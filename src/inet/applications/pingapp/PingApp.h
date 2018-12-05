@@ -110,7 +110,7 @@ class INET_API PingApp : public ApplicationBase, public INetworkSocket::ICallbac
     virtual void handleStartOperation(LifecycleOperation *operation) override;
     virtual void handleStopOperation(LifecycleOperation *operation) override;
     virtual void handleCrashOperation(LifecycleOperation *operation) override;
-    virtual bool isOperationFinished() override;
+    virtual bool isActiveOperationFinished() override;
 
     //INetworkSocket::ICallback:
     virtual void socketDataArrived(INetworkSocket *socket, Packet *packet) override;

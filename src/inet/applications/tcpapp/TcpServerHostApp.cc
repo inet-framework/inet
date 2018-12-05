@@ -57,17 +57,19 @@ void TcpServerHostApp::handleCrashOperation(LifecycleOperation *operation)
     // remove and delete threads
     while (!threadSet.empty()) {
         auto thread = *threadSet.begin();
+        // TODO: destroy!!!
         thread->getSocket()->close();
         removeThread(thread);
     }
+    // TODO: always?
     if (operation->getRootModule() != getContainingNode(this))
         serverSocket.destroy();
 }
 
-bool TcpServerHostApp::isOperationFinished()
+bool TcpServerHostApp::isActiveOperationFinished()
 {
-    if (operational == State::STOPPING_OPERATION)
-        return (threadSet.empty() && serverSocket.getState() == TcpSocket::CLOSED);
+    if (operationalState == State::STOPPING_OPERATION)
+        return (threadSet.empty() && !serverSocket.isOpen());
     else
         return true;
 }

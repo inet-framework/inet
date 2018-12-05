@@ -392,7 +392,7 @@ void DhcpClient::initRebootedClient()
 
 void DhcpClient::handleDhcpMessage(Packet *packet)
 {
-    ASSERT(isWorking() && ie != nullptr);
+    ASSERT(isUp() && ie != nullptr);
 
     const auto& msg = packet->peekAtFront<DhcpMessage>();
     if (msg->getOp() != BOOTREPLY) {
@@ -513,7 +513,7 @@ void DhcpClient::receiveSignal(cComponent *source, int signalID, cObject *obj, c
         }
     }
     else if (signalID == interfaceDeletedSignal) {
-        if (isWorking())
+        if (isUp())
             throw cRuntimeError("Reacting to interface deletions is not implemented in this module");
     }
 }
@@ -721,9 +721,9 @@ void DhcpClient::handleCrashOperation(LifecycleOperation *operation)
         socket.destroy();         //TODO  in real operating systems, program crash detected by OS and OS closes sockets of crashed programs.
 }
 
-bool DhcpClient::isOperationFinished()
+bool DhcpClient::isActiveOperationFinished()
 {
-    if (operational == State::STOPPING_OPERATION)
+    if (operationalState == State::STOPPING_OPERATION)
         return socket.getState() == UdpSocket::CLOSED;
     else
         return true;

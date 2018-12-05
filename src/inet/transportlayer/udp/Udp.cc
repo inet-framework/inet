@@ -474,6 +474,7 @@ void Udp::processICMPv4Error(Packet *packet)
     // extract details from the error message, then try to notify socket that sent bogus packet
 
     if (!icmp)
+        // TODO: move to initialize?
         icmp = getModuleFromPar<Icmp>(par("icmpModule"), this);
     if (!icmp->verifyCrc(packet)) {
         EV_WARN << "incoming ICMP packet has wrong CRC, dropped\n";
@@ -525,6 +526,7 @@ void Udp::processICMPv6Error(Packet *packet)
 {
 #ifdef WITH_IPv6
     if (!icmpv6)
+        // TODO: move to initialize?
         icmpv6 = getModuleFromPar<Icmpv6>(par("icmpv6Module"), this);
     if (!icmpv6->verifyCrc(packet)) {
         EV_WARN << "incoming ICMPv6 packet has wrong CRC, dropped\n";
@@ -606,6 +608,7 @@ void Udp::processUndeliverablePacket(Packet *udpPacket)
     if (protocol->getId() == Protocol::ipv4.getId()) {
 #ifdef WITH_IPv4
         if (!icmp)
+            // TODO: move to initialize?
             icmp = getModuleFromPar<Icmp>(par("icmpModule"), this);
         icmp->sendErrorMessage(udpPacket, inIe, ICMP_DESTINATION_UNREACHABLE, ICMP_DU_PORT_UNREACHABLE);
 #else // ifdef WITH_IPv4
@@ -615,6 +618,7 @@ void Udp::processUndeliverablePacket(Packet *udpPacket)
     else if (protocol->getId() == Protocol::ipv6.getId()) {
 #ifdef WITH_IPv6
         if (!icmpv6)
+            // TODO: move to initialize?
             icmpv6 = getModuleFromPar<Icmpv6>(par("icmpv6Module"), this);
         icmpv6->sendErrorMessage(udpPacket, ICMPv6_DESTINATION_UNREACHABLE, PORT_UNREACHABLE);
 #else // ifdef WITH_IPv6
@@ -747,14 +751,10 @@ void Udp::destroySocket(SocketsByIdMap::iterator it)
 void Udp::clearAllSockets()
 {
     EV_INFO << "Clear all sockets\n";
-
-    for (auto & elem : socketsByPortMap) {
-        elem.second.clear();
-    }
-    socketsByPortMap.clear();
     for (auto & elem : socketsByIdMap)
         delete elem.second;
     socketsByIdMap.clear();
+    socketsByPortMap.clear();
 }
 
 ushort Udp::getEphemeralPort()

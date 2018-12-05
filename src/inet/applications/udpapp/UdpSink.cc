@@ -177,9 +177,9 @@ void UdpSink::handleCrashOperation(LifecycleOperation *operation)
     }
 }
 
-bool UdpSink::isOperationFinished()
+bool UdpSink::isActiveOperationFinished()
 {
-    if (operational == State::STOPPING_OPERATION)
+    if (operationalState == State::STOPPING_OPERATION)
         return socket.getState() == UdpSocket::CLOSED;
     else
         return true;

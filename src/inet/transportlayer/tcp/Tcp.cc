@@ -538,7 +538,7 @@ void Tcp::handleStartOperation(LifecycleOperation *operation)
 
 void Tcp::handleStopOperation(LifecycleOperation *operation)
 {
-    //FIXME close connections???
+    //FIXME close connections??? yes!!!
     reset();
 }
 

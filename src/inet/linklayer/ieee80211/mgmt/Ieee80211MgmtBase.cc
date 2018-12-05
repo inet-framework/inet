@@ -75,7 +75,7 @@ void Ieee80211MgmtBase::handleMessageWhenUp(cMessage *msg)
 
 void Ieee80211MgmtBase::sendDown(Packet *frame)
 {
-    ASSERT(isWorking());
+    ASSERT(isUp());
     frame->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211Mgmt);
     send(frame, "macOut");
 }

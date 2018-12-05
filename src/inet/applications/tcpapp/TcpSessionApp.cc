@@ -86,9 +86,9 @@ void TcpSessionApp::handleCrashOperation(LifecycleOperation *operation)
         socket.destroy();
 }
 
-bool TcpSessionApp::isOperationFinished()
+bool TcpSessionApp::isActiveOperationFinished()
 {
-    if (operational == State::STOPPING_OPERATION)
+    if (operationalState == State::STOPPING_OPERATION)
         return socket.getState() == TcpSocket::CLOSED;
     else
         return true;

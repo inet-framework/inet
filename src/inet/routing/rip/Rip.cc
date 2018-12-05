@@ -433,9 +433,9 @@ void Rip::handleCrashOperation(LifecycleOperation *operation)
     stopRIPRouting();
 }
 
-bool Rip::isOperationFinished()
+bool Rip::isActiveOperationFinished()
 {
-    if (operational == State::STOPPING_OPERATION)
+    if (operationalState == State::STOPPING_OPERATION)
         return !shutdownTimer->isScheduled();
     else
         return true;

@@ -103,9 +103,9 @@ void UdpEchoApp::handleCrashOperation(LifecycleOperation *operation)
     socket.setCallback(nullptr);
 }
 
-bool UdpEchoApp::isOperationFinished()
+bool UdpEchoApp::isActiveOperationFinished()
 {
-    if (operational == State::STOPPING_OPERATION)
+    if (operationalState == State::STOPPING_OPERATION)
         return socket.getState() == UdpSocket::CLOSED;
     else
         return true;

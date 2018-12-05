@@ -79,7 +79,7 @@ class INET_API EtherAppClient : public ApplicationBase, public Ieee8022LlcSocket
     virtual void handleStartOperation(LifecycleOperation *operation) override;
     virtual void handleStopOperation(LifecycleOperation *operation) override;
     virtual void handleCrashOperation(LifecycleOperation *operation) override;
-    virtual bool isOperationFinished() override;
+    virtual bool isActiveOperationFinished() override;
 
   public:
     EtherAppClient() {}

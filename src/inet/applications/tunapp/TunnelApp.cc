@@ -171,9 +171,9 @@ void TunnelApp::handleCrashOperation(LifecycleOperation *operation)
     socketMap.deleteSockets();
 }
 
-bool TunnelApp::isOperationFinished()
+bool TunnelApp::isActiveOperationFinished()
 {
-    if (operational == State::STOPPING_OPERATION) {
+    if (operationalState == State::STOPPING_OPERATION) {
         if (ipv4Socket.isOpen() || serverSocket.isOpen() || clientSocket.isOpen())
             return false;
         for (auto s: socketMap.getMap())

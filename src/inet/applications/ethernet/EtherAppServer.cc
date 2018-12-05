@@ -70,9 +70,9 @@ void EtherAppServer::handleCrashOperation(LifecycleOperation *operation)
         llcSocket.destroy();
 }
 
-bool EtherAppServer::isOperationFinished()
+bool EtherAppServer::isActiveOperationFinished()
 {
-    if (operational == State::STOPPING_OPERATION)
+    if (operationalState == State::STOPPING_OPERATION)
         return !llcSocket.isOpen();
     else
         return true;

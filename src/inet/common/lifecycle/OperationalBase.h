@@ -25,8 +25,11 @@ namespace inet {
 class INET_API OperationalBase : public cSimpleModule, public ILifecycle
 {
   protected:
-    enum State { STARTING_OPERATION, OPERATING, STOPPING_OPERATION, CRASHING_OPERATION, NOT_OPERATING, SUSPENDING_OPERATION, OPERATION_SUSPENDED, RESUMING_OPERATION };
-    State operational = static_cast<State>(-1);
+    enum State {
+        STARTING_OPERATION, OPERATING, STOPPING_OPERATION, CRASHING_OPERATION, NOT_OPERATING,
+        /*SUSPENDING_OPERATION, OPERATION_SUSPENDED, RESUMING_OPERATION */
+    };
+    State operationalState = NOT_OPERATING;
     simtime_t lastChange;
 
     class INET_API Operation
@@ -34,17 +37,15 @@ class INET_API OperationalBase : public cSimpleModule, public ILifecycle
       public:
         LifecycleOperation *operation = nullptr;
         IDoneCallback *doneCallback = nullptr;
-        State endOperation = (State)(-1);
-        bool isPending = false;
-        bool isExtraPending = false;
-        void set(LifecycleOperation *operation_, IDoneCallback *doneCallback_, State endOperation_) { operation = operation_; doneCallback = doneCallback_; endOperation = endOperation_; isPending = false; isExtraPending = false; }
-        void clear() { operation = nullptr; doneCallback = nullptr; endOperation = (State)(-1); isPending = false; isExtraPending = false; }
-        void pending() { isPending = true; }
-        void extraPending() { isPending = true; isExtraPending = true; }
+        State endState = (State)(-1);
+        bool isDelayedFinish = false;
+        void set(LifecycleOperation *operation_, IDoneCallback *doneCallback_, State endState_) { operation = operation_; doneCallback = doneCallback_; endState = endState_; isDelayedFinish = false; }
+        void clear() { operation = nullptr; doneCallback = nullptr; endState = (State)(-1); isDelayedFinish = false; }
+        void delayFinish() { isDelayedFinish = true; }
     };
     Operation activeOperation;
-    cMessage *operationTimeoutMsg = nullptr;
-    cMessage *delayedOperationDoneMsg = nullptr;
+    cMessage *activeOperationTimeout = nullptr;
+    cMessage *activeOperationExtraTimer = nullptr;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
@@ -59,28 +60,31 @@ class INET_API OperationalBase : public cSimpleModule, public ILifecycle
     virtual void handleStartOperation(LifecycleOperation *operation) = 0;
     virtual void handleStopOperation(LifecycleOperation *operation) = 0;
     virtual void handleCrashOperation(LifecycleOperation *operation) = 0;
-    virtual void handleSuspendOperation(LifecycleOperation *operation);
-    virtual void handleResumeOperation(LifecycleOperation *operation);
-    virtual bool isOperationFinished();
+
+    /**
+     * returns initial operation state.
+     * valid return values only the OPERATING and NOT_OPERATING.
+     */
+    virtual State getInitialOperationalState() const;
 
     virtual bool isInitializeStage(int stage) = 0;
     virtual bool isModuleStartStage(int stage) = 0;
     virtual bool isModuleStopStage(int stage) = 0;
 
-    virtual void handleOperationTimeout(cMessage *message);
+    virtual void handleActiveOperationTimeout(cMessage *message);
 
     /// @{ utility functions
-    virtual bool isWorking() const { return operational != NOT_OPERATING && operational != OPERATION_SUSPENDED; }
-    virtual void setOperational(State newState);
+    virtual bool isUp() const { return operationalState != NOT_OPERATING /* && operationalState != OPERATION_SUSPENDED */; }
+    virtual bool isDown() const { return operationalState == NOT_OPERATING /* || operationalState == OPERATION_SUSPENDED */; }
+    virtual void setOperationalState(State newState);
     virtual void scheduleOperationTimeout(simtime_t timeout);
-    virtual bool checkOperationFinished();
-    virtual bool isOperationTimeout(cMessage *message);
-    virtual void operationStarted(LifecycleOperation *operation, IDoneCallback *doneCallback, State);
-    virtual void operationPending();
-    virtual void operationCompleted();
-    virtual void delayDoneCallbackInvocation(simtime_t delay = SIMTIME_ZERO);
-    /// }@
+    virtual void setupActiveOperation(LifecycleOperation *operation, IDoneCallback *doneCallback, State);
 
+    virtual void delayActiveOperationFinish(simtime_t timeout);
+    virtual void startActiveOperationExtraTime(simtime_t delay = SIMTIME_ZERO);
+    virtual void startActiveOperationExtraTimeOrFinish(simtime_t extraTime);
+    virtual void finishActiveOperation();
+    /// }@
   public:
     OperationalBase();
     ~OperationalBase();

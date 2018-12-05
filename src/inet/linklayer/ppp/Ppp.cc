@@ -405,9 +405,9 @@ void Ppp::handleStopOperation(LifecycleOperation *operation)
 {
 }
 
-bool Ppp::isOperationFinished()
+bool Ppp::isActiveOperationFinished()
 {
-    if (operational == State::STOPPING_OPERATION) {
+    if (operationalState == State::STOPPING_OPERATION) {
         if (queueModule ? queueModule->isEmpty() : txQueue.isEmpty()) {
             return true;
         }

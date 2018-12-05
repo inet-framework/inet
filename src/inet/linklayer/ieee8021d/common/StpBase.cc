@@ -107,11 +107,11 @@ void StpBase::refreshDisplay() const
         for (unsigned int i = 0; i < numPorts; i++) {
             InterfaceEntry *ie = ifTable->getInterface(i);
             cModule *nicModule = ie;
-            if (isWorking()) {
+            if (isUp()) {
                 const Ieee8021dInterfaceData *port = getPortInterfaceData(ie->getInterfaceId());
 
                 // color link
-                colorLink(ie, isWorking() && (port->getState() == Ieee8021dInterfaceData::FORWARDING));
+                colorLink(ie, isUp() && (port->getState() == Ieee8021dInterfaceData::FORWARDING));
 
                 // label ethernet interface with port status and role
                 if (nicModule != nullptr) {
@@ -132,7 +132,7 @@ void StpBase::refreshDisplay() const
         }
 
         // mark root switch
-        if (isWorking() && getRootInterfaceId() == -1)
+        if (isUp() && getRootInterfaceId() == -1)
             switchModule->getDisplayString().setTagArg("i", 1, ROOT_SWITCH_COLOR);
         else
             switchModule->getDisplayString().setTagArg("i", 1, "");

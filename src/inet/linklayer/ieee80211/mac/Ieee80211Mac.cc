@@ -78,7 +78,7 @@ void Ieee80211Mac::initialize(int stage)
         rx = check_and_cast<IRx *>(getSubmodule("rx"));
         tx = check_and_cast<ITx *>(getSubmodule("tx"));
         emit(modesetChangedSignal, modeSet);
-        if (isWorking())
+        if (isUp())
             initializeRadioMode();
         rx = check_and_cast<IRx *>(getSubmodule("rx"));
         tx = check_and_cast<ITx *>(getSubmodule("tx"));

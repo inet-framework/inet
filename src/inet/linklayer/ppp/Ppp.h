@@ -82,7 +82,7 @@ class INET_API Ppp : public MacBase
     virtual void handleUpperPacket(Packet *packet) override;
     virtual void handleLowerPacket(Packet *packet) override;
     virtual void handleStopOperation(LifecycleOperation *operation) override;
-    virtual bool isOperationFinished() override;
+    virtual bool isActiveOperationFinished() override;
 };
 
 } // namespace inet

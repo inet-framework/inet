@@ -1260,6 +1260,7 @@ void Ipv4::handleStartOperation(LifecycleOperation *operation)
 
 void Ipv4::handleStopOperation(LifecycleOperation *operation)
 {
+    // TODO: stop should send and wait pending packets
     stop();
 }
 

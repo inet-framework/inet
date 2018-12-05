@@ -237,9 +237,9 @@ void Ldp::handleStopOperation(LifecycleOperation *operation)
         s.second->close();
 }
 
-bool Ldp::isOperationFinished()
+bool Ldp::isActiveOperationFinished()
 {
-    if (operational == State::STOPPING_OPERATION) {
+    if (operationalState == State::STOPPING_OPERATION) {
         if (udpSocket.isOpen() || serverSocket.isOpen())
             return false;
         for (auto& s: udpSockets)
@@ -248,6 +248,7 @@ bool Ldp::isOperationFinished()
         for (auto s: socketMap.getMap())
             if (s.second->isOpen())
                 return false;
+        // TODO: OMG?!
         udpSockets.clear();
         socketMap.deleteSockets();
         return true;

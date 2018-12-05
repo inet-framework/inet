@@ -299,9 +299,9 @@ void EtherMacBase::handleCrashOperation(LifecycleOperation *operation)
     processConnectDisconnect();
 }
 
-bool EtherMacBase::isOperationFinished()
+bool EtherMacBase::isActiveOperationFinished()
 {
-    if (operational == State::STOPPING_OPERATION) {
+    if (operationalState == State::STOPPING_OPERATION) {
         if (txQueue.isEmpty()) {
             connected = false;
             processConnectDisconnect();

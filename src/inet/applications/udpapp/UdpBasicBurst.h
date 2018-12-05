@@ -103,7 +103,7 @@ class INET_API UdpBasicBurst : public ApplicationBase, public UdpSocket::ICallba
     virtual void handleStartOperation(LifecycleOperation *operation) override;
     virtual void handleStopOperation(LifecycleOperation *operation) override;
     virtual void handleCrashOperation(LifecycleOperation *operation) override;
-    virtual bool isOperationFinished() override;
+    virtual bool isActiveOperationFinished() override;
 
     virtual void socketDataArrived(UdpSocket *socket, Packet *packet) override;
     virtual void socketErrorArrived(UdpSocket *socket, Indication *indication) override;

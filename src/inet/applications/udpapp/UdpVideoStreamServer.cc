@@ -175,9 +175,9 @@ void UdpVideoStreamServer::handleCrashOperation(LifecycleOperation *operation)
     socket.setCallback(nullptr);
 }
 
-bool UdpVideoStreamServer::isOperationFinished()
+bool UdpVideoStreamServer::isActiveOperationFinished()
 {
-    if (operational == State::STOPPING_OPERATION)
+    if (operationalState == State::STOPPING_OPERATION)
         return socket.getState() == UdpSocket::CLOSED;
     else
         return true;

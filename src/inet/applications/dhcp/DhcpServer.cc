@@ -81,7 +81,7 @@ void DhcpServer::receiveSignal(cComponent *source, int signalID, cObject *obj, c
     Enter_Method_Silent();
 
     if (signalID == interfaceDeletedSignal) {
-        if (isWorking()) {
+        if (isUp()) {
             InterfaceEntry *nie = check_and_cast<InterfaceEntry *>(obj);
             if (ie == nie)
                 throw cRuntimeError("Reacting to interface deletions is not implemented in this module");
@@ -158,7 +158,7 @@ void DhcpServer::handleSelfMessages(cMessage *msg)
 
 void DhcpServer::processDhcpMessage(Packet *packet)
 {
-    ASSERT(isWorking() && ie != nullptr);
+    ASSERT(isUp() && ie != nullptr);
 
     const auto& dhcpMsg = packet->peekAtFront<DhcpMessage>();
 
@@ -554,9 +554,9 @@ void DhcpServer::handleCrashOperation(LifecycleOperation *operation)
         socket.destroy();         //TODO  in real operating systems, program crash detected by OS and OS closes sockets of crashed programs.
 }
 
-bool DhcpServer::isOperationFinished()
+bool DhcpServer::isActiveOperationFinished()
 {
-    if (operational == State::STOPPING_OPERATION)
+    if (operationalState == State::STOPPING_OPERATION)
         return socket.getState() == UdpSocket::CLOSED;
     else
         return true;

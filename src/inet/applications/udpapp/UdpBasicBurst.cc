@@ -359,9 +359,9 @@ void UdpBasicBurst::handleCrashOperation(LifecycleOperation *operation)
         socket.destroy();         //TODO  in real operating systems, program crash detected by OS and OS closes sockets of crashed programs.
 }
 
-bool UdpBasicBurst::isOperationFinished()
+bool UdpBasicBurst::isActiveOperationFinished()
 {
-    if (operational == State::STOPPING_OPERATION)
+    if (operationalState == State::STOPPING_OPERATION)
         return socket.getState() == UdpSocket::CLOSED;
     else
         return true;
