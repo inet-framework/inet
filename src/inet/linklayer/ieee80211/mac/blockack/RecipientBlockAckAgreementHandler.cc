@@ -92,7 +92,8 @@ RecipientBlockAckAgreement* RecipientBlockAckAgreementHandler::addAgreement(cons
         return agreement;
     }
     else
-        throw cRuntimeError("TODO"); // TODO: update?
+        // TODO: update?
+        return it->second;
 }
 
 //
