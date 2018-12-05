@@ -187,8 +187,17 @@ void Ldp::handleMessageWhenUp(cMessage *msg)
         else if (udpSocket.belongsToSocket(msg)) {
             udpSocket.processMessage(msg);
         }
-        else
-            throw cRuntimeError("model error: no socket found for msg '%s'", msg->getName());
+        else {
+            auto& tags = getTags(msg);
+            int socketId = tags.getTag<SocketInd>()->getSocketId();
+            for (auto& s: udpSockets) {
+                if (s.getSocketId() == socketId) {
+                    s.processMessage(msg);
+                    return;
+                }
+            }
+            throw cRuntimeError("model error: no socket found for msg '%s' with socketId %d", msg->getName(), socketId);
+        }
     }
 }
 
@@ -207,7 +216,6 @@ void Ldp::socketErrorArrived(UdpSocket *socket, Indication *indication)
 
 void Ldp::socketClosed(UdpSocket *socket)
 {
-    //TODO lifecycle stopOperation: should detect close sockets and call doneCallback->invoke() when all socket closed
 }
 
 void Ldp::handleStartOperation(LifecycleOperation *operation)
