@@ -140,7 +140,7 @@ std::set<std::pair<MacAddress, std::pair<Tid, SequenceControlField>>> QosAckHand
         int startingSeqNum = compressedBlockAck->getStartingSequenceNumber();
         BitVector bitmap = compressedBlockAck->getBlockAckBitmap();
         for (int seqNum = 0; seqNum < 64; seqNum++) {
-            auto id = std::make_pair(receiverAddr, std::make_pair(compressedBlockAck->getTidInfo(), SequenceControlField(startingSeqNum + seqNum, 0)));
+            auto id = std::make_pair(receiverAddr, std::make_pair(compressedBlockAck->getTidInfo(), SequenceControlField((startingSeqNum + seqNum) % 4096, 0)));
             Status& status = getQoSDataAckStatus(id);
             if (status == Status::WAITING_FOR_BLOCK_ACK) {
                 bool acked = bitmap.getBit(seqNum) == 1;
