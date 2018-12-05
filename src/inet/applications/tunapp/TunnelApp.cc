@@ -152,5 +152,37 @@ void TunnelApp::socketDataArrived(TunSocket *socket, Packet *packet)
         throw cRuntimeError("Unknown protocol: %s", protocol->getName());;
 }
 
+void TunnelApp::handleStopOperation(LifecycleOperation *operation)
+{
+    ipv4Socket.close();
+    serverSocket.close();
+    clientSocket.close();
+    for (auto s: socketMap.getMap())
+        s.second->close();
+}
+
+void TunnelApp::handleCrashOperation(LifecycleOperation *operation)
+{
+    ipv4Socket.destroy();
+    serverSocket.destroy();
+    clientSocket.destroy();
+    for (auto s: socketMap.getMap())
+        s.second->destroy();
+    socketMap.deleteSockets();
+}
+
+bool TunnelApp::isOperationFinished()
+{
+    if (operational == State::STOPPING_OPERATION) {
+        if (ipv4Socket.isOpen() || serverSocket.isOpen() || clientSocket.isOpen())
+            return false;
+        for (auto s: socketMap.getMap())
+            if (s.second->isOpen())
+                return false;
+        socketMap.deleteSockets();
+    }
+    return true;
+}
+
 } // namespace inet
 
