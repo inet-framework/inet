@@ -95,6 +95,8 @@ simple TcpSessionApp like IApp
         double tClose @unit(s) = default(2s);
         @display("i=block/app");
         @lifecycleSupport;
+        double stopOperationExtraTime @unit(s) = default(-1s);    // extra time after lifecycle stop operation finished
+        double stopOperationTimeout @unit(s) = default(2s);    // timeout value for lifecycle stop operation
         @signal[connect](type=long);
         @signal[packetSent](type=inet::Packet);
         @signal[packetReceived](type=inet::Packet);

@@ -60,7 +60,6 @@ class INET_API TcpServerHostApp : public ApplicationBase, public TcpSocket::ICal
     virtual void handleStartOperation(LifecycleOperation *operation) override;
     virtual void handleStopOperation(LifecycleOperation *operation) override;
     virtual void handleCrashOperation(LifecycleOperation *operation) override;
-    virtual bool isActiveOperationFinished() override;
 
   public:
     virtual ~TcpServerHostApp() { socketMap.deleteSockets(); }

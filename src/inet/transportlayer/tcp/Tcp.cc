@@ -538,8 +538,10 @@ void Tcp::handleStartOperation(LifecycleOperation *operation)
 
 void Tcp::handleStopOperation(LifecycleOperation *operation)
 {
-    //FIXME close connections??? yes!!!
+    //FIXME close connections??? yes, because the applications may not close them!!!
     reset();
+    delayActiveOperationFinish(par("stopOperationTimeout"));
+    startActiveOperationExtraTimeOrFinish(par("stopOperationExtraTime"));
 }
 
 void Tcp::handleCrashOperation(LifecycleOperation *operation)

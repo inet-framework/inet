@@ -99,6 +99,7 @@ void EtherAppClient::handleStopOperation(LifecycleOperation *operation)
 {
     cancelNextPacket();
     llcSocket.close();
+    delayActiveOperationFinish(par("stopOperationTimeout"));
 }
 
 void EtherAppClient::handleCrashOperation(LifecycleOperation *operation)
@@ -108,12 +109,10 @@ void EtherAppClient::handleCrashOperation(LifecycleOperation *operation)
         llcSocket.destroy();
 }
 
-bool EtherAppClient::isActiveOperationFinished()
+void EtherAppClient::socketClosed(inet::Ieee8022LlcSocket *socket)
 {
-    if (operationalState == State::STOPPING_OPERATION)
-        return !llcSocket.isOpen();
-    else
-        return true;
+    if (operationalState == State::STOPPING_OPERATION && !llcSocket.isOpen())
+        startActiveOperationExtraTimeOrFinish(par("stopOperationExtraTime"));
 }
 
 bool EtherAppClient::isGenerator()

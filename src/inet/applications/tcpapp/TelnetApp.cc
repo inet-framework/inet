@@ -73,8 +73,10 @@ void TelnetApp::handleStartOperation(LifecycleOperation *operation)
 void TelnetApp::handleStopOperation(LifecycleOperation *operation)
 {
     cancelEvent(timeoutMsg);
-    if (socket.getState() == TcpSocket::CONNECTED || socket.getState() == TcpSocket::CONNECTING || socket.getState() == TcpSocket::PEER_CLOSED)
+    if (socket.isOpen()) {
         close();
+        delayActiveOperationFinish(par("stopOperationTimeout"));
+    }
 }
 
 void TelnetApp::handleCrashOperation(LifecycleOperation *operation)
@@ -82,14 +84,6 @@ void TelnetApp::handleCrashOperation(LifecycleOperation *operation)
     cancelEvent(timeoutMsg);
     if (operation->getRootModule() != getContainingNode(this))
         socket.destroy();
-}
-
-bool TelnetApp::isActiveOperationFinished()
-{
-    if (operationalState == State::STOPPING_OPERATION)
-        return socket.getState() == TcpSocket::CLOSED;
-    else
-        return true;
 }
 
 void TelnetApp::handleTimer(cMessage *msg)
@@ -194,6 +188,10 @@ void TelnetApp::socketClosed(TcpSocket *socket)
         // start another session after a delay
         timeoutMsg->setKind(MSGKIND_CONNECT);
         checkedScheduleAt(simTime() + par("idleInterval"), timeoutMsg);
+    }
+    else if (operationalState == State::STOPPING_OPERATION) {
+        if (!this->socket.isOpen())
+            startActiveOperationExtraTimeOrFinish(par("stopOperationExtraTime"));
     }
 }
 

@@ -40,6 +40,8 @@ simple DhcpServer like IApp
         double startTime @unit(s) = default(0s); // application start time
         @display("i=block/app2");
         @lifecycleSupport;
+        double stopOperationExtraTime @unit(s) = default(-1s);    // extra time after lifecycle stop operation finished
+        double stopOperationTimeout @unit(s) = default(2s);    // timeout value for lifecycle stop operation
     gates:
         input socketIn @labels(UdpControlInfo/up);
         output socketOut @labels(UdpControlInfo/down);

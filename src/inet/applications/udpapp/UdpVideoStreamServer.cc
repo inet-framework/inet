@@ -88,6 +88,8 @@ void UdpVideoStreamServer::socketErrorArrived(UdpSocket *socket, Indication *ind
 
 void UdpVideoStreamServer::socketClosed(UdpSocket *socket)
 {
+    if (operationalState == State::STOPPING_OPERATION)
+        startActiveOperationExtraTimeOrFinish(par("stopOperationExtraTime"));
 }
 
 void UdpVideoStreamServer::processStreamRequest(Packet *msg)
@@ -165,6 +167,7 @@ void UdpVideoStreamServer::handleStopOperation(LifecycleOperation *operation)
     clearStreams();
     socket.setCallback(nullptr);
     socket.close();
+    delayActiveOperationFinish(par("stopOperationTimeout"));
 }
 
 void UdpVideoStreamServer::handleCrashOperation(LifecycleOperation *operation)
@@ -173,14 +176,6 @@ void UdpVideoStreamServer::handleCrashOperation(LifecycleOperation *operation)
     if (operation->getRootModule() != getContainingNode(this))     // closes socket when the application crashed only
         socket.destroy();    //TODO  in real operating systems, program crash detected by OS and OS closes sockets of crashed programs.
     socket.setCallback(nullptr);
-}
-
-bool UdpVideoStreamServer::isActiveOperationFinished()
-{
-    if (operationalState == State::STOPPING_OPERATION)
-        return socket.getState() == UdpSocket::CLOSED;
-    else
-        return true;
 }
 
 } // namespace inet

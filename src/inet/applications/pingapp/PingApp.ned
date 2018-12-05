@@ -75,6 +75,8 @@ simple PingApp like IApp
         string networkProtocol = default(""); // uses specified network protocol for communication; uses the address-specified default network protocol when the parameter is empty
         @display("i=block/app");
         @lifecycleSupport;
+        double stopOperationExtraTime @unit(s) = default(-1s);    // extra time after lifecycle stop operation finished
+        double stopOperationTimeout @unit(s) = default(2s);    // timeout value for lifecycle stop operation
         @signal[rtt](type=simtime_t);
         @signal[numLost](type=long);
         @signal[numOutOfOrderArrivals](type=long);

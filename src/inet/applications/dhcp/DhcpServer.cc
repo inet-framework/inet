@@ -143,8 +143,10 @@ void DhcpServer::socketErrorArrived(UdpSocket *socket, Indication *indication)
     delete indication;
 }
 
-void DhcpServer::socketClosed(UdpSocket *socket)
+void DhcpServer::socketClosed(UdpSocket *socket_)
 {
+    if (operationalState == State::STOPPING_OPERATION && !socket.isOpen())
+        startActiveOperationExtraTimeOrFinish(par("stopOperationExtraTime"));
 }
 
 void DhcpServer::handleSelfMessages(cMessage *msg)
@@ -543,6 +545,7 @@ void DhcpServer::handleStopOperation(LifecycleOperation *operation)
     ie = nullptr;
     cancelEvent(startTimer);
     socket.close();
+    delayActiveOperationFinish(par("stopOperationTimeout"));
 }
 
 void DhcpServer::handleCrashOperation(LifecycleOperation *operation)
@@ -552,14 +555,6 @@ void DhcpServer::handleCrashOperation(LifecycleOperation *operation)
     cancelEvent(startTimer);
     if (operation->getRootModule() != getContainingNode(this))     // closes socket when the application crashed only
         socket.destroy();         //TODO  in real operating systems, program crash detected by OS and OS closes sockets of crashed programs.
-}
-
-bool DhcpServer::isActiveOperationFinished()
-{
-    if (operationalState == State::STOPPING_OPERATION)
-        return socket.getState() == UdpSocket::CLOSED;
-    else
-        return true;
 }
 
 } // namespace inet

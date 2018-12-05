@@ -149,6 +149,8 @@ void Rip::handleMessageWhenUp(cMessage *msg)
             startRIPRouting();
         }
         else if (msg == shutdownTimer) {
+            ASSERT(operationalState == State::STOPPING_OPERATION);
+            finishActiveOperation();
         }
         else
             throw cRuntimeError("unknown self message");
@@ -426,19 +428,12 @@ void Rip::handleStopOperation(LifecycleOperation *operation)
 
     // wait a few seconds before calling doneCallback, so that UDP can send the messages
     scheduleAt(simTime() + shutdownTime, shutdownTimer);
+    delayActiveOperationFinish(par("stopOperationTimeout"));
 }
 
 void Rip::handleCrashOperation(LifecycleOperation *operation)
 {
     stopRIPRouting();
-}
-
-bool Rip::isActiveOperationFinished()
-{
-    if (operationalState == State::STOPPING_OPERATION)
-        return !shutdownTimer->isScheduled();
-    else
-        return true;
 }
 
 /**

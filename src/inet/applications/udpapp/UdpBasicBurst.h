@@ -71,7 +71,6 @@ class INET_API UdpBasicBurst : public ApplicationBase, public UdpSocket::ICallba
     bool isSource = false;
     bool activeBurst = false;
     bool haveSleepDuration = false;
-    std::list<IDoneCallback*> stopDoneCallbackList;
 
     // statistics:
     static int counter;    // counter for generating a global number for each packet
@@ -103,7 +102,6 @@ class INET_API UdpBasicBurst : public ApplicationBase, public UdpSocket::ICallba
     virtual void handleStartOperation(LifecycleOperation *operation) override;
     virtual void handleStopOperation(LifecycleOperation *operation) override;
     virtual void handleCrashOperation(LifecycleOperation *operation) override;
-    virtual bool isActiveOperationFinished() override;
 
     virtual void socketDataArrived(UdpSocket *socket, Packet *packet) override;
     virtual void socketErrorArrived(UdpSocket *socket, Indication *indication) override;

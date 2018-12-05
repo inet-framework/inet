@@ -67,7 +67,6 @@ protected:
     virtual void handleStartOperation(LifecycleOperation *operation) override {}    //TODO implementation
     virtual void handleStopOperation(LifecycleOperation *operation) override;
     virtual void handleCrashOperation(LifecycleOperation *operation) override;
-    virtual bool isActiveOperationFinished() override;
 };
 
 } // namespace inet

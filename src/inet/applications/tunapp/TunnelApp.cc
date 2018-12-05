@@ -94,6 +94,16 @@ void TunnelApp::handleMessageWhenUp(cMessage *message)
     }
     else
         throw cRuntimeError("Message arrived on unknown gate %s", message->getArrivalGate()->getFullName());
+
+    if (operationalState == State::STOPPING_OPERATION) {
+        if (ipv4Socket.isOpen() || serverSocket.isOpen() || clientSocket.isOpen())
+            return;
+        for (auto s: socketMap.getMap())
+            if (s.second->isOpen())
+                return;
+        socketMap.deleteSockets();
+        startActiveOperationExtraTimeOrFinish(par("stopOperationExtraTime"));
+    }
 }
 
 void TunnelApp::socketDataArrived(UdpSocket *socket, Packet *packet)
@@ -159,6 +169,7 @@ void TunnelApp::handleStopOperation(LifecycleOperation *operation)
     clientSocket.close();
     for (auto s: socketMap.getMap())
         s.second->close();
+    delayActiveOperationFinish(par("stopOperationTimeout"));
 }
 
 void TunnelApp::handleCrashOperation(LifecycleOperation *operation)
@@ -169,19 +180,6 @@ void TunnelApp::handleCrashOperation(LifecycleOperation *operation)
     for (auto s: socketMap.getMap())
         s.second->destroy();
     socketMap.deleteSockets();
-}
-
-bool TunnelApp::isActiveOperationFinished()
-{
-    if (operationalState == State::STOPPING_OPERATION) {
-        if (ipv4Socket.isOpen() || serverSocket.isOpen() || clientSocket.isOpen())
-            return false;
-        for (auto s: socketMap.getMap())
-            if (s.second->isOpen())
-                return false;
-        socketMap.deleteSockets();
-    }
-    return true;
 }
 
 } // namespace inet

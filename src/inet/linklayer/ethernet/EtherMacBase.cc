@@ -290,6 +290,8 @@ void EtherMacBase::handleStartOperation(LifecycleOperation *operation)
 
 void EtherMacBase::handleStopOperation(LifecycleOperation *operation)
 {
+    if (!txQueue.isEmpty())
+        delayActiveOperationFinish(par("stopOperationTimeout"));
 }
 
 void EtherMacBase::handleCrashOperation(LifecycleOperation *operation)
@@ -299,19 +301,16 @@ void EtherMacBase::handleCrashOperation(LifecycleOperation *operation)
     processConnectDisconnect();
 }
 
-bool EtherMacBase::isActiveOperationFinished()
+// TODO: this method should be renamed and called where processing is finished on the current frame (i.e. curTxFrame becomes nullptr)
+void EtherMacBase::processAtHandleMessageFinished()
 {
     if (operationalState == State::STOPPING_OPERATION) {
         if (txQueue.isEmpty()) {
             connected = false;
             processConnectDisconnect();
-            return true;
+            startActiveOperationExtraTimeOrFinish(par("stopOperationExtraTime"));
         }
-        else
-            return false;
     }
-    else
-        return true;
 }
 
 void EtherMacBase::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)

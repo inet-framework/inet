@@ -198,6 +198,7 @@ void EtherMac::handleMessageWhenUp(cMessage *msg)
     else
         throw cRuntimeError("Message received from unknown gate");
 
+    processAtHandleMessageFinished();
     printState();
 }
 

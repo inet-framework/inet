@@ -61,6 +61,7 @@ void EtherAppServer::handleStopOperation(LifecycleOperation *operation)
 {
     EV_INFO << "Stop the application\n";
     llcSocket.close();
+    delayActiveOperationFinish(par("stopOperationTimeout"));
 }
 
 void EtherAppServer::handleCrashOperation(LifecycleOperation *operation)
@@ -70,12 +71,10 @@ void EtherAppServer::handleCrashOperation(LifecycleOperation *operation)
         llcSocket.destroy();
 }
 
-bool EtherAppServer::isActiveOperationFinished()
+void EtherAppServer::socketClosed(Ieee8022LlcSocket *socket)
 {
-    if (operationalState == State::STOPPING_OPERATION)
-        return !llcSocket.isOpen();
-    else
-        return true;
+    if (operationalState == State::STOPPING_OPERATION && !llcSocket.isOpen())
+        startActiveOperationExtraTimeOrFinish(par("stopOperationExtraTime"));
 }
 
 void EtherAppServer::handleMessageWhenUp(cMessage *msg)

@@ -195,7 +195,7 @@ class INET_API EtherMacBase : public MacBase
     virtual void handleStartOperation(LifecycleOperation *operation) override;
     virtual void handleStopOperation(LifecycleOperation *operation) override;
     virtual void handleCrashOperation(LifecycleOperation *operation) override;
-    virtual bool isActiveOperationFinished() override;
+    virtual void processAtHandleMessageFinished();
 
   protected:
     //  initialization

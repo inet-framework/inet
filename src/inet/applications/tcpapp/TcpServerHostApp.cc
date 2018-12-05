@@ -44,12 +44,10 @@ void TcpServerHostApp::handleStartOperation(LifecycleOperation *operation)
 
 void TcpServerHostApp::handleStopOperation(LifecycleOperation *operation)
 {
-    // remove and delete threads
-    for (auto thread: threadSet) {
+    for (auto thread: threadSet)
         thread->getSocket()->close();
-    }
-
     serverSocket.close();
+    delayActiveOperationFinish(par("stopOperationTimeout"));
 }
 
 void TcpServerHostApp::handleCrashOperation(LifecycleOperation *operation)
@@ -64,14 +62,6 @@ void TcpServerHostApp::handleCrashOperation(LifecycleOperation *operation)
     // TODO: always?
     if (operation->getRootModule() != getContainingNode(this))
         serverSocket.destroy();
-}
-
-bool TcpServerHostApp::isActiveOperationFinished()
-{
-    if (operationalState == State::STOPPING_OPERATION)
-        return (threadSet.empty() && !serverSocket.isOpen());
-    else
-        return true;
 }
 
 void TcpServerHostApp::refreshDisplay() const
@@ -137,6 +127,8 @@ void TcpServerHostApp::socketAvailable(TcpSocket *socket, TcpAvailableInfo *avai
 
 void TcpServerHostApp::socketClosed(TcpSocket *socket)
 {
+    if (operationalState == State::STOPPING_OPERATION && threadSet.empty() && !serverSocket.isOpen())
+        startActiveOperationExtraTimeOrFinish(par("stopOperationExtraTime"));
 }
 
 void TcpServerHostApp::removeThread(TcpServerThreadBase *thread)

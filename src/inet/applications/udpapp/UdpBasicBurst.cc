@@ -211,11 +211,8 @@ void UdpBasicBurst::socketErrorArrived(UdpSocket *socket, Indication *indication
 
 void UdpBasicBurst::socketClosed(UdpSocket *socket)
 {
-    while (!stopDoneCallbackList.empty()) {
-        auto callback = stopDoneCallbackList.front();
-        callback->invoke();
-        stopDoneCallbackList.pop_front();
-    }
+    if (operationalState == State::STOPPING_OPERATION)
+        startActiveOperationExtraTimeOrFinish(par("stopOperationExtraTime"));
 }
 
 void UdpBasicBurst::refreshDisplay() const
@@ -348,6 +345,7 @@ void UdpBasicBurst::handleStopOperation(LifecycleOperation *operation)
         cancelEvent(timerNext);
     activeBurst = false;
     socket.close();
+    delayActiveOperationFinish(par("stopOperationTimeout"));
 }
 
 void UdpBasicBurst::handleCrashOperation(LifecycleOperation *operation)
@@ -357,14 +355,6 @@ void UdpBasicBurst::handleCrashOperation(LifecycleOperation *operation)
     activeBurst = false;
     if (operation->getRootModule() != getContainingNode(this))     // closes socket when the application crashed only
         socket.destroy();         //TODO  in real operating systems, program crash detected by OS and OS closes sockets of crashed programs.
-}
-
-bool UdpBasicBurst::isActiveOperationFinished()
-{
-    if (operationalState == State::STOPPING_OPERATION)
-        return socket.getState() == UdpSocket::CLOSED;
-    else
-        return true;
 }
 
 } // namespace inet

@@ -78,11 +78,11 @@ class INET_API Ppp : public MacBase
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
+    virtual void handleMessageWhenUp(cMessage *message) override;
     virtual void handleSelfMessage(cMessage *message) override;
     virtual void handleUpperPacket(Packet *packet) override;
     virtual void handleLowerPacket(Packet *packet) override;
     virtual void handleStopOperation(LifecycleOperation *operation) override;
-    virtual bool isActiveOperationFinished() override;
 };
 
 } // namespace inet

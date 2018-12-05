@@ -43,6 +43,7 @@ simple HttpBrowserDirect like IHttpDirectApp
         double linkSpeed @unit(bps) = default(11Mbps); // Used to model transmission delays (Bit/s)
         xml config;                                    // The XML configuration file for the browser
         string httpControllerModule = default("httpController"); // the absolute path to the http browser controller, @see HttpController
+        @lifecycleSupport;
     gates:
         input httpIn @directIn;
 }

@@ -37,12 +37,27 @@ void MpduGen::initialize(int stage)
     }
 }
 
-void MpduGen::processPacket(Packet *pk)
+void MpduGen::socketDataArrived(UdpSocket *socket, Packet *pk)
 {
     emit(packetReceivedSignal, pk);
     EV_INFO << "Received packet: " << UdpSocket::getReceivedPacketInfo(pk) << endl;
     delete pk;
     numReceived++;
+}
+
+void MpduGen::socketErrorArrived(UdpSocket *socket, Indication *indication)
+{
+    EV_WARN << "Ignoring UDP error report\n";
+    delete indication;
+}
+
+void MpduGen::socketClosed(UdpSocket *socket_)
+{
+    ASSERT(&socket == socket_);
+    EV_WARN << "Ignoring UDP socket closed report\n";
+    if (operationalState == STOPPING_OPERATION)
+        if (!socket.isOpen())
+            finishActiveOperation();
 }
 
 void MpduGen::sendPackets()
@@ -82,20 +97,9 @@ void MpduGen::handleMessageWhenUp(cMessage *msg)
         ASSERT(msg == selfMsg);
         sendPackets();
     }
-    else if (msg->getKind() == UDP_I_DATA) {
-        processPacket(check_and_cast<Packet*>(msg));
-    }
-    else if (msg->getKind() == UDP_I_ERROR) {
-        EV_WARN << "Ignoring UDP error report\n";
-        delete msg;
-    }
-    else if (msg->getKind() == UDP_I_SOCKET_CLOSED) {
-        EV_WARN << "Ignoring UDP socket closed report\n";
-        delete msg;
-    }
-    else {
-        throw cRuntimeError("Unrecognized message (%s)%s", msg->getClassName(), msg->getName());
-    }
+    else
+        socket.processMessage(msg);
+
     if (hasGUI()) {
         char buf[40];
         sprintf(buf, "rcvd: %d pks\nsent: %d pks", numReceived, numSent);
@@ -112,6 +116,7 @@ void MpduGen::handleStopOperation(LifecycleOperation *operation)
 {
     cancelEvent(selfMsg);
     socket.close();
+    delayActiveOperationFinish(par("stopOperationTimeout"));
 }
 
 void MpduGen::handleCrashOperation(LifecycleOperation *operation)
@@ -120,15 +125,5 @@ void MpduGen::handleCrashOperation(LifecycleOperation *operation)
     socket.destroy();
 }
 
-bool MpduGen::isOperationFinished()
-{
-    switch (operational) {
-        case STOPPING_OPERATION:
-        case SUSPENDING_OPERATION:
-            return socket.getState() == UdpSocket::CLOSED;
-        default:
-            return true;
-    }
-}
+}   // namespace inet
 
-}

@@ -77,6 +77,7 @@ void TcpSessionApp::handleStopOperation(LifecycleOperation *operation)
     cancelEvent(timeoutMsg);
     if (socket.getState() == TcpSocket::CONNECTED || socket.getState() == TcpSocket::CONNECTING || socket.getState() == TcpSocket::PEER_CLOSED)
         close();
+    delayActiveOperationFinish(par("stopOperationTimeout"));
 }
 
 void TcpSessionApp::handleCrashOperation(LifecycleOperation *operation)
@@ -84,14 +85,6 @@ void TcpSessionApp::handleCrashOperation(LifecycleOperation *operation)
     cancelEvent(timeoutMsg);
     if (operation->getRootModule() != getContainingNode(this))
         socket.destroy();
-}
-
-bool TcpSessionApp::isActiveOperationFinished()
-{
-    if (operationalState == State::STOPPING_OPERATION)
-        return socket.getState() == TcpSocket::CLOSED;
-    else
-        return true;
 }
 
 void TcpSessionApp::handleTimer(cMessage *msg)
@@ -182,6 +175,8 @@ void TcpSessionApp::socketClosed(TcpSocket *socket)
 {
     TcpAppBase::socketClosed(socket);
     cancelEvent(timeoutMsg);
+    if (operationalState == State::STOPPING_OPERATION && !this->socket.isOpen())
+        startActiveOperationExtraTimeOrFinish(par("stopOperationExtraTime"));
 }
 
 void TcpSessionApp::socketFailure(TcpSocket *socket, int code)

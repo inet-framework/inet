@@ -67,7 +67,6 @@ class INET_API UdpSink : public ApplicationBase, public UdpSocket::ICallback
     virtual void handleStartOperation(LifecycleOperation *operation) override;
     virtual void handleStopOperation(LifecycleOperation *operation) override;
     virtual void handleCrashOperation(LifecycleOperation *operation) override;
-    virtual bool isActiveOperationFinished() override;
 };
 
 } // namespace inet

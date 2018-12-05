@@ -210,6 +210,8 @@ void UdpBasicApp::socketErrorArrived(UdpSocket *socket, Indication *indication)
 
 void UdpBasicApp::socketClosed(UdpSocket *socket)
 {
+    if (operationalState == State::STOPPING_OPERATION)
+        startActiveOperationExtraTimeOrFinish(par("stopOperationExtraTime"));
 }
 
 void UdpBasicApp::refreshDisplay() const
@@ -242,21 +244,13 @@ void UdpBasicApp::handleStopOperation(LifecycleOperation *operation)
 {
     cancelEvent(selfMsg);
     socket.close();
+    delayActiveOperationFinish(par("stopOperationTimeout"));
 }
 
 void UdpBasicApp::handleCrashOperation(LifecycleOperation *operation)
 {
     cancelEvent(selfMsg);
-    if (operation->getRootModule() != getContainingNode(this))     // closes socket when the application crashed only
-        socket.destroy();         //TODO  in real operating systems, program crash detected by OS and OS closes sockets of crashed programs.
-}
-
-bool UdpBasicApp::isActiveOperationFinished()
-{
-    if (operationalState == State::STOPPING_OPERATION)
-        return socket.getState() == UdpSocket::CLOSED;
-    else
-        return true;
+    socket.destroy();         //TODO  in real operating systems, program crash detected by OS and OS closes sockets of crashed programs.
 }
 
 } // namespace inet

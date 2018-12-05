@@ -241,6 +241,8 @@ void PingApp::handleMessageWhenUp(cMessage *msg)
         else
             throw cRuntimeError("Unaccepted message: %s(%s)", msg->getName(), msg->getClassName());
     }
+    if (operationalState == State::STOPPING_OPERATION && socketMap.size() == 0)
+        startActiveOperationExtraTimeOrFinish(par("stopOperationExtraTime"));
 }
 
 void PingApp::socketDataArrived(INetworkSocket *socket, Packet *packet)
@@ -340,6 +342,7 @@ void PingApp::handleStopOperation(LifecycleOperation *operation)
         for (auto socket: socketMap.getMap())
             socket.second->close();
     }
+    delayActiveOperationFinish(par("stopOperationTimeout"));
 }
 
 void PingApp::handleCrashOperation(LifecycleOperation *operation)
@@ -359,14 +362,6 @@ void PingApp::handleCrashOperation(LifecycleOperation *operation)
             socket.second->destroy();
         socketMap.deleteSockets();
     }
-}
-
-bool PingApp::isActiveOperationFinished()
-{
-    if (operationalState == State::STOPPING_OPERATION)
-        return socketMap.size() == 0;
-    else
-        return true;
 }
 
 void PingApp::scheduleNextPingRequest(simtime_t previous, bool withSleep)

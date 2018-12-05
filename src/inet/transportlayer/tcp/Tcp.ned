@@ -210,8 +210,8 @@ simple Tcp like ITcp
         string tcpAlgorithmClass @enum("TcpVegas", "TcpWestwood", "TcpNewReno", "TcpReno", "TcpTahoe", "TcpNoCongestionControl") = default("TcpReno");
         bool recordStats = default(true); // recording of seqNum etc. into output vectors enabled/disabled
         bool useDataNotification = default(false); // turn the notifications for arrived data on or off
-        double extraStopTime @unit(s) = default(0s);		// extra waiting time after lifecycle stop/suspend operation finished in tcp
-        double operationTimeout @unit(s) = default(2s);		// timeout value for waiting operations
+        double stopOperationExtraTime @unit(s) = default(0s);    // extra time after lifecycle stop operation finished
+        double stopOperationTimeout @unit(s) = default(2s);    // timeout value for lifecycle stop operation
         @display("i=block/wheelbarrow");
         @signal[tcpConnectionAdded];
         @signal[tcpConnectionRemoved];

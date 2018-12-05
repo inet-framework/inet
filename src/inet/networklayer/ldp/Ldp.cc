@@ -199,6 +199,21 @@ void Ldp::handleMessageWhenUp(cMessage *msg)
             throw cRuntimeError("model error: no socket found for msg '%s' with socketId %d", msg->getName(), socketId);
         }
     }
+    // TODO: move to separate function and reuse from socketClosed
+    if (operationalState == State::STOPPING_OPERATION) {
+        if (udpSocket.isOpen() || serverSocket.isOpen())
+            return;
+        // TODO: check for empty sockets?
+        for (auto& s: udpSockets)
+            if (s.isOpen())
+                return;
+        for (auto s: socketMap.getMap())
+            if (s.second->isOpen())
+                return;
+        udpSockets.clear();
+        socketMap.deleteSockets();
+        startActiveOperationExtraTimeOrFinish(par("stopOperationExtraTime"));
+    }
 }
 
 void Ldp::socketDataArrived(UdpSocket *socket, Packet *packet)
@@ -235,26 +250,7 @@ void Ldp::handleStopOperation(LifecycleOperation *operation)
     serverSocket.close();
     for (auto s: socketMap.getMap())
         s.second->close();
-}
-
-bool Ldp::isActiveOperationFinished()
-{
-    if (operationalState == State::STOPPING_OPERATION) {
-        if (udpSocket.isOpen() || serverSocket.isOpen())
-            return false;
-        for (auto& s: udpSockets)
-            if (s.isOpen())
-                return false;
-        for (auto s: socketMap.getMap())
-            if (s.second->isOpen())
-                return false;
-        // TODO: OMG?!
-        udpSockets.clear();
-        socketMap.deleteSockets();
-        return true;
-    }
-    else
-        return true;
+    delayActiveOperationFinish(par("stopOperationTimeout"));
 }
 
 void Ldp::handleCrashOperation(LifecycleOperation *operation)

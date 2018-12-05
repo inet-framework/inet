@@ -29,7 +29,6 @@ module TcpSinkApp extends TcpServerHostApp
         serverThreadModuleType = default("inet.applications.tcpapp.TcpSinkAppThread");
         @class(TcpSinkApp);
         @display("i=block/sink");
-        @lifecycleSupport;
         @statistic[packetReceived](title="packets received"; source=packetReceived; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none; checkSignals=false);
         @statistic[endToEndDelay](title="end-to-end delay"; source="dataAge(packetReceived)"; unit=s; record=histogram,vector; interpolationmode=none; checkSignals=false);
 }

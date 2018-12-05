@@ -85,6 +85,8 @@ void UdpSink::socketErrorArrived(UdpSocket *socket, Indication *indication)
 
 void UdpSink::socketClosed(UdpSocket *socket)
 {
+    if (operationalState == State::STOPPING_OPERATION)
+        startActiveOperationExtraTimeOrFinish(par("stopOperationExtraTime"));
 }
 
 void UdpSink::refreshDisplay() const
@@ -165,6 +167,7 @@ void UdpSink::handleStopOperation(LifecycleOperation *operation)
     if (!multicastGroup.isUnspecified())
         socket.leaveMulticastGroup(multicastGroup); // FIXME should be done by socket.close()
     socket.close();
+    delayActiveOperationFinish(par("stopOperationTimeout"));
 }
 
 void UdpSink::handleCrashOperation(LifecycleOperation *operation)
@@ -175,14 +178,6 @@ void UdpSink::handleCrashOperation(LifecycleOperation *operation)
             socket.leaveMulticastGroup(multicastGroup); // FIXME should be done by socket.close()
         socket.destroy();    //TODO  in real operating systems, program crash detected by OS and OS closes sockets of crashed programs.
     }
-}
-
-bool UdpSink::isActiveOperationFinished()
-{
-    if (operationalState == State::STOPPING_OPERATION)
-        return socket.getState() == UdpSocket::CLOSED;
-    else
-        return true;
 }
 
 } // namespace inet

@@ -41,6 +41,7 @@ simple HttpServerDirect like IHttpDirectApp
         double linkSpeed @unit(bps) = default(11Mbps);      // Used to model transmission delays.
         xml config;                                         // The XML configuration file for random sites
         string httpControllerModule = default("httpController"); // ModulePath for HttpController module, @see HttpController
+        @lifecycleSupport;
     gates:
         input httpIn @directIn;
 }
