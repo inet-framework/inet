@@ -110,9 +110,9 @@ void EthernetSocket::processMessage(cMessage *msg)
                 delete msg;
             break;
         case ETHERNET_I_SOCKET_CLOSED:
+            isOpened = false;
             if (callback)
                 callback->socketClosed(this);
-            isOpened = false;
             delete msg;
             break;
         default:

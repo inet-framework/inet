@@ -55,11 +55,11 @@ void Ipv4Socket::processMessage(cMessage *msg)
             break;
         case IPv4_I_SOCKET_CLOSED:
             check_and_cast<Indication *>(msg);
+            isOpened = false;
+            bound = false;
             if (callback)
                 callback->socketClosed(this);
             delete msg;
-            isOpened = false;
-            bound = false;
             break;
         default:
             throw cRuntimeError("Ipv4Socket: invalid msg kind %d, one of the IPv4_I_xxx constants expected", msg->getKind());

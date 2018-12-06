@@ -55,10 +55,10 @@ void Ipv6Socket::processMessage(cMessage *msg)
             break;
         case IPv6_I_SOCKET_CLOSED:
             check_and_cast<Indication *>(msg);
+            bound = isOpened = false;
             if (callback)
                 callback->socketClosed(this);
             delete msg;
-            bound = isOpened = false;
             break;
         default:
             throw cRuntimeError("Ipv6Socket: invalid msg kind %d, one of the IPv6_I_xxx constants expected", msg->getKind());

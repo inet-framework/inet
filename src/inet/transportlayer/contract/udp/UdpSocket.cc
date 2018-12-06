@@ -360,10 +360,10 @@ void UdpSocket::processMessage(cMessage *msg)
             break;
         case UDP_I_SOCKET_CLOSED:
             check_and_cast<Indication *>(msg);
+            sockState = CLOSED;
             if (cb)
                 cb->socketClosed(this);
             delete msg;
-            sockState = CLOSED;
             break;
         default:
             throw cRuntimeError("UdpSocket: invalid msg kind %d, one of the UDP_I_xxx constants expected", msg->getKind());

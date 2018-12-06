@@ -54,9 +54,9 @@ void Ieee8022LlcSocket::processMessage(cMessage *msg)
                 delete msg;
             break;
         case IEEE8022_LLC_I_SOCKET_CLOSED:
+            isOpened = false;
             if (callback)
                 callback->socketClosed(this);
-            isOpened = false;
             delete msg;
             break;
         default:

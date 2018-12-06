@@ -52,9 +52,9 @@ void TunSocket::processMessage(cMessage *msg)
                 delete msg;
             break;
         case TUN_I_CLOSED:
+            isOpened = false;
             if (callback)
                 callback->socketClosed(this);
-            isOpened = false;
             delete msg;
             break;
         default:

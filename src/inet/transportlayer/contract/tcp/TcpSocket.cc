@@ -292,12 +292,10 @@ void TcpSocket::processMessage(cMessage *msg)
 
         case TCP_I_AVAILABLE:
             availableInfo = check_and_cast<TcpAvailableInfo *>(msg->getControlInfo());
-
             if (cb)
                 cb->socketAvailable(this, availableInfo);
             else
                 accept(availableInfo->getNewSocketId());
-
             delete msg;
             break;
 
@@ -313,7 +311,6 @@ void TcpSocket::processMessage(cMessage *msg)
             remoteAddr = connectInfo->getRemoteAddr();
             localPrt = connectInfo->getLocalPort();
             remotePrt = connectInfo->getRemotePort();
-
             if (cb)
                 cb->socketEstablished(this);
             delete msg;
@@ -321,39 +318,31 @@ void TcpSocket::processMessage(cMessage *msg)
 
         case TCP_I_PEER_CLOSED:
             sockstate = PEER_CLOSED;
-            delete msg;
-
             if (cb)
                 cb->socketPeerClosed(this);
-
+            delete msg;
             break;
 
         case TCP_I_CLOSED:
             sockstate = CLOSED;
-            delete msg;
-
             if (cb)
                 cb->socketClosed(this);
-
+            delete msg;
             break;
 
         case TCP_I_CONNECTION_REFUSED:
         case TCP_I_CONNECTION_RESET:
         case TCP_I_TIMED_OUT:
             sockstate = SOCKERROR;
-
             if (cb)
                 cb->socketFailure(this, msg->getKind());
-
             delete msg;
             break;
 
         case TCP_I_STATUS:
             status = check_and_cast<TcpStatusInfo *>(msg->getControlInfo());
-
             if (cb)
                 cb->socketStatusArrived(this, status);
-
             delete msg;
             break;
 

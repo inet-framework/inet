@@ -56,10 +56,10 @@ void L3Socket::processMessage(cMessage *msg)
             break;
         case L3_I_SOCKET_CLOSED:
             check_and_cast<Indication *>(msg);
+            bound = isOpened = false;
             if (callback)
                 callback->socketClosed(this);
             delete msg;
-            bound = isOpened = false;
             break;
         default:
             throw cRuntimeError("L3Socket: invalid msg kind %d, one of the L3_I_xxx constants expected", msg->getKind());
