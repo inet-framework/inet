@@ -25,8 +25,6 @@ namespace inet {
 Register_Class(ModuleStartOperation);
 Register_Class(ModuleStopOperation);
 Register_Class(ModuleCrashOperation);
-Register_Class(ModuleSuspendOperation);
-Register_Class(ModuleResumeOperation);
 
 } // namespace inet
 

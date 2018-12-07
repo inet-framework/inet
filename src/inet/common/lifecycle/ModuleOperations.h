@@ -24,7 +24,14 @@
 
 namespace inet {
 
-class INET_API ModuleStartOrResumeOperationBase : public LifecycleOperation
+/**
+ * This operation represents the process of turning on a module
+ * after a stop or crash operation.
+ *
+ * The operation should be applied to the module of a network node. Operation
+ * stages are organized bottom-up similarly to the OSI network layers.
+ */
+class INET_API ModuleStartOperation : public LifecycleOperation
 {
   public:
     enum Stage {
@@ -43,17 +50,11 @@ class INET_API ModuleStartOrResumeOperationBase : public LifecycleOperation
 };
 
 /**
- * This operation represents the process of turning on a module
- * after a stop or crash operation.
+ * This operation represents the process of orderly stopping down a module.
  *
- * The operation should be applied to the module of a network node. Operation
- * stages are organized bottom-up similarly to the OSI network layers.
+ * Operation stages are organized top-down similarly to the OSI network layers.
  */
-class INET_API ModuleStartOperation : public ModuleStartOrResumeOperationBase
-{
-};
-
-class INET_API ModuleStopOrSuspendOperationBase : public LifecycleOperation
+class INET_API ModuleStopOperation : public LifecycleOperation
 {
   public:
     enum Stage {
@@ -69,36 +70,6 @@ class INET_API ModuleStopOrSuspendOperationBase : public LifecycleOperation
 
   public:
     virtual int getNumStages() const override { return STAGE_LAST + 1; }
-};
-
-/**
- * This operation represents the process of orderly stopping down a module.
- *
- * Operation stages are organized top-down similarly to the OSI network layers.
- */
-class INET_API ModuleStopOperation : public ModuleStopOrSuspendOperationBase
-{
-};
-
-/**
- * This operation represents the process of suspending (hybernating)
- * a module. All state information (routing tables, etc) will
- * remain intact, but the module will stop responding to messages.
- *
- * Operation stages are organized top-down similarly to the OSI network layers.
- **/
-class INET_API ModuleSuspendOperation : public ModuleStopOrSuspendOperationBase
-{
-};
-
-/**
- * This operation represents the process of resume a suspended (hybernated)
- * module.
- *
- * Operation stages are similarly to the OSI network layers.
- **/
-class INET_API ModuleResumeOperation : public ModuleStartOrResumeOperationBase
-{
 };
 
 /**

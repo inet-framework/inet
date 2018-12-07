@@ -116,8 +116,8 @@ class INET_API Ieee8021dRelay : public LayeredProtocolBase
     virtual bool isLowerMessage(cMessage *message) override { return message->arrivedOn("ifIn"); }
 
     virtual bool isInitializeStage(int stage) override { return stage == INITSTAGE_LINK_LAYER; }
-    virtual bool isModuleStartStage(int stage) override { return stage == ModuleStartOrResumeOperationBase::STAGE_LINK_LAYER; }
-    virtual bool isModuleStopStage(int stage) override { return stage == ModuleStopOrSuspendOperationBase::STAGE_LINK_LAYER; }
+    virtual bool isModuleStartStage(int stage) override { return stage == ModuleStartOperation::STAGE_LINK_LAYER; }
+    virtual bool isModuleStopStage(int stage) override { return stage == ModuleStopOperation::STAGE_LINK_LAYER; }
 
     /*
      * Gets port data from the InterfaceTable

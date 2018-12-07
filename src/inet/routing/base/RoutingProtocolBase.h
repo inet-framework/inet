@@ -30,8 +30,8 @@ class INET_API RoutingProtocolBase : public OperationalBase
 
   protected:
     virtual bool isInitializeStage(int stage) override { return stage == INITSTAGE_ROUTING_PROTOCOLS; }
-    virtual bool isModuleStartStage(int stage) override { return stage == ModuleStartOrResumeOperationBase::STAGE_ROUTING_PROTOCOLS; }
-    virtual bool isModuleStopStage(int stage) override { return stage == ModuleStopOrSuspendOperationBase::STAGE_ROUTING_PROTOCOLS; }
+    virtual bool isModuleStartStage(int stage) override { return stage == ModuleStartOperation::STAGE_ROUTING_PROTOCOLS; }
+    virtual bool isModuleStopStage(int stage) override { return stage == ModuleStopOperation::STAGE_ROUTING_PROTOCOLS; }
 };
 
 } // namespace inet

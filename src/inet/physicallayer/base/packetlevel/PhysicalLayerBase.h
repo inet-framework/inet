@@ -46,8 +46,8 @@ class INET_API PhysicalLayerBase : public LayeredProtocolBase, public IPhysicalL
     virtual bool isLowerMessage(cMessage *message) override;
 
     virtual bool isInitializeStage(int stage) override { return stage == INITSTAGE_PHYSICAL_LAYER; }
-    virtual bool isModuleStartStage(int stage) override { return stage == ModuleStartOrResumeOperationBase::STAGE_PHYSICAL_LAYER; }
-    virtual bool isModuleStopStage(int stage) override { return stage == ModuleStopOrSuspendOperationBase::STAGE_PHYSICAL_LAYER; }
+    virtual bool isModuleStartStage(int stage) override { return stage == ModuleStartOperation::STAGE_PHYSICAL_LAYER; }
+    virtual bool isModuleStopStage(int stage) override { return stage == ModuleStopOperation::STAGE_PHYSICAL_LAYER; }
 };
 
 } // namespace physicallayer

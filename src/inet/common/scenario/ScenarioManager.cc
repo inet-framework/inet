@@ -357,10 +357,6 @@ void ScenarioManager::processLifecycleCommand(cXMLElement *node)
         operation = new ModuleStopOperation;
     else if (operationName == "crash")
         operation = new ModuleCrashOperation;
-    else if (operationName == "suspend")
-        operation = new ModuleSuspendOperation;
-    else if (operationName == "resume")
-        operation = new ModuleResumeOperation;
     else
         operation = check_and_cast<LifecycleOperation *>(inet::utils::createOne(operationName.c_str()));
 
