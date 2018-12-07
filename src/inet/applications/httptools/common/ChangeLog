@@ -1,3 +1,7 @@
+2018-10-04  Zoltan Bojthe
+
+	Added LifecycleUnsupported base class instead of copy-pasting the same code.
+
 ====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------
@@ -37,4 +41,3 @@
 	Added required import statements to MSG files according to new syntax.
 
 2017-11-16  ------ inet-3.99.1 released ------
-

@@ -1,3 +1,36 @@
+2018-10-22  Levente Mészáros
+
+	Extracted typeColumn from protocol printer.
+	Moved address parameter from MAC to interface.
+
+2018-10-08  Zoltan Bojthe
+
+	Moved registerInterface() call to MacProtocolBase::initialize().
+
+2018-09-20  Levente Mészáros
+
+	Renamed Ieee80211Llc to IIeee80211Llc.
+
+2018-07-27  Zoltan Bojthe
+
+	Refactored createInterfaceEntry() to configureInterfaceEntry().
+
+2018-07-19  Zoltan Bojthe
+
+	Moved MAC address initialization to createInterfaceEntry().
+
+2018-07-12  Zoltan Bojthe
+
+	Refactored MAC modules to use the MacAddress stored in the InterfaceEntry.
+
+2018-07-11  Raphael Riebl
+
+	Removed superfluous 802.2 LLC header inclusion from Dcf and Hcf.
+
+2018-07-10  Raphael Riebl
+
+	Support EtherType protocol discrimination in 5.9 GHz band.
+
 ====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------

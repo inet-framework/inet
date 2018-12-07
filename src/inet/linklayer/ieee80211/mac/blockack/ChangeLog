@@ -1,3 +1,11 @@
+2018-12-05  Levente Mészáros
+
+	Fixed sequence number check if getAckState().
+
+2018-12-03  Levente Mészáros
+
+	Added missing ACK state removal function up to a sequence number.
+
 ====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------

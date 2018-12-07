@@ -1,3 +1,7 @@
+2018-09-27  Zoltan Bojthe
+
+	Changed ExampleQosClassifier, RandomQosClassifier to forward handleRegisterProtocol calls.
+
 ====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------

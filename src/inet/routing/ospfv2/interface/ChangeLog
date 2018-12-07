@@ -1,3 +1,31 @@
+2018-08-13  Mani Amoozadeh
+
+	Added checksum to the OSPF messages.
+
+2018-08-10  Mani Amoozadeh
+
+	Showing ospf interface name in the vector along with other params.
+
+2018-08-08  Mani Amoozadeh
+
+	Added interface mode: Active, Passive and NoOSPF.
+
+2018-08-07  Mani Amoozadeh
+
+	Print the result of DR/BDR election.
+
+2018-08-05  Mani Amoozadeh
+
+	Added neighbor list with status to each interface.
+
+2018-07-25  Mani Amoozadeh
+
+	Added WATCHes for important data structures.
+
+2018-07-20  Mani Amoozadeh
+
+	Rename classes for clarity.
+
 ====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------

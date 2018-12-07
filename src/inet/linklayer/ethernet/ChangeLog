@@ -1,3 +1,76 @@
+2018-11-27  Levente Mészáros
+
+	Replaced dispatch on message kind with dispatch on C++ type, message kinds overlap with base class.
+
+2018-10-24  Levente Mészáros
+
+	Moved MAC address parameter to network interface.
+
+2018-10-11  Levente Mészáros
+
+	Added EthernetSocket class.
+	Added socket handling to EtherEncap.
+
+2018-10-10  Zoltan Bojthe
+
+	Fixed deserializer, serialize/deserialize all fields.
+
+2018-10-09  Levente Mészáros
+
+	Added optional vlan submodule to EthernetInterface.
+	Added cTag and sTag fields to EthernetMacHeader.
+	Extended EthernetMacHeaderSerializer with cTag and sTag.
+
+2018-10-10  Zoltan Bojthe
+
+	Fixed #391 'EtherMAC swallows frames when PAUSE is engaged' reported by Danushka Menikkumbura.
+	Fixed #390 'Cannot abort PAUSE (LFC) before timeout' reported by Danushka Menikkumbura.
+
+2018-10-08  Zoltan Bojthe
+
+	Moved registerInterface() call to MacProtocolBase::initialize().
+
+2018-10-02  Zoltan Bojthe
+
+	Removed obsolete EtherLlc NED module.
+
+2018-09-28  Levente Mészáros
+
+	Extracted INITSTAGE_LINK_LAYER from INITSTAGE_NETWORK_INTERFACE_CONFIGURATION where applicable.
+
+2018-09-27  Levente Mészáros
+
+	Renamed INITSTAGE_LINK_LAYER to INITSTAGE_NETWORK_INTERFACE_CONFIGURATION.
+	Renamed INITSTAGE_LINK_LAYER_2 to INITSTAGE_LINK_LAYER.
+
+2018-09-25  Zoltan Bojthe
+
+	Removed EtherLlc and switched to EtherEncap instead.
+
+2018-09-24  Zoltan Bojthe
+
+	Dropped optional hooks from network interfaces.
+
+2018-09-14  Zoltan Bojthe
+
+	Added registerProtocol NED parameter to EtherEncap.
+
+2018-08-17  Zoltan Bojthe
+
+	Added namespace qualifier to @signal type parameters.
+
+2018-07-27  Zoltan Bojthe
+
+	Refactored createInterfaceEntry() to configureInterfaceEntry().
+
+2018-07-20  Levente Mészáros
+
+	Fixed chunk length for ethernet FCS.
+
+2018-07-12  Zoltan Bojthe
+
+	Refactored MAC modules to use the MacAddress stored in the InterfaceEntry.
+
 ====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------

@@ -1,3 +1,12 @@
+2018-10-19  Levente Mészáros
+
+	Renamed DefaultDissector to DefaultProtocolDissector.
+
+2018-10-19  Levente Mészáros
+
+	Added protocol parameter to ProtocolDissector::dissect().
+	This allows handling multiple protocols in the same dissector.
+
 ====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------

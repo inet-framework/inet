@@ -1,3 +1,41 @@
+2018-11-16  TÖRÖK Attila
+
+	Disable depth test for labels and icons, use opacity par where present, increase to 1 otherwise.
+
+2018-09-30  Andras Varga
+
+	Renamed playground* (NED parameters, C++ variables/methods) to scene*.
+
+2018-09-19  Levente Mészáros
+
+	Fixed canvas projection for right-handed coordinate systems.
+
+	Setting sceneVisualizer.viewAngle = "x right y up z out" makes the Y axis
+	grow upward. Mobilities and visualization still works as before.
+	Positions assigned in display strings are kept on the screen but may be
+	differently represented numerically.
+
+2018-09-17  Levente Mészáros
+
+	Updated MobilityOsgVisualizer and NetworkNodeOsgVisualizer to work similarly to the canvas variants.
+
+2018-09-11  Levente Mészáros
+
+	Added missing default values for visualization*Module parameters.
+	Renamed visualizerTargetModule to visualizationTargetModule for consistency.
+	Replaced getSystemModule() with visualizationSubjectModule to allow using visualizers
+	only on a part of the simulation.
+
+2018-07-19  Levente Mészáros
+
+	Added hasGUI guard to handleParameterChange functions.
+	Changed viewAngle parameter format and properly implemented all combinations.
+	Changed axis visualization in SceneCanvasVisualizer to follow viewAngle changes.
+
+2018-07-02  TÖRÖK Attila
+
+	Fixed #353 build if OSG is available, but osgEarth isn't, contribution by ABDULLATIF Mouhamadi.
+
 ====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------

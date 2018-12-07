@@ -1,3 +1,15 @@
+2018-10-18  Levente Mészáros
+
+	Fixed CRC deserialization for Icmpv6.
+
+2018-10-17  Zoltan Bojthe
+
+	Changed base class of Ipv6, Icmpv6, Ipv6NeighbourDiscovery, Ipv6Tunneling to LifecycleUnsupported. 
+
+2018-09-27  Levente Mészáros
+
+	Merged INITSTAGE_NETWORK_LAYER and INITSTAGE_NETWORK_LAYER_3.
+
 ====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------

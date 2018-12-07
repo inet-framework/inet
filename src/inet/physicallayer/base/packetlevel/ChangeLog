@@ -1,3 +1,19 @@
+2018-09-27  Levente Mészáros
+
+	Fixed and simplified dimensional signal power creation.
+
+2018-09-20  Levente Mészáros
+
+	Fixed interpolation mode for dimensional noise calculation.
+
+2018-07-19  Levente Mészáros
+
+	Changed antenna gain computation to use normalized EulerAngles.
+
+2018-06-28  Levente Mészáros
+
+	Optimized antenna gain computation for the simple cases where min gain equals max gain.
+
 ====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------

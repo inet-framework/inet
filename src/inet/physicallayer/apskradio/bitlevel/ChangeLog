@@ -1,3 +1,7 @@
+2018-09-26  Levente Mészáros
+
+	Moved sensible default values for propagation and path loss submodules of the radio medium.
+
 ====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------

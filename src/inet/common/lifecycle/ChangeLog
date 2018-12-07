@@ -1,3 +1,19 @@
+2018-10-25  Zoltan Bojthe
+
+	Fixed NodeStatus check in OperationalBase when findContiningNode() returns nullptr.
+
+2018-10-22  Levente Mészáros
+
+	Dropped unused KIND from LifecycleOperation.
+
+2018-10-04  Zoltan Bojthe
+
+	Added 'LifecycleUnsupported' base class.
+
+2018-08-17  Zoltan Bojthe
+
+	Added namespace qualifier to @signal type parameters.
+
 ====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------

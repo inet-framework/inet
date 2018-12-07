@@ -1,3 +1,23 @@
+2018-08-22  Mani Amoozadeh
+
+	BDR can now promote to DR in case of DR's failure.
+
+2018-08-16  Mani Amoozadeh
+
+	Sending less OSPF messages after link breackage.
+
+2018-08-13  Mani Amoozadeh
+
+	Added checksum to the OSPF messages.
+
+2018-08-08  Mani Amoozadeh
+
+	Added interface mode: Active, Passive and NoOSPF.
+
+2018-07-25  Mani Amoozadeh
+
+	Added WATCHes for important data structures.
+
 ====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------

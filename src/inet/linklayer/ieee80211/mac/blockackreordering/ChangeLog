@@ -1,3 +1,9 @@
+2018-12-03  Levente Mészáros
+
+	Fixed block ack mechanism, fixed clearing obsolete state for passed up frames.
+	Extended frame removal to drop frames up to a sequence number.
+	Added block ack agreement parameter to a few functions.
+
 ====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------

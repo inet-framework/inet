@@ -1,3 +1,16 @@
+2018-12-05  Levente Mészáros
+
+	Added missing % 4096 to sequence number computation.
+	Extended QosAckHandler with handling a failed block ack request.
+
+2018-12-04  Levente Mészáros
+
+	Added BLOCK_ACK_NOT_ARRIVED status to QosAckHandler.
+
+2018-12-03  Levente Mészáros
+
+	Added missing mechanism for clearing the state of ack handlers.
+
 ====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------

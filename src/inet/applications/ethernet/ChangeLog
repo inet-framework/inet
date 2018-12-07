@@ -1,3 +1,27 @@
+2018-10-03  Zoltan Bojthe
+
+	Changed ethernet application base classes to ApplicationBase.
+
+2018-10-01  Zoltan Bojthe
+
+	Removed obsolete registerDSAP from EtherAppClient.
+
+2018-09-25  Zoltan Bojthe
+
+	Ethernet applications use LlcSocket instead of registerDSAP.
+
+2018-08-17  Zoltan Bojthe
+
+	Added namespace qualifier to @signal type parameters.
+
+2018-07-20  Zoltan Bojthe
+
+	Changed ethernet applications to use L3AddressResolver to get destination addresses.
+
+2018-07-12  Zoltan Bojthe
+
+	Ethernet applications connect to an EthernetInterface instead of the MAC module.
+
 ====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------

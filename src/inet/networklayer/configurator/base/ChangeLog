@@ -1,3 +1,16 @@
+2018-11-14  Zoltan Bojthe
+
+	Renamed NED parameter 'default_ssid' to 'defaultSsid' according to NED naming convention.
+
+2018-09-11  Levente Mészáros
+
+	Polished isolated network topology extraction.
+	Renamed groupId to networkId and similar renames.
+
+2018-08-19  Mani Amoozadeh
+
+	Added support for isolated networks, they can be configured separately.
+
 ====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------

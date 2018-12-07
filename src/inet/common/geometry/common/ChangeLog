@@ -1,3 +1,22 @@
+2018-10-15  Levente Mészáros
+
+	Renamed toAxisAngle to getRotationAxisAndAngle, and added separate getRotationAxis and getRotationAngle too.
+
+2018-09-18  Levente Mészáros
+
+	Replaced EulerAngles with Quaternion in GeographicCoordinateSystem.
+	Renamed Rotation to RotationMatrix.
+	Added call to normalize when converting a Quaternion to EulerAngles.
+	Added Quaternion::IDENTITY and Quaternion::NIL.
+
+2018-07-19  Levente Mészáros
+
+	Added new Rotation constructor using matrix.
+	Added important note about gimbal lock.
+	Added Rotation::toEulerAngles() and Rotation::toQuaternion().
+	Extended 2D/3D CanvasProjection with depth argument in both conversions.
+	Added normalize() to EulerAngles which limits all 3 angles in the range (0, 2 * M_PI).
+
 ====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------

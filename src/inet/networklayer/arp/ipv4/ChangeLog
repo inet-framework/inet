@@ -1,3 +1,27 @@
+2018-10-04  Zoltan Bojthe
+
+	Changed Arp and GlobalArp base classes to OperationalBase.
+
+2018-09-27  Levente Mészáros
+
+	Merged INITSTAGE_NETWORK_LAYER and INITSTAGE_NETWORK_LAYER_3.
+
+2018-09-19  Zoltan Bojthe
+
+	Adapted to the new protocol specific data storage API of InterfaceEntry.
+
+2018-09-17  Zoltan Bojthe
+
+	Added resolveMacAddressForArpReply to Arp as an extension point.
+
+2018-08-28  Zoltan Bojthe
+
+	Added sendARPGratuitous().
+
+2018-08-17  Zoltan Bojthe
+
+	Added namespace qualifier to @signal type parameters.
+
 ====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------

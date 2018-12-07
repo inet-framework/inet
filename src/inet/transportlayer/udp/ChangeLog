@@ -1,3 +1,28 @@
+2018-11-28  Levente Mészáros
+
+	Fixed protocol detection by port number in TCP/UDP.
+
+2018-10-19  Levente Mészáros
+
+	Extended UcpProtocolDissector to use udpprotocol protocol group.
+
+2018-10-26  Zoltan Bojthe
+
+	Fixed socket close when socket is already closed.
+
+2018-10-17  Zoltan Bojthe
+
+	Switched to parseCrcMode().
+	Changed UDP module base class to OperationalBase.
+
+2018-08-17  Zoltan Bojthe
+
+	Added namespace qualifier to @signal type parameters.
+
+2018-06-29  Levente Mészáros
+
+	Changed CRC computation to be public.
+
 ====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------

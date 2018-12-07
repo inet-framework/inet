@@ -1,3 +1,51 @@
+2018-10-19  Levente Mészáros
+
+	Added antennaLobeNormalize and antennaLobeRelativeLabels parameters.
+
+2018-10-17  Levente Mészáros
+
+	Added logarithmic mode to antenna lobe visualization.
+
+2018-10-15  Levente Mészáros
+
+	Added antennaLobeLineSmooth parameter.
+
+2018-10-05  Andras Varga
+
+	Changed %d to %t in InfoVisualizer format string.
+
+2018-09-30  Andras Varga
+
+	Renamed playground* (NED parameters, C++ variables/methods) to scene*.
+
+2018-09-28  Levente Mészáros
+
+	Fixed getPlayground when constraint area min/max is NaN.
+	Added sceneMin* and sceneMax* parameters to SceneVisualizerBase.
+
+2018-09-17  Levente Mészáros
+
+	Updated MobilityOsgVisualizer and NetworkNodeOsgVisualizer to work similarly to the canvas variants.
+
+2018-09-11  Levente Mészáros
+
+	Renamed visualizerTargetModule to visualizationTargetModule for consistency.
+	Removed visualizationSubjectModule lookup from subscribe methods.
+	Replaced subscriptionModule with visualizationSubjectModule in subscribe/unsubscribe methods.
+	Replaced subscriptionModule with visualizationSubjectModule parameter in NED files.
+	Replaced default <root> subscriptionModule with ^ parent.
+	Replaced getSystemModule() with visualizationSubjectModule to allow using visualizers
+	only on a part of the simulation.
+	Added visualizationSubjectModule parameter to all visualizers.
+
+2018-07-19  Levente Mészáros
+
+	Added hasGUI guard to handleParameterChange functions.
+
+2018-06-26  Levente Mészáros
+
+	Added antenna lobe visualization parameters to RadioVisualizerBase.
+
 ====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------

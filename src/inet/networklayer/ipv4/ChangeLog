@@ -1,3 +1,64 @@
+2018-11-30  Levente Mészáros
+
+	Fixed wrong IP option codes for STREAM_ID and RECORD_ROUTE, see #376 reported by screw.
+	Renamed direct broadcast related parameters to better express the purpose.
+
+2018-11-29  Mani Amoozadeh
+
+	Selectively enable direct broadcast on each interface.
+
+2018-11-27  Mani Amoozadeh
+
+	Added several important variables to WATCHes.
+
+2018-10-25  Zoltan Bojthe
+
+	Fixed Ipv4SocketCloseCommand bug, it used 0 instead of socketId in request.
+
+2018-10-22  Levente Mészáros
+
+	Changed ipv4 submodule to be repaceable with alternative implementations.
+
+2018-10-19  Levente Mészáros
+
+	Extracted typeColumn from infoColumn in IcmpProtocolPrinter.
+
+2018-09-27  Levente Mészáros
+
+	Merged INITSTAGE_NETWORK_LAYER and INITSTAGE_NETWORK_LAYER_3.
+
+2018-09-25  Zoltan Bojthe
+
+	Processing incoming request in Ipv4 moved to handleRequest, throw error when unknown request arrived.
+
+2018-09-19  Zoltan Bojthe
+
+	Adapted to the new protocol specific data storage API of InterfaceEntry.
+
+2018-08-28  Zoltan Bojthe
+
+	Remove IPv4RoutingTable localAddresses cache.
+
+2018-08-17  Zoltan Bojthe
+
+	Added namespace qualifier to @signal type parameters.
+
+2018-07-19  Mani Amoozadeh
+
+	Display administrative distance in the routing table if enabled.
+
+2018-07-11  Gyorgy Szaszko
+
+	Added missing handling of parameters: srcAddress, srcPort, destPort.
+
+2018-06-29  Levente Mészáros
+
+	Added UDP CRC handling and destPort.
+
+2018-06-28  Levente Mészáros
+
+	Added network address translation, added Ipv4NatTable submodule to Ipv4NetworkLayer.
+
 ====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------
