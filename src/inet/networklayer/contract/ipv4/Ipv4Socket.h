@@ -46,7 +46,7 @@ class INET_API Ipv4Socket : public INetworkSocket
     };
   protected:
     bool bound = false;
-    bool isOpened = false;
+    bool isOpen_ = false;
     int socketId = -1;
     INetworkSocket::ICallback *callback = nullptr;
     void *userData = nullptr;
@@ -81,7 +81,7 @@ class INET_API Ipv4Socket : public INetworkSocket
     virtual void sendTo(Packet *packet, Ipv4Address destAddress);
     virtual void close() override;
     virtual void destroy() override;
-    virtual bool isOpen() const override { return isOpened; }
+    virtual bool isOpen() const override { return isOpen_; }
 
   protected:
     virtual void bind(const Protocol *protocol, L3Address localAddress) override { bind(protocol, localAddress.toIpv4()); }

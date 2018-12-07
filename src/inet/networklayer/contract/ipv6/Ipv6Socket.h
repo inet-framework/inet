@@ -45,7 +45,7 @@ class INET_API Ipv6Socket : public INetworkSocket
     };
   protected:
     bool bound = false;
-    bool isOpened = false;
+    bool isOpen_ = false;
     int socketId = -1;
     INetworkSocket::ICallback *callback = nullptr;
     void *userData = nullptr;
@@ -80,7 +80,7 @@ class INET_API Ipv6Socket : public INetworkSocket
     virtual void sendTo(Packet *packet, Ipv6Address destAddress);
     virtual void close() override;
     virtual void destroy() override;
-    virtual bool isOpen() const override { return isOpened; }
+    virtual bool isOpen() const override { return isOpen_; }
   protected:
     virtual void bind(const Protocol *protocol, L3Address localAddress) override { bind(protocol, localAddress.toIpv6()); };
     virtual void connect(L3Address remoteAddress) override { connect(remoteAddress.toIpv6()); }

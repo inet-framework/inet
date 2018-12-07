@@ -55,7 +55,7 @@ void Ipv6Socket::processMessage(cMessage *msg)
             break;
         case IPv6_I_SOCKET_CLOSED:
             check_and_cast<Indication *>(msg);
-            bound = isOpened = false;
+            bound = isOpen_ = false;
             if (callback)
                 callback->socketClosed(this);
             delete msg;
@@ -76,12 +76,12 @@ void Ipv6Socket::bind(const Protocol *protocol, Ipv6Address localAddress)
     request->setControlInfo(command);
     sendToOutput(request);
     bound = true;
-    isOpened = true;
+    isOpen_ = true;
 }
 
 void Ipv6Socket::connect(Ipv6Address remoteAddress)
 {
-    isOpened = true;
+    isOpen_ = true;
     auto *command = new Ipv6SocketConnectCommand();
     command->setRemoteAddress(remoteAddress);
     auto request = new Request("connect", IPv6_C_CONNECT);

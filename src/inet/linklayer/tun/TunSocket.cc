@@ -52,7 +52,7 @@ void TunSocket::processMessage(cMessage *msg)
                 delete msg;
             break;
         case TUN_I_CLOSED:
-            isOpened = false;
+            isOpen_ = false;
             if (callback)
                 callback->socketClosed(this);
             delete msg;
@@ -65,7 +65,7 @@ void TunSocket::processMessage(cMessage *msg)
 
 void TunSocket::open(int interfaceId)
 {
-    isOpened = true;
+    isOpen_ = true;
     this->interfaceId = interfaceId;
     auto request = new Request("OPEN", TUN_C_OPEN);
     TunOpenCommand *command = new TunOpenCommand();

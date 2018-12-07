@@ -55,7 +55,7 @@ class INET_API EthernetSocket : public ISocket
     void *userData = nullptr;
     InterfaceEntry *interfaceEntry = nullptr;
     cGate *gateToEthernet = nullptr;
-    bool isOpened = false;
+    bool isOpen_ = false;
 
   protected:
     void sendToEthernet(cMessage *msg);
@@ -109,7 +109,7 @@ class INET_API EthernetSocket : public ISocket
      */
     void send(Packet *packet);
 
-    virtual bool isOpen() const override { return isOpened; }
+    virtual bool isOpen() const override { return isOpen_; }
     /**
      * Unbinds the socket. Once closed, a closed socket may be bound to another
      * (or the same) port, and reused.

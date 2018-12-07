@@ -54,7 +54,7 @@ void Ieee8022LlcSocket::processMessage(cMessage *msg)
                 delete msg;
             break;
         case IEEE8022_LLC_I_SOCKET_CLOSED:
-            isOpened = false;
+            isOpen_ = false;
             if (callback)
                 callback->socketClosed(this);
             delete msg;
@@ -75,13 +75,13 @@ void Ieee8022LlcSocket::open(int interfaceId, int localSap)
     Ieee8022LlcSocketOpenCommand *command = new Ieee8022LlcSocketOpenCommand();
     command->setLocalSap(localSap);
     request->setControlInfo(command);
-    isOpened = true;
+    isOpen_ = true;
     sendToLlc(request);
 }
 
 void Ieee8022LlcSocket::send(Packet *packet)
 {
-    if (! isOpened)
+    if (! isOpen_)
         throw cRuntimeError("Socket is closed");
     sendToLlc(packet);
 }
@@ -102,7 +102,7 @@ void Ieee8022LlcSocket::destroy()
     request->setControlInfo(command);
     sendToLlc(request);
     interfaceId = -1;
-    isOpened = false;
+    isOpen_ = false;
 }
 
 void Ieee8022LlcSocket::sendToLlc(cMessage *msg)

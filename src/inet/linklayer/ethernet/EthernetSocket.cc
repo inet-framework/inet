@@ -58,14 +58,14 @@ void EthernetSocket::bind(const MacAddress& sourceAddress, const MacAddress& des
     ctrl->setProtocol(protocol);
     ctrl->setVlanId(vlanId);
     request->setControlInfo(ctrl);
-    isOpened = true;
+    isOpen_ = true;
     sendToEthernet(request);
 }
 
 void EthernetSocket::send(Packet *packet)
 {
     packet->setKind(ETHERNET_C_DATA);
-    isOpened = true;
+    isOpen_ = true;
     sendToEthernet(packet);
 }
 
@@ -74,7 +74,7 @@ void EthernetSocket::close()
     auto request = new Request("CLOSE", ETHERNET_C_CLOSE);
     auto *ctrl = new EthernetCloseCommand();
     request->setControlInfo(ctrl);
-    isOpened = true;
+    isOpen_ = true;
     sendToEthernet(request);
 }
 
@@ -84,7 +84,7 @@ void EthernetSocket::destroy()
     auto *ctrl = new EthernetDestroyCommand();
     request->setControlInfo(ctrl);
     sendToEthernet(request);
-    isOpened = false;
+    isOpen_ = false;
 }
 
 void EthernetSocket::setCallback(ICallback *callback)
@@ -110,7 +110,7 @@ void EthernetSocket::processMessage(cMessage *msg)
                 delete msg;
             break;
         case ETHERNET_I_SOCKET_CLOSED:
-            isOpened = false;
+            isOpen_ = false;
             if (callback)
                 callback->socketClosed(this);
             delete msg;

@@ -55,7 +55,7 @@ void Ipv4Socket::processMessage(cMessage *msg)
             break;
         case IPv4_I_SOCKET_CLOSED:
             check_and_cast<Indication *>(msg);
-            isOpened = false;
+            isOpen_ = false;
             bound = false;
             if (callback)
                 callback->socketClosed(this);
@@ -77,7 +77,7 @@ void Ipv4Socket::bind(const Protocol *protocol, Ipv4Address localAddress)
     request->setControlInfo(command);
     sendToOutput(request);
     bound = true;
-    isOpened = true;
+    isOpen_ = true;
 }
 
 void Ipv4Socket::connect(Ipv4Address remoteAddress)
@@ -87,7 +87,7 @@ void Ipv4Socket::connect(Ipv4Address remoteAddress)
     auto request = new Request("connect", IPv4_C_CONNECT);
     request->setControlInfo(command);
     sendToOutput(request);
-    isOpened = true;
+    isOpen_ = true;
 }
 
 void Ipv4Socket::send(Packet *packet)

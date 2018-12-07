@@ -56,7 +56,7 @@ void L3Socket::processMessage(cMessage *msg)
             break;
         case L3_I_SOCKET_CLOSED:
             check_and_cast<Indication *>(msg);
-            bound = isOpened = false;
+            bound = isOpen_ = false;
             if (callback)
                 callback->socketClosed(this);
             delete msg;
@@ -77,12 +77,12 @@ void L3Socket::bind(const Protocol *protocol, L3Address localAddress)
     request->setControlInfo(command);
     sendToOutput(request);
     bound = true;
-    isOpened = true;
+    isOpen_ = true;
 }
 
 void L3Socket::connect(L3Address remoteAddress)
 {
-    isOpened = true;
+    isOpen_ = true;
     auto *command = new L3SocketConnectCommand();
     command->setRemoteAddress(remoteAddress);
     auto request = new Request("connect", L3_C_CONNECT);

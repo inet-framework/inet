@@ -41,7 +41,7 @@ class INET_API Ieee8022LlcSocket : public ISocket
     ICallback *callback = nullptr;
     void *userData = nullptr;
     cGate *outputGate = nullptr;
-    bool isOpened = false;
+    bool isOpen_ = false;
 
   protected:
     void sendToLlc(cMessage *msg);
@@ -93,7 +93,7 @@ class INET_API Ieee8022LlcSocket : public ISocket
     void open(int interfaceId, int localSap);
     void send(Packet *packet);
     virtual void close() override;
-    virtual bool isOpen() const override { return isOpened; }
+    virtual bool isOpen() const override { return isOpen_; }
 
     virtual bool belongsToSocket(cMessage *msg) const override;
     virtual void processMessage(cMessage *msg) override;

@@ -40,7 +40,7 @@ class INET_API TunSocket : public ISocket
     ICallback *callback = nullptr;
     void *userData = nullptr;
     cGate *outputGate = nullptr;
-    bool isOpened = false;
+    bool isOpen_ = false;
 
   protected:
     void sendToTun(cMessage *msg);
@@ -83,7 +83,7 @@ class INET_API TunSocket : public ISocket
     void send(Packet *packet);
     void close() override;
     virtual void destroy() override;
-    virtual bool isOpen() const override { return isOpened; }
+    virtual bool isOpen() const override { return isOpen_; }
 
     virtual bool belongsToSocket(cMessage *msg) const override;
     virtual void processMessage(cMessage *msg) override;
