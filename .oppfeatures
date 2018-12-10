@@ -312,6 +312,7 @@
                        inet.applications.ethernet
                        inet.linklayer.ethernet
                        inet.node.ethernet
+                       inet.physicallayer.ethernet
                       "
         extraSourceFolders = ""
         compileFlags = "-DWITH_ETHERNET"
