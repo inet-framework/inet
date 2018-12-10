@@ -3,8 +3,11 @@
 # whether features can be enabled and disabled independently without causing
 # build or runtime failures.
 
-skipped_features="TCP_NSC VoIPStream"
-skipped_features=""
+set -e
+
+# Set the SKIPPED_FEATURES environment variable to allow enabling
+# the features that require NSC or libav*.
+skipped_features=${SKIPPED_FEATURES:-"TCP_NSC VoIPStream"}
 
 # These two variables control which feature subset is being checked.
 # This makes it easy to split a single test across multiple machines.
