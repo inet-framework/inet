@@ -311,13 +311,15 @@
         nedPackages = "
                        inet.applications.ethernet
                        inet.linklayer.ethernet
+                       inet.linklayer.ieee8021q
+                       inet.linklayer.vlan
                        inet.node.ethernet
                        inet.physicallayer.ethernet
                       "
         extraSourceFolders = ""
         compileFlags = "-DWITH_ETHERNET"
         linkerFlags = ""
-        />
+        /><!-- TODO: move inet.linklayer.ieee8021q and inet.linklayer.vlan to a new feature -->
     <feature
         id="Ethernet_examples"
         name="Ethernet examples"
