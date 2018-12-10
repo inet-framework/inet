@@ -355,7 +355,7 @@
                        packets on the network. This feature requires at least version 1.5.3
                        of the libpcap-dev package."
         initiallyEnabled = "false"
-        requires = "IPv4"
+        requires = "Ethernet IPv4"
         labels = "nic"
         nedPackages = "
                        inet.emulation
