@@ -4,6 +4,7 @@
 # build or runtime failures.
 
 skipped_features="TCP_NSC VoIPStream"
+skipped_features=""
 
 # These two variables control which feature subset is being checked.
 # This makes it easy to split a single test across multiple machines.
@@ -31,7 +32,7 @@ rm -rf $LOG_DIR; mkdir -p $LOG_DIR
 cd ../..
 
 echo "Running feature build and run tests..."
-base_features=$(./inet_featuretool list | grep -v _examples | awk '{print $2;}' | awk "NR % ${SPLIT_TOTAL} == ${SPLIT_INDEX}")
+base_features=$(./bin/inet_featuretool list | grep -v _examples | awk '{print $2;}' | awk "NR % ${SPLIT_TOTAL} == ${SPLIT_INDEX}")
 if [ -n "$skipped_features" ]; then
   echo "Skipping the following features: $skipped_features"
 fi
@@ -43,22 +44,22 @@ fi
 if [ "$SPLIT_INDEX" = "0" ]; then
 
   # test with all features disabled
-  ./inet_featuretool -q disable -f all
+  ./bin/inet_featuretool -q disable -f all
   runtest all_disabled
   if [ $? != 0 ]; then exitcode=1; fi
 
   # test with default features enabled (except skipped ones)
-  ./inet_featuretool -q reset
+  ./bin/inet_featuretool -q reset
   if [ -n "$skipped_features" ]; then
-    ./inet_featuretool -q disable -f $skipped_features
+    ./bin/inet_featuretool -q disable -f $skipped_features
   fi
   runtest default
   if [ $? != 0 ]; then exitcode=1; fi
 
   # test with all features enabled (except skipped ones)
-  ./inet_featuretool -q enable -f all
+  ./bin/inet_featuretool -q enable -f all
   if [ -n "$skipped_features" ]; then
-    ./inet_featuretool -q disable -f $skipped_features
+    ./bin/inet_featuretool -q disable -f $skipped_features
   fi
   runtest all_enabled
   if [ $? != 0 ]; then exitcode=1; fi
@@ -70,8 +71,8 @@ for feature in $base_features; do
   if echo $skipped_features | grep -q $feature; then
     echo "*** ${feature}_enabled: SKIPPED"
   else
-    ./inet_featuretool -q disable -f all
-    ./inet_featuretool -q enable -f $feature
+    ./bin/inet_featuretool -q disable -f all
+    ./bin/inet_featuretool -q enable -f $feature
     runtest ${feature}_enabled
     if [ $? != 0 ]; then exitcode=1; fi
   fi
@@ -79,14 +80,14 @@ done
 
 # test with each feature disabled - one by one
 for feature in $base_features; do
-  ./inet_featuretool -q enable -f all
+  ./bin/inet_featuretool -q enable -f all
   if [ -n "$skipped_features" ]; then
-    ./inet_featuretool -q disable -f $skipped_features
+    ./bin/inet_featuretool -q disable -f $skipped_features
   fi
   if echo $skipped_features | grep -q $feature; then
     echo "*** ${feature}_disabled: SKIPPED"
   else
-    ./inet_featuretool -q disable -f $feature
+    ./bin/inet_featuretool -q disable -f $feature
     runtest ${feature}_disabled
     if [ $? != 0 ]; then exitcode=1; fi
   fi
