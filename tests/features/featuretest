@@ -52,24 +52,21 @@ if [ "$SPLIT_INDEX" = "0" ]; then
 
   # test with all features disabled
   ./bin/inet_featuretool -q disable -f all
-  runtest all_disabled
-  if [ $? != 0 ]; then exitcode=1; fi
+  runtest all_disabled || exitcode=1
 
   # test with default features enabled (except skipped ones)
   ./bin/inet_featuretool -q reset
   if [ -n "$skipped_features" ]; then
     ./bin/inet_featuretool -q disable -f $skipped_features
   fi
-  runtest default
-  if [ $? != 0 ]; then exitcode=1; fi
+  runtest default || exitcode=1
 
   # test with all features enabled (except skipped ones)
   ./bin/inet_featuretool -q enable -f all
   if [ -n "$skipped_features" ]; then
     ./bin/inet_featuretool -q disable -f $skipped_features
   fi
-  runtest all_enabled
-  if [ $? != 0 ]; then exitcode=1; fi
+  runtest all_enabled || exitcode=1
 
 fi
 
@@ -80,8 +77,7 @@ for feature in $base_features; do
   else
     ./bin/inet_featuretool -q disable -f all
     ./bin/inet_featuretool -q enable -f $feature
-    runtest ${feature}_enabled
-    if [ $? != 0 ]; then exitcode=1; fi
+    runtest ${feature}_enabled || exitcode=1
   fi
 done
 
@@ -95,8 +91,7 @@ for feature in $base_features; do
     echo "*** ${feature}_disabled: SKIPPED"
   else
     ./bin/inet_featuretool -q disable -f $feature
-    runtest ${feature}_disabled
-    if [ $? != 0 ]; then exitcode=1; fi
+    runtest ${feature}_disabled || exitcode=1
   fi
 done
 
