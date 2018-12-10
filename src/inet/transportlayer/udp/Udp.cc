@@ -386,8 +386,10 @@ void Udp::processPacketFromApp(Packet *packet)
         udpHeader->setCrcMode(CRC_COMPUTED);
         udpHeader->setCrc(0x0000);    // crcMode == CRC_COMPUTED is done in an INetfilter hook
     }
-    else
+    else {
+        udpHeader->setCrcMode(crcMode);
         insertCrc(l3Protocol, srcAddr, destAddr, udpHeader, packet);
+    }
     insertTransportProtocolHeader(packet, Protocol::udp, udpHeader);
     packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(l3Protocol);
 
@@ -1283,7 +1285,7 @@ INetfilter::IHook::Result Udp::CrcInsertion::datagramPostRoutingHook(Packet *pac
 
 void Udp::insertCrc(const Protocol *networkProtocol, const L3Address& srcAddress, const L3Address& destAddress, const Ptr<UdpHeader>& udpHeader, Packet *packet)
 {
-    udpHeader->setCrcMode(crcMode);
+    CrcMode crcMode = udpHeader->getCrcMode();
     switch (crcMode) {
         case CRC_DISABLED:
             // if the CRC mode is disabled, then the CRC is 0
@@ -1307,7 +1309,7 @@ void Udp::insertCrc(const Protocol *networkProtocol, const L3Address& srcAddress
             break;
         }
         default:
-            throw cRuntimeError("Unknown CRC mode");
+            throw cRuntimeError("Unknown CRC mode: %d", (int)crcMode);
     }
 }
 
