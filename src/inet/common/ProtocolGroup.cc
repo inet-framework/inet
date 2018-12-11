@@ -79,6 +79,7 @@ ProtocolGroup ProtocolGroup::ethertype("ethertype", {
     { 0x86FF, &Protocol::nextHopForwarding },         // ETHERTYPE_INET_NEXTHOP
     { 0x8847, &Protocol::mpls },
     { 0x88CC, &Protocol::lldp },
+    { 0x8888, &Protocol::isis }, //TODO remove, IS-IS does not have Ethertype(AFAIK) temporary solution
 });
 
 // excerpt from http://www.iana.org/assignments/ppp-numbers/ppp-numbers.xhtml#ppp-numbers-2
@@ -127,6 +128,7 @@ ProtocolGroup ProtocolGroup::snapOui("snapOui", {
 
 ProtocolGroup ProtocolGroup::ieee8022protocol("ieee8022protocol", {
     { 0x4242, &Protocol::stp },
+    { 0xFE00, &Protocol::isis },
 });
 
 ProtocolGroup ProtocolGroup::udpprotocol("udpprotocol", {
