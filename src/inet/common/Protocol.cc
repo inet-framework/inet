@@ -101,6 +101,7 @@ const Protocol Protocol::igmp("igmp", "IGMP", Protocol::NetworkLayer);
 const Protocol Protocol::igp("igp", "IGP");
 const Protocol Protocol::ipv4("ipv4", "IPv4", Protocol::NetworkLayer);
 const Protocol Protocol::ipv6("ipv6", "IPv6", Protocol::NetworkLayer);
+const Protocol Protocol::isis("isis", "IS-IS");
 const Protocol Protocol::lldp("lldp", "LLDP", Protocol::NetworkLayer);
 const Protocol Protocol::lmac("lmac", "L-MAC");
 const Protocol Protocol::manet("manet", "MANET");
