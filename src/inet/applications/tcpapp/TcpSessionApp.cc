@@ -75,7 +75,7 @@ void TcpSessionApp::handleStartOperation(LifecycleOperation *operation)
 void TcpSessionApp::handleStopOperation(LifecycleOperation *operation)
 {
     cancelEvent(timeoutMsg);
-    if (socket.getState() == TcpSocket::CONNECTED || socket.getState() == TcpSocket::CONNECTING || socket.getState() == TcpSocket::PEER_CLOSED)
+    if (socket.isOpen())
         close();
     delayActiveOperationFinish(par("stopOperationTimeout"));
 }
