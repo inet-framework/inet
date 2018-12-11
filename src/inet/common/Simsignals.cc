@@ -40,6 +40,7 @@ simsignal_t interfaceConfigChangedSignal = cComponent::registerSignal("interface
 simsignal_t interfaceGnpConfigChangedSignal = cComponent::registerSignal("interfaceGnpConfigChanged");
 simsignal_t interfaceIpv4ConfigChangedSignal = cComponent::registerSignal("interfaceIpv4ConfigChanged");
 simsignal_t interfaceIpv6ConfigChangedSignal = cComponent::registerSignal("interfaceIpv6ConfigChanged");
+simsignal_t interfaceClnsConfigChangedSignal = cComponent::registerSignal("interfaceClnsConfigChanged");
 simsignal_t tedChangedSignal = cComponent::registerSignal("tedChanged");
 
 // layer 3 - Routing Table
@@ -73,6 +74,9 @@ simsignal_t ipv6MulticastGroupJoinedSignal = cComponent::registerSignal("ipv6Mul
 simsignal_t ipv6MulticastGroupLeftSignal = cComponent::registerSignal("ipv6MulticastGroupLeft");
 simsignal_t ipv6MulticastGroupRegisteredSignal = cComponent::registerSignal("ipv6MulticastGroupRegistered");
 simsignal_t ipv6MulticastGroupUnregisteredSignal = cComponent::registerSignal("ipv6MulticastGroupUnregistered");
+
+//layer 3 - ISIS
+simsignal_t isisAdjChangedSignal = cComponent::registerSignal("isisAdjChanged");
 
 // - layer 4 (transport)
 //...
