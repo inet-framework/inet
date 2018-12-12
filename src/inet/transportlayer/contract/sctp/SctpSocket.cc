@@ -72,13 +72,21 @@ SctpSocket::SctpSocket(cMessage *msg)
     lastStream = -1;
     oneToOne = true;
 
-    if (msg->getKind() == SCTP_I_ESTABLISHED) {
+    if (msg->getKind() == SCTP_I_AVAILABLE) {
+        auto connectInfo = tags.findTag<SctpAvailableReq>();
+        assocId = connectInfo->getNewSocketId();
+        localAddr = connectInfo->getLocalAddr();
+        remoteAddr = connectInfo->getRemoteAddr();
+        localPrt = connectInfo->getLocalPort();
+        remotePrt = connectInfo->getRemotePort();
+    }
+    else if (msg->getKind() == SCTP_I_ESTABLISHED) {
         // management of stockstate is left to processMessage() so we always
         // set it to CONNECTED in the ctor, whatever SCTP_I_xxx arrives.
         // However, for convenience we extract SctpConnectInfo already here, so that
         // remote address/port can be read already after the ctor call.
 
-        SctpConnectReq *connectInfo = tags.findTag<SctpConnectReq>();
+        auto connectInfo = tags.findTag<SctpConnectReq>();
         localAddr = connectInfo->getLocalAddr();
         remoteAddr = connectInfo->getRemoteAddr();
         localPrt = connectInfo->getLocalPort();
@@ -343,6 +351,15 @@ void SctpSocket::accept(int32 assId, int32 fd)
     sendToSctp(cmsg);
 }
 
+void SctpSocket::acceptSocket(int newSockId)
+{
+    Request *cmsg = new Request("SCTP_C_ACCEPT_SOCKET_ID", SCTP_C_ACCEPT_SOCKET_ID);
+    cmsg->addTag<SctpAvailableReq>()->setSocketId(newSockId);
+    cmsg->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::sctp);
+    cmsg->addTag<SocketReq>()->setSocketId(newSockId);
+    check_and_cast<cSimpleModule *>(gateToSctp->getOwnerModule())->send(cmsg, gateToSctp);
+}
+
 void SctpSocket::connectx(AddressVector remoteAddressList, int32 remotePort, bool streamReset, int32 prMethod, uint32 numRequests)
 {
     EV_INFO << "Socket connectx.  sockstate=" << stateName(sockstate) << "\n";
@@ -486,13 +503,24 @@ void SctpSocket::processMessage(cMessage *msg)
             }
             break;
 
+        case SCTP_I_AVAILABLE: {
+            auto indication = check_and_cast<Indication *>(msg);
+            if (cb)
+                cb->socketAvailable(this, indication);
+            else {
+                int newSocketId = indication->getTag<SctpAvailableReq>()->getNewSocketId();
+                acceptSocket(newSocketId);
+            }
+            delete msg;
+            break;
+        }
+
         case SCTP_I_ESTABLISHED: {
             EV_INFO << "SCTP_I_ESTABLISHED\n";
             if (oneToOne)
                 sockstate = CONNECTED;
-            Message *message = check_and_cast<Message *>(msg);
-            auto& tags = getTags(message);
-            SctpConnectReq *connectInfo = tags.findTag<SctpConnectReq>();
+            auto indication = check_and_cast<Indication *>(msg);
+            SctpConnectReq *connectInfo = indication->getTag<SctpConnectReq>();
             localAddr = connectInfo->getLocalAddr();
             remoteAddr = connectInfo->getRemoteAddr();
             localPrt = connectInfo->getLocalPort();
@@ -500,12 +528,12 @@ void SctpSocket::processMessage(cMessage *msg)
             fsmStatus = connectInfo->getStatus();
             appOptions->inboundStreams = connectInfo->getInboundStreams();
             appOptions->outboundStreams = connectInfo->getOutboundStreams();
-            assocId = tags.getTag<SocketInd>()->getSocketId();
+            assocId = indication->getTag<SocketInd>()->getSocketId();
 
             if (cb) {
                 cb->socketEstablished(this, connectInfo->getNumMsgs());
             }
-            delete message;
+            delete msg;
             break;
         }
 
@@ -541,14 +569,13 @@ void SctpSocket::processMessage(cMessage *msg)
             break;
 
         case SCTP_I_STATUS: {
-            Message *message = check_and_cast<Message *>(msg);
-            auto& tags = getTags(message);
-            SctpStatusReq *status = tags.findTag<SctpStatusReq>();
+            auto *message = check_and_cast<Indication *>(msg);
+            SctpStatusReq *status = message->getTag<SctpStatusReq>();
             if (cb) {
                 cb->socketStatusArrived(this, status);
             }
-            }
             break;
+        }
 
         case SCTP_I_ABANDONED:
             if (cb) {
@@ -562,6 +589,7 @@ void SctpSocket::processMessage(cMessage *msg)
             if (cb) {
                 cb->shutdownReceivedArrived(this);
             }
+            delete msg;
             break;
 
         case SCTP_I_SENDQUEUE_FULL:
@@ -577,15 +605,22 @@ void SctpSocket::processMessage(cMessage *msg)
                 cb->sendqueueAbatedArrived(this, cmd->getNumMsgs());
             }
             delete cmd;
-            }
             break;
+        }
 
         case SCTP_I_RCV_STREAMS_RESETTED:
         case SCTP_I_SEND_STREAMS_RESETTED:
         case SCTP_I_RESET_REQUEST_FAILED:
-        case SCTP_I_SENDSOCKETOPTIONS:
             delete msg;
             break;
+        case SCTP_I_SENDSOCKETOPTIONS: {
+            auto *indication = check_and_cast<Indication *>(msg);
+            if (cb)
+                cb->socketOptionsArrived(this, indication);
+            else
+                delete indication;
+            break;
+        }
 
         case SCTP_I_ADDRESS_ADDED: {
             EV_INFO << "SCTP_I_ADDRESS_ADDED\n";
