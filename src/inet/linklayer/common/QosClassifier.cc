@@ -15,8 +15,8 @@
 
 #include "inet/common/packet/Packet.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/linklayer/common/QosClassifier.h"
 #include "inet/linklayer/common/UserPriority.h"
-#include "inet/linklayer/common/UserPriorityClassifier.h"
 #include "inet/linklayer/common/UserPriorityTag_m.h"
 #include "inet/networklayer/common/IpProtocolId_m.h"
 
@@ -37,9 +37,9 @@
 
 namespace inet {
 
-Define_Module(UserPriorityClassifier);
+Define_Module(QosClassifier);
 
-void UserPriorityClassifier::initialize(int stage)
+void QosClassifier::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
         defaultUp = parseUserPriority(par("defaultUp"));
@@ -49,14 +49,14 @@ void UserPriorityClassifier::initialize(int stage)
     }
 }
 
-void UserPriorityClassifier::handleMessage(cMessage *msg)
+void QosClassifier::handleMessage(cMessage *msg)
 {
     auto packet = check_and_cast<Packet *>(msg);
     packet->addTagIfAbsent<UserPriorityReq>()->setUserPriority(getUserPriority(msg));
     send(msg, "out");
 }
 
-int UserPriorityClassifier::parseUserPriority(const char *text)
+int QosClassifier::parseUserPriority(const char *text)
 {
     if (!strcmp(text, "BE"))
         return UP_BE;
@@ -78,7 +78,7 @@ int UserPriorityClassifier::parseUserPriority(const char *text)
         throw cRuntimeError("Unknown user priority: '%s'", text);
 }
 
-void UserPriorityClassifier::parseUserPriorityMap(const char *text, std::map<int, int>& upMap)
+void QosClassifier::parseUserPriorityMap(const char *text, std::map<int, int>& upMap)
 {
     cStringTokenizer tokenizer(text);
     while (tokenizer.hasMoreTokens()) {
@@ -92,7 +92,7 @@ void UserPriorityClassifier::parseUserPriorityMap(const char *text, std::map<int
     }
 }
 
-int UserPriorityClassifier::getUserPriority(cMessage *msg)
+int QosClassifier::getUserPriority(cMessage *msg)
 {
     auto packet = check_and_cast<Packet *>(msg);
     int ipProtocol = -1;
@@ -151,7 +151,7 @@ int UserPriorityClassifier::getUserPriority(cMessage *msg)
     return defaultUp;
 }
 
-void UserPriorityClassifier::handleRegisterService(const Protocol& protocol, cGate *out, ServicePrimitive servicePrimitive)
+void QosClassifier::handleRegisterService(const Protocol& protocol, cGate *out, ServicePrimitive servicePrimitive)
 {
     Enter_Method("handleRegisterService");
     if (!strcmp("out", out->getName()))
@@ -160,7 +160,7 @@ void UserPriorityClassifier::handleRegisterService(const Protocol& protocol, cGa
         throw cRuntimeError("Unknown gate: %s", out->getName());
 }
 
-void UserPriorityClassifier::handleRegisterProtocol(const Protocol& protocol, cGate *in, ServicePrimitive servicePrimitive)
+void QosClassifier::handleRegisterProtocol(const Protocol& protocol, cGate *in, ServicePrimitive servicePrimitive)
 {
     Enter_Method("handleRegisterProtocol");
     if (!strcmp("in", in->getName()))

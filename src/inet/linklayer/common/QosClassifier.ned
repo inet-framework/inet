@@ -19,7 +19,7 @@ package inet.linklayer.common;
 // This module classifies packets and assigns a User Priority based on the IP
 // protocol or the transport protocol port numbers.
 //
-simple UserPriorityClassifier like IIeee8021dQosClassifier
+simple QosClassifier like IIeee8021dQosClassifier
 {
     parameters:
         string ipProtocolUpMap = default("1 BE 58 BE");

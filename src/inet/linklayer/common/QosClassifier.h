@@ -24,7 +24,7 @@ namespace inet {
 /**
  * This module classifies and assigns User Priority to packets.
  */
-class INET_API UserPriorityClassifier : public cSimpleModule, public IProtocolRegistrationListener
+class INET_API QosClassifier : public cSimpleModule, public IProtocolRegistrationListener
 {
   protected:
     int defaultUp;
@@ -41,7 +41,7 @@ class INET_API UserPriorityClassifier : public cSimpleModule, public IProtocolRe
     virtual void handleRegisterProtocol(const Protocol& protocol, cGate *in, ServicePrimitive servicePrimitive) override;
 
   public:
-    UserPriorityClassifier() {}
+    QosClassifier() {}
 
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
