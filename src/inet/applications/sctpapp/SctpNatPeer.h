@@ -116,6 +116,8 @@ class INET_API SctpNatPeer : public cSimpleModule, public SctpSocket::ICallback,
     void connect(L3Address connectAddress, int32 connectPort);
     void connectx(AddressVector connectAddressList, int32 connectPort);
 
+    virtual void socketAvailable(SctpSocket *socket, Indication *indication) override { throw cRuntimeError("Model error, this module doesn't use any listener SCTP sockets"); }
+
     /** Does nothing but update statistics/status. Redefine to perform or schedule first sending. */
     void socketEstablished(SctpSocket *socket, unsigned long int buffer) override;
 
