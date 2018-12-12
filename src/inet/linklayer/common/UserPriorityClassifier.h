@@ -22,22 +22,29 @@
 namespace inet {
 
 /**
- * An example packet classifier based on the UDP/TCP port number.
+ * This module classifies and assigns User Priority to packets.
  */
-class INET_API QosClassifier : public cSimpleModule, public IProtocolRegistrationListener
+class INET_API UserPriorityClassifier : public cSimpleModule, public IProtocolRegistrationListener
 {
   protected:
-    std::map<int, int> udpPortMap;
-    std::map<int, int> tcpPortMap;
-    int defaultAc;
+    int defaultUp;
+    std::map<int, int> ipProtocolUpMap;
+    std::map<int, int> udpPortUpMap;
+    std::map<int, int> tcpPortUpMap;
+
+    virtual int parseUserPriority(const char *text);
+    virtual void parseUserPriorityMap(const char *text, std::map<int, int>& upMap);
 
     virtual int getUserPriority(cMessage *msg);
+
     virtual void handleRegisterService(const Protocol& protocol, cGate *out, ServicePrimitive servicePrimitive) override;
     virtual void handleRegisterProtocol(const Protocol& protocol, cGate *in, ServicePrimitive servicePrimitive) override;
 
   public:
-    QosClassifier() {}
-    virtual void initialize() override;
+    UserPriorityClassifier() {}
+
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *msg) override;
 };
 
