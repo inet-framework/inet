@@ -537,8 +537,8 @@
 /examples/wireless/scaling/,         -f omnetpp.ini -c ScalarRadioMedium -r 0,      10s,               9c71-423d/tplx, PASS, wireless
 /examples/wireless/scaling/,         -f omnetpp.ini -c DimensionalRadioMedium -r 0, 1s,                ca14-f089/tplx, PASS, wireless
 
-/examples/wireless/shortcut/,        -f omnetpp.ini -c ShortcutMac -r 0,            100s,            eb8e-31c8/tplx, PASS, wireless
-/examples/wireless/shortcut/,        -f omnetpp.ini -c ShortcutRadio -r 0,          100s,            e4ce-5332/tplx, PASS, wireless
+/examples/wireless/shortcut/,        -f omnetpp.ini -c ShortcutMac -r 0,            1000s,            91d1-098d/tplx, PASS, wireless
+/examples/wireless/shortcut/,        -f omnetpp.ini -c ShortcutRadio -r 0,          1000s,            568f-5ed0/tplx, PASS, wireless
 
 /examples/wireless/synchronized/,    -f omnetpp.ini -c Synchronized -r 0,           2s,              bbba-a77a/tplx, PASS, wireless
 /examples/wireless/synchronized/,    -f omnetpp.ini -c NonSynchronized -r 0,        2s,              f793-dfa9/tplx, PASS, wireless
