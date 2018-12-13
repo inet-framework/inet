@@ -39,6 +39,7 @@ class INET_API ShortcutRadio : public PhysicalLayerBase, public virtual IRadio
     cPar *durationOverhead = nullptr;
     cPar *propagationDelay = nullptr;
     cPar *packetLoss = nullptr;
+    TransmissionState transmissionState = TRANSMISSION_STATE_UNDEFINED;
 
   protected:
     virtual void initialize(int stage) override;
@@ -55,7 +56,7 @@ class INET_API ShortcutRadio : public PhysicalLayerBase, public virtual IRadio
     virtual RadioMode getRadioMode() const override { return radioMode; }
     virtual void setRadioMode(RadioMode radioMode) override { this->radioMode = radioMode; }
     virtual ReceptionState getReceptionState() const override { return RECEPTION_STATE_UNDEFINED; }
-    virtual TransmissionState getTransmissionState() const override { return TRANSMISSION_STATE_UNDEFINED; }
+    virtual TransmissionState getTransmissionState() const override { return transmissionState; }
     virtual int getId() const override { return -1; }
     virtual const IAntenna *getAntenna() const override { return nullptr; }
     virtual const ITransmitter *getTransmitter() const override { return nullptr; }
