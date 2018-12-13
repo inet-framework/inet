@@ -58,7 +58,7 @@ void ReceiveBuffer::dropFramesUntil(SequenceNumber sequenceNumber)
 {
     auto it = buffer.begin();
     while (it != buffer.end()) {
-        if (isSequenceNumberLess(it->first, sequenceNumber, nextExpectedSequenceNumber, length)) {
+        if (isSequenceNumberLess(it->first, sequenceNumber, nextExpectedSequenceNumber, bufferSize)) {
             length -= it->second.size();
             for (auto fragment : it->second)
                 delete fragment;

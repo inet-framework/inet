@@ -29,6 +29,7 @@ typedef int8_t Tid;
 
 inline SequenceNumber sequenceNumberDistance(SequenceNumber number1, SequenceNumber number2) { return (number2 - number1 + 4096) % 4096; }
 inline bool isSequenceNumberTooOld(SequenceNumber number, SequenceNumber nextExpected, SequenceNumber range) { return sequenceNumberDistance(nextExpected, number) > range; }
+// range is the expected range of sequence numbers above nextExpected which are considered new, sequence numbers above range are considered old due to wrap around
 inline bool isSequenceNumberLess(SequenceNumber number1, SequenceNumber number2, SequenceNumber nextExpected, SequenceNumber range) {
     int d1 = sequenceNumberDistance(nextExpected, number1);
     int d2 = sequenceNumberDistance(nextExpected, number2);
