@@ -43,9 +43,11 @@ void SocketMap::addSocket(ISocket *socket)
 ISocket *SocketMap::removeSocket(ISocket *socket)
 {
     auto i = socketMap.find(socket->getSocketId());
-    if (i != socketMap.end())
+    if (i != socketMap.end()) {
         socketMap.erase(i);
-    return socket;
+        return socket;
+    }
+    return nullptr;
 }
 
 void SocketMap::deleteSockets()

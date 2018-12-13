@@ -52,6 +52,7 @@ class INET_API SocketMap
 
     /**
      * Removes the given socket.
+     * Returns removed socket or returns nullptr when socket not found in the map
      */
     ISocket *removeSocket(ISocket *socket);
 
