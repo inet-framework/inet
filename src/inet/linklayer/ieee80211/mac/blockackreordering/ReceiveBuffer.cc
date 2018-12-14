@@ -34,13 +34,20 @@ ReceiveBuffer::ReceiveBuffer(int bufferSize, int nextExpectedSequenceNumber) :
 //
 bool ReceiveBuffer::insertFrame(Packet *dataPacket, const Ptr<const Ieee80211DataHeader>& dataHeader)
 {
-    int sequenceNumber = dataHeader->getSequenceNumber();
+    auto sequenceNumber = dataHeader->getSequenceNumber();
+    auto fragmentNumber = dataHeader->getFragmentNumber();
     // The total number of MPDUs in these MSDUs may not
     // exceed the reorder buffer size in the receiver.
     if (length < bufferSize && !isSequenceNumberTooOld(sequenceNumber, nextExpectedSequenceNumber, bufferSize)) {
         auto it = buffer.find(sequenceNumber);
         if (it != buffer.end()) {
             auto &fragments = it->second;
+            // TODO: efficiency
+            for (auto fragment : fragments) {
+                const auto& fragmentHeader = fragment->peekAtFront<Ieee80211DataHeader>();
+                if (fragmentHeader->getSequenceNumber() == sequenceNumber && fragmentHeader->getFragmentNumber() == fragmentNumber)
+                    return false;
+            }
             fragments.push_back(dataPacket);
         }
         else {
