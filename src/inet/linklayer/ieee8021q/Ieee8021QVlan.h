@@ -20,6 +20,7 @@
 
 namespace inet {
 
+// TODO: explain how it should work when the packet API is extended with chunk insertion into the middle of a packet
 class INET_API Ieee8021QVlan : public cSimpleModule
 {
   protected:

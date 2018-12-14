@@ -15,6 +15,7 @@
 
 package inet.linklayer.ieee8021q;
 
+// TODO: IIeee8021QEncap
 moduleinterface IIeee8021QVlan
 {
     parameters:

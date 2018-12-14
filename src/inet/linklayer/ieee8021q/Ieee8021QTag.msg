@@ -19,6 +19,7 @@ import inet.common.packet.chunk.Chunk;
 
 namespace inet;
 
+// TODO: Ieee8021QHeader!!!
 class Ieee8021QTag extends FieldsChunk
 {
     chunkLength = B(4);
@@ -32,11 +33,14 @@ class Ieee8021QTag extends FieldsChunk
                        // VLAN 1 (the default VLAN ID) is often reserved for a management VLAN; this is vendor-specific.
 }
 
+// TODO: separate file
 //
 // This is an abstract base class that should not be directly added as a tag.
 //
+// TODO: VlanTagBase
 class Ieee8021QTagBase extends TagBase
 {
+    // TODO: vlanId
     int vid = -1;
 }
 
@@ -44,6 +48,7 @@ class Ieee8021QTagBase extends TagBase
 // This request determines the vlan that should be used to send the packet.
 // It may be present on a packet from the application to the mac protocol.
 //
+// TODO: VlanReq?
 class Ieee8021QReq extends Ieee8021QTagBase
 {
 }
@@ -52,6 +57,7 @@ class Ieee8021QReq extends Ieee8021QTagBase
 // This indication specifies the vlan that was used to receive the packet.
 // It may be present on a packet from the mac protocol to the application.
 //
+// TODO: VlanInd?
 class Ieee8021QInd extends Ieee8021QTagBase
 {
 }

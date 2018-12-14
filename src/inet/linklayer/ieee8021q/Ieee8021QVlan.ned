@@ -15,6 +15,7 @@
 
 package inet.linklayer.ieee8021q;
 
+// TODO Ieee8021QEncap like IIeee8021QEncap
 simple Ieee8021QVlan like IIeee8021QVlan
 {
     parameters:

@@ -66,6 +66,7 @@ module EthernetInterface like IEthernetInterface
             parameters:
                 @display("p=250,200");
         }
+        // TODO: qEncap
         vlan: <default("")> like IIeee8021QVlan if typename != "" {
             parameters:
                 @display("p=150,300");
