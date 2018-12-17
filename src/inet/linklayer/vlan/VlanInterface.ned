@@ -28,7 +28,6 @@ module VlanInterface like IVlanInterface
         input upperLayerIn;
         output upperLayerOut;
     submodules:
-        // tunnel: VlanTunnel?
         tunnel: VlanTunnel {
             @display("p=100,100");
         }

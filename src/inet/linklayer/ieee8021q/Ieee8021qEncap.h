@@ -13,8 +13,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_IEEE8021QVLAN_H
-#define __INET_IEEE8021QVLAN_H
+#ifndef __INET_IEEE8021QENCAP_H
+#define __INET_IEEE8021QENCAP_H
 
 #include "inet/common/INETDefs.h"
 
@@ -43,5 +43,5 @@ class INET_API Ieee8021qEncap : public cSimpleModule
 
 } // namespace inet
 
-#endif // ifndef __INET_IEEE8021QVLAN_H
+#endif // ifndef __INET_IEEE8021QENCAP_H
 
