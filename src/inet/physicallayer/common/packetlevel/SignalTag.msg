@@ -122,5 +122,6 @@ class ErrorRateInd extends SignalTagBase
 //
 class SignalTimeInd extends SignalTagBase
 {
-    simtime_t arrivalTime;
+    simtime_t startTime;
+    simtime_t endTime;
 }
