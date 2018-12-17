@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.linklayer.vlan;
+package inet.linklayer.contract;
 
 import inet.linklayer.contract.INetworkInterface;
 

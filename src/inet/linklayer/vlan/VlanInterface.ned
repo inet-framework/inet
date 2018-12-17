@@ -17,6 +17,8 @@
 
 package inet.linklayer.vlan;
 
+import inet.linklayer.contract.IVlanInterface;
+
 module VlanInterface like IVlanInterface
 {
     parameters:
