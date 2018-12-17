@@ -1,4 +1,4 @@
-<features cppSourceRoots="src" definesFile="src/inet/features.h">
+    <features cppSourceRoots="src" definesFile="src/inet/features.h">
     <feature
         id="TCP_common"
         name="TCP Common"
@@ -1147,7 +1147,15 @@
         name="General showcases"
         description = "Simple showcases demonstrating general features."
         initiallyEnabled = "true"
-        requires = ""
+        requires = "visualization
+                    physicalenvironment
+                    apskradio
+                    Ethernet PPP Ieee80211 Ieee802154 BMAC CsmaCaMac LMAC XMAC
+                    IPv4
+                    TCP_INET UDP
+                    AODV DSDV GPSR RIP
+                    DiffServ
+                    DHCP"
         labels = "showcase general"
         nedPackages = "inet.showcases.general"
         extraSourceFolders = ""
