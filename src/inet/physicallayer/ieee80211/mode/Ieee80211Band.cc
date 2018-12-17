@@ -82,7 +82,7 @@ const Ieee80211ArithmeticalBand Ieee80211CompliantBands::band5GHz80MHz("5 GHz (8
 
 const Ieee80211ArithmeticalBand Ieee80211CompliantBands::band5GHz160MHz("5 GHz (160 MHz)", GHz(5), MHz(160), 2);
 
-const Ieee80211ArithmeticalBand Ieee80211CompliantBands::band5_9GHz("5.9 GHz", GHz(5.86), MHz(10), 7);
+const Ieee80211ArithmeticalBand Ieee80211CompliantBands::band5_9GHz("5.9 GHz", GHz(5.855), MHz(10), 7);
 
 const std::vector<const IIeee80211Band *> Ieee80211CompliantBands::bands = {&band2_4GHz, &band5GHz, &band5GHz20MHz, &band5GHz40MHz, &band5GHz80MHz, &band5GHz160MHz, &band5_9GHz};
 
