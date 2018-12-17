@@ -30,7 +30,6 @@ import inet.physicallayer.contract.packetlevel.IRadio;
 
 //
 // This module provides an IEEE 802.11 network interface suitable for emulation.
-//
 // The upper part of the network interface is realized in the real world using
 // a real TAP device of the host computer which is running the simulation.
 //

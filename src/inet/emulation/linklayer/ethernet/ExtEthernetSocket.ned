@@ -18,12 +18,10 @@
 package inet.emulation.linklayer.ethernet;
 
 //
-// This module provides a connection to an ethernet socket of the host computer
-// which is running to the simulation.
-//
-// This module writes the packets arrived on 'upperLayerIn' gate to the specified
-// real socket, and sends out packets arrived from the real socket on
-// 'upperLayerOut' gate.
+// This module provides a bidirectional connection to an ethernet socket of the
+// host computer which is running the simulation. It writes the packets arrived
+// on 'upperLayerIn' gate to the specified real socket, and sends out packets
+// arrived from the real socket on 'upperLayerOut' gate.
 //
 simple ExtEthernetSocket
 {
