@@ -17,7 +17,7 @@
 
 package inet.emulation.networklayer.ipv4;
 
-simple ExtIpv4TunDeviceFileIo
+simple ExtIpv4TunDevice
 {
     parameters:
         string device;

@@ -25,7 +25,7 @@ package inet.emulation.linklayer.ethernet;
 // real socket, and sends out packets arrived from the real socket on
 // 'upperLayerOut' gate.
 //
-simple ExtEthernetDeviceSocket
+simple ExtEthernetSocket
 {
     parameters:
         string device; // name of existing real ethernet device

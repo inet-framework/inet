@@ -28,89 +28,86 @@
 
 #include <omnetpp/platdep/sockets.h>
 
+#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/NetworkNamespaceContext.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/emulation/linklayer/ethernet/ExtEthernetTapDeviceFileIo.h"
-#include "inet/linklayer/ethernet/EtherEncap.h"
-#include "inet/linklayer/ethernet/EtherFrame_m.h"
+#include "inet/emulation/networklayer/ipv4/ExtIpv4TunDevice.h"
+#include "inet/linklayer/common/InterfaceTag_m.h"
+#include "inet/networklayer/ipv4/Ipv4Header_m.h"
 
 namespace inet {
 
-Define_Module(ExtEthernetTapDeviceFileIo);
+Define_Module(ExtIpv4TunDevice);
 
-ExtEthernetTapDeviceFileIo::~ExtEthernetTapDeviceFileIo()
+ExtIpv4TunDevice::~ExtIpv4TunDevice()
 {
-    closeTap();
+    closeTun();
 }
 
-void ExtEthernetTapDeviceFileIo::initialize(int stage)
+void ExtIpv4TunDevice::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         device = par("device").stdstringValue();
         packetNameFormat = par("packetNameFormat");
         rtScheduler = check_and_cast<RealTimeScheduler *>(getSimulation()->getScheduler());
-        openTap(device);
+        registerService(Protocol::ipv4, nullptr, gate("lowerLayerIn"));
+        registerProtocol(Protocol::ipv4, gate("lowerLayerOut"), nullptr);
+        openTun(device);
         numSent = numReceived = 0;
         WATCH(numSent);
         WATCH(numReceived);
     }
 }
 
-void ExtEthernetTapDeviceFileIo::handleMessage(cMessage *msg)
+void ExtIpv4TunDevice::handleMessage(cMessage *msg)
 {
     auto packet = check_and_cast<Packet *>(msg);
     emit(packetReceivedFromLowerSignal, packet);
     auto protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
-    if (protocol != &Protocol::ethernetMac)
-        throw cRuntimeError("ExtInterface accepts ethernet packets only");
-    const auto& ethHeader = packet->peekAtFront<EthernetMacHeader>();
-    packet->popAtBack<EthernetFcs>(ETHER_FCS_BYTES);
+    if (protocol != &Protocol::ipv4)
+        throw cRuntimeError("ExtInterface accepts IPv4 packets only");
+    const auto& ipv4Header = packet->peekAtFront<Ipv4Header>();
     auto bytesChunk = packet->peekDataAsBytes();
-    uint8_t buffer[packet->getByteLength() + 4];
-    buffer[0] = 0;
-    buffer[1] = 0;
-    buffer[2] = 0x86; // Ethernet
-    buffer[3] = 0xdd;
-    size_t packetLength = bytesChunk->copyToBuffer(buffer + 4, packet->getByteLength());
+    uint8_t buffer[packet->getByteLength()];
+    size_t packetLength = bytesChunk->copyToBuffer(buffer, packet->getByteLength());
     ASSERT(packetLength == (size_t)packet->getByteLength());
-    packetLength += 4;
     ssize_t nwrite = write(fd, buffer, packetLength);
     if ((size_t)nwrite == packetLength) {
         emit(packetSentSignal, packet);
-        EV_INFO << "Sent a " << packet->getTotalLength() << " packet from " << ethHeader->getSrc() << " to " << ethHeader->getDest() << " to TAP device '" << device << "'.\n";
+        EV_INFO << "Sent a " << packet->getTotalLength() << " packet from " << ipv4Header->getSrcAddress() << " to " << ipv4Header->getDestAddress() << " to TUN device '" << device << "'.\n";
         numSent++;
     }
     else
-        EV_ERROR << "Sending Ethernet packet FAILED! (sendto returned " << nwrite << " (" << strerror(errno) << ") instead of " << packetLength << ").\n";
+        EV_ERROR << "Sending IPv4 packet FAILED! (sendto returned " << nwrite << " (" << strerror(errno) << ") instead of " << packetLength << ").\n";
     delete packet;
 }
 
-void ExtEthernetTapDeviceFileIo::refreshDisplay() const
+void ExtIpv4TunDevice::refreshDisplay() const
 {
     char buf[180];
-    sprintf(buf, "TAP device: %s\nrcv:%d snt:%d", device.c_str(), numReceived, numSent);
+    sprintf(buf, "TUN device: %s\nrcv:%d snt:%d", device.c_str(), numReceived, numSent);
     getDisplayString().setTagArg("t", 0, buf);
 }
 
-void ExtEthernetTapDeviceFileIo::finish()
+void ExtIpv4TunDevice::finish()
 {
     EV_INFO << numSent << " packets sent, " << numReceived << " packets received.\n";
-    closeTap();
+    closeTun();
 }
 
-void ExtEthernetTapDeviceFileIo::openTap(std::string dev)
+void ExtIpv4TunDevice::openTun(std::string dev)
 {
     NetworkNamespaceContext context(par("namespace"));
     if ((fd = open("/dev/net/tun", O_RDWR)) < 0)
-        throw cRuntimeError("Cannot open TAP device: %s", strerror(errno));
+        throw cRuntimeError("Cannot open TUN device: %s", strerror(errno));
 
     // preparation of the struct ifr, of type "struct ifreq"
     struct ifreq ifr;
     memset(&ifr, 0, sizeof(ifr));
-    ifr.ifr_flags = IFF_TAP; /* IFF_TUN or IFF_TAP, plus maybe IFF_NO_PI */
+    ifr.ifr_flags = IFF_TUN + IFF_NO_PI; /* IFF_TUN or IFF_TAP, plus maybe IFF_NO_PI */
     if (!dev.empty())
         /* if a device name was specified, put it in the structure; otherwise,
          * the kernel will try to allocate the "next" device of the
@@ -118,7 +115,7 @@ void ExtEthernetTapDeviceFileIo::openTap(std::string dev)
         strncpy(ifr.ifr_name, dev.c_str(), IFNAMSIZ);
     if (ioctl(fd, (TUNSETIFF), (void *) &ifr) < 0) {
         close(fd);
-        throw cRuntimeError("Cannot create TAP device: %s", strerror(errno));
+        throw cRuntimeError("Cannot create TUN device: %s", strerror(errno));
     }
 
     /* if the operation was successful, write back the name of the
@@ -129,7 +126,7 @@ void ExtEthernetTapDeviceFileIo::openTap(std::string dev)
     rtScheduler->addCallback(fd, this);
 }
 
-void ExtEthernetTapDeviceFileIo::closeTap()
+void ExtIpv4TunDevice::closeTun()
 {
     if (fd != INVALID_SOCKET) {
         rtScheduler->removeCallback(fd, this);
@@ -138,7 +135,7 @@ void ExtEthernetTapDeviceFileIo::closeTap()
     }
 }
 
-bool ExtEthernetTapDeviceFileIo::notify(int fd)
+bool ExtIpv4TunDevice::notify(int fd)
 {
     Enter_Method_Silent();
     ASSERT(fd == this->fd);
@@ -149,16 +146,14 @@ bool ExtEthernetTapDeviceFileIo::notify(int fd)
         throw cRuntimeError("Cannot read '%s' device: %s", device.c_str(), strerror(errno));
     }
     else if (nread > 0) {
-        ASSERT (nread > 4);
-        // buffer[0..1]: flags, buffer[2..3]: ethertype
-        Packet *packet = new Packet(nullptr, makeShared<BytesChunk>(buffer + 4, nread - 4));
-        EtherEncap::addPaddingAndFcs(packet, FCS_COMPUTED);
-        packet->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ethernetMac);
-        packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);
+        Packet *packet = new Packet(nullptr, makeShared<BytesChunk>(buffer, nread));
+        // KLUDGE:
+        packet->addTag<InterfaceReq>()->setInterfaceId(101);
+        packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
         packet->setName(packetPrinter.printPacketToString(packet, packetNameFormat).c_str());
         emit(packetReceivedSignal, packet);
-        const auto& macHeader = packet->peekAtFront<EthernetMacHeader>();
-        EV_INFO << "Received a " << packet->getTotalLength() << " packet from " << macHeader->getSrc() << " to " << macHeader->getDest() << ".\n";
+        const auto& ipv4Header = packet->peekAtFront<Ipv4Header>();
+        EV_INFO << "Received a " << packet->getTotalLength() << " packet from " << ipv4Header->getSrcAddress() << " to " << ipv4Header->getDestAddress() << ".\n";
         send(packet, "lowerLayerOut");
         emit(packetSentToLowerSignal, packet);
         numReceived++;

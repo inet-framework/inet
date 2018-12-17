@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_EXTETHERNETTAPDEVICEFILEIO_H
-#define __INET_EXTETHERNETTAPDEVICEFILEIO_H
+#ifndef __INET_EXTETHERNETTAPDEVICE_H
+#define __INET_EXTETHERNETTAPDEVICE_H
 
 #include "inet/common/packet/printer/PacketPrinter.h"
 #include "inet/common/scheduler/RealTimeScheduler.h"
@@ -31,7 +31,7 @@ namespace inet {
  *
  * See NED file for more details.
  */
-class INET_API ExtEthernetTapDeviceFileIo : public cSimpleModule, public RealTimeScheduler::ICallback
+class INET_API ExtEthernetTapDevice : public cSimpleModule, public RealTimeScheduler::ICallback
 {
   protected:
     // parameters
@@ -58,12 +58,12 @@ class INET_API ExtEthernetTapDeviceFileIo : public cSimpleModule, public RealTim
     virtual void closeTap();
 
   public:
-    virtual ~ExtEthernetTapDeviceFileIo();
+    virtual ~ExtEthernetTapDevice();
 
     virtual bool notify(int fd) override;
 };
 
 } // namespace inet
 
-#endif // ifndef __INET_EXTETHERNETTAPDEVICEFILEIO_H
+#endif // ifndef __INET_EXTETHERNETTAPDEVICE_H
 

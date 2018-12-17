@@ -38,7 +38,7 @@ module ExtLowerEthernetInterface extends ExtInterface like IEthernetInterface
             parameters:
                 @display("p=100,100");
         }
-        socket: ExtEthernetDeviceSocket {
+        socket: ExtEthernetSocket {
             parameters:
                 @display("p=100,300");
         }

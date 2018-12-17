@@ -36,7 +36,7 @@ module ExtUpperEthernetInterface extends ExtInterface like IEthernetInterface
     gates:
         inout phys @labels(EtherFrame);
     submodules:
-        tap: ExtEthernetTapDeviceFileIo {
+        tap: ExtEthernetTapDevice {
             parameters:
                 @display("p=100,100");
         }

@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_EXTIPV4TUNDEVICEFILEIO_H
-#define __INET_EXTIPV4TUNDEVICEFILEIO_H
+#ifndef __INET_EXTIPV4TUNDEVICE_H
+#define __INET_EXTIPV4TUNDEVICE_H
 
 #include "inet/common/packet/printer/PacketPrinter.h"
 #include "inet/common/scheduler/RealTimeScheduler.h"
@@ -31,7 +31,7 @@ namespace inet {
  *
  * See NED file for more details.
  */
-class INET_API ExtIpv4TunDeviceFileIo : public cSimpleModule, public RealTimeScheduler::ICallback
+class INET_API ExtIpv4TunDevice : public cSimpleModule, public RealTimeScheduler::ICallback
 {
   protected:
     // parameters
@@ -58,12 +58,12 @@ class INET_API ExtIpv4TunDeviceFileIo : public cSimpleModule, public RealTimeSch
     virtual void closeTun();
 
   public:
-    virtual ~ExtIpv4TunDeviceFileIo();
+    virtual ~ExtIpv4TunDevice();
 
     virtual bool notify(int fd) override;
 };
 
 } // namespace inet
 
-#endif // ifndef __INET_EXTIPV4TUNDEVICEFILEIO_H
+#endif // ifndef __INET_EXTIPV4TUNDEVICE_H
 

@@ -29,20 +29,20 @@
 #include "inet/common/NetworkNamespaceContext.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/emulation/linklayer/ethernet/ExtEthernetDeviceSocket.h"
+#include "inet/emulation/linklayer/ethernet/ExtEthernetSocket.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
 
 namespace inet {
 
-Define_Module(ExtEthernetDeviceSocket);
+Define_Module(ExtEthernetSocket);
 
-ExtEthernetDeviceSocket::~ExtEthernetDeviceSocket()
+ExtEthernetSocket::~ExtEthernetSocket()
 {
     closeSocket();
 }
 
-void ExtEthernetDeviceSocket::initialize(int stage)
+void ExtEthernetSocket::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
@@ -56,7 +56,7 @@ void ExtEthernetDeviceSocket::initialize(int stage)
     }
 }
 
-void ExtEthernetDeviceSocket::handleMessage(cMessage *message)
+void ExtEthernetSocket::handleMessage(cMessage *message)
 {
     Packet *packet = check_and_cast<Packet *>(message);
     emit(packetReceivedFromUpperSignal, packet);
@@ -89,20 +89,20 @@ void ExtEthernetDeviceSocket::handleMessage(cMessage *message)
     delete packet;
 }
 
-void ExtEthernetDeviceSocket::refreshDisplay() const
+void ExtEthernetSocket::refreshDisplay() const
 {
     char buf[80];
     sprintf(buf, "device: %s\nsnt:%d rcv:%d", device, numSent, numReceived);
     getDisplayString().setTagArg("t", 0, buf);
 }
 
-void ExtEthernetDeviceSocket::finish()
+void ExtEthernetSocket::finish()
 {
     std::cout << numSent << " packets sent, " << numReceived << " packets received\n";
     closeSocket();
 }
 
-void ExtEthernetDeviceSocket::openSocket()
+void ExtEthernetSocket::openSocket()
 {
     NetworkNamespaceContext context(par("namespace"));
     // open socket
@@ -141,7 +141,7 @@ void ExtEthernetDeviceSocket::openSocket()
         rtScheduler->addCallback(fd, this);
 }
 
-void ExtEthernetDeviceSocket::closeSocket()
+void ExtEthernetSocket::closeSocket()
 {
     if (fd != INVALID_SOCKET) {
         if (gate("upperLayerOut")->isConnected())
@@ -151,7 +151,7 @@ void ExtEthernetDeviceSocket::closeSocket()
     }
 }
 
-bool ExtEthernetDeviceSocket::notify(int fd)
+bool ExtEthernetSocket::notify(int fd)
 {
     Enter_Method_Silent();
     ASSERT(this->fd == fd);

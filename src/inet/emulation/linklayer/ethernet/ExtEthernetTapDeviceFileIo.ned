@@ -25,7 +25,7 @@ package inet.emulation.linklayer.ethernet;
 // real TAP device, and sends out packets arrived from real TAP device on
 // 'lowerLayerOut' gate.
 //
-simple ExtEthernetTapDeviceFileIo
+simple ExtEthernetTapDevice
 {
     parameters:
         string device; // name of existing real tap interface
