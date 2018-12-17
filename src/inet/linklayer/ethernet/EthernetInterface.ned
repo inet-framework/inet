@@ -37,7 +37,7 @@ module EthernetInterface like IEthernetInterface
                                             // "auto". "auto" values will be replaced by
                                             // a generated MAC address in init stage 0.
         bool csmacdSupport = default(false);  // by default CSMA/CD is turned off, so only point-to-point duplex links are supported.
-        string fcsMode @enum("declared", "computed") = default("declared");
+        string fcsMode @enum("declared","computed") = default("declared");
         @display("i=block/ifcard;bgl=2");
         *.interfaceTableModule = default(absPath(interfaceTableModule));
         *.fcsMode = fcsMode;
@@ -47,28 +47,28 @@ module EthernetInterface like IEthernetInterface
         inout phys @labels(EtherFrame);
     submodules:
         ingressTC: <default("")> like ITrafficConditioner if typename != "" {
-            @display("p=400,200");
+            @display("p=400,100");
         }
         egressTC: <default("")> like ITrafficConditioner if typename != "" {
-            @display("p=100,200");
+            @display("p=100,100");
         }
         queue: <default("")> like IOutputQueue if typename != "" {
             parameters:
-                @display("p=100,400;q=l2queue");
+                @display("p=150,400;q=l2queue");
         }
         mac: <default(csmacdSupport ? "EtherMac" : "EtherMacFullDuplex")> like IEtherMac {
             parameters:
                 queueModule = (exists(queue) ? "^.queue" : "");
                 txQueueLimit = (exists(queue) ? 1 : 10000); // queue sends one packet at a time
-                @display("p=200,500");
+                @display("p=250,500");
         }
         encap: <default("EtherEncap")> like IEtherEncap {
             parameters:
-                @display("p=250,300");
+                @display("p=250,200");
         }
         vlan: <default("")> like IIeee8021QVlan if typename != "" {
             parameters:
-                @display("p=250,400");
+                @display("p=150,300");
         }
     connections:
         mac.upperLayerOut --> vlan.lowerLayerIn if exists(vlan);
