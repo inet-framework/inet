@@ -27,7 +27,7 @@ Register_Serializer(EthernetPadding, EthernetPaddingSerializer);
 Register_Serializer(EthernetFcs, EthernetFcsSerializer);
 Register_Serializer(EthernetPhyHeader, EthernetPhyHeaderSerializer);
 
-static void serializeQtag(MemoryOutputStream& stream, uint16_t ethType, const Ieee8021QTag *qtag)
+static void serializeQtag(MemoryOutputStream& stream, uint16_t ethType, const Ieee8021qHeader *qtag)
 {
     stream.writeUint16Be(ethType);
     stream.writeUint16Be((qtag->getVid() & 0xFFF) |
@@ -35,9 +35,9 @@ static void serializeQtag(MemoryOutputStream& stream, uint16_t ethType, const Ie
                          (qtag->getDe() ? 0x1000 : 0));
 }
 
-static Ieee8021QTag *deserializeQtag(MemoryInputStream& stream)
+static Ieee8021qHeader *deserializeQtag(MemoryInputStream& stream)
 {
-    auto qtag = new Ieee8021QTag();
+    auto qtag = new Ieee8021qHeader();
     uint16_t qtagValue = stream.readUint16Be();
     qtag->setVid(qtagValue & 0xFFF);
     qtag->setPcp((qtagValue >> 13) & 7);

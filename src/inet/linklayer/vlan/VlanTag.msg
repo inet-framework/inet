@@ -13,16 +13,32 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-package inet.linklayer.ieee8021q;
+import inet.common.INETDefs;
+import inet.common.TagBase;
 
-// TODO: IIeee8021QEncap
-moduleinterface IIeee8021QVlan
+namespace inet;
+
+//
+// This is an abstract base class that should not be directly added as a tag.
+//
+class VlanTagBase extends TagBase
 {
-    parameters:
-        @display("i=block/cogwheel");
-    gates:
-        input upperLayerIn;
-        output upperLayerOut;
-        input lowerLayerIn;
-        output lowerLayerOut;
+    int vlanId = -1;
 }
+
+//
+// This request determines the vlan that should be used to send the packet.
+// It may be present on a packet from the application to the mac protocol.
+//
+class VlanReq extends VlanTagBase
+{
+}
+
+//
+// This indication specifies the vlan that was used to receive the packet.
+// It may be present on a packet from the mac protocol to the application.
+//
+class VlanInd extends VlanTagBase
+{
+}
+

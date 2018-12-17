@@ -14,13 +14,11 @@
 //
 
 import inet.common.INETDefs;
-import inet.common.TagBase;
 import inet.common.packet.chunk.Chunk;
 
 namespace inet;
 
-// TODO: Ieee8021QHeader!!!
-class Ieee8021QTag extends FieldsChunk
+class Ieee8021qHeader extends FieldsChunk
 {
     chunkLength = B(4);
     uint8_t pcp;       // Priority Code Point (PCP): a 3-bit field which refers to the IEEE 802.1p priority. It indicates the frame priority level.
@@ -31,34 +29,5 @@ class Ieee8021QTag extends FieldsChunk
                        // The reserved value 0x000 indicates that the frame does not belong to any VLAN; in this case,
                        // the 802.1Q tag specifies only a priority and is referred to as a priority tag. On bridges,
                        // VLAN 1 (the default VLAN ID) is often reserved for a management VLAN; this is vendor-specific.
-}
-
-// TODO: separate file
-//
-// This is an abstract base class that should not be directly added as a tag.
-//
-// TODO: VlanTagBase
-class Ieee8021QTagBase extends TagBase
-{
-    // TODO: vlanId
-    int vid = -1;
-}
-
-//
-// This request determines the vlan that should be used to send the packet.
-// It may be present on a packet from the application to the mac protocol.
-//
-// TODO: VlanReq?
-class Ieee8021QReq extends Ieee8021QTagBase
-{
-}
-
-//
-// This indication specifies the vlan that was used to receive the packet.
-// It may be present on a packet from the mac protocol to the application.
-//
-// TODO: VlanInd?
-class Ieee8021QInd extends Ieee8021QTagBase
-{
 }
 

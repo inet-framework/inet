@@ -19,7 +19,7 @@ package inet.linklayer.vlan;
 
 import inet.linklayer.contract.INetworkInterface;
 
-simple Vlan
+simple VlanTunnel
 {
     parameters:
         string interfaceTableModule;

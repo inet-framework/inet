@@ -21,7 +21,7 @@ import inet.linklayer.common.EtherType;
 import inet.linklayer.common.FcsMode;
 import inet.linklayer.common.Ieee802Ctrl;
 import inet.linklayer.common.MacAddress;
-import inet.linklayer.ieee8021q.Ieee8021QTag;
+import inet.linklayer.ieee8021q.Ieee8021qHeader;
 
 cplusplus {{
 #include "inet/linklayer/ethernet/Ethernet.h"
@@ -44,8 +44,8 @@ class EthernetMacHeader extends FieldsChunk
     chunkLength = B(14);
     MacAddress dest;
     MacAddress src;
-    Ieee8021QTag *cTag @owned;
-    Ieee8021QTag *sTag @owned;
+    Ieee8021qHeader *cTag @owned;
+    Ieee8021qHeader *sTag @owned;
     int typeOrLength;
 }
 

@@ -29,10 +29,10 @@ module VlanInterface like IVlanInterface
         output upperLayerOut;
     submodules:
         // tunnel: VlanTunnel?
-        vlan: Vlan {
+        tunnel: VlanTunnel {
             @display("p=100,100");
         }
     connections:
-        upperLayerIn --> vlan.upperLayerIn;
-        upperLayerOut <-- vlan.upperLayerOut;
+        upperLayerIn --> tunnel.upperLayerIn;
+        upperLayerOut <-- tunnel.upperLayerOut;
 }

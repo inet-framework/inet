@@ -22,7 +22,7 @@ import inet.common.queue.IOutputQueue;
 import inet.linklayer.contract.IEtherMac;
 import inet.linklayer.contract.IEthernetInterface;
 import inet.linklayer.contract.ITrafficConditioner;
-import inet.linklayer.ieee8021q.IIeee8021QVlan;
+import inet.linklayer.ieee8021q.IIeee8021qEncap;
 
 //
 // Ethernet network interface. Complements ~EtherMac and ~EtherEncap
@@ -66,24 +66,23 @@ module EthernetInterface like IEthernetInterface
             parameters:
                 @display("p=250,200");
         }
-        // TODO: qEncap
-        vlan: <default("")> like IIeee8021QVlan if typename != "" {
+        qEncap: <default("")> like IIeee8021qEncap if typename != "" {
             parameters:
                 @display("p=150,300");
         }
     connections:
-        mac.upperLayerOut --> vlan.lowerLayerIn if exists(vlan);
-        mac.upperLayerOut --> encap.lowerLayerIn if !exists(vlan);
+        mac.upperLayerOut --> qEncap.lowerLayerIn if exists(qEncap);
+        mac.upperLayerOut --> encap.lowerLayerIn if !exists(qEncap);
 
         mac.upperLayerIn <-- queue.out if exists(queue);
-        mac.upperLayerIn <-- vlan.lowerLayerOut if !exists(queue) && exists(vlan);
-        mac.upperLayerIn <-- encap.lowerLayerOut if !exists(queue) && !exists(vlan);
+        mac.upperLayerIn <-- qEncap.lowerLayerOut if !exists(queue) && exists(qEncap);
+        mac.upperLayerIn <-- encap.lowerLayerOut if !exists(queue) && !exists(qEncap);
 
-        encap.lowerLayerOut --> vlan.upperLayerIn if exists(vlan);
-        encap.lowerLayerIn <-- vlan.upperLayerOut if exists(vlan);
+        encap.lowerLayerOut --> qEncap.upperLayerIn if exists(qEncap);
+        encap.lowerLayerIn <-- qEncap.upperLayerOut if exists(qEncap);
 
-        vlan.lowerLayerOut --> queue.in if exists(vlan) && exists(queue);
-        encap.lowerLayerOut --> queue.in if !exists(vlan) && exists(queue);
+        qEncap.lowerLayerOut --> queue.in if exists(qEncap) && exists(queue);
+        encap.lowerLayerOut --> queue.in if !exists(qEncap) && exists(queue);
 
         mac.phys <--> { @display("m=s"); } <--> phys;
 

@@ -23,7 +23,7 @@
 
 namespace inet {
 
-class Vlan : public cSimpleModule, public EthernetSocket::ICallback
+class VlanTunnel : public cSimpleModule, public EthernetSocket::ICallback
 {
   protected:
     int vlanId = -1;

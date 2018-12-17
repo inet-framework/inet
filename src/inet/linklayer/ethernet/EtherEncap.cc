@@ -31,6 +31,7 @@
 #include "inet/linklayer/ethernet/EthernetCommand_m.h"
 #include "inet/linklayer/ethernet/EtherPhyFrame_m.h"
 #include "inet/linklayer/ieee8022/Ieee8022LlcHeader_m.h"
+#include "inet/linklayer/vlan/VlanTag_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 
 namespace inet {
@@ -49,7 +50,7 @@ bool EtherEncap::Socket::matches(Packet *packet, const Ptr<const EthernetMacHead
         return false;
     if (protocol != nullptr && packet->getTag<PacketProtocolTag>()->getProtocol() != protocol)
         return false;
-    if (vlanId != -1 && packet->getTag<Ieee8021QInd>()->getVid() != vlanId)
+    if (vlanId != -1 && packet->getTag<VlanInd>()->getVlanId() != vlanId)
         return false;
     return true;
 }
