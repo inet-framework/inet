@@ -21,6 +21,15 @@ namespace inet {
 
 std::map<const cCanvas *, CanvasProjection *> CanvasProjection::canvasProjections;
 
+EXECUTE_ON_SHUTDOWN(CanvasProjection::dropCanvasProjections());
+
+void CanvasProjection::dropCanvasProjections()
+{
+    for (auto it : canvasProjections)
+        delete it.second;
+    canvasProjections.clear();
+}
+
 CanvasProjection::CanvasProjection(RotationMatrix rotation, cFigure::Point translation) :
     rotation(rotation),
     scale(cFigure::Point(1, 1)),
@@ -30,8 +39,6 @@ CanvasProjection::CanvasProjection(RotationMatrix rotation, cFigure::Point trans
 
 CanvasProjection::~CanvasProjection()
 {
-    for (auto it : canvasProjections)
-        delete it.second;
 }
 
 cFigure::Point CanvasProjection::computeCanvasPoint(const Coord& point) const
