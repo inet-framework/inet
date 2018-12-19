@@ -41,7 +41,7 @@ class INET_API ReceiveBuffer
         SequenceNumber nextExpectedSequenceNumber = -1;
 
     public:
-        ReceiveBuffer(int bufferSize, int nextExpectedSequenceNumber);
+        ReceiveBuffer(int bufferSize, SequenceNumber nextExpectedSequenceNumber);
         virtual ~ReceiveBuffer();
 
         bool insertFrame(Packet *dataPacket, const Ptr<const Ieee80211DataHeader>& dataHeader);

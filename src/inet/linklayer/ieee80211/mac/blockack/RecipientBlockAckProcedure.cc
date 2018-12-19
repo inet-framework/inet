@@ -58,7 +58,7 @@ const Ptr<Ieee80211BlockAck> RecipientBlockAckProcedure::buildBlockAck(const Ptr
     if (auto basicBlockAckReq = dynamicPtrCast<const Ieee80211BasicBlockAckReq>(blockAckReq)) {
         ASSERT(agreement != nullptr);
         auto blockAck = makeShared<Ieee80211BasicBlockAck>();
-        int startingSequenceNumber = basicBlockAckReq->getStartingSequenceNumber();
+        auto startingSequenceNumber = basicBlockAckReq->getStartingSequenceNumber();
         for (SequenceNumber seqNum = startingSequenceNumber; seqNum < startingSequenceNumber + 64; seqNum++) {
             BitVector &bitmap = blockAck->getBlockAckBitmapForUpdate(seqNum - startingSequenceNumber);
             for (FragmentNumber fragNum = 0; fragNum < 16; fragNum++) {

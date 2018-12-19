@@ -35,7 +35,7 @@ QoSSequenceNumberAssignment::CacheType QoSSequenceNumberAssignment::getCacheType
 void QoSSequenceNumberAssignment::assignSequenceNumber(const Ptr<Ieee80211DataOrMgmtHeader>& header)
 {
     CacheType type = getCacheType(header, false);
-    int seqNum;
+    SequenceNumber seqNum;
     MacAddress address = header->getReceiverAddress();
     if (type == TIME_PRIORITY)
     {

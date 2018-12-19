@@ -36,7 +36,7 @@ BlockAckReordering::ReorderBuffer BlockAckReordering::processReceivedQoSFrame(Re
             agreement->blockAckPolicyFrameReceived(dataHeader);
         auto earliestCompleteMsduOrAMsdu = getEarliestCompleteMsduOrAMsduIfExists(receiveBuffer);
         if (earliestCompleteMsduOrAMsdu.size() > 0) {
-            int earliestSequenceNumber = earliestCompleteMsduOrAMsdu.at(0)->peekAtFront<Ieee80211DataHeader>()->getSequenceNumber();
+            auto earliestSequenceNumber = earliestCompleteMsduOrAMsdu.at(0)->peekAtFront<Ieee80211DataHeader>()->getSequenceNumber();
             // If, after an MPDU is received, the receive buffer is full, the complete MSDU or A-MSDU with the earliest
             // sequence number shall be passed up to the next MAC process.
             if (receiveBuffer->isFull()) {
@@ -64,7 +64,7 @@ BlockAckReordering::ReorderBuffer BlockAckReordering::processReceivedBlockAckReq
 {
     // The originator shall use the Block Ack starting sequence control to signal the first MPDU in the block for
     // which an acknowledgment is expected.
-    int startingSequenceNumber = -1;
+    SequenceNumber startingSequenceNumber;
     Tid tid = -1;
     if (auto basicReq = dynamicPtrCast<const Ieee80211BasicBlockAckReq>(blockAckReq)) {
         tid = basicReq->getTidInfo();
@@ -113,13 +113,13 @@ BlockAckReordering::ReorderBuffer BlockAckReordering::processReceivedBlockAckReq
 // the starting sequence number contained in the BlockAckReq frame shall be passed up to the next MAC process
 // as shown in Figure 5-1.
 //
-BlockAckReordering::ReorderBuffer BlockAckReordering::collectCompletePrecedingMpdus(ReceiveBuffer *receiveBuffer, int startingSequenceNumber)
+BlockAckReordering::ReorderBuffer BlockAckReordering::collectCompletePrecedingMpdus(ReceiveBuffer *receiveBuffer, SequenceNumber startingSequenceNumber)
 {
     ASSERT(startingSequenceNumber != -1);
     ReorderBuffer completePrecedingMpdus;
     const auto& buffer = receiveBuffer->getBuffer();
     for (auto it : buffer) { // collects complete preceding MPDUs
-        int sequenceNumber = it.first;
+        auto sequenceNumber = it.first;
         auto fragments = it.second;
         if (isSequenceNumberLess(sequenceNumber, startingSequenceNumber, receiveBuffer->getNextExpectedSequenceNumber(), receiveBuffer->getBufferSize()))
             if (isComplete(fragments))
@@ -133,7 +133,7 @@ BlockAckReordering::ReorderBuffer BlockAckReordering::collectCompletePrecedingMp
 // the starting sequence number sequentially until there is an incomplete or missing MSDU
 // or A-MSDU in the buffer.
 //
-BlockAckReordering::ReorderBuffer BlockAckReordering::collectConsecutiveCompleteFollowingMpdus(ReceiveBuffer *receiveBuffer, int startingSequenceNumber)
+BlockAckReordering::ReorderBuffer BlockAckReordering::collectConsecutiveCompleteFollowingMpdus(ReceiveBuffer *receiveBuffer, SequenceNumber startingSequenceNumber)
 {
     ASSERT(startingSequenceNumber != -1);
     ReorderBuffer framesToPassUp;
@@ -173,7 +173,7 @@ bool BlockAckReordering::addMsduIfComplete(ReceiveBuffer *receiveBuffer, Reorder
 void BlockAckReordering::releaseReceiveBuffer(RecipientBlockAckAgreement *agreement, ReceiveBuffer *receiveBuffer, const ReorderBuffer& reorderBuffer)
 {
     for (auto it : reorderBuffer) {
-        int sequenceNumber = it.first;
+        auto sequenceNumber = it.first;
         passedUp(agreement, receiveBuffer, sequenceNumber);
     }
 }
@@ -223,7 +223,7 @@ void BlockAckReordering::processReceivedDelba(const Ptr<const Ieee80211Delba>& d
         EV_DETAIL << "Receive buffer is not found" << endl;
 }
 
-void BlockAckReordering::passedUp(RecipientBlockAckAgreement *agreement, ReceiveBuffer *receiveBuffer, int sequenceNumber)
+void BlockAckReordering::passedUp(RecipientBlockAckAgreement *agreement, ReceiveBuffer *receiveBuffer, SequenceNumber sequenceNumber)
 {
     // Each time that the recipient passes an MSDU or A-MSDU for a Block Ack agreement up to the next MAC
     // process, the NextExpectedSequenceNumber for that Block Ack agreement is set to the sequence number of the

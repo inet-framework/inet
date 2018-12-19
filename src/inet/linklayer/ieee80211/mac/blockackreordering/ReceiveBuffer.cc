@@ -20,7 +20,7 @@
 namespace inet {
 namespace ieee80211 {
 
-ReceiveBuffer::ReceiveBuffer(int bufferSize, int nextExpectedSequenceNumber) :
+ReceiveBuffer::ReceiveBuffer(int bufferSize, SequenceNumber nextExpectedSequenceNumber) :
         bufferSize(bufferSize),
         nextExpectedSequenceNumber(nextExpectedSequenceNumber)
 {

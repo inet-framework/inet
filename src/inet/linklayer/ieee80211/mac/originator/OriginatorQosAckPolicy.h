@@ -42,7 +42,7 @@ class INET_API OriginatorQosAckPolicy : public ModeSetListener, public IOriginat
 
         virtual bool checkAgreementPolicy(const Ptr<const Ieee80211DataHeader>& header, OriginatorBlockAckAgreement *agreement) const;
         virtual std::map<MacAddress, std::vector<Packet *>> getOutstandingFramesPerReceiver(InProgressFrames *inProgressFrames) const;
-        virtual int computeStartingSequenceNumber(const std::vector<Packet *>& outstandingFrames) const;
+        virtual SequenceNumber computeStartingSequenceNumber(const std::vector<Packet *>& outstandingFrames) const;
         virtual bool isCompressedBlockAckReq(const std::vector<Packet *>& outstandingFrames, int startingSequenceNumber) const;
 
     public:

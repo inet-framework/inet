@@ -50,12 +50,12 @@ std::map<MacAddress, std::vector<Packet *>> OriginatorQosAckPolicy::getOutstandi
 }
 
 
-int OriginatorQosAckPolicy::computeStartingSequenceNumber(const std::vector<Packet *>& outstandingFrames) const
+SequenceNumber OriginatorQosAckPolicy::computeStartingSequenceNumber(const std::vector<Packet *>& outstandingFrames) const
 {
     ASSERT(outstandingFrames.size() > 0);
-    int startingSequenceNumber = outstandingFrames[0]->peekAtFront<Ieee80211DataHeader>()->getSequenceNumber();
+    auto startingSequenceNumber = outstandingFrames[0]->peekAtFront<Ieee80211DataHeader>()->getSequenceNumber();
     for (size_t i = 1; i < outstandingFrames.size(); i++) {
-        int seqNum = outstandingFrames[i]->peekAtFront<Ieee80211DataHeader>()->getSequenceNumber();
+        auto seqNum = outstandingFrames[i]->peekAtFront<Ieee80211DataHeader>()->getSequenceNumber();
         if (seqNum < startingSequenceNumber)
             startingSequenceNumber = seqNum;
     }
