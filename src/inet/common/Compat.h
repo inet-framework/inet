@@ -21,8 +21,6 @@
 #include <iostream>
 #include <omnetpp.h>
 
-namespace omnetpp { }  // so "using namespace omnetpp" in INETDefs.h doesn't cause error for OMNeT++ 4.x
-
 namespace inet {
 
     typedef uint64_t uint64;
