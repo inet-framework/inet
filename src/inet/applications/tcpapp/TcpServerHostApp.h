@@ -96,7 +96,7 @@ class INET_API TcpServerThreadBase : public cSimpleModule, public TcpSocket::ICa
   public:
 
     TcpServerThreadBase() { sock = nullptr; hostmod = nullptr; }
-    virtual ~TcpServerThreadBase() {}
+    virtual ~TcpServerThreadBase() { delete sock; }
 
     // internal: called by TcpServerHostApp after creating this module
     virtual void init(TcpServerHostApp *hostmodule, TcpSocket *socket) { hostmod = hostmodule; sock = socket; }
