@@ -1708,6 +1708,10 @@ void Ipv4NetworkConfigurator::optimizeRoutes(std::vector<Ipv4Route *>& originalR
 
 #ifndef NDEBUG
     checkOriginalRoutes(routingTableInfo, originalRoutingTableInfo);
+
+    for (auto rti: originalRoutingTableInfo.routeInfos)
+        delete rti;
+    originalRoutingTableInfo.routeInfos.clear();
 #endif // ifndef NDEBUG
 
     // STEP 3.
