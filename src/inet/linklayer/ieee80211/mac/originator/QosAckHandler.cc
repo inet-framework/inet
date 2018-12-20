@@ -125,7 +125,7 @@ std::set<std::pair<MacAddress, std::pair<Tid, SequenceControlField>>> QosAckHand
         for (int seqNum = 0; seqNum < 64; seqNum++) {
             BitVector bitmap = basicBlockAck->getBlockAckBitmap(seqNum);
             for (int fragNum = 0; fragNum < 16; fragNum++) { // TODO: declare these const values
-                auto id = std::make_pair(receiverAddr, std::make_pair(basicBlockAck->getTidInfo(), SequenceControlField((startingSeqNum + seqNum) % 4096, fragNum)));
+                auto id = std::make_pair(receiverAddr, std::make_pair(basicBlockAck->getTidInfo(), SequenceControlField(startingSeqNum + seqNum, fragNum)));
                 Status& status = getQoSDataAckStatus(id);
                 if (status == Status::WAITING_FOR_BLOCK_ACK) {
                     bool acked = bitmap.getBit(fragNum) == 1;
@@ -140,7 +140,7 @@ std::set<std::pair<MacAddress, std::pair<Tid, SequenceControlField>>> QosAckHand
         auto startingSeqNum = compressedBlockAck->getStartingSequenceNumber();
         BitVector bitmap = compressedBlockAck->getBlockAckBitmap();
         for (int seqNum = 0; seqNum < 64; seqNum++) {
-            auto id = std::make_pair(receiverAddr, std::make_pair(compressedBlockAck->getTidInfo(), SequenceControlField((startingSeqNum + seqNum) % 4096, 0)));
+            auto id = std::make_pair(receiverAddr, std::make_pair(compressedBlockAck->getTidInfo(), SequenceControlField(startingSeqNum + seqNum, 0)));
             Status& status = getQoSDataAckStatus(id);
             if (status == Status::WAITING_FOR_BLOCK_ACK) {
                 bool acked = bitmap.getBit(seqNum) == 1;
@@ -164,7 +164,7 @@ void QosAckHandler::processFailedBlockAckReq(const Ptr<const Ieee80211BlockAckRe
         for (int seqNum = 0; seqNum < 64; seqNum++) {
             for (int fragNum = 0; fragNum < 16; fragNum++) { // TODO: declare these const values
                 MacAddress receiverAddr = blockAckReq->getReceiverAddress();
-                auto id = std::make_pair(receiverAddr, std::make_pair(basicBlockAckReq->getTidInfo(), SequenceControlField((startingSeqNum + seqNum) % 4096, fragNum)));
+                auto id = std::make_pair(receiverAddr, std::make_pair(basicBlockAckReq->getTidInfo(), SequenceControlField(startingSeqNum + seqNum, fragNum)));
                 Status& status = getQoSDataAckStatus(id);
                 if (status == Status::WAITING_FOR_BLOCK_ACK)
                     status = Status::BLOCK_ACK_NOT_ARRIVED;
@@ -175,7 +175,7 @@ void QosAckHandler::processFailedBlockAckReq(const Ptr<const Ieee80211BlockAckRe
         auto startingSeqNum = compressedBlockAckReq->getStartingSequenceNumber();
         for (int seqNum = 0; seqNum < 64; seqNum++) {
             MacAddress receiverAddr = blockAckReq->getReceiverAddress();
-            auto id = std::make_pair(receiverAddr, std::make_pair(compressedBlockAckReq->getTidInfo(), SequenceControlField((startingSeqNum + seqNum) % 4096, 0)));
+            auto id = std::make_pair(receiverAddr, std::make_pair(compressedBlockAckReq->getTidInfo(), SequenceControlField(startingSeqNum + seqNum, 0)));
             Status& status = getQoSDataAckStatus(id);
             if (status == Status::WAITING_FOR_BLOCK_ACK)
                 status = Status::BLOCK_ACK_NOT_ARRIVED;

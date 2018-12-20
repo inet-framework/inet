@@ -228,7 +228,7 @@ void BlockAckReordering::passedUp(RecipientBlockAckAgreement *agreement, Receive
     // Each time that the recipient passes an MSDU or A-MSDU for a Block Ack agreement up to the next MAC
     // process, the NextExpectedSequenceNumber for that Block Ack agreement is set to the sequence number of the
     // MSDU or A-MSDU that was passed up to the next MAC process plus one.
-    receiveBuffer->setNextExpectedSequenceNumber((sequenceNumber + 1) % 4096);
+    receiveBuffer->setNextExpectedSequenceNumber(sequenceNumber + 1);
     receiveBuffer->dropFramesUntil(sequenceNumber);
     receiveBuffer->removeFrame(sequenceNumber);
     agreement->getBlockAckRecord()->removeAckStates(sequenceNumber);
