@@ -23,28 +23,45 @@
 namespace inet {
 namespace ieee80211 {
 
-typedef int16_t SequenceNumber;
 typedef int8_t FragmentNumber;
 typedef int8_t Tid;
 
-inline SequenceNumber sequenceNumberDistance(SequenceNumber number1, SequenceNumber number2) { return (number2 - number1 + 4096) % 4096; }
-inline bool isSequenceNumberTooOld(SequenceNumber number, SequenceNumber nextExpected, SequenceNumber range) { return sequenceNumberDistance(nextExpected, number) > range; }
-// range is the expected range of sequence numbers above nextExpected which are considered new, sequence numbers above range are considered old due to wrap around
-inline bool isSequenceNumberLess(SequenceNumber number1, SequenceNumber number2, SequenceNumber nextExpected, SequenceNumber range) {
-    int d1 = sequenceNumberDistance(nextExpected, number1);
-    int d2 = sequenceNumberDistance(nextExpected, number2);
-    if (d1 < range && d2 < range)
-        return d1 < d2;
-    else if (d1 < range && d2 >= range)
-        return false;
-    else if (d1 >= range && d2 < range)
-        return true;
-    else if (d1 >= range && d2 >= range)
-        return d1 < d2;
-    else {
-        ASSERT(false);
-        return false; // should never happen
+struct SequenceNumber
+{
+  private:
+    int16_t value;
+
+  private:
+    int16_t modulo4096(int16_t value) const { ASSERT(value != -1); return (value % 4096 + 4096) % 4096; } // always returns positive result
+    int16_t distance4096(int16_t other) const { ASSERT(0 <= other && other < 4096); return (value - other + 4096) % 4096; }
+
+  public:
+    SequenceNumber() : value(-1) { }
+    SequenceNumber(int16_t value) : value(value) { ASSERT(0 <= value && value < 4096); }
+    SequenceNumber(const SequenceNumber& other) : value(other.value) { ASSERT(other.value != -1); }
+
+    int16_t getRaw() const { ASSERT(value != -1); return value; }
+
+    SequenceNumber& operator=(const SequenceNumber& other) { ASSERT(other.value != -1); value = other.value; return *this; }
+    bool operator==(const SequenceNumber& other) const { ASSERT(value != -1 && other.value != -1); return value == other.value; }
+    bool operator!=(const SequenceNumber& other) const { ASSERT(value != -1 && other.value != -1); return value != other.value; }
+
+    SequenceNumber operator-(int other) const { ASSERT(value != -1); SequenceNumber result; result.value = modulo4096(value - other); return result; }
+    SequenceNumber operator+(int other) const { ASSERT(value != -1); SequenceNumber result; result.value = modulo4096(value + other); return result; }
+
+    bool operator<(const SequenceNumber& other) const { ASSERT(value != -1 && other.value != -1);
+        int16_t d = (other.value - value + 4096) % 4096;
+        return 0 < d && d < 2048;
     }
+    bool operator<=(const SequenceNumber& other) const { return *this == other || *this < other; }
+    bool operator>(const SequenceNumber& other) const { return other < *this; }
+    bool operator>=(const SequenceNumber& other) const { return *this == other || *this > other; }
+};
+
+inline std::ostream& operator<<(std::ostream& os, const SequenceNumber& sequenceNumber)
+{
+    os << sequenceNumber.getRaw();
+    return os;
 }
 
 } // namespace ieee80211
