@@ -59,10 +59,10 @@ const Ptr<Ieee80211BlockAck> RecipientBlockAckProcedure::buildBlockAck(const Ptr
         ASSERT(agreement != nullptr);
         auto blockAck = makeShared<Ieee80211BasicBlockAck>();
         auto startingSequenceNumber = basicBlockAckReq->getStartingSequenceNumber();
-        for (SequenceNumber seqNum = startingSequenceNumber; seqNum < startingSequenceNumber + 64; seqNum++) {
-            BitVector &bitmap = blockAck->getBlockAckBitmapForUpdate(seqNum - startingSequenceNumber);
+        for (int i = 0; i < 64; i++) {
+            BitVector &bitmap = blockAck->getBlockAckBitmapForUpdate(i);
             for (FragmentNumber fragNum = 0; fragNum < 16; fragNum++) {
-                bool ackState = agreement->getBlockAckRecord()->getAckState(seqNum, fragNum);
+                bool ackState = agreement->getBlockAckRecord()->getAckState(startingSequenceNumber + i, fragNum);
                 bitmap.setBit(fragNum, ackState);
             }
         }

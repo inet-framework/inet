@@ -115,7 +115,6 @@ BlockAckReordering::ReorderBuffer BlockAckReordering::processReceivedBlockAckReq
 //
 BlockAckReordering::ReorderBuffer BlockAckReordering::collectCompletePrecedingMpdus(ReceiveBuffer *receiveBuffer, SequenceNumber startingSequenceNumber)
 {
-    ASSERT(startingSequenceNumber != -1);
     ReorderBuffer completePrecedingMpdus;
     const auto& buffer = receiveBuffer->getBuffer();
     for (auto it : buffer) { // collects complete preceding MPDUs
@@ -135,23 +134,10 @@ BlockAckReordering::ReorderBuffer BlockAckReordering::collectCompletePrecedingMp
 //
 BlockAckReordering::ReorderBuffer BlockAckReordering::collectConsecutiveCompleteFollowingMpdus(ReceiveBuffer *receiveBuffer, SequenceNumber startingSequenceNumber)
 {
-    ASSERT(startingSequenceNumber != -1);
     ReorderBuffer framesToPassUp;
-    if (startingSequenceNumber + receiveBuffer->getBufferSize() > 4095) {
-        for (int i = startingSequenceNumber; i <= 4095; i++) {
-            if (!addMsduIfComplete(receiveBuffer, framesToPassUp, i))
-                return framesToPassUp;
-        }
-        for (int i = 0; i < (startingSequenceNumber + receiveBuffer->getBufferSize()) % 4096; i++) {
-            if (!addMsduIfComplete(receiveBuffer, framesToPassUp, i))
-                return framesToPassUp;
-        }
-    }
-    else {
-        for (int i = startingSequenceNumber; i < startingSequenceNumber + receiveBuffer->getBufferSize(); i++) {
-            if (!addMsduIfComplete(receiveBuffer, framesToPassUp, i))
-                return framesToPassUp;
-        }
+    for (int i = 0; i < receiveBuffer->getBufferSize(); i++) {
+        if (!addMsduIfComplete(receiveBuffer, framesToPassUp, startingSequenceNumber + i))
+            return framesToPassUp;
     }
     return framesToPassUp;
 }
@@ -177,7 +163,6 @@ void BlockAckReordering::releaseReceiveBuffer(RecipientBlockAckAgreement *agreem
         passedUp(agreement, receiveBuffer, sequenceNumber);
     }
 }
-
 
 bool BlockAckReordering::isComplete(const std::vector<Packet *>& fragments)
 {
