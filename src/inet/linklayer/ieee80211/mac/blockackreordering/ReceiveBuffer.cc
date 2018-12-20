@@ -38,7 +38,7 @@ bool ReceiveBuffer::insertFrame(Packet *dataPacket, const Ptr<const Ieee80211Dat
     auto fragmentNumber = dataHeader->getFragmentNumber();
     // The total number of MPDUs in these MSDUs may not
     // exceed the reorder buffer size in the receiver.
-    if (length < bufferSize && !isSequenceNumberTooOld(sequenceNumber, nextExpectedSequenceNumber, bufferSize)) {
+    if (length < bufferSize && nextExpectedSequenceNumber <= sequenceNumber && sequenceNumber < nextExpectedSequenceNumber + bufferSize) {
         auto it = buffer.find(sequenceNumber);
         if (it != buffer.end()) {
             auto &fragments = it->second;
@@ -65,7 +65,7 @@ void ReceiveBuffer::dropFramesUntil(SequenceNumber sequenceNumber)
 {
     auto it = buffer.begin();
     while (it != buffer.end()) {
-        if (isSequenceNumberLess(it->first, sequenceNumber, nextExpectedSequenceNumber, bufferSize)) {
+        if (it->first < sequenceNumber) {
             length -= it->second.size();
             for (auto fragment : it->second)
                 delete fragment;

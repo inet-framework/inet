@@ -55,7 +55,7 @@ void BlockAckRecord::removeAckStates(SequenceNumber sequenceNumber)
 {
     auto it = acknowledgmentState.begin();
     while (it != acknowledgmentState.end()) {
-        if (isSequenceNumberLess(it->first.first, sequenceNumber, sequenceNumber, acknowledgmentState.size()))
+        if (it->first.first < sequenceNumber)
             it = acknowledgmentState.erase(it);
         else
             it++;

@@ -95,7 +95,7 @@ BlockAckReordering::ReorderBuffer BlockAckReordering::processReceivedBlockAckReq
         // NextExpectedSequenceNumber for that Block Ack agreement, then the NextExpectedSequenceNumber for
         // that Block Ack agreement is set to the sequence number of the BlockAckReq frame.
         int numOfMsdusToPassUp = completePrecedingMpdus.size() + consecutiveCompleteFollowingMpdus.size();
-        if (numOfMsdusToPassUp == 0  && isSequenceNumberLess(receiveBuffer->getNextExpectedSequenceNumber(), startingSequenceNumber, receiveBuffer->getNextExpectedSequenceNumber(), receiveBuffer->getBufferSize()))
+        if (numOfMsdusToPassUp == 0  && receiveBuffer->getNextExpectedSequenceNumber() < startingSequenceNumber)
             receiveBuffer->setNextExpectedSequenceNumber(startingSequenceNumber);
         // The recipient shall then release any buffers held by preceding MPDUs.
         releaseReceiveBuffer(agreement, receiveBuffer, completePrecedingMpdus);
@@ -121,7 +121,7 @@ BlockAckReordering::ReorderBuffer BlockAckReordering::collectCompletePrecedingMp
     for (auto it : buffer) { // collects complete preceding MPDUs
         auto sequenceNumber = it.first;
         auto fragments = it.second;
-        if (isSequenceNumberLess(sequenceNumber, startingSequenceNumber, receiveBuffer->getNextExpectedSequenceNumber(), receiveBuffer->getBufferSize()))
+        if (sequenceNumber < startingSequenceNumber)
             if (isComplete(fragments))
                 completePrecedingMpdus[sequenceNumber] = fragments;
     }
@@ -249,7 +249,7 @@ std::vector<Packet *> BlockAckReordering::getEarliestCompleteMsduOrAMsduIfExists
     if (earliestFragments.size() > 0) {
         for (auto it : buffer) {
             SequenceNumber currentSeqNum = it.second.at(0)->peekAtFront<Ieee80211DataOrMgmtHeader>()->getSequenceNumber();
-            if (isSequenceNumberLess(currentSeqNum, earliestSeqNum, receiveBuffer->getNextExpectedSequenceNumber(), receiveBuffer->getBufferSize())) {
+            if (currentSeqNum < earliestSeqNum) {
                 if (isComplete(it.second)) {
                     earliestFragments = it.second;
                     earliestSeqNum = currentSeqNum;
