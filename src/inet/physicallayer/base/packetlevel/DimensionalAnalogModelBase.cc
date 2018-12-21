@@ -114,14 +114,14 @@ const INoise *DimensionalAnalogModelBase::computeNoise(const IListening *listeni
     const DimensionalNoise *dimensionalBackgroundNoise = dynamic_cast<const DimensionalNoise *>(interference->getBackgroundNoise());
     if (dimensionalBackgroundNoise) {
         const ConstMapping *backgroundNoisePower = dimensionalBackgroundNoise->getPower();
-        if (backgroundNoisePower->getDimensionSet().hasDimension(Dimension::frequency) || (carrierFrequency == dimensionalBackgroundNoise->getCarrierFrequency() && bandwidth == dimensionalBackgroundNoise->getBandwidth()))
+        if (backgroundNoisePower->getDimensionSet().hasDimension(Dimension::frequency) || (carrierFrequency == dimensionalBackgroundNoise->getCarrierFrequency() && bandwidth >= dimensionalBackgroundNoise->getBandwidth()))
             receptionPowers.push_back(const_cast<ConstMapping *>(backgroundNoisePower));
     }
     const std::vector<const IReception *> *interferingReceptions = interference->getInterferingReceptions();
     for (const auto & interferingReception : *interferingReceptions) {
         const DimensionalReception *dimensionalReception = check_and_cast<const DimensionalReception *>(interferingReception);
         const ConstMapping *receptionPower = dimensionalReception->getPower();
-        if (receptionPower->getDimensionSet().hasDimension(Dimension::frequency) || (carrierFrequency == dimensionalReception->getCarrierFrequency() && bandwidth == dimensionalReception->getBandwidth())) {
+        if (receptionPower->getDimensionSet().hasDimension(Dimension::frequency) || (carrierFrequency == dimensionalReception->getCarrierFrequency() && bandwidth >= dimensionalReception->getBandwidth())) {
             receptionPowers.push_back(const_cast<ConstMapping *>(receptionPower));
             EV_DEBUG << "Interference power begin " << endl;
             dimensionalReception->getPower()->print(EVSTREAM);

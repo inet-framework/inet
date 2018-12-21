@@ -65,7 +65,7 @@ bool NarrowbandReceiverBase::computeIsReceptionPossible(const IListening *listen
 {
     // TODO: check if modulation matches?
     const NarrowbandTransmissionBase *narrowbandTransmission = check_and_cast<const NarrowbandTransmissionBase *>(transmission);
-    return carrierFrequency == narrowbandTransmission->getCarrierFrequency() && bandwidth == narrowbandTransmission->getBandwidth();
+    return carrierFrequency == narrowbandTransmission->getCarrierFrequency() && bandwidth >= narrowbandTransmission->getBandwidth();
 }
 
 // TODO: this is not purely functional, see interface comment
@@ -73,7 +73,7 @@ bool NarrowbandReceiverBase::computeIsReceptionPossible(const IListening *listen
 {
     const BandListening *bandListening = check_and_cast<const BandListening *>(listening);
     const NarrowbandReceptionBase *narrowbandReception = check_and_cast<const NarrowbandReceptionBase *>(reception);
-    if (bandListening->getCarrierFrequency() != narrowbandReception->getCarrierFrequency() || bandListening->getBandwidth() != narrowbandReception->getBandwidth()) {
+    if (bandListening->getCarrierFrequency() != narrowbandReception->getCarrierFrequency() || bandListening->getBandwidth() < narrowbandReception->getBandwidth()) {
         EV_DEBUG << "Computing whether reception is possible: listening and reception bands are different -> reception is impossible" << endl;
         return false;
     }
@@ -85,7 +85,7 @@ const IReceptionDecision *NarrowbandReceiverBase::computeReceptionDecision(const
 {
     const BandListening *bandListening = check_and_cast<const BandListening *>(listening);
     const NarrowbandReceptionBase *narrowbandReception = check_and_cast<const NarrowbandReceptionBase *>(reception);
-    if (bandListening->getCarrierFrequency() == narrowbandReception->getCarrierFrequency() && bandListening->getBandwidth() == narrowbandReception->getBandwidth())
+    if (bandListening->getCarrierFrequency() == narrowbandReception->getCarrierFrequency() && bandListening->getBandwidth() >= narrowbandReception->getBandwidth())
         return SnirReceiverBase::computeReceptionDecision(listening, reception, part, interference, snir);
     else
         return new ReceptionDecision(reception, part, false, false, false);
