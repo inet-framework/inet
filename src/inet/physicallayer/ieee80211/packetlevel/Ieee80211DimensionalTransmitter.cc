@@ -54,6 +54,7 @@ const ITransmission *Ieee80211DimensionalTransmitter::createTransmission(const I
     const IIeee80211Mode *transmissionMode = computeTransmissionMode(packet);
     const Ieee80211Channel *transmissionChannel = computeTransmissionChannel(packet);
     W transmissionPower = computeTransmissionPower(packet);
+    Hz transmissionBandwidth = transmissionMode->getDataMode()->getBandwidth();
     bps transmissionBitrate = transmissionMode->getDataMode()->getNetBitrate();
     if (transmissionMode->getDataMode()->getNumberOfSpatialStreams() > transmitter->getAntenna()->getNumAntennas())
         throw cRuntimeError("Number of spatial streams is higher than the number of antennas");
@@ -70,7 +71,7 @@ const ITransmission *Ieee80211DimensionalTransmitter::createTransmission(const I
     const simtime_t preambleDuration = transmissionMode->getPreambleMode()->getDuration();
     const simtime_t headerDuration = transmissionMode->getHeaderMode()->getDuration();
     const simtime_t dataDuration = duration - headerDuration - preambleDuration;
-    return new Ieee80211DimensionalTransmission(transmitter, packet, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, modulation, headerLength, dataLength, carrierFrequency, bandwidth, transmissionBitrate, powerMapping, transmissionMode, transmissionChannel);
+    return new Ieee80211DimensionalTransmission(transmitter, packet, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, modulation, headerLength, dataLength, carrierFrequency, transmissionBandwidth, transmissionBitrate, powerMapping, transmissionMode, transmissionChannel);
 }
 
 } // namespace physicallayer
