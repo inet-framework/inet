@@ -1,3 +1,9 @@
+2018-12-17  Levente Mészáros
+
+	Cleaned up and updated documentation.
+	Renamed a couple of emulation support modules for simplicity:
+	ExtIpv4TunDeviceFileIo -> ExtIpv4TunDevice
+
 2018-10-22  Levente Mészáros
 
 	Added support for host network namespaces.

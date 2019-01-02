@@ -1,3 +1,10 @@
+2018-12-17  Levente Mészáros
+
+	Cleaned up and updated documentation.
+	Renamed a couple of emulation support modules for simplicity:
+	ExtEthernetDeviceSocket -> ExtEthernetSocket
+	ExtEthernetTapDeviceFileIo -> ExtEthernetTapDevice
+
 2018-10-18  Levente Mészáros
 
 	Added support for host network namespaces.

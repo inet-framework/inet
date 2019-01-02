@@ -1,3 +1,7 @@
+2018-10-25  Zoltan Bojthe
+
+	Fixed NodeStatus module detection.
+
 2018-11-23  Mani Amoozadeh
 
 	Added redistributeOspf parameter that supports all OSPF route types.

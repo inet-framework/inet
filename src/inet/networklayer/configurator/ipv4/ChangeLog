@@ -1,3 +1,7 @@
+2018-12-19  Zoltan Bojthe
+
+	Fixed memory leak in Ipv4NetworkConfigurator.
+
 2018-11-28  Levente Mészáros
 
 	Fixed checking optimized routing table against original.

@@ -1,3 +1,31 @@
+2018-11-14  Zoltan Bojthe
+
+	lifecycle: pingapp: using doneCallback
+
+2018-11-12  Zoltan Bojthe
+
+	Call socket->destroy() when the operation root module is not the containing node module.
+
+2018-11-09  Zoltan Bojthe
+
+	Switched to socket.destroy() in handleCrashOperation().
+
+2018-11-07  Zoltan Bojthe
+
+	Added @lifecycleSupport property.
+
+2018-11-05  Zoltan Bojthe
+
+	Close/abort socket at module crash operation.
+
+2018-10-29  Zoltan Bojthe
+
+	Moved self message processing to a new handleSelfMessage() from handleMessageWhenUp().
+
+2018-10-25  Zoltan Bojthe
+
+	Close socket at stop/crash lifecycle operations.
+
 2018-10-04  Zoltan Bojthe
 
 	Changed PingApp base class to ApplicationBase.

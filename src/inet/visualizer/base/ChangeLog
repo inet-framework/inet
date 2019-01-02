@@ -1,3 +1,7 @@
+2018-12-10  Zoltan Bojthe
+
+	Fixed feature related dependency.
+
 2018-10-19  Levente Mészáros
 
 	Added antennaLobeNormalize and antennaLobeRelativeLabels parameters.

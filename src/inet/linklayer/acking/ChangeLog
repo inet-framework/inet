@@ -1,3 +1,7 @@
+2018-12-13  Zoltan Bojthe
+
+	Fixed AckingMac, the external queue is required.
+
 2018-10-08  Zoltan Bojthe
 
 	Moved registerInterface() call to MacProtocolBase::initialize().

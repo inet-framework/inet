@@ -1,3 +1,12 @@
+2018-12-21  Levente Mészáros
+
+	Changed default bandwidth parameters.
+	Changed transmitters to use the data mode bandwidth parameter in the signal analogue domain representation.
+
+2018-12-17  Levente Mészáros
+
+	Fixed mode lookup bandwidth parameter, the lookup incorrectly used the spacing parameter.
+
 2018-09-26  Levente Mészáros
 
 	Added sensible default values for transmitter/receiver submodule types in radio modules.

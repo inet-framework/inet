@@ -1,3 +1,20 @@
+2018-12-17  Zoltan Bojthe
+
+	Renamed several modules, classes around VLAN support.
+	Split Ieee8021qTag.msg into VlanTag.msg and Ieee8021qHeader.msg.
+
+	vlan submodule -> qEncap
+	Vlan -> VlanTunnel
+
+	Ieee8021QTagBase -> VlanTagBase
+	Ieee8021QInd -> VlanInd
+	Ieee8021QReq -> VlanReq
+	.vid -> .vlanId
+
+	Ieee8021QTag -> Ieee8021qHeader
+	IIeee8021QVlan -> IIeee8021qEncap
+	Ieee8021Q* -> Ieee8021q*
+
 2018-10-10  Levente Mészáros
 
 	Added Ieee8021QTag and Ieee8021QVlan module.

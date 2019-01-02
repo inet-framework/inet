@@ -1,3 +1,15 @@
+2018-11-26  Zoltan Bojthe
+
+	Removed QueueBase base class which was used to incorrectly simulate a processing delay.
+
+2018-11-12  Zoltan Bojthe
+
+	Added lifecycle operation support.
+
+2018-11-09  Zoltan Bojthe
+
+	Added handlers for processing destroy command
+
 2018-09-27  Levente Mészáros
 
 	Renamed INITSTAGE_LINK_LAYER to INITSTAGE_NETWORK_INTERFACE_CONFIGURATION.

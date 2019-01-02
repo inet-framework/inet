@@ -1,3 +1,7 @@
+2018-10-25  Zoltan Bojthe
+
+	Fixed NodeStatus module detection.
+
 2018-10-18  Levente Mészáros
 
 	Fixed CRC deserialization for Icmpv6.

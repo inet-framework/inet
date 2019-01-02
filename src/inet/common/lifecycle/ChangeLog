@@ -1,6 +1,34 @@
+2018-11-28  Zoltan Bojthe
+
+	Added operationTimeout and extraStopTime optional parameters.
+
+2018-11-26  Zoltan Bojthe
+
+	Redesigned support for pending operations with timeout limit.
+	Extended OperationalBase with delayed operation handling.
+
+2018-11-07  Zoltan Bojthe
+
+	LifecycleOperation checks the module properties @networkNode or @lifecycleSupport before doing operation.
+
+2018-11-05  Zoltan Bojthe
+
+	Added 'LifecycleOperation *operation' argument to operation handlers.
+	Removed the 'stage' argument from handleOperationStage(), stage value available as 'operation->getCurrentStage()'.
+
+2018-10-29  Zoltan Bojthe
+
+	Redesigned invoke mechanism for OperationalBase.
+
 2018-10-25  Zoltan Bojthe
 
+	Added suspend, resume operations; fixed state when IDoneCallback is used.
+	Added more statuses (UP, DOWN, GOING_UP, GOING_DOWN) to OperationalBase.
 	Fixed NodeStatus check in OperationalBase when findContiningNode() returns nullptr.
+
+2018-10-22  Zoltan Bojthe
+
+	Renamed node operations to module operations, extended with suspend/resume, usable with all modules.
 
 2018-10-22  Levente Mészáros
 

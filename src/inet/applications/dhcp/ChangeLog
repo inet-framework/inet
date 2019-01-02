@@ -1,3 +1,27 @@
+2018-11-15  Zoltan Bojthe
+
+	Set callback and gate for udp socket in initialize.
+
+2018-11-13  Zoltan Bojthe
+
+	Added waiting for udp socketClosed indication in stopOperation.
+
+2018-11-12  Zoltan Bojthe
+
+	Call socket->destroy() during crash when the operation root module is not the containing node module.
+
+2018-11-09  Zoltan Bojthe
+
+	Switched to socket.destroy() in handleCrashOperation().
+
+2018-11-07  Zoltan Bojthe
+
+	Added @lifecycleSupport property.
+
+2018-10-26  Zoltan Bojthe
+
+	Added missing socket close calls for stop/crash handling.
+
 2018-10-04  Zoltan Bojthe
 
 	Changed DhcpServer and DhcpClient base classes to ApplicationBase.

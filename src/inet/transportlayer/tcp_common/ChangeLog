@@ -1,3 +1,7 @@
+2018-12-10  Zoltan Bojthe
+
+	Changed tcp CRC calculation function to static, and get crcMode from TCP header.
+
 2018-11-28  Levente Mészáros
 
 	Fixed protocol detection by port number in TCP/UDP.

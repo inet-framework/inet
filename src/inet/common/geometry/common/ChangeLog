@@ -1,3 +1,7 @@
+2018-12-19  Zoltan Bojthe
+
+	Fixed memory leak in CanvasProjection.
+
 2018-10-15  Levente Mészáros
 
 	Renamed toAxisAngle to getRotationAxisAndAngle, and added separate getRotationAxis and getRotationAngle too.

@@ -1,3 +1,15 @@
+2018-11-27  Zoltan Bojthe
+
+	Fixed close, it shouldn't throw.
+
+2018-11-09  Zoltan Bojthe
+
+	Added handlers for processing destroy command
+
+2018-11-16  Zoltan Bojthe
+
+	The MSL value is NED parameter instead of C++ macro.
+
 2018-11-28  Zoltan Bojthe
 
 	Fixed compatibility for cObject::info() and cObject::detailedInfo() functions removed in omnetpp 6.0.

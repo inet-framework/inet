@@ -1,3 +1,13 @@
+2018-12-19  Zoltan Bojthe
+
+	Moved omnetpp::cEventlogListener related code from RoutingTableRecorder to a separate branch.
+
+2018-12-10  Zoltan Bojthe
+
+	Added TCP support to Ipv4NatTable.
+	Marked feature dependent code fragments
+	Fixed CRC recalculation.
+
 2018-11-30  Levente Mészáros
 
 	Fixed wrong IP option codes for STREAM_ID and RECORD_ROUTE, see #376 reported by screw.
@@ -10,6 +20,27 @@
 2018-11-27  Mani Amoozadeh
 
 	Added several important variables to WATCHes.
+	Added hostData and routerData to WATCHes in Igmpv2 and Igmpv3.
+
+2018-11-26  Zoltan Bojthe
+
+	Removed QueueBase base class which was used to incorrectly simulate a processing delay.
+
+2018-11-14  Zoltan Bojthe
+
+	Send up socket closed indication, set kind when sent data to a network socket.
+
+2018-11-12  Zoltan Bojthe
+
+	Added lifecycle operation support.
+
+2018-11-09  Zoltan Bojthe
+
+	Added handlers for processing destroy command.
+
+2018-11-06  Zoltan Bojthe
+
+	Drop sockets when Ipv4 stops or crashes.
 
 2018-10-25  Zoltan Bojthe
 

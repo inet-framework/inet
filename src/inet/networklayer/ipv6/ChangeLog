@@ -2,6 +2,18 @@
 
 	Fixed compatibility for cObject::info() and cObject::detailedInfo() functions removed in omnetpp 6.0.
 
+2018-11-26  Zoltan Bojthe
+
+	Removed QueueBase base class which was used to incorrectly simulate a processing delay.
+
+2018-11-14  Zoltan Bojthe
+
+	Send up socket closed indication, set kind when sent data to a network socket.
+
+2018-10-25  Zoltan Bojthe
+
+	Fixed NodeStatus module detection.
+
 2018-10-17  Zoltan Bojthe
 
 	Changed Ipv6, Icmpv6, Ipv6NeighbourDiscovery, Ipv6Tunneling to LifecycleUnsupported.

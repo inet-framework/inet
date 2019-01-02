@@ -1,3 +1,16 @@
+2018-12-17  Zoltan Bojthe
+
+	Fixed issue #371: Ieee80211MgmtStaSimplified.accessPointAddress parameter
+	only accepts hex string, but no symbolic name like module name
+
+2018-11-07  Zoltan Bojthe
+
+	Changed Ieee80211MgmtBase base class to OperationalBase.
+
+2018-10-25  Zoltan Bojthe
+
+	Fixed NodeStatus module detection.
+
 2018-11-14  Zoltan Bojthe
 
 	Renamed 'default_ssid' parameter to 'defaultSsid'.

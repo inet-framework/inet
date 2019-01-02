@@ -1,6 +1,33 @@
+2018-12-19  Zoltan Bojthe
+
+	Removed obsolete OMNeT++ 4.x related code fragments.
+
+2018-12-13  Zoltan Bojthe
+
+	Changed SocketMap::removeSocket() to return nullptr when socket not found in map.
+
+2018-12-11  Marcel Marek
+
+	Removed IS-IS protocol type from ethertype group.
+	Added CLNS and IS-IS signals.
+	Added ISIS Protocol definition.
+
+2018-12-04  Zoltan Bojthe
+
+	Added ISocket::isOpen() function.
+
+2018-11-14  Zoltan Bojthe
+
+	Added SocketMap::getMap(), SocketMap::getSocketById().
+	Added ISocket::close() and ISocket::destroy().
+
 2018-11-28  Zoltan Bojthe
 
 	Added OMNETPP5_CODE() macro for code only compiling with omnetpp 5.x.
+
+2018-10-26  Zoltan Bojthe
+
+	Added new lifecycle commands to ScenarioManager.
 
 2018-10-19  Levente Mészáros
 

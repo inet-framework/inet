@@ -1,3 +1,19 @@
+2018-12-07  Zoltan Bojthe
+
+	Renamed 'isOpened' member to 'isOpen_' in Ipv6Socket.
+
+2018-12-04  Zoltan Bojthe
+
+	Added isOpen() function to Ipv6Socket.
+
+2018-11-14  Zoltan Bojthe
+
+	Added socketClosed() callback.
+
+2018-11-09  Zoltan Bojthe
+
+	Added destroy() function to Ipv6Socket.
+
 2018-09-19  Zoltan Bojthe
 
 	Adapted to the new protocol specific data storage API of InterfaceEntry.

@@ -1,3 +1,30 @@
+2018-12-21  Levente Mészáros
+
+	Changed default bandwidth parameters.
+	Changed analogue model bandwidth checks to allow receiving signals with narrower bandwidth.
+
+	The problem is that Wifi has many different physical layers which often
+	use different bandwidths depending on the bitrate. So simply comparing
+	the listening and signal bandwidth is too restrictive. The listener is
+	conceptually using the widest signal bandwidth that it is capable of
+	receiving.
+
+2018-12-21  Levente Mészáros
+
+	Added ignorePartialInterference parameter to scalar analogue models.
+
+	This parameter allows ignoring interfering signals which have partially
+	overlapping frequency domain analog representation. For example, a Wifi
+	signal using adjacent channels. This parameter is disabled by default.
+
+2018-12-17  Levente Mészáros
+
+	Added end time to SignalTimeInd.
+
+2018-11-20  Timofei Istomin
+
+	Add signal arrival time to the incoming packets
+
 2018-09-27  Levente Mészáros
 
 	Fixed and simplified dimensional signal power creation.

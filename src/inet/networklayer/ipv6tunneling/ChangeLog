@@ -1,3 +1,7 @@
+2018-10-25  Zoltan Bojthe
+
+	Fixed NodeStatus module detection.
+
 2018-10-17  Zoltan Bojthe
 
 	Added LifecycleUnsupported base class to Ipv6, Icmpv6, Ipv6NeighbourDiscovery, Ipv6Tunneling.

@@ -1,3 +1,7 @@
+2018-12-17  Zoltan Bojthe
+
+	Moved IVlanInterface to linklayer/contract folder.
+
 2018-10-24  Levente Mészáros
 
 	Moved address parameter from MAC module to network interface.

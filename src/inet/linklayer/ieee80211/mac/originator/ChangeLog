@@ -1,3 +1,11 @@
+2018-12-20  Levente Mészáros
+
+	Removed explicit modulo 4096 operations, because it's done automatically by the underlying SequenceNumber struct.
+
+2018-12-19  Levente Mészáros
+
+	Replaced variable and argument types for sequence number from int to SequenceNumber.
+
 2018-12-05  Levente Mészáros
 
 	Added missing % 4096 to sequence number computation.
