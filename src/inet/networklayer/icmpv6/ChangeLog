@@ -4,7 +4,7 @@
 
 2018-10-17  Zoltan Bojthe
 
-	Changed base class of Ipv6, Icmpv6, Ipv6NeighbourDiscovery, Ipv6Tunneling to LifecycleUnsupported. 
+	Changed base class of Ipv6, Icmpv6, Ipv6NeighbourDiscovery, Ipv6Tunneling to LifecycleUnsupported.
 
 2018-09-27  Levente Mészáros
 
@@ -265,11 +265,11 @@
 
 2015-03-10  Zoltan Bojthe
 
-    Fixed ICMPv6 serializer.
+	Fixed ICMPv6 serializer.
 
 2015-02-10  Zoltan Bojthe
 
-    Fixed IPv6NeighborDiscovery packet length.
+	Fixed IPv6NeighborDiscovery packet length.
 
 2015-01-21  Zoltan Bojthe
 

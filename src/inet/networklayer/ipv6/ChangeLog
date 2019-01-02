@@ -4,7 +4,7 @@
 
 2018-10-17  Zoltan Bojthe
 
-	Changed Ipv6, Icmpv6, Ipv6NeighbourDiscovery, Ipv6Tunneling to LifecycleUnsupported. 
+	Changed Ipv6, Icmpv6, Ipv6NeighbourDiscovery, Ipv6Tunneling to LifecycleUnsupported.
 
 2018-09-28  Levente Mészáros
 

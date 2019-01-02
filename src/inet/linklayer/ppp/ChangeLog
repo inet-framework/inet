@@ -135,7 +135,6 @@
 	Added missing PacketProtocolTag.
 	Changed append/prepend to the more intentional push variants.
 
-
 2017-02-21  Levente Mészáros
 
 	Moved headerserializers one level up.

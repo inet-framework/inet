@@ -48,7 +48,7 @@
 
 2018-08-19  Mani Amoozadeh
 
-	Isolated networks can be configured separately by Ipv4NetworkConfigurator. 
+	Isolated networks can be configured separately by Ipv4NetworkConfigurator.
 
 ====== inet-4.x ======
 
