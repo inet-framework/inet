@@ -84,7 +84,7 @@ void ReceiveBuffer::removeFrame(SequenceNumber sequenceNumber)
         buffer.erase(sequenceNumber);
     }
     else
-        throw cRuntimeError("Unknown sequence number = %d", sequenceNumber);
+        throw cRuntimeError("Unknown sequence number: %d", sequenceNumber.getRaw());
 }
 
 ReceiveBuffer::~ReceiveBuffer()
