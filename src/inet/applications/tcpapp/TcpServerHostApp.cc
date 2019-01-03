@@ -134,22 +134,25 @@ void TcpServerHostApp::socketClosed(TcpSocket *socket)
 void TcpServerHostApp::removeThread(TcpServerThreadBase *thread)
 {
     // remove socket
-    socketMap.removeSocket(thread->getSocket());
-    threadSet.erase(thread);
+    auto socket = thread->getSocket();
+    socketMap.removeSocket(socket);
+    delete socket;
 
     // remove thread object
+    threadSet.erase(thread);
     delete thread;
 }
 
 void TcpServerHostApp::threadClosed(TcpServerThreadBase *thread)
 {
     // remove socket
-    socketMap.removeSocket(thread->getSocket());
-    threadSet.erase(thread);
-
-    socketClosed(thread->getSocket());
+    auto socket = thread->getSocket();
+    socketMap.removeSocket(socket);
+    socketClosed(socket);
+    delete socket;
 
     // remove thread object
+    threadSet.erase(thread);
     delete thread;
 }
 
