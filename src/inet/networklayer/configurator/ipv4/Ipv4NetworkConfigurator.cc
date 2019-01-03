@@ -1672,9 +1672,7 @@ void Ipv4NetworkConfigurator::optimizeRoutes(std::vector<Ipv4Route *>& originalR
     // routes are classified based on their action (gateway, interface, type, source, metric, etc.) and a color is assigned to them.
     RoutingTableInfo routingTableInfo;
     std::vector<Ipv4Route *> colorToRoute;    // a mapping from color to route action (interface, gateway, metric, etc.)
-#ifndef NDEBUG
     RoutingTableInfo originalRoutingTableInfo;    // a copy of the original routes in the optimizer's format
-#endif // ifndef NDEBUG
 
     // build colorToRouteColor, originalRoutingTableInfo and initial routeInfos in routingTableInfo
     for (auto & originalRoute : originalRoutes) {
@@ -1686,9 +1684,7 @@ void Ipv4NetworkConfigurator::optimizeRoutes(std::vector<Ipv4Route *>& originalR
 
         // create original route and determine its color
         RouteInfo *originalRouteInfo = new RouteInfo(color, originalRoute->getDestination().getInt(), originalRoute->getNetmask().getInt());
-#ifndef NDEBUG
         originalRoutingTableInfo.addRouteInfo(originalRouteInfo);
-#endif // ifndef NDEBUG
 
         // create a copy of the original route that can be destructively optimized later
         RouteInfo *optimizedRouteInfo = new RouteInfo(*originalRouteInfo);
@@ -1708,11 +1704,11 @@ void Ipv4NetworkConfigurator::optimizeRoutes(std::vector<Ipv4Route *>& originalR
 
 #ifndef NDEBUG
     checkOriginalRoutes(routingTableInfo, originalRoutingTableInfo);
+#endif // ifndef NDEBUG
 
     for (auto rti: originalRoutingTableInfo.routeInfos)
         delete rti;
     originalRoutingTableInfo.routeInfos.clear();
-#endif // ifndef NDEBUG
 
     // STEP 3.
     // convert the optimized routes to new optimized Ipv4 routes based on the saved colors
