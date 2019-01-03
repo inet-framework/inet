@@ -47,9 +47,9 @@ The main changes of the new INET 4.1 minor stable release are:
    the host OS, and also for using host OS network interfaces from the simulation.
    The new external interfaces no longer rely on PCAP, they rather use host OS
    raw sockets and TUN/TAP interfaces. Besides ethernet, the new version also
-   provides IEEE 802.11 network interface emulation. And finally, a new external
-   UDP protocol module is also added, which allows INET applications to be tested
-   unmodified on real networks using the UDP protocol of the host OS.
+   provides IEEE 802.11 network interface emulation. A new external UDP protocol
+   module is also added, which allows INET applications to be tested unmodified
+   on real networks using the UDP protocol of the host OS.
 
 7. Modules that provide emulation support have been extended with a new host OS
    network namespace parameter. This feature allows, for example, running multiple
@@ -88,11 +88,11 @@ The main changes of the new INET 4.1 minor stable release are:
     selected based on the opMode and band parameters.
 
 13. Mani Amoozadeh contributed several new features and fixed quite a few bugs
-    in BGP and OSPF wired routing protocols. Among others, BGP has been extended
-    with split horizon, multi-hop EGBP, network interface mode parameters, packet
-    checksum calculation, packet serialization, and multiple additional parameters
-    to turn on/off individual protocol features. Similarly, OSPF has also been
-    extended with, among others, BDR promotion, network interface mode parameters,
+    in BGP and OSPF wired routing protocols. Among others, BGP has been updated
+    related to split horizon, multi-hop EGBP, network interface mode parameters,
+    packet checksum calculation, packet serialization, and multiple additional
+    parameters to turn on/off individual protocol features. Similarly, OSPF has
+    also been updated related to BDR promotion, network interface mode parameters,
     packet checksum calculation, and packet serialization. He also validated the
     INET models by comparing simulation runs with the CISCO packet tracer tool
     for many important use cases.
@@ -109,7 +109,7 @@ The main changes of the new INET 4.1 minor stable release are:
 
     Extended IPv4 network configuration with support for configuring isolated networks.
 
-    Fixed IEEE 802.11 block acknowledgement and QoS recovery procedures.
+    Fixed several smaller issues related to 802.11 block acknowledgement and QoS recovery procedures.
 
     Numerous other bug fixes and small improvements.
 
