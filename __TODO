@@ -1,9 +1,23 @@
- - add parameter to mobility base which determines what should happen if the energy storage is depleted. For example, a drone should just stop, but a satellite should continue its motion.
- - help ANSA porting to INET 4.0
- - LTE PHY support and porting to INET 4.0
+most important topics
+ - existing protocols
+   - 802.11 statistics, logging, display strings, code cleanup, memory management
+   - complete IPv6
+ - cross-cutting smaller changes
+   - review NED documentation, update obsolete parts
+   - add meaningful display strings to at least the top level submodules of network nodes (with optional formatting parameters)
+   - finish renaming signals, labels, statistics to have a consistent naming scheme
+   - review all examples to check if they still work as expected
+ - new features
+   - add geographic mobility modules (separate Euclidean and geographic mobilities)
+   - add new queue module API and use it in all protocols which have queues
+   - LTE PHY full support and porting to INET 4.0, source/sink separation, signal classes, etc. (e.g. probe/microwave oven)
+ - port existing 3rd party models
+   - help ANSA porting to INET 4.0
 
- - merge BGP changes by Mani
- - merge OSPF changes by Mani
+=====================
+
+ - add parameter to mobility base which determines what should happen if the energy storage is depleted. For example, a drone should just stop, but a satellite should continue its motion.
+
  - route source type should be a protocol, CISCO admin dist should be calculated from the source type
  - all protocols must set their protocol as source to routes added
  - long term: extract OspfRouteData from OspfRoutingTableEntry and add as protocolData into Ipv4Route
@@ -15,7 +29,6 @@
  - change all protocols (where applicable) to accept any kind of cPacket (not only Packet) for interoperability with 3rd party projects 
  - add test and check for std::dynamic_pointer_cast<Subclass1>(chunk->peek<Subclass1>()) != nullptr always holds when peek uses a variant type deserializer
  - remove obsolete HostAutoConfigurator, Ipv4FlatNetworkConfigurator modules?
- - revise and rename statistics to have a consistent naming scheme
  - fix mobility non-determinism caused by interpolation from last position during animation
  - validate Rotation, Quaternion, EulerAngles against each other and documentation
  - validate positioning and orientation IMobility, PhysicalEnvironment, ObstacleLoss
@@ -27,15 +40,13 @@
  - add L2 sockets: EthernetSocket bound to EtherType, LlcSocket bound to SSAP, DSAP, add Ieee80211Socket bound unconditionally
  - solve dynamic node creation and address resolution in applications
  - don't subclass APSK medium and such with other specific radios, think of APSK radio as yet another specific conceptual radio
- - generalize shutdown, startup, crash operations to applications, protocols, interfaces, etc. (NodeShutdownOperation -> ShutdownOperation, NodeStatus -> OperationalStatus?)
- - add antenna directional selectivity visualizer
- - separate Euclidean and geographic mobilities
+ + generalize shutdown, startup, crash operations to applications, protocols, interfaces, etc. (NodeShutdownOperation -> ShutdownOperation, NodeStatus -> OperationalStatus?)
+ + add antenna directional selectivity visualizer
  - move extra functions that doesn't really belong to L3AddressResolver (e.g. findInterfaceTableOf, findIPv4RoutingTableOf)
  - revise protocol base class hierarchy (e.g. LayeredProtocolBase vs IPv4 base class, etc.)
  - revise protocol header class hierarchy (e.g. avoid unnecessary interfaces)
  - revise NED network node module hierarchy (e.g. MPLS nodes)
  - use m instead of double in Coord?
- - add meaningful display strings to at least the top level submodules of network nodes
  - replace functionality of GenericAppMsg with chunk tags, or better yet get rid of it altogether!
  - use shared pointers for transmissions/receptions, etc. because the gui copies packets in the packet log and inspects them later
  - factor out physical layer analog domain representation into a separate parameter of transmissions
