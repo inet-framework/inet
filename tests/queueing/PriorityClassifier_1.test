@@ -1,0 +1,99 @@
+%description:
+
+TODO
+
+%file: test.ned
+
+import inet.common.queueing.PacketCollector;
+import inet.common.queueing.PacketQueue;
+import inet.common.queueing.PriorityClassifier;
+import inet.common.queueing.PacketProducer;
+
+network TestPriorityClassifier
+{
+    submodules:
+        producer: PacketProducer {
+            @display("p=100,100");
+        }
+        classifier: PriorityClassifier {
+            @display("p=200,100");
+        }
+        queue1: PacketQueue {
+            @display("p=300,100");
+        }
+        queue2: PacketQueue {
+            @display("p=300,200");
+        }
+        collector1: PacketCollector {
+            @display("p=400,100");
+        }
+        collector2: PacketCollector {
+            @display("p=400,200");
+        }
+    connections allowunconnected:
+        producer.out --> classifier.in;
+        classifier.out++ --> queue1.in;
+        classifier.out++ --> queue2.in;
+        queue1.out --> collector1.in;
+        queue2.out --> collector2.in;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = TestPriorityClassifier
+sim-time-limit = 10s
+cmdenv-event-banners = false
+*.queue*.frameCapacity = 1
+*.producer.packetLength = 1B
+*.producer.productionInterval = uniform(0s, 1s)
+*.collector*.collectionInterval = uniform(0s, 2s)
+
+%contains: stdout
+Producing packet producer-0.
+Classifying packet producer-0.
+Pushing packet producer-0 into the queue.
+Popping packet producer-0 from the queue.
+Collecting packet producer-0.
+
+Running simulation...
+Producing packet producer-1.
+Classifying packet producer-1.
+Pushing packet producer-1 into the queue.
+Popping packet producer-1 from the queue.
+Collecting packet producer-1.
+Producing packet producer-2.
+Classifying packet producer-2.
+Pushing packet producer-2 into the queue.
+Producing packet producer-3.
+Classifying packet producer-3.
+Pushing packet producer-3 into the queue.
+Popping packet producer-3 from the queue.
+Collecting packet producer-3.
+Producing packet producer-4.
+Classifying packet producer-4.
+Pushing packet producer-4 into the queue.
+Popping packet producer-2 from the queue.
+Collecting packet producer-2.
+Producing packet producer-5.
+Classifying packet producer-5.
+Pushing packet producer-5 into the queue.
+Popping packet producer-4 from the queue.
+Collecting packet producer-4.
+Popping packet producer-5 from the queue.
+Collecting packet producer-5.
+Producing packet producer-6.
+Classifying packet producer-6.
+Pushing packet producer-6 into the queue.
+Producing packet producer-7.
+Classifying packet producer-7.
+Pushing packet producer-7 into the queue.
+Popping packet producer-6 from the queue.
+Collecting packet producer-6.
+Producing packet producer-8.
+Classifying packet producer-8.
+Pushing packet producer-8 into the queue.
+Popping packet producer-7 from the queue.
+Collecting packet producer-7.
+Popping packet producer-8 from the queue.
+Collecting packet producer-8.

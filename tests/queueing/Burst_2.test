@@ -1,0 +1,78 @@
+%description:
+
+TODO
+
+%file: test.ned
+
+import inet.common.queueing.PacketCollector;
+import inet.common.queueing.MarkovClassifier;
+import inet.common.queueing.PacketProvider;
+
+network TestBurst
+{
+    submodules:
+        provider: PacketProvider {
+            @display("p=100,100");
+        }
+        classifier: MarkovClassifier {
+            @display("p=200,100");
+        }
+        collector1: PacketCollector {
+            @display("p=300,100");
+        }
+        collector2: PacketCollector {
+            @display("p=300,200");
+        }
+    connections allowunconnected:
+        provider.out --> classifier.in;
+        classifier.out++ --> collector1.in;
+        classifier.out++ --> collector2.in;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = TestBurst
+sim-time-limit = 100s
+cmdenv-event-banners = false
+*.provider.packetLength = 1B
+*.collector1.collectionInterval = uniform(0s, 20s)
+*.collector2.collectionInterval = uniform(0s, 2s)
+*.classifier.transitionProbabilities = "0 1 1 0"
+*.classifier.waitIntervals = "40 4"
+
+%contains: stdout
+Providing packet provider-0.
+Collecting packet provider-0.
+
+Running simulation...
+Providing packet provider-1.
+Collecting packet provider-1.
+Providing packet provider-2.
+Collecting packet provider-2.
+Providing packet provider-3.
+Collecting packet provider-3.
+Providing packet provider-4.
+Collecting packet provider-4.
+Providing packet provider-5.
+Collecting packet provider-5.
+Providing packet provider-6.
+Collecting packet provider-6.
+Providing packet provider-7.
+Collecting packet provider-7.
+Providing packet provider-8.
+Collecting packet provider-8.
+Providing packet provider-9.
+Collecting packet provider-9.
+Providing packet provider-10.
+Collecting packet provider-10.
+Providing packet provider-11.
+Collecting packet provider-11.
+Providing packet provider-12.
+Collecting packet provider-12.
+Providing packet provider-13.
+Collecting packet provider-13.
+Providing packet provider-14.
+Collecting packet provider-14.
+Providing packet provider-15.
+Collecting packet provider-15.

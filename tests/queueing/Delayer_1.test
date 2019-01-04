@@ -1,0 +1,69 @@
+%description:
+
+TODO
+
+%file: test.ned
+
+import inet.common.queueing.PacketConsumer;
+import inet.common.queueing.PacketDelayer;
+import inet.common.queueing.PacketProducer;
+
+network TestDelayer
+{
+    submodules:
+        producer: PacketProducer {
+            @display("p=100,100");
+        }
+        delayer: PacketDelayer {
+            @display("p=200,100");
+        }
+        consumer: PacketConsumer {
+            @display("p=300,100");
+        }
+    connections allowunconnected:
+        producer.out --> delayer.in;
+        delayer.out --> consumer.in;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = TestDelayer
+sim-time-limit = 10s
+cmdenv-event-banners = false
+*.producer.packetLength = 1B
+*.producer.productionInterval = 1s
+*.delayer.delay = uniform(0s, 2s)
+
+%contains: stdout
+Producing packet producer-0.
+Delaying packet producer-0.
+
+Running simulation...
+Producing packet producer-1.
+Delaying packet producer-1.
+Consuming packet producer-0.
+Producing packet producer-2.
+Delaying packet producer-2.
+Consuming packet producer-1.
+Producing packet producer-3.
+Delaying packet producer-3.
+Consuming packet producer-2.
+Producing packet producer-4.
+Delaying packet producer-4.
+Consuming packet producer-3.
+Producing packet producer-5.
+Delaying packet producer-5.
+Consuming packet producer-4.
+Producing packet producer-6.
+Delaying packet producer-6.
+Consuming packet producer-5.
+Producing packet producer-7.
+Delaying packet producer-7.
+Consuming packet producer-6.
+Producing packet producer-8.
+Delaying packet producer-8.
+Consuming packet producer-7.
+Consuming packet producer-8.
+Producing packet producer-9.
+Delaying packet producer-9.
