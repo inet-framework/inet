@@ -74,7 +74,6 @@ module BGPRouterSimple
         }
         ipv4: Ipv4NetworkLayer {
             parameters:
-                proxyARP = true;
                 @display("p=325,400;i=block/layer;q=queue");
         }
         nl: MessageDispatcher {

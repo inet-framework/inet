@@ -78,7 +78,6 @@ module BGPRouterEx
         }
         ipv4: Ipv4NetworkLayer {
             parameters:
-                proxyARP = true;
                 routingTable.routerId = "auto";
                 @display("p=250,400;i=block/layer;q=queue");
         }
