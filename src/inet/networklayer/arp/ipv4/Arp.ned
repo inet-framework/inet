@@ -50,7 +50,7 @@ simple Arp like IArp
         double retryTimeout @unit(s) = default(1s);   // number seconds ARP waits between retries to resolve an IPv4 address
         int retryCount = default(3);                  // number of times ARP will attempt to resolve an IPv4 address
         double cacheTimeout @unit(s) = default(120s); // number seconds unused entries in the cache will time out
-        bool proxyARP = default(true);                // enable proxy ARP on this node
+        string proxyArpInterfaces = default("*");     // list of interfaces that proxy ARP is enabled (all interfaces by default)
         @display("i=block/layer");
         @signal[arpRequestSent](type=inet::Packet);
         @signal[arpReplySent](type=inet::Packet);

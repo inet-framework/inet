@@ -69,11 +69,13 @@ class INET_API Arp : public OperationalBase, public IArp
     simtime_t retryTimeout;
     int retryCount = 0;
     simtime_t cacheTimeout;
-    bool proxyARP = false;
+    std::string proxyArpInterfaces = "";
     long numResolutions = 0;
     long numFailedResolutions = 0;
     long numRequestsSent = 0;
     long numRepliesSent = 0;
+
+    cPatternMatcher proxyArpInterfacesMatcher;
 
     static simsignal_t arpRequestSentSignal;
     static simsignal_t arpReplySentSignal;
