@@ -61,7 +61,7 @@ void Arp::initialize(int stage)
         retryTimeout = par("retryTimeout");
         retryCount = par("retryCount");
         cacheTimeout = par("cacheTimeout");
-        respondToProxyArp = par("respondToProxyARP");
+        proxyARP = par("proxyARP");
 
         // init statistics
         numRequestsSent = numRepliesSent = 0;
@@ -219,9 +219,9 @@ bool Arp::addressRecognized(Ipv4Address destAddr, InterfaceEntry *ie)
     if (rt->isLocalAddress(destAddr)) {
         return true;
     }
-    else if (respondToProxyArp) {
-        // respond to Proxy ARP request: if we can route this packet (and the
-        // output port is different from this one), say yes
+    else if (proxyARP) {
+        // if we can route this packet, and the output port is
+        // different from this one, then say yes
         InterfaceEntry *rtie = rt->getInterfaceForDestAddr(destAddr);
         return rtie != nullptr && rtie != ie;
     }

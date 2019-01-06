@@ -47,10 +47,10 @@ simple Arp like IArp
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module
         string routingTableModule;
-        double retryTimeout @unit(s) = default(1s); // number seconds ARP waits between retries to resolve an IPv4 address
-        int retryCount = default(3);   // number of times ARP will attempt to resolve an IPv4 address
+        double retryTimeout @unit(s) = default(1s);   // number seconds ARP waits between retries to resolve an IPv4 address
+        int retryCount = default(3);                  // number of times ARP will attempt to resolve an IPv4 address
         double cacheTimeout @unit(s) = default(120s); // number seconds unused entries in the cache will time out
-        bool respondToProxyARP = default(true);        // reply to proxy ARP requests (i.e. for IP addresses that this node can route)
+        bool proxyARP = default(true);                // enable proxy ARP on this node
         @display("i=block/layer");
         @signal[arpRequestSent](type=inet::Packet);
         @signal[arpReplySent](type=inet::Packet);

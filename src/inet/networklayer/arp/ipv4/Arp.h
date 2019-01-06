@@ -69,7 +69,7 @@ class INET_API Arp : public OperationalBase, public IArp
     simtime_t retryTimeout;
     int retryCount = 0;
     simtime_t cacheTimeout;
-    bool respondToProxyArp = false;
+    bool proxyARP = false;
     long numResolutions = 0;
     long numFailedResolutions = 0;
     long numRequestsSent = 0;

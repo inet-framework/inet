@@ -92,7 +92,6 @@ void Ipv4::initialize(int stage)
         fragmentTimeoutTime = par("fragmentTimeout");
         limitedBroadcast = par("limitedBroadcast");
         directBroadcastInterfaces = par("directBroadcastInterfaces").stdstringValue();
-        useProxyARP = par("useProxyARP");
 
         directBroadcastInterfaceMatcher.setPattern(directBroadcastInterfaces.c_str(), false, true, false);
 
@@ -835,17 +834,7 @@ void Ipv4::fragmentAndSend(Packet *packet)
     const InterfaceEntry *destIE = ift->getInterfaceById(packet->getTag<InterfaceReq>()->getInterfaceId());
     Ipv4Address nextHopAddr = getNextHop(packet);
     if (nextHopAddr.isUnspecified()) {
-        Ipv4InterfaceData *ipv4Data = destIE->getProtocolData<Ipv4InterfaceData>();
-        const auto& ipv4Header = packet->peekAtFront<Ipv4Header>();
-        Ipv4Address destAddress = ipv4Header->getDestAddress();
-        if (Ipv4Address::maskedAddrAreEqual(destAddress, ipv4Data->getIPAddress(), ipv4Data->getNetmask()))
-            nextHopAddr = destAddress;
-        else if (useProxyARP) {
-            nextHopAddr = destAddress;
-            EV_WARN << "no next-hop address, using destination address " << nextHopAddr << " (proxy ARP)\n";
-        }
-        else
-            throw cRuntimeError(packet, "Cannot send datagram on broadcast interface: no next-hop address and Proxy ARP is disabled");
+        nextHopAddr = packet->peekAtFront<Ipv4Header>()->getDestAddress();
         packet->addTagIfAbsent<NextHopAddressReq>()->setNextHopAddress(nextHopAddr);
     }
 
