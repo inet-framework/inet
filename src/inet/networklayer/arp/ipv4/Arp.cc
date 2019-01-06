@@ -61,7 +61,9 @@ void Arp::initialize(int stage)
         retryTimeout = par("retryTimeout");
         retryCount = par("retryCount");
         cacheTimeout = par("cacheTimeout");
-        proxyARP = par("proxyARP");
+        proxyArpInterfaces = par("proxyArpInterfaces").stdstringValue();
+
+        proxyArpInterfacesMatcher.setPattern(proxyArpInterfaces.c_str(), false, true, false);
 
         // init statistics
         numRequestsSent = numRepliesSent = 0;
@@ -216,17 +218,19 @@ void Arp::requestTimedOut(cMessage *selfmsg)
 
 bool Arp::addressRecognized(Ipv4Address destAddr, InterfaceEntry *ie)
 {
-    if (rt->isLocalAddress(destAddr)) {
+    if (rt->isLocalAddress(destAddr))
         return true;
-    }
-    else if (proxyARP) {
-        // if we can route this packet, and the output port is
-        // different from this one, then say yes
-        InterfaceEntry *rtie = rt->getInterfaceForDestAddr(destAddr);
-        return rtie != nullptr && rtie != ie;
-    }
     else {
-        return false;
+        // if proxy ARP is enables in interface ie
+        if (proxyArpInterfacesMatcher.matches(ie->getInterfaceName()) ||
+                proxyArpInterfacesMatcher.matches(ie->getInterfaceFullPath().c_str())) {
+            // if we can route this packet, and the output port is
+            // different from this one, then say yes
+            InterfaceEntry *rtie = rt->getInterfaceForDestAddr(destAddr);
+            return rtie != nullptr && rtie != ie;
+        }
+        else
+            return false;
     }
 }
 
