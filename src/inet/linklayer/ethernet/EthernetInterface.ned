@@ -32,6 +32,7 @@ module EthernetInterface like IEthernetInterface
 {
     parameters:
         @class(InterfaceEntry);
+        @lifecycleSupport;
         string interfaceTableModule;
         string address = default("auto");   // MAC address as hex string (12 hex digits), or
                                             // "auto". "auto" values will be replaced by

@@ -286,12 +286,19 @@ void EtherMacBase::handleStartOperation(LifecycleOperation *operation)
 {
     initializeFlags();
     initializeQueueModule();
+    interfaceEntry->setState(InterfaceEntry::State::UP);
 }
 
 void EtherMacBase::handleStopOperation(LifecycleOperation *operation)
 {
-    if (curTxFrame != nullptr || !txQueue.isEmpty())
+    if (curTxFrame != nullptr || !txQueue.isEmpty()) {
+        interfaceEntry->setState(InterfaceEntry::State::GOING_DOWN);
         delayActiveOperationFinish(par("stopOperationTimeout"));
+    }
+    else {
+        interfaceEntry->setState(InterfaceEntry::State::DOWN);
+        startActiveOperationExtraTimeOrFinish(par("stopOperationExtraTime"));
+    }
 }
 
 void EtherMacBase::handleCrashOperation(LifecycleOperation *operation)
@@ -299,6 +306,7 @@ void EtherMacBase::handleCrashOperation(LifecycleOperation *operation)
 //    clearQueue();
     connected = false;
     processConnectDisconnect();
+    interfaceEntry->setState(InterfaceEntry::State::DOWN);
 }
 
 // TODO: this method should be renamed and called where processing is finished on the current frame (i.e. curTxFrame becomes nullptr)
@@ -309,6 +317,7 @@ void EtherMacBase::processAtHandleMessageFinished()
             EV << "Ethernet Queue is empty, MAC stopped\n";
             connected = false;
             processConnectDisconnect();
+            interfaceEntry->setState(InterfaceEntry::State::DOWN);
             startActiveOperationExtraTimeOrFinish(par("stopOperationExtraTime"));
         }
     }
