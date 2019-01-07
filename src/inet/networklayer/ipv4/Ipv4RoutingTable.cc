@@ -741,8 +741,7 @@ void Ipv4RoutingTable::updateNetmaskRoutes()
         if (interfaceNameMatcher.matches(ie->getFullName()))
         {
             auto ipv4Data = ie->findProtocolData<Ipv4InterfaceData>();
-            if (ipv4Data && ipv4Data->getNetmask() != Ipv4Address::ALLONES_ADDRESS)
-            {
+            if (ipv4Data && ipv4Data->getNetmask() != Ipv4Address::ALLONES_ADDRESS) {
                 Ipv4Route *route = createNewRoute();
                 route->setSourceType(IRoute::IFACENETMASK);
                 route->setSource(ie);
