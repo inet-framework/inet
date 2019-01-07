@@ -220,8 +220,10 @@ void Ppp::handleMessageWhenUp(cMessage *message)
 {
     MacBase::handleMessageWhenUp(message);
     if (operationalState == State::STOPPING_OPERATION) {
-        if (queueModule ? queueModule->isEmpty() : txQueue.isEmpty())
+        if (queueModule ? queueModule->isEmpty() : txQueue.isEmpty()) {
+            interfaceEntry->setState(InterfaceEntry::State::DOWN);
             startActiveOperationExtraTimeOrFinish(par("stopOperationExtraTime"));
+        }
     }
 }
 
@@ -413,8 +415,14 @@ void Ppp::clearQueue()
 void Ppp::handleStopOperation(LifecycleOperation *operation)
 {
     bool queueEmpty = queueModule ? queueModule->isEmpty() : txQueue.isEmpty();
-    if (!queueEmpty)
+    if (!queueEmpty) {
+        interfaceEntry->setState(InterfaceEntry::State::GOING_DOWN);
         delayActiveOperationFinish(par("stopOperationTimeout"));
+    }
+    else {
+        interfaceEntry->setState(InterfaceEntry::State::DOWN);
+        startActiveOperationExtraTimeOrFinish(par("stopOperationExtraTime"));
+    }
 }
 
 } // namespace inet
