@@ -189,11 +189,21 @@
 /examples/inet/routerperf/,          -f omnetpp.ini -c General -r 0,                100s,            9c6b-d207/tplx, PASS,
 
 /examples/inet/shutdownrestart/,     -f omnetpp.ini -c Ping -r 0,                   100s,            fd9c-a4f3/tplx, PASS,
+/examples/inet/shutdownrestart/,     -f omnetpp.ini -c Ping -r 1,                   100s,            6f9f-aa84/tplx, PASS,
+/examples/inet/shutdownrestart/,     -f omnetpp.ini -c Ping -r 2,                   100s,            fe07-a019/tplx, PASS,
 /examples/inet/shutdownrestart/,     -f omnetpp.ini -c UDP_Basic_Echo -r 0,         100s,            1d36-18a1/tplx, PASS,
+/examples/inet/shutdownrestart/,     -f omnetpp.ini -c UDP_Basic_Echo -r 1,         100s,            2b83-bdd7/tplx, PASS,
+/examples/inet/shutdownrestart/,     -f omnetpp.ini -c UDP_Basic_Echo -r 2,         100s,            280e-137e/tplx, PASS,
 /examples/inet/shutdownrestart/,     -f omnetpp.ini -c UDP_Burst_Sink -r 0,         100s,            1297-a899/tplx, PASS,
+/examples/inet/shutdownrestart/,     -f omnetpp.ini -c UDP_Burst_Sink -r 1,         100s,            26e1-3b20/tplx, PASS,
+/examples/inet/shutdownrestart/,     -f omnetpp.ini -c UDP_Burst_Sink -r 2,         100s,            e8c1-597b/tplx, PASS,
 /examples/inet/shutdownrestart/,     -f omnetpp.ini -c UDP_VideoStream -r 0,        100s,            b6b1-57a6/tplx, PASS,
+/examples/inet/shutdownrestart/,     -f omnetpp.ini -c UDP_VideoStream -r 1,        100s,            841e-f7a9/tplx, PASS,
+/examples/inet/shutdownrestart/,     -f omnetpp.ini -c UDP_VideoStream -r 2,        100s,            a42b-6de8/tplx, PASS,
 # /examples/inet/shutdownrestart/,     -f omnetpp.ini -c TCP_common -r 0,             100s,            0000-0000/tplx, ERROR,   # TCP_common extended
 /examples/inet/shutdownrestart/,     -f omnetpp.ini -c TCP -r 0,                    100s,            f71a-ecc1/tplx, PASS,
+/examples/inet/shutdownrestart/,     -f omnetpp.ini -c TCP -r 1,                    100s,            f814-42e9/tplx, PASS,
+/examples/inet/shutdownrestart/,     -f omnetpp.ini -c TCP -r 2,                    100s,            8906-3978/tplx, PASS,
 
 /examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMACFullDuplex_externalQueue -r 0, 5s,    eeb4-0630/tplx, PASS,
 /examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMACFullDuplex_externalQueue -r 1, 5s,    eeb4-0630/tplx, PASS,
