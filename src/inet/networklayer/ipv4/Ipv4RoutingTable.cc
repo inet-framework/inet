@@ -182,6 +182,14 @@ void Ipv4RoutingTable::receiveSignal(cComponent *source, simsignal_t signalID, c
     }
     else if (signalID == interfaceStateChangedSignal) {
         invalidateCache();
+        const auto *ieChangeDetails = check_and_cast<const InterfaceEntryChangeDetails *>(obj);
+        if (ieChangeDetails->getFieldId() == InterfaceEntry::F_STATE) {
+            const auto *entry = ieChangeDetails->getInterfaceEntry();
+            updateNetmaskRoutes();
+            if (entry->getState() != InterfaceEntry::State::UP)
+                deleteInterfaceRoutes(entry);
+            invalidateCache();
+        }
     }
     else if (signalID == interfaceConfigChangedSignal) {
         invalidateCache();
@@ -738,8 +746,7 @@ void Ipv4RoutingTable::updateNetmaskRoutes()
     PatternMatcher interfaceNameMatcher(netmaskRoutes, false, true, true);
     for (int i = 0; i < ift->getNumInterfaces(); i++) {
         InterfaceEntry *ie = ift->getInterface(i);
-        if (interfaceNameMatcher.matches(ie->getFullName()))
-        {
+        if (ie->getState() == InterfaceEntry::State::UP && interfaceNameMatcher.matches(ie->getFullName())) {
             auto ipv4Data = ie->findProtocolData<Ipv4InterfaceData>();
             if (ipv4Data && ipv4Data->getNetmask() != Ipv4Address::ALLONES_ADDRESS) {
                 Ipv4Route *route = createNewRoute();
