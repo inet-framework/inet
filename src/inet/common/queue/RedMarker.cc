@@ -27,6 +27,7 @@
 #include "inet/linklayer/ethernet/EtherEncap.h"
 
 #include "inet/networklayer/common/L3Tools.h"
+#include "inet/networklayer/common/EcnTag_m.h"
 
 
 //#ifdef WITH_IPv6
@@ -96,16 +97,16 @@ void RedMarker::handleMessage(cMessage *msg)
   //      packet->insertAtFront(ipv4Header);
 
   // if packet supports marking (ECT(1) or ECT(0))
-      if ((ect & 0x01) || (ect & 0x02))
+      if ((ect == IP_ECN_ECT_0) || (ect == IP_ECN_ECT_1))
       {
 
         // if next packet should be marked and it is not
-        if (markNext && !(ect & 0x03))
+        if (markNext && !(ect == IP_ECN_CE))
         {
           markPacket(packet);
           markNext = false;
         }
-        else if (ect & 0x03)
+        else if (ect == IP_ECN_CE)
         {
           if (shouldMark(packet))
           {
