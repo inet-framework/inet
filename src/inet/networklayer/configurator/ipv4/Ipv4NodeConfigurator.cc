@@ -165,6 +165,27 @@ void Ipv4NodeConfigurator::receiveSignal(cComponent *source, simsignal_t signalI
 
     Enter_Method_Silent();
     printSignalBanner(signalID, obj, details);
+
+    if (signalID == interfaceCreatedSignal) {
+        auto *entry = check_and_cast<InterfaceEntry *>(obj);
+        prepareInterface(entry);
+        // TODO
+    }
+    else if (signalID == interfaceDeletedSignal) {
+        // The RoutingTable deletes routing entries of interface
+    }
+    else if (signalID == interfaceStateChangedSignal) {
+        const auto *ieChangeDetails = check_and_cast<const InterfaceEntryChangeDetails *>(obj);
+        if (ieChangeDetails->getFieldId() == InterfaceEntry::F_STATE) {
+            auto *entry = ieChangeDetails->getInterfaceEntry();
+            if (entry->getState() == InterfaceEntry::State::UP && networkConfigurator) {
+                networkConfigurator->configureInterface(entry);
+                if (par("configureRoutingTable"))
+                    networkConfigurator->configureRoutingTable(routingTable, entry);
+            }
+            // otherwise the RoutingTable deletes routing entries of interface entry
+        }
+    }
 }
 
 } // namespace inet
