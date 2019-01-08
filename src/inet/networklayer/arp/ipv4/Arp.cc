@@ -448,6 +448,7 @@ L3Address Arp::getL3AddressFor(const MacAddress& macAddr) const
     return Ipv4Address::UNSPECIFIED_ADDRESS;
 }
 
+// Also known as ARP Announcement
 void Arp::sendArpGratuitous(const InterfaceEntry *ie, MacAddress srcAddr, Ipv4Address ipAddr, ArpOpcode opCode)
 {
     Enter_Method_Silent();
@@ -482,10 +483,38 @@ void Arp::sendArpGratuitous(const InterfaceEntry *ie, MacAddress srcAddr, Ipv4Ad
     entry->numRetries = 0;
 
 //    updateARPCache(entry, srcAddr); //FIXME
+
     // send out
     send(packet, "ifOut");
-//    sendPacketToNIC(arp, ie, srcAddr, ETHERTYPE_ARP);
-//    send(arp, nicOutBaseGateId + ie->getNetworkLayerGateIndex());
+}
+
+// A client should send out 'ARP Probe' to probe the newly received IPv4 address.
+// Refer to RFC 5227, IPv4 Address Conflict Detection
+void Arp::sendArpProbe(const InterfaceEntry *ie, MacAddress srcAddr, Ipv4Address probedAddr)
+{
+    Enter_Method_Silent();
+
+    // both must be set
+    ASSERT(!srcAddr.isUnspecified());
+    ASSERT(!probedAddr.isUnspecified());
+
+    Packet *packet = new Packet("arpProbe");
+    const auto& arp = makeShared<ArpPacket>();
+    arp->setOpcode(ARP_REQUEST);
+    arp->setSrcMacAddress(srcAddr);
+    arp->setSrcIpAddress(Ipv4Address::UNSPECIFIED_ADDRESS);
+    arp->setDestIpAddress(probedAddr);
+    arp->setDestMacAddress(MacAddress::UNSPECIFIED_ADDRESS);
+    packet->insertAtFront(arp);
+
+    auto macAddrReq = packet->addTag<MacAddressReq>();
+    macAddrReq->setSrcAddress(srcAddr);
+    macAddrReq->setDestAddress(MacAddress::BROADCAST_ADDRESS);
+    packet->addTag<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
+    packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::arp);
+
+    // send out
+    send(packet, "ifOut");
 }
 
 } // namespace inet

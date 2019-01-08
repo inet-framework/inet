@@ -99,7 +99,8 @@ class INET_API Arp : public OperationalBase, public IArp
     virtual L3Address getL3AddressFor(const MacAddress& addr) const override;
     /// @}
 
-    void sendArpGratuitous(const InterfaceEntry *ie, MacAddress srcAddr, Ipv4Address ipAddr, ArpOpcode opCode);
+    void sendArpGratuitous(const InterfaceEntry *ie, MacAddress srcAddr, Ipv4Address ipAddr, ArpOpcode opCode = ARP_REQUEST);
+    void sendArpProbe(const InterfaceEntry *ie, MacAddress srcAddr, Ipv4Address probedAddr);
 
   protected:
     virtual void initialize(int stage) override;
