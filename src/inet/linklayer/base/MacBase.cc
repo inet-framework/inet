@@ -61,17 +61,20 @@ void MacBase::handleMessageWhenDown(cMessage *msg)
 void MacBase::handleStartOperation(LifecycleOperation *operation)
 {
     interfaceEntry->setState(InterfaceEntry::State::UP);
+    interfaceEntry->setCarrier(true);
 }
 
 void MacBase::handleStopOperation(LifecycleOperation *operation)
 {
     flushQueue();
+    interfaceEntry->setCarrier(false);
     interfaceEntry->setState(InterfaceEntry::State::DOWN);
 }
 
 void MacBase::handleCrashOperation(LifecycleOperation *operation)
 {
     clearQueue();
+    interfaceEntry->setCarrier(false);
     interfaceEntry->setState(InterfaceEntry::State::DOWN);
 }
 

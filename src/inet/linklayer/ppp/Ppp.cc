@@ -221,6 +221,7 @@ void Ppp::handleMessageWhenUp(cMessage *message)
     MacBase::handleMessageWhenUp(message);
     if (operationalState == State::STOPPING_OPERATION) {
         if (queueModule ? queueModule->isEmpty() : txQueue.isEmpty()) {
+            interfaceEntry->setCarrier(false);
             interfaceEntry->setState(InterfaceEntry::State::DOWN);
             startActiveOperationExtraTimeOrFinish(par("stopOperationExtraTime"));
         }
@@ -420,6 +421,7 @@ void Ppp::handleStopOperation(LifecycleOperation *operation)
         delayActiveOperationFinish(par("stopOperationTimeout"));
     }
     else {
+        interfaceEntry->setCarrier(false);
         interfaceEntry->setState(InterfaceEntry::State::DOWN);
         startActiveOperationExtraTimeOrFinish(par("stopOperationExtraTime"));
     }
