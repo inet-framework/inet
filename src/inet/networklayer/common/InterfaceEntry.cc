@@ -140,16 +140,16 @@ std::string InterfaceEntry::detailedInfo() const
     out << "name:" << getInterfaceName();
     out << "  ID:" << getInterfaceId();
     out << "  MTU: " << getMtu() << " \t";
-    if (!isUp())
-        out << "DOWN ";
+    out << ((state == DOWN) ? "DOWN " : "UP ");
+    if (isLoopback())
+        out << "LOOPBACK ";
     if (isBroadcast())
         out << "BROADCAST ";
+    out << (hasCarrier() ? "CARRIER " : "NOCARRIER ");
     if (isMulticast())
         out << "MULTICAST ";
     if (isPointToPoint())
         out << "POINTTOPOINT ";
-    if (isLoopback())
-        out << "LOOPBACK ";
     out << "\n";
     out << "  macAddr:";
     if (getMacAddress().isUnspecified())
