@@ -183,14 +183,19 @@ void EtherMacBase::initialize(int stage)
         // initialize states
         transmitState = TX_IDLE_STATE;
         receiveState = RX_IDLE_STATE;
-        WATCH(transmitState);
-        WATCH(receiveState);
 
         // initialize pause
         pauseUnitsRequested = 0;
-        WATCH(pauseUnitsRequested);
 
         subscribe(POST_MODEL_CHANGE, this);
+
+        WATCH(transmitState);
+        WATCH(receiveState);
+        WATCH(connected);
+        WATCH(disabled);
+        WATCH(frameBursting);
+        WATCH(promiscuous);
+        WATCH(pauseUnitsRequested);
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
         initializeQueueModule();
@@ -232,21 +237,16 @@ void EtherMacBase::initializeFlags()
     if (!connected)
         EV_WARN << "MAC not connected to a network.\n";
 
-    WATCH(connected);
-
     // TODO: this should be set from the GUI
     // initialize disabled flag
     // Note: it is currently not supported to enable a disabled MAC at runtime.
     // Difficulties: (1) autoconfig (2) how to pick up channel state (free, tx, collision etc)
     disabled = false;
-    WATCH(disabled);
 
     // initialize promiscuous flag
     promiscuous = par("promiscuous");
-    WATCH(promiscuous);
 
     frameBursting = false;
-    WATCH(frameBursting);
 }
 
 void EtherMacBase::initializeStatistics()
