@@ -338,5 +338,25 @@ Ipv4Address InterfaceEntry::getIpv4Address() const {
 #endif // ifdef WITH_IPv4
 }
 
+void InterfaceEntry::setState(State s)
+{
+    if (state != s)
+    {
+        state = s;
+        if (state == DOWN)
+            setCarrier(false);
+        stateChanged(F_STATE);
+    }
+}
+void InterfaceEntry::setCarrier(bool b)
+{
+    ASSERT(!(b && (state == DOWN)));
+    if (carrier != b)
+    {
+        carrier = b;
+        stateChanged(F_CARRIER);
+    }
+}
+
 } // namespace inet
 
