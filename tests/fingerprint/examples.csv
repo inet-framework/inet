@@ -409,7 +409,7 @@
 /examples/ospfv2/fulltest/,          -f omnetpp.ini -c General -r 0,                100s,            4a02-8cc2/tplx, PASS,
 /examples/ospfv2/simpletest/,        -f omnetpp.ini -c AlwaysUp -r 0,               500s,            4c41-52be/tplx, PASS,
 /examples/ospfv2/simpletest/,        -f omnetpp.ini -c ShutdownAndRestart -r 0,     500s,            6440-625d/tplx, PASS,
-/examples/ospfv2/simpletest/,        -f omnetpp.ini -c CrashAndReboot -r 0,        500s,             6440-625d/tplx, PASS,
+/examples/ospfv2/simpletest/,        -f omnetpp.ini -c CrashAndReboot -r 0,         500s,            2882-fa95/tplx, PASS,
 
 /examples/pim/dm/assert/,            -f omnetpp.ini -c General -r 0,                300s,            ffdc-9c1b/tplx, PASS,
 /examples/pim/dm/basic/,             -f omnetpp.ini -c General -r 0,                300s,            ba0c-c81a/tplx, PASS,
