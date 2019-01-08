@@ -197,10 +197,6 @@ void EtherMacBase::initialize(int stage)
         WATCH(promiscuous);
         WATCH(pauseUnitsRequested);
     }
-    else if (stage == INITSTAGE_LINK_LAYER) {
-        initializeQueueModule();
-        readChannelParameters(true);
-    }
 }
 
 void EtherMacBase::initializeQueueModule()
@@ -284,9 +280,10 @@ void EtherMacBase::configureInterfaceEntry()
 
 void EtherMacBase::handleStartOperation(LifecycleOperation *operation)
 {
+    interfaceEntry->setState(InterfaceEntry::State::UP);
     initializeFlags();
     initializeQueueModule();
-    interfaceEntry->setState(InterfaceEntry::State::UP);
+    readChannelParameters(true);
 }
 
 void EtherMacBase::handleStopOperation(LifecycleOperation *operation)
