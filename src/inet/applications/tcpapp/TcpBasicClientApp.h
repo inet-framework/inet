@@ -29,11 +29,10 @@ namespace inet {
 /**
  * An example request-reply based client application.
  */
-class INET_API TcpBasicClientApp : public TcpAppBase, public ILifecycle
+class INET_API TcpBasicClientApp : public TcpAppBase
 {
   protected:
     cMessage *timeoutMsg = nullptr;
-    NodeStatus *nodeStatus = nullptr;
     bool earlySend = false;    // if true, don't wait with sendRequest() until established()
     int numRequestsToSend = 0;    // requests to send in this session
     simtime_t startTime;
@@ -45,12 +44,17 @@ class INET_API TcpBasicClientApp : public TcpAppBase, public ILifecycle
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
     virtual void handleTimer(cMessage *msg) override;
+
     virtual void socketEstablished(TcpSocket *socket) override;
     virtual void socketDataArrived(TcpSocket *socket, Packet *msg, bool urgent) override;
     virtual void socketClosed(TcpSocket *socket) override;
     virtual void socketFailure(TcpSocket *socket, int code) override;
-    virtual bool isNodeUp();
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
+
+    virtual void handleStartOperation(LifecycleOperation *operation) override;
+    virtual void handleStopOperation(LifecycleOperation *operation) override;
+    virtual void handleCrashOperation(LifecycleOperation *operation) override;
+
+    virtual void close() override;
 
   public:
     TcpBasicClientApp() {}

@@ -79,12 +79,20 @@ class INET_API UdpSocket : public ISocket
          * Notifies about error indication arrival, indication ownership is transferred to the callee.
          */
         virtual void socketErrorArrived(UdpSocket *socket, Indication *indication) = 0;
+
+        /**
+         * Notifies about socket closed, indication ownership is transferred to the callee.
+         */
+        virtual void socketClosed(UdpSocket *socket) = 0;
     };
+    enum State { CONNECTED, CLOSED};
+
   protected:
     int socketId;
     ICallback *cb = nullptr;
     void *userData = nullptr;
-    cGate *gateToUdp;
+    cGate *gateToUdp = nullptr;
+    State sockState = CLOSED;
 
   protected:
     void sendToUDP(cMessage *msg);
@@ -103,6 +111,7 @@ class INET_API UdpSocket : public ISocket
 
     void *getUserData() const { return userData; }
     void setUserData(void *userData) { this->userData = userData; }
+    State getState() const { return sockState; }
 
     /**
      * Returns the internal socket Id.
@@ -259,8 +268,10 @@ class INET_API UdpSocket : public ISocket
      * Unbinds the socket. Once closed, a closed socket may be bound to another
      * (or the same) port, and reused.
      */
-    void close();
+    void close() override;
     //@}
+
+    virtual void destroy() override;
 
     /** @name Handling of messages arriving from UDP */
     //@{
@@ -288,6 +299,8 @@ class INET_API UdpSocket : public ISocket
     void setCallback(ICallback *cb);
 
     virtual void processMessage(cMessage *msg) override;
+
+    virtual bool isOpen() const override { return sockState != CLOSED; }
 
     /**
      * Utility function: returns a line of information about a packet received via UDP.

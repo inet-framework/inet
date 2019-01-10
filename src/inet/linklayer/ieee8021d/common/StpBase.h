@@ -19,7 +19,7 @@
 #define __INET_STPBASE_H
 
 #include "inet/common/lifecycle/OperationalBase.h"
-#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/linklayer/configurator/Ieee8021dInterfaceData.h"
 #include "inet/linklayer/ethernet/switch/IMacAddressTable.h"
@@ -51,11 +51,11 @@ class INET_API StpBase : public OperationalBase, public cListener
   public:
     StpBase();
     virtual bool isInitializeStage(int stage) override { return stage == INITSTAGE_LINK_LAYER; }
-    virtual bool isNodeStartStage(int stage) override { return stage == NodeStartOperation::STAGE_LINK_LAYER; }
-    virtual bool isNodeShutdownStage(int stage) override { return stage == NodeShutdownOperation::STAGE_LINK_LAYER; }
-    virtual bool handleNodeStart(IDoneCallback *doneCallback) override;
-    virtual bool handleNodeShutdown(IDoneCallback *doneCallback) override;
-    virtual void handleNodeCrash() override;
+    virtual bool isModuleStartStage(int stage) override { return stage == ModuleStartOperation::STAGE_LINK_LAYER; }
+    virtual bool isModuleStopStage(int stage) override { return stage == ModuleStopOperation::STAGE_LINK_LAYER; }
+    virtual void handleStartOperation(LifecycleOperation *operation) override;
+    virtual void handleStopOperation(LifecycleOperation *operation) override;
+    virtual void handleCrashOperation(LifecycleOperation *operation) override;
 
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override {}
 

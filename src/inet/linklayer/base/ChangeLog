@@ -1,3 +1,35 @@
+2018-11-21  Zoltan Bojthe
+
+	Set state of InterfaceEntry in start/stop/crash operations.
+
+2018-10-08  Zoltan Bojthe
+
+	Moved registerInterface() call to MacProtocolBase::initialize().
+
+2018-09-28  Levente Mészáros
+
+	Extracted INITSTAGE_LINK_LAYER from INITSTAGE_NETWORK_INTERFACE_CONFIGURATION where applicable.
+
+2018-09-27  Levente Mészáros
+
+	Renamed INITSTAGE_LINK_LAYER to INITSTAGE_NETWORK_INTERFACE_CONFIGURATION.	Renamed INITSTAGE_LINK_LAYER_2 to INITSTAGE_LINK_LAYER.
+
+2018-08-28  Zoltan Bojthe
+
+	Changed handleMessageWhenDown to throw an error when receiving a self message only.
+
+2018-07-30  Zoltan Bojthe
+
+	InterfaceEntry registers the network interface (NIC) to interfacetable (instead of mac modules).
+
+2018-07-27  Zoltan Bojthe
+
+	Refactored createInterfaceEntry() to configureInterfaceEntry().
+
+2018-07-12  Zoltan Bojthe
+
+	Refactored MAC modules to use the MacAddress stored in the InterfaceEntry.
+
 ====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------

@@ -19,7 +19,7 @@
 #define __INET_PHYSICALLAYERBASE_H
 
 #include "inet/common/LayeredProtocolBase.h"
-#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/physicallayer/common/packetlevel/Signal.h"
 #include "inet/physicallayer/contract/packetlevel/IPhysicalLayer.h"
 
@@ -46,8 +46,8 @@ class INET_API PhysicalLayerBase : public LayeredProtocolBase, public IPhysicalL
     virtual bool isLowerMessage(cMessage *message) override;
 
     virtual bool isInitializeStage(int stage) override { return stage == INITSTAGE_PHYSICAL_LAYER; }
-    virtual bool isNodeStartStage(int stage) override { return stage == NodeStartOperation::STAGE_PHYSICAL_LAYER; }
-    virtual bool isNodeShutdownStage(int stage) override { return stage == NodeShutdownOperation::STAGE_PHYSICAL_LAYER; }
+    virtual bool isModuleStartStage(int stage) override { return stage == ModuleStartOperation::STAGE_PHYSICAL_LAYER; }
+    virtual bool isModuleStopStage(int stage) override { return stage == ModuleStopOperation::STAGE_PHYSICAL_LAYER; }
 };
 
 } // namespace physicallayer

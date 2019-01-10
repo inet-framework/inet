@@ -51,7 +51,7 @@ INetfilter::IHook::Result TcpCrcInsertion::datagramPostRoutingHook(Packet *packe
 
 void TcpCrcInsertion::insertCrc(const Protocol *networkProtocol, const L3Address& srcAddress, const L3Address& destAddress, const Ptr<TcpHeader>& tcpHeader, Packet *packet)
 {
-    tcpHeader->setCrcMode(crcMode);
+    auto crcMode = tcpHeader->getCrcMode();
     switch (crcMode) {
         case CRC_DECLARED_CORRECT:
             // if the CRC mode is declared to be correct, then set the CRC to an easily recognizable value

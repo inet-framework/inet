@@ -28,7 +28,7 @@ namespace ieee80211 {
 void LegacySequenceNumberAssigment::assignSequenceNumber(const Ptr<Ieee80211DataOrMgmtHeader>& header)
 {
     ASSERT(header->getType() != ST_DATA_WITH_QOS);
-    lastSeqNum = (lastSeqNum + 1) % 4096;
+    lastSeqNum = lastSeqNum + 1;
     header->setSequenceNumber(lastSeqNum);
 }
 

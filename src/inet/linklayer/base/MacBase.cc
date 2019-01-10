@@ -26,7 +26,7 @@
 #include "inet/common/IInterfaceRegistrationListener.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/ModuleAccess.h"
 
 namespace inet {
@@ -58,20 +58,24 @@ void MacBase::handleMessageWhenDown(cMessage *msg)
         MacProtocolBase::handleMessageWhenDown(msg);
 }
 
-bool MacBase::handleNodeStart(IDoneCallback *doneCallback)
+void MacBase::handleStartOperation(LifecycleOperation *operation)
 {
-    return true;
+    interfaceEntry->setState(InterfaceEntry::State::UP);
+    interfaceEntry->setCarrier(true);
 }
 
-bool MacBase::handleNodeShutdown(IDoneCallback *doneCallback)
+void MacBase::handleStopOperation(LifecycleOperation *operation)
 {
     flushQueue();
-    return true;
+    interfaceEntry->setCarrier(false);
+    interfaceEntry->setState(InterfaceEntry::State::DOWN);
 }
 
-void MacBase::handleNodeCrash()
+void MacBase::handleCrashOperation(LifecycleOperation *operation)
 {
     clearQueue();
+    interfaceEntry->setCarrier(false);
+    interfaceEntry->setState(InterfaceEntry::State::DOWN);
 }
 
 void MacBase::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)

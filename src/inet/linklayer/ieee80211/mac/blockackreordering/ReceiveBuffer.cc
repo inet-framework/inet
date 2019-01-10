@@ -20,7 +20,7 @@
 namespace inet {
 namespace ieee80211 {
 
-ReceiveBuffer::ReceiveBuffer(int bufferSize, int nextExpectedSequenceNumber) :
+ReceiveBuffer::ReceiveBuffer(int bufferSize, SequenceNumber nextExpectedSequenceNumber) :
         bufferSize(bufferSize),
         nextExpectedSequenceNumber(nextExpectedSequenceNumber)
 {
@@ -34,13 +34,20 @@ ReceiveBuffer::ReceiveBuffer(int bufferSize, int nextExpectedSequenceNumber) :
 //
 bool ReceiveBuffer::insertFrame(Packet *dataPacket, const Ptr<const Ieee80211DataHeader>& dataHeader)
 {
-    int sequenceNumber = dataHeader->getSequenceNumber();
+    auto sequenceNumber = dataHeader->getSequenceNumber();
+    auto fragmentNumber = dataHeader->getFragmentNumber();
     // The total number of MPDUs in these MSDUs may not
     // exceed the reorder buffer size in the receiver.
-    if (length < bufferSize && !isSequenceNumberTooOld(sequenceNumber, nextExpectedSequenceNumber, bufferSize)) {
+    if (length < bufferSize && nextExpectedSequenceNumber <= sequenceNumber && sequenceNumber < nextExpectedSequenceNumber + bufferSize) {
         auto it = buffer.find(sequenceNumber);
         if (it != buffer.end()) {
             auto &fragments = it->second;
+            // TODO: efficiency
+            for (auto fragment : fragments) {
+                const auto& fragmentHeader = fragment->peekAtFront<Ieee80211DataHeader>();
+                if (fragmentHeader->getSequenceNumber() == sequenceNumber && fragmentHeader->getFragmentNumber() == fragmentNumber)
+                    return false;
+            }
             fragments.push_back(dataPacket);
         }
         else {
@@ -54,7 +61,22 @@ bool ReceiveBuffer::insertFrame(Packet *dataPacket, const Ptr<const Ieee80211Dat
     return false;
 }
 
-void ReceiveBuffer::remove(int sequenceNumber)
+void ReceiveBuffer::dropFramesUntil(SequenceNumber sequenceNumber)
+{
+    auto it = buffer.begin();
+    while (it != buffer.end()) {
+        if (it->first < sequenceNumber) {
+            length -= it->second.size();
+            for (auto fragment : it->second)
+                delete fragment;
+            it = buffer.erase(it);
+        }
+        else
+            it++;
+    }
+}
+
+void ReceiveBuffer::removeFrame(SequenceNumber sequenceNumber)
 {
     auto it = buffer.find(sequenceNumber);
     if (it != buffer.end()) {
@@ -62,7 +84,7 @@ void ReceiveBuffer::remove(int sequenceNumber)
         buffer.erase(sequenceNumber);
     }
     else
-        throw cRuntimeError("Unknown sequence number = %d", sequenceNumber);
+        throw cRuntimeError("Unknown sequence number: %d", sequenceNumber.getRaw());
 }
 
 ReceiveBuffer::~ReceiveBuffer()

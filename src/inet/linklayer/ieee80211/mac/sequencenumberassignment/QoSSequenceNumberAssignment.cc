@@ -35,7 +35,7 @@ QoSSequenceNumberAssignment::CacheType QoSSequenceNumberAssignment::getCacheType
 void QoSSequenceNumberAssignment::assignSequenceNumber(const Ptr<Ieee80211DataOrMgmtHeader>& header)
 {
     CacheType type = getCacheType(header, false);
-    int seqNum;
+    SequenceNumber seqNum;
     MacAddress address = header->getReceiverAddress();
     if (type == TIME_PRIORITY)
     {
@@ -46,7 +46,7 @@ void QoSSequenceNumberAssignment::assignSequenceNumber(const Ptr<Ieee80211DataOr
         if (it == lastSentTimePrioritySeqNums.end())
             lastSentTimePrioritySeqNums[address] = seqNum = 0;
         else
-            it->second = seqNum = (it->second + 1) % 4096;
+            it->second = seqNum = it->second + 1;
     }
     if (type == SHARED)
     {
@@ -55,7 +55,7 @@ void QoSSequenceNumberAssignment::assignSequenceNumber(const Ptr<Ieee80211DataOr
             lastSentSharedSeqNums[address] = seqNum = lastSentSharedCounterSeqNum;
         else {
             if (it->second == lastSentSharedCounterSeqNum)
-                lastSentSharedCounterSeqNum = (lastSentSharedCounterSeqNum + 1) % 4096; // make it different from the last sequence number sent to that RA (spec: "add 2")
+                lastSentSharedCounterSeqNum = lastSentSharedCounterSeqNum + 1; // make it different from the last sequence number sent to that RA (spec: "add 2")
             it->second = seqNum = lastSentSharedCounterSeqNum;
         }
     }
@@ -67,7 +67,7 @@ void QoSSequenceNumberAssignment::assignSequenceNumber(const Ptr<Ieee80211DataOr
         if (it == lastSentSeqNums.end())
             lastSentSeqNums[key] = seqNum = 0;
         else
-            it->second = seqNum = (it->second + 1) % 4096;
+            it->second = seqNum = it->second + 1;
     }
     else
         ASSERT(false);

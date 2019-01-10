@@ -18,13 +18,14 @@
 #include "inet/common/Simsignals.h"
 #include "inet/linklayer/ethernet/EtherEncap.h"
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
-#include "inet/linklayer/ieee8021q/Ieee8021QVlan.h"
+#include "inet/linklayer/ieee8021q/Ieee8021qEncap.h"
+#include "inet/linklayer/vlan/VlanTag_m.h"
 
 namespace inet {
 
-Define_Module(Ieee8021QVlan);
+Define_Module(Ieee8021qEncap);
 
-void Ieee8021QVlan::initialize(int stage)
+void Ieee8021qEncap::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
@@ -38,7 +39,7 @@ void Ieee8021QVlan::initialize(int stage)
     }
 }
 
-void Ieee8021QVlan::parseParameters(const char *filterParameterName, const char *mapParameterName, std::vector<int>& vlanIdFilter, std::map<int, int>& vlanIdMap)
+void Ieee8021qEncap::parseParameters(const char *filterParameterName, const char *mapParameterName, std::vector<int>& vlanIdFilter, std::map<int, int>& vlanIdMap)
 {
     cStringTokenizer filterTokenizer(par(filterParameterName));
     while (filterTokenizer.hasMoreTokens())
@@ -51,7 +52,7 @@ void Ieee8021QVlan::parseParameters(const char *filterParameterName, const char 
     }
 }
 
-Ieee8021QTag *Ieee8021QVlan::findVlanTag(const Ptr<EthernetMacHeader>& ethernetMacHeader)
+Ieee8021qHeader *Ieee8021qEncap::findVlanTag(const Ptr<EthernetMacHeader>& ethernetMacHeader)
 {
     if (*vlanTagType == 'c')
         return ethernetMacHeader->getCTagForUpdate();
@@ -61,9 +62,9 @@ Ieee8021QTag *Ieee8021QVlan::findVlanTag(const Ptr<EthernetMacHeader>& ethernetM
         throw cRuntimeError("Unknown VLAN tag type");
 }
 
-Ieee8021QTag *Ieee8021QVlan::addVlanTag(const Ptr<EthernetMacHeader>& ethernetMacHeader)
+Ieee8021qHeader *Ieee8021qEncap::addVlanTag(const Ptr<EthernetMacHeader>& ethernetMacHeader)
 {
-    auto vlanTag = new Ieee8021QTag();
+    auto vlanTag = new Ieee8021qHeader();
     ethernetMacHeader->setChunkLength(ethernetMacHeader->getChunkLength() + B(4));
     if (*vlanTagType == 'c')
         ethernetMacHeader->setCTag(vlanTag);
@@ -74,7 +75,7 @@ Ieee8021QTag *Ieee8021QVlan::addVlanTag(const Ptr<EthernetMacHeader>& ethernetMa
     return vlanTag;
 }
 
-Ieee8021QTag *Ieee8021QVlan::removeVlanTag(const Ptr<EthernetMacHeader>& ethernetMacHeader)
+Ieee8021qHeader *Ieee8021qEncap::removeVlanTag(const Ptr<EthernetMacHeader>& ethernetMacHeader)
 {
     ethernetMacHeader->setChunkLength(ethernetMacHeader->getChunkLength() - B(4));
     if (*vlanTagType == 'c')
@@ -85,14 +86,14 @@ Ieee8021QTag *Ieee8021QVlan::removeVlanTag(const Ptr<EthernetMacHeader>& etherne
         throw cRuntimeError("Unknown VLAN tag type");
 }
 
-void Ieee8021QVlan::processPacket(Packet *packet, std::vector<int>& vlanIdFilter, std::map<int, int>& vlanIdMap, cGate *gate)
+void Ieee8021qEncap::processPacket(Packet *packet, std::vector<int>& vlanIdFilter, std::map<int, int>& vlanIdMap, cGate *gate)
 {
     packet->trimFront();
     const auto& ethernetMacHeader = packet->removeAtFront<EthernetMacHeader>();
-    Ieee8021QTag *vlanTag = findVlanTag(ethernetMacHeader);
+    Ieee8021qHeader *vlanTag = findVlanTag(ethernetMacHeader);
     auto oldVlanId = vlanTag != nullptr ? vlanTag->getVid() : -1;
-    auto vlanReq = packet->removeTagIfPresent<Ieee8021QReq>();
-    auto newVlanId = vlanReq != nullptr ? vlanReq->getVid() : oldVlanId;
+    auto vlanReq = packet->removeTagIfPresent<VlanReq>();
+    auto newVlanId = vlanReq != nullptr ? vlanReq->getVlanId() : oldVlanId;
     bool acceptPacket = vlanIdFilter.empty() || std::find(vlanIdFilter.begin(), vlanIdFilter.end(), newVlanId) != vlanIdFilter.end();
     if (acceptPacket) {
         auto it = vlanIdMap.find(newVlanId);
@@ -112,7 +113,7 @@ void Ieee8021QVlan::processPacket(Packet *packet, std::vector<int>& vlanIdFilter
         }
         else
             packet->insertAtFront(ethernetMacHeader);
-        packet->addTagIfAbsent<Ieee8021QInd>()->setVid(newVlanId);
+        packet->addTagIfAbsent<VlanInd>()->setVlanId(newVlanId);
         send(packet, gate);
     }
     else {
@@ -124,7 +125,7 @@ void Ieee8021QVlan::processPacket(Packet *packet, std::vector<int>& vlanIdFilter
     }
 }
 
-void Ieee8021QVlan::handleMessage(cMessage *message)
+void Ieee8021qEncap::handleMessage(cMessage *message)
 {
     if (message->getArrivalGate()->isName("upperLayerIn"))
         processPacket(check_and_cast<Packet *>(message), outboundVlanIdFilter, outboundVlanIdMap, gate("lowerLayerOut"));

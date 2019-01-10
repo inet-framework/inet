@@ -167,20 +167,19 @@ Ieee802154Mac::~Ieee802154Mac()
 
 void Ieee802154Mac::configureInterfaceEntry()
 {
-    InterfaceEntry *e = getContainingNicModule(this);
     MacAddress address = parseMacAddressParameter(par("address"));
 
     // data rate
-    e->setDatarate(bitrate);
+    interfaceEntry->setDatarate(bitrate);
 
     // generate a link-layer address to be used as interface token for IPv6
-    e->setMacAddress(address);
-    e->setInterfaceToken(address.formInterfaceIdentifier());
+    interfaceEntry->setMacAddress(address);
+    interfaceEntry->setInterfaceToken(address.formInterfaceIdentifier());
 
     // capabilities
-    e->setMtu(par("mtu"));
-    e->setMulticast(true);
-    e->setBroadcast(true);
+    interfaceEntry->setMtu(par("mtu"));
+    interfaceEntry->setMulticast(true);
+    interfaceEntry->setBroadcast(true);
 }
 
 /**

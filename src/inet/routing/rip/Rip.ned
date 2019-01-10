@@ -86,6 +86,10 @@ simple Rip like IApp
         bool triggeredUpdate = default(true);  // sending triggered updates on route changes
         volatile double triggeredUpdateDelay @unit(s) = default(uniform(1s,5s));
 
+        @lifecycleSupport;
+        double stopOperationExtraTime @unit(s) = default(-1s);    // extra time after lifecycle stop operation finished
+        double stopOperationTimeout @unit(s) = default(2s);    // timeout value for lifecycle stop operation
+
         @signal[sentRequest](type=cPacket);
         @signal[sentUpdate](type=cPacket);
         @signal[rcvdResponse](type=cPacket);

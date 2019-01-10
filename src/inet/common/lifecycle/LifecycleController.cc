@@ -82,7 +82,7 @@ void LifecycleController::doOneStage(LifecycleOperation *operation, cModule *sub
     ILifecycle *subject = dynamic_cast<ILifecycle *>(submodule);
     if (subject) {
         Callback *callback = spareCallback ? spareCallback : new Callback();
-        bool done = subject->handleOperationStage(operation, operation->currentStage, callback);
+        bool done = subject->handleOperationStage(operation, callback);
         if (!done) {
             callback->init(this, operation, submodule);
             operation->pendingList.push_back(callback);

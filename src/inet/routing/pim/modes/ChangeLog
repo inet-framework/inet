@@ -1,3 +1,12 @@
+2018-11-29  Mani Amoozadeh
+
+	Refactored code to better reflect code execution flow.
+	Added WATCHes for important variables.
+
+2018-10-05  Zoltan Bojthe
+
+	Changed base class of PimBase to RoutingProtocolBase.
+
 ====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------

@@ -95,7 +95,8 @@ void SctpServer::initialize(int stage)
             socket->setStreamPriority(streamNum, (unsigned int)atoi(token));
         }
 
-        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+        cModule *node = findContainingNode(this);
+        NodeStatus *nodeStatus = node ? check_and_cast_nullable<NodeStatus *>(node->getSubmodule("status")) : nullptr;
         bool isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
         if (!isOperational)
             throw cRuntimeError("This module doesn't support starting in node DOWN state");
@@ -241,15 +242,11 @@ void SctpServer::handleMessage(cMessage *msg)
             case SCTP_I_AVAILABLE: {
                 EV_INFO << "SCTP_I_AVAILABLE arrived at server\n";
                 Message *message = check_and_cast<Message *>(msg);
-                auto& intags = getTags(message);
-                Request *cmsg = new Request("SCTP_C_ACCEPT_SOCKET_ID");
-                auto& outtags = cmsg->getTags();
-                auto availableInfo = outtags.addTagIfAbsent<SctpAvailableReq>();
-                SctpAvailableReq *avInfo = intags.findTag<SctpAvailableReq>();
-                int newSockId = avInfo->getNewSocketId();
+                int newSockId = message->getTag<SctpAvailableReq>()->getNewSocketId();
                 EV_INFO << "new socket id = " << newSockId << endl;
-                availableInfo->setSocketId(newSockId);
+                Request *cmsg = new Request("SCTP_C_ACCEPT_SOCKET_ID");
                 cmsg->setKind(SCTP_C_ACCEPT_SOCKET_ID);
+                cmsg->addTag<SctpAvailableReq>()->setSocketId(newSockId);
                 cmsg->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::sctp);
                 cmsg->addTagIfAbsent<SocketReq>()->setSocketId(newSockId);
                 EV_INFO << "Sending accept socket id request ..." << endl;
@@ -260,8 +257,7 @@ void SctpServer::handleMessage(cMessage *msg)
             case SCTP_I_ESTABLISHED: {
                 count = 0;
                 Message *message = check_and_cast<Message *>(msg);
-                auto& tags = getTags(message);
-                SctpConnectReq *connectInfo = tags.findTag<SctpConnectReq>();
+                SctpConnectReq *connectInfo = message->getTag<SctpConnectReq>();
                 numSessions++;
                 assocId = connectInfo->getSocketId();
                 inboundStreams = connectInfo->getInboundStreams();

@@ -18,7 +18,7 @@
 #ifndef __INET_SIMPLECCBATTERY_H
 #define __INET_SIMPLECCBATTERY_H
 
-#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/power/base/CcEnergyStorageBase.h"
 
 namespace inet {

@@ -19,6 +19,7 @@
 #define __INET_L3SOCKET_H
 
 #include "inet/common/INETDefs.h"
+#include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/Protocol.h"
 #include "inet/networklayer/contract/INetworkSocket.h"
@@ -36,9 +37,16 @@ class INET_API L3Socket : public INetworkSocket
       public:
         virtual void socketDataArrived(INetworkSocket *socket, Packet *packet) override { socketDataArrived(check_and_cast<L3Socket *>(socket), packet); }
         virtual void socketDataArrived(L3Socket *socket, Packet *packet) = 0;
+
+        /**
+         * Notifies about socket closed, indication ownership is transferred to the callee.
+         */
+        virtual void socketClosed(INetworkSocket *socket) override { socketClosed(check_and_cast<L3Socket *>(socket)); }
+        virtual void socketClosed(L3Socket *socket) = 0;
     };
   protected:
     bool bound = false;
+    bool isOpen_ = false;
     const Protocol *l3Protocol = nullptr;
     int socketId = -1;
     INetworkSocket::ICallback *callback = nullptr;
@@ -73,6 +81,8 @@ class INET_API L3Socket : public INetworkSocket
     virtual void send(Packet *packet) override;
     virtual void sendTo(Packet *packet, L3Address destAddress) override;
     virtual void close() override;
+    virtual void destroy() override;
+    virtual bool isOpen() const override { return isOpen_; }
 };
 
 } // namespace inet

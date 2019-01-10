@@ -77,9 +77,9 @@ class INET_API Dsdv : public RoutingProtocolBase
     void handleSelfMessage(cMessage *msg);
 
     // lifecycle
-    virtual bool handleNodeStart(IDoneCallback *) override { start(); return true; }
-    virtual bool handleNodeShutdown(IDoneCallback *) override { stop(); return true; }
-    virtual void handleNodeCrash() override  { stop(); }
+    virtual void handleStartOperation(LifecycleOperation *operation) override { start(); }
+    virtual void handleStopOperation(LifecycleOperation *operation) override { stop(); }
+    virtual void handleCrashOperation(LifecycleOperation *operation) override  { stop(); }
     void start();
     void stop();
 };

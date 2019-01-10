@@ -28,7 +28,6 @@
 #include "inet/networklayer/ipv4/IcmpHeader_m.h"
 
 namespace inet {
-using namespace std;
 
 Define_Module(PimSplitter);
 

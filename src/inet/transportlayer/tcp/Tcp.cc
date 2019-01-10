@@ -22,7 +22,7 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/lifecycle/LifecycleOperation.h"
-#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/packet/Message.h"
 #include "inet/common/checksum/TcpIpChecksum.h"
@@ -95,6 +95,7 @@ void Tcp::initialize(int stage)
         if (crcMode == CRC_DISABLED)
             throw cRuntimeError("Unknown crc mode: '%s'", crcModeString);
         crcInsertion.setCrcMode(crcMode);
+        msl = par("msl");
     }
     else if (stage == INITSTAGE_TRANSPORT_LAYER) {
         registerService(Protocol::tcp, gate("appIn"), gate("ipIn"));
@@ -247,20 +248,14 @@ void Tcp::segmentArrivalWhileClosed(Packet *packet, const Ptr<const TcpHeader>& 
 
 void Tcp::refreshDisplay() const
 {
+    OperationalBase::refreshDisplay();
+
     if (getEnvir()->isExpressMode()) {
         // in express mode, we don't bother to update the display
         // (std::map's iteration is not very fast if map is large)
         getDisplayString().setTagArg("t", 0, "");
         return;
     }
-
-    //char buf[40];
-    //sprintf(buf,"%d conns", tcpAppConnMap.size());
-    //getDisplayString().setTagArg("t",0,buf);
-    if (isOperational)
-        getDisplayString().removeTag("i2");
-    else
-        getDisplayString().setTagArg("i2", 0, "status/cross");
 
     int numINIT = 0, numCLOSED = 0, numLISTEN = 0, numSYN_SENT = 0, numSYN_RCVD = 0,
         numESTABLISHED = 0, numCLOSE_WAIT = 0, numLAST_ACK = 0, numFIN_WAIT_1 = 0,
@@ -536,20 +531,20 @@ TcpReceiveQueue *Tcp::createReceiveQueue()
     return new TcpReceiveQueue();
 }
 
-bool Tcp::handleNodeStart(IDoneCallback *)
+void Tcp::handleStartOperation(LifecycleOperation *operation)
 {
     //FIXME implementation
-    return true;
 }
 
-bool Tcp::handleNodeShutdown(IDoneCallback *)
+void Tcp::handleStopOperation(LifecycleOperation *operation)
 {
-    //FIXME close connections???
+    //FIXME close connections??? yes, because the applications may not close them!!!
     reset();
-    return true;
+    delayActiveOperationFinish(par("stopOperationTimeout"));
+    startActiveOperationExtraTimeOrFinish(par("stopOperationExtraTime"));
 }
 
-void Tcp::handleNodeCrash()
+void Tcp::handleCrashOperation(LifecycleOperation *operation)
 {
     reset();
 }

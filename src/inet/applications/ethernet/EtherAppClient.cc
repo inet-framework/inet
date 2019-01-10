@@ -89,22 +89,30 @@ void EtherAppClient::handleMessageWhenUp(cMessage *msg)
         llcSocket.processMessage(msg);
 }
 
-bool EtherAppClient::handleNodeStart(IDoneCallback *doneCallback)
+void EtherAppClient::handleStartOperation(LifecycleOperation *operation)
 {
     if (isGenerator())
         scheduleNextPacket(true);
-    return true;
 }
 
-bool EtherAppClient::handleNodeShutdown(IDoneCallback *doneCallback)
+void EtherAppClient::handleStopOperation(LifecycleOperation *operation)
 {
     cancelNextPacket();
-    return true;
+    llcSocket.close();
+    delayActiveOperationFinish(par("stopOperationTimeout"));
 }
 
-void EtherAppClient::handleNodeCrash()
+void EtherAppClient::handleCrashOperation(LifecycleOperation *operation)
 {
     cancelNextPacket();
+    if (operation->getRootModule() != getContainingNode(this))
+        llcSocket.destroy();
+}
+
+void EtherAppClient::socketClosed(inet::Ieee8022LlcSocket *socket)
+{
+    if (operationalState == State::STOPPING_OPERATION && !llcSocket.isOpen())
+        startActiveOperationExtraTimeOrFinish(par("stopOperationExtraTime"));
 }
 
 bool EtherAppClient::isGenerator()

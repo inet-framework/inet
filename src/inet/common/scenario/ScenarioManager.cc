@@ -18,7 +18,7 @@
 #include "inet/common/scenario/ScenarioManager.h"
 #include "inet/common/XMLUtils.h"
 #include "inet/common/lifecycle/LifecycleOperation.h"
-#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/INETUtils.h"
 
 namespace inet {
@@ -79,8 +79,10 @@ void ScenarioManager::processCommand(cXMLElement *node)
         processConnectCommand(node);
     else if (!strcmp(tag, "disconnect"))
         processDisconnectCommand(node);
-    else if (!strcmp(tag, "initiate") || !strcmp(tag, "start") || !strcmp(tag, "startup") ||
-            !strcmp(tag, "shutdown") || !strcmp(tag, "crash"))
+    else if (!strcmp(tag, "initiate") || !strcmp(tag, "start") || !strcmp(tag, "startup")
+            || !strcmp(tag, "stop") || !strcmp(tag, "shutdown") || !strcmp(tag, "crash")
+            || !strcmp(tag, "suspend") || !strcmp(tag, "resume")
+            )
         processLifecycleCommand(node);
     else
         processModuleSpecificCommand(node);
@@ -350,11 +352,11 @@ void ScenarioManager::processLifecycleCommand(cXMLElement *node)
     std::string operationName = (tag == "initiate") ? node->getAttribute("operation") : tag;
     LifecycleOperation *operation;
     if (operationName == "start" || operationName == "startup")
-        operation = new NodeStartOperation;
-    else if (operationName == "shutdown")
-        operation = new NodeShutdownOperation;
+        operation = new ModuleStartOperation;
+    else if (operationName == "stop" || operationName == "shutdown")
+        operation = new ModuleStopOperation;
     else if (operationName == "crash")
-        operation = new NodeCrashOperation;
+        operation = new ModuleCrashOperation;
     else
         operation = check_and_cast<LifecycleOperation *>(inet::utils::createOne(operationName.c_str()));
 

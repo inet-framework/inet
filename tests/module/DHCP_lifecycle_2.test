@@ -10,7 +10,6 @@ before its first success.
 %inifile: omnetpp.ini
 [General]
 network = LifecycleTest
-tkenv-plugin-path = ../../../etc/plugins
 ned-path = .;../../../../src;../../lib
 cmdenv-express-mode = false
 sim-time-limit = 300s
@@ -75,7 +74,7 @@ network LifecycleTest
 
 %contains-regex: stdout
 .*
-LifecycleTest.server shut down
+LifecycleTest.server shutting down
 .*
 Sending DHCPDISCOVER.
 .*

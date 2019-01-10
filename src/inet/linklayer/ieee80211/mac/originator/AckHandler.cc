@@ -93,6 +93,12 @@ void AckHandler::processFailedFrame(const Ptr<const Ieee80211DataOrMgmtHeader>& 
     ackStatuses[id] = Status::ACK_NOT_ARRIVED;
 }
 
+void AckHandler::dropFrame(const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader)
+{
+    auto id = SequenceControlField(dataOrMgmtHeader->getSequenceNumber(), dataOrMgmtHeader->getFragmentNumber());
+    ackStatuses.erase(id);
+}
+
 std::string AckHandler::getStatusString(Status status)
 {
     switch (status) {

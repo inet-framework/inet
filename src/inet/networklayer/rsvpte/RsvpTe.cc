@@ -21,7 +21,7 @@
 #include "inet/common/XMLUtils.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 #include "inet/common/ModuleAccess.h"
-#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
@@ -2079,19 +2079,17 @@ void RsvpTe::clear()
         removeHello(&HelloList.front());
 }
 
-bool RsvpTe::handleNodeStart(IDoneCallback *)
+void RsvpTe::handleStartOperation(LifecycleOperation *operation)
 {
     setupHello();
-    return true;
 }
 
-bool RsvpTe::handleNodeShutdown(IDoneCallback *)
+void RsvpTe::handleStopOperation(LifecycleOperation *operation)
 {
     clear();
-    return true;
 }
 
-void RsvpTe::handleNodeCrash()
+void RsvpTe::handleCrashOperation(LifecycleOperation *operation)
 {
     clear();
 }

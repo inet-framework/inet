@@ -1,3 +1,95 @@
+2018-12-19  Zoltan Bojthe
+
+	Removed obsolete OMNeT++ 4.x related code fragments.
+
+2018-12-13  Zoltan Bojthe
+
+	Changed SocketMap::removeSocket() to return nullptr when socket not found in map.
+
+2018-12-11  Marcel Marek
+
+	Removed IS-IS protocol type from ethertype group.
+	Added CLNS and IS-IS signals.
+	Added ISIS Protocol definition.
+
+2018-12-04  Zoltan Bojthe
+
+	Added ISocket::isOpen() function.
+
+2018-11-14  Zoltan Bojthe
+
+	Added SocketMap::getMap(), SocketMap::getSocketById().
+	Added ISocket::close() and ISocket::destroy().
+
+2018-11-28  Zoltan Bojthe
+
+	Added OMNETPP5_CODE() macro for code only compiling with omnetpp 5.x.
+
+2018-10-26  Zoltan Bojthe
+
+	Added new lifecycle commands to ScenarioManager.
+
+2018-10-19  Levente Mészáros
+
+	Removed visualizer namespace from StringFormat.
+	Added HTTP and BABEL protocol definitions.
+	Added udpprotocol and tcpprotocol protocol groups with a number of protocols used in
+	examples to allow detecting them based on TCP/UDP ports.
+
+2018-10-18  Levente Mészáros
+
+	Added NetworkNamespaceContext to allow switching between network namespaces on the host machine.
+
+2018-10-04  Andras Varga
+
+	Refactored ThroughputFilter finish() added (to record last interval).
+
+2018-10-03  Andras Varga
+
+	Added LiveThroughputFilter.
+
+2018-10-02  Levente Mészáros
+
+	Added INITSTAGE_PHYSICAL_LAYER_NEIGHBOR_CACHE stage.
+	Renumbered INITSTAGEs allowing overlaps between stages which don't depend on each other.
+
+2018-09-27  Levente Mészáros
+
+	Added INITSTAGE_GROUP_MOBILITY.
+	Renamed initstage to INITSTAGE_NETWORK_CONFIGURATION.
+	Renamed INITSTAGE_LINK_LAYER to INITSTAGE_NETWORK_INTERFACE_CONFIGURATION.
+	Renamed INITSTAGE_LINK_LAYER_2 to INITSTAGE_LINK_LAYER.
+	Merged INITSTAGE_NETWORK_LAYER and INITSTAGE_NETWORK_LAYER_3.
+	Split INITSTAGE_NETWORK_LAYER_2 into INITSTAGE_NETWORK_CONFIGURATOR, INITSTAGE_NETWORK_ADDRESS_ASSIGNMENT, INITSTAGE_STATIC_ROUTING.
+	Added separate INITSTAGE_POWER for power models.
+	Split INITSTAGE_PHYSICAL_ENVIRONMENT_2 into INITSTAGE_PHYSICAL_OBJECT_CACHE and INITSTAGE_MOBILITY.
+	Eliminated unnecessary INITSTAGE_TRANSPORT_LAYER_2 stage.
+
+2018-09-20  Andras Varga
+
+	Added createImageFromResource() and fixed bogus error message 'Image "" not found'.
+
+2018-08-03  Zoltan Bojthe
+
+	Added xmlattr(xml, attrName, defaultValue?) NED function.
+
+2018-08-17  Zoltan Bojthe
+
+	Added namespace qualifier to @signal type parameters.
+
+2018-07-17  Levente Mészáros
+
+	Fixed advancing simulation time when there are no simulation events.
+
+2018-06-29  Levente Mészáros
+
+	Dropped FES macro from RealTimeScheduler.
+	Added BeginSimulation event to RealTimeScheduler to prevent Qtenv animation to jump there immediately.
+
+2018-06-27  Zoltan Bojthe
+
+	Updated the required OMNet++ version to 5.4.1.
+
 ====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------

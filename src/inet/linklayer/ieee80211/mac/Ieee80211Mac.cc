@@ -78,7 +78,7 @@ void Ieee80211Mac::initialize(int stage)
         rx = check_and_cast<IRx *>(getSubmodule("rx"));
         tx = check_and_cast<ITx *>(getSubmodule("tx"));
         emit(modesetChangedSignal, modeSet);
-        if (isOperational)
+        if (isUp())
             initializeRadioMode();
         rx = check_and_cast<IRx *>(getSubmodule("rx"));
         tx = check_and_cast<ITx *>(getSubmodule("tx"));
@@ -122,14 +122,13 @@ const MacAddress& Ieee80211Mac::isInterfaceRegistered()
 
 void Ieee80211Mac::configureInterfaceEntry()
 {
-    InterfaceEntry *e = getContainingNicModule(this);
     //TODO the mib module should use the mac address from InterfaceEntry
-    mib->address = e->getMacAddress();
-    e->setMtu(par("mtu"));
+    mib->address = interfaceEntry->getMacAddress();
+    interfaceEntry->setMtu(par("mtu"));
     // capabilities
-    e->setBroadcast(true);
-    e->setMulticast(true);
-    e->setPointToPoint(false);
+    interfaceEntry->setBroadcast(true);
+    interfaceEntry->setMulticast(true);
+    interfaceEntry->setPointToPoint(false);
 }
 
 void Ieee80211Mac::handleMessageWhenUp(cMessage *message)
@@ -398,26 +397,21 @@ void Ieee80211Mac::processLowerFrame(Packet *packet, const Ptr<const Ieee80211Ma
 }
 
 // FIXME
-bool Ieee80211Mac::handleNodeStart(IDoneCallback *doneCallback)
+void Ieee80211Mac::handleStartOperation(LifecycleOperation *operation)
 {
-    if (!doneCallback)
-        return true;    // do nothing when called from initialize()
+    if (!operation)
+        return;    // do nothing when called from initialize()
 
-    bool ret = MacProtocolBase::handleNodeStart(doneCallback);
     initializeRadioMode();
-    return ret;
 }
 
 // FIXME
-bool Ieee80211Mac::handleNodeShutdown(IDoneCallback *doneCallback)
+void Ieee80211Mac::handleStopOperation(LifecycleOperation *operation)
 {
-    bool ret = MacProtocolBase::handleNodeStart(doneCallback);
-    handleNodeCrash();
-    return ret;
 }
 
 // FIXME
-void Ieee80211Mac::handleNodeCrash()
+void Ieee80211Mac::handleCrashOperation(LifecycleOperation *operation)
 {
 }
 

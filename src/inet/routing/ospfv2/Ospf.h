@@ -72,9 +72,9 @@ class Ospf : public RoutingProtocolBase, protected cListener
     virtual void createOspfRouter();
 
     // lifecycle
-    virtual bool handleNodeStart(IDoneCallback *) override;
-    virtual bool handleNodeShutdown(IDoneCallback *) override;
-    virtual void handleNodeCrash() override;
+    virtual void handleStartOperation(LifecycleOperation *operation) override;
+    virtual void handleStopOperation(LifecycleOperation *operation) override;
+    virtual void handleCrashOperation(LifecycleOperation *operation) override;
 
     void handleInterfaceDown(const InterfaceEntry *ie);
 };
@@ -84,3 +84,4 @@ class Ospf : public RoutingProtocolBase, protected cListener
 } // namespace inet
 
 #endif // ifndef __INET_OSPFROUTING_H
+

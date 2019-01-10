@@ -50,6 +50,7 @@ class INET_API CanvasProjection
     Coord computeCanvasPointInverse(const cFigure::Point& point, double depth) const;
 
     static CanvasProjection *getCanvasProjection(const cCanvas *canvas);
+    static void dropCanvasProjections();
 };
 
 } // namespace inet

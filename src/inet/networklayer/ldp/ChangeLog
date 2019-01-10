@@ -1,3 +1,31 @@
+2018-12-05  Zoltan Bojthe
+
+	Fixed udp socket handling to process all incoming messages.
+
+2018-12-04  Zoltan Bojthe
+
+	Added missing destructor.
+
+2018-11-15  Zoltan Bojthe
+
+	Added missing socket close/socket destroy at stop/crash.
+
+2018-11-13  Zoltan Bojthe
+
+	Waiting for udp socketClosed indication in stopOperation.
+
+2018-10-17  Zoltan Bojthe
+
+	Changed base class of Ldp to RoutingProtocolBase.
+
+2018-10-05  Zoltan Bojthe
+
+	Fixed node crash operation.
+
+2018-09-19  Zoltan Bojthe
+
+	Adapted to the new protocol specific data storage API of InterfaceEntry.
+
 ====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------

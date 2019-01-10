@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2013 Opensim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -14,26 +14,20 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
-// Author: Levente Meszaros <levy@omnetpp.org>, Andras Varga (andras@omnetpp.org)
-//
 
-#include "inet/common/lifecycle/NodeOperations.h"
-#include "inet/common/ModuleAccess.h"
+package inet.linklayer.vlan;
 
-namespace inet {
+import inet.linklayer.contract.INetworkInterface;
 
-Register_Class(NodeStartOperation);
-Register_Class(NodeShutdownOperation);
-Register_Class(NodeCrashOperation);
-//Register_Class(NodeSuspendOperation);
-
-void NodeOperation::initialize(cModule *module, StringMap& params)
+simple VlanTunnel
 {
-    if (!isNetworkNode(module))
-        throw cRuntimeError("Node operations may only be applied to network nodes (host, router, etc.)");
-
-    LifecycleOperation::initialize(module, params);
+    parameters:
+        string interfaceTableModule;
+        string address @enum("auto", "copy") = default("copy");
+        int vlanId;
+        string realInterfaceName;
+        @display("i=block/cogwheel");
+    gates:
+        input upperLayerIn;
+        output upperLayerOut;
 }
-
-} // namespace inet
-

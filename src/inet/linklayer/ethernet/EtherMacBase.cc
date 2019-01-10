@@ -28,7 +28,7 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
 #include "inet/common/queue/IPassiveQueue.h"
-#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/INETUtils.h"
 
 namespace inet {
@@ -183,18 +183,19 @@ void EtherMacBase::initialize(int stage)
         // initialize states
         transmitState = TX_IDLE_STATE;
         receiveState = RX_IDLE_STATE;
-        WATCH(transmitState);
-        WATCH(receiveState);
 
         // initialize pause
         pauseUnitsRequested = 0;
-        WATCH(pauseUnitsRequested);
 
         subscribe(POST_MODEL_CHANGE, this);
-    }
-    else if (stage == INITSTAGE_LINK_LAYER) {
-        initializeQueueModule();
-        readChannelParameters(true);
+
+        WATCH(transmitState);
+        WATCH(receiveState);
+        WATCH(connected);
+        WATCH(disabled);
+        WATCH(frameBursting);
+        WATCH(promiscuous);
+        WATCH(pauseUnitsRequested);
     }
 }
 
@@ -232,21 +233,16 @@ void EtherMacBase::initializeFlags()
     if (!connected)
         EV_WARN << "MAC not connected to a network.\n";
 
-    WATCH(connected);
-
     // TODO: this should be set from the GUI
     // initialize disabled flag
     // Note: it is currently not supported to enable a disabled MAC at runtime.
     // Difficulties: (1) autoconfig (2) how to pick up channel state (free, tx, collision etc)
     disabled = false;
-    WATCH(disabled);
 
     // initialize promiscuous flag
     promiscuous = par("promiscuous");
-    WATCH(promiscuous);
 
     frameBursting = false;
-    WATCH(frameBursting);
 }
 
 void EtherMacBase::initializeStatistics()
@@ -272,7 +268,6 @@ void EtherMacBase::initializeStatistics()
 
 void EtherMacBase::configureInterfaceEntry()
 {
-    InterfaceEntry *interfaceEntry = getContainingNicModule(this);
 
     // MTU: typical values are 576 (Internet de facto), 1500 (Ethernet-friendly),
     // 4000 (on some point-to-point links), 4470 (Cisco routers default, FDDI compatible)
@@ -283,26 +278,49 @@ void EtherMacBase::configureInterfaceEntry()
     interfaceEntry->setBroadcast(true);
 }
 
-bool EtherMacBase::handleNodeStart(IDoneCallback *doneCallback)
+void EtherMacBase::handleStartOperation(LifecycleOperation *operation)
 {
+    interfaceEntry->setState(InterfaceEntry::State::UP);
     initializeFlags();
     initializeQueueModule();
-    return true;
+    readChannelParameters(true);
 }
 
-bool EtherMacBase::handleNodeShutdown(IDoneCallback *doneCallback)
+void EtherMacBase::handleStopOperation(LifecycleOperation *operation)
 {
-//    flushQueue();
-    connected = false;
-    processConnectDisconnect();
-    return true;
+    if (curTxFrame != nullptr || !txQueue.isEmpty()) {
+        interfaceEntry->setState(InterfaceEntry::State::GOING_DOWN);
+        delayActiveOperationFinish(par("stopOperationTimeout"));
+    }
+    else {
+        interfaceEntry->setCarrier(false);
+        interfaceEntry->setState(InterfaceEntry::State::DOWN);
+        startActiveOperationExtraTimeOrFinish(par("stopOperationExtraTime"));
+    }
 }
 
-void EtherMacBase::handleNodeCrash()
+void EtherMacBase::handleCrashOperation(LifecycleOperation *operation)
 {
 //    clearQueue();
     connected = false;
+    interfaceEntry->setCarrier(false);
     processConnectDisconnect();
+    interfaceEntry->setState(InterfaceEntry::State::DOWN);
+}
+
+// TODO: this method should be renamed and called where processing is finished on the current frame (i.e. curTxFrame becomes nullptr)
+void EtherMacBase::processAtHandleMessageFinished()
+{
+    if (operationalState == State::STOPPING_OPERATION) {
+        if (curTxFrame == nullptr && txQueue.isEmpty()) {
+            EV << "Ethernet Queue is empty, MAC stopped\n";
+            connected = false;
+            interfaceEntry->setCarrier(false);
+            processConnectDisconnect();
+            interfaceEntry->setState(InterfaceEntry::State::DOWN);
+            startActiveOperationExtraTimeOrFinish(par("stopOperationExtraTime"));
+        }
+    }
 }
 
 void EtherMacBase::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
@@ -631,6 +649,8 @@ void EtherMacBase::finish()
 
 void EtherMacBase::refreshDisplay() const
 {
+    MacBase::refreshDisplay();
+
     // icon coloring
     const char *color;
 

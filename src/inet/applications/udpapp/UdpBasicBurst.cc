@@ -209,8 +209,16 @@ void UdpBasicBurst::socketErrorArrived(UdpSocket *socket, Indication *indication
     delete indication;
 }
 
+void UdpBasicBurst::socketClosed(UdpSocket *socket)
+{
+    if (operationalState == State::STOPPING_OPERATION)
+        startActiveOperationExtraTimeOrFinish(par("stopOperationExtraTime"));
+}
+
 void UdpBasicBurst::refreshDisplay() const
 {
+    ApplicationBase::refreshDisplay();
+
     char buf[100];
     sprintf(buf, "rcvd: %d pks\nsent: %d pks", numReceived, numSent);
     getDisplayString().setTagArg("t", 0, buf);
@@ -321,7 +329,7 @@ void UdpBasicBurst::finish()
     ApplicationBase::finish();
 }
 
-bool UdpBasicBurst::handleNodeStart(IDoneCallback *doneCallback)
+void UdpBasicBurst::handleStartOperation(LifecycleOperation *operation)
 {
     simtime_t start = std::max(startTime, simTime());
 
@@ -329,24 +337,24 @@ bool UdpBasicBurst::handleNodeStart(IDoneCallback *doneCallback)
         timerNext->setKind(START);
         scheduleAt(start, timerNext);
     }
-
-    return true;
 }
 
-bool UdpBasicBurst::handleNodeShutdown(IDoneCallback *doneCallback)
+void UdpBasicBurst::handleStopOperation(LifecycleOperation *operation)
 {
     if (timerNext)
         cancelEvent(timerNext);
     activeBurst = false;
-    //TODO if(socket.isOpened()) socket.close();
-    return true;
+    socket.close();
+    delayActiveOperationFinish(par("stopOperationTimeout"));
 }
 
-void UdpBasicBurst::handleNodeCrash()
+void UdpBasicBurst::handleCrashOperation(LifecycleOperation *operation)
 {
     if (timerNext)
         cancelEvent(timerNext);
     activeBurst = false;
+    if (operation->getRootModule() != getContainingNode(this))     // closes socket when the application crashed only
+        socket.destroy();         //TODO  in real operating systems, program crash detected by OS and OS closes sockets of crashed programs.
 }
 
 } // namespace inet

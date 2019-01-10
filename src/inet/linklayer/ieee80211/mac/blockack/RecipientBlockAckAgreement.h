@@ -43,7 +43,7 @@ class INET_API RecipientBlockAckAgreement
         virtual BlockAckRecord *getBlockAckRecord() const { return blockAckRecord; }
         virtual simtime_t getBlockAckTimeoutValue() const { return blockAckTimeoutValue; }
         virtual int getBufferSize() const { return bufferSize; }
-        virtual int getStartingSequenceNumber() const { return startingSequenceNumber; }
+        virtual SequenceNumber getStartingSequenceNumber() const { return startingSequenceNumber; }
 
         virtual void addbaResposneSent() { isAddbaResponseSent = true; }
         virtual void calculateExpirationTime() { expirationTime = blockAckTimeoutValue == 0 ? SIMTIME_MAX : simTime() + blockAckTimeoutValue; }

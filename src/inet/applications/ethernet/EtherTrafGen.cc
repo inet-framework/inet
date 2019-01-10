@@ -23,7 +23,7 @@
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
@@ -95,23 +95,24 @@ void EtherTrafGen::handleMessageWhenUp(cMessage *msg)
         receivePacket(check_and_cast<Packet *>(msg));
 }
 
-bool EtherTrafGen::handleNodeStart(IDoneCallback *doneCallback)
+void EtherTrafGen::handleStartOperation(LifecycleOperation *operation)
 {
     if (isGenerator()) {
         scheduleNextPacket(-1);
     }
-    return true;
 }
 
-bool EtherTrafGen::handleNodeShutdown(IDoneCallback *doneCallback)
+void EtherTrafGen::handleStopOperation(LifecycleOperation *operation)
 {
     cancelNextPacket();
-    return true;
+    llcSocket.close();     //TODO return false and waiting socket close
 }
 
-void EtherTrafGen::handleNodeCrash()
+void EtherTrafGen::handleCrashOperation(LifecycleOperation *operation)
 {
     cancelNextPacket();
+    if (operation->getRootModule() != getContainingNode(this))     // closes socket when the application crashed only
+        llcSocket.destroy();         //TODO  in real operating systems, program crash detected by OS and OS closes sockets of crashed programs.
 }
 
 bool EtherTrafGen::isGenerator()

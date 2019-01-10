@@ -45,9 +45,9 @@ class INET_API IpvxTrafSink : public ApplicationBase
     virtual void handleMessageWhenUp(cMessage *msg) override;
     virtual void refreshDisplay() const override;
 
-    virtual bool handleNodeStart(IDoneCallback *doneCallback) override { return true; }
-    virtual bool handleNodeShutdown(IDoneCallback *doneCallback) override { return true; }
-    virtual void handleNodeCrash() override { }
+    virtual void handleStartOperation(LifecycleOperation *operation) override { }
+    virtual void handleStopOperation(LifecycleOperation *operation) override { }
+    virtual void handleCrashOperation(LifecycleOperation *operation) override { }
 };
 
 } // namespace inet

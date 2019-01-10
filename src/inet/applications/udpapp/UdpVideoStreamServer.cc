@@ -17,7 +17,7 @@
 //
 
 #include "inet/applications/udpapp/UdpVideoStreamServer.h"
-
+#include "inet/common/ModuleAccess.h"
 #include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/transportlayer/common/L4PortTag_m.h"
@@ -86,6 +86,12 @@ void UdpVideoStreamServer::socketErrorArrived(UdpSocket *socket, Indication *ind
     delete indication;
 }
 
+void UdpVideoStreamServer::socketClosed(UdpSocket *socket)
+{
+    if (operationalState == State::STOPPING_OPERATION)
+        startActiveOperationExtraTimeOrFinish(par("stopOperationExtraTime"));
+}
+
 void UdpVideoStreamServer::processStreamRequest(Packet *msg)
 {
     // register video stream...
@@ -149,26 +155,26 @@ void UdpVideoStreamServer::clearStreams()
     streams.clear();
 }
 
-bool UdpVideoStreamServer::handleNodeStart(IDoneCallback *doneCallback)
+void UdpVideoStreamServer::handleStartOperation(LifecycleOperation *operation)
 {
     socket.setOutputGate(gate("socketOut"));
     socket.bind(localPort);
     socket.setCallback(this);
-
-    return true;
 }
 
-bool UdpVideoStreamServer::handleNodeShutdown(IDoneCallback *doneCallback)
+void UdpVideoStreamServer::handleStopOperation(LifecycleOperation *operation)
 {
     clearStreams();
-    //TODO if(socket.isOpened()) socket.close();
     socket.setCallback(nullptr);
-    return true;
+    socket.close();
+    delayActiveOperationFinish(par("stopOperationTimeout"));
 }
 
-void UdpVideoStreamServer::handleNodeCrash()
+void UdpVideoStreamServer::handleCrashOperation(LifecycleOperation *operation)
 {
     clearStreams();
+    if (operation->getRootModule() != getContainingNode(this))     // closes socket when the application crashed only
+        socket.destroy();    //TODO  in real operating systems, program crash detected by OS and OS closes sockets of crashed programs.
     socket.setCallback(nullptr);
 }
 

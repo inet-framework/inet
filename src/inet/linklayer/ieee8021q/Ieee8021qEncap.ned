@@ -15,7 +15,7 @@
 
 package inet.linklayer.ieee8021q;
 
-simple Ieee8021QVlan like IIeee8021QVlan
+simple Ieee8021qEncap like IIeee8021qEncap
 {
     parameters:
         string vlanTagType @enum("c","s") = default("c");

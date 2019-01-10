@@ -33,19 +33,31 @@ void MpduGen::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         localPort = par("localPort");
         destPort = par("destPort");
-    }
-    else if (stage == INITSTAGE_LAST) {
         selfMsg = new cMessage("Self msg");
-        scheduleAt(simTime() + par("startTime"), selfMsg);
     }
 }
 
-void MpduGen::processPacket(Packet *pk)
+void MpduGen::socketDataArrived(UdpSocket *socket, Packet *pk)
 {
     emit(packetReceivedSignal, pk);
     EV_INFO << "Received packet: " << UdpSocket::getReceivedPacketInfo(pk) << endl;
     delete pk;
     numReceived++;
+}
+
+void MpduGen::socketErrorArrived(UdpSocket *socket, Indication *indication)
+{
+    EV_WARN << "Ignoring UDP error report\n";
+    delete indication;
+}
+
+void MpduGen::socketClosed(UdpSocket *socket_)
+{
+    ASSERT(&socket == socket_);
+    EV_WARN << "Ignoring UDP socket closed report\n";
+    if (operationalState == STOPPING_OPERATION)
+        if (!socket.isOpen())
+            finishActiveOperation();
 }
 
 void MpduGen::sendPackets()
@@ -85,16 +97,9 @@ void MpduGen::handleMessageWhenUp(cMessage *msg)
         ASSERT(msg == selfMsg);
         sendPackets();
     }
-    else if (msg->getKind() == UDP_I_DATA) {
-        processPacket(check_and_cast<Packet*>(msg));
-    }
-    else if (msg->getKind() == UDP_I_ERROR) {
-        EV_WARN << "Ignoring UDP error report\n";
-        delete msg;
-    }
-    else {
-        throw cRuntimeError("Unrecognized message (%s)%s", msg->getClassName(), msg->getName());
-    }
+    else
+        socket.processMessage(msg);
+
     if (hasGUI()) {
         char buf[40];
         sprintf(buf, "rcvd: %d pks\nsent: %d pks", numReceived, numSent);
@@ -102,4 +107,23 @@ void MpduGen::handleMessageWhenUp(cMessage *msg)
     }
 }
 
+void MpduGen::handleStartOperation(LifecycleOperation *operation)
+{
+    scheduleAt(simTime() + par("startTime"), selfMsg);
 }
+
+void MpduGen::handleStopOperation(LifecycleOperation *operation)
+{
+    cancelEvent(selfMsg);
+    socket.close();
+    delayActiveOperationFinish(par("stopOperationTimeout"));
+}
+
+void MpduGen::handleCrashOperation(LifecycleOperation *operation)
+{
+    cancelEvent(selfMsg);
+    socket.destroy();
+}
+
+}   // namespace inet
+

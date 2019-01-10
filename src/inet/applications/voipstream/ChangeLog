@@ -1,3 +1,23 @@
+2018-11-13  Zoltan Bojthe
+
+	Added waiting for udp socketClosed indication in stopOperation.
+
+2018-10-25  Zoltan Bojthe
+
+	Fixed NodeStatus module detection.
+
+2018-10-04  Zoltan Bojthe
+
+	Added LifecycleUnsupported base class instead of copy-pasting the same code.
+
+2018-08-17  Zoltan Bojthe
+
+	Added namespace qualifier to @signal type parameters.
+
+2018-07-17  Levente Mészáros
+
+	Added VoipStreamPacketSerializer.
+
 ====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------

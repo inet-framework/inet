@@ -21,7 +21,7 @@
 #include "inet/common/INETDefs.h"
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/lifecycle/LifecycleUnsupported.h"
-#include "inet/common/queue/QueueBase.h"
+#include "inet/common/packet/Message.h"
 #include "inet/networklayer/contract/INetfilter.h"
 #include "inet/networklayer/contract/INetworkProtocol.h"
 #include "inet/networklayer/icmpv6/Icmpv6.h"
@@ -41,7 +41,7 @@ class Icmpv6Header;
 /**
  * Ipv6 implementation.
  */
-class INET_API Ipv6 : public QueueBase, public NetfilterBase, public LifecycleUnsupported, public INetworkProtocol, public IProtocolRegistrationListener
+class INET_API Ipv6 : public cSimpleModule, public NetfilterBase, public LifecycleUnsupported, public INetworkProtocol, public IProtocolRegistrationListener
 {
   public:
     /**
@@ -137,6 +137,8 @@ class INET_API Ipv6 : public QueueBase, public NetfilterBase, public LifecycleUn
     virtual void preroutingFinish(Packet *packet, const InterfaceEntry *fromIE, const InterfaceEntry *destIE, Ipv6Address nextHopAddr);
 
     virtual void handleMessage(cMessage *msg) override;
+
+    virtual void handleRequest(Request *request);
 
     /**
      * Handle messages (typically packets to be send in Ipv6) from transport or ICMP.
@@ -238,12 +240,6 @@ class INET_API Ipv6 : public QueueBase, public NetfilterBase, public LifecycleUn
      */
     virtual void initialize(int stage) override;
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
-
-    /**
-     * Processing of Ipv6 datagrams. Called when a datagram reaches the front
-     * of the queue.
-     */
-    virtual void endService(cPacket *msg) override;
 
     /**
      * Determines the correct interface for the specified destination address.

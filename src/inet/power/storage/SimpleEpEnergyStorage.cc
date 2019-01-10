@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/power/storage/SimpleEpEnergyStorage.h"
 
@@ -79,7 +79,7 @@ void SimpleEpEnergyStorage::executeNodeOperation(J newResidualCapacity)
     if (newResidualCapacity <= J(0) && nodeStatus->getState() == NodeStatus::UP) {
         EV_WARN << "Energy storage failed" << endl;
         LifecycleOperation::StringMap params;
-        NodeCrashOperation *operation = new NodeCrashOperation();
+        ModuleCrashOperation *operation = new ModuleCrashOperation();
         operation->initialize(networkNode, params);
         lifecycleController.initiateOperation(operation);
     }

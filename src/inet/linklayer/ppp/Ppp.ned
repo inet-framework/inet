@@ -49,6 +49,9 @@ simple Ppp
         int txQueueLimit = default(1000);  // only used if queueModule==""; zero means infinite
         string queueModule = default("");  // path of external (QoS,RED,etc) queue module
         int mtu @unit(B) = default(4470B);
+        @lifecycleSupport;
+        double stopOperationExtraTime @unit(s) = default(-1s);    // extra time after lifecycle stop operation finished
+        double stopOperationTimeout @unit(s) = default(2s);    // timeout value for lifecycle stop operation
         @display("i=block/rxtx");
 
         @signal[transmissionStateChanged](type=long);    // 1:transmit, 0:idle

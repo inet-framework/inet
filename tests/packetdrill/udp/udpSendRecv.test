@@ -10,7 +10,6 @@ SUT is a server, i.e. it opens a socket, sends 1000 bytes, receives 500 bytes an
 [General]
 network = PacketDrillUdp
 debug-on-errors = true
-tkenv-plugin-path = ../../../etc/plugins
 ned-path = .;../../../../../src;../../lib
 
 **.scriptFile="../../udptests/udpSendRecv.pkt"

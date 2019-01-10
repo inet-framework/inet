@@ -40,7 +40,8 @@ class INET_API QosAckHandler : public IAckHandler
             NORMAL_ACK_NOT_ARRIVED,
             NORMAL_ACK_ARRIVED,
             BLOCK_ACK_ARRIVED_UNACKED,
-            BLOCK_ACK_ARRIVED_ACKED
+            BLOCK_ACK_ARRIVED_ACKED,
+            BLOCK_ACK_NOT_ARRIVED
         };
     protected:
         typedef std::pair<MacAddress, std::pair<Tid, SequenceControlField>> QoSKey;
@@ -61,11 +62,13 @@ class INET_API QosAckHandler : public IAckHandler
 
         virtual void processReceivedAck(const Ptr<const Ieee80211AckFrame>& ack, const Ptr<const Ieee80211DataOrMgmtHeader>& ackedHeader);
         virtual std::set<std::pair<MacAddress, std::pair<Tid, SequenceControlField>>> processReceivedBlockAck(const Ptr<const Ieee80211BlockAck>& blockAck);
+        virtual void processFailedBlockAckReq(const Ptr<const Ieee80211BlockAckReq>& blockAckReq);
 
         virtual void frameGotInProgress(const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader) override;
         virtual void processTransmittedDataOrMgmtFrame(const Ptr<const Ieee80211DataOrMgmtHeader>& header);
         virtual void processTransmittedBlockAckReq(const Ptr<const Ieee80211BlockAckReq>& blockAckReq);
         virtual void processFailedFrame(const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader);
+        virtual void dropFrame(const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader);
 
         virtual Status getQoSDataAckStatus(const Ptr<const Ieee80211DataHeader>& header);
         virtual Status getMgmtOrNonQoSAckStatus(const Ptr<const Ieee80211DataOrMgmtHeader>& header);

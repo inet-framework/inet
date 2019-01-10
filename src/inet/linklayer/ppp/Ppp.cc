@@ -20,7 +20,7 @@
 
 #include "inet/common/INETDefs.h"
 #include "inet/common/INETUtils.h"
-#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
@@ -91,25 +91,23 @@ void Ppp::initialize(int stage)
 
 void Ppp::configureInterfaceEntry()
 {
-    InterfaceEntry *e = getContainingNicModule(this);
-
     // data rate
     bool connected = datarateChannel != nullptr;
     double datarate = connected ? datarateChannel->getNominalDatarate() : 0;
-    e->setDatarate(datarate);
-    e->setCarrier(connected);
+    interfaceEntry->setDatarate(datarate);
+    interfaceEntry->setCarrier(connected);
 
     // generate a link-layer address to be used as interface token for IPv6
     InterfaceToken token(0, getSimulation()->getUniqueNumber(), 64);
-    e->setInterfaceToken(token);
+    interfaceEntry->setInterfaceToken(token);
 
     // MTU: typical values are 576 (Internet de facto), 1500 (Ethernet-friendly),
     // 4000 (on some point-to-point links), 4470 (Cisco routers default, FDDI compatible)
-    e->setMtu(par("mtu"));
+    interfaceEntry->setMtu(par("mtu"));
 
     // capabilities
-    e->setMulticast(true);
-    e->setPointToPoint(true);
+    interfaceEntry->setMulticast(true);
+    interfaceEntry->setPointToPoint(true);
 }
 
 void Ppp::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
@@ -218,6 +216,18 @@ void Ppp::startTransmitting(Packet *msg)
     numSent++;
 }
 
+void Ppp::handleMessageWhenUp(cMessage *message)
+{
+    MacBase::handleMessageWhenUp(message);
+    if (operationalState == State::STOPPING_OPERATION) {
+        if (queueModule ? queueModule->isEmpty() : txQueue.isEmpty()) {
+            interfaceEntry->setCarrier(false);
+            interfaceEntry->setState(InterfaceEntry::State::DOWN);
+            startActiveOperationExtraTimeOrFinish(par("stopOperationExtraTime"));
+        }
+    }
+}
+
 void Ppp::handleSelfMessage(cMessage *message)
 {
     if (message == endTransmissionEvent) {
@@ -304,6 +314,8 @@ void Ppp::handleLowerPacket(Packet *packet)
 
 void Ppp::refreshDisplay() const
 {
+    MacBase::refreshDisplay();
+
     std::ostringstream buf;
     const char *color = "";
 
@@ -398,6 +410,20 @@ void Ppp::clearQueue()
     }
     else {
         txQueue.clear();
+    }
+}
+
+void Ppp::handleStopOperation(LifecycleOperation *operation)
+{
+    bool queueEmpty = queueModule ? queueModule->isEmpty() : txQueue.isEmpty();
+    if (!queueEmpty) {
+        interfaceEntry->setState(InterfaceEntry::State::GOING_DOWN);
+        delayActiveOperationFinish(par("stopOperationTimeout"));
+    }
+    else {
+        interfaceEntry->setCarrier(false);
+        interfaceEntry->setState(InterfaceEntry::State::DOWN);
+        startActiveOperationExtraTimeOrFinish(par("stopOperationExtraTime"));
     }
 }
 

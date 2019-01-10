@@ -94,6 +94,16 @@ void TunnelApp::handleMessageWhenUp(cMessage *message)
     }
     else
         throw cRuntimeError("Message arrived on unknown gate %s", message->getArrivalGate()->getFullName());
+
+    if (operationalState == State::STOPPING_OPERATION) {
+        if (ipv4Socket.isOpen() || serverSocket.isOpen() || clientSocket.isOpen())
+            return;
+        for (auto s: socketMap.getMap())
+            if (s.second->isOpen())
+                return;
+        socketMap.deleteSockets();
+        startActiveOperationExtraTimeOrFinish(par("stopOperationExtraTime"));
+    }
 }
 
 void TunnelApp::socketDataArrived(UdpSocket *socket, Packet *packet)
@@ -112,7 +122,12 @@ void TunnelApp::socketErrorArrived(UdpSocket *socket, Indication *indication)
     delete indication;
 }
 
-// L3Socket::ICallback
+void TunnelApp::socketClosed(UdpSocket *socket)
+{
+    //TODO processing socket closed at stopOperation
+}
+
+// Ipv4Socket::ICallback
 void TunnelApp::socketDataArrived(Ipv4Socket *socket, Packet *packet)
 {
     auto packetProtocol = packet->getTag<NetworkProtocolInd>()->getProtocol();
@@ -122,6 +137,11 @@ void TunnelApp::socketDataArrived(Ipv4Socket *socket, Packet *packet)
     }
     else
         throw cRuntimeError("Unknown protocol: %s", packetProtocol->getName());;
+}
+
+void TunnelApp::socketClosed(Ipv4Socket *socket)
+{
+    //TODO processing socket closed at stopOperation
 }
 
 // TunSocket::ICallback
@@ -140,6 +160,26 @@ void TunnelApp::socketDataArrived(TunSocket *socket, Packet *packet)
     }
     else
         throw cRuntimeError("Unknown protocol: %s", protocol->getName());;
+}
+
+void TunnelApp::handleStopOperation(LifecycleOperation *operation)
+{
+    ipv4Socket.close();
+    serverSocket.close();
+    clientSocket.close();
+    for (auto s: socketMap.getMap())
+        s.second->close();
+    delayActiveOperationFinish(par("stopOperationTimeout"));
+}
+
+void TunnelApp::handleCrashOperation(LifecycleOperation *operation)
+{
+    ipv4Socket.destroy();
+    serverSocket.destroy();
+    clientSocket.destroy();
+    for (auto s: socketMap.getMap())
+        s.second->destroy();
+    socketMap.deleteSockets();
 }
 
 } // namespace inet

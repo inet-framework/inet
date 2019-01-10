@@ -1,3 +1,11 @@
+2018-12-10  Zoltan Bojthe
+
+	Fixed features for OsgEarthGround which depends on SceneOsgEarthVisualizer.
+
+2018-09-30  Andras Varga
+
+	Renamed playground* (NED parameters, C++ variables/methods) to scene*.
+
 ====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------

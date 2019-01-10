@@ -111,6 +111,7 @@ class INET_API DhcpServer : public ApplicationBase, public cListener, public Udp
     //UdpSocket::ICallback methods
     virtual void socketDataArrived(UdpSocket *socket, Packet *packet) override;
     virtual void socketErrorArrived(UdpSocket *socket, Indication *indication) override;
+    virtual void socketClosed(UdpSocket *socket) override;
 
     /*
      * Signal handler for cObject, override cListener function.
@@ -118,10 +119,9 @@ class INET_API DhcpServer : public ApplicationBase, public cListener, public Udp
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
 
     // Lifecycle methods
-    virtual bool handleNodeStart(IDoneCallback *doneCallback) override;
-    virtual bool handleNodeShutdown(IDoneCallback *doneCallback) override { stopApp(); return true; }
-    virtual void handleNodeCrash() override { stopApp(); }
-    virtual void stopApp();
+    virtual void handleStartOperation(LifecycleOperation *operation) override;
+    virtual void handleStopOperation(LifecycleOperation *operation) override;
+    virtual void handleCrashOperation(LifecycleOperation *operation) override;
 
   public:
     DhcpServer();

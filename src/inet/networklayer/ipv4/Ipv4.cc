@@ -22,7 +22,7 @@
 #include "inet/common/INETUtils.h"
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/LayeredProtocolBase.h"
-#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/packet/Message.h"
@@ -56,8 +56,7 @@ Define_Module(Ipv4);
 // a multicast cimek eseten hianyoznak bizonyos NetFilter hook-ok
 // a local interface-k hasznalata eseten szinten hianyozhatnak bizonyos NetFilter hook-ok
 
-Ipv4::Ipv4() :
-    isUp(true)
+Ipv4::Ipv4()
 {
 }
 
@@ -70,9 +69,9 @@ Ipv4::~Ipv4()
 
 void Ipv4::initialize(int stage)
 {
-    if (stage == INITSTAGE_LOCAL) {
-        QueueBase::initialize();
+    OperationalBase::initialize(stage);
 
+    if (stage == INITSTAGE_LOCAL) {
         ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
         rt = getModuleFromPar<IIpv4RoutingTable>(par("routingTableModule"), this);
         arp = getModuleFromPar<IArp>(par("arpModule"), this);
@@ -92,10 +91,10 @@ void Ipv4::initialize(int stage)
         defaultMCTimeToLive = par("multicastTimeToLive");
         fragmentTimeoutTime = par("fragmentTimeout");
         limitedBroadcast = par("limitedBroadcast");
-        directBroadcast = par("directBroadcast").stdstringValue();
+        directBroadcastInterfaces = par("directBroadcastInterfaces").stdstringValue();
         useProxyARP = par("useProxyARP");
 
-        interfaceMatcher.setPattern(directBroadcast.c_str(), false, true, false);
+        directBroadcastInterfaceMatcher.setPattern(directBroadcastInterfaces.c_str(), false, true, false);
 
         curFragmentId = 0;
         lastCheckTime = 0;
@@ -122,9 +121,6 @@ void Ipv4::initialize(int stage)
         WATCH_MAP(pendingPackets);
         WATCH_MAP(socketIdToSocketDescriptor);
     }
-    else if (stage == INITSTAGE_NETWORK_LAYER) {
-        isUp = isNodeUp();
-    }
 }
 
 void Ipv4::handleRegisterService(const Protocol& protocol, cGate *out, ServicePrimitive servicePrimitive)
@@ -141,6 +137,8 @@ void Ipv4::handleRegisterProtocol(const Protocol& protocol, cGate *in, ServicePr
 
 void Ipv4::refreshDisplay() const
 {
+    OperationalBase::refreshDisplay();
+
     char buf[80] = "";
     if (numForwarded > 0)
         sprintf(buf + strlen(buf), "fwd:%d ", numForwarded);
@@ -179,6 +177,20 @@ void Ipv4::handleRequest(Request *request)
         if (it != socketIdToSocketDescriptor.end()) {
             delete it->second;
             socketIdToSocketDescriptor.erase(it);
+            auto indication = new Indication("closed", IPv4_I_SOCKET_CLOSED);
+            auto ctrl = new Ipv4SocketClosedIndication();
+            indication->setControlInfo(ctrl);
+            indication->addTagIfAbsent<SocketInd>()->setSocketId(socketId);
+            send(indication, "transportOut");
+        }
+        delete request;
+    }
+    else if (dynamic_cast<Ipv4SocketDestroyCommand *>(ctrl) != nullptr) {
+        int socketId = request->getTag<SocketReq>()->getSocketId();
+        auto it = socketIdToSocketDescriptor.find(socketId);
+        if (it != socketIdToSocketDescriptor.end()) {
+            delete it->second;
+            socketIdToSocketDescriptor.erase(it);
         }
         delete request;
     }
@@ -186,28 +198,20 @@ void Ipv4::handleRequest(Request *request)
         throw cRuntimeError("Unknown command: '%s' with %s", request->getName(), ctrl->getClassName());
 }
 
-void Ipv4::handleMessage(cMessage *msg)
+void Ipv4::handleMessageWhenUp(cMessage *msg)
 {
-    if (auto request = dynamic_cast<Request *>(msg))
-        handleRequest(request);
+    if (msg->arrivedOn("transportIn")) {    //TODO packet->getArrivalGate()->getBaseId() == transportInGateBaseId
+        if (auto request = dynamic_cast<Request *>(msg))
+            handleRequest(request);
+        else
+            handlePacketFromHL(check_and_cast<Packet*>(msg));
+    }
+    else if (msg->arrivedOn("queueIn")) {    // from network
+        EV_INFO << "Received " << msg << " from network.\n";
+        handleIncomingDatagram(check_and_cast<Packet*>(msg));
+    }
     else
-        QueueBase::handleMessage(msg);
-}
-
-void Ipv4::endService(cPacket *packet)
-{
-    if (!isUp) {
-        EV_ERROR << "Ipv4 is down -- discarding message\n";
-        delete packet;
-        return;
-    }
-    if (packet->getArrivalGate()->isName("transportIn")) {    //TODO packet->getArrivalGate()->getBaseId() == transportInGateBaseId
-        handlePacketFromHL(check_and_cast<Packet*>(packet));
-    }
-    else {    // from network
-        EV_INFO << "Received " << packet << " from network.\n";
-        handleIncomingDatagram(check_and_cast<Packet*>(packet));
-    }
+        throw cRuntimeError("message arrived on unknown gate '%s'", msg->getArrivalGate()->getName());
 }
 
 bool Ipv4::verifyCrc(const Ptr<const Ipv4Header>& ipv4Header)
@@ -365,8 +369,9 @@ void Ipv4::preroutingFinish(Packet *packet)
         else if (destAddr.isLimitedBroadcastAddress() || (broadcastIE = rt->findInterfaceByLocalBroadcastAddress(destAddr))) {
             // broadcast datagram on the target subnet if we are a router
             if (broadcastIE && fromIE != broadcastIE && rt->isForwardingEnabled()) {
-                if(interfaceMatcher.matches(broadcastIE->getInterfaceName()) ||
-                        interfaceMatcher.matches(broadcastIE->getInterfaceFullPath().c_str())) {
+                if (directBroadcastInterfaceMatcher.matches(broadcastIE->getInterfaceName()) ||
+                    directBroadcastInterfaceMatcher.matches(broadcastIE->getInterfaceFullPath().c_str()))
+                {
                     auto packetCopy = prepareForForwarding(packet->dup());
                     packetCopy->addTagIfAbsent<InterfaceReq>()->setInterfaceId(broadcastIE->getInterfaceId());
                     packetCopy->addTagIfAbsent<NextHopAddressReq>()->setNextHopAddress(Ipv4Address::ALLONES_ADDRESS);
@@ -756,6 +761,7 @@ void Ipv4::reassembleAndDeliverFinish(Packet *packet)
                 && (elem.second->localAddress.isUnspecified() || elem.second->localAddress == localAddress)
                 && (elem.second->remoteAddress.isUnspecified() || elem.second->remoteAddress == remoteAddress)) {
             auto *packetCopy = packet->dup();
+            packetCopy->setKind(IPv4_I_DATA);
             packetCopy->addTagIfAbsent<SocketInd>()->setSocketId(elem.second->socketId);
             EV_INFO << "Passing up to socket " << elem.second->socketId << "\n";
             emit(packetSentToUpperSignal, packetCopy);
@@ -1247,42 +1253,36 @@ INetfilter::IHook::Result Ipv4::datagramPostRoutingHook(Packet *packet)
     return INetfilter::IHook::ACCEPT;
 }
 
-bool Ipv4::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+void Ipv4::handleStartOperation(LifecycleOperation *operation)
 {
-    Enter_Method_Silent();
-    if (dynamic_cast<NodeStartOperation *>(operation)) {
-        if (static_cast<NodeStartOperation::Stage>(stage) == NodeStartOperation::STAGE_NETWORK_LAYER)
-            start();
-    }
-    else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
-        if (static_cast<NodeShutdownOperation::Stage>(stage) == NodeShutdownOperation::STAGE_NETWORK_LAYER)
-            stop();
-    }
-    else if (dynamic_cast<NodeCrashOperation *>(operation)) {
-        if (static_cast<NodeCrashOperation::Stage>(stage) == NodeCrashOperation::STAGE_CRASH)
-            stop();
-    }
-    return true;
+    start();
+}
+
+void Ipv4::handleStopOperation(LifecycleOperation *operation)
+{
+    // TODO: stop should send and wait pending packets
+    stop();
+}
+
+void Ipv4::handleCrashOperation(LifecycleOperation *operation)
+{
+    stop();
 }
 
 void Ipv4::start()
 {
-    ASSERT(queue.isEmpty());
-    isUp = true;
 }
 
 void Ipv4::stop()
 {
-    isUp = false;
     flush();
+    for (auto it : socketIdToSocketDescriptor)
+        delete it.second;
+    socketIdToSocketDescriptor.clear();
 }
 
 void Ipv4::flush()
 {
-    delete cancelService();
-    EV_DEBUG << "Ipv4::flush(): packets in queue: " << queue.str() << endl;
-    queue.clear();
-
     EV_DEBUG << "Ipv4::flush(): pending packets:\n";
     for (auto & elem : pendingPackets) {
         EV_DEBUG << "Ipv4::flush():    " << elem.first << ": " << elem.second.str() << endl;
@@ -1297,12 +1297,6 @@ void Ipv4::flush()
     queuedDatagramsForHooks.clear();
 
     fragbuf.flush();
-}
-
-bool Ipv4::isNodeUp()
-{
-    NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
-    return !nodeStatus || nodeStatus->getState() == NodeStatus::UP;
 }
 
 INetfilter::IHook::Result Ipv4::datagramLocalInHook(Packet *packet)

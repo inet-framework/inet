@@ -28,7 +28,7 @@
 #include "inet/linklayer/ieee8021d/common/Ieee8021dBpdu_m.h"
 #include "inet/networklayer/common/InterfaceTable.h"
 #include "inet/linklayer/configurator/Ieee8021dInterfaceData.h"
-#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/linklayer/ieee8021d/common/StpBase.h"
 

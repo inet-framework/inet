@@ -1,3 +1,7 @@
+2018-10-02  Levente Mészáros
+
+	Added INITSTAGE_PHYSICAL_LAYER_NEIGHBOR_CACHE stage.
+
 ====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------

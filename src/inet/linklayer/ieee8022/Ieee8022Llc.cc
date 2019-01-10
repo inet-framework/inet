@@ -97,6 +97,21 @@ void Ieee8022Llc::processCommandFromHigherLayer(Request *request)
             socketIdToSocketDescriptor.erase(it);
         }
         delete request;
+        auto indication = new Indication("closed", IEEE8022_LLC_I_SOCKET_CLOSED);
+        auto ctrl = new Ieee8022LlcSocketClosedIndication();
+        indication->setControlInfo(ctrl);
+        indication->addTagIfAbsent<SocketInd>()->setSocketId(socketId);
+        send(indication, "upperLayerOut");
+
+    }
+    else if (dynamic_cast<Ieee8022LlcSocketDestroyCommand *>(ctrl) != nullptr) {
+        int socketId = request->getTag<SocketReq>()->getSocketId();
+        auto it = socketIdToSocketDescriptor.find(socketId);
+        if (it != socketIdToSocketDescriptor.end()) {
+            delete it->second;
+            socketIdToSocketDescriptor.erase(it);
+        }
+        delete request;
     }
     else
         throw cRuntimeError("Unknown command: '%s' with %s", request->getName(), ctrl->getClassName());
@@ -117,6 +132,7 @@ void Ieee8022Llc::processPacketFromMac(Packet *packet)
                 auto *packetCopy = packet->dup();
                 packetCopy->addTagIfAbsent<SocketInd>()->setSocketId(elem.second->socketId);
                 EV_INFO << "Passing up to socket " << elem.second->socketId << "\n";
+                packetCopy->setKind(IEEE8022_LLC_I_DATA);
                 send(packetCopy, "upperLayerOut");
                 isSent = true;
             }
@@ -251,19 +267,17 @@ void Ieee8022Llc::clearSockets()
     socketIdToSocketDescriptor.clear();
 }
 
-bool Ieee8022Llc::handleNodeStart(IDoneCallback *)
+void Ieee8022Llc::handleStartOperation(LifecycleOperation *operation)
 {
     clearSockets();
-    return true;
 }
 
-bool Ieee8022Llc::handleNodeShutdown(IDoneCallback *)
+void Ieee8022Llc::handleStopOperation(LifecycleOperation *operation)
 {
     clearSockets();
-    return true;
 }
 
-void Ieee8022Llc::handleNodeCrash()
+void Ieee8022Llc::handleCrashOperation(LifecycleOperation *operation)
 {
     clearSockets();
 }

@@ -18,7 +18,7 @@
 package inet.emulation.linklayer.ieee80211;
 
 import inet.emulation.common.ExtInterface;
-import inet.emulation.linklayer.ethernet.ExtEthernetTapDeviceFileIo;
+import inet.emulation.linklayer.ethernet.ExtEthernetTapDevice;
 import inet.linklayer.common.IIeee8021dQosClassifier;
 import inet.linklayer.contract.IWirelessInterface;
 import inet.linklayer.ieee80211.IIeee80211Mac;
@@ -30,7 +30,6 @@ import inet.physicallayer.contract.packetlevel.IRadio;
 
 //
 // This module provides an IEEE 802.11 network interface suitable for emulation.
-//
 // The upper part of the network interface is realized in the real world using
 // a real TAP device of the host computer which is running the simulation.
 //
@@ -57,7 +56,7 @@ module ExtUpperIeee80211Interface extends ExtInterface like IWirelessInterface
             parameters:
                 @display("p=100,100;is=s");
         }
-        tap: ExtEthernetTapDeviceFileIo {
+        tap: ExtEthernetTapDevice {
             parameters:
                 @display("p=250,100");
         }

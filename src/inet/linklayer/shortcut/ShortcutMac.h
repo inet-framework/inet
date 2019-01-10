@@ -49,6 +49,11 @@ class INET_API ShortcutMac : public MacProtocolBase
     virtual ShortcutMac *findPeer(MacAddress address);
     virtual void sendToPeer(Packet *packet, ShortcutMac *peer);
     virtual void receiveFromPeer(Packet *packet);
+
+    // OperationalBase:
+    virtual void handleStartOperation(LifecycleOperation *operation) override {}    //TODO implementation
+    virtual void handleStopOperation(LifecycleOperation *operation) override {}    //TODO implementation
+    virtual void handleCrashOperation(LifecycleOperation *operation) override {}    //TODO implementation
 };
 
 } // namespace inet

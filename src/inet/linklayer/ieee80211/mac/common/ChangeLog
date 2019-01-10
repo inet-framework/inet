@@ -1,3 +1,15 @@
+2018-12-20  Levente Mészáros
+
+	Simplified loops by relying on the wrap around nature of SequenceNumber.
+	Added a separate SequenceNumber struct to encapsulate the wrap around behaviour of sequence numbers.
+
+2018-12-13  Levente Mészáros
+
+	Fixed invalid sequence number error when block ack is used.
+
+	The incorrect valid range parameter for isSequenceNumberLess caused some
+	frame to be dropped before it was actually passed up.
+
 ====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------

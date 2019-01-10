@@ -1,0 +1,24 @@
+2018-12-17  Levente Mészáros
+
+	Cleaned up and updated documentation.
+	Renamed a couple of emulation support modules for simplicity:
+	ExtIpv4TunDeviceFileIo -> ExtIpv4TunDevice
+
+2018-10-22  Levente Mészáros
+
+	Added support for host network namespaces.
+
+2018-09-18  Levente Mészáros
+
+	Added ExtIpv4TunDeviceFileIo module.
+
+2018-07-26  Levente Mészáros
+
+	Renamed RawSocket to ExtIpv4Socket.
+
+2018-07-20  Levente Mészáros
+
+	Created a separate folder structure under src for emulation related modules and components.
+	Added ExtLowerIpv4 and ExtUpperIpv4 modules that provide emulation support at the IPv4 protocol level.
+
+====== inet-4.x ======

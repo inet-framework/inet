@@ -47,11 +47,24 @@ bool L3Socket::belongsToSocket(cMessage *msg) const
 void L3Socket::processMessage(cMessage *msg)
 {
     ASSERT(belongsToSocket(msg));
-
-    if (callback)
-        callback->socketDataArrived(this, check_and_cast<Packet*>(msg));
-    else
-        delete msg;
+    switch (msg->getKind()) {
+        case L3_I_DATA:
+            if (callback)
+                callback->socketDataArrived(this, check_and_cast<Packet *>(msg));
+            else
+                delete msg;
+            break;
+        case L3_I_SOCKET_CLOSED:
+            check_and_cast<Indication *>(msg);
+            bound = isOpen_ = false;
+            if (callback)
+                callback->socketClosed(this);
+            delete msg;
+            break;
+        default:
+            throw cRuntimeError("L3Socket: invalid msg kind %d, one of the L3_I_xxx constants expected", msg->getKind());
+            break;
+    }
 }
 
 void L3Socket::bind(const Protocol *protocol, L3Address localAddress)
@@ -64,10 +77,12 @@ void L3Socket::bind(const Protocol *protocol, L3Address localAddress)
     request->setControlInfo(command);
     sendToOutput(request);
     bound = true;
+    isOpen_ = true;
 }
 
 void L3Socket::connect(L3Address remoteAddress)
 {
+    isOpen_ = true;
     auto *command = new L3SocketConnectCommand();
     command->setRemoteAddress(remoteAddress);
     auto request = new Request("connect", L3_C_CONNECT);
@@ -93,6 +108,15 @@ void L3Socket::close()
     ASSERT(l3Protocol != nullptr);
     L3SocketCloseCommand *command = new L3SocketCloseCommand();
     auto request = new Request("close", L3_C_CLOSE);
+    request->setControlInfo(command);
+    sendToOutput(request);
+}
+
+void L3Socket::destroy()
+{
+    ASSERT(l3Protocol != nullptr);
+    auto *command = new L3SocketDestroyCommand();
+    auto request = new Request("destroy", L3_C_DESTROY);
     request->setControlInfo(command);
     sendToOutput(request);
 }

@@ -105,7 +105,7 @@ bool RedDropper::shouldDrop(cPacket *packet)
         const double pa = pb / (1 - count[i] * pb); // TD: Adapted to work as in [Floyd93].
         if (dblrand() < pa)
         {
-            EV << "Random early packet drop (avg queue len=" << avg << ", pa=" << pb << ")\n";
+            EV << "Random early packet drop (avg queue len=" << avg << ", pa=" << pa << ")\n";
             count[i] = 0;
             return true;
         }

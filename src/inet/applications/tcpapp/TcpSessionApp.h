@@ -51,11 +51,11 @@ class INET_API TcpSessionApp : public TcpAppBase
     // state
     int commandIndex = -1;
     cMessage *timeoutMsg = nullptr;
-    NodeStatus *nodeStatus = nullptr;
 
   protected:
-    virtual bool isNodeUp();
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
+    virtual void handleStartOperation(LifecycleOperation *operation) override;
+    virtual void handleStopOperation(LifecycleOperation *operation) override;
+    virtual void handleCrashOperation(LifecycleOperation *operation) override;
 
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;

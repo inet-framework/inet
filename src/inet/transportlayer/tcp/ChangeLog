@@ -1,3 +1,24 @@
+2018-11-27  Zoltan Bojthe
+
+	Fixed close, it shouldn't throw.
+
+2018-11-09  Zoltan Bojthe
+
+	Added handlers for processing destroy command
+
+2018-11-16  Zoltan Bojthe
+
+	The MSL value is NED parameter instead of C++ macro.
+
+2018-11-28  Zoltan Bojthe
+
+	Fixed compatibility for cObject::info() and cObject::detailedInfo() functions removed in omnetpp 6.0.
+
+2018-10-17  Zoltan Bojthe
+
+	Switched to parseCrcMode().
+	Changed TCP module base class to OperationalBase.
+
 ====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------

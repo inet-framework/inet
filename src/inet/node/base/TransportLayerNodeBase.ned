@@ -25,8 +25,8 @@ import inet.transportlayer.contract.IUdp;
 module TransportLayerNodeBase extends NetworkLayerNodeBase
 {
     parameters:
-        bool hasUdp = default(true);
-        bool hasTcp = default(true);
+        bool hasUdp = default(firstAvailableOrEmpty("Udp") != "");
+        bool hasTcp = default(firstAvailableOrEmpty("Tcp", "TcpLwip", "TcpNsc") != "");
         bool hasSctp = default(false);
         @figure[transportLayer](type=rectangle; pos=250,156; size=1000,130; fillColor=#ff0000; lineColor=#808080; cornerRadius=5; fillOpacity=0.1);
         @figure[transportLayer.title](type=text; pos=1245,161; anchor=ne; text="transport layer");

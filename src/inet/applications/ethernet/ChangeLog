@@ -1,3 +1,47 @@
+2018-11-14  Zoltan Bojthe
+
+	Removed unused obsolete EthernetApplication.
+
+2018-11-12  Zoltan Bojthe
+
+	Call socket->destroy() when the operation root module is not the containing node module.
+
+2018-11-09  Zoltan Bojthe
+
+	Switched to socket.destroy() in handleCrashOperation().
+
+2018-11-05  Zoltan Bojthe
+
+	Close/abort socket at module crash operation.
+
+2018-10-26  Zoltan Bojthe
+
+	Added missing socket close calls for stop/crash handling.
+
+2018-10-03  Zoltan Bojthe
+
+	Changed ethernet application base classes to ApplicationBase.
+
+2018-10-01  Zoltan Bojthe
+
+	Removed obsolete registerDSAP from EtherAppClient.
+
+2018-09-25  Zoltan Bojthe
+
+	Ethernet applications use LlcSocket instead of registerDSAP.
+
+2018-08-17  Zoltan Bojthe
+
+	Added namespace qualifier to @signal type parameters.
+
+2018-07-20  Zoltan Bojthe
+
+	Changed ethernet applications to use L3AddressResolver to get destination addresses.
+
+2018-07-12  Zoltan Bojthe
+
+	Ethernet applications connect to an EthernetInterface instead of the MAC module.
+
 ====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------

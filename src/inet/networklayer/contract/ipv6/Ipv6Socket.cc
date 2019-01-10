@@ -46,11 +46,24 @@ bool Ipv6Socket::belongsToSocket(cMessage *msg) const
 void Ipv6Socket::processMessage(cMessage *msg)
 {
     ASSERT(belongsToSocket(msg));
-
-    if (callback)
-        callback->socketDataArrived(this, check_and_cast<Packet*>(msg));
-    else
-        delete msg;
+    switch (msg->getKind()) {
+        case IPv6_I_DATA:
+            if (callback)
+                callback->socketDataArrived(this, check_and_cast<Packet *>(msg));
+            else
+                delete msg;
+            break;
+        case IPv6_I_SOCKET_CLOSED:
+            check_and_cast<Indication *>(msg);
+            bound = isOpen_ = false;
+            if (callback)
+                callback->socketClosed(this);
+            delete msg;
+            break;
+        default:
+            throw cRuntimeError("Ipv6Socket: invalid msg kind %d, one of the IPv6_I_xxx constants expected", msg->getKind());
+            break;
+    }
 }
 
 void Ipv6Socket::bind(const Protocol *protocol, Ipv6Address localAddress)
@@ -63,10 +76,12 @@ void Ipv6Socket::bind(const Protocol *protocol, Ipv6Address localAddress)
     request->setControlInfo(command);
     sendToOutput(request);
     bound = true;
+    isOpen_ = true;
 }
 
 void Ipv6Socket::connect(Ipv6Address remoteAddress)
 {
+    isOpen_ = true;
     auto *command = new Ipv6SocketConnectCommand();
     command->setRemoteAddress(remoteAddress);
     auto request = new Request("connect", IPv6_C_CONNECT);
@@ -91,6 +106,14 @@ void Ipv6Socket::close()
     ASSERT(bound);
     Ipv6SocketCloseCommand *command = new Ipv6SocketCloseCommand();
     auto request = new Request("close", IPv6_C_CLOSE);
+    request->setControlInfo(command);
+    sendToOutput(request);
+}
+
+void Ipv6Socket::destroy()
+{
+    auto *command = new Ipv6SocketDestroyCommand();
+    auto request = new Request("destroy", IPv6_C_DESTROY);
     request->setControlInfo(command);
     sendToOutput(request);
 }

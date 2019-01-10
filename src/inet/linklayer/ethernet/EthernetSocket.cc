@@ -58,21 +58,33 @@ void EthernetSocket::bind(const MacAddress& sourceAddress, const MacAddress& des
     ctrl->setProtocol(protocol);
     ctrl->setVlanId(vlanId);
     request->setControlInfo(ctrl);
+    isOpen_ = true;
     sendToEthernet(request);
 }
 
 void EthernetSocket::send(Packet *packet)
 {
     packet->setKind(ETHERNET_C_DATA);
+    isOpen_ = true;
     sendToEthernet(packet);
 }
 
 void EthernetSocket::close()
 {
     auto request = new Request("CLOSE", ETHERNET_C_CLOSE);
-    EthernetCloseCommand *ctrl = new EthernetCloseCommand();
+    auto *ctrl = new EthernetCloseCommand();
+    request->setControlInfo(ctrl);
+    isOpen_ = true;
+    sendToEthernet(request);
+}
+
+void EthernetSocket::destroy()
+{
+    auto request = new Request("destroy", ETHERNET_C_DESTROY);
+    auto *ctrl = new EthernetDestroyCommand();
     request->setControlInfo(ctrl);
     sendToEthernet(request);
+    isOpen_ = false;
 }
 
 void EthernetSocket::setCallback(ICallback *callback)
@@ -91,14 +103,20 @@ void EthernetSocket::processMessage(cMessage *msg)
 {
     ASSERT(belongsToSocket(msg));
     switch (msg->getKind()) {
-        case ETHERNET_C_DATA:
+        case ETHERNET_I_DATA:
             if (callback)
                 callback->socketDataArrived(this, check_and_cast<Packet *>(msg));
             else
                 delete msg;
             break;
+        case ETHERNET_I_SOCKET_CLOSED:
+            isOpen_ = false;
+            if (callback)
+                callback->socketClosed(this);
+            delete msg;
+            break;
         default:
-            throw cRuntimeError("EthernetSocket: invalid msg kind %d, one of the UDP_I_xxx constants expected", msg->getKind());
+            throw cRuntimeError("EthernetSocket: invalid msg kind %d, one of the ETHERNNET_I_xxx constants expected", msg->getKind());
             break;
     }
 }

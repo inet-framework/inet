@@ -7,16 +7,15 @@ Sequence of operations:
  - at 0 server initializes to up
  - at 1 client executes shutdown operation
  - at 2 server executes shutdown operation
- - simulation stops at 3
+ - simulation stops at 10s
 
 %inifile: omnetpp.ini
 
 [General]
 network = Test
-tkenv-plugin-path = ../../../etc/plugins
 ned-path = .;../../../../src;../../lib
 cmdenv-express-mode = false
-sim-time-limit = 3s
+sim-time-limit = 10s
 record-eventlog = true
 
 #omnetpp 5.0 - 5.1 compatibility:

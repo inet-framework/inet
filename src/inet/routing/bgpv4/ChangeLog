@@ -1,3 +1,86 @@
+2018-10-25  Zoltan Bojthe
+
+	Fixed NodeStatus module detection.
+
+2018-11-23  Mani Amoozadeh
+
+	Added redistributeOspf parameter that supports all OSPF route types.
+
+2018-10-25  Mani Amoozadeh
+
+	Added support for multi-hop EBGP.
+
+2018-10-23  Mani Amoozadeh
+
+	Local preference is now working properly.
+
+2018-10-20  Mani Amoozadeh
+
+	Added BGP split horizon.
+
+2018-10-19  Mani Amoozadeh
+
+	Changed isRechable logic.
+
+2018-10-18  Mani Amoozadeh
+
+	BGP speaker should not prepend its ASN to an internal peer.
+
+2018-10-12  Mani Amoozadeh
+
+	Added local address which was missing in TCP binding.
+
+2018-10-10  Mani Amoozadeh
+
+	TCP binding should be done for internal address in IGP sessions.
+
+2018-10-09  Mani Amoozadeh
+
+	Next hop must be directly-connected.
+
+2018-10-08  Mani Amoozadeh
+
+	Making sure the next hop is valid before advertising.
+	Prevent loopback interfaces from getting advertised by BGP.
+	Added parameter nextHopSelf.
+
+2018-10-04  Zoltan Bojthe
+
+	Added LifecycleUnsupported base class instead of copy-pasting the same code.
+
+2018-09-28  Mani Amoozadeh
+
+	Added multiple parameters to the BGP module to turn on/off features.
+
+2018-09-21  Mani Amoozadeh
+
+	Allowed configuring advertised interfaces of a BGP speaker.
+
+2018-09-20  Levente Mészáros
+
+	Avoid scheduling a message when startupTime is zero.
+
+2018-09-16  Mani Amoozadeh
+
+	Added BGP protocol data into ip routing table.
+
+2018-09-15  Mani Amoozadeh
+
+	Fixed a bug when a multi-chunk TCP segment containing multiple BGP messages is received, all chunks are processed.
+
+2018-09-14  Mani Amoozadeh
+
+	Making sure only two routers are listed under the Session tag.
+	Ospf module is not mandotory for a BGP router.
+
+2018-09-09  Mani Amoozadeh
+
+	Split the Bgp class into three classes.
+
+2018-09-08  Mani Amoozadeh
+
+	Renamed for consistency with other routing protocols
+
 ====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------

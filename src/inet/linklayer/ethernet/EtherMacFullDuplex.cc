@@ -80,6 +80,7 @@ void EtherMacFullDuplex::handleMessageWhenUp(cMessage *msg)
         processMsgFromNetwork(check_and_cast<EthernetSignal *>(msg));
     else
         throw cRuntimeError("Message received from unknown gate!");
+    processAtHandleMessageFinished();
 }
 
 void EtherMacFullDuplex::handleSelfMessage(cMessage *msg)

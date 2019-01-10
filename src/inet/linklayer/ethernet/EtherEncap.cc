@@ -31,6 +31,7 @@
 #include "inet/linklayer/ethernet/EthernetCommand_m.h"
 #include "inet/linklayer/ethernet/EtherPhyFrame_m.h"
 #include "inet/linklayer/ieee8022/Ieee8022LlcHeader_m.h"
+#include "inet/linklayer/vlan/VlanTag_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 
 namespace inet {
@@ -49,7 +50,7 @@ bool EtherEncap::Socket::matches(Packet *packet, const Ptr<const EthernetMacHead
         return false;
     if (protocol != nullptr && packet->getTag<PacketProtocolTag>()->getProtocol() != protocol)
         return false;
-    if (vlanId != -1 && packet->getTag<Ieee8021QInd>()->getVid() != vlanId)
+    if (vlanId != -1 && packet->getTag<VlanInd>()->getVlanId() != vlanId)
         return false;
     return true;
 }
@@ -98,6 +99,18 @@ void EtherEncap::processCommandFromHigherLayer(Request *msg)
         delete it->second;
         socketIdToSocketMap.erase(it);
         delete msg;
+        auto indication = new Indication("closed", ETHERNET_I_SOCKET_CLOSED);
+        auto ctrl = new EthernetSocketClosedIndication();
+        indication->setControlInfo(ctrl);
+        indication->addTagIfAbsent<SocketInd>()->setSocketId(socketId);
+        send(indication, "transportOut");
+    }
+    else if (dynamic_cast<EthernetDestroyCommand *>(ctrl) != nullptr) {
+        int socketId = check_and_cast<Request *>(msg)->getTag<SocketReq>()->getSocketId();
+        auto it = socketIdToSocketMap.find(socketId);
+        delete it->second;
+        socketIdToSocketMap.erase(it);
+        delete msg;
     }
     else
         Ieee8022Llc::processCommandFromHigherLayer(msg);
@@ -105,6 +118,7 @@ void EtherEncap::processCommandFromHigherLayer(Request *msg)
 
 void EtherEncap::refreshDisplay() const
 {
+    Ieee8022Llc::refreshDisplay();
     char buf[80];
     sprintf(buf, "passed up: %ld\nsent: %ld", totalFromMAC, totalFromHigherLayer);
     getDisplayString().setTagArg("t", 0, buf);
@@ -231,6 +245,7 @@ void EtherEncap::processPacketFromMac(Packet *packet)
             auto socket = it.second;
             if (socket->matches(packet, ethHeader)) {
                 auto packetCopy = packet->dup();
+                packetCopy->setKind(ETHERNET_I_DATA);
                 packetCopy->addTagIfAbsent<SocketInd>()->setSocketId(it.first);
                 send(packetCopy, "upperLayerOut");
                 stealPacket |= socket->vlanId != -1;

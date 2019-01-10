@@ -72,6 +72,8 @@ class INET_API SctpSocket : public ISocket
         virtual ~ICallback() {}
         virtual void socketDataArrived(SctpSocket *socket, Packet *packet, bool urgent) = 0;
         virtual void socketDataNotificationArrived(SctpSocket *socket, Message *msg) = 0;
+        virtual void socketAvailable(SctpSocket *socket, Indication *indication) = 0;
+        virtual void socketOptionsArrived(SctpSocket *socket, Indication *indication) { delete indication; }
         virtual void socketEstablished(SctpSocket *socket, unsigned long int buffer) {}
         virtual void socketPeerClosed(SctpSocket *socket) {}
         virtual void socketClosed(SctpSocket *socket) {}
@@ -271,6 +273,8 @@ class INET_API SctpSocket : public ISocket
 
     void accept(int32 assocId, int32 fd);
 
+    void acceptSocket(int newSockId);
+
     /**
      * Send data message
      */
@@ -292,7 +296,9 @@ class INET_API SctpSocket : public ISocket
      * connection until the remote SCTP closes too (or the FIN_WAIT_1 timeout
      * expires)
      */
-    void close(int id = -1);
+    void close(int id);
+
+    virtual void close() override { close(-1); }
 
     /**
      * Aborts the association.
@@ -357,6 +363,10 @@ class INET_API SctpSocket : public ISocket
     void setTunInterface(int id) { interfaceIdToTun = id; };
 
     int getTunInterface() { return interfaceIdToTun; };
+
+    virtual void destroy() override;
+
+    virtual bool isOpen() const override;
 };
 
 } // namespace inet

@@ -37,11 +37,11 @@ class INET_API LifecycleOperation : public cObject, public noncopyable
     typedef std::map<std::string, std::string> StringMap;
 
   private:
-    cModule *rootModule;
-    int currentStage;
+    cModule *rootModule = nullptr;
+    int currentStage = 0;
     std::vector<IDoneCallback *> pendingList;
-    bool insideInitiateOperation;
-    IDoneCallback *operationCompletionCallback;
+    bool insideInitiateOperation = false;
+    IDoneCallback *operationCompletionCallback = nullptr;
 
   public:
     LifecycleOperation() :
@@ -55,7 +55,13 @@ class INET_API LifecycleOperation : public cObject, public noncopyable
      * treat that as an error, and report the remaining parameters as
      * unrecognized by the operation.
      */
-    virtual void initialize(cModule *module, StringMap& params) { rootModule = module; }
+    virtual void initialize(cModule *module, StringMap& params) {
+        cProperties *props = module->getProperties();
+        if (props && (props->getAsBool("networkNode") || props->getAsBool("lifecycleSupport")))
+            rootModule = module;
+        else
+            throw cRuntimeError("LifecycleOperation not accepted directly by '(%s)%s' module", module->getClassName(), module->getFullPath().c_str());
+    }
 
     /**
      * Returns the module the operation is initiated on.

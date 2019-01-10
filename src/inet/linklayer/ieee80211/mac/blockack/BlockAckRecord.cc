@@ -47,7 +47,18 @@ bool BlockAckRecord::getAckState(SequenceNumber sequenceNumber, FragmentNumber f
     }
     else {
         auto earliest = acknowledgmentState.begin();
-        return earliest->second > sequenceNumber; // old = true
+        return earliest->first.first > sequenceNumber; // old = true
+    }
+}
+
+void BlockAckRecord::removeAckStates(SequenceNumber sequenceNumber)
+{
+    auto it = acknowledgmentState.begin();
+    while (it != acknowledgmentState.end()) {
+        if (it->first.first < sequenceNumber)
+            it = acknowledgmentState.erase(it);
+        else
+            it++;
     }
 }
 

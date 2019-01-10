@@ -28,7 +28,7 @@
 #include "inet/networklayer/ipv4/Ipv4Route.h"
 #include "inet/common/Simsignals.h"
 #include "inet/networklayer/ipv4/RoutingTableParser.h"
-#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/INETUtils.h"
 #include "inet/common/ModuleAccess.h"
@@ -88,7 +88,8 @@ void Ipv4RoutingTable::initialize(int stage)
     }
     // TODO: INITSTAGE
     else if (stage == INITSTAGE_STATIC_ROUTING) {
-        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+        cModule *node = findContainingNode(this);
+        NodeStatus *nodeStatus = node ? check_and_cast_nullable<NodeStatus *>(node->getSubmodule("status")) : nullptr;
         isNodeUp = !nodeStatus || nodeStatus->getState() == NodeStatus::UP;
         if (isNodeUp) {
             // set routerId if param is not "" (==no routerId) or "auto" (in which case we'll
@@ -181,6 +182,14 @@ void Ipv4RoutingTable::receiveSignal(cComponent *source, simsignal_t signalID, c
     }
     else if (signalID == interfaceStateChangedSignal) {
         invalidateCache();
+        const auto *ieChangeDetails = check_and_cast<const InterfaceEntryChangeDetails *>(obj);
+        if (ieChangeDetails->getFieldId() == InterfaceEntry::F_STATE) {
+            const auto *entry = ieChangeDetails->getInterfaceEntry();
+            updateNetmaskRoutes();
+            if (entry->getState() != InterfaceEntry::State::UP)
+                deleteInterfaceRoutes(entry);
+            invalidateCache();
+        }
     }
     else if (signalID == interfaceConfigChangedSignal) {
         invalidateCache();
@@ -737,11 +746,9 @@ void Ipv4RoutingTable::updateNetmaskRoutes()
     PatternMatcher interfaceNameMatcher(netmaskRoutes, false, true, true);
     for (int i = 0; i < ift->getNumInterfaces(); i++) {
         InterfaceEntry *ie = ift->getInterface(i);
-        if (interfaceNameMatcher.matches(ie->getFullName()))
-        {
+        if (ie->getState() == InterfaceEntry::State::UP && interfaceNameMatcher.matches(ie->getFullName())) {
             auto ipv4Data = ie->findProtocolData<Ipv4InterfaceData>();
-            if (ipv4Data && ipv4Data->getNetmask() != Ipv4Address::ALLONES_ADDRESS)
-            {
+            if (ipv4Data && ipv4Data->getNetmask() != Ipv4Address::ALLONES_ADDRESS) {
                 Ipv4Route *route = createNewRoute();
                 route->setSourceType(IRoute::IFACENETMASK);
                 route->setSource(ie);
@@ -761,32 +768,33 @@ void Ipv4RoutingTable::updateNetmaskRoutes()
     }
 }
 
-bool Ipv4RoutingTable::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+bool Ipv4RoutingTable::handleOperationStage(LifecycleOperation *operation, IDoneCallback *doneCallback)
 {
     Enter_Method_Silent();
-    if (dynamic_cast<NodeStartOperation *>(operation)) {
-        if (static_cast<NodeStartOperation::Stage>(stage) == NodeStartOperation::STAGE_NETWORK_LAYER) {
+    int stage = operation->getCurrentStage();
+    if (dynamic_cast<ModuleStartOperation *>(operation)) {
+        if (static_cast<ModuleStartOperation::Stage>(stage) == ModuleStartOperation::STAGE_NETWORK_LAYER) {
             // read routing table file (and interface configuration)
             const char *filename = par("routingFile");
             RoutingTableParser parser(ift, this);
             if (*filename && parser.readRoutingTableFromFile(filename) == -1)
                 throw cRuntimeError("Error reading routing table file %s", filename);
         }
-        else if (static_cast<NodeStartOperation::Stage>(stage) == NodeStartOperation::STAGE_TRANSPORT_LAYER) {
+        else if (static_cast<ModuleStartOperation::Stage>(stage) == ModuleStartOperation::STAGE_TRANSPORT_LAYER) {
             configureRouterId();
             updateNetmaskRoutes();
             isNodeUp = true;
         }
     }
-    else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
-        if (static_cast<NodeShutdownOperation::Stage>(stage) == NodeShutdownOperation::STAGE_NETWORK_LAYER) {
+    else if (dynamic_cast<ModuleStopOperation *>(operation)) {
+        if (static_cast<ModuleStopOperation::Stage>(stage) == ModuleStopOperation::STAGE_NETWORK_LAYER) {
             while (!routes.empty())
                 delete removeRoute(routes[0]);
             isNodeUp = false;
         }
     }
-    else if (dynamic_cast<NodeCrashOperation *>(operation)) {
-        if (static_cast<NodeCrashOperation::Stage>(stage) == NodeCrashOperation::STAGE_CRASH) {
+    else if (dynamic_cast<ModuleCrashOperation *>(operation)) {
+        if (static_cast<ModuleCrashOperation::Stage>(stage) == ModuleCrashOperation::STAGE_CRASH) {
             while (!routes.empty())
                 delete removeRoute(routes[0]);
             isNodeUp = false;

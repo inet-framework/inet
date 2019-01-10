@@ -81,7 +81,7 @@ void Ieee80211MacHeaderSerializer::serialize(MemoryOutputStream& stream, const P
         stream.writeMacAddress(dataOrMgmtFrame->getReceiverAddress());
         stream.writeMacAddress(dataOrMgmtFrame->getTransmitterAddress());
         stream.writeMacAddress(dataOrMgmtFrame->getAddress3());
-        stream.writeUint16Le(dataOrMgmtFrame->getSequenceNumber() << 4
+        stream.writeUint16Le(dataOrMgmtFrame->getSequenceNumber().getRaw() << 4
                 | dataOrMgmtFrame->getFragmentNumber());
 
         if (auto dataFrame = dynamicPtrCast<const Ieee80211DataHeader>(chunk)) {

@@ -19,7 +19,7 @@
 #define __INET_ROUTINGLIFECYCLEBASE_H
 
 #include "inet/common/lifecycle/OperationalBase.h"
-#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
 
 namespace inet {
 
@@ -30,8 +30,8 @@ class INET_API RoutingProtocolBase : public OperationalBase
 
   protected:
     virtual bool isInitializeStage(int stage) override { return stage == INITSTAGE_ROUTING_PROTOCOLS; }
-    virtual bool isNodeStartStage(int stage) override { return stage == NodeStartOperation::STAGE_ROUTING_PROTOCOLS; }
-    virtual bool isNodeShutdownStage(int stage) override { return stage == NodeShutdownOperation::STAGE_ROUTING_PROTOCOLS; }
+    virtual bool isModuleStartStage(int stage) override { return stage == ModuleStartOperation::STAGE_ROUTING_PROTOCOLS; }
+    virtual bool isModuleStopStage(int stage) override { return stage == ModuleStopOperation::STAGE_ROUTING_PROTOCOLS; }
 };
 
 } // namespace inet

@@ -26,7 +26,6 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/Simsignals.h"
 #include "inet/common/lifecycle/NodeStatus.h"
-#include "inet/common/lifecycle/NodeOperations.h"
 
 #ifdef WITH_NEXTHOP
 #include "inet/networklayer/nexthop/NextHopInterfaceData.h"
@@ -66,7 +65,7 @@ InterfaceTable::~InterfaceTable()
 
 void InterfaceTable::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    OperationalBase::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
         // get a pointer to the host module
@@ -77,6 +76,8 @@ void InterfaceTable::initialize(int stage)
 
 void InterfaceTable::refreshDisplay() const
 {
+    OperationalBase::refreshDisplay();
+
     char buf[80];
     sprintf(buf, "%d interfaces", getNumInterfaces());
     getDisplayString().setTagArg("t", 0, buf);
@@ -91,7 +92,7 @@ void InterfaceTable::refreshDisplay() const
 
 }
 
-void InterfaceTable::handleMessage(cMessage *msg)
+void InterfaceTable::handleMessageWhenUp(cMessage *msg)
 {
     throw cRuntimeError("This module doesn't process messages");
 }
@@ -500,20 +501,18 @@ InterfaceEntry *InterfaceTable::getFirstMulticastInterface() const
     return nullptr;
 }
 
-bool InterfaceTable::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+void InterfaceTable::handleStartOperation(LifecycleOperation *operation)
 {
-    Enter_Method_Silent();
-    if (dynamic_cast<NodeStartOperation *>(operation)) {
-    }
-    else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
-        if (static_cast<NodeShutdownOperation::Stage>(stage) == NodeShutdownOperation::STAGE_LINK_LAYER)
-            resetInterfaces();
-    }
-    else if (dynamic_cast<NodeCrashOperation *>(operation)) {
-        if (static_cast<NodeCrashOperation::Stage>(stage) == NodeCrashOperation::STAGE_CRASH)
-            resetInterfaces();
-    }
-    return true;
+}
+
+void InterfaceTable::handleStopOperation(LifecycleOperation *operation)
+{
+    resetInterfaces();
+}
+
+void InterfaceTable::handleCrashOperation(LifecycleOperation *operation)
+{
+    resetInterfaces();
 }
 
 void InterfaceTable::resetInterfaces()
@@ -522,7 +521,6 @@ void InterfaceTable::resetInterfaces()
     for (int i = 0; i < n; i++)
         if (idToInterface[i])
             idToInterface[i]->resetInterface();
-
 }
 
 MulticastGroupList InterfaceTable::collectMulticastGroups() const

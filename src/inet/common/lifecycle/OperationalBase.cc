@@ -19,36 +19,61 @@
 
 #include "inet/common/lifecycle/OperationalBase.h"
 #include "inet/common/ModuleAccess.h"
-#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 
 namespace inet {
 
-OperationalBase::OperationalBase() :
-    isOperational(false)
+OperationalBase::OperationalBase()
 {
+}
+
+OperationalBase::~OperationalBase()
+{
+    cancelAndDelete(activeOperationExtraTimer);
+    cancelAndDelete(activeOperationTimeout);
 }
 
 void OperationalBase::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
-        WATCH(isOperational);
+        WATCH(operationalState);
+        activeOperationTimeout = new cMessage("ActiveOperationTimeout");
+        activeOperationExtraTimer = new cMessage("ActiveOperationExtraTimer");
+        activeOperationExtraTimer->setSchedulingPriority(std::numeric_limits<short>::max());
     }
     if (isInitializeStage(stage)) {
-        cModule *node = findContainingNode(this);
-        NodeStatus *nodeStatus = node ? check_and_cast_nullable<NodeStatus *>(node->getSubmodule("status")) : nullptr;
-        setOperational(!nodeStatus || nodeStatus->getState() == NodeStatus::UP);
-        if (isOperational)
-            handleNodeStart(nullptr);
+        auto state = getInitialOperationalState();
+        ASSERT(state == NOT_OPERATING || state == OPERATING);
+        setOperationalState(state);
+        if (operationalState == OPERATING)
+            handleStartOperation(nullptr);     //TODO use an InitializeOperation with current stage value
     }
 }
 
 void OperationalBase::handleMessage(cMessage *message)
 {
-    if (isOperational)
-        handleMessageWhenUp(message);
-    else
-        handleMessageWhenDown(message);
+    if (message == activeOperationExtraTimer)
+        finishActiveOperation();
+    else if (message == activeOperationTimeout) {
+        cancelEvent(activeOperationExtraTimer);
+        handleActiveOperationTimeout(message);
+    }
+    else {
+        switch (operationalState) {
+            case STARTING_OPERATION:
+            case OPERATING:
+            case STOPPING_OPERATION:
+                handleMessageWhenUp(message);
+                break;
+            case NOT_OPERATING:
+                handleMessageWhenDown(message);
+                break;
+            case CRASHING_OPERATION:
+            default:
+                throw cRuntimeError("Invalid operational state: %d", (int)operationalState);
+        }
+    }
 }
 
 void OperationalBase::handleMessageWhenDown(cMessage *message)
@@ -62,51 +87,132 @@ void OperationalBase::handleMessageWhenDown(cMessage *message)
     delete message;
 }
 
-bool OperationalBase::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+bool OperationalBase::handleOperationStage(LifecycleOperation *operation, IDoneCallback *doneCallback)
 {
     Enter_Method_Silent();
-    if (dynamic_cast<NodeStartOperation *>(operation)) {
-        if (isNodeStartStage(stage)) {
-            setOperational(true);
-            return handleNodeStart(doneCallback);
+    int stage = operation->getCurrentStage();
+    if (dynamic_cast<ModuleStartOperation *>(operation)) {
+        if (isModuleStartStage(stage)) {
+            operationalState = STARTING_OPERATION;
+            setupActiveOperation(operation, doneCallback, OPERATING);
+            handleStartOperation(operation);
+            if (activeOperation.operation != nullptr && !activeOperation.isDelayedFinish)
+                finishActiveOperation();
+            return activeOperation.operation == nullptr;
         }
     }
-    else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
-        if (isNodeShutdownStage(stage)) {
-            bool done = handleNodeShutdown(doneCallback);
-            if (done)
-                setOperational(false);
-            return done;
+    else if (dynamic_cast<ModuleStopOperation *>(operation)) {
+        if (isModuleStopStage(stage)) {
+            operationalState = STOPPING_OPERATION;
+            setupActiveOperation(operation, doneCallback, NOT_OPERATING);
+            handleStopOperation(operation);
+            if (activeOperation.operation != nullptr && !activeOperation.isDelayedFinish)
+                finishActiveOperation();
+            return activeOperation.operation == nullptr;
         }
     }
-    else if (dynamic_cast<NodeCrashOperation *>(operation)) {
-        if (stage == NodeCrashOperation::STAGE_CRASH) {
-            handleNodeCrash();
-            setOperational(false);
+    else if (dynamic_cast<ModuleCrashOperation *>(operation)) {
+        if (stage == ModuleCrashOperation::STAGE_CRASH) {
+            operationalState = CRASHING_OPERATION;
+            setupActiveOperation(operation, doneCallback, NOT_OPERATING);
+            handleCrashOperation(operation);
+            finishActiveOperation();
             return true;
         }
     }
+    else
+        throw cRuntimeError("unaccepted Lifecycle operation: (%s)%s", operation->getClassName(), operation->getName());
     return true;
 }
 
-bool OperationalBase::handleNodeStart(IDoneCallback *doneCallback)
+void OperationalBase::scheduleOperationTimeout(simtime_t timeout)
 {
-    return true;
+    ASSERT(activeOperation.isDelayedFinish);
+    ASSERT(!activeOperationTimeout->isScheduled());
+    activeOperationTimeout->setContextPointer(activeOperation.operation);
+    scheduleAt(simTime() + timeout, activeOperationTimeout);
+    // TODO: schedule timer and use module parameter
 }
 
-bool OperationalBase::handleNodeShutdown(IDoneCallback *doneCallback)
+void OperationalBase::handleActiveOperationTimeout(cMessage *message)
 {
-    return true;
+    handleCrashOperation(activeOperation.operation);
+    finishActiveOperation();
 }
 
-void OperationalBase::handleNodeCrash()
+void OperationalBase::setupActiveOperation(LifecycleOperation *operation, IDoneCallback *doneCallback, State endState)
 {
+    ASSERT(activeOperation.operation == nullptr);
+    activeOperation.set(operation, doneCallback, endState);
 }
 
-void OperationalBase::setOperational(bool isOperational)
+void OperationalBase::setOperationalState(State newState)
 {
-    this->isOperational = isOperational;
+    operationalState = newState;
     lastChange = simTime();
+}
+
+OperationalBase::State OperationalBase::getInitialOperationalState() const
+{
+    cModule *node = findContainingNode(this);
+    NodeStatus *nodeStatus = node ? check_and_cast_nullable<NodeStatus *>(node->getSubmodule("status")) : nullptr;
+    return (!nodeStatus || nodeStatus->getState() == NodeStatus::UP) ? OPERATING : NOT_OPERATING;
+}
+
+void OperationalBase::delayActiveOperationFinish(simtime_t timeout)
+{
+    ASSERT(activeOperation.operation != nullptr);
+    activeOperation.delayFinish();
+    scheduleOperationTimeout(timeout);
+}
+
+void OperationalBase::startActiveOperationExtraTime(simtime_t extraTime)
+{
+    ASSERT(extraTime >= SIMTIME_ZERO);
+    ASSERT(!activeOperationExtraTimer->isScheduled());
+    activeOperation.delayFinish();
+    setOperationalState(activeOperation.endState);
+    scheduleAt(simTime() + extraTime, activeOperationExtraTimer);
+}
+
+void OperationalBase::startActiveOperationExtraTimeOrFinish(simtime_t extraTime)
+{
+    if (extraTime >= SIMTIME_ZERO)
+        startActiveOperationExtraTime(extraTime);
+    else
+        finishActiveOperation();
+}
+
+void OperationalBase::finishActiveOperation()
+{
+    setOperationalState(activeOperation.endState);
+    if (activeOperation.isDelayedFinish) {
+        cancelEvent(activeOperationExtraTimer);
+        cancelEvent(activeOperationTimeout);
+        activeOperation.doneCallback->invoke();
+    }
+    activeOperation.clear();
+}
+
+void OperationalBase::refreshDisplay() const
+{
+    switch (operationalState) {
+    case STARTING_OPERATION:
+        getDisplayString().setTagArg("i2", 0, "status/up");
+        break;
+    case OPERATING:
+        getDisplayString().removeTag("i2");
+        break;
+    case STOPPING_OPERATION:
+    case CRASHING_OPERATION:
+        getDisplayString().setTagArg("i2", 0, "status/down");
+        break;
+    case NOT_OPERATING:
+        getDisplayString().setTagArg("i2", 0, "status/cross");
+        break;
+    default:
+        break;
+    }
 }
 
 } // namespace inet

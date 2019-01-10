@@ -127,6 +127,9 @@ simple EtherMacFullDuplex like IEtherMac
                                             // (only used if queueModule==""); additional frames cause a runtime error
         string queueModule = default("");   // name of optional external queue module
         int mtu @unit(B) = default(1500B);
+        @lifecycleSupport;
+        double stopOperationExtraTime @unit(s) = default(-1s);    // extra time after lifecycle stop operation finished
+        double stopOperationTimeout @unit(s) = default(2s);    // timeout value for lifecycle stop operation
         @display("i=block/rxtx");
 
         @signal[txPk](type=inet::Packet);

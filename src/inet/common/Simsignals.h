@@ -51,6 +51,7 @@ extern INET_API simsignal_t    // admin
     interfaceGnpConfigChangedSignal,
     interfaceIpv4ConfigChangedSignal,
     interfaceIpv6ConfigChangedSignal,
+    interfaceClnsConfigChangedSignal,
     tedChangedSignal,
 
 // layer 3 - Routing Table
@@ -84,6 +85,9 @@ extern INET_API simsignal_t    // admin
     ipv6MulticastGroupLeftSignal,
     ipv6MulticastGroupRegisteredSignal,
     ipv6MulticastGroupUnregisteredSignal,
+
+//layer 3 - ISIS
+    isisAdjChangedSignal,
 
 // - layer 4 (transport)
 //...

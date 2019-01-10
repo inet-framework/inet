@@ -24,7 +24,6 @@ import inet.linklayer.contract.IEthernetInterface;
 
 //
 // This module provides an Ethernet network interface suitable for emulation.
-//
 // The upper part of the network interface is realized in the real world using
 // a real TAP device of the host computer which is running the simulation.
 //
@@ -36,7 +35,7 @@ module ExtUpperEthernetInterface extends ExtInterface like IEthernetInterface
     gates:
         inout phys @labels(EtherFrame);
     submodules:
-        tap: ExtEthernetTapDeviceFileIo {
+        tap: ExtEthernetTapDevice {
             parameters:
                 @display("p=100,100");
         }

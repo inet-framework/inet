@@ -46,9 +46,9 @@ class INET_API MacBase : public MacProtocolBase
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void handleMessageWhenDown(cMessage *msg) override;
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
-    virtual bool handleNodeStart(IDoneCallback *doneCallback) override;
-    virtual bool handleNodeShutdown(IDoneCallback *doneCallback) override;
-    virtual void handleNodeCrash() override;
+    virtual void handleStartOperation(LifecycleOperation *operation) override;
+    virtual void handleStopOperation(LifecycleOperation *operation) override;
+    virtual void handleCrashOperation(LifecycleOperation *operation) override;
 
     /**
      * should clear queue and emit signal "packetDropped" with entire packets

@@ -130,7 +130,6 @@ network Test1
 [General]
 description = "Simple test"
 network = Test1
-tkenv-plugin-path = ../../../etc/plugins
 sim-time-limit = 1200s
 num-rngs = 2
 

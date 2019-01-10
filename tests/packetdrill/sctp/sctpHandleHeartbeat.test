@@ -12,7 +12,6 @@ After the association is established, a Heartbeat is expected and answered.
 
 network = PacketDrillSctp
 debug-on-errors = true
-tkenv-plugin-path = ../../../etc/plugins
 ned-path = .;../../../../../src;../../lib
 
 **.scriptFile="../../sctptests/sctpHandleHeartbeat.pkt"

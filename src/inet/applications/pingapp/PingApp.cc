@@ -29,7 +29,7 @@
 #include "inet/common/Protocol.h"
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
@@ -87,7 +87,7 @@ PingApp::PingApp()
 PingApp::~PingApp()
 {
     cancelAndDelete(timer);
-    delete l3Socket;
+    socketMap.deleteSockets();
 }
 
 void PingApp::initialize(int stage)
@@ -161,80 +161,88 @@ void PingApp::parseDestAddressesPar()
     }
 }
 
+void PingApp::handleSelfMessage(cMessage *msg)
+{
+    if (msg->getKind() == PING_FIRST_ADDR) {
+        srcAddr = L3AddressResolver().resolve(par("srcAddr"));
+        parseDestAddressesPar();
+        if (destAddresses.empty()) {
+            return;
+        }
+        destAddrIdx = 0;
+        msg->setKind(PING_CHANGE_ADDR);
+    }
+
+    if (msg->getKind() == PING_CHANGE_ADDR) {
+        if (destAddrIdx >= (int)destAddresses.size())
+            return;
+        destAddr = destAddresses[destAddrIdx];
+        EV_INFO << "Starting up: dest=" << destAddr << "  src=" << srcAddr << "seqNo=" << sendSeqNo << endl;
+        ASSERT(!destAddr.isUnspecified());
+        const Protocol *networkProtocol = nullptr;
+        const char *networkProtocolAsString = par("networkProtocol");
+        if (*networkProtocolAsString)
+            networkProtocol = Protocol::getProtocol(networkProtocolAsString);
+        else {
+            switch (destAddr.getType()) {
+                case L3Address::IPv4: networkProtocol = &Protocol::ipv4; break;
+                case L3Address::IPv6: networkProtocol = &Protocol::ipv6; break;
+                case L3Address::MODULEID:
+                case L3Address::MODULEPATH: networkProtocol = &Protocol::nextHopForwarding; break;
+                default: throw cRuntimeError("unknown address type: %d(%s)", (int)destAddr.getType(), L3Address::getTypeName(destAddr.getType()));
+            }
+        }
+        const Protocol *icmp = l3Echo.at(networkProtocol);
+
+        for (auto socket: socketMap.getMap()) {
+            socket.second->close();
+        }
+        currentSocket = nullptr;
+        if (networkProtocol == &Protocol::ipv4)
+            currentSocket = new Ipv4Socket(gate("socketOut"));
+        else if (networkProtocol == &Protocol::ipv6)
+            currentSocket = new Ipv6Socket(gate("socketOut"));
+        else
+            currentSocket = new L3Socket(networkProtocol, gate("socketOut"));
+        socketMap.addSocket(currentSocket);
+        currentSocket->bind(icmp, L3Address());
+        currentSocket->setCallback(this);
+        msg->setKind(PING_SEND);
+    }
+
+    ASSERT2(msg->getKind() == PING_SEND, "Unknown kind in self message.");
+
+    // send a ping
+    sendPingRequest();
+
+    if (count > 0 && sendSeqNo % count == 0) {
+        // choose next dest address
+        destAddrIdx++;
+        msg->setKind(PING_CHANGE_ADDR);
+        if (destAddrIdx >= (int)destAddresses.size()) {
+            if (continuous) {
+                destAddrIdx = destAddrIdx % destAddresses.size();
+            }
+        }
+    }
+
+    // then schedule next one if needed
+    scheduleNextPingRequest(simTime(), msg->getKind() == PING_CHANGE_ADDR);
+}
+
 void PingApp::handleMessageWhenUp(cMessage *msg)
 {
-    if (msg->isSelfMessage()) {
-        if (msg->getKind() == PING_FIRST_ADDR) {
-            srcAddr = L3AddressResolver().resolve(par("srcAddr"));
-            parseDestAddressesPar();
-            if (destAddresses.empty()) {
-                return;
-            }
-            destAddrIdx = 0;
-            msg->setKind(PING_CHANGE_ADDR);
-        }
-
-        if (msg->getKind() == PING_CHANGE_ADDR) {
-            if (destAddrIdx >= (int)destAddresses.size())
-                return;
-            destAddr = destAddresses[destAddrIdx];
-            EV_INFO << "Starting up: dest=" << destAddr << "  src=" << srcAddr << "seqNo=" << sendSeqNo << endl;
-            ASSERT(!destAddr.isUnspecified());
-            const Protocol *networkProtocol = nullptr;
-            const char *networkProtocolAsString = par("networkProtocol");
-            if (*networkProtocolAsString)
-                networkProtocol = Protocol::getProtocol(networkProtocolAsString);
-            else {
-                switch (destAddr.getType()) {
-                    case L3Address::IPv4: networkProtocol = &Protocol::ipv4; break;
-                    case L3Address::IPv6: networkProtocol = &Protocol::ipv6; break;
-                    case L3Address::MODULEID:
-                    case L3Address::MODULEPATH: networkProtocol = &Protocol::nextHopForwarding; break;
-                    default: throw cRuntimeError("unknown address type: %d(%s)", (int)destAddr.getType(), L3Address::getTypeName(destAddr.getType()));
-                }
-            }
-            const Protocol *icmp = l3Echo.at(networkProtocol);
-
-            if (!l3Socket || l3Socket->getNetworkProtocol() != networkProtocol) {
-                if (l3Socket) {
-                    l3Socket->close();
-                    delete l3Socket;
-                }
-                if (networkProtocol == &Protocol::ipv4)
-                    l3Socket = new Ipv4Socket(gate("socketOut"));
-                else if (networkProtocol == &Protocol::ipv6)
-                    l3Socket = new Ipv6Socket(gate("socketOut"));
-                else
-                    l3Socket = new L3Socket(networkProtocol, gate("socketOut"));
-                l3Socket->bind(icmp, L3Address());
-                l3Socket->setCallback(this);
-            }
-            msg->setKind(PING_SEND);
-        }
-
-        ASSERT2(msg->getKind() == PING_SEND, "Unknown kind in self message.");
-
-        // send a ping
-        sendPingRequest();
-
-        if (count > 0 && sendSeqNo % count == 0) {
-            // choose next dest address
-            destAddrIdx++;
-            msg->setKind(PING_CHANGE_ADDR);
-            if (destAddrIdx >= (int)destAddresses.size()) {
-                if (continuous) {
-                    destAddrIdx = destAddrIdx % destAddresses.size();
-                }
-            }
-        }
-
-        // then schedule next one if needed
-        scheduleNextPingRequest(simTime(), msg->getKind() == PING_CHANGE_ADDR);
+    if (msg->isSelfMessage())
+        handleSelfMessage(msg);
+    else {
+        auto socket = check_and_cast_nullable<INetworkSocket *>(socketMap.findSocketFor(msg));
+        if (socket)
+            socket->processMessage(msg);
+        else
+            throw cRuntimeError("Unaccepted message: %s(%s)", msg->getName(), msg->getClassName());
     }
-    else if (l3Socket->belongsToSocket(msg))
-        l3Socket->processMessage(msg);
-    else
-        throw cRuntimeError("Unaccepted message: %s(%s)", msg->getName(), msg->getClassName());
+    if (operationalState == State::STOPPING_OPERATION && socketMap.size() == 0)
+        startActiveOperationExtraTimeOrFinish(par("stopOperationExtraTime"));
 }
 
 void PingApp::socketDataArrived(INetworkSocket *socket, Packet *packet)
@@ -285,18 +293,26 @@ void PingApp::socketDataArrived(INetworkSocket *socket, Packet *packet)
     }
 }
 
+void PingApp::socketClosed(INetworkSocket *socket)
+{
+    if (socket == currentSocket)
+        currentSocket = nullptr;
+    delete socketMap.removeSocket(socket);
+}
+
 void PingApp::refreshDisplay() const
 {
+    ApplicationBase::refreshDisplay();
+
     char buf[40];
     sprintf(buf, "sent: %ld pks\nrcvd: %ld pks", sentCount, numPongs);
     getDisplayString().setTagArg("t", 0, buf);
 }
 
-bool PingApp::handleNodeStart(IDoneCallback *doneCallback)
+void PingApp::handleStartOperation(LifecycleOperation *operation)
 {
     if (isEnabled())
         startSendingPingRequests();
-    return true;
 }
 
 void PingApp::startSendingPingRequests()
@@ -310,7 +326,7 @@ void PingApp::startSendingPingRequests()
     scheduleNextPingRequest(-1, false);
 }
 
-void PingApp::stopSendingPingRequests()
+void PingApp::handleStopOperation(LifecycleOperation *operation)
 {
     pid = -1;
     lastStart = -1;
@@ -319,6 +335,33 @@ void PingApp::stopSendingPingRequests()
     destAddresses.clear();
     destAddrIdx = -1;
     cancelNextPingRequest();
+    currentSocket = nullptr;
+    // TODO: close sockets
+    // TODO: remove getMap()
+    if (socketMap.size() > 0) {
+        for (auto socket: socketMap.getMap())
+            socket.second->close();
+    }
+    delayActiveOperationFinish(par("stopOperationTimeout"));
+}
+
+void PingApp::handleCrashOperation(LifecycleOperation *operation)
+{
+    pid = -1;
+    lastStart = -1;
+    sendSeqNo = expectedReplySeqNo = 0;
+    srcAddr = destAddr = L3Address();
+    destAddresses.clear();
+    destAddrIdx = -1;
+    cancelNextPingRequest();
+    currentSocket = nullptr;
+    // TODO: remove check?
+    if (operation->getRootModule() != getContainingNode(this)) {
+        // TODO: destroy sockets
+        for (auto socket: socketMap.getMap())
+            socket.second->destroy();
+        socketMap.deleteSockets();
+    }
 }
 
 void PingApp::scheduleNextPingRequest(simtime_t previous, bool withSleep)
@@ -411,7 +454,7 @@ void PingApp::sendPingRequest()
     if (hopLimit != -1)
         outPacket->addTagIfAbsent<HopLimitReq>()->setHopLimit(hopLimit);
     EV_INFO << "Sending ping request #" << sendSeqNo << " to lower layer.\n";
-    l3Socket->send(outPacket);
+    currentSocket->send(outPacket);
 
     // store the sending time in a circular buffer so we can compute RTT when the packet returns
     sendTimeHistory[sendSeqNo % PING_HISTORY_SIZE] = simTime();

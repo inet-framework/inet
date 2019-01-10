@@ -19,6 +19,8 @@
 #include "inet/applications/common/SocketTag_m.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
+#include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/networklayer/common/HopLimitTag_m.h"
@@ -60,9 +62,9 @@ NextHopForwarding::~NextHopForwarding()
 
 void NextHopForwarding::initialize(int stage)
 {
-    if (stage == INITSTAGE_LOCAL) {
-        QueueBase::initialize();
+    OperationalBase::initialize(stage);
 
+    if (stage == INITSTAGE_LOCAL) {
         interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
         routingTable = getModuleFromPar<NextHopRoutingTable>(par("routingTableModule"), this);
         arp = getModuleFromPar<IArp>(par("arpModule"), this);
@@ -95,6 +97,8 @@ void NextHopForwarding::handleRegisterProtocol(const Protocol& protocol, cGate *
 
 void NextHopForwarding::refreshDisplay() const
 {
+    OperationalBase::refreshDisplay();
+
     char buf[80] = "";
     if (numForwarded > 0)
         sprintf(buf + strlen(buf), "fwd:%d ", numForwarded);
@@ -107,12 +111,20 @@ void NextHopForwarding::refreshDisplay() const
     getDisplayString().setTagArg("t", 0, buf);
 }
 
-void NextHopForwarding::handleMessage(cMessage *msg)
+void NextHopForwarding::handleMessageWhenUp(cMessage *msg)
 {
-    if (auto request = dynamic_cast<Request *>(msg))
-        handleCommand(request);
+    if (msg->arrivedOn("transportIn")) {    //TODO packet->getArrivalGate()->getBaseId() == transportInGateBaseId
+        if (auto request = dynamic_cast<Request *>(msg))
+            handleCommand(request);
+        else
+            handlePacketFromHL(check_and_cast<Packet*>(msg));
+    }
+    else if (msg->arrivedOn("queueIn")) {    // from network
+        EV_INFO << "Received " << msg << " from network.\n";
+        handlePacketFromNetwork(check_and_cast<Packet*>(msg));
+    }
     else
-        QueueBase::handleMessage(msg);
+        throw cRuntimeError("message arrived on unknown gate '%s'", msg->getArrivalGate()->getName());
 }
 
 void NextHopForwarding::handleCommand(Request *request)
@@ -136,20 +148,25 @@ void NextHopForwarding::handleCommand(Request *request)
         if (it != socketIdToSocketDescriptor.end()) {
             delete it->second;
             socketIdToSocketDescriptor.erase(it);
+            auto indication = new Indication("closed", L3_I_SOCKET_CLOSED);
+            auto ctrl = new L3SocketClosedIndication();
+            indication->setControlInfo(ctrl);
+            indication->addTagIfAbsent<SocketInd>()->setSocketId(socketId);
+            send(indication, "transportOut");
+        }
+        delete request;
+    }
+    else if (dynamic_cast<L3SocketDestroyCommand *>(request->getControlInfo()) != nullptr) {
+        int socketId = request->getTag<SocketReq>()->getSocketId();
+        auto it = socketIdToSocketDescriptor.find(socketId);
+        if (it != socketIdToSocketDescriptor.end()) {
+            delete it->second;
+            socketIdToSocketDescriptor.erase(it);
         }
         delete request;
     }
     else
         throw cRuntimeError("Invalid command: (%s)%s", request->getClassName(), request->getName());
-}
-
-void NextHopForwarding::endService(cPacket *pk)
-{
-    if (pk->getArrivalGate()->isName("transportIn"))
-        handlePacketFromHL(check_and_cast<Packet *>(pk));
-    else {
-        handlePacketFromNetwork(check_and_cast<Packet *>(pk));
-    }
 }
 
 const InterfaceEntry *NextHopForwarding::getSourceInterfaceFrom(Packet *packet)
@@ -552,6 +569,7 @@ void NextHopForwarding::sendDatagramToHL(Packet *packet)
                 && (elem.second->localAddress.isUnspecified() || elem.second->localAddress == localAddress)
                 && (elem.second->remoteAddress.isUnspecified() || elem.second->remoteAddress == remoteAddress)) {
             auto *packetCopy = packet->dup();
+            packetCopy->setKind(L3_I_DATA);
             packetCopy->addTagIfAbsent<SocketInd>()->setSocketId(elem.second->socketId);
             EV_INFO << "Passing up to socket " << elem.second->socketId << "\n";
             emit(packetSentToUpperSignal, packetCopy);
@@ -838,6 +856,44 @@ INetfilter::IHook::Result NextHopForwarding::datagramLocalOutHook(Packet *datagr
         }
     }
     return IHook::ACCEPT;
+}
+
+void NextHopForwarding::handleStartOperation(LifecycleOperation *operation)
+{
+    start();
+}
+
+void NextHopForwarding::handleStopOperation(LifecycleOperation *operation)
+{
+    stop();
+}
+
+void NextHopForwarding::handleCrashOperation(LifecycleOperation *operation)
+{
+    stop();
+}
+
+void NextHopForwarding::start()
+{
+}
+
+void NextHopForwarding::stop()
+{
+    flush();
+    for (auto it : socketIdToSocketDescriptor)
+        delete it.second;
+    socketIdToSocketDescriptor.clear();
+}
+
+void NextHopForwarding::flush()
+{
+    EV_DEBUG << "NextHopForwarding::flush(): packets in hooks: " << queuedDatagramsForHooks.size() << endl;
+    for (auto & elem : queuedDatagramsForHooks) {
+        delete elem.datagram;
+    }
+    queuedDatagramsForHooks.clear();
+
+//    fragbuf.flush();
 }
 
 } // namespace inet

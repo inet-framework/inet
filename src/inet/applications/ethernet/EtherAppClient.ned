@@ -34,6 +34,9 @@ simple EtherAppClient
         volatile double sendInterval @unit(s) = default(uniform(0s,1s));  // interval between sending requests
         volatile int reqLength @unit(B) = default(100B);  // length of request packets
         volatile int respLength @unit(B) = default(1KiB);  // length of response packets
+        @lifecycleSupport;
+        double stopOperationExtraTime @unit(s) = default(-1s);    // extra time after lifecycle stop operation finished
+        double stopOperationTimeout @unit(s) = default(2s);    // timeout value for lifecycle stop operation
         @display("i=block/app");
         @signal[packetSent](type=inet::Packet);
         @signal[packetReceived](type=inet::Packet);

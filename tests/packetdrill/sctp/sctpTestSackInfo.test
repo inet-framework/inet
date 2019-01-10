@@ -13,7 +13,6 @@ A SACK chunk for a single DATA chunk is expected after 10 ms.
 [General]
 network = PacketDrillSctp
 debug-on-errors = true
-tkenv-plugin-path = ../../../etc/plugins
 ned-path = .;../../../../../src;../../lib
 
 **.scriptFile="../../sctptests/sctpTestSackInfo.pkt"

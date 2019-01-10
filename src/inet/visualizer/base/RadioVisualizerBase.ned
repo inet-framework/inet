@@ -43,7 +43,7 @@ simple RadioVisualizerBase extends VisualizerBase
         string placementHint = default("bottomRight"); // annotation placement hint, space separated list of any, top, bottom, left, right, topLeft, topCenter, topRight, etc.
         double placementPriority = default(0); // determines the order of annotation positioning
 
-		bool antennaLobeNormalize = default(false); // true means maxium gain, false means 0dB is displayed at the given antennaLobeRadius
+		bool antennaLobeNormalize = default(false); // true means maximum gain, false means 0dB is displayed at the given antennaLobeRadius
 		bool antennaLobeRelativeLabels = default(false); // determines whether gain labels are relative or absolute (if true, maximum gain label is 0dB)
         bool antennaLobePlaneGlobal = default(true); // compute antenna lobe relative to the global or antenna local coordinate systems, global by default
         string antennaLobePlane @enum("view", "xy", "xz", "yz") = default("view"); // compute antenna lobe in this plane, view by default

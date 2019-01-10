@@ -51,15 +51,13 @@ void Loopback::initialize(int stage)
 
 void Loopback::configureInterfaceEntry()
 {
-    InterfaceEntry *ie = getContainingNicModule(this);
-
 //    // generate a link-layer address to be used as interface token for IPv6
 //    InterfaceToken token(0, getSimulation()->getUniqueNumber(), 64);
 //    ie->setInterfaceToken(token);
 
     // capabilities
-    ie->setMtu(par("mtu"));
-    ie->setLoopback(true);
+    interfaceEntry->setMtu(par("mtu"));
+    interfaceEntry->setLoopback(true);
 }
 
 void Loopback::handleUpperPacket(Packet *packet)
@@ -91,6 +89,8 @@ void Loopback::clearQueue()
 
 void Loopback::refreshDisplay() const
 {
+    MacBase::refreshDisplay();
+
     /* TBD find solution for displaying IPv4 address without dependence on IPv4 or IPv6
             Ipv4Address addr = interfaceEntry->getProtocolData<Ipv4InterfaceData>()->getIPAddress();
             sprintf(buf, "%s / %s\nrcv:%ld snt:%ld", addr.isUnspecified()?"-":addr.str().c_str(), datarateText, numRcvdOK, numSent);

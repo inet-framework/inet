@@ -32,41 +32,12 @@
 
 namespace inet {
 
-using namespace std;
-
 const Ipv4Address PimBase::ALL_PIM_ROUTERS_MCAST("224.0.0.13");
 
 const PimBase::AssertMetric PimBase::AssertMetric::PIM_INFINITE;
 
 simsignal_t PimBase::sentHelloPkSignal = registerSignal("sentHelloPk");
 simsignal_t PimBase::rcvdHelloPkSignal = registerSignal("rcvdHelloPk");
-
-bool PimBase::AssertMetric::operator==(const AssertMetric& other) const
-{
-    return rptBit == other.rptBit && preference == other.preference &&
-           metric == other.metric && address == other.address;
-}
-
-bool PimBase::AssertMetric::operator!=(const AssertMetric& other) const
-{
-    return rptBit != other.rptBit || preference != other.preference ||
-           metric != other.metric || address != other.address;
-}
-
-bool PimBase::AssertMetric::operator<(const AssertMetric& other) const
-{
-    if (isInfinite())
-        return false;
-    if (other.isInfinite())
-        return true;
-    if (rptBit != other.rptBit)
-        return rptBit < other.rptBit;
-    if (preference != other.preference)
-        return preference < other.preference;
-    if (metric != other.metric)
-        return metric < other.metric;
-    return address > other.address;
-}
 
 PimBase::~PimBase()
 {
@@ -99,9 +70,10 @@ void PimBase::initialize(int stage)
     }
 }
 
-bool PimBase::handleNodeStart(IDoneCallback *doneCallback)
+void PimBase::handleStartOperation(LifecycleOperation *operation)
 {
     generationID = intrand(UINT32_MAX);
+
     // to receive PIM messages, join to ALL_PIM_ROUTERS multicast group
     isEnabled = false;
     for (int i = 0; i < pimIft->getNumInterfaces(); i++) {
@@ -117,19 +89,16 @@ bool PimBase::handleNodeStart(IDoneCallback *doneCallback)
         helloTimer = new cMessage("PIM HelloTimer", HelloTimer);
         scheduleAt(simTime() + par("triggeredHelloDelay"), helloTimer);
     }
-
-    return true;
 }
 
-bool PimBase::handleNodeShutdown(IDoneCallback *doneCallback)
+void PimBase::handleStopOperation(LifecycleOperation *operation)
 {
     // TODO unregister IP_PROT_PIM
     cancelAndDelete(helloTimer);
     helloTimer = nullptr;
-    return true;
 }
 
-void PimBase::handleNodeCrash()
+void PimBase::handleCrashOperation(LifecycleOperation *operation)
 {
     // TODO unregister IP_PROT_PIM
     cancelAndDelete(helloTimer);
@@ -243,6 +212,40 @@ void PimBase::processHelloPacket(Packet *packet)
     neighbor->setDRPriority(drPriority);
 
     delete packet;
+}
+
+bool PimBase::AssertMetric::operator==(const AssertMetric& other) const
+{
+    return rptBit == other.rptBit && preference == other.preference &&
+           metric == other.metric && address == other.address;
+}
+
+bool PimBase::AssertMetric::operator!=(const AssertMetric& other) const
+{
+    return rptBit != other.rptBit || preference != other.preference ||
+           metric != other.metric || address != other.address;
+}
+
+bool PimBase::AssertMetric::operator<(const AssertMetric& other) const
+{
+    if (isInfinite())
+        return false;
+    if (other.isInfinite())
+        return true;
+    if (rptBit != other.rptBit)
+        return rptBit < other.rptBit;
+    if (preference != other.preference)
+        return preference < other.preference;
+    if (metric != other.metric)
+        return metric < other.metric;
+    return address > other.address;
+}
+
+std::ostream& operator<<(std::ostream& out, const PimBase::SourceAndGroup& sourceGroup)
+{
+    out << "(source: " << (sourceGroup.source.isUnspecified() ? "*" : sourceGroup.source.str()) << ", "
+        << "group: " << (sourceGroup.group.isUnspecified() ? "*" : sourceGroup.group.str()) << ")";
+    return out;
 }
 
 }    // namespace inet

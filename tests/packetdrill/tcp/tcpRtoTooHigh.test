@@ -13,7 +13,6 @@ Problem: The RTO is too high, more than 2 seconds.
 [General]
 network = PacketDrillTcp
 debug-on-errors = true
-tkenv-plugin-path = ../../../etc/plugins
 ned-path = .;../../../../../src;../../lib
 
 **.scriptFile="../../tcptests/tcpRtoTooHigh.pkt"

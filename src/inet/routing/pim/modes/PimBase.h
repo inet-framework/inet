@@ -129,6 +129,8 @@ class INET_API PimBase : public RoutingProtocolBase
         bool operator<(const SourceAndGroup& other) const { return source < other.source || (source == other.source && group < other.group); }
     };
 
+    friend std::ostream& operator<<(std::ostream& out, const SourceAndGroup& sourceGroup);
+
     enum PimTimerKind {
         // global timers
         HelloTimer = 1,
@@ -191,9 +193,9 @@ class INET_API PimBase : public RoutingProtocolBase
     void processHelloTimer(cMessage *timer);
     void processHelloPacket(Packet *pk);
 
-    virtual bool handleNodeStart(IDoneCallback *doneCallback) override;
-    virtual bool handleNodeShutdown(IDoneCallback *doneCallback) override;
-    virtual void handleNodeCrash() override;
+    virtual void handleStartOperation(LifecycleOperation *operation) override;
+    virtual void handleStopOperation(LifecycleOperation *operation) override;
+    virtual void handleCrashOperation(LifecycleOperation *operation) override;
 };
 
 }    // namespace inet

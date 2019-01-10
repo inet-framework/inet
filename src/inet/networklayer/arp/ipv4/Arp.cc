@@ -18,7 +18,7 @@
  */
 
 #include "inet/common/IProtocolRegistrationListener.h"
-#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/packet/dissector/ProtocolDissector.h"
@@ -102,19 +102,17 @@ void Arp::handleMessageWhenUp(cMessage *msg)
     }
 }
 
-bool Arp::handleNodeStart(IDoneCallback *doneCallback)
+void Arp::handleStartOperation(LifecycleOperation *operation)
 {
     ASSERT(arpCache.empty());
-    return true;
 }
 
-bool Arp::handleNodeShutdown(IDoneCallback *doneCallback)
+void Arp::handleStopOperation(LifecycleOperation *operation)
 {
     flush();
-    return true;
 }
 
-void Arp::handleNodeCrash()
+void Arp::handleCrashOperation(LifecycleOperation *operation)
 {
     flush();
 }
@@ -133,6 +131,8 @@ void Arp::flush()
 
 void Arp::refreshDisplay() const
 {
+    OperationalBase::refreshDisplay();
+
     std::stringstream os;
 
     os << "size:" << arpCache.size() << " sent:" << numRequestsSent << "\n"

@@ -15,15 +15,15 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_VLAN_H
-#define __INET_VLAN_H
+#ifndef __INET_VLANTUNNEL_H
+#define __INET_VLANTUNNEL_H
 
 #include "inet/linklayer/ethernet/EthernetSocket.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
 
 namespace inet {
 
-class Vlan : public cSimpleModule, public EthernetSocket::ICallback
+class VlanTunnel : public cSimpleModule, public EthernetSocket::ICallback
 {
   protected:
     int vlanId = -1;
@@ -38,9 +38,10 @@ class Vlan : public cSimpleModule, public EthernetSocket::ICallback
 
     virtual void socketDataArrived(EthernetSocket *socket, Packet *packet) override;
     virtual void socketErrorArrived(EthernetSocket *socket, Indication *indication) override;
+    virtual void socketClosed(EthernetSocket *socket) override {}
 };
 
 } // namespace inet
 
-#endif // ifndef __INET_VLAN_H
+#endif // ifndef __INET_VLANTUNNEL_H
 

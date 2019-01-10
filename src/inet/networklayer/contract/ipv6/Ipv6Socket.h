@@ -36,9 +36,16 @@ class INET_API Ipv6Socket : public INetworkSocket
       public:
         virtual void socketDataArrived(INetworkSocket *socket, Packet *packet) override { socketDataArrived(check_and_cast<Ipv6Socket *>(socket), packet); }
         virtual void socketDataArrived(Ipv6Socket *socket, Packet *packet) = 0;
+
+        /**
+         * Notifies about socket closed, indication ownership is transferred to the callee.
+         */
+        virtual void socketClosed(INetworkSocket *socket) override { socketClosed(check_and_cast<Ipv6Socket *>(socket)); }
+        virtual void socketClosed(Ipv6Socket *socket) = 0;
     };
   protected:
     bool bound = false;
+    bool isOpen_ = false;
     int socketId = -1;
     INetworkSocket::ICallback *callback = nullptr;
     void *userData = nullptr;
@@ -72,6 +79,8 @@ class INET_API Ipv6Socket : public INetworkSocket
     virtual void send(Packet *packet) override;
     virtual void sendTo(Packet *packet, Ipv6Address destAddress);
     virtual void close() override;
+    virtual void destroy() override;
+    virtual bool isOpen() const override { return isOpen_; }
   protected:
     virtual void bind(const Protocol *protocol, L3Address localAddress) override { bind(protocol, localAddress.toIpv6()); };
     virtual void connect(L3Address remoteAddress) override { connect(remoteAddress.toIpv6()); }

@@ -6,7 +6,6 @@ Test node startup followed by ping stop.
 
 [General]
 network = Test
-tkenv-plugin-path = ../../../etc/plugins
 ned-path = .;../../../../src;../../lib
 cmdenv-express-mode = false
 
@@ -54,7 +53,7 @@ network Test
 \*\* Event #\d+  t=3   Test\.scenarioManager \(ScenarioManager, id=\d+\)
 processing <at> command\.\.\.
 processing <startup> command\.\.\.
-Doing stage 0/8 of operation inet::NodeStartOperation on Test\.host
+Doing stage 0/8 of operation inet::ModuleStartOperation on Test\.host
 Test\.host starting up
 .*
 Test\.host started

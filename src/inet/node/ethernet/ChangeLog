@@ -1,3 +1,38 @@
+2018-10-09  Levente Mészáros
+
+	Added PcapRecorder submodules to EtherSwitch.
+
+2018-10-02  Zoltan Bojthe
+
+	Remove obsolete EtherLlc NED module.
+
+2018-09-20  Zoltan Bojthe
+
+	Added numEthInterfaces parameter to EtherSwitch.
+	Added optional ext interface vector to EtherSwitch.
+
+2018-09-14  Zoltan Bojthe
+
+	Added registerProtocol parameter to EtherEncap.
+
+2018-09-13  Marcel Marek
+
+	Fixed the activation of STP, the hasStp parameter must be set to true
+	Updated EtherSwitch submodules depending on STP.
+	Moved some code, which really belongs here, from ANSA to INET.
+
+2018-06-28  Zoltan Bojthe
+
+	Added 200Gbps and 400Gbps ethernet channels.
+
+2018-07-20  Zoltan Bojthe
+
+	Added InterfaceTable to ethernet hosts.
+
+2018-07-12  Zoltan Bojthe
+
+	Change EtherHost, EtherHost2 to use EthernetInterface instead of mac+queue(+encap) modules.
+
 ====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------

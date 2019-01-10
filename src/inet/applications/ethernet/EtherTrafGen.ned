@@ -33,6 +33,9 @@ simple EtherTrafGen
         volatile double sendInterval @unit(s);  // interval between sending bursts
         volatile int numPacketsPerBurst = default(1);  // number of packets to send per burst (packets within a burst are sent at the same simulation time)
         volatile int packetLength @unit(B);  // length of packets to send
+        @lifecycleSupport;
+        double stopOperationExtraTime @unit(s) = default(-1s);    // extra time after lifecycle stop operation finished
+        double stopOperationTimeout @unit(s) = default(2s);    // timeout value for lifecycle stop operation
         @display("i=block/app");
         @signal[packetSent](type=inet::Packet);
         @signal[packetReceived](type=inet::Packet);

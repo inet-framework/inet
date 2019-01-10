@@ -19,7 +19,7 @@
 #include "inet/common/INETDefs.h"
 
 #include "inet/common/LayeredProtocolBase.h"
-#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
 #include "inet/linklayer/ethernet/switch/IMacAddressTable.h"
@@ -63,15 +63,15 @@ class INET_API MacRelayUnit : public LayeredProtocolBase
     virtual void finish() override;
 
     // for lifecycle:
-    bool handleNodeStart(IDoneCallback *) override { start(); return true; }
-    bool handleNodeShutdown(IDoneCallback *) override { stop(); return true; }
-    void handleNodeCrash() override { stop(); }
+    virtual void handleStartOperation(LifecycleOperation *operation) override { start(); }
+    virtual void handleStopOperation(LifecycleOperation *operation) override { stop(); }
+    virtual void handleCrashOperation(LifecycleOperation *operation) override { stop(); }
     virtual bool isUpperMessage(cMessage *message) override { return message->arrivedOn("upperLayerIn"); }
     virtual bool isLowerMessage(cMessage *message) override { return message->arrivedOn("ifIn"); }
 
     virtual bool isInitializeStage(int stage) override { return stage == INITSTAGE_LINK_LAYER; }
-    virtual bool isNodeStartStage(int stage) override { return stage == NodeStartOperation::STAGE_LINK_LAYER; }
-    virtual bool isNodeShutdownStage(int stage) override { return stage == NodeShutdownOperation::STAGE_LINK_LAYER; }
+    virtual bool isModuleStartStage(int stage) override { return stage == ModuleStartOperation::STAGE_LINK_LAYER; }
+    virtual bool isModuleStopStage(int stage) override { return stage == ModuleStopOperation::STAGE_LINK_LAYER; }
 
     virtual void start();
     virtual void stop();

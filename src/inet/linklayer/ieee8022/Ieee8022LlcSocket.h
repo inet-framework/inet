@@ -32,6 +32,7 @@ class INET_API Ieee8022LlcSocket : public ISocket
       public:
         virtual ~ICallback() {}
         virtual void socketDataArrived(Ieee8022LlcSocket *socket, Packet *packet) = 0;
+        virtual void socketClosed(Ieee8022LlcSocket *socket) = 0;
     };
   protected:
     int socketId = -1;
@@ -40,7 +41,7 @@ class INET_API Ieee8022LlcSocket : public ISocket
     ICallback *callback = nullptr;
     void *userData = nullptr;
     cGate *outputGate = nullptr;
-    bool isOpen = false;
+    bool isOpen_ = false;
 
   protected:
     void sendToLlc(cMessage *msg);
@@ -91,10 +92,12 @@ class INET_API Ieee8022LlcSocket : public ISocket
 
     void open(int interfaceId, int localSap);
     void send(Packet *packet);
-    void close();
+    virtual void close() override;
+    virtual bool isOpen() const override { return isOpen_; }
 
     virtual bool belongsToSocket(cMessage *msg) const override;
     virtual void processMessage(cMessage *msg) override;
+    virtual void destroy() override;
 };
 
 } // namespace inet

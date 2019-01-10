@@ -56,6 +56,7 @@ class INET_API AckHandler : public IAckHandler
         virtual bool isOutstandingFrame(const Ptr<const Ieee80211DataOrMgmtHeader>& header) override;
         virtual int getNumberOfFramesWithStatus(Status status);
         virtual void processFailedFrame(const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader);
+        virtual void dropFrame(const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader);
 };
 
 } /* namespace ieee80211 */

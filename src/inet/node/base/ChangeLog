@@ -1,3 +1,15 @@
+2018-12-17  Zoltan Bojthe
+
+	Changed TransportLayerNodeBase hasUdp and hasTcp parameter default values to depend on the available modules.
+
+2018-12-17  Zoltan Bojthe
+
+	Moved IVlanInterface to linklayer/contract folder.
+
+2018-10-10  Levente Mészáros
+
+	Added vlan interfaces to network nodes.
+
 ====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------

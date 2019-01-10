@@ -21,7 +21,7 @@
 #include "inet/networklayer/configurator/ipv4/Ipv4NodeConfigurator.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/NodeStatus.h"
-#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
 
 namespace inet {
 
@@ -64,27 +64,48 @@ void Ipv4NodeConfigurator::initialize(int stage)
             configureAllInterfaces();
     }
     else if (stage == INITSTAGE_STATIC_ROUTING) {
-        if ((!nodeStatus || nodeStatus->getState() == NodeStatus::UP) && networkConfigurator)
+        if ((!nodeStatus || nodeStatus->getState() == NodeStatus::UP) && networkConfigurator) {
             configureRoutingTable();
+            cModule *node = getContainingNode(this);
+            // get a pointer to the host module and IInterfaceTable
+            node->subscribe(interfaceCreatedSignal, this);
+            node->subscribe(interfaceDeletedSignal, this);
+            node->subscribe(interfaceStateChangedSignal, this);
+        }
     }
 }
 
-bool Ipv4NodeConfigurator::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+bool Ipv4NodeConfigurator::handleOperationStage(LifecycleOperation *operation, IDoneCallback *doneCallback)
 {
     Enter_Method_Silent();
-    if (dynamic_cast<NodeStartOperation *>(operation)) {
-        if (static_cast<NodeStartOperation::Stage>(stage) == NodeStartOperation::STAGE_LINK_LAYER)
+    int stage = operation->getCurrentStage();
+    if (dynamic_cast<ModuleStartOperation *>(operation)) {
+        if (static_cast<ModuleStartOperation::Stage>(stage) == ModuleStartOperation::STAGE_LINK_LAYER)
             prepareAllInterfaces();
-        else if (static_cast<NodeStartOperation::Stage>(stage) == NodeStartOperation::STAGE_NETWORK_LAYER && networkConfigurator) {
-            configureAllInterfaces();
-            configureRoutingTable();
+        else if (static_cast<ModuleStartOperation::Stage>(stage) == ModuleStartOperation::STAGE_NETWORK_LAYER) {
+            if (networkConfigurator != nullptr) {
+                configureAllInterfaces();
+                configureRoutingTable();
+            }
+            cModule *node = getContainingNode(this);
+            node->subscribe(interfaceCreatedSignal, this);
+            node->subscribe(interfaceDeletedSignal, this);
+            node->subscribe(interfaceStateChangedSignal, this);
         }
     }
-    else if (dynamic_cast<NodeShutdownOperation *>(operation)) {    /*nothing to do*/
-        ;
+    else if (dynamic_cast<ModuleStopOperation *>(operation)) {
+        if (static_cast<ModuleStopOperation::Stage>(stage) == ModuleStopOperation::STAGE_LOCAL) {
+            cModule *node = getContainingNode(this);
+            node->unsubscribe(interfaceCreatedSignal, this);
+            node->unsubscribe(interfaceDeletedSignal, this);
+            node->unsubscribe(interfaceStateChangedSignal, this);
+        }
     }
-    else if (dynamic_cast<NodeCrashOperation *>(operation)) {    /*nothing to do*/
-        ;
+    else if (dynamic_cast<ModuleCrashOperation *>(operation)) {
+        cModule *node = getContainingNode(this);
+        node->unsubscribe(interfaceCreatedSignal, this);
+        node->unsubscribe(interfaceDeletedSignal, this);
+        node->unsubscribe(interfaceStateChangedSignal, this);
     }
     else
         throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());
@@ -135,6 +156,36 @@ void Ipv4NodeConfigurator::configureRoutingTable()
     ASSERT(networkConfigurator);
     if (par("configureRoutingTable"))
         networkConfigurator->configureRoutingTable(routingTable);
+}
+
+void Ipv4NodeConfigurator::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
+{
+    if (getSimulation()->getContextType() == CTX_INITIALIZE)
+        return; // ignore notifications during initialize
+
+    Enter_Method_Silent();
+    printSignalBanner(signalID, obj, details);
+
+    if (signalID == interfaceCreatedSignal) {
+        auto *entry = check_and_cast<InterfaceEntry *>(obj);
+        prepareInterface(entry);
+        // TODO
+    }
+    else if (signalID == interfaceDeletedSignal) {
+        // The RoutingTable deletes routing entries of interface
+    }
+    else if (signalID == interfaceStateChangedSignal) {
+        const auto *ieChangeDetails = check_and_cast<const InterfaceEntryChangeDetails *>(obj);
+        if (ieChangeDetails->getFieldId() == InterfaceEntry::F_STATE) {
+            auto *entry = ieChangeDetails->getInterfaceEntry();
+            if (entry->getState() == InterfaceEntry::State::UP && networkConfigurator) {
+                networkConfigurator->configureInterface(entry);
+                if (par("configureRoutingTable"))
+                    networkConfigurator->configureRoutingTable(routingTable, entry);
+            }
+            // otherwise the RoutingTable deletes routing entries of interface entry
+        }
+    }
 }
 
 } // namespace inet

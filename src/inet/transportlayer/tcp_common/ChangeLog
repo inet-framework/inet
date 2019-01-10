@@ -1,3 +1,15 @@
+2018-12-10  Zoltan Bojthe
+
+	Changed tcp CRC calculation function to static, and get crcMode from TCP header.
+
+2018-11-28  Levente Mészáros
+
+	Fixed protocol detection by port number in TCP/UDP.
+
+2018-10-19  Levente Mészáros
+
+	Extended TcpProtocolDissector to use tcpprotocol protocol group.
+
 ====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------

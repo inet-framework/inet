@@ -1,3 +1,23 @@
+2018-12-11  Zoltan Bojthe
+
+	Refactored PacketDrillApp to use sockets.
+
+2018-10-29  Zoltan Bojthe
+
+	Changed PacketDrillApp base class to ApplicationBase.
+
+2018-10-25  Zoltan Bojthe
+
+	Fixed NodeStatus module detection.
+
+2018-10-04  Zoltan Bojthe
+
+	Added LifecycleUnsupported base class instead of copy-pasting the same code.
+
+2018-09-19  Zoltan Bojthe
+
+	Adapted to the new protocol specific data storage API of InterfaceEntry.
+
 ====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------

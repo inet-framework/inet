@@ -1,3 +1,27 @@
+2018-12-05  Levente Mészáros
+
+	Added processing failed block ack req without response to HCF and frame sequence handling.
+
+2018-12-03  Levente Mészáros
+
+	Added missing mechanism for clearing the state of ack handlers.
+
+2018-11-21  Levente Mészáros
+
+	Fixed Hcf QoS recovery procedure notification for receiving ACK frames.
+
+	This bug caused the station short and long retry counters to increase
+	monotonically without ever resetting.
+
+2018-09-27  Levente Mészáros
+
+	Renamed INITSTAGE_LINK_LAYER to INITSTAGE_NETWORK_INTERFACE_CONFIGURATION.
+	Renamed INITSTAGE_LINK_LAYER_2 to INITSTAGE_LINK_LAYER.
+
+2018-08-17  Zoltan Bojthe
+
+	Added namespace qualifier to @signal type parameters.
+
 ====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------

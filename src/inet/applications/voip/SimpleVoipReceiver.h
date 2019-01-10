@@ -108,6 +108,7 @@ class INET_API SimpleVoipReceiver : public cSimpleModule, public LifecycleUnsupp
     //UdpSocket::ICallback methods
     virtual void socketDataArrived(UdpSocket *socket, Packet *packet) override;
     virtual void socketErrorArrived(UdpSocket *socket, Indication *indication) override;
+    virtual void socketClosed(UdpSocket *socket) override {}
 
   public:
     SimpleVoipReceiver();

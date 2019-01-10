@@ -97,9 +97,9 @@ class INET_API Ieee80211Mac : public MacProtocolBase
     /** @brief Handle messages from lower (physical) layer */
     virtual void handleLowerPacket(Packet *packet) override;
 
-    virtual bool handleNodeStart(IDoneCallback *doneCallback) override;
-    virtual bool handleNodeShutdown(IDoneCallback *doneCallback) override;
-    virtual void handleNodeCrash() override;
+    virtual void handleStartOperation(LifecycleOperation *operation) override;
+    virtual void handleStopOperation(LifecycleOperation *operation) override;
+    virtual void handleCrashOperation(LifecycleOperation *operation) override;
 
     virtual void encapsulate(Packet *packet);
     virtual void decapsulate(Packet *packet);

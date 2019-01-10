@@ -78,6 +78,9 @@ simple TcpBasicClientApp like IApp
         volatile double idleInterval @unit(s); // time gap between sessions
         volatile double reconnectInterval @unit(s) = default(30s);  // if connection breaks, waits this much before trying to reconnect
         @display("i=block/app");
+        @lifecycleSupport;
+        double stopOperationExtraTime @unit(s) = default(-1s);    // extra time after lifecycle stop operation finished
+        double stopOperationTimeout @unit(s) = default(2s);    // timeout value for lifecycle stop operation
         @signal[packetSent](type=inet::Packet);
         @signal[packetReceived](type=inet::Packet);
         @signal[connect](type=long);  // 1 for open, -1 for close

@@ -12,7 +12,6 @@ Socket options are defined. A DATA chunk is sent containing no user data. An ABO
 
 network = PacketDrillSctp
 debug-on-errors = true
-tkenv-plugin-path = ../../../etc/plugins
 ned-path = .;../../../../../src;../../lib
 
 **.scriptFile="../../sctptests/sctpIfdef.pkt"

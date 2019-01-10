@@ -25,7 +25,7 @@ namespace inet {
 class INET_API LifecycleUnsupported : public ILifecycle
 {
   public:
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override
+    virtual bool handleOperationStage(LifecycleOperation *operation, IDoneCallback *doneCallback) override
     {
         omnetpp::cMethodCallContextSwitcher __ctx(check_and_cast<cModule*>(this)); __ctx.methodCallSilent();   // Enter_Method_Silent();
         throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());

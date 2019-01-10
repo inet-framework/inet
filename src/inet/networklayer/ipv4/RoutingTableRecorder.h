@@ -19,65 +19,7 @@
 #define __INET_ROUTINGTABLERECORDER_H
 
 #include "inet/common/INETDefs.h"
-
-#if OMNETPP_VERSION >= 0x0500 && defined HAVE_CEVENTLOGLISTENER    /* cEventlogListener is only supported from 5.0 */
-
-#include <map>
 #include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
-#include "inet/networklayer/contract/IRoute.h"
-
-/**
- * Records interface table and routing table changes into the eventlog.
- *
- * @see Ipv4RoutingTable, Ipv4Route
- */
-class INET_API RoutingTableRecorder : public cSimpleModule, public cIndexedEventlogManager::cEventlogListener
-{
-    friend class RoutingTableNotificationBoardListener;
-
-  protected:
-    struct EventLogEntryReference
-    {
-        eventnumber_t eventNumber;
-        int entryIndex;
-
-        EventLogEntryReference()
-        {
-            this->eventNumber = -1;
-            this->entryIndex = -1;
-        }
-
-        EventLogEntryReference(eventnumber_t eventNumber, int entryIndex)
-        {
-            this->eventNumber = eventNumber;
-            this->entryIndex = entryIndex;
-        }
-    };
-
-    long interfaceKey;
-    long routeKey;
-    std::map<const InterfaceEntry *, long> interfaceEntryToKey;
-    std::map<const IRoute *, long> routeToKey;
-
-  public:
-    RoutingTableRecorder();
-    virtual ~RoutingTableRecorder();
-
-  protected:
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
-    virtual void initialize(int stage);
-    virtual void handleMessage(cMessage *);
-    virtual void hookListeners();
-    virtual void receiveChangeNotification(cModule *source, simsignal_t signalID, cObject *obj);
-    virtual void recordSnapshot();
-    virtual void recordIndex() {}
-    virtual void recordInterface(cModule *host, const InterfaceEntry *ie, simsignal_t signalID);
-    virtual void recordRoute(cModule *host, const IRoute *route, simsignal_t signalID);
-};
-
-#else /*OMNETPP_VERSION*/
-
-#include "IIpv4RoutingTable.h"
 
 namespace inet {
 
@@ -110,8 +52,6 @@ class INET_API RoutingTableRecorder : public cSimpleModule, public cListener
 };
 
 } // namespace inet
-
-#endif /*OMNETPP_VERSION*/
 
 #endif // ifndef __INET_ROUTINGTABLERECORDER_H
 

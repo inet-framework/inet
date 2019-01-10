@@ -19,7 +19,6 @@
 #define __INET_TELNETAPP_H
 
 #include "inet/applications/tcpapp/TcpAppBase.h"
-#include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/common/lifecycle/LifecycleOperation.h"
 
 namespace inet {
@@ -27,7 +26,7 @@ namespace inet {
 /**
  * An example Telnet client application. The server app should be TcpGenericServerApp.
  */
-class INET_API TelnetApp : public TcpAppBase, public ILifecycle
+class INET_API TelnetApp : public TcpAppBase
 {
   protected:
     cMessage *timeoutMsg = nullptr;
@@ -46,7 +45,9 @@ class INET_API TelnetApp : public TcpAppBase, public ILifecycle
     virtual void checkedScheduleAt(simtime_t t, cMessage *msg);
     virtual void sendGenericAppMsg(int numBytes, int expectedReplyBytes);
 
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
+    virtual void handleStartOperation(LifecycleOperation *operation) override;
+    virtual void handleStopOperation(LifecycleOperation *operation) override;
+    virtual void handleCrashOperation(LifecycleOperation *operation) override;
 
   public:
     TelnetApp() {}

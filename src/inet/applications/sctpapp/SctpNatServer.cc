@@ -245,14 +245,10 @@ void SctpNatServer::handleMessage(cMessage *msg)
             case SCTP_I_AVAILABLE: {
                 EV_DETAIL << "SCTP_I_AVAILABLE arrived at server\n";
                 Message *message = check_and_cast<Message *>(msg);
-                auto& intags = getTags(message);
-                Request *cmsg = new Request("SCTP_C_ACCEPT_SOCKET_ID");
-                auto& outtags = cmsg->getTags();
-                auto availableInfo = outtags.addTagIfAbsent<SctpAvailableReq>();
-                SctpAvailableReq *avInfo = intags.findTag<SctpAvailableReq>();
-                int newSockId = avInfo->getNewSocketId();
+                int newSockId = message->getTag<SctpAvailableReq>()->getNewSocketId();
                 EV_DETAIL << "new socket id = " << newSockId << endl;
-                availableInfo->setSocketId(newSockId);
+                Request *cmsg = new Request("SCTP_C_ACCEPT_SOCKET_ID");
+                cmsg->addTag<SctpAvailableReq>()->setSocketId(newSockId);
                 cmsg->setKind(SCTP_C_ACCEPT_SOCKET_ID);
                 cmsg->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::sctp);
                 cmsg->addTagIfAbsent<SocketReq>()->setSocketId(newSockId);

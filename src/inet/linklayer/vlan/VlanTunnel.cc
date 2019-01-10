@@ -15,19 +15,20 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
+
 #include "inet/applications/common/SocketTag_m.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
-#include "inet/linklayer/ieee8021q/Ieee8021QTag_m.h"
-#include "inet/linklayer/vlan/Vlan.h"
+#include "inet/linklayer/vlan/VlanTag_m.h"
+#include "inet/linklayer/vlan/VlanTunnel.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 
 namespace inet {
 
-Define_Module(Vlan);
+Define_Module(VlanTunnel);
 
-void Vlan::initialize(int stage)
+void VlanTunnel::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
         vlanId = par("vlanId");
@@ -61,25 +62,25 @@ void Vlan::initialize(int stage)
     }
 }
 
-void Vlan::handleMessage(cMessage *message)
+void VlanTunnel::handleMessage(cMessage *message)
 {
     if (socket.belongsToSocket(message))
         socket.processMessage(message);
     else {
         auto packet = check_and_cast<Packet *>(message);
-        packet->addTag<Ieee8021QReq>()->setVid(vlanId);
+        packet->addTag<VlanReq>()->setVlanId(vlanId);
         socket.send(packet);
     }
 }
 
-void Vlan::socketDataArrived(EthernetSocket *socket, Packet *packet)
+void VlanTunnel::socketDataArrived(EthernetSocket *socket, Packet *packet)
 {
     packet->removeTag<SocketInd>();
     packet->getTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
     send(packet, "upperLayerOut");
 }
 
-void Vlan::socketErrorArrived(EthernetSocket *socket, Indication *indication)
+void VlanTunnel::socketErrorArrived(EthernetSocket *socket, Indication *indication)
 {
     throw cRuntimeError("Invalid operation");
 }

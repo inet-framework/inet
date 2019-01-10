@@ -1,3 +1,28 @@
+2018-10-19  Levente Mészáros
+
+	Added antennaLobeNormalize and antennaLobeRelativeLabels parameters.
+
+2018-10-17  Levente Mészáros
+
+	Added logarithmic mode to antenna lobe visualization.
+
+2018-10-15  Levente Mészáros
+
+	Added antennaLobeLineSmooth parameter.
+
+2018-09-18  Levente Mészáros
+
+	Added guards to prevent crashes when a network node visualization cannot be found.
+
+2018-09-11  Levente Mészáros
+
+	Added missing default values for visualization*Module parameters.
+	Renamed visualizerTargetModule to visualizationTargetModule for consistency.
+
+2018-07-19  Levente Mészáros
+
+	Added antenna lobe visualization to RadioCanvasVisualizer.
+
 ====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------

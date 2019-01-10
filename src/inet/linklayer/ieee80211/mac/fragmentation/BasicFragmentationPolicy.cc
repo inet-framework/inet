@@ -45,7 +45,7 @@ std::vector<int> BasicFragmentationPolicy::computeFragmentSizes(Packet *frame)
         else
             headerLength = frame->getByteLength();
         int maxFragmentPayload = fragmentationThreshold - headerLength - trailerLength;
-        if (payloadLength >= maxFragmentPayload * MAX_NUM_FRAGMENTS)
+        if (payloadLength > maxFragmentPayload * MAX_NUM_FRAGMENTS)
             throw cRuntimeError("Fragmentation: frame \"%s\" too large, won't fit into %d fragments", frame->getName(), MAX_NUM_FRAGMENTS);
         for(int i = 0; headerLength + trailerLength + payloadLength > fragmentationThreshold; i++) {
             sizes.push_back(fragmentationThreshold - headerLength - trailerLength);
