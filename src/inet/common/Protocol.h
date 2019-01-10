@@ -88,6 +88,7 @@ class INET_API Protocol
     static const Protocol ipv4;
     static const Protocol ipv6;
     static const Protocol isis;
+    static const Protocol l2isis;
     static const Protocol lldp;
     static const Protocol lmac;
     static const Protocol manet;
@@ -104,6 +105,7 @@ class INET_API Protocol
     static const Protocol stp;
     static const Protocol tcp;
     static const Protocol telnet;
+    static const Protocol trill;
     static const Protocol udp;
     static const Protocol xmac;
     static const Protocol xtp;
