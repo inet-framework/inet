@@ -757,18 +757,11 @@ void Router::rebuildRoutingTable()
     for(auto &entry : addEntries) {
         auto position = std::find_if(diffEraseEntries.begin(), diffEraseEntries.end(),
                 [&](const Ipv4Route *m) -> bool {
-            if (m->getDestination() != entry->getDestination())
-                return false;
-            else if(m->getNetmask() != entry->getNetmask())
-                return false;
-            else if(m->getInterface()->getInterfaceId() != entry->getInterface()->getInterfaceId())
-                return false;
-            else if(m->getGateway() != entry->getGateway())
-                return false;
-            else if(m->getMetric() != entry->getMetric())
-                return false;
-            else
-                return true;
+                    return (m->getDestination() == entry->getDestination()) &&
+                           (m->getNetmask() == entry->getNetmask()) &&
+                           (m->getInterface()->getInterfaceId() == entry->getInterface()->getInterfaceId()) &&
+                           (m->getGateway() == entry->getGateway()) &&
+                           (m->getMetric() == entry->getMetric());
         });
         if(position != diffEraseEntries.end())
             diffEraseEntries.erase(position);
