@@ -55,7 +55,7 @@ class INET_API ILifecycle
      * Return value: true = "done"; false = "not yet done, will invoke
      * doneCallback when done"
      */
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) = 0;
+    virtual bool handleOperationStage(LifecycleOperation *operation, IDoneCallback *doneCallback) = 0;
 };
 
 } // namespace inet

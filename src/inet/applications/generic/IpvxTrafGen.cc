@@ -22,7 +22,7 @@
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolGroup.h"
-#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
@@ -117,6 +117,8 @@ void IpvxTrafGen::handleMessageWhenUp(cMessage *msg)
 
 void IpvxTrafGen::refreshDisplay() const
 {
+    ApplicationBase::refreshDisplay();
+
     char buf[40];
     sprintf(buf, "rcvd: %d pks\nsent: %d pks", numReceived, numSent);
     getDisplayString().setTagArg("t", 0, buf);
@@ -206,6 +208,21 @@ void IpvxTrafGen::processPacket(Packet *msg)
     printPacket(msg);
     delete msg;
     numReceived++;
+}
+
+void IpvxTrafGen::handleStartOperation(LifecycleOperation *operation)
+{
+    startApp();
+}
+
+void IpvxTrafGen::handleStopOperation(LifecycleOperation *operation)
+{
+    cancelNextPacket();
+}
+
+void IpvxTrafGen::handleCrashOperation(LifecycleOperation *operation)
+{
+    cancelNextPacket();
 }
 
 void ipvxTrafGenClearProtocols()

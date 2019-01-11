@@ -1,3 +1,53 @@
+2018-11-20  Mani Amoozadeh
+
+	Fixed bug #367.
+
+2018-10-24  Levente Mészáros
+
+	Added optional broadcast, multicast, pointToPoint parameters to InterfaceEntry.
+
+2018-10-22  Levente Mészáros
+
+	Added MAC address parameter to InterfaceEntry originally defined by MAC modules.
+
+2018-09-27  Levente Mészáros
+
+	Renamed INITSTAGE_LINK_LAYER to INITSTAGE_NETWORK_INTERFACE_CONFIGURATION.
+	Renamed INITSTAGE_LINK_LAYER_2 to INITSTAGE_LINK_LAYER.
+
+2018-09-20  Zoltan Bojthe
+
+	Removed ipv4Data(), ipv6Data(), getNextHopData(), ieee8021dData() from InterfaceEntry.
+
+2018-09-19  Zoltan Bojthe
+
+	Adapted to the new protocol specific data storage API of InterfaceEntry.
+
+2018-09-18  Zoltan Bojthe
+
+	Changed InterfaceEntry to use a TagSet to store protocol specific data.
+
+2018-09-17  Zoltan Bojthe
+
+	Added conversion from/to ClncAddress and L3Address.
+
+2018-08-28  Zoltan Bojthe
+
+	Added hasNetworkAddress to InterfaceEntry.
+	Added IP_PROT_EIGRP and IP_PROT_VRRP to IPProtocolId.
+
+2018-08-17  Zoltan Bojthe
+
+	Added namespace qualifier to @signal type parameters.
+
+2018-07-30  Zoltan Bojthe
+
+	Changed InterfaceEntry to register the NIC to InterfaceTable (instead of mac modules).
+
+2018-07-20  Zoltan Bojthe
+
+	L3AddressResolver tries to parse string addresses as specified address types only.
+
 ====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------

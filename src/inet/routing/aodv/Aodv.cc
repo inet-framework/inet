@@ -39,7 +39,7 @@ Define_Module(Aodv);
 void Aodv::initialize(int stage)
 {
     if (stage == INITSTAGE_ROUTING_PROTOCOLS)
-        addressType = getSelfIPAddress().getAddressType();  // needed for handleNodeStart()
+        addressType = getSelfIPAddress().getAddressType();  // needed for handleStartOperation()
 
     RoutingProtocolBase::initialize(stage);
 
@@ -1173,7 +1173,7 @@ void Aodv::handleRERR(const Ptr<const Rerr>& rerr, const L3Address& sourceAddr)
     }
 }
 
-bool Aodv::handleNodeStart(IDoneCallback *)
+void Aodv::handleStartOperation(LifecycleOperation *operation)
 {
     rebootTime = simTime();
 
@@ -1185,16 +1185,14 @@ bool Aodv::handleNodeStart(IDoneCallback *)
         scheduleAt(simTime() + helloInterval - *periodicJitter, helloMsgTimer);
 
     scheduleAt(simTime() + 1, counterTimer);
-    return true;
 }
 
-bool Aodv::handleNodeShutdown(IDoneCallback *)
+void Aodv::handleStopOperation(LifecycleOperation *operation)
 {
     clearState();
-    return true;
 }
 
-void Aodv::handleNodeCrash()
+void Aodv::handleCrashOperation(LifecycleOperation *operation)
 {
     clearState();
 }

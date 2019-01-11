@@ -70,7 +70,7 @@ void PimBase::initialize(int stage)
     }
 }
 
-bool PimBase::handleNodeStart(IDoneCallback *doneCallback)
+void PimBase::handleStartOperation(LifecycleOperation *operation)
 {
     generationID = intrand(UINT32_MAX);
 
@@ -89,19 +89,16 @@ bool PimBase::handleNodeStart(IDoneCallback *doneCallback)
         helloTimer = new cMessage("PIM HelloTimer", HelloTimer);
         scheduleAt(simTime() + par("triggeredHelloDelay"), helloTimer);
     }
-
-    return true;
 }
 
-bool PimBase::handleNodeShutdown(IDoneCallback *doneCallback)
+void PimBase::handleStopOperation(LifecycleOperation *operation)
 {
     // TODO unregister IP_PROT_PIM
     cancelAndDelete(helloTimer);
     helloTimer = nullptr;
-    return true;
 }
 
-void PimBase::handleNodeCrash()
+void PimBase::handleCrashOperation(LifecycleOperation *operation)
 {
     // TODO unregister IP_PROT_PIM
     cancelAndDelete(helloTimer);

@@ -1,3 +1,7 @@
+2018-06-12  Gyorgy Szaszko
+
+	Added SimTimeTextFigure for displaying the simTime on the canvas.
+
 ====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------

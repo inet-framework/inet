@@ -140,16 +140,16 @@ std::string InterfaceEntry::detailedInfo() const
     out << "name:" << getInterfaceName();
     out << "  ID:" << getInterfaceId();
     out << "  MTU: " << getMtu() << " \t";
-    if (!isUp())
-        out << "DOWN ";
+    out << ((state == DOWN) ? "DOWN " : "UP ");
+    if (isLoopback())
+        out << "LOOPBACK ";
     if (isBroadcast())
         out << "BROADCAST ";
+    out << (hasCarrier() ? "CARRIER " : "NOCARRIER ");
     if (isMulticast())
         out << "MULTICAST ";
     if (isPointToPoint())
         out << "POINTTOPOINT ";
-    if (isLoopback())
-        out << "LOOPBACK ";
     out << "\n";
     out << "  macAddr:";
     if (getMacAddress().isUnspecified())
@@ -336,6 +336,26 @@ Ipv4Address InterfaceEntry::getIpv4Address() const {
 #else
     return Ipv4Address::UNSPECIFIED_ADDRESS;
 #endif // ifdef WITH_IPv4
+}
+
+void InterfaceEntry::setState(State s)
+{
+    if (state != s)
+    {
+        state = s;
+        if (state == DOWN)
+            setCarrier(false);
+        stateChanged(F_STATE);
+    }
+}
+void InterfaceEntry::setCarrier(bool b)
+{
+    ASSERT(!(b && (state == DOWN)));
+    if (carrier != b)
+    {
+        carrier = b;
+        stateChanged(F_CARRIER);
+    }
 }
 
 } // namespace inet

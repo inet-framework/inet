@@ -17,7 +17,7 @@
  * along with this program; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/networklayer/arp/ipv4/GlobalArp.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
@@ -141,17 +141,15 @@ void GlobalArp::handlePacket(Packet *packet)
     delete packet;
 }
 
-bool GlobalArp::handleNodeStart(IDoneCallback *doneCallback)
+void GlobalArp::handleStartOperation(LifecycleOperation *operation)
 {
-    return true;
 }
 
-bool GlobalArp::handleNodeShutdown(IDoneCallback *doneCallback)
+void GlobalArp::handleStopOperation(LifecycleOperation *operation)
 {
-    return true;
 }
 
-void GlobalArp::handleNodeCrash()
+void GlobalArp::handleCrashOperation(LifecycleOperation *operation)
 {
 }
 

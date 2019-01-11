@@ -1,3 +1,65 @@
+2018-10-02  Mani Amoozadeh
+
+	Look for the area of the loopback interface too.
+
+2018-09-20  Mani Amoozadeh
+
+	Fixed bug: virtual link is always added into the backbone.
+	If it's not an ABR then add the virtual interface into the transit area.
+
+2018-09-19  Zoltan Bojthe
+
+	Adapted to the new protocol specific data storage API of InterfaceEntry.
+
+2018-09-10  Levente Mészáros
+
+	Extracted subscribe/unsubscribe to support lifecycle operations.
+
+2018-09-07  Mani Amoozadeh
+
+	Loopback interfaces can now be advertised with OSPF.
+	Fixed the cost to an external network with type 2 metric.
+
+2018-09-02  Mani Amoozadeh
+
+	Forwarding address is now optional.
+
+2018-08-24  Mani Amoozadeh
+
+	Addresses are advertised if not specified.
+	Changed the default output cost to use the bandwidth.
+
+2018-08-15  Mani Amoozadeh
+
+	React to link breackage.
+	Don't add 'down' interfaces.
+
+2018-08-13  Mani Amoozadeh
+
+	Added OSPF packet serializer.
+
+2018-08-10  Mani Amoozadeh
+
+	Added OSPF default config.
+
+2018-08-08  Mani Amoozadeh
+
+	Checking interface mode for other link/route types.
+
+2018-08-07  Mani Amoozadeh
+
+	If no area is specified in OSPF config, default 0.0.0.0 is used.
+
+2018-07-20  Mani Amoozadeh
+
+	Subscribed to interface create, delete, and change signals.
+	Refactor config reader to better reflect the execution flow.
+
+2018-07-19  Mani Amoozadeh
+
+	Added cost calculation based on reference bandwidth.
+	Added startupTime parameter
+
 ====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------

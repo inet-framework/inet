@@ -395,7 +395,7 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *packet, const Ptr<c
         if (state->fin_ack_rcvd) {
             EV_INFO << "Our FIN acked -- can go to TIME_WAIT now\n";
             event = TCP_E_RCV_ACK;    // will trigger transition to TIME-WAIT
-            scheduleTimeout(the2MSLTimer, TCP_TIMEOUT_2MSL);    // start timer
+            scheduleTimeout(the2MSLTimer, 2*tcpMain->getMsl());    // start timer
 
             // we're entering TIME_WAIT, so we can signal CLOSED the user
             // (the only thing left to do is wait until the 2MSL timer expires)
@@ -424,7 +424,7 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *packet, const Ptr<c
         //
         sendAck();
         cancelEvent(the2MSLTimer);
-        scheduleTimeout(the2MSLTimer, TCP_TIMEOUT_2MSL);
+        scheduleTimeout(the2MSLTimer, 2*tcpMain->getMsl());
     }
 
     //
@@ -570,7 +570,7 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *packet, const Ptr<c
                                     event = TCP_E_RCV_FIN_ACK;
                                     // start the time-wait timer, turn off the other timers
                                     cancelEvent(finWait2Timer);
-                                    scheduleTimeout(the2MSLTimer, TCP_TIMEOUT_2MSL);
+                                    scheduleTimeout(the2MSLTimer, 2*tcpMain->getMsl());
 
                                     // we're entering TIME_WAIT, so we can signal CLOSED the user
                                     // (the only thing left to do is wait until the 2MSL timer expires)
@@ -580,7 +580,7 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *packet, const Ptr<c
                             case TCP_S_FIN_WAIT_2:
                                 // Start the time-wait timer, turn off the other timers.
                                 cancelEvent(finWait2Timer);
-                                scheduleTimeout(the2MSLTimer, TCP_TIMEOUT_2MSL);
+                                scheduleTimeout(the2MSLTimer, 2*tcpMain->getMsl());
 
                                 // we're entering TIME_WAIT, so we can signal CLOSED the user
                                 // (the only thing left to do is wait until the 2MSL timer expires)
@@ -589,7 +589,7 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *packet, const Ptr<c
                             case TCP_S_TIME_WAIT:
                                 // Restart the 2 MSL time-wait timeout.
                                 cancelEvent(the2MSLTimer);
-                                scheduleTimeout(the2MSLTimer, TCP_TIMEOUT_2MSL);
+                                scheduleTimeout(the2MSLTimer, 2*tcpMain->getMsl());
                                 break;
 
                             default:
@@ -645,7 +645,7 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *packet, const Ptr<c
                         event = TCP_E_RCV_FIN_ACK;
                         // start the time-wait timer, turn off the other timers
                         cancelEvent(finWait2Timer);
-                        scheduleTimeout(the2MSLTimer, TCP_TIMEOUT_2MSL);
+                        scheduleTimeout(the2MSLTimer, 2*tcpMain->getMsl());
 
                         // we're entering TIME_WAIT, so we can signal CLOSED the user
                         // (the only thing left to do is wait until the 2MSL timer expires)
@@ -655,7 +655,7 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *packet, const Ptr<c
                 case TCP_S_FIN_WAIT_2:
                     // Start the time-wait timer, turn off the other timers.
                     cancelEvent(finWait2Timer);
-                    scheduleTimeout(the2MSLTimer, TCP_TIMEOUT_2MSL);
+                    scheduleTimeout(the2MSLTimer, 2*tcpMain->getMsl());
 
                     // we're entering TIME_WAIT, so we can signal CLOSED the user
                     // (the only thing left to do is wait until the 2MSL timer expires)
@@ -664,7 +664,7 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *packet, const Ptr<c
                 case TCP_S_TIME_WAIT:
                     // Restart the 2 MSL time-wait timeout.
                     cancelEvent(the2MSLTimer);
-                    scheduleTimeout(the2MSLTimer, TCP_TIMEOUT_2MSL);
+                    scheduleTimeout(the2MSLTimer, 2*tcpMain->getMsl());
                     break;
 
                 default:

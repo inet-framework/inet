@@ -1,3 +1,15 @@
+2018-10-05  Zoltan Bojthe
+
+	Changed base class of Gpsr to RoutingProtocolBase.
+
+2018-10-04  Zoltan Bojthe
+
+	Fixed lifecycle stages.
+
+2018-09-19  Zoltan Bojthe
+
+	Adapted to the new protocol specific data storage API of InterfaceEntry.
+
 ====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------

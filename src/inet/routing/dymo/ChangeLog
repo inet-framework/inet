@@ -1,3 +1,15 @@
+2018-10-05  Zoltan Bojthe
+
+	Changed base class of Dymo to RoutingProtocolBase.
+
+2018-10-04  Zoltan Bojthe
+
+	Fixed lifecycle stages.
+
+2018-09-27  Levente Mészáros
+
+	Merged INITSTAGE_NETWORK_LAYER and INITSTAGE_NETWORK_LAYER_3.
+
 ====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------
@@ -111,7 +123,7 @@
 
 2015-08-04  Zoltan Bojthe
 
-	dymo: code style changes    
+	dymo: code style changes
 
 2016-10-20  Rudolf Hornig
 

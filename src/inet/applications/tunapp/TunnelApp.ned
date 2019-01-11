@@ -28,6 +28,9 @@ simple TunnelApp like IApp
         string destinationAddress = default("");
         int destinationPort = default(-1);
         int localPort = default(-1);
+        @lifecycleSupport;
+        double stopOperationExtraTime @unit(s) = default(-1s);    // extra time after lifecycle stop operation finished
+        double stopOperationTimeout @unit(s) = default(2s);    // timeout value for lifecycle stop operation
         @display("i=block/app");
     gates:
         input socketIn;

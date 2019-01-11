@@ -1,3 +1,17 @@
+2018-10-15  Levente Mészáros
+
+	Added AxiallySymmetricAntenna model.
+	Added wireAxis parameter to DipoleAntenna.
+	Changed CosineAntenna and ParabolicAntenna to work properly in 3 dimensions.
+
+2018-07-19  Gyorgy Szaszko
+
+	Fixed computeGain() in CosineAntenna.
+
+2018-07-19  Levente Mészáros
+
+	Fixed ParabolicAntenna gain computation when the angle is >180.
+
 ====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------

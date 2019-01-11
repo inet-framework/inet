@@ -34,14 +34,6 @@ namespace inet {
 // since that would create dependence on Ipv4 and Ipv6 stuff!
 class InterfaceEntry;
 class IInterfaceTable;
-class InterfaceProtocolData;
-class NextHopInterfaceData;
-class Ipv4InterfaceData;
-class Ipv6InterfaceData;
-class TrillInterfaceData;
-class IsisInterfaceData;
-class Ieee8021dInterfaceData;
-class CLNSInterfaceData;
 
 enum McastSourceFilterMode { MCAST_INCLUDE_SOURCES, MCAST_EXCLUDE_SOURCES };
 
@@ -207,8 +199,8 @@ class INET_API InterfaceEntry : public cModule
     virtual void setNodeOutputGateId(int i) { if (nodeOutputGateId != i) { nodeOutputGateId = i; configChanged(F_NODE_OUT_GATEID); } }
     virtual void setNodeInputGateId(int i) { if (nodeInputGateId != i) { nodeInputGateId = i; configChanged(F_NODE_IN_GATEID); } }
     virtual void setMtu(int m) { if (mtu != m) { mtu = m; configChanged(F_MTU); } }
-    virtual void setState(State s) { if (state != s) { state = s; stateChanged(F_STATE); } }
-    virtual void setCarrier(bool b) { if (carrier != b) { carrier = b; stateChanged(F_CARRIER); } }
+    virtual void setState(State s);
+    virtual void setCarrier(bool b);
     virtual void setBroadcast(bool b) { if (broadcast != b) { broadcast = b; configChanged(F_BROADCAST); } }
     virtual void setMulticast(bool b) { if (multicast != b) { multicast = b; configChanged(F_MULTICAST); } }
     virtual void setPointToPoint(bool b) { if (pointToPoint != b) { pointToPoint = b; configChanged(F_POINTTOPOINT); } }

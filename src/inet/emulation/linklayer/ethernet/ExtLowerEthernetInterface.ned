@@ -23,7 +23,6 @@ import inet.linklayer.ethernet.IEtherEncap;
 
 //
 // This module provides an Ethernet network interface suitable for emulation.
-//
 // The lower part of the network interface is realized in the real world using
 // a real ethernet socket of the host computer which is running the simulation.
 //
@@ -38,7 +37,7 @@ module ExtLowerEthernetInterface extends ExtInterface like IEthernetInterface
             parameters:
                 @display("p=100,100");
         }
-        socket: ExtEthernetDeviceSocket {
+        socket: ExtEthernetSocket {
             parameters:
                 @display("p=100,300");
         }

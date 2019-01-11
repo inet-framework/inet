@@ -21,10 +21,11 @@
 
 #include <list>
 #include <map>
+#include <set>
 #include "inet/common/IProtocolRegistrationListener.h"
+#include "inet/common/lifecycle/OperationalBase.h"
 #include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
-#include "inet/common/queue/QueueBase.h"
 #include "inet/networklayer/contract/IArp.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/contract/INetfilter.h"
@@ -32,8 +33,6 @@
 #include "inet/networklayer/nexthop/NextHopForwardingHeader_m.h"
 #include "inet/networklayer/nexthop/NextHopRoutingTable.h"
 
-#include <map>
-#include <set>
 
 namespace inet {
 
@@ -43,7 +42,7 @@ namespace inet {
  * interface to allow routing protocols to kick in. It doesn't provide datagram fragmentation
  * and reassembling.
  */
-class INET_API NextHopForwarding : public QueueBase, public NetfilterBase, public INetworkProtocol, public IProtocolRegistrationListener
+class INET_API NextHopForwarding : public OperationalBase, public NetfilterBase, public INetworkProtocol, public IProtocolRegistrationListener
 {
   protected:
     /**
@@ -176,15 +175,24 @@ class INET_API NextHopForwarding : public QueueBase, public NetfilterBase, publi
      * Initialization
      */
     virtual void initialize(int stage) override;
-    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void handleMessageWhenUp(cMessage *msg) override;
 
-    virtual void handleMessage(cMessage *msg) override;
     void handleCommand(Request *msg);
 
     /**
-     * Processing of datagrams. Called when a datagram reaches the front of the queue.
+     * ILifecycle method
      */
-    virtual void endService(cPacket *packet) override;
+    virtual bool isInitializeStage(int stage) override { return stage == INITSTAGE_NETWORK_LAYER; }
+    virtual bool isModuleStartStage(int stage) override { return stage == ModuleStartOperation::STAGE_NETWORK_LAYER; }
+    virtual bool isModuleStopStage(int stage) override { return stage == ModuleStopOperation::STAGE_NETWORK_LAYER; }
+    virtual void handleStartOperation(LifecycleOperation *operation) override;
+    virtual void handleStopOperation(LifecycleOperation *operation) override;
+    virtual void handleCrashOperation(LifecycleOperation *operation) override;
+
+  protected:
+    virtual void stop();
+    virtual void start();
+    virtual void flush();
 };
 
 } // namespace inet

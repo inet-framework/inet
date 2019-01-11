@@ -1,3 +1,37 @@
+2018-10-02  Levente Mészáros
+
+	Added INITSTAGE_GROUP_MOBILITY.
+
+2018-09-30  Andras Varga
+
+	Renamed playground* (NED parameters, C++ variables/methods) to scene*.
+
+2018-09-27  Levente Mészáros
+
+	Split INITSTAGE_PHYSICAL_ENVIRONMENT_2 into INITSTAGE_PHYSICAL_OBJECT_CACHE and INITSTAGE_MOBILITY.
+
+2018-09-26  Andras Varga
+
+	Added support for 3D movement to TurtleMobility.
+
+2018-09-20  Andras Varga
+
+	Added several different reflectIfOutside variants.
+	Added heading, elevation and direction as quaternion handling.
+
+2018-09-18  Levente Mészáros
+
+	Switched to Quaternion::slerp.
+
+2018-09-17  Levente Mészáros
+
+	Replaced EulerAngles with Quaternion in angular position, velocity and acceleration.
+	Added guard agains updating lastOrientation with NaN.
+
+2018-08-17  Zoltan Bojthe
+
+	Added namespace qualifier to @signal type parameters.
+
 ====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------

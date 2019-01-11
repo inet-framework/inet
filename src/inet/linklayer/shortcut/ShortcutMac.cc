@@ -56,7 +56,6 @@ void ShortcutMac::initialize(int stage)
 
 void ShortcutMac::configureInterfaceEntry()
 {
-    auto interfaceEntry = getContainingNicModule(this);
     MacAddress address = parseMacAddressParameter(par("address"));
     shortcutMacs[address] = this;
     interfaceEntry->setDatarate(bitrate);

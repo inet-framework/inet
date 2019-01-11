@@ -46,11 +46,25 @@ bool Ipv4Socket::belongsToSocket(cMessage *msg) const
 void Ipv4Socket::processMessage(cMessage *msg)
 {
     ASSERT(belongsToSocket(msg));
-
-    if (callback)
-        callback->socketDataArrived(this, check_and_cast<Packet*>(msg));
-    else
-        delete msg;
+    switch (msg->getKind()) {
+        case IPv4_I_DATA:
+            if (callback)
+                callback->socketDataArrived(this, check_and_cast<Packet *>(msg));
+            else
+                delete msg;
+            break;
+        case IPv4_I_SOCKET_CLOSED:
+            check_and_cast<Indication *>(msg);
+            isOpen_ = false;
+            bound = false;
+            if (callback)
+                callback->socketClosed(this);
+            delete msg;
+            break;
+        default:
+            throw cRuntimeError("Ipv4Socket: invalid msg kind %d, one of the IPv4_I_xxx constants expected", msg->getKind());
+            break;
+    }
 }
 
 void Ipv4Socket::bind(const Protocol *protocol, Ipv4Address localAddress)
@@ -63,6 +77,7 @@ void Ipv4Socket::bind(const Protocol *protocol, Ipv4Address localAddress)
     request->setControlInfo(command);
     sendToOutput(request);
     bound = true;
+    isOpen_ = true;
 }
 
 void Ipv4Socket::connect(Ipv4Address remoteAddress)
@@ -72,6 +87,7 @@ void Ipv4Socket::connect(Ipv4Address remoteAddress)
     auto request = new Request("connect", IPv4_C_CONNECT);
     request->setControlInfo(command);
     sendToOutput(request);
+    isOpen_ = true;
 }
 
 void Ipv4Socket::send(Packet *packet)
@@ -91,6 +107,15 @@ void Ipv4Socket::close()
     ASSERT(bound);
     Ipv4SocketCloseCommand *command = new Ipv4SocketCloseCommand();
     auto request = new Request("close", IPv4_C_CLOSE);
+    request->setControlInfo(command);
+    sendToOutput(request);
+}
+
+void Ipv4Socket::destroy()
+{
+    ASSERT(bound);
+    auto command = new Ipv4SocketDestroyCommand();
+    auto request = new Request("destroy", IPv4_C_DESTROY);
     request->setControlInfo(command);
     sendToOutput(request);
 }

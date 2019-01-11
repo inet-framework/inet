@@ -63,8 +63,16 @@ void UdpEchoApp::socketErrorArrived(UdpSocket *socket, Indication *indication)
     delete indication;
 }
 
+void UdpEchoApp::socketClosed(UdpSocket *socket)
+{
+    if (operationalState == State::STOPPING_OPERATION)
+        startActiveOperationExtraTimeOrFinish(par("stopOperationExtraTime"));
+}
+
 void UdpEchoApp::refreshDisplay() const
 {
+    ApplicationBase::refreshDisplay();
+
     char buf[40];
     sprintf(buf, "echoed: %d pks", numEchoed);
     getDisplayString().setTagArg("t", 0, buf);
@@ -75,7 +83,7 @@ void UdpEchoApp::finish()
     ApplicationBase::finish();
 }
 
-bool UdpEchoApp::handleNodeStart(IDoneCallback *doneCallback)
+void UdpEchoApp::handleStartOperation(LifecycleOperation *operation)
 {
     socket.setOutputGate(gate("socketOut"));
     int localPort = par("localPort");
@@ -83,18 +91,19 @@ bool UdpEchoApp::handleNodeStart(IDoneCallback *doneCallback)
     MulticastGroupList mgl = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this)->collectMulticastGroups();
     socket.joinLocalMulticastGroups(mgl);
     socket.setCallback(this);
-    return true;
 }
 
-bool UdpEchoApp::handleNodeShutdown(IDoneCallback *doneCallback)
+void UdpEchoApp::handleStopOperation(LifecycleOperation *operation)
 {
-    //TODO if(socket.isOpened()) socket.close();
+    socket.close();
+    delayActiveOperationFinish(par("stopOperationTimeout"));
+}
+
+void UdpEchoApp::handleCrashOperation(LifecycleOperation *operation)
+{
+    if (operation->getRootModule() != getContainingNode(this))     // closes socket when the application crashed only
+        socket.destroy();         //TODO  in real operating systems, program crash detected by OS and OS closes sockets of crashed programs.
     socket.setCallback(nullptr);
-    return true;
-}
-
-void UdpEchoApp::handleNodeCrash()
-{
 }
 
 } // namespace inet

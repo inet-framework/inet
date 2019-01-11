@@ -1,3 +1,11 @@
+2018-10-15  Zoltan Bojthe
+
+	Changed RsvpTe base class to RoutingProtocolBase.
+
+2018-08-17  Zoltan Bojthe
+
+	Added namespace qualifier to @signal type parameters.
+
 ====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------

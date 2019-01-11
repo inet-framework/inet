@@ -17,6 +17,8 @@
 
 package inet.linklayer.vlan;
 
+import inet.linklayer.contract.IVlanInterface;
+
 module VlanInterface like IVlanInterface
 {
     parameters:
@@ -28,10 +30,10 @@ module VlanInterface like IVlanInterface
         input upperLayerIn;
         output upperLayerOut;
     submodules:
-        vlan: Vlan {
+        tunnel: VlanTunnel {
             @display("p=100,100");
         }
     connections:
-        upperLayerIn --> vlan.upperLayerIn;
-        upperLayerOut <-- vlan.upperLayerOut;
+        upperLayerIn --> tunnel.upperLayerIn;
+        upperLayerOut <-- tunnel.upperLayerOut;
 }

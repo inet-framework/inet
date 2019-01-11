@@ -112,6 +112,7 @@ simple HttpServer like IApp
         double activationTime @unit(s) = default(0s); // The initial activation delay. Zero to disable.
         xml config;                                     // The XML configuration file for random sites
         string httpControllerModule = default("httpController"); // ModulePath for HttpController module
+        @lifecycleSupport;
     gates:
         input socketIn;
         output socketOut;

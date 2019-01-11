@@ -26,7 +26,7 @@
 
 #include "inet/routing/ospfv2/messagehandler/MessageHandler.h"
 #include "inet/routing/ospfv2/OspfConfigReader.h"
-#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/ModuleAccess.h"
 
@@ -137,7 +137,7 @@ void Ospf::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj,
         throw cRuntimeError("Unexpected signal: %s", getSignalName(signalID));
 }
 
-bool Ospf::handleNodeStart(IDoneCallback *)
+void Ospf::handleStartOperation(LifecycleOperation *operation)
 {
     ASSERT(ospfRouter == nullptr);
     simtime_t startupTime = par("startupTime");
@@ -147,20 +147,18 @@ bool Ospf::handleNodeStart(IDoneCallback *)
     }
     else
         scheduleAt(simTime() + startupTime, startupTimer);
-    return true;
 }
 
-bool Ospf::handleNodeShutdown(IDoneCallback *)
+void Ospf::handleStopOperation(LifecycleOperation *operation)
 {
     ASSERT(ospfRouter);
     delete ospfRouter;
     cancelEvent(startupTimer);
     ospfRouter = nullptr;
     unsubscribe();
-    return true;
 }
 
-void Ospf::handleNodeCrash()
+void Ospf::handleCrashOperation(LifecycleOperation *operation)
 {
     ASSERT(ospfRouter);
     delete ospfRouter;
@@ -208,6 +206,7 @@ void Ospf::handleInterfaceDown(const InterfaceEntry *ie)
         if(ospfRoute && ospfRoute->getInterface() == ie && ospfRoute->getNextHopAsGeneric().isUnspecified()) {
             EV_DEBUG << "removing route from OSPF routing table: " << ospfRoute << "\n";
             ospfRouter->deleteRoute(ospfRoute);
+            i--;
         }
     }
     // ... from Ipv4 table
@@ -216,6 +215,7 @@ void Ospf::handleInterfaceDown(const InterfaceEntry *ie)
         if(route && route->getInterface() == ie && route->getNextHopAsGeneric().isUnspecified()) {
             EV_DEBUG << "removing route from Ipv4 routing table: " << route << "\n";
             rt->deleteRoute(route);
+            i--;
         }
     }
 

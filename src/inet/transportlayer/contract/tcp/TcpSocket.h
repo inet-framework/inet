@@ -308,12 +308,17 @@ class INET_API TcpSocket : public ISocket
      * connection until the remote TCP closes too (or the FIN_WAIT_1 timeout
      * expires)
      */
-    void close();
+    void close() override;
 
     /**
      * Aborts the connection.
      */
     void abort();
+
+    /**
+     * Destroy the connection.
+     */
+    virtual void destroy() override;
 
     /**
      * Causes TCP to reply with a fresh TcpStatusInfo, attached to a dummy
@@ -342,6 +347,8 @@ class INET_API TcpSocket : public ISocket
      * after it reported "connection closed" to us.
      */
     void renewSocket();
+
+    virtual bool isOpen() const override;
     //@}
 
     /** @name Handling of messages arriving from TCP */

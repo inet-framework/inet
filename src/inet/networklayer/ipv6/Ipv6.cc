@@ -82,8 +82,6 @@ Ipv6::ScheduledDatagram::~ScheduledDatagram()
 void Ipv6::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
-        QueueBase::initialize();
-
         ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
         rt = getModuleFromPar<Ipv6RoutingTable>(par("routingTableModule"), this);
         nd = getModuleFromPar<Ipv6NeighbourDiscovery>(par("ipv6NeighbourDiscoveryModule"), this);
@@ -110,9 +108,9 @@ void Ipv6::initialize(int stage)
         WATCH(numForwarded);
     }
     else if (stage == INITSTAGE_NETWORK_LAYER) {
-        bool isOperational;
-        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
-        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
+        cModule *node = findContainingNode(this);
+        NodeStatus *nodeStatus = node ? check_and_cast_nullable<NodeStatus *>(node->getSubmodule("status")) : nullptr;
+        bool isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
         if (!isOperational)
             throw cRuntimeError("This module doesn't support starting in node DOWN state");
     }
@@ -130,33 +128,49 @@ void Ipv6::handleRegisterProtocol(const Protocol& protocol, cGate *in, ServicePr
         upperProtocols.insert(&protocol);
 }
 
-void Ipv6::handleMessage(cMessage *msg)
+void Ipv6::handleRequest(Request *request)
 {
-    auto request = dynamic_cast<Request *>(msg);
-    if (auto *command = dynamic_cast<Ipv6SocketBindCommand *>(msg->getControlInfo())) {
+    auto ctrl = request->getControlInfo();
+    if (ctrl == nullptr)
+        throw cRuntimeError("Request '%s' arrived without controlinfo", request->getName());
+    if (auto *command = dynamic_cast<Ipv6SocketBindCommand *>(ctrl)) {
         int socketId = request->getTag<SocketReq>()->getSocketId();
         SocketDescriptor *descriptor = new SocketDescriptor(socketId, command->getProtocol()->getId(), command->getLocalAddress());
         socketIdToSocketDescriptor[socketId] = descriptor;
-        delete msg;
+        delete request;
     }
-    else if (auto *command = dynamic_cast<Ipv6SocketConnectCommand *>(msg->getControlInfo())) {
+    else if (auto *command = dynamic_cast<Ipv6SocketConnectCommand *>(ctrl)) {
         int socketId = request->getTag<SocketReq>()->getSocketId();
         if (socketIdToSocketDescriptor.find(socketId) == socketIdToSocketDescriptor.end())
             throw cRuntimeError("Ipv6Socket: should use bind() before connect()");
         socketIdToSocketDescriptor[socketId]->remoteAddress = command->getRemoteAddress();
-        delete msg;
+        delete request;
     }
-    else if (dynamic_cast<Ipv6SocketCloseCommand *>(msg->getControlInfo()) != nullptr) {
+    else if (dynamic_cast<Ipv6SocketCloseCommand *>(ctrl) != nullptr) {
+        int socketId = 0; request->getTag<SocketReq>()->getSocketId();
+        auto it = socketIdToSocketDescriptor.find(socketId);
+        if (it != socketIdToSocketDescriptor.end()) {
+            delete it->second;
+            socketIdToSocketDescriptor.erase(it);
+            auto indication = new Indication("closed", IPv6_I_SOCKET_CLOSED);
+            auto ctrl = new Ipv6SocketClosedIndication();
+            indication->setControlInfo(ctrl);
+            indication->addTagIfAbsent<SocketInd>()->setSocketId(socketId);
+            send(indication, "transportOut");
+        }
+        delete request;
+    }
+    else if (dynamic_cast<Ipv6SocketDestroyCommand *>(ctrl) != nullptr) {
         int socketId = 0; request->getTag<SocketReq>()->getSocketId();
         auto it = socketIdToSocketDescriptor.find(socketId);
         if (it != socketIdToSocketDescriptor.end()) {
             delete it->second;
             socketIdToSocketDescriptor.erase(it);
         }
-        delete msg;
+        delete request;
     }
     else
-        QueueBase::handleMessage(msg);
+        throw cRuntimeError("Unknown command: '%s' with %s", request->getName(), ctrl->getClassName());
 }
 
 void Ipv6::refreshDisplay() const
@@ -175,9 +189,9 @@ void Ipv6::refreshDisplay() const
     getDisplayString().setTagArg("t", 0, buf);
 }
 
-void Ipv6::endService(cPacket *msg)
+void Ipv6::handleMessage(cMessage *msg)
 {
-    Packet *packet = dynamic_cast<Packet *>(msg);
+    auto& tags = getTags(msg);
 
 #ifdef WITH_xMIPv6
     // 28.09.07 - CB
@@ -202,18 +216,21 @@ void Ipv6::endService(cPacket *msg)
     else
 #endif /* WITH_xMIPv6 */
 
+    if (auto request = dynamic_cast<Request *>(msg))
+        handleRequest(request);
+    else
     if (msg->getArrivalGate()->isName("transportIn")
-        || (msg->getArrivalGate()->isName("ndIn") && packet->getTag<PacketProtocolTag>()->getProtocol() == &Protocol::icmpv6)
-        || (msg->getArrivalGate()->isName("upperTunnelingIn"))    // for tunneling support-CB
+        || (msg->arrivedOn("ndIn") && tags.getTag<PacketProtocolTag>()->getProtocol() == &Protocol::icmpv6)
+        || (msg->arrivedOn("upperTunnelingIn"))    // for tunneling support-CB
 #ifdef WITH_xMIPv6
-        || (msg->getArrivalGate()->isName("xMIPv6In") && packet->getTag<PacketProtocolTag>()->getProtocol() == &Protocol::mobileipv6)
+        || (msg->arrivedOn("xMIPv6In") && tags.getTag<PacketProtocolTag>()->getProtocol() == &Protocol::mobileipv6)
 #endif /* WITH_xMIPv6 */
         )
     {
         // packet from upper layers, tunnel link-layer output or ND: encapsulate and send out
-        handleMessageFromHL(packet);
+        handleMessageFromHL(check_and_cast<Packet *>(msg));
     }
-    else if (msg->getArrivalGate()->isName("ndIn") && packet->getTag<PacketProtocolTag>()->getProtocol() == &Protocol::ipv6) {
+    else if (msg->arrivedOn("ndIn") && tags.getTag<PacketProtocolTag>()->getProtocol() == &Protocol::ipv6) {
         auto packet = check_and_cast<Packet *>(msg);
         Ipv6NdControlInfo *ctrl = check_and_cast<Ipv6NdControlInfo *>(msg->removeControlInfo());
         bool fromHL = ctrl->getFromHL();
@@ -676,6 +693,7 @@ void Ipv6::localDeliver(Packet *packet, const InterfaceEntry *fromIE)
                 && (elem.second->localAddress.isUnspecified() || elem.second->localAddress == localAddress)
                 && (elem.second->remoteAddress.isUnspecified() || elem.second->remoteAddress == remoteAddress)) {
             auto *packetCopy = packet->dup();
+            packetCopy->setKind(IPv6_I_DATA);
             packetCopy->addTagIfAbsent<SocketInd>()->setSocketId(elem.second->socketId);
             EV_INFO << "Passing up to socket " << elem.second->socketId << "\n";
             emit(packetSentToUpperSignal, packetCopy);

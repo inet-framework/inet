@@ -288,9 +288,9 @@ class INET_API RsvpTe : public RoutingProtocolBase, public IScriptable
     virtual void handleMessageWhenUp(cMessage *msg) override;
 
     virtual void clear();
-    virtual bool handleNodeStart(IDoneCallback *) override;
-    virtual bool handleNodeShutdown(IDoneCallback *) override;
-    virtual void handleNodeCrash() override;
+    virtual void handleStartOperation(LifecycleOperation *operation) override;
+    virtual void handleStopOperation(LifecycleOperation *operation) override;
+    virtual void handleCrashOperation(LifecycleOperation *operation) override;
 
     // IScriptable implementation
     virtual void processCommand(const cXMLElement& node) override;

@@ -1,3 +1,15 @@
+2018-12-12  Levente Mészáros
+
+	Extended, refactored QosClassifier.
+
+2018-11-22  Gyorgy Szaszko
+
+	Added a new generic purpose QosClassifier module which classifies packets into user priority categories.
+
+2018-09-27  Zoltan Bojthe
+
+	Changed ExampleQosClassifier, RandomQosClassifier to forward handleRegisterProtocol calls.
+
 ====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------

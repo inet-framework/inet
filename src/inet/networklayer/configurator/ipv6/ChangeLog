@@ -1,3 +1,16 @@
+2018-09-28  Levente Mészáros
+
+	Renamed initstage to INITSTAGE_NETWORK_CONFIGURATION.
+
+2018-09-27  Levente Mészáros
+
+	Split INITSTAGE_NETWORK_LAYER_2 into INITSTAGE_NETWORK_CONFIGURATOR,
+	INITSTAGE_NETWORK_ADDRESS_ASSIGNMENT, INITSTAGE_STATIC_ROUTING.
+
+2018-09-19  Zoltan Bojthe
+
+	Adapted to the new protocol specific data storage API of InterfaceEntry.
+
 ====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------

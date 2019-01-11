@@ -187,8 +187,32 @@ void Ldp::handleMessageWhenUp(cMessage *msg)
         else if (udpSocket.belongsToSocket(msg)) {
             udpSocket.processMessage(msg);
         }
-        else
-            throw cRuntimeError("model error: no socket found for msg '%s'", msg->getName());
+        else {
+            auto& tags = getTags(msg);
+            int socketId = tags.getTag<SocketInd>()->getSocketId();
+            for (auto& s: udpSockets) {
+                if (s.getSocketId() == socketId) {
+                    s.processMessage(msg);
+                    return;
+                }
+            }
+            throw cRuntimeError("model error: no socket found for msg '%s' with socketId %d", msg->getName(), socketId);
+        }
+    }
+    // TODO: move to separate function and reuse from socketClosed
+    if (operationalState == State::STOPPING_OPERATION) {
+        if (udpSocket.isOpen() || serverSocket.isOpen())
+            return;
+        // TODO: check for empty sockets?
+        for (auto& s: udpSockets)
+            if (s.isOpen())
+                return;
+        for (auto s: socketMap.getMap())
+            if (s.second->isOpen())
+                return;
+        udpSockets.clear();
+        socketMap.deleteSockets();
+        startActiveOperationExtraTimeOrFinish(par("stopOperationExtraTime"));
     }
 }
 
@@ -205,27 +229,43 @@ void Ldp::socketErrorArrived(UdpSocket *socket, Indication *indication)
     delete indication;
 }
 
-bool Ldp::handleNodeStart(IDoneCallback *doneCallback)
+void Ldp::socketClosed(UdpSocket *socket)
+{
+}
+
+void Ldp::handleStartOperation(LifecycleOperation *operation)
 {
     scheduleAt(simTime() + exponential(0.1), sendHelloMsg);
-    return true;
 }
 
-bool Ldp::handleNodeShutdown(IDoneCallback *doneCallback)
+void Ldp::handleStopOperation(LifecycleOperation *operation)
 {
     for (auto & elem : myPeers)
         cancelAndDelete(elem.timeout);
     myPeers.clear();
     cancelEvent(sendHelloMsg);
-    return true;
+    udpSocket.close();
+    for (auto& s: udpSockets)
+        s.close();
+    serverSocket.close();
+    for (auto s: socketMap.getMap())
+        s.second->close();
+    delayActiveOperationFinish(par("stopOperationTimeout"));
 }
 
-void Ldp::handleNodeCrash()
+void Ldp::handleCrashOperation(LifecycleOperation *operation)
 {
     for (auto & elem : myPeers)
         cancelAndDelete(elem.timeout);
     myPeers.clear();
     cancelEvent(sendHelloMsg);
+
+    udpSocket.destroy();
+    for (auto& s: udpSockets)
+        s.destroy();
+    serverSocket.destroy();
+    for (auto s: socketMap.getMap())
+        s.second->destroy();
 }
 
 void Ldp::sendToPeer(Ipv4Address dest, Packet *msg)

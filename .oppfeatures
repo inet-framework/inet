@@ -1,4 +1,4 @@
-<features cppSourceRoots="src" definesFile="src/inet/features.h">
+    <features cppSourceRoots="src" definesFile="src/inet/features.h">
     <feature
         id="TCP_common"
         name="TCP Common"
@@ -311,12 +311,15 @@
         nedPackages = "
                        inet.applications.ethernet
                        inet.linklayer.ethernet
+                       inet.linklayer.ieee8021q
+                       inet.linklayer.vlan
                        inet.node.ethernet
+                       inet.physicallayer.ethernet
                       "
         extraSourceFolders = ""
         compileFlags = "-DWITH_ETHERNET"
         linkerFlags = ""
-        />
+        /><!-- TODO: move inet.linklayer.ieee8021q and inet.linklayer.vlan to a new feature -->
     <feature
         id="Ethernet_examples"
         name="Ethernet examples"
@@ -352,7 +355,7 @@
                        packets on the network. This feature requires at least version 1.5.3
                        of the libpcap-dev package."
         initiallyEnabled = "false"
-        requires = "IPv4"
+        requires = "Ethernet IPv4"
         labels = "nic"
         nedPackages = "
                        inet.emulation
@@ -1140,11 +1143,31 @@
         linkerFlags = ""
         />
     <feature
+        id="riptutorial"
+        name="RIP routing tutorial"
+        description = "A step-by-step tutorial starting from the basics, and introducing new features and concepts related to RIP routing."
+        initiallyEnabled = "true"
+        requires = "visualization Ethernet RIP"
+        labels = "tutorial rip routing"
+        nedPackages = "inet.tutorials.rip"
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
         id="generalshowcases"
         name="General showcases"
         description = "Simple showcases demonstrating general features."
         initiallyEnabled = "true"
-        requires = ""
+        requires = "visualization
+                    physicalenvironment
+                    apskradio
+                    Ethernet PPP Ieee80211 Ieee802154 BMAC CsmaCaMac LMAC XMAC
+                    IPv4
+                    TCP_INET UDP
+                    AODV DSDV GPSR RIP
+                    DiffServ
+                    DHCP"
         labels = "showcase general"
         nedPackages = "inet.showcases.general"
         extraSourceFolders = ""

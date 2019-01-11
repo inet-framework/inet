@@ -100,7 +100,6 @@ network Test1
 description = "Simple test"
 network = Test1
 ned-path = .;../../../../src;../../lib
-tkenv-plugin-path = ../../../etc/plugins
 sim-time-limit = 200s
 
 #omnetpp 5.0 - 5.1 compatibility:

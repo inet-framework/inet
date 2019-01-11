@@ -55,6 +55,7 @@ class OriginatorBlockAckAgreement
 
         virtual int getBufferSize() const { return bufferSize; }
         virtual SequenceNumber getStartingSequenceNumber() { return startingSequenceNumber; }
+        virtual void setStartingSequenceNumber(SequenceNumber sequenceNumber) { startingSequenceNumber = sequenceNumber; }
         virtual bool getIsAddbaResponseReceived() const { return isAddbaResponseReceived; }
         virtual bool getIsAddbaRequestSent() const { return isAddbaRequestSent; }
         virtual bool getIsAMsduSupported() const { return isAMsduSupported; }

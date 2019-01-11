@@ -117,6 +117,11 @@ class INET_API LMac : public MacProtocolBase, public IMacProtocol
     virtual void encapsulate(Packet *);
     virtual void decapsulate(Packet *);
 
+    // OperationalBase:
+    virtual void handleStartOperation(LifecycleOperation *operation) override {}    //TODO implementation
+    virtual void handleStopOperation(LifecycleOperation *operation) override {}    //TODO implementation
+    virtual void handleCrashOperation(LifecycleOperation *operation) override {}    //TODO implementation
+
   protected:
     /** @brief Generate new interface address*/
     virtual void configureInterfaceEntry() override;

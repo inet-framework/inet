@@ -1,3 +1,37 @@
+2018-12-17  Levente Mészáros
+
+	Cleaned up and updated documentation.
+	Renamed a couple of emulation support modules for simplicity:
+	ExtEthernetDeviceSocket -> ExtEthernetSocket
+	ExtEthernetTapDeviceFileIo -> ExtEthernetTapDevice
+
+2018-10-18  Levente Mészáros
+
+	Added support for host network namespaces.
+
+2018-09-19  Levente Mészáros
+
+	Fixed copying packet to buffer.
+
+2018-07-27  Zoltan Bojthe
+
+	Renamed ExtTapDeviceIo to ExtEthernetTapDeviceFileIo.
+
+2018-07-27  Levente Mészáros
+
+	Extracted ExtInterface base NED module.
+	Removed tapDevice parameter superseeded by device parameter.
+
+2018-07-26  Levente Mészáros
+
+	Replaced ExtEthernetInterface with ExtLowerEthernetInterface and ExtUpperEthernetInterface modules.
+	Extracted ExtEthernetDeviceSocket from RawSocket.
+
+2018-07-20  Levente Mészáros
+
+	Moved old ExtInterface to ExtEthernetInterface.
+	Created a separate folder structure under src for emulation related modules and components.
+
 ====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------

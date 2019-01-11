@@ -15,23 +15,15 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_EXTETHERNETTAPDEVICEFILEIO_H
-#define __INET_EXTETHERNETTAPDEVICEFILEIO_H
+#ifndef __INET_EXTIPV4TUNDEVICE_H
+#define __INET_EXTIPV4TUNDEVICE_H
 
 #include "inet/common/packet/printer/PacketPrinter.h"
 #include "inet/common/scheduler/RealTimeScheduler.h"
 
 namespace inet {
 
-/**
- * Implements an interface suitable for emulation that corresponds to a real
- * interface on the host running the simulation.
- *
- * Requires RealTimeScheduler to be configured as scheduler in omnetpp.ini.
- *
- * See NED file for more details.
- */
-class INET_API ExtEthernetTapDeviceFileIo : public cSimpleModule, public RealTimeScheduler::ICallback
+class INET_API ExtIpv4TunDevice : public cSimpleModule, public RealTimeScheduler::ICallback
 {
   protected:
     // parameters
@@ -45,7 +37,7 @@ class INET_API ExtEthernetTapDeviceFileIo : public cSimpleModule, public RealTim
 
     // state
     PacketPrinter packetPrinter;
-    int fd = -1;
+    int fd = INVALID_SOCKET;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
@@ -54,16 +46,16 @@ class INET_API ExtEthernetTapDeviceFileIo : public cSimpleModule, public RealTim
     virtual void refreshDisplay() const override;
     virtual void finish() override;
 
-    virtual void openTap(std::string dev);
-    virtual void closeTap();
+    virtual void openTun(std::string dev);
+    virtual void closeTun();
 
   public:
-    virtual ~ExtEthernetTapDeviceFileIo();
+    virtual ~ExtIpv4TunDevice();
 
     virtual bool notify(int fd) override;
 };
 
 } // namespace inet
 
-#endif // ifndef __INET_EXTETHERNETTAPDEVICEFILEIO_H
+#endif // ifndef __INET_EXTIPV4TUNDEVICE_H
 

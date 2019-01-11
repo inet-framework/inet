@@ -605,7 +605,7 @@ void PacketDump::tcpDump(bool l2r, const char *label, const Ptr<const tcp::TcpHe
                     case TCPOPTION_SACK: {
                         auto sackOpt = check_and_cast<const TcpOptionSack *>(option);
                         out << " SACK";
-                        for (int k = 0; k < sackOpt->getSackItemArraySize(); k++) {
+                        for (size_t k = 0; k < sackOpt->getSackItemArraySize(); k++) {
                             const auto& sackItem = sackOpt->getSackItem(k);
                             out << "[" << sackItem.getStart() << "," << sackItem.getEnd() << ")";
                         }

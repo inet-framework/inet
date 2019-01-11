@@ -38,5 +38,6 @@ simple ShortcutRadio extends PhysicalLayerBase like IRadio
         volatile double propagationDelay @unit(s) = default(0s); // propagation time to all destinations
         volatile double packetLoss = default(0); // packet loss probability
         @class(ShortcutRadio);
+        @signal[transmissionStateChanged](type=long);    // type=inet::physicallayer::TransmissionState
 }
 

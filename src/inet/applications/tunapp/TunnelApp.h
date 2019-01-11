@@ -53,12 +53,20 @@ protected:
     // UdpSocket::ICallback
     virtual void socketDataArrived(UdpSocket *socket, Packet *packet) override;
     virtual void socketErrorArrived(UdpSocket *socket, Indication *indication) override;
+    virtual void socketClosed(UdpSocket *socket) override;
 
     // Ipv4Socket::ICallback
     virtual void socketDataArrived(Ipv4Socket *socket, Packet *packet) override;
+    virtual void socketClosed(Ipv4Socket *socket) override;
 
     // TunSocket::ICallback
     virtual void socketDataArrived(TunSocket *socket, Packet *packet) override;
+    virtual void socketClosed(TunSocket *socket) override {}
+
+    // OperationalBase:
+    virtual void handleStartOperation(LifecycleOperation *operation) override {}    //TODO implementation
+    virtual void handleStopOperation(LifecycleOperation *operation) override;
+    virtual void handleCrashOperation(LifecycleOperation *operation) override;
 };
 
 } // namespace inet

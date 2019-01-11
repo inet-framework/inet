@@ -185,6 +185,17 @@ void Ipv4NetworkConfigurator::configureRoutingTable(IIpv4RoutingTable *routingTa
     }
 }
 
+void Ipv4NetworkConfigurator::configureRoutingTable(IIpv4RoutingTable *routingTable, InterfaceEntry *interfaceEntry)
+{
+    ensureConfigurationComputed(topology);
+    // TODO: avoid linear search
+    for (int i = 0; i < topology.getNumNodes(); i++) {
+        Node *node = (Node *)topology.getNode(i);
+        if (node->routingTable == routingTable)
+            configureRoutingTable(node, interfaceEntry);
+    }
+}
+
 void Ipv4NetworkConfigurator::configureInterface(InterfaceInfo *interfaceInfo)
 {
     EV_DETAIL << "Configuring network interface " << interfaceInfo->getFullPath() << ".\n";
@@ -231,6 +242,46 @@ void Ipv4NetworkConfigurator::configureRoutingTable(Node *node)
         for (size_t j = 0; j < original->getNumOutInterfaces(); j++)
             clone->addOutInterface(new IMulticastRoute::OutInterface(*original->getOutInterface(j)));
         node->routingTable->addMulticastRoute(clone);
+    }
+}
+
+void Ipv4NetworkConfigurator::configureRoutingTable(Node *node, InterfaceEntry *interfaceEntry)
+{
+    EV_DETAIL << "Configuring routing table of " << node->getModule()->getFullPath() << ".\n";
+    for (size_t i = 0; i < node->staticRoutes.size(); i++) {
+        Ipv4Route *original = node->staticRoutes[i];
+        if (original->getInterface() == interfaceEntry) {
+            Ipv4Route *clone = new Ipv4Route();
+            clone->setMetric(original->getMetric());
+            clone->setSourceType(original->getSourceType());
+            clone->setSource(original->getSource());
+            clone->setDestination(original->getDestination());
+            clone->setNetmask(original->getNetmask());
+            clone->setGateway(original->getGateway());
+            clone->setInterface(original->getInterface());
+            node->routingTable->addRoute(clone);
+        }
+    }
+    for (size_t i = 0; i < node->staticMulticastRoutes.size(); i++) {
+        Ipv4MulticastRoute *original = node->staticMulticastRoutes[i];
+        bool needed = original->getInInterface() && original->getInInterface()->getInterface() == interfaceEntry;
+        for (size_t j = 0; !needed && j < original->getNumOutInterfaces(); j++)
+            if (original->getOutInterface(j) && original->getOutInterface(j)->getInterface() == interfaceEntry)
+                needed = true;
+
+        if (needed) {
+            Ipv4MulticastRoute *clone = new Ipv4MulticastRoute();
+            clone->setMetric(original->getMetric());
+            clone->setSourceType(original->getSourceType());
+            clone->setSource(original->getSource());
+            clone->setOrigin(original->getOrigin());
+            clone->setOriginNetmask(original->getOriginNetmask());
+            clone->setInInterface(original->getInInterface());
+            clone->setMulticastGroup(original->getMulticastGroup());
+            for (size_t j = 0; j < original->getNumOutInterfaces(); j++)
+                clone->addOutInterface(new IMulticastRoute::OutInterface(*original->getOutInterface(j)));
+            node->routingTable->addMulticastRoute(clone);
+        }
     }
 }
 
@@ -1672,9 +1723,7 @@ void Ipv4NetworkConfigurator::optimizeRoutes(std::vector<Ipv4Route *>& originalR
     // routes are classified based on their action (gateway, interface, type, source, metric, etc.) and a color is assigned to them.
     RoutingTableInfo routingTableInfo;
     std::vector<Ipv4Route *> colorToRoute;    // a mapping from color to route action (interface, gateway, metric, etc.)
-#ifndef NDEBUG
     RoutingTableInfo originalRoutingTableInfo;    // a copy of the original routes in the optimizer's format
-#endif // ifndef NDEBUG
 
     // build colorToRouteColor, originalRoutingTableInfo and initial routeInfos in routingTableInfo
     for (auto & originalRoute : originalRoutes) {
@@ -1686,9 +1735,7 @@ void Ipv4NetworkConfigurator::optimizeRoutes(std::vector<Ipv4Route *>& originalR
 
         // create original route and determine its color
         RouteInfo *originalRouteInfo = new RouteInfo(color, originalRoute->getDestination().getInt(), originalRoute->getNetmask().getInt());
-#ifndef NDEBUG
         originalRoutingTableInfo.addRouteInfo(originalRouteInfo);
-#endif // ifndef NDEBUG
 
         // create a copy of the original route that can be destructively optimized later
         RouteInfo *optimizedRouteInfo = new RouteInfo(*originalRouteInfo);
@@ -1709,6 +1756,10 @@ void Ipv4NetworkConfigurator::optimizeRoutes(std::vector<Ipv4Route *>& originalR
 #ifndef NDEBUG
     checkOriginalRoutes(routingTableInfo, originalRoutingTableInfo);
 #endif // ifndef NDEBUG
+
+    for (auto rti: originalRoutingTableInfo.routeInfos)
+        delete rti;
+    originalRoutingTableInfo.routeInfos.clear();
 
     // STEP 3.
     // convert the optimized routes to new optimized Ipv4 routes based on the saved colors

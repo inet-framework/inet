@@ -49,6 +49,8 @@ void TcpSinkApp::initialize(int stage)
 
 void TcpSinkApp::refreshDisplay() const
 {
+    ApplicationBase::refreshDisplay();
+
     char buf[160];
     sprintf(buf, "threads: %d\nrcvd: %ld bytes", socketMap.size(), bytesRcvd);
     getDisplayString().setTagArg("t", 0, buf);
@@ -57,6 +59,8 @@ void TcpSinkApp::refreshDisplay() const
 
 void TcpSinkApp::finish()
 {
+    TcpServerHostApp::finish();
+
     recordScalar("bytesRcvd", bytesRcvd);
 }
 

@@ -1,3 +1,7 @@
+2018-09-27  Levente Mészáros
+
+	Merged INITSTAGE_NETWORK_LAYER and INITSTAGE_NETWORK_LAYER_3.
+
 ====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------

@@ -1,3 +1,16 @@
+2018-09-28  Levente Mészáros
+
+	Disabled lightning on mobility trail.
+
+2018-09-17  Levente Mészáros
+
+	Updated MobilityOsgVisualizer and NetworkNodeOsgVisualizer to work similarly to the canvas variants.
+
+2018-09-11  Levente Mészáros
+
+	Added missing default values for visualization*Module parameters.
+	Renamed visualizerTargetModule to visualizationTargetModule for consistency.
+
 ====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------

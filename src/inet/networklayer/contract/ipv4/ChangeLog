@@ -1,3 +1,23 @@
+2018-12-07  Zoltan Bojthe
+
+	Renamed 'isOpened' member to 'isOpen_' in Ipv4Socket.
+
+2018-12-04  Zoltan Bojthe
+
+	Added isOpen() function to Ipv4Socket.
+
+2018-11-14  Zoltan Bojthe
+
+	Added socketClosed() callback.
+
+2018-11-09  Zoltan Bojthe
+
+	Added destroy() function to Ipv4Socket.
+
+2018-07-27  Zoltan Bojthe
+
+	Extended Ipv4Address documentation.
+
 ====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------

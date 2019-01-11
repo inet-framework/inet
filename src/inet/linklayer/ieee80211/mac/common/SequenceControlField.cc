@@ -24,7 +24,6 @@ SequenceControlField::SequenceControlField(SequenceNumber sequenceNumber, Fragme
     sequenceNumber(sequenceNumber),
     fragmentNumber(fragmentNumber)
 {
-    ASSERT(sequenceNumber < 4096);
     ASSERT(fragmentNumber < 16);
 }
 

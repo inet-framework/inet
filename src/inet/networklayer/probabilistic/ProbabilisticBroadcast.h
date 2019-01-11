@@ -158,6 +158,11 @@ class INET_API ProbabilisticBroadcast : public NetworkProtocolBase, public INetw
      */
     virtual void setDownControlInfo(Packet *const pMsg, const MacAddress& pDestAddr);
 
+    // OperationalBase:
+    virtual void handleStartOperation(LifecycleOperation *operation) override {}    //TODO implementation
+    virtual void handleStopOperation(LifecycleOperation *operation) override {}    //TODO implementation
+    virtual void handleCrashOperation(LifecycleOperation *operation) override {}    //TODO implementation
+
     /**
      * @brief Period (in sim time) between two broadcast attempts.
      * Read from omnetpp.ini

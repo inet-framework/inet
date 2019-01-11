@@ -84,7 +84,7 @@ Dymo::~Dymo()
 void Dymo::initialize(int stage)
 {
     if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
-        addressType = getSelfAddress().getAddressType();    // addressType need for handleNodeStart()  and handleNodeStart() called by RoutingProtocolBase::initialize();
+        addressType = getSelfAddress().getAddressType();    // addressType need for handleStartOperation()  and handleStartOperation() called by RoutingProtocolBase::initialize();
     }
 
     RoutingProtocolBase::initialize(stage);
@@ -1396,21 +1396,19 @@ INetfilter::IHook::Result Dymo::ensureRouteForDatagram(Packet *datagram)
 // lifecycle
 //
 
-bool Dymo::handleNodeStart(IDoneCallback *)
+void Dymo::handleStartOperation(LifecycleOperation *operation)
 {
     configureInterfaces();
-    return true;
 }
 
-bool Dymo::handleNodeShutdown(IDoneCallback *)
+void Dymo::handleStopOperation(LifecycleOperation *operation)
 {
     // TODO: send a RERR to notify peers about broken routes
     for (auto & elem : targetAddressToRREQTimer)
         cancelRouteDiscovery(elem.first);
-    return true;
 }
 
-void Dymo::handleNodeCrash()
+void Dymo::handleCrashOperation(LifecycleOperation *operation)
 {
     targetAddressToSequenceNumber.clear();
     targetAddressToRREQTimer.clear();

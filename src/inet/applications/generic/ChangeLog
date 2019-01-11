@@ -1,3 +1,19 @@
+2018-11-27  Zoltan Bojthe
+
+	Changed refreshDisplay to show lifecycle operational status.
+
+2018-11-05  Zoltan Bojthe
+
+	Added close/abort socket at module crash operation
+
+2018-10-10  Zoltan Bojthe
+
+	Changed IpvxTrafSink and IpvxTrafGen base classes to ApplicationBase.
+
+2018-08-17  Zoltan Bojthe
+
+	Added namespace qualifier to @signal type parameters.
+
 ====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------

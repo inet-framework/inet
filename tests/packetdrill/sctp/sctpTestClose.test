@@ -13,7 +13,6 @@ Then a DATA chunk is injected by the server which should be answered with an ABO
 [General]
 network = PacketDrillSctp
 debug-on-errors = true
-tkenv-plugin-path = ../../../etc/plugins
 ned-path = .;../../../../../src;../../lib
 
 **.scriptFile="../../sctptests/sctpTestClose.pkt"

@@ -71,9 +71,9 @@ class INET_API EtherTrafGen : public ApplicationBase
     virtual void sendBurstPackets();
     virtual void receivePacket(Packet *msg);
 
-    virtual bool handleNodeStart(IDoneCallback *doneCallback) override;
-    virtual bool handleNodeShutdown(IDoneCallback *doneCallback) override;
-    virtual void handleNodeCrash() override;
+    virtual void handleStartOperation(LifecycleOperation *operation) override;
+    virtual void handleStopOperation(LifecycleOperation *operation) override;
+    virtual void handleCrashOperation(LifecycleOperation *operation) override;
 
   public:
     EtherTrafGen();

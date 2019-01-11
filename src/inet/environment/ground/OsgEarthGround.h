@@ -22,6 +22,9 @@
 
 #ifdef WITH_OSGEARTH
 
+#ifdef WITH_VISUALIZERS
+//TODO the visualizers needed only for get the map from SceneOsgEarthVisualizer
+
 #include <osgEarth/ElevationQuery>
 #include <osgEarth/MapNode>
 #include "inet/common/geometry/common/GeographicCoordinateSystem.h"
@@ -47,6 +50,8 @@ class INET_API OsgEarthGround : public IGround, public cModule
 } // namespace physicalenvironment
 
 } // namespace inet
+
+#endif // WITH_VISUALIZERS
 
 #endif // WITH_OSGEARTH
 

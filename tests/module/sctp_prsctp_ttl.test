@@ -10,7 +10,6 @@ Testing PR-SCTP: prMethod=PR_TTL prValue=0.5 se lifetime
 network=SctpFeatureTest
 cmdenv-event-banners=false
 cmdenv-express-mode = false
-tkenv-plugin-path = ../../../etc/plugins
 ned-path = .;../../../../src;../../lib
 
 #omnetpp 5.0 - 5.1 compatibility:

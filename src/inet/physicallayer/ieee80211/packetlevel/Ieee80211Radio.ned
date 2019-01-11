@@ -43,11 +43,12 @@ module Ieee80211Radio extends FlatRadioBase
         transmitter.typename = default(signalAnalogRepresentation == "scalar" ? "Ieee80211ScalarTransmitter" : signalAnalogRepresentation == "dimensional" ? "Ieee80211DimensionalTransmitter" : "");
         receiver.typename = default(signalAnalogRepresentation == "scalar" ? "Ieee80211ScalarReceiver" : signalAnalogRepresentation == "dimensional" ? "Ieee80211DimensionalReceiver" : "");
         carrierFrequency @unit(Hz) = default(2.412GHz);                 // the center frequency of the band is automatically set by the radio
-        bandwidth @unit(Hz) = default(2MHz);
+        bandwidth @unit(Hz) = default(nan MHz);
         transmitter.preambleDuration = default(nan s);
         transmitter.bitrate = default(11Mbps);
         transmitter.headerLength = default(192b);
         transmitter.power = default(20mW);
+        receiver.bandwidth = default(22 MHz); // the highest value
         receiver.sensitivity = default(-85dBm);
         receiver.energyDetection = default(-85dBm);
         receiver.snirThreshold = default(4dB);

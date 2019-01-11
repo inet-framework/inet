@@ -1,3 +1,32 @@
+2018-10-02  Zoltan Bojthe
+
+	Changed base class of Ieee8022Llc to OperationalBase.
+
+2018-10-01  Zoltan Bojthe
+
+	Added lifecycle support to Ieee8022Llc.
+
+2018-09-27  Zoltan Bojthe
+
+	Added WATCHes for important fields.
+	Fixed undisposed object bug.
+
+2018-09-26  Zoltan Bojthe
+
+	Don't send up packet if the payload protocol is not registered by any upper layer protocol.
+
+2018-09-25  Zoltan Bojthe
+
+	Added socket handling to Ieee8022Llc.
+
+2018-09-24  Zoltan Bojthe
+
+	Added new Ieee8022LlcSocket that allows applications to directly to talk to LLC.
+
+2018-08-17  Zoltan Bojthe
+
+	Added namespace qualifier to @signal type parameters.
+
 ====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------

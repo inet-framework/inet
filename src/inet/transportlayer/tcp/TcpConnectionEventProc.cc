@@ -187,8 +187,6 @@ void TcpConnection::process_CLOSE(TcpEventCode& event, TcpCommand *tcpCommand, c
 
     switch (fsm.getState()) {
         case TCP_S_INIT:
-            throw cRuntimeError(tcpMain, "Error processing command CLOSE: connection not open");
-
         case TCP_S_LISTEN:
             // Nothing to do here
             break;
@@ -267,6 +265,13 @@ void TcpConnection::process_ABORT(TcpEventCode& event, TcpCommand *tcpCommand, c
             sendRst(state->snd_nxt);
             break;
     }
+}
+
+void TcpConnection::process_DESTROY(TcpEventCode& event, TcpCommand *tcpCommand, cMessage *msg)
+{
+    delete tcpCommand;
+    delete msg;
+    //TODO should we send a RST or not?
 }
 
 void TcpConnection::process_STATUS(TcpEventCode& event, TcpCommand *tcpCommand, cMessage *msg)

@@ -87,36 +87,36 @@ void AckingMac::initialize(int stage)
         // find queueModule
         cGate *queueOut = gate("upperLayerIn")->getPathStartGate();
         queueModule = dynamic_cast<IPassiveQueue *>(queueOut->getOwnerModule());
+        if (queueModule == nullptr)
+            throw cRuntimeError("External queue required for AckingMac module");
 
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
         radio->setRadioMode(fullDuplex ? IRadio::RADIO_MODE_TRANSCEIVER : IRadio::RADIO_MODE_RECEIVER);
         if (useAck)
             ackTimeoutMsg = new cMessage("link-break");
-        if (queueModule != nullptr)
-            getNextMsgFromHL();
+        getNextMsgFromHL();
     }
 }
 
 void AckingMac::configureInterfaceEntry()
 {
-    InterfaceEntry *e = getContainingNicModule(this);
     MacAddress address = parseMacAddressParameter(par("address"));
 
     // data rate
-    e->setDatarate(bitrate);
+    interfaceEntry->setDatarate(bitrate);
 
     // generate a link-layer address to be used as interface token for IPv6
-    e->setMacAddress(address);
-    e->setInterfaceToken(address.formInterfaceIdentifier());
+    interfaceEntry->setMacAddress(address);
+    interfaceEntry->setInterfaceToken(address.formInterfaceIdentifier());
 
     // MTU: typical values are 576 (Internet de facto), 1500 (Ethernet-friendly),
     // 4000 (on some point-to-point links), 4470 (Cisco routers default, FDDI compatible)
-    e->setMtu(par("mtu"));
+    interfaceEntry->setMtu(par("mtu"));
 
     // capabilities
-    e->setMulticast(true);
-    e->setBroadcast(true);
+    interfaceEntry->setMulticast(true);
+    interfaceEntry->setBroadcast(true);
 }
 
 void AckingMac::receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details)
@@ -126,7 +126,7 @@ void AckingMac::receiveSignal(cComponent *source, simsignal_t signalID, long val
         IRadio::TransmissionState newRadioTransmissionState = static_cast<IRadio::TransmissionState>(value);
         if (transmissionState == IRadio::TRANSMISSION_STATE_TRANSMITTING && newRadioTransmissionState == IRadio::TRANSMISSION_STATE_IDLE) {
             radio->setRadioMode(fullDuplex ? IRadio::RADIO_MODE_TRANSCEIVER : IRadio::RADIO_MODE_RECEIVER);
-            if (!lastSentPk && queueModule != nullptr)
+            if (!lastSentPk)
                 getNextMsgFromHL();
         }
         transmissionState = newRadioTransmissionState;
@@ -213,8 +213,7 @@ void AckingMac::handleSelfMessage(cMessage *message)
         emit(linkBrokenSignal, lastSentPk);
         delete lastSentPk;
         lastSentPk = nullptr;
-        if (queueModule != nullptr)
-            getNextMsgFromHL();
+        getNextMsgFromHL();
     }
     else {
         MacProtocolBase::handleSelfMessage(message);
@@ -233,8 +232,7 @@ void AckingMac::acked(Packet *frame)
         cancelEvent(ackTimeoutMsg);
         delete lastSentPk;
         lastSentPk = nullptr;
-        if (queueModule != nullptr)
-            getNextMsgFromHL();
+        getNextMsgFromHL();
     }
     else
         EV_DEBUG << "unaccepted\n";

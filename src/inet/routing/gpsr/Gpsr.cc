@@ -20,7 +20,7 @@
 #include <algorithm>
 #include "inet/common/INETUtils.h"
 #include "inet/common/IProtocolRegistrationListener.h"
-#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
@@ -786,24 +786,22 @@ INetfilter::IHook::Result Gpsr::datagramLocalOutHook(Packet *packet)
 // lifecycle
 //
 
-bool Gpsr::handleNodeStart(IDoneCallback *)
+void Gpsr::handleStartOperation(LifecycleOperation *operation)
 {
     configureInterfaces();
     storeSelfPositionInGlobalRegistry();
     scheduleBeaconTimer();
-    return true;
 }
 
-bool Gpsr::handleNodeShutdown(IDoneCallback *)
+void Gpsr::handleStopOperation(LifecycleOperation *operation)
 {
     // TODO: send a beacon to remove ourself from peers neighbor position table
     neighborPositionTable.clear();
     cancelEvent(beaconTimer);
     cancelEvent(purgeNeighborsTimer);
-    return true;
 }
 
-void Gpsr::handleNodeCrash()
+void Gpsr::handleCrashOperation(LifecycleOperation *operation)
 {
     neighborPositionTable.clear();
     cancelEvent(beaconTimer);

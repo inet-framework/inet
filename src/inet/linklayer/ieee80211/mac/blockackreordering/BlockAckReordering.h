@@ -40,12 +40,12 @@ class INET_API BlockAckReordering
         std::map<std::pair<Tid, MacAddress>, ReceiveBuffer *> receiveBuffers;
 
     protected:
-        ReorderBuffer collectCompletePrecedingMpdus(ReceiveBuffer *receiveBuffer, int startingSequenceNumber);
-        ReorderBuffer collectConsecutiveCompleteFollowingMpdus(ReceiveBuffer *receiveBuffer, int startingSequenceNumber);
+        ReorderBuffer collectCompletePrecedingMpdus(ReceiveBuffer *receiveBuffer, SequenceNumber startingSequenceNumber);
+        ReorderBuffer collectConsecutiveCompleteFollowingMpdus(ReceiveBuffer *receiveBuffer, SequenceNumber startingSequenceNumber);
 
         std::vector<Packet *> getEarliestCompleteMsduOrAMsduIfExists(ReceiveBuffer *receiveBuffer);
         bool isComplete(const Fragments& fragments);
-        void passedUp(RecipientBlockAckAgreement *agreement, ReceiveBuffer *receiveBuffer, int sequenceNumber);
+        void passedUp(RecipientBlockAckAgreement *agreement, ReceiveBuffer *receiveBuffer, SequenceNumber sequenceNumber);
         void releaseReceiveBuffer(RecipientBlockAckAgreement *agreement, ReceiveBuffer *receiveBuffer, const ReorderBuffer& reorderBuffer);
         ReceiveBuffer* createReceiveBufferIfNecessary(RecipientBlockAckAgreement *agreement);
         bool addMsduIfComplete(ReceiveBuffer *receiveBuffer, ReorderBuffer &reorderBuffer, SequenceNumber seqNum);

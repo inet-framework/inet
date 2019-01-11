@@ -87,7 +87,7 @@ void SimpleCcBattery::executeNodeOperation(C newResidualCapacity)
     if (nodeStatus->getState() == NodeStatus::UP && newResidualCapacity <= C(0)) {
         EV_WARN << "Battery failed" << endl;
         LifecycleOperation::StringMap params;
-        NodeCrashOperation *operation = new NodeCrashOperation();
+        ModuleCrashOperation *operation = new ModuleCrashOperation();
         operation->initialize(networkNode, params);
         lifecycleController.initiateOperation(operation);
     }

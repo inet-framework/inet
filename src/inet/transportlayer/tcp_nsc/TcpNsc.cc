@@ -236,9 +236,9 @@ void TcpNsc::initialize(int stage)
         pStackM->add_default_gateway(localInnerGwS.str().c_str());
     }
     else if (stage == INITSTAGE_TRANSPORT_LAYER) {
-        bool isOperational;
-        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
-        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
+        cModule *node = findContainingNode(this);
+        NodeStatus *nodeStatus = node ? check_and_cast_nullable<NodeStatus *>(node->getSubmodule("status")) : nullptr;
+        bool isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
         if (!isOperational)
             throw cRuntimeError("This module doesn't support starting in node DOWN state");
         registerService(Protocol::tcp, gate("appIn"), gate("ipIn"));

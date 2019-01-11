@@ -1,0 +1,8 @@
+<script>
+    <at t='3s'><shutdown module='cli[0]'/></at>
+    <at t='6s'><startup module='cli[0]'/></at>
+    <at t='9s'><shutdown module='cli[0].eth[0]'/></at>
+    <at t='12s'><startup module='cli[0].eth[0]'/></at>
+    <at t='15s'><shutdown module='cli[0]'/></at>
+    <at t='18s'><startup module='cli[0]'/></at>
+</script>

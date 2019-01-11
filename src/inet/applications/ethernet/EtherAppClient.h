@@ -70,11 +70,15 @@ class INET_API EtherAppClient : public ApplicationBase, public Ieee8022LlcSocket
     virtual MacAddress resolveDestMacAddress();
 
     virtual void sendPacket();
-    virtual void socketDataArrived(Ieee8022LlcSocket*, Packet *msg) override;
 
-    virtual bool handleNodeStart(IDoneCallback *doneCallback) override;
-    virtual bool handleNodeShutdown(IDoneCallback *doneCallback) override;
-    virtual void handleNodeCrash() override;
+    // Ieee8022LlcSocket::ICallback
+    virtual void socketDataArrived(Ieee8022LlcSocket*, Packet *msg) override;
+    virtual void socketClosed(Ieee8022LlcSocket *socket) override;
+
+    // ApplicationBase:
+    virtual void handleStartOperation(LifecycleOperation *operation) override;
+    virtual void handleStopOperation(LifecycleOperation *operation) override;
+    virtual void handleCrashOperation(LifecycleOperation *operation) override;
 
   public:
     EtherAppClient() {}

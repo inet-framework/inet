@@ -26,6 +26,14 @@ namespace inet {
 
 namespace physicallayer {
 
+void ScalarAnalogModelBase::initialize(int stage)
+{
+    AnalogModelBase::initialize(stage);
+    if (stage == INITSTAGE_LOCAL) {
+        ignorePartialInterference = par("ignorePartialInterference");
+    }
+}
+
 bool ScalarAnalogModelBase::areOverlappingBands(Hz carrierFrequency1, Hz bandwidth1, Hz carrierFrequency2, Hz bandwidth2) const
 {
     return carrierFrequency1 + bandwidth1 / 2 >= carrierFrequency2 - bandwidth2 / 2 &&
@@ -98,17 +106,17 @@ const INoise *ScalarAnalogModelBase::computeNoise(const IListening *listening, c
         const INarrowbandSignal *narrowbandSignalAnalogModel = check_and_cast<const INarrowbandSignal *>(signalAnalogModel);
         Hz signalCarrierFrequency = narrowbandSignalAnalogModel->getCarrierFrequency();
         Hz signalBandwidth = narrowbandSignalAnalogModel->getBandwidth();
-        if (commonCarrierFrequency == signalCarrierFrequency && commonBandwidth == signalBandwidth)
+        if (commonCarrierFrequency == signalCarrierFrequency && commonBandwidth >= signalBandwidth)
             addReception(check_and_cast<const ScalarReception *>(reception), noiseStartTime, noiseEndTime, powerChanges);
-        else if (areOverlappingBands(commonCarrierFrequency, commonBandwidth, narrowbandSignalAnalogModel->getCarrierFrequency(), narrowbandSignalAnalogModel->getBandwidth()))
-            throw cRuntimeError("Overlapping bands are not supported");
+        else if (!ignorePartialInterference && areOverlappingBands(commonCarrierFrequency, commonBandwidth, narrowbandSignalAnalogModel->getCarrierFrequency(), narrowbandSignalAnalogModel->getBandwidth()))
+            throw cRuntimeError("Partially interfering signals are not supported by ScalarAnalogModel, enable ignorePartialInterference to avoid this error!");
     }
     const ScalarNoise *scalarBackgroundNoise = dynamic_cast<const ScalarNoise *>(interference->getBackgroundNoise());
     if (scalarBackgroundNoise) {
-        if (commonCarrierFrequency == scalarBackgroundNoise->getCarrierFrequency() && commonBandwidth == scalarBackgroundNoise->getBandwidth())
+        if (commonCarrierFrequency == scalarBackgroundNoise->getCarrierFrequency() && commonBandwidth >= scalarBackgroundNoise->getBandwidth())
             addNoise(scalarBackgroundNoise, noiseStartTime, noiseEndTime, powerChanges);
-        else if (areOverlappingBands(commonCarrierFrequency, commonBandwidth, scalarBackgroundNoise->getCarrierFrequency(), scalarBackgroundNoise->getBandwidth()))
-            throw cRuntimeError("Overlapping bands are not supported");
+        else if (!ignorePartialInterference && areOverlappingBands(commonCarrierFrequency, commonBandwidth, scalarBackgroundNoise->getCarrierFrequency(), scalarBackgroundNoise->getBandwidth()))
+            throw cRuntimeError("Partially interfering background noise is not supported by ScalarAnalogModel, enable ignorePartialInterference to avoid this error!");
     }
     EV_TRACE << "Noise power begin " << endl;
     W noise = W(0);

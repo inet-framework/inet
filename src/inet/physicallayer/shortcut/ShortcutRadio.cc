@@ -62,6 +62,8 @@ void ShortcutRadio::handleMessageWhenUp(cMessage *message)
 void ShortcutRadio::handleUpperPacket(Packet *packet)
 {
     auto destination = packet->getTag<MacAddressReq>()->getDestAddress();
+    transmissionState = IRadio::TRANSMISSION_STATE_TRANSMITTING;
+    emit(transmissionStateChangedSignal, transmissionState);
     if (destination.isBroadcast()) {
         for (auto it : shortcutRadios)
             if (it.second != this)
@@ -75,6 +77,8 @@ void ShortcutRadio::handleUpperPacket(Packet *packet)
         else
             throw cRuntimeError("ShortcutRadio not found");
     }
+    transmissionState = IRadio::TRANSMISSION_STATE_IDLE;        //TODO zero time transmission simulated
+    emit(transmissionStateChangedSignal, transmissionState);
 }
 
 ShortcutRadio *ShortcutRadio::findPeer(MacAddress address)

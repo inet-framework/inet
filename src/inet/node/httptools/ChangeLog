@@ -1,3 +1,7 @@
+2018-06-28  Zoltan Bojthe
+
+	Renamed DirectHost to HttpDirectHost.
+
 ====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------

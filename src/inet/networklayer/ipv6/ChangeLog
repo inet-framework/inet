@@ -1,3 +1,56 @@
+2018-11-28  Zoltan Bojthe
+
+	Fixed compatibility for cObject::info() and cObject::detailedInfo() functions removed in omnetpp 6.0.
+
+2018-11-26  Zoltan Bojthe
+
+	Removed QueueBase base class which was used to incorrectly simulate a processing delay.
+
+2018-11-14  Zoltan Bojthe
+
+	Send up socket closed indication, set kind when sent data to a network socket.
+
+2018-10-25  Zoltan Bojthe
+
+	Fixed NodeStatus module detection.
+
+2018-10-17  Zoltan Bojthe
+
+	Changed Ipv6, Icmpv6, Ipv6NeighbourDiscovery, Ipv6Tunneling to LifecycleUnsupported.
+
+2018-09-28  Levente Mészáros
+
+	Renamed initstage to INITSTAGE_NETWORK_CONFIGURATION.
+
+2018-09-27  Levente Mészáros
+
+	Renamed INITSTAGE_LINK_LAYER to INITSTAGE_NETWORK_INTERFACE_CONFIGURATION.
+	Renamed INITSTAGE_LINK_LAYER_2 to INITSTAGE_LINK_LAYER.
+
+2018-09-27  Levente Mészáros
+
+	Merged INITSTAGE_NETWORK_LAYER and INITSTAGE_NETWORK_LAYER_3.
+
+2018-09-19  Zoltan Bojthe
+
+	Adapted to the new protocol specific data storage API of InterfaceEntry.
+
+2018-08-28  Zoltan Bojthe
+
+	Added dBABEL, dLISP to source types.
+
+2018-08-28  Zoltan Bojthe
+
+	Changed IPv6RoutingTable::addRoute() is public.
+
+2018-07-19  Mani Amoozadeh
+
+	Display administrative distance in the routing table if enabled.
+
+2018-08-17  Zoltan Bojthe
+
+	Added namespace qualifier to @signal type parameters.
+
 ====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------

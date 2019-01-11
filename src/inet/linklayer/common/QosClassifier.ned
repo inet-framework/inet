@@ -1,6 +1,4 @@
 //
-// Copyright (C) OpenSim Ltd.
-//
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
 // as published by the Free Software Foundation; either version 2
@@ -12,22 +10,25 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-package inet.linklayer.vlan;
+package inet.linklayer.common;
 
-import inet.linklayer.contract.INetworkInterface;
-
-simple Vlan
+//
+// This module classifies packets and assigns a User Priority based on the IP
+// protocol or the transport protocol port numbers.
+//
+simple QosClassifier like IIeee8021dQosClassifier
 {
     parameters:
-        string interfaceTableModule;
-        string address @enum("auto", "copy") = default("copy");
-        int vlanId;
-        string realInterfaceName;
-        @display("i=block/cogwheel");
+        string ipProtocolUpMap = default("1 BE 58 BE");
+        string udpPortUpMap @enum() = default("21 BK 80 BE 4000 VI 5000 VO");
+        string tcpPortUpMap @enum() = default("21 BK 80 BE 4000 VI 5000 VO");
+        string defaultUp = default("BE");
+        @display("i=block/classifier");
     gates:
-        input upperLayerIn;
-        output upperLayerOut;
+        input in;
+        output out;
 }
+

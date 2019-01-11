@@ -24,7 +24,7 @@
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/common/ModuleAccess.h"
-#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 
 namespace inet {
@@ -480,20 +480,18 @@ Ipv4Address Ted::getPeerByLocalAddress(Ipv4Address localInf)
     return ted[index].linkid;
 }
 
-bool Ted::handleNodeStart(IDoneCallback *)
+void Ted::handleStartOperation(LifecycleOperation *operation)
 {
     initializeTED();
-    return true;
 }
 
-bool Ted::handleNodeShutdown(IDoneCallback *)
+void Ted::handleStopOperation(LifecycleOperation *operation)
 {
     ted.clear();
     interfaceAddrs.clear();
-    return true;
 }
 
-void Ted::handleNodeCrash()
+void Ted::handleCrashOperation(LifecycleOperation *operation)
 {
     ted.clear();
     interfaceAddrs.clear();

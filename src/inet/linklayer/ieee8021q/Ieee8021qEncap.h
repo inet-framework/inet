@@ -13,14 +13,15 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_IEEE8021QVLAN_H
-#define __INET_IEEE8021QVLAN_H
+#ifndef __INET_IEEE8021QENCAP_H
+#define __INET_IEEE8021QENCAP_H
 
 #include "inet/common/INETDefs.h"
 
 namespace inet {
 
-class INET_API Ieee8021QVlan : public cSimpleModule
+// TODO: explain how it should work when the packet API is extended with chunk insertion into the middle of a packet
+class INET_API Ieee8021qEncap : public cSimpleModule
 {
   protected:
     const char *vlanTagType = nullptr;
@@ -33,14 +34,14 @@ class INET_API Ieee8021QVlan : public cSimpleModule
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *message) override;
 
-    virtual Ieee8021QTag *findVlanTag(const Ptr<EthernetMacHeader>& ethernetMacHeader);
-    virtual Ieee8021QTag *addVlanTag(const Ptr<EthernetMacHeader>& ethernetMacHeader);
-    virtual Ieee8021QTag *removeVlanTag(const Ptr<EthernetMacHeader>& ethernetMacHeader);
+    virtual Ieee8021qHeader *findVlanTag(const Ptr<EthernetMacHeader>& ethernetMacHeader);
+    virtual Ieee8021qHeader *addVlanTag(const Ptr<EthernetMacHeader>& ethernetMacHeader);
+    virtual Ieee8021qHeader *removeVlanTag(const Ptr<EthernetMacHeader>& ethernetMacHeader);
     virtual void parseParameters(const char *filterParameterName, const char *mapParameterName, std::vector<int>& vlanIdFilter, std::map<int, int>& vlanIdMap);
     virtual void processPacket(Packet *packet, std::vector<int>& vlanIdFilter, std::map<int, int>& vlanIdMap, cGate *gate);
 };
 
 } // namespace inet
 
-#endif // ifndef __INET_IEEE8021QVLAN_H
+#endif // ifndef __INET_IEEE8021QENCAP_H
 

@@ -44,14 +44,28 @@ void TunSocket::processMessage(cMessage *msg)
 {
     ASSERT(belongsToSocket(msg));
 
-    if (callback)
-        callback->socketDataArrived(this, check_and_cast<Packet*>(msg));
-    else
-        delete msg;
+    switch (msg->getKind()) {
+        case TUN_I_DATA:
+            if (callback)
+                callback->socketDataArrived(this, check_and_cast<Packet*>(msg));
+            else
+                delete msg;
+            break;
+        case TUN_I_CLOSED:
+            isOpen_ = false;
+            if (callback)
+                callback->socketClosed(this);
+            delete msg;
+            break;
+        default:
+            throw cRuntimeError("TunSocket: invalid msg kind %d, one of the TUN_I_xxx constants expected",
+                msg->getKind());
+    }
 }
 
 void TunSocket::open(int interfaceId)
 {
+    isOpen_ = true;
     this->interfaceId = interfaceId;
     auto request = new Request("OPEN", TUN_C_OPEN);
     TunOpenCommand *command = new TunOpenCommand();
@@ -65,6 +79,7 @@ void TunSocket::send(Packet *packet)
         throw cRuntimeError("Socket is closed");
 //    TunSendCommand *command = new TunSendCommand();
 //    packet->setControlInfo(command);
+    packet->setKind(TUN_C_DATA);
     sendToTun(packet);
 }
 
@@ -72,6 +87,15 @@ void TunSocket::close()
 {
     auto request = new Request("CLOSE", TUN_C_CLOSE);
     TunCloseCommand *command = new TunCloseCommand();
+    request->setControlInfo(command);
+    sendToTun(request);
+    this->interfaceId = -1;
+}
+
+void TunSocket::destroy()
+{
+    auto request = new Request("DESTROY", TUN_C_DESTROY);
+    auto command = new TunDestroyCommand();
     request->setControlInfo(command);
     sendToTun(request);
     this->interfaceId = -1;

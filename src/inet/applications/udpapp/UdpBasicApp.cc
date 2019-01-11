@@ -18,7 +18,7 @@
 
 #include "inet/applications/base/ApplicationPacket_m.h"
 #include "inet/applications/udpapp/UdpBasicApp.h"
-#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/TagBase_m.h"
@@ -208,8 +208,16 @@ void UdpBasicApp::socketErrorArrived(UdpSocket *socket, Indication *indication)
     delete indication;
 }
 
+void UdpBasicApp::socketClosed(UdpSocket *socket)
+{
+    if (operationalState == State::STOPPING_OPERATION)
+        startActiveOperationExtraTimeOrFinish(par("stopOperationExtraTime"));
+}
+
 void UdpBasicApp::refreshDisplay() const
 {
+    ApplicationBase::refreshDisplay();
+
     char buf[100];
     sprintf(buf, "rcvd: %d pks\nsent: %d pks", numReceived, numSent);
     getDisplayString().setTagArg("t", 0, buf);
@@ -223,28 +231,26 @@ void UdpBasicApp::processPacket(Packet *pk)
     numReceived++;
 }
 
-bool UdpBasicApp::handleNodeStart(IDoneCallback *doneCallback)
+void UdpBasicApp::handleStartOperation(LifecycleOperation *operation)
 {
     simtime_t start = std::max(startTime, simTime());
     if ((stopTime < SIMTIME_ZERO) || (start < stopTime) || (start == stopTime && startTime == stopTime)) {
         selfMsg->setKind(START);
         scheduleAt(start, selfMsg);
     }
-    return true;
 }
 
-bool UdpBasicApp::handleNodeShutdown(IDoneCallback *doneCallback)
+void UdpBasicApp::handleStopOperation(LifecycleOperation *operation)
 {
-    if (selfMsg)
-        cancelEvent(selfMsg);
-    //TODO if(socket.isOpened()) socket.close();
-    return true;
+    cancelEvent(selfMsg);
+    socket.close();
+    delayActiveOperationFinish(par("stopOperationTimeout"));
 }
 
-void UdpBasicApp::handleNodeCrash()
+void UdpBasicApp::handleCrashOperation(LifecycleOperation *operation)
 {
-    if (selfMsg)
-        cancelEvent(selfMsg);
+    cancelEvent(selfMsg);
+    socket.destroy();         //TODO  in real operating systems, program crash detected by OS and OS closes sockets of crashed programs.
 }
 
 } // namespace inet

@@ -25,22 +25,13 @@
 namespace inet {
 
 /**
- * Base class for operations that manipulate network nodes.
- */
-class INET_API NodeOperation : public LifecycleOperation
-{
-  public:
-    virtual void initialize(cModule *module, StringMap& params) override;
-};
-
-/**
- * This operation represents the process of turning on a network node
- * after a shutdown, crash or suspend operation.
+ * This operation represents the process of turning on a module
+ * after a stop or crash operation.
  *
  * The operation should be applied to the module of a network node. Operation
  * stages are organized bottom-up similarly to the OSI network layers.
  */
-class INET_API NodeStartOperation : public NodeOperation
+class INET_API ModuleStartOperation : public LifecycleOperation
 {
   public:
     enum Stage {
@@ -59,12 +50,11 @@ class INET_API NodeStartOperation : public NodeOperation
 };
 
 /**
- * This operation represents the process of orderly shutting down a network node.
+ * This operation represents the process of orderly stopping down a module.
  *
- * The operation should be applied to the module of a network node. Operation
- * stages are organized top-down similarly to the OSI network layers.
+ * Operation stages are organized top-down similarly to the OSI network layers.
  */
-class INET_API NodeShutdownOperation : public NodeOperation
+class INET_API ModuleStopOperation : public LifecycleOperation
 {
   public:
     enum Stage {
@@ -82,43 +72,16 @@ class INET_API NodeShutdownOperation : public NodeOperation
     virtual int getNumStages() const override { return STAGE_LAST + 1; }
 };
 
-/** TODO:
- * This operation represents the process of suspending (hybernating)
- * a network node. All state information (routing tables, etc) will
- * remain intact, but the node will stop responding to messages.
- *
- * The operation should be applied to the module of a network node. Operation
- * stages are organized top-down similarly to the OSI network layers.
- * /
-   class INET_API NodeSuspendOperation : public NodeOperation {
-   public:
-    enum Stage {
-      STAGE_LOCAL, // for changes that don't depend on other modules
-      STAGE_APPLICATION_LAYER,
-      STAGE_TRANSPORT_LAYER,
-      STAGE_NETWORK_LAYER,
-      STAGE_LINK_LAYER,
-      STAGE_PHYSICAL_LAYER,
-      STAGE_LAST
-    };
-
-   public:
-    virtual int getNumStages() const { return STAGE_LAST+1; }
-    virtual Kind getKind() const { return DOWN; }
-   };
- */
-
 /**
- * This operation represents the process of crashing a network node. The
- * difference between this operation and NodeShutdownOperation is that the
- * network node will not do a graceful shutdown (e.g. routing protocols will
+ * This operation represents the process of crashing a module. The
+ * difference between this operation and ShutdownOperation is that the
+ * module will not do a graceful shutdown (e.g. routing protocols will
  * not have chance of notifying peers about broken routes).
  *
- * The operation should be applied to the module of a network node. The
- * operation has only one stage, and the execution must finish in zero
+ * The operation has only one stage, and the execution must finish in zero
  * simulation time.
  */
-class INET_API NodeCrashOperation : public NodeOperation
+class INET_API ModuleCrashOperation : public LifecycleOperation
 {
   public:
     enum Stage {

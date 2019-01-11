@@ -50,13 +50,14 @@ class INET_API EtherAppServer : public ApplicationBase, public Ieee8022LlcSocket
     virtual void handleMessageWhenUp(cMessage *msg) override;
     virtual void finish() override;
 
-    virtual bool handleNodeStart(IDoneCallback *doneCallback) override;
-    virtual bool handleNodeShutdown(IDoneCallback *doneCallback) override;
-    virtual void handleNodeCrash() override;
+    virtual void handleStartOperation(LifecycleOperation *operation) override;
+    virtual void handleStopOperation(LifecycleOperation *operation) override;
+    virtual void handleCrashOperation(LifecycleOperation *operation) override;
 
     void registerDsap(int dsap);
     void sendPacket(Packet *datapacket, const MacAddress& destAddr, int destSap);
     virtual void socketDataArrived(Ieee8022LlcSocket*, Packet *msg) override;
+    virtual void socketClosed(Ieee8022LlcSocket* socket) override;
 };
 
 } // namespace inet

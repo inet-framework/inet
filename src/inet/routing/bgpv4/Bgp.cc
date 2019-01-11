@@ -48,7 +48,8 @@ void Bgp::initialize(int stage)
         startupTimer = new cMessage("BGP-startup");
     }
     else if (stage == INITSTAGE_ROUTING_PROTOCOLS) { // interfaces and static routes are already initialized
-        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+        cModule *node = findContainingNode(this);
+        NodeStatus *nodeStatus = node ? check_and_cast_nullable<NodeStatus *>(node->getSubmodule("status")) : nullptr;
         isUp = !nodeStatus || nodeStatus->getState() == NodeStatus::UP;
         if (isUp) {
             simtime_t startupTime = par("startupTime");

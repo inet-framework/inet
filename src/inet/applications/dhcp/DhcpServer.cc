@@ -62,6 +62,8 @@ void DhcpServer::initialize(int stage)
     else if (stage == INITSTAGE_APPLICATION_LAYER) {
         cModule *host = getContainingNode(this);
         host->subscribe(interfaceDeletedSignal, this);
+        socket.setOutputGate(gate("socketOut"));
+        socket.setCallback(this);
     }
 }
 
@@ -69,10 +71,8 @@ void DhcpServer::openSocket()
 {
     if (!ie)
         throw cRuntimeError("Interface to listen does not exist. aborting");
-    socket.setOutputGate(gate("socketOut"));
     socket.bind(serverPort);
     socket.setBroadcast(true);
-    socket.setCallback(this);
     EV_INFO << "DHCP server bound to port " << serverPort << endl;
 }
 
@@ -81,7 +81,7 @@ void DhcpServer::receiveSignal(cComponent *source, int signalID, cObject *obj, c
     Enter_Method_Silent();
 
     if (signalID == interfaceDeletedSignal) {
-        if (isOperational) {
+        if (isUp()) {
             InterfaceEntry *nie = check_and_cast<InterfaceEntry *>(obj);
             if (ie == nie)
                 throw cRuntimeError("Reacting to interface deletions is not implemented in this module");
@@ -143,6 +143,12 @@ void DhcpServer::socketErrorArrived(UdpSocket *socket, Indication *indication)
     delete indication;
 }
 
+void DhcpServer::socketClosed(UdpSocket *socket_)
+{
+    if (operationalState == State::STOPPING_OPERATION && !socket.isOpen())
+        startActiveOperationExtraTimeOrFinish(par("stopOperationExtraTime"));
+}
+
 void DhcpServer::handleSelfMessages(cMessage *msg)
 {
     if (msg->getKind() == START_DHCP) {
@@ -154,7 +160,7 @@ void DhcpServer::handleSelfMessages(cMessage *msg)
 
 void DhcpServer::processDhcpMessage(Packet *packet)
 {
-    ASSERT(isOperational && ie != nullptr);
+    ASSERT(isUp() && ie != nullptr);
 
     const auto& dhcpMsg = packet->peekAtFront<DhcpMessage>();
 
@@ -510,9 +516,8 @@ void DhcpServer::sendToUDP(Packet *msg, int srcPort, const L3Address& destAddr, 
     socket.sendTo(msg, destAddr, destPort);
 }
 
-bool DhcpServer::handleNodeStart(IDoneCallback *doneCallback)
+void DhcpServer::handleStartOperation(LifecycleOperation *operation)
 {
-    (void)doneCallback; // unused variable
     maxNumOfClients = par("maxNumClients");
     leaseTime = par("leaseTime");
 
@@ -532,15 +537,24 @@ bool DhcpServer::handleNodeStart(IDoneCallback *doneCallback)
     if (!Ipv4Address::maskedAddrAreEqual(ipv4data->getIPAddress(), Ipv4Address(ipAddressStart.getInt() + maxNumOfClients - 1), subnetMask))
         throw cRuntimeError("Not enough IP addresses in subnet for %d clients", maxNumOfClients);
     scheduleAt(start, startTimer);
-    return true;
 }
 
-void DhcpServer::stopApp()
+void DhcpServer::handleStopOperation(LifecycleOperation *operation)
 {
     leased.clear();
     ie = nullptr;
     cancelEvent(startTimer);
-    // socket.close(); TODO:
+    socket.close();
+    delayActiveOperationFinish(par("stopOperationTimeout"));
+}
+
+void DhcpServer::handleCrashOperation(LifecycleOperation *operation)
+{
+    leased.clear();
+    ie = nullptr;
+    cancelEvent(startTimer);
+    if (operation->getRootModule() != getContainingNode(this))     // closes socket when the application crashed only
+        socket.destroy();         //TODO  in real operating systems, program crash detected by OS and OS closes sockets of crashed programs.
 }
 
 } // namespace inet

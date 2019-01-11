@@ -1,3 +1,9 @@
+2018-09-13  Raphael Riebl
+
+	Improved implementation of TwoRayInterference path loss.
+	Fixed bug in LOS and ground distance calculation.
+	Added influence of antenna polarization.
+
 ====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------

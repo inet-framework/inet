@@ -1,3 +1,7 @@
+2018-09-14  Zoltan Bojthe
+
+	Fixed hasStp in AccessPoint.
+
 ====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------

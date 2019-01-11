@@ -27,7 +27,7 @@ module ExtUpperIpv4 like IIpv4
         input queueIn @labels(Ipv4Header,ArpPacket,Ieee802Ctrl);
         output queueOut @labels(Ipv4Header,ArpPacket,Ieee802Ctrl);
     submodules:
-        tun: ExtIpv4TunDeviceFileIo {
+        tun: ExtIpv4TunDevice {
             parameters:
 	            @display("p=100,150");
         }

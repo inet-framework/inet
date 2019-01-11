@@ -15,23 +15,15 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_EXTETHERNETDEVICESOCKET_H
-#define __INET_EXTETHERNETDEVICESOCKET_H
+#ifndef __INET_EXTETHERNETSOCKET_H
+#define __INET_EXTETHERNETSOCKET_H
 
 #include "inet/common/packet/printer/PacketPrinter.h"
 #include "inet/common/scheduler/RealTimeScheduler.h"
 
 namespace inet {
 
-/**
- * Implements an interface suitable for emulation that corresponds to a real
- * interface on the host running the simulation .
- *
- * Requires RealTimeScheduler to be configured as scheduler in omnetpp.ini.
- *
- * See NED file for more details.
- */
-class INET_API ExtEthernetDeviceSocket : public cSimpleModule, public RealTimeScheduler::ICallback
+class INET_API ExtEthernetSocket : public cSimpleModule, public RealTimeScheduler::ICallback
 {
   protected:
     // parameters
@@ -60,12 +52,12 @@ class INET_API ExtEthernetDeviceSocket : public cSimpleModule, public RealTimeSc
     virtual void closeSocket();
 
   public:
-    virtual ~ExtEthernetDeviceSocket();
+    virtual ~ExtEthernetSocket();
 
     virtual bool notify(int fd) override;
 };
 
 } // namespace inet
 
-#endif // ifndef __INET_EXTETHERNETDEVICESOCKET_H
+#endif // ifndef __INET_EXTETHERNETSOCKET_H
 

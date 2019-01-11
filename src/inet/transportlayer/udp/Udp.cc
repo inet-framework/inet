@@ -27,7 +27,7 @@
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/LayeredProtocolBase.h"
 #include "inet/common/ModuleAccess.h"
-#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/checksum/TcpIpChecksum.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
@@ -188,6 +188,8 @@ void Udp::handleMessageWhenUp(cMessage *msg)
 
 void Udp::refreshDisplay() const
 {
+    OperationalBase::refreshDisplay();
+
     char buf[80];
     sprintf(buf, "passed up: %d pks\nsent: %d pks", numPassedUp, numSent);
     if (numDroppedWrongPort > 0) {
@@ -217,6 +219,18 @@ void Udp::processCommandFromApp(cMessage *msg)
         case UDP_C_CLOSE: {
             int socketId = check_and_cast<Request *>(msg)->getTag<SocketReq>()->getSocketId();
             close(socketId);
+            auto indication = new Indication("closed", UDP_I_SOCKET_CLOSED);
+            auto udpCtrl = new UdpSocketClosedIndication();
+            indication->setControlInfo(udpCtrl);
+            indication->addTagIfAbsent<SocketInd>()->setSocketId(socketId);
+            send(indication, "appOut");
+
+            break;
+        }
+
+        case UDP_C_DESTROY: {
+            int socketId = check_and_cast<Request *>(msg)->getTag<SocketReq>()->getSocketId();
+            destroySocket(socketId);
             break;
         }
 
@@ -372,8 +386,10 @@ void Udp::processPacketFromApp(Packet *packet)
         udpHeader->setCrcMode(CRC_COMPUTED);
         udpHeader->setCrc(0x0000);    // crcMode == CRC_COMPUTED is done in an INetfilter hook
     }
-    else
+    else {
+        udpHeader->setCrcMode(crcMode);
         insertCrc(l3Protocol, srcAddr, destAddr, udpHeader, packet);
+    }
     insertTransportProtocolHeader(packet, Protocol::udp, udpHeader);
     packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(l3Protocol);
 
@@ -460,6 +476,7 @@ void Udp::processICMPv4Error(Packet *packet)
     // extract details from the error message, then try to notify socket that sent bogus packet
 
     if (!icmp)
+        // TODO: move to initialize?
         icmp = getModuleFromPar<Icmp>(par("icmpModule"), this);
     if (!icmp->verifyCrc(packet)) {
         EV_WARN << "incoming ICMP packet has wrong CRC, dropped\n";
@@ -511,6 +528,7 @@ void Udp::processICMPv6Error(Packet *packet)
 {
 #ifdef WITH_IPv6
     if (!icmpv6)
+        // TODO: move to initialize?
         icmpv6 = getModuleFromPar<Icmpv6>(par("icmpv6Module"), this);
     if (!icmpv6->verifyCrc(packet)) {
         EV_WARN << "incoming ICMPv6 packet has wrong CRC, dropped\n";
@@ -592,6 +610,7 @@ void Udp::processUndeliverablePacket(Packet *udpPacket)
     if (protocol->getId() == Protocol::ipv4.getId()) {
 #ifdef WITH_IPv4
         if (!icmp)
+            // TODO: move to initialize?
             icmp = getModuleFromPar<Icmp>(par("icmpModule"), this);
         icmp->sendErrorMessage(udpPacket, inIe, ICMP_DESTINATION_UNREACHABLE, ICMP_DU_PORT_UNREACHABLE);
 #else // ifdef WITH_IPv4
@@ -601,6 +620,7 @@ void Udp::processUndeliverablePacket(Packet *udpPacket)
     else if (protocol->getId() == Protocol::ipv6.getId()) {
 #ifdef WITH_IPv6
         if (!icmpv6)
+            // TODO: move to initialize?
             icmpv6 = getModuleFromPar<Icmpv6>(par("icmpv6Module"), this);
         icmpv6->sendErrorMessage(udpPacket, ICMPv6_DESTINATION_UNREACHABLE, PORT_UNREACHABLE);
 #else // ifdef WITH_IPv6
@@ -694,10 +714,29 @@ void Udp::close(int sockId)
         EV_ERROR << "socket id=" << sockId << " doesn't exist (already closed?)\n";
         return;
     }
+    EV_INFO << "Closing socket: " << *(it->second) << "\n";
+
+    destroySocket(it);
+}
+
+//TODO refactoring common part of close() and destroySocket()
+void Udp::destroySocket(int sockId)
+{
+    // remove from socketsByIdMap
+    auto it = socketsByIdMap.find(sockId);
+    if (it == socketsByIdMap.end()) {
+        EV_WARN << "socket id=" << sockId << " doesn't exist\n";
+        return;
+    }
+    EV_INFO << "Destroy socket: " << *(it->second) << "\n";
+
+    destroySocket(it);
+}
+
+void Udp::destroySocket(SocketsByIdMap::iterator it)
+{
     SockDesc *sd = it->second;
     socketsByIdMap.erase(it);
-
-    EV_INFO << "Closing socket: " << *sd << "\n";
 
     // remove from socketsByPortMap
     SockDescList& list = socketsByPortMap[sd->localPort];
@@ -714,14 +753,10 @@ void Udp::close(int sockId)
 void Udp::clearAllSockets()
 {
     EV_INFO << "Clear all sockets\n";
-
-    for (auto & elem : socketsByPortMap) {
-        elem.second.clear();
-    }
-    socketsByPortMap.clear();
     for (auto & elem : socketsByIdMap)
         delete elem.second;
     socketsByIdMap.clear();
+    socketsByPortMap.clear();
 }
 
 ushort Udp::getEphemeralPort()
@@ -1154,22 +1189,20 @@ void Udp::setMulticastSourceFilter(SockDesc *sd, InterfaceEntry *ie, L3Address m
     }
 }
 
-bool Udp::handleNodeStart(IDoneCallback *)
+void Udp::handleStartOperation(LifecycleOperation *operation)
 {
     icmp = nullptr;
     icmpv6 = nullptr;
-    return true;
 }
 
-bool Udp::handleNodeShutdown(IDoneCallback *)
+void Udp::handleStopOperation(LifecycleOperation *operation)
 {
     clearAllSockets();
     icmp = nullptr;
     icmpv6 = nullptr;
-    return true;
 }
 
-void Udp::handleNodeCrash()
+void Udp::handleCrashOperation(LifecycleOperation *operation)
 {
     clearAllSockets();
     icmp = nullptr;
@@ -1252,7 +1285,7 @@ INetfilter::IHook::Result Udp::CrcInsertion::datagramPostRoutingHook(Packet *pac
 
 void Udp::insertCrc(const Protocol *networkProtocol, const L3Address& srcAddress, const L3Address& destAddress, const Ptr<UdpHeader>& udpHeader, Packet *packet)
 {
-    udpHeader->setCrcMode(crcMode);
+    CrcMode crcMode = udpHeader->getCrcMode();
     switch (crcMode) {
         case CRC_DISABLED:
             // if the CRC mode is disabled, then the CRC is 0
@@ -1276,7 +1309,7 @@ void Udp::insertCrc(const Protocol *networkProtocol, const L3Address& srcAddress
             break;
         }
         default:
-            throw cRuntimeError("Unknown CRC mode");
+            throw cRuntimeError("Unknown CRC mode: %d", (int)crcMode);
     }
 }
 

@@ -16,7 +16,7 @@
 //
 
 #include "inet/common/LayeredProtocolBase.h"
-#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/physicallayer/common/packetlevel/Radio.h"
 #include "inet/physicallayer/common/packetlevel/RadioMedium.h"
@@ -296,30 +296,27 @@ void Radio::handleSignal(Signal *signal)
         startReception(receptionTimer, IRadioSignal::SIGNAL_PART_WHOLE);
 }
 
-bool Radio::handleNodeStart(IDoneCallback *doneCallback)
+void Radio::handleStartOperation(LifecycleOperation *operation)
 {
     // NOTE: we ignore radio mode switching during start
     initializeRadioMode();
-    return PhysicalLayerBase::handleNodeStart(doneCallback);
 }
 
-bool Radio::handleNodeShutdown(IDoneCallback *doneCallback)
+void Radio::handleStopOperation(LifecycleOperation *operation)
 {
     // NOTE: we ignore radio mode switching and ongoing transmission during shutdown
     cancelEvent(switchTimer);
     if (transmissionTimer->isScheduled())
         abortTransmission();
     completeRadioModeSwitch(RADIO_MODE_OFF);
-    return PhysicalLayerBase::handleNodeShutdown(doneCallback);
 }
 
-void Radio::handleNodeCrash()
+void Radio::handleCrashOperation(LifecycleOperation *operation)
 {
     cancelEvent(switchTimer);
     if (transmissionTimer->isScheduled())
         abortTransmission();
     completeRadioModeSwitch(RADIO_MODE_OFF);
-    PhysicalLayerBase::handleNodeCrash();
 }
 
 void Radio::startTransmission(Packet *macFrame, IRadioSignal::SignalPart part)

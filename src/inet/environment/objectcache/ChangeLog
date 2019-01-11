@@ -1,3 +1,7 @@
+2018-09-27  Levente Mészáros
+
+	Split INITSTAGE_PHYSICAL_ENVIRONMENT_2 into INITSTAGE_PHYSICAL_OBJECT_CACHE and INITSTAGE_MOBILITY.
+
 ====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------

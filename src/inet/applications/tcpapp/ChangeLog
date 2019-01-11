@@ -1,3 +1,45 @@
+2018-12-11  Zoltan Bojthe
+
+	TcpSessionApp: using socket isOpen()
+
+2018-11-27  Zoltan Bojthe
+
+	Changed refreshDisplay to show lifecycle operational status.
+
+2018-11-12  Zoltan Bojthe
+
+	Finish stop operation when the sockets are closed.
+	Call socket->destroy() when the operation root module is not the containing node module.
+
+2018-11-09  Zoltan Bojthe
+
+	Switched to socket.destroy() in handleCrashOperation().
+
+2018-11-07  Zoltan Bojthe
+
+	Added @lifecycleSupport property.
+
+2018-11-05  Zoltan Bojthe
+
+	Close/abort socket at module crash operation.
+
+2018-10-26  Zoltan Bojthe
+
+	Added ILifecycle to TcpAppBase base classes.
+	Changed TcpServerHostApp base class to ApplicationBase.
+
+2018-10-25  Zoltan Bojthe
+
+	Fixed NodeStatus module detection.
+
+2018-10-04  Zoltan Bojthe
+
+	Added LifecycleUnsupported base class instead of copy-pasting the same code.
+
+2018-08-17  Zoltan Bojthe
+
+	Added namespace qualifier to @signal type parameters.
+
 ====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------

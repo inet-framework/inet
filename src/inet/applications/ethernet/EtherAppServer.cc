@@ -51,22 +51,30 @@ void EtherAppServer::initialize(int stage)
     }
 }
 
-bool EtherAppServer::handleNodeStart(IDoneCallback *doneCallback)
+void EtherAppServer::handleStartOperation(LifecycleOperation *operation)
 {
     EV_INFO << "Starting application\n";
     registerDsap(localSap);
-    return true;
 }
 
-bool EtherAppServer::handleNodeShutdown(IDoneCallback *doneCallback)
+void EtherAppServer::handleStopOperation(LifecycleOperation *operation)
 {
     EV_INFO << "Stop the application\n";
-    return true;
+    llcSocket.close();
+    delayActiveOperationFinish(par("stopOperationTimeout"));
 }
 
-void EtherAppServer::handleNodeCrash()
+void EtherAppServer::handleCrashOperation(LifecycleOperation *operation)
 {
     EV_INFO << "Crash the application\n";
+    if (operation->getRootModule() != getContainingNode(this))
+        llcSocket.destroy();
+}
+
+void EtherAppServer::socketClosed(Ieee8022LlcSocket *socket)
+{
+    if (operationalState == State::STOPPING_OPERATION && !llcSocket.isOpen())
+        startActiveOperationExtraTimeOrFinish(par("stopOperationExtraTime"));
 }
 
 void EtherAppServer::handleMessageWhenUp(cMessage *msg)

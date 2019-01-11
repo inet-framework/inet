@@ -1,3 +1,24 @@
+2018-10-05  Zoltan Bojthe
+
+	Changed base class of Rip to RoutingProtocolBase.
+
+2018-08-02  Mani Amoozadeh
+
+	Metric of an interface can be set to zero.
+
+2018-08-01  Mani Amoozadeh
+
+	Fixed runtime error when a customized cost is assigned to an interface.
+
+2018-07-19  Mani Amoozadeh
+
+	Moved mode check into sendRoutes.
+	Added mode checks before importRoute.
+
+2018-07-16  Mani Amoozadeh
+
+	Added capability to set a local interface into passive mode.
+
 ====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------

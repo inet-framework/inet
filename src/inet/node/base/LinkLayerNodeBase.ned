@@ -24,7 +24,7 @@ import inet.linklayer.contract.ILoopbackInterface;
 import inet.linklayer.contract.IPppInterface;
 import inet.linklayer.contract.ITunnelInterface;
 import inet.linklayer.contract.IWirelessInterface;
-import inet.linklayer.vlan.IVlanInterface;
+import inet.linklayer.contract.IVlanInterface;
 import inet.networklayer.common.InterfaceTable;
 
 module LinkLayerNodeBase extends NodeBase

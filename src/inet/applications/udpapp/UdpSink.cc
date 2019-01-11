@@ -83,8 +83,16 @@ void UdpSink::socketErrorArrived(UdpSocket *socket, Indication *indication)
     delete indication;
 }
 
+void UdpSink::socketClosed(UdpSocket *socket)
+{
+    if (operationalState == State::STOPPING_OPERATION)
+        startActiveOperationExtraTimeOrFinish(par("stopOperationExtraTime"));
+}
+
 void UdpSink::refreshDisplay() const
 {
+    ApplicationBase::refreshDisplay();
+
     char buf[50];
     sprintf(buf, "rcvd: %d pks", numReceived);
     getDisplayString().setTagArg("t", 0, buf);
@@ -144,28 +152,32 @@ void UdpSink::processPacket(Packet *pk)
     numReceived++;
 }
 
-bool UdpSink::handleNodeStart(IDoneCallback *doneCallback)
+void UdpSink::handleStartOperation(LifecycleOperation *operation)
 {
     simtime_t start = std::max(startTime, simTime());
     if ((stopTime < SIMTIME_ZERO) || (start < stopTime) || (start == stopTime && startTime == stopTime)) {
         selfMsg->setKind(START);
         scheduleAt(start, selfMsg);
     }
-    return true;
 }
 
-bool UdpSink::handleNodeShutdown(IDoneCallback *doneCallback)
+void UdpSink::handleStopOperation(LifecycleOperation *operation)
 {
-    if (selfMsg)
-        cancelEvent(selfMsg);
-    //TODO if(socket.isOpened()) socket.close();
-    return true;
+    cancelEvent(selfMsg);
+    if (!multicastGroup.isUnspecified())
+        socket.leaveMulticastGroup(multicastGroup); // FIXME should be done by socket.close()
+    socket.close();
+    delayActiveOperationFinish(par("stopOperationTimeout"));
 }
 
-void UdpSink::handleNodeCrash()
+void UdpSink::handleCrashOperation(LifecycleOperation *operation)
 {
-    if (selfMsg)
-        cancelEvent(selfMsg);
+    cancelEvent(selfMsg);
+    if (operation->getRootModule() != getContainingNode(this)) {     // closes socket when the application crashed only
+        if (!multicastGroup.isUnspecified())
+            socket.leaveMulticastGroup(multicastGroup); // FIXME should be done by socket.close()
+        socket.destroy();    //TODO  in real operating systems, program crash detected by OS and OS closes sockets of crashed programs.
+    }
 }
 
 } // namespace inet

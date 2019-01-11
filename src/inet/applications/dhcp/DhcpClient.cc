@@ -19,7 +19,7 @@
 
 #include "inet/applications/dhcp/DhcpClient.h"
 #include "inet/common/Simsignals.h"
-#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
@@ -74,7 +74,8 @@ void DhcpClient::initialize(int stage)
         // for a wireless interface subscribe the association event to start the DHCP protocol
         host->subscribe(l2AssociatedSignal, this);
         host->subscribe(interfaceDeletedSignal, this);
-
+        socket.setCallback(this);
+        socket.setOutputGate(gate("socketOut"));
     }
 }
 
@@ -178,6 +179,8 @@ const char *DhcpClient::getAndCheckMessageTypeName(DhcpMessageType type)
 
 void DhcpClient::refreshDisplay() const
 {
+    ApplicationBase::refreshDisplay();
+
     getDisplayString().setTagArg("t", 0, getStateName(clientState));
 }
 
@@ -204,6 +207,12 @@ void DhcpClient::socketErrorArrived(UdpSocket *socket, Indication *indication)
 {
     EV_WARN << "Ignoring UDP error report " << indication->getName() << endl;
     delete indication;
+}
+
+void DhcpClient::socketClosed(UdpSocket *socket_)
+{
+    if (operationalState == State::STOPPING_OPERATION && !socket.isOpen())
+        startActiveOperationExtraTimeOrFinish(par("stopOperationExtraTime"));
 }
 
 void DhcpClient::handleTimer(cMessage *msg)
@@ -385,7 +394,7 @@ void DhcpClient::initRebootedClient()
 
 void DhcpClient::handleDhcpMessage(Packet *packet)
 {
-    ASSERT(isOperational && ie != nullptr);
+    ASSERT(isUp() && ie != nullptr);
 
     const auto& msg = packet->peekAtFront<DhcpMessage>();
     if (msg->getOp() != BOOTREPLY) {
@@ -506,7 +515,7 @@ void DhcpClient::receiveSignal(cComponent *source, int signalID, cObject *obj, c
         }
     }
     else if (signalID == interfaceDeletedSignal) {
-        if (isOperational)
+        if (isUp())
             throw cRuntimeError("Reacting to interface deletions is not implemented in this module");
     }
 }
@@ -673,23 +682,20 @@ void DhcpClient::sendToUdp(Packet *msg, int srcPort, const L3Address& destAddr, 
 
 void DhcpClient::openSocket()
 {
-    socket.setOutputGate(gate("socketOut"));
     socket.bind(clientPort);
     socket.setBroadcast(true);
-    socket.setCallback(this);
     EV_INFO << "DHCP server bound to port " << serverPort << "." << endl;
 }
 
-bool DhcpClient::handleNodeStart(IDoneCallback *doneCallback)
+void DhcpClient::handleStartOperation(LifecycleOperation *operation)
 {
     simtime_t start = std::max(startTime, simTime());
     ie = chooseInterface();
     macAddress = ie->getMacAddress();
     scheduleAt(start, startTimer);
-    return true;
 }
 
-void DhcpClient::stopApp()
+void DhcpClient::handleStopOperation(LifecycleOperation *operation)
 {
     cancelEvent(timerT1);
     cancelEvent(timerT2);
@@ -700,7 +706,22 @@ void DhcpClient::stopApp()
 
     // TODO: Client should send DHCPRELEASE to the server. However, the correct operation
     // of DHCP does not depend on the transmission of DHCPRELEASE messages.
-    // TODO: socket.close();
+
+    socket.close();
+    delayActiveOperationFinish(par("stopOperationTimeout"));
+}
+
+void DhcpClient::handleCrashOperation(LifecycleOperation *operation)
+{
+    cancelEvent(timerT1);
+    cancelEvent(timerT2);
+    cancelEvent(timerTo);
+    cancelEvent(leaseTimer);
+    cancelEvent(startTimer);
+    ie = nullptr;
+
+    if (operation->getRootModule() != getContainingNode(this))     // closes socket when the application crashed only
+        socket.destroy();         //TODO  in real operating systems, program crash detected by OS and OS closes sockets of crashed programs.
 }
 
 } // namespace inet

@@ -1,3 +1,21 @@
+2018-12-17  Levente Mészáros
+
+	Added end time to SignalTimeInd.
+
+2018-11-20  Timofei Istomin
+
+	Added signal arrival time to the incoming packets
+
+2018-09-26  Levente Mészáros
+
+	Added sensible default values for transmitter/receiver submodule types in radio modules.
+	Moved sensible default for antenna submodule type to Radio.
+	Moved sensible default values for propagation and path loss submodules of the radio medium.
+
+2018-07-19  Levente Mészáros
+
+	Moved initializeRadioMode() to the physical layer stage.
+
 ====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------

@@ -24,7 +24,7 @@
 
 #include "inet/common/INETDefs.h"
 
-#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/OperationalBase.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/L3Address.h"
@@ -160,6 +160,7 @@ class INET_API Tcp : public OperationalBase
 
     bool useDataNotification = false;
     CrcMode crcMode = CRC_MODE_UNDEFINED;
+    int msl;
 
   public:
     Tcp() {}
@@ -206,17 +207,18 @@ class INET_API Tcp : public OperationalBase
     virtual TcpReceiveQueue *createReceiveQueue();
 
     // ILifeCycle:
-    virtual bool handleNodeStart(IDoneCallback *doneCallback) override;
-    virtual bool handleNodeShutdown(IDoneCallback *doneCallback) override;
-    virtual void handleNodeCrash() override;
+    virtual void handleStartOperation(LifecycleOperation *operation) override;
+    virtual void handleStopOperation(LifecycleOperation *operation) override;
+    virtual void handleCrashOperation(LifecycleOperation *operation) override;
     virtual bool isInitializeStage(int stage) override { return stage == INITSTAGE_TRANSPORT_LAYER; }
-    virtual bool isNodeStartStage(int stage) override { return stage == NodeStartOperation::STAGE_TRANSPORT_LAYER; }
-    virtual bool isNodeShutdownStage(int stage) override { return stage == NodeShutdownOperation::STAGE_TRANSPORT_LAYER; }
+    virtual bool isModuleStartStage(int stage) override { return stage == ModuleStartOperation::STAGE_TRANSPORT_LAYER; }
+    virtual bool isModuleStopStage(int stage) override { return stage == ModuleStopOperation::STAGE_TRANSPORT_LAYER; }
 
     // called at shutdown/crash
     virtual void reset();
 
     bool checkCrc(const Ptr<const TcpHeader>& tcpHeader, Packet *pk);
+    int getMsl() { return msl; }
 };
 
 } // namespace tcp

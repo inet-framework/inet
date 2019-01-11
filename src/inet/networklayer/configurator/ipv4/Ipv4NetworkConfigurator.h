@@ -165,6 +165,11 @@ class INET_API Ipv4NetworkConfigurator : public NetworkConfiguratorBase
      */
     virtual void configureRoutingTable(IIpv4RoutingTable *routingTable);
 
+    /**
+     * Configures the provided routing table based on the current network configuration for specified interfaceEntry.
+     */
+    virtual void configureRoutingTable(IIpv4RoutingTable *routingTable, InterfaceEntry *interfaceEntry);
+
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void handleMessage(cMessage *msg) override { throw cRuntimeError("this module doesn't handle messages, it runs only in initialize()"); }
@@ -215,6 +220,7 @@ class INET_API Ipv4NetworkConfigurator : public NetworkConfiguratorBase
     void ensureConfigurationComputed(Topology& topology);
     void configureInterface(InterfaceInfo *interfaceInfo);
     void configureRoutingTable(Node *node);
+    void configureRoutingTable(Node *node, InterfaceEntry *interfaceEntry);
 
     /**
      * Prints the current network configuration to the module output.

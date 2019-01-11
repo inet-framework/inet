@@ -1,3 +1,15 @@
+2018-09-02  Mani Amoozadeh
+
+	Fixed routing table update after receiving AS-External LSA.
+
+2018-08-13  Mani Amoozadeh
+
+	Added checksum to the OSPF messages.
+
+2018-08-08  Mani Amoozadeh
+
+	Added interface mode: Active, Passive and NoOSPF.
+
 ====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------
@@ -65,4 +77,3 @@
 	Updated for new msgc function names: getFooForUpdate, insertFoo, eraseFoo, etc.
 
 2017-11-16  ------ inet-3.99.1 released ------
-

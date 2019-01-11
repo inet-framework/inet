@@ -1,3 +1,27 @@
+2018-09-19  Zoltan Bojthe
+
+	Adapted to the new protocol specific data storage API of InterfaceEntry.
+
+2018-09-03  Zoltan Bojthe
+
+	Split INetworkLayer to INetworkLayerUpper and INetworkLayerLower.
+
+2018-08-28  Zoltan Bojthe
+
+	Added EIGRP, LISP, BABEL, ODR, UNKNOWN, ISIS to IRoute::SourceType.
+
+2018-08-28  Zoltan Bojthe
+
+	Added ClnsAddress and ClnsAddressType.
+
+2018-07-19  Mani Amoozadeh
+
+	Display administrative distance in the routing table if enabled.
+
+2018-08-17  Zoltan Bojthe
+
+	Added namespace qualifier to @signal type parameters.
+
 ====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------

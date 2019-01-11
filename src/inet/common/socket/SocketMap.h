@@ -30,7 +30,7 @@ namespace inet {
 class INET_API SocketMap
 {
   protected:
-    std::map<int, ISocket *> socketMap;
+    std::map<int, ISocket *> socketMap;         // socketId, socketPtr
 
   public:
     SocketMap() {}
@@ -52,6 +52,7 @@ class INET_API SocketMap
 
     /**
      * Removes the given socket.
+     * Returns removed socket or returns nullptr when socket not found in the map
      */
     ISocket *removeSocket(ISocket *socket);
 
@@ -59,6 +60,16 @@ class INET_API SocketMap
      * Returns the number of sockets stored.
      */
     unsigned int size() const { return socketMap.size(); }
+
+    /**
+     * Returns the socket map
+     */
+    std::map<int, ISocket *>& getMap() { return socketMap; }
+
+    /**
+     * Returns the socket specified by socketId
+     */
+    ISocket *getSocketById(unsigned int socketId) { return socketMap.at(socketId); }
 
     /**
      * Deletes the socket objects.

@@ -6,7 +6,6 @@ Test crash and startup operations on AdhocHost.
 
 [General]
 network = Test
-tkenv-plugin-path = ../../../etc/plugins
 ned-path = .;../../../../src;../../lib
 cmdenv-express-mode = false
 record-eventlog = true

@@ -41,7 +41,6 @@ network DhcpExample
 %inifile: omnetpp.ini
 
 [General]
-tkenv-plugin-path = ../../../etc/plugins
 ned-path = .;../../../../src;../../lib
 cmdenv-express-mode = false
 sim-time-limit = 1000s

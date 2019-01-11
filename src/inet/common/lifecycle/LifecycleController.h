@@ -66,15 +66,15 @@ class INET_API LifecycleController
     class INET_API Callback : public IDoneCallback
     {
       public:
-        LifecycleController *controller;
-        LifecycleOperation *operation;
-        cModule *module;
+        LifecycleController *controller = nullptr;
+        LifecycleOperation *operation = nullptr;
+        cModule *module = nullptr;
 
         void init(LifecycleController *controller, LifecycleOperation *operation, cModule *module);
         virtual void invoke() override;
     };
 
-    Callback *spareCallback;
+    Callback *spareCallback = nullptr;
 
   protected:
     virtual bool resumeOperation(LifecycleOperation *operation);

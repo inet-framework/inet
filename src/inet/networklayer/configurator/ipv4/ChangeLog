@@ -1,3 +1,59 @@
+2018-12-19  Zoltan Bojthe
+
+	Fixed memory leak in Ipv4NetworkConfigurator.
+
+2018-11-28  Levente Mészáros
+
+	Fixed checking optimized routing table against original.
+
+2018-10-11  Levente Mészáros
+
+	Fixed checking optimized routing table for consistency.
+
+	The checked incorrectly reported errors when two routes were the same
+	except their interface. Actually, the optimizer did work correctly.
+
+2018-10-05  Zoltan Bojthe
+
+	HostAutoConfigurator: based on OperationalBase
+
+2018-10-02  Levente Mészáros
+
+	Renamed Ipv4NodeConfigurator methods to prepareAllInterfaces and configureAllInterfaces for clarity.
+
+2018-09-28  Levente Mészáros
+
+	Renamed initstage to INITSTAGE_NETWORK_CONFIGURATION.
+
+2018-09-27  Levente Mészáros
+
+	Split INITSTAGE_NETWORK_LAYER_2 into INITSTAGE_NETWORK_CONFIGURATOR,
+	INITSTAGE_NETWORK_ADDRESS_ASSIGNMENT, INITSTAGE_STATIC_ROUTING.
+
+2018-09-19  Zoltan Bojthe
+
+	Adapted to the new protocol specific data storage API of InterfaceEntry.
+
+2018-09-13  Levente Mészáros
+
+	Removed obsolete code used for network address selection.
+
+	This code had two purpose, one is to prevent overlapping network
+	addressing, but it failed to do this. Second is to optimize selection,
+	but it prevents using all available smaller ranges (holes).
+
+2018-09-13  Levente Mészáros
+
+	Fixed overlapping network address range check in Ipv4NetworkConfigurator.
+
+2018-09-13  Andras Varga
+
+	Added lifecycle support to HostAutoConfigurator.
+
+2018-08-19  Mani Amoozadeh
+
+	Isolated networks can be configured separately by Ipv4NetworkConfigurator.
+
 ====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------

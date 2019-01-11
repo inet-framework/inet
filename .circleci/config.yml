@@ -9,15 +9,12 @@ jobs:
       - run:
           name: Cloning git submodules
           command: git submodule update --init
-      - run:
-          name: Setting up PATH environment variable
-          command: echo 'export PATH=/root/omnetpp-5.4.1-linux/bin:$PATH' >> $BASH_ENV
+      - run: # note: this does not set ALL variables that ". setenv" (in OMNeT++ and in INET) do, but this should to be enough for testing
+          name: Setting up environment variables
+          command: echo 'export PATH=/root/omnetpp-5.4.1-linux/bin:$PATH SKIPPED_FEATURES="" SPLIT_INDEX=$CIRCLE_NODE_INDEX SPLIT_TOTAL=$CIRCLE_NODE_TOTAL' >> $BASH_ENV
       - run:
           name: Copying NSC into INET
           command: cp -r /root/nsc-0.5.3 3rdparty
-      - run:
-          name: Setting up parallel environment
-          command: echo 'export SPLIT_INDEX=$CIRCLE_NODE_INDEX SPLIT_TOTAL=$CIRCLE_NODE_TOTAL' >> $BASH_ENV
       - run:
           name: Feature tests
           command: ./tests/features/featuretest
@@ -25,7 +22,8 @@ jobs:
           path: /root/project/tests/features/_log
           destination: log # replace the absolute path above with a shorter one
 
-# the rest is just to schedule a cron job for automated weekly tests
+# the rest is just to schedule a cron job for automated weekly tests,
+# and to allow triggering a build manually by pushing a tag
 workflows:
   version: 2
   weekly: # this name is arbitrary, but fitting
@@ -38,4 +36,11 @@ workflows:
             branches:
               only:
                 - master
-#                - integration
+  manual: # this name is arbitrary, but fitting
+    jobs:
+      - build: # the name of the job above
+          filters:
+            tags:
+              only: trigger-circleci # run if this tag is pushed
+            branches:
+              ignore: /.*/ # do not run on any branch pushes

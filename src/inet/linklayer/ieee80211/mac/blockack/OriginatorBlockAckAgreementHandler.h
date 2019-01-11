@@ -33,7 +33,7 @@ class INET_API OriginatorBlockAckAgreementHandler : public IOriginatorBlockAckAg
         std::map<std::pair<MacAddress, Tid>, OriginatorBlockAckAgreement *> blockAckAgreements;
 
     protected:
-        virtual const Ptr<Ieee80211AddbaRequest> buildAddbaRequest(MacAddress receiverAddr, Tid tid, int startingSequenceNumber, IOriginatorBlockAckAgreementPolicy* blockAckAgreementPolicy);
+        virtual const Ptr<Ieee80211AddbaRequest> buildAddbaRequest(MacAddress receiverAddr, Tid tid, SequenceNumber startingSequenceNumber, IOriginatorBlockAckAgreementPolicy* blockAckAgreementPolicy);
         virtual void createAgreement(const Ptr<const Ieee80211AddbaRequest>& addbaRequest);
         virtual void updateAgreement(OriginatorBlockAckAgreement *agreement, const Ptr<const Ieee80211AddbaResponse>& addbaResp);
         virtual void terminateAgreement(MacAddress originatorAddr, Tid tid);
