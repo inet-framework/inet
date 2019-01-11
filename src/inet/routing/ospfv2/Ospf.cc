@@ -206,6 +206,7 @@ void Ospf::handleInterfaceDown(const InterfaceEntry *ie)
         if(ospfRoute && ospfRoute->getInterface() == ie && ospfRoute->getNextHopAsGeneric().isUnspecified()) {
             EV_DEBUG << "removing route from OSPF routing table: " << ospfRoute << "\n";
             ospfRouter->deleteRoute(ospfRoute);
+            i--;
         }
     }
     // ... from Ipv4 table
@@ -214,6 +215,7 @@ void Ospf::handleInterfaceDown(const InterfaceEntry *ie)
         if(route && route->getInterface() == ie && route->getNextHopAsGeneric().isUnspecified()) {
             EV_DEBUG << "removing route from Ipv4 routing table: " << route << "\n";
             rt->deleteRoute(route);
+            i--;
         }
     }
 
