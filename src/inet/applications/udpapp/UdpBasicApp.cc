@@ -25,6 +25,7 @@
 #include "inet/common/TimeTag_m.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/transportlayer/contract/udp/UdpControlInfo_m.h"
+#include "inet/networklayer/common/FragmentationTag_m.h"
 
 namespace inet {
 
@@ -50,6 +51,7 @@ void UdpBasicApp::initialize(int stage)
         startTime = par("startTime");
         stopTime = par("stopTime");
         packetName = par("packetName");
+        dontFragment = par("dontFragment");
         if (stopTime >= SIMTIME_ZERO && stopTime < startTime)
             throw cRuntimeError("Invalid startTime/stopTime parameters");
         selfMsg = new cMessage("sendTimer");
@@ -108,6 +110,8 @@ void UdpBasicApp::sendPacket()
     std::ostringstream str;
     str << packetName << "-" << numSent;
     Packet *packet = new Packet(str.str().c_str());
+    if(dontFragment)
+        packet->addTagIfAbsent<FragmentationReq>()->setDontFragment(true);
     const auto& payload = makeShared<ApplicationPacket>();
     payload->setChunkLength(B(par("messageLength")));
     payload->setSequenceNumber(numSent);
