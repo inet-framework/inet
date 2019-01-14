@@ -89,7 +89,7 @@ void PimDm::handleStopOperation(LifecycleOperation *operation)
 {
     // TODO send PIM Hellos to neighbors with 0 HoldTime
     stopPIMRouting();
-    handleStopOperation(operation);
+    PimBase::handleStopOperation(operation);
 }
 
 void PimDm::handleCrashOperation(LifecycleOperation *operation)
