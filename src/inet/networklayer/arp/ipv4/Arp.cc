@@ -222,8 +222,7 @@ bool Arp::addressRecognized(Ipv4Address destAddr, InterfaceEntry *ie)
         return true;
     else {
         // if proxy ARP is enables in interface ie
-        if (proxyArpInterfacesMatcher.matches(ie->getInterfaceName()) ||
-                proxyArpInterfacesMatcher.matches(ie->getInterfaceFullPath().c_str())) {
+        if (proxyArpInterfacesMatcher.matches(ie->getInterfaceName())) {
             // if we can route this packet, and the output port is
             // different from this one, then say yes
             InterfaceEntry *rtie = rt->getInterfaceForDestAddr(destAddr);
