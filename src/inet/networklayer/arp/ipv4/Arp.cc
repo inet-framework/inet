@@ -61,7 +61,9 @@ void Arp::initialize(int stage)
         retryTimeout = par("retryTimeout");
         retryCount = par("retryCount");
         cacheTimeout = par("cacheTimeout");
-        respondToProxyArp = par("respondToProxyARP");
+        proxyArpInterfaces = par("proxyArpInterfaces").stdstringValue();
+
+        proxyArpInterfacesMatcher.setPattern(proxyArpInterfaces.c_str(), false, true, false);
 
         // init statistics
         numRequestsSent = numRepliesSent = 0;
@@ -216,17 +218,18 @@ void Arp::requestTimedOut(cMessage *selfmsg)
 
 bool Arp::addressRecognized(Ipv4Address destAddr, InterfaceEntry *ie)
 {
-    if (rt->isLocalAddress(destAddr)) {
+    if (rt->isLocalAddress(destAddr))
         return true;
-    }
-    else if (respondToProxyArp) {
-        // respond to Proxy ARP request: if we can route this packet (and the
-        // output port is different from this one), say yes
-        InterfaceEntry *rtie = rt->getInterfaceForDestAddr(destAddr);
-        return rtie != nullptr && rtie != ie;
-    }
     else {
-        return false;
+        // if proxy ARP is enables in interface ie
+        if (proxyArpInterfacesMatcher.matches(ie->getInterfaceName())) {
+            // if we can route this packet, and the output port is
+            // different from this one, then say yes
+            InterfaceEntry *rtie = rt->getInterfaceForDestAddr(destAddr);
+            return rtie != nullptr && rtie != ie;
+        }
+        else
+            return false;
     }
 }
 
@@ -444,6 +447,7 @@ L3Address Arp::getL3AddressFor(const MacAddress& macAddr) const
     return Ipv4Address::UNSPECIFIED_ADDRESS;
 }
 
+// Also known as ARP Announcement
 void Arp::sendArpGratuitous(const InterfaceEntry *ie, MacAddress srcAddr, Ipv4Address ipAddr, ArpOpcode opCode)
 {
     Enter_Method_Silent();
@@ -478,10 +482,38 @@ void Arp::sendArpGratuitous(const InterfaceEntry *ie, MacAddress srcAddr, Ipv4Ad
     entry->numRetries = 0;
 
 //    updateARPCache(entry, srcAddr); //FIXME
+
     // send out
     send(packet, "ifOut");
-//    sendPacketToNIC(arp, ie, srcAddr, ETHERTYPE_ARP);
-//    send(arp, nicOutBaseGateId + ie->getNetworkLayerGateIndex());
+}
+
+// A client should send out 'ARP Probe' to probe the newly received IPv4 address.
+// Refer to RFC 5227, IPv4 Address Conflict Detection
+void Arp::sendArpProbe(const InterfaceEntry *ie, MacAddress srcAddr, Ipv4Address probedAddr)
+{
+    Enter_Method_Silent();
+
+    // both must be set
+    ASSERT(!srcAddr.isUnspecified());
+    ASSERT(!probedAddr.isUnspecified());
+
+    Packet *packet = new Packet("arpProbe");
+    const auto& arp = makeShared<ArpPacket>();
+    arp->setOpcode(ARP_REQUEST);
+    arp->setSrcMacAddress(srcAddr);
+    arp->setSrcIpAddress(Ipv4Address::UNSPECIFIED_ADDRESS);
+    arp->setDestIpAddress(probedAddr);
+    arp->setDestMacAddress(MacAddress::UNSPECIFIED_ADDRESS);
+    packet->insertAtFront(arp);
+
+    auto macAddrReq = packet->addTag<MacAddressReq>();
+    macAddrReq->setSrcAddress(srcAddr);
+    macAddrReq->setDestAddress(MacAddress::BROADCAST_ADDRESS);
+    packet->addTag<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
+    packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::arp);
+
+    // send out
+    send(packet, "ifOut");
 }
 
 } // namespace inet

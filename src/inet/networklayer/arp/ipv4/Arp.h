@@ -69,11 +69,13 @@ class INET_API Arp : public OperationalBase, public IArp
     simtime_t retryTimeout;
     int retryCount = 0;
     simtime_t cacheTimeout;
-    bool respondToProxyArp = false;
+    std::string proxyArpInterfaces = "";
     long numResolutions = 0;
     long numFailedResolutions = 0;
     long numRequestsSent = 0;
     long numRepliesSent = 0;
+
+    cPatternMatcher proxyArpInterfacesMatcher;
 
     static simsignal_t arpRequestSentSignal;
     static simsignal_t arpReplySentSignal;
@@ -97,7 +99,8 @@ class INET_API Arp : public OperationalBase, public IArp
     virtual L3Address getL3AddressFor(const MacAddress& addr) const override;
     /// @}
 
-    void sendArpGratuitous(const InterfaceEntry *ie, MacAddress srcAddr, Ipv4Address ipAddr, ArpOpcode opCode);
+    void sendArpGratuitous(const InterfaceEntry *ie, MacAddress srcAddr, Ipv4Address ipAddr, ArpOpcode opCode = ARP_REQUEST);
+    void sendArpProbe(const InterfaceEntry *ie, MacAddress srcAddr, Ipv4Address probedAddr);
 
   protected:
     virtual void initialize(int stage) override;
