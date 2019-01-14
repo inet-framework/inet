@@ -198,6 +198,7 @@ void Ipv6RoutingTable::receiveSignal(cComponent *source, simsignal_t signalID, c
 
         // an interface went down
         if (!interfaceEntry->isUp()) {
+            deleteInterfaceRoutes(interfaceEntry);
             purgeDestCacheForInterfaceId(interfaceEntryId);
         }
     }
