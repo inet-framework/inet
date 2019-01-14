@@ -26,7 +26,6 @@
 
 namespace inet{
 
-static const int CLNSADDRESS_STRING_SIZE = 25;
 const ClnsAddress ClnsAddress::UNSPECIFIED_ADDRESS;
 
 ClnsAddress::ClnsAddress()
