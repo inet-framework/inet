@@ -233,7 +233,17 @@ void Tcp::handleMessageWhenUp(cMessage *msg)
 
 TcpConnection *Tcp::createConnection(int socketId)
 {
-    return new TcpConnection(this, socketId);
+//    return new TcpConnection(this, socketId);
+
+    auto moduleType = cModuleType::get("inet.transportlayer.tcp.TcpConnection");
+    char submoduleName[24];
+    sprintf(submoduleName, "conn-%d", socketId);
+    auto module = check_and_cast<TcpConnection *>(moduleType->create(submoduleName, this));
+    module->finalizeParameters();
+    module->buildInside();
+    module->initConnection(this, socketId);
+    module->callInitialize();
+    return module;
 }
 
 void Tcp::segmentArrivalWhileClosed(Packet *packet, const Ptr<const TcpHeader>& tcpseg, L3Address srcAddr, L3Address destAddr)

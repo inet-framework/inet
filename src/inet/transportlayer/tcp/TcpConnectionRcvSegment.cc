@@ -783,6 +783,9 @@ TcpEventCode TcpConnection::processSegmentInListen(Packet *packet, const Ptr<con
         if (state->fork) {
             TcpConnection *conn = cloneListeningConnection();    // "conn" is the clone which will stay LISTENing, while "this" gets updated with the remote address
             tcpMain->addForkedConnection(this, conn, destAddr, srcAddr, tcpseg->getDestPort(), tcpseg->getSrcPort());
+            char submoduleName[24];
+            sprintf(submoduleName, "conn-%d", socketId);
+            this->setName(submoduleName);
             EV_DETAIL << "Connection forked: this connection got new socketId=" << socketId << ", "
                                                                                            "spinoff keeps LISTENing with socketId=" << conn->socketId << "\n";
         }

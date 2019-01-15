@@ -31,6 +31,8 @@
 namespace inet {
 namespace tcp {
 
+Define_Module(TcpConnection);
+
 TcpStateVariables::TcpStateVariables()
 {
     // set everything to 0 -- real init values will be set manually
@@ -169,9 +171,9 @@ std::string TcpStateVariables::detailedInfo() const
     return out.str();
 }
 
-TcpConnection::TcpConnection(Tcp *mod) :
-        tcpMain(mod)
+TcpConnection::TcpConnection(Tcp *mod)
 {
+    tcpMain = mod;
     // Note: this ctor is NOT used to create live connections, only
     // temporary ones to invoke segmentArrivalWhileClosed() on
 }
@@ -180,14 +182,13 @@ TcpConnection::TcpConnection(Tcp *mod) :
 // FSM framework, TCP FSM
 //
 
-TcpConnection::TcpConnection(Tcp *_mod, int _socketId)
+void TcpConnection::initConnection(Tcp *_mod, int _socketId)
 {
     tcpMain = _mod;
     socketId = _socketId;
 
     char fsmname[24];
-    sprintf(fsmname, "fsm-%d", socketId);
-    fsm.setName(fsmname);
+    fsm.setName(getName());
     fsm.setState(TCP_S_INIT);
 
     // queues and algorithm will be created on active or passive open

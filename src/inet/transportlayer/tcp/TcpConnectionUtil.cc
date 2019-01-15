@@ -205,7 +205,16 @@ void TcpConnection::printSegmentBrief(Packet *packet, const Ptr<const TcpHeader>
 
 TcpConnection *TcpConnection::cloneListeningConnection()
 {
-    TcpConnection *conn = new TcpConnection(tcpMain, socketId);
+//    TcpConnection *conn = new TcpConnection();
+//    conn->initConnection(tcpMain, socketId);
+    auto moduleType = cModuleType::get("inet.transportlayer.tcp.TcpConnection");
+    char submoduleName[24];
+    sprintf(submoduleName, "conn-%d", socketId);
+    auto conn = check_and_cast<TcpConnection *>(moduleType->create(submoduleName, tcpMain));
+    conn->finalizeParameters();
+    conn->buildInside();
+    conn->initConnection(tcpMain, socketId);
+    conn->callInitialize();
 
     // following code to be kept consistent with initConnection()
     const char *sendQueueClass = sendQueue->getClassName();
@@ -284,7 +293,7 @@ void TcpConnection::sendToIP(Packet *pkt, const Ptr<TcpHeader>& tcpseg, L3Addres
     addresses->setSrcAddress(src);
     addresses->setDestAddress(dest);
     insertTransportProtocolHeader(pkt, Protocol::tcp, tcpseg);
-    check_and_cast<Tcp *>(getSimulation()->getContextModule())->send(pkt, "ipOut");
+    tcpMain->send(pkt, "ipOut");
 }
 
 void TcpConnection::signalConnectionTimeout()

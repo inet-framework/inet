@@ -310,12 +310,13 @@ class INET_API TcpStateVariables : public cObject
  * When the CLOSED state is reached, TCP will delete the TcpConnection object.
  *
  */
-class INET_API TcpConnection : public cObject
+class INET_API TcpConnection : public cSimpleModule
 {
   public:
     // connection identification by apps: socketId
     int socketId = -1;    // identifies connection within the app
     int getSocketId() const { return socketId; }
+    void setSocketId(int newSocketId) { ASSERT(socketId == -1); socketId = newSocketId; }
 
     int listeningSocketId = -1;    // identifies listening connection within the app
     int getListeningSocketId() const { return listeningSocketId; }
@@ -533,7 +534,7 @@ class INET_API TcpConnection : public cObject
     cMessage *cancelEvent(cMessage *msg) { return tcpMain->cancelEvent(msg); }
 
     /** Utility: send IP packet */
-    static void sendToIP(Packet *pkt, const Ptr<TcpHeader>& tcpseg, L3Address src, L3Address dest);
+    virtual void sendToIP(Packet *pkt, const Ptr<TcpHeader>& tcpseg, L3Address src, L3Address dest);
 
     /** Utility: sends packet to application */
     virtual void sendToApp(cMessage *msg);
@@ -578,13 +579,17 @@ class INET_API TcpConnection : public cObject
     virtual void updateWndInfo(const Ptr<const TcpHeader>& tcpseg, bool doAlways = false);
 
   public:
+    TcpConnection() {}
+    TcpConnection(const TcpConnection& other) {}    //FIXME kludge
+    void initialize() {}
+
     /**
      * The "normal" constructor.
      */
-    TcpConnection(Tcp *mod, int socketId);
+    void initConnection(Tcp *mod, int socketId);
 
     /**
-     * Note: this default ctor is NOT used to create live connections, only
+     * Note: this ctor is NOT used to create live connections, only
      * temporary ones so that TCPMain can invoke their segmentArrivalWhileClosed().
      */
     TcpConnection(Tcp *mod);
