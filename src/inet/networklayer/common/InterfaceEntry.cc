@@ -104,26 +104,24 @@ void InterfaceEntry::initialize(int stage)
 std::string InterfaceEntry::str() const
 {
     std::stringstream out;
-    out << "name:" << getInterfaceName();
-    out << "  ID:" << getInterfaceId();
-    out << "  MTU: " << getMtu() << " \t";
-    out << ((state == DOWN) ? "DOWN " : "UP ");
+    out << getInterfaceName();
+    out << " ID:" << getInterfaceId();
+    out << " MTU:" << getMtu();
+    out << ((state == DOWN) ? " DOWN" : " UP");
     if (isLoopback())
-        out << "LOOPBACK ";
+        out << " LOOPBACK";
     if (isBroadcast())
-        out << "BROADCAST ";
-    out << (hasCarrier() ? "CARRIER " : "NOCARRIER ");
+        out << " BROADCAST";
+    out << (hasCarrier() ? " CARRIER" : " NOCARRIER");
     if (isMulticast())
-        out << "MULTICAST ";
+        out << " MULTICAST";
     if (isPointToPoint())
-        out << "POINTTOPOINT ";
-    out << "\n";
-    out << "  macAddr:";
+        out << " POINTTOPOINT";
+    out << " macAddr:";
     if (getMacAddress().isUnspecified())
         out << "n/a";
     else
         out << getMacAddress();
-    out << "\n";
     for (int i=0; i<protocolDataSet.getNumTags(); i++)
         out << " " << protocolDataSet.getTag(i)->str();
 
