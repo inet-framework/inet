@@ -69,6 +69,7 @@ uint32_t swapByteOrder32(uint32_t v)
     return ((v & 0xFFL) << 24) | ((v & 0xFF00L) << 8) | ((v & 0xFF0000L) >> 8) | ((v & 0xFF000000L) >> 24);
 }
 
+#if 0
 static void printobject(cObject* object)
 {
     EV << object->getClassName() << ":" << endl;
@@ -84,6 +85,7 @@ static void printobject(cObject* object)
             EV << descriptor->getFieldValueAsString(object,i,0) << endl;
     }
 }
+#endif
 
 static bool testOneRecord(const Protocol *protocol, Packet *pk);
 static Packet *deserialize(const Protocol *protocol, Packet *pk);
