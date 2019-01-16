@@ -20,14 +20,14 @@
 #include "inet/networklayer/ipv4/Ipv4NatTable.h"
 #include "inet/transportlayer/common/L4Tools.h"
 
-#ifdef WITH_UDP
-#include "inet/transportlayer/udp/UdpHeader_m.h"
-#include "inet/transportlayer/udp/Udp.h"
-#endif
-
 #ifdef WITH_TCP_COMMON
 #include "inet/transportlayer/tcp_common/TcpCrcInsertionHook.h"
 #include "inet/transportlayer/tcp_common/TcpHeader.h"
+#endif
+
+#ifdef WITH_UDP
+#include "inet/transportlayer/udp/Udp.h"
+#include "inet/transportlayer/udp/UdpHeader_m.h"
 #endif
 
 namespace inet {

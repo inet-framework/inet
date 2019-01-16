@@ -19,7 +19,6 @@
 #define __INET_NETWORKINFO_H
 
 #include "inet/common/INETDefs.h"
-
 #include "inet/common/scenario/IScriptable.h"
 
 namespace inet {

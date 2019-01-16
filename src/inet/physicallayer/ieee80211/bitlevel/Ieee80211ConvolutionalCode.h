@@ -18,8 +18,8 @@
 #ifndef __INET_IEEE80211CONVOLUTIONALCODE_H
 #define __INET_IEEE80211CONVOLUTIONALCODE_H
 
-#include "inet/physicallayer/common/bitlevel/ConvolutionalCoder.h"
 #include "inet/physicallayer/common/bitlevel/ConvolutionalCode.h"
+#include "inet/physicallayer/common/bitlevel/ConvolutionalCoder.h"
 
 namespace inet {
 

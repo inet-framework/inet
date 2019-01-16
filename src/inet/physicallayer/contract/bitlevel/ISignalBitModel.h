@@ -19,12 +19,11 @@
 #define __INET_ISIGNALBITMODEL_H
 
 #include "inet/physicallayer/contract/bitlevel/IFecCoder.h"
-#include "inet/physicallayer/contract/bitlevel/IScrambler.h"
 #include "inet/physicallayer/contract/bitlevel/IInterleaver.h"
+#include "inet/physicallayer/contract/bitlevel/IScrambler.h"
 #include "inet/physicallayer/contract/packetlevel/IModulation.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 /**
@@ -61,7 +60,6 @@ class INET_API IReceptionBitModel : public virtual ISignalBitModel
 };
 
 } // namespace physicallayer
-
 } // namespace inet
 
 #endif // ifndef __INET_ISIGNALBITMODEL_H

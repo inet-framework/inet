@@ -18,9 +18,9 @@
 #ifndef __INET_DIMENSIONALSIGNALANALOGMODEL_H
 #define __INET_DIMENSIONALSIGNALANALOGMODEL_H
 
-#include "inet/physicallayer/analogmodel/bitlevel/SignalAnalogModel.h"
 #include "inet/common/mapping/MappingBase.h"
 #include "inet/common/mapping/MappingUtils.h"
+#include "inet/physicallayer/analogmodel/bitlevel/SignalAnalogModel.h"
 
 namespace inet {
 

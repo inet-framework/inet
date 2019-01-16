@@ -17,10 +17,9 @@
 // @author: Zoltan Bojthe
 //
 
-#include "inet/transportlayer/sctp/SctpProtocolDissector.h"
-
 #include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
 #include "inet/transportlayer/sctp/SctpHeader.h"
+#include "inet/transportlayer/sctp/SctpProtocolDissector.h"
 
 namespace inet {
 namespace sctp {

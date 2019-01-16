@@ -18,12 +18,11 @@
 #ifndef __INET_ANALOGDIGITALCONVERTER_H
 #define __INET_ANALOGDIGITALCONVERTER_H
 
-#include "inet/physicallayer/contract/bitlevel/IAnalogDigitalConverter.h"
-#include "inet/physicallayer/common/bitlevel/SignalSampleModel.h"
 #include "inet/physicallayer/analogmodel/bitlevel/SignalAnalogModel.h"
+#include "inet/physicallayer/common/bitlevel/SignalSampleModel.h"
+#include "inet/physicallayer/contract/bitlevel/IAnalogDigitalConverter.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 class INET_API ScalarAnalogDigitalConverter : public IAnalogDigitalConverter
@@ -42,7 +41,6 @@ class INET_API ScalarAnalogDigitalConverter : public IAnalogDigitalConverter
 };
 
 } // namespace physicallayer
-
 } // namespace inet
 
 #endif // ifndef __INET_ANALOGDIGITALCONVERTER_H

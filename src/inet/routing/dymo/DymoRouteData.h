@@ -20,7 +20,7 @@
 #ifndef __INET_DYMOROUTEDATA_H
 #define __INET_DYMOROUTEDATA_H
 
-#include <omnetpp.h>
+#include "inet/common/INETDefs.h"
 #include "inet/networklayer/contract/IRoute.h"
 #include "inet/routing/dymo/Dymo_m.h"
 

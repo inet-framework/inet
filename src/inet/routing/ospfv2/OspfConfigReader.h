@@ -21,7 +21,6 @@
 #include <vector>
 
 #include "inet/common/INETDefs.h"
-
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
 #include "inet/routing/ospfv2/OspfPacket_m.h"

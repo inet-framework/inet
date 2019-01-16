@@ -18,7 +18,6 @@
 #include "inet/physicallayer/common/bitlevel/SignalSymbolModel.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 SignalSymbolModel::SignalSymbolModel(int headerSymbolLength, double headerSymbolRate, int payloadSymbolLength, double payloadSymbolRate, const std::vector<const ISymbol *> *symbols) :
@@ -59,6 +58,5 @@ ReceptionSymbolModel::ReceptionSymbolModel(int headerSymbolLength, double header
 }
 
 } // namespace physicallayer
-
 } // namespace inet
 

@@ -18,16 +18,14 @@
 #ifndef __INET_RTPPARTICIPANTINFO_H
 #define __INET_RTPPARTICIPANTINFO_H
 
-#include "inet/transportlayer/rtp/RtpParticipantInfo_m.h"
-
 #include "inet/common/INETDefs.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
 #include "inet/transportlayer/rtp/RtpPacket_m.h"
+#include "inet/transportlayer/rtp/RtpParticipantInfo_m.h"
 #include "inet/transportlayer/rtp/Sdes.h"
 
 namespace inet {
-
 namespace rtp {
 
 //Forward declarations:
@@ -197,7 +195,6 @@ class INET_API RtpParticipantInfo : public RtpParticipantInfo_Base
 };
 
 } // namespace rtp
-
 } // namespace inet
 
 #endif // ifndef __INET_RTPPARTICIPANTINFO_H

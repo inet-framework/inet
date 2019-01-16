@@ -16,6 +16,7 @@
 //
 
 #include <algorithm>
+
 #include "inet/power/base/EnergySourceBase.h"
 
 namespace inet {

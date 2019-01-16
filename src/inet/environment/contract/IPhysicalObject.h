@@ -18,8 +18,8 @@
 #ifndef __INET_IPHYSICALOBJECT_H
 #define __INET_IPHYSICALOBJECT_H
 
-#include "inet/common/geometry/common/Quaternion.h"
 #include "inet/common/geometry/base/ShapeBase.h"
+#include "inet/common/geometry/common/Quaternion.h"
 #include "inet/environment/contract/IMaterial.h"
 
 namespace inet {

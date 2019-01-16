@@ -17,10 +17,9 @@
 // @author: Zoltan Bojthe
 //
 
-#include "inet/routing/ospfv2/OspfProtocolDissector.h"
-
 #include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
 #include "inet/routing/ospfv2/OspfPacket_m.h"
+#include "inet/routing/ospfv2/OspfProtocolDissector.h"
 
 
 namespace inet {

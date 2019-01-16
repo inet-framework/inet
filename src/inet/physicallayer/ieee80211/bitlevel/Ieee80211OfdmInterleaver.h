@@ -18,13 +18,12 @@
 #ifndef __INET_IEEE80211OFDMINTERLEAVER_H
 #define __INET_IEEE80211OFDMINTERLEAVER_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/BitVector.h"
+#include "inet/common/INETDefs.h"
 #include "inet/physicallayer/contract/bitlevel/IInterleaver.h"
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OfdmInterleaving.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 /*

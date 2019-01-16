@@ -17,11 +17,10 @@
 // @author: Zoltan Bojthe
 //
 
-#include "inet/networklayer/probabilistic/ProbabilisticProtocolPrinter.h"
-
 #include "inet/common/packet/printer/PacketPrinter.h"
 #include "inet/common/packet/printer/ProtocolPrinterRegistry.h"
 #include "inet/networklayer/probabilistic/ProbabilisticBroadcastHeader_m.h"
+#include "inet/networklayer/probabilistic/ProbabilisticProtocolPrinter.h"
 
 namespace inet {
 

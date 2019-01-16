@@ -17,13 +17,12 @@
 
 #include <map>
 
-#include "inet/routing/ospfv2/interface/OspfInterfaceState.h"
-
-#include "inet/routing/ospfv2/router/OspfArea.h"
 #include "inet/routing/ospfv2/interface/OspfInterface.h"
+#include "inet/routing/ospfv2/interface/OspfInterfaceState.h"
 #include "inet/routing/ospfv2/interface/OspfInterfaceStateBackup.h"
 #include "inet/routing/ospfv2/interface/OspfInterfaceStateDesignatedRouter.h"
 #include "inet/routing/ospfv2/interface/OspfInterfaceStateNotDesignatedRouter.h"
+#include "inet/routing/ospfv2/router/OspfArea.h"
 #include "inet/routing/ospfv2/router/OspfRouter.h"
 
 namespace inet {

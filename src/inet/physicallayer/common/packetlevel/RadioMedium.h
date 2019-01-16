@@ -18,6 +18,8 @@
 #ifndef __INET_RADIOMEDIUM_H
 #define __INET_RADIOMEDIUM_H
 
+#include <algorithm>
+
 #include "inet/common/IntervalTree.h"
 #include "inet/environment/contract/IMaterialRegistry.h"
 #include "inet/environment/contract/IPhysicalEnvironment.h"
@@ -28,10 +30,8 @@
 #include "inet/physicallayer/contract/packetlevel/IMediumLimitCache.h"
 #include "inet/physicallayer/contract/packetlevel/INeighborCache.h"
 #include "inet/physicallayer/contract/packetlevel/IRadioMedium.h"
-#include <algorithm>
 
 namespace inet {
-
 namespace physicallayer {
 
 /**
@@ -365,7 +365,6 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
 };
 
 } // namespace physicallayer
-
 } // namespace inet
 
 #endif // ifndef __INET_RADIOMEDIUM_H

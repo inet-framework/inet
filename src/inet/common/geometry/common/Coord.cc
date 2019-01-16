@@ -17,7 +17,8 @@
  * part of:     framework implementation developed by tkn
  **************************************************************************/
 
-#include "assert.h"
+#include <assert.h>
+
 #include "inet/common/geometry/common/Coord.h"
 
 namespace inet {

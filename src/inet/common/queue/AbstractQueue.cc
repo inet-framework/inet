@@ -16,7 +16,6 @@
 //
 
 #include "inet/common/INETDefs.h"
-
 #include "inet/common/queue/AbstractQueue.h"
 
 namespace inet {

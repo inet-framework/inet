@@ -18,9 +18,8 @@
 #ifndef __INET_VEHICLEMOBILITY_H
 #define __INET_VEHICLEMOBILITY_H
 
-#include "inet/mobility/base/MovingMobilityBase.h"
-
 #include "inet/environment/contract/IGround.h"
+#include "inet/mobility/base/MovingMobilityBase.h"
 
 namespace inet {
 

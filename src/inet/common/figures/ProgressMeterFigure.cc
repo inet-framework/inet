@@ -16,8 +16,8 @@
 //
 //
 
-#include "ProgressMeterFigure.h"
 #include "inet/common/INETUtils.h"
+#include "inet/common/figures/ProgressMeterFigure.h"
 
 namespace inet {
 

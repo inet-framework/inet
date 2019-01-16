@@ -16,12 +16,10 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include "inet/transportlayer/contract/sctp/SctpCommand_m.h"
 #include "inet/transportlayer/sctp/SctpSendStream.h"
 
-#include "inet/transportlayer/contract/sctp/SctpCommand_m.h"
-
 namespace inet {
-
 namespace sctp {
 
 SctpSendStream::SctpSendStream(SctpAssociation *assoc_, const uint16 id)
@@ -75,8 +73,6 @@ void SctpSendStream::setNextStreamSeqNum(const uint16 num) {
     nextStreamSeqNum = num;
 };
 
-
 } // namespace sctp
-
 } // namespace inet
 

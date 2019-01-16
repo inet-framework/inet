@@ -18,12 +18,11 @@
 #ifndef __INET_ISCRAMBLER_H
 #define __INET_ISCRAMBLER_H
 
-#include "inet/physicallayer/contract/packetlevel/IPrintableObject.h"
 #include "inet/common/BitVector.h"
 #include "inet/common/ShortBitVector.h"
+#include "inet/physicallayer/contract/packetlevel/IPrintableObject.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 class INET_API IScrambling : public IPrintableObject
@@ -42,7 +41,6 @@ class INET_API IScrambler : public IPrintableObject
 };
 
 } // namespace physicallayer
-
 } // namespace inet
 
 #endif // ifndef __INET_ISCRAMBLER_H

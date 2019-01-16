@@ -17,16 +17,16 @@
 // Author: Benjamin Seregi
 //
 
-#include <set>
-#include <vector>
-#include <sstream>
 #include <queue>
+#include <set>
+#include <sstream>
+#include <vector>
 
-#include "inet/linklayer/configurator/L2NetworkConfigurator.h"
-#include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/networklayer/common/InterfaceEntry.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/stlutils.h"
+#include "inet/linklayer/configurator/L2NetworkConfigurator.h"
+#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/networklayer/contract/IInterfaceTable.h"
 
 namespace inet {
 

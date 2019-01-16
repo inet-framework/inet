@@ -19,14 +19,15 @@
 //
 
 #include <set>
+
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/common/packet/chunk/ByteCountChunk.h"
-#include "inet/common/packet/Packet.h"
-#include "inet/common/stlutils.h"
 #include "inet/common/XMLUtils.h"
-#include "inet/networklayer/configurator/base/NetworkConfiguratorBase.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/common/stlutils.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/networklayer/configurator/base/NetworkConfiguratorBase.h"
 
 #ifdef WITH_RADIO
 #include "inet/physicallayer/base/packetlevel/FlatReceiverBase.h"

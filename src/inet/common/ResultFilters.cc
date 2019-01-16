@@ -18,11 +18,10 @@
 //
 
 #include "inet/applications/base/ApplicationPacket_m.h"
-#include "inet/applications/base/ApplicationPacket_m.h"
-#include "inet/common/geometry/common/Coord.h"
 #include "inet/common/ResultFilters.h"
 #include "inet/common/Simsignals_m.h"
 #include "inet/common/TimeTag_m.h"
+#include "inet/common/geometry/common/Coord.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/mobility/contract/IMobility.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"

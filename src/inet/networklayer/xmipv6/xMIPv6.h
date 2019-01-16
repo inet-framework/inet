@@ -23,14 +23,13 @@
 #ifndef __INET_XMIPV6_H
 #define __INET_XMIPV6_H
 
-#include <vector>
 #include <map>
+#include <vector>
 
 #include "inet/common/INETDefs.h"
-
 #include "inet/networklayer/contract/ipv6/Ipv6Address.h"
-#include "inet/networklayer/xmipv6/BindingUpdateList.h"
 #include "inet/networklayer/ipv6tunneling/Ipv6Tunneling.h"
+#include "inet/networklayer/xmipv6/BindingUpdateList.h"
 #include "inet/networklayer/xmipv6/MobilityHeader_m.h"    // for HAOpt & RH2
 
 namespace inet {

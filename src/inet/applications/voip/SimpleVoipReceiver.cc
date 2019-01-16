@@ -16,11 +16,10 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include "inet/applications/voip/SimpleVoipPacket_m.h"
 #include "inet/applications/voip/SimpleVoipReceiver.h"
-
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/NodeStatus.h"
-#include "inet/applications/voip/SimpleVoipPacket_m.h"
 
 namespace inet {
 

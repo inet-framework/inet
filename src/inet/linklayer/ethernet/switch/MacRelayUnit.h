@@ -17,7 +17,6 @@
 #define __INET_MACRELAYUNIT_H
 
 #include "inet/common/INETDefs.h"
-
 #include "inet/common/LayeredProtocolBase.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/packet/Packet.h"

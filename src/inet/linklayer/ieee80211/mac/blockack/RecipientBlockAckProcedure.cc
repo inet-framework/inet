@@ -16,7 +16,7 @@
 //
 
 #include "inet/linklayer/ieee80211/mac/blockack/RecipientBlockAckAgreement.h"
-#include "RecipientBlockAckProcedure.h"
+#include "inet/linklayer/ieee80211/mac/blockack/RecipientBlockAckProcedure.h"
 
 namespace inet {
 namespace ieee80211 {

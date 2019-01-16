@@ -17,11 +17,10 @@
 // @author: Zoltan Bojthe
 //
 
-#include "inet/linklayer/lmac/LMacProtocolPrinter.h"
-
 #include "inet/common/packet/printer/PacketPrinter.h"
 #include "inet/common/packet/printer/ProtocolPrinterRegistry.h"
 #include "inet/linklayer/lmac/LMacHeader_m.h"
+#include "inet/linklayer/lmac/LMacProtocolPrinter.h"
 
 namespace inet {
 

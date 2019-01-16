@@ -17,11 +17,10 @@
 // @author: Zoltan Bojthe
 //
 
-#include "inet/linklayer/lmac/LMacProtocolDissector.h"
-
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
 #include "inet/linklayer/lmac/LMacHeader_m.h"
+#include "inet/linklayer/lmac/LMacProtocolDissector.h"
 
 
 namespace inet {

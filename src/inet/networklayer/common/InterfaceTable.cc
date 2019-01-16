@@ -15,21 +15,17 @@
 // License along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include <algorithm>
+#include <ctype.h>
+#include <sstream>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
-#include <algorithm>
-#include <sstream>
 
-#include "inet/networklayer/common/InterfaceTable.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/Simsignals.h"
 #include "inet/common/lifecycle/NodeStatus.h"
-
-#ifdef WITH_NEXTHOP
-#include "inet/networklayer/nexthop/NextHopInterfaceData.h"
-#endif // ifdef WITH_NEXTHOP
+#include "inet/networklayer/common/InterfaceTable.h"
 
 #ifdef WITH_IPv4
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
@@ -38,6 +34,10 @@
 #ifdef WITH_IPv6
 #include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
 #endif // ifdef WITH_IPv6
+
+#ifdef WITH_NEXTHOP
+#include "inet/networklayer/nexthop/NextHopInterfaceData.h"
+#endif // ifdef WITH_NEXTHOP
 
 namespace inet {
 

@@ -15,7 +15,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#include "Edca.h"
+#include "inet/linklayer/ieee80211/mac/channelaccess/Edca.h"
 
 namespace inet {
 namespace ieee80211 {

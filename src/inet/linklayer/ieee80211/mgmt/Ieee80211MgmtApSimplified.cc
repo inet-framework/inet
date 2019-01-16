@@ -15,11 +15,11 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtApSimplified.h"
-
 #ifdef WITH_ETHERNET
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
 #endif // ifdef WITH_ETHERNET
+
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtApSimplified.h"
 
 namespace inet {
 

@@ -18,6 +18,7 @@
 #define __INET_SUIPATHLOSS_H
 
 #include <string>
+
 #include "inet/physicallayer/base/packetlevel/PathLossBase.h"
 
 namespace inet {

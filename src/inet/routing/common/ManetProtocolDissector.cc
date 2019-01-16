@@ -17,8 +17,8 @@
 // @author: Zoltan Bojthe
 //
 
-#include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
 #include "inet/common/ProtocolGroup.h"
+#include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
 #include "inet/routing/common/ManetProtocolDissector.h"
 
 namespace inet {

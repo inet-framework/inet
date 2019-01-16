@@ -18,7 +18,6 @@
 #include "inet/physicallayer/common/bitlevel/DigitalAnalogConverter.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 ScalarDigitalAnalogConverter::ScalarDigitalAnalogConverter() :
@@ -35,6 +34,5 @@ const ITransmissionAnalogModel *ScalarDigitalAnalogConverter::convertDigitalToAn
 }
 
 } // namespace physicallayer
-
 } // namespace inet
 

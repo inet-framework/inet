@@ -31,10 +31,9 @@
 #include <vector>
 
 #include "inet/common/INETDefs.h"
-
+#include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
 #include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
-#include "inet/common/lifecycle/ILifecycle.h"
 
 namespace inet {
 

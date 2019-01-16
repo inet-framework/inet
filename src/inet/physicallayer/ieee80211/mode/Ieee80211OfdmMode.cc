@@ -15,12 +15,11 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "Ieee80211OfdmMode.h"
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OfdmDefs.h"
-#include "Ieee80211OfdmModulation.h"
+#include "inet/physicallayer/ieee80211/mode/Ieee80211OfdmMode.h"
+#include "inet/physicallayer/ieee80211/mode/Ieee80211OfdmModulation.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 
@@ -393,5 +392,5 @@ const Ieee80211OfdmMode Ieee80211OfdmCompliantModes::ofdmMode48Mbps("ofdmMode48M
 const Ieee80211OfdmMode Ieee80211OfdmCompliantModes::ofdmMode54Mbps("ofdmMode54Mbps", &Ieee80211OfdmCompliantModes::ofdmPreambleModeCS20MHz, &Ieee80211OfdmCompliantModes::ofdmHeaderMode6MbpsRate3, &Ieee80211OfdmCompliantModes::ofdmDataMode54Mbps, MHz(20), MHz(20));
 
 } // namespace physicallayer
-
 } // namespace inet
+

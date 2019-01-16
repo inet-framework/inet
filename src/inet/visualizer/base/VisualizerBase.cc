@@ -15,12 +15,12 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include "inet/common/ModuleAccess.h"
 #include "inet/common/geometry/object/LineSegment.h"
 #include "inet/common/geometry/shape/Cuboid.h"
-#include "inet/common/ModuleAccess.h"
+#include "inet/common/packet/Packet.h"
 #include "inet/common/packet/chunk/SequenceChunk.h"
 #include "inet/common/packet/chunk/SliceChunk.h"
-#include "inet/common/packet/Packet.h"
 #include "inet/mobility/contract/IMobility.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/visualizer/base/VisualizerBase.h"

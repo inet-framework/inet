@@ -18,11 +18,12 @@
 //
 
 #include <algorithm>
+
 #include "inet/common/INETUtils.h"
 #include "inet/common/IProtocolRegistrationListener.h"
-#include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/IpProtocolId_m.h"

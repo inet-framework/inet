@@ -18,12 +18,12 @@
 #ifndef __INET_NEIGHBORLISTNEIGHBORCACHE_H
 #define __INET_NEIGHBORLISTNEIGHBORCACHE_H
 
-#include "inet/physicallayer/common/packetlevel/RadioMedium.h"
 #include <set>
 #include <vector>
 
-namespace inet {
+#include "inet/physicallayer/common/packetlevel/RadioMedium.h"
 
+namespace inet {
 namespace physicallayer {
 
 class INET_API NeighborListNeighborCache : public cSimpleModule, public INeighborCache
@@ -71,7 +71,6 @@ class INET_API NeighborListNeighborCache : public cSimpleModule, public INeighbo
 };
 
 } // namespace physicallayer
-
 } // namespace inet
 
 #endif // ifndef __INET_NEIGHBORLISTNEIGHBORCACHE_H

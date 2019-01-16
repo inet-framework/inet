@@ -18,11 +18,10 @@
 #ifndef __INET_IANALOGDIGITALCONVERTER_H
 #define __INET_IANALOGDIGITALCONVERTER_H
 
-#include "inet/physicallayer/contract/bitlevel/ISignalSampleModel.h"
 #include "inet/physicallayer/contract/bitlevel/ISignalAnalogModel.h"
+#include "inet/physicallayer/contract/bitlevel/ISignalSampleModel.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 class INET_API IAnalogDigitalConverter : public IPrintableObject
@@ -32,7 +31,6 @@ class INET_API IAnalogDigitalConverter : public IPrintableObject
 };
 
 } // namespace physicallayer
-
 } // namespace inet
 
 #endif // ifndef __INET_IANALOGDIGITALCONVERTER_H

@@ -18,12 +18,11 @@
 #include "inet/mobility/contract/IMobility.h"
 #include "inet/physicallayer/contract/packetlevel/IRadio.h"
 #include "inet/physicallayer/contract/packetlevel/RadioControlInfo_m.h"
-#include "inet/physicallayer/unitdisk/UnitDiskTransmission.h"
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211UnitDiskTransmission.h"
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211UnitDiskTransmitter.h"
+#include "inet/physicallayer/unitdisk/UnitDiskTransmission.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 Define_Module(Ieee80211UnitDiskTransmitter);
@@ -72,6 +71,5 @@ const ITransmission *Ieee80211UnitDiskTransmitter::createTransmission(const IRad
 }
 
 } // namespace physicallayer
-
 } // namespace inet
 

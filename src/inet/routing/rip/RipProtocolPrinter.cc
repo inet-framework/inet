@@ -17,11 +17,10 @@
 // @author: Zoltan Bojthe
 //
 
-#include "inet/routing/rip/RipProtocolPrinter.h"
-
 #include "inet/common/packet/printer/PacketPrinter.h"
 #include "inet/common/packet/printer/ProtocolPrinterRegistry.h"
 #include "inet/routing/rip/RipPacket_m.h"
+#include "inet/routing/rip/RipProtocolPrinter.h"
 
 namespace inet {
 

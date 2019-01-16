@@ -20,11 +20,10 @@
 
 #include "inet/power/contract/IEnergyStorage.h"
 #include "inet/visualizer/base/VisualizerBase.h"
-#include "inet/visualizer/util/Placement.h"
 #include "inet/visualizer/util/ModuleFilter.h"
+#include "inet/visualizer/util/Placement.h"
 
 namespace inet {
-
 namespace visualizer {
 
 class INET_API EnergyStorageVisualizerBase : public VisualizerBase
@@ -72,7 +71,6 @@ class INET_API EnergyStorageVisualizerBase : public VisualizerBase
 };
 
 } // namespace visualizer
-
 } // namespace inet
 
 #endif // ifndef __INET_ENERGYSTORAGEVISUALIZERBASE_H

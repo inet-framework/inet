@@ -18,21 +18,20 @@
 #ifndef __INET_IEEE80211LAYEREDOFDMRECEIVER_H
 #define __INET_IEEE80211LAYEREDOFDMRECEIVER_H
 
-#include "inet/physicallayer/common/bitlevel/SignalPacketModel.h"
-#include "inet/physicallayer/contract/packetlevel/IRadioMedium.h"
 #include "inet/physicallayer/base/packetlevel/ApskModulationBase.h"
-#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211ConvolutionalCode.h"
 #include "inet/physicallayer/base/packetlevel/SnirReceiverBase.h"
+#include "inet/physicallayer/common/bitlevel/SignalPacketModel.h"
+#include "inet/physicallayer/contract/bitlevel/IAnalogDigitalConverter.h"
 #include "inet/physicallayer/contract/bitlevel/IDecoder.h"
 #include "inet/physicallayer/contract/bitlevel/IDemodulator.h"
-#include "inet/physicallayer/contract/bitlevel/IPulseFilter.h"
-#include "inet/physicallayer/contract/bitlevel/IAnalogDigitalConverter.h"
-#include "inet/physicallayer/contract/packetlevel/IErrorModel.h"
 #include "inet/physicallayer/contract/bitlevel/ILayeredErrorModel.h"
+#include "inet/physicallayer/contract/bitlevel/IPulseFilter.h"
+#include "inet/physicallayer/contract/packetlevel/IErrorModel.h"
+#include "inet/physicallayer/contract/packetlevel/IRadioMedium.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211ConvolutionalCode.h"
 #include "inet/physicallayer/ieee80211/mode/Ieee80211OfdmMode.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 class INET_API Ieee80211LayeredOfdmReceiver : public SnirReceiverBase
@@ -103,6 +102,7 @@ class INET_API Ieee80211LayeredOfdmReceiver : public SnirReceiverBase
     virtual const IReceptionResult *computeReceptionResult(const IListening *listening, const IReception *reception, const IInterference *interference, const ISnir *snir, const std::vector<const IReceptionDecision *> *decisions) const override;
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 };
+
 } /* namespace physicallayer */
 } /* namespace inet */
 

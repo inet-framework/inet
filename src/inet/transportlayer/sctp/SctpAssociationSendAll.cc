@@ -17,15 +17,14 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#include "inet/transportlayer/sctp/SctpAssociation.h"
-#include "inet/transportlayer/sctp/SctpAlgorithm.h"
-#include "inet/transportlayer/contract/sctp/SctpCommand_m.h"
-
 #include <assert.h>
 #include <algorithm>
 
-namespace inet {
+#include "inet/transportlayer/contract/sctp/SctpCommand_m.h"
+#include "inet/transportlayer/sctp/SctpAlgorithm.h"
+#include "inet/transportlayer/sctp/SctpAssociation.h"
 
+namespace inet {
 namespace sctp {
 
 void SctpAssociation::increaseOutstandingBytes(SctpDataVariables *chunk,
@@ -1496,6 +1495,5 @@ uint32 SctpAssociation::getAllTransQ()
 }
 
 } // namespace sctp
-
 } // namespace inet
 

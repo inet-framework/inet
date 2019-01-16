@@ -20,8 +20,8 @@
 
 #include "inet/common/INETDefs.h"
 #include "inet/common/packet/Packet.h"
-#include "inet/networklayer/common/L3Address.h"
 #include "inet/networklayer/common/EchoPacket_m.h"
+#include "inet/networklayer/common/L3Address.h"
 
 namespace inet {
 

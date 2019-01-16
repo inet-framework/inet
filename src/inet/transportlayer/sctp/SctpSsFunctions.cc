@@ -34,11 +34,10 @@
 #include <list>
 #include <math.h>
 
-#include "inet/transportlayer/sctp/SctpAssociation.h"
 #include "inet/transportlayer/contract/sctp/SctpCommand_m.h"
+#include "inet/transportlayer/sctp/SctpAssociation.h"
 
 namespace inet {
-
 namespace sctp {
 
 void SctpAssociation::initStreams(uint32 inStreams, uint32 outStreams)
@@ -545,6 +544,5 @@ int32 SctpAssociation::pathStreamSchedulerMapToPath(SctpPathVariables *path, boo
 }
 
 } // namespace sctp
-
 } // namespace inet
 

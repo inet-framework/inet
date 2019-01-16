@@ -18,7 +18,6 @@
 #include "inet/physicallayer/common/bitlevel/PulseShaper.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 PulseShaper::PulseShaper() :
@@ -33,6 +32,5 @@ const ITransmissionSampleModel *PulseShaper::shape(const ITransmissionSymbolMode
 }
 
 } // namespace physicallayer
-
 } // namespace inet
 

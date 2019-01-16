@@ -15,14 +15,14 @@
 
 #include "inet/common/INETUtils.h"
 #include "inet/common/INETMath.h"
-#include "inet/common/ProtocolTag_m.h"
-#include "inet/common/ProtocolGroup.h"
-#include "inet/networklayer/common/InterfaceEntry.h"
 #include "inet/common/ModuleAccess.h"
-#include "inet/linklayer/bmac/BMacHeader_m.h"
+#include "inet/common/ProtocolGroup.h"
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/bmac/BMac.h"
+#include "inet/linklayer/bmac/BMacHeader_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
+#include "inet/networklayer/common/InterfaceEntry.h"
 
 namespace inet {
 

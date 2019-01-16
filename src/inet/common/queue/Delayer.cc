@@ -17,8 +17,8 @@
 // @author: Zoltan Bojthe
 //
 
-#include "inet/common/queue/Delayer.h"
 #include "inet/common/Simsignals.h"
+#include "inet/common/queue/Delayer.h"
 
 namespace inet {
 

@@ -15,18 +15,16 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/routing/ospfv2/neighbor/OspfNeighborStateTwoWay.h"
-
-#include "inet/routing/ospfv2/messagehandler/MessageHandler.h"
-#include "inet/routing/ospfv2/router/OspfArea.h"
 #include "inet/routing/ospfv2/interface/OspfInterface.h"
+#include "inet/routing/ospfv2/messagehandler/MessageHandler.h"
 #include "inet/routing/ospfv2/neighbor/OspfNeighborStateDown.h"
 #include "inet/routing/ospfv2/neighbor/OspfNeighborStateExchangeStart.h"
 #include "inet/routing/ospfv2/neighbor/OspfNeighborStateInit.h"
+#include "inet/routing/ospfv2/neighbor/OspfNeighborStateTwoWay.h"
+#include "inet/routing/ospfv2/router/OspfArea.h"
 #include "inet/routing/ospfv2/router/OspfRouter.h"
 
 namespace inet {
-
 namespace ospf {
 
 void NeighborStateTwoWay::processEvent(Neighbor *neighbor, Neighbor::NeighborEventType event)
@@ -71,6 +69,5 @@ void NeighborStateTwoWay::processEvent(Neighbor *neighbor, Neighbor::NeighborEve
 }
 
 } // namespace ospf
-
 } // namespace inet
 

@@ -16,6 +16,7 @@
 //
 
 #include <algorithm>
+
 #include "inet/common/ShortBitVector.h"
 
 namespace inet {

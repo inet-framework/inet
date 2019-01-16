@@ -19,11 +19,11 @@
 #define __INET_SIGNALBITMODEL_H
 
 #include <vector>
+
 #include "inet/common/BitVector.h"
 #include "inet/physicallayer/contract/bitlevel/ISignalBitModel.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 class INET_API SignalBitModel : public virtual ISignalBitModel
@@ -70,7 +70,6 @@ class INET_API ReceptionBitModel : public SignalBitModel, public virtual IRecept
 };
 
 } // namespace physicallayer
-
 } // namespace inet
 
 #endif // ifndef __INET_SIGNALBITMODEL_H

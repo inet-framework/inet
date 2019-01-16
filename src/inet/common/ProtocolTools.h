@@ -19,9 +19,9 @@
 #ifndef __INET_PROTOCOLTOOLS_H
 #define __INET_PROTOCOLTOOLS_H
 
-#include "inet/common/packet/Packet.h"
 #include "inet/common/Protocol.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/packet/Packet.h"
 
 namespace inet {
 

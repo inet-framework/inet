@@ -23,8 +23,8 @@
 #include <vector>
 
 #include "inet/common/packet/Packet.h"
-#include "inet/networklayer/contract/ipv6/Ipv6Address.h"
 #include "inet/linklayer/common/MacAddress.h"
+#include "inet/networklayer/contract/ipv6/Ipv6Address.h"
 
 namespace inet {
 

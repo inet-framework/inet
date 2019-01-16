@@ -18,11 +18,10 @@
 #ifndef __INET_IPULSEFILTER_H
 #define __INET_IPULSEFILTER_H
 
-#include "inet/physicallayer/contract/bitlevel/ISignalSymbolModel.h"
 #include "inet/physicallayer/contract/bitlevel/ISignalSampleModel.h"
+#include "inet/physicallayer/contract/bitlevel/ISignalSymbolModel.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 class INET_API IPulseFilter : public IPrintableObject
@@ -32,7 +31,6 @@ class INET_API IPulseFilter : public IPrintableObject
 };
 
 } // namespace physicallayer
-
 } // namespace inet
 
 #endif // ifndef __INET_IPULSEFILTER_H

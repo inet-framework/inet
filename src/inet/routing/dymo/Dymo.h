@@ -20,16 +20,16 @@
 #ifndef __INET_DYMO_H
 #define __INET_DYMO_H
 
-#include <vector>
 #include <map>
+#include <vector>
 
 #include "inet/networklayer/contract/IL3AddressType.h"
 #include "inet/networklayer/contract/INetfilter.h"
 #include "inet/networklayer/contract/IRoutingTable.h"
 #include "inet/routing/base/RoutingProtocolBase.h"
+#include "inet/routing/dymo/Dymo_m.h"
 #include "inet/routing/dymo/DymoDefs.h"
 #include "inet/routing/dymo/DymoRouteData.h"
-#include "inet/routing/dymo/Dymo_m.h"
 #include "inet/transportlayer/udp/UdpHeader_m.h"
 
 namespace inet {

@@ -15,16 +15,13 @@
 #define __INET_TCPCRCINSERTIONHOOK_H
 
 #include "inet/common/INETDefs.h"
-
 #include "inet/common/Protocol.h"
 #include "inet/networklayer/contract/INetfilter.h"
 #include "inet/transportlayer/common/CrcMode_m.h"
 #include "inet/transportlayer/tcp_common/TcpCrcInsertionHook.h"
 #include "inet/transportlayer/tcp_common/TcpHeader.h"
 
-
 namespace inet {
-
 namespace tcp {
 
 class TcpCrcInsertion : public NetfilterBase::HookBase {
@@ -44,7 +41,6 @@ class TcpCrcInsertion : public NetfilterBase::HookBase {
 };
 
 } // namespace tcp
-
 } // namespace inet
 
 #endif // ifndef __INET_TCPCRCINSERTIONHOOK_H

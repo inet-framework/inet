@@ -16,8 +16,8 @@
 //
 
 #include "inet/common/LayeredProtocolBase.h"
-#include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/physicallayer/common/packetlevel/Radio.h"
 #include "inet/physicallayer/common/packetlevel/RadioMedium.h"
 #include "inet/physicallayer/common/packetlevel/SignalTag_m.h"
@@ -27,7 +27,6 @@
 #endif
 
 namespace inet {
-
 namespace physicallayer {
 
 Define_Module(Radio);
@@ -598,6 +597,5 @@ void Radio::updateTransceiverPart()
 }
 
 } // namespace physicallayer
-
 } // namespace inet
 

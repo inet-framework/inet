@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 // 
 
-#include "Ieee80211ModeBase.h"
+#include "inet/physicallayer/ieee80211/mode/Ieee80211ModeBase.h"
 
 namespace inet {
 namespace physicallayer {

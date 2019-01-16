@@ -18,17 +18,16 @@
 #ifndef __INET_IEEE80211OFDMDEMODULATOR_H
 #define __INET_IEEE80211OFDMDEMODULATOR_H
 
+#include "inet/physicallayer/base/packetlevel/ApskModulationBase.h"
+#include "inet/physicallayer/contract/bitlevel/IDemodulator.h"
 #include "inet/physicallayer/contract/bitlevel/ISignalBitModel.h"
 #include "inet/physicallayer/contract/bitlevel/ISignalSymbolModel.h"
-#include "inet/physicallayer/contract/bitlevel/IDemodulator.h"
-#include "inet/physicallayer/base/packetlevel/ApskModulationBase.h"
-#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OfdmSymbol.h"
-#include "inet/physicallayer/ieee80211/mode/Ieee80211OfdmModulation.h"
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211ConvolutionalCode.h"
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OfdmInterleaving.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OfdmSymbol.h"
+#include "inet/physicallayer/ieee80211/mode/Ieee80211OfdmModulation.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 class INET_API Ieee80211OfdmDemodulator : public IDemodulator
@@ -50,7 +49,6 @@ class INET_API Ieee80211OfdmDemodulator : public IDemodulator
 };
 
 } // namespace physicallayer
-
 } // namespace inet
 
 #endif // ifndef __INET_IEEE80211OFDMDEMODULATOR_H

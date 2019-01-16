@@ -20,8 +20,8 @@
 #define __INET_FIFOQUEUE_H
 
 #include "inet/common/INETDefs.h"
-#include "inet/common/queue/PassiveQueueBase.h"
 #include "inet/common/queue/IQueueAccess.h"
+#include "inet/common/queue/PassiveQueueBase.h"
 
 namespace inet {
 

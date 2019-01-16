@@ -18,7 +18,6 @@
 #include "inet/physicallayer/common/packetlevel/Arrival.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 Arrival::Arrival(const simtime_t startPropagationTime, const simtime_t endPropagationTime, const simtime_t startTime, const simtime_t endTime, const simtime_t preambleDuration, const simtime_t headerDuration, const simtime_t dataDuration, const Coord startPosition, const Coord endPosition, const Quaternion startOrientation, const Quaternion endOrientation) :
@@ -87,6 +86,5 @@ const simtime_t Arrival::getEndTime(IRadioSignal::SignalPart part) const
 }
 
 } // namespace physicallayer
-
 } // namespace inet
 

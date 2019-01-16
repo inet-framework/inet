@@ -15,8 +15,8 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-#include "inet/linklayer/ieee80211/mac/fragmentation/Defragmentation.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "inet/linklayer/ieee80211/mac/fragmentation/Defragmentation.h"
 
 namespace inet {
 namespace ieee80211 {

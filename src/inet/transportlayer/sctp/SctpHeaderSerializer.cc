@@ -16,10 +16,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-//#include "inet/common/serializer/SerializerUtil.h"
-
 #include "inet/common/Endian.h"
-
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
 #include "inet/networklayer/common/IpProtocolId_m.h"
 #include "inet/networklayer/ipv4/headers/ip.h"

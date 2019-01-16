@@ -21,7 +21,6 @@
 #define __INET_TCPCONNECTION_H
 
 #include "inet/common/INETDefs.h"
-
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/transportlayer/tcp/Tcp.h"
 #include "inet/transportlayer/tcp_common/TcpHeader.h"

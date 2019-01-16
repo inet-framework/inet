@@ -19,6 +19,8 @@
 #ifndef __INET_AODV_H
 #define __INET_AODV_H
 
+#include <map>
+
 #include "inet/common/INETDefs.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
@@ -29,7 +31,6 @@
 #include "inet/routing/base/RoutingProtocolBase.h"
 #include "inet/transportlayer/contract/udp/UdpSocket.h"
 #include "inet/transportlayer/udp/UdpHeader_m.h"
-#include <map>
 
 namespace inet {
 namespace aodv {

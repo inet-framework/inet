@@ -16,8 +16,8 @@
 //
 //
 
-#include "ThermometerFigure.h"
 #include "inet/common/INETUtils.h"
+#include "inet/common/figures/ThermometerFigure.h"
 
 namespace inet {
 

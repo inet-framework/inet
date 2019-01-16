@@ -16,6 +16,7 @@
 //
 
 #include <algorithm>
+
 #include "inet/power/base/EnergySinkBase.h"
 
 namespace inet {

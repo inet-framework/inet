@@ -20,11 +20,9 @@
 #define __INET_SCTPALG_H
 
 #include "inet/common/INETDefs.h"
-
 #include "inet/transportlayer/sctp/SctpAlgorithm.h"
 
 namespace inet {
-
 namespace sctp {
 
 /**
@@ -77,7 +75,6 @@ class INET_API SctpAlg : public SctpAlgorithm
 };
 
 } // namespace sctp
-
 } // namespace inet
 
 #endif // ifndef __INET_SCTPALG_H

@@ -16,20 +16,15 @@
 #include <string.h>
 
 #include "inet/common/INETDefs.h"
-
+#include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/packet/Packet.h"
-
-#include "inet/networklayer/mpls/Mpls.h"
-
-#include "inet/common/ModuleAccess.h"
-#include "inet/networklayer/mpls/IIngressClassifier.h"
-#include "inet/networklayer/rsvpte/Utils.h"
-
-// FIXME temporary fix
-#include "inet/networklayer/ldp/Ldp.h"
-#include "inet/transportlayer/tcp_common/TcpHeader.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
+#include "inet/networklayer/ldp/Ldp.h"
+#include "inet/networklayer/mpls/IIngressClassifier.h"
+#include "inet/networklayer/mpls/Mpls.h"
+#include "inet/networklayer/rsvpte/Utils.h"
+#include "inet/transportlayer/tcp_common/TcpHeader.h"
 
 namespace inet {
 

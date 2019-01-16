@@ -18,8 +18,8 @@
 #ifndef __INET_NARROWBANDRADIOBASE_H
 #define __INET_NARROWBANDRADIOBASE_H
 
-#include "inet/physicallayer/contract/packetlevel/IModulation.h"
 #include "inet/physicallayer/common/packetlevel/Radio.h"
+#include "inet/physicallayer/contract/packetlevel/IModulation.h"
 
 namespace inet {
 

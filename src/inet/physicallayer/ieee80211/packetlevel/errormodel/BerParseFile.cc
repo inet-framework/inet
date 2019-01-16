@@ -17,10 +17,10 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
+#include <algorithm>
 #include <fstream>
 #include <sstream>
 #include <string>
-#include <algorithm>
 
 #include "inet/common/INETDefs.h"
 #include "inet/physicallayer/ieee80211/packetlevel/errormodel/BerParseFile.h"

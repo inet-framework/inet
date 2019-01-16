@@ -15,8 +15,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#include <fcntl.h>
 #include <arpa/inet.h>
+#include <fcntl.h>
 #include <linux/if_tun.h>
 #include <net/if.h>
 #include <net/if_arp.h>

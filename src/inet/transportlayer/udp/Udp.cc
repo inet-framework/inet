@@ -19,29 +19,24 @@
 #include <algorithm>
 #include <string>
 
-#include "inet/transportlayer/udp/Udp.h"
-
 #include "inet/applications/common/SocketTag_m.h"
 #include "inet/common/IProtocolRegistrationListener.h"
-#include "inet/common/packet/Packet.h"
-#include "inet/common/ProtocolTag_m.h"
 #include "inet/common/LayeredProtocolBase.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/common/checksum/TcpIpChecksum.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
-#include "inet/common/checksum/TcpIpChecksum.h"
+#include "inet/common/packet/Packet.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
+#include "inet/networklayer/common/DscpTag_m.h"
 #include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
-#include "inet/networklayer/common/DscpTag_m.h"
 #include "inet/networklayer/common/L3Tools.h"
 #include "inet/networklayer/common/MulticastTag_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
-#include "inet/transportlayer/common/L4PortTag_m.h"
-#include "inet/transportlayer/common/L4Tools.h"
-#include "inet/transportlayer/udp/UdpHeader_m.h"
 
 #ifdef WITH_IPv4
 #include "inet/networklayer/ipv4/Icmp.h"
@@ -53,11 +48,15 @@
 #ifdef WITH_IPv6
 #include "inet/networklayer/icmpv6/Icmpv6.h"
 #include "inet/networklayer/icmpv6/Icmpv6Header_m.h"
-#include "inet/networklayer/ipv6/Ipv6Header.h"
 #include "inet/networklayer/ipv6/Ipv6ExtensionHeaders_m.h"
+#include "inet/networklayer/ipv6/Ipv6Header.h"
 #include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
 #endif // ifdef WITH_IPv6
 
+#include "inet/transportlayer/common/L4PortTag_m.h"
+#include "inet/transportlayer/common/L4Tools.h"
+#include "inet/transportlayer/udp/Udp.h"
+#include "inet/transportlayer/udp/UdpHeader_m.h"
 
 namespace inet {
 

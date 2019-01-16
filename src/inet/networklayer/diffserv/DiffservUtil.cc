@@ -16,8 +16,10 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/networklayer/common/InterfaceEntry.h"
 #include "inet/common/INETUtils.h"
+#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/networklayer/diffserv/DiffservUtil.h"
+#include "inet/networklayer/diffserv/Dscp_m.h"
 
 #ifdef WITH_IPv4
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
@@ -27,11 +29,7 @@
 #include "inet/networklayer/ipv6/Ipv6Header.h"
 #endif // ifdef WITH_IPv6
 
-#include "inet/networklayer/diffserv/DiffservUtil.h"
-#include "inet/networklayer/diffserv/Dscp_m.h"
-
 namespace inet {
-
 namespace DiffservUtil {
 
 using namespace utils;

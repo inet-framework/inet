@@ -25,7 +25,7 @@
 #include <set>
 #include <vector>
 
-#include "INETDefs.h" // for ASSERT
+#include "inet/common/INETDefs.h" // for ASSERT
 
 namespace inet {
 

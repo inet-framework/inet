@@ -15,8 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include <string.h>
+
+#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/networklayer/common/EchoProtocol.h"
 #include "inet/networklayer/common/IpProtocolId_m.h"

@@ -20,8 +20,8 @@
 
 #include "inet/common/geometry/base/ShapeBase.h"
 #include "inet/common/geometry/common/Quaternion.h"
-#include "inet/environment/contract/IPhysicalObject.h"
 #include "inet/environment/common/Material.h"
+#include "inet/environment/contract/IPhysicalObject.h"
 
 namespace inet {
 

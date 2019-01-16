@@ -16,12 +16,13 @@
 //
 
 #include "inet/common/INETDefs.h"
+
 #include "inet/applications/common/SocketTag_m.h"
 #include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/socket/SocketMap.h"
-#include "inet/transportlayer/contract/udp/UdpSocket.h"
 #include "inet/transportlayer/contract/tcp/TcpSocket.h"
+#include "inet/transportlayer/contract/udp/UdpSocket.h"
 
 namespace inet {
 

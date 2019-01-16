@@ -15,11 +15,10 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/neighborcache/NeighborListNeighborCache.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/physicallayer/neighborcache/NeighborListNeighborCache.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 Define_Module(NeighborListNeighborCache);
@@ -153,6 +152,5 @@ NeighborListNeighborCache::~NeighborListNeighborCache()
 }
 
 } // namespace physicallayer
-
 } // namespace inet
 

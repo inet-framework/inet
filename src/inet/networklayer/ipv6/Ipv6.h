@@ -18,6 +18,9 @@
 #ifndef __INET_IPV6_H
 #define __INET_IPV6_H
 
+#include <map>
+#include <set>
+
 #include "inet/common/INETDefs.h"
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/lifecycle/LifecycleUnsupported.h"
@@ -26,13 +29,10 @@
 #include "inet/networklayer/contract/INetworkProtocol.h"
 #include "inet/networklayer/icmpv6/Icmpv6.h"
 #include "inet/networklayer/icmpv6/Ipv6NeighbourDiscovery.h"
-#include "inet/networklayer/ipv6/Ipv6RoutingTable.h"
 #include "inet/networklayer/ipv6/Ipv6FragBuf.h"
 #include "inet/networklayer/ipv6/Ipv6Header.h"
+#include "inet/networklayer/ipv6/Ipv6RoutingTable.h"
 #include "inet/networklayer/ipv6tunneling/Ipv6Tunneling.h"
-
-#include <map>
-#include <set>
 
 namespace inet {
 

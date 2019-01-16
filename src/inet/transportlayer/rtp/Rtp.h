@@ -21,12 +21,11 @@
 #include "inet/common/INETDefs.h"
 #include "inet/common/lifecycle/LifecycleUnsupported.h"
 #include "inet/networklayer/common/L3Address.h"
+#include "inet/transportlayer/contract/udp/UdpSocket.h"
 #include "inet/transportlayer/rtp/RtpInnerPacket_m.h"
 #include "inet/transportlayer/rtp/RtpInterfacePacket_m.h"
-#include "inet/transportlayer/contract/udp/UdpSocket.h"
 
 namespace inet {
-
 namespace rtp {
 
 /**
@@ -204,7 +203,6 @@ class INET_API Rtp : public cSimpleModule, public LifecycleUnsupported
 };
 
 } // namespace rtp
-
 } // namespace inet
 
 #endif // ifndef __INET_RTP_H

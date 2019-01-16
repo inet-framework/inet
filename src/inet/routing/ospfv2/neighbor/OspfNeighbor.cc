@@ -17,18 +17,16 @@
 
 #include <memory.h>
 
-#include "inet/routing/ospfv2/neighbor/OspfNeighbor.h"
-
+#include "inet/common/checksum/TcpIpChecksum.h"
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #include "inet/routing/ospfv2/messagehandler/MessageHandler.h"
-#include "inet/routing/ospfv2/router/OspfArea.h"
+#include "inet/routing/ospfv2/neighbor/OspfNeighbor.h"
 #include "inet/routing/ospfv2/neighbor/OspfNeighborState.h"
 #include "inet/routing/ospfv2/neighbor/OspfNeighborStateDown.h"
+#include "inet/routing/ospfv2/router/OspfArea.h"
 #include "inet/routing/ospfv2/router/OspfRouter.h"
-#include "inet/common/checksum/TcpIpChecksum.h"
 
 namespace inet {
-
 namespace ospf {
 
 // FIXME!!! Should come from a global unique number generator module.
@@ -827,6 +825,5 @@ void Neighbor::deleteLastSentDDPacket()
 }
 
 } // namespace ospf
-
 } // namespace inet
 

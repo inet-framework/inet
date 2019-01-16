@@ -15,12 +15,11 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/routing/bgpv4/BgpSession.h"
 #include "inet/routing/bgpv4/Bgp.h"
 #include "inet/routing/bgpv4/BgpFsm.h"
+#include "inet/routing/bgpv4/BgpSession.h"
 
 namespace inet {
-
 namespace bgp {
 
 BgpSession::BgpSession(BgpRouter& bgpRouter) : bgpRouter(bgpRouter)
@@ -227,6 +226,5 @@ std::ostream& operator<<(std::ostream& out, const BgpSession& entry)
 }
 
 } // namespace bgp
-
 } // namespace inet
 

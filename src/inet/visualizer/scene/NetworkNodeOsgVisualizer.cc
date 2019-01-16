@@ -16,6 +16,7 @@
 //
 
 #include <omnetpp/osgutil.h>
+
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/OsgScene.h"
 #include "inet/common/OsgUtils.h"

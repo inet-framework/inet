@@ -15,16 +15,14 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/routing/ospfv2/interface/OspfInterfaceStateWaiting.h"
-
-#include "inet/routing/ospfv2/messagehandler/MessageHandler.h"
-#include "inet/routing/ospfv2/router/OspfArea.h"
 #include "inet/routing/ospfv2/interface/OspfInterfaceStateDown.h"
 #include "inet/routing/ospfv2/interface/OspfInterfaceStateLoopback.h"
+#include "inet/routing/ospfv2/interface/OspfInterfaceStateWaiting.h"
+#include "inet/routing/ospfv2/messagehandler/MessageHandler.h"
+#include "inet/routing/ospfv2/router/OspfArea.h"
 #include "inet/routing/ospfv2/router/OspfRouter.h"
 
 namespace inet {
-
 namespace ospf {
 
 void InterfaceStateWaiting::processEvent(OspfInterface *intf, OspfInterface::OspfInterfaceEventType event)
@@ -64,6 +62,5 @@ void InterfaceStateWaiting::processEvent(OspfInterface *intf, OspfInterface::Osp
 }
 
 } // namespace ospf
-
 } // namespace inet
 

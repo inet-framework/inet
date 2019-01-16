@@ -19,8 +19,8 @@
 #define __INET_IEEE80211LLCEPD_H
 
 #include "inet/common/packet/Packet.h"
-#include "inet/linklayer/ieee80211/llc/Ieee80211EtherTypeHeader_m.h"
 #include "inet/linklayer/ieee80211/llc/IIeee80211Llc.h"
+#include "inet/linklayer/ieee80211/llc/Ieee80211EtherTypeHeader_m.h"
 
 namespace inet {
 namespace ieee80211 {

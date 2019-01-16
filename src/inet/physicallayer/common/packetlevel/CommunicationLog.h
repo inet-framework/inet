@@ -19,12 +19,12 @@
 #define __INET_COMMUNICATIONLOG_H
 
 #include <fstream>
-#include "inet/physicallayer/contract/packetlevel/ITransmission.h"
+
 #include "inet/physicallayer/contract/packetlevel/IReceptionDecision.h"
 #include "inet/physicallayer/contract/packetlevel/ISignal.h"
+#include "inet/physicallayer/contract/packetlevel/ITransmission.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 class INET_API CommunicationLog
@@ -40,7 +40,6 @@ class INET_API CommunicationLog
 };
 
 } // namespace physicallayer
-
 } // namespace inet
 
 #endif // ifndef __INET_COMMUNICATIONLOG_H

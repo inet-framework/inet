@@ -21,7 +21,6 @@
 #include <stdint.h>
 
 #include "inet/applications/voipstream/AudioOutFile.h"
-
 #include "inet/common/INETEndians.h"
 
 namespace inet {

@@ -17,12 +17,11 @@
 // @author Zoltan Bojthe
 //
 
-#include "inet/networklayer/internetcloud/MatrixCloudDelayer.h"
-
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/PatternMatcher.h"
 #include "inet/common/XMLUtils.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
+#include "inet/networklayer/internetcloud/MatrixCloudDelayer.h"
 
 namespace inet {
 

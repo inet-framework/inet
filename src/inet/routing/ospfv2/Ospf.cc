@@ -16,22 +16,20 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include <string>
 #include <map>
-#include <stdlib.h>
 #include <memory.h>
+#include <stdlib.h>
+#include <string>
 
 #include "inet/common/IProtocolRegistrationListener.h"
-#include "inet/routing/ospfv2/Ospf.h"
-
-#include "inet/routing/ospfv2/messagehandler/MessageHandler.h"
-#include "inet/routing/ospfv2/OspfConfigReader.h"
+#include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
-#include "inet/common/ModuleAccess.h"
+#include "inet/routing/ospfv2/Ospf.h"
+#include "inet/routing/ospfv2/OspfConfigReader.h"
+#include "inet/routing/ospfv2/messagehandler/MessageHandler.h"
 
 namespace inet {
-
 namespace ospf {
 
 Define_Module(Ospf);
@@ -240,5 +238,4 @@ void Ospf::handleInterfaceDown(const InterfaceEntry *ie)
 }
 
 } // namespace ospf
-
 } // namespace inet

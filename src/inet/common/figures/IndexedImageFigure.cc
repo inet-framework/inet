@@ -16,8 +16,8 @@
 //
 //
 
-#include "IndexedImageFigure.h"
 #include "inet/common/INETUtils.h"
+#include "inet/common/figures/IndexedImageFigure.h"
 
 namespace inet {
 

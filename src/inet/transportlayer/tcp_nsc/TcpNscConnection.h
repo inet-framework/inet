@@ -20,7 +20,6 @@
 #define __INET_TCP_NSC_CONNECTION_H
 
 #include "inet/common/INETDefs.h"
-
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/L3Address.h"
 

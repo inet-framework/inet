@@ -20,23 +20,23 @@
 #ifndef __INET_SCTPASSOCIATION_H
 #define __INET_SCTPASSOCIATION_H
 
-#include "inet/common/INETDefs.h"
+#include <errno.h>
+#include <iostream>
+#include <list>
+#include <math.h>
 
+#include "inet/common/INETDefs.h"
 #include "inet/networklayer/common/L3Address.h"
-#include "inet/networklayer/contract/ipv4/Ipv4Address.h"
-#include "inet/transportlayer/sctp/Sctp.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
+#include "inet/networklayer/contract/ipv4/Ipv4Address.h"
 #include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
 #include "inet/networklayer/ipv6/Ipv6RoutingTable.h"
+#include "inet/transportlayer/sctp/Sctp.h"
 #include "inet/transportlayer/sctp/SctpGapList.h"
-#include "inet/transportlayer/sctp/SctpQueue.h"
-#include "inet/transportlayer/sctp/SctpSendStream.h"
-#include "inet/transportlayer/sctp/SctpReceiveStream.h"
 #include "inet/transportlayer/sctp/SctpHeader.h"
-#include <list>
-#include <iostream>
-#include <errno.h>
-#include <math.h>
+#include "inet/transportlayer/sctp/SctpQueue.h"
+#include "inet/transportlayer/sctp/SctpReceiveStream.h"
+#include "inet/transportlayer/sctp/SctpSendStream.h"
 
 namespace inet {
 

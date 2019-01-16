@@ -18,16 +18,15 @@
 #ifndef __INET_LAYEREDRECEPTIONRESULT_H
 #define __INET_LAYEREDRECEPTIONRESULT_H
 
-#include "inet/physicallayer/contract/packetlevel/IReceptionResult.h"
 #include "inet/physicallayer/common/packetlevel/ReceptionResult.h"
-#include "inet/physicallayer/contract/bitlevel/ISignalPacketModel.h"
-#include "inet/physicallayer/contract/bitlevel/ISignalBitModel.h"
-#include "inet/physicallayer/contract/bitlevel/ISignalSymbolModel.h"
-#include "inet/physicallayer/contract/bitlevel/ISignalSampleModel.h"
 #include "inet/physicallayer/contract/bitlevel/ISignalAnalogModel.h"
+#include "inet/physicallayer/contract/bitlevel/ISignalBitModel.h"
+#include "inet/physicallayer/contract/bitlevel/ISignalPacketModel.h"
+#include "inet/physicallayer/contract/bitlevel/ISignalSampleModel.h"
+#include "inet/physicallayer/contract/bitlevel/ISignalSymbolModel.h"
+#include "inet/physicallayer/contract/packetlevel/IReceptionResult.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 class INET_API LayeredReceptionResult : public ReceptionResult
@@ -55,7 +54,6 @@ class INET_API LayeredReceptionResult : public ReceptionResult
 };
 
 } // namespace physicallayer
-
 } // namespace inet
 
 #endif // ifndef __INET_LAYEREDRECEPTIONRESULT_H

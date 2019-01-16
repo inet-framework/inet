@@ -15,12 +15,13 @@
 //
 
 #include <algorithm>
+
+#include "inet/common/INETUtils.h"
 #include "inet/common/lifecycle/LifecycleController.h"
-#include "inet/networklayer/contract/IInterfaceTable.h"
+#include "inet/common/lifecycle/LifecycleOperation.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
-#include "inet/common/lifecycle/LifecycleOperation.h"
-#include "inet/common/INETUtils.h"
+#include "inet/networklayer/contract/IInterfaceTable.h"
 
 namespace inet {
 

@@ -15,11 +15,10 @@
 //
 
 #include "inet/applications/rtpapp/RtpApplication.h"
-
-#include "inet/networklayer/common/L3AddressResolver.h"
-#include "inet/common/lifecycle/LifecycleOperation.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/lifecycle/LifecycleOperation.h"
 #include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/transportlayer/rtp/RtpInterfacePacket_m.h"
 
 namespace inet {

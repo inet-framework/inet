@@ -19,8 +19,6 @@
 #include "inet/networklayer/ipv6/Ipv6Route.h"
 #include "inet/networklayer/ipv6/Ipv6RoutingTable.h"
 
-#include "Ipv6RoutingTable.h"
-
 namespace inet {
 
 Register_Abstract_Class(Ipv6Route);

@@ -17,15 +17,15 @@
 //
 
 #include "inet/applications/generic/IpvxTrafGen.h"
-
-#include "inet/networklayer/common/L3AddressResolver.h"
-#include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
+#include "inet/networklayer/common/L3AddressTag_m.h"
+
 namespace inet {
 
 Define_Module(IpvxTrafSink);

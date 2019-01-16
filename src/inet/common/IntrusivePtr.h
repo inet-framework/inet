@@ -20,6 +20,8 @@
 
 #include <iosfwd>
 
+#include "inet/common/INETDefs.h"
+
 #define INET_ALWAYS_INLINE __attribute__((always_inline)) inline
 
 namespace inet {

@@ -21,8 +21,8 @@
 #include "inet/common/INETDefs.h"
 
 #include "inet/applications/tcpapp/TcpAppBase.h"
-#include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/lifecycle/ILifecycle.h"
+#include "inet/common/lifecycle/NodeStatus.h"
 
 namespace inet {
 

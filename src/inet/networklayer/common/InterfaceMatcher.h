@@ -18,7 +18,6 @@
 #ifndef __INET_INTERFACEMATCHER_H
 #define __INET_INTERFACEMATCHER_H
 
-#include <omnetpp.h>
 #include "inet/common/INETDefs.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
 

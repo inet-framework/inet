@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/geometry/common/Quaternion.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/geometry/common/Quaternion.h"
 #include "inet/visualizer/physicallayer/RadioCanvasVisualizer.h"
 
 namespace inet {

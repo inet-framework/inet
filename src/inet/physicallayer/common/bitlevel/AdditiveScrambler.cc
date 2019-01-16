@@ -15,11 +15,10 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/common/bitlevel/AdditiveScrambler.h"
 #include "inet/common/ShortBitVector.h"
+#include "inet/physicallayer/common/bitlevel/AdditiveScrambler.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 std::ostream& AdditiveScrambler::printToStream(std::ostream& stream, int level) const
@@ -68,6 +67,7 @@ AdditiveScrambler::AdditiveScrambler(const AdditiveScrambling *scrambling) : scr
     ShortBitVector seed = scrambling->getSeed();
     scramblingSequence = generateScramblingSequence(generatorPolynomial, seed);
 }
+
 } /* namespace physicallayer */
 } /* namespace inet */
 

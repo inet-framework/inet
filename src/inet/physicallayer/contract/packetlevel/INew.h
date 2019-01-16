@@ -18,14 +18,13 @@
 #ifndef __INET_NEW_H
 #define __INET_NEW_H
 
+#include "inet/common/Units.h"
 #include "inet/common/geometry/common/Coord.h"
 #include "inet/common/geometry/common/Quaternion.h"
 #include "inet/common/packet/Packet.h"
-#include "inet/common/Units.h"
 #include "inet/physicallayer/contract/packetlevel/IPrintableObject.h"
 
 namespace inet {
-
 namespace newphysicallayer {
 
 using namespace inet::units::values;
@@ -116,7 +115,6 @@ class ISignalReception : public ISignalArrival
 };
 
 } // namespace newphysicallayer
-
 } // namespace inet
 
 #endif // ifndef __INET_INEW_H

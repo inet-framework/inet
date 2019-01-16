@@ -15,8 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "ResultRecorders.h"
 #include <sstream>
+
+#include "inet/common/ResultRecorders.h"
 
 namespace inet {
 

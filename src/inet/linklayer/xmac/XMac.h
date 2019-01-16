@@ -19,10 +19,10 @@
 #ifndef __INET_XMAC_H_
 #define __INET_XMAC_H_
 
-#include <string>
-#include <sstream>
-#include <vector>
 #include <list>
+#include <sstream>
+#include <string>
+#include <vector>
 
 #include "inet/common/INETDefs.h"
 #include "inet/linklayer/base/MacProtocolBase.h"

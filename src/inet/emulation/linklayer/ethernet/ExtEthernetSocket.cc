@@ -21,14 +21,15 @@
 #include <linux/if_packet.h>
 #include <net/if.h>
 #include <netinet/ether.h>
-#include <omnetpp/platdep/sockets.h>
 #include <sys/ioctl.h>
 
-#include "inet/common/checksum/EthernetCRC.h"
+#include <omnetpp/platdep/sockets.h>
+
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/NetworkNamespaceContext.h"
-#include "inet/common/packet/Packet.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/checksum/EthernetCRC.h"
+#include "inet/common/packet/Packet.h"
 #include "inet/emulation/linklayer/ethernet/ExtEthernetSocket.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/InterfaceEntry.h"

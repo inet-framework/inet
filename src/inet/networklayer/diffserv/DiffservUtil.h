@@ -23,7 +23,6 @@
 #include "inet/networklayer/contract/IInterfaceTable.h"
 
 namespace inet {
-
 namespace DiffservUtil {
 
 // colors for naming the output of meters

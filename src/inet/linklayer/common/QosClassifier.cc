@@ -13,8 +13,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/packet/Packet.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/packet/Packet.h"
 #include "inet/linklayer/common/QosClassifier.h"
 #include "inet/linklayer/common/UserPriority.h"
 #include "inet/linklayer/common/UserPriorityTag_m.h"
@@ -28,11 +28,11 @@
 #  include "inet/networklayer/icmpv6/Icmpv6Header_m.h"
 #  include "inet/networklayer/ipv6/Ipv6Header.h"
 #endif
-#ifdef WITH_UDP
-#  include "inet/transportlayer/udp/UdpHeader_m.h"
-#endif
 #ifdef WITH_TCP_COMMON
 #  include "inet/transportlayer/tcp_common/TcpHeader.h"
+#endif
+#ifdef WITH_UDP
+#  include "inet/transportlayer/udp/UdpHeader_m.h"
 #endif
 
 namespace inet {

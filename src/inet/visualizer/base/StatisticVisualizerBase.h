@@ -19,6 +19,7 @@
 #define __INET_STATISTICVISUALIZERBASE_H
 
 #include <functional>
+
 #include "inet/common/StringFormat.h"
 #include "inet/visualizer/base/VisualizerBase.h"
 #include "inet/visualizer/util/ModuleFilter.h"

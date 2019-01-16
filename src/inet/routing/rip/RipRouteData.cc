@@ -19,7 +19,6 @@
 
 namespace inet {
 
-
 std::string RipRoute::str() const
 {
     std::stringstream out;

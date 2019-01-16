@@ -19,8 +19,8 @@
 #define __INET_MACADDRESSTYPE_H
 
 #include "inet/common/INETDefs.h"
-#include "inet/networklayer/contract/IL3AddressType.h"
 #include "inet/linklayer/common/MacAddress.h"
+#include "inet/networklayer/contract/IL3AddressType.h"
 
 namespace inet {
 

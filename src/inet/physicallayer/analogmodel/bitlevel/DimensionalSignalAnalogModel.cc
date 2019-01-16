@@ -18,7 +18,6 @@
 #include "inet/physicallayer/analogmodel/bitlevel/DimensionalSignalAnalogModel.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 DimensionalSignalAnalogModel::DimensionalSignalAnalogModel(const simtime_t duration, Hz carrierFrequency, Hz bandwidth, const ConstMapping *power) :

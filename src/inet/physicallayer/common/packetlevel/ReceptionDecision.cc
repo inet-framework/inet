@@ -18,7 +18,6 @@
 #include "inet/physicallayer/common/packetlevel/ReceptionDecision.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 ReceptionDecision::ReceptionDecision(const IReception *reception, IRadioSignal::SignalPart part, bool isReceptionPossible, bool isReceptionAttempted, bool isReceptionSuccessful) :
@@ -41,6 +40,5 @@ std::ostream& ReceptionDecision::printToStream(std::ostream& stream, int level) 
 }
 
 } // namespace physicallayer
-
 } // namespace inet
 

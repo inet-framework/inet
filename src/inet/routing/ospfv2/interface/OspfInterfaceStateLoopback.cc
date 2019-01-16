@@ -15,12 +15,10 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include "inet/routing/ospfv2/interface/OspfInterfaceStateDown.h"
 #include "inet/routing/ospfv2/interface/OspfInterfaceStateLoopback.h"
 
-#include "inet/routing/ospfv2/interface/OspfInterfaceStateDown.h"
-
 namespace inet {
-
 namespace ospf {
 
 void InterfaceStateLoopback::processEvent(OspfInterface *intf, OspfInterface::OspfInterfaceEventType event)
@@ -35,6 +33,5 @@ void InterfaceStateLoopback::processEvent(OspfInterface *intf, OspfInterface::Os
 }
 
 } // namespace ospf
-
 } // namespace inet
 

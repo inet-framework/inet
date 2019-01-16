@@ -18,12 +18,11 @@
 #ifndef __INET_IANTENNAGAIN_H
 #define __INET_IANTENNAGAIN_H
 
-#include "inet/common/geometry/common/Quaternion.h"
 #include "inet/common/Ptr.h"
+#include "inet/common/geometry/common/Quaternion.h"
 #include "inet/physicallayer/contract/packetlevel/IPrintableObject.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 /**
@@ -61,7 +60,6 @@ class INET_API IAntennaGain : public IPrintableObject
 };
 
 } // namespace physicallayer
-
 } // namespace inet
 
 #endif // ifndef __INET_IANTENNAGAIN_H

@@ -18,8 +18,8 @@
 #ifndef __INET_ROUTINGLIFECYCLEBASE_H
 #define __INET_ROUTINGLIFECYCLEBASE_H
 
-#include "inet/common/lifecycle/OperationalBase.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
+#include "inet/common/lifecycle/OperationalBase.h"
 
 namespace inet {
 

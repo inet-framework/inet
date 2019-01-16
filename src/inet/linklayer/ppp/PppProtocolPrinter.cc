@@ -17,11 +17,10 @@
 // @author: Zoltan Bojthe
 //
 
-#include "inet/linklayer/ppp/PppProtocolPrinter.h"
-
 #include "inet/common/packet/printer/PacketPrinter.h"
 #include "inet/common/packet/printer/ProtocolPrinterRegistry.h"
 #include "inet/linklayer/ppp/PppFrame_m.h"
+#include "inet/linklayer/ppp/PppProtocolPrinter.h"
 
 namespace inet {
 

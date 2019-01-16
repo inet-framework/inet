@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "InstrumentUtil.h"
+#include "inet/common/figures/InstrumentUtil.h"
 
 InstrumentUtil::OutCode InstrumentUtil::ComputeOutCode(double x, double y, double xmin, double xmax, double ymin, double ymax)
 {

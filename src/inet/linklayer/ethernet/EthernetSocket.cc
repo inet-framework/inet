@@ -16,8 +16,8 @@
 //
 
 #include "inet/applications/common/SocketTag_m.h"
-#include "inet/common/packet/Message.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/packet/Message.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/ethernet/EthernetSocket.h"
 #include "inet/linklayer/ethernet/EthernetCommand_m.h"

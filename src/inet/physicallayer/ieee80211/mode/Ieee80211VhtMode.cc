@@ -16,6 +16,7 @@
 //
 
 #include <tuple>
+
 #include "inet/physicallayer/ieee80211/mode/Ieee80211VhtCode.h"
 #include "inet/physicallayer/ieee80211/mode/Ieee80211VhtMode.h"
 #include "inet/physicallayer/modulation/QbpskModulation.h"

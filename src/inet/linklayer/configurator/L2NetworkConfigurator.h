@@ -24,10 +24,10 @@
 #include <vector>
 
 #include "inet/common/INETDefs.h"
-#include "inet/linklayer/configurator/Ieee8021dInterfaceData.h"
-#include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/common/PatternMatcher.h"
 #include "inet/common/Topology.h"
+#include "inet/linklayer/configurator/Ieee8021dInterfaceData.h"
+#include "inet/networklayer/contract/IInterfaceTable.h"
 
 namespace inet {
 

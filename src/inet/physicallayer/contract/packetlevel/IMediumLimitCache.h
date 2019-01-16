@@ -19,6 +19,7 @@
 #define __INET_IMEDIUMLIMITCACHE_H
 
 #include "inet/physicallayer/contract/packetlevel/IPrintableObject.h"
+#include "inet/physicallayer/contract/packetlevel/IRadio.h"
 
 namespace inet {
 

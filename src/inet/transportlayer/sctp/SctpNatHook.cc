@@ -1,17 +1,15 @@
-#include "inet/networklayer/ipv4/Ipv4.h"
 #include "inet/common/ModuleAccess.h"
-#include "inet/transportlayer/sctp/SctpNatHook.h"
-#include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
-#include "inet/transportlayer/sctp/SctpAssociation.h"
-#include "inet/transportlayer/contract/sctp/SctpCommand_m.h"
-#include "inet/networklayer/common/L3Tools.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
-#include "inet/transportlayer/common/L4Tools.h"
+#include "inet/networklayer/common/L3Tools.h"
 #include "inet/networklayer/common/NextHopAddressTag_m.h"
-
+#include "inet/networklayer/ipv4/Ipv4.h"
+#include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
+#include "inet/transportlayer/common/L4Tools.h"
+#include "inet/transportlayer/contract/sctp/SctpCommand_m.h"
+#include "inet/transportlayer/sctp/SctpAssociation.h"
+#include "inet/transportlayer/sctp/SctpNatHook.h"
 
 namespace inet {
-
 namespace sctp {
 
 Define_Module(SctpNatHook);
@@ -333,6 +331,5 @@ void SctpNatHook::finish()
 }
 
 } // namespace sctp
-
 } // namespace inet
 

@@ -22,7 +22,6 @@
 #include "inet/physicallayer/common/bitlevel/AdditiveScrambling.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 class INET_API AdditiveScramblerModule : public cSimpleModule, public IScrambler
@@ -43,6 +42,7 @@ class INET_API AdditiveScramblerModule : public cSimpleModule, public IScrambler
     virtual BitVector descramble(const BitVector& bits) const override { return scrambler->descramble(bits); }
     virtual const AdditiveScrambling *getScrambling() const override { return scrambler->getScrambling(); }
 };
+
 } /* namespace physicallayer */
 } /* namespace inet */
 

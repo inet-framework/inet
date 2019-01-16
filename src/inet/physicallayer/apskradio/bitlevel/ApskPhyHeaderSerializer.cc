@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
 #include "inet/common/checksum/EthernetCRC.h"
+#include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
 #include "inet/physicallayer/apskradio/bitlevel/ApskPhyHeaderSerializer.h"
 
 namespace inet {

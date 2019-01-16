@@ -16,8 +16,8 @@
 //
 
 #include "inet/common/INETUtils.h"
-#include "inet/common/queue/OrdinalBasedDuplicator.h"
 #include "inet/common/Simsignals.h"
+#include "inet/common/queue/OrdinalBasedDuplicator.h"
 
 namespace inet {
 

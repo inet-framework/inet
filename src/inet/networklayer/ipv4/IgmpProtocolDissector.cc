@@ -17,11 +17,9 @@
 // @author: Zoltan Bojthe
 //
 
-#include "inet/networklayer/ipv4/IgmpProtocolDissector.h"
-
-#include "inet/networklayer/ipv4/IgmpMessage_m.h"
 #include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
-
+#include "inet/networklayer/ipv4/IgmpMessage_m.h"
+#include "inet/networklayer/ipv4/IgmpProtocolDissector.h"
 
 namespace inet {
 

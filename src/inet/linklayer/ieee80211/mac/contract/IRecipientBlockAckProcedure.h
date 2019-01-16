@@ -15,10 +15,10 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include "inet/linklayer/ieee80211/mac/contract/IProcedureCallback.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRecipientBlockAckAgreementHandler.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRecipientQosAckPolicy.h"
-#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 
 #ifndef __INET_IRECIPIENTBLOCKACKPROCEDURE_H
 #define __INET_IRECIPIENTBLOCKACKPROCEDURE_H

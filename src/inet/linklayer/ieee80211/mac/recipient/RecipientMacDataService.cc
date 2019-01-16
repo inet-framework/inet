@@ -17,7 +17,7 @@
 
 #include "inet/linklayer/ieee80211/mac/duplicateremoval/LegacyDuplicateRemoval.h"
 #include "inet/linklayer/ieee80211/mac/fragmentation/BasicReassembly.h"
-#include "RecipientMacDataService.h"
+#include "inet/linklayer/ieee80211/mac/recipient/RecipientMacDataService.h"
 
 namespace inet {
 namespace ieee80211 {

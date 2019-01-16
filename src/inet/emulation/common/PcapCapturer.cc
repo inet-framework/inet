@@ -17,9 +17,9 @@
 
 #define WANT_WINSOCK2
 
-#include <omnetpp/platdep/sockets.h>
-#include <net/if.h>
 #include <arpa/inet.h>
+#include <net/if.h>
+#include <omnetpp/platdep/sockets.h>
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/packet/Packet.h"

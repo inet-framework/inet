@@ -19,6 +19,7 @@
 #define __INET_RESULTRECORDERS_H
 
 #include <string>
+
 #include "inet/common/INETDefs.h"
 
 namespace inet {

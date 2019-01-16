@@ -26,7 +26,6 @@
 #include <vector>
 
 #include "inet/common/INETDefs.h"
-
 #include "inet/networklayer/common/InterfaceEntry.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
 

@@ -18,10 +18,10 @@
 #ifndef __INET_IPHYSICALENVIRONMENT_H
 #define __INET_IPHYSICALENVIRONMENT_H
 
+#include "inet/common/IVisitor.h"
 #include "inet/common/geometry/common/Coord.h"
 #include "inet/common/geometry/common/Quaternion.h"
 #include "inet/common/geometry/common/RotationMatrix.h"
-#include "inet/common/IVisitor.h"
 #include "inet/environment/contract/IGround.h"
 #include "inet/environment/contract/IMaterialRegistry.h"
 #include "inet/environment/contract/IObjectCache.h"

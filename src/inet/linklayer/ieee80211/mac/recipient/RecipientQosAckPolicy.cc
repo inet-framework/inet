@@ -16,7 +16,7 @@
 //
 
 #include "inet/common/ModuleAccess.h"
-#include "RecipientQosAckPolicy.h"
+#include "inet/linklayer/ieee80211/mac/recipient/RecipientQosAckPolicy.h"
 
 namespace inet {
 namespace ieee80211 {

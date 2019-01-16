@@ -17,8 +17,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/mobility/single/MassMobility.h"
 #include "inet/common/INETMath.h"
+#include "inet/mobility/single/MassMobility.h"
 
 namespace inet {
 

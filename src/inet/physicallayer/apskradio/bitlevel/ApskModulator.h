@@ -18,11 +18,11 @@
 #ifndef __INET_APSKMODULATOR_H
 #define __INET_APSKMODULATOR_H
 
-#include "inet/physicallayer/contract/bitlevel/IModulator.h"
+#include "inet/physicallayer/apskradio/bitlevel/ApskSymbol.h"
+#include "inet/physicallayer/base/packetlevel/ApskModulationBase.h"
 #include "inet/physicallayer/common/bitlevel/SignalBitModel.h"
 #include "inet/physicallayer/common/bitlevel/SignalSymbolModel.h"
-#include "inet/physicallayer/base/packetlevel/ApskModulationBase.h"
-#include "inet/physicallayer/apskradio/bitlevel/ApskSymbol.h"
+#include "inet/physicallayer/contract/bitlevel/IModulator.h"
 
 namespace inet {
 

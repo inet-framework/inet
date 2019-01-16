@@ -16,6 +16,7 @@
 //
 
 #include <assert.h>
+
 #include "inet/common/mapping/MappingBase.h"
 
 namespace inet {

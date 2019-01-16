@@ -16,11 +16,10 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#include "inet/transportlayer/sctp/SctpGapList.h"
 #include "inet/transportlayer/sctp/SctpAssociation.h"
+#include "inet/transportlayer/sctp/SctpGapList.h"
 
 namespace inet {
-
 namespace sctp {
 
 // ###### Constructor #######################################################
@@ -401,6 +400,5 @@ void SctpGapList::resetGaps(const uint32 newCumAck)
 }
 
 } // namespace sctp
-
 } // namespace inet
 

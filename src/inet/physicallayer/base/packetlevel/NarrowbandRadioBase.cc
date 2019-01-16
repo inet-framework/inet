@@ -16,8 +16,8 @@
 //
 
 #include "inet/physicallayer/base/packetlevel/NarrowbandRadioBase.h"
-#include "inet/physicallayer/base/packetlevel/NarrowbandTransmitterBase.h"
 #include "inet/physicallayer/base/packetlevel/NarrowbandReceiverBase.h"
+#include "inet/physicallayer/base/packetlevel/NarrowbandTransmitterBase.h"
 #include "inet/physicallayer/contract/packetlevel/RadioControlInfo_m.h"
 
 namespace inet {

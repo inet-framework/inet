@@ -16,7 +16,7 @@
 //
 
 #include "inet/linklayer/ieee80211/mac/contract/IRtsPolicy.h"
-#include "QosRecoveryProcedure.h"
+#include "inet/linklayer/ieee80211/mac/originator/QosRecoveryProcedure.h"
 
 namespace inet {
 namespace ieee80211 {

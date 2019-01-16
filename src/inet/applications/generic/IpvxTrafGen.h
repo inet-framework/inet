@@ -22,11 +22,11 @@
 #include <vector>
 
 #include "inet/applications/base/ApplicationBase.h"
+#include "inet/applications/generic/IpvxTrafSink.h"
 #include "inet/common/INETDefs.h"
 #include "inet/common/Protocol.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/L3Address.h"
-#include "inet/applications/generic/IpvxTrafSink.h"
 
 namespace inet {
 

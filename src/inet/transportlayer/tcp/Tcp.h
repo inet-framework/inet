@@ -23,7 +23,6 @@
 #include <set>
 
 #include "inet/common/INETDefs.h"
-
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/OperationalBase.h"
 #include "inet/common/packet/Packet.h"
@@ -34,7 +33,6 @@
 #include "inet/transportlayer/tcp_common/TcpHeader.h"
 
 namespace inet {
-
 namespace tcp {
 
 // Forward declarations:
@@ -222,7 +220,6 @@ class INET_API Tcp : public OperationalBase
 };
 
 } // namespace tcp
-
 } // namespace inet
 
 #endif // ifndef __INET_TCP_H

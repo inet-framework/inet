@@ -16,8 +16,9 @@
 //
 
 #include <algorithm>
-#include "inet/routing/ospfv2/router/OspfRouter.h"
+
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
+#include "inet/routing/ospfv2/router/OspfRouter.h"
 
 namespace inet {
 

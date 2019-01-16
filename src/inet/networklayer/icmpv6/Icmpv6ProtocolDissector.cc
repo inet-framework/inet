@@ -17,10 +17,10 @@
 // @author: Zoltan Bojthe
 //
 
-#include "inet/networklayer/icmpv6/Icmpv6ProtocolDissector.h"
 
 #include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
 #include "inet/networklayer/icmpv6/Icmpv6.h"
+#include "inet/networklayer/icmpv6/Icmpv6ProtocolDissector.h"
 #include "inet/networklayer/ipv6/Ipv6Header.h"
 
 

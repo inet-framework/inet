@@ -18,7 +18,6 @@
 #include "inet/physicallayer/common/bitlevel/ConvolutionalCoderModule.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 Define_Module(ConvolutionalCoderModule);
@@ -47,6 +46,7 @@ ConvolutionalCoderModule::~ConvolutionalCoderModule()
     //delete convolutionalCoder->getForwardErrorCorrection();
     delete convolutionalCoder;
 }
+
 } /* namespace physicallayer */
 } /* namespace inet */
 

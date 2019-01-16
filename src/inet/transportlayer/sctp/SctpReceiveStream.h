@@ -20,11 +20,9 @@
 #define __INET_SCTPRECEIVESTREAM_H
 
 #include "inet/common/INETDefs.h"
-
 #include "inet/transportlayer/sctp/SctpQueue.h"
 
 namespace inet {
-
 namespace sctp {
 
 class INET_API SctpReceiveStream : public cObject
@@ -60,7 +58,6 @@ class INET_API SctpReceiveStream : public cObject
 };
 
 } // namespace sctp
-
 } // namespace inet
 
 #endif // ifndef __INET_SCTPRECEIVESTREAM_H

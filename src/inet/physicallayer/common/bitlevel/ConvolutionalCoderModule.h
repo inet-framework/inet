@@ -21,7 +21,6 @@
 #include "inet/physicallayer/common/bitlevel/ConvolutionalCoder.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 class INET_API ConvolutionalCoderModule : public cSimpleModule, public IFecCoder
@@ -42,6 +41,7 @@ class INET_API ConvolutionalCoderModule : public cSimpleModule, public IFecCoder
     virtual std::pair<BitVector, bool> decode(const BitVector& encodedBits) const override { return convolutionalCoder->decode(encodedBits); }
     virtual const ConvolutionalCode *getForwardErrorCorrection() const override { return convolutionalCoder->getForwardErrorCorrection(); }
 };
+
 } /* namespace physicallayer */
 } /* namespace inet */
 

@@ -16,8 +16,8 @@
 //
 
 #include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
-#include "inet/linklayer/shortcut/ShortcutMacProtocolDissector.h"
 #include "inet/linklayer/shortcut/ShortcutMacHeader_m.h"
+#include "inet/linklayer/shortcut/ShortcutMacProtocolDissector.h"
 
 namespace inet {
 

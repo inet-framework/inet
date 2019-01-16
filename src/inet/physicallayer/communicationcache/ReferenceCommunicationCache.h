@@ -21,7 +21,6 @@
 #include "inet/physicallayer/base/packetlevel/CommunicationCacheBase.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 class INET_API ReferenceCommunicationCache : public CommunicationCacheBase
@@ -70,7 +69,6 @@ class INET_API ReferenceCommunicationCache : public CommunicationCacheBase
 };
 
 } // namespace physicallayer
-
 } // namespace inet
 
 #endif // ifndef __INET_REFERENCECOMMUNICATIONCACHE_H

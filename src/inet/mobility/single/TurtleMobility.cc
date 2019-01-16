@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/mobility/single/TurtleMobility.h"
 #include "inet/common/INETMath.h"
+#include "inet/mobility/single/TurtleMobility.h"
 
 namespace inet {
 

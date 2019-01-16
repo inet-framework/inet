@@ -15,16 +15,15 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OfdmDemodulator.h"
-#include "inet/physicallayer/modulation/Qam16Modulation.h"
-#include "inet/physicallayer/modulation/Qam64Modulation.h"
-#include "inet/physicallayer/modulation/BpskModulation.h"
-#include "inet/physicallayer/modulation/QpskModulation.h"
 #include "inet/physicallayer/apskradio/bitlevel/ApskSymbol.h"
 #include "inet/physicallayer/common/bitlevel/SignalBitModel.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OfdmDemodulator.h"
+#include "inet/physicallayer/modulation/BpskModulation.h"
+#include "inet/physicallayer/modulation/Qam16Modulation.h"
+#include "inet/physicallayer/modulation/Qam64Modulation.h"
+#include "inet/physicallayer/modulation/QpskModulation.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 Ieee80211OfdmDemodulator::Ieee80211OfdmDemodulator(const Ieee80211OfdmModulation *subcarrierModulation) :
@@ -81,6 +80,5 @@ const IReceptionBitModel *Ieee80211OfdmDemodulator::demodulate(const IReceptionS
 }
 
 } // namespace physicallayer
-
 } // namespace inet
 

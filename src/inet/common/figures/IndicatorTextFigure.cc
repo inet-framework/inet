@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "IndicatorTextFigure.h"
 #include "inet/common/INETUtils.h"
+#include "inet/common/figures/IndicatorTextFigure.h"
 
 namespace inet {
 

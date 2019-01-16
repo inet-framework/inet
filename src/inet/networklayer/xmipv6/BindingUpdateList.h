@@ -24,7 +24,6 @@
 #define __INET_BINDINGUPDATELIST_H
 
 #include "inet/common/INETDefs.h"
-
 #include "inet/networklayer/contract/ipv6/Ipv6Address.h"
 
 namespace inet {

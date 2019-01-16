@@ -21,7 +21,6 @@
 #include <vector>
 
 #include "inet/common/INETDefs.h"
-
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/networklayer/contract/IRoutingTable.h"
 

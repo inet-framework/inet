@@ -19,8 +19,8 @@
 #define __INET_MODULEIDADDRESSTYPE_H
 
 #include "inet/common/INETDefs.h"
-#include "inet/networklayer/contract/IL3AddressType.h"
 #include "inet/networklayer/common/ModuleIdAddress.h"
+#include "inet/networklayer/contract/IL3AddressType.h"
 
 namespace inet {
 

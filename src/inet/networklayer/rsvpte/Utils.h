@@ -18,7 +18,6 @@
 #include <vector>
 
 #include "inet/common/INETDefs.h"
-
 #include "inet/networklayer/rsvpte/IntServ_m.h"
 
 namespace inet {

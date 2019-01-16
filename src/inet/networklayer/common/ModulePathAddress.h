@@ -18,8 +18,8 @@
 #ifndef __INET_MODULEPATHADDRESS_H
 #define __INET_MODULEPATHADDRESS_H
 
-#include <string>
 #include <iostream>
+#include <string>
 
 #include "inet/common/INETDefs.h"
 

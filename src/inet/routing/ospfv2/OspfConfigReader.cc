@@ -16,28 +16,26 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include <string>
-#include <map>
-#include <stdlib.h>
-#include <memory.h>
 #include <algorithm>
+#include <map>
+#include <memory.h>
+#include <stdlib.h>
+#include <string>
 
-#include "inet/routing/ospfv2/OspfConfigReader.h"
-
+#include "inet/common/ModuleAccess.h"
+#include "inet/common/PatternMatcher.h"
+#include "inet/common/XMLUtils.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
-#include "inet/networklayer/common/L3AddressResolver.h"
+#include "inet/routing/ospfv2/OspfConfigReader.h"
+#include "inet/routing/ospfv2/interface/OspfInterface.h"
 #include "inet/routing/ospfv2/messagehandler/MessageHandler.h"
 #include "inet/routing/ospfv2/router/OspfArea.h"
 #include "inet/routing/ospfv2/router/OspfCommon.h"
-#include "inet/routing/ospfv2/interface/OspfInterface.h"
-#include "inet/common/PatternMatcher.h"
-#include "inet/common/XMLUtils.h"
-#include "inet/common/ModuleAccess.h"
 
 namespace inet {
-
 namespace ospf {
 
 using namespace xmlutils;
@@ -628,6 +626,5 @@ void OspfConfigReader::joinMulticastGroups(int interfaceId)
 }
 
 } // namespace ospf
-
 } // namespace inet
 

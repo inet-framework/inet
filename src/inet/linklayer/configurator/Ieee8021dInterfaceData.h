@@ -21,8 +21,8 @@
 #define __INET_IEEE8021DINTERFACEDATA_H
 
 #include "inet/common/INETDefs.h"
-#include "inet/networklayer/common/InterfaceEntry.h"
 #include "inet/linklayer/common/MacAddress.h"
+#include "inet/networklayer/common/InterfaceEntry.h"
 
 namespace inet {
 

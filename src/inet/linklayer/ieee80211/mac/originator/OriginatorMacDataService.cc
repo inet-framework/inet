@@ -16,8 +16,8 @@
 // 
 
 #include "inet/linklayer/ieee80211/mac/fragmentation/Fragmentation.h"
+#include "inet/linklayer/ieee80211/mac/originator/OriginatorMacDataService.h"
 #include "inet/linklayer/ieee80211/mac/sequencenumberassignment/NonQoSSequenceNumberAssignment.h"
-#include "OriginatorMacDataService.h"
 
 namespace inet {
 namespace ieee80211 {

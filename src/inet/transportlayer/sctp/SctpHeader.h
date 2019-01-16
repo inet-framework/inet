@@ -20,6 +20,7 @@
 #define __INET_SCTPHEADER_H
 
 #include <list>
+
 #include "inet/common/INETDefs.h"
 //#include "inet/transportlayer/contract/ITransportPacket.h"
 #include "inet/transportlayer/sctp/SctpHeader_m.h"

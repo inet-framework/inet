@@ -18,11 +18,10 @@
 #ifndef __INET_QUADTREENEIGHBORCACHE_H
 #define __INET_QUADTREENEIGHBORCACHE_H
 
-#include "inet/physicallayer/common/packetlevel/RadioMedium.h"
 #include "inet/common/geometry/container/QuadTree.h"
+#include "inet/physicallayer/common/packetlevel/RadioMedium.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 class INET_API QuadTreeNeighborCache : public cSimpleModule, public INeighborCache
@@ -72,7 +71,6 @@ class INET_API QuadTreeNeighborCache : public cSimpleModule, public INeighborCac
 };
 
 } // namespace physicallayer
-
 } // namespace inet
 
 #endif // ifndef __INET_QUADTREENEIGHBORCACHE_H

@@ -15,9 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/LifecycleController.h"
 #include "inet/common/lifecycle/NodeStatus.h"
-#include "inet/common/ModuleAccess.h"
 #include "inet/power/storage/SimpleCcBattery.h"
 
 namespace inet {

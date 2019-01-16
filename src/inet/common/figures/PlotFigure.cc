@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "PlotFigure.h"
-#include "InstrumentUtil.h"
+#include "inet/common/figures/InstrumentUtil.h"
+#include "inet/common/figures/PlotFigure.h"
 
 namespace inet {
 

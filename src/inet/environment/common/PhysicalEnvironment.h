@@ -18,11 +18,11 @@
 #ifndef __INET_PHYSICALENVIRONMENT_H
 #define __INET_PHYSICALENVIRONMENT_H
 
+#include "inet/common/IVisitor.h"
 #include "inet/common/geometry/base/ShapeBase.h"
 #include "inet/common/geometry/common/GeographicCoordinateSystem.h"
 #include "inet/common/geometry/common/RotationMatrix.h"
 #include "inet/common/geometry/object/LineSegment.h"
-#include "inet/common/IVisitor.h"
 #include "inet/environment/common/MaterialRegistry.h"
 #include "inet/environment/common/PhysicalObject.h"
 #include "inet/environment/contract/IObjectCache.h"

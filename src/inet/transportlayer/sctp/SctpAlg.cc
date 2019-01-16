@@ -16,11 +16,10 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/transportlayer/sctp/SctpAlg.h"
 #include "inet/transportlayer/sctp/Sctp.h"
+#include "inet/transportlayer/sctp/SctpAlg.h"
 
 namespace inet {
-
 namespace sctp {
 
 Register_Class(SctpAlg);
@@ -92,6 +91,5 @@ void SctpAlg::dataSent(uint32)
 }
 
 } // namespace sctp
-
 } // namespace inet
 

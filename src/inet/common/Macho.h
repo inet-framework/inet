@@ -209,6 +209,8 @@
 #include <new>
 #include <cassert>
 
+#include "inet/common/INETDefs.h"
+
 namespace inet {
 
 class TestAccess;

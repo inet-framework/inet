@@ -19,6 +19,7 @@
 #define __INET_NEXTHOPROUTINGTABLE_H
 
 #include <vector>
+
 #include "inet/common/INETDefs.h"
 #include "inet/networklayer/contract/IRoutingTable.h"
 #include "inet/networklayer/nexthop/NextHopRoute.h"

@@ -15,16 +15,15 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/unitdisk/UnitDiskAnalogModel.h"
-#include "inet/physicallayer/unitdisk/UnitDiskTransmission.h"
-#include "inet/physicallayer/unitdisk/UnitDiskReception.h"
-#include "inet/physicallayer/unitdisk/UnitDiskNoise.h"
-#include "inet/physicallayer/unitdisk/UnitDiskSnir.h"
 #include "inet/physicallayer/contract/packetlevel/IArrival.h"
 #include "inet/physicallayer/contract/packetlevel/IRadioMedium.h"
+#include "inet/physicallayer/unitdisk/UnitDiskAnalogModel.h"
+#include "inet/physicallayer/unitdisk/UnitDiskNoise.h"
+#include "inet/physicallayer/unitdisk/UnitDiskReception.h"
+#include "inet/physicallayer/unitdisk/UnitDiskSnir.h"
+#include "inet/physicallayer/unitdisk/UnitDiskTransmission.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 Define_Module(UnitDiskAnalogModel);
@@ -82,6 +81,5 @@ const ISnir *UnitDiskAnalogModel::computeSNIR(const IReception *reception, const
 }
 
 } // namespace physicallayer
-
 } // namespace inet
 

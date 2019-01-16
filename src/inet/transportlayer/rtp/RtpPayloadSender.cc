@@ -15,13 +15,11 @@
 *                                                                         *
 ***************************************************************************/
 
+#include "inet/transportlayer/rtp/RtpInnerPacket_m.h"
+#include "inet/transportlayer/rtp/RtpInterfacePacket_m.h"
 #include "inet/transportlayer/rtp/RtpPayloadSender.h"
 
-#include "inet/transportlayer/rtp/RtpInterfacePacket_m.h"
-#include "inet/transportlayer/rtp/RtpInnerPacket_m.h"
-
 namespace inet {
-
 namespace rtp {
 
 Define_Module(RtpPayloadSender);
@@ -211,6 +209,5 @@ bool RtpPayloadSender::sendPacket()
 }
 
 } // namespace rtp
-
 } // namespace inet
 

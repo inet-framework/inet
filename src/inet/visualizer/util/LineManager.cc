@@ -16,6 +16,7 @@
 //
 
 #include <algorithm>
+
 #include "inet/visualizer/util/LineManager.h"
 
 namespace inet {

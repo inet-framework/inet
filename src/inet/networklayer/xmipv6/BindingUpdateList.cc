@@ -20,9 +20,8 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-#include "inet/networklayer/xmipv6/BindingUpdateList.h"
-
 #include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
+#include "inet/networklayer/xmipv6/BindingUpdateList.h"
 
 namespace inet {
 

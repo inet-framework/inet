@@ -13,10 +13,10 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#include "inet/common/packet/chunk/EmptyChunk.h"
-#include "inet/common/packet/chunk/SequenceChunk.h"
 #include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
+#include "inet/common/packet/chunk/EmptyChunk.h"
+#include "inet/common/packet/chunk/SequenceChunk.h"
 
 namespace inet {
 

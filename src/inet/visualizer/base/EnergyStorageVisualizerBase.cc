@@ -16,12 +16,12 @@
 //
 
 #include <algorithm>
+
 #include "inet/power/contract/ICcEnergyStorage.h"
 #include "inet/power/contract/IEpEnergyStorage.h"
 #include "inet/visualizer/base/EnergyStorageVisualizerBase.h"
 
 namespace inet {
-
 namespace visualizer {
 
 using namespace inet::power;
@@ -117,6 +117,5 @@ void EnergyStorageVisualizerBase::removeAllEnergyStorageVisualizations()
 }
 
 } // namespace visualizer
-
 } // namespace inet
 

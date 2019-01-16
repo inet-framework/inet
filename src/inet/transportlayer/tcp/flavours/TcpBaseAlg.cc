@@ -16,12 +16,11 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/transportlayer/tcp/flavours/TcpBaseAlg.h"
 #include "inet/transportlayer/tcp/Tcp.h"
 #include "inet/transportlayer/tcp/TcpSackRexmitQueue.h"
+#include "inet/transportlayer/tcp/flavours/TcpBaseAlg.h"
 
 namespace inet {
-
 namespace tcp {
 
 //
@@ -680,6 +679,5 @@ void TcpBaseAlg::restartRexmitTimer()
 }
 
 } // namespace tcp
-
 } // namespace inet
 

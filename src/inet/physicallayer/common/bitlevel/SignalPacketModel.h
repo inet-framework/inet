@@ -21,7 +21,6 @@
 #include "inet/physicallayer/contract/bitlevel/ISignalPacketModel.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 class INET_API SignalPacketModel : public virtual ISignalPacketModel
@@ -51,7 +50,6 @@ class INET_API ReceptionPacketModel : public SignalPacketModel, public IReceptio
 };
 
 } // namespace physicallayer
-
 } // namespace inet
 
 #endif // ifndef __INET_SIGNALPACKETMODEL_H

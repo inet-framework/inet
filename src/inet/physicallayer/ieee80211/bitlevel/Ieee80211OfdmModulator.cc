@@ -15,16 +15,15 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OfdmDefs.h"
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OfdmModulator.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OfdmSymbolModel.h"
+#include "inet/physicallayer/modulation/BpskModulation.h"
 #include "inet/physicallayer/modulation/Qam16Modulation.h"
 #include "inet/physicallayer/modulation/Qam64Modulation.h"
-#include "inet/physicallayer/modulation/BpskModulation.h"
 #include "inet/physicallayer/modulation/QpskModulation.h"
-#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OfdmDefs.h"
-#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OfdmSymbolModel.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 const ApskSymbol Ieee80211OfdmModulator::positivePilotSubcarrier(1,0);
@@ -120,6 +119,5 @@ const ITransmissionSymbolModel *Ieee80211OfdmModulator::modulate(const ITransmis
 }
 
 } // namespace physicallayer
-
 } // namespace inet
 

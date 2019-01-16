@@ -19,6 +19,7 @@
 #define __INET_MATERIALREGISTRY_H
 
 #include <map>
+
 #include "inet/environment/contract/IMaterialRegistry.h"
 
 namespace inet {

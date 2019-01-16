@@ -19,15 +19,14 @@
 
 #include <stdlib.h>
 
-#include "inet/linklayer/base/MacBase.h"
-
-#include "inet/common/lifecycle/NodeStatus.h"
-#include "inet/common/Simsignals.h"
 #include "inet/common/IInterfaceRegistrationListener.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/common/Simsignals.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
+#include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/linklayer/base/MacBase.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/common/lifecycle/ModuleOperations.h"
-#include "inet/common/ModuleAccess.h"
 
 namespace inet {
 

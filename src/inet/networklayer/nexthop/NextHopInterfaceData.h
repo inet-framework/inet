@@ -19,6 +19,7 @@
 #define __INET_NEXTHOPINTERFACEDATA_H
 
 #include <vector>
+
 #include "inet/common/INETDefs.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
 #include "inet/networklayer/common/L3Address.h"

@@ -21,7 +21,6 @@
 #include "inet/physicallayer/base/packetlevel/CommunicationCacheBase.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 class INET_API VectorCommunicationCache : public CommunicationCacheBase
@@ -82,7 +81,6 @@ class INET_API VectorCommunicationCache : public CommunicationCacheBase
 };
 
 } // namespace physicallayer
-
 } // namespace inet
 
 #endif // ifndef __INET_VECTORCOMMUNICATIONCACHE_H

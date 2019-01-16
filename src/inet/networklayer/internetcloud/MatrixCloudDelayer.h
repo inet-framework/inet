@@ -21,7 +21,6 @@
 #define __INET_MATRIXCLOUDDELAYER_H
 
 #include "inet/common/INETDefs.h"
-
 #include "inet/networklayer/internetcloud/CloudDelayerBase.h"
 
 namespace inet {

@@ -15,13 +15,11 @@
 *                                                                         *
 ***************************************************************************/
 
-#include "inet/transportlayer/rtp/RtpParticipantInfo.h"
-
 #include "inet/transportlayer/rtp/Reports_m.h"
 #include "inet/transportlayer/rtp/RtpPacket_m.h"
+#include "inet/transportlayer/rtp/RtpParticipantInfo.h"
 
 namespace inet {
-
 namespace rtp {
 
 Register_Class(RtpParticipantInfo);
@@ -153,6 +151,5 @@ std::string RtpParticipantInfo::ssrcToName(uint32 ssrc)
 }
 
 } // namespace rtp
-
 } // namespace inet
 

@@ -16,12 +16,12 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/transportlayer/sctp/SctpAssociation.h"
 #include "inet/transportlayer/contract/sctp/SctpCommand_m.h"
+#include "inet/transportlayer/sctp/SctpAssociation.h"
 
 namespace inet {
-
 namespace sctp {
+
 void SctpAssociation::retransmitReset()
 {
     if (fsm->getState() == SCTP_S_SHUTDOWN_PENDING || fsm->getState() == SCTP_S_ESTABLISHED) {
@@ -941,5 +941,5 @@ bool SctpAssociation::receiveStreamPresent(uint16 id)
 }
 
 } // namespace sctp
-
 } // namespace inet
+

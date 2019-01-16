@@ -18,7 +18,6 @@
 #include "inet/physicallayer/common/packetlevel/ReceptionResult.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 ReceptionResult::ReceptionResult(const IReception *reception, const std::vector<const IReceptionDecision *> *decisions, const Packet *packet) :
@@ -46,6 +45,5 @@ const Packet* ReceptionResult::getPacket() const
 }
 
 } // namespace physicallayer
-
 } // namespace inet
 

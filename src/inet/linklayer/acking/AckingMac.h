@@ -21,9 +21,9 @@
 #define __INET_ACKINGMAC_H
 
 #include "inet/common/INETDefs.h"
-#include "inet/physicallayer/contract/packetlevel/IRadio.h"
-#include "inet/linklayer/common/MacAddress.h"
 #include "inet/linklayer/base/MacProtocolBase.h"
+#include "inet/linklayer/common/MacAddress.h"
+#include "inet/physicallayer/contract/packetlevel/IRadio.h"
 
 namespace inet {
 

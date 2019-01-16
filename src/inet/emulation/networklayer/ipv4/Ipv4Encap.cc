@@ -16,8 +16,8 @@
 //
 
 #include "inet/applications/common/SocketTag_m.h"
-#include "inet/common/checksum/TcpIpChecksum.h"
 #include "inet/common/IProtocolRegistrationListener.h"
+#include "inet/common/checksum/TcpIpChecksum.h"
 #include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/emulation/networklayer/ipv4/Ipv4Encap.h"

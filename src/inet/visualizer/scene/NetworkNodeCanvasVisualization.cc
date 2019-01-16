@@ -16,6 +16,7 @@
 //
 
 #include <algorithm>
+
 #include "inet/common/INETMath.h"
 #include "inet/common/figures/BoxedLabelFigure.h"
 #include "inet/visualizer/scene/NetworkNodeCanvasVisualization.h"

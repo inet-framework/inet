@@ -16,15 +16,16 @@
 //
 
 #include <algorithm>
+
 #include "inet/applications/common/SocketTag_m.h"
-#include "inet/common/packet/Message.h"
-#include "inet/common/packet/Packet.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/packet/Message.h"
+#include "inet/common/packet/Packet.h"
 #include "inet/common/stlutils.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
-#include "inet/linklayer/tun/TunControlInfo_m.h"
 #include "inet/linklayer/tun/Tun.h"
+#include "inet/linklayer/tun/TunControlInfo_m.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
 
 namespace inet {

@@ -18,7 +18,6 @@
 #include "inet/physicallayer/common/packetlevel/ListeningDecision.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 ListeningDecision::ListeningDecision(const IListening *listening, bool isListeningPossible_) :
@@ -38,6 +37,5 @@ std::ostream& ListeningDecision::printToStream(std::ostream& stream, int level) 
 }
 
 } // namespace physicallayer
-
 } // namespace inet
 

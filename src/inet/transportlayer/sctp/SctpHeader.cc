@@ -16,11 +16,10 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/transportlayer/sctp/SctpHeader.h"
 #include "inet/transportlayer/sctp/SctpAssociation.h"
+#include "inet/transportlayer/sctp/SctpHeader.h"
 
 namespace inet {
-
 namespace sctp {
 
 Register_Class(SctpHeader);
@@ -439,6 +438,5 @@ SctpParameter *SctpAsconfAckChunk::removeAsconfResponse()
 }
 
 } // namespace sctp
-
 } // namespace inet
 

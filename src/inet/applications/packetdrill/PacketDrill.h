@@ -20,16 +20,15 @@
 #define __INET_PACKETDRILL_H
 
 #include "inet/common/INETDefs.h"
-//#include "omnetpp/platdep/sockets.h"
 
-#include "PacketDrillUtils.h"
-#include "inet/transportlayer/udp/UdpHeader_m.h"
-#include "inet/transportlayer/tcp_common/TcpHeader.h"
+#include "inet/applications/packetdrill/PacketDrillApp.h"
+#include "inet/applications/packetdrill/PacketDrillUtils.h"
 #include "inet/networklayer/common/IpProtocolId_m.h"
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
-#include "inet/transportlayer/sctp/SctpHeader.h"
 #include "inet/transportlayer/sctp/SctpAssociation.h"
-#include "PacketDrillApp.h"
+#include "inet/transportlayer/sctp/SctpHeader.h"
+#include "inet/transportlayer/tcp_common/TcpHeader.h"
+#include "inet/transportlayer/udp/UdpHeader_m.h"
 
 namespace inet {
 class PacketDrillApp;

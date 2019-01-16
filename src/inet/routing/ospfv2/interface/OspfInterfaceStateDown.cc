@@ -16,13 +16,12 @@
 //
 
 #include "inet/routing/ospfv2/interface/OspfInterfaceStateDown.h"
-
-#include "inet/routing/ospfv2/messagehandler/MessageHandler.h"
-#include "inet/routing/ospfv2/router/OspfArea.h"
 #include "inet/routing/ospfv2/interface/OspfInterfaceStateLoopback.h"
 #include "inet/routing/ospfv2/interface/OspfInterfaceStateNotDesignatedRouter.h"
 #include "inet/routing/ospfv2/interface/OspfInterfaceStatePointToPoint.h"
 #include "inet/routing/ospfv2/interface/OspfInterfaceStateWaiting.h"
+#include "inet/routing/ospfv2/messagehandler/MessageHandler.h"
+#include "inet/routing/ospfv2/router/OspfArea.h"
 #include "inet/routing/ospfv2/router/OspfRouter.h"
 
 namespace inet {

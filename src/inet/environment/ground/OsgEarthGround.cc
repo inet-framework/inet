@@ -17,13 +17,11 @@
 
 #include "inet/environment/ground/OsgEarthGround.h"
 
-#ifdef WITH_OSGEARTH
-
-#ifdef WITH_VISUALIZERS
+#if defined(WITH_OSGEARTH) && defined(WITH_VISUALIZERS)
 //TODO the visualizers needed only for get the map from SceneOsgEarthVisualizer
 
-#include "inet/common/geometry/common/GeographicCoordinateSystem.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/geometry/common/GeographicCoordinateSystem.h"
 #include "inet/visualizer/scene/SceneOsgEarthVisualizer.h"
 
 
@@ -81,6 +79,5 @@ Coord OsgEarthGround::computeGroundNormal(const Coord &position) const
 
 } // namespace inet
 
-#endif // WITH_VISUALIZERS
+#endif // defined(WITH_OSGEARTH) && defined(WITH_VISUALIZERS)
 
-#endif // WITH_OSGEARTH

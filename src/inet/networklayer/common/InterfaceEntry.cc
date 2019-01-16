@@ -24,14 +24,13 @@
 
 
 
-#include "inet/networklayer/common/InterfaceEntry.h"
-
 #include "inet/common/IInterfaceRegistrationListener.h"
 #include "inet/common/INETUtils.h"
 #include "inet/common/ModuleAccess.h"
-
 #include "inet/linklayer/configurator/Ieee8021dInterfaceData.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
+#include "inet/networklayer/common/InterfaceEntry.h"
+
 
 #ifdef WITH_IPv4
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"

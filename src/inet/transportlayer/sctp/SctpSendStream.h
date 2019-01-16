@@ -22,7 +22,6 @@
 #include <list>
 
 #include "inet/common/INETDefs.h"
-
 #include "inet/transportlayer/sctp/SctpAssociation.h"
 #include "inet/transportlayer/sctp/SctpQueue.h"
 

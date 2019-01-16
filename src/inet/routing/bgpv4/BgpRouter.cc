@@ -16,8 +16,9 @@
 //
 
 #include <algorithm>
-#include "inet/routing/bgpv4/BgpRouter.h"
+
 #include "inet/common/ModuleAccess.h"
+#include "inet/routing/bgpv4/BgpRouter.h"
 #include "inet/routing/bgpv4/BgpSession.h"
 //#include "inet/routing/ospfv2/router/OspfRoutingTableEntry.h"
 

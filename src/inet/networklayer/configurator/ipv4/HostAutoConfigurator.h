@@ -20,8 +20,8 @@
 #define __INET_HOSTAUTOCONFIGURATOR_H
 
 #include "inet/common/INETDefs.h"
-#include "inet/common/lifecycle/OperationalBase.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
+#include "inet/common/lifecycle/OperationalBase.h"
 
 namespace inet {
 

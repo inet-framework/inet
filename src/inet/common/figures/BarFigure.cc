@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "BarFigure.h"
+#include "inet/common/figures/BarFigure.h"
 
 namespace inet {
 

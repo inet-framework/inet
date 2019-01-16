@@ -15,11 +15,11 @@
 // Author: Zsolt Prontvai
 //
 
-#include "inet/linklayer/ieee8021d/common/StpBase.h"
-#include "inet/networklayer/common/InterfaceEntry.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/linklayer/ieee8021d/common/StpBase.h"
+#include "inet/networklayer/common/InterfaceEntry.h"
 
 namespace inet {
 

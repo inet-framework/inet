@@ -19,7 +19,6 @@
 #define __INET_DROPTAILQUEUE_H
 
 #include "inet/common/INETDefs.h"
-
 #include "inet/common/queue/PassiveQueueBase.h"
 
 namespace inet {

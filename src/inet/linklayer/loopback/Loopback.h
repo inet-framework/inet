@@ -21,7 +21,6 @@
 #define __INET_LOOPBACK_H
 
 #include "inet/common/INETDefs.h"
-
 #include "inet/linklayer/base/MacBase.h"
 
 namespace inet {

@@ -18,8 +18,8 @@
 #ifndef __INET_LAYEREDDIMENSIONALANALOGMODEL_H
 #define __INET_LAYEREDDIMENSIONALANALOGMODEL_H
 
-#include "inet/physicallayer/base/packetlevel/DimensionalAnalogModelBase.h"
 #include "inet/physicallayer/analogmodel/bitlevel/DimensionalSignalAnalogModel.h"
+#include "inet/physicallayer/base/packetlevel/DimensionalAnalogModelBase.h"
 #include "inet/physicallayer/common/bitlevel/LayeredReception.h"
 
 namespace inet {

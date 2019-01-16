@@ -20,11 +20,9 @@
 #define __INET_TCPBASEALG_H
 
 #include "inet/common/INETDefs.h"
-
 #include "inet/transportlayer/tcp/TcpAlgorithm.h"
 
 namespace inet {
-
 namespace tcp {
 
 /**
@@ -202,7 +200,6 @@ class INET_API TcpBaseAlg : public TcpAlgorithm
 };
 
 } // namespace tcp
-
 } // namespace inet
 
 #endif // ifndef __INET_TCPBASEALG_H

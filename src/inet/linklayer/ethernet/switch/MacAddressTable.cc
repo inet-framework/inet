@@ -15,6 +15,7 @@
 //
 
 #include <map>
+
 #include "inet/linklayer/ethernet/switch/MacAddressTable.h"
 
 namespace inet {

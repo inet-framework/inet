@@ -18,7 +18,6 @@
 #include "inet/physicallayer/common/bitlevel/AdditiveScramblerModule.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 Define_Module(AdditiveScramblerModule);
@@ -43,6 +42,7 @@ AdditiveScramblerModule::~AdditiveScramblerModule()
     delete scrambler->getScrambling();
     delete scrambler;
 }
+
 } /* namespace physicallayer */
 } /* namespace inet */
 

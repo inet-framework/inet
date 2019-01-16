@@ -21,8 +21,8 @@
 // This file is based on the cSocketRTScheduler.cc of OMNeT++ written by
 // Andras Varga.
 
-#include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/common/packet/Packet.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/common/scheduler/RealTimeScheduler.h"
 
 #if defined(_WIN32) || defined(__WIN32__) || defined(WIN32) || defined(__CYGWIN__) || defined(_WIN64)

@@ -39,6 +39,7 @@
 
 #include <deque>
 #include <limits>
+
 #include "inet/common/INETDefs.h"
 
 namespace inet {

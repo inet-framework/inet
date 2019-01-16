@@ -9,18 +9,17 @@
  *  Converted to MiXiM by Kapourniotis Theodoros
  */
 
-#include "inet/linklayer/lmac/LMac.h"
-
 #include "inet/common/INETUtils.h"
 #include "inet/common/INETMath.h"
-#include "inet/common/ProtocolTag_m.h"
-#include "inet/common/ProtocolGroup.h"
-#include "inet/common/ModuleAccess.h"
-#include "inet/linklayer/lmac/LMacHeader_m.h"
-#include "inet/networklayer/common/InterfaceEntry.h"
 #include "inet/common/FindModule.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/common/ProtocolGroup.h"
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
+#include "inet/linklayer/lmac/LMac.h"
+#include "inet/linklayer/lmac/LMacHeader_m.h"
+#include "inet/networklayer/common/InterfaceEntry.h"
 
 namespace inet {
 

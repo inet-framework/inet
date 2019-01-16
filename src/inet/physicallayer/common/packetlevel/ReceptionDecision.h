@@ -21,7 +21,6 @@
 #include "inet/physicallayer/contract/packetlevel/IReceptionDecision.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 class INET_API ReceptionDecision : public IReceptionDecision, public cObject
@@ -47,7 +46,6 @@ class INET_API ReceptionDecision : public IReceptionDecision, public cObject
 };
 
 } // namespace physicallayer
-
 } // namespace inet
 
 #endif // ifndef __INET_RECEPTIONDECISION_H

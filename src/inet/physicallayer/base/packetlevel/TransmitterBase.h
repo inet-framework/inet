@@ -21,7 +21,6 @@
 #include "inet/physicallayer/contract/packetlevel/ITransmitter.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 class INET_API TransmitterBase : public cModule, public virtual ITransmitter
@@ -36,7 +35,6 @@ class INET_API TransmitterBase : public cModule, public virtual ITransmitter
 };
 
 } // namespace physicallayer
-
 } // namespace inet
 
 #endif // ifndef __INET_TRANSMITTERBASE_H

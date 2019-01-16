@@ -16,8 +16,8 @@
 //
 
 #include "inet/linklayer/ieee80211/mac/coordinationfunction/Dcf.h"
+#include "inet/linklayer/ieee80211/mac/protectionmechanism/OriginatorProtectionMechanism.h"
 #include "inet/linklayer/ieee80211/mac/rateselection/RateSelection.h"
-#include "OriginatorProtectionMechanism.h"
 
 namespace inet {
 namespace ieee80211 {

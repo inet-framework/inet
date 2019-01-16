@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/geometry/object/LineSegment.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/geometry/object/LineSegment.h"
 #include "inet/mobility/contract/IMobility.h"
 #include "inet/visualizer/base/PathCanvasVisualizerBase.h"
 

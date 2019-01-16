@@ -17,7 +17,7 @@
 
 #include "inet/applications/tcpapp/TcpGenericServerThread.h"
 
-#include "GenericAppMsg_m.h"
+#include "inet/applications/tcpapp/GenericAppMsg_m.h"
 #include "inet/common/packet/chunk/ByteCountChunk.h"
 
 namespace inet {

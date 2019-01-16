@@ -13,21 +13,19 @@
 // See the GNU Lesser General Public License for more details.
 //
 
-#include <iostream>
-#include <fstream>
 #include <algorithm>
-
-#include "inet/common/INETDefs.h"
-
-#include "inet/networklayer/ldp/Ldp.h"
+#include <fstream>
+#include <iostream>
 
 #include "inet/applications/common/SocketTag_m.h"
+#include "inet/common/INETDefs.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/Simsignals.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
+#include "inet/networklayer/ldp/Ldp.h"
 #include "inet/networklayer/mpls/LibTable.h"
 #include "inet/networklayer/ted/Ted.h"
 #include "inet/transportlayer/contract/udp/UdpControlInfo_m.h"

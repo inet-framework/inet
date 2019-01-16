@@ -21,21 +21,8 @@
 
 #include <errno.h>
 
-#include "inet/common/packet/recorder/PacketDump.h"
 #include "inet/common/packet/Packet.h"
-
-#ifdef WITH_UDP
-#include "inet/transportlayer/udp/UdpHeader_m.h"
-#endif // ifdef WITH_UDP
-
-#ifdef WITH_SCTP
-#include "inet/transportlayer/sctp/SctpHeader.h"
-#include "inet/transportlayer/sctp/SctpAssociation.h"
-#endif // ifdef WITH_SCTP
-
-#ifdef WITH_TCP_COMMON
-#include "inet/transportlayer/tcp_common/TcpHeader.h"
-#endif // ifdef WITH_TCP_COMMON
+#include "inet/common/packet/recorder/PacketDump.h"
 
 #ifdef WITH_IPv4
 #include "inet/networklayer/arp/ipv4/ArpPacket_m.h"
@@ -46,6 +33,19 @@
 #ifdef WITH_IPv6
 #include "inet/networklayer/ipv6/Ipv6Header.h"
 #endif // ifdef WITH_IPv6
+
+#ifdef WITH_SCTP
+#include "inet/transportlayer/sctp/SctpAssociation.h"
+#include "inet/transportlayer/sctp/SctpHeader.h"
+#endif // ifdef WITH_SCTP
+
+#ifdef WITH_TCP_COMMON
+#include "inet/transportlayer/tcp_common/TcpHeader.h"
+#endif // ifdef WITH_TCP_COMMON
+
+#ifdef WITH_UDP
+#include "inet/transportlayer/udp/UdpHeader_m.h"
+#endif // ifdef WITH_UDP
 
 
 namespace inet {

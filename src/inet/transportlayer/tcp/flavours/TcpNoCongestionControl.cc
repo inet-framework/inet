@@ -15,11 +15,10 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/transportlayer/tcp/flavours/TcpNoCongestionControl.h"
 #include "inet/transportlayer/tcp/Tcp.h"
+#include "inet/transportlayer/tcp/flavours/TcpNoCongestionControl.h"
 
 namespace inet {
-
 namespace tcp {
 
 Register_Class(TcpNoCongestionControl);
@@ -57,6 +56,5 @@ void TcpNoCongestionControl::receivedDataAck(uint32 firstSeqAcked)
 }
 
 } // namespace tcp
-
 } // namespace inet
 

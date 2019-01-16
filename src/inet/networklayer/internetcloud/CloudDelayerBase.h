@@ -21,7 +21,6 @@
 #define __INET_CLOUDDELAYERBASE_H
 
 #include "inet/common/INETDefs.h"
-
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/contract/INetfilter.h"
 

@@ -28,8 +28,8 @@
 #include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/InterfaceMatcher.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
-#include "inet/routing/rip/RipPacket_m.h"
 #include "inet/routing/rip/Rip.h"
+#include "inet/routing/rip/RipPacket_m.h"
 #include "inet/transportlayer/common/L4PortTag_m.h"
 #include "inet/transportlayer/udp/UdpHeader_m.h"
 

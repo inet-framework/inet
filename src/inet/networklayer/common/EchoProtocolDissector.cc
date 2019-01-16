@@ -17,11 +17,9 @@
 // @author: Zoltan Bojthe
 //
 
-#include "inet/networklayer/common/EchoProtocolDissector.h"
-
-#include "inet/networklayer/common/EchoPacket_m.h"
 #include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
-
+#include "inet/networklayer/common/EchoPacket_m.h"
+#include "inet/networklayer/common/EchoProtocolDissector.h"
 
 namespace inet {
 

@@ -36,22 +36,21 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/Protocol.h"
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/checksum/TcpIpChecksum.h"
+#include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/IpProtocolId_m.h"
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
-#include "inet/transportlayer/contract/tcp/TcpCommand_m.h"
 #include "inet/transportlayer/common/L4Tools.h"
+#include "inet/transportlayer/contract/tcp/TcpCommand_m.h"
 #include "inet/transportlayer/tcp_common/TcpHeader.h"
 #include "inet/transportlayer/tcp_common/headers/tcphdr.h"
 #include "inet/transportlayer/tcp_lwip/TcpLwipConnection.h"
 #include "inet/transportlayer/tcp_lwip/queues/TcpLwipQueues.h"
 
 namespace inet {
-
 namespace tcp {
 
 Define_Module(TcpLwip);
@@ -798,6 +797,5 @@ TcpLwipReceiveQueue *TcpLwip::createReceiveQueue()
 }
 
 } // namespace tcp
-
 } // namespace inet
 

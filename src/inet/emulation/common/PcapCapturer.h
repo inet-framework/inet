@@ -19,6 +19,7 @@
 #define __INET_PCAPCAPTURER_H
 
 #include <pcap.h>
+
 #include "inet/common/scheduler/RealTimeScheduler.h"
 
 namespace inet {

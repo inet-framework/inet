@@ -25,7 +25,6 @@
 #include "inet/physicallayer/contract/packetlevel/IRadioMedium.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 /**
@@ -244,7 +243,6 @@ class INET_API Radio : public PhysicalLayerBase, public virtual IRadio
 };
 
 } // namespace physicallayer
-
 } // namespace inet
 
 #endif // ifndef __INET_RADIO_H

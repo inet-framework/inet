@@ -28,10 +28,10 @@
 #include "NetPerfMeter.h"
 #include "NetPerfMeter_m.h"
 
-#include "inet/common/packet/Message.h"
 #include "inet/applications/common/SocketTag_m.h"
-#include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/common/TimeTag_m.h"
+#include "inet/common/packet/Message.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
 
 namespace inet {
 

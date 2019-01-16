@@ -17,7 +17,6 @@
 //
 
 #include "inet/common/INETDefs.h"
-
 #include "inet/common/queue/FifoQueue.h"
 
 namespace inet {

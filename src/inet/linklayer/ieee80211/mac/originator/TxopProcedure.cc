@@ -16,11 +16,11 @@
 //
 
 #include "inet/linklayer/ieee80211/mac/contract/IRateSelection.h"
+#include "inet/linklayer/ieee80211/mac/originator/TxopProcedure.h"
 #include "inet/physicallayer/ieee80211/mode/Ieee80211DsssMode.h"
 #include "inet/physicallayer/ieee80211/mode/Ieee80211HrDsssMode.h"
 #include "inet/physicallayer/ieee80211/mode/Ieee80211HtMode.h"
 #include "inet/physicallayer/ieee80211/mode/Ieee80211OfdmMode.h"
-#include "TxopProcedure.h"
 
 namespace inet {
 namespace ieee80211 {

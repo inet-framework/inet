@@ -15,13 +15,12 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include "inet/common/checksum/TcpIpChecksum.h"
 #include "inet/routing/ospfv2/messagehandler/LinkStateUpdateHandler.h"
-
+#include "inet/routing/ospfv2/neighbor/OspfNeighbor.h"
 #include "inet/routing/ospfv2/router/OspfArea.h"
 #include "inet/routing/ospfv2/router/OspfCommon.h"
-#include "inet/routing/ospfv2/neighbor/OspfNeighbor.h"
 #include "inet/routing/ospfv2/router/OspfRouter.h"
-#include "inet/common/checksum/TcpIpChecksum.h"
 
 namespace inet {
 

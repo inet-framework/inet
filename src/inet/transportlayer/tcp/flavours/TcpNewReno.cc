@@ -16,11 +16,11 @@
 //
 
 #include <algorithm>    // min,max
-#include "inet/transportlayer/tcp/flavours/TcpNewReno.h"
+
 #include "inet/transportlayer/tcp/Tcp.h"
+#include "inet/transportlayer/tcp/flavours/TcpNewReno.h"
 
 namespace inet {
-
 namespace tcp {
 
 Register_Class(TcpNewReno);
@@ -356,6 +356,5 @@ void TcpNewReno::receivedDuplicateAck()
 }
 
 } // namespace tcp
-
 } // namespace inet
 

@@ -18,10 +18,9 @@
 
 #include <algorithm>
 
-#include "inet/networklayer/configurator/ipv6/Ipv6FlatNetworkConfigurator.h"
-
-#include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
+#include "inet/networklayer/configurator/ipv6/Ipv6FlatNetworkConfigurator.h"
+#include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
 #include "inet/networklayer/ipv6/Ipv6RoutingTable.h"
 

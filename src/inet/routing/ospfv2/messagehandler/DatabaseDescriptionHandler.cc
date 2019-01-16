@@ -15,15 +15,13 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/routing/ospfv2/messagehandler/DatabaseDescriptionHandler.h"
-
-#include "inet/routing/ospfv2/router/OspfArea.h"
 #include "inet/routing/ospfv2/interface/OspfInterface.h"
+#include "inet/routing/ospfv2/messagehandler/DatabaseDescriptionHandler.h"
 #include "inet/routing/ospfv2/neighbor/OspfNeighbor.h"
+#include "inet/routing/ospfv2/router/OspfArea.h"
 #include "inet/routing/ospfv2/router/OspfRouter.h"
 
 namespace inet {
-
 namespace ospf {
 
 DatabaseDescriptionHandler::DatabaseDescriptionHandler(Router *containingRouter) :
@@ -256,6 +254,5 @@ bool DatabaseDescriptionHandler::processDDPacket(const OspfDatabaseDescriptionPa
 }
 
 } // namespace ospf
-
 } // namespace inet
 

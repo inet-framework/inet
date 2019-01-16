@@ -19,6 +19,7 @@
  */
 
 #include <math.h>
+
 #include "inet/common/INETDefs.h"
 #include "inet/physicallayer/ieee80211/packetlevel/errormodel/DsssErrorRateModel.h"
 

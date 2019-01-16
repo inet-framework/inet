@@ -19,7 +19,6 @@
 #define __INET_STATIONARYMOBILITY_H
 
 #include "inet/common/INETDefs.h"
-
 #include "inet/mobility/base/MobilityBase.h"
 
 namespace inet {
