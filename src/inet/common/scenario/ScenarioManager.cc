@@ -194,8 +194,6 @@ void ScenarioManager::processCreateModuleCommand(cXMLElement *node)
     const char *submoduleName = xmlutils::getMandatoryFilledAttribute(*node, "submodule");
     const char *parentModulePath = xmlutils::getMandatoryFilledAttribute(*node, "parent");
     cModuleType *moduleType = cModuleType::get(moduleTypeName);
-    if (moduleType == nullptr)
-        throw cRuntimeError("module type '%s' is not found", moduleType);
     cModule *parentModule = getSimulation()->getSystemModule()->getModuleByPath(parentModulePath);
     if (parentModule == nullptr)
         throw cRuntimeError("parent module '%s' is not found", parentModulePath);
