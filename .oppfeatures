@@ -351,9 +351,7 @@
         id="ExternalInterface"
         name="Network emulation support"
         description = "Support for connecting the simulation to a real network.
-                       The ExternalInterface module is responsible for sending/receiving
-                       packets on the network. This feature requires at least version 1.5.3
-                       of the libpcap-dev package."
+                       This feature currently works on Linux systems only."
         initiallyEnabled = "false"
         requires = "Ethernet IPv4"
         labels = "nic"
@@ -362,7 +360,7 @@
                       "
         extraSourceFolders = ""
         compileFlags = "-DWITH_EXT_IF"
-        linkerFlags = "-lpcap"
+        linkerFlags = ""
         />
     <feature
         id="ExternalInterface_examples"

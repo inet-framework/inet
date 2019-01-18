@@ -15,15 +15,17 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#define WANT_WINSOCK2
+#include <omnetpp/platdep/sockets.h>
+
+#ifndef  __linux__
+#error The 'Network Emulation Support' feature currently works on Linux systems only
+#else
 
 #include <arpa/inet.h>
 #include <linux/if_packet.h>
 #include <net/if.h>
 #include <netinet/ether.h>
 #include <sys/ioctl.h>
-
-#include <omnetpp/platdep/sockets.h>
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/NetworkNamespaceContext.h"
@@ -141,4 +143,6 @@ bool ExtIpv4Socket::notify(int fd)
 }
 
 } // namespace inet
+
+#endif // __linux__
 
