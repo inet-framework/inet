@@ -174,14 +174,14 @@ class Batman : public ManetRoutingBase
     virtual bool getDestAddress(Packet *, L3Address &) override {return false;};
 
 
-    virtual bool handleNodeStart(IDoneCallback *doneCallback) override;
-    virtual bool handleNodeShutdown(IDoneCallback *doneCallback) override;
-    virtual void handleNodeCrash() override;
+    virtual void handleStartOperation(LifecycleOperation *operation) override;
+    virtual void handleStopOperation(LifecycleOperation *operation) override;
+    virtual void handleCrashOperation(LifecycleOperation *operation) override;
 
     virtual void socketDataArrived(UdpSocket *socket, Packet *packet) override;
     virtual void socketErrorArrived(UdpSocket *socket, Indication *indication) override;
 
-    virtual Result ensureRouteForDatagram(Packet *datagram) override {throw cRuntimeError("ensureRouteForDatagram called with OLSR protocol");}
+    virtual Result ensureRouteForDatagram(Packet *datagram) override {throw cRuntimeError("ensureRouteForDatagram called with Batman protocol");}
 
 };
 

@@ -3148,16 +3148,14 @@ Olsr::isNodeCandidate(const nsaddr_t &src_addr)
     return false;
 }
 
-bool Olsr::handleNodeStart(IDoneCallback *doneCallback)
+void Olsr::handleStartOperation(LifecycleOperation *operation)
 {
     hello_timer_.resched(hello_ival());
     tc_timer_.resched(hello_ival());
     mid_timer_.resched(hello_ival());
-    scheduleEvent();
-    return true;
-}
+    scheduleEvent();}
 
-bool Olsr::handleNodeShutdown(IDoneCallback *doneCallback)
+void Olsr::handleStopOperation(LifecycleOperation *operation)
 {
 
     rtable_.clear();
@@ -3176,10 +3174,9 @@ bool Olsr::handleNodeShutdown(IDoneCallback *doneCallback)
         delete timer;
     }
     scheduleEvent();
-    return true;
 }
 
-void Olsr::handleNodeCrash()
+void Olsr::handleCrashOperation(LifecycleOperation *operation)
 {
     rtable_.clear();
     msgs_.clear();

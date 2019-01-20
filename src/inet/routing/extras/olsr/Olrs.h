@@ -540,9 +540,9 @@ class Olsr : public ManetRoutingBase
 
     virtual bool isNodeCandidate(const L3Address&);
 
-    virtual bool handleNodeStart(IDoneCallback *doneCallback) override;
-    virtual bool handleNodeShutdown(IDoneCallback *doneCallback) override;
-    virtual void handleNodeCrash() override;
+    virtual void handleStartOperation(LifecycleOperation *operation) override;
+    virtual void handleStopOperation(LifecycleOperation *operation) override;
+    virtual void handleCrashOperation(LifecycleOperation *operation) override;
 
 
     virtual Result ensureRouteForDatagram(Packet *datagram) override {throw cRuntimeError("ensureRouteForDatagram called with OLSR protocol");}

@@ -459,7 +459,7 @@ Packet *Batman::buildDefaultBatmanPkt(const BatmanIf *batman_if)
     return p;
 }
 
-bool Batman::handleNodeStart(IDoneCallback *doneCallback)
+void Batman::handleStartOperation(LifecycleOperation *operation)
 {
     for (auto & elem : if_list)
     {
@@ -471,10 +471,9 @@ bool Batman::handleNodeStart(IDoneCallback *doneCallback)
     simtime_t select_timeout = forw_list[0]->send_time > curr_time ? forw_list[0]->send_time : curr_time+10;
     scheduleAt(select_timeout, timer);
     scheduleNextEvent();
-    return true;
 }
 
-bool Batman::handleNodeShutdown(IDoneCallback *doneCallback)
+void Batman::handleStopOperation(LifecycleOperation *operation)
 {
 
     while (!origMap.empty())
@@ -507,10 +506,9 @@ bool Batman::handleNodeShutdown(IDoneCallback *doneCallback)
     hna_list.clear();
     hna_buff_local.clear();
     hna_chg_list.clear();
-    return true;
 }
 
-void Batman::handleNodeCrash()
+void Batman::handleCrashOperation(LifecycleOperation *operation)
 {
 
     while (!origMap.empty())

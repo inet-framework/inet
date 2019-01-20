@@ -1846,7 +1846,7 @@ void NS_CLASS actualizeTablesWithCollaborative(const L3Address &dest)
 }
 
 
-bool NS_CLASS handleNodeStart(IDoneCallback *doneCallback)
+void NS_CLASS handleStartOperation(LifecycleOperation *operation)
 {
     if (isRoot)
     {
@@ -1860,10 +1860,9 @@ bool NS_CLASS handleNodeStart(IDoneCallback *doneCallback)
     rt_table_init();
     packet_queue_init();
     startAODVUUAgent();
-    return true;
 }
 
-bool NS_CLASS handleNodeShutdown(IDoneCallback *doneCallback)
+void NS_CLASS handleStopOperation(LifecycleOperation *operation)
 {
 
     while (!aodvRtTableMap.empty())
@@ -1891,10 +1890,9 @@ bool NS_CLASS handleNodeShutdown(IDoneCallback *doneCallback)
     packet_queue_destroy();
     cancelEvent(sendMessageEvent);
     log_cleanup();
-    return true;
 }
 
-void NS_CLASS handleNodeCrash()
+void NS_CLASS handleCrashOperation(LifecycleOperation *operation)
 {
     while (!aodvRtTableMap.empty())
     {
