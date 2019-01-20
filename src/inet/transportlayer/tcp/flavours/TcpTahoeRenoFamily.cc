@@ -15,11 +15,10 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/transportlayer/tcp/flavours/TcpTahoeRenoFamily.h"
 #include "inet/transportlayer/tcp/Tcp.h"
+#include "inet/transportlayer/tcp/flavours/TcpTahoeRenoFamily.h"
 
 namespace inet {
-
 namespace tcp {
 
 TcpTahoeRenoFamilyStateVariables::TcpTahoeRenoFamilyStateVariables()
@@ -61,6 +60,5 @@ TcpTahoeRenoFamily::TcpTahoeRenoFamily() : TcpBaseAlg(),
 }
 
 } // namespace tcp
-
 } // namespace inet
 

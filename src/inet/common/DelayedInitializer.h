@@ -20,6 +20,8 @@
 
 #include <functional>
 
+#include "inet/common/INETDefs.h"
+
 namespace inet {
 
 // this is a singleton
@@ -48,3 +50,4 @@ template <typename T> class INET_API DelayedInitializer
 } /* namespace inet */
 
 #endif // ifndef __INET_DELAYEDINITIALIZER_H
+

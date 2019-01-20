@@ -20,6 +20,8 @@
 #ifndef __INET_INITSTAGES
 #define __INET_INITSTAGES
 
+#include "inet/common/INETDefs.h"
+
 namespace inet {
 
 /**

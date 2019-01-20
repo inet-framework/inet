@@ -20,7 +20,6 @@
 #define __INET_STATICGRIDMOBILITY_H
 
 #include "inet/common/INETDefs.h"
-
 #include "inet/mobility/static/StationaryMobility.h"
 
 namespace inet {

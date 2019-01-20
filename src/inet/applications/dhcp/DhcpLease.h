@@ -19,9 +19,9 @@
 #ifndef __INET_DHCPLEASE_H
 #define __INET_DHCPLEASE_H
 
-#include "inet/networklayer/contract/ipv4/Ipv4Address.h"
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/networklayer/arp/ipv4/Arp.h"
+#include "inet/networklayer/contract/ipv4/Ipv4Address.h"
 
 namespace inet {
 

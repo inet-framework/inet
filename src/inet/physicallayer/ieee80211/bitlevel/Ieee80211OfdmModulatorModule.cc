@@ -15,14 +15,13 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "Ieee80211OfdmModulatorModule.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OfdmModulatorModule.h"
+#include "inet/physicallayer/modulation/BpskModulation.h"
 #include "inet/physicallayer/modulation/Qam16Modulation.h"
 #include "inet/physicallayer/modulation/Qam64Modulation.h"
-#include "inet/physicallayer/modulation/BpskModulation.h"
 #include "inet/physicallayer/modulation/QpskModulation.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 Define_Module(Ieee80211OfdmModulatorModule);
@@ -42,6 +41,7 @@ Ieee80211OfdmModulatorModule::~Ieee80211OfdmModulatorModule()
 {
     delete ofdmModulator;
 }
+
 } /* namespace physicallayer */
 } /* namespace inet */
 

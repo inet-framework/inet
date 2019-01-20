@@ -16,11 +16,9 @@
 ***************************************************************************/
 
 #include "inet/transportlayer/rtp/RtpInnerPacket_m.h"
-
 #include "inet/transportlayer/rtp/RtpPacket_m.h"
 
 namespace inet {
-
 namespace rtp {
 
 Register_Class(RtpInnerPacket);
@@ -163,6 +161,5 @@ void RtpInnerPacket::setDataInPkt(Packet *packet, Ipv4Address address_par, int p
 }
 
 } // namespace rtp
-
 } // namespace inet
 

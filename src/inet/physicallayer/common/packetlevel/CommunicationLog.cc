@@ -19,7 +19,6 @@
 #include "inet/physicallayer/common/packetlevel/Radio.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 void CommunicationLog::open()
@@ -54,6 +53,5 @@ void CommunicationLog::writeReception(const IRadio *receiver, const ISignal *sig
 }
 
 } // namespace physicallayer
-
 } // namespace inet
 

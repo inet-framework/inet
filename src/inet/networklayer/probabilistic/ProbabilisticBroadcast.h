@@ -8,13 +8,14 @@
 #ifndef __INET_PROBABILISTICBROADCAST_H
 #define __INET_PROBABILISTICBROADCAST_H
 
-#include <set>
 #include <map>
+#include <set>
+
 #include "inet/common/packet/Packet.h"
-#include "inet/networklayer/contract/INetworkProtocol.h"
 #include "inet/networklayer/base/NetworkProtocolBase.h"
-#include "inet/networklayer/probabilistic/ProbabilisticBroadcastHeader_m.h"
 #include "inet/networklayer/common/L3Address.h"
+#include "inet/networklayer/contract/INetworkProtocol.h"
+#include "inet/networklayer/probabilistic/ProbabilisticBroadcastHeader_m.h"
 
 namespace inet {
 

@@ -16,8 +16,8 @@
 //
 //
 
-#include "GaugeFigure.h"
 #include "inet/common/INETUtils.h"
+#include "inet/common/figures/GaugeFigure.h"
 
 namespace inet {
 

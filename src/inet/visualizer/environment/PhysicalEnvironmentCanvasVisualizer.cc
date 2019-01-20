@@ -15,13 +15,14 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include <algorithm>
+
+#include "inet/common/ModuleAccess.h"
 #include "inet/common/geometry/shape/Cuboid.h"
-#include "inet/common/geometry/shape/polyhedron/Polyhedron.h"
 #include "inet/common/geometry/shape/Prism.h"
 #include "inet/common/geometry/shape/Sphere.h"
-#include "inet/common/ModuleAccess.h"
+#include "inet/common/geometry/shape/polyhedron/Polyhedron.h"
 #include "inet/visualizer/environment/PhysicalEnvironmentCanvasVisualizer.h"
-#include <algorithm>
 
 namespace inet {
 

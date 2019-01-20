@@ -18,9 +18,9 @@
 #ifndef __INET_PACKETDROPVISUALIZERBASE_H
 #define __INET_PACKETDROPVISUALIZERBASE_H
 
-#include "inet/common/packet/PacketFilter.h"
 #include "inet/common/Simsignals.h"
 #include "inet/common/StringFormat.h"
+#include "inet/common/packet/PacketFilter.h"
 #include "inet/visualizer/base/VisualizerBase.h"
 #include "inet/visualizer/util/AnimationPosition.h"
 #include "inet/visualizer/util/ColorSet.h"

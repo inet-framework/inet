@@ -18,11 +18,10 @@
 #ifndef __INET_IFECCODER_H
 #define __INET_IFECCODER_H
 
-#include "inet/physicallayer/contract/packetlevel/IPrintableObject.h"
 #include "inet/common/BitVector.h"
+#include "inet/physicallayer/contract/packetlevel/IPrintableObject.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 class INET_API IForwardErrorCorrection : public IPrintableObject
@@ -43,7 +42,6 @@ class INET_API IFecCoder : public IPrintableObject
 };
 
 } // namespace physicallayer
-
 } // namespace inet
 
 #endif // ifndef __INET_IFECCODER_H

@@ -16,6 +16,7 @@
  */
 
 #include <ctype.h>
+
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/networklayer/common/InterfaceToken.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"

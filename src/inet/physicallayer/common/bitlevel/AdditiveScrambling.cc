@@ -18,7 +18,6 @@
 #include "inet/physicallayer/common/bitlevel/AdditiveScrambling.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 AdditiveScrambling::AdditiveScrambling(const ShortBitVector& seed, const ShortBitVector& generatorPolynomial) :
@@ -37,6 +36,5 @@ std::ostream& AdditiveScrambling::printToStream(std::ostream& stream, int level)
 }
 
 } /* namespace physicallayer */
-
 } /* namespace inet */
 

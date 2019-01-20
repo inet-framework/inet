@@ -27,9 +27,9 @@
 #ifndef __INET_IPV6TUNNELING_H
 #define __INET_IPV6TUNNELING_H
 
+#include "inet/common/lifecycle/LifecycleUnsupported.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/contract/ipv6/Ipv6Address.h"
-#include "inet/common/lifecycle/LifecycleUnsupported.h"
 
 namespace inet {
 

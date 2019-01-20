@@ -24,14 +24,13 @@
 
 
 
-#include "inet/networklayer/common/InterfaceEntry.h"
-
 #include "inet/common/IInterfaceRegistrationListener.h"
 #include "inet/common/INETUtils.h"
 #include "inet/common/ModuleAccess.h"
-
 #include "inet/linklayer/configurator/Ieee8021dInterfaceData.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
+#include "inet/networklayer/common/InterfaceEntry.h"
+
 
 #ifdef WITH_IPv4
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
@@ -59,13 +58,8 @@ void InterfaceProtocolData::changed(simsignal_t signalID, int fieldId)
 
 std::string InterfaceEntryChangeDetails::str() const
 {
-    return ie->str();
-}
-
-std::string InterfaceEntryChangeDetails::detailedInfo() const
-{
     std::stringstream out;
-    out << ie->detailedInfo() << " changed field: " << field << "\n";
+    out << ie->str() << " changed field: " << field << "\n";
     return out.str();
 }
 
@@ -110,53 +104,23 @@ std::string InterfaceEntry::str() const
 {
     std::stringstream out;
     out << getInterfaceName();
-    out << "  ID:" << getInterfaceId();
-    out << "  MTU:" << getMtu();
-    if (!isUp())
-        out << " DOWN";
+    out << " ID:" << getInterfaceId();
+    out << " MTU:" << getMtu();
+    out << ((state == DOWN) ? " DOWN" : " UP");
+    if (isLoopback())
+        out << " LOOPBACK";
     if (isBroadcast())
         out << " BROADCAST";
+    out << (hasCarrier() ? " CARRIER" : " NOCARRIER");
     if (isMulticast())
         out << " MULTICAST";
     if (isPointToPoint())
         out << " POINTTOPOINT";
-    if (isLoopback())
-        out << " LOOPBACK";
-    out << "  macAddr:";
+    out << " macAddr:";
     if (getMacAddress().isUnspecified())
         out << "n/a";
     else
         out << getMacAddress();
-
-    for (int i=0; i<protocolDataSet.getNumTags(); i++)
-        out << " " << protocolDataSet.getTag(i)->str();
-
-    return out.str();
-}
-
-std::string InterfaceEntry::detailedInfo() const
-{
-    std::stringstream out;
-    out << "name:" << getInterfaceName();
-    out << "  ID:" << getInterfaceId();
-    out << "  MTU: " << getMtu() << " \t";
-    out << ((state == DOWN) ? "DOWN " : "UP ");
-    if (isLoopback())
-        out << "LOOPBACK ";
-    if (isBroadcast())
-        out << "BROADCAST ";
-    out << (hasCarrier() ? "CARRIER " : "NOCARRIER ");
-    if (isMulticast())
-        out << "MULTICAST ";
-    if (isPointToPoint())
-        out << "POINTTOPOINT ";
-    out << "\n";
-    out << "  macAddr:";
-    if (getMacAddress().isUnspecified())
-        out << "n/a";
-    else
-        out << getMacAddress();
-    out << "\n";
     for (int i=0; i<protocolDataSet.getNumTags(); i++)
         out << " " << protocolDataSet.getTag(i)->str();
 

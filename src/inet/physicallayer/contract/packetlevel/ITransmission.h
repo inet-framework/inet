@@ -18,17 +18,16 @@
 #ifndef __INET_ITRANSMISSION_H
 #define __INET_ITRANSMISSION_H
 
+#include "inet/common/Units.h"
 #include "inet/common/geometry/common/Coord.h"
 #include "inet/common/geometry/common/Quaternion.h"
 #include "inet/common/packet/Packet.h"
-#include "inet/common/Units.h"
 #include "inet/physicallayer/contract/bitlevel/ISignalAnalogModel.h"
 #include "inet/physicallayer/contract/packetlevel/IAntennaGain.h"
 #include "inet/physicallayer/contract/packetlevel/IPrintableObject.h"
 #include "inet/physicallayer/contract/packetlevel/IRadioSignal.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 class IRadio;
@@ -156,7 +155,6 @@ class INET_API ITransmission : public IPrintableObject
 };
 
 } // namespace physicallayer
-
 } // namespace inet
 
 #endif // ifndef __INET_ITRANSMISSION_H

@@ -21,7 +21,6 @@
 #include <stack>
 
 #include "inet/common/INETDefs.h"
-
 #include "inet/mobility/base/LineSegmentsMobilityBase.h"
 
 namespace inet {

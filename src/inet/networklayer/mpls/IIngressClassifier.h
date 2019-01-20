@@ -16,7 +16,6 @@
 #define __INET_ICLASSIFIER_H
 
 #include "inet/common/INETDefs.h"
-
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/mpls/LibTable.h"
 

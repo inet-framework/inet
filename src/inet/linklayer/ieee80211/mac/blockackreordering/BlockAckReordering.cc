@@ -15,8 +15,8 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 // 
 
-#include "BlockAckReordering.h"
 #include "inet/linklayer/ieee80211/mac/blockack/RecipientBlockAckAgreement.h"
+#include "inet/linklayer/ieee80211/mac/blockackreordering/BlockAckReordering.h"
 
 namespace inet {
 namespace ieee80211 {

@@ -17,12 +17,11 @@
 // @author: Zoltan Bojthe
 //
 
-#include "inet/linklayer/ieee802154/Ieee802154ProtocolDissector.h"
-
-#include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
 #include "inet/linklayer/ieee802154/Ieee802154MacHeader_m.h"
+#include "inet/linklayer/ieee802154/Ieee802154ProtocolDissector.h"
 
 namespace inet {
 

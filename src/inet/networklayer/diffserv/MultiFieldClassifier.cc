@@ -22,7 +22,8 @@
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
-#include "inet/transportlayer/common/L4Tools.h"
+#include "inet/networklayer/diffserv/DiffservUtil.h"
+#include "inet/networklayer/diffserv/MultiFieldClassifier.h"
 
 #ifdef WITH_IPv4
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
@@ -32,16 +33,15 @@
 #include "inet/networklayer/ipv6/Ipv6Header.h"
 #endif // ifdef WITH_IPv6
 
-#ifdef WITH_UDP
-#include "inet/transportlayer/udp/UdpHeader_m.h"
-#endif // ifdef WITH_UDP
+#include "inet/transportlayer/common/L4Tools.h"
 
 #ifdef WITH_TCP_COMMON
 #include "inet/transportlayer/tcp_common/TcpHeader.h"
 #endif // ifdef WITH_TCP_COMMON
 
-#include "inet/networklayer/diffserv/MultiFieldClassifier.h"
-#include "inet/networklayer/diffserv/DiffservUtil.h"
+#ifdef WITH_UDP
+#include "inet/transportlayer/udp/UdpHeader_m.h"
+#endif // ifdef WITH_UDP
 
 namespace inet {
 

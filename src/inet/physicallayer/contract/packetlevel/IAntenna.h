@@ -19,12 +19,11 @@
 #define __INET_IANTENNA_H
 
 #include "inet/common/INETDefs.h"
-#include "inet/physicallayer/contract/packetlevel/IPrintableObject.h"
-#include "inet/physicallayer/contract/packetlevel/IAntennaGain.h"
 #include "inet/mobility/contract/IMobility.h"
+#include "inet/physicallayer/contract/packetlevel/IAntennaGain.h"
+#include "inet/physicallayer/contract/packetlevel/IPrintableObject.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 /**
@@ -54,7 +53,6 @@ class INET_API IAntenna : public IPrintableObject
 };
 
 } // namespace physicallayer
-
 } // namespace inet
 
 #endif // ifndef __INET_IANTENNA_H

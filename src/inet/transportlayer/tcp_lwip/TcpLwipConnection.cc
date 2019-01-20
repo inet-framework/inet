@@ -16,22 +16,21 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#include "inet/transportlayer/tcp_lwip/TcpLwipConnection.h"
 
 #include "inet/applications/common/SocketTag_m.h"
+#include "inet/common/INETUtils.h"
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/common/packet/Message.h"
 #include "inet/common/checksum/TcpIpChecksum.h"
-#include "lwip/lwip_tcp.h"
+#include "inet/common/packet/Message.h"
 #include "inet/transportlayer/contract/tcp/TcpCommand_m.h"
-#include "inet/transportlayer/tcp_lwip/TcpLwip.h"
-#include "inet/transportlayer/tcp_lwip/queues/TcpLwipQueues.h"
 #include "inet/transportlayer/tcp_common/TcpHeader.h"
 #include "inet/transportlayer/tcp_common/headers/tcphdr.h"
-#include "inet/common/INETUtils.h"
+#include "lwip/lwip_tcp.h"
+#include "inet/transportlayer/tcp_lwip/TcpLwip.h"
+#include "inet/transportlayer/tcp_lwip/TcpLwipConnection.h"
+#include "inet/transportlayer/tcp_lwip/queues/TcpLwipQueues.h"
 
 namespace inet {
-
 namespace tcp {
 
 TcpLwipConnection::Stats::Stats()
@@ -393,6 +392,5 @@ void TcpLwipConnection::sendUpData()
 }
 
 } // namespace tcp
-
 } // namespace inet
 

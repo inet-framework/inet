@@ -16,9 +16,9 @@
 #ifndef __INET_PACKETPRINTER_H_
 #define __INET_PACKETPRINTER_H_
 
+#include "inet/common/StringFormat.h"
 #include "inet/common/packet/dissector/PacketDissector.h"
 #include "inet/common/packet/printer/ProtocolPrinter.h"
-#include "inet/common/StringFormat.h"
 
 #ifdef WITH_RADIO
 #include "inet/physicallayer/common/packetlevel/Signal.h"

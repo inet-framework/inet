@@ -18,15 +18,15 @@
 #ifndef __INET_OSPFAREA_H
 #define __INET_OSPFAREA_H
 
-#include <vector>
 #include <map>
+#include <vector>
 
 #include "inet/common/INETDefs.h"
+#include "inet/networklayer/contract/IInterfaceTable.h"
+#include "inet/routing/ospfv2/interface/OspfInterface.h"
 #include "inet/routing/ospfv2/router/Lsa.h"
 #include "inet/routing/ospfv2/router/OspfCommon.h"
-#include "inet/routing/ospfv2/interface/OspfInterface.h"
 #include "inet/routing/ospfv2/router/OspfRoutingTableEntry.h"
-#include "inet/networklayer/contract/IInterfaceTable.h"
 
 namespace inet {
 

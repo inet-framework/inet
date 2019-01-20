@@ -18,19 +18,18 @@
 #ifndef __INET_IEEE80211OFDMDECODER_H
 #define __INET_IEEE80211OFDMDECODER_H
 
-#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OfdmInterleaver.h"
-#include "inet/physicallayer/common/bitlevel/AdditiveScrambler.h"
-#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OfdmInterleaving.h"
-#include "inet/physicallayer/common/bitlevel/ConvolutionalCoder.h"
-#include "inet/physicallayer/ieee80211/mode/Ieee80211OfdmCode.h"
-#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211ConvolutionalCode.h"
 #include "inet/physicallayer/base/packetlevel/ApskModulationBase.h"
-#include "inet/physicallayer/contract/bitlevel/ISignalPacketModel.h"
-#include "inet/physicallayer/contract/bitlevel/ISignalBitModel.h"
+#include "inet/physicallayer/common/bitlevel/AdditiveScrambler.h"
+#include "inet/physicallayer/common/bitlevel/ConvolutionalCoder.h"
 #include "inet/physicallayer/contract/bitlevel/IDecoder.h"
+#include "inet/physicallayer/contract/bitlevel/ISignalBitModel.h"
+#include "inet/physicallayer/contract/bitlevel/ISignalPacketModel.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211ConvolutionalCode.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OfdmInterleaver.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OfdmInterleaving.h"
+#include "inet/physicallayer/ieee80211/mode/Ieee80211OfdmCode.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 class INET_API Ieee80211OfdmDecoder : public IDecoder
@@ -56,6 +55,7 @@ class INET_API Ieee80211OfdmDecoder : public IDecoder
     const IReceptionPacketModel *decode(const IReceptionBitModel *bitModel) const override;
     const Ieee80211OfdmCode *getCode() const { return code; }
 };
+
 } /* namespace physicallayer */
 } /* namespace inet */
 

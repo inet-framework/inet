@@ -17,10 +17,9 @@
 // @author: Zoltan Bojthe
 //
 
-#include "inet/networklayer/ted/LsrProtocolDissector.h"
-
-#include "inet/networklayer/ted/LinkStatePacket_m.h"
 #include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
+#include "inet/networklayer/ted/LinkStatePacket_m.h"
+#include "inet/networklayer/ted/LsrProtocolDissector.h"
 
 
 namespace inet {

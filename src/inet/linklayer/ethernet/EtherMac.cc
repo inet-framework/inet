@@ -19,7 +19,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "inet/linklayer/ethernet/EtherMac.h"
 
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ProtocolTag_m.h"
@@ -28,8 +27,9 @@
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/ethernet/EtherEncap.h"
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
-#include "inet/linklayer/ethernet/Ethernet.h"
+#include "inet/linklayer/ethernet/EtherMac.h"
 #include "inet/linklayer/ethernet/EtherPhyFrame_m.h"
+#include "inet/linklayer/ethernet/Ethernet.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
 
 namespace inet {

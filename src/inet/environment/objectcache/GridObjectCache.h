@@ -20,9 +20,9 @@
 
 #include "inet/common/IVisitor.h"
 #include "inet/common/geometry/container/SpatialGrid.h"
+#include "inet/environment/common/PhysicalEnvironment.h"
 #include "inet/environment/contract/IObjectCache.h"
 #include "inet/environment/contract/IPhysicalObject.h"
-#include "inet/environment/common/PhysicalEnvironment.h"
 
 namespace inet {
 

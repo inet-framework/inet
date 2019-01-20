@@ -19,13 +19,13 @@
 #define __INET_RIPROUTEDATA_H
 
 #include <set>
-#include "inet/networklayer/common/L3Address.h"
-#include "inet/networklayer/contract/IRoute.h"
-#include "inet/networklayer/contract/IInterfaceTable.h"
+
 #include "inet/common/INETDefs.h"
+#include "inet/networklayer/common/L3Address.h"
+#include "inet/networklayer/contract/IInterfaceTable.h"
+#include "inet/networklayer/contract/IRoute.h"
 
 namespace inet {
-
 
 class INET_API RipRoute : public cObject
 {

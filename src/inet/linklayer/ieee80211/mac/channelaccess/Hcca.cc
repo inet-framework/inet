@@ -15,7 +15,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#include "Hcca.h"
+#include "inet/linklayer/ieee80211/mac/channelaccess/Hcca.h"
 
 namespace inet {
 namespace ieee80211 {

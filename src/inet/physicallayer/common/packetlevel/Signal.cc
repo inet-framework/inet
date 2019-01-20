@@ -20,7 +20,6 @@
 #include "inet/physicallayer/contract/packetlevel/IRadioMedium.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 Signal::Signal(const ITransmission *transmission) :
@@ -104,6 +103,5 @@ const IReception *Signal::getReception() const
 }
 
 } // namespace physicallayer
-
 } // namespace inet
 

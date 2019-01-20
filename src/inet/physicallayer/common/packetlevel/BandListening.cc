@@ -18,7 +18,6 @@
 #include "inet/physicallayer/common/packetlevel/BandListening.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 BandListening::BandListening(const IRadio *radio, simtime_t startTime, simtime_t endTime, Coord startPosition, Coord endPosition, Hz carrierFrequency, Hz bandwidth) :
@@ -38,6 +37,5 @@ std::ostream& BandListening::printToStream(std::ostream& stream, int level) cons
 }
 
 } // namespace physicallayer
-
 } // namespace inet
 

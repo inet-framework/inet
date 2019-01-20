@@ -20,9 +20,7 @@
 
 #include "inet/environment/contract/IGround.h"
 
-#ifdef WITH_OSGEARTH
-
-#ifdef WITH_VISUALIZERS
+#if defined(WITH_OSGEARTH) && defined(WITH_VISUALIZERS)
 //TODO the visualizers needed only for get the map from SceneOsgEarthVisualizer
 
 #include <osgEarth/ElevationQuery>
@@ -51,9 +49,7 @@ class INET_API OsgEarthGround : public IGround, public cModule
 
 } // namespace inet
 
-#endif // WITH_VISUALIZERS
-
-#endif // WITH_OSGEARTH
+#endif // defined(WITH_OSGEARTH) && defined(WITH_VISUALIZERS)
 
 #endif // ifndef __INET_OSGEARTHGROUND_H
 

@@ -42,6 +42,7 @@ class INET_API UdpBasicApp : public ApplicationBase, public UdpSocket::ICallback
     int localPort = -1, destPort = -1;
     simtime_t startTime;
     simtime_t stopTime;
+    bool dontFragment = false;
     const char *packetName = nullptr;
 
     // state

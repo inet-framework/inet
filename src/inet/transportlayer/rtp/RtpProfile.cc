@@ -17,14 +17,12 @@
 
 #include <string.h>
 
-#include "inet/transportlayer/rtp/RtpProfile.h"
-
 #include "inet/transportlayer/rtp/RtpInnerPacket_m.h"
 #include "inet/transportlayer/rtp/RtpPayloadReceiver.h"
 #include "inet/transportlayer/rtp/RtpPayloadSender.h"
+#include "inet/transportlayer/rtp/RtpProfile.h"
 
 namespace inet {
-
 namespace rtp {
 
 Define_Module(RtpProfile);
@@ -302,6 +300,5 @@ RtpProfile::SsrcGate *RtpProfile::newSSRCGate(uint32 ssrc)
 }
 
 } // namespace rtp
-
 } // namespace inet
 

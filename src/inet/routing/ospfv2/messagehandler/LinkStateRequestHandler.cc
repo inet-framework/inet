@@ -18,7 +18,6 @@
 #include <vector>
 
 #include "inet/routing/ospfv2/messagehandler/LinkStateRequestHandler.h"
-
 #include "inet/routing/ospfv2/neighbor/OspfNeighbor.h"
 #include "inet/routing/ospfv2/router/OspfRouter.h"
 

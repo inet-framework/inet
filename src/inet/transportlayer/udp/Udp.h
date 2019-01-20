@@ -19,15 +19,15 @@
 #ifndef __INET_UDP_H
 #define __INET_UDP_H
 
-#include <map>
 #include <list>
+#include <map>
 
+#include "inet/common/Protocol.h"
 #include "inet/common/lifecycle/OperationalBase.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
-#include "inet/common/Protocol.h"
-#include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/networklayer/contract/INetfilter.h"
 #include "inet/transportlayer/common/CrcMode_m.h"
 #include "inet/transportlayer/common/TransportPseudoHeader_m.h"

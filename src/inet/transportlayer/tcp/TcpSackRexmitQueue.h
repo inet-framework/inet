@@ -19,12 +19,10 @@
 #define __INET_TCPSACKREXMITQUEUE_H
 
 #include "inet/common/INETDefs.h"
-
 #include "inet/transportlayer/tcp/TcpConnection.h"
 #include "inet/transportlayer/tcp_common/TcpHeader.h"
 
 namespace inet {
-
 namespace tcp {
 
 /**
@@ -183,7 +181,6 @@ class INET_API TcpSackRexmitQueue
 };
 
 } // namespace tcp
-
 } // namespace inet
 
 #endif // ifndef __INET_TCPSACKREXMITQUEUE_H

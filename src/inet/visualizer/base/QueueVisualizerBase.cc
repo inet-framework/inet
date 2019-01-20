@@ -16,6 +16,7 @@
 //
 
 #include <algorithm>
+
 #include "inet/visualizer/base/QueueVisualizerBase.h"
 
 namespace inet {

@@ -14,8 +14,8 @@
 //
 
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
-#include "inet/linklayer/common/MacAddress.h"
 #include "inet/linklayer/common/EtherType_m.h"
+#include "inet/linklayer/common/MacAddress.h"
 #include "inet/networklayer/arp/ipv4/ArpPacket_m.h"
 #include "inet/networklayer/arp/ipv4/ArpPacketSerializer.h"
 

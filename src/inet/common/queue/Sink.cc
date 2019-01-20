@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/queue/Sink.h"
 #include "inet/common/Simsignals.h"
+#include "inet/common/queue/Sink.h"
 
 namespace inet {
 

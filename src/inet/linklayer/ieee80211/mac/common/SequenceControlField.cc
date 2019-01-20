@@ -15,7 +15,7 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-#include "SequenceControlField.h"
+#include "inet/linklayer/ieee80211/mac/common/SequenceControlField.h"
 
 namespace inet {
 namespace ieee80211 {

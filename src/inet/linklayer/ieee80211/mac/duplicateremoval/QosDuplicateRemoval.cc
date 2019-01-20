@@ -16,7 +16,7 @@
 //
 
 #include "inet/common/stlutils.h"
-#include "QosDuplicateRemoval.h"
+#include "inet/linklayer/ieee80211/mac/duplicateremoval/QosDuplicateRemoval.h"
 
 namespace inet {
 namespace ieee80211 {

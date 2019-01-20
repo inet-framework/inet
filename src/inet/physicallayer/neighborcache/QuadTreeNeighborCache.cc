@@ -15,11 +15,10 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/neighborcache/QuadTreeNeighborCache.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/physicallayer/neighborcache/QuadTreeNeighborCache.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 Define_Module(QuadTreeNeighborCache);
@@ -155,6 +154,5 @@ void QuadTreeNeighborCache::QuadTreeNeighborCacheVisitor::visit(const cObject *r
 }
 
 } // namespace physicallayer
-
 } // namespace inet
 

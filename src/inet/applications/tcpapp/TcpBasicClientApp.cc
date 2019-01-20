@@ -17,10 +17,10 @@
 
 #include "inet/applications/tcpapp/TcpBasicClientApp.h"
 
+#include "inet/applications/tcpapp/GenericAppMsg_m.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/packet/Packet.h"
-#include "inet/applications/tcpapp/GenericAppMsg_m.h"
 
 namespace inet {
 

@@ -19,17 +19,16 @@
 #define __INET_MESSAGEHANDLER_H
 
 #include "inet/common/INETDefs.h"
+#include "inet/routing/ospfv2/OspfTimer.h"
+#include "inet/routing/ospfv2/interface/OspfInterface.h"
 #include "inet/routing/ospfv2/messagehandler/DatabaseDescriptionHandler.h"
 #include "inet/routing/ospfv2/messagehandler/HelloHandler.h"
 #include "inet/routing/ospfv2/messagehandler/IMessageHandler.h"
 #include "inet/routing/ospfv2/messagehandler/LinkStateAcknowledgementHandler.h"
 #include "inet/routing/ospfv2/messagehandler/LinkStateRequestHandler.h"
 #include "inet/routing/ospfv2/messagehandler/LinkStateUpdateHandler.h"
-#include "inet/routing/ospfv2/interface/OspfInterface.h"
-#include "inet/routing/ospfv2/OspfTimer.h"
 
 namespace inet {
-
 namespace ospf {
 
 class INET_API MessageHandler : public IMessageHandler
@@ -67,7 +66,6 @@ class INET_API MessageHandler : public IMessageHandler
 };
 
 } // namespace ospf
-
 } // namespace inet
 
 #endif // ifndef __INET_MESSAGEHANDLER_H

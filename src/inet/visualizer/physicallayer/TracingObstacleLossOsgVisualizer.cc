@@ -15,10 +15,10 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/geometry/common/RotationMatrix.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/OsgScene.h"
 #include "inet/common/OsgUtils.h"
+#include "inet/common/geometry/common/RotationMatrix.h"
 #include "inet/visualizer/physicallayer/TracingObstacleLossOsgVisualizer.h"
 
 #ifdef WITH_OSG

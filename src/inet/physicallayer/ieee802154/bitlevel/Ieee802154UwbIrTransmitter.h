@@ -24,6 +24,7 @@
 #define __INET_IEEE802154UWBIRTRANSMITTER_H
 
 #include <vector>
+
 #include "inet/common/mapping/MappingBase.h"
 #include "inet/common/mapping/MappingUtils.h"
 #include "inet/physicallayer/base/packetlevel/TransmitterBase.h"

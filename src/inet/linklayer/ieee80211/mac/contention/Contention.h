@@ -18,10 +18,9 @@
 #ifndef __INET_CONTENTION_H
 #define __INET_CONTENTION_H
 
-#include "inet/linklayer/ieee80211/mac/contract/IContention.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
+#include "inet/linklayer/ieee80211/mac/contract/IContention.h"
 #include "inet/physicallayer/contract/packetlevel/IRadio.h"
-
 
 namespace inet {
 namespace ieee80211 {

@@ -16,6 +16,7 @@
 //
 
 #include <algorithm>
+
 #include "inet/common/LayeredProtocolBase.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/queue/PassiveQueueBase.h"

@@ -42,12 +42,11 @@
 #ifndef __INET_MOBANCOORDINATOR_H
 #define __INET_MOBANCOORDINATOR_H
 
+#include <iostream>
 #include <sstream>
 #include <vector>
-#include <iostream>
 
 #include "inet/common/INETDefs.h"
-
 #include "inet/mobility/base/LineSegmentsMobilityBase.h"
 #include "inet/mobility/group/Posture.h"
 #include "inet/mobility/group/PostureTransition.h"

@@ -18,8 +18,8 @@
 #ifndef __INET_STPBASE_H
 #define __INET_STPBASE_H
 
-#include "inet/common/lifecycle/OperationalBase.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
+#include "inet/common/lifecycle/OperationalBase.h"
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/linklayer/configurator/Ieee8021dInterfaceData.h"
 #include "inet/linklayer/ethernet/switch/IMacAddressTable.h"

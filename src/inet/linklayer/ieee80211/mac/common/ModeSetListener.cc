@@ -15,9 +15,9 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 // 
 
-#include "ModeSetListener.h"
-#include "inet/common/Simsignals.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/Simsignals.h"
+#include "inet/linklayer/ieee80211/mac/common/ModeSetListener.h"
 
 namespace inet {
 namespace ieee80211 {

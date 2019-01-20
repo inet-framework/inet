@@ -15,23 +15,22 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#define WANT_WINSOCK2
+#include <omnetpp/platdep/sockets.h>
+
+#ifndef  __linux__
+#error The 'Network Emulation Support' feature currently works on Linux systems only
+#else
 
 #include <arpa/inet.h>
-#include <fcntl.h>
 #include <linux/if_tun.h>
 #include <net/if.h>
 #include <sys/ioctl.h>
 #include <sys/stat.h>
-#include <sys/types.h>
-#include <unistd.h>
-
-#include <omnetpp/platdep/sockets.h>
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/NetworkNamespaceContext.h"
-#include "inet/common/packet/Packet.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/packet/Packet.h"
 #include "inet/emulation/linklayer/ethernet/ExtEthernetTapDevice.h"
 #include "inet/linklayer/ethernet/EtherEncap.h"
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
@@ -169,4 +168,6 @@ bool ExtEthernetTapDevice::notify(int fd)
 }
 
 } // namespace inet
+
+#endif // __linux__
 

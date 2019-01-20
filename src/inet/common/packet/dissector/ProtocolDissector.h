@@ -16,8 +16,8 @@
 #ifndef __INET_PROTOCOLDISSECTOR_H_
 #define __INET_PROTOCOLDISSECTOR_H_
 
-#include "inet/common/packet/Packet.h"
 #include "inet/common/Protocol.h"
+#include "inet/common/packet/Packet.h"
 
 namespace inet {
 

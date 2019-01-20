@@ -15,13 +15,13 @@
 // License along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include "inet/linklayer/common/MacAddressType.h"
 #include "inet/networklayer/common/L3Address.h"
+#include "inet/networklayer/common/ModuleIdAddressType.h"
+#include "inet/networklayer/common/ModulePathAddressType.h"
 #include "inet/networklayer/contract/clns/ClnsAddressType.h"
 #include "inet/networklayer/contract/ipv4/Ipv4AddressType.h"
 #include "inet/networklayer/contract/ipv6/Ipv6AddressType.h"
-#include "inet/linklayer/common/MacAddressType.h"
-#include "inet/networklayer/common/ModuleIdAddressType.h"
-#include "inet/networklayer/common/ModulePathAddressType.h"
 
 namespace inet {
 

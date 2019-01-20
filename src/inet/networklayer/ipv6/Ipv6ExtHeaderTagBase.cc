@@ -16,7 +16,6 @@
 //
 
 #include "inet/networklayer/ipv6/Ipv6ExtHeaderTag_m.h"
-
 #include "inet/networklayer/ipv6/Ipv6Header.h"
 
 namespace inet {

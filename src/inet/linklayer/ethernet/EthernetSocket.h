@@ -18,9 +18,9 @@
 #ifndef __INET_ETHERNETSOCKET_H
 #define __INET_ETHERNETSOCKET_H
 
+#include "inet/common/Protocol.h"
 #include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
-#include "inet/common/Protocol.h"
 #include "inet/common/socket/ISocket.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
 

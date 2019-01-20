@@ -19,9 +19,9 @@
 #define __INET_L3SOCKET_H
 
 #include "inet/common/INETDefs.h"
+#include "inet/common/Protocol.h"
 #include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
-#include "inet/common/Protocol.h"
 #include "inet/networklayer/contract/INetworkSocket.h"
 
 namespace inet {

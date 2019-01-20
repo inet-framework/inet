@@ -20,12 +20,11 @@
 #define __INET_SCTPNATTABLE_H
 
 #include <vector>
-#include <omnetpp.h>
+
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/transportlayer/sctp/SctpAssociation.h"
 
 namespace inet {
-
 namespace sctp {
 
 class INET_API SctpNatEntry : public cObject
@@ -99,7 +98,6 @@ class INET_API SctpNatTable : public cSimpleModule
 };
 
 } // namespace sctp
-
 } // namespace inet
 
 #endif // ifndef __INET_SCTPNATTABLE_H

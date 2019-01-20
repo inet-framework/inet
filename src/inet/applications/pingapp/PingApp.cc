@@ -20,10 +20,6 @@
 
 #include "inet/applications/pingapp/PingApp.h"
 
-#include "inet/networklayer/common/EchoPacket_m.h"
-#include "inet/networklayer/common/HopLimitTag_m.h"
-#include "inet/networklayer/common/IpProtocolId_m.h"
-#include "inet/networklayer/common/L3AddressTag_m.h"
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/Protocol.h"
@@ -32,13 +28,17 @@
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/networklayer/common/EchoPacket_m.h"
+#include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/networklayer/common/IpProtocolId_m.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
-#include "inet/networklayer/contract/IL3AddressType.h"
+#include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
+#include "inet/networklayer/contract/IL3AddressType.h"
+#include "inet/networklayer/contract/L3Socket.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Socket.h"
 #include "inet/networklayer/contract/ipv6/Ipv6Socket.h"
-#include "inet/networklayer/contract/L3Socket.h"
 
 #ifdef WITH_IPv4
 #include "inet/networklayer/ipv4/Icmp.h"

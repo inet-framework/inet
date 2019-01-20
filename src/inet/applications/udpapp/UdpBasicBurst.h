@@ -21,8 +21,8 @@
 #ifndef __INET_UDPBASICBURST_H
 #define __INET_UDPBASICBURST_H
 
-#include <vector>
 #include <map>
+#include <vector>
 
 #include "inet/common/INETDefs.h"
 

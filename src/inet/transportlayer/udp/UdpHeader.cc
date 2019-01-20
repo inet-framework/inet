@@ -18,7 +18,6 @@
 
 #include "inet/transportlayer/udp/UdpHeader_m.h"
 
-
 namespace inet {
 
 std::string UdpHeader::str() const

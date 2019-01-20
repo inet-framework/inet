@@ -19,11 +19,11 @@
 #include "inet/applications/tcpapp/TcpSessionApp.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/ModuleAccess.h"
-#include "inet/common/packet/chunk/ByteCountChunk.h"
-#include "inet/common/packet/chunk/BytesChunk.h"
-#include "inet/common/packet/Packet.h"
 #include "inet/common/TagBase_m.h"
 #include "inet/common/TimeTag_m.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 
 namespace inet {

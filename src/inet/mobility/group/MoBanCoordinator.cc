@@ -39,9 +39,10 @@
  *
  **************************************************************************/
 
-#include <string>
-#include <stdio.h>
 #include <assert.h>
+#include <stdio.h>
+#include <string>
+
 #include "inet/common/INETMath.h"
 #include "inet/common/INETUtils.h"
 #include "inet/mobility/group/MoBanCoordinator.h"

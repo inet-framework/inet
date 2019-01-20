@@ -18,7 +18,6 @@
 #include "inet/physicallayer/common/bitlevel/AnalogDigitalConverter.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 ScalarAnalogDigitalConverter::ScalarAnalogDigitalConverter() :
@@ -36,6 +35,5 @@ const IReceptionSampleModel *ScalarAnalogDigitalConverter::convertAnalogToDigita
 }
 
 } // namespace physicallayer
-
 } // namespace inet
 

@@ -18,12 +18,11 @@
 #ifndef __INET_IEEE80211DSSSMODE_H
 #define __INET_IEEE80211DSSSMODE_H
 
+#include "inet/physicallayer/ieee80211/mode/Ieee80211ModeBase.h"
 #include "inet/physicallayer/modulation/DbpskModulation.h"
 #include "inet/physicallayer/modulation/DqpskModulation.h"
-#include "inet/physicallayer/ieee80211/mode/Ieee80211ModeBase.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 class INET_API Ieee80211DsssChunkMode
@@ -149,7 +148,6 @@ class INET_API Ieee80211DsssCompliantModes
 };
 
 } // namespace physicallayer
-
 } // namespace inet
 
 #endif // ifndef __INET_IEEE80211DSSSMODE_H

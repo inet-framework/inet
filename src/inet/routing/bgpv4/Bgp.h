@@ -19,12 +19,11 @@
 #define __INET_BGPROUTING_H
 
 #include "inet/common/INETDefs.h"
-
 #include "inet/common/lifecycle/LifecycleUnsupported.h"
+#include "inet/networklayer/contract/ipv4/Ipv4Address.h"
+#include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 #include "inet/routing/bgpv4/BgpCommon.h"
 #include "inet/routing/bgpv4/BgpRouter.h"
-#include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
-#include "inet/networklayer/contract/ipv4/Ipv4Address.h"
 #include "inet/routing/bgpv4/bgpmessage/BgpHeader_m.h"
 
 namespace inet {

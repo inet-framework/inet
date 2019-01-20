@@ -20,6 +20,8 @@
 #ifndef __INET_GPSRDEFS_H
 #define __INET_GPSRDEFS_H
 
+#include "inet/common/INETDefs.h"
+
 #define GPSR_UDP_PORT    269
 
 namespace inet {

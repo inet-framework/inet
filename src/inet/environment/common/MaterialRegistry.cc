@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/environment/common/MaterialRegistry.h"
 #include "inet/common/INETMath.h"
+#include "inet/environment/common/MaterialRegistry.h"
 
 namespace inet {
 

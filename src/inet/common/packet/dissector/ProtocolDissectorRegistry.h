@@ -16,8 +16,8 @@
 #ifndef __INET_PROTOCOLDISSECTORREGISTRY_H_
 #define __INET_PROTOCOLDISSECTORREGISTRY_H_
 
-#include "inet/common/packet/dissector/ProtocolDissector.h"
 #include "inet/common/Protocol.h"
+#include "inet/common/packet/dissector/ProtocolDissector.h"
 
 namespace inet {
 

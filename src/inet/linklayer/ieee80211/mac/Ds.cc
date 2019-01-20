@@ -16,9 +16,9 @@
 //
 
 #include "inet/common/ModuleAccess.h"
-#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtApSimplified.h"
 #include "inet/linklayer/ieee80211/mac/Ds.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtApSimplified.h"
 
 namespace inet {
 namespace ieee80211 {

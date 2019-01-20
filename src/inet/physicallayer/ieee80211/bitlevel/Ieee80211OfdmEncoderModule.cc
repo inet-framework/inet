@@ -15,10 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "Ieee80211OfdmEncoderModule.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OfdmEncoderModule.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 Define_Module(Ieee80211OfdmEncoderModule);
@@ -49,6 +48,7 @@ Ieee80211OfdmEncoderModule::~Ieee80211OfdmEncoderModule()
     delete code;
     delete encoder;
 }
+
 } /* namespace physicallayer */
 } /* namespace inet */
 

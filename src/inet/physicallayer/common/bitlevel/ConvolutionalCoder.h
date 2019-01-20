@@ -18,16 +18,15 @@
 #ifndef __INET_CONVOLUTIONALCODER_H
 #define __INET_CONVOLUTIONALCODER_H
 
-#include "inet/common/INETDefs.h"
-#include "inet/common/BitVector.h"
-#include "inet/common/ShortBitVector.h"
-#include "inet/physicallayer/contract/bitlevel/IFecCoder.h"
-#include "inet/physicallayer/common/bitlevel/ConvolutionalCode.h"
-#include <vector>
 #include <queue>
+#include <vector>
+#include "inet/common/BitVector.h"
+#include "inet/common/INETDefs.h"
+#include "inet/common/ShortBitVector.h"
+#include "inet/physicallayer/common/bitlevel/ConvolutionalCode.h"
+#include "inet/physicallayer/contract/bitlevel/IFecCoder.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 /*

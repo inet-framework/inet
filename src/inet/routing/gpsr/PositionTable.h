@@ -20,11 +20,12 @@
 #ifndef __INET_POSITIONTABLE_H
 #define __INET_POSITIONTABLE_H
 
-#include <vector>
 #include <map>
+#include <vector>
+
 #include "inet/common/INETDefs.h"
-#include "inet/networklayer/common/L3Address.h"
 #include "inet/common/geometry/common/Coord.h"
+#include "inet/networklayer/common/L3Address.h"
 
 namespace inet {
 

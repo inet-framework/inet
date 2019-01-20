@@ -15,16 +15,15 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/errormodel/bitlevel/StochasticLayeredErrorModel.h"
-#include "inet/physicallayer/common/bitlevel/SignalPacketModel.h"
-#include "inet/physicallayer/common/bitlevel/SignalBitModel.h"
-#include "inet/physicallayer/common/bitlevel/SignalSymbolModel.h"
-#include "inet/physicallayer/common/bitlevel/SignalSampleModel.h"
-#include "inet/physicallayer/base/packetlevel/ApskModulationBase.h"
 #include "inet/physicallayer/apskradio/bitlevel/ApskSymbol.h"
+#include "inet/physicallayer/base/packetlevel/ApskModulationBase.h"
+#include "inet/physicallayer/common/bitlevel/SignalBitModel.h"
+#include "inet/physicallayer/common/bitlevel/SignalPacketModel.h"
+#include "inet/physicallayer/common/bitlevel/SignalSampleModel.h"
+#include "inet/physicallayer/common/bitlevel/SignalSymbolModel.h"
+#include "inet/physicallayer/errormodel/bitlevel/StochasticLayeredErrorModel.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 Define_Module(StochasticLayeredErrorModel);
@@ -76,6 +75,5 @@ const IReceptionSampleModel *StochasticLayeredErrorModel::computeSampleModel(con
 }
 
 } // namespace physicallayer
-
 } // namespace inet
 

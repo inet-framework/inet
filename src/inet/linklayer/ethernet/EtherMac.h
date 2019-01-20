@@ -19,7 +19,6 @@
 #define __INET_ETHERMAC_H
 
 #include "inet/common/INETDefs.h"
-
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/ethernet/EtherMacBase.h"
 

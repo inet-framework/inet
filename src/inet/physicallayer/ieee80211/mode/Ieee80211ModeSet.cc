@@ -14,6 +14,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include <algorithm>
+
 #include "inet/physicallayer/ieee80211/mode/Ieee80211DsssMode.h"
 #include "inet/physicallayer/ieee80211/mode/Ieee80211ErpOfdmMode.h"
 #include "inet/physicallayer/ieee80211/mode/Ieee80211FhssMode.h"
@@ -23,8 +25,6 @@
 #include "inet/physicallayer/ieee80211/mode/Ieee80211ModeSet.h"
 #include "inet/physicallayer/ieee80211/mode/Ieee80211OfdmMode.h"
 #include "inet/physicallayer/ieee80211/mode/Ieee80211VhtMode.h"
-#include <algorithm>
-
 
 namespace inet {
 

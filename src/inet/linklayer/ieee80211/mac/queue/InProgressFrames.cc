@@ -16,6 +16,7 @@
 //
 
 #include <algorithm>
+
 #include "inet/linklayer/ieee80211/mac/queue/InProgressFrames.h"
 
 namespace inet {

@@ -20,8 +20,8 @@
 #define __INET_SCTPSERVER_H
 
 #include "inet/common/INETDefs.h"
-#include "inet/common/packet/Message.h"
 #include "inet/common/lifecycle/LifecycleUnsupported.h"
+#include "inet/common/packet/Message.h"
 #include "inet/transportlayer/contract/sctp/SctpSocket.h"
 #include "inet/transportlayer/sctp/SctpAssociation.h"
 

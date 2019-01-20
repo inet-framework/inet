@@ -22,7 +22,6 @@
 #include "inet/physicallayer/contract/packetlevel/IReceptionResult.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 class INET_API ReceptionResult : public IReceptionResult, public cObject
@@ -45,7 +44,6 @@ class INET_API ReceptionResult : public IReceptionResult, public cObject
 };
 
 } // namespace physicallayer
-
 } // namespace inet
 
 #endif // ifndef __INET_RECEPTIONRESULT_H

@@ -18,11 +18,10 @@
 #ifndef __INET_ADDITIVESCRAMBLING_H
 #define __INET_ADDITIVESCRAMBLING_H
 
-#include "inet/physicallayer/contract/bitlevel/IScrambler.h"
 #include "inet/common/ShortBitVector.h"
+#include "inet/physicallayer/contract/bitlevel/IScrambler.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 class INET_API AdditiveScrambling : public IScrambling
@@ -41,7 +40,6 @@ class INET_API AdditiveScrambling : public IScrambling
 };
 
 } /* namespace physicallayer */
-
 } /* namespace inet */
 
 #endif // ifndef __INET_ADDITIVESCRAMBLING_H

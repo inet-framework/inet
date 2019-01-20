@@ -18,11 +18,10 @@
 #ifndef __INET_IEEE80211MODESET_H
 #define __INET_IEEE80211MODESET_H
 
-#include "inet/physicallayer/ieee80211/mode/IIeee80211Mode.h"
 #include "inet/common/DelayedInitializer.h"
+#include "inet/physicallayer/ieee80211/mode/IIeee80211Mode.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 class INET_API Ieee80211ModeSet : public IPrintableObject, public cObject
@@ -89,7 +88,6 @@ class INET_API Ieee80211ModeSet : public IPrintableObject, public cObject
 };
 
 } // namespace physicallayer
-
 } // namespace inet
 
 #endif // ifndef __INET_IEEE80211MODESET_H

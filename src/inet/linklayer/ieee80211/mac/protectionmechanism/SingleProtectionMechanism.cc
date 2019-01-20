@@ -16,9 +16,9 @@
 //
 
 #include "inet/common/ModuleAccess.h"
+#include "inet/linklayer/ieee80211/mac/protectionmechanism/SingleProtectionMechanism.h"
 #include "inet/linklayer/ieee80211/mac/rateselection/RateSelection.h"
 #include "inet/linklayer/ieee80211/mac/recipient/RecipientAckProcedure.h"
-#include "SingleProtectionMechanism.h"
 
 namespace inet {
 namespace ieee80211 {

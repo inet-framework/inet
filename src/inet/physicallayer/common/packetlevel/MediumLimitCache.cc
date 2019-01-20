@@ -16,10 +16,10 @@
 //
 
 #include <algorithm>
+
 #include "inet/physicallayer/common/packetlevel/MediumLimitCache.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 Define_Module(MediumLimitCache);
@@ -258,6 +258,5 @@ m MediumLimitCache::getMaxCommunicationRange(const IRadio* radio) const
 }
 
 } // namespace physicallayer
-
 } // namespace inet
 

@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "Ieee80211HtCode.h"
-#include "Ieee80211OfdmCode.h"
+#include "inet/physicallayer/ieee80211/mode/Ieee80211HtCode.h"
+#include "inet/physicallayer/ieee80211/mode/Ieee80211OfdmCode.h"
 
 namespace inet {
 namespace physicallayer {

@@ -18,10 +18,11 @@
 #ifndef __INET_QUADTREE_H
 #define __INET_QUADTREE_H
 
-#include "inet/common/INETDefs.h"
-#include "inet/common/geometry/common/Coord.h"
-#include "inet/common/IVisitor.h"
 #include <algorithm>
+
+#include "inet/common/INETDefs.h"
+#include "inet/common/IVisitor.h"
+#include "inet/common/geometry/common/Coord.h"
 
 namespace inet {
 

@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 #
 # Fingerprint-based regression test tool
 #
@@ -16,6 +16,7 @@
 # Authors: Andras Varga, Zoltan Bojthe
 #
 
+from __future__ import absolute_import, division, print_function, unicode_literals
 import argparse
 import copy
 import csv
@@ -33,11 +34,10 @@ from io import StringIO
 
 # FIXME this is a hard coded path!!! must be specified from command line or dicovered automatically
 rootDir = os.path.abspath(".")  # the working directory in the CSV file is relative to this dir
-cpuTimeLimit = "300s"
+cpuTimeLimit = "30000s"
 logFile = "test.out"
 extraOppRunArgs = ""
 debug=False
-release=False
 exitCode = 0
 
 class FingerprintTestCaseGenerator():
@@ -65,7 +65,7 @@ class FingerprintTestCaseGenerator():
 
         testcases = []
         for simulation in simulations:
-            title = simulation['wd'] + " " + simulation['args'] + " " + simulation['tags']
+            title = simulation['wd'] + " " + simulation['args']
             if not filterRegexList or ['x' for regex in filterRegexList if re.search(regex, title)]: # if any regex matches title
                 if not excludeFilterRegexList or not ['x' for regex in excludeFilterRegexList if re.search(regex, title)]: # if NO exclude-regex matches title
                     testcases.append(FingerprintTestCase(title, simulation['file'], simulation['wd'], simulation['args'],
@@ -81,14 +81,14 @@ class FingerprintTestCaseGenerator():
     def parseSimulationsTable(self, csvFile):
         simulations = []
         f = open(csvFile, 'rb')
-        csvReader = csv.reader(self.commentRemover(f), delimiter=',', quotechar='"', skipinitialspace=True)
+        csvReader = csv.reader(self.commentRemover(f), delimiter=str(','), quotechar=str('"'), skipinitialspace=True)
         for fields in csvReader:
             if len(fields) == 0:
                 pass        # empty line
             elif len(fields) == 6:
                 if fields[4] in ['PASS', 'FAIL', 'ERROR']:
                     simulations.append({'file': csvFile, 'line' : csvReader.line_num,
-                            'wd': fields[0], 'args': fields[1], 'simtimelimit': fields[2], 'fingerprint': fields[3], 'expectedResult': fields[4], 'tags': fields[5]})
+                            'wd': fields[0], 'args': fields[1], 'simtimelimit': fields[2], 'fingerprint': fields[3], 'expectedResult': fields[4]})
                 else:
                     raise Exception(csvFile + " Line " + str(csvReader.line_num) + ": the 5th item must contain one of 'PASS', 'FAIL', 'ERROR'" + ": " + '"' + '", "'.join(fields) + '"')
             else:
@@ -283,7 +283,7 @@ class SimulationTestCase(unittest.TestCase):
         env = os.environ
 #        env['CPUPROFILE'] = resultdir+"/cpuprofile"
 #        env['CPUPROFILE_FREQUENCY'] = "1000"
-        process = subprocess.Popen(command, shell=True, cwd=workingdir, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, env=env)
+        process = subprocess.Popen(['sh','-c',command], shell=sys.platform.startswith('win'), cwd=workingdir, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, env=env)
         out = process.communicate()[0]
         out = re.sub("\r", "", out.decode('utf-8'))
         return (process.returncode, out)
@@ -305,7 +305,7 @@ class FingerprintTestCase(SimulationTestCase):
 
     def runTest(self):
         # CPU time limit is a safety guard: fingerprint checks shouldn't take forever
-        global rootDir, executable, debug, release, cpuTimeLimit, extraOppRunArgs
+        global rootDir, executable, debug, cpuTimeLimit, extraOppRunArgs
 
 
         # run the simulation
@@ -319,9 +319,9 @@ class FingerprintTestCase(SimulationTestCase):
         # Check if the command line does not contain executable name (starts with an option i.e. - char)
         # and use the executable name from the command line.
         # Otherwise, assume the first word as the name of the executable.
-        (exeName, progArgs) = (executable, self.cmdLine) if (self.cmdLine.startswith("-")) else self.cmdLine.split(maxsplit=1)
+        (exeName, progArgs) = (executable, self.cmdLine) if (self.cmdLine.startswith("-")) else self.cmdLine.split(None, 1)
 
-        command = (exeName + "_dbg" if debug else exeName + "_release" if release else exeName) + " -u Cmdenv " + progArgs + \
+        command =  (exeName+"_dbg" if debug else exeName) + " -u Cmdenv " + progArgs + \
             _iif(self.simtimelimit != "", " --sim-time-limit=" + self.simtimelimit, "") + \
             " \"--fingerprint=" + self.fingerprint + "\" --cpu-time-limit=" + cpuTimeLimit + \
             " --vector-recording=false --scalar-recording=true" + \
@@ -338,7 +338,7 @@ class FingerprintTestCase(SimulationTestCase):
             # note: fingerprint mismatch is technically NOT an error in 4.2 or before! (exitcode==0)
             self.storeExitcodeCallback(result.exitcode)
             if result.exitcode != 0:
-                raise Exception("runtime error:" + result.errormsg)
+                raise Exception("runtime error with exitcode="+str(result.exitcode)+": " + result.errormsg)
             elif result.cpuTimeLimitReached:
                 raise Exception("cpu time limit exceeded")
             elif result.simulatedTime == 0 and self.simtimelimit != '0s':
@@ -360,7 +360,6 @@ class FingerprintTestCase(SimulationTestCase):
     def __str__(self):
         return self.title
 
-
 class ThreadSafeIter:
     """Takes an iterator/generator and makes it thread-safe by
     serializing call to the `next` method of given iterator/generator.
@@ -375,6 +374,8 @@ class ThreadSafeIter:
     def __next__(self):
         with self.lock:
             return next(self.it)
+
+    next = __next__  # for python 2 compatibility
 
 
 
@@ -492,7 +493,7 @@ class SimulationTextTestResult(ThreadedTestResult):
     def startTest(self, test):
         super(SimulationTextTestResult, self).startTest(test)
         if self.showAll:
-            self.stream.write(self.getDescription(test))
+            self.stream.write(""+self.getDescription(test))  # NOTE: the empty "" string is needed here for python2/3 compatibility (unicode vs. str) - can be removed if only python3 is used
             self.stream.write(" ... ")
             self.stream.flush()
 
@@ -512,13 +513,10 @@ class SimulationTextTestResult(ThreadedTestResult):
             self.addExpectedError(test, err)
         else:
             super(SimulationTextTestResult, self).addError(test, err)
-            self.errors[-1] = (test, err[1])  # super class method inserts stack trace; we don't need that, so overwrite it
+            errmsg = err[1]
+            self.errors[-1] = (test, errmsg)  # super class method inserts stack trace; we don't need that, so overwrite it
             if self.showAll:
-                (cause, detail) = self._splitMsg(err[1])
-                self.stream.write(": ERROR (should be %s) (%s)\n" % (test.expectedResult, cause))
-                if detail:
-                    self.stream.write(detail)
-                    self.stream.write("\n")
+                self.stream.write(": ERROR (should be %s): %s\n" % (test.expectedResult, errmsg))
             elif self.dots:
                 self.stream.write('E')
                 self.stream.flush()
@@ -530,7 +528,6 @@ class SimulationTextTestResult(ThreadedTestResult):
         self._mirrorOutput = True
         self.expectedErrors[-1] = (test, err[1])  # super class method inserts stack trace; we don't need that, so overwrite it
         if self.showAll:
-            (cause, detail) = self._splitMsg(err[1])
             self.stream.write(": ERROR (expected)\n")
         elif self.dots:
             self.stream.write('e')
@@ -542,13 +539,10 @@ class SimulationTextTestResult(ThreadedTestResult):
             self.addExpectedFailure(test, err)
         else:
             super(SimulationTextTestResult, self).addFailure(test, err)
-            self.failures[-1] = (test, err[1])  # super class method inserts stack trace; we don't need that, so overwrite it
+            errmsg = err[1]
+            self.failures[-1] = (test, errmsg)  # super class method inserts stack trace; we don't need that, so overwrite it
             if self.showAll:
-                (cause, detail) = self._splitMsg(err[1])
-                self.stream.write(": FAIL (should be %s) (%s)\n" % (test.expectedResult, cause))
-                if detail:
-                    self.stream.write(detail)
-                    self.stream.write("\n")
+                self.stream.write(": FAIL (should be %s): %s\n" % (test.expectedResult, errmsg))
             elif self.dots:
                 self.stream.write('F')
                 self.stream.flush()
@@ -599,7 +593,7 @@ class SimulationTextTestResult(ThreadedTestResult):
         if errors:
             self.stream.write("%s:\n" % flavour)
         for test, err in errors:
-            self.stream.write("  %s (%s)\n" % (self.getDescription(test), self._splitMsg(err)[0]))
+            self.stream.write("  %s (%s)\n" % (self.getDescription(test), err))
 
     def printUnexpectedSuccessList(self, flavour, errors):
         if errors:
@@ -607,34 +601,28 @@ class SimulationTextTestResult(ThreadedTestResult):
         for test in errors:
             self.stream.write("  %s\n" % (self.getDescription(test)))
 
-    def _splitMsg(self, msg):
-        cause = str(msg)
-        detail = None
-        if cause.count(': '):
-            (cause, detail) = cause.split(': ',1)
-        return (cause, detail)
-
-
 def _iif(cond,t,f):
     return t if cond else f
 
 def ensure_dir(f):
-    os.makedirs(f, exist_ok=True)
+    try:
+        os.makedirs(f)
+    except:
+        pass # do nothing if already exist
 
 if __name__ == "__main__":
     defaultNumThreads = multiprocessing.cpu_count()
     if defaultNumThreads >= 6:
         defaultNumThreads = defaultNumThreads - 1
     parser = argparse.ArgumentParser(description='Run the fingerprint tests specified in the input files.')
-    parser.add_argument('testspecfiles', nargs='*', metavar='testspecfile', help='CSV files that contain the tests to run (default: *.csv). Expected CSV file columns: workingdir, args, simtimelimit, fingerprint')
+    parser.add_argument('testspecfiles', nargs='*', metavar='testspecfile', help='CSV files that contain the tests to run (default: *.csv). Expected CSV file columns: working directory, command to run, simulation time limit, expected fingerprint, expected result, tags. The command column may contain only options without a program name (i.e. it starts with - ). In this case the --executable option can be used to specify a program name.')
     parser.add_argument('-m', '--match', action='append', metavar='regex', help='Line filter: a line (more precisely, workingdir+SPACE+args) must match any of the regular expressions in order for that test case to be run')
     parser.add_argument('-x', '--exclude', action='append', metavar='regex', help='Negative line filter: a line (more precisely, workingdir+SPACE+args) must NOT match any of the regular expressions in order for that test case to be run')
     parser.add_argument('-t', '--threads', type=int, default=defaultNumThreads, help='number of parallel threads (default: number of CPUs, currently '+str(defaultNumThreads)+')')
     parser.add_argument('-r', '--repeat', type=int, default=1, help='number of repeating each test (default: 1)')
-    parser.add_argument('-e', '--executable', help='Determines which binary to execute (e.g. opp_run_dbg, opp_run_release)')
+    parser.add_argument('-e', '--executable', help='Determines which binary to execute (e.g. opp_run_dbg, opp_run_release) if the command column in the CSV file does not specify one.')
     parser.add_argument('-C', '--directory', help='Change to DIRECTORY before executing the tests. Working dirs in the CSV files are relative to this.')
     parser.add_argument('-d', '--debug', action='store_true', help='Run debug executables: use the debug version of the executable (appends _dbg to the executable name)')
-    parser.add_argument('-s', '--release', action='store_true', help='Run release executables: use the release version of the executable (appends _release to the executable name)')
     parser.add_argument('-a', '--oppargs', action='append', metavar='oppargs', nargs=argparse.REMAINDER, help='extra opp_run arguments until the end of the line')
     args = parser.parse_args()
 
@@ -657,7 +645,6 @@ if __name__ == "__main__":
         rootDir = os.path.abspath(args.directory)
 
     debug = args.debug
-    release = args.release
 
     generator = FingerprintTestCaseGenerator()
     testcases = generator.generateFromCSV(args.testspecfiles, args.match, args.exclude, args.repeat)
@@ -684,4 +671,3 @@ if __name__ == "__main__":
     else:
         print("Test results differ from expected results")
     exit(exitCode)
-

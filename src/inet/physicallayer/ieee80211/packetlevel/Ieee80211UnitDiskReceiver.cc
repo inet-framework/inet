@@ -18,16 +18,15 @@
 #include "inet/mobility/contract/IMobility.h"
 #include "inet/physicallayer/contract/packetlevel/IRadio.h"
 #include "inet/physicallayer/contract/packetlevel/RadioControlInfo_m.h"
+#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211ControlInfo_m.h"
+#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211Tag_m.h"
+#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211TransmissionBase.h"
+#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211UnitDiskReceiver.h"
 #include "inet/physicallayer/unitdisk/UnitDiskNoise.h"
 #include "inet/physicallayer/unitdisk/UnitDiskReception.h"
 #include "inet/physicallayer/unitdisk/UnitDiskTransmission.h"
-#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211ControlInfo_m.h"
-#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211UnitDiskReceiver.h"
-#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211Tag_m.h"
-#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211TransmissionBase.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 Define_Module(Ieee80211UnitDiskReceiver);
@@ -61,6 +60,5 @@ const IReceptionResult *Ieee80211UnitDiskReceiver::computeReceptionResult(const 
 }
 
 } // namespace physicallayer
-
 } // namespace inet
 

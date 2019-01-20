@@ -15,11 +15,11 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/scenario/ScenarioManager.h"
+#include "inet/common/INETUtils.h"
 #include "inet/common/XMLUtils.h"
 #include "inet/common/lifecycle/LifecycleOperation.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
-#include "inet/common/INETUtils.h"
+#include "inet/common/scenario/ScenarioManager.h"
 
 namespace inet {
 
@@ -194,8 +194,6 @@ void ScenarioManager::processCreateModuleCommand(cXMLElement *node)
     const char *submoduleName = xmlutils::getMandatoryFilledAttribute(*node, "submodule");
     const char *parentModulePath = xmlutils::getMandatoryFilledAttribute(*node, "parent");
     cModuleType *moduleType = cModuleType::get(moduleTypeName);
-    if (moduleType == nullptr)
-        throw cRuntimeError("module type '%s' is not found", moduleType);
     cModule *parentModule = getSimulation()->getSystemModule()->getModuleByPath(parentModulePath);
     if (parentModule == nullptr)
         throw cRuntimeError("parent module '%s' is not found", parentModulePath);

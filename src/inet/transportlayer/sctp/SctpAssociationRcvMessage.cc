@@ -16,16 +16,10 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include <string.h>
 #include <assert.h>
+#include <string.h>
 
 #include "inet/common/packet/Message.h"
-#include "inet/transportlayer/sctp/Sctp.h"
-#include "inet/transportlayer/sctp/SctpAssociation.h"
-#include "inet/transportlayer/contract/sctp/SctpCommand_m.h"
-#include "inet/transportlayer/sctp/SctpHeader_m.h"
-#include "inet/transportlayer/sctp/SctpQueue.h"
-#include "inet/transportlayer/sctp/SctpAlgorithm.h"
 
 #ifdef WITH_IPv4
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
@@ -35,8 +29,14 @@
 #include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
 #endif // ifdef WITH_IPv6
 
-namespace inet {
+#include "inet/transportlayer/contract/sctp/SctpCommand_m.h"
+#include "inet/transportlayer/sctp/Sctp.h"
+#include "inet/transportlayer/sctp/SctpAlgorithm.h"
+#include "inet/transportlayer/sctp/SctpAssociation.h"
+#include "inet/transportlayer/sctp/SctpHeader_m.h"
+#include "inet/transportlayer/sctp/SctpQueue.h"
 
+namespace inet {
 namespace sctp {
 
 void SctpAssociation::decreaseOutstandingBytes(SctpDataVariables *chunk)
@@ -3910,6 +3910,5 @@ void SctpAssociation::moveChunkToOtherPath(SctpDataVariables *chunk,
 }
 
 } // namespace sctp
-
 } // namespace inet
 

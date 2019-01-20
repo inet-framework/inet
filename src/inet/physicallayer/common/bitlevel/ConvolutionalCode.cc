@@ -18,7 +18,6 @@
 #include "inet/physicallayer/common/bitlevel/ConvolutionalCode.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 ConvolutionalCode::ConvolutionalCode(const char *transferFunctionMatrix, const char *puncturingMatrix, const char *constraintLengthVector, int codeRatePuncturingK, int codeRatePuncturingN, const char *mode) :
@@ -81,6 +80,5 @@ double ConvolutionalCode::computeNetBitErrorRate(double grossBitErrorRate) const
 }
 
 } // namespace physicallayer
-
 } // namespace inet
 

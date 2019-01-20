@@ -26,18 +26,16 @@
 #include <map>
 
 #include "inet/common/INETDefs.h"
-
 #include "inet/networklayer/common/L3Address.h"
-#include "inet/transportlayer/contract/udp/UdpSocket.h"
-#include "inet/transportlayer/contract/sctp/SctpSocket.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
+#include "inet/transportlayer/contract/sctp/SctpSocket.h"
+#include "inet/transportlayer/contract/udp/UdpSocket.h"
+#include "inet/transportlayer/sctp/SctpCrcInsertionHook.h"
 #include "inet/transportlayer/sctp/SctpHeader.h"
 #include "inet/transportlayer/sctp/SctpUdpHook.h"
-#include "inet/transportlayer/sctp/SctpCrcInsertionHook.h"
 
 namespace inet {
-
 namespace sctp {
 
 #define SCTP_UDP_PORT    9899
@@ -293,7 +291,6 @@ class INET_API Sctp : public cSimpleModule
 };
 
 } // namespace sctp
-
 } // namespace inet
 
 #endif // ifndef __INET_SCTP_H

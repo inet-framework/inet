@@ -21,15 +21,14 @@
 #define __INET_PIMDM_H
 
 #include "inet/common/INETDefs.h"
-
-#include "inet/common/packet/Packet.h"
-#include "inet/routing/pim/PimPacket_m.h"
 #include "inet/common/Simsignals.h"
-#include "inet/routing/pim/tables/PimNeighborTable.h"
-#include "inet/routing/pim/tables/PimInterfaceTable.h"
+#include "inet/common/packet/Packet.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 #include "inet/networklayer/ipv4/Ipv4Route.h"
+#include "inet/routing/pim/PimPacket_m.h"
 #include "inet/routing/pim/modes/PimBase.h"
+#include "inet/routing/pim/tables/PimInterfaceTable.h"
+#include "inet/routing/pim/tables/PimNeighborTable.h"
 
 namespace inet {
 

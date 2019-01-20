@@ -15,16 +15,14 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/routing/ospfv2/messagehandler/HelloHandler.h"
-
 #include "inet/networklayer/common/L3AddressTag_m.h"
-#include "inet/routing/ospfv2/router/OspfArea.h"
 #include "inet/routing/ospfv2/interface/OspfInterface.h"
+#include "inet/routing/ospfv2/messagehandler/HelloHandler.h"
 #include "inet/routing/ospfv2/neighbor/OspfNeighbor.h"
+#include "inet/routing/ospfv2/router/OspfArea.h"
 #include "inet/routing/ospfv2/router/OspfRouter.h"
 
 namespace inet {
-
 namespace ospf {
 
 HelloHandler::HelloHandler(Router *containingRouter) :
@@ -342,6 +340,5 @@ void HelloHandler::processPacket(Packet *packet, OspfInterface *intf, Neighbor *
 }
 
 } // namespace ospf
-
 } // namespace inet
 

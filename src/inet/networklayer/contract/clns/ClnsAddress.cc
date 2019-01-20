@@ -26,7 +26,6 @@
 
 namespace inet{
 
-static const int CLNSADDRESS_STRING_SIZE = 25;
 const ClnsAddress ClnsAddress::UNSPECIFIED_ADDRESS;
 
 ClnsAddress::ClnsAddress()
@@ -76,23 +75,23 @@ ClnsAddress::ClnsAddress(std::string net)
         case 2:
             dots++;
             // area[0] = (unsigned char) (atoi(net.substr(0, 2).c_str()));
-            areaID += strtoul(net.substr(0, 2).c_str(), NULL, 16) << 16;
+            areaID += (uint64_t)(strtoul(net.substr(0, 2).c_str(), NULL, 16)) << 16;
             break;
         case 7:
-            areaID += strtoul(net.substr(3, 4).c_str(), NULL, 16);
+            areaID += (uint64_t)(strtoul(net.substr(3, 4).c_str(), NULL, 16));
             dots++;
             break;
         case 12:
             dots++;
-            systemID += strtoul(net.substr(8, 4).c_str(), NULL, 16) << 32;
+            systemID += (uint64_t)(strtoul(net.substr(8, 4).c_str(), NULL, 16)) << 32;
             break;
         case 17:
             dots++;
-            systemID += strtoul(net.substr(13, 4).c_str(), NULL, 16) << 16;
+            systemID += (uint64_t)(strtoul(net.substr(13, 4).c_str(), NULL, 16)) << 16;
             break;
         case 22:
             dots++;
-            systemID += strtoul(net.substr(18, 4).c_str(), NULL, 16);
+            systemID += (uint64_t)(strtoul(net.substr(18, 4).c_str(), NULL, 16));
             break;
         default:
             return;
@@ -127,7 +126,7 @@ std::string ClnsAddress::str(bool printUnspec    /* = true */) const
     if (printUnspec && isUnspecified())
         return std::string("<unspec>");
 
-    char buf[CLNSADDRESS_STRING_SIZE];
+    char buf[100];
     sprintf(buf, "%02lX.%04lX.%04lX.%04lX.%04lX.%02X", (areaID >> 16) & (0xFF), areaID & (0xFFFF), (systemID >> 32) & (0xFFFF), (systemID >> 16) & (0xFFFF), systemID & (0xFFFF), nsel & 255);
     return std::string(buf);
 }

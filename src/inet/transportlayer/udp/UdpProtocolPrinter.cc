@@ -17,11 +17,10 @@
 // @author: Zoltan Bojthe
 //
 
-#include "inet/transportlayer/udp/UdpProtocolPrinter.h"
-
 #include "inet/common/packet/printer/PacketPrinter.h"
 #include "inet/common/packet/printer/ProtocolPrinterRegistry.h"
 #include "inet/transportlayer/udp/UdpHeader_m.h"
+#include "inet/transportlayer/udp/UdpProtocolPrinter.h"
 
 namespace inet {
 

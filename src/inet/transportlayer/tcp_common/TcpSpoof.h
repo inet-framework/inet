@@ -15,13 +15,11 @@
 #define __INET_TCPSPOOF_H
 
 #include "inet/common/INETDefs.h"
-
 #include "inet/common/packet/Packet.h"
-#include "inet/transportlayer/tcp_common/TcpHeader.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
+#include "inet/transportlayer/tcp_common/TcpHeader.h"
 
 namespace inet {
-
 namespace tcp {
 
 /**
@@ -40,7 +38,6 @@ class INET_API TcpSpoof : public cSimpleModule
 };
 
 } // namespace tcp
-
 } // namespace inet
 
 #endif // ifndef __INET_TCPSPOOF_H

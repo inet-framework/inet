@@ -19,6 +19,7 @@
 #define __INET_VISUALIZERBASE_H
 
 #include <functional>
+
 #include "inet/common/geometry/common/Coord.h"
 #include "inet/common/geometry/common/Quaternion.h"
 #include "inet/common/packet/chunk/Chunk.h"

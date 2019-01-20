@@ -15,14 +15,12 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/routing/ospfv2/neighbor/OspfNeighborState.h"
-
-#include "inet/routing/ospfv2/router/OspfArea.h"
 #include "inet/routing/ospfv2/interface/OspfInterface.h"
+#include "inet/routing/ospfv2/neighbor/OspfNeighborState.h"
+#include "inet/routing/ospfv2/router/OspfArea.h"
 #include "inet/routing/ospfv2/router/OspfRouter.h"
 
 namespace inet {
-
 namespace ospf {
 
 void NeighborState::changeState(Neighbor *neighbor, NeighborState *newState, NeighborState *currentState)
@@ -90,6 +88,5 @@ bool NeighborState::updateLsa(Neighbor *neighbor)
 }
 
 } // namespace ospf
-
 } // namespace inet
 

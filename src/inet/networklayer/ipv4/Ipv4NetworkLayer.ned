@@ -30,7 +30,6 @@ import inet.networklayer.contract.INetworkLayer;
 module Ipv4NetworkLayer like INetworkLayer
 {
     parameters:
-        bool proxyARP = default(true);
         bool forwarding = default(false);
         bool multicastForwarding = default(false);
         string interfaceTableModule;
@@ -40,8 +39,6 @@ module Ipv4NetworkLayer like INetworkLayer
         *.routingTableModule = default(absPath(".routingTable"));
         *.arpModule = default(absPath(".arp"));
         *.icmpModule = default(absPath(".icmp"));
-        arp.respondToProxyARP = proxyARP;
-        ip.useProxyARP = true; // as routes with unspecified next-hop addr are quite common
         @display("i=block/fork");
 
     gates:

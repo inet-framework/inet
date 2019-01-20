@@ -21,7 +21,6 @@
 #include "inet/physicallayer/contract/packetlevel/ISignal.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 class INET_API Signal : public cPacket, public ISignal
@@ -55,7 +54,6 @@ class INET_API Signal : public cPacket, public ISignal
 };
 
 } // namespace physicallayer
-
 } // namespace inet
 
 #endif // ifndef __INET_SIGNAL_H

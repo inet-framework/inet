@@ -18,15 +18,14 @@
 
 //  Cleanup and rewrite: Andras Varga, 2004
 
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
-
-#include "inet/networklayer/ipv4/RoutingTableParser.h"
 
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
+#include "inet/networklayer/ipv4/RoutingTableParser.h"
 
 namespace inet {
 

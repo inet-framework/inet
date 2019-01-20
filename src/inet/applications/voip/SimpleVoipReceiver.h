@@ -19,15 +19,14 @@
 #ifndef __INET_SIMPLEVOIPRECEIVER_H
 #define __INET_SIMPLEVOIPRECEIVER_H
 
-#include <string.h>
 #include <list>
-
+#include <string.h>
 
 #include "inet/common/INETDefs.h"
 #include "inet/common/INETMath.h"
+#include "inet/common/lifecycle/LifecycleUnsupported.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/transportlayer/contract/udp/UdpSocket.h"
-#include "inet/common/lifecycle/LifecycleUnsupported.h"
 
 namespace inet {
 

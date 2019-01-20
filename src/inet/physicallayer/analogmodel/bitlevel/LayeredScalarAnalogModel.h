@@ -18,8 +18,8 @@
 #ifndef __INET_LAYEREDSCALARANALOGMODEL_H
 #define __INET_LAYEREDSCALARANALOGMODEL_H
 
-#include "inet/physicallayer/base/packetlevel/ScalarAnalogModelBase.h"
 #include "inet/physicallayer/analogmodel/bitlevel/ScalarSignalAnalogModel.h"
+#include "inet/physicallayer/base/packetlevel/ScalarAnalogModelBase.h"
 #include "inet/physicallayer/common/bitlevel/LayeredReception.h"
 
 namespace inet {

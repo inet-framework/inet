@@ -18,12 +18,11 @@
 #ifndef __INET_PULSESHAPER_H
 #define __INET_PULSESHAPER_H
 
-#include "inet/physicallayer/contract/bitlevel/IPulseShaper.h"
-#include "inet/physicallayer/common/bitlevel/SignalSymbolModel.h"
 #include "inet/physicallayer/common/bitlevel/SignalSampleModel.h"
+#include "inet/physicallayer/common/bitlevel/SignalSymbolModel.h"
+#include "inet/physicallayer/contract/bitlevel/IPulseShaper.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 class INET_API PulseShaper : public IPulseShaper
@@ -38,7 +37,6 @@ class INET_API PulseShaper : public IPulseShaper
 };
 
 } // namespace physicallayer
-
 } // namespace inet
 
 #endif // ifndef __INET_PULSESHAPER_H

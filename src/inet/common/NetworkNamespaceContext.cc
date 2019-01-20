@@ -17,6 +17,7 @@
 
 #include <cstdio>
 #include <fcntl.h>
+
 #include "inet/common/NetworkNamespaceContext.h"
 
 namespace inet {

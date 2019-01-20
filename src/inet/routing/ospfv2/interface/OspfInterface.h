@@ -18,17 +18,16 @@
 #ifndef __INET_OSPFINTERFACE_H
 #define __INET_OSPFINTERFACE_H
 
+#include <list>
 #include <map>
 #include <vector>
-#include <list>
 
 #include "inet/common/INETDefs.h"
-
 #include "inet/common/packet/Packet.h"
-#include "inet/routing/ospfv2/router/OspfCommon.h"
-#include "inet/routing/ospfv2/neighbor/OspfNeighbor.h"
-#include "inet/routing/ospfv2/OspfTimer.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
+#include "inet/routing/ospfv2/OspfTimer.h"
+#include "inet/routing/ospfv2/neighbor/OspfNeighbor.h"
+#include "inet/routing/ospfv2/router/OspfCommon.h"
 
 namespace inet {
 

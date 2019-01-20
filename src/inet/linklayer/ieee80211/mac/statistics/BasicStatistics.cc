@@ -15,9 +15,9 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 //#include "inet/linklayer/ieee80211/mac/common/MacUtils.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRateControl.h"
-#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include "inet/linklayer/ieee80211/mac/statistics/BasicStatistics.h"
 
 namespace inet {

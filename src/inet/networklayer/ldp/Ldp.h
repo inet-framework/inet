@@ -16,12 +16,11 @@
 #ifndef __INET_LDP_H
 #define __INET_LDP_H
 
-#include <string>
 #include <iostream>
+#include <string>
 #include <vector>
 
 #include "inet/common/INETDefs.h"
-
 #include "inet/common/socket/SocketMap.h"
 #include "inet/networklayer/ldp/LdpPacket_m.h"
 #include "inet/networklayer/mpls/IIngressClassifier.h"

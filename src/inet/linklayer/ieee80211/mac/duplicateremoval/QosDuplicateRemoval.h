@@ -18,10 +18,11 @@
 #ifndef __INET_QOSDUPLICATEDETECTOR_H
 #define __INET_QOSDUPLICATEDETECTOR_H
 
+#include <map>
+
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/linklayer/ieee80211/mac/common/SequenceControlField.h"
 #include "inet/linklayer/ieee80211/mac/contract/IDuplicateRemoval.h"
-#include <map>
 
 namespace inet {
 namespace ieee80211 {

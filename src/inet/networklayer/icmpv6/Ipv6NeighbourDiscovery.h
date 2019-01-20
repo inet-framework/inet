@@ -19,15 +19,15 @@
 #ifndef __INET_IPV6NEIGHBOURDISCOVERY_H
 #define __INET_IPV6NEIGHBOURDISCOVERY_H
 
-#include <vector>
-#include <set>
 #include <map>
+#include <set>
+#include <vector>
 
+#include "inet/common/lifecycle/LifecycleUnsupported.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/contract/ipv6/Ipv6Address.h"
 #include "inet/networklayer/icmpv6/Ipv6NdMessage_m.h"
 #include "inet/networklayer/icmpv6/Ipv6NeighbourCache.h"
-#include "inet/common/lifecycle/LifecycleUnsupported.h"
 #include "inet/transportlayer/common/CrcMode_m.h"
 
 namespace inet {

@@ -27,7 +27,7 @@
 #endif
 #include <assert.h>
 
-#include "PacketDrillUtils.h"
+#include "inet/applications/packetdrill/PacketDrillUtils.h"
 
 namespace inet {
 using namespace sctp;

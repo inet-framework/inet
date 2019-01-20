@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/figures/FigureRecorder.h"
 #include "inet/common/INETUtils.h"
+#include "inet/common/figures/FigureRecorder.h"
 
 namespace inet {
 Register_ResultRecorder("figure", FigureRecorder);

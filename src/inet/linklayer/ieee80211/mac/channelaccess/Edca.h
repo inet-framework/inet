@@ -18,7 +18,7 @@
 #ifndef __INET_EDCA_H
 #define __INET_EDCA_H
 
-#include "Edcaf.h"
+#include "inet/linklayer/ieee80211/mac/channelaccess/Edcaf.h"
 #include "inet/linklayer/ieee80211/mac/common/Ieee80211Defs.h"
 
 namespace inet {

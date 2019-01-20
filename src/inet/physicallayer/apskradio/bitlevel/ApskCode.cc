@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "ApskCode.h"
+#include "inet/physicallayer/apskradio/bitlevel/ApskCode.h"
 
 namespace inet {
 

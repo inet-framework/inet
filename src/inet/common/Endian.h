@@ -20,6 +20,8 @@
 
 #include <stdint.h>    /* ISO C compliant platforms: Linux, Mac OS/X, recent MSVC versions */
 
+#include "inet/common/INETDefs.h"
+
 //
 // Get endianness macros defined
 //

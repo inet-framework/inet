@@ -18,9 +18,9 @@
 #ifndef __INET_APSKMODULATIONBASE_H
 #define __INET_APSKMODULATIONBASE_H
 
-#include "inet/physicallayer/contract/packetlevel/IApskModulation.h"
 #include "inet/common/ShortBitVector.h"
 #include "inet/physicallayer/apskradio/bitlevel/ApskSymbol.h"
+#include "inet/physicallayer/contract/packetlevel/IApskModulation.h"
 
 namespace inet {
 

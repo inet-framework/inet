@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/backgroundnoise/IsotropicDimensionalBackgroundNoise.h"
 #include "inet/physicallayer/analogmodel/packetlevel/DimensionalNoise.h"
+#include "inet/physicallayer/backgroundnoise/IsotropicDimensionalBackgroundNoise.h"
 #include "inet/physicallayer/common/packetlevel/BandListening.h"
 
 namespace inet {

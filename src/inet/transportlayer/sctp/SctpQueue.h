@@ -20,12 +20,10 @@
 #define __INET_SCTPQUEUE_H
 
 #include "inet/common/INETDefs.h"
-
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/transportlayer/sctp/Sctp.h"
 
 namespace inet {
-
 namespace sctp {
 
 class SctpDataVariables;
@@ -108,7 +106,6 @@ class INET_API SctpQueue : public cObject
 };
 
 } // namespace sctp
-
 } // namespace inet
 
 #endif // ifndef __INET_SCTPQUEUE_H

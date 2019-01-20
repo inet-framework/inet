@@ -19,6 +19,7 @@
 #define __INET_ROUTINGTABLEVISUALIZERBASE_H
 
 #include <tuple>
+
 #include "inet/common/StringFormat.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
 #include "inet/networklayer/ipv4/Ipv4RoutingTable.h"

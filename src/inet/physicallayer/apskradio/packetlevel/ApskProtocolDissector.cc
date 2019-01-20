@@ -17,12 +17,11 @@
 // @author: Zoltan Bojthe
 //
 
-#include "inet/physicallayer/apskradio/packetlevel/ApskProtocolDissector.h"
-
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/packet/chunk/BitCountChunk.h"
 #include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
 #include "inet/physicallayer/apskradio/packetlevel/ApskPhyHeader_m.h"
+#include "inet/physicallayer/apskradio/packetlevel/ApskProtocolDissector.h"
 
 
 namespace inet {

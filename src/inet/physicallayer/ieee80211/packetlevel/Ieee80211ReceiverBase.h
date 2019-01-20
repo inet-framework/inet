@@ -19,12 +19,11 @@
 #define __INET_IEEE80211RECEIVERBASE_H
 
 #include "inet/physicallayer/base/packetlevel/FlatReceiverBase.h"
-#include "inet/physicallayer/ieee80211/mode/Ieee80211ModeSet.h"
-#include "inet/physicallayer/ieee80211/mode/Ieee80211Channel.h"
 #include "inet/physicallayer/ieee80211/mode/Ieee80211Band.h"
+#include "inet/physicallayer/ieee80211/mode/Ieee80211Channel.h"
+#include "inet/physicallayer/ieee80211/mode/Ieee80211ModeSet.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 class INET_API Ieee80211ReceiverBase : public FlatReceiverBase
@@ -52,7 +51,6 @@ class INET_API Ieee80211ReceiverBase : public FlatReceiverBase
 };
 
 } // namespace physicallayer
-
 } // namespace inet
 
 #endif // ifndef __INET_IEEE80211RECEIVERBASE_H

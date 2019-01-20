@@ -19,13 +19,12 @@
 #define __INET_L3ADDRESS_H
 
 #include "inet/common/INETDefs.h"
-
 #include "inet/linklayer/common/MacAddress.h"
+#include "inet/networklayer/common/ModuleIdAddress.h"
+#include "inet/networklayer/common/ModulePathAddress.h"
 #include "inet/networklayer/contract/clns/ClnsAddress.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
 #include "inet/networklayer/contract/ipv6/Ipv6Address.h"
-#include "inet/networklayer/common/ModuleIdAddress.h"
-#include "inet/networklayer/common/ModulePathAddress.h"
 
 namespace inet {
 

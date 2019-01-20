@@ -19,11 +19,10 @@
 #define __INET_ISIGNALSYMBOLMODEL_H
 
 #include "inet/physicallayer/contract/bitlevel/ISymbol.h"
-#include "inet/physicallayer/contract/packetlevel/IPrintableObject.h"
 #include "inet/physicallayer/contract/packetlevel/IModulation.h"
+#include "inet/physicallayer/contract/packetlevel/IPrintableObject.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 /**
@@ -52,7 +51,6 @@ class INET_API IReceptionSymbolModel : public virtual ISignalSymbolModel
 };
 
 } // namespace physicallayer
-
 } // namespace inet
 
 #endif // ifndef __INET_ISIGNALSYMBOLMODEL_H

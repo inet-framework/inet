@@ -15,14 +15,13 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/routing/bgpv4/Bgp.h"
-#include "inet/routing/bgpv4/BgpConfigReader.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/routing/bgpv4/Bgp.h"
+#include "inet/routing/bgpv4/BgpConfigReader.h"
 #include "inet/routing/bgpv4/BgpSession.h"
 
 namespace inet {
-
 namespace bgp {
 
 Define_Module(Bgp);
@@ -138,6 +137,5 @@ void Bgp::handleTimer(cMessage *timer)
 }
 
 } // namespace bgp
-
 } // namespace inet
 

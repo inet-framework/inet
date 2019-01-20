@@ -17,10 +17,9 @@
 // @author: Zoltan Bojthe
 //
 
-#include "inet/networklayer/probabilistic/ProbabilisticProtocolDissector.h"
-
-#include "inet/networklayer/probabilistic/ProbabilisticBroadcastHeader_m.h"
 #include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
+#include "inet/networklayer/probabilistic/ProbabilisticBroadcastHeader_m.h"
+#include "inet/networklayer/probabilistic/ProbabilisticProtocolDissector.h"
 
 
 namespace inet {

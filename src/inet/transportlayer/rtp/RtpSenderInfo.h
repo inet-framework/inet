@@ -18,12 +18,10 @@
 #ifndef __INET_RTPSENDERINFO_H
 #define __INET_RTPSENDERINFO_H
 
+#include "inet/common/INETDefs.h"
 #include "inet/transportlayer/rtp/RtpParticipantInfo.h"
 
-#include "inet/common/INETDefs.h"
-
 namespace inet {
-
 namespace rtp {
 
 /**
@@ -133,7 +131,6 @@ class INET_API RtpSenderInfo : public RtpParticipantInfo
 };
 
 } // namespace rtp
-
 } // namespace inet
 
 #endif // ifndef __INET_RTPSENDERINFO_H

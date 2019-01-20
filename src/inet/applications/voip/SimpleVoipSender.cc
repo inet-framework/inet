@@ -17,11 +17,11 @@
 //
 
 #include <cmath>
-#include "inet/applications/voip/SimpleVoipSender.h"
 
+#include "inet/applications/voip/SimpleVoipPacket_m.h"
+#include "inet/applications/voip/SimpleVoipSender.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/NodeStatus.h"
-#include "inet/applications/voip/SimpleVoipPacket_m.h"
 
 namespace inet {
 

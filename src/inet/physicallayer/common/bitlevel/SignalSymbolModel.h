@@ -22,7 +22,6 @@
 #include "inet/physicallayer/contract/packetlevel/IModulation.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 class INET_API SignalSymbolModel : public virtual ISignalSymbolModel
@@ -66,7 +65,6 @@ class INET_API ReceptionSymbolModel : public SignalSymbolModel, public virtual I
 };
 
 } // namespace physicallayer
-
 } // namespace inet
 
 #endif /* ifndef __INET_SIGNALSYMBOLMODEL_H */

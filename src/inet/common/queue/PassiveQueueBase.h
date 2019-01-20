@@ -21,7 +21,6 @@
 #include <map>
 
 #include "inet/common/INETDefs.h"
-
 #include "inet/common/queue/IPassiveQueue.h"
 
 namespace inet {

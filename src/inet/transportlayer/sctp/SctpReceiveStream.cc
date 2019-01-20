@@ -16,12 +16,11 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/transportlayer/sctp/SctpReceiveStream.h"
-#include "inet/transportlayer/sctp/SctpAssociation.h"
 #include "inet/transportlayer/contract/sctp/SctpCommand_m.h"
+#include "inet/transportlayer/sctp/SctpAssociation.h"
+#include "inet/transportlayer/sctp/SctpReceiveStream.h"
 
 namespace inet {
-
 namespace sctp {
 
 SctpReceiveStream::SctpReceiveStream(SctpAssociation *assoc_)

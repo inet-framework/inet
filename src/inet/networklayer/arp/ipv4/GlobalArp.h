@@ -20,6 +20,7 @@
 #define __INET_GLOBALARP_H
 
 #include <map>
+
 #include "inet/common/lifecycle/OperationalBase.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/InterfaceEntry.h"

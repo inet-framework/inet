@@ -17,8 +17,8 @@
 // @author: Zoltan Bojthe
 //
 
-#include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
 #include "inet/common/ProtocolGroup.h"
+#include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
 #include "inet/transportlayer/tcp_common/TcpHeader.h"
 #include "inet/transportlayer/tcp_common/TcpProtocolDissector.h"
 

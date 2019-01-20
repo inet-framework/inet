@@ -19,15 +19,14 @@
 #define __INET_IEEE80211OFDMDECODERMODULE_H
 
 #include "inet/common/INETDefs.h"
+#include "inet/physicallayer/common/bitlevel/AdditiveScrambler.h"
+#include "inet/physicallayer/common/bitlevel/ConvolutionalCoder.h"
 #include "inet/physicallayer/contract/bitlevel/IDecoder.h"
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OfdmDecoder.h"
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OfdmInterleaver.h"
-#include "inet/physicallayer/common/bitlevel/AdditiveScrambler.h"
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OfdmInterleaving.h"
-#include "inet/physicallayer/common/bitlevel/ConvolutionalCoder.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 class INET_API Ieee80211OfdmDecoderModule : public cSimpleModule, public IDecoder
@@ -51,6 +50,7 @@ class INET_API Ieee80211OfdmDecoderModule : public cSimpleModule, public IDecode
     const Ieee80211OfdmCode *getCode() const { return code; }
     const IReceptionPacketModel *decode(const IReceptionBitModel *bitModel) const override;
 };
+
 } /* namespace physicallayer */
 } /* namespace inet */
 

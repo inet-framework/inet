@@ -19,14 +19,14 @@
 #define __INET_BGPSESSION_H
 
 #include <vector>
+
 #include "inet/common/INETDefs.h"
-#include "inet/routing/bgpv4/BgpCommon.h"
-#include "inet/transportlayer/contract/tcp/TcpSocket.h"
 #include "inet/routing/bgpv4/Bgp.h"
+#include "inet/routing/bgpv4/BgpCommon.h"
 #include "inet/routing/bgpv4/BgpFsm.h"
+#include "inet/transportlayer/contract/tcp/TcpSocket.h"
 
 namespace inet {
-
 namespace bgp {
 
 class INET_API BgpSession : public cObject
@@ -121,7 +121,6 @@ private:
 std::ostream& operator<<(std::ostream& out, const BgpSession& entry);
 
 } // namespace bgp
-
 } // namespace inet
 
 #endif // ifndef __INET_BGPSESSION_H

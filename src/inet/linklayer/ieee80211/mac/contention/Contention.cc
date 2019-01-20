@@ -17,8 +17,8 @@
 
 #include "inet/common/FSMA.h"
 #include "inet/common/ModuleAccess.h"
-#include "inet/linklayer/ieee80211/mac/contention/Contention.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "inet/linklayer/ieee80211/mac/contention/Contention.h"
 
 namespace inet {
 namespace ieee80211 {

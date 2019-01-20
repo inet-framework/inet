@@ -18,12 +18,12 @@
 #ifndef __INET_TRANSMISSIONBASE_H
 #define __INET_TRANSMISSIONBASE_H
 
-#include "inet/physicallayer/contract/packetlevel/IRadio.h"
-#include "inet/physicallayer/contract/packetlevel/ITransmission.h"
 #include <memory>
 
-namespace inet {
+#include "inet/physicallayer/contract/packetlevel/IRadio.h"
+#include "inet/physicallayer/contract/packetlevel/ITransmission.h"
 
+namespace inet {
 namespace physicallayer {
 
 class IRadioMedium;
@@ -88,7 +88,6 @@ class INET_API TransmissionBase : public virtual ITransmission, public virtual I
 };
 
 } // namespace physicallayer
-
 } // namespace inet
 
 #endif // ifndef __INET_TRANSMISSIONBASE_H

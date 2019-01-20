@@ -16,6 +16,7 @@
 //
 
 #include <algorithm>
+
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/Simsignals.h"
 #ifdef WITH_IEEE80211

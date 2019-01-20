@@ -17,13 +17,13 @@
 // @author: Zoltan Bojthe
 //
 
-#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211PhyProtocolDissector.h"
 
-#include "inet/common/packet/chunk/BitCountChunk.h"
-#include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/packet/chunk/BitCountChunk.h"
+#include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211PhyHeader_m.h"
+#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211PhyProtocolDissector.h"
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211Tag_m.h"
 
 namespace inet {

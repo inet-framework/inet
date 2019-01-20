@@ -24,7 +24,6 @@
 #define __INET_STATICCONCENTRICMOBILITY_H
 
 #include "inet/common/INETDefs.h"
-
 #include "inet/mobility/static/StationaryMobility.h"
 
 

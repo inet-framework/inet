@@ -19,8 +19,11 @@
 #ifndef __INET_IPV4_H
 #define __INET_IPV4_H
 
-#include "inet/common/INETDefs.h"
+#include <list>
+#include <map>
+#include <set>
 
+#include "inet/common/INETDefs.h"
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/OperationalBase.h"
@@ -31,9 +34,6 @@
 #include "inet/networklayer/ipv4/Icmp.h"
 #include "inet/networklayer/ipv4/Ipv4FragBuf.h"
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
-#include <list>
-#include <map>
-#include <set>
 
 namespace inet {
 
@@ -88,7 +88,6 @@ class INET_API Ipv4 : public OperationalBase, public NetfilterBase, public INetw
     simtime_t fragmentTimeoutTime;
     bool limitedBroadcast = false;
     std::string directBroadcastInterfaces = "";
-    bool useProxyARP = false;
 
     cPatternMatcher directBroadcastInterfaceMatcher;
 

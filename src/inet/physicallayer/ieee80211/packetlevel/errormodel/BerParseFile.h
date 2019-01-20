@@ -20,11 +20,10 @@
 #ifndef __INET_BERPARSEFILE_H
 #define __INET_BERPARSEFILE_H
 
-#include <vector>
 #include <math.h>
+#include <vector>
 
 namespace inet {
-
 namespace physicallayer {
 
 /**
@@ -82,7 +81,6 @@ class INET_API BerParseFile
 };
 
 } // namespace physicallayer
-
 } // namespace inet
 
 #endif // ifndef __INET_BERPARSEFILE_H

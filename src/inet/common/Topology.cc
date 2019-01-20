@@ -15,15 +15,16 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include <stdio.h>
-#include <string.h>
-#include <stdarg.h>
+#include <algorithm>
 #include <deque>
 #include <list>
-#include <algorithm>
 #include <sstream>
-#include "inet/common/Topology.h"
+#include <stdarg.h>
+#include <stdio.h>
+#include <string.h>
+
 #include "inet/common/PatternMatcher.h"
+#include "inet/common/Topology.h"
 #include "inet/common/stlutils.h"
 
 namespace inet {

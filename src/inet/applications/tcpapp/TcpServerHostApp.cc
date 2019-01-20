@@ -16,11 +16,10 @@
 //
 
 #include "inet/applications/tcpapp/TcpServerHostApp.h"
-
-#include "inet/networklayer/common/L3AddressResolver.h"
+#include "inet/common/INETUtils.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
-#include "inet/common/INETUtils.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
 
 namespace inet {
 

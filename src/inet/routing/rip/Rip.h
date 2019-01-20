@@ -24,9 +24,9 @@
 #include "inet/networklayer/contract/IRoute.h"
 #include "inet/networklayer/contract/IRoutingTable.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/transportlayer/contract/udp/UdpSocket.h"
 #include "inet/routing/base/RoutingProtocolBase.h"
 #include "inet/routing/rip/RipRouteData.h"
+#include "inet/transportlayer/contract/udp/UdpSocket.h"
 
 namespace inet {
 

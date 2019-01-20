@@ -24,21 +24,20 @@
  * last modification: 06/02/11
  **************************************************************************/
 
-#include <limits>
 #include <algorithm>
-
-#include "inet/networklayer/wiseroute/WiseRoute.h"
+#include <limits>
 
 #include "inet/common/FindModule.h"
 #include "inet/common/INETMath.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/packet/Packet.h"
-#include "inet/networklayer/common/L3AddressTag_m.h"
-#include "inet/networklayer/contract/IL3AddressType.h"
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
+#include "inet/networklayer/common/L3AddressTag_m.h"
+#include "inet/networklayer/contract/IL3AddressType.h"
+#include "inet/networklayer/wiseroute/WiseRoute.h"
 
 namespace inet {
 

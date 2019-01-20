@@ -16,11 +16,11 @@
 //
 
 #include <algorithm>    // min,max
-#include "inet/transportlayer/tcp/flavours/TcpTahoe.h"
+
 #include "inet/transportlayer/tcp/Tcp.h"
+#include "inet/transportlayer/tcp/flavours/TcpTahoe.h"
 
 namespace inet {
-
 namespace tcp {
 
 Register_Class(TcpTahoe);
@@ -146,6 +146,5 @@ void TcpTahoe::receivedDuplicateAck()
 }
 
 } // namespace tcp
-
 } // namespace inet
 

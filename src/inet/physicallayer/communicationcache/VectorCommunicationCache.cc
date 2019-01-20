@@ -15,11 +15,10 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/contract/packetlevel/IRadio.h"
 #include "inet/physicallayer/communicationcache/VectorCommunicationCache.h"
+#include "inet/physicallayer/contract/packetlevel/IRadio.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 Define_Module(VectorCommunicationCache);
@@ -148,6 +147,5 @@ void VectorCommunicationCache::removeNonInterferingTransmissions()
 }
 
 } // namespace physicallayer
-
 } // namespace inet
 

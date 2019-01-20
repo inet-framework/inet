@@ -16,6 +16,7 @@
 //
 
 #include <algorithm>
+
 #include "inet/common/ModuleAccess.h"
 #include "inet/visualizer/base/TracingObstacleLossVisualizerBase.h"
 

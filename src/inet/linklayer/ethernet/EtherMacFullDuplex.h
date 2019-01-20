@@ -19,7 +19,6 @@
 #define __INET_ETHERMACFULLDUPLEX_H
 
 #include "inet/common/INETDefs.h"
-
 #include "inet/linklayer/ethernet/EtherMacBase.h"
 
 namespace inet {

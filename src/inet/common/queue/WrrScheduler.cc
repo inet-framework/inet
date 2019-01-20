@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/queue/WrrScheduler.h"
 #include "inet/common/INETUtils.h"
+#include "inet/common/queue/WrrScheduler.h"
 
 namespace inet {
 

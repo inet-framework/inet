@@ -21,12 +21,11 @@
 #include <memory.h>
 
 #include "inet/common/INETDefs.h"
-
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
+#include "inet/routing/ospfv2/OspfPacket_m.h"
 #include "inet/routing/ospfv2/router/Lsa.h"
 #include "inet/routing/ospfv2/router/OspfCommon.h"
-#include "inet/routing/ospfv2/OspfPacket_m.h"
 
 namespace inet {
 

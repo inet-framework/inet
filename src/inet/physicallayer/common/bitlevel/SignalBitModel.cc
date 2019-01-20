@@ -18,7 +18,6 @@
 #include "inet/physicallayer/common/bitlevel/SignalBitModel.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 SignalBitModel::SignalBitModel(b headerLength, bps headerBitRate, b dataLength, bps dataBitRate, const BitVector *bits) :
@@ -68,6 +67,5 @@ ReceptionBitModel::ReceptionBitModel(b headerLength, bps headerBitRate, b dataLe
 }
 
 } // namespace physicallayer
-
 } // namespace inet
 

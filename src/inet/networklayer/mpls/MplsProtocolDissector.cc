@@ -17,10 +17,9 @@
 // @author: Zoltan Bojthe
 //
 
-#include "inet/networklayer/mpls/MplsProtocolDissector.h"
-
-#include "inet/networklayer/mpls/MplsPacket_m.h"
 #include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
+#include "inet/networklayer/mpls/MplsPacket_m.h"
+#include "inet/networklayer/mpls/MplsProtocolDissector.h"
 
 
 namespace inet {

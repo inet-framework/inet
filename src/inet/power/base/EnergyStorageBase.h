@@ -18,12 +18,11 @@
 #ifndef __INET_ENERGYSTORAGEBASE_H
 #define __INET_ENERGYSTORAGEBASE_H
 
-#include "inet/power/contract/IEnergyStorage.h"
-#include "inet/power/base/EnergySourceBase.h"
 #include "inet/power/base/EnergySinkBase.h"
+#include "inet/power/base/EnergySourceBase.h"
+#include "inet/power/contract/IEnergyStorage.h"
 
 namespace inet {
-
 namespace power {
 
 class INET_API EnergyStorageBase : public cSimpleModule, public EnergySourceBase, public EnergySinkBase, public virtual IEnergyStorage
@@ -31,7 +30,6 @@ class INET_API EnergyStorageBase : public cSimpleModule, public EnergySourceBase
 };
 
 } // namespace power
-
 } // namespace inet
 
 #endif // ifndef __INET_ENERGYSTORAGEBASE_H

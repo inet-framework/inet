@@ -16,6 +16,7 @@
 //
 
 #include <stdio.h>
+
 #include "inet/common/Simsignals.h"
 
 namespace inet {

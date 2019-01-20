@@ -16,6 +16,7 @@
 //
 
 #include "omnetpp/cstatisticbuilder.h"
+
 #include "inet/common/ModuleAccess.h"
 #include "inet/visualizer/base/StatisticVisualizerBase.h"
 

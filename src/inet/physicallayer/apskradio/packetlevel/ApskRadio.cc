@@ -15,9 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/packet/chunk/BitCountChunk.h"
-#include "inet/common/packet/Packet.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/chunk/BitCountChunk.h"
 #include "inet/physicallayer/apskradio/bitlevel/ApskEncoder.h"
 #include "inet/physicallayer/apskradio/bitlevel/ApskLayeredTransmitter.h"
 #include "inet/physicallayer/apskradio/packetlevel/ApskPhyHeader_m.h"

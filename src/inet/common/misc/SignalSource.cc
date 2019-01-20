@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "SignalSource.h"
+#include "inet/common/misc/SignalSource.h"
 
 namespace inet {
 

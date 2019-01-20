@@ -22,10 +22,10 @@
 
 #include "inet/common/INETDefs.h"
 #include "inet/common/packet/Packet.h"
-#include "inet/routing/ospfv2/router/Lsa.h"
-#include "inet/routing/ospfv2/router/OspfCommon.h"
 #include "inet/routing/ospfv2/OspfPacket_m.h"
 #include "inet/routing/ospfv2/OspfTimer.h"
+#include "inet/routing/ospfv2/router/Lsa.h"
+#include "inet/routing/ospfv2/router/OspfCommon.h"
 
 namespace inet {
 

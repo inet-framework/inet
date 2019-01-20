@@ -17,12 +17,11 @@
 // @author: Zoltan Bojthe
 //
 
-#include "inet/linklayer/ppp/PppProtocolDissector.h"
-
-#include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
 #include "inet/linklayer/ppp/PppFrame_m.h"
+#include "inet/linklayer/ppp/PppProtocolDissector.h"
 
 namespace inet {
 

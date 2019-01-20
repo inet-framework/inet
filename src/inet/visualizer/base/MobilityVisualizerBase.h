@@ -20,8 +20,8 @@
 
 #include "inet/mobility/contract/IMobility.h"
 #include "inet/visualizer/base/VisualizerBase.h"
-#include "inet/visualizer/util/ModuleFilter.h"
 #include "inet/visualizer/util/ColorSet.h"
+#include "inet/visualizer/util/ModuleFilter.h"
 
 namespace inet {
 

@@ -19,14 +19,12 @@
 #include <algorithm>
 
 #include "inet/common/INETUtils.h"
-
-#include "inet/networklayer/ipv6/Ipv6RoutingTable.h"
-#include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/common/ModuleAccess.h"
-#include "inet/networklayer/ipv6tunneling/Ipv6Tunneling.h"
-
-#include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
+#include "inet/networklayer/contract/IInterfaceTable.h"
+#include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
+#include "inet/networklayer/ipv6/Ipv6RoutingTable.h"
+#include "inet/networklayer/ipv6tunneling/Ipv6Tunneling.h"
 
 namespace inet {
 
@@ -198,6 +196,7 @@ void Ipv6RoutingTable::receiveSignal(cComponent *source, simsignal_t signalID, c
 
         // an interface went down
         if (!interfaceEntry->isUp()) {
+            deleteInterfaceRoutes(interfaceEntry);
             purgeDestCacheForInterfaceId(interfaceEntryId);
         }
     }

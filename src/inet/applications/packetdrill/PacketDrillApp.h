@@ -19,6 +19,7 @@
 #define __INET_PACKETDRILLAPP_H_
 
 #include "inet/common/INETDefs.h"
+
 #include "inet/applications/base/ApplicationBase.h"
 #include "inet/applications/packetdrill/PacketDrill.h"
 #include "inet/applications/packetdrill/PacketDrillUtils.h"

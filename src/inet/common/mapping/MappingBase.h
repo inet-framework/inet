@@ -18,7 +18,6 @@
 #ifndef __INET_MAPPINGBASE_H
 #define __INET_MAPPINGBASE_H
 
-#include <omnetpp.h>
 #include <map>
 #include <set>
 #include <string>

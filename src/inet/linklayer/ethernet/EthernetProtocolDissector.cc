@@ -17,13 +17,12 @@
 // @author: Zoltan Bojthe
 //
 
-#include "inet/linklayer/ethernet/EthernetProtocolDissector.h"
-
-#include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
 #include "inet/linklayer/ethernet/EtherPhyFrame_m.h"
+#include "inet/linklayer/ethernet/EthernetProtocolDissector.h"
 
 namespace inet {
 

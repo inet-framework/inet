@@ -18,9 +18,9 @@
 #ifndef __INET_LINKVISUALIZERBASE_H
 #define __INET_LINKVISUALIZERBASE_H
 
+#include "inet/common/StringFormat.h"
 #include "inet/common/geometry/common/Coord.h"
 #include "inet/common/packet/PacketFilter.h"
-#include "inet/common/StringFormat.h"
 #include "inet/visualizer/base/VisualizerBase.h"
 #include "inet/visualizer/util/AnimationPosition.h"
 #include "inet/visualizer/util/InterfaceFilter.h"

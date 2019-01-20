@@ -86,17 +86,19 @@ for (f.src=1024; f.src<1026; f.src++) {
 }
 
 // dump
-for (int j=0; j<v.size(); j++)
+#if 0
+for (size_t j=0; j<v.size(); j++)
 {
     Frag& f = v[j];
-//    EV << f.src << ">" << f.dest << ":" << f.id << " " << f.offset << " (" << f.bytes << ") " << (f.islast?"LAST":"") << "\n";
+    EV << f.src << ">" << f.dest << ":" << f.id << " " << f.offset << " (" << f.bytes << ") " << (f.islast?"LAST":"") << "\n";
 }
+#endif
 
 EV << numdatagrams << " datagrams in " << v.size() << " fragments\n";
 
 // try assemble them, fragments in original order
 Ipv4FragBuf fragbuf1;
-int i, num;
+size_t i, num;
 for (i=0, num=0; i<v.size(); i++)
     if (insertFragment(fragbuf1, v[i]))
         num++;
@@ -104,8 +106,8 @@ EV << "assembled in original order: " << num << "\n";
 
 // try assemble fragments in reverse order
 Ipv4FragBuf fragbuf2;
-for (i=v.size()-1, num=0; i>=0; i--)
-    if (insertFragment(fragbuf2, v[i]))
+for (i=v.size(), num=0; i>0; i--)
+    if (insertFragment(fragbuf2, v[i-1]))
         num++;
 EV << "assembled in reverse order: " << num << "\n";
 

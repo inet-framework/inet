@@ -16,11 +16,10 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/transportlayer/sctp/SctpQueue.h"
 #include "inet/transportlayer/sctp/SctpAssociation.h"
+#include "inet/transportlayer/sctp/SctpQueue.h"
 
 namespace inet {
-
 namespace sctp {
 
 Register_Class(SctpQueue);
@@ -249,6 +248,5 @@ uint32 SctpQueue::getSizeOfFirstChunk(const L3Address& remoteAddress)
 }
 
 } // namespace sctp
-
 } // namespace inet
 

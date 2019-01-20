@@ -18,10 +18,11 @@
 
 #include <stack>
 #include <functional>
+
+#include "inet/common/Protocol.h"
+#include "inet/common/packet/Packet.h"
 #include "inet/common/packet/dissector/ProtocolDissector.h"
 #include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
-#include "inet/common/packet/Packet.h"
-#include "inet/common/Protocol.h"
 
 namespace inet {
 

@@ -18,9 +18,10 @@
 #ifndef __INET_QOSACKHANDLER_H
 #define __INET_QOSACKHANDLER_H
 
+#include <map>
+
 #include "inet/linklayer/ieee80211/mac/common/SequenceControlField.h"
 #include "inet/linklayer/ieee80211/mac/contract/IAckHandler.h"
-#include <map>
 
 namespace inet {
 namespace ieee80211 {

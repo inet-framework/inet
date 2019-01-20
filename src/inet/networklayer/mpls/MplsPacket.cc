@@ -14,7 +14,6 @@
 //
 
 #include "inet/common/INETDefs.h"
-
 #include "inet/networklayer/mpls/MplsPacket_m.h"
 
 namespace inet {

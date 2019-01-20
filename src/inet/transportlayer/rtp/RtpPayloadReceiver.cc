@@ -17,13 +17,11 @@
 
 #include <fstream>
 
-#include "inet/transportlayer/rtp/RtpPayloadReceiver.h"
-
 #include "inet/transportlayer/rtp/RtpInnerPacket_m.h"
 #include "inet/transportlayer/rtp/RtpPacket_m.h"
+#include "inet/transportlayer/rtp/RtpPayloadReceiver.h"
 
 namespace inet {
-
 namespace rtp {
 
 Define_Module(RtpPayloadReceiver);
@@ -83,6 +81,5 @@ void RtpPayloadReceiver::closeOutputFile()
 }
 
 } // namespace rtp
-
 } // namespace inet
 

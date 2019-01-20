@@ -18,14 +18,13 @@
 #ifndef __INET_ADDITIVESCRAMBLER_H
 #define __INET_ADDITIVESCRAMBLER_H
 
+#include "inet/common/BitVector.h"
 #include "inet/common/INETDefs.h"
+#include "inet/common/ShortBitVector.h"
 #include "inet/physicallayer/common/bitlevel/AdditiveScrambler.h"
 #include "inet/physicallayer/common/bitlevel/AdditiveScrambling.h"
-#include "inet/common/BitVector.h"
-#include "inet/common/ShortBitVector.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 /*
@@ -52,6 +51,7 @@ class INET_API AdditiveScrambler : public IScrambler
     const AdditiveScrambling *getScrambling() const override { return scrambling; }
     const BitVector& getScramblingSequcene() const { return scramblingSequence; }
 };
+
 } /* namespace physicallayer */
 } /* namespace inet */
 

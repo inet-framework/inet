@@ -20,12 +20,10 @@
 #define __INET_TCPVEGAS_H
 
 #include "inet/common/INETDefs.h"
-
 #include "inet/transportlayer/tcp/flavours/TcpBaseAlg.h"
 #include "inet/transportlayer/tcp/flavours/TcpSegmentTransmitInfoList.h"
 
 namespace inet {
-
 namespace tcp {
 
 /**
@@ -96,7 +94,6 @@ class INET_API TcpVegas : public TcpBaseAlg
 };
 
 } // namespace tcp
-
 } // namespace inet
 
 #endif // ifndef __INET_TCPVEGAS_H

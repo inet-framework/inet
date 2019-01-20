@@ -19,16 +19,15 @@
 #define __INET_IEEE80211OFDMENCODER_H
 
 #include "inet/physicallayer/contract/bitlevel/IEncoder.h"
+#include "inet/physicallayer/contract/bitlevel/IInterleaver.h"
 #include "inet/physicallayer/contract/bitlevel/IFecCoder.h"
 #include "inet/physicallayer/contract/bitlevel/IScrambler.h"
-#include "inet/physicallayer/contract/bitlevel/IInterleaver.h"
-#include "inet/physicallayer/common/bitlevel/SignalPacketModel.h"
 #include "inet/physicallayer/common/bitlevel/SignalBitModel.h"
+#include "inet/physicallayer/common/bitlevel/SignalPacketModel.h"
 #include "inet/physicallayer/base/packetlevel/ApskModulationBase.h"
 #include "inet/physicallayer/ieee80211/mode/Ieee80211OfdmCode.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 class INET_API Ieee80211OfdmEncoder : public IEncoder
@@ -47,6 +46,7 @@ class INET_API Ieee80211OfdmEncoder : public IEncoder
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
     const Ieee80211OfdmCode *getCode() const override { return code; }
 };
+
 } /* namespace physicallayer */
 } /* namespace inet */
 

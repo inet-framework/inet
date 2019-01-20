@@ -20,9 +20,9 @@
  * part of:     framework implementation developed by tkn
  **************************************************************************/
 
+#include "inet/common/INETMath.h"
 #include "inet/common/geometry/common/GeographicCoordinateSystem.h"
 #include "inet/common/geometry/common/Quaternion.h"
-#include "inet/common/INETMath.h"
 #include "inet/mobility/base/MobilityBase.h"
 #ifdef WITH_VISUALIZERS
 #include "inet/visualizer/mobility/MobilityCanvasVisualizer.h"

@@ -19,14 +19,12 @@
 #define __INET_TCPSENDQUEUE_H
 
 #include "inet/common/INETDefs.h"
-
 #include "inet/common/packet/ChunkQueue.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/transportlayer/tcp/TcpConnection.h"
 #include "inet/transportlayer/tcp_common/TcpHeader.h"
 
 namespace inet {
-
 namespace tcp {
 
 /**
@@ -123,7 +121,6 @@ class INET_API TcpSendQueue : public cObject
 };
 
 } // namespace tcp
-
 } // namespace inet
 
 #endif // ifndef __INET_TCPSENDQUEUE_H

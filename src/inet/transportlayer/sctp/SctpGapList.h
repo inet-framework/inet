@@ -19,12 +19,11 @@
 #ifndef __INET_SCTPGAPLIST_H
 #define __INET_SCTPGAPLIST_H
 
-#include <omnetpp.h>
 #include <assert.h>
+
 #include "inet/common/INETDefs.h"
 
 namespace inet {
-
 namespace sctp {
 
 //#include "SctpSeqNumbers.h"
@@ -186,7 +185,6 @@ class INET_API SctpGapList
 inline std::ostream& operator<<(std::ostream& ostr, const SctpGapList& gapList) { gapList.print(ostr); return ostr; }
 
 } // namespace sctp
-
 } // namespace inet
 
 #endif // ifndef __INET_SCTPGAPLIST_H

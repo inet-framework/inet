@@ -18,12 +18,11 @@
 #ifndef __INET_IEEE80211OFDMMODE_H
 #define __INET_IEEE80211OFDMMODE_H
 
-#include "Ieee80211OfdmModulation.h"
-#include "Ieee80211OfdmCode.h"
 #include "inet/physicallayer/ieee80211/mode/Ieee80211ModeBase.h"
+#include "inet/physicallayer/ieee80211/mode/Ieee80211OfdmCode.h"
+#include "inet/physicallayer/ieee80211/mode/Ieee80211OfdmModulation.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 class INET_API Ieee80211OfdmTimingRelatedParametersBase
@@ -266,7 +265,6 @@ class INET_API Ieee80211OfdmCompliantModes
 };
 
 } // namespace physicallayer
-
 } // namespace inet
 
 #endif // ifndef __INET_IEEE80211OFDMMODE_H

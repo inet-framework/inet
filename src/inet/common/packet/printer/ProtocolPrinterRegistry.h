@@ -16,8 +16,8 @@
 #ifndef __INET_PROTOCOLPRINTERREGISTRY_H_
 #define __INET_PROTOCOLPRINTERREGISTRY_H_
 
-#include "inet/common/packet/printer/ProtocolPrinter.h"
 #include "inet/common/Protocol.h"
+#include "inet/common/packet/printer/ProtocolPrinter.h"
 
 namespace inet {
 

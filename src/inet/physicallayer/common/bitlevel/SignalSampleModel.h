@@ -21,7 +21,6 @@
 #include "inet/physicallayer/contract/bitlevel/ISignalSampleModel.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 class INET_API SignalSampleModel : public virtual ISignalSampleModel
@@ -59,7 +58,6 @@ class INET_API ReceptionSampleModel : public SignalSampleModel, public virtual I
 };
 
 } // namespace physicallayer
-
 } // namespace inet
 
 #endif // ifndef __INET_SIGNALSAMPLEMODEL_H

@@ -28,8 +28,8 @@
 #include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/InterfaceMatcher.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
-#include "inet/routing/rip/RipPacket_m.h"
 #include "inet/routing/rip/Rip.h"
+#include "inet/routing/rip/RipPacket_m.h"
 #include "inet/transportlayer/common/L4PortTag_m.h"
 #include "inet/transportlayer/udp/UdpHeader_m.h"
 
@@ -333,8 +333,9 @@ void Rip::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, 
             ie = change->getInterfaceEntry();
             if (!ie->isUp()) {
                 for (auto & elem : ripRoutingTable)
-                    if ((elem)->getInterface() == ie)
+                    if ((elem)->getInterface() == ie) {
                         invalidateRoute(elem);
+                    }
             }
             else {
                 RipInterfaceEntry *ripInterfacePtr = findRipInterfaceById(ie->getInterfaceId());
@@ -346,12 +347,13 @@ void Rip::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, 
     else if (signalID == routeDeletedSignal) {
         // remove references to the deleted route and invalidate the RIP route
         const IRoute *route = check_and_cast<const IRoute *>(obj);
-        if (route->getSource() != this) {
-            for (auto & elem : ripRoutingTable)
-                if ((elem)->getRoute() == route) {
-                    (elem)->setRoute(nullptr);
+        for (auto & elem : ripRoutingTable) {
+            if ((elem)->getRoute() == route) {
+                (elem)->setRoute(nullptr);
+                if (route->getSource() != this) {
                     invalidateRoute(elem);
                 }
+            }
         }
     }
     else if (signalID == routeAddedSignal) {

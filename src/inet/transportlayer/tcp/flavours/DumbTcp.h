@@ -19,11 +19,9 @@
 #define __INET_DUMBTCP_H
 
 #include "inet/common/INETDefs.h"
-
 #include "inet/transportlayer/tcp/TcpAlgorithm.h"
 
 namespace inet {
-
 namespace tcp {
 
 /**
@@ -94,7 +92,6 @@ class INET_API DumbTcp : public TcpAlgorithm
 };
 
 } // namespace tcp
-
 } // namespace inet
 
 #endif // ifndef __INET_DUMBTCP_H

@@ -16,8 +16,8 @@
 #ifndef __INET_PROTOCOLPRINTER_H_
 #define __INET_PROTOCOLPRINTER_H_
 
-#include "inet/common/packet/chunk/Chunk.h"
 #include "inet/common/Protocol.h"
+#include "inet/common/packet/chunk/Chunk.h"
 
 namespace inet {
 

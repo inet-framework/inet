@@ -18,14 +18,13 @@
 #include <vector>
 
 #include "inet/common/INETDefs.h"
-
 #include "inet/common/scenario/IScriptable.h"
 #include "inet/networklayer/rsvpte/IntServ_m.h"
+#include "inet/networklayer/rsvpte/IRsvpClassifier.h"
+#include "inet/networklayer/rsvpte/RsvpHelloMsg_m.h"
 #include "inet/networklayer/rsvpte/RsvpPathMsg_m.h"
 #include "inet/networklayer/rsvpte/RsvpResvMsg_m.h"
-#include "inet/networklayer/rsvpte/RsvpHelloMsg_m.h"
 #include "inet/networklayer/rsvpte/SignallingMsg_m.h"
-#include "inet/networklayer/rsvpte/IRsvpClassifier.h"
 #include "inet/routing/base/RoutingProtocolBase.h"
 
 namespace inet {

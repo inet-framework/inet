@@ -15,12 +15,10 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include <cinttypes>
 
 #include "inet/common/INETDefs.h"
 #include "inet/common/INETUtils.h"
-
-#include <cinttypes>
-
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/Simsignals.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"

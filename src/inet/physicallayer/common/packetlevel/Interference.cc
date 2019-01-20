@@ -18,7 +18,6 @@
 #include "inet/physicallayer/common/packetlevel/Interference.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 Interference::Interference(const INoise *backgroundNoise, const std::vector<const IReception *> *interferingReceptions) :
@@ -43,6 +42,5 @@ std::ostream& Interference::printToStream(std::ostream& stream, int level) const
 }
 
 } // namespace physicallayer
-
 } // namespace inet
 

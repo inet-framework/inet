@@ -17,14 +17,13 @@
 // Authors: Veronika Rybova, Vladimir Vesely (ivesely@fit.vutbr.cz),
 //          Tamas Borbely (tomi@omnetpp.org)
 
-#include "inet/routing/pim/modes/PimDm.h"
-
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
+#include "inet/routing/pim/modes/PimDm.h"
 
 namespace inet {
 
@@ -89,7 +88,7 @@ void PimDm::handleStopOperation(LifecycleOperation *operation)
 {
     // TODO send PIM Hellos to neighbors with 0 HoldTime
     stopPIMRouting();
-    handleStopOperation(operation);
+    PimBase::handleStopOperation(operation);
 }
 
 void PimDm::handleCrashOperation(LifecycleOperation *operation)

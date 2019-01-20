@@ -19,11 +19,9 @@
 #define __INET_TCPRENO_H
 
 #include "inet/common/INETDefs.h"
-
 #include "inet/transportlayer/tcp/flavours/TcpTahoeRenoFamily.h"
 
 namespace inet {
-
 namespace tcp {
 
 /**
@@ -63,7 +61,6 @@ class INET_API TcpReno : public TcpTahoeRenoFamily
 };
 
 } // namespace tcp
-
 } // namespace inet
 
 #endif // ifndef __INET_TCPRENO_H

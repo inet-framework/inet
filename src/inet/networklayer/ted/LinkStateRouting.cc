@@ -14,16 +14,15 @@
 
 #include <algorithm>
 
-#include "inet/networklayer/ted/LinkStateRouting.h"
-
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
-#include "inet/common/Simsignals.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/Simsignals.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
+#include "inet/networklayer/ted/LinkStateRouting.h"
 #include "inet/networklayer/ted/Ted.h"
 
 namespace inet {

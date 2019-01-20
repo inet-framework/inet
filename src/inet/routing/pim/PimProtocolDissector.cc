@@ -17,11 +17,9 @@
 // @author: Zoltan Bojthe
 //
 
-#include "inet/routing/pim/PimProtocolDissector.h"
-
 #include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
 #include "inet/routing/pim/PimPacket_m.h"
-
+#include "inet/routing/pim/PimProtocolDissector.h"
 
 namespace inet {
 

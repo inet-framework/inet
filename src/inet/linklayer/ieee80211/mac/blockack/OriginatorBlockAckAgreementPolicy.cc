@@ -16,8 +16,8 @@
 // 
 
 #include "inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.h"
-#include "OriginatorBlockAckAgreement.h"
-#include "OriginatorBlockAckAgreementPolicy.h"
+#include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckAgreement.h"
+#include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckAgreementPolicy.h"
 
 namespace inet {
 namespace ieee80211 {

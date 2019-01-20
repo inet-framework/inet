@@ -15,18 +15,17 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include <vector>
 #include <memory.h>
+#include <vector>
 
-#include "inet/routing/ospfv2/interface/OspfInterface.h"
-
+#include "inet/common/checksum/TcpIpChecksum.h"
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
+#include "inet/routing/ospfv2/interface/OspfInterface.h"
+#include "inet/routing/ospfv2/interface/OspfInterfaceStateDown.h"
 #include "inet/routing/ospfv2/messagehandler/MessageHandler.h"
 #include "inet/routing/ospfv2/router/OspfArea.h"
-#include "inet/routing/ospfv2/interface/OspfInterfaceStateDown.h"
 #include "inet/routing/ospfv2/router/OspfRouter.h"
-#include "inet/common/checksum/TcpIpChecksum.h"
 
 namespace inet {
 

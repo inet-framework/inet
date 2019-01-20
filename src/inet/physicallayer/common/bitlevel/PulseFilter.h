@@ -18,12 +18,11 @@
 #ifndef __INET_PULSEFILTER_H
 #define __INET_PULSEFILTER_H
 
-#include "inet/physicallayer/contract/bitlevel/IPulseFilter.h"
-#include "inet/physicallayer/common/bitlevel/SignalSymbolModel.h"
 #include "inet/physicallayer/common/bitlevel/SignalSampleModel.h"
+#include "inet/physicallayer/common/bitlevel/SignalSymbolModel.h"
+#include "inet/physicallayer/contract/bitlevel/IPulseFilter.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 class INET_API PulseFilter : public IPulseFilter
@@ -38,7 +37,6 @@ class INET_API PulseFilter : public IPulseFilter
 };
 
 } // namespace physicallayer
-
 } // namespace inet
 
 #endif // ifndef __INET_PULSEFILTER_H

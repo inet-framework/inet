@@ -19,6 +19,7 @@
 #define __INET_ISOCKETMAP_H
 
 #include <map>
+
 #include "inet/common/INETDefs.h"
 #include "inet/common/socket/ISocket.h"
 

@@ -17,11 +17,10 @@
 // @author: Zoltan Bojthe
 //
 
-#include "inet/networklayer/ipv4/IcmpProtocolPrinter.h"
-
 #include "inet/common/packet/printer/PacketPrinter.h"
 #include "inet/common/packet/printer/ProtocolPrinterRegistry.h"
 #include "inet/networklayer/ipv4/IcmpHeader_m.h"
+#include "inet/networklayer/ipv4/IcmpProtocolPrinter.h"
 
 namespace inet {
 

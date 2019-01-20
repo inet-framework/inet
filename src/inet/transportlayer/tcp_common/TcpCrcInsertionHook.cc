@@ -12,11 +12,10 @@
 //
 
 #include "inet/common/INETDefs.h"
-
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/checksum/TcpIpChecksum.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/packet/chunk/EmptyChunk.h"
-#include "inet/common/checksum/TcpIpChecksum.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/IpProtocolId_m.h"
 #include "inet/networklayer/common/L3Tools.h"
@@ -24,9 +23,7 @@
 #include "inet/transportlayer/common/TransportPseudoHeader_m.h"
 #include "inet/transportlayer/tcp_common/TcpCrcInsertionHook.h"
 
-
 namespace inet {
-
 namespace tcp {
 
 INetfilter::IHook::Result TcpCrcInsertion::datagramPostRoutingHook(Packet *packet)
@@ -102,9 +99,6 @@ uint16_t TcpCrcInsertion::computeCrc(const Protocol *networkProtocol, const L3Ad
     return crc;
 }
 
-
 } // namespace tcp
-
 } // namespace inet
-
 

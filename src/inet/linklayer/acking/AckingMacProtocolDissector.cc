@@ -17,12 +17,10 @@
 // @author: Zoltan Bojthe
 //
 
-#include "inet/linklayer/acking/AckingMacProtocolDissector.h"
-
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
 #include "inet/linklayer/acking/AckingMacHeader_m.h"
-
+#include "inet/linklayer/acking/AckingMacProtocolDissector.h"
 
 namespace inet {
 

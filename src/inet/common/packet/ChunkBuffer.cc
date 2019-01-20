@@ -14,8 +14,9 @@
 //
 
 #include <algorithm>
-#include "inet/common/packet/chunk/ByteCountChunk.h"
+
 #include "inet/common/packet/ChunkBuffer.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/common/packet/chunk/SequenceChunk.h"
 
 namespace inet {

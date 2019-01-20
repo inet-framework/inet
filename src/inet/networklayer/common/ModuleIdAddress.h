@@ -18,8 +18,8 @@
 #ifndef __INET_MODULEIDADDRESS_H
 #define __INET_MODULEIDADDRESS_H
 
-#include <string>
 #include <iostream>
+#include <string>
 
 #include "inet/common/INETDefs.h"
 

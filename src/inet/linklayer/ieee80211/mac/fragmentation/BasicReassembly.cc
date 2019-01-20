@@ -16,9 +16,10 @@
 //
 
 #include <algorithm>
-#include "inet/linklayer/ieee80211/mac/fragmentation/Defragmentation.h"
-#include "inet/linklayer/ieee80211/mac/fragmentation/BasicReassembly.h"
+
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "inet/linklayer/ieee80211/mac/fragmentation/BasicReassembly.h"
+#include "inet/linklayer/ieee80211/mac/fragmentation/Defragmentation.h"
 
 namespace inet {
 namespace ieee80211 {

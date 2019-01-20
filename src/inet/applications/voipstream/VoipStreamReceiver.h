@@ -35,12 +35,12 @@ extern "C" {
 #include <iostream>
 #include <sys/stat.h>
 
+#include "inet/applications/voipstream/AudioOutFile.h"
+#include "inet/applications/voipstream/VoipStreamPacket_m.h"
+#include "inet/common/lifecycle/LifecycleUnsupported.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/transportlayer/contract/udp/UdpControlInfo_m.h"
 #include "inet/transportlayer/contract/udp/UdpSocket.h"
-#include "inet/applications/voipstream/VoipStreamPacket_m.h"
-#include "inet/applications/voipstream/AudioOutFile.h"
-#include "inet/common/lifecycle/LifecycleUnsupported.h"
 
 namespace inet {
 

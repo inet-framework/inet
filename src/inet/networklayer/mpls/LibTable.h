@@ -16,14 +16,13 @@
 #ifndef __INET_LIBTABLE_H
 #define __INET_LIBTABLE_H
 
-#include <vector>
 #include <string>
+#include <vector>
 
 #include "inet/common/INETDefs.h"
-
-#include "inet/networklayer/mpls/ConstType.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
+#include "inet/networklayer/mpls/ConstType.h"
 
 namespace inet {
 

@@ -19,6 +19,8 @@
 #ifndef __INET_SCTPCOMMAND_H
 #define __INET_SCTPCOMMAND_H
 
+#include "inet/common/INETDefs.h"
+
 namespace inet {
 
 //

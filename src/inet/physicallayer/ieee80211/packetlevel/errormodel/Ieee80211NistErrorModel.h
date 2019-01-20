@@ -21,13 +21,12 @@
 #ifndef __INET_IEEE80211NISTERRORMODEL_H
 #define __INET_IEEE80211NISTERRORMODEL_H
 
+#include "inet/physicallayer/base/packetlevel/ApskModulationBase.h"
+#include "inet/physicallayer/common/bitlevel/ConvolutionalCode.h"
 #include "inet/physicallayer/ieee80211/packetlevel/errormodel/DsssErrorRateModel.h"
 #include "inet/physicallayer/ieee80211/packetlevel/errormodel/Ieee80211ErrorModelBase.h"
-#include "inet/physicallayer/common/bitlevel/ConvolutionalCode.h"
-#include "inet/physicallayer/base/packetlevel/ApskModulationBase.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 /**
@@ -64,7 +63,6 @@ class INET_API Ieee80211NistErrorModel : public Ieee80211ErrorModelBase
 };
 
 } // namespace physicallayer
-
 } // namespace inet
 
 #endif // ifndef __INET_NISTERRORRATEMODEL_H

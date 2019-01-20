@@ -18,12 +18,11 @@
 #ifndef __INET_IBACKGROUNDNOISE_H
 #define __INET_IBACKGROUNDNOISE_H
 
-#include "inet/physicallayer/contract/packetlevel/IReception.h"
 #include "inet/physicallayer/contract/packetlevel/IListening.h"
 #include "inet/physicallayer/contract/packetlevel/INoise.h"
+#include "inet/physicallayer/contract/packetlevel/IReception.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 /**
@@ -36,7 +35,6 @@ class INET_API IBackgroundNoise : public IPrintableObject
 };
 
 } // namespace physicallayer
-
 } // namespace inet
 
 #endif // ifndef __INET_IBACKGROUNDNOISE_H

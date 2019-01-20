@@ -19,7 +19,6 @@
 #define __INET_BONNMOTIONMOBILITY_H
 
 #include "inet/common/INETDefs.h"
-
 #include "inet/mobility/base/LineSegmentsMobilityBase.h"
 #include "inet/mobility/single/BonnMotionFileCache.h"
 

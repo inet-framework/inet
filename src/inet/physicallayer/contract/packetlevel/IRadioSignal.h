@@ -19,12 +19,11 @@
 #define __INET_IRADIOSIGNAL_H
 
 #include "inet/common/geometry/common/Coord.h"
-#include "inet/physicallayer/contract/packetlevel/IPrintableObject.h"
 #include "inet/common/mapping/MappingBase.h"
 #include "inet/common/mapping/MappingUtils.h"
+#include "inet/physicallayer/contract/packetlevel/IPrintableObject.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 class INET_API IRadioSignal
@@ -97,7 +96,6 @@ class INET_API IDimensionalSignal
 };
 
 } // namespace physicallayer
-
 } // namespace inet
 
 #endif // ifndef __INET_IRADIOSIGNAL_H

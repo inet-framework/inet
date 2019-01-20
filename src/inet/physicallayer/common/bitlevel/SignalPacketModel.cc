@@ -18,7 +18,6 @@
 #include "inet/physicallayer/common/bitlevel/SignalPacketModel.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 SignalPacketModel::SignalPacketModel(const Packet *packet, bps bitrate) :
@@ -46,6 +45,5 @@ ReceptionPacketModel::ReceptionPacketModel(const Packet *packet, bps bitrate) :
 }
 
 } // namespace physicallayer
-
 } // namespace inet
 

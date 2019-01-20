@@ -17,17 +17,17 @@
 //
 
 #include <string.h>
-#include "inet/transportlayer/sctp/Sctp.h"
-#include "inet/transportlayer/sctp/SctpAssociation.h"
-#include "inet/transportlayer/contract/sctp/SctpCommand_m.h"
-#include "inet/transportlayer/sctp/SctpAlgorithm.h"
-#include "inet/common/packet/chunk/ByteCountChunk.h"
+
 #include "inet/common/TimeTag_m.h"
-#include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/common/packet/Message.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/linklayer/common/InterfaceTag_m.h"
+#include "inet/transportlayer/contract/sctp/SctpCommand_m.h"
+#include "inet/transportlayer/sctp/Sctp.h"
+#include "inet/transportlayer/sctp/SctpAlgorithm.h"
+#include "inet/transportlayer/sctp/SctpAssociation.h"
 
 namespace inet {
-
 namespace sctp {
 
 //
@@ -449,6 +449,5 @@ void SctpAssociation::process_STATUS(SctpEventCode& event, SctpCommandReq *sctpC
 }
 
 } // namespace sctp
-
 } // namespace inet
 

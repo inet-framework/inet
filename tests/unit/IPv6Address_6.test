@@ -15,6 +15,7 @@ static void parseAddr(const char *s)
     if (!a.tryParseAddrWithPrefix(s,prefixLen))
         EV << "BAD ";
     uint32 *d = a.words();
+    (void)d;
     EV << s << " --> " << a.str() << "/" << prefixLen << "\n";
 }
 

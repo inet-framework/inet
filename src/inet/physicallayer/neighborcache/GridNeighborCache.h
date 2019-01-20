@@ -18,11 +18,10 @@
 #ifndef __INET_GRIDNEIGHBORCACHE_H
 #define __INET_GRIDNEIGHBORCACHE_H
 
-#include "inet/physicallayer/common/packetlevel/RadioMedium.h"
 #include "inet/common/geometry/container/SpatialGrid.h"
+#include "inet/physicallayer/common/packetlevel/RadioMedium.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 class INET_API GridNeighborCache : public cSimpleModule, public INeighborCache
@@ -71,7 +70,6 @@ class INET_API GridNeighborCache : public cSimpleModule, public INeighborCache
 };
 
 } // namespace physicallayer
-
 } // namespace inet
 
 #endif // ifndef __INET_GRIDNEIGHBORCACHE_H

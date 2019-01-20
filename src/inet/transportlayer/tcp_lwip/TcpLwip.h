@@ -23,7 +23,6 @@
 #include <map>
 
 #include "inet/common/INETDefs.h"
-
 #include "inet/common/lifecycle/LifecycleUnsupported.h"
 #include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"

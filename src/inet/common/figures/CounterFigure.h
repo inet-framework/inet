@@ -18,9 +18,9 @@
 #ifndef __INET_COUNTERFIGURE_H
 #define __INET_COUNTERFIGURE_H
 
-#include "IIndicatorFigure.h"
 #include "inet/common/INETDefs.h"
 #include "inet/common/INETMath.h"
+#include "inet/common/figures/IIndicatorFigure.h"
 
 // for the moment commented out as omnet cannot instatiate it from a namespace
 namespace inet {

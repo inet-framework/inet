@@ -21,7 +21,6 @@
 #include "inet/physicallayer/contract/packetlevel/IListeningDecision.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 class INET_API ListeningDecision : public IListeningDecision, public cObject
@@ -41,7 +40,6 @@ class INET_API ListeningDecision : public IListeningDecision, public cObject
 };
 
 } // namespace physicallayer
-
 } // namespace inet
 
 #endif // ifndef __INET_LISTENINGDECISION_H

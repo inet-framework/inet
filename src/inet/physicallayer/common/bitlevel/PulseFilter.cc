@@ -18,7 +18,6 @@
 #include "inet/physicallayer/common/bitlevel/PulseFilter.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 PulseFilter::PulseFilter() :
@@ -33,6 +32,5 @@ const IReceptionSymbolModel *PulseFilter::filter(const IReceptionSampleModel *sa
 }
 
 } // namespace physicallayer
-
 } // namespace inet
 

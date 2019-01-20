@@ -18,7 +18,6 @@
 #include "inet/physicallayer/common/bitlevel/SignalSampleModel.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 SignalSampleModel::SignalSampleModel(int sampleLength, double sampleRate, const std::vector<W> *samples) :
@@ -54,6 +53,5 @@ ReceptionSampleModel::ReceptionSampleModel(int sampleLength, double sampleRate, 
 }
 
 } // namespace physicallayer
-
 } // namespace inet
 

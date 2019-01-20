@@ -18,11 +18,12 @@
 #ifndef __INET_GENERICFRAMESEQUENCES_H
 #define __INET_GENERICFRAMESEQUENCES_H
 
+#include <algorithm>
+#include <functional>
+
 #include "inet/linklayer/ieee80211/mac/contract/IFrameSequence.h"
 #include "inet/linklayer/ieee80211/mac/framesequence/FrameSequenceContext.h"
 #include "inet/linklayer/ieee80211/mac/framesequence/FrameSequenceStep.h"
-#include <algorithm>
-#include <functional>
 
 namespace inet {
 namespace ieee80211 {

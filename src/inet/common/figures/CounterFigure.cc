@@ -16,8 +16,8 @@
 //
 //
 
-#include "CounterFigure.h"
 #include "inet/common/INETUtils.h"
+#include "inet/common/figures/CounterFigure.h"
 
 namespace inet {
 

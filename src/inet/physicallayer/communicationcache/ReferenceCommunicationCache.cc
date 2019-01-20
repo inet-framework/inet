@@ -15,11 +15,10 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/contract/packetlevel/IRadio.h"
 #include "inet/physicallayer/communicationcache/ReferenceCommunicationCache.h"
+#include "inet/physicallayer/contract/packetlevel/IRadio.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 Define_Module(ReferenceCommunicationCache);
@@ -97,6 +96,5 @@ std::vector<const ITransmission *> *ReferenceCommunicationCache::computeInterfer
 }
 
 } // namespace physicallayer
-
 } // namespace inet
 

@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/common/ShortBitVector.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/physicallayer/common/bitlevel/AdditiveScrambler.h"
 #include "inet/physicallayer/common/bitlevel/ConvolutionalCoder.h"
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OfdmDefs.h"

@@ -15,18 +15,17 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OfdmDecoder.h"
+#include "inet/physicallayer/common/bitlevel/SignalPacketModel.h"
+#include "inet/physicallayer/contract/packetlevel/IApskModulation.h"
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211ConvolutionalCode.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OfdmDecoder.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OfdmDefs.h"
 #include "inet/physicallayer/modulation/BpskModulation.h"
-#include "inet/physicallayer/modulation/QpskModulation.h"
 #include "inet/physicallayer/modulation/Qam16Modulation.h"
 #include "inet/physicallayer/modulation/Qam64Modulation.h"
-#include "inet/physicallayer/contract/packetlevel/IApskModulation.h"
-#include "inet/physicallayer/common/bitlevel/SignalPacketModel.h"
-#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OfdmDefs.h"
+#include "inet/physicallayer/modulation/QpskModulation.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 Ieee80211OfdmDecoder::Ieee80211OfdmDecoder(const Ieee80211OfdmCode *code) :
@@ -128,6 +127,7 @@ Ieee80211OfdmDecoder::~Ieee80211OfdmDecoder()
     delete descrambler;
     delete fecDecoder;
 }
+
 } /* namespace physicallayer */
 } /* namespace inet */
 

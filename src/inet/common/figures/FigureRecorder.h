@@ -18,8 +18,8 @@
 #ifndef __INET_FIGURERECORDER_H
 #define __INET_FIGURERECORDER_H
 
-#include "IIndicatorFigure.h"
 #include "inet/common/INETDefs.h"
+#include "inet/common/figures/IIndicatorFigure.h"
 
 namespace inet {
 class INET_API FigureRecorder : public cNumericResultRecorder

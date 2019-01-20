@@ -15,18 +15,19 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#include <fcntl.h>
+
+#include <omnetpp/platdep/sockets.h>
+
+#ifndef  __linux__
+#error The 'Network Emulation Support' feature currently works on Linux systems only
+#else
+
 #include <arpa/inet.h>
 #include <linux/if_tun.h>
 #include <net/if.h>
 #include <net/if_arp.h>
-#include <netinet/in.h>
 #include <sys/ioctl.h>
 #include <sys/stat.h>
-#include <sys/types.h>
-#include <unistd.h>
-
-#include <omnetpp/platdep/sockets.h>
 
 #include "inet/common/Endian.h"
 #include "inet/common/ModuleAccess.h"
@@ -174,4 +175,6 @@ void ExtInterface::copyNetworkAddressToExt()
 }
 
 } // namespace inet
+
+#endif // __linux__
 

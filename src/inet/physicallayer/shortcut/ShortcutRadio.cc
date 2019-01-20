@@ -20,11 +20,10 @@
 #include "inet/common/packet/chunk/BitCountChunk.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/physicallayer/shortcut/ShortcutRadio.h"
 #include "inet/physicallayer/shortcut/ShortcutPhyHeader_m.h"
+#include "inet/physicallayer/shortcut/ShortcutRadio.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 std::map<MacAddress, ShortcutRadio *> ShortcutRadio::shortcutRadios;
@@ -126,6 +125,5 @@ void ShortcutRadio::receiveFromPeer(Packet *packet)
 }
 
 } // namespace physicallayer
-
 } // namespace inet
 

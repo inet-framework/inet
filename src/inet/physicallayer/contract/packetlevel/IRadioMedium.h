@@ -32,12 +32,11 @@
 #include "inet/physicallayer/contract/packetlevel/IPathLoss.h"
 #include "inet/physicallayer/contract/packetlevel/IPropagation.h"
 #include "inet/physicallayer/contract/packetlevel/IRadio.h"
-#include "inet/physicallayer/contract/packetlevel/ISignal.h"
 #include "inet/physicallayer/contract/packetlevel/IReceptionDecision.h"
+#include "inet/physicallayer/contract/packetlevel/ISignal.h"
 #include "inet/physicallayer/contract/packetlevel/ISnir.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 /**
@@ -259,7 +258,6 @@ class INET_API IRadioMedium : public IPrintableObject
 };
 
 } // namespace physicallayer
-
 } // namespace inet
 
 #endif // ifndef __INET_IRADIOMEDIUM_H

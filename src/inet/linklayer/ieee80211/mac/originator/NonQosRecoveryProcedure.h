@@ -19,12 +19,12 @@
 #define __INET_NONQOSRECOVERYPROCEDURE_H
 
 #include "inet/common/packet/Packet.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include "inet/linklayer/ieee80211/mac/common/AccessCategory.h"
 #include "inet/linklayer/ieee80211/mac/common/Ieee80211Defs.h"
 #include "inet/linklayer/ieee80211/mac/common/SequenceControlField.h"
 #include "inet/linklayer/ieee80211/mac/common/StationRetryCounters.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRecoveryProcedure.h"
-#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 
 namespace inet {
 namespace ieee80211 {

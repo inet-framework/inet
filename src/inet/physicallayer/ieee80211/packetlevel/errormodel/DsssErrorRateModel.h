@@ -22,6 +22,8 @@
 #define __INET_DSSS_ERROR_RATE_MODEL_H
 //#include <stdint.h>
 
+#include "inet/common/INETDefs.h"
+
 #ifdef ENABLE_GSL
 #include <gsl/gsl_math.h>
 #include <gsl/gsl_integration.h>
@@ -29,8 +31,8 @@
 #include <gsl/gsl_sf_bessel.h>
 
 #endif // ifdef ENABLE_GSL
-namespace inet {
 
+namespace inet {
 namespace physicallayer {
 
 #ifdef ENABLE_GSL

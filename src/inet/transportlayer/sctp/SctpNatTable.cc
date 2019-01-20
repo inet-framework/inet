@@ -16,19 +16,18 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
+#include <algorithm>
+#include <ctype.h>
+#include <sstream>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
-#include <algorithm>
-#include <sstream>
 
-#include "inet/transportlayer/sctp/SctpNatTable.h"
 #include "inet/common/Simsignals.h"
 #include "inet/transportlayer/sctp/SctpAssociation.h"
+#include "inet/transportlayer/sctp/SctpNatTable.h"
 
 namespace inet {
-
 namespace sctp {
 
 uint32 SctpNatTable::nextEntryNumber = 0;
@@ -155,6 +154,5 @@ SctpNatEntry::~SctpNatEntry()
 }
 
 } // namespace sctp
-
 } // namespace inet
 

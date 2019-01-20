@@ -26,8 +26,8 @@
 #define ANSA_NETWORKLAYER_CLNS_CLNSADDRESSTYPE_H_
 
 #include "inet/common/INETDefs.h"
-#include "inet/networklayer/contract/clns/ClnsAddress.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
+#include "inet/networklayer/contract/clns/ClnsAddress.h"
 
 namespace inet {
 

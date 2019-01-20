@@ -21,7 +21,6 @@
 #include "inet/physicallayer/contract/packetlevel/IInterference.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 class INET_API Interference : public virtual IInterference
@@ -40,7 +39,6 @@ class INET_API Interference : public virtual IInterference
 };
 
 } // namespace physicallayer
-
 } // namespace inet
 
 #endif // ifndef __INET_INTERFERENCE_H

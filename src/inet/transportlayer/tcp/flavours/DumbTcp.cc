@@ -15,11 +15,10 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/transportlayer/tcp/flavours/DumbTcp.h"
 #include "inet/transportlayer/tcp/Tcp.h"
+#include "inet/transportlayer/tcp/flavours/DumbTcp.h"
 
 namespace inet {
-
 namespace tcp {
 
 Register_Class(DumbTcp);

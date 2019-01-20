@@ -19,9 +19,8 @@
 #define __INET_IPV4ROUTE_H
 
 #include "inet/common/INETDefs.h"
-
-#include "inet/networklayer/contract/ipv4/Ipv4Address.h"
 #include "inet/networklayer/contract/IRoute.h"
+#include "inet/networklayer/contract/ipv4/Ipv4Address.h"
 
 namespace inet {
 

@@ -16,12 +16,11 @@
 // License along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include <sstream>
 #include <algorithm>
-
-#include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
+#include <sstream>
 
 #include "inet/networklayer/contract/IInterfaceTable.h"
+#include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
 
 namespace inet {
 

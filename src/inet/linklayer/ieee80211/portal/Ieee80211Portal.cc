@@ -19,14 +19,15 @@
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/FcsMode_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
-#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
-#include "inet/linklayer/ieee80211/portal/Ieee80211Portal.h"
-#include "inet/linklayer/ieee8022/Ieee8022LlcHeader_m.h"
 
 #ifdef WITH_ETHERNET
 #include "inet/linklayer/ethernet/EtherEncap.h"
 #include "inet/linklayer/ethernet/EtherPhyFrame_m.h"
 #endif // ifdef WITH_ETHERNET
+
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "inet/linklayer/ieee80211/portal/Ieee80211Portal.h"
+#include "inet/linklayer/ieee8022/Ieee8022LlcHeader_m.h"
 
 namespace inet {
 
