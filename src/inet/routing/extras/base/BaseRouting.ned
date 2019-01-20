@@ -46,6 +46,7 @@ simple BaseRouting like IApp
         bool autoassignAddress = default(false); // assign IP adresses automatically to the interfaces
         string autoassignAddressBase = default("10.0.0.0");
         bool isStaticNode = default(false);
+        double stopOperationExtraTime @unit(s) = default(-1s);    // extra time after lifecycle stop operation finished
         @signal[packetSent](type=inet::Packet);
         @signal[packetReceived](type=inet::Packet);
         @statistic[packetSent](title="packets sent"; source=packetSent; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);

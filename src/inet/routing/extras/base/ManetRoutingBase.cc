@@ -29,7 +29,6 @@
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include "inet/mobility/contract/IMobility.h"
 #include "inet/common/ModuleAccess.h"
-#include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/networklayer/common/L3Tools.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
@@ -218,8 +217,7 @@ bool ManetRoutingBase::isThisInterfaceRegistered(InterfaceEntry * ie)
 {
     if (!isRegistered)
         throw cRuntimeError("Manet routing protocol is not register");
-    for (auto & elem : *interfaceVector)
-    {
+    for (auto & elem : *interfaceVector) {
         if (elem.interfacePtr==ie)
             return true;
     }
@@ -244,8 +242,7 @@ void ManetRoutingBase::registerRoutingModule()
     if (routesVector)
         routesVector->clear();
 
-    if (par("useICMP"))
-    {
+    if (par("useICMP")) {
         icmpModule = findModuleFromPar<Icmp>(par("icmpModule"), this);
     }
     sendToICMP = false;
@@ -264,22 +261,17 @@ void ManetRoutingBase::registerRoutingModule()
     if (!mac_layer_)
          setStaticNode(par("isStaticNode").boolValue());
 
-    if (!mac_layer_)
-    {
-        while ((token = tokenizerInterfaces.nextToken()) != nullptr)
-        {
-            if ((prefixName = strstr(token, "prefix")) != nullptr)
-            {
+    if (!mac_layer_) {
+        while ((token = tokenizerInterfaces.nextToken()) != nullptr) {
+            if ((prefixName = strstr(token, "prefix")) != nullptr) {
                 const char *leftparenp = strchr(prefixName, '(');
                 const char *rightparenp = strchr(prefixName, ')');
                 std::string interfacePrefix;
                 interfacePrefix.assign(leftparenp + 1, rightparenp - leftparenp - 1);
-                for (int i = 0; i < inet_ift->getNumInterfaces(); i++)
-                {
+                for (int i = 0; i < inet_ift->getNumInterfaces(); i++) {
                     ie = inet_ift->getInterface(i);
                     name = ie->getInterfaceName();
-                    if ((strstr(name, interfacePrefix.c_str()) != nullptr) && !isThisInterfaceRegistered(ie))
-                    {
+                    if ((strstr(name, interfacePrefix.c_str()) != nullptr) && !isThisInterfaceRegistered(ie)) {
                         InterfaceIdentification interface;
                         interface.interfacePtr = ie;
                         interface.index = i;
@@ -288,14 +280,11 @@ void ManetRoutingBase::registerRoutingModule()
                     }
                 }
             }
-            else
-            {
-                for (int i = 0; i < inet_ift->getNumInterfaces(); i++)
-                {
+            else {
+                for (int i = 0; i < inet_ift->getNumInterfaces(); i++) {
                     ie = inet_ift->getInterface(i);
                     name = ie->getInterfaceName();
-                    if (strcmp(name, token) == 0 && !isThisInterfaceRegistered(ie))
-                    {
+                    if (strcmp(name, token) == 0 && !isThisInterfaceRegistered(ie)) {
                         InterfaceIdentification interface;
                         interface.interfacePtr = ie;
                         interface.index = i;
@@ -306,8 +295,7 @@ void ManetRoutingBase::registerRoutingModule()
             }
         }
     }
-    else
-    {
+    else {
         cModule *mod = nullptr;
         if (hasNic)
             mod = getParentModule();
@@ -322,12 +310,10 @@ void ManetRoutingBase::registerRoutingModule()
                 *d++ = *s;
         *d = '\0';
 
-        for (int i = 0; i < inet_ift->getNumInterfaces(); i++)
-        {
+        for (int i = 0; i < inet_ift->getNumInterfaces(); i++) {
             ie = inet_ift->getInterface(i);
             name = ie->getInterfaceName();
-            if (strcmp(name, interfaceName) == 0 && !isThisInterfaceRegistered(ie))
-            {
+            if (strcmp(name, interfaceName) == 0 && !isThisInterfaceRegistered(ie)) {
                 InterfaceIdentification interface;
                 interface.interfacePtr = ie;
                 interface.index = i;
@@ -339,15 +325,11 @@ void ManetRoutingBase::registerRoutingModule()
     }
     const char *exclInterfaces = par("excludedInterfaces");
     cStringTokenizer tokenizerExcluded(exclInterfaces);
-    if (tokenizerExcluded.hasMoreTokens())
-    {
-        while ((token = tokenizerExcluded.nextToken())!=nullptr)
-        {
-            for (unsigned int i = 0; i<interfaceVector->size(); i++)
-            {
+    if (tokenizerExcluded.hasMoreTokens()) {
+        while ((token = tokenizerExcluded.nextToken())!=nullptr) {
+            for (unsigned int i = 0; i<interfaceVector->size(); i++) {
                 name = (*interfaceVector)[i].interfacePtr->getInterfaceName();
-                if (strcmp(token, name)==0)
-                {
+                if (strcmp(token, name)==0) {
                     interfaceVector->erase(interfaceVector->begin()+i);
                     break;
                 }
@@ -362,41 +344,33 @@ void ManetRoutingBase::registerRoutingModule()
     // One enabled network interface (in total)
     // clear routing entries related to wlan interfaces and autoassign ip adresses
     bool manetPurgeRoutingTables = (bool) par("manetPurgeRoutingTables");
-    if (manetPurgeRoutingTables && !mac_layer_)
-    {
+    if (manetPurgeRoutingTables && !mac_layer_) {
         IRoute *entry;
         // clean the route table wlan interface entry
-        for (int i=inet_rt->getNumRoutes()-1; i>=0; i--)
-        {
+        for (int i=inet_rt->getNumRoutes()-1; i>=0; i--) {
             entry = inet_rt->getRoute(i);
             const InterfaceEntry *ie = entry->getInterface();
-            if (strstr(ie->getInterfaceName(), "wlan")!=nullptr)
-            {
+            if (strstr(ie->getInterfaceName(), "wlan")!=nullptr) {
                 inet_rt->deleteRoute(entry);
             }
         }
     }
-    if (par("autoassignAddress") && !mac_layer_)
-    {
+    if (par("autoassignAddress") && !mac_layer_) {
         Ipv4Address AUTOASSIGN_ADDRESS_BASE(par("autoassignAddressBase").stringValue());
         if (AUTOASSIGN_ADDRESS_BASE.getInt() == 0)
             throw cRuntimeError("Auto assignment need autoassignAddressBase to be set");
         Ipv4Address myAddr(AUTOASSIGN_ADDRESS_BASE.getInt() + uint32(getParentModule()->getId()));
-        for (int k=0; k<inet_ift->getNumInterfaces(); k++)
-        {
+        for (int k=0; k<inet_ift->getNumInterfaces(); k++) {
             InterfaceEntry *ie = inet_ift->getInterface(k);
-            if (strstr(ie->getInterfaceName(), "wlan")!=nullptr)
-            {
+            if (strstr(ie->getInterfaceName(), "wlan")!=nullptr) {
                 ie->getProtocolData<Ipv4InterfaceData>()->setIPAddress(myAddr);
                 ie->getProtocolData<Ipv4InterfaceData>()->setNetmask(Ipv4Address::ALLONES_ADDRESS); // full address must match for local delivery
             }
         }
     }
     // register LL-MANET-Routers
-    if (!mac_layer_)
-    {
-        for (auto & elem : *interfaceVector)
-        {
+    if (!mac_layer_) {
+        for (auto & elem : *interfaceVector) {
             elem.interfacePtr->getProtocolData<Ipv4InterfaceData>()->joinMulticastGroup(Ipv4Address::LL_MANET_ROUTERS);
         }
         arp = getModuleFromPar<IArp>(par("arpModule"), this);
@@ -409,8 +383,7 @@ void ManetRoutingBase::registerRoutingModule()
     isOperational = true;
     WATCH_PTRMULTIMAP(timerMultiMap);
  //   WATCH_MAP(*routesVector);
-    if (!mac_layer_)
-    {
+    if (!mac_layer_) {
         socket.setOutputGate(gate("socketOut"));
         // IPSocket socket(gate("ipOut"));
         socket.bind(par("UdpPort"));
@@ -423,21 +396,18 @@ ManetRoutingBase::~ManetRoutingBase()
 {
     // socket.close();
     delete interfaceVector;
-    if (timerMessagePtr)
-    {
+    if (timerMessagePtr) {
         cancelAndDelete(timerMessagePtr);
         timerMessagePtr = nullptr;
     }
 
-    while (timerMultiMapPtr->size()>0)
-    {
+    while (timerMultiMapPtr->size()>0) {
         ManetTimer * timer = timerMultiMapPtr->begin()->second;
         timerMultiMapPtr->erase(timerMultiMapPtr->begin());
         delete timer;
     }
 
-    if (routesVector)
-    {
+    if (routesVector) {
         delete routesVector;
         routesVector = nullptr;
     }
@@ -445,13 +415,11 @@ ManetRoutingBase::~ManetRoutingBase()
     addressGroupVector.clear();
     inAddressGroup.clear();
 
-    if (globalRouteMap)
-    {
+    if (globalRouteMap) {
         auto it = globalRouteMap->find(getAddress());
         if (it != globalRouteMap->end())
             globalRouteMap->erase(it);
-        if (globalRouteMap->empty())
-        {
+        if (globalRouteMap->empty()) {
             delete globalRouteMap;
             globalRouteMap = nullptr;
         }
@@ -474,8 +442,7 @@ bool ManetRoutingBase::isLocalAddress(const L3Address& dest) const
     if (dest.getType() == L3Address::IPv4)
         return inet_rt->isLocalAddress(dest.toIpv4());
     InterfaceEntry *ie;
-    for (int i = 0; i < inet_ift->getNumInterfaces(); i++)
-    {
+    for (int i = 0; i < inet_ift->getNumInterfaces(); i++) {
         ie = inet_ift->getInterface(i);
         L3Address add(ie->getMacAddress());
         if (add==dest) return true;
@@ -520,17 +487,13 @@ void ManetRoutingBase::processChangeInterface(simsignal_t signalID,const cObject
 {
     IRoute *entry;
     // clean the route table wlan interface entry
-    for (int i=inet_rt->getNumRoutes()-1; i>=0; i--)
-    {
+    for (int i=inet_rt->getNumRoutes()-1; i>=0; i--) {
         entry = inet_rt->getRoute(i);
         const InterfaceEntry *ie = entry->getInterface();
-        if (strstr(ie->getInterfaceName(), "wlan")!=nullptr)
-        {
+        if (strstr(ie->getInterfaceName(), "wlan")!=nullptr) {
             inet_rt->deleteRoute(entry);
         }
     }
-    handleNodeShutdown(nullptr);
-    handleNodeStart(nullptr);
 }
 
 
@@ -540,8 +503,7 @@ void ManetRoutingBase::sendToIpOnIface(Packet *msg, int srcPort, const L3Address
     if (!isRegistered)
         throw cRuntimeError("Manet routing protocol is not register");
 
-    if (!isOperational)
-    {
+    if (!isOperational) {
         delete msg;
         return;
     }
@@ -1609,6 +1571,12 @@ bool ManetRoutingBase::getRouteFromGlobal(const L3Address &src, const L3Address 
             }
         }
     }
+}
+
+void ManetRoutingBase::socketClosed(UdpSocket *socket)
+{
+    if (operationalState == State::STOPPING_OPERATION)
+        startActiveOperationExtraTimeOrFinish(par("stopOperationExtraTime"));
 }
 
 

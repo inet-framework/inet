@@ -363,6 +363,9 @@ class INET_API ManetRoutingBase : public ApplicationBase, public UdpSocket::ICal
     virtual void setRouteInternalStorege(const L3Address &, const L3Address &, const bool &);
 
     virtual INetfilter * getNetworkProtocol() const {return networkProtocol;}
+
+    virtual void socketClosed(UdpSocket *socket) override;
+
   public:
     std::string convertAddressToString(const L3Address&);
     virtual void setCollaborativeProtocol(cObject *p) {collaborativeProtocol = dynamic_cast<ManetRoutingBase*>(p);}
