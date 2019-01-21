@@ -1,4 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <buildspec version="4.0">
-<dir makemake-options="--deep --make-so -o inet -O out --meta:auto-include-path --meta:export-library --meta:use-exported-libs --meta:feature-cflags --meta:feature-ldflags" path="src" type="makemake"/>
-<dir makemake-options="--deep --nolink -O out --meta:recurse --meta:auto-include-path --meta:export-library --meta:use-exported-libs --meta:feature-cflags --meta:feature-ldflags" path="." type="custom"/>
+    <dir path="." type="custom"/>
+    <dir makemake-options="--make-so --deep -o inet -O out
+        -Iapplications
+        -Iapplications/ethernet
+        -Iapplications/generic
+        -Iapplications/pingapp
+        -Iapplications/rtpapp
+        -Iapplications/sctpapp
+        -Iapplications/tcpapp
+        -Iapplications/udpapp
+        -Ibase
+        -Ilinklayer
+        -Ilinklayer/contract
+        -Ilinklayer/ethernet
+        -Ilinklayer/etherswitch
+        -Ilinklayer/ext
+        -Ilinklayer/ieee80211
+        -Ilinklayer/ieee80211/mac
+        -Ilinklayer/ieee80211/mgmt
+        -Ilinklayer/mf80211
+        -Ilinklayer/mf80211/macLayer
+        -Ilinklayer/mf80211/phyLayer
+        -Ilinklayer/mf80211/phyLayer/decider
+        -Ilinklayer/mf80211/phyLayer/snrEval
+        -Ilinklayer/mfcore
+        -Ilinklayer/ppp
+        -Ilinklayer/radio
+        -Imobility
+        -Inetworklayer
+        -Inetworklayer/arp
+        -Inetworklayer/autorouting
+        -Inetworklayer/common
+        -Inetworklayer/contract
+        -Inetworklayer/extras
+        -Inetworklayer/icmpv6
+        -Inetworklayer/ipv4
+        -Inetworklayer/ipv6
+        -Inetworklayer/ldp
+        -Inetworklayer/mpls
+        -Inetworklayer/ospfv2
+        -Inetworklayer/ospfv2/interface
+        -Inetworklayer/ospfv2/messagehandler
+        -Inetworklayer/ospfv2/neighbor
+        -Inetworklayer/ospfv2/router
+        -Inetworklayer/queue
+        -Inetworklayer/rsvp_te
+        -Inetworklayer/ted
+        -Inodes
+        -Inodes/adhoc
+        -Inodes/ethernet
+        -Inodes/inet
+        -Inodes/ipv6
+        -Inodes/mpls
+        -Inodes/wireless
+        -Itransport
+        -Itransport/contract
+        -Itransport/rtp
+        -Itransport/rtp/profiles
+        -Itransport/rtp/profiles/avprofile
+        -Itransport/sctp
+        -Itransport/tcp
+        -Itransport/tcp/flavours
+        -Itransport/tcp_nsc
+        -Itransport/tcp_nsc/queues
+        -Itransport/tcp_old
+        -Itransport/tcp_old/flavours
+        -Itransport/tcp_old/queues
+        -Itransport/tcp/queues
+        -Itransport/udp
+        -Iutil
+        -Iutil/headerserializers
+        -Iutil/headerserializers/headers
+        -Iworld
+  --meta:export-library --meta:use-exported-libs --meta:feature-cflags --meta:feature-ldflags" path="src" type="makemake"/>
 </buildspec>
