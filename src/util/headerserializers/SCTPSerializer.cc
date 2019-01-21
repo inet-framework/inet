@@ -73,7 +73,7 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                 case DATA:
                 {
                     //sctpEV3<<simulation.simTime()<<" SCTPAssociation:: Data sent \n";
-                    SCTPDataChunk *dataChunk = check_and_cast<SCTPDataChunk *>(chunk);
+                    const SCTPDataChunk *dataChunk = check_and_cast<const SCTPDataChunk *>(chunk);
                     struct data_chunk *dc = (struct data_chunk*) (buf + writtenbytes); // append data to buffer
                     unsigned char flags = 0;
 
@@ -108,7 +108,7 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                 {
                     //sctpEV3<<"serialize INIT sizeKeyVector="<<sizeKeyVector<<"\n";
                     // source data from internal struct:
-                    SCTPInitChunk *initChunk = check_and_cast<SCTPInitChunk *>(chunk);
+                    const SCTPInitChunk *initChunk = check_and_cast<const SCTPInitChunk *>(chunk);
                     //sctpEV3<<simulation.simTime()<<" SCTPAssociation:: Init sent \n";
                     // destination is send buffer:
                     struct init_chunk *ic = (struct init_chunk*) (buf + writtenbytes); // append data to buffer
@@ -145,7 +145,7 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                 case INIT_ACK:
                 {
                     //sctpEV3<<"serialize INIT_ACK sizeKeyVector="<<sizeKeyVector<<"\n";
-                    SCTPInitAckChunk *initAckChunk = check_and_cast<SCTPInitAckChunk *>(chunk);
+                    const SCTPInitAckChunk *initAckChunk = check_and_cast<const SCTPInitAckChunk *>(chunk);
                     //sctpEV3<<simulation.simTime()<<" SCTPAssociation:: InitAck sent \n";
                     // destination is send buffer:
                     struct init_ack_chunk *iac = (struct init_ack_chunk*) (buf + writtenbytes); // append data to buffer
@@ -238,7 +238,7 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                 }
                 case SACK:
                 {
-                    SCTPSackChunk *sackChunk = check_and_cast<SCTPSackChunk *>(chunk);
+                    const SCTPSackChunk *sackChunk = check_and_cast<const SCTPSackChunk *>(chunk);
 
                     // destination is send buffer:
                     struct sack_chunk *sac = (struct sack_chunk*) (buf + writtenbytes); // append data to buffer
@@ -273,7 +273,7 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                 case HEARTBEAT:
                 {
                     //sctpEV3<<simulation.simTime()<<"  SCTPAssociation:: Heartbeat sent \n";
-                    SCTPHeartbeatChunk *heartbeatChunk = check_and_cast<SCTPHeartbeatChunk *>(chunk);
+                    const SCTPHeartbeatChunk *heartbeatChunk = check_and_cast<const SCTPHeartbeatChunk *>(chunk);
 
                     // destination is send buffer:
                     struct heartbeat_chunk *hbc = (struct heartbeat_chunk*) (buf + writtenbytes); // append data to buffer
@@ -298,7 +298,7 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                 case HEARTBEAT_ACK:
                 {
                     //sctpEV3<<simulation.simTime()<<" SCTPAssociation:: HeartbeatAck sent \n";
-                    SCTPHeartbeatAckChunk *heartbeatAckChunk = check_and_cast<SCTPHeartbeatAckChunk *>(chunk);
+                    const SCTPHeartbeatAckChunk *heartbeatAckChunk = check_and_cast<const SCTPHeartbeatAckChunk *>(chunk);
 
                     // destination is send buffer:
                     struct heartbeat_ack_chunk *hbac = (struct heartbeat_ack_chunk*) (buf + writtenbytes); // append data to buffer
@@ -337,7 +337,7 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                 case ABORT:
                 {
                     //sctpEV3<<simulation.simTime()<<" SCTPAssociation:: Abort sent \n";
-                    SCTPAbortChunk *abortChunk = check_and_cast<SCTPAbortChunk *>(chunk);
+                    const SCTPAbortChunk *abortChunk = check_and_cast<const SCTPAbortChunk *>(chunk);
 
                     // destination is send buffer:
                     struct abort_chunk *ac = (struct abort_chunk*) (buf + writtenbytes); // append data to buffer
@@ -355,7 +355,7 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                 case COOKIE_ECHO:
                 {
                     //sctpEV3<<simulation.simTime()<<" SCTPAssociation:: CookieEcho sent \n";
-                    SCTPCookieEchoChunk *cookieChunk = check_and_cast<SCTPCookieEchoChunk *>(chunk);
+                    const SCTPCookieEchoChunk *cookieChunk = check_and_cast<const SCTPCookieEchoChunk *>(chunk);
 
                     struct cookie_echo_chunk *cec = (struct cookie_echo_chunk*) (buf + writtenbytes);
 
@@ -417,7 +417,7 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                 case COOKIE_ACK:
                 {
                     //sctpEV3<<simulation.simTime()<<" SCTPAssociation:: CookieAck sent \n";
-                    SCTPCookieAckChunk *cookieAckChunk = check_and_cast<SCTPCookieAckChunk *>(chunk);
+                    const SCTPCookieAckChunk *cookieAckChunk = check_and_cast<const SCTPCookieAckChunk *>(chunk);
 
                     struct cookie_ack_chunk *cac = (struct cookie_ack_chunk*) (buf + writtenbytes);
                     writtenbytes += (cookieAckChunk->getBitLength() / 8);
@@ -430,7 +430,7 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                 case SHUTDOWN:
                 {
                     //sctpEV3<<simulation.simTime()<<" SCTPAssociation:: ShutdownAck sent \n";
-                    SCTPShutdownChunk *shutdownChunk = check_and_cast<SCTPShutdownChunk *>(chunk);
+                    const SCTPShutdownChunk *shutdownChunk = check_and_cast<const SCTPShutdownChunk *>(chunk);
 
                     struct shutdown_chunk *sac = (struct shutdown_chunk*) (buf + writtenbytes);
                     writtenbytes += (shutdownChunk->getBitLength() / 8);
@@ -444,7 +444,7 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                 case SHUTDOWN_ACK:
                 {
                     //sctpEV3<<simulation.simTime()<<" SCTPAssociation:: ShutdownAck sent \n";
-                    SCTPShutdownAckChunk *shutdownAckChunk = check_and_cast<SCTPShutdownAckChunk *>(chunk);
+                    const SCTPShutdownAckChunk *shutdownAckChunk = check_and_cast<const SCTPShutdownAckChunk *>(chunk);
 
                     struct shutdown_ack_chunk *sac = (struct shutdown_ack_chunk*) (buf + writtenbytes);
                     writtenbytes += (shutdownAckChunk->getBitLength() / 8);
@@ -457,7 +457,7 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                 case SHUTDOWN_COMPLETE:
                 {
                     //sctpEV3<<simulation.simTime()<<" SCTPAssociation:: ShutdownAck sent \n";
-                    SCTPShutdownCompleteChunk *shutdownCompleteChunk = check_and_cast<SCTPShutdownCompleteChunk *>(chunk);
+                    const SCTPShutdownCompleteChunk *shutdownCompleteChunk = check_and_cast<const SCTPShutdownCompleteChunk *>(chunk);
 
                     struct shutdown_complete_chunk *sac = (struct shutdown_complete_chunk*) (buf + writtenbytes);
                     writtenbytes += (shutdownCompleteChunk->getBitLength() / 8);
@@ -472,7 +472,7 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                 }
                 case ERRORTYPE:
                 {
-                    SCTPErrorChunk* errorchunk = check_and_cast<SCTPErrorChunk*>(chunk);
+                    const SCTPErrorChunk* errorchunk = check_and_cast<const SCTPErrorChunk*>(chunk);
                     struct error_chunk* error = (struct error_chunk*)(buf + writtenbytes);
                     error->type = errorchunk->getChunkType();
                     error->flags = 0;

@@ -185,7 +185,7 @@ void MACRelayUnitNP::processFrame(cMessage *msg)
     numProcessedFrames++;
 
     // Process next frame in queue if they are pending
-    if (!queue.empty())
+    if (!queue.isEmpty())
     {
         EtherFrame *newframe = (EtherFrame *) queue.pop();
         msg->setContextPointer(newframe);

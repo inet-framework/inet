@@ -56,13 +56,13 @@ void NetAnimTrace::dump()
 {
     cModule *parent = simulation.getSystemModule();
     for (cModule::SubmoduleIterator it(parent); !it.end(); it++)
-        if (it() != this)
-            addNode(it());
+        if (*it != this)
+            addNode(*it);
     for (cModule::SubmoduleIterator it(parent); !it.end(); it++)
-        if (it() != this)
-            for (cModule::GateIterator ig(it()); !ig.end(); ig++)
-                if (ig()->getType()==cGate::OUTPUT && ig()->getNextGate())
-                    addLink(ig());
+        if (*it != this)
+            for (cModule::GateIterator ig(*it); !ig.end(); ig++)
+                if ((*ig)->getType()==cGate::OUTPUT && (*ig)->getNextGate())
+                    addLink(*ig);
 }
 
 void NetAnimTrace::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)
@@ -196,11 +196,11 @@ void NetAnimTrace::resolveNodeCoordinates(cModule *submod, double& x, double& y)
     }
     else if (!strcmp(layout,"i") || !strcmp(layout,"ri") || !strcmp(layout,"ring"))
     {
-        int rx = toDouble(ds.getTagArg("p",3), (sx+sy)*submod->size()/4);
+        int rx = toDouble(ds.getTagArg("p",3), (sx+sy)*submod->getVectorSize()/4);
         int ry = toDouble(ds.getTagArg("p",4), rx);
 
-        x += (int) floor(rx - rx*sin(submod->getIndex()*2*PI/submod->size()));
-        y += (int) floor(ry - ry*cos(submod->getIndex()*2*PI/submod->size()));
+        x += (int) floor(rx - rx*sin(submod->getIndex()*2*PI/submod->getVectorSize()));
+        y += (int) floor(ry - ry*cos(submod->getIndex()*2*PI/submod->getVectorSize()));
     }
     else
     {

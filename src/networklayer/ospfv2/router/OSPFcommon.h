@@ -291,7 +291,7 @@ inline unsigned long ULongFromAddressString(const char* charForm)
 inline char* AddressStringFromIPv4Address(char* buffer, int bufferLength, OSPF::IPv4Address byteForm)
 {
     if (bufferLength < 16) {
-        buffer = '\0';
+        *buffer = '\0';
     }
     else {
         sprintf(buffer, "%d.%d.%d.%d", byteForm.bytes[0], byteForm.bytes[1], byteForm.bytes[2], byteForm.bytes[3]);
@@ -302,7 +302,7 @@ inline char* AddressStringFromIPv4Address(char* buffer, int bufferLength, OSPF::
 inline char* AddressStringFromULong(char* buffer, int bufferLength, unsigned long longForm)
 {
     if (bufferLength < 16) {
-        buffer = '\0';
+        *buffer = '\0';
     }
     else {
         sprintf(buffer, "%d.%d.%d.%d", (int)((longForm & 0xFF000000) >> 24),

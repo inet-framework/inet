@@ -558,7 +558,7 @@ void TCP_NSC::handleIpInputMessage(TCPSegment* tcpsegP)
                 ++changes;
 
                 TCP_NSC_Connection *conn;
-                int newConnId = ev.getUniqueNumber();
+                int newConnId = getEnvir()->getUniqueNumber();
                 // add into appConnMap
                 conn = &tcpAppConnMapM[newConnId];
                 conn->connIdM = newConnId;
@@ -720,7 +720,7 @@ void TCP_NSC::handleMessage(cMessage *msgP)
         handleAppMessage(msgP);
     }
 
-    if (ev.isGUI())
+    if (hasGUI())
         updateDisplayString();
 }
 

@@ -112,7 +112,7 @@ class INET_API RoutingTable: public cSimpleModule, public IRoutingTable, protect
     virtual void updateDisplayString();
 
     // delete routes for the given interface
-    virtual void deleteInterfaceRoutes(InterfaceEntry *entry);
+    virtual void deleteInterfaceRoutes(const InterfaceEntry *entry);
 
     // invalidates routing cache and local addresses cache
     virtual void invalidateCache();

@@ -117,7 +117,7 @@ void NAMTraceWriter::receiveChangeNotification(int category, const cPolymorphic 
     // process notification
     if (category==NF_PP_TX_BEGIN || category==NF_PP_RX_END || category==NF_L2_Q_DROP)
     {
-        TxNotifDetails *d = check_and_cast<TxNotifDetails *>(details);
+        const TxNotifDetails *d = check_and_cast<const TxNotifDetails *>(details);
         int peernamid = d->getInterfaceEntry()->getPeerNamId();
         cPacket *msg = d->getPacket();
 
@@ -174,7 +174,7 @@ void NAMTraceWriter::recordPacketEvent(char event, int peernamid, cPacket *msg)
     int color = 0;
     for (cPacket *em = msg; em; em = em->getEncapsulatedPacket())
         if (em->hasPar("color"))
-            {color = em->par("color").longValue(); break;}
+            {color = em->par("color"); break;}
 
     out << event << " -t " << simTime();
     if (event=='h')

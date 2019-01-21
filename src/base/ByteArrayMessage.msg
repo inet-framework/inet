@@ -23,5 +23,6 @@ cplusplus {{
 packet ByteArrayMessage
 {
     @customize(true);
+    @fieldNameSuffix("_var");
     char data[];
 }

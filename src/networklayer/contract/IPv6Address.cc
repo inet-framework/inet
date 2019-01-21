@@ -147,7 +147,7 @@ void IPv6Address::set(const char *addr)
 }
 
 // find longest sequence of zeros in address (at least with len=2)
-static void findGap(int *octals, int& start, int& end)
+static void findGap(unsigned int *octals, int& start, int& end)
 {
     start = end = 0;
     int beg = -1;
@@ -180,7 +180,7 @@ std::string IPv6Address::str() const
         return std::string("<unspec>");
 
     // convert to 16-bit octals
-    int octals[8] = {
+    unsigned int octals[8] = {
         (d[0]>>16), (d[0]&0xffff), (d[1]>>16), (d[1]&0xffff),
         (d[2]>>16), (d[2]&0xffff), (d[3]>>16), (d[3]&0xffff)
     };

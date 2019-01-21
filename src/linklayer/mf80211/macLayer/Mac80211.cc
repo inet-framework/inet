@@ -920,7 +920,7 @@ void Mac80211::receiveChangeNotification(int category, const cPolymorphic *detai
     if (category == NF_RADIOSTATE_CHANGED)
     {
         // update the local copy of the radio state
-        radioState = check_and_cast<RadioState *>(details)->getState();
+        radioState = check_and_cast<const RadioState *>(details)->getState();
 
         // NOTE: we may be invoked during INIT STAGE 1 too, when SnrEval notifies us
         // about the initial radio state. This function has to work correctly

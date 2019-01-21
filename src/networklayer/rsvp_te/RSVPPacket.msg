@@ -54,6 +54,7 @@ struct EroObj_t;
 //
 packet RSVPMessage
 {
+    @fieldNameSuffix("_var");
     int rsvpKind;
 }
 
@@ -63,6 +64,7 @@ packet RSVPMessage
 packet RSVPPacket extends RSVPMessage
 {
     @customize(true);
+    @fieldNameSuffix("_var");
     SessionObj_t session;
     bool checksumValid = true;
 }

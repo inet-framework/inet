@@ -39,7 +39,7 @@ void UDPSink::handleMessage(cMessage *msg)
 {
     processPacket(PK(msg));
 
-    if (ev.isGUI())
+    if (hasGUI())
     {
         char buf[32];
         sprintf(buf, "rcvd: %d pks", numReceived);

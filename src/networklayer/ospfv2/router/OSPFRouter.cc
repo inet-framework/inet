@@ -65,7 +65,7 @@ OSPF::Router::~Router(void)
 void OSPF::Router::AddWatches(void)
 {
     WATCH(routerID);
-    WATCH_PTRVECTOR(areas);
+    // WATCH_PTRVECTOR(areas); //TODO
     WATCH_PTRVECTOR(asExternalLSAs);
 }
 

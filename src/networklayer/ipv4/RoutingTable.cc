@@ -146,7 +146,7 @@ void RoutingTable::configureRouterId()
 
 void RoutingTable::updateDisplayString()
 {
-    if (!ev.isGUI())
+    if (!hasGUI())
         return;
 
     std::stringstream os;
@@ -179,7 +179,7 @@ void RoutingTable::receiveChangeNotification(int category, const cPolymorphic *d
     else if (category==NF_INTERFACE_DELETED)
     {
         // remove all routes that point to that interface
-        InterfaceEntry *entry = check_and_cast<InterfaceEntry*>(details);
+        const InterfaceEntry *entry = check_and_cast<const InterfaceEntry*>(details);
         deleteInterfaceRoutes(entry);
     }
     else if (category==NF_INTERFACE_STATE_CHANGED)
@@ -198,7 +198,7 @@ void RoutingTable::receiveChangeNotification(int category, const cPolymorphic *d
     }
 }
 
-void RoutingTable::deleteInterfaceRoutes(InterfaceEntry *entry)
+void RoutingTable::deleteInterfaceRoutes(const InterfaceEntry *entry)
 {
     RouteVector::iterator it = routes.begin();
     while (it != routes.end())
@@ -225,9 +225,10 @@ void RoutingTable::invalidateCache()
 void RoutingTable::printRoutingTable() const
 {
     EV << "-- Routing table --\n";
-    ev.printf("%-16s %-16s %-16s %-3s %s\n",
+    char buf[200];
+    sprintf(buf, "%-16s %-16s %-16s %-3s %s\n",
               "Destination", "Gateway", "Netmask", "Iface");
-
+    EV << buf;
     for (int i=0; i<getNumRoutes(); i++)
         EV << getRoute(i)->detailedInfo() << "\n";
     EV << "\n";

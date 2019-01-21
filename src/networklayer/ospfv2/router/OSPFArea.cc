@@ -58,12 +58,12 @@ void OSPF::Area::AddInterface(OSPF::Interface* intf)
     associatedInterfaces.push_back(intf);
 }
 
-void OSPF::Area::info(char *buffer)
+std::string OSPF::Area::info() const
 {
     std::stringstream out;
     char areaString[16];
     out << "areaID: " << AddressStringFromULong(areaString, 16, areaID);
-    strcpy(buffer, out.str().c_str());
+    return out.str();
 }
 
 std::string OSPF::Area::detailedInfo(void) const

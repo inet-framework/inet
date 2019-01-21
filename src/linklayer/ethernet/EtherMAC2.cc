@@ -84,7 +84,7 @@ void EtherMAC2::handleMessage(cMessage *msg)
             error("Message received from unknown gate!");
     }
 
-    if (ev.isGUI())  updateDisplayString();
+    if (hasGUI())  updateDisplayString();
 }
 
 void EtherMAC2::startFrameTransmission()

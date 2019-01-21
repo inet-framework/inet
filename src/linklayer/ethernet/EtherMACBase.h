@@ -127,7 +127,7 @@ class INET_API EtherMACBase : public cSimpleModule, public INotifiable
     EtherMACBase();
     virtual ~EtherMACBase();
 
-    virtual long getQueueLength() {return txQueue.length();}
+    virtual long getQueueLength() {return txQueue.getLength();}
     virtual MACAddress getMACAddress() {return address;}
 
   protected:

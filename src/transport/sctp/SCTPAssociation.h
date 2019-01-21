@@ -36,7 +36,7 @@
 #include <iostream>
 #include <errno.h>
 #include <math.h>
-#include <platdep/intxtypes.h>
+//#include <platdep/intxtypes.h>
 #include "common.h"
 
 

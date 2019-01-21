@@ -68,8 +68,8 @@ int32 SCTPAssociation::streamScheduler(bool peek) //peek indicates that no data 
     sid = -1;
 
     if ((state->ssLastDataChunkSizeSet == false || state->ssNextStream == false) &&
-         (sendStreams.find(state->lastStreamScheduled)->second->getUnorderedStreamQ()->length() > 0 ||
-         sendStreams.find(state->lastStreamScheduled)->second->getStreamQ()->length() > 0))
+         (sendStreams.find(state->lastStreamScheduled)->second->getUnorderedStreamQ()->getLength() > 0 ||
+         sendStreams.find(state->lastStreamScheduled)->second->getStreamQ()->getLength() > 0))
     {
         sid = state->lastStreamScheduled;
         sctpEV3<<"Stream Scheduler: again sid " << sid << ".\n";
@@ -82,8 +82,8 @@ int32 SCTPAssociation::streamScheduler(bool peek) //peek indicates that no data 
         do {
             testsid = (testsid + 1) % outboundStreams;
 
-            if (sendStreams.find(testsid)->second->getUnorderedStreamQ()->length() > 0 ||
-                sendStreams.find(testsid)->second->getStreamQ()->length() > 0)
+            if (sendStreams.find(testsid)->second->getUnorderedStreamQ()->getLength() > 0 ||
+                sendStreams.find(testsid)->second->getStreamQ()->getLength() > 0)
             {
                 sid = testsid;
                 sctpEV3<<"Stream Scheduler: chose sid " << sid << ".\n";
@@ -108,7 +108,7 @@ int32 SCTPAssociation::numUsableStreams(void)
     int32 count=0;
 
     for (SCTPSendStreamMap::iterator iter=sendStreams.begin(); iter!=sendStreams.end(); iter++)
-        if (iter->second->getStreamQ()->length()>0 || iter->second->getUnorderedStreamQ()->length()>0)
+        if (iter->second->getStreamQ()->getLength()>0 || iter->second->getUnorderedStreamQ()->getLength()>0)
         {
             count++;
         }

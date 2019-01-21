@@ -123,7 +123,7 @@ void TCPSessionApp::activity()
     socket.bind(*address ? IPvXAddress(address) : IPvXAddress(), port);
 
     EV << "issuing OPEN command\n";
-    if (ev.isGUI()) getDisplayString().setTagArg("t",0, active?"connecting":"listening");
+    if (hasGUI()) getDisplayString().setTagArg("t",0, active?"connecting":"listening");
 
     if (active)
         socket.connect(IPAddressResolver().resolve(connectAddress), connectPort);
@@ -139,7 +139,7 @@ void TCPSessionApp::activity()
     }
 
     EV << "connection established, starting sending\n";
-    if (ev.isGUI()) getDisplayString().setTagArg("t",0,"connected");
+    if (hasGUI()) getDisplayString().setTagArg("t",0,"connected");
 
     // send
     if (sendBytes>0)
@@ -166,7 +166,7 @@ void TCPSessionApp::activity()
     {
         waitUntil(tClose);
         EV << "issuing CLOSE command\n";
-        if (ev.isGUI()) getDisplayString().setTagArg("t",0,"closing");
+        if (hasGUI()) getDisplayString().setTagArg("t",0,"closing");
         socket.close();
     }
 

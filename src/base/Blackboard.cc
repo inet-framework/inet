@@ -23,7 +23,7 @@
 Define_Module(Blackboard);
 
 
-#define coreEV (ev.isDisabled()||!coreDebug) ? ev : ev <<getParentModule()->getName()<<"["<<getParentModule()->getIndex()<<"]::Blackboard: "
+#define coreEV EV
 
 
 std::ostream& operator<<(std::ostream& os, const Blackboard::BBItem& bbi)

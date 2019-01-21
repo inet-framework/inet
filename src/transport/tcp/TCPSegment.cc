@@ -80,16 +80,27 @@ void TCPSegment::truncateSegment(uint32 firstSeqNo, uint32 endSeqNo)
     }
 }
 
-void TCPSegment::parsimPack(cCommBuffer *b)
+void TCPSegment::parsimPack(cCommBuffer *b) const
 {
     TCPSegment_Base::parsimPack(b);
-    doPacking(b, payloadList);
+    b->pack((int)payloadList.size());
+    for (std::list<TCPPayloadMessage>::const_iterator it = payloadList.begin(); it != payloadList.end(); it++) {
+        b->pack(it->endSequenceNo);
+        b->packObject(it->msg);
+    }
 }
 
 void TCPSegment::parsimUnpack(cCommBuffer *b)
 {
     TCPSegment_Base::parsimUnpack(b);
-    doUnpacking(b, payloadList);
+    int i, n;
+    b->unpack(n);
+    for (i = 0; i < n; i++) {
+        TCPPayloadMessage payload;
+        b->unpack(payload.endSequenceNo);
+        payload.msg = check_and_cast<cPacket*>(b->unpackObject());
+        payloadList.push_back(payload);
+    }
 }
 
 void TCPSegment::setPayloadArraySize(unsigned int size)

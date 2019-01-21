@@ -88,11 +88,11 @@ bool Ieee80211RadioModel::isPacketOK(double snirMin, int lengthMPDU, double bitr
     // probability of no bit error in the MPDU
     double MpduNoError = pow(1.0 - berMPDU, lengthMPDU);
     EV << "berHeader: " << berHeader << " berMPDU: " << berMPDU << endl;
-    double rand = dblrand();
+    double rand = check_and_cast<cModule*>(this)->dblrand();
 
     if (rand > headerNoError)
         return false; // error in header
-    else if (dblrand() > MpduNoError)
+    else if (check_and_cast<cModule*>(this)->dblrand() > MpduNoError)
         return false;  // error in MPDU
     else
         return true; // no error

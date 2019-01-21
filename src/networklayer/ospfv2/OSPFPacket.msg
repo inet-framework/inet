@@ -50,6 +50,7 @@ struct OSPFOptions
 //
 packet OSPFPacket
 {
+    @fieldNameSuffix("_var");
     char version = 2;
     char type enum(OSPFPacketType) = HelloPacket;
     short packetLength = 0;
@@ -67,6 +68,7 @@ packet OSPFPacket
 //
 packet OSPFHelloPacket extends OSPFPacket
 {
+    @fieldNameSuffix("_var");
     IPAddress networkMask;
 
     short helloInterval = 5;
@@ -98,6 +100,7 @@ enum LSAType
 //class OSPFLSAHeader extends cObject
 class OSPFLSAHeader
 {
+    @fieldNameSuffix("_var");
     unsigned short lsAge = 0;
     OSPFOptions lsOptions;
     char lsType enum(LSAType) = RouterLSAType;
@@ -114,6 +117,7 @@ class OSPFLSAHeader
 //class OSPFLSA extends cObject
 class OSPFLSA
 {
+    @fieldNameSuffix("_var");
     OSPFLSAHeader header;
 }
 
@@ -135,6 +139,7 @@ struct TOSData
 //class Link extends cObject
 class Link
 {
+    @fieldNameSuffix("_var");
     IPAddress linkID;
     unsigned long linkData = 0;
     unsigned char type enum(LinkType) = PointToPointLink;
@@ -148,6 +153,7 @@ class Link
 //
 class OSPFRouterLSA extends OSPFLSA
 {
+    @fieldNameSuffix("_var");
     bool V_VirtualLinkEndpoint = false;
     bool E_ASBoundaryRouter = false;
     bool B_AreaBorderRouter = false;
@@ -160,6 +166,7 @@ class OSPFRouterLSA extends OSPFLSA
 //
 class OSPFNetworkLSA extends OSPFLSA
 {
+    @fieldNameSuffix("_var");
     IPAddress networkMask;
     IPAddress attachedRouters[];
 }
@@ -169,6 +176,7 @@ class OSPFNetworkLSA extends OSPFLSA
 //
 class OSPFSummaryLSA extends OSPFLSA
 {
+    @fieldNameSuffix("_var");
     IPAddress networkMask;
     unsigned long routeCost = 1;
     TOSData tosData[];
@@ -187,6 +195,7 @@ struct ExternalTOSInfo
 //
 class OSPFASExternalLSAContents
 {
+    @fieldNameSuffix("_var");
     IPAddress networkMask;
     bool E_ExternalMetricType = false;
     unsigned long routeCost = 1;
@@ -200,6 +209,7 @@ class OSPFASExternalLSAContents
 //
 class OSPFASExternalLSA extends OSPFLSA
 {
+    @fieldNameSuffix("_var");
     OSPFASExternalLSAContents contents;
 }
 
@@ -222,6 +232,7 @@ struct OSPFDDOptions
 //
 packet OSPFDatabaseDescriptionPacket extends OSPFPacket
 {
+    @fieldNameSuffix("_var");
     unsigned short interfaceMTU;
     OSPFOptions options;
     OSPFDDOptions ddOptions;
@@ -241,6 +252,7 @@ struct LSARequest
 //
 packet OSPFLinkStateRequestPacket extends OSPFPacket
 {
+    @fieldNameSuffix("_var");
     LSARequest requests[];
 }
 
@@ -249,6 +261,7 @@ packet OSPFLinkStateRequestPacket extends OSPFPacket
 //
 packet OSPFLinkStateUpdatePacket extends OSPFPacket
 {
+    @fieldNameSuffix("_var");
     unsigned long numberOfLSAs;
     OSPFRouterLSA routerLSAs[];
     OSPFNetworkLSA networkLSAs[];
@@ -261,5 +274,6 @@ packet OSPFLinkStateUpdatePacket extends OSPFPacket
 //
 packet OSPFLinkStateAcknowledgementPacket extends OSPFPacket
 {
+    @fieldNameSuffix("_var");
     OSPFLSAHeader lsaHeaders[];
 }

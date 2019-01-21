@@ -181,7 +181,7 @@ void EtherMAC::handleAutoconfigMessage(cMessage *msg)
 
         EV << "Parameters after autoconfig: txrate=" << txrate/1000000 << "Mb, " << (duplexMode ? "duplex" : "half-duplex") << endl;
 
-        if (ev.isGUI())
+        if (hasGUI())
         {
             char modestr[64];
             sprintf(modestr, "%dMb\n%s", int(txrate/1000000), (duplexMode ? "full duplex" : "half duplex"));
@@ -191,7 +191,7 @@ void EtherMAC::handleAutoconfigMessage(cMessage *msg)
             getParentModule()->bubble(modestr);
         }
 
-        if (!txQueue.empty())
+        if (!txQueue.isEmpty())
         {
             EV << "Autoconfig period over, starting to send frames\n";
             scheduleEndIFGPeriod();
@@ -262,7 +262,7 @@ void EtherMAC::handleMessage (cMessage *msg)
     }
     printState();
 
-    if (ev.isGUI())
+    if (hasGUI())
         updateDisplayString();
 }
 
@@ -417,7 +417,7 @@ void EtherMAC::startFrameTransmission()
 
     // add preamble and SFD (Starting Frame Delimiter), then send out
     frame->addByteLength(PREAMBLE_BYTES+SFD_BYTES);
-    if (ev.isGUI())  updateConnectionColor(TRANSMITTING_STATE);
+    if (hasGUI())  updateConnectionColor(TRANSMITTING_STATE);
     send(frame, physOutGate);
 
     // update burst variables
@@ -482,7 +482,7 @@ void EtherMAC::handleEndTxPeriod()
     // Gigabit Ethernet: now decide if we transmit next frame right away (burst) or wait IFG
     // FIXME! this is not entirely correct, there must be IFG between burst frames too
     bool burstFrame=false;
-    if (frameBursting && !txQueue.empty())
+    if (frameBursting && !txQueue.isEmpty())
     {
         // check if max bytes for burst not exceeded
         if (bytesSentInBurst<GIGABIT_MAX_BURST_BYTES)
@@ -521,7 +521,7 @@ void EtherMAC::handleEndRxPeriod()
     receiveState = RX_IDLE_STATE;
     numConcurrentTransmissions = 0;
 
-    if (transmitState==TX_IDLE_STATE && !txQueue.empty())
+    if (transmitState==TX_IDLE_STATE && !txQueue.isEmpty())
     {
         EV << "Receiver now idle, can transmit frames in output buffer after IFG period\n";
         scheduleEndIFGPeriod();
@@ -532,7 +532,7 @@ void EtherMAC::handleEndBackoffPeriod()
 {
     if (transmitState != BACKOFF_STATE)
         error("At end of BACKOFF not in BACKOFF_STATE!");
-    if (txQueue.empty())
+    if (txQueue.isEmpty())
         error("At end of BACKOFF and buffer empty!");
 
     if (receiveState==RX_IDLE_STATE)
@@ -559,7 +559,7 @@ void EtherMAC::sendJamSignal()
 {
     cPacket *jam = new EtherJam("JAM_SIGNAL");
     jam->setByteLength(JAM_SIGNAL_BYTES);
-    if (ev.isGUI())  updateConnectionColor(JAMMING_STATE);
+    if (hasGUI())  updateConnectionColor(JAMMING_STATE);
     send(jam, physOutGate);
 
     scheduleAt(simTime()+jamDuration, endJammingMsg);
@@ -617,7 +617,7 @@ void EtherMAC::printState()
     }
     EV << ",  backoffs: " << backoffs;
     EV << ",  numConcurrentTransmissions: " << numConcurrentTransmissions;
-    EV << ",  queueLength: " << txQueue.length() << endl;
+    EV << ",  queueLength: " << txQueue.getLength() << endl;
 #undef CASE
 }
 

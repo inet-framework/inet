@@ -114,7 +114,7 @@ bool Ieee80211MgmtBase::enqueue(cMessage *msg)
         mgmtQueue.insert(msg);
         return false;
     }
-    else if (frameCapacity && dataQueue.length() >= frameCapacity)
+    else if (frameCapacity && dataQueue.getLength() >= frameCapacity)
     {
         EV << "Queue full, dropping packet.\n";
         delete msg;
@@ -124,7 +124,7 @@ bool Ieee80211MgmtBase::enqueue(cMessage *msg)
     else
     {
         dataQueue.insert(msg);
-        dataQueueLenVec.record(dataQueue.length());
+        dataQueueLenVec.record(dataQueue.getLength());
         return false;
     }
 }
@@ -132,17 +132,17 @@ bool Ieee80211MgmtBase::enqueue(cMessage *msg)
 cMessage *Ieee80211MgmtBase::dequeue()
 {
     // management frames have priority
-    if (!mgmtQueue.empty())
+    if (!mgmtQueue.isEmpty())
         return (cMessage *)mgmtQueue.pop();
 
     // return a data frame if we have one
-    if (dataQueue.empty())
+    if (dataQueue.isEmpty())
         return NULL;
 
     cMessage *pk = (cMessage *)dataQueue.pop();
 
     // statistics
-    dataQueueLenVec.record(dataQueue.length());
+    dataQueueLenVec.record(dataQueue.getLength());
     return pk;
 }
 

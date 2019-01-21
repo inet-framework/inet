@@ -30,13 +30,13 @@ namespace tcp_old {
 class TCPConnection;
 
 // macro for normal ev<< logging (note: deliberately no parens in macro def)
-#define tcpEV (ev.disable_tracing||TCP::testing)?ev:ev
+#define tcpEV (getEnvir()->isExpressMode()||TCP::testing)?EV:EV
 
 // macro for more verbose ev<< logging (note: deliberately no parens in macro def)
-#define tcpEV2 (ev.disable_tracing||TCP::testing||!TCP::logverbose)?ev:ev
+#define tcpEV2 (getEnvir()->isExpressMode()||TCP::testing||!TCP::logverbose)?EV:EV
 
 // testingEV writes log that automated test cases can check (*.test files)
-#define testingEV (ev.disable_tracing||!TCP::testing)?ev:ev
+#define testingEV (getEnvir()->isExpressMode()||!TCP::testing)?EV:EV
 
 
 

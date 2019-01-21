@@ -30,7 +30,7 @@ void TCPSrvHostApp::initialize()
 
 void TCPSrvHostApp::updateDisplay()
 {
-    if (!ev.isGUI()) return;
+    if (!hasGUI()) return;
 
     char buf[32];
     sprintf(buf, "%d threads", socketMap.size());

@@ -85,7 +85,7 @@ void IP::endService(cPacket *msg)
         handlePacketFromNetwork(dgram);
     }
 
-    if (ev.isGUI())
+    if (hasGUI())
         updateDisplayString();
 }
 

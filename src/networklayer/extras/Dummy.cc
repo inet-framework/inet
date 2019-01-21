@@ -16,7 +16,7 @@
 //
 
 
-#include <omnetpp.h>
+#include "INETDefs.h"
 
 class Dummy : public cSimpleModule
 {

@@ -129,6 +129,8 @@ class TCPOption
 packet TCPSegment
 {
     @customize(true);
+    @fieldNameSuffix("_var");
+
     // Source Port
     unsigned short srcPort;
 

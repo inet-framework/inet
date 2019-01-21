@@ -61,8 +61,8 @@ void TCP::initialize()
     lastEphemeralPort = EPHEMERAL_PORTRANGE_START;
     WATCH(lastEphemeralPort);
 
-    WATCH_PTRMAP(tcpConnMap);
-    WATCH_PTRMAP(tcpAppConnMap);
+    //WATCH_PTRMAP(tcpConnMap); //TODO
+    //WATCH_PTRMAP(tcpAppConnMap); //TODO
 
     recordStatistics = par("recordStats");
 
@@ -163,7 +163,7 @@ void TCP::handleMessage(cMessage *msg)
             removeConnection(conn);
     }
 
-    if (ev.isGUI())
+    if (hasGUI())
         updateDisplayString();
 }
 
@@ -182,7 +182,7 @@ void TCP::segmentArrivalWhileClosed(TCPSegment *tcpseg, IPvXAddress srcAddr, IPv
 
 void TCP::updateDisplayString()
 {
-    if (ev.isDisabled())
+    if (getEnvir()->isExpressMode())
     {
         // in express mode, we don't bother to update the display
         // (std::map's iteration is not very fast if map is large)
@@ -368,7 +368,7 @@ void TCP::addForkedConnection(TCPConnection *conn, TCPConnection *newConn, IPvXA
     key.appGateIndex = conn->appGateIndex;
     key.connId = conn->connId;
     tcpAppConnMap.erase(key);
-    key.connId = conn->connId = ev.getUniqueNumber();
+    key.connId = conn->connId = getEnvir()->getUniqueNumber();
     tcpAppConnMap[key] = conn;
 
     // ...and newConn will live on with the old connId

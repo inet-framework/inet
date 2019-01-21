@@ -21,7 +21,7 @@
 #include "BasicDecider.h"
 
 
-#define coreEV (ev.isDisabled()||!coreDebug) ? ev : ev << logName() << "::BasicDecider: "
+#define coreEV EV
 
 Define_Module(BasicDecider);
 

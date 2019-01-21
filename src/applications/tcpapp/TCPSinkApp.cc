@@ -46,7 +46,7 @@ void TCPSinkApp::handleMessage(cMessage *msg)
         bytesRcvd += PK(msg)->getByteLength();
         delete msg;
 
-        if (ev.isGUI())
+        if (hasGUI())
         {
             char buf[32];
             sprintf(buf, "rcvd: %ld bytes", bytesRcvd);

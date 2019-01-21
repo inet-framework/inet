@@ -63,9 +63,9 @@ bool REDQueue::enqueue(cMessage *msg)
     //            m <- f(time-q_time)
     //            avg <- (1-wq)^m * avg
     //"
-    if (!queue.empty())
+    if (!queue.isEmpty())
     {
-        avg = (1-wq)*avg + wq*queue.length();
+        avg = (1-wq)*avg + wq*queue.getLength();
     }
     else
     {
@@ -120,7 +120,7 @@ bool REDQueue::enqueue(cMessage *msg)
     }
 
     // carry out decision
-    if (mark || queue.length()>=maxth) // maxth is also the "hard" limit
+    if (mark || queue.getLength()>=maxth) // maxth is also the "hard" limit
     {
         delete msg;
         dropVec.record(1);
@@ -129,14 +129,14 @@ bool REDQueue::enqueue(cMessage *msg)
     else
     {
         queue.insert(msg);
-        qlenVec.record(queue.length());
+        qlenVec.record(queue.getLength());
         return false;
     }
 }
 
 cMessage *REDQueue::dequeue()
 {
-    if (queue.empty())
+    if (queue.isEmpty())
         return NULL;
 
     //"
@@ -144,11 +144,11 @@ cMessage *REDQueue::dequeue()
     //    q_time <- time
     //"
     cMessage *pk = (cMessage *)queue.pop();
-    if (queue.length()==0)
+    if (queue.getLength()==0)
         q_time = simTime();
 
     // statistics
-    qlenVec.record(queue.length());
+    qlenVec.record(queue.getLength());
 
     return pk;
 }

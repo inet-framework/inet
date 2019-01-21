@@ -98,7 +98,7 @@ void UDPBasicApp::handleMessage(cMessage *msg)
         processPacket(PK(msg));
     }
 
-    if (ev.isGUI())
+    if (hasGUI())
     {
         char buf[40];
         sprintf(buf, "rcvd: %d pks\nsent: %d pks", numReceived, numSent);

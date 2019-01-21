@@ -154,7 +154,7 @@ void CSMAMacLayer::handleUpperMsg(cPacket *msg)
         }
 
         // the queue is not full yet so we can queue the message
-        if (macQueue.length() < queueLength)
+        if (macQueue.getLength() < queueLength)
         {
             EV << "already transmitting, putting pkt into queue...\n";
             macQueue.insert(mac);
@@ -272,7 +272,7 @@ void CSMAMacLayer::receiveChangeNotification(int category, const cPolymorphic *d
     if (category == NF_RADIOSTATE_CHANGED)
     {
         // update the local copy of the radio state
-        radioState = check_and_cast<RadioState *>(details)->getState();
+        radioState = check_and_cast<const RadioState *>(details)->getState();
 
         // NOTE: we may be invoked during INIT STAGE 1 too, when SnrEval notifies us
         // about the initial radio state. This function has to work correctly
@@ -281,7 +281,7 @@ void CSMAMacLayer::receiveChangeNotification(int category, const cPolymorphic *d
         // if the channel is idle now, the queue is not empty and no timer
         // is scheduled, this means that sending the previous message is
         // complete and the next one can be taken out of the queue
-        if (radioState == RadioState::IDLE && !macQueue.empty() && !timer->isScheduled())
+        if (radioState == RadioState::IDLE && !macQueue.isEmpty() && !timer->isScheduled())
         {
             timer->setContextPointer(macQueue.pop());
             simtime_t randomTime = intuniform(0, 10) / 100.0;

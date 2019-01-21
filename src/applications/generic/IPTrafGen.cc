@@ -37,7 +37,7 @@ void IPTrafSink::handleMessage(cMessage *msg)
 {
     processPacket(check_and_cast<cPacket *>(msg));
 
-    if (ev.isGUI())
+    if (hasGUI())
     {
         char buf[32];
         sprintf(buf, "rcvd: %d pks", numReceived);
@@ -185,7 +185,7 @@ void IPTrafGen::handleMessage(cMessage *msg)
         processPacket(PK(msg));
     }
 
-    if (ev.isGUI())
+    if (hasGUI())
     {
         char buf[40];
         sprintf(buf, "rcvd: %d pks\nsent: %d pks", numReceived, numSent);

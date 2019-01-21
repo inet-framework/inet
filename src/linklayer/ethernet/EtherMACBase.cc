@@ -302,7 +302,7 @@ void EtherMACBase::processFrameFromUpperLayer(EtherFrame *frame)
     {
         numFramesFromHL++;
 
-        if (txQueueLimit && txQueue.length()>txQueueLimit)
+        if (txQueueLimit && txQueue.getLength() > txQueueLimit)
             error("txQueue length exceeds %d -- this is probably due to "
                   "a bogus app model generating excessive traffic "
                   "(or if this is normal, increase txQueueLimit!)",
@@ -321,7 +321,7 @@ void EtherMACBase::processFrameFromUpperLayer(EtherFrame *frame)
         EV << "PAUSE received from higher layer\n";
 
         // PAUSE frames enjoy priority -- they're transmitted before all other frames queued up
-        if (!txQueue.empty())
+        if (!txQueue.isEmpty())
             txQueue.insertBefore(txQueue.front(), frame);  // front() frame is probably being transmitted
         else
             txQueue.insert(frame);
@@ -424,7 +424,7 @@ void EtherMACBase::handleEndIFGPeriod()
     if (transmitState!=WAIT_IFG_STATE)
         error("Not in WAIT_IFG_STATE at the end of IFG period");
 
-    if (txQueue.empty())
+    if (txQueue.isEmpty())
         error("End of IFG and no frame to transmit");
 
     // End of IFG period, okay to transmit, if Rx idle OR duplexMode
@@ -453,7 +453,7 @@ void EtherMACBase::handleEndTxPeriod()
     if (transmitState!=TRANSMITTING_STATE || (!duplexMode && receiveState!=RX_IDLE_STATE))
         error("End of transmission, and incorrect state detected");
 
-    if (txQueue.empty())
+    if (txQueue.isEmpty())
         error("Frame under transmission cannot be found");
 
     // get frame from buffer
@@ -532,7 +532,7 @@ bool EtherMACBase::checkAndScheduleEndPausePeriod()
 
 void EtherMACBase::beginSendFrames()
 {
-    if (!txQueue.empty())
+    if (!txQueue.isEmpty())
     {
         // Other frames are queued, therefore wait IFG period and transmit next frame
         EV << "Transmit next frame in output queue, after IFG period\n";

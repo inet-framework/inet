@@ -115,7 +115,7 @@ public:
     void                CalculateInterAreaRoutes            (std::vector<RoutingTableEntry*>& newRoutingTable);
     void                ReCheckSummaryLSAs                  (std::vector<RoutingTableEntry*>& newRoutingTable);
 
-    void        info(char* buffer);
+    std::string        info() const;
     std::string detailedInfo(void) const;
 
 private:
@@ -141,7 +141,7 @@ private:
 
 } // namespace OSPF
 
-inline std::ostream& operator<< (std::ostream& ostr, OSPF::Area& area)
+inline std::ostream& operator<< (std::ostream& ostr, const OSPF::Area& area)
 {
     ostr << area.detailedInfo();
     return ostr;

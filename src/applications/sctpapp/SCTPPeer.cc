@@ -379,7 +379,7 @@ void SCTPPeer::handleMessage(cMessage *msg)
         break;
     }
 
-    if (ev.isGUI())
+    if (hasGUI())
     {
         char buf[32];
         RcvdBytesPerAssoc::iterator l=rcvdBytesPerAssoc.find(id);
@@ -495,7 +495,7 @@ struct pathStatus ps;
 
 void SCTPPeer::setStatusString(const char *s)
 {
-    if (ev.isGUI()) getDisplayString().setTagArg("t", 0, s);
+    if (hasGUI()) getDisplayString().setTagArg("t", 0, s);
 }
 
 void SCTPPeer::sendRequest(bool last)

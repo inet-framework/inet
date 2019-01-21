@@ -85,7 +85,7 @@ void IPv6::endService(cPacket *msg)
         handleDatagramFromNetwork(dgram);
     }
 
-    if (ev.isGUI())
+    if (hasGUI())
         updateDisplayString();
 }
 

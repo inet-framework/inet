@@ -88,7 +88,7 @@ void TCPGenericCliAppBase::sendPacket(int numBytes, int expectedReplyBytes, bool
 
 void TCPGenericCliAppBase::setStatusString(const char *s)
 {
-    if (ev.isGUI()) getDisplayString().setTagArg("t", 0, s);
+    if (hasGUI()) getDisplayString().setTagArg("t", 0, s);
 }
 
 void TCPGenericCliAppBase::socketEstablished(int, void *)

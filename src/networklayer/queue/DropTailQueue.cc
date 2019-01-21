@@ -38,7 +38,7 @@ void DropTailQueue::initialize()
 
 bool DropTailQueue::enqueue(cMessage *msg)
 {
-    if (frameCapacity && queue.length() >= frameCapacity)
+    if (frameCapacity && queue.getLength() >= frameCapacity)
     {
         EV << "Queue full, dropping packet.\n";
         delete msg;
@@ -48,20 +48,20 @@ bool DropTailQueue::enqueue(cMessage *msg)
     else
     {
         queue.insert(msg);
-        qlenVec.record(queue.length());
+        qlenVec.record(queue.getLength());
         return false;
     }
 }
 
 cMessage *DropTailQueue::dequeue()
 {
-    if (queue.empty())
+    if (queue.isEmpty())
         return NULL;
 
    cMessage *pk = (cMessage *)queue.pop();
 
     // statistics
-    qlenVec.record(queue.length());
+    qlenVec.record(queue.getLength());
 
     return pk;
 }

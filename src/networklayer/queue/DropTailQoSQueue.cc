@@ -62,7 +62,7 @@ bool DropTailQoSQueue::enqueue(cMessage *msg)
     int queueIndex = classifier->classifyPacket(msg);
     cQueue *queue = queues[queueIndex];
 
-    if (frameCapacity && queue->length() >= frameCapacity)
+    if (frameCapacity && queue->getLength() >= frameCapacity)
     {
         EV << "Queue " << queueIndex << " full, dropping packet.\n";
         delete msg;
@@ -79,7 +79,7 @@ cMessage *DropTailQoSQueue::dequeue()
 {
     // queue 0 is highest priority
     for (int i=0; i<numQueues; i++)
-        if (!queues[i]->empty())
+        if (!queues[i]->isEmpty())
             return (cMessage *)queues[i]->pop();
     return NULL;
 }

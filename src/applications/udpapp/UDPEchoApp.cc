@@ -59,7 +59,7 @@ void UDPEchoApp::processPacket(cPacket *msg)
 
     UDPEchoAppMsg *packet = check_and_cast<UDPEchoAppMsg *>(msg);
 
-    if (packet->getIsRequest())
+    if (packet->isRequest())
     {
         UDPControlInfo *controlInfo = check_and_cast<UDPControlInfo *>(packet->getControlInfo());
 

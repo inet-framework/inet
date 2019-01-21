@@ -356,7 +356,7 @@ void TCPDumper::dump(const char *label, const char *msg)
 
 Define_Module(TCPDump);
 
-TCPDump::TCPDump() : cSimpleModule(), tcpdump(ev.getOStream())
+TCPDump::TCPDump() : cSimpleModule(), tcpdump(EV)
 {
 
 
@@ -550,7 +550,7 @@ void TCPDump::initialize()
 void TCPDump::handleMessage(cMessage *msg)
 {
 
-    if (!ev.disable_tracing)
+    if (!getEnvir()->isExpressMode())
     {
         bool l2r;
 

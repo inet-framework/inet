@@ -74,7 +74,7 @@ void InterfaceTable::initialize(int stage)
 
 void InterfaceTable::updateDisplayString()
 {
-    if (!ev.isGUI())
+    if (!hasGUI())
         return;
 
     char buf[80];
@@ -170,7 +170,7 @@ void InterfaceTable::discoverConnectingGates(InterfaceEntry *entry, cModule *ifm
     cGate *nwlayerInGate=NULL, *nwlayerOutGate=NULL;
     for (GateIterator i(ifmod); !i.end(); i++)
     {
-        cGate *g = i();
+        cGate *g = *i;
         if (!g) continue;
 
         // find the host/router's gates that internally connect to this interface

@@ -463,7 +463,7 @@ void OSPFRouting::LoadVirtualLink(const cXMLElement& virtualLinkConfig)
  */
 bool OSPFRouting::LoadConfigFromXML(const char * filename)
 {
-    cXMLElement* asConfig = ev.getXMLDocument(filename);
+    cXMLElement* asConfig = getEnvir()->getXMLDocument(filename);
     if (asConfig == NULL) {
         error("Cannot read AS configuration from file: %s", filename);
     }

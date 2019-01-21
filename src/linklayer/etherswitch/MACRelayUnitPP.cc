@@ -168,7 +168,7 @@ void MACRelayUnitPP::processFrame(cMessage *msg)
     numProcessedFrames++;
 
     // Process next frame in queue if they are pending
-    if (!pBuff->queue.empty())
+    if (!pBuff->queue.isEmpty())
     {
         EV << "Begin processing of next frame\n";
         scheduleAt(simTime()+processingTime, msg);

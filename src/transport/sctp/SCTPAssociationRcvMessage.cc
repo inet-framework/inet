@@ -86,7 +86,7 @@ bool SCTPAssociation::process_RCV_Message(SCTPMessage*       sctpmsg,
     bool dataChunkDelivered = false;
     bool shutdownCalled     = false;
     for (uint32 i = 0; i < numberOfChunks; i++) {
-        const SCTPChunk* header = (const SCTPChunk*)(sctpmsg->removeChunk());
+        SCTPChunk* header = check_and_cast<SCTPChunk*>(sctpmsg->removeChunk());
         const uint8       type  = header->getChunkType();
 
         if ((type != INIT) &&
@@ -277,7 +277,7 @@ bool SCTPAssociation::process_RCV_Message(SCTPMessage*       sctpmsg,
             break;
         case SHUTDOWN_COMPLETE:
             sctpEV3<<"Shutdown Complete arrived" << endl;
-            SCTPShutdownCompleteChunk* shutdownCompleteChunk;
+            const SCTPShutdownCompleteChunk* shutdownCompleteChunk;
             shutdownCompleteChunk = check_and_cast<SCTPShutdownCompleteChunk*>(header);
             trans = performStateTransition(SCTP_E_RCV_SHUTDOWN_COMPLETE);
             sendIndicationToApp(SCTP_I_PEER_CLOSED);     // necessary for NAT-Rendezvous

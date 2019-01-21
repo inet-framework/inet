@@ -103,7 +103,7 @@
     int ___c = 0;                                                      \
     cFSM *___fsm = &fsm;                                               \
     EV << "processing event in state machine " << (fsm).getName() << endl;  \
-    while (!___exit && (___c++ < FSM_MAXT || (opp_error(eINFLOOP, (fsm).getStateName()), 0)))
+    while (!___exit && (___c++ < FSM_MAXT || (opp_error(E_INFLOOP, (fsm).getStateName()), 0)))
 
 #define FSMA_Print(exiting)                                            \
     (ev << "FSM " << ___fsm->getName()                                    \

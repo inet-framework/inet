@@ -21,7 +21,7 @@
 #include "ChannelAccess.h"
 
 
-#define coreEV (ev.isDisabled()||!coreDebug) ? ev : ev << logName() << "::ChannelAccess: "
+#define coreEV (getEnvir()->isExpressMode() || !coreDebug) ? EV : EV << logName() << "::ChannelAccess: "
 
 /**
  * Upon initialization ChannelAccess registers the nic parent module

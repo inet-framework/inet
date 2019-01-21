@@ -89,7 +89,7 @@ void PPP::initialize(int stage)
         updateHasSubcribers();
 
         // display string stuff
-        if (ev.isGUI())
+        if (hasGUI())
         {
             if (connected) {
                 oldConnColor = datarateChannel->getDisplayString().getTagArg("ls",0);
@@ -159,7 +159,7 @@ void PPP::startTransmitting(cPacket *msg)
     // if there's any control info, remove it; then encapsulate the packet
     delete msg->removeControlInfo();
     PPPFrame *pppFrame = encapsulate(msg);
-    if (ev.isGUI()) displayBusy();
+    if (hasGUI()) displayBusy();
 
     if (hasSubscribers)
     {
@@ -189,7 +189,7 @@ void PPP::handleMessage(cMessage *msg)
     {
         // Transmission finished, we can start next one.
         EV << "Transmission finished.\n";
-        if (ev.isGUI()) displayIdle();
+        if (hasGUI()) displayIdle();
 
         if (hasSubscribers)
         {
@@ -198,7 +198,7 @@ void PPP::handleMessage(cMessage *msg)
             nb->fireChangeNotification(NF_PP_TX_END, &notifDetails);
         }
 
-        if (!txQueue.empty())
+        if (!txQueue.isEmpty())
         {
             cPacket *pk = (cPacket *) txQueue.pop();
             startTransmitting(pk);
@@ -240,9 +240,9 @@ void PPP::handleMessage(cMessage *msg)
         {
             // We are currently busy, so just queue up the packet.
             EV << "Received " << msg << " for transmission but transmitter busy, queueing.\n";
-            if (ev.isGUI() && txQueue.length()>=3) getDisplayString().setTagArg("i",1,"red");
+            if (hasGUI() && txQueue.getLength()>=3) getDisplayString().setTagArg("i",1,"red");
 
-            if (txQueueLimit && txQueue.length()>txQueueLimit)
+            if (txQueueLimit && txQueue.getLength()>txQueueLimit)
                 error("txQueue length exceeds %d -- this is probably due to "
                       "a bogus app model generating excessive traffic "
                       "(or if this is normal, increase txQueueLimit!)",
@@ -259,14 +259,14 @@ void PPP::handleMessage(cMessage *msg)
         }
     }
 
-    if (ev.isGUI())
+    if (hasGUI())
         updateDisplayString();
 
 }
 
 void PPP::displayBusy()
 {
-    getDisplayString().setTagArg("i",1, txQueue.length()>=3 ? "red" : "yellow");
+    getDisplayString().setTagArg("i",1, txQueue.getLength()>=3 ? "red" : "yellow");
     datarateChannel->getDisplayString().setTagArg("ls",0,"yellow");
     datarateChannel->getDisplayString().setTagArg("ls",1,"3");
 }
@@ -280,7 +280,7 @@ void PPP::displayIdle()
 
 void PPP::updateDisplayString()
 {
-    if (ev.isDisabled())
+    if (getEnvir()->isExpressMode())
     {
         // speed up things
         getDisplayString().setTagArg("t",0,"");

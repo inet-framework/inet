@@ -328,7 +328,7 @@ void Ieee80211Mac::receiveChangeNotification(int category, const cPolymorphic *d
 
     if (category == NF_RADIOSTATE_CHANGED)
     {
-        RadioState::State newRadioState = check_and_cast<RadioState *>(details)->getState();
+        RadioState::State newRadioState = check_and_cast<const RadioState *>(details)->getState();
 
         // FIXME: double recording, because there's no sample hold in the gui
         radioStateVector.record(radioState);

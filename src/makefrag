@@ -3,6 +3,9 @@
 # the omnetpp root directory and comment out the following line:
 HAVE_PCAP=no
 
+# using omnetpp 4.x compatible msg compiler
+MSGC += --msg4
+
 ifeq ($(HAVE_PCAP),yes)
   # link with PCAP libs too
   LIBS += $(PCAP_LIBS)

@@ -97,7 +97,7 @@ void ARP::handleMessage(cMessage *msg)
     {
         processOutboundPacket(msg);
     }
-    if (ev.isGUI())
+    if (hasGUI())
         updateDisplayString();
 }
 

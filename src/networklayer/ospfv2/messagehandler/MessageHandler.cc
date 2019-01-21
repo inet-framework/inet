@@ -428,7 +428,7 @@ void OSPF::MessageHandler::PrintDatabaseDescriptionPacket(const OSPFDatabaseDesc
     unsigned int lsaCount = ddPacket->getLsaHeadersArraySize();
     for (unsigned int i = 0; i < lsaCount; i++) {
         EV << "    ";
-        PrintLSAHeader(ddPacket->getLsaHeaders(i), ev.getOStream());
+        PrintLSAHeader(ddPacket->getLsaHeaders(i), EV);
         EV << "\n";
     }
 }
@@ -470,7 +470,7 @@ void OSPF::MessageHandler::PrintLinkStateUpdatePacket(const OSPFLinkStateUpdateP
     for (i = 0; i < updateCount; i++) {
         const OSPFRouterLSA& lsa = updatePacket->getRouterLSAs(i);
         EV << "  ";
-        PrintLSAHeader(lsa.getHeader(), ev.getOStream());
+        PrintLSAHeader(lsa.getHeader(), EV);
         EV << "\n";
 
         EV << "  bits="
@@ -506,7 +506,7 @@ void OSPF::MessageHandler::PrintLinkStateUpdatePacket(const OSPFLinkStateUpdateP
     for (i = 0; i < updateCount; i++) {
         const OSPFNetworkLSA& lsa = updatePacket->getNetworkLSAs(i);
         EV << "  ";
-        PrintLSAHeader(lsa.getHeader(), ev.getOStream());
+        PrintLSAHeader(lsa.getHeader(), EV);
         EV << "\n";
 
         EV << "  netMask="
@@ -526,7 +526,7 @@ void OSPF::MessageHandler::PrintLinkStateUpdatePacket(const OSPFLinkStateUpdateP
     for (i = 0; i < updateCount; i++) {
         const OSPFSummaryLSA& lsa = updatePacket->getSummaryLSAs(i);
         EV << "  ";
-        PrintLSAHeader(lsa.getHeader(), ev.getOStream());
+        PrintLSAHeader(lsa.getHeader(), EV);
         EV << "\n";
 
         EV << "  netMask="
@@ -541,7 +541,7 @@ void OSPF::MessageHandler::PrintLinkStateUpdatePacket(const OSPFLinkStateUpdateP
     for (i = 0; i < updateCount; i++) {
         const OSPFASExternalLSA& lsa = updatePacket->getAsExternalLSAs(i);
         EV << "  ";
-        PrintLSAHeader(lsa.getHeader(), ev.getOStream());
+        PrintLSAHeader(lsa.getHeader(), EV);
         EV << "\n";
 
         const OSPFASExternalLSAContents& contents = lsa.getContents();
@@ -571,7 +571,7 @@ void OSPF::MessageHandler::PrintLinkStateAcknowledgementPacket(const OSPFLinkSta
     unsigned int lsaCount = ackPacket->getLsaHeadersArraySize();
     for (unsigned int i = 0; i < lsaCount; i++) {
         EV << "    ";
-        PrintLSAHeader(ackPacket->getLsaHeaders(i), ev.getOStream());
+        PrintLSAHeader(ackPacket->getLsaHeaders(i), EV);
         EV << "\n";
     }
 }

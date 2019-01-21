@@ -20,7 +20,7 @@
 #include <cassert>
 
 
-#define coreEV (ev.isDisabled()||!coreDebug) ? ev : ev << "ChannelControl: "
+#define coreEV (getEnvir()->isExpressMode() || !coreDebug) ? EV : EV << "ChannelControl: "
 
 Define_Module(ChannelControl);
 
@@ -52,9 +52,9 @@ ChannelControl::~ChannelControl()
 
 ChannelControl *ChannelControl::get()
 {
-    ChannelControl *cc = dynamic_cast<ChannelControl *>(simulation.getModuleByPath("channelcontrol"));
+    ChannelControl *cc = dynamic_cast<ChannelControl *>(cSimulation::getActiveSimulation()->getModuleByPath("channelcontrol"));
     if (!cc)
-        cc = dynamic_cast<ChannelControl *>(simulation.getModuleByPath("channelControl"));
+        cc = dynamic_cast<ChannelControl *>(cSimulation::getActiveSimulation()->getModuleByPath("channelControl"));
     if (!cc)
         throw cRuntimeError("Could not find ChannelControl module");
     return cc;

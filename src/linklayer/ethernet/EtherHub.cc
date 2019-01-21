@@ -24,7 +24,8 @@ Define_Module(EtherHub);
 
 static cEnvir& operator<< (cEnvir& out, cMessage *msg)
 {
-    out.printf("(%s)%s",msg->getClassName(),msg->getFullName());
+    EV_STATICCONTEXT;
+    EV << "(" << msg->getClassName() << ")" << msg->getFullName();
     return out;
 }
 

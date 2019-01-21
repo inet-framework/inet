@@ -44,7 +44,7 @@ std::string TCPSACKRexmitQueue::str() const
     return out.str();
 }
 
-void TCPSACKRexmitQueue::info()
+void TCPSACKRexmitQueue::nfo()
 {
     str();
     RexmitQueue::iterator i = rexmitQueue.begin();

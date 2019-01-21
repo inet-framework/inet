@@ -23,7 +23,7 @@
 #include "TransmComplete_m.h"
 
 
-#define coreEV (ev.isDisabled()||!coreDebug) ? ev : ev << logName() << "::BasicSnrEval: "
+#define coreEV EV
 
 Define_Module(BasicSnrEval);
 

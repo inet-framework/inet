@@ -138,7 +138,7 @@ void SCTPClient::close()
 
 void SCTPClient::setStatusString(const char *s)
 {
-    if (ev.isGUI()) getDisplayString().setTagArg("t", 0, s);
+    if (hasGUI()) getDisplayString().setTagArg("t", 0, s);
 }
 
 void SCTPClient::socketEstablished(int32, void *, uint64 buffer )

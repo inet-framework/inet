@@ -24,7 +24,10 @@
 
 #include <omnetpp.h>
 
-#if OMNETPP_VERSION < 0x0402
+namespace omnetpp {}
+using namespace omnetpp;
+
+#if OMNETPP_VERSION < 0x0504
 #  error At least OMNeT++/OMNEST version 4.2 required
 #endif
 
@@ -36,16 +39,39 @@
 #  define INET_API
 #endif
 
+/////////////////////
+#define RNGCONTEXT  (cSimulation::getActiveSimulation()->getContext())->
+
 typedef unsigned short ushort;
 typedef unsigned int uint;
 typedef unsigned long ulong;
 
+#define opp_error    throw cRuntimeError
+#define longValue    intValue
+#define simulation   (*getSimulation())
+#define ev           EV
+#define info()       str()
+#define MAXTIME      SIMTIME_MAX
 
-//
-// Macro to prevent executing ev<< statements in Express mode.
-// Compare ev/sec values with code compiled with #define EV ev.
-//
-#define EV ev.isDisabled()?ev:ev
+typedef uint8_t  uint8;
+typedef uint16_t uint16;
+typedef uint32_t uint32;
+typedef uint64_t uint64;
+typedef int8_t  int8;
+typedef int16_t int16;
+typedef int32_t int32;
+typedef int64_t int64;
+
+// ev.isDisabled()  -->  getEnvir()->isExpressMode()
+// hasGUI() --> hasGUI()
+typedef cObject cPolymorphic;
+typedef cHistogram cDoubleHistogram;
+
+//dblrand() --> dblRand()
+
+// ev. --> getEnvir()->
+
+//////////////////////
 
 
 //

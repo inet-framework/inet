@@ -74,7 +74,7 @@ void ExtInterface::initialize(int stage)
     interfaceEntry = registerInterface();
 
     // if not connected, make it gray
-    if (ev.isGUI() && !connected)
+    if (hasGUI() && !connected)
     {
         getDisplayString().setTagArg("i",1,"#707070");
         getDisplayString().setTagArg("i",2,"100");
@@ -171,7 +171,7 @@ void ExtInterface::handleMessage(cMessage *msg)
         }
     }
     delete(msg);
-    if (ev.isGUI())
+    if (hasGUI())
         updateDisplayString();
 }
 
