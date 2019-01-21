@@ -26,7 +26,7 @@ import inet.visualizer.integrated.IntegratedVisualizer;
 //
 // TODO documentation
 //
-network osgDemoHumveeShowcase
+network osgDemoRoverShowcase
 {
     parameters:
         int hosts;
@@ -52,7 +52,7 @@ network osgDemoHumveeShowcase
         physicalEnvironment: PhysicalEnvironment {
             @display("p=120,550");
         }
-        humvee[hosts]: AdhocHost {
+        rover[hosts]: AdhocHost {
             @display("p=456.365,219.9225;i=misc/truck2");
         }
 }
