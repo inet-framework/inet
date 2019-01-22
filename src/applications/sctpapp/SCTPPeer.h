@@ -18,9 +18,13 @@
 #ifndef __SCTPPEER_H_
 #define __SCTPPEER_H_
 
-#include <omnetpp.h>
+#include "INETDefs.h"
 #include "SCTPAssociation.h"
 #include "SCTPSocket.h"
+
+#ifndef RNGCONTEXT
+#error bubu
+#endif
 
 
 class INET_API SCTPPeer : public cSimpleModule, public SCTPSocket::CallbackInterface
@@ -58,7 +62,7 @@ class INET_API SCTPPeer : public cSimpleModule, public SCTPSocket::CallbackInter
         RcvdBytesPerAssoc rcvdBytesPerAssoc;
         typedef std::map<int32,cOutVector*> BytesPerAssoc;
         BytesPerAssoc bytesPerAssoc;
-        typedef std::map<int32,cDoubleHistogram*> HistEndToEndDelay;
+        typedef std::map<int32,cHistogram*> HistEndToEndDelay;
         HistEndToEndDelay histEndToEndDelay;
         typedef std::map<int32,cOutVector*> EndToEndDelay;
         EndToEndDelay endToEndDelay;

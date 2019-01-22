@@ -240,7 +240,7 @@ void SCTPServer::handleMessage(cMessage *msg)
             serverAssocStatMap[assocId].lifeTime=0;
             serverAssocStatMap[assocId].abortSent=false;
             serverAssocStatMap[assocId].peerClosed = false;
-            char text[30];
+            char text[100];
             sprintf(text, "App: Received Bytes of assoc %d",assocId);
             bytesPerAssoc[assocId] = new cOutVector(text);
             sprintf(text, "App: EndToEndDelay of assoc %d",assocId);

@@ -16,6 +16,7 @@
 //
 
 
+#include "INETDefs.h"
 #include "SCTPPeer.h"
 #include "SCTPSocket.h"
 #include "SCTPCommand_m.h"
@@ -188,14 +189,14 @@ void SCTPPeer::handleMessage(cMessage *msg)
                 outboundStreams = connectInfo->getOutboundStreams();
                 rcvdPacketsPerAssoc[serverAssocId]= (long) par("numPacketsToReceivePerClient");
                 sentPacketsPerAssoc[serverAssocId]= (long) par("numPacketsToSendPerClient");
-                char text[30];
+                char text[100];
                 sprintf(text, "App: Received Bytes of assoc %d",serverAssocId);
                 bytesPerAssoc[serverAssocId] = new cOutVector(text);
                 rcvdBytesPerAssoc[serverAssocId]= 0;
                 sprintf(text, "App: EndToEndDelay of assoc %d",serverAssocId);
                 endToEndDelay[serverAssocId] = new cOutVector(text);
                 sprintf(text, "Hist: EndToEndDelay of assoc %d",serverAssocId);
-                histEndToEndDelay[serverAssocId] = new cDoubleHistogram(text);
+                histEndToEndDelay[serverAssocId] = new cHistogram(text);
 
                 //delete connectInfo;
                 delete msg;

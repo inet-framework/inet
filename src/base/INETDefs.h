@@ -24,7 +24,9 @@
 
 #include <omnetpp.h>
 
-namespace omnetpp {}
+namespace omnetpp {
+}
+
 using namespace omnetpp;
 
 #if OMNETPP_VERSION < 0x0504
@@ -41,17 +43,16 @@ using namespace omnetpp;
 
 /////////////////////
 #define RNGCONTEXT  (cSimulation::getActiveSimulation()->getContext())->
-
-typedef unsigned short ushort;
-typedef unsigned int uint;
-typedef unsigned long ulong;
-
 #define opp_error    throw cRuntimeError
 #define longValue    intValue
 #define simulation   (*getSimulation())
 #define ev           EV
 #define info()       str()
 #define MAXTIME      SIMTIME_MAX
+
+typedef unsigned short ushort;
+typedef unsigned int uint;
+typedef unsigned long ulong;
 
 typedef uint8_t  uint8;
 typedef uint16_t uint16;
@@ -62,13 +63,12 @@ typedef int16_t int16;
 typedef int32_t int32;
 typedef int64_t int64;
 
+typedef omnetpp::cObject cPolymorphic;
+
 // ev.isDisabled()  -->  getEnvir()->isExpressMode()
 // hasGUI() --> hasGUI()
-typedef cObject cPolymorphic;
-typedef cHistogram cDoubleHistogram;
-
+// cDoubleHistogram --> cHistogram
 //dblrand() --> dblRand()
-
 // ev. --> getEnvir()->
 
 //////////////////////

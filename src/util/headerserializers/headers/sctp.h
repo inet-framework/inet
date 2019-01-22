@@ -278,7 +278,7 @@ struct heartbeat_info {
     unsigned short type;
     unsigned short length;
     union {
-      unsigned char info[];
+      unsigned char info[0];
       struct {
         unsigned int addr;
         unsigned int time;
