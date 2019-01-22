@@ -27,6 +27,7 @@
 #include "inet/common/IInterfaceRegistrationListener.h"
 #include "inet/common/INETUtils.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/StringFormat.h"
 #include "inet/linklayer/configurator/Ieee8021dInterfaceData.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
@@ -98,6 +99,31 @@ void InterfaceEntry::initialize(int stage)
             interfaceTable->addInterface(this);
         inet::registerInterface(*this, gate("upperLayerIn"), gate("upperLayerOut"));
     }
+}
+
+void InterfaceEntry::refreshDisplay() const
+{
+    auto text = StringFormat::formatString(par("displayStringTextFormat"), [&] (char directive) {
+        static std::string result;
+        switch (directive) {
+            case 'i':
+                result = std::to_string(interfaceId);
+                break;
+            case 'm':
+                result = macAddr.str();
+                break;
+            case 'n':
+                result = interfaceName;
+                break;
+            case 'a':
+                result = getNetworkAddress().str();
+                break;
+            default:
+                throw cRuntimeError("Unknown directive: %c", directive);
+        }
+        return result.c_str();
+    });
+    getDisplayString().setTagArg("t", 0, text);
 }
 
 std::string InterfaceEntry::str() const
