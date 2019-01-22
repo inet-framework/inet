@@ -48,7 +48,6 @@ using namespace omnetpp;
 #define simulation   (*getSimulation())
 #define ev           EV
 #define info()       str()
-#define MAXTIME      SIMTIME_MAX
 
 typedef unsigned short ushort;
 typedef unsigned int uint;

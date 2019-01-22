@@ -246,7 +246,7 @@ bool SCTPAssociation::process_RCV_Message(SCTPMessage*       sctpmsg,
             SCTPShutdownChunk* shutdownChunk;
             shutdownChunk = check_and_cast<SCTPShutdownChunk*>(header);
             if (shutdownChunk->getCumTsnAck()>state->lastTsnAck) {
-                simtime_t rttEstimation = MAXTIME;
+                simtime_t rttEstimation = SIMTIME_MAX;
                 dequeueAckedChunks(shutdownChunk->getCumTsnAck(),
                                          getPath(remoteAddr), rttEstimation);
                 state->lastTsnAck = shutdownChunk->getCumTsnAck();
@@ -708,7 +708,7 @@ void SCTPAssociation::tsnWasReneged(SCTPDataVariables*       chunk,
 
 SCTPEventCode SCTPAssociation::processSackArrived(SCTPSackChunk* sackChunk)
 {
-    simtime_t            rttEstimation            = MAXTIME;
+    simtime_t            rttEstimation            = SIMTIME_MAX;
     bool                     ctsnaAdvanced            = false;
     SCTPPathVariables* path                       = getPath(remoteAddr);    // Path for *this* SACK!
     const uint64         arwnd                    = sackChunk->getA_rwnd();
@@ -1157,7 +1157,7 @@ uint32 SCTPAssociation::dequeueAckedChunks(const uint32       tsna,
     uint64            sendBufferBeforeUpdate = state->sendBuffer;
 
     // Set it ridiculously high
-    rttEstimation = MAXTIME;
+    rttEstimation = SIMTIME_MAX;
 
     // Are there chunks in the retransmission queue ? If Yes -> check for dequeue.
     SCTPQueue::PayloadQueue::iterator iterator = retransmissionQ->payloadQueue.begin();
@@ -1201,7 +1201,7 @@ uint32 SCTPAssociation::dequeueAckedChunks(const uint32       tsna,
                 ackChunk(chunk);
                 if ((chunk->numberOfTransmissions == 1) && (chunk->getLastDestinationPath() == sackPath)) {
                     const simtime_t timeDifference = simTime() - chunk->sendTime;
-                    if ((timeDifference < rttEstimation) || (rttEstimation == MAXTIME)) {
+                    if ((timeDifference < rttEstimation) || (rttEstimation == SIMTIME_MAX)) {
                         rttEstimation = timeDifference;
                     }
                 }
