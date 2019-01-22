@@ -211,7 +211,7 @@ static void packet_handler(u_char *user, const struct pcap_pkthdr *hdr, const u_
     // TBD assert that it's somehow not smaller than previous event's time
     notificationMsg->setArrival(module, -1, t);
 
-    simulation.msgQueue.insert(notificationMsg);
+    simulation.getFES()->insert(notificationMsg);
 }
 #endif
 
@@ -270,14 +270,14 @@ bool cSocketRTScheduler::receiveWithTimeout()
 int32 cSocketRTScheduler::receiveUntil(const timeval& targetTime)
 {
     // wait until targetTime or a bit longer, wait in PCAP_TIMEOUT chunks
-    // in order to keep UI responsiveness by invoking ev.idle()
+    // in order to keep UI responsiveness by invoking getEnvir()->idle()
     timeval curTime;
     gettimeofday(&curTime, NULL);
     while (timeval_greater(targetTime, curTime))
     {
         if (receiveWithTimeout())
             return 1;
-        if (ev.idle())
+        if (getEnvir()->idle())
             return -1;
         gettimeofday(&curTime, NULL);
     }
@@ -287,7 +287,7 @@ int32 cSocketRTScheduler::receiveUntil(const timeval& targetTime)
 #if OMNETPP_VERSION >= 0x0500
 cEvent *cSocketRTScheduler::guessNextEvent()
 {
-    return sim->msgQueue.peekFirst();
+    return sim->getFES()->peekFirst();
 }
 cEvent *cSocketRTScheduler::takeNextEvent()
 #else
@@ -298,7 +298,7 @@ cMessage *cSocketRTScheduler::getNextEvent()
     timeval targetTime, curTime, diffTime;
 
     // calculate target time
-    cEvent *event = sim->msgQueue.peekFirst();
+    cEvent *event = sim->getFES()->peekFirst();
     if (!event)
     {
         targetTime.tv_sec = LONG_MAX;
@@ -317,7 +317,7 @@ cMessage *cSocketRTScheduler::getNextEvent()
         if (status == -1)
             return NULL; // interrupted by user
         if (status == 1)
-            event = sim->msgQueue.peekFirst(); // received something
+            event = sim->getFES()->peekFirst(); // received something
     }
     else
     {
@@ -333,7 +333,7 @@ cMessage *cSocketRTScheduler::getNextEvent()
 #if OMNETPP_VERSION >= 0x0500
 void cSocketRTScheduler::putBackEvent(cEvent *event)
 {
-    sim->msgQueue.putBackFirst(event);
+    sim->getFES()->putBackFirst(event);
 }
 #endif
 

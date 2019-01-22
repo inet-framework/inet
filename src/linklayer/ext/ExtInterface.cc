@@ -148,7 +148,7 @@ void ExtInterface::handleMessage(cMessage *msg)
         {
             struct sockaddr_in addr;
             addr.sin_family      = AF_INET;
-#if !defined(linux) && !defined(_WIN32)
+#if !defined(__linux__) && !defined(_WIN32)
             addr.sin_len         = sizeof(struct sockaddr_in);
 #endif
             addr.sin_port        = 0;
@@ -192,7 +192,7 @@ void ExtInterface::displayIdle()
 void ExtInterface::updateDisplayString()
 {
     char buf[80];
-    if (ev.disable_tracing)
+    if (getEnvir()->isExpressMode())
         getDisplayString().setTagArg("t",0,"");
     if(connected)
         sprintf(buf, "pcap device: %s\nrcv:%d snt:%d", device, numRcvd, numSent);
