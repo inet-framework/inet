@@ -23,6 +23,7 @@ import inet.linklayer.ieee80211.llc.IIeee80211Llc;
 import inet.linklayer.ieee80211.mgmt.IIeee80211Agent;
 import inet.linklayer.ieee80211.mgmt.IIeee80211Mgmt;
 import inet.linklayer.ieee80211.mib.Ieee80211Mib;
+import inet.networklayer.common.InterfaceEntry;
 import inet.physicallayer.contract.packetlevel.IRadio;
 
 //
@@ -35,13 +36,13 @@ import inet.physicallayer.contract.packetlevel.IRadio;
 //
 // A classifier is needed if you want to use QoS.
 //
-module Ieee80211Interface like IWirelessInterface
+module Ieee80211Interface extends InterfaceEntry like IWirelessInterface
 {
     parameters:
         @class(::inet::InterfaceEntry);
         string interfaceTableModule;
         string energySourceModule = default("");
-        string opMode @enum("a", "b", "g(erp)", "g(mixed)", "n(mixed-2.4Ghz)", "p", "ac") = default("g(mixed)");
+        string opMode @enum("a","b","g(erp)","g(mixed)","n(mixed-2.4Ghz)","p","ac") = default("g(mixed)");
         string address = default("auto"); // MAC address as hex string (12 hex digits), or
                                           // "auto". "auto" values will be replaced by
                                           // a generated MAC address in init stage 0.

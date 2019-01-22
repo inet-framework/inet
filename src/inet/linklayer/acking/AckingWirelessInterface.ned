@@ -21,6 +21,7 @@ package inet.linklayer.acking;
 
 import inet.common.queue.IOutputQueue;
 import inet.linklayer.contract.IWirelessInterface;
+import inet.networklayer.common.InterfaceEntry;
 import inet.physicallayer.contract.packetlevel.IRadio;
 
 //
@@ -36,7 +37,7 @@ import inet.physicallayer.contract.packetlevel.IRadio;
 //
 // This module requires an ~UnitDiskRadioMedium instance in the network.
 //
-module AckingWirelessInterface like IWirelessInterface
+module AckingWirelessInterface extends InterfaceEntry like IWirelessInterface
 {
     parameters:
         @class(InterfaceEntry);

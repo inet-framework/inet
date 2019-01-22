@@ -19,9 +19,10 @@ package inet.linklayer.common;
 
 import inet.linklayer.contract.IMacProtocol;
 import inet.linklayer.contract.IWirelessInterface;
+import inet.networklayer.common.InterfaceEntry;
 import inet.physicallayer.contract.packetlevel.IRadio;
 
-module WirelessInterface like IWirelessInterface
+module WirelessInterface extends InterfaceEntry like IWirelessInterface
 {
     parameters:
         @class(InterfaceEntry);
@@ -36,13 +37,13 @@ module WirelessInterface like IWirelessInterface
         input radioIn @labels(ISignal);
     submodules:
         classifier: <default("")> like IIeee8021dQosClassifier if typename != "" {
-                @display("p=250,100");
+            @display("p=250,100");
         }
         mac: <> like IMacProtocol {
-                @display("p=100,200");
+            @display("p=100,200");
         }
         radio: <> like IRadio if typename != "" {
-                @display("p=100,350");
+            @display("p=100,350");
         }
     connections allowunconnected:
         radioIn --> { @display("m=s"); } --> radio.radioIn if exists(radio);

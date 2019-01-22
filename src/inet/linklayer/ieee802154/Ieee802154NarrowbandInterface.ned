@@ -19,9 +19,10 @@
 package inet.linklayer.ieee802154;
 
 import inet.linklayer.contract.IWirelessInterface;
+import inet.networklayer.common.InterfaceEntry;
 import inet.physicallayer.contract.packetlevel.IRadio;
 
-module Ieee802154NarrowbandInterface like IWirelessInterface
+module Ieee802154NarrowbandInterface extends InterfaceEntry like IWirelessInterface
 {
     parameters:
         @class(InterfaceEntry);

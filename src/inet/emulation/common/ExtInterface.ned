@@ -18,17 +18,18 @@
 package inet.emulation.common;
 
 import inet.linklayer.contract.IExternalInterface;
+import inet.networklayer.common.InterfaceEntry;
 
 //
 // This module provides a base module for external network interfaces.
 //
-module ExtInterface like IExternalInterface
+module ExtInterface extends InterfaceEntry like IExternalInterface
 {
     parameters:
         string interfaceTableModule;
         string device;
         string namespace = default("");
-        string copyConfiguration @enum("", "copyToExt", "copyFromExt") = default("");
+        string copyConfiguration @enum("","copyToExt","copyFromExt") = default("");
         string address = default("auto");
         bool broadcast = default(true);
         bool multicast = default(true);

@@ -20,9 +20,10 @@ package inet.linklayer.ieee802154;
 import inet.common.queue.IOutputQueue;
 import inet.linklayer.acking.AckingMac;
 import inet.linklayer.contract.IWirelessInterface;
+import inet.networklayer.common.InterfaceEntry;
 import inet.physicallayer.contract.packetlevel.IRadio;
 
-module Ieee802154UwbIrInterface like IWirelessInterface
+module Ieee802154UwbIrInterface extends InterfaceEntry like IWirelessInterface
 {
     parameters:
         @class(InterfaceEntry);

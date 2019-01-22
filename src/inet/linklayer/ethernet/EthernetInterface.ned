@@ -23,12 +23,13 @@ import inet.linklayer.contract.IEtherMac;
 import inet.linklayer.contract.IEthernetInterface;
 import inet.linklayer.contract.ITrafficConditioner;
 import inet.linklayer.ieee8021q.IIeee8021qEncap;
+import inet.networklayer.common.InterfaceEntry;
 
 //
 // Ethernet network interface. Complements ~EtherMac and ~EtherEncap
 // with an output queue for QoS and RED support.
 //
-module EthernetInterface like IEthernetInterface
+module EthernetInterface extends InterfaceEntry like IEthernetInterface
 {
     parameters:
         @class(InterfaceEntry);

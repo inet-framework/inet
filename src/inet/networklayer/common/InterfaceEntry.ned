@@ -1,5 +1,5 @@
 //
-// Copyright (C) OpenSim Ltd.
+// Copyright (C) 2012 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -15,26 +15,11 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.linklayer.vlan;
+package inet.networklayer.common;
 
-import inet.linklayer.contract.IVlanInterface;
-import inet.networklayer.common.InterfaceEntry;
-
-module VlanInterface extends InterfaceEntry like IVlanInterface
+module InterfaceEntry
 {
     parameters:
-        string interfaceTableModule;
-        *.interfaceTableModule = default(absPath(interfaceTableModule));
-        @display("i=block/tunnel");
-        @class(InterfaceEntry);
-    gates:
-        input upperLayerIn;
-        output upperLayerOut;
-    submodules:
-        tunnel: VlanTunnel {
-            @display("p=100,100");
-        }
-    connections:
-        upperLayerIn --> tunnel.upperLayerIn;
-        upperLayerOut <-- tunnel.upperLayerOut;
+        string displayStringTextFormat = default("ifId: %i");
 }
+
