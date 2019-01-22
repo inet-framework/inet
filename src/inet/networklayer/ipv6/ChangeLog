@@ -1,3 +1,7 @@
+2019-01-14  Zoltan Bojthe
+
+	Changed Ipv6RoutingTable to delete interface routes when an interface goes down.
+
 2018-11-28  Zoltan Bojthe
 
 	Fixed compatibility for cObject::info() and cObject::detailedInfo() functions removed in omnetpp 6.0.

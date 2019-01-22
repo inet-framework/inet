@@ -1,3 +1,12 @@
+2019-01-07  Zoltan Bojthe
+
+	Added handling interface specific signals to Ipv4NodeConfigurator,
+	configure interface and add routing entries when interface goes up.
+
+2019-01-03  Levente Mészáros
+
+	Fixed memory leak in Ipv4NetworkConfigurator only present in release mode.
+
 2018-12-19  Zoltan Bojthe
 
 	Fixed memory leak in Ipv4NetworkConfigurator.

@@ -1,3 +1,14 @@
+2019-01-08  Zoltan Bojthe
+
+	Set carrier status on start/stop/crash operations.
+	Fixed initialize/startup of EtherMacBase:
+	 - WATCHes moved to initialize()
+	 - readChannelParameters() moved to handleStartOperation()
+
+2019-01-07  Zoltan Bojthe
+
+	Set interface status on start/stop/crash operations.
+
 2018-12-17  Zoltan Bojthe
 
 	Renamed several modules, classes around VLAN support.

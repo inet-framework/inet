@@ -1,3 +1,7 @@
+2019-01-08  Zoltan Bojthe
+
+	Set carrier status on start/stop/crash operations.
+
 2018-11-21  Zoltan Bojthe
 
 	Set state of InterfaceEntry in start/stop/crash operations.

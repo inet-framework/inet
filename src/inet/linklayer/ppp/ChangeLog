@@ -1,3 +1,11 @@
+2019-01-08  Zoltan Bojthe
+
+	Set carrier status on start/stop/crash operations.
+
+2019-01-07  Zoltan Bojthe
+
+	Set interface status on start/stop/crash operations.
+
 2018-12-04  Zoltan Bojthe
 
 	Added wait until queue becomes empty at stop operation.

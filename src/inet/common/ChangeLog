@@ -1,3 +1,11 @@
+2019-01-16  Rudolf Hornig
+
+	Updated version to 4.1.
+
+2019-01-10  Marcel Marek
+
+	Added TRILL and L2 IS-IS protocols to list of known protocols.
+
 2018-12-19  Zoltan Bojthe
 
 	Removed obsolete OMNeT++ 4.x related code fragments.

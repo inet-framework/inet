@@ -1,3 +1,7 @@
+2019-01-11  Zoltan Bojthe
+
+	Fixed compiler warnings: compare signed/unsigned, sprintf buffer was too short.
+
 2018-07-30  Zoltan Bojthe
 
 	PacketDump shows TcpOptions in more detail in verbose mode.

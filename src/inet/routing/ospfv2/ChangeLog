@@ -1,3 +1,7 @@
+2019-01-11  Zoltan Bojthe
+
+	Fixed iterate on vectors with delete.
+
 2018-10-02  Mani Amoozadeh
 
 	Look for the area of the loopback interface too.

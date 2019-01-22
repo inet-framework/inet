@@ -1,3 +1,7 @@
+2018-12-19  Zoltan Bojthe
+
+	Fixed memory leak.
+
 2018-12-11  Zoltan Bojthe
 
 	TcpSessionApp: using socket isOpen()

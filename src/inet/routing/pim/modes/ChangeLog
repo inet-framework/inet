@@ -1,3 +1,7 @@
+2019-01-14  Zoltan Bojthe
+
+	Fixed infinite recursion.
+
 2018-11-29  Mani Amoozadeh
 
 	Refactored code to better reflect code execution flow.
