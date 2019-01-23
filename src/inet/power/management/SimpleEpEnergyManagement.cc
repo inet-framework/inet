@@ -58,6 +58,22 @@ void SimpleEpEnergyManagement::handleMessage(cMessage *message)
         throw cRuntimeError("Unknown message");
 }
 
+void SimpleEpEnergyManagement::refreshDisplay() const
+{
+    std::string text;
+    if (std::isnan(targetCapacity.get()))
+        text = "";
+    else if (targetCapacity == nodeShutdownCapacity)
+        text = "shutdown";
+    else if (targetCapacity == nodeStartCapacity)
+        text = "start";
+    else
+        throw cRuntimeError("Invalid state");
+    if (text.length() != 0)
+        text += " in " + (lifecycleOperationTimer->getArrivalTime() - simTime()).str() + " s";
+    getDisplayString().setTagArg("t", 0, text.c_str());
+}
+
 void SimpleEpEnergyManagement::executeNodeOperation(J estimatedEnergyCapacity)
 {
     if (!std::isnan(nodeShutdownCapacity.get()) && estimatedEnergyCapacity <= nodeShutdownCapacity && nodeStatus->getState() == NodeStatus::UP) {
@@ -78,7 +94,7 @@ void SimpleEpEnergyManagement::executeNodeOperation(J estimatedEnergyCapacity)
 
 void SimpleEpEnergyManagement::scheduleLifecycleOperationTimer()
 {
-    J targetCapacity = J(NaN);
+    targetCapacity = J(NaN);
     J estimatedResidualCapacity = getEstimatedEnergyCapacity();
     W totalPower = energyStorage->getTotalPowerGeneration() - energyStorage->getTotalPowerConsumption();
     if (totalPower > W(0)) {
