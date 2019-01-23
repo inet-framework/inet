@@ -214,7 +214,7 @@ class INET_API Blackboard : public cSimpleModule
       private:
         ContentsMap::iterator it;
       public:
-        iterator(ContentsMap::iterator it0) {it==it0;}
+        iterator(ContentsMap::iterator it0) {it=it0;}
         BBItemRef operator*()  {return (*it).second;}
         iterator& operator++()  {++it; return *this;}
         iterator operator++(int)  {iterator x=iterator(it); ++it; return x;}
