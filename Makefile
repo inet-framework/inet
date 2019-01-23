@@ -11,6 +11,7 @@ cleanall: checkmakefiles
 
 makefiles:
 	cd src && opp_makemake -f --deep --make-so \
+	        -I. \
 	        -Iapplications \
 	        -Iapplications/ethernet \
 	        -Iapplications/generic \

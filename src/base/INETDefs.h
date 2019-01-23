@@ -41,6 +41,8 @@ using namespace omnetpp;
 #  define INET_API
 #endif
 
+#include "inet_features.h"
+
 /////////////////////
 #define RNGCONTEXT  (cSimulation::getActiveSimulation()->getContext())->
 #define opp_error    throw cRuntimeError

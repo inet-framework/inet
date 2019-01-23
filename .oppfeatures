@@ -1,0 +1,35 @@
+<features cppSourceRoots="src" definesFile="src/inet_features.h">
+    <feature
+        id="TCP_NSC"
+        name="TCP (NSC)"
+        description = "TCP module based on Sam Jensen's Network Simulation Cradle
+                       (NSC, http://www.wand.net.nz/~stj2/nsc) that wraps real
+                       OS stacks: Linux, FreeBSD, OpenBSD and lwIP.
+                       NSC must be downloaded and installed separately; read
+                       inet/3rdparty/README for more information."
+        initiallyEnabled = "false"
+        requires = ""
+        labels = ""
+        nedPackages = "
+                       inet.transport.tcp_nsc
+                      "
+        extraSourceFolders = ""
+        compileFlags = "-DWITH_TCP_NSC"
+        linkerFlags = ""
+        />
+    <feature
+        id="ExternalInterface"
+        name="Network emulation support"
+        description = "Support for connecting the simulation to a real network.
+                       This feature currently works on Linux systems only."
+        initiallyEnabled = "false"
+        requires = ""
+        labels = "nic"
+        nedPackages = "
+                       inet.linklayer.ext
+                      "
+        extraSourceFolders = ""
+        compileFlags = "-DWITH_EXT_IF"
+        linkerFlags = ""
+        />
+</features>
