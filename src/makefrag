@@ -11,7 +11,7 @@ ifeq ($(HAVE_PCAP),yes)
   LIBS += $(PCAP_LIBS)
 else
   # remove the HAVE_PCAP define if we do not need PCAP
-  CFLAGS := $(filter-out -DHAVE_PCAP,$(CFLAGS))
+#  CFLAGS := $(filter-out -DHAVE_PCAP,$(CFLAGS))
 endif
 
 # TCP implementaion using the Network Simulation Cradle
