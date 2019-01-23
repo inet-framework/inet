@@ -394,7 +394,7 @@ void SCTP::sendShutdownCompleteFromMain(SCTPMessage* sctpmsg, IPvXAddress srcAdd
 
 void SCTP::updateDisplayString()
 {
-//    if (getEnvir()->disableTracing)  // TODO
+    if (getEnvir()->isExpressMode())  // TODO
     {
         // in express mode, we don't bother to update the display
         // (std::map's iteration is not very fast if map is large)

@@ -35,6 +35,7 @@ bool TCP::logverbose;
 #define EPHEMERAL_PORTRANGE_START 1024
 #define EPHEMERAL_PORTRANGE_END   5000
 
+namespace tcp_old {
 static std::ostream& operator<<(std::ostream& os, const TCP::SockPair& sp)
 {
     os << "loc=" << IPvXAddress(sp.localAddr) << ":" << sp.localPort << " "
@@ -55,14 +56,15 @@ static std::ostream& operator<<(std::ostream& os, const TCPConnection& conn)
     return os;
 }
 
+} // namespace tcp_old
 
 void TCP::initialize()
 {
     lastEphemeralPort = EPHEMERAL_PORTRANGE_START;
     WATCH(lastEphemeralPort);
 
-    //WATCH_PTRMAP(tcpConnMap); //TODO
-    //WATCH_PTRMAP(tcpAppConnMap); //TODO
+    WATCH_PTRMAP(tcpConnMap);
+    WATCH_PTRMAP(tcpAppConnMap);
 
     recordStatistics = par("recordStats");
 

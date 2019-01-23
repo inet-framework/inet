@@ -291,7 +291,7 @@ inline void PrintLSAHeader(const OSPFLSAHeader& lsaHeader, std::ostream& output)
     output << endl;
 }
 
-inline std::ostream& operator<< (std::ostream& ostr, OSPFLSA& lsa)
+inline std::ostream& operator<< (std::ostream& ostr, const OSPFLSA& lsa)
 {
     PrintLSAHeader(lsa.getHeader(), ostr);
     return ostr;
