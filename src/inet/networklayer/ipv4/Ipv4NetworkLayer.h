@@ -24,6 +24,7 @@ class INET_API Ipv4NetworkLayer : public cModule
 {
   protected:
     virtual void refreshDisplay() const override;
+    virtual void updateDisplayString() const;
 };
 
 } // namespace inet

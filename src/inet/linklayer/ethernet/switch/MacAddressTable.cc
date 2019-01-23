@@ -84,6 +84,11 @@ void MacAddressTable::handleMessage(cMessage *)
 
 void MacAddressTable::refreshDisplay() const
 {
+    updateDisplayString();
+}
+
+void MacAddressTable::updateDisplayString() const
+{
     auto text = StringFormat::formatString(par("displayStringTextFormat"), [&] (char directive) {
         static std::string result;
         switch (directive) {

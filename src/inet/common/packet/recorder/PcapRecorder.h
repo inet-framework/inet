@@ -51,6 +51,7 @@ class INET_API PcapRecorder : public cSimpleModule, protected cListener
     virtual void initialize() override;
     virtual void handleMessage(cMessage *msg) override;
     virtual void refreshDisplay() const override;
+    virtual void updateDisplayString() const;
     virtual void finish() override;
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
     virtual void recordPacket(cPacket *msg, bool l2r);

@@ -103,6 +103,11 @@ void InterfaceEntry::initialize(int stage)
 
 void InterfaceEntry::refreshDisplay() const
 {
+    updateDisplayString();
+}
+
+void InterfaceEntry::updateDisplayString() const
+{
     auto text = StringFormat::formatString(par("displayStringTextFormat"), [&] (char directive) {
         static std::string result;
         switch (directive) {

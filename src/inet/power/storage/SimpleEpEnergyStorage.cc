@@ -63,6 +63,11 @@ void SimpleEpEnergyStorage::handleMessage(cMessage *message)
 
 void SimpleEpEnergyStorage::refreshDisplay() const
 {
+    updateDisplayString();
+}
+
+void SimpleEpEnergyStorage::updateDisplayString() const
+{
     auto text = StringFormat::formatString(par("displayStringTextFormat"), [&] (char directive) {
         static std::string result;
         switch (directive) {

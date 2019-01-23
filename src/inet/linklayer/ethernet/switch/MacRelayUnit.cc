@@ -54,6 +54,11 @@ void MacRelayUnit::initialize(int stage)
 void MacRelayUnit::handleLowerPacket(Packet *packet)
 {
     handleAndDispatchFrame(packet);
+    updateDisplayString();
+}
+
+void MacRelayUnit::updateDisplayString() const
+{
     auto text = StringFormat::formatString(par("displayStringTextFormat"), [&] (char directive) {
         static std::string result;
         switch (directive) {

@@ -92,6 +92,7 @@ class INET_API SimpleEpEnergyStorage : public EpEnergyStorageBase
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *message) override;
     virtual void refreshDisplay() const override;
+    virtual void updateDisplayString() const;
 
     virtual void updateTotalPowerConsumption() override;
     virtual void updateTotalPowerGeneration() override;

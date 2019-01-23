@@ -22,6 +22,11 @@ Define_Module(Ipv4NetworkLayer);
 
 void Ipv4NetworkLayer::refreshDisplay() const
 {
+    updateDisplayString();
+}
+
+void Ipv4NetworkLayer::updateDisplayString() const
+{
     auto text = StringFormat::formatString(par("displayStringTextFormat"), [&] (char directive) {
         static std::string result;
         switch (directive) {

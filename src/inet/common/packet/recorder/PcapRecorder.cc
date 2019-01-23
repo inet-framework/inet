@@ -115,6 +115,11 @@ void PcapRecorder::handleMessage(cMessage *msg)
 
 void PcapRecorder::refreshDisplay() const
 {
+    updateDisplayString();
+}
+
+void PcapRecorder::updateDisplayString() const
+{
     auto text = StringFormat::formatString(par("displayStringTextFormat"), [&] (char directive) {
         static std::string result;
         switch (directive) {

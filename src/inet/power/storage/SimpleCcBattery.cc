@@ -47,6 +47,11 @@ void SimpleCcBattery::initialize(int stage)
 
 void SimpleCcBattery::refreshDisplay() const
 {
+    updateDisplayString();
+}
+
+void SimpleCcBattery::updateDisplayString() const
+{
     auto text = StringFormat::formatString(par("displayStringTextFormat"), [&] (char directive) {
         static std::string result;
         switch (directive) {

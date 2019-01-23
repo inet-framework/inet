@@ -39,6 +39,7 @@ class INET_API MacRelayUnit : public LayeredProtocolBase
   protected:
     virtual void initialize(int stage) override;
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void updateDisplayString() const;
     /**
      * Updates address table with source address, determines output port
      * and sends out (or broadcasts) frame on ports. Includes calls to
