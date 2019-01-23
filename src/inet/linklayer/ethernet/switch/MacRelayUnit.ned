@@ -26,6 +26,7 @@ simple MacRelayUnit like IMacRelayUnit
         string macTableModule = default("^.macTable"); // The path to the MacAddressTable module
         string interfaceTableModule = default("^.interfaceTable"); // The path to the InterfaceTable module
         bool hasStp;
+        string displayStringTextFormat = default("proc: %p\ndisc: %d");
         @signal[packetSentToLower](type=cPacket);
         @signal[packetReceivedFromUpper](type=cPacket);
         @signal[packetReceivedFromLower](type=cPacket);

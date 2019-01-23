@@ -57,6 +57,7 @@ class INET_API MacAddressTable : public cSimpleModule, public IMacAddressTable
 
     virtual void initialize() override;
     virtual void handleMessage(cMessage *msg) override;
+    virtual void refreshDisplay() const override;
 
     /**
      * @brief Returns a MAC Address Table for a specified VLAN ID

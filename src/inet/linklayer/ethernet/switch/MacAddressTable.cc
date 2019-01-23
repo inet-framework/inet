@@ -16,6 +16,7 @@
 
 #include <map>
 
+#include "inet/common/StringFormat.h"
 #include "inet/linklayer/ethernet/switch/MacAddressTable.h"
 
 namespace inet {
@@ -79,6 +80,25 @@ static char *fgetline(FILE *fp)
 void MacAddressTable::handleMessage(cMessage *)
 {
     throw cRuntimeError("This module doesn't process messages");
+}
+
+void MacAddressTable::refreshDisplay() const
+{
+    auto text = StringFormat::formatString(par("displayStringTextFormat"), [&] (char directive) {
+        static std::string result;
+        switch (directive) {
+            case 'a':
+                result = addressTable ? std::to_string(addressTable->size()) : "0";
+                break;
+            case 'v':
+                result = std::to_string(vlanAddressTable.size());
+                break;
+            default:
+                throw cRuntimeError("Unknown directive: %c", directive);
+        }
+        return result.c_str();
+    });
+    getDisplayString().setTagArg("t", 0, text);
 }
 
 /*
