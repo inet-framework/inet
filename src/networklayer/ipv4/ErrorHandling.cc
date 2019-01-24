@@ -68,7 +68,7 @@ void ErrorHandling::handleMessage(cMessage *msg)
 
     delete icmpMsg;
 
-    if (ev.isGUI())
+    if (getEnvir()->isGUI())
     {
         char buf[80];
         sprintf(buf, "errors: %ld", numReceived);

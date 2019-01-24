@@ -20,7 +20,9 @@
 
 #include <iostream>
 #include <omnetpp.h>
-
+#if OMNETPP_VERSION >= 0x504
+#include "inet_features.h"
+#endif
 
 #if OMNETPP_VERSION >= 0x500
     typedef uint64_t uint64;
@@ -30,7 +32,50 @@
     typedef uint16_t uint16;
     typedef int16_t  int16;
     typedef uint8_t  uint8;
-#endif  // OMNETPP_VERSION >= 0x500
+
+#if OMNETPP_VERSION >= 0x600
+    typedef cHistogram cDoubleHistogram;
+#endif // OMNETPP_VERSION >= 0x600
+
+#if OMNETPP_VERSION >= 0x504
+#define opp_isEmpty   isEmpty
+#define opp_error throw cRuntimeError
+#define longValue    intValue
+#define simulation   (*getSimulation())
+#define ev           EV
+#define info()       str()
+#define MAXTIME      SIMTIME_MAX
+#define RNGCONTEXT  (cSimulation::getActiveSimulation()->getContext())->
+#define STR_SIMTIME(x)   SimTime::parse(x)
+    typedef cObject cPolymorphic;
+    inline long genk_intrand(int k,long r)  { return cSimulation::getActiveSimulation()->getContext()->getRNG(k)->intRand(r); }
+    inline int64_t SIMTIME_RAW(simtime_t t)  { return t.raw(); }
+#define FINGERPRINT_ADD_EXTRA_DATA(x)  { if (cFingerprintCalculator *fpc = getSimulation()->getFingerprintCalculator()) fpc->addExtraData(x); }
+#define FINGERPRINT_ADD_EXTRA_DATA2(x,y)  { if (cFingerprintCalculator *fpc = getSimulation()->getFingerprintCalculator()) fpc->addExtraData(x, y); }
+#else
+#define FINGERPRINT_ADD_EXTRA_DATA(mos)  { if (cHasher *hasher = simulation.getHasher()) hasher->add(mos); }
+#define opp_isEmpty   empty
+#define hasGui()   ev.isGui()
+#define getEnvir()   (*ev)
+#define isExpressMode() isDisabled()
+#endif  // OMNETPP_VERSION >= 0x504
+
+#endif  // OMNETPP_VERSION >= 0x600
+
+#if OMNETPP_VERSION < 0x0500
+//cClassDescriptor compatibility
+#define getFieldValueAsString(a, b, c)         getFieldAsString((a), (b), (c))
+#define getFieldProperty(a, b)                 getFieldProperty(nullptr, (a), (b))
+#define getFieldName(a)                        getFieldName(nullptr, (a))
+#define getFieldIsCObject(a)                   getFieldIsCObject(nullptr, (a))
+#define getFieldCount()                        getFieldCount(nullptr)
+#define getFieldTypeString(a)                  getFieldTypeString(nullptr, (a))
+#define getFieldIsArray(a)                     getFieldIsArray(nullptr, (a))
+#define getFieldArraySize(a, b)                getArraySize((a), (b))
+#define getFieldStructValuePointer(a, b, c)    getFieldStructPointer((a), (b), (c))
+#define getFieldTypeFlags(a)                   getFieldTypeFlags(nullptr, (a))
+#define getFieldStructName(a)                  getFieldStructName(nullptr, (a))
+#endif    // OMNETPP_VERSION < 0x0500
 
 #if OMNETPP_VERSION < 0x500
 #  define EV_FATAL  EV << "FATAL: "
@@ -58,10 +103,31 @@
 #endif
 
 #if OMNETPP_VERSION < 0x500
-#  define EVSTREAM  ev.getOStream()
+#  define EVSTREAM  getEnvir()->getOStream()
 #else
 #  define EVSTREAM  EV
 #endif  // OMNETPP_VERSION < 0x500
+
+// Around OMNeT++ 5.0 beta 3, signal listeners and result filters/recorders received
+// an extra cObject *details argument.
+#if OMNETPP_BUILDNUM >= 1005
+#define DETAILS_ARG        ,cObject *details
+#define DETAILS_ARG_NAME   ,details
+#else
+#define DETAILS_ARG
+#define DETAILS_ARG_NAME
+#endif
+
+// Around OMNeT++ 5.3, packet printers received an extra const Options *options argument.
+#if OMNETPP_VERSION >= 0x503
+#define PACKETPRINTEROPTIONS_ARG        ,const Options *options
+#define PACKETPRINTEROPTIONS_ARG_NAME   ,options
+#define PACKETPRINTEROPTIONS_ARG_NULL   ,nullptr
+#else
+#define PACKETPRINTEROPTIONS_ARG
+#define PACKETPRINTEROPTIONS_ARG_NAME
+#define PACKETPRINTEROPTIONS_ARG_NULL
+#endif
 
 #ifdef _MSC_VER
 // complementary error function, not in MSVC

@@ -49,8 +49,11 @@ class TCPSegment;
 class UDPPacket;
 #endif
 
+#if OMNETPP_VERSION < 0x0500
 //TODO HACK, remove next line
 #include "cmessageprinter.h"
+#endif
+
 
 class INET_API InetPacketPrinter : public cMessagePrinter
 {
@@ -63,7 +66,7 @@ class INET_API InetPacketPrinter : public cMessagePrinter
     InetPacketPrinter() {}
     virtual ~InetPacketPrinter() {}
     virtual int getScoreFor(cMessage *msg) const;
-    virtual void printMessage(std::ostream& os, cMessage *msg) const;
+    virtual void printMessage(std::ostream& os, cMessage *msg PACKETPRINTEROPTIONS_ARG) const;
 };
 
 Register_MessagePrinter(InetPacketPrinter);
@@ -73,7 +76,7 @@ int InetPacketPrinter::getScoreFor(cMessage *msg) const
     return msg->isPacket() ? 20 : 0;
 }
 
-void InetPacketPrinter::printMessage(std::ostream& os, cMessage *msg) const
+void InetPacketPrinter::printMessage(std::ostream& os, cMessage *msg PACKETPRINTEROPTIONS_ARG) const
 {
     IPvXAddress srcAddr, destAddr;
 
@@ -185,7 +188,7 @@ void InetPacketPrinter::printICMPPacket(std::ostream& os, IPvXAddress srcAddr, I
         case ICMP_DESTINATION_UNREACHABLE:
             os << "ICMP dest unreachable " << srcAddr << " to " << destAddr << " type=" << packet->getType() << " code=" << packet->getCode()
                << " origin: ";
-            printMessage(os, packet->getEncapsulatedPacket());
+            printMessage(os, packet->getEncapsulatedPacket() PACKETPRINTEROPTIONS_ARG_NULL);
             break;
         default:
             os << "ICMP " << srcAddr << " to " << destAddr << " type=" << packet->getType() << " code=" << packet->getCode();

@@ -24,7 +24,7 @@
 #include <set>
 #include <list>
 
-#include <omnetpp.h>
+#include "INETDefs.h"
 #include "ILifecycle.h"
 #include "LifecycleOperation.h"
 #include "mobility/single/TraCIMobility.h"

@@ -45,7 +45,7 @@ double LogNormalShadowingModel::calculateReceivedPower(double pSend, double carr
 
     // Pathloss at distance d + normal distribution
     // normal-distr. assumes std-deviation: s
-    double PL_db = PL_d0_db + 10 * pathLossAlpha * log10(distance/d0) + normal(0.0, sigma);
+    double PL_db = PL_d0_db + 10 * pathLossAlpha * log10(distance/d0) + RNGCONTEXT normal(0.0, sigma);
 
     // Reception power = Tx Power - Pathloss
     double Prx_db = (10.0 * log10(pSend)) - PL_db;

@@ -64,7 +64,7 @@ void IPvXTrafSink::handleMessage(cMessage *msg)
     }
     processPacket(check_and_cast<cPacket *>(msg));
 
-    if (ev.isGUI())
+    if (getEnvir()->isGUI())
     {
         char buf[32];
         sprintf(buf, "rcvd: %d pks", numReceived);

@@ -18,6 +18,7 @@
 
 #include "LSA.h"
 
+namespace OSPF {
 
 bool operator<(const OSPFLSAHeader& leftLSA, const OSPFLSAHeader& rightLSA)
 {
@@ -228,3 +229,6 @@ std::ostream& operator<<(std::ostream& ostr, const OSPFASExternalLSA& lsa)
     printLSAHeader(lsa.getHeader(), ostr);
     return ostr;
 }
+
+} // namespace OSPF
+

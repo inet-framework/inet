@@ -97,7 +97,7 @@ SCTPPathVariables::SCTPPathVariables(const IPvXAddress& addr, SCTPAssociation* a
 
     cmtCCGroup = 0;
     lastTransmission = simTime();
-    sendAllRandomizer = uniform(0, (1 << 31));
+    sendAllRandomizer = RNGCONTEXT uniform(0, (1 << 31));
     pseudoCumAck = 0;
     newPseudoCumAck = false;
     findPseudoCumAck = true;   // Set findPseudoCumAck to TRUE for new destination.

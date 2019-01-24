@@ -26,8 +26,11 @@
 
 
 Define_Module(RoutingTableRecorder);
-
+#if OMNETPP_VERSION >= 0x0502
+#define LL PRId64  // for eventnumber_t
+#else
 #define LL INT64_PRINTF_FORMAT  // for eventnumber_t
+#endif
 
 Register_PerRunConfigOption(CFGID_ROUTINGLOG_FILE, "routinglog-file", CFG_FILENAME, "${resultdir}/${configname}-${runnumber}.rt", "Name of the routing log file to generate.");
 
@@ -105,7 +108,7 @@ void RoutingTableRecorder::ensureRoutingLogFileOpen()
         // hack to ensure that results/ folder is created
         simulation.getSystemModule()->recordScalar("hackForCreateResultsFolder", 0);
 
-        std::string fname = ev.getConfig()->getAsFilename(CFGID_ROUTINGLOG_FILE);
+        std::string fname = getEnvir()->getConfig()->getAsFilename(CFGID_ROUTINGLOG_FILE);
         routingLogFile = fopen(fname.c_str(), "w");
         if (!routingLogFile)
             throw cRuntimeError("Cannot open file %s", fname.c_str());

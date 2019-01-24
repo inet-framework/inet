@@ -38,8 +38,10 @@ TelnetApp::~TelnetApp()
 
 int TelnetApp::checkedScheduleAt(simtime_t t, cMessage *msg)
 {
-    if (stopTime < SIMTIME_ZERO || t < stopTime)
-        return scheduleAt(t, msg);
+    if (stopTime < SIMTIME_ZERO || t < stopTime) {
+        scheduleAt(t, msg);
+        return 1;
+    }
     return 0;
 }
 

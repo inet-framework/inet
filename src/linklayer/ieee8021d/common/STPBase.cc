@@ -97,7 +97,7 @@ void STPBase::stop()
 
 void STPBase::colorLink(unsigned int i, bool forwarding)
 {
-    if (ev.isGUI() && visualize)
+    if (getEnvir()->isGUI() && visualize)
     {
         cGate *inGate = switchModule->gate("ethg$i", i);
         cGate *outGate = switchModule->gate("ethg$o", i);
@@ -135,7 +135,7 @@ void STPBase::colorLink(unsigned int i, bool forwarding)
 
 void STPBase::updateDisplay()
 {
-    if (ev.isGUI() && visualize)
+    if (getEnvir()->isGUI() && visualize)
     {
         for (unsigned int i = 0; i < numPorts; i++)
         {

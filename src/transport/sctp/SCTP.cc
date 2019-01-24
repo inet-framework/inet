@@ -326,7 +326,7 @@ void SCTP::handleMessage(cMessage *msg)
         }
         delete msg;
     }
-    if (ev.isGUI())
+    if (getEnvir()->isGUI())
         updateDisplayString();
 }
 
@@ -421,7 +421,7 @@ void SCTP::sendShutdownCompleteFromMain(SCTPMessage* sctpmsg, IPvXAddress srcAdd
 void SCTP::updateDisplayString()
 {
 #if 0
-    if (ev.disable_tracing)
+    if (getEnvir()->disable_tracing)
     {
         // in express mode, we don't bother to update the display
         // (std::map's iteration is not very fast if map is large)

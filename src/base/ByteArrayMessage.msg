@@ -28,6 +28,7 @@ class noncobject ByteArray;
 packet ByteArrayMessage
 {
     @customize(true);
+    @fieldNameSuffix("_var");
     ByteArray byteArray;
 }
 

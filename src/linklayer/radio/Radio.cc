@@ -988,7 +988,7 @@ void Radio::updateDisplayString() {
     // it should be the methods provided by propagation models, but to
     // avoid a big modification, we reuse those methods.
 
-    if (!ev.isGUI() || !drawCoverage) // nothing to do
+    if (!getEnvir()->isGUI() || !drawCoverage) // nothing to do
         return;
     if (myRadioRef) {
         cDisplayString& d = hostModule->getDisplayString();

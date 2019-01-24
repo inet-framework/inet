@@ -228,7 +228,7 @@ void UDPBasicBurst::handleMessageWhenUp(cMessage *msg)
         error("Unrecognized message (%s)%s", msg->getClassName(), msg->getName());
     }
 
-    if (ev.isGUI())
+    if (getEnvir()->isGUI())
     {
         char buf[40];
         sprintf(buf, "rcvd: %d pks\nsent: %d pks", numReceived, numSent);

@@ -23,7 +23,7 @@
 #include "IMobility.h"
 
 
-#define coreEV (ev.isDisabled()||!coreDebug) ? EV : EV << logName() << "::IdealChannelModelAccess: "
+#define coreEV (getEnvir()->isExpressMode()||!coreDebug) ? EV : EV << logName() << "::IdealChannelModelAccess: "
 
 simsignal_t IdealChannelModelAccess::mobilityStateChangedSignal = registerSignal("mobilityStateChanged");
 

@@ -18,7 +18,7 @@
 #endif
 #else
 
-#include <omnetpp.h>
+#include "INETDefs.h"
 #include "compatibility_dsr.h"
 
 class DSRPkt;

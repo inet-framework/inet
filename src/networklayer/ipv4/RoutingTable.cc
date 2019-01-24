@@ -166,7 +166,7 @@ void RoutingTable::configureRouterId()
 
 void RoutingTable::updateDisplayString()
 {
-    if (!ev.isGUI())
+    if (!getEnvir()->isGUI())
         return;
 
     char buf[80];

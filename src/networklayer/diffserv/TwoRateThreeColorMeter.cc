@@ -66,7 +66,7 @@ void TwoRateThreeColorMeter::handleMessage(cMessage *msg)
         case RED: numRed++; send(packet, "redOut"); break;
     }
 
-    if (ev.isGUI())
+    if (getEnvir()->isGUI())
     {
         char buf[80] = "";
         if (numRcvd>0) sprintf(buf+strlen(buf), "rcvd: %d ", numRcvd);

@@ -20,8 +20,10 @@
 
 #ifdef Register_MessagePrinter
 
+#if OMNETPP_VERSION < 0x0500
 //TODO HACK, remove next line
 #include "cmessageprinter.h"
+#endif
 
 class INET_API InetPacketBytesPrinter : public cMessagePrinter
 {
@@ -31,7 +33,7 @@ class INET_API InetPacketBytesPrinter : public cMessagePrinter
         InetPacketBytesPrinter() { showEncapsulatedPackets = true; }
         virtual ~InetPacketBytesPrinter() {}
         virtual int getScoreFor(cMessage *msg) const;
-        virtual void printMessage(std::ostream& os, cMessage *msg) const;
+        virtual void printMessage(std::ostream& os, cMessage *msg PACKETPRINTEROPTIONS_ARG) const;
 };
 
 Register_MessagePrinter(InetPacketBytesPrinter);
@@ -44,7 +46,7 @@ int InetPacketBytesPrinter::getScoreFor(cMessage *msg) const
     return msg->isPacket() ? 18 : 0;
 }
 
-void InetPacketBytesPrinter::printMessage(std::ostream& os, cMessage *msg) const
+void InetPacketBytesPrinter::printMessage(std::ostream& os, cMessage *msg PACKETPRINTEROPTIONS_ARG) const
 {
     std::string outs;
 

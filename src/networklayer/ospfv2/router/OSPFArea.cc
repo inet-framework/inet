@@ -1386,7 +1386,7 @@ void OSPF::Area::calculateShortestPathTree(std::vector<OSPF::RoutingTableEntry*>
     do {
         LSAType vertexType = static_cast<LSAType> (justAddedVertex->getHeader().getLsType());
 
-        if ((vertexType == ROUTERLSA_TYPE)) {
+        if (vertexType == ROUTERLSA_TYPE) {
             OSPF::RouterLSA* routerVertex = check_and_cast<OSPF::RouterLSA*> (justAddedVertex);
             if (routerVertex->getV_VirtualLinkEndpoint()) {    // (2)
                 transitCapability = true;
@@ -1489,7 +1489,7 @@ void OSPF::Area::calculateShortestPathTree(std::vector<OSPF::RoutingTableEntry*>
             }
         }
 
-        if ((vertexType == NETWORKLSA_TYPE)) {
+        if (vertexType == NETWORKLSA_TYPE) {
             OSPF::NetworkLSA* networkVertex = check_and_cast<OSPF::NetworkLSA*> (justAddedVertex);
             unsigned int routerCount = networkVertex->getAttachedRoutersArraySize();
 

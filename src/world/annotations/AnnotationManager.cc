@@ -76,7 +76,7 @@ void AnnotationManager::handleParameterChange(const char *parname)
 {
     if (parname && (std::string(parname) == "draw"))
     {
-        if (ev.isGUI() && par("draw"))
+        if (getEnvir()->isGUI() && par("draw"))
         {
             showAll();
         }
@@ -165,7 +165,7 @@ AnnotationManager::Line* AnnotationManager::drawLine(Coord p1, Coord p2, std::st
 
     annotations.push_back(l);
 
-    if (ev.isGUI() && par("draw")) show(l);
+    if (getEnvir()->isGUI() && par("draw")) show(l);
 
     return l;
 }
@@ -177,7 +177,7 @@ AnnotationManager::Polygon* AnnotationManager::drawPolygon(std::list<Coord> coor
 
     annotations.push_back(p);
 
-    if (ev.isGUI() && par("draw")) show(p);
+    if (getEnvir()->isGUI() && par("draw")) show(p);
 
     return p;
 }

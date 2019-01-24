@@ -27,7 +27,7 @@
 class INET_API MessageAgeFilter : public cObjectResultFilter
 {
     public:
-        virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object);
+        virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object DETAILS_ARG);
 };
 
 
@@ -38,7 +38,7 @@ class INET_API MessageAgeFilter : public cObjectResultFilter
 class INET_API MessageTSAgeFilter : public cObjectResultFilter
 {
     public:
-        virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object);
+        virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object DETAILS_ARG);
 };
 
 /**
@@ -47,7 +47,7 @@ class INET_API MessageTSAgeFilter : public cObjectResultFilter
 class INET_API MobilityPosFilter : public cObjectResultFilter
 {
     public:
-        virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object);
+        virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object DETAILS_ARG);
 };
 
 /**
@@ -56,7 +56,7 @@ class INET_API MobilityPosFilter : public cObjectResultFilter
 class INET_API XCoordFilter : public cObjectResultFilter
 {
     public:
-        virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object);
+        virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object DETAILS_ARG);
 };
 
 /**
@@ -65,7 +65,7 @@ class INET_API XCoordFilter : public cObjectResultFilter
 class INET_API YCoordFilter : public cObjectResultFilter
 {
     public:
-        virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object);
+        virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object DETAILS_ARG);
 };
 
 /**
@@ -74,7 +74,7 @@ class INET_API YCoordFilter : public cObjectResultFilter
 class INET_API ZCoordFilter : public cObjectResultFilter
 {
     public:
-        virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object);
+        virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object DETAILS_ARG);
 };
 
 

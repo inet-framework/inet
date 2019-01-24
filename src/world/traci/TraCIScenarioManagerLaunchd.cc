@@ -86,7 +86,11 @@ void TraCIScenarioManagerLaunchd::init_traci() {
         EV_DEBUG << "TraCI launchd reports version \"" << serverVersion << "\"" << endl;
     }
 
+#if OMNETPP_VERSION >= 0x504
+    std::string contents = launchConfig->str();
+#else
     std::string contents = launchConfig->tostr(0);
+#endif
 
     TraCIBuffer buf;
     buf << std::string("sumo-launchd.launch.xml") << contents;

@@ -17,6 +17,10 @@
 // TODO generated message class
 //
 
+cplusplus {{
+#include "INETDefs.h"
+}}
+
 class cArray;
 
 enum RTCPPacketType
@@ -32,6 +36,7 @@ packet RTCPPacket
 {
     byteLength = 4;
     @customize(true);  // see the generated C++ header for more info
+    @fieldNameSuffix("_var");
     int8 version = 2;
     bool padding = 0;
     short count = 0;
@@ -43,5 +48,6 @@ packet RTCPCompoundPacket
 {
     byteLength = 0;
     @customize(true);  // see the generated C++ header for more info
+    @fieldNameSuffix("_var");
     cArray rtcpPackets;
 }

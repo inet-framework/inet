@@ -55,7 +55,7 @@ void TCPDump::initialize()
 
 void TCPDump::handleMessage(cMessage *msg)
 {
-    if (!ev.isDisabled() && msg->isPacket())
+    if (!getEnvir()->isExpressMode() && msg->isPacket())
     {
         bool l2r = msg->arrivedOn("hlIn");
         tcpdump.dumpPacket(l2r, PK(msg));

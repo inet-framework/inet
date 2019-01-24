@@ -102,6 +102,7 @@ enum TCPOptionNumbers
 class Sack
 {
     @customize(true);
+    @fieldNameSuffix("_var");
     unsigned int start;     // start seq no. of sack block
     unsigned int end;       // end seq no. of sack block
 }
@@ -109,6 +110,7 @@ class Sack
 // Header Options (optional):
 class TCPOption
 {
+    @fieldNameSuffix("_var");
     unsigned short kind @enum(TCPOptionNumbers) = TCPOPTION_END_OF_OPTION_LIST;  // option kind
     unsigned short length = 1;                          // option length
     unsigned int values[];                              // option value(s)
@@ -131,6 +133,8 @@ class TCPOption
 packet TCPSegment
 {
     @customize(true);
+    @fieldNameSuffix("_var");
+
     // Source Port
     unsigned short srcPort;
 

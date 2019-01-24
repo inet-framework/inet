@@ -80,7 +80,7 @@ class INET_API TCPSACKRexmitQueue
     /**
      * Prints the current rexmitQueue status for debug purposes.
      */
-    virtual void info() const;
+    virtual void qInfo() const;
 
     /**
      * Returns the sequence number of the first byte stored in the buffer.

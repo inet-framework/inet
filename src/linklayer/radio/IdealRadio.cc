@@ -78,7 +78,7 @@ void IdealRadio::initialize(int stage)
         emit(radioStateSignal, rs);
 
         // draw the interference distance
-        if (ev.isGUI() && drawCoverage)
+        if (getEnvir()->isGUI() && drawCoverage)
             updateDisplayString();
     }
 }

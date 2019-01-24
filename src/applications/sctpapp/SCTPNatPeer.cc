@@ -481,7 +481,7 @@ void SCTPNatPeer::handleMessage(cMessage *msg)
     }
     }
 
-    if (ev.isGUI())
+    if (getEnvir()->isGUI())
     {
         char buf[32];
         RcvdBytesPerAssoc::iterator l = rcvdBytesPerAssoc.find(id);
@@ -659,7 +659,7 @@ void SCTPNatPeer::socketStatusArrived(int32 assocId, void *yourPtr, SCTPStatusIn
 
 void SCTPNatPeer::setStatusString(const char *s)
 {
-    if (ev.isGUI()) getDisplayString().setTagArg("t", 0, s);
+    if (getEnvir()->isGUI()) getDisplayString().setTagArg("t", 0, s);
 }
 
 void SCTPNatPeer::sendRequest(bool last)

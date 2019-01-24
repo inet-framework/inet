@@ -42,6 +42,12 @@ timeval cSocketRTScheduler::baseTime;
 
 Register_Class(cSocketRTScheduler);
 
+#if OMNETPP_BUILDNUM <= 1003
+#define FES(sim) (&sim->msgQueue)
+#else
+#define FES(sim) (sim->getFES())
+#endif
+
 inline std::ostream& operator<<(std::ostream& out, const timeval& tv)
 {
     return out << (uint32)tv.tv_sec << "s" << tv.tv_usec << "us";
@@ -261,14 +267,14 @@ bool cSocketRTScheduler::receiveWithTimeout()
 int32 cSocketRTScheduler::receiveUntil(const timeval& targetTime)
 {
     // wait until targetTime or a bit longer, wait in PCAP_TIMEOUT chunks
-    // in order to keep UI responsiveness by invoking ev.idle()
+    // in order to keep UI responsiveness by invoking getEnvir()->idle()
     timeval curTime;
     gettimeofday(&curTime, NULL);
     while (timeval_greater(targetTime, curTime))
     {
         if (receiveWithTimeout())
             return 1;
-        if (ev.idle())
+        if (getEnvir()->idle())
             return -1;
         gettimeofday(&curTime, NULL);
     }
@@ -278,7 +284,7 @@ int32 cSocketRTScheduler::receiveUntil(const timeval& targetTime)
 #if OMNETPP_VERSION >= 0x0500
 cEvent *cSocketRTScheduler::guessNextEvent()
 {
-    return sim->msgQueue.peekFirst();
+    return FES(sim)->peekFirst();
 }
 cEvent *cSocketRTScheduler::takeNextEvent()
 #else
@@ -289,7 +295,7 @@ cMessage *cSocketRTScheduler::getNextEvent()
     timeval targetTime, curTime, diffTime;
 
     // calculate target time
-    cEvent *event = sim->msgQueue.peekFirst();
+    cEvent *event = FES(sim)->peekFirst();
     if (!event)
     {
         targetTime.tv_sec = LONG_MAX;
@@ -308,7 +314,7 @@ cMessage *cSocketRTScheduler::getNextEvent()
         if (status == -1)
             return NULL; // interrupted by user
         if (status == 1)
-            event = sim->msgQueue.peekFirst(); // received something
+            event = FES(sim)->peekFirst(); // received something
     }
     else
     {
@@ -317,7 +323,7 @@ cMessage *cSocketRTScheduler::getNextEvent()
         diffTime = timeval_substract(curTime, targetTime);
         EV << "We are behind: " << diffTime.tv_sec + diffTime.tv_usec * 1e-6 << " seconds\n";
     }
-    cEvent *tmp = sim->msgQueue.removeFirst();
+    cEvent *tmp = FES(sim)->removeFirst();
     ASSERT(tmp == event);
     return event;
 }
@@ -326,7 +332,7 @@ cMessage *cSocketRTScheduler::getNextEvent()
 #if OMNETPP_VERSION >= 0x0500
 void cSocketRTScheduler::putBackEvent(cEvent *event)
 {
-    sim->msgQueue.putBackFirst(event);
+    FES(sim)->putBackFirst(event);
 }
 #endif
 

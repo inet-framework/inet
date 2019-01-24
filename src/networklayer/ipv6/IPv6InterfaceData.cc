@@ -452,12 +452,12 @@ void IPv6InterfaceData::removeAdvPrefix(int i)
 simtime_t IPv6InterfaceData::generateReachableTime(double MIN_RANDOM_FACTOR,
     double MAX_RANDOM_FACTOR, uint baseReachableTime)
 {
-    return uniform(MIN_RANDOM_FACTOR, MAX_RANDOM_FACTOR) * baseReachableTime;
+    return RNGCONTEXT uniform(MIN_RANDOM_FACTOR, MAX_RANDOM_FACTOR) * baseReachableTime;
 }
 
 simtime_t IPv6InterfaceData::generateReachableTime()
 {
-    return uniform(_getMinRandomFactor(), _getMaxRandomFactor()) * getBaseReachableTime();
+    return RNGCONTEXT uniform(_getMinRandomFactor(), _getMaxRandomFactor()) * getBaseReachableTime();
 }
 
 bool IPv6InterfaceData::isMemberOfMulticastGroup(const IPv6Address &multicastAddress) const
@@ -491,8 +491,8 @@ void IPv6InterfaceData::joinMulticastGroup(const IPv6Address& multicastAddress)
 
     if(!nb)
         nb = NotificationBoardAccess().get();
-    IPv6MulticastGroupInfo info(ownerp, multicastAddress);
-    nb->fireChangeNotification(NF_IPv6_MCAST_JOIN, &info);
+    IPv6MulticastGroupInfo inform(ownerp, multicastAddress);
+    nb->fireChangeNotification(NF_IPv6_MCAST_JOIN, &inform);
 }
 
 void IPv6InterfaceData::leaveMulticastGroup(const IPv6Address& multicastAddress)
@@ -515,8 +515,8 @@ void IPv6InterfaceData::leaveMulticastGroup(const IPv6Address& multicastAddress)
 
                 if (!nb)
                     nb = NotificationBoardAccess().get();
-                IPv6MulticastGroupInfo info(ownerp, multicastAddress);
-                nb->fireChangeNotification(NF_IPv6_MCAST_LEAVE, &info);
+                IPv6MulticastGroupInfo inform(ownerp, multicastAddress);
+                nb->fireChangeNotification(NF_IPv6_MCAST_LEAVE, &inform);
             }
         }
     }

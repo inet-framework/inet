@@ -58,6 +58,7 @@ enum RTP_INP_TYPE
 packet RTPInnerPacket
 {
     @customize(true);  // see the generated C++ header for more info
+    @fieldNameSuffix("_var");
 
     // The type of this ~RTPInnerPacket.
     short type @enum(RTP_INP_TYPE) = RTP_INP_UNDEF;

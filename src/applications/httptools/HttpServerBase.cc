@@ -178,7 +178,7 @@ void HttpServerBase::finish()
 
 void HttpServerBase::updateDisplay()
 {
-    if (ev.isGUI())
+    if (getEnvir()->isGUI())
     {
         char buf[1024];
         sprintf(buf, "%ld", htmlDocsServed);

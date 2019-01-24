@@ -76,6 +76,7 @@ class BGPUpdatePathAttributeList
 packet BGPUpdateMessage extends BGPHeader
 {
     @customize(true);
+    @fieldNameSuffix("_var");
     type = BGP_UPDATE;
     byteLength = BGP_HEADER_OCTETS + BGP_EMPTY_UPDATE_OCTETS;
 

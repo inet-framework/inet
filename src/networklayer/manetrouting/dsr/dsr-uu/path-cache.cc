@@ -377,7 +377,7 @@ struct dsr_srt *NSCLASS ph_srt_find(struct in_addr src,struct in_addr dst,int cr
     aux +=size_cost;
     srt->addrs=(struct in_addr*)(aux);
 
-    if (vector_cost<=0)
+    if (vector_cost == NULL)
     {
         srt->cost=NULL;
         srt->cost_size=0;

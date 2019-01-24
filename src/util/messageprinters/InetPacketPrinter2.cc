@@ -76,8 +76,11 @@ class RIPPacket;
 class AirFrame;
 #endif
 
+#if OMNETPP_VERSION < 0x0500
 //TODO HACK, remove next line
 #include "cmessageprinter.h"
+#endif
+
 
 class INET_API InetPacketPrinter2 : public cMessagePrinter
 {
@@ -98,7 +101,7 @@ class INET_API InetPacketPrinter2 : public cMessagePrinter
         InetPacketPrinter2() { showEncapsulatedPackets = true; }
         virtual ~InetPacketPrinter2() {}
         virtual int getScoreFor(cMessage *msg) const;
-        virtual void printMessage(std::ostream& os, cMessage *msg) const;
+        virtual void printMessage(std::ostream& os, cMessage *msg PACKETPRINTEROPTIONS_ARG) const;
 };
 
 Register_MessagePrinter(InetPacketPrinter2);
@@ -111,7 +114,7 @@ int InetPacketPrinter2::getScoreFor(cMessage *msg) const
     return msg->isPacket() ? 21 : 0;
 }
 
-void InetPacketPrinter2::printMessage(std::ostream& os, cMessage *msg) const
+void InetPacketPrinter2::printMessage(std::ostream& os, cMessage *msg PACKETPRINTEROPTIONS_ARG) const
 {
     std::string outs;
 
@@ -385,7 +388,7 @@ std::string InetPacketPrinter2::formatICMPPacket(ICMPMessage *packet) const
         case ICMP_DESTINATION_UNREACHABLE:
             os << "ICMP dest unreachable " << srcAddr << " to " << destAddr << " type=" << packet->getType() << " code=" << packet->getCode()
                << " origin:" << INFO_SEPAR;
-            InetPacketPrinter2().printMessage(os, packet->getEncapsulatedPacket());
+            InetPacketPrinter2().printMessage(os, packet->getEncapsulatedPacket() PACKETPRINTEROPTIONS_ARG_NULL);
             showEncapsulatedPackets = false; // stop printing
             break;
         default:

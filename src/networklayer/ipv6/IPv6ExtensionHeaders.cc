@@ -21,5 +21,5 @@
 void IPv6RoutingHeader::setAddressArraySize(unsigned int size)
 {
     IPv6RoutingHeader_Base::setAddressArraySize(size);
-    byteLength_var = 8 + 16 * size;
+    setByteLength(8 + 16 * size);
 }

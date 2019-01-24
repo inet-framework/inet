@@ -28,7 +28,7 @@
 #include "NotifierConsts.h"
 
 #ifndef EV
-#define EV (ev.isDisabled()||!debug) ? (std::ostream&)ev : EV << logName() << "::" << getClassName() << ": "
+#define EV (getEnvir()->isExpressMode()||!debug) ? (std::ostream&)ev : EV << logName() << "::" << getClassName() << ": "
 #endif
 
 

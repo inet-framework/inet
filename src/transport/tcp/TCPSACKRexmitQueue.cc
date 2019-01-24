@@ -46,7 +46,7 @@ std::string TCPSACKRexmitQueue::str() const
     return out.str();
 }
 
-void TCPSACKRexmitQueue::info() const
+void TCPSACKRexmitQueue::qInfo() const
 {
     tcpEV << str() << endl;
 

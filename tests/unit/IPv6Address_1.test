@@ -10,7 +10,7 @@ static void parseAddr(const char *s)
     IPv6Address a(s);
     uint32 *d = a.words();
     ev << s << " --> " << a.str() << " (";
-    ev.printf("%x-%x-%x-%x", d[0],d[1],d[2],d[3]);
+    getEnvir()->printf("%x-%x-%x-%x", d[0],d[1],d[2],d[3]);
     ev << ")\n";
 }
 

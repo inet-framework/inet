@@ -30,6 +30,7 @@ packet RTCPReceiverReportPacket extends RTCPPacket
 {
     packetType = RTCP_PT_RR;
     @customize(true);  // see the generated C++ header for more info
+    @fieldNameSuffix("_var");
     uint32 ssrc = 0;
     cArray receptionReports;
 }
@@ -38,6 +39,7 @@ packet RTCPSDESPacket extends RTCPPacket
 {
     packetType = RTCP_PT_SDES;
     @customize(true);  // see the generated C++ header for more info
+    @fieldNameSuffix("_var");
     cArray sdesChunks;
 }
 
@@ -46,5 +48,6 @@ packet RTCPByePacket extends RTCPPacket
     packetType = RTCP_PT_BYE;
     count = 1;
     @customize(true);  // see the generated C++ header for more info
+    @fieldNameSuffix("_var");
     uint32 ssrc = 0;
 }

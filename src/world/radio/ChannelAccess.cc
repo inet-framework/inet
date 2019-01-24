@@ -19,7 +19,7 @@
 #include "ChannelAccess.h"
 #include "IMobility.h"
 
-#define coreEV (ev.isDisabled()||!coreDebug) ? EV : EV << logName() << "::ChannelAccess: "
+#define coreEV (getEnvir()->isExpressMode()||!coreDebug) ? EV : EV << logName() << "::ChannelAccess: "
 
 simsignal_t ChannelAccess::mobilityStateChangedSignal = registerSignal("mobilityStateChanged");
 
@@ -91,7 +91,11 @@ void ChannelAccess::initialize(int stage)
 
 IChannelControl *ChannelAccess::getChannelControl()
 {
+#if OMNETPP_VERSION >= 0x500
+    IChannelControl *cc = dynamic_cast<IChannelControl *>(cSimulation::getActiveSimulation()->getSystemModule()->getModuleByPath("channelControl"));
+#else
     IChannelControl *cc = dynamic_cast<IChannelControl *>(simulation.getModuleByPath("channelControl"));
+#endif
     if (!cc)
         throw cRuntimeError("Could not find ChannelControl module with name 'channelControl' in the toplevel network.");
     return cc;

@@ -25,6 +25,7 @@ cplusplus {{
 class ByteArray
 {
     @customize(true);
+    @fieldNameSuffix("_var");
     char data[];
 }
 

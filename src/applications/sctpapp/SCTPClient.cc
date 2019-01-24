@@ -204,7 +204,7 @@ void SCTPClient::close()
 
 void SCTPClient::setStatusString(const char *s)
 {
-    if (ev.isGUI())
+    if (getEnvir()->isGUI())
         getDisplayString().setTagArg("t", 0, s);
 }
 

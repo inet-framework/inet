@@ -17,7 +17,6 @@
 
 cplusplus {{
 #include "IPv4Address.h"
-#include "simtime_t.h"
 }}
 
 class noncobject IPv4Address;

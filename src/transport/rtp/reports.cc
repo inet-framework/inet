@@ -35,11 +35,11 @@ std::string SenderReport::info() const
 
 void SenderReport::dump(std::ostream& os) const
 {
-    os << "SenderReport:" << endl;
-    os << "  ntpTimeStamp = " << NTPTimeStamp_var << endl;
-    os << "  rtpTimeStamp = " << RTPTimeStamp_var << endl;
-    os << "  packetCount = " << packetCount_var << endl;
-    os << "  byteCount = " << byteCount_var << endl;
+    os << "SenderReport:" << std::endl;
+    os << "  ntpTimeStamp = " << NTPTimeStamp_var << std::endl;
+    os << "  rtpTimeStamp = " << RTPTimeStamp_var << std::endl;
+    os << "  packetCount = " << packetCount_var << std::endl;
+    os << "  byteCount = " << byteCount_var << std::endl;
 }
 
 
@@ -58,12 +58,12 @@ std::string ReceptionReport::info() const
 
 void ReceptionReport::dump(std::ostream& os) const
 {
-    os << "ReceptionReport:" << endl;
-    os << "  ssrc = " << ssrc_var << endl;
-    os << "  fractionLost = " << (int)fractionLost_var << endl;
-    os << "  packetsLostCumulative = " << packetsLostCumulative_var << endl;
-    os << "  extendedHighestSequenceNumber = " << sequenceNumber_var << endl;
-    os << "  jitter = " << jitter_var << endl;
-    os << "  lastSR = " << lastSR_var << endl;
-    os << "  delaySinceLastSR = " << delaySinceLastSR_var << endl;
+    os << "ReceptionReport:" << std::endl;
+    os << "  ssrc = " << ssrc_var << std::endl;
+    os << "  fractionLost = " << (int)fractionLost_var << std::endl;
+    os << "  packetsLostCumulative = " << packetsLostCumulative_var << std::endl;
+    os << "  extendedHighestSequenceNumber = " << sequenceNumber_var << std::endl;
+    os << "  jitter = " << jitter_var << std::endl;
+    os << "  lastSR = " << lastSR_var << std::endl;
+    os << "  delaySinceLastSR = " << delaySinceLastSR_var << std::endl;
 }

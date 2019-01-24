@@ -38,16 +38,12 @@ double RiceModel::calculateReceivedPower(double pSend, double carrierFrequency, 
 {
     double waveLength = SPEED_OF_LIGHT / carrierFrequency;
     double c = 1.0/(2.0*(K+1));
-    double x = normal(0, 1);
-    double y = normal(0, 1);
+    double x = RNGCONTEXT normal(0, 1);
+    double y = RNGCONTEXT normal(0, 1);
     double rr = c*( (x + sqrt(2*K))*(x + sqrt(2*K)) + y*y);
     double prec = freeSpace(Gt, Gr, L, pSend, waveLength, distance, pathLossAlpha) * rr;
     if (prec > pSend)
         prec = pSend;
     return prec;
-
-
 }
-
-
 

@@ -23,10 +23,16 @@
 //
 
 #include <omnetpp.h>
+
+#include "inet_features.h"
+
+namespace omnetpp {}
+using namespace omnetpp;
+
 #include "Compat.h"
 
-#if OMNETPP_VERSION < 0x0403
-#  error At least OMNeT++/OMNEST version 4.3 required
+#if OMNETPP_VERSION < 0x0504
+#  error At least OMNeT++/OMNEST version 5.4 required
 #endif
 
 #define INET_VERSION  0x0206

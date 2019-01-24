@@ -181,7 +181,7 @@ void ARP::handleMessage(cMessage *msg)
         processARPPacket(arp);
     }
 
-    if (ev.isGUI())
+    if (getEnvir()->isGUI())
         updateDisplayString();
 }
 

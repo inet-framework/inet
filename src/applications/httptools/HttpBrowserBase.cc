@@ -332,24 +332,24 @@ void HttpBrowserBase::handleDataMessage(cMessage *msg)
                 else
                     EV_DEBUG << appmsg->getName() << " has no referenced resources. No GETs will be issued in parsing" << endl;
                 htmlReceived++;
-                if (ev.isGUI())
+                if (getEnvir()->isGUI())
                     bubble("Received a HTML document");
                 break;
             case CT_TEXT:
                 EV_INFO << "Text resource received: " << appmsg->getName() << "'. Size is " << appmsg->getByteLength() << " bytes and serial " << serial << endl;
                 textResourcesReceived++;
-                if (ev.isGUI())
+                if (getEnvir()->isGUI())
                     bubble("Received a text resource");
                 break;
             case CT_IMAGE:
                 EV_INFO << "Image resource received: " << appmsg->getName() << "'. Size is " << appmsg->getByteLength() << " bytes and serial " << serial << endl;
                 imgResourcesReceived++;
-                if (ev.isGUI())
+                if (getEnvir()->isGUI())
                     bubble("Received an image resource");
                 break;
             case CT_UNKNOWN:
                 EV_DEBUG << "UNKNOWN RESOURCE TYPE RECEIVED: " << (HttpContentType)appmsg->contentType() << endl;
-                if (ev.isGUI())
+                if (getEnvir()->isGUI())
                     bubble("Received an unknown resource type");
                 break;
         }

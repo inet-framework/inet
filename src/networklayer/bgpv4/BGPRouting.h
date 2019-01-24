@@ -60,7 +60,7 @@ protected:
 
     friend class BGPSession;
     //functions used by the BGPSession class
-    int             getScheduleAt(simtime_t t, cMessage* msg)   { return scheduleAt(t, msg);}
+    int             getScheduleAt(simtime_t t, cMessage* msg)   { scheduleAt(t, msg); return 1; }
     simtime_t       getSimTime()                                { return simTime();}
     void            getCancelAndDelete(cMessage* msg)           { return cancelAndDelete(msg);}
     cMessage*       getCancelEvent(cMessage* msg)               { return cancelEvent(msg);}

@@ -35,7 +35,7 @@ void TCPTesterBase::initialize()
 
 void TCPTesterBase::dump(TCPSegment *seg, bool fromA, const char *comment)
 {
-    if (ev.isDisabled()) return;
+    if (getEnvir()->isExpressMode()) return;
 
     char lbl[32];
     sprintf(lbl," %c%03d", fromA ? 'A' : 'B', fromA ? fromASeq : fromBSeq);

@@ -172,7 +172,7 @@ void UDP::handleMessage(cMessage *msg)
             processCommandFromApp(msg);
     }
 
-    if (ev.isGUI())
+    if (getEnvir()->isGUI())
         updateDisplayString();
 }
 

@@ -33,7 +33,7 @@ UDPSocket::UDPSocket()
 
 int UDPSocket::generateSocketId()
 {
-    return ev.getUniqueNumber();
+    return getEnvir()->getUniqueNumber();
 }
 
 void UDPSocket::sendToUDP(cMessage *msg)

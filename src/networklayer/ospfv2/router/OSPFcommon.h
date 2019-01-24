@@ -145,6 +145,25 @@ const IPv4Address           NULL_IPV4ADDRESS(0, 0, 0, 0);
 const IPv4AddressRange      NULL_IPV4ADDRESSRANGE(IPv4Address(0, 0, 0, 0), IPv4Address(0, 0, 0, 0));
 const DesignatedRouterID    NULL_DESIGNATEDROUTERID = { IPv4Address(0, 0, 0, 0), IPv4Address(0, 0, 0, 0)};
 
+inline bool operator==(OSPF::DesignatedRouterID leftID, OSPF::DesignatedRouterID rightID)
+{
+    return (leftID.routerID == rightID.routerID &&
+            leftID.ipInterfaceAddress == rightID.ipInterfaceAddress);
+}
+
+inline bool operator!=(OSPF::DesignatedRouterID leftID, OSPF::DesignatedRouterID rightID)
+{
+    return (!(leftID == rightID));
+}
+
+inline bool OSPF::LSAKeyType_Less::operator() (OSPF::LSAKeyType leftKey, OSPF::LSAKeyType rightKey) const
+{
+    return ((leftKey.linkStateID < rightKey.linkStateID) ||
+            ((leftKey.linkStateID == rightKey.linkStateID) &&
+             (leftKey.advertisingRouter < rightKey.advertisingRouter)));
+}
+
+
 } // namespace OSPF
 
 inline IPv4Address operator&(IPv4Address address, IPv4Address mask)
@@ -164,24 +183,6 @@ inline IPv4Address operator|(IPv4Address address, IPv4Address match)
 inline bool isSameNetwork(IPv4Address address1, IPv4Address mask1, IPv4Address address2, IPv4Address mask2)
 {
     return (mask1 == mask2) && ((address1 & mask1) == (address2 & mask2));
-}
-
-inline bool operator==(OSPF::DesignatedRouterID leftID, OSPF::DesignatedRouterID rightID)
-{
-    return (leftID.routerID == rightID.routerID &&
-            leftID.ipInterfaceAddress == rightID.ipInterfaceAddress);
-}
-
-inline bool operator!=(OSPF::DesignatedRouterID leftID, OSPF::DesignatedRouterID rightID)
-{
-    return (!(leftID == rightID));
-}
-
-inline bool OSPF::LSAKeyType_Less::operator() (OSPF::LSAKeyType leftKey, OSPF::LSAKeyType rightKey) const
-{
-    return ((leftKey.linkStateID < rightKey.linkStateID) ||
-            ((leftKey.linkStateID == rightKey.linkStateID) &&
-             (leftKey.advertisingRouter < rightKey.advertisingRouter)));
 }
 
 inline IPv4Address ipv4AddressFromAddressString(const char* charForm)

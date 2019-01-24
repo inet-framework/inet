@@ -101,7 +101,7 @@ void Loopback::handleMessage(cMessage *msg)
     numSent++;
     send(msg, "netwOut");
 
-    if (ev.isGUI())
+    if (getEnvir()->isGUI())
         updateDisplayString();
 }
 
@@ -122,7 +122,7 @@ bool Loopback::isUpperMsg(cMessage *msg)
 
 void Loopback::updateDisplayString()
 {
-    if (ev.isDisabled())
+    if (getEnvir()->isExpressMode())
     {
         // speed up things
         getDisplayString().setTagArg("t", 0, "");

@@ -113,7 +113,7 @@ void PPP::initialize(int stage)
     else if (stage == 3)
     {
         // display string stuff
-        if (ev.isGUI())
+        if (getEnvir()->isGUI())
         {
             if (datarateChannel)    // not NULL if connected
             {
@@ -229,7 +229,7 @@ void PPP::refreshOutGateConnection(bool connected)
     if (datarateChannel && !oldChannel)
         datarateChannel->subscribe(POST_MODEL_CHANGE, this);
 
-    if (ev.isGUI())
+    if (getEnvir()->isGUI())
     {
         if (connected)
         {
@@ -262,7 +262,7 @@ void PPP::startTransmitting(cPacket *msg)
     delete msg->removeControlInfo();
     PPPFrame *pppFrame = encapsulate(msg);
 
-    if (ev.isGUI())
+    if (getEnvir()->isGUI())
         displayBusy();
 
     // fire notification
@@ -297,7 +297,7 @@ void PPP::handleMessage(cMessage *msg)
         EV << "Transmission finished.\n";
         emit(txStateSignal, 0L);
 
-        if (ev.isGUI())
+        if (getEnvir()->isGUI())
             displayIdle();
 
         // fire notification
@@ -365,7 +365,7 @@ void PPP::handleMessage(cMessage *msg)
                 // We are currently busy, so just queue up the packet.
                 EV << "Received " << msg << " for transmission but transmitter busy, queueing.\n";
 
-                if (ev.isGUI() && txQueue.length() >= 3)
+                if (getEnvir()->isGUI() && txQueue.length() >= 3)
                     getDisplayString().setTagArg("i", 1, "red");
 
                 if (txQueueLimit && txQueue.length() > txQueueLimit)
@@ -385,7 +385,7 @@ void PPP::handleMessage(cMessage *msg)
         }
     }
 
-    if (ev.isGUI())
+    if (getEnvir()->isGUI())
         updateDisplayString();
 }
 
@@ -409,7 +409,7 @@ void PPP::displayIdle()
 
 void PPP::updateDisplayString()
 {
-    if (ev.isDisabled())
+    if (getEnvir()->isExpressMode())
     {
         // speed up things
         getDisplayString().setTagArg("t", 0, "");

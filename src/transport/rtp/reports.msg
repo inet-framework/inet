@@ -14,6 +14,7 @@
 class SenderReport
 {
     @customize(true);
+    @fieldNameSuffix("_var");
 
     // The ntp time stamp.
     uint64 NTPTimeStamp;
@@ -35,6 +36,7 @@ class SenderReport
 class ReceptionReport
 {
     @customize(true);
+    @fieldNameSuffix("_var");
 
     // The ssrc identifier of the sender this ~ReceptionReport is for.
     uint32 ssrc;
@@ -58,3 +60,4 @@ class ReceptionReport
     // received in units of 1/65536 seconds.
     int delaySinceLastSR;
 };
+

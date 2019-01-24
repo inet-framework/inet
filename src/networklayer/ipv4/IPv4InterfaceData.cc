@@ -148,8 +148,8 @@ void IPv4InterfaceData::joinMulticastGroup(const IPv4Address& multicastAddress)
 
     if (!nb)
         nb = NotificationBoardAccess().get();
-    IPv4MulticastGroupInfo info(ownerp, multicastAddress);
-    nb->fireChangeNotification(NF_IPv4_MCAST_JOIN, &info);
+    IPv4MulticastGroupInfo inform(ownerp, multicastAddress);
+    nb->fireChangeNotification(NF_IPv4_MCAST_JOIN, &inform);
 }
 
 void IPv4InterfaceData::leaveMulticastGroup(const IPv4Address& multicastAddress)
@@ -172,8 +172,8 @@ void IPv4InterfaceData::leaveMulticastGroup(const IPv4Address& multicastAddress)
 
                 if (!nb)
                     nb = NotificationBoardAccess().get();
-                IPv4MulticastGroupInfo info(ownerp, multicastAddress);
-                nb->fireChangeNotification(NF_IPv4_MCAST_LEAVE, &info);
+                IPv4MulticastGroupInfo inform(ownerp, multicastAddress);
+                nb->fireChangeNotification(NF_IPv4_MCAST_LEAVE, &inform);
             }
         }
     }

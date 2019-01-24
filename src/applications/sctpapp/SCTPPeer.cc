@@ -469,7 +469,7 @@ void SCTPPeer::handleMessage(cMessage *msg)
             break;
     }
 
-    if (ev.isGUI())
+    if (getEnvir()->isGUI())
     {
         char buf[32];
         RcvdBytesPerAssoc::iterator l = rcvdBytesPerAssoc.find(id);
@@ -587,7 +587,7 @@ void SCTPPeer::socketStatusArrived(int32 assocId, void *yourPtr, SCTPStatusInfo 
 
 void SCTPPeer::setStatusString(const char *s)
 {
-    if (ev.isGUI()) getDisplayString().setTagArg("t", 0, s);
+    if (getEnvir()->isGUI()) getDisplayString().setTagArg("t", 0, s);
 }
 
 void SCTPPeer::sendRequest(bool last)

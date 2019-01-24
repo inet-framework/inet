@@ -128,7 +128,7 @@ void PcapRecorder::receiveSignal(cComponent *source, simsignal_t signalID, cObje
 
 void PcapRecorder::recordPacket(cPacket *msg, bool l2r)
 {
-    if (!ev.isDisabled())
+    if (!getEnvir()->isExpressMode())
     {
         EV << "PcapRecorder::recordPacket(" << msg->getFullPath() << ", " << l2r << ")\n";
         packetDumper.dumpPacket(l2r, msg);

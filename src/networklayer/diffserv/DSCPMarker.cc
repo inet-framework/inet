@@ -16,6 +16,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include "INETDefs.h"
+
 #ifdef WITH_IPv4
 #include "IPv4Datagram.h"
 #endif
@@ -67,7 +69,7 @@ void DSCPMarker::handleMessage(cMessage *msg)
     else
         throw cRuntimeError("DSCPMarker expects cPackets");
 
-    if (ev.isGUI())
+    if (getEnvir()->isGUI())
     {
         char buf[50] = "";
         if (numRcvd>0) sprintf(buf+strlen(buf), "rcvd: %d ", numRcvd);

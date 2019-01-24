@@ -141,13 +141,13 @@ private:
                                                                 const OSPF::RoutingTableEntry& borderRouterEntry) const;
 };
 
-} // namespace OSPF
-
 inline std::ostream& operator<<(std::ostream& ostr, OSPF::Area& area)
 {
     ostr << area.detailedInfo();
     return ostr;
 }
+
+} // namespace OSPF
 
 #endif // __INET_OSPFAREA_H
 

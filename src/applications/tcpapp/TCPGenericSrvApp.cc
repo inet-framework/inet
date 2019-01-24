@@ -162,7 +162,7 @@ void TCPGenericSrvApp::handleMessage(cMessage *msg)
         delete msg;
     }
 
-    if (ev.isGUI())
+    if (getEnvir()->isGUI())
     {
         char buf[64];
         sprintf(buf, "rcvd: %ld pks %ld bytes\nsent: %ld pks %ld bytes", msgsRcvd, bytesRcvd, msgsSent, bytesSent);

@@ -151,7 +151,7 @@ void TCPEchoApp::handleMessage(cMessage *msg)
         delete msg;
     }
 
-    if (ev.isGUI())
+    if (getEnvir()->isGUI())
     {
         char buf[80];
         sprintf(buf, "rcvd: %ld bytes\nsent: %ld bytes", bytesRcvd, bytesSent);

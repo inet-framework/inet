@@ -195,8 +195,6 @@ public:
     void popFirstLinkStateRequest()  { linkStateRequestList.pop_front(); }
 };
 
-} // namespace OSPF
-
 inline bool operator==(OSPF::Neighbor::DDPacketID leftID, OSPF::Neighbor::DDPacketID rightID)
 {
     return ((leftID.ddOptions.I_Init == rightID.ddOptions.I_Init) &&
@@ -210,6 +208,9 @@ inline bool operator!=(OSPF::Neighbor::DDPacketID leftID, OSPF::Neighbor::DDPack
 {
     return (!(leftID == rightID));
 }
+
+} // namespace OSPF
+
 
 #endif // __INET_OSPFNEIGHBOR_H
 

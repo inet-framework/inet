@@ -76,9 +76,9 @@ double rdNormal::draw()
     do
     {
         if (m_nonNegative)
-            retval = truncnormal(m_mean, m_sd);
+            retval = RNGCONTEXT truncnormal(m_mean, m_sd);
         else
-            retval = normal(m_mean, m_sd);
+            retval = RNGCONTEXT normal(m_mean, m_sd);
     }
     while (m_bMinLimit && retval<m_min);
 
@@ -105,7 +105,7 @@ rdUniform::rdUniform(cXMLAttributeMap attributes)
 
 double rdUniform::draw()
 {
-    return uniform(m_beginning, m_end);
+    return RNGCONTEXT uniform(m_beginning, m_end);
 }
 
 rdExponential::rdExponential(double mean)
@@ -140,7 +140,7 @@ double rdExponential::draw()
 {
     double val;
     do
-        val = exponential(m_mean);
+        val = RNGCONTEXT exponential(m_mean);
     while ((m_bMinLimit && val < m_min) || (m_bMaxLimit && val > m_max));
     return val;
 }
@@ -169,7 +169,7 @@ double rdHistogram::draw()
     int i;
     int count = m_bins.size();
     rdHistogramBin bin;
-    double val = uniform(0, 1);
+    double val = RNGCONTEXT uniform(0, 1);
     double cumsum = 0;
     int cumcount = 0;
     for (i=0; i<count; i++)
@@ -180,7 +180,7 @@ double rdHistogram::draw()
         if (cumsum >= val)
         {
             // Then choose from the elements in the bin
-            double n = uniform(1, bin.count)+cumcount;
+            double n = RNGCONTEXT uniform(1, bin.count)+cumcount;
             if (m_zeroBased) return n-1.0;
             else return n;
         }
@@ -296,7 +296,7 @@ rdZipf::rdZipf(int n, double alpha, bool baseZero)
 double rdZipf::draw()
 {
     double sum_prob = 0;
-    double z = uniform(0.0001, 0.9999);
+    double z = RNGCONTEXT uniform(0.0001, 0.9999);
 
     int i;
     for (i=1; i<=m_number; i++)

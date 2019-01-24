@@ -202,7 +202,7 @@ void RoutingTable6::parseXMLConfigFile()
 
 void RoutingTable6::updateDisplayString()
 {
-    if (!ev.isGUI())
+    if (!getEnvir()->isGUI())
         return;
 
     std::stringstream os;

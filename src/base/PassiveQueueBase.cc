@@ -69,7 +69,7 @@ void PassiveQueueBase::handleMessage(cMessage *msg)
             notifyListeners();
     }
 
-    if (ev.isGUI())
+    if (getEnvir()->isGUI())
     {
         char buf[40];
         sprintf(buf, "q rcvd: %d\nq dropped: %d", numQueueReceived, numQueueDropped);

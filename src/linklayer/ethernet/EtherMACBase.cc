@@ -692,7 +692,7 @@ void EtherMACBase::updateConnectionColor(int txState)
     else
         color = "";
 
-    if (ev.isGUI() && connectionColoring)
+    if (getEnvir()->isGUI() && connectionColoring)
     {
         if (connected)
         {

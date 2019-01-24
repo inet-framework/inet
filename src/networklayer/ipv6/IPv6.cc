@@ -174,7 +174,7 @@ void IPv6::endService(cPacket *msg)
             routeMulticastPacket(datagram, NULL, getSourceInterfaceFrom(datagram), fromHL);
     }
 
-    if (ev.isGUI())
+    if (getEnvir()->isGUI())
         updateDisplayString();
 }
 

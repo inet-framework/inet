@@ -37,6 +37,7 @@ enum RTPPacketEnums
 packet RTPPacket
 {
     @customize(true);  // see the generated C++ header for more info
+    @fieldNameSuffix("_var");
 
     byteLength = RTPPACKET_FIX_HEADERLENGTH;  // 12-byte fixed header
 

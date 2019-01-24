@@ -48,9 +48,9 @@ void ExtInterface::initialize(int stage)
         if (dynamic_cast<cSocketRTScheduler *>(simulation.getScheduler()) != NULL)
         {
             rtScheduler = check_and_cast<cSocketRTScheduler *>(simulation.getScheduler());
-            //device = ev.config()->getAsString("Capture", "device", "lo0");
+            //device = getEnvir()->config()->getAsString("Capture", "device", "lo0");
             device = par("device");
-            //const char *filter = ev.config()->getAsString("Capture", "filter-string", "ip");
+            //const char *filter = getEnvir()->config()->getAsString("Capture", "filter-string", "ip");
             const char *filter = par("filterString");
             rtScheduler->setInterfaceModule(this, device, filter);
             connected = true;
@@ -70,14 +70,14 @@ void ExtInterface::initialize(int stage)
     else if (stage == 3)
     {
         // if not connected, make it gray
-        if (ev.isGUI() && !connected)
+        if (getEnvir()->isGUI() && !connected)
         {
             getDisplayString().setTagArg("i", 1, "#707070");
             getDisplayString().setTagArg("i", 2, "100");
         }
 
         // update display string when addresses have been autoconfigured etc.
-        if (ev.isGUI())
+        if (getEnvir()->isGUI())
             updateDisplayString();
     }
 }
@@ -169,7 +169,7 @@ void ExtInterface::handleMessage(cMessage *msg)
         }
     }
     delete (msg);
-    if (ev.isGUI())
+    if (getEnvir()->isGUI())
         updateDisplayString();
 }
 
@@ -189,7 +189,7 @@ void ExtInterface::displayIdle()
 
 void ExtInterface::updateDisplayString()
 {
-    if (!ev.isGUI())
+    if (!getEnvir()->isGUI())
         return;
 
     const char *str;

@@ -146,7 +146,7 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                     int32 numaddr = initChunk->getAddressesArraySize();
                     for (int32 i=0; i<numaddr; i++)
                     {
-#if WITH_IPv4
+#ifdef WITH_IPv4
                          if (!initChunk->getAddresses(i).isIPv6()) {
                             struct init_ipv4_address_parameter *ipv4addr = (struct init_ipv4_address_parameter*) (((unsigned char *)ic) + size_init_chunk + parPtr);
                             ipv4addr->type = htons(INIT_PARAM_IPV4);
@@ -155,7 +155,7 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                             parPtr += sizeof(struct init_ipv4_address_parameter);
                         }
 #endif
-#if WITH_IPv6
+#ifdef WITH_IPv6
                         if (initChunk->getAddresses(i).isIPv6()) {
                             struct init_ipv6_address_parameter *ipv6addr = (struct init_ipv6_address_parameter*) (((unsigned char *)ic) + size_init_chunk + parPtr);
                             ipv6addr->type = htons(INIT_PARAM_IPV6);
@@ -271,7 +271,7 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                     int32 numaddr = initAckChunk->getAddressesArraySize();
                     for (int32 i=0; i<numaddr; i++)
                     {
-#if WITH_IPv4
+#ifdef WITH_IPv4
                          if (!initAckChunk->getAddresses(i).isIPv6()) {
                             struct init_ipv4_address_parameter *ipv4addr = (struct init_ipv4_address_parameter*) (((unsigned char *)iac) + size_init_chunk + parPtr);
                             ipv4addr->type = htons(INIT_PARAM_IPV4);
@@ -280,7 +280,7 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                             parPtr += sizeof(struct init_ipv4_address_parameter);
                         }
 #endif
-#if WITH_IPv6
+#ifdef WITH_IPv6
                         if (initAckChunk->getAddresses(i).isIPv6()) {
                             struct init_ipv6_address_parameter *ipv6addr = (struct init_ipv6_address_parameter*) (((unsigned char *)iac) + size_init_chunk + parPtr);
                             ipv6addr->type = htons(INIT_PARAM_IPV6);

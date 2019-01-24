@@ -30,5 +30,6 @@ packet RTCPSenderReportPacket extends RTCPReceiverReportPacket
 {
     packetType = RTCP_PT_SR;
     @customize(true);  // see the generated C++ header for more info
+    @fieldNameSuffix("_var");
     SenderReport senderReport;
 }

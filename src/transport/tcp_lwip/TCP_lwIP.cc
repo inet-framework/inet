@@ -323,7 +323,7 @@ err_t TCP_lwIP::lwip_tcp_event(void *arg, LwipTcpLayer::tcp_pcb *pcb,
 
 err_t TCP_lwIP::tcp_event_accept(TcpLwipConnection &conn, LwipTcpLayer::tcp_pcb *pcb, err_t err)
 {
-    int newConnId = ev.getUniqueNumber();
+    int newConnId = getEnvir()->getUniqueNumber();
     TcpLwipConnection *newConn = new TcpLwipConnection(conn, newConnId, pcb);
     // add into appConnMap
     tcpAppConnMapM[newConnId] = newConn;
@@ -515,13 +515,13 @@ void TCP_lwIP::handleMessage(cMessage *msgP)
             scheduleAt(roundTime(simTime() + 0.250, 4), pLwipFastTimerM);
     }
 
-    if (ev.isGUI())
+    if (getEnvir()->isGUI())
         updateDisplayString();
 }
 
 void TCP_lwIP::updateDisplayString()
 {
-    if (ev.isDisabled())
+    if (getEnvir()->isExpressMode())
     {
         // in express mode, we don't bother to update the display
         // (std::map's iteration is not very fast if map is large)
