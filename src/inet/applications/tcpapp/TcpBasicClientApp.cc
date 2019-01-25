@@ -21,6 +21,7 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/packet/Packet.h"
+#include "inet/common/TimeTag_m.h"
 
 namespace inet {
 
@@ -86,6 +87,7 @@ void TcpBasicClientApp::sendRequest()
 
     const auto& payload = makeShared<GenericAppMsg>();
     Packet *packet = new Packet("data");
+    payload->addTag<CreationTimeTag>()->setCreationTime(simTime());
     payload->setChunkLength(B(requestLength));
     payload->setExpectedReplyLength(B(replyLength));
     payload->setServerClose(false);

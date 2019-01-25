@@ -21,6 +21,7 @@
 #include "inet/applications/ethernet/EtherAppServer.h"
 
 #include "inet/applications/ethernet/EtherApp_m.h"
+#include "inet/common/TimeTag_m.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/packet/Packet.h"
@@ -106,6 +107,7 @@ void EtherAppServer::socketDataArrived(Ieee8022LlcSocket*, Packet *msg)
 
         Packet *outPacket = new Packet(s.str().c_str(), IEEE802CTRL_DATA);
         const auto& outPayload = makeShared<EtherAppResp>();
+        outPayload->addTag<CreationTimeTag>()->setCreationTime(simTime());
         outPayload->setRequestId(requestId);
         outPayload->setChunkLength(B(l));
         outPacket->insertAtBack(outPayload);

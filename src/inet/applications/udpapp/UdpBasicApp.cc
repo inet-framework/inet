@@ -115,8 +115,7 @@ void UdpBasicApp::sendPacket()
     const auto& payload = makeShared<ApplicationPacket>();
     payload->setChunkLength(B(par("messageLength")));
     payload->setSequenceNumber(numSent);
-    auto creationTimeTag = payload->addTag<CreationTimeTag>();
-    creationTimeTag->setCreationTime(simTime());
+    payload->addTag<CreationTimeTag>()->setCreationTime(simTime());
     packet->insertAtBack(payload);
     L3Address destAddr = chooseDestAddr();
     emit(packetSentSignal, packet);

@@ -22,6 +22,7 @@
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/packet/Packet.h"
+#include "inet/common/TimeTag_m.h"
 
 namespace inet {
 
@@ -127,6 +128,7 @@ void TelnetApp::sendGenericAppMsg(int numBytes, int expectedReplyBytes)
 
     const auto& payload = makeShared<GenericAppMsg>();
     Packet *packet = new Packet("data");
+    payload->addTag<CreationTimeTag>()->setCreationTime(simTime());
     payload->setChunkLength(B(numBytes));
     payload->setExpectedReplyLength(B(expectedReplyBytes));
     payload->setServerClose(false);
