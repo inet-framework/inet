@@ -43,10 +43,10 @@ simple PingApp
     parameters:
         string destAddr = default(""); // destination IP or IPv6 address
         string srcAddr = default(""); // source IP or IPv6 address (useful with multi-homing)
-        double packetSize @unit("B") = default(56B); // of ping payload, in bytes
+        int packetSize @unit("B") = default(56B); // of ping payload, in bytes
         volatile double interval @unit("s") = default(1s); // time to wait between pings (can be random)
-        double hopLimit = default(32); // TTL or hopLimit for IP packets
-        double count = default(0); // stop after count ping requests, 0 means continuously
+        int hopLimit = default(32); // TTL or hopLimit for IP packets
+        int count = default(0); // stop after count ping requests, 0 means continuously
         double startTime @unit("s") = default(uniform(0s,this.interval)); // send first ping at startTime
         double stopTime @unit("s") = default(0s); // send no pings after stopTime, 0 means forever
         bool printPing = default(true); // dump on stdout

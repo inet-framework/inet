@@ -37,10 +37,10 @@ simple TelnetApp like TCPApp
         string connectAddress;  // server address (may be symbolic)
         int connectPort = default(1000); // port number to connect to
         double startTime @unit("s") = default(1s); // time first session begins
-        volatile int numCommands = default(exponential(10)); // user types this many commands in a session
+        volatile int numCommands = default(int(exponential(10))); // user types this many commands in a session
         volatile int commandLength @unit("B") = default(10B); // commands are this many characters (plus Enter)
         volatile double keyPressDelay @unit("s") = default(exponential(0.1s)); // delay between keypresses
-        volatile int commandOutputLength @unit("B") = default(exponential(1000B)); // commands produce this much output
+        volatile int commandOutputLength @unit("B") = default(int(exponential(1000B))); // commands produce this much output
         volatile double thinkTime @unit("s") = default(exponential(10s)); // user waits this much before starting to type new command
         volatile double idleInterval @unit("s") = default(exponential(300s)); // time gap between sessions
         volatile double reconnectInterval @unit("s") = default(30s);  // if connection breaks, user waits this much before trying to reconnect
