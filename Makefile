@@ -1,4 +1,6 @@
-all: checkmakefiles
+FEATURES_H = src/base/inet_features.h
+
+all: checkmakefiles $(FEATURES_H)
 	cd src && $(MAKE)
 
 clean: checkmakefiles
@@ -7,10 +9,10 @@ clean: checkmakefiles
 cleanall: checkmakefiles
 	@cd src && $(MAKE) MODE=release clean
 	@cd src && $(MAKE) MODE=debug clean
-	@rm -f src/Makefile
+	@rm -f src/Makefile $(FEATURES_H)
 
-makefiles:
-	cd src && opp_makemake -f --deep --make-so \
+makefiles: $(FEATURES_H)
+	@cd src && opp_makemake -f --deep --make-so \
 	        -I. \
 	        -Iapplications \
 	        -Iapplications/ethernet \
@@ -84,6 +86,10 @@ makefiles:
 	    -Iutil/headerserializers/headers \
 	    -Iworld \
 	     -o INET -O out -pINET $$NSC_VERSION_DEF
+
+# generate an include file that contains all the WITH_FEATURE macros according to the current enablement of features
+$(FEATURES_H): $(wildcard .oppfeaturestate) .oppfeatures
+	@opp_featuretool defines >$(FEATURES_H)
 
 checkmakefiles:
 	@if [ ! -f src/Makefile ]; then \

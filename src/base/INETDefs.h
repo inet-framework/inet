@@ -30,7 +30,7 @@ namespace omnetpp {
 using namespace omnetpp;
 
 #if OMNETPP_VERSION < 0x0504
-#  error At least OMNeT++/OMNEST version 4.2 required
+#  error At least OMNeT++/OMNEST version 5.4 required
 #endif
 
 #if defined(INET_EXPORT)
@@ -44,12 +44,16 @@ using namespace omnetpp;
 #include "inet_features.h"
 
 /////////////////////
+#define OPP omnetpp
 #define RNGCONTEXT  (cSimulation::getActiveSimulation()->getContext())->
 #define opp_error    throw cRuntimeError
 #define longValue    intValue
 #define simulation   (*getSimulation())
 #define ev           EV
 #define info()       str()
+
+#define doPacking    doParsimPacking
+#define doUnpacking  doParsimUnpacking
 
 typedef unsigned short ushort;
 typedef unsigned int uint;
@@ -67,11 +71,11 @@ typedef int64_t int64;
 typedef omnetpp::cObject cPolymorphic;
 
 // ev.isDisabled()  -->  getEnvir()->isExpressMode()
-// hasGUI() --> hasGUI()
+// ev.isGUI() --> hasGUI()
 // cDoubleHistogram --> cHistogram
-//dblrand() --> dblRand()
+// dblrand() --> dblRand()
 // ev. --> getEnvir()->
-
+// MAXTIME --> SIMTIME_MAX
 //////////////////////
 
 
