@@ -1,10 +1,10 @@
 # workingdir,                        args,                                          simtimelimit,    fingerprint
 /examples/adhoc/ieee80211/,          -f fingerprints.ini -c Ping1 -r 0
 /examples/adhoc/ieee80211/,          -f omnetpp.ini -c Ping1 -r 0
-/examples/adhoc/ieee80211/,          -f omnetpp.ini -c Ping2 -r 0
+# /examples/adhoc/ieee80211/,          -f omnetpp.ini -c Ping2 -r 0     # interactive
 /examples/adhoc/mf80211/,            -f fingerprints.ini -c Ping1 -r 0
 /examples/adhoc/mf80211/,            -f omnetpp.ini -c Ping1 -r 0
-/examples/adhoc/mf80211/,            -f omnetpp.ini -c Ping2 -r 0
+# /examples/adhoc/mf80211/,            -f omnetpp.ini -c Ping2 -r 0       # interactive
 /examples/adhoc/mobility/,           -f omnetpp.ini -c NullMobility -r 0
 /examples/adhoc/mobility/,           -f omnetpp.ini -c LinearMobility -r 0
 /examples/adhoc/mobility/,           -f omnetpp.ini -c MassMobility -r 0
@@ -48,9 +48,9 @@
 /examples/inet/bulktransfer/,        -f omnetpp.ini -c inet_inet_2a -r 0
 /examples/inet/bulktransfer/,        -f omnetpp.ini -c inet_inet_2b -r 0
 /examples/inet/bulktransfer/,        -f omnetpp.ini -c inet_old_inet_old -r 0
-/examples/inet/bulktransfer/,        -f omnetpp.ini -c nsc_nsc -r 0
-/examples/inet/bulktransfer/,        -f omnetpp.ini -c nsc_inet -r 0
-/examples/inet/bulktransfer/,        -f omnetpp.ini -c inet_nsc -r 0
+# /examples/inet/bulktransfer/,        -f omnetpp.ini -c nsc_nsc -r 0
+# /examples/inet/bulktransfer/,        -f omnetpp.ini -c nsc_inet -r 0
+# /examples/inet/bulktransfer/,        -f omnetpp.ini -c inet_nsc -r 0
 /examples/inet/flatnet/,             -f fingerprints.ini -c General -r 0
 /examples/inet/flatnet/,             -f omnetpp.ini -c General -r 0
 /examples/inet/kidsnw1/,             -f omnetpp.ini -c General -r 0
@@ -69,11 +69,11 @@
 /examples/inet/routerperf/,          -f omnetpp.ini -c General -r 0
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet_inet -r 0
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet_inet_old -r 0
-/examples/inet/tcpclientserver/,     -f omnetpp.ini -c linux_linux -r 0
-/examples/inet/tcpclientserver/,     -f omnetpp.ini -c linux_freebsd -r 0
-/examples/inet/tcpclientserver/,     -f omnetpp.ini -c freebsd_freebsd -r 0
-/examples/inet/tcpclientserver/,     -f omnetpp.ini -c lwip_inet -r 0
-/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet_linux -r 0
+# /examples/inet/tcpclientserver/,     -f omnetpp.ini -c linux_linux -r 0
+# /examples/inet/tcpclientserver/,     -f omnetpp.ini -c linux_freebsd -r 0
+# /examples/inet/tcpclientserver/,     -f omnetpp.ini -c freebsd_freebsd -r 0
+# /examples/inet/tcpclientserver/,     -f omnetpp.ini -c lwip_inet -r 0
+# /examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet_linux -r 0
 /examples/inet/tcpsack/,             -f omnetpp.ini -c One -r 0
 /examples/inet/tcpsack/,             -f omnetpp.ini -c Two -r 0
 /examples/inet/tcpsack/,             -f omnetpp.ini -c Three -r 0
@@ -86,9 +86,9 @@
 /examples/inet/tcpwindowscale/,      -f omnetpp.ini -c WS_enabled -r 0
 /examples/ipv6/demonetworketh/,      -f omnetpp.ini -c General -r 0
 /examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c inet_inet -r 0
-/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c nsc_nsc -r 0
-/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c nsc_inet -r 0
-/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c inet_nsc -r 0
+# /examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c nsc_nsc -r 0
+# /examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c nsc_inet -r 0
+# /examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c inet_nsc -r 0
 /examples/ipv6/ipv6nclients/,        -f omnetpp.ini -c General -r 0
 /examples/ipv6/nclients/,            -f omnetpp.ini -c PPP -r 0
 /examples/ipv6/nclients/,            -f omnetpp.ini -c ETH -r 0
@@ -112,7 +112,7 @@
 /examples/wireless/lan80211/,        -f omnetpp-ftp.ini -c TwoHosts -r 0
 /examples/wireless/lan80211/,        -f omnetpp-ftp.ini -c NHosts -r 0
 /examples/wireless/lan80211/,        -f omnetpp-streaming.ini -c Streaming1 -r 0
-/examples/wireless/lan80211/,        -f omnetpp-streaming.ini -c Streaming2 -r 0
+# /examples/wireless/lan80211/,        -f omnetpp-streaming.ini -c Streaming2 -r 0   # interactive
 /examples/wireless/lan80211/,        -f omnetpp.ini -c Ping1 -r 0
 /examples/wireless/lan80211/,        -f omnetpp.ini -c Ping2 -r 0
 /examples/wireless/throughput/,      -f omnetpp.ini -c Throughput1 -r 0
