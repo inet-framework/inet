@@ -43,7 +43,7 @@ double PathLossReceptionModel::calculateReceivedPower(double pSend, double carri
         // variable has a normal distribution in dB and results to log-normal distribution in mW.
         // This is a widespread and common model used for reproducing shadowing effects
         // (Rappaport, T. S. (2002), Wireless Communications - Principles and Practice, Prentice Hall PTR).
-        double xs = check_and_cast<cModule*>(this)->normal(0.0, shadowingDeviation);
+        double xs = RNGCONTEXT normal(0.0, shadowingDeviation);
         double mWValue = pSend * waveLength * waveLength / (16 * M_PI * M_PI * pow(distance, pathLossAlpha));
         double dBmValue = mW2dBm(mWValue);
         dBmValue += xs;
