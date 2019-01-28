@@ -1,3 +1,7 @@
+====== inet-4.x ======
+
+2019-01-28  ------ inet-4.1.0 released ------
+
 2018-12-17  Zoltan Bojthe
 
 	Moved IVlanInterface to linklayer/contract folder.
@@ -9,8 +13,6 @@
 2018-10-02  Zoltan Bojthe
 
 	Removed obsolete EtherLlc NED module.
-
-====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------
 

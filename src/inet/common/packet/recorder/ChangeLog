@@ -1,3 +1,7 @@
+====== inet-4.x ======
+
+2019-01-28  ------ inet-4.1.0 released ------
+
 2019-01-11  Zoltan Bojthe
 
 	Fixed compiler warnings: compare signed/unsigned, sprintf buffer was too short.
@@ -5,8 +9,6 @@
 2018-07-30  Zoltan Bojthe
 
 	PacketDump shows TcpOptions in more detail in verbose mode.
-
-====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------
 

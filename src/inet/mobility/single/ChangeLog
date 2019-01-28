@@ -1,3 +1,7 @@
+====== inet-4.x ======
+
+2019-01-28  ------ inet-4.1.0 released ------
+
 2018-09-30  Andras Varga
 
 	Renamed playground* (NED parameters, C++ variables/methods) to scene*.
@@ -35,8 +39,6 @@
 
 	Replaced EulerAngles with Quaternion in angular position, velocity and acceleration.
 	Added positionComposition and orientationComposition parameters to SuperpositioningMobility.
-
-====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------
 

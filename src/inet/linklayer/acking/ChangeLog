@@ -1,3 +1,7 @@
+====== inet-4.x ======
+
+2019-01-28  ------ inet-4.1.0 released ------
+
 2018-12-13  Zoltan Bojthe
 
 	Fixed AckingMac, the external queue is required.
@@ -25,8 +29,6 @@
 2018-07-12  Zoltan Bojthe
 
 	Refactored MAC modules to use the MacAddress stored in the InterfaceEntry.
-
-====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------
 

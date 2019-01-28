@@ -1,3 +1,7 @@
+====== inet-4.x ======
+
+2019-01-28  ------ inet-4.1.0 released ------
+
 2018-12-10  Zoltan Bojthe
 
 	Changed CRC calculator function to static, and get the crcMode value from the UDP header.
@@ -34,8 +38,6 @@
 2018-06-29  Levente Mészáros
 
 	Changed CRC computation to be public.
-
-====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------
 

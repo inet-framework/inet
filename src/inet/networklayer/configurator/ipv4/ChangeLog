@@ -1,3 +1,7 @@
+====== inet-4.x ======
+
+2019-01-28  ------ inet-4.1.0 released ------
+
 2019-01-07  Zoltan Bojthe
 
 	Added handling interface specific signals to Ipv4NodeConfigurator,
@@ -62,8 +66,6 @@
 2018-08-19  Mani Amoozadeh
 
 	Isolated networks can be configured separately by Ipv4NetworkConfigurator.
-
-====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------
 

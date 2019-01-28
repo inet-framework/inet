@@ -1,3 +1,7 @@
+====== inet-4.x ======
+
+2019-01-28  ------ inet-4.1.0 released ------
+
 2019-01-07  Mani Amoozadeh
 
 	Added ARP probe.
@@ -33,8 +37,6 @@
 2018-08-17  Zoltan Bojthe
 
 	Added namespace qualifier to @signal type parameters.
-
-====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------
 

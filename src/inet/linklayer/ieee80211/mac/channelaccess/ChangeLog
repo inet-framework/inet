@@ -1,9 +1,11 @@
+====== inet-4.x ======
+
+2019-01-28  ------ inet-4.1.0 released ------
+
 2018-07-11  Raphael Riebl
 
 	Allow replacing the contention submodule in Dcaf and Edcaf with a module
 	implementing the IContention module interface.
-
-====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------
 

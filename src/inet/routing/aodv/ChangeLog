@@ -1,3 +1,7 @@
+====== inet-4.x ======
+
+2019-01-28  ------ inet-4.1.0 released ------
+
 2018-10-05  Zoltan Bojthe
 
 	Changed base class of Aodv to RoutingProtocolBase.
@@ -5,8 +9,6 @@
 2018-10-04  Zoltan Bojthe
 
 	Fixed lifecycle stages.
-
-====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------
 

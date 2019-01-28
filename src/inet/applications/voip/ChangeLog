@@ -1,3 +1,7 @@
+====== inet-4.x ======
+
+2019-01-28  ------ inet-4.1.0 released ------
+
 2018-11-13  Zoltan Bojthe
 
 	Added waiting for udp socketClosed indication in stopOperation.
@@ -9,8 +13,6 @@
 2018-10-04  Zoltan Bojthe
 
 	Added LifecycleUnsupported base class instead of copy-pasting the same code.
-
-====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------
 

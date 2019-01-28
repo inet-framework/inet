@@ -1,3 +1,7 @@
+====== inet-4.x ======
+
+2019-01-28  ------ inet-4.1.0 released ------
+
 2019-01-16  Rudolf Hornig
 
 	Updated version to 4.1.
@@ -97,8 +101,6 @@
 2018-06-27  Zoltan Bojthe
 
 	Updated the required OMNet++ version to 5.4.1.
-
-====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------
 

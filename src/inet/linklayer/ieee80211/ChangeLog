@@ -1,3 +1,7 @@
+====== inet-4.x ======
+
+2019-01-28  ------ inet-4.1.0 released ------
+
 2018-07-11  Raphael Riebl
 
 	Changed Ieee80211Interface to use opMode to decide default LLC module.
@@ -5,8 +9,6 @@
 	Actually only the 5.9 GHz band mandates EPD. However, not all radios have
 	a bandName parameter (e.g. UnitDiskRadio) and thus we use opMode instead.
 	Usually "p" is only used in the 5.9 GHz band and vice versa.
-
-====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------
 

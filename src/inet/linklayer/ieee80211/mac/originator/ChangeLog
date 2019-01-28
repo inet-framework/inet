@@ -1,3 +1,7 @@
+====== inet-4.x ======
+
+2019-01-28  ------ inet-4.1.0 released ------
+
 2018-12-20  Levente Mészáros
 
 	Removed explicit modulo 4096 operations, because it's done automatically by the underlying SequenceNumber struct.
@@ -18,8 +22,6 @@
 2018-12-03  Levente Mészáros
 
 	Added missing mechanism for clearing the state of ack handlers.
-
-====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------
 

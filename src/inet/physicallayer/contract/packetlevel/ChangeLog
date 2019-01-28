@@ -1,3 +1,7 @@
+====== inet-4.x ======
+
+2019-01-28  ------ inet-4.1.0 released ------
+
 2018-10-15  Levente Mészáros
 
 	Added documentation to antenna interface.
@@ -5,8 +9,6 @@
 2018-06-28  Levente Mészáros
 
 	Added getMinGain to IAntennaGain.
-
-====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------
 

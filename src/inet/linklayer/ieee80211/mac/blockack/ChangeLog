@@ -1,3 +1,7 @@
+====== inet-4.x ======
+
+2019-01-28  ------ inet-4.1.0 released ------
+
 2018-12-20  Levente Mészáros
 
 	Added updating the starting sequence number of the block ack agreement at the originator.
@@ -20,8 +24,6 @@
 2018-12-03  Levente Mészáros
 
 	Added missing ACK state removal function up to a sequence number.
-
-====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------
 
