@@ -40,7 +40,7 @@ echo "inet-$BUILDID" > $INET_ROOT/out/$DIRNAME/Version
 #cp -r doc/neddoc $INET_ROOT/out/$DIRNAME/doc || { echo --- error copying generated docs ---; exit 1;}
 #cp -r doc/index.html $INET_ROOT/out/$DIRNAME/doc || { echo --- error copying generated docs ---; exit 1;}
 (cd doc/src && make)
-cp -r doc/inet-*.pdf $INET_ROOT/out/$DIRNAME/doc || { echo --- error copying generated docs ---; exit 1;}
+cp -r doc/src/_build/latex/*.pdf $INET_ROOT/out/$DIRNAME/doc || { echo --- error copying generated docs ---; exit 1;}
 
 # switch to the destination dir
 cd $INET_ROOT/out/$DIRNAME
@@ -49,7 +49,7 @@ perl -i -pe $REGEXPREPLACE s/##BUILDID##/$BUILDID/g doc/neddoc/overview.html
 perl -i -pe $REGEXPREPLACE s/##BUILDID##/$BUILDID/g src/inet-index.ned
 
 # cleanup
-rm -rf _scripts obsolete doc/src
+rm -rf _scripts doc/src .gitattributes .gitignore .gitmodules .circleci .travis.yml .oppfeaturestate
 
 todofiles=`find . -name '__*'`
 if [ "$todofiles" != "" ]; then
