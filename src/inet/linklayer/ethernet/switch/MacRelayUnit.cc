@@ -17,10 +17,11 @@
 
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/LayeredProtocolBase.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/Protocol.h"
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/common/lifecycle/ModuleOperations.h"
+#include "inet/common/StringFormat.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
 #include "inet/linklayer/ethernet/EtherMacBase.h"
@@ -53,6 +54,26 @@ void MacRelayUnit::initialize(int stage)
 void MacRelayUnit::handleLowerPacket(Packet *packet)
 {
     handleAndDispatchFrame(packet);
+    updateDisplayString();
+}
+
+void MacRelayUnit::updateDisplayString() const
+{
+    auto text = StringFormat::formatString(par("displayStringTextFormat"), [&] (char directive) {
+        static std::string result;
+        switch (directive) {
+            case 'p':
+                result = std::to_string(numProcessedFrames);
+                break;
+            case 'd':
+                result = std::to_string(numDiscardedFrames);
+                break;
+            default:
+                throw cRuntimeError("Unknown directive: %c", directive);
+        }
+        return result.c_str();
+    });
+    getDisplayString().setTagArg("t", 0, text);
 }
 
 void MacRelayUnit::broadcast(Packet *packet, int arrivalInterfaceId)

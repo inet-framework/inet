@@ -1,3 +1,7 @@
+====== inet-4.x ======
+
+2019-01-28  ------ inet-4.1.0 released ------
+
 2018-08-22  Mani Amoozadeh
 
 	BDR can now promote to DR in case of DR's failure.
@@ -17,8 +21,6 @@
 2018-07-25  Mani Amoozadeh
 
 	Added WATCHes for important data structures.
-
-====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------
 

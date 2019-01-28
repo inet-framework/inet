@@ -1,3 +1,12 @@
+====== inet-4.x ======
+
+2019-01-28  ------ inet-4.1.0 released ------
+
+2019-01-18  Zoltan Bojthe
+
+	Removed PcapCapturer module and removed libpcap dependency.
+	The 'Network Emulation Support' feature currently works on Linux systems only.
+
 2018-10-24  Levente Mészáros
 
 	Added default broadcast, multicast, pointToPoint parameters to ExtInterface.

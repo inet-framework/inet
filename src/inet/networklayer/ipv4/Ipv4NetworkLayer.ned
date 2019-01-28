@@ -33,12 +33,14 @@ module Ipv4NetworkLayer like INetworkLayer
         bool forwarding = default(false);
         bool multicastForwarding = default(false);
         string interfaceTableModule;
+        string displayStringTextFormat = default("%i");
         *.forwarding = forwarding;
         *.multicastForwarding = multicastForwarding;
         *.interfaceTableModule = default(absPath(interfaceTableModule));
         *.routingTableModule = default(absPath(".routingTable"));
         *.arpModule = default(absPath(".arp"));
         *.icmpModule = default(absPath(".icmp"));
+        @class(::inet::Ipv4NetworkLayer);
         @display("i=block/fork");
 
     gates:

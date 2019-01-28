@@ -18,6 +18,7 @@
 #ifndef __INET_STRINGFORMAT_H
 #define __INET_STRINGFORMAT_H
 
+#include <functional>
 #include "inet/common/INETDefs.h"
 
 namespace inet {
@@ -33,11 +34,15 @@ class INET_API StringFormat
 
   protected:
     std::string format;
-    mutable std::string result;
 
   public:
     void parseFormat(const char *format);
+
     const char *formatString(IDirectiveResolver *resolver) const;
+    const char *formatString(std::function<const char *(char)>& resolver) const;
+
+    static const char *formatString(const char *format, IDirectiveResolver *resolver);
+    static const char *formatString(const char *format, std::function<const char *(char)> resolver);
 };
 
 } // namespace inet

@@ -18,6 +18,7 @@
 #include "inet/applications/tcpapp/TcpGenericServerThread.h"
 
 #include "inet/applications/tcpapp/GenericAppMsg_m.h"
+#include "inet/common/TimeTag_m.h"
 #include "inet/common/packet/chunk/ByteCountChunk.h"
 
 namespace inet {
@@ -51,6 +52,7 @@ void TcpGenericServerThread::dataArrived(Packet *msg, bool)
     if (requestedBytes > B(0)) {
         Packet *outPacket = new Packet(msg->getName());
         const auto& payload = makeShared<ByteCountChunk>(requestedBytes);
+        payload->addTag<CreationTimeTag>()->setCreationTime(simTime());
         outPacket->insertAtBack(payload);
         getSocket()->send(outPacket);
     }

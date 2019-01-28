@@ -51,6 +51,8 @@ void Ipv4NatTable::initialize(int stage)
         parseConfig();
         if (natEntries.size() != 0)
             networkProtocol->registerHook(0, this);
+        auto text = std::to_string(natEntries.size()) + " entries";
+        getDisplayString().setTagArg("t", 0, text.c_str());
     }
 }
 

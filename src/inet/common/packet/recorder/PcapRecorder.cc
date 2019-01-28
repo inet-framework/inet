@@ -19,8 +19,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/ProtocolTag_m.h"
 #include "inet/common/packet/recorder/PcapRecorder.h"
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/common/StringFormat.h"
 
 namespace inet {
 
@@ -103,11 +104,34 @@ void PcapRecorder::initialize()
         pcapDumper.openPcap(file, snaplen, par("pcapNetwork"));
         pcapDumper.setFlushParameter(par("alwaysFlush").boolValue());
     }
+
+    WATCH(numRecorded);
 }
 
 void PcapRecorder::handleMessage(cMessage *msg)
 {
     throw cRuntimeError("This module does not handle messages");
+}
+
+void PcapRecorder::refreshDisplay() const
+{
+    updateDisplayString();
+}
+
+void PcapRecorder::updateDisplayString() const
+{
+    auto text = StringFormat::formatString(par("displayStringTextFormat"), [&] (char directive) {
+        static std::string result;
+        switch (directive) {
+            case 'n':
+                result = std::to_string(numRecorded);
+                break;
+            default:
+                throw cRuntimeError("Unknown directive: %c", directive);
+        }
+        return result.c_str();
+    });
+    getDisplayString().setTagArg("t", 0, text);
 }
 
 void PcapRecorder::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
@@ -137,6 +161,7 @@ void PcapRecorder::recordPacket(cPacket *msg, bool l2r)
         for (auto dumpProtocol : dumpProtocols) {
             if (protocol == dumpProtocol) {
                 pcapDumper.writePacket(simTime(), packet);
+                numRecorded++;
                 break;
             }
         }

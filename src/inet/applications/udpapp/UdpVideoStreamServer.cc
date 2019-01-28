@@ -18,6 +18,7 @@
 
 #include "inet/applications/udpapp/UdpVideoStreamServer.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/TimeTag_m.h"
 #include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/transportlayer/common/L4PortTag_m.h"
@@ -128,6 +129,7 @@ void UdpVideoStreamServer::sendStreamData(cMessage *timer)
     if (pktLen > d->bytesLeft)
         pktLen = d->bytesLeft;
     const auto& payload = makeShared<ByteCountChunk>(B(pktLen));
+    payload->addTag<CreationTimeTag>()->setCreationTime(simTime());
     pkt->insertAtBack(payload);
 
     emit(packetSentSignal, pkt);

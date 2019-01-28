@@ -38,12 +38,14 @@ class INET_API SimpleEpEnergyManagement : public cSimpleModule, public virtual I
     cModule *networkNode = nullptr;
     NodeStatus *nodeStatus = nullptr;
     cMessage *lifecycleOperationTimer = nullptr;
+    J targetCapacity = J(NaN);
 
     LifecycleController lifecycleController;
 
   protected:
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *message) override;
+    virtual void refreshDisplay() const override;
 
     virtual void executeNodeOperation(J estimatedEnergyCapacity);
     virtual void scheduleLifecycleOperationTimer();

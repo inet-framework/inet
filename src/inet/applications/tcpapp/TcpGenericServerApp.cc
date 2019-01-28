@@ -24,6 +24,7 @@
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/packet/Message.h"
 #include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/common/TimeTag_m.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/transportlayer/contract/tcp/TcpCommand_m.h"
 
@@ -126,6 +127,7 @@ void TcpGenericServerApp::handleMessage(cMessage *msg)
                 outPacket->addTagIfAbsent<SocketReq>()->setSocketId(connId);
                 outPacket->setKind(TCP_C_SEND);
                 const auto& payload = makeShared<GenericAppMsg>();
+                payload->addTag<CreationTimeTag>()->setCreationTime(simTime());
                 payload->setChunkLength(requestedBytes);
                 payload->setExpectedReplyLength(B(0));
                 payload->setReplyDelay(0);

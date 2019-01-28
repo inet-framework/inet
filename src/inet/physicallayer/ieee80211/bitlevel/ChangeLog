@@ -1,9 +1,11 @@
+====== inet-4.x ======
+
+2019-01-28  ------ inet-4.1.0 released ------
+
 2018-09-26  Levente Mészáros
 
 	Moved sensible default for antenna submodule type to Radio.
 	Moved sensible default values for propagation and path loss submodules of the radio medium.
-
-====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------
 

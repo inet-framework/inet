@@ -1,3 +1,7 @@
+====== inet-4.x ======
+
+2019-01-28  ------ inet-4.1.0 released ------
+
 2018-10-17  Zoltan Bojthe
 
 	Changed Stp, Rstp base classes to OperationalBase.
@@ -6,8 +10,6 @@
 
 	Renamed INITSTAGE_LINK_LAYER to INITSTAGE_NETWORK_INTERFACE_CONFIGURATION.
 	Renamed INITSTAGE_LINK_LAYER_2 to INITSTAGE_LINK_LAYER.
-
-====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------
 

@@ -1,3 +1,7 @@
+====== inet-4.x ======
+
+2019-01-28  ------ inet-4.1.0 released ------
+
 2018-11-14  Zoltan Bojthe
 
 	Renamed NED parameter 'default_ssid' to 'defaultSsid' according to NED naming convention.
@@ -10,8 +14,6 @@
 2018-08-19  Mani Amoozadeh
 
 	Added support for isolated networks, they can be configured separately.
-
-====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------
 

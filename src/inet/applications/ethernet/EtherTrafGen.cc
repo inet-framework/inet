@@ -23,6 +23,7 @@
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/TimeTag_m.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/common/packet/Packet.h"
@@ -163,6 +164,7 @@ void EtherTrafGen::sendBurstPackets()
         Packet *datapacket = new Packet(msgname, IEEE802CTRL_DATA);
         long len = *packetLength;
         const auto& payload = makeShared<ByteCountChunk>(B(len));
+        payload->addTag<CreationTimeTag>()->setCreationTime(simTime());
         datapacket->insertAtBack(payload);
         datapacket->removeTagIfPresent<PacketProtocolTag>();
         datapacket->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ieee8022);

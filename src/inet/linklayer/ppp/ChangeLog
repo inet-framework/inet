@@ -1,3 +1,15 @@
+====== inet-4.x ======
+
+2019-01-28  ------ inet-4.1.0 released ------
+
+2019-01-08  Zoltan Bojthe
+
+	Set carrier status on start/stop/crash operations.
+
+2019-01-07  Zoltan Bojthe
+
+	Set interface status on start/stop/crash operations.
+
 2018-12-04  Zoltan Bojthe
 
 	Added wait until queue becomes empty at stop operation.
@@ -30,8 +42,6 @@
 2018-07-27  Zoltan Bojthe
 
 	Refactored createInterfaceEntry() to configureInterfaceEntry().
-
-====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------
 

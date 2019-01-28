@@ -33,4 +33,5 @@ simple MacAddressTable like IMacAddressTable
         @display("i=block/table2");
         double agingTime @unit(s) = default(120s);
         string addressTableFile = default("");
+        string displayStringTextFormat = default("addr: %a\nvlan: %v");
 }

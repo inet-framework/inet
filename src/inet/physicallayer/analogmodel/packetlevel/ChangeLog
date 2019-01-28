@@ -1,3 +1,7 @@
+====== inet-4.x ======
+
+2019-01-28  ------ inet-4.1.0 released ------
+
 2018-12-21  Levente Mészáros
 
 	Added ignorePartialInterference parameter to scalar analogue models.
@@ -5,8 +9,6 @@
 	This parameter allows ignoring interfering signals which have partially
 	overlapping frequency domain analog representation. For example, a Wifi
 	signal using adjacent channels. This parameter is disabled by default.
-
-====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------
 

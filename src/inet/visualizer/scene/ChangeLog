@@ -1,3 +1,7 @@
+====== inet-4.x ======
+
+2019-01-28  ------ inet-4.1.0 released ------
+
 2018-11-16  TÖRÖK Attila
 
 	Disable depth test for labels and icons, use opacity par where present, increase to 1 otherwise.
@@ -35,8 +39,6 @@
 2018-07-02  TÖRÖK Attila
 
 	Fixed #353 build if OSG is available, but osgEarth isn't, contribution by ABDULLATIF Mouhamadi.
-
-====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------
 

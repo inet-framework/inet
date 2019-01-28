@@ -1,3 +1,15 @@
+====== inet-4.x ======
+
+2019-01-28  ------ inet-4.1.0 released ------
+
+2019-01-18  Zoltan Bojthe
+
+	Fixed unsigned long != uint64_t on some systems in CLNS.
+
+2019-01-11  Zoltan Bojthe
+
+	Fixed compiler warnings: compare signed/unsigned, sprintf buffer was too short.
+
 2018-09-19  Zoltan Bojthe
 
 	Adapted to the new protocol specific data storage API of InterfaceEntry.
@@ -21,8 +33,6 @@
 2018-08-17  Zoltan Bojthe
 
 	Added namespace qualifier to @signal type parameters.
-
-====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------
 

@@ -1,3 +1,7 @@
+====== inet-4.x ======
+
+2019-01-28  ------ inet-4.1.0 released ------
+
 2018-12-17  Levente Mészáros
 
 	Cleaned up and updated documentation.
@@ -31,8 +35,6 @@
 
 	Moved old ExtInterface to ExtEthernetInterface.
 	Created a separate folder structure under src for emulation related modules and components.
-
-====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------
 

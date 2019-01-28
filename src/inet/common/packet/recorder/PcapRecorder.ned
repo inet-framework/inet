@@ -62,6 +62,7 @@ simple PcapRecorder
         string packetFilter = default("*"); // which packets are considered, matches all packets by default
         string packetDataFilter = default("*"); // which packets are considered based on the data they contain, matches all packets by default
         bool alwaysFlush = default(false); // flush the pcapFile after each write to ensure that all packets are captured in case of a crash
+        string displayStringTextFormat = default("rec: %n pks");
         @display("i=block/blackboard");
 }
 

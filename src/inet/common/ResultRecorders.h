@@ -21,6 +21,7 @@
 #include <string>
 
 #include "inet/common/INETDefs.h"
+#include "inet/common/INETMath.h"
 
 namespace inet {
 
@@ -63,6 +64,34 @@ class INET_API ElapsedTimeRecorder : public cResultRecorder
         ElapsedTimeRecorder();
         virtual void finish(cResultFilter* prev) override;
 };
+
+class INET_API WeightedHistogramRecorder : public cNumericResultRecorder
+{
+    public:
+        class cWeight : public cObject {
+            protected:
+                const double weight;
+
+            public:
+                cWeight(double weight) : weight(weight) { }
+                double getWeight() const { return weight; }
+        };
+
+    protected:
+        cStatistic *statistic = nullptr;
+    protected:
+        virtual void collect(simtime_t_cref t, double value, cObject *details) override;
+        virtual void finish(cResultFilter *prev) override;
+        virtual void forEachChild(cVisitor *v) override;
+    public:
+        WeightedHistogramRecorder();
+        ~WeightedHistogramRecorder();
+        virtual void init(cComponent *component, const char *statisticName, const char *recordingMode, cProperty *attrsProperty, opp_string_map *manualAttrs) override;
+        virtual void setStatistic(cStatistic* stat);
+        virtual cStatistic *getStatistic() const {return statistic;}
+        virtual std::string str() const override;
+};
+
 
 } // namespace inet
 

@@ -97,6 +97,13 @@ class value
     {
     }
 
+    std::string str() const
+    {
+        std::stringstream ss;
+        ss << *this;
+        return ss.str();
+    }
+
     const value_type& get() const
     {
         return m_rep;

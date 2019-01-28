@@ -20,12 +20,13 @@ package inet.linklayer.ppp;
 import inet.common.queue.IOutputQueue;
 import inet.linklayer.contract.IPppInterface;
 import inet.linklayer.contract.ITrafficConditioner;
+import inet.networklayer.common.InterfaceEntry;
 
 //
 // PPP interface. Complements the ~PPP module with an output queue
 // for QoS and RED support.
 //
-module PppInterface like IPppInterface
+module PppInterface extends InterfaceEntry like IPppInterface
 {
     parameters:
         @class(InterfaceEntry);

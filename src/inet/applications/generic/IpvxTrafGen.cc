@@ -22,6 +22,7 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/TimeTag_m.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/packet/chunk/ByteCountChunk.h"
@@ -162,6 +163,7 @@ void IpvxTrafGen::sendPacket()
 
     Packet *packet = new Packet(msgName);
     const auto& payload = makeShared<ByteCountChunk>(B(*packetLengthPar));
+    payload->addTag<CreationTimeTag>()->setCreationTime(simTime());
     packet->insertAtBack(payload);
 
     L3Address destAddr = chooseDestAddr();

@@ -1,3 +1,7 @@
+====== inet-4.x ======
+
+2019-01-28  ------ inet-4.1.0 released ------
+
 2018-12-10  Zoltan Bojthe
 
 	Fixed feature related dependency.
@@ -49,8 +53,6 @@
 2018-06-26  Levente Mészáros
 
 	Added antenna lobe visualization parameters to RadioVisualizerBase.
-
-====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------
 

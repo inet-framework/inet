@@ -23,6 +23,7 @@
 
 #include "inet/applications/ethernet/EtherApp_m.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/TimeTag_m.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
 #include "inet/linklayer/common/Ieee802SapTag_m.h"
@@ -163,6 +164,7 @@ void EtherAppClient::sendPacket()
 
     Packet *datapacket = new Packet(msgname, IEEE802CTRL_DATA);
     const auto& data = makeShared<EtherAppReq>();
+    data->addTag<CreationTimeTag>()->setCreationTime(simTime());
 
     data->setRequestId(seqNum);
 

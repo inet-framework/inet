@@ -3,6 +3,10 @@ most important topics
    - 802.11 statistics, logging, display strings, code cleanup, memory management
    - complete IPv6
  - cross-cutting smaller changes
+   - review end-to-end delay calculation
+     - for applications it means the delay of complete application packets
+     - for UDP it means the delay of datagrams
+     - for TCP it means the delay of bytes
    - review NED documentation, update obsolete parts
    - add meaningful display strings to at least the top level submodules of network nodes (with optional formatting parameters)
    - finish renaming signals, labels, statistics to have a consistent naming scheme

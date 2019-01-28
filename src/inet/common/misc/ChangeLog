@@ -1,8 +1,10 @@
+====== inet-4.x ======
+
+2019-01-28  ------ inet-4.1.0 released ------
+
 2018-11-23  Levente Mészáros
 
 	Added displayAsTooltip parameter to ThruputMeteringChannel.
-
-====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------
 

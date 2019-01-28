@@ -1,3 +1,7 @@
+====== inet-4.x ======
+
+2019-01-28  ------ inet-4.1.0 released ------
+
 2018-08-13  Mani Amoozadeh
 
 	Added checksum to the OSPF messages.
@@ -25,8 +29,6 @@
 2018-07-20  Mani Amoozadeh
 
 	Rename classes for clarity.
-
-====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------
 

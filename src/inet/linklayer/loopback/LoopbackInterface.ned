@@ -20,11 +20,12 @@
 package inet.linklayer.loopback;
 
 import inet.linklayer.contract.ILoopbackInterface;
+import inet.networklayer.common.InterfaceEntry;
 
 //
 // Loopback interface. Complements the ~Loopback module.
 //
-module LoopbackInterface like ILoopbackInterface
+module LoopbackInterface extends InterfaceEntry like ILoopbackInterface
 {
     parameters:
         @class(InterfaceEntry);

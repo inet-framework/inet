@@ -1,3 +1,11 @@
+====== inet-4.x ======
+
+2019-01-28  ------ inet-4.1.0 released ------
+
+2018-12-19  Zoltan Bojthe
+
+	Fixed memory leak.
+
 2018-12-11  Zoltan Bojthe
 
 	TcpSessionApp: using socket isOpen()
@@ -39,8 +47,6 @@
 2018-08-17  Zoltan Bojthe
 
 	Added namespace qualifier to @signal type parameters.
-
-====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------
 

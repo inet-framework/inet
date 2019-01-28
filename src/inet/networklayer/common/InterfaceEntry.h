@@ -21,9 +21,8 @@
 #include <vector>
 
 #include "inet/common/INETDefs.h"
-#include "inet/common/Simsignals.h"
 #include "inet/common/packet/tag/TagSet.h"
-
+#include "inet/common/Simsignals.h"
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/networklayer/common/InterfaceToken.h"
 #include "inet/networklayer/common/L3Address.h"
@@ -138,6 +137,8 @@ class INET_API InterfaceEntry : public cModule
 
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
+    virtual void refreshDisplay() const override;
+    virtual void updateDisplayString() const;
 
   public:
     // internal: to be invoked from InterfaceTable only!

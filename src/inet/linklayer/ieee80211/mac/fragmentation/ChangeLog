@@ -1,8 +1,10 @@
+====== inet-4.x ======
+
+2019-01-28  ------ inet-4.1.0 released ------
+
 2018-12-12  Levente Mészáros
 
 	Fixed fragmentation when the packet length equals with the fragmentation threshold.
-
-====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------
 

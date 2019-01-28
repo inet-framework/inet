@@ -1,3 +1,17 @@
+====== inet-4.x ======
+
+2019-01-28  ------ inet-4.1.0 released ------
+
+2019-01-07  Zoltan Bojthe
+
+	Added handling interface state changed signal to Ipv4RoutingTable.
+	Delete routing entries when an interface goes down.
+	Do not add netmask route entries for interfaces in down state.
+
+2019-01-05  Mani Amoozadeh
+
+	Removed useProxyARP parameter from ipv4 module.
+
 2018-12-19  Zoltan Bojthe
 
 	Moved omnetpp::cEventlogListener related code from RoutingTableRecorder to a separate branch.
@@ -89,8 +103,6 @@
 2018-06-28  Levente Mészáros
 
 	Added network address translation, added Ipv4NatTable submodule to Ipv4NetworkLayer.
-
-====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------
 

@@ -1,3 +1,7 @@
+====== inet-4.x ======
+
+2019-01-28  ------ inet-4.1.0 released ------
+
 2018-09-26  Levente Mészáros
 
 	Extracted Ieee802154NarrowbandRadio.
@@ -9,8 +13,6 @@
 
 	Changed carrierFrequency parameter to use a default value to allow overriding it.
 	Added dimensional transmitter/receiver/radio variants.
-
-====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------
 

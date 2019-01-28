@@ -1,3 +1,7 @@
+====== inet-4.x ======
+
+2019-01-28  ------ inet-4.1.0 released ------
+
 2018-10-09  Levente Mészáros
 
 	Added PcapRecorder submodules to EtherSwitch.
@@ -32,8 +36,6 @@
 2018-07-12  Zoltan Bojthe
 
 	Change EtherHost, EtherHost2 to use EthernetInterface instead of mac+queue(+encap) modules.
-
-====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------
 

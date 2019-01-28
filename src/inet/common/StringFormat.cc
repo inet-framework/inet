@@ -24,8 +24,24 @@ void StringFormat::parseFormat(const char *format)
     this->format = format;
 }
 
-const char *StringFormat::formatString(IDirectiveResolver *directiveResolver) const
+const char *StringFormat::formatString(IDirectiveResolver *resolver) const
 {
+    return formatString(format.c_str(), resolver);
+}
+
+const char *StringFormat::formatString(std::function<const char *(char)>& resolver) const
+{
+    return formatString(format.c_str(), resolver);
+}
+
+const char *StringFormat::formatString(const char *format, IDirectiveResolver *resolver)
+{
+    return formatString(format, [&] (char directive) { return resolver->resolveDirective(directive); });
+}
+
+const char *StringFormat::formatString(const char *format, std::function<const char *(char)> resolver)
+{
+    static std::string result;
     result.clear();
     int current = 0;
     int previous = current;
@@ -33,19 +49,19 @@ const char *StringFormat::formatString(IDirectiveResolver *directiveResolver) co
         char ch = format[current];
         if (ch == '\0') {
             if (previous != current)
-                result.append(format.begin() + previous, format.begin() + current);
+                result.append(format + previous, current - previous);
             break;
         }
         else if (ch == '%') {
             if (previous != current)
-                result.append(format.begin() + previous, format.begin() + current);
+                result.append(format + previous, current - previous);
             previous = current;
             current++;
             ch = format[current];
             if (ch == '%')
-                result.append(format.begin() + previous, format.begin() + current);
+                result.append(format + previous, current - previous);
             else
-                result.append(directiveResolver->resolveDirective(ch));
+                result.append(resolver(ch));
             previous = current + 1;
         }
         current++;

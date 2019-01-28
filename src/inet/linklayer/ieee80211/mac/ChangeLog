@@ -1,3 +1,7 @@
+====== inet-4.x ======
+
+2019-01-28  ------ inet-4.1.0 released ------
+
 2018-10-22  Levente Mészáros
 
 	Extracted typeColumn from protocol printer.
@@ -30,8 +34,6 @@
 2018-07-10  Raphael Riebl
 
 	Support EtherType protocol discrimination in 5.9 GHz band.
-
-====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------
 

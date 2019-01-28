@@ -22,6 +22,7 @@
 #include "inet/applications/base/ApplicationPacket_m.h"
 #include "inet/applications/udpapp/UdpBasicBurst.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/TimeTag_m.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/transportlayer/contract/udp/UdpControlInfo_m.h"
@@ -108,6 +109,7 @@ Packet *UdpBasicBurst::createPacket()
     long msgByteLength = *messageLengthPar;
     Packet *pk = new Packet(msgName);
     const auto& payload = makeShared<ApplicationPacket>();
+    payload->addTag<CreationTimeTag>()->setCreationTime(simTime());
     payload->setChunkLength(B(msgByteLength));
     payload->setSequenceNumber(numSent);
     pk->insertAtBack(payload);

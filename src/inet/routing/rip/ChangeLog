@@ -1,3 +1,11 @@
+====== inet-4.x ======
+
+2019-01-28  ------ inet-4.1.0 released ------
+
+2019-01-14  Zoltan Bojthe
+
+	Fixed signal handler: always process deleted routes.
+
 2018-10-05  Zoltan Bojthe
 
 	Changed base class of Rip to RoutingProtocolBase.
@@ -18,8 +26,6 @@
 2018-07-16  Mani Amoozadeh
 
 	Added capability to set a local interface into passive mode.
-
-====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------
 

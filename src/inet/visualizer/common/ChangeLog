@@ -1,3 +1,7 @@
+====== inet-4.x ======
+
+2019-01-28  ------ inet-4.1.0 released ------
+
 2018-09-18  Levente Mészáros
 
 	Added guards to prevent crashes when a network node visualization cannot be found.
@@ -6,8 +10,6 @@
 
 	Added missing default values for visualization*Module parameters.
 	Renamed visualizerTargetModule to visualizationTargetModule for consistency.
-
-====== inet-4.x ======
 
 2018-06-27  ------ inet-4.0.0 released ------
 
