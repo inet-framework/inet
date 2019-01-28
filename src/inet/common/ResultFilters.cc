@@ -18,11 +18,12 @@
 //
 
 #include "inet/applications/base/ApplicationPacket_m.h"
-#include "inet/common/ResultFilters.h"
-#include "inet/common/Simsignals_m.h"
-#include "inet/common/TimeTag_m.h"
 #include "inet/common/geometry/common/Coord.h"
 #include "inet/common/packet/Packet.h"
+#include "inet/common/ResultFilters.h"
+#include "inet/common/ResultRecorders.h"
+#include "inet/common/Simsignals_m.h"
+#include "inet/common/TimeTag_m.h"
 #include "inet/mobility/contract/IMobility.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/physicallayer/base/packetlevel/FlatReceptionBase.h"
@@ -41,9 +42,12 @@ Register_ResultFilter("dataAge", DataAgeFilter);
 
 void DataAgeFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
 {
-    if (auto packet = dynamic_cast<Packet *>(object))
-        for (auto& region : packet->peekData()->getAllTags<CreationTimeTag>())
-            fire(this, t, t - region.getTag()->getCreationTime(), details);
+    if (auto packet = dynamic_cast<Packet *>(object)) {
+        for (auto& region : packet->peekData()->getAllTags<CreationTimeTag>()) {
+            WeightedHistogramRecorder::cWeight weight(region.getLength().get());
+            fire(this, t, t - region.getTag()->getCreationTime(), &weight);
+        }
+    }
 }
 
 Register_ResultFilter("messageAge", MessageAgeFilter);
