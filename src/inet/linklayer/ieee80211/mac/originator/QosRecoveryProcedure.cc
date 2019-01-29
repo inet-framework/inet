@@ -42,6 +42,7 @@ void QosRecoveryProcedure::initialize(int stage)
         rtsThreshold = rtsPolicy->getRtsThreshold();
         shortRetryLimit = par("shortRetryLimit");
         longRetryLimit = par("longRetryLimit");
+        emit(contentionWindowChangedSignal, cwCalculator->getCw());
     }
 }
 
@@ -51,7 +52,7 @@ void QosRecoveryProcedure::incrementStationSrc()
     if (stationShortRetryCounter == shortRetryLimit) // 9.3.3 Random backoff time
         resetContentionWindow();
     else
-        cwCalculator->incrementCw();
+        incrementContentionWindow();
 }
 
 void QosRecoveryProcedure::incrementStationLrc()
@@ -60,7 +61,7 @@ void QosRecoveryProcedure::incrementStationLrc()
     if (stationLongRetryCounter == longRetryLimit) // 9.3.3 Random backoff time
         resetContentionWindow();
     else
-        cwCalculator->incrementCw();
+        incrementContentionWindow();
 }
 
 void QosRecoveryProcedure::incrementCounter(const Ptr<const Ieee80211DataHeader>& header, std::map<std::pair<Tid, SequenceControlField>, int>& retryCounter)
@@ -149,6 +150,7 @@ void QosRecoveryProcedure::retryLimitReached(Packet *packet, const Ptr<const Iee
         if (it != shortRetryCounter.end())
             shortRetryCounter.erase(it);
     }
+    emit(retryLimitReachedSignal, packet);
 }
 
 //
@@ -203,9 +205,22 @@ int QosRecoveryProcedure::getRetryCount(Packet *packet, const Ptr<const Ieee8021
         return getRc(packet, header, shortRetryCounter);
 }
 
+void QosRecoveryProcedure::incrementContentionWindow()
+{
+    auto oldCw = cwCalculator->getCw();
+    cwCalculator->incrementCw();
+    auto newCw = cwCalculator->getCw();
+    if (oldCw != newCw)
+        emit(contentionWindowChangedSignal, cwCalculator->getCw());
+}
+
 void QosRecoveryProcedure::resetContentionWindow()
 {
+    auto oldCw = cwCalculator->getCw();
     cwCalculator->resetCw();
+    auto newCw = cwCalculator->getCw();
+    if (oldCw != newCw)
+        emit(contentionWindowChangedSignal, newCw);
 }
 
 bool QosRecoveryProcedure::isRtsFrameRetryLimitReached(Packet *packet, const Ptr<const Ieee80211DataHeader>& protectedHeader)

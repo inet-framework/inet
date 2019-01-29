@@ -42,6 +42,7 @@ void NonQosRecoveryProcedure::initialize(int stage)
         rtsThreshold = rtsPolicy->getRtsThreshold();
         shortRetryLimit = par("shortRetryLimit");
         longRetryLimit = par("longRetryLimit");
+        emit(contentionWindowChangedSignal, cwCalculator->getCw());
     }
 }
 
@@ -51,7 +52,7 @@ void NonQosRecoveryProcedure::incrementStationSrc(StationRetryCounters *stationC
     if (stationCounters->getStationShortRetryCount() == shortRetryLimit) // 9.3.3 Random backoff time
         resetContentionWindow();
     else
-        cwCalculator->incrementCw();
+        incrementContentionWindow();
 }
 
 void NonQosRecoveryProcedure::incrementStationLrc(StationRetryCounters *stationCounters)
@@ -60,7 +61,7 @@ void NonQosRecoveryProcedure::incrementStationLrc(StationRetryCounters *stationC
     if (stationCounters->getStationLongRetryCount() == longRetryLimit) // 9.3.3 Random backoff time
         resetContentionWindow();
     else
-        cwCalculator->incrementCw();
+        incrementContentionWindow();
 }
 
 void NonQosRecoveryProcedure::incrementCounter(const Ptr<const Ieee80211DataOrMgmtHeader>& header, std::map<SequenceControlField, int>& retryCounter)
@@ -145,6 +146,7 @@ void NonQosRecoveryProcedure::retryLimitReached(Packet *packet, const Ptr<const 
         if (it != shortRetryCounter.end())
             shortRetryCounter.erase(it);
     }
+    emit(retryLimitReachedSignal, packet);
 }
 
 //
@@ -211,9 +213,22 @@ int NonQosRecoveryProcedure::getLongRetryCount(Packet *packet, const Ptr<const I
     return getRc(packet, dataOrMgmtHeader, longRetryCounter);
 }
 
+void NonQosRecoveryProcedure::incrementContentionWindow()
+{
+    auto oldCw = cwCalculator->getCw();
+    cwCalculator->incrementCw();
+    auto newCw = cwCalculator->getCw();
+    if (oldCw != newCw)
+        emit(contentionWindowChangedSignal, cwCalculator->getCw());
+}
+
 void NonQosRecoveryProcedure::resetContentionWindow()
 {
+    auto oldCw = cwCalculator->getCw();
     cwCalculator->resetCw();
+    auto newCw = cwCalculator->getCw();
+    if (oldCw != newCw)
+        emit(contentionWindowChangedSignal, newCw);
 }
 
 bool NonQosRecoveryProcedure::isRtsFrameRetryLimitReached(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& protectedHeader)

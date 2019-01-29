@@ -26,5 +26,9 @@ simple NonQosRecoveryProcedure
         int shortRetryLimit = default(7);
         int longRetryLimit = default(4);
         @display("i=block/cogwheel");
+        @signal[contentionWindowChanged](type=long);
+        @signal[retryLimitReached](type=inet::Packet);
+        @statistic[contentionWindow](title="contention window"; source=contentionWindowChanged; record=vector; interpolationmode=none);
+        @statistic[retryLimitReach](title="retry limit reach"; source=retryLimitReached; record=count);
 }
 
