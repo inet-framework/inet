@@ -110,7 +110,7 @@
 /examples/wireless/handover/,        -f omnetpp.ini -c General -r 0
 /examples/wireless/hosttohost/,      -f omnetpp.ini -c Throughput1 -r 0
 /examples/wireless/lan80211/,        -f omnetpp-ftp.ini -c TwoHosts -r 0
-/examples/wireless/lan80211/,        -f omnetpp-ftp.ini -c NHosts -r 0
+# /examples/wireless/lan80211/,        -f omnetpp-ftp.ini -c NHosts -r 0  # interactive
 /examples/wireless/lan80211/,        -f omnetpp-streaming.ini -c Streaming1 -r 0
 # /examples/wireless/lan80211/,        -f omnetpp-streaming.ini -c Streaming2 -r 0   # interactive
 /examples/wireless/lan80211/,        -f omnetpp.ini -c Ping1 -r 0
