@@ -114,6 +114,6 @@
 /examples/wireless/lan80211/,        -f omnetpp-streaming.ini -c Streaming1 -r 0
 # /examples/wireless/lan80211/,        -f omnetpp-streaming.ini -c Streaming2 -r 0   # interactive
 /examples/wireless/lan80211/,        -f omnetpp.ini -c Ping1 -r 0
-/examples/wireless/lan80211/,        -f omnetpp.ini -c Ping2 -r 0
+# /examples/wireless/lan80211/,        -f omnetpp.ini -c Ping2 -r 0 # interactive
 /examples/wireless/throughput/,      -f omnetpp.ini -c Throughput1 -r 0
 /examples/wireless/throughput/,      -f omnetpp.ini -c Throughput2 -r 0
