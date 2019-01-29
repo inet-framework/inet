@@ -24,6 +24,7 @@ namespace inet {
 namespace ieee80211 {
 
 simsignal_t Contention::stateChangedSignal = registerSignal("stateChanged");
+
 // for @statistic; don't forget to keep synchronized the C++ enum and the runtime enum definition
 Register_Enum(Contention::State,
         (Contention::IDLE,
@@ -87,6 +88,7 @@ void Contention::startContention(int cw, simtime_t ifs, simtime_t eifs, simtime_
     this->slotTime = slotTime;
     this->callback = callback;
     backoffSlots = intrand(cw + 1);
+    emit(contentionPeriodGeneratedSignal, backoffSlots);
     EV_DETAIL << "Starting contention: cw = " << cw << ", slots = " << backoffSlots << endl;
     handleWithFSM(START);
 }
@@ -174,6 +176,7 @@ void Contention::handleMessage(cMessage *msg)
         handleWithFSM(CHANNEL_ACCESS_GRANTED);
     else if (msg == channelGrantedEvent) {
         EV_INFO << "Channel granted: contention started at " << startTime << std::endl;
+        emit(channelAccessGrantedSignal, this);
         callback->channelAccessGranted();
         callback = nullptr;
     }
