@@ -17,7 +17,7 @@ module RTPHost
         string profileName;
         string destinationAddress;
         int portNumber;
-        double bandwidth;
+        int bandwidth;
         string fileName;
         int payloadType;
         // network information

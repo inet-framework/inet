@@ -6,7 +6,7 @@ simple RTPApplication
         @display("i=block/app");
         string commonName;
         string profileName;
-        double bandwidth;  //XXX in bytes(!) per sec
+        int bandwidth;  //XXX in bytes(!) per sec
         string destinationAddress;
         int portNumber;
         string fileName;
