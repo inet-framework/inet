@@ -24,6 +24,8 @@ network RTPMulticast1
                 bandwidth = 8000;
                 routingFile = "host1.mrt";
                 @display("p=150,50");
+            gates:
+                pppg[1];
         }
         host2: RTPHost {
             parameters:
@@ -33,6 +35,8 @@ network RTPMulticast1
                 bandwidth = 8000;
                 routingFile = "host2.mrt";
                 @display("p=250,150");
+            gates:
+                pppg[1];
         }
         host3: RTPHost {
             parameters:
@@ -42,6 +46,8 @@ network RTPMulticast1
                 bandwidth = 8000;
                 routingFile = "host3.mrt";
                 @display("p=150,250");
+            gates:
+                pppg[1];
         }
         host4: RTPHost {
             parameters:
@@ -51,6 +57,8 @@ network RTPMulticast1
                 bandwidth = 8000;
                 routingFile = "host4.mrt";
                 @display("p=50,150");
+            gates:
+                pppg[1];
         }
         router1: Router {
             parameters:
