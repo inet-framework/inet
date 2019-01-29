@@ -503,7 +503,8 @@ void TCPConnection::sendRstAck(uint32 seq, uint32 ack, IPvXAddress src, IPvXAddr
     sendToIP(tcpseg, src, dest);
 
     // notify
-    tcpAlgorithm->ackSent();
+    if (tcpAlgorithm)
+        tcpAlgorithm->ackSent();
 }
 
 void TCPConnection::sendAck()
