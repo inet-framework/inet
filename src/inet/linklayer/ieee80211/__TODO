@@ -1,6 +1,160 @@
  - add statistic collection, consider removing IStatistics and BasicStatistics and adding signals based statistics instead
    reasoning: there are many components in 802.11 and it seems to be a bad idea to centralize all possible events into a single class
    even if we do that, how can we be sure of whether we added all useful events to the API?
+
+ - Signals and statistics
+   - Mac
+     @signal[packetReceivedFromUpper](type=inet::Packet);
+     @signal[packetSentToUpper](type=inet::Packet);
+     @signal[packetReceivedFromLower](type=inet::Packet);
+     @signal[packetSentToLower](type=inet::Packet);
+     @signal[packetReceivedFromPeer](type=inet::Packet);
+     @signal[packetSentToPeer](type=inet::Packet);
+     @signal[packetDropped](type=inet::Packet);
+     @signal[linkBroken](type=inet::Packet);
+     @signal[modesetChanged](type=inet::physicallayer::Ieee80211ModeSet);
+     @statistic[packetDropIncorrectlyReceived](record=count);
+     @statistic[packetDropNotAddressedToUs](record=count);
+     @statistic[packetDropQueueOverflow](record=count);
+     @statistic[packetDropRetryLimitReached](record=count);
+     @statistic[linkBreak](record=count);
+     @statistic[modeset](record=count);
+   - Contention
+     @signal[contentionPeriodGenerated](type=int);
+     @signal[contentionStarted];
+     @signal[contentionStopped];
+     @signal[channelAccessGranted];
+     @statistic[contentionPeriod](record=vector);
+     @statistic[contentionDuration](record=vector);
+     @statistic[channelAccessGrant](record=count);
+   - Dcf/Hcf
+     @signal[frameSequenceStarted](type=inet::ieee80211::IFrameSequence);
+     @signal[frameSequenceAborted](type=inet::ieee80211::IFrameSequence);
+     @signal[frameSequenceFinished](type=inet::ieee80211::IFrameSequence);
+     @statistic[frameSequenceStart](record=count);
+     @statistic[frameSequenceAbort](record=count);
+     @statistic[frameSequenceFinish](record=count);
+     @statistic[frameSequenceNumPackets](record=vector);
+     @statistic[frameSequenceDuration](record=vector);
+   - Edcaf TODO: ennek veres a torka, mert honnan tudja, hogy milyen AC-ju packet, talan a TID-bol? meg egyebkent is, milyen mar ez?
+     TODO: hogy is lesz ez a per AC dolog??? mert igy biztosan nem
+
+     @statistic[unicastSending](source=^.^.^.tx.packetSent; record=count); <--- ez sajnos nem megy
+     @statistic[multicastSending](source=^.^.^.tx.packetSent; record=count);
+     @statistic[broadcastSending](source=^.^.^.tx.packetSent; record=count);
+     @statistic[unicastReception](source=^.^.^.rx.packetReceived; record=count);
+     @statistic[multicastReception](source=^.^.^.rx.packetReceived; record=count);
+     @statistic[broadcastReception](source=^.^.^.rx.packetReceived; record=count);
+   - CollisionController
+     @signal[internalCollisionDetected];
+     @statistic[internalCollision](record=count);
+   - OriginatorMacDataService
+     @signal[packetFragmented](type=inet::Packet);
+     @signal[packetAggregated](type=inet::Packet);
+     @statistic[packetFragmentation](record=count,vector);
+     @statistic[packetAggregation](record=count,vector);
+   - RecipientMacDataService
+     @signal[packetDropped](type=inet::Packet);
+     @signal[packetDefragmented](type=inet::Packet);
+     @signal[packetDeaggregated](type=inet::Packet);
+     @statistic[packetDropDuplicateDetected](record=count);
+     @statistic[packetDefragmentation](record=count,vector);
+     @statistic[packetDeaggregation](record=count,vector);
+   - Tx
+     @signal[packetSent](type=inet::Packet);
+     @statistic[unicastSending](record=count);
+     @statistic[multicastSending](record=count);
+     @statistic[broadcastSending](record=count);
+   - Rx
+     @signal[packetReceived](type=inet::Packet);
+     @signal[packetDropped](type=inet::Packet);
+     @statistic[unicastReception](record=count);
+     @statistic[multicastReception](record=count);
+     @statistic[broadcastReception](record=count);
+     @statistic[packetDropIncorrectlyReceived](record=count);
+     @statistic[packetDropNotForUs](record=count);
+   - RateControl
+     @signal[datarateChanged](type=inet::ieee80211::IIeee80211Mode);
+     @statistic[datarate](record=vector);
+   - RateSelection
+     @signal[datarateSelected](type=inet::Packet);
+     @statistic[datarate](record=vector);
+   - TxopProcedure
+     @signal(txopStarted);
+     @signal(txopAborted);
+     @signal(txopFinished);
+     @statistic[txopStart](record=count);
+     @statistic[txopAbort](record=count);
+     @statistic[txopFinish](record=count);
+     @statistic[txopNumPackets](record=vector);
+     @statistic[txopDuration](record=vector);
+   - RecoveryProcedure
+     @signal(contentionWindowChanged)[type=int];
+     @signal(retryLimitReached)[type=inet::Packet];
+     @statistic[contentionWindow](record=vector);
+     @statistic[retryLimitReach](record=count);
+   - OriginatorBlockAckAgreementHandler
+     @signal[blockAckAgreementRequested];
+     @signal[blockAckAgreementTerminated];
+     @statistic[blockAckAgreementRequest](record=count);
+     @statistic[blockAckAgreementTermination](record=count);
+   - RecipientBlockAckAgreementHandler
+     @signal[blockAckAgreementAccepted];
+     @signal[blockAckAgreementRejected];
+     @signal[blockAckAgreementTerminated];
+     @statistic[blockAckAgreementAcceptance](record=count);
+     @statistic[blockAckAgreementRejection](record=count);
+     @statistic[blockAckAgreementTermination](record=count);
+     TODO: number of packets in a block ack agreement when terminated
+
+ - @statistic
+   - contention
+     - drawn backoff period
+     - backoff duration (may be smaller than period)
+   - frame sequence
+     - number of packets sent and received
+   - channel owning
+   - data rate
+     - for both sent and received packets
+   - error rates (packet, bit, symbol)
+   - txop
+     - length in time
+     - number of packets sent and received
+   - block ack agreement
+     - number of packets sent and received in a block ack agreement
+     - block ack agreement duration
+   - fragmentation
+     - number of fragments per fragmented packet
+   - aggregation
+     - number of packets per aggregated packet
+   - in node communications
+     - sent to higher layer, sent to lower layer
+     - received from higher layer, received from lower layer
+   - number of (per AC)
+     - link breaks
+     - packet drops (per reason)
+     - packets sent without retry
+     - packets retried
+     - packets given up
+     - duplicates detected
+     - collisions
+       - internal
+       - external
+     - packets sent
+       - unicast
+       - multicast
+       - broadcast
+       - aggregated
+       - fragmented
+     - packets received
+       - unicast
+       - multicast
+       - broadcast
+       - aggregated
+       - fragmented
+       - not for us
+       - incorrect
+
  - remove frame arguments where appropriate
  - add more logging and display strings
  - generic cleanup, order of functions, formatting, whitespace, etc.
