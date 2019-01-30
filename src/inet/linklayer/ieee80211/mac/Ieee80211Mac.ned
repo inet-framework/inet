@@ -80,6 +80,7 @@ module Ieee80211Mac extends MacProtocolBase like IIeee80211Mac
         @class(Ieee80211Mac);
         @signal[packetSentToPeer](type=inet::Packet);
         @signal[packetReceivedFromPeer](type=inet::Packet);
+        @signal[modesetChanged](type=inet::physicallayer::Ieee80211ModeSet);
         @statistic[passedUpPk](title="packets passed to higher layer"; source=packetSentToUpper; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[sentDownPk](title="packets sent to lower layer"; source=packetSentToLower; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[rcvdPkFromHl](title="packets received from higher layer"; source=packetReceivedFromUpper; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
@@ -89,7 +90,6 @@ module Ieee80211Mac extends MacProtocolBase like IIeee80211Mac
         @statistic[packetDropNotAddressedToUs](title="packet drop: not addressed to us"; source=packetDropReasonIsNotAddressedToUs(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetDropQueueOverflow](title="packet drop: queue overflow"; source=packetDropReasonIsQueueOverflow(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetDropRetryLimitReached](title="packet drop: retry limit reached"; source=packetDropReasonIsRetryLimitReached(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
-        @signal[modesetChanged](type=inet::physicallayer::Ieee80211ModeSet);
     gates:
         input mgmtIn;
         output mgmtOut;
