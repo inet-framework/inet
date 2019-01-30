@@ -28,6 +28,10 @@ namespace ieee80211 {
 class INET_API IRecipientQosMacDataService
 {
     public:
+        static simsignal_t packetDefragmentedSignal;
+        static simsignal_t packetDeaggregatedSignal;
+
+    public:
         virtual ~IRecipientQosMacDataService() { }
 
         virtual std::vector<Packet *> dataFrameReceived(Packet *dataPacket, const Ptr<const Ieee80211DataHeader>& dataHeader, IRecipientBlockAckAgreementHandler *blockAckAgreementHandler) = 0;

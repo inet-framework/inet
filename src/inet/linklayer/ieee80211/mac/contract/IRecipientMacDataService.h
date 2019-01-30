@@ -27,6 +27,9 @@ namespace ieee80211 {
 class INET_API IRecipientMacDataService
 {
     public:
+        static simsignal_t packetDefragmentedSignal;
+
+    public:
         virtual ~IRecipientMacDataService() { }
 
         virtual std::vector<Packet *> dataFrameReceived(Packet *dataPacket, const Ptr<const Ieee80211DataHeader>& dataHeader) = 0;

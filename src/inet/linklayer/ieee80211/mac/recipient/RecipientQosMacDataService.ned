@@ -22,5 +22,9 @@ module RecipientQosMacDataService
     parameters:
         @class("RecipientQosMacDataService");
         @display("i=block/join");
+        @signal[packetDefragmented](type=inet::Packet);
+        @signal[packetDeaggregated](type=inet::Packet);
+        @statistic[packetDefragmentation](title="packet defragmentation"; source=packetDefragmented; record=count);
+        @statistic[packetDeaggregation](title="packet deaggregation"; source=packetDeaggregated; record=count);
 }
 
