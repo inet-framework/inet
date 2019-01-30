@@ -27,7 +27,7 @@ namespace ieee80211 {
 class INET_API RateControlBase : public ModeSetListener, public IRateControl
 {
     public:
-        static simsignal_t datarateSignal;
+        static simsignal_t datarateChangedSignal;
 
     protected:
         const physicallayer::IIeee80211Mode *currentMode = nullptr;
@@ -37,7 +37,7 @@ class INET_API RateControlBase : public ModeSetListener, public IRateControl
         virtual void initialize(int stage) override;
         virtual void receiveSignal(cComponent* source, simsignal_t signalID, cObject* obj, cObject* details) override;
 
-        virtual void emitDatarateSignal();
+        virtual void emitDatarateChangedSignal();
 
         const physicallayer::IIeee80211Mode *increaseRateIfPossible(const physicallayer::IIeee80211Mode *currentMode);
         const physicallayer::IIeee80211Mode *decreaseRateIfPossible(const physicallayer::IIeee80211Mode *currentMode);
