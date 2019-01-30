@@ -15,6 +15,7 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
+#include "inet/common/Simsignals.h"
 #include "inet/linklayer/ieee80211/mac/aggregation/MpduDeaggregation.h"
 #include "inet/linklayer/ieee80211/mac/aggregation/MsduDeaggregation.h"
 #include "inet/linklayer/ieee80211/mac/blockack/RecipientBlockAckAgreementHandler.h"
@@ -65,6 +66,9 @@ std::vector<Packet *> RecipientQosMacDataService::dataFrameReceived(Packet *data
 {
     // TODO: A-MPDU Deaggregation, MPDU Header+CRC Validation, Address1 Filtering, Duplicate Removal, MPDU Decryption
     if (duplicateRemoval && duplicateRemoval->isDuplicate(dataHeader)) {
+        PacketDropDetails details;
+        details.setReason(DUPLICATE_DETECTED);
+        emit(packetDroppedSignal, dataPacket, &details);
         delete dataPacket;
         return std::vector<Packet *>();
     }

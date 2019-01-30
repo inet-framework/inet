@@ -15,6 +15,7 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
+#include "inet/common/Simsignals.h"
 #include "inet/linklayer/ieee80211/mac/duplicateremoval/LegacyDuplicateRemoval.h"
 #include "inet/linklayer/ieee80211/mac/fragmentation/BasicReassembly.h"
 #include "inet/linklayer/ieee80211/mac/recipient/RecipientMacDataService.h"
@@ -44,6 +45,9 @@ Packet *RecipientMacDataService::defragment(Packet *dataOrMgmtFrame)
 std::vector<Packet *> RecipientMacDataService::dataOrMgmtFrameReceived(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header)
 {
     if (duplicateRemoval && duplicateRemoval->isDuplicate(header)) {
+        PacketDropDetails details;
+        details.setReason(DUPLICATE_DETECTED);
+        emit(packetDroppedSignal, packet, &details);
         delete packet;
         return std::vector<Packet *>();
     }
