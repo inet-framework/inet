@@ -233,6 +233,10 @@
     <filename>src-inet-common-packet-ChunkQueue.html</filename>
   </compound>
   <compound kind="class">
+    <name>ClnsAddress</name>
+    <filename>src-inet-networklayer-contract-clns-ClnsAddress.html</filename>
+  </compound>
+  <compound kind="class">
     <name>ConfigureRadioCommand</name>
     <filename>src-inet-physicallayer-contract-packetlevel-ConfigureRadioCommand.html</filename>
   </compound>
@@ -381,12 +385,32 @@
     <filename>src-inet-applications-ethernet-EtherAppResp.html</filename>
   </compound>
   <compound kind="class">
+    <name>EthernetBindCommand</name>
+    <filename>src-inet-linklayer-ethernet-EthernetBindCommand.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>EthernetCloseCommand</name>
+    <filename>src-inet-linklayer-ethernet-EthernetCloseCommand.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>EthernetCommandBase</name>
+    <filename>src-inet-linklayer-ethernet-EthernetCommandBase.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>EthernetCommandCode</name>
+    <filename>src-inet-linklayer-ethernet-EthernetCommandCode.html</filename>
+  </compound>
+  <compound kind="class">
     <name>EthernetControlFrame</name>
     <filename>src-inet-linklayer-ethernet-EthernetControlFrame.html</filename>
   </compound>
   <compound kind="class">
     <name>EthernetControlOpCode</name>
     <filename>src-inet-linklayer-ethernet-EthernetControlOpCode.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>EthernetDestroyCommand</name>
+    <filename>src-inet-linklayer-ethernet-EthernetDestroyCommand.html</filename>
   </compound>
   <compound kind="class">
     <name>EthernetFcs</name>
@@ -419,6 +443,14 @@
   <compound kind="class">
     <name>EthernetSignal</name>
     <filename>src-inet-linklayer-ethernet-EthernetSignal.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>EthernetSocketClosedIndication</name>
+    <filename>src-inet-linklayer-ethernet-EthernetSocketClosedIndication.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>EthernetStatusInd</name>
+    <filename>src-inet-linklayer-ethernet-EthernetStatusInd.html</filename>
   </compound>
   <compound kind="class">
     <name>EtherType</name>
@@ -793,6 +825,10 @@
     <filename>src-inet-physicallayer-ieee80211-packetlevel-Ieee80211ErpOfdmPhyPreamble.html</filename>
   </compound>
   <compound kind="class">
+    <name>Ieee80211EtherTypeHeader</name>
+    <filename>src-inet-linklayer-ieee80211-llc-Ieee80211EtherTypeHeader.html</filename>
+  </compound>
+  <compound kind="class">
     <name>Ieee80211FhssPhyHeader</name>
     <filename>src-inet-physicallayer-ieee80211-packetlevel-Ieee80211FhssPhyHeader.html</filename>
   </compound>
@@ -1037,6 +1073,10 @@
     <filename>src-inet-linklayer-ieee802154-Ieee802154MacHeader.html</filename>
   </compound>
   <compound kind="class">
+    <name>Ieee8021qHeader</name>
+    <filename>src-inet-linklayer-ieee8021q-Ieee8021qHeader.html</filename>
+  </compound>
+  <compound kind="class">
     <name>Ieee8022LlcHeader</name>
     <filename>src-inet-linklayer-ieee8022-Ieee8022LlcHeader.html</filename>
   </compound>
@@ -1045,12 +1085,32 @@
     <filename>src-inet-linklayer-ieee8022-Ieee8022LlcSnapHeader.html</filename>
   </compound>
   <compound kind="class">
-    <name>Ieee802_1QHeader</name>
-    <filename>src-inet-linklayer-ethernet-Ieee802_1QHeader.html</filename>
+    <name>Ieee8022LlcSocketCloseCommand</name>
+    <filename>src-inet-linklayer-ieee8022-Ieee8022LlcSocketCloseCommand.html</filename>
   </compound>
   <compound kind="class">
-    <name>Ieee802DeregisterDsapCommand</name>
-    <filename>src-inet-linklayer-common-Ieee802DeregisterDsapCommand.html</filename>
+    <name>Ieee8022LlcSocketClosedIndication</name>
+    <filename>src-inet-linklayer-ieee8022-Ieee8022LlcSocketClosedIndication.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>Ieee8022LlcSocketCommand</name>
+    <filename>src-inet-linklayer-ieee8022-Ieee8022LlcSocketCommand.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>Ieee8022LlcSocketCommandCode</name>
+    <filename>src-inet-linklayer-ieee8022-Ieee8022LlcSocketCommandCode.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>Ieee8022LlcSocketDestroyCommand</name>
+    <filename>src-inet-linklayer-ieee8022-Ieee8022LlcSocketDestroyCommand.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>Ieee8022LlcSocketIndicationCode</name>
+    <filename>src-inet-linklayer-ieee8022-Ieee8022LlcSocketIndicationCode.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>Ieee8022LlcSocketOpenCommand</name>
+    <filename>src-inet-linklayer-ieee8022-Ieee8022LlcSocketOpenCommand.html</filename>
   </compound>
   <compound kind="class">
     <name>Ieee802MessageKind</name>
@@ -1059,10 +1119,6 @@
   <compound kind="class">
     <name>Ieee802PauseCommand</name>
     <filename>src-inet-linklayer-common-Ieee802PauseCommand.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>Ieee802RegisterDsapCommand</name>
-    <filename>src-inet-linklayer-common-Ieee802RegisterDsapCommand.html</filename>
   </compound>
   <compound kind="class">
     <name>Ieee802SapInd</name>
@@ -1237,12 +1293,24 @@
     <filename>src-inet-networklayer-contract-ipv4-Ipv4SocketCloseCommand.html</filename>
   </compound>
   <compound kind="class">
+    <name>Ipv4SocketClosedIndication</name>
+    <filename>src-inet-networklayer-contract-ipv4-Ipv4SocketClosedIndication.html</filename>
+  </compound>
+  <compound kind="class">
     <name>Ipv4SocketCommandBase</name>
     <filename>src-inet-networklayer-contract-ipv4-Ipv4SocketCommandBase.html</filename>
   </compound>
   <compound kind="class">
     <name>Ipv4SocketConnectCommand</name>
     <filename>src-inet-networklayer-contract-ipv4-Ipv4SocketConnectCommand.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>Ipv4SocketDestroyCommand</name>
+    <filename>src-inet-networklayer-contract-ipv4-Ipv4SocketDestroyCommand.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>Ipv4StatusInd</name>
+    <filename>src-inet-networklayer-contract-ipv4-Ipv4StatusInd.html</filename>
   </compound>
   <compound kind="class">
     <name>Ipv6Address</name>
@@ -1341,12 +1409,24 @@
     <filename>src-inet-networklayer-contract-ipv6-Ipv6SocketCloseCommand.html</filename>
   </compound>
   <compound kind="class">
+    <name>Ipv6SocketClosedIndication</name>
+    <filename>src-inet-networklayer-contract-ipv6-Ipv6SocketClosedIndication.html</filename>
+  </compound>
+  <compound kind="class">
     <name>Ipv6SocketCommandBase</name>
     <filename>src-inet-networklayer-contract-ipv6-Ipv6SocketCommandBase.html</filename>
   </compound>
   <compound kind="class">
     <name>Ipv6SocketConnectCommand</name>
     <filename>src-inet-networklayer-contract-ipv6-Ipv6SocketConnectCommand.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>Ipv6SocketDestroyCommand</name>
+    <filename>src-inet-networklayer-contract-ipv6-Ipv6SocketDestroyCommand.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>Ipv6StatusInd</name>
+    <filename>src-inet-networklayer-contract-ipv6-Ipv6StatusInd.html</filename>
   </compound>
   <compound kind="class">
     <name>Ipv6TlvOptionTypes</name>
@@ -1393,12 +1473,24 @@
     <filename>src-inet-networklayer-contract-L3SocketCloseCommand.html</filename>
   </compound>
   <compound kind="class">
+    <name>L3SocketClosedIndication</name>
+    <filename>src-inet-networklayer-contract-L3SocketClosedIndication.html</filename>
+  </compound>
+  <compound kind="class">
     <name>L3SocketCommandBase</name>
     <filename>src-inet-networklayer-contract-L3SocketCommandBase.html</filename>
   </compound>
   <compound kind="class">
     <name>L3SocketConnectCommand</name>
     <filename>src-inet-networklayer-contract-L3SocketConnectCommand.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>L3SocketDestroyCommand</name>
+    <filename>src-inet-networklayer-contract-L3SocketDestroyCommand.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>L3StatusInd</name>
+    <filename>src-inet-networklayer-contract-L3StatusInd.html</filename>
   </compound>
   <compound kind="class">
     <name>L4PortInd</name>
@@ -1467,6 +1559,14 @@
   <compound kind="class">
     <name>LinkType</name>
     <filename>src-inet-routing-ospfv2-LinkType.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>LlcProtocolId</name>
+    <filename>src-inet-linklayer-ieee80211-llc-LlcProtocolId.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>LlcProtocolTag</name>
+    <filename>src-inet-linklayer-ieee80211-llc-LlcProtocolTag.html</filename>
   </compound>
   <compound kind="class">
     <name>LMacHeader</name>
@@ -1767,6 +1867,10 @@
   <compound kind="class">
     <name>PsbTimerMsg</name>
     <filename>src-inet-networklayer-rsvpte-PsbTimerMsg.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>Quaternion</name>
+    <filename>src-inet-common-geometry-Quaternion.html</filename>
   </compound>
   <compound kind="class">
     <name>rad</name>
@@ -2289,6 +2393,10 @@
     <filename>src-inet-common-packet-chunk-SequenceChunk.html</filename>
   </compound>
   <compound kind="class">
+    <name>SequenceNumber</name>
+    <filename>src-inet-linklayer-ieee80211-mac-SequenceNumber.html</filename>
+  </compound>
+  <compound kind="class">
     <name>ServicePrimitive</name>
     <filename>src-inet-common-ServicePrimitive.html</filename>
   </compound>
@@ -2355,6 +2463,10 @@
   <compound kind="class">
     <name>SignalTagBase</name>
     <filename>src-inet-physicallayer-common-packetlevel-SignalTagBase.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>SignalTimeInd</name>
+    <filename>src-inet-physicallayer-common-packetlevel-SignalTimeInd.html</filename>
   </compound>
   <compound kind="class">
     <name>SimpleVoipPacket</name>
@@ -2557,8 +2669,20 @@
     <filename>src-inet-linklayer-tun-TunControlInfo.html</filename>
   </compound>
   <compound kind="class">
+    <name>TunDestroyCommand</name>
+    <filename>src-inet-linklayer-tun-TunDestroyCommand.html</filename>
+  </compound>
+  <compound kind="class">
     <name>TunOpenCommand</name>
     <filename>src-inet-linklayer-tun-TunOpenCommand.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>TunSocketClosedIndication</name>
+    <filename>src-inet-linklayer-tun-TunSocketClosedIndication.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>TunSocketIndication</name>
+    <filename>src-inet-linklayer-tun-TunSocketIndication.html</filename>
   </compound>
   <compound kind="class">
     <name>UdpBindCommand</name>
@@ -2583,6 +2707,10 @@
   <compound kind="class">
     <name>UdpControlInfo</name>
     <filename>src-inet-transportlayer-contract-udp-UdpControlInfo.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>UdpDestroyCommand</name>
+    <filename>src-inet-transportlayer-contract-udp-UdpDestroyCommand.html</filename>
   </compound>
   <compound kind="class">
     <name>UdpErrorIndication</name>
@@ -2641,6 +2769,10 @@
     <filename>src-inet-transportlayer-contract-udp-UdpSetTypeOfServiceCommand.html</filename>
   </compound>
   <compound kind="class">
+    <name>UdpSocketClosedIndication</name>
+    <filename>src-inet-transportlayer-contract-udp-UdpSocketClosedIndication.html</filename>
+  </compound>
+  <compound kind="class">
     <name>UdpSourceFilterMode</name>
     <filename>src-inet-transportlayer-contract-udp-UdpSourceFilterMode.html</filename>
   </compound>
@@ -2675,6 +2807,18 @@
   <compound kind="class">
     <name>UserPriorityTagBase</name>
     <filename>src-inet-linklayer-common-UserPriorityTagBase.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>VlanInd</name>
+    <filename>src-inet-linklayer-vlan-VlanInd.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>VlanReq</name>
+    <filename>src-inet-linklayer-vlan-VlanReq.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>VlanTagBase</name>
+    <filename>src-inet-linklayer-vlan-VlanTagBase.html</filename>
   </compound>
   <compound kind="class">
     <name>VoipStreamPacket</name>

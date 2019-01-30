@@ -142,7 +142,7 @@ The Ethernet MAC (Media Access Control) layer transmits the Ethernet
 frames on the physical media. This is a sublayer within the data link
 layer. Because encapsulation/decapsulation is not always needed (e.g.
 switches does not do encapsulation/decapsulation), it is implemented in
-a separate modules (:ned:`EtherEncap` and :ned:`EtherLlc`) that are part
+a separate modules (e.g. :ned:`EtherEncap`) that are part
 of the LLC layer.
 
 Nowadays almost all Ethernet networks operate using full-duplex
@@ -165,8 +165,6 @@ The following components are present in the model:
 -  :ned:`EtherMacFullDuplex`
 
 -  :ned:`EtherMac`
-
--  :ned:`EtherLlc`
 
 -  :ned:`EtherEncap`
 
@@ -207,14 +205,6 @@ EtherEncap
 ~~~~~~~~~~
 
 The :ned:`EtherEncap` module performs Ethernet II or Ethernet with SNAP
-encapsulation/decapsulation.
-
-.. _ug:sec:ethernet:etherllc:
-
-EtherLlc
-~~~~~~~~
-
-The :ned:`EtherLlc` module provides Ethernet 802.3
 encapsulation/decapsulation.
 
 .. _ug:sec:ethernet:macrelayunit:

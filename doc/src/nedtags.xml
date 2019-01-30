@@ -5,10 +5,6 @@
     <filename>inet.linklayer.ieee80211.mac.ratecontrol.AarfRateControl.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.examples.inet.netperfmeter.accessChannel</name>
-    <filename>inet.examples.inet.netperfmeter.accessChannel.html</filename>
-  </compound>
-  <compound kind="class">
     <name>inet.node.wireless.AccessPoint</name>
     <filename>inet.node.wireless.AccessPoint.html</filename>
   </compound>
@@ -45,10 +41,6 @@
     <filename>inet.power.generator.AlternatingEpEnergyGenerator.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.showcases.visualizer.styling.AnnotationShowcase</name>
-    <filename>inet.showcases.visualizer.styling.AnnotationShowcase.html</filename>
-  </compound>
-  <compound kind="class">
     <name>inet.mobility.single.AnsimMobility</name>
     <filename>inet.mobility.single.AnsimMobility.html</filename>
   </compound>
@@ -57,20 +49,8 @@
     <filename>inet.physicallayer.base.packetlevel.AntennaBase.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.examples.wireless.antenna.AntennaDirectionalSelectivityExample</name>
-    <filename>inet.examples.wireless.antenna.AntennaDirectionalSelectivityExample.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.general.compoundMobility.AntennaOrientation</name>
-    <filename>inet.showcases.general.compoundMobility.AntennaOrientation.html</filename>
-  </compound>
-  <compound kind="class">
     <name>inet.routing.aodv.Aodv</name>
     <filename>inet.routing.aodv.Aodv.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.aodv.AODVNetwork</name>
-    <filename>inet.examples.aodv.AODVNetwork.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.node.aodv.AodvRouter</name>
@@ -173,20 +153,12 @@
     <filename>inet.networklayer.arp.ipv4.Arp.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.examples.ethernet.arptest.ARPTest</name>
-    <filename>inet.examples.ethernet.arptest.ARPTest.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.ethernet.arptest2.ARPTest</name>
-    <filename>inet.examples.ethernet.arptest2.ARPTest.html</filename>
-  </compound>
-  <compound kind="class">
     <name>inet.mobility.single.AttachedMobility</name>
     <filename>inet.mobility.single.AttachedMobility.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.examples.ospfv2.backbone.Backbone</name>
-    <filename>inet.examples.ospfv2.backbone.Backbone.html</filename>
+    <name>inet.physicallayer.antenna.AxiallySymmetricAntenna</name>
+    <filename>inet.physicallayer.antenna.AxiallySymmetricAntenna.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.linklayer.ieee80211.mac.fragmentation.BasicFragmentationPolicy</name>
@@ -209,48 +181,12 @@
     <filename>inet.networklayer.diffserv.BehaviorAggregateClassifier.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.examples.inet.ber.ber</name>
-    <filename>inet.examples.inet.ber.ber.html</filename>
-  </compound>
-  <compound kind="class">
     <name>inet.routing.bgpv4.Bgp</name>
     <filename>inet.routing.bgpv4.Bgp.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.examples.bgpv4.BgpAndOspfSimple.BGPNet</name>
-    <filename>inet.examples.bgpv4.BgpAndOspfSimple.BGPNet.html</filename>
-  </compound>
-  <compound kind="class">
     <name>inet.node.bgp.BgpRouter</name>
     <filename>inet.node.bgp.BgpRouter.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.bgpv4.BgpUpdate.BGPRouterEx</name>
-    <filename>inet.examples.bgpv4.BgpUpdate.BGPRouterEx.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.bgpv4.BgpOpen.BGPRouterSimple</name>
-    <filename>inet.examples.bgpv4.BgpOpen.BGPRouterSimple.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.bgpv4.Bgp2RoutersInAS.BGPTest</name>
-    <filename>inet.examples.bgpv4.Bgp2RoutersInAS.BGPTest.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.bgpv4.Bgp3Routers.BGPTest</name>
-    <filename>inet.examples.bgpv4.Bgp3Routers.BGPTest.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.bgpv4.BgpAndOspf.BGPTest</name>
-    <filename>inet.examples.bgpv4.BgpAndOspf.BGPTest.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.bgpv4.BgpCompleteTest.BGPTest</name>
-    <filename>inet.examples.bgpv4.BgpCompleteTest.BGPTest.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.bgpv4.BgpUpdate.BGPTest</name>
-    <filename>inet.examples.bgpv4.BgpUpdate.BGPTest.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.networklayer.xmipv6.BindingCache</name>
@@ -273,52 +209,12 @@
     <filename>inet.mobility.single.BonnMotionMobility.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.examples.sctp.cmttest.BottlePath</name>
-    <filename>inet.examples.sctp.cmttest.BottlePath.html</filename>
-  </compound>
-  <compound kind="class">
     <name>inet.physicallayer.pathloss.BreakpointPathLoss</name>
     <filename>inet.physicallayer.pathloss.BreakpointPathLoss.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.examples.inet.bulktransfer.BulkTransfer</name>
-    <filename>inet.examples.inet.bulktransfer.BulkTransfer.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.ipv6.ipv6bulk.BulkTransfer6</name>
-    <filename>inet.examples.ipv6.ipv6bulk.BulkTransfer6.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.inet.routerperf.BurstHost</name>
-    <filename>inet.examples.inet.routerperf.BurstHost.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.ethernet.lans.BusLAN</name>
-    <filename>inet.examples.ethernet.lans.BusLAN.html</filename>
-  </compound>
-  <compound kind="class">
     <name>inet.environment.objectcache.BvhObjectCache</name>
     <filename>inet.environment.objectcache.BvhObjectCache.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.ospfv2.fulltest.C</name>
-    <filename>inet.examples.ospfv2.fulltest.C.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.ethernet.lans.cable</name>
-    <filename>inet.examples.ethernet.lans.cable.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.inet.ipv4largenet.cable</name>
-    <filename>inet.examples.inet.ipv4largenet.cable.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.voipstream.VoIPStreamLargeNet.cable</name>
-    <filename>inet.examples.voipstream.VoIPStreamLargeNet.cable.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.general.ethernet.largeNet.cable</name>
-    <filename>inet.showcases.general.ethernet.largeNet.cable.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.power.base.CcEnergyConsumerBase</name>
@@ -349,82 +245,6 @@
     <filename>inet.mobility.single.CircleMobility.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.examples.wireless.ratecontrol.Client</name>
-    <filename>inet.examples.wireless.ratecontrol.Client.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.inet.tcpclientserver.ClientServer</name>
-    <filename>inet.examples.inet.tcpclientserver.ClientServer.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.inet.tcp_eth_reconnect.ClientServerWithSM</name>
-    <filename>inet.examples.inet.tcp_eth_reconnect.ClientServerWithSM.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.inet.tcp_ppp_reconnect.ClientServerWithSM</name>
-    <filename>inet.examples.inet.tcp_ppp_reconnect.ClientServerWithSM.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.internetcloud.cloudandhosts.CloudAndHosts</name>
-    <filename>inet.examples.internetcloud.cloudandhosts.CloudAndHosts.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.internetcloud.cloudandrouters.CloudAndRouters</name>
-    <filename>inet.examples.internetcloud.cloudandrouters.CloudAndRouters.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.wireless.coexistence.CoexistenceShowcase</name>
-    <filename>inet.showcases.wireless.coexistence.CoexistenceShowcase.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.wireless.coexistence.CoexistenceShowcase2</name>
-    <filename>inet.showcases.wireless.coexistence.CoexistenceShowcase2.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.wireless.coexistence.CoexistenceShowcase3</name>
-    <filename>inet.showcases.wireless.coexistence.CoexistenceShowcase3.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.wireless.coexistence.CoexistenceShowcase4</name>
-    <filename>inet.showcases.wireless.coexistence.CoexistenceShowcase4.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.wireless.coexistence.CoexistenceShowcase5</name>
-    <filename>inet.showcases.wireless.coexistence.CoexistenceShowcase5.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.wireless.coexistence.CoexistenceShowcase6</name>
-    <filename>inet.showcases.wireless.coexistence.CoexistenceShowcase6.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.inet.configurator.ComplexConfiguratorNetwork</name>
-    <filename>inet.examples.inet.configurator.ComplexConfiguratorNetwork.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.visualizer.transportconnection.Complexer</name>
-    <filename>inet.showcases.visualizer.transportconnection.Complexer.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.tutorials.configurator.ConfiguratorA</name>
-    <filename>inet.tutorials.configurator.ConfiguratorA.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.tutorials.configurator.ConfiguratorB</name>
-    <filename>inet.tutorials.configurator.ConfiguratorB.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.tutorials.configurator.ConfiguratorC</name>
-    <filename>inet.tutorials.configurator.ConfiguratorC.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.tutorials.configurator.ConfiguratorD</name>
-    <filename>inet.tutorials.configurator.ConfiguratorD.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.tutorials.configurator.ConfiguratorE</name>
-    <filename>inet.tutorials.configurator.ConfiguratorE.html</filename>
-  </compound>
-  <compound kind="class">
     <name>inet.physicallayer.antenna.ConstantGainAntenna</name>
     <filename>inet.physicallayer.antenna.ConstantGainAntenna.html</filename>
   </compound>
@@ -437,10 +257,6 @@
     <filename>inet.physicallayer.propagation.ConstantTimePropagation.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.mobility.single.ConstSpeedMobility</name>
-    <filename>inet.mobility.single.ConstSpeedMobility.html</filename>
-  </compound>
-  <compound kind="class">
     <name>inet.linklayer.ieee80211.mac.contention.Contention</name>
     <filename>inet.linklayer.ieee80211.mac.contention.Contention.html</filename>
   </compound>
@@ -449,40 +265,12 @@
     <filename>inet.physicallayer.common.bitlevel.ConvolutionalCoder.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.examples.inet.netperfmeter.coreChannel</name>
-    <filename>inet.examples.inet.netperfmeter.coreChannel.html</filename>
-  </compound>
-  <compound kind="class">
     <name>inet.node.xmipv6.CorrespondentNode6</name>
     <filename>inet.node.xmipv6.CorrespondentNode6.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.examples.wireless.corruptionmode.CorruptionModeExample</name>
-    <filename>inet.examples.wireless.corruptionmode.CorruptionModeExample.html</filename>
-  </compound>
-  <compound kind="class">
     <name>inet.physicallayer.antenna.CosineAntenna</name>
     <filename>inet.physicallayer.antenna.CosineAntenna.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.wireless.crosstalk.Crosstalk</name>
-    <filename>inet.examples.wireless.crosstalk.Crosstalk.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.wireless.crosstalk.CrosstalkShowcaseBaseNetwork</name>
-    <filename>inet.showcases.wireless.crosstalk.CrosstalkShowcaseBaseNetwork.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.wireless.crosstalk.CrosstalkShowcaseOneScalarRadioMediumModule</name>
-    <filename>inet.showcases.wireless.crosstalk.CrosstalkShowcaseOneScalarRadioMediumModule.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.wireless.crosstalk.CrosstalkShowcasePartiallyOverlappingFrequencyBands</name>
-    <filename>inet.showcases.wireless.crosstalk.CrosstalkShowcasePartiallyOverlappingFrequencyBands.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.wireless.crosstalk.CrosstalkShowcaseTwoScalarRadioMediumModules</name>
-    <filename>inet.showcases.wireless.crosstalk.CrosstalkShowcaseTwoScalarRadioMediumModules.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.linklayer.csmaca.CsmaCaInterface</name>
@@ -509,28 +297,8 @@
     <filename>inet.visualizer.linklayer.DataLinkVisualizer.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.showcases.visualizer.datalinkactivity.DataLinkVisualizerActivityLevelShowcase</name>
-    <filename>inet.showcases.visualizer.datalinkactivity.DataLinkVisualizerActivityLevelShowcase.html</filename>
-  </compound>
-  <compound kind="class">
     <name>inet.visualizer.base.DataLinkVisualizerBase</name>
     <filename>inet.visualizer.base.DataLinkVisualizerBase.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.visualizer.datalinkactivity.DataLinkVisualizerEnablingWiredShowcase</name>
-    <filename>inet.showcases.visualizer.datalinkactivity.DataLinkVisualizerEnablingWiredShowcase.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.visualizer.datalinkactivity.DataLinkVisualizerEnablingWirelessShowcase</name>
-    <filename>inet.showcases.visualizer.datalinkactivity.DataLinkVisualizerEnablingWirelessShowcase.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.visualizer.datalinkactivity.DataLinkVisualizerFilteringShowcase</name>
-    <filename>inet.showcases.visualizer.datalinkactivity.DataLinkVisualizerFilteringShowcase.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.visualizer.datalinkactivity.DataLinkVisualizerMobileShowcase</name>
-    <filename>inet.showcases.visualizer.datalinkactivity.DataLinkVisualizerMobileShowcase.html</filename>
   </compound>
   <compound kind="class">
     <name>ned.DatarateChannel</name>
@@ -553,10 +321,6 @@
     <filename>inet.common.queue.Delayer.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.examples.ipv6.demonetworketh.DemoNetworkEth</name>
-    <filename>inet.examples.ipv6.demonetworketh.DemoNetworkEth.html</filename>
-  </compound>
-  <compound kind="class">
     <name>inet.applications.dhcp.DhcpClient</name>
     <filename>inet.applications.dhcp.DhcpClient.html</filename>
   </compound>
@@ -565,24 +329,8 @@
     <filename>inet.applications.dhcp.DhcpServer.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.examples.dhcp.DHCPShutdownReboot</name>
-    <filename>inet.examples.dhcp.DHCPShutdownReboot.html</filename>
-  </compound>
-  <compound kind="class">
     <name>inet.physicallayer.obstacleloss.DielectricObstacleLoss</name>
     <filename>inet.physicallayer.obstacleloss.DielectricObstacleLoss.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.diffserv.onedomain.DiffservNetwork</name>
-    <filename>inet.examples.diffserv.onedomain.DiffservNetwork.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.diffserv.simple_.DiffservNetwork</name>
-    <filename>inet.examples.diffserv.simple_.DiffservNetwork.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.general.diffserv.DiffservNetwork</name>
-    <filename>inet.showcases.general.diffserv.DiffservNetwork.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.networklayer.diffserv.DiffservQueue</name>
@@ -601,10 +349,6 @@
     <filename>inet.physicallayer.antenna.DipoleAntenna.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.showcases.wireless.directionalselectivity.DirectionalSelectivityShowcase</name>
-    <filename>inet.showcases.wireless.directionalselectivity.DirectionalSelectivityShowcase.html</filename>
-  </compound>
-  <compound kind="class">
     <name>inet.common.queue.DropTailQueue</name>
     <filename>inet.common.queue.DropTailQueue.html</filename>
   </compound>
@@ -621,88 +365,16 @@
     <filename>inet.routing.dsdv.Dsdv.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.examples.manetrouting.dsdv.DsdvNetwork</name>
-    <filename>inet.examples.manetrouting.dsdv.DsdvNetwork.html</filename>
-  </compound>
-  <compound kind="class">
     <name>inet.node.dsdv.DsdvRouter</name>
     <filename>inet.node.dsdv.DsdvRouter.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.diffserv.onedomain.DSQueue1</name>
-    <filename>inet.examples.diffserv.onedomain.DSQueue1.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.diffserv.onedomain.DSQueue2</name>
-    <filename>inet.examples.diffserv.onedomain.DSQueue2.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.routing.dymo.Dymo</name>
     <filename>inet.routing.dymo.Dymo.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.examples.manetrouting.dymo.DYMONetwork</name>
-    <filename>inet.examples.manetrouting.dymo.DYMONetwork.html</filename>
-  </compound>
-  <compound kind="class">
     <name>inet.node.dymo.DymoRouter</name>
     <filename>inet.node.dymo.DymoRouter.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.wireless.dynamic.DynamicHost</name>
-    <filename>inet.examples.wireless.dynamic.DynamicHost.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.general.dynamic.DynamicHost</name>
-    <filename>inet.showcases.general.dynamic.DynamicHost.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.general.dynamicNetworks.DynamicHost</name>
-    <filename>inet.showcases.general.dynamicNetworks.DynamicHost.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.wireless.dynamic.DynamicRadioNetwork</name>
-    <filename>inet.examples.wireless.dynamic.DynamicRadioNetwork.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.general.dynamic.DynamicShowcase</name>
-    <filename>inet.showcases.general.dynamic.DynamicShowcase.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.general.dynamicNetworks.DynamicShowcase</name>
-    <filename>inet.showcases.general.dynamicNetworks.DynamicShowcase.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.general.dynamicNetworks.DynamicShowcase2</name>
-    <filename>inet.showcases.general.dynamicNetworks.DynamicShowcase2.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.general.dynamicNetworks.DynamicShowcase3</name>
-    <filename>inet.showcases.general.dynamicNetworks.DynamicShowcase3.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.ospfv2.dynamictest.DynamicTest</name>
-    <filename>inet.examples.ospfv2.dynamictest.DynamicTest.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.rip.dynamictest.DynamicTest</name>
-    <filename>inet.examples.rip.dynamictest.DynamicTest.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.internetcloud.earthcloud.EarthCloud</name>
-    <filename>inet.examples.internetcloud.earthcloud.EarthCloud.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.visualizer.earth.EarthVisualization2</name>
-    <filename>inet.showcases.visualizer.earth.EarthVisualization2.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.visualizer.earth.EarthVisualization3</name>
-    <filename>inet.showcases.visualizer.earth.EarthVisualization3.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.visualizer.earth.EarthVisualizationExample</name>
-    <filename>inet.showcases.visualizer.earth.EarthVisualizationExample.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.networklayer.common.EchoProtocol</name>
@@ -761,24 +433,12 @@
     <filename>inet.physicallayer.base.packetlevel.ErrorModelBase.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.showcases.wireless.errorrate.ErrorRateShowcase</name>
-    <filename>inet.showcases.wireless.errorrate.ErrorRateShowcase.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.wireless.errorrate.ErrorRateTest</name>
-    <filename>inet.examples.wireless.errorrate.ErrorRateTest.html</filename>
-  </compound>
-  <compound kind="class">
     <name>inet.node.ethernet.Eth100G</name>
     <filename>inet.node.ethernet.Eth100G.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.node.ethernet.Eth100M</name>
     <filename>inet.node.ethernet.Eth100M.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.tutorials.configurator.Eth100MLong</name>
-    <filename>inet.tutorials.configurator.Eth100MLong.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.node.ethernet.Eth10G</name>
@@ -845,10 +505,6 @@
     <filename>inet.node.ethernet.EtherLink.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.linklayer.ethernet.EtherLlc</name>
-    <filename>inet.linklayer.ethernet.EtherLlc.html</filename>
-  </compound>
-  <compound kind="class">
     <name>inet.linklayer.ethernet.EtherMac</name>
     <filename>inet.linklayer.ethernet.EtherMac.html</filename>
   </compound>
@@ -857,20 +513,12 @@
     <filename>inet.linklayer.ethernet.EtherMacFullDuplex.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.applications.ethernet.EthernetApplication</name>
-    <filename>inet.applications.ethernet.EthernetApplication.html</filename>
-  </compound>
-  <compound kind="class">
     <name>inet.linklayer.ethernet.EthernetInterface</name>
     <filename>inet.linklayer.ethernet.EthernetInterface.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.examples.httptools.socket.tenserverssocket.ethernetline</name>
-    <filename>inet.examples.httptools.socket.tenserverssocket.ethernetline.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.mobileipv6.ethernetline</name>
-    <filename>inet.examples.mobileipv6.ethernetline.html</filename>
+    <name>inet.physicallayer.ethernet.EtherPhy</name>
+    <filename>inet.physicallayer.ethernet.EtherPhy.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.linklayer.ethernet.EtherQosQueue</name>
@@ -889,52 +537,68 @@
     <filename>inet.linklayer.common.ExampleQosClassifier.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.linklayer.ext.Ext</name>
-    <filename>inet.linklayer.ext.Ext.html</filename>
+    <name>inet.emulation.linklayer.ethernet.ExtEthernetSocket</name>
+    <filename>inet.emulation.linklayer.ethernet.ExtEthernetSocket.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.examples.emulation.extclient.ExtClient</name>
-    <filename>inet.examples.emulation.extclient.ExtClient.html</filename>
+    <name>inet.emulation.linklayer.ethernet.ExtEthernetTapDevice</name>
+    <filename>inet.emulation.linklayer.ethernet.ExtEthernetTapDevice.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.linklayer.ext.ExtInterface</name>
-    <filename>inet.linklayer.ext.ExtInterface.html</filename>
+    <name>inet.emulation.common.ExtInterface</name>
+    <filename>inet.emulation.common.ExtInterface.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.examples.emulation.pinger.ExtPinger</name>
-    <filename>inet.examples.emulation.pinger.ExtPinger.html</filename>
+    <name>inet.emulation.networklayer.ipv4.ExtIpv4Socket</name>
+    <filename>inet.emulation.networklayer.ipv4.ExtIpv4Socket.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.examples.emulation.extserver.extserver</name>
-    <filename>inet.examples.emulation.extserver.extserver.html</filename>
+    <name>inet.emulation.networklayer.ipv4.ExtIpv4TunDevice</name>
+    <filename>inet.emulation.networklayer.ipv4.ExtIpv4TunDevice.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.emulation.linklayer.ethernet.ExtLowerEthernetInterface</name>
+    <filename>inet.emulation.linklayer.ethernet.ExtLowerEthernetInterface.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.emulation.networklayer.ipv4.ExtLowerIpv4</name>
+    <filename>inet.emulation.networklayer.ipv4.ExtLowerIpv4.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.emulation.networklayer.ipv4.ExtLowerIpv4NetworkLayer</name>
+    <filename>inet.emulation.networklayer.ipv4.ExtLowerIpv4NetworkLayer.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.emulation.transportlayer.udp.ExtLowerUdp</name>
+    <filename>inet.emulation.transportlayer.udp.ExtLowerUdp.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.emulation.linklayer.ethernet.ExtUpperEthernetInterface</name>
+    <filename>inet.emulation.linklayer.ethernet.ExtUpperEthernetInterface.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.emulation.linklayer.ieee80211.ExtUpperIeee80211Interface</name>
+    <filename>inet.emulation.linklayer.ieee80211.ExtUpperIeee80211Interface.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.emulation.networklayer.ipv4.ExtUpperIpv4</name>
+    <filename>inet.emulation.networklayer.ipv4.ExtUpperIpv4.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.emulation.networklayer.ipv4.ExtUpperIpv4NetworkLayer</name>
+    <filename>inet.emulation.networklayer.ipv4.ExtUpperIpv4NetworkLayer.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.mobility.single.FacingMobility</name>
     <filename>inet.mobility.single.FacingMobility.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.examples.mobileipv6.fiberline</name>
-    <filename>inet.examples.mobileipv6.fiberline.html</filename>
-  </compound>
-  <compound kind="class">
     <name>inet.common.queue.FifoQueue</name>
     <filename>inet.common.queue.FifoQueue.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.examples.wireless.filtering.FilteringExampleNetwork</name>
-    <filename>inet.examples.wireless.filtering.FilteringExampleNetwork.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.visualizer.filtering.FilteringShowcase</name>
-    <filename>inet.showcases.visualizer.filtering.FilteringShowcase.html</filename>
-  </compound>
-  <compound kind="class">
     <name>inet.environment.ground.FlatGround</name>
     <filename>inet.environment.ground.FlatGround.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.inet.flatnet.FlatNet</name>
-    <filename>inet.examples.inet.flatnet.FlatNet.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.physicallayer.base.packetlevel.FlatRadioBase</name>
@@ -961,14 +625,6 @@
     <filename>inet.routing.gpsr.Gpsr.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.examples.manetrouting.gpsr.GPSRNetworkManual</name>
-    <filename>inet.examples.manetrouting.gpsr.GPSRNetworkManual.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.manetrouting.gpsr.GPSRNetworkRandom</name>
-    <filename>inet.examples.manetrouting.gpsr.GPSRNetworkRandom.html</filename>
-  </compound>
-  <compound kind="class">
     <name>inet.node.gpsr.GpsrRouter</name>
     <filename>inet.node.gpsr.GpsrRouter.html</filename>
   </compound>
@@ -981,14 +637,6 @@
     <filename>inet.environment.objectcache.GridObjectCache.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.examples.wireless.handover.HandoverNetwork</name>
-    <filename>inet.examples.wireless.handover.HandoverNetwork.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.wireless.handover.HandoverShowcase</name>
-    <filename>inet.showcases.wireless.handover.HandoverShowcase.html</filename>
-  </compound>
-  <compound kind="class">
     <name>inet.linklayer.ieee80211.mac.channelaccess.Hcca</name>
     <filename>inet.linklayer.ieee80211.mac.channelaccess.Hcca.html</filename>
   </compound>
@@ -997,36 +645,12 @@
     <filename>inet.linklayer.ieee80211.mac.coordinationfunction.Hcf.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.examples.wireless.hiddennode.HiddenNode</name>
-    <filename>inet.examples.wireless.hiddennode.HiddenNode.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.wireless.hiddennode.HiddenNodeShowcase</name>
-    <filename>inet.showcases.wireless.hiddennode.HiddenNodeShowcase.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.inet.hierarchical.Hierarchical</name>
-    <filename>inet.examples.inet.hierarchical.Hierarchical.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.inet.hierarchical99.Hierarchical99</name>
-    <filename>inet.examples.inet.hierarchical99.Hierarchical99.html</filename>
-  </compound>
-  <compound kind="class">
     <name>inet.node.xmipv6.HomeAgent6</name>
     <filename>inet.node.xmipv6.HomeAgent6.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.examples.adhoc.hostautoconf.Host</name>
-    <filename>inet.examples.adhoc.hostautoconf.Host.html</filename>
-  </compound>
-  <compound kind="class">
     <name>inet.networklayer.configurator.ipv4.HostAutoConfigurator</name>
     <filename>inet.networklayer.configurator.ipv4.HostAutoConfigurator.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.httptools.socket.tenserverssocket.Http10Servers</name>
-    <filename>inet.examples.httptools.socket.tenserverssocket.Http10Servers.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.applications.httptools.browser.HttpBrowser</name>
@@ -1041,20 +665,8 @@
     <filename>inet.applications.httptools.configurator.HttpController.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.examples.httptools.direct.flashdirect.HttpDirectFlash</name>
-    <filename>inet.examples.httptools.direct.flashdirect.HttpDirectFlash.html</filename>
-  </compound>
-  <compound kind="class">
     <name>inet.node.httptools.HttpDirectHost</name>
     <filename>inet.node.httptools.HttpDirectHost.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.httptools.direct.pairdirect.HttpDirectPair</name>
-    <filename>inet.examples.httptools.direct.pairdirect.HttpDirectPair.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.httptools.socket.simpleddos.HttpNnodes</name>
-    <filename>inet.examples.httptools.socket.simpleddos.HttpNnodes.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.applications.httptools.server.HttpServer</name>
@@ -1079,14 +691,6 @@
   <compound kind="class">
     <name>inet.applications.httptools.server.HttpServerEvilB</name>
     <filename>inet.applications.httptools.server.HttpServerEvilB.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.httptools.socket.pairsocket.HttpSockPair</name>
-    <filename>inet.examples.httptools.socket.pairsocket.HttpSockPair.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.ethernet.lans.HubLAN</name>
-    <filename>inet.examples.ethernet.lans.HubLAN.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.physicallayer.contract.bitlevel.IAnalogDigitalConverter</name>
@@ -1253,8 +857,12 @@
     <filename>inet.physicallayer.ieee80211.bitlevel.Ieee80211LayeredScalarRadioMedium.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.showcases.wireless.ieee80211levelofdetail.Ieee80211LevelofDetailShowcase</name>
-    <filename>inet.showcases.wireless.ieee80211levelofdetail.Ieee80211LevelofDetailShowcase.html</filename>
+    <name>inet.linklayer.ieee80211.llc.Ieee80211LlcEpd</name>
+    <filename>inet.linklayer.ieee80211.llc.Ieee80211LlcEpd.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.linklayer.ieee80211.llc.Ieee80211LlcLpd</name>
+    <filename>inet.linklayer.ieee80211.llc.Ieee80211LlcLpd.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.linklayer.ieee80211.mac.Ieee80211Mac</name>
@@ -1377,22 +985,6 @@
     <filename>inet.physicallayer.ieee80211.packetlevel.Ieee80211UnitDiskTransmitter.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.showcases.visualizer.ieee80211.Ieee80211VisualizationAdvancedFeaturesShowcase</name>
-    <filename>inet.showcases.visualizer.ieee80211.Ieee80211VisualizationAdvancedFeaturesShowcase.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.visualizer.ieee80211.Ieee80211VisualizationDisplayingAssociationsShowcase</name>
-    <filename>inet.showcases.visualizer.ieee80211.Ieee80211VisualizationDisplayingAssociationsShowcase.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.visualizer.ieee80211.Ieee80211VisualizationSignalLevelsShowcase</name>
-    <filename>inet.showcases.visualizer.ieee80211.Ieee80211VisualizationSignalLevelsShowcase.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.visualizer.ieee80211.Ieee80211VisualizationVisualizingHandoverShowcase</name>
-    <filename>inet.showcases.visualizer.ieee80211.Ieee80211VisualizationVisualizingHandoverShowcase.html</filename>
-  </compound>
-  <compound kind="class">
     <name>inet.visualizer.linklayer.Ieee80211Visualizer</name>
     <filename>inet.visualizer.linklayer.Ieee80211Visualizer.html</filename>
   </compound>
@@ -1409,12 +1001,32 @@
     <filename>inet.linklayer.ieee802154.Ieee802154Mac.html</filename>
   </compound>
   <compound kind="class">
+    <name>inet.physicallayer.ieee802154.packetlevel.Ieee802154NarrowbandDimensionalRadio</name>
+    <filename>inet.physicallayer.ieee802154.packetlevel.Ieee802154NarrowbandDimensionalRadio.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.physicallayer.ieee802154.packetlevel.Ieee802154NarrowbandDimensionalRadioMedium</name>
+    <filename>inet.physicallayer.ieee802154.packetlevel.Ieee802154NarrowbandDimensionalRadioMedium.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.physicallayer.ieee802154.packetlevel.Ieee802154NarrowbandDimensionalReceiver</name>
+    <filename>inet.physicallayer.ieee802154.packetlevel.Ieee802154NarrowbandDimensionalReceiver.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.physicallayer.ieee802154.packetlevel.Ieee802154NarrowbandDimensionalTransmitter</name>
+    <filename>inet.physicallayer.ieee802154.packetlevel.Ieee802154NarrowbandDimensionalTransmitter.html</filename>
+  </compound>
+  <compound kind="class">
     <name>inet.linklayer.ieee802154.Ieee802154NarrowbandInterface</name>
     <filename>inet.linklayer.ieee802154.Ieee802154NarrowbandInterface.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.linklayer.ieee802154.Ieee802154NarrowbandMac</name>
     <filename>inet.linklayer.ieee802154.Ieee802154NarrowbandMac.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.physicallayer.ieee802154.packetlevel.Ieee802154NarrowbandRadio</name>
+    <filename>inet.physicallayer.ieee802154.packetlevel.Ieee802154NarrowbandRadio.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.physicallayer.ieee802154.packetlevel.Ieee802154NarrowbandScalarRadio</name>
@@ -1431,10 +1043,6 @@
   <compound kind="class">
     <name>inet.physicallayer.ieee802154.packetlevel.Ieee802154NarrowbandScalarTransmitter</name>
     <filename>inet.physicallayer.ieee802154.packetlevel.Ieee802154NarrowbandScalarTransmitter.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.wireless.ieee802154.Ieee802154Showcase</name>
-    <filename>inet.showcases.wireless.ieee802154.Ieee802154Showcase.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.linklayer.ieee802154.Ieee802154UwbIrInterface</name>
@@ -1459,6 +1067,10 @@
   <compound kind="class">
     <name>inet.linklayer.ieee8021d.relay.Ieee8021dRelay</name>
     <filename>inet.linklayer.ieee8021d.relay.Ieee8021dRelay.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.linklayer.ieee8021q.Ieee8021qEncap</name>
+    <filename>inet.linklayer.ieee8021q.Ieee8021qEncap.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.linklayer.ieee8022.Ieee8022Llc</name>
@@ -1581,6 +1193,10 @@
     <filename>inet.linklayer.ieee80211.mgmt.IIeee80211Agent.html</filename>
   </compound>
   <compound kind="class">
+    <name>inet.linklayer.ieee80211.llc.IIeee80211Llc</name>
+    <filename>inet.linklayer.ieee80211.llc.IIeee80211Llc.html</filename>
+  </compound>
+  <compound kind="class">
     <name>inet.linklayer.ieee80211.IIeee80211Mac</name>
     <filename>inet.linklayer.ieee80211.IIeee80211Mac.html</filename>
   </compound>
@@ -1595,6 +1211,10 @@
   <compound kind="class">
     <name>inet.linklayer.common.IIeee8021dQosClassifier</name>
     <filename>inet.linklayer.common.IIeee8021dQosClassifier.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.linklayer.ieee8021q.IIeee8021qEncap</name>
+    <filename>inet.linklayer.ieee8021q.IIeee8021qEncap.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.linklayer.ieee8022.IIeee8022Llc</name>
@@ -1623,6 +1243,10 @@
   <compound kind="class">
     <name>inet.physicallayer.contract.bitlevel.IInterleaver</name>
     <filename>inet.physicallayer.contract.bitlevel.IInterleaver.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.networklayer.ipv4.IIpv4</name>
+    <filename>inet.networklayer.ipv4.IIpv4.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.networklayer.contract.IIpv6Tunneling</name>
@@ -1725,6 +1349,14 @@
     <filename>inet.networklayer.contract.INetworkLayer.html</filename>
   </compound>
   <compound kind="class">
+    <name>inet.networklayer.contract.INetworkLayerLower</name>
+    <filename>inet.networklayer.contract.INetworkLayerLower.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>inet.networklayer.contract.INetworkLayerUpper</name>
+    <filename>inet.networklayer.contract.INetworkLayerUpper.html</filename>
+  </compound>
+  <compound kind="class">
     <name>inet.node.inet.INetworkNode</name>
     <filename>inet.node.inet.INetworkNode.html</filename>
   </compound>
@@ -1757,22 +1389,6 @@
     <filename>inet.visualizer.base.InfoVisualizerBase.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.showcases.wireless.infrastructure.InfrastructureShowcaseA</name>
-    <filename>inet.showcases.wireless.infrastructure.InfrastructureShowcaseA.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.wireless.infrastructure.InfrastructureShowcaseB</name>
-    <filename>inet.showcases.wireless.infrastructure.InfrastructureShowcaseB.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.wireless.infrastructure.InfrastructureShowcaseBase</name>
-    <filename>inet.showcases.wireless.infrastructure.InfrastructureShowcaseBase.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.visualizer.instrument.InstrumentShowcase</name>
-    <filename>inet.showcases.visualizer.instrument.InstrumentShowcase.html</filename>
-  </compound>
-  <compound kind="class">
     <name>inet.visualizer.integrated.IntegratedCanvasVisualizer</name>
     <filename>inet.visualizer.integrated.IntegratedCanvasVisualizer.html</filename>
   </compound>
@@ -1797,6 +1413,10 @@
     <filename>inet.visualizer.integrated.IntegratedVisualizer.html</filename>
   </compound>
   <compound kind="class">
+    <name>inet.networklayer.common.InterfaceEntry</name>
+    <filename>inet.networklayer.common.InterfaceEntry.html</filename>
+  </compound>
+  <compound kind="class">
     <name>inet.networklayer.common.InterfaceTable</name>
     <filename>inet.networklayer.common.InterfaceTable.html</filename>
   </compound>
@@ -1807,14 +1427,6 @@
   <compound kind="class">
     <name>inet.visualizer.linklayer.InterfaceTableOsgVisualizer</name>
     <filename>inet.visualizer.linklayer.InterfaceTableOsgVisualizer.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.visualizer.interfacetable.InterfaceTableVisualizationAdvancedFeaturesShowcase</name>
-    <filename>inet.showcases.visualizer.interfacetable.InterfaceTableVisualizationAdvancedFeaturesShowcase.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.visualizer.interfacetable.InterfaceTableVisualizationEnablingVisualizationShowcase</name>
-    <filename>inet.showcases.visualizer.interfacetable.InterfaceTableVisualizationEnablingVisualizationShowcase.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.visualizer.linklayer.InterfaceTableVisualizer</name>
@@ -1897,24 +1509,12 @@
     <filename>inet.networklayer.ipv4.Ipv4.html</filename>
   </compound>
   <compound kind="class">
+    <name>inet.emulation.networklayer.ipv4.Ipv4Encap</name>
+    <filename>inet.emulation.networklayer.ipv4.Ipv4Encap.html</filename>
+  </compound>
+  <compound kind="class">
     <name>inet.networklayer.configurator.ipv4.Ipv4FlatNetworkConfigurator</name>
     <filename>inet.networklayer.configurator.ipv4.Ipv4FlatNetworkConfigurator.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.inet.ipv4hook.Ipv4hook</name>
-    <filename>inet.examples.inet.ipv4hook.Ipv4hook.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.inet.ipv4largenet.IPv4LargeLAN</name>
-    <filename>inet.examples.inet.ipv4largenet.IPv4LargeLAN.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.inet.ipv4largenet.IPv4LargeNet</name>
-    <filename>inet.examples.inet.ipv4largenet.IPv4LargeNet.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.inet.ipv4largenet.IPv4MediumLAN</name>
-    <filename>inet.examples.inet.ipv4largenet.IPv4MediumLAN.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.networklayer.ipv4.Ipv4NatTable</name>
@@ -1935,10 +1535,6 @@
   <compound kind="class">
     <name>inet.networklayer.ipv4.Ipv4RoutingTable</name>
     <filename>inet.networklayer.ipv4.Ipv4RoutingTable.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.inet.ipv4largenet.IPv4SmallLAN</name>
-    <filename>inet.examples.inet.ipv4largenet.IPv4SmallLAN.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.networklayer.ipv6.Ipv6</name>
@@ -2097,6 +1693,10 @@
     <filename>ned.IUnidirectionalChannel.html</filename>
   </compound>
   <compound kind="class">
+    <name>inet.linklayer.contract.IVlanInterface</name>
+    <filename>inet.linklayer.contract.IVlanInterface.html</filename>
+  </compound>
+  <compound kind="class">
     <name>inet.linklayer.contract.IWiredInterface</name>
     <filename>inet.linklayer.contract.IWiredInterface.html</filename>
   </compound>
@@ -2113,52 +1713,12 @@
     <filename>inet.common.queue.Join.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.examples.inet.kidsnw1.KIDSNw1</name>
-    <filename>inet.examples.inet.kidsnw1.KIDSNw1.html</filename>
-  </compound>
-  <compound kind="class">
     <name>inet.linklayer.configurator.L2NetworkConfigurator</name>
     <filename>inet.linklayer.configurator.L2NetworkConfigurator.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.linklayer.configurator.L2NodeConfigurator</name>
     <filename>inet.linklayer.configurator.L2NodeConfigurator.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.wireless.lan80211.Lan80211</name>
-    <filename>inet.examples.wireless.lan80211.Lan80211.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.wireless.lan80211ac.Lan80211ac</name>
-    <filename>inet.examples.wireless.lan80211ac.Lan80211ac.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.ethernet.lans.LargeLAN</name>
-    <filename>inet.examples.ethernet.lans.LargeLAN.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.general.ethernet.largeNet.LargeLAN</name>
-    <filename>inet.showcases.general.ethernet.largeNet.LargeLAN.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.ethernet.lans.LargeNet</name>
-    <filename>inet.examples.ethernet.lans.LargeNet.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.ieee8021d.LargeNet</name>
-    <filename>inet.examples.ieee8021d.LargeNet.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.general.ethernet.largeNet.LargeNet</name>
-    <filename>inet.showcases.general.ethernet.largeNet.LargeNet.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.wireless.layered80211.Layered80211</name>
-    <filename>inet.examples.wireless.layered80211.Layered80211.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.wireless.layeredapsk.LayeredApsk</name>
-    <filename>inet.examples.wireless.layeredapsk.LayeredApsk.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.physicallayer.analogmodel.bitlevel.LayeredDimensionalAnalogModel</name>
@@ -2185,28 +1745,12 @@
     <filename>inet.node.mpls.LdpMplsRouter.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.examples.mpls.ldp.LDPTEST</name>
-    <filename>inet.examples.mpls.ldp.LDPTEST.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.wireless.levelofdetail.LevelofDetail</name>
-    <filename>inet.showcases.wireless.levelofdetail.LevelofDetail.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.inet.tcpwindowscale.LFNPath</name>
-    <filename>inet.examples.inet.tcpwindowscale.LFNPath.html</filename>
-  </compound>
-  <compound kind="class">
     <name>inet.networklayer.mpls.LibTable</name>
     <filename>inet.networklayer.mpls.LibTable.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.mobility.single.LinearMobility</name>
     <filename>inet.mobility.single.LinearMobility.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.visualizer.linkbreak.LinkBreakA</name>
-    <filename>inet.showcases.visualizer.linkbreak.LinkBreakA.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.visualizer.linklayer.LinkBreakCanvasVisualizer</name>
@@ -2269,18 +1813,6 @@
     <filename>inet.linklayer.ethernet.switch.MacRelayUnit.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.examples.wireless.mactest.MacTest</name>
-    <filename>inet.examples.wireless.mactest.MacTest.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.routing.manet.ManetprotocolsShowcaseA</name>
-    <filename>inet.showcases.routing.manet.ManetprotocolsShowcaseA.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.routing.manet.ManetprotocolsShowcaseB</name>
-    <filename>inet.showcases.routing.manet.ManetprotocolsShowcaseB.html</filename>
-  </compound>
-  <compound kind="class">
     <name>inet.node.inet.ManetRouter</name>
     <filename>inet.node.inet.ManetRouter.html</filename>
   </compound>
@@ -2301,28 +1833,8 @@
     <filename>inet.linklayer.ieee80211.mac.coordinationfunction.Mcf.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.showcases.visualizer.radiomediumactivity.MediumActivityDisplayingSignalsTransmissionsReceptionsShowcase</name>
-    <filename>inet.showcases.visualizer.radiomediumactivity.MediumActivityDisplayingSignalsTransmissionsReceptionsShowcase.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.visualizer.radiomediumactivity.MediumActivityInterferingSignalsShowcase</name>
-    <filename>inet.showcases.visualizer.radiomediumactivity.MediumActivityInterferingSignalsShowcase.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.visualizer.radiomediumactivity.MediumActivityMultipleNodesShowcase</name>
-    <filename>inet.showcases.visualizer.radiomediumactivity.MediumActivityMultipleNodesShowcase.html</filename>
-  </compound>
-  <compound kind="class">
     <name>inet.visualizer.physicallayer.MediumCanvasVisualizer</name>
     <filename>inet.visualizer.physicallayer.MediumCanvasVisualizer.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.ethernet.lans.MediumLAN</name>
-    <filename>inet.examples.ethernet.lans.MediumLAN.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.general.ethernet.largeNet.MediumLAN</name>
-    <filename>inet.showcases.general.ethernet.largeNet.MediumLAN.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.physicallayer.common.packetlevel.MediumLimitCache</name>
@@ -2349,18 +1861,6 @@
     <filename>inet.common.MessageDispatcher.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.examples.mobileipv6.mIPv6Network</name>
-    <filename>inet.examples.mobileipv6.mIPv6Network.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.ethernet.lans.MixedLAN</name>
-    <filename>inet.examples.ethernet.lans.MixedLAN.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.rip.mixednetwork.MixedNetwork</name>
-    <filename>inet.examples.rip.mixednetwork.MixedNetwork.html</filename>
-  </compound>
-  <compound kind="class">
     <name>inet.mobility.group.MoBanCoordinator</name>
     <filename>inet.mobility.group.MoBanCoordinator.html</filename>
   </compound>
@@ -2369,24 +1869,8 @@
     <filename>inet.mobility.group.MoBanLocal.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.examples.mobility.MoBANNetwork</name>
-    <filename>inet.examples.mobility.MoBANNetwork.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.mobility.MobileHost</name>
-    <filename>inet.examples.mobility.MobileHost.html</filename>
-  </compound>
-  <compound kind="class">
     <name>inet.node.xmipv6.MobileHost6</name>
     <filename>inet.node.xmipv6.MobileHost6.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.mobility.MobileNetwork</name>
-    <filename>inet.examples.mobility.MobileNetwork.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.mobility.MobileNetworkWithScenario</name>
-    <filename>inet.examples.mobility.MobileNetworkWithScenario.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.mobility.base.MobilityBase</name>
@@ -2401,100 +1885,12 @@
     <filename>inet.visualizer.mobility.MobilityOsgVisualizer.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.showcases.general.compoundMobility.MobilityShowcase</name>
-    <filename>inet.showcases.general.compoundMobility.MobilityShowcase.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.general.simpleMobility.MobilityShowcase</name>
-    <filename>inet.showcases.general.simpleMobility.MobilityShowcase.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.general.mobility3D.MobilityShowcase3D</name>
-    <filename>inet.showcases.general.mobility3D.MobilityShowcase3D.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.general.mobility.MobilityShowcaseA</name>
-    <filename>inet.showcases.general.mobility.MobilityShowcaseA.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.general.mobility.MobilityShowcaseB</name>
-    <filename>inet.showcases.general.mobility.MobilityShowcaseB.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.general.mobility.MobilityShowcaseC</name>
-    <filename>inet.showcases.general.mobility.MobilityShowcaseC.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.general.mobility.MobilityShowcaseE</name>
-    <filename>inet.showcases.general.mobility.MobilityShowcaseE.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.general.mobility.MobilityShowcaseG</name>
-    <filename>inet.showcases.general.mobility.MobilityShowcaseG.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.general.mobility.MobilityShowcaseH</name>
-    <filename>inet.showcases.general.mobility.MobilityShowcaseH.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.general.mobility.MobilityShowcaseI</name>
-    <filename>inet.showcases.general.mobility.MobilityShowcaseI.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.general.mobility.MobilityShowcaseK</name>
-    <filename>inet.showcases.general.mobility.MobilityShowcaseK.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.general.mobility.MobilityShowcaseL</name>
-    <filename>inet.showcases.general.mobility.MobilityShowcaseL.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.general.mobility.MobilityShowcaseM</name>
-    <filename>inet.showcases.general.mobility.MobilityShowcaseM.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.general.mobility.MobilityShowcaseM1</name>
-    <filename>inet.showcases.general.mobility.MobilityShowcaseM1.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.general.mobility.MobilityShowcaseM2</name>
-    <filename>inet.showcases.general.mobility.MobilityShowcaseM2.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.general.mobility.MobilityShowcaseM3</name>
-    <filename>inet.showcases.general.mobility.MobilityShowcaseM3.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.general.mobility.MobilityShowcaseM3_50</name>
-    <filename>inet.showcases.general.mobility.MobilityShowcaseM3_50.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.general.mobility.MobilityShowcaseM3_75</name>
-    <filename>inet.showcases.general.mobility.MobilityShowcaseM3_75.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.general.mobility.MobilityShowcaseN</name>
-    <filename>inet.showcases.general.mobility.MobilityShowcaseN.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.general.mobility.MobilityShowcaseSimplistic1</name>
-    <filename>inet.showcases.general.mobility.MobilityShowcaseSimplistic1.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.general.mobility.MobilityShowcaseSimplistic2</name>
-    <filename>inet.showcases.general.mobility.MobilityShowcaseSimplistic2.html</filename>
-  </compound>
-  <compound kind="class">
     <name>inet.visualizer.mobility.MobilityVisualizer</name>
     <filename>inet.visualizer.mobility.MobilityVisualizer.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.visualizer.base.MobilityVisualizerBase</name>
     <filename>inet.visualizer.base.MobilityVisualizerBase.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.visualizer.mobility.MobilityVisualizerShowcase</name>
-    <filename>inet.showcases.visualizer.mobility.MobilityVisualizerShowcase.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.mobility.base.MovingMobilityBase</name>
@@ -2505,44 +1901,12 @@
     <filename>inet.networklayer.mpls.Mpls.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.examples.sctp.multihomed.multi</name>
-    <filename>inet.examples.sctp.multihomed.multi.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.inet.multicast.MulticastNetwork</name>
-    <filename>inet.examples.inet.multicast.MulticastNetwork.html</filename>
-  </compound>
-  <compound kind="class">
     <name>inet.node.inet.MulticastRouter</name>
     <filename>inet.node.inet.MulticastRouter.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.networklayer.diffserv.MultiFieldClassifier</name>
     <filename>inet.networklayer.diffserv.MultiFieldClassifier.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.sctp.cmttest.multihomed</name>
-    <filename>inet.examples.sctp.cmttest.multihomed.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.manetrouting.multiradio.MultiRadio</name>
-    <filename>inet.examples.manetrouting.multiradio.MultiRadio.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.wireless.multiradio.MultiRadio</name>
-    <filename>inet.examples.wireless.multiradio.MultiRadio.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.wireless.multiradio.MultiRadioShowcase</name>
-    <filename>inet.showcases.wireless.multiradio.MultiRadioShowcase.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.inet.ipv4hook.MyHost</name>
-    <filename>inet.examples.inet.ipv4hook.MyHost.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.inet.ipv4hook.MyRouter</name>
-    <filename>inet.examples.inet.ipv4hook.MyRouter.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.physicallayer.pathloss.NakagamiFading</name>
@@ -2561,56 +1925,8 @@
     <filename>inet.physicallayer.base.packetlevel.NarrowbandTransmitterBase.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.examples.inet.nclients.NClients</name>
-    <filename>inet.examples.inet.nclients.NClients.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.inet.shutdownrestart.NClients</name>
-    <filename>inet.examples.inet.shutdownrestart.NClients.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.sctp.nclients.NClients</name>
-    <filename>inet.examples.sctp.nclients.NClients.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.inet.nclients.NClients2</name>
-    <filename>inet.examples.inet.nclients.NClients2.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.ipv6.ipv6nclients.NClientsEth</name>
-    <filename>inet.examples.ipv6.ipv6nclients.NClientsEth.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.ipv6.nclients.NClientsEth</name>
-    <filename>inet.examples.ipv6.nclients.NClientsEth.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.ipv6.ipv6nclients.NClientsPPP</name>
-    <filename>inet.examples.ipv6.ipv6nclients.NClientsPPP.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.ipv6.nclients.NClientsPPP</name>
-    <filename>inet.examples.ipv6.nclients.NClientsPPP.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.neighborcache.NeighborCacheTest</name>
-    <filename>inet.examples.neighborcache.NeighborCacheTest.html</filename>
-  </compound>
-  <compound kind="class">
     <name>inet.physicallayer.neighborcache.NeighborListNeighborCache</name>
     <filename>inet.physicallayer.neighborcache.NeighborListNeighborCache.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.adhoc.idealwireless.Net</name>
-    <filename>inet.examples.adhoc.idealwireless.Net.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.bgpv4.BgpOpen.Net</name>
-    <filename>inet.examples.bgpv4.BgpOpen.Net.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.adhoc.ieee80211.Net80211</name>
-    <filename>inet.examples.adhoc.ieee80211.Net80211.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.common.misc.NetAnimTrace</name>
@@ -2627,18 +1943,6 @@
   <compound kind="class">
     <name>inet.applications.netperfmeter.NetPerfMeterHost</name>
     <filename>inet.applications.netperfmeter.NetPerfMeterHost.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.inet.igmp.Network</name>
-    <filename>inet.examples.inet.igmp.Network.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.pim.dm.assert.Network</name>
-    <filename>inet.examples.pim.dm.assert.Network.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.pim.iptv.Network</name>
-    <filename>inet.examples.pim.iptv.Network.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.networklayer.configurator.base.NetworkConfiguratorBase</name>
@@ -2685,26 +1989,6 @@
     <filename>inet.visualizer.base.NetworkNodeVisualizerBase.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.showcases.visualizer.networknode.NetworkNodeVisualizerShowcase</name>
-    <filename>inet.showcases.visualizer.networknode.NetworkNodeVisualizerShowcase.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.visualizer.networkpathactivity.NetworkPathComplexShowcase</name>
-    <filename>inet.showcases.visualizer.networkpathactivity.NetworkPathComplexShowcase.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.visualizer.networkpathactivity.NetworkPathMobileShowcase</name>
-    <filename>inet.showcases.visualizer.networkpathactivity.NetworkPathMobileShowcase.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.visualizer.networkpathactivity.NetworkPathRIPShowcase</name>
-    <filename>inet.showcases.visualizer.networkpathactivity.NetworkPathRIPShowcase.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.visualizer.networkpathactivity.NetworkPathSimpleShowcase</name>
-    <filename>inet.showcases.visualizer.networkpathactivity.NetworkPathSimpleShowcase.html</filename>
-  </compound>
-  <compound kind="class">
     <name>inet.networklayer.base.NetworkProtocolBase</name>
     <filename>inet.networklayer.base.NetworkProtocolBase.html</filename>
   </compound>
@@ -2737,10 +2021,6 @@
     <filename>inet.networklayer.nexthop.NextHopRoutingTable.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.examples.wireless.hiddennode.Node</name>
-    <filename>inet.examples.wireless.hiddennode.Node.html</filename>
-  </compound>
-  <compound kind="class">
     <name>inet.node.base.NodeBase</name>
     <filename>inet.node.base.NodeBase.html</filename>
   </compound>
@@ -2757,40 +2037,8 @@
     <filename>inet.common.queue.Nop.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.examples.emulation.extserver.NormalPath</name>
-    <filename>inet.examples.emulation.extserver.NormalPath.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.sctp.cmttest.NormalPath</name>
-    <filename>inet.examples.sctp.cmttest.NormalPath.html</filename>
-  </compound>
-  <compound kind="class">
     <name>inet.mobility.single.Ns2MotionMobility</name>
     <filename>inet.mobility.single.Ns2MotionMobility.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.objectcache.ObjectCacheTest</name>
-    <filename>inet.examples.objectcache.ObjectCacheTest.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.geometry.ObstacleIntersectionTest</name>
-    <filename>inet.examples.geometry.ObstacleIntersectionTest.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.visualizer.obstacleloss.ObstacleLossVisualizationEnablingShowcase</name>
-    <filename>inet.showcases.visualizer.obstacleloss.ObstacleLossVisualizationEnablingShowcase.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.visualizer.obstacleloss.ObstacleLossVisualizationMultipleObstaclesShowcase</name>
-    <filename>inet.showcases.visualizer.obstacleloss.ObstacleLossVisualizationMultipleObstaclesShowcase.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.wireless.obstacle.ObstacleTest</name>
-    <filename>inet.examples.wireless.obstacle.ObstacleTest.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.ospfv2.areas.OneNetArea</name>
-    <filename>inet.examples.ospfv2.areas.OneNetArea.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.linklayer.ieee80211.mac.ratecontrol.OnoeRateControl</name>
@@ -2833,14 +2081,6 @@
     <filename>inet.linklayer.ieee80211.mac.originator.OriginatorQosMacDataService.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.showcases.visualizer.osgdemo.osgDemoDroneShowcase</name>
-    <filename>inet.showcases.visualizer.osgdemo.osgDemoDroneShowcase.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.visualizer.osgdemo.osgDemoHumveeShowcase</name>
-    <filename>inet.showcases.visualizer.osgdemo.osgDemoHumveeShowcase.html</filename>
-  </compound>
-  <compound kind="class">
     <name>inet.environment.ground.OsgEarthGround</name>
     <filename>inet.environment.ground.OsgEarthGround.html</filename>
   </compound>
@@ -2853,52 +2093,8 @@
     <filename>inet.routing.ospfv2.Ospf.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.examples.ospfv2.fulltest.OSPF_Area1</name>
-    <filename>inet.examples.ospfv2.fulltest.OSPF_Area1.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.ospfv2.fulltest.OSPF_Area2</name>
-    <filename>inet.examples.ospfv2.fulltest.OSPF_Area2.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.ospfv2.fulltest.OSPF_Area3</name>
-    <filename>inet.examples.ospfv2.fulltest.OSPF_Area3.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.ospfv2.areas.OSPF_AreaTest</name>
-    <filename>inet.examples.ospfv2.areas.OSPF_AreaTest.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.ospfv2.areatests.OSPF_BackboneAndOneStubTest</name>
-    <filename>inet.examples.ospfv2.areatests.OSPF_BackboneAndOneStubTest.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.ospfv2.areatests.OSPF_BackboneAndTwoStubsTest</name>
-    <filename>inet.examples.ospfv2.areatests.OSPF_BackboneAndTwoStubsTest.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.ospfv2.areatests.OSPF_BackboneTest</name>
-    <filename>inet.examples.ospfv2.areatests.OSPF_BackboneTest.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.ospfv2.areatests.OSPF_mininet</name>
-    <filename>inet.examples.ospfv2.areatests.OSPF_mininet.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.ospfv2.fulltest.OSPF_RFC2328_Fig6</name>
-    <filename>inet.examples.ospfv2.fulltest.OSPF_RFC2328_Fig6.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.ospfv2.fulltest.OspfLan</name>
-    <filename>inet.examples.ospfv2.fulltest.OspfLan.html</filename>
-  </compound>
-  <compound kind="class">
     <name>inet.node.ospfv2.OspfRouter</name>
     <filename>inet.node.ospfv2.OspfRouter.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.transportlayer.udp.OsUdp</name>
-    <filename>inet.transportlayer.udp.OsUdp.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.applications.packetdrill.PacketDrillApp</name>
@@ -2909,32 +2105,12 @@
     <filename>inet.node.packetdrill.PacketDrillHost.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.showcases.visualizer.packetdrop.PacketDropArpResolutionFailedShowcase</name>
-    <filename>inet.showcases.visualizer.packetdrop.PacketDropArpResolutionFailedShowcase.html</filename>
-  </compound>
-  <compound kind="class">
     <name>inet.visualizer.common.PacketDropCanvasVisualizer</name>
     <filename>inet.visualizer.common.PacketDropCanvasVisualizer.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.showcases.visualizer.packetdrop.PacketDropInterfaceNotConnectedShowcase</name>
-    <filename>inet.showcases.visualizer.packetdrop.PacketDropInterfaceNotConnectedShowcase.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.visualizer.packetdrop.PacketDropMacRetryLimitReachedShowcase</name>
-    <filename>inet.showcases.visualizer.packetdrop.PacketDropMacRetryLimitReachedShowcase.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.visualizer.packetdrop.PacketDropNoRouteToDestinationShowcase</name>
-    <filename>inet.showcases.visualizer.packetdrop.PacketDropNoRouteToDestinationShowcase.html</filename>
-  </compound>
-  <compound kind="class">
     <name>inet.visualizer.common.PacketDropOsgVisualizer</name>
     <filename>inet.visualizer.common.PacketDropOsgVisualizer.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.visualizer.packetdrop.PacketDropQueueOverflowShowcase</name>
-    <filename>inet.showcases.visualizer.packetdrop.PacketDropQueueOverflowShowcase.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.visualizer.common.PacketDropVisualizer</name>
@@ -2949,24 +2125,12 @@
     <filename>inet.physicallayer.antenna.ParabolicAntenna.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.showcases.wireless.pathloss.PathLossShowcase</name>
-    <filename>inet.showcases.wireless.pathloss.PathLossShowcase.html</filename>
-  </compound>
-  <compound kind="class">
     <name>inet.visualizer.base.PathVisualizerBase</name>
     <filename>inet.visualizer.base.PathVisualizerBase.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.common.packet.recorder.PcapRecorder</name>
     <filename>inet.common.packet.recorder.PcapRecorder.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.inet.pcaprecorder.PcapRecorderTest</name>
-    <filename>inet.examples.inet.pcaprecorder.PcapRecorderTest.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.general.pcaprecording.PcapRecordingShowcase</name>
-    <filename>inet.showcases.general.pcaprecording.PcapRecordingShowcase.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.linklayer.ieee80211.mac.coordinationfunction.Pcf</name>
@@ -2983,10 +2147,6 @@
   <compound kind="class">
     <name>inet.visualizer.environment.PhysicalEnvironmentOsgVisualizer</name>
     <filename>inet.visualizer.environment.PhysicalEnvironmentOsgVisualizer.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.visualizer.environment.PhysicalEnvironmentVisualizationShowcase</name>
-    <filename>inet.showcases.visualizer.environment.PhysicalEnvironmentVisualizationShowcase.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.visualizer.environment.PhysicalEnvironmentVisualizer</name>
@@ -3017,32 +2177,12 @@
     <filename>inet.visualizer.base.PhysicalLinkVisualizerBase.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.showcases.visualizer.physicallinkactivity.PhysicalLinkVisualizerEnablingShowcase</name>
-    <filename>inet.showcases.visualizer.physicallinkactivity.PhysicalLinkVisualizerEnablingShowcase.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.visualizer.physicallinkactivity.PhysicalLinkVisualizerFilteringShowcase</name>
-    <filename>inet.showcases.visualizer.physicallinkactivity.PhysicalLinkVisualizerFilteringShowcase.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.visualizer.physicallinkactivity.PhysicalLinkVisualizerMobileShowcase</name>
-    <filename>inet.showcases.visualizer.physicallinkactivity.PhysicalLinkVisualizerMobileShowcase.html</filename>
-  </compound>
-  <compound kind="class">
     <name>inet.routing.pim.Pim</name>
     <filename>inet.routing.pim.Pim.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.examples.pim.sm.basic.PIM_SM_Network</name>
-    <filename>inet.examples.pim.sm.basic.PIM_SM_Network.html</filename>
-  </compound>
-  <compound kind="class">
     <name>inet.routing.pim.modes.PimDm</name>
     <filename>inet.routing.pim.modes.PimDm.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.pim.dm.basic.pimDMFinal</name>
-    <filename>inet.examples.pim.dm.basic.pimDMFinal.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.routing.pim.tables.PimInterfaceTable</name>
@@ -3065,26 +2205,6 @@
     <filename>inet.applications.pingapp.PingApp.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.showcases.emulation.pingpong.PingEmulated1Showcase</name>
-    <filename>inet.showcases.emulation.pingpong.PingEmulated1Showcase.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.emulation.pingpong.PingEmulated2Showcase</name>
-    <filename>inet.showcases.emulation.pingpong.PingEmulated2Showcase.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.emulation.pingpong.PingSimulatedShowcase</name>
-    <filename>inet.showcases.emulation.pingpong.PingSimulatedShowcase.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.wireless.power.PowerConsumptionShowcase</name>
-    <filename>inet.showcases.wireless.power.PowerConsumptionShowcase.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.wireless.power.PowerNetwork</name>
-    <filename>inet.examples.wireless.power.PowerNetwork.html</filename>
-  </compound>
-  <compound kind="class">
     <name>inet.linklayer.ppp.Ppp</name>
     <filename>inet.linklayer.ppp.Ppp.html</filename>
   </compound>
@@ -3105,6 +2225,10 @@
     <filename>inet.physicallayer.base.packetlevel.PropagationBase.html</filename>
   </compound>
   <compound kind="class">
+    <name>inet.linklayer.common.QosClassifier</name>
+    <filename>inet.linklayer.common.QosClassifier.html</filename>
+  </compound>
+  <compound kind="class">
     <name>inet.linklayer.ieee80211.mac.recipient.QosCtsPolicy</name>
     <filename>inet.linklayer.ieee80211.mac.recipient.QosCtsPolicy.html</filename>
   </compound>
@@ -3119,18 +2243,6 @@
   <compound kind="class">
     <name>inet.linklayer.ieee80211.mac.originator.QosRtsPolicy</name>
     <filename>inet.linklayer.ieee80211.mac.originator.QosRtsPolicy.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.adhoc.qos.QosThroughput</name>
-    <filename>inet.examples.adhoc.qos.QosThroughput.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.wireless.qos.QosThroughput</name>
-    <filename>inet.examples.wireless.qos.QosThroughput.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.wireless.qos.QosThroughput</name>
-    <filename>inet.showcases.wireless.qos.QosThroughput.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.physicallayer.neighborcache.QuadTreeNeighborCache</name>
@@ -3151,14 +2263,6 @@
   <compound kind="class">
     <name>inet.visualizer.base.QueueVisualizerBase</name>
     <filename>inet.visualizer.base.QueueVisualizerBase.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.mpls.net37.R37</name>
-    <filename>inet.examples.mpls.net37.R37.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.mpls.net37.R37orig</name>
-    <filename>inet.examples.mpls.net37.R37orig.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.physicallayer.common.packetlevel.Radio</name>
@@ -3191,14 +2295,6 @@
   <compound kind="class">
     <name>inet.mobility.single.RandomWaypointMobility</name>
     <filename>inet.mobility.single.RandomWaypointMobility.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.wireless.ratecontrol.RateControlShowcase</name>
-    <filename>inet.showcases.wireless.ratecontrol.RateControlShowcase.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.wireless.ratecontrol.RateControlTest</name>
-    <filename>inet.examples.wireless.ratecontrol.RateControlTest.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.linklayer.ieee80211.mac.rateselection.RateSelection</name>
@@ -3241,10 +2337,6 @@
     <filename>inet.common.queue.RedDropper.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.examples.inet.netperfmeter.REDQueue</name>
-    <filename>inet.examples.inet.netperfmeter.REDQueue.html</filename>
-  </compound>
-  <compound kind="class">
     <name>inet.physicallayer.communicationcache.ReferenceCommunicationCache</name>
     <filename>inet.physicallayer.communicationcache.ReferenceCommunicationCache.html</filename>
   </compound>
@@ -3255,26 +2347,6 @@
   <compound kind="class">
     <name>inet.routing.rip.Rip</name>
     <filename>inet.routing.rip.Rip.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.rip.infinitycount.RIPInfinityCountTest</name>
-    <filename>inet.examples.rip.infinitycount.RIPInfinityCountTest.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.tutorials.rip.RipNetworkA</name>
-    <filename>inet.tutorials.rip.RipNetworkA.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.tutorials.rip.RipNetworkB</name>
-    <filename>inet.tutorials.rip.RipNetworkB.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.tutorials.rip.RipNetworkC</name>
-    <filename>inet.tutorials.rip.RipNetworkC.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.tutorials.rip.RipNetworkD</name>
-    <filename>inet.tutorials.rip.RipNetworkD.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.node.rip.RipRouter</name>
@@ -3289,10 +2361,6 @@
     <filename>inet.node.ipv6.Router6.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.examples.inet.routerperf.RouterPerfNetwork</name>
-    <filename>inet.examples.inet.routerperf.RouterPerfNetwork.html</filename>
-  </compound>
-  <compound kind="class">
     <name>inet.visualizer.networklayer.RoutingTableCanvasVisualizer</name>
     <filename>inet.visualizer.networklayer.RoutingTableCanvasVisualizer.html</filename>
   </compound>
@@ -3303,18 +2371,6 @@
   <compound kind="class">
     <name>inet.networklayer.ipv4.RoutingTableRecorder</name>
     <filename>inet.networklayer.ipv4.RoutingTableRecorder.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.visualizer.routingtable.RoutingTableVisualizationDisplayingAllShowcase</name>
-    <filename>inet.showcases.visualizer.routingtable.RoutingTableVisualizationDisplayingAllShowcase.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.visualizer.routingtable.RoutingTableVisualizationDynamicShowcase</name>
-    <filename>inet.showcases.visualizer.routingtable.RoutingTableVisualizationDynamicShowcase.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.visualizer.routingtable.RoutingTableVisualizationFilteringShowcase</name>
-    <filename>inet.showcases.visualizer.routingtable.RoutingTableVisualizationFilteringShowcase.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.visualizer.networklayer.RoutingTableVisualizer</name>
@@ -3339,26 +2395,6 @@
   <compound kind="class">
     <name>inet.networklayer.rsvpte.RsvpTe</name>
     <filename>inet.networklayer.rsvpte.RsvpTe.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.mpls.testte_failure.RSVPTE4</name>
-    <filename>inet.examples.mpls.testte_failure.RSVPTE4.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.mpls.testte_failure2.RSVPTE4</name>
-    <filename>inet.examples.mpls.testte_failure2.RSVPTE4.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.mpls.testte_reroute.RSVPTE4</name>
-    <filename>inet.examples.mpls.testte_reroute.RSVPTE4.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.mpls.testte_routing.RSVPTE4</name>
-    <filename>inet.examples.mpls.testte_routing.RSVPTE4.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.mpls.testte_tunnel.RSVPTE4</name>
-    <filename>inet.examples.mpls.testte_tunnel.RSVPTE4.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.transportlayer.rtp.Rtcp</name>
@@ -3405,14 +2441,6 @@
     <filename>inet.node.rtp.RtpHost.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.examples.rtp.multicast1.RTPMulticast1</name>
-    <filename>inet.examples.rtp.multicast1.RTPMulticast1.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.rtp.unicast.RTPNetwork</name>
-    <filename>inet.examples.rtp.unicast.RTPNetwork.html</filename>
-  </compound>
-  <compound kind="class">
     <name>inet.transportlayer.rtp.RtpPayloadReceiver</name>
     <filename>inet.transportlayer.rtp.RtpPayloadReceiver.html</filename>
   </compound>
@@ -3425,14 +2453,6 @@
     <filename>inet.transportlayer.rtp.RtpProfile.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.examples.rtp.unicast1.RTPUnicast1</name>
-    <filename>inet.examples.rtp.unicast1.RTPUnicast1.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.rtp.unicast2.RTPUnicast2</name>
-    <filename>inet.examples.rtp.unicast2.RTPUnicast2.html</filename>
-  </compound>
-  <compound kind="class">
     <name>inet.linklayer.ieee80211.mac.originator.RtsPolicy</name>
     <filename>inet.linklayer.ieee80211.mac.originator.RtsPolicy.html</filename>
   </compound>
@@ -3443,14 +2463,6 @@
   <compound kind="class">
     <name>inet.physicallayer.analogmodel.packetlevel.ScalarAnalogModel</name>
     <filename>inet.physicallayer.analogmodel.packetlevel.ScalarAnalogModel.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.wireless.scaling.ScalingExampleNetwork</name>
-    <filename>inet.showcases.wireless.scaling.ScalingExampleNetwork.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.adhoc.hostautoconf.Scenario</name>
-    <filename>inet.examples.adhoc.hostautoconf.Scenario.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.common.scenario.ScenarioManager</name>
@@ -3517,14 +2529,6 @@
     <filename>inet.applications.sctpapp.SctpServer.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.showcases.wireless.sensornetwork.SensorNetworkShowcaseA</name>
-    <filename>inet.showcases.wireless.sensornetwork.SensorNetworkShowcaseA.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.wireless.sensornetwork.SensorNetworkShowcaseB</name>
-    <filename>inet.showcases.wireless.sensornetwork.SensorNetworkShowcaseB.html</filename>
-  </compound>
-  <compound kind="class">
     <name>inet.node.inet.SensorNode</name>
     <filename>inet.node.inet.SensorNode.html</filename>
   </compound>
@@ -3545,20 +2549,8 @@
     <filename>inet.linklayer.shortcut.ShortcutMac.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.examples.wireless.shortcut.ShortcutMacExample</name>
-    <filename>inet.examples.wireless.shortcut.ShortcutMacExample.html</filename>
-  </compound>
-  <compound kind="class">
     <name>inet.physicallayer.shortcut.ShortcutRadio</name>
     <filename>inet.physicallayer.shortcut.ShortcutRadio.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.wireless.shortcut.ShortcutRadioExample</name>
-    <filename>inet.examples.wireless.shortcut.ShortcutRadioExample.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.aodv.ShortestPath</name>
-    <filename>inet.examples.aodv.ShortestPath.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.common.misc.SignalSource</name>
@@ -3567,14 +2559,6 @@
   <compound kind="class">
     <name>inet.power.storage.SimpleCcBattery</name>
     <filename>inet.power.storage.SimpleCcBattery.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.inet.configurator.SimpleConfiguratorNetwork</name>
-    <filename>inet.examples.inet.configurator.SimpleConfiguratorNetwork.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.internetcloud.earthcloud.SimpleContinentCloud</name>
-    <filename>inet.examples.internetcloud.earthcloud.SimpleContinentCloud.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.power.management.SimpleEpEnergyManagement</name>
@@ -3591,22 +2575,6 @@
   <compound kind="class">
     <name>inet.networklayer.common.SimpleNetworkLayer</name>
     <filename>inet.networklayer.common.SimpleNetworkLayer.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.aodv.SimpleRREQ</name>
-    <filename>inet.examples.aodv.SimpleRREQ.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.aodv.SimpleRREQ2</name>
-    <filename>inet.examples.aodv.SimpleRREQ2.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.ospfv2.simpletest.SimpleTest</name>
-    <filename>inet.examples.ospfv2.simpletest.SimpleTest.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.rip.simpletest.SimpleTest</name>
-    <filename>inet.examples.rip.simpletest.SimpleTest.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.applications.voip.SimpleVoipReceiver</name>
@@ -3627,22 +2595,6 @@
   <compound kind="class">
     <name>inet.common.queue.Sink</name>
     <filename>inet.common.queue.Sink.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.wireless.ratecontrol.SinkClient</name>
-    <filename>inet.examples.wireless.ratecontrol.SinkClient.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.wireless.hiddennode.SinkNode</name>
-    <filename>inet.examples.wireless.hiddennode.SinkNode.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.ethernet.lans.SmallLAN</name>
-    <filename>inet.examples.ethernet.lans.SmallLAN.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.general.ethernet.largeNet.SmallLAN</name>
-    <filename>inet.showcases.general.ethernet.largeNet.SmallLAN.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.node.inet.StandardHost</name>
@@ -3685,14 +2637,6 @@
     <filename>inet.visualizer.common.StatisticOsgVisualizer.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.showcases.visualizer.statistic.StatisticVisualizationPacketErrorRateShowcase</name>
-    <filename>inet.showcases.visualizer.statistic.StatisticVisualizationPacketErrorRateShowcase.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.visualizer.statistic.StatisticVisualizationPingRttShowcase</name>
-    <filename>inet.showcases.visualizer.statistic.StatisticVisualizationPingRttShowcase.html</filename>
-  </compound>
-  <compound kind="class">
     <name>inet.visualizer.common.StatisticVisualizer</name>
     <filename>inet.visualizer.common.StatisticVisualizer.html</filename>
   </compound>
@@ -3717,56 +2661,12 @@
     <filename>inet.linklayer.ieee8021d.tester.StpTester.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.showcases.visualizer.styling.StylingShowcase</name>
-    <filename>inet.showcases.visualizer.styling.StylingShowcase.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.visualizer.info.SubmoduleInformationVisualizationShowcase</name>
-    <filename>inet.showcases.visualizer.info.SubmoduleInformationVisualizationShowcase.html</filename>
-  </compound>
-  <compound kind="class">
     <name>inet.physicallayer.pathloss.SuiPathLoss</name>
     <filename>inet.physicallayer.pathloss.SuiPathLoss.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.mobility.single.SuperpositioningMobility</name>
     <filename>inet.mobility.single.SuperpositioningMobility.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.ethernet.lans.SwitchedDuplexLAN</name>
-    <filename>inet.examples.ethernet.lans.SwitchedDuplexLAN.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.ethernet.lans.SwitchedLAN</name>
-    <filename>inet.examples.ethernet.lans.SwitchedLAN.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.ieee8021d.SwitchNetwork</name>
-    <filename>inet.examples.ieee8021d.SwitchNetwork.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.emulation.videostreaming.SwitchWithExtInterfaceTest</name>
-    <filename>inet.showcases.emulation.videostreaming.SwitchWithExtInterfaceTest.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.emulation.videostreaming.SwitchWithExtInterfaceTest2</name>
-    <filename>inet.showcases.emulation.videostreaming.SwitchWithExtInterfaceTest2.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.wireless.synchronized.Synchronized</name>
-    <filename>inet.examples.wireless.synchronized.Synchronized.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.diffserv.onedomain.TC1</name>
-    <filename>inet.examples.diffserv.onedomain.TC1.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.diffserv.onedomain.TC2</name>
-    <filename>inet.examples.diffserv.onedomain.TC2.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.diffserv.onedomain.TC3</name>
-    <filename>inet.examples.diffserv.onedomain.TC3.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.transportlayer.tcp.Tcp</name>
@@ -3817,10 +2717,6 @@
     <filename>inet.transportlayer.tcp_common.TcpSpoof.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.examples.inet.tcpwindowscale.tcpwindowscale</name>
-    <filename>inet.examples.inet.tcpwindowscale.tcpwindowscale.html</filename>
-  </compound>
-  <compound kind="class">
     <name>inet.networklayer.ted.Ted</name>
     <filename>inet.networklayer.ted.Ted.html</filename>
   </compound>
@@ -3829,60 +2725,8 @@
     <filename>inet.applications.tcpapp.TelnetApp.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.examples.ospfv2.areatests.TestArea</name>
-    <filename>inet.examples.ospfv2.areatests.TestArea.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.inet.netperfmeter.testNetwork</name>
-    <filename>inet.examples.inet.netperfmeter.testNetwork.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.wireless.nic.TestNic</name>
-    <filename>inet.examples.wireless.nic.TestNic.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.wireless.scaling.TestRadioScaling</name>
-    <filename>inet.examples.wireless.scaling.TestRadioScaling.html</filename>
-  </compound>
-  <compound kind="class">
     <name>inet.common.queue.ThresholdDropper</name>
     <filename>inet.common.queue.ThresholdDropper.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.wireless.hosttohost.Throughput</name>
-    <filename>inet.examples.wireless.hosttohost.Throughput.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.wireless.testnewmac.Throughput</name>
-    <filename>inet.examples.wireless.testnewmac.Throughput.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.wireless.throughput.Throughput</name>
-    <filename>inet.examples.wireless.throughput.Throughput.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.wireless.throughput.Throughput</name>
-    <filename>inet.showcases.wireless.throughput.Throughput.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.wireless.hosttohost.ThroughputClient</name>
-    <filename>inet.examples.wireless.hosttohost.ThroughputClient.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.wireless.testnewmac.ThroughputClient</name>
-    <filename>inet.examples.wireless.testnewmac.ThroughputClient.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.wireless.throughput.ThroughputClient</name>
-    <filename>inet.examples.wireless.throughput.ThroughputClient.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.wireless.hosttohost.ThroughputServer</name>
-    <filename>inet.examples.wireless.hosttohost.ThroughputServer.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.wireless.testnewmac.ThroughputServer</name>
-    <filename>inet.examples.wireless.testnewmac.ThroughputServer.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.common.misc.ThruputMeter</name>
@@ -3895,10 +2739,6 @@
   <compound kind="class">
     <name>inet.networklayer.diffserv.TokenBucketMeter</name>
     <filename>inet.networklayer.diffserv.TokenBucketMeter.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.emulation.traceroute.Traceroute</name>
-    <filename>inet.examples.emulation.traceroute.Traceroute.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.physicallayer.base.packetlevel.TracingObstacleLossBase</name>
@@ -3925,24 +2765,12 @@
     <filename>inet.mobility.single.TractorMobility.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.examples.diffserv.simple_.TrafficConditioner</name>
-    <filename>inet.examples.diffserv.simple_.TrafficConditioner.html</filename>
-  </compound>
-  <compound kind="class">
     <name>inet.visualizer.transportlayer.TransportConnectionCanvasVisualizer</name>
     <filename>inet.visualizer.transportlayer.TransportConnectionCanvasVisualizer.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.visualizer.transportlayer.TransportConnectionOsgVisualizer</name>
     <filename>inet.visualizer.transportlayer.TransportConnectionOsgVisualizer.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.visualizer.transportconnection.TransportConnectionVisualizationEnablingShowcase</name>
-    <filename>inet.showcases.visualizer.transportconnection.TransportConnectionVisualizationEnablingShowcase.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.visualizer.transportconnection.TransportConnectionVisualizationMultipleConnectionsShowcase</name>
-    <filename>inet.showcases.visualizer.transportconnection.TransportConnectionVisualizationMultipleConnectionsShowcase.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.visualizer.transportlayer.TransportConnectionVisualizer</name>
@@ -3955,18 +2783,6 @@
   <compound kind="class">
     <name>inet.node.base.TransportLayerNodeBase</name>
     <filename>inet.node.base.TransportLayerNodeBase.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.visualizer.transportpathactivity.TransportPathVisualizerFilteringShowcase</name>
-    <filename>inet.showcases.visualizer.transportpathactivity.TransportPathVisualizerFilteringShowcase.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.visualizer.transportpathactivity.TransportPathVisualizerSimpleWiredShowcase</name>
-    <filename>inet.showcases.visualizer.transportpathactivity.TransportPathVisualizerSimpleWiredShowcase.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.visualizer.transportpathactivity.TransportPathVisualizerSimpleWirelessShowcase</name>
-    <filename>inet.showcases.visualizer.transportpathactivity.TransportPathVisualizerSimpleWirelessShowcase.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.transportlayer.base.TransportProtocolBase</name>
@@ -3997,24 +2813,12 @@
     <filename>inet.applications.tunapp.TunLoopbackApp.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.examples.inet.tunnel.Tunnel</name>
-    <filename>inet.examples.inet.tunnel.Tunnel.html</filename>
-  </compound>
-  <compound kind="class">
     <name>inet.applications.tunapp.TunnelApp</name>
     <filename>inet.applications.tunapp.TunnelApp.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.mobility.single.TurtleMobility</name>
     <filename>inet.mobility.single.TurtleMobility.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.ethernet.lans.TwoHosts</name>
-    <filename>inet.examples.ethernet.lans.TwoHosts.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.ospfv2.areas.TwoNetsArea</name>
-    <filename>inet.examples.ospfv2.areas.TwoNetsArea.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.networklayer.diffserv.TwoRateThreeColorMeter</name>
@@ -4047,18 +2851,6 @@
   <compound kind="class">
     <name>inet.applications.udpapp.UdpBasicBurst</name>
     <filename>inet.applications.udpapp.UdpBasicBurst.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.inet.broadcast.UDPBroadcastNetwork</name>
-    <filename>inet.examples.inet.broadcast.UDPBroadcastNetwork.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.inet.udpburst.UDPBurst</name>
-    <filename>inet.examples.inet.udpburst.UDPBurst.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.inet.udpclientserver.UdpClientServer</name>
-    <filename>inet.examples.inet.udpclientserver.UdpClientServer.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.applications.udpapp.UdpEchoApp</name>
@@ -4097,14 +2889,6 @@
     <filename>inet.physicallayer.unitdisk.UnitDiskTransmitter.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.showcases.visualizer.advanced.UsingMultipleVisualizerModulesShowcaseA</name>
-    <filename>inet.showcases.visualizer.advanced.UsingMultipleVisualizerModulesShowcaseA.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.visualizer.advanced.UsingMultipleVisualizerModulesShowcaseB</name>
-    <filename>inet.showcases.visualizer.advanced.UsingMultipleVisualizerModulesShowcaseB.html</filename>
-  </compound>
-  <compound kind="class">
     <name>inet.physicallayer.pathloss.UwbIrStochasticPathLoss</name>
     <filename>inet.physicallayer.pathloss.UwbIrStochasticPathLoss.html</filename>
   </compound>
@@ -4117,200 +2901,24 @@
     <filename>inet.mobility.single.VehicleMobility.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.showcases.emulation.videostreaming.VideoStreamingExtHost</name>
-    <filename>inet.showcases.emulation.videostreaming.VideoStreamingExtHost.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.emulation.videostreaming.VideoStreamingPing</name>
-    <filename>inet.showcases.emulation.videostreaming.VideoStreamingPing.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.emulation.videostreaming.VideoStreamingPingSwitch</name>
-    <filename>inet.showcases.emulation.videostreaming.VideoStreamingPingSwitch.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.emulation.videostreaming.VideoStreamingShowcase</name>
-    <filename>inet.showcases.emulation.videostreaming.VideoStreamingShowcase.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.emulation.videostreaming2.VideoStreamingShowcase</name>
-    <filename>inet.showcases.emulation.videostreaming2.VideoStreamingShowcase.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.emulation.videostreaming3.VideoStreamingShowcase</name>
-    <filename>inet.showcases.emulation.videostreaming3.VideoStreamingShowcase.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.emulation.videostreaming.VideoStreamingShowcaseNoSwitch</name>
-    <filename>inet.showcases.emulation.videostreaming.VideoStreamingShowcaseNoSwitch.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.emulation.videostreaming.VideoStreamingShowcaseOneHost</name>
-    <filename>inet.showcases.emulation.videostreaming.VideoStreamingShowcaseOneHost.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.emulation.videostreaming.VideoStreamingWithRouters</name>
-    <filename>inet.showcases.emulation.videostreaming.VideoStreamingWithRouters.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.emulation.videostreaming.VideoStreamingWithSwitches</name>
-    <filename>inet.showcases.emulation.videostreaming.VideoStreamingWithSwitches.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.tutorials.visualization.VisuA</name>
-    <filename>inet.tutorials.visualization.VisuA.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.tutorials.visualization.VisualizationA</name>
-    <filename>inet.tutorials.visualization.VisualizationA.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.tutorials.visualization.VisualizationB</name>
-    <filename>inet.tutorials.visualization.VisualizationB.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.tutorials.visualization.VisualizationC</name>
-    <filename>inet.tutorials.visualization.VisualizationC.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.tutorials.visualization.VisualizationD</name>
-    <filename>inet.tutorials.visualization.VisualizationD.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.tutorials.visualization.VisualizationE</name>
-    <filename>inet.tutorials.visualization.VisualizationE.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.tutorials.visualization.VisualizationF</name>
-    <filename>inet.tutorials.visualization.VisualizationF.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.tutorials.visualization.VisualizationG</name>
-    <filename>inet.tutorials.visualization.VisualizationG.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.tutorials.visualization.VisualizationH</name>
-    <filename>inet.tutorials.visualization.VisualizationH.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.tutorials.visualization.VisualizationTutorialA</name>
-    <filename>inet.tutorials.visualization.VisualizationTutorialA.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.tutorials.visualization.VisualizationTutorialB</name>
-    <filename>inet.tutorials.visualization.VisualizationTutorialB.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.tutorials.visualization.VisualizationTutorialC</name>
-    <filename>inet.tutorials.visualization.VisualizationTutorialC.html</filename>
-  </compound>
-  <compound kind="class">
     <name>inet.visualizer.base.VisualizerBase</name>
     <filename>inet.visualizer.base.VisualizerBase.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.tutorials.visualization.VisuB</name>
-    <filename>inet.tutorials.visualization.VisuB.html</filename>
+    <name>inet.linklayer.vlan.VlanInterface</name>
+    <filename>inet.linklayer.vlan.VlanInterface.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.tutorials.visualization.VisuC</name>
-    <filename>inet.tutorials.visualization.VisuC.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.tutorials.visualization.VisuD</name>
-    <filename>inet.tutorials.visualization.VisuD.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.tutorials.visualization.VisuE</name>
-    <filename>inet.tutorials.visualization.VisuE.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.tutorials.visualization.VisuF</name>
-    <filename>inet.tutorials.visualization.VisuF.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.tutorials.visualization.VisuG</name>
-    <filename>inet.tutorials.visualization.VisuG.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.tutorials.visualization.VisuH</name>
-    <filename>inet.tutorials.visualization.VisuH.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.voip.Voip</name>
-    <filename>inet.examples.voip.Voip.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.voipstream.VoIPStreamLargeNet.VoIPStreamLargeLAN</name>
-    <filename>inet.examples.voipstream.VoIPStreamLargeNet.VoIPStreamLargeLAN.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.voipstream.VoIPStreamLargeNet.VoIPStreamLargeNet</name>
-    <filename>inet.examples.voipstream.VoIPStreamLargeNet.VoIPStreamLargeNet.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.voipstream.VoIPStreamLargeNet.VoIPStreamMediumLAN</name>
-    <filename>inet.examples.voipstream.VoIPStreamLargeNet.VoIPStreamMediumLAN.html</filename>
+    <name>inet.linklayer.vlan.VlanTunnel</name>
+    <filename>inet.linklayer.vlan.VlanTunnel.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.applications.voipstream.VoipStreamReceiver</name>
     <filename>inet.applications.voipstream.VoipStreamReceiver.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.examples.voipstream.osudp.VoipStreamReceiverApplication</name>
-    <filename>inet.examples.voipstream.osudp.VoipStreamReceiverApplication.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.emulation.osudpVoip.VoipStreamReceiverApplication</name>
-    <filename>inet.showcases.emulation.osudpVoip.VoipStreamReceiverApplication.html</filename>
-  </compound>
-  <compound kind="class">
     <name>inet.applications.voipstream.VoipStreamSender</name>
     <filename>inet.applications.voipstream.VoipStreamSender.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.voipstream.osudp.VoipStreamSenderApplication</name>
-    <filename>inet.examples.voipstream.osudp.VoipStreamSenderApplication.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.showcases.emulation.osudpVoip.VoipStreamSenderApplication</name>
-    <filename>inet.showcases.emulation.osudpVoip.VoipStreamSenderApplication.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.voipstream.VoIPStreamLargeNet.VoIPStreamSmallLAN</name>
-    <filename>inet.examples.voipstream.VoIPStreamLargeNet.VoIPStreamSmallLAN.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.voipstream.VoIPStreamTest.VoIPStreamTest</name>
-    <filename>inet.examples.voipstream.VoIPStreamTest.VoIPStreamTest.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.voipstream.VoIPStreamTrafficTest.VoIPStreamTrafficTest</name>
-    <filename>inet.examples.voipstream.VoIPStreamTrafficTest.VoIPStreamTrafficTest.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.wireless.wiredandwirelesshostswithap.WiredAndWirelessHostsWithAP</name>
-    <filename>inet.examples.wireless.wiredandwirelesshostswithap.WiredAndWirelessHostsWithAP.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.dhcp.WiredNetWithDHCP</name>
-    <filename>inet.examples.dhcp.WiredNetWithDHCP.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.tutorials.wireless.WirelessA</name>
-    <filename>inet.tutorials.wireless.WirelessA.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.wireless.throughput.WirelessAPWithSink</name>
-    <filename>inet.examples.wireless.throughput.WirelessAPWithSink.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.tutorials.wireless.WirelessB</name>
-    <filename>inet.tutorials.wireless.WirelessB.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.tutorials.wireless.WirelessC</name>
-    <filename>inet.tutorials.wireless.WirelessC.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.node.inet.WirelessHost</name>
@@ -4323,14 +2931,6 @@
   <compound kind="class">
     <name>inet.linklayer.common.WirelessInterface</name>
     <filename>inet.linklayer.common.WirelessInterface.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.dhcp.WirelessNetWith2DHCP</name>
-    <filename>inet.examples.dhcp.WirelessNetWith2DHCP.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>inet.examples.dhcp.WirelessNetWithDHCP</name>
-    <filename>inet.examples.dhcp.WirelessNetWithDHCP.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.networklayer.wiseroute.WiseRoute</name>
