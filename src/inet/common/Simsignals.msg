@@ -22,6 +22,7 @@ enum PacketDropReason
     CONGESTION                = 11;
     NO_PROTOCOL_FOUND         = 12;
     NO_PORT_FOUND             = 13;
+    DUPLICATE_DETECTED        = 14;
     OTHER_PACKET_DROP         = 99;
 }
 
