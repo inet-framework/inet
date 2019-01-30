@@ -56,6 +56,8 @@ module Hcf like IHcf
         @display("i=block/queue");
         @signal[linkBroken](type=inet::Packet);
         @signal[packetDropped](type=inet::Packet);
+        @signal[edcaCollisionDetected](type=long);
+        @statistic[edcaCollision](title="EDCA collision"; source=edcaCollisionDetected; record=count);
 
     submodules:
         edca: Edca {

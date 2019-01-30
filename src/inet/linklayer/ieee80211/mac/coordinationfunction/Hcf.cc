@@ -30,6 +30,8 @@ namespace ieee80211 {
 
 using namespace inet::physicallayer;
 
+simsignal_t Hcf::edcaCollisionDetectedSignal = cComponent::registerSignal("edcaCollisionDetected");
+
 Define_Module(Hcf);
 
 void Hcf::initialize(int stage)
@@ -208,6 +210,7 @@ void Hcf::channelGranted(IChannelAccess* channelAccess)
         if (internallyCollidedEdcafs.size() > 0) {
             EV_INFO << "Internal collision happened with the following queues:" << std::endl;
             handleInternalCollision(internallyCollidedEdcafs);
+            emit(edcaCollisionDetectedSignal, internallyCollidedEdcafs.size());
         }
         startFrameSequence(ac);
     }
