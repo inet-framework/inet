@@ -40,8 +40,8 @@ std::vector<Packet *> *OriginatorMacDataService::fragmentIfNeeded(Packet *frame)
 {
     auto fragmentSizes = fragmentationPolicy->computeFragmentSizes(frame);
     if (fragmentSizes.size() != 0) {
-        auto fragmentFrames = fragmentation->fragmentFrame(frame, fragmentSizes);
         emit(packetFragmentedSignal, frame);
+        auto fragmentFrames = fragmentation->fragmentFrame(frame, fragmentSizes);
         return fragmentFrames;
     }
     return nullptr;

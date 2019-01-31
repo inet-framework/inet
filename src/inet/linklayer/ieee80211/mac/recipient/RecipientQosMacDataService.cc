@@ -104,8 +104,8 @@ std::vector<Packet *> RecipientQosMacDataService::dataFrameReceived(Packet *data
         for (auto defragmentedFrame : defragmentedFrames) {
             auto defragmentedHeader = defragmentedFrame->peekAtFront<Ieee80211DataHeader>();
             if (defragmentedHeader->getAMsduPresent()) {
-                auto subframes = aMsduDeaggregation->deaggregateFrame(defragmentedFrame);
                 emit(packetDeaggregatedSignal, defragmentedFrame);
+                auto subframes = aMsduDeaggregation->deaggregateFrame(defragmentedFrame);
                 for (auto subframe : *subframes)
                     deaggregatedFrames.push_back(subframe);
                 delete subframes;
@@ -167,8 +167,8 @@ std::vector<Packet *> RecipientQosMacDataService::controlFrameReceived(Packet *c
         if (aMsduDeaggregation) {
             for (auto frame : defragmentedFrames) {
                 if (frame->peekAtFront<Ieee80211DataHeader>()->getAMsduPresent()) {
-                    auto subframes = aMsduDeaggregation->deaggregateFrame(frame);
                     emit(packetDeaggregatedSignal, frame);
+                    auto subframes = aMsduDeaggregation->deaggregateFrame(frame);
                     for (auto subframe : *subframes)
                         deaggregatedFrames.push_back(subframe);
                     delete subframes;
