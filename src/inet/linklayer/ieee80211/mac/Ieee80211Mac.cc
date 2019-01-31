@@ -164,6 +164,9 @@ void Ieee80211Mac::handleUpperPacket(Packet *packet)
 {
     if (mib->mode == Ieee80211Mib::INFRASTRUCTURE && mib->bssStationData.stationType == Ieee80211Mib::STATION && !mib->bssStationData.isAssociated) {
         EV << "STA is not associated with an access point, discarding packet " << packet << "\n";
+        PacketDropDetails details;
+        details.setReason(OTHER_PACKET_DROP);
+        emit(packetDroppedSignal, packet, &details);
         delete packet;
         return;
     }
@@ -175,6 +178,9 @@ void Ieee80211Mac::handleUpperPacket(Packet *packet)
             auto it = mib->bssAccessPointData.stations.find(receiverAddress);
             if (it == mib->bssAccessPointData.stations.end() || it->second != Ieee80211Mib::ASSOCIATED) {
                 EV << "STA with MAC address " << receiverAddress << " not associated with this AP, dropping frame\n";
+                PacketDropDetails details;
+                details.setReason(OTHER_PACKET_DROP);
+                emit(packetDroppedSignal, packet, &details);
                 delete packet;
                 return;
             }
