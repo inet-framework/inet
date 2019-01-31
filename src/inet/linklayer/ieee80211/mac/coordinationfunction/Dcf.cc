@@ -121,6 +121,7 @@ void Dcf::transmitControlResponseFrame(Packet *responsePacket, const Ptr<const I
     else
         throw cRuntimeError("Unknown received frame type");
     RateSelection::setFrameMode(responsePacket, responseHeader, responseMode);
+    emit(IRateSelection::datarateSelectedSignal, responseMode->getDataMode()->getNetBitrate().get(), responsePacket);
     tx->transmitFrame(responsePacket, responseHeader, modeSet->getSifsTime(), this);
     delete responsePacket;
 }
@@ -179,7 +180,9 @@ void Dcf::processLowerFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>&
 void Dcf::transmitFrame(Packet *packet, simtime_t ifs)
 {
     const auto& header = packet->peekAtFront<Ieee80211MacHeader>();
-    RateSelection::setFrameMode(packet, header, rateSelection->computeMode(packet, header));
+    auto mode = rateSelection->computeMode(packet, header);
+    RateSelection::setFrameMode(packet, header, mode);
+    emit(IRateSelection::datarateSelectedSignal, mode->getDataMode()->getNetBitrate().get(), packet);
     auto pendingPacket = inProgressFrames->getPendingFrameFor(packet);
     auto duration = originatorProtectionMechanism->computeDurationField(packet, header, pendingPacket, pendingPacket == nullptr ? nullptr : pendingPacket->peekAtFront<Ieee80211DataOrMgmtHeader>());
     const auto& updatedHeader = packet->removeAtFront<Ieee80211MacHeader>();

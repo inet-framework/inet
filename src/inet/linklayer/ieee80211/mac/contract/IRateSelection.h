@@ -34,6 +34,9 @@ namespace ieee80211 {
 class INET_API IRateSelection
 {
     public:
+        static simsignal_t datarateSelectedSignal;
+
+    public:
         virtual ~IRateSelection() { }
 
         virtual const physicallayer::IIeee80211Mode *computeResponseCtsFrameMode(Packet *packet, const Ptr<const Ieee80211RtsFrame>& rtsFrame) = 0;

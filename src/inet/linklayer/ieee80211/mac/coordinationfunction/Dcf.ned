@@ -51,6 +51,7 @@ module Dcf like IDcf
         @signal[packetDropped](type=inet::Packet);
         @signal[frameSequenceStarted];
         @signal[frameSequenceFinished];
+        @signal[datarateSelected](type=double);
         @statistic[linkBroken](title="link break"; source=linkBroken; record=count; interpolationmode=none);
         @statistic[packetDropNotAddressedToUs](title="packet drop: not addressed to us"; source=packetDropReasonIsNotAddressedToUs(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetDropQueueOverflow](title="packet drop: queue overflow"; source=packetDropReasonIsQueueOverflow(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
@@ -58,6 +59,7 @@ module Dcf like IDcf
         @statistic[frameSequence](title="frame sequence"; source=frameSequenceFinished; record=count);
         @statistic[frameSequenceDuration](title="frame sequence duration"; source=frameSequenceDuration(frameSequenceFinished); record=histogram,vector?);
         @statistic[frameSequenceNumPackets](title="frame sequence number of packets"; source=frameSequenceNumPackets(frameSequenceFinished); record=histogram,vector?);
+        @statistic[datarate](title="datarate"; source=datarateSelected; record=vector; interpolationmode=none);
 
     submodules:
         channelAccess: Dcaf {

@@ -653,7 +653,9 @@ void Hcf::transmitFrame(Packet *packet, simtime_t ifs)
             dataHeader->setAckPolicy(ackPolicy);
             packet->insertAtFront(dataHeader);
         }
-        setFrameMode(packet, header, rateSelection->computeMode(packet, header, txop));
+        auto mode = rateSelection->computeMode(packet, header, txop);
+        setFrameMode(packet, header, mode);
+        emit(IRateSelection::datarateSelectedSignal, mode->getDataMode()->getNetBitrate().get(), packet);
         if (txop->getProtectionMechanism() == TxopProcedure::ProtectionMechanism::SINGLE_PROTECTION) {
             auto pendingPacket = edcaInProgressFrames[ac]->getPendingFrameFor(packet);
             const auto& pendingHeader = pendingPacket == nullptr ? nullptr : pendingPacket->peekAtFront<Ieee80211DataOrMgmtHeader>();
@@ -685,6 +687,7 @@ void Hcf::transmitControlResponseFrame(Packet *responsePacket, const Ptr<const I
     else
         throw cRuntimeError("Unknown received frame type");
     setFrameMode(responsePacket, responseHeader, responseMode);
+    emit(IRateSelection::datarateSelectedSignal, responseMode->getDataMode()->getNetBitrate().get(), responsePacket);
     tx->transmitFrame(responsePacket, responseHeader, modeSet->getSifsTime(), this);
     delete responsePacket;
 }
