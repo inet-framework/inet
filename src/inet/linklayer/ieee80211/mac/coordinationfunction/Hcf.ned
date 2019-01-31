@@ -56,7 +56,7 @@ module Hcf like IHcf
         @display("i=block/queue");
         @signal[linkBroken](type=inet::Packet);
         @signal[packetDropped](type=inet::Packet);
-        @signal[edcaCollisionDetected](type=long);
+        @signal[edcaCollisionDetected](type=unsigned long);
         @statistic[linkBroken](title="link break"; source=linkBroken; record=count; interpolationmode=none);
         @statistic[packetDropNotAddressedToUs](title="packet drop: not addressed to us"; source=packetDropReasonIsNotAddressedToUs(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetDropQueueOverflow](title="packet drop: queue overflow"; source=packetDropReasonIsQueueOverflow(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
