@@ -80,6 +80,7 @@ module Ieee80211Mac extends MacProtocolBase like IIeee80211Mac
         @class(Ieee80211Mac);
         @signal[packetSentToPeer](type=inet::Packet);
         @signal[packetReceivedFromPeer](type=inet::Packet);
+        @signal[linkBroken](type=inet::Packet);
         @signal[modesetChanged](type=inet::physicallayer::Ieee80211ModeSet);
         @statistic[passedUpPk](title="packets passed to higher layer"; source=packetSentToUpper; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[sentDownPk](title="packets sent to lower layer"; source=packetSentToLower; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
