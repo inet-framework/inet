@@ -31,6 +31,8 @@ namespace ieee80211 {
 using namespace inet::physicallayer;
 
 simsignal_t Hcf::edcaCollisionDetectedSignal = cComponent::registerSignal("edcaCollisionDetected");
+simsignal_t Hcf::blockAckAgreementAddedSignal = cComponent::registerSignal("blockAckAgreementAdded");
+simsignal_t Hcf::blockAckAgreementDeletedSignal = cComponent::registerSignal("blockAckAgreementDeleted");
 
 Define_Module(Hcf);
 
@@ -339,15 +341,27 @@ void Hcf::recipientProcessReceivedControlFrame(Packet *packet, const Ptr<const I
 void Hcf::recipientProcessReceivedManagementFrame(const Ptr<const Ieee80211MgmtHeader>& header)
 {
     if (recipientBlockAckAgreementHandler && originatorBlockAckAgreementHandler) {
-        if (auto addbaRequest = dynamicPtrCast<const Ieee80211AddbaRequest>(header))
+        if (auto addbaRequest = dynamicPtrCast<const Ieee80211AddbaRequest>(header)) {
             recipientBlockAckAgreementHandler->processReceivedAddbaRequest(addbaRequest, recipientBlockAckAgreementPolicy, this);
-        else if (auto addbaResp = dynamicPtrCast<const Ieee80211AddbaResponse>(header))
+            auto agreement = recipientBlockAckAgreementHandler->getAgreement(addbaRequest->getTid(), addbaRequest->getTransmitterAddress());
+            emit(blockAckAgreementAddedSignal, agreement);
+        }
+        else if (auto addbaResp = dynamicPtrCast<const Ieee80211AddbaResponse>(header)) {
             originatorBlockAckAgreementHandler->processReceivedAddbaResp(addbaResp, originatorBlockAckAgreementPolicy, this);
+            auto agreement = originatorBlockAckAgreementHandler->getAgreement(addbaResp->getTransmitterAddress(), addbaResp->getTid());
+            emit(blockAckAgreementAddedSignal, agreement);
+        }
         else if (auto delba = dynamicPtrCast<const Ieee80211Delba>(header)) {
-            if (delba->getInitiator())
+            if (delba->getInitiator()) {
+                auto agreement = recipientBlockAckAgreementHandler->getAgreement(delba->getTid(), delba->getReceiverAddress());
+                emit(blockAckAgreementDeletedSignal, agreement);
                 recipientBlockAckAgreementHandler->processReceivedDelba(delba, recipientBlockAckAgreementPolicy);
-            else
+            }
+            else {
+                auto agreement = originatorBlockAckAgreementHandler->getAgreement(delba->getReceiverAddress(), delba->getTid());
+                emit(blockAckAgreementDeletedSignal, agreement);
                 originatorBlockAckAgreementHandler->processReceivedDelba(delba, originatorBlockAckAgreementPolicy);
+            }
         }
         else
             ; // Beacon, etc
