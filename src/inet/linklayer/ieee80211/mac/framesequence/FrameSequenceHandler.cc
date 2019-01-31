@@ -145,11 +145,11 @@ void FrameSequenceHandler::finishFrameSequenceStep()
 void FrameSequenceHandler::finishFrameSequence()
 {
     EV_INFO << "Frame sequence finished\n";
+    callback->frameSequenceFinished();
     delete context;
     delete frameSequence;
     context = nullptr;
     frameSequence = nullptr;
-    callback->frameSequenceFinished();
     callback = nullptr;
 }
 
@@ -166,11 +166,11 @@ void FrameSequenceHandler::abortFrameSequence()
         callback->originatorProcessRtsProtectionFailed(const_cast<Packet *>(rtsTxStep->getProtectedFrame()));
     else if (auto blockAckReq = dynamicPtrCast<const Ieee80211BlockAckReq>(header))
         callback->originatorProcessFailedFrame(frameToTransmit);
+    callback->frameSequenceFinished();
     delete context;
     delete frameSequence;
     context = nullptr;
     frameSequence = nullptr;
-    callback->frameSequenceFinished();
     callback = nullptr;
 }
 
