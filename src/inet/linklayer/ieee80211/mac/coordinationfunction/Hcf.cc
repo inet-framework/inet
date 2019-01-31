@@ -227,6 +227,7 @@ FrameSequenceContext* Hcf::buildContext(AccessCategory ac)
 void Hcf::startFrameSequence(AccessCategory ac)
 {
     frameSequenceHandler->startFrameSequence(new HcfFs(), buildContext(ac), this);
+    emit(IFrameSequenceHandler::frameSequenceStartedSignal, frameSequenceHandler->getContext());
     updateDisplayString();
 }
 
@@ -278,6 +279,7 @@ void Hcf::handleInternalCollision(std::vector<Edcaf*> internallyCollidedEdcafs)
 
 void Hcf::frameSequenceFinished()
 {
+    emit(IFrameSequenceHandler::frameSequenceFinishedSignal, frameSequenceHandler->getContext());
     auto edcaf = edca->getChannelOwner();
     if (edcaf) {
         bool startContention = hasFrameToTransmit(); // TODO: outstanding frame

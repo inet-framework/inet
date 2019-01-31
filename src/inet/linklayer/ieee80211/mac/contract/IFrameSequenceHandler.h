@@ -24,8 +24,14 @@
 namespace inet {
 namespace ieee80211 {
 
+class FrameSequenceContext;
+
 class INET_API IFrameSequenceHandler
 {
+    public:
+        static simsignal_t frameSequenceStartedSignal;
+        static simsignal_t frameSequenceFinishedSignal;
+
     public:
         class INET_API ICallback
         {
@@ -45,6 +51,7 @@ class INET_API IFrameSequenceHandler
     public:
         virtual ~IFrameSequenceHandler() { }
 
+        virtual const FrameSequenceContext *getContext() const = 0;
         virtual const IFrameSequence *getFrameSequence() const = 0;
         virtual void startFrameSequence(IFrameSequence *frameSequence, FrameSequenceContext *context, ICallback *callback) = 0;
         virtual void processResponse(Packet *frame) = 0;

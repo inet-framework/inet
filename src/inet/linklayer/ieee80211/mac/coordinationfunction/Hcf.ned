@@ -57,11 +57,16 @@ module Hcf like IHcf
         @signal[linkBroken](type=inet::Packet);
         @signal[packetDropped](type=inet::Packet);
         @signal[edcaCollisionDetected](type=unsigned long);
+        @signal[frameSequenceStarted];
+        @signal[frameSequenceFinished];
         @statistic[linkBroken](title="link break"; source=linkBroken; record=count; interpolationmode=none);
         @statistic[packetDropNotAddressedToUs](title="packet drop: not addressed to us"; source=packetDropReasonIsNotAddressedToUs(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetDropQueueOverflow](title="packet drop: queue overflow"; source=packetDropReasonIsQueueOverflow(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetDropRetryLimitReached](title="packet drop: retry limit reached"; source=packetDropReasonIsRetryLimitReached(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[edcaCollision](title="EDCA collision"; source=edcaCollisionDetected; record=count);
+        @statistic[frameSequence](title="frame sequence"; source=frameSequenceFinished; record=count);
+        @statistic[frameSequenceDuration](title="frame sequence duration"; source=frameSequenceDuration(frameSequenceFinished); record=histogram,vector?);
+        @statistic[frameSequenceNumPackets](title="frame sequence number of packets"; source=frameSequenceNumPackets(frameSequenceFinished); record=histogram,vector?);
 
     submodules:
         edca: Edca {

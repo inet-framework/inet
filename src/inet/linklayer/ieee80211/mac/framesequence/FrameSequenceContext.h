@@ -60,9 +60,10 @@ class INET_API NonQoSContext
         IOriginatorAckPolicy *ackPolicy = nullptr;
 };
 
-class INET_API FrameSequenceContext
+class INET_API FrameSequenceContext : public cObject
 {
     protected:
+        simtime_t startTime = simTime();
         MacAddress address = MacAddress::UNSPECIFIED_ADDRESS;
         physicallayer::Ieee80211ModeSet *modeSet = nullptr;
         InProgressFrames *inProgressFrames = nullptr;
@@ -77,6 +78,8 @@ class INET_API FrameSequenceContext
     public:
         FrameSequenceContext(MacAddress address, physicallayer::Ieee80211ModeSet *modeSet, InProgressFrames *inProgressFrames, IRtsProcedure *rtsProcedure, IRtsPolicy *rtsPolicy, NonQoSContext *nonQosContext, QoSContext *qosContext);
         virtual ~FrameSequenceContext();
+
+        virtual simtime_t getDuration() const { return simTime() - startTime; }
 
         virtual void addStep(IFrameSequenceStep *step) { steps.push_back(step); }
         virtual int getNumSteps() const { return steps.size(); }
@@ -97,6 +100,18 @@ class INET_API FrameSequenceContext
 
         virtual bool isForUs(const Ptr<const Ieee80211MacHeader>& header) const;
         virtual bool isSentByUs(const Ptr<const Ieee80211MacHeader>& header) const;
+};
+
+class INET_API FrameSequenceDurationFilter : public cObjectResultFilter
+{
+  public:
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details) override;
+};
+
+class INET_API FrameSequenceNumPacketsFilter : public cObjectResultFilter
+{
+  public:
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details) override;
 };
 
 } // namespace ieee80211

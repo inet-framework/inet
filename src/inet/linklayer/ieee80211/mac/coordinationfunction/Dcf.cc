@@ -86,6 +86,7 @@ void Dcf::channelGranted(IChannelAccess *channelAccess)
     ASSERT(dcfChannelAccess == channelAccess);
     if (!frameSequenceHandler->isSequenceRunning()) {
         frameSequenceHandler->startFrameSequence(new DcfFs(), buildContext(), this);
+        emit(IFrameSequenceHandler::frameSequenceStartedSignal, frameSequenceHandler->getContext());
         updateDisplayString();
     }
 }
@@ -195,6 +196,7 @@ void Dcf::transmitFrame(Packet *packet, simtime_t ifs)
 
 void Dcf::frameSequenceFinished()
 {
+    emit(IFrameSequenceHandler::frameSequenceFinishedSignal, frameSequenceHandler->getContext());
     dcfChannelAccess->releaseChannel(this);
     if (hasFrameToTransmit())
         dcfChannelAccess->requestChannel(this);
