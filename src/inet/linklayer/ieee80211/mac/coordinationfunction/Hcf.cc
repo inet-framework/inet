@@ -422,10 +422,10 @@ void Hcf::originatorProcessRtsProtectionFailed(Packet *packet)
 
 void Hcf::originatorProcessTransmittedFrame(Packet *packet)
 {
-    emit(packetSentToPeerSignal, packet);
     auto transmittedHeader = packet->peekAtFront<Ieee80211MacHeader>();
     auto edcaf = edca->getChannelOwner();
     if (edcaf) {
+        edcaf->emit(packetSentToPeerSignal, packet);
         AccessCategory ac = edcaf->getAccessCategory();
         if (transmittedHeader->getReceiverAddress().isMulticast()) {
             edcaDataRecoveryProcedures[ac]->multicastFrameTransmitted();
