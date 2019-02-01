@@ -64,6 +64,14 @@ module Hcf like IHcf
         @signal[datarateSelected](type=double);
         @signal[blockAckAgreementAdded];
         @signal[blockAckAgreementDeleted];
+        @statistic[packetSending](title="packet sending"; source=packetSentToPeer; record=count, vector?; interpolationmode=none);
+        @statistic[packetSendingUnicast](title="packet sending: unicast"; source=ieee80211Unicast(packetSentToPeer); record=count, vector?; interpolationmode=none);
+        @statistic[packetSendingMulticast](title="packet sending: multicast"; source=ieee80211Multicast(packetSentToPeer); record=count, vector?; interpolationmode=none);
+        @statistic[packetSendingBroadcast](title="packet sending: broadcast "; source=ieee80211Broadcast(packetSentToPeer); record=count, vector?; interpolationmode=none);
+        @statistic[packetReception](title="packet reception"; source=packetReceivedFromPeer; record=count, vector?; interpolationmode=none);
+        @statistic[packetReceptionUnicast](title="packet reception: unicast"; source=ieee80211Unicast(packetReceivedFromPeer); record=count, vector?; interpolationmode=none);
+        @statistic[packetReceptionMulticast](title="packet reception: multicast"; source=ieee80211Multicast(packetReceivedFromPeer); record=count, vector?; interpolationmode=none);
+        @statistic[packetReceptionBroadcast](title="packet reception: broadcast"; source=ieee80211Broadcast(packetReceivedFromPeer); record=count, vector?; interpolationmode=none);
         @statistic[linkBroken](title="link break"; source=linkBroken; record=count; interpolationmode=none);
         @statistic[packetDropNotAddressedToUs](title="packet drop: not addressed to us"; source=packetDropReasonIsNotAddressedToUs(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetDropQueueOverflow](title="packet drop: queue overflow"; source=packetDropReasonIsQueueOverflow(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
