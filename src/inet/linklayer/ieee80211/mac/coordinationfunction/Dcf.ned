@@ -47,6 +47,8 @@ module Dcf like IDcf
 
         @class(Dcf);
         @display("i=block/queue");
+        @signal[packetSentToPeer](type=inet::Packet);
+        @signal[packetReceivedFromPeer](type=inet::Packet);
         @signal[linkBroken](type=inet::Packet);
         @signal[packetDropped](type=inet::Packet);
         @signal[frameSequenceStarted];

@@ -54,6 +54,8 @@ module Hcf like IHcf
 
         @class(Hcf);
         @display("i=block/queue");
+        @signal[packetSentToPeer](type=inet::Packet);
+        @signal[packetReceivedFromPeer](type=inet::Packet);
         @signal[linkBroken](type=inet::Packet);
         @signal[packetDropped](type=inet::Packet);
         @signal[edcaCollisionDetected](type=unsigned long);

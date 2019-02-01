@@ -133,7 +133,7 @@ void Dcf::processMgmtFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>&
 
 void Dcf::recipientProcessTransmittedControlResponseFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header)
 {
-    mac->emit(packetSentToPeerSignal, packet);
+    emit(packetSentToPeerSignal, packet);
     if (auto ctsFrame = dynamicPtrCast<const Ieee80211CtsFrame>(header))
         ctsProcedure->processTransmittedCts(ctsFrame);
     else if (auto ackFrame = dynamicPtrCast<const Ieee80211AckFrame>(header))
@@ -213,7 +213,7 @@ bool Dcf::isReceptionInProgress()
 
 void Dcf::recipientProcessReceivedFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header)
 {
-    mac->emit(packetReceivedFromPeerSignal, packet);
+    emit(packetReceivedFromPeerSignal, packet);
     if (auto dataOrMgmtHeader = dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(header))
         recipientAckProcedure->processReceivedFrame(packet, dataOrMgmtHeader, recipientAckPolicy, this);
     if (auto dataHeader = dynamicPtrCast<const Ieee80211DataHeader>(header))
@@ -282,7 +282,7 @@ void Dcf::originatorProcessRtsProtectionFailed(Packet *packet)
 
 void Dcf::originatorProcessTransmittedFrame(Packet *packet)
 {
-    mac->emit(packetSentToPeerSignal, packet);
+    emit(packetSentToPeerSignal, packet);
     auto transmittedHeader = packet->peekAtFront<Ieee80211MacHeader>();
     if (auto dataOrMgmtHeader = dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(transmittedHeader)) {
         EV_INFO << "For the current frame exchange, we have CW = " << dcfChannelAccess->getCw() << " SRC = " << recoveryProcedure->getShortRetryCount(packet, dataOrMgmtHeader) << " LRC = " << recoveryProcedure->getLongRetryCount(packet, dataOrMgmtHeader) << " SSRC = " << stationRetryCounters->getStationShortRetryCount() << " and SLRC = " << stationRetryCounters->getStationLongRetryCount() << std::endl;
@@ -304,7 +304,7 @@ void Dcf::originatorProcessTransmittedFrame(Packet *packet)
 
 void Dcf::originatorProcessReceivedFrame(Packet *receivedPacket, Packet *lastTransmittedPacket)
 {
-    mac->emit(packetReceivedFromPeerSignal, receivedPacket);
+    emit(packetReceivedFromPeerSignal, receivedPacket);
     auto receivedHeader = receivedPacket->peekAtFront<Ieee80211MacHeader>();
     auto lastTransmittedHeader = lastTransmittedPacket->peekAtFront<Ieee80211MacHeader>();
     if (receivedHeader->getType() == ST_ACK) {
