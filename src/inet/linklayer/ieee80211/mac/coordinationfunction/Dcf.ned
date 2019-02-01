@@ -58,10 +58,14 @@ module Dcf like IDcf
         @statistic[packetSendingUnicast](title="packet sending: unicast"; source=ieee80211Unicast(packetSentToPeer); record=count, vector?; interpolationmode=none);
         @statistic[packetSendingMulticast](title="packet sending: multicast"; source=ieee80211Multicast(packetSentToPeer); record=count, vector?; interpolationmode=none);
         @statistic[packetSendingBroadcast](title="packet sending: broadcast "; source=ieee80211Broadcast(packetSentToPeer); record=count, vector?; interpolationmode=none);
+        @statistic[packetSendingRetry](title="packet sending: retry"; source=ieee80211Retry(packetSentToPeer); record=count);
+        @statistic[packetSendingWithoutRetry](title="packet sending: without retry"; source=ieee80211NotRetry(packetSentToPeer); record=count);
         @statistic[packetReception](title="packet reception"; source=packetReceivedFromPeer; record=count, vector?; interpolationmode=none);
         @statistic[packetReceptionUnicast](title="packet reception: unicast"; source=ieee80211Unicast(packetReceivedFromPeer); record=count, vector?; interpolationmode=none);
         @statistic[packetReceptionMulticast](title="packet reception: multicast"; source=ieee80211Multicast(packetReceivedFromPeer); record=count, vector?; interpolationmode=none);
         @statistic[packetReceptionBroadcast](title="packet reception: broadcast"; source=ieee80211Broadcast(packetReceivedFromPeer); record=count, vector?; interpolationmode=none);
+        @statistic[packetReceptionWithRetry](title="packet reception: retry"; source=ieee80211Retry(packetReceivedFromPeer); record=count);
+        @statistic[packetReceptionWithoutRetry](title="packet reception: without retry"; source=ieee80211NotRetry(packetReceivedFromPeer); record=count);
         @statistic[linkBroken](title="link break"; source=linkBroken; record=count; interpolationmode=none);
         @statistic[packetDropNotAddressedToUs](title="packet drop: not addressed to us"; source=packetDropReasonIsNotAddressedToUs(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetDropQueueOverflow](title="packet drop: queue overflow"; source=packetDropReasonIsQueueOverflow(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);

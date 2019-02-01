@@ -61,6 +61,28 @@ void Ieee80211BroadcastFilter::receiveSignal(cResultFilter *prev, simtime_t_cref
     }
 }
 
+Register_ResultFilter("ieee80211Retry", Ieee80211RetryFilter);
+
+void Ieee80211RetryFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
+{
+    if (auto packet = dynamic_cast<Packet *>(object)) {
+        const auto& header = packet->peekAtFront<Ieee80211MacHeader>();
+        if (header != nullptr && header->getRetry())
+            fire(prev, t, object, details);
+    }
+}
+
+Register_ResultFilter("ieee80211NotRetry", Ieee80211NotRetryFilter);
+
+void Ieee80211NotRetryFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
+{
+    if (auto packet = dynamic_cast<Packet *>(object)) {
+        const auto& header = packet->peekAtFront<Ieee80211MacHeader>();
+        if (header != nullptr && !header->getRetry())
+            fire(prev, t, object, details);
+    }
+}
+
 } // namespace ieee80211
 
 } // namespace inet
