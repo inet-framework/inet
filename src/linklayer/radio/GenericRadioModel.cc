@@ -96,7 +96,7 @@ bool GenericRadioModel::isPacketOK(double snirMin, int length, double bitrate)
 
     double probNoError = pow(1.0 - ber, length); // probability of no bit error
 
-    if (check_and_cast<cModule *>(this)->dblrand() > probNoError)
+    if (RNGCONTEXT dblrand() > probNoError)
         return false; // error in MPDU
     else
         return true; // no error
