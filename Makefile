@@ -12,7 +12,7 @@ cleanall: checkmakefiles
 	rm -f src/Makefile $(FEATURES_H)
 
 makefiles: $(FEATURES_H)
-	@cd src && opp_makemake -f --deep --make-so -o inet -O out -pINET \
+	@cd src && opp_makemake -f --deep --make-so -o INET -O out -pINET \
 		-Xapplications/voipstream -Xtransport/tcp_lwip -Xtransport/tcp_nsc \
 		-DWITH_TCP_COMMON -DWITH_TCP_INET -DWITH_IPv4 -DWITH_IPv6 -DWITH_UDP -DWITH_RTP -DWITH_SCTP -DWITH_NETPERFMETER -DWITH_DHCP -DWITH_ETHERNET -DWITH_PPP -DWITH_EXT_IF -DWITH_MPLS -DWITH_OSPFv2 -DWITH_BGPv4 -DWITH_TRACI -DWITH_MANET -DWITH_xMIPv6 -DWITH_AODV -DWITH_RIP -DWITH_RADIO -DWITH_IEEE80211 \
 		-I. \
