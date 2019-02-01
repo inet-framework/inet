@@ -843,7 +843,7 @@ void ManetRoutingBase::receiveChangeNotification(int category, const cObject *de
     }
 }
 
-void ManetRoutingBase::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)
+void ManetRoutingBase::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj DETAILS_ARG)
 {
     if (signalID == mobilityStateChangedSignal)
     {

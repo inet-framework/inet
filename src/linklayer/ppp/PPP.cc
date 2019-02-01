@@ -158,7 +158,7 @@ InterfaceEntry *PPP::createInterfaceEntry()
     return e;
 }
 
-void PPP::receiveSignal(cComponent *src, simsignal_t signalID, cObject *obj)
+void PPP::receiveSignal(cComponent *src, simsignal_t signalID, cObject *obj DETAILS_ARG)
 {
     if (signalID != POST_MODEL_CHANGE)
         return;

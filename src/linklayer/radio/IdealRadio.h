@@ -82,7 +82,7 @@ class INET_API IdealRadio : public IdealChannelModelAccess, public ILifecycle
 
     virtual void updateDisplayString();
 
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj DETAILS_ARG);
 
     // ILifecycle:
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);

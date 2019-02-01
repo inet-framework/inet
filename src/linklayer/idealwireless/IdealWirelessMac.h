@@ -77,7 +77,7 @@ class INET_API IdealWirelessMac : public WirelessMacBase, public cListener
     virtual void getNextMsgFromHL();
 
     //cListener:
-    virtual void receiveSignal(cComponent *src, simsignal_t id, long x);
+    virtual void receiveSignal(cComponent *src, simsignal_t id, long x DETAILS_ARG);
 
     /** implements WirelessMacBase functions */
     //@{

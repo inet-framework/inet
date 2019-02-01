@@ -57,7 +57,7 @@ class INET_API IdealChannelModelAccess : public BasicModule, protected cListener
      *
      * IdealChannelModelAccess is subscribed to position changes.
      */
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj DETAILS_ARG);
 
   protected:
     /** Sends a message to all radios in range */

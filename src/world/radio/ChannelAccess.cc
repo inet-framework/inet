@@ -116,7 +116,7 @@ void ChannelAccess::sendToChannel(AirFrame *msg)
     cc->sendToChannel(myRadioRef, msg);
 }
 
-void ChannelAccess::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)
+void ChannelAccess::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj DETAILS_ARG)
 {
     if (signalID == mobilityStateChangedSignal)
     {

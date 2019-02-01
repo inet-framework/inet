@@ -69,7 +69,7 @@ class INET_API ChannelAccess : public BasicModule, protected cListener
      *
      * ChannelAccess is subscribed to position changes.
      */
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj DETAILS_ARG);
 
     /** Finds the channelControl module in the network */
     static IChannelControl *getChannelControl();

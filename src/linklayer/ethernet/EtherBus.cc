@@ -153,7 +153,7 @@ void EtherBus::checkConnections(bool errorWhenAsymmetric)
     }
 }
 
-void EtherBus::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)
+void EtherBus::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj DETAILS_ARG)
 {
     Enter_Method_Silent();
 

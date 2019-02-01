@@ -1044,9 +1044,9 @@ double Radio::calcDistDoubleRay()
     return interfDistance;
 }
 
-void Radio::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)
+void Radio::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj DETAILS_ARG)
 {
-    ChannelAccess::receiveSignal(source,signalID, obj);
+    ChannelAccess::receiveSignal(source,signalID, obj DETAILS_ARG_NAME);
     if (signalID == changeLevelNoise)
     {
         if (BASE_NOISE_LEVEL < receptionThreshold)

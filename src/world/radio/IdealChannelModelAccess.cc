@@ -85,7 +85,7 @@ void IdealChannelModelAccess::sendToChannel(IdealAirFrame *msg)
     cc->sendToChannel(myRadioRef, msg);
 }
 
-void IdealChannelModelAccess::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)
+void IdealChannelModelAccess::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj DETAILS_ARG)
 {
     if (signalID == mobilityStateChangedSignal)
     {

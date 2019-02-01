@@ -40,7 +40,7 @@ class INET_API EtherHub : public cSimpleModule, protected cListener
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);
     virtual void finish();
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj DETAILS_ARG);
 
     virtual void checkConnections(bool errorWhenAsymmetric);
 };

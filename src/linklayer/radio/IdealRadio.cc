@@ -352,7 +352,7 @@ void IdealRadio::updateDisplayString()
     }
 }
 
-void IdealRadio::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)
+void IdealRadio::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj DETAILS_ARG)
 {
-    IdealChannelModelAccess::receiveSignal(source, signalID, obj);
+    IdealChannelModelAccess::receiveSignal(source, signalID, obj  DETAILS_ARG_NAME);
 }

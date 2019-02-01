@@ -74,7 +74,7 @@ void TraCIDemo::handleLowerMsg(cMessage* msg) {
     delete msg;
 }
 
-void TraCIDemo::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj) {
+void TraCIDemo::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj DETAILS_ARG) {
     Enter_Method_Silent();
     if (signalID == mobilityStateChangedSignal) {
         handlePositionUpdate();

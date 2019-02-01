@@ -72,7 +72,7 @@ void TraCITestApp::handleMessage(cMessage* msg) {
 }
 
 
-void TraCITestApp::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj) {
+void TraCITestApp::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj DETAILS_ARG) {
     if (signalID == mobilityStateChangedSignal) {
         handlePositionUpdate();
     }

@@ -56,7 +56,7 @@ class TraCITestApp : public cSimpleModule, protected cListener, public ILifecycl
         void handleSelfMsg(cMessage* msg);
         void handleLowerMsg(cMessage* msg);
         virtual void handleMessage(cMessage* msg);
-        virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
+        virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj DETAILS_ARG);
 
         void handlePositionUpdate();
 };
