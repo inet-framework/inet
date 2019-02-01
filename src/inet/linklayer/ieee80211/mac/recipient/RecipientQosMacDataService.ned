@@ -25,8 +25,8 @@ module RecipientQosMacDataService
         @signal[packetDefragmented](type=inet::Packet);
         @signal[packetDeaggregated](type=inet::Packet);
         @signal[packetDropped](type=inet::Packet);
-        @statistic[packetDefragmented](title="packet defragmentation"; source=packetDefragmented; record=count);
-        @statistic[packetDeaggregated](title="packet deaggregation"; source=packetDeaggregated; record=count);
+        @statistic[packetDefragmented](title="packet defragmentation"; record=count);
+        @statistic[packetDeaggregated](title="packet deaggregation"; record=count);
         @statistic[packetDropReasonIsDuplicateDetected](title="packet drop: duplicate detected"; source=packetDropReasonIsDuplicateDetected(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
 }
 

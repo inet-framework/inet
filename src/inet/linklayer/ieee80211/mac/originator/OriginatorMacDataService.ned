@@ -26,8 +26,8 @@ module OriginatorMacDataService
         @display("i=block/fork");
         @signal[packetFragmented](type=inet::Packet);
         @signal[packetAggregated](type=inet::Packet);
-        @statistic[packetFragmented](title="packet fragmentation"; source=packetFragmented; record=count);
-        @statistic[packetAggregated](title="packet aggregation"; source=packetAggregated; record=count);
+        @statistic[packetFragmented](title="packet fragmentation"; record=count);
+        @statistic[packetAggregated](title="packet aggregation"; record=count);
     submodules:
         fragmentationPolicy: <"BasicFragmentationPolicy"> like IFragmentationPolicy if typename != "" {
             parameters:

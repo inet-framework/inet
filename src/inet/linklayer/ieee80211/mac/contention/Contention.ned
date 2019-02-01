@@ -31,8 +31,8 @@ simple Contention like IContention
         @signal[contentionPeriodGenerated](type=long);
         @signal[channelAccessGranted];
         @signal[stateChanged](type=long); // TODO: enum=inet::ieee80211::Contention::State
-        @statistic[contentionPeriodGenerated](title="contention period"; source=contentionPeriodGenerated; record=vector; interpolationmode=none);
-        @statistic[channelAccessGranted](title="channel access grant"; source=channelAccessGranted; record=count);
-        @statistic[stateChanged](title="contention state"; source=stateChanged; record=vector; interpolationmode=none);
+        @statistic[contentionPeriodGenerated](title="contention period"; record=vector; interpolationmode=none);
+        @statistic[channelAccessGranted](title="channel access grant"; record=count);
+        @statistic[stateChanged](title="contention state"; record=vector; interpolationmode=none);
 }
 
