@@ -26,6 +26,6 @@ simple OnoeRateControl like IRateControl
         double interval @unit(s) = default(1s);
         @display("i=block/cogwheel");
         @signal[datarateChanged];
-        @statistic[datarateChanged](title="datarate"; record=vector; interpolationmode=none;);
+        @statistic[datarateChanged](title="datarate changed"; record=vector; interpolationmode=none;);
 }
 

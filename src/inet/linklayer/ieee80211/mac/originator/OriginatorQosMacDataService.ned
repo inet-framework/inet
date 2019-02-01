@@ -28,8 +28,8 @@ module OriginatorQosMacDataService
         @display("i=block/fork");
         @signal[packetFragmented](type=inet::Packet);
         @signal[packetAggregated](type=inet::Packet);
-        @statistic[packetFragmented](title="packet fragmentation"; record=count);
-        @statistic[packetAggregated](title="packet aggregation"; record=count);
+        @statistic[packetFragmented](title="packet fragmented"; record=count);
+        @statistic[packetAggregated](title="packet aggregated"; record=count);
     submodules:
         msduAggregationPolicy: <default("BasicMsduAggregationPolicy")> like IMsduAggregationPolicy if typename != "" {
             parameters:

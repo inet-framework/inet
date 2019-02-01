@@ -29,7 +29,7 @@ simple QosRecoveryProcedure
         @display("i=block/cogwheel");
         @signal[contentionWindowChanged](type=long);
         @signal[retryLimitReached](type=inet::Packet);
-        @statistic[contentionWindowChanged](title="contention window"; record=vector; interpolationmode=none);
-        @statistic[retryLimitReached](title="retry limit reach"; record=count);
+        @statistic[contentionWindowChanged](title="contention window changed"; record=vector; interpolationmode=none);
+        @statistic[retryLimitReached](title="retry limit reached"; record=count);
 }
 

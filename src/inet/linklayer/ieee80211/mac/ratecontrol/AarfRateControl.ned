@@ -39,6 +39,6 @@ simple AarfRateControl like IRateControl
         int maxIncreaseThreshold = default(50); // Upper bound for increaseThreshold.
         @display("i=block/cogwheel");
         @signal[datarateChanged];
-        @statistic[datarateChanged](title="datarate"; record=vector; interpolationmode=none;);
+        @statistic[datarateChanged](title="datarate changed"; record=vector; interpolationmode=none;);
 }
 

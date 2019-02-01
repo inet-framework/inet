@@ -54,26 +54,26 @@ module Dcf like IDcf
         @signal[frameSequenceStarted];
         @signal[frameSequenceFinished];
         @signal[datarateSelected](type=double);
-        @statistic[packetSentToPeer](title="packet sending"; record=count, vector?; interpolationmode=none);
-        @statistic[packetSentToPeerUnicast](title="packet sending: unicast"; source=ieee80211Unicast(packetSentToPeer); record=count, vector?; interpolationmode=none);
-        @statistic[packetSentToPeerMulticast](title="packet sending: multicast"; source=ieee80211Multicast(packetSentToPeer); record=count, vector?; interpolationmode=none);
-        @statistic[packetSentToPeerBroadcast](title="packet sending: broadcast "; source=ieee80211Broadcast(packetSentToPeer); record=count, vector?; interpolationmode=none);
-        @statistic[packetSentToPeerRetry](title="packet sending: retry"; source=ieee80211Retry(packetSentToPeer); record=count);
-        @statistic[packetSentToPeerWithoutRetry](title="packet sending: without retry"; source=ieee80211NotRetry(packetSentToPeer); record=count);
-        @statistic[packetReceivedFromPeer](title="packet reception"; record=count, vector?; interpolationmode=none);
-        @statistic[packetReceivedFromPeerUnicast](title="packet reception: unicast"; source=ieee80211Unicast(packetReceivedFromPeer); record=count, vector?; interpolationmode=none);
-        @statistic[packetReceivedFromPeerMulticast](title="packet reception: multicast"; source=ieee80211Multicast(packetReceivedFromPeer); record=count, vector?; interpolationmode=none);
-        @statistic[packetReceivedFromPeerBroadcast](title="packet reception: broadcast"; source=ieee80211Broadcast(packetReceivedFromPeer); record=count, vector?; interpolationmode=none);
-        @statistic[packetReceivedFromPeerWithRetry](title="packet reception: retry"; source=ieee80211Retry(packetReceivedFromPeer); record=count);
-        @statistic[packetReceivedFromPeerWithoutRetry](title="packet reception: without retry"; source=ieee80211NotRetry(packetReceivedFromPeer); record=count);
-        @statistic[linkBroken](title="link break"; record=count; interpolationmode=none);
+        @statistic[packetSentToPeer](title="packet sent"; record=count, vector?; interpolationmode=none);
+        @statistic[packetSentToPeerUnicast](title="packet sent: unicast"; source=ieee80211Unicast(packetSentToPeer); record=count, vector?; interpolationmode=none);
+        @statistic[packetSentToPeerMulticast](title="packet sent: multicast"; source=ieee80211Multicast(packetSentToPeer); record=count, vector?; interpolationmode=none);
+        @statistic[packetSentToPeerBroadcast](title="packet sent: broadcast "; source=ieee80211Broadcast(packetSentToPeer); record=count, vector?; interpolationmode=none);
+        @statistic[packetSentToPeerRetry](title="packet sent: with retry"; source=ieee80211Retry(packetSentToPeer); record=count);
+        @statistic[packetSentToPeerWithoutRetry](title="packet sent: without retry"; source=ieee80211NotRetry(packetSentToPeer); record=count);
+        @statistic[packetReceivedFromPeer](title="packet received"; record=count, vector?; interpolationmode=none);
+        @statistic[packetReceivedFromPeerUnicast](title="packet received: unicast"; source=ieee80211Unicast(packetReceivedFromPeer); record=count, vector?; interpolationmode=none);
+        @statistic[packetReceivedFromPeerMulticast](title="packet received: multicast"; source=ieee80211Multicast(packetReceivedFromPeer); record=count, vector?; interpolationmode=none);
+        @statistic[packetReceivedFromPeerBroadcast](title="packet received: broadcast"; source=ieee80211Broadcast(packetReceivedFromPeer); record=count, vector?; interpolationmode=none);
+        @statistic[packetReceivedFromPeerRetry](title="packet received: retry"; source=ieee80211Retry(packetReceivedFromPeer); record=count);
+        @statistic[packetReceivedFromPeerWithoutRetry](title="packet received: without retry"; source=ieee80211NotRetry(packetReceivedFromPeer); record=count);
+        @statistic[linkBroken](title="link broken"; record=count; interpolationmode=none);
         @statistic[packetDropReasonIsNotAddressedToUs](title="packet drop: not addressed to us"; source=packetDropReasonIsNotAddressedToUs(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetDropReasonIsQueueOverflow](title="packet drop: queue overflow"; source=packetDropReasonIsQueueOverflow(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetDropReasonIsRetryLimitReached](title="packet drop: retry limit reached"; source=packetDropReasonIsRetryLimitReached(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
-        @statistic[frameSequenceFinished](title="frame sequence"; record=count);
+        @statistic[frameSequenceFinished](title="frame sequence finished"; record=count);
         @statistic[frameSequenceDuration](title="frame sequence duration"; source=frameSequenceDuration(frameSequenceFinished); record=histogram,vector?);
         @statistic[frameSequenceNumPackets](title="frame sequence number of packets"; source=frameSequenceNumPackets(frameSequenceFinished); record=histogram,vector?);
-        @statistic[datarateSelected](title="datarate"; record=vector; interpolationmode=none);
+        @statistic[datarateSelected](title="datarate selected"; record=vector; interpolationmode=none);
 
     submodules:
         channelAccess: Dcaf {
