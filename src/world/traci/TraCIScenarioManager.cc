@@ -628,7 +628,7 @@ void TraCIScenarioManager::addModule(std::string nodeId, std::string type, std::
 
     // pre-initialize TraCIMobility
     for (cModule::SubmoduleIterator iter(mod); !iter.end(); iter++) {
-        cModule* submod = iter();
+        cModule* submod = *iter;
         TraCIMobility* mm = dynamic_cast<TraCIMobility*>(submod);
         if (!mm) continue;
         mm->preInitialize(nodeId, position, road_id, speed, angle);
@@ -1096,7 +1096,7 @@ void TraCIScenarioManager::processVehicleSubscription(std::string objectId, TraC
     } else {
         // module existed - update position
         for (cModule::SubmoduleIterator iter(mod); !iter.end(); iter++) {
-            cModule* submod = iter();
+            cModule* submod = *iter;
             TraCIMobility* mm = dynamic_cast<TraCIMobility*>(submod);
             if (!mm) continue;
             EV_DEBUG << "module " << objectId << " moving to " << p.x << "," << p.y << endl;
