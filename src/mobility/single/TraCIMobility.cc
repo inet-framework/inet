@@ -18,12 +18,14 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
 
-#ifdef WITH_TRACI
 
 #include <limits>
 #include <iostream>
 #include <sstream>
 
+#include "INETDefs.h"
+
+#ifdef WITH_TRACI
 #include "FWMath.h"  // for M_PI
 #include "mobility/single/TraCIMobility.h"
 

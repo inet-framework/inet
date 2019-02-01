@@ -20,16 +20,16 @@
 
 #ifndef MOBILITY_TRACI_TRACIMOBILITY_H
 #define MOBILITY_TRACI_TRACIMOBILITY_H
-#ifdef WITH_TRACI
 
 #include <string>
 #include <fstream>
 #include <list>
 #include <stdexcept>
 
-#include <omnetpp.h>
-
 #include "INETDefs.h"
+
+#ifdef WITH_TRACI
+
 #include "MobilityBase.h"
 #include "ModuleAccess.h"
 #include "world/traci/TraCIScenarioManager.h"
