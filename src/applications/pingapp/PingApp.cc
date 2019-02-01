@@ -200,8 +200,9 @@ void PingApp::sendPingRequest()
     msg->setOriginatorId(pid);
     msg->setSeqNo(sendSeqNo);
     msg->setByteLength(packetSize);
-    const char *time = SIMTIME_STR(simTime());
-    int timeLength = strlen(time);
+    std::string time;
+    time = simTime().str();
+    int timeLength = time.length();
     msg->setDataArraySize(timeLength);
     for (int i = 0; i < timeLength; i++)
         msg->setData(i, time[i]);
