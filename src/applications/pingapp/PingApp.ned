@@ -49,10 +49,10 @@ simple PingApp like IPingApp
     parameters:
         string destAddr = default(""); // destination address
         string srcAddr = default(""); // source address (useful with multi-homing)
-        double packetSize @unit("B") = default(56B); // of ping payload, in bytes
+        int packetSize @unit("B") = default(56B); // of ping payload, in bytes
         volatile double sendInterval @unit("s") = default(1s); // time to wait between pings (can be random)
-        double hopLimit = default(32); // TTL or hopLimit for IP packets
-        double count = default(-1); // stop after count ping requests, -1 means continuously
+        int hopLimit = default(32); // TTL or hopLimit for IP packets
+        int count = default(-1); // stop after count ping requests, -1 means continuously
         double startTime @unit("s") = default(uniform(0s,this.sendInterval)); // send first ping at startTime
         double stopTime @unit("s") = default(-1s); // time to finish sending, negative values mean forever
         bool printPing = default(false); // log to stdout
@@ -64,7 +64,7 @@ simple PingApp like IPingApp
         @signal[pingRxSeq](type=long);
         @statistic[rtt](title="ping round-trip time"; unit=s; record=histogram,vector; interpolationmode=none);
         @statistic[numLost](title="pings lost"; record=last,vector; interpolationmode=none);
-        @statistic[numOutOfOrderArrivals](title="ping out-of-order arrivals"; record=last,vector; interpolationmode=none);
+        @statistic[numOutOfOrderArrivals](title="ping out-of-order arrivals"; source=outOfOrderArrivals; record=last,vector; interpolationmode=none);
         @statistic[pingTxSeq](title="ping tx seq"; record=count,vector; interpolationmode=none);
         @statistic[pingRxSeq](title="ping rx seq"; record=count,vector; interpolationmode=none);
     gates:

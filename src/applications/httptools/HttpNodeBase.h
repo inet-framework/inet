@@ -68,7 +68,7 @@ class HttpNodeBase : public cSimpleModule, public ILifecycle
 {
     protected:
         /** The link speed in bits per second. Only needed for direct message passing transmission delay calculations. */
-        unsigned long linkSpeed;
+        double linkSpeed;
 
         /** The http protocol. http/1.0: 10 ; http/1.1: 11 */
         int httpProtocol;

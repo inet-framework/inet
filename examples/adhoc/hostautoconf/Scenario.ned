@@ -24,7 +24,7 @@ import inet.world.radio.ChannelControl;
 network Scenario
 {
     parameters:
-        double hosts;
+        int hosts;
 
     submodules:
         channelControl: ChannelControl;

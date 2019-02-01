@@ -62,7 +62,7 @@ simple AODVUU extends BaseRouting like IManetRouting
         bool isRoot = default(false); // Proactive RREQ
         int proactiveRreqTimeout @unit(ms) = default(5000ms);// 5 seconds
         int proactiveLifeTime @unit(ms) = default(0ms); // if zero lifetime is PATH_DISCOVERY_TIME - 2 * rreq_new_hcnt * NODE_TRAVERSAL_TIME;
-        int startRreqProactive @unit(ms) = default(uniform(1000ms,2000ms));
+        int startRreqProactive @unit(ms) = default(intuniform(1000ms,2000ms));
         bool propagateProactive = default(true); // Proactive feedback
         bool checkNextHop = default(false);
         bool PublicRoutingTables =default(false);

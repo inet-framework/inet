@@ -70,7 +70,7 @@ class INET_API RTPApplication : public cSimpleModule, public ILifecycle
         /**
          * The reserved bandwidth for rtp/rtcp in bytes/second.
          */
-        int _bandwidth;
+        double _bandwidth;
 
         /**
          * The address of the unicast peer or of the multicast group.

@@ -53,7 +53,7 @@ import inet.mobility.group.MoBANCoordinator;
 network MoBANNetwork
 {
     parameters:
-        double numNodes; // total number of nodes in the network, either ordinary nodes or WBAN nodes
+        int numNodes; // total number of nodes in the network, either ordinary nodes or WBAN nodes
         int numMoBAN; // total number of MoBAN coordinators (WBAN instances)
         @display("bgb=1000,1000,white;bgp=0,0");
     submodules:

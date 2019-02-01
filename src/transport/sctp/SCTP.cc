@@ -959,6 +959,6 @@ void SCTP::finish()
             recordScalar("Average End to End Delay", assoc.cumEndToEndDelay / msgnum);
         }
 
-        recordScalar("RTXMethod", (double)par("RTXMethod"));
+        recordScalar("RTXMethod", (double)(intpar_t)par("RTXMethod"));
     }
 }

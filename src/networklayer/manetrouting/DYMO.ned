@@ -42,11 +42,11 @@ simple DYMO extends BaseRouting like IManetRouting
         int RESPONSIBLE_ADDRESSES_PREFIX = default(-1); // netmask of network this DYMO router is responsible for, -1 for self only
         //        string DYMO_INTERFACES = default("wlan"); // list of interfaces to run DYMO on, separated by a single space character
         //        string AUTOASSIGN_ADDRESS_BASE = default("10.0.0.0"); // start of address range from which to automatically assign an address to the DYMO_INTERFACES
-        double ROUTE_AGE_MIN_TIMEOUT @unit("s") = default(1s);
-        double ROUTE_AGE_MAX_TIMEOUT @unit("s") = default(60s);
-        double ROUTE_NEW_TIMEOUT @unit("s") = default(5s);
-        double ROUTE_USED_TIMEOUT @unit("s") = default(5s);
-        double ROUTE_DELETE_TIMEOUT @unit("s") = default(10s);
+        int ROUTE_AGE_MIN_TIMEOUT @unit("s") = default(1s);
+        int ROUTE_AGE_MAX_TIMEOUT @unit("s") = default(60s);
+        int ROUTE_NEW_TIMEOUT @unit("s") = default(5s);
+        int ROUTE_USED_TIMEOUT @unit("s") = default(5s);
+        int ROUTE_DELETE_TIMEOUT @unit("s") = default(10s);
         int MIN_HOPLIMIT = default(5); // RREQs are first tried with this MsgHdr.HopLimit
         int MAX_HOPLIMIT = default(10); // MsgHdr.HopLimit for last RREQ, as well as other DYMO control messages
         double RREQ_RATE_LIMIT = default(10); // maximum average RREQs per second (token bucket)
