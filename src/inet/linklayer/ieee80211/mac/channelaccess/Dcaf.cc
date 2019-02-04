@@ -94,14 +94,12 @@ void Dcaf::channelAccessGranted()
 {
     ASSERT(callback != nullptr);
     owning = true;
-    contentionInProgress = false;
     callback->channelGranted(this);
 }
 
 void Dcaf::releaseChannel(IChannelAccess::ICallback* callback)
 {
     owning = false;
-    contentionInProgress = false;
     this->callback = nullptr;
 }
 
@@ -110,10 +108,8 @@ void Dcaf::requestChannel(IChannelAccess::ICallback* callback)
     this->callback = callback;
     if (owning)
         callback->channelGranted(this);
-    else if (!contentionInProgress) {
-        contentionInProgress = true;
+    else if (!contention->isContentionInProgress())
         contention->startContention(cw, ifs, eifs, slotTime, this);
-    }
     else ;
 }
 

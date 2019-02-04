@@ -34,7 +34,6 @@ class INET_API Dcaf : public IChannelAccess, public IContention::ICallback, publ
         IChannelAccess::ICallback *callback = nullptr;
 
         bool owning = false;
-        bool contentionInProgress = false;
 
         simtime_t slotTime = -1;
         simtime_t sifs = -1;
