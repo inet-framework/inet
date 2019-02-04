@@ -97,7 +97,7 @@
                     					
                     <sourceEntries>
                         						
-                        <entry excluding="transport/tcp_nsc|applications/voipstream|transport/tcp_lwip" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
+                        <entry excluding="applications/voipstream" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
                         					
                     </sourceEntries>
                     				
@@ -193,7 +193,7 @@
                     					
                     <sourceEntries>
                         						
-                        <entry excluding="transport/tcp_nsc|applications/voipstream|transport/tcp_lwip" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="src"/>
+                        <entry excluding="applications/voipstream" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="src"/>
                         					
                     </sourceEntries>
                     				
