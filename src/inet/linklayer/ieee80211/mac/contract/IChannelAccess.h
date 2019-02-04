@@ -26,6 +26,9 @@ namespace ieee80211 {
 class INET_API IChannelAccess
 {
     public:
+        static simsignal_t channelOwningChangedSignal;
+
+    public:
         class ICallback
         {
             public:

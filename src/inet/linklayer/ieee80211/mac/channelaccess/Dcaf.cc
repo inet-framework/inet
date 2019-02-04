@@ -109,6 +109,7 @@ void Dcaf::channelAccessGranted()
     Enter_Method_Silent("channelAccessGranted");
     ASSERT(callback != nullptr);
     owning = true;
+    emit(channelOwningChangedSignal, owning);
     callback->channelGranted(this);
 }
 
@@ -116,6 +117,7 @@ void Dcaf::releaseChannel(IChannelAccess::ICallback* callback)
 {
     Enter_Method_Silent("releaseChannel");
     owning = false;
+    emit(channelOwningChangedSignal, owning);
     this->callback = nullptr;
     EV_INFO << "Channel released.\n";
 }
