@@ -33,8 +33,8 @@ from StringIO import StringIO
 inetRoot = os.path.abspath("../..")
 sep = ";" if sys.platform == 'win32' else ':'
 nedPath = inetRoot + "/src" + sep + inetRoot + "/examples" + sep + inetRoot + "/tests/networks"
-inetLib = inetRoot + "/src/inet"
-opp_run = "opp_run"
+inetLib = inetRoot + "/src/INET"
+opp_run = "opp_run_dbg"
 cpuTimeLimit = "300s"
 logFile = "test.out"
 extraOppRunArgs = ""
