@@ -39,7 +39,7 @@ class INET_API InetSimpleBattery : public BasicBattery
       public:
         int currentState;
         cObject * owner;
-        double radioUsageCurrent[4];
+        double radioUsageCurrent[5];
         double  draw;
         int     currentActivity;
         int     numAccts;

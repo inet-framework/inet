@@ -591,12 +591,11 @@ double** PostureTransition::extractMatrixFromSteadyState(double* vec)
         delete identity[i];
         delete change[i];
     }
-    delete temp1; delete temp2; delete temp3;
-    delete identity;
-    delete change;
-    delete sum;
-    delete changeSum;
-
+    delete[] temp1; delete[] temp2; delete[] temp3;
+    delete[] identity;
+    delete[] change;
+    delete[] sum;
+    delete[] changeSum;
 
     return mat;
 }

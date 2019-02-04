@@ -182,7 +182,7 @@ double BerParseFile::getPer(double speed, double tsnr, int tlen)
         snrdata4.snr = snrdata3.snr;
         snrdata4.ber = snrdata3.ber;
     }
-    double per1, per2, per;
+    double per1, per2, per = 0.0;
     per1 = snrdata1.ber;
     per2 = snrdata3.ber;
 

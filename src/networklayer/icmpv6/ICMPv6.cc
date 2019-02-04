@@ -208,7 +208,7 @@ void ICMPv6::sendErrorMessage(IPv6Datagram *origDatagram, ICMPv6Type type, int c
     else if (type == ICMPv6_PACKET_TOO_BIG) errorMsg = createPacketTooBigMsg(0);
     else if (type == ICMPv6_TIME_EXCEEDED) errorMsg = createTimeExceededMsg(code);
     else if (type == ICMPv6_PARAMETER_PROBLEM) errorMsg = createParamProblemMsg(code);
-    else error("Unknown ICMPv6 error type\n");
+    else throw cRuntimeError("Unknown ICMPv6 error type\n");
 
     // Encapsulate the original datagram, but the whole ICMPv6 error
     // packet cannot be larger than the minimum IPv6 MTU (RFC 4443 2.4. (c)).

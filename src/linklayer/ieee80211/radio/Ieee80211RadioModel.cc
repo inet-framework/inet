@@ -229,7 +229,7 @@ double Ieee80211RadioModel::getTestFrameError(double snirMin, double bitrate)
 
 bool Ieee80211RadioModel::isPacketOK(double snirMin, int lengthMPDU, double bitrate)
 {
-    double berHeader, berMPDU;
+    double berHeader, berMPDU = 0.0;
     ModulationType modeBody;
     ModulationType modeHeader;
 
