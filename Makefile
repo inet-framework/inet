@@ -1,5 +1,7 @@
 FEATURES_H = src/base/inet_features.h
 
+.PHONY: all clean cleanall makefiles makefiles-so makefiles-lib makefiles-exe checkmakefiles doxy doc
+
 all: checkmakefiles $(FEATURES_H)
 	cd src && $(MAKE)
 
@@ -7,15 +9,11 @@ clean: checkmakefiles
 	cd src && $(MAKE) clean
 
 cleanall: checkmakefiles
-	cd src && $(MAKE) MODE=release clean
-	cd src && $(MAKE) MODE=debug clean
-	rm -f src/Makefile $(FEATURES_H)
+	@cd src && $(MAKE) MODE=release clean
+	@cd src && $(MAKE) MODE=debug clean
+	@rm -f src/Makefile $(FEATURES_H)
 
-makefiles: $(FEATURES_H)
-	@cd src && opp_makemake -f --deep --make-so -o INET -O out -pINET \
-		-Xapplications/voipstream -Xtransport/tcp_lwip -Xtransport/tcp_nsc \
-		-DWITH_TCP_COMMON -DWITH_TCP_INET -DWITH_IPv4 -DWITH_IPv6 -DWITH_UDP -DWITH_RTP -DWITH_SCTP -DWITH_NETPERFMETER -DWITH_DHCP -DWITH_ETHERNET -DWITH_PPP -DWITH_EXT_IF -DWITH_MPLS -DWITH_OSPFv2 -DWITH_BGPv4 -DWITH_TRACI -DWITH_MANET -DWITH_xMIPv6 -DWITH_AODV -DWITH_RIP -DWITH_RADIO -DWITH_IEEE80211 \
-		-I. \
+INCLUDE_PATH := -I. \
 		-Iapplications \
 		-Iapplications/common \
 		-Iapplications/dhcp \
@@ -176,6 +174,19 @@ makefiles: $(FEATURES_H)
 		-Iworld/scenario \
 		-Iworld/traci
 
+MAKEMAKE_OPTIONS := -f --deep -o INET -O out -pINET $(INCLUDE_PATH)
+
+makefiles: makefiles-so
+
+makefiles-so: $(FEATURES_H)
+	@FEATURE_OPTIONS=$$(opp_featuretool options -f -l) && cd src && opp_makemake --make-so $(MAKEMAKE_OPTIONS) $$FEATURE_OPTIONS
+
+makefiles-lib: $(FEATURES_H)
+	@FEATURE_OPTIONS=$$(opp_featuretool options -f -l) && cd src && opp_makemake --make-lib $(MAKEMAKE_OPTIONS) $$FEATURE_OPTIONS
+
+makefiles-exe: $(FEATURES_H)
+	@FEATURE_OPTIONS=$$(opp_featuretool options -f -l) && cd src && opp_makemake $(MAKEMAKE_OPTIONS) $$FEATURE_OPTIONS
+
 checkmakefiles:
 	@if [ ! -f src/Makefile ]; then \
 	echo; \
@@ -195,3 +206,4 @@ doxy:
 
 tcptut:
 	cd doc/src/tcp && $(MAKE)
+

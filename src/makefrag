@@ -1,12 +1,45 @@
 #
+# Use the new message compiler introduced in OMNeT++ 5.3
+#
+MSGC:=$(MSGC) --msg4
+
+#
+# compiler warning for c-style cast
+#
+#CFLAGS += -Wold-style-cast
+
+
+#
+# on windows we have to link with the ws2_32 (winsock2) library as it is no longer added
+# to the omnetpp system libraries by default (as of OMNeT++ 5.1)
+#
+ifeq ($(PLATFORM),win32.x86_64)
+  LIBS += -lws2_32
+  DEFINES += -DINET_EXPORT
+  ENABLE_AUTO_IMPORT=-Wl,--enable-auto-import
+  LDFLAGS := $(filter-out $(ENABLE_AUTO_IMPORT), $(LDFLAGS))
+endif
+
+#
 # TCP implementaion using the Network Simulation Cradle (TCP_NSC feature)
 #
-ifneq (,$(findstring -DWITH_TCP_NSC,$(COPTS)))
+WITH_TCP_NSC := $(shell (cd .. && opp_featuretool -q isenabled TCP_NSC && echo enabled) )
+ifeq ($(WITH_TCP_NSC), enabled)
   NSC_VERSION= $(shell ls -d ../3rdparty/nsc* 2>/dev/null | sed 's/^.*-//')
   ifneq ($(NSC_VERSION),)
-    CFLAGS += -I../3rdparty/nsc-$(NSC_VERSION)/sim -DHAVE_NSC
-    LIBS += -Wl,-rpath,`abspath ../3rdparty/nsc-$(NSC_VERSION)`
+    INCLUDE_PATH += -I../3rdparty/nsc-$(NSC_VERSION)/sim
+    LIBS += -Wl,-rpath,$(abspath ../3rdparty/nsc-$(NSC_VERSION))
+  else
+    $(error Please install NSC or disable 'TCP_NSC' feature)
   endif
+endif
+
+#
+# TCP implementation using the lwIP stack
+#
+WITH_TCP_LWIP := $(shell (cd .. && opp_featuretool -q isenabled TCP_lwIP && echo enabled) )
+ifeq ($(WITH_TCP_LWIP), enabled)
+  INCLUDE_PATH += -Iinet/transportlayer/tcp_lwip/lwip/include -Iinet/transportlayer/tcp_lwip/lwip/include/ipv4 -Iinet/transportlayer/tcp_lwip/lwip/include/ipv6
 endif
 
 #
@@ -23,7 +56,8 @@ endif
 #
 # VoipStream feature:
 #
-ifneq (,$(findstring -DWITH_VOIPSTREAM,$(COPTS)))
+WITH_VOIPSTREAM := $(shell (cd .. && opp_featuretool -q isenabled VoIPStream && echo enabled) )
+ifeq ($(WITH_VOIPSTREAM), enabled)
   ifeq ($(HAVE_PKGCFG), yes)
     HAVE_FFMPEG := $(shell $(PKGCFG) --exists libavcodec libavformat libavutil && echo yes || echo no)
     ifeq ($(HAVE_FFMPEG), yes)
@@ -40,3 +74,15 @@ endif
 
 # disable anoying "... hides overloaded virtual function" warning
 CFLAGS += -Wno-overloaded-virtual
+
+# disable warning: '...' overrides a member function but is not marked 'override'
+CFLAGS += -Wno-inconsistent-missing-override
+
+# dump out the actual compiler and linker command line for easier debugging
+ifneq ($(MAKECMDGOALS),clean)
+$(info *** COMPILING with:)
+$(info $(CXX) -c $(CXXFLAGS) $(COPTS))
+$(info *** LINKING with:)
+$(info $(SHLIB_LD) -o $O/$(TARGET) $(AS_NEEDED_OFF) $(WHOLE_ARCHIVE_ON) $(LIBS) $(WHOLE_ARCHIVE_OFF) $(OMNETPP_LIBS) $(LDFLAGS))
+$(info Building...)
+endif
