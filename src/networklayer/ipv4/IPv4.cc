@@ -874,7 +874,7 @@ void IPv4::arpResolutionCompleted(IARPCache::Notification *entry)
         EV << "ARP resolution completed for " << entry->ipv4Address << ". Sending " << packetQueue.getLength()
                 << " waiting packets from the queue\n";
 
-        while (!packetQueue.empty())
+        while (!packetQueue.isEmpty())
         {
             cPacket *msg = packetQueue.pop();
             EV << "Sending out queued packet " << msg << "\n";

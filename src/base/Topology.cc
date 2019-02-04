@@ -202,7 +202,7 @@ void Topology::extractFromNetwork(bool (*predicate)(cModule *,void *), void *dat
 
         for (cModule::GateIterator i(mod); !i.end(); i++)
         {
-            cGate *gate = i();
+            cGate *gate = *i;
             if (gate->getType()!=cGate::OUTPUT)
                 continue;
 

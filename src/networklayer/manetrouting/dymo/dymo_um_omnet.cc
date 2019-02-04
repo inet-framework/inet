@@ -1056,7 +1056,7 @@ void DYMOUM::processPromiscuous(const cObject *details)
         // if rrep proccess the packet
         if (!no_path_acc)
         {
-            DYMO_element * dymo_msg;
+            DYMO_element * dymo_msg = nullptr;
             if (!isInMacLayer())
             {
                 if (ip_msg && ip_msg->getTransportProtocol()==IP_PROT_MANET)

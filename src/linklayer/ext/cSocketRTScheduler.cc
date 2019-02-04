@@ -106,7 +106,7 @@ void cSocketRTScheduler::endRun()
 void cSocketRTScheduler::executionResumed()
 {
     gettimeofday(&baseTime, NULL);
-    baseTime = timeval_substract(baseTime, sim->getSimTime().dbl());
+    baseTime = timeval_subtract(baseTime, sim->getSimTime().dbl());
 }
 
 void cSocketRTScheduler::setInterfaceModule(cModule *mod, const char *dev, const char *filter)

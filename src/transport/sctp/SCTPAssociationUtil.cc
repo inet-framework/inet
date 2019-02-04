@@ -2320,12 +2320,12 @@ SCTPDataMsg* SCTPAssociation::dequeueOutboundDataMsg(SCTPPathVariables* path,
             SCTPSendStream* stream = iter->second;
             streamQ = NULL;
 
-            if (!stream->getUnorderedStreamQ()->empty())
+            if (!stream->getUnorderedStreamQ()->isEmpty())
             {
                 streamQ = stream->getUnorderedStreamQ();
                 sctpEV3<<"DequeueOutboundDataMsg() found chunks in stream "<<iter->first<<" unordered queue, queue size="<<stream->getUnorderedStreamQ()->getLength()<<"\n";
             }
-            else if (!stream->getStreamQ()->empty())
+            else if (!stream->getStreamQ()->isEmpty())
             {
                 streamQ = stream->getStreamQ();
                 sctpEV3<<"DequeueOutboundDataMsg() found chunks in stream "<<iter->first<<" ordered queue, queue size="<<stream->getStreamQ()->getLength()<<"\n";
@@ -2405,7 +2405,7 @@ SCTPDataMsg* SCTPAssociation::dequeueOutboundDataMsg(SCTPPathVariables* path,
                         datMsgFragment->encapsulate(datMsgFragmentEncMsg);
 
                         /* insert fragment into queue */
-                        if (!streamQ->empty())
+                        if (!streamQ->isEmpty())
                         {
                             if (!datMsgLastFragment)
                             {
@@ -2506,9 +2506,9 @@ bool SCTPAssociation::nextChunkFitsIntoPacket(SCTPPathVariables* path, int32 byt
     {
         cPacketQueue* streamQ = NULL;
 
-        if (!stream->getUnorderedStreamQ()->empty())
+        if (!stream->getUnorderedStreamQ()->isEmpty())
             streamQ = stream->getUnorderedStreamQ();
-        else if (!stream->getStreamQ()->empty())
+        else if (!stream->getStreamQ()->isEmpty())
             streamQ = stream->getStreamQ();
 
         if (streamQ)

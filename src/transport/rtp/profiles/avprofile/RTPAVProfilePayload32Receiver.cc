@@ -104,7 +104,7 @@ void RTPAVProfilePayload32Receiver::processPacket(RTPPacket *rtpPacket)
 
             // the queue contains all packets for this frame
             // we have received
-            while (!_queue->empty())
+            while (!_queue->isEmpty())
             {
                 RTPPacket *readPacket = (RTPPacket *)(_queue->pop());
                 RTPMpegPacket *mpegPacket = (RTPMpegPacket *)(readPacket->decapsulate());

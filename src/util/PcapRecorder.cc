@@ -80,7 +80,7 @@ void PcapRecorder::initialize()
 
         for (cModule::SubmoduleIterator i(getParentModule()); !i.end(); i++)
         {
-            cModule *submod = i();
+            cModule *submod = *i;
             if (0 == strcmp(isAllIndex ? submod->getName() : submod->getFullName(), mname.c_str()))
             {
                 found = true;

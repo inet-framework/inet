@@ -39,7 +39,7 @@ void Ieee80211MgmtBase::initialize(int stage)
 
         dataQueue.setName("wlanDataQueue");
         mgmtQueue.setName("wlanMgmtQueue");
-        emit(dataQueueLenSignal, dataQueue.length());
+        emit(dataQueueLenSignal, dataQueue.getLength());
 
         numDataFramesReceived = 0;
         numMgmtFramesReceived = 0;
@@ -122,7 +122,7 @@ cMessage *Ieee80211MgmtBase::enqueue(cMessage *msg)
         mgmtQueue.insert(msg);
         return NULL;
     }
-    else if (frameCapacity && dataQueue.length() >= frameCapacity)
+    else if (frameCapacity && dataQueue.getLength() >= frameCapacity)
     {
         EV << "Queue full, dropping packet.\n";
         return msg;
@@ -130,33 +130,33 @@ cMessage *Ieee80211MgmtBase::enqueue(cMessage *msg)
     else
     {
         dataQueue.insert(msg);
-        emit(dataQueueLenSignal, dataQueue.length());
+        emit(dataQueueLenSignal, dataQueue.getLength());
         return NULL;
     }
 }
 
 bool Ieee80211MgmtBase::isEmpty()
 {
-    if (!mgmtQueue.empty())
+    if (!mgmtQueue.isEmpty())
         return false;
 
-    return dataQueue.empty();
+    return dataQueue.isEmpty();
 }
 
 cMessage *Ieee80211MgmtBase::dequeue()
 {
     // management frames have priority
-    if (!mgmtQueue.empty())
+    if (!mgmtQueue.isEmpty())
         return (cMessage *)mgmtQueue.pop();
 
     // return a data frame if we have one
-    if (dataQueue.empty())
+    if (dataQueue.isEmpty())
         return NULL;
 
     cMessage *pk = (cMessage *)dataQueue.pop();
 
     // statistics
-    emit(dataQueueLenSignal, dataQueue.length());
+    emit(dataQueueLenSignal, dataQueue.getLength());
     return pk;
 }
 
@@ -272,7 +272,7 @@ void Ieee80211MgmtBase::stop()
 {
     clear();
     dataQueue.clear();
-    emit(dataQueueLenSignal, dataQueue.length());
+    emit(dataQueueLenSignal, dataQueue.getLength());
     mgmtQueue.clear();
     isOperational = false;
 }

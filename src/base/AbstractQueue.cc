@@ -74,7 +74,7 @@ void AbstractQueue::doStartService()
 void AbstractQueue::doEndService()
 {
     endService( msgServiced );
-    if (queue.empty())
+    if (queue.isEmpty())
     {
         msgServiced = NULL;
     }

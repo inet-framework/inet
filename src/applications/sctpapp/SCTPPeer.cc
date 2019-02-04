@@ -266,7 +266,7 @@ void SCTPPeer::handleMessage(cMessage *msg)
                 sprintf(text, "App: EndToEndDelay of assoc %d", serverAssocId);
                 endToEndDelay[serverAssocId] = new cOutVector(text);
                 sprintf(text, "Hist: EndToEndDelay of assoc %d", serverAssocId);
-                histEndToEndDelay[serverAssocId] = new cDoubleHistogram(text);
+                histEndToEndDelay[serverAssocId] = new cHistogram(text);
 
                 //delete connectInfo;
                 delete msg;

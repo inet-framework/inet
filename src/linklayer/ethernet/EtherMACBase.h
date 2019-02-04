@@ -101,10 +101,10 @@ class INET_API EtherMACBase : public MACBase, public cListener
         InnerQueue(const char* name = NULL, int limit = 0) : queue(name, packetCompare), queueLimit(limit) {}
         void insertFrame(cObject *obj) { queue.insert(obj); }
         cObject *pop() { return queue.pop(); }
-        bool empty() const { return queue.empty(); }
+        bool empty() const { return queue.isEmpty(); }
         int getQueueLimit() const { return queueLimit; }
-        bool isFull() const { return queueLimit != 0 && queue.length() > queueLimit; }
-        int length() const { return queue.length(); }
+        bool isFull() const { return queueLimit != 0 && queue.getLength() > queueLimit; }
+        int length() const { return queue.getLength(); }
         void clear() { queue.clear(); }
     };
 

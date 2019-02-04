@@ -287,7 +287,7 @@ void InterfaceTable::discoverConnectingGates(InterfaceEntry *entry)
     cGate *nwlayerInGate = NULL, *nwlayerOutGate = NULL; // ifIn[] and ifOut[] gates in the network layer
     for (GateIterator i(ifmod); !i.end(); i++)
     {
-        cGate *g = i();
+        cGate *g = *i;
         if (!g) continue;
 
         // find the host/router's gates that internally connect to this interface
@@ -423,7 +423,7 @@ InterfaceEntry *InterfaceTable::getInterfaceByInterfaceModule(cModule *ifmod)
     int nodeInputGateId = -1, nodeOutputGateId = -1;
     for (GateIterator i(ifmod); !i.end(); i++)
     {
-        cGate *g = i();
+        cGate *g = *i;
         if (!g) continue;
 
         // find the host/router's gates that internally connect to this interface

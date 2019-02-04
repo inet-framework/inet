@@ -691,7 +691,7 @@ void MoBANCoordinator::collectLocalModules(cModule *module)
 {
     for (cModule::SubmoduleIterator it(module); !it.end(); it++)
     {
-        cModule *submodule = it();
+        cModule *submodule = *it;
         collectLocalModules(submodule);
         MoBANLocal *localModule = dynamic_cast<MoBANLocal *>(submodule);
         if (localModule && localModule->par("coordinatorIndex").longValue() == getIndex()) {
