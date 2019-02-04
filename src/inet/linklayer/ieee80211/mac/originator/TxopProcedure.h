@@ -34,7 +34,7 @@ class INET_API TxopProcedure : public ModeSetListener
     public:
         // [...] transmitted under EDCA by a STA that initiates a TXOP, there are
         // two classes of duration settings: single protection and multiple protection.
-        enum class ProtectionMechanism {
+        enum ProtectionMechanism {
             SINGLE_PROTECTION,
             MULTIPLE_PROTECTION,
             UNDEFINED_PROTECTION

@@ -23,6 +23,8 @@ namespace ieee80211 {
 
 Define_Module(QosRecoveryProcedure);
 
+inline std::ostream& operator<<(std::ostream& os, const std::pair<Tid, SequenceControlField>& p) { return os << p.first << "#" << p.second; }
+
 //
 // Contention window management
 // ============================
@@ -43,6 +45,10 @@ void QosRecoveryProcedure::initialize(int stage)
         shortRetryLimit = par("shortRetryLimit");
         longRetryLimit = par("longRetryLimit");
         emit(contentionWindowChangedSignal, cwCalculator->getCw());
+        WATCH(stationLongRetryCounter);
+        WATCH(stationShortRetryCounter);
+        WATCH_MAP(shortRetryCounter);
+        WATCH_MAP(longRetryCounter);
     }
 }
 

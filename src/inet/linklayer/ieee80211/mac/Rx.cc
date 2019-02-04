@@ -46,6 +46,7 @@ void Rx::initialize(int stage)
         WATCH(address);
         WATCH(receptionState);
         WATCH(transmissionState);
+        WATCH(receivedPart);
         WATCH(mediumFree);
     }
     // TODO: INITSTAGE

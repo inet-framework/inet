@@ -43,6 +43,8 @@ class INET_API SequenceControlField
         bool operator <(const SequenceControlField& other) const;
 };
 
+inline std::ostream& operator<<(std::ostream& os, const SequenceControlField& field) { return os << field.getSequenceNumber() << ":" << (int)field.getFragmentNumber(); }
+
 } /* namespace ieee80211 */
 } /* namespace inet */
 

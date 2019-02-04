@@ -26,8 +26,10 @@ Define_Module(EdcaCollisionController);
 
 void EdcaCollisionController::initialize()
 {
-    for (int ac = 0; ac < 4; ac++)
+    for (int ac = 0; ac < 4; ac++) {
         txStartTimes[ac] = -1;
+        WATCH(txStartTimes[ac]);
+    }
 }
 
 void EdcaCollisionController::expectedChannelAccess(Edcaf *edcaf, simtime_t time)

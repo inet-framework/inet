@@ -38,6 +38,14 @@ void Dcaf::initialize(int stage)
         auto rx = check_and_cast<IRx *>(getModuleByPath(par("rxModule")));
         rx->registerContention(contention);
         calculateTimingParameters();
+        WATCH(owning);
+        WATCH(slotTime);
+        WATCH(sifs);
+        WATCH(ifs);
+        WATCH(eifs);
+        WATCH(cw);
+        WATCH(cwMin);
+        WATCH(cwMax);
     }
 }
 

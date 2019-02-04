@@ -62,6 +62,7 @@ void Contention::initialize(int stage)
         WATCH(backoffOptimizationDelta);
         WATCH(mediumFree);
         WATCH(backoffOptimization);
+        WATCH(startTime);
         updateDisplayString(-1);
     }
     else if (stage == INITSTAGE_LAST) {

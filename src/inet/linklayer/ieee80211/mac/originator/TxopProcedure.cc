@@ -37,6 +37,8 @@ void TxopProcedure::initialize(int stage)
     ModeSetListener::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         limit = par("txopLimit");
+        WATCH(start);
+        WATCH(protectionMechanism);
     }
 }
 

@@ -37,6 +37,15 @@ void Edcaf::initialize(int stage)
         ac = getAccessCategory(par("accessCategory"));
         contention = check_and_cast<IContention *>(getSubmodule("contention"));
         collisionController = check_and_cast<IEdcaCollisionController *>(getModuleByPath(par("collisionControllerModule")));
+        WATCH(owning);
+        WATCH(slotTime);
+        WATCH(sifs);
+        WATCH(ifs);
+        WATCH(eifs);
+        WATCH(ac);
+        WATCH(cw);
+        WATCH(cwMin);
+        WATCH(cwMax);
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
         auto rx = check_and_cast<IRx *>(getModuleByPath(par("rxModule")));
