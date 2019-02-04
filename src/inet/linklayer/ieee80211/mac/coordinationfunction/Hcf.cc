@@ -603,10 +603,9 @@ void Hcf::originatorProcessReceivedControlFrame(Packet *packet, const Ptr<const 
         auto ackedSeqAndFragNums = edcaAckHandlers[ac]->processReceivedBlockAck(blockAck);
         if (originatorBlockAckAgreementHandler)
             originatorBlockAckAgreementHandler->processReceivedBlockAck(blockAck, this);
-        EV_INFO << "It has acknowledged the following frames:" << std::endl;
-        // FIXME
-//        for (auto seqCtrlField : ackedSeqAndFragNums)
-//            EV_INFO << "Fragment number = " << seqCtrlField.getSequenceNumber() << " Sequence number = " << (int)seqCtrlField.getFragmentNumber() << std::endl;
+        EV_TRACE << "It has acknowledged the following frames:" << std::endl;
+        for (auto it : ackedSeqAndFragNums)
+            EV_TRACE << "   sequenceNumber = " << it.second.second.getSequenceNumber() << ", fragmentNumber = " << (int)it.second.second.getFragmentNumber() << std::endl;
         edcaInProgressFrames[ac]->dropFrames(ackedSeqAndFragNums);
     }
     else if (dynamicPtrCast<const Ieee80211RtsFrame>(header))

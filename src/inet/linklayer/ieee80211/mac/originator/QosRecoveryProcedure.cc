@@ -55,6 +55,7 @@ void QosRecoveryProcedure::initialize(int stage)
 void QosRecoveryProcedure::incrementStationSrc()
 {
     stationShortRetryCounter++;
+    EV_INFO << "Incremented station SRC: stationShortRetryCounter = " << stationShortRetryCounter << ".\n";
     if (stationShortRetryCounter == shortRetryLimit) // 9.3.3 Random backoff time
         resetContentionWindow();
     else
@@ -64,6 +65,7 @@ void QosRecoveryProcedure::incrementStationSrc()
 void QosRecoveryProcedure::incrementStationLrc()
 {
     stationLongRetryCounter++;
+    EV_INFO << "Incremented station LRC: stationLongRetryCounter = " << stationLongRetryCounter << ".\n";
     if (stationLongRetryCounter == longRetryLimit) // 9.3.3 Random backoff time
         resetContentionWindow();
     else
@@ -145,6 +147,7 @@ void QosRecoveryProcedure::ackFrameReceived(Packet *packet, const Ptr<const Ieee
 //
 void QosRecoveryProcedure::retryLimitReached(Packet *packet, const Ptr<const Ieee80211DataHeader>& header)
 {
+    EV_WARN << "Retry limit reached for " << *packet << ".\n";
     auto id = std::make_pair(header->getTid(), SequenceControlField(header->getSequenceNumber(), header->getFragmentNumber()));
     if (packet->getByteLength() >= rtsThreshold) {
         auto it = longRetryCounter.find(id);

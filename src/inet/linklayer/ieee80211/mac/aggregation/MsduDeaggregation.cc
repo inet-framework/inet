@@ -56,6 +56,7 @@ void MsduDeaggregation::setExplodedFrameAddress(const Ptr<Ieee80211DataHeader>& 
 
 std::vector<Packet *> *MsduDeaggregation::deaggregateFrame(Packet *aggregatedFrame)
 {
+    EV_DEBUG << "Deaggregating A-MSDU " << *aggregatedFrame << " into multiple packets.\n";
     std::vector<Packet *> *frames = new std::vector<Packet *>();
     const auto& amsduHeader = aggregatedFrame->popAtFront<Ieee80211DataHeader>();
     aggregatedFrame->popAtBack<Ieee80211MacTrailer>();
@@ -82,9 +83,11 @@ std::vector<Packet *> *MsduDeaggregation::deaggregateFrame(Packet *aggregatedFra
         setExplodedFrameAddress(header, msduSubframeHeader, amsduHeader);
         frame->insertAtFront(header);
         frame->insertAtBack(makeShared<Ieee80211MacTrailer>());
+        EV_TRACE << "Created " << *frame << " from A-MSDU.\n";
         frames->push_back(frame);
     }
     delete aggregatedFrame;
+    EV_TRACE << "Created " << frames->size() << " packets from A-MSDU.\n";
     return frames;
 }
 

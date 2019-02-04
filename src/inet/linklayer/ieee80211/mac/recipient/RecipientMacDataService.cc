@@ -45,6 +45,7 @@ Packet *RecipientMacDataService::defragment(Packet *dataOrMgmtFrame)
 std::vector<Packet *> RecipientMacDataService::dataOrMgmtFrameReceived(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header)
 {
     if (duplicateRemoval && duplicateRemoval->isDuplicate(header)) {
+        EV_WARN << "Dropping duplicate packet " << *packet << ".\n";
         PacketDropDetails details;
         details.setReason(DUPLICATE_DETECTED);
         emit(packetDroppedSignal, packet, &details);

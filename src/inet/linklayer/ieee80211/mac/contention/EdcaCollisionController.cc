@@ -45,8 +45,10 @@ bool EdcaCollisionController::isInternalCollision(Edcaf *edcaf)
     AccessCategory accessCategory = edcaf->getAccessCategory();
     if (txStartTimes[accessCategory] == now) {
         for (int ac = accessCategory + 1; ac < 4; ac++) {
-            if (txStartTimes[ac] == now)
+            if (txStartTimes[ac] == now) {
+                EV_WARN << "Internal collision detected between multiple access categories for the current simulation time.\n";
                 return true;
+            }
         }
     }
     return false;

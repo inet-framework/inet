@@ -74,6 +74,7 @@ void Dcaf::calculateTimingParameters()
     // lowest PHY mandatory rate by Equation (9-4).
     // EIFS = aSIFSTime + DIFS + ACKTxTime
     eifs = sifs + ifs + modeSet->getSlowestMandatoryMode()->getDuration(LENGTH_ACK);
+    EV_DEBUG << "Timing parameters are initialized: slotTime = " << slotTime << ", sifs = " << sifs << ", ifs = " << ifs << ", eifs = " << eifs << std::endl;
     ASSERT(ifs > sifs);
     cwMin = par("cwMin");
     cwMax = par("cwMax");
@@ -82,6 +83,7 @@ void Dcaf::calculateTimingParameters()
     if (cwMax == -1)
         cwMax = modeSet->getCwMax();
     cw = cwMin;
+    EV_DEBUG << "Contention window parameters are initialized: cw = " << cw << ", cwMin = " << cwMin << ", cwMax = " << cwMax << std::endl;
 }
 
 void Dcaf::incrementCw()
@@ -92,12 +94,14 @@ void Dcaf::incrementCw()
         cw = cwMax;
     else
         cw = newCw;
+    EV_DEBUG << "Contention window is incremented: cw = " << cw << std::endl;
 }
 
 void Dcaf::resetCw()
 {
     Enter_Method_Silent("resetCw");
     cw = cwMin;
+    EV_DEBUG << "Contention window is reset: cw = " << cw << std::endl;
 }
 
 void Dcaf::channelAccessGranted()
@@ -113,6 +117,7 @@ void Dcaf::releaseChannel(IChannelAccess::ICallback* callback)
     Enter_Method_Silent("releaseChannel");
     owning = false;
     this->callback = nullptr;
+    EV_INFO << "Channel released.\n";
 }
 
 void Dcaf::requestChannel(IChannelAccess::ICallback* callback)
@@ -123,7 +128,8 @@ void Dcaf::requestChannel(IChannelAccess::ICallback* callback)
         callback->channelGranted(this);
     else if (!contention->isContentionInProgress())
         contention->startContention(cw, ifs, eifs, slotTime, this);
-    else ;
+    else
+        EV_DEBUG << "Contention has been already started.\n";
 }
 
 void Dcaf::expectedChannelAccess(simtime_t time)

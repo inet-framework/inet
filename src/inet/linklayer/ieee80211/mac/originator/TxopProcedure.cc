@@ -90,6 +90,7 @@ void TxopProcedure::startTxop(AccessCategory ac)
     protectionMechanism = selectProtectionMechanism(ac);
     start = simTime();
     emit(txopStartedSignal, this);
+    EV_INFO << "Txop started: limit = " << limit << ".\n";
 }
 
 
@@ -99,6 +100,7 @@ void TxopProcedure::stopTxop()
     emit(txopStoppedSignal, this);
     start = -1;
     protectionMechanism = ProtectionMechanism::UNDEFINED_PROTECTION;
+    EV_INFO << "Txop stopped.\n";
 }
 
 simtime_t TxopProcedure::getRemaining() const

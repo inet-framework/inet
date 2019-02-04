@@ -66,6 +66,7 @@ std::vector<Packet *> RecipientQosMacDataService::dataFrameReceived(Packet *data
 {
     // TODO: A-MPDU Deaggregation, MPDU Header+CRC Validation, Address1 Filtering, Duplicate Removal, MPDU Decryption
     if (duplicateRemoval && duplicateRemoval->isDuplicate(dataHeader)) {
+        EV_WARN << "Dropping duplicate packet " << *dataPacket << ".\n";
         PacketDropDetails details;
         details.setReason(DUPLICATE_DETECTED);
         emit(packetDroppedSignal, dataPacket, &details);

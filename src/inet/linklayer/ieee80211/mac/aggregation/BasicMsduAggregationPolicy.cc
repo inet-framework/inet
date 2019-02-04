@@ -84,17 +84,23 @@ std::vector<Packet *> *BasicMsduAggregationPolicy::computeAggregateFrames(cQueue
             break;
         if (!firstFrame)
             firstFrame = dataHeader;
-        if (!isEligible(staticPtrCast<const Ieee80211DataHeader>(dataHeader), firstPacket, staticPtrCast<const Ieee80211DataHeader>(firstFrame), B(aMsduLength).get()))
+        if (!isEligible(staticPtrCast<const Ieee80211DataHeader>(dataHeader), firstPacket, staticPtrCast<const Ieee80211DataHeader>(firstFrame), B(aMsduLength).get())) {
+            EV_TRACE << "Queued " << *dataPacket << " is not eligible for A-MSDU aggregation.\n";
             break;
+        }
+        EV_TRACE << "Queued " << *dataPacket << " is eligible for A-MSDU aggregation.\n";
         frames->push_back(dataPacket);
         aMsduLength += dataPacket->getTotalLength() - dataHeader->getChunkLength() - dataTrailer->getChunkLength() + b(LENGTH_A_MSDU_SUBFRAME_HEADER); // sum of MSDU lengths + subframe header
     }
     if (frames->size() <= 1 || !isAggregationPossible(frames->size(), B(aMsduLength).get())) {
+        EV_DEBUG << "A-MSDU aggregation is not possible, collected " << frames->size() << " packets.\n";
         delete frames;
         return nullptr;
     }
-    else
+    else {
+        EV_DEBUG << "A-MSDU aggregation is possible, collected " << frames->size() << " packets.\n";
         return frames;
+    }
 }
 
 } /* namespace ieee80211 */

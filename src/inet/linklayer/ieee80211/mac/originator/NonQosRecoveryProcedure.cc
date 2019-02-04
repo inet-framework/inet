@@ -51,6 +51,7 @@ void NonQosRecoveryProcedure::initialize(int stage)
 void NonQosRecoveryProcedure::incrementStationSrc(StationRetryCounters *stationCounters)
 {
     stationCounters->incrementStationShortRetryCount();
+    EV_INFO << "Incremented station SRC: stationShortRetryCounter = " << stationCounters->getStationShortRetryCount() << ".\n";
     if (stationCounters->getStationShortRetryCount() == shortRetryLimit) // 9.3.3 Random backoff time
         resetContentionWindow();
     else
@@ -60,6 +61,7 @@ void NonQosRecoveryProcedure::incrementStationSrc(StationRetryCounters *stationC
 void NonQosRecoveryProcedure::incrementStationLrc(StationRetryCounters *stationCounters)
 {
     stationCounters->incrementStationLongRetryCount();
+    EV_INFO << "Incremented station LRC: stationLongRetryCounter = " << stationCounters->getStationLongRetryCount() << ".\n";
     if (stationCounters->getStationLongRetryCount() == longRetryLimit) // 9.3.3 Random backoff time
         resetContentionWindow();
     else
@@ -137,6 +139,7 @@ void NonQosRecoveryProcedure::ackFrameReceived(Packet *packet, const Ptr<const I
 //
 void NonQosRecoveryProcedure::retryLimitReached(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header)
 {
+    EV_WARN << "Retry limit reached for " << *packet << ".\n";
     auto id = SequenceControlField(header->getSequenceNumber(), header->getFragmentNumber());
     if (packet->getByteLength() >= rtsThreshold) {
         auto it = longRetryCounter.find(id);

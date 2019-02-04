@@ -69,6 +69,7 @@ void FrameSequenceHandler::transmissionComplete()
 
 void FrameSequenceHandler::startFrameSequence(IFrameSequence *frameSequence, FrameSequenceContext *context, IFrameSequenceHandler::ICallback *callback)
 {
+    EV_INFO << "Starting frame sequence.\n";
     this->callback = callback;
     if (!isSequenceRunning()) {
         this->frameSequence = frameSequence;
@@ -85,7 +86,7 @@ void FrameSequenceHandler::startFrameSequenceStep()
 {
     ASSERT(isSequenceRunning());
     auto nextStep = frameSequence->prepareStep(context);
-    // EV_INFO << "Frame sequence history:" << frameSequence->getHistory() << endl;
+    EV_INFO << "Starting next frame sequence step: history = " << frameSequence->getHistory() << "\n";
     if (nextStep == nullptr)
         finishFrameSequence();
     else {
@@ -93,7 +94,7 @@ void FrameSequenceHandler::startFrameSequenceStep()
         switch (nextStep->getType()) {
             case IFrameSequenceStep::Type::TRANSMIT: {
                 auto transmitStep = static_cast<TransmitStep *>(nextStep);
-                EV_INFO << "Transmitting, frame = " << transmitStep->getFrameToTransmit() << "\n";
+                EV_INFO << "Transmitting, frame = " << transmitStep->getFrameToTransmit() << ".\n";
                 callback->transmitFrame(transmitStep->getFrameToTransmit(), transmitStep->getIfs());
                 // TODO: lifetime
                 // if (auto dataFrame = dynamic_cast<const Ptr<const Ieee80211DataHeader>& >(transmitStep->getFrameToTransmit()))
@@ -117,7 +118,7 @@ void FrameSequenceHandler::finishFrameSequenceStep()
     ASSERT(isSequenceRunning());
     auto lastStep = context->getLastStep();
     auto stepResult = frameSequence->completeStep(context);
-    // EV_INFO << "Frame sequence history:" << frameSequence->getHistory() << endl;
+    EV_INFO << "Finishing last frame sequence step: history = " << frameSequence->getHistory() << "\n";
     if (!stepResult) {
         lastStep->setCompletion(IFrameSequenceStep::Completion::REJECTED);
         abortFrameSequence();
@@ -144,7 +145,7 @@ void FrameSequenceHandler::finishFrameSequenceStep()
 
 void FrameSequenceHandler::finishFrameSequence()
 {
-    EV_INFO << "Frame sequence finished\n";
+    EV_INFO << "Frame sequence finished.\n";
     callback->frameSequenceFinished();
     delete context;
     delete frameSequence;
@@ -155,7 +156,7 @@ void FrameSequenceHandler::finishFrameSequence()
 
 void FrameSequenceHandler::abortFrameSequence()
 {
-    EV_INFO << "Frame sequence aborted\n";
+    EV_INFO << "Frame sequence aborted.\n";
     auto step = context->getLastStep();
     auto failedTxStep = check_and_cast<ITransmitStep*>(dynamic_cast<IReceiveStep*>(step) ? context->getStepBeforeLast() : step);
     auto frameToTransmit = failedTxStep->getFrameToTransmit();

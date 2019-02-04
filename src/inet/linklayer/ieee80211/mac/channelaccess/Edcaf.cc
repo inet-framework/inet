@@ -74,6 +74,7 @@ void Edcaf::calculateTimingParameters()
     simtime_t aifs = sifs + fallback(aifsn, getAifsNumber(ac)) * slotTime;
     ifs = aifs;
     eifs = sifs + aifs + modeSet->getSlowestMandatoryMode()->getDuration(LENGTH_ACK);
+    EV_DEBUG << "Timing parameters are initialized: slotTime = " << slotTime << ", sifs = " << sifs << ", ifs = " << ifs << ", eifs = " << eifs << std::endl;
     ASSERT(ifs > sifs);
     cwMin = par("cwMin");
     cwMax = par("cwMax");
@@ -82,6 +83,7 @@ void Edcaf::calculateTimingParameters()
     if (cwMax == -1)
         cwMax = getCwMax(ac, modeSet->getCwMax(), modeSet->getCwMin());
     cw = cwMin;
+    EV_DEBUG << "Contention window parameters are initialized: cw = " << cw << ", cwMin = " << cwMin << ", cwMax = " << cwMax << std::endl;
 }
 
 
@@ -93,12 +95,14 @@ void Edcaf::incrementCw()
         cw = cwMax;
     else
         cw = newCw;
+    EV_DEBUG << "Contention window is incremented: cw = " << cw << std::endl;
 }
 
 void Edcaf::resetCw()
 {
     Enter_Method_Silent("resetCw");
     cw = cwMin;
+    EV_DEBUG << "Contention window is reset: cw = " << cw << std::endl;
 }
 
 int Edcaf::getAifsNumber(AccessCategory ac)
@@ -134,6 +138,8 @@ void Edcaf::channelAccessGranted()
         owning = true;
         callback->channelGranted(this);
     }
+    else
+        EV_WARN << "Ignoring channel access granted due to internal collision.\n";
 }
 
 void Edcaf::releaseChannel(IChannelAccess::ICallback* callback)
@@ -142,6 +148,7 @@ void Edcaf::releaseChannel(IChannelAccess::ICallback* callback)
     ASSERT(owning);
     owning = false;
     this->callback = nullptr;
+    EV_INFO << "Channel released.\n";
 }
 
 void Edcaf::requestChannel(IChannelAccess::ICallback* callback)
@@ -150,12 +157,9 @@ void Edcaf::requestChannel(IChannelAccess::ICallback* callback)
     this->callback = callback;
     ASSERT(!owning);
     if (contention->isContentionInProgress())
-        EV_DETAIL << "Contention has already been started" << std::endl;
-    else {
-//        EV_DETAIL << "Starting contention with cw = " << cw << ", ifs = " << ifs << ", eifs = "
-//                  << eifs << ", slotTime = " << slotTime << std::endl;
+        EV_DEBUG << "Contention has been already started.\n";
+    else
         contention->startContention(cw, ifs, eifs, slotTime, this);
-    }
 }
 
 void Edcaf::expectedChannelAccess(simtime_t time)

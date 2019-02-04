@@ -43,7 +43,7 @@ void Ds::processDataFrame(Packet *frame, const Ptr<const Ieee80211DataHeader>& h
             // check toDS bit
             if (!header->getToDS()) {
                 // looks like this is not for us - discard
-                EV << "Frame is not for us (toDS=false) -- discarding\n";
+                EV_WARN << "Frame is not for us (toDS=false) -- discarding\n";
                 PacketDropDetails details;
                 details.setReason(NOT_ADDRESSED_TO_US);
                 emit(packetDroppedSignal, frame, &details);
@@ -52,7 +52,7 @@ void Ds::processDataFrame(Packet *frame, const Ptr<const Ieee80211DataHeader>& h
             }
             // handle broadcast/multicast frames
             if (header->getAddress3().isMulticast()) {
-                EV << "Handling multicast frame\n";
+                EV_INFO << "Handling multicast frame\n";
                 distributeDataFrame(frame, header);
                 mac->sendUp(frame);
                 return;
@@ -60,7 +60,7 @@ void Ds::processDataFrame(Packet *frame, const Ptr<const Ieee80211DataHeader>& h
             // look up destination address in our STA list
             auto it = mib->bssAccessPointData.stations.find(header->getAddress3());
             if (it == mib->bssAccessPointData.stations.end()) {
-                EV << "Frame's destination address is not in our STA list -- passing up\n";
+                EV_WARN << "Frame's destination address is not in our STA list -- passing up\n";
                 mac->sendUp(frame);
             }
             else {
@@ -70,7 +70,7 @@ void Ds::processDataFrame(Packet *frame, const Ptr<const Ieee80211DataHeader>& h
                     delete frame;
                 }
                 else {
-                    EV << "Frame's destination STA is not in associated state -- dropping frame\n";
+                    EV_WARN << "Frame's destination STA is not in associated state -- dropping frame\n";
                     PacketDropDetails details;
                     details.setReason(OTHER_PACKET_DROP);
                     emit(packetDroppedSignal, frame, &details);
@@ -80,14 +80,14 @@ void Ds::processDataFrame(Packet *frame, const Ptr<const Ieee80211DataHeader>& h
         }
         else if (mib->bssStationData.stationType == Ieee80211Mib::STATION) {
             if (!mib->bssStationData.isAssociated) {
-                EV << "Rejecting data frame as STA is not associated with an AP" << endl;
+                EV_WARN << "Rejecting data frame as STA is not associated with an AP" << endl;
                 PacketDropDetails details;
                 details.setReason(OTHER_PACKET_DROP);
                 emit(packetDroppedSignal, frame, &details);
                 delete frame;
             }
             else if (mib->bssData.bssid != header->getTransmitterAddress()) {
-                EV << "Rejecting data frame received from another AP" << endl;
+                EV_WARN << "Rejecting data frame received from another AP" << endl;
                 PacketDropDetails details;
                 details.setReason(OTHER_PACKET_DROP);
                 emit(packetDroppedSignal, frame, &details);
@@ -105,6 +105,7 @@ void Ds::processDataFrame(Packet *frame, const Ptr<const Ieee80211DataHeader>& h
 
 void Ds::distributeDataFrame(Packet *incomingFrame, const Ptr<const Ieee80211DataOrMgmtHeader>& incomingHeader)
 {
+    EV_INFO << "Distributing data frame.\n";
     incomingFrame->trim();
     const auto& outgoingHeader = staticPtrCast<Ieee80211DataOrMgmtHeader>(incomingHeader->dupShared());
 
