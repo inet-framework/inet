@@ -20,16 +20,16 @@
 #ifndef VOIPSTREAM_VOIPSTREAMSENDER_H
 #define VOIPSTREAM_VOIPSTREAMSENDER_H
 
-#ifndef HAVE_FFMPEG
-#error Please install libavcodec, libavformat, libavutil or disable 'VoIPStream' feature
-#endif
-
 #include <fnmatch.h>
 #include <vector>
 
 #define __STDC_CONSTANT_MACROS
 
 #include "INETDefs.h"
+
+#ifndef HAVE_FFMPEG
+#error Please install libavcodec, libavformat, libavutil or disable 'VoIPStream' feature
+#endif
 
 extern "C" {
 #include <libavcodec/avcodec.h>

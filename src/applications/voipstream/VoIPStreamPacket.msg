@@ -17,11 +17,11 @@
 //
 
 cplusplus {{
+#include "ByteArrayMessage.h"
+
 #ifndef HAVE_FFMPEG
 #error Please install libavcodec, libavformat, libavutil or disable 'VoIPStream' feature.
 #endif
-
-#include "ByteArrayMessage.h"
 }};
 
 class ByteArrayMessage;
