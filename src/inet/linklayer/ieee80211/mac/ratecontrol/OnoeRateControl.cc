@@ -114,7 +114,7 @@ void OnoeRateControl::computeMode()
 
 const IIeee80211Mode* OnoeRateControl::getRate()
 {
-    Enter_Method_Silent("getRate()");
+    Enter_Method_Silent("getRate");
     computeModeIfTimerIsExpired();
     EV_INFO << "The current mode is " << currentMode << " the net bitrate is " << currentMode->getDataMode()->getNetBitrate() << std::endl;
     return currentMode;

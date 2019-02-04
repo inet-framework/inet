@@ -69,6 +69,7 @@ bool BasicMsduAggregationPolicy::isEligible(const Ptr<const Ieee80211DataHeader>
 
 std::vector<Packet *> *BasicMsduAggregationPolicy::computeAggregateFrames(cQueue *queue)
 {
+    Enter_Method_Silent("computeAggregateFrames");
     ASSERT(!queue->isEmpty());
     b aMsduLength = b(0);
     auto firstPacket = check_and_cast<Packet *>(queue->front());

@@ -313,7 +313,7 @@ void Ieee80211Mac::decapsulate(Packet *packet)
 
 void Ieee80211Mac::receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details)
 {
-    Enter_Method_Silent("receiveSignal()");
+    Enter_Method_Silent("receiveSignal");
     if (signalID == IRadio::receptionStateChangedSignal) {
         rx->receptionStateChanged(static_cast<IRadio::ReceptionState>(value));
     }
@@ -346,14 +346,14 @@ void Ieee80211Mac::configureRadioMode(IRadio::RadioMode radioMode)
 
 void Ieee80211Mac::sendUp(cMessage *msg)
 {
-    Enter_Method("sendUp(\"%s\")", msg->getName());
+    Enter_Method_Silent("sendUp(\"%s\")", msg->getName());
     take(msg);
     MacProtocolBase::sendUp(msg);
 }
 
 void Ieee80211Mac::sendUpFrame(Packet *frame)
 {
-    Enter_Method("sendUpFrame(\"%s\")", frame->getName());
+    Enter_Method_Silent("sendUpFrame(\"%s\")", frame->getName());
     const auto& header = frame->peekAtFront<Ieee80211DataOrMgmtHeader>();
     decapsulate(frame);
     if (!(header->getType() & 0x30))
@@ -364,7 +364,7 @@ void Ieee80211Mac::sendUpFrame(Packet *frame)
 
 void Ieee80211Mac::sendDownFrame(Packet *frame)
 {
-    Enter_Method("sendDownFrame(\"%s\")", frame->getName());
+    Enter_Method_Silent("sendDownFrame(\"%s\")", frame->getName());
     take(frame);
     configureRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
     frame->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211Mac);
@@ -381,7 +381,7 @@ void Ieee80211Mac::sendDownPendingRadioConfigMsg()
 
 void Ieee80211Mac::processUpperFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header)
 {
-    Enter_Method("processUpperFrame(\"%s\")", packet->getName());
+    Enter_Method_Silent("processUpperFrame(\"%s\")", packet->getName());
     take(packet);
     EV_INFO << "Frame " << packet << " received from higher layer, receiver = " << header->getReceiverAddress() << "\n";
     ASSERT(!header->getReceiverAddress().isUnspecified());
@@ -393,7 +393,7 @@ void Ieee80211Mac::processUpperFrame(Packet *packet, const Ptr<const Ieee80211Da
 
 void Ieee80211Mac::processLowerFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header)
 {
-    Enter_Method("processLowerFrame(\"%s\")", packet->getName());
+    Enter_Method_Silent("processLowerFrame(\"%s\")", packet->getName());
     take(packet);
     if (mib->qos)
         hcf->processLowerFrame(packet, header);

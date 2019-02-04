@@ -35,6 +35,7 @@ void Ds::initialize(int stage)
 
 void Ds::processDataFrame(Packet *frame, const Ptr<const Ieee80211DataHeader>& header)
 {
+    Enter_Method_Silent("processDataFrame");
     if (mib->mode == Ieee80211Mib::INDEPENDENT)
         mac->sendUp(frame);
     else if (mib->mode == Ieee80211Mib::INFRASTRUCTURE) {

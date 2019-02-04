@@ -78,6 +78,7 @@ void Edcaf::calculateTimingParameters()
 
 void Edcaf::incrementCw()
 {
+    Enter_Method_Silent("incrementCw");
     int newCw = 2 * cw + 1;
     if (newCw > cwMax)
         cw = cwMax;
@@ -87,6 +88,7 @@ void Edcaf::incrementCw()
 
 void Edcaf::resetCw()
 {
+    Enter_Method_Silent("resetCw");
     cw = cwMin;
 }
 
@@ -117,6 +119,7 @@ AccessCategory Edcaf::getAccessCategory(const char *ac)
 
 void Edcaf::channelAccessGranted()
 {
+    Enter_Method_Silent("channelAccessGranted");
     ASSERT(callback != nullptr);
     if (!collisionController->isInternalCollision(this)) {
         owning = true;
@@ -126,6 +129,7 @@ void Edcaf::channelAccessGranted()
 
 void Edcaf::releaseChannel(IChannelAccess::ICallback* callback)
 {
+    Enter_Method_Silent("releaseChannel");
     ASSERT(owning);
     owning = false;
     this->callback = nullptr;
@@ -133,6 +137,7 @@ void Edcaf::releaseChannel(IChannelAccess::ICallback* callback)
 
 void Edcaf::requestChannel(IChannelAccess::ICallback* callback)
 {
+    Enter_Method_Silent("requestChannel");
     this->callback = callback;
     ASSERT(!owning);
     if (contention->isContentionInProgress())
@@ -180,7 +185,7 @@ int Edcaf::getCwMin(AccessCategory ac, int aCwMin)
 
 void Edcaf::receiveSignal(cComponent* source, simsignal_t signalID, cObject* obj, cObject* details)
 {
-    Enter_Method("receiveModeSetChangeNotification");
+    Enter_Method_Silent("receiveSignal");
     if (signalID == modesetChangedSignal) {
         modeSet = check_and_cast<Ieee80211ModeSet*>(obj);
         calculateTimingParameters();

@@ -132,7 +132,7 @@ void AarfRateControl::frameReceived(Packet *frame)
 
 const IIeee80211Mode* AarfRateControl::getRate()
 {
-    Enter_Method_Silent("getRate()");
+    Enter_Method_Silent("getRate");
     increaseRateIfTimerIsExpired();
     EV_INFO << "The current mode is " << currentMode << " the net bitrate is " << currentMode->getDataMode()->getNetBitrate() << std::endl;
     return currentMode;

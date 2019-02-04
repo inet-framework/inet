@@ -28,6 +28,7 @@ void BasicMpduAggregationPolicy::initialize()
 
 std::vector<Packet *> *BasicMpduAggregationPolicy::computeAggregateFrames(std::vector<Packet *> *frames)
 {
+    Enter_Method_Silent("computeAggregateFrames");
     return nullptr;
 }
 

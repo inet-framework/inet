@@ -78,6 +78,7 @@ void Dcaf::calculateTimingParameters()
 
 void Dcaf::incrementCw()
 {
+    Enter_Method_Silent("incrementCw");
     int newCw = 2 * cw + 1;
     if (newCw > cwMax)
         cw = cwMax;
@@ -87,11 +88,13 @@ void Dcaf::incrementCw()
 
 void Dcaf::resetCw()
 {
+    Enter_Method_Silent("resetCw");
     cw = cwMin;
 }
 
 void Dcaf::channelAccessGranted()
 {
+    Enter_Method_Silent("channelAccessGranted");
     ASSERT(callback != nullptr);
     owning = true;
     callback->channelGranted(this);
@@ -99,12 +102,14 @@ void Dcaf::channelAccessGranted()
 
 void Dcaf::releaseChannel(IChannelAccess::ICallback* callback)
 {
+    Enter_Method_Silent("releaseChannel");
     owning = false;
     this->callback = nullptr;
 }
 
 void Dcaf::requestChannel(IChannelAccess::ICallback* callback)
 {
+    Enter_Method_Silent("requestChannel");
     this->callback = callback;
     if (owning)
         callback->channelGranted(this);
@@ -120,7 +125,7 @@ void Dcaf::expectedChannelAccess(simtime_t time)
 
 void Dcaf::receiveSignal(cComponent* source, simsignal_t signalID, cObject* obj, cObject* details)
 {
-    Enter_Method("receiveModeSetChangeNotification");
+    Enter_Method_Silent("receiveSignal");
     if (signalID == modesetChangedSignal) {
         modeSet = check_and_cast<Ieee80211ModeSet*>(obj);
         calculateTimingParameters();

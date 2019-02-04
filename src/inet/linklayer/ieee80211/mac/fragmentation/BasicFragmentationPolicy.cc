@@ -30,6 +30,7 @@ void BasicFragmentationPolicy::initialize()
 
 std::vector<int> BasicFragmentationPolicy::computeFragmentSizes(Packet *frame)
 {
+    Enter_Method_Silent("computeFragmentSizes");
     if (fragmentationThreshold < frame->getByteLength()) {
         std::vector<int> sizes;
         int payloadLength = 0;
