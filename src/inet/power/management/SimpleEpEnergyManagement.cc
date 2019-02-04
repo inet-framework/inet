@@ -126,7 +126,7 @@ J SimpleEpEnergyManagement::getEstimatedEnergyCapacity() const
 
 void SimpleEpEnergyManagement::receiveSignal(cComponent *source, simsignal_t signal, double value, cObject *details)
 {
-    Enter_Method("receiveSignal");
+    Enter_Method_Silent("receiveSignal");
     if (signal == IEpEnergySource::powerConsumptionChangedSignal || signal == IEpEnergySink::powerGenerationChangedSignal) {
         executeNodeOperation(getEstimatedEnergyCapacity());
         scheduleLifecycleOperationTimer();
