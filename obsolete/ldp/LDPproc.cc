@@ -28,7 +28,7 @@ void LDPproc::initialize()
 {
     // Get number of peers, we don't want to rely on intialisation time period only
     // This is an assumption
-    peerNo = (int) par("peerNo").longValue();
+    peerNo = par("peerNo");
     helloTimeout = par("helloTimeout").doubleValue();
 }
 

@@ -100,7 +100,7 @@ void TCPServerProc::activity()
     // Initialization of communication parameters
     if ((whoMsg->kind()) == ConstType::HOW_KIND)
     {
-        local_addr = whoMsg->par("local_addr").longValue();
+        local_addr = whoMsg->par("local_addr");
         keepAliveTime = whoMsg->par("keep_alive_time");
         timeout = whoMsg->par("timeout");
         appl_timeout = whoMsg->par("appl_timeout");
@@ -132,7 +132,7 @@ void TCPServerProc::activity()
     rem_addr = msg->par("src_addr");  // client IP-address at remote client side
     local_port = msg->par("dest_port"); // own server TCP-port
     local_addr = msg->par("dest_addr"); // own server IP-address
-    tcp_mss = 8 * ((msg->par("mss")).longValue());  // bits
+    tcp_mss = 8 * ((msg->par("mss")).intValue());  // bits
     msgLng = tcp_mss / 4;  // bits
 
     ev << "TCP_SERVER_PROC DEBUG:  LSR(" << IPAddress(local_addr) << ") received ESTAB from LSR(" <<

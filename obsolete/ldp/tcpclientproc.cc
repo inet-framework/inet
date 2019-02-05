@@ -98,8 +98,8 @@ void TCPClientProc::activity()
 
     if ((whoMsg->kind()) == ConstType::HOW_KIND)
     {
-        local_addr = whoMsg->par("local_addr").longValue();
-        rem_addr = whoMsg->par("rem_addr").longValue();
+        local_addr = whoMsg->par("local_addr");
+        rem_addr = whoMsg->par("rem_addr");
         keepAliveTime = whoMsg->par("keep_alive_time");
         timeout = whoMsg->par("timeout");
         appl_timeout = whoMsg->par("appl_timeout");
@@ -142,7 +142,7 @@ void TCPClientProc::activity()
     cMessage *e_msg = receive();
 
     tcp_conn_id = e_msg->par("tcp_conn_id");
-    tcp_mss = 8 * ((e_msg->par("mss")).longValue());  // bits
+    tcp_mss = 8 * ((e_msg->par("mss")).intValue());  // bits
     msgLng = tcp_mss / 4;
 
     ev << "TCP_CLIENT_PROC DEBUG: LSR(" << IPAddress(local_addr);

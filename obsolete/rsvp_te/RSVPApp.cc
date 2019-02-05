@@ -440,7 +440,7 @@ void RSVPAppl::processSignalFromTester(cMessage *msg)
         error("Command message from Tester doesn't have test_command parameter");
 
     // Process the test command
-    int command = msg->par("test_command").longValue();
+    int command = msg->par("test_command");
     switch (command)
     {
         case NEW_BW_REQUEST:     processCommand_NEW_BW_REQUEST(msg); break;

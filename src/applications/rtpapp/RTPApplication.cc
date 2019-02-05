@@ -41,7 +41,7 @@ void RTPApplication::initialize()
 
     // port number which is to be used; to ports are actually used: one
     // for rtp and one for rtcp
-    _port = (int)par("portNumber").longValue();
+    _port = par("portNumber");
 
     // fileName of file to be transmitted
     // NULL or "" means this system acts only as a receiver

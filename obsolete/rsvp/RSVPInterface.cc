@@ -75,7 +75,7 @@ void RSVPInterface::processMsgFromIp(cMessage * msg)
 
         if (rsvpMsg->hasPar("peerInf"))
         {
-            peerInf = rsvpMsg->par("peerInf").longValue();
+            peerInf = rsvpMsg->par("peerInf");
             pMsg->addPar("peerInf") = peerInf;
         }
 

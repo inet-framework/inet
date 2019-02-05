@@ -119,7 +119,7 @@ void MyTCPServerProc::activity()
       local_addr = msg->par("dest_addr"); //own server IP-address
 
       if(msg->hasPar("mss"))
-              tcp_mss   = 8*((msg->par("mss")).longValue());   //bits
+              tcp_mss   = 8*((msg->par("mss")).intValue());   //bits
           else
               tcp_mss = 8; //Length is not important as this stage, dummy value
 

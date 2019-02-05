@@ -310,8 +310,8 @@ void TCPConnection::initConnection(TCPOpenCommand *openCmd)
 
 void TCPConnection::configureStateVariables()
 {
-    state->snd_mss = tcpMain->par("mss").longValue(); // TODO: mss=-1 should mean autodetect
-    long advertisedWindowPar = tcpMain->par("advertisedWindow").longValue();
+    state->snd_mss = tcpMain->par("mss"); // TODO: mss=-1 should mean autodetect
+    long advertisedWindowPar = tcpMain->par("advertisedWindow");
     if (advertisedWindowPar > TCP_MAX_WIN || advertisedWindowPar <= 0)
         throw cRuntimeError("Invalid advertisedWindow parameter: %d", advertisedWindowPar);
     state->rcv_wnd = advertisedWindowPar;

@@ -111,7 +111,7 @@ void MyTCPClient::activity()
         }
     }
     tcp_conn_id   = e_msg->par("tcp_conn_id");
-    tcp_mss = 8*((e_msg->par("mss")).longValue()); //bits
+    tcp_mss = 8*((e_msg->par("mss")).intValue()); //bits
     msgLng = tcp_mss/4;
     delete e_msg;
 

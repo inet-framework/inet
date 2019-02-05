@@ -71,7 +71,7 @@ cPacket *UDPBasicApp::createPacket()
     sprintf(msgName,"UDPBasicAppData-%d", counter++);
 
     cPacket *payload = new cPacket(msgName);
-    payload->setByteLength(par("messageLength").longValue());
+    payload->setByteLength(par("messageLength"));
     return payload;
 }
 

@@ -343,7 +343,7 @@ void TCP_NSC::initialize()
 
     const char* stackName = this->par(stackNameParamNameS).stringValue();
 
-    int bufferSize = (int)(this->par(bufferSizeParamNameS).longValue());
+    int bufferSize = (this->par(bufferSizeParamNameS));
 
     loadStack(stackName, bufferSize);
     pStackM->if_attach(localInnerIpS.str().c_str(), localInnerMaskS.str().c_str(), 1500);

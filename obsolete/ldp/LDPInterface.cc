@@ -77,13 +77,13 @@ void LDPInterface::activity()
             // PART I: Messages from LDP proc
         case LDP_CLIENT_CREATE:
             // LDPproc sends message with peerIP (int)tagged
-            createClient(msg->par("peerIP").longValue());
+            createClient(msg->par("peerIP"));
             delete msg;
             break;
 
         case LABEL_REQUEST:
             // LDPproc forwards request with peerIP tagged
-            modID = getModidByPeerIP(msg->par("peerIP").longValue());
+            modID = getModidByPeerIP(msg->par("peerIP"));
             if (modID == id())  // Invalid mod id
             {
                 ev << "LDP INTERFACE DEBUG: LABEL_REQUEST unhandled in LDPInterface\n";
@@ -107,7 +107,7 @@ void LDPInterface::activity()
 
         case LABEL_MAPPING:
             // LDPproc return reply with peerIP tagged
-            modID = getModidByPeerIP(msg->par("peerIP").longValue());
+            modID = getModidByPeerIP(msg->par("peerIP"));
             if (modID == (this->id()))
             {
                 ev << "LDP INTERFACE DEBUG: LABEL_MAPPING unhandled in LDPInterface\n";
@@ -132,7 +132,7 @@ void LDPInterface::activity()
             // PART II : Messages from TCP layers
         case TCP_I_RCVD_SYN:
 
-            modID = msg->par("tcp_conn_id").longValue();  // From client to server only
+            modID = msg->par("tcp_conn_id");  // From client to server only
 
             mod = simulation.module(modID);
 
@@ -144,7 +144,7 @@ void LDPInterface::activity()
             }
             else
             {
-                pIP = msg->par("src_addr").longValue();
+                pIP = msg->par("src_addr");
 
                 // Update ldpSession for server entries
                 for (i = 0; i < ldpSessions.size(); i++)
@@ -168,7 +168,7 @@ void LDPInterface::activity()
 
         case TCP_I_ESTAB:
 
-            pIP = msg->par("src_addr").longValue();
+            pIP = msg->par("src_addr");
 
             conID = msg->par("tcp_conn_id");
 
@@ -208,7 +208,7 @@ void LDPInterface::activity()
                     cMessage *tcp_send_msg = (cMessage *) ((cMessage *) (msg_list->get(i)))->dup();
                     tcp_send_msg->setKind(TCP_I_SEG_FWD);
 
-                    modID = getModidByPeerIP(tcp_send_msg->par("src_addr").longValue());
+                    modID = getModidByPeerIP(tcp_send_msg->par("src_addr"));
                     mod = simulation.module(modID);
                     if (mod == NULL)
                         error("no module found for TCP_I_SEG_FWD");
@@ -222,9 +222,9 @@ void LDPInterface::activity()
         default:
 
             if (msg->hasPar("src_addr"))
-                modID = getModidByPeerIP(msg->par("src_addr").longValue());
+                modID = getModidByPeerIP(msg->par("src_addr"));
             else
-                modID = getModidByPeerIP(msg->par("peerIP").longValue());
+                modID = getModidByPeerIP(msg->par("peerIP"));
 
             ev <<
                 "LDP INTERFACE DEBUG: Unknown message kind. Redirecting msg to module with TCP connection ID = "
