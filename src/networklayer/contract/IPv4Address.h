@@ -335,12 +335,12 @@ inline std::ostream& operator<<(std::ostream& os, const IPv4Address& ip)
     return os << ip.str();
 }
 
-inline void doPacking(cCommBuffer *buf, const IPv4Address& addr)
+inline void doParsimPacking(cCommBuffer *buf, const IPv4Address& addr)
 {
     buf->pack(addr.getInt());
 }
 
-inline void doUnpacking(cCommBuffer *buf, IPv4Address& addr)
+inline void doParsimUnpacking(cCommBuffer *buf, IPv4Address& addr)
 {
     int32 d; buf->unpack(d); addr.set(d);
 }
