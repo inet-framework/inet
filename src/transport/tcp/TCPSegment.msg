@@ -37,8 +37,8 @@ cplusplus {{
         return os << "(" << msg->getClassName() << ") " << msg->getName() << ": " << msg->info();
     }
 
-    inline void doPacking(cCommBuffer *b, cPacketPtr& msg) {msg->parsimPack(b);}
-    inline void doUnpacking(cCommBuffer *b, cPacketPtr& msg) {msg->parsimUnpack(b);}
+    inline void doParsimPacking(cCommBuffer *b, cPacketPtr& msg) {msg->parsimPack(b);}
+    inline void doParsimUnpacking(cCommBuffer *b, cPacketPtr& msg) {msg->parsimUnpack(b);}
 }}
 
 

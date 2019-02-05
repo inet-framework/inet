@@ -296,12 +296,12 @@ inline std::ostream& operator<<(std::ostream& os, const IPv6Address& ip)
     return os << ip.str();
 }
 
-inline void doPacking(cCommBuffer *buf, const IPv6Address& addr)
+inline void doParsimPacking(cCommBuffer *buf, const IPv6Address& addr)
 {
     buf->pack(addr.words(), 4);
 }
 
-inline void doUnpacking(cCommBuffer *buf, IPv6Address& addr)
+inline void doParsimUnpacking(cCommBuffer *buf, IPv6Address& addr)
 {
     buf->unpack(addr.words(), 4);
 }

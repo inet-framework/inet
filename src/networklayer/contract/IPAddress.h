@@ -255,12 +255,12 @@ inline std::ostream& operator<<(std::ostream& os, const IPAddress& ip)
     return os << ip.str();
 }
 
-inline void doPacking(cCommBuffer *buf, const IPAddress& addr)
+inline void doParsimPacking(cCommBuffer *buf, const IPAddress& addr)
 {
     buf->pack(addr.getInt());
 }
 
-inline void doUnpacking(cCommBuffer *buf, IPAddress& addr)
+inline void doParsimUnpacking(cCommBuffer *buf, IPAddress& addr)
 {
     int32 d; buf->unpack(d); addr.set(d);
 }
