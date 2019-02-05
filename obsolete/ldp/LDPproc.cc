@@ -29,7 +29,7 @@ void LDPproc::initialize()
     // Get number of peers, we don't want to rely on intialisation time period only
     // This is an assumption
     peerNo = par("peerNo");
-    helloTimeout = par("helloTimeout").doubleValue();
+    helloTimeout = par("helloTimeout");
 }
 
 void LDPproc::activity()

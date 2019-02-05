@@ -454,7 +454,7 @@ void RSVPAppl::processCommand_NEW_BW_REQUEST(cMessage *msg)
 {
     int rSrc = IPAddress(msg->par("src").stringValue()).getInt();
     int rDest = IPAddress(msg->par("dest").stringValue()).getInt();
-    double bw = msg->par("bandwidth").doubleValue();
+    double bw = msg->par("bandwidth");
 
     int k = 0;
     int n = 0;

@@ -253,7 +253,7 @@ void TCPRandomTester::processIncomingSegment(TCPSegment *seg, bool fromA)
     {
         bubble("delay: removing original");
         dump(seg, fromA, "delay: removing original");
-        double d = delay->doubleValue();
+        double d = *delay;
         seg->setContextPointer((void*)fromA);
         scheduleAt(simTime()+d, seg);
     }
@@ -264,7 +264,7 @@ void TCPRandomTester::processIncomingSegment(TCPSegment *seg, bool fromA)
         int n = *numCopies;
         for (int i=0; i<n; i++)
         {
-            double d = delay->doubleValue();
+            double d = *delay;
             TCPSegment *segcopy = (TCPSegment *)seg->dup();
             segcopy->setControlInfo(new IPControlInfo(*check_and_cast<IPControlInfo *>(seg->controlInfo())));
             segcopy->setContextPointer((void *)fromA);

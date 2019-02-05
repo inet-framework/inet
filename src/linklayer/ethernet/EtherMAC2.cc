@@ -51,7 +51,7 @@ void EtherMAC2::initializeTxrate()
         // insists that the connection has *no* datarate set.
         // if we're connected, get the gate with transmission rate
         cChannel *datarateChannel = physOutGate->getTransmissionChannel();
-        txrate = datarateChannel->par("datarate").doubleValue();
+        txrate = datarateChannel->par("datarate");
     }
 }
 

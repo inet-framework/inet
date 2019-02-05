@@ -42,7 +42,7 @@ void EtherBus::initialize()
     numMessages = 0;
     WATCH(numMessages);
 
-    propagationSpeed = par("propagationSpeed").doubleValue();
+    propagationSpeed = par("propagationSpeed");
 
     // initialize the positions where the hosts connects to the bus
     taps = gateSize("ethg");

@@ -21,7 +21,7 @@ Define_Module(TCPSpoof);
 
 void TCPSpoof::initialize()
 {
-    simtime_t t = par("t").doubleValue();
+    simtime_t t = par("t");
     scheduleAt(t, new cMessage("timer"));
 }
 

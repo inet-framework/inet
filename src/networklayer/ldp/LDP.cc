@@ -101,8 +101,8 @@ void LDP::initialize(int stage)
     if (stage != 3)
         return; // wait for routing table to initialize first
 
-    holdTime = par("holdTime").doubleValue();
-    helloInterval = par("helloInterval").doubleValue();
+    holdTime = par("holdTime");
+    helloInterval = par("helloInterval");
 
     ift = InterfaceTableAccess().get();
     rt = RoutingTableAccess().get();

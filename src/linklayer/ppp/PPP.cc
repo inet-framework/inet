@@ -287,7 +287,7 @@ void PPP::updateDisplayString()
     }
     else if (datarateChannel!=NULL)
     {
-        double datarate = datarateChannel->par("datarate").doubleValue();
+        double datarate = datarateChannel->par("datarate");
         char datarateText[40];
         if (datarate>=1e9) sprintf(datarateText,"%gG", datarate/1e9);
         else if (datarate>=1e6) sprintf(datarateText,"%gM", datarate/1e6);

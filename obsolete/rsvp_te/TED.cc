@@ -133,8 +133,8 @@ void TED::buildDatabase()
             // Get remote address
             entry.remote = neighbourIFT->interfaceByPortNo(remote_gateIndex)->ipv4()->inetAddress();
 
-            double BW = node->out(j)->localGate()->channel()->par("datarate").doubleValue();
-            double delay = node->out(j)->localGate()->channel()->par("delay").doubleValue();
+            double BW = node->out(j)->localGate()->channel()->par("datarate");
+            double delay = node->out(j)->localGate()->channel()->par("delay");
             entry.MaxBandwith = BW;
             entry.MaxResvBandwith = BW;
             entry.metric = delay;

@@ -49,7 +49,7 @@ void MassMobility::initialize(int stage)
         speed = &par("speed");
 
         // initial speed and angle
-        currentSpeed = speed->doubleValue();
+        currentSpeed = *speed;
         currentAngle = uniform(0, 360);
         step.x = currentSpeed * cos(PI * currentAngle / 180) * updateInterval;
         step.y = currentSpeed * sin(PI * currentAngle / 180) * updateInterval;
@@ -74,7 +74,7 @@ void MassMobility::handleSelfMsg(cMessage * msg)
         break;
     case MK_CHANGE_DIR:
         currentAngle += changeAngleBy->doubleValue();
-        currentSpeed = speed->doubleValue();
+        currentSpeed = *speed;
         step.x = currentSpeed * cos(PI * currentAngle / 180) * updateInterval;
         step.y = currentSpeed * sin(PI * currentAngle / 180) * updateInterval;
         scheduleAt(simTime() + changeInterval->doubleValue(), msg);
