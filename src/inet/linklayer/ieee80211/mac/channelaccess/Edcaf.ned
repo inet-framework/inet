@@ -28,6 +28,9 @@ import inet.linklayer.ieee80211.mac.originator.TxopProcedure;
 module Edcaf
 {
     parameters:
+        string originatorMacDataServiceModule;
+        int maxQueueSize = default(100); // -1 means unlimited
+        bool prioritizeMulticast = default(false); // if true, prioritize multicast frames (9.3.2.1 Fundamental access)
         string accessCategory @enum("AC_BK","AC_BE","AC_VI","AC_VO");
         int aifsn = default(-1);
         int cwMin = default(-1);
@@ -61,7 +64,7 @@ module Edcaf
         dataRecoveryProcedure: QosRecoveryProcedure {
             parameters:
                 cwCalculatorModule = "^";
-                rtsPolicyModule = "^.^.rtsPolicy";
+                rtsPolicyModule = "^.^.^.rtsPolicy";
                 @display("p=100,300");
         }
 }

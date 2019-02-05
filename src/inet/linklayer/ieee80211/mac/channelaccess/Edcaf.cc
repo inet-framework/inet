@@ -48,7 +48,7 @@ void Edcaf::initialize(int stage)
         pendingQueue = new PendingQueue(par("maxQueueSize"), nullptr, par("prioritizeMulticast") ? PendingQueue::Priority::PRIORITIZE_MULTICAST_OVER_DATA : PendingQueue::Priority::PRIORITIZE_MGMT_OVER_DATA);
         dataRecoveryProcedure = check_and_cast<QosRecoveryProcedure *>(getSubmodule("dataRecoveryProcedure"));
         ackHandler = new QosAckHandler();
-        inProgressFrame = new InProgressFrames(pendingQueue, check_and_cast<IOriginatorMacDataService *>(getModuleByPath(par("originatorDataServiceModule"))), ackHandler);
+        inProgressFrame = new InProgressFrames(pendingQueue, check_and_cast<IOriginatorMacDataService *>(getModuleByPath(par("originatorMacDataServiceModule"))), ackHandler);
         txop = check_and_cast<TxopProcedure *>(getSubmodule("txopProcedure"));
         stationRetryCounter = new StationRetryCounters();
         WATCH(owning);

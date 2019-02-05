@@ -41,15 +41,14 @@ import inet.linklayer.ieee80211.mac.recipient.RecipientQosMacDataService;
 module Hcf like IHcf
 {
     parameters:
-        int maxQueueSize = default(100); // -1 means unlimited
         bool isBlockAckSupported = default(false);
-        bool prioritizeMulticast = default(false); // if true, prioritize multicast frames (9.3.2.1 Fundamental access)
 
         string rxModule;
         string txModule;
 
         *.rateSelectionModule = "^.rateSelection";
         *.rxModule = "^." + rxModule;
+        *.*.originatorMacDataServiceModule = "^.^.originatorMacDataService";
 
         @class(Hcf);
         @display("i=block/queue");
