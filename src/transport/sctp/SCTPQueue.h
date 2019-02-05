@@ -46,7 +46,7 @@ class SCTPAssociation;
  *
  * @see SCTPSendQueue
  */
-class INET_API SCTPQueue : public cPolymorphic
+class INET_API SCTPQueue : public cObject
 {
     public:
     /**

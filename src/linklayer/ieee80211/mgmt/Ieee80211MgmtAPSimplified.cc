@@ -43,12 +43,12 @@ void Ieee80211MgmtAPSimplified::handleUpperMessage(cPacket *msg)
     sendOrEnqueue(frame);
 }
 
-void Ieee80211MgmtAPSimplified::handleCommand(int msgkind, cPolymorphic *ctrl)
+void Ieee80211MgmtAPSimplified::handleCommand(int msgkind, cObject *ctrl)
 {
     error("handleCommand(): no commands supported");
 }
 
-void Ieee80211MgmtAPSimplified::receiveChangeNotification(int category, const cPolymorphic *details)
+void Ieee80211MgmtAPSimplified::receiveChangeNotification(int category, const cObject *details)
 {
     Enter_Method_Silent();
     printNotificationBanner(category, details);

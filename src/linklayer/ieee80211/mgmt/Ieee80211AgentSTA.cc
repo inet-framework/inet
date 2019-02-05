@@ -74,7 +74,7 @@ void Ieee80211AgentSTA::handleTimer(cMessage *msg)
 
 void Ieee80211AgentSTA::handleResponse(cMessage *msg)
 {
-    cPolymorphic *ctrl = msg->removeControlInfo();
+    cObject *ctrl = msg->removeControlInfo();
     delete msg;
 
     EV << "Processing confirmation from mgmt: " << ctrl->getClassName() << "\n";
@@ -94,7 +94,7 @@ void Ieee80211AgentSTA::handleResponse(cMessage *msg)
     delete ctrl;
 }
 
-void Ieee80211AgentSTA::receiveChangeNotification(int category, const cPolymorphic *details)
+void Ieee80211AgentSTA::receiveChangeNotification(int category, const cObject *details)
 {
     Enter_Method_Silent();
     printNotificationBanner(category, details);

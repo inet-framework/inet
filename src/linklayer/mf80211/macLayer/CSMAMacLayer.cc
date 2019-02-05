@@ -263,7 +263,7 @@ MacPkt *CSMAMacLayer::encapsMsg(cPacket *netw)
  * messages in the queue, call handleUpperMsg in order to try to send
  * those now.
  */
-void CSMAMacLayer::receiveChangeNotification(int category, const cPolymorphic *details)
+void CSMAMacLayer::receiveChangeNotification(int category, const cObject *details)
 {
     Enter_Method("receiveChangeNotification(%s, %s)", notificationCategoryName(category),
                  details?details->info().c_str() : "n/a");

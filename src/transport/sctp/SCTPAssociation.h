@@ -200,7 +200,7 @@ inline double min(const double a, const double b) { return (a < b) ? a : b; }
 inline double max(const double a, const double b) { return (a < b) ? b : a; }
 
 
-class INET_API SCTPPathVariables : public cPolymorphic
+class INET_API SCTPPathVariables : public cObject
 {
     public:
         SCTPPathVariables(const IPvXAddress& addr, SCTPAssociation* assoc);
@@ -283,7 +283,7 @@ class INET_API SCTPPathVariables : public cPolymorphic
 
 
 
-class INET_API SCTPDataVariables : public cPolymorphic
+class INET_API SCTPDataVariables : public cObject
 {
     public:
         SCTPDataVariables();
@@ -364,7 +364,7 @@ class INET_API SCTPDataVariables : public cPolymorphic
 
 
 
-class INET_API SCTPStateVariables : public cPolymorphic
+class INET_API SCTPStateVariables : public cObject
 {
     public:
         SCTPStateVariables();

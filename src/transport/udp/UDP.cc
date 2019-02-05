@@ -296,7 +296,7 @@ void UDP::sendUp(cPacket *payload, UDPPacket *udpHeader, IPv6ControlInfo *ipCtrl
     numPassedUp++;
 }
 
-void UDP::processUndeliverablePacket(UDPPacket *udpPacket, cPolymorphic *ctrl)
+void UDP::processUndeliverablePacket(UDPPacket *udpPacket, cObject *ctrl)
 {
     numDroppedWrongPort++;
 
@@ -418,7 +418,7 @@ void UDP::processUDPPacket(UDPPacket *udpPacket)
     }
 
     int destPort = udpPacket->getDestinationPort();
-    cPolymorphic *ctrl = udpPacket->removeControlInfo();
+    cObject *ctrl = udpPacket->removeControlInfo();
 
     // send back ICMP error if no socket is bound to that port
     SocketsByPortMap::iterator it = socketsByPortMap.find(destPort);

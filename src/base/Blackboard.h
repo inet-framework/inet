@@ -41,7 +41,7 @@ class BlackboardAccess;
  * interface (=have this abstract class as base class).
  *
  * Anyone can publish data items on the blackboard. In order to allow for some
- * type safety via dynamic_cast, items have to be subclassed from cPolymorphic.
+ * type safety via dynamic_cast, items have to be subclassed from cObject.
  *
  * Every item is published with a unique string label.
  * The Blackboard makes no assumption about the format
@@ -171,16 +171,16 @@ class INET_API Blackboard : public cSimpleModule
     {
       private:
         friend class Blackboard;
-        cPolymorphic *_item;
+        cObject *_item;
         std::string _label;
         SubscriberVector subscribers;
       public:
         /** Return the label of this data item*/
         const char *getLabel()  {return _label.c_str();}
         /** Return the data item*/
-        cPolymorphic *getData()  {return _item;}
+        cObject *getData()  {return _item;}
         /** Return the data item*/
-        const cPolymorphic *getData() const  {return _item;}
+        const cObject *getData() const  {return _item;}
     };
 
   protected:
@@ -245,7 +245,7 @@ class INET_API Blackboard : public cSimpleModule
     /**
      * Publish new item on the BB, with the given label.
      */
-    virtual BBItemRef publish(const char *label, cPolymorphic *item);
+    virtual BBItemRef publish(const char *label, cObject *item);
 
     /**
      * Withdraw (unpublish) item from the BB (typically called by publisher).
@@ -257,7 +257,7 @@ class INET_API Blackboard : public cSimpleModule
      * When item pointer is omitted, it is assumed that the item object
      * was updated "in place" (as opposed to being replaced by another object).
      */
-    virtual void changed(BBItemRef bbItem, cPolymorphic *item=NULL);
+    virtual void changed(BBItemRef bbItem, cObject *item=NULL);
     //@}
 
     /** @name Methods for subscribers */

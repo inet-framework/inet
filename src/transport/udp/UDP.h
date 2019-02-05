@@ -100,7 +100,7 @@ class INET_API UDP : public cSimpleModule
     virtual bool matchesSocket(SockDesc *sd, const IPvXAddress& localAddr, const IPvXAddress& remoteAddr, ushort remotePort);
     virtual void sendUp(cPacket *payload, UDPPacket *udpHeader, IPControlInfo *ctrl, SockDesc *sd);
     virtual void sendUp(cPacket *payload, UDPPacket *udpHeader, IPv6ControlInfo *ctrl, SockDesc *sd);
-    virtual void processUndeliverablePacket(UDPPacket *udpPacket, cPolymorphic *ctrl);
+    virtual void processUndeliverablePacket(UDPPacket *udpPacket, cObject *ctrl);
     virtual void sendUpErrorNotification(SockDesc *sd, int msgkind, const IPvXAddress& localAddr, const IPvXAddress& remoteAddr, ushort remotePort);
 
     // process an ICMP error packet

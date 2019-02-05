@@ -66,7 +66,7 @@ class INET_API PPP : public cSimpleModule, public INotifiable
     virtual void displayIdle();
     virtual void updateDisplayString();
     virtual void updateHasSubcribers();
-    virtual void receiveChangeNotification(int category, const cPolymorphic *details);
+    virtual void receiveChangeNotification(int category, const cObject *details);
 
   public:
     PPP();

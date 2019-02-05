@@ -28,7 +28,7 @@
  * @see NotificationBoard
  */
 //XXX also used by Ieee80211 to signal that a msg has been acked (must use an ID to identify msg!!!), and that channel was switched (msg==NULL then)
-class TxNotifDetails : public cPolymorphic
+class TxNotifDetails : public cObject
 {
   protected:
     cPacket *msg;

@@ -664,7 +664,7 @@ void EtherMACBase::updateConnectionColor(int txState)
     }
 }
 
-void EtherMACBase::receiveChangeNotification(int category, const cPolymorphic *)
+void EtherMACBase::receiveChangeNotification(int category, const cObject *)
 {
     if (category==NF_SUBSCRIBERLIST_CHANGED)
         updateHasSubcribers();

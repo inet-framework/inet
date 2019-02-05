@@ -181,7 +181,7 @@ void Ieee80211MgmtSTA::handleUpperMessage(cPacket *msg)
     sendOrEnqueue(frame);
 }
 
-void Ieee80211MgmtSTA::handleCommand(int msgkind, cPolymorphic *ctrl)
+void Ieee80211MgmtSTA::handleCommand(int msgkind, cObject *ctrl)
 {
     if (dynamic_cast<Ieee80211Prim_ScanRequest *>(ctrl))
         processScanCommand((Ieee80211Prim_ScanRequest *)ctrl);
@@ -317,7 +317,7 @@ void Ieee80211MgmtSTA::startAssociation(APInfo *ap, simtime_t timeout)
     scheduleAt(simTime()+timeout, assocTimeoutMsg);
 }
 
-void Ieee80211MgmtSTA::receiveChangeNotification(int category, const cPolymorphic *details)
+void Ieee80211MgmtSTA::receiveChangeNotification(int category, const cObject *details)
 {
     Enter_Method_Silent();
     printNotificationBanner(category, details);

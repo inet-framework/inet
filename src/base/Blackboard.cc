@@ -60,7 +60,7 @@ void Blackboard::handleMessage(cMessage *msg)
     error("Blackboard doesn't handle messages, it can be accessed via direct method calls");
 }
 
-BBItemRef Blackboard::publish(const char *label, cPolymorphic *item)
+BBItemRef Blackboard::publish(const char *label, cObject *item)
 {
     Enter_Method("publish(\"%s\", %s *ptr)", label, item->getClassName());
 
@@ -105,7 +105,7 @@ void Blackboard::withdraw(BBItemRef bbItem)
     delete bbItem;
 }
 
-void Blackboard::changed(BBItemRef bbItem, cPolymorphic *item)
+void Blackboard::changed(BBItemRef bbItem, cObject *item)
 {
   coreEV <<"enter changed; item: "<<bbItem->getLabel()<<" changed -> notify subscribers\n";
 

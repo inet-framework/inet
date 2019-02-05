@@ -30,7 +30,7 @@ class InterfaceEntry;
  *
  * @see IRoutingTable, IRoutingTable
  */
-class INET_API IPRoute : public cPolymorphic
+class INET_API IPRoute : public cObject
 {
   public:
     /** Route type */

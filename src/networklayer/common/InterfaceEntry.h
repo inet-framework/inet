@@ -38,7 +38,7 @@ class IPv6InterfaceData;
  * Base class for protocol-specific data on an interface.
  * Notable subclasses are IPv4InterfaceData and IPv6InterfaceData.
  */
-class INET_API InterfaceProtocolData : public cPolymorphic
+class INET_API InterfaceProtocolData : public cObject
 {
     friend class InterfaceEntry; //only this guy is allowed to set ownerp
 

@@ -54,7 +54,7 @@
  * In cases when the category itself (an int) does not carry enough information
  * about the notification event, one can pass additional information
  * in a data class. There is no restriction on what the data class may contain,
- * except that it has to be subclassed from cPolymorphic, and of course
+ * except that it has to be subclassed from cObject, and of course
  * producers and consumers of notifications should agree on its contents.
  * If no extra info is needed, one can pass a NULL pointer in the
  * fireChangeNotification() method.
@@ -64,7 +64,7 @@
  * <pre>
  * class Foo : public cSimpleModule, public INotifiable {
  *     ...
- *     virtual void receiveChangeNotification(int category, const cPolymorphic *details) {..}
+ *     virtual void receiveChangeNotification(int category, const cObject *details) {..}
  *     ...
  * };
  * </pre>
@@ -135,7 +135,7 @@ class INET_API NotificationBoard : public cSimpleModule
      * information about the change (e.g. exact location, specific attribute
      * that changed, old value, new value, etc).
      */
-    virtual void fireChangeNotification(int category, const cPolymorphic *details=NULL);
+    virtual void fireChangeNotification(int category, const cObject *details=NULL);
     //@}
 };
 

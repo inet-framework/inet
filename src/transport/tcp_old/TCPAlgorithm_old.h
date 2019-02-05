@@ -30,7 +30,7 @@ namespace tcp_old {
  * retransmit/recovery, selective acknowledgement etc. Subclasses
  * may implement various sets and flavours of the above algorithms.
  */
-class INET_API TCPAlgorithm : public cPolymorphic
+class INET_API TCPAlgorithm : public cObject
 {
   protected:
     TCPConnection *conn; // we belong to this connection

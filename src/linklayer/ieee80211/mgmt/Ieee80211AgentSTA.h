@@ -58,7 +58,7 @@ class INET_API Ieee80211AgentSTA : public cSimpleModule, public INotifiable
     virtual void handleResponse(cMessage *msg);
 
     /** Redefined from INotifiable; called by NotificationBoard */
-    virtual void receiveChangeNotification(int category, const cPolymorphic *details);
+    virtual void receiveChangeNotification(int category, const cObject *details);
 
     // utility method: attaches object to a message as controlInfo, and sends it to mgmt
     virtual void sendRequest(Ieee80211PrimRequest *req);

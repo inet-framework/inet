@@ -74,7 +74,7 @@ class LinkStateRouting : public cSimpleModule, public INotifiable
     virtual void processLINK_STATE_MESSAGE(LinkStateMsg* msg, IPAddress sender);
 
     // INotifiable method
-    virtual void receiveChangeNotification(int category, const cPolymorphic *details);
+    virtual void receiveChangeNotification(int category, const cObject *details);
 
     virtual void sendToPeers(const std::vector<TELinkStateInfo>& list, bool req, IPAddress exceptPeer);
     virtual void sendToPeer(IPAddress peer, const std::vector<TELinkStateInfo> & list, bool req);

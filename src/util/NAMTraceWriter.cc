@@ -106,7 +106,7 @@ NAMTraceWriter::~NAMTraceWriter()
 }
 
 
-void NAMTraceWriter::receiveChangeNotification(int category, const cPolymorphic *details)
+void NAMTraceWriter::receiveChangeNotification(int category, const cObject *details)
 {
     // don't do anything if global NAMTrace module doesn't exist or does not have a file open
     if (!nt || !nt->isEnabled())

@@ -182,7 +182,7 @@ void RoutingTable6::handleMessage(cMessage *msg)
     opp_error("This module doesn't process messages");
 }
 
-void RoutingTable6::receiveChangeNotification(int category, const cPolymorphic *details)
+void RoutingTable6::receiveChangeNotification(int category, const cObject *details)
 {
     if (simulation.getContextType()==CTX_INITIALIZE)
         return;  // ignore notifications during initialize

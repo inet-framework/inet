@@ -911,7 +911,7 @@ void Mac80211::testMaxAttempts()
  * Handle change nofitications. In this layer it is usually
  * information about the radio channel, i.e. if it is IDLE etc.
  */
-void Mac80211::receiveChangeNotification(int category, const cPolymorphic *details)
+void Mac80211::receiveChangeNotification(int category, const cObject *details)
 {
     Enter_Method("receiveChangeNotification(%s, %s)", notificationCategoryName(category),
                  details?details->info().c_str() : "n/a");

@@ -64,7 +64,7 @@ const char *notificationCategoryName(int category)
     return s;
 }
 
-void printNotificationBanner(int category, const cPolymorphic *details)
+void printNotificationBanner(int category, const cObject *details)
 {
     EV << "** Notification at T=" << simTime()
        << " to " << simulation.getContextModule()->getFullPath() << ": "

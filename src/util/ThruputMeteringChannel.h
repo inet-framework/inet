@@ -98,7 +98,7 @@ class SIM_API ThruputMeteringChannel : public cDatarateChannel
 
     /**
      * Creates and returns an exact copy of this object.
-     * See cPolymorphic for more details.
+     * See cObject for more details.
      */
     virtual ThruputMeteringChannel *dup() const {return new ThruputMeteringChannel(*this);}
 

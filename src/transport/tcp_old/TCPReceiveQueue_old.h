@@ -44,7 +44,7 @@ namespace tcp_old {
  *
  * @see TCPSendQueue
  */
-class INET_API TCPReceiveQueue : public cPolymorphic
+class INET_API TCPReceiveQueue : public cObject
 {
   protected:
     TCPConnection *conn; // the connection that owns this queue

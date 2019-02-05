@@ -25,7 +25,7 @@
 /**
  * Abstract base class for enqueue hooks.
  */
-class INET_API EnqueueHook : public cPolymorphic
+class INET_API EnqueueHook : public cObject
 {
   public:
     /**

@@ -75,7 +75,7 @@ class INET_API Mac80211 : public WirelessMacBase, public INotifiable
 
   protected:
     /** @brief Called by the NotificationBoard whenever a change occurs we're interested in */
-    virtual void receiveChangeNotification(int category, const cPolymorphic *details);
+    virtual void receiveChangeNotification(int category, const cObject *details);
 
     /** @brief Handle self messages such as timer... */
     virtual void handleSelfMsg(cMessage*);

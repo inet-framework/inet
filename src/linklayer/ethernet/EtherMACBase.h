@@ -175,7 +175,7 @@ class INET_API EtherMACBase : public cSimpleModule, public INotifiable
 
     // notifications
     virtual void updateHasSubcribers() = 0;
-    virtual void receiveChangeNotification(int category, const cPolymorphic *details);
+    virtual void receiveChangeNotification(int category, const cObject *details);
 
 };
 

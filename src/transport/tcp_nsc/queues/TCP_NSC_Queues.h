@@ -79,7 +79,7 @@ class TCP_NSC_Connection;
  * @see TCP_NSCReceiveQueue
  */
 
-class INET_API TCP_NSC_SendQueue : public cPolymorphic
+class INET_API TCP_NSC_SendQueue : public cObject
 {
   public:
     /**
@@ -153,7 +153,7 @@ class INET_API TCP_NSC_SendQueue : public cPolymorphic
     TCP_NSC_Connection *connM;
 };
 
-class INET_API TCP_NSC_ReceiveQueue : public cPolymorphic
+class INET_API TCP_NSC_ReceiveQueue : public cObject
 {
   public:
     /**

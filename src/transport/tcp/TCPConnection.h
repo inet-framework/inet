@@ -133,7 +133,7 @@ enum TCPEventCode
  *
  * TCPStateVariables is effectively a "struct" -- it only contains
  * public data members. (Only declared as a class so that we can use
- * cPolymorphic as base class and make it possible to inspect
+ * cObject as base class and make it possible to inspect
  * it in Tkenv.)
  *
  * TCPStateVariables only contains variables needed to implement
@@ -141,7 +141,7 @@ enum TCPEventCode
  * into TCPAlgorithm subclasses which can have their own state blocks,
  * subclassed from TCPStateVariables. See TCPAlgorithm::createStateVariables().
  */
-class INET_API TCPStateVariables : public cPolymorphic
+class INET_API TCPStateVariables : public cObject
 {
   public:
     TCPStateVariables();

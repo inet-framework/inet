@@ -1232,7 +1232,7 @@ bool LDP::lookupLabel(IPDatagram *ipdatagram, LabelOpVector& outLabel, std::stri
     return false;
 }
 
-void LDP::receiveChangeNotification(int category, const cPolymorphic *details)
+void LDP::receiveChangeNotification(int category, const cObject *details)
 {
     Enter_Method_Silent();
     printNotificationBanner(category, details);

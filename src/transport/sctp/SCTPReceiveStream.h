@@ -23,7 +23,7 @@
 #include "SCTPQueue.h"
 
 
-class INET_API SCTPReceiveStream : public cPolymorphic
+class INET_API SCTPReceiveStream : public cObject
 {
   protected:
     uint16 streamId;

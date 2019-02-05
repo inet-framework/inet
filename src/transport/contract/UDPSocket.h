@@ -102,9 +102,9 @@ class INET_API UDPSocket
      * Abstract base class for your callback objects. See setCallbackObject()
      * and processMessage() for more info.
      *
-     * Note: this class is not subclassed from cPolymorphic, because
+     * Note: this class is not subclassed from cObject, because
      * classes may have both this class and cSimpleModule as base class,
-     * and cSimpleModule is already a cPolymorphic.
+     * and cSimpleModule is already a cObject.
      */
     class CallbackInterface
     {

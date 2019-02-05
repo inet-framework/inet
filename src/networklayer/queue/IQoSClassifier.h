@@ -31,7 +31,7 @@
  *
  * @see DropTailQoSQueue
  */
-class INET_API IQoSClassifier : public cPolymorphic
+class INET_API IQoSClassifier : public cObject
 {
   public:
     /**
