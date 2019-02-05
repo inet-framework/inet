@@ -41,7 +41,6 @@ import inet.linklayer.ieee80211.mac.recipient.RecipientQosMacDataService;
 module Hcf like IHcf
 {
     parameters:
-        int numEdcafs = default(4);
         int maxQueueSize = default(100); // -1 means unlimited
         bool isBlockAckSupported = default(false);
         bool prioritizeMulticast = default(false); // if true, prioritize multicast frames (9.3.2.1 Fundamental access)
@@ -90,7 +89,6 @@ module Hcf like IHcf
     submodules:
         edca: Edca {
             parameters:
-                numEdcafs = numEdcafs;
                 @display("p=150,100");
         }
         hcca: Hcca {
@@ -123,16 +121,6 @@ module Hcf like IHcf
                 cwCalculatorModule = "^.edca.edcaf[1]"; // best effort
                 rtsPolicyModule = "^.rtsPolicy";
                 @display("p=550,300");
-        }
-        edcaDataRecoveryProcedures[numEdcafs]: QosRecoveryProcedure {
-            parameters:
-                cwCalculatorModule = "^.edca.edcaf[" + string(index) + "]";
-                rtsPolicyModule = "^.rtsPolicy";
-                @display("p=550,400,column,100");
-        }
-        edcaTxopProcedures[numEdcafs]: TxopProcedure {
-            parameters:
-                @display("p=350,400,column,100");
         }
         originatorAckPolicy: OriginatorQosAckPolicy {
             parameters:

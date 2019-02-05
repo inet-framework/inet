@@ -67,7 +67,6 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
     protected:
         Ieee80211Mac *mac = nullptr;
         IRateControl *dataAndMgmtRateControl = nullptr;
-        int numEdcafs = -1;
 
         cMessage *startRxTimer = nullptr;
         cMessage *inactivityTimer = nullptr;

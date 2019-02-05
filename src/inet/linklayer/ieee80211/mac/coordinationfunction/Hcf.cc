@@ -43,7 +43,6 @@ void Hcf::initialize(int stage)
         mac = check_and_cast<Ieee80211Mac *>(getContainingNicModule(this)->getSubmodule("mac"));
         startRxTimer = new cMessage("startRxTimeout");
         inactivityTimer = new cMessage("blockAckInactivityTimer");
-        numEdcafs = par("numEdcafs");
         edca = check_and_cast<Edca *>(getSubmodule("edca"));
         hcca = check_and_cast<Hcca *>(getSubmodule("hcca"));
         tx = check_and_cast<ITx *>(getModuleByPath(par("txModule")));
@@ -69,14 +68,6 @@ void Hcf::initialize(int stage)
             originatorBlockAckAgreementHandler = new OriginatorBlockAckAgreementHandler();
             originatorBlockAckProcedure = new OriginatorBlockAckProcedure();
             recipientBlockAckProcedure = new RecipientBlockAckProcedure();
-        }
-        for (int ac = 0; ac < numEdcafs; ac++) {
-            edcaPendingQueues.push_back(new PendingQueue(par("maxQueueSize"), nullptr, par("prioritizeMulticast") ? PendingQueue::Priority::PRIORITIZE_MULTICAST_OVER_DATA : PendingQueue::Priority::PRIORITIZE_MGMT_OVER_DATA));
-            edcaDataRecoveryProcedures.push_back(check_and_cast<QosRecoveryProcedure *>(getSubmodule("edcaDataRecoveryProcedures", ac)));
-            edcaAckHandlers.push_back(new QosAckHandler());
-            edcaInProgressFrames.push_back(new InProgressFrames(edcaPendingQueues[ac], originatorDataService, edcaAckHandlers[ac]));
-            edcaTxops.push_back(check_and_cast<TxopProcedure *>(getSubmodule("edcaTxopProcedures", ac)));
-            stationRetryCounters.push_back(new StationRetryCounters());
         }
     }
 }
