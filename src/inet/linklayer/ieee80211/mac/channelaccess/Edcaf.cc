@@ -46,7 +46,7 @@ void Edcaf::initialize(int stage)
         contention = check_and_cast<IContention *>(getSubmodule("contention"));
         collisionController = check_and_cast<IEdcaCollisionController *>(getModuleByPath(par("collisionControllerModule")));
         pendingQueue = new PendingQueue(par("maxQueueSize"), nullptr, par("prioritizeMulticast") ? PendingQueue::Priority::PRIORITIZE_MULTICAST_OVER_DATA : PendingQueue::Priority::PRIORITIZE_MGMT_OVER_DATA);
-        dataRecoveryProcedure = check_and_cast<QosRecoveryProcedure *>(getSubmodule("dataRecoveryProcedure"));
+        recoveryProcedure = check_and_cast<QosRecoveryProcedure *>(getSubmodule("recoveryProcedure"));
         ackHandler = new QosAckHandler();
         inProgressFrame = new InProgressFrames(pendingQueue, check_and_cast<IOriginatorMacDataService *>(getModuleByPath(par("originatorMacDataServiceModule"))), ackHandler);
         txop = check_and_cast<TxopProcedure *>(getSubmodule("txopProcedure"));

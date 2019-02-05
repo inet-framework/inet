@@ -61,7 +61,7 @@ module Edcaf
             parameters:
                 @display("p=100,200");
         }
-        dataRecoveryProcedure: QosRecoveryProcedure {
+        recoveryProcedure: QosRecoveryProcedure {
             parameters:
                 cwCalculatorModule = "^";
                 rtsPolicyModule = "^.^.^.rtsPolicy";

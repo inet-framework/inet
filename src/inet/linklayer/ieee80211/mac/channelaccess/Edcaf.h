@@ -48,7 +48,7 @@ class INET_API Edcaf : public IChannelAccess, public IContention::ICallback, pub
 
         StationRetryCounters *stationRetryCounter = nullptr;
         QosAckHandler *ackHandler = nullptr;
-        QosRecoveryProcedure *dataRecoveryProcedure = nullptr;
+        QosRecoveryProcedure *recoveryProcedure = nullptr;
 
         // Tx Opportunity
         TxopProcedure *txop = nullptr;
@@ -88,7 +88,7 @@ class INET_API Edcaf : public IChannelAccess, public IContention::ICallback, pub
 
         virtual StationRetryCounters *getStationRetryCounter() const { return stationRetryCounter; }
         virtual QosAckHandler *getAckHandler() const { return ackHandler; }
-        virtual QosRecoveryProcedure *getDataRecoveryProcedure() const { return dataRecoveryProcedure; }
+        virtual QosRecoveryProcedure *getRecoveryProcedure() const { return recoveryProcedure; }
 
         virtual TxopProcedure *getTxop() const { return txop; }
 
