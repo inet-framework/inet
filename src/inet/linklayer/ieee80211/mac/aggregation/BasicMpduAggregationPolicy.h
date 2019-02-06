@@ -26,10 +26,18 @@ namespace ieee80211 {
 class INET_API BasicMpduAggregationPolicy : public IMpduAggregationPolicy, public cSimpleModule
 {
     protected:
+        bool qOsCheck = false;
+        int subframeNumThreshold = -1;
+        int aggregationLengthThreshold = -1;
+        int maxAMpduSize = -1;
+
+    protected:
         virtual void initialize() override;
+        virtual bool isAggregationPossible(int numOfFramesToAggragate, int aMpduLength);
+        virtual bool isEligible(const Ptr<const Ieee80211DataHeader>& header, Packet *testPacket, const Ptr<const Ieee80211DataHeader>& testHeader, int aMpduLength);
 
     public:
-        virtual std::vector<Packet *> *computeAggregateFrames(std::vector<Packet *> *frames) override;
+        virtual std::vector<Packet *> *computeAggregateFrames(std::vector<Packet *> *availableFrames) override;
 };
 
 } /* namespace ieee80211 */
