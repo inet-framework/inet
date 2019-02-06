@@ -22,6 +22,29 @@
 namespace inet {
 namespace ieee80211 {
 
+InProgressFrames::InProgressFrames(PendingQueue* pendingQueue, IOriginatorMacDataService* dataService, IAckHandler* ackHandler) :
+    cOwnedObject(),
+    pendingQueue(pendingQueue),
+    dataService(dataService),
+    ackHandler(ackHandler)
+{
+}
+
+std::string InProgressFrames::str() const
+{
+    if (inProgressFrames.size() == 0)
+        return std::string("empty");
+    std::stringstream out;
+    out << "length=" << inProgressFrames.size();
+    return out.str();
+}
+
+void InProgressFrames::forEachChild(cVisitor *v)
+{
+    for (auto frame : inProgressFrames)
+        v->visit(frame);
+}
+
 bool InProgressFrames::hasEligibleFrameToTransmit()
 {
     for (auto frame : inProgressFrames) {
@@ -91,7 +114,7 @@ Packet *InProgressFrames::getPendingFrameFor(Packet *frame)
 void InProgressFrames::dropFrame(Packet *packet)
 {
     EV_DEBUG << "Dropping frame " << packet->getName() << ".\n";
-    inProgressFrames.remove(packet);
+    inProgressFrames.erase(std::remove(inProgressFrames.begin(), inProgressFrames.end(), packet), inProgressFrames.end());
     droppedFrames.push_back(packet);
 }
 

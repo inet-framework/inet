@@ -27,13 +27,13 @@
 namespace inet {
 namespace ieee80211 {
 
-class INET_API InProgressFrames
+class INET_API InProgressFrames : public cOwnedObject
 {
     protected:
         PendingQueue *pendingQueue = nullptr;
         IOriginatorMacDataService *dataService = nullptr;
         IAckHandler *ackHandler = nullptr;
-        std::list<Packet *> inProgressFrames;
+        std::vector<Packet *> inProgressFrames;
         std::vector<Packet *> droppedFrames;
 
     protected:
@@ -41,13 +41,13 @@ class INET_API InProgressFrames
         bool hasEligibleFrameToTransmit();
 
     public:
-        InProgressFrames(PendingQueue *pendingQueue, IOriginatorMacDataService *dataService, IAckHandler *ackHandler) :
-            pendingQueue(pendingQueue),
-            dataService(dataService),
-            ackHandler(ackHandler)
-        { }
+        InProgressFrames(PendingQueue* pendingQueue, IOriginatorMacDataService* dataService, IAckHandler* ackHandler);
         virtual ~InProgressFrames();
 
+        virtual std::string str() const override;
+        virtual void forEachChild(cVisitor *v) override;
+        virtual int getLength() const { return inProgressFrames.size(); }
+        virtual Packet *getFrames(int i) const { return inProgressFrames[i]; }
         virtual Packet *getFrameToTransmit();
         virtual Packet *getPendingFrameFor(Packet *frame);
         virtual void dropFrame(Packet *packet);
