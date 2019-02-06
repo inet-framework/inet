@@ -165,6 +165,17 @@ class INET_API IPv6InterfaceData : public InterfaceProtocolData
         IPv6Address prefix;     //default in RA's
         IPv6Address rtrAddress; //global scope, present when advRtrAddr is true (Zarrar Yousaf 09.07.07)
 #endif /* WITH_xMIPv6 */
+
+        AdvPrefix() {}
+        AdvPrefix(const IPv6Address& addr, short preflength)
+            : prefixLength(preflength),
+              advOnLinkFlag(false), advAutonomousFlag(false),
+#ifdef WITH_xMIPv6
+              advRtrAddr(false),
+#endif /* WITH_xMIPv6 */
+              prefix(addr)
+        {
+        }
     };
 
     /*************RFC 2461: Section 10 Protocol Constants**********************/
