@@ -188,6 +188,19 @@ while (<LISTFILE>)
     $txt =~ s/\bsetMulticastInterface\(/setMulticastInterfaceId(/mg;
     $txt =~ s/\bmulticastInterface\(/getMulticastInterfaceId(/mg;
 
+    # IP
+    $txt =~ s/\bIPAddressResolver\b/IPvXAddressResolver/mg;
+    $txt =~ s/\bIPAddress\b/IPv4Address/mg;
+    $txt =~ s/\bIPDatagram_m\b/IPv4Datagram/mg;
+    $txt =~ s/\bIPDatagram\b/IPv4Datagram/mg;
+    $txt =~ s/\bIPRoute\b/IPv4Route/mg;
+    $txt =~ s/\bNetworkConfigurator\b/IPv4NetworkConfigurator/mg;
+    $txt =~ s/\bIPControlInfo\b/IPv4ControlInfo/mg;
+    $txt =~ s/\bsetHost\(/setDestination(/mg;           # IPv4Route.setHost()
+    $txt =~ s/\bgetHost\(\)/getDestination()/mg;        # IPv4Route.getHost()
+    $txt =~ s/\bsetSource\(/setSourceType(/mg;
+    $txt =~ s/\bgetSource\(\)/getSourceType()/mg;
+
     # other
     $txt =~ s/\bpacketOk\(/isPacketOK(/mg;
     $txt =~ s/\bnodepos\(/find(/mg;
