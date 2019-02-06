@@ -115,10 +115,10 @@ std::vector<Packet *> *OriginatorQosMacDataService::extractFramesToTransmit(Pend
         // if (mpduHeaderPlusCrc)
         //    fragments = mpduCrcFooBarIfNeeded(fragments);
         // const Ptr<const Ieee80211DataOrMgmtHeader>& aMpdu = nullptr;
-        // if (aMpduAggregation)
-        //    aMpdu = aMpduAggregateIfNeeded(fragments);
-        // if (aMpdu)
-        //    fragments = new Fragments({aMpdu});
+        if (aMpduAggregation) {
+           if (auto aMpdu = aMpduAggregateIfNeeded(fragments))
+               fragments = new std::vector<Packet *>({aMpdu});
+        }
         return fragments;
     }
 }
