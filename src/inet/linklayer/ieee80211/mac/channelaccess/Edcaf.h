@@ -21,12 +21,17 @@
 
 #include "inet/linklayer/ieee80211/mac/common/AccessCategory.h"
 #include "inet/linklayer/ieee80211/mac/common/ModeSetListener.h"
+#include "inet/linklayer/ieee80211/mac/common/StationRetryCounters.h"
 #include "inet/linklayer/ieee80211/mac/contract/IChannelAccess.h"
 #include "inet/linklayer/ieee80211/mac/contract/IContention.h"
 #include "inet/linklayer/ieee80211/mac/contract/IEdcaCollisionController.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRecoveryProcedure.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRx.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "inet/linklayer/ieee80211/mac/originator/QosAckHandler.h"
+#include "inet/linklayer/ieee80211/mac/originator/QosRecoveryProcedure.h"
+#include "inet/linklayer/ieee80211/mac/originator/TxopProcedure.h"
+#include "inet/linklayer/ieee80211/mac/queue/InProgressFrames.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -40,6 +45,17 @@ class INET_API Edcaf : public IChannelAccess, public IContention::ICallback, pub
         IContention *contention = nullptr;
         IChannelAccess::ICallback *callback = nullptr;
         IEdcaCollisionController *collisionController = nullptr;
+
+        StationRetryCounters *stationRetryCounter = nullptr;
+        QosAckHandler *ackHandler = nullptr;
+        QosRecoveryProcedure *dataRecoveryProcedure = nullptr;
+
+        // Tx Opportunity
+        TxopProcedure *txop = nullptr;
+
+        // Queues
+        PendingQueue *pendingQueue = nullptr;
+        InProgressFrames *inProgressFrame = nullptr;
 
         bool owning = false;
 

@@ -37,6 +37,12 @@ void Edcaf::initialize(int stage)
         ac = getAccessCategory(par("accessCategory"));
         contention = check_and_cast<IContention *>(getSubmodule("contention"));
         collisionController = check_and_cast<IEdcaCollisionController *>(getModuleByPath(par("collisionControllerModule")));
+        pendingQueue = new PendingQueue(par("maxQueueSize"), nullptr, par("prioritizeMulticast") ? PendingQueue::Priority::PRIORITIZE_MULTICAST_OVER_DATA : PendingQueue::Priority::PRIORITIZE_MGMT_OVER_DATA);
+        dataRecoveryProcedure = check_and_cast<QosRecoveryProcedure *>(getSubmodule("dataRecoveryProcedure"));
+        ackHandler = new QosAckHandler();
+        inProgressFrame = new InProgressFrames(pendingQueue, check_and_cast<IOriginatorMacDataService *>(getModuleByPath(par("originatorDataServiceModule"))), ackHandler);
+        txop = check_and_cast<TxopProcedure *>(getSubmodule("txopProcedure"));
+        stationRetryCounter = new StationRetryCounters();
         WATCH(owning);
         WATCH(slotTime);
         WATCH(sifs);
