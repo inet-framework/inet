@@ -23,7 +23,8 @@
 namespace inet {
 namespace ieee80211 {
 
-class PendingQueue : public cQueue {
+class PendingQueue : public cSimpleModule
+{
     public:
         enum class Priority {
             PRIORITIZE_MGMT_OVER_DATA,
@@ -31,26 +32,32 @@ class PendingQueue : public cQueue {
         };
 
     protected:
+        cQueue queue;
         int maxQueueSize = -1; // -1 means unlimited queue
+
+    protected:
+        virtual void initialize(int stage) override;
 
     public:
         virtual ~PendingQueue() { }
-        PendingQueue(int maxQueueSize, const char *name);
-        PendingQueue(int maxQueueSize, const char *name, Priority priority);
+
+        virtual cQueue *getQueue() { return &queue; } // TODO: KLUDGE
+
+        virtual bool isEmpty() const { return queue.isEmpty(); }
 
         virtual bool insert(Packet *frame);
         virtual bool insertBefore(Packet *where, Packet *frame);
         virtual bool insertAfter(Packet *where, Packet *frame);
 
         virtual Packet *remove(Packet *frame);
-        virtual Packet *pop() override;
+        virtual Packet *pop();
 
-        virtual Packet *front() const override;
-        virtual Packet *back() const override;
+        virtual Packet *front() const;
+        virtual Packet *back() const;
 
         virtual bool contains(Packet *frame) const;
 
-        int getNumberOfFrames() { return getLength(); }
+        int getNumberOfFrames() { return queue.getLength(); }
         int getMaxQueueSize() { return maxQueueSize; }
 
     public:
