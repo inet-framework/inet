@@ -23,5 +23,9 @@ simple PendingQueue
         int maxQueueSize = default(100); // -1 means unlimited
         bool prioritizeMulticast = default(false); // if true, prioritize multicast frames (9.3.2.1 Fundamental access)
         @display("i=block/queue");
+        @signal[queueingTime](type=simtime_t; unit=s);
+        @signal[queueLength](type=long);
+        @statistic[queueingTime](title="queueing time"; record=histogram,vector; interpolationmode=none);
+        @statistic[queueLength](title="queue length"; record=max,timeavg,vector; interpolationmode=sample-hold);
 }
 

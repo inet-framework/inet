@@ -23,6 +23,9 @@ namespace ieee80211 {
 
 Define_Module(PendingQueue);
 
+simsignal_t PendingQueue::queueingTimeSignal = cComponent::registerSignal("queueingTime");
+simsignal_t PendingQueue::queueLengthSignal = cComponent::registerSignal("queueLength");
+
 void PendingQueue::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
@@ -39,6 +42,7 @@ bool PendingQueue::insert(Packet *frame)
     if (maxQueueSize != -1 && queue.getLength() == maxQueueSize)
         return false;
     queue.insert(frame);
+    emit(queueLengthSignal, queue.getLength());
     return true;
 }
 
@@ -47,6 +51,7 @@ bool PendingQueue::insertBefore(Packet *where, Packet *frame)
     if (maxQueueSize != -1 && queue.getLength() == maxQueueSize)
         return false;
     queue.insertBefore(where, frame);
+    emit(queueLengthSignal, queue.getLength());
     return true;
 }
 
@@ -55,17 +60,24 @@ bool PendingQueue::insertAfter(Packet *where, Packet *frame)
     if (maxQueueSize != -1 && queue.getLength() == maxQueueSize)
         return false;
     queue.insertAfter(where, frame);
+    emit(queueLengthSignal, queue.getLength());
     return true;
 }
 
 Packet *PendingQueue::remove(Packet *frame)
 {
-    return check_and_cast<Packet *>(queue.remove(frame));
+    auto packet = check_and_cast<Packet *>(queue.remove(frame));
+    emit(queueLengthSignal, queue.getLength());
+    emit(queueingTimeSignal, simTime() - packet->getArrivalTime());
+    return packet;
 }
 
 Packet *PendingQueue::pop()
 {
-    return check_and_cast<Packet *>(queue.pop());
+    auto packet = check_and_cast<Packet *>(queue.pop());
+    emit(queueLengthSignal, queue.getLength());
+    emit(queueingTimeSignal, simTime() - packet->getArrivalTime());
+    return packet;
 }
 
 Packet *PendingQueue::front() const

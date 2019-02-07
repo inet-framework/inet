@@ -23,8 +23,13 @@
 namespace inet {
 namespace ieee80211 {
 
+// TODO: eventually replace this class with IPassiveQueue or a more generic queue interface
 class PendingQueue : public cSimpleModule
 {
+    public:
+        static simsignal_t queueingTimeSignal;
+        static simsignal_t queueLengthSignal;
+
     public:
         enum class Priority {
             PRIORITIZE_MGMT_OVER_DATA,
