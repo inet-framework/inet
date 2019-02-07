@@ -29,7 +29,7 @@ namespace ieee80211 {
 /*
  * TODO: processFailedFrame
  */
-class INET_API QosAckHandler : public IAckHandler
+class INET_API QosAckHandler : public cSimpleModule, public IAckHandler
 {
     public:
         enum class Status {
@@ -51,11 +51,11 @@ class INET_API QosAckHandler : public IAckHandler
         std::map<Key, Status> mgmtAckStatuses;
 
     protected:
+        virtual void initialize(int stage) override;
+
         virtual Status& getQoSDataAckStatus(const QoSKey& id);
         virtual Status& getMgmtOrNonQoSAckStatus(const Key& id);
 
-
-        std::string getStatusString(Status status);
         void printAckStatuses();
 
     public:
@@ -77,6 +77,8 @@ class INET_API QosAckHandler : public IAckHandler
 
         virtual bool isEligibleToTransmit(const Ptr<const Ieee80211DataOrMgmtHeader>& header) override;
         virtual bool isOutstandingFrame(const Ptr<const Ieee80211DataOrMgmtHeader>& header) override;
+
+        static std::string getStatusString(Status status);
 };
 
 } /* namespace ieee80211 */

@@ -20,6 +20,17 @@
 namespace inet {
 namespace ieee80211 {
 
+Define_Module(AckHandler);
+
+std::ostream& operator<<(std::ostream& os, const AckHandler::Status& status) { return os << AckHandler::getStatusString(status); }
+
+void AckHandler::initialize(int stage)
+{
+    if (stage == INITSTAGE_LOCAL) {
+        WATCH_MAP(ackStatuses);
+    }
+}
+
 AckHandler::Status& AckHandler::getAckStatus(SequenceControlField id)
 {
     auto it = ackStatuses.find(id);

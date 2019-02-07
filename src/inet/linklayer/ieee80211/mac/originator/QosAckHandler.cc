@@ -20,6 +20,21 @@
 namespace inet {
 namespace ieee80211 {
 
+Define_Module(QosAckHandler);
+
+std::ostream& operator<<(std::ostream& os, const QosAckHandler::Status& status) { return os << QosAckHandler::getStatusString(status); }
+
+template <typename K, typename V>
+std::ostream& operator<<(std::ostream& os, const std::pair<K, V>& pair) { return os << "(" << pair.first << ", " << pair.second << ")"; }
+
+void QosAckHandler::initialize(int stage)
+{
+    if (stage == INITSTAGE_LOCAL) {
+        WATCH_MAP(ackStatuses);
+        WATCH_MAP(mgmtAckStatuses);
+    }
+}
+
 QosAckHandler::Status& QosAckHandler::getQoSDataAckStatus(const QoSKey& id)
 {
     auto it = ackStatuses.find(id);

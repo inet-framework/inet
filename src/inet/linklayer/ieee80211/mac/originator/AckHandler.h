@@ -26,7 +26,7 @@
 namespace inet {
 namespace ieee80211 {
 
-class INET_API AckHandler : public IAckHandler
+class INET_API AckHandler : public cSimpleModule, public IAckHandler
 {
     public:
         enum class Status {
@@ -40,8 +40,8 @@ class INET_API AckHandler : public IAckHandler
         std::map<SequenceControlField, Status> ackStatuses;
 
     protected:
+        virtual void initialize(int stage) override;
         virtual Status& getAckStatus(SequenceControlField id);
-        std::string getStatusString(Status status);
         void printAckStatuses();
 
     public:
@@ -58,6 +58,8 @@ class INET_API AckHandler : public IAckHandler
         virtual int getNumberOfFramesWithStatus(Status status);
         virtual void processFailedFrame(const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader);
         virtual void dropFrame(const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader);
+
+        static std::string getStatusString(Status status);
 };
 
 } /* namespace ieee80211 */
