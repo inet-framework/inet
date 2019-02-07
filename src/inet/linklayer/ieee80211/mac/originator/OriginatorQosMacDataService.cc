@@ -43,7 +43,7 @@ void OriginatorQosMacDataService::initialize()
 
 Packet *OriginatorQosMacDataService::aMsduAggregateIfNeeded(PendingQueue *pendingQueue)
 {
-    auto subframes = aMsduAggregationPolicy->computeAggregateFrames(pendingQueue);
+    auto subframes = aMsduAggregationPolicy->computeAggregateFrames(pendingQueue->getQueue());
     if (subframes) {
         for (auto f : *subframes)
             pendingQueue->remove(f);

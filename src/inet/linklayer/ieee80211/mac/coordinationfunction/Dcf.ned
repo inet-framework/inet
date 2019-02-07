@@ -25,10 +25,12 @@ import inet.linklayer.ieee80211.mac.originator.OriginatorAckPolicy;
 import inet.linklayer.ieee80211.mac.originator.OriginatorMacDataService;
 import inet.linklayer.ieee80211.mac.originator.RtsPolicy;
 import inet.linklayer.ieee80211.mac.protectionmechanism.OriginatorProtectionMechanism;
+import inet.linklayer.ieee80211.mac.queue.PendingQueue;
 import inet.linklayer.ieee80211.mac.rateselection.RateSelection;
 import inet.linklayer.ieee80211.mac.recipient.CtsPolicy;
 import inet.linklayer.ieee80211.mac.recipient.RecipientAckPolicy;
 import inet.linklayer.ieee80211.mac.recipient.RecipientMacDataService;
+
 
 //
 // IEEE 802.11 Distributed Coordination Function
@@ -36,11 +38,8 @@ import inet.linklayer.ieee80211.mac.recipient.RecipientMacDataService;
 module Dcf like IDcf
 {
     parameters:
-        int maxQueueSize = default(100); // -1 means unlimited
-
         string rxModule;
         string txModule;
-        bool prioritizeMulticast = default(false); // if true, prioritize multicast frames (9.3.2.1 Fundamental access)
 
         *.rateSelectionModule = "^.rateSelection";
         *.rxModule = "^." + rxModule;
@@ -54,16 +53,16 @@ module Dcf like IDcf
         @signal[frameSequenceStarted];
         @signal[frameSequenceFinished];
         @signal[datarateSelected](type=double);
-        @statistic[packetSentToPeer](title="packet sent"; record=count, vector?; interpolationmode=none);
-        @statistic[packetSentToPeerUnicast](title="packet sent: unicast"; source=ieee80211Unicast(packetSentToPeer); record=count, vector?; interpolationmode=none);
-        @statistic[packetSentToPeerMulticast](title="packet sent: multicast"; source=ieee80211Multicast(packetSentToPeer); record=count, vector?; interpolationmode=none);
-        @statistic[packetSentToPeerBroadcast](title="packet sent: broadcast "; source=ieee80211Broadcast(packetSentToPeer); record=count, vector?; interpolationmode=none);
+        @statistic[packetSentToPeer](title="packet sent"; record=count,vector?; interpolationmode=none);
+        @statistic[packetSentToPeerUnicast](title="packet sent: unicast"; source=ieee80211Unicast(packetSentToPeer); record=count,vector?; interpolationmode=none);
+        @statistic[packetSentToPeerMulticast](title="packet sent: multicast"; source=ieee80211Multicast(packetSentToPeer); record=count,vector?; interpolationmode=none);
+        @statistic[packetSentToPeerBroadcast](title="packet sent: broadcast "; source=ieee80211Broadcast(packetSentToPeer); record=count,vector?; interpolationmode=none);
         @statistic[packetSentToPeerWithRetry](title="packet sent: with retry"; source=ieee80211Retry(packetSentToPeer); record=count);
         @statistic[packetSentToPeerWithoutRetry](title="packet sent: without retry"; source=ieee80211NotRetry(packetSentToPeer); record=count);
-        @statistic[packetReceivedFromPeer](title="packet received"; record=count, vector?; interpolationmode=none);
-        @statistic[packetReceivedFromPeerUnicast](title="packet received: unicast"; source=ieee80211Unicast(packetReceivedFromPeer); record=count, vector?; interpolationmode=none);
-        @statistic[packetReceivedFromPeerMulticast](title="packet received: multicast"; source=ieee80211Multicast(packetReceivedFromPeer); record=count, vector?; interpolationmode=none);
-        @statistic[packetReceivedFromPeerBroadcast](title="packet received: broadcast"; source=ieee80211Broadcast(packetReceivedFromPeer); record=count, vector?; interpolationmode=none);
+        @statistic[packetReceivedFromPeer](title="packet received"; record=count,vector?; interpolationmode=none);
+        @statistic[packetReceivedFromPeerUnicast](title="packet received: unicast"; source=ieee80211Unicast(packetReceivedFromPeer); record=count,vector?; interpolationmode=none);
+        @statistic[packetReceivedFromPeerMulticast](title="packet received: multicast"; source=ieee80211Multicast(packetReceivedFromPeer); record=count,vector?; interpolationmode=none);
+        @statistic[packetReceivedFromPeerBroadcast](title="packet received: broadcast"; source=ieee80211Broadcast(packetReceivedFromPeer); record=count,vector?; interpolationmode=none);
         @statistic[packetReceivedFromPeerWithRetry](title="packet received: with retry"; source=ieee80211Retry(packetReceivedFromPeer); record=count);
         @statistic[packetReceivedFromPeerWithoutRetry](title="packet received: without retry"; source=ieee80211NotRetry(packetReceivedFromPeer); record=count);
         @statistic[linkBroken](title="link broken"; record=count; interpolationmode=none);
@@ -76,6 +75,7 @@ module Dcf like IDcf
         @statistic[datarateSelected](title="datarate selected"; record=vector; interpolationmode=none);
 
     submodules:
+        pendingQueue: PendingQueue; // TODO: move to Dcaf
         channelAccess: Dcaf {
             parameters:
                 @display("p=150,100");

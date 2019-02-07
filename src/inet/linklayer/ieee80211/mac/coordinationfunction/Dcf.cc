@@ -43,7 +43,7 @@ void Dcf::initialize(int stage)
         recipientDataService = check_and_cast<IRecipientMacDataService*>(getSubmodule("recipientMacDataService"));
         recoveryProcedure = check_and_cast<NonQosRecoveryProcedure *>(getSubmodule("recoveryProcedure"));
         rateSelection = check_and_cast<IRateSelection*>(getSubmodule("rateSelection"));
-        pendingQueue = new PendingQueue(par("maxQueueSize"), nullptr, par("prioritizeMulticast") ? PendingQueue::Priority::PRIORITIZE_MULTICAST_OVER_DATA : PendingQueue::Priority::PRIORITIZE_MGMT_OVER_DATA);
+        pendingQueue = check_and_cast<PendingQueue *>(getSubmodule("pendingQueue"));
         rtsProcedure = new RtsProcedure();
         rtsPolicy = check_and_cast<IRtsPolicy *>(getSubmodule("rtsPolicy"));
         recipientAckProcedure = new RecipientAckProcedure();
@@ -410,7 +410,6 @@ Dcf::~Dcf()
     delete ctsProcedure;
     delete frameSequenceHandler;
     delete inProgressFrames;
-    delete pendingQueue;
 }
 
 } // namespace ieee80211

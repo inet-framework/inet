@@ -21,6 +21,7 @@ package inet.linklayer.ieee80211.mac.channelaccess;
 import inet.linklayer.ieee80211.mac.contract.IContention;
 import inet.linklayer.ieee80211.mac.originator.QosRecoveryProcedure;
 import inet.linklayer.ieee80211.mac.originator.TxopProcedure;
+import inet.linklayer.ieee80211.mac.queue.PendingQueue;
 
 //
 // IEEE 802.11 Enhanced Distributed Channel Access Function
@@ -29,8 +30,6 @@ module Edcaf
 {
     parameters:
         string originatorMacDataServiceModule;
-        int maxQueueSize = default(100); // -1 means unlimited
-        bool prioritizeMulticast = default(false); // if true, prioritize multicast frames (9.3.2.1 Fundamental access)
         string accessCategory @enum("AC_BK","AC_BE","AC_VI","AC_VO");
         int aifsn = default(-1);
         int cwMin = default(-1);
@@ -44,28 +43,32 @@ module Edcaf
         @display("i=block/queue");
         @signal[packetSentToPeer](type=inet::Packet);
         @signal[channelOwningChanged](type=bool);
-        @statistic[packetSentToPeer](title="packet sent"; record=count, vector?; interpolationmode=none);
-        @statistic[packetSentToPeerUnicast](title="packet sent: unicast"; source=ieee80211Unicast(packetSentToPeer); record=count, vector?; interpolationmode=none);
-        @statistic[packetSentToPeerMulticast](title="packet sent: multicast"; source=ieee80211Multicast(packetSentToPeer); record=count, vector?; interpolationmode=none);
-        @statistic[packetSentToPeerBroadcast](title="packet sent: broadcast "; source=ieee80211Broadcast(packetSentToPeer); record=count, vector?; interpolationmode=none);
+        @statistic[packetSentToPeer](title="packet sent"; record=count,vector?; interpolationmode=none);
+        @statistic[packetSentToPeerUnicast](title="packet sent: unicast"; source=ieee80211Unicast(packetSentToPeer); record=count,vector?; interpolationmode=none);
+        @statistic[packetSentToPeerMulticast](title="packet sent: multicast"; source=ieee80211Multicast(packetSentToPeer); record=count,vector?; interpolationmode=none);
+        @statistic[packetSentToPeerBroadcast](title="packet sent: broadcast "; source=ieee80211Broadcast(packetSentToPeer); record=count,vector?; interpolationmode=none);
         @statistic[packetSentToPeerWithRetry](title="packet sent: with retry"; source=ieee80211Retry(packetSentToPeer); record=count);
         @statistic[packetSentToPeerWithoutRetry](title="packet sent: without retry"; source=ieee80211NotRetry(packetSentToPeer); record=count);
         @statistic[channelOwningChanged](title="channel owning"; record=vector?; interpolationmode=sample-hold);
 
     submodules:
-        contention: <default("Contention")> like IContention {
+        pendingQueue: PendingQueue {
             parameters:
                 @display("p=100,100");
         }
-        txopProcedure: TxopProcedure {
+        contention: <default("Contention")> like IContention {
             parameters:
                 @display("p=100,200");
+        }
+        txopProcedure: TxopProcedure {
+            parameters:
+                @display("p=100,300");
         }
         recoveryProcedure: QosRecoveryProcedure {
             parameters:
                 cwCalculatorModule = "^";
                 rtsPolicyModule = "^.^.^.rtsPolicy";
-                @display("p=100,300");
+                @display("p=100,400");
         }
 }
 
