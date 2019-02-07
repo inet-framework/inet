@@ -20,11 +20,13 @@ package inet.linklayer.ieee80211.mac.coordinationfunction;
 import inet.linklayer.ieee80211.mac.channelaccess.Dcaf;
 import inet.linklayer.ieee80211.mac.contract.IDcf;
 import inet.linklayer.ieee80211.mac.contract.IRateControl;
+import inet.linklayer.ieee80211.mac.originator.AckHandler;
 import inet.linklayer.ieee80211.mac.originator.NonQosRecoveryProcedure;
 import inet.linklayer.ieee80211.mac.originator.OriginatorAckPolicy;
 import inet.linklayer.ieee80211.mac.originator.OriginatorMacDataService;
 import inet.linklayer.ieee80211.mac.originator.RtsPolicy;
 import inet.linklayer.ieee80211.mac.protectionmechanism.OriginatorProtectionMechanism;
+import inet.linklayer.ieee80211.mac.queue.InProgressFrames;
 import inet.linklayer.ieee80211.mac.queue.PendingQueue;
 import inet.linklayer.ieee80211.mac.rateselection.RateSelection;
 import inet.linklayer.ieee80211.mac.recipient.CtsPolicy;
@@ -75,7 +77,14 @@ module Dcf like IDcf
         @statistic[datarateSelected](title="datarate selected"; record=vector; interpolationmode=none);
 
     submodules:
-        pendingQueue: PendingQueue; // TODO: move to Dcaf
+        pendingQueue: PendingQueue;
+        inProgressFrames: InProgressFrames { // TODO: move to Dcaf
+            parameters:
+                pendingQueueModule = default("^.pendingQueue");
+                originatorMacDataServiceModule = default("^.originatorMacDataService");
+                ackHandlerModule = default("^.ackHandler");
+        }
+        ackHandler: AckHandler;
         channelAccess: Dcaf {
             parameters:
                 @display("p=150,100");

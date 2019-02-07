@@ -19,8 +19,10 @@
 package inet.linklayer.ieee80211.mac.channelaccess;
 
 import inet.linklayer.ieee80211.mac.contract.IContention;
+import inet.linklayer.ieee80211.mac.originator.QosAckHandler;
 import inet.linklayer.ieee80211.mac.originator.QosRecoveryProcedure;
 import inet.linklayer.ieee80211.mac.originator.TxopProcedure;
+import inet.linklayer.ieee80211.mac.queue.InProgressFrames;
 import inet.linklayer.ieee80211.mac.queue.PendingQueue;
 
 //
@@ -56,19 +58,30 @@ module Edcaf
             parameters:
                 @display("p=100,100");
         }
+        inProgressFrames: InProgressFrames {
+            parameters:
+                pendingQueueModule = default("^.pendingQueue");
+                originatorMacDataServiceModule = default("^.^.^.originatorMacDataService");
+                ackHandlerModule = default("^.ackHandler");
+                @display("p=100,200");
+        }
         contention: <default("Contention")> like IContention {
             parameters:
-                @display("p=100,200");
+                @display("p=100,300");
+        }
+        ackHandler: QosAckHandler {
+            parameters:
+                @display("p=100,400");
         }
         txopProcedure: TxopProcedure {
             parameters:
-                @display("p=100,300");
+                @display("p=100,500");
         }
         recoveryProcedure: QosRecoveryProcedure {
             parameters:
                 cwCalculatorModule = "^";
                 rtsPolicyModule = "^.^.^.rtsPolicy";
-                @display("p=100,400");
+                @display("p=100,600");
         }
 }
 

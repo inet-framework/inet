@@ -50,11 +50,11 @@ void Dcf::initialize(int stage)
         recipientAckPolicy = check_and_cast<IRecipientAckPolicy *>(getSubmodule("recipientAckPolicy"));
         originatorAckPolicy = check_and_cast<IOriginatorAckPolicy *>(getSubmodule("originatorAckPolicy"));
         frameSequenceHandler = new FrameSequenceHandler();
-        ackHandler = new AckHandler();
+        ackHandler = check_and_cast<AckHandler *>(getSubmodule("ackHandler"));
         ctsProcedure = new CtsProcedure();
         ctsPolicy = check_and_cast<ICtsPolicy *>(getSubmodule("ctsPolicy"));
         stationRetryCounters = new StationRetryCounters();
-        inProgressFrames = new InProgressFrames(pendingQueue, originatorDataService, ackHandler);
+        inProgressFrames = check_and_cast<InProgressFrames *>(getSubmodule("inProgressFrames"));
         originatorProtectionMechanism = check_and_cast<OriginatorProtectionMechanism*>(getSubmodule("originatorProtectionMechanism"));
     }
 }
@@ -405,11 +405,9 @@ Dcf::~Dcf()
     cancelAndDelete(startRxTimer);
     delete rtsProcedure;
     delete recipientAckProcedure;
-    delete ackHandler;
     delete stationRetryCounters;
     delete ctsProcedure;
     delete frameSequenceHandler;
-    delete inProgressFrames;
 }
 
 } // namespace ieee80211

@@ -32,8 +32,6 @@ inline simtime_t fallback(simtime_t a, simtime_t b) {return a!=-1 ? a : b;}
 
 Edcaf::~Edcaf()
 {
-    delete inProgressFrames;
-    delete ackHandler;
     delete stationRetryCounter;
 }
 
@@ -46,8 +44,8 @@ void Edcaf::initialize(int stage)
         collisionController = check_and_cast<IEdcaCollisionController *>(getModuleByPath(par("collisionControllerModule")));
         pendingQueue = check_and_cast<PendingQueue *>(getSubmodule("pendingQueue"));
         recoveryProcedure = check_and_cast<QosRecoveryProcedure *>(getSubmodule("recoveryProcedure"));
-        ackHandler = new QosAckHandler();
-        inProgressFrames = new InProgressFrames(pendingQueue, check_and_cast<IOriginatorMacDataService *>(getModuleByPath(par("originatorMacDataServiceModule"))), ackHandler);
+        ackHandler = check_and_cast<QosAckHandler *>(getSubmodule("ackHandler"));
+        inProgressFrames = check_and_cast<InProgressFrames *>(getSubmodule("inProgressFrames"));
         txop = check_and_cast<TxopProcedure *>(getSubmodule("txopProcedure"));
         stationRetryCounter = new StationRetryCounters();
         WATCH(owning);
