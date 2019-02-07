@@ -23,14 +23,20 @@
 namespace inet {
 namespace ieee80211 {
 
-class INET_API Ieee80211Queue : public cQueue
-{
+class PendingQueue : public cQueue {
+    public:
+        enum class Priority {
+            PRIORITIZE_MGMT_OVER_DATA,
+            PRIORITIZE_MULTICAST_OVER_DATA
+        };
+
     protected:
         int maxQueueSize = -1; // -1 means unlimited queue
 
     public:
-        virtual ~Ieee80211Queue() { }
-        Ieee80211Queue(int maxQueueSize, const char *name);
+        virtual ~PendingQueue() { }
+        PendingQueue(int maxQueueSize, const char *name);
+        PendingQueue(int maxQueueSize, const char *name, Priority priority);
 
         virtual bool insert(Packet *frame);
         virtual bool insertBefore(Packet *where, Packet *frame);
@@ -46,20 +52,6 @@ class INET_API Ieee80211Queue : public cQueue
 
         int getNumberOfFrames() { return getLength(); }
         int getMaxQueueSize() { return maxQueueSize; }
-
-};
-
-class PendingQueue : public Ieee80211Queue {
-    public:
-        enum class Priority {
-            PRIORITIZE_MGMT_OVER_DATA,
-            PRIORITIZE_MULTICAST_OVER_DATA
-        };
-
-    public:
-        virtual ~PendingQueue() { }
-        PendingQueue(int maxQueueSize, const char *name);
-        PendingQueue(int maxQueueSize, const char *name, Priority priority);
 
     public:
         static int cmpMgmtOverData(Packet *a, Packet *b);

@@ -21,68 +21,14 @@
 namespace inet {
 namespace ieee80211 {
 
-Ieee80211Queue::Ieee80211Queue(int maxQueueSize, const char *name) :
+PendingQueue::PendingQueue(int maxQueueSize, const char *name) :
     cQueue(name, nullptr)
 {
     this->maxQueueSize = maxQueueSize;
 }
 
-bool Ieee80211Queue::insert(Packet *frame)
-{
-    if (maxQueueSize != -1 && getLength() == maxQueueSize)
-        return false;
-    cQueue::insert(frame);
-    return true;
-}
-
-bool Ieee80211Queue::insertBefore(Packet *where, Packet *frame)
-{
-    if (maxQueueSize != -1 && getLength() == maxQueueSize)
-        return false;
-    cQueue::insertBefore(where, frame);
-    return true;
-}
-
-bool Ieee80211Queue::insertAfter(Packet *where, Packet *frame)
-{
-    if (maxQueueSize != -1 && getLength() == maxQueueSize)
-        return false;
-    cQueue::insertAfter(where, frame);
-    return true;
-}
-
-Packet *Ieee80211Queue::remove(Packet *frame)
-{
-    return check_and_cast<Packet *>(cQueue::remove(frame));
-}
-
-Packet *Ieee80211Queue::pop()
-{
-    return check_and_cast<Packet *>(cQueue::pop());
-}
-
-Packet *Ieee80211Queue::front() const
-{
-    return check_and_cast<Packet *>(cQueue::front());
-}
-
-Packet *Ieee80211Queue::back() const
-{
-    return check_and_cast<Packet *>(cQueue::back());
-}
-
-bool Ieee80211Queue::contains(Packet *frame) const
-{
-    return cQueue::contains(frame);
-}
-
-PendingQueue::PendingQueue(int maxQueueSize, const char *name) :
-    Ieee80211Queue(maxQueueSize, name)
-{
-}
-
 PendingQueue::PendingQueue(int maxQueueSize, const char *name, Priority priority) :
-    Ieee80211Queue(maxQueueSize, name)
+    cQueue(name, nullptr)
 {
     if (priority == Priority::PRIORITIZE_MGMT_OVER_DATA)
         setup((CompareFunc)cmpMgmtOverData);
@@ -91,6 +37,55 @@ PendingQueue::PendingQueue(int maxQueueSize, const char *name, Priority priority
     else
         throw cRuntimeError("Unknown 802.11 queue priority");
     this->maxQueueSize = maxQueueSize;
+}
+
+bool PendingQueue::insert(Packet *frame)
+{
+    if (maxQueueSize != -1 && getLength() == maxQueueSize)
+        return false;
+    cQueue::insert(frame);
+    return true;
+}
+
+bool PendingQueue::insertBefore(Packet *where, Packet *frame)
+{
+    if (maxQueueSize != -1 && getLength() == maxQueueSize)
+        return false;
+    cQueue::insertBefore(where, frame);
+    return true;
+}
+
+bool PendingQueue::insertAfter(Packet *where, Packet *frame)
+{
+    if (maxQueueSize != -1 && getLength() == maxQueueSize)
+        return false;
+    cQueue::insertAfter(where, frame);
+    return true;
+}
+
+Packet *PendingQueue::remove(Packet *frame)
+{
+    return check_and_cast<Packet *>(cQueue::remove(frame));
+}
+
+Packet *PendingQueue::pop()
+{
+    return check_and_cast<Packet *>(cQueue::pop());
+}
+
+Packet *PendingQueue::front() const
+{
+    return check_and_cast<Packet *>(cQueue::front());
+}
+
+Packet *PendingQueue::back() const
+{
+    return check_and_cast<Packet *>(cQueue::back());
+}
+
+bool PendingQueue::contains(Packet *frame) const
+{
+    return cQueue::contains(frame);
 }
 
 int PendingQueue::cmpMgmtOverData(Packet *a, Packet *b)
