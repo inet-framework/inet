@@ -345,14 +345,14 @@ double NetworkConfiguratorBase::computeWiredLinkWeight(Link *link, const char *m
         if (!strcmp(metric, "hopCount"))
             return 1;
         else if (!strcmp(metric, "delay")) {
-            cDatarateChannel *transmissionChannel = dynamic_cast<cDatarateChannel *>(linkOut->getLocalGate()->getTransmissionChannel());
+            cDatarateChannel *transmissionChannel = dynamic_cast<cDatarateChannel *>(linkOut->getLocalGate()->findTransmissionChannel());
             if (transmissionChannel != nullptr)
                 return transmissionChannel->getDelay().dbl();
             else
                 return minLinkWeight;
         }
         else if (!strcmp(metric, "dataRate")) {
-            cChannel *transmissionChannel = linkOut->getLocalGate()->getTransmissionChannel();
+            cChannel *transmissionChannel = linkOut->getLocalGate()->findTransmissionChannel();
             if (transmissionChannel != nullptr) {
                 double dataRate = transmissionChannel->getNominalDatarate();
                 return dataRate != 0 ? 1 / dataRate : minLinkWeight;
@@ -361,8 +361,8 @@ double NetworkConfiguratorBase::computeWiredLinkWeight(Link *link, const char *m
                 return minLinkWeight;
         }
         else if (!strcmp(metric, "errorRate")) {
-            cDatarateChannel *transmissionChannel = dynamic_cast<cDatarateChannel *>(linkOut->getLocalGate()->getTransmissionChannel());
-            if (transmissionChannel) {
+            cDatarateChannel *transmissionChannel = dynamic_cast<cDatarateChannel *>(linkOut->getLocalGate()->findTransmissionChannel());
+            if (transmissionChannel != nullptr) {
                 InterfaceInfo *sourceInterfaceInfo = link->sourceInterfaceInfo;
                 double bitErrorRate = transmissionChannel->getBitErrorRate();
                 double packetErrorRate = 1.0 - pow(1.0 - bitErrorRate, sourceInterfaceInfo->interfaceEntry->getMtu());
