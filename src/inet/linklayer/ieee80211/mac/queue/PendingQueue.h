@@ -15,8 +15,8 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_IEEE80211QUEUE_H
-#define __INET_IEEE80211QUEUE_H
+#ifndef __INET_PENDINGQUEUE_H
+#define __INET_PENDINGQUEUE_H
 
 #include "inet/common/packet/Packet.h"
 
@@ -61,4 +61,4 @@ class PendingQueue : public cQueue {
 } /* namespace ieee80211 */
 } /* namespace inet */
 
-#endif // ifndef __INET_IEEE80211QUEUE_H
+#endif // ifndef __INET_PENDINGQUEUE_H
