@@ -27,7 +27,7 @@
 namespace inet {
 namespace ieee80211 {
 
-class INET_API InProgressFrames : public cOwnedObject
+class INET_API InProgressFrames : public cSimpleModule
 {
     protected:
         PendingQueue *pendingQueue = nullptr;
@@ -37,11 +37,12 @@ class INET_API InProgressFrames : public cOwnedObject
         std::vector<Packet *> droppedFrames;
 
     protected:
+        virtual void initialize(int stage) override;
+
         void ensureHasFrameToTransmit();
         bool hasEligibleFrameToTransmit();
 
     public:
-        InProgressFrames(PendingQueue* pendingQueue, IOriginatorMacDataService* dataService, IAckHandler* ackHandler);
         virtual ~InProgressFrames();
 
         virtual std::string str() const override;

@@ -22,12 +22,15 @@
 namespace inet {
 namespace ieee80211 {
 
-InProgressFrames::InProgressFrames(PendingQueue* pendingQueue, IOriginatorMacDataService* dataService, IAckHandler* ackHandler) :
-    cOwnedObject(),
-    pendingQueue(pendingQueue),
-    dataService(dataService),
-    ackHandler(ackHandler)
+Define_Module(InProgressFrames);
+
+void InProgressFrames::initialize(int stage)
 {
+    if (stage == INITSTAGE_LOCAL) {
+        pendingQueue = check_and_cast<PendingQueue *>(getModuleByPath(par("pendingQueueModule")));
+        dataService = check_and_cast<IOriginatorMacDataService *>(getModuleByPath(par("originatorMacDataServiceModule")));
+        ackHandler = check_and_cast<IAckHandler *>(getModuleByPath(par("ackHandlerModule")));
+    }
 }
 
 std::string InProgressFrames::str() const
