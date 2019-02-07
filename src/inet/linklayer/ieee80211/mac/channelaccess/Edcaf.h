@@ -55,7 +55,7 @@ class INET_API Edcaf : public IChannelAccess, public IContention::ICallback, pub
 
         // Queues
         PendingQueue *pendingQueue = nullptr;
-        InProgressFrames *inProgressFrame = nullptr;
+        InProgressFrames *inProgressFrames = nullptr;
 
         bool owning = false;
 
@@ -93,7 +93,7 @@ class INET_API Edcaf : public IChannelAccess, public IContention::ICallback, pub
         virtual TxopProcedure *getTxop() const { return txop; }
 
         virtual PendingQueue *getPendingQueue() const { return pendingQueue; }
-        virtual InProgressFrames *getInProgressFrame() const { return inProgressFrame; }
+        virtual InProgressFrames *getInProgressFrames() const { return inProgressFrames; }
 
         // IChannelAccess
         virtual void requestChannel(IChannelAccess::ICallback *callback) override;

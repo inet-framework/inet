@@ -32,7 +32,7 @@ inline simtime_t fallback(simtime_t a, simtime_t b) {return a!=-1 ? a : b;}
 
 Edcaf::~Edcaf()
 {
-    delete inProgressFrame;
+    delete inProgressFrames;
     delete pendingQueue;
     delete ackHandler;
     delete stationRetryCounter;
@@ -48,7 +48,7 @@ void Edcaf::initialize(int stage)
         pendingQueue = new PendingQueue(par("maxQueueSize"), nullptr, par("prioritizeMulticast") ? PendingQueue::Priority::PRIORITIZE_MULTICAST_OVER_DATA : PendingQueue::Priority::PRIORITIZE_MGMT_OVER_DATA);
         recoveryProcedure = check_and_cast<QosRecoveryProcedure *>(getSubmodule("recoveryProcedure"));
         ackHandler = new QosAckHandler();
-        inProgressFrame = new InProgressFrames(pendingQueue, check_and_cast<IOriginatorMacDataService *>(getModuleByPath(par("originatorMacDataServiceModule"))), ackHandler);
+        inProgressFrames = new InProgressFrames(pendingQueue, check_and_cast<IOriginatorMacDataService *>(getModuleByPath(par("originatorMacDataServiceModule"))), ackHandler);
         txop = check_and_cast<TxopProcedure *>(getSubmodule("txopProcedure"));
         stationRetryCounter = new StationRetryCounters();
         WATCH(owning);
