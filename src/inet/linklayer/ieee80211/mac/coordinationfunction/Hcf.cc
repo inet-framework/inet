@@ -213,7 +213,7 @@ void Hcf::channelGranted(IChannelAccess* channelAccess)
         if (internallyCollidedEdcafs.size() > 0) {
             EV_INFO << "Internal collision happened with the following queues:" << std::endl;
             handleInternalCollision(internallyCollidedEdcafs);
-            emit(edcaCollisionDetectedSignal, internallyCollidedEdcafs.size());
+            emit(edcaCollisionDetectedSignal, (unsigned long)internallyCollidedEdcafs.size());
         }
         startFrameSequence(ac);
     }
