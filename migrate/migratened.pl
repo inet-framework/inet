@@ -64,6 +64,33 @@ while (<INFILE>) {
     "message_length" => "messageLength",
     "message_freq" => "messageFreq",
     "dest_addresses" => "destAddresses",
+
+    # ned paths
+    "RoutingTable" => "IPv4RoutingTable",
+    "RoutingTable6" => "IPv6RoutingTable",
+    "inet\.nodes\.inet\.NetworkLayer" => "inet.networklayer.ipv4.IPv4NetworkLayer",
+    "inet\.nodes\.ipv6\.NetworkLayer6" => "inet.networklayer.ipv6.IPv6NetworkLayer",
+    "inet\.node\.inet\.NetworkLayer" => "inet.networklayer.ipv4.IPv4NetworkLayer",
+    "inet\.node\.ipv6\.NetworkLayer6" => "inet.networklayer.ipv6.IPv6NetworkLayer",
+    "inet\.nodes\." => "inet.node.",
+    "inet\.nodes\." => "inet.node.",
+    "NetworkLayer" => "IPv4NetworkLayer",
+    "NetworkLayer6" => "IPv6NetworkLayer",
+    "IPForward" => "forwarding",
+    "netwOut" => "upperLayerOut",
+    "netwIn" => "upperLayerIn",
+    "networkLayer\.udpIn" => "networkLayer.transportIn++",
+    "networkLayer\.udpOut" => "networkLayer.transportOut++",
+    "networkLayer\.tcpIn" => "networkLayer.transportIn++",
+    "networkLayer\.tcpOut" => "networkLayer.transportOut++",
+    "notificationBoard: *NotificationBoard *\\{[^}]*\\}\n" => "",
+    "tcp\.ipv6In" => "tcp.ipIn",
+    "tcp\.ipv6Out" => "tcp.ipOut",
+    "udp\.ipv6In" => "udp.ipIn",
+    "udp\.ipv6Out" => "udp.ipOut",
+    "" => "",
+    "" => "",
+    "" => "",
 );
 
 foreach $fname (@fnames)
@@ -72,6 +99,14 @@ foreach $fname (@fnames)
     $txt = readfile($fname);
 
     # process $txt:
+    $txt =~ s/^import +inet\.base\.NotificationBoard;\n//sg;
+    $txt =~ s/^ *notificationBoard: *NotificationBoard *\{[^}]*\}\n//sg;
+
+    $txt =~ s/^import +inet\.util\.NAMTraceWriter;\n//sg;
+    $txt =~ s/^ *namTrace: *NAMTraceWriter *\{[^}]*\}\n//sg;
+
+    $txt =~ s/\@node\(\)/\@networkNode/sg;
+
     foreach my $from (keys(%replacements)) {
         my $to = $replacements{$from};
         $txt =~ s/\b$from\b/$to/sg;

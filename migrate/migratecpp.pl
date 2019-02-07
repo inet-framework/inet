@@ -96,7 +96,6 @@ $gettersWithArg =~ s/\s+/|/g;
     "OSPFOut"   => "ospfOut",
 
     "fromIPv6"  => "ipv6In",
-    "toIPv6"    => "ipv6Out",
 
     # from RTP -- TBD only when RTP code has been patched!
 #    "fromApp" =>            "appIn",
@@ -222,6 +221,10 @@ while (<LISTFILE>)
     # NotificationBoard
     # add "const" to 'detail' argument in receiveChangeNotification()
     $txt =~ s/(\breceiveChangeNotification *\( *int +[a-zA-Z]+ *), *(cPolymorphic|cObject) *\*/$1, const $2 */mg;
+
+
+    $txt =~ s/\bclearResult\(\)/clear()/mg;
+    $txt =~ s/\blongValue\(\)/intValue()/mg;
 
     # InterfaceEntry
     $txt =~ s/\bipv4\(\)/ipv4Data()/mg;
