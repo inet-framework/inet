@@ -42,6 +42,7 @@ void InProgressFrames::ensureHasFrameToTransmit()
         auto frames = dataService->extractFramesToTransmit(pendingQueue);
         if (frames) {
             for (auto frame : *frames) {
+                EV_DEBUG << "Inserting frame " << frame->getName() << " extracted from MAC data service.\n";
                 ackHandler->frameGotInProgress(frame->peekAtFront<Ieee80211DataOrMgmtHeader>());
                 inProgressFrames.push_back(frame);
             }
@@ -89,6 +90,7 @@ Packet *InProgressFrames::getPendingFrameFor(Packet *frame)
 
 void InProgressFrames::dropFrame(Packet *packet)
 {
+    EV_DEBUG << "Dropping frame " << packet->getName() << ".\n";
     inProgressFrames.remove(packet);
     droppedFrames.push_back(packet);
 }
@@ -101,6 +103,7 @@ void InProgressFrames::dropFrames(std::set<std::pair<MacAddress, std::pair<Tid, 
         if (header->getType() == ST_DATA_WITH_QOS) {
             auto dataheader = CHK(dynamicPtrCast<const Ieee80211DataHeader>(header));
             if (seqAndFragNums.count(std::make_pair(dataheader->getReceiverAddress(), std::make_pair(dataheader->getTid(), SequenceControlField(dataheader->getSequenceNumber(), dataheader->getFragmentNumber())))) != 0) {
+                EV_DEBUG << "Dropping frame " << frame->getName() << ".\n";
                 it = inProgressFrames.erase(it);
                 droppedFrames.push_back(frame);
             }

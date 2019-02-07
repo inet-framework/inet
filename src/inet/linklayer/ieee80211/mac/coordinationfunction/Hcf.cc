@@ -172,6 +172,7 @@ void Hcf::scheduleInactivityTimer(simtime_t timeout)
 void Hcf::processLowerFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header)
 {
     Enter_Method_Silent("processLowerFrame(%s)", packet->getName());
+    EV_INFO << "Processing lower frame: " << packet->getName() << endl;
     auto edcaf = edca->getChannelOwner();
     if (edcaf && frameSequenceHandler->isSequenceRunning()) {
         // TODO: always call processResponse?
@@ -305,6 +306,7 @@ void Hcf::frameSequenceFinished()
 
 void Hcf::recipientProcessReceivedFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header)
 {
+    EV_INFO << "Processing received frame " << packet->getName() << " as recipient.\n";
     emit(packetReceivedFromPeerSignal, packet);
     if (auto dataOrMgmtHeader = dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(header))
         recipientAckProcedure->processReceivedFrame(packet, dataOrMgmtHeader, check_and_cast<IRecipientAckPolicy*>(recipientAckPolicy), this);
@@ -413,6 +415,7 @@ void Hcf::originatorProcessRtsProtectionFailed(Packet *packet)
                 edcaMgmtAndNonQoSRecoveryProcedure->retryLimitReached(packet, mgmtHeader);
             else ; // TODO: nonqos data
             edcaInProgressFrames[ac]->dropFrame(packet);
+            EV_INFO << "Dropping RTS/CTS protected frame " << packet->getName() << ", because retry limit is reached.\n";
             PacketDropDetails details;
             details.setReason(RETRY_LIMIT_REACHED);
             details.setLimit(-1); // TODO:
@@ -427,6 +430,7 @@ void Hcf::originatorProcessRtsProtectionFailed(Packet *packet)
 void Hcf::originatorProcessTransmittedFrame(Packet *packet)
 {
     Enter_Method_Silent("originatorProcessTransmittedFrame");
+    EV_INFO << "Processing transmitted frame " << packet->getName() << " as originator in frame sequence.\n";
     auto transmittedHeader = packet->peekAtFront<Ieee80211MacHeader>();
     auto edcaf = edca->getChannelOwner();
     if (edcaf) {
@@ -530,6 +534,7 @@ void Hcf::originatorProcessFailedFrame(Packet *failedPacket)
             else if (auto mgmtHeader = dynamicPtrCast<const Ieee80211MgmtHeader>(failedHeader))
                 edcaMgmtAndNonQoSRecoveryProcedure->retryLimitReached(failedPacket, mgmtHeader);
             edcaInProgressFrames[ac]->dropFrame(failedPacket);
+            EV_INFO << "Dropping frame " << failedPacket->getName() << ", because retry limit is reached.\n";
             PacketDropDetails details;
             details.setReason(RETRY_LIMIT_REACHED);
             details.setLimit(-1); // TODO:
@@ -537,6 +542,7 @@ void Hcf::originatorProcessFailedFrame(Packet *failedPacket)
             emit(linkBrokenSignal, failedPacket);
         }
         else {
+            EV_INFO << "Retrying frame " << failedPacket->getName() << ".\n";
             auto h = failedPacket->removeAtFront<Ieee80211DataOrMgmtHeader>();
             h->setRetry(true);
             failedPacket->insertAtFront(h);
@@ -549,6 +555,7 @@ void Hcf::originatorProcessFailedFrame(Packet *failedPacket)
 void Hcf::originatorProcessReceivedFrame(Packet *receivedPacket, Packet *lastTransmittedPacket)
 {
     Enter_Method_Silent("originatorProcessReceivedFrame");
+    EV_INFO << "Processing received frame " << receivedPacket->getName() << " as originator in frame sequence.\n";
     emit(packetReceivedFromPeerSignal, receivedPacket);
     auto receivedHeader = receivedPacket->peekAtFront<Ieee80211MacHeader>();
     auto lastTransmittedHeader = lastTransmittedPacket->peekAtFront<Ieee80211MacHeader>();
@@ -677,6 +684,7 @@ void Hcf::transmitFrame(Packet *packet, simtime_t ifs)
         auto mode = rateSelection->computeMode(packet, header, txop);
         setFrameMode(packet, header, mode);
         emit(IRateSelection::datarateSelectedSignal, mode->getDataMode()->getNetBitrate().get(), packet);
+        EV_DEBUG << "Datarate for " << packet->getName() << " is set to " << mode->getDataMode()->getNetBitrate() << ".\n";
         if (txop->getProtectionMechanism() == TxopProcedure::ProtectionMechanism::SINGLE_PROTECTION) {
             auto pendingPacket = edcaInProgressFrames[ac]->getPendingFrameFor(packet);
             const auto& pendingHeader = pendingPacket == nullptr ? nullptr : pendingPacket->peekAtFront<Ieee80211DataOrMgmtHeader>();
@@ -710,6 +718,7 @@ void Hcf::transmitControlResponseFrame(Packet *responsePacket, const Ptr<const I
         throw cRuntimeError("Unknown received frame type");
     setFrameMode(responsePacket, responseHeader, responseMode);
     emit(IRateSelection::datarateSelectedSignal, responseMode->getDataMode()->getNetBitrate().get(), responsePacket);
+    EV_DEBUG << "Datarate for " << responsePacket->getName() << " is set to " << responseMode->getDataMode()->getNetBitrate() << ".\n";
     tx->transmitFrame(responsePacket, responseHeader, modeSet->getSifsTime(), this);
     delete responsePacket;
 }
@@ -768,12 +777,12 @@ bool Hcf::isSentByUs(const Ptr<const Ieee80211MacHeader>& header) const
 void Hcf::corruptedFrameReceived()
 {
     Enter_Method_Silent("corruptedFrameReceived");
-    if (frameSequenceHandler->isSequenceRunning()) {
-        if (!startRxTimer->isScheduled()) {
-            frameSequenceHandler->handleStartRxTimeout();
-            updateDisplayString();
-        }
+    if (frameSequenceHandler->isSequenceRunning() && !startRxTimer->isScheduled()) {
+        frameSequenceHandler->handleStartRxTimeout();
+        updateDisplayString();
     }
+    else
+        EV_DEBUG << "Ignoring received corrupt frame.\n";
 }
 
 Hcf::~Hcf()
