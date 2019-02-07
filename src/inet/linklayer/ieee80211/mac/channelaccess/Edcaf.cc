@@ -30,6 +30,14 @@ Define_Module(Edcaf);
 inline double fallback(double a, double b) {return a!=-1 ? a : b;}
 inline simtime_t fallback(simtime_t a, simtime_t b) {return a!=-1 ? a : b;}
 
+Edcaf::~Edcaf()
+{
+    delete inProgressFrame;
+    delete pendingQueue;
+    delete ackHandler;
+    delete stationRetryCounter;
+}
+
 void Edcaf::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {

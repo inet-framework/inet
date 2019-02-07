@@ -84,8 +84,18 @@ class INET_API Edcaf : public IChannelAccess, public IContention::ICallback, pub
         virtual void calculateTimingParameters();
 
     public:
-        // IChannelAccess
+        virtual ~Edcaf();
 
+        virtual StationRetryCounters *getStationRetryCounter() const { return stationRetryCounter; }
+        virtual QosAckHandler *getAckHandler() const { return ackHandler; }
+        virtual QosRecoveryProcedure *getDataRecoveryProcedure() const { return dataRecoveryProcedure; }
+
+        virtual TxopProcedure *getTxop() const { return txop; }
+
+        virtual PendingQueue *getPendingQueue() const { return pendingQueue; }
+        virtual InProgressFrames *getInProgressFrame() const { return inProgressFrame; }
+
+        // IChannelAccess
         virtual void requestChannel(IChannelAccess::ICallback *callback) override;
         virtual void releaseChannel(IChannelAccess::ICallback *callback) override;
 

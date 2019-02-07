@@ -96,7 +96,6 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
         IOriginatorBlockAckProcedure *originatorBlockAckProcedure = nullptr;
         IRecipientBlockAckProcedure *recipientBlockAckProcedure = nullptr;
         EdcaTransmitLifetimeHandler *lifetimeHandler = nullptr;
-        std::vector<QosRecoveryProcedure*> edcaDataRecoveryProcedures;
         NonQosRecoveryProcedure *edcaMgmtAndNonQoSRecoveryProcedure = nullptr;
 
         // Block Ack Agreement Handlers
@@ -105,24 +104,15 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
         IRecipientBlockAckAgreementHandler *recipientBlockAckAgreementHandler = nullptr;
         IRecipientBlockAckAgreementPolicy *recipientBlockAckAgreementPolicy = nullptr;
 
-        // Ack handler
-        std::vector<QosAckHandler *> edcaAckHandlers;
-
         // Tx Opportunity
-        std::vector<TxopProcedure*> edcaTxops;
         TxopProcedure *hccaTxop = nullptr;
 
         // Queues
-        std::vector<PendingQueue *> edcaPendingQueues;
         PendingQueue *hccaPendingQueue = nullptr;
-        std::vector<InProgressFrames *> edcaInProgressFrames;
         InProgressFrames *hccaInProgressFrame = nullptr;
 
         // Frame sequence handler
         IFrameSequenceHandler *frameSequenceHandler = nullptr;
-
-        // Station retry counters
-        std::vector<StationRetryCounters*> stationRetryCounters;
 
         // Protection mechanisms
         SingleProtectionMechanism *singleProtectionMechanism = nullptr;
