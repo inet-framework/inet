@@ -25,10 +25,7 @@ module Dcaf
         int difsn = default(-1);
         int cwMin = default(-1);
         int cwMax = default(-1);
-
-        string rateSelectionModule;
         string rxModule;
-
         @class("Dcaf");
         @display("i=block/star");
         @signal[channelOwningChanged](type=bool);

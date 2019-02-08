@@ -31,16 +31,13 @@ import inet.linklayer.ieee80211.mac.queue.PendingQueue;
 module Edcaf
 {
     parameters:
+        string rxModule;
+        string collisionControllerModule;
         string originatorMacDataServiceModule;
         string accessCategory @enum("AC_BK","AC_BE","AC_VI","AC_VO");
         int aifsn = default(-1);
         int cwMin = default(-1);
         int cwMax = default(-1);
-
-        string rateSelectionModule;
-        string rxModule;
-        string collisionControllerModule;
-
         @class(Edcaf);
         @display("i=block/queue");
         @signal[packetSentToPeer](type=inet::Packet);
@@ -52,7 +49,6 @@ module Edcaf
         @statistic[packetSentToPeerWithRetry](title="packet sent: with retry"; source=ieee80211Retry(packetSentToPeer); record=count);
         @statistic[packetSentToPeerWithoutRetry](title="packet sent: without retry"; source=ieee80211NotRetry(packetSentToPeer); record=count);
         @statistic[channelOwningChanged](title="channel owning"; record=vector?; interpolationmode=sample-hold);
-
     submodules:
         pendingQueue: PendingQueue {
             parameters:
