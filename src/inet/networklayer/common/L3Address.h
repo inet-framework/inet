@@ -104,11 +104,33 @@ class INET_API L3Address
     bool matches(const L3Address& other, int prefixLength) const;
 
     static const char *getTypeName(AddressType t);
+
+    inline void doParsimPacking(cCommBuffer *buf) const
+    {
+        buf->pack(hi);
+        buf->pack(lo);
+    }
+
+    inline void doParsimUnpacking(cCommBuffer *buf)
+    {
+        buf->unpack(hi);
+        buf->unpack(lo);
+    }
 };
 
 inline std::ostream& operator<<(std::ostream& os, const L3Address& address)
 {
     return os << address.str();
+}
+
+inline void doParsimPacking(cCommBuffer *buf, const L3Address& addr)
+{
+    addr.doParsimPacking(buf);
+}
+
+inline void doParsimUnpacking(cCommBuffer *buf, L3Address& addr)
+{
+    addr.doParsimUnpacking(buf);
 }
 
 } // namespace inet
