@@ -63,7 +63,7 @@ class INET_API Dcf : public ICoordinationFunction, public IFrameSequenceHandler:
         IRateSelection *rateSelection = nullptr;
 
         // Channel access method
-        Dcaf *dcfChannelAccess = nullptr;
+        Dcaf *channelAccess = nullptr;
 
         // MAC Data Service
         IOriginatorMacDataService *originatorDataService = nullptr;
