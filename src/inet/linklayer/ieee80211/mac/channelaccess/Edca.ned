@@ -18,8 +18,8 @@
 
 package inet.linklayer.ieee80211.mac.channelaccess;
 
-import inet.linklayer.ieee80211.mac.contention.Contention;
 import inet.linklayer.ieee80211.mac.contract.ICollisionController;
+import inet.linklayer.ieee80211.mac.originator.NonQosRecoveryProcedure;
 
 module Edca
 {
@@ -47,6 +47,12 @@ module Edca
         collisionController: <default("EdcaCollisionController")> like ICollisionController {
             parameters:
                 @display("p=100,200");
+        }
+        mgmtAndNonQoSRecoveryProcedure: NonQosRecoveryProcedure {
+            parameters:
+                cwCalculatorModule = "^.edcaf[1]"; // best effort
+                rtsPolicyModule = "^.^.rtsPolicy";
+                @display("p=400,200");
         }
 }
 

@@ -102,6 +102,10 @@ module Hcf like IHcf
             parameters:
                 @display("p=150,400");
         }
+        singleProtectionMechanism: SingleProtectionMechanism {
+            parameters:
+                @display("p=150,500");
+        }
         rateSelection: QosRateSelection {
             parameters:
                 rateControlModule = "^.rateControl";
@@ -111,40 +115,30 @@ module Hcf like IHcf
             parameters:
                 @display("p=350,200");
         }
-        singleProtectionMechanism: SingleProtectionMechanism {
-            parameters:
-                @display("p=350,300");
-        }
-        edcaMgmtAndNonQoSRecoveryProcedure: NonQosRecoveryProcedure {
-            parameters:
-                cwCalculatorModule = "^.edca.edcaf[1]"; // best effort
-                rtsPolicyModule = "^.rtsPolicy";
-                @display("p=550,300");
-        }
         originatorAckPolicy: OriginatorQosAckPolicy {
             parameters:
-                @display("p=750,100");
+                @display("p=550,100");
         }
         recipientAckPolicy: RecipientQosAckPolicy {
             parameters:
-                @display("p=750,200");
+                @display("p=550,200");
         }
         rtsPolicy: QosRtsPolicy {
             parameters:
-                @display("p=750,300");
+                @display("p=550,300");
         }
         ctsPolicy: QosCtsPolicy {
             parameters:
-                @display("p=750,400");
+                @display("p=550,400");
         }
         originatorBlockAckAgreementPolicy: OriginatorBlockAckAgreementPolicy if isBlockAckSupported {
             parameters:
                 originatorAckPolicyModule = "^.originatorAckPolicy";
-                @display("p=750,500");
+                @display("p=550,500");
         }
         recipientBlockAckAgreementPolicy: RecipientBlockAckAgreementPolicy if isBlockAckSupported {
             parameters:
-                @display("p=750,600");
+                @display("p=550,600");
         }
 }
 

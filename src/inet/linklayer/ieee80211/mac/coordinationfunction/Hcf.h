@@ -39,8 +39,6 @@
 #include "inet/linklayer/ieee80211/mac/contract/ITx.h"
 #include "inet/linklayer/ieee80211/mac/framesequence/FrameSequenceContext.h"
 #include "inet/linklayer/ieee80211/mac/framesequence/FrameSequenceHandler.h"
-#include "inet/linklayer/ieee80211/mac/lifetime/EdcaTransmitLifetimeHandler.h"
-#include "inet/linklayer/ieee80211/mac/originator/NonQosRecoveryProcedure.h"
 #include "inet/linklayer/ieee80211/mac/originator/OriginatorQosMacDataService.h"
 #include "inet/linklayer/ieee80211/mac/originator/QosAckHandler.h"
 #include "inet/linklayer/ieee80211/mac/originator/QosRecoveryProcedure.h"
@@ -95,8 +93,6 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
         ICtsPolicy *ctsPolicy = nullptr;
         IOriginatorBlockAckProcedure *originatorBlockAckProcedure = nullptr;
         IRecipientBlockAckProcedure *recipientBlockAckProcedure = nullptr;
-        EdcaTransmitLifetimeHandler *lifetimeHandler = nullptr;
-        NonQosRecoveryProcedure *edcaMgmtAndNonQoSRecoveryProcedure = nullptr;
 
         // Block Ack Agreement Handlers
         IOriginatorBlockAckAgreementHandler *originatorBlockAckAgreementHandler = nullptr;
