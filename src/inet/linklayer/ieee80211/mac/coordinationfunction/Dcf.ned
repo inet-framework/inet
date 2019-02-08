@@ -77,14 +77,6 @@ module Dcf like IDcf
         @statistic[datarateSelected](title="datarate selected"; record=vector; interpolationmode=none);
 
     submodules:
-        pendingQueue: PendingQueue;
-        inProgressFrames: InProgressFrames { // TODO: move to Dcaf
-            parameters:
-                pendingQueueModule = default("^.pendingQueue");
-                originatorMacDataServiceModule = default("^.originatorMacDataService");
-                ackHandlerModule = default("^.ackHandler");
-        }
-        ackHandler: AckHandler;
         channelAccess: Dcaf {
             parameters:
                 @display("p=150,100");
@@ -96,6 +88,17 @@ module Dcf like IDcf
         recipientMacDataService: RecipientMacDataService {
             parameters:
                 @display("p=150,300");
+        }
+        pendingQueue: PendingQueue {
+            parameters:
+                @display("p=150,400");
+        }
+        inProgressFrames: InProgressFrames { // TODO: move to Dcaf
+            parameters:
+                pendingQueueModule = default("^.pendingQueue");
+                originatorMacDataServiceModule = default("^.originatorMacDataService");
+                ackHandlerModule = default("^.ackHandler");
+                @display("p=150,500");
         }
         rateSelection: RateSelection {
             parameters:
@@ -115,6 +118,10 @@ module Dcf like IDcf
         originatorProtectionMechanism: OriginatorProtectionMechanism {
             parameters:
                 @display("p=350,400");
+        }
+        ackHandler: AckHandler {
+            parameters:
+                @display("p=350,500");
         }
         originatorAckPolicy: OriginatorAckPolicy {
             parameters:
