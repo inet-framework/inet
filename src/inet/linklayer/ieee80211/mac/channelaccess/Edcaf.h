@@ -46,12 +46,12 @@ class INET_API Edcaf : public IChannelAccess, public IContention::ICallback, pub
         IChannelAccess::ICallback *callback = nullptr;
         IEdcaCollisionController *collisionController = nullptr;
 
-        StationRetryCounters *stationRetryCounter = nullptr;
+        StationRetryCounters *stationRetryCounters = nullptr;
         QosAckHandler *ackHandler = nullptr;
         QosRecoveryProcedure *recoveryProcedure = nullptr;
 
         // Tx Opportunity
-        TxopProcedure *txop = nullptr;
+        TxopProcedure *txopProcedure = nullptr;
 
         // Queues
         PendingQueue *pendingQueue = nullptr;
@@ -86,11 +86,11 @@ class INET_API Edcaf : public IChannelAccess, public IContention::ICallback, pub
     public:
         virtual ~Edcaf();
 
-        virtual StationRetryCounters *getStationRetryCounter() const { return stationRetryCounter; }
+        virtual StationRetryCounters *getStationRetryCounters() const { return stationRetryCounters; }
         virtual QosAckHandler *getAckHandler() const { return ackHandler; }
         virtual QosRecoveryProcedure *getRecoveryProcedure() const { return recoveryProcedure; }
 
-        virtual TxopProcedure *getTxop() const { return txop; }
+        virtual TxopProcedure *getTxopProcedure() const { return txopProcedure; }
 
         virtual PendingQueue *getPendingQueue() const { return pendingQueue; }
         virtual InProgressFrames *getInProgressFrames() const { return inProgressFrames; }

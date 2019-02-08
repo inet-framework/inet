@@ -32,7 +32,7 @@ inline simtime_t fallback(simtime_t a, simtime_t b) {return a!=-1 ? a : b;}
 
 Edcaf::~Edcaf()
 {
-    delete stationRetryCounter;
+    delete stationRetryCounters;
 }
 
 void Edcaf::initialize(int stage)
@@ -46,8 +46,8 @@ void Edcaf::initialize(int stage)
         recoveryProcedure = check_and_cast<QosRecoveryProcedure *>(getSubmodule("recoveryProcedure"));
         ackHandler = check_and_cast<QosAckHandler *>(getSubmodule("ackHandler"));
         inProgressFrames = check_and_cast<InProgressFrames *>(getSubmodule("inProgressFrames"));
-        txop = check_and_cast<TxopProcedure *>(getSubmodule("txopProcedure"));
-        stationRetryCounter = new StationRetryCounters();
+        txopProcedure = check_and_cast<TxopProcedure *>(getSubmodule("txopProcedure"));
+        stationRetryCounters = new StationRetryCounters();
         WATCH(owning);
         WATCH(slotTime);
         WATCH(sifs);

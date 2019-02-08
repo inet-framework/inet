@@ -201,7 +201,7 @@ void Hcf::channelGranted(IChannelAccess* channelAccess)
     if (edcaf) {
         AccessCategory ac = edcaf->getAccessCategory();
         EV_DETAIL << "Channel access granted to the " << printAccessCategory(ac) << " queue" << std::endl;
-        edcaf->getTxop()->startTxop(ac);
+        edcaf->getTxopProcedure()->startTxop(ac);
         auto internallyCollidedEdcafs = edca->getInternallyCollidedEdcafs();
         if (internallyCollidedEdcafs.size() > 0) {
             EV_INFO << "Internal collision happened with the following queues:" << std::endl;
@@ -217,7 +217,7 @@ void Hcf::channelGranted(IChannelAccess* channelAccess)
 FrameSequenceContext* Hcf::buildContext(AccessCategory ac)
 {
     auto edcaf = edca->getEdcaf(ac);
-    auto qosContext = new QoSContext(originatorAckPolicy, originatorBlockAckProcedure, originatorBlockAckAgreementHandler, edcaf->getTxop());
+    auto qosContext = new QoSContext(originatorAckPolicy, originatorBlockAckProcedure, originatorBlockAckAgreementHandler, edcaf->getTxopProcedure());
     return new FrameSequenceContext(mac->getAddress(), modeSet, edcaf->getInProgressFrames(), rtsProcedure, rtsPolicy, nullptr, qosContext);
 }
 
@@ -243,7 +243,7 @@ void Hcf::handleInternalCollision(std::vector<Edcaf*> internallyCollidedEdcafs)
         }
         else if (auto mgmtHeader = dynamicPtrCast<const Ieee80211MgmtHeader>(internallyCollidedHeader)) {
             ASSERT(ac == AccessCategory::AC_BE);
-            edcaMgmtAndNonQoSRecoveryProcedure->dataOrMgmtFrameTransmissionFailed(internallyCollidedFrame, mgmtHeader, edca->getEdcaf(AccessCategory::AC_BE)->getStationRetryCounter());
+            edcaMgmtAndNonQoSRecoveryProcedure->dataOrMgmtFrameTransmissionFailed(internallyCollidedFrame, mgmtHeader, edca->getEdcaf(AccessCategory::AC_BE)->getStationRetryCounters());
             retryLimitReached = edcaMgmtAndNonQoSRecoveryProcedure->isRetryLimitReached(internallyCollidedFrame, mgmtHeader);
         }
         else // TODO: + NonQoSDataFrame
@@ -284,7 +284,7 @@ void Hcf::frameSequenceFinished()
         bool startContention = hasFrameToTransmit(); // TODO: outstanding frame
         edcaf->releaseChannel(this);
         mac->sendDownPendingRadioConfigMsg(); // TODO: review
-        edcaf->getTxop()->stopTxop();
+        edcaf->getTxopProcedure()->stopTxop();
         if (startContention)
             edcaf->requestChannel(this);
     }
@@ -395,7 +395,7 @@ void Hcf::originatorProcessRtsProtectionFailed(Packet *packet)
             retryLimitReached = edcaf->getRecoveryProcedure()->isRtsFrameRetryLimitReached(packet, dataHeader);
         }
         else if (auto mgmtHeader = dynamicPtrCast<const Ieee80211MgmtHeader>(protectedHeader)) {
-            edcaMgmtAndNonQoSRecoveryProcedure->rtsFrameTransmissionFailed(mgmtHeader, edcaf->getStationRetryCounter());
+            edcaMgmtAndNonQoSRecoveryProcedure->rtsFrameTransmissionFailed(mgmtHeader, edcaf->getStationRetryCounters());
             retryLimitReached = edcaMgmtAndNonQoSRecoveryProcedure->isRtsFrameRetryLimitReached(packet, dataHeader);
         }
         else
@@ -507,7 +507,7 @@ void Hcf::originatorProcessFailedFrame(Packet *failedPacket)
         }
         else if (auto mgmtHeader = dynamicPtrCast<const Ieee80211MgmtHeader>(failedHeader)) { // TODO: + NonQoS frames
             EV_INFO << "Management frame transmission failed\n";
-            edcaMgmtAndNonQoSRecoveryProcedure->dataOrMgmtFrameTransmissionFailed(failedPacket, mgmtHeader, edcaf->getStationRetryCounter());
+            edcaMgmtAndNonQoSRecoveryProcedure->dataOrMgmtFrameTransmissionFailed(failedPacket, mgmtHeader, edcaf->getStationRetryCounters());
             retryLimitReached = edcaMgmtAndNonQoSRecoveryProcedure->isRetryLimitReached(failedPacket, mgmtHeader);
             if (dataAndMgmtRateControl) {
                 int retryCount = edcaMgmtAndNonQoSRecoveryProcedure->getRetryCount(failedPacket, mgmtHeader);
@@ -592,7 +592,7 @@ void Hcf::originatorProcessReceivedControlFrame(Packet *packet, const Ptr<const 
                 int retryCount = edcaMgmtAndNonQoSRecoveryProcedure->getRetryCount(lastTransmittedPacket, dataHeader);
                 dataAndMgmtRateControl->frameTransmitted(lastTransmittedPacket, retryCount, true, false);
             }
-            edcaMgmtAndNonQoSRecoveryProcedure->ackFrameReceived(lastTransmittedPacket, mgmtHeader, edcaf->getStationRetryCounter());
+            edcaMgmtAndNonQoSRecoveryProcedure->ackFrameReceived(lastTransmittedPacket, mgmtHeader, edcaf->getStationRetryCounters());
         }
         else
             throw cRuntimeError("Unknown frame"); // TODO: qos, nonqos frame
@@ -661,7 +661,7 @@ void Hcf::transmitFrame(Packet *packet, simtime_t ifs)
     auto channelOwner = edca->getChannelOwner();
     if (channelOwner) {
         auto header = packet->peekAtFront<Ieee80211MacHeader>();
-        auto txop = channelOwner->getTxop();
+        auto txop = channelOwner->getTxopProcedure();
         if (auto dataFrame = dynamicPtrCast<const Ieee80211DataHeader>(header)) {
             OriginatorBlockAckAgreement *agreement = nullptr;
             if (originatorBlockAckAgreementHandler)
