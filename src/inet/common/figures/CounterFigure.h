@@ -58,6 +58,8 @@ class INET_API CounterFigure : public cGroupFigure, public inet::IIndicatorFigur
 
     virtual void setValue(int series, simtime_t timestamp, double value) override;
 
+    virtual const Point getSize() const override { return backgroundFigure->getBounds().getSize(); }
+
     // getters and setters
     const Color& getBackgroundColor() const;
     void setBackgroundColor(const Color& color);

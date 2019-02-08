@@ -57,6 +57,7 @@ class INET_API LinearGaugeFigure : public cGroupFigure, public inet::IIndicatorF
     LinearGaugeFigure(const char *name = nullptr);
     virtual ~LinearGaugeFigure();
 
+    virtual const Point getSize() const override { return getBounds().getSize(); }
     virtual void setValue(int series, simtime_t timestamp, double value) override;
 
     const Rectangle& getBounds() const;
