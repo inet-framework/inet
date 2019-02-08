@@ -33,7 +33,6 @@ import inet.linklayer.ieee80211.mac.recipient.CtsPolicy;
 import inet.linklayer.ieee80211.mac.recipient.RecipientAckPolicy;
 import inet.linklayer.ieee80211.mac.recipient.RecipientMacDataService;
 
-
 //
 // IEEE 802.11 Distributed Coordination Function
 //
@@ -89,17 +88,6 @@ module Dcf like IDcf
             parameters:
                 @display("p=150,300");
         }
-        pendingQueue: PendingQueue {
-            parameters:
-                @display("p=150,400");
-        }
-        inProgressFrames: InProgressFrames { // TODO: move to Dcaf
-            parameters:
-                pendingQueueModule = default("^.pendingQueue");
-                originatorMacDataServiceModule = default("^.originatorMacDataService");
-                ackHandlerModule = default("^.ackHandler");
-                @display("p=150,500");
-        }
         rateSelection: RateSelection {
             parameters:
                 rateControlModule = "^.rateControl";
@@ -117,11 +105,11 @@ module Dcf like IDcf
         }
         originatorProtectionMechanism: OriginatorProtectionMechanism {
             parameters:
-                @display("p=350,400");
+                @display("p=150,400");
         }
         ackHandler: AckHandler {
             parameters:
-                @display("p=350,500");
+                @display("p=350,400");
         }
         originatorAckPolicy: OriginatorAckPolicy {
             parameters:

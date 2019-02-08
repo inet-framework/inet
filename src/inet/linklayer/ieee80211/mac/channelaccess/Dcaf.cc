@@ -34,6 +34,8 @@ void Dcaf::initialize(int stage)
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
         // TODO: calculateTimingParameters()
+        pendingQueue = check_and_cast<PendingQueue *>(getSubmodule("pendingQueue"));
+        inProgressFrames = check_and_cast<InProgressFrames *>(getSubmodule("inProgressFrames"));
         contention = check_and_cast<IContention *>(getSubmodule("contention"));
         auto rx = check_and_cast<IRx *>(getModuleByPath(par("rxModule")));
         rx->registerContention(contention);

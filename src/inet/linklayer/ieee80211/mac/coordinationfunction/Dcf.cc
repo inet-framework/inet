@@ -43,7 +43,6 @@ void Dcf::initialize(int stage)
         recipientDataService = check_and_cast<IRecipientMacDataService*>(getSubmodule("recipientMacDataService"));
         recoveryProcedure = check_and_cast<NonQosRecoveryProcedure *>(getSubmodule("recoveryProcedure"));
         rateSelection = check_and_cast<IRateSelection*>(getSubmodule("rateSelection"));
-        pendingQueue = check_and_cast<PendingQueue *>(getSubmodule("pendingQueue"));
         rtsProcedure = new RtsProcedure();
         rtsPolicy = check_and_cast<IRtsPolicy *>(getSubmodule("rtsPolicy"));
         recipientAckProcedure = new RecipientAckProcedure();
@@ -54,7 +53,6 @@ void Dcf::initialize(int stage)
         ctsProcedure = new CtsProcedure();
         ctsPolicy = check_and_cast<ICtsPolicy *>(getSubmodule("ctsPolicy"));
         stationRetryCounters = new StationRetryCounters();
-        inProgressFrames = check_and_cast<InProgressFrames *>(getSubmodule("inProgressFrames"));
         originatorProtectionMechanism = check_and_cast<OriginatorProtectionMechanism*>(getSubmodule("originatorProtectionMechanism"));
     }
 }
@@ -96,7 +94,7 @@ void Dcf::processUpperFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtH
 {
     Enter_Method_Silent("processUpperFrame(%s)", packet->getName());
     EV_INFO << "Processing upper frame: " << packet->getName() << endl;
-    if (pendingQueue->insert(packet)) {
+    if (channelAccess->getPendingQueue()->insert(packet)) {
         EV_INFO << "Frame " << packet->getName() << " has been inserted into the PendingQueue." << endl;
         EV_DETAIL << "Requesting channel" << endl;
         channelAccess->requestChannel(this);
@@ -105,7 +103,7 @@ void Dcf::processUpperFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtH
         EV_INFO << "Frame " << packet->getName() << " has been dropped because the PendingQueue is full." << endl;
         PacketDropDetails details;
         details.setReason(QUEUE_OVERFLOW);
-        details.setLimit(pendingQueue->getMaxQueueSize());
+        details.setLimit(channelAccess->getPendingQueue()->getMaxQueueSize());
         emit(packetDroppedSignal, packet, &details);
         delete packet;
     }
@@ -189,7 +187,7 @@ void Dcf::transmitFrame(Packet *packet, simtime_t ifs)
     RateSelection::setFrameMode(packet, header, mode);
     emit(IRateSelection::datarateSelectedSignal, mode->getDataMode()->getNetBitrate().get(), packet);
     EV_DEBUG << "Datarate for " << packet->getName() << " is set to " << mode->getDataMode()->getNetBitrate() << ".\n";
-    auto pendingPacket = inProgressFrames->getPendingFrameFor(packet);
+    auto pendingPacket = channelAccess->getInProgressFrames()->getPendingFrameFor(packet);
     auto duration = originatorProtectionMechanism->computeDurationField(packet, header, pendingPacket, pendingPacket == nullptr ? nullptr : pendingPacket->peekAtFront<Ieee80211DataOrMgmtHeader>());
     const auto& updatedHeader = packet->removeAtFront<Ieee80211MacHeader>();
     updatedHeader->setDuration(duration);
@@ -252,7 +250,7 @@ void Dcf::recipientProcessReceivedControlFrame(Packet *packet, const Ptr<const I
 FrameSequenceContext* Dcf::buildContext()
 {
     auto nonQoSContext = new NonQoSContext(originatorAckPolicy);
-    return new FrameSequenceContext(mac->getAddress(), modeSet, inProgressFrames, rtsProcedure, rtsPolicy, nonQoSContext, nullptr);
+    return new FrameSequenceContext(mac->getAddress(), modeSet, channelAccess->getInProgressFrames(), rtsProcedure, rtsPolicy, nonQoSContext, nullptr);
 }
 
 void Dcf::transmissionComplete(Packet *packet, const Ptr<const Ieee80211MacHeader>& header)
@@ -269,7 +267,7 @@ void Dcf::transmissionComplete(Packet *packet, const Ptr<const Ieee80211MacHeade
 
 bool Dcf::hasFrameToTransmit()
 {
-    return !pendingQueue->isEmpty() || inProgressFrames->hasInProgressFrames();
+    return !channelAccess->getPendingQueue()->isEmpty() || channelAccess->getInProgressFrames()->hasInProgressFrames();
 }
 
 void Dcf::originatorProcessRtsProtectionFailed(Packet *packet)
@@ -281,7 +279,7 @@ void Dcf::originatorProcessRtsProtectionFailed(Packet *packet)
     EV_INFO << "For the current frame exchange, we have CW = " << channelAccess->getCw() << " SRC = " << recoveryProcedure->getShortRetryCount(packet, protectedHeader) << " LRC = " << recoveryProcedure->getLongRetryCount(packet, protectedHeader) << " SSRC = " << stationRetryCounters->getStationShortRetryCount() << " and SLRC = " << stationRetryCounters->getStationLongRetryCount() << std::endl;
     if (recoveryProcedure->isRtsFrameRetryLimitReached(packet, protectedHeader)) {
         recoveryProcedure->retryLimitReached(packet, protectedHeader);
-        inProgressFrames->dropFrame(packet);
+        channelAccess->getInProgressFrames()->dropFrame(packet);
         EV_INFO << "Dropping RTS/CTS protected frame " << packet->getName() << ", because retry limit is reached.\n";
         PacketDropDetails details;
         details.setReason(RETRY_LIMIT_REACHED);
@@ -304,11 +302,11 @@ void Dcf::originatorProcessTransmittedFrame(Packet *packet)
         }
         else if (dataOrMgmtHeader->getReceiverAddress().isMulticast()) {
             recoveryProcedure->multicastFrameTransmitted(stationRetryCounters);
-            inProgressFrames->dropFrame(packet);
+            channelAccess->getInProgressFrames()->dropFrame(packet);
         }
     }
     else if (auto rtsFrame = dynamicPtrCast<const Ieee80211RtsFrame>(transmittedHeader)) {
-        auto protectedFrame = inProgressFrames->getFrameToTransmit(); // KLUDGE:
+        auto protectedFrame = channelAccess->getInProgressFrames()->getFrameToTransmit(); // KLUDGE:
         auto protectedHeader = protectedFrame->peekAtFront<Ieee80211DataOrMgmtHeader>();
         EV_INFO << "For the current frame exchange, we have CW = " << channelAccess->getCw() << " SRC = " << recoveryProcedure->getShortRetryCount(protectedFrame, protectedHeader) << " LRC = " << recoveryProcedure->getLongRetryCount(protectedFrame, protectedHeader) << " SSRC = " << stationRetryCounters->getStationShortRetryCount() << " and SLRC = " << stationRetryCounters->getStationLongRetryCount() << std::endl;
         rtsProcedure->processTransmittedRts(rtsFrame);
@@ -330,7 +328,7 @@ void Dcf::originatorProcessReceivedFrame(Packet *receivedPacket, Packet *lastTra
         }
         recoveryProcedure->ackFrameReceived(lastTransmittedPacket, lastTransmittedDataOrMgmtHeader, stationRetryCounters);
         ackHandler->processReceivedAck(dynamicPtrCast<const Ieee80211AckFrame>(receivedHeader), lastTransmittedDataOrMgmtHeader);
-        inProgressFrames->dropFrame(lastTransmittedPacket);
+        channelAccess->getInProgressFrames()->dropFrame(lastTransmittedPacket);
     }
     else if (receivedHeader->getType() == ST_RTS)
         ; // void
@@ -356,7 +354,7 @@ void Dcf::originatorProcessFailedFrame(Packet *failedPacket)
     ackHandler->processFailedFrame(failedHeader);
     if (retryLimitReached) {
         recoveryProcedure->retryLimitReached(failedPacket, failedHeader);
-        inProgressFrames->dropFrame(failedPacket);
+        channelAccess->getInProgressFrames()->dropFrame(failedPacket);
         ackHandler->dropFrame(failedHeader);
         EV_INFO << "Dropping frame " << failedPacket->getName() << ", because retry limit is reached.\n";
         PacketDropDetails details;
