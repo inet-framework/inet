@@ -29,6 +29,10 @@ namespace ieee80211 {
 
 class INET_API InProgressFrames : public cSimpleModule
 {
+    public:
+        static simsignal_t queueingTimeSignal;
+        static simsignal_t queueLengthSignal;
+
     protected:
         PendingQueue *pendingQueue = nullptr;
         IOriginatorMacDataService *dataService = nullptr;
