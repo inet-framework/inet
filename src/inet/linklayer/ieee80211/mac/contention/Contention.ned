@@ -28,7 +28,11 @@ simple Contention like IContention
         bool initialChannelBusy = default(true); // assume that channel was busy before the simulation started
         bool backoffOptimization = default(true);    // we can pretend the frame has arrived into the queue a little bit earlier, and may be able to start transmitting immediately
         @display("i=block/timer");
+        @signal[contentionPeriodGenerated](type=long);
+        @signal[channelAccessGranted];
         @signal[stateChanged](type=long); // TODO: enum=inet::ieee80211::Contention::State
-        @statistic[state](title="contention state"; source=stateChanged; record=vector; interpolationmode=none);
+        @statistic[contentionPeriodGenerated](title="contention period generated"; record=vector; interpolationmode=none);
+        @statistic[channelAccessGranted](title="channel access granted"; record=count);
+        @statistic[stateChanged](title="contention state changed"; record=count,vector?; interpolationmode=none);
 }
 

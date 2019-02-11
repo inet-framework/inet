@@ -89,7 +89,7 @@ void OnoeRateControl::computeMode()
         if (numOfFrameTransmitted >= 10 && avgRetriesPerFrame > 1)
         {
             currentMode = decreaseRateIfPossible(currentMode);
-            emitDatarateSignal();
+            emitDatarateChangedSignal();
             updateDisplayString();
             EV_DETAIL << "Decreased rate to " << *currentMode << endl;
             credit = 0;
@@ -102,7 +102,7 @@ void OnoeRateControl::computeMode()
         if (credit >= 10)
         {
             currentMode = increaseRateIfPossible(currentMode);
-            emitDatarateSignal();
+            emitDatarateChangedSignal();
             updateDisplayString();
             EV_DETAIL << "Increased rate to " << *currentMode << endl;
             credit = 0;
@@ -114,7 +114,7 @@ void OnoeRateControl::computeMode()
 
 const IIeee80211Mode* OnoeRateControl::getRate()
 {
-    Enter_Method_Silent("getRate()");
+    Enter_Method_Silent("getRate");
     computeModeIfTimerIsExpired();
     EV_INFO << "The current mode is " << currentMode << " the net bitrate is " << currentMode->getDataMode()->getNetBitrate() << std::endl;
     return currentMode;

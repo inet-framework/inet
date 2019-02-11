@@ -59,6 +59,11 @@ class Ieee80211Mac;
  */
 class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler::ICallback, public IChannelAccess::ICallback, public ITx::ICallback, public IProcedureCallback, public IBlockAckAgreementHandlerCallback, public ModeSetListener
 {
+    public:
+        static simsignal_t edcaCollisionDetectedSignal;
+        static simsignal_t blockAckAgreementAddedSignal;
+        static simsignal_t blockAckAgreementDeletedSignal;
+
     protected:
         Ieee80211Mac *mac = nullptr;
         IRateControl *dataAndMgmtRateControl = nullptr;

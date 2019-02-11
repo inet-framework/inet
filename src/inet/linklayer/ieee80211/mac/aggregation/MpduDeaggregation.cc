@@ -24,7 +24,27 @@ Register_Class(MpduDeaggregation);
 
 std::vector<Packet *> *MpduDeaggregation::deaggregateFrame(Packet *aggregatedFrame)
 {
-    throw cRuntimeError("Not yet implemented");
+    EV_DEBUG << "Deaggregating A-MPDU " << *aggregatedFrame << " into multiple packets.\n";
+    std::vector<Packet *> *frames = new std::vector<Packet *>();
+    int paddingLength = 0;
+    cStringTokenizer tokenizer(aggregatedFrame->getName(), "+");
+    while (aggregatedFrame->getDataLength() > b(0))
+    {
+        aggregatedFrame->setFrontOffset(aggregatedFrame->getFrontOffset() + B(paddingLength == 4 ? 0 : paddingLength));
+        const auto& mpduSubframeHeader = aggregatedFrame->popAtFront<Ieee80211MpduSubframeHeader>();
+        const auto& mpdu = aggregatedFrame->peekDataAt(b(0), B(mpduSubframeHeader->getLength()));
+        paddingLength = 4 - B(mpduSubframeHeader->getChunkLength() + mpdu->getChunkLength()).get() % 4;
+        aggregatedFrame->setFrontOffset(aggregatedFrame->getFrontOffset() + mpdu->getChunkLength());
+        auto frame = new Packet();
+        frame->setName(tokenizer.nextToken());
+        frame->insertAtBack(mpdu);
+        EV_TRACE << "Created " << *frame << " from A-MPDU.\n";
+        // TODO: check CRC?
+        frames->push_back(frame);
+    }
+    delete aggregatedFrame;
+    EV_TRACE << "Created " << frames->size() << " packets from A-MPDU.\n";
+    return frames;
 }
 
 } /* namespace ieee80211 */

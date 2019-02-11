@@ -25,6 +25,7 @@ Register_Class(Defragmentation);
 
 Packet *Defragmentation::defragmentFrames(std::vector<Packet *> *fragmentFrames)
 {
+    EV_DEBUG << "Defragmenting " << fragmentFrames->size() << " fragments.\n";
     auto defragmentedFrame = new Packet();
     const auto& defragmentedHeader = staticPtrCast<Ieee80211DataOrMgmtHeader>(fragmentFrames->at(0)->peekAtFront<Ieee80211DataOrMgmtHeader>()->dupShared());
     for (auto fragmentFrame : *fragmentFrames) {
@@ -40,6 +41,7 @@ Packet *Defragmentation::defragmentFrames(std::vector<Packet *> *fragmentFrames)
     defragmentedHeader->setMoreFragments(false);
     defragmentedFrame->insertAtFront(defragmentedHeader);
     defragmentedFrame->insertAtBack(makeShared<Ieee80211MacTrailer>());
+    EV_TRACE << "Created " << *defragmentedFrame << ".\n";
     return defragmentedFrame;
 }
 

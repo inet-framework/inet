@@ -26,13 +26,14 @@ Define_Module(EdcaCollisionController);
 
 void EdcaCollisionController::initialize()
 {
-    for (int ac = 0; ac < 4; ac++)
+    for (int ac = 0; ac < 4; ac++) {
         txStartTimes[ac] = -1;
+        WATCH(txStartTimes[ac]);
+    }
 }
 
 void EdcaCollisionController::expectedChannelAccess(Edcaf *edcaf, simtime_t time)
 {
-    //Enter_Method("recordTxStartTime(%d)", edcaf->getAccessCategory());
     auto ac = edcaf->getAccessCategory();
     EV_INFO << "The expected channel access of the " << printAccessCategory(ac) << " queue is: " << time << std::endl;
     txStartTimes[ac] = time;
@@ -44,8 +45,10 @@ bool EdcaCollisionController::isInternalCollision(Edcaf *edcaf)
     AccessCategory accessCategory = edcaf->getAccessCategory();
     if (txStartTimes[accessCategory] == now) {
         for (int ac = accessCategory + 1; ac < 4; ac++) {
-            if (txStartTimes[ac] == now)
+            if (txStartTimes[ac] == now) {
+                EV_WARN << "Internal collision detected between multiple access categories for the current simulation time.\n";
                 return true;
+            }
         }
     }
     return false;

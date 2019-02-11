@@ -30,6 +30,16 @@ void ArpProtocolPrinter::print(const Ptr<const Chunk>& chunk, const Protocol *pr
 {
     if (auto arpPacket = dynamicPtrCast<const ArpPacket>(chunk)) {
         context.infoColumn << arpPacket->str();
+        switch (arpPacket->getOpcode()) {
+            case ARP_REQUEST:
+            case ARP_RARP_REQUEST:
+                context.typeColumn << "REQUEST";
+                break;
+            case ARP_REPLY:
+            case ARP_RARP_REPLY:
+                context.typeColumn << "REPLY";
+                break;
+        }
     }
     else
         context.infoColumn << "(ARP) " << chunk;

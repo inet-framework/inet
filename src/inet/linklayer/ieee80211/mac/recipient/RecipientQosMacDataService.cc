@@ -15,6 +15,7 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
+#include "inet/common/Simsignals.h"
 #include "inet/linklayer/ieee80211/mac/aggregation/MpduDeaggregation.h"
 #include "inet/linklayer/ieee80211/mac/aggregation/MsduDeaggregation.h"
 #include "inet/linklayer/ieee80211/mac/blockack/RecipientBlockAckAgreementHandler.h"
@@ -42,8 +43,10 @@ Packet *RecipientQosMacDataService::defragment(std::vector<Packet *> completeFra
 {
     for (auto fragment : completeFragments) {
         auto packet = basicReassembly->addFragment(fragment);
-        if (packet != nullptr)
+        if (packet != nullptr) {
+            emit(packetDefragmentedSignal, packet);
             return packet;
+        }
     }
     return nullptr;
 }
@@ -51,8 +54,10 @@ Packet *RecipientQosMacDataService::defragment(std::vector<Packet *> completeFra
 Packet *RecipientQosMacDataService::defragment(Packet *mgmtFragment)
 {
     auto packet = basicReassembly->addFragment(mgmtFragment);
-    if (packet && packet->hasAtFront<Ieee80211DataOrMgmtHeader>())
+    if (packet && packet->hasAtFront<Ieee80211DataOrMgmtHeader>()) {
+        emit(packetDefragmentedSignal, packet);
         return packet;
+    }
     else
         return nullptr;
 }
@@ -61,6 +66,10 @@ std::vector<Packet *> RecipientQosMacDataService::dataFrameReceived(Packet *data
 {
     // TODO: A-MPDU Deaggregation, MPDU Header+CRC Validation, Address1 Filtering, Duplicate Removal, MPDU Decryption
     if (duplicateRemoval && duplicateRemoval->isDuplicate(dataHeader)) {
+        EV_WARN << "Dropping duplicate packet " << *dataPacket << ".\n";
+        PacketDropDetails details;
+        details.setReason(DUPLICATE_DETECTED);
+        emit(packetDroppedSignal, dataPacket, &details);
         delete dataPacket;
         return std::vector<Packet *>();
     }
@@ -96,6 +105,7 @@ std::vector<Packet *> RecipientQosMacDataService::dataFrameReceived(Packet *data
         for (auto defragmentedFrame : defragmentedFrames) {
             auto defragmentedHeader = defragmentedFrame->peekAtFront<Ieee80211DataHeader>();
             if (defragmentedHeader->getAMsduPresent()) {
+                emit(packetDeaggregatedSignal, defragmentedFrame);
                 auto subframes = aMsduDeaggregation->deaggregateFrame(defragmentedFrame);
                 for (auto subframe : *subframes)
                     deaggregatedFrames.push_back(subframe);
@@ -158,6 +168,7 @@ std::vector<Packet *> RecipientQosMacDataService::controlFrameReceived(Packet *c
         if (aMsduDeaggregation) {
             for (auto frame : defragmentedFrames) {
                 if (frame->peekAtFront<Ieee80211DataHeader>()->getAMsduPresent()) {
+                    emit(packetDeaggregatedSignal, frame);
                     auto subframes = aMsduDeaggregation->deaggregateFrame(frame);
                     for (auto subframe : *subframes)
                         deaggregatedFrames.push_back(subframe);

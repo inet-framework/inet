@@ -78,20 +78,19 @@ module Ieee80211Mac extends MacProtocolBase like IIeee80211Mac
 
         @display("i=block/layer");
         @class(Ieee80211Mac);
-        @signal[packetSentToPeer](type=inet::Packet);
-        @signal[packetReceivedFromPeer](type=inet::Packet);
-        @statistic[passedUpPk](title="packets passed to higher layer"; source=packetSentToUpper; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
-        @statistic[sentDownPk](title="packets sent to lower layer"; source=packetSentToLower; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
-        @statistic[rcvdPkFromHl](title="packets received from higher layer"; source=packetReceivedFromUpper; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
-        @statistic[rcvdPkFromLl](title="packets received from lower layer"; source=packetReceivedFromLower; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
-
-        @signal[linkBroken];
-        @statistic[linkBroken](title="link break"; source=linkBroken; record=count; interpolationmode=none);
+        @signal[linkBroken](type=inet::Packet);
+        @signal[modesetChanged](type=inet::physicallayer::Ieee80211ModeSet);
+        @statistic[packetSentToUpper](title="packet sent to higher layer"; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
+        @statistic[packetSentToLower](title="packet sent to lower layer"; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
+        @statistic[packetReceivedFromUpper](title="packet received from higher layer"; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
+        @statistic[packetReceivedFromLower](title="packet received from lower layer"; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
+        @statistic[linkBroken](title="link broken"; record=count; interpolationmode=none);
         @statistic[packetDropIncorrectlyReceived](title="packet drop: incorrectly received"; source=packetDropReasonIsIncorrectlyReceived(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetDropNotAddressedToUs](title="packet drop: not addressed to us"; source=packetDropReasonIsNotAddressedToUs(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetDropQueueOverflow](title="packet drop: queue overflow"; source=packetDropReasonIsQueueOverflow(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetDropRetryLimitReached](title="packet drop: retry limit reached"; source=packetDropReasonIsRetryLimitReached(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
-        @signal[modesetChanged](type=inet::physicallayer::Ieee80211ModeSet);
+        @statistic[packetDropDuplicateDetected](title="packet drop: duplicate detected"; source=packetDropReasonIsDuplicateDetected(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
+        @statistic[packetDropOther](title="packet drop: other"; source=packetDropReasonIsOther(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
     gates:
         input mgmtIn;
         output mgmtOut;

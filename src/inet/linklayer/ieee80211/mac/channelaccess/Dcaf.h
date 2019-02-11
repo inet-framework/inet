@@ -34,7 +34,6 @@ class INET_API Dcaf : public IChannelAccess, public IContention::ICallback, publ
         IChannelAccess::ICallback *callback = nullptr;
 
         bool owning = false;
-        bool contentionInProgress = false;
 
         simtime_t slotTime = -1;
         simtime_t sifs = -1;
@@ -65,8 +64,7 @@ class INET_API Dcaf : public IChannelAccess, public IContention::ICallback, publ
         // IRecoveryProcedure::ICallback
         virtual void incrementCw() override;
         virtual void resetCw() override;
-
-        virtual int getCw() { return cw; }
+        virtual int getCw() override { return cw; }
 
 };
 

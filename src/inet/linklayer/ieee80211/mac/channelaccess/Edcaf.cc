@@ -37,6 +37,15 @@ void Edcaf::initialize(int stage)
         ac = getAccessCategory(par("accessCategory"));
         contention = check_and_cast<IContention *>(getSubmodule("contention"));
         collisionController = check_and_cast<IEdcaCollisionController *>(getModuleByPath(par("collisionControllerModule")));
+        WATCH(owning);
+        WATCH(slotTime);
+        WATCH(sifs);
+        WATCH(ifs);
+        WATCH(eifs);
+        WATCH(ac);
+        WATCH(cw);
+        WATCH(cwMin);
+        WATCH(cwMax);
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
         auto rx = check_and_cast<IRx *>(getModuleByPath(par("rxModule")));
@@ -65,6 +74,7 @@ void Edcaf::calculateTimingParameters()
     simtime_t aifs = sifs + fallback(aifsn, getAifsNumber(ac)) * slotTime;
     ifs = aifs;
     eifs = sifs + aifs + modeSet->getSlowestMandatoryMode()->getDuration(LENGTH_ACK);
+    EV_DEBUG << "Timing parameters are initialized: slotTime = " << slotTime << ", sifs = " << sifs << ", ifs = " << ifs << ", eifs = " << eifs << std::endl;
     ASSERT(ifs > sifs);
     cwMin = par("cwMin");
     cwMax = par("cwMax");
@@ -73,21 +83,26 @@ void Edcaf::calculateTimingParameters()
     if (cwMax == -1)
         cwMax = getCwMax(ac, modeSet->getCwMax(), modeSet->getCwMin());
     cw = cwMin;
+    EV_DEBUG << "Contention window parameters are initialized: cw = " << cw << ", cwMin = " << cwMin << ", cwMax = " << cwMax << std::endl;
 }
 
 
 void Edcaf::incrementCw()
 {
+    Enter_Method_Silent("incrementCw");
     int newCw = 2 * cw + 1;
     if (newCw > cwMax)
         cw = cwMax;
     else
         cw = newCw;
+    EV_DEBUG << "Contention window is incremented: cw = " << cw << std::endl;
 }
 
 void Edcaf::resetCw()
 {
+    Enter_Method_Silent("resetCw");
     cw = cwMin;
+    EV_DEBUG << "Contention window is reset: cw = " << cw << std::endl;
 }
 
 int Edcaf::getAifsNumber(AccessCategory ac)
@@ -117,31 +132,36 @@ AccessCategory Edcaf::getAccessCategory(const char *ac)
 
 void Edcaf::channelAccessGranted()
 {
+    Enter_Method_Silent("channelAccessGranted");
     ASSERT(callback != nullptr);
     if (!collisionController->isInternalCollision(this)) {
         owning = true;
+        emit(channelOwningChangedSignal, owning);
         callback->channelGranted(this);
     }
+    else
+        EV_WARN << "Ignoring channel access granted due to internal collision.\n";
 }
 
 void Edcaf::releaseChannel(IChannelAccess::ICallback* callback)
 {
+    Enter_Method_Silent("releaseChannel");
     ASSERT(owning);
     owning = false;
+    emit(channelOwningChangedSignal, owning);
     this->callback = nullptr;
+    EV_INFO << "Channel released.\n";
 }
 
 void Edcaf::requestChannel(IChannelAccess::ICallback* callback)
 {
+    Enter_Method_Silent("requestChannel");
     this->callback = callback;
     ASSERT(!owning);
     if (contention->isContentionInProgress())
-        EV_DETAIL << "Contention has already been started" << std::endl;
-    else {
-//        EV_DETAIL << "Starting contention with cw = " << cw << ", ifs = " << ifs << ", eifs = "
-//                  << eifs << ", slotTime = " << slotTime << std::endl;
+        EV_DEBUG << "Contention has been already started.\n";
+    else
         contention->startContention(cw, ifs, eifs, slotTime, this);
-    }
 }
 
 void Edcaf::expectedChannelAccess(simtime_t time)
@@ -180,7 +200,7 @@ int Edcaf::getCwMin(AccessCategory ac, int aCwMin)
 
 void Edcaf::receiveSignal(cComponent* source, simsignal_t signalID, cObject* obj, cObject* details)
 {
-    Enter_Method("receiveModeSetChangeNotification");
+    Enter_Method_Silent("receiveSignal");
     if (signalID == modesetChangedSignal) {
         modeSet = check_and_cast<Ieee80211ModeSet*>(obj);
         calculateTimingParameters();

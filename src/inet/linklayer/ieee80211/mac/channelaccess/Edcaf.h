@@ -80,13 +80,12 @@ class INET_API Edcaf : public IChannelAccess, public IContention::ICallback, pub
         // IRecoveryProcedure::ICallback
         virtual void incrementCw() override;
         virtual void resetCw() override;
+        virtual int getCw() override { return cw; }
 
         // Edcaf
         virtual bool isOwning() { return owning; }
         virtual bool isInternalCollision();
         virtual AccessCategory getAccessCategory() { return ac; }
-
-        virtual int getCw() { return cw; }
 };
 
 } /* namespace ieee80211 */

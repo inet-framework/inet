@@ -26,6 +26,7 @@ class INET_API IIndicatorFigure
 {
   public:
     virtual ~IIndicatorFigure() {}
+    virtual const cFigure::Point getSize() const = 0;
     virtual int getNumSeries() const { return 1; }
     virtual void setValue(int series, simtime_t timestamp, double value) = 0;
     virtual void refreshDisplay() {}

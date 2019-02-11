@@ -23,7 +23,7 @@
 namespace inet {
 namespace ieee80211 {
 
-class INET_API RecipientBlockAckAgreement
+class INET_API RecipientBlockAckAgreement : public cObject
 {
     protected:
         BlockAckRecord *blockAckRecord = nullptr;

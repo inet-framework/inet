@@ -23,6 +23,8 @@ namespace ieee80211 {
 
 Define_Module(QosRecoveryProcedure);
 
+inline std::ostream& operator<<(std::ostream& os, const std::pair<Tid, SequenceControlField>& p) { return os << p.first << "#" << p.second; }
+
 //
 // Contention window management
 // ============================
@@ -42,25 +44,32 @@ void QosRecoveryProcedure::initialize(int stage)
         rtsThreshold = rtsPolicy->getRtsThreshold();
         shortRetryLimit = par("shortRetryLimit");
         longRetryLimit = par("longRetryLimit");
+        emit(contentionWindowChangedSignal, cwCalculator->getCw());
+        WATCH(stationLongRetryCounter);
+        WATCH(stationShortRetryCounter);
+        WATCH_MAP(shortRetryCounter);
+        WATCH_MAP(longRetryCounter);
     }
 }
 
 void QosRecoveryProcedure::incrementStationSrc()
 {
     stationShortRetryCounter++;
+    EV_INFO << "Incremented station SRC: stationShortRetryCounter = " << stationShortRetryCounter << ".\n";
     if (stationShortRetryCounter == shortRetryLimit) // 9.3.3 Random backoff time
         resetContentionWindow();
     else
-        cwCalculator->incrementCw();
+        incrementContentionWindow();
 }
 
 void QosRecoveryProcedure::incrementStationLrc()
 {
     stationLongRetryCounter++;
+    EV_INFO << "Incremented station LRC: stationLongRetryCounter = " << stationLongRetryCounter << ".\n";
     if (stationLongRetryCounter == longRetryLimit) // 9.3.3 Random backoff time
         resetContentionWindow();
     else
-        cwCalculator->incrementCw();
+        incrementContentionWindow();
 }
 
 void QosRecoveryProcedure::incrementCounter(const Ptr<const Ieee80211DataHeader>& header, std::map<std::pair<Tid, SequenceControlField>, int>& retryCounter)
@@ -138,6 +147,7 @@ void QosRecoveryProcedure::ackFrameReceived(Packet *packet, const Ptr<const Ieee
 //
 void QosRecoveryProcedure::retryLimitReached(Packet *packet, const Ptr<const Ieee80211DataHeader>& header)
 {
+    EV_WARN << "Retry limit reached for " << *packet << ".\n";
     auto id = std::make_pair(header->getTid(), SequenceControlField(header->getSequenceNumber(), header->getFragmentNumber()));
     if (packet->getByteLength() >= rtsThreshold) {
         auto it = longRetryCounter.find(id);
@@ -149,6 +159,7 @@ void QosRecoveryProcedure::retryLimitReached(Packet *packet, const Ptr<const Iee
         if (it != shortRetryCounter.end())
             shortRetryCounter.erase(it);
     }
+    emit(retryLimitReachedSignal, packet);
 }
 
 //
@@ -203,9 +214,22 @@ int QosRecoveryProcedure::getRetryCount(Packet *packet, const Ptr<const Ieee8021
         return getRc(packet, header, shortRetryCounter);
 }
 
+void QosRecoveryProcedure::incrementContentionWindow()
+{
+    auto oldCw = cwCalculator->getCw();
+    cwCalculator->incrementCw();
+    auto newCw = cwCalculator->getCw();
+    if (oldCw != newCw)
+        emit(contentionWindowChangedSignal, cwCalculator->getCw());
+}
+
 void QosRecoveryProcedure::resetContentionWindow()
 {
+    auto oldCw = cwCalculator->getCw();
     cwCalculator->resetCw();
+    auto newCw = cwCalculator->getCw();
+    if (oldCw != newCw)
+        emit(contentionWindowChangedSignal, newCw);
 }
 
 bool QosRecoveryProcedure::isRtsFrameRetryLimitReached(Packet *packet, const Ptr<const Ieee80211DataHeader>& protectedHeader)

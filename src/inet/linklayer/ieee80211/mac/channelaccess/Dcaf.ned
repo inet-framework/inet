@@ -31,6 +31,8 @@ module Dcaf
 
         @class("Dcaf");
         @display("i=block/star");
+        @signal[channelOwningChanged](type=bool);
+        @statistic[channelOwningChanged](title="channel owning"; record=vector?; interpolationmode=sample-hold);
     submodules:
         contention: <default("Contention")> like IContention {
             parameters:

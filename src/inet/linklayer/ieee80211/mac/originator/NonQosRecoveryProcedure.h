@@ -51,6 +51,7 @@ class INET_API NonQosRecoveryProcedure : public cSimpleModule, public IRecoveryP
         virtual void initialize(int stage) override;
 
         virtual void incrementCounter(const Ptr<const Ieee80211DataOrMgmtHeader>& header, std::map<SequenceControlField, int>& retryCounter);
+        virtual void incrementContentionWindow();
         virtual void resetContentionWindow();
         virtual int getRc(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header, std::map<SequenceControlField, int>& retryCounter);
         virtual bool isMulticastFrame(const Ptr<const Ieee80211MacHeader>& header);

@@ -37,6 +37,15 @@ module Edcaf
 
         @class(Edcaf);
         @display("i=block/queue");
+        @signal[packetSentToPeer](type=inet::Packet);
+        @signal[channelOwningChanged](type=bool);
+        @statistic[packetSentToPeer](title="packet sent"; record=count, vector?; interpolationmode=none);
+        @statistic[packetSentToPeerUnicast](title="packet sent: unicast"; source=ieee80211Unicast(packetSentToPeer); record=count, vector?; interpolationmode=none);
+        @statistic[packetSentToPeerMulticast](title="packet sent: multicast"; source=ieee80211Multicast(packetSentToPeer); record=count, vector?; interpolationmode=none);
+        @statistic[packetSentToPeerBroadcast](title="packet sent: broadcast "; source=ieee80211Broadcast(packetSentToPeer); record=count, vector?; interpolationmode=none);
+        @statistic[packetSentToPeerWithRetry](title="packet sent: with retry"; source=ieee80211Retry(packetSentToPeer); record=count);
+        @statistic[packetSentToPeerWithoutRetry](title="packet sent: without retry"; source=ieee80211NotRetry(packetSentToPeer); record=count);
+        @statistic[channelOwningChanged](title="channel owning"; record=vector?; interpolationmode=sample-hold);
 
     submodules:
         contention: <default("Contention")> like IContention {

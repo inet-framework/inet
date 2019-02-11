@@ -66,6 +66,7 @@ class INET_API GaugeFigure : public cGroupFigure, public inet::IIndicatorFigure
     GaugeFigure(const char *name = nullptr);
     virtual ~GaugeFigure();
 
+    virtual const Point getSize() const override { return getBounds().getSize(); }
     virtual void setValue(int series, simtime_t timestamp, double value) override;
 
     const Rectangle& getBounds() const;

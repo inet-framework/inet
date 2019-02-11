@@ -83,16 +83,18 @@ void Dcf::updateDisplayString()
 
 void Dcf::channelGranted(IChannelAccess *channelAccess)
 {
+    Enter_Method_Silent("channelGranted");
     ASSERT(dcfChannelAccess == channelAccess);
     if (!frameSequenceHandler->isSequenceRunning()) {
         frameSequenceHandler->startFrameSequence(new DcfFs(), buildContext(), this);
+        emit(IFrameSequenceHandler::frameSequenceStartedSignal, frameSequenceHandler->getContext());
         updateDisplayString();
     }
 }
 
 void Dcf::processUpperFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header)
 {
-    Enter_Method("processUpperFrame(%s)", packet->getName());
+    Enter_Method_Silent("processUpperFrame(%s)", packet->getName());
     EV_INFO << "Processing upper frame: " << packet->getName() << endl;
     if (pendingQueue->insert(packet)) {
         EV_INFO << "Frame " << packet->getName() << " has been inserted into the PendingQueue." << endl;
@@ -111,6 +113,7 @@ void Dcf::processUpperFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtH
 
 void Dcf::transmitControlResponseFrame(Packet *responsePacket, const Ptr<const Ieee80211MacHeader>& responseHeader, Packet *receivedPacket, const Ptr<const Ieee80211MacHeader>& receivedHeader)
 {
+    Enter_Method_Silent("transmitControlResponseFrame");
     responsePacket->insertAtBack(makeShared<Ieee80211MacTrailer>());
     const IIeee80211Mode *responseMode = nullptr;
     if (auto rtsFrame = dynamicPtrCast<const Ieee80211RtsFrame>(receivedHeader))
@@ -120,6 +123,8 @@ void Dcf::transmitControlResponseFrame(Packet *responsePacket, const Ptr<const I
     else
         throw cRuntimeError("Unknown received frame type");
     RateSelection::setFrameMode(responsePacket, responseHeader, responseMode);
+    emit(IRateSelection::datarateSelectedSignal, responseMode->getDataMode()->getNetBitrate().get(), responsePacket);
+    EV_DEBUG << "Datarate for " << responsePacket->getName() << " is set to " << responseMode->getDataMode()->getNetBitrate() << ".\n";
     tx->transmitFrame(responsePacket, responseHeader, modeSet->getSifsTime(), this);
     delete responsePacket;
 }
@@ -131,7 +136,7 @@ void Dcf::processMgmtFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>&
 
 void Dcf::recipientProcessTransmittedControlResponseFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header)
 {
-    mac->emit(packetSentToPeerSignal, packet);
+    emit(packetSentToPeerSignal, packet);
     if (auto ctsFrame = dynamicPtrCast<const Ieee80211CtsFrame>(header))
         ctsProcedure->processTransmittedCts(ctsFrame);
     else if (auto ackFrame = dynamicPtrCast<const Ieee80211AckFrame>(header))
@@ -148,7 +153,8 @@ void Dcf::scheduleStartRxTimer(simtime_t timeout)
 
 void Dcf::processLowerFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header)
 {
-    Enter_Method_Silent();
+    Enter_Method_Silent("processLowerFrame(%s)", packet->getName());
+    EV_INFO << "Processing lower frame: " << packet->getName() << endl;
     if (frameSequenceHandler->isSequenceRunning()) {
         // TODO: always call processResponses
         if ((!isForUs(header) && !startRxTimer->isScheduled()) || isForUs(header)) {
@@ -177,8 +183,12 @@ void Dcf::processLowerFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>&
 
 void Dcf::transmitFrame(Packet *packet, simtime_t ifs)
 {
+    Enter_Method_Silent("transmitFrame");
     const auto& header = packet->peekAtFront<Ieee80211MacHeader>();
-    RateSelection::setFrameMode(packet, header, rateSelection->computeMode(packet, header));
+    auto mode = rateSelection->computeMode(packet, header);
+    RateSelection::setFrameMode(packet, header, mode);
+    emit(IRateSelection::datarateSelectedSignal, mode->getDataMode()->getNetBitrate().get(), packet);
+    EV_DEBUG << "Datarate for " << packet->getName() << " is set to " << mode->getDataMode()->getNetBitrate() << ".\n";
     auto pendingPacket = inProgressFrames->getPendingFrameFor(packet);
     auto duration = originatorProtectionMechanism->computeDurationField(packet, header, pendingPacket, pendingPacket == nullptr ? nullptr : pendingPacket->peekAtFront<Ieee80211DataOrMgmtHeader>());
     const auto& updatedHeader = packet->removeAtFront<Ieee80211MacHeader>();
@@ -195,6 +205,8 @@ void Dcf::transmitFrame(Packet *packet, simtime_t ifs)
 
 void Dcf::frameSequenceFinished()
 {
+    Enter_Method_Silent("frameSequenceFinished");
+    emit(IFrameSequenceHandler::frameSequenceFinishedSignal, frameSequenceHandler->getContext());
     dcfChannelAccess->releaseChannel(this);
     if (hasFrameToTransmit())
         dcfChannelAccess->requestChannel(this);
@@ -208,7 +220,8 @@ bool Dcf::isReceptionInProgress()
 
 void Dcf::recipientProcessReceivedFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header)
 {
-    mac->emit(packetReceivedFromPeerSignal, packet);
+    EV_INFO << "Processing received frame " << packet->getName() << " as recipient.\n";
+    emit(packetReceivedFromPeerSignal, packet);
     if (auto dataOrMgmtHeader = dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(header))
         recipientAckProcedure->processReceivedFrame(packet, dataOrMgmtHeader, recipientAckPolicy, this);
     if (auto dataHeader = dynamicPtrCast<const Ieee80211DataHeader>(header))
@@ -217,7 +230,7 @@ void Dcf::recipientProcessReceivedFrame(Packet *packet, const Ptr<const Ieee8021
         sendUp(recipientDataService->managementFrameReceived(packet, mgmtHeader));
     else { // TODO: else if (auto ctrlFrame = dynamic_cast<Ieee80211ControlFrame*>(frame))
         sendUp(recipientDataService->controlFrameReceived(packet, header));
-        recipientProcessControlFrame(packet, header);
+        recipientProcessReceivedControlFrame(packet, header);
         delete packet;
     }
 }
@@ -228,7 +241,7 @@ void Dcf::sendUp(const std::vector<Packet *>& completeFrames)
         mac->sendUpFrame(frame);
 }
 
-void Dcf::recipientProcessControlFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header)
+void Dcf::recipientProcessReceivedControlFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header)
 {
     if (auto rtsFrame = dynamicPtrCast<const Ieee80211RtsFrame>(header))
         ctsProcedure->processReceivedRts(packet, rtsFrame, ctsPolicy, this);
@@ -244,6 +257,7 @@ FrameSequenceContext* Dcf::buildContext()
 
 void Dcf::transmissionComplete(Packet *packet, const Ptr<const Ieee80211MacHeader>& header)
 {
+    Enter_Method_Silent("transmissionComplete");
     if (frameSequenceHandler->isSequenceRunning()) {
         frameSequenceHandler->transmissionComplete();
         updateDisplayString();
@@ -260,6 +274,7 @@ bool Dcf::hasFrameToTransmit()
 
 void Dcf::originatorProcessRtsProtectionFailed(Packet *packet)
 {
+    Enter_Method_Silent("originatorProcessRtsProtectionFailed");
     EV_INFO << "RTS frame transmission failed\n";
     auto protectedHeader = packet->peekAtFront<Ieee80211DataOrMgmtHeader>();
     recoveryProcedure->rtsFrameTransmissionFailed(protectedHeader, stationRetryCounters);
@@ -267,6 +282,7 @@ void Dcf::originatorProcessRtsProtectionFailed(Packet *packet)
     if (recoveryProcedure->isRtsFrameRetryLimitReached(packet, protectedHeader)) {
         recoveryProcedure->retryLimitReached(packet, protectedHeader);
         inProgressFrames->dropFrame(packet);
+        EV_INFO << "Dropping RTS/CTS protected frame " << packet->getName() << ", because retry limit is reached.\n";
         PacketDropDetails details;
         details.setReason(RETRY_LIMIT_REACHED);
         details.setLimit(recoveryProcedure->getShortRetryLimit());
@@ -277,7 +293,9 @@ void Dcf::originatorProcessRtsProtectionFailed(Packet *packet)
 
 void Dcf::originatorProcessTransmittedFrame(Packet *packet)
 {
-    mac->emit(packetSentToPeerSignal, packet);
+    Enter_Method_Silent("originatorProcessTransmittedFrame");
+    EV_INFO << "Processing transmitted frame " << packet->getName() << " as originator in frame sequence.\n";
+    emit(packetSentToPeerSignal, packet);
     auto transmittedHeader = packet->peekAtFront<Ieee80211MacHeader>();
     if (auto dataOrMgmtHeader = dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(transmittedHeader)) {
         EV_INFO << "For the current frame exchange, we have CW = " << dcfChannelAccess->getCw() << " SRC = " << recoveryProcedure->getShortRetryCount(packet, dataOrMgmtHeader) << " LRC = " << recoveryProcedure->getLongRetryCount(packet, dataOrMgmtHeader) << " SSRC = " << stationRetryCounters->getStationShortRetryCount() << " and SLRC = " << stationRetryCounters->getStationLongRetryCount() << std::endl;
@@ -299,7 +317,9 @@ void Dcf::originatorProcessTransmittedFrame(Packet *packet)
 
 void Dcf::originatorProcessReceivedFrame(Packet *receivedPacket, Packet *lastTransmittedPacket)
 {
-    mac->emit(packetReceivedFromPeerSignal, receivedPacket);
+    Enter_Method_Silent("originatorProcessReceivedFrame");
+    EV_INFO << "Processing received frame " << receivedPacket->getName() << " as originator in frame sequence.\n";
+    emit(packetReceivedFromPeerSignal, receivedPacket);
     auto receivedHeader = receivedPacket->peekAtFront<Ieee80211MacHeader>();
     auto lastTransmittedHeader = lastTransmittedPacket->peekAtFront<Ieee80211MacHeader>();
     if (receivedHeader->getType() == ST_ACK) {
@@ -322,6 +342,7 @@ void Dcf::originatorProcessReceivedFrame(Packet *receivedPacket, Packet *lastTra
 
 void Dcf::originatorProcessFailedFrame(Packet *failedPacket)
 {
+    Enter_Method_Silent("originatorProcessFailedFrame");
     EV_INFO << "Data/Mgmt frame transmission failed\n";
     const auto& failedHeader = failedPacket->peekAtFront<Ieee80211DataOrMgmtHeader>();
     ASSERT(failedHeader->getType() != ST_DATA_WITH_QOS);
@@ -337,6 +358,7 @@ void Dcf::originatorProcessFailedFrame(Packet *failedPacket)
         recoveryProcedure->retryLimitReached(failedPacket, failedHeader);
         inProgressFrames->dropFrame(failedPacket);
         ackHandler->dropFrame(failedHeader);
+        EV_INFO << "Dropping frame " << failedPacket->getName() << ", because retry limit is reached.\n";
         PacketDropDetails details;
         details.setReason(RETRY_LIMIT_REACHED);
         details.setLimit(-1); // TODO:
@@ -344,6 +366,7 @@ void Dcf::originatorProcessFailedFrame(Packet *failedPacket)
         emit(linkBrokenSignal, failedPacket);
     }
     else {
+        EV_INFO << "Retrying frame " << failedPacket->getName() << ".\n";
         auto h = failedPacket->removeAtFront<Ieee80211DataOrMgmtHeader>();
         h->setRetry(true);
         failedPacket->insertAtFront(h);
@@ -368,12 +391,13 @@ bool Dcf::isSentByUs(const Ptr<const Ieee80211MacHeader>& header) const
 
 void Dcf::corruptedFrameReceived()
 {
-    if (frameSequenceHandler->isSequenceRunning()) {
-        if (!startRxTimer->isScheduled()) {
-            frameSequenceHandler->handleStartRxTimeout();
-            updateDisplayString();
-        }
+    Enter_Method_Silent("corruptedFrameReceived");
+    if (frameSequenceHandler->isSequenceRunning() && !startRxTimer->isScheduled()) {
+        frameSequenceHandler->handleStartRxTimeout();
+        updateDisplayString();
     }
+    else
+        EV_DEBUG << "Ignoring received corrupt frame.\n";
 }
 
 Dcf::~Dcf()

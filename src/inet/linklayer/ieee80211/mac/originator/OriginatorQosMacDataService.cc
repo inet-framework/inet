@@ -48,6 +48,7 @@ Packet *OriginatorQosMacDataService::aMsduAggregateIfNeeded(PendingQueue *pendin
         for (auto f : *subframes)
             pendingQueue->remove(f);
         auto aggregatedFrame = aMsduAggregation->aggregateFrames(subframes);
+        emit(packetAggregatedSignal, aggregatedFrame);
         delete subframes;
         return aggregatedFrame;
     }
@@ -61,6 +62,7 @@ Packet *OriginatorQosMacDataService::aMpduAggregateIfNeeded(std::vector<Packet *
         for (auto f : *subframes)
             fragments->erase(std::remove(fragments->begin(), fragments->end(), f), fragments->end());
         auto aggregatedFrame = aMpduAggregation->aggregateFrames(subframes);
+        emit(packetAggregatedSignal, aggregatedFrame);
         delete subframes;
         return aggregatedFrame;
     }
@@ -76,6 +78,7 @@ std::vector<Packet *> *OriginatorQosMacDataService::fragmentIfNeeded(Packet *fra
 {
     auto fragmentSizes = fragmentationPolicy->computeFragmentSizes(frame);
     if (fragmentSizes.size() != 0) {
+        emit(packetFragmentedSignal, frame);
         auto fragmentFrames = fragmentation->fragmentFrame(frame, fragmentSizes);
         return fragmentFrames;
     }

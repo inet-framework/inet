@@ -523,17 +523,21 @@ cModule *L3AddressResolver::findHostWithAddress(const L3Address& add)
                 InterfaceEntry *entry = itable->getInterface(i);
                 switch (add.getType()) {
 #ifdef WITH_IPv6
-                    case L3Address::IPv6:
-                        if (entry->getProtocolData<Ipv6InterfaceData>()->hasAddress(add.toIpv6()))
+                    case L3Address::IPv6: {
+                        auto protocolData = entry->findProtocolData<Ipv6InterfaceData>();
+                        if (protocolData != nullptr && protocolData->hasAddress(add.toIpv6()))
                             return mod;
                         break;
+                    }
 
 #endif // ifdef WITH_IPv6
 #ifdef WITH_IPv4
-                    case L3Address::IPv4:
-                        if (entry->getProtocolData<Ipv4InterfaceData>()->getIPAddress() == add.toIpv4())
+                    case L3Address::IPv4: {
+                        auto protocolData = entry->findProtocolData<Ipv4InterfaceData>();
+                        if (protocolData != nullptr && protocolData->getIPAddress() == add.toIpv4())
                             return mod;
                         break;
+                    }
 
 #endif // ifdef WITH_IPv4
                     case L3Address::MAC:

@@ -22,5 +22,9 @@ simple TxopProcedure
     parameters:
         double txopLimit @unit(s) = default(-1s);
         @display("i=block/timer");
+        @signal[txopStarted](inet::ieee80211::TxopProcedure);
+        @signal[txopStopped](inet::ieee80211::TxopProcedure);
+        @statistic[txopStopped](title="txop stopped"; record=count);
+        @statistic[txopDuration](title="txop duration"; source=txopDuration(txopStopped); record=histogram,vector?; interpolationmode=none);
 }
 

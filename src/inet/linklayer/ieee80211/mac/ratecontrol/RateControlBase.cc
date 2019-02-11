@@ -23,7 +23,7 @@ namespace ieee80211 {
 
 using namespace inet::physicallayer;
 
-simsignal_t RateControlBase::datarateSignal = cComponent::registerSignal("datarate");
+simsignal_t RateControlBase::datarateChangedSignal = cComponent::registerSignal("datarateChanged");
 
 void RateControlBase::initialize(int stage)
 {
@@ -42,20 +42,20 @@ const IIeee80211Mode* RateControlBase::decreaseRateIfPossible(const IIeee80211Mo
     return newMode == nullptr ? currentMode : newMode;
 }
 
-void RateControlBase::emitDatarateSignal()
+void RateControlBase::emitDatarateChangedSignal()
 {
     bps rate = currentMode->getDataMode()->getNetBitrate();
-    emit(datarateSignal, rate.get());
+    emit(datarateChangedSignal, rate.get());
 }
 
 void RateControlBase::receiveSignal(cComponent* source, simsignal_t signalID, cObject* obj, cObject* details)
 {
-    Enter_Method("receiveModeSetChangeNotification");
+    Enter_Method_Silent("receiveSignal");
     if (signalID == modesetChangedSignal) {
         modeSet = check_and_cast<Ieee80211ModeSet*>(obj);
         double initRate = par("initialRate");
         currentMode = initRate == -1 ? modeSet->getFastestMandatoryMode() : modeSet->getMode(bps(initRate));
-        emitDatarateSignal();
+        emitDatarateChangedSignal();
     }
 }
 

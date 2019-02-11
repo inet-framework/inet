@@ -27,6 +27,9 @@ namespace ieee80211 {
 
 using namespace inet::physicallayer;
 
+simsignal_t TxopProcedure::txopStartedSignal = cComponent::registerSignal("txopStarted");
+simsignal_t TxopProcedure::txopStoppedSignal = cComponent::registerSignal("txopStopped");
+
 Define_Module(TxopProcedure);
 
 void TxopProcedure::initialize(int stage)
@@ -34,6 +37,8 @@ void TxopProcedure::initialize(int stage)
     ModeSetListener::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         limit = par("txopLimit");
+        WATCH(start);
+        WATCH(protectionMechanism);
     }
 }
 
@@ -73,6 +78,7 @@ simtime_t TxopProcedure::getLimit() const
 
 void TxopProcedure::startTxop(AccessCategory ac)
 {
+    Enter_Method_Silent("startTxop");
     if (start != -1)
         throw cRuntimeError("Txop is already running");
     if (limit == -1) {
@@ -83,13 +89,18 @@ void TxopProcedure::startTxop(AccessCategory ac)
     // All subsequent frames transmitted by the STA in the same TXOP use the same class of duration settings.
     protectionMechanism = selectProtectionMechanism(ac);
     start = simTime();
+    emit(txopStartedSignal, this);
+    EV_INFO << "Txop started: limit = " << limit << ".\n";
 }
 
 
 void TxopProcedure::stopTxop()
 {
+    Enter_Method_Silent("stopTxop");
+    emit(txopStoppedSignal, this);
     start = -1;
     protectionMechanism = ProtectionMechanism::UNDEFINED_PROTECTION;
+    EV_INFO << "Txop stopped.\n";
 }
 
 simtime_t TxopProcedure::getRemaining() const
@@ -98,6 +109,13 @@ simtime_t TxopProcedure::getRemaining() const
         throw cRuntimeError("Txop has not started yet");
     auto now = simTime();
     return now > start + limit ? 0 : now - start;
+}
+
+simtime_t TxopProcedure::getDuration() const
+{
+    if (start == -1)
+        throw cRuntimeError("Txop has not started yet");
+    return simTime() - start;
 }
 
 // FIXME: implement!
@@ -116,6 +134,13 @@ bool TxopProcedure::isTxopInitiator(const Ptr<const Ieee80211MacHeader>& header)
 bool TxopProcedure::isTxopTerminator(const Ptr<const Ieee80211MacHeader>& header) const
 {
     return false;
+}
+
+Register_ResultFilter("txopDuration", TxopDurationFilter);
+
+void TxopDurationFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
+{
+    fire(this, t, check_and_cast<TxopProcedure *>(object)->getDuration(), details);
 }
 
 } // namespace ieee80211

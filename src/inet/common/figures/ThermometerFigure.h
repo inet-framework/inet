@@ -59,6 +59,7 @@ class INET_API ThermometerFigure : public cGroupFigure, public inet::IIndicatorF
     ThermometerFigure(const char *name = nullptr);
     virtual ~ThermometerFigure();
 
+    virtual const Point getSize() const override { return getBounds().getSize(); }
     virtual void setValue(int series, simtime_t timestamp, double value) override;
 
     const Rectangle& getBounds() const;

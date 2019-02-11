@@ -58,6 +58,7 @@ void MsduAggregation::setSubframeAddress(const Ptr<Ieee80211MsduSubframeHeader>&
 
 Packet *MsduAggregation::aggregateFrames(std::vector<Packet *> *frames)
 {
+    EV_DEBUG << "Aggregating " << frames->size() << " packets into A-MSDU.\n";
     auto firstFrame = frames->at(0);
     auto firstHeader = firstFrame->peekAtFront<Ieee80211DataHeader>();
     auto tid = firstHeader->getTid();
@@ -102,6 +103,7 @@ Packet *MsduAggregation::aggregateFrames(std::vector<Packet *> *frames)
     aggregatedFrame->insertAtFront(amsduHeader);
     aggregatedFrame->insertAtBack(makeShared<Ieee80211MacTrailer>());
     aggregatedFrame->setName(aggregatedName.c_str());
+    EV_TRACE << "Created A-MSDU " << *aggregatedFrame << ".\n";
     return aggregatedFrame;
 }
 

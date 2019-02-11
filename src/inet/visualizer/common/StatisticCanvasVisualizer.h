@@ -18,7 +18,6 @@
 #ifndef __INET_STATISTICCANVASVISUALIZER_H
 #define __INET_STATISTICCANVASVISUALIZER_H
 
-#include "inet/common/figures/BoxedLabelFigure.h"
 #include "inet/visualizer/base/StatisticVisualizerBase.h"
 #include "inet/visualizer/scene/NetworkNodeCanvasVisualization.h"
 #include "inet/visualizer/scene/NetworkNodeCanvasVisualizer.h"
@@ -33,10 +32,10 @@ class INET_API StatisticCanvasVisualizer : public StatisticVisualizerBase
     class StatisticCanvasVisualization : public StatisticVisualization {
       public:
         NetworkNodeCanvasVisualization *networkNodeVisualization = nullptr;
-        BoxedLabelFigure *figure = nullptr;
+        cFigure *figure = nullptr;
 
       public:
-        StatisticCanvasVisualization(NetworkNodeCanvasVisualization *networkNodeVisualization, BoxedLabelFigure *figure, int moduleId, simsignal_t signal, const char *unit);
+        StatisticCanvasVisualization(NetworkNodeCanvasVisualization *networkNodeVisualization, cFigure *figure, int moduleId, simsignal_t signal, const char *unit);
     };
 
   protected:

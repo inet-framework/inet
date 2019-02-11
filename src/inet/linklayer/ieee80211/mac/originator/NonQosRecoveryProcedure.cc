@@ -42,25 +42,30 @@ void NonQosRecoveryProcedure::initialize(int stage)
         rtsThreshold = rtsPolicy->getRtsThreshold();
         shortRetryLimit = par("shortRetryLimit");
         longRetryLimit = par("longRetryLimit");
+        emit(contentionWindowChangedSignal, cwCalculator->getCw());
+        WATCH_MAP(shortRetryCounter);
+        WATCH_MAP(longRetryCounter);
     }
 }
 
 void NonQosRecoveryProcedure::incrementStationSrc(StationRetryCounters *stationCounters)
 {
     stationCounters->incrementStationShortRetryCount();
+    EV_INFO << "Incremented station SRC: stationShortRetryCounter = " << stationCounters->getStationShortRetryCount() << ".\n";
     if (stationCounters->getStationShortRetryCount() == shortRetryLimit) // 9.3.3 Random backoff time
         resetContentionWindow();
     else
-        cwCalculator->incrementCw();
+        incrementContentionWindow();
 }
 
 void NonQosRecoveryProcedure::incrementStationLrc(StationRetryCounters *stationCounters)
 {
     stationCounters->incrementStationLongRetryCount();
+    EV_INFO << "Incremented station LRC: stationLongRetryCounter = " << stationCounters->getStationLongRetryCount() << ".\n";
     if (stationCounters->getStationLongRetryCount() == longRetryLimit) // 9.3.3 Random backoff time
         resetContentionWindow();
     else
-        cwCalculator->incrementCw();
+        incrementContentionWindow();
 }
 
 void NonQosRecoveryProcedure::incrementCounter(const Ptr<const Ieee80211DataOrMgmtHeader>& header, std::map<SequenceControlField, int>& retryCounter)
@@ -134,6 +139,7 @@ void NonQosRecoveryProcedure::ackFrameReceived(Packet *packet, const Ptr<const I
 //
 void NonQosRecoveryProcedure::retryLimitReached(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header)
 {
+    EV_WARN << "Retry limit reached for " << *packet << ".\n";
     auto id = SequenceControlField(header->getSequenceNumber(), header->getFragmentNumber());
     if (packet->getByteLength() >= rtsThreshold) {
         auto it = longRetryCounter.find(id);
@@ -145,6 +151,7 @@ void NonQosRecoveryProcedure::retryLimitReached(Packet *packet, const Ptr<const 
         if (it != shortRetryCounter.end())
             shortRetryCounter.erase(it);
     }
+    emit(retryLimitReachedSignal, packet);
 }
 
 //
@@ -211,9 +218,22 @@ int NonQosRecoveryProcedure::getLongRetryCount(Packet *packet, const Ptr<const I
     return getRc(packet, dataOrMgmtHeader, longRetryCounter);
 }
 
+void NonQosRecoveryProcedure::incrementContentionWindow()
+{
+    auto oldCw = cwCalculator->getCw();
+    cwCalculator->incrementCw();
+    auto newCw = cwCalculator->getCw();
+    if (oldCw != newCw)
+        emit(contentionWindowChangedSignal, cwCalculator->getCw());
+}
+
 void NonQosRecoveryProcedure::resetContentionWindow()
 {
+    auto oldCw = cwCalculator->getCw();
     cwCalculator->resetCw();
+    auto newCw = cwCalculator->getCw();
+    if (oldCw != newCw)
+        emit(contentionWindowChangedSignal, newCw);
 }
 
 bool NonQosRecoveryProcedure::isRtsFrameRetryLimitReached(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& protectedHeader)

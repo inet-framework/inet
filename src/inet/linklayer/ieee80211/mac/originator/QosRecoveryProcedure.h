@@ -60,6 +60,7 @@ class INET_API QosRecoveryProcedure : public cSimpleModule, public IRecoveryProc
         void incrementStationLrc();
         void resetStationSrc() { stationShortRetryCounter = 0; }
         void resetStationLrc() { stationLongRetryCounter = 0; }
+        void incrementContentionWindow();
         void resetContentionWindow();
         int doubleCw(int cw);
         int getRc(Packet *packet, const Ptr<const Ieee80211DataHeader>& header, std::map<std::pair<Tid, SequenceControlField>, int>& retryCounter);

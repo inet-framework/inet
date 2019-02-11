@@ -64,7 +64,7 @@ void AarfRateControl::frameTransmitted(Packet *frame, int retryCount, bool isSuc
     {
         numberOfConsSuccTransmissions = 0;
         currentMode = decreaseRateIfPossible(currentMode);
-        emitDatarateSignal();
+        emitDatarateChangedSignal();
         updateDisplayString();
         EV_DETAIL << "Decreased rate to " << *currentMode << endl;
         multiplyIncreaseThreshold(factor);
@@ -74,7 +74,7 @@ void AarfRateControl::frameTransmitted(Packet *frame, int retryCount, bool isSuc
     {
         numberOfConsSuccTransmissions = 0;
         currentMode = decreaseRateIfPossible(currentMode);
-        emitDatarateSignal();
+        emitDatarateChangedSignal();
         updateDisplayString();
         EV_DETAIL << "Decreased rate to " << *currentMode << endl;
         resetIncreaseThreshdold();
@@ -87,7 +87,7 @@ void AarfRateControl::frameTransmitted(Packet *frame, int retryCount, bool isSuc
     {
         numberOfConsSuccTransmissions = 0;
         currentMode = increaseRateIfPossible(currentMode);
-        emitDatarateSignal();
+        emitDatarateChangedSignal();
         updateDisplayString();
         EV_DETAIL << "Increased rate to " << *currentMode << endl;
         resetTimer();
@@ -119,7 +119,7 @@ void AarfRateControl::increaseRateIfTimerIsExpired()
     if (simTime() - timer >= interval)
     {
         currentMode = increaseRateIfPossible(currentMode);
-        emitDatarateSignal();
+        emitDatarateChangedSignal();
         updateDisplayString();
         EV_DETAIL << "Increased rate to " << *currentMode << endl;
         resetTimer();
@@ -132,7 +132,7 @@ void AarfRateControl::frameReceived(Packet *frame)
 
 const IIeee80211Mode* AarfRateControl::getRate()
 {
-    Enter_Method_Silent("getRate()");
+    Enter_Method_Silent("getRate");
     increaseRateIfTimerIsExpired();
     EV_INFO << "The current mode is " << currentMode << " the net bitrate is " << currentMode->getDataMode()->getNetBitrate() << std::endl;
     return currentMode;

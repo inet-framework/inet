@@ -38,6 +38,14 @@ void Dcaf::initialize(int stage)
         auto rx = check_and_cast<IRx *>(getModuleByPath(par("rxModule")));
         rx->registerContention(contention);
         calculateTimingParameters();
+        WATCH(owning);
+        WATCH(slotTime);
+        WATCH(sifs);
+        WATCH(ifs);
+        WATCH(eifs);
+        WATCH(cw);
+        WATCH(cwMin);
+        WATCH(cwMax);
     }
 }
 
@@ -66,6 +74,7 @@ void Dcaf::calculateTimingParameters()
     // lowest PHY mandatory rate by Equation (9-4).
     // EIFS = aSIFSTime + DIFS + ACKTxTime
     eifs = sifs + ifs + modeSet->getSlowestMandatoryMode()->getDuration(LENGTH_ACK);
+    EV_DEBUG << "Timing parameters are initialized: slotTime = " << slotTime << ", sifs = " << sifs << ", ifs = " << ifs << ", eifs = " << eifs << std::endl;
     ASSERT(ifs > sifs);
     cwMin = par("cwMin");
     cwMax = par("cwMax");
@@ -74,47 +83,55 @@ void Dcaf::calculateTimingParameters()
     if (cwMax == -1)
         cwMax = modeSet->getCwMax();
     cw = cwMin;
+    EV_DEBUG << "Contention window parameters are initialized: cw = " << cw << ", cwMin = " << cwMin << ", cwMax = " << cwMax << std::endl;
 }
 
 void Dcaf::incrementCw()
 {
+    Enter_Method_Silent("incrementCw");
     int newCw = 2 * cw + 1;
     if (newCw > cwMax)
         cw = cwMax;
     else
         cw = newCw;
+    EV_DEBUG << "Contention window is incremented: cw = " << cw << std::endl;
 }
 
 void Dcaf::resetCw()
 {
+    Enter_Method_Silent("resetCw");
     cw = cwMin;
+    EV_DEBUG << "Contention window is reset: cw = " << cw << std::endl;
 }
 
 void Dcaf::channelAccessGranted()
 {
+    Enter_Method_Silent("channelAccessGranted");
     ASSERT(callback != nullptr);
     owning = true;
-    contentionInProgress = false;
+    emit(channelOwningChangedSignal, owning);
     callback->channelGranted(this);
 }
 
 void Dcaf::releaseChannel(IChannelAccess::ICallback* callback)
 {
+    Enter_Method_Silent("releaseChannel");
     owning = false;
-    contentionInProgress = false;
+    emit(channelOwningChangedSignal, owning);
     this->callback = nullptr;
+    EV_INFO << "Channel released.\n";
 }
 
 void Dcaf::requestChannel(IChannelAccess::ICallback* callback)
 {
+    Enter_Method_Silent("requestChannel");
     this->callback = callback;
     if (owning)
         callback->channelGranted(this);
-    else if (!contentionInProgress) {
-        contentionInProgress = true;
+    else if (!contention->isContentionInProgress())
         contention->startContention(cw, ifs, eifs, slotTime, this);
-    }
-    else ;
+    else
+        EV_DEBUG << "Contention has been already started.\n";
 }
 
 void Dcaf::expectedChannelAccess(simtime_t time)
@@ -124,7 +141,7 @@ void Dcaf::expectedChannelAccess(simtime_t time)
 
 void Dcaf::receiveSignal(cComponent* source, simsignal_t signalID, cObject* obj, cObject* details)
 {
-    Enter_Method("receiveModeSetChangeNotification");
+    Enter_Method_Silent("receiveSignal");
     if (signalID == modesetChangedSignal) {
         modeSet = check_and_cast<Ieee80211ModeSet*>(obj);
         calculateTimingParameters();

@@ -300,7 +300,8 @@ Register_PacketDropReason_ResultFilter("packetDropReasonIsLifetimeExpired", Life
 Register_PacketDropReason_ResultFilter("packetDropReasonIsCongestion", CongestionPacketDropReasonFilter, CONGESTION);
 Register_PacketDropReason_ResultFilter("packetDropReasonIsNoProtocolFound", NoProtocolFoundPacketDropReasonFilter, NO_PROTOCOL_FOUND);
 Register_PacketDropReason_ResultFilter("packetDropReasonIsNoPortFound", NoPortFoundPacketDropReasonFilter, NO_PORT_FOUND);
-
+Register_PacketDropReason_ResultFilter("packetDropReasonIsDuplicateDetected", DuplicateDetectedPacketDropReasonFilter, DUPLICATE_DETECTED);
+Register_PacketDropReason_ResultFilter("packetDropReasonIsOther", OtherPacketDropReasonFilter, OTHER_PACKET_DROP);
 
 Register_ResultFilter("minimumSnir", MinimumSnirFromSnirIndFilter);
 

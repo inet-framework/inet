@@ -46,6 +46,7 @@ void Rx::initialize(int stage)
         WATCH(address);
         WATCH(receptionState);
         WATCH(transmissionState);
+        WATCH(receivedPart);
         WATCH(mediumFree);
     }
     // TODO: INITSTAGE
@@ -68,7 +69,7 @@ void Rx::handleMessage(cMessage *msg)
 
 bool Rx::lowerFrameReceived(Packet *packet)
 {
-    Enter_Method("lowerFrameReceived(\"%s\")", packet->getName());
+    Enter_Method_Silent("lowerFrameReceived(\"%s\")", packet->getName());
     take(packet);
 
     bool isFrameOk = isFcsOk(packet);
