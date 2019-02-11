@@ -67,6 +67,16 @@ class INET_API MessageTsAgeFilter : public cObjectResultFilter
 };
 
 /**
+ * Filter that expects a cMessage and outputs its age in seconds
+ * (t - msg->getArrivalTime()).
+ */
+class INET_API QueueingTimeFilter : public cObjectResultFilter
+{
+  public:
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details) override;
+};
+
+/**
  * Filter that expects an IReception and outputs its minimum signal power.
  */
 class INET_API ReceptionMinSignalPowerFilter : public cObjectResultFilter

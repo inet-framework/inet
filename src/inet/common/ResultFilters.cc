@@ -66,6 +66,14 @@ void MessageTsAgeFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cO
         fire(this, t, t - msg->getTimestamp(), details);
 }
 
+Register_ResultFilter("queueingTime", QueueingTimeFilter);
+
+void QueueingTimeFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
+{
+    if (auto msg = dynamic_cast<cMessage *>(object))
+        fire(this, t, t - msg->getArrivalTime(), details);
+}
+
 Register_ResultFilter("receptionMinSignalPower", ReceptionMinSignalPowerFilter);
 
 void ReceptionMinSignalPowerFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
