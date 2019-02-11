@@ -88,8 +88,19 @@ void TxopProcedure::startTxop(AccessCategory ac)
     // All subsequent frames transmitted by the STA in the same TXOP use the same class of duration settings.
     protectionMechanism = selectProtectionMechanism(ac);
     start = simTime();
+
     emit(txopStartedSignal, this);
     EV_INFO << "Txop started: limit = " << limit << ".\n";
+
+//    this->getParentModule()->getParentModule()->getParentModule()->getParentModule()->bubble("TXOP start");
+
+    if(ac == 2 || ac == 3)
+    {
+    char dstring[80];
+        sprintf(dstring, "TXOP in progress - %s (%d)", printAccessCategory(ac).c_str(),ac);
+        getDisplayString().setTagArg("t", 0, dstring);
+    }
+
 }
 
 void TxopProcedure::endTxop()
@@ -99,6 +110,12 @@ void TxopProcedure::endTxop()
     start = -1;
     protectionMechanism = ProtectionMechanism::UNDEFINED_PROTECTION;
     EV_INFO << "Txop ended.\n";
+
+//    this->getParentModule()->getParentModule()->getParentModule()->getParentModule()->bubble("TXOP end");
+//    this->setDisplayString("");
+    char dstring[20];
+            sprintf(dstring, "");
+            getDisplayString().setTagArg("t", 0, dstring);
 }
 
 simtime_t TxopProcedure::getRemaining() const
