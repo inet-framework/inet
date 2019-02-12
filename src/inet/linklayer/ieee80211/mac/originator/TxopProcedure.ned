@@ -24,8 +24,8 @@ simple TxopProcedure
         @display("i=block/timer");
         @signal[txopStarted](inet::ieee80211::TxopProcedure);
         @signal[txopEnded](inet::ieee80211::TxopProcedure);
-        @statistic[txopActive](title="txop active"; source=count(txopStart)-count(txopEnd); record=vector);
-        @statistic[txopEnded](title="txops ended"; source=txopEnded; record=count);
+        @statistic[txopEnded](title="txops ended"; source=txopEnded; record=count,vector?; interpolationmode=none);
         @statistic[txopDuration](title="txop duration"; source=txopDuration(txopEnded); record=histogram,vector?; interpolationmode=none);
+        @statistic[txopActive](title="txop active"; source=count(txopStarted)-count(txopEnded); record=vector; interpolationmode=sample-hold);
 }
 

@@ -23,9 +23,11 @@ simple PendingQueue
         int maxQueueSize = default(100); // -1 means unlimited
         bool prioritizeMulticast = default(false); // if true, prioritize multicast frames (9.3.2.1 Fundamental access)
         @display("i=block/queue");
-        @signal[queueingTime](type=simtime_t; unit=s);
-        @signal[queueLength](type=long);
-        @statistic[queueingTime](title="queueing time"; record=histogram,vector; interpolationmode=none);
-        @statistic[queueLength](title="queue length"; record=max,timeavg,vector; interpolationmode=sample-hold);
+        @signal[packetEnqueued](type=inet::Packet);
+        @signal[packetDequeued](type=inet::Packet);
+        @signal[packetDropped](type=inet::Packet);
+        @statistic[queueingTime](title="queueing times"; source=queueingTime(packetDequeued); record=histogram,vector; unit=s; interpolationmode=none);
+        @statistic[queueLength](title="queue length"; source=count(packetEnqueued) - count(packetDequeued); record=max,timeavg,vector; interpolationmode=sample-hold);
+        @statistic[packetDropQueueOverflow](title="packet drops: queue overflow"; source=packetDropReasonIsQueueOverflow(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
 }
 

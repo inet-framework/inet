@@ -17,16 +17,16 @@
 
 package inet.linklayer.ieee80211.mac.queue;
 
-simple InProgressFrames
+simple InProgressFrames // TODO: rename to InProgressQueue?
 {
     parameters:
         string pendingQueueModule;
         string originatorMacDataServiceModule;
         string ackHandlerModule;
         @display("i=block/queue");
-        @signal[queueingTime](type=simtime_t; unit=s);
-        @signal[queueLength](type=long);
-        @statistic[queueingTime](title="queueing time"; record=histogram,vector; interpolationmode=none);
-        @statistic[queueLength](title="queue length"; record=max,timeavg,vector; interpolationmode=sample-hold);
+        @signal[packetEnqueued](type=inet::Packet);
+        @signal[packetDequeued](type=inet::Packet);
+        @statistic[queueingTime](title="queueing times"; source=queueingTime(packetDequeued); record=histogram,vector; interpolationmode=none);
+        @statistic[queueLength](title="queue length"; source=count(packetEnqueued) - count(packetDequeued); record=max,timeavg,vector; interpolationmode=sample-hold);
 }
 

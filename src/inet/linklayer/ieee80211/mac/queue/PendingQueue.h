@@ -27,8 +27,8 @@ namespace ieee80211 {
 class PendingQueue : public cSimpleModule
 {
     public:
-        static simsignal_t queueingTimeSignal;
-        static simsignal_t queueLengthSignal;
+        static simsignal_t packetEnqueuedSignal;
+        static simsignal_t packetDequeuedSignal;
 
     public:
         enum class Priority {

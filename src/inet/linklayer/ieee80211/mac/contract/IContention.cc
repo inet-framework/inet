@@ -20,7 +20,9 @@
 namespace inet {
 namespace ieee80211 {
 
-simsignal_t IContention::contentionPeriodGeneratedSignal = cComponent::registerSignal("contentionPeriodGenerated");
+simsignal_t IContention::backoffPeriodGeneratedSignal = cComponent::registerSignal("backoffPeriodGenerated");
+simsignal_t IContention::backoffStartedSignal = cComponent::registerSignal("backoffStarted");
+simsignal_t IContention::backoffStoppedSignal = cComponent::registerSignal("backoffStopped");
 simsignal_t IContention::channelAccessGrantedSignal = cComponent::registerSignal("channelAccessGranted");
 
 } // namespace ieee80211

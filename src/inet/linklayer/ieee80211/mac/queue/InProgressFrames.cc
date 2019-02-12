@@ -24,8 +24,8 @@ namespace ieee80211 {
 
 Define_Module(InProgressFrames);
 
-simsignal_t InProgressFrames::queueingTimeSignal = cComponent::registerSignal("queueingTime");
-simsignal_t InProgressFrames::queueLengthSignal = cComponent::registerSignal("queueLength");
+simsignal_t InProgressFrames::packetEnqueuedSignal = cComponent::registerSignal("packetEnqueued");
+simsignal_t InProgressFrames::packetDequeuedSignal = cComponent::registerSignal("packetDequeued");
 
 void InProgressFrames::initialize(int stage)
 {
@@ -75,7 +75,7 @@ void InProgressFrames::ensureHasFrameToTransmit()
                 ackHandler->frameGotInProgress(frame->peekAtFront<Ieee80211DataOrMgmtHeader>());
                 inProgressFrames.push_back(frame);
                 frame->setArrivalTime(simTime());
-                emit(queueLengthSignal, inProgressFrames.size());
+                emit(packetEnqueuedSignal, frame);
             }
             delete frames;
         }
@@ -109,7 +109,7 @@ Packet *InProgressFrames::getPendingFrameFor(Packet *frame)
                 ackHandler->frameGotInProgress(frame->peekAtFront<Ieee80211DataOrMgmtHeader>());
                 inProgressFrames.push_back(frame);
                 frame->setArrivalTime(simTime());
-                emit(queueLengthSignal, inProgressFrames.size());
+                emit(packetEnqueuedSignal, frame);
             }
             delete frames;
             // FIXME: If the next Txop sequence were a BlockAckReqBlockAckFs then this would return
@@ -126,8 +126,7 @@ void InProgressFrames::dropFrame(Packet *packet)
     EV_DEBUG << "Dropping frame " << packet->getName() << ".\n";
     inProgressFrames.erase(std::remove(inProgressFrames.begin(), inProgressFrames.end(), packet), inProgressFrames.end());
     droppedFrames.push_back(packet);
-    emit(queueLengthSignal, inProgressFrames.size());
-    emit(queueingTimeSignal, simTime() - packet->getArrivalTime());
+    emit(packetDequeuedSignal, packet);
 }
 
 void InProgressFrames::dropFrames(std::set<std::pair<MacAddress, std::pair<Tid, SequenceControlField>>> seqAndFragNums)
@@ -141,8 +140,7 @@ void InProgressFrames::dropFrames(std::set<std::pair<MacAddress, std::pair<Tid, 
                 EV_DEBUG << "Dropping frame " << frame->getName() << ".\n";
                 it = inProgressFrames.erase(it);
                 droppedFrames.push_back(frame);
-                emit(queueLengthSignal, inProgressFrames.size());
-                emit(queueingTimeSignal, simTime() - frame->getArrivalTime());
+                emit(packetDequeuedSignal, frame);
             }
             else
                 it++;

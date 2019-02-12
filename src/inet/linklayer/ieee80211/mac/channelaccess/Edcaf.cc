@@ -147,7 +147,7 @@ void Edcaf::channelAccessGranted()
     ASSERT(callback != nullptr);
     if (!collisionController->isInternalCollision(this)) {
         owning = true;
-        emit(channelOwningChangedSignal, owning);
+        emit(channelOwnershipChangedSignal, owning);
         callback->channelGranted(this);
     }
     else
@@ -159,7 +159,7 @@ void Edcaf::releaseChannel(IChannelAccess::ICallback* callback)
     Enter_Method_Silent("releaseChannel");
     ASSERT(owning);
     owning = false;
-    emit(channelOwningChangedSignal, owning);
+    emit(channelOwnershipChangedSignal, owning);
     this->callback = nullptr;
     EV_INFO << "Channel released.\n";
 }

@@ -89,7 +89,7 @@ void Contention::startContention(int cw, simtime_t ifs, simtime_t eifs, simtime_
     this->slotTime = slotTime;
     this->callback = callback;
     backoffSlots = intrand(cw + 1);
-    emit(contentionPeriodGeneratedSignal, backoffSlots);
+    emit(backoffPeriodGeneratedSignal, backoffSlots);
     EV_DETAIL << "Starting contention: cw = " << cw << ", slots = " << backoffSlots << ", slotTime = " << slotTime << ", ifs = " << ifs << ", eifs = " << eifs << endl;
     handleWithFSM(START);
 }
@@ -173,8 +173,10 @@ void Contention::mediumStateChanged(bool mediumFree)
 
 void Contention::handleMessage(cMessage *msg)
 {
-    if (msg == startTxEvent)
+    if (msg == startTxEvent) {
+        emit(backoffStoppedSignal, SimTime::ZERO);
         handleWithFSM(CHANNEL_ACCESS_GRANTED);
+    }
     else if (msg == channelGrantedEvent) {
         EV_INFO << "Channel granted: startTime = " << startTime << std::endl;
         emit(channelAccessGrantedSignal, this);
@@ -195,6 +197,7 @@ void Contention::scheduleTransmissionRequestFor(simtime_t txStartTime)
 {
     scheduleAt(txStartTime, startTxEvent);
     callback->expectedChannelAccess(txStartTime);
+    emit(backoffStartedSignal, txStartTime);
     if (hasGUI())
         updateDisplayString(txStartTime);
 }
@@ -203,6 +206,7 @@ void Contention::cancelTransmissionRequest()
 {
     cancelEvent(startTxEvent);
     callback->expectedChannelAccess(-1);
+    emit(backoffStoppedSignal, SimTime::ZERO);
     if (hasGUI())
         updateDisplayString(-1);
 }
