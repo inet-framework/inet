@@ -1,4 +1,5 @@
 most important topics
+ - chapter in developers guild about signals and statistics, naming convention, what constitues a signal and what does not, etc.
  - existing protocols
    - 802.11 statistics, logging, display strings, code cleanup, memory management
    - complete IPv6
