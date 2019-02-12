@@ -283,7 +283,7 @@ void Hcf::frameSequenceFinished()
         bool startContention = hasFrameToTransmit(); // TODO: outstanding frame
         edcaf->releaseChannel(this);
         mac->sendDownPendingRadioConfigMsg(); // TODO: review
-        edcaf->getTxopProcedure()->stopTxop();
+        edcaf->getTxopProcedure()->endTxop();
         if (startContention)
             edcaf->requestChannel(this);
     }

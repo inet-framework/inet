@@ -28,7 +28,7 @@ namespace ieee80211 {
 using namespace inet::physicallayer;
 
 simsignal_t TxopProcedure::txopStartedSignal = cComponent::registerSignal("txopStarted");
-simsignal_t TxopProcedure::txopStoppedSignal = cComponent::registerSignal("txopStopped");
+simsignal_t TxopProcedure::txopEndedSignal = cComponent::registerSignal("txopEnded");
 
 Define_Module(TxopProcedure);
 
@@ -94,13 +94,13 @@ void TxopProcedure::startTxop(AccessCategory ac)
 }
 
 
-void TxopProcedure::stopTxop()
+void TxopProcedure::endTxop()
 {
-    Enter_Method_Silent("stopTxop");
-    emit(txopStoppedSignal, this);
+    Enter_Method_Silent("endTxop");
+    emit(txopEndedSignal, this);
     start = -1;
     protectionMechanism = ProtectionMechanism::UNDEFINED_PROTECTION;
-    EV_INFO << "Txop stopped.\n";
+    EV_INFO << "Txop ended.\n";
 }
 
 simtime_t TxopProcedure::getRemaining() const

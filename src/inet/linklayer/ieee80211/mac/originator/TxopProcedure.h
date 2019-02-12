@@ -29,7 +29,7 @@ class INET_API TxopProcedure : public ModeSetListener
 {
     public:
         static simsignal_t txopStartedSignal;
-        static simsignal_t txopStoppedSignal;
+        static simsignal_t txopEndedSignal;
 
     public:
         // [...] transmitted under EDCA by a STA that initiates a TXOP, there are
@@ -54,7 +54,7 @@ class INET_API TxopProcedure : public ModeSetListener
 
     public:
         virtual void startTxop(AccessCategory ac);
-        virtual void stopTxop();
+        virtual void endTxop();
 
         virtual simtime_t getStart() const;
         virtual simtime_t getLimit() const;
