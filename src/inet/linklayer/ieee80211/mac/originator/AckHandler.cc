@@ -31,34 +31,32 @@ void AckHandler::initialize(int stage)
     }
 }
 
-AckHandler::Status& AckHandler::getAckStatus(SequenceControlField id)
+AckHandler::Status AckHandler::getAckStatus(SequenceControlField id)
 {
     auto it = ackStatuses.find(id);
-    if (it == ackStatuses.end()) {
-        ackStatuses[id] = Status::FRAME_NOT_YET_TRANSMITTED;
-        return ackStatuses[id];
-    }
-    return it->second;
+    if (it == ackStatuses.end())
+        return Status::FRAME_NOT_YET_TRANSMITTED;
+    else
+        return it->second;
 }
 
 AckHandler::Status AckHandler::getAckStatus(const Ptr<const Ieee80211DataOrMgmtHeader>& header)
 {
     auto id = SequenceControlField(header->getSequenceNumber(), header->getFragmentNumber());
     auto it = ackStatuses.find(id);
-    if (it == ackStatuses.end()) {
-        ackStatuses[id] = Status::FRAME_NOT_YET_TRANSMITTED;
+    if (it == ackStatuses.end())
         return Status::FRAME_NOT_YET_TRANSMITTED;
-    }
-    return it->second;
+    else
+        return it->second;
 }
 
 void AckHandler::processReceivedAck(const Ptr<const Ieee80211AckFrame>& ack, const Ptr<const Ieee80211DataOrMgmtHeader>& ackedHeader)
 {
     auto id = SequenceControlField(ackedHeader->getSequenceNumber(), ackedHeader->getFragmentNumber());
-    Status &status = getAckStatus(id);
+    auto status = getAckStatus(id);
     if (status == Status::FRAME_NOT_YET_TRANSMITTED)
         throw cRuntimeError("ackedFrame = %s is not yet transmitted", ackedHeader->getName());
-    status = Status::ACK_ARRIVED;
+    ackStatuses[id] = Status::ACK_ARRIVED;
 }
 
 void AckHandler::processTransmittedDataOrMgmtFrame(const Ptr<const Ieee80211DataOrMgmtHeader>& header)
@@ -77,7 +75,7 @@ void AckHandler::processTransmittedDataOrMgmtFrame(const Ptr<const Ieee80211Data
 void AckHandler::frameGotInProgress(const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader)
 {
     auto id = SequenceControlField(dataOrMgmtHeader->getSequenceNumber(), dataOrMgmtHeader->getFragmentNumber());
-    Status& status = getAckStatus(id);
+    auto status = getAckStatus(id);
     ASSERT(status != Status::WAITING_FOR_ACK);
     ackStatuses[id] = Status::FRAME_NOT_YET_TRANSMITTED;
 }

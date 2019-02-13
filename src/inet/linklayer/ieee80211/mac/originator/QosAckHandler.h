@@ -55,8 +55,8 @@ class INET_API QosAckHandler : public cSimpleModule, public IAckHandler
     protected:
         virtual void initialize(int stage) override;
 
-        virtual Status& getQoSDataAckStatus(const QoSKey& id);
-        virtual Status& getMgmtOrNonQoSAckStatus(const Key& id);
+        virtual Status getQoSDataAckStatus(const QoSKey& id);
+        virtual Status getMgmtOrNonQoSAckStatus(const Key& id);
 
         void printAckStatuses();
 

@@ -42,7 +42,7 @@ class INET_API AckHandler : public cSimpleModule, public IAckHandler
 
     protected:
         virtual void initialize(int stage) override;
-        virtual Status& getAckStatus(SequenceControlField id);
+        virtual Status getAckStatus(SequenceControlField id);
         void printAckStatuses();
 
     public:
