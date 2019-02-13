@@ -54,6 +54,7 @@ std::string InProgressFrames::str() const
 
 void InProgressFrames::forEachChild(cVisitor *v)
 {
+    cSimpleModule::forEachChild(v);
     for (auto frame : inProgressFrames)
         v->visit(frame);
 }
