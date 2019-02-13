@@ -130,7 +130,6 @@ void QosAckHandler::dropFrame(const Ptr<const Ieee80211DataOrMgmtHeader>& dataOr
 
 std::set<std::pair<MacAddress, std::pair<Tid, SequenceControlField>>> QosAckHandler::processReceivedBlockAck(const Ptr<const Ieee80211BlockAck>& blockAck)
 {
-    printAckStatuses();
     MacAddress receiverAddr = blockAck->getTransmitterAddress();
     std::set<QoSKey> ackedFrames;
     // Table 8-16—BlockAckReq frame variant encoding
@@ -167,7 +166,6 @@ std::set<std::pair<MacAddress, std::pair<Tid, SequenceControlField>>> QosAckHand
     else {
         throw cRuntimeError("Multi-TID BlockReq is unimplemented");
     }
-    printAckStatuses();
     return ackedFrames;
 }
 
@@ -219,7 +217,6 @@ void QosAckHandler::processTransmittedDataOrMgmtFrame(const Ptr<const Ieee80211D
 
 void QosAckHandler::processTransmittedBlockAckReq(const Ptr<const Ieee80211BlockAckReq>& blockAckReq)
 {
-    //printAckStatuses();
     for (auto &ackStatus : ackStatuses) {
         auto tid = ackStatus.first.second.first;
         auto seqCtrlField = ackStatus.first.second.second;
@@ -241,7 +238,6 @@ void QosAckHandler::processTransmittedBlockAckReq(const Ptr<const Ieee80211Block
         else
             throw cRuntimeError("Multi-TID BlockReq is unimplemented");
     }
-    //printAckStatuses();
 }
 
 bool QosAckHandler::isEligibleToTransmit(const Ptr<const Ieee80211DataOrMgmtHeader>& header)
@@ -314,11 +310,11 @@ std::string QosAckHandler::getStatusString(Status status)
 
 void QosAckHandler::printAckStatuses()
 {
-//    for (auto ackStatus : ackStatuses) {
-//        std::cout << "Seq Num = " << ackStatus.first.getSequenceNumber() << " " << "Frag Num = " << (int)ackStatus.first.getFragmentNumber() << std::endl;
-//        std::cout << "Status = " << getStatusString(ackStatus.second) << std::endl;
-//    }
-//    std::cout << "=========================================" << std::endl;
+    for (auto ackStatus : ackStatuses) {
+        std::cout << "Seq Num = " << ackStatus.first.second.second.getSequenceNumber() << " " << "Frag Num = " << (int)ackStatus.first.second.second.getFragmentNumber() << std::endl;
+        std::cout << "Status = " << getStatusString(ackStatus.second) << std::endl;
+    }
+    std::cout << "=========================================" << std::endl;
 }
 
 
