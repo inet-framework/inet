@@ -645,9 +645,6 @@ INetfilter::IHook::Result NS_CLASS ensureRouteForDatagram(Packet *datagram)
     const auto& networkHeader = getNetworkProtocolHeader(datagram);
     const L3Address& destAddr = networkHeader->getDestinationAddress();
 
-    if (isInMacLayer())
-        throw cRuntimeError("Error AODV-uu HOOK");
-
     if (destAddr.isBroadcast() || isLocalAddress(destAddr) || destAddr.isMulticast())
         return ACCEPT;
 

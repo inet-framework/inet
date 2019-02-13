@@ -59,17 +59,17 @@
 
 /* Global definitions and lib functions */
 #include <deque>
-#include "aodv-uu/params.h"
-#include "aodv-uu/defs_aodv.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/params.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/defs_aodv.h"
 
 /* System-dependent datatypes */
 /* Needed by some network-related datatypes */
 #include "inet/routing/extras/base/ManetRoutingBase.h"
-#include "aodv-uu/list.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/list.h"
 
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 
-#include "aodv_msg_struct.h"
+#include "inet/routing/extras/aodv-uu/aodv_msg_struct.h"
 /* Forward declaration needed to be able to reference the class */
 
 namespace inet { namespace inetmanet { class AODVUU; } }

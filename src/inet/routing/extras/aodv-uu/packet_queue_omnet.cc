@@ -77,6 +77,7 @@ int NS_CLASS packet_queue_garbage_collect(void)
         {
             PQ.pkQueue.erase(PQ.pkQueue.begin()+i);
             sendICMP(qp->p);
+            getNetworkProtocol()->dropQueuedDatagram(qp->p);
             free(qp);
             count++;
         }
@@ -97,15 +98,15 @@ int NS_CLASS packet_queue_garbage_collect(void)
 void NS_CLASS packet_queue_add(Packet * p, struct in_addr dest_addr)
 {
     struct q_pkt *qp;
-    Packet *dgram;
 
     if (PQ.pkQueue.size() >= MAX_QUEUE_LENGTH)
     {
         DEBUG(LOG_DEBUG, 0, "MAX Queue length! Removing first packet.");
         qp = PQ.pkQueue.front();
         PQ.pkQueue.erase(PQ.pkQueue.begin());
-        dgram = qp->p;
+        auto dgram = qp->p;
         sendICMP(dgram);
+        getNetworkProtocol()->dropQueuedDatagram(dgram);
         free(qp);
     }
 
@@ -130,15 +131,15 @@ void NS_CLASS packet_queue_add(Packet * p, struct in_addr dest_addr)
 void NS_CLASS packet_queue_add_inject(Packet * p, struct in_addr dest_addr)
 {
     struct q_pkt *qp;
-    Packet *dgram;
 
     if (PQ.pkQueue.size() >= MAX_QUEUE_LENGTH)
     {
         DEBUG(LOG_DEBUG, 0, "MAX Queue length! Removing first packet.");
         qp = PQ.pkQueue.front();
         PQ.pkQueue.erase(PQ.pkQueue.begin());
-        dgram = qp->p;
+        auto dgram = qp->p;
         sendICMP(dgram);
+        getNetworkProtocol()->dropQueuedDatagram(dgram);
         free(qp);
     }
 
@@ -234,6 +235,7 @@ int NS_CLASS packet_queue_set_verdict(struct in_addr dest_addr, int verdict)
                         else
                         {
                             sendICMP(qp->p);
+                            getNetworkProtocol()->dropQueuedDatagram(qp->p);
                         }
                     break;
                     case PQ_SEND:
@@ -267,6 +269,7 @@ int NS_CLASS packet_queue_set_verdict(struct in_addr dest_addr, int verdict)
                     break;
                     case PQ_DROP:
                         sendICMP(qp->p);
+                        getNetworkProtocol()->dropQueuedDatagram(qp->p);
                     break;
                 }
                 free(qp);
