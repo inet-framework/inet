@@ -288,6 +288,7 @@ void Dcf::originatorProcessRtsProtectionFailed(Packet *packet)
     if (recoveryProcedure->isRtsFrameRetryLimitReached(packet, protectedHeader)) {
         recoveryProcedure->retryLimitReached(packet, protectedHeader);
         channelAccess->getInProgressFrames()->dropFrame(packet);
+        ackHandler->dropFrame(protectedHeader);
         EV_INFO << "Dropping RTS/CTS protected frame " << packet->getName() << ", because retry limit is reached.\n";
         PacketDropDetails details;
         details.setReason(RETRY_LIMIT_REACHED);
@@ -337,6 +338,7 @@ void Dcf::originatorProcessReceivedFrame(Packet *receivedPacket, Packet *lastTra
         recoveryProcedure->ackFrameReceived(lastTransmittedPacket, lastTransmittedDataOrMgmtHeader, stationRetryCounters);
         ackHandler->processReceivedAck(dynamicPtrCast<const Ieee80211AckFrame>(receivedHeader), lastTransmittedDataOrMgmtHeader);
         channelAccess->getInProgressFrames()->dropFrame(lastTransmittedPacket);
+        ackHandler->dropFrame(lastTransmittedDataOrMgmtHeader);
     }
     else if (receivedHeader->getType() == ST_RTS)
         ; // void
