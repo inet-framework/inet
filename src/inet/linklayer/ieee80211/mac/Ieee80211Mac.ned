@@ -23,7 +23,6 @@ import inet.linklayer.ieee80211.mac.contract.IDcf;
 import inet.linklayer.ieee80211.mac.contract.IDs;
 import inet.linklayer.ieee80211.mac.contract.IHcf;
 import inet.linklayer.ieee80211.mac.contract.IRx;
-import inet.linklayer.ieee80211.mac.contract.IStatistics;
 import inet.linklayer.ieee80211.mac.contract.ITx;
 import inet.linklayer.ieee80211.mac.coordinationfunction.Dcf;
 import inet.linklayer.ieee80211.mac.coordinationfunction.Hcf;
@@ -114,10 +113,6 @@ module Ieee80211Mac extends MacProtocolBase like IIeee80211Mac
         tx: <default("Tx")> like ITx {
             parameters:
                 @display("p=250,200");
-        }
-        statistics: <default("BasicStatistics")> like IStatistics {
-            parameters:
-                @display("p=400,200");
         }
 }
 

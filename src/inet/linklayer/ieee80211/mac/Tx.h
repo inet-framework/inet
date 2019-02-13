@@ -25,7 +25,6 @@ namespace ieee80211 {
 
 class Ieee80211Mac;
 class IRx;
-class IStatistics;
 
 /**
  * The default implementation of ITx.
@@ -36,7 +35,6 @@ class INET_API Tx : public cSimpleModule, public ITx
         ITx::ICallback *txCallback = nullptr;
         Ieee80211Mac *mac = nullptr;
         IRx *rx = nullptr;
-        IStatistics *statistics = nullptr;
         Packet *frame = nullptr;
         cMessage *endIfsTimer = nullptr;
         bool transmitting = false;

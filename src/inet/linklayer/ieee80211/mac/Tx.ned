@@ -26,7 +26,6 @@ simple Tx like ITx
 {
     parameters:
         string rxModule;
-        string statisticsModule = default("");
         @display("i=block/tx");
 }
 

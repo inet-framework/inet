@@ -36,7 +36,6 @@ class INET_API Rx : public cSimpleModule, public IRx
 {
     protected:
         std::vector<IContention *> contentions;
-        IStatistics *statistics = nullptr;
 
         MacAddress address;
         cMessage *endNavTimer = nullptr;

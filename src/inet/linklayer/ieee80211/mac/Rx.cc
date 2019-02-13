@@ -20,7 +20,6 @@
 #include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
 #include "inet/linklayer/ieee80211/mac/Rx.h"
 #include "inet/linklayer/ieee80211/mac/contract/IContention.h"
-#include "inet/linklayer/ieee80211/mac/contract/IStatistics.h"
 #include "inet/linklayer/ieee80211/mac/contract/ITx.h"
 
 namespace inet {
@@ -51,7 +50,6 @@ void Rx::initialize(int stage)
     }
     // TODO: INITSTAGE
     else if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION) {
-        // statistics = check_and_cast<IStatistics *>(getModuleByPath(par("statisticsModule")));
         address = check_and_cast<Ieee80211Mac*>(getContainingNicModule(this)->getSubmodule("mac"))->getAddress();
         recomputeMediumFree();
     }
@@ -78,7 +76,6 @@ bool Rx::lowerFrameReceived(Packet *packet)
         const auto& header = packet->peekAtFront<Ieee80211MacHeader>();
         if (header->getReceiverAddress() != address)
             setOrExtendNav(header->getDuration());
-//        statistics->frameReceived(frame);
         return true;
     }
     else {
@@ -89,7 +86,6 @@ bool Rx::lowerFrameReceived(Packet *packet)
         delete packet;
         for (auto contention : contentions)
             contention->corruptedFrameReceived();
-//        statistics->erroneousFrameReceived();
         return false;
     }
 }
