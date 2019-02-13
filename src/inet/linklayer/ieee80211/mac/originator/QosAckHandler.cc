@@ -22,6 +22,8 @@ namespace ieee80211 {
 
 Define_Module(QosAckHandler);
 
+std::ostream& operator<<(std::ostream& os, const Tid tid) { return os << (int)tid; }
+
 std::ostream& operator<<(std::ostream& os, const QosAckHandler::Status& status) { return os << QosAckHandler::getStatusString(status); }
 
 template <typename K, typename V>
