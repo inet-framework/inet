@@ -107,6 +107,8 @@ class INET_API ManetRoutingBase : public ApplicationBase, public UdpSocket::ICal
         }
     };
 
+    bool isConnectedIp = false;
+
     typedef std::vector<ProtocolRoutingData> ProtocolsRoutes;
     typedef std::map<L3Address,ProtocolsRoutes>GlobalRouteMap;
 

@@ -262,6 +262,12 @@ void ManetRoutingBase::registerRoutingModule()
          setStaticNode(par("isStaticNode").boolValue());
 
     if (!mac_layer_) {
+        // search in which layer is connected.
+        auto  modAuxName = gate("socketOut")->getPathEndGate()->getOwnerModule()->getName();
+
+        if ((strcmp(modAuxName, "tn") == 0 ) || props->getAsBool("inIpLayer"))
+            isConnectedIp = true;
+
         while ((token = tokenizerInterfaces.nextToken()) != nullptr) {
             if ((prefixName = strstr(token, "prefix")) != nullptr) {
                 const char *leftparenp = strchr(prefixName, '(');
@@ -383,7 +389,7 @@ void ManetRoutingBase::registerRoutingModule()
     isOperational = true;
     WATCH_PTRMULTIMAP(timerMultiMap);
  //   WATCH_MAP(*routesVector);
-    if (!mac_layer_) {
+    if (!mac_layer_ || isConnectedIp) {
         socket.setOutputGate(gate("socketOut"));
         // IPSocket socket(gate("ipOut"));
         socket.bind(par("UdpPort"));
@@ -519,7 +525,10 @@ void ManetRoutingBase::sendToIpOnIface(Packet *msg, int srcPort, const L3Address
     }
     else {
         emit(packetSentSignal, msg);
-        socket.sendTo(msg, destAddr, destPort);
+        if (isConnectedIp || mac_layer_)
+            send(msg, "socketOut");
+        else
+            socket.sendTo(msg, destAddr, destPort);
     }
     // totalSend++;
 }
@@ -538,8 +547,6 @@ void ManetRoutingBase::sendToIp(Packet *msg, int srcPort, const L3Address& destA
             throw cRuntimeError("not valid wireless interface present");
         ie = interfaceVector->front().interfacePtr;
     }
-
-
     sendToIpOnIface(msg, srcPort, destAddr, destPort, ttl, delay, ie);
 }
 
