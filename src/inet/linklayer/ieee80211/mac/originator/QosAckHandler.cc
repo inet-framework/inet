@@ -128,6 +128,12 @@ void QosAckHandler::dropFrame(const Ptr<const Ieee80211DataOrMgmtHeader>& dataOr
     }
 }
 
+void QosAckHandler::dropFrames(std::set<std::pair<MacAddress, std::pair<Tid, SequenceControlField>>> seqAndFragNums)
+{
+    for (auto it : seqAndFragNums)
+        ackStatuses.erase(it);
+}
+
 std::set<std::pair<MacAddress, std::pair<Tid, SequenceControlField>>> QosAckHandler::processReceivedBlockAck(const Ptr<const Ieee80211BlockAck>& blockAck)
 {
     MacAddress receiverAddr = blockAck->getTransmitterAddress();

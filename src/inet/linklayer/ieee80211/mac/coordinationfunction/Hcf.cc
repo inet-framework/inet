@@ -619,6 +619,7 @@ void Hcf::originatorProcessReceivedControlFrame(Packet *packet, const Ptr<const 
         for (auto it : ackedSeqAndFragNums)
             EV_TRACE << "   sequenceNumber = " << it.second.second.getSequenceNumber() << ", fragmentNumber = " << (int)it.second.second.getFragmentNumber() << std::endl;
         edcaf->getInProgressFrames()->dropFrames(ackedSeqAndFragNums);
+        edcaf->getAckHandler()->dropFrames(ackedSeqAndFragNums);
     }
     else if (dynamicPtrCast<const Ieee80211RtsFrame>(header))
         ; // void
