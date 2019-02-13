@@ -27,8 +27,10 @@ void CtsProcedure::processReceivedRts(Packet *rtsPacket, const Ptr<const Ieee802
     // if the NAV at the STA receiving the RTS frame indicates that the medium is idle.
     if (ctsPolicy->isCtsNeeded(rtsFrame)) {
         auto ctsFrame = buildCts(rtsFrame);
-        ctsFrame->setDuration(ctsPolicy->computeCtsDurationField(rtsPacket, rtsFrame));
+        auto duration = ctsPolicy->computeCtsDurationField(rtsPacket, rtsFrame);
+        ctsFrame->setDuration(duration);
         auto ctsPacket = new Packet("CTS", ctsFrame);
+        EV_DEBUG << "Duration for " << ctsPacket->getName() << " is set to " << duration << " s.\n";
         callback->transmitControlResponseFrame(ctsPacket, ctsFrame, rtsPacket, rtsFrame);
     }
     // If the NAV at the STA receiving the RTS indicates the medium is not idle,

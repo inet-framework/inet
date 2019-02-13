@@ -27,8 +27,10 @@ void RecipientAckProcedure::processReceivedFrame(Packet *packet, const Ptr<const
     // shall commence after a SIFS period, without regard to the busy/idle state of the medium. (See Figure 9-9.)
     if (ackPolicy->isAckNeeded(dataOrMgmtHeader)) {
         auto ackFrame = buildAck(dataOrMgmtHeader);
-        ackFrame->setDuration(ackPolicy->computeAckDurationField(packet, dataOrMgmtHeader));
+        auto duration = ackPolicy->computeAckDurationField(packet, dataOrMgmtHeader);
+        ackFrame->setDuration(duration);
         auto ackPacket = new Packet("WlanAck", ackFrame);
+        EV_DEBUG << "Duration for " << ackFrame->getName() << " is set to " << duration << " s.\n";
         callback->transmitControlResponseFrame(ackPacket, ackFrame, packet, dataOrMgmtHeader);
     }
 }

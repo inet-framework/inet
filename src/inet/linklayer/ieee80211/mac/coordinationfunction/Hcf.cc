@@ -687,6 +687,7 @@ void Hcf::transmitFrame(Packet *packet, simtime_t ifs)
             auto duration = singleProtectionMechanism->computeDurationField(packet, header, pendingPacket, pendingHeader, txop, recipientAckPolicy);
             auto header = packet->removeAtFront<Ieee80211MacHeader>();
             header->setDuration(duration);
+            EV_DEBUG << "Duration for " << packet->getName() << " is set to " << duration << " s.\n";
             packet->insertAtFront(header);
         }
         else if (txop->getProtectionMechanism() == TxopProcedure::ProtectionMechanism::MULTIPLE_PROTECTION)
