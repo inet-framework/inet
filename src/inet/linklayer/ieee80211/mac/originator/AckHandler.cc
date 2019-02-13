@@ -63,9 +63,15 @@ void AckHandler::processReceivedAck(const Ptr<const Ieee80211AckFrame>& ack, con
 
 void AckHandler::processTransmittedDataOrMgmtFrame(const Ptr<const Ieee80211DataOrMgmtHeader>& header)
 {
-    // TODO: mgmt with NoAck subfield?
     auto id = SequenceControlField(header->getSequenceNumber(), header->getFragmentNumber());
-    ackStatuses[id] = Status::WAITING_FOR_ACK;
+    if (auto dataHeader = dynamicPtrCast<const Ieee80211DataHeader>(header)) {
+        if (dataHeader->getAckPolicy() == NORMAL_ACK)
+            ackStatuses[id] = Status::WAITING_FOR_ACK;
+        else
+            ackStatuses[id] = Status::NO_ACK_REQUIRED;
+    }
+    else
+        ackStatuses[id] = Status::NO_ACK_REQUIRED;
 }
 
 void AckHandler::frameGotInProgress(const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader)
