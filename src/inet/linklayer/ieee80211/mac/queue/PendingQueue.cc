@@ -34,7 +34,14 @@ void PendingQueue::initialize(int stage)
         else
             queue.setup((CompareFunc)cmpMgmtOverData);
         maxQueueSize = par("maxQueueSize");
+        updateDisplayString();
     }
+}
+
+void PendingQueue::updateDisplayString()
+{
+    std::string text = std::to_string(queue.getLength()) + " packets";
+    getDisplayString().setTagArg("t", 0, text.c_str());
 }
 
 bool PendingQueue::insert(Packet *frame)
@@ -42,6 +49,7 @@ bool PendingQueue::insert(Packet *frame)
     if (maxQueueSize != -1 && queue.getLength() == maxQueueSize)
         return false;
     queue.insert(frame);
+    updateDisplayString();
     emit(packetEnqueuedSignal, frame);
     return true;
 }
@@ -51,6 +59,7 @@ bool PendingQueue::insertBefore(Packet *where, Packet *frame)
     if (maxQueueSize != -1 && queue.getLength() == maxQueueSize)
         return false;
     queue.insertBefore(where, frame);
+    updateDisplayString();
     emit(packetEnqueuedSignal, frame);
     return true;
 }
@@ -60,6 +69,7 @@ bool PendingQueue::insertAfter(Packet *where, Packet *frame)
     if (maxQueueSize != -1 && queue.getLength() == maxQueueSize)
         return false;
     queue.insertAfter(where, frame);
+    updateDisplayString();
     emit(packetEnqueuedSignal, frame);
     return true;
 }
@@ -67,6 +77,7 @@ bool PendingQueue::insertAfter(Packet *where, Packet *frame)
 Packet *PendingQueue::remove(Packet *frame)
 {
     auto packet = check_and_cast<Packet *>(queue.remove(frame));
+    updateDisplayString();
     emit(packetDequeuedSignal, packet);
     return packet;
 }
@@ -74,6 +85,7 @@ Packet *PendingQueue::remove(Packet *frame)
 Packet *PendingQueue::pop()
 {
     auto packet = check_and_cast<Packet *>(queue.pop());
+    updateDisplayString();
     emit(packetDequeuedSignal, packet);
     return packet;
 }

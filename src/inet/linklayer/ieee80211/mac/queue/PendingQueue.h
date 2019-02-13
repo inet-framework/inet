@@ -42,6 +42,7 @@ class PendingQueue : public cSimpleModule
 
     protected:
         virtual void initialize(int stage) override;
+        virtual void updateDisplayString();
 
     public:
         virtual ~PendingQueue() { }
