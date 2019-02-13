@@ -48,6 +48,7 @@ class INET_API QosAckHandler : public cSimpleModule, public IAckHandler
     protected:
         typedef std::pair<MacAddress, std::pair<Tid, SequenceControlField>> QoSKey;
         typedef std::pair<MacAddress, SequenceControlField> Key;
+        // TODO: these maps are actually never erased
         std::map<QoSKey, Status> ackStatuses;
         std::map<Key, Status> mgmtAckStatuses;
 
