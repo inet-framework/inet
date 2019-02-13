@@ -27,6 +27,8 @@ namespace ieee80211 {
 
 using namespace inet::physicallayer;
 
+simsignal_t Rx::navChangedSignal = cComponent::registerSignal("navChanged");
+
 Define_Module(Rx);
 
 Rx::Rx()
@@ -59,6 +61,7 @@ void Rx::handleMessage(cMessage *msg)
 {
     if (msg == endNavTimer) {
         EV_INFO << "The radio channel has become free according to the NAV" << std::endl;
+        emit(navChangedSignal, SimTime::ZERO);
         recomputeMediumFree();
     }
     else
@@ -171,10 +174,14 @@ void Rx::setOrExtendNav(simtime_t navInterval)
             simtime_t oldEndNav = endNavTimer->getArrivalTime();
             if (endNav < oldEndNav)
                 return;    // never decrease NAV
+            emit(navChangedSignal, endNavTimer->getArrivalTime() - simTime());
             cancelEvent(endNavTimer);
         }
+        else
+            emit(navChangedSignal, SimTime::ZERO);
         EV_INFO << "Setting NAV to " << navInterval << std::endl;
         scheduleAt(endNav, endNavTimer);
+        emit(navChangedSignal, endNav - simTime());
         recomputeMediumFree();
     }
 }

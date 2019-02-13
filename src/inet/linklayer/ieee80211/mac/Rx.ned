@@ -26,6 +26,8 @@ simple Rx like IRx
 {
     parameters:
         @display("i=block/rx");
+        @signal[navChanged](type=simtime_t);
         @signal[packetDropped](type=inet::Packet);
+        @statistic[nav](title="network allocation vector"; source=navChanged; record=vector; interpolationmode=linear);
 }
 
