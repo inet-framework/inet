@@ -289,15 +289,6 @@ void QosAckHandler::frameGotInProgress(const Ptr<const Ieee80211DataOrMgmtHeader
     }
 }
 
-int QosAckHandler::getNumberOfFramesWithStatus(Status status)
-{
-    int count = 0;
-    for (auto ackStatus : ackStatuses)
-        if (ackStatus.second == status)
-            count++;
-    return count;
-}
-
 std::string QosAckHandler::getStatusString(Status status)
 {
     switch (status) {

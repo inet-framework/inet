@@ -76,7 +76,6 @@ class INET_API QosAckHandler : public cSimpleModule, public IAckHandler
 
         virtual Status getQoSDataAckStatus(const Ptr<const Ieee80211DataHeader>& header);
         virtual Status getMgmtOrNonQoSAckStatus(const Ptr<const Ieee80211DataOrMgmtHeader>& header);
-        virtual int getNumberOfFramesWithStatus(Status status);
 
         virtual bool isEligibleToTransmit(const Ptr<const Ieee80211DataOrMgmtHeader>& header) override;
         virtual bool isOutstandingFrame(const Ptr<const Ieee80211DataOrMgmtHeader>& header) override;

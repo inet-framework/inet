@@ -56,7 +56,6 @@ class INET_API AckHandler : public cSimpleModule, public IAckHandler
         virtual Status getAckStatus(const Ptr<const Ieee80211DataOrMgmtHeader>& header);
         virtual bool isEligibleToTransmit(const Ptr<const Ieee80211DataOrMgmtHeader>& header) override;
         virtual bool isOutstandingFrame(const Ptr<const Ieee80211DataOrMgmtHeader>& header) override;
-        virtual int getNumberOfFramesWithStatus(Status status);
         virtual void processFailedFrame(const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader);
         virtual void dropFrame(const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader);
 

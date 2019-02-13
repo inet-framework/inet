@@ -91,16 +91,6 @@ bool AckHandler::isOutstandingFrame(const Ptr<const Ieee80211DataOrMgmtHeader>& 
     return false;
 }
 
-int AckHandler::getNumberOfFramesWithStatus(Status status)
-{
-    int count = 0;
-    for (auto ackStatus : ackStatuses)
-        if (ackStatus.second == status)
-            count++;
-    return count;
-}
-
-
 void AckHandler::processFailedFrame(const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader)
 {
     ASSERT(getAckStatus(dataOrMgmtHeader) == Status::WAITING_FOR_ACK);
