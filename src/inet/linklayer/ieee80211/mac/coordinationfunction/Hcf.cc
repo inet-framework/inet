@@ -71,6 +71,13 @@ void Hcf::initialize(int stage)
     }
 }
 
+void Hcf::forEachChild(cVisitor *v)
+{
+    cSimpleModule::forEachChild(v);
+    if (frameSequenceHandler != nullptr && frameSequenceHandler->getContext() != nullptr)
+        v->visit(const_cast<FrameSequenceContext *>(frameSequenceHandler->getContext()));
+}
+
 void Hcf::handleMessage(cMessage* msg)
 {
     if (msg == startRxTimer) {

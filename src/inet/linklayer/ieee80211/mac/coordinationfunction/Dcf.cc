@@ -57,6 +57,13 @@ void Dcf::initialize(int stage)
     }
 }
 
+void Dcf::forEachChild(cVisitor *v)
+{
+    cSimpleModule::forEachChild(v);
+    if (frameSequenceHandler != nullptr && frameSequenceHandler->getContext() != nullptr)
+        v->visit(const_cast<FrameSequenceContext *>(frameSequenceHandler->getContext()));
+}
+
 void Dcf::handleMessage(cMessage* msg)
 {
     if (msg == startRxTimer) {
