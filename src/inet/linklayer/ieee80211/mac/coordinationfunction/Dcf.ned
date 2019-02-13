@@ -46,7 +46,7 @@ module Dcf like IDcf
         *.rxModule = "^." + rxModule;
 
         @class(Dcf);
-        @display("i=block/queue");
+        @display("i=block/layer");
         @signal[packetSentToPeer](type=inet::Packet);
         @signal[packetReceivedFromPeer](type=inet::Packet);
         @signal[linkBroken](type=inet::Packet);

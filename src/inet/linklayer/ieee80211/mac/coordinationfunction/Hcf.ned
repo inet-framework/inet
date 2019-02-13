@@ -51,7 +51,7 @@ module Hcf like IHcf
         *.*.originatorMacDataServiceModule = "^.^.originatorMacDataService";
 
         @class(Hcf);
-        @display("i=block/queue");
+        @display("i=block/layer");
         @signal[packetSentToPeer](type=inet::Packet);
         @signal[packetReceivedFromPeer](type=inet::Packet);
         @signal[linkBroken](type=inet::Packet);
