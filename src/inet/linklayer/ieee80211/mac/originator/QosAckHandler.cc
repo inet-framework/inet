@@ -255,7 +255,8 @@ bool QosAckHandler::isEligibleToTransmit(const Ptr<const Ieee80211DataOrMgmtHead
     }
     else
         status = getMgmtOrNonQoSAckStatus(header);
-    return status == QosAckHandler::Status::NORMAL_ACK_NOT_ARRIVED ||
+    return status == QosAckHandler::Status::NO_ACK_REQUIRED ||
+           status == QosAckHandler::Status::NORMAL_ACK_NOT_ARRIVED ||
            status == QosAckHandler::Status::BLOCK_ACK_NOT_ARRIVED ||
            status == QosAckHandler::Status::BLOCK_ACK_ARRIVED_UNACKED ||
            status == QosAckHandler::Status::FRAME_NOT_YET_TRANSMITTED;

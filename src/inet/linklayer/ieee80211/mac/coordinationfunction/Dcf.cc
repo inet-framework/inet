@@ -354,7 +354,7 @@ void Dcf::originatorProcessFailedFrame(Packet *failedPacket)
     EV_INFO << "Data/Mgmt frame transmission failed\n";
     const auto& failedHeader = failedPacket->peekAtFront<Ieee80211DataOrMgmtHeader>();
     ASSERT(failedHeader->getType() != ST_DATA_WITH_QOS);
-    ASSERT(ackHandler->getAckStatus(failedHeader) == AckHandler::Status::WAITING_FOR_ACK);
+    ASSERT(ackHandler->getAckStatus(failedHeader) == AckHandler::Status::WAITING_FOR_ACK || ackHandler->getAckStatus(failedHeader) == AckHandler::Status::NO_ACK_REQUIRED);
     recoveryProcedure->dataOrMgmtFrameTransmissionFailed(failedPacket, failedHeader, stationRetryCounters);
     bool retryLimitReached = recoveryProcedure->isRetryLimitReached(failedPacket, failedHeader);
     if (dataAndMgmtRateControl) {
