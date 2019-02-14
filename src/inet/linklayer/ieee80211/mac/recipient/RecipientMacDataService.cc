@@ -27,7 +27,7 @@ Define_Module(RecipientMacDataService);
 
 void RecipientMacDataService::initialize()
 {
-    duplicateRemoval = new LegacyDuplicateRemoval();
+    duplicateRemoval = check_and_cast<LegacyDuplicateRemoval *>(getSubmodule("duplicateRemoval"));;
     basicReassembly = new BasicReassembly();
 }
 
@@ -76,7 +76,6 @@ std::vector<Packet *> RecipientMacDataService::controlFrameReceived(Packet *cont
 
 RecipientMacDataService::~RecipientMacDataService()
 {
-    delete duplicateRemoval;
     delete basicReassembly;
 }
 

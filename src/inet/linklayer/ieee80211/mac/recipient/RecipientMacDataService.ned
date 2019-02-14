@@ -17,6 +17,8 @@
 
 package inet.linklayer.ieee80211.mac.recipient;
 
+import inet.linklayer.ieee80211.mac.duplicateremoval.LegacyDuplicateRemoval;
+
 module RecipientMacDataService
 {
     parameters:
@@ -28,5 +30,10 @@ module RecipientMacDataService
         @statistic[packetDefragmented](title="packets defragmented"; record=count);
         @statistic[packetDeaggregated](title="packets deaggregated"; record=count);
         @statistic[packetDropDuplicateDetected](title="packet drops: duplicate detected"; source=packetDropReasonIsDuplicateDetected(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
+    submodules:
+        duplicateRemoval: LegacyDuplicateRemoval {
+            parameters:
+	            @display("p=100,100");
+        }
 }
 

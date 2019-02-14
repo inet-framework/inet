@@ -32,7 +32,7 @@ Define_Module(RecipientQosMacDataService);
 // TODO: refactor to avoid code duplication
 void RecipientQosMacDataService::initialize()
 {
-    duplicateRemoval = new QoSDuplicateRemoval();
+    duplicateRemoval = check_and_cast<QoSDuplicateRemoval *>(getSubmodule("duplicateRemoval"));
     basicReassembly = new BasicReassembly();
     aMsduDeaggregation = new MsduDeaggregation();
     aMpduDeaggregation = new MpduDeaggregation();
@@ -186,7 +186,6 @@ std::vector<Packet *> RecipientQosMacDataService::controlFrameReceived(Packet *c
 
 RecipientQosMacDataService::~RecipientQosMacDataService()
 {
-    delete duplicateRemoval;
     delete basicReassembly;
     delete aMsduDeaggregation;
     delete aMpduDeaggregation;
