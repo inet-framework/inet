@@ -37,7 +37,6 @@ class INET_API AckHandler : public cSimpleModule, public IAckHandler
             ACK_ARRIVED,
         };
     protected:
-        // TODO: this map is actually never erased
         std::map<SequenceControlField, Status> ackStatuses;
 
     protected:
