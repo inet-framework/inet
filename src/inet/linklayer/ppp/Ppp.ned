@@ -17,6 +17,8 @@
 
 package inet.linklayer.ppp;
 
+import inet.common.queueing.contract.IPacketQueue;
+
 //
 // PPP implementation.
 //
@@ -41,17 +43,17 @@ package inet.linklayer.ppp;
 //
 // @see ~PppInterface, ~IOutputQueue, ~PppFrame
 //
-simple Ppp
+module Ppp
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module
         bool sendRawBytes = default(false); // when true packets are serialized into a sequence of bytes before sending out
-        int txQueueLimit = default(1000);  // only used if queueModule==""; zero means infinite
-        string queueModule = default("");  // path of external (QoS,RED,etc) queue module
+        int txQueueLimit = default(1000);  // zero means infinite
         int mtu @unit(B) = default(4470B);
         @lifecycleSupport;
         double stopOperationExtraTime @unit(s) = default(-1s);    // extra time after lifecycle stop operation finished
         double stopOperationTimeout @unit(s) = default(2s);    // timeout value for lifecycle stop operation
+        @class(Ppp);
         @display("i=block/rxtx");
 
         @signal[transmissionStateChanged](type=long);    // 1:transmit, 0:idle
@@ -68,10 +70,16 @@ simple Ppp
         @statistic[packetDropInterfaceDown](title="packet drop: interface down"; source=packetDropReasonIsInterfaceDown(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[rcvdPkFromHl](title="packets received from higher layer"; source=packetReceivedFromUpper; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[passedUpPk](title="packets passed to higher layer"; source=packetSentToUpper; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
-
     gates:
         input upperLayerIn;
         output upperLayerOut;
         inout phys @labels(PppFrame);
+    submodules:
+        queue: <default("DropTailQueue")> like IPacketQueue {
+            parameters:
+                frameCapacity = default(txQueueLimit);
+                @display("p=100,100;q=l2queue");
+        }
+    connections allowunconnected:
 }
 
