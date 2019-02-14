@@ -387,7 +387,10 @@ void TcpConnection::sendSegmentDuringLossRecoveryPhase(uint32 seqNum)
 
     uint32 sentSeqNum = seqNum + state->sentBytes;
 
-    ASSERT(seqLE(state->snd_nxt, sentSeqNum + 1));    // +1 for FIN, if sent
+    if(state->send_fin && sentSeqNum == state->snd_fin_seq)
+        sentSeqNum = sentSeqNum + 1;
+    
+    ASSERT(seqLE(state->snd_nxt, sentSeqNum));
 
     // RFC 3517 page 8: "(C.2) If any of the data octets sent in (C.1) are below HighData,
     // HighRxt MUST be set to the highest sequence number of the
