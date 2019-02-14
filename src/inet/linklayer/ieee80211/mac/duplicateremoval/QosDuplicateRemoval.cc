@@ -21,6 +21,17 @@
 namespace inet {
 namespace ieee80211 {
 
+Define_Module(QoSDuplicateRemoval);
+
+void QoSDuplicateRemoval::initialize(int stage)
+{
+    if (stage == INITSTAGE_LOCAL) {
+        // TODO: WATCH_MAP(lastSeenSeqNumCache);
+        WATCH_MAP(lastSeenSharedSeqNumCache);
+        WATCH_MAP(lastSeenTimePriorityManagementSeqNumCache);
+    }
+}
+
 bool QoSDuplicateRemoval::isDuplicate(const Ptr<const Ieee80211DataOrMgmtHeader>& header)
 {
     SequenceControlField seqVal(header);

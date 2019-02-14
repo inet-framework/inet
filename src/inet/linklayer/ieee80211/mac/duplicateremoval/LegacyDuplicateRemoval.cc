@@ -21,6 +21,15 @@
 namespace inet {
 namespace ieee80211 {
 
+Define_Module(LegacyDuplicateRemoval);
+
+void LegacyDuplicateRemoval::initialize(int stage)
+{
+    if (stage == INITSTAGE_LOCAL) {
+        WATCH_MAP(lastSeenSeqNumCache);
+    }
+}
+
 bool LegacyDuplicateRemoval::isDuplicate(const Ptr<const Ieee80211DataOrMgmtHeader>& header)
 {
     ASSERT(header->getType() != ST_DATA_WITH_QOS);
