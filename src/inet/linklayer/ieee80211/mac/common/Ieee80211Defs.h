@@ -64,6 +64,11 @@ inline std::ostream& operator<<(std::ostream& os, const SequenceNumber& sequence
     return os;
 }
 
+inline std::ostream& operator<<(std::ostream& os, const Tid tid) { return os << (int)tid; }
+
+template <typename K, typename V>
+std::ostream& operator<<(std::ostream& os, const std::pair<K, V>& pair) { return os << "(" << pair.first << ", " << pair.second << ")"; }
+
 } // namespace ieee80211
 } // namespace inet
 
