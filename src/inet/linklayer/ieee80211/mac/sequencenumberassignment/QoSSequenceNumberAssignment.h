@@ -27,7 +27,7 @@
 namespace inet {
 namespace ieee80211 {
 
-class INET_API QoSSequenceNumberAssignment : public ISequenceNumberAssignment
+class INET_API QosSequenceNumberAssignment : public ISequenceNumberAssignment
 {
     protected:
         enum CacheType

@@ -35,7 +35,7 @@ class INET_API Edca : public cSimpleModule
         int numEdcafs = -1;
         Edcaf **edcafs = nullptr;
         EdcaTransmitLifetimeHandler *lifetimeHandler = nullptr;
-        NonQosRecoveryProcedure *mgmtAndNonQoSRecoveryProcedure = nullptr;
+        NonQosRecoveryProcedure *mgmtAndNonQosRecoveryProcedure = nullptr;
 
     protected:
         virtual int numInitStages() const override { return NUM_INIT_STAGES; }
@@ -50,7 +50,7 @@ class INET_API Edca : public cSimpleModule
         virtual Edcaf *getEdcaf(AccessCategory ac) const { return edcafs[ac]; }
         virtual Edcaf *getChannelOwner();
         virtual std::vector<Edcaf*> getInternallyCollidedEdcafs();
-        virtual NonQosRecoveryProcedure *getMgmtAndNonQoSRecoveryProcedure() const { return mgmtAndNonQoSRecoveryProcedure; }
+        virtual NonQosRecoveryProcedure *getMgmtAndNonQosRecoveryProcedure() const { return mgmtAndNonQosRecoveryProcedure; }
 
         virtual void requestChannelAccess(AccessCategory ac, IChannelAccess::ICallback *callback);
         virtual void releaseChannelAccess(AccessCategory ac, IChannelAccess::ICallback *callback);

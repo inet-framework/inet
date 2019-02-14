@@ -21,7 +21,7 @@
 #include "inet/linklayer/ieee80211/mac/aggregation/MsduAggregation.h"
 #include "inet/linklayer/ieee80211/mac/fragmentation/Fragmentation.h"
 #include "inet/linklayer/ieee80211/mac/originator/OriginatorQosMacDataService.h"
-#include "inet/linklayer/ieee80211/mac/sequencenumberassignment/QoSSequenceNumberAssignment.h"
+#include "inet/linklayer/ieee80211/mac/sequencenumberassignment/QosSequenceNumberAssignment.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -36,7 +36,7 @@ void OriginatorQosMacDataService::initialize()
     aMpduAggregationPolicy = dynamic_cast<IMpduAggregationPolicy*>(getSubmodule("mpduAggregationPolicy"));
     if (aMpduAggregationPolicy)
         aMpduAggregation = new MpduAggregation();
-    sequenceNumberAssigment = new QoSSequenceNumberAssignment();
+    sequenceNumberAssigment = new QosSequenceNumberAssignment();
     fragmentationPolicy = dynamic_cast<IFragmentationPolicy*>(getSubmodule("fragmentationPolicy"));
     fragmentation = new Fragmentation();
 }

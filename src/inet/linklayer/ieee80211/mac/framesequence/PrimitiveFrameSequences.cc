@@ -402,11 +402,11 @@ IFrameSequenceStep *BlockAckReqBlockAckFs::prepareStep(FrameSequenceContext *con
 {
     switch (step) {
         case 0: {
-            auto blockAckReqParams = context->getQoSContext()->ackPolicy->computeBlockAckReqParameters(context->getInProgressFrames(), context->getQoSContext()->txopProcedure);
+            auto blockAckReqParams = context->getQosContext()->ackPolicy->computeBlockAckReqParameters(context->getInProgressFrames(), context->getQosContext()->txopProcedure);
             auto receiverAddr = std::get<0>(blockAckReqParams);
             auto startingSequenceNumber = std::get<1>(blockAckReqParams);
             auto tid = std::get<2>(blockAckReqParams);
-            auto blockAckReq = context->getQoSContext()->blockAckProcedure->buildBasicBlockAckReqFrame(receiverAddr, tid, startingSequenceNumber);
+            auto blockAckReq = context->getQosContext()->blockAckProcedure->buildBasicBlockAckReqFrame(receiverAddr, tid, startingSequenceNumber);
             auto blockAckPacket = new Packet("BasicBlockAckReq", blockAckReq);
             blockAckPacket->insertAtBack(makeShared<Ieee80211MacTrailer>());
             return new TransmitStep(blockAckPacket, context->getIfs());
@@ -415,7 +415,7 @@ IFrameSequenceStep *BlockAckReqBlockAckFs::prepareStep(FrameSequenceContext *con
             auto txStep = check_and_cast<ITransmitStep *>(context->getLastStep());
             auto packet = txStep->getFrameToTransmit();
             auto blockAckReq = packet->peekAtFront<Ieee80211BlockAckReq>();
-            return new ReceiveStep(context->getQoSContext()->ackPolicy->getBlockAckTimeout(packet, blockAckReq));
+            return new ReceiveStep(context->getQosContext()->ackPolicy->getBlockAckTimeout(packet, blockAckReq));
         }
         case 2:
             return nullptr;

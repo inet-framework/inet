@@ -28,7 +28,7 @@ void OriginatorBlockAckAgreementPolicy::initialize(int stage)
 {
     ModeSetListener::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        ackPolicy = check_and_cast<IOriginatorQoSAckPolicy*>(getModuleByPath(par("originatorAckPolicyModule")));
+        ackPolicy = check_and_cast<IOriginatorQosAckPolicy*>(getModuleByPath(par("originatorAckPolicyModule")));
         delayedAckPolicySupported = par("delayedAckPolicySupported");
         aMsduSupported = par("aMsduSupported");
         maximumAllowedBufferSize = par("maximumAllowedBufferSize");

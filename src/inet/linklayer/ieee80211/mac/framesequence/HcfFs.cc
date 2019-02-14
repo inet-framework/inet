@@ -71,7 +71,7 @@ bool HcfFs::hasMoreTxOps(RepeatingFs *frameSequence, FrameSequenceContext *conte
     if (hasFrameToTransmit) {
         auto nextFrameToTransmit = context->getInProgressFrames()->getFrameToTransmit();
         const auto& nextHeader = nextFrameToTransmit->peekAtFront<Ieee80211MacHeader>();
-        return frameSequence->getCount() == 0 || (!nextHeader->getReceiverAddress().isMulticast() && context->getQoSContext()->txopProcedure->getRemaining() > 0);
+        return frameSequence->getCount() == 0 || (!nextHeader->getReceiverAddress().isMulticast() && context->getQosContext()->txopProcedure->getRemaining() > 0);
     }
     return false;
 }

@@ -126,14 +126,14 @@ simtime_t SingleProtectionMechanism::computeDataOrMgmtFrameDurationField(Packet 
         mgmtFrame = true;
         mgmtFrameWithNoAck = false; // FIXME: ack policy?
     }
-    bool nonQoSData = dataOrMgmtHeader->getType() == ST_DATA;
+    bool nonQosData = dataOrMgmtHeader->getType() == ST_DATA;
     bool individuallyAddressedDataWithNormalAck = false;
     bool individuallyAddressedDataWithNoAckOrBlockAck = false;
     if (auto dataHeader = dynamicPtrCast<const Ieee80211DataHeader>(dataOrMgmtHeader)) {
         individuallyAddressedDataWithNormalAck = !groupAddressed && dataHeader->getAckPolicy() == AckPolicy::NORMAL_ACK;
         individuallyAddressedDataWithNoAckOrBlockAck = !groupAddressed && (dataHeader->getAckPolicy() == AckPolicy::NO_ACK || dataHeader->getAckPolicy() == AckPolicy::BLOCK_ACK);
     }
-    if (mgmtFrame || nonQoSData || individuallyAddressedDataWithNormalAck) {
+    if (mgmtFrame || nonQosData || individuallyAddressedDataWithNormalAck) {
         simtime_t ackFrameDuration = rateSelection->computeResponseAckFrameMode(packet, dataOrMgmtHeader)->getDuration(LENGTH_ACK);
         if (txop->isFinalFragment(dataOrMgmtHeader)) {
             return ackFrameDuration + modeSet->getSifsTime();

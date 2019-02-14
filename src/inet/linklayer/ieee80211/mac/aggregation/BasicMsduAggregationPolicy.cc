@@ -27,7 +27,7 @@ void BasicMsduAggregationPolicy::initialize()
     subframeNumThreshold = par("subframeNumThreshold");
     aggregationLengthThreshold = par("aggregationLengthThreshold");
     maxAMsduSize = par("maxAMsduSize");
-    qOsCheck = par("qOsCheck");
+    qosCheck = par("qosCheck");
 }
 
 bool BasicMsduAggregationPolicy::isAggregationPossible(int numOfFramesToAggragate, int aMsduLength)
@@ -40,7 +40,7 @@ bool BasicMsduAggregationPolicy::isEligible(const Ptr<const Ieee80211DataHeader>
 {
     const auto& testTrailer = testPacket->peekAtBack<Ieee80211MacTrailer>();
 //   Only QoS data frames have a TID.
-    if (qOsCheck && header->getType() != ST_DATA_WITH_QOS)
+    if (qosCheck && header->getType() != ST_DATA_WITH_QOS)
         return false;
 
 //    The maximum MPDU length that can be transported using A-MPDU aggregation is 4095 octets. An

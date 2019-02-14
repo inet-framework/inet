@@ -27,7 +27,7 @@
 namespace inet {
 namespace ieee80211 {
 
-class INET_API QoSDuplicateRemoval : public cSimpleModule, public IDuplicateRemoval
+class INET_API QosDuplicateRemoval : public cSimpleModule, public IDuplicateRemoval
 {
     public:
         typedef std::pair<MacAddress, Tid> Key;

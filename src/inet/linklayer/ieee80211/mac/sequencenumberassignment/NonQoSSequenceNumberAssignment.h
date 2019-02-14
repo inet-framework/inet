@@ -23,7 +23,7 @@
 namespace inet {
 namespace ieee80211 {
 
-class NonQoSSequenceNumberAssignment : public LegacySequenceNumberAssigment
+class NonQosSequenceNumberAssignment : public LegacySequenceNumberAssigment
 {
     protected:
         std::map<MacAddress, SequenceNumber> lastSentSeqNums; // last sent sequence numbers per RA

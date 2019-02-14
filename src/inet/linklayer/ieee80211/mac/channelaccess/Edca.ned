@@ -48,7 +48,7 @@ module Edca
             parameters:
                 @display("p=100,200");
         }
-        mgmtAndNonQoSRecoveryProcedure: NonQosRecoveryProcedure {
+        mgmtAndNonQosRecoveryProcedure: NonQosRecoveryProcedure {
             parameters:
                 cwCalculatorModule = "^.edcaf[1]"; // best effort
                 rtsPolicyModule = "^.^.rtsPolicy";

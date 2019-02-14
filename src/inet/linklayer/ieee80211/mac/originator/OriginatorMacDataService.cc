@@ -17,7 +17,7 @@
 
 #include "inet/linklayer/ieee80211/mac/fragmentation/Fragmentation.h"
 #include "inet/linklayer/ieee80211/mac/originator/OriginatorMacDataService.h"
-#include "inet/linklayer/ieee80211/mac/sequencenumberassignment/NonQoSSequenceNumberAssignment.h"
+#include "inet/linklayer/ieee80211/mac/sequencenumberassignment/NonQosSequenceNumberAssignment.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -26,7 +26,7 @@ Define_Module(OriginatorMacDataService);
 
 void OriginatorMacDataService::initialize()
 {
-    sequenceNumberAssigment = new NonQoSSequenceNumberAssignment();
+    sequenceNumberAssigment = new NonQosSequenceNumberAssignment();
     fragmentationPolicy = check_and_cast<IFragmentationPolicy*>(getSubmodule("fragmentationPolicy"));
     fragmentation = new Fragmentation();
 }

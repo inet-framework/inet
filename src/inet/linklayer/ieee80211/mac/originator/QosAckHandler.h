@@ -46,16 +46,16 @@ class INET_API QosAckHandler : public cSimpleModule, public IAckHandler
             BLOCK_ACK_NOT_ARRIVED
         };
     protected:
-        typedef std::pair<MacAddress, std::pair<Tid, SequenceControlField>> QoSKey;
+        typedef std::pair<MacAddress, std::pair<Tid, SequenceControlField>> QosKey;
         typedef std::pair<MacAddress, SequenceControlField> Key;
-        std::map<QoSKey, Status> ackStatuses;
+        std::map<QosKey, Status> ackStatuses;
         std::map<Key, Status> mgmtAckStatuses;
 
     protected:
         virtual void initialize(int stage) override;
 
-        virtual Status getQoSDataAckStatus(const QoSKey& id);
-        virtual Status getMgmtOrNonQoSAckStatus(const Key& id);
+        virtual Status getQosDataAckStatus(const QosKey& id);
+        virtual Status getMgmtOrNonQosAckStatus(const Key& id);
 
         void printAckStatuses();
 
@@ -73,8 +73,8 @@ class INET_API QosAckHandler : public cSimpleModule, public IAckHandler
         virtual void dropFrame(const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader);
         virtual void dropFrames(std::set<std::pair<MacAddress, std::pair<Tid, SequenceControlField>>> seqAndFragNums);
 
-        virtual Status getQoSDataAckStatus(const Ptr<const Ieee80211DataHeader>& header);
-        virtual Status getMgmtOrNonQoSAckStatus(const Ptr<const Ieee80211DataOrMgmtHeader>& header);
+        virtual Status getQosDataAckStatus(const Ptr<const Ieee80211DataHeader>& header);
+        virtual Status getMgmtOrNonQosAckStatus(const Ptr<const Ieee80211DataOrMgmtHeader>& header);
 
         virtual bool isEligibleToTransmit(const Ptr<const Ieee80211DataOrMgmtHeader>& header) override;
         virtual bool isOutstandingFrame(const Ptr<const Ieee80211DataOrMgmtHeader>& header) override;

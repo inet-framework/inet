@@ -32,7 +32,7 @@ Define_Module(RecipientQosMacDataService);
 // TODO: refactor to avoid code duplication
 void RecipientQosMacDataService::initialize()
 {
-    duplicateRemoval = check_and_cast<QoSDuplicateRemoval *>(getSubmodule("duplicateRemoval"));
+    duplicateRemoval = check_and_cast<QosDuplicateRemoval *>(getSubmodule("duplicateRemoval"));
     basicReassembly = new BasicReassembly();
     aMsduDeaggregation = new MsduDeaggregation();
     aMpduDeaggregation = new MpduDeaggregation();
@@ -80,7 +80,7 @@ std::vector<Packet *> RecipientQosMacDataService::dataFrameReceived(Packet *data
         MacAddress originatorAddr = dataHeader->getTransmitterAddress();
         RecipientBlockAckAgreement *agreement = blockAckAgreementHandler->getAgreement(tid, originatorAddr);
         if (agreement)
-            frames = blockAckReordering->processReceivedQoSFrame(agreement, dataPacket, dataHeader);
+            frames = blockAckReordering->processReceivedQosFrame(agreement, dataPacket, dataHeader);
     }
     std::vector<Packet *> defragmentedFrames;
     if (basicReassembly) { // FIXME: defragmentation

@@ -257,8 +257,8 @@ void Dcf::recipientProcessReceivedControlFrame(Packet *packet, const Ptr<const I
 
 FrameSequenceContext* Dcf::buildContext()
 {
-    auto nonQoSContext = new NonQoSContext(originatorAckPolicy);
-    return new FrameSequenceContext(mac->getAddress(), modeSet, channelAccess->getInProgressFrames(), rtsProcedure, rtsPolicy, nonQoSContext, nullptr);
+    auto nonQosContext = new NonQosContext(originatorAckPolicy);
+    return new FrameSequenceContext(mac->getAddress(), modeSet, channelAccess->getInProgressFrames(), rtsProcedure, rtsPolicy, nonQosContext, nullptr);
 }
 
 void Dcf::transmissionComplete(Packet *packet, const Ptr<const Ieee80211MacHeader>& header)

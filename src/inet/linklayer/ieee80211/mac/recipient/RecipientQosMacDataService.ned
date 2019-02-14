@@ -17,7 +17,7 @@
 
 package inet.linklayer.ieee80211.mac.recipient;
 
-import inet.linklayer.ieee80211.mac.duplicateremoval.QoSDuplicateRemoval;
+import inet.linklayer.ieee80211.mac.duplicateremoval.QosDuplicateRemoval;
 
 module RecipientQosMacDataService
 {
@@ -31,7 +31,7 @@ module RecipientQosMacDataService
         @statistic[packetDeaggregated](title="packets deaggregated"; record=count);
         @statistic[packetDropDuplicateDetected](title="packet drops: duplicate detected"; source=packetDropReasonIsDuplicateDetected(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
     submodules:
-        duplicateRemoval: QoSDuplicateRemoval {
+        duplicateRemoval: QosDuplicateRemoval {
             parameters:
                 @display("p=100,100");
         }

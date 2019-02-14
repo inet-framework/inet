@@ -26,7 +26,7 @@ namespace ieee80211 {
 class INET_API BasicMsduAggregationPolicy : public IMsduAggregationPolicy, public cSimpleModule
 {
     protected:
-        bool qOsCheck = false;
+        bool qosCheck = false;
         int subframeNumThreshold = -1;
         int aggregationLengthThreshold = -1;
         int maxAMsduSize = -1;

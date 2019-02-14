@@ -20,7 +20,7 @@
 
 #include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckAgreementHandler.h"
 #include "inet/linklayer/ieee80211/mac/common/ModeSetListener.h"
-#include "inet/linklayer/ieee80211/mac/contract/IOriginatorQoSAckPolicy.h"
+#include "inet/linklayer/ieee80211/mac/contract/IOriginatorQosAckPolicy.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -28,7 +28,7 @@ namespace ieee80211 {
 class INET_API OriginatorBlockAckAgreementPolicy : public ModeSetListener, public IOriginatorBlockAckAgreementPolicy
 {
     protected:
-        IOriginatorQoSAckPolicy *ackPolicy = nullptr;
+        IOriginatorQosAckPolicy *ackPolicy = nullptr;
 
         int blockAckReqTreshold = -1;
         bool delayedAckPolicySupported = false;

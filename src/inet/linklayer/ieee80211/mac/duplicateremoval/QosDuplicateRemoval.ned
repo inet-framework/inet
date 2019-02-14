@@ -17,7 +17,7 @@
 
 package inet.linklayer.ieee80211.mac.duplicateremoval;
 
-simple QoSDuplicateRemoval
+simple QosDuplicateRemoval
 {
     parameters:
         @display("i=block/table2");

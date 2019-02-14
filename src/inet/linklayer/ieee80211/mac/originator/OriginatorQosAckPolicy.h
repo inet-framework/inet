@@ -20,13 +20,13 @@
 
 #include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckAgreement.h"
 #include "inet/linklayer/ieee80211/mac/common/ModeSetListener.h"
-#include "inet/linklayer/ieee80211/mac/contract/IOriginatorQoSAckPolicy.h"
+#include "inet/linklayer/ieee80211/mac/contract/IOriginatorQosAckPolicy.h"
 #include "inet/linklayer/ieee80211/mac/contract/IQosRateSelection.h"
 
 namespace inet {
 namespace ieee80211 {
 
-class INET_API OriginatorQosAckPolicy : public ModeSetListener, public IOriginatorQoSAckPolicy
+class INET_API OriginatorQosAckPolicy : public ModeSetListener, public IOriginatorQosAckPolicy
 {
     protected:
         IQosRateSelection *rateSelection = nullptr;

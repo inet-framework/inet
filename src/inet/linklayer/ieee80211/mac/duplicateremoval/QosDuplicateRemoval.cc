@@ -21,9 +21,9 @@
 namespace inet {
 namespace ieee80211 {
 
-Define_Module(QoSDuplicateRemoval);
+Define_Module(QosDuplicateRemoval);
 
-void QoSDuplicateRemoval::initialize(int stage)
+void QosDuplicateRemoval::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
         // TODO: WATCH_MAP(lastSeenSeqNumCache);
@@ -32,7 +32,7 @@ void QoSDuplicateRemoval::initialize(int stage)
     }
 }
 
-bool QoSDuplicateRemoval::isDuplicate(const Ptr<const Ieee80211DataOrMgmtHeader>& header)
+bool QosDuplicateRemoval::isDuplicate(const Ptr<const Ieee80211DataOrMgmtHeader>& header)
 {
     SequenceControlField seqVal(header);
     bool isManagementFrame = dynamicPtrCast<const Ieee80211MgmtHeader>(header) != nullptr;

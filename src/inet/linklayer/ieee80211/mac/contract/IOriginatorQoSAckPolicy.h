@@ -26,10 +26,10 @@
 namespace inet {
 namespace ieee80211 {
 
-class INET_API IOriginatorQoSAckPolicy
+class INET_API IOriginatorQosAckPolicy
 {
     public:
-        virtual ~IOriginatorQoSAckPolicy() { }
+        virtual ~IOriginatorQosAckPolicy() { }
 
         virtual bool isAckNeeded(const Ptr<const Ieee80211MgmtHeader>& header) const = 0;
         virtual AckPolicy computeAckPolicy(Packet *packet, const Ptr<const Ieee80211DataHeader>& header, OriginatorBlockAckAgreement *agreement) const = 0;

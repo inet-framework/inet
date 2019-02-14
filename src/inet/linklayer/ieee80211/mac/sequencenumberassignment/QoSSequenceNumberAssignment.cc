@@ -15,12 +15,12 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 // 
 
-#include "inet/linklayer/ieee80211/mac/sequencenumberassignment/QoSSequenceNumberAssignment.h"
+#include "inet/linklayer/ieee80211/mac/sequencenumberassignment/QosSequenceNumberAssignment.h"
 
 namespace inet {
 namespace ieee80211 {
 
-QoSSequenceNumberAssignment::CacheType QoSSequenceNumberAssignment::getCacheType(const Ptr<const Ieee80211DataOrMgmtHeader>& header, bool incoming)
+QosSequenceNumberAssignment::CacheType QosSequenceNumberAssignment::getCacheType(const Ptr<const Ieee80211DataOrMgmtHeader>& header, bool incoming)
 {
     bool isTimePriorityFrame = false; // TODO
     const MacAddress& address = incoming ? header->getTransmitterAddress() : header->getReceiverAddress();
@@ -32,7 +32,7 @@ QoSSequenceNumberAssignment::CacheType QoSSequenceNumberAssignment::getCacheType
         return DATA;
 }
 
-void QoSSequenceNumberAssignment::assignSequenceNumber(const Ptr<Ieee80211DataOrMgmtHeader>& header)
+void QosSequenceNumberAssignment::assignSequenceNumber(const Ptr<Ieee80211DataOrMgmtHeader>& header)
 {
     CacheType type = getCacheType(header, false);
     SequenceNumber seqNum;

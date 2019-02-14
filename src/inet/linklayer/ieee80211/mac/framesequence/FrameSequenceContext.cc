@@ -22,13 +22,13 @@ namespace ieee80211 {
 
 using namespace inet::physicallayer;
 
-FrameSequenceContext::FrameSequenceContext(MacAddress address, Ieee80211ModeSet *modeSet, InProgressFrames *inProgressFrames, IRtsProcedure *rtsProcedure, IRtsPolicy *rtsPolicy, NonQoSContext *nonQoSContext, QoSContext *qosContext) :
+FrameSequenceContext::FrameSequenceContext(MacAddress address, Ieee80211ModeSet *modeSet, InProgressFrames *inProgressFrames, IRtsProcedure *rtsProcedure, IRtsPolicy *rtsPolicy, NonQosContext *nonQosContext, QosContext *qosContext) :
     address(address),
     modeSet(modeSet),
     inProgressFrames(inProgressFrames),
     rtsProcedure(rtsProcedure),
     rtsPolicy(rtsPolicy),
-    nonQoSContext(nonQoSContext),
+    nonQosContext(nonQosContext),
     qosContext(qosContext)
 {
 }
@@ -40,7 +40,7 @@ simtime_t FrameSequenceContext::getIfs() const
 
 simtime_t FrameSequenceContext::getAckTimeout(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtframe) const
 {
-    return qosContext ? qosContext->ackPolicy->getAckTimeout(packet, dataOrMgmtframe) : nonQoSContext->ackPolicy->getAckTimeout(packet, dataOrMgmtframe);
+    return qosContext ? qosContext->ackPolicy->getAckTimeout(packet, dataOrMgmtframe) : nonQosContext->ackPolicy->getAckTimeout(packet, dataOrMgmtframe);
 }
 
 simtime_t FrameSequenceContext::getCtsTimeout(Packet *packet, const Ptr<const Ieee80211RtsFrame>& rtsFrame) const
@@ -68,7 +68,7 @@ FrameSequenceContext::~FrameSequenceContext()
 {
     for (auto step : steps)
         delete step;
-    delete nonQoSContext;
+    delete nonQosContext;
     delete qosContext;
     inProgressFrames->clearDroppedFrames();
 }

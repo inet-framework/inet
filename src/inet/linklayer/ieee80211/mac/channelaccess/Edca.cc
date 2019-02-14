@@ -30,7 +30,7 @@ void Edca::initialize(int stage)
         for (int ac = 0; ac < numEdcafs; ac++) {
             edcafs[ac] = check_and_cast<Edcaf*>(getSubmodule("edcaf", ac));
         }
-        mgmtAndNonQoSRecoveryProcedure = check_and_cast<NonQosRecoveryProcedure *>(getSubmodule("mgmtAndNonQoSRecoveryProcedure"));
+        mgmtAndNonQosRecoveryProcedure = check_and_cast<NonQosRecoveryProcedure *>(getSubmodule("mgmtAndNonQosRecoveryProcedure"));
     }
 }
 

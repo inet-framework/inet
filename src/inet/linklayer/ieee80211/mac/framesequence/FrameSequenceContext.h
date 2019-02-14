@@ -24,7 +24,7 @@
 #include "inet/linklayer/ieee80211/mac/contract/IOriginatorAckPolicy.h"
 #include "inet/linklayer/ieee80211/mac/contract/IOriginatorBlockAckAgreementHandler.h"
 #include "inet/linklayer/ieee80211/mac/contract/IOriginatorBlockAckProcedure.h"
-#include "inet/linklayer/ieee80211/mac/contract/IOriginatorQoSAckPolicy.h"
+#include "inet/linklayer/ieee80211/mac/contract/IOriginatorQosAckPolicy.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRtsPolicy.h"
 #include "inet/linklayer/ieee80211/mac/originator/RtsProcedure.h"
 #include "inet/linklayer/ieee80211/mac/originator/TxopProcedure.h"
@@ -34,26 +34,26 @@
 namespace inet {
 namespace ieee80211 {
 
-class INET_API QoSContext
+class INET_API QosContext
 {
     public:
-        QoSContext(IOriginatorQoSAckPolicy *ackPolicy, IOriginatorBlockAckProcedure *blockAckProcedure, IOriginatorBlockAckAgreementHandler *blockAckAgreementHandler, TxopProcedure *txopProcedure) :
+        QosContext(IOriginatorQosAckPolicy *ackPolicy, IOriginatorBlockAckProcedure *blockAckProcedure, IOriginatorBlockAckAgreementHandler *blockAckAgreementHandler, TxopProcedure *txopProcedure) :
             ackPolicy(ackPolicy),
             blockAckProcedure(blockAckProcedure),
             blockAckAgreementHandler(blockAckAgreementHandler),
             txopProcedure(txopProcedure)
         { }
 
-        IOriginatorQoSAckPolicy *ackPolicy = nullptr;
+        IOriginatorQosAckPolicy *ackPolicy = nullptr;
         IOriginatorBlockAckProcedure *blockAckProcedure = nullptr;
         IOriginatorBlockAckAgreementHandler *blockAckAgreementHandler = nullptr;
         TxopProcedure *txopProcedure = nullptr;
 };
 
-class INET_API NonQoSContext
+class INET_API NonQosContext
 {
     public:
-        NonQoSContext(IOriginatorAckPolicy *ackPolicy) :
+        NonQosContext(IOriginatorAckPolicy *ackPolicy) :
             ackPolicy(ackPolicy)
         { }
 
@@ -72,11 +72,11 @@ class INET_API FrameSequenceContext : public cObject
         IRtsProcedure *rtsProcedure = nullptr;
         IRtsPolicy *rtsPolicy = nullptr;
 
-        NonQoSContext *nonQoSContext = nullptr;
-        QoSContext *qosContext = nullptr;
+        NonQosContext *nonQosContext = nullptr;
+        QosContext *qosContext = nullptr;
 
     public:
-        FrameSequenceContext(MacAddress address, physicallayer::Ieee80211ModeSet *modeSet, InProgressFrames *inProgressFrames, IRtsProcedure *rtsProcedure, IRtsPolicy *rtsPolicy, NonQoSContext *nonQosContext, QoSContext *qosContext);
+        FrameSequenceContext(MacAddress address, physicallayer::Ieee80211ModeSet *modeSet, InProgressFrames *inProgressFrames, IRtsProcedure *rtsProcedure, IRtsPolicy *rtsPolicy, NonQosContext *nonQosContext, QosContext *qosContext);
         virtual ~FrameSequenceContext();
 
         virtual simtime_t getDuration() const { return simTime() - startTime; }
@@ -91,8 +91,8 @@ class INET_API FrameSequenceContext : public cObject
         virtual IRtsProcedure* getRtsProcedure() const { return rtsProcedure; }
         virtual IRtsPolicy* getRtsPolicy() const { return rtsPolicy; }
 
-        virtual NonQoSContext *getNonQoSContext() const { return nonQoSContext; }
-        virtual QoSContext *getQoSContext() const { return qosContext; }
+        virtual NonQosContext *getNonQosContext() const { return nonQosContext; }
+        virtual QosContext *getQosContext() const { return qosContext; }
 
         virtual simtime_t getAckTimeout(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtframe) const;
         virtual simtime_t getCtsTimeout(Packet *packet, const Ptr<const Ieee80211RtsFrame>& rtsFrame) const;

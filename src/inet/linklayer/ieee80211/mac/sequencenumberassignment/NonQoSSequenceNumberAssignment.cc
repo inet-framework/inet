@@ -15,12 +15,12 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 // 
 
-#include "inet/linklayer/ieee80211/mac/sequencenumberassignment/NonQoSSequenceNumberAssignment.h"
+#include "inet/linklayer/ieee80211/mac/sequencenumberassignment/NonQosSequenceNumberAssignment.h"
 
 namespace inet {
 namespace ieee80211 {
 
-void NonQoSSequenceNumberAssignment::assignSequenceNumber(const Ptr<Ieee80211DataOrMgmtHeader>& header)
+void NonQosSequenceNumberAssignment::assignSequenceNumber(const Ptr<Ieee80211DataOrMgmtHeader>& header)
 {
     ASSERT(header->getType() != ST_DATA_WITH_QOS);
     lastSeqNum = lastSeqNum + 1;
