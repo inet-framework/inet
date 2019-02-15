@@ -118,3 +118,24 @@ INET with the ``-h figures`` command-line option):
    ``type``, ``visible``, ``zIndex``, ``tooltip``, ``tags``, ``transform``, ``backgroundColor``, ``stripColor``, ``cornerRadius``, ``borderWidth``, ``minValue``, ``maxValue``, ``text``, ``textFont``, ``textColor``, ``label``, ``labelOffset``, ``labelFont``, ``labelColor``, ``initialValue``, ``pos``, ``size``, ``anchor``, ``bounds``
 ``thermometer``:
    ``type``, ``visible``, ``zIndex``, ``tooltip``, ``tags``, ``transform``, ``mercuryColor``, ``label``, ``labelFont``, ``labelColor``, ``minValue``, ``maxValue``, ``tickSize``, ``initialValue``, ``pos``, ``size``, ``anchor``, ``bounds``, ``labelOffset``
+
+Making Instrument Figures Un-zoomable
+-------------------------------------
+
+Instrument figures are zoomable, i.e. they get smaller or bigger in
+accordance with the current zoom level. They can be made un-zoomable
+(i.e. they keep their size independent of the current zoom level) by
+placing them on a ``PanelFigure``, which is an un-zoomable figure
+intended for grouping other figures. To make the above example figure
+un-zoomable, we create a ``PanelFigure`` named ``panel``, and make the
+counter figure its child by naming it ``panel.counter``:
+
+.. code-block:: none
+
+   @statistic[numRcvdPk](source=count(client.app[0].rcvdPk); record=figure; targetFigure=panel.counter);
+   @figure[panel](type=panel; pos=100,50);
+   @figure[panel.numRcvdPkCounter](type=counter; pos=413,327; label="Packets received"; decimalPlaces=4);
+
+Note that the position of the child figure is set as relative to the parent figure, in pixels.
+Multiple figures can be placed on a panel figure, this way they keep their relative positions when zoomed,
+so they don't overlap when at low zoom levels.
