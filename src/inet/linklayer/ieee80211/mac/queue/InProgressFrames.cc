@@ -30,7 +30,7 @@ simsignal_t InProgressFrames::packetDequeuedSignal = cComponent::registerSignal(
 void InProgressFrames::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
-        pendingQueue = check_and_cast<PendingQueue *>(getModuleByPath(par("pendingQueueModule")));
+        pendingQueue = check_and_cast<queueing::IPacketQueue *>(getModuleByPath(par("pendingQueueModule")));
         dataService = check_and_cast<IOriginatorMacDataService *>(getModuleByPath(par("originatorMacDataServiceModule")));
         ackHandler = check_and_cast<IAckHandler *>(getModuleByPath(par("ackHandlerModule")));
         updateDisplayString();

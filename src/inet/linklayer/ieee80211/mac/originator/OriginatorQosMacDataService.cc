@@ -41,12 +41,12 @@ void OriginatorQosMacDataService::initialize()
     fragmentation = new Fragmentation();
 }
 
-Packet *OriginatorQosMacDataService::aMsduAggregateIfNeeded(PendingQueue *pendingQueue)
+Packet *OriginatorQosMacDataService::aMsduAggregateIfNeeded(queueing::IPacketQueue *pendingQueue)
 {
-    auto subframes = aMsduAggregationPolicy->computeAggregateFrames(pendingQueue->getQueue());
+    auto subframes = aMsduAggregationPolicy->computeAggregateFrames(pendingQueue);
     if (subframes) {
         for (auto f : *subframes)
-            pendingQueue->remove(f);
+            pendingQueue->removePacket(f);
         auto aggregatedFrame = aMsduAggregation->aggregateFrames(subframes);
         emit(packetAggregatedSignal, aggregatedFrame);
         delete subframes;
@@ -85,7 +85,7 @@ std::vector<Packet *> *OriginatorQosMacDataService::fragmentIfNeeded(Packet *fra
     return nullptr;
 }
 
-std::vector<Packet *> *OriginatorQosMacDataService::extractFramesToTransmit(PendingQueue *pendingQueue)
+std::vector<Packet *> *OriginatorQosMacDataService::extractFramesToTransmit(queueing::IPacketQueue *pendingQueue)
 {
     if (pendingQueue->isEmpty())
         return nullptr;
@@ -96,7 +96,7 @@ std::vector<Packet *> *OriginatorQosMacDataService::extractFramesToTransmit(Pend
         if (aMsduAggregationPolicy)
             packet = aMsduAggregateIfNeeded(pendingQueue);
         if (!packet)
-            packet = pendingQueue->pop();
+            packet = pendingQueue->popPacket();
         // PS Defer Queueing
         if (sequenceNumberAssigment) {
             auto header = packet->removeAtFront<Ieee80211DataOrMgmtHeader>();
