@@ -18,41 +18,53 @@
 
 package inet.linklayer.ethernet;
 
-import inet.common.queue.DropTailQueue;
-import inet.common.queue.IOutputQueue;
-import inet.common.queue.PriorityScheduler;
+import inet.common.queueing.CompoundPacketQueue;
+import inet.common.queueing.DropTailQueue;
+import inet.common.queueing.contract.IPacketClassifier;
+import inet.common.queueing.contract.IPacketQueue;
+import inet.common.queueing.contract.IPacketScheduler;
+
+//
+// Queue module that gives the PAUSE frames a higher priority.
+//
+// TODO: rename to EtherQosQueue or keep name as it is?
+module EtherQueue extends DropTailQueue
+{
+    parameters:
+        comparatorClass = default("inet::EthernetFrameTypeComparator");
+}
 
 //
 // Queue module that gives the PAUSE frames a higher priority,
-// and can be parametrized with an ~IOutputQueue for serving the
-// other frames.
+// and can be parametrized with an ~IPacketQueue for serving the
+// data frames.
 //
-module EtherQosQueue like IOutputQueue
+// TODO: rename to CompoundEtherQueue? or CompoundEtherQosQueue?
+module EtherQosQueue extends CompoundPacketQueue like IPacketQueue
 {
     parameters:
         @display("i=block/queue");
-    gates:
-        input in;
-        output out;
     submodules:
-        classifier: EtherFrameClassifier {
-            @display("p=100,200");
+        classifier: <default("EtherFrameClassifier")> like IPacketClassifier {
+            parameters:
+                @display("p=100,200");
         }
-        pauseQueue: DropTailQueue {
-            queueName = "pauseQueue";
-            @display("p=250,100");
+        pauseQueue: <default("DropTailQueue")> like IPacketQueue {
+            parameters:
+                @display("p=250,100");
         }
-        dataQueue: <default("DropTailQueue")> like IOutputQueue {
+        dataQueue: <default("DropTailQueue")> like IPacketQueue {
             parameters:
                 @display("p=250,300;q=l2queue");
         }
-        scheduler: PriorityScheduler {
-            @display("p=400,200");
+        scheduler: <default("PriorityScheduler")> like IPacketScheduler {
+            parameters:
+                @display("p=400,200");
         }
     connections:
         in --> classifier.in;
-        classifier.pauseOut --> pauseQueue.in;
-        classifier.defaultOut --> dataQueue.in;
+        classifier.out++ --> pauseQueue.in;
+        classifier.out++ --> dataQueue.in;
         pauseQueue.out --> scheduler.in++;
         dataQueue.out --> scheduler.in++;
         scheduler.out --> out;

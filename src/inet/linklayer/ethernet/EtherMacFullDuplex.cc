@@ -18,7 +18,6 @@
 
 #include "inet/common/Simsignals.h"
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/common/queue/IPassiveQueue.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/ethernet/EtherEncap.h"
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
@@ -162,7 +161,6 @@ void EtherMacFullDuplex::handleUpperPacket(Packet *packet)
         numDroppedPkFromHLIfaceDown++;
         delete packet;
 
-        requestNextFrameFromExtQueue();
         return;
     }
 
@@ -177,24 +175,12 @@ void EtherMacFullDuplex::handleUpperPacket(Packet *packet)
         EtherEncap::addFcs(packet, oldFcs->getFcsMode());
     }
 
-    if (txQueue.extQueue) {
-        ASSERT(curTxFrame == nullptr);
-        ASSERT(transmitState == TX_IDLE_STATE || transmitState == PAUSE_STATE);
-        curTxFrame = packet;
-    }
-    else {
-        if (txQueue.innerQueue->isFull())
-            throw cRuntimeError("txQueue length exceeds %d -- this is probably due to "
-                                "a bogus app model generating excessive traffic "
-                                "(or if this is normal, increase txQueueLimit!)",
-                    txQueue.innerQueue->getQueueLimit());
-        // store frame and possibly begin transmitting
-        EV_DETAIL << "Frame " << frame << " arrived from higher layers, enqueueing\n";
-        txQueue.innerQueue->insertFrame(packet);
+    // store frame and possibly begin transmitting
+    EV_DETAIL << "Frame " << frame << " arrived from higher layers, enqueueing\n";
+    txQueue->pushPacket(packet);
 
-        if (!curTxFrame && !txQueue.innerQueue->isEmpty() && transmitState == TX_IDLE_STATE)
-            curTxFrame = check_and_cast<Packet *>(txQueue.innerQueue->pop());
-    }
+    if (!curTxFrame && !txQueue->isEmpty() && transmitState == TX_IDLE_STATE)
+        curTxFrame = check_and_cast<Packet *>(txQueue->popPacket());
 
     if (transmitState == TX_IDLE_STATE)
         startFrameTransmission();
@@ -412,11 +398,7 @@ void EtherMacFullDuplex::beginSendFrames()
     else {
         // No more frames set transmitter to idle
         changeTransmissionState(TX_IDLE_STATE);
-        if (!txQueue.extQueue) {
-            // Output only for internal queue (we cannot be shure that there
-            //are no other frames in external queue)
-            EV_DETAIL << "No more frames to send, transmitter set to idle\n";
-        }
+        EV_DETAIL << "No more frames to send, transmitter set to idle\n";
     }
 }
 

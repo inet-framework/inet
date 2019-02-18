@@ -15,7 +15,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/packet/Packet.h"
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
 #include "inet/linklayer/ethernet/EtherFrameClassifier.h"
 
@@ -23,20 +22,14 @@ namespace inet {
 
 Define_Module(EtherFrameClassifier);
 
-void EtherFrameClassifier::handleMessage(cMessage *msg)
+int EtherFrameClassifier::classifyPacket(Packet *packet)
 {
-    //FIXME msg is always Packet*, need another way to detect pause frame
-    if (Packet *pk = dynamic_cast<Packet *>(msg)) {
-        auto hdr = pk->peekAtFront<EthernetMacHeader>(b(-1), Chunk::PF_ALLOW_NULLPTR|Chunk::PF_ALLOW_INCOMPLETE);
-        if (hdr != nullptr) {
-            if (hdr->getTypeOrLength() == ETHERTYPE_FLOW_CONTROL) {
-                send(msg, "pauseOut");
-                return;
-            }
-        }
-    }
-
-    send(msg, "defaultOut");
+    //FIXME need another way to detect pause frame
+    auto header = packet->peekAtFront<EthernetMacHeader>(b(-1), Chunk::PF_ALLOW_NULLPTR|Chunk::PF_ALLOW_INCOMPLETE);
+    if (header != nullptr && header->getTypeOrLength() == ETHERTYPE_FLOW_CONTROL)
+        return 0;
+    else
+        return 1;
 }
 
 } // namespace inet

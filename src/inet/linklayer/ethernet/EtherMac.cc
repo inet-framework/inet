@@ -22,7 +22,6 @@
 
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/common/queue/IPassiveQueue.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/ethernet/EtherEncap.h"
@@ -232,7 +231,6 @@ void EtherMac::handleUpperPacket(Packet *packet)
         numDroppedPkFromHLIfaceDown++;
         delete packet;
 
-        requestNextFrameFromExtQueue();
         return;
     }
 
@@ -248,25 +246,12 @@ void EtherMac::handleUpperPacket(Packet *packet)
         EtherEncap::addFcs(packet, oldFcs->getFcsMode());
     }
 
-    if (txQueue.extQueue) {
-        ASSERT(curTxFrame == nullptr);
-        curTxFrame = packet;
-        fillIFGIfInBurst();
-    }
-    else {
-        if (txQueue.innerQueue->isFull())
-            throw cRuntimeError("txQueue length exceeds %d -- this is probably due to "
-                                "a bogus app model generating excessive traffic "
-                                "(or if this is normal, increase txQueueLimit!)",
-                    txQueue.innerQueue->getQueueLimit());
+    // store frame and possibly begin transmitting
+    EV_DETAIL << "Frame " << packet << " arrived from higher layer, enqueueing\n";
+    txQueue->pushPacket(packet);
 
-        // store frame and possibly begin transmitting
-        EV_DETAIL << "Frame " << packet << " arrived from higher layer, enqueueing\n";
-        txQueue.innerQueue->insertFrame(packet);
-
-        if (!curTxFrame && !txQueue.innerQueue->isEmpty())
-            curTxFrame = static_cast<Packet *>(txQueue.innerQueue->pop());
-    }
+    if (!curTxFrame && !txQueue->isEmpty())
+        curTxFrame = static_cast<Packet *>(txQueue->popPacket());
 
     if ((duplexMode || receiveState == RX_IDLE_STATE) && transmitState == TX_IDLE_STATE) {
         EV_DETAIL << "No incoming carrier signals detected, frame clear to send\n";
@@ -632,8 +617,7 @@ void EtherMac::handleEndTxPeriod()
     else {
         EV_DETAIL << "Start IFG period\n";
         scheduleEndIFGPeriod();
-        if (!txQueue.extQueue)
-            fillIFGIfInBurst();
+        fillIFGIfInBurst();
     }
 }
 
@@ -776,10 +760,7 @@ void EtherMac::printState()
 
     EV_DETAIL << ",  backoffs: " << backoffs;
     EV_DETAIL << ",  numConcurrentRxTransmissions: " << numConcurrentTransmissions;
-
-    if (txQueue.innerQueue)
-        EV_DETAIL << ",  queueLength: " << txQueue.innerQueue->getLength();
-
+    EV_DETAIL << ",  queueLength: " << txQueue->getNumPackets();
     EV_DETAIL << endl;
 
 #undef CASE

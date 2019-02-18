@@ -25,7 +25,7 @@
 #include "inet/common/checksum/EthernetCRC.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/packet/chunk/BytesChunk.h"
-#include "inet/common/queue/IPassiveQueue.h"
+#include "inet/common/queueing/PacketComparatorFunction.h"
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
 #include "inet/linklayer/ethernet/EtherMacBase.h"
 #include "inet/linklayer/ethernet/EtherPhyFrame_m.h"
@@ -139,6 +139,17 @@ const EtherMacBase::EtherDescr EtherMacBase::etherDescrs[NUM_OF_ETHERDESCRS] = {
     }
 };
 
+static int compareEthernetFrameType(Packet *a, Packet *b)
+{
+    const auto& ah = a->peekAtFront<EthernetMacHeader>();
+    const auto& bh = b->peekAtFront<EthernetMacHeader>();
+    int ac = (ah->getTypeOrLength() == ETHERTYPE_FLOW_CONTROL) ? 0 : 1;
+    int bc = (bh->getTypeOrLength() == ETHERTYPE_FLOW_CONTROL) ? 0 : 1;
+    return ac - bc;
+}
+
+Register_Packet_Comparator_Function(EthernetFrameTypeComparator, compareEthernetFrameType);
+
 simsignal_t EtherMacBase::rxPkOkSignal = registerSignal("rxPkOk");
 simsignal_t EtherMacBase::txPausePkUnitsSignal = registerSignal("txPausePkUnits");
 simsignal_t EtherMacBase::rxPausePkUnitsSignal = registerSignal("rxPausePkUnits");
@@ -200,27 +211,9 @@ void EtherMacBase::initialize(int stage)
     }
 }
 
-void EtherMacBase::initializeQueueModule()
+void EtherMacBase::initializeQueue()
 {
-    if (par("queueModule").stringValue()[0]) {
-        cModule *module = getModuleFromPar<cModule>(par("queueModule"), this);
-        IPassiveQueue *queueModule;
-        if (module->isSimple())
-            queueModule = check_and_cast<IPassiveQueue *>(module);
-        else {
-            cGate *queueOut = module->gate("out")->getPathStartGate();
-            queueModule = check_and_cast<IPassiveQueue *>(queueOut->getOwnerModule());
-        }
-
-        EV_DETAIL << "Requesting first frame from queue module\n";
-        txQueue.setExternalQueue(queueModule);
-
-        if (txQueue.extQueue->getNumPendingRequests() == 0)
-            txQueue.extQueue->requestPacket();
-    }
-    else {
-        txQueue.setInternalQueue("txQueue", par("txQueueLimit"));
-    }
+    txQueue = check_and_cast<queueing::IPacketQueue *>(getSubmodule("queue"));
 }
 
 void EtherMacBase::initializeFlags()
@@ -283,13 +276,13 @@ void EtherMacBase::handleStartOperation(LifecycleOperation *operation)
 {
     interfaceEntry->setState(InterfaceEntry::State::UP);
     initializeFlags();
-    initializeQueueModule();
+    initializeQueue();
     readChannelParameters(true);
 }
 
 void EtherMacBase::handleStopOperation(LifecycleOperation *operation)
 {
-    if (curTxFrame != nullptr || !txQueue.isEmpty()) {
+    if (curTxFrame != nullptr || !txQueue->isEmpty()) {
         interfaceEntry->setState(InterfaceEntry::State::GOING_DOWN);
         delayActiveOperationFinish(par("stopOperationTimeout"));
     }
@@ -313,7 +306,7 @@ void EtherMacBase::handleCrashOperation(LifecycleOperation *operation)
 void EtherMacBase::processAtHandleMessageFinished()
 {
     if (operationalState == State::STOPPING_OPERATION) {
-        if (curTxFrame == nullptr && txQueue.isEmpty()) {
+        if (curTxFrame == nullptr && txQueue->isEmpty()) {
             EV << "Ethernet Queue is empty, MAC stopped\n";
             connected = false;
             interfaceEntry->setCarrier(false);
@@ -366,22 +359,15 @@ void EtherMacBase::processConnectDisconnect()
             lastTxFinishTime = -1.0;    // so that it never equals to the current simtime, used for Burst mode detection.
         }
 
-        if (txQueue.extQueue) {
-            // Clear external queue: send a request, and received packet will be deleted in handleMessage()
-            if (txQueue.extQueue->getNumPendingRequests() == 0)
-                txQueue.extQueue->requestPacket();
-        }
-        else {
-            // Clear inner queue
-            while (!txQueue.innerQueue->isEmpty()) {
-                cMessage *msg = check_and_cast<cMessage *>(txQueue.innerQueue->pop());
-                EV_DETAIL << "Interface is not connected, dropping packet " << msg << endl;
-                numDroppedPkFromHLIfaceDown++;
-                PacketDropDetails details;
-                details.setReason(INTERFACE_DOWN);
-                emit(packetDroppedSignal, msg, &details);
-                delete msg;
-            }
+        // Clear queue
+        while (!txQueue->isEmpty()) {
+            cMessage *msg = check_and_cast<cMessage *>(txQueue->popPacket());
+            EV_DETAIL << "Interface is not connected, dropping packet " << msg << endl;
+            numDroppedPkFromHLIfaceDown++;
+            PacketDropDetails details;
+            details.setReason(INTERFACE_DOWN);
+            emit(packetDroppedSignal, msg, &details);
+            delete msg;
         }
 
         changeTransmissionState(TX_IDLE_STATE);         //FIXME replace status to OFF
@@ -450,33 +436,19 @@ bool EtherMacBase::verifyCrcAndLength(Packet *packet)
 void EtherMacBase::flushQueue()
 {
     // code would look slightly nicer with a pop() function that returns nullptr if empty
-    if (txQueue.innerQueue) {
-        while (!txQueue.innerQueue->isEmpty()) {
-            cMessage *msg = static_cast<cMessage *>(txQueue.innerQueue->pop());
-            PacketDropDetails details;
-            details.setReason(INTERFACE_DOWN);
-            emit(packetDroppedSignal, msg, &details);
-            delete msg;
-        }
-    }
-    else {
-        while (!txQueue.extQueue->isEmpty()) {
-            cMessage *msg = txQueue.extQueue->pop();
-            PacketDropDetails details;
-            details.setReason(INTERFACE_DOWN);
-            emit(packetDroppedSignal, msg, &details);
-            delete msg;
-        }
-        txQueue.extQueue->clear();    // clear request count
+    while (!txQueue->isEmpty()) {
+        cMessage *msg = static_cast<cMessage *>(txQueue->popPacket());
+        PacketDropDetails details;
+        details.setReason(INTERFACE_DOWN);
+        emit(packetDroppedSignal, msg, &details);
+        delete msg;
     }
 }
 
 void EtherMacBase::clearQueue()
 {
-    if (txQueue.innerQueue)
-        txQueue.innerQueue->clear();
-    else
-        txQueue.extQueue->clear(); // clear request count
+    while (!txQueue->isEmpty())
+        delete txQueue->popPacket();
 }
 
 void EtherMacBase::refreshConnection()
@@ -613,23 +585,8 @@ void EtherMacBase::printParameters()
 void EtherMacBase::getNextFrameFromQueue()
 {
     ASSERT(nullptr == curTxFrame);
-    if (txQueue.extQueue) {
-        if (txQueue.extQueue->getNumPendingRequests() == 0)
-            txQueue.extQueue->requestPacket();
-    }
-    else {
-        if (!txQueue.innerQueue->isEmpty())
-            curTxFrame = static_cast<Packet *>(txQueue.innerQueue->pop());
-    }
-}
-
-void EtherMacBase::requestNextFrameFromExtQueue()
-{
-    ASSERT(nullptr == curTxFrame);
-    if (txQueue.extQueue) {
-        if (txQueue.extQueue->getNumPendingRequests() == 0)
-            txQueue.extQueue->requestPacket();
-    }
+    if (!txQueue->isEmpty())
+        curTxFrame = static_cast<Packet *>(txQueue->popPacket());
 }
 
 void EtherMacBase::finish()
@@ -674,17 +631,6 @@ void EtherMacBase::refreshDisplay() const
 
     if (!strcmp(getParentModule()->getNedTypeName(), "inet.linklayer.ethernet.EthernetInterface"))
         getParentModule()->getDisplayString().setTagArg("i", 1, color);
-}
-
-int EtherMacBase::InnerQueue::packetCompare(cObject *a, cObject *b)
-{
-    Packet *ap = static_cast<Packet *>(a);
-    Packet *bp = static_cast<Packet *>(b);
-    const auto& ah = ap->peekAtFront<EthernetMacHeader>();
-    const auto& bh = bp->peekAtFront<EthernetMacHeader>();
-    int ac = (ah->getTypeOrLength() == ETHERTYPE_FLOW_CONTROL) ? 0 : 1;
-    int bc = (bh->getTypeOrLength() == ETHERTYPE_FLOW_CONTROL) ? 0 : 1;
-    return ac - bc;
 }
 
 void EtherMacBase::changeTransmissionState(MacTransmitState newState)

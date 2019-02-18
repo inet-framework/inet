@@ -17,7 +17,6 @@
 
 package inet.emulation.linklayer.ethernet;
 
-import inet.common.queue.IOutputQueue;
 import inet.emulation.common.ExtInterface;
 import inet.linklayer.contract.IEtherMac;
 import inet.linklayer.contract.IEthernetInterface;
@@ -39,22 +38,13 @@ module ExtUpperEthernetInterface extends ExtInterface like IEthernetInterface
             parameters:
                 @display("p=100,100");
         }
-        queue: <default("")> like IOutputQueue if typename != "" {
-            parameters:
-                @display("p=100,300;q=l2queue");
-        }
         mac: <default(csmacdSupport ? "EtherMac" : "EtherMacFullDuplex")> like IEtherMac {
             parameters:
-                queueModule = (exists(queue) ? "^.queue" : "");
-                txQueueLimit = (exists(queue) ? 1 : 10000);
+                txQueueLimit = 10000;
                 @display("p=200,400");
         }
     connections allowunconnected:
-        if exists(queue) {
-            tap.lowerLayerOut --> queue.in;
-            queue.out --> mac.upperLayerIn;
-        }
-        tap.lowerLayerOut --> { @display("m=s"); } --> mac.upperLayerIn if !exists(queue);
+        tap.lowerLayerOut --> { @display("m=s"); } --> mac.upperLayerIn;
         tap.lowerLayerIn <-- { @display("m=s"); } <-- mac.upperLayerOut;
         mac.phys <--> { @display("m=s"); } <--> phys;
 }

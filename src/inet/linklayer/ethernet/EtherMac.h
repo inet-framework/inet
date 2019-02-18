@@ -26,7 +26,6 @@ namespace inet {
 
 class EthernetJamSignal;
 class EtherPauseFrame;
-class IPassiveQueue;
 
 /**
  * Ethernet MAC module which supports both half-duplex (CSMA/CD) and full-duplex
