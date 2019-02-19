@@ -432,6 +432,11 @@ private:
     struct dsr_srt *dsr_srt_concatenate(struct dsr_srt *srt1, struct dsr_srt *srt2); int dsr_srt_check_duplicate(struct dsr_srt *srt);
     struct dsr_srt *dsr_srt_new_split(struct dsr_srt *srt, struct in_addr addr);
 
+    struct dsr_srt * dsr_srt_new_split_rev(struct dsr_srt *srt, struct in_addr addr);
+    struct dsr_srt * dsr_srt_shortcut(struct dsr_srt *srt, struct in_addr a1,
+                                     struct in_addr a2);
+
+
     struct neighbor_info
     {
         struct sockaddr hw_addr;
@@ -705,7 +710,8 @@ private:
 
     void drop (cMessage *msg,int code) { delete msg;}
 
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
+    // virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
+    virtual void processLinkBreak(const Packet* details) override;
 
   protected:
     struct in_addr ifaddr;
@@ -714,7 +720,7 @@ private:
     void tap(Packet * p);
     void omnet_xmit(struct dsr_pkt *dp);
     void omnet_deliver(struct dsr_pkt *dp);
-    void packetFailed(Packet *ipDgram);
+    void packetFailed(const Packet *ipDgram);
     void packetLinkAck(Packet *ipDgram);
     void handleTimer(cMessage *);
     void defaultProcess(Packet *);

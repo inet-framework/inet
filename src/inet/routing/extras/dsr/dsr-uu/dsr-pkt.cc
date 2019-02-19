@@ -77,33 +77,41 @@ struct dsr_pkt *  dsr_pkt::dup()
     dp->costVector = this->costVector;
     DSRUU::dsr_opt_parse(dp);
     dp->flags = this->flags;
+    dp->inputInterfaceId = this->inputInterfaceId;
     return dp;
 }
 
 dsr_pkt * NSCLASS dsr_pkt_alloc(Packet * p)
 {
 
-    if (p == nullptr)
+
+    auto dp = new dsr_pkt;
+    if (dp == nullptr)
         return nullptr;
 
-    struct dsr_pkt *dp;
+    dp->clear();
+
     // int dsr_opts_len = 0;
 
     // dp = (struct dsr_pkt *)MALLOC(sizeof(struct dsr_pkt), GFP_ATOMIC);
 
-    dp = new dsr_pkt;
 
-    if (!dp)
-        return nullptr;
+    if (p == nullptr)
+        return dp;
 
-    dp->clear();
     const auto &ipHeader = p->peekAtFront<Ipv4Header>();
     if (ipHeader == nullptr)
         throw cRuntimeError("DSRUU Error: This packet is not a Ipv4");
+
+    if (ipHeader->getDestAddress().isUnspecified())
+        throw cRuntimeError("DSRUU Error: This packet doesn't have a valid destination address");
+
     auto ipv4Header = removeNetworkProtocolHeader(p, Protocol::ipv4);
+
+
     dp->encapsulate_protocol=0;
     dp->mac.raw = dp->mac_data;
-    auto macAddressInd = p->getTag<MacAddressInd>();
+    auto macAddressInd = p->findTag<MacAddressInd>();
     if (macAddressInd) {
         macAddressInd->getDestAddress().getAddressBytes(dp->mac.ethh->h_dest); /* destination eth addr */
         macAddressInd->getSrcAddress().getAddressBytes(dp->mac.ethh->h_source); /* destination eth addr */
@@ -111,8 +119,13 @@ dsr_pkt * NSCLASS dsr_pkt_alloc(Packet * p)
     // IPv4Address dest = dgram->getDestAddress();
     // IPv4Address src = dgram->getSrcAddress();
 
+
+
     dp->src.s_addr = ipHeader->getSrcAddress();
     dp->dst.s_addr = ipHeader->getDestAddress();
+    if (dp->src.s_addr.isUnspecified())
+        dp->src.s_addr = myaddr_.s_addr;
+
     dp->nh.iph = (struct iphdr *) dp->ip_data;
 
     dp->nh.iph->ihl= B(ipHeader->getHeaderLength()).get();// Header length

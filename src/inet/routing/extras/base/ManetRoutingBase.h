@@ -107,6 +107,30 @@ class INET_API ManetRoutingBase : public ApplicationBase, public UdpSocket::ICal
         }
     };
 
+    class DelayPacket : public ManetTimer {
+        Packet *msg = nullptr;
+        public:
+        DelayPacket(Packet *m, ManetRoutingBase *a) : ManetTimer(a){msg = m;}
+        void expire() override {
+            if (msg != nullptr) {
+                agent_->emit(packetSentSignal, msg);
+                if (agent_->getNetworkProtocol()) {
+                    agent_->getNetworkProtocol()->enqueuePreRoutingRoutingHook(msg);
+                    agent_->getNetworkProtocol()->reinjectQueuedDatagram(msg);
+                }
+                else
+                    throw cRuntimeError("No network protocol");
+            }
+            msg = nullptr;
+            delete this;
+        }
+        ~DelayPacket() {
+            if (msg != nullptr) {
+                delete msg;
+            }
+        }
+    };
+
     bool isConnectedIp = false;
 
     typedef std::vector<ProtocolRoutingData> ProtocolsRoutes;
@@ -221,9 +245,11 @@ class INET_API ManetRoutingBase : public ApplicationBase, public UdpSocket::ICal
 //   encapsulate messages and send to the next layer
 //
 /////////////////////////////////////
-    void sendToIpOnIface(Packet *pk, int srcPort, const L3Address& destAddr, int destPort, int ttl, double delay, InterfaceEntry *iface);
+    virtual void sendToIpOnIface(Packet *pk, int srcPort, const L3Address& destAddr, int destPort, int ttl, double delay, InterfaceEntry *iface);
     virtual void sendToIp(Packet *pk, int srcPort, const L3Address& destAddr, int destPort, int ttl, double delay, const L3Address& ifaceAddr);
     virtual void sendToIp(Packet *pk, int srcPort, const L3Address& destAddr, int destPort, int ttl, double delay, int ifaceIndex = -1);
+
+    virtual void injectDirectToIp(Packet *pk, double delay, InterfaceEntry *iface);
 
 /////////////////////////////////
 //

@@ -562,6 +562,53 @@ void ManetRoutingBase::sendToIp(Packet *msg, int srcPort, const L3Address& destA
     sendToIpOnIface(msg, srcPort, destAddr, destPort, ttl, delay, ie);
 }
 
+void ManetRoutingBase::injectDirectToIp(Packet *msg, double delay, InterfaceEntry *ie)
+{
+    if (!isRegistered)
+        throw cRuntimeError("Manet routing protocol is not register");
+
+    if (!isOperational) {
+        delete msg;
+        return;
+    }
+
+
+    if (ie == nullptr) {
+        auto tag = msg->findTag<InterfaceReq>();
+        if (tag == nullptr)
+            throw cRuntimeError("Not valid interface");
+    }
+    else {
+        msg->addTagIfAbsent<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
+    }
+    auto tagProt = msg->findTag<PacketProtocolTag>();
+    if (tagProt == nullptr)
+        msg->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::manet);
+
+    // if delay
+    if (delay > 0) {
+        DelayPacket * delayTimer =  new DelayPacket(msg, this);
+        if (timerMultiMapPtr == nullptr)
+            throw cRuntimeError("timerMultiMapPtr == nullptr");
+        delayTimer->resched(delay);
+    }
+    else {
+        emit(packetSentSignal, msg);
+        if (isConnectedIp || mac_layer_)
+            throw cRuntimeError("The packet must be sent to the network layer");
+        else {
+            if (getNetworkProtocol()) {
+                getNetworkProtocol()->enqueuePreRoutingRoutingHook(msg);
+                getNetworkProtocol()->reinjectQueuedDatagram(msg);
+            }
+            else
+                throw cRuntimeError("No network protocol");
+        }
+    }
+    // totalSend++;
+}
+
+
 
 void ManetRoutingBase::omnet_chg_rte(const struct in_addr &dst, const struct in_addr &gtwy, const struct in_addr &netm,
                                       short int hops, bool del_entry)

@@ -25,6 +25,7 @@ import inet.applications.contract.IApp;
 simple BaseRouting like IApp
 {
     parameters:
+        @class(ManetRoutingBase);
         @display("i=block/routing");
         
         string routingTableModule = default("^.ipv4.routingTable");

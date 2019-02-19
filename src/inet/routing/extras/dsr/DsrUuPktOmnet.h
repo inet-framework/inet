@@ -26,11 +26,12 @@ namespace inet {
 namespace inetmanet {
 
 
-class EtxCost
+struct  EtxCost
 {
-  public:
     L3Address address;
     double cost;
+    const L3Address getAddress() const {return address;}
+    const double getCost() const {return cost;}
     ~EtxCost() {}
 };
 
@@ -50,6 +51,7 @@ class DSRPkt : public FieldsChunk
     void clean();
 
   public:
+
     virtual void cleanAll() {clean(); previous = L3Address(); next = L3Address(); dsr_ttl = 0; encapProtocol = -1; };
     explicit DSRPkt() : FieldsChunk() {costVector.clear(); dsrOptions.clear(); dsr_ttl=0;}
     ~DSRPkt ();
@@ -59,13 +61,13 @@ class DSRPkt : public FieldsChunk
     //void addOption();
     //readOption();
     void setTimeToLive (int ttl) {dsr_ttl = ttl;}
-    int getTimeToLive() {return dsr_ttl;}
+    int const getTimeToLive() const {return dsr_ttl;}
     void modDsrOptions (struct dsr_pkt *p,int);
     void setEncapProtocol(IpProtocolId procotol) {encapProtocol = procotol;}
     int getEncapProtocol() {return encapProtocol;}
-    const L3Address getPrevAddress() const {return previous;}
+    const L3Address &getPrevAddress() const {return previous;}
     void setPrevAddress(const L3Address address_var) {previous = address_var;}
-    const L3Address getNextAddress() const {return next;}
+    const  L3Address &getNextAddress() const {return next;}
     void setNextAddress(const L3Address address_var) {next = address_var;}
 
     std::vector<struct dsr_opt_hdr> &getDsrOptions() {return dsrOptions;}
@@ -75,7 +77,7 @@ class DSRPkt : public FieldsChunk
 
     void resetCostVector();
     virtual void getCostVector(std::vector<EtxCost> &cost); // Copy
-    virtual std::vector<EtxCost> getCostVector() {return costVector;}
+    virtual std::vector<EtxCost> &getCostVector() {return costVector;}
 
     virtual void setCostVector(std::vector<EtxCost> &cost);
 
@@ -85,9 +87,8 @@ class DSRPkt : public FieldsChunk
     virtual void setCostVectorSize(L3Address addr, double cost);
 };
 
-class EtxList
+struct EtxList
 {
-  public:
     L3Address address;
     double delivery;// the simulation suppose that the code use a u_int32_t
 };
@@ -103,6 +104,7 @@ class DSRPktExt: public DSRPkt
     void clean() { clearExtension(); }
 
   public:
+    int getSize() {return size;}
     virtual void cleanAll() override {DSRPkt::cleanAll(); clean();}
     explicit DSRPktExt() : DSRPkt() {size=0; extension=nullptr;}
     ~DSRPktExt ();

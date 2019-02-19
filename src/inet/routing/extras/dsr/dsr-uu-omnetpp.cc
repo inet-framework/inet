@@ -172,12 +172,21 @@ void DSRUU::omnet_xmit(struct dsr_pkt *dp)
     */
     //L3Address prev = myaddr_.s_addr;
     //p->setPrevAddress(prev);
+#if 0
     if (jitter)
-        sendDelayed(p, jitter, "socketOut");
+         sendDelayed(p, jitter, "socketOut");
     else if (dp->dst.s_addr.toIpv4().getInt() != DSR_BROADCAST)
         sendDelayed(p, par("unicastDelay"), "socketOut");
     else
         sendDelayed(p, par("broadcastDelay"), "socketOut");
+#else
+    if (jitter)
+        injectDirectToIp(p, jitter, nullptr);
+    else if (dp->dst.s_addr.toIpv4().getInt() != DSR_BROADCAST)
+        injectDirectToIp(p, par("unicastDelay"), nullptr);
+    else
+        injectDirectToIp(p, par("broadcastDelay"), nullptr);
+#endif
     dp->payload = nullptr;
     dsr_pkt_free(dp);
 }
@@ -214,7 +223,7 @@ void DSRUUTimer::cancel()
 
 void DSRUU::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    ManetRoutingBase::initialize(stage);
 
     //current_time =simTime();
     if (stage == INITSTAGE_LOCAL)
@@ -338,6 +347,7 @@ void DSRUU::initialize(int stage)
     }
     else if (stage == INITSTAGE_ROUTING_PROTOCOLS)
     {
+        registerRoutingModule();
 
         registerService(Protocol::dsr, nullptr, gate("socketIn"));
         registerProtocol(Protocol::dsr, gate("socketOut"), nullptr);
@@ -345,12 +355,7 @@ void DSRUU::initialize(int stage)
         registerService(Protocol::manet, nullptr, gate("socketIn"));
         registerProtocol(Protocol::manet, gate("socketOut"), nullptr);
 
-
-        getNetworkProtocol()->registerHook(0, this);
-        auto host = getContainingNode(this);
-
-
-        registerRoutingModule();
+        registerHook();
 
         // ASSERT(stage >= STAGE:IP_LAYER_READY_FOR_HOOK_REGISTRATION);
 
@@ -398,7 +403,8 @@ void DSRUU::initialize(int stage)
 
         if (!par("UseNetworkLayerAck").boolValue())
         {
-            host->subscribe(linkBrokenSignal, this);
+            linkLayerFeeback();
+            // host->subscribe(linkBrokenSignal, this);
             //host->subscribe(NF_LINK_BREAK, this);
             // host->subscribe(NF_TX_ACKED, this);
         }
@@ -520,6 +526,10 @@ INetfilter::IHook::Result DSRUU::processPacket(Packet *pkt, unsigned int) {
 
     auto dsrHeader = findDsrProtocolHeader(pkt);
 
+    struct in_addr nxt_hop;
+    auto ipHeader = dynamicPtrCast<Ipv4Header>(constPtrCast<NetworkHeaderBase>(networkHeader));
+    nxt_hop.s_addr = destAddr;
+
     if (dsrHeader) {
         if (dsrHeader->getPrevAddress() == this->my_addr().s_addr)
             return ACCEPT;
@@ -527,32 +537,31 @@ INetfilter::IHook::Result DSRUU::processPacket(Packet *pkt, unsigned int) {
     else {
         // if the destination is 1 hopt, send the packet.
         // This shouldn't really happen ?
-        const auto& networkHeader = getNetworkProtocolHeader(pkt);
-        auto ipHeader = dynamicPtrCast<Ipv4Header>(constPtrCast<NetworkHeaderBase>(networkHeader));
-
-        EV_INFO << "Data packet from "<< ipHeader->getDestAddress() <<"without DSR header!n";
+        EV_INFO << "Data packet from "<< destAddr <<"without DSR header!n";
         // one hop?
-        struct dsr_srt *srt;
-        struct in_addr nxt_hop;
-        nxt_hop.s_addr = destAddr;
-        if (ConfVal(PathCache))
-            srt = ph_srt_find_map(my_addr(), nxt_hop, 0);
-        else
-            srt = ph_srt_find_link_route_map(my_addr(),nxt_hop, 0);
+
+        auto srt = RouteFind(my_addr(), nxt_hop);
         if (srt && (srt->addrs.empty() || srt->dst.s_addr == ipHeader->getDestAddress()))
             return ACCEPT;
     }
 
     // check the interface that the DSR is using
-    auto tag = pkt->findTag<InterfaceInd>();
-    if (tag == nullptr)
+    // check if the routing table has an entry for this packet
+
+
+    if (omnet_exist_rte(nxt_hop))
         return ACCEPT;
 
-    auto ie = this->getInterfaceEntryById(tag->getInterfaceId());
-    if (ie != interface80211ptr)
-        return ACCEPT;
+    auto tag = pkt->findTag<InterfaceInd>();
+
+    if (tag) {
+        auto ie = this->getInterfaceEntryById(tag->getInterfaceId());
+        if (ie != interface80211ptr)
+            return ACCEPT;
+    }
 
     // must be stolen and processed.
+    take(pkt);
     defaultProcess(pkt);
     return STOLEN;
     // TODO: check if the destination is a neighbor node, set the next hop and acept.
@@ -690,6 +699,27 @@ void DSRUU::defaultProcess(Packet * ipDgram)
     }
 }
 
+void DSRUU::processLinkBreak(const Packet *pkt)
+{
+    if (pkt == nullptr)
+        return;
+
+    const auto& header80211 = pkt->peekAtFront<Ieee80211DataOrMgmtHeader>();
+    if (header80211 == nullptr)
+        return;
+
+    auto sender = header80211->getTransmitterAddress();
+    auto receiver = header80211->getReceiverAddress();
+
+    const auto& networkHeader = getNetworkProtocolHeader(const_cast<Packet *>(pkt));
+    if (networkHeader == nullptr)
+        return;
+
+    packetFailed(pkt);
+}
+
+
+#if 0
 void DSRUU::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
 
@@ -761,6 +791,7 @@ void DSRUU::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj
         }
     }*/
 }
+#endif
 
 void DSRUU::packetLinkAck(Packet *ipDgram)
 {
@@ -793,7 +824,7 @@ void DSRUU::packetLinkAck(Packet *ipDgram)
     return;
 }
 
-void DSRUU::packetFailed(Packet *ipDgram)
+void DSRUU::packetFailed(const Packet *pkt)
 {
     struct dsr_pkt *dp;
     struct in_addr dst, nxt_hop;
@@ -801,7 +832,7 @@ void DSRUU::packetFailed(Packet *ipDgram)
     /* Cast the packet so that we can touch it */
     /* Do nothing for my own packets... */
 
-
+    Packet *ipDgram = const_cast<Packet *> (pkt);
     auto dsrPkt = findDsrProtocolHeader(ipDgram);
     const auto& networkHeader = getNetworkProtocolHeader(ipDgram);
     auto ipHeader = dynamicPtrCast<Ipv4Header>(constPtrCast<NetworkHeaderBase>(networkHeader));
@@ -818,7 +849,7 @@ void DSRUU::packetFailed(Packet *ipDgram)
             srt = ph_srt_find_map(my_addr(), nxt_hop, 0);
         else
             srt = ph_srt_find_link_route_map(my_addr(),nxt_hop, 0);
-        if (srt && srt->addrs.empty())
+        if (srt && (srt->addrs.empty() || srt->dst.s_addr == nxt_hop.s_addr))
             ph_srt_delete_link_map(my_addr(), nxt_hop);// one hop
         return;
     }
@@ -1035,7 +1066,8 @@ void DSRUU::EtxMsgSend(void *data) {
 
     pkt->addTagIfAbsent<InterfaceReq>()->setInterfaceId(interface80211ptr->getInterfaceId());
 
-    sendDelayed(pkt, uniform(0, etxJitter), "ipOut");
+    injectDirectToIp(pkt, uniform(0, etxJitter), nullptr);
+    // sendDelayed(pkt, uniform(0, etxJitter), "ipOut");
     etxWindow += etxTime;
     set_timer(&etx_timer, etxTime + SIMTIME_DBL(simTime()));
 }
@@ -1367,7 +1399,9 @@ Packet * DSRUU::newDsrPacket(struct dsr_pkt *dp, int interface_id, bool withDsrH
     if(dp->payload) {
         pkt = dp->payload;
         pkt->trim();
+        pkt->clearTags();
         dp->payload = nullptr;
+
     }
     else {
         pkt = new Packet();
@@ -1440,8 +1474,16 @@ Packet * DSRUU::newDsrPacket(struct dsr_pkt *dp, int interface_id, bool withDsrH
     if (interface_id >= 0) {
         pkt->addTagIfAbsent<InterfaceReq>()->setInterfaceId(interface_id);
     }
+
     if (!dp->dst.s_addr.toIpv4().isLimitedBroadcastAddress())
         pkt->addTagIfAbsent<NextHopAddressReq>()->setNextHopAddress(dp->nxt_hop.s_addr);
+    else {
+        auto addresses = pkt->addTagIfAbsent<L3AddressReq>();
+        addresses->setSrcAddress(this->my_addr().s_addr);
+        addresses->setDestAddress(dp->dst.s_addr.toIpv4());
+    }
+
+    pkt->addTagIfAbsent<HopLimitReq>()->setHopLimit(ttl);
 
     return pkt;
 }
@@ -1457,6 +1499,7 @@ Packet * DSRUU::newDsrPacket(struct dsr_pkt *dp, int interface_id, const Packet 
     auto pkt = pktAux->dup();
 
     pkt->trim();
+    pkt->clearTags();
 
     const auto& dsrPkt = makeShared<DSRPkt>();
     dsrPkt->cleanAll();
@@ -1530,6 +1573,15 @@ Packet * DSRUU::newDsrPacket(struct dsr_pkt *dp, int interface_id, const Packet 
     pkt->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::dsr);
     if (!dp->dst.s_addr.toIpv4().isLimitedBroadcastAddress())
         pkt->addTagIfAbsent<NextHopAddressReq>()->setNextHopAddress(dp->nxt_hop.s_addr);
+    else {
+        auto addresses = pkt->addTagIfAbsent<L3AddressReq>();
+        addresses->setSrcAddress(this->my_addr().s_addr);
+        addresses->setDestAddress(dp->dst.s_addr.toIpv4());
+    }
+
+    pkt->addTagIfAbsent<HopLimitReq>()->setHopLimit(ttl);
+
+    pkt->addTagIfAbsent<InterfaceInd>()->setInterfaceId(interface_id);
 
     return pkt;
 }

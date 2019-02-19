@@ -15,7 +15,7 @@ namespace inet {
 
 namespace inetmanet {
 
-struct dsr_opt_hdr *dsr_opt_hdr_add(struct dsr_opt_hdr *opt_hdr, unsigned int len,
+struct dsr_opt_hdr * NSCLASS dsr_opt_hdr_add(struct dsr_opt_hdr *opt_hdr, unsigned int len,
                                     unsigned int protocol)
 {
     if (len < DSR_OPT_HDR_LEN)
@@ -62,7 +62,7 @@ struct iphdr *dsr_build_ip(struct dsr_pkt *dp, struct in_addr src,
 }
 #endif
 
-struct dsr_opt *dsr_opt_find_opt(struct dsr_pkt *dp, int type)
+struct dsr_opt * NSCLASS dsr_opt_find_opt(struct dsr_pkt *dp, int type)
 {
     struct dsr_opt *dopt;
     for (unsigned int i = 0; i < dp->dh.opth.size(); i++)

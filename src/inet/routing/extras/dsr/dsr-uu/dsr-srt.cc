@@ -14,7 +14,7 @@ namespace inet {
 
 namespace inetmanet {
 
-struct in_addr dsr_srt_next_hop(struct dsr_srt *srt, int sleft)
+struct in_addr NSCLASS dsr_srt_next_hop(struct dsr_srt *srt, int sleft)
 {
     int n = srt->laddrs / SIZE_ADDRESS;
     struct in_addr nxt_hop;
@@ -27,7 +27,7 @@ struct in_addr dsr_srt_next_hop(struct dsr_srt *srt, int sleft)
     return nxt_hop;
 }
 
-struct in_addr dsr_srt_prev_hop(struct dsr_srt *srt, int sleft)
+struct in_addr NSCLASS dsr_srt_prev_hop(struct dsr_srt *srt, int sleft)
 {
     struct in_addr prev_hop;
     int n = srt->laddrs / SIZE_ADDRESS;
@@ -58,7 +58,7 @@ static int dsr_srt_find_addr(struct dsr_srt *srt, struct in_addr addr,
     return 0;
 }
 
-struct dsr_srt *dsr_srt_new(struct in_addr src, struct in_addr dst,
+struct dsr_srt * NSCLASS dsr_srt_new(struct in_addr src, struct in_addr dst,
                             unsigned int length, const VectorAddress &addrs,const std::vector<EtxCost>&cost)
 {
     struct dsr_srt *sr;
@@ -186,7 +186,7 @@ struct dsr_srt *dsr_srt_new(struct in_addr src, struct in_addr dst,
 }
 
 
-void dsr_srt_split_both(struct dsr_srt *srt, struct in_addr addr, struct in_addr src,struct dsr_srt **srt_to_dest_ptr,struct dsr_srt **srt_to_src_ptr)
+void NSCLASS dsr_srt_split_both(struct dsr_srt *srt, struct in_addr addr, struct in_addr src,struct dsr_srt **srt_to_dest_ptr,struct dsr_srt **srt_to_src_ptr)
 {
     int i, n,l;
     bool split;
@@ -373,7 +373,7 @@ void dsr_srt_split_both(struct dsr_srt *srt, struct in_addr addr, struct in_addr
 }
 
 
-struct dsr_srt *dsr_srt_new_rev(struct dsr_srt *srt)
+struct dsr_srt * NSCLASS dsr_srt_new_rev(struct dsr_srt *srt)
 {
     struct dsr_srt *srt_rev;
     int i, n;
@@ -409,7 +409,7 @@ struct dsr_srt *dsr_srt_new_rev(struct dsr_srt *srt)
     return srt_rev;
 }
 
-struct dsr_srt *dsr_srt_new_split(struct dsr_srt *srt, struct in_addr addr)
+struct dsr_srt * NSCLASS dsr_srt_new_split(struct dsr_srt *srt, struct in_addr addr)
 {
     struct dsr_srt *srt_split;
     int i, n;
@@ -455,7 +455,7 @@ split:
     return srt_split;
 }
 
-struct dsr_srt *dsr_srt_new_split_rev(struct dsr_srt *srt, struct in_addr addr)
+struct dsr_srt * NSCLASS dsr_srt_new_split_rev(struct dsr_srt *srt, struct in_addr addr)
 {
     struct dsr_srt *srt_split, *srt_split_rev;
 
@@ -471,7 +471,7 @@ struct dsr_srt *dsr_srt_new_split_rev(struct dsr_srt *srt, struct in_addr addr)
     return srt_split_rev;
 }
 
-struct dsr_srt *dsr_srt_shortcut(struct dsr_srt *srt, struct in_addr a1,
+struct dsr_srt * NSCLASS dsr_srt_shortcut(struct dsr_srt *srt, struct in_addr a1,
                                  struct in_addr a2)
 {
     struct dsr_srt *srt_cut;
@@ -542,7 +542,7 @@ struct dsr_srt *dsr_srt_shortcut(struct dsr_srt *srt, struct in_addr a1,
     return srt_cut;
 }
 
-struct dsr_srt *dsr_srt_concatenate(struct dsr_srt *srt1, struct dsr_srt *srt2)
+struct dsr_srt * NSCLASS dsr_srt_concatenate(struct dsr_srt *srt1, struct dsr_srt *srt2)
 {
     struct dsr_srt *srt_cat;
     int n, n1, n2;
@@ -596,7 +596,7 @@ struct dsr_srt *dsr_srt_concatenate(struct dsr_srt *srt1, struct dsr_srt *srt2)
 }
 
 
-int dsr_srt_check_duplicate(struct dsr_srt *srt)
+int NSCLASS dsr_srt_check_duplicate(struct dsr_srt *srt)
 {
     struct in_addr *buf;
     int n, i, res = 0;
@@ -635,7 +635,7 @@ out:
     return res;
 }
 
-struct dsr_srt_opt *dsr_srt_opt_add(struct dsr_opt_hdr *opt_hdr, int len, int flags,
+struct dsr_srt_opt * NSCLASS dsr_srt_opt_add(struct dsr_opt_hdr *opt_hdr, int len, int flags,
                                     int salvage, struct dsr_srt *srt)
 {
     struct dsr_srt_opt *srt_opt;
@@ -662,7 +662,7 @@ struct dsr_srt_opt *dsr_srt_opt_add(struct dsr_opt_hdr *opt_hdr, int len, int fl
 }
 
 
-struct dsr_srt_opt *dsr_srt_opt_add_char(char *buf, int len, int flags,
+struct dsr_srt_opt * NSCLASS dsr_srt_opt_add_char(char *buf, int len, int flags,
                                     int salvage, struct dsr_srt *srt)
 {
         struct dsr_srt_opt *srt_opt;

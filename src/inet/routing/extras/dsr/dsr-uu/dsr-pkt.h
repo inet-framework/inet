@@ -17,7 +17,7 @@ namespace inet {
 namespace inetmanet {
 
 class DSRPkt;
-class EtxCost;
+struct EtxCost;
 
 struct dsr_srt
 {
@@ -163,6 +163,7 @@ struct dsr_pkt
 
     }
     struct dsr_pkt *dup();
+    int inputInterfaceId = -1;
 };
 
 
