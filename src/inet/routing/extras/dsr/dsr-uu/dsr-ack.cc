@@ -179,12 +179,18 @@ int NSCLASS dsr_ack_req_send(struct dsr_pkt *dp)
     }
     */
 
+//    if (jitter)
+//        sendDelayed(dgram, jitter, "socketOut");
+//    else if (dp->dst.s_addr.toIpv4().getInt() != DSR_BROADCAST)
+//        sendDelayed(dgram, par("unicastDelay"), "socketOut");
+//    else
+//        sendDelayed(dgram, par ("broadcastDelay"), "socketOut");
     if (jitter)
-        sendDelayed(dgram, jitter, "socketOut");
+        injectDirectToIp(dgram, jitter, nullptr);
     else if (dp->dst.s_addr.toIpv4().getInt() != DSR_BROADCAST)
-        sendDelayed(dgram, par("unicastDelay"), "socketOut");
+        injectDirectToIp(dgram, par("unicastDelay"), nullptr);
     else
-        sendDelayed(dgram, par ("broadcastDelay"), "socketOut");
+        injectDirectToIp(dgram, par ("broadcastDelay"), nullptr);
     return 1;
 }
 
@@ -209,7 +215,12 @@ dsr_ack_req_opt_add(struct dsr_pkt *dp, unsigned short id)
             if (dopt->type==DSR_OPT_ACK_REQ)
             {
                 buf = &dp->dh.opth[i];
-                goto end;
+                auto ackOpt = dynamic_cast<dsr_ack_req_opt *>(dopt);
+                if (ackOpt == nullptr)
+                    throw cRuntimeError("The option is not of the ACK type");
+                // change the id and return, this is rewrite the option
+                ackOpt->id = id;
+                return  ackOpt;
             }
         }
     }
@@ -266,7 +277,6 @@ dsr_ack_req_opt_add(struct dsr_pkt *dp, unsigned short id)
                             DSR_ACK_REQ_HDR_LEN, dp->dh.opth.begin()->nh);
     }
     DEBUG("Added ACK REQ option id=%u\n", id, ntohs(dp->dh.opth.begin()->p_len));
-end:
     return dsr_ack_req_opt_create(buf, DSR_ACK_REQ_HDR_LEN, id);
 }
 

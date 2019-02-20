@@ -201,11 +201,15 @@ void DSRUU::omnet_deliver(struct dsr_pkt *dp)
         dsr_opt_remove(dp);
     }
 
+    auto outInterface = interfaceId;
+    if (isLocalAddress(dp->dst.s_addr))
+        outInterface = -1;
+
     auto dgram = newDsrPacket(dp, interfaceId, false);
 
     dp->payload = nullptr;
     dsr_pkt_free(dp);
-    send(dgram, "ipOut");
+    injectDirectToIp(dgram, 0, nullptr);
 }
 
 
@@ -519,18 +523,18 @@ void DSRUU::handleTimer(cMessage* msg)
 
 INetfilter::IHook::Result DSRUU::processPacket(Packet *pkt, unsigned int) {
     // DSR will take control of the packets
-    const auto& networkHeader = getNetworkProtocolHeader(pkt);
-    const L3Address& destAddr = networkHeader->getDestinationAddress();
+
+    const auto &ipHeader = pkt->peekAtFront<Ipv4Header>();
+    //const auto& networkHeader = getNetworkProtocolHeader(pkt);
+    const L3Address& destAddr = ipHeader->getDestinationAddress();
 
     if (destAddr.isBroadcast() || isLocalAddress(destAddr) || destAddr.isMulticast())
         return ACCEPT;
 
-    auto dsrHeader = findDsrProtocolHeader(pkt);
-
     struct in_addr nxt_hop;
-    auto ipHeader = dynamicPtrCast<Ipv4Header>(constPtrCast<NetworkHeaderBase>(networkHeader));
     nxt_hop.s_addr = destAddr;
 
+    const auto &dsrHeader = findDsrProtocolHeader(pkt);
     if (dsrHeader) {
         if (dsrHeader->getPrevAddress() == this->my_addr().s_addr)
             return ACCEPT;
@@ -542,17 +546,18 @@ INetfilter::IHook::Result DSRUU::processPacket(Packet *pkt, unsigned int) {
         // one hop?
 
         auto srt = RouteFind(my_addr(), nxt_hop);
-        if (srt && (srt->addrs.empty() || srt->dst.s_addr == ipHeader->getDestAddress()))
+        if (srt && (srt->addrs.empty())) {
+            pkt->addTagIfAbsent<NextHopAddressReq>()->setNextHopAddress(srt->dst.s_addr);
             return ACCEPT;
+        }
     }
 
-    // check the interface that the DSR is using
     // check if the routing table has an entry for this packet
-
 
     if (omnet_exist_rte(nxt_hop))
         return ACCEPT;
 
+    // check the interface that the DSR is using: ??? Not sure of thi
     auto tag = pkt->findTag<InterfaceInd>();
 
     if (tag) {
@@ -578,17 +583,16 @@ INetfilter::IHook::Result DSRUU::ensureRouteForDatagram(Packet *datagram)
         return ACCEPT;
     }
 
-    const auto& networkHeader = removeNetworkProtocolHeader<Ipv4Header>(datagram);
+    const auto &networkHeader = datagram->peekAtFront<Ipv4Header>();
     const L3Address& destAddr = networkHeader->getDestinationAddress();
 
     // check if it has DSR header
-    const auto &chunk = datagram->peekAtFront<Chunk>();
-    const auto &dsrHeader = dynamicPtrCast<DSRPkt>(constPtrCast<Chunk>(chunk));
-    if (dsrHeader)
-        datagram->addTagIfAbsent<DsrProtocolInd>()->setDsrProtocolHeader(chunk);
-    insertNetworkProtocolHeader(datagram, Protocol::ipv4, networkHeader);
-
-    if (dsrHeader) {
+    if (networkHeader->getProtocolId() == IP_PROT_DSR) {
+        const auto& networkHeader = removeNetworkProtocolHeader<Ipv4Header>(datagram);
+        const auto &chunk = datagram->peekAtFront<DSRPkt>();
+        if (chunk)
+            datagram->addTagIfAbsent<DsrProtocolInd>()->setDsrProtocolHeader(chunk);
+        insertNetworkProtocolHeader(datagram, Protocol::ipv4, networkHeader);
         take(datagram);
         mainProcess(datagram);
         return STOLEN;
@@ -668,12 +672,13 @@ void DSRUU::mainProcess(Packet *pkt)
             //
             const auto& networkHeader = getNetworkProtocolHeader(pkt);
             const L3Address& destAddr = networkHeader->getDestinationAddress();
+            const L3Address& nextAddr = dsrHeader->getNextAddress();
             if (destAddr.isBroadcast() || isLocalAddress(destAddr)
-                    || destAddr.isMulticast())
+                    || destAddr.isMulticast() || isLocalAddress(nextAddr))
                 defaultProcess(pkt);
             else
                 throw cRuntimeError(
-                        "The packet must be stolen from the IP layer with the Ipv4 header");
+                        "The packet must be stolen from the IP layer with the Ipv4 header and a valid address");
             return;
         }
 
@@ -833,7 +838,7 @@ void DSRUU::packetLinkAck(Packet *ipDgram)
                     srt = ph_srt_find_map(my_addr(), nxt_hop, 0);
                 else
                     srt = ph_srt_find_link_route_map(my_addr(),nxt_hop, 0);
-                if (srt && (srt->addrs.empty() || srt->dst.s_addr == ipHeader->getDestAddress()))
+                if (srt && srt->addrs.empty())
                     maint_buf_del_all(nxt_hop);
             }
         }
@@ -936,8 +941,7 @@ void DSRUU::tap(Packet *p)
 {
     struct dsr_pkt *dp;
 
-    const auto& networkHeader = getNetworkProtocolHeader(p);
-    auto ipHeader = dynamicPtrCast<Ipv4Header>(constPtrCast<NetworkHeaderBase>(networkHeader));
+    const auto ipHeader = p->peekAtFront<Ipv4Header>();
 
     //struct in_addr next_hop, prev_hop;
     //next_hop.s_addr = p->nextAddress().getInt();
@@ -1422,7 +1426,6 @@ Packet * DSRUU::newDsrPacket(struct dsr_pkt *dp, int interface_id, bool withDsrH
         pkt->trim();
         pkt->clearTags();
         dp->payload = nullptr;
-
     }
     else {
         pkt = new Packet();
@@ -1480,6 +1483,9 @@ Packet * DSRUU::newDsrPacket(struct dsr_pkt *dp, int interface_id, bool withDsrH
     else {
 
         pkt->addTagIfAbsent<PacketProtocolTag>()->setProtocol(Protocol::getProtocol(dp->nh.iph->protocol));
+        // only if it is not a DSR packet
+        if (dp->inputInterfaceId != -1)
+            pkt->addTagIfAbsent<InterfaceInd>()->setInterfaceId(dp->inputInterfaceId);
 
     }
 

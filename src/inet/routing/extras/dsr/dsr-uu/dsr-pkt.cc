@@ -165,11 +165,11 @@ dsr_pkt * NSCLASS dsr_pkt_alloc(Packet * p)
     if (dp->nh.iph->protocol == IP_PROT_DSR && p->peekAtFront<DSRPkt>() == nullptr)
     throw cRuntimeError("DSRUU Error: This packet deosn't have Dsr header");
 
-    auto dsrHeader = findDsrProtocolHeader(p);
+    const auto &dsrHeader = findDsrProtocolHeader(p);
 
     if (dsrHeader != nullptr)
     {
-        auto dsrpkt = constPtrCast<DSRPkt> (removeDsrProtocolHeader(p));
+        const auto & dsrpkt = removeDsrProtocolHeader(p);
         if (p->getDataLength() > B(0)) {
             dp->payload = p;
         }

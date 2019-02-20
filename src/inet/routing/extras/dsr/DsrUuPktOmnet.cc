@@ -71,13 +71,13 @@ DSRPkt& DSRPkt::operator=(const DSRPkt& m)
 
 void DSRPkt::copy(const DSRPkt& m)
 {
+    dsr_ttl = m.dsr_ttl;
+    encapProtocol = m.encapProtocol;
     previous = m.previous;
     next = m.next;
     dsrOptions = m.dsrOptions;
     costVector = m.costVector;
 }
-
-
 
 std::string DSRPkt::str() const
 {

@@ -115,20 +115,20 @@ struct dsr_pkt
          std::vector<struct dsr_opt_hdr>opth;
     } dh;
 
-    struct dsr_srt_opt *srt_opt;
+    struct dsr_srt_opt *srt_opt = nullptr;
     std::vector<struct dsr_rreq_opt *> rreq_opt;  /* Can only be one */
     std::vector<struct dsr_rrep_opt *> rrep_opt;
     std::vector<struct dsr_rerr_opt *> rerr_opt;
     std::vector<struct dsr_ack_opt *> ack_opt;
-    struct dsr_ack_req_opt *ack_req_opt;
-    struct dsr_srt *srt;    /* Source route */
-    int payload_len;
-    bool moreFragments;
-    int fragmentOffset;
-    int totalPayloadLength;
+    struct dsr_ack_req_opt *ack_req_opt = nullptr;
+    struct dsr_srt *srt = nullptr;    /* Source route */
+    int payload_len = 0;
+    bool moreFragments = false;
+    int fragmentOffset = 0;
+    int totalPayloadLength = 0;
 
-    Packet *payload;
-    int encapsulate_protocol;
+    Packet *payload = nullptr;
+    int encapsulate_protocol = -1;
     // Etx cost
 
     std::vector<EtxCost> costVector;
@@ -160,6 +160,11 @@ struct dsr_pkt
         rrep_opt.clear();
         rerr_opt.clear();
         ack_opt.clear();
+        inputInterfaceId = -1;
+        encapsulate_protocol = -1;
+        if (payload)
+            delete payload;
+        payload = nullptr;
 
     }
     struct dsr_pkt *dup();
