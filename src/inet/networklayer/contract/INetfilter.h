@@ -119,7 +119,7 @@ class INET_API INetfilter
     virtual void reinjectQueuedDatagram(const Packet *datagram) = 0;
 
     /* Force the enque of a new packet in prerouting mode */
-    virtual void enqueuePreRoutingRoutingHook(Packet *datagram) = 0;
+    virtual void enqueueRoutingHook(Packet *datagram, const IHook::Type &) = 0;
 
 };
 

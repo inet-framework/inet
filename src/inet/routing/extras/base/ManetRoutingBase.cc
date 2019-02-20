@@ -594,11 +594,14 @@ void ManetRoutingBase::injectDirectToIp(Packet *msg, double delay, InterfaceEntr
     }
     else {
         emit(packetSentSignal, msg);
-        if (isConnectedIp || mac_layer_)
+        if (!isConnectedIp || mac_layer_)
             throw cRuntimeError("The packet must be sent to the network layer");
         else {
             if (getNetworkProtocol()) {
-                getNetworkProtocol()->enqueuePreRoutingRoutingHook(msg);
+                if (msg->findTag<InterfaceInd>())
+                    getNetworkProtocol()->enqueueRoutingHook(msg, IHook::Type::PREROUTING);
+                else
+                    getNetworkProtocol()->enqueueRoutingHook(msg, IHook::Type::LOCALOUT);
                 getNetworkProtocol()->reinjectQueuedDatagram(msg);
             }
             else

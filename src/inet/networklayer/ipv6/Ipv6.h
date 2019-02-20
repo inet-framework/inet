@@ -232,7 +232,7 @@ class INET_API Ipv6 : public cSimpleModule, public NetfilterBase, public Lifecyc
     virtual void unregisterHook(IHook *hook) override;
     virtual void dropQueuedDatagram(const Packet *packet) override;
     virtual void reinjectQueuedDatagram(const Packet *packet) override;
-    virtual void enqueuePreRoutingRoutingHook(Packet *datagram) override {queuedDatagramsForHooks.push_back(QueuedDatagramForHook(datagram, INetfilter::IHook::PREROUTING));};
+    virtual void enqueueRoutingHook(Packet *datagram, const IHook::Type &hook) override {queuedDatagramsForHooks.push_back(QueuedDatagramForHook(datagram, hook));}
 
   protected:
     /**

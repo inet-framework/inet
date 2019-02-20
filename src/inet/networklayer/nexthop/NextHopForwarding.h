@@ -169,8 +169,7 @@ class INET_API NextHopForwarding : public OperationalBase, public NetfilterBase,
     virtual void unregisterHook(IHook *hook) override;
     virtual void dropQueuedDatagram(const Packet *datagram) override;
     virtual void reinjectQueuedDatagram(const Packet *datagram) override;
-    virtual void enqueuePreRoutingRoutingHook(Packet *datagram) override {queuedDatagramsForHooks.push_back(QueuedDatagramForHook(datagram, INetfilter::IHook::PREROUTING));};
-
+    virtual void enqueueRoutingHook(Packet *datagram, const IHook::Type &hook) override {queuedDatagramsForHooks.push_back(QueuedDatagramForHook(datagram, hook));}
   protected:
     /**
      * Initialization
