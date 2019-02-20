@@ -27,14 +27,15 @@ using namespace inet::physicallayer;
 
 Define_Module(RadioCanvasVisualizer);
 
-RadioCanvasVisualizer::RadioCanvasVisualization::RadioCanvasVisualization(NetworkNodeCanvasVisualization *networkNodeVisualization, IndexedImageFigure *radioModeFigure, IndexedImageFigure *receptionStateFigure, IndexedImageFigure *transmissionStateFigure, cPolygonFigure *antennaLobeFigure, cOvalFigure *antennaLobeUnitGainFigure, const int radioModuleId) :
+RadioCanvasVisualizer::RadioCanvasVisualization::RadioCanvasVisualization(NetworkNodeCanvasVisualization *networkNodeVisualization, IndexedImageFigure *radioModeFigure, IndexedImageFigure *receptionStateFigure, IndexedImageFigure *transmissionStateFigure, cPolygonFigure *antennaLobeFigure, cOvalFigure *antennaLobeUnitGainFigure, cOvalFigure *antennaLobeMaxGainFigure, const int radioModuleId) :
     RadioVisualization(radioModuleId),
     networkNodeVisualization(networkNodeVisualization),
     radioModeFigure(radioModeFigure),
     receptionStateFigure(receptionStateFigure),
     transmissionStateFigure(transmissionStateFigure),
     antennaLobeFigure(antennaLobeFigure),
-    antennaLobeUnitGainFigure(antennaLobeUnitGainFigure)
+    antennaLobeUnitGainFigure(antennaLobeUnitGainFigure),
+    antennaLobeMaxGainFigure(antennaLobeMaxGainFigure)
 {
 }
 
@@ -88,18 +89,25 @@ RadioVisualizerBase::RadioVisualization *RadioCanvasVisualizer::createRadioVisua
     antennaLobeFigure->setSmooth(antennaLobeLineSmooth);
     auto antennaLobeUnitGainFigure = new cOvalFigure("antenna_lobe unit_gain");
     antennaLobeUnitGainFigure->setTags("antennaLobe unitGain");
-    antennaLobeUnitGainFigure->setTooltip("This figure represents the antenna lobe 0dB of a radio");
+    antennaLobeUnitGainFigure->setTooltip("This figure represents the 0dB gain of a radio antenna");
     antennaLobeUnitGainFigure->setZIndex(zIndex);
     antennaLobeUnitGainFigure->setOutlined(true);
     antennaLobeUnitGainFigure->setLineColor(cFigure::GREY);
     antennaLobeUnitGainFigure->setLineStyle(cFigure::LINE_DOTTED);
+    auto antennaLobeMaxGainFigure = new cOvalFigure("antenna_lobe max_gain");
+    antennaLobeMaxGainFigure->setTags("antennaLobe maxGain");
+    antennaLobeMaxGainFigure->setTooltip("This figure represents the maximum gain of a radio antenna");
+    antennaLobeMaxGainFigure->setZIndex(zIndex);
+    antennaLobeMaxGainFigure->setOutlined(true);
+    antennaLobeMaxGainFigure->setLineColor(cFigure::GREY);
+    antennaLobeMaxGainFigure->setLineStyle(cFigure::LINE_DOTTED);
     auto networkNode = getContainingNode(module);
     auto networkNodeVisualization = networkNodeVisualizer->getNetworkNodeVisualization(networkNode);
     if (networkNodeVisualization == nullptr)
         throw cRuntimeError("Cannot create radio visualization for '%s', because network node visualization is not found for '%s'", module->getFullPath().c_str(), networkNode->getFullPath().c_str());
     auto antenna = radio->getAntenna();
-    refreshAntennaLobe(antenna, antennaLobeFigure, antennaLobeUnitGainFigure);
-    return new RadioCanvasVisualization(networkNodeVisualization, radioModeFigure, receptionStateFigure, transmissionStateFigure, antennaLobeFigure, antennaLobeUnitGainFigure, module->getId());
+    refreshAntennaLobe(antenna, antennaLobeFigure, antennaLobeUnitGainFigure, antennaLobeMaxGainFigure);
+    return new RadioCanvasVisualization(networkNodeVisualization, radioModeFigure, receptionStateFigure, transmissionStateFigure, antennaLobeFigure, antennaLobeUnitGainFigure, antennaLobeMaxGainFigure, module->getId());
 }
 
 void RadioCanvasVisualizer::addRadioVisualization(const RadioVisualization *radioVisualization)
@@ -111,6 +119,7 @@ void RadioCanvasVisualizer::addRadioVisualization(const RadioVisualization *radi
     radioCanvasVisualization->networkNodeVisualization->addAnnotation(radioCanvasVisualization->transmissionStateFigure, radioCanvasVisualization->transmissionStateFigure->getSize(), placementHint, placementPriority);
     radioCanvasVisualization->networkNodeVisualization->addFigure(radioCanvasVisualization->antennaLobeFigure);
     radioCanvasVisualization->networkNodeVisualization->addFigure(radioCanvasVisualization->antennaLobeUnitGainFigure);
+    radioCanvasVisualization->networkNodeVisualization->addFigure(radioCanvasVisualization->antennaLobeMaxGainFigure);
 }
 
 void RadioCanvasVisualizer::removeRadioVisualization(const RadioVisualization *radioVisualization)
@@ -122,6 +131,7 @@ void RadioCanvasVisualizer::removeRadioVisualization(const RadioVisualization *r
     radioCanvasVisualization->networkNodeVisualization->removeAnnotation(radioCanvasVisualization->transmissionStateFigure);
     radioCanvasVisualization->networkNodeVisualization->removeFigure(radioCanvasVisualization->antennaLobeFigure);
     radioCanvasVisualization->networkNodeVisualization->removeFigure(radioCanvasVisualization->antennaLobeUnitGainFigure);
+    radioCanvasVisualization->networkNodeVisualization->removeFigure(radioCanvasVisualization->antennaLobeMaxGainFigure);
 }
 
 void RadioCanvasVisualizer::refreshRadioVisualization(const RadioVisualization *radioVisualization) const
@@ -136,11 +146,11 @@ void RadioCanvasVisualizer::refreshRadioVisualization(const RadioVisualization *
         radioCanvasVisualization->receptionStateFigure->setAssociatedObject(const_cast<cObject *>(dynamic_cast<const cObject *>(radio->getReceptionInProgress())));
         radioCanvasVisualization->transmissionStateFigure->setAssociatedObject(const_cast<cObject *>(dynamic_cast<const cObject *>(radio->getTransmissionInProgress())));
         if (displayAntennaLobes)
-            refreshAntennaLobe(radio->getAntenna(), radioCanvasVisualization->antennaLobeFigure, radioCanvasVisualization->antennaLobeUnitGainFigure);
+            refreshAntennaLobe(radio->getAntenna(), radioCanvasVisualization->antennaLobeFigure, radioCanvasVisualization->antennaLobeUnitGainFigure, radioCanvasVisualization->antennaLobeMaxGainFigure);
     }
 }
 
-void RadioCanvasVisualizer::refreshAntennaLobe(const IAntenna *antenna, cPolygonFigure *antennaLobeFigure, cOvalFigure *antennaLobeUnitGainFigure) const
+void RadioCanvasVisualizer::refreshAntennaLobe(const IAntenna *antenna, cPolygonFigure *antennaLobeFigure, cOvalFigure *antennaLobeUnitGainFigure, cOvalFigure *antennaLobeMaxGainFigure) const
 {
     EulerAngles direction;
     auto antennaPosition = antenna->getMobility()->getCurrentPosition();
@@ -195,8 +205,10 @@ void RadioCanvasVisualizer::refreshAntennaLobe(const IAntenna *antenna, cPolygon
         else
             antennaLobeFigure->addPoint(point);
     }
-    double radius = antennaLobeRelativeLabels ? getGainRadius(maxGain, maxGain) : getGainRadius(1, maxGain);
-    antennaLobeUnitGainFigure->setBounds(cFigure::Rectangle(-radius, -radius, 2 * radius, 2 * radius));
+    double unitRadius = getGainRadius(1, maxGain);
+    antennaLobeUnitGainFigure->setBounds(cFigure::Rectangle(-unitRadius, -unitRadius, 2 * unitRadius, 2 * unitRadius));
+    double maxRadius = getGainRadius(maxGain, maxGain);
+    antennaLobeMaxGainFigure->setBounds(cFigure::Rectangle(-maxRadius, -maxRadius, 2 * maxRadius, 2 * maxRadius));
 }
 
 void RadioCanvasVisualizer::setImageIndex(IndexedImageFigure *indexedImageFigure, int index) const
