@@ -90,8 +90,10 @@ Register_ResultFilter("appPkSeqNo", ApplicationPacketSequenceNumberFilter);
 
 void ApplicationPacketSequenceNumberFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
 {
-    if (auto msg = dynamic_cast<ApplicationPacket*>(object))
-        fire(this, t, (long)msg->getSequenceNumber(), details);
+    if (auto packet = dynamic_cast<Packet*>(object)) {
+        if (auto applicationPacket = dynamicPtrCast<const ApplicationPacket>(packet->peekAtFront()))
+            fire(this, t, (long)applicationPacket->getSequenceNumber(), details);
+    }
 }
 
 
