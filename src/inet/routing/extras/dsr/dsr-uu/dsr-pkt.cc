@@ -12,6 +12,7 @@
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/networklayer/contract/NetworkHeaderBase_m.h"
 #include "inet/networklayer/common/L3Tools.h"
+#include "inet/linklayer/common/InterfaceTag_m.h"
 
 namespace inet {
 
@@ -83,8 +84,6 @@ struct dsr_pkt *  dsr_pkt::dup()
 
 dsr_pkt * NSCLASS dsr_pkt_alloc(Packet * p)
 {
-
-
     auto dp = new dsr_pkt;
     if (dp == nullptr)
         return nullptr;
@@ -98,8 +97,14 @@ dsr_pkt * NSCLASS dsr_pkt_alloc(Packet * p)
 
     if (p == nullptr)
         return dp;
+    auto tagIfaceIndication = p->findTag<InterfaceInd>();
+    if (tagIfaceIndication)
+        dp->inputInterfaceId = tagIfaceIndication->getInterfaceId();
+    else
+        dp->inputInterfaceId = -1;
 
-    const auto &ipHeader = p->peekAtFront<Ipv4Header>();
+    const auto &header = peekNetworkProtocolHeader(p, Protocol::ipv4);
+    auto ipHeader = dynamicPtrCast<Ipv4Header> (constPtrCast<NetworkHeaderBase>(header));
     if (ipHeader == nullptr)
         throw cRuntimeError("DSRUU Error: This packet is not a Ipv4");
 
@@ -109,7 +114,7 @@ dsr_pkt * NSCLASS dsr_pkt_alloc(Packet * p)
     auto ipv4Header = removeNetworkProtocolHeader(p, Protocol::ipv4);
 
 
-    dp->encapsulate_protocol=0;
+    dp->encapsulate_protocol=-1;
     dp->mac.raw = dp->mac_data;
     auto macAddressInd = p->findTag<MacAddressInd>();
     if (macAddressInd) {
@@ -156,7 +161,6 @@ dsr_pkt * NSCLASS dsr_pkt_alloc(Packet * p)
     dp->payload = nullptr;
     //else
     //  dp->payload = nullptr;
-    dp->encapsulate_protocol = 0;
 
     if (dp->nh.iph->protocol == IP_PROT_DSR && p->peekAtFront<DSRPkt>() == nullptr)
     throw cRuntimeError("DSRUU Error: This packet deosn't have Dsr header");
@@ -177,7 +181,7 @@ dsr_pkt * NSCLASS dsr_pkt_alloc(Packet * p)
         // dsr_opts_len = dp->dh.opth.begin()->p_len + DSR_OPT_HDR_LEN;
 
         if (dp->payload)
-            dp->encapsulate_protocol=dsrpkt->getEncapProtocol();
+            dp->encapsulate_protocol = dsrpkt->getEncapProtocol();
 
         int n = dsr_opt_parse(dp);
         DEBUG("Packet has %d DSR option(s)\n", n);

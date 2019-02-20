@@ -36,6 +36,7 @@
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/ipv4/Icmp.h"
 #include "inet/networklayer/ipv4/Ipv4.h"
+#include "inet/linklayer/common/InterfaceTag_m.h"
 
 #include <vector>
 #include <set>
@@ -115,7 +116,10 @@ class INET_API ManetRoutingBase : public ApplicationBase, public UdpSocket::ICal
             if (msg != nullptr) {
                 agent_->emit(packetSentSignal, msg);
                 if (agent_->getNetworkProtocol()) {
-                    agent_->getNetworkProtocol()->enqueuePreRoutingRoutingHook(msg);
+                    if (msg->findTag<InterfaceInd>())
+                        agent_->getNetworkProtocol()->enqueueRoutingHook(msg, IHook::Type::PREROUTING);
+                    else
+                        agent_->getNetworkProtocol()->enqueueRoutingHook(msg, IHook::Type::LOCALOUT);
                     agent_->getNetworkProtocol()->reinjectQueuedDatagram(msg);
                 }
                 else

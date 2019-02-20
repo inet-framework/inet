@@ -724,6 +724,7 @@ private:
     void packetLinkAck(Packet *ipDgram);
     void handleTimer(cMessage *);
     void defaultProcess(Packet *);
+    void mainProcess(Packet *);
 
     struct dsr_srt *RouteFind(struct in_addr , struct in_addr);
     int RouteAdd(struct dsr_srt *, unsigned long, unsigned short );

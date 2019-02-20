@@ -63,7 +63,7 @@ class DSRPkt : public FieldsChunk
     void setTimeToLive (int ttl) {dsr_ttl = ttl;}
     int const getTimeToLive() const {return dsr_ttl;}
     void modDsrOptions (struct dsr_pkt *p,int);
-    void setEncapProtocol(IpProtocolId procotol) {encapProtocol = procotol;}
+    void setEncapProtocol(int procotol) {encapProtocol = procotol;}
     int getEncapProtocol() {return encapProtocol;}
     const L3Address &getPrevAddress() const {return previous;}
     void setPrevAddress(const L3Address address_var) {previous = address_var;}

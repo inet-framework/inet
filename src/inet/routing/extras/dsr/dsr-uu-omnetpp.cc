@@ -40,6 +40,7 @@
 #include "inet/networklayer/common/DscpTag_m.h"
 #include "inet/networklayer/common/EcnTag_m.h"
 #include "inet/networklayer/common/FragmentationTag_m.h"
+#include "inet/routing/extras/dsr/DsrProtocolTag_m.h"
 
 namespace inet {
 
@@ -577,8 +578,21 @@ INetfilter::IHook::Result DSRUU::ensureRouteForDatagram(Packet *datagram)
         return ACCEPT;
     }
 
-    const auto& networkHeader = getNetworkProtocolHeader(datagram);
+    const auto& networkHeader = removeNetworkProtocolHeader<Ipv4Header>(datagram);
     const L3Address& destAddr = networkHeader->getDestinationAddress();
+
+    // check if it has DSR header
+    const auto &chunk = datagram->peekAtFront<Chunk>();
+    const auto &dsrHeader = dynamicPtrCast<DSRPkt>(constPtrCast<Chunk>(chunk));
+    if (dsrHeader)
+        datagram->addTagIfAbsent<DsrProtocolInd>()->setDsrProtocolHeader(chunk);
+    insertNetworkProtocolHeader(datagram, Protocol::ipv4, networkHeader);
+
+    if (dsrHeader) {
+        take(datagram);
+        mainProcess(datagram);
+        return STOLEN;
+    }
 
     if (destAddr.isBroadcast() || isLocalAddress(destAddr) || destAddr.isMulticast())
         return ACCEPT;
@@ -612,29 +626,8 @@ void DSRUU::handleMessageWhenUp(cMessage *msg)
     }
 
     // Ext messge
-    Packet * pkt = check_and_cast<Packet *>(msg);
-    auto dsrHeader =  findDsrProtocolHeader(pkt);
-    if (dsrHeader) {
-        auto etxHeader = dynamicPtrCast<DSRPktExt> (constPtrCast<DSRPkt>(dsrHeader));
-        if (etxHeader) {
-            EtxMsgProc(pkt);
-            return;
-        }
-        else {
-            //
-            const auto& networkHeader = getNetworkProtocolHeader(pkt);
-            const L3Address& destAddr = networkHeader->getDestinationAddress();
-            if (destAddr.isBroadcast() || isLocalAddress(destAddr) || destAddr.isMulticast())
-                defaultProcess(pkt);
-            else
-                throw cRuntimeError("The packet must be stolen from the IP layer with the Ipv4 header");
-            return;
-        }
-
-    }
-    delete msg;
-    return;
-
+    throw cRuntimeError("A packet has arrived to DSR, DSR should stolen the datagrams from IP");
+    mainProcess(check_and_cast<Packet *>(msg));
 /*
     IPv4Datagram * ipDgram = nullptr;
     if (dynamic_cast<IPv4Datagram *>(msg)) {
@@ -659,6 +652,34 @@ void DSRUU::handleMessageWhenUp(cMessage *msg)
     //defaultProcess(check_and_cast<Packet *>(msg));
     return;
 
+}
+
+void DSRUU::mainProcess(Packet *pkt)
+{
+    auto dsrHeader = findDsrProtocolHeader(pkt);
+    if (dsrHeader) {
+        auto etxHeader = dynamicPtrCast<DSRPktExt>(
+                constPtrCast<DSRPkt>(dsrHeader));
+        if (etxHeader) {
+            EtxMsgProc(pkt);
+            return;
+        }
+        else {
+            //
+            const auto& networkHeader = getNetworkProtocolHeader(pkt);
+            const L3Address& destAddr = networkHeader->getDestinationAddress();
+            if (destAddr.isBroadcast() || isLocalAddress(destAddr)
+                    || destAddr.isMulticast())
+                defaultProcess(pkt);
+            else
+                throw cRuntimeError(
+                        "The packet must be stolen from the IP layer with the Ipv4 header");
+            return;
+        }
+
+    }
+    delete pkt;
+    return;
 }
 
 
@@ -1056,7 +1077,7 @@ void DSRUU::EtxMsgSend(void *data) {
 
     ipHeader->setProtocolId(IP_PROT_DSR);
 
-    ipHeader->setCrcMode(CRC_COMPUTED);
+    ipHeader->setCrcMode(CRC_DECLARED_CORRECT);
     ipHeader->setCrc(0);
     ipHeader->setTotalLengthField(ipHeader->getChunkLength() + etxHeader->getChunkLength());
 
@@ -1426,10 +1447,40 @@ Packet * DSRUU::newDsrPacket(struct dsr_pkt *dp, int interface_id, bool withDsrH
 
         dsrPkt->setPrevAddress(this->my_addr().s_addr);
 
+        dsrPkt->setEncapProtocol(dp->encapsulate_protocol);
+
         insertDsrProtocolHeader(pkt, dsrPkt);
+        if (pkt->getName() == nullptr || strcmp(pkt->getName(), "") == 0) {
+            auto dopt = dp->dh.opth.front().option.front();
+            switch (dopt->type) {
+            case DSR_OPT_PADN:
+                break;
+            case DSR_OPT_RREQ:
+                pkt->setName("DsrRREQ");
+
+                break;
+            case DSR_OPT_RREP:
+                pkt->setName("DsrRREP");
+                break;
+            case DSR_OPT_RERR:
+                pkt->setName("DsrRERR");
+                break;
+            case DSR_OPT_PREV_HOP:
+                break;
+            case DSR_OPT_ACK:
+                pkt->setName("DsrACK");
+                break;
+            case DSR_OPT_SRT:
+                pkt->setName("DsrSRT");
+                break;
+            }
+        }
+
     }
     else {
+
         pkt->addTagIfAbsent<PacketProtocolTag>()->setProtocol(Protocol::getProtocol(dp->nh.iph->protocol));
+
     }
 
     const auto& ipHeader = makeShared<Ipv4Header>();
@@ -1437,7 +1488,12 @@ Packet * DSRUU::newDsrPacket(struct dsr_pkt *dp, int interface_id, bool withDsrH
     ipHeader->setDestAddress(dp->dst.s_addr.toIpv4());
     ipHeader->setSourceAddress(dp->src.s_addr.toIpv4());
 
-    ipHeader->setProtocolId((IpProtocolId)dp->nh.iph->protocol);
+    if (withDsrHeader)
+        ipHeader->setProtocolId(IP_PROT_DSR);
+    else if (dp->encapsulate_protocol != -1)
+        ipHeader->setProtocolId((IpProtocolId)dp->encapsulate_protocol);
+    else
+        ipHeader->setProtocolId((IpProtocolId)dp->nh.iph->protocol);
 
     auto hopLimitReq = pkt->removeTagIfPresent<HopLimitReq>();
 
@@ -1456,7 +1512,7 @@ Packet * DSRUU::newDsrPacket(struct dsr_pkt *dp, int interface_id, bool withDsrH
         delete ecnReq;
     }
     ipHeader->setTimeToLive(ttl);
-    ipHeader->setCrcMode(CRC_COMPUTED);
+    ipHeader->setCrcMode(CRC_DECLARED_CORRECT);
     ipHeader->setCrc(0);
     ipHeader->setHeaderLength(B(dp->nh.iph->ihl)); // Header length
     ipHeader->setChunkLength(ipHeader->getHeaderLength());
@@ -1526,6 +1582,33 @@ Packet * DSRUU::newDsrPacket(struct dsr_pkt *dp, int interface_id, const Packet 
 
     insertDsrProtocolHeader(pkt, dsrPkt);
 
+
+    if (pkt->getName() == nullptr || strcmp(pkt->getName(), "") == 0) {
+        auto dopt = dp->dh.opth.front().option.front();
+        switch (dopt->type) {
+        case DSR_OPT_PADN:
+            break;
+        case DSR_OPT_RREQ:
+            pkt->setName("DsrRREQ");
+
+            break;
+        case DSR_OPT_RREP:
+            pkt->setName("DsrRREP");
+            break;
+        case DSR_OPT_RERR:
+            pkt->setName("DsrRERR");
+            break;
+        case DSR_OPT_PREV_HOP:
+            break;
+        case DSR_OPT_ACK:
+            pkt->setName("DsrACK");
+            break;
+        case DSR_OPT_SRT:
+            pkt->setName("DsrSRT");
+            break;
+        }
+    }
+
     const auto& ipHeader = makeShared<Ipv4Header>();
 
     ipHeader->setDestAddress(dp->dst.s_addr.toIpv4());
@@ -1550,7 +1633,7 @@ Packet * DSRUU::newDsrPacket(struct dsr_pkt *dp, int interface_id, const Packet 
         delete ecnReq;
     }
     ipHeader->setTimeToLive(ttl);
-    ipHeader->setCrcMode(CRC_COMPUTED);
+    ipHeader->setCrcMode(CRC_DECLARED_CORRECT);
     ipHeader->setCrc(0);
     ipHeader->setHeaderLength(B(dp->nh.iph->ihl)); // Header length
     ipHeader->setChunkLength(ipHeader->getHeaderLength());
@@ -1578,10 +1661,12 @@ Packet * DSRUU::newDsrPacket(struct dsr_pkt *dp, int interface_id, const Packet 
         addresses->setSrcAddress(this->my_addr().s_addr);
         addresses->setDestAddress(dp->dst.s_addr.toIpv4());
     }
+    ipHeader->setProtocolId(IP_PROT_DSR);
 
     pkt->addTagIfAbsent<HopLimitReq>()->setHopLimit(ttl);
 
-    pkt->addTagIfAbsent<InterfaceInd>()->setInterfaceId(interface_id);
+    if (dp->inputInterfaceId != -1)
+        pkt->addTagIfAbsent<InterfaceInd>()->setInterfaceId(dp->inputInterfaceId);
 
     return pkt;
 }
