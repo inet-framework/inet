@@ -95,6 +95,7 @@ class INET_API EtherMacBase : public MacBase
     static const EtherDescr nullEtherDescr;
 
     // configuration
+    const char *displayStringTextFormat = nullptr;
     bool sendRawBytes = false;
     const EtherDescr *curEtherDescr = nullptr;    // constants for the current Ethernet mode, e.g. txrate
     bool connected = false;    // true if connected to a network, set automatically by exploring the network configuration

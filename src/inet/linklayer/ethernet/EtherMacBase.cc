@@ -22,6 +22,7 @@
 #include "inet/common/ModuleAccess.h"
 //#include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/StringFormat.h"
 #include "inet/common/checksum/EthernetCRC.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/packet/chunk/BytesChunk.h"
@@ -218,6 +219,7 @@ void EtherMacBase::initializeQueue()
 
 void EtherMacBase::initializeFlags()
 {
+    displayStringTextFormat = par("displayStringTextFormat");
     sendRawBytes = par("sendRawBytes");
     duplexMode = true;
 
@@ -631,6 +633,45 @@ void EtherMacBase::refreshDisplay() const
 
     if (!strcmp(getParentModule()->getNedTypeName(), "inet.linklayer.ethernet.EthernetInterface"))
         getParentModule()->getDisplayString().setTagArg("i", 1, color);
+
+    auto text = StringFormat::formatString(displayStringTextFormat, [&] (char directive) {
+        static std::string result;
+        switch (directive) {
+            case 's':
+                result = std::to_string(numFramesSent);
+                break;
+            case 'r':
+                result = std::to_string(numFramesReceivedOK);
+                break;
+            case 'd':
+                result = std::to_string(numDroppedPkFromHLIfaceDown + numDroppedIfaceDown + numDroppedBitError + numDroppedNotForUs);
+                break;
+            case 'q':
+                result = std::to_string(txQueue->getNumPackets());
+                break;
+            case 'b':
+                if (transmissionChannel == nullptr)
+                    result = "not connected";
+                else {
+                    char datarateText[40];
+                    double datarate = transmissionChannel->getNominalDatarate();
+                    if (datarate >= 1e9)
+                        sprintf(datarateText, "%gGbps", datarate / 1e9);
+                    else if (datarate >= 1e6)
+                        sprintf(datarateText, "%gMbps", datarate / 1e6);
+                    else if (datarate >= 1e3)
+                        sprintf(datarateText, "%gkbps", datarate / 1e3);
+                    else
+                        sprintf(datarateText, "%gbps", datarate);
+                    result = datarateText;
+                }
+                break;
+            default:
+                throw cRuntimeError("Unknown directive: %c", directive);
+        }
+        return result.c_str();
+    });
+    getDisplayString().setTagArg("t", 0, text);
 }
 
 void EtherMacBase::changeTransmissionState(MacTransmitState newState)
