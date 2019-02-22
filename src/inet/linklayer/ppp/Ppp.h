@@ -36,6 +36,7 @@ class InterfaceEntry;
 class INET_API Ppp : public MacBase
 {
   protected:
+    const char *displayStringTextFormat = nullptr;
     bool sendRawBytes = false;
     cGate *physOutGate = nullptr;
     cChannel *datarateChannel = nullptr;    // nullptr if we're not connected
@@ -48,7 +49,7 @@ class INET_API Ppp : public MacBase
     // statistics
     long numSent = 0;
     long numRcvdOK = 0;
-    long numBitErr = 0;
+    long numDroppedBitErr = 0;
     long numDroppedIfaceDown = 0;
 
     static simsignal_t transmissionStateChangedSignal;

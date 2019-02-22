@@ -47,6 +47,7 @@ module Ppp
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module
+        string displayStringTextFormat = default("rate: %b\nsent: %s, rcvd: %r\nqueue: %q, drop: %d");
         bool sendRawBytes = default(false); // when true packets are serialized into a sequence of bytes before sending out
         int txQueueLimit = default(1000);  // zero means infinite
         int mtu @unit(B) = default(4470B);

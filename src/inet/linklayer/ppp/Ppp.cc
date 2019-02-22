@@ -24,6 +24,7 @@
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/Simsignals.h"
+#include "inet/common/StringFormat.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/ppp/Ppp.h"
@@ -47,6 +48,7 @@ void Ppp::initialize(int stage)
 
     // all initialization is done in the first stage
     if (stage == INITSTAGE_LOCAL) {
+        displayStringTextFormat = par("displayStringTextFormat");
         sendRawBytes = par("sendRawBytes");
         endTransmissionEvent = new cMessage("pppEndTxEvent");
         physOutGate = gate("phys$o");
@@ -55,10 +57,10 @@ void Ppp::initialize(int stage)
         // if we're connected, get the gate with transmission rate
         datarateChannel = connected ? physOutGate->getTransmissionChannel() : nullptr;
 
-        numSent = numRcvdOK = numBitErr = numDroppedIfaceDown = 0;
+        numSent = numRcvdOK = numDroppedBitErr = numDroppedIfaceDown = 0;
         WATCH(numSent);
         WATCH(numRcvdOK);
-        WATCH(numBitErr);
+        WATCH(numDroppedBitErr);
         WATCH(numDroppedIfaceDown);
 
         subscribe(POST_MODEL_CHANGE, this);
@@ -233,7 +235,7 @@ void Ppp::handleLowerPacket(Packet *packet)
         PacketDropDetails details;
         details.setReason(INCORRECTLY_RECEIVED);
         emit(packetDroppedSignal, packet, &details);
-        numBitErr++;
+        numDroppedBitErr++;
         delete packet;
     }
     else {
@@ -255,36 +257,52 @@ void Ppp::refreshDisplay() const
 {
     MacBase::refreshDisplay();
 
-    std::ostringstream buf;
-    const char *color = "";
-
-    if (datarateChannel != nullptr) {
-        char datarateText[40];
-
-        double datarate = datarateChannel->getNominalDatarate();
-        if (datarate >= 1e9)
-            sprintf(datarateText, "%gGbps", datarate / 1e9);
-        else if (datarate >= 1e6)
-            sprintf(datarateText, "%gMbps", datarate / 1e6);
-        else if (datarate >= 1e3)
-            sprintf(datarateText, "%gkbps", datarate / 1e3);
-        else
-            sprintf(datarateText, "%gbps", datarate);
-
-        buf << datarateText << "\nrcv:" << numRcvdOK << " snt:" << numSent;
-
-        if (numBitErr > 0)
-            buf << "\nerr:" << numBitErr;
-
-        if (endTransmissionEvent->isScheduled()) {
-            color = queue->getNumPackets() >= 3 ? "red" : "yellow";
+    auto text = StringFormat::formatString(displayStringTextFormat, [&] (char directive) {
+        static std::string result;
+        switch (directive) {
+            case 's':
+                result = std::to_string(numSent);
+                break;
+            case 'r':
+                result = std::to_string(numRcvdOK);
+                break;
+            case 'd':
+                result = std::to_string(numDroppedIfaceDown + numDroppedBitErr);
+                break;
+            case 'q':
+                result = std::to_string(queue->getNumPackets());
+                break;
+            case 'b':
+                if (datarateChannel == nullptr)
+                    result = "not connected";
+                else {
+                    char datarateText[40];
+                    double datarate = datarateChannel->getNominalDatarate();
+                    if (datarate >= 1e9)
+                        sprintf(datarateText, "%gGbps", datarate / 1e9);
+                    else if (datarate >= 1e6)
+                        sprintf(datarateText, "%gMbps", datarate / 1e6);
+                    else if (datarate >= 1e3)
+                        sprintf(datarateText, "%gkbps", datarate / 1e3);
+                    else
+                        sprintf(datarateText, "%gbps", datarate);
+                    result = datarateText;
+                }
+                break;
+            default:
+                throw cRuntimeError("Unknown directive: %c", directive);
         }
+        return result.c_str();
+    });
+    getDisplayString().setTagArg("t", 0, text);
+
+    const char *color = "";
+    if (datarateChannel != nullptr) {
+        if (endTransmissionEvent->isScheduled())
+            color = queue->getNumPackets() >= 3 ? "red" : "yellow";
     }
-    else {
-        buf << "not connected\ndropped:" << numDroppedIfaceDown;
+    else
         color = "#707070";
-    }
-    getDisplayString().setTagArg("t", 0, buf.str().c_str());
     getDisplayString().setTagArg("i", 1, color);
 }
 
