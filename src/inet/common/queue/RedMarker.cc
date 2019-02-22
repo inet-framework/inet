@@ -97,7 +97,7 @@ void RedMarker::handleMessage(cMessage *msg)
   //      packet->insertAtFront(ipv4Header);
 
   // if packet supports marking (ECT(1) or ECT(0))
-      if ((ect == IP_ECN_ECT_0) || (ect == IP_ECN_ECT_1))
+      if (((ect & IP_ECN_ECT_0) == IP_ECN_ECT_0) || ((ect & IP_ECN_ECT_1) == IP_ECN_ECT_1))
       {
 
         // if next packet should be marked and it is not
