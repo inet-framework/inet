@@ -15,11 +15,18 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-package inet.linklayer.ieee80211.mac.contract;
+package inet.linklayer.ieee80211.mac.queue;
 
-moduleinterface IHcf
+simple InProgressFrames // TODO: rename to InProgressQueue?
 {
     parameters:
-        @display("i=block/layer");
+        string pendingQueueModule;
+        string originatorMacDataServiceModule;
+        string ackHandlerModule;
+        @display("i=block/queue");
+        @signal[packetEnqueued](type=inet::Packet);
+        @signal[packetDequeued](type=inet::Packet);
+        @statistic[queueingTime](title="queueing times"; source=queueingTime(packetDequeued); record=histogram,vector; interpolationmode=none);
+        @statistic[queueLength](title="queue length"; source=count(packetEnqueued) - count(packetDequeued); record=max,timeavg,vector; interpolationmode=sample-hold);
 }
 

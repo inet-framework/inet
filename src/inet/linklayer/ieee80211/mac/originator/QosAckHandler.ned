@@ -15,14 +15,9 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-package inet.linklayer.ieee80211.mac.statistics;
+package inet.linklayer.ieee80211.mac.originator;
 
-import inet.linklayer.ieee80211.mac.contract.IStatistics;
-
-//
-// The default implementation of ~IStatistics
-//
-simple BasicStatistics like IStatistics
+simple QosAckHandler
 {
     parameters:
         @display("i=block/table2");

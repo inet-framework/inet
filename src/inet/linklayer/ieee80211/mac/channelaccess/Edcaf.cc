@@ -30,6 +30,11 @@ Define_Module(Edcaf);
 inline double fallback(double a, double b) {return a!=-1 ? a : b;}
 inline simtime_t fallback(simtime_t a, simtime_t b) {return a!=-1 ? a : b;}
 
+Edcaf::~Edcaf()
+{
+    delete stationRetryCounters;
+}
+
 void Edcaf::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
@@ -37,6 +42,12 @@ void Edcaf::initialize(int stage)
         ac = getAccessCategory(par("accessCategory"));
         contention = check_and_cast<IContention *>(getSubmodule("contention"));
         collisionController = check_and_cast<IEdcaCollisionController *>(getModuleByPath(par("collisionControllerModule")));
+        pendingQueue = check_and_cast<PendingQueue *>(getSubmodule("pendingQueue"));
+        recoveryProcedure = check_and_cast<QosRecoveryProcedure *>(getSubmodule("recoveryProcedure"));
+        ackHandler = check_and_cast<QosAckHandler *>(getSubmodule("ackHandler"));
+        inProgressFrames = check_and_cast<InProgressFrames *>(getSubmodule("inProgressFrames"));
+        txopProcedure = check_and_cast<TxopProcedure *>(getSubmodule("txopProcedure"));
+        stationRetryCounters = new StationRetryCounters();
         WATCH(owning);
         WATCH(slotTime);
         WATCH(sifs);
@@ -136,7 +147,7 @@ void Edcaf::channelAccessGranted()
     ASSERT(callback != nullptr);
     if (!collisionController->isInternalCollision(this)) {
         owning = true;
-        emit(channelOwningChangedSignal, owning);
+        emit(channelOwnershipChangedSignal, owning);
         callback->channelGranted(this);
     }
     else
@@ -148,7 +159,7 @@ void Edcaf::releaseChannel(IChannelAccess::ICallback* callback)
     Enter_Method_Silent("releaseChannel");
     ASSERT(owning);
     owning = false;
-    emit(channelOwningChangedSignal, owning);
+    emit(channelOwnershipChangedSignal, owning);
     this->callback = nullptr;
     EV_INFO << "Channel released.\n";
 }

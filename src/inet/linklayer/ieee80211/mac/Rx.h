@@ -34,9 +34,11 @@ class IStatistics;
  */
 class INET_API Rx : public cSimpleModule, public IRx
 {
+    public:
+        static simsignal_t navChangedSignal;
+
     protected:
         std::vector<IContention *> contentions;
-        IStatistics *statistics = nullptr;
 
         MacAddress address;
         cMessage *endNavTimer = nullptr;

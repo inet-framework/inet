@@ -38,7 +38,6 @@
 #include "inet/linklayer/ieee80211/mac/originator/AckHandler.h"
 #include "inet/linklayer/ieee80211/mac/originator/NonQosRecoveryProcedure.h"
 #include "inet/linklayer/ieee80211/mac/protectionmechanism/OriginatorProtectionMechanism.h"
-#include "inet/linklayer/ieee80211/mac/queue/InProgressFrames.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -63,7 +62,7 @@ class INET_API Dcf : public ICoordinationFunction, public IFrameSequenceHandler:
         IRateSelection *rateSelection = nullptr;
 
         // Channel access method
-        Dcaf *dcfChannelAccess = nullptr;
+        Dcaf *channelAccess = nullptr;
 
         // MAC Data Service
         IOriginatorMacDataService *originatorDataService = nullptr;
@@ -87,10 +86,6 @@ class INET_API Dcf : public ICoordinationFunction, public IFrameSequenceHandler:
         // Protection mechanism
         OriginatorProtectionMechanism *originatorProtectionMechanism = nullptr;
 
-        // Queue
-        PendingQueue *pendingQueue = nullptr;
-        InProgressFrames *inProgressFrames = nullptr;
-
         // Frame sequence handler
         IFrameSequenceHandler *frameSequenceHandler = nullptr;
 
@@ -101,6 +96,7 @@ class INET_API Dcf : public ICoordinationFunction, public IFrameSequenceHandler:
     protected:
         virtual int numInitStages() const override { return NUM_INIT_STAGES; }
         virtual void initialize(int stage) override;
+        virtual void forEachChild(cVisitor *v) override;
         virtual void handleMessage(cMessage *msg) override;
         virtual void updateDisplayString();
 

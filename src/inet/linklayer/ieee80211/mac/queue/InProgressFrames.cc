@@ -22,6 +22,43 @@
 namespace inet {
 namespace ieee80211 {
 
+Define_Module(InProgressFrames);
+
+simsignal_t InProgressFrames::packetEnqueuedSignal = cComponent::registerSignal("packetEnqueued");
+simsignal_t InProgressFrames::packetDequeuedSignal = cComponent::registerSignal("packetDequeued");
+
+void InProgressFrames::initialize(int stage)
+{
+    if (stage == INITSTAGE_LOCAL) {
+        pendingQueue = check_and_cast<PendingQueue *>(getModuleByPath(par("pendingQueueModule")));
+        dataService = check_and_cast<IOriginatorMacDataService *>(getModuleByPath(par("originatorMacDataServiceModule")));
+        ackHandler = check_and_cast<IAckHandler *>(getModuleByPath(par("ackHandlerModule")));
+        updateDisplayString();
+    }
+}
+
+void InProgressFrames::updateDisplayString()
+{
+    std::string text = std::to_string(inProgressFrames.size()) + " packets";
+    getDisplayString().setTagArg("t", 0, text.c_str());
+}
+
+std::string InProgressFrames::str() const
+{
+    if (inProgressFrames.size() == 0)
+        return std::string("empty");
+    std::stringstream out;
+    out << "length=" << inProgressFrames.size();
+    return out.str();
+}
+
+void InProgressFrames::forEachChild(cVisitor *v)
+{
+    cSimpleModule::forEachChild(v);
+    for (auto frame : inProgressFrames)
+        v->visit(frame);
+}
+
 bool InProgressFrames::hasEligibleFrameToTransmit()
 {
     for (auto frame : inProgressFrames) {
@@ -45,6 +82,9 @@ void InProgressFrames::ensureHasFrameToTransmit()
                 EV_DEBUG << "Inserting frame " << frame->getName() << " extracted from MAC data service.\n";
                 ackHandler->frameGotInProgress(frame->peekAtFront<Ieee80211DataOrMgmtHeader>());
                 inProgressFrames.push_back(frame);
+                frame->setArrivalTime(simTime());
+                updateDisplayString();
+                emit(packetEnqueuedSignal, frame);
             }
             delete frames;
         }
@@ -77,6 +117,9 @@ Packet *InProgressFrames::getPendingFrameFor(Packet *frame)
             for (auto frame : *frames) {
                 ackHandler->frameGotInProgress(frame->peekAtFront<Ieee80211DataOrMgmtHeader>());
                 inProgressFrames.push_back(frame);
+                frame->setArrivalTime(simTime());
+                updateDisplayString();
+                emit(packetEnqueuedSignal, frame);
             }
             delete frames;
             // FIXME: If the next Txop sequence were a BlockAckReqBlockAckFs then this would return
@@ -91,8 +134,10 @@ Packet *InProgressFrames::getPendingFrameFor(Packet *frame)
 void InProgressFrames::dropFrame(Packet *packet)
 {
     EV_DEBUG << "Dropping frame " << packet->getName() << ".\n";
-    inProgressFrames.remove(packet);
+    inProgressFrames.erase(std::remove(inProgressFrames.begin(), inProgressFrames.end(), packet), inProgressFrames.end());
     droppedFrames.push_back(packet);
+    updateDisplayString();
+    emit(packetDequeuedSignal, packet);
 }
 
 void InProgressFrames::dropFrames(std::set<std::pair<MacAddress, std::pair<Tid, SequenceControlField>>> seqAndFragNums)
@@ -106,6 +151,8 @@ void InProgressFrames::dropFrames(std::set<std::pair<MacAddress, std::pair<Tid, 
                 EV_DEBUG << "Dropping frame " << frame->getName() << ".\n";
                 it = inProgressFrames.erase(it);
                 droppedFrames.push_back(frame);
+                updateDisplayString();
+                emit(packetDequeuedSignal, frame);
             }
             else
                 it++;

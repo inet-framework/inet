@@ -23,7 +23,6 @@
 #include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
 #include "inet/linklayer/ieee80211/mac/Tx.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRx.h"
-#include "inet/linklayer/ieee80211/mac/contract/IStatistics.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -43,7 +42,6 @@ void Tx::initialize(int stage)
         mac = check_and_cast<Ieee80211Mac *>(getContainingNicModule(this)->getSubmodule("mac"));
         endIfsTimer = new cMessage("endIFS");
         rx = dynamic_cast<IRx *>(getModuleByPath(par("rxModule")));
-        // statistics = check_and_cast<IStatistics*>(getModuleByPath(par("statisticsModule")));
         WATCH(transmitting);
     }
     else if (stage == INITSTAGE_LINK_LAYER) {

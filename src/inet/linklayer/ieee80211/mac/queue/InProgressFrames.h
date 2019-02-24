@@ -22,32 +22,38 @@
 #include "inet/linklayer/ieee80211/mac/common/SequenceControlField.h"
 #include "inet/linklayer/ieee80211/mac/contract/IAckHandler.h"
 #include "inet/linklayer/ieee80211/mac/contract/IOriginatorMacDataService.h"
-#include "inet/linklayer/ieee80211/mac/queue/Ieee80211Queue.h"
+#include "inet/linklayer/ieee80211/mac/queue/PendingQueue.h"
 
 namespace inet {
 namespace ieee80211 {
 
-class INET_API InProgressFrames
+class INET_API InProgressFrames : public cSimpleModule
 {
+    public:
+        static simsignal_t packetEnqueuedSignal;
+        static simsignal_t packetDequeuedSignal;
+
     protected:
         PendingQueue *pendingQueue = nullptr;
         IOriginatorMacDataService *dataService = nullptr;
         IAckHandler *ackHandler = nullptr;
-        std::list<Packet *> inProgressFrames;
+        std::vector<Packet *> inProgressFrames;
         std::vector<Packet *> droppedFrames;
 
     protected:
+        virtual void initialize(int stage) override;
+        virtual void updateDisplayString();
+
         void ensureHasFrameToTransmit();
         bool hasEligibleFrameToTransmit();
 
     public:
-        InProgressFrames(PendingQueue *pendingQueue, IOriginatorMacDataService *dataService, IAckHandler *ackHandler) :
-            pendingQueue(pendingQueue),
-            dataService(dataService),
-            ackHandler(ackHandler)
-        { }
         virtual ~InProgressFrames();
 
+        virtual std::string str() const override;
+        virtual void forEachChild(cVisitor *v) override;
+        virtual int getLength() const { return inProgressFrames.size(); }
+        virtual Packet *getFrames(int i) const { return inProgressFrames[i]; }
         virtual Packet *getFrameToTransmit();
         virtual Packet *getPendingFrameFor(Packet *frame);
         virtual void dropFrame(Packet *packet);

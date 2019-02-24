@@ -22,6 +22,7 @@
 #include "inet/linklayer/ieee80211/mac/contract/IChannelAccess.h"
 #include "inet/linklayer/ieee80211/mac/contract/IContention.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRecoveryProcedure.h"
+#include "inet/linklayer/ieee80211/mac/queue/InProgressFrames.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -32,6 +33,9 @@ class INET_API Dcaf : public IChannelAccess, public IContention::ICallback, publ
         physicallayer::Ieee80211ModeSet *modeSet = nullptr;
         IContention *contention = nullptr;
         IChannelAccess::ICallback *callback = nullptr;
+
+        PendingQueue *pendingQueue = nullptr;
+        InProgressFrames *inProgressFrames = nullptr;
 
         bool owning = false;
 
@@ -53,6 +57,9 @@ class INET_API Dcaf : public IChannelAccess, public IContention::ICallback, publ
         virtual void receiveSignal(cComponent* source, simsignal_t signalID, cObject* obj, cObject* details) override;
 
     public:
+        virtual PendingQueue *getPendingQueue() const { return pendingQueue; }
+        virtual InProgressFrames *getInProgressFrames() const { return inProgressFrames; }
+
         // IChannelAccess::ICallback
         virtual void requestChannel(IChannelAccess::ICallback* callback) override;
         virtual void releaseChannel(IChannelAccess::ICallback* callback) override;

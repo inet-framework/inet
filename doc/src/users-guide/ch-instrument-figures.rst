@@ -25,11 +25,13 @@ Some of the instrument figure types available in INET are the following:
 
 .. figure:: figures/instr_gauge.png
    :align: center
+   :width: 150
 
 - *linearGauge:* A horizontal linear gauge similar to a VU meter.
 
 .. figure:: figures/instr_linearGauge.png
    :align: center
+   :width: 300
 
 - *progressMeter:* A horizontal progress bar.
 
@@ -45,6 +47,7 @@ Some of the instrument figure types available in INET are the following:
 
 .. figure:: figures/instr_thermometer.png
    :align: center
+   :width: 100
 
 - *indexedImage:* A figure that displays one of several images: the first image for the value 0, the second image for the value of 1, and so on.
 
@@ -69,12 +72,12 @@ the mathematical operations on it, to derive the statistic. The
 ``record`` attribute specifies where the values of the statistic is
 recorded into. In the case of instrument figures, this is set to
 ``figure``, i.e. ``record=figure``. The ``targetFigure`` attribute
-selects which figure should display the statistic. 
+selects which figure should display the statistic.
 
-The instrument figure itself is specified in the NED file with the 
+The instrument figure itself is specified in the NED file with the
 ``@figure`` property. The property's ``type`` attribute selects
 the type of the instrument figure (``gauge``, ``thermometer``, etc.),
-and the property's index (i.e. the figure name) should match the 
+and the property's index (i.e. the figure name) should match the
 name given in the statistic's ``targetFigure`` attribute.
 
 Here is an example NED file:
@@ -82,10 +85,10 @@ Here is an example NED file:
 .. code-block:: none
 
    @statistic[numRcvdPk](source=count(client.app[0].rcvdPk); record=figure; targetFigure=counter);
-   @figure[numRcvdPkCounter](type=counter; pos=413,327; label="Packets received"; decimalPlaces=4); 
+   @figure[numRcvdPkCounter](type=counter; pos=413,327; label="Packets received"; decimalPlaces=4);
 
-This creates a figure named ``numRcvdPkCounter``, which displays a counter. 
-The statistic ``numRcvdPk`` counts the packets received by the ``client`` host's 
+This creates a figure named ``numRcvdPkCounter``, which displays a counter.
+The statistic ``numRcvdPk`` counts the packets received by the ``client`` host's
 first application, and records it in the ``numRcvdPkCounter`` figure.
 
 Instrument Figure Attributes

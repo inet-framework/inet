@@ -20,13 +20,14 @@
 #include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
 #include "inet/linklayer/ieee80211/mac/Rx.h"
 #include "inet/linklayer/ieee80211/mac/contract/IContention.h"
-#include "inet/linklayer/ieee80211/mac/contract/IStatistics.h"
 #include "inet/linklayer/ieee80211/mac/contract/ITx.h"
 
 namespace inet {
 namespace ieee80211 {
 
 using namespace inet::physicallayer;
+
+simsignal_t Rx::navChangedSignal = cComponent::registerSignal("navChanged");
 
 Define_Module(Rx);
 
@@ -51,7 +52,6 @@ void Rx::initialize(int stage)
     }
     // TODO: INITSTAGE
     else if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION) {
-        // statistics = check_and_cast<IStatistics *>(getModuleByPath(par("statisticsModule")));
         address = check_and_cast<Ieee80211Mac*>(getContainingNicModule(this)->getSubmodule("mac"))->getAddress();
         recomputeMediumFree();
     }
@@ -61,6 +61,7 @@ void Rx::handleMessage(cMessage *msg)
 {
     if (msg == endNavTimer) {
         EV_INFO << "The radio channel has become free according to the NAV" << std::endl;
+        emit(navChangedSignal, SimTime::ZERO);
         recomputeMediumFree();
     }
     else
@@ -78,7 +79,6 @@ bool Rx::lowerFrameReceived(Packet *packet)
         const auto& header = packet->peekAtFront<Ieee80211MacHeader>();
         if (header->getReceiverAddress() != address)
             setOrExtendNav(header->getDuration());
-//        statistics->frameReceived(frame);
         return true;
     }
     else {
@@ -89,7 +89,6 @@ bool Rx::lowerFrameReceived(Packet *packet)
         delete packet;
         for (auto contention : contentions)
             contention->corruptedFrameReceived();
-//        statistics->erroneousFrameReceived();
         return false;
     }
 }
@@ -175,10 +174,14 @@ void Rx::setOrExtendNav(simtime_t navInterval)
             simtime_t oldEndNav = endNavTimer->getArrivalTime();
             if (endNav < oldEndNav)
                 return;    // never decrease NAV
+            emit(navChangedSignal, endNavTimer->getArrivalTime() - simTime());
             cancelEvent(endNavTimer);
         }
+        else
+            emit(navChangedSignal, SimTime::ZERO);
         EV_INFO << "Setting NAV to " << navInterval << std::endl;
         scheduleAt(endNav, endNavTimer);
+        emit(navChangedSignal, endNav - simTime());
         recomputeMediumFree();
     }
 }

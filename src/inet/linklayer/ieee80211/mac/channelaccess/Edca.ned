@@ -18,13 +18,13 @@
 
 package inet.linklayer.ieee80211.mac.channelaccess;
 
-import inet.linklayer.ieee80211.mac.contention.Contention;
 import inet.linklayer.ieee80211.mac.contract.ICollisionController;
+import inet.linklayer.ieee80211.mac.originator.NonQosRecoveryProcedure;
 
 module Edca
 {
     parameters:
-        int numEdcafs;
+        int numEdcafs = default(4);
         string rxModule;
         string rateSelectionModule;
 
@@ -32,10 +32,10 @@ module Edca
         *.rxModule = "^." + rxModule;
         *.collisionControllerModule = "^.collisionController";
 
-        edcaf[0].accessCategory = "AC_BK";
-        edcaf[1].accessCategory = "AC_BE";
-        edcaf[2].accessCategory = "AC_VI";
-        edcaf[3].accessCategory = "AC_VO";
+        edcaf[0].accessCategory = default("AC_BK");
+        edcaf[1].accessCategory = default("AC_BE");
+        edcaf[2].accessCategory = default("AC_VI");
+        edcaf[3].accessCategory = default("AC_VO");
 
         @class("Edca");
         @display("i=block/star");
@@ -47,6 +47,12 @@ module Edca
         collisionController: <default("EdcaCollisionController")> like ICollisionController {
             parameters:
                 @display("p=100,200");
+        }
+        mgmtAndNonQoSRecoveryProcedure: NonQosRecoveryProcedure {
+            parameters:
+                cwCalculatorModule = "^.edcaf[1]"; // best effort
+                rtsPolicyModule = "^.^.rtsPolicy";
+                @display("p=400,200");
         }
 }
 

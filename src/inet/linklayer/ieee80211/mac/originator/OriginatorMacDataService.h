@@ -23,7 +23,7 @@
 #include "inet/linklayer/ieee80211/mac/contract/IFragmentationPolicy.h"
 #include "inet/linklayer/ieee80211/mac/contract/IOriginatorMacDataService.h"
 #include "inet/linklayer/ieee80211/mac/contract/ISequenceNumberAssignment.h"
-#include "inet/linklayer/ieee80211/mac/queue/Ieee80211Queue.h"
+#include "inet/linklayer/ieee80211/mac/queue/PendingQueue.h"
 
 namespace inet {
 namespace ieee80211 {

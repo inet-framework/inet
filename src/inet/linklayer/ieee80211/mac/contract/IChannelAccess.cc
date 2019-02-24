@@ -20,7 +20,7 @@
 namespace inet {
 namespace ieee80211 {
 
-simsignal_t IChannelAccess::channelOwningChangedSignal = cComponent::registerSignal("channelOwningChanged");
+simsignal_t IChannelAccess::channelOwnershipChangedSignal = cComponent::registerSignal("channelOwnershipChanged");
 
 } // namespace ieee80211
 } // namespace inet

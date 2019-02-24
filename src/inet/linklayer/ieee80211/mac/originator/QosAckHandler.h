@@ -29,7 +29,8 @@ namespace ieee80211 {
 /*
  * TODO: processFailedFrame
  */
-class INET_API QosAckHandler : public IAckHandler
+// TODO: this class seems to be able to handle all ACs at once, so maybe it should be moved to Hcf
+class INET_API QosAckHandler : public cSimpleModule, public IAckHandler
 {
     public:
         enum class Status {
@@ -51,11 +52,11 @@ class INET_API QosAckHandler : public IAckHandler
         std::map<Key, Status> mgmtAckStatuses;
 
     protected:
-        virtual Status& getQoSDataAckStatus(const QoSKey& id);
-        virtual Status& getMgmtOrNonQoSAckStatus(const Key& id);
+        virtual void initialize(int stage) override;
 
+        virtual Status getQoSDataAckStatus(const QoSKey& id);
+        virtual Status getMgmtOrNonQoSAckStatus(const Key& id);
 
-        std::string getStatusString(Status status);
         void printAckStatuses();
 
     public:
@@ -70,13 +71,15 @@ class INET_API QosAckHandler : public IAckHandler
         virtual void processTransmittedBlockAckReq(const Ptr<const Ieee80211BlockAckReq>& blockAckReq);
         virtual void processFailedFrame(const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader);
         virtual void dropFrame(const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader);
+        virtual void dropFrames(std::set<std::pair<MacAddress, std::pair<Tid, SequenceControlField>>> seqAndFragNums);
 
         virtual Status getQoSDataAckStatus(const Ptr<const Ieee80211DataHeader>& header);
         virtual Status getMgmtOrNonQoSAckStatus(const Ptr<const Ieee80211DataOrMgmtHeader>& header);
-        virtual int getNumberOfFramesWithStatus(Status status);
 
         virtual bool isEligibleToTransmit(const Ptr<const Ieee80211DataOrMgmtHeader>& header) override;
         virtual bool isOutstandingFrame(const Ptr<const Ieee80211DataOrMgmtHeader>& header) override;
+
+        static std::string getStatusString(Status status);
 };
 
 } /* namespace ieee80211 */
