@@ -359,7 +359,7 @@ private:
 
 
     struct dsr_pkt *dsr_pkt_alloc(Packet *p);
-    struct dsr_pkt * dsr_pkt_alloc2(Packet  * p, cObject *ctrl);
+    struct dsr_pkt *dsr_pkt_alloc2(Packet  * p, cObject *ctrl);
 
 
     struct dsr_opt_hdr * dsr_pkt_alloc_opts(struct dsr_pkt *dp);

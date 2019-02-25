@@ -41,6 +41,7 @@
 #include "inet/networklayer/common/EcnTag_m.h"
 #include "inet/networklayer/common/FragmentationTag_m.h"
 #include "inet/routing/extras/dsr/DsrProtocolTag_m.h"
+#include "inet/common/packet/dissector/PacketDissector.h"
 
 namespace inet {
 
@@ -850,7 +851,7 @@ void DSRUU::packetLinkAck(Packet *ipDgram)
     return;
 }
 
-void DSRUU::packetFailed(const Packet *pkt)
+void DSRUU::packetFailed(const Packet *pktAux)
 {
     struct dsr_pkt *dp;
     struct in_addr dst, nxt_hop;
@@ -858,19 +859,25 @@ void DSRUU::packetFailed(const Packet *pkt)
     /* Cast the packet so that we can touch it */
     /* Do nothing for my own packets... */
 
-    Packet *ipDgram = const_cast<Packet *> (pkt);
-    auto dsrPkt = findDsrProtocolHeader(ipDgram);
-    const auto& networkHeader = getNetworkProtocolHeader(ipDgram);
-    auto ipHeader = dynamicPtrCast<Ipv4Header>(constPtrCast<NetworkHeaderBase>(networkHeader));
-    if (ipHeader == nullptr)
+    const auto& header80211 = pktAux->peekAtFront<Ieee80211DataOrMgmtHeader>();
+    if (header80211 == nullptr)
         return;
 
+    auto senderAddr = header80211->getTransmitterAddress();
+
+    Packet *ipDgram = const_cast<Packet *> (pktAux);
+    const auto& networkHeader = getNetworkProtocolHeader(ipDgram);
+    L3Address destination = networkHeader->getDestinationAddress();
+    L3Address source = networkHeader->getSourceAddress();
+    const auto &dsrPkt = findDsrProtocolHeader(ipDgram);
+
     if (dsrPkt == nullptr) {
+
         // This shouldn't really happen ?
-        EV_INFO << "Data packet from "<< ipHeader->getSrcAddress() <<"without DSR header!n";
+        EV_INFO << "Data packet from "<< source <<"without DSR header!n";
         // one hop?
         struct dsr_srt *srt;
-        nxt_hop.s_addr = ipHeader->getDestAddress();
+        nxt_hop.s_addr = destination;
         if (ConfVal(PathCache))
             srt = ph_srt_find_map(my_addr(), nxt_hop, 0);
         else
@@ -880,18 +887,109 @@ void DSRUU::packetFailed(const Packet *pkt)
         return;
     }
 
-    auto p = ipDgram->dup();
-    //prev_hop.s_addr = p->prevAddress().getInt();
+    PacketDissector::PduTreeBuilder pduTreeBuilder;
+    auto packetProtocolTag = ipDgram->findTag<PacketProtocolTag>();
+    auto protocol = packetProtocolTag != nullptr ? packetProtocolTag->getProtocol() : nullptr;
+    PacketDissector packetDissector(ProtocolDissectorRegistry::globalRegistry, pduTreeBuilder);
+    packetDissector.dissectPacket(const_cast<Packet *> (ipDgram), protocol);
 
-    dst.s_addr = ipHeader->getDestAddress();
+    auto& protocolDataUnit = pduTreeBuilder.getTopLevelPdu();
+
+    bool isIpv4 = false;
+    bool isDsr = false;
+
+    for (const auto& chunk : protocolDataUnit->getChunks()) {
+        if (auto childLevel = dynamicPtrCast<const PacketDissector::ProtocolDataUnit>(chunk)) {
+            for (const auto& chunkAux : childLevel->getChunks()) {
+                if (chunkAux->getChunkType() == Chunk::CT_SEQUENCE) {
+                    for (const auto& elementChunk : staticPtrCast<const SequenceChunk>(chunkAux)->getChunks()) {
+                        if (dynamic_cast<const Ipv4Header *>(elementChunk.get()))
+                            isIpv4 = true;
+                        if (dynamic_cast<const DSRPkt *>(elementChunk.get()))
+                            isDsr = true;
+                    }
+                }
+            }
+        }
+        else if (chunk->getChunkType() == Chunk::CT_SEQUENCE) {
+            for (const auto& elementChunk : staticPtrCast<const SequenceChunk>(chunk)->getChunks()) {
+                if (dynamic_cast<const Ipv4Header *>(elementChunk.get()))
+                    isIpv4 = true;
+                if (dynamic_cast<const DSRPkt *>(elementChunk.get()))
+                    isDsr = true;
+            }
+        }
+    }
+
+    if (!isIpv4)
+        return; // nothing more to do
+
+    // create a copy of this packet
+    auto pkt = new Packet(ipDgram->getName());
+
+    for (const auto& chunk : protocolDataUnit->getChunks()) {
+        if (auto childLevel = dynamicPtrCast<const PacketDissector::ProtocolDataUnit>(chunk)) {
+            for (const auto& chunkAux : childLevel->getChunks()) {
+                if (chunkAux->getChunkType() == Chunk::CT_SEQUENCE) {
+                    // remove previous headers to ipv4
+                    bool removed = false;
+                    for (const auto& elementChunk : staticPtrCast<const SequenceChunk>(chunkAux)->getChunks()) {
+                        if (elementChunk == networkHeader) {
+                            removed = true;
+                            insertNetworkProtocolHeader(pkt, Protocol::ipv4, dynamicPtrCast<NetworkHeaderBase> (networkHeader->dupShared()));
+                        }
+                        else if (removed) {
+                            if (elementChunk == dsrPkt)
+                                insertDsrProtocolHeader(pkt, dynamicPtrCast<DSRPkt> (networkHeader->dupShared()));
+                            else
+                                pkt->insertAtBack(elementChunk->dupShared());
+                        }
+                    }
+                }
+            }
+        }
+        else if (chunk->getChunkType() == Chunk::CT_SEQUENCE) {
+            if (staticPtrCast<const SequenceChunk>(chunk)->getChunks().front() != networkHeader){
+                delete pkt;
+                return;
+            }
+            for (const auto& elementChunk : staticPtrCast<const SequenceChunk>(chunk)->getChunks()) {
+                if (elementChunk == networkHeader) {
+                    insertNetworkProtocolHeader(pkt, Protocol::ipv4, dynamicPtrCast<NetworkHeaderBase> (networkHeader->dupShared()));
+                }
+                else
+                    if (elementChunk == dsrPkt)
+                        insertDsrProtocolHeader(pkt, dynamicPtrCast<DSRPkt> (networkHeader->dupShared()));
+                    else
+                        pkt->insertAtBack(elementChunk->dupShared());
+            }
+        }
+    }
+    pkt->copyTags(*ipDgram);
+    if (isDsr)
+        pkt->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::dsr);
+    else
+        pkt->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
+
+    for (int index = 0; index < getNumInterfaces(); index++)  {
+        if (getInterfaceEntry(index)->getMacAddress() == senderAddr) {
+            pkt->addTagIfAbsent<InterfaceInd>()->setInterfaceId(getInterfaceEntry(index)->getInterfaceId());
+            break;
+        }
+    }
+
+    // pkt is a duplicate of the packet that have removed all headers previous to network header
+
+    //prev_hop.s_addr = p->prevAddress().getInt();
+    dst.s_addr = destination;
     nxt_hop.s_addr = dsrPkt->getNextAddress();
 
     DEBUG("Xmit failure for %s nxt_hop=%s\n", print_ip(dst), print_ip(nxt_hop));
     ph_srt_delete_link_map(my_addr(), nxt_hop);
-    dp = dsr_pkt_alloc(p);
+    dp = dsr_pkt_alloc(pkt);
     if (!dp) {
         DEBUG("Could not allocate DSR packet\n");
-        drop(p, ICMP_DESTINATION_UNREACHABLE);
+        drop(pkt, ICMP_DESTINATION_UNREACHABLE);
     }
     else {
         dsr_rerr_send(dp, nxt_hop);
@@ -903,6 +1001,7 @@ void DSRUU::packetFailed(const Packet *pkt)
             dsr_pkt_free(dp);
         }
     }
+
     /* Salvage the other packets still in the interface queue with the same
      * next hop */
     /* mac access
