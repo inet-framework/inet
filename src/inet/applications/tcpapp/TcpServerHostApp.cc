@@ -149,7 +149,7 @@ void TcpServerHostApp::threadClosed(TcpServerThreadBase *thread)
     socketClosed(thread->getSocket());
 
     // remove thread object
-    delete thread;
+    thread->deleteModule();
 }
 
 void TcpServerThreadBase::refreshDisplay() const
