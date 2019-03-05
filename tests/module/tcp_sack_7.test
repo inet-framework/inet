@@ -14,26 +14,24 @@ TCP SACK test
         [4001-4501)      (data packet dropped)
         [4501-5001)      [4501-5001)   3501, SACK=4501-5001
         [5001-5501)      [5001-5501)   3501, SACK=4501-5501
-        [5501-6001)      [5501-6001)   3501, SACK=4501-6001       
-        --- 3 Duplicate ACKs: Enter Fast Retransmit + Fast recovery---     
+        [5501-6001)      [5501-6001)   3501, SACK=4501-6001          
         [6001-6501)      [5001-5501)   3501, SACK=4501-6501
         [6501-7001)      [6001-6501)   3501, SACK=4501-7001                              
- 		[7001-7501)		 [7001-7501)   3501, SACK=4501-7501
+ 		     [7001-7501)		    [7001-7501)   3501, SACK=4501-7501
  		
    Because of two consecutive lost data packets, the sender receives three duplicate acks,
-   triggering Fast Retransmirt + Fast Recovery. The congestion window is not reduced to 7 
+   triggering Fast Retransmirt + Fast Recovery. The congestion window is now reduced to 7 
    segments (3500B). 
    
  		(Re-)Transmitted      	Received       ACK Sent
-        Segment               	Segment        (Including SACK Blocks)
+        Segment           Segment        (Including SACK Blocks)
  		(R) [3501-4001)     	[3501-4001)   4001, SACK=3501-4001 SACK=4501-5001
-        (R) [4001-4501)  	    [4001-4501)   7501
-        [7501-8001)			  	[7501-8001)   8001
- 		[8001-8201)+FIN		  	[8001-8202)   8202
+   (R) [4001-4501)  	   [4001-4501)   7501
+   [7501-8001)			  	    [7501-8001)   8001
+ 		[8001-8201)+FIN		  	 [8001-8202)   8202
  
-   In the current imoplementation, rcv_nxt on the receiver side will be updated to 8202,
-   snd_max on the sender side is set to 8201, causing an error.
-   
+ The last segment [8001-8201), which is sent for the first time during Fast Recovery, 
+ contains 200 bytes of data and 1 byte for the FIN. 
    
 
 %inifile: {}.ini
