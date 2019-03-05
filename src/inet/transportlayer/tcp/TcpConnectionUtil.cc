@@ -618,6 +618,7 @@ void TcpConnection::sendFin()
     // send it
     sendToIP(fp, tcpseg);
 
+
     // notify
     tcpAlgorithm->ackSent();
 }
@@ -662,9 +663,11 @@ void TcpConnection::sendSegment(uint32 bytes)
     tcpseg->setSequenceNo(state->snd_nxt);
     ASSERT(tcpseg != nullptr);
 
-    // if sack_enabled copy region of tcpseg to rexmitQueue
-    if (state->sack_enabled)
-        rexmitQueue->enqueueSentData(state->snd_nxt, state->snd_nxt + bytes);
+    //Remember old_snd_next to store in SACK rexmit queue.
+    uint32 old_snd_nxt = state->snd_nxt;
+
+    //Number of bytes of data (without FIN) sent
+    uint32 bytes_sent = state->snd_nxt + bytes;
 
     tcpseg->setAckNo(state->rcv_nxt);
     tcpseg->setAckBit(true);
@@ -684,7 +687,12 @@ void TcpConnection::sendSegment(uint32 bytes)
         EV_DETAIL << "Setting FIN on segment\n";
         tcpseg->setFinBit(true);
         state->snd_nxt = state->snd_fin_seq + 1;
+        bytes_sent += 1; //Increase the number of bytes by one for FIN
     }
+
+    // if sack_enabled copy region of tcpseg to rexmitQueue
+    if (state->sack_enabled)
+        rexmitQueue->enqueueSentData(old_snd_nxt, bytes_sent);
 
     // add header options and update header length (from tcpseg_temp)
     for (uint i = 0; i < tcpseg_temp->getHeaderOptionArraySize(); i++)
