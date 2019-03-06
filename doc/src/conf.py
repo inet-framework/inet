@@ -178,7 +178,7 @@ latex_elements = {
 
     # The font size ('10pt', '11pt' or '12pt').
     #
-    'pointsize': '12pt',
+    'pointsize': '10pt',
 
     # Additional stuff for the LaTeX preamble.
     #
