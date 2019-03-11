@@ -32,6 +32,8 @@ namespace inet {
 
 MacBase::~MacBase()
 {
+    if (hostModule)
+        hostModule->unsubscribe(interfaceDeletedSignal, this);
 }
 
 void MacBase::initialize(int stage)
