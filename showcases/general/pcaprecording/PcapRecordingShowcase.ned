@@ -12,6 +12,12 @@ import inet.visualizer.canvas.integrated.IntegratedMultiCanvasVisualizer;
 network PcapRecordingShowcase
 {
     @display("bgb=1214,400");
+    @statistic[progress](source=100 * sum(packetBytes(ethHost2.app[0].packetReceived)) / 1048576; record=figure; targetFigure=progressMeter; checkSignals=false);
+    @figure[progressMeter](type=progressMeter; pos=900,300; size=250,20; text="%.4g%%"; label="eth2Host: download progress");
+    @statistic[numRcvdPk](source=count(host2.app[0].packetReceived); record=figure; targetFigure=numRcvdPkCounter; checkSignals=false);
+    @figure[numRcvdPkCounter](type=counter; pos=400,40; label="host2: packets received"; decimalPlaces=4);
+    @statistic[rtt](source=ethHost1.app[1].rtt; record=figure; targetFigure=rttThermometer);
+    @figure[rttThermometer](type=thermometer; pos=400,250; size=30,100; minValue=0; maxValue=0.002; label="ethHost1: ping rtt");
     submodules:
         configurator: Ipv4NetworkConfigurator {
             @display("p=87,57");
