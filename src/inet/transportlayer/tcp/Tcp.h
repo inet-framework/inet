@@ -151,9 +151,6 @@ class INET_API Tcp : public OperationalBase
     virtual void refreshDisplay() const override;
 
   public:
-    static bool testing;    // switches between tcpEV and testingEV
-    static bool logverbose;    // if !testing, turns on more verbose logging
-
     bool recordStatistics = false;    // output vectors on/off
 
     bool useDataNotification = false;

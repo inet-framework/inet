@@ -19,8 +19,11 @@
 #define __INET_ETHERNET_H
 
 #include "inet/common/INETDefs.h"
+#include "inet/common/Units.h"
 
 namespace inet {
+
+using namespace inet::units::values;
 
 // Constants from the 802.3 spec
 #define MAX_PACKETBURST                     13
