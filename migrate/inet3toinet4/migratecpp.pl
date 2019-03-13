@@ -1,9 +1,11 @@
+#
+#
+#
 
 use File::Basename;
 my $dirname = dirname(__FILE__);
 require $dirname."/replacements.pl";
 
-# from msg files
 
 $listfname = $ARGV[0];
 open(LISTFILE, $listfname) || die "cannot open $listfname";
@@ -21,9 +23,7 @@ while (<LISTFILE>)
 
     print "processing $fname... ";
 
-    open(INFILE, $fname) || die "cannot open $fname";
-    read(INFILE, $txt, 1000000) || die "cannot read $fname";
-    close INFILE;
+    $txt = readfile($fname);
 
     my $origtxt = $txt;
 
@@ -48,12 +48,16 @@ while (<LISTFILE>)
         $txt =~ s/\b${from}\b/${to}/sg;
     }
 
+    #fixup
+    {
+        $txt =~ s/\bL3Address::Ipv4\b/L3Address::IPv4/sg;
+        $txt =~ s/\bL3Address::Ipv6\b/L3Address::IPv6/sg;
+    }
+
     if ($txt eq $origtxt) {
         print "unchanged\n";
     } else {
-        open(OUTFILE, ">$fname") || die "cannot open $fname for write";
-        print OUTFILE $txt || die "cannot write $fname";
-        close OUTFILE;
+        writefile($fname, $txt);
         print "DONE\n";
     }
 }
@@ -61,4 +65,23 @@ while (<LISTFILE>)
 # BEWARE OF BOGUS REPLACEMENTS INSIDE COMMENTS!!
 # getAddress(), getData(), getPayload() !!!!
 print "\nConversion done. You may safely re-run this script as many times as you want.\n";
+
+sub readfile ()
+{
+    my $fname = shift;
+    my $content;
+    open FILE, "$fname" || die "cannot open $fname";
+    read(FILE, $content, 1000000) || die "cannot read $fname";
+    close FILE;
+    $content;
+}
+
+sub writefile ()
+{
+    my $fname = shift;
+    my $content = shift;
+    open FILE, ">$fname" || die "cannot open $fname for write";
+    print FILE $content || die "cannot write $fname";
+    close FILE;
+}
 
