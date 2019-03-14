@@ -18,7 +18,7 @@
 
 package inet.linklayer.ieee802154;
 
-simple Ieee802154NarrowbandMac extends Ieee802154Mac
+module Ieee802154NarrowbandMac extends Ieee802154Mac
 {
     parameters:
         useMACAcks = true;
