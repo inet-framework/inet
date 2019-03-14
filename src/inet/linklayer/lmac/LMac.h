@@ -12,6 +12,7 @@
 #ifndef __INET_LMAC_H
 #define __INET_LMAC_H
 
+#include "inet/common/queueing/contract/IPacketQueue.h"
 #include "inet/linklayer/base/MacProtocolBase.h"
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/linklayer/contract/IMacProtocol.h"
@@ -82,10 +83,9 @@ class INET_API LMac : public MacProtocolBase, public IMacProtocol
         , numSlots(0)
         , currSlot()
         , reservedMobileSlots(0)
-        , macQueue()
+        , queue()
         , radio(nullptr)
         , transmissionState(physicallayer::IRadio::TRANSMISSION_STATE_UNDEFINED)
-        , queueLength(0)
         , wakeup(nullptr)
         , timeout(nullptr)
         , sendData(nullptr)
@@ -126,8 +126,6 @@ class INET_API LMac : public MacProtocolBase, public IMacProtocol
     /** @brief Generate new interface address*/
     virtual void configureInterfaceEntry() override;
     virtual void handleCommand(cMessage *msg) {}
-
-    typedef std::list<Packet *> MacQueue;
 
     /** @brief MAC states
      *
@@ -181,14 +179,11 @@ class INET_API LMac : public MacProtocolBase, public IMacProtocol
 
     /** @brief A queue to store packets from upper layer in case another
        packet is still waiting for transmission..*/
-    MacQueue macQueue;
+    queueing::IPacketQueue *queue = nullptr;
 
     /** @brief The radio. */
     physicallayer::IRadio *radio;
     physicallayer::IRadio::TransmissionState transmissionState;
-
-    /** @brief length of the queue*/
-    unsigned queueLength;
 
     cMessage *wakeup;
     cMessage *timeout;
