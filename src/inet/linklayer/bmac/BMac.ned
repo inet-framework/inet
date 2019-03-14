@@ -32,16 +32,16 @@ package inet.linklayer.bmac;
 //*
 //**************************************************************************/
 
+import inet.common.queueing.contract.IPacketQueue;
 import inet.linklayer.base.MacProtocolBase;
 import inet.linklayer.contract.IMacProtocol;
-
 
 //
 // Implementation of B-MAC (called also Berkeley MAC, Low Power Listening or
 // LPL).
 // See C++ documentation for details.
 //
-simple BMac extends MacProtocolBase like IMacProtocol
+module BMac extends MacProtocolBase like IMacProtocol
 {
     parameters:
         string address = default("auto"); // MAC address as hex string (12 hex digits), or
@@ -83,5 +83,12 @@ simple BMac extends MacProtocolBase like IMacProtocol
         @statistic[packetDropIncorrectlyReceived](title="packet drop: incorrectly received"; source=packetDropReasonIsIncorrectlyReceived(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetDropNotAddressedToUs](title="packet drop: not addressed to us"; source=packetDropReasonIsNotAddressedToUs(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetDropQueueOverlow](title="packet drop: queue overflow"; source=packetDropReasonIsQueueOverflow(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
+    submodules:
+        queue: <default("DropTailQueue")> like IPacketQueue {
+            parameters:
+                frameCapacity = default(queueLength);
+                @display("p=100,100;q=l2queue");
+        }
+    connections allowunconnected:
 }
 
