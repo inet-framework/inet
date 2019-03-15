@@ -123,6 +123,7 @@ class INET_API Protocol
     static const Protocol shortcutPhy;
     static const Protocol unitDisk;
     static const Protocol wiseRoute;
+    static const Protocol lora;
 };
 
 inline std::ostream& operator << (std::ostream& o, const Protocol& t) { o << t.str(); return o; }
