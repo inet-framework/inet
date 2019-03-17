@@ -120,6 +120,7 @@ const Protocol Protocol::stp("stp", "STP");
 const Protocol Protocol::tcp("tcp", "TCP", Protocol::TransportLayer);
 const Protocol Protocol::telnet("telnet", "TELNET");
 const Protocol Protocol::trill("trill", "TRILL");
+const Protocol Protocol::tsn("tsn", "TSN");
 const Protocol Protocol::udp("udp", "UDP", Protocol::TransportLayer);
 const Protocol Protocol::xmac("xmac", "X-MAC");
 const Protocol Protocol::xtp("xtp", "XTP");

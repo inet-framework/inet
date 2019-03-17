@@ -106,6 +106,7 @@ class INET_API Protocol
     static const Protocol tcp;
     static const Protocol telnet;
     static const Protocol trill;
+    static const Protocol tsn;  // ieee1722, AVB, TSN
     static const Protocol udp;
     static const Protocol xmac;
     static const Protocol xtp;
