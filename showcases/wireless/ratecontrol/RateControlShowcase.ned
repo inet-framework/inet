@@ -17,13 +17,11 @@ import inet.visualizer.canvas.integrated.IntegratedCanvasVisualizer;
 network RateControlShowcase
 {
     parameters:
-        @display("b=297,203;bgb=1300,460");
-//        @statistic[bitrate](source=sourceHost.wlan[0].mac.dcf.rateControl.datarateChanged/1000000; record=figure; targetFigure=bitrateLinearGauge);
-//        @figure[bitrateLinearGauge](type=linearGauge; pos=320,65; size=250,30; minValue=0; maxValue=54; tickSize=6);
+        @display("bgb=1300,460");
+        @statistic[bitrate](source=sourceHost.wlan[0].mac.dcf.rateControl.datarateChanged/1000000; record=figure; targetFigure=bitrateLinearGauge);
+        @figure[bitrateLinearGauge](type=linearGauge; pos=1000,200; size=225,30; minValue=0; maxValue=54; tickSize=6; label="Data Bitrate [Mbps]");
         @statistic[throughput](source=liveThroughput(sinkHost.app[0].packetReceived)/1000000; record=figure; targetFigure=throughputPlot);
-        @figure[throughputPlot](type=plot; pos=300,280; size=450,60; timeWindow=25; maxValue=30; valueTickSize=30; timeTickSize=5; label="Application level throughput"; numberSizeFactor=1.5);
-        @statistic[numRcvdPk](source=count(sinkHost.app[0].packetReceived); record=figure; targetFigure=numRcvdPkCounter; checkSignals=false);
-        @figure[numRcvdPkCounter](type=counter; pos=785,285; label="Packets received"; decimalPlaces=5);
+        @figure[throughputPlot](type=plot; pos=1000,50; size=225,80; timeWindow=25; maxValue=30; valueTickSize=30; timeTickSize=5; label="App Level Throughput [Mbps] vs Time [s]"; labelOffset=10);
 
 
     submodules:
