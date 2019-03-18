@@ -43,6 +43,8 @@ class INET_API PcapRecorder : public cSimpleModule, protected cListener
     PacketFilter packetFilter;
     int numRecorded = 0;
 
+    static simsignal_t pcapFrameRecordedSignal;
+
   public:
     PcapRecorder();
     ~PcapRecorder();

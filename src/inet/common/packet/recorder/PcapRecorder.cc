@@ -29,6 +29,8 @@ namespace inet {
 
 Define_Module(PcapRecorder);
 
+simsignal_t PcapRecorder::pcapFrameRecordedSignal = registerSignal("pcapFrameRecorded");
+
 PcapRecorder::~PcapRecorder()
 {
 }
@@ -162,6 +164,7 @@ void PcapRecorder::recordPacket(cPacket *msg, bool l2r)
             if (protocol == dumpProtocol) {
                 pcapDumper.writePacket(simTime(), packet);
                 numRecorded++;
+                emit(pcapFrameRecordedSignal, packet);
                 break;
             }
         }
