@@ -1119,6 +1119,20 @@
         linkerFlags = ""
         />
     <feature
+        id="LoraFlora"
+        name="Lora model"
+        description = "Lora/Flora implementation"
+        initiallyEnabled = "false"
+        requires = ""
+        labels = ""
+        nedPackages = "
+                       inet.flora
+                      "
+        extraSourceFolders = ""
+        compileFlags = "-DWITH_FLORACODE"
+        linkerFlags = ""
+        />
+    <feature
         id="wirelesstutorial"
         name="Wireless tutorial"
         description = "A step-by-step tutorial starting from the basics, and introducing new features and concepts related to wireless communication networks."
