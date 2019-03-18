@@ -82,6 +82,7 @@ ProtocolGroup ProtocolGroup::ethertype("ethertype", {
     { 0x86FF, &Protocol::nextHopForwarding },         // ETHERTYPE_INET_NEXTHOP
     { 0x8847, &Protocol::mpls },
     { 0x88CC, &Protocol::lldp },
+    { 0x891d, &Protocol::tteth },
 });
 
 // excerpt from http://www.iana.org/assignments/ppp-numbers/ppp-numbers.xhtml#ppp-numbers-2
