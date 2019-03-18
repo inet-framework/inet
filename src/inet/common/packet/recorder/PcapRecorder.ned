@@ -64,5 +64,6 @@ simple PcapRecorder
         bool alwaysFlush = default(false); // flush the pcapFile after each write to ensure that all packets are captured in case of a crash
         string displayStringTextFormat = default("rec: %n pks");
         @display("i=block/blackboard");
+        @signal[pcapFrameRecorded](type=Packet);
 }
 
