@@ -32,12 +32,10 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
-
 #include "inet/routing/extras/dymo_fau/DYMOFau.h"
 #include "inet/transportlayer/contract/udp/UdpSocket.h"
-#include "inet/common/ModuleAccess.h"
 #include "inet/networklayer/ipv4/Ipv4.h"
-#include "inet/routing/extras/base/ControlManetRouting_m.h"
+#include "inet/routing/extras/dymo_fau/DYMO_PacketBBMessage_m.h"
 
 namespace inet {
 
@@ -53,7 +51,6 @@ const int DYMO_RM_HEADER_LENGTH = 13; /**< length (in bytes) of a DYMO RM header
 const int DYMO_RBLOCK_LENGTH = 10; /**< length (in bytes) of one DYMO RBlock */
 const int DYMO_RERR_HEADER_LENGTH = 4; /**< length (in bytes) of a DYMO RERR header */
 const int DYMO_UBLOCK_LENGTH = 8; /**< length (in bytes) of one DYMO UBlock */
-const int UDPPort = DYMO_PORT; //9000 /**< UDP Port to listen on (TBD) */
 const double MAXJITTER = 0.001; /**< all messages sent to a lower layer are delayed by 0..MAXJITTER seconds (draft-ietf-manet-jitter-01) */
 }
 
@@ -123,6 +120,8 @@ void DYMOFau::initialize(int stage)
         BUFFER_SIZE_PACKETS = par("BUFFER_SIZE_PACKETS");
         BUFFER_SIZE_BYTES = par("BUFFER_SIZE_BYTES");
 
+        registerRoutingModule();
+
         // myAddr = AUTOASSIGN_ADDRESS_BASE.getInt() + uint32(getParentModule()->getId());
 
         rateLimiterRREQ = new DYMO_TokenBucket(RREQ_RATE_LIMIT, RREQ_BURST_LIMIT, simTime());
@@ -136,13 +135,13 @@ void DYMOFau::initialize(int stage)
         queuedDataPackets = new DYMO_DataQueue(this, BUFFER_SIZE_PACKETS, BUFFER_SIZE_BYTES);
         WATCH_PTR(queuedDataPackets);
 
-        registerRoutingModule();
         if (!isInMacLayer())
             registerHook();
 
         // setSendToICMP(true);
         linkLayerFeeback();
         timerMsg = new cMessage("DYMO_scheduler");
+        socket.joinMulticastGroup(L3Address(Ipv4Address::LL_MANET_ROUTERS));
     }
 }
 
@@ -347,6 +346,31 @@ INetfilter::IHook::Result DYMOFau::processPacket(const Packet* datagram)
     return INetfilter::IHook::QUEUE;
 }
 
+void DYMOFau::handleMessageWhenUp(cMessage* apMsg)
+{
+    if (apMsg->isSelfMessage() && checkTimer(apMsg)) {
+        scheduleEvent();
+        return;
+    }
+
+    if (apMsg->isSelfMessage()) {
+        handleSelfMsg(apMsg);
+    }
+    else {
+        Packet *pkt = check_and_cast<Packet *>(apMsg);
+        const auto &dymoHeader = pkt->peekAtFront<DYMO_PacketBBMessage>();
+        if (dymoHeader == nullptr)
+            throw cRuntimeError("Header error");
+        auto tag = pkt->getTag<L3AddressInd>();
+        if (isLocalAddress(tag->getSrcAddress()) || tag->getSrcAddress().isUnspecified()) {
+            // local address delete packet
+            delete apMsg;
+            return;
+        }
+        socket.processMessage(pkt);
+    }
+    scheduleEvent();
+}
 
 void DYMOFau::handleLowerMsg(Packet* apMsg)
 {
@@ -475,6 +499,9 @@ void DYMOFau::handleLowerRMForRelay(Packet *pkt)
 
     const auto & routingMsg = pkt->peekAtFront<DYMO_RM>();
 
+    bool isRreq = (dynamicPtrCast<const DYMO_RREQ>(routingMsg) != nullptr)?true:false;
+    bool isRrep = (dynamicPtrCast<const DYMO_RREP>(routingMsg) != nullptr)?true:false;
+
     L3Address targetAddr = routingMsg->getTargetNode().getAddress();
     unsigned int targetSeqNum = 0;
 
@@ -525,7 +552,13 @@ void DYMOFau::handleLowerRMForRelay(Packet *pkt)
         delete pkt;
         return;
     }
-
+    auto tag1 = pkt->removeTagIfPresent<NetworkProtocolInd>();
+    if (tag1)
+        delete tag1;
+    auto tag2 = pkt->removeTagIfPresent<PacketProtocolTag>();
+    if (tag2)
+        delete tag2;
+    pkt->trimFront();
     auto routingMsgAux = pkt->removeAtFront<DYMO_RM>();
     auto origNode = routingMsgAux->getOrigNode();
     origNode.incrementDistIfAvailable();
@@ -574,7 +607,7 @@ void DYMOFau::handleLowerRMForRelay(Packet *pkt)
     }
 
     // do rate limiting
-    if ((dynamicPtrCast<const DYMO_RREQ>(routingMsg)) && (!rateLimiterRREQ->consumeTokens(1, simTime())))
+    if (isRreq && (!rateLimiterRREQ->consumeTokens(1, simTime())))
     {
         EV_INFO << "RREQ send rate exceeded maximum -> not transmitting RREQ" << endl;
         delete pkt;
@@ -582,7 +615,10 @@ void DYMOFau::handleLowerRMForRelay(Packet *pkt)
     }
 
     /* transmit message -- RREP via unicast, RREQ via DYMOcast */
-    sendDown(pkt, dynamicPtrCast<const DYMO_RREP>(routingMsg) ? (entry->routeNextHopAddress) : L3Address(Ipv4Address::LL_MANET_ROUTERS));
+    if (isRrep)
+        sendDown(pkt, entry->routeNextHopAddress, entry->routeNextHopInterface);
+    else
+        sendDown(pkt, L3Address(Ipv4Address::LL_MANET_ROUTERS));
 
     /* keep statistics */
     if (dynamicPtrCast<const DYMO_RREP>(routingMsg))
@@ -602,6 +638,13 @@ void DYMOFau::handleLowerRERR(Packet *pkt)
     InterfaceEntry* sourceInterface = getNextHopInterface(pkt);
 
     /** message is a RERR. **/
+    auto tag1 = pkt->removeTagIfPresent<NetworkProtocolInd>();
+    if (tag1)
+        delete tag1;
+    auto tag2 = pkt->removeTagIfPresent<PacketProtocolTag>();
+    if (tag2)
+        delete tag2;
+    pkt->trimFront();
     auto my_rerr = pkt->removeAtFront<DYMO_RERR>();
     statsDYMORcvd++;
 
@@ -780,12 +823,21 @@ void DYMOFau::handleSelfMsg(cMessage* apMsg)
     else throw cRuntimeError("unknown message type");
 }
 
-void DYMOFau::sendDown(Packet* apMsg, L3Address destAddr)
+void DYMOFau::sendDown(Packet* apMsg, L3Address destAddr, InterfaceEntry *ientry)
 {
     // all messages sent to a lower layer are delayed by 0..MAXJITTER seconds (draft-ietf-manet-jitter-01)
     simtime_t jitter = dblrand() * MAXJITTER;
 
     // set byte size of message
+    auto tag1 = apMsg->removeTagIfPresent<NetworkProtocolInd>();
+    if (tag1)
+        delete tag1;
+    auto tag2 = apMsg->removeTagIfPresent<PacketProtocolTag>();
+    if (tag2)
+        delete tag2;
+    apMsg->trimFront();
+
+    apMsg->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::dymo);
     auto chunk = apMsg->removeAtFront<FieldsChunk>();
     auto re = dynamicPtrCast<DYMO_RM>(chunk);
     auto rerr = dynamicPtrCast<DYMO_RERR>(chunk);
@@ -806,13 +858,23 @@ void DYMOFau::sendDown(Packet* apMsg, L3Address destAddr)
     // keep statistics
     totalPacketsSent++;
     totalBytesSent += apMsg->getByteLength();
-    if (L3Address(Ipv4Address::LL_MANET_ROUTERS) == destAddr)
-    {
-        sendToIp(apMsg, UDPPort, destAddr, UDPPort, 1, SIMTIME_DBL(jitter));
+    if (L3Address(Ipv4Address::LL_MANET_ROUTERS) == destAddr) {
+        if (ientry == nullptr) {
+            for (int i = 0; i < getNumWlanInterfaces() - 1; i++) {
+                auto ie = getWlanInterfaceEntry(i);
+                sendToIpOnIface(apMsg->dup(), par("UdpPort"), destAddr, par("UdpPort"), 1, SIMTIME_DBL(jitter), ie);
+            }
+            auto ie = getWlanInterfaceEntry(getNumWlanInterfaces() - 1);
+            sendToIpOnIface(apMsg, par("UdpPort"), destAddr, par("UdpPort"), 1, SIMTIME_DBL(jitter), ie);
+        }
+        else
+            sendToIpOnIface(apMsg, par("UdpPort"), destAddr, par("UdpPort"), 1, SIMTIME_DBL(jitter), ientry);
     }
-    else
-    {
-        sendToIp(apMsg, UDPPort, destAddr, UDPPort, 1, 0.0);
+    else {
+        if (ientry != nullptr)
+            sendToIpOnIface(apMsg, par("UdpPort"), destAddr, par("UdpPort"), 1, 0.0, ientry);
+        else
+            throw cRuntimeError("interface entry is null");
     }
 }
 
@@ -903,7 +965,7 @@ void DYMOFau::sendReply(L3Address destAddr, unsigned int tSeqNum)
     auto pkt = new Packet("RREP");
     pkt->insertAtFront(rrep);
 
-    sendDown(pkt, entry->routeNextHopAddress);
+    sendDown(pkt, entry->routeNextHopAddress, entry->routeNextHopInterface);
 
     statsRREPSent++;
 }
@@ -986,8 +1048,8 @@ void DYMOFau::sendReplyAsIntermediateRouter(const DYMO_AddressBlock& origNode, c
     pktToOrigin->insertAtFront(rrepToOrigNode);
     pktToTarget->insertAtFront(rrepToTargetNode);
 
-    sendDown(pktToOrigin, routeToOrigNode->routeNextHopAddress);
-    sendDown(pktToTarget, routeToTargetNode->routeNextHopAddress);
+    sendDown(pktToOrigin, routeToOrigNode->routeNextHopAddress, routeToOrigNode->routeNextHopInterface);
+    sendDown(pktToTarget, routeToTargetNode->routeNextHopAddress, routeToTargetNode->routeNextHopInterface);
 
     statsRREPSent++;
 }
@@ -1253,6 +1315,14 @@ Packet* DYMOFau::updateRoutes(Packet * pkt)
         EV_INFO << "OrigNode AddressBlock had no valid information -> deleting received routing message" << endl;
         return nullptr;
     }
+
+    auto tag1 = pkt->removeTagIfPresent<NetworkProtocolInd>();
+    if (tag1)
+        delete tag1;
+    auto tag2 = pkt->removeTagIfPresent<PacketProtocolTag>();
+    if (tag2)
+        delete tag2;
+    pkt->trimFront();
 
     auto reAux = pkt->removeAtFront<DYMO_RM>();
     reAux->setAdditionalNodes(new_additional_nodes);

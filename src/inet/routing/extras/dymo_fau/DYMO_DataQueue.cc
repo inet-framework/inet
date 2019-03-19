@@ -44,10 +44,11 @@ DYMO_DataQueue::DYMO_DataQueue(cSimpleModule *owner, int BUFFER_SIZE_PACKETS, in
 
 DYMO_DataQueue::~DYMO_DataQueue()
 {
-    while (!dataQueue.empty())
-    {
-        delete dataQueue.front().datagram;
-        dataQueue.pop_front();
+    if (moduleOwner->isInMacLayer()) {
+        while (!dataQueue.empty()) {
+            delete dataQueue.front().datagram;
+            dataQueue.pop_front();
+        }
     }
 }
 

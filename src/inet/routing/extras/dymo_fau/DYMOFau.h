@@ -134,7 +134,7 @@ class DYMOFau : public ManetRoutingBase
     virtual void handleLowerUERR(Packet *);
 
     /** @brief Function sends messages to lower layer (transport layer) */
-    void sendDown(Packet*, L3Address);
+    void sendDown(Packet*, L3Address, InterfaceEntry * = nullptr);
 
     /** @brief Increments the ownSeqNum */
     void incSeqNum();
@@ -240,11 +240,11 @@ class DYMOFau : public ManetRoutingBase
     int RESPONSIBLE_ADDRESSES_PREFIX = -1; /**< NED parameter: netmask of network this DYMO router is responsible for, -1 for self only */
     const char* DYMO_INTERFACES = nullptr; /**< NED parameter: list of interfaces to run DYMO on, separated by a single space character */
     L3Address AUTOASSIGN_ADDRESS_BASE; /**< NED parameter: start of address range from which to automatically assign an address to the DYMO_INTERFACES */
-    int ROUTE_AGE_MIN_TIMEOUT = -1;
-    int ROUTE_AGE_MAX_TIMEOUT = -1;
-    int ROUTE_NEW_TIMEOUT = -1;
-    int ROUTE_USED_TIMEOUT = -1;
-    int ROUTE_DELETE_TIMEOUT = -1;
+    simtime_t ROUTE_AGE_MIN_TIMEOUT = -1;
+    simtime_t ROUTE_AGE_MAX_TIMEOUT = -1;
+    simtime_t  ROUTE_NEW_TIMEOUT = -1;
+    simtime_t  ROUTE_USED_TIMEOUT = -1;
+    simtime_t  ROUTE_DELETE_TIMEOUT = -1;
     int MIN_HOPLIMIT = -1; /**< NED parameter: RREQs are first tried with this MsgHdr.HopLimit */
     int MAX_HOPLIMIT = -1; /**< NED parameter: MsgHdr.HopLimit for last RREQ, as well as other DYMO control messages */
     double RREQ_RATE_LIMIT = NaN; /**< NED parameter: maximum average RREQs per second (token bucket) */
