@@ -162,11 +162,10 @@ class Batman : public ManetRoutingBase
     virtual bool supportGetRoute () override {return false;}
     virtual bool isOurType(const Packet* pkt) override
     {
-        auto batPkt = pkt->peekAtFront<BatmanPacket>();
-        if (batPkt != nullptr)
+        const auto &chunk = pkt->peekAtFront<Chunk>();
+        if (dynamicPtrCast<const BatmanPacket>(chunk) != nullptr)
             return true;
-        auto visPkt = pkt->peekAtFront<visPacket>();
-        if (visPkt != nullptr)
+        if ((dynamicPtrCast<const visPacket>(chunk) != nullptr))
             return true;
         return false;
     };

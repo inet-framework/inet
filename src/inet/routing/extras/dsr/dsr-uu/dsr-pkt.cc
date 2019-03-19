@@ -231,7 +231,7 @@ void NSCLASS dsr_pkt_free(dsr_pkt *dp)
         dp->dh.opth.clear();
 
     if (dp->payload != nullptr)
-        delete dp->payload
+        delete dp->payload;
 
     delete dp;
     dp=nullptr;
