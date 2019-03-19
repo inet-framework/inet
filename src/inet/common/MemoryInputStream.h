@@ -186,14 +186,21 @@ class INET_API MemoryInputStream {
      * Reads a byte at the current position of the stream in MSB to LSB bit order.
      */
     uint8_t readByte() {
-        assert(isByteAligned());
         if (position + B(1) > length) {
             isReadBeyondEnd_ = true;
             position = length;
             return 0;
         }
         else {
-            uint8_t result = data[B(position).get()];
+            uint8_t result;
+            if (isByteAligned())
+                result = data[B(position).get()];
+            else {
+                int l1 = b(position).get() % 8;
+                int l2 = 8 - l1;
+                result = data[B(position - b(l1)).get()] << l1;
+                result |= data[B(position + b(l2)).get()] >> l2;
+            }
             position += B(1);
             return result;
         }

@@ -129,8 +129,14 @@ class INET_API MemoryOutputStream {
      * Writes a byte to the end of the stream in MSB to LSB bit order.
      */
     void writeByte(uint8_t value) {
-        assert(isByteAligned());
-        data.push_back(value);
+        if (isByteAligned())
+            data.push_back(value);
+        else {
+            int l1 = b(length).get() % 8;
+            int l2 = 8 - l1;
+            data.back() |= (value & (0xFF << l2)) >> l2;
+            data.push_back((value & (0xFF >> l1)) << l1);
+        }
         length += B(1);
     }
 
