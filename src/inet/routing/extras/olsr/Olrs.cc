@@ -2934,8 +2934,8 @@ bool Olsr::isProactive()
 
 bool Olsr::isOurType(const Packet * msg)
 {
-    auto pkt = msg->peekAtFront<OlsrPkt>();
-    if (pkt != nullptr)
+    const auto chunk = msg->peekAtFront<Chunk>();
+    if (dynamicPtrCast<const OlsrPkt>(chunk))
         return true;
     return false;
 }
