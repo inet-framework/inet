@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#include "../loraphy/LoRaHataOkumura.h"
+#include "inet/lora/loraphy/LoRaHataOkumura.h"
 
 namespace inet {
 

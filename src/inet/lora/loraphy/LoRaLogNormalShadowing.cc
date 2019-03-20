@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#include "../loraphy/LoRaLogNormalShadowing.h"
+#include "inet/lora/loraphy/LoRaLogNormalShadowing.h"
 
 #include "inet/common/INETMath.h"
 

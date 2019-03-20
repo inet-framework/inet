@@ -290,7 +290,7 @@ void NetworkServerApp::evaluateADR(Packet* pkt, L3Address pickedGateway, double 
     bool sendADRAckRep = false;
     double SNRm; //needed for ADR
     int nodeIndex;
-
+    pkt->trimFront();
     auto frame = pkt->removeAtFront<LoRaMacFrame>();
 
     const auto & rcvAppPacket = pkt->peekAtFront<LoRaAppPacket>();

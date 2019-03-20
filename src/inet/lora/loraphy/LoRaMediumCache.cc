@@ -15,12 +15,12 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "../loraphy/LoRaMediumCache.h"
+#include "inet/lora/loraphy/LoRaMediumCache.h"
 
 #include <algorithm>
 
-#include "../loraphy/LoRaLogNormalShadowing.h"
-#include "../loraphy/LoRaMedium.h"
+#include "inet/lora/loraphy/LoRaLogNormalShadowing.h"
+#include "inet/lora/loraphy/LoRaMedium.h"
 
 namespace inet {
 

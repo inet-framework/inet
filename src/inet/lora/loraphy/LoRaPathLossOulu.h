@@ -16,7 +16,7 @@
 #ifndef LORAPHY_LORAPATHLOSSOULU_H_
 #define LORAPHY_LORAPATHLOSSOULU_H_
 
-#include <inet/physicallayer/pathloss/FreeSpacePathLoss.h>
+#include "inet/physicallayer/pathloss/FreeSpacePathLoss.h"
 
 namespace inet {
 

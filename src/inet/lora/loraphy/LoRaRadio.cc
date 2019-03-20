@@ -41,16 +41,6 @@ simsignal_t LoRaRadio::bitErrorRateSignal = cComponent::registerSignal("bitError
 simsignal_t LoRaRadio::symbolErrorRateSignal = cComponent::registerSignal("symbolErrorRate");
 simsignal_t LoRaRadio::droppedPacket = cComponent::registerSignal("droppedPacket");
 
-LoRaRadio::~LoRaRadio()
-{
-    // NOTE: can't use the medium module here, because it may have been already deleted
-    cModule *medium = getSimulation()->getModule(mediumModuleId);
-    if (medium != nullptr)
-        check_and_cast<IRadioMedium *>(medium)->removeRadio(this);
-    cancelAndDelete(transmissionTimer);
-    cancelAndDelete(switchTimer);
-}
-
 void LoRaRadio::initialize(int stage)
 {
     FlatRadioBase::initialize(stage);
@@ -397,7 +387,8 @@ void LoRaRadio::startTransmission(Packet *macFrame, IRadioSignal::SignalPart par
     emit(transmissionStartedSignal, check_and_cast<const cObject *>(transmission));
     //check_and_cast<LoRaMedium *>(medium)->fireTransmissionStarted(transmission);
     //check_and_cast<LoRaMedium *>(medium)->emit(IRadioMedium::transmissionStartedSignal, check_and_cast<const cObject *>(transmission));
-    check_and_cast<RadioMedium *>(medium)->emit(transmissionStartedSignal, check_and_cast<const cObject *>(transmission));
+    //check_and_cast<RadioMedium *>(medium)->emit(transmissionStartedSignal, check_and_cast<const cObject *>(transmission));
+    check_and_cast<RadioMedium *>(medium)->emit(IRadioMedium::signalDepartureStartedSignal, check_and_cast<const cObject *>(transmission));
 }
 
 void LoRaRadio::continueTransmission()
@@ -425,8 +416,11 @@ void LoRaRadio::endTransmission()
     updateTransceiverState();
     updateTransceiverPart();
     //check_and_cast<LoRaMedium *>(medium)->fireTransmissionEnded(transmission);
+    //check_and_cast<RadioMedium *>(medium)->emit(transmissionEndedSignal, check_and_cast<const cObject *>(transmission));
     emit(transmissionEndedSignal, check_and_cast<const cObject *>(transmission));
-    check_and_cast<RadioMedium *>(medium)->emit(transmissionEndedSignal, check_and_cast<const cObject *>(transmission));
+    // TODO: move to radio medium
+    check_and_cast<LoRaMedium *>(medium)->emit(IRadioMedium::signalDepartureEndedSignal, check_and_cast<const cObject *>(transmission));
+
 }
 
 void LoRaRadio::abortTransmission()
@@ -462,6 +456,7 @@ void LoRaRadio::startReception(cMessage *timer, IRadioSignal::SignalPart part)
         if (isReceptionAttempted)
         {
             receptionTimer = timer;
+            emit(receptionStartedSignal, check_and_cast<const cObject *>(reception));
         }
     }
     else
@@ -471,7 +466,8 @@ void LoRaRadio::startReception(cMessage *timer, IRadioSignal::SignalPart part)
     updateTransceiverState();
     updateTransceiverPart();
     //check_and_cast<LoRaMedium *>(medium)->fireReceptionStarted(reception);
-    check_and_cast<RadioMedium *>(medium)->emit(receptionStartedSignal, check_and_cast<const cObject *>(reception));
+    //check_and_cast<RadioMedium *>(medium)->emit(receptionStartedSignal, check_and_cast<const cObject *>(reception));
+    check_and_cast<LoRaMedium *>(medium)->emit(IRadioMedium::signalArrivalStartedSignal, check_and_cast<const cObject *>(reception));
 }
 
 void LoRaRadio::continueReception(cMessage *timer)
@@ -533,6 +529,9 @@ void LoRaRadio::endReception(cMessage *timer)
         if(isReceptionSuccessful)
         {
             emit(packetSentToUpperSignal, macFrame);
+            auto preamble = macFrame->popAtFront<LoRaPhyPreamble>();
+            if (preamble == nullptr)
+                throw cRuntimeError("Lora preamble not present");
             sendUp(macFrame);
         }
         else
@@ -540,14 +539,17 @@ void LoRaRadio::endReception(cMessage *timer)
             emit(LoRaRadio::droppedPacket, 0);
             delete macFrame;
         }
+        emit(receptionEndedSignal, check_and_cast<const cObject *>(reception));
         receptionTimer = nullptr;
+
     }
     else
         EV_INFO << "Reception ended: ignoring " << (ISignal *)radioFrame << " " << IRadioSignal::getSignalPartName(part) << " as " << reception << endl;
     updateTransceiverState();
     updateTransceiverPart();
     //check_and_cast<LoRaMedium *>(medium)->fireReceptionEnded(reception);
-    check_and_cast<RadioMedium *>(medium)->emit(receptionEndedSignal, check_and_cast<const cObject *>(reception));
+    //check_and_cast<RadioMedium *>(medium)->emit(receptionEndedSignal, check_and_cast<const cObject *>(reception));
+    check_and_cast<LoRaMedium *>(medium)->emit(IRadioMedium::signalArrivalEndedSignal, check_and_cast<const cObject *>(reception));
     delete timer;
 }
 
@@ -575,8 +577,6 @@ void LoRaRadio::sendUp(Packet *macFrame)
 {
     EV_INFO << "Sending up " << macFrame << endl;
     emit(packetSentToUpperSignal, macFrame);
-    send(macFrame, upperLayerOut);
-
 
     auto signalPowerInd = macFrame->findTag<SignalPowerInd>();
     if (signalPowerInd == nullptr)

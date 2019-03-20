@@ -36,10 +36,10 @@ module LoRaGW
         *.routingTableModule = default(routingTableType != "" ? absPath(".routingTable") : "");
         string networkLayerType = default("Ipv4NetworkLayer");
         string routingTableType = default("Ipv4RoutingTable");
-        int numUdpApps = default(0);        
+        int numUdpApps = default(0);
         bool hasUdp = default(firstAvailableOrEmpty("Udp") != "");
         string udpType = default(firstAvailableOrEmpty("UDP"));
-        
+
         LoRaGWNic.radio.antenna.mobilityModule = default("^.^.^.mobility");
 
         @display("bgb=829.08,559.48804;i=device/antennatower");
@@ -53,21 +53,21 @@ module LoRaGW
             @display("p=51.888,143.256");
         }
         LoRaGWNic: LoRaGWNic {
-            @display("p=160.17601,442.17603");
+            @display("p=248.846,450.4");
         }
         packetForwarder: PacketForwarder {
-            @display("p=404.95203,69.936005;is=vl");
+            @display("p=422.25,56.3;is=vl");
         }
         eth[sizeof(ethg)]: <default("EthernetInterface")> like IWiredInterface {
             parameters:
-                @display("p=423,433.152,row,60;q=txQueue");
+                @display("p=422.25,450.4,row,60;q=txQueue");
         }
         udp: <default(firstAvailableOrEmpty("Udp"))> like IUdp if hasUdp {
             parameters:
-                @display("p=375,226");
+                @display("p=422.25,177.90799");
         }
         networkLayer: <networkLayerType> like INetworkLayer {
-            @display("p=462.48,267.336");
+            @display("p=422.25,300.642");
         }
         routingTable: <routingTableType> like IRoutingTable if routingTableType != "" {
             parameters:
@@ -79,12 +79,12 @@ module LoRaGW
 
         at: MessageDispatcher {
             parameters:
-                @display("p=462,144;b=627,5,,,,1");
+                @display("p=422.25,122.73399;b=627,5,,,,1");
         }
 
         tn: MessageDispatcher {
             parameters:
-                @display("p=479.40002,234.62401;b=627,5,,,,1");
+                @display("p=423.37598,229.704;b=627,5,,,,1");
         }
 
         nl: MessageDispatcher {

@@ -18,6 +18,7 @@
 #include "inet/physicallayer/analogmodel/packetlevel/ScalarNoise.h"
 #include "inet/physicallayer/common/packetlevel/SignalTag_m.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/ModuleAccess.h"
 
 namespace inet {
 
@@ -37,7 +38,7 @@ void LoRaReceiver::initialize(int stage)
     if (stage == INITSTAGE_LOCAL)
     {
         snirThreshold = math::dB2fraction(par("snirThreshold"));
-        if(strcmp(getParentModule()->getClassName(), "inet::physicallayer::LoRaGWRadio") == 0)
+        if(strcmp(getParentModule()->getClassName(), "inet::lora::LoRaGWRadio") == 0)
         {
             iAmGateway = true;
         } else iAmGateway = false;
@@ -244,10 +245,11 @@ const IListening *LoRaReceiver::createListening(const IRadio *radio, const simti
 {
     if(iAmGateway == false)
     {
-        lora::SimpleLoRaApp *loRaApp = check_and_cast<lora::SimpleLoRaApp *>(getParentModule()->getParentModule()->getParentModule()->getSubmodule("SimpleLoRaApp"));
-        return new LoRaBandListening(radio, startTime, endTime, startPosition, endPosition, loRaApp->loRaCF, loRaApp->loRaSF, loRaApp->loRaBW);
+        auto node = getContainingNode(this);
+        auto loRaApp = check_and_cast<SimpleLoRaApp *>(node->getSubmodule("SimpleLoRaApp"));
+        return new LoRaBandListening(radio, startTime, endTime, startPosition, endPosition, loRaApp->loRaCF, loRaApp->loRaBW, loRaApp->loRaSF);
     }
-    else return new LoRaBandListening(radio, startTime, endTime, startPosition, endPosition, LoRaCF, LoRaSF, LoRaBW);
+    else return new LoRaBandListening(radio, startTime, endTime, startPosition, endPosition, LoRaCF, LoRaBW, LoRaSF);
 }
 
 const IListeningDecision *LoRaReceiver::computeListeningDecision(const IListening *listening, const IInterference *interference) const

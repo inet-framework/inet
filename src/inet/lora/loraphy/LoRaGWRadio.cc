@@ -13,9 +13,11 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#include "../loraphy/LoRaGWRadio.h"
-
+#include "inet/lora/loraphy/LoRaGWRadio.h"
 #include "inet/lora/loraphy/LoRaMedium.h"
+#include "inet/lora/loraphy/LoRaPhyPreamble_m.h"
+#include "inet/lora/lorabase/LoRaTagInfo_m.h"
+#include "inet/physicallayer/common/packetlevel/SignalTag_m.h"
 
 namespace inet {
 
@@ -78,6 +80,24 @@ void LoRaGWRadio::handleTransmissionTimer(cMessage *message)
 void LoRaGWRadio::handleUpperPacket(Packet *packet)
 {
     emit(packetReceivedFromUpperSignal, packet);
+
+    auto tag = packet->removeTagIfPresent<lora::LoRaTag>();
+
+    auto preamble = makeShared<LoRaPhyPreamble>();
+    if (tag != nullptr) {
+        preamble->setBandwidth(tag->getBandwidth());
+        preamble->setCarrierFrequency(tag->getCarrierFrequency());
+        preamble->setCodeRendundance(tag->getCodeRendundance());
+        preamble->setPower(tag->getPower());
+        preamble->setSpreadFactor(tag->getSpreadFactor());
+        preamble->setUseHeader(tag->getUseHeader());
+        auto signalPowerReq = packet->addTagIfAbsent<SignalPowerReq>();
+        signalPowerReq->setPower(tag->getPower());
+    }
+    preamble->setChunkLength(b(16));
+    packet->insertAtFront(preamble);
+
+
     if (separateTransmissionParts)
         startTransmission(packet, IRadioSignal::SIGNAL_PART_PREAMBLE);
     else
@@ -88,6 +108,12 @@ void LoRaGWRadio::startTransmission(Packet *macFrame, IRadioSignal::SignalPart p
 {
     if(iAmTransmiting == false)
     {
+
+        //auto radioFrame = createSignal(macFrame);
+        //auto transmission = radioFrame->getTransmission();
+        //transmissionTimer->setKind(part);
+        //transmissionTimer->setContextPointer(const_cast<Signal *>(radioFrame));
+
         iAmTransmiting = true;
         auto radioFrame = createSignal(macFrame);
         auto transmission = radioFrame->getTransmission();
@@ -96,8 +122,12 @@ void LoRaGWRadio::startTransmission(Packet *macFrame, IRadioSignal::SignalPart p
         txTimer->setKind(part);
         txTimer->setContextPointer(radioFrame);
         scheduleAt(transmission->getEndTime(part), txTimer);
+        //updateTransceiverState();
+        //updateTransceiverPart();
+        emit(transmissionStartedSignal, check_and_cast<const cObject *>(transmission));
         EV_INFO << "Transmission started: " << (ISignal *)radioFrame << " " << IRadioSignal::getSignalPartName(part) << " as " << transmission << endl;
-        check_and_cast<LoRaMedium *>(medium)->emit(transmissionStartedSignal, check_and_cast<const cObject *>(transmission));
+        //check_and_cast<LoRaMedium *>(medium)->emit(transmissionStartedSignal, check_and_cast<const cObject *>(transmission));
+        check_and_cast<LoRaMedium *>(medium)->emit(IRadioMedium::signalDepartureStartedSignal, check_and_cast<const cObject *>(transmission));
     }
     else delete macFrame;
 }
@@ -123,7 +153,12 @@ void LoRaGWRadio::endTransmission(cMessage *timer)
     timer->setContextPointer(nullptr);
     concurrentTransmissions.remove(timer);
     EV_INFO << "Transmission ended: " << (ISignal *)radioFrame << " " << IRadioSignal::getSignalPartName(part) << " as " << transmission << endl;
-    check_and_cast<LoRaMedium *>(medium)->emit(transmissionEndedSignal, check_and_cast<const cObject *>(transmission));
+
+
+    emit(transmissionEndedSignal, check_and_cast<const cObject *>(transmission));
+    // TODO: move to radio medium
+    check_and_cast<LoRaMedium *>(medium)->emit(IRadioMedium::signalDepartureEndedSignal, check_and_cast<const cObject *>(transmission));
+    //check_and_cast<LoRaMedium *>(medium)->emit(transmissionEndedSignal, check_and_cast<const cObject *>(transmission));
     delete(timer);
 }
 
@@ -158,6 +193,7 @@ void LoRaGWRadio::startReception(cMessage *timer, IRadioSignal::SignalPart part)
                 concurrentReceptions.push_back(timer);
             }
             receptionTimer = timer;
+            emit(receptionStartedSignal, check_and_cast<const cObject *>(reception));
         }
     }
     else
@@ -167,7 +203,8 @@ void LoRaGWRadio::startReception(cMessage *timer, IRadioSignal::SignalPart part)
     //updateTransceiverState();
     //updateTransceiverPart();
     radioMode = RADIO_MODE_TRANSCEIVER;
-    check_and_cast<LoRaMedium *>(medium)->emit(receptionStartedSignal, check_and_cast<const cObject *>(reception));
+    //check_and_cast<LoRaMedium *>(medium)->emit(receptionStartedSignal, check_and_cast<const cObject *>(reception));
+    check_and_cast<LoRaMedium *>(medium)->emit(IRadioMedium::signalArrivalStartedSignal, check_and_cast<const cObject *>(reception));
     if(iAmGateway) EV << "[MSDebug] start reception, size : " << concurrentReceptions.size() << endl;
 }
 
@@ -233,9 +270,13 @@ void LoRaGWRadio::endReception(cMessage *timer)
             emit(LoRaGWRadioReceptionFinishedCorrect, true);
             if (simTime() >= getSimulation()->getWarmupPeriod())
                 LoRaGWRadioReceptionFinishedCorrect_counter++;
+            auto preamble = macFrame->popAtFront<LoRaPhyPreamble>();
+            if (preamble == nullptr)
+                throw cRuntimeError("Lora preamble not present");
             sendUp(macFrame);
         }
         receptionTimer = nullptr;
+        emit(receptionEndedSignal, check_and_cast<const cObject *>(reception));
         if(iAmGateway) concurrentReceptions.remove(timer);
     }
     else
@@ -243,7 +284,8 @@ void LoRaGWRadio::endReception(cMessage *timer)
     //updateTransceiverState();
     //updateTransceiverPart();
     radioMode = RADIO_MODE_TRANSCEIVER;
-    check_and_cast<LoRaMedium *>(medium)->emit(receptionEndedSignal, check_and_cast<const cObject *>(reception));
+    //check_and_cast<LoRaMedium *>(medium)->emit(receptionEndedSignal, check_and_cast<const cObject *>(reception));
+    check_and_cast<LoRaMedium *>(medium)->emit(IRadioMedium::signalArrivalEndedSignal, check_and_cast<const cObject *>(reception));
     delete timer;
 }
 

@@ -88,6 +88,14 @@ void PacketForwarder::handleMessage(cMessage *msg)
             throw cRuntimeError("Packet type error");
         //EV << frame->getLoRaTP() << endl;
         //delete frame;
+
+       /* auto loraTag = pkt->addTagIfAbsent<LoRaTag>();
+        pkt->setBandwidth(loRaBW);
+        pkt->setCarrierFrequency(loRaCF);
+        pkt->setSpreadFactor(loRaSF);
+        pkt->setCodeRendundance(loRaCR);
+        pkt->setPower(W(loRaTP));*/
+
         send(pkt, "lowerLayerOut");
         //
     }
@@ -99,6 +107,7 @@ void PacketForwarder::processLoraMACPacket(Packet *pk)
     emit(LoRa_GWPacketReceived, 42);
     if (simTime() >= getSimulation()->getWarmupPeriod())
         counterOfReceivedPackets++;
+    pk->trimFront();
     auto frame = pk->removeAtFront<LoRaMacFrame>();
 
     auto snirInd = pk->getTag<SnirInd>();
@@ -132,6 +141,9 @@ void PacketForwarder::sendPacket()
     LoRaOptions newOptions;
     newOptions.setLoRaTP(uniform(0.1, 1));
     mgmtCommand->setOptions(newOptions);
+
+
+
 
     LoRaMacFrame *response = new LoRaMacFrame("mgmtCommand");
     response->encapsulate(mgmtCommand);
