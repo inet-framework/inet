@@ -830,6 +830,34 @@ void Ipv4::setComputedCrc(Ptr<Ipv4Header>& ipv4Header)
     ipv4Header->setCrc(crc);
 }
 
+void Ipv4::insertCrc(const Ptr<Ipv4Header>& ipv4Header)
+{
+    CrcMode crcMode = ipv4Header->getCrcMode();
+    switch (crcMode) {
+        case CRC_DECLARED_CORRECT:
+            // if the CRC mode is declared to be correct, then set the CRC to an easily recognizable value
+            ipv4Header->setCrc(0xC00D);
+            break;
+        case CRC_DECLARED_INCORRECT:
+            // if the CRC mode is declared to be incorrect, then set the CRC to an easily recognizable value
+            ipv4Header->setCrc(0xBAAD);
+            break;
+        case CRC_COMPUTED: {
+            // if the CRC mode is computed, then compute the CRC and set it
+            // this computation is delayed after the routing decision, see INetfilter hook
+            ipv4Header->setCrc(0x0000); // make sure that the CRC is 0 in the Udp header before computing the CRC
+            MemoryOutputStream ipv4HeaderStream;
+            Chunk::serialize(ipv4HeaderStream, ipv4Header);
+            // compute the CRC
+            uint16_t crc = TcpIpChecksum::checksum(ipv4HeaderStream.getData());
+            ipv4Header->setCrc(crc);
+            break;
+        }
+        default:
+            throw cRuntimeError("Unknown CRC mode: %d", (int)crcMode);
+    }
+}
+
 void Ipv4::fragmentAndSend(Packet *packet)
 {
     const InterfaceEntry *destIE = ift->getInterfaceById(packet->getTag<InterfaceReq>()->getInterfaceId());
