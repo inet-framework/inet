@@ -313,7 +313,7 @@ The following ini file fragment shows an example configuration.
    *.host[*].wlan[*].radioType = "UnitDiskRadio"
    *.host[*].wlan[*].radio.transmitter.bitrate = 2Mbps
    *.host[*].wlan[*].radio.transmitter.preambleDuration = 0s
-   *.host[*].wlan[*].radio.transmitter.headerLength = 100b
+   *.host[*].wlan[*].radio.transmitter.headerLength = 96b
    *.host[*].wlan[*].radio.transmitter.communicationRange = 100m
    *.host[*].wlan[*].radio.transmitter.interferenceRange = 0m
    *.host[*].wlan[*].radio.transmitter.detectionRange = 0m
