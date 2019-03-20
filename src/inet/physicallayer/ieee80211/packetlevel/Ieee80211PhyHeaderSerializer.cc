@@ -44,14 +44,14 @@ void Ieee80211PhyHeaderSerializer::serialize(MemoryOutputStream& stream, const P
         stream.writeUint16Be(0);
     }
     else {
-        // TODO:
+        // TODO: KLUDGE:
         stream.writeByteRepeatedly('?', B(phyHeader->getChunkLength()).get());
     }
 }
 
 const Ptr<Chunk> Ieee80211PhyHeaderSerializer::deserialize(MemoryInputStream& stream) const
 {
-    if (true) {
+    if (true) { // TODO: KLUDGE:
         auto ofdmPhyHeader = makeShared<Ieee80211OfdmPhyHeader>();
         ofdmPhyHeader->setRate(stream.readUint4());
         stream.readBit();
@@ -67,7 +67,7 @@ const Ptr<Chunk> Ieee80211PhyHeaderSerializer::deserialize(MemoryInputStream& st
     }
     else {
         auto phyHeader = makeShared<Ieee80211PhyHeader>();
-        // TODO:
+        // TODO: KLUDGE:
         phyHeader->setChunkLength(b(192));
         stream.readByteRepeatedly('?', B(phyHeader->getChunkLength()).get());
         return phyHeader;
