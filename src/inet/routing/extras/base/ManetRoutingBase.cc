@@ -895,14 +895,14 @@ void ManetRoutingBase::receiveSignal(cComponent *source, simsignal_t signalID, c
             return;
         Packet *datagram = check_and_cast<Packet *>(obj);
 
-        const auto dataHeader80211 = datagram->peekAtFront<Ieee80211DataOrMgmtHeader>();
-        const auto dataOrMfmHeader80211 = datagram->peekAtFront<Ieee80211DataHeader>();
+        const auto & header80211 = datagram->peekAtFront<Ieee80211MacHeader>();
+        auto dataOrMfmHeader80211 = dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(header80211);
+        auto dataHeader80211 = dynamicPtrCast<const Ieee80211DataHeader>(header80211);
 
         if (dataHeader80211 != nullptr)
             processLinkBreak(datagram);
         else if (dataOrMfmHeader80211 != nullptr)
             processLinkBreakManagement(datagram);
-
     }
     else if(signalID == l2ApDisassociatedSignal || signalID == l2ApAssociatedSignal)
     {

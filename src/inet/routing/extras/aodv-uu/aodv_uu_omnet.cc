@@ -1476,7 +1476,7 @@ void NS_CLASS setRefreshRoute(const L3Address &destination, const L3Address & ne
 
 bool NS_CLASS isOurType(const Packet * msg)
 {
-    const auto chunk = msg->peekAtFront<Chunk>();
+    const auto &chunk = msg->peekAtFront<Chunk>();
     if (dynamicPtrCast<const AODV_msg>(chunk))
         return true;
     return false;
@@ -1484,7 +1484,7 @@ bool NS_CLASS isOurType(const Packet * msg)
 
 bool NS_CLASS getDestAddress(Packet *msg,L3Address &dest)
 {
-    const auto chunk = msg->peekAtFront<Chunk>();
+    const auto &chunk = msg->peekAtFront<Chunk>();
 
     const auto rreq = dynamicPtrCast<const RREQ>(chunk);
     if (!rreq)
@@ -1496,7 +1496,7 @@ bool NS_CLASS getDestAddress(Packet *msg,L3Address &dest)
 
 bool AODVUU::getDestAddressRreq(Packet *msg,PacketDestOrigin &orgDest,RREQInfo &rreqInfo)
 {
-    const auto chunk = msg->peekAtFront<Chunk>();
+    const auto &chunk = msg->peekAtFront<Chunk>();
 
     const auto rreq = dynamicPtrCast<const RREQ>(chunk);
 

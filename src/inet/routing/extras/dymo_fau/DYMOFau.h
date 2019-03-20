@@ -261,7 +261,7 @@ class DYMOFau : public ManetRoutingBase
     virtual bool isProactive() override {return false;};
     virtual bool isOurType(const Packet * msg) override
     {
-        const auto chunk = msg->peekAtFront<Chunk>();
+        const auto &chunk = msg->peekAtFront<Chunk>();
         if (dynamicPtrCast<const DYMO_PacketBBMessage>(chunk))
             return true;
         else if (dynamicPtrCast<const DYMO_Packet>(chunk))

@@ -1040,7 +1040,7 @@ void DSRUU::tap(Packet *p)
 {
     struct dsr_pkt *dp;
 
-    const auto ipHeader = p->peekAtFront<Ipv4Header>();
+    const auto &ipHeader = p->peekAtFront<Ipv4Header>();
 
     //struct in_addr next_hop, prev_hop;
     //next_hop.s_addr = p->nextAddress().getInt();
