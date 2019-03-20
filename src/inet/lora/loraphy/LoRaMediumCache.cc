@@ -256,6 +256,8 @@ m LoRaMediumCache::getMaxCommunicationRange(const IRadio* radio) const
         return(loraLogNormalShadowing->computeRange(maxTransmissionPower));
 
     }
+    throw cRuntimeError("Lora propagation model is not of the type LoRaLogNormalShadowing, correct or modify the code in getMaxCommunicationRange");
+    return m(NaN);
 }
 
 } // namespace physicallayer

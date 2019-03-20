@@ -28,11 +28,9 @@ protected:
     static const std::vector<ApskSymbol> constellation;
     int spreadFactor;
     Hz bandwith;
-    double codeRate;
     bps bitRate;
-
     int notHeader = 1;
-
+    double codeRate;
   public:
     LoRaModulation(int spreadFactor,Hz bandwith,bps bitRate, int notHeader, double codeRate);
     virtual Hz getBandwith() const {return  bandwith;}

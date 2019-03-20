@@ -23,12 +23,13 @@ namespace physicallayer {
 const std::vector<ApskSymbol> LoRaModulation::constellation = {};
 
 LoRaModulation::LoRaModulation(int spreadFactor,Hz bandwith,bps bitRate, int notHeader, double codeRate) :
+        ApskModulationBase(&constellation),
         spreadFactor(spreadFactor),
         bandwith(bandwith),
         bitRate(bitRate),
         notHeader(notHeader),
-        codeRate(codeRate),
-        ApskModulationBase(&constellation)
+        codeRate(codeRate)
+
 {
 }
 

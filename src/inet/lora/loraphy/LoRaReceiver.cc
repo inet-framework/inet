@@ -111,7 +111,7 @@ bool LoRaReceiver::computeIsReceptionAttempted(const IListening *listening, cons
 
 bool LoRaReceiver::isPacketCollided(const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference) const
 {
-    auto radio = reception->getReceiver();
+    //auto radio = reception->getReceiver();
     //auto radioMedium = radio->getMedium();
     auto interferingReceptions = interference->getInterferingReceptions();
     const LoRaReception *loRaReception = check_and_cast<const LoRaReception *>(reception);
