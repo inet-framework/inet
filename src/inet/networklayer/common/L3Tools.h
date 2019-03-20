@@ -30,7 +30,7 @@ const Protocol& getNetworkProtocol(Packet *packet);
 const Ptr<const NetworkHeaderBase> findNetworkProtocolHeader(Packet *packet);
 const Ptr<const NetworkHeaderBase> getNetworkProtocolHeader(Packet *packet);
 
-const Ptr<const NetworkHeaderBase> peekNetworkProtocolHeader(Packet *packet, const Protocol& protocol);
+const Ptr<const NetworkHeaderBase> peekNetworkProtocolHeader(const Packet *packet, const Protocol& protocol);
 
 void insertNetworkProtocolHeader(Packet *packet, const Protocol& protocol, const Ptr<NetworkHeaderBase>& header);
 
