@@ -697,7 +697,8 @@ void NS_CLASS handleMessageWhenUp(cMessage *msg)
 void NS_CLASS  socketDataArrived(UdpSocket *socket, Packet *pkt)
 {
 
-    const auto aodvMsg = pkt->peekAtFront<AODV_msg>();
+    const auto &aodvMsg = pkt->peekAtFront<AODV_msg>();
+
     struct in_addr src_addr;
     struct in_addr dest_addr;
 
@@ -1475,15 +1476,17 @@ void NS_CLASS setRefreshRoute(const L3Address &destination, const L3Address & ne
 
 bool NS_CLASS isOurType(const Packet * msg)
 {
-    auto pkt = msg->peekAtFront<AODV_msg>();
-    if (pkt != nullptr)
+    const auto &chunk = msg->peekAtFront<Chunk>();
+    if (dynamicPtrCast<const AODV_msg>(chunk))
         return true;
     return false;
 }
 
 bool NS_CLASS getDestAddress(Packet *msg,L3Address &dest)
 {
-    RREQ *rreq = dynamic_cast <RREQ *>(msg);
+    const auto &chunk = msg->peekAtFront<Chunk>();
+
+    const auto rreq = dynamicPtrCast<const RREQ>(chunk);
     if (!rreq)
         return false;
     dest = rreq->dest_addr;
@@ -1493,7 +1496,10 @@ bool NS_CLASS getDestAddress(Packet *msg,L3Address &dest)
 
 bool AODVUU::getDestAddressRreq(Packet *msg,PacketDestOrigin &orgDest,RREQInfo &rreqInfo)
 {
-    RREQ *rreq = dynamic_cast <RREQ *>(msg);
+    const auto &chunk = msg->peekAtFront<Chunk>();
+
+    const auto rreq = dynamicPtrCast<const RREQ>(chunk);
+
     if (!rreq)
         return false;
     orgDest.setDests(rreq->dest_addr);

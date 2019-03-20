@@ -774,7 +774,7 @@ void Batman::parseIncomingPacket(L3Address neigh, BatmanIf *if_incoming, Packet 
 
         while ((msg->getDataLength() > b(0)) && msg->hasAtFront<BatmanPacket>()) {
 
-            BatmanPacket batmanPacketAux = *msg->peekAtFront<BatmanPacket>();
+            BatmanPacket batmanPacketAux = *(msg->peekAtFront<BatmanPacket>());
 
             EV_INFO << "packet receive from :" << batmanPacketAux.getOrig() << endl;
 

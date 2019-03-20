@@ -6,55 +6,71 @@ use File::Basename;
 my $dirname = dirname(__FILE__);
 require $dirname."/replacements.pl";
 
-$verbose = 1;
 
-$listfile = $ARGV[0];
-die "no listfile specified" if ($listfile eq '');
-
-# parse listfile
-print "reading $listfile...\n" if ($verbose);
-open(INFILE, $listfile) || die "cannot open $listfile";
-@fnames = ();
-while (<INFILE>) {
+$listfname = $ARGV[0];
+open(LISTFILE, $listfname) || die "cannot open $listfname";
+while (<LISTFILE>)
+{
     chomp;
     s/\r$//; # cygwin/mingw perl does not do CR/LF translation
-    push(@fnames,$_);
-}
-#print join(' ', @fnames);
 
-foreach $fname (@fnames)
-{
-    print "reading $fname...\n" if ($verbose);
+    $fname = $_;
+
+    if ($fname =~ /_m\./) {
+        print "skipping $fname...\n";
+        next;
+    }
+
+    print "processing $fname... ";
+
     $txt = readfile($fname);
 
+    my $origtxt = $txt;
+
     # process $txt:
+
+    # do signal renamings
     foreach my $from (keys(%replSignals1)) {
         my $to = $replSignals1{$from};
-        $txt =~ s/\b$from\b/$to/sg;
+        $txt =~ s/\b${from}\b/${to}/sg;
     }
 
     foreach my $from (keys(%replSignals2)) {
         my $to = $replSignals2{$from};
-        $txt =~ s/\b$from\b/$to/sg;
+        $txt =~ s/\b${from}\b/${to}/sg;
     }
 
+    # do statistic renamings
     foreach my $i (keys(%replStatistics)) {
         my $ii = '@statistic['.$i.']';
         my $rr = '@statistic['.$replStatistics{$i}.']';
-        $txt =~ s|\Q$ii\E|$rr|gs;
+        $txt =~ s|\Q${ii}\E|${rr}|gs;
     }
 
-    writefile($fname, $txt);
-    #writefile("$fname.new", $txt);
+    # do class renamings
+    foreach my $from (keys(%replClasses)) {
+        my $to = $replClasses{$from};
+        $txt =~ s/\b${from}\b/${to}/sg;
+    }
+
+    if ($txt eq $origtxt) {
+        print "unchanged\n";
+    } else {
+        writefile($fname, $txt);
+        print "DONE\n";
+    }
 }
 
+# BEWARE OF BOGUS REPLACEMENTS INSIDE COMMENTS!!
+# getAddress(), getData(), getPayload() !!!!
+print "\nConversion done. You may safely re-run this script as many times as you want.\n";
 
 sub readfile ()
 {
     my $fname = shift;
     my $content;
     open FILE, "$fname" || die "cannot open $fname";
-    read(FILE, $content, 1000000);
+    read(FILE, $content, 1000000) || die "cannot read $fname";
     close FILE;
     $content;
 }
@@ -64,7 +80,7 @@ sub writefile ()
     my $fname = shift;
     my $content = shift;
     open FILE, ">$fname" || die "cannot open $fname for write";
-    print FILE $content;
+    print FILE $content || die "cannot write $fname";
     close FILE;
 }
 

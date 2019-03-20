@@ -586,7 +586,7 @@ Olsr::check_packet(Packet* msg, nsaddr_t &src_addr, int &index)
           return false;
     }
 
-    auto &op = msg->peekAtFront<OlsrPkt>();
+    const auto &op = msg->peekAtFront<OlsrPkt>();
 
     if (op == nullptr) {
         return false;
@@ -2934,8 +2934,8 @@ bool Olsr::isProactive()
 
 bool Olsr::isOurType(const Packet * msg)
 {
-    auto pkt = msg->peekAtFront<OlsrPkt>();
-    if (pkt != nullptr)
+    const auto &chunk = msg->peekAtFront<Chunk>();
+    if (dynamicPtrCast<const OlsrPkt>(chunk))
         return true;
     return false;
 }

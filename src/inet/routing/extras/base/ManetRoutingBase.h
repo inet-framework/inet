@@ -328,23 +328,6 @@ class INET_API ManetRoutingBase : public ApplicationBase, public UdpSocket::ICal
     virtual void processLocatorDisAssoc(const Packet *details);
     virtual void processChangeInterface(simsignal_t signalID, const cObject *details);
 
-    //@}
-
-    /**
-     *  Replacement for gettimeofday(), used for timers.
-     *  The timeval should only be interpreted as number of seconds and
-     *  fractions of seconds since the start of the simulation.
-     */
-    virtual int gettimeofday(struct timeval *, struct timezone *);
-
-    /// Get the address of the first wlan interface
-    virtual L3Address getAddress() const;
-
-    virtual L3Address getRouterId() const;
-
-    /// Return true if the routing protocols is execute in the mac layer
-    virtual bool isInMacLayer() const {return mac_layer_;}
-
     /// get the i-esime interface
     virtual InterfaceEntry *getInterfaceEntry(int index) const {return inet_ift->getInterface(index);}
     virtual InterfaceEntry *getInterfaceEntryById(int id) const {return inet_ift->getInterfaceById(id);}
@@ -393,12 +376,28 @@ class INET_API ManetRoutingBase : public ApplicationBase, public UdpSocket::ICal
     virtual void getApListIp(const Ipv4Address &,std::vector<Ipv4Address>&);
     virtual void getListRelatedAp(const L3Address &, std::vector<L3Address>&);
     virtual void setRouteInternalStorege(const L3Address &, const L3Address &, const bool &);
-
-    virtual INetfilter * getNetworkProtocol() const {return networkProtocol;}
-
     virtual void socketClosed(UdpSocket *socket) override;
 
   public:
+    //@}
+
+    /**
+     *  Replacement for gettimeofday(), used for timers.
+     *  The timeval should only be interpreted as number of seconds and
+     *  fractions of seconds since the start of the simulation.
+     */
+    virtual int gettimeofday(struct timeval *, struct timezone *);
+
+    /// Get the address of the first wlan interface
+    virtual L3Address getAddress() const;
+
+    virtual L3Address getRouterId() const;
+
+    /// Return true if the routing protocols is execute in the mac layer
+    virtual bool isInMacLayer() const {return mac_layer_;}
+
+    virtual INetfilter * getNetworkProtocol() const {return networkProtocol;}
+
     std::string convertAddressToString(const L3Address&);
     virtual void setCollaborativeProtocol(cObject *p) {collaborativeProtocol = dynamic_cast<ManetRoutingBase*>(p);}
     virtual ManetRoutingBase * getCollaborativeProtocol() const {return collaborativeProtocol;}
