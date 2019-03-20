@@ -23,8 +23,12 @@ namespace inet {
 
 namespace  physicallayer {
 
-Register_Serializer(Ieee80211PhyHeader, Ieee80211PhyHeaderSerializer);
+Register_Serializer(Ieee80211FhssPhyHeader, Ieee80211PhyHeaderSerializer);
+Register_Serializer(Ieee80211IrPhyHeader, Ieee80211PhyHeaderSerializer);
+Register_Serializer(Ieee80211DsssPhyHeader, Ieee80211PhyHeaderSerializer);
 Register_Serializer(Ieee80211OfdmPhyHeader, Ieee80211PhyHeaderSerializer);
+Register_Serializer(Ieee80211HtPhyHeader, Ieee80211PhyHeaderSerializer);
+Register_Serializer(Ieee80211VhtPhyHeader, Ieee80211PhyHeaderSerializer);
 
 void Ieee80211PhyHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
