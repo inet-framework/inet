@@ -51,6 +51,7 @@ using namespace DiffservUtil;
 bool MultiFieldClassifier::PacketDissectorCallback::matches(const Packet *packet)
 {
     matchesL3 = matchesL4 = false;
+    dissect = true;
     auto packetProtocolTag = packet->findTag<PacketProtocolTag>();
     auto protocol = packetProtocolTag != nullptr ? packetProtocolTag->getProtocol() : nullptr;
     PacketDissector packetDissector(ProtocolDissectorRegistry::globalRegistry, *this);
@@ -62,7 +63,7 @@ bool MultiFieldClassifier::PacketDissectorCallback::matches(const Packet *packet
 
 bool MultiFieldClassifier::PacketDissectorCallback::shouldDissectProtocolDataUnit(const Protocol *protocol)
 {
-    return true;
+    return dissect;
 }
 
 void MultiFieldClassifier::PacketDissectorCallback::visitChunk(const Ptr<const Chunk>& chunk, const Protocol *protocol)
@@ -70,6 +71,7 @@ void MultiFieldClassifier::PacketDissectorCallback::visitChunk(const Ptr<const C
     if (protocol == nullptr)
         return;
     if (*protocol == Protocol::ipv4) {
+        dissect = false;
 #ifdef WITH_IPv4
         const auto& ipv4Header = dynamicPtrCast<const Ipv4Header>(chunk);
         if (!ipv4Header)
@@ -82,17 +84,22 @@ void MultiFieldClassifier::PacketDissectorCallback::visitChunk(const Ptr<const C
             return;
         if (tosMask != 0 && (tos & tosMask) != (ipv4Header->getTypeOfService() & tosMask))
             return;
+
         matchesL3 = true;
         if (srcPortMin < 0 && destPortMin < 0)
             matchesL4 = true;
+        else
+            dissect = true;
 #endif // ifdef WITH_IPv4
     }
     else
     if (*protocol == Protocol::ipv6) {
 #ifdef WITH_IPv6
+        dissect = false;
         const auto& ipv6Header = dynamicPtrCast<const Ipv6Header>(chunk);
         if (!ipv6Header)
             return;
+
         if (srcPrefixLength > 0 && (srcAddr.getType() != L3Address::IPv6 || !ipv6Header->getSrcAddress().matches(srcAddr.toIpv6(), srcPrefixLength)))
             return;
         if (destPrefixLength > 0 && (destAddr.getType() != L3Address::IPv6 || !ipv6Header->getDestAddress().matches(destAddr.toIpv6(), destPrefixLength)))
@@ -101,9 +108,12 @@ void MultiFieldClassifier::PacketDissectorCallback::visitChunk(const Ptr<const C
             return;
         if (tosMask != 0 && (tos & tosMask) != (ipv6Header->getTrafficClass() & tosMask))
             return;
+
         matchesL3 = true;
         if (srcPortMin < 0 && destPortMin < 0)
             matchesL4 = true;
+        else
+            dissect = true;
 #endif // ifdef WITH_IPv6
     }
     else
@@ -111,6 +121,7 @@ void MultiFieldClassifier::PacketDissectorCallback::visitChunk(const Ptr<const C
         const auto& transportHeader = dynamicPtrCast<const TransportHeaderBase>(chunk);
         if (!transportHeader)
             return;
+        dissect = false;
         auto srcPort = transportHeader->getSourcePort();
         auto destPort = transportHeader->getDestinationPort();
 

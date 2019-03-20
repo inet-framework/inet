@@ -42,6 +42,7 @@ class INET_API MultiFieldClassifier : public cSimpleModule
     class INET_API PacketDissectorCallback : public PacketDissector::ICallback
     {
       protected:
+        bool dissect = true;
         bool matchesL3 = false;
         bool matchesL4 = false;
 
@@ -62,6 +63,7 @@ class INET_API MultiFieldClassifier : public cSimpleModule
 
       public:
         PacketDissectorCallback() {}
+        virtual ~PacketDissectorCallback() {}
 
         bool matches(const Packet *packet);
 
