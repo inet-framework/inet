@@ -60,6 +60,11 @@ bool MultiFieldClassifier::PacketDissectorCallback::matches(const Packet *packet
     return matchesL3 && matchesL4;
 }
 
+bool MultiFieldClassifier::PacketDissectorCallback::shouldDissectProtocolDataUnit(const Protocol *protocol)
+{
+    return true;
+}
+
 void MultiFieldClassifier::PacketDissectorCallback::visitChunk(const Ptr<const Chunk>& chunk, const Protocol *protocol)
 {
     if (protocol == nullptr)

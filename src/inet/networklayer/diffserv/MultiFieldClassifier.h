@@ -65,6 +65,7 @@ class INET_API MultiFieldClassifier : public cSimpleModule
 
         bool matches(const Packet *packet);
 
+        virtual bool shouldDissectProtocolDataUnit(const Protocol *protocol) override;
         virtual void startProtocolDataUnit(const Protocol *protocol) override {}
         virtual void endProtocolDataUnit(const Protocol *protocol) override {}
         virtual void markIncorrect() override {}
