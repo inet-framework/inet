@@ -46,7 +46,7 @@ void PacketForwarder::initialize(int stage)
 
 void PacketForwarder::startUDP()
 {
-    socket.setOutputGate(gate("udpOut"));
+    socket.setOutputGate(gate("socketOut"));
     const char *localAddress = par("localAddress");
     socket.bind(*localAddress ? L3AddressResolver().resolve(localAddress) : L3Address(), localPort);
     // TODO: is this required?

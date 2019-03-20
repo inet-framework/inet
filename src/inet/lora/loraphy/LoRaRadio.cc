@@ -31,7 +31,7 @@
 
 namespace inet {
 
-namespace physicallayer {
+namespace lora {
 
 Define_Module(LoRaRadio);
 

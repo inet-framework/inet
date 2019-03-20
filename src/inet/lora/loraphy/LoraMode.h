@@ -23,7 +23,9 @@
 #include "inet/lora/loraphy/LoraMode.h"
 
 namespace inet {
-namespace physicallayer {
+namespace lora {
+
+using namespace physicallayer;
 
 class ILoraMode: public omnetpp::cObject, public IPrintableObject {
 public:
@@ -64,12 +66,12 @@ private:
     int cwMax;
     b pading;
     b completeLen;
-    simtime_t slot;
-    simtime_t sif;
-    simtime_t difs;
-    simtime_t cca;
-    simtime_t rxStartDelay;
-    simtime_t rxTxTurn;
+    double slot;
+    double sif;
+    double difs;
+    double cca;
+    double rxStartDelay;
+    double rxTxTurn;
     int maxLeng = 0;
     double codeRate = 0;
     int preambleLength = 8;
@@ -83,12 +85,12 @@ public:
             int cwMin,
             int cwMax,
             b pading,
-            simtime_t slot,
-            simtime_t sif,
-            simtime_t difs,
-            simtime_t cca,
-            simtime_t rxStartDelay,
-            simtime_t rxTxTurn,
+            double slot,
+            double sif,
+            double difs,
+            double cca,
+            double rxStartDelay,
+            double rxTxTurn,
             double codeRate);
 
     virtual void setPreambleSimbolsLength(const int &p) override {preambleLength = p;}

@@ -23,9 +23,11 @@
 
 namespace inet {
 
-namespace physicallayer {
+namespace lora {
 
-class LoRaEnergyConsumer: public inet::physicallayer::StateBasedEpEnergyConsumer {
+using namespace physicallayer;
+
+class LoRaEnergyConsumer: public StateBasedEpEnergyConsumer {
 public:
     void initialize(int stage) override;
     void finish() override;

@@ -19,7 +19,7 @@
 #include "inet/physicallayer/contract/packetlevel/IRadio.h"
 namespace inet {
 
-namespace physicallayer {
+namespace lora {
 
 using namespace inet::power;
 

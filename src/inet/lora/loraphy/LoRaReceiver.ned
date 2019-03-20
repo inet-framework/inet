@@ -33,7 +33,7 @@ module LoRaReceiver like IReceiver
         double bandwidth @unit(Hz);        // bandwidth of the band where this receiver listens on the medium
         bool alohaChannelModel = default(false);
         string errorModelType = default("");             // NED type of the error model
-        @class(inet::physicallayer::LoRaReceiver);
+        @class(LoRaReceiver);
         @display("i=block/wrx");
 
     submodules:

@@ -40,7 +40,7 @@ simple LoRaGWMac extends MacProtocolBase like IMacProtocol
         int cwMax = default(1023); // maximum contention window
         int cwMulticast = default(cwMin); // multicast contention window
         int retryLimit = default(7); // maximum number of retries
-        @class(inet::lora::LoRaGWMac);
+        @class(LoRaGWMac);
         
     gates:
     	input upperMgmtIn;

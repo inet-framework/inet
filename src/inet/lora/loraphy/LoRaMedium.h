@@ -30,7 +30,10 @@
 
 #include "LoRaRadio.h"
 namespace inet {
-namespace physicallayer {
+namespace lora {
+
+using namespace physicallayer;
+
 class INET_API LoRaMedium : public RadioMedium
 {
     friend class LoRaGWRadio;
@@ -42,7 +45,7 @@ protected:
     public:
       LoRaMedium();
       virtual ~LoRaMedium();
-      virtual const IReceptionDecision *getReceptionDecision(const IRadio *receiver, const IListening *listening, const ITransmission *transmission, IRadioSignal::SignalPart part) const override;
+      //virtual const IReceptionDecision *getReceptionDecision(const IRadio *receiver, const IListening *listening, const ITransmission *transmission, IRadioSignal::SignalPart part) const override;
       virtual const IReceptionResult *getReceptionResult(const IRadio *receiver, const IListening *listening, const ITransmission *transmission) const override;
 };
 }

@@ -12,7 +12,9 @@
 #include "inet/physicallayer/contract/packetlevel/IRadioSignal.h"
 
 namespace inet {
-namespace physicallayer {
+namespace lora {
+
+using namespace physicallayer;
 
 class INET_API LoRaTransmission : public TransmissionBase, public virtual INarrowbandSignal, public virtual IScalarSignal
 {

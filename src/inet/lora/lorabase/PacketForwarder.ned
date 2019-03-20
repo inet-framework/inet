@@ -20,7 +20,7 @@ import inet.applications.contract.IApp;
 
 simple PacketForwarder like IApp
 {
-    @class(inet::PacketForwarder);
+    @class(PacketForwarder);
     @signal[LoRa_GWPacketReceived](type=long); // optional
     @statistic[LoRa_GWPacketReceived](source=LoRa_GWPacketReceived; record=count);
     int localPort = default(-1);  // local port (-1: use ephemeral port)
@@ -29,9 +29,9 @@ simple PacketForwarder like IApp
     int destPort;
 	
     gates:
+         output socketOut @labels(UdpControlInfo/up);
+         input socketIn @labels(UdpControlInfo/down);
+    
 		input lowerLayerIn @labels(PacketForwarder/up);
-        output lowerLayerOut @labels(PacketForwarder/down);
-        input udpIn @labels(PacketForwarder/udpIn);
-        output udpOut @labels(PacketForwarder/udpOut);
-
+        output lowerLayerOut @labels(PacketForwarder/down);      
 }

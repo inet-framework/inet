@@ -18,7 +18,7 @@
 #include <math.h>
 
 namespace inet {
-namespace physicallayer {
+namespace lora {
 
 LoraMode::LoraMode(const char *name,
                     Hz bandwith,
@@ -26,12 +26,12 @@ LoraMode::LoraMode(const char *name,
                     int cwMin,
                     int cwMax,
                     b pading,
-                    simtime_t slot,
-                    simtime_t sif,
-                    simtime_t difs,
-                    simtime_t cca,
-                    simtime_t rxStartDelay,
-                    simtime_t rxTxTurn,
+                    double slot,
+                    double sif,
+                    double difs,
+                    double cca,
+                    double rxStartDelay,
+                    double rxTxTurn,
                     double codeRate):
                 name(name),
                 bandwith(bandwith),
@@ -140,6 +140,7 @@ LoraMode::~LoraMode() {
     // TODO Auto-generated destructor stub
     delete modulation;
 }
+
 
 const LoraMode LoraCompliantModes::EULoraD0("EuD0",Hz(125000), 12, 0, 0, b(0), 0, 0, 0, 0, 0, 0, 2);
 const LoraMode LoraCompliantModes::EULoraD1("EuD1",Hz(125000), 11, 0, 0, b(0), 0, 0, 0, 0, 0, 0, 2);

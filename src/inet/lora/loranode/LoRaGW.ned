@@ -94,8 +94,8 @@ module LoRaGW
     connections allowunconnected:
         packetForwarder.lowerLayerOut --> LoRaGWNic.upperLayerIn;
         LoRaGWNic.upperLayerOut --> packetForwarder.lowerLayerIn;
-        packetForwarder.udpOut --> at.in++;
-        packetForwarder.udpIn <-- at.out++;
+        packetForwarder.socketOut --> at.in++;
+        packetForwarder.socketIn <-- at.out++;
         for i=0..sizeof(ethg)-1 {
             ethg[i] <--> { @display("m=s"); } <--> eth[i].phys;
             eth[i].upperLayerOut --> nl.in++;

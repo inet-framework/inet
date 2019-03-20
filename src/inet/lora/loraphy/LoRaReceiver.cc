@@ -21,7 +21,9 @@
 
 namespace inet {
 
-namespace physicallayer {
+namespace lora {
+
+using namespace physicallayer;
 
 Define_Module(LoRaReceiver);
 

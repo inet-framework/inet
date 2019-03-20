@@ -25,7 +25,9 @@
 
 namespace inet {
 
-namespace physicallayer {
+namespace lora {
+
+using namespace physicallayer;
 
 class INET_API LoRaRadio : public FlatRadioBase //: public PhysicalLayerBase, public virtual IRadio
 {

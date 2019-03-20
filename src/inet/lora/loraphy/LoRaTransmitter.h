@@ -24,7 +24,9 @@
 
 namespace inet {
 
-namespace physicallayer {
+namespace lora {
+
+using namespace physicallayer;
 
 class LoRaTransmitter : public FlatTransmitterBase {
     public:

@@ -31,5 +31,5 @@ module LoRaMedium extends RadioMedium
         // TODO couple with sensitivity
         backgroundNoise.power = default(-96.616dBm);
         backgroundNoise.dimensions = default("time");
-        @class(inet::physicallayer::LoRaMedium);
+        @class(LoRaMedium);
 }

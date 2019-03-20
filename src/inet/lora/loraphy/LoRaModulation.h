@@ -20,7 +20,8 @@
 
 namespace inet {
 
-namespace physicallayer {
+namespace lora {
+using namespace physicallayer;
 
 class INET_API LoRaModulation : public ApskModulationBase
 {

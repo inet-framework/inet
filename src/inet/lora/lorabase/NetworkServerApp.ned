@@ -18,7 +18,7 @@ import inet.applications.contract.IApp;
 
 simple NetworkServerApp like IApp
 {
-    @class(inet::NetworkServerApp);
+    @class(NetworkServerApp);
     @signal[LoRa_ServerPacketReceived](type=bool); // optional
     @statistic[LoRa_ServerPacketReceived](source=LoRa_ServerPacketReceived; record=count);
     int localPort = default(-1);  // local port (-1: use ephemeral port)
@@ -31,7 +31,7 @@ simple NetworkServerApp like IApp
 	double adrDeviceMargin = default(15);
 	
     gates:
-    output udpOut;
-    input udpIn;
+    output socketOut @labels(UdpControlInfo/up);
+    input socketIn @labels(UdpControlInfo/down);
 
 }

@@ -20,7 +20,8 @@
 
 namespace inet {
 
-namespace physicallayer {
+namespace lora {
+using namespace physicallayer;
 
 /**
  * This class implements the log normal shadowing model.

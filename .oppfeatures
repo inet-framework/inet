@@ -1126,7 +1126,7 @@
         requires = ""
         labels = ""
         nedPackages = "
-                       inet.flora
+                       inet.lora
                       "
         extraSourceFolders = ""
         compileFlags = "-DWITH_FLORACODE"

@@ -26,5 +26,5 @@ module LoRaAnalogModel like IAnalogModel
 {
     parameters:
         @display("i=block/tunnel");
-        @class(inet::physicallayer::LoRaAnalogModel);
+        @class(LoRaAnalogModel);
 }

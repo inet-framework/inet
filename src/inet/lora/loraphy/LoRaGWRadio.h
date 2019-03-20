@@ -28,8 +28,8 @@
 
 namespace inet {
 
-namespace physicallayer {
-
+namespace lora {
+using namespace physicallayer;
 class LoRaGWRadio : public FlatRadioBase {
 private:
     void completeRadioModeSwitch(RadioMode newRadioMode);

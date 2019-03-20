@@ -27,7 +27,8 @@
 
 namespace inet {
 
-namespace physicallayer {
+namespace lora {
+
 Define_Module(LoRaMedium);
 LoRaMedium::LoRaMedium() : RadioMedium()
 {

@@ -21,7 +21,7 @@
 import inet.common.INETDefs;
 import inet.common.packet.chunk.Chunk;
 
-namespace inet::physicallayer;
+namespace inet::lora;
 
 //
 // Message kinds for sending commands to the radio.
