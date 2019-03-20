@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+	<supplyVoltage value="3.3"/>
+	<receiverReceivingSupplyCurrent value="9.7"/>
+	<receiverBusySupplyCurrent value="9.7"/>
+	<idleSupplyCurrent value="0.0001"/>
+	<txSupplyCurrents>
+		<txSupplyCurrent txPower="2" supplyCurrent="24"/>
+		<txSupplyCurrent txPower="3" supplyCurrent="24"/>
+		<txSupplyCurrent txPower="4" supplyCurrent="24"/>
+		<txSupplyCurrent txPower="5" supplyCurrent="25"/>
+		<txSupplyCurrent txPower="6" supplyCurrent="25"/>
+		<txSupplyCurrent txPower="7" supplyCurrent="25"/>
+		<txSupplyCurrent txPower="8" supplyCurrent="25"/>
+		<txSupplyCurrent txPower="9" supplyCurrent="26"/>
+		<txSupplyCurrent txPower="10" supplyCurrent="31"/>
+		<txSupplyCurrent txPower="11" supplyCurrent="32"/>
+		<txSupplyCurrent txPower="12" supplyCurrent="34"/>
+		<txSupplyCurrent txPower="13" supplyCurrent="35"/>
+		<txSupplyCurrent txPower="14" supplyCurrent="44"/>
+	</txSupplyCurrents>
+</root>
