@@ -50,7 +50,7 @@ void CloudDelayerBase::initialize(int stage)
 
 void CloudDelayerBase::finish()
 {
-    if (isRegisteredHook())
+    if (isRegisteredHook(networkProtocol))
         networkProtocol->unregisterHook(this);
 }
 
