@@ -53,9 +53,6 @@ class INET_API Udp : public OperationalBase
   public:
     class CrcInsertion : public NetfilterBase::HookBase {
       public:
-        Udp *udp = nullptr;
-
-      public:
         virtual Result datagramPreRoutingHook(Packet *packet) override { return ACCEPT; }
         virtual Result datagramForwardHook(Packet *packet) override { return ACCEPT; }
         virtual Result datagramPostRoutingHook(Packet *packet) override;
