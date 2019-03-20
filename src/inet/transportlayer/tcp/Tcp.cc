@@ -92,7 +92,6 @@ void Tcp::initialize(int stage)
         crcMode = parseCrcMode(crcModeString);
         if (crcMode == CRC_DISABLED)
             throw cRuntimeError("Unknown crc mode: '%s'", crcModeString);
-        crcInsertion.setCrcMode(crcMode);
         msl = par("msl");
     }
     else if (stage == INITSTAGE_TRANSPORT_LAYER) {
