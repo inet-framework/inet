@@ -29,6 +29,7 @@ module LoRaNode
         double maxGatewayDistance = default(320.0);
         double gatewayX = default(320.0);
         double gatewayY = default(320.0);
+        LoRaNic.radio.antenna.mobilityModule = default("^.^.^.mobility");
         @networkNode();
         *.interfaceTableModule = default(absPath(".interfaceTable"));
         @display("bgb=297,313;i=device/accesspoint;is=vs");

@@ -20,6 +20,7 @@ import inet.physicallayer.base.packetlevel.NarrowbandTransmitterBase;
 module LoRaTransmitter extends NarrowbandTransmitterBase
 {
     parameters:
+        headerLength = 0b; // 
         string dataRate @enum("DR0", "DR1","DR2","DR3","DR4","DR5","DR6","DR7","DR8","DR9","DR10","DR11","DR12","DR13") = default("DR6");
         @signal[LoRaTransmissionCreated](type=bool); // optional
         @statistic[LoRaTransmissionCreated](source=LoRaTransmissionCreated; record=count);

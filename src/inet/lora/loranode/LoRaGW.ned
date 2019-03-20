@@ -36,9 +36,11 @@ module LoRaGW
         *.routingTableModule = default(routingTableType != "" ? absPath(".routingTable") : "");
         string networkLayerType = default("Ipv4NetworkLayer");
         string routingTableType = default("Ipv4RoutingTable");
-        int numUdpApps = default(0);
-        bool hasUdp = true;
+        int numUdpApps = default(0);        
+        bool hasUdp = default(firstAvailableOrEmpty("Udp") != "");
         string udpType = default(firstAvailableOrEmpty("UDP"));
+        
+        LoRaGWNic.radio.antenna.mobilityModule = default("^.^.^.mobility");
 
         @display("bgb=829.08,559.48804;i=device/antennatower");
     gates:
@@ -60,9 +62,9 @@ module LoRaGW
             parameters:
                 @display("p=423,433.152,row,60;q=txQueue");
         }
-        udp: <udpType> like IUdp if hasUdp {
+        udp: <default(firstAvailableOrEmpty("Udp"))> like IUdp if hasUdp {
             parameters:
-                @display("p=497.44803,166.944");
+                @display("p=375,226");
         }
         networkLayer: <networkLayerType> like INetworkLayer {
             @display("p=462.48,267.336");

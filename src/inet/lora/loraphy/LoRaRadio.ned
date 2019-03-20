@@ -62,7 +62,7 @@ module LoRaRadio extends FlatRadioBase
         transmitter.power = default(25.118mW);
         transmitter.preambleDuration = 0.001s;
         //*.energySourceModule = default(absPath(energySourceModule));
-        energySourceModule = default(absPath(energySourceModule));
+        //*.energySourceModule = default(absPath(energySourceModule));
         bool iAmGateway = default(false);
         @class(LoRaRadio); //originally it was @class(Radio);
         @display("bgb=215,413");

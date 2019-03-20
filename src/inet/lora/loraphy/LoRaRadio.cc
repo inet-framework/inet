@@ -53,7 +53,7 @@ LoRaRadio::~LoRaRadio()
 
 void LoRaRadio::initialize(int stage)
 {
-    PhysicalLayerBase::initialize(stage);
+    FlatRadioBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         transmissionTimer = new cMessage("transmissionTimer");
         antenna = check_and_cast<IAntenna *>(getSubmodule("antenna"));
