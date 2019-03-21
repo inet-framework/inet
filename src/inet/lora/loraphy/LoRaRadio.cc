@@ -50,9 +50,6 @@ void LoRaRadio::initialize(int stage)
 }
 
 LoRaRadio::~LoRaRadio() {
-    cancelAndDelete(transmissionTimer);
-    cancelAndDelete(receptionTimer);
-    cancelAndDelete(switchTimer);
 }
 
 std::ostream& LoRaRadio::printToStream(std::ostream& stream, int level) const
