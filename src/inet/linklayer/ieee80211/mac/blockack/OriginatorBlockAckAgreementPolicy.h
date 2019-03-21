@@ -30,7 +30,7 @@ class INET_API OriginatorBlockAckAgreementPolicy : public ModeSetListener, publi
     protected:
         IOriginatorQoSAckPolicy *ackPolicy = nullptr;
 
-        int blockAckReqTreshold = -1;
+        int blockAckReqThreshold = -1;
         bool delayedAckPolicySupported = false;
         bool aMsduSupported = false;
         int maximumAllowedBufferSize = -1;

@@ -30,7 +30,7 @@ void OriginatorQosAckPolicy::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         rateSelection = check_and_cast<IQosRateSelection*>(getModuleByPath(par("rateSelectionModule")));
         maxBlockAckPolicyFrameLength = par("maxBlockAckPolicyFrameLength");
-        blockAckReqTreshold = par("blockAckReqTreshold");
+        blockAckReqThreshold = par("blockAckReqThreshold");
         blockAckTimeout = par("blockAckTimeout");
         ackTimeout = par("ackTimeout");
     }
@@ -79,7 +79,7 @@ bool OriginatorQosAckPolicy::isBlockAckReqNeeded(InProgressFrames* inProgressFra
 {
     auto outstandingFramesPerReceiver = getOutstandingFramesPerReceiver(inProgressFrames);
     for (auto outstandingFrames : outstandingFramesPerReceiver) {
-        if ((int)outstandingFrames.second.size() >= blockAckReqTreshold)
+        if ((int)outstandingFrames.second.size() >= blockAckReqThreshold)
             return true;
     }
     return false;
@@ -90,7 +90,7 @@ std::tuple<MacAddress, SequenceNumber, Tid> OriginatorQosAckPolicy::computeBlock
 {
     auto outstandingFramesPerReceiver = getOutstandingFramesPerReceiver(inProgressFrames);
     for (auto outstandingFrames : outstandingFramesPerReceiver) {
-        if ((int)outstandingFrames.second.size() >= blockAckReqTreshold) {
+        if ((int)outstandingFrames.second.size() >= blockAckReqThreshold) {
             auto largestOutstandingFrames = outstandingFramesPerReceiver.begin();
             for (auto it = outstandingFramesPerReceiver.begin(); it != outstandingFramesPerReceiver.end(); it++) {
                 if (it->second.size() > largestOutstandingFrames->second.size())
