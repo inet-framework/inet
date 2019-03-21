@@ -21,6 +21,7 @@
 
 #include "inet/common/INETDefs.h"
 #include "inet/common/packet/Packet.h"
+#include "inet/common/packet/dissector/PacketDissector.h"
 
 namespace inet {
 
@@ -30,6 +31,27 @@ namespace inet {
 class INET_API BehaviorAggregateClassifier : public cSimpleModule
 {
   protected:
+    class INET_API PacketDissectorCallback : public PacketDissector::ICallback
+    {
+      protected:
+        bool matches_ = false;
+        bool dissect = true;
+
+      public:
+        int dscp = -1;
+
+      public:
+        PacketDissectorCallback() {}
+
+        bool matches(const Packet *packet);
+
+        virtual bool shouldDissectProtocolDataUnit(const Protocol *protocol) override { return true; }
+        virtual void startProtocolDataUnit(const Protocol *protocol) override {}
+        virtual void endProtocolDataUnit(const Protocol *protocol) override {}
+        virtual void markIncorrect() override {}
+        virtual void visitChunk(const Ptr<const Chunk>& chunk, const Protocol *protocol) override;
+    };
+
     int numOutGates = 0;
     std::map<int, int> dscpToGateIndexMap;
 
@@ -46,8 +68,6 @@ class INET_API BehaviorAggregateClassifier : public cSimpleModule
     virtual void refreshDisplay() const override;
 
     virtual int classifyPacket(Packet *packet);
-
-    int getDscpFromPacket(Packet *packet);
 };
 
 } // namespace inet

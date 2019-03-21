@@ -22,6 +22,7 @@
 #include "inet/networklayer/diffserv/DscpMarker.h"
 
 #ifdef WITH_IPv4
+#include "inet/networklayer/ipv4/Ipv4.h"
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #endif // ifdef WITH_IPv4
 
@@ -86,6 +87,7 @@ bool DscpMarker::markPacket(Packet *packet, int dscp)
         packet->trimFront();
         const auto& ipv4Header = packet->removeAtFront<Ipv4Header>();
         ipv4Header->setDiffServCodePoint(dscp);
+        Ipv4::insertCrc(ipv4Header);
         packet->insertAtFront(ipv4Header);
         return true;
     }
