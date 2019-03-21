@@ -77,6 +77,8 @@ class INET_API NetworkServerApp : public cSimpleModule, cListener
     std::map<int, int> numReceivedPerNode;
 
   protected:
+
+    virtual ~NetworkServerApp();
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *msg) override;
     virtual void finish() override;

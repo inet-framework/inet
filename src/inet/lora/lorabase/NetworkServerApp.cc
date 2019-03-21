@@ -49,7 +49,6 @@ void NetworkServerApp::initialize(int stage)
     }
 }
 
-
 void NetworkServerApp::startUDP()
 {
     socket.setOutputGate(gate("socketOut"));
@@ -90,29 +89,48 @@ void NetworkServerApp::processLoraMACPacket(Packet *pk)
     addPktToProcessingTable(pk);
 }
 
+NetworkServerApp::~NetworkServerApp() {
+    while(!knownNodes.empty()) {
+        delete knownNodes.back().historyAllSNIR;
+        delete knownNodes.back().historyAllRSSI;
+        delete knownNodes.back().receivedSeqNumber;
+        delete knownNodes.back().calculatedSNRmargin;
+        knownNodes.pop_back();
+    }
+    while(!receivedPackets.empty()) {
+        delete receivedPackets.back().rcvdPacket;
+        receivedPackets.pop_back();
+    }
+}
+
+
 void NetworkServerApp::finish()
 {
     recordScalar("LoRa_NS_DER", double(counterUniqueReceivedPackets)/counterOfSentPacketsFromNodes);
-    for(uint i=0;i<knownNodes.size();i++)
-    {
-        delete knownNodes[i].historyAllSNIR;
-        delete knownNodes[i].historyAllRSSI;
-        delete knownNodes[i].receivedSeqNumber;
-        delete knownNodes[i].calculatedSNRmargin;
-        recordScalar("Send ADR for node", knownNodes[i].numberOfSentADRPackets);
+
+    for(auto &elem : knownNodes) {
+        delete elem.historyAllSNIR;
+        delete elem.historyAllRSSI;
+        delete elem.receivedSeqNumber;
+        delete elem.calculatedSNRmargin;
+        recordScalar("Send ADR for node", elem.numberOfSentADRPackets);
     }
-    for (std::map<int,int>::iterator it=numReceivedPerNode.begin(); it != numReceivedPerNode.end(); ++it)
-    {
-        const std::string stringScalar = "numReceivedFromNode " + std::to_string(it->first);
-        recordScalar(stringScalar.c_str(), it->second);
+
+    for (auto &elem : numReceivedPerNode) {
+        const std::string stringScalar = "numReceivedFromNode " + std::to_string(elem.first);
+        recordScalar(stringScalar.c_str(), elem.second);
     }
 
     receivedRSSI.recordAs("receivedRSSI");
     recordScalar("totalReceivedPackets", totalReceivedPackets);
-    for(uint i=0;i<receivedPackets.size();i++)
-    {
-        delete receivedPackets[i].rcvdPacket;
+    for(auto &elem : receivedPackets)  {
+        delete elem.rcvdPacket;
     }
+
+    // clean vector to avoid problems in the destructor
+    knownNodes.clear();
+    receivedPackets.clear();
+
     recordScalar("counterUniqueReceivedPacketsPerSF SF7", counterUniqueReceivedPacketsPerSF[0]);
     recordScalar("counterUniqueReceivedPacketsPerSF SF8", counterUniqueReceivedPacketsPerSF[1]);
     recordScalar("counterUniqueReceivedPacketsPerSF SF9", counterUniqueReceivedPacketsPerSF[2]);
@@ -152,11 +170,9 @@ void NetworkServerApp::finish()
 
 bool NetworkServerApp::isPacketProcessed(const Ptr<const LoRaMacFrame> &pkt)
 {
-    for(uint i=0;i<knownNodes.size();i++)
-    {
-        if(knownNodes[i].srcAddr == pkt->getTransmitterAddress())
-        {
-            if(knownNodes[i].lastSeqNoProcessed > pkt->getSequenceNumber()) return true;
+    for(const auto & elem : knownNodes) {
+        if(elem.srcAddr == pkt->getTransmitterAddress()) {
+            if(elem.lastSeqNoProcessed > pkt->getSequenceNumber()) return true;
         }
     }
     return false;
@@ -166,18 +182,17 @@ void NetworkServerApp::updateKnownNodes(Packet* pkt)
 {
     const auto & frame = pkt->peekAtFront<LoRaMacFrame>();
     bool nodeExist = false;
-    for(uint i=0;i<knownNodes.size();i++)
+    for(auto &elem : knownNodes)
     {
-        if(knownNodes[i].srcAddr == frame->getTransmitterAddress())
-        {
+        if(elem.srcAddr == frame->getTransmitterAddress()) {
             nodeExist = true;
-            if(knownNodes[i].lastSeqNoProcessed < frame->getSequenceNumber())
-            {
-                knownNodes[i].lastSeqNoProcessed = frame->getSequenceNumber();
+            if(elem.lastSeqNoProcessed < frame->getSequenceNumber()) {
+                elem.lastSeqNoProcessed = frame->getSequenceNumber();
             }
             break;
         }
     }
+
     if(nodeExist == false)
     {
         knownNode newNode;
@@ -206,13 +221,13 @@ void NetworkServerApp::addPktToProcessingTable(Packet* pkt)
     bool packetExists = false;
     //UDPDataIndication *cInfo = check_and_cast<UdpDataIndication*>(pkt->getControlInfo());
 
-    for(uint i=0;i<receivedPackets.size();i++)
+    for(auto &elem : receivedPackets)
     {
-        const auto &frameAux = receivedPackets[i].rcvdPacket->peekAtFront<LoRaMacFrame>();
+        const auto &frameAux = elem.rcvdPacket->peekAtFront<LoRaMacFrame>();
         if(frameAux->getTransmitterAddress() == frame->getTransmitterAddress() && frameAux->getSequenceNumber() == frame->getSequenceNumber())
         {
             packetExists = true;
-            receivedPackets[i].possibleGateways.emplace_back(frame->getTransmitterAddress(), math::fraction2dB(frame->getSNIR()), frame->getRSSI());
+            elem.possibleGateways.emplace_back(frame->getTransmitterAddress(), math::fraction2dB(frame->getSNIR()), frame->getRSSI());
             delete pkt;
         }
     }
