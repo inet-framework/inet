@@ -32,4 +32,5 @@ class LoRaPhyPreamble extends FieldsChunk {
     W power;
     bool UseHeader;
     int codeRendundance;
+    MacAddress receiverAddress;
 }

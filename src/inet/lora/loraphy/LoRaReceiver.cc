@@ -19,6 +19,7 @@
 #include "inet/physicallayer/common/packetlevel/SignalTag_m.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/lora/loraphy/LoRaPhyPreamble_m.h"
 
 namespace inet {
 
@@ -90,19 +91,26 @@ bool LoRaReceiver::computeIsReceptionAttempted(const IListening *listening, cons
 {
     if(isPacketCollided(reception, part, interference))
     {
-        auto macFrame = reception->getTransmission()->getPacket();
-        const auto &loraMacFrame = macFrame->peekAtFront<lora::LoRaMacFrame>();
+        auto packet = reception->getTransmission()->getPacket();
+        const auto &chunk = packet->peekAtFront<FieldsChunk>();
+        auto loraMac = dynamicPtrCast<const LoRaMacFrame>(chunk);
+        auto loraPreamble = dynamicPtrCast<const LoRaPhyPreamble>(chunk);
+        MacAddress rec;
+        if (loraPreamble)
+            rec = loraPreamble->getReceiverAddress();
+        else if (loraMac)
+            rec = loraMac->getReceiverAddress();
 
         if (iAmGateway == false) {
             auto *macLayer = check_and_cast<lora::LoRaMac *>(getParentModule()->getParentModule()->getSubmodule("mac"));
-            if (loraMacFrame->getReceiverAddress() == macLayer->getAddress()) {
+            if (rec == macLayer->getAddress()) {
                 const_cast<LoRaReceiver* >(this)->numCollisions++;
             }
             //EV << "Node: Extracted macFrame = " << loraMacFrame->getReceiverAddress() << ", node address = " << macLayer->getAddress() << std::endl;
         } else {
             auto *gwMacLayer = check_and_cast<lora::LoRaGWMac *>(getParentModule()->getParentModule()->getSubmodule("mac"));
-            EV << "GW: Extracted macFrame = " << loraMacFrame->getReceiverAddress() << ", node address = " << gwMacLayer->getAddress() << std::endl;
-            if (loraMacFrame->getReceiverAddress() == MacAddress::BROADCAST_ADDRESS) {
+            EV << "GW: Extracted macFrame = " << rec << ", node address = " << gwMacLayer->getAddress() << std::endl;
+            if (rec == MacAddress::BROADCAST_ADDRESS) {
                 const_cast<LoRaReceiver* >(this)->numCollisions++;
             }
         }

@@ -26,7 +26,7 @@ module LoRaRadio extends FlatRadioBase
         antenna.typename = default("IsotropicAntenna");
         transmitter.typename = default("LoRaTransmitter");
         receiver.typename = default("LoRaReceiver");
-        @signal[droppedPacket](type=long);
+
         
         @signal[packetSentToUpper](type=cPacket);
         @signal[packetReceivedFromUpper](type=cPacket);
@@ -40,6 +40,11 @@ module LoRaRadio extends FlatRadioBase
         @signal[transmissionEnded];
         @signal[receptionStarted];
         @signal[receptionEnded];
+        @signal[minSNIR];
+        @signal[packetErrorRate];
+        @signal[bitErrorRate];
+        @signal[symbolErrorRate];
+        @signal[droppedPacket](type=long);
 
         @statistic[radioMode](title="Radio mode"; source=radioModeChanged; record=count,vector; interpolationmode=sample-hold);
         @statistic[receptionState](title="Radio reception state"; source=receptionStateChanged; record=count,vector; interpolationmode=sample-hold);

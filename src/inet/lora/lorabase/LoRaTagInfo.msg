@@ -16,6 +16,7 @@
 import inet.common.INETDefs;
 import inet.common.TagBase;
 import inet.common.Units;
+import inet.linklayer.common.MacAddress;
 
 namespace inet::lora;
 
@@ -26,5 +27,5 @@ class LoRaTag extends TagBase
     int spreadFactor = 12;
     W power = mW(100);
     bool UseHeader = true;
-    int codeRendundance = 1;
+    int codeRendundance = 1;    
 }

@@ -23,8 +23,8 @@ import inet.physicallayer.common.packetlevel.Radio;
 import inet.physicallayer.base.packetlevel.FlatRadioBase;
 
 module LoRaGWRadio extends FlatRadioBase
-{
-    parameters:
+{      
+     parameters:
         @signal[LoRaGWRadioReceptionStarted](type=bool); // optional
         @statistic[LoRaGWRadioReceptionStarted](source=LoRaGWRadioReceptionStarted; record=count);
         @signal[LoRaGWRadioReceptionFinishedCorrect](type=bool); // optional
@@ -43,6 +43,13 @@ module LoRaGWRadio extends FlatRadioBase
         @signal[transmissionEnded];
         @signal[receptionStarted];
         @signal[receptionEnded];
+        @signal[minSNIR];
+        @signal[packetErrorRate];
+        @signal[bitErrorRate];
+        @signal[symbolErrorRate];
+        @signal[droppedPacket];
+               
+        
 
         @statistic[radioMode](title="Radio mode"; source=radioModeChanged; record=count,vector; interpolationmode=sample-hold);
         @statistic[receptionState](title="Radio reception state"; source=receptionStateChanged; record=count,vector; interpolationmode=sample-hold);

@@ -191,10 +191,14 @@ void LoRaRadio::handleUpperPacket(Packet *packet)
         preamble->setPower(tag->getPower());
         preamble->setSpreadFactor(tag->getSpreadFactor());
         preamble->setUseHeader(tag->getUseHeader());
+        const auto & loraHeader =  packet->peekAtFront<LoRaMacFrame>();
+        preamble->setReceiverAddress(loraHeader->getReceiverAddress());
 
 
         auto signalPowerReq = packet->addTagIfAbsent<SignalPowerReq>();
         signalPowerReq->setPower(tag->getPower());
+
+        delete tag;
 
         preamble->setChunkLength(b(16));
         packet->insertAtFront(preamble);

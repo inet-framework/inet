@@ -93,7 +93,11 @@ void LoRaGWRadio::handleUpperPacket(Packet *packet)
         preamble->setUseHeader(tag->getUseHeader());
         auto signalPowerReq = packet->addTagIfAbsent<SignalPowerReq>();
         signalPowerReq->setPower(tag->getPower());
+        delete tag;
     }
+    const auto & loraHeader =  packet->peekAtFront<LoRaMacFrame>();
+    preamble->setReceiverAddress(loraHeader->getReceiverAddress());
+
     preamble->setChunkLength(b(16));
     packet->insertAtFront(preamble);
 
