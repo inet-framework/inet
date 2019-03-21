@@ -24,24 +24,21 @@ namespace inet {
 namespace lora {
 using namespace physicallayer;
 
-class INET_API LoRaBandListening : public ListeningBase
+class INET_API LoRaBandListening : public BandListening
 {
   protected:
-    const Hz LoRaCF;
     const int LoRaSF;
-    const Hz LoRaBW;
-
   public:
-    LoRaBandListening(const IRadio *radio, simtime_t startTime, simtime_t endTime, Coord startPosition, Coord endPosition, Hz LoRaCF, int LoRaSF, Hz LoRaBW);
+    LoRaBandListening(const IRadio *radio, simtime_t startTime, simtime_t endTime, Coord startPosition, Coord endPosition, Hz carrierFrequency, Hz bandwidth, int LoRaSF);
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 
     //virtual Hz getCarrierFrequency() const { return LoRaCF; }
     //virtual Hz getBandwidth() const { return LoRaBW; }
 
-    virtual Hz getLoRaCF() const { return LoRaCF; }
+    virtual Hz getLoRaCF() const { return carrierFrequency; }
     virtual int getLoRaSF() const { return LoRaSF; }
-    virtual Hz getLoRaBW() const { return LoRaBW; }
+    virtual Hz getLoRaBW() const { return bandwidth; }
 };
 
 } // namespace physicallayer

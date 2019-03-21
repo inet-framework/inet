@@ -47,7 +47,7 @@ void LoRaTransmitter::initialize(int stage)
         LoRaTransmissionCreated = registerSignal("LoRaTransmissionCreated");
         std::string dataRate = par("dataRate").stdstringValue();
 
-        if(strcmp(getParentModule()->getClassName(), "inet::physicallayer::LoRaGWRadio") == 0)
+        if(strcmp(getParentModule()->getClassName(), "inet::lora::LoRaGWRadio") == 0)
         {
             iAmGateway = true;
         }

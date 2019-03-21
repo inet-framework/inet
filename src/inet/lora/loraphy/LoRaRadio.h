@@ -206,7 +206,6 @@ class INET_API LoRaRadio : public FlatRadioBase //: public PhysicalLayerBase, pu
 
   public:
     LoRaRadio() { }
-    virtual ~LoRaRadio();
     bool iAmGateway;
     double getCurrentTxPower();
     void setCurrentTxPower(double txPower);

@@ -16,7 +16,7 @@
 #ifndef LORAPHY_LORAANALOGMODEL_H_
 #define LORAPHY_LORAANALOGMODEL_H_
 
-#include "../loraphy/LoRaBandListening.h"
+#include "inet/lora/loraphy/LoRaBandListening.h"
 #include "inet/physicallayer/base/packetlevel/ScalarAnalogModelBase.h"
 #include "inet/physicallayer/common/packetlevel/BandListening.h"
 #include "inet/physicallayer/analogmodel/packetlevel/ScalarNoise.h"

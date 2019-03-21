@@ -31,7 +31,7 @@
 #include "inet/physicallayer/common/packetlevel/ReceptionDecision.h"
 #include "inet/physicallayer/base/packetlevel/NarrowbandNoiseBase.h"
 #include "inet/physicallayer/analogmodel/packetlevel/ScalarSnir.h"
-#include "LoRaRadioControlInfo_m.h"
+#include "inet/lora/loraphy/LoRaRadioControlInfo_m.h"
 #include "inet/physicallayer/base/packetlevel/FlatReceiverBase.h"
 
 //based on Ieee802154UWBIRReceiver

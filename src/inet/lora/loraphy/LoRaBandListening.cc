@@ -13,18 +13,16 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#include "../loraphy/LoRaBandListening.h"
+#include "inet/lora/loraphy/LoRaBandListening.h"
 
 namespace inet {
 
 namespace lora {
 
 
-LoRaBandListening::LoRaBandListening(const IRadio *radio, simtime_t startTime, simtime_t endTime, Coord startPosition, Coord endPosition, Hz LoRaCF, int LoRaSF, Hz LoRaBW) :
-    ListeningBase(radio, startTime, endTime, startPosition, endPosition),
-    LoRaCF(LoRaCF),
-    LoRaSF(LoRaSF),
-    LoRaBW(LoRaBW)
+LoRaBandListening::LoRaBandListening(const IRadio *radio, simtime_t startTime, simtime_t endTime, Coord startPosition, Coord endPosition,  Hz carrierFrequency, Hz bandwidth, int LoRaSF) :
+        BandListening(radio, startTime, endTime, startPosition, endPosition, carrierFrequency, bandwidth),
+    LoRaSF(LoRaSF)
 {
 }
 
@@ -32,9 +30,9 @@ std::ostream& LoRaBandListening::printToStream(std::ostream& stream, int level) 
 {
     stream << "LoRaBandListening";
     if (level <= PRINT_LEVEL_DETAIL)
-        stream << ", LoRaCF = " << LoRaCF
+        stream << ", LoRaCF = " << carrierFrequency
                << ", LoRaSF = " << LoRaSF
-               << ", LoRaBW = " << LoRaBW;
+               << ", LoRaBW = " << bandwidth;
     return ListeningBase::printToStream(stream, level);
 }
 

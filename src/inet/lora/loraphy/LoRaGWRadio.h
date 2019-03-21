@@ -55,6 +55,7 @@ protected:
 
 
 public:
+    LoRaGWRadio() { }
     bool iAmGateway;
 
     std::list<cMessage *>concurrentReceptions;

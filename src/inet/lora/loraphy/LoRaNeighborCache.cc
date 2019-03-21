@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "../loraphy/LoRaNeighborCache.h"
+#include "inet/lora/loraphy/LoRaNeighborCache.h"
 
 #include "inet/common/ModuleAccess.h"
 

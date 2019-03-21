@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#include "../loraphy/LoRaPathLossOulu.h"
+#include "inet/lora/loraphy/LoRaPathLossOulu.h"
 
 namespace inet {
 

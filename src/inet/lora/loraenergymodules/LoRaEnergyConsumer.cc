@@ -13,9 +13,9 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#include "../loraenergymodules/LoRaEnergyConsumer.h"
+#include "inet/lora/loraenergymodules/LoRaEnergyConsumer.h"
 
-#include "../loraphy/LoRaTransmitter.h"
+#include "inet/lora/loraphy/LoRaTransmitter.h"
 #include "inet/physicallayer/contract/packetlevel/IRadio.h"
 namespace inet {
 

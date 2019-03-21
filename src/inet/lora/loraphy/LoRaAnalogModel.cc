@@ -21,7 +21,7 @@
 #include "inet/physicallayer/contract/packetlevel/IRadioMedium.h"
 #include "inet/physicallayer/analogmodel/packetlevel/ScalarAnalogModel.h"
 #include "inet/physicallayer/analogmodel/packetlevel/ScalarReception.h"
-#include "LoRaRadio.h"
+#include "inet/lora/loraphy/LoRaRadio.h"
 
 namespace inet {
 
