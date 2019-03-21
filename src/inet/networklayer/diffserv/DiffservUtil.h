@@ -88,13 +88,6 @@ std::string colorToString(int color);
 double getInterfaceDatarate(IInterfaceTable *ift, cSimpleModule *interfaceModule);
 
 /**
- * Returns the IP datagram encapsulated inside packet, or
- * the packet itself if it is an Ipv4/Ipv6 datagram.
- * Returns nullptr, if there is no IP datagram in the packet.
- */
-cPacket *findIPDatagramInPacket(cPacket *packet);
-
-/**
  * Returns the color of the packet.
  * The color was set by a previous meter component.
  * Returns -1, if the color was not set.

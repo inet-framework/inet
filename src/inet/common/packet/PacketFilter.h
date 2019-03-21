@@ -43,6 +43,7 @@ class INET_API PacketFilter
 
         bool matches(const Packet *packet);
 
+        virtual bool shouldDissectProtocolDataUnit(const Protocol *protocol) override { return true; }
         virtual void startProtocolDataUnit(const Protocol *protocol) override;
         virtual void endProtocolDataUnit(const Protocol *protocol) override;
         virtual void markIncorrect() override;

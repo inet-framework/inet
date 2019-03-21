@@ -24,6 +24,7 @@
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/networklayer/diffserv/DiffservUtil.h"
 #include "inet/networklayer/diffserv/MultiFieldClassifier.h"
+#include "inet/transportlayer/contract/TransportHeaderBase_m.h"
 
 #ifdef WITH_IPv4
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
@@ -47,75 +48,90 @@ namespace inet {
 
 using namespace DiffservUtil;
 
+bool MultiFieldClassifier::PacketDissectorCallback::matches(const Packet *packet)
+{
+    matchesL3 = matchesL4 = false;
+    dissect = true;
+    auto packetProtocolTag = packet->findTag<PacketProtocolTag>();
+    auto protocol = packetProtocolTag != nullptr ? packetProtocolTag->getProtocol() : nullptr;
+    PacketDissector packetDissector(ProtocolDissectorRegistry::globalRegistry, *this);
+    auto copy = packet->dup();
+    packetDissector.dissectPacket(copy, protocol);
+    delete copy;
+    return matchesL3 && matchesL4;
+}
+
+bool MultiFieldClassifier::PacketDissectorCallback::shouldDissectProtocolDataUnit(const Protocol *protocol)
+{
+    return dissect;
+}
+
+void MultiFieldClassifier::PacketDissectorCallback::visitChunk(const Ptr<const Chunk>& chunk, const Protocol *protocol)
+{
+    if (protocol == nullptr)
+        return;
+    if (*protocol == Protocol::ipv4) {
+        dissect = false;
 #ifdef WITH_IPv4
-bool MultiFieldClassifier::Filter::matches(Packet *packet, const Ipv4Header *ipv4Header)
-{
-    if (srcPrefixLength > 0 && (srcAddr.getType() != L3Address::IPv4 || !ipv4Header->getSrcAddress().prefixMatches(srcAddr.toIpv4(), srcPrefixLength)))
-        return false;
-    if (destPrefixLength > 0 && (destAddr.getType() != L3Address::IPv4 || !ipv4Header->getDestAddress().prefixMatches(destAddr.toIpv4(), destPrefixLength)))
-        return false;
-    int ipv4HeaderProtocolId = ipv4Header->getProtocolId();
-    if (protocol >= 0 && ipv4HeaderProtocolId != protocol)
-        return false;
-    if (tosMask != 0 && (tos & tosMask) != (ipv4Header->getTypeOfService() & tosMask))
-        return false;
-    if (srcPortMin >= 0 || destPortMin >= 0) {
-        int srcPort = -1, destPort = -1;
+        const auto& ipv4Header = dynamicPtrCast<const Ipv4Header>(chunk);
+        if (!ipv4Header)
+            return;
+        if (srcPrefixLength > 0 && (srcAddr.getType() != L3Address::IPv4 || !ipv4Header->getSrcAddress().prefixMatches(srcAddr.toIpv4(), srcPrefixLength)))
+            return;
+        if (destPrefixLength > 0 && (destAddr.getType() != L3Address::IPv4 || !ipv4Header->getDestAddress().prefixMatches(destAddr.toIpv4(), destPrefixLength)))
+            return;
+        if (protocolId >= 0 && protocolId != ipv4Header->getProtocolId())
+            return;
+        if (tosMask != 0 && (tos & tosMask) != (ipv4Header->getTypeOfService() & tosMask))
+            return;
 
-        const Protocol *protocolPtr = ipv4Header->getProtocol();
-        if (!protocolPtr || !isTransportProtocol(*protocolPtr))
-            return false;
-        auto headerOffset = packet->getFrontOffset();
-        packet->setFrontOffset(headerOffset + ipv4Header->getChunkLength());
-        const auto& transportHeader = peekTransportProtocolHeader(packet, *protocolPtr);
-        packet->setFrontOffset(headerOffset);
-        srcPort = transportHeader->getSourcePort();
-        destPort = transportHeader->getDestinationPort();
-
-        if (srcPortMin >= 0 && (srcPort < srcPortMin || srcPort > srcPortMax))
-            return false;
-        if (destPortMin >= 0 && (destPort < destPortMin || destPort > destPortMax))
-            return false;
-    }
-    return true;
-}
+        matchesL3 = true;
+        if (srcPortMin < 0 && destPortMin < 0)
+            matchesL4 = true;
+        else
+            dissect = true;
 #endif // ifdef WITH_IPv4
-
+    }
+    else
+    if (*protocol == Protocol::ipv6) {
 #ifdef WITH_IPv6
-bool MultiFieldClassifier::Filter::matches(Packet *packet, const Ipv6Header *ipv6Header)
-{
-    if (srcPrefixLength > 0 && (srcAddr.getType() != L3Address::IPv6 || !ipv6Header->getSrcAddress().matches(srcAddr.toIpv6(), srcPrefixLength)))
-        return false;
-    if (destPrefixLength > 0 && (destAddr.getType() != L3Address::IPv6 || !ipv6Header->getDestAddress().matches(destAddr.toIpv6(), destPrefixLength)))
-        return false;
-    int ipv6HeaderProtocolId = ipv6Header->getProtocolId();
-    if (protocol >= 0 && ipv6HeaderProtocolId != protocol)
-        return false;
-    if (tosMask != 0 && (tos & tosMask) != (ipv6Header->getTrafficClass() & tosMask))
-        return false;
-    if (srcPortMin >= 0 || destPortMin >= 0) {
-        int srcPort = -1, destPort = -1;
+        dissect = false;
+        const auto& ipv6Header = dynamicPtrCast<const Ipv6Header>(chunk);
+        if (!ipv6Header)
+            return;
 
-        const Protocol *protocolPtr = ipv6Header->getProtocol();
-        if (!protocolPtr || !isTransportProtocol(*protocolPtr))
-            return false;
-        auto headerOffset = packet->getFrontOffset();
-        packet->setFrontOffset(headerOffset + ipv6Header->getChunkLength());
-        const auto& transportHeader = peekTransportProtocolHeader(packet, *protocolPtr);
-        packet->setFrontOffset(headerOffset);
-        srcPort = transportHeader->getSourcePort();
-        destPort = transportHeader->getDestinationPort();
+        if (srcPrefixLength > 0 && (srcAddr.getType() != L3Address::IPv6 || !ipv6Header->getSrcAddress().matches(srcAddr.toIpv6(), srcPrefixLength)))
+            return;
+        if (destPrefixLength > 0 && (destAddr.getType() != L3Address::IPv6 || !ipv6Header->getDestAddress().matches(destAddr.toIpv6(), destPrefixLength)))
+            return;
+        if (protocolId >= 0 && protocolId != ipv6Header->getProtocolId())
+            return;
+        if (tosMask != 0 && (tos & tosMask) != (ipv6Header->getTrafficClass() & tosMask))
+            return;
+
+        matchesL3 = true;
+        if (srcPortMin < 0 && destPortMin < 0)
+            matchesL4 = true;
+        else
+            dissect = true;
+#endif // ifdef WITH_IPv6
+    }
+    else
+    if (isTransportProtocol(*protocol)) {
+        const auto& transportHeader = dynamicPtrCast<const TransportHeaderBase>(chunk);
+        if (!transportHeader)
+            return;
+        dissect = false;
+        auto srcPort = transportHeader->getSourcePort();
+        auto destPort = transportHeader->getDestinationPort();
 
         if (srcPortMin >= 0 && (srcPort < srcPortMin || srcPort > srcPortMax))
-            return false;
+            return;
         if (destPortMin >= 0 && (destPort < destPortMin || destPort > destPortMax))
-            return false;
+            return;
+        matchesL4 = true;
     }
-
-    return true;
 }
-
-#endif // ifdef WITH_IPv6
 
 Define_Module(MultiFieldClassifier);
 
@@ -161,32 +177,13 @@ void MultiFieldClassifier::refreshDisplay() const
 
 int MultiFieldClassifier::classifyPacket(Packet *packet)
 {
-    auto protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
-
-#ifdef WITH_IPv4
-    if (protocol == &Protocol::ipv4) {
-        const auto& ipv4Header = packet->peekAtFront<Ipv4Header>();
-        for (auto & elem : filters)
-            if (elem.matches(packet, ipv4Header.get()))
-                return elem.gateIndex;
-        return -1;
-    }
-#endif
-
-#ifdef WITH_IPv6
-    if (protocol == &Protocol::ipv6) {
-        const auto& ipv6Header = packet->peekAtFront<Ipv6Header>();
-        for (auto & elem : filters)
-            if (elem.matches(packet, ipv6Header.get()))
-                return elem.gateIndex;
-        return -1;
-    }
-#endif
-
+    for (auto & elem : filters)
+        if (elem.matches(packet))
+            return elem.gateIndex;
     return -1;
 }
 
-void MultiFieldClassifier::addFilter(const Filter& filter)
+void MultiFieldClassifier::addFilter(const PacketDissectorCallback& filter)
 {
     if (filter.gateIndex < 0 || filter.gateIndex >= numOutGates)
         throw cRuntimeError("no output gate for gate index %d", filter.gateIndex);
@@ -196,7 +193,7 @@ void MultiFieldClassifier::addFilter(const Filter& filter)
     if (!filter.destAddr.isUnspecified() && ((filter.destAddr.getType() == L3Address::IPv6 && filter.destPrefixLength > 128) ||
                                              (filter.destAddr.getType() == L3Address::IPv4 && filter.destPrefixLength > 32)))
         throw cRuntimeError("srcPrefixLength is invalid");
-    if (filter.protocol != -1 && (filter.protocol < 0 || filter.protocol > 0xff))
+    if (filter.protocolId != -1 && (filter.protocolId < 0 || filter.protocolId > 0xff))
         throw cRuntimeError("protocol is not a valid protocol number");
     if (filter.tos != -1 && (filter.tos < 0 || filter.tos > 0xff))
         throw cRuntimeError("tos is not valid");
@@ -240,7 +237,7 @@ void MultiFieldClassifier::configureFilters(cXMLElement *config)
             const char *destPortMinAttr = filterElement->getAttribute("destPortMin");
             const char *destPortMaxAttr = filterElement->getAttribute("destPortMax");
 
-            Filter filter;
+            PacketDissectorCallback filter;
             filter.gateIndex = parseIntAttribute(gateAttr, "gate");
             if (srcAddrAttr)
                 filter.srcAddr = addressResolver.resolve(srcAddrAttr);
@@ -255,7 +252,7 @@ void MultiFieldClassifier::configureFilters(cXMLElement *config)
             else if (destAddrAttr)
                 filter.destPrefixLength = filter.destAddr.getType() == L3Address::IPv6 ? 128 : 32;
             if (protocolAttr)
-                filter.protocol = parseProtocol(protocolAttr, "protocol");
+                filter.protocolId = parseProtocol(protocolAttr, "protocol");
             if (tosAttr)
                 filter.tos = parseIntAttribute(tosAttr, "tos");
             if (tosMaskAttr)

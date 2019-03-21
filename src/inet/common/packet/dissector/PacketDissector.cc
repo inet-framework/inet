@@ -111,7 +111,7 @@ PacketDissector::PacketDissector(const ProtocolDissectorRegistry& protocolDissec
 
 void PacketDissector::doDissectPacket(Packet *packet, const Protocol *protocol) const
 {
-    auto protocolDissector = protocolDissectorRegistry.findProtocolDissector(protocol);
+    auto protocolDissector = callback.shouldDissectProtocolDataUnit(protocol) ? protocolDissectorRegistry.findProtocolDissector(protocol) : nullptr;
     if (protocolDissector == nullptr)
         protocolDissector = protocolDissectorRegistry.getProtocolDissector(nullptr);
     ProtocolDissectorCallback callback(*this);

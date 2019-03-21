@@ -47,6 +47,45 @@ Define_Module(BehaviorAggregateClassifier);
 
 simsignal_t BehaviorAggregateClassifier::pkClassSignal = registerSignal("pkClass");
 
+bool BehaviorAggregateClassifier::PacketDissectorCallback::matches(const Packet *packet)
+{
+    dissect = true;
+    matches_ = false;
+    auto packetProtocolTag = packet->findTag<PacketProtocolTag>();
+    auto protocol = packetProtocolTag != nullptr ? packetProtocolTag->getProtocol() : nullptr;
+    PacketDissector packetDissector(ProtocolDissectorRegistry::globalRegistry, *this);
+    auto copy = packet->dup();
+    packetDissector.dissectPacket(copy, protocol);
+    delete copy;
+    return matches_;
+}
+
+void BehaviorAggregateClassifier::PacketDissectorCallback::visitChunk(const Ptr<const Chunk>& chunk, const Protocol *protocol)
+{
+    if (protocol == nullptr)
+        return;
+    if (*protocol == Protocol::ipv4) {
+        dissect = false;
+#ifdef WITH_IPv4
+        const auto& ipv4Header = dynamicPtrCast<const Ipv4Header>(chunk);
+        if (!ipv4Header)
+            return;
+        dscp = ipv4Header->getDiffServCodePoint();
+        matches_ = true;
+#endif // ifdef WITH_IPv4
+    }
+    else if (*protocol == Protocol::ipv6) {
+        dissect = false;
+#ifdef WITH_IPv6
+        const auto& ipv6Header = dynamicPtrCast<const Ipv6Header>(chunk);
+        if (!ipv6Header)
+            return;
+        dscp = ipv6Header->getDiffServCodePoint();
+        matches_ = true;
+#endif // ifdef WITH_IPv6
+    }
+}
+
 void BehaviorAggregateClassifier::initialize()
 {
     numOutGates = gateSize("outs");
@@ -86,33 +125,14 @@ void BehaviorAggregateClassifier::refreshDisplay() const
 
 int BehaviorAggregateClassifier::classifyPacket(Packet *packet)
 {
-    int dscp = getDscpFromPacket(packet);
-    if (dscp >= 0) {
+    PacketDissectorCallback callback;
+
+    if (callback.matches(packet)) {
+        int dscp = callback.dscp;
         auto it = dscpToGateIndexMap.find(dscp);
         if (it != dscpToGateIndexMap.end())
             return it->second;
     }
-    return -1;
-}
-
-int BehaviorAggregateClassifier::getDscpFromPacket(Packet *packet)
-{
-    auto protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
-
-    //TODO processing link-layer headers when exists
-
-#ifdef WITH_IPv4
-    if (protocol == &Protocol::ipv4) {
-        const auto& ipv4Header = packet->peekAtFront<Ipv4Header>();
-        return ipv4Header->getDiffServCodePoint();
-    }
-#endif // ifdef WITH_IPv4
-#ifdef WITH_IPv6
-    if (protocol == &Protocol::ipv6) {
-        const auto& ipv6Header = packet->peekAtFront<Ipv6Header>();
-        return ipv6Header->getDiffServCodePoint();
-    }
-#endif // ifdef WITH_IPv6
     return -1;
 }
 
