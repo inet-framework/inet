@@ -18,28 +18,25 @@ network LoRaNetworkTest
         int numberOfGateways = default(1);
         int networkSizeX = default(500);
         int networkSizeY = default(500);
-        @display("bgb=355.824,356.832");
+        @display("bgb=581,413");
     submodules:
-        loRaNodes[numberOfNodes]: LoRaNode {
-            @display("p=83.664,233.856");
-        }
-        loRaGW[numberOfGateways]: LoRaGW {
-            @display("p=83.664,150.192;is=s");
-        }
         LoRaMedium: LoRaMedium {
-            @display("p=167.328,88.704");
-        }
-        networkServer: StandardHost {
-            parameters:
-                @display("p=208.24002,27.216002");
+            @display("p=535,86");
         }
         configurator: Ipv4NetworkConfigurator {
             parameters:
                 assignDisjunctSubnetAddresses = false;
-                @display("p=207.64801,88.704");
+                @display("p=535,27");
+        }
+        loRaGW[numberOfGateways]: LoRaGW {
+            @display("p=83.664,150.192;is=s");
         }
         internetCloud: InternetCloud {
             @display("p=83.664,27.216002");
+        }
+        networkServer: StandardHost {
+            parameters:
+                @display("p=208.24002,27.216002");
         }
         gwRouter[numberOfGateways]: Router {
             @display("p=24.192001,27.216002");
@@ -47,6 +44,11 @@ network LoRaNetworkTest
         nsRouter: Router {
             @display("p=138.09601,27.216002");
         }
+        loRaNodes[numberOfNodes]: LoRaNode {
+            @display("p=83.664,233.856");
+        }
+
+
     connections:
         networkServer.ethg++ <--> Eth1G <--> nsRouter.ethg++;
         nsRouter.pppg++ <--> Eth1G <--> internetCloud.pppg++;
