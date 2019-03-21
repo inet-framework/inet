@@ -146,9 +146,11 @@ void LoRaMac::configureInterfaceEntry()
 
     // data rate
     interfaceEntry->setDatarate(bitrate);
+    interfaceEntry->setMacAddress(address);
 
     // capabilities
-    interfaceEntry->setMtu(par("mtu"));
+    //interfaceEntry->setMtu(par("mtu"));
+    interfaceEntry->setMtu(NaN);
     interfaceEntry->setMulticast(true);
     interfaceEntry->setBroadcast(true);
     interfaceEntry->setPointToPoint(false);
