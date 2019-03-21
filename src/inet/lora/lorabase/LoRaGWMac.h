@@ -30,13 +30,14 @@ using namespace physicallayer;
 class LoRaGWMac: public MacProtocolBase {
 public:
     bool waitingForDC;
-    cMessage *dutyCycleTimer;
+    cMessage *dutyCycleTimer = nullptr;
     virtual void initialize(int stage) override;
     virtual void finish() override;
     virtual void configureInterfaceEntry() override;
     long GW_forwardedDown;
     long GW_droppedDC;
 
+    virtual ~LoRaGWMac();
     virtual void handleUpperMessage(cMessage *msg) override;
     virtual void handleLowerMessage(cMessage *msg) override;
     virtual void handleSelfMessage(cMessage *message) override;

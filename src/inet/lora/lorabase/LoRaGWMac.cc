@@ -59,8 +59,13 @@ void LoRaGWMac::finish()
     recordScalar("GW_forwardedDown", GW_forwardedDown);
     recordScalar("GW_droppedDC", GW_droppedDC);
     cancelAndDelete(dutyCycleTimer);
+    dutyCycleTimer = nullptr;
 }
 
+LoRaGWMac::~LoRaGWMac() {
+    if (dutyCycleTimer != nullptr)
+        cancelAndDelete(dutyCycleTimer);
+}
 
 void LoRaGWMac::configureInterfaceEntry()
 {
