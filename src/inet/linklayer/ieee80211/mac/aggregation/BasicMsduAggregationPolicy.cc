@@ -26,7 +26,7 @@ void BasicMsduAggregationPolicy::initialize()
 {
     subframeNumThreshold = par("subframeNumThreshold");
     aggregationLengthThreshold = par("aggregationLengthThreshold");
-    maxAMsduSize = par("maxAMsduSize");
+    maxAMsduSize = B(par("maxAMsduSize"));
     qOsCheck = par("qOsCheck");
 }
 
@@ -36,9 +36,8 @@ bool BasicMsduAggregationPolicy::isAggregationPossible(int numOfFramesToAggragat
             (aggregationLengthThreshold == -1 || aggregationLengthThreshold <= aMsduLength));
 }
 
-bool BasicMsduAggregationPolicy::isEligible(const Ptr<const Ieee80211DataHeader>& header, Packet *testPacket, const Ptr<const Ieee80211DataHeader>& testHeader, int aMsduLength)
+bool BasicMsduAggregationPolicy::isEligible(Packet *packet, const Ptr<const Ieee80211DataHeader>& header, const Ptr<const Ieee80211MacTrailer>& trailer, const Ptr<const Ieee80211DataHeader>& testHeader, b aMsduLength)
 {
-    const auto& testTrailer = testPacket->peekAtBack<Ieee80211MacTrailer>();
 //   Only QoS data frames have a TID.
     if (qOsCheck && header->getType() != ST_DATA_WITH_QOS)
         return false;
@@ -46,7 +45,7 @@ bool BasicMsduAggregationPolicy::isEligible(const Ptr<const Ieee80211DataHeader>
 //    The maximum MPDU length that can be transported using A-MPDU aggregation is 4095 octets. An
 //    A-MSDU cannot be fragmented. Therefore, an A-MSDU of a length that exceeds 4065 octets (
 //    4095 minus the QoS data MPDU overhead) cannot be transported in an A-MPDU.
-    if (aMsduLength + B(testPacket->getTotalLength() - testHeader->getChunkLength() - testTrailer->getChunkLength() + b(LENGTH_A_MSDU_SUBFRAME_HEADER)).get() > maxAMsduSize) // default value of maxAMsduSize is 4065
+    if (aMsduLength + packet->getTotalLength() - header->getChunkLength() - trailer->getChunkLength() + b(LENGTH_A_MSDU_SUBFRAME_HEADER) > maxAMsduSize) // default value of maxAMsduSize is 4065
         return false;
 
 //    The value of TID present in the QoS Control field of the MPDU carrying the A-MSDU indicates the TID for
@@ -72,19 +71,18 @@ std::vector<Packet *> *BasicMsduAggregationPolicy::computeAggregateFrames(cQueue
     Enter_Method_Silent("computeAggregateFrames");
     ASSERT(!queue->isEmpty());
     b aMsduLength = b(0);
-    auto firstPacket = check_and_cast<Packet *>(queue->front());
-    Ptr<const Ieee80211DataOrMgmtHeader> firstFrame = nullptr;
+    Ptr<const Ieee80211DataHeader> firstHeader = nullptr;
     auto frames = new std::vector<Packet *>();
     for (cQueue::Iterator it(*queue); !it.end(); it++)
     {
         auto dataPacket = check_and_cast<Packet *>(*it);
-        const auto& dataHeader = dataPacket->peekAtFront<Ieee80211DataOrMgmtHeader>();
-        const auto& dataTrailer = dataPacket->peekAtBack<Ieee80211MacTrailer>();
-        if (!dynamicPtrCast<const Ieee80211DataHeader>(dataHeader))
+        const auto& dataHeader = dynamicPtrCast<const Ieee80211DataHeader>(dataPacket->peekAtFront<Ieee80211DataOrMgmtHeader>());
+        if (dataHeader == nullptr)
             break;
-        if (!firstFrame)
-            firstFrame = dataHeader;
-        if (!isEligible(staticPtrCast<const Ieee80211DataHeader>(dataHeader), firstPacket, staticPtrCast<const Ieee80211DataHeader>(firstFrame), B(aMsduLength).get())) {
+        if (firstHeader == nullptr)
+            firstHeader = dataHeader;
+        const auto& dataTrailer = dataPacket->peekAtBack<Ieee80211MacTrailer>();
+        if (!isEligible(dataPacket, staticPtrCast<const Ieee80211DataHeader>(dataHeader), dataTrailer, firstHeader, aMsduLength)) {
             EV_TRACE << "Queued " << *dataPacket << " is not eligible for A-MSDU aggregation.\n";
             break;
         }
