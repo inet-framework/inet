@@ -15,6 +15,20 @@
 
 package inet.lora.loranode;
 
+import inet.common.lifecycle.NodeStatus;
+import inet.node.inet.INetworkNode;
+import inet.power.contract.IEnergyGenerator;
+import inet.power.contract.IEnergyManagement;
+import inet.power.contract.IEnergyStorage;
+import inet.common.packet.recorder.PcapRecorder;
+import inet.linklayer.contract.IEthernetInterface;
+import inet.linklayer.contract.IExternalInterface;
+import inet.linklayer.contract.ILoopbackInterface;
+import inet.linklayer.contract.IPppInterface;
+import inet.linklayer.contract.ITunnelInterface;
+import inet.linklayer.contract.IWirelessInterface;
+import inet.networklayer.common.InterfaceTable;
+
 import inet.mobility.static.StationaryMobility;
 import inet.networklayer.common.InterfaceTable;
 import inet.networklayer.contract.INetworkLayer;
@@ -28,10 +42,20 @@ import inet.transportlayer.contract.IUdp;
 import inet.networklayer.contract.IRoutingTable;
 import inet.common.MessageDispatcher;
 
-module LoRaGW
+module LoRaGW like INetworkNode
 {
     parameters:
         @networkNode();
+        bool hasStatus = default(false);
+        int numLoInterfaces = default(1);
+        int numEthInterfaces = default(0);  // minimum number of ethernet interfaces
+        int numWlanInterfaces = 1;
+        bool hasIpv4 = default(true);
+        bool hasIpv6 = default(false);
+        string osgModel = default(""); // 3D model for OSG visualization, no 3D model by default
+        string osgModelColor = default(""); // tint color, no colorization by default
+        string canvasImage = default(""); // image for canvas visualization, no image by default
+        string canvasImageColor = default(""); // tint color, no colorization by default
         *.interfaceTableModule = default(absPath(".interfaceTable"));
         *.routingTableModule = default(routingTableType != "" ? absPath(".routingTable") : "");
         string networkLayerType = default("Ipv4NetworkLayer");
@@ -42,10 +66,32 @@ module LoRaGW
 
         LoRaGWNic.radio.antenna.mobilityModule = default("^.^.^.mobility");
 
+        *.mobilityModule = default(exists(mobility) ? absPath(".mobility") : "");
+        *.energySourceModule = default(exists(energyStorage) ? absPath(".energyStorage") : "");
+        *.energyGeneratorModule = default(exists(energyGenerator) ? absPath(".energyGenerator") : "");
+
         @display("bgb=829.08,559.48804;i=device/antennatower");
     gates:
-        inout ethg[] @labels(EtherFrame-conn);
+        inout ethg[numEthInterfaces] @labels(EtherFrame-conn) @allowUnconnected;
+        input radioIn[numWlanInterfaces] @directIn;
     submodules:
+        status: NodeStatus if hasStatus {
+            parameters:
+                @display("p=125,80;is=s");
+        }
+        energyStorage: <default("")> like IEnergyStorage if typename != "" {
+            parameters:
+                @display("p=51.795998,229.704;is=s");
+        }
+        energyManagement: <default("")> like IEnergyManagement if typename != "" {
+            parameters:
+                @display("p=51.795998,361.44598;is=s");
+        }
+        energyGenerator: <default("")> like IEnergyGenerator if typename != "" {
+            parameters:
+                @display("p=51.795998,459.408;is=s");
+        }
+
         interfaceTable: InterfaceTable {
             @display("p=51.888,56.4");
         }
@@ -53,7 +99,7 @@ module LoRaGW
             @display("p=51.888,143.256");
         }
         LoRaGWNic: LoRaGWNic {
-            @display("p=248.846,450.4");
+            @display("p=659.836,424.50198");
         }
         packetForwarder: PacketForwarder {
             @display("p=422.25,56.3;is=vl");
@@ -66,17 +112,16 @@ module LoRaGW
             parameters:
                 @display("p=422.25,177.90799");
         }
-        networkLayer: <networkLayerType> like INetworkLayer {
-            @display("p=422.25,300.642");
-        }
-        routingTable: <routingTableType> like IRoutingTable if routingTableType != "" {
+        ipv4: <default("Ipv4NetworkLayer")> like INetworkLayer if hasIpv4 {
             parameters:
-                @display("p=51.888,266.208;is=s");
+                @display("p=363.698,284.878;q=queue");
         }
-
+        ipv6: <default("Ipv6NetworkLayer")> like INetworkLayer if hasIpv6 {
+            parameters:
+                @display("p=475.172,284.878;q=queue");
+        }
 
         // Message dispacher
-
         at: MessageDispatcher {
             parameters:
                 @display("p=422.25,122.73399;b=627,5,,,,1");
@@ -92,23 +137,44 @@ module LoRaGW
                 @display("p=423,347.424;b=664,5,,,,1");
         }
 
+        lo[numLoInterfaces]: <default("LoopbackInterface")> like ILoopbackInterface {
+            parameters:
+                @display("p=281.5,406.486,row,150");
+        }
+
 
     connections allowunconnected:
         packetForwarder.lowerLayerOut --> LoRaGWNic.upperLayerIn;
         LoRaGWNic.upperLayerOut --> packetForwarder.lowerLayerIn;
         packetForwarder.socketOut --> at.in++;
         packetForwarder.socketIn <-- at.out++;
+
         for i=0..sizeof(ethg)-1 {
             ethg[i] <--> { @display("m=s"); } <--> eth[i].phys;
+        }
+
+        for i=0..numLoInterfaces-1 {
+            nl.out++ --> lo[i].upperLayerIn;
+            lo[i].upperLayerOut --> nl.in++;
+        }
+
+        for i=0..sizeof(ethg)-1 {
             eth[i].upperLayerOut --> nl.in++;
             eth[i].upperLayerIn <-- nl.out++;
         }
 
-        networkLayer.ifIn <-- nl.out++;
-        networkLayer.ifOut --> nl.in++;
 
-        tn.out++ --> networkLayer.transportIn;
-        tn.in++ <-- networkLayer.transportOut;
+        ipv4.ifIn <-- nl.out++ if hasIpv4;
+        ipv4.ifOut --> nl.in++ if hasIpv4;
+
+        ipv6.ifIn <-- nl.out++ if hasIpv6;
+        ipv6.ifOut --> nl.in++ if hasIpv6;
+
+        tn.out++ --> ipv4.transportIn if hasIpv4;
+        tn.in++ <-- ipv4.transportOut if hasIpv4;
+
+        tn.out++ --> ipv6.transportIn if hasIpv6;
+        tn.in++ <-- ipv6.transportOut if hasIpv6;
 
         at.out++ --> udp.appIn;
         at.in++ <-- udp.appOut;
@@ -116,6 +182,7 @@ module LoRaGW
 
         udp.ipOut --> tn.in++;
         udp.ipIn <-- tn.out++;
+        radioIn[0] --> { @display("m=s"); } --> LoRaGWNic.radioIn;
 
 
 }
