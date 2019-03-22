@@ -3,6 +3,12 @@
 Visualization
 =============
 
+TODO: identify missing visualizers, and add sections for them.
+TODO: give an overview for them, esp. RadioVisualizer, MediumVisualizer.
+
+TODO RadioVisualizer neddoc: add formula for computing lobe radius from gain
+
+
 .. _ug:sec:visualization:overview:
 
 Overview
