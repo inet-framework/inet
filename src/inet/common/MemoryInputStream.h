@@ -119,6 +119,8 @@ class INET_API MemoryInputStream {
 
     void copyData(std::vector<uint8_t>& result, B offset = B(0), B length = B(-1)) const {
         auto end = length == B(-1) ? B(data.size()) : offset + length;
+        assert(b(0) <= offset && offset < B(data.size()));
+        assert(b(0) <= end && end <= B(data.size()));
         result.insert(result.begin(), data.begin() + B(offset).get(), data.begin() + B(end).get());
     }
     //@}
@@ -227,7 +229,10 @@ class INET_API MemoryInputStream {
             length = this->length - position;
             isReadBeyondEnd_ = true;
         }
-        bytes.insert(bytes.end(), data.begin() + B(position).get(), data.begin() + B(position + length).get());
+        auto end = position + length;
+        assert(b(0) <= position && position < B(data.size()));
+        assert(b(0) <= end && end < B(data.size()));
+        bytes.insert(bytes.end(), data.begin() + B(position).get(), data.begin() + B(end).get());
         position += length;
         return length;
     }

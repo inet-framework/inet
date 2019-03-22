@@ -84,6 +84,8 @@ class INET_API MemoryOutputStream {
 
     void copyData(std::vector<uint8_t>& result, B offset = B(0), B length = B(-1)) const {
         auto end = length == B(-1) ? B(data.size()) : offset + length;
+        assert(b(0) <= offset && offset < B(data.size()));
+        assert(b(0) <= end && end <= B(data.size()));
         result.insert(result.begin(), data.begin() + B(offset).get(), data.begin() + B(end).get());
     }
     //@}
@@ -156,6 +158,8 @@ class INET_API MemoryOutputStream {
     void writeBytes(const std::vector<uint8_t>& bytes, B offset = B(0), B length = B(-1)) {
         assert(isByteAligned());
         auto end = length == B(-1) ? B(bytes.size()) : offset + length;
+        assert(b(0) <= offset && offset < B(bytes.size()));
+        assert(b(0) <= end && end <= B(bytes.size()));
         data.insert(data.end(), bytes.begin() + B(offset).get(), bytes.begin() + B(end).get());
         this->length += end - offset;
     }
