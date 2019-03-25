@@ -26,7 +26,6 @@
 namespace inet {
 
 class InterfaceEntry;
-class IPassiveQueue;
 
 /**
  * Loopback interface implementation.
