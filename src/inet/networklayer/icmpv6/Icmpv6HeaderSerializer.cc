@@ -257,7 +257,13 @@ void Icmpv6HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<con
             stream.writeByte(pkt->getType());
             stream.writeByte(frame->getCode());
             stream.writeUint16Be(frame->getChksum());
-            stream.writeUint32Be(0);   // unused
+            stream.writeUint32Be(
+                      (frame->getRouterFlag() ? 0x80000000u : 0)
+                    | (frame->getSolicitedFlag() ? 0x40000000u : 0)
+                    | (frame->getOverrideFlag() ? 0x20000000u : 0)
+                    | (frame->getReserved() & 0x1fffffffu)
+                    );
+            stream.writeIpv6Address(frame->getTargetAddress());
             serializeIpv6NdOptions(stream, frame->getOptions());
             break;
         }
@@ -267,7 +273,7 @@ void Icmpv6HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<con
             stream.writeByte(pkt->getType());
             stream.writeByte(frame->getCode());
             stream.writeUint16Be(frame->getChksum());
-            stream.writeUint32Be(0);   // unused
+            stream.writeUint32Be(frame->getReserved());   // unused
             serializeIpv6NdOptions(stream, frame->getOptions());
             break;
         }
@@ -340,7 +346,11 @@ const Ptr<Chunk> Icmpv6HeaderSerializer::deserialize(MemoryInputStream& stream) 
             auto neighbourAd = makeShared<Ipv6NeighbourAdvertisement>(); icmpv6Header = neighbourAd;
             neighbourAd->setType(type);
             neighbourAd->setCode(subcode);
-            stream.readUint32Be(); // reserved
+            uint32_t reserved = stream.readUint32Be(); // reserved
+            neighbourAd->setRouterFlag((reserved & 0x80000000u) != 0);
+            neighbourAd->setSolicitedFlag((reserved & 0x40000000u) != 0);
+            neighbourAd->setOverrideFlag((reserved & 0x20000000u) != 0);
+            neighbourAd->setReserved(reserved & 0x1fffffffu);
             deserializeIpv6NdOptions(*neighbourAd, neighbourAd->getOptionsForUpdate(), stream);
             break;
         }
@@ -349,7 +359,7 @@ const Ptr<Chunk> Icmpv6HeaderSerializer::deserialize(MemoryInputStream& stream) 
             auto routerSol = makeShared<Ipv6RouterSolicitation>(); icmpv6Header = routerSol;
             routerSol->setType(type);
             routerSol->setCode(subcode);
-            stream.readUint32Be(); // reserved
+            routerSol->setReserved(stream.readUint32Be());
             deserializeIpv6NdOptions(*routerSol, routerSol->getOptionsForUpdate(), stream);
             break;
         }
