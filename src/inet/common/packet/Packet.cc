@@ -287,7 +287,7 @@ const Ptr<Chunk> Packet::removeAll()
 std::string Packet::str() const
 {
     std::ostringstream out;
-    out << "(" << getClassName() << ")" << getName() << " (" << getByteLength() << " bytes) [" << content->str() << "]";
+    out << "(" << getClassName() << ")" << getName() << " (" << getTotalLength() << ") [" << content->str() << "]";
     return out.str();
 }
 
