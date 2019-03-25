@@ -438,6 +438,7 @@ void OspfConfigReader::loadVirtualLink(const cXMLElement& virtualLinkConfig, cXM
     intf->setTransmissionDelay(getIntAttrOrPar(virtualLinkConfig, "interfaceTransmissionDelay"));
     intf->setHelloInterval(getIntAttrOrPar(virtualLinkConfig, "helloInterval"));
     intf->setRouterDeadInterval(getIntAttrOrPar(virtualLinkConfig, "routerDeadInterval"));
+    intf->setCrcMode(CRC_DISABLED); // TODO:
 
     loadAuthenticationConfig(intf, virtualLinkConfig);
 

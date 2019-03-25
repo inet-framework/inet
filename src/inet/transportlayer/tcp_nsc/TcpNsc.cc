@@ -224,7 +224,6 @@ void TcpNsc::initialize(int stage)
             crcMode = CRC_COMPUTED;
         else
             throw cRuntimeError("Unknown crc mode: '%s'", crcModeString);
-        crcInsertion.setCrcMode(crcMode);
 
         WATCH_MAP(tcpAppConnMapM);
 

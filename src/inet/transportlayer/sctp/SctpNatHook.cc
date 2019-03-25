@@ -324,7 +324,7 @@ void SctpNatHook::sendBackError(SctpHeader* sctp)
 void SctpNatHook::finish()
 {
     auto ipv4 = dynamic_cast<INetfilter *>(getModuleByPath("^.ipv4.ip"));
-    if (isRegisteredHook())
+    if (isRegisteredHook(ipv4))
         ipv4->unregisterHook(this);
     ipLayer = nullptr;
     EV_INFO<< getFullPath() << ": Natted packets: " << nattedPackets << "\n";

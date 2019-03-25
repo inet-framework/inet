@@ -100,7 +100,6 @@ void TcpLwip::initialize(int stage)
             crcMode = CRC_COMPUTED;
         else
             throw cRuntimeError("Unknown crc mode: '%s'", crcModeString);
-        crcInsertion.setCrcMode(crcMode);
 
         WATCH_MAP(tcpAppConnMapM);
 
@@ -349,7 +348,8 @@ err_t TcpLwip::tcp_event_recv(TcpLwipConnection& conn, struct pbuf *p, err_t err
     else {
         EV_DETAIL << this << ": tcp_event_recv(" << conn.connIdM << ", pbuf[" << p->len << ", "
                   << p->tot_len << "], " << (int)err << ")\n";
-        conn.receiveQueueM->enqueueTcpLayerData(p->payload, p->tot_len);
+        for (auto c = p; c; c = c->next)
+            conn.receiveQueueM->enqueueTcpLayerData(p->payload, c->len);
         pLwipTcpLayerM->tcp_recved(conn.pcbM, p->tot_len);
         pbuf_free(p);
     }

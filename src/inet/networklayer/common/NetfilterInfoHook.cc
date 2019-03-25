@@ -126,7 +126,7 @@ INetfilter::IHook::Result NetfilterInfoHook::datagramLocalOutHook(Packet *datagr
 
 void NetfilterInfoHook::finish()
 {
-    if (isRegisteredHook())
+    if (isRegisteredHook(netfilter))
         netfilter->unregisterHook(this);
 }
 

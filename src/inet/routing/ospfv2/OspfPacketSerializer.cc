@@ -261,6 +261,7 @@ uint16_t OspfPacketSerializer::deserializeOspfHeader(MemoryInputStream& stream, 
     ospfPacket->setRouterID(stream.readIpv4Address());
     ospfPacket->setAreaID(stream.readIpv4Address());
     ospfPacket->setCrc(stream.readUint16Be());
+    ospfPacket->setCrcMode(CRC_COMPUTED);
     ospfPacket->setAuthenticationType(stream.readUint16Be());
     for (int i = 0; i < 8; ++i) {
         ospfPacket->setAuthentication(i, stream.readUint8());

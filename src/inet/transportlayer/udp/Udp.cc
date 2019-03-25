@@ -127,8 +127,6 @@ void Udp::initialize(int stage)
 
         const char *crcModeString = par("crcMode");
         crcMode = parseCrcMode(crcModeString);
-        if (crcMode == CRC_COMPUTED)
-            crcInsertion.udp = this;
 
         lastEphemeralPort = EPHEMERAL_PORTRANGE_START;
         ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
@@ -1275,7 +1273,7 @@ INetfilter::IHook::Result Udp::CrcInsertion::datagramPostRoutingHook(Packet *pac
         ASSERT(udpHeader->getCrcMode() == CRC_COMPUTED);
         const L3Address& srcAddress = networkHeader->getSourceAddress();
         const L3Address& destAddress = networkHeader->getDestinationAddress();
-        udp->insertCrc(networkProtocol, srcAddress, destAddress, udpHeader, packet);
+        Udp::insertCrc(networkProtocol, srcAddress, destAddress, udpHeader, packet);
         packet->insertAtFront(udpHeader);
         packet->insertAtFront(networkHeader);
     }
