@@ -154,6 +154,7 @@ class Ipv6NdMessage extends Icmpv6Header
 class Ipv6RouterSolicitation extends Ipv6NdMessage
 {
     type = ICMPv6_ROUTER_SOL;
+    uint32_t reserved = 0;
     Ipv6NdOptions options;
 }
 
@@ -199,6 +200,7 @@ class Ipv6NeighbourAdvertisement extends Ipv6NdMessage
     bool routerFlag;    //R-flag
     bool solicitedFlag;    //S-flag
     bool overrideFlag;    //O-flag
+    uint32_t reserved = 0;
     Ipv6Address targetAddress;// MUST NOT be a multicast address.
     Ipv6NdOptions options;
 }
