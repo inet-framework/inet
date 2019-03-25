@@ -1229,7 +1229,9 @@ void Ipv6NeighbourDiscovery::createAndSendRaPacket(const Ipv6Address& destAddr, 
         /*o Source Link-Layer Address option: link-layer address of the sending
             interface.  (Assumption: We always send this)*/
         ra->setSourceLinkLayerAddress(ie->getMacAddress());
+        ra->setChunkLength(ra->getChunkLength() + IPv6ND_LINK_LAYER_ADDRESS_OPTION_LENGTH);
         ra->setMTU(ie->getProtocolData<Ipv6InterfaceData>()->getAdvLinkMtu());
+        ra->setChunkLength(ra->getChunkLength() + IPv6ND_MTU_OPTION_LENGTH);
 
         //Add all Advertising Prefixes to the RA
         int numAdvPrefixes = ie->getProtocolData<Ipv6InterfaceData>()->getNumAdvPrefixes();
@@ -1280,7 +1282,7 @@ void Ipv6NeighbourDiscovery::createAndSendRaPacket(const Ipv6Address& destAddr, 
             ra->setPrefixInformation(i, prefixInfo);
         }
 
-        ra->setChunkLength(ICMPv6_HEADER_BYTES + IPv6ND_PREFIX_INFORMATION_OPTION_LENGTH * numAdvPrefixes);
+        ra->setChunkLength(ra->getChunkLength() + IPv6ND_PREFIX_INFORMATION_OPTION_LENGTH * numAdvPrefixes);
 
         auto packet = new Packet("RApacket");
         Icmpv6::insertCrc(crcMode, ra, packet);
