@@ -22,7 +22,6 @@
 #include "inet/common/INETMath.h"
 #include "inet/common/figures/IIndicatorFigure.h"
 
-// for the moment commented out as omnet cannot instatiate it from a namespace
 namespace inet {
 
 class INET_API CounterFigure : public cGroupFigure, public inet::IIndicatorFigure

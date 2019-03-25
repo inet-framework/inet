@@ -119,6 +119,9 @@ class INET_API MemoryInputStream {
 
     void copyData(std::vector<uint8_t>& result, B offset = B(0), B length = B(-1)) const {
         auto end = length == B(-1) ? B(data.size()) : offset + length;
+        assert(b(0) <= offset && offset <= B(data.size()));
+        assert(b(0) <= end && end <= B(data.size()));
+        assert(offset <= end);
         result.insert(result.begin(), data.begin() + B(offset).get(), data.begin() + B(end).get());
     }
     //@}
@@ -186,14 +189,21 @@ class INET_API MemoryInputStream {
      * Reads a byte at the current position of the stream in MSB to LSB bit order.
      */
     uint8_t readByte() {
-        assert(isByteAligned());
         if (position + B(1) > length) {
             isReadBeyondEnd_ = true;
             position = length;
             return 0;
         }
         else {
-            uint8_t result = data[B(position).get()];
+            uint8_t result;
+            if (isByteAligned())
+                result = data[B(position).get()];
+            else {
+                int l1 = b(position).get() % 8;
+                int l2 = 8 - l1;
+                result = data[B(position - b(l1)).get()] << l1;
+                result |= data[B(position + b(l2)).get()] >> l2;
+            }
             position += B(1);
             return result;
         }
@@ -220,7 +230,11 @@ class INET_API MemoryInputStream {
             length = this->length - position;
             isReadBeyondEnd_ = true;
         }
-        bytes.insert(bytes.end(), data.begin() + B(position).get(), data.begin() + B(position + length).get());
+        auto end = position + length;
+        assert(b(0) <= position && position <= B(data.size()));
+        assert(b(0) <= end && end <= B(data.size()));
+        assert(position <= end);
+        bytes.insert(bytes.end(), data.begin() + B(position).get(), data.begin() + B(end).get());
         position += length;
         return length;
     }

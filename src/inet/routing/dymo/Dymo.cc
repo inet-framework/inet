@@ -412,6 +412,7 @@ void Dymo::sendDymoPacket(const Ptr<DymoPacket>& packet, const InterfaceEntry *i
     // In its default mode of operation, AODVv2 uses the Udp port 269 [RFC5498] to carry protocol packets.
     udpHeader->setSourcePort(DYMO_UDP_PORT);
     udpHeader->setDestinationPort(DYMO_UDP_PORT);
+    udpHeader->setCrcMode(CRC_DISABLED);
     udpPacket->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
     if (interfaceEntry)
         udpPacket->addTagIfAbsent<InterfaceReq>()->setInterfaceId(interfaceEntry->getInterfaceId());

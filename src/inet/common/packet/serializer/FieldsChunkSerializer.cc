@@ -22,8 +22,10 @@ namespace inet {
 void FieldsChunkSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk, b offset, b length) const
 {
     auto fieldsChunk = staticPtrCast<const FieldsChunk>(chunk);
-    if (fieldsChunk->getSerializedBytes() != nullptr)
+    if (fieldsChunk->getSerializedBytes() != nullptr) {
+        CHUNK_CHECK_USAGE(B(fieldsChunk->getSerializedBytes()->size()) == chunk->getChunkLength(), "serialized length is incorrect");
         stream.writeBytes(*fieldsChunk->getSerializedBytes(), offset, length == b(-1) ? chunk->getChunkLength() - offset : length);
+    }
     else if (offset == b(0) && (length == b(-1) || length == chunk->getChunkLength())) {
         auto startPosition = stream.getLength();
         serialize(stream, fieldsChunk);
@@ -33,6 +35,7 @@ void FieldsChunkSerializer::serialize(MemoryOutputStream& stream, const Ptr<cons
         auto serializedBytes = new std::vector<uint8_t>();
         stream.copyData(*serializedBytes, startPosition, serializedLength);
         fieldsChunk->setSerializedBytes(serializedBytes);
+        CHUNK_CHECK_USAGE(B(serializedBytes->size()) == chunk->getChunkLength(), "serialized length is incorrect");
     }
     else {
         MemoryOutputStream chunkStream(fieldsChunk->getChunkLength());
@@ -42,6 +45,7 @@ void FieldsChunkSerializer::serialize(MemoryOutputStream& stream, const Ptr<cons
         auto serializedBytes = new std::vector<uint8_t>();
         chunkStream.copyData(*serializedBytes);
         fieldsChunk->setSerializedBytes(serializedBytes);
+        CHUNK_CHECK_USAGE(B(serializedBytes->size()) == chunk->getChunkLength(), "serialized length is incorrect");
     }
 }
 
@@ -56,6 +60,7 @@ const Ptr<Chunk> FieldsChunkSerializer::deserialize(MemoryInputStream& stream, c
     auto serializedBytes = new std::vector<uint8_t>();
     stream.copyData(*serializedBytes, startPosition, chunkLength);
     fieldsChunk->setSerializedBytes(serializedBytes);
+    CHUNK_CHECK_USAGE(B(serializedBytes->size()) == fieldsChunk->getChunkLength(), "serialized length is incorrect");
     return fieldsChunk;
 }
 

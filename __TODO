@@ -21,6 +21,8 @@ most important topics
 
 =====================
 
+ - implicit serialization of chunks for conversion must be controllable from the API with flags
+ - the packet dissector may need to do implicit chunk conversion because it has to choose a representation which may or may not be the same as the one in the packet (e.g. two interoperable frameworks)
  - add parameter to mobility base which determines what should happen if the energy storage is depleted. For example, a drone should just stop, but a satellite should continue its motion.
 
  - route source type should be a protocol, CISCO admin dist should be calculated from the source type

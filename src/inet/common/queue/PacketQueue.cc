@@ -20,7 +20,7 @@
 namespace inet {
 
 PacketQueue::PacketQueue(const char *name) :
-    cPacketQueue(name, nullptr)
+    cPacketQueue(name)
 {
 }
 

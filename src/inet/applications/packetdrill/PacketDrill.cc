@@ -115,6 +115,7 @@ Packet* PacketDrill::buildUDPPacket(int address_family, enum direction_t directi
         packet->setName("UDPOutbound");
     } else
         throw cRuntimeError("Unknown direction");
+    udpHeader->setCrcMode(CRC_DISABLED);
     udpHeader->setTotalLengthField(UDP_HEADER_LENGTH + B(udpPayloadBytes));
     packet->insertAtFront(udpHeader);
     auto ipHeader = PacketDrill::makeIpv4Header(IP_PROT_UDP, direction, app->getLocalAddress(), app->getRemoteAddress());
