@@ -212,6 +212,8 @@ void Icmpv6HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<con
             stream.writeByte(pkt->getType());
             stream.writeByte(frame->getCode());
             stream.writeUint16Be(frame->getChksum());
+            stream.writeUint16Be(frame->getIdentifier());
+            stream.writeUint16Be(frame->getSeqNumber());
             break;
         }
 
@@ -220,6 +222,8 @@ void Icmpv6HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<con
             stream.writeByte(pkt->getType());
             stream.writeByte(frame->getCode());
             stream.writeUint16Be(frame->getChksum());
+            stream.writeUint16Be(frame->getIdentifier());
+            stream.writeUint16Be(frame->getSeqNumber());
             break;
         }
 
@@ -305,6 +309,8 @@ const Ptr<Chunk> Icmpv6HeaderSerializer::deserialize(MemoryInputStream& stream) 
             auto echoRequest = makeShared<Icmpv6EchoRequestMsg>(); icmpv6Header = echoRequest;
             echoRequest->setType(type);
             echoRequest->setCode(subcode);
+            echoRequest->setIdentifier(stream.readUint16Be());
+            echoRequest->setSeqNumber(stream.readUint16Be());
             break;
         }
 
@@ -312,6 +318,8 @@ const Ptr<Chunk> Icmpv6HeaderSerializer::deserialize(MemoryInputStream& stream) 
             auto echoReply = makeShared<Icmpv6EchoReplyMsg>(); icmpv6Header = echoReply;
             echoReply->setType(type);
             echoReply->setCode(subcode);
+            echoReply->setIdentifier(stream.readUint16Be());
+            echoReply->setSeqNumber(stream.readUint16Be());
             break;
         }
 
