@@ -371,6 +371,68 @@ achieved by setting the :par:`sourcePortFilter`,
 The icon, colors and other visual properties can be configured by
 setting the visualizer’s parameters.
 
+Visualizing Radio State and Radiation Patterns
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+TODO: radio state
+
+The :ned:`RadioVisualizer` module can visualize antenna directional characteristics,
+using its antenna lobe visualization feature. For example, the radiation patterns of
+an isotropic and a directional antenna:
+
+.. figure:: antennalobe4.png
+   :width: 100%
+   :align: center
+
+The visualized lobes indicate the antenna gain. The gain at a given direction is
+proportional to the length of the line connecting the node and the boundary of the lobe shape.
+This visualization feature can be enabled by setting the visualizer's
+:par:`displayAntennaLobes` parameter to ``true`` (false by default).
+
+The visualization is actually a cross-section of the 3D radiation pattern.
+By default, the cross-section plane corresponds/is perpendicular to the current
+viewing angle, in the global coordinate system. However, one can specify other
+planes in the antenna's local coordinate system, using the visualizer's
+:par:`antennaLobePlane` parameter. The possible values for the parameter are:
+`view` (default), `xy`, `xz`, and `yz`. (The views in the antenna's local
+coordinate system are typically useful for validating antenna models,
+by checking their shapes from the different viewpoints).
+
+The shape and size of the antenna lobe figure is determined by the characteristics
+of the antenna, but also by the parameters of the visualizer. Thus the visualization
+is an approximate representation of the antenna's radiation pattern.
+Depending on the visualizer's parameters, some fine details of the pattern might be
+visible, while others might not.
+There are several visualizer parameters for fine-tuning the visualized radiation
+pattern.
+
+The antenna lobe figure is made up of circular arcs, the radiuses of which depend
+on a base radius, and the gain evaluated at certain angles. The :par:`antennaLobeStep`
+parameter specifies how fine-grained the evaluation is, i.e. it evaluates the gain at
+every :par:`antennaLobeStep` degrees (10 degrees by default). The size of the arcs at
+the intermittent angles are interpolated.
+
+The size of the radiation pattern figure is specified by the :par:`AntennaLobeRadius`
+parameter, in pixels (100 by default). It is essentially the base radius, which is
+increased or decreased according to the gain. The :par:`AntennaLobeNormalize` parameter
+controls whether to display the radiation pattern in a normalized or in an absolute way.
+If it's normalized, the maximum gain is displayed at the given antenna lobe radius.
+If it's absolute, the 0 dB gain is at the given radius (it's absolute by default).
+The normalized version produces figures of the same size for different antennas, useful
+for comparing the gain patterns qualitatively. The absolute version produces figures
+displayed on the same scale, so the patterns can be compared quantitatively.
+The visualizer indicates the 0 dB gain and the maximum gain with dashed circles on the
+radiation pattern figure.
+
+The :par:`antennaLobeLogarithmicScale` parameter controls how sensitive the visualization
+is to changes in the antenna's gain. If the parameter is set too low, the fine details of
+the radiation pattern are not visible (large changes in gain are visualized as small changes
+in the lobe shape distance). If it is too high, detail are lost again, as even small changes
+from the base radius result in 0 shape distance). There is an optimal range for this value,
+depending on the individual antenna characteristics (antennas with little variation need
+a higher value in order for the variation to be clearly visible/prominent. similarly,
+antennas with high variation need a lower value).
+
 .. _ug:sec:visualization:the-infrastructure:
 
 Visualizing The Infrastructure
