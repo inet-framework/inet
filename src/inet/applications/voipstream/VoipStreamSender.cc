@@ -353,6 +353,7 @@ Packet *VoipStreamSender::generatePacket()
         vp->setChunkLength(B(voipHeaderSize + opacket.size));
     }
 
+    vp->setHeaderLength(voipHeaderSize);
     vp->setTimeStamp(pktID);
     vp->setSeqNo(pktID);
     vp->setCodec(pEncoderCtx->codec_id);
