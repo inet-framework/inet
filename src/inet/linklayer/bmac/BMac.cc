@@ -104,7 +104,7 @@ void BMac::initialize(int stage)
         resend_data->setKind(BMAC_RESEND_DATA);
         resend_data->setSchedulingPriority(100);
 
-        scheduleAt(0.0, start_bmac);
+        scheduleAt(simTime(), start_bmac);
     }
 }
 
