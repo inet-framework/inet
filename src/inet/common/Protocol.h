@@ -101,6 +101,7 @@ class INET_API Protocol
     static const Protocol rsvpTe;
     static const Protocol rtsp;
     static const Protocol sctp;
+    static const Protocol srp;
     static const Protocol ssh;
     static const Protocol stp;
     static const Protocol tcp;
