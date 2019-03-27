@@ -371,8 +371,10 @@ achieved by setting the :par:`sourcePortFilter`,
 The icon, colors and other visual properties can be configured by
 setting the visualizer’s parameters.
 
-Visualizing Radio State and Radiation Patterns
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. _ug:sec:visualization:radio-state:
+
+Visualizing Radio States and Antenna Radiation Patterns
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 TODO: radio state
 
@@ -380,23 +382,21 @@ The :ned:`RadioVisualizer` module can visualize antenna directional characterist
 using its antenna lobe visualization feature. For example, the radiation patterns of
 an isotropic and a directional antenna:
 
-.. figure:: antennalobe4.png
-   :width: 100%
+.. figure:: figures/antennalobe.png
+   :width: 90%
    :align: center
 
-The visualized lobes indicate the antenna gain. The gain at a given direction is
-proportional to the length of the line connecting the node and the boundary of the lobe shape.
-This visualization feature can be enabled by setting the visualizer's
-:par:`displayAntennaLobes` parameter to ``true`` (false by default).
+The visualized lobes indicate the antenna gain.
+At any given direction, the distance between the node and the boundary of the lobe shape
+depends on the gain at that direction. The gain can be visualized on a linear or a logarithmic
+scale (default).
 
 The visualization is actually a cross-section of the 3D radiation pattern.
-By default, the cross-section plane corresponds/is perpendicular to the current
+By default, the cross-section plane is perpendicular to the current
 viewing angle, in the global coordinate system. However, one can specify other
-planes in the antenna's local coordinate system, using the visualizer's
-:par:`antennaLobePlane` parameter. The possible values for the parameter are:
-`view` (default), `xy`, `xz`, and `yz`. (The views in the antenna's local
-coordinate system are typically useful for validating antenna models,
-by checking their shapes from the different viewpoints).
+planes in the antenna's local coordinate system, such as `xy`, `xz`, or `yz`.
+(The views in the antenna's local coordinate system are typically useful
+for validating antenna models, by checking their shapes from the different viewpoints).
 
 The shape and size of the antenna lobe figure is determined by the characteristics
 of the antenna, but also by the parameters of the visualizer. Thus the visualization
@@ -407,31 +407,28 @@ There are several visualizer parameters for fine-tuning the visualized radiation
 pattern.
 
 The antenna lobe figure is made up of circular arcs, the radiuses of which depend
-on a base radius, and the gain evaluated at certain angles. The :par:`antennaLobeStep`
-parameter specifies how fine-grained the evaluation is, i.e. it evaluates the gain at
-every :par:`antennaLobeStep` degrees (10 degrees by default). The size of the arcs at
-the intermittent angles are interpolated.
+on a base radius, and the gain evaluated at certain angles. By default, the visualizer
+evaluates the gain at every 10 degrees, but the evaluation can be made more fine-grained.
+The size of the arcs at the intermittent angles are interpolated.
 
-The size of the radiation pattern figure is specified by the :par:`AntennaLobeRadius`
-parameter, in pixels (100 by default). It is essentially the base radius, which is
-increased or decreased according to the gain. The :par:`AntennaLobeNormalize` parameter
-controls whether to display the radiation pattern in a normalized or in an absolute way.
-If it's normalized, the maximum gain is displayed at the given antenna lobe radius.
-If it's absolute, the 0 dB gain is at the given radius (it's absolute by default).
-The normalized version produces figures of the same size for different antennas, useful
-for comparing the gain patterns qualitatively. The absolute version produces figures
-displayed on the same scale, so the patterns can be compared quantitatively.
-The visualizer indicates the 0 dB gain and the maximum gain with dashed circles on the
-radiation pattern figure.
+The size of the radiation pattern figure is specified by the base radius, which is
+increased or decreased according to the gain. The visualizer can display the radiation
+pattern in a normalized or in an absolute way. If it's normalized, the maximum gain is
+displayed at the given antenna lobe radius. If it's absolute, the 0 dB gain is at
+the base radius (it's absolute by default). The normalized version produces figures
+of the same size for different antennas, useful for comparing the gain patterns
+qualitatively. The absolute version produces figures displayed on the same scale,
+so the patterns can be compared quantitatively. The visualizer indicates the 0 dB
+gain and the maximum gain with dashed circles on the radiation pattern figure.
 
-The :par:`antennaLobeLogarithmicScale` parameter controls how sensitive the visualization
-is to changes in the antenna's gain. If the parameter is set too low, the fine details of
-the radiation pattern are not visible (large changes in gain are visualized as small changes
-in the lobe shape distance). If it is too high, detail are lost again, as even small changes
-from the base radius result in 0 shape distance). There is an optimal range for this value,
-depending on the individual antenna characteristics (antennas with little variation need
-a higher value in order for the variation to be clearly visible/prominent. similarly,
-antennas with high variation need a lower value).
+If the visualization mode is set to logarithmic, a scale value controls how sensitive the
+visualization is to changes in the antenna's gain. If the parameter is set too low,
+the fine details of the radiation pattern are not visible (large changes in gain are
+visualized as small changes in the lobe shape distance). If it is too high, detail
+are lost again, as even small changes from the base radius result in 0 shape distance).
+There is an optimal range for this value, depending on the individual antenna characteristics
+to be clearly visible. Similarly, antennas with high variation need a lower value).
+(antennas with little variation need a higher value in order for the variation
 
 .. _ug:sec:visualization:the-infrastructure:
 
