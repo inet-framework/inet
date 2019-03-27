@@ -1,0 +1,36 @@
+# all tests that require the external TCP/IP stacks (NSC / lwip)
+
+# working directory, command line arguments, simulation time limit, fingerprint, expected result, tags
+
+/examples/inet/bulktransfer/,        -f omnetpp.ini -c inet__lwip -r 0,                  50s,            45a7-9d4e/tlN, PASS,
+/examples/inet/bulktransfer/,        -f omnetpp.ini -c inet_nsc -r 0,                    50s,            50b3-a6a1/tlN, PASS,
+/examples/inet/bulktransfer/,        -f omnetpp.ini -c lwip__inet -r 0,                  50s,            23dc-bc6f/tlN, PASS,
+/examples/inet/bulktransfer/,        -f omnetpp.ini -c lwip__lwip -r 0,                  50s,            d7fa-a324/tlN, PASS,
+/examples/inet/bulktransfer/,        -f omnetpp.ini -c nsc_inet -r 0,                    50s,            a692-dafb/tlN, PASS,
+/examples/inet/bulktransfer/,        -f omnetpp.ini -c nsc_nsc -r 0,                     50s,            2f01-b35d/tlN, PASS,
+
+# /examples/inet/shutdownrestart/,     -f omnetpp.ini -c TCP_NSC -r 0,                     100s,           0000-0000/tlN, ERROR,    # object transfer not supported by TCP_NSC
+# /examples/inet/shutdownrestart/,     -f omnetpp.ini -c TCP_lwIP -r 0,                    100s,           0000-0000/tlN, ERROR,    # shutdown/restart not supported by TCP_lwIP
+
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c NSClinux__NSClinux -r 0,         100s,            8cb8-1a13/tlN, PASS,
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c NSClinux__NSClinux_stream -r 0,  100s,            8cb8-1a13/tlN, PASS,
+# /examples/inet/tcpclientserver/,     -f omnetpp.ini -c NSClinux__NSCfreebsd -r 0,       100s,            0000-0000/tlN, ERROR,    # freebsd NSC stack works on 32 bit system only
+# /examples/inet/tcpclientserver/,     -f omnetpp.ini -c NSCfreebsd__NSCfreebsd -r 0,     100s,            0000-0000/tlN, ERROR,    # freebsd NSC stack works on 32 bit system only
+# /examples/inet/tcpclientserver/,     -f omnetpp.ini -c NSClwip__inet -r 0,              100s,            0000-0000/tlN, ERROR,    # lwip NSC stack works on 32 bit system only
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet__NSClinux -r 0,             100s,            d84e-30a0/tlN, PASS,
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c lwip__lwip -r 0,                 100s,            8c36-03ce/tlN, PASS,
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c lwip__inet -r 0,                 100s,            a3ea-806a/tlN, PASS,
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c lwip__lwip__msg -r 0,            100s,            8c36-03ce/tlN, PASS,
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c lwip__lwip__stream -r 0,         100s,            8c36-03ce/tlN, PASS,
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet__lwip -r 0,                 100s,            8e3e-71f5/tlN, PASS,
+
+/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c inet__lwip -r 0,                  50s,            9cdf-95d1/tlN, PASS,
+/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c inet_nsc -r 0,                    50s,            d1e6-5eb8/tlN, PASS,
+/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c lwip__inet -r 0,                  50s,            2967-3176/tlN, PASS,
+/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c lwip__lwip -r 0,                  50s,            3e54-0ec9/tlN, PASS,
+/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c nsc_inet -r 0,                    50s,            4439-d48e/tlN, PASS,
+/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c nsc_nsc -r 0,                     50s,            d604-3492/tlN, PASS,
+
+/examples/inet/nclients/,            -f omnetpp.ini -c inet__lwip -r 0,                 200s,            e194-036d/tlN, ERROR,
+/examples/inet/nclients/,            -f omnetpp.ini -c lwip__inet -r 0,                 200s,            0de9-dea9/tlN, ERROR,
+/examples/inet/nclients/,            -f omnetpp.ini -c lwip__lwip -r 0,                 200s,            53b3-7f25/tlN, ERROR,
