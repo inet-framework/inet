@@ -27,7 +27,7 @@ simple RadioVisualizerBase extends VisualizerBase
     parameters:
         string networkNodeVisualizerModule = default("^.networkNodeVisualizer"); // module path to the network node visualizer module, refers to a sibling submodule by default
 
-        bool displayRadios = default(false);
+        bool displayRadios = default(false);				// master switch
         bool displayRadioMode = default(true);
         bool displayReceptionState = default(true);
         bool displayTransmissionState = default(true);
@@ -49,8 +49,9 @@ simple RadioVisualizerBase extends VisualizerBase
         string antennaLobePlane @enum("view", "xy", "xz", "yz") = default("view"); // compute antenna lobe in this plane, view by default
         string antennaLobeMode @enum("logarithmic", "linear") = default("logarithmic");
         double antennaLobeLogarithmicBase = default(10);
-        double antennaLobeLogarithmicScale = default(100); // distance change in pixels for 10dB
-        double antennaLobeRadius = default(100); // distance in pixels for 0dB (1 gain) or maximum gain depending on antennaLobeNormalize parameter
+        double antennaLobeLogarithmicScale = default(100); // distance change in pixels for 10dB change in gain; gainRadius = baseRadius + scale * log(gain)
+        // TODO: shouldn't we call this antennaLobeBaseRadius ?
+        double antennaLobeRadius = default(100); // base radius; distance in pixels for 0dB (1 gain) or maximum gain depending on antennaLobeNormalize parameter
         double antennaLobeStep @unit(deg) = default(10deg);
         double antennaLobeOpacity = default(0.25); // opacity of the antenna lobe
         bool antennaLobeLineSmooth = default(true);
