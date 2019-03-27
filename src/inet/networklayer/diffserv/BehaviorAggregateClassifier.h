@@ -45,7 +45,7 @@ class INET_API BehaviorAggregateClassifier : public cSimpleModule
 
         bool matches(const Packet *packet);
 
-        virtual bool shouldDissectProtocolDataUnit(const Protocol *protocol) override { return true; }
+        virtual bool shouldDissectProtocolDataUnit(const Protocol *protocol) override { return dissect; }
         virtual void startProtocolDataUnit(const Protocol *protocol) override {}
         virtual void endProtocolDataUnit(const Protocol *protocol) override {}
         virtual void markIncorrect() override {}
