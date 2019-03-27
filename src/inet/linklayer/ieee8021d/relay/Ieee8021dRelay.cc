@@ -71,7 +71,6 @@ void Ieee8021dRelay::registerAddress(MacAddress mac)
 void Ieee8021dRelay::registerAddresses(MacAddress startMac, MacAddress endMac)
 {
     registeredMacAddresses.insert(MacAddressPair(startMac, endMac));
-
 }
 
 void Ieee8021dRelay::handleLowerPacket(Packet *packet)
@@ -101,13 +100,12 @@ void Ieee8021dRelay::handleUpperPacket(Packet *packet)
         // Not known -> broadcast
         if (outInterfaceId == -1) {
             EV_DETAIL << "Destination address = " << frame->getDest()
-                             << " unknown, broadcasting frame " << frame
-                             << endl;
+                      << " unknown, broadcasting frame " << frame
+                      << endl;
             broadcast(packet, -1);
         } else {
             InterfaceEntry *ie = ifTable->getInterfaceById(interfaceId);
             dispatch(packet, ie);
-
         }
     }
 }
