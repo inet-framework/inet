@@ -380,7 +380,7 @@ TODO: radio state
 
 The :ned:`RadioVisualizer` module can visualize antenna directional characteristics,
 using its antenna lobe visualization feature. For example, the radiation patterns of
-an isotropic and a directional antenna:
+an isotropic and a directional antenna looks like the following:
 
 .. figure:: figures/antennalobe.png
    :width: 90%
@@ -428,7 +428,8 @@ visualized as small changes in the lobe shape distance). If it is too high, deta
 are lost again, as even small changes from the base radius result in 0 shape distance).
 There is an optimal range for this value, depending on the individual antenna characteristics
 to be clearly visible. Similarly, antennas with high variation need a lower value).
-(antennas with little variation need a higher value in order for the variation
+(antennas with little variation need a higher value in order for the variation to be
+clearly visible/prominent. similarly, antennas with high variation need a lower value).
 
 .. _ug:sec:visualization:the-infrastructure:
 
