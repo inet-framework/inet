@@ -165,6 +165,9 @@ void Ieee8021dRelay::handleAndDispatchFrame(Packet *packet)
         throw cRuntimeError("Ieee8021dInterfaceData not found for interface %s", arrivalInterface->getFullName());
     learn(frame->getSrc(), arrivalInterfaceId);
 
+    //TODO revise next "if"s: 2nd drops all packets for me if not forwarding port; 3rd sends up when dest==STP_MULTICAST_ADDRESS; etc.
+    // reordering, merge 1st and 3rd, ...
+
     // BPDU Handling
     if (isStpAware
             && (frame->getDest() == MacAddress::STP_MULTICAST_ADDRESS || frame->getDest() == bridgeAddress)
