@@ -115,6 +115,7 @@ const Protocol Protocol::rip("rip", "RIP");
 const Protocol Protocol::rsvpTe("rsvpte", "RSVP-TE");
 const Protocol Protocol::rtsp("rtsp", "RTSP");
 const Protocol Protocol::sctp("sctp", "SCTP", Protocol::TransportLayer);
+const Protocol Protocol::srp("srp", "SRP");
 const Protocol Protocol::ssh("ssh", "SSH");
 const Protocol Protocol::stp("stp", "STP");
 const Protocol Protocol::tcp("tcp", "TCP", Protocol::TransportLayer);

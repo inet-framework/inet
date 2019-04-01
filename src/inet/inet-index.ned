@@ -26,7 +26,7 @@
 // and students working with communication networks. INET is especially useful
 // when designing and validating new protocols, or exploring new or exotic
 // scenarios.
-// 
+//
 // INET supports a wide class of communication networks, including wired,
 // wireless, mobile, ad hoc and sensor networks. It contains models for the
 // Internet stack (TCP, UDP, IPv4, IPv6, OSPF, BGP, etc.), link layer
@@ -35,7 +35,7 @@
 // DiffServ, MPLS with LDP and RSVP-TE signalling, several application models,
 // and many other protocols and components. It also provides support for node
 // mobility, advanced visualization, network emulation and more.
-// 
+//
 // Several other simulation frameworks take INET as a base, and extend it into
 // specific directions, such as vehicular networks, overlay/peer-to-peer
 // networks, or LTE.
@@ -48,7 +48,6 @@
 //   - <a href="https://inet.omnetpp.org/docs/developers-guide/index.html" target="_top">INET Developer's Guide</a>
 //   - <a href="https://inet.omnetpp.org/docs/showcases/index.html" target="_top">INET Showcases</a> and
 //     <a href="https://inet.omnetpp.org/docs/tutorials/index.html" target="_top">INET Tutorials</a>
-//   - <a href="../doxy/index.html" target="_top">INET C++ source documentation (Doxygen)</a>
 //   - <a href="https://omnetpp.org/doc/omnetpp/manual" target="_top">OMNeT++ Simulation Manual</a>
 //   - <a href="https://omnetpp.org/documentation" target="_top">Further OMNeT++ documentation</a>
 //
