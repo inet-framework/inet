@@ -426,10 +426,9 @@ visualization is to changes in the antenna's gain. If the parameter is set too l
 the fine details of the radiation pattern are not visible (large changes in gain are
 visualized as small changes in the lobe shape distance). If it is too high, detail
 are lost again, as even small changes from the base radius result in 0 shape distance).
-There is an optimal range for this value, depending on the individual antenna characteristics
-to be clearly visible. Similarly, antennas with high variation need a lower value).
-(antennas with little variation need a higher value in order for the variation to be
-clearly visible/prominent. similarly, antennas with high variation need a lower value).
+There is an optimal range for this value, depending on the individual antenna characteristics.
+(Antennas with little variation need a higher value in order for the variation to be
+clearly visible. Similarly, antennas with high variation need a lower value.)
 
 .. _ug:sec:visualization:the-infrastructure:
 
