@@ -153,7 +153,7 @@
 
 # /examples/inet/hierarchical99/,      -f .qtenv.ini -c General -r 0
 /examples/inet/hierarchical99/,      -f networklayer.ini -c IPv4 -r 0,              10000s,          cead-32e3/tplx, PASS,
-/examples/inet/hierarchical99/,      -f networklayer.ini -c IPv6 -r 0,              10000s,          484d-a7e4/tplx, PASS,
+/examples/inet/hierarchical99/,      -f networklayer.ini -c IPv6 -r 0,              10000s,          c194-ddc8/tplx, PASS,
 /examples/inet/hierarchical99/,      -f networklayer.ini -c Generic -r 0,           10000s,          a78a-c6ed/tplx, PASS,
 /examples/inet/hierarchical99/,      -f networklayer.ini -c Flooding -r 0,          10000s,          793c-994c/tplx, PASS,
 /examples/inet/hierarchical99/,      -f networklayer.ini -c ProbabilisticBroadcast -r 0,              10000s,          fb43-68bd/tplx, PASS,
@@ -298,30 +298,30 @@
 /examples/internetcloud/cloudandrouters/, -f omnetpp.ini -c ten_senders -r 0,            100s,            1153-9b5e/tplx, PASS,
 /examples/internetcloud/earthcloud/, -f omnetpp.ini -c General -r 0,                100s,            5bc6-4ad4/tplx, PASS,
 
-/examples/ipv6/demonetworketh/,      -f omnetpp.ini -c General -r 0,                50000s,          a7a5-b535/tplx, PASS,
-/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c inet_inet -r 0,              50s,             940b-9ee3/tplx, PASS,
-/examples/ipv6/ipv6nclients/,        -f omnetpp.ini -c ETH -r 0,                    50s,             13aa-cead/tplx, PASS,
-/examples/ipv6/ipv6nclients/,        -f omnetpp.ini -c PPP -r 0,                    50s,             2b3b-a2be/tplx, PASS,
+/examples/ipv6/demonetworketh/,      -f omnetpp.ini -c General -r 0,                50000s,          8cd1-ca6a/tplx, PASS,
+/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c inet_inet -r 0,              50s,             77ae-751c/tplx, PASS,
+/examples/ipv6/ipv6nclients/,        -f omnetpp.ini -c ETH -r 0,                    50s,             aa73-c5ae/tplx, PASS,
+/examples/ipv6/ipv6nclients/,        -f omnetpp.ini -c PPP -r 0,                    50s,             c89e-d7c1/tplx, PASS,
 # /examples/ipv6/nclients/,            -f omnetpp.ini -c TCP_APP -r 0   # TCP_APP extended
 # /examples/ipv6/nclients/,            -f omnetpp.ini -c SCTP_APP -r 0   # SCTP_APP extended
-/examples/ipv6/nclients/,            -f omnetpp.ini -c ETH -r 0,                    1000s,           b616-49c7/tplx, PASS,
-/examples/ipv6/nclients/,            -f omnetpp.ini -c PPP -r 0,                    1000s,           5b8c-d4ad/tplx, PASS,
-/examples/ipv6/nclients/,            -f omnetpp.ini -c PPP_SCTP -r 0,               100s,            5b23-ab93/tplx, PASS,
+/examples/ipv6/nclients/,            -f omnetpp.ini -c ETH -r 0,                    1000s,           e04d-010d/tplx, PASS,
+/examples/ipv6/nclients/,            -f omnetpp.ini -c PPP -r 0,                    1000s,           7e5b-1a94/tplx, PASS,
+/examples/ipv6/nclients/,            -f omnetpp.ini -c PPP_SCTP -r 0,               100s,            5864-2a45/tplx, PASS,
 
 /examples/manetrouting/dsdv/,        -f omnetpp.ini -c IPv4 -r 0,                   10s,             7c52-202e/tplx, PASS,  wireless adhoc
-/examples/manetrouting/dsdv/,        -f omnetpp.ini -c MultiIPv4 -r 0,              10s,             a525-679e/tplx, PASS,  wireless adhoc
+/examples/manetrouting/dsdv/,        -f omnetpp.ini -c MultiIPv4 -r 0,              10s,             71ac-bbd3/tplx, PASS,  wireless adhoc
 /examples/manetrouting/dsdv/,        -f omnetpp.ini -c DynamicIPv4 -r 0,            22s,             94c2-a928/tplx, PASS,  wireless adhoc
 
 # /examples/manetrouting/dymo/,        -f omnetpp.ini -c _IPv4 -r 0   # _IPv4 extended
 /examples/manetrouting/dymo/,        -f omnetpp.ini -c IPv4 -r 0,                   10s,             9df7-b85a/tplx, PASS,  wireless adhoc
 # /examples/manetrouting/dymo/,        -f omnetpp.ini -c _IPv6 -r 0   # _IPv6 extended
-/examples/manetrouting/dymo/,        -f omnetpp.ini -c IPv6 -r 0,                   10s,             b2e0-9bd9/tplx, PASS,  wireless adhoc
+/examples/manetrouting/dymo/,        -f omnetpp.ini -c IPv6 -r 0,                   10s,             7c9a-400d/tplx, PASS,  wireless adhoc
 # /examples/manetrouting/dymo/,        -f omnetpp.ini -c _Generic -r 0   # _Generic extended
 /examples/manetrouting/dymo/,        -f omnetpp.ini -c Generic -r 0,                10s,             5dc0-cd0d/tplx, PASS,  wireless adhoc
 # /examples/manetrouting/dymo/,        -f omnetpp.ini -c _Multi -r 0   # _Multi extended
-/examples/manetrouting/dymo/,        -f omnetpp.ini -c MultiIPv4 -r 0,              10s,             115e-9143/tplx, PASS,  wireless adhoc
-/examples/manetrouting/dymo/,        -f omnetpp.ini -c MultiIPv6 -r 0,              10s,             b2e0-9bd9/tplx, PASS,  wireless adhoc
-/examples/manetrouting/dymo/,        -f omnetpp.ini -c MultiGeneric -r 0,           10s,             23d6-0cf0/tplx, PASS,  wireless adhoc
+/examples/manetrouting/dymo/,        -f omnetpp.ini -c MultiIPv4 -r 0,              10s,             54d0-a63a/tplx, PASS,  wireless adhoc
+/examples/manetrouting/dymo/,        -f omnetpp.ini -c MultiIPv6 -r 0,              10s,             7c9a-400d/tplx, PASS,  wireless adhoc
+/examples/manetrouting/dymo/,        -f omnetpp.ini -c MultiGeneric -r 0,           10s,             ec33-fd8c/tplx, PASS,  wireless adhoc
 # /examples/manetrouting/dymo/,        -f omnetpp.ini -c _Dynamic -r 0   # _Dynamic extended
 /examples/manetrouting/dymo/,        -f omnetpp.ini -c DynamicIPv4 -r 0,            22s,             7048-a27c/tplx, PASS,  wireless adhoc
 /examples/manetrouting/dymo/,        -f omnetpp.ini -c DynamicIPv6 -r 0,            22s,             5fe9-22ea/tplx, ERROR, wireless adhoc # IPv6: Shutdown not supported
@@ -332,12 +332,12 @@
 # /examples/manetrouting/gpsr/,        -f omnetpp.ini -c _IPv6 -r 0,                  ---100s,         0000-0000/tplx, ERROR, wireless adhoc # _IPv6 extended
 # /examples/manetrouting/gpsr/,        -f omnetpp.ini -c _Generic -r 0,               ---100s,         0000-0000/tplx, ERROR, wireless adhoc # _Generic extended
 /examples/manetrouting/gpsr/,        -f omnetpp.ini -c IPv4 -r 0,                   20s,             4259-cfc0/tplx, PASS,  wireless adhoc
-/examples/manetrouting/gpsr/,        -f omnetpp.ini -c IPv6 -r 0,                   20s,             a916-19aa/tplx, PASS,  wireless adhoc
+/examples/manetrouting/gpsr/,        -f omnetpp.ini -c IPv6 -r 0,                   20s,             3086-a8cc/tplx, PASS,  wireless adhoc
 /examples/manetrouting/gpsr/,        -f omnetpp.ini -c Generic -r 0,                20s,             35b2-6608/tplx, PASS,  wireless adhoc
 # /examples/manetrouting/gpsr/,        -f omnetpp.ini -c _Multi -r 0,                 ---100s,         0000-0000/tplx, ERROR, wireless adhoc # _Multi extended
-/examples/manetrouting/gpsr/,        -f omnetpp.ini -c MultiIPv4 -r 0,              20s,             6483-91d0/tplx, PASS,  wireless adhoc
-/examples/manetrouting/gpsr/,        -f omnetpp.ini -c MultiIPv6 -r 0,              20s,             a916-19aa/tplx, PASS,  wireless adhoc
-/examples/manetrouting/gpsr/,        -f omnetpp.ini -c MultiGeneric -r 0,           20s,             4a4a-eb72/tplx, PASS,  wireless adhoc
+/examples/manetrouting/gpsr/,        -f omnetpp.ini -c MultiIPv4 -r 0,              20s,             1f30-60aa/tplx, PASS,  wireless adhoc
+/examples/manetrouting/gpsr/,        -f omnetpp.ini -c MultiIPv6 -r 0,              20s,             3086-a8cc/tplx, PASS,  wireless adhoc
+/examples/manetrouting/gpsr/,        -f omnetpp.ini -c MultiGeneric -r 0,           20s,             2399-6f98/tplx, PASS,  wireless adhoc
 /examples/manetrouting/gpsr/,        -f omnetpp.ini -c Manual -r 0,                 20s,             872f-8618/tplx, PASS,  wireless adhoc
 # /examples/manetrouting/gpsr/,        -f omnetpp.ini -c _Dynamic -r 0,               ---100s,         0000-0000/tplx, ERROR, wireless adhoc   # _Dynamic extended
 /examples/manetrouting/gpsr/,        -f omnetpp.ini -c DynamicIPv4 -r 0,            20s,             a7a1-cc2c/tplx, PASS,  wireless adhoc
@@ -347,7 +347,7 @@
 /examples/manetrouting/multiradio/,  -f omnetpp.ini -c MultiRadio -r 0,             20s,             d035-2ecd/tplx, PASS,  wireless adhoc
 /examples/manetrouting/multiradio/,  -f omnetpp.ini -c SingleRadio -r 0,            20s,             6a41-cf55/tplx, PASS,  wireless adhoc
 
-/examples/mobileipv6/,               -f omnetpp.ini -c One -r 0,                    25s,             1505-807d/tplx, PASS, wireless
+/examples/mobileipv6/,               -f omnetpp.ini -c One -r 0,                    25s,             94fe-fb29/tplx, PASS, wireless
 
 /examples/mobility/,                 -f omnetpp.ini -c AnsimMobility -r 0,          10000s,          72f8-5c0b/tplx, PASS,
 /examples/mobility/,                 -f omnetpp.ini -c BonnMotionMobility1 -r 0,    10000s,          ce84-30b6/tplx, PASS,
@@ -428,8 +428,8 @@
 /examples/rip/mixednetwork/,         -f omnetpp.ini -c disconnect -r 0,             100s,            bf26-67b4/tplx, PASS,
 /examples/rip/mixednetwork/,         -f omnetpp.ini -c shutdown-restart -r 0,       100s,            f3d9-4905/tplx, PASS,
 /examples/rip/simpletest/,           -f omnetpp.ini -c IPv4 -r 0,                   100s,            5ae0-2e0f/tplx, PASS,
-/examples/rip/simpletest/,           -f omnetpp.ini -c IPv6 -r 0,                   100s,            38cb-01ac/tplx, PASS,
-/examples/rip/simpletest/,           -f omnetpp.ini -c MultiIPv4 -r 0,              100s,            886d-54a9/tplx, PASS,
+/examples/rip/simpletest/,           -f omnetpp.ini -c IPv6 -r 0,                   100s,            cca8-a20f/tplx, PASS,
+/examples/rip/simpletest/,           -f omnetpp.ini -c MultiIPv4 -r 0,              100s,            205c-7a2d/tplx, PASS,
 
 /examples/rtp/multicast1/,           -f omnetpp.ini -c General -r 0,                500s,           d6f1-b720/tplx, PASS,
 /examples/rtp/unicast/,              -f omnetpp.ini -c General -r 0,                1500s,           706d-80ce/tplx, PASS,
@@ -548,7 +548,7 @@
 /examples/wireless/scaling/,         -f omnetpp.ini -c DimensionalRadioMedium -r 0, 1s,                168f-1d5c/tplx, PASS, wireless
 
 /examples/wireless/shortcut/,        -f omnetpp.ini -c ShortcutMac -r 0,            1000s,            91d1-098d/tplx, PASS, wireless
-/examples/wireless/shortcut/,        -f omnetpp.ini -c ShortcutRadio -r 0,          1000s,            568f-5ed0/tplx, PASS, wireless
+/examples/wireless/shortcut/,        -f omnetpp.ini -c ShortcutRadio -r 0,          1000s,            3442-a2db/tplx, PASS, wireless
 
 /examples/wireless/synchronized/,    -f omnetpp.ini -c Synchronized -r 0,           2s,              bbba-a77a/tplx, PASS, wireless
 /examples/wireless/synchronized/,    -f omnetpp.ini -c NonSynchronized -r 0,        2s,              f793-dfa9/tplx, PASS, wireless

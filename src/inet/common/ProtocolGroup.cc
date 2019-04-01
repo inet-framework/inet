@@ -72,6 +72,7 @@ ProtocolGroup ProtocolGroup::ethertype("ethertype", {
     { 0x0800, &Protocol::ipv4 },
     { 0x0806, &Protocol::arp },
     { 0x2000, &Protocol::cdp },              // TODO remove it, it's a CISCO code for LLC, ANSAINET project use it currently
+    { 0x22EA, &Protocol::srp},
     { 0x22F0, &Protocol::tsn},
     { 0x22F3, &Protocol::trill},
     { 0x22F4, &Protocol::l2isis},
