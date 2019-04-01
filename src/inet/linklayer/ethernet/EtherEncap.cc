@@ -275,7 +275,6 @@ void EtherEncap::processPacketFromMac(Packet *packet)
     }
     else
         throw cRuntimeError("Unknown ethernet header");
-
 }
 
 void EtherEncap::handleSendPause(cMessage *msg)
