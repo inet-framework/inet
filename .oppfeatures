@@ -1133,6 +1133,21 @@
         compileFlags = "-DWITH_CLOUDNETSIM"
         linkerFlags = ""
         />
+		<feature
+        id="iCanCloud"
+        name="ClodNetSim"
+        description = "iCanCloud model"
+        initiallyEnabled = "true"
+        requires = ""
+        labels = ""
+        nedPackages = "
+                       inet.icancloud
+                       inet.examples.icancloud
+                      "
+        extraSourceFolders = ""
+        compileFlags = "-DWITH_ICANCLOUD"
+        linkerFlags = "-lz"
+        />
     <feature
         id="wirelesstutorial"
         name="Wireless tutorial"
