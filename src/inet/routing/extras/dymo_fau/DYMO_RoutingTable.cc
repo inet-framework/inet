@@ -57,7 +57,7 @@ const char* DYMO_RoutingTable::getFullName() const
     return "DYMO_RoutingTable";
 }
 
-std::string DYMO_RoutingTable::info() const
+std::string DYMO_RoutingTable::str() const
 {
     std::ostringstream ss;
 
@@ -80,11 +80,6 @@ std::string DYMO_RoutingTable::info() const
     ss << "}";
 
     return ss.str();
-}
-
-std::string DYMO_RoutingTable::str() const
-{
-    return info();
 }
 
 //=================================================================================================
@@ -233,7 +228,7 @@ void DYMO_RoutingTable::maintainAssociatedRoutingEntryFor(DYMO_RoutingEntry* ent
 
 std::ostream& operator<<(std::ostream& os, const DYMO_RoutingTable& o)
 {
-    os << o.info();
+    os << o.str();
     return os;
 }
 

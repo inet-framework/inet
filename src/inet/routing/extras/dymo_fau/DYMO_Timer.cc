@@ -40,7 +40,7 @@ const char* DYMO_Timer::getFullName() const
     return name;
 }
 
-std::string DYMO_Timer::info() const
+std::string DYMO_Timer::str() const
 {
     if (!active)
     {
@@ -49,11 +49,6 @@ std::string DYMO_Timer::info() const
     std::ostringstream ss;
     ss << (expiresAt - (simTime())) << "s left";
     return ss.str();
-}
-
-std::string DYMO_Timer::str() const
-{
-    return info();
 }
 
 bool DYMO_Timer::isRunning() const
@@ -91,7 +86,7 @@ simtime_t DYMO_Timer::getInterval() const
 
 std::ostream& operator<<(std::ostream& os, const DYMO_Timer& o)
 {
-    os << o.info();
+    os << o.str();
     return os;
 }
 

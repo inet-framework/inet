@@ -51,9 +51,6 @@ class DYMO_Timer : public cObject
     virtual const char* getFullName() const override;
 
     /** @brief inherited from cObject */
-    virtual std::string info() const override;
-
-    /** @brief inherited from cObject */
     virtual std::string str() const override;
 
     /** @brief returns whether the given timeout was started, but is not yet expired */
