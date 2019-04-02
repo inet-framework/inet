@@ -52,7 +52,7 @@ const char* DYMO_OutstandingRREQList::getFullName() const
     return "DYMO_OutstandingRREQList";
 }
 
-std::string DYMO_OutstandingRREQList::info() const
+std::string DYMO_OutstandingRREQList::str() const
 {
     std::ostringstream ss;
 
@@ -68,11 +68,6 @@ std::string DYMO_OutstandingRREQList::info() const
     ss << "}";
 
     return ss.str();
-}
-
-std::string DYMO_OutstandingRREQList::str() const
-{
-    return info();
 }
 
 DYMO_OutstandingRREQ* DYMO_OutstandingRREQList::getByDestAddr(L3Address destAddr, int prefix)
@@ -141,7 +136,7 @@ void DYMO_OutstandingRREQList::delAll()
 
 std::ostream& operator<<(std::ostream& os, const DYMO_OutstandingRREQList& o)
 {
-    os << o.info();
+    os << o.str();
     return os;
 }
 
