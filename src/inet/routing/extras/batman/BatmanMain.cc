@@ -16,13 +16,13 @@ Define_Module(Batman);
 
 std::ostream& operator<<(std::ostream& os, const OrigNode& e)
 {
-    os << e.info();
+    os << e.str();
     return os;
 };
 
 std::ostream& operator<<(std::ostream& os, const NeighNode& e)
 {
-    os << e.info();
+    os << e.str();
     return os;
 };
 

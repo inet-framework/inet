@@ -42,8 +42,8 @@ enum VoipStreamPacketType
 //
 class VoipStreamPacket extends FieldsChunk
 {
+    short headerLength = 0;     // from voipHeaderSize parameter
     VoipStreamPacketType type;
-
     int codec;  // FFmpeg identifier of the codec
     short sampleBits;
     int sampleRate;

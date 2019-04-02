@@ -57,7 +57,7 @@ const char* DYMO_DataQueue::getFullName() const
     return "DYMO_DataQueue";
 }
 
-std::string DYMO_DataQueue::info() const
+std::string DYMO_DataQueue::str() const
 {
     std::ostringstream ss;
 
@@ -73,11 +73,6 @@ std::string DYMO_DataQueue::info() const
     ss << "}";
 
     return ss.str();
-}
-
-std::string DYMO_DataQueue::str() const
-{
-    return info();
 }
 
 
@@ -160,7 +155,7 @@ void DYMO_DataQueue::dropPacketsTo(L3Address destAddr, int prefix, std::list<Pac
 
 std::ostream& operator<<(std::ostream& os, const DYMO_DataQueue& o)
 {
-    os << o.info();
+    os << o.str();
     return os;
 }
 

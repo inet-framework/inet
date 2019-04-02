@@ -53,9 +53,6 @@ class DYMO_OutstandingRREQList : public cObject
     virtual const char* getFullName() const override;
 
     /** @brief inherited from cObject */
-    virtual std::string info() const override;
-
-    /** @brief inherited from cObject */
     virtual std::string str() const override;
 
     /**

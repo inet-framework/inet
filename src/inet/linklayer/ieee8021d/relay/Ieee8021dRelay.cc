@@ -71,7 +71,6 @@ void Ieee8021dRelay::registerAddress(MacAddress mac)
 void Ieee8021dRelay::registerAddresses(MacAddress startMac, MacAddress endMac)
 {
     registeredMacAddresses.insert(MacAddressPair(startMac, endMac));
-
 }
 
 void Ieee8021dRelay::handleLowerPacket(Packet *packet)
@@ -101,13 +100,12 @@ void Ieee8021dRelay::handleUpperPacket(Packet *packet)
         // Not known -> broadcast
         if (outInterfaceId == -1) {
             EV_DETAIL << "Destination address = " << frame->getDest()
-                             << " unknown, broadcasting frame " << frame
-                             << endl;
+                      << " unknown, broadcasting frame " << frame
+                      << endl;
             broadcast(packet, -1);
         } else {
             InterfaceEntry *ie = ifTable->getInterfaceById(interfaceId);
             dispatch(packet, ie);
-
         }
     }
 }
@@ -166,6 +164,9 @@ void Ieee8021dRelay::handleAndDispatchFrame(Packet *packet)
     if (isStpAware && arrivalPortData == nullptr)
         throw cRuntimeError("Ieee8021dInterfaceData not found for interface %s", arrivalInterface->getFullName());
     learn(frame->getSrc(), arrivalInterfaceId);
+
+    //TODO revise next "if"s: 2nd drops all packets for me if not forwarding port; 3rd sends up when dest==STP_MULTICAST_ADDRESS; etc.
+    // reordering, merge 1st and 3rd, ...
 
     // BPDU Handling
     if (isStpAware

@@ -322,7 +322,7 @@ void OrigNode::clear()
     neigh_list.clear();
 }
 
-std::string OrigNode::info() const
+std::string OrigNode::str() const
 {
     std::stringstream out;
     out << "orig:"  << orig << "  ";
@@ -352,18 +352,18 @@ std::string OrigNode::info() const
     if (!neigh_node)
         out << "*";
     else
-        out << neigh_node->info();
+        out << neigh_node->str();
 
     for (auto & elem : neigh_list)
     {
         out << "list neig :" << elem->addr << " ";
     }
 
-    out << "\n router info:"; if (router==nullptr) out << "*  "; else out << router->info() << "  ";
+    out << "\n router info:"; if (router==nullptr) out << "*  "; else out << router->str() << "  ";
     return out.str();
 }
 
-std::string NeighNode::info() const
+std::string NeighNode::str() const
 {
     std::stringstream out;
     out << "addr:"  << addr << "  ";
