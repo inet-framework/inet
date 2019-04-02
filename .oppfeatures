@@ -1135,7 +1135,7 @@
         />
 		<feature
         id="iCanCloud"
-        name="ClodNetSim"
+        name="iCanCloud"
         description = "iCanCloud model"
         initiallyEnabled = "true"
         requires = ""
