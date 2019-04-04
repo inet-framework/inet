@@ -57,16 +57,17 @@ using 'make makefiles'.
 INETMANET differences
 =================================
 Inetmanet is compatible with inet framework but it has several differences.
-       Additional routing protocols.
-              Batman
-              Olsr (Universidad de Murcia)
-              Dymo (Friedrich-Alexander-Universität version)
-              Aodv (Uppsala university)
-              Dsr (Uppsala university)
+       Additional routing protocols:
+              Batman.
+              Olsr (Universidad de Murcia).
+              Dymo (Friedrich-Alexander-Universität version).
+              Aodv (Uppsala university).
+              Dsr (Uppsala university).
               (Except Dsr, the rest of protocols are implemented like Udp applications).
-       Cloud Computing modules
-              iCanClod
-              CloudNetSim++
+       Cloud Computing modules:
+              iCanClod.
+              CloudNetSim++.
+
 
 
 [travis-master]: https://travis-ci.org/inet-framework/inet.svg?branch=master
