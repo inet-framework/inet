@@ -45,7 +45,7 @@ void EthernetMacDissector::dissect(Packet *packet, const Protocol *protocol, ICa
     callback.visitChunk(header, &Protocol::ethernetMac);
     const auto& fcs = packet->popAtBack<EthernetFcs>(B(4));
     if (isEth2Header(*header)) {
-        auto payloadProtocol = ProtocolGroup::ethertype.getProtocol(header->getTypeOrLength());
+        auto payloadProtocol = ProtocolGroup::ethertype.findProtocol(header->getTypeOrLength());
         callback.dissectPacket(packet, payloadProtocol);
     }
     else {
