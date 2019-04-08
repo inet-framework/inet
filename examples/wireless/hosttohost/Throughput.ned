@@ -19,7 +19,7 @@
 package inet.examples.wireless.hosttohost;
 
 import inet.applications.ethernet.EtherAppClient;
-import inet.common.queue.Sink;
+import inet.common.queueing.PacketConsumer;
 import inet.linklayer.ieee80211.Ieee80211Interface;
 import inet.mobility.single.CircleMobility;
 import inet.mobility.static.StationaryMobility;
@@ -72,7 +72,7 @@ module ThroughputServer
         input radioIn @directIn;
 
     submodules:
-        sink: Sink {
+        sink: PacketConsumer {
             parameters:
                 @display("p=300,100");
         }
@@ -92,7 +92,7 @@ module ThroughputServer
         }
     connections allowunconnected:
         wlan.radioIn <-- radioIn;
-        sink.in++ <-- wlan.upperLayerOut;
+        sink.in <-- wlan.upperLayerOut;
 }
 
 network Throughput

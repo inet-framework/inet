@@ -19,12 +19,11 @@
 
 package inet.examples.diffserv.onedomain;
 
-import inet.common.queue.Join;
+import inet.common.queueing.PacketMultiplexer;
 import inet.linklayer.contract.ITrafficConditioner;
 import inet.networklayer.diffserv.DscpMarker;
 import inet.networklayer.diffserv.MultiFieldClassifier;
 import inet.networklayer.diffserv.TokenBucketMeter;
-
 
 //
 // Traffic conditioner used in Experiment 3.1.
@@ -49,12 +48,12 @@ module TC2 like ITrafficConditioner
         marker: DscpMarker {
             @display("p=400,100");
         }
-        join: Join {
+        join: PacketMultiplexer {
             @display("p=550,200");
         }
     connections:
         in --> classifier.in;
-        classifier.outs++ --> meter.in++;
+        classifier.out++ --> meter.in;
         classifier.defaultOut --> join.in++;
         meter.greenOut --> marker.in++;
         meter.redOut --> marker.in++;

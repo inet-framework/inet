@@ -42,9 +42,9 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 **.srv.hasUdp = false
 
 # Ethernet NIC configuration
-**.eth[*].queue.typename = "EtherQosQueue"
-**.eth[*].queue.dataQueue.typename = "DropTailQueue" # in routers
-**.eth[*].queue.dataQueue.frameCapacity = 10  # in routers
+**.eth[*].mac.queue.typename = "EtherQosQueue"
+**.eth[*].mac.queue.dataQueue.typename = "DropTailQueue" # in routers
+**.eth[*].mac.queue.dataQueue.frameCapacity = 10  # in routers
 **.eth[*].mac.duplexEnabled = true
 
 %#--------------------------------------------------------------------------------------------------------------
