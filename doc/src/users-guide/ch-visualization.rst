@@ -383,7 +383,7 @@ using its antenna lobe visualization feature. For example, the radiation pattern
 an isotropic and a directional antenna looks like the following:
 
 .. figure:: figures/antennalobe.png
-   :width: 90%
+   :width: 80%
    :align: center
 
 The visualized lobes indicate the antenna gain.
