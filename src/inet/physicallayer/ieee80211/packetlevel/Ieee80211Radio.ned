@@ -48,7 +48,7 @@ module Ieee80211Radio extends FlatRadioBase
         transmitter.bitrate = default(11Mbps);
         transmitter.headerLength = default(192b);
         transmitter.power = default(20mW);
-        receiver.bandwidth = default(22 MHz); // the highest value
+        receiver.bandwidth = default(20 MHz); // the highest value
         receiver.sensitivity = default(-85dBm);
         receiver.energyDetection = default(-85dBm);
         receiver.snirThreshold = default(4dB);
