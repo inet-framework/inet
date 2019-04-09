@@ -220,7 +220,10 @@ const Ptr<const EthernetMacHeader> EtherEncap::decapsulateMacHeader(Packet *pack
         packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ieee8022);
     }
     else if (isEth2Header(*ethHeader)) {
-        packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(ProtocolGroup::ethertype.getProtocol(ethHeader->getTypeOrLength()));
+        if (auto protocol = ProtocolGroup::ethertype.findProtocol(ethHeader->getTypeOrLength()))
+            packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(protocol);
+        else
+            packet->removeTagIfPresent<PacketProtocolTag>();
     }
     return ethHeader;
 }
@@ -236,10 +239,15 @@ void EtherEncap::processPacketFromMac(Packet *packet)
         return;
     }
     else if (isEth2Header(*ethHeader)) {
-        payloadProtocol = ProtocolGroup::ethertype.getProtocol(ethHeader->getTypeOrLength());
-        packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(payloadProtocol);
-        packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(payloadProtocol);
-
+        payloadProtocol = ProtocolGroup::ethertype.findProtocol(ethHeader->getTypeOrLength());
+        if (payloadProtocol != nullptr) {
+            packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(payloadProtocol);
+            packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(payloadProtocol);
+        }
+        else {
+            packet->removeTagIfPresent<PacketProtocolTag>();
+            packet->removeTagIfPresent<DispatchProtocolReq>();
+        }
         bool stealPacket = false;
         for (auto it : socketIdToSocketMap) {
             auto socket = it.second;
@@ -254,7 +262,7 @@ void EtherEncap::processPacketFromMac(Packet *packet)
         // TODO: should the socket configure if it steals packets or not?
         if (stealPacket)
             delete packet;
-        else if (upperProtocols.find(payloadProtocol) != upperProtocols.end()) {
+        else if (payloadProtocol != nullptr && upperProtocols.find(payloadProtocol) != upperProtocols.end()) {
             EV_DETAIL << "Decapsulating frame `" << packet->getName() << "', passing up contained packet `"
                       << packet->getName() << "' to higher layer\n";
 
