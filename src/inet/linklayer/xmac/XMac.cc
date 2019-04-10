@@ -120,7 +120,7 @@ void XMac::initialize(int stage)
         switching_done = new cMessage("switching_done");
         switching_done->setKind(XMAC_SWITCHING_FINISHED);
 
-        scheduleAt(0.0, start_xmac);
+        scheduleAt(simTime(), start_xmac);
     }
 }
 
