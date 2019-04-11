@@ -368,6 +368,84 @@ void SymbolErrorRateFromErrorRateIndFilter::receiveSignal(cResultFilter *prev, s
 #endif  // WITH_RADIO
 }
 
+Register_ResultFilter("localSignal", LocalSignalFilter);
+
+void LocalSignalFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, bool b, cObject *details)
+{
+    fire(this, t, b, details);
+}
+
+void LocalSignalFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, long l, cObject *details)
+{
+    fire(this, t, l, details);
+}
+
+void LocalSignalFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, unsigned long l, cObject *details)
+{
+    fire(this, t, l, details);
+}
+
+void LocalSignalFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, double d, cObject *details)
+{
+    fire(this, t, d, details);
+}
+
+void LocalSignalFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, const SimTime& v, cObject *details)
+{
+    fire(this, t, v, details);
+}
+
+void LocalSignalFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, const char *s, cObject *details)
+{
+    fire(this, t, s, details);
+}
+
+void LocalSignalFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
+{
+    fire(this, t, object, details);
+}
+
+void LocalSignalFilter::receiveSignal(cComponent *source, simsignal_t signal, bool b, cObject *details)
+{
+    if (source == component)
+        cResultListener::receiveSignal(source, signal, b, details);
+}
+
+void LocalSignalFilter::receiveSignal(cComponent *source, simsignal_t signal, long l, cObject *details)
+{
+    if (source == component)
+        cResultListener::receiveSignal(source, signal, l, details);
+}
+
+void LocalSignalFilter::receiveSignal(cComponent *source, simsignal_t signal, unsigned long l, cObject *details)
+{
+    if (source == component)
+        cResultListener::receiveSignal(source, signal, l, details);
+}
+
+void LocalSignalFilter::receiveSignal(cComponent *source, simsignal_t signal, double d, cObject *details)
+{
+    if (source == component)
+        cResultListener::receiveSignal(source, signal, d, details);
+}
+
+void LocalSignalFilter::receiveSignal(cComponent *source, simsignal_t signal, const SimTime& v, cObject *details)
+{
+    if (source == component)
+        cResultListener::receiveSignal(source, signal, v, details);
+}
+
+void LocalSignalFilter::receiveSignal(cComponent *source, simsignal_t signal, const char *s, cObject *details)
+{
+    if (source == component)
+        cResultListener::receiveSignal(source, signal, s, details);
+}
+
+void LocalSignalFilter::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
+{
+    if (source == component)
+        cResultListener::receiveSignal(source, signal, object, details);
+}
 
 } // namespace filters
 
