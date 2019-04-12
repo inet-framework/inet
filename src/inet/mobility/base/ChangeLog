@@ -1,4 +1,10 @@
+
+
 ====== inet-3.x ======
+
+2018-09-12  Zoltan Bojthe
+
+	NED is now using full qualified type names
 
 2018-03-21  ------ inet-3.6.4 released ------
 

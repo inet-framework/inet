@@ -1,5 +1,9 @@
 ====== inet-3.x ======
 
+2018-06-11  Zoltan Bojthe
+
+	all: added missing measurement unit for 0 values
+
 2018-03-21  ------ inet-3.6.4 released ------
 
 2018-01-12  Zoltan Bojthe

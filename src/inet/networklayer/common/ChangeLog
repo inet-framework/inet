@@ -1,5 +1,9 @@
 ====== inet-3.x ======
 
+2019-02-08  Zoltan Bojthe
+
+	L3Address: added missing doParsimPacking/doParsimUnpacking
+
 2018-03-21  ------ inet-3.6.4 released ------
 
 2017-12-22  ------ inet-3.6.3 released ------

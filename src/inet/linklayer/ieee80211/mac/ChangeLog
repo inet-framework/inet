@@ -1,5 +1,12 @@
 ====== inet-3.x ======
 
+2018-05-03  Levente Meszaros
+
+	802.11: Fixed ACK frame duration bug reported by Raphael Elsner.
+
+	The duration was incorrectly rounded up in seconds instead of
+	microseconds for data fragment ACKs.
+
 2018-03-21  ------ inet-3.6.4 released ------
 
 2018-01-12  Zoltan Bojthe
