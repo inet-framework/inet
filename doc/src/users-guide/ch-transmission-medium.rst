@@ -260,7 +260,7 @@ propagated, and received.
 In INET, an analog model is an OMNeT++ simple module. Its main purpose
 is to compute the received signal from the transmitted signal. The
 analog model combines the effect of the antenna, path loss, and obstacle
-loss models. Transceivers must be configured transmit and receive
+loss models. Transceivers must be configured to transmit and receive
 signals according to the representation used by the analog model.
 
 The most commonly used analog model, which uses a scalar signal power
