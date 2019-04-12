@@ -72,7 +72,7 @@ class INET_API EtherEncap : public Ieee8022Llc
 
   public:
     static void addPaddingAndFcs(Packet *packet, FcsMode fcsMode, B requiredMinByteLength = MIN_ETHERNET_FRAME_BYTES);
-    static void addFcs(Packet *packet, FcsMode fcsMode);
+    static void addFcs(Packet *packet, FcsMode fcsMode, bool calculate = true);
 
     static const Ptr<const EthernetMacHeader> decapsulateMacHeader(Packet *packet);
 };

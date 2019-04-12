@@ -203,7 +203,6 @@ void EtherMac::handleMessageWhenUp(cMessage *msg)
 
 void EtherMac::handleUpperPacket(Packet *packet)
 {
-    ASSERT(packet->getDataLength() >= MIN_ETHERNET_FRAME_BYTES);
 
     EV_INFO << "Received " << packet << " from upper layer." << endl;
 
@@ -242,8 +241,6 @@ void EtherMac::handleUpperPacket(Packet *packet)
         newFrame->setSrc(address);
         packet->insertAtFront(newFrame);
         frame = newFrame;
-        auto oldFcs = packet->removeAtBack<EthernetFcs>();
-        EtherEncap::addFcs(packet, oldFcs->getFcsMode());
     }
 
     // store frame and possibly begin transmitting
@@ -492,6 +489,14 @@ void EtherMac::handleEndIFGPeriod()
     beginSendFrames();
 }
 
+B EtherMac::calculateMinFrameLength()
+{
+    bool inBurst = frameBursting && framesSentInBurst;
+    B minFrameLength = duplexMode ? curEtherDescr->frameMinBytes : (inBurst ? curEtherDescr->frameInBurstMinBytes : curEtherDescr->halfDuplexFrameMinBytes);
+
+    return minFrameLength;
+}
+
 void EtherMac::startFrameTransmission()
 {
     ASSERT(curTxFrame);
@@ -504,13 +509,9 @@ void EtherMac::startFrameTransmission()
     ASSERT(hdr);
     ASSERT(!hdr->getSrc().isUnspecified());
 
-    bool inBurst = frameBursting && framesSentInBurst;
-    B minFrameLength = duplexMode ? curEtherDescr->frameMinBytes : (inBurst ? curEtherDescr->frameInBurstMinBytes : curEtherDescr->halfDuplexFrameMinBytes);
-
-    if (frame->getDataLength() < minFrameLength) {
-        auto oldFcs = frame->removeAtBack<EthernetFcs>(B(4));
-        EtherEncap::addPaddingAndFcs(frame, oldFcs->getFcsMode(), minFrameLength);
-    }
+    B minFrameLength = calculateMinFrameLength();
+    auto oldFcs = frame->removeAtBack<EthernetFcs>(B(4));
+    EtherEncap::addPaddingAndFcs(frame, oldFcs->getFcsMode(), minFrameLength);  // calculate valid FCS
 
     // add preamble and SFD (Starting Frame Delimiter), then send out
     encapsulate(frame);

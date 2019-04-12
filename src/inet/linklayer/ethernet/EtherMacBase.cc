@@ -391,6 +391,7 @@ void EtherMacBase::decapsulate(Packet *packet)
     auto phyHeader = packet->popAtFront<EthernetPhyHeader>();
     if (phyHeader->getSrcMacFullDuplex() != duplexMode)
         throw cRuntimeError("Ethernet misconfiguration: MACs on the same link must be all in full duplex mode, or all in half-duplex mode");
+    ASSERT(packet->getDataLength() >= MIN_ETHERNET_FRAME_BYTES);
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);
 }
 
@@ -400,13 +401,13 @@ bool EtherMacBase::verifyCrcAndLength(Packet *packet)
     EV_STATICCONTEXT;
 
     auto ethHeader = packet->peekAtFront<EthernetMacHeader>();          //FIXME can I use any flags?
-    const auto& ethTrailer = packet->peekAtBack<EthernetFcs>(B(ETHER_FCS_BYTES));          //FIXME can I use any flags?
+    const auto& ethTrailer = packet->peekAtBack<EthernetFcs>(ETHER_FCS_BYTES);          //FIXME can I use any flags?
 
     switch(ethTrailer->getFcsMode()) {
         case FCS_DECLARED_CORRECT:
             break;
         case FCS_DECLARED_INCORRECT:
-            EV_ERROR << "incorrect fcs in ethernet frame\n";
+            EV_ERROR << "incorrect FCS in ethernet frame\n";
             return false;
         case FCS_COMPUTED: {
             bool isFcsBad = false;
