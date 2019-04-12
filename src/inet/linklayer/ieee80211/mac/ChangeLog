@@ -1,5 +1,7 @@
 ====== inet-3.x ======
 
+2019-04-12  ------ inet-3.6.5 released ------
+
 2018-05-03  Levente Meszaros
 
 	802.11: Fixed ACK frame duration bug reported by Raphael Elsner.

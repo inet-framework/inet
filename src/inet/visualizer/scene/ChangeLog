@@ -1,5 +1,7 @@
 ====== inet-3.x ======
 
+2019-04-12  ------ inet-3.6.5 released ------
+
 2019-04-12  Rudolf Hornig
 
 	visualizer: removed dependence on ObjectLocatorNode as it is removed in
