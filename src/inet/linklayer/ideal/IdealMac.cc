@@ -68,7 +68,7 @@ void IdealMac::initialize(int stage)
         outStandingRequests = 0;
 
         bitrate = par("bitrate").doubleValue();
-        headerLength = par("headerLength").longValue();
+        headerLength = par("headerLength").intValue();
         promiscuous = par("promiscuous");
         fullDuplex = par("fullDuplex");
         useAck = par("useAck");
@@ -125,7 +125,7 @@ InterfaceEntry *IdealMac::createInterfaceEntry()
 
     // MTU: typical values are 576 (Internet de facto), 1500 (Ethernet-friendly),
     // 4000 (on some point-to-point links), 4470 (Cisco routers default, FDDI compatible)
-    e->setMtu(par("mtu").longValue());
+    e->setMtu(par("mtu").intValue());
 
     // capabilities
     e->setMulticast(true);

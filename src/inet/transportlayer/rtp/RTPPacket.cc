@@ -23,7 +23,7 @@ namespace rtp {
 
 Register_Class(RTPPacket);
 
-std::string RTPPacket::info() const
+std::string RTPPacket::str() const
 {
     std::stringstream out;
     out << "RTPPacket: payloadType=" << payloadType

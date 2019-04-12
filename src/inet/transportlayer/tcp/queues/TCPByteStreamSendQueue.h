@@ -53,7 +53,7 @@ class INET_API TCPByteStreamSendQueue : public TCPSendQueue
 
     virtual void init(uint32 startSeq) override;
 
-    virtual std::string info() const override;
+    virtual std::string str() const override;
 
     virtual void enqueueAppData(cPacket *msg) override;
 

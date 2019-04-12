@@ -147,7 +147,7 @@ int OSPFConfigReader::getIntAttrOrPar(const cXMLElement& ifConfig, const char *n
     const char *attrStr = ifConfig.getAttribute(name);
     if (attrStr && *attrStr)
         return atoi(attrStr);
-    return par(name).longValue();
+    return par(name).intValue();
 }
 
 bool OSPFConfigReader::getBoolAttrOrPar(const cXMLElement& ifConfig, const char *name) const

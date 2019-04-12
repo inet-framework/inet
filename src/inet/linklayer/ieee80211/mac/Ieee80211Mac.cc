@@ -105,7 +105,7 @@ InterfaceEntry *Ieee80211Mac::createInterfaceEntry()
     // address
     e->setMACAddress(address);
     e->setInterfaceToken(address.formInterfaceIdentifier());
-    e->setMtu(par("mtu").longValue());
+    e->setMtu(par("mtu").intValue());
     // capabilities
     e->setBroadcast(true);
     e->setMulticast(true);

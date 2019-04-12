@@ -56,7 +56,7 @@ class INET_API TCPVirtualDataSendQueue : public TCPSendQueue
     /**
      * Returns a string with the region stored.
      */
-    virtual std::string info() const override;
+    virtual std::string str() const override;
 
     /**
      *

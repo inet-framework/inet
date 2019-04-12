@@ -29,7 +29,7 @@ Register_Abstract_Class(IPv6MulticastGroupInfo);
 
 //FIXME invoked changed() from state-changing methods, to trigger notification...
 
-std::string IPv6InterfaceData::HostMulticastData::info()
+std::string IPv6InterfaceData::HostMulticastData::str()
 {
     std::stringstream out;
     if (!joinedMulticastGroups.empty() &&
@@ -57,7 +57,7 @@ std::string IPv6InterfaceData::HostMulticastData::detailedInfo()
     return out.str();
 }
 
-std::string IPv6InterfaceData::RouterMulticastData::info()
+std::string IPv6InterfaceData::RouterMulticastData::str()
 {
     std::stringstream out;
     if (reportedMulticastGroups.size() > 0) {
@@ -151,9 +151,9 @@ IPv6InterfaceData::~IPv6InterfaceData()
     delete routerMcastData;
 }
 
-std::string IPv6InterfaceData::info() const
+std::string IPv6InterfaceData::str() const
 {
-    // FIXME FIXME FIXME FIXME info() should never print a newline
+    // FIXME FIXME FIXME FIXME str() should never print a newline
     std::ostringstream os;
     os << "IPv6:{" << endl;
     for (int i = 0; i < getNumAddresses(); i++) {
@@ -173,7 +173,7 @@ std::string IPv6InterfaceData::info() const
     }
 
     if (hostMcastData)
-        os << hostMcastData->info();
+        os << hostMcastData->str();
 
     for (int i = 0; i < getNumAdvPrefixes(); i++) {
         const AdvPrefix& a = getAdvPrefix(i);
@@ -196,7 +196,7 @@ std::string IPv6InterfaceData::info() const
     os << " ";
 
     if (routerMcastData)
-        os << routerMcastData->info();
+        os << routerMcastData->str();
 
     // uncomment the following as needed!
     os << "\tNode:";
@@ -234,7 +234,7 @@ std::string IPv6InterfaceData::info() const
 
 std::string IPv6InterfaceData::detailedInfo() const
 {
-    return info();    // TBD this could be improved: multi-line text, etc
+    return str();    // TBD this could be improved: multi-line text, etc
 }
 
 #ifndef WITH_xMIPv6

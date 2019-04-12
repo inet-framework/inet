@@ -40,7 +40,7 @@ MPLSPacket& MPLSPacket::operator=(const MPLSPacket& p)
     return *this;
 }
 
-std::string MPLSPacket::info() const
+std::string MPLSPacket::str() const
 {
     std::stringstream out;
     for (int i = (int)labels.size() - 1; i >= 0; i--)

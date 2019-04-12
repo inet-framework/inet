@@ -47,7 +47,7 @@ class INET_API SenderReport : public SenderReport_Base
     /**
      * Writes a short info about this SenderReport into the given string.
      */
-    virtual std::string info() const override;
+    virtual std::string str() const override;
 
     /**
      * Writes a longer info about this SenderReport into the given stream.
@@ -72,7 +72,7 @@ class INET_API ReceptionReport : public ReceptionReport_Base
     /**
      * Writes a short info about this ReceptionReport into the given string.
      */
-    virtual std::string info() const override;
+    virtual std::string str() const override;
 
     /**
      * Writes a longer info about this ReceptionReport into the given stream.

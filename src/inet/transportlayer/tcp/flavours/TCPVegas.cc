@@ -52,10 +52,10 @@ TCPVegasStateVariables::~TCPVegasStateVariables()
 {
 }
 
-std::string TCPVegasStateVariables::info() const
+std::string TCPVegasStateVariables::str() const
 {
     std::stringstream out;
-    out << TCPBaseAlgStateVariables::info();
+    out << TCPBaseAlgStateVariables::str();
     out << " ssthresh=" << ssthresh;
     return out.str();
 }

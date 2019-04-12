@@ -34,7 +34,7 @@ Define_Module(IPv6RoutingTable);
 
 std::ostream& operator<<(std::ostream& os, const IPv6Route& e)
 {
-    os << e.info();
+    os << e.str();
     return os;
 };
 
@@ -897,7 +897,7 @@ bool IPv6RoutingTable::handleOperationStage(LifecycleOperation *operation, int s
 void IPv6RoutingTable::printRoutingTable() const
 {
     for (const auto & elem : routeList)
-        EV_INFO << (elem)->getInterface()->getFullPath() << " -> " << (elem)->getDestinationAsGeneric().str() << " as " << (elem)->info() << endl;
+        EV_INFO << (elem)->getInterface()->getFullPath() << " -> " << (elem)->getDestinationAsGeneric().str() << " as " << (elem)->str() << endl;
 }
 
 } // namespace inet

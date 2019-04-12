@@ -51,7 +51,7 @@ struct INET_API IPv4MulticastSourceList
     bool contains(IPv4Address source);
     bool add(IPv4Address source);
     bool remove(IPv4Address source);
-    std::string info() const;
+    std::string str() const;
     std::string detailedInfo() const;
 };
 
@@ -118,7 +118,7 @@ class INET_API IPv4InterfaceData : public InterfaceProtocolData
         HostMulticastGroupVector joinedMulticastGroups;    // multicast groups this interface joined
 
         virtual ~HostMulticastData();
-        std::string info();
+        std::string str();
         std::string detailedInfo();
     };
 
@@ -140,7 +140,7 @@ class INET_API IPv4InterfaceData : public InterfaceProtocolData
 
         RouterMulticastData() : multicastTtlThreshold(0) {}
         virtual ~RouterMulticastData();
-        std::string info();
+        std::string str();
         std::string detailedInfo();
     };
 
@@ -169,8 +169,8 @@ class INET_API IPv4InterfaceData : public InterfaceProtocolData
   public:
     IPv4InterfaceData();
     virtual ~IPv4InterfaceData();
-    virtual std::string info() const override;
-    virtual std::string detailedInfo() const override;
+    virtual std::string str() const override;
+    virtual std::string detailedInfo() const OMNETPP5_CODE(override);
 
     /** @name Getters */
     //@{

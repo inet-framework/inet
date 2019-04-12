@@ -78,7 +78,7 @@ class INET_API TCPByteStreamRcvQueue : public TCPVirtualDataRcvQueue
     /**
      * Returns a string with region stored.
      */
-    virtual std::string info() const override;
+    virtual std::string str() const override;
 
     cPacket *extractBytesUpTo(uint32 seq) override;
 

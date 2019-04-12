@@ -38,7 +38,7 @@ void TunInterface::initialize(int stage)
 InterfaceEntry *TunInterface::createInterfaceEntry()
 {
     InterfaceEntry *e = new InterfaceEntry(this);
-    e->setMtu(par("mtu").longValue());
+    e->setMtu(par("mtu").intValue());
     return e;
 }
 

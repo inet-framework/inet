@@ -319,7 +319,7 @@ double **PostureTransition::getMatrix(simtime_t iTime, Coord iLocation)
         }
     }
 
-    EV_DEBUG << "The corresponding Markov matrix for time" << iTime.dbl() << " and location " << iLocation.info() << " is: " << matrixList.at(matrixID)->name << endl;
+    EV_DEBUG << "The corresponding Markov matrix for time" << iTime.dbl() << " and location " << iLocation.str() << " is: " << matrixList.at(matrixID)->name << endl;
 
     return matrixList.at(matrixID)->matrix;
 }

@@ -173,12 +173,12 @@ class INET_API NetPerfMeter : public cSimpleModule
       inline void reset() {
          ReceivedBytes    = 0;
          ReceivedMessages = 0;
-         ReceivedDelayHistogram.clearResult();
+         ReceivedDelayHistogram.clear();
       }
 
       unsigned long long ReceivedBytes = 0;
       unsigned long long ReceivedMessages = 0;
-      cDoubleHistogram   ReceivedDelayHistogram;
+      cHistogram   ReceivedDelayHistogram;
    };
 
    std::map<unsigned int, SenderStatistics*>   SenderStatisticsMap;

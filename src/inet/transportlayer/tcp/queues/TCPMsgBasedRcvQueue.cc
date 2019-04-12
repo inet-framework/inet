@@ -47,7 +47,7 @@ void TCPMsgBasedRcvQueue::init(uint32 startSeq)
     TCPVirtualDataRcvQueue::init(startSeq);
 }
 
-std::string TCPMsgBasedRcvQueue::info() const
+std::string TCPMsgBasedRcvQueue::str() const
 {
     std::stringstream os;
 

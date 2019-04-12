@@ -61,7 +61,7 @@ Topology::~Topology()
     clear();
 }
 
-std::string Topology::info() const
+std::string Topology::str() const
 {
     std::stringstream out;
     out << "n=" << nodes.size();

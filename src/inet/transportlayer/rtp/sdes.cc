@@ -76,7 +76,7 @@ SDESItem *SDESItem::dup() const
     return new SDESItem(*this);
 }
 
-std::string SDESItem::info() const
+std::string SDESItem::str() const
 {
     std::stringstream out;
     out << "SDESItem=" << _content;
@@ -149,7 +149,7 @@ SDESChunk *SDESChunk::dup() const
     return new SDESChunk(*this);
 }
 
-std::string SDESChunk::info() const
+std::string SDESChunk::str() const
 {
     std::stringstream out;
     out << "SDESChunk.ssrc=" << _ssrc << " items=" << size();

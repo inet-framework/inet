@@ -706,7 +706,7 @@ void IPv4NetworkConfigurator::dumpAddresses(Topology& topology)
         for (auto & interfaceInfo : linkInfo->interfaceInfos) {
             InterfaceEntry *interfaceEntry = interfaceInfo->interfaceEntry;
             cModule *host = interfaceInfo->node->module;
-            EV_INFO << "    " << host->getFullName() << " / " << interfaceEntry->info() << endl;
+            EV_INFO << "    " << host->getFullName() << " / " << interfaceEntry->str() << endl;
         }
     }
 }
@@ -1378,7 +1378,7 @@ void IPv4NetworkConfigurator::addStaticRoutes(Topology& topology, cXMLElement *a
                                 delete route;
                             else {
                                 sourceNode->staticRoutes.push_back(route);
-                                EV_DEBUG << "Adding route " << sourceInterfaceEntry->getFullPath() << " -> " << destinationInterfaceEntry->getFullPath() << " as " << route->info() << endl;
+                                EV_DEBUG << "Adding route " << sourceInterfaceEntry->getFullPath() << " -> " << destinationInterfaceEntry->getFullPath() << " as " << route->str() << endl;
                             }
                         }
                     }

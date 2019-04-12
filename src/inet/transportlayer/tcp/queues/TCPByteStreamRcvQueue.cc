@@ -88,7 +88,7 @@ TCPByteStreamRcvQueue::~TCPByteStreamRcvQueue()
 {
 }
 
-std::string TCPByteStreamRcvQueue::info() const
+std::string TCPByteStreamRcvQueue::str() const
 {
     std::stringstream os;
 

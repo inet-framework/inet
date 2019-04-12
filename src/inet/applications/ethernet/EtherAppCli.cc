@@ -193,10 +193,10 @@ void EtherAppCli::sendPacket()
 
     datapacket->setRequestId(seqNum);
 
-    long len = reqLength->longValue();
+    long len = reqLength->intValue();
     datapacket->setByteLength(len);
 
-    long respLen = respLength->longValue();
+    long respLen = respLength->intValue();
     datapacket->setResponseBytes(respLen);
 
     Ieee802Ctrl *etherctrl = new Ieee802Ctrl();

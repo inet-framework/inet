@@ -37,10 +37,10 @@ void TCPTahoeRenoFamilyStateVariables::setSendQueueLimit(uint32 newLimit){
     ssthresh = sendQueueLimit;
 }
 
-std::string TCPTahoeRenoFamilyStateVariables::info() const
+std::string TCPTahoeRenoFamilyStateVariables::str() const
 {
     std::stringstream out;
-    out << TCPBaseAlgStateVariables::info();
+    out << TCPBaseAlgStateVariables::str();
     out << " ssthresh=" << ssthresh;
     return out.str();
 }

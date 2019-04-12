@@ -54,7 +54,7 @@ std::ostream& operator<<(std::ostream& os, const PIMNeighborTable::PIMNeighborVe
     return os;
 };
 
-std::string PIMNeighbor::info() const
+std::string PIMNeighbor::str() const
 {
     std::stringstream out;
     out << "PIMNeighbor addr=" << address << ", iface=" << ie->getName() << ", v=" << version << ", priority=" << this->drPriority << "}";
@@ -120,7 +120,7 @@ bool PIMNeighborTable::addNeighbor(PIMNeighbor *entry, double holdTime)
             return false;
 
 
-    EV_DETAIL << "Added new neighbor to table: " << entry->info() << "\n";
+    EV_DETAIL << "Added new neighbor to table: " << entry->str() << "\n";
     entry->nt = this;
     neighborsOnInterface.push_back(entry);
     take(entry->getLivenessTimer());

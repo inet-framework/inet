@@ -63,7 +63,7 @@ class INET_API TCPMsgBasedSendQueue : public TCPSendQueue
     /**
      * Returns a string with the region stored.
      */
-    virtual std::string info() const override;
+    virtual std::string str() const override;
 
     /**
      *

@@ -48,7 +48,7 @@ const char *RoutingTableVisualizerBase::DirectiveResolver::resolveDirective(char
             result = route->getInterface()->getName();
             break;
         case 'i':
-            result = route->info();
+            result = route->str();
             break;
         case 's':
             result = route->str();

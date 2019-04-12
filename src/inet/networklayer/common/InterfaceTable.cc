@@ -48,7 +48,7 @@ Define_Module(InterfaceTable);
 
 std::ostream& operator<<(std::ostream& os, const InterfaceEntry& e)
 {
-    os << e.info();
+    os << e.str();
     return os;
 };
 

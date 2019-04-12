@@ -21,7 +21,7 @@ namespace inet {
 namespace ieee80211 {
 
 Ieee80211Queue::Ieee80211Queue(int maxQueueSize, const char *name) :
-    cQueue(name, nullptr)
+    cQueue(name)
 {
     this->maxQueueSize = maxQueueSize;
 }

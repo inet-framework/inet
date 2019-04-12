@@ -70,7 +70,7 @@ class INET_API SCTPNatPeer : public cSimpleModule, public SCTPSocket::CallbackIn
     RcvdBytesPerAssoc rcvdBytesPerAssoc;
     typedef std::map<int32, cOutVector *> BytesPerAssoc;
     BytesPerAssoc bytesPerAssoc;
-    typedef std::map<int32, cDoubleHistogram *> HistEndToEndDelay;
+    typedef std::map<int32, cHistogram *> HistEndToEndDelay;
     HistEndToEndDelay histEndToEndDelay;
     typedef std::map<int32, cOutVector *> EndToEndDelay;
     EndToEndDelay endToEndDelay;

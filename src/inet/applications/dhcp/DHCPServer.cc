@@ -515,7 +515,7 @@ void DHCPServer::startApp()
     const char *gatewayStr = par("gateway").stringValue();
     gateway = *gatewayStr ? L3AddressResolver().resolve(gatewayStr, L3AddressResolver::ADDR_IPv4).toIPv4() : ipv4data->getIPAddress();
     subnetMask = ipv4data->getNetmask();
-    long numReservedAddresses = par("numReservedAddresses").longValue();
+    long numReservedAddresses = par("numReservedAddresses").intValue();
     uint32_t networkStartAddress = ipv4data->getIPAddress().getInt() & ipv4data->getNetmask().getInt();
     ipAddressStart = IPv4Address(networkStartAddress + numReservedAddresses);
     if (!IPv4Address::maskedAddrAreEqual(ipv4data->getIPAddress(), ipAddressStart, subnetMask))

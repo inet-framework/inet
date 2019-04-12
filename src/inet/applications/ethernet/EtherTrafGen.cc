@@ -170,7 +170,7 @@ MACAddress EtherTrafGen::resolveDestMACAddress()
 
 void EtherTrafGen::sendBurstPackets()
 {
-    int n = numPacketsPerBurst->longValue();
+    int n = numPacketsPerBurst->intValue();
     for (int i = 0; i < n; i++) {
         seqNum++;
 
@@ -179,7 +179,7 @@ void EtherTrafGen::sendBurstPackets()
 
         cPacket *datapacket = new cPacket(msgname, IEEE802CTRL_DATA);
 
-        long len = packetLength->longValue();
+        long len = packetLength->intValue();
         datapacket->setByteLength(len);
 
         Ieee802Ctrl *etherctrl = new Ieee802Ctrl();

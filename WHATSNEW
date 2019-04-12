@@ -1,17 +1,17 @@
 Recent changes in the INET Framework
 ====================================
 
-INET 3.6.5 (April 2019) - satble
+INET 3.6.5 (April 2019) - stable
 --------------------------------
 
 This release contains minor bug fixes and compatibility fixes for the
 OMNeT++ 5.4.1 release and for recent Linux distros. It requires
-OMNeT++ 5.1 or later.
+OMNeT++ 5.3 or later.
 
 General:
 
   - Added missing measurement units for 0 values in NED and INI files
-  - NED files are now using full qualified type names
+  - NED files are now using fully qualified type names
   - Added missing doParsimPacking/doParsimUnpacking in L3Address
 
 Ethernet:
@@ -39,7 +39,7 @@ IPv6:
 
 Visualizers:
 
-  - Removed dependence on ObjectLocatorNode as it was removed in later
+  - Removed dependence on ObjectLocatorNode as it was removed in recent
     versions of osgEarth
 
 

@@ -55,15 +55,10 @@ void InterfaceProtocolData::changed(simsignal_t signalID, int fieldId)
         ownerp->changed(signalID, fieldId);
 }
 
-std::string InterfaceEntryChangeDetails::info() const
-{
-    return ie->info();
-}
-
-std::string InterfaceEntryChangeDetails::detailedInfo() const
+std::string InterfaceEntryChangeDetails::str() const
 {
     std::stringstream out;
-    out << ie->detailedInfo() << " changed field: " << field << "\n";
+    out << ie->str() << " changed field: " << field << "\n";
     return out.str();
 }
 
@@ -83,7 +78,7 @@ InterfaceEntry::~InterfaceEntry()
     resetInterface();
 }
 
-std::string InterfaceEntry::info() const
+std::string InterfaceEntry::str() const
 {
     std::stringstream out;
     out << (getName()[0] ? getName() : "*");
@@ -111,11 +106,11 @@ std::string InterfaceEntry::info() const
 
 #ifdef WITH_IPv4
     if (ipv4data)
-        out << " " << ipv4data->info();
+        out << " " << ipv4data->str();
 #endif // ifdef WITH_IPv4
 #ifdef WITH_IPv6
     if (ipv6data)
-        out << " " << ipv6data->info();
+        out << " " << ipv6data->str();
 #endif // ifdef WITH_IPv6
     if (isisdata)
         out << " " << ((InterfaceProtocolData *)isisdata)->str(); // Khmm...
@@ -123,53 +118,6 @@ std::string InterfaceEntry::info() const
         out << " " << ((InterfaceProtocolData *)trilldata)->str(); // Khmm...
     if (ieee8021ddata)
         out << " " << ((InterfaceProtocolData *)ieee8021ddata)->str(); // Khmm...
-    return out.str();
-}
-
-std::string InterfaceEntry::detailedInfo() const
-{
-    std::stringstream out;
-    out << "name:" << (getName()[0] ? getName() : "*");
-    if (getNetworkLayerGateIndex() == -1)
-        out << "  on:-";
-    else
-        out << "  on:nwLayer.ifOut[" << getNetworkLayerGateIndex() << "]";
-    out << "MTU: " << getMTU() << " \t";
-    if (!isUp())
-        out << "DOWN ";
-    if (isBroadcast())
-        out << "BROADCAST ";
-    if (isMulticast())
-        out << "MULTICAST ";
-    if (isPointToPoint())
-        out << "POINTTOPOINT ";
-    if (isLoopback())
-        out << "LOOPBACK ";
-    out << "\n";
-    out << "  macAddr:";
-    if (getMacAddress().isUnspecified())
-        out << "n/a";
-    else
-        out << getMacAddress();
-    out << "\n";
-#ifdef WITH_IPv4
-    if (ipv4data)
-        out << " " << ipv4data->detailedInfo() << "\n";
-#endif // ifdef WITH_IPv4
-#ifdef WITH_IPv6
-    if (ipv6data)
-        out << " " << ipv6data->detailedInfo() << "\n";
-#endif // ifdef WITH_IPv6
-#ifdef WITH_GENERIC
-    if (genericNetworkProtocolData)
-        out << " " << genericNetworkProtocolData->detailedInfo() << "\n";
-#endif // ifdef WITH_GENERIC
-    if (isisdata)
-        out << " " << ((InterfaceProtocolData *)isisdata)->str() << "\n"; // Khmm...
-    if (trilldata)
-        out << " " << ((InterfaceProtocolData *)trilldata)->str() << "\n"; // Khmm...
-    if (ieee8021ddata)
-        out << " " << ((InterfaceProtocolData *)ieee8021ddata)->str() << "\n"; // Khmm...
     return out.str();
 }
 

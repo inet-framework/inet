@@ -71,7 +71,7 @@ static std::ostream& operator<<(std::ostream& os, const TCP::AppConnKey& app)
 static std::ostream& operator<<(std::ostream& os, const TCPConnection& conn)
 {
     os << "connId=" << conn.connId << " " << TCPConnection::stateName(conn.getFsmState())
-       << " state={" << const_cast<TCPConnection&>(conn).getState()->info() << "}";
+       << " state={" << const_cast<TCPConnection&>(conn).getState()->str() << "}";
     return os;
 }
 

@@ -119,7 +119,7 @@ TCPStateVariables::TCPStateVariables()
     queueUpdate = true;
 }
 
-std::string TCPStateVariables::info() const
+std::string TCPStateVariables::str() const
 {
     std::stringstream out;
     out << "snd_una=" << snd_una;

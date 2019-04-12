@@ -100,7 +100,7 @@ void TCPVirtualDataRcvQueue::init(uint32 startSeq)
     }
 }
 
-std::string TCPVirtualDataRcvQueue::info() const
+std::string TCPVirtualDataRcvQueue::str() const
 {
     std::string res;
     char buf[32];
@@ -134,7 +134,7 @@ uint32 TCPVirtualDataRcvQueue::insertBytesFromSegment(TCPSegment *tcpseg)
         uint32 maxe = seqMax(oe, ne);
         if (seqGE(minb, oe) || seqGE(minb, ne) || seqGE(ob, maxe) || seqGE(nb, maxe))
             throw cRuntimeError("The new segment is [%u, %u) out of the acceptable range at the queue %s",
-                    region->getBegin(), region->getEnd(), info().c_str());
+                    region->getBegin(), region->getEnd(), str().c_str());
     }
 #endif // ifndef NDEBUG
 
@@ -231,7 +231,7 @@ uint32 TCPVirtualDataRcvQueue::getQueueLength()
 
 void TCPVirtualDataRcvQueue::getQueueStatus()
 {
-    EV_DEBUG << "receiveQLength=" << regionList.size() << " " << info() << "\n";
+    EV_DEBUG << "receiveQLength=" << regionList.size() << " " << str() << "\n";
 }
 
 uint32 TCPVirtualDataRcvQueue::getLE(uint32 fromSeqNum)

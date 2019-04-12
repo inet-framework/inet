@@ -42,7 +42,7 @@ void TCPMsgBasedSendQueue::init(uint32 startSeq)
     end = startSeq;
 }
 
-std::string TCPMsgBasedSendQueue::info() const
+std::string TCPMsgBasedSendQueue::str() const
 {
     std::stringstream out;
     out << "[" << begin << ".." << end << "), " << payloadQueue.size() << " packets";
@@ -51,7 +51,7 @@ std::string TCPMsgBasedSendQueue::info() const
 
 void TCPMsgBasedSendQueue::enqueueAppData(cPacket *msg)
 {
-    //tcpEV << "sendQ: " << info() << " enqueueAppData(bytes=" << msg->getByteLength() << ")\n";
+    //tcpEV << "sendQ: " << str() << " enqueueAppData(bytes=" << msg->getByteLength() << ")\n";
     end += msg->getByteLength();
     if (seqLess(end, begin))
         throw cRuntimeError("Send queue is full");
@@ -74,7 +74,7 @@ uint32 TCPMsgBasedSendQueue::getBufferEndSeq()
 
 TCPSegment *TCPMsgBasedSendQueue::createSegmentWithBytes(uint32 fromSeq, ulong numBytes)
 {
-    //tcpEV << "sendQ: " << info() << " createSeg(seq=" << fromSeq << " len=" << numBytes << ")\n";
+    //tcpEV << "sendQ: " << str() << " createSeg(seq=" << fromSeq << " len=" << numBytes << ")\n";
     ASSERT(seqLE(begin, fromSeq) && seqLE(fromSeq + numBytes, end));
 
     TCPSegment *tcpseg = new TCPSegment(nullptr);
@@ -112,7 +112,7 @@ TCPSegment *TCPMsgBasedSendQueue::createSegmentWithBytes(uint32 fromSeq, ulong n
 
 void TCPMsgBasedSendQueue::discardUpTo(uint32 seqNum)
 {
-    //tcpEV << "sendQ: " << info() << " discardUpTo(seq=" << seqNum << ")\n";
+    //tcpEV << "sendQ: " << str() << " discardUpTo(seq=" << seqNum << ")\n";
 
     ASSERT(seqLE(begin, seqNum) && seqLE(seqNum, end));
 

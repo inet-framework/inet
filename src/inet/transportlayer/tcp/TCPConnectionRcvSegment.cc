@@ -90,7 +90,7 @@ TCPEventCode TCPConnection::process_RCV_SEGMENT(TCPSegment *tcpseg, L3Address sr
 {
     EV_INFO << "Seg arrived: ";
     printSegmentBrief(tcpseg);
-    EV_DETAIL << "TCB: " << state->info() << "\n";
+    EV_DETAIL << "TCB: " << state->str() << "\n";
 
     if (rcvSeqVector)
         rcvSeqVector->record(tcpseg->getSequenceNo());

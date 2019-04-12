@@ -180,7 +180,7 @@ void IPvXTrafGen::sendPacket()
     sprintf(msgName, "appData-%d", numSent);
 
     cPacket *payload = new cPacket(msgName);
-    payload->setByteLength(packetLengthPar->longValue());
+    payload->setByteLength(packetLengthPar->intValue());
 
     L3Address destAddr = chooseDestAddr();
 

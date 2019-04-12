@@ -64,7 +64,7 @@ class INET_API TCPMsgBasedRcvQueue : public TCPVirtualDataRcvQueue
     /**
      * Returns a string with region stored.
      */
-    virtual std::string info() const override;
+    virtual std::string str() const override;
 
     /**
      * Called when a TCP segment arrives. Returns sequence number for ACK.

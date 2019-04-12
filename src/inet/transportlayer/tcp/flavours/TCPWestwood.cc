@@ -41,10 +41,10 @@ TCPWestwoodStateVariables::~TCPWestwoodStateVariables()
 {
 }
 
-std::string TCPWestwoodStateVariables::info() const
+std::string TCPWestwoodStateVariables::str() const
 {
     std::stringstream out;
-    out << TCPBaseAlgStateVariables::info();
+    out << TCPBaseAlgStateVariables::str();
     out << " ssthresh=" << ssthresh;
     return out.str();
 }

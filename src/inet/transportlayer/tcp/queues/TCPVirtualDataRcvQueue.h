@@ -103,7 +103,7 @@ class INET_API TCPVirtualDataRcvQueue : public TCPReceiveQueue
     virtual void init(uint32 startSeq) override;
 
     /** Method inherited from TCPReceiveQueue */
-    virtual std::string info() const override;
+    virtual std::string str() const override;
 
     /** Method inherited from TCPReceiveQueue */
     virtual uint32 insertBytesFromSegment(TCPSegment *tcpseg) override;

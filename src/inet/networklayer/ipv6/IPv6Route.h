@@ -93,8 +93,8 @@ class INET_API IPv6Route : public cObject, public IRoute
 
     virtual ~IPv6Route() { delete _protocolData; }
 
-    virtual std::string info() const override;
-    virtual std::string detailedInfo() const override;
+    virtual std::string str() const override;
+    virtual std::string detailedInfo() const OMNETPP5_CODE(override);
 
     /** To be called by the routing table when this route is added or removed from it */
     virtual void setRoutingTable(IPv6RoutingTable *rt) { _rt = rt; }

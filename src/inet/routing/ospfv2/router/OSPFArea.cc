@@ -106,7 +106,7 @@ void Area::addAddressRange(IPv4AddressRange addressRange, bool advertise)
     }
 }
 
-std::string Area::info() const
+std::string Area::str() const
 {
     std::stringstream out;
     out << "areaID: " << areaID.str(false);

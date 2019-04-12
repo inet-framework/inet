@@ -25,7 +25,7 @@ namespace rtp {
 
 Register_Class(RTPInnerPacket);
 
-std::string RTPInnerPacket::info() const
+std::string RTPInnerPacket::str() const
 {
     std::stringstream out;
     out << "RTPInnerPacket: type=" << type;

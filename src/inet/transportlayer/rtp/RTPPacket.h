@@ -43,7 +43,7 @@ class INET_API RTPPacket : public RTPPacket_Base
     /**
      * Writes a one line info about this RTPPacket into the given string.
      */
-    virtual std::string info() const override;
+    virtual std::string str() const override;
 
     /**
      * Writes a longer description about this RTPPacket into the given stream.

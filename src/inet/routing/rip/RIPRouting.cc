@@ -37,7 +37,7 @@ Define_Module(RIPRouting);
 
 std::ostream& operator<<(std::ostream& os, const RIPRoute& e)
 {
-    os << e.info();
+    os << e.str();
     return os;
 }
 
@@ -51,7 +51,7 @@ RIPRoute::RIPRoute(IRoute *route, RouteType type, int metric, uint16 routeTag)
     tag = routeTag;
 }
 
-std::string RIPRoute::info() const
+std::string RIPRoute::str() const
 {
     std::stringstream out;
 

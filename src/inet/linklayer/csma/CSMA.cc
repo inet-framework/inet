@@ -191,7 +191,7 @@ InterfaceEntry *CSMA::createInterfaceEntry()
     e->setInterfaceToken(address.formInterfaceIdentifier());
 
     // capabilities
-    e->setMtu(par("mtu").longValue());
+    e->setMtu(par("mtu").intValue());
     e->setMulticast(false);
     e->setBroadcast(true);
 

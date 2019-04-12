@@ -128,7 +128,7 @@ void SCTPPeer::initialize(int stage)
             listeningSocket.bindx(addresses, port);
             clientSocket.bindx(addresses, port);
         }
-        listeningSocket.listen(true, par("streamReset").boolValue(), par("numPacketsToSendPerClient").longValue());
+        listeningSocket.listen(true, par("streamReset").boolValue(), par("numPacketsToSendPerClient").intValue());
         EV_DEBUG << "SCTPPeer::initialized listen port=" << port << "\n";
         clientSocket.setCallbackObject(this);
         clientSocket.setOutputGate(gate("sctpOut"));
@@ -270,12 +270,12 @@ void SCTPPeer::handleMessage(cMessage *msg)
                 sprintf(text, "App: EndToEndDelay of assoc %d", serverAssocId);
                 endToEndDelay[serverAssocId] = new cOutVector(text);
                 sprintf(text, "Hist: EndToEndDelay of assoc %d", serverAssocId);
-                histEndToEndDelay[serverAssocId] = new cDoubleHistogram(text);
+                histEndToEndDelay[serverAssocId] = new cHistogram(text);
 
                 //delete connectInfo;
                 delete msg;
 
-                if (par("numPacketsToSendPerClient").longValue() > 0) {
+                if (par("numPacketsToSendPerClient").intValue() > 0) {
                     auto i = sentPacketsPerAssoc.find(serverAssocId);
                     numRequestsToSend = i->second;
                     if (par("thinkTime").doubleValue() > 0) {
@@ -369,7 +369,7 @@ void SCTPPeer::handleMessage(cMessage *msg)
                 packetsRcvd++;
 
                 if (!echo) {
-                    if (par("numPacketsToReceivePerClient").longValue() > 0) {
+                    if (par("numPacketsToReceivePerClient").intValue() > 0) {
                         auto i = rcvdPacketsPerAssoc.find(id);
                         i->second--;
                         SCTPSimpleMessage *smsg = check_and_cast<SCTPSimpleMessage *>(msg);
@@ -595,7 +595,7 @@ void SCTPPeer::sendRequest(bool last)
     SCTPSendInfo* sendCommand = new SCTPSendInfo;
     sendCommand->setLast(last);
     cmsg->setControlInfo(sendCommand);
-    
+
     // send SCTPMessage with SCTPSimpleMessage enclosed
     emit(sentPkSignal, msg);
     clientSocket.sendMsg(cmsg);
@@ -706,7 +706,7 @@ void SCTPPeer::socketDataArrived(int, void *, cPacket *msg, bool)
         clientSocket.sendMsg(cmsg);
     }
 
-    if (par("numPacketsToReceive").longValue() > 0) {
+    if (par("numPacketsToReceive").intValue() > 0) {
         numPacketsToReceive--;
         if (numPacketsToReceive == 0) {
             setStatusString("closing");

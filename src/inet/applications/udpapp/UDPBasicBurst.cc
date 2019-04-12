@@ -107,7 +107,7 @@ cPacket *UDPBasicBurst::createPacket()
 {
     char msgName[32];
     sprintf(msgName, "UDPBasicAppData-%d", counter++);
-    long msgByteLength = messageLengthPar->longValue();
+    long msgByteLength = messageLengthPar->intValue();
     ApplicationPacket *payload = new ApplicationPacket(msgName);
     payload->setByteLength(msgByteLength);
     payload->setSequenceNumber(numSent);

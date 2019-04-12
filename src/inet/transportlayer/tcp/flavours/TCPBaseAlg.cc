@@ -75,10 +75,10 @@ TCPBaseAlgStateVariables::TCPBaseAlgStateVariables()
     firstPartialACK = false;
 }
 
-std::string TCPBaseAlgStateVariables::info() const
+std::string TCPBaseAlgStateVariables::str() const
 {
     std::stringstream out;
-    out << TCPStateVariables::info();
+    out << TCPStateVariables::str();
     out << " snd_cwnd=" << snd_cwnd;
     out << " rto=" << rexmit_timeout;
     return out.str();
@@ -230,7 +230,7 @@ void TCPBaseAlg::processTimer(cMessage *timer, TCPEventCode& event)
 
 void TCPBaseAlg::processRexmitTimer(TCPEventCode& event)
 {
-    EV_DETAIL << "TCB: " << state->info() << "\n";
+    EV_DETAIL << "TCB: " << state->str() << "\n";
 
     //"
     // For any state if the retransmission timeout expires on a segment in

@@ -32,7 +32,7 @@ Define_Module(GenericRoutingTable);
 
 std::ostream& operator<<(std::ostream& os, const GenericRoute& e)
 {
-    os << e.info();
+    os << e.str();
     return os;
 };
 
@@ -416,7 +416,7 @@ IRoute *GenericRoutingTable::createRoute()
 void GenericRoutingTable::printRoutingTable() const
 {
     for (const auto & elem : routes)
-        EV_INFO << (elem)->getInterface()->getFullPath() << " -> " << (elem)->getDestinationAsGeneric().str() << " as " << (elem)->info() << endl;
+        EV_INFO << (elem)->getInterface()->getFullPath() << " -> " << (elem)->getDestinationAsGeneric().str() << " as " << (elem)->str() << endl;
 }
 
 } // namespace inet

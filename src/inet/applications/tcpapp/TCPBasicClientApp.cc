@@ -143,7 +143,7 @@ void TCPBasicClientApp::socketEstablished(int connId, void *ptr)
     TCPAppBase::socketEstablished(connId, ptr);
 
     // determine number of requests in this session
-    numRequestsToSend = par("numRequestsPerSession").longValue();
+    numRequestsToSend = par("numRequestsPerSession").intValue();
     if (numRequestsToSend < 1)
         numRequestsToSend = 1;
 

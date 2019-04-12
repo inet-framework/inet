@@ -36,8 +36,8 @@ class INET_API TCPVegasStateVariables : public TCPBaseAlgStateVariables
   public:
     TCPVegasStateVariables();
     ~TCPVegasStateVariables();
-    virtual std::string info() const override;
-    virtual std::string detailedInfo() const override;
+    virtual std::string str() const override;
+    virtual std::string detailedInfo() const OMNETPP5_CODE(override);
 
     uint32 v_recoverypoint;
     simtime_t v_cwnd_changed;    // last time cwnd changes because of a rtx.

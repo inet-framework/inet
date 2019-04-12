@@ -50,7 +50,7 @@ class INET_API MPLSPacket : public cPacket
     /**
      * Returns a string with the labels, starting with the top of stack.
      */
-    virtual std::string info() const override;
+    virtual std::string str() const override;
 
     /**
      * Swap Label operation

@@ -38,7 +38,7 @@ void TCPVirtualDataSendQueue::init(uint32 startSeq)
     end = startSeq;
 }
 
-std::string TCPVirtualDataSendQueue::info() const
+std::string TCPVirtualDataSendQueue::str() const
 {
     std::stringstream out;
     out << "[" << begin << ".." << end << ")";

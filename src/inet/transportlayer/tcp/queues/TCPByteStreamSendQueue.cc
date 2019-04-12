@@ -42,7 +42,7 @@ void TCPByteStreamSendQueue::init(uint32 startSeq)
     dataBuffer.clear();
 }
 
-std::string TCPByteStreamSendQueue::info() const
+std::string TCPByteStreamSendQueue::str() const
 {
     std::stringstream out;
     out << "[" << begin << ".." << end << "), " << dataBuffer.getLength() << " bytes";
