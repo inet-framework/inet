@@ -20,15 +20,16 @@
 #define __INET_BEHAVIORAGGREGATECLASSIFIER_H
 
 #include "inet/common/INETDefs.h"
-#include "inet/common/packet/Packet.h"
+#include "inet/common/queueing/base/PacketClassifierBase.h"
 #include "inet/common/packet/dissector/PacketDissector.h"
+#include "inet/common/packet/Packet.h"
 
 namespace inet {
 
 /**
  * Behavior Aggregate Classifier.
  */
-class INET_API BehaviorAggregateClassifier : public cSimpleModule
+class INET_API BehaviorAggregateClassifier : public queueing::PacketClassifierBase
 {
   protected:
     class INET_API PacketDissectorCallback : public PacketDissector::ICallback
@@ -63,11 +64,11 @@ class INET_API BehaviorAggregateClassifier : public cSimpleModule
     BehaviorAggregateClassifier() {}
 
   protected:
-    virtual void initialize() override;
-    virtual void handleMessage(cMessage *msg) override;
+    virtual void initialize(int stage) override;
     virtual void refreshDisplay() const override;
 
-    virtual int classifyPacket(Packet *packet);
+    virtual void pushPacket(Packet *packet, cGate *gate) override;
+    virtual int classifyPacket(Packet *packet) override;
 };
 
 } // namespace inet

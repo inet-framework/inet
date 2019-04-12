@@ -28,8 +28,7 @@ Define_Module(TwoRateThreeColorMeter);
 
 void TwoRateThreeColorMeter::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
-
+    PacketMeterBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         numRcvd = 0;
         numYellow = 0;
@@ -52,27 +51,27 @@ void TwoRateThreeColorMeter::initialize(int stage)
     }
 }
 
-void TwoRateThreeColorMeter::handleMessage(cMessage *msg)
+void TwoRateThreeColorMeter::pushPacket(Packet *packet, cGate *inputGate)
 {
-    cPacket *packet = check_and_cast<cPacket *>(msg);
-
     numRcvd++;
+    cGate *outputGate = nullptr;
     int color = meterPacket(packet);
     switch (color) {
         case GREEN:
-            send(packet, "greenOut");
+            outputGate = gate("greenOut");
             break;
 
         case YELLOW:
             numYellow++;
-            send(packet, "yellowOut");
+            outputGate = gate("yellowOut");
             break;
 
         case RED:
             numRed++;
-            send(packet, "redOut");
+            outputGate = gate("redOut");
             break;
     }
+    pushOrSendPacket(packet, outputGate);
 }
 
 void TwoRateThreeColorMeter::refreshDisplay() const
@@ -87,7 +86,7 @@ void TwoRateThreeColorMeter::refreshDisplay() const
     getDisplayString().setTagArg("t", 0, buf);
 }
 
-int TwoRateThreeColorMeter::meterPacket(cPacket *packet)
+int TwoRateThreeColorMeter::meterPacket(Packet *packet)
 {
     // update token buckets
     simtime_t currentTime = simTime();

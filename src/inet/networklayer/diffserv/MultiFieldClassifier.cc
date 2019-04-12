@@ -17,9 +17,10 @@
 //
 
 #include "inet/common/INETDefs.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/common/packet/Packet.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/XMLUtils.h"
-#include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/networklayer/diffserv/DiffservUtil.h"
@@ -142,7 +143,7 @@ void MultiFieldClassifier::initialize(int stage)
     cSimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
-        numOutGates = gateSize("outs");
+        numOutGates = gateSize("out");
 
         numRcvd = 0;
         WATCH(numRcvd);
@@ -153,18 +154,18 @@ void MultiFieldClassifier::initialize(int stage)
     }
 }
 
-void MultiFieldClassifier::handleMessage(cMessage *msg)
+void MultiFieldClassifier::pushPacket(Packet *packet, cGate *inputGate)
 {
-    Packet *packet = check_and_cast<Packet *>(msg);
-
     numRcvd++;
     int gateIndex = classifyPacket(packet);
     emit(pkClassSignal, gateIndex);
 
+    cGate *outputGate = nullptr;
     if (gateIndex >= 0)
-        send(packet, "outs", gateIndex);
+        outputGate = gate("out", gateIndex);
     else
-        send(packet, "defaultOut");
+        outputGate = gate("defaultOut", gateIndex);
+    pushOrSendPacket(packet, outputGate);
 }
 
 void MultiFieldClassifier::refreshDisplay() const

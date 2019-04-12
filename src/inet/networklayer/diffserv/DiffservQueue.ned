@@ -18,11 +18,11 @@
 
 package inet.networklayer.diffserv;
 
-import inet.common.queue.DropTailQueue;
-import inet.common.queue.IOutputQueue;
-import inet.common.queue.PriorityScheduler;
-import inet.common.queue.Sink;
-import inet.common.queue.WrrScheduler;
+import inet.common.queueing.CompoundPacketQueue;
+import inet.common.queueing.DropTailQueue;
+import inet.common.queueing.PacketConsumer;
+import inet.common.queueing.PriorityScheduler;
+import inet.common.queueing.WrrScheduler;
 
 //
 // This is an example queue, that can be used in
@@ -49,14 +49,11 @@ import inet.common.queue.WrrScheduler;
 //
 // @see ~AFxyQueue
 //
-module DiffservQueue like IOutputQueue
+module DiffservQueue extends CompoundPacketQueue
 {
     parameters:
         string interfaceTableModule;
         *.interfaceTableModule = default(absPath(interfaceTableModule));
-    gates:
-        input in;
-        output out;
     submodules:
         classifier: BehaviorAggregateClassifier {
             dscps = "EF AF11 AF12 AF13 AF21 AF22 AF23 AF31 AF32 AF33 AF41 AF42 AF43";
@@ -67,7 +64,7 @@ module DiffservQueue like IOutputQueue
             cbs = default(5000B); // 5 1000B packets
             @display("p=250,130");
         }
-        sink: Sink {
+        sink: PacketConsumer {
             @display("p=400,80");
         }
         efQueue: DropTailQueue {
@@ -99,23 +96,23 @@ module DiffservQueue like IOutputQueue
 
     connections:
         in --> classifier.in;
-        classifier.outs++ --> efMeter.in++;
-        classifier.outs++ --> af1xQueue.afx1In;
-        classifier.outs++ --> af1xQueue.afx2In;
-        classifier.outs++ --> af1xQueue.afx3In;
-        classifier.outs++ --> af2xQueue.afx1In;
-        classifier.outs++ --> af2xQueue.afx2In;
-        classifier.outs++ --> af2xQueue.afx3In;
-        classifier.outs++ --> af3xQueue.afx1In;
-        classifier.outs++ --> af3xQueue.afx2In;
-        classifier.outs++ --> af3xQueue.afx3In;
-        classifier.outs++ --> af4xQueue.afx1In;
-        classifier.outs++ --> af4xQueue.afx2In;
-        classifier.outs++ --> af4xQueue.afx3In;
+        classifier.out++ --> efMeter.in;
+        classifier.out++ --> af1xQueue.afx1In;
+        classifier.out++ --> af1xQueue.afx2In;
+        classifier.out++ --> af1xQueue.afx3In;
+        classifier.out++ --> af2xQueue.afx1In;
+        classifier.out++ --> af2xQueue.afx2In;
+        classifier.out++ --> af2xQueue.afx3In;
+        classifier.out++ --> af3xQueue.afx1In;
+        classifier.out++ --> af3xQueue.afx2In;
+        classifier.out++ --> af3xQueue.afx3In;
+        classifier.out++ --> af4xQueue.afx1In;
+        classifier.out++ --> af4xQueue.afx2In;
+        classifier.out++ --> af4xQueue.afx3In;
         classifier.defaultOut --> beQueue.in;
 
         efMeter.greenOut --> { @display("ls=green"); } --> efQueue.in;
-        efMeter.redOut --> { @display("ls=red"); } --> sink.in++;
+        efMeter.redOut --> { @display("ls=red"); } --> sink.in;
 
         af1xQueue.out --> wrr.in++;
         af2xQueue.out --> wrr.in++;
