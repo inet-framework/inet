@@ -259,7 +259,8 @@ void TcpSocket::renewSocket()
 bool TcpSocket::belongsToSocket(cMessage *msg) const
 {
     auto& tags = getTags(msg);
-    return tags.getTag<SocketInd>()->getSocketId() == connId;
+    auto socketInd = tags.findTag<SocketInd>();
+    return socketInd != nullptr && socketInd->getSocketId() == connId;
 }
 
 void TcpSocket::setCallback(ICallback *callback)
