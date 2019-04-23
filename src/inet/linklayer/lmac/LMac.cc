@@ -89,7 +89,7 @@ void LMac::initialize(int stage)
         send_control = new cMessage("send_control");
         send_control->setKind(LMAC_SEND_CONTROL);
 
-        scheduleAt(simTime(), start_lmac);
+        scheduleAt(0.0, start_lmac);
         EV_DETAIL << "My Mac address is" << interfaceEntry->getMacAddress() << " and my Id is " << myId << endl;
     }
 }
