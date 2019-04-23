@@ -283,11 +283,11 @@ const Ptr<Chunk> Packet::removeAll()
     return makeExclusivelyOwnedMutableChunk(oldContent);
 }
 
-//(inet::Packet)UdpBasicAppData-0 (5000 bytes)
+//(inet::Packet)UdpBasicAppData-0 (5000 bytes) [content]
 std::string Packet::str() const
 {
     std::ostringstream out;
-    out << "(" << getClassName() << ")" << getName() << " (" << getTotalLength() << ") [" << content->str() << "]";
+    out << "(" << getClassName() << ")" << getName() << " (" << getDataLength() << ") [" << content->str() << "]";
     return out.str();
 }
 
