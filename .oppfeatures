@@ -1126,11 +1126,42 @@
         requires = ""
         labels = ""
         nedPackages = "
-                       inet.lora
+                      inet.lora
+                      inet.examples.lora
                       "
         extraSourceFolders = ""
         compileFlags = "-DWITH_FLORACODE"
         linkerFlags = ""
+        />        
+    <feature
+        id="ClodNetSim"
+        name="ClodNetSim"
+        description = "ClodNetSim++ model"
+        initiallyEnabled = "false"
+        requires = ""
+        labels = ""
+        nedPackages = "
+                       inet.greencloudsimulator
+                       inet.examples.cloudNetSim
+                      "
+        extraSourceFolders = ""
+        compileFlags = "-DWITH_CLOUDNETSIM"
+        linkerFlags = ""
+        />
+		<feature
+        id="iCanCloud"
+        name="iCanCloud"
+        description = "iCanCloud model"
+        initiallyEnabled = "true"
+        requires = ""
+        labels = ""
+        nedPackages = "
+                       inet.icancloud
+                       inet.examples.icancloud
+                      "
+        extraSourceFolders = ""
+        compileFlags = "-DWITH_ICANCLOUD"
+        linkerFlags = "-lz"
         />
     <feature
         id="wirelesstutorial"

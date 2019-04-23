@@ -33,7 +33,7 @@ void CsmaCaMacProtocolDissector::dissect(Packet *packet, const Protocol *protoco
     callback.startProtocolDataUnit(&Protocol::csmaCaMac);
     callback.visitChunk(header, &Protocol::csmaCaMac);
     if (auto dataHeader = dynamicPtrCast<const CsmaCaMacDataHeader>(header)) {
-        auto payloadProtocol = ProtocolGroup::ethertype.getProtocol(dataHeader->getNetworkProtocol());
+        auto payloadProtocol = ProtocolGroup::ethertype.findProtocol(dataHeader->getNetworkProtocol());
         callback.dissectPacket(packet, payloadProtocol);
     }
     ASSERT(packet->getDataLength() == B(0));
