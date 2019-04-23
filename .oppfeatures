@@ -1119,6 +1119,21 @@
         linkerFlags = ""
         />
     <feature
+        id="LoraFlora"
+        name="Lora model"
+        description = "Lora/Flora implementation"
+        initiallyEnabled = "false"
+        requires = ""
+        labels = ""
+        nedPackages = "
+                      inet.lora
+                      inet.examples.lora
+                      "
+        extraSourceFolders = ""
+        compileFlags = "-DWITH_FLORACODE"
+        linkerFlags = ""
+        />        
+    <feature
         id="ClodNetSim"
         name="ClodNetSim"
         description = "ClodNetSim++ model"
