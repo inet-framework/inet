@@ -166,8 +166,6 @@ void EtherMacFullDuplex::handleUpperPacket(Packet *packet)
         newFrame->setSrc(getMacAddress());
         packet->insertAtFront(newFrame);
         frame = newFrame;
-        auto oldFcs = packet->removeAtBack<EthernetFcs>();
-        EtherEncap::addFcs(packet, oldFcs->getFcsMode());
     }
 
     // store frame and possibly begin transmitting
