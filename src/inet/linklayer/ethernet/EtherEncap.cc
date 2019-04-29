@@ -162,30 +162,25 @@ void EtherEncap::processPacketFromHigherLayer(Packet *packet)
     ethHeader->setTypeOrLength(typeOrLength);
     packet->insertAtFront(ethHeader);
 
-    EtherEncap::addFcs(packet, fcsMode, false);
+    EtherEncap::addFcs(packet, fcsMode);
 
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);
     EV_INFO << "Sending " << packet << " to lower layer.\n";
     send(packet, "lowerLayerOut");
 }
 
-void EtherEncap::addPaddingAndFcs(Packet *packet, FcsMode fcsMode, B requiredMinBytes)
+void EtherEncap::addPaddingAndSetFcs(Packet *packet, B requiredMinBytes)
 {
+    auto ethFcs = packet->removeAtBack<EthernetFcs>(B(4));
+
     B paddingLength = requiredMinBytes - ETHER_FCS_BYTES - B(packet->getByteLength());
     if (paddingLength > B(0)) {
         const auto& ethPadding = makeShared<EthernetPadding>();
         ethPadding->setChunkLength(paddingLength);
         packet->insertAtBack(ethPadding);
     }
-    addFcs(packet, fcsMode);
-}
 
-void EtherEncap::addFcs(Packet *packet, FcsMode fcsMode, bool calculate)
-{
-    const auto& ethFcs = makeShared<EthernetFcs>();
-    ethFcs->setFcsMode(fcsMode);
-
-    switch(fcsMode) {
+    switch(ethFcs->getFcsMode()) {
         case FCS_DECLARED_CORRECT:
             ethFcs->setFcs(0xC00DC00DL);
             break;
@@ -193,8 +188,7 @@ void EtherEncap::addFcs(Packet *packet, FcsMode fcsMode, bool calculate)
             ethFcs->setFcs(0xBAADBAADL);
             break;
         case FCS_COMPUTED:
-            if (calculate) {
-                // calculate Fcs if needed
+            { // calculate FCS
                 auto ethBytes = packet->peekDataAsBytes();
                 auto bufferLength = B(ethBytes->getChunkLength()).get();
                 auto buffer = new uint8_t[bufferLength];
@@ -205,13 +199,19 @@ void EtherEncap::addFcs(Packet *packet, FcsMode fcsMode, bool calculate)
                 delete [] buffer;
                 ethFcs->setFcs(computedFcs);
             }
-            else
-                ethFcs->setFcs(0L);     // unfilled
             break;
         default:
-            throw cRuntimeError("Unknown FCS mode: %d", (int)fcsMode);
+            throw cRuntimeError("Unknown FCS mode: %d", (int)(ethFcs->getFcsMode()));
     }
 
+    packet->insertAtBack(ethFcs);
+}
+
+void EtherEncap::addFcs(Packet *packet, FcsMode fcsMode)
+{
+    const auto& ethFcs = makeShared<EthernetFcs>();
+    ethFcs->setFcsMode(fcsMode);
+    ethFcs->setFcs(0L);     // unfilled
     packet->insertAtBack(ethFcs);
 }
 
@@ -323,7 +323,7 @@ void EtherEncap::handleSendPause(cMessage *msg)
     packet->insertAtFront(frame);
     hdr->setTypeOrLength(ETHERTYPE_FLOW_CONTROL);
     packet->insertAtFront(hdr);
-    addFcs(packet, fcsMode, false);
+    addFcs(packet, fcsMode);
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);
 
     EV_INFO << "Sending " << frame << " to lower layer.\n";

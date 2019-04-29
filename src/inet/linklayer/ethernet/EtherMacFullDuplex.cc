@@ -105,8 +105,7 @@ void EtherMacFullDuplex::startFrameTransmission()
     ASSERT(hdr);
     ASSERT(!hdr->getSrc().isUnspecified());
 
-    auto oldFcs = frame->removeAtBack<EthernetFcs>();
-    EtherEncap::addPaddingAndFcs(frame, oldFcs->getFcsMode(), curEtherDescr->frameMinBytes);
+    EtherEncap::addPaddingAndSetFcs(frame, curEtherDescr->frameMinBytes);
 
     // add preamble and SFD (Starting Frame Delimiter), then send out
     encapsulate(frame);
