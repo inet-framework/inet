@@ -171,7 +171,7 @@ void EtherEncap::processPacketFromHigherLayer(Packet *packet)
 
 void EtherEncap::addPaddingAndSetFcs(Packet *packet, B requiredMinBytes)
 {
-    auto ethFcs = packet->removeAtBack<EthernetFcs>(B(4));
+    auto ethFcs = packet->removeAtBack<EthernetFcs>(ETHER_FCS_BYTES);
 
     B paddingLength = requiredMinBytes - ETHER_FCS_BYTES - B(packet->getByteLength());
     if (paddingLength > B(0)) {
