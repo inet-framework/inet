@@ -1380,7 +1380,9 @@ bool Udp::isCorrectPacket(Packet *packet, const Ptr<const UdpHeader>& udpHeader)
 {
     auto trailerPopOffset = packet->getBackOffset();
     auto udpHeaderOffset = packet->getFrontOffset() - udpHeader->getChunkLength();
-    if (B(udpHeader->getTotalLengthField()) > trailerPopOffset - udpHeaderOffset)
+    if (udpHeader->getTotalLengthField() < UDP_HEADER_LENGTH)
+        return false;
+    else if (B(udpHeader->getTotalLengthField()) > trailerPopOffset - udpHeaderOffset)
         return false;
     else {
         auto l3AddressInd = packet->findTag<L3AddressInd>();
