@@ -535,13 +535,13 @@ void LoadNg::handleRREP(const Ptr<Rrep>& rrep, const L3Address& sourceAddr)
         }
     }
     else {    // create forward route for the destination: this path will be used by the originator to send data packets
-        orgRouteData->setIsBidirectiona(true);
+       // orgRouteData->setIsBidirectiona(true);
         originRoute = createRoute(rrep->getOriginatorAddr(), sourceAddr, newHopCount, seqNum, true, simTime() + activeRouteTimeout, metricType, metric);
      }
 
     // check ack req, Tlv
     auto flagPos = rrep->getTlvOptionsForUpdate().findByType(FLAGS);
-    if (flagPos != 1) {
+    if (flagPos != -1) {
         auto flag = check_and_cast<LoadNgAckRrepReq *>(rrep->getTlvOptionsForUpdate().getTlvOptionForUpdate(flagPos));
         if (flag->getValue() == REQACK) {
             auto rrepACK = createRREPACK();
@@ -550,6 +550,8 @@ void LoadNg::handleRREP(const Ptr<Rrep>& rrep, const L3Address& sourceAddr)
             // rrep->setAckRequiredFlag(false);
         }
     }
+
+
 
     if (hasOngoingRouteDiscovery(rrep->getOriginatorAddr())) {
         EV_INFO << "The Route Reply has arrived for our Route Request to node " << rrep->getOriginatorAddr() << endl;
@@ -1114,10 +1116,23 @@ void LoadNg::forwardRREP(const Ptr<Rrep>& rrep, const L3Address& destAddr, unsig
 {
     EV_INFO << "Forwarding the Route Reply to the node " << rrep->getOriginatorAddr() << " which originated the Route Request" << endl;
 
-    // RFC 5148:
-    // When a node forwards a message, it SHOULD be jittered by delaying it
-    // by a random duration.  This delay SHOULD be generated uniformly in an
-    // interval between zero and MAXJITTER.
+    IRoute *destRoute = routingTable->findBestMatchingRoute(destAddr);
+    LoadNgRouteData *destRouteData = check_and_cast<LoadNgRouteData *>(destRoute->getProtocolData());
+
+    if (!destRouteData->getIsBidirectiona() && destRoute->getNextHopAsGeneric() == destAddr) {
+        // It is possible that a RREP transmission may fail, especially if the
+        // RREQ transmission triggering the RREP occurs over a unidirectional
+        // link.
+        auto ackReq = new LoadNgAckRrepReq();
+        rrep->getTlvOptionsForUpdate().insertTlvOption(ackReq);
+        //rrep->setAckRequiredFlag(true);
+        // when a node detects that its transmission of a RREP message has failed,
+        // it remembers the next-hop of the failed RREP in a "blacklist" set.
+        failedNextHop = destAddr;
+        if (rrepAckTimer->isScheduled())
+            cancelEvent(rrepAckTimer);
+        scheduleAt(simTime() + nextHopWait, rrepAckTimer);
+    }
     sendAODVPacket(rrep, destAddr, 100, *jitterPar);
 }
 
@@ -1506,6 +1521,7 @@ void LoadNg::handleRREPACK(const Ptr<const RrepAck>& rrepACK, const L3Address& n
             EV_DETAIL << "Marking route " << route << " as active" << endl;
             LoadNgRouteData *routeData = check_and_cast<LoadNgRouteData *>(route->getProtocolData());
             routeData->setIsActive(true);
+            routeData->setIsBidirectiona(true);
             cancelEvent(rrepAckTimer);
         }
     }
