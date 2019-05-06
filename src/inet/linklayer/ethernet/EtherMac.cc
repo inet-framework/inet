@@ -497,6 +497,12 @@ B EtherMac::calculateMinFrameLength()
     return minFrameLength;
 }
 
+B EtherMac::calculatePaddedFrameLength(Packet *frame)
+{
+    B minFrameLength = calculateMinFrameLength();
+    return std::max(minFrameLength, B(frame->getDataLength()));
+}
+
 void EtherMac::startFrameTransmission()
 {
     ASSERT(curTxFrame);
@@ -511,12 +517,14 @@ void EtherMac::startFrameTransmission()
 
     B minFrameLength = calculateMinFrameLength();
     auto oldFcs = frame->removeAtBack<EthernetFcs>(B(4));
-    EtherEncap::addPaddingAndFcs(frame, oldFcs->getFcsMode(), minFrameLength);  // calculate valid FCS
+    EtherEncap::addPaddingAndFcs(frame, oldFcs->getFcsMode(), curEtherDescr->frameMinBytes);  // calculate valid FCS
+
+    long extensionBytes = minFrameLength > frame->getDataLength() ? B(minFrameLength - frame->getDataLength()).get() : 0;
 
     // add preamble and SFD (Starting Frame Delimiter), then send out
     encapsulate(frame);
 
-    B sentFrameByteLength = B(frame->getByteLength());
+    B sentFrameByteLength = B(frame->getByteLength() + extensionBytes);
     auto oldPacketProtocolTag = frame->removeTag<PacketProtocolTag>();
     frame->clearTags();
     auto newPacketProtocolTag = frame->addTag<PacketProtocolTag>();
@@ -532,6 +540,7 @@ void EtherMac::startFrameTransmission()
     }
     else
         signal->encapsulate(frame);
+    signal->addByteLength(extensionBytes);
     send(signal, physOutGate);
 
     // check for collisions (there might be an ongoing reception which we don't know about, see below)
@@ -902,7 +911,7 @@ void EtherMac::fillIFGIfInBurst()
         && (simTime() == endIFGMsg->getSendingTime())
         && (framesSentInBurst > 0)
         && (framesSentInBurst < curEtherDescr->maxFramesInBurst)
-        && (bytesSentInBurst + INTERFRAME_GAP_BITS + PREAMBLE_BYTES + SFD_BYTES + curTxFrame->getDataLength()
+        && (bytesSentInBurst + INTERFRAME_GAP_BITS + PREAMBLE_BYTES + SFD_BYTES + calculatePaddedFrameLength(curTxFrame)
             <= curEtherDescr->maxBytesInBurst)
         )
     {
