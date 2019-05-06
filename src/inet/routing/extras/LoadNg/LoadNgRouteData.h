@@ -30,7 +30,6 @@ namespace inetmanet {
 class INET_API LoadNgRouteData : public cObject
 {
   protected:
-    std::set<L3Address> precursorList;
     bool active = true;
     bool repariable = false;
     bool beingRepaired = false;
@@ -72,8 +71,6 @@ class INET_API LoadNgRouteData : public cObject
     unsigned int getMetric() {return this->metric;}
     void setMetric(unsigned int val) {this->metric = val;}
 
-    void addPrecursor(const L3Address& precursorAddr) { precursorList.insert(precursorAddr); }
-    const std::set<L3Address>& getPrecursorList() const { return precursorList; }
     virtual std::string str() const;
 };
 

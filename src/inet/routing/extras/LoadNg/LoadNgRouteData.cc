@@ -29,15 +29,6 @@ std::string LoadNgRouteData::str() const
         << ", destNum = " << this->getDestSeqNum()
         << ", lifetime = " << getLifeTime();
 
-    const std::set<L3Address>& preList = getPrecursorList();
-
-    if (!preList.empty()) {
-        out << ", precursor list: ";
-        std::set<L3Address>::const_iterator iter = preList.begin();
-        out << *iter;
-        for (++iter; iter != preList.end(); ++iter)
-            out << "; " << *iter;
-    }
     return out.str();
 };
 

@@ -328,7 +328,6 @@ void LoadNg::sendRREP(const Ptr<Rrep>& rrep, const L3Address& destAddr, unsigned
     IRoute *destRoute = routingTable->findBestMatchingRoute(destAddr);
     const L3Address& nextHop = destRoute->getNextHopAsGeneric();
     LoadNgRouteData *destRouteData = check_and_cast<LoadNgRouteData *>(destRoute->getProtocolData());
-    destRouteData->addPrecursor(nextHop);
 
     // The node we received the Route Request for is our neighbor,
     // it is probably an unidirectional link
@@ -571,13 +570,12 @@ void LoadNg::handleRREP(const Ptr<Rrep>& rrep, const L3Address& sourceAddr)
     else if (destRoute && destRoute->getSource() == this) {    // already exists
         destRouteData = check_and_cast<LoadNgRouteData *>(destRoute->getProtocolData());
         // Upon comparison, the existing entry is updated only in the following circumstances:
-        updateRoutingTable(destRoute, sourceAddr, destRoute->getMetric(), destRouteData->getDestSeqNum(), true, simTime() + activeRouteTimeout, destRouteData->getMetric(), destRouteData->getMetric());
+        updateRoutingTable(destRoute, rrep->getDestAddr(), destRoute->getMetric(), destRouteData->getDestSeqNum(), true, simTime() + activeRouteTimeout, destRouteData->getMetric(), destRouteData->getMetric());
 
         // When any node transmits a RREP, the precursor list for the
         // corresponding destination node is updated by adding to it
         // the next hop node to which the RREP is forwarded.
 
-        destRouteData->addPrecursor(destRoute->getNextHopAsGeneric());
         auto outgoingRREP = dynamicPtrCast<Rrep>(rrep->dupShared());
         forwardRREP(outgoingRREP, destRoute->getNextHopAsGeneric(), 100);
     }
@@ -1013,12 +1011,12 @@ void LoadNg::handleRERR(const Ptr<const Rerr>& rerr, const L3Address& sourceAddr
                     // the created list of unreachable destinations and have a non-empty
                     // precursor list.
 
-                    if (routeData->getPrecursorList().size() > 0) {
-                        UnreachableNode node;
-                        node.addr = route->getDestinationAsGeneric();
-                        node.seqNum = routeData->getDestSeqNum();
-                        unreachableNeighbors.push_back(node);
-                    }
+                    //if (routeData->getPrecursorList().size() > 0) {
+                    //    UnreachableNode node;
+                    //    node.addr = route->getDestinationAsGeneric();
+                    //    node.seqNum = routeData->getDestSeqNum();
+                    //    unreachableNeighbors.push_back(node);
+                    //}
                     scheduleExpungeRoutes();
                 }
             }
