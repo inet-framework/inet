@@ -44,7 +44,7 @@ echo -e "Additional arguments passed to fingerprint test script: " $@ "\n"
 
 cd tests/fingerprint
 if [ "$MODE" = "debug" ]; then
-    ./fingerprinttest -d "$@"
+    ./fingerprinttest -d "$@" -a --cmdenv-express-mode=true
 else
-    ./fingerprinttest "$@"
+    ./fingerprinttest "$@" -a --cmdenv-express-mode=true
 fi
