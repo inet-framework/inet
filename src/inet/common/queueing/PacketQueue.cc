@@ -84,12 +84,6 @@ void PacketQueue::pushPacket(Packet *packet, cGate *gate)
 {
     emit(packetPushedSignal, packet);
     EV_INFO << "Pushing packet " << packet->getName() << " into the queue." << endl;
-    // KLUDGE: begin
-    if (frameCapacity != -1 && getNumPackets() + 1 > frameCapacity) {
-        delete packet;
-        return;
-    }
-    // KLUDGE: end
     queue.insert(packet);
     if (buffer != nullptr)
         buffer->addPacket(packet);

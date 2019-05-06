@@ -105,7 +105,7 @@
 /showcases/visualizer/styling/,      -f omnetpp.ini -c Line -r 0,                   25s,         6610-c12c/tND, PASS,
 /showcases/visualizer/styling/,      -f omnetpp.ini -c Font -r 0,                   25s,         6610-c12c/tND, PASS,
 /showcases/visualizer/styling/,      -f omnetpp.ini -c Icon -r 0,                   25s,         6079-5ea3/tND, PASS,
-/showcases/visualizer/styling/,      -f omnetpp.ini -c Annotation -r 0,             25s,         3ef7-ef68/tND, PASS,
+/showcases/visualizer/styling/,      -f omnetpp.ini -c Annotation -r 0,             25s,         38be-2979/tND, PASS,
 
 /showcases/visualizer/transportconnection/, -f omnetpp.ini -c EnablingVisualization -r 0,                       2s,            b2d4-0aff/tND, PASS,
 /showcases/visualizer/transportconnection/, -f omnetpp.ini -c MultipleConnections -r 0,                         2s,            ad99-a0c1/tND, PASS,
