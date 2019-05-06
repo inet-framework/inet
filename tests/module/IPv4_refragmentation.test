@@ -48,7 +48,7 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 This fragment completes the datagram.
 %#--------------------------------------------------------------------------------------------------------------
 %contains: stdout
-Received packet: (inet::Packet)UdpBasicAppData-0 (5000 bytes)
+Received packet: (inet::Packet)UdpBasicAppData-0 (5000 B)
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout
 undisposed object:
