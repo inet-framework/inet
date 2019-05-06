@@ -20,10 +20,9 @@
 //
 
 #include <errno.h>
-
 #include "inet/common/INETUtils.h"
 #include "inet/common/packet/chunk/BytesChunk.h"
-#include "inet/common/packet/recorder/PcapDump.h"
+#include "inet/common/packet/recorder/PcapWriter.h"
 
 namespace inet {
 
@@ -52,12 +51,12 @@ struct pcaprec_hdr
     uint32 orig_len;    /* actual length of packet */
 };
 
-PcapDump::~PcapDump()
+PcapWriter::~PcapWriter()
 {
     closePcap();
 }
 
-void PcapDump::openPcap(const char *filename, unsigned int snaplen_par, uint32 network)
+void PcapWriter::openPcap(const char *filename, unsigned int snaplen_par, uint32 network)
 {
     struct pcap_hdr fh;
 
@@ -84,12 +83,12 @@ void PcapDump::openPcap(const char *filename, unsigned int snaplen_par, uint32 n
     fwrite(&fh, sizeof(fh), 1, dumpfile);
 }
 
-void PcapDump::writePacket(simtime_t stime, const Packet *packet)
+void PcapWriter::writePacket(simtime_t stime, const Packet *packet)
 {
     if (!dumpfile)
         throw cRuntimeError("Cannot write frame: pcap output file is not open");
 
-    EV << "PcapDump::writeFrame\n";
+    EV << "PcapWriter::writeFrame\n";
     uint8 buf[MAXBUFLENGTH];
     memset(buf, 0, sizeof(buf));
 
@@ -110,7 +109,7 @@ void PcapDump::writePacket(simtime_t stime, const Packet *packet)
         fflush(dumpfile);
 }
 
-void PcapDump::closePcap()
+void PcapWriter::closePcap()
 {
     if (dumpfile) {
         fclose(dumpfile);

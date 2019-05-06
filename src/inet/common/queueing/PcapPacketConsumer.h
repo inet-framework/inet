@@ -31,7 +31,7 @@ class INET_API PcapPacketConsumer : public PacketConsumerBase
     cGate *inputGate = nullptr;
     IPacketProducer *producer = nullptr;
 
-    PcapDump pcapWriter;
+    PcapWriter pcapWriter;
 
   protected:
     virtual void initialize(int stage) override;

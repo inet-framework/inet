@@ -18,8 +18,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_PCAPDUMP_H
-#define __INET_PCAPDUMP_H
+#ifndef __INET_PCAPWRITER_H
+#define __INET_PCAPWRITER_H
 
 #include "inet/common/packet/Packet.h"
 
@@ -35,7 +35,7 @@ class Ipv6Header;
  * Note: The file is currently recorded in the "classic" format,
  * not in the "Next Generation" file format also on tcpdump.org.
  */
-class INET_API PcapDump
+class INET_API PcapWriter
 {
   protected:
     FILE *dumpfile = nullptr;    // pcap file
@@ -46,12 +46,12 @@ class INET_API PcapDump
     /**
      * Constructor. It does not open the output file.
      */
-    PcapDump() {}
+    PcapWriter() {}
 
     /**
      * Destructor. It closes the output file if it is open.
      */
-    ~PcapDump();
+    ~PcapWriter();
 
     /**
      * Opens a PCAP file with the given file name. The snaplen parameter
@@ -84,5 +84,5 @@ class INET_API PcapDump
 
 } // namespace inet
 
-#endif // ifndef __INET_PCAPDUMP_H
+#endif // ifndef __INET_PCAPWRITER_H
 
