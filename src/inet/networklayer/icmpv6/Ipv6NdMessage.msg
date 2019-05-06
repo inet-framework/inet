@@ -168,12 +168,15 @@ class Ipv6RouterAdvertisement extends Ipv6NdMessage
     type = ICMPv6_ROUTER_AD;
     //Additional ICMP fields
     unsigned short curHopLimit;
+
     bool managedAddrConfFlag;    //M-bit
     bool otherStatefulConfFlag;    //O-bit
     bool homeAgentFlag = false;        //H-bit
-    unsigned short routerLifetime;  // 0 indicates router is not a default router
-    unsigned int reachableTime;
-    unsigned int retransTimer;
+    uint8_t reserved = 0;
+
+    unsigned short routerLifetime;  // [s] 0 indicates router is not a default router
+    unsigned int reachableTime;     // [ms]
+    unsigned int retransTimer;      // [ms]
     Ipv6NdOptions options;
 }
 
