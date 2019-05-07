@@ -40,7 +40,7 @@ Register_Serializer(Ipv6RouterAdvertisement, Icmpv6HeaderSerializer);
 
 void serializeIpv6NdOptions(MemoryOutputStream& stream, const Ipv6NdOptions& options)
 {
-    for (int i=0; i < options.getOptionArraySize(); i++) {
+    for (size_t i=0; i < options.getOptionArraySize(); i++) {
         const Ipv6NdOption *option = options.getOption(i);
         stream.writeByte(option->getType());
         stream.writeByte(option->getOptionLength());
@@ -86,7 +86,7 @@ void serializeIpv6NdOptions(MemoryOutputStream& stream, const Ipv6NdOptions& opt
         default:
             throw cRuntimeError("Unknown IPv6ND option type=%i", option->getType());
         }
-        for (int j=0; j < option->getPaddingBytesArraySize(); j++)
+        for (size_t j=0; j < option->getPaddingBytesArraySize(); j++)
             stream.writeByte(option->getPaddingBytes(j));
     }
 }
