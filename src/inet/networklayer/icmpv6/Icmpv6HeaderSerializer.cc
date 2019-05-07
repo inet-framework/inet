@@ -250,7 +250,7 @@ void Icmpv6HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<con
             stream.writeByte(pkt->getType());
             stream.writeByte(frame->getCode());
             stream.writeUint16Be(frame->getChksum());
-            stream.writeUint32Be(0);   // unused
+            stream.writeUint32Be(frame->getReserved());
             stream.writeIpv6Address(frame->getTargetAddress());
             serializeIpv6NdOptions(stream, frame->getOptions());
             break;
@@ -352,8 +352,7 @@ const Ptr<Chunk> Icmpv6HeaderSerializer::deserialize(MemoryInputStream& stream) 
             auto neighbourSol = makeShared<Ipv6NeighbourSolicitation>(); icmpv6Header = neighbourSol;
             neighbourSol->setType(type);
             neighbourSol->setCode(subcode);
-
-            stream.readUint32Be(); // reserved
+            neighbourSol->setReserved(stream.readUint32Be());
             neighbourSol->setTargetAddress(stream.readIpv6Address());
             deserializeIpv6NdOptions(*neighbourSol, neighbourSol->getOptionsForUpdate(), stream);
             break;

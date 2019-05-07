@@ -188,6 +188,7 @@ class Ipv6NeighbourSolicitation extends Ipv6NdMessage
 {
     type = ICMPv6_NEIGHBOUR_SOL;
     //Additional ICMP fields
+    uint32_t reserved = 0;
     Ipv6Address targetAddress;// MUST NOT be a multicast address.
     Ipv6NdOptions options;
 }
