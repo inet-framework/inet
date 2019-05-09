@@ -181,8 +181,8 @@
 /examples/inet/nclients/,            -f omnetpp.ini -c General -r 0,                3000s,           ae0d-824f/tND, PASS,
 /examples/inet/nclients/,            -f video.ini -c General -r 0,                  50s,             5a36-258b/tND, PASS,
 
-/examples/inet/netperfmeter/,        -f omnetpp.ini -c TraceFile -r 0,              100s,            3e05-b9eb/tND, PASS,
-/examples/inet/netperfmeter/,        -f omnetpp.ini -c SCTP-with-OLIA -r 0,         30s,             13bd-7730/tND, PASS,
+/examples/inet/netperfmeter/,        -f omnetpp.ini -c TraceFile -r 0,              100s,            6e9b-7195/tND, PASS,
+/examples/inet/netperfmeter/,        -f omnetpp.ini -c SCTP-with-OLIA -r 0,         30s,             89bd-ad97/tND, PASS,
 
 /examples/inet/pcaprecorder/,        -f omnetpp.ini -c General -r 0,                5000s,           b8ff-fbe5/tND, PASS,
 
@@ -306,7 +306,7 @@
 # /examples/ipv6/nclients/,            -f omnetpp.ini -c SCTP_APP -r 0   # SCTP_APP extended
 /examples/ipv6/nclients/,            -f omnetpp.ini -c ETH -r 0,                    1000s,           b616-49c7/tND, PASS,
 /examples/ipv6/nclients/,            -f omnetpp.ini -c PPP -r 0,                    1000s,           5b8c-d4ad/tND, PASS,
-/examples/ipv6/nclients/,            -f omnetpp.ini -c PPP_SCTP -r 0,               100s,            7bb6-ff03/tND, PASS,
+/examples/ipv6/nclients/,            -f omnetpp.ini -c PPP_SCTP -r 0,               100s,            0753-6d7f/tND, PASS,
 
 /examples/manetrouting/dsdv/,        -f omnetpp.ini -c IPv4 -r 0,                   10s,             7c52-202e/tND, PASS,  wireless adhoc
 /examples/manetrouting/dsdv/,        -f omnetpp.ini -c MultiIPv4 -r 0,              10s,             a525-679e/tND, PASS,  wireless adhoc
@@ -436,9 +436,9 @@
 /examples/rtp/unicast1/,             -f omnetpp.ini -c General -r 0,                1000s,           6853-75a6/tND, PASS,
 /examples/rtp/unicast2/,             -f omnetpp.ini -c General -r 0,                500s,           d22e-c743/tND, PASS,
 
-/examples/sctp/cmttest/,             -f omnetpp.ini -c General -r 0,                100s,            18c9-b097/tND, PASS,
-/examples/sctp/multihomed/,          -f omnetpp.ini -c General -r 0,                500s,            43c2-29ff/tND, PASS,
-/examples/sctp/nclients/,            -f omnetpp.ini -c General -r 0,                500s,            0dba-375a/tND, PASS,
+/examples/sctp/cmttest/,             -f omnetpp.ini -c General -r 0,                100s,            2742-9a4e/tND, PASS,
+/examples/sctp/multihomed/,          -f omnetpp.ini -c General -r 0,                500s,            8a0d-3e60/tND, PASS,
+/examples/sctp/nclients/,            -f omnetpp.ini -c General -r 0,                500s,            10b5-fcc2/tND, PASS,
 
 /examples/voip/,                     -f omnetpp.ini -c GoodChannel -r 0,            200s,            891d-24f4/tND, PASS,
 /examples/voip/,                     -f omnetpp.ini -c BadChannel -r 0,             200s,            5cc0-9205/tND, PASS,
