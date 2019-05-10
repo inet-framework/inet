@@ -19,6 +19,7 @@
 #define __INET_PACKETQUEUE_H
 
 #include "inet/common/queueing/base/PacketQueueBase.h"
+#include "inet/common/queueing/compat/cpacketqueue.h"
 #include "inet/common/queueing/contract/IPacketBuffer.h"
 #include "inet/common/queueing/contract/IPacketCollector.h"
 #include "inet/common/queueing/contract/IPacketComparatorFunction.h"
