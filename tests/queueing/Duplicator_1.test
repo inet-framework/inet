@@ -1,6 +1,9 @@
 %description:
 
-TODO
+In this test, packets are produced periodically by an active packet source
+(PacketProducer). The produced packets are randomly either duplicated or not
+(PacketDuplicator). Finally, the packets are all sent into a passive packet
+sink (PacketConsumer).
 
 %file: test.ned
 

@@ -1,6 +1,9 @@
 %description:
 
-TODO
+In this test, packets are produced periodically by an active packet source
+(PacketProducer). The packets are consumed by a passive packet sink (PacketConsumer).
+Packets are passed through from the source to the sink by a dropper (OrdinalBasedDropper).
+Every second packet is dropped based on its ordinal number.
 
 %file: test.ned
 

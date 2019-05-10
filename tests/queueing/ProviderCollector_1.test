@@ -1,6 +1,8 @@
 %description:
 
-TODO
+In this test, packets are collected periodically by an active packet sink
+(PacketCollector). The packets are provided by a passive packet source
+(PacketProvider).
 
 %file: test.ned
 

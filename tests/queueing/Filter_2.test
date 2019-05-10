@@ -1,6 +1,9 @@
 %description:
 
-TODO
+In this test, packets are collected periodically by an active packet sink
+(PacketCollector). The packets are provided by a passive packet source
+(PacketProvider). Packets are passed through from the source to the sink by
+a filter (PacketFilter). Every second packet is dropped.
 
 %file: test.ned
 

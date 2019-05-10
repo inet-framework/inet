@@ -1,6 +1,9 @@
 %description:
 
-TODO
+In this test, packets are passed through from the source to the sink periodically
+(randomly) by an active packet processor (PacketServer). The packets are generated
+by a passive packet source (PacketProvider) and consumed by a passive packet sink
+(PacketConsumer).
 
 %file: test.ned
 

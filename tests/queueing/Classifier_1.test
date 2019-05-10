@@ -1,6 +1,10 @@
 %description:
 
-TODO
+In this test, packets are produced periodically by an active packet source
+(PacketProducer). The packets are consumed by two passive packet sinks
+(PacketConsumers). The single source is connected to the two sinks using a
+classifier (PacketClassifier). The classifier forwards packets alternately to
+one or the other sink.
 
 %file: test.ned
 

@@ -1,6 +1,12 @@
 %description:
 
-TODO
+In this test, packets are produced periodically (randomly) by an active packet
+source (PacketProducer). The packets are collected periodically (randomly) by
+an active packet sink (PacketCollector). The source and the sink is connected
+by a compound priority queue (TestQueue) where packets are stored temporarily.
+This queue contains a classifier (PacketClassifier), two queues (PacketQueues)
+that use a limited shared buffer (PacketBuffer) to store packets, and a priorty
+scheduler (PriortyScheduler).
 
 %file: test.ned
 
@@ -12,7 +18,7 @@ import inet.common.queueing.PacketCollector;
 import inet.common.queueing.PacketProducer;
 import inet.common.queueing.PriorityScheduler;
 
-module TestBuffer extends CompoundPacketQueue
+module TestQueue extends CompoundPacketQueue
 {
     parameters:
         *.bufferModule = "^.buffer";
@@ -48,7 +54,7 @@ network TestBufferNetwork
         producer: PacketProducer {
             @display("p=100,100");
         }
-        queue: TestBuffer {
+        queue: TestQueue {
             @display("p=200,100");
         }
         collector: PacketCollector {
