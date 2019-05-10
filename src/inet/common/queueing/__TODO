@@ -1,15 +1,6 @@
-Failures:
-  /examples/inet/netperfmeter/ -f omnetpp.ini -c SCTP-with-OLIA -r 0  (some fingerprint mismatch; actual  '8085-b891/tND')
-    - only tND differs
-    - sctp serializer structure initialization problem
-  /examples/sctp/cmttest/ -f omnetpp.ini -c General -r 0  (some fingerprint mismatch; actual  'c7ee-185e/tND')
-    - only tND differs
-    - SCTP packet SACK header content changed
-    - sctp serializer structure initialization problem
-  /showcases/visualizer/styling/ -f omnetpp.ini -c Annotation -r 0  (some fingerprint mismatch; actual  '38be-2979/tND')
-    - both tlN and tND differs, with KLUDGE both tlN and tND matches
-    - packet queue drops packet before insertion in the old implementation, must be kludged in the new
-
+ - classifyPacketByData function corresponds to PacketByDataClassifier or ClassifyPacketByData class? which one? and rename all similar classes according to naming convention
+ - remove txQueueLimit parameters from network interfaces which are only simply passed down to the MAC queue
+ - using queue->getPacket(0) as the current transmission is generally wrong, because a new high priority packet might jump to the front of the queue
  - update NED documentation and User's Guide
  - PacketQueue -> RequestHandler -> ManualScheduler & PacketServer (timeLimit, dataLimit, packetLimit)
  - konnyu csatorna telites (pl ethernet interface), gateway module to stop/start packet flow, customizable request/response based applications
