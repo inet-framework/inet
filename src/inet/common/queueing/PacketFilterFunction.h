@@ -33,7 +33,7 @@ class INET_API CPacketFilterFunction : public cObject, public IPacketFilterFunct
   public:
     CPacketFilterFunction(PacketFilterFunction packetFilterFunction) : packetFilterFunction(packetFilterFunction) { }
 
-    virtual bool matchesPacket(Packet *packet) const { return packetFilterFunction(packet); }
+    virtual bool matchesPacket(Packet *packet) const override { return packetFilterFunction(packet); }
 };
 
 #define Register_Packet_Filter_Function(name, function) \

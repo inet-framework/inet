@@ -40,8 +40,8 @@ class INET_API PacketBasedTokenGenerator : public PacketConsumerBase, public cLi
     virtual void initialize(int stage) override;
 
   public:
-    virtual bool supportsPushPacket(cGate *gate) { return true; }
-    virtual bool supportsPopPacket(cGate *gate) { return false; }
+    virtual bool supportsPushPacket(cGate *gate) override { return true; }
+    virtual bool supportsPopPacket(cGate *gate) override { return false; }
 
     virtual bool canPushSomePacket(cGate *gate) override { return server->getNumTokens() == 0; }
     virtual bool canPushPacket(Packet *packet, cGate *gate) override { return server->getNumTokens() == 0; }

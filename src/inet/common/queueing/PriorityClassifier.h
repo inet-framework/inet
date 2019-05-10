@@ -31,7 +31,7 @@ class INET_API PriorityClassifier : public PacketClassifierBase
 
   public:
     virtual bool canPushSomePacket(cGate *gate) override;
-    virtual bool canPushPacket(Packet *packet, cGate *gate);
+    virtual bool canPushPacket(Packet *packet, cGate *gate) override;
 };
 
 } // namespace queueing

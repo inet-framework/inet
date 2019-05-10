@@ -34,7 +34,7 @@ class INET_API CPacketComparatorFunction : public cObject, public IPacketCompara
     CPacketComparatorFunction(PacketComparatorFunction packetComparatorFunction) : packetComparatorFunction(packetComparatorFunction) { }
 
     virtual CPacketComparatorFunction *dup() const override { return new CPacketComparatorFunction(packetComparatorFunction); }
-    virtual int comparePackets(Packet *packet1, Packet *packet2) const { return packetComparatorFunction(packet1, packet2); }
+    virtual int comparePackets(Packet *packet1, Packet *packet2) const override { return packetComparatorFunction(packet1, packet2); }
 };
 
 #define Register_Packet_Comparator_Function(name, function) \

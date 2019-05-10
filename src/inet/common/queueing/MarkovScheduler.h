@@ -42,7 +42,7 @@ class INET_API MarkovScheduler : public PacketSchedulerBase, public IPacketConsu
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *message) override;
 
-    virtual int schedulePacket();
+    virtual int schedulePacket() override;
     virtual void scheduleWaitTimer();
 
   public:

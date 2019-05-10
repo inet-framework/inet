@@ -33,7 +33,7 @@ class INET_API CPacketClassifierFunction : public cObject, public IPacketClassif
   public:
     CPacketClassifierFunction(PacketClassifierFunction packetClassifierFunction) : packetClassifierFunction(packetClassifierFunction) { }
 
-    virtual int classifyPacket(Packet *packet) const { return packetClassifierFunction(packet); }
+    virtual int classifyPacket(Packet *packet) const override { return packetClassifierFunction(packet); }
 };
 
 #define Register_Packet_Classifier_Function(name, function) \

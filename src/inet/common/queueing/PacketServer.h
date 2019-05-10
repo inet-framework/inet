@@ -31,7 +31,7 @@ class INET_API PacketServer : public PacketServerBase
 
   protected:
     virtual void initialize(int stage) override;
-    virtual void handleMessage(cMessage *message);
+    virtual void handleMessage(cMessage *message) override;
     virtual void scheduleProcessingTimer();
     virtual bool canStartProcessingPacket();
     virtual void startProcessingPacket();

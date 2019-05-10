@@ -33,7 +33,7 @@ class INET_API CPacketDropperFunction : public cObject, public IPacketDropperFun
   public:
     CPacketDropperFunction(PacketDropperFunction packetDropperFunction) : packetDropperFunction(packetDropperFunction) { }
 
-    virtual void dropPackets(IPacketCollection* collection) const;
+    virtual void dropPackets(IPacketCollection* collection) const override;
 };
 
 #define Register_Packet_Dropper_Function(name, function) \

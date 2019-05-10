@@ -36,7 +36,7 @@ class INET_API TokenBasedServer : public PacketServerBase
 
   protected:
     virtual void initialize(int stage) override;
-    virtual void handleMessage(cMessage *message);
+    virtual void handleMessage(cMessage *message) override;
     virtual void scheduleTokenProductionTimer();
     virtual void processPackets();
 
