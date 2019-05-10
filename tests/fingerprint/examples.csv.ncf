@@ -88,10 +88,10 @@
 
 /examples/ethernet/vlan/,            -f omnetpp.ini -c NoVlan -r 0,                 10ms,            62f8-fadc/tplx, PASS,
 /examples/ethernet/vlan/,            -f omnetpp.ini -c BetweenSwitches -r 0,        10ms,            2b8c-e35d/tplx, PASS,
-/examples/ethernet/vlan/,            -f omnetpp.ini -c BetweenHosts -r 0,           10ms,            b23a-7f27/tplx, PASS,
-/examples/ethernet/vlan/,            -f omnetpp.ini -c Asymmetric -r 0,             10ms,            f14a-c784/tplx, PASS,
-/examples/ethernet/vlan/,            -f omnetpp.ini -c DoubleTagged -r 0,           10ms,            4580-8555/tplx, PASS,
-/examples/ethernet/vlan/,            -f omnetpp.ini -c VirtualInterface -r 0,       10ms,            b23a-7f27/tplx, PASS,
+/examples/ethernet/vlan/,            -f omnetpp.ini -c BetweenHosts -r 0,           10ms,            3af2-772d/tplx, PASS,
+/examples/ethernet/vlan/,            -f omnetpp.ini -c Asymmetric -r 0,             10ms,            55e7-0fbf/tplx, PASS,
+/examples/ethernet/vlan/,            -f omnetpp.ini -c DoubleTagged -r 0,           10ms,            4d13-9d6c/tplx, PASS,
+/examples/ethernet/vlan/,            -f omnetpp.ini -c VirtualInterface -r 0,       10ms,            3af2-772d/tplx, PASS,
 
 /examples/geometry/,                 -f omnetpp.ini -c General -r 0,                100s,            c301-acfa/tplx, PASS, wireless
 
