@@ -515,15 +515,15 @@ void EtherMac::startFrameTransmission()
     ASSERT(hdr);
     ASSERT(!hdr->getSrc().isUnspecified());
 
-    B minFrameLength = calculateMinFrameLength();
+    B minFrameLengthWithExtension = calculateMinFrameLength();
     addPaddingAndSetFcs(frame, curEtherDescr->frameMinBytes);  // calculate valid FCS
 
-    long extensionBytes = minFrameLength > frame->getDataLength() ? B(minFrameLength - frame->getDataLength()).get() : 0;
+    B extensionLength = minFrameLengthWithExtension > frame->getDataLength() ? (minFrameLengthWithExtension - frame->getDataLength()) : B(0);
 
     // add preamble and SFD (Starting Frame Delimiter), then send out
     encapsulate(frame);
 
-    B sentFrameByteLength = B(frame->getByteLength() + extensionBytes);
+    B sentFrameByteLength = frame->getDataLength() + extensionLength;
     auto oldPacketProtocolTag = frame->removeTag<PacketProtocolTag>();
     frame->clearTags();
     auto newPacketProtocolTag = frame->addTag<PacketProtocolTag>();
@@ -539,7 +539,7 @@ void EtherMac::startFrameTransmission()
     }
     else
         signal->encapsulate(frame);
-    signal->addByteLength(extensionBytes);
+    signal->addByteLength(extensionLength.get());
     send(signal, physOutGate);
 
     // check for collisions (there might be an ongoing reception which we don't know about, see below)
