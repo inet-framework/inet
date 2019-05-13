@@ -516,7 +516,7 @@ void EtherMac::startFrameTransmission()
     ASSERT(!hdr->getSrc().isUnspecified());
 
     B minFrameLength = calculateMinFrameLength();
-    EtherEncap::addPaddingAndSetFcs(frame, curEtherDescr->frameMinBytes);  // calculate valid FCS
+    addPaddingAndSetFcs(frame, curEtherDescr->frameMinBytes);  // calculate valid FCS
 
     long extensionBytes = minFrameLength > frame->getDataLength() ? B(minFrameLength - frame->getDataLength()).get() : 0;
 

@@ -72,11 +72,6 @@ class INET_API EtherEncap : public Ieee8022Llc
 
   public:
     /**
-     * Inserts padding in front of FCS and calculate FCS
-     */
-    static void addPaddingAndSetFcs(Packet *packet, B requiredMinByteLength = MIN_ETHERNET_FRAME_BYTES);
-
-    /**
      * Inserts the FCS chunk to end of packet. Fill the fcsMode and set fcs to 0.
      */
     static void addFcs(Packet *packet, FcsMode fcsMode);

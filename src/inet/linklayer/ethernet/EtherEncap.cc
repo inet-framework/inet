@@ -169,44 +169,6 @@ void EtherEncap::processPacketFromHigherLayer(Packet *packet)
     send(packet, "lowerLayerOut");
 }
 
-void EtherEncap::addPaddingAndSetFcs(Packet *packet, B requiredMinBytes)
-{
-    auto ethFcs = packet->removeAtBack<EthernetFcs>(ETHER_FCS_BYTES);
-
-    B paddingLength = requiredMinBytes - ETHER_FCS_BYTES - B(packet->getByteLength());
-    if (paddingLength > B(0)) {
-        const auto& ethPadding = makeShared<EthernetPadding>();
-        ethPadding->setChunkLength(paddingLength);
-        packet->insertAtBack(ethPadding);
-    }
-
-    switch(ethFcs->getFcsMode()) {
-        case FCS_DECLARED_CORRECT:
-            ethFcs->setFcs(0xC00DC00DL);
-            break;
-        case FCS_DECLARED_INCORRECT:
-            ethFcs->setFcs(0xBAADBAADL);
-            break;
-        case FCS_COMPUTED:
-            { // calculate FCS
-                auto ethBytes = packet->peekDataAsBytes();
-                auto bufferLength = B(ethBytes->getChunkLength()).get();
-                auto buffer = new uint8_t[bufferLength];
-                // 1. fill in the data
-                ethBytes->copyToBuffer(buffer, bufferLength);
-                // 2. compute the FCS
-                auto computedFcs = ethernetCRC(buffer, bufferLength);
-                delete [] buffer;
-                ethFcs->setFcs(computedFcs);
-            }
-            break;
-        default:
-            throw cRuntimeError("Unknown FCS mode: %d", (int)(ethFcs->getFcsMode()));
-    }
-
-    packet->insertAtBack(ethFcs);
-}
-
 void EtherEncap::addFcs(Packet *packet, FcsMode fcsMode)
 {
     const auto& ethFcs = makeShared<EthernetFcs>();

@@ -162,6 +162,11 @@ class INET_API EtherMacBase : public MacBase
     virtual void handleCrashOperation(LifecycleOperation *operation) override;
     virtual void processAtHandleMessageFinished();
 
+    /**
+     * Inserts padding in front of FCS and calculate FCS
+     */
+    void addPaddingAndSetFcs(Packet *packet, B requiredMinByteLength = MIN_ETHERNET_FRAME_BYTES) const;
+
   protected:
     //  initialization
     virtual void initialize(int stage) override;
