@@ -85,3 +85,6 @@ class EthernetFcs extends FieldsChunk
     FcsMode fcsMode = FCS_MODE_UNDEFINED;
 }
 
+cplusplus(EthernetFcs) {{
+    EthernetFcs(FcsMode _fcsMode) : EthernetFcs() { fcsMode = _fcsMode; }
+}}
