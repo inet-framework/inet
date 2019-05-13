@@ -54,7 +54,7 @@ bool OspfConfigReader::loadConfigFromXML(cXMLElement *asConfig, Router *ospfRout
     this->ospfRouter = ospfRouter;
 
     if (strcmp(asConfig->getTagName(), "OSPFASConfig"))
-        throw cRuntimeError("Cannot read OSPF configuration, unexpected element '%s' at %s", asConfig->getTagName(), asConfig->getSourceLocation());
+        throw cRuntimeError("Cannot read OSPF configuration, unexpected element '%s' at %s", asConfig->getTagName(), std::string(asConfig->getSourceLocation()).c_str());
 
     cModule *myNode = findContainingNode(ospfModule);
     ASSERT(myNode);
@@ -73,7 +73,7 @@ bool OspfConfigReader::loadConfigFromXML(cXMLElement *asConfig, Router *ospfRout
         }
     }
     if (routerNode == nullptr) {
-        throw cRuntimeError("No configuration for Router '%s' at '%s'", nodeFullPath.c_str(), asConfig->getSourceLocation());
+        throw cRuntimeError("No configuration for Router '%s' at '%s'", nodeFullPath.c_str(), std::string(asConfig->getSourceLocation()).c_str());
     }
 
     EV_DEBUG << "OspfConfigReader: Loading info for Router " << nodeFullPath << "\n";
@@ -125,7 +125,7 @@ bool OspfConfigReader::loadConfigFromXML(cXMLElement *asConfig, Router *ospfRout
         }
         else {
             throw cRuntimeError("Invalid '%s' node in Router '%s' at %s",
-                    nodeName.c_str(), nodeFullPath.c_str(), elem->getSourceLocation());
+                    nodeName.c_str(), nodeFullPath.c_str(), std::string(elem->getSourceLocation()).c_str());
         }
     }
 
@@ -163,7 +163,7 @@ void OspfConfigReader::loadAreaFromXML(const cXMLElement& asConfig, AreaId areaI
     cXMLElement *areaConfig = asConfig.getElementByPath(areaXPath.c_str());
     if (areaConfig == nullptr) {
         if(areaID != Ipv4Address("0.0.0.0"))
-            throw cRuntimeError("No configuration for Area ID: %s at %s", areaID.str(false).c_str(), asConfig.getSourceLocation());
+            throw cRuntimeError("No configuration for Area ID: %s at %s", areaID.str(false).c_str(), std::string(asConfig.getSourceLocation()).c_str());
         Area *area = new Area(ift, areaID);
         area->addWatches();
         ospfRouter->addArea(area);
@@ -190,12 +190,12 @@ void OspfConfigReader::loadAreaFromXML(const cXMLElement& asConfig, AreaId areaI
         }
         else if (nodeName == "Stub") {
             if (areaID == BACKBONE_AREAID)
-                throw cRuntimeError("The backbone cannot be configured as a stub at %s", (areaDetail)->getSourceLocation());
+                throw cRuntimeError("The backbone cannot be configured as a stub at %s", std::string(areaDetail->getSourceLocation()).c_str());
             area->setExternalRoutingCapability(false);
             area->setStubDefaultCost(atoi(getMandatoryFilledAttribute(*areaDetail, "defaultCost")));
         }
         else
-            throw cRuntimeError("Invalid node '%s' at %s", nodeName.c_str(), (areaDetail)->getSourceLocation());
+            throw cRuntimeError("Invalid node '%s' at %s", nodeName.c_str(), std::string(areaDetail->getSourceLocation()).c_str());
     }
     // Add the Area to the router
     ospfRouter->addArea(area);
@@ -231,7 +231,7 @@ void OspfConfigReader::loadInterfaceParameters(const cXMLElement& ifConfig, Inte
     else {
         delete intf;
         throw cRuntimeError("Unknown interface type '%s' for interface %s (ifIndex=%d) at %s",
-                interfaceType.c_str(), ifName.c_str(), ifIndex, ifConfig.getSourceLocation());
+                interfaceType.c_str(), ifName.c_str(), ifIndex, std::string(ifConfig.getSourceLocation()).c_str());
     }
 
     if(intfModeStr == "Active")
@@ -241,7 +241,7 @@ void OspfConfigReader::loadInterfaceParameters(const cXMLElement& ifConfig, Inte
     else {
         delete intf;
         throw cRuntimeError("Unknown interface mode '%s' for interface %s (ifIndex=%d) at %s",
-                interfaceType.c_str(), ifName.c_str(), ifIndex, ifConfig.getSourceLocation());
+                interfaceType.c_str(), ifName.c_str(), ifIndex, std::string(ifConfig.getSourceLocation()).c_str());
     }
 
     std::string ospfCrcMode = par("crcMode").stdstringValue();
@@ -315,7 +315,7 @@ void OspfConfigReader::loadInterfaceParameters(const cXMLElement& ifConfig, Inte
     }
     else {
         delete intf;
-        throw cRuntimeError("Loading %s ifIndex[%d] in Area %s aborted at %s", interfaceType.c_str(), ifIndex, areaID.str(false).c_str(), ifConfig.getSourceLocation());
+        throw cRuntimeError("Loading %s ifIndex[%d] in Area %s aborted at %s", interfaceType.c_str(), ifIndex, areaID.str(false).c_str(), std::string(ifConfig.getSourceLocation()).c_str());
     }
 }
 
@@ -344,7 +344,7 @@ void OspfConfigReader::loadExternalRoute(const cXMLElement& externalRouteConfig)
         else if (metricType == "Type2")
             asExternalRoute.setE_ExternalMetricType(true);
         else
-            throw cRuntimeError("Invalid 'externalInterfaceOutputType' at interface '%s' at ", ie->getInterfaceName(), externalRouteConfig.getSourceLocation());
+            throw cRuntimeError("Invalid 'externalInterfaceOutputType' at interface '%s' at ", ie->getInterfaceName(), std::string(externalRouteConfig.getSourceLocation()).c_str());
 
         asExternalRoute.setForwardingAddress(ipv4AddressFromAddressString(getStrAttrOrPar(externalRouteConfig, "forwardingAddress")));
 
@@ -354,7 +354,7 @@ void OspfConfigReader::loadExternalRoute(const cXMLElement& externalRouteConfig)
             char *endp = nullptr;
             externalRouteTagVal = strtol(externalRouteTag, &endp, 0);
             if (*endp)
-                throw cRuntimeError("Invalid externalRouteTag='%s' at %s", externalRouteTag, externalRouteConfig.getSourceLocation());
+                throw cRuntimeError("Invalid externalRouteTag='%s' at %s", externalRouteTag, std::string(externalRouteConfig.getSourceLocation()).c_str());
         }
         asExternalRoute.setExternalRouteTag(externalRouteTagVal);
 
@@ -391,7 +391,7 @@ void OspfConfigReader::loadHostRoute(const cXMLElement& hostRouteConfig)
             area->addHostRoute(hostParameters);
         }
         else {
-            throw cRuntimeError("Loading HostInterface '%s' aborted, unknown area %s at %s", ie->getInterfaceName(), hostArea.str(false).c_str(), hostRouteConfig.getSourceLocation());
+            throw cRuntimeError("Loading HostInterface '%s' aborted, unknown area %s at %s", ie->getInterfaceName(), hostArea.str(false).c_str(), std::string(hostRouteConfig.getSourceLocation()).c_str());
         }
     }
 }
@@ -415,7 +415,7 @@ void OspfConfigReader::loadLoopbackParameters(const cXMLElement& loConfig, Inter
     if (area != nullptr)
         area->addHostRoute(hostParameters);
     else
-        throw cRuntimeError("Loading LoopbackInterface '%s' aborted, unknown area %s at %s", ie.getInterfaceName(), hostArea.str(false).c_str(), loConfig.getSourceLocation());
+        throw cRuntimeError("Loading LoopbackInterface '%s' aborted, unknown area %s at %s", ie.getInterfaceName(), hostArea.str(false).c_str(), std::string(loConfig.getSourceLocation()).c_str());
 }
 
 void OspfConfigReader::loadVirtualLink(const cXMLElement& virtualLinkConfig, cXMLElement& asConfig)
@@ -446,11 +446,11 @@ void OspfConfigReader::loadVirtualLink(const cXMLElement& virtualLinkConfig, cXM
     Area *transitArea = ospfRouter->getAreaByID(transitAreaId);
     if (!transitArea) {
         delete intf;
-        throw cRuntimeError("Virtual link to router %s cannot be configured through a non-existence transit area '%s' at %s", routerId.str(false).c_str(), transitAreaId.str(false).c_str(), virtualLinkConfig.getSourceLocation());
+        throw cRuntimeError("Virtual link to router %s cannot be configured through a non-existence transit area '%s' at %s", routerId.str(false).c_str(), transitAreaId.str(false).c_str(), std::string(virtualLinkConfig.getSourceLocation()).c_str());
     }
     else if (!transitArea->getExternalRoutingCapability()) {
         delete intf;
-        throw cRuntimeError("Virtual link to router %s cannot be configured through a stub area '%s' at %s", routerId.str(false).c_str(), transitAreaId.str(false).c_str(), virtualLinkConfig.getSourceLocation());
+        throw cRuntimeError("Virtual link to router %s cannot be configured through a stub area '%s' at %s", routerId.str(false).c_str(), transitAreaId.str(false).c_str(), std::string(virtualLinkConfig.getSourceLocation()).c_str());
     }
 
     // add the virtual link to the OSPF data structure
@@ -472,7 +472,7 @@ void OspfConfigReader::loadAuthenticationConfig(OspfInterface *intf, const cXMLE
     else if (authenticationType == "NullType")
         intf->setAuthenticationType(NULL_TYPE);
     else
-        throw cRuntimeError("Invalid AuthenticationType '%s' at %s", authenticationType.c_str(), ifConfig.getSourceLocation());
+        throw cRuntimeError("Invalid AuthenticationType '%s' at %s", authenticationType.c_str(), std::string(ifConfig.getSourceLocation()).c_str());
 
     std::string key = getStrAttrOrPar(ifConfig, "authenticationKey");
     AuthenticationKeyType keyValue;
@@ -536,7 +536,7 @@ cXMLElement * OspfConfigReader::findMatchingConfig(const cXMLElementList& router
             const char *toward = getMandatoryFilledAttribute(*ifConfig, "toward");
             cModule *destnode = getSimulation()->getSystemModule()->getModuleByPath(toward);
             if (!destnode)
-                throw cRuntimeError("toward module `%s' not found at %s", toward, (*ifConfig).getSourceLocation());
+                throw cRuntimeError("toward module `%s' not found at %s", toward, std::string((*ifConfig).getSourceLocation()).c_str());
 
             int gateId = intf.getNodeOutputGateId();
             if ((gateId != -1) && ift->getHostModule()->gate(gateId)->pathContains(destnode))
@@ -567,7 +567,7 @@ std::vector<InterfaceEntry *> OspfConfigReader::getInterfaceByXMLAttributesOf(co
     const char *toward = getMandatoryFilledAttribute(ifConfig, "toward");
     cModule *destnode = getSimulation()->getSystemModule()->getModuleByPath(toward);
     if (!destnode)
-        throw cRuntimeError("'ifName' or 'toward' module `%s' not found at %s", toward, ifConfig.getSourceLocation());
+        throw cRuntimeError("'ifName' or 'toward' module `%s' not found at %s", toward, std::string(ifConfig.getSourceLocation()).c_str());
 
     cModule *host = ift->getHostModule();
     for (int i = 0; i < ift->getNumInterfaces(); i++) {
@@ -580,7 +580,7 @@ std::vector<InterfaceEntry *> OspfConfigReader::getInterfaceByXMLAttributesOf(co
             }
         }
     }
-    throw cRuntimeError("Error reading XML config: IInterfaceTable contains no interface toward '%s' at %s", toward, ifConfig.getSourceLocation());
+    throw cRuntimeError("Error reading XML config: IInterfaceTable contains no interface toward '%s' at %s", toward, std::string(ifConfig.getSourceLocation()).c_str());
 }
 
 int OspfConfigReader::getIntAttrOrPar(const cXMLElement& ifConfig, const char *name) const
@@ -599,7 +599,7 @@ bool OspfConfigReader::getBoolAttrOrPar(const cXMLElement& ifConfig, const char 
             return true;
         if (strcmp(attrStr, "false") == 0 || strcmp(attrStr, "0") == 0)
             return false;
-        throw cRuntimeError("Invalid boolean attribute %s = '%s' at %s", name, attrStr, ifConfig.getSourceLocation());
+        throw cRuntimeError("Invalid boolean attribute %s = '%s' at %s", name, attrStr, std::string(ifConfig.getSourceLocation()).c_str());
     }
     return par(name);
 }

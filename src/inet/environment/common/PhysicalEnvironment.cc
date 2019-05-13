@@ -109,13 +109,13 @@ void PhysicalEnvironment::parseShapes(cXMLElement *xml)
                 throw cRuntimeError("Missing size attribute of cuboid");
             cStringTokenizer tokenizer(sizeAttribute);
             if ((tok = tokenizer.nextToken()) == nullptr)
-                throw cRuntimeError("Missing cuboid size x at %s", element->getSourceLocation());
+                throw cRuntimeError("Missing cuboid size x at %s", std::string(element->getSourceLocation()).c_str());
             size.x = atof(tok);
             if ((tok = tokenizer.nextToken()) == nullptr)
-                throw cRuntimeError("Missing cuboid size y at %s", element->getSourceLocation());
+                throw cRuntimeError("Missing cuboid size y at %s", std::string(element->getSourceLocation()).c_str());
             size.y = atof(tok);
             if ((tok = tokenizer.nextToken()) == nullptr)
-                throw cRuntimeError("Missing cuboid size z at %s", element->getSourceLocation());
+                throw cRuntimeError("Missing cuboid size z at %s", std::string(element->getSourceLocation()).c_str());
             size.z = atof(tok);
             shape = new Cuboid(size);
         }
@@ -145,13 +145,13 @@ void PhysicalEnvironment::parseShapes(cXMLElement *xml)
                 Coord point;
                 point.x = atof(tokenizer.nextToken());
                 if ((tok = tokenizer.nextToken()) == nullptr)
-                    throw cRuntimeError("Missing prism y at %s", element->getSourceLocation());
+                    throw cRuntimeError("Missing prism y at %s", std::string(element->getSourceLocation()).c_str());
                 point.y = atof(tok);
                 point.z = -height / 2;
                 points.push_back(point);
             }
             if (points.size() < 3)
-                throw cRuntimeError("prism needs at least three points at %s", element->getSourceLocation());
+                throw cRuntimeError("prism needs at least three points at %s", std::string(element->getSourceLocation()).c_str());
             convertPoints(points);
             shape = new Prism(height, Polygon(points));
         }
@@ -167,15 +167,15 @@ void PhysicalEnvironment::parseShapes(cXMLElement *xml)
                 Coord point;
                 point.x = atof(tokenizer.nextToken());
                 if ((tok = tokenizer.nextToken()) == nullptr)
-                    throw cRuntimeError("Missing polyhedron y at %s", element->getSourceLocation());
+                    throw cRuntimeError("Missing polyhedron y at %s", std::string(element->getSourceLocation()).c_str());
                 point.y = atof(tok);
                 if ((tok = tokenizer.nextToken()) == nullptr)
-                    throw cRuntimeError("Missing polyhedron z at %s", element->getSourceLocation());
+                    throw cRuntimeError("Missing polyhedron z at %s", std::string(element->getSourceLocation()).c_str());
                 point.z = atof(tok);
                 points.push_back(point);
             }
             if (points.size() < 4)
-                throw cRuntimeError("polyhedron needs at least four points at %s", element->getSourceLocation());
+                throw cRuntimeError("polyhedron needs at least four points at %s", std::string(element->getSourceLocation()).c_str());
             convertPoints(points);
             shape = new Polyhedron(points);
         }
@@ -253,13 +253,13 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
         {
             cStringTokenizer tokenizer(orientationAttribute);
             if ((tok = tokenizer.nextToken()) == nullptr)
-                throw cRuntimeError("Missing orientation alpha at %s", element->getSourceLocation());
+                throw cRuntimeError("Missing orientation alpha at %s", std::string(element->getSourceLocation()).c_str());
             auto alpha = deg(atof(tok));
             if ((tok = tokenizer.nextToken()) == nullptr)
-                throw cRuntimeError("Missing orientation beta at %s", element->getSourceLocation());
+                throw cRuntimeError("Missing orientation beta at %s", std::string(element->getSourceLocation()).c_str());
             auto beta = deg(atof(tok));
             if ((tok = tokenizer.nextToken()) == nullptr)
-                throw cRuntimeError("Missing orientation gamma at %s", element->getSourceLocation());
+                throw cRuntimeError("Missing orientation gamma at %s", std::string(element->getSourceLocation()).c_str());
             auto gamma = deg(atof(tok));
             orientation = Quaternion(EulerAngles(alpha, beta, gamma));
         }
@@ -274,13 +274,13 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
         if (!strcmp(shapeType, "cuboid"))
         {
             if ((tok = shapeTokenizer.nextToken()) == nullptr)
-                throw cRuntimeError("Missing cuboid x at %s", element->getSourceLocation());
+                throw cRuntimeError("Missing cuboid x at %s", std::string(element->getSourceLocation()).c_str());
             size.x = atof(tok);
             if ((tok = shapeTokenizer.nextToken()) == nullptr)
-                throw cRuntimeError("Missing cuboid y at %s", element->getSourceLocation());
+                throw cRuntimeError("Missing cuboid y at %s", std::string(element->getSourceLocation()).c_str());
             size.y = atof(tok);
             if ((tok = shapeTokenizer.nextToken()) == nullptr)
-                throw cRuntimeError("Missing cuboid z at %s", element->getSourceLocation());
+                throw cRuntimeError("Missing cuboid z at %s", std::string(element->getSourceLocation()).c_str());
             size.z = atof(tok);
             shape = new Cuboid(size);
             shapes.push_back(shape);
@@ -288,7 +288,7 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
         else if (!strcmp(shapeType, "sphere"))
         {
             if ((tok = shapeTokenizer.nextToken()) == nullptr)
-                throw cRuntimeError("Missing sphere radius at %s", element->getSourceLocation());
+                throw cRuntimeError("Missing sphere radius at %s", std::string(element->getSourceLocation()).c_str());
             double radius = atof(tok);
             shape = new Sphere(radius);
             size = Coord(radius, radius, radius) * 2;
@@ -298,7 +298,7 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
         {
             double height;
             if ((tok = shapeTokenizer.nextToken()) == nullptr)
-                throw cRuntimeError("Missing prism height at %s", element->getSourceLocation());
+                throw cRuntimeError("Missing prism height at %s", std::string(element->getSourceLocation()).c_str());
             height = atof(tok);
             std::vector<Coord> points;
             while (shapeTokenizer.hasMoreTokens())
@@ -306,13 +306,13 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
                 Coord point;
                 point.x = atof(shapeTokenizer.nextToken());
                 if ((tok = shapeTokenizer.nextToken()) == nullptr)
-                    throw cRuntimeError("Missing prism y at %s", element->getSourceLocation());
+                    throw cRuntimeError("Missing prism y at %s", std::string(element->getSourceLocation()).c_str());
                 point.y = atof(tok);
                 point.z = -height / 2;
                 points.push_back(point);
             }
             if (points.size() < 3)
-                throw cRuntimeError("prism needs at least three points at %s", element->getSourceLocation());
+                throw cRuntimeError("prism needs at least three points at %s", std::string(element->getSourceLocation()).c_str());
             size = Box::computeBoundingBox(points).getSize();
             convertPoints(points);
             shape = new Prism(height, Polygon(points));
@@ -326,15 +326,15 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
                 Coord point;
                 point.x = atof(shapeTokenizer.nextToken());
                 if ((tok = shapeTokenizer.nextToken()) == nullptr)
-                    throw cRuntimeError("Missing polyhedron y at %s", element->getSourceLocation());
+                    throw cRuntimeError("Missing polyhedron y at %s", std::string(element->getSourceLocation()).c_str());
                 point.y = atof(tok);
                 if ((tok = shapeTokenizer.nextToken()) == nullptr)
-                    throw cRuntimeError("Missing polyhedron z at %s", element->getSourceLocation());
+                    throw cRuntimeError("Missing polyhedron z at %s", std::string(element->getSourceLocation()).c_str());
                 point.z = atof(tok);
                 points.push_back(point);
             }
             if (points.size() < 4)
-                throw cRuntimeError("polyhedron needs at least four points at %s", element->getSourceLocation());
+                throw cRuntimeError("polyhedron needs at least four points at %s", std::string(element->getSourceLocation()).c_str());
             size = Box::computeBoundingBox(points).getSize();
             convertPoints(points);
             shape = new Polyhedron(points);
@@ -356,13 +356,13 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
             if (!kind)
                 throw cRuntimeError("Missing position kind");
             if ((tok = tokenizer.nextToken()) == nullptr)
-                throw cRuntimeError("Missing position x at %s", element->getSourceLocation());
+                throw cRuntimeError("Missing position x at %s", std::string(element->getSourceLocation()).c_str());
             position.x = atof(tok);
             if ((tok = tokenizer.nextToken()) == nullptr)
-                throw cRuntimeError("Missing position y at %s", element->getSourceLocation());
+                throw cRuntimeError("Missing position y at %s", std::string(element->getSourceLocation()).c_str());
             position.y = atof(tok);
             if ((tok = tokenizer.nextToken()) == nullptr)
-                throw cRuntimeError("Missing position z at %s", element->getSourceLocation());
+                throw cRuntimeError("Missing position z at %s", std::string(element->getSourceLocation()).c_str());
             position.z = atof(tok);
             if (!strcmp(kind, "min"))
                 position += size / 2;
@@ -405,13 +405,13 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
             {
                 cStringTokenizer tokenizer(lineColorAttribute);
                 if ((tok = tokenizer.nextToken()) == nullptr)
-                    throw cRuntimeError("Missing line-color red at %s", element->getSourceLocation());
+                    throw cRuntimeError("Missing line-color red at %s", std::string(element->getSourceLocation()).c_str());
                 lineColor.red = atoi(tok);
                 if ((tok = tokenizer.nextToken()) == nullptr)
-                    throw cRuntimeError("Missing line-color green at %s", element->getSourceLocation());
+                    throw cRuntimeError("Missing line-color green at %s", std::string(element->getSourceLocation()).c_str());
                 lineColor.green = atoi(tok);
                 if ((tok = tokenizer.nextToken()) == nullptr)
-                    throw cRuntimeError("Missing line-color blue at %s", element->getSourceLocation());
+                    throw cRuntimeError("Missing line-color blue at %s", std::string(element->getSourceLocation()).c_str());
                 lineColor.blue = atoi(tok);
             }
             else
@@ -426,13 +426,13 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
             {
                 cStringTokenizer tokenizer(fillColorAttribute);
                 if ((tok = tokenizer.nextToken()) == nullptr)
-                    throw cRuntimeError("Missing fill-color red at %s", element->getSourceLocation());
+                    throw cRuntimeError("Missing fill-color red at %s", std::string(element->getSourceLocation()).c_str());
                 fillColor.red = atoi(tok);
                 if ((tok = tokenizer.nextToken()) == nullptr)
-                    throw cRuntimeError("Missing fill-color green at %s", element->getSourceLocation());
+                    throw cRuntimeError("Missing fill-color green at %s", std::string(element->getSourceLocation()).c_str());
                 fillColor.green = atoi(tok);
                 if ((tok = tokenizer.nextToken()) == nullptr)
-                    throw cRuntimeError("Missing fill-color blue at %s", element->getSourceLocation());
+                    throw cRuntimeError("Missing fill-color blue at %s", std::string(element->getSourceLocation()).c_str());
                 fillColor.blue = atoi(tok);
             }
             else

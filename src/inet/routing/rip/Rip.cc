@@ -1062,7 +1062,7 @@ void Rip::addRipInterface(const InterfaceEntry *ie, cXMLElement *config)
         if (metricAttr) {
             int metric = atoi(metricAttr);
             if (metric < 0 || metric >= RIP_INFINITE_METRIC)
-                throw cRuntimeError("RIP: invalid metric in <interface> element at %s: %s", config->getSourceLocation(), metricAttr);
+                throw cRuntimeError("RIP: invalid metric in <interface> element at %s: %s", std::string(config->getSourceLocation()).c_str(), metricAttr);
             ripInterface.metric = metric;
         }
 
@@ -1077,7 +1077,7 @@ void Rip::addRipInterface(const InterfaceEntry *ie, cXMLElement *config)
 
         if (mode == static_cast<RipMode>(-1))
             throw cRuntimeError("RIP: invalid mode attribute in <interface> element at %s: %s",
-                    config->getSourceLocation(), ripModeAttr);
+                    std::string(config->getSourceLocation()).c_str(), ripModeAttr);
         ripInterface.mode = mode;
     }
 

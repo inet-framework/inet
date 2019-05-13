@@ -652,7 +652,7 @@ void Ipv4NetworkConfigurator::readInterfaceConfiguration(Topology& topology)
 
         if (amongAttr && *amongAttr) {    // among="X Y Z" means hosts = "X Y Z" towards = "X Y Z"
             if ((hostAttr && *hostAttr) || (towardsAttr && *towardsAttr))
-                throw cRuntimeError("The 'hosts'/'towards' and 'among' attributes are mutually exclusive, at %s", interfaceElement->getSourceLocation());
+                throw cRuntimeError("The 'hosts'/'towards' and 'among' attributes are mutually exclusive, at %s", std::string(interfaceElement->getSourceLocation()).c_str());
             towardsAttr = hostAttr = amongAttr;
         }
 
@@ -726,7 +726,7 @@ void Ipv4NetworkConfigurator::readInterfaceConfiguration(Topology& topology)
             }
         }
         catch (std::exception& e) {
-            throw cRuntimeError("Error in XML <interface> element at %s: %s", interfaceElement->getSourceLocation(), e.what());
+            throw cRuntimeError("Error in XML <interface> element at %s: %s", std::string(interfaceElement->getSourceLocation()).c_str(), e.what());
         }
     }
 }
@@ -965,7 +965,7 @@ void Ipv4NetworkConfigurator::readMulticastGroupConfiguration(Topology& topology
 
         if (amongAttr && *amongAttr) {    // among="X Y Z" means hosts = "X Y Z" towards = "X Y Z"
             if ((hostAttr && *hostAttr) || (towardsAttr && *towardsAttr))
-                throw cRuntimeError("The 'hosts'/'towards' and 'among' attributes are mutually exclusive, at %s", multicastGroupElement->getSourceLocation());
+                throw cRuntimeError("The 'hosts'/'towards' and 'among' attributes are mutually exclusive, at %s", std::string(multicastGroupElement->getSourceLocation()).c_str());
             towardsAttr = hostAttr = amongAttr;
         }
 
@@ -1002,7 +1002,7 @@ void Ipv4NetworkConfigurator::readMulticastGroupConfiguration(Topology& topology
             }
         }
         catch (std::exception& e) {
-            throw cRuntimeError("Error in XML <multicast-group> element at %s: %s", multicastGroupElement->getSourceLocation(), e.what());
+            throw cRuntimeError("Error in XML <multicast-group> element at %s: %s", std::string(multicastGroupElement->getSourceLocation()).c_str(), e.what());
         }
     }
 }
@@ -1063,7 +1063,7 @@ void Ipv4NetworkConfigurator::readManualRouteConfiguration(Topology& topology)
             }
         }
         catch (std::exception& e) {
-            throw cRuntimeError("Error in XML <route> element at %s: %s", routeElement->getSourceLocation(), e.what());
+            throw cRuntimeError("Error in XML <route> element at %s: %s", std::string(routeElement->getSourceLocation()).c_str(), e.what());
         }
     }
 }
@@ -1154,7 +1154,7 @@ void Ipv4NetworkConfigurator::readManualMulticastRouteConfiguration(Topology& to
             }
         }
         catch (std::exception& e) {
-            throw cRuntimeError("Error in XML <multicast-route> element at %s: %s", routeElement->getSourceLocation(), e.what());
+            throw cRuntimeError("Error in XML <multicast-route> element at %s: %s", std::string(routeElement->getSourceLocation()).c_str(), e.what());
         }
     }
 }
