@@ -20,6 +20,13 @@ package inet.common.queueing;
 import inet.common.queueing.contract.IPacketConsumer;
 import inet.common.queueing.contract.IPacketProducer;
 
+//
+// This module connects one packet producer to one packet consumer. It can be
+// pushed with packets from the connected packet producer. When this happens,
+// the packet is delayed and eventually pushed to the output. Note that the
+// order of packets may change if the delay parameter is configured to be a
+// distribution.
+//
 simple PacketDelayer like IPacketConsumer, IPacketProducer
 {
     parameters:

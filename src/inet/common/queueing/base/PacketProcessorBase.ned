@@ -17,8 +17,16 @@
 
 package inet.common.queueing.base;
 
+//
+// This is a base module for various packet processing modules which maintains
+// a few statistics.
+//
+// Available display string text format directives:
+//  %p - number of processed packets
+//  %l - processed total packet length
+//
 simple PacketProcessorBase
 {
     parameters:
-        string displayStringTextFormat = default("processed %p pk (%l)"); // %p number of processed packets, %l processed total packet length
+        string displayStringTextFormat = default("processed %p pk (%l)"); // determines the text that is written on top of the submodule
 }

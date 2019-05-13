@@ -27,7 +27,7 @@ import inet.common.queueing.contract.IPacketProducer;
 simple PacketProducer extends PacketSourceBase like IPacketProducer
 {
     parameters:
-        volatile double productionInterval @unit(s);
+        volatile double productionInterval @unit(s); // elapsed time between subsequent packets pushed to the connected packet consumer
         @class(PacketProducer);
         @display("i=block/source");
         @signal[packetCreated](type=inet::Packet);

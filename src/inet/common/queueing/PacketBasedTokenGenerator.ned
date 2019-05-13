@@ -23,7 +23,7 @@ import inet.common.queueing.contract.IPacketConsumer;
 simple PacketBasedTokenGenerator extends PacketSinkBase like IPacketConsumer
 {
     parameters:
-        string serverModule;
+        string serverModule; // module path of the packet server where the tokens are generated via C++ method call
         int numTokensPerPacket = default(1);
         int numTokensPerBit = default(0);
         displayStringTextFormat = default("processed %p pk (%l)\ngenerated %t tk"); // %p number of packet, %l total length

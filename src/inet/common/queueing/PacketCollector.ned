@@ -27,7 +27,7 @@ import inet.common.queueing.contract.IPacketCollector;
 simple PacketCollector extends PacketSinkBase like IPacketCollector
 {
     parameters:
-        volatile double collectionInterval @unit(s); // elapsed time between two subsequent packets popped from the connected packet provider
+        volatile double collectionInterval @unit(s); // elapsed time between subsequent packets popped from the connected packet provider
         @class(PacketCollector);
     gates:
         input in @labels(pop);

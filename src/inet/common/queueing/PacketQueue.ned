@@ -25,28 +25,32 @@ import inet.common.queueing.contract.IPacketQueue;
 // among others, to be used in MAC protocols, traffic conditioning, and quality
 // of services. This module can be used on its own, but it's also often supplemented
 // by additional queueing components such as servers, classifiers, schedulers,
-// and multiplexers. This kind of composition allows to form a larger module
+// multiplexers, etc. This kind of composition allows to form a larger module
 // which can act as a packet queue with more complex behavior.
 //
 // By default, this module acts as a standard FIFO queue with an infinite
-// internal buffer. The queue can also be configured to limit the number of
-// packets and the total data length of packets in the internal buffer. It's
-// also possible to use an external buffer, which can be shared among multiple
+// internal buffer. Nevertheless, it can also be configured to limit the number
+// of packets and the total data length of packets in the internal buffer.
+// If the queue becomes overloaded by surpassing the limits of the internal
+// buffer, an error is raised unless a packet drop algorithm is configured.
+//
+// When a packet drop algorithm is used, then one or more packets are dropped
+// until the storage limits are met according to the dropping strategy. Packets
+// are only dropped after the new packet has been inserted into the queue. This
+// method allows higher priority packets to take precedence over already stored
+// lower priority packets even if the queue is already full.
+//
+// The queue can also keep the packets sorted according to a comparator function.
+// If a comparator is not configured, then packets are pushed at the back of the
+// queue and they are kept in this order. Packets are always popped at the front
+// of the queue.
+//
+// It's also possible to use an external buffer, which can be shared among multiple
 // queues. In this case, the storage limits are configured on the packet buffer,
 // which also takes care of dropping packets from either this queue or some
 // other queues as necessary.
 //
-// If the queue becomes overloaded by surpassing the limits of the internal
-// buffer, an error is raised unless a packet drop algorithm is configured.
-// When a packet drop algorithm is used, then one or more packets are dropped
-// until the storage limits are met according to the dropping strategy, but
-// only after the new packet has been inserted into the queue. This method
-// allows higher priority packets to take precedence over already stored lower
-// priority packets even if the queue is already full.
-//
-// The queue can also keep the packets sorted according to a comparator function.
-// If a comparator is not configured, then packets are pushed at the back of the
-// queue and they are kept in this order.
+// @see IPacketBuffer
 //
 simple PacketQueue extends PacketQueueBase like IPacketQueue
 {

@@ -21,7 +21,7 @@ package inet.common.queueing.contract;
 // This module interface is implemented by packet filter modules. A packet filter
 // connects one input to one output. It can operate in both active and passive
 // mode. Packets can be pushed into its input or packets can be popped from its
-// output. Received packets are either dropped, if they don't match the filter
+// output. Processed packets are either dropped, if they don't match the filter
 // criteria, or they are passed through without any delay or reordering.
 //
 moduleinterface IPacketFilter extends IPacketSink, IPacketSource

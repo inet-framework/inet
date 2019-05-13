@@ -17,6 +17,13 @@
 
 package inet.common.queueing.base;
 
+//
+// This is a base module for various packet filter modules. Derived modules must
+// implement a single packet matcher function which determines if a packet is to
+// be passed through or filtered out.
+//
+// @see IPacketFilter
+//
 simple PacketFilterBase
 {
     parameters:

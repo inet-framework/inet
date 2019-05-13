@@ -17,6 +17,9 @@
 
 package inet.common.queueing;
 
+//
+// This is a limited packet queue which drops packets at the head of the queue.
+//
 simple DropHeadQueue extends PacketQueue
 {
     parameters:

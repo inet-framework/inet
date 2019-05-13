@@ -20,6 +20,9 @@ package inet.common.queueing;
 import inet.common.queueing.base.PacketServerBase;
 import inet.common.queueing.contract.IPacketServer;
 
+//
+// %n number of available tokens
+//
 simple TokenBasedServer extends PacketServerBase like IPacketServer
 {
     parameters:
@@ -28,7 +31,7 @@ simple TokenBasedServer extends PacketServerBase like IPacketServer
         volatile double tokenProductionInterval @unit(s) = default(0);
         volatile int tokenConsumptionPerPacket = default(1);
         volatile int tokenConsumptionPerBit = default(0);
-        displayStringTextFormat = default("contains %n tk\nserved %p pk (%l)"); // %n number of available tokens
+        displayStringTextFormat = default("contains %n tk\nserved %p pk (%l)"); // determines display string text above the submodule
         @signal[tokensDepleted];
         @class(TokenBasedServer);
 }

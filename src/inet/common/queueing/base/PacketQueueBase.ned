@@ -18,19 +18,24 @@
 package inet.common.queueing.base;
 
 //
-// Format directives:
-//  - %p number of packet
-//  - %l total length
-//  - %u number of pushed packets
-//  - %o number of popped packets
-//  - %r number of removed packets
-//  - %d number of dropped packets
-//  - %n name of next popped packet
+// This is a base module for various packet queue modules which maintains a few
+// statistics.
+//
+// Available display string format directives:
+//  %p - number of packet
+//  %l - total length
+//  %u - number of pushed packets
+//  %o - number of popped packets
+//  %r - number of removed packets
+//  %d - number of dropped packets
+//  %n - name of next popped packet
+//
+// @see IPacketQueue
 //
 simple PacketQueueBase
 {
     parameters:
-        string displayStringTextFormat;
+        string displayStringTextFormat = default("contains %p pk (%l)\npushed %u popped %o dropped %d"); // determines display string text above the submodule
         @display("i=block/queue");
     gates:
         input in;

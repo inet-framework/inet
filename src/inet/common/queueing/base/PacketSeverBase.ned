@@ -17,10 +17,15 @@
 
 package inet.common.queueing.base;
 
+//
+// This is a base module for various packet server modules.
+//
+// @see IPacketServer
+//
 simple PacketServerBase extends PacketSinkBase
 {
     parameters:
-        displayStringTextFormat = default("served %p pk (%l)\n%s"); // %p number of packet, %l total length
+        displayStringTextFormat = default("served %p pk (%l)\n%s");
         @display("i=block/server");
     gates:
         input in;

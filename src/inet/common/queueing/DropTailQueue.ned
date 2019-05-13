@@ -17,6 +17,9 @@
 
 package inet.common.queueing;
 
+//
+// This module is a limited packet queue which drops packets at the tail of the queue.
+//
 simple DropTailQueue extends PacketQueue
 {
     parameters:

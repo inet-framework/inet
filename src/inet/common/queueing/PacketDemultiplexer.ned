@@ -17,8 +17,8 @@
 
 package inet.common.queueing;
 
+import inet.common.queueing.base.PacketProcessorBase;
 import inet.common.queueing.contract.IPacketCollector;
-import inet.common.queueing.contract.IPacketProvider;
 
 //
 // This module connects multiple packet collectors to one packet provider. When

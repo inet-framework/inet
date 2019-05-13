@@ -27,7 +27,7 @@ import inet.common.queueing.contract.IPacketProvider;
 simple PacketProvider extends PacketSourceBase like IPacketProvider
 {
     parameters:
-        volatile double providingInterval @unit(s) = default(0s);
+        volatile double providingInterval @unit(s) = default(0s); // elapsed time between subsequent packets allowed to be popped by the connected packet collector, 0 means any number of packets can be popped at the same simulation time
         @class(PacketProvider);
         @signal[packetPopped](type=inet::Packet);
         @signal[packetCreated](type=inet::Packet);

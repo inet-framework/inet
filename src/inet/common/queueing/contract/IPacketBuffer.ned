@@ -23,7 +23,7 @@ package inet.common.queueing.contract;
 // resource. Packets can be added to and removed from a packet buffer. When the
 // buffer becomes overloaded, one or more packets are dropped according to the
 // configured dropping strategy. For each dropped packet, the packet owner is
-// notified.
+// notified in order to update its internal state.
 //
 moduleinterface IPacketBuffer
 {

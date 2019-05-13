@@ -20,10 +20,15 @@ package inet.common.queueing;
 import inet.common.queueing.contract.IPacketConsumer;
 import inet.common.queueing.contract.IPacketProducer;
 
+//
+// This module connects one packet producer to one packet consumer. It can be
+// pushed with packets from the connected packet producer. When this happens,
+// one or more copy of the packet is pushed to the output gate.
+//
 simple PacketDuplicator like IPacketConsumer, IPacketProducer
 {
     parameters:
-        volatile int numDuplicates = default(1);
+        volatile int numDuplicates = default(1); // number of duplicates, 0 means only the original packet is forwarded
         @display("i=block/star");
     gates:
         input in @labels(push);

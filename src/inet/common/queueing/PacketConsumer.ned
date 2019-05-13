@@ -27,7 +27,7 @@ import inet.common.queueing.contract.IPacketConsumer;
 simple PacketConsumer extends PacketSinkBase like IPacketConsumer
 {
     parameters:
-        volatile double consumptionInterval @unit(s) = default(0s); // elapsed time between two subsequent packets pushed by the connected packet producer
+        volatile double consumptionInterval @unit(s) = default(0s); // elapsed time between subsequent packets allowed to be pushed by the connected packet producer, 0 means any number of packets can be pushed at the same simulation time
         @class(PacketConsumer);
         @signal[packetPushed](type=inet::Packet);
     gates:

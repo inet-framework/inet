@@ -17,6 +17,10 @@
 
 package inet.common.queueing;
 
+//
+// This buffer drops packets among the connected packet queues based on their
+// module id.
+//
 simple PriorityBuffer extends PacketBuffer
 {
     parameters:

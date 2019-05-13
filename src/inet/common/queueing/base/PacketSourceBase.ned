@@ -17,14 +17,21 @@
 
 package inet.common.queueing.base;
 
+//
+// This is a base module for various packet source modules. Packets are created
+// randomly with regard to packet length and packet data. The representation of
+// packet data can also be configured.
+//
+// @see IPacketSource
+//
 simple PacketSourceBase extends PacketProcessorBase
 {
     parameters:
-        displayStringTextFormat = default("created %p pk (%l)");
         string packetNameFormat = default("%n-%c"); // %n module name, %c packet number
         string packetRepresentation @units("bitCount","bits","byteCount","bytes","applicationPacket") = default("byteCount"); // determines the chunk of the packet data
         volatile int packetLength @unit(b);
         volatile int packetData = default(-1);
+        displayStringTextFormat = default("created %p pk (%l)");
         @class(PacketSourceBase);
         @display("i=block/source");
 }

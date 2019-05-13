@@ -24,11 +24,20 @@ import inet.common.queueing.contract.IPacketProducer;
 // This module is an active packet source which pushes packets into the connected
 // packet consumer. All pushed packets are read from a PCAP file.
 //
+// Available packet name format directives:
+//  %s - source address and/or port
+//  %d - destination address and/or port
+//  %p - innermost packet protocol
+//  %t - innermost packet protocol subtype
+//  %l - packet length
+//  %i - packet data information
+//  %n - number of packets read so far
+//
 simple PcapPacketProducer like IPacketProducer
 {
     parameters:
         string filename; // the PCAP file to be read
-        string packetNameFormat = default("Pcap-%p-%t-%n");
+        string packetNameFormat = default("Pcap-%p-%t-%n"); // determines the name of the packets read from the PCAP file
         @class(PcapPacketProducer);
         @display("i=block/source");
     gates:
