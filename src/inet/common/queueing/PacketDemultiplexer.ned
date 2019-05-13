@@ -25,10 +25,10 @@ import inet.common.queueing.contract.IPacketCollector;
 // a packet is popped by one of the connected packet providers, then the demultiplexer
 // simply pops a packet from the connected packet provider.
 //
-simple PacketDemultiplexer like IPacketCollector // TODO: , IPacketProvider // out gate is vector
+simple PacketDemultiplexer extends PacketProcessorBase like IPacketCollector // TODO: , IPacketProvider // out gate is vector
 {
     parameters:
-        string displayStringTextFormat = default("passed %p pk (%l)"); // %p number of packet, %l total length
+        displayStringTextFormat = default("passed %p pk (%l)");
         @class(PacketDemultiplexer);
         @display("i=block/fork");
     gates:
