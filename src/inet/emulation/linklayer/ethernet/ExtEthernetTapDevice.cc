@@ -151,7 +151,7 @@ bool ExtEthernetTapDevice::notify(int fd)
         ASSERT (nread > 4);
         // buffer[0..1]: flags, buffer[2..3]: ethertype
         Packet *packet = new Packet(nullptr, makeShared<BytesChunk>(buffer + 4, nread - 4));
-        EtherEncap::addFcs(packet, FCS_COMPUTED);
+        packet->insertAtBack(makeShared<EthernetFcs>(FCS_COMPUTED));    //TODO get fcsMode from NED parameter
         packet->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ethernetMac);
         packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);
         packet->setName(packetPrinter.printPacketToString(packet, packetNameFormat).c_str());

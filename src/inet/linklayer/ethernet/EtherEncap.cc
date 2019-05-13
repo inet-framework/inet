@@ -162,19 +162,11 @@ void EtherEncap::processPacketFromHigherLayer(Packet *packet)
     ethHeader->setTypeOrLength(typeOrLength);
     packet->insertAtFront(ethHeader);
 
-    EtherEncap::addFcs(packet, fcsMode);
+    packet->insertAtBack(makeShared<EthernetFcs>(fcsMode));
 
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);
     EV_INFO << "Sending " << packet << " to lower layer.\n";
     send(packet, "lowerLayerOut");
-}
-
-void EtherEncap::addFcs(Packet *packet, FcsMode fcsMode)
-{
-    const auto& ethFcs = makeShared<EthernetFcs>();
-    ethFcs->setFcsMode(fcsMode);
-    ethFcs->setFcs(0L);     // unfilled
-    packet->insertAtBack(ethFcs);
 }
 
 const Ptr<const EthernetMacHeader> EtherEncap::decapsulateMacHeader(Packet *packet)
@@ -285,7 +277,7 @@ void EtherEncap::handleSendPause(cMessage *msg)
     packet->insertAtFront(frame);
     hdr->setTypeOrLength(ETHERTYPE_FLOW_CONTROL);
     packet->insertAtFront(hdr);
-    addFcs(packet, fcsMode);
+    packet->insertAtBack(makeShared<EthernetFcs>(fcsMode));
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);
 
     EV_INFO << "Sending " << frame << " to lower layer.\n";

@@ -74,8 +74,6 @@ class INET_API EtherEncap : public Ieee8022Llc
     /**
      * Inserts the FCS chunk to end of packet. Fill the fcsMode and set fcs to 0.
      */
-    static void addFcs(Packet *packet, FcsMode fcsMode);
-
     static const Ptr<const EthernetMacHeader> decapsulateMacHeader(Packet *packet);
 };
 
