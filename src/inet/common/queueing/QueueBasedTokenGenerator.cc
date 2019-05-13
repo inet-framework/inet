@@ -30,6 +30,7 @@ void QueueBasedTokenGenerator::initialize(int stage)
         queue = getModuleFromPar<IPacketQueue>(par("queueModule"), this);
         check_and_cast<cSimpleModule *>(queue)->subscribe(packetPoppedSignal, this);
         server = getModuleFromPar<TokenBasedServer>(par("serverModule"), this);
+        numTokens = par("numTokens");
         numTokensGenerated = 0;
         WATCH(numTokensGenerated);
     }
@@ -59,9 +60,8 @@ void QueueBasedTokenGenerator::receiveSignal(cComponent *source, simsignal_t sig
 {
     Enter_Method_Silent();
     if (signal == packetPoppedSignal) {
-        auto numTokens = 1;
-        numTokensGenerated += numTokens;
         server->addTokens(numTokens);
+        numTokensGenerated += numTokens;
         updateDisplayString();
     }
     else

@@ -32,6 +32,7 @@ class INET_API QueueBasedTokenGenerator : public cSimpleModule, public cListener
     const char *displayStringTextFormat = nullptr;
     IPacketQueue *queue = nullptr;
     TokenBasedServer *server = nullptr;
+    int numTokens = -1;
 
     int numTokensGenerated = -1;
 

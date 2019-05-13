@@ -37,6 +37,7 @@ simple QueueBasedTokenGenerator
         string queueModule; // module path of the observed packet queue
         string serverModule; // module path of the packet server where the tokens are generated via C++ method call
         string displayStringTextFormat = default("generated %t tk"); // determines display string text above the submodule
+        int numTokens = default(1); // number of tokens generated when the queue becomes empty
         @class(QueueBasedTokenGenerator);
         @display("i=block/control");
 }
