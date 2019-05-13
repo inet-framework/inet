@@ -28,15 +28,49 @@ namespace physicallayer {
 class INET_API IsotropicDimensionalBackgroundNoise : public cModule, public IBackgroundNoise
 {
   protected:
+    class TimeGainEntry {
+    public:
+      char timeUnit;
+      double time;
+      double gain;
+
+    public:
+      TimeGainEntry(char timeUnit, double time, double gain) :
+          timeUnit(timeUnit),
+          time(time),
+          gain(gain)
+      {}
+    };
+
+    class FrequencyGainEntry {
+    public:
+      char frequencyUnit;
+      double frequency;
+      double gain;
+
+    public:
+      FrequencyGainEntry(char frequencyUnit, double frequency, double gain) :
+          frequencyUnit(frequencyUnit),
+          frequency(frequency),
+          gain(gain)
+      {}
+    };
+
+  protected:
     DimensionSet dimensions;
     Mapping::InterpolationMethod interpolationMode;
     W power;
+
+    std::vector<TimeGainEntry> timeGains;
+    std::vector<FrequencyGainEntry> frequencyGains;
 
   protected:
     virtual void initialize(int stage) override;
 
   public:
     IsotropicDimensionalBackgroundNoise();
+
+    ConstMapping *createPowerMapping(const simtime_t startTime, const simtime_t endTime, Hz carrierFrequency, Hz bandwidth, W power) const;
 
   public:
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;

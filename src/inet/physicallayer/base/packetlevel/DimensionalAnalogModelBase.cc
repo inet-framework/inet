@@ -114,6 +114,9 @@ const INoise *DimensionalAnalogModelBase::computeNoise(const IListening *listeni
     const DimensionalNoise *dimensionalBackgroundNoise = dynamic_cast<const DimensionalNoise *>(interference->getBackgroundNoise());
     if (dimensionalBackgroundNoise) {
         const ConstMapping *backgroundNoisePower = dimensionalBackgroundNoise->getPower();
+        EV_TRACE << "Background noise power begin " << endl;
+        backgroundNoisePower->print(EVSTREAM);
+        EV_TRACE << "Background noise power end" << endl;
         if (backgroundNoisePower->getDimensionSet().hasDimension(Dimension::frequency) || (carrierFrequency == dimensionalBackgroundNoise->getCarrierFrequency() && bandwidth >= dimensionalBackgroundNoise->getBandwidth()))
             receptionPowers.push_back(const_cast<ConstMapping *>(backgroundNoisePower));
     }
