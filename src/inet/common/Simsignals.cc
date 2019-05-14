@@ -86,6 +86,9 @@ simsignal_t isisAdjChangedSignal = cComponent::registerSignal("isisAdjChanged");
 //...
 
 // general
+simsignal_t packetCreatedSignal = cComponent::registerSignal("packetCreated");
+simsignal_t packetAddedSignal = cComponent::registerSignal("packetAdded");
+simsignal_t packetRemovedSignal = cComponent::registerSignal("packetRemoved");
 simsignal_t packetDroppedSignal = cComponent::registerSignal("packetDropped");
 
 simsignal_t packetSentToUpperSignal = cComponent::registerSignal("packetSentToUpper");
@@ -99,6 +102,9 @@ simsignal_t packetReceivedFromPeerSignal = cComponent::registerSignal("packetRec
 
 simsignal_t packetSentSignal = cComponent::registerSignal("packetSent");
 simsignal_t packetReceivedSignal = cComponent::registerSignal("packetReceived");
+
+simsignal_t packetPushedSignal = cComponent::registerSignal("packetPushed");
+simsignal_t packetPoppedSignal = cComponent::registerSignal("packetPopped");
 
 void printSignalBanner(simsignal_t signalID, const cObject *obj, const cObject *details)
 {

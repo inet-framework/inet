@@ -47,14 +47,14 @@ std::vector<Packet *> *OriginatorMacDataService::fragmentIfNeeded(Packet *frame)
     return nullptr;
 }
 
-std::vector<Packet *> *OriginatorMacDataService::extractFramesToTransmit(PendingQueue *pendingQueue)
+std::vector<Packet *> *OriginatorMacDataService::extractFramesToTransmit(queueing::IPacketQueue *pendingQueue)
 {
     if (pendingQueue->isEmpty())
         return nullptr;
     else {
         // if (msduRateLimiting)
         //    txRateLimitingIfNeeded();
-        Packet *packet = pendingQueue->pop();
+        Packet *packet = pendingQueue->popPacket();
         if (sequenceNumberAssigment) {
             auto frame = packet->removeAtFront<Ieee80211DataOrMgmtHeader>();
             assignSequenceNumber(frame);

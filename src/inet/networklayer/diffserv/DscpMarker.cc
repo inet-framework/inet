@@ -38,32 +38,34 @@ Define_Module(DscpMarker);
 
 simsignal_t DscpMarker::packetMarkedSignal = registerSignal("packetMarked");
 
-void DscpMarker::initialize()
+void DscpMarker::initialize(int stage)
 {
-    parseDSCPs(par("dscps"), "dscps", dscps);
-    if (dscps.empty())
-        dscps.push_back(DSCP_BE);
-    while ((int)dscps.size() < gateSize("in"))
-        dscps.push_back(dscps.back());
+    PacketQueueingElementBase::initialize(stage);
+    if (stage == INITSTAGE_LOCAL) {
+        parseDSCPs(par("dscps"), "dscps", dscps);
+        if (dscps.empty())
+            dscps.push_back(DSCP_BE);
+        while ((int)dscps.size() < gateSize("in"))
+            dscps.push_back(dscps.back());
 
-    numRcvd = 0;
-    numMarked = 0;
-    WATCH(numRcvd);
-    WATCH(numMarked);
+        numRcvd = 0;
+        numMarked = 0;
+        WATCH(numRcvd);
+        WATCH(numMarked);
+    }
 }
 
-void DscpMarker::handleMessage(cMessage *msg)
+void DscpMarker::pushPacket(Packet *packet, cGate *inputGate)
 {
-    Packet *packet = check_and_cast<Packet *>(msg);
     numRcvd++;
-    int dscp = dscps.at(msg->getArrivalGate()->getIndex());
+    int dscp = dscps.at(inputGate->getIndex());
     if (markPacket(packet, dscp)) {
         emit(packetMarkedSignal, packet);
         numMarked++;
     }
-
-    send(packet, "out");
+    pushOrSendPacket(packet, gate("out"));
 }
+
 void DscpMarker::refreshDisplay() const
 {
     char buf[50] = "";

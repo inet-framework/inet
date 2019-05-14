@@ -12,6 +12,7 @@
 
 package inet.linklayer.lmac;
 
+import inet.common.queueing.contract.IPacketQueue;
 import inet.linklayer.base.MacProtocolBase;
 import inet.linklayer.contract.IMacProtocol;
 
@@ -21,7 +22,7 @@ import inet.linklayer.contract.IMacProtocol;
 //
 // See C++ documentation for details
 //
-simple LMac extends MacProtocolBase like IMacProtocol
+module LMac extends MacProtocolBase like IMacProtocol
 {
     parameters:
         string address = default("auto"); // MAC address as hex string (12 hex digits), or
@@ -47,5 +48,12 @@ simple LMac extends MacProtocolBase like IMacProtocol
         @class(LMac);
         @statistic[packetDropIncorrectlyReceived](title="packet drop: incorrectly received"; source=packetDropReasonIsIncorrectlyReceived(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetDropNotAddressedToUs](title="packet drop: not addressed to us"; source=packetDropReasonIsNotAddressedToUs(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
+    submodules:
+        queue: <default("DropTailQueue")> like IPacketQueue {
+            parameters:
+                frameCapacity = default(queueLength);
+                @display("p=100,100;q=l2queue");
+        }
+    connections allowunconnected:
 }
 

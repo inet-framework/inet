@@ -135,21 +135,13 @@ void Hcf::processUpperFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtH
         throw cRuntimeError("Unknown message type");
     EV_INFO << "The upper frame has been classified as a " << printAccessCategory(ac) << " frame." << endl;
     auto pendingQueue = edca->getEdcaf(ac)->getPendingQueue();
-    if (pendingQueue->insert(packet)) {
-        EV_INFO << "Frame " << packet->getName() << " has been inserted into the PendingQueue." << endl;
+    pendingQueue->pushPacket(packet);
+    if (!pendingQueue->isEmpty()) {
         auto edcaf = edca->getChannelOwner();
         if (edcaf == nullptr || edcaf->getAccessCategory() != ac) {
             EV_DETAIL << "Requesting channel for access category " << printAccessCategory(ac) << endl;
             edca->requestChannelAccess(ac, this);
         }
-    }
-    else {
-        EV_INFO << "Frame " << packet->getName() << " has been dropped because the PendingQueue is full." << endl;
-        PacketDropDetails details;
-        details.setReason(QUEUE_OVERFLOW);
-        details.setLimit(pendingQueue->getMaxQueueSize());
-        emit(packetDroppedSignal, packet, &details);
-        delete packet;
     }
 }
 

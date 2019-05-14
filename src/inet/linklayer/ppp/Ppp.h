@@ -19,6 +19,7 @@
 #define __INET_PPP_H
 
 #include "inet/common/INETDefs.h"
+#include "inet/common/queueing/contract/IPacketQueue.h"
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/packet/Packet.h"
@@ -28,7 +29,6 @@
 namespace inet {
 
 class InterfaceEntry;
-class IPassiveQueue;
 
 /**
  * PPP implementation.
@@ -36,21 +36,20 @@ class IPassiveQueue;
 class INET_API Ppp : public MacBase
 {
   protected:
+    const char *displayStringTextFormat = nullptr;
     bool sendRawBytes = false;
-    long txQueueLimit = -1;
     cGate *physOutGate = nullptr;
     cChannel *datarateChannel = nullptr;    // nullptr if we're not connected
 
-    cQueue txQueue;
     cMessage *endTransmissionEvent = nullptr;
-    IPassiveQueue *queueModule = nullptr;
+    queueing::IPacketQueue *queue = nullptr;
 
     std::string oldConnColor;
 
     // statistics
     long numSent = 0;
     long numRcvdOK = 0;
-    long numBitErr = 0;
+    long numDroppedBitErr = 0;
     long numDroppedIfaceDown = 0;
 
     static simsignal_t transmissionStateChangedSignal;

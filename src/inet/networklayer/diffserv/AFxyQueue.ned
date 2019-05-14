@@ -18,8 +18,10 @@
 
 package inet.networklayer.diffserv;
 
-import inet.common.queue.FifoQueue;
-import inet.common.queue.RedDropper;
+import inet.common.queueing.PacketMultiplexer;
+import inet.common.queueing.PacketQueue;
+import inet.common.queueing.RedDropper;
+
 
 //
 // This is an example queue, that implements
@@ -63,24 +65,44 @@ module AFxyQueue
         input afx3In;
         output out;
     submodules:
-        fifoQueue: FifoQueue {
-            @display("p=250,100");
-        }
-        redDropper: RedDropper {
-            numGates = 3;
+        red1: RedDropper {
+            collectionModule = "^.queue";
             wq = wq;
-            minths = string(afx1Minth) + " " + string(afx2Minth) + " " + string(afx3Minth);
-            maxths = string(afx1Maxth) + " " + string(afx2Maxth) + " " + string(afx3Maxth);
-            maxps = string(afx1Maxp) + " " + string(afx2Maxp) + " " + string(afx3Maxp);
+            minth = afx1Minth;
+            maxth = afx1Maxth;
+            maxp = afx1Maxp;
             @display("p=100,100");
         }
+        red2: RedDropper {
+            collectionModule = "^.queue";
+            wq = wq;
+            minth = afx2Minth;
+            maxth = afx2Maxth;
+            maxp = afx2Maxp;
+            @display("p=100,200");
+        }
+        red3: RedDropper {
+            collectionModule = "^.queue";
+            wq = wq;
+            minth = afx3Minth;
+            maxth = afx3Maxth;
+            maxp = afx3Maxp;
+            @display("p=100,300");
+        }
+        mux: PacketMultiplexer {
+            @display("p=200,200");
+        }
+        queue: PacketQueue {
+            @display("p=300,200");
+        }
     connections:
-        afx1In --> { @display("m=w"); } --> redDropper.in[0];
-        afx2In --> { @display("m=w"); } --> redDropper.in[1];
-        afx3In --> { @display("m=w"); } --> redDropper.in[2];
-        redDropper.out[0] --> { @display("m=m,100,20,0,50"); } --> fifoQueue.in++;
-        redDropper.out[1] --> { @display("m=m,100,50,0,50"); } --> fifoQueue.in++;
-        redDropper.out[2] --> { @display("m=m,100,80,0,50"); } --> fifoQueue.in++;
-        fifoQueue.out --> { @display("m=e"); } --> out;
+        afx1In --> { @display("m=w"); } --> red1.in;
+        afx2In --> { @display("m=w"); } --> red2.in;
+        afx3In --> { @display("m=w"); } --> red3.in;
+        red1.out --> { @display("m=m,100,20,0,50"); } --> mux.in++;
+        red2.out --> { @display("m=m,100,50,0,50"); } --> mux.in++;
+        red3.out --> { @display("m=m,100,80,0,50"); } --> mux.in++;
+        mux.out --> queue.in;
+        queue.out --> { @display("m=e"); } --> out;
 }
 

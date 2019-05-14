@@ -33,7 +33,7 @@ void BgpConfigReader::loadConfigFromXML(cXMLElement *bgpConfig, BgpRouter *bgpRo
     this->bgpRouter = bgpRouter;
 
     if (strcmp(bgpConfig->getTagName(), "BGPConfig"))
-        throw cRuntimeError("Cannot read BGP configuration, unaccepted '%s' node at %s", bgpConfig->getTagName(), bgpConfig->getSourceLocation());
+        throw cRuntimeError("Cannot read BGP configuration, unaccepted '%s' node at %s", bgpConfig->getTagName(), std::string(bgpConfig->getSourceLocation()).c_str());
 
     // load bgp timer parameters informations
     cXMLElement *paramNode = bgpConfig->getElementByPath("TimerParams");
@@ -311,7 +311,7 @@ bool BgpConfigReader::getBoolAttrOrPar(const cXMLElement& ifConfig, const char *
             return true;
         if (strcmp(attrStr, "false") == 0 || strcmp(attrStr, "0") == 0)
             return false;
-        throw cRuntimeError("Invalid boolean attribute %s = '%s' at %s", name, attrStr, ifConfig.getSourceLocation());
+        throw cRuntimeError("Invalid boolean attribute %s = '%s' at %s", name, attrStr, std::string(ifConfig.getSourceLocation()).c_str());
     }
     return bgpModule->par(name);
 }

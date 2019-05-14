@@ -486,11 +486,11 @@ const char *NetworkConfiguratorBase::getWirelessId(InterfaceEntry *interfaceEntr
                 (interfaceMatcher.matchesAny() || interfaceMatcher.matches(interfaceEntry->getInterfaceName())))
             {
                 const char *idAttr = wirelessElement->getAttribute("id");    // identifier of wireless connection
-                return idAttr ? idAttr : wirelessElement->getSourceLocation();
+                return idAttr ? idAttr : std::string(wirelessElement->getSourceLocation()).c_str();
             }
         }
         catch (std::exception& e) {
-            throw cRuntimeError("Error in XML <wireless> element at %s: %s", wirelessElement->getSourceLocation(), e.what());
+            throw cRuntimeError("Error in XML <wireless> element at %s: %s", std::string(wirelessElement->getSourceLocation()).c_str(), e.what());
         }
     }
     cModule *interfaceModule = interfaceEntry;

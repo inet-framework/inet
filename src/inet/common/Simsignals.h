@@ -96,6 +96,9 @@ extern INET_API simsignal_t    // admin
 //...
 
 // general
+    packetCreatedSignal,
+    packetAddedSignal,
+    packetRemovedSignal,
     packetDroppedSignal,
 
     packetSentToUpperSignal,
@@ -108,7 +111,10 @@ extern INET_API simsignal_t    // admin
     packetReceivedFromPeerSignal,
 
     packetSentSignal,
-    packetReceivedSignal;
+    packetReceivedSignal,
+
+    packetPushedSignal,
+    packetPoppedSignal;
 
 /**
  * Utility function

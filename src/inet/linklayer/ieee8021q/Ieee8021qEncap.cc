@@ -109,8 +109,6 @@ void Ieee8021qEncap::processPacket(Packet *packet, std::vector<int>& vlanIdFilte
             else
                 vlanTag->setVid(newVlanId);
             packet->insertAtFront(ethernetMacHeader);
-            auto oldFcs = packet->removeAtBack<EthernetFcs>();
-            EtherEncap::addFcs(packet, oldFcs->getFcsMode());
         }
         else
             packet->insertAtFront(ethernetMacHeader);

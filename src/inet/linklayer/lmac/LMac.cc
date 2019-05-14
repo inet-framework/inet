@@ -34,7 +34,6 @@ void LMac::initialize(int stage)
 {
     MacProtocolBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        queueLength = par("queueLength");
         slotDuration = par("slotDuration");
         bitrate = par("bitrate");
         headerLength = b(par("headerLength"));
@@ -53,6 +52,8 @@ void LMac::initialize(int stage)
         // how long does it take to send/receive a control packet
         controlDuration = (double)(headerLength.get() + numSlots + 16) / (double)bitrate;     //FIXME replace 16 to a constant
         EV << "Control packets take : " << controlDuration << " seconds to transmit\n";
+
+        queue = check_and_cast<queueing::IPacketQueue *>(getSubmodule("queue"));
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
         cModule *radioModule = getModuleFromPar<cModule>(par("radioModule"), this);
@@ -62,8 +63,7 @@ void LMac::initialize(int stage)
 
         WATCH(macState);
 
-        EV_DETAIL << "queueLength = " << queueLength
-                  << " slotDuration = " << slotDuration
+        EV_DETAIL << " slotDuration = " << slotDuration
                   << " controlDuration = " << controlDuration
                   << " numSlots = " << numSlots
                   << " bitrate = " << bitrate << endl;
@@ -104,11 +104,6 @@ LMac::~LMac()
     cancelAndDelete(initChecker);
     cancelAndDelete(start_lmac);
     cancelAndDelete(send_control);
-
-    for (auto & elem : macQueue) {
-        delete (elem);
-    }
-    macQueue.clear();
 }
 
 void LMac::configureInterfaceEntry()
@@ -135,26 +130,9 @@ void LMac::configureInterfaceEntry()
 void LMac::handleUpperPacket(Packet *packet)
 {
     encapsulate(packet);
-
-    // message has to be queued if another message is waiting to be send
-    // or if we are already trying to send another message
-
-    if (macQueue.size() <= queueLength) {
-        macQueue.push_back(packet);
-        EV_DETAIL << "packet put in queue\n  queue size: " << macQueue.size() << " macState: " << macState
-                  << "; mySlot is " << mySlot << "; current slot is " << currSlot << endl;
-        ;
-    }
-    else {
-        // queue is full, message has to be deleted
-        EV_DETAIL << "New packet arrived, but queue is FULL, so new packet is deleted\n";
-        PacketDropDetails details;
-        details.setReason(QUEUE_OVERFLOW);
-        details.setLimit(queueLength);
-        emit(packetDroppedSignal, packet, &details);
-        delete packet;
-        EV_DETAIL << "ERROR: Queue is full, forced to delete.\n";
-    }
+    queue->pushPacket(packet);
+    EV_DETAIL << "packet put in queue\n  queue size: " << queue->getNumPackets() << " macState: " << macState
+              << "; mySlot is " << mySlot << "; current slot is " << currSlot << endl;
 }
 
 /**
@@ -453,8 +431,8 @@ void LMac::handleSelfMessage(cMessage *msg)
                 // send first a control message, so that non-receiving nodes can switch off.
                 EV << "Sending a control packet.\n";
                 auto control = makeShared<LMacHeader>();
-                if ((macQueue.size() > 0) && !SETUP_PHASE)
-                    control->setDestAddr(macQueue.front()->peekAtFront<LMacHeader>()->getDestAddr());
+                if ((queue->getNumPackets() > 0) && !SETUP_PHASE)
+                    control->setDestAddr(queue->getPacket(0)->peekAtFront<LMacHeader>()->getDestAddr());
                 else
                     control->setDestAddr(LMAC_NO_RECEIVER);
 
@@ -470,7 +448,7 @@ void LMac::handleSelfMessage(cMessage *msg)
                 packet->insertAtFront(control);
                 packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::lmac);
                 sendDown(packet);
-                if ((macQueue.size() > 0) && (!SETUP_PHASE))
+                if ((queue->getNumPackets() > 0) && (!SETUP_PHASE))
                     scheduleAt(simTime() + controlDuration, sendData);
             }
             else if (msg->getKind() == LMAC_SEND_DATA) {
@@ -483,8 +461,8 @@ void LMac::handleSelfMessage(cMessage *msg)
                     return;
                 }
                 Packet *data = new Packet("Data");
-                data->insertAtBack(macQueue.front()->peekAt(headerLength, macQueue.front()->getTotalLength() - headerLength));
-                const auto& lmacHeader = staticPtrCast<LMacHeader>(macQueue.front()->peekAtFront<LMacHeader>()->dupShared());
+                data->insertAtBack(queue->getPacket(0)->peekAt(headerLength, queue->getPacket(0)->getTotalLength() - headerLength));
+                const auto& lmacHeader = staticPtrCast<LMacHeader>(queue->getPacket(0)->peekAtFront<LMacHeader>()->dupShared());
                 lmacHeader->setType(LMAC_DATA);
                 lmacHeader->setMySlot(mySlot);
                 lmacHeader->setOccupiedSlotsArraySize(numSlots);
@@ -495,8 +473,7 @@ void LMac::handleSelfMessage(cMessage *msg)
                 data->addTag<PacketProtocolTag>()->setProtocol(&Protocol::lmac);
                 EV << "Sending down data packet\n";
                 sendDown(data);
-                delete macQueue.front();
-                macQueue.pop_front();
+                delete queue->popPacket();
                 macState = SEND_DATA;
                 EV_DETAIL << "Old state: SEND_CONTROL, New state: SEND_DATA" << endl;
             }
@@ -683,13 +660,19 @@ void LMac::encapsulate(Packet *netwPkt)
 
 void LMac::flushQueue()
 {
-    // TODO:
-    macQueue.clear();
+    while (!queue->isEmpty()) {
+        auto packet = queue->popPacket();
+        PacketDropDetails details;
+        details.setReason(INTERFACE_DOWN);
+        emit(packetDroppedSignal, packet, &details); //FIXME this signal lumps together packets from the network and packets from higher layers! separate them
+        delete packet;
+    }
 }
 
 void LMac::clearQueue()
 {
-    macQueue.clear();
+    while (!queue->isEmpty())
+        delete queue->popPacket();
 }
 
 void LMac::attachSignal(Packet *macPkt)

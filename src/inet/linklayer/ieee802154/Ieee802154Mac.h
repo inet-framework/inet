@@ -24,9 +24,10 @@
  * part of:    Modifications to the MF-2 framework by CSEM
  **************************************************************************/
 
-#ifndef __INET_CSMA_H
-#define __INET_CSMA_H
+#ifndef __INET_IEEE802154MAC_H
+#define __INET_IEEE802154MAC_H
 
+#include "inet/common/queueing/contract/IPacketQueue.h"
 #include "inet/linklayer/base/MacProtocolBase.h"
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/linklayer/contract/IMacProtocol.h"
@@ -81,7 +82,7 @@ class INET_API Ieee802154Mac : public MacProtocolBase, public IMacProtocol
         , initialCW(0)
         , txPower(0)
         , NB(0)
-        , macQueue()
+        , queue()
         , queueLength(0)
         , txAttempts(0)
         , bitrate(0)
@@ -117,8 +118,6 @@ class INET_API Ieee802154Mac : public MacProtocolBase, public IMacProtocol
     virtual void handleCrashOperation(LifecycleOperation *operation) override {}    //TODO implementation
 
   protected:
-    typedef std::list<Packet *> MacQueue;
-
     /** @name Different tracked statistics.*/
     /*@{*/
     long nbTxFrames;
@@ -272,7 +271,7 @@ class INET_API Ieee802154Mac : public MacProtocolBase, public IMacProtocol
 
     /** @brief A queue to store packets from upper layer in case another
        packet is still waiting for transmission..*/
-    MacQueue macQueue;
+    queueing::IPacketQueue *queue = nullptr;
 
     /** @brief length of the queue*/
     unsigned int queueLength;
@@ -340,5 +339,5 @@ class INET_API Ieee802154Mac : public MacProtocolBase, public IMacProtocol
 
 } // namespace inet
 
-#endif // ifndef __INET_CSMA_H
+#endif // ifndef __INET_IEEE802154MAC_H
 

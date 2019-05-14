@@ -86,33 +86,35 @@ void BehaviorAggregateClassifier::PacketDissectorCallback::visitChunk(const Ptr<
     }
 }
 
-void BehaviorAggregateClassifier::initialize()
+void BehaviorAggregateClassifier::initialize(int stage)
 {
-    numOutGates = gateSize("outs");
-    std::vector<int> dscps;
-    parseDSCPs(par("dscps"), "dscps", dscps);
-    int numDscps = (int)dscps.size();
-    if (numDscps > numOutGates)
-        throw cRuntimeError("%s dscp values are given, but the module has only %d out gates",
-                numDscps, numOutGates);
-    for (int i = 0; i < numDscps; ++i)
-        dscpToGateIndexMap[dscps[i]] = i;
+    PacketClassifierBase::initialize(stage);
+    if (stage == INITSTAGE_LOCAL) {
+        numOutGates = gateSize("out");
+        std::vector<int> dscps;
+        parseDSCPs(par("dscps"), "dscps", dscps);
+        int numDscps = (int)dscps.size();
+        if (numDscps > numOutGates)
+            throw cRuntimeError("%s dscp values are given, but the module has only %d out gates",
+                    numDscps, numOutGates);
+        for (int i = 0; i < numDscps; ++i)
+            dscpToGateIndexMap[dscps[i]] = i;
 
-    numRcvd = 0;
-    WATCH(numRcvd);
+        numRcvd = 0;
+        WATCH(numRcvd);
+    }
 }
 
-void BehaviorAggregateClassifier::handleMessage(cMessage *msg)
+void BehaviorAggregateClassifier::pushPacket(Packet *packet, cGate *inputGate)
 {
-    Packet *packet = check_and_cast<Packet *>(msg);
+    EV_INFO << "Classifying packet " << packet->getName() << ".\n";
     numRcvd++;
-    int clazz = classifyPacket(packet);
-    emit(pkClassSignal, clazz);
-
-    if (clazz >= 0)
-        send(packet, "outs", clazz);
+    int index = classifyPacket(packet);
+    emit(pkClassSignal, index);
+    if (index >= 0)
+        pushOrSendPacket(packet, outputGates[index], consumers[index]);
     else
-        send(packet, "defaultOut");
+        pushOrSendPacket(packet, gate("defaultOutputGate"));
 }
 
 void BehaviorAggregateClassifier::refreshDisplay() const

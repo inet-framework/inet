@@ -422,6 +422,7 @@ void SctpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
 
                 // fill buffer with data from Sctp init ack chunk structure
                 sac->type = sackChunk->getSctpChunkType();
+                sac->flags = 0;
                 sac->length = htons(sackChunk->getByteLength());
                 uint32 cumtsnack = sackChunk->getCumTsnAck();
                 sac->cum_tsn_ack = htonl(cumtsnack);
@@ -453,6 +454,7 @@ void SctpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
 
                 // fill buffer with data from Sctp init ack chunk structure
                 sac->type = sackChunk->getSctpChunkType();
+                sac->flags = 0;
                 sac->length = htons(sackChunk->getByteLength());
                 uint32 cumtsnack = sackChunk->getCumTsnAck();
                 sac->cum_tsn_ack = htonl(cumtsnack);

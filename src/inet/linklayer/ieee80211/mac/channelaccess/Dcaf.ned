@@ -17,9 +17,9 @@
 
 package inet.linklayer.ieee80211.mac.channelaccess;
 
+import inet.common.queueing.contract.IPacketQueue;
 import inet.linklayer.ieee80211.mac.contract.IContention;
 import inet.linklayer.ieee80211.mac.queue.InProgressFrames;
-import inet.linklayer.ieee80211.mac.queue.PendingQueue;
 
 module Dcaf
 {
@@ -33,7 +33,7 @@ module Dcaf
         @signal[channelOwnershipChanged](type=bool);
         @statistic[channelOwnershipChanged](title="channel ownership"; record=count,vector?; interpolationmode=sample-hold);
     submodules:
-        pendingQueue: PendingQueue {
+        pendingQueue: <default("PendingQueue")> like IPacketQueue {
             parameters:
                 @display("p=100,100");
         }
@@ -48,5 +48,6 @@ module Dcaf
             parameters:
                 @display("p=100,300");
         }
+    connections allowunconnected:
 }
 

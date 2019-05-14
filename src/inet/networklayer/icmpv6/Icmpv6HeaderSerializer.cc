@@ -40,7 +40,7 @@ Register_Serializer(Ipv6RouterAdvertisement, Icmpv6HeaderSerializer);
 
 void serializeIpv6NdOptions(MemoryOutputStream& stream, const Ipv6NdOptions& options)
 {
-    for (int i=0; i < options.getOptionArraySize(); i++) {
+    for (size_t i=0; i < options.getOptionArraySize(); i++) {
         const Ipv6NdOption *option = options.getOption(i);
         stream.writeByte(option->getType());
         stream.writeByte(option->getOptionLength());
@@ -86,7 +86,7 @@ void serializeIpv6NdOptions(MemoryOutputStream& stream, const Ipv6NdOptions& opt
         default:
             throw cRuntimeError("Unknown IPv6ND option type=%i", option->getType());
         }
-        for (int j=0; j < option->getPaddingBytesArraySize(); j++)
+        for (size_t j=0; j < option->getPaddingBytesArraySize(); j++)
             stream.writeByte(option->getPaddingBytes(j));
     }
 }
@@ -250,7 +250,7 @@ void Icmpv6HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<con
             stream.writeByte(pkt->getType());
             stream.writeByte(frame->getCode());
             stream.writeUint16Be(frame->getChksum());
-            stream.writeUint32Be(0);   // unused
+            stream.writeUint32Be(frame->getReserved());
             stream.writeIpv6Address(frame->getTargetAddress());
             serializeIpv6NdOptions(stream, frame->getOptions());
             break;
@@ -287,7 +287,16 @@ void Icmpv6HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<con
             stream.writeByte(pkt->getType());
             stream.writeByte(frame->getCode());
             stream.writeUint16Be(frame->getChksum());
-            stream.writeUint32Be(0);   // unused
+            stream.writeUint8(frame->getCurHopLimit());
+            stream.writeUint8(
+                      (frame->getManagedAddrConfFlag() ? 0x80u : 0)
+                    | (frame->getOtherStatefulConfFlag() ? 0x40u : 0)
+                    | (frame->getHomeAgentFlag() ? 0x20u : 0)
+                    | (frame->getReserved() & 0x1fu)
+                    );
+            stream.writeUint16Be(frame->getRouterLifetime());
+            stream.writeUint32Be(frame->getReachableTime());
+            stream.writeUint32Be(frame->getRetransTimer());
             serializeIpv6NdOptions(stream, frame->getOptions());
             break;
         }
@@ -343,10 +352,9 @@ const Ptr<Chunk> Icmpv6HeaderSerializer::deserialize(MemoryInputStream& stream) 
             auto neighbourSol = makeShared<Ipv6NeighbourSolicitation>(); icmpv6Header = neighbourSol;
             neighbourSol->setType(type);
             neighbourSol->setCode(subcode);
-
-            stream.readUint32Be(); // reserved
+            neighbourSol->setReserved(stream.readUint32Be());
             neighbourSol->setTargetAddress(stream.readIpv6Address());
-
+            deserializeIpv6NdOptions(*neighbourSol, neighbourSol->getOptionsForUpdate(), stream);
             break;
         }
 
@@ -359,6 +367,7 @@ const Ptr<Chunk> Icmpv6HeaderSerializer::deserialize(MemoryInputStream& stream) 
             neighbourAd->setSolicitedFlag((reserved & 0x40000000u) != 0);
             neighbourAd->setOverrideFlag((reserved & 0x20000000u) != 0);
             neighbourAd->setReserved(reserved & 0x1fffffffu);
+            neighbourAd->setTargetAddress(stream.readIpv6Address());
             deserializeIpv6NdOptions(*neighbourAd, neighbourAd->getOptionsForUpdate(), stream);
             break;
         }
@@ -376,7 +385,15 @@ const Ptr<Chunk> Icmpv6HeaderSerializer::deserialize(MemoryInputStream& stream) 
             auto routerAd = makeShared<Ipv6RouterAdvertisement>(); icmpv6Header = routerAd;
             routerAd->setType(type);
             routerAd->setCode(subcode);
-            stream.readUint32Be(); // reserved
+            routerAd->setCurHopLimit(stream.readUint8());
+            uint32_t reserved = stream.readUint8(); // reserved
+            routerAd->setManagedAddrConfFlag((reserved & 0x80u) != 0);
+            routerAd->setOtherStatefulConfFlag((reserved & 0x40u) != 0);
+            routerAd->setHomeAgentFlag((reserved & 0x20u) != 0);
+            routerAd->setReserved(reserved & 0x1fu);
+            routerAd->setRouterLifetime(stream.readUint16Be());
+            routerAd->setReachableTime(stream.readUint32Be());
+            routerAd->setRetransTimer(stream.readUint32Be());
             deserializeIpv6NdOptions(*routerAd, routerAd->getOptionsForUpdate(), stream);
             break;
         }

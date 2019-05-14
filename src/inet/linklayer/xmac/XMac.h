@@ -24,7 +24,7 @@
 #include <string>
 #include <vector>
 
-#include "inet/common/INETDefs.h"
+#include "inet/common/queueing/contract/IPacketQueue.h"
 #include "inet/linklayer/base/MacProtocolBase.h"
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/linklayer/contract/IMacProtocol.h"
@@ -65,7 +65,7 @@ class INET_API XMac : public MacProtocolBase, public IMacProtocol
   public:
     XMac()
         : MacProtocolBase()
-        , macQueue()
+        , queue()
         , nbTxDataPackets(0), nbTxPreambles(0), nbRxDataPackets(0), nbRxPreambles(0)
         , nbMissedAcks(0), nbRecvdAcks(0), nbDroppedDataPackets(0), nbTxAcks(0)
         , macState(INIT)
@@ -75,7 +75,6 @@ class INET_API XMac : public MacProtocolBase, public IMacProtocol
         , lastDataPktSrcAddr()
         , lastDataPktDestAddr()
         , txAttempts(0)
-        , queueLength(0)
         , animation(false)
         , slotDuration(0), bitrate(0), checkInterval(0), txPower(0)
         , useMacAcks(0)
@@ -107,8 +106,6 @@ class INET_API XMac : public MacProtocolBase, public IMacProtocol
     virtual void handleCrashOperation(LifecycleOperation *operation) override {}    //TODO implementation
 
   protected:
-    typedef std::list<Packet *> MacQueue;
-
     /** implements MacBase functions */
     //@{
     virtual void flushQueue();
@@ -118,7 +115,7 @@ class INET_API XMac : public MacProtocolBase, public IMacProtocol
 
     /** @brief A queue to store packets from upper layer in case another
     packet is still waiting for transmission.*/
-    MacQueue macQueue;
+    queueing::IPacketQueue *queue = nullptr;
 
     /** @name Different tracked statistics.*/
     /*@{*/
@@ -198,8 +195,6 @@ class INET_API XMac : public MacProtocolBase, public IMacProtocol
     int              txAttempts;
     /*@}*/
 
-    /** @brief The maximum length of the queue */
-    unsigned int queueLength;
     /** @brief Animate (colorize) the nodes.
      *
      * The color of the node reflects its basic status (not the exact state!)
@@ -247,9 +242,6 @@ class INET_API XMac : public MacProtocolBase, public IMacProtocol
 
     /** @brief Internal function to attach a signal to the packet */
     void attachSignal(Packet *packet, simtime_t_cref startTime);
-
-    /** @brief Internal function to add a new packet from upper to the queue */
-    bool addToQueue(Packet *packet);
 
     void decapsulate(Packet *packet);
     void encapsulate(Packet *packet);

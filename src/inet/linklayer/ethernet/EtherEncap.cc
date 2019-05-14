@@ -162,43 +162,11 @@ void EtherEncap::processPacketFromHigherLayer(Packet *packet)
     ethHeader->setTypeOrLength(typeOrLength);
     packet->insertAtFront(ethHeader);
 
-    EtherEncap::addPaddingAndFcs(packet, fcsMode);
+    packet->insertAtBack(makeShared<EthernetFcs>(fcsMode));
 
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);
     EV_INFO << "Sending " << packet << " to lower layer.\n";
     send(packet, "lowerLayerOut");
-}
-
-void EtherEncap::addPaddingAndFcs(Packet *packet, FcsMode fcsMode, B requiredMinBytes)
-{
-    B paddingLength = requiredMinBytes - ETHER_FCS_BYTES - B(packet->getByteLength());
-    if (paddingLength > B(0)) {
-        const auto& ethPadding = makeShared<EthernetPadding>();
-        ethPadding->setChunkLength(paddingLength);
-        packet->insertAtBack(ethPadding);
-    }
-    addFcs(packet, fcsMode);
-}
-
-void EtherEncap::addFcs(Packet *packet, FcsMode fcsMode)
-{
-    const auto& ethFcs = makeShared<EthernetFcs>();
-    ethFcs->setFcsMode(fcsMode);
-
-    // calculate Fcs if needed
-    if (fcsMode == FCS_COMPUTED) {
-        auto ethBytes = packet->peekDataAsBytes();
-        auto bufferLength = B(ethBytes->getChunkLength()).get();
-        auto buffer = new uint8_t[bufferLength];
-        // 1. fill in the data
-        ethBytes->copyToBuffer(buffer, bufferLength);
-        // 2. compute the FCS
-        auto computedFcs = ethernetCRC(buffer, bufferLength);
-        delete [] buffer;
-        ethFcs->setFcs(computedFcs);
-    }
-
-    packet->insertAtBack(ethFcs);
 }
 
 const Ptr<const EthernetMacHeader> EtherEncap::decapsulateMacHeader(Packet *packet)
@@ -309,7 +277,7 @@ void EtherEncap::handleSendPause(cMessage *msg)
     packet->insertAtFront(frame);
     hdr->setTypeOrLength(ETHERTYPE_FLOW_CONTROL);
     packet->insertAtFront(hdr);
-    EtherEncap::addPaddingAndFcs(packet, fcsMode);
+    packet->insertAtBack(makeShared<EthernetFcs>(fcsMode));
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);
 
     EV_INFO << "Sending " << frame << " to lower layer.\n";

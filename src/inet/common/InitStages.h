@@ -68,6 +68,11 @@ enum InitStages {
     INITSTAGE_POWER = 1,
 
     /**
+     * Initialization of queueing modules.
+     */
+    INITSTAGE_QUEUEING = 2,
+
+    /**
      * Initialization of physical layer protocols includes:
      *  - registering radios in the RadioMedium
      *  - initializing radio mode, transmission and reception states
