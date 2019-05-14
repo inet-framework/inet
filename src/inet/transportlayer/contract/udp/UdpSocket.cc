@@ -312,8 +312,8 @@ void UdpSocket::setMulticastSourceFilter(int interfaceId, const L3Address& multi
 bool UdpSocket::belongsToSocket(cMessage *msg) const
 {
     auto& tags = getTags(msg);
-    int socketId = tags.getTag<SocketInd>()->getSocketId();
-    return socketId == this->socketId;
+    auto socketInd = tags.findTag<SocketInd>();
+    return socketInd != nullptr && socketInd->getSocketId() == socketId;
 }
 
 std::string UdpSocket::getReceivedPacketInfo(Packet *pk)

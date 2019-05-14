@@ -42,7 +42,7 @@ simple TokenBucketMeter
         int cbs @unit(B); // committed burst size
         bool colorAwareMode = default(false); // enables color-aware mode
     gates:
-        input in[];
+        input in;
         output greenOut;
         output redOut;
 }

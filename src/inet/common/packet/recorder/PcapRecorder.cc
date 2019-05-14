@@ -33,7 +33,7 @@ PcapRecorder::~PcapRecorder()
 {
 }
 
-PcapRecorder::PcapRecorder() : cSimpleModule(), pcapDumper()
+PcapRecorder::PcapRecorder() : cSimpleModule(), pcapWriter()
 {
 }
 
@@ -101,8 +101,8 @@ void PcapRecorder::initialize()
     }
 
     if (*file) {
-        pcapDumper.openPcap(file, snaplen, par("pcapNetwork"));
-        pcapDumper.setFlushParameter(par("alwaysFlush").boolValue());
+        pcapWriter.openPcap(file, snaplen, par("pcapNetwork"));
+        pcapWriter.setFlushParameter(par("alwaysFlush").boolValue());
     }
 
     WATCH(numRecorded);
@@ -151,7 +151,7 @@ void PcapRecorder::recordPacket(cPacket *msg, bool l2r)
     EV << "PcapRecorder::recordPacket(" << msg->getFullPath() << ", " << l2r << ")\n";
     packetDumper.dumpPacket(l2r, msg);
 
-    if (!pcapDumper.isOpen())
+    if (!pcapWriter.isOpen())
         return;
 
     auto packet = dynamic_cast<Packet *>(msg);
@@ -160,7 +160,7 @@ void PcapRecorder::recordPacket(cPacket *msg, bool l2r)
         auto protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
         for (auto dumpProtocol : dumpProtocols) {
             if (protocol == dumpProtocol) {
-                pcapDumper.writePacket(simTime(), packet);
+                pcapWriter.writePacket(simTime(), packet);
                 numRecorded++;
                 break;
             }
@@ -171,7 +171,7 @@ void PcapRecorder::recordPacket(cPacket *msg, bool l2r)
 void PcapRecorder::finish()
 {
     packetDumper.dump("", "pcapRecorder finished");
-    pcapDumper.closePcap();
+    pcapWriter.closePcap();
 }
 
 } // namespace inet

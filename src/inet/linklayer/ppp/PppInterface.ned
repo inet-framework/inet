@@ -17,7 +17,6 @@
 
 package inet.linklayer.ppp;
 
-import inet.common.queue.IOutputQueue;
 import inet.linklayer.contract.IPppInterface;
 import inet.linklayer.contract.ITrafficConditioner;
 import inet.networklayer.common.InterfaceEntry;
@@ -39,30 +38,21 @@ module PppInterface extends InterfaceEntry like IPppInterface
         inout phys @labels(PppFrame);
     submodules:
         ingressTC: <default("")> like ITrafficConditioner if typename != "" {
-            @display("p=500,200");
+            @display("p=300,100");
         }
         egressTC: <default("")> like ITrafficConditioner if typename != "" {
-            @display("p=100,200");
-        }
-        queue: <default("DropTailQueue")> like IOutputQueue if typename != "" {
-            parameters:
-                @display("p=219,247;q=l2queue");
+            @display("p=100,100");
         }
         ppp: Ppp {
             parameters:
-                queueModule = (!exists(queue) ? "" : "^.queue");
-                txQueueLimit = (!exists(queue) ? 10000 : 1); // queue sends one packet at a time
-                @display("p=300,400");
+                txQueueLimit = default(10000);
+                @display("p=200,200");
         }
     connections:
         upperLayerIn --> { @display("m=n"); } --> egressTC.in if exists(egressTC);
-        upperLayerIn --> { @display("m=n"); } --> queue.in if !exists(egressTC) && exists(queue);
-        upperLayerIn --> { @display("m=n"); } --> ppp.upperLayerIn if !exists(egressTC) && !exists(queue);
+        upperLayerIn --> { @display("m=n"); } --> ppp.upperLayerIn if !exists(egressTC);
 
-        egressTC.out --> queue.in if exists(egressTC) && exists(queue);
-        egressTC.out --> ppp.upperLayerIn if exists(egressTC) && !exists(queue);
-
-        queue.out --> ppp.upperLayerIn if exists(queue);
+        egressTC.out --> ppp.upperLayerIn if exists(egressTC);
 
         phys <--> { @display("m=s"); } <--> ppp.phys;
 

@@ -24,8 +24,8 @@
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/Simsignals.h"
+#include "inet/common/StringFormat.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
-#include "inet/common/queue/IPassiveQueue.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/ppp/Ppp.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
@@ -48,44 +48,25 @@ void Ppp::initialize(int stage)
 
     // all initialization is done in the first stage
     if (stage == INITSTAGE_LOCAL) {
+        displayStringTextFormat = par("displayStringTextFormat");
         sendRawBytes = par("sendRawBytes");
-        txQueue.setName("txQueue");
         endTransmissionEvent = new cMessage("pppEndTxEvent");
-        txQueueLimit = par("txQueueLimit");
         physOutGate = gate("phys$o");
         // we're connected if other end of connection path is an input gate
         bool connected = physOutGate->getPathEndGate()->getType() == cGate::INPUT;
         // if we're connected, get the gate with transmission rate
         datarateChannel = connected ? physOutGate->getTransmissionChannel() : nullptr;
 
-        numSent = numRcvdOK = numBitErr = numDroppedIfaceDown = 0;
+        numSent = numRcvdOK = numDroppedBitErr = numDroppedIfaceDown = 0;
         WATCH(numSent);
         WATCH(numRcvdOK);
-        WATCH(numBitErr);
+        WATCH(numDroppedBitErr);
         WATCH(numDroppedIfaceDown);
 
         subscribe(POST_MODEL_CHANGE, this);
         emit(transmissionStateChangedSignal, 0L);
 
-        // find queueModule
-        queueModule = nullptr;
-    }
-    else if (stage == INITSTAGE_LINK_LAYER) {
-        if (par("queueModule").stringValue()[0]) {
-            cModule *mod = getModuleFromPar<cModule>(par("queueModule"), this);
-            if (mod->isSimple())
-                queueModule = check_and_cast<IPassiveQueue *>(mod);
-            else {
-                cGate *queueOut = mod->gate("out")->getPathStartGate();
-                queueModule = check_and_cast<IPassiveQueue *>(queueOut->getOwnerModule());
-            }
-        }
-
-        // request first frame to send
-        if (queueModule && 0 == queueModule->getNumPendingRequests()) {
-            EV_DETAIL << "Requesting first frame from queue module\n";
-            queueModule->requestPacket();
-        }
+        queue = check_and_cast<queueing::IPacketQueue *>(getSubmodule("queue"));
     }
 }
 
@@ -148,23 +129,7 @@ void Ppp::refreshOutGateConnection(bool connected)
                 datarateChannel->forceTransmissionFinishTime(SIMTIME_ZERO);
         }
 
-        if (queueModule) {
-            // Clear external queue: send a request, and received packet will be deleted in handleMessage()
-            if (0 == queueModule->getNumPendingRequests())
-                queueModule->requestPacket();
-        }
-        else {
-            //Clear inner queue
-            while (!txQueue.isEmpty()) {
-                cMessage *msg = check_and_cast<cMessage *>(txQueue.pop());
-                EV_ERROR << "Interface is not connected, dropping packet " << msg << endl;
-                numDroppedIfaceDown++;
-                PacketDropDetails details;
-                details.setReason(INTERFACE_DOWN);
-                emit(packetDroppedSignal, msg, &details);
-                delete msg;
-            }
-        }
+        flushQueue();
     }
 
     cChannel *oldChannel = datarateChannel;
@@ -181,8 +146,8 @@ void Ppp::refreshOutGateConnection(bool connected)
         interfaceEntry->setDatarate(datarate);
     }
 
-    if (queueModule && 0 == queueModule->getNumPendingRequests())
-        queueModule->requestPacket();
+    if (connected && !endTransmissionEvent->isScheduled() && !queue->isEmpty())
+        startTransmitting(queue->popPacket());
 }
 
 void Ppp::startTransmitting(Packet *msg)
@@ -220,7 +185,7 @@ void Ppp::handleMessageWhenUp(cMessage *message)
 {
     MacBase::handleMessageWhenUp(message);
     if (operationalState == State::STOPPING_OPERATION) {
-        if (queueModule ? queueModule->isEmpty() : txQueue.isEmpty()) {
+        if (queue->isEmpty()) {
             interfaceEntry->setCarrier(false);
             interfaceEntry->setState(InterfaceEntry::State::DOWN);
             startActiveOperationExtraTimeOrFinish(par("stopOperationExtraTime"));
@@ -234,14 +199,8 @@ void Ppp::handleSelfMessage(cMessage *message)
         // Transmission finished, we can start next one.
         EV_INFO << "Transmission successfully completed.\n";
         emit(transmissionStateChangedSignal, 0L);
-
-        if (!txQueue.isEmpty()) {
-            auto packet = check_and_cast<Packet *>(txQueue.pop());
-            startTransmitting(packet);
-        }
-        else if (queueModule && 0 == queueModule->getNumPendingRequests()) {
-            queueModule->requestPacket();
-        }
+        if (!queue->isEmpty())
+            startTransmitting(queue->popPacket());
     }
     else
         throw cRuntimeError("Unknown self message");
@@ -257,28 +216,10 @@ void Ppp::handleUpperPacket(Packet *packet)
         details.setReason(INTERFACE_DOWN);
         emit(packetDroppedSignal, packet, &details);
         delete packet;
-
-        if (queueModule && 0 == queueModule->getNumPendingRequests())
-            queueModule->requestPacket();
     }
-    else {
-        if (endTransmissionEvent->isScheduled()) {
-            // We are currently busy, so just queue up the packet.
-            EV_DETAIL << "Received " << packet << " for transmission but transmitter busy, queueing.\n";
-
-            if (txQueueLimit && txQueue.getLength() > txQueueLimit)
-                throw cRuntimeError("txQueue length exceeds %d -- this is probably due to "
-                                    "a bogus app model generating excessive traffic "
-                                    "(or if this is normal, increase txQueueLimit!)",
-                        txQueueLimit);
-
-            txQueue.insert(packet);
-        }
-        else {
-            // We are idle, so we can start transmitting right away.
-            startTransmitting(packet);
-        }
-    }
+    queue->pushPacket(packet);
+    if (!endTransmissionEvent->isScheduled() && !queue->isEmpty())
+        startTransmitting(queue->popPacket());
 }
 
 void Ppp::handleLowerPacket(Packet *packet)
@@ -294,7 +235,7 @@ void Ppp::handleLowerPacket(Packet *packet)
         PacketDropDetails details;
         details.setReason(INCORRECTLY_RECEIVED);
         emit(packetDroppedSignal, packet, &details);
-        numBitErr++;
+        numDroppedBitErr++;
         delete packet;
     }
     else {
@@ -316,36 +257,52 @@ void Ppp::refreshDisplay() const
 {
     MacBase::refreshDisplay();
 
-    std::ostringstream buf;
-    const char *color = "";
-
-    if (datarateChannel != nullptr) {
-        char datarateText[40];
-
-        double datarate = datarateChannel->getNominalDatarate();
-        if (datarate >= 1e9)
-            sprintf(datarateText, "%gGbps", datarate / 1e9);
-        else if (datarate >= 1e6)
-            sprintf(datarateText, "%gMbps", datarate / 1e6);
-        else if (datarate >= 1e3)
-            sprintf(datarateText, "%gkbps", datarate / 1e3);
-        else
-            sprintf(datarateText, "%gbps", datarate);
-
-        buf << datarateText << "\nrcv:" << numRcvdOK << " snt:" << numSent;
-
-        if (numBitErr > 0)
-            buf << "\nerr:" << numBitErr;
-
-        if (endTransmissionEvent->isScheduled()) {
-            color = txQueue.getLength() >= 3 ? "red" : "yellow";
+    auto text = StringFormat::formatString(displayStringTextFormat, [&] (char directive) {
+        static std::string result;
+        switch (directive) {
+            case 's':
+                result = std::to_string(numSent);
+                break;
+            case 'r':
+                result = std::to_string(numRcvdOK);
+                break;
+            case 'd':
+                result = std::to_string(numDroppedIfaceDown + numDroppedBitErr);
+                break;
+            case 'q':
+                result = std::to_string(queue->getNumPackets());
+                break;
+            case 'b':
+                if (datarateChannel == nullptr)
+                    result = "not connected";
+                else {
+                    char datarateText[40];
+                    double datarate = datarateChannel->getNominalDatarate();
+                    if (datarate >= 1e9)
+                        sprintf(datarateText, "%gGbps", datarate / 1e9);
+                    else if (datarate >= 1e6)
+                        sprintf(datarateText, "%gMbps", datarate / 1e6);
+                    else if (datarate >= 1e3)
+                        sprintf(datarateText, "%gkbps", datarate / 1e3);
+                    else
+                        sprintf(datarateText, "%gbps", datarate);
+                    result = datarateText;
+                }
+                break;
+            default:
+                throw cRuntimeError("Unknown directive: %c", directive);
         }
+        return result.c_str();
+    });
+    getDisplayString().setTagArg("t", 0, text);
+
+    const char *color = "";
+    if (datarateChannel != nullptr) {
+        if (endTransmissionEvent->isScheduled())
+            color = queue->getNumPackets() >= 3 ? "red" : "yellow";
     }
-    else {
-        buf << "not connected\ndropped:" << numDroppedIfaceDown;
+    else
         color = "#707070";
-    }
-    getDisplayString().setTagArg("t", 0, buf.str().c_str());
     getDisplayString().setTagArg("i", 1, color);
 }
 
@@ -379,44 +336,24 @@ cPacket *Ppp::decapsulate(Packet *packet)
 void Ppp::flushQueue()
 {
     // code would look slightly nicer with a pop() function that returns nullptr if empty
-    if (queueModule) {
-        while (!queueModule->isEmpty()) {
-            cMessage *msg = queueModule->pop();
-            PacketDropDetails details;
-            details.setReason(INTERFACE_DOWN);
-            emit(packetDroppedSignal, msg, &details); //FIXME this signal lumps together packets from the network and packets from higher layers! separate them
-            delete msg;
-        }
-        queueModule->clear();    // clear request count
-        queueModule->requestPacket();
-    }
-    else {
-        while (!txQueue.isEmpty()) {
-            cMessage *msg = static_cast<cMessage *>(txQueue.pop());
-            PacketDropDetails details;
-            details.setReason(INTERFACE_DOWN);
-            emit(packetDroppedSignal, msg, &details); //FIXME this signal lumps together packets from the network and packets from higher layers! separate them
-            delete msg;
-        }
+    while (!queue->isEmpty()) {
+        auto packet = queue->popPacket();
+        PacketDropDetails details;
+        details.setReason(INTERFACE_DOWN);
+        emit(packetDroppedSignal, packet, &details); //FIXME this signal lumps together packets from the network and packets from higher layers! separate them
+        delete packet;
     }
 }
 
 void Ppp::clearQueue()
 {
-    // code would look slightly nicer with a pop() function that returns nullptr if empty
-    if (queueModule) {
-        queueModule->clear();    // clear request count
-        queueModule->requestPacket();
-    }
-    else {
-        txQueue.clear();
-    }
+    while (!queue->isEmpty())
+        delete queue->popPacket();
 }
 
 void Ppp::handleStopOperation(LifecycleOperation *operation)
 {
-    bool queueEmpty = queueModule ? queueModule->isEmpty() : txQueue.isEmpty();
-    if (!queueEmpty) {
+    if (!queue->isEmpty()) {
         interfaceEntry->setState(InterfaceEntry::State::GOING_DOWN);
         delayActiveOperationFinish(par("stopOperationTimeout"));
     }

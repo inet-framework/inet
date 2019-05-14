@@ -21,13 +21,14 @@
 
 #include "inet/common/INETDefs.h"
 #include "inet/common/INETMath.h"
+#include "inet/networklayer/diffserv/PacketMeterBase.h"
 
 namespace inet {
 
 /**
  * Simple token bucket meter.
  */
-class INET_API TokenBucketMeter : public cSimpleModule
+class INET_API TokenBucketMeter : public PacketMeterBase
 {
   protected:
     double CIR = NaN;    // Commited Information Rate (bits/sec)
@@ -46,10 +47,10 @@ class INET_API TokenBucketMeter : public cSimpleModule
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
-    virtual void handleMessage(cMessage *msg) override;
+    virtual void pushPacket(Packet *packet, cGate *gate = nullptr) override;
     virtual void refreshDisplay() const override;
 
-    virtual int meterPacket(cPacket *packet);
+    virtual int meterPacket(Packet *packet) override;
 };
 
 } // namespace inet

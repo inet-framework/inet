@@ -125,8 +125,8 @@ on PPP interfaces:
 
 .. code-block:: ini
 
-   **.ppp[*].queueType = "DropTailQueue"
-   **.ppp[*].queue.frameCapacity = 10
+   **.ppp[*].ppp.queueType = "DropTailQueue"
+   **.ppp[*].ppp.queue.frameCapacity = 10
 
 .. _ug:sec:interfaces:traffic-conditioners:
 

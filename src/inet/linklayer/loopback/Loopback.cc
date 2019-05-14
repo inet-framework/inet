@@ -25,7 +25,6 @@
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/Simsignals.h"
 #include "inet/common/packet/Packet.h"
-#include "inet/common/queue/IPassiveQueue.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/loopback/Loopback.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"

@@ -18,11 +18,11 @@
 #ifndef __INET_INPROGRESSFRAMES_H
 #define __INET_INPROGRESSFRAMES_H
 
-#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "inet/common/queueing/contract/IPacketQueue.h"
 #include "inet/linklayer/ieee80211/mac/common/SequenceControlField.h"
 #include "inet/linklayer/ieee80211/mac/contract/IAckHandler.h"
 #include "inet/linklayer/ieee80211/mac/contract/IOriginatorMacDataService.h"
-#include "inet/linklayer/ieee80211/mac/queue/PendingQueue.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -34,7 +34,7 @@ class INET_API InProgressFrames : public cSimpleModule
         static simsignal_t packetDequeuedSignal;
 
     protected:
-        PendingQueue *pendingQueue = nullptr;
+        queueing::IPacketQueue *pendingQueue = nullptr;
         IOriginatorMacDataService *dataService = nullptr;
         IAckHandler *ackHandler = nullptr;
         std::vector<Packet *> inProgressFrames;

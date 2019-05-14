@@ -18,6 +18,7 @@
 
 package inet.linklayer.xmac;
 
+import inet.common.queueing.contract.IPacketQueue;
 import inet.linklayer.base.MacProtocolBase;
 import inet.linklayer.contract.IMacProtocol;
 
@@ -25,7 +26,7 @@ import inet.linklayer.contract.IMacProtocol;
 // Implementation of X-MAC.
 // See C++ documentation for details.
 //
-simple XMac extends MacProtocolBase like IMacProtocol
+module XMac extends MacProtocolBase like IMacProtocol
 {
     parameters:
         string address = default("auto"); // MAC address as hex string (12 hex digits), or
@@ -75,5 +76,12 @@ simple XMac extends MacProtocolBase like IMacProtocol
 
         @class(XMac);
         @signal[packetDropped](type=inet::Packet);
+    submodules:
+        queue: <default("DropTailQueue")> like IPacketQueue {
+            parameters:
+                frameCapacity = default(queueLength);
+                @display("p=100,100;q=l2queue");
+        }
+    connections allowunconnected:
 }
 

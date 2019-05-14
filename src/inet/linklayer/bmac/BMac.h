@@ -16,6 +16,7 @@
 #ifndef __INET_BMAC_H
 #define __INET_BMAC_H
 
+#include "inet/common/queueing/contract/IPacketQueue.h"
 #include "inet/linklayer/base/MacProtocolBase.h"
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/linklayer/contract/IMacProtocol.h"
@@ -92,11 +93,9 @@ class INET_API BMac : public MacProtocolBase, public IMacProtocol
     virtual void handleCrashOperation(LifecycleOperation *operation) override {}    //TODO implementation
 
   protected:
-    typedef std::list<Packet *> MacQueue;
-
     /** @brief A queue to store packets from upper layer in case another
        packet is still waiting for transmission.*/
-    MacQueue macQueue;
+    queueing::IPacketQueue *queue = nullptr;
 
     /** @brief The radio. */
     physicallayer::IRadio *radio = nullptr;
@@ -169,8 +168,6 @@ class INET_API BMac : public MacProtocolBase, public IMacProtocol
     int txAttempts = 0;
     /*@}*/
 
-    /** @brief The maximum length of the queue */
-    unsigned int queueLength = 0;
     /** @brief Animate (colorize) the nodes.
      *
      * The color of the node reflects its basic status (not the exact state!)
@@ -210,9 +207,6 @@ class INET_API BMac : public MacProtocolBase, public IMacProtocol
 
     /** @brief Internal function to attach a signal to the packet */
     void attachSignal(Packet *macPkt);
-
-    /** @brief Internal function to add a new packet from upper to the queue */
-    bool addToQueue(cMessage *msg);
 
     virtual void flushQueue();
 

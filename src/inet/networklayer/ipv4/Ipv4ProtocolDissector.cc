@@ -31,7 +31,7 @@ void Ipv4ProtocolDissector::dissect(Packet *packet, const Protocol *protocol, IC
     const auto& header = packet->popAtFront<Ipv4Header>();
     ipv4EndOffset += B(header->getTotalLengthField());
     callback.startProtocolDataUnit(&Protocol::ipv4);
-    bool incorrect = (ipv4EndOffset > trailerPopOffset);
+    bool incorrect = (ipv4EndOffset > trailerPopOffset || header->getTotalLengthField() <= header->getHeaderLength());
     if (incorrect) {
         callback.markIncorrect();
         ipv4EndOffset = trailerPopOffset;

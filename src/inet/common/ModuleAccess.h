@@ -123,6 +123,9 @@ INET_API InterfaceEntry *findContainingNicModule(const cModule *from);
  */
 INET_API InterfaceEntry *getContainingNicModule(const cModule *from);
 
+INET_API cModule *findConnectedModule(cGate *gate);
+INET_API cModule *getConnectedModule(cGate *gate);
+
 } // namespace inet
 
 #endif // ifndef __INET_MODULEACCESS_H

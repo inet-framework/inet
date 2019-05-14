@@ -101,18 +101,11 @@ void Dcf::processUpperFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtH
 {
     Enter_Method_Silent("processUpperFrame(%s)", packet->getName());
     EV_INFO << "Processing upper frame: " << packet->getName() << endl;
-    if (channelAccess->getPendingQueue()->insert(packet)) {
-        EV_INFO << "Frame " << packet->getName() << " has been inserted into the PendingQueue." << endl;
+    auto pendingQueue = channelAccess->getPendingQueue();
+    pendingQueue->pushPacket(packet);
+    if (!pendingQueue->isEmpty()) {
         EV_DETAIL << "Requesting channel" << endl;
         channelAccess->requestChannel(this);
-    }
-    else {
-        EV_INFO << "Frame " << packet->getName() << " has been dropped because the PendingQueue is full." << endl;
-        PacketDropDetails details;
-        details.setReason(QUEUE_OVERFLOW);
-        details.setLimit(channelAccess->getPendingQueue()->getMaxQueueSize());
-        emit(packetDroppedSignal, packet, &details);
-        delete packet;
     }
 }
 

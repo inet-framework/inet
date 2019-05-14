@@ -145,11 +145,11 @@ void Ipv6RoutingTable::parseXmlConfigFile()
                 //std::cout << "Getting attribute: name" << endl;
                 const char *ifname = ifTag->getAttribute("name");
                 if (!ifname)
-                    throw cRuntimeError("<interface> without name attribute at %s", child->getSourceLocation());
+                    throw cRuntimeError("<interface> without name attribute at %s", std::string(child->getSourceLocation()).c_str());
 
                 InterfaceEntry *ie = ift->getInterfaceByName(ifname);
                 if (!ie)
-                    throw cRuntimeError("no interface named %s was registered, %s", ifname, child->getSourceLocation());
+                    throw cRuntimeError("no interface named %s was registered, %s", ifname, std::string(child->getSourceLocation()).c_str());
 
                 configureInterfaceFromXml(ie, ifTag);
             }
@@ -299,7 +299,7 @@ static const char *getRequiredAttr(cXMLElement *elem, const char *attrName)
     const char *s = elem->getAttribute(attrName);
     if (!s)
         throw cRuntimeError("Element <%s> misses required attribute %s at %s",
-                elem->getTagName(), attrName, elem->getSourceLocation());
+                elem->getTagName(), attrName, std::string(elem->getSourceLocation()).c_str());
     return s;
 }
 
@@ -354,7 +354,7 @@ void Ipv6RoutingTable::configureInterfaceFromXml(InterfaceEntry *ie, cXMLElement
         int pfxLen;
         if (!prefix.prefix.tryParseAddrWithPrefix(node->getNodeValue(), pfxLen))
             throw cRuntimeError("Element <%s> at %s: wrong Ipv6Address/prefix syntax %s",
-                    node->getTagName(), node->getSourceLocation(), node->getNodeValue());
+                    node->getTagName(), std::string(node->getSourceLocation()).c_str(), node->getNodeValue());
 
         prefix.prefixLength = pfxLen;
         prefix.advValidLifetime = utils::atoul(getRequiredAttr(node, "AdvValidLifetime"));
@@ -391,7 +391,7 @@ void Ipv6RoutingTable::configureTunnelFromXml(cXMLElement *cfg)
 
         if (triggerList.size() != 1)
             throw cRuntimeError("element <%s> at %s: Only exactly one trigger allowed",
-                    node->getTagName(), node->getSourceLocation());
+                    node->getTagName(), std::string(node->getSourceLocation()).c_str());
 
         cXMLElement *triggerNode = triggerList[0];
         trigger.set(getRequiredAttr(triggerNode, "destination"));

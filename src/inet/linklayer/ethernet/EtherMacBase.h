@@ -25,7 +25,7 @@
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/packet/Packet.h"
-#include "inet/common/queue/IPassiveQueue.h"
+#include "inet/common/queueing/contract/IPacketQueue.h"
 #include "inet/linklayer/base/MacBase.h"
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
@@ -90,46 +90,12 @@ class INET_API EtherMacBase : public MacBase
         double maxPropagationDelay;    // used for detecting longer cables than allowed
     };
 
-    class InnerQueue
-    {
-      protected:
-        cQueue queue;
-        int queueLimit = 0;    // max queue length
-
-      protected:
-        static int packetCompare(cObject *a, cObject *b);    // PAUSE frames have higher priority
-
-      public:
-        InnerQueue(const char *name = nullptr, int limit = 0) : queue(name, packetCompare), queueLimit(limit) {}
-        void insertFrame(Packet *obj) { queue.insert(obj); }
-        cObject *pop() { return queue.pop(); }
-        bool isEmpty() const { return queue.isEmpty(); }
-        int getQueueLimit() const { return queueLimit; }
-        bool isFull() const { return queueLimit != 0 && queue.getLength() > queueLimit; }
-        int getLength() const { return queue.getLength(); }
-        void clear() { queue.clear(); }
-    };
-
-    class MacQueue
-    {
-      public:
-        InnerQueue *innerQueue = nullptr;
-        IPassiveQueue *extQueue = nullptr;
-
-      public:
-        ~MacQueue() { delete innerQueue; };
-        bool isEmpty() { return innerQueue ? innerQueue->isEmpty() : extQueue->isEmpty(); }
-        void setExternalQueue(IPassiveQueue *_extQueue)
-        { delete innerQueue; innerQueue = nullptr; extQueue = _extQueue; };
-        void setInternalQueue(const char *name = nullptr, int limit = 0)
-        { delete innerQueue; innerQueue = new InnerQueue(name, limit); extQueue = nullptr; };
-    };
-
     // MAC constants for bitrates and modes
     static const EtherDescr etherDescrs[NUM_OF_ETHERDESCRS];
     static const EtherDescr nullEtherDescr;
 
     // configuration
+    const char *displayStringTextFormat = nullptr;
     bool sendRawBytes = false;
     const EtherDescr *curEtherDescr = nullptr;    // constants for the current Ethernet mode, e.g. txrate
     bool connected = false;    // true if connected to a network, set automatically by exploring the network configuration
@@ -139,7 +105,7 @@ class INET_API EtherMacBase : public MacBase
     bool frameBursting = false;    // frame bursting on/off (Gigabit Ethernet)
 
     // gate pointers, etc.
-    MacQueue txQueue;    // the output queue
+    queueing::IPacketQueue *txQueue = nullptr;    // the output queue
     cChannel *transmissionChannel = nullptr;    // transmission channel
     cGate *physInGate = nullptr;    // pointer to the "phys$i" gate
     cGate *physOutGate = nullptr;    // pointer to the "phys$o" gate
@@ -196,12 +162,17 @@ class INET_API EtherMacBase : public MacBase
     virtual void handleCrashOperation(LifecycleOperation *operation) override;
     virtual void processAtHandleMessageFinished();
 
+    /**
+     * Inserts padding in front of FCS and calculate FCS
+     */
+    void addPaddingAndSetFcs(Packet *packet, B requiredMinByteLength = MIN_ETHERNET_FRAME_BYTES) const;
+
   protected:
     //  initialization
     virtual void initialize(int stage) override;
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initializeFlags();
-    virtual void initializeQueueModule();
+    virtual void initializeQueue();
     virtual void initializeStatistics();
 
     // finish
@@ -219,7 +190,6 @@ class INET_API EtherMacBase : public MacBase
 
     // helpers
     virtual void getNextFrameFromQueue();
-    virtual void requestNextFrameFromExtQueue();
     virtual void processConnectDisconnect();
     virtual void encapsulate(Packet *packet);
     virtual void decapsulate(Packet *packet);

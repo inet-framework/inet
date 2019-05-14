@@ -15,104 +15,24 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
+#include "inet/common/queueing/PacketClassifierFunction.h"
+#include "inet/common/queueing/PacketComparatorFunction.h"
+#include "inet/common/packet/Packet.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
-#include "inet/linklayer/ieee80211/mac/queue/PendingQueue.h"
 
 namespace inet {
 namespace ieee80211 {
 
-Define_Module(PendingQueue);
-
-simsignal_t PendingQueue::packetEnqueuedSignal = cComponent::registerSignal("packetEnqueued");
-simsignal_t PendingQueue::packetDequeuedSignal = cComponent::registerSignal("packetDequeued");
-
-void PendingQueue::initialize(int stage)
-{
-    if (stage == INITSTAGE_LOCAL) {
-        if (par("prioritizeMulticast"))
-            queue.setup((CompareFunc)cmpMgmtOverMulticastOverUnicast);
-        else
-            queue.setup((CompareFunc)cmpMgmtOverData);
-        maxQueueSize = par("maxQueueSize");
-        updateDisplayString();
-    }
-}
-
-void PendingQueue::updateDisplayString()
-{
-    std::string text = std::to_string(queue.getLength()) + " packets";
-    getDisplayString().setTagArg("t", 0, text.c_str());
-}
-
-bool PendingQueue::insert(Packet *frame)
-{
-    if (maxQueueSize != -1 && queue.getLength() == maxQueueSize)
-        return false;
-    queue.insert(frame);
-    updateDisplayString();
-    emit(packetEnqueuedSignal, frame);
-    return true;
-}
-
-bool PendingQueue::insertBefore(Packet *where, Packet *frame)
-{
-    if (maxQueueSize != -1 && queue.getLength() == maxQueueSize)
-        return false;
-    queue.insertBefore(where, frame);
-    updateDisplayString();
-    emit(packetEnqueuedSignal, frame);
-    return true;
-}
-
-bool PendingQueue::insertAfter(Packet *where, Packet *frame)
-{
-    if (maxQueueSize != -1 && queue.getLength() == maxQueueSize)
-        return false;
-    queue.insertAfter(where, frame);
-    updateDisplayString();
-    emit(packetEnqueuedSignal, frame);
-    return true;
-}
-
-Packet *PendingQueue::remove(Packet *frame)
-{
-    auto packet = check_and_cast<Packet *>(queue.remove(frame));
-    updateDisplayString();
-    emit(packetDequeuedSignal, packet);
-    return packet;
-}
-
-Packet *PendingQueue::pop()
-{
-    auto packet = check_and_cast<Packet *>(queue.pop());
-    updateDisplayString();
-    emit(packetDequeuedSignal, packet);
-    return packet;
-}
-
-Packet *PendingQueue::front() const
-{
-    return check_and_cast<Packet *>(queue.front());
-}
-
-Packet *PendingQueue::back() const
-{
-    return check_and_cast<Packet *>(queue.back());
-}
-
-bool PendingQueue::contains(Packet *frame) const
-{
-    return queue.contains(frame);
-}
-
-int PendingQueue::cmpMgmtOverData(Packet *a, Packet *b)
+static int compareMgmtOverData(Packet *a, Packet *b)
 {
     int aPri = dynamicPtrCast<const Ieee80211MgmtHeader>(a->peekAtFront<Ieee80211MacHeader>()) ? 1 : 0;  //TODO there should really exist a high-performance isMgmtFrame() function!
     int bPri = dynamicPtrCast<const Ieee80211MgmtHeader>(b->peekAtFront<Ieee80211MacHeader>()) ? 1 : 0;
     return bPri - aPri;
 }
 
-int PendingQueue::cmpMgmtOverMulticastOverUnicast(Packet *a, Packet *b)
+Register_Packet_Comparator_Function(MgmtOverDataComparator, compareMgmtOverData);
+
+static int compareMgmtOverMulticastOverUnicast(Packet *a, Packet *b)
 {
     const auto& aHeader = a->peekAtFront<Ieee80211MacHeader>();
     const auto& bHeader = b->peekAtFront<Ieee80211MacHeader>();
@@ -120,6 +40,32 @@ int PendingQueue::cmpMgmtOverMulticastOverUnicast(Packet *a, Packet *b)
     int bPri = dynamicPtrCast<const Ieee80211MgmtHeader>(bHeader) ? 2 : bHeader->getReceiverAddress().isMulticast() ? 1 : 0;
     return bPri - aPri;
 }
+
+Register_Packet_Comparator_Function(MgmtOverMulticastOverUnicastComparator, compareMgmtOverMulticastOverUnicast);
+
+static int classifyMgmtOverData(Packet *packet)
+{
+    const auto& header = packet->peekAtFront<Ieee80211MacHeader>();
+    if (dynamicPtrCast<const Ieee80211MgmtHeader>(header))
+        return 0;
+    else
+        return 1;
+}
+
+Register_Packet_Classifier_Function(MgmtOverDataClassifier, classifyMgmtOverData);
+
+static int classifyMgmtOverMulticastOverUnicast(Packet *packet)
+{
+    const auto& header = packet->peekAtFront<Ieee80211MacHeader>();
+    if (dynamicPtrCast<const Ieee80211MgmtHeader>(header))
+        return 0;
+    else if (header->getReceiverAddress().isMulticast())
+        return 1;
+    else
+        return 2;
+}
+
+Register_Packet_Classifier_Function(MgmtOverMulticastOverUnicastClassifier, classifyMgmtOverMulticastOverUnicast);
 
 } /* namespace inet */
 } /* namespace ieee80211 */

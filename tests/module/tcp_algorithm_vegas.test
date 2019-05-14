@@ -58,8 +58,8 @@ description = "inet_TCP <---> inet_TCP with algorithms"
 **.server.app[0].localPort = 1000
 
 # NIC configuration
-**.ppp[*].queue.typename = "DropTailQueue"
-**.ppp[*].queue.frameCapacity = 10
+**.ppp[*].ppp.queue.typename = "DropTailQueue"
+**.ppp[*].ppp.queue.frameCapacity = 10
 
 *.configurator.config=xml("<config><interface hosts='*' address='192.168.1.x' netmask='255.255.255.0'/></config>")
 

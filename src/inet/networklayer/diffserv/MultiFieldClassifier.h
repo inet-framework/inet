@@ -20,8 +20,9 @@
 #define __INET_MULTIFIELDCLASSIFIER_H
 
 #include "inet/common/INETDefs.h"
-#include "inet/common/packet/Packet.h"
+#include "inet/common/queueing/base/PacketClassifierBase.h"
 #include "inet/common/packet/dissector/PacketDissector.h"
+#include "inet/common/packet/Packet.h"
 
 #ifdef WITH_IPv4
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
@@ -36,7 +37,7 @@ namespace inet {
 /**
  * Absolute dropper.
  */
-class INET_API MultiFieldClassifier : public cSimpleModule
+class INET_API MultiFieldClassifier : public queueing::PacketClassifierBase
 {
   protected:
     class INET_API PacketDissectorCallback : public PacketDissector::ICallback
@@ -92,10 +93,10 @@ class INET_API MultiFieldClassifier : public cSimpleModule
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
-    virtual void handleMessage(cMessage *msg) override;
+    virtual void pushPacket(Packet *packet, cGate *gate = nullptr) override;
     virtual void refreshDisplay() const override;
 
-    virtual int classifyPacket(Packet *packet);
+    virtual int classifyPacket(Packet *packet) override;
 };
 
 } // namespace inet

@@ -56,7 +56,6 @@ class INET_API MessageDispatcher : public cSimpleModule, public IProtocolRegistr
     std::map<int, int> interfaceIdToGateIndex;
     std::map<Key, int> serviceToGateIndex;
     std::map<Key, int> protocolToGateIndex;
-    std::map<std::pair<int, int>, int> xxx;
 
   protected:
     virtual void initialize() override;

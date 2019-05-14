@@ -86,7 +86,7 @@ InterfaceMatcher::InterfaceMatcher(const cXMLElementList& xmlSelectors)
 
         if (amongAttr && *amongAttr) {    // among="X Y Z" means hosts = "X Y Z" towards = "X Y Z"
             if ((hostAttr && *hostAttr) || (towardsAttr && *towardsAttr))
-                throw cRuntimeError("The 'hosts'/'towards' and 'among' attributes are mutually exclusive, at %s", interfaceElement->getSourceLocation());
+                throw cRuntimeError("The 'hosts'/'towards' and 'among' attributes are mutually exclusive, at %s", std::string(interfaceElement->getSourceLocation()).c_str());
             towardsAttr = hostAttr = amongAttr;
         }
 
@@ -94,7 +94,7 @@ InterfaceMatcher::InterfaceMatcher(const cXMLElementList& xmlSelectors)
             selectors.push_back(new Selector(hostAttr, interfaceAttr, towardsAttr, this));
         }
         catch (std::exception& e) {
-            throw cRuntimeError("Error in XML <interface> element at %s: %s", interfaceElement->getSourceLocation(), e.what());
+            throw cRuntimeError("Error in XML <interface> element at %s: %s", std::string(interfaceElement->getSourceLocation()).c_str(), e.what());
         }
     }
 }
@@ -142,7 +142,7 @@ bool InterfaceMatcher::linkContainsMatchingHost(const InterfaceEntry *ie, const 
     collectNeighbors(outGate, hostNodes, deviceNodes, node);
 
     for (auto neighbour : hostNodes) {
-        
+
         std::string hostFullPath = neighbour->getFullPath();
         std::string hostShortenedFullPath = hostFullPath.substr(hostFullPath.find('.') + 1);
         if (hostMatcher.matches(hostShortenedFullPath.c_str()) || hostMatcher.matches(hostFullPath.c_str()))

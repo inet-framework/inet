@@ -272,7 +272,33 @@ class INET_API SymbolErrorRateFromErrorRateIndFilter : public cObjectResultFilte
     virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details) override;
 };
 
+/**
+ * Filter that expects a Packet and outputs its it if the source is the same component as where the filter is used.
+ */
+class INET_API LocalSignalFilter : public cObjectResultFilter
+{
+  protected:
+    cComponent *component = nullptr;
 
+  public:
+    virtual void subscribedTo(cComponent *component, simsignal_t signal) override { this->component = component; }
+
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, bool b, cObject *details) override;
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, long l, cObject *details) override;
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, unsigned long l, cObject *details) override;
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, double d, cObject *details) override;
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, const SimTime& v, cObject *details) override;
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, const char *s, cObject *details) override;
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details) override;
+
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, bool b, cObject *details) override;
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, long l, cObject *details) override;
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, unsigned long l, cObject *details) override;
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, double d, cObject *details) override;
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, const SimTime& v, cObject *details) override;
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, const char *s, cObject *details) override;
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override;
+};
 
 } // namespace filters
 

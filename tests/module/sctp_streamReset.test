@@ -62,8 +62,8 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 **.sctp.arwnd = 200000
 
 # NIC configuration
-#**.ppp[*].queue.typename = "DropTailQueue" # in routers
-#**.ppp[*].queue.frameCapacity = 100  # in routers
+#**.ppp[*].ppp.queue.typename = "DropTailQueue" # in routers
+#**.ppp[*].ppp.queue.frameCapacity = 100  # in routers
 #**.ppp[*].ppp.mtu = 1500 B
 
 #**.vector-recording = false
