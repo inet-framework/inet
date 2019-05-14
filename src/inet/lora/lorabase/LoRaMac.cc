@@ -91,7 +91,7 @@ void LoRaMac::initialize(int stage)
         mediumStateChange = new cMessage("MediumStateChange");
 
         // set up internal queue
-        transmissionQueue.setName("transmissionQueue");
+        transmissionQueue = check_and_cast<queueing::IPacketQueue *>(getSubmodule("queue"));
 
         // state variables
         fsm.setName("LoRaMac State Machine");
@@ -179,10 +179,13 @@ void LoRaMac::handleUpperMessage(cMessage *msg)
 
     const auto &frame = pktEncap->peekAtFront<LoRaMacFrame>();
 
-
     EV << "frame " << pktEncap << " received from higher layer, receiver = " << frame->getReceiverAddress() << endl;
-    transmissionQueue.insert(pktEncap);
-    handleWithFsm(pktEncap);
+
+    transmissionQueue->pushPacket(pktEncap);
+    if (fsm.getState() != IDLE)
+        EV << "deferring upper message transmission in " << fsm.getStateName() << " state\n";
+    else
+        handleWithFsm(transmissionQueue->getPacket(0));
 }
 
 void LoRaMac::handleLowerMessage(cMessage *msg)
@@ -432,18 +435,13 @@ void LoRaMac::finishCurrentTransmission()
 
 Packet *LoRaMac::getCurrentTransmission()
 {
-    return static_cast<Packet*>(transmissionQueue.front());
+    return static_cast<Packet *>(transmissionQueue->getPacket(0));
 }
 
 void LoRaMac::popTransmissionQueue()
 {
     EV << "dropping frame from transmission queue\n";
-    delete transmissionQueue.pop();
-    if (queueModule) {
-        // tell queue module that we've become idle
-        EV << "requesting another frame from queue module\n";
-        queueModule->requestPacket();
-    }
+    delete transmissionQueue->popPacket();
 }
 
 bool LoRaMac::isReceiving()

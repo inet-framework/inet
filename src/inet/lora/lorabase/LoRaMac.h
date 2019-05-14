@@ -6,8 +6,7 @@
 #include "inet/linklayer/contract/IMacProtocol.h"
 #include "inet/linklayer/base/MacProtocolBase.h"
 #include "inet/common/FSMA.h"
-#include "inet/common/queue/PacketQueue.h"
-#include "inet/common/queue/IPassiveQueue.h"
+#include "inet/common/queueing/contract/IPacketQueue.h"
 #include "inet/lora/lorabase/LoRaMacFrame_m.h"
 
 
@@ -91,10 +90,11 @@ class LoRaMac : public MacProtocolBase
     int retryCounter = -1;
 
     /** Messages received from upper layer and to be transmitted later */
-    PacketQueue transmissionQueue;
+    queueing::IPacketQueue *transmissionQueue = nullptr;
 
-    /** Passive queue module to request messages from */
-    IPassiveQueue *queueModule = nullptr;
+    /** Currently transmitted frame if any */
+    Packet *currentTransmission = nullptr;
+
     //@}
 
     /** @name Timer messages */
