@@ -186,14 +186,25 @@ void PaparazziMobility::moveOval(const double &sp, const double &radious, const 
             lastVelocity.x = -sp;
             rigth = false;
         }
+        initCircle = lastPosition;
         if (targetPosition.y - constraintAreaMin.y < constraintAreaMax.y - targetPosition.y) {
             down = true;
+            initCircle.y += radious;
             acummulateAngle = rad(PI/2);
         }
         else {
             down = false;
+            initCircle.y -= radious;
             acummulateAngle = rad(3*PI/2);
         }
+        // compute the center position of both circles.
+        center1 = initCircle;
+        center2 = initCircle;
+        if (rigth)
+            center2.x += linDist;
+        else
+            center2.x -= linDist;
+
         // angle proyection;
         nextChange = simTime() + linDist / sp;
     }
@@ -217,6 +228,12 @@ void PaparazziMobility::moveOval(const double &sp, const double &radious, const 
                 acummulateAngle = rad(3*PI/2);
                 initCircle.y -= radious;
             }
+
+            // correct the center position of the circle
+            if (initCircle.distance(center1) < initCircle.distance(center2))
+                initCircle = center1;
+            else
+                initCircle = center2;
             rigth = !rigth;
         }
         else if (partialState == Circle) {
@@ -225,13 +242,26 @@ void PaparazziMobility::moveOval(const double &sp, const double &radious, const 
             targetPosition = lastPosition;
             if (rigth) {
                 targetPosition.x += linDist;
+                // correct position
                 lastVelocity.x = speed;
             }
             else {
                 targetPosition.x -= linDist;
                 lastVelocity.x = -speed;
             }
-            nextChange = simTime() + std::abs(linDist / speed);
+// correct errors in the position
+            if (std::abs(targetPosition.x - center1.x) < std::abs(targetPosition.x - center2.x))
+                targetPosition.x  = center1.x;
+            else
+                targetPosition.x  = center2.x;
+
+            if (std::abs(targetPosition.y - (center1.y+radious)) < std::abs(targetPosition.y - (center1.y - radious)))
+                targetPosition.y  = center1.y + radious;
+            else
+                targetPosition.y  = center1.y - radious;
+
+            lastUpdate = simTime();
+            nextChange = simTime() + std::abs(targetPosition.distance(lastPosition) / sp);
         }
     }
     if (now > lastUpdate) {
@@ -296,16 +326,25 @@ void PaparazziMobility::moveEight(const double &sp, const double &radious, const
             targetPosition.x -= disX;
             lastVelocity.x = -sp * std::abs(std::cos(angle));
         }
-
-        if (down)
+        initCircle = lastPosition;
+        if (down) {
             acummulateAngle = rad(PI);
-        else
+            initCircle.y += radious;
+        }
+        else {
+            initCircle.y -= radious;
             acummulateAngle = rad(3*PI/2);
+        }
+
+        center1 = initCircle;
+        center2 = initCircle;
+        if (rigth)
+            center2.x += disX;
+        else
+            center2.x -= disX;
 
         double distance = lastPosition.distance(targetPosition);
         nextChange = simTime() + distance / sp;
-
-
     }
 
     if (nextChange == simTime()) {
@@ -324,6 +363,12 @@ void PaparazziMobility::moveEight(const double &sp, const double &radious, const
                 initCircle.y -= radious;
             }
 
+            // correct the center position of the circle
+            if (initCircle.distance(center1) < initCircle.distance(center2))
+                initCircle = center1;
+            else
+                initCircle = center2;
+
             nextChange = simTime() + std::abs(PI / omega);
             if (nextChange > endPattern)
                 nextChange = endPattern;
@@ -332,27 +377,44 @@ void PaparazziMobility::moveEight(const double &sp, const double &radious, const
             //down = !down;
             partialState = Lineal;
 
+            // compute next target position
             targetPosition = lastPosition;
-            if (rigth) {
-                lastVelocity.x = sp*std::abs(std::cos(angle));
+            if (rigth)
                 targetPosition.x += disX;
-            }
-            else {
+            else
                 targetPosition.x -= disX;
-                lastVelocity.y = - sp*std::abs(std::sin(angle));
-            }
-            if (down) {
-                lastVelocity.y = sp*std::abs(std::sin(angle));
+            if (down)
                 targetPosition.y += 2*radious;
-            }
-            else {
-                lastVelocity.y = -sp*std::abs(std::sin(angle));
+            else
                 targetPosition.y -= 2*radious;
-            }
-            // angle projection;
-            double distance = lastPosition.distance(targetPosition);
 
-            nextChange = simTime() + distance / sp;
+            // correct position
+            if (std::abs(targetPosition.x - center1.x) < std::abs(targetPosition.x - center2.x))
+                targetPosition.x  = center1.x;
+            else
+                targetPosition.x  = center2.x;
+
+            if (std::abs(targetPosition.y - (center1.y+radious)) < std::abs(targetPosition.y - (center1.y - radious)))
+                targetPosition.y  = center1.y + radious;
+            else
+                targetPosition.y  = center1.y - radious;
+
+            // compute speed
+            if (targetPosition.x - lastPosition.x == 0)
+                angle = PI/2;
+            else
+                angle = std::atan(std::abs(targetPosition.y - lastPosition.y)/std::abs(targetPosition.x - lastPosition.x));
+
+            lastVelocity.x = sp*std::abs(std::cos(angle));
+            lastVelocity.y = sp*std::abs(std::sin(angle));
+            if (!rigth)
+                lastVelocity.x *=-1;
+            if (!down)
+                lastVelocity.y *= -1;
+            nextChange = simTime() + std::abs(targetPosition.distance(lastPosition) / sp);
+            // angle projection;
+            lastUpdate = simTime();
+
             if (nextChange > endPattern)
                 nextChange = endPattern;
         }
@@ -423,6 +485,7 @@ void PaparazziMobility::moveScan(const double &sp, const double &radious, const 
         lastChange = simTime();
         if (partialState == Lineal) {
             partialState = Circle;
+
             initCircle = lastPosition;
             double omega = std::abs(sp / radious);
             nextChange = simTime() + (PI / omega);

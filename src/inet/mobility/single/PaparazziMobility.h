@@ -75,6 +75,9 @@ class INET_API PaparazziMobility : public MovingMobilityBase
     Coord origin;
     Coord originLimit;
 
+    Coord center1;
+    Coord center2;
+
     double borderX;
     double borderY;
     double borderZ;
