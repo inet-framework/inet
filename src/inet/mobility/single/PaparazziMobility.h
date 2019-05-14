@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_CIRCLEMOBILITY_H
-#define __INET_CIRCLEMOBILITY_H
+#ifndef __INET_PAPARAZZIMOBILITY_H
+#define __INET_PAPARAZZIMOBILITY_H
 
 #include "inet/common/INETDefs.h"
 #include "inet/mobility/base/MovingMobilityBase.h"
@@ -66,14 +66,14 @@ class INET_API PaparazziMobility : public MovingMobilityBase
     virtual void startWaypoint();
     virtual void startStayAt();
 
+    bool fisrtTime = true;
     Coord initCircle;
 
     enum Mode mode;
 
     Coord destination;
     Coord origin;
-
-
+    Coord originLimit;
 
     double borderX;
     double borderY;
@@ -131,5 +131,5 @@ class INET_API PaparazziMobility : public MovingMobilityBase
 
 } // namespace inet
 
-#endif // ifndef __INET_CIRCLEMOBILITY_H
+#endif // ifndef __INET_PAPARAZZIMOBILITY_H
 

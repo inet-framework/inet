@@ -52,6 +52,7 @@ simple PaparazziMobility extends MovingMobilityBase
         string sequence = default("waypoint stayat eigth oval scan"); // state sequence
         bool randomSequence = default(false);
         volatile int ScanLines = default(5);
+        bool correctPositionErrors = default(true);
         double borderX @unit(m) = default(2m); // Radious of the circles
         double borderY @unit(m) = default(2m); // Radious of the circles
         double borderZ @unit(m) = default(2m); // Radious of the circles
