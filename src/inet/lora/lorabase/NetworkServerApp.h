@@ -55,8 +55,8 @@ public:
 class receivedPacket
 {
 public:
-    Packet* rcvdPacket;
-    cMessage* endOfWaiting;
+    Packet* rcvdPacket = nullptr;
+    cMessage* endOfWaiting = nullptr;
     std::vector<std::tuple<L3Address, double, double>> possibleGateways; // <address, sinr, rssi>
 };
 

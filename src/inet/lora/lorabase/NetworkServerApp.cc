@@ -59,7 +59,7 @@ void NetworkServerApp::startUDP()
 
 void NetworkServerApp::handleMessage(cMessage *msg)
 {
-    if (msg->arrivedOn("udpIn")) {
+    if (msg->arrivedOn("socketIn")) {
         auto pkt = check_and_cast<Packet *>(msg);
         const auto &frame  = pkt->peekAtFront<LoRaMacFrame>();
         if (frame == nullptr)
@@ -75,6 +75,9 @@ void NetworkServerApp::handleMessage(cMessage *msg)
     else if(msg->isSelfMessage()) {
         processScheduledPacket(msg);
     }
+    //else
+    //    delete msg;
+
 }
 
 void NetworkServerApp::processLoraMACPacket(Packet *pk)
@@ -99,6 +102,10 @@ NetworkServerApp::~NetworkServerApp() {
     }
     while(!receivedPackets.empty()) {
         delete receivedPackets.back().rcvdPacket;
+        if (receivedPackets.back().endOfWaiting && receivedPackets.back().endOfWaiting->isScheduled())
+            cancelAndDelete(receivedPackets.back().endOfWaiting);
+        else
+            delete receivedPackets.back().endOfWaiting;
         receivedPackets.pop_back();
     }
 }
@@ -125,6 +132,10 @@ void NetworkServerApp::finish()
     recordScalar("totalReceivedPackets", totalReceivedPackets);
     for(auto &elem : receivedPackets)  {
         delete elem.rcvdPacket;
+        if (elem.endOfWaiting && elem.endOfWaiting->isScheduled())
+            cancelAndDelete(elem.endOfWaiting);
+        else
+            delete elem.endOfWaiting;
     }
 
     // clean vector to avoid problems in the destructor
