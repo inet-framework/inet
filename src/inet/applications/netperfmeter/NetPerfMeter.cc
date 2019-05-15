@@ -414,6 +414,21 @@ void NetPerfMeter::handleMessage(cMessage* msg)
             send(cmsg, "sctpOut");
          }
          break;
+         // ------ Connection available -----------------------------------
+         case SCTP_I_AVAILABLE: {
+             EV_INFO << "SCTP_I_AVAILABLE arrived\n";
+             Message *message = check_and_cast<Message *>(msg);
+             int newSockId = message->getTag<SctpAvailableReq>()->getNewSocketId();
+             EV_INFO << "new socket id = " << newSockId << endl;
+             Request *cmsg = new Request("SCTP_C_ACCEPT_SOCKET_ID");
+             cmsg->setKind(SCTP_C_ACCEPT_SOCKET_ID);
+             cmsg->addTag<SctpAvailableReq>()->setSocketId(newSockId);
+             cmsg->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&inet::Protocol::sctp);
+             cmsg->addTagIfAbsent<SocketReq>()->setSocketId(newSockId);
+             EV_INFO << "Sending accept socket id request ..." << endl;
+             send(cmsg, "sctpOut");
+         }
+         break;
          // ------ Connection established -----------------------------------
          case SCTP_I_ESTABLISHED: {
              Message *message = check_and_cast<Message *>(msg);
