@@ -19,6 +19,7 @@
 #include <assert.h>
 #include <string.h>
 
+#include "inet/applications/common/SocketTag_m.h"
 #include "inet/common/packet/Message.h"
 
 #ifdef WITH_IPv4
@@ -2009,11 +2010,11 @@ void SctpAssociation::generateSendQueueAbatedIndication(const uint64 bytes)
         auto& tags = getTags(msg);
         SctpSendQueueAbatedReq *sendQueueAbatedIndication =
             tags.addTagIfAbsent<SctpSendQueueAbatedReq>();
+        msg->addTag<SocketInd>()->setSocketId(assocId);
         sendQueueAbatedIndication->setSocketId(assocId);
         sendQueueAbatedIndication->setLocalAddr(localAddr);
         sendQueueAbatedIndication->setRemoteAddr(remoteAddr);
         sendQueueAbatedIndication->setNumMsgs(bytes);    // NOTE: Legacy API!
-
         sendQueueAbatedIndication->setQueuedForStreamArraySize(sendStreams.size());
         unsigned int streamID = 0;
         for (auto & elem : sendStreams)
