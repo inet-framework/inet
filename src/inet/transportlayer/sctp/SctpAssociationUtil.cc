@@ -450,14 +450,13 @@ void SctpAssociation::sendIndicationToApp(const int32 code, const int32 value)
     Indication *msg = new Indication(indicationName(code));
     msg->setKind(code);
 
-    auto& tags = getTags(msg);
-    SctpCommandReq *indication = tags.addTagIfAbsent<SctpCommandReq>();
+    SctpCommandReq *indication = msg->addTag<SctpCommandReq>();
     indication->setSocketId(assocId);
     indication->setLocalAddr(localAddr);
     indication->setLocalPort(localPort);
     indication->setRemoteAddr(remoteAddr);
     indication->setRemotePort(remotePort);
-    msg->addTagIfAbsent<SocketInd>()->setSocketId(assocId);
+    msg->addTag<SocketInd>()->setSocketId(assocId);
     sctpMain->send(msg, "appOut");
 }
 
@@ -469,8 +468,7 @@ void SctpAssociation::sendAvailableIndicationToApp()
     Indication *msg = new Indication(indicationName(SCTP_I_AVAILABLE));
     msg->setKind(SCTP_I_AVAILABLE);
 
-    auto& tags = getTags(msg);
-    auto availableIndication = tags.addTagIfAbsent<SctpAvailableReq>();
+    auto availableIndication = msg->addTag<SctpAvailableReq>();
    // SctpAvailableInfo *availableIndication = new SctpAvailableInfo("SctpAvailableInfo");
     availableIndication->setSocketId(listeningAssocId);
     availableIndication->setLocalAddr(localAddr);
@@ -478,7 +476,7 @@ void SctpAssociation::sendAvailableIndicationToApp()
     availableIndication->setLocalPort(localPort);
     availableIndication->setRemotePort(remotePort);
     availableIndication->setNewSocketId(assocId);
-    msg->addTagIfAbsent<SocketInd>()->setSocketId(listeningAssocId);
+    msg->addTag<SocketInd>()->setSocketId(listeningAssocId);
   //  msg->setControlInfo(availableIndication);
     sctpMain->send(msg, "appOut");
 }
@@ -491,8 +489,7 @@ void SctpAssociation::sendEstabIndicationToApp()
     Indication *msg = new Indication(indicationName(SCTP_I_ESTABLISHED));
     msg->setKind(SCTP_I_ESTABLISHED);
 
-    auto& tags = msg->getTags();
-    auto establishIndication = tags.addTagIfAbsent<SctpConnectReq>();
+    auto establishIndication = msg->addTag<SctpConnectReq>();
    // SctpConnectInfo *establishIndication = new SctpConnectInfo("ConnectInfo");
     establishIndication->setSocketId(assocId);
     establishIndication->setLocalAddr(localAddr);
@@ -503,7 +500,7 @@ void SctpAssociation::sendEstabIndicationToApp()
     establishIndication->setInboundStreams(inboundStreams);
     establishIndication->setOutboundStreams(outboundStreams);
     establishIndication->setNumMsgs(state->sendQueueLimit);
-    msg->addTagIfAbsent<SocketInd>()->setSocketId(assocId);
+    msg->addTag<SocketInd>()->setSocketId(assocId);
    // msg->setControlInfo(establishIndication);
     sctpMain->send(msg, "appOut");
 
