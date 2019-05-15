@@ -29,6 +29,7 @@
 #include "NetPerfMeter_m.h"
 
 #include "inet/applications/common/SocketTag_m.h"
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/common/TimeTag_m.h"
 #include "inet/common/packet/Message.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
@@ -122,8 +123,9 @@ void NetPerfMeter::parseExpressionVector(std::vector<cDynamicExpression>& expres
 
 
 // ###### initialize() method ###############################################
-void NetPerfMeter::initialize()
+void NetPerfMeter::initialize(int stage)
 {
+   if (stage == INITSTAGE_LOCAL) {
    // ====== Handle parameters ==============================================
    ActiveMode = par("activeMode");
    const char * protocolPar = par("protocol");
@@ -187,7 +189,8 @@ void NetPerfMeter::initialize()
         }
       }
    }
-
+   }
+   else if (stage == INITSTAGE_APPLICATION_LAYER) {
    // ====== Initialize and bind socket =====================================
    SocketSCTP = IncomingSocketSCTP = nullptr;
    SocketTCP  = IncomingSocketTCP  = nullptr;
@@ -231,7 +234,7 @@ void NetPerfMeter::initialize()
    ConnectTimer->setKind(TIMER_CONNECT);
    scheduleAt(ConnectTime, ConnectTimer);
 }
-
+}
 
 // ###### finish() method ###################################################
 void NetPerfMeter::finish()

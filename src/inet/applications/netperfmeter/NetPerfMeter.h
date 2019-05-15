@@ -50,7 +50,8 @@ class INET_API NetPerfMeter : public cSimpleModule
    public:
    NetPerfMeter();
    ~NetPerfMeter();
-   virtual void initialize() override;
+   virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+   virtual void initialize(int stage) override;
    virtual void finish() override;
    virtual void handleMessage(cMessage *msg) override;
 
