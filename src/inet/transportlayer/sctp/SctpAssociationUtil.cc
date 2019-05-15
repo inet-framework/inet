@@ -296,7 +296,7 @@ uint16 SctpAssociation::chunkToInt(const char *type)
 
 void SctpAssociation::printAssocBrief()
 {
-    EV_DETAIL << "Connection " << this << " "
+    EV_DETAIL << "Connection " << assocId << " "
               << localAddr << ":" << localPort << " to " << remoteAddr << ":" << remotePort
               << "  on app[" << appGateIndex << "],assocId=" << assocId
               << "  in " << stateName(fsm->getState()) << "\n";
@@ -2626,7 +2626,7 @@ SctpDataMsg *SctpAssociation::dequeueOutboundDataMsg(SctpPathVariables *path,
                     state->lastMsgWasFragment = true;
             }
 
-            EV_DETAIL << "DequeueOutboundDataMsg() found chunk (" << &datMsg << ") in the stream queue " << nextStream << "(" << streamQ << ") queue size=" << streamQ->getLength() << endl;
+            EV_DETAIL << "DequeueOutboundDataMsg() found chunk (" << datMsg->str() << ") in the stream queue " << nextStream << "(" << streamQ << ") queue size=" << streamQ->getLength() << endl;
         }
     }
 

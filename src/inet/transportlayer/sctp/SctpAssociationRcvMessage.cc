@@ -629,7 +629,7 @@ bool SctpAssociation::processInitArrived(SctpInitChunk *initchunk, int32 srcPort
                 // set path variables for this pathlocalAddresses
                 if (!getPath(initchunk->getAddresses(j))) {
                     SctpPathVariables *path = new SctpPathVariables(initchunk->getAddresses(j), this, rt);
-                    EV_INFO << " get new path for " << initchunk->getAddresses(j) << " ptr=" << path << "\n";
+                    EV_INFO << " get new path for " << initchunk->getAddresses(j) << "\n";
                     for (auto & elem : state->localAddresses) {
                         if (sctpMain->addRemoteAddress(this, (elem), initchunk->getAddresses(j))) {
                             this->remoteAddressList.push_back(initchunk->getAddresses(j));
