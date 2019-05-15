@@ -424,8 +424,8 @@ void NetPerfMeter::handleMessage(cMessage* msg)
              Request *cmsg = new Request("SCTP_C_ACCEPT_SOCKET_ID");
              cmsg->setKind(SCTP_C_ACCEPT_SOCKET_ID);
              cmsg->addTag<SctpAvailableReq>()->setSocketId(newSockId);
-             cmsg->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&inet::Protocol::sctp);
-             cmsg->addTagIfAbsent<SocketReq>()->setSocketId(newSockId);
+             cmsg->addTag<DispatchProtocolReq>()->setProtocol(&inet::Protocol::sctp);
+             cmsg->addTag<SocketReq>()->setSocketId(newSockId);
              EV_INFO << "Sending accept socket id request ..." << endl;
              send(cmsg, "socketOut");
          }
@@ -974,8 +974,8 @@ unsigned long NetPerfMeter::transmitFrame(const unsigned int frameSize,
             dataMessage->addTag<CreationTimeTag>()->setCreationTime(simTime());
             cmsg->insertAtBack(dataMessage);
 
-            cmsg->addTagIfAbsent<SocketReq>()->setSocketId(ConnectionID);
-            auto command = cmsg->addTagIfAbsent<SctpSendReq>();
+            cmsg->addTag<SocketReq>()->setSocketId(ConnectionID);
+            auto command = cmsg->addTag<SctpSendReq>();
             command->setSocketId(ConnectionID);
             command->setSid(streamID);
             command->setSendUnordered( (sendUnordered == true) ?
@@ -1245,8 +1245,7 @@ void NetPerfMeter::sendSCTPQueueRequest(const unsigned int queueSize)
    // SCTP_I_SENDQUEUE_ABATED!
 
    Request* cmsg = new Request("QueueRequest");
-   auto& tags = getTags(cmsg);
-   SctpInfoReq* queueInfo = tags.addTagIfAbsent<SctpInfoReq>();
+   SctpInfoReq* queueInfo = cmsg->addTag<SctpInfoReq>();
    queueInfo->setText(queueSize);
    queueInfo->setSocketId(ConnectionID);
 
@@ -1274,7 +1273,7 @@ void NetPerfMeter::sendTCPQueueRequest(const unsigned int queueSize)
 
    auto request = new Request("QueueRequest", TCP_C_QUEUE_BYTES_LIMIT);
    request->setControlInfo(queueInfo);
-   request->addTagIfAbsent<SocketReq>()->setSocketId(ConnectionID);
+   request->addTag<SocketReq>()->setSocketId(ConnectionID);
    if(IncomingSocketTCP) {
       IncomingSocketTCP->sendCommand(request);
    }
