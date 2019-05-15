@@ -27,11 +27,10 @@
 
 package inet.applications.netperfmeter;
 
-import inet.applications.contract.INetPerfMeterApp;
+import inet.applications.contract.IApp;
+import inet.common.MessageDispatcher;
 import inet.node.base.TransportLayerNodeBase;
-import inet.transportlayer.contract.ISctp;
-import inet.transportlayer.contract.ITcp;
-import inet.transportlayer.contract.IUdp;
+
 
 //
 // NetPerfMeter application host.
@@ -46,19 +45,32 @@ module NetPerfMeterHost extends TransportLayerNodeBase
         *.routingTableModule = default("^.ipv4.routingTable");
 
     submodules:
-        netPerfMeterApp[numNetPerfMeterApps]: <default("NetPerfMeter")> like INetPerfMeterApp {  // T.D. 17.11.09
+        netPerfMeterApp[numNetPerfMeterApps]: <default("NetPerfMeter")> like IApp {  // T.D. 17.11.09
             parameters:
                 @display("p=375,76,row,150");
         }
 
+        at: MessageDispatcher {
+            parameters:
+                @display("p=750,146;b=1000,5,,,,1");
+        }
+
     connections allowunconnected:
         for i=0..numNetPerfMeterApps-1 {
-            netPerfMeterApp[i].tcpOut --> tcp.appIn;
-            netPerfMeterApp[i].tcpIn <-- tcp.appOut;
-            netPerfMeterApp[i].sctpOut --> sctp.appIn;
-            netPerfMeterApp[i].sctpIn <-- sctp.appOut;
-            netPerfMeterApp[i].udpOut --> udp.appIn;
-            netPerfMeterApp[i].udpIn <-- udp.appOut;
+            netPerfMeterApp[i].socketOut --> at.in++;
+            netPerfMeterApp[i].socketIn <-- at.out++;
         }
+
+        at.out++ --> udp.appIn if hasUdp;
+        at.in++ <-- udp.appOut if hasUdp;
+
+        at.out++ --> tcp.appIn if hasTcp;
+        at.in++ <-- tcp.appOut if hasTcp;
+
+        at.out++ --> sctp.appIn if hasSctp;
+        at.in++ <-- sctp.appOut if hasSctp;
+
+        at.out++ --> tn.in++;
+        at.in++ <-- tn.out++;
 }
 

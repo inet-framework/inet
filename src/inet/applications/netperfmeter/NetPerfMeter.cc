@@ -411,7 +411,8 @@ void NetPerfMeter::handleMessage(cMessage* msg)
             cmd->setSocketId(dataIndication->getSocketId());
             cmd->setSid(dataIndication->getSid());
             cmsg->addTag<SocketReq>()->setSocketId(dataIndication->getSocketId());
-            send(cmsg, "sctpOut");
+            cmsg->addTag<DispatchProtocolReq>()->setProtocol(&inet::Protocol::sctp);
+            send(cmsg,"socketOut");
          }
          break;
          // ------ Connection available -----------------------------------
@@ -426,7 +427,7 @@ void NetPerfMeter::handleMessage(cMessage* msg)
              cmsg->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&inet::Protocol::sctp);
              cmsg->addTagIfAbsent<SocketReq>()->setSocketId(newSockId);
              EV_INFO << "Sending accept socket id request ..." << endl;
-             send(cmsg, "sctpOut");
+             send(cmsg, "socketOut");
          }
          break;
          // ------ Connection established -----------------------------------
@@ -502,7 +503,7 @@ void NetPerfMeter::handleMessage(cMessage* msg)
               cmsg->addTag<DispatchProtocolReq>()->setProtocol(&inet::Protocol::tcp);
               cmsg->addTag<SocketReq>()->setSocketId(newSockId);
               EV_INFO << "Sending accept socket id request ..." << endl;
-              send(cmsg, "tcpOut");
+              send(cmsg, "socketOut");
           }
           break;
          // ------ Connection established -----------------------------------
@@ -619,7 +620,7 @@ void NetPerfMeter::successfullyEstablishedConnection(cMessage*          msg,
             delete IncomingSocketTCP;
          }
          IncomingSocketTCP = new TcpSocket(msg);
-         IncomingSocketTCP->setOutputGate(gate("tcpOut"));
+         IncomingSocketTCP->setOutputGate(gate("socketOut"));
       }
 
       ConnectionID = check_and_cast<Indication *>(msg)->getTag<SocketInd>()->getSocketId();
@@ -632,7 +633,7 @@ void NetPerfMeter::successfullyEstablishedConnection(cMessage*          msg,
             delete IncomingSocketSCTP;
          }
          IncomingSocketSCTP = new SctpSocket(msg);
-         IncomingSocketSCTP->setOutputGate(gate("sctpOut"));
+         IncomingSocketSCTP->setOutputGate(gate("socketOut"));
       }
 
       ConnectionID = check_and_cast<Indication *>(msg)->getTag<SocketInd>()->getSocketId();
@@ -733,7 +734,7 @@ void NetPerfMeter::createAndBindSocket()
       SocketSCTP = new SctpSocket;
       SocketSCTP->setInboundStreams(MaxInboundStreams);
       SocketSCTP->setOutboundStreams(RequestedOutboundStreams);
-      SocketSCTP->setOutputGate(gate("sctpOut"));
+      SocketSCTP->setOutputGate(gate("socketOut"));
       SocketSCTP->bind(localPort);
       if(ActiveMode == false) {
          SocketSCTP->listen(true);
@@ -742,7 +743,7 @@ void NetPerfMeter::createAndBindSocket()
    else if(TransportProtocol == TCP) {
       assert(SocketTCP == nullptr);
       SocketTCP = new TcpSocket;
-      SocketTCP->setOutputGate(gate("tcpOut"));
+      SocketTCP->setOutputGate(gate("socketOut"));
       SocketTCP->bind(localAddr, localPort);
       if(ActiveMode == false) {
          SocketTCP->listen();
@@ -751,7 +752,7 @@ void NetPerfMeter::createAndBindSocket()
    else if(TransportProtocol == UDP) {
       assert(SocketUDP == nullptr);
       SocketUDP = new UdpSocket;
-      SocketUDP->setOutputGate(gate("udpOut"));
+      SocketUDP->setOutputGate(gate("socketOut"));
       SocketUDP->bind(localAddr, localPort);
    }
 }
@@ -992,7 +993,8 @@ unsigned long NetPerfMeter::transmitFrame(const unsigned int frameSize,
             cmsg->setKind(SCTP_C_SEND);
             cmsg->setControlInfo(command);
             cmsg->setByteLength(msgSize);*/
-            send(cmsg, "sctpOut");
+            cmsg->addTag<DispatchProtocolReq>()->setProtocol(&inet::Protocol::sctp);
+            send(cmsg,"socketOut");
 
             SenderStatistics* senderStatistics = getSenderStatistics(streamID);
             senderStatistics->SentBytes += msgSize;
