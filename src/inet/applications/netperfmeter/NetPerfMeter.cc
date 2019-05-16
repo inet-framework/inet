@@ -552,7 +552,7 @@ void NetPerfMeter::establishConnection()
    else {
       // ------ Handle UDP on passive side ----------------
       if(TransportProtocol == UDP) {
-         SocketUDP->connect(L3AddressResolver().resolve(remoteAddress), remotePort);
+         //SocketUDP->connect(L3AddressResolver().resolve(remoteAddress), remotePort);
          successfullyEstablishedConnection(nullptr, 0);
       }
    }
@@ -892,24 +892,23 @@ unsigned long NetPerfMeter::transmitFrame(const unsigned int frameSize,
    unsigned long newlyQueuedBytes = 0;
    if(TransportProtocol == TCP) {
       // TCP is stream-oriented: just pass the amount of frame data.
-      const auto& tcpMessage = new NetPerfMeterDataMessage();
-      tcpMessage->setCreationTime(simTime());
-      tcpMessage->setByteLength(frameSize);
-      /* ToDo: Just to make it compile */
-    /*  Packet* pk = new Packet();
-      const auto& tcpMessage = makeShared<NetPerfMeterDataMessage>();
-      tcpMessage->setChunkLength(B(frameSize));
-
-      pk->insertAtBack(tcpMessage);
-      pk->setKind(TCP_C_SEND);
+      auto cmsg = new Packet("NetPerfMeterDataMessage");
+      auto dataMessage = makeShared<BytesChunk>();
+      std::vector<uint8_t> vec;
+      vec.resize(frameSize);
+      for (uint32 i = 0; i < frameSize; i++)
+          vec[i] = ((i & 1) ? 'D' : 'T');
+      dataMessage->setBytes(vec);
+      dataMessage->addTag<CreationTimeTag>()->setCreationTime(simTime());
+      cmsg->insertAtBack(dataMessage);
 
       if(IncomingSocketTCP) {
-         IncomingSocketTCP->send(pk);
+         IncomingSocketTCP->send(cmsg);
       }
       else {
-         SocketTCP->send(pk);
+         SocketTCP->send(cmsg);
       }
-      */
+
       newlyQueuedBytes += frameSize;
       SenderStatistics* senderStatistics = getSenderStatistics(0);
       senderStatistics->SentBytes += frameSize;
@@ -969,17 +968,18 @@ unsigned long NetPerfMeter::transmitFrame(const unsigned int frameSize,
 #endif
          // ====== UDP ===================================================
          else if(TransportProtocol == UDP) {
-            const auto& dataMessage = new NetPerfMeterDataMessage();
-            dataMessage->setCreationTime(simTime());
-            dataMessage->setByteLength(msgSize);
-         /* ToDo: Just to make it compile */
-          /*  Packet* packet = new Packet();
-            const auto& dataMessage = makeShared<NetPerfMeterDataMessage>();
+            auto cmsg = new Packet("NetPerfMeterDataMessage");
+            auto dataMessage = makeShared<BytesChunk>();
+            std::vector<uint8_t> vec;
+            vec.resize(msgSize);
+            for (uint32 i = 0; i < msgSize; i++)
+                vec[i] = ((i & 1) ? 'D' : 'T');
+            dataMessage->setBytes(vec);
+            dataMessage->addTag<CreationTimeTag>()->setCreationTime(simTime());
+            cmsg->insertAtBack(dataMessage);
 
-            dataMessage->setChunkLength(B(msgSize));
-            packet->insertAtBack(dataMessage);
-            SocketUDP->send(packet);
-           */
+            SocketUDP->send(cmsg);
+
             SenderStatistics* senderStatistics = getSenderStatistics(0);
             senderStatistics->SentBytes += msgSize;
             senderStatistics->SentMessages++;
