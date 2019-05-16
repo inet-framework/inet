@@ -102,10 +102,12 @@ NetworkServerApp::~NetworkServerApp() {
     }
     while(!receivedPackets.empty()) {
         delete receivedPackets.back().rcvdPacket;
-        if (receivedPackets.back().endOfWaiting && receivedPackets.back().endOfWaiting->isScheduled())
-            cancelAndDelete(receivedPackets.back().endOfWaiting);
-        else
-            delete receivedPackets.back().endOfWaiting;
+        if (receivedPackets.back().endOfWaiting) {
+            if (receivedPackets.back().endOfWaiting->isScheduled())
+                cancelAndDelete(receivedPackets.back().endOfWaiting);
+            else
+                delete receivedPackets.back().endOfWaiting;
+        }
         receivedPackets.pop_back();
     }
 }
