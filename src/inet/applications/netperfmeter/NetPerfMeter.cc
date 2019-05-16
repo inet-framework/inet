@@ -490,6 +490,21 @@ void NetPerfMeter::handleMessage(cMessage* msg)
          case TCP_I_URGENT_DATA:
             receiveMessage(msg);
           break;
+          // ------ Connection available -----------------------------------
+          case TCP_I_AVAILABLE: {
+              EV_INFO << "TCP_I_AVAILABLE arrived\n";
+              TcpAvailableInfo *availableInfo = check_and_cast<TcpAvailableInfo *>(msg->getControlInfo());
+              int newSockId = availableInfo->getNewSocketId();
+              EV_INFO << "new socket id = " << newSockId << endl;
+              Request *cmsg = new Request("TCP_C_ACCEPT", TCP_C_ACCEPT);
+              auto *acceptCmd = new TcpAcceptCommand();
+              cmsg->setControlInfo(acceptCmd);
+              cmsg->addTag<DispatchProtocolReq>()->setProtocol(&inet::Protocol::tcp);
+              cmsg->addTag<SocketReq>()->setSocketId(newSockId);
+              EV_INFO << "Sending accept socket id request ..." << endl;
+              send(cmsg, "tcpOut");
+          }
+          break;
          // ------ Connection established -----------------------------------
          case TCP_I_ESTABLISHED:
             successfullyEstablishedConnection(msg, 0);
