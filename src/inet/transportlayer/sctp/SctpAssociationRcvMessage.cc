@@ -19,6 +19,7 @@
 #include <assert.h>
 #include <string.h>
 
+#include "inet/applications/common/SocketTag_m.h"
 #include "inet/common/packet/Message.h"
 
 #ifdef WITH_IPv4
@@ -628,7 +629,7 @@ bool SctpAssociation::processInitArrived(SctpInitChunk *initchunk, int32 srcPort
                 // set path variables for this pathlocalAddresses
                 if (!getPath(initchunk->getAddresses(j))) {
                     SctpPathVariables *path = new SctpPathVariables(initchunk->getAddresses(j), this, rt);
-                    EV_INFO << " get new path for " << initchunk->getAddresses(j) << " ptr=" << path << "\n";
+                    EV_INFO << " get new path for " << initchunk->getAddresses(j) << "\n";
                     for (auto & elem : state->localAddresses) {
                         if (sctpMain->addRemoteAddress(this, (elem), initchunk->getAddresses(j))) {
                             this->remoteAddressList.push_back(initchunk->getAddresses(j));
@@ -2006,14 +2007,12 @@ void SctpAssociation::generateSendQueueAbatedIndication(const uint64 bytes)
         Indication *msg = new Indication(indicationName(SCTP_I_SENDQUEUE_ABATED));
         msg->setKind(SCTP_I_SENDQUEUE_ABATED);
 
-        auto& tags = getTags(msg);
-        SctpSendQueueAbatedReq *sendQueueAbatedIndication =
-            tags.addTagIfAbsent<SctpSendQueueAbatedReq>();
+        msg->addTag<SocketInd>()->setSocketId(assocId);
+        SctpSendQueueAbatedReq *sendQueueAbatedIndication = msg->addTag<SctpSendQueueAbatedReq>();
         sendQueueAbatedIndication->setSocketId(assocId);
         sendQueueAbatedIndication->setLocalAddr(localAddr);
         sendQueueAbatedIndication->setRemoteAddr(remoteAddr);
         sendQueueAbatedIndication->setNumMsgs(bytes);    // NOTE: Legacy API!
-
         sendQueueAbatedIndication->setQueuedForStreamArraySize(sendStreams.size());
         unsigned int streamID = 0;
         for (auto & elem : sendStreams)

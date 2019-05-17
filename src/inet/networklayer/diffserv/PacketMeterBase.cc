@@ -26,8 +26,10 @@ void PacketMeterBase::initialize(int stage)
         inputGate = gate("in");
         producer = dynamic_cast<IPacketProducer *>(findConnectedModule(inputGate));
     }
-    else if (stage == INITSTAGE_LAST)
-        checkPushPacketSupport(inputGate);
+    else if (stage == INITSTAGE_LAST) {
+        if (producer != nullptr)
+            checkPushPacketSupport(inputGate);
+    }
 }
 
 void PacketMeterBase::handleCanPushPacket(cGate *gate)

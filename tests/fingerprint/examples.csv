@@ -181,8 +181,10 @@
 /examples/inet/nclients/,            -f omnetpp.ini -c General -r 0,                3000s,           0df4-26f8/tplx, PASS,
 /examples/inet/nclients/,            -f video.ini -c General -r 0,                  50s,             6927-2354/tplx, PASS,
 
-/examples/inet/netperfmeter/,        -f omnetpp.ini -c TraceFile -r 0,              100s,            9ce3-3c6e/tplx, PASS,
-/examples/inet/netperfmeter/,        -f omnetpp.ini -c SCTP-with-OLIA -r 0,         30s,             6abf-f93a/tplx, PASS,
+/examples/inet/netperfmeter/,        -f omnetpp.ini -c TraceFile-Udp -r 0,          100s,            5726-c4f0/tplx, PASS,
+/examples/inet/netperfmeter/,        -f omnetpp.ini -c TraceFile-Tcp -r 0,          100s,            4db7-867e/tplx, PASS,
+/examples/inet/netperfmeter/,        -f omnetpp.ini -c TraceFile-Sctp -r 0,              100s,            7395-7102/tplx, PASS,
+/examples/inet/netperfmeter/,        -f omnetpp.ini -c SCTP-with-OLIA -r 0,         30s,             3e2b-f59f/tplx, PASS,
 
 /examples/inet/pcaprecorder/,        -f omnetpp.ini -c General -r 0,                5000s,           e7f5-5a43/tplx, PASS,
 

@@ -19,7 +19,7 @@ network TestNetwork
     meter: SingleRateThreeColorMeter;
 
   connections allowunconnected:
-    app.out --> meter.in++;
+    app.out --> meter.in;
     meter.greenOut --> app.in++;
     meter.yellowOut --> app.in++;
     meter.redOut --> app.in++;

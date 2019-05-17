@@ -27,13 +27,14 @@
 
 package inet.examples.inet.netperfmeter;
 
-import inet.applications.netperfmeter.NetPerfMeterHost;
 import inet.common.queueing.CompoundPacketQueue;
 import inet.common.queueing.PacketQueue;
 import inet.common.queueing.RedDropper;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.Router;
+import inet.node.inet.StandardHost;
 import ned.DatarateChannel;
+
 
 module REDQueue extends CompoundPacketQueue
 {
@@ -114,14 +115,14 @@ network testNetwork
         }
 
         // ------ Systems -----------------------------------------------------
-        clientMain[systems]: NetPerfMeterHost {
+        clientMain[systems]: StandardHost {
             parameters:
                 forwarding = false;
                 @display("p=50,50,c,200;i=device/laptop_l,green");
             gates:
                 pppg[1];
         }
-        serverMain[systems]: NetPerfMeterHost {
+        serverMain[systems]: StandardHost {
             parameters:
                 forwarding = false;
                 @display("p=1650,50,c,200;i=device/server_l,green");
