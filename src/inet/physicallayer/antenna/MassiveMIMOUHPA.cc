@@ -33,25 +33,18 @@ static double overall_sum(EulerAngles direction);
 Define_Module(MassiveMIMOUHPA);
 
 MassiveMIMOUHPA::MassiveMIMOUHPA() :
-        AntennaBase(), length(NaN),
-        freq(NaN),
-        distance (NaN),
-        phiz(NaN)
-
-
+        AntennaBase()
 {
-
-
 
 }
 
 void MassiveMIMOUHPA::initialize(int stage) {
     AntennaBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        length = m(par("length"));
-        freq = (par("freq"));
-        distance = (par("distance"));
-        phiz = (par("phiz"));
+        auto length = m(par("length"));
+        auto freq = (par("freq").doubleValue());
+        auto distance = (par("distance").doubleValue());
+        auto phiz = (par("phiz").doubleValue());
         M = (par("M"));
 #ifdef REGISTER_IN_NODE
 		// this code register in the node module
@@ -71,7 +64,8 @@ void MassiveMIMOUHPA::initialize(int stage) {
         radioModule->subscribe(IRadio::receptionStateChangedSignal, this);
         radioModule->subscribe(IRadio::transmissionStateChangedSignal, this);
         radioModule->subscribe(IRadio::receivedSignalPartChangedSignal, this);
-        radio = check_and_cast<IRadio *>(radioModule);
+
+        gain = makeShared<AntennaGain>(length, M, phiz, freq, distance, risInt, this);
 
 /*
         const char *energySourceModule = par("energySourceModule");
@@ -124,43 +118,31 @@ static double getFunc (double x, double y)
   return afmod*third;
 }
 
-double MassiveMIMOUHPA::getMaxGain() const
+double MassiveMIMOUHPA::AntennaGain::getMaxGain() const
 {
-       IRadio *radio= check_and_cast<IRadio *>(getParentModule());
-       IRadioMedium *ra =  const_cast< IRadioMedium *> (radio->getMedium());
-       RadioMedium *rm=dynamic_cast< RadioMedium *>(ra);
        double maxG;
-       int numel = getNumAntennas();
+       int numel = ourpa->getNumAntennas();
        double numer = 4 * M_PI * numel*numel;
        maxG= 20 * log10 (numer/risInt);
        return maxG;
 }
 
-double MassiveMIMOUHPA::computeGain(const EulerAngles direction) const {
+double MassiveMIMOUHPA::AntennaGain::computeGain(const Quaternion direction) const {
 
     double gain;
     double maxGain = getMaxGain();
-    IRadio *radio = check_and_cast<IRadio *>(getParentModule());
-    IRadioMedium *ra = const_cast<IRadioMedium *>(radio->getMedium());
-    RadioMedium *rm = dynamic_cast<RadioMedium *>(ra);
-
     if (phiz == -1) {
         // omni
         return 1;
     }
 
-    int numel = getNumAntennas(); //without energy control
+    int numel = ourpa->getNumAntennas(); //without energy control
     cout << "ACTIVE ARRAY ELEMENTS:" << numel << endl;
 
-    double c = 300000 * 10 * 10 * 10;
-    double lambda = c / freq;
-    double d = distance * lambda;
-
-    double k = (2 * M_PI) / lambda;
     double phizero = phiz * (M_PI / 180);
 
-    double heading = direction.alpha;
-    double elevation = direction.beta;
+    double heading = direction.toEulerAngles().alpha.get();
+    double elevation = direction.toEulerAngles().beta.get();
     double currentangle = heading * 180.0 / M_PI;
 
     if (currentangle == phiz)
@@ -174,14 +156,11 @@ double MassiveMIMOUHPA::computeGain(const EulerAngles direction) const {
     const std::complex<double> i(0, 1);
 
     double betax = sin(phizero) * cos(elevation);
-    double betay = (sin(phizero) * sin(phizero));
 
     for (int m = -emme; m <= emme; ++m) {
         int val = (2 * emme) - abs(m);
         sum2 = 0;
         for (int n = 0; n <= val; ++n) {
-
-            double aux = n * (sin(heading) * cos(elevation));
             double auxprova = n
                     * (double) (sin(heading) * cos(elevation) + betax);
 
@@ -213,9 +192,9 @@ double MassiveMIMOUHPA::computeGain(const EulerAngles direction) const {
     if (rec != nullptr) {
         // is of type Ieee80211ScalarReceiver
         if (phiz >= 0)
-            gain = computeRecGain(direction.alpha - M_PI);
+            gain = computeRecGain(direction.toEulerAngles().alpha - rad(M_PI));
         else
-            gain = computeRecGain(direction.alpha + M_PI);
+            gain = computeRecGain(direction.toEulerAngles().alpha + rad(M_PI));
     }
 
     cout << "Gain (dB) at angle (degree): " << currentangle << " is: " << gain
@@ -225,30 +204,21 @@ double MassiveMIMOUHPA::computeGain(const EulerAngles direction) const {
 
 }
 
-double MassiveMIMOUHPA::computeRecGain(const EulerAngles &direction) const {
+double MassiveMIMOUHPA::AntennaGain::computeRecGain(const rad &direction) const {
 
     double gain;
     double maxGain = getMaxGain();
-    IRadio *radio = check_and_cast<IRadio *>(getParentModule());
-    IRadioMedium *ra = const_cast<IRadioMedium *>(radio->getMedium());
-    RadioMedium *rm = dynamic_cast<RadioMedium *>(ra);
     if (phiz == -1) {
         // omni
         return 1;
     }
 
-    int numel = getNumAntennas(); //without energy control
+    int numel = ourpa->getNumAntennas(); //without energy control
     cout << "ACTIVE ARRAY ELEMENTS:" << numel << endl;
-
-    double c = 300000 * 10 * 10 * 10;
-    double lambda = c / freq;
-    double d = distance * lambda;
-
-    double k = (2 * M_PI) / lambda;
     double phizero = phiz * (M_PI / 180);
 
-    double heading = direction.alpha;
-    double elevation = direction.beta;
+    double heading = direction.get();
+    double elevation = 0;
     double currentangle = heading * 180.0 / M_PI;
 
     if (currentangle == phiz)
@@ -259,13 +229,10 @@ double MassiveMIMOUHPA::computeRecGain(const EulerAngles &direction) const {
     int emme = MassiveMIMOUHPA::M;
     const std::complex<double> i(0, 1);
     double betax = sin(phizero) * cos(elevation);
-    double betay = (sin(phizero) * sin(phizero));
     for (int m = -emme; m <= emme; ++m) {
         int val = (2 * emme) - abs(m);
         sum2 = 0;
         for (int n = 0; n <= val; ++n) {
-
-            double aux = n * (sin(heading) * cos(elevation));
             double auxprova = (double) n
                     * (sin(heading) * cos(elevation) + betax);
 
@@ -296,9 +263,8 @@ double MassiveMIMOUHPA::computeRecGain(const EulerAngles &direction) const {
 
 }
 
-double MassiveMIMOUHPA::getAngolo(Coord p1, Coord p2) const {
+double MassiveMIMOUHPA::AntennaGain::getAngolo(Coord p1, Coord p2) const {
     double angolo;
-    double cangl, intercept;
     double x1, y1, x2, y2;
     double dx, dy;
 
@@ -308,7 +274,7 @@ double MassiveMIMOUHPA::getAngolo(Coord p1, Coord p2) const {
     y2 = p2.y;
     dx = x2 - x1;
     dy = y2 - y1;
-    cangl = dy / dx;
+    double cangl = dy / dx;
     angolo = atan(cangl) * (180 / 3.14);
     return angolo;
 
@@ -319,7 +285,7 @@ std::ostream& MassiveMIMOUHPA::printToStream(std::ostream& stream,
     stream << "MassiveMIMOUHPA";
     if (level >= PRINT_LEVEL_DETAIL) {
 
-        stream << ", length = " << length;
+        stream << ", length = " << gain->getLength();
 
         cout << getFullPath().substr(13, 8) << " Posizione: "
                 << getMobility()->getCurrentPosition() << endl;
@@ -334,6 +300,7 @@ std::ostream& MassiveMIMOUHPA::printToStream(std::ostream& stream,
 void MassiveMIMOUHPA::receiveSignal(cComponent *source, simsignal_t signalID,
         double val, cObject *details) {
     if (signalID == MassiveMIMOUHPAConfigureChange) {
+        auto radio =  check_and_cast<IRadio *>(getParentModule());
         if (radio->getRadioMode() == IRadio::RADIO_MODE_TRANSMITTER
                 && radio->getTransmissionState()
                         == IRadio::TRANSMISSION_STATE_TRANSMITTING) {
@@ -342,9 +309,9 @@ void MassiveMIMOUHPA::receiveSignal(cComponent *source, simsignal_t signalID,
             newConfigurtion = val;
         }
         if (val >= -180 && val <= 180)
-            phiz = val;
+            gain->setPhizero(val);
         else if (val == 360)
-            phiz = 360;
+            gain->setPhizero(360);
     }
 }
 
@@ -353,19 +320,20 @@ void MassiveMIMOUHPA::receiveSignal(cComponent *source, simsignal_t signalID,
     if (signalID != MassiveMIMOUHPAConfigureChange)
         // Radio signals
         if (pendingConfiguration) {
+            auto radio =  check_and_cast<IRadio *>(getParentModule());
             if (radio->getRadioMode() != IRadio::RADIO_MODE_TRANSMITTER
                     || (radio->getRadioMode() == IRadio::RADIO_MODE_TRANSMITTER
                             && radio->getTransmissionState()
                                     != IRadio::TRANSMISSION_STATE_TRANSMITTING)) {
                 if (val >= -180 && val <= 180)
-                    phiz = val;
+                    gain->setPhizero(val);
                 else if (val == 360)
-                    phiz = 360;
+                    gain->setPhizero(360);
             }
         }
 }
 
-void Simpson2D2::initializeCoeff(Mat &coeff, int size) {
+void MassiveMIMOUHPA::Simpson2D2::initializeCoeff(Mat &coeff, int size) {
     Vec uniDiCoeff;
     // check if size is odd or even
     int correctSize = (size % 2 == 0) ? size + 1 : size;
@@ -386,7 +354,7 @@ void Simpson2D2::initializeCoeff(Mat &coeff, int size) {
     }
 }
 
-double Simpson2D2::Integral(double (*fun)(double, double), const Mat &coeff,
+double MassiveMIMOUHPA::Simpson2D2::Integral(double (*fun)(double, double), const Mat &coeff,
         limits xLimit, limits yLimit, int size) {
 
     double xInterval = xLimit.getUpper() - xLimit.getLower();
@@ -408,7 +376,7 @@ double Simpson2D2::Integral(double (*fun)(double, double), const Mat &coeff,
     return val * xStep * yStep / 9;
 }
 
-double Simpson2D2::Integral(double (*fun)(double, double), limits xLimit,
+double MassiveMIMOUHPA::Simpson2D2::Integral(double (*fun)(double, double), limits xLimit,
         limits yLimits, int tam) {
     Mat coeff;
     initializeCoeff(coeff, tam);
