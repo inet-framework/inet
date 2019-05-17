@@ -29,6 +29,7 @@
 #include "NetPerfMeter_m.h"
 
 #include "inet/applications/common/SocketTag_m.h"
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/common/TimeTag_m.h"
 #include "inet/common/packet/Message.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
@@ -37,9 +38,7 @@ namespace inet {
 
 Define_Module(NetPerfMeter);
 
-
 // #define EV std::cout
-
 
 // ###### Get pareto-distributed double random value ########################
 // Parameters:
@@ -77,31 +76,29 @@ static cNEDValue pareto(cComponent *context, cNEDValue argv[], int argc)
 
 Define_NED_Function(pareto, "quantity pareto(quantity location, quantity shape, long rng?)");
 
-
 // ###### Constructor #######################################################
 NetPerfMeter::NetPerfMeter()
 {
-   SendingAllowed = false;
-   ConnectionID   = 0;
-   resetStatistics();
+    SendingAllowed = false;
+    ConnectionID = 0;
+    resetStatistics();
 }
-
 
 // ###### Destructor ########################################################
 NetPerfMeter::~NetPerfMeter()
 {
-   cancelAndDelete(ConnectTimer);
-   ConnectTimer = nullptr;
-   cancelAndDelete(StartTimer);
-   StartTimer = nullptr;
-   cancelAndDelete(ResetTimer);
-   ResetTimer = nullptr;
-   cancelAndDelete(StopTimer);
-   StopTimer = nullptr;
-   for(auto & elem : TransmitTimerVector) {
-      cancelAndDelete(elem);
-      elem = nullptr;
-   }
+    cancelAndDelete(ConnectTimer);
+    ConnectTimer = nullptr;
+    cancelAndDelete(StartTimer);
+    StartTimer = nullptr;
+    cancelAndDelete(ResetTimer);
+    ResetTimer = nullptr;
+    cancelAndDelete(StopTimer);
+    StopTimer = nullptr;
+    for (auto & elem : TransmitTimerVector) {
+        cancelAndDelete(elem);
+        elem = nullptr;
+    }
 }
 
 
@@ -110,156 +107,158 @@ void NetPerfMeter::parseExpressionVector(std::vector<cDynamicExpression>& expres
                                          const char*                      string,
                                          const char*                      delimiters)
 {
-   expressionVector.clear();
-   cStringTokenizer tokenizer(string, delimiters);
-   while(tokenizer.hasMoreTokens()) {
-      const char*        token = tokenizer.nextToken();
-      cDynamicExpression expression;
-      expression.parse(token);
-      expressionVector.push_back(expression);
-   }
+    expressionVector.clear();
+    cStringTokenizer tokenizer(string, delimiters);
+    while (tokenizer.hasMoreTokens()) {
+        const char* token = tokenizer.nextToken();
+        cDynamicExpression expression;
+        expression.parse(token);
+        expressionVector.push_back(expression);
+    }
 }
 
 
 // ###### initialize() method ###############################################
-void NetPerfMeter::initialize()
+void NetPerfMeter::initialize(int stage)
 {
-   // ====== Handle parameters ==============================================
-   ActiveMode = par("activeMode");
-   const char * protocolPar = par("protocol");
-   if(strcmp(protocolPar, "TCP") == 0) {
-      TransportProtocol = TCP;
-   }
-   else if(strcmp(protocolPar, "SCTP") == 0) {
-      TransportProtocol = SCTP;
-   }
-   else if(strcmp(protocolPar, "UDP") == 0) {
-      TransportProtocol = UDP;
-   }
-   else {
-      throw cRuntimeError("Bad protocol setting!");
-   }
-
-   RequestedOutboundStreams = 1;
-   MaxInboundStreams        = 1;
-   ActualOutboundStreams    = 1;
-   ActualInboundStreams     = 1;
-   LastStreamID             = 1;
-   MaxMsgSize               = par("maxMsgSize");
-   QueueSize                = par("queueSize");
-   DecoupleSaturatedStreams = par("decoupleSaturatedStreams");
-   RequestedOutboundStreams = par("outboundStreams");
-   if((RequestedOutboundStreams < 1) || (RequestedOutboundStreams > 65535)) {
-      throw cRuntimeError("Invalid number of outbound streams; use range from [1, 65535]");
-   }
-   MaxInboundStreams = par("maxInboundStreams");
-   if((MaxInboundStreams < 1) || (MaxInboundStreams > 65535)) {
-      throw cRuntimeError("Invalid number of inbound streams; use range from [1, 65535]");
-   }
-   UnorderedMode = par("unordered");
-   if((UnorderedMode < 0.0) || (UnorderedMode > 1.0)) {
-      throw cRuntimeError("Bad value for unordered probability; use range from [0.0, 1.0]");
-   }
-   UnreliableMode = par("unreliable");
-   if((UnreliableMode < 0.0) || (UnreliableMode > 1.0)) {
-      throw cRuntimeError("Bad value for unreliable probability; use range from [0.0, 1.0]");
-   }
-   parseExpressionVector(FrameRateExpressionVector, par("frameRateString"), ";");
-   parseExpressionVector(FrameSizeExpressionVector, par("frameSizeString"), ";");
-
-   TraceIndex = ~0;
-   if(strcmp(par("traceFile").stringValue(), "") != 0) {
-      std::fstream traceFile(par("traceFile").stringValue());
-      if(!traceFile.good()) {
-         throw cRuntimeError("Unable to load trace file");
-      }
-      while(!traceFile.eof()) {
-        TraceEntry traceEntry;
-        traceEntry.InterFrameDelay = 0;
-        traceEntry.FrameSize       = 0;
-        traceEntry.StreamID        = 0;
-
-        char line[256];
-        traceFile.getline(line, sizeof(line), '\n');
-        if(sscanf(line, "%lf %u %u", &traceEntry.InterFrameDelay, &traceEntry.FrameSize, &traceEntry.StreamID) >= 2) {
-           // std::cout << "Frame: " << traceEntry.InterFrameDelay << "\t" << traceEntry.FrameSize << "\t" << traceEntry.StreamID << endl;
-           TraceVector.push_back(traceEntry);
+    if (stage == INITSTAGE_LOCAL) {
+        // ====== Handle parameters ==============================================
+        ActiveMode = par("activeMode");
+        const char * protocolPar = par("protocol");
+        if (strcmp(protocolPar, "TCP") == 0) {
+            TransportProtocol = TCP;
         }
-      }
-   }
+        else if (strcmp(protocolPar, "SCTP") == 0) {
+            TransportProtocol = SCTP;
+        }
+        else if (strcmp(protocolPar, "UDP") == 0) {
+            TransportProtocol = UDP;
+        }
+        else {
+            throw cRuntimeError("Bad protocol setting!");
+        }
 
-   // ====== Initialize and bind socket =====================================
-   SocketSCTP = IncomingSocketSCTP = nullptr;
-   SocketTCP  = IncomingSocketTCP  = nullptr;
-   SocketUDP  = nullptr;
+        RequestedOutboundStreams = 1;
+        MaxInboundStreams = 1;
+        ActualOutboundStreams = 1;
+        ActualInboundStreams = 1;
+        LastStreamID = 1;
+        MaxMsgSize = par("maxMsgSize");
+        QueueSize = par("queueSize");
+        DecoupleSaturatedStreams = par("decoupleSaturatedStreams");
+        RequestedOutboundStreams = par("outboundStreams");
+        if ((RequestedOutboundStreams < 1) || (RequestedOutboundStreams > 65535)) {
+            throw cRuntimeError("Invalid number of outbound streams; use range from [1, 65535]");
+        }
+        MaxInboundStreams = par("maxInboundStreams");
+        if ((MaxInboundStreams < 1) || (MaxInboundStreams > 65535)) {
+            throw cRuntimeError("Invalid number of inbound streams; use range from [1, 65535]");
+        }
+        UnorderedMode = par("unordered");
+        if ((UnorderedMode < 0.0) || (UnorderedMode > 1.0)) {
+            throw cRuntimeError("Bad value for unordered probability; use range from [0.0, 1.0]");
+        }
+        UnreliableMode = par("unreliable");
+        if ((UnreliableMode < 0.0) || (UnreliableMode > 1.0)) {
+            throw cRuntimeError("Bad value for unreliable probability; use range from [0.0, 1.0]");
+        }
+        parseExpressionVector(FrameRateExpressionVector, par("frameRateString"), ";");
+        parseExpressionVector(FrameSizeExpressionVector, par("frameSizeString"), ";");
 
-   for(unsigned int i = 0;i < RequestedOutboundStreams;i++) {
-      SenderStatistics* senderStatistics = new SenderStatistics;
-      SenderStatisticsMap.insert(std::pair<unsigned int, SenderStatistics*>(i, senderStatistics));
-   }
-   for(unsigned int i = 0;i < MaxInboundStreams;i++) {
-      ReceiverStatistics* receiverStatistics = new ReceiverStatistics;
-      ReceiverStatisticsMap.insert(std::pair<unsigned int, ReceiverStatistics*>(i, receiverStatistics));
-   }
+        TraceIndex = ~0;
+        if (strcmp(par("traceFile").stringValue(), "") != 0) {
+            std::fstream traceFile(par("traceFile").stringValue());
+            if (!traceFile.good()) {
+                throw cRuntimeError("Unable to load trace file");
+            }
+            while (!traceFile.eof()) {
+                TraceEntry traceEntry;
+                traceEntry.InterFrameDelay = 0;
+                traceEntry.FrameSize = 0;
+                traceEntry.StreamID = 0;
 
-   ConnectTime       = par("connectTime");
-   StartTime         = par("startTime");
-   ResetTime         = par("resetTime");
-   StopTime          = par("stopTime");
-   MaxOnOffCycles    = par("maxOnOffCycles");
+                char line[256];
+                traceFile.getline(line, sizeof(line), '\n');
+                if (sscanf(line, "%lf %u %u", &traceEntry.InterFrameDelay, &traceEntry.FrameSize, &traceEntry.StreamID) >= 2) {
+                    // std::cout << "Frame: " << traceEntry.InterFrameDelay << "\t" << traceEntry.FrameSize << "\t" << traceEntry.StreamID << endl;
+                    TraceVector.push_back(traceEntry);
+                }
+            }
+        }
+    }
+    else if (stage == INITSTAGE_APPLICATION_LAYER) {
+        // ====== Initialize and bind socket =====================================
+        SocketSCTP = IncomingSocketSCTP = nullptr;
+        SocketTCP = IncomingSocketTCP = nullptr;
+        SocketUDP = nullptr;
 
-   HasFinished       = false;
-   OffTimer          = nullptr;
-   OnTimer           = nullptr;
-   OnOffCycleCounter = 0;
+        for (unsigned int i = 0; i < RequestedOutboundStreams; i++) {
+            SenderStatistics* senderStatistics = new SenderStatistics;
+            SenderStatisticsMap.insert(std::pair<unsigned int, SenderStatistics*>(i, senderStatistics));
+        }
+        for (unsigned int i = 0; i < MaxInboundStreams; i++) {
+            ReceiverStatistics* receiverStatistics = new ReceiverStatistics;
+            ReceiverStatisticsMap.insert(std::pair<unsigned int, ReceiverStatistics*>(i, receiverStatistics));
+        }
 
-   EV << simTime() << ", " << getFullPath() << ": Initialize"
-      << "\tConnectTime=" << ConnectTime
-      << "\tStartTime="   << StartTime
-      << "\tResetTime="   << ResetTime
-      << "\tStopTime="    << StopTime
-      << endl;
+        ConnectTime = par("connectTime");
+        StartTime = par("startTime");
+        ResetTime = par("resetTime");
+        StopTime = par("stopTime");
+        MaxOnOffCycles = par("maxOnOffCycles");
 
-   if(ActiveMode == false) {
-      // Passive mode: create and bind socket immediately.
-      // For active mode, the socket will be created just before connect().
-      createAndBindSocket();
-   }
+        HasFinished = false;
+        OffTimer = nullptr;
+        OnTimer = nullptr;
+        OnOffCycleCounter = 0;
 
-   // ====== Schedule Connect Timer =========================================
-   ConnectTimer = new cMessage("ConnectTimer");
-   ConnectTimer->setKind(TIMER_CONNECT);
-   scheduleAt(ConnectTime, ConnectTimer);
+        EV << simTime() << ", " << getFullPath() << ": Initialize"
+                  << "\tConnectTime=" << ConnectTime
+                  << "\tStartTime=" << StartTime
+                  << "\tResetTime=" << ResetTime
+                  << "\tStopTime=" << StopTime
+                  << endl;
+
+        if (ActiveMode == false) {
+            // Passive mode: create and bind socket immediately.
+            // For active mode, the socket will be created just before connect().
+            createAndBindSocket();
+        }
+
+        // ====== Schedule Connect Timer =========================================
+        ConnectTimer = new cMessage("ConnectTimer");
+        ConnectTimer->setKind(TIMER_CONNECT);
+        scheduleAt(ConnectTime, ConnectTimer);
+    }
 }
-
 
 // ###### finish() method ###################################################
 void NetPerfMeter::finish()
 {
-   if(TransportProtocol == SCTP) {
-   }
-   else if(TransportProtocol == TCP) {
-   }
-   else if(TransportProtocol == UDP) {
-   }
+    if (TransportProtocol == SCTP) {
+    }
+    else if (TransportProtocol == TCP) {
+    }
+    else if (TransportProtocol == UDP) {
+    }
 
-   std::map<unsigned int, SenderStatistics*>::iterator senderStatisticsIterator = SenderStatisticsMap.begin();
-   while(senderStatisticsIterator != SenderStatisticsMap.end()) {
-      delete senderStatisticsIterator->second;
-      SenderStatisticsMap.erase(senderStatisticsIterator);
-      senderStatisticsIterator = SenderStatisticsMap.begin();
-   }
-   std::map<unsigned int, ReceiverStatistics*>::iterator receiverStatisticsIterator = ReceiverStatisticsMap.begin();
-   while(receiverStatisticsIterator != ReceiverStatisticsMap.end()) {
-      delete receiverStatisticsIterator->second;
-      ReceiverStatisticsMap.erase(receiverStatisticsIterator);
-      receiverStatisticsIterator = ReceiverStatisticsMap.begin();
-   }
+    std::map<unsigned int, SenderStatistics*>::iterator senderStatisticsIterator = SenderStatisticsMap.begin();
+    while (senderStatisticsIterator != SenderStatisticsMap.end()) {
+        delete senderStatisticsIterator->second;
+        SenderStatisticsMap.erase(senderStatisticsIterator);
+        senderStatisticsIterator = SenderStatisticsMap.begin();
+    }
+    std::map<unsigned int, ReceiverStatistics*>::iterator receiverStatisticsIterator = ReceiverStatisticsMap.begin();
+    while (receiverStatisticsIterator != ReceiverStatisticsMap.end()) {
+        delete receiverStatisticsIterator->second;
+        ReceiverStatisticsMap.erase(receiverStatisticsIterator);
+        receiverStatisticsIterator = ReceiverStatisticsMap.begin();
+    }
 }
 
-
 // ###### Show I/O status ###################################################
-void NetPerfMeter::refreshDisplay() const {
+void NetPerfMeter::refreshDisplay() const
+{
     unsigned long long totalSentBytes = 0;
     for(std::map<unsigned int, SenderStatistics*>::const_iterator iterator = SenderStatisticsMap.begin();
         iterator != SenderStatisticsMap.end(); iterator++) {
@@ -279,126 +278,118 @@ void NetPerfMeter::refreshDisplay() const {
            totalReceivedBytes, totalSentBytes);
     getDisplayString().setTagArg("t", 0, status);
     //TODO also was setStatusString("Connecting"), setStatusString("Closed")
-
 }
-
 
 // ###### Handle timer ######################################################
 void NetPerfMeter::handleTimer(cMessage* msg)
 {
-   // ====== Transmit timer =================================================
-   const NetPerfMeterTransmitTimer* transmitTimer =
-      dynamic_cast<NetPerfMeterTransmitTimer*>(msg);
-   if(transmitTimer) {
-      TransmitTimerVector[transmitTimer->getStreamID()] = nullptr;
-      if(TraceVector.size() > 0) {
-         sendDataOfTraceFile(QueueSize);
-      }
-      else {
-         sendDataOfNonSaturatedStreams(QueueSize, transmitTimer->getStreamID());
-      }
-   }
+    // ====== Transmit timer =================================================
+    const NetPerfMeterTransmitTimer* transmitTimer = dynamic_cast<NetPerfMeterTransmitTimer*>(msg);
+    if (transmitTimer) {
+        TransmitTimerVector[transmitTimer->getStreamID()] = nullptr;
+        if (TraceVector.size() > 0) {
+            sendDataOfTraceFile(QueueSize);
+        }
+        else {
+            sendDataOfNonSaturatedStreams(QueueSize, transmitTimer->getStreamID());
+        }
+    }
 
-   // ====== Off timer ======================================================
-   else if(msg == OffTimer) {
-      EV << simTime() << ", " << getFullPath() << ": Entering OFF mode" << endl;
+    // ====== Off timer ======================================================
+    else if (msg == OffTimer) {
+        EV << simTime() << ", " << getFullPath() << ": Entering OFF mode" << endl;
+        OffTimer = nullptr;
+        stopSending();
+    }
 
-      OffTimer = nullptr;
-      stopSending();
-   }
+    // ====== On timer =======================================================
+    else if (msg == OnTimer) {
+        EV << simTime() << ", " << getFullPath() << ": Entering ON mode" << endl;
+        OnTimer = nullptr;
+        startSending();
+    }
 
-   // ====== On timer =======================================================
-   else if(msg == OnTimer) {
-      EV << simTime() << ", " << getFullPath() << ": Entering ON mode" << endl;
+    // ====== Reset timer ====================================================
+    else if (msg == ResetTimer) {
+        EV << simTime() << ", " << getFullPath() << ": Reset" << endl;
 
-      OnTimer = nullptr;
-      startSending();
-   }
+        ResetTimer = nullptr;
+        resetStatistics();
 
-   // ====== Reset timer ====================================================
-   else if(msg == ResetTimer) {
-      EV << simTime() << ", " << getFullPath() << ": Reset" << endl;
+        assert(StopTimer == nullptr);
+        if (StopTime > 0.0) {
+            StopTimer = new cMessage("StopTimer");
+            StopTimer->setKind(TIMER_STOP);
+            scheduleAt(simTime() + StopTime, StopTimer);
+        }
+    }
 
-      ResetTimer = nullptr;
-      resetStatistics();
+    // ====== Stop timer =====================================================
+    else if (msg == StopTimer) {
+        EV << simTime() << ", " << getFullPath() << ": STOP" << endl;
 
-      assert(StopTimer == nullptr);
-      if(StopTime > 0.0) {
-         StopTimer = new cMessage("StopTimer");
-         StopTimer->setKind(TIMER_STOP);
-         scheduleAt(simTime() + StopTime, StopTimer);
-      }
-   }
+        StopTimer = nullptr;
+        if (OffTimer) {
+            cancelAndDelete(OffTimer);
+            OffTimer = nullptr;
+        }
+        if (OnTimer) {
+            cancelAndDelete(OnTimer);
+            OnTimer = nullptr;
+        }
 
-   // ====== Stop timer =====================================================
-   else if(msg == StopTimer) {
-      EV << simTime() << ", " << getFullPath() << ": STOP" << endl;
+        if (TransportProtocol == SCTP) {
+            if (IncomingSocketSCTP != nullptr) {
+                IncomingSocketSCTP->close();
+            } else if (SocketSCTP != nullptr) {
+                SocketSCTP->close();
+            }
+        } else if (TransportProtocol == TCP) {
+            if (SocketTCP != nullptr) {
+                SocketTCP->close();
+            }
+        }
+        teardownConnection(true);
+    }
 
-      StopTimer = nullptr;
-      if(OffTimer) {
-         cancelAndDelete(OffTimer);
-         OffTimer = nullptr;
-      }
-      if(OnTimer) {
-         cancelAndDelete(OnTimer);
-         OnTimer = nullptr;
-      }
+    // ====== Start timer ====================================================
+    else if (msg == StartTimer) {
+        EV << simTime() << ", " << getFullPath() << ": Start" << endl;
 
-      if(TransportProtocol == SCTP) {
-         if(IncomingSocketSCTP != nullptr) {
-            IncomingSocketSCTP->close();
-         }
-         else if(SocketSCTP != nullptr) {
-            SocketSCTP->close();
-         }
-      }
-      else if(TransportProtocol == TCP) {
-         if(SocketTCP != nullptr) {
-            SocketTCP->close();
-         }
-      }
-      teardownConnection(true);
-   }
+        StartTimer = nullptr;
+        startSending();
+    }
 
-   // ====== Start timer ====================================================
-   else if(msg == StartTimer) {
-      EV << simTime() << ", " << getFullPath() << ": Start" << endl;
+    // ====== Connect timer ==================================================
+    else if (msg == ConnectTimer) {
+        EV << simTime() << ", " << getFullPath() << ": Connect" << endl;
 
-      StartTimer = nullptr;
-      startSending();
-   }
-
-   // ====== Connect timer ==================================================
-   else if(msg == ConnectTimer) {
-      EV << simTime() << ", " << getFullPath() << ": Connect" << endl;
-
-      ConnectTimer = nullptr;
-      establishConnection();
-   }
+        ConnectTimer = nullptr;
+        establishConnection();
+    }
 }
-
 
 // ###### Handle message ####################################################
 void NetPerfMeter::handleMessage(cMessage* msg)
 {
-   // ====== Timer handling =================================================
-   if(msg->isSelfMessage()) {
-      handleTimer(msg);
-   }
+    // ====== Timer handling =================================================
+    if (msg->isSelfMessage()) {
+        handleTimer(msg);
+    }
 
-   // ====== SCTP ===========================================================
-   else if(TransportProtocol == SCTP) {
-      switch(msg->getKind()) {
-         // ------ Data -----------------------------------------------------
-         case SCTP_I_DATA:
+    // ====== SCTP ===========================================================
+    else if (TransportProtocol == SCTP) {
+        switch (msg->getKind()) {
+        // ------ Data -----------------------------------------------------
+        case SCTP_I_DATA:
             receiveMessage(msg);
-          break;
-         // ------ Data Arrival Indication ----------------------------------
-         case SCTP_I_DATA_NOTIFICATION: {
+            break;
+            // ------ Data Arrival Indication ----------------------------------
+        case SCTP_I_DATA_NOTIFICATION: {
             // Data has arrived -> request it from the SCTP module.
             auto& tags = getTags(msg);
             const SctpCommandReq* dataIndication = tags.getTag<SctpCommandReq>();
-           // SctpInfoReq* command = new SctpInfoReq("SendCommand");
+            // SctpInfoReq* command = new SctpInfoReq("SendCommand");
             SctpInfoReq* command = new SctpInfoReq();
             command->setSocketId(dataIndication->getSocketId());
             command->setSid(dataIndication->getSid());
@@ -408,156 +399,182 @@ void NetPerfMeter::handleMessage(cMessage* msg)
             cmd->setSocketId(dataIndication->getSocketId());
             cmd->setSid(dataIndication->getSid());
             cmsg->addTag<SocketReq>()->setSocketId(dataIndication->getSocketId());
-            send(cmsg, "sctpOut");
-         }
-         break;
-         // ------ Connection established -----------------------------------
-         case SCTP_I_ESTABLISHED: {
-             Message *message = check_and_cast<Message *>(msg);
-             auto& tags = getTags(message);
-             const SctpConnectReq *connectInfo = tags.getTag<SctpConnectReq>();
+            cmsg->addTag<DispatchProtocolReq>()->setProtocol(&inet::Protocol::sctp);
+            send(cmsg, "socketOut");
+            break;
+        }
+            // ------ Connection available -----------------------------------
+        case SCTP_I_AVAILABLE: {
+            EV_INFO << "SCTP_I_AVAILABLE arrived\n";
+            Message *message = check_and_cast<Message *>(msg);
+            int newSockId = message->getTag<SctpAvailableReq>()->getNewSocketId();
+            EV_INFO << "new socket id = " << newSockId << endl;
+            Request *cmsg = new Request("SCTP_C_ACCEPT_SOCKET_ID");
+            cmsg->setKind(SCTP_C_ACCEPT_SOCKET_ID);
+            cmsg->addTag<SctpAvailableReq>()->setSocketId(newSockId);
+            cmsg->addTag<DispatchProtocolReq>()->setProtocol(&inet::Protocol::sctp);
+            cmsg->addTag<SocketReq>()->setSocketId(newSockId);
+            EV_INFO << "Sending accept socket id request ..." << endl;
+            send(cmsg, "socketOut");
+            break;
+        }
+            // ------ Connection established -----------------------------------
+        case SCTP_I_ESTABLISHED: {
+            Message *message = check_and_cast<Message *>(msg);
+            auto& tags = getTags(message);
+            const SctpConnectReq *connectInfo = tags.getTag<SctpConnectReq>();
             ActualOutboundStreams = connectInfo->getOutboundStreams();
-            if(ActualOutboundStreams > RequestedOutboundStreams) {
-               ActualOutboundStreams = RequestedOutboundStreams;
+            if (ActualOutboundStreams > RequestedOutboundStreams) {
+                ActualOutboundStreams = RequestedOutboundStreams;
             }
             ActualInboundStreams = connectInfo->getInboundStreams();
-            if(ActualInboundStreams > MaxInboundStreams) {
-               ActualInboundStreams = MaxInboundStreams;
+            if (ActualInboundStreams > MaxInboundStreams) {
+                ActualInboundStreams = MaxInboundStreams;
             }
             LastStreamID = ActualOutboundStreams - 1;
             // NOTE: Start sending on stream 0!
             successfullyEstablishedConnection(msg, QueueSize);
-           }
-          break;
-         // ------ Queue indication -----------------------------------------
-         case SCTP_I_SENDQUEUE_ABATED: {
+            break;
+        }
+            // ------ Queue indication -----------------------------------------
+        case SCTP_I_SENDQUEUE_ABATED: {
             Message *message = check_and_cast<Message *>(msg);
             auto& tags = getTags(message);
             const SctpSendQueueAbatedReq* sendQueueAbatedIndication = tags.getTag<SctpSendQueueAbatedReq>();
             assert(sendQueueAbatedIndication != nullptr);
             // Queue is underfull again -> give it more data.
             SendingAllowed = true;
-            if(TraceVector.size() == 0) {
-               sendDataOfSaturatedStreams(sendQueueAbatedIndication->getBytesAvailable(),
-                                          sendQueueAbatedIndication);
+            if (TraceVector.size() == 0) {
+                sendDataOfSaturatedStreams(sendQueueAbatedIndication->getBytesAvailable(), sendQueueAbatedIndication);
             }
-           }
-          break;
-         case SCTP_I_SENDQUEUE_FULL:
+            break;
+        }
+        case SCTP_I_SENDQUEUE_FULL:
             SendingAllowed = false;
-          break;
-         // ------ Errors ---------------------------------------------------
-         case SCTP_I_PEER_CLOSED:
-         case SCTP_I_CLOSED:
-         case SCTP_I_CONNECTION_REFUSED:
-         case SCTP_I_CONNECTION_RESET:
-         case SCTP_I_TIMED_OUT:
-         case SCTP_I_ABORT:
-         case SCTP_I_CONN_LOST:
-         case SCTP_I_SHUTDOWN_RECEIVED:
+            break;
+            // ------ Errors ---------------------------------------------------
+        case SCTP_I_PEER_CLOSED:
+        case SCTP_I_CLOSED:
+        case SCTP_I_CONNECTION_REFUSED:
+        case SCTP_I_CONNECTION_RESET:
+        case SCTP_I_TIMED_OUT:
+        case SCTP_I_ABORT:
+        case SCTP_I_CONN_LOST:
+        case SCTP_I_SHUTDOWN_RECEIVED:
             teardownConnection();
-          break;
-         default:
+            break;
+        default:
             // printf("SCTP: kind=%d\n", msg->getKind());
-          break;
-      }
-   }
+            break;
+        }
+    }
 
-   // ====== TCP ============================================================
-   else if(TransportProtocol == TCP) {
-      short kind = msg->getKind();
-      switch(kind) {
-         // ------ Data -----------------------------------------------------
-         case TCP_I_DATA:
-         case TCP_I_URGENT_DATA:
+    // ====== TCP ============================================================
+    else if (TransportProtocol == TCP) {
+        short kind = msg->getKind();
+        switch (kind) {
+        // ------ Data -----------------------------------------------------
+        case TCP_I_DATA:
+        case TCP_I_URGENT_DATA:
             receiveMessage(msg);
-          break;
-         // ------ Connection established -----------------------------------
-         case TCP_I_ESTABLISHED:
+            break;
+            // ------ Connection available -----------------------------------
+        case TCP_I_AVAILABLE: {
+            EV_INFO << "TCP_I_AVAILABLE arrived\n";
+            TcpAvailableInfo *availableInfo = check_and_cast<TcpAvailableInfo *>(msg->getControlInfo());
+            int newSockId = availableInfo->getNewSocketId();
+            EV_INFO << "new socket id = " << newSockId << endl;
+            Request *cmsg = new Request("TCP_C_ACCEPT", TCP_C_ACCEPT);
+            auto *acceptCmd = new TcpAcceptCommand();
+            cmsg->setControlInfo(acceptCmd);
+            cmsg->addTag<DispatchProtocolReq>()->setProtocol(&inet::Protocol::tcp);
+            cmsg->addTag<SocketReq>()->setSocketId(newSockId);
+            EV_INFO << "Sending accept socket id request ..." << endl;
+            send(cmsg, "socketOut");
+            break;
+        }
+            // ------ Connection established -----------------------------------
+        case TCP_I_ESTABLISHED:
             successfullyEstablishedConnection(msg, 0);
-          break;
-         // ------ Queue indication -----------------------------------------
-         case TCP_I_SEND_MSG: {
-            const TcpCommand* tcpCommand =
-               check_and_cast<TcpCommand*>(msg->getControlInfo());
-            assert(tcpCommand != nullptr);
+            break;
+            // ------ Queue indication -----------------------------------------
+        case TCP_I_SEND_MSG: {
+            const TcpCommand* tcpCommand = check_and_cast<TcpCommand*>(msg->getControlInfo());
             // Queue is underfull again -> give it more data.
-            if(SocketTCP != nullptr) {   // T.D. 16.11.2011: Ensure that there is still a TCP socket!
-               SendingAllowed = true;
-               if(TraceVector.size() == 0) {
-                  sendDataOfSaturatedStreams(tcpCommand->getUserId(), nullptr);
-               }
+            if (SocketTCP != nullptr) { // T.D. 16.11.2011: Ensure that there is still a TCP socket!
+                SendingAllowed = true;
+                if (TraceVector.size() == 0) {
+                    sendDataOfSaturatedStreams(tcpCommand->getUserId(), nullptr);
+                }
             }
-           }
-          break;
-         // ------ Errors ---------------------------------------------------
-         case TCP_I_PEER_CLOSED:
-         case TCP_I_CLOSED:
-         case TCP_I_CONNECTION_REFUSED:
-         case TCP_I_CONNECTION_RESET:
-         case TCP_I_TIMED_OUT:
+        }
+            break;
+            // ------ Errors ---------------------------------------------------
+        case TCP_I_PEER_CLOSED:
+        case TCP_I_CLOSED:
+        case TCP_I_CONNECTION_REFUSED:
+        case TCP_I_CONNECTION_RESET:
+        case TCP_I_TIMED_OUT:
             teardownConnection();
-          break;
-      }
-   }
+            break;
+        }
+    }
 
-   // ====== UDP ============================================================
-   else if(TransportProtocol == UDP) {
-      switch(msg->getKind()) {
-         // ------ Data -----------------------------------------------------
-         case UDP_I_DATA:
+    // ====== UDP ============================================================
+    else if (TransportProtocol == UDP) {
+        switch (msg->getKind()) {
+        // ------ Data -----------------------------------------------------
+        case UDP_I_DATA:
             receiveMessage(msg);
-          break;
-         // ------ Error ----------------------------------------------------
-         case UDP_I_ERROR:
+            break;
+            // ------ Error ----------------------------------------------------
+        case UDP_I_ERROR:
             teardownConnection();
-          break;
-      }
-   }
+            break;
+        }
+    }
 
-   delete msg;
+    delete msg;
 }
-
 
 // ###### Establish connection ##############################################
 void NetPerfMeter::establishConnection()
 {
-   const char* remoteAddress = par("remoteAddress");
-   const int   remotePort    = par("remotePort");
+    const char* remoteAddress = par("remoteAddress");
+    const int remotePort = par("remotePort");
 
-   // ====== Establish connection ===========================================
-   if(ActiveMode == true) {
-      createAndBindSocket();
+    // ====== Establish connection ===========================================
+    if (ActiveMode == true) {
+        createAndBindSocket();
 
-      const char* primaryPath   = par("primaryPath");
-      PrimaryPath = (primaryPath[0] != 0x00) ?
-                       L3AddressResolver().resolve(primaryPath) : L3Address();
+        const char* primaryPath = par("primaryPath");
+        PrimaryPath = (primaryPath[0] != 0x00) ? L3AddressResolver().resolve(primaryPath) : L3Address();
 
-      if(TransportProtocol == SCTP) {
-         AddressVector remoteAddressList;
-         remoteAddressList.push_back(L3AddressResolver().resolve(remoteAddress));
-         SocketSCTP->connectx(remoteAddressList, remotePort);
-      }
-      else if(TransportProtocol == TCP) {
-         SocketTCP->renewSocket();
-         SocketTCP->connect(L3AddressResolver().resolve(remoteAddress), remotePort);
-      }
-      else if(TransportProtocol == UDP) {
-         SocketUDP->connect(L3AddressResolver().resolve(remoteAddress), remotePort);
-         // Just start sending, since UDP is connection-less
-         successfullyEstablishedConnection(nullptr, 0);
-      }
-      ConnectionEstablishmentTime = simTime();
-   }
-   else {
-      // ------ Handle UDP on passive side ----------------
-      if(TransportProtocol == UDP) {
-         SocketUDP->connect(L3AddressResolver().resolve(remoteAddress), remotePort);
-         successfullyEstablishedConnection(nullptr, 0);
-      }
-   }
-   EV << simTime() << ", " << getFullPath() << ": Sending allowed" << endl;
-   SendingAllowed = true;
+        if (TransportProtocol == SCTP) {
+            AddressVector remoteAddressList;
+            remoteAddressList.push_back(L3AddressResolver().resolve(remoteAddress));
+            SocketSCTP->connectx(remoteAddressList, remotePort);
+        }
+        else if (TransportProtocol == TCP) {
+            SocketTCP->renewSocket();
+            SocketTCP->connect(L3AddressResolver().resolve(remoteAddress), remotePort);
+        }
+        else if (TransportProtocol == UDP) {
+            SocketUDP->connect(L3AddressResolver().resolve(remoteAddress), remotePort);
+            // Just start sending, since UDP is connection-less
+            successfullyEstablishedConnection(nullptr, 0);
+        }
+        ConnectionEstablishmentTime = simTime();
+    }
+    else {
+        // ------ Handle UDP on passive side ----------------
+        if (TransportProtocol == UDP) {
+            //SocketUDP->connect(L3AddressResolver().resolve(remoteAddress), remotePort);
+            successfullyEstablishedConnection(nullptr, 0);
+        }
+    }
+    EV << simTime() << ", " << getFullPath() << ": Sending allowed" << endl;
+    SendingAllowed = true;
 }
 
 
@@ -565,699 +582,670 @@ void NetPerfMeter::establishConnection()
 void NetPerfMeter::successfullyEstablishedConnection(cMessage*          msg,
                                                      const unsigned int queueSize)
 {
-   if(HasFinished) {
-      EV << "Already finished -> no new connection!" << endl;
-      SctpSocket newSocket(msg);
-      newSocket.abort();
-      return;
-   }
+    if (HasFinished) {
+        EV << "Already finished -> no new connection!" << endl;
+        SctpSocket newSocket(msg);
+        newSocket.abort();
+        return;
+    }
 
-   // ====== Update queue size ==============================================
-   if(queueSize != 0) {
-      QueueSize = queueSize;
-      EV << simTime() << ", " << getFullPath() << ": Got queue size " << QueueSize << " from transport protocol" << endl;
-   }
+    // ====== Update queue size ==============================================
+    if (queueSize != 0) {
+        QueueSize = queueSize;
+        EV << simTime() << ", " << getFullPath() << ": Got queue size " << QueueSize << " from transport protocol" << endl;
+    }
 
-   // ====== Get connection ID ==============================================
-   if(TransportProtocol == TCP) {
-      if(ActiveMode == false) {
-         assert(SocketTCP != nullptr);
-         if(IncomingSocketTCP != nullptr) {
-            delete IncomingSocketTCP;
-         }
-         IncomingSocketTCP = new TcpSocket(msg);
-         IncomingSocketTCP->setOutputGate(gate("tcpOut"));
-      }
+    // ====== Get connection ID ==============================================
+    if (TransportProtocol == TCP) {
+        if (ActiveMode == false) {
+            assert(SocketTCP != nullptr);
+            if (IncomingSocketTCP != nullptr) {
+                delete IncomingSocketTCP;
+            }
+            IncomingSocketTCP = new TcpSocket(msg);
+            IncomingSocketTCP->setOutputGate(gate("socketOut"));
+        }
 
-      ConnectionID = check_and_cast<Indication *>(msg)->getTag<SocketInd>()->getSocketId();
-      sendTCPQueueRequest(QueueSize);   // Limit the send queue as given.
-   }
-   else if(TransportProtocol == SCTP) {
-      if(ActiveMode == false) {
-         assert(SocketSCTP != nullptr);
-         if(IncomingSocketSCTP != nullptr) {
-            delete IncomingSocketSCTP;
-         }
-         IncomingSocketSCTP = new SctpSocket(msg);
-         IncomingSocketSCTP->setOutputGate(gate("sctpOut"));
-      }
+        ConnectionID = check_and_cast<Indication *>(msg)->getTag<SocketInd>()->getSocketId();
+        sendTCPQueueRequest(QueueSize);   // Limit the send queue as given.
+    }
+    else if (TransportProtocol == SCTP) {
+        if (ActiveMode == false) {
+            assert(SocketSCTP != nullptr);
+            if (IncomingSocketSCTP != nullptr) {
+                delete IncomingSocketSCTP;
+            }
+            IncomingSocketSCTP = new SctpSocket(msg);
+            IncomingSocketSCTP->setOutputGate(gate("socketOut"));
+        }
 
-      ConnectionID = check_and_cast<Indication *>(msg)->getTag<SocketInd>()->getSocketId();
-      sendSCTPQueueRequest(QueueSize);   // Limit the send queue as given.
-   }
+        ConnectionID = check_and_cast<Indication *>(msg)->getTag<SocketInd>()->getSocketId();
+        sendSCTPQueueRequest(QueueSize);   // Limit the send queue as given.
+    }
 
-   // ====== Initialize TransmitTimerVector =================================
-   TransmitTimerVector.resize(ActualOutboundStreams);
-   for(unsigned int i = 0; i < ActualOutboundStreams; i++) {
-      TransmitTimerVector[i] = nullptr;
-   }
+    // ====== Initialize TransmitTimerVector =================================
+    TransmitTimerVector.resize(ActualOutboundStreams);
+    for (unsigned int i = 0; i < ActualOutboundStreams; i++) {
+        TransmitTimerVector[i] = nullptr;
+    }
 
-   // ====== Schedule Start Timer to begin transmission =====================
-   if(OnOffCycleCounter == 0) {
-      assert(StartTimer == nullptr);
-      StartTimer = new cMessage("StartTimer");
-      StartTimer->setKind(TIMER_START);
-      TransmissionStartTime = ConnectTime + StartTime;
-      if(TransmissionStartTime < simTime()) {
-         throw cRuntimeError("Connection establishment has been too late. Check startTime parameter!");
-      }
-      scheduleAt(TransmissionStartTime, StartTimer);
+    // ====== Schedule Start Timer to begin transmission =====================
+    if (OnOffCycleCounter == 0) {
+        assert(StartTimer == nullptr);
+        StartTimer = new cMessage("StartTimer");
+        StartTimer->setKind(TIMER_START);
+        TransmissionStartTime = ConnectTime + StartTime;
+        if (TransmissionStartTime < simTime()) {
+            throw cRuntimeError("Connection establishment has been too late. Check startTime parameter!");
+        }
+        scheduleAt(TransmissionStartTime, StartTimer);
 
-      // ====== Schedule Reset Timer to reset statistics ====================
-      assert(ResetTimer == nullptr);
-      ResetTimer = new cMessage("ResetTimer");
-      ResetTimer->setKind(TIMER_RESET);
-      StatisticsResetTime = ConnectTime + ResetTime;
-      scheduleAt(StatisticsResetTime, ResetTimer);
-   }
-   else {
-      // ====== Restart transmission immediately ============================
-      StartTimer = new cMessage("StartTimer");
-      scheduleAt(simTime(), StartTimer);
-   }
+        // ====== Schedule Reset Timer to reset statistics ====================
+        assert(ResetTimer == nullptr);
+        ResetTimer = new cMessage("ResetTimer");
+        ResetTimer->setKind(TIMER_RESET);
+        StatisticsResetTime = ConnectTime + ResetTime;
+        scheduleAt(StatisticsResetTime, ResetTimer);
+    }
+    else {
+        // ====== Restart transmission immediately ============================
+        StartTimer = new cMessage("StartTimer");
+        scheduleAt(simTime(), StartTimer);
+    }
 }
-
 
 // ###### Start sending #####################################################
 void NetPerfMeter::startSending()
 {
-   if(TraceVector.size() > 0) {
-      sendDataOfTraceFile(QueueSize);
-   }
-   else {
-      for(unsigned int streamID = 0; streamID < ActualOutboundStreams; streamID++) {
-         sendDataOfNonSaturatedStreams(QueueSize, streamID);
-      }
-      sendDataOfSaturatedStreams(QueueSize, nullptr);
-   }
+    if (TraceVector.size() > 0) {
+        sendDataOfTraceFile(QueueSize);
+    }
+    else {
+        for (unsigned int streamID = 0; streamID < ActualOutboundStreams; streamID++) {
+            sendDataOfNonSaturatedStreams(QueueSize, streamID);
+        }
+        sendDataOfSaturatedStreams(QueueSize, nullptr);
+    }
 
-   // ------ On/Off handling ------------------------------------------------
-   const simtime_t onTime = par("onTime");
-   if(onTime.dbl() > 0.0) {
-      OffTimer = new cMessage("OffTimer");
-      OffTimer->setKind(TIMER_OFF);
-      scheduleAt(simTime() + onTime, OffTimer);
-   }
+    // ------ On/Off handling ------------------------------------------------
+    const simtime_t onTime = par("onTime");
+    if (onTime.dbl() > 0.0) {
+        OffTimer = new cMessage("OffTimer");
+        OffTimer->setKind(TIMER_OFF);
+        scheduleAt(simTime() + onTime, OffTimer);
+    }
 }
-
 
 // ###### Stop sending ######################################################
 void NetPerfMeter::stopSending()
 {
     // ------ Stop all transmission timers ----------------------------------
-    for(auto & elem : TransmitTimerVector) {
-      cancelAndDelete(elem);
-      elem = nullptr;
-   }
-   OnOffCycleCounter++;
+    for (auto & elem : TransmitTimerVector) {
+        cancelAndDelete(elem);
+        elem = nullptr;
+    }
+    OnOffCycleCounter++;
 
-   // ------ Schedule On timer ----------------------------------------------
-   const simtime_t offDuration = par("offTime");
-   if( (offDuration.dbl() > 0.0) &&
-       ((MaxOnOffCycles < 0) ||
-        (OnOffCycleCounter <= (unsigned int)MaxOnOffCycles)) ) {
-      OnTimer = new cMessage("OnTimer");
-      OnTimer->setKind(TIMER_ON);
-      scheduleAt(simTime() + offDuration, OnTimer);
-   }
+    // ------ Schedule On timer ----------------------------------------------
+    const simtime_t offDuration = par("offTime");
+    if ((offDuration.dbl() > 0.0)
+            && ((MaxOnOffCycles < 0) || (OnOffCycleCounter <= (unsigned int) MaxOnOffCycles))) {
+        OnTimer = new cMessage("OnTimer");
+        OnTimer->setKind(TIMER_ON);
+        scheduleAt(simTime() + offDuration, OnTimer);
+    }
 }
-
 
 // ###### Create and bind socket ############################################
 void NetPerfMeter::createAndBindSocket()
 {
-   const char* localAddress = par("localAddress");
-   const int   localPort    = par("localPort");
-   if( (ActiveMode == false) && (localPort == 0) ) {
-      throw cRuntimeError("No local port number given in active mode!");
-   }
-   L3Address localAddr;
-   if (*localAddress)
-       localAddr = L3AddressResolver().resolve(localAddress);
+    const char* localAddress = par("localAddress");
+    const int localPort = par("localPort");
+    if ((ActiveMode == false) && (localPort == 0)) {
+        throw cRuntimeError("No local port number given in active mode!");
+    }
+    L3Address localAddr;
+    if (*localAddress)
+        localAddr = L3AddressResolver().resolve(localAddress);
 
-   if(TransportProtocol == SCTP) {
-      assert(SocketSCTP == nullptr);
-      SocketSCTP = new SctpSocket;
-      SocketSCTP->setInboundStreams(MaxInboundStreams);
-      SocketSCTP->setOutboundStreams(RequestedOutboundStreams);
-      SocketSCTP->setOutputGate(gate("sctpOut"));
-      SocketSCTP->bind(localPort);
-      if(ActiveMode == false) {
-         SocketSCTP->listen(true);
-      }
-   }
-   else if(TransportProtocol == TCP) {
-      assert(SocketTCP == nullptr);
-      SocketTCP = new TcpSocket;
-      SocketTCP->setOutputGate(gate("tcpOut"));
-      SocketTCP->bind(localAddr, localPort);
-      if(ActiveMode == false) {
-         SocketTCP->listen();
-      }
-   }
-   else if(TransportProtocol == UDP) {
-      assert(SocketUDP == nullptr);
-      SocketUDP = new UdpSocket;
-      SocketUDP->setOutputGate(gate("udpOut"));
-      SocketUDP->bind(localAddr, localPort);
-   }
+    if (TransportProtocol == SCTP) {
+        assert(SocketSCTP == nullptr);
+        SocketSCTP = new SctpSocket;
+        SocketSCTP->setInboundStreams(MaxInboundStreams);
+        SocketSCTP->setOutboundStreams(RequestedOutboundStreams);
+        SocketSCTP->setOutputGate(gate("socketOut"));
+        SocketSCTP->bind(localPort);
+        if (ActiveMode == false) {
+            SocketSCTP->listen(true);
+        }
+    }
+    else if (TransportProtocol == TCP) {
+        assert(SocketTCP == nullptr);
+        SocketTCP = new TcpSocket;
+        SocketTCP->setOutputGate(gate("socketOut"));
+        SocketTCP->bind(localAddr, localPort);
+        if (ActiveMode == false) {
+            SocketTCP->listen();
+        }
+    }
+    else if (TransportProtocol == UDP) {
+        assert(SocketUDP == nullptr);
+        SocketUDP = new UdpSocket;
+        SocketUDP->setOutputGate(gate("socketOut"));
+        SocketUDP->bind(localAddr, localPort);
+    }
 }
-
 
 // ###### Connection teardown ###############################################
 void NetPerfMeter::teardownConnection(const bool stopTimeReached)
 {
-   for(auto & elem : TransmitTimerVector) {
-      cancelAndDelete(elem);
-      elem = nullptr;
-   }
+    for (auto & elem : TransmitTimerVector) {
+        cancelAndDelete(elem);
+        elem = nullptr;
+    }
 
-   if(ActiveMode == false) {
-      if(TransportProtocol == SCTP) {
-         if(IncomingSocketSCTP != nullptr) {
-            delete IncomingSocketSCTP;
-            IncomingSocketSCTP = nullptr;
-         }
-      }
-      else if(TransportProtocol == TCP) {
-         if(IncomingSocketTCP != nullptr) {
-            delete IncomingSocketTCP;
-            IncomingSocketTCP = nullptr;
-         }
-      }
-   }
-   if( (stopTimeReached) || (ActiveMode == true) ) {
-      if(TransportProtocol == SCTP) {
-         if(SocketSCTP != nullptr) {
-            SocketSCTP->close();
-            delete SocketSCTP;
-            SocketSCTP = nullptr;
-         }
-      }
-      else if(TransportProtocol == TCP) {
-         if(SocketTCP != nullptr) {
-            SocketTCP->abort();
-            delete SocketTCP;
-            SocketTCP = nullptr;
-         }
-      }
-      else if(TransportProtocol == UDP) {
-         if(SocketUDP != nullptr) {
-            delete SocketUDP;
-            SocketUDP = nullptr;
-         }
-      }
-      SendingAllowed = false;
-      ConnectionID   = 0;
-   }
+    if (ActiveMode == false) {
+        if (TransportProtocol == SCTP) {
+            if (IncomingSocketSCTP != nullptr) {
+                delete IncomingSocketSCTP;
+                IncomingSocketSCTP = nullptr;
+            }
+        }
+        else if (TransportProtocol == TCP) {
+            if (IncomingSocketTCP != nullptr) {
+                delete IncomingSocketTCP;
+                IncomingSocketTCP = nullptr;
+            }
+        }
+    }
+    if ((stopTimeReached) || (ActiveMode == true)) {
+        if (TransportProtocol == SCTP) {
+            if (SocketSCTP != nullptr) {
+                SocketSCTP->close();
+                delete SocketSCTP;
+                SocketSCTP = nullptr;
+            }
+        }
+        else if (TransportProtocol == TCP) {
+            if (SocketTCP != nullptr) {
+                SocketTCP->abort();
+                delete SocketTCP;
+                SocketTCP = nullptr;
+            }
+        }
+        else if (TransportProtocol == UDP) {
+            if (SocketUDP != nullptr) {
+                delete SocketUDP;
+                SocketUDP = nullptr;
+            }
+        }
+        SendingAllowed = false;
+        ConnectionID = 0;
+    }
 
-   if(stopTimeReached) {
-      writeStatistics();
-      HasFinished = true;
-   }
+    if (stopTimeReached) {
+        writeStatistics();
+        HasFinished = true;
+    }
 }
-
 
 // ###### Reset statistics ##################################################
 void NetPerfMeter::resetStatistics()
 {
-   StatisticsStartTime = simTime();
-   for(auto & elem : SenderStatisticsMap) {
-       SenderStatistics* senderStatistics = elem.second;
-       senderStatistics->reset();
-   }
-   for(auto & elem : ReceiverStatisticsMap) {
-       ReceiverStatistics* receiverStatistics = elem.second;
-       receiverStatistics->reset();
-   }
+    StatisticsStartTime = simTime();
+    for (auto & elem : SenderStatisticsMap) {
+        SenderStatistics* senderStatistics = elem.second;
+        senderStatistics->reset();
+    }
+    for (auto & elem : ReceiverStatisticsMap) {
+        ReceiverStatistics* receiverStatistics = elem.second;
+        receiverStatistics->reset();
+    }
 }
-
 
 // ###### Write scalar statistics ###########################################
 void NetPerfMeter::writeStatistics()
 {
-   const simtime_t statisticsStopTime = simTime();
-   const double    duration           = statisticsStopTime.dbl() - StatisticsStartTime.dbl();
+    const simtime_t statisticsStopTime = simTime();
+    const double duration = statisticsStopTime.dbl() - StatisticsStartTime.dbl();
 
-   recordScalar("Total Measurement Duration", duration);
-   recordScalar("On-Off Cycles",              OnOffCycleCounter);
+    recordScalar("Total Measurement Duration", duration);
+    recordScalar("On-Off Cycles", OnOffCycleCounter);
 
-   // ====== Per-Stream Statistics ==========================================
-   unsigned long long totalSentBytes    = 0;
-   unsigned long long totalSentMessages = 0;
-   for(std::map<unsigned int, SenderStatistics*>::const_iterator iterator = SenderStatisticsMap.begin();
-       iterator != SenderStatisticsMap.end(); iterator++) {
-      const unsigned int streamID = iterator->first;
-      if(streamID >= ActualOutboundStreams) {
-         break;
-      }
-      const SenderStatistics* senderStatistics = iterator->second;
-      totalSentBytes    += senderStatistics->SentBytes;
-      totalSentMessages += senderStatistics->SentMessages;
+    // ====== Per-Stream Statistics ==========================================
+    unsigned long long totalSentBytes = 0;
+    unsigned long long totalSentMessages = 0;
+    for (std::map<unsigned int, SenderStatistics*>::const_iterator iterator =
+            SenderStatisticsMap.begin(); iterator != SenderStatisticsMap.end();
+            iterator++) {
+        const unsigned int streamID = iterator->first;
+        if (streamID >= ActualOutboundStreams) {
+            break;
+        }
+        const SenderStatistics* senderStatistics = iterator->second;
+        totalSentBytes += senderStatistics->SentBytes;
+        totalSentMessages += senderStatistics->SentMessages;
 
-      const double transmissionBitRate     = (duration > 0.0) ? (8 * senderStatistics->SentBytes / duration) : 0.0;
-      const double transmissionByteRate    = (duration > 0.0) ? (senderStatistics->SentBytes / duration) : 0.0;
-      const double transmissionMessageRate = (duration > 0.0) ? (senderStatistics->SentMessages / duration) : 0.0;
-      recordScalar(format("Transmission Bit Rate Stream #%u", streamID).c_str(),     transmissionBitRate);
-      recordScalar(format("Transmission Byte Rate Stream #%u", streamID).c_str(),    transmissionByteRate);
-      recordScalar(format("Transmission Message Rate Stream #%u", streamID).c_str(), transmissionMessageRate);
-      recordScalar(format("Sent Bytes Stream #%u", streamID).c_str(),                senderStatistics->SentBytes);
-      recordScalar(format("Sent Messages Stream #%u", streamID).c_str(),             senderStatistics->SentMessages);
-   }
+        const double transmissionBitRate = (duration > 0.0) ? (8 * senderStatistics->SentBytes / duration) : 0.0;
+        const double transmissionByteRate = (duration > 0.0) ? (senderStatistics->SentBytes / duration) : 0.0;
+        const double transmissionMessageRate = (duration > 0.0) ? (senderStatistics->SentMessages / duration) : 0.0;
+        recordScalar(format("Transmission Bit Rate Stream #%u", streamID).c_str(), transmissionBitRate);
+        recordScalar(format("Transmission Byte Rate Stream #%u", streamID).c_str(), transmissionByteRate);
+        recordScalar(format("Transmission Message Rate Stream #%u", streamID).c_str(), transmissionMessageRate);
+        recordScalar(format("Sent Bytes Stream #%u", streamID).c_str(), senderStatistics->SentBytes);
+        recordScalar(format("Sent Messages Stream #%u", streamID).c_str(), senderStatistics->SentMessages);
+    }
 
-   unsigned long long totalReceivedBytes    = 0;
-   unsigned long long totalReceivedMessages = 0;
-   for(auto & elem : ReceiverStatisticsMap) {
-      const unsigned int streamID = elem.first;
-      if(streamID >= ActualInboundStreams) {
-         break;
-      }
-      ReceiverStatistics* receiverStatistics = elem.second;
-      totalReceivedBytes    += receiverStatistics->ReceivedBytes;
-      totalReceivedMessages += receiverStatistics->ReceivedMessages;
+    unsigned long long totalReceivedBytes = 0;
+    unsigned long long totalReceivedMessages = 0;
+    for (auto & elem : ReceiverStatisticsMap) {
+        const unsigned int streamID = elem.first;
+        if (streamID >= ActualInboundStreams) {
+            break;
+        }
+        ReceiverStatistics* receiverStatistics = elem.second;
+        totalReceivedBytes += receiverStatistics->ReceivedBytes;
+        totalReceivedMessages += receiverStatistics->ReceivedMessages;
 
-      // NOTE: When sending "as much as possible", the transmission counters are
-      //       set to 0 on reset. If the queue is long enough, there may be no
-      //       need to fill it again => counters will be 0 here.
-      const double receptionBitRate     = (duration > 0.0) ? (8 * receiverStatistics->ReceivedBytes / duration) : 0.0;
-      const double receptionByteRate    = (duration > 0.0) ? (receiverStatistics->ReceivedBytes / duration) : 0.0;
-      const double receptionMessageRate = (duration > 0.0) ? (receiverStatistics->ReceivedMessages / duration) : 0.0;
-      recordScalar(format("Reception Bit Rate Stream #%u", streamID).c_str(),     receptionBitRate);
-      recordScalar(format("Reception Byte Rate Stream #%u", streamID).c_str(),    receptionByteRate);
-      recordScalar(format("Reception Message Rate Stream #%u", streamID).c_str(), receptionMessageRate);
-      recordScalar(format("Received Bytes Stream #%u", streamID).c_str(),         receiverStatistics->ReceivedBytes);
-      recordScalar(format("Received Messages Stream #%u", streamID).c_str(),      receiverStatistics->ReceivedMessages);
-      receiverStatistics->ReceivedDelayHistogram.recordAs(format("Received Message Delay Stream #%u", streamID).c_str(), "s");
-   }
+        // NOTE: When sending "as much as possible", the transmission counters are
+        //       set to 0 on reset. If the queue is long enough, there may be no
+        //       need to fill it again => counters will be 0 here.
+        const double receptionBitRate = (duration > 0.0) ? (8 * receiverStatistics->ReceivedBytes / duration) : 0.0;
+        const double receptionByteRate = (duration > 0.0) ? (receiverStatistics->ReceivedBytes / duration) : 0.0;
+        const double receptionMessageRate = (duration > 0.0) ? (receiverStatistics->ReceivedMessages / duration) : 0.0;
+        recordScalar(format("Reception Bit Rate Stream #%u", streamID).c_str(), receptionBitRate);
+        recordScalar(format("Reception Byte Rate Stream #%u", streamID).c_str(), receptionByteRate);
+        recordScalar(format("Reception Message Rate Stream #%u", streamID).c_str(), receptionMessageRate);
+        recordScalar(format("Received Bytes Stream #%u", streamID).c_str(), receiverStatistics->ReceivedBytes);
+        recordScalar(format("Received Messages Stream #%u", streamID).c_str(), receiverStatistics->ReceivedMessages);
+        receiverStatistics->ReceivedDelayHistogram.recordAs(format("Received Message Delay Stream #%u", streamID).c_str(), "s");
+    }
 
+    // ====== Total Statistics ===============================================
+    // NOTE: When sending "as much as possible", the transmission counters are
+    //       set to 0 on reset. If the queue is long enough, there may be no
+    //       need to fill it again => counters will be 0 here.
+    const double totalReceptionBitRate = (duration > 0.0) ? (8 * totalReceivedBytes / duration) : 0.0;
+    const double totalReceptionByteRate = (duration > 0.0) ? (totalReceivedBytes / duration) : 0.0;
+    const double totalReceptionMessageRate = (duration > 0.0) ? (totalReceivedMessages / duration) : 0.0;
+    const double totalTransmissionBitRate = (duration > 0.0) ? (8 * totalSentBytes / duration) : 0.0;
+    const double totalTransmissionByteRate = (duration > 0.0) ? (totalSentBytes / duration) : 0.0;
+    const double totalTransmissionMessageRate = (duration > 0.0) ? (totalSentMessages / duration) : 0.0;
 
-   // ====== Total Statistics ===============================================
-   // NOTE: When sending "as much as possible", the transmission counters are
-   //       set to 0 on reset. If the queue is long enough, there may be no
-   //       need to fill it again => counters will be 0 here.
-   const double totalReceptionBitRate        = (duration > 0.0) ? (8 * totalReceivedBytes / duration) : 0.0;
-   const double totalReceptionByteRate       = (duration > 0.0) ? (totalReceivedBytes / duration) : 0.0;
-   const double totalReceptionMessageRate    = (duration > 0.0) ? (totalReceivedMessages / duration) : 0.0;
-   const double totalTransmissionBitRate     = (duration > 0.0) ? (8 * totalSentBytes / duration) : 0.0;
-   const double totalTransmissionByteRate    = (duration > 0.0) ? (totalSentBytes / duration) : 0.0;
-   const double totalTransmissionMessageRate = (duration > 0.0) ? (totalSentMessages / duration) : 0.0;
+    // NOTE: The byte rate is redundant, but having bits and bytes
+    //       makes manual reading of the results easier.
+    recordScalar("Total Transmission Bit Rate", totalTransmissionBitRate);
+    recordScalar("Total Transmission Byte Rate", totalTransmissionByteRate);
+    recordScalar("Total Transmission Message Rate", totalTransmissionMessageRate);
+    recordScalar("Total Sent Bytes", totalSentBytes);
+    recordScalar("Total Sent Messages", totalSentMessages);
 
-   // NOTE: The byte rate is redundant, but having bits and bytes
-   //       makes manual reading of the results easier.
-   recordScalar("Total Transmission Bit Rate",     totalTransmissionBitRate);
-   recordScalar("Total Transmission Byte Rate",    totalTransmissionByteRate);
-   recordScalar("Total Transmission Message Rate", totalTransmissionMessageRate);
-   recordScalar("Total Sent Bytes",                totalSentBytes);
-   recordScalar("Total Sent Messages",             totalSentMessages);
+    recordScalar("Total Reception Bit Rate", totalReceptionBitRate);
+    recordScalar("Total Reception Byte Rate", totalReceptionByteRate);
+    recordScalar("Total Reception Message Rate", totalReceptionMessageRate);
+    recordScalar("Total Received Bytes", totalReceivedBytes);
+    recordScalar("Total Received Messages", totalReceivedMessages);
 
-   recordScalar("Total Reception Bit Rate",        totalReceptionBitRate);
-   recordScalar("Total Reception Byte Rate",       totalReceptionByteRate);
-   recordScalar("Total Reception Message Rate",    totalReceptionMessageRate);
-   recordScalar("Total Received Bytes",            totalReceivedBytes);
-   recordScalar("Total Received Messages",         totalReceivedMessages);
-
-   resetStatistics();   // Make sure that it is not mistakenly used later
+    resetStatistics();   // Make sure that it is not mistakenly used later
 }
-
 
 // ###### Transmit frame of given size via given stream #####################
 unsigned long NetPerfMeter::transmitFrame(const unsigned int frameSize,
                                           const unsigned int streamID)
 {
-   EV << simTime() << ", " << getFullPath() << ": Transmit frame of size "
-      << frameSize << " on stream #" << streamID << endl;
-   assert(OnTimer == nullptr);
+    EV << simTime() << ", " << getFullPath() << ": Transmit frame of size "
+              << frameSize << " on stream #" << streamID << endl;
+    assert(OnTimer == nullptr);
 
-   // ====== TCP ============================================================
-   unsigned long newlyQueuedBytes = 0;
-   if(TransportProtocol == TCP) {
-      // TCP is stream-oriented: just pass the amount of frame data.
-      const auto& tcpMessage = new NetPerfMeterDataMessage();
-      tcpMessage->setCreationTime(simTime());
-      tcpMessage->setByteLength(frameSize);
-      /* ToDo: Just to make it compile */
-    /*  Packet* pk = new Packet();
-      const auto& tcpMessage = makeShared<NetPerfMeterDataMessage>();
-      tcpMessage->setChunkLength(B(frameSize));
+    // ====== TCP ============================================================
+    unsigned long newlyQueuedBytes = 0;
+    if (TransportProtocol == TCP) {
+        // TCP is stream-oriented: just pass the amount of frame data.
+        auto cmsg = new Packet("NetPerfMeterDataMessage");
+        auto dataMessage = makeShared<BytesChunk>();
+        std::vector<uint8_t> vec;
+        vec.resize(frameSize);
+        for (uint32 i = 0; i < frameSize; i++)
+            vec[i] = ((i & 1) ? 'D' : 'T');
+        dataMessage->setBytes(vec);
+        dataMessage->addTag<CreationTimeTag>()->setCreationTime(simTime());
+        cmsg->insertAtBack(dataMessage);
 
-      pk->insertAtBack(tcpMessage);
-      pk->setKind(TCP_C_SEND);
+        if (IncomingSocketTCP) {
+            IncomingSocketTCP->send(cmsg);
+        }
+        else {
+            SocketTCP->send(cmsg);
+        }
 
-      if(IncomingSocketTCP) {
-         IncomingSocketTCP->send(pk);
-      }
-      else {
-         SocketTCP->send(pk);
-      }
-      */
-      newlyQueuedBytes += frameSize;
-      SenderStatistics* senderStatistics = getSenderStatistics(0);
-      senderStatistics->SentBytes += frameSize;
-      senderStatistics->SentMessages++;
-   }
+        newlyQueuedBytes += frameSize;
+        SenderStatistics* senderStatistics = getSenderStatistics(0);
+        senderStatistics->SentBytes += frameSize;
+        senderStatistics->SentMessages++;
+    }
+    // ====== Message-Oriented Protocols =====================================
+    else {
+        unsigned int bytesToSend = frameSize;
+        do {
+            const unsigned int msgSize = (bytesToSend > MaxMsgSize) ? MaxMsgSize : bytesToSend;
 
-   // ====== Message-Oriented Protocols =====================================
-   else {
-      unsigned int bytesToSend = frameSize;
-      do {
-         const unsigned int msgSize =
-            (bytesToSend > MaxMsgSize) ? MaxMsgSize : bytesToSend;
-
-         if (false) {
-         }
-         // ====== SCTP =====================================================
+            if (false) {
+            }
+            // ====== SCTP =====================================================
 #ifdef WITH_SCTP
-         else if(TransportProtocol == SCTP) {
-            const bool sendUnordered  = (UnorderedMode > 0.0)  ? (uniform(0.0, 1.0) < UnorderedMode)  : false;
-            const bool sendUnreliable = (UnreliableMode > 0.0) ? (uniform(0.0, 1.0) < UnreliableMode) : false;
+            else if (TransportProtocol == SCTP) {
+                const bool sendUnordered = (UnorderedMode > 0.0) ? (uniform(0.0, 1.0) < UnorderedMode) : false;
+                const bool sendUnreliable = (UnreliableMode > 0.0) ? (uniform(0.0, 1.0) < UnreliableMode) : false;
 
-            auto cmsg = new Packet("NetPerfMeterDataMessage");
-            auto dataMessage = makeShared<BytesChunk>();
-            std::vector<uint8_t> vec;
-            vec.resize(msgSize);
-            for (uint32 i = 0; i < msgSize; i++)
-                vec[i] = ((i & 1) ? 'D' : 'T');
-            dataMessage->setBytes(vec);
-            dataMessage->addTag<CreationTimeTag>()->setCreationTime(simTime());
-            cmsg->insertAtBack(dataMessage);
+                auto cmsg = new Packet("NetPerfMeterDataMessage");
+                auto dataMessage = makeShared<BytesChunk>();
+                std::vector<uint8_t> vec;
+                vec.resize(msgSize);
+                for (uint32 i = 0; i < msgSize; i++)
+                    vec[i] = ((i & 1) ? 'D' : 'T');
+                dataMessage->setBytes(vec);
+                dataMessage->addTag<CreationTimeTag>()->setCreationTime(simTime());
+                cmsg->insertAtBack(dataMessage);
 
-            cmsg->addTagIfAbsent<SocketReq>()->setSocketId(ConnectionID);
-            auto command = cmsg->addTagIfAbsent<SctpSendReq>();
-            command->setSocketId(ConnectionID);
-            command->setSid(streamID);
-            command->setSendUnordered( (sendUnordered == true) ?
-                                       COMPLETE_MESG_UNORDERED : COMPLETE_MESG_ORDERED );
-            command->setLast(true);
-            command->setPrimary(PrimaryPath.isUnspecified());
-            command->setRemoteAddr(PrimaryPath);
-            command->setPrValue(1);
-            command->setPrMethod( (sendUnreliable == true) ? 2 : 0 );   // PR-SCTP policy: RTX
+                cmsg->addTag<SocketReq>()->setSocketId(ConnectionID);
+                auto command = cmsg->addTag<SctpSendReq>();
+                command->setSocketId(ConnectionID);
+                command->setSid(streamID);
+                command->setSendUnordered((sendUnordered == true) ? COMPLETE_MESG_UNORDERED : COMPLETE_MESG_ORDERED);
+                command->setLast(true);
+                command->setPrimary(PrimaryPath.isUnspecified());
+                command->setRemoteAddr(PrimaryPath);
+                command->setPrValue(1);
+                command->setPrMethod((sendUnreliable == true) ? 2 : 0); // PR-SCTP policy: RTX
 
-            //SctpSendInfo* cmsg = new SctpSendInfo("ControlInfo");
-            cmsg->setKind(sendUnordered ? SCTP_C_SEND_ORDERED : SCTP_C_SEND_UNORDERED);
-           /* SctpSendReq* cmsg = new SctpSendReq();
-            cmsg->encapsulate(dataMessage);
-            cmsg->setKind(SCTP_C_SEND);
-            cmsg->setControlInfo(command);
-            cmsg->setByteLength(msgSize);*/
-            send(cmsg, "sctpOut");
+                cmsg->setKind(sendUnordered ? SCTP_C_SEND_ORDERED : SCTP_C_SEND_UNORDERED);
+                cmsg->addTag<DispatchProtocolReq>()->setProtocol(&inet::Protocol::sctp);
+                send(cmsg, "socketOut");
 
-            SenderStatistics* senderStatistics = getSenderStatistics(streamID);
-            senderStatistics->SentBytes += msgSize;
-            senderStatistics->SentMessages++;
-         }
+                SenderStatistics* senderStatistics = getSenderStatistics(streamID);
+                senderStatistics->SentBytes += msgSize;
+                senderStatistics->SentMessages++;
+            }
 #endif
-         // ====== UDP ===================================================
-         else if(TransportProtocol == UDP) {
-            const auto& dataMessage = new NetPerfMeterDataMessage();
-            dataMessage->setCreationTime(simTime());
-            dataMessage->setByteLength(msgSize);
-         /* ToDo: Just to make it compile */
-          /*  Packet* packet = new Packet();
-            const auto& dataMessage = makeShared<NetPerfMeterDataMessage>();
+            // ====== UDP ===================================================
+            else if (TransportProtocol == UDP) {
+                auto cmsg = new Packet("NetPerfMeterDataMessage");
+                auto dataMessage = makeShared<BytesChunk>();
+                std::vector<uint8_t> vec;
+                vec.resize(msgSize);
+                for (uint32 i = 0; i < msgSize; i++)
+                    vec[i] = ((i & 1) ? 'D' : 'T');
+                dataMessage->setBytes(vec);
+                dataMessage->addTag<CreationTimeTag>()->setCreationTime(simTime());
+                cmsg->insertAtBack(dataMessage);
 
-            dataMessage->setChunkLength(B(msgSize));
-            packet->insertAtBack(dataMessage);
-            SocketUDP->send(packet);
-           */
-            SenderStatistics* senderStatistics = getSenderStatistics(0);
-            senderStatistics->SentBytes += msgSize;
-            senderStatistics->SentMessages++;
-         }
+                SocketUDP->send(cmsg);
 
-         newlyQueuedBytes += msgSize;
-         bytesToSend      -= msgSize;
-      } while(bytesToSend > 0);
-   }
-   return(newlyQueuedBytes);
+                SenderStatistics* senderStatistics = getSenderStatistics(0);
+                senderStatistics->SentBytes += msgSize;
+                senderStatistics->SentMessages++;
+            }
+
+            newlyQueuedBytes += msgSize;
+            bytesToSend -= msgSize;
+        } while (bytesToSend > 0);
+    }
+    return (newlyQueuedBytes);
 }
-
 
 // ###### Get frame rate for next frame to be sent on given stream ##########
 double NetPerfMeter::getFrameRate(const unsigned int streamID)
 {
-   double frameRate;
-   if(FrameRateExpressionVector.size() == 0) {
-      frameRate = par("frameRate");
-   }
-   else {
-      frameRate =
-         FrameRateExpressionVector[streamID % FrameRateExpressionVector.size()].
-            doubleValue(this, "Hz");
-      if(frameRate < 0) {
-         frameRate = par("frameRate");
-      }
-   }
-   return(frameRate);
+    double frameRate;
+    if (FrameRateExpressionVector.size() == 0) {
+        frameRate = par("frameRate");
+    }
+    else {
+        frameRate = FrameRateExpressionVector[streamID % FrameRateExpressionVector.size()].doubleValue(this, "Hz");
+        if (frameRate < 0) {
+            frameRate = par("frameRate");
+        }
+    }
+    return (frameRate);
 }
-
 
 // ###### Get frame rate for next frame to be sent on given stream ##########
 unsigned long NetPerfMeter::getFrameSize(const unsigned int streamID)
 {
-   unsigned long frameSize;
-   if(FrameSizeExpressionVector.size() == 0) {
-      frameSize = par("frameSize");
-   }
-   else {
-      double doubleSize =
-         FrameSizeExpressionVector[streamID % FrameSizeExpressionVector.size()].doubleValue(this, "B");
-      frameSize = (doubleSize >= 0.0) ? (long)doubleSize : par("frameSize");
-   }
-   return(frameSize);
+    unsigned long frameSize;
+    if (FrameSizeExpressionVector.size() == 0) {
+        frameSize = par("frameSize");
+    }
+    else {
+        double doubleSize = FrameSizeExpressionVector[streamID % FrameSizeExpressionVector.size()].doubleValue(this, "B");
+        frameSize = (doubleSize >= 0.0) ? (long) doubleSize : par("frameSize");
+    }
+    return (frameSize);
 }
-
 
 // ###### Send data of saturated streams ####################################
 void NetPerfMeter::sendDataOfSaturatedStreams(const unsigned long long   bytesAvailableInQueue,
                                               const SctpSendQueueAbatedReq* sendQueueAbatedIndication)
 {
-   if(OnTimer != nullptr) {
-      // We are in Off mode -> nothing to send!
-      return;
-   }
+    if (OnTimer != nullptr) {
+        // We are in Off mode -> nothing to send!
+        return;
+    }
 
-   // ====== Is sending allowed (i.e. space in the queue)? ==================
-   if(SendingAllowed) {
-      // ====== SCTP tells current queue occupation for each stream =========
-      unsigned long long contingent;
-      unsigned long long queued[ActualOutboundStreams];
-      if(sendQueueAbatedIndication == nullptr)  {
-         // At the moment, the actual queue size is unknown.
-         // => Assume it to be bytesAvailableInQueue.
-         contingent = bytesAvailableInQueue / ActualOutboundStreams;
-         for(unsigned int streamID = 0; streamID < ActualOutboundStreams; streamID++) {
-            queued[streamID] = 0;
-         }
-      }
-      else {
-         assert(ActualOutboundStreams <= sendQueueAbatedIndication->getQueuedForStreamArraySize());
-         for(unsigned int streamID = 0; streamID < ActualOutboundStreams; streamID++) {
-            queued[streamID] = sendQueueAbatedIndication->getQueuedForStream(streamID);
-         }
-         contingent = sendQueueAbatedIndication->getBytesLimit() / ActualOutboundStreams;
-      }
-
-      // ====== Send, but care for per-stream contingent ====================
-      LastStreamID = (LastStreamID + 1) % ActualOutboundStreams;
-      unsigned int       startStreamID    = LastStreamID;
-      unsigned long long newlyQueuedBytes = 0;
-      bool               progress;
-      do {
-         // ====== Perform one round ========================================
-         progress = false;   // Will be set to true on any transmission progress
-                             // during the next round
-         do {
-            const double frameRate = getFrameRate(LastStreamID);
-            if(frameRate < 0.0000001) {   // Saturated stream
-               if( (DecoupleSaturatedStreams == false) ||
-                   (queued[LastStreamID] < contingent) ) {
-                  // ====== Send one frame ==================================
-                  const unsigned long frameSize = getFrameSize(LastStreamID);
-                  if(frameSize >= 1) {
-                     const unsigned long long sent = transmitFrame(frameSize, LastStreamID);
-                     newlyQueuedBytes     += sent;
-                     queued[LastStreamID] += sent;
-                     progress = true;
-                  }
-               }
+    // ====== Is sending allowed (i.e. space in the queue)? ==================
+    if (SendingAllowed) {
+        // ====== SCTP tells current queue occupation for each stream =========
+        unsigned long long contingent;
+        unsigned long long queued[ActualOutboundStreams];
+        if (sendQueueAbatedIndication == nullptr) {
+            // At the moment, the actual queue size is unknown.
+            // => Assume it to be bytesAvailableInQueue.
+            contingent = bytesAvailableInQueue / ActualOutboundStreams;
+            for (unsigned int streamID = 0; streamID < ActualOutboundStreams; streamID++) {
+                queued[streamID] = 0;
             }
-            LastStreamID = (LastStreamID + 1) % ActualOutboundStreams;
-         } while(LastStreamID != startStreamID);
-      } while( (newlyQueuedBytes < bytesAvailableInQueue) && (progress == true) );
-   }
-}
+        }
+        else {
+            assert(ActualOutboundStreams <= sendQueueAbatedIndication->getQueuedForStreamArraySize());
+            for (unsigned int streamID = 0; streamID < ActualOutboundStreams; streamID++) {
+                queued[streamID] = sendQueueAbatedIndication->getQueuedForStream(streamID);
+            }
+            contingent = sendQueueAbatedIndication->getBytesLimit() / ActualOutboundStreams;
+        }
 
+        // ====== Send, but care for per-stream contingent ====================
+        LastStreamID = (LastStreamID + 1) % ActualOutboundStreams;
+        unsigned int startStreamID = LastStreamID;
+        unsigned long long newlyQueuedBytes = 0;
+        bool progress;
+        do {
+            // ====== Perform one round ========================================
+            progress = false; // Will be set to true on any transmission progress
+                              // during the next round
+            do {
+                const double frameRate = getFrameRate(LastStreamID);
+                if (frameRate < 0.0000001) {   // Saturated stream
+                    if ((DecoupleSaturatedStreams == false) || (queued[LastStreamID] < contingent)) {
+                        // ====== Send one frame ==================================
+                        const unsigned long frameSize = getFrameSize(LastStreamID);
+                        if (frameSize >= 1) {
+                            const unsigned long long sent = transmitFrame(frameSize, LastStreamID);
+                            newlyQueuedBytes += sent;
+                            queued[LastStreamID] += sent;
+                            progress = true;
+                        }
+                    }
+                }
+                LastStreamID = (LastStreamID + 1) % ActualOutboundStreams;
+            } while (LastStreamID != startStreamID);
+        } while ((newlyQueuedBytes < bytesAvailableInQueue) && (progress == true));
+    }
+}
 
 // ###### Send data of non-saturated streams ################################
 void NetPerfMeter::sendDataOfNonSaturatedStreams(const unsigned long long bytesAvailableInQueue,
                                                  const unsigned int       streamID)
 {
-   assert(OnTimer == nullptr);
+    assert(OnTimer == nullptr);
 
-   // ====== Is there something to send? ====================================
-   const double frameRate = getFrameRate(streamID);
-   if(frameRate <= 0.0) {
-      // No non-saturated transmission on this stream
-      // => no need to re-schedule timer!
-      return;
-   }
+    // ====== Is there something to send? ====================================
+    const double frameRate = getFrameRate(streamID);
+    if (frameRate <= 0.0) {
+        // No non-saturated transmission on this stream
+        // => no need to re-schedule timer!
+        return;
+    }
 
-   // ====== Is sending allowed (i.e. space in the queue)? ==================
-   if(SendingAllowed) {
-      const long frameSize = getFrameSize(streamID);
-      if(frameSize < 1) {
-         return;
-      }
-      if( (frameRate <= 0.0) &&
-         ((TransportProtocol == TCP) || (TransportProtocol == UDP)) ) {
-         throw cRuntimeError("TCP and UDP do not support \"send as much as possible\" mode (frameRate=0)!");
-      }
+    // ====== Is sending allowed (i.e. space in the queue)? ==================
+    if (SendingAllowed) {
+        const long frameSize = getFrameSize(streamID);
+        if (frameSize < 1) {
+            return;
+        }
+        if ((frameRate <= 0.0) && ((TransportProtocol == TCP) || (TransportProtocol == UDP))) {
+            throw cRuntimeError("TCP and UDP do not support \"send as much as possible\" mode (frameRate=0)!");
+        }
 
-      // ====== Transmit frame ==============================================
-/*
-      EV << simTime() << ", " << getFullPath() << ": Stream #" << streamID
+        // ====== Transmit frame ==============================================
+        /*
+         EV << simTime() << ", " << getFullPath() << ": Stream #" << streamID
          << ":\tframeRate=" << frameRate
          << "\tframeSize=" << frameSize << endl;
-*/
-      transmitFrame(frameSize, streamID);
-   }
-   else {
-      // No transmission allowed -> skip this frame!
-   }
+         */
+        transmitFrame(frameSize, streamID);
+    }
+    else {
+        // No transmission allowed -> skip this frame!
+    }
 
-   // ====== Schedule next frame transmission ===============================
-   assert(TransmitTimerVector[streamID] == nullptr);
-   TransmitTimerVector[streamID] = new NetPerfMeterTransmitTimer("TransmitTimer");
-   TransmitTimerVector[streamID]->setKind(TIMER_TRANSMIT);
-   TransmitTimerVector[streamID]->setStreamID(streamID);
-   const double nextFrameTime = 1.0 / frameRate;
-/*
-   EV << simTime() << ", " << getFullPath()
-      << ": Next on stream #" << streamID << " in " << nextFrameTime << "s" << endl;
-*/
-   scheduleAt(simTime() + nextFrameTime, TransmitTimerVector[streamID]);
+    // ====== Schedule next frame transmission ===============================
+    assert(TransmitTimerVector[streamID] == nullptr);
+    TransmitTimerVector[streamID] = new NetPerfMeterTransmitTimer("TransmitTimer");
+    TransmitTimerVector[streamID]->setKind(TIMER_TRANSMIT);
+    TransmitTimerVector[streamID]->setStreamID(streamID);
+    const double nextFrameTime = 1.0 / frameRate;
+    /*
+     EV << simTime() << ", " << getFullPath()
+     << ": Next on stream #" << streamID << " in " << nextFrameTime << "s" << endl;
+     */
+    scheduleAt(simTime() + nextFrameTime, TransmitTimerVector[streamID]);
 }
 
 
 // ###### Send data of non-saturated streams ################################
 void NetPerfMeter::sendDataOfTraceFile(const unsigned long long bytesAvailableInQueue)
 {
-   if(TraceIndex < TraceVector.size()) {
-      const unsigned int frameSize = TraceVector[TraceIndex].FrameSize;
-      unsigned int streamID        = TraceVector[TraceIndex].StreamID;
-      if(streamID >= ActualOutboundStreams) {
-        if(TransportProtocol == SCTP) {
-           throw cRuntimeError("Invalid streamID in trace");
+    if (TraceIndex < TraceVector.size()) {
+        const unsigned int frameSize = TraceVector[TraceIndex].FrameSize;
+        unsigned int streamID = TraceVector[TraceIndex].StreamID;
+        if (streamID >= ActualOutboundStreams) {
+            if (TransportProtocol == SCTP) {
+                throw cRuntimeError("Invalid streamID in trace");
+            }
+            streamID = 0;
         }
-        streamID = 0;
-      }
-      transmitFrame(frameSize, streamID);
-      TraceIndex++;
-   }
+        transmitFrame(frameSize, streamID);
+        TraceIndex++;
+    }
 
-   if(TraceIndex >= TraceVector.size()) {
-      TraceIndex = 0;
-   }
+    if (TraceIndex >= TraceVector.size()) {
+        TraceIndex = 0;
+    }
 
-   // ====== Schedule next frame transmission ===============================
-   if(TraceIndex < TraceVector.size()) {
-      const double nextFrameTime = TraceVector[TraceIndex].InterFrameDelay;
-      assert(TransmitTimerVector[0] == nullptr);
-      TransmitTimerVector[0] = new NetPerfMeterTransmitTimer("TransmitTimer");
-      TransmitTimerVector[0]->setKind(TIMER_TRANSMIT);
-      TransmitTimerVector[0]->setStreamID(0);
+    // ====== Schedule next frame transmission ===============================
+    if (TraceIndex < TraceVector.size()) {
+        const double nextFrameTime = TraceVector[TraceIndex].InterFrameDelay;
+        assert(TransmitTimerVector[0] == nullptr);
+        TransmitTimerVector[0] = new NetPerfMeterTransmitTimer("TransmitTimer");
+        TransmitTimerVector[0]->setKind(TIMER_TRANSMIT);
+        TransmitTimerVector[0]->setStreamID(0);
 
-      // std::cout << simTime() << ", " << getFullPath()
-      //           << ": Next in " << nextFrameTime << "s" << endl;
+        // std::cout << simTime() << ", " << getFullPath()
+        //           << ": Next in " << nextFrameTime << "s" << endl;
 
-      scheduleAt(simTime() + nextFrameTime, TransmitTimerVector[0]);
-   }
+        scheduleAt(simTime() + nextFrameTime, TransmitTimerVector[0]);
+    }
 }
-
 
 // ###### Receive data ######################################################
 void NetPerfMeter::receiveMessage(cMessage* msg)
 {
-   if (const Packet* dataMessage = dynamic_cast<const Packet*>(msg)) {
-      unsigned int    streamID = 0;
-      const auto& smsg = dataMessage->peekData();
+    if (const Packet* dataMessage = dynamic_cast<const Packet*>(msg)) {
+        unsigned int streamID = 0;
+        const auto& smsg = dataMessage->peekData();
 
-      if(TransportProtocol == SCTP) {
-         auto& tags = getTags(msg);
-         SctpRcvReq *receiveCommand = tags.findTag<SctpRcvReq>();
-        /* const SctpRcvInfo* receiveCommand =
-            check_and_cast<const SctpRcvInfo*>(dataMessage->getControlInfo());*/
-         streamID = receiveCommand->getSid();
-      }
+        if (TransportProtocol == SCTP) {
+            auto& tags = getTags(msg);
+            SctpRcvReq *receiveCommand = tags.findTag<SctpRcvReq>();
+            streamID = receiveCommand->getSid();
+        }
 
-      ReceiverStatistics* receiverStatistics = getReceiverStatistics(streamID);
-      receiverStatistics->ReceivedMessages++;
-      receiverStatistics->ReceivedBytes += B(smsg->getChunkLength()).get();
-      for (auto& region : smsg->getAllTags<CreationTimeTag>())
-          receiverStatistics->ReceivedDelayHistogram.collect(simTime() - region.getTag()->getCreationTime());
-   }
+        ReceiverStatistics* receiverStatistics = getReceiverStatistics( streamID);
+        receiverStatistics->ReceivedMessages++;
+        receiverStatistics->ReceivedBytes += B(smsg->getChunkLength()).get();
+        for (auto& region : smsg->getAllTags<CreationTimeTag>())
+            receiverStatistics->ReceivedDelayHistogram.collect(simTime() - region.getTag()->getCreationTime());
+    }
 }
 
 
 // ###### SCTP queue length configuration ###################################
 void NetPerfMeter::sendSCTPQueueRequest(const unsigned int queueSize)
 {
-   assert(SocketSCTP != nullptr);
+    assert(SocketSCTP != nullptr);
 
-   // Tell SCTP to limit the send queue to the number of bytes specified.
-   // When the queue is able accept more data again, it will be indicated by
-   // SCTP_I_SENDQUEUE_ABATED!
+    // Tell SCTP to limit the send queue to the number of bytes specified.
+    // When the queue is able accept more data again, it will be indicated by
+    // SCTP_I_SENDQUEUE_ABATED!
 
-   Request* cmsg = new Request("QueueRequest");
-   auto& tags = getTags(cmsg);
-   SctpInfoReq* queueInfo = tags.addTagIfAbsent<SctpInfoReq>();
-   queueInfo->setText(queueSize);
-   queueInfo->setSocketId(ConnectionID);
+    Request* cmsg = new Request("QueueRequest");
+    SctpInfoReq* queueInfo = cmsg->addTag<SctpInfoReq>();
+    queueInfo->setText(queueSize);
+    queueInfo->setSocketId(ConnectionID);
 
-   cmsg->setKind(SCTP_C_QUEUE_BYTES_LIMIT);
-   if(IncomingSocketSCTP) {
-      IncomingSocketSCTP->sendRequest(cmsg);
-   }
-   else {
-      SocketSCTP->sendRequest(cmsg);
-   }
+    cmsg->setKind(SCTP_C_QUEUE_BYTES_LIMIT);
+    if (IncomingSocketSCTP) {
+        IncomingSocketSCTP->sendRequest(cmsg);
+    }
+    else {
+        SocketSCTP->sendRequest(cmsg);
+    }
 }
-
 
 // ###### TCP queue length configuration ####################################
 void NetPerfMeter::sendTCPQueueRequest(const unsigned int queueSize)
 {
-   assert(SocketTCP != nullptr);
+    assert(SocketTCP != nullptr);
 
-   // Tell TCP to limit the send queue to the number of bytes specified.
-   // When the queue is able accept more data again, it will be indicated by
-   // TCP_I_SEND_MSG!
+    // Tell TCP to limit the send queue to the number of bytes specified.
+    // When the queue is able accept more data again, it will be indicated by
+    // TCP_I_SEND_MSG!
 
-   TcpCommand* queueInfo = new TcpCommand();
-   queueInfo->setUserId(queueSize);
+    TcpCommand* queueInfo = new TcpCommand();
+    queueInfo->setUserId(queueSize);
 
-   auto request = new Request("QueueRequest", TCP_C_QUEUE_BYTES_LIMIT);
-   request->setControlInfo(queueInfo);
-   request->addTagIfAbsent<SocketReq>()->setSocketId(ConnectionID);
-   if(IncomingSocketTCP) {
-      IncomingSocketTCP->sendCommand(request);
-   }
-   else {
-      SocketTCP->sendCommand(request);
-   }
+    auto request = new Request("QueueRequest", TCP_C_QUEUE_BYTES_LIMIT);
+    request->setControlInfo(queueInfo);
+    request->addTag<SocketReq>()->setSocketId(ConnectionID);
+    if (IncomingSocketTCP) {
+        IncomingSocketTCP->sendCommand(request);
+    }
+    else {
+        SocketTCP->sendCommand(request);
+    }
 }
 
 
 // ###### Return sprintf-formatted string ####################################
 opp_string NetPerfMeter::format(const char* formatString, ...)
 {
-   char    str[1024];
-   va_list args;
-   va_start(args, formatString);
-   vsnprintf(str, sizeof(str), formatString, args);
-   va_end(args);
-   return(opp_string(str));
+    char    str[1024];
+    va_list args;
+    va_start(args, formatString);
+    vsnprintf(str, sizeof(str), formatString, args);
+    va_end(args);
+    return(opp_string(str));
 }
 
 } // namespace inet
+

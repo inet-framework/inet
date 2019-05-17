@@ -216,6 +216,7 @@ void Ppp::handleUpperPacket(Packet *packet)
         details.setReason(INTERFACE_DOWN);
         emit(packetDroppedSignal, packet, &details);
         delete packet;
+        return;
     }
     queue->pushPacket(packet);
     if (!endTransmissionEvent->isScheduled() && !queue->isEmpty())

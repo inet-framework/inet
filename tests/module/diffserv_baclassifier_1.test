@@ -99,7 +99,7 @@ network TestNetwork
   connections:
     app.out --> classifier.in;
     for i=0..63 {
-      classifier.outs++ --> app.in++;
+      classifier.out++ --> app.in++;
     }
     classifier.defaultOut --> app.in++;
 }

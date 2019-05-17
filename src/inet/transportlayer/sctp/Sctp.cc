@@ -54,7 +54,7 @@ void Sctp::printInfoAssocMap()
             assoc = elem.second;
             key = elem.first;
 
-            EV_DETAIL << "assocId: " << assoc->assocId << "  assoc: " << assoc << " src: " << key.localAddr << " dst: " << key.remoteAddr << " lPort: " << key.localPort << " rPort: " << key.remotePort << " fd: " << assoc->fd <<"\n";
+            EV_DETAIL << "assocId: " << assoc->assocId << " src: " << key.localAddr << " dst: " << key.remoteAddr << " lPort: " << key.localPort << " rPort: " << key.remotePort << " fd: " << assoc->fd <<"\n";
         }
 
         EV_DETAIL << "\n";
@@ -671,7 +671,7 @@ void Sctp::updateSockPair(SctpAssociation *assoc, L3Address localAddr, L3Address
         }
     }
 
-    EV_INFO << "updateSockPair assoc=" << assoc << "    localAddr=" << key.localAddr << "            remoteAddr=" << key.remoteAddr << "     localPort=" << key.localPort << "  remotePort=" << remotePort << "\n";
+    EV_INFO << "updateSockPair assoc=" << assoc->assocId << "    localAddr=" << key.localAddr << "            remoteAddr=" << key.remoteAddr << "     localPort=" << key.localPort << "  remotePort=" << remotePort << "\n";
 
     sctpAssocMap[key] = assoc;
     sizeAssocMap = sctpAssocMap.size();

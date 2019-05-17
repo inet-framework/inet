@@ -77,6 +77,7 @@ const char *TcpConnection::eventName(int event)
         CASE(TCP_E_IGNORE);
         CASE(TCP_E_OPEN_ACTIVE);
         CASE(TCP_E_OPEN_PASSIVE);
+        CASE(TCP_E_ACCEPT);
         CASE(TCP_E_SEND);
         CASE(TCP_E_CLOSE);
         CASE(TCP_E_ABORT);
