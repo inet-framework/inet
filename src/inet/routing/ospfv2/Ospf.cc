@@ -79,7 +79,7 @@ void Ospf::createOspfRouter()
     cXMLElement *ospfConfig = par("ospfConfig");
     OspfConfigReader configReader(this, ift);
     if (!configReader.loadConfigFromXML(ospfConfig, ospfRouter))
-        throw cRuntimeError("Error reading AS configuration from %s", std::string(ospfConfig->getSourceLocation()).c_str());
+        throw cRuntimeError("Error reading AS configuration from %s", ospfConfig->getSourceLocation());
 
     ospfRouter->addWatches();
 }
