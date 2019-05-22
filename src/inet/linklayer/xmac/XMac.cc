@@ -393,7 +393,9 @@ void XMac::handleSelfMessage(cMessage *msg)
         // radio switch from above
         if (msg->getKind() == XMAC_SWITCHING_FINISHED) {
             if (radio->getRadioMode() == IRadio::RADIO_MODE_TRANSMITTER) {
-                auto pkt_preamble = queue->getPacket(0)->peekAtFront<XMacHeader>();
+                if (currentTransmission == nullptr)
+                    currentTransmission = queue->popPacket();
+                auto pkt_preamble = currentTransmission->peekAtFront<XMacHeader>();
                 sendPreamble(pkt_preamble->getDestAddr());
             }
             return;
@@ -455,7 +457,8 @@ void XMac::handleSelfMessage(cMessage *msg)
         if (msg->getKind() == XMAC_DATA_TX_OVER) {
             EV_DEBUG << "node " << address << " : State WAIT_TX_DATA_OVER, message XMAC_DATA_TX_OVER, new state  SLEEP" << endl;
             // remove the packet just served from the queue
-            delete queue->popPacket();
+            delete currentTransmission;
+            currentTransmission = nullptr;
             // if something in the queue, wakeup soon.
             if (queue->getNumPackets() > 0)
                 scheduleAt(simTime() + dblrand()*checkInterval, wakeup);
@@ -573,7 +576,9 @@ void XMac::handleLowerPacket(Packet *msg)
 void XMac::sendDataPacket()
 {
     nbTxDataPackets++;
-    auto packet = queue->getPacket(0)->dup();
+    if (currentTransmission == nullptr)
+        currentTransmission = queue->popPacket();
+    auto packet = currentTransmission->dup();
     const auto& hdr = packet->peekAtFront<XMacHeader>();
     lastDataPktDestAddr = hdr->getDestAddr();
     ASSERT(hdr->getType() == XMAC_DATA);

@@ -165,6 +165,9 @@ class INET_API XMac : public MacProtocolBase, public IMacProtocol
     /** @brief The current state of the protocol */
     States macState;
 
+    /** Currently transmitted frame if any */
+    Packet *currentTransmission = nullptr;
+
     // messages used in the FSM
     cMessage *resend_data;
     cMessage *ack_timeout;
