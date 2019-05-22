@@ -363,7 +363,7 @@ void EtherMacBase::processConnectDisconnect()
 
         // Clear queue
         while (!txQueue->isEmpty()) {
-            cMessage *msg = check_and_cast<cMessage *>(txQueue->popPacket());
+            Packet *msg = txQueue->popPacket();
             EV_DETAIL << "Interface is not connected, dropping packet " << msg << endl;
             numDroppedPkFromHLIfaceDown++;
             PacketDropDetails details;
@@ -440,7 +440,7 @@ void EtherMacBase::flushQueue()
 {
     // code would look slightly nicer with a pop() function that returns nullptr if empty
     while (!txQueue->isEmpty()) {
-        cMessage *msg = static_cast<cMessage *>(txQueue->popPacket());
+        Packet *msg = txQueue->popPacket();
         PacketDropDetails details;
         details.setReason(INTERFACE_DOWN);
         emit(packetDroppedSignal, msg, &details);
@@ -589,7 +589,7 @@ void EtherMacBase::getNextFrameFromQueue()
 {
     ASSERT(nullptr == curTxFrame);
     if (!txQueue->isEmpty())
-        curTxFrame = static_cast<Packet *>(txQueue->popPacket());
+        curTxFrame = txQueue->popPacket();
 }
 
 void EtherMacBase::finish()
