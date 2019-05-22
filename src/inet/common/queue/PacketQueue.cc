@@ -20,7 +20,11 @@
 namespace inet {
 
 PacketQueue::PacketQueue(const char *name) :
+#if OMNETPP_BUILDNUM >= 1021
+    cPacketQueue(name)
+#else
     cPacketQueue(name, nullptr)
+#endif
 {
 }
 

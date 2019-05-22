@@ -22,7 +22,11 @@ namespace inet {
 namespace ieee80211 {
 
 Ieee80211Queue::Ieee80211Queue(int maxQueueSize, const char *name) :
+#if OMNETPP_BUILDNUM >= 1021
+    cQueue(name)
+#else
     cQueue(name, nullptr)
+#endif
 {
     this->maxQueueSize = maxQueueSize;
 }
