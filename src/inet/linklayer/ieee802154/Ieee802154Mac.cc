@@ -398,8 +398,7 @@ void Ieee802154Mac::updateStatusCCA(t_mac_event event, cMessage *msg)
                     // drop the frame
                     EV_DETAIL << "Tried " << NB << " backoffs, all reported a busy "
                               << "channel. Dropping the packet." << endl;
-                    cMessage *mac = queue->getPacket(0);
-                    queue->popPacket();
+                    auto *mac = queue->popPacket();
                     txAttempts = 0;
                     nbDroppedFrames++;
                     PacketDropDetails details;
@@ -521,8 +520,7 @@ void Ieee802154Mac::updateStatusWaitAck(t_mac_event event, cMessage *msg)
                       << " ProcessAck, manageQueue..." << endl;
             if (rxAckTimer->isScheduled())
                 cancelEvent(rxAckTimer);
-            cMessage *mac = queue->getPacket(0);
-            queue->popPacket();
+            auto *mac = queue->popPacket();
             txAttempts = 0;
             delete mac;
             delete msg;
@@ -564,8 +562,7 @@ void Ieee802154Mac::manageMissingAck(t_mac_event    /*event*/, cMessage *    /*m
         // drop packet
         EV_DETAIL << "Packet was transmitted " << txAttempts
                   << " times and I never got an Ack. I drop the packet." << endl;
-        cMessage *mac = queue->getPacket(0);
-        queue->popPacket();
+        auto *mac = queue->popPacket();
         txAttempts = 0;
         PacketDropDetails details;
         details.setReason(RETRY_LIMIT_REACHED);
