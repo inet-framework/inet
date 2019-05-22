@@ -193,6 +193,9 @@ class INET_API LMac : public MacProtocolBase, public IMacProtocol
     cMessage *start_lmac;
     cMessage *send_control;
 
+    /** Currently transmitted frame if any */
+    Packet *currentTransmission = nullptr;
+
     /** @brief the bit rate at which we transmit */
     double bitrate;
 

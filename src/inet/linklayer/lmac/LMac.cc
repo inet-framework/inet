@@ -426,13 +426,14 @@ void LMac::handleSelfMessage(cMessage *msg)
             break;
 
         case SEND_CONTROL:
-
             if (msg->getKind() == LMAC_SEND_CONTROL) {
+                if (!SETUP_PHASE && currentTransmission == nullptr && !queue->isEmpty())
+                    currentTransmission = queue->popPacket();
                 // send first a control message, so that non-receiving nodes can switch off.
                 EV << "Sending a control packet.\n";
                 auto control = makeShared<LMacHeader>();
-                if ((queue->getNumPackets() > 0) && !SETUP_PHASE)
-                    control->setDestAddr(queue->getPacket(0)->peekAtFront<LMacHeader>()->getDestAddr());
+                if (currentTransmission != nullptr && !SETUP_PHASE)
+                    control->setDestAddr(currentTransmission->peekAtFront<LMacHeader>()->getDestAddr());
                 else
                     control->setDestAddr(LMAC_NO_RECEIVER);
 
@@ -448,7 +449,7 @@ void LMac::handleSelfMessage(cMessage *msg)
                 packet->insertAtFront(control);
                 packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::lmac);
                 sendDown(packet);
-                if ((queue->getNumPackets() > 0) && (!SETUP_PHASE))
+                if ((currentTransmission != nullptr) && (!SETUP_PHASE))
                     scheduleAt(simTime() + controlDuration, sendData);
             }
             else if (msg->getKind() == LMAC_SEND_DATA) {
@@ -461,8 +462,9 @@ void LMac::handleSelfMessage(cMessage *msg)
                     return;
                 }
                 Packet *data = new Packet("Data");
-                data->insertAtBack(queue->getPacket(0)->peekAt(headerLength, queue->getPacket(0)->getTotalLength() - headerLength));
-                const auto& lmacHeader = staticPtrCast<LMacHeader>(queue->getPacket(0)->peekAtFront<LMacHeader>()->dupShared());
+                auto pk0 = currentTransmission;
+                data->insertAtBack(pk0->peekAt(headerLength, pk0->getTotalLength() - headerLength));
+                const auto& lmacHeader = staticPtrCast<LMacHeader>(pk0->peekAtFront<LMacHeader>()->dupShared());
                 lmacHeader->setType(LMAC_DATA);
                 lmacHeader->setMySlot(mySlot);
                 lmacHeader->setOccupiedSlotsArraySize(numSlots);
@@ -473,7 +475,8 @@ void LMac::handleSelfMessage(cMessage *msg)
                 data->addTag<PacketProtocolTag>()->setProtocol(&Protocol::lmac);
                 EV << "Sending down data packet\n";
                 sendDown(data);
-                delete queue->popPacket();
+                delete pk0;
+                currentTransmission = nullptr;
                 macState = SEND_DATA;
                 EV_DETAIL << "Old state: SEND_CONTROL, New state: SEND_DATA" << endl;
             }
