@@ -148,6 +148,9 @@ class INET_API BMac : public MacProtocolBase, public IMacProtocol
     /** @brief The current state of the protocol */
     States macState = static_cast<States>(-1);
 
+    /** Currently transmitted frame if any */
+    Packet *currentTransmission = nullptr;
+
     // messages used in the FSM
     cMessage *resend_data = nullptr;
     cMessage *ack_timeout = nullptr;

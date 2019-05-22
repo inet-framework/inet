@@ -349,7 +349,8 @@ void BMac::handleSelfMessage(cMessage *msg)
                 else {
                     EV_DETAIL << "State WAIT_TX_DATA_OVER, message BMAC_DATA_TX_OVER,"
                                  " new state  SLEEP" << endl;
-                    delete queue->popPacket();
+                    delete currentTransmission;
+                    currentTransmission = nullptr;
                     // if something in the queue, wakeup soon.
                     if (queue->getNumPackets() > 0)
                         scheduleAt(simTime() + dblrand() * checkInterval, wakeup);
@@ -377,9 +378,9 @@ void BMac::handleSelfMessage(cMessage *msg)
                     EV_DETAIL << "State WAIT_ACK, message BMAC_ACK_TIMEOUT, new state"
                                  " SLEEP" << endl;
                     //drop the packet
-                    cMessage *mac = queue->popPacket();
-                    emit(linkBrokenSignal, mac);
-                    delete mac;
+                    emit(linkBrokenSignal, currentTransmission);
+                    delete currentTransmission;
+                    currentTransmission = nullptr;
 
                     // if something in the queue, wakeup soon.
                     if (queue->getNumPackets() > 0)
@@ -411,7 +412,8 @@ void BMac::handleSelfMessage(cMessage *msg)
                     nbRecvdAcks++;
                     lastDataPktDestAddr = MacAddress::BROADCAST_ADDRESS;
                     cancelEvent(ack_timeout);
-                    delete queue->popPacket();
+                    delete currentTransmission;
+                    currentTransmission = nullptr;
                     // if something in the queue, wakeup soon.
                     if (queue->getNumPackets() > 0)
                         scheduleAt(simTime() + dblrand() * checkInterval, wakeup);
@@ -555,7 +557,10 @@ void BMac::handleLowerPacket(Packet *packet)
 void BMac::sendDataPacket()
 {
     nbTxDataPackets++;
-    Packet *pkt = queue->getPacket(0)->dup();
+
+    ASSERT(currentTransmission == nullptr);
+    currentTransmission = queue->popPacket();
+    Packet *pkt = currentTransmission->dup();
     attachSignal(pkt);
     const auto& hdr = pkt->peekAtFront<BMacHeader>();
     lastDataPktDestAddr = hdr->getDestAddr();
