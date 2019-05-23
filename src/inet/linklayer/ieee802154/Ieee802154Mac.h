@@ -288,6 +288,9 @@ class INET_API Ieee802154Mac : public MacProtocolBase, public IMacProtocol
     /** @brief The bit length of the ACK packet.*/
     int ackLength;
 
+    /** Currently transmitted frame if any */
+    Packet *currentTransmission = nullptr;
+
   protected:
     /** @brief Generate new interface address*/
     virtual void configureInterfaceEntry() override;

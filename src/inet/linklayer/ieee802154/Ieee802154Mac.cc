@@ -348,6 +348,7 @@ void Ieee802154Mac::updateStatusBackoff(t_mac_event event, cMessage *msg)
 
 void Ieee802154Mac::flushQueue()
 {
+    currentTransmission = nullptr;
     while (!queue->isEmpty()) {
         auto packet = queue->popPacket();
         PacketDropDetails details;
@@ -359,6 +360,7 @@ void Ieee802154Mac::flushQueue()
 
 void Ieee802154Mac::clearQueue()
 {
+    currentTransmission = nullptr;
     while (!queue->isEmpty())
         delete queue->popPacket();
 }
@@ -379,7 +381,9 @@ void Ieee802154Mac::updateStatusCCA(t_mac_event event, cMessage *msg)
                 EV_DETAIL << "(3) FSM State CCA_3, EV_TIMER_CCA, [Channel Idle]: -> TRANSMITFRAME_4." << endl;
                 updateMacState(TRANSMITFRAME_4);
                 radio->setRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
-                Packet *mac = queue->getPacket(0)->dup();
+                if (currentTransmission == nullptr)
+                    currentTransmission = queue->getPacket(0);
+                Packet *mac = currentTransmission->dup();
                 attachSignal(mac, simTime() + aTurnaroundTime);
                 //sendDown(msg);
                 // give time for the radio to be in Tx state before transmitting
@@ -399,13 +403,15 @@ void Ieee802154Mac::updateStatusCCA(t_mac_event event, cMessage *msg)
                     EV_DETAIL << "Tried " << NB << " backoffs, all reported a busy "
                               << "channel. Dropping the packet." << endl;
                     auto *mac = queue->popPacket();
+                    ASSERT(currentTransmission == mac);
                     txAttempts = 0;
                     nbDroppedFrames++;
                     PacketDropDetails details;
                     details.setReason(CONGESTION);
                     details.setLimit(macMaxCSMABackoffs);
-                    emit(packetDroppedSignal, mac, &details);
-                    delete mac;
+                    emit(packetDroppedSignal, currentTransmission, &details);
+                    delete currentTransmission;
+                    currentTransmission = nullptr;
                     manageQueue();
                 }
                 else {
@@ -475,7 +481,8 @@ void Ieee802154Mac::updateStatusTransmitFrame(t_mac_event event, cMessage *msg)
 {
     if (event == EV_FRAME_TRANSMITTED) {
         //    delete msg;
-        Packet *packet = queue->getPacket(0);
+        ASSERT(currentTransmission == queue->getPacket(0));
+        Packet *packet = currentTransmission;
         const auto& csmaHeader = packet->peekAtFront<Ieee802154MacHeader>();
         radio->setRadioMode(IRadio::RADIO_MODE_RECEIVER);
 
@@ -499,8 +506,10 @@ void Ieee802154Mac::updateStatusTransmitFrame(t_mac_event event, cMessage *msg)
         }
         else {
             EV_DETAIL << ": RadioSetupRx, manageQueue..." << endl;
-            queue->popPacket();
-            delete packet;
+            auto pk = queue->popPacket();
+            ASSERT(pk == currentTransmission);
+            delete currentTransmission;
+            currentTransmission = nullptr;
             manageQueue();
         }
         delete msg;
@@ -521,8 +530,10 @@ void Ieee802154Mac::updateStatusWaitAck(t_mac_event event, cMessage *msg)
             if (rxAckTimer->isScheduled())
                 cancelEvent(rxAckTimer);
             auto *mac = queue->popPacket();
+            ASSERT(mac == currentTransmission);
+            delete currentTransmission;
+            currentTransmission = nullptr;
             txAttempts = 0;
-            delete mac;
             delete msg;
             manageQueue();
             break;
@@ -563,13 +574,15 @@ void Ieee802154Mac::manageMissingAck(t_mac_event    /*event*/, cMessage *    /*m
         EV_DETAIL << "Packet was transmitted " << txAttempts
                   << " times and I never got an Ack. I drop the packet." << endl;
         auto *mac = queue->popPacket();
+        ASSERT(mac == currentTransmission);
         txAttempts = 0;
         PacketDropDetails details;
         details.setReason(RETRY_LIMIT_REACHED);
         details.setLimit(macMaxFrameRetries);
-        emit(packetDroppedSignal, mac, &details);
-        emit(linkBrokenSignal, mac);
-        delete mac;
+        emit(packetDroppedSignal, currentTransmission, &details);
+        emit(linkBrokenSignal, currentTransmission);
+        delete currentTransmission;
+        currentTransmission = nullptr;
     }
     manageQueue();
 }
@@ -902,7 +915,8 @@ void Ieee802154Mac::handleLowerPacket(Packet *packet)
             else if (queue->getNumPackets() != 0) {
                 // message is an ack, and it is for us.
                 // Is it from the right node ?
-                Packet *firstPacket = static_cast<Packet *>(queue->getPacket(0));
+                ASSERT(currentTransmission == queue->getPacket(0));
+                Packet *firstPacket = currentTransmission;
                 const auto& csmaHeader = firstPacket->peekAtFront<Ieee802154MacHeader>();
                 if (src == csmaHeader->getDestAddr()) {
                     nbRecvdAcks++;
