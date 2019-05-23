@@ -41,13 +41,13 @@ bool getBoolAttribute(const cXMLElement& element, const char *name, const bool *
         if (defaultValue)
             return *defaultValue;
         throw cRuntimeError("Required attribute %s of <%s> missing at %s", name, element.getTagName(),
-                std::string(element.getSourceLocation()).c_str());
+                element.getSourceLocation());
     }
     if (strcasecmp(s, "true") == 0 || strcmp(s, "1") == 0)
         return true;
     if (strcasecmp(s, "false") == 0 || strcmp(s, "0") == 0)
         return false;
-    throw cRuntimeError("Invalid boolean attribute %s = '%s' at %s", name, s, std::string(element.getSourceLocation()).c_str());
+    throw cRuntimeError("Invalid boolean attribute %s = '%s' at %s", name, s, element.getSourceLocation());
 }
 } // namespace {
 
@@ -98,19 +98,19 @@ MatrixCloudDelayer::MatrixEntry::MatrixEntry(cXMLElement *trafficEntity, bool de
         delayPar.parse(delayAttr);
     }
     catch (std::exception& e) {
-        throw cRuntimeError("parser error '%s' in 'delay' attribute of '%s' entity at %s", e.what(), trafficEntity->getTagName(), std::string(trafficEntity->getSourceLocation()).c_str());
+        throw cRuntimeError("parser error '%s' in 'delay' attribute of '%s' entity at %s", e.what(), trafficEntity->getTagName(), trafficEntity->getSourceLocation());
     }
     try {
         dataratePar.parse(datarateAttr);
     }
     catch (std::exception& e) {
-        throw cRuntimeError("parser error '%s' in 'datarate' attribute of '%s' entity at %s", e.what(), trafficEntity->getTagName(), std::string(trafficEntity->getSourceLocation()).c_str());
+        throw cRuntimeError("parser error '%s' in 'datarate' attribute of '%s' entity at %s", e.what(), trafficEntity->getTagName(), trafficEntity->getSourceLocation());
     }
     try {
         dropPar.parse(dropAttr);
     }
     catch (std::exception& e) {
-        throw cRuntimeError("parser error '%s' in 'drop' attribute of '%s' entity at %s", e.what(), trafficEntity->getTagName(), std::string(trafficEntity->getSourceLocation()).c_str());
+        throw cRuntimeError("parser error '%s' in 'drop' attribute of '%s' entity at %s", e.what(), trafficEntity->getTagName(), trafficEntity->getSourceLocation());
     }
 }
 
@@ -143,7 +143,7 @@ void MatrixCloudDelayer::initialize(int stage)
         // parse XML config
         if (strcmp(configEntity->getTagName(), "internetCloud"))
             throw cRuntimeError("Cannot read internetCloud configuration, unaccepted '%s' entity at %s", configEntity->getTagName(),
-                    std::string(configEntity->getSourceLocation()).c_str());
+                    configEntity->getSourceLocation());
         bool defaultSymmetric = getBoolAttribute(*configEntity, "symmetric");
         const cXMLElement *parameterEntity = getUniqueChild(configEntity, "parameters");
         cXMLElementList trafficEntities = parameterEntity->getChildrenByTagName("traffic");
@@ -201,8 +201,8 @@ MatrixCloudDelayer::Descriptor *MatrixCloudDelayer::getOrCreateDescriptor(int sr
             if (matrixEntry->symmetric) {
                 if (reverseMatrixEntry) // existing previous asymmetric entry which matching to (dest,src)
                     throw cRuntimeError("Inconsistent xml config between '%s' and '%s' nodes (at %s and %s)",
-                            src.c_str(), dest.c_str(), std::string(matrixEntry->entity->getSourceLocation()).c_str(),
-                            std::string(reverseMatrixEntry->entity->getSourceLocation()).c_str());
+                            src.c_str(), dest.c_str(), matrixEntry->entity->getSourceLocation(),
+                            reverseMatrixEntry->entity->getSourceLocation());
                 IdPair reverseIdPair(destID, srcID);
                 MatrixCloudDelayer::Descriptor& rdescriptor = idPairToDescriptorMap[reverseIdPair];
                 rdescriptor = descriptor;

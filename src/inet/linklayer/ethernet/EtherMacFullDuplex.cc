@@ -173,7 +173,7 @@ void EtherMacFullDuplex::handleUpperPacket(Packet *packet)
     txQueue->pushPacket(packet);
 
     if (!curTxFrame && !txQueue->isEmpty() && transmitState == TX_IDLE_STATE)
-        curTxFrame = check_and_cast<Packet *>(txQueue->popPacket());
+        curTxFrame = txQueue->popPacket();
 
     if (transmitState == TX_IDLE_STATE)
         startFrameTransmission();

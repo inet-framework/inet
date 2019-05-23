@@ -274,7 +274,7 @@ void MultiFieldClassifier::configureFilters(cXMLElement *config)
             addFilter(filter);
         }
         catch (std::exception& e) {
-            throw cRuntimeError("Error in XML <filter> element at %s: %s", std::string(filterElement->getSourceLocation()).c_str(), e.what());
+            throw cRuntimeError("Error in XML <filter> element at %s: %s", filterElement->getSourceLocation(), e.what());
         }
     }
 }

@@ -30,7 +30,7 @@ static cXMLElement *firstChildWithTag(cXMLElement *node, const char *tagname)
 
     if (!child)
         throw cRuntimeError("Element <%s> has no <%s> child at %s",
-                node->getTagName(), tagname, std::string(node->getSourceLocation()).c_str());
+                node->getTagName(), tagname, node->getSourceLocation());
 
     return child;
 }
@@ -42,11 +42,11 @@ void AnsimMobility::computeMaxSpeed()
     cXMLElement *curElem = rootElem->getElementByPath("mobility/position_change");
     if (!curElem)
         throw cRuntimeError("Element doesn't have <mobility> child or <position_change> grandchild at %s",
-                std::string(rootElem->getSourceLocation()).c_str());
+                rootElem->getSourceLocation());
     cXMLElement *nextElem = findNextPositionChange(curElem);
     if (!nextElem)
         throw cRuntimeError("Element doesn't have second <position_change> grandchild at %s",
-                std::string(curElem->getSourceLocation()).c_str());
+                curElem->getSourceLocation());
     curElem = nextElem;
     cXMLElement *destElem = firstChildWithTag(curElem, "destination");
     const char *xStr = firstChildWithTag(destElem, "xpos")->getNodeValue();
@@ -96,11 +96,11 @@ void AnsimMobility::initialize(int stage)
         cXMLElement *rootElem = par("ansimTrace");
         if (strcmp(rootElem->getTagName(), "simulation") != 0)
             throw cRuntimeError("<simulation> is expected as root element not <%s> at %s",
-                    rootElem->getTagName(), std::string(rootElem->getSourceLocation()).c_str());
+                    rootElem->getTagName(), rootElem->getSourceLocation());
         nextPositionChange = rootElem->getElementByPath("mobility/position_change");
         if (!nextPositionChange)
             throw cRuntimeError("Element doesn't have <mobility> child or <position_change> grandchild at %s",
-                    std::string(rootElem->getSourceLocation()).c_str());
+                    rootElem->getSourceLocation());
         computeMaxSpeed();
     }
 }
@@ -149,15 +149,15 @@ void AnsimMobility::extractDataFrom(cXMLElement *node)
     // FIXME start_time has to be taken into account too! as pause from prev element's end_time
     const char *startTimeStr = firstChildWithTag(node, "start_time")->getNodeValue();
     if (!startTimeStr)
-        throw cRuntimeError("No content in <start_time> element at %s", std::string(node->getSourceLocation()).c_str());
+        throw cRuntimeError("No content in <start_time> element at %s", node->getSourceLocation());
     const char *endTimeStr = firstChildWithTag(node, "end_time")->getNodeValue();
     if (!endTimeStr)
-        throw cRuntimeError("No content in <end_time> element at %s", std::string(node->getSourceLocation()).c_str());
+        throw cRuntimeError("No content in <end_time> element at %s", node->getSourceLocation());
     cXMLElement *destElem = firstChildWithTag(node, "destination");
     const char *xStr = firstChildWithTag(destElem, "xpos")->getNodeValue();
     const char *yStr = firstChildWithTag(destElem, "ypos")->getNodeValue();
     if (!xStr || !yStr)
-        throw cRuntimeError("No content in <destination>/<xpos> or <ypos> element at %s", std::string(node->getSourceLocation()).c_str());
+        throw cRuntimeError("No content in <destination>/<xpos> or <ypos> element at %s", node->getSourceLocation());
 
     nextChange = atof(endTimeStr);
     targetPosition.x = atof(xStr);

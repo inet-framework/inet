@@ -40,6 +40,7 @@ int PriorityScheduler::getNumPackets()
 
 Packet *PriorityScheduler::getPacket(int index)
 {
+    int origIndex = index;
     for (auto collection : collections) {
         auto numPackets = collection->getNumPackets();
         if (index < numPackets)
@@ -47,7 +48,7 @@ Packet *PriorityScheduler::getPacket(int index)
         else
             index -= numPackets;
     }
-    throw cRuntimeError("Index out of range");
+    throw cRuntimeError("Index %i out of range", origIndex);
 }
 
 void PriorityScheduler::removePacket(Packet *packet)

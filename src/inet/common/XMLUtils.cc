@@ -153,7 +153,7 @@ const char *getMandatoryAttribute(const cXMLElement& node, const char *attr)
     const char *s = node.getAttribute(attr);
     if (s == nullptr)
         throw cRuntimeError("required attribute %s of <%s> missing at %s",
-                attr, node.getTagName(), std::string(node.getSourceLocation()).c_str());
+                attr, node.getTagName(), node.getSourceLocation());
     return s;
 }
 
@@ -162,7 +162,7 @@ const char *getMandatoryFilledAttribute(const cXMLElement& node, const char *att
     const char *s = getMandatoryAttribute(node, attr);
     if (*s == '\0')
         throw cRuntimeError("required attribute %s of <%s> is empty at %s",
-                attr, node.getTagName(), std::string(node.getSourceLocation()).c_str());
+                attr, node.getTagName(), node.getSourceLocation());
     return s;
 }
 

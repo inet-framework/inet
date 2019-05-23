@@ -248,7 +248,7 @@ void EtherMac::handleUpperPacket(Packet *packet)
     txQueue->pushPacket(packet);
 
     if (!curTxFrame && !txQueue->isEmpty())
-        curTxFrame = static_cast<Packet *>(txQueue->popPacket());
+        curTxFrame = txQueue->popPacket();
 
     if ((duplexMode || receiveState == RX_IDLE_STATE) && transmitState == TX_IDLE_STATE) {
         EV_DETAIL << "No incoming carrier signals detected, frame clear to send\n";
