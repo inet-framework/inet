@@ -77,6 +77,8 @@ int PacketQueue::getNumPackets()
 
 Packet *PacketQueue::getPacket(int index)
 {
+    if (index < 0 || index >= queue.getLength())
+        throw cRuntimeError("index %i out of range", index);
     return check_and_cast<Packet *>(queue.get(index));
 }
 
