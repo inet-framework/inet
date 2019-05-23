@@ -29,6 +29,8 @@ class INET_API Ieee802154NarrowbandDimensionalReceiver : public FlatReceiverBase
 {
   protected:
     W minInterferencePower;
+    virtual bool computeIsReceptionPossible(const IListening *listening, const ITransmission *transmission) const override;
+    virtual bool computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part) const override;
 
   public:
     Ieee802154NarrowbandDimensionalReceiver();

@@ -1,5 +1,4 @@
 //
-// Copyright (C) 2014 Florian Meier
 // Copyright (C) 2013 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
@@ -16,35 +15,26 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IEEE802154NARROWBANDSCALARRECEIVER_H
-#define __INET_IEEE802154NARROWBANDSCALARRECEIVER_H
+#ifndef __INET_IEEE802154NARROWBANDDIMENSIONALTRANSMISSION_H
+#define __INET_IEEE802154NARROWBANDDIMENSIONALTRANSMISSION_H
 
-#include "inet/physicallayer/base/packetlevel/FlatReceiverBase.h"
+#include "inet/physicallayer/analogmodel/packetlevel/DimensionalTransmission.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-class INET_API Ieee802154NarrowbandScalarReceiver : public FlatReceiverBase
+class INET_API Ieee802154NarrowbandDimensionalTransmission : public DimensionalTransmission
 {
-  protected:
-    W minInterferencePower;
-    virtual bool computeIsReceptionPossible(const IListening *listening, const ITransmission *transmission) const override;
-    virtual bool computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part) const override;
-
   public:
-    Ieee802154NarrowbandScalarReceiver();
-
-    void initialize(int stage) override;
+    Ieee802154NarrowbandDimensionalTransmission(const IRadio *transmitter, const Packet *packet, const simtime_t startTime, const simtime_t endTime, const simtime_t preambleDuration, const simtime_t headerDuration, const simtime_t dataDuration, const Coord startPosition, const Coord endPosition, const Quaternion startOrientation, const Quaternion endOrientation, const IModulation *modulation, b headerLength, b dataLength, Hz carrierFrequency, Hz bandwidth, bps bitrate, const ConstMapping *power);
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
-
-    virtual W getMinInterferencePower() const override { return minInterferencePower; }
 };
 
 } // namespace physicallayer
 
 } // namespace inet
 
-#endif // ifndef __INET_IEEE802154SCALARRECEIVER_H
+#endif // ifndef __INET_IEEE802154NARROWBANDDIMENSIONALTRANSMISSION_H
 

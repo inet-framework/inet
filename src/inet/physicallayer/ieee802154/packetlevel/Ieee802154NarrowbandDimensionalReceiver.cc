@@ -17,6 +17,7 @@
 //
 
 #include "inet/physicallayer/ieee802154/packetlevel/Ieee802154NarrowbandDimensionalReceiver.h"
+#include "inet/physicallayer/ieee802154/packetlevel/Ieee802154NarrowbandDimensionalTransmission.h"
 
 namespace inet {
 
@@ -35,6 +36,18 @@ void Ieee802154NarrowbandDimensionalReceiver::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         minInterferencePower = mW(math::dBm2mW(par("minInterferencePower")));
     }
+}
+
+bool Ieee802154NarrowbandDimensionalReceiver::computeIsReceptionPossible(const IListening *listening, const ITransmission *transmission) const
+{
+    const Ieee802154NarrowbandDimensionalTransmission *ieee802154Transmission = dynamic_cast<const Ieee802154NarrowbandDimensionalTransmission *>(transmission);
+    return ieee802154Transmission && NarrowbandReceiverBase::computeIsReceptionPossible(listening, transmission);
+}
+
+bool Ieee802154NarrowbandDimensionalReceiver::computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part) const
+{
+    auto ieee802154Transmission = dynamic_cast<const Ieee802154NarrowbandDimensionalTransmission *>(reception->getTransmission());
+    return ieee802154Transmission && NarrowbandReceiverBase::computeIsReceptionPossible(listening, reception, part);
 }
 
 std::ostream& Ieee802154NarrowbandDimensionalReceiver::printToStream(std::ostream& stream, int level) const
