@@ -51,6 +51,7 @@ class INET_API IPacketCollection
 
     /**
      * Returns the packet at the given index.
+     * Throws error when index is out of range.
      */
     virtual Packet *getPacket(int index) = 0;
 

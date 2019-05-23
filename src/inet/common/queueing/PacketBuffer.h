@@ -49,7 +49,7 @@ class INET_API PacketBuffer : public cSimpleModule, public IPacketBuffer, public
     virtual b getMaxTotalLength() override { return dataCapacity; }
     virtual b getTotalLength() override { return totalLength; }
 
-    virtual Packet *getPacket(int index) override { return packets[index]; }
+    virtual Packet *getPacket(int index) override;
     virtual bool isEmpty() override { return packets.size() == 0; }
 
     virtual void addPacket(Packet *packet) override;

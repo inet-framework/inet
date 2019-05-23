@@ -86,6 +86,13 @@ void PacketBuffer::updateDisplayString()
     getDisplayString().setTagArg("t", 0, text);
 }
 
+Packet *PacketBuffer::getPacket(int index)
+{
+    if (index < 0 || (size_t)index >= packets.size())
+        throw cRuntimeError("index %i out of range", index);
+    return packets[index];
+}
+
 } // namespace queueing
 } // namespace inet
 
