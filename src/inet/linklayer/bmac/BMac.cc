@@ -253,7 +253,7 @@ void BMac::handleSelfMessage(cMessage *msg)
             if (msg->getKind() == BMAC_CCA_TIMEOUT) {
                 // channel is clear
                 // something waiting in eth queue?
-                if (queue->getNumPackets() > 0) {
+                if (!queue->isEmpty()) {
                     EV_DETAIL << "State CCA, message CCA_TIMEOUT, new state"
                                  " SEND_PREAMBLE" << endl;
                     macState = SEND_PREAMBLE;
@@ -357,7 +357,7 @@ void BMac::handleSelfMessage(cMessage *msg)
                     delete currentTransmission;
                     currentTransmission = nullptr;
                     // if something in the queue, wakeup soon.
-                    if (queue->getNumPackets() > 0)
+                    if (!queue->isEmpty())
                         scheduleAt(simTime() + dblrand() * checkInterval, wakeup);
                     else
                         scheduleAt(simTime() + slotDuration, wakeup);
@@ -388,7 +388,7 @@ void BMac::handleSelfMessage(cMessage *msg)
                     currentTransmission = nullptr;
 
                     // if something in the queue, wakeup soon.
-                    if (queue->getNumPackets() > 0)
+                    if (!queue->isEmpty())
                         scheduleAt(simTime() + dblrand() * checkInterval, wakeup);
                     else
                         scheduleAt(simTime() + slotDuration, wakeup);
@@ -420,7 +420,7 @@ void BMac::handleSelfMessage(cMessage *msg)
                     delete currentTransmission;
                     currentTransmission = nullptr;
                     // if something in the queue, wakeup soon.
-                    if (queue->getNumPackets() > 0)
+                    if (!queue->isEmpty())
                         scheduleAt(simTime() + dblrand() * checkInterval, wakeup);
                     else
                         scheduleAt(simTime() + slotDuration, wakeup);
@@ -483,7 +483,7 @@ void BMac::handleSelfMessage(cMessage *msg)
                     EV_DETAIL << "State WAIT_DATA, message BMAC_DATA, new state SLEEP"
                               << endl;
                     // if something in the queue, wakeup soon.
-                    if (queue->getNumPackets() > 0)
+                    if (!queue->isEmpty())
                         scheduleAt(simTime() + dblrand() * checkInterval, wakeup);
                     else
                         scheduleAt(simTime() + slotDuration, wakeup);
@@ -496,7 +496,7 @@ void BMac::handleSelfMessage(cMessage *msg)
                 EV_DETAIL << "State WAIT_DATA, message BMAC_DATA_TIMEOUT, new state"
                              " SLEEP" << endl;
                 // if something in the queue, wakeup soon.
-                if (queue->getNumPackets() > 0)
+                if (!queue->isEmpty())
                     scheduleAt(simTime() + dblrand() * checkInterval, wakeup);
                 else
                     scheduleAt(simTime() + slotDuration, wakeup);
@@ -523,7 +523,7 @@ void BMac::handleSelfMessage(cMessage *msg)
                              " SLEEP" << endl;
                 // ack sent, go to sleep now.
                 // if something in the queue, wakeup soon.
-                if (queue->getNumPackets() > 0)
+                if (!queue->isEmpty())
                     scheduleAt(simTime() + dblrand() * checkInterval, wakeup);
                 else
                     scheduleAt(simTime() + slotDuration, wakeup);

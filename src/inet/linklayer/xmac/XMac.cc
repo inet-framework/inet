@@ -295,7 +295,7 @@ void XMac::handleSelfMessage(cMessage *msg)
         if (msg->getKind() == XMAC_CCA_TIMEOUT)
         {
             // channel is clear and we wanna SEND
-            if (queue->getNumPackets() > 0)
+            if (!queue->isEmpty())
             {
                 radio->setRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
                 changeDisplayColor(YELLOW);
@@ -460,7 +460,7 @@ void XMac::handleSelfMessage(cMessage *msg)
             delete currentTransmission;
             currentTransmission = nullptr;
             // if something in the queue, wakeup soon.
-            if (queue->getNumPackets() > 0)
+            if (!queue->isEmpty())
                 scheduleAt(simTime() + dblrand()*checkInterval, wakeup);
             else
                 scheduleAt(simTime() + slotDuration, wakeup);
@@ -497,7 +497,7 @@ void XMac::handleSelfMessage(cMessage *msg)
                 cancelEvent(data_timeout);
 
                 // if something in the queue, wakeup soon.
-                if (queue->getNumPackets() > 0)
+                if (!queue->isEmpty())
                     scheduleAt(simTime() + dblrand()*checkInterval, wakeup);
                 else
                     scheduleAt(simTime() + slotDuration, wakeup);
@@ -519,7 +519,7 @@ void XMac::handleSelfMessage(cMessage *msg)
         if (msg->getKind() == XMAC_DATA_TIMEOUT) {
             EV << "node " << address << " : State WAIT_DATA, message XMAC_DATA_TIMEOUT, new state SLEEP" << endl;
             // if something in the queue, wakeup soon.
-            if (queue->getNumPackets() > 0)
+            if (!queue->isEmpty())
                 scheduleAt(simTime() + dblrand()*checkInterval, wakeup);
             else
                 scheduleAt(simTime() + slotDuration, wakeup);
