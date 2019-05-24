@@ -172,11 +172,12 @@ void EtherMacFullDuplex::handleUpperPacket(Packet *packet)
     EV_DETAIL << "Frame " << frame << " arrived from higher layers, enqueueing\n";
     txQueue->pushPacket(packet);
 
-    if (!curTxFrame && !txQueue->isEmpty() && transmitState == TX_IDLE_STATE)
-        curTxFrame = txQueue->popPacket();
-
-    if (transmitState == TX_IDLE_STATE)
-        startFrameTransmission();
+    if (transmitState == TX_IDLE_STATE) {
+        if (curTxFrame == nullptr)
+            getNextFrameFromQueue();
+        if (curTxFrame != nullptr)
+            startFrameTransmission();
+    }
 }
 
 void EtherMacFullDuplex::processMsgFromNetwork(EthernetSignal *signal)
