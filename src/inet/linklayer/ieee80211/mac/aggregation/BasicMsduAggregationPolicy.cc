@@ -72,7 +72,7 @@ std::vector<Packet *> *BasicMsduAggregationPolicy::computeAggregateFrames(queuei
     Enter_Method_Silent("computeAggregateFrames");
     ASSERT(!queue->isEmpty());
     b aMsduLength = b(0);
-    auto firstPacket = check_and_cast<Packet *>(queue->getPacket(0));
+    auto firstPacket = queue->getPacket(0);
     Ptr<const Ieee80211DataOrMgmtHeader> firstFrame = nullptr;
     auto frames = new std::vector<Packet *>();
     for (int i = 0; i < queue->getNumPackets(); i++)
