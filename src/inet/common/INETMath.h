@@ -157,11 +157,6 @@ inline int round(double d) { return static_cast<int>(ceil(d - 0.5)); }
 inline double floorToZero(double d) { return (d >= 0.0) ? floor(d) : ceil(d); }
 
 /**
- * Returns the greater of the given parameters
- */
-inline double max(double a, double b) { return (a < b) ? b : a; }
-
-/**
  * Converts a dB value to fraction.
  */
 inline double dB2fraction(double dB) { return pow(10.0, dB / 10.0); }
