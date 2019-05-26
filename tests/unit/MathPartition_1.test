@@ -1,0 +1,307 @@
+%description:
+
+This test contains basic checks for various multi-dimensional partitioning of mathematical functions.
+
+%includes:
+#include "inet/common/math/Functions.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::math;
+using namespace inet::units::values;
+
+class FunctionTest
+{
+  protected:
+    template<typename R, typename D>
+    void printPartitioning(const typename D::I& i, const Ptr<const IFunction<R, D>>& f) {
+    	FunctionChecker<R, D>(f).check();
+        std::cout << "\nPartitioning " << i << std::endl;
+	    f->partition(i, [&] (const typename D::I& i1, const IFunction<R, D> *f1) {
+	    	std::cout << i1 << " -> " << *f1 << std::endl;
+	    });
+    }
+
+  public:
+    void test1();
+};
+
+void FunctionTest::test1()
+{
+    std::cout << "\nConstantFunction\n";
+    auto f1 = makeShared<ConstantFunction<double, Domain<double>>>(10.0);
+    printPartitioning<double, Domain<double>>(f1->getDomain(), f1);
+
+    std::cout << "\nOneDimensionalBoxcarFunction\n";
+    auto f2 = makeShared<OneDimensionalBoxcarFunction<double, double>>(-1.0, 1.0, 10.0);
+    printPartitioning<double, Domain<double>>(f2->getDomain(), f2);
+    printPartitioning<double, Domain<double>>(Interval<double>(Point<double>(-10.0), Point<double>(0.0), 0), f2);
+    printPartitioning<double, Domain<double>>(Interval<double>(Point<double>(0.0), Point<double>(10.0), 0), f2);
+
+    std::cout << "\nAdditionFunction\n";
+    auto f3 = makeShared<OneDimensionalBoxcarFunction<double, double>>(0.0, 2.0, 1.0);
+    auto f4 = f2->add(f3);
+    printPartitioning<double, Domain<double>>(f3->getDomain(), f4);
+    printPartitioning<double, Domain<double>>(Interval<double>(Point<double>(-10.0), Point<double>(0.0), 0), f4);
+    printPartitioning<double, Domain<double>>(Interval<double>(Point<double>(0.0), Point<double>(10.0), 0), f4);
+
+    std::cout << "\nMultiplicationFunction\n";
+    auto f5 = f2->multiply(f3);
+    printPartitioning<double, Domain<double>>(f3->getDomain(), f5);
+    printPartitioning<double, Domain<double>>(Interval<double>(Point<double>(-10.0), Point<double>(0.0), 0), f5);
+    printPartitioning<double, Domain<double>>(Interval<double>(Point<double>(0.0), Point<double>(10.0), 0), f5);
+
+    std::cout << "\nOneDimensionalInterpolatedFunction\n";
+    std::map<double, double> rs;
+    rs[-INFINITY] = 0.0;
+    rs[-1.0] = 0.0;
+    rs[0.0] = 10.0;
+    rs[1.0] = 0.0;
+    rs[INFINITY] = 0.0;
+    auto f6 = makeShared<OneDimensionalInterpolatedFunction<double, double>>(rs, &LinearInterpolator<double, double>::singleton);
+    printPartitioning<double, Domain<double>>(f6->getDomain(), f6);
+
+    std::cout << "\nMultiplicationFunction optimization\n";
+    auto f7 = makeShared<ConstantFunction<double, Domain<double>>>(0.0)->multiply(f6);
+    printPartitioning<double, Domain<double>>(f7->getDomain(), f7);
+
+    std::cout << "\nOrthogonalCombinatorFunction\n";
+    auto f8 = makeShared<OrthogonalCombinatorFunction<double, double, double>>(f2, f3);
+    printPartitioning<double, Domain<double, double>>(f8->getDomain(), f8);
+
+    std::cout << "\nTwoDimensionalBoxcarFunction\n";
+    auto f9 = makeShared<TwoDimensionalBoxcarFunction<double, double, double>>(-1.0, 1.0, 0.0, 2.0, 10.0);
+    printPartitioning<double, Domain<double, double>>(f9->getDomain(), f9);
+
+    std::cout << "\nDivisionFunction\n";
+    auto f10 = f8->divide(f9);
+    printPartitioning<double, Domain<double, double>>(f10->getDomain(), f10);
+}
+
+%activity:
+FunctionTest tester;
+tester.test1();
+
+%contains: stdout
+ConstantFunction
+
+Partitioning [-inf ... inf] 1
+[-inf ... inf] 1 -> f {
+  i [-inf ... inf] 1 -> { @-inf = 10, @inf = 10, min = 10, max = 10, mean = 10 }
+} min = 10, max = 10, mean = 10
+
+OneDimensionalBoxcarFunction
+
+Partitioning [-inf ... inf] 1
+[-inf ... -1] 0 -> f {
+  i [-inf ... inf] 1 -> { @-inf = 0, @inf = 0, min = 0, max = 0, mean = 0 }
+} min = 0, max = 0, mean = 0
+[-1 ... 1] 0 -> f {
+  i [-inf ... inf] 1 -> { @-inf = 10, @inf = 10, min = 10, max = 10, mean = 10 }
+} min = 10, max = 10, mean = 10
+[1 ... inf] 0 -> f {
+  i [-inf ... inf] 1 -> { @-inf = 0, @inf = 0, min = 0, max = 0, mean = 0 }
+} min = 0, max = 0, mean = 0
+
+Partitioning [-10 ... 0] 0
+[-10 ... -1] 0 -> f {
+  i [-inf ... inf] 1 -> { @-inf = 0, @inf = 0, min = 0, max = 0, mean = 0 }
+} min = 0, max = 0, mean = 0
+[-1 ... 0] 0 -> f {
+  i [-inf ... inf] 1 -> { @-inf = 10, @inf = 10, min = 10, max = 10, mean = 10 }
+} min = 10, max = 10, mean = 10
+
+Partitioning [0 ... 10] 0
+[0 ... 1] 0 -> f {
+  i [-inf ... inf] 1 -> { @-inf = 10, @inf = 10, min = 10, max = 10, mean = 10 }
+} min = 10, max = 10, mean = 10
+[1 ... 10] 0 -> f {
+  i [-inf ... inf] 1 -> { @-inf = 0, @inf = 0, min = 0, max = 0, mean = 0 }
+} min = 0, max = 0, mean = 0
+
+AdditionFunction
+
+Partitioning [-inf ... inf] 1
+[-inf ... -1] 0 -> f {
+  i [-inf ... inf] 1 -> { @-inf = 0, @inf = 0, min = 0, max = 0, mean = 0 }
+} min = 0, max = 0, mean = 0
+[-1 ... 0] 0 -> f {
+  i [-inf ... inf] 1 -> { @-inf = 10, @inf = 10, min = 10, max = 10, mean = 10 }
+} min = 10, max = 10, mean = 10
+[0 ... 1] 0 -> f {
+  i [-inf ... inf] 1 -> { @-inf = 11, @inf = 11, min = 11, max = 11, mean = 11 }
+} min = 11, max = 11, mean = 11
+[1 ... 2] 0 -> f {
+  i [-inf ... inf] 1 -> { @-inf = 1, @inf = 1, min = 1, max = 1, mean = 1 }
+} min = 1, max = 1, mean = 1
+[2 ... inf] 0 -> f {
+  i [-inf ... inf] 1 -> { @-inf = 0, @inf = 0, min = 0, max = 0, mean = 0 }
+} min = 0, max = 0, mean = 0
+
+Partitioning [-10 ... 0] 0
+[-10 ... -1] 0 -> f {
+  i [-inf ... inf] 1 -> { @-inf = 0, @inf = 0, min = 0, max = 0, mean = 0 }
+} min = 0, max = 0, mean = 0
+[-1 ... 0] 0 -> f {
+  i [-inf ... inf] 1 -> { @-inf = 10, @inf = 10, min = 10, max = 10, mean = 10 }
+} min = 10, max = 10, mean = 10
+
+Partitioning [0 ... 10] 0
+[0 ... 1] 0 -> f {
+  i [-inf ... inf] 1 -> { @-inf = 11, @inf = 11, min = 11, max = 11, mean = 11 }
+} min = 11, max = 11, mean = 11
+[1 ... 2] 0 -> f {
+  i [-inf ... inf] 1 -> { @-inf = 1, @inf = 1, min = 1, max = 1, mean = 1 }
+} min = 1, max = 1, mean = 1
+[2 ... 10] 0 -> f {
+  i [-inf ... inf] 1 -> { @-inf = 0, @inf = 0, min = 0, max = 0, mean = 0 }
+} min = 0, max = 0, mean = 0
+
+MultiplicationFunction
+
+Partitioning [-inf ... inf] 1
+[-inf ... -1] 0 -> f {
+  i [-inf ... inf] 1 -> { @-inf = 0, @inf = 0, min = 0, max = 0, mean = 0 }
+} min = 0, max = 0, mean = 0
+[-1 ... 0] 0 -> f {
+  i [-inf ... inf] 1 -> { @-inf = 0, @inf = 0, min = 0, max = 0, mean = 0 }
+} min = 0, max = 0, mean = 0
+[0 ... 1] 0 -> f {
+  i [-inf ... inf] 1 -> { @-inf = 10, @inf = 10, min = 10, max = 10, mean = 10 }
+} min = 10, max = 10, mean = 10
+[1 ... inf] 0 -> f {
+  i [-inf ... inf] 1 -> { @-inf = 0, @inf = 0, min = 0, max = 0, mean = 0 }
+} min = 0, max = 0, mean = 0
+
+Partitioning [-10 ... 0] 0
+[-10 ... -1] 0 -> f {
+  i [-inf ... inf] 1 -> { @-inf = 0, @inf = 0, min = 0, max = 0, mean = 0 }
+} min = 0, max = 0, mean = 0
+[-1 ... 0] 0 -> f {
+  i [-inf ... inf] 1 -> { @-inf = 0, @inf = 0, min = 0, max = 0, mean = 0 }
+} min = 0, max = 0, mean = 0
+
+Partitioning [0 ... 10] 0
+[0 ... 1] 0 -> f {
+  i [-inf ... inf] 1 -> { @-inf = 10, @inf = 10, min = 10, max = 10, mean = 10 }
+} min = 10, max = 10, mean = 10
+[1 ... 10] 0 -> f {
+  i [-inf ... inf] 1 -> { @-inf = 0, @inf = 0, min = 0, max = 0, mean = 0 }
+} min = 0, max = 0, mean = 0
+
+OneDimensionalInterpolatedFunction
+
+Partitioning [-inf ... inf] 1
+[-inf ... -1] 0 -> f {
+  i [-inf ... inf] 1 -> { @-inf = 0, @inf = 0, min = 0, max = 0, mean = 0 }
+} min = 0, max = 0, mean = 0
+[-1 ... 0] 0 -> f {
+  i [-1 ... 0] 0 -> { @-1 = 0, @0 = 10, min = 0, max = 10, mean = 5 }
+} min = 0, max = 10, mean = 5
+[0 ... 1] 0 -> f {
+  i [0 ... 1] 0 -> { @0 = 10, @1 = 0, min = 0, max = 10, mean = 5 }
+} min = 0, max = 10, mean = 5
+[1 ... inf] 0 -> f {
+  i [-inf ... inf] 1 -> { @-inf = 0, @inf = 0, min = 0, max = 0, mean = 0 }
+} min = 0, max = 0, mean = 0
+
+MultiplicationFunction optimization
+
+Partitioning [-inf ... inf] 1
+[-inf ... inf] 1 -> f {
+  i [-inf ... inf] 1 -> { @-inf = 0, @inf = 0, min = 0, max = 0, mean = 0 }
+} min = 0, max = 0, mean = 0
+
+OrthogonalCombinatorFunction
+
+Partitioning [(-inf, -inf) ... (inf, inf)] 11
+[(-inf, -inf) ... (-1, 0)] 00 -> f {
+  i [(-inf, -inf) ... (inf, inf)] 11 -> { @(-inf, -inf) = 0, @(inf, -inf) = 0, @(-inf, inf) = 0, @(inf, inf) = 0, min = 0, max = 0, mean = 0 }
+} min = 0, max = 0, mean = 0
+[(-inf, 0) ... (-1, 2)] 00 -> f {
+  i [(-inf, -inf) ... (inf, inf)] 11 -> { @(-inf, -inf) = 0, @(inf, -inf) = 0, @(-inf, inf) = 0, @(inf, inf) = 0, min = 0, max = 0, mean = 0 }
+} min = 0, max = 0, mean = 0
+[(-inf, 2) ... (-1, inf)] 00 -> f {
+  i [(-inf, -inf) ... (inf, inf)] 11 -> { @(-inf, -inf) = 0, @(inf, -inf) = 0, @(-inf, inf) = 0, @(inf, inf) = 0, min = 0, max = 0, mean = 0 }
+} min = 0, max = 0, mean = 0
+[(-1, -inf) ... (1, 0)] 00 -> f {
+  i [(-inf, -inf) ... (inf, inf)] 11 -> { @(-inf, -inf) = 0, @(inf, -inf) = 0, @(-inf, inf) = 0, @(inf, inf) = 0, min = 0, max = 0, mean = 0 }
+} min = 0, max = 0, mean = 0
+[(-1, 0) ... (1, 2)] 00 -> f {
+  i [(-inf, -inf) ... (inf, inf)] 11 -> { @(-inf, -inf) = 10, @(inf, -inf) = 10, @(-inf, inf) = 10, @(inf, inf) = 10, min = 10, max = 10, mean = 10 }
+} min = 10, max = 10, mean = 10
+[(-1, 2) ... (1, inf)] 00 -> f {
+  i [(-inf, -inf) ... (inf, inf)] 11 -> { @(-inf, -inf) = 0, @(inf, -inf) = 0, @(-inf, inf) = 0, @(inf, inf) = 0, min = 0, max = 0, mean = 0 }
+} min = 0, max = 0, mean = 0
+[(1, -inf) ... (inf, 0)] 00 -> f {
+  i [(-inf, -inf) ... (inf, inf)] 11 -> { @(-inf, -inf) = 0, @(inf, -inf) = 0, @(-inf, inf) = 0, @(inf, inf) = 0, min = 0, max = 0, mean = 0 }
+} min = 0, max = 0, mean = 0
+[(1, 0) ... (inf, 2)] 00 -> f {
+  i [(-inf, -inf) ... (inf, inf)] 11 -> { @(-inf, -inf) = 0, @(inf, -inf) = 0, @(-inf, inf) = 0, @(inf, inf) = 0, min = 0, max = 0, mean = 0 }
+} min = 0, max = 0, mean = 0
+[(1, 2) ... (inf, inf)] 00 -> f {
+  i [(-inf, -inf) ... (inf, inf)] 11 -> { @(-inf, -inf) = 0, @(inf, -inf) = 0, @(-inf, inf) = 0, @(inf, inf) = 0, min = 0, max = 0, mean = 0 }
+} min = 0, max = 0, mean = 0
+
+TwoDimensionalBoxcarFunction
+
+Partitioning [(-inf, -inf) ... (inf, inf)] 11
+[(-inf, -inf) ... (-1, 0)] 00 -> f {
+  i [(-inf, -inf) ... (inf, inf)] 11 -> { @(-inf, -inf) = 0, @(inf, -inf) = 0, @(-inf, inf) = 0, @(inf, inf) = 0, min = 0, max = 0, mean = 0 }
+} min = 0, max = 0, mean = 0
+[(-1, -inf) ... (1, 0)] 00 -> f {
+  i [(-inf, -inf) ... (inf, inf)] 11 -> { @(-inf, -inf) = 0, @(inf, -inf) = 0, @(-inf, inf) = 0, @(inf, inf) = 0, min = 0, max = 0, mean = 0 }
+} min = 0, max = 0, mean = 0
+[(1, -inf) ... (inf, 0)] 00 -> f {
+  i [(-inf, -inf) ... (inf, inf)] 11 -> { @(-inf, -inf) = 0, @(inf, -inf) = 0, @(-inf, inf) = 0, @(inf, inf) = 0, min = 0, max = 0, mean = 0 }
+} min = 0, max = 0, mean = 0
+[(-inf, 0) ... (-1, 2)] 00 -> f {
+  i [(-inf, -inf) ... (inf, inf)] 11 -> { @(-inf, -inf) = 0, @(inf, -inf) = 0, @(-inf, inf) = 0, @(inf, inf) = 0, min = 0, max = 0, mean = 0 }
+} min = 0, max = 0, mean = 0
+[(-1, 0) ... (1, 2)] 00 -> f {
+  i [(-inf, -inf) ... (inf, inf)] 11 -> { @(-inf, -inf) = 10, @(inf, -inf) = 10, @(-inf, inf) = 10, @(inf, inf) = 10, min = 10, max = 10, mean = 10 }
+} min = 10, max = 10, mean = 10
+[(1, 0) ... (inf, 2)] 00 -> f {
+  i [(-inf, -inf) ... (inf, inf)] 11 -> { @(-inf, -inf) = 0, @(inf, -inf) = 0, @(-inf, inf) = 0, @(inf, inf) = 0, min = 0, max = 0, mean = 0 }
+} min = 0, max = 0, mean = 0
+[(-inf, 2) ... (-1, inf)] 00 -> f {
+  i [(-inf, -inf) ... (inf, inf)] 11 -> { @(-inf, -inf) = 0, @(inf, -inf) = 0, @(-inf, inf) = 0, @(inf, inf) = 0, min = 0, max = 0, mean = 0 }
+} min = 0, max = 0, mean = 0
+[(-1, 2) ... (1, inf)] 00 -> f {
+  i [(-inf, -inf) ... (inf, inf)] 11 -> { @(-inf, -inf) = 0, @(inf, -inf) = 0, @(-inf, inf) = 0, @(inf, inf) = 0, min = 0, max = 0, mean = 0 }
+} min = 0, max = 0, mean = 0
+[(1, 2) ... (inf, inf)] 00 -> f {
+  i [(-inf, -inf) ... (inf, inf)] 11 -> { @(-inf, -inf) = 0, @(inf, -inf) = 0, @(-inf, inf) = 0, @(inf, inf) = 0, min = 0, max = 0, mean = 0 }
+} min = 0, max = 0, mean = 0
+
+DivisionFunction
+
+Partitioning [(-inf, -inf) ... (inf, inf)] 11
+[(-inf, -inf) ... (-1, 0)] 00 -> f {
+  i [(-inf, -inf) ... (inf, inf)] 11 -> { @(-inf, -inf) = -nan, @(inf, -inf) = -nan, @(-inf, inf) = -nan, @(inf, inf) = -nan, min = -nan, max = -nan, mean = -nan }
+} min = -nan, max = -nan, mean = -nan
+[(-inf, 0) ... (-1, 2)] 00 -> f {
+  i [(-inf, -inf) ... (inf, inf)] 11 -> { @(-inf, -inf) = -nan, @(inf, -inf) = -nan, @(-inf, inf) = -nan, @(inf, inf) = -nan, min = -nan, max = -nan, mean = -nan }
+} min = -nan, max = -nan, mean = -nan
+[(-inf, 2) ... (-1, inf)] 00 -> f {
+  i [(-inf, -inf) ... (inf, inf)] 11 -> { @(-inf, -inf) = -nan, @(inf, -inf) = -nan, @(-inf, inf) = -nan, @(inf, inf) = -nan, min = -nan, max = -nan, mean = -nan }
+} min = -nan, max = -nan, mean = -nan
+[(-1, -inf) ... (1, 0)] 00 -> f {
+  i [(-inf, -inf) ... (inf, inf)] 11 -> { @(-inf, -inf) = -nan, @(inf, -inf) = -nan, @(-inf, inf) = -nan, @(inf, inf) = -nan, min = -nan, max = -nan, mean = -nan }
+} min = -nan, max = -nan, mean = -nan
+[(-1, 0) ... (1, 2)] 00 -> f {
+  i [(-inf, -inf) ... (inf, inf)] 11 -> { @(-inf, -inf) = 1, @(inf, -inf) = 1, @(-inf, inf) = 1, @(inf, inf) = 1, min = 1, max = 1, mean = 1 }
+} min = 1, max = 1, mean = 1
+[(-1, 2) ... (1, inf)] 00 -> f {
+  i [(-inf, -inf) ... (inf, inf)] 11 -> { @(-inf, -inf) = -nan, @(inf, -inf) = -nan, @(-inf, inf) = -nan, @(inf, inf) = -nan, min = -nan, max = -nan, mean = -nan }
+} min = -nan, max = -nan, mean = -nan
+[(1, -inf) ... (inf, 0)] 00 -> f {
+  i [(-inf, -inf) ... (inf, inf)] 11 -> { @(-inf, -inf) = -nan, @(inf, -inf) = -nan, @(-inf, inf) = -nan, @(inf, inf) = -nan, min = -nan, max = -nan, mean = -nan }
+} min = -nan, max = -nan, mean = -nan
+[(1, 0) ... (inf, 2)] 00 -> f {
+  i [(-inf, -inf) ... (inf, inf)] 11 -> { @(-inf, -inf) = -nan, @(inf, -inf) = -nan, @(-inf, inf) = -nan, @(inf, inf) = -nan, min = -nan, max = -nan, mean = -nan }
+} min = -nan, max = -nan, mean = -nan
+[(1, 2) ... (inf, inf)] 00 -> f {
+  i [(-inf, -inf) ... (inf, inf)] 11 -> { @(-inf, -inf) = -nan, @(inf, -inf) = -nan, @(-inf, inf) = -nan, @(inf, inf) = -nan, min = -nan, max = -nan, mean = -nan }
+} min = -nan, max = -nan, mean = -nan
