@@ -27,10 +27,8 @@ import inet.physicallayer.base.packetlevel.NarrowbandTransmitterBase;
 module DimensionalTransmitterBase extends NarrowbandTransmitterBase
 {
     parameters:
-        string dimensions = default("time");                // dimensions of power: time and/or frequency
-        string timeGains = default("0% 0dB 100% 0dB");      // sequence of time and gain pairs; time is in [%] or [s], negative time measures from the end; gain is in [dB] or [0..1]; default value is a flat signal
-        string frequencyGains = default("0% 0dB 100% 0dB"); // sequence of frequency and gain pairs; frequency is in [%] or [Hz], negative frequency measures from the end; gain is in [dB] or [0..1]; default value is a flat signal
-        string interpolationMode @enum("linear", "sample-hold") = default("sample-hold");
+        string timeGains = default("smaller start 0dB either end 0dB greater");      // sequence of time and gain pairs; time is in [%] or [s], negative time measures from the end; gain is in [dB] or [0..1]; default value is a flat signal
+        string frequencyGains = default("smaller start 0dB either end 0dB greater"); // sequence of frequency and gain pairs; frequency is in [%] or [Hz], negative frequency measures from the end; gain is in [dB] or [0..1]; default value is a flat signal
         modulation = default("BPSK");
         @class(DimensionalTransmitterBase);
 }

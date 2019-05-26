@@ -87,7 +87,7 @@ simtime_t Ieee802154UwbIrTransmitter::getThdr() const
 	return 0;
 }
 
-void Ieee802154UwbIrTransmitter::generateSyncPreamble(Mapping* mapping, Argument* arg, const simtime_t startTime) const
+void Ieee802154UwbIrTransmitter::generateSyncPreamble(math::Function<W, simtime_t, Hz>* mapping, math::Point<simtime_t, Hz>* arg, const simtime_t startTime) const
 {
     // NSync repetitions of the Si symbol
     for (short n = 0; n < cfg.NSync; n = n + 1) {
@@ -95,9 +95,9 @@ void Ieee802154UwbIrTransmitter::generateSyncPreamble(Mapping* mapping, Argument
             if (Ieee802154UwbIrMode::C31[Ieee802154UwbIrMode::Ci - 1][pos] != 0) {
                 if(n==0 && pos==0) {
                     // we slide the first pulse slightly in time to get the first point "inside" the signal
-                  arg->setTime(1E-12 + n * cfg.sync_symbol_duration + pos * cfg.spreadingdL * cfg.pulse_duration);
+//                  arg->setTime(1E-12 + n * cfg.sync_symbol_duration + pos * cfg.spreadingdL * cfg.pulse_duration);
                 } else {
-                  arg->setTime(n * cfg.sync_symbol_duration + pos * cfg.spreadingdL * cfg.pulse_duration);
+//                  arg->setTime(n * cfg.sync_symbol_duration + pos * cfg.spreadingdL * cfg.pulse_duration);
                 }
                 //generatePulse(mapping, arg, startTime, C31[Ci - 1][pos], IEEE802154A::maxPulse, IEEE802154A::mandatory_pulse);
                 generatePulse(mapping, arg, startTime, 1, Ieee802154UwbIrMode::maxPulse, cfg.pulse_duration); // always positive polarity
@@ -106,14 +106,14 @@ void Ieee802154UwbIrTransmitter::generateSyncPreamble(Mapping* mapping, Argument
     }
 }
 
-void Ieee802154UwbIrTransmitter::generateSFD(Mapping* mapping, Argument* arg, const simtime_t startTime) const
+void Ieee802154UwbIrTransmitter::generateSFD(math::Function<W, simtime_t, Hz>* mapping, math::Point<simtime_t, Hz>* arg, const simtime_t startTime) const
 {
     const simtime_t sfdStart = cfg.NSync * cfg.sync_symbol_duration;
     for (short n = 0; n < 8; n = n + 1) {
         if (Ieee802154UwbIrMode::shortSFD[n] != 0) {
             for (short pos = 0; pos < cfg.CLength; pos = pos + 1) {
                 if (Ieee802154UwbIrMode::C31[Ieee802154UwbIrMode::Ci - 1][pos] != 0) {
-                    arg->setTime(sfdStart + n * cfg.sync_symbol_duration + pos * cfg.spreadingdL*cfg.pulse_duration);
+//                    arg->setTime(sfdStart + n * cfg.sync_symbol_duration + pos * cfg.spreadingdL*cfg.pulse_duration);
                     //generatePulse(mapping, arg, startTime, C31[Ci - 1][pos] * shortSFD[n]); // change pulse polarity
                     generatePulse(mapping, arg, startTime, 1, Ieee802154UwbIrMode::maxPulse, cfg.pulse_duration); // always positive polarity
                 }
@@ -122,59 +122,60 @@ void Ieee802154UwbIrTransmitter::generateSFD(Mapping* mapping, Argument* arg, co
     }
 }
 
-void Ieee802154UwbIrTransmitter::generatePhyHeader(Mapping* mapping, Argument* arg, const simtime_t startTime) const
+void Ieee802154UwbIrTransmitter::generatePhyHeader(math::Function<W, simtime_t, Hz>* mapping, math::Point<simtime_t, Hz>* arg, const simtime_t startTime) const
 {
     // not implemented
 }
 
-void Ieee802154UwbIrTransmitter::generatePulse(Mapping* mapping, Argument* arg, const simtime_t startTime, short polarity, double peak, const simtime_t chip) const
+void Ieee802154UwbIrTransmitter::generatePulse(math::Function<W, simtime_t, Hz>* mapping, math::Point<simtime_t, Hz>* arg, const simtime_t startTime, short polarity, double peak, const simtime_t chip) const
 {
     ASSERT(polarity == -1 || polarity == +1);
-    arg->setTime(arg->getTime() + startTime);  // adjust argument so that we use absolute time values in Mapping
-    mapping->setValue(*arg, 0);
-    arg->setTime(arg->getTime() + chip / 2);
-    // Maximum point at symbol half (triangular pulse)
-    mapping->setValue(*arg, peak * polarity);
-    arg->setTime(arg->getTime() + chip / 2);
-    mapping->setValue(*arg, 0);
+//    arg->setTime(arg->getTime() + startTime);  // adjust argument so that we use absolute time values in Mapping
+//    mapping->setValue(*arg, 0);
+//    arg->setTime(arg->getTime() + chip / 2);
+//    // Maximum point at symbol half (triangular pulse)
+//    mapping->setValue(*arg, peak * polarity);
+//    arg->setTime(arg->getTime() + chip / 2);
+//    mapping->setValue(*arg, 0);
 }
 
-void Ieee802154UwbIrTransmitter::generateBurst(Mapping* mapping, Argument* arg, const simtime_t startTime, const simtime_t burstStart, short /*polarity*/) const
+void Ieee802154UwbIrTransmitter::generateBurst(math::Function<W, simtime_t, Hz>* mapping, math::Point<simtime_t, Hz>* arg, const simtime_t startTime, const simtime_t burstStart, short /*polarity*/) const
 {
     // ASSERT(burstStart < cfg.preambleLength + (psduLength * 8 + 48 + 2) * cfg.data_symbol_duration);
     // 1. Start point = zeros
     simtime_t offset = burstStart;
     for (int pulse = 0; pulse < cfg.nbPulsesPerBurst; pulse++) {
-        arg->setTime(offset);
+//        arg->setTime(offset);
         generatePulse(mapping, arg, startTime, 1, Ieee802154UwbIrMode::maxPulse, cfg.pulse_duration);
         offset = offset + cfg.pulse_duration;
     }
 }
 
-ConstMapping *Ieee802154UwbIrTransmitter::generateIEEE802154AUWBSignal(const simtime_t startTime, std::vector<bool> *bits) const
+math::Function<W, simtime_t, Hz> *Ieee802154UwbIrTransmitter::generateIEEE802154AUWBSignal(const simtime_t startTime, std::vector<bool> *bits) const
 {
     // 48 R-S parity bits, the 2 symbols phy header is not modeled as it includes its own parity bits
     // and is thus very robust
     unsigned int bitLength = bits->size() + 48;
     // data start time relative to signal->getReceptionStart();
     simtime_t dataStart = cfg.preambleLength; // = Tsync + Tsfd
-    TimeMapping<Linear>* mapping = new TimeMapping<Linear> ();
-    Argument arg;
-
-    generateSyncPreamble(mapping, &arg, startTime);
-    generateSFD(mapping, &arg, startTime);
-    //generatePhyHeader(mapping, &arg, startTime);
-
-    // generate bit values and modulates them according to
-    // the IEEE 802.15.4A specification
-    simtime_t symbolStart = dataStart;
-    simtime_t burstPos;
-    for (unsigned int burst = 0; burst < bitLength; burst++) {
-        int bit = burst < bits->size() ? bits->at(burst) : intuniform(0, 1, 0);
-        burstPos = symbolStart + bit * cfg.shift_duration + cfg.getHoppingPos(burst) * cfg.burst_duration;
-        generateBurst(mapping, &arg, startTime, burstPos, +1);
-        symbolStart = symbolStart + cfg.data_symbol_duration;
-    }
+    math::Function<W, simtime_t, Hz> *mapping = nullptr;
+//    TimeMapping<Linear>* mapping = new TimeMapping<Linear> ();
+//    Argument arg;
+//
+//    generateSyncPreamble(mapping, &arg, startTime);
+//    generateSFD(mapping, &arg, startTime);
+//    //generatePhyHeader(mapping, &arg, startTime);
+//
+//    // generate bit values and modulates them according to
+//    // the IEEE 802.15.4A specification
+//    simtime_t symbolStart = dataStart;
+//    simtime_t burstPos;
+//    for (unsigned int burst = 0; burst < bitLength; burst++) {
+//        int bit = burst < bits->size() ? bits->at(burst) : intuniform(0, 1, 0);
+//        burstPos = symbolStart + bit * cfg.shift_duration + cfg.getHoppingPos(burst) * cfg.burst_duration;
+//        generateBurst(mapping, &arg, startTime, burstPos, +1);
+//        symbolStart = symbolStart + cfg.data_symbol_duration;
+//    }
     return mapping;
 }
 
@@ -201,7 +202,7 @@ const ITransmission *Ieee802154UwbIrTransmitter::createTransmission(const IRadio
     const Coord endPosition = mobility->getCurrentPosition();
     const Quaternion startOrientation = mobility->getCurrentAngularPosition();
     const Quaternion endOrientation = mobility->getCurrentAngularPosition();
-    const ConstMapping *powerMapping = generateIEEE802154AUWBSignal(startTime, bits);
+    const math::Function<W, simtime_t, Hz> *powerMapping = generateIEEE802154AUWBSignal(startTime, bits);
     return new DimensionalTransmission(transmitter, packet, startTime, endTime, -1, -1, -1, startPosition, endPosition, startOrientation, endOrientation, nullptr, packet->getTotalLength(), b(-1), cfg.centerFrequency, cfg.bandwidth, cfg.bitrate, powerMapping);
 }
 

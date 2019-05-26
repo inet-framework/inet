@@ -106,31 +106,31 @@ Smaller
 0
 0
 0
-0 pW
-0 pW
-0 pW
-0 pW
-0 pW
+0 W
+0 W
+0 W
+0 W
+0 W
 0
 0
 0
 0
 0
-0 pW
-0 pW
-0 pW
-0 pW
-0 pW
+0 W
+0 W
+0 W
+0 W
+0 W
 0
 0
 0
 0
 0
-0 pW
-0 pW
-0 pW
-0 pW
-0 pW
+0 W
+0 W
+0 W
+0 W
+0 W
 Greater
 1
 1
@@ -168,8 +168,8 @@ Closer
 1
 1
 1
-0 pW
-0 pW
+0 W
+0 W
 1 W
 1 W
 1 W
@@ -178,8 +178,8 @@ Closer
 1
 1
 1
-0 pW
-0 pW
+0 W
+0 W
 1 W
 1 W
 1 W
@@ -188,8 +188,8 @@ Closer
 1
 1
 1
-0 pW
-0 pW
+0 W
+0 W
 1 W
 1 W
 1 W
@@ -199,7 +199,7 @@ Linear
 0.5
 0.75
 1
-0 pW
+0 W
 250 mW
 500 mW
 750 mW
@@ -209,7 +209,7 @@ Linear
 0.5
 0.75
 1
-0 pW
+0 W
 250 mW
 500 mW
 750 mW
@@ -219,7 +219,7 @@ Linear
 0.5
 0.75
 1
-0 pW
+0 W
 250 mW
 500 mW
 750 mW

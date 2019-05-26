@@ -65,13 +65,13 @@ const ITransmission *Ieee80211DimensionalTransmitter::createTransmission(const I
     const Coord endPosition = mobility->getCurrentPosition();
     const Quaternion startOrientation = mobility->getCurrentAngularPosition();
     const Quaternion endOrientation = mobility->getCurrentAngularPosition();
-    const ConstMapping *powerMapping = createPowerMapping(startTime, endTime, carrierFrequency, transmissionBandwidth, transmissionPower);
+    const math::Function<W, simtime_t, Hz> *powerFunction = createPowerFunction(startTime, endTime, carrierFrequency, transmissionBandwidth, transmissionPower);
     auto headerLength = b(transmissionMode->getHeaderMode()->getLength());
     auto dataLength = b(transmissionMode->getDataMode()->getCompleteLength(B(phyHeader->getLengthField())));
     const simtime_t preambleDuration = transmissionMode->getPreambleMode()->getDuration();
     const simtime_t headerDuration = transmissionMode->getHeaderMode()->getDuration();
     const simtime_t dataDuration = duration - headerDuration - preambleDuration;
-    return new Ieee80211DimensionalTransmission(transmitter, packet, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, modulation, headerLength, dataLength, carrierFrequency, transmissionBandwidth, transmissionBitrate, powerMapping, transmissionMode, transmissionChannel);
+    return new Ieee80211DimensionalTransmission(transmitter, packet, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, modulation, headerLength, dataLength, carrierFrequency, transmissionBandwidth, transmissionBitrate, powerFunction, transmissionMode, transmissionChannel);
 }
 
 } // namespace physicallayer

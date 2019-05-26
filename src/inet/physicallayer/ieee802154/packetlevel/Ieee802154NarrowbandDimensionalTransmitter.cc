@@ -55,7 +55,7 @@ const ITransmission *Ieee802154NarrowbandDimensionalTransmitter::createTransmiss
     const simtime_t duration = preambleDuration + headerDuration + dataDuration;
     const simtime_t endTime = startTime + duration;
     IMobility *mobility = transmitter->getAntenna()->getMobility();
-    const ConstMapping *powerMapping = createPowerMapping(startTime, endTime, carrierFrequency, bandwidth, transmissionPower);
+    const math::Function<W, simtime_t, Hz> *powerMapping = createPowerFunction(startTime, endTime, carrierFrequency, bandwidth, transmissionPower);
     const Coord startPosition = mobility->getCurrentPosition();
     const Coord endPosition = mobility->getCurrentPosition();
     const Quaternion startOrientation = mobility->getCurrentAngularPosition();

@@ -131,7 +131,7 @@ double DielectricObstacleLoss::computeObstacleLoss(Hz frequency, const Coord& tr
     return totalLoss;
 }
 
-DielectricObstacleLoss::TotalObstacleLossComputation::TotalObstacleLossComputation(const DielectricObstacleLoss *obstacleLoss, Hz frequency, const Coord& transmissionPosition, const Coord& receptionPosition) :
+DielectricObstacleLoss::TotalObstacleLossComputation::TotalObstacleLossComputation(const DielectricObstacleLoss *obstacleLossimtime_t, Hz frequency, const Coord& transmissionPosition, const Coord& receptionPosition) :
     totalLoss(1),
     obstacleLoss(obstacleLoss),
     frequency(frequency),

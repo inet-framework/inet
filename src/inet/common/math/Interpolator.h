@@ -13,8 +13,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_INTERPOLATOR_H_
-#define __INET_INTERPOLATOR_H_
+#ifndef __INET_MATH_INTERPOLATOR_H_
+#define __INET_MATH_INTERPOLATOR_H_
 
 #include "inet/common/Units.h"
 
@@ -28,7 +28,20 @@ template<typename X, typename Y>
 class INET_API Interpolator
 {
   public:
+    virtual ~Interpolator() { }
+
     virtual Y get(const X x1, const Y y1, const X x2, const Y y2, const X x) const = 0;
+};
+
+template<typename X, typename Y>
+class INET_API EitherInterpolator : public Interpolator<X, Y>
+{
+  public:
+    virtual Y get(const X x1, const Y y1, const X x2, const Y y2, const X x) const override {
+        ASSERT(x1 <= x && x <= x2);
+        ASSERT(y1 == y2);
+        return y1;
+    }
 };
 
 template<typename X, typename Y>
@@ -80,7 +93,9 @@ class INET_API LinearInterpolator : public Interpolator<X, Y>
 
 template<typename X, typename Y>
 const Interpolator<X, Y> *createInterpolator(const char *text) {
-    if (!strcmp("smaller", text))
+    if (!strcmp("either", text))
+        return new EitherInterpolator<X, Y>();
+    else if (!strcmp("smaller", text))
         return new SmallerInterpolator<X, Y>();
     else if (!strcmp("greater", text))
         return new GreaterInterpolator<X, Y>();
@@ -89,12 +104,12 @@ const Interpolator<X, Y> *createInterpolator(const char *text) {
     else if (!strcmp("linear", text))
         return new LinearInterpolator<X, Y>();
     else
-        throw cRuntimeError("Unknown interpolation mode: '%s'", text);
+        throw cRuntimeError("Unknown interpolator: '%s'", text);
 }
 
 } // namespace math
 
 } // namespace inet
 
-#endif // #ifndef __INET_INTERPOLATOR_H_
+#endif // #ifndef __INET_MATH_INTERPOLATOR_H_
 

@@ -48,7 +48,7 @@ class INET_API DielectricObstacleLoss : public TracingObstacleLossBase
         const Coord receptionPosition;
 
       public:
-        TotalObstacleLossComputation(const DielectricObstacleLoss *obstacleLoss, Hz frequency, const Coord& transmissionPosition, const Coord& receptionPosition);
+        TotalObstacleLossComputation(const DielectricObstacleLoss *obstacleLossimtime_t, Hz frequency, const Coord& transmissionPosition, const Coord& receptionPosition);
         void visit(const cObject *object) const override;
         double getTotalLoss() const { return totalLoss; }
     };

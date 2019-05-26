@@ -18,7 +18,6 @@
 #ifndef __INET_ISOTROPICDIMENSIONALBACKGROUNDNOISE_H
 #define __INET_ISOTROPICDIMENSIONALBACKGROUNDNOISE_H
 
-#include "inet/common/mapping/MappingBase.h"
 #include "inet/physicallayer/contract/packetlevel/IBackgroundNoise.h"
 
 namespace inet {
@@ -28,8 +27,6 @@ namespace physicallayer {
 class INET_API IsotropicDimensionalBackgroundNoise : public cModule, public IBackgroundNoise
 {
   protected:
-    DimensionSet dimensions;
-    Mapping::InterpolationMethod interpolationMode;
     W power;
 
   protected:

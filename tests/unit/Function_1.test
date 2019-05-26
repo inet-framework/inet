@@ -3,7 +3,7 @@
 This test contains basic checks for various multi-dimensional mathematical function.
 
 %includes:
-#include "inet/common/math/Function.h"
+#include "inet/common/math/Functions.h"
 
 %global:
 
@@ -14,77 +14,66 @@ class FunctionTest
 {
   public:
     void test1();
-    void test2();
 };
 
 void FunctionTest::test1()
 {
     auto backgroundNoise = new ConstantFunction<W, simtime_t, Hz>(W(1));
-    std::cout << "Background noise: " << backgroundNoise << std::endl;
+    std::cout << "Background noise: " << *backgroundNoise << std::endl;
     auto transmission = new TwoDimensionalBoxcarFunction<W, simtime_t, Hz>(10, 30, GHz(0.9), GHz(1.1), W(100));
-    std::cout << "Transmission: " << transmission << std::endl;
+    std::cout << "Transmission: " << *transmission << std::endl;
     auto propagation = Point<simtime_t, Hz> (10, Hz(0));
     std::cout << "Propagation: " << propagation << std::endl;
     auto attenuation = new ConstantFunction<double, simtime_t, Hz>(0.5);
-    std::cout << "Attenuation: " << attenuation << std::endl;
+    std::cout << "Attenuation: " << *attenuation << std::endl;
     auto reception = Function<W, simtime_t, Hz>::multiply(new ShiftFunction<W, simtime_t, Hz>(transmission, propagation), attenuation);
-    std::cout << "Reception: " << reception << std::endl;
+    std::cout << "Reception: " << *reception << std::endl;
     auto snir = Function<W, simtime_t, Hz>::divide(reception, backgroundNoise);
-    std::cout << "SNIR: " << snir << std::endl;
-}
-
-void FunctionTest::test2()
-{
-//    auto power = new OneDimensionalInterpolatedFunction<W, simtime_t>(LinearInterpolator<simtime_t, W>(), {});
-//    	{getLowerBoundary<simtime_t>(), W(0)},
-//    	{0, W(0)},
-//    	{getUpperBoundary<simtime_t>(), W(0)}});
-//    std::cout << "Interpolated: " << power << std::endl;
+    std::cout << "SNIR: " << *snir << std::endl;
 }
 
 %activity:
 FunctionTest tester;
 tester.test1();
-tester.test2();
 
 %contains: stdout
-Background noise: function {
-  interval = [(-4611686.018427387903, -inf Hz) ... (4611686.018427387903, inf GHz)] -> (@lower = 1 W, @upper = 1 W)
+Background noise: f {
+  i [(-4611686.018427387903, -inf Hz) ... (4611686.018427387903, inf GHz)] -> {@ (-4611686.018427387903, -inf Hz) = 1 W, @ (-4611686.018427387903, inf GHz) = 1 W, @ (4611686.018427387903, -inf Hz) = 1 W, @ (4611686.018427387903, inf GHz) = 1 W}
 }
-Transmission: function {
-  interval = [(-4611686.018427387903, -inf Hz) ... (10, 900 MHz)] -> (@lower = 0 pW, @upper = 100 W)
-  interval = [(10, -inf Hz) ... (30, 900 MHz)] -> (@lower = 0 pW, @upper = 100 W)
-  interval = [(30, -inf Hz) ... (4611686.018427387903, 900 MHz)] -> (@lower = 0 pW, @upper = 0 pW)
-  interval = [(-4611686.018427387903, 900 MHz) ... (10, 1.1 GHz)] -> (@lower = 0 pW, @upper = 100 W)
-  interval = [(10, 900 MHz) ... (30, 1.1 GHz)] -> (@lower = 100 W, @upper = 100 W)
-  interval = [(30, 900 MHz) ... (4611686.018427387903, 1.1 GHz)] -> (@lower = 100 W, @upper = 0 pW)
-  interval = [(-4611686.018427387903, 1.1 GHz) ... (10, inf GHz)] -> (@lower = 0 pW, @upper = 0 pW)
-  interval = [(10, 1.1 GHz) ... (30, inf GHz)] -> (@lower = 100 W, @upper = 0 pW)
-  interval = [(30, 1.1 GHz) ... (4611686.018427387903, inf GHz)] -> (@lower = 100 W, @upper = 0 pW)
+Transmission: f {
+  i [(-4611686.018427387903, -inf Hz) ... (10, 900 MHz)] -> {@ (-4611686.018427387903, -inf Hz) = 0 W, @ (-4611686.018427387903, 900 MHz) = 0 W, @ (10, -inf Hz) = 0 W, @ (10, 900 MHz) = 100 W}
+  i [(10, -inf Hz) ... (30, 900 MHz)] -> {@ (10, -inf Hz) = 0 W, @ (10, 900 MHz) = 100 W, @ (30, -inf Hz) = 0 W, @ (30, 900 MHz) = 100 W}
+  i [(30, -inf Hz) ... (4611686.018427387903, 900 MHz)] -> {@ (30, -inf Hz) = 0 W, @ (30, 900 MHz) = 100 W, @ (4611686.018427387903, -inf Hz) = 0 W, @ (4611686.018427387903, 900 MHz) = 0 W}
+  i [(-4611686.018427387903, 900 MHz) ... (10, 1.1 GHz)] -> {@ (-4611686.018427387903, 900 MHz) = 0 W, @ (-4611686.018427387903, 1.1 GHz) = 0 W, @ (10, 900 MHz) = 100 W, @ (10, 1.1 GHz) = 100 W}
+  i [(10, 900 MHz) ... (30, 1.1 GHz)] -> {@ (10, 900 MHz) = 100 W, @ (10, 1.1 GHz) = 100 W, @ (30, 900 MHz) = 100 W, @ (30, 1.1 GHz) = 100 W}
+  i [(30, 900 MHz) ... (4611686.018427387903, 1.1 GHz)] -> {@ (30, 900 MHz) = 100 W, @ (30, 1.1 GHz) = 100 W, @ (4611686.018427387903, 900 MHz) = 0 W, @ (4611686.018427387903, 1.1 GHz) = 0 W}
+  i [(-4611686.018427387903, 1.1 GHz) ... (10, inf GHz)] -> {@ (-4611686.018427387903, 1.1 GHz) = 0 W, @ (-4611686.018427387903, inf GHz) = 0 W, @ (10, 1.1 GHz) = 100 W, @ (10, inf GHz) = 0 W}
+  i [(10, 1.1 GHz) ... (30, inf GHz)] -> {@ (10, 1.1 GHz) = 100 W, @ (10, inf GHz) = 0 W, @ (30, 1.1 GHz) = 100 W, @ (30, inf GHz) = 0 W}
+  i [(30, 1.1 GHz) ... (4611686.018427387903, inf GHz)] -> {@ (30, 1.1 GHz) = 100 W, @ (30, inf GHz) = 0 W, @ (4611686.018427387903, 1.1 GHz) = 0 W, @ (4611686.018427387903, inf GHz) = 0 W}
 }
 Propagation: (10, 0 Hz)
-Attenuation: function {
-  interval = [(-4611686.018427387903, -inf Hz) ... (4611686.018427387903, inf GHz)] -> (@lower = 0.5, @upper = 0.5)
+Attenuation: f {
+  i [(-4611686.018427387903, -inf Hz) ... (4611686.018427387903, inf GHz)] -> {@ (-4611686.018427387903, -inf Hz) = 0.5, @ (-4611686.018427387903, inf GHz) = 0.5, @ (4611686.018427387903, -inf Hz) = 0.5, @ (4611686.018427387903, inf GHz) = 0.5}
 }
-Reception: function {
-  interval = [(-4611676.018427387903, -inf Hz) ... (20, 900 MHz)] -> (@lower = 0 pW, @upper = 50 W)
-  interval = [(20, -inf Hz) ... (40, 900 MHz)] -> (@lower = 0 pW, @upper = 50 W)
-  interval = [(40, -inf Hz) ... (4611686.018427387903, 900 MHz)] -> (@lower = 0 pW, @upper = 0 pW)
-  interval = [(-4611676.018427387903, 900 MHz) ... (20, 1.1 GHz)] -> (@lower = 0 pW, @upper = 50 W)
-  interval = [(20, 900 MHz) ... (40, 1.1 GHz)] -> (@lower = 50 W, @upper = 50 W)
-  interval = [(40, 900 MHz) ... (4611686.018427387903, 1.1 GHz)] -> (@lower = 50 W, @upper = 0 pW)
-  interval = [(-4611676.018427387903, 1.1 GHz) ... (20, inf GHz)] -> (@lower = 0 pW, @upper = 0 pW)
-  interval = [(20, 1.1 GHz) ... (40, inf GHz)] -> (@lower = 50 W, @upper = 0 pW)
-  interval = [(40, 1.1 GHz) ... (4611686.018427387903, inf GHz)] -> (@lower = 50 W, @upper = 0 pW)
+Reception: f {
+  i [(-4611676.018427387903, -inf Hz) ... (20, 900 MHz)] -> {@ (-4611676.018427387903, -inf Hz) = 0 W, @ (-4611676.018427387903, 900 MHz) = 0 W, @ (20, -inf Hz) = 0 W, @ (20, 900 MHz) = 50 W}
+  i [(20, -inf Hz) ... (40, 900 MHz)] -> {@ (20, -inf Hz) = 0 W, @ (20, 900 MHz) = 50 W, @ (40, -inf Hz) = 0 W, @ (40, 900 MHz) = 50 W}
+  i [(40, -inf Hz) ... (4611686.018427387903, 900 MHz)] -> {@ (40, -inf Hz) = 0 W, @ (40, 900 MHz) = 50 W, @ (4611686.018427387903, -inf Hz) = 0 W, @ (4611686.018427387903, 900 MHz) = 0 W}
+  i [(-4611676.018427387903, 900 MHz) ... (20, 1.1 GHz)] -> {@ (-4611676.018427387903, 900 MHz) = 0 W, @ (-4611676.018427387903, 1.1 GHz) = 0 W, @ (20, 900 MHz) = 50 W, @ (20, 1.1 GHz) = 50 W}
+  i [(20, 900 MHz) ... (40, 1.1 GHz)] -> {@ (20, 900 MHz) = 50 W, @ (20, 1.1 GHz) = 50 W, @ (40, 900 MHz) = 50 W, @ (40, 1.1 GHz) = 50 W}
+  i [(40, 900 MHz) ... (4611686.018427387903, 1.1 GHz)] -> {@ (40, 900 MHz) = 50 W, @ (40, 1.1 GHz) = 50 W, @ (4611686.018427387903, 900 MHz) = 0 W, @ (4611686.018427387903, 1.1 GHz) = 0 W}
+  i [(-4611676.018427387903, 1.1 GHz) ... (20, inf GHz)] -> {@ (-4611676.018427387903, 1.1 GHz) = 0 W, @ (-4611676.018427387903, inf GHz) = 0 W, @ (20, 1.1 GHz) = 50 W, @ (20, inf GHz) = 0 W}
+  i [(20, 1.1 GHz) ... (40, inf GHz)] -> {@ (20, 1.1 GHz) = 50 W, @ (20, inf GHz) = 0 W, @ (40, 1.1 GHz) = 50 W, @ (40, inf GHz) = 0 W}
+  i [(40, 1.1 GHz) ... (4611686.018427387903, inf GHz)] -> {@ (40, 1.1 GHz) = 50 W, @ (40, inf GHz) = 0 W, @ (4611686.018427387903, 1.1 GHz) = 0 W, @ (4611686.018427387903, inf GHz) = 0 W}
 }
-SNIR: function {
-  interval = [(-4611676.018427387903, -inf Hz) ... (20, 900 MHz)] -> (@lower = 0, @upper = 50)
-  interval = [(20, -inf Hz) ... (40, 900 MHz)] -> (@lower = 0, @upper = 50)
-  interval = [(40, -inf Hz) ... (4611686.018427387903, 900 MHz)] -> (@lower = 0, @upper = 0)
-  interval = [(-4611676.018427387903, 900 MHz) ... (20, 1.1 GHz)] -> (@lower = 0, @upper = 50)
-  interval = [(20, 900 MHz) ... (40, 1.1 GHz)] -> (@lower = 50, @upper = 50)
-  interval = [(40, 900 MHz) ... (4611686.018427387903, 1.1 GHz)] -> (@lower = 50, @upper = 0)
-  interval = [(-4611676.018427387903, 1.1 GHz) ... (20, inf GHz)] -> (@lower = 0, @upper = 0)
-  interval = [(20, 1.1 GHz) ... (40, inf GHz)] -> (@lower = 50, @upper = 0)
-  interval = [(40, 1.1 GHz) ... (4611686.018427387903, inf GHz)] -> (@lower = 50, @upper = 0)
+SNIR: f {
+  i [(-4611676.018427387903, -inf Hz) ... (20, 900 MHz)] -> {@ (-4611676.018427387903, -inf Hz) = 0, @ (-4611676.018427387903, 900 MHz) = 0, @ (20, -inf Hz) = 0, @ (20, 900 MHz) = 50}
+  i [(20, -inf Hz) ... (40, 900 MHz)] -> {@ (20, -inf Hz) = 0, @ (20, 900 MHz) = 50, @ (40, -inf Hz) = 0, @ (40, 900 MHz) = 50}
+  i [(40, -inf Hz) ... (4611686.018427387903, 900 MHz)] -> {@ (40, -inf Hz) = 0, @ (40, 900 MHz) = 50, @ (4611686.018427387903, -inf Hz) = 0, @ (4611686.018427387903, 900 MHz) = 0}
+  i [(-4611676.018427387903, 900 MHz) ... (20, 1.1 GHz)] -> {@ (-4611676.018427387903, 900 MHz) = 0, @ (-4611676.018427387903, 1.1 GHz) = 0, @ (20, 900 MHz) = 50, @ (20, 1.1 GHz) = 50}
+  i [(20, 900 MHz) ... (40, 1.1 GHz)] -> {@ (20, 900 MHz) = 50, @ (20, 1.1 GHz) = 50, @ (40, 900 MHz) = 50, @ (40, 1.1 GHz) = 50}
+  i [(40, 900 MHz) ... (4611686.018427387903, 1.1 GHz)] -> {@ (40, 900 MHz) = 50, @ (40, 1.1 GHz) = 50, @ (4611686.018427387903, 900 MHz) = 0, @ (4611686.018427387903, 1.1 GHz) = 0}
+  i [(-4611676.018427387903, 1.1 GHz) ... (20, inf GHz)] -> {@ (-4611676.018427387903, 1.1 GHz) = 0, @ (-4611676.018427387903, inf GHz) = 0, @ (20, 1.1 GHz) = 50, @ (20, inf GHz) = 0}
+  i [(20, 1.1 GHz) ... (40, inf GHz)] -> {@ (20, 1.1 GHz) = 50, @ (20, inf GHz) = 0, @ (40, 1.1 GHz) = 50, @ (40, inf GHz) = 0}
+  i [(40, 1.1 GHz) ... (4611686.018427387903, inf GHz)] -> {@ (40, 1.1 GHz) = 50, @ (40, inf GHz) = 0, @ (4611686.018427387903, 1.1 GHz) = 0, @ (4611686.018427387903, inf GHz) = 0}
 }

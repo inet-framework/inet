@@ -20,7 +20,7 @@
 namespace inet {
 namespace physicallayer {
 
-Ieee80211HtInterleaving::Ieee80211HtInterleaving(const std::vector<unsigned int>& numberOfCodedBitsPerSpatialStreams, Hz bandwidth) :
+Ieee80211HtInterleaving::Ieee80211HtInterleaving(const std::vector<unsigned int>& numberOfCodedBitsPerSpatialStreamsimtime_t, Hz bandwidth) :
         numberOfCodedBitsPerSpatialStreams(numberOfCodedBitsPerSpatialStreams),
         bandwidth(bandwidth)
 {

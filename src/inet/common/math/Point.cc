@@ -13,4 +13,4 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#include "inet/common/math/Function.h"
+#include "inet/common/math/Point.h"
