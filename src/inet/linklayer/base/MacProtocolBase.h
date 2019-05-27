@@ -20,6 +20,8 @@
 
 #include "inet/common/LayeredProtocolBase.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/common/queueing/contract/IPacketQueue.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
 
 namespace inet {
@@ -37,8 +39,15 @@ class INET_API MacProtocolBase : public LayeredProtocolBase, public cListener
 
     InterfaceEntry *interfaceEntry;
 
+    /** Currently transmitted frame if any */
+    Packet *currentTxFrame = nullptr;
+
+    /** Messages received from upper layer and to be transmitted later */
+    queueing::IPacketQueue *transmissionQueue = nullptr;
+
   protected:
     MacProtocolBase();
+    virtual ~MacProtocolBase();
 
     virtual void initialize(int stage) override;
 
@@ -56,6 +65,10 @@ class INET_API MacProtocolBase : public LayeredProtocolBase, public cListener
     virtual bool isInitializeStage(int stage) override { return stage == INITSTAGE_LINK_LAYER; }
     virtual bool isModuleStartStage(int stage) override { return stage == ModuleStartOperation::STAGE_LINK_LAYER; }
     virtual bool isModuleStopStage(int stage) override { return stage == ModuleStopOperation::STAGE_LINK_LAYER; }
+
+    virtual void deleteCurrentTxFrame();
+    virtual void dropCurrentTxFrame(PacketDropDetails& details);
+    virtual void popFromTransmissionQueue();
 };
 
 } // namespace inet

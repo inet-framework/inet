@@ -29,6 +29,11 @@ MacProtocolBase::MacProtocolBase() :
 {
 }
 
+MacProtocolBase::~MacProtocolBase()
+{
+    delete currentTxFrame;
+}
+
 MacAddress MacProtocolBase::parseMacAddressParameter(const char *addrstr)
 {
     MacAddress address;
@@ -84,6 +89,27 @@ bool MacProtocolBase::isUpperMessage(cMessage *message)
 bool MacProtocolBase::isLowerMessage(cMessage *message)
 {
     return message->getArrivalGateId() == lowerLayerInGateId;
+}
+
+void MacProtocolBase::deleteCurrentTxFrame()
+{
+    delete currentTxFrame;
+    currentTxFrame = nullptr;
+}
+
+void MacProtocolBase::dropCurrentTxFrame(PacketDropDetails& details)
+{
+    emit(packetDroppedSignal, currentTxFrame, &details);
+    delete currentTxFrame;
+    currentTxFrame = nullptr;
+}
+
+void MacProtocolBase::popFromTransmissionQueue()
+{
+    if (currentTxFrame != nullptr)
+        throw cRuntimeError("Model error: incomplete transmission exists");
+    ASSERT(transmissionQueue != nullptr);
+    currentTxFrame = transmissionQueue->popPacket();
 }
 
 } // namespace inet
