@@ -53,7 +53,7 @@ class INET_API MacBase : public MacProtocolBase
     /**
      * should clear queue and emit signal "packetDropped" with entire packets
      */
-    virtual void flushQueue() = 0;
+    virtual void flushQueue(PacketDropDetails& details) = 0;
 
     /**
      * should clear queue silently

@@ -67,7 +67,9 @@ void MacBase::handleStartOperation(LifecycleOperation *operation)
 
 void MacBase::handleStopOperation(LifecycleOperation *operation)
 {
-    flushQueue();
+    PacketDropDetails details;
+    details.setReason(INTERFACE_DOWN);
+    flushQueue(details);
     interfaceEntry->setCarrier(false);
     interfaceEntry->setState(InterfaceEntry::State::DOWN);
 }
