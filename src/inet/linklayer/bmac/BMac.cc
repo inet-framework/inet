@@ -331,6 +331,11 @@ void BMac::handleSelfMessage(cMessage *msg)
                 EV_DETAIL << "State SEND_DATA, message BMAC_SEND_PREAMBLE or"
                              " BMAC_RESEND_DATA, new state WAIT_TX_DATA_OVER" << endl;
                 // send the data packet
+                if (msg->getKind() == BMAC_SEND_PREAMBLE) {
+                    ASSERT(currentTransmission == nullptr);
+                    currentTransmission = queue->popPacket();
+                }
+                ASSERT(currentTransmission != nullptr);
                 sendDataPacket();
                 macState = WAIT_TX_DATA_OVER;
                 return;
@@ -558,8 +563,6 @@ void BMac::sendDataPacket()
 {
     nbTxDataPackets++;
 
-    ASSERT(currentTransmission == nullptr);
-    currentTransmission = queue->popPacket();
     Packet *pkt = currentTransmission->dup();
     attachSignal(pkt);
     const auto& hdr = pkt->peekAtFront<BMacHeader>();
