@@ -348,13 +348,6 @@ void Ieee802154Mac::updateStatusBackoff(t_mac_event event, cMessage *msg)
 
 void Ieee802154Mac::flushQueue()
 {
-    PacketDropDetails details;
-    details.setReason(INTERFACE_DOWN);
-    if (currentTransmission) {
-        emit(packetDroppedSignal, currentTransmission, &details); //FIXME this signal lumps together packets from the network and packets from higher layers! separate them
-        delete currentTransmission;
-        currentTransmission = nullptr;
-    }
     while (!queue->isEmpty()) {
         auto packet = queue->popPacket();
         PacketDropDetails details;
@@ -366,8 +359,6 @@ void Ieee802154Mac::flushQueue()
 
 void Ieee802154Mac::clearQueue()
 {
-    delete currentTransmission;
-    currentTransmission = nullptr;
     while (!queue->isEmpty())
         delete queue->popPacket();
 }
