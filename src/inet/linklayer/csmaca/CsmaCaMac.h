@@ -189,7 +189,7 @@ class INET_API CsmaCaMac : public MacProtocolBase
     virtual void giveUpCurrentTransmission();
     virtual void retryCurrentTransmission();
     virtual Packet *getCurrentTransmission();
-    virtual void popTransmissionQueue();
+    virtual void deleteCurrentTransmission();
     virtual void resetTransmissionVariables();
     virtual void emitPacketDropSignal(Packet *frame, PacketDropReason reason, int limit = -1);
 

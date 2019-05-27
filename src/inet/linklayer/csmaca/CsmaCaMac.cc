@@ -169,8 +169,8 @@ void CsmaCaMac::handleUpperPacket(Packet *packet)
     if (fsm.getState() != IDLE)
         EV << "deferring upper message transmission in " << fsm.getStateName() << " state\n";
     else {
-        if (currentTransmission == nullptr)
-            currentTransmission = transmissionQueue->popPacket();
+        ASSERT(currentTransmission == nullptr);
+        currentTransmission = transmissionQueue->popPacket();
         handleWithFsm(currentTransmission);
     }
 }
@@ -354,9 +354,10 @@ void CsmaCaMac::handleWithFsm(cMessage *msg)
     if (fsm.getState() == IDLE) {
         if (isReceiving())
             handleWithFsm(mediumStateChange);
-        else if (currentTransmission != nullptr || !transmissionQueue->isEmpty()) {
-            if (currentTransmission == nullptr)
-                currentTransmission = transmissionQueue->popPacket();
+        else if (currentTransmission != nullptr)
+            handleWithFsm(currentTransmission);
+        else if (!transmissionQueue->isEmpty()) {
+            currentTransmission = transmissionQueue->popPacket();
             handleWithFsm(currentTransmission);
         }
     }
@@ -542,7 +543,7 @@ void CsmaCaMac::sendAckFrame()
  */
 void CsmaCaMac::finishCurrentTransmission()
 {
-    popTransmissionQueue();
+    deleteCurrentTransmission();
     resetTransmissionVariables();
 }
 
@@ -551,7 +552,7 @@ void CsmaCaMac::giveUpCurrentTransmission()
     auto packet = getCurrentTransmission();
     emitPacketDropSignal(packet, RETRY_LIMIT_REACHED, retryLimit);
     emit(linkBrokenSignal, packet);
-    popTransmissionQueue();
+    deleteCurrentTransmission();
     resetTransmissionVariables();
     numGivenUp++;
 }
@@ -570,9 +571,8 @@ Packet *CsmaCaMac::getCurrentTransmission()
     return currentTransmission;
 }
 
-void CsmaCaMac::popTransmissionQueue()
+void CsmaCaMac::deleteCurrentTransmission()
 {
-    EV << "dropping frame from transmission queue\n";
     delete currentTransmission;
     currentTransmission = nullptr;
 }
