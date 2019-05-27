@@ -462,9 +462,8 @@ void LMac::handleSelfMessage(cMessage *msg)
                     return;
                 }
                 Packet *data = new Packet("Data");
-                auto pk0 = currentTransmission;
-                data->insertAtBack(pk0->peekAt(headerLength, pk0->getTotalLength() - headerLength));
-                const auto& lmacHeader = staticPtrCast<LMacHeader>(pk0->peekAtFront<LMacHeader>()->dupShared());
+                data->insertAtBack(currentTransmission->peekAt(headerLength, currentTransmission->getTotalLength() - headerLength));
+                const auto& lmacHeader = staticPtrCast<LMacHeader>(currentTransmission->peekAtFront<LMacHeader>()->dupShared());
                 lmacHeader->setType(LMAC_DATA);
                 lmacHeader->setMySlot(mySlot);
                 lmacHeader->setOccupiedSlotsArraySize(numSlots);
@@ -475,7 +474,7 @@ void LMac::handleSelfMessage(cMessage *msg)
                 data->addTag<PacketProtocolTag>()->setProtocol(&Protocol::lmac);
                 EV << "Sending down data packet\n";
                 sendDown(data);
-                delete pk0;
+                delete currentTransmission;
                 currentTransmission = nullptr;
                 macState = SEND_DATA;
                 EV_DETAIL << "Old state: SEND_CONTROL, New state: SEND_DATA" << endl;
