@@ -27,6 +27,8 @@ MacProtocolBase::MacProtocolBase()
 MacProtocolBase::~MacProtocolBase()
 {
     delete currentTxFrame;
+    if (hostModule)
+        hostModule->unsubscribe(interfaceDeletedSignal, this);
 }
 
 MacAddress MacProtocolBase::parseMacAddressParameter(const char *addrstr)
@@ -50,6 +52,9 @@ void MacProtocolBase::initialize(int stage)
         upperLayerOutGateId = findGate("upperLayerOut");
         lowerLayerInGateId = findGate("lowerLayerIn");
         lowerLayerOutGateId = findGate("lowerLayerOut");
+        hostModule = findContainingNode(this);
+        if (hostModule)
+            hostModule->subscribe(interfaceDeletedSignal, this);
     }
     else if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION)
         registerInterface();
@@ -123,6 +128,49 @@ void MacProtocolBase::clearQueue()
     if (transmissionQueue)
         while (!transmissionQueue->isEmpty())
             delete transmissionQueue->popPacket();
+}
+
+void MacProtocolBase::handleMessageWhenDown(cMessage *msg)
+{
+    if (!msg->isSelfMessage() && msg->getArrivalGateId() == lowerLayerInGateId) {
+        EV << "Interface is turned off, dropping packet\n";
+        delete msg;
+    }
+    else
+        LayeredProtocolBase::handleMessageWhenDown(msg);
+}
+
+void MacProtocolBase::handleStartOperation(LifecycleOperation *operation)
+{
+    interfaceEntry->setState(InterfaceEntry::State::UP);
+    interfaceEntry->setCarrier(true);
+}
+
+void MacProtocolBase::handleStopOperation(LifecycleOperation *operation)
+{
+    PacketDropDetails details;
+    details.setReason(INTERFACE_DOWN);
+    if (currentTxFrame)
+        dropCurrentTxFrame(details);
+    flushQueue(details);
+    interfaceEntry->setCarrier(false);
+    interfaceEntry->setState(InterfaceEntry::State::DOWN);
+}
+
+void MacProtocolBase::handleCrashOperation(LifecycleOperation *operation)
+{
+    deleteCurrentTxFrame();
+    clearQueue();
+    interfaceEntry->setCarrier(false);
+    interfaceEntry->setState(InterfaceEntry::State::DOWN);
+}
+
+void MacProtocolBase::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
+{
+    if (signalID == interfaceDeletedSignal) {
+        if (interfaceEntry == check_and_cast<const InterfaceEntry *>(obj))
+            interfaceEntry = nullptr;
+    }
 }
 
 } // namespace inet

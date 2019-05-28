@@ -33,22 +33,12 @@ class InterfaceEntry;
  */
 class INET_API MacBase : public MacProtocolBase
 {
-  protected:
-    cModule *hostModule = nullptr;
-
   public:
     MacBase() {}
     virtual ~MacBase();
 
   protected:
-    using cListener::receiveSignal;
     virtual void initialize(int stage) override;
-    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
-    virtual void handleMessageWhenDown(cMessage *msg) override;
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
-    virtual void handleStartOperation(LifecycleOperation *operation) override;
-    virtual void handleStopOperation(LifecycleOperation *operation) override;
-    virtual void handleCrashOperation(LifecycleOperation *operation) override;
 };
 
 } // namespace inet

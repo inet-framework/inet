@@ -32,8 +32,6 @@ namespace inet {
 
 MacBase::~MacBase()
 {
-    if (hostModule)
-        hostModule->unsubscribe(interfaceDeletedSignal, this);
 }
 
 void MacBase::initialize(int stage)
@@ -43,52 +41,6 @@ void MacBase::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         lowerLayerInGateId = findGate("phys$i");
         lowerLayerOutGateId = findGate("phys$o");
-        hostModule = findContainingNode(this);
-        if (hostModule)
-            hostModule->subscribe(interfaceDeletedSignal, this);
-    }
-}
-
-void MacBase::handleMessageWhenDown(cMessage *msg)
-{
-    if (!msg->isSelfMessage() && msg->getArrivalGateId() == lowerLayerInGateId) {
-        EV << "Interface is turned off, dropping packet\n";
-        delete msg;
-    }
-    else
-        MacProtocolBase::handleMessageWhenDown(msg);
-}
-
-void MacBase::handleStartOperation(LifecycleOperation *operation)
-{
-    interfaceEntry->setState(InterfaceEntry::State::UP);
-    interfaceEntry->setCarrier(true);
-}
-
-void MacBase::handleStopOperation(LifecycleOperation *operation)
-{
-    PacketDropDetails details;
-    details.setReason(INTERFACE_DOWN);
-    if (currentTxFrame)
-        dropCurrentTxFrame(details);
-    flushQueue(details);
-    interfaceEntry->setCarrier(false);
-    interfaceEntry->setState(InterfaceEntry::State::DOWN);
-}
-
-void MacBase::handleCrashOperation(LifecycleOperation *operation)
-{
-    deleteCurrentTxFrame();
-    clearQueue();
-    interfaceEntry->setCarrier(false);
-    interfaceEntry->setState(InterfaceEntry::State::DOWN);
-}
-
-void MacBase::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
-{
-    if (signalID == interfaceDeletedSignal) {
-        if (interfaceEntry == check_and_cast<const InterfaceEntry *>(obj))
-            interfaceEntry = nullptr;
     }
 }
 

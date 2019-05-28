@@ -28,7 +28,7 @@ namespace inet {
 
 class INET_API MacProtocolBase : public LayeredProtocolBase, public cListener
 {
-  public:
+  protected:
     /** @brief Gate ids */
     //@{
     int upperLayerInGateId = -1;
@@ -44,6 +44,8 @@ class INET_API MacProtocolBase : public LayeredProtocolBase, public cListener
 
     /** Messages received from upper layer and to be transmitted later */
     queueing::IPacketQueue *transmissionQueue = nullptr;
+
+    cModule *hostModule = nullptr;
 
   protected:
     MacProtocolBase();
@@ -79,6 +81,13 @@ class INET_API MacProtocolBase : public LayeredProtocolBase, public cListener
      * should clear queue silently
      */
     virtual void clearQueue();
+
+    using cListener::receiveSignal;
+    virtual void handleMessageWhenDown(cMessage *msg) override;
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
+    virtual void handleStartOperation(LifecycleOperation *operation) override;
+    virtual void handleStopOperation(LifecycleOperation *operation) override;
+    virtual void handleCrashOperation(LifecycleOperation *operation) override;
 };
 
 } // namespace inet
