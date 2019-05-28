@@ -26,7 +26,7 @@
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/queueing/contract/IPacketQueue.h"
-#include "inet/linklayer/base/MacBase.h"
+#include "inet/linklayer/base/MacProtocolBase.h"
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
@@ -39,7 +39,7 @@ class EthernetSignal;
 /**
  * Base class for Ethernet MAC implementations.
  */
-class INET_API EtherMacBase : public MacBase
+class INET_API EtherMacBase : public MacProtocolBase
 {
   public:
         enum MacTransmitState {

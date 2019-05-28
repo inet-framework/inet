@@ -173,10 +173,12 @@ EtherMacBase::~EtherMacBase()
 
 void EtherMacBase::initialize(int stage)
 {
-    MacBase::initialize(stage);
+    MacProtocolBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         physInGate = gate("phys$i");
         physOutGate = gate("phys$o");
+        lowerLayerInGateId = physInGate->getId();
+        lowerLayerOutGateId = physOutGate->getId();
         transmissionChannel = nullptr;
         currentTxFrame = nullptr;
 
@@ -321,7 +323,7 @@ void EtherMacBase::receiveSignal(cComponent *source, simsignal_t signalID, cObje
 {
     Enter_Method_Silent();
 
-    MacBase::receiveSignal(source, signalID, obj, details);
+    MacProtocolBase::receiveSignal(source, signalID, obj, details);
 
     if (signalID != POST_MODEL_CHANGE)
         return;
@@ -587,7 +589,7 @@ void EtherMacBase::finish()
 
 void EtherMacBase::refreshDisplay() const
 {
-    MacBase::refreshDisplay();
+    MacProtocolBase::refreshDisplay();
 
     // icon coloring
     const char *color;

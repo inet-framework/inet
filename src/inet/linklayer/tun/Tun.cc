@@ -34,7 +34,11 @@ Define_Module(Tun);
 
 void Tun::initialize(int stage)
 {
-    MacBase::initialize(stage);
+    MacProtocolBase::initialize(stage);
+    if (stage == INITSTAGE_LOCAL) {
+        lowerLayerInGateId = findGate("phys$i");
+        lowerLayerOutGateId = findGate("phys$o");
+    }
 }
 
 void Tun::configureInterfaceEntry()

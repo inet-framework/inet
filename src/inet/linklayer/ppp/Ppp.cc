@@ -44,14 +44,17 @@ Ppp::~Ppp()
 
 void Ppp::initialize(int stage)
 {
-    MacBase::initialize(stage);
+    MacProtocolBase::initialize(stage);
 
     // all initialization is done in the first stage
     if (stage == INITSTAGE_LOCAL) {
         displayStringTextFormat = par("displayStringTextFormat");
         sendRawBytes = par("sendRawBytes");
         endTransmissionEvent = new cMessage("pppEndTxEvent");
+        lowerLayerInGateId = findGate("phys$i");
         physOutGate = gate("phys$o");
+        lowerLayerOutGateId = physOutGate->getId();
+
         // we're connected if other end of connection path is an input gate
         bool connected = physOutGate->getPathEndGate()->getType() == cGate::INPUT;
         // if we're connected, get the gate with transmission rate
@@ -93,7 +96,7 @@ void Ppp::configureInterfaceEntry()
 
 void Ppp::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
-    MacBase::receiveSignal(source, signalID, obj, details);
+    MacProtocolBase::receiveSignal(source, signalID, obj, details);
 
     if (signalID != POST_MODEL_CHANGE)
         return;
@@ -188,7 +191,7 @@ void Ppp::startTransmitting()
 
 void Ppp::handleMessageWhenUp(cMessage *message)
 {
-    MacBase::handleMessageWhenUp(message);
+    MacProtocolBase::handleMessageWhenUp(message);
     if (operationalState == State::STOPPING_OPERATION) {
         if (transmissionQueue->isEmpty()) {
             interfaceEntry->setCarrier(false);
@@ -266,7 +269,7 @@ void Ppp::handleLowerPacket(Packet *packet)
 
 void Ppp::refreshDisplay() const
 {
-    MacBase::refreshDisplay();
+    MacProtocolBase::refreshDisplay();
 
     auto text = StringFormat::formatString(displayStringTextFormat, [&] (char directive) {
         static std::string result;

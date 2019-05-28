@@ -23,7 +23,7 @@
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/packet/Packet.h"
-#include "inet/linklayer/base/MacBase.h"
+#include "inet/linklayer/base/MacProtocolBase.h"
 #include "inet/linklayer/ppp/PppFrame_m.h"
 
 namespace inet {
@@ -33,7 +33,7 @@ class InterfaceEntry;
 /**
  * PPP implementation.
  */
-class INET_API Ppp : public MacBase
+class INET_API Ppp : public MacProtocolBase
 {
   protected:
     const char *displayStringTextFormat = nullptr;
