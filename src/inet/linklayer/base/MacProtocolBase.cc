@@ -20,12 +20,7 @@
 
 namespace inet {
 
-MacProtocolBase::MacProtocolBase() :
-    upperLayerInGateId(-1),
-    upperLayerOutGateId(-1),
-    lowerLayerInGateId(-1),
-    lowerLayerOutGateId(-1),
-    interfaceEntry(nullptr)
+MacProtocolBase::MacProtocolBase()
 {
 }
 

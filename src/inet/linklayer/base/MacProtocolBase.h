@@ -31,13 +31,13 @@ class INET_API MacProtocolBase : public LayeredProtocolBase, public cListener
   public:
     /** @brief Gate ids */
     //@{
-    int upperLayerInGateId;
-    int upperLayerOutGateId;
-    int lowerLayerInGateId;
-    int lowerLayerOutGateId;
+    int upperLayerInGateId = -1;
+    int upperLayerOutGateId = -1;
+    int lowerLayerInGateId = -1;
+    int lowerLayerOutGateId = -1;
     //@}
 
-    InterfaceEntry *interfaceEntry;
+    InterfaceEntry *interfaceEntry = nullptr;
 
     /** Currently transmitted frame if any */
     Packet *currentTxFrame = nullptr;
