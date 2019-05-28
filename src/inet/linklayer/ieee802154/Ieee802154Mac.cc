@@ -346,23 +346,6 @@ void Ieee802154Mac::updateStatusBackoff(t_mac_event event, cMessage *msg)
     }
 }
 
-void Ieee802154Mac::flushQueue()
-{
-    while (!transmissionQueue->isEmpty()) {
-        auto packet = transmissionQueue->popPacket();
-        PacketDropDetails details;
-        details.setReason(INTERFACE_DOWN);
-        emit(packetDroppedSignal, packet, &details); //FIXME this signal lumps together packets from the network and packets from higher layers! separate them
-        delete packet;
-    }
-}
-
-void Ieee802154Mac::clearQueue()
-{
-    while (!transmissionQueue->isEmpty())
-        delete transmissionQueue->popPacket();
-}
-
 void Ieee802154Mac::attachSignal(Packet *mac, simtime_t_cref startTime)
 {
     simtime_t duration = mac->getBitLength() / bitrate;

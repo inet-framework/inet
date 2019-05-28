@@ -87,11 +87,6 @@ class INET_API BMac : public MacProtocolBase, public IMacProtocol
     /** @brief Handle control messages from lower layer */
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details) override;
 
-    // OperationalBase:
-    virtual void handleStartOperation(LifecycleOperation *operation) override {}    //TODO implementation
-    virtual void handleStopOperation(LifecycleOperation *operation) override {}    //TODO implementation
-    virtual void handleCrashOperation(LifecycleOperation *operation) override {}    //TODO implementation
-
   protected:
     /** @brief The radio. */
     physicallayer::IRadio *radio = nullptr;

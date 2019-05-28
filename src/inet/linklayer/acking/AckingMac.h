@@ -76,11 +76,6 @@ class INET_API AckingMac : public MacProtocolBase
     virtual void handleSelfMessage(cMessage *message) override;
     //@}
 
-    // OperationalBase:
-    virtual void handleStartOperation(LifecycleOperation *operation) override {}    //TODO implementation
-    virtual void handleStopOperation(LifecycleOperation *operation) override {}    //TODO implementation
-    virtual void handleCrashOperation(LifecycleOperation *operation) override {}    //TODO implementation
-
   public:
     AckingMac();
     virtual ~AckingMac();

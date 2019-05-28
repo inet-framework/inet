@@ -141,23 +141,6 @@ XMac::~XMac()
     cancelAndDelete(switching_done);
 }
 
-void XMac::flushQueue()
-{
-    while (!transmissionQueue->isEmpty()) {
-        auto packet = transmissionQueue->popPacket();
-        PacketDropDetails details;
-        details.setReason(INTERFACE_DOWN);
-        emit(packetDroppedSignal, packet, &details); //FIXME this signal lumps together packets from the network and packets from higher layers! separate them
-        delete packet;
-    }
-}
-
-void XMac::clearQueue()
-{
-    while (!transmissionQueue->isEmpty())
-        delete transmissionQueue->popPacket();
-}
-
 void XMac::finish()
 {
     // record stats
