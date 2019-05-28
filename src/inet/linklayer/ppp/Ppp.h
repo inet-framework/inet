@@ -42,7 +42,6 @@ class INET_API Ppp : public MacBase
     cChannel *datarateChannel = nullptr;    // nullptr if we're not connected
 
     cMessage *endTransmissionEvent = nullptr;
-    queueing::IPacketQueue *queue = nullptr;
 
     std::string oldConnColor;
 
@@ -56,9 +55,9 @@ class INET_API Ppp : public MacBase
     static simsignal_t rxPkOkSignal;
 
   protected:
-    virtual void startTransmitting(Packet *msg);
-    virtual Packet *encapsulate(Packet *msg);
-    virtual cPacket *decapsulate(Packet *packet);
+    virtual void startTransmitting();
+    virtual void encapsulate(Packet *msg);
+    virtual void decapsulate(Packet *packet);
     virtual void refreshDisplay() const override;
     virtual void refreshOutGateConnection(bool connected);
 
