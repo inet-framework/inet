@@ -58,15 +58,20 @@ out on the underlying simulated network interface. This device requires a TAP de
 in the host OS. The simulation sends and receives packets through the TAP device using
 the OS file API.
 
-The sender host's :ned:`ExtUpperEthernetInterface` is configured as follows in the ini file:
+The sender host's Ethernet interface is configured in the ini file. The type of the interface
+is set to :ned:`ExtUpperEthernetInterface`, and the name of the TAP device that it uses is called
+"tap0". The interface is set to copy the remaining configurations, such as IP address, from
+the external TAP device, therefore these properties do not need to be configured here.
+
+.. The sender host's :ned:`ExtUpperEthernetInterface` is configured as follows in the ini file:
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
    :start-at: *.host1.eth[0].typename = "ExtUpperEthernetInterface"
    :end-at: *.host1.eth[0].copyConfiguration = "copyFromExt"
 
-The IP address and other configuratons of the Ethernet interface are not explicitly configured,
-but instead they are set to be copied form the TAP device.
+.. The IP address and other configuratons of the Ethernet interface are not explicitly configured,
+.. but instead they are set to be copied form the TAP device.
 
 The only configuration needed for the receiver host is to set the IP address of its
 Ethernet interface. This IP address is later also set as the destination address
@@ -81,16 +86,27 @@ With that done, the simulated part of the network is properly configured.
 The further configurations affect the real OS and are contained in the
 ``TestExtUpperEthernetInterfaceInHost1.sh`` shell script.
 
-In the host computer, the above mentioned TAP device needs to be created.
-An IP address from within the same subnet as the receiver host needs to be assigned to it:
+.. At this point, the ``TestExtUpperEthernetInterfaceInHost1.sh`` shell script
+.. can be run from the terminal. This script file contains all the required
+.. commands to create the TAP device, run the simulation and save the results.
+
+In the host computer, the above mentioned TAP device is created and an
+IP address from within the same subnet as the receiver host is assigned to it:
 
 .. literalinclude:: ../TestExtUpperEthernetInterfaceInHost1.sh
    :language: sh
    :start-at: # create TAP interface
    :end-at: sudo ip link set dev tap0 up
 
-After that, the simulation can be run. While it is running, the ping command with
-the IP address of the simulated receiver host is run from the terminal.
+.. The simulation is also run using commands from the shell script.
+.. After that, the simulation can be run.
+
+When the TAP interface is brought up, the simulation is run.
+While it is running, a ping command is executed in order to ping into the simulation
+from the real OS of the host computer.
+
+.. While it is running, the ping command with
+.. the IP address of the simulated receiver host is run from the terminal.
 
 .. literalinclude:: ../TestExtUpperEthernetInterfaceInHost1.sh
    :language: sh
@@ -110,12 +126,16 @@ file.
 The following schematic image illustrates the structure of the network and
 the route of the messages:
 
-.. figure:: ExtUpperEthernetInterfaceInHost1.png
+.. figure:: ExtUpperEthernetInterfaceInHost1.svg
    :width: 100%
    :align: center
 
-After the simulation stops, the output of the pinging contained in the ``ping.out`` file are checked
-and the TAP interface is destroyed:
+.. After the simulation stops, the output of the pinging contained in the ``ping.out`` file are checked
+.. and the TAP interface is destroyed:
+
+The script file also takes care of examining whether the emulation was
+successful by checking the content of the ``ping.out`` file.
+At the end, the used TAP device is also destroyed:
 
 .. literalinclude:: ../TestExtUpperEthernetInterfaceInHost1.sh
    :language: sh
@@ -153,8 +173,10 @@ is set to the IP address that is going to be assigned to the TAP device.
    :start-at: *.host1.numApps = 1
    :end-at: *.host1.app[0].printPing = true
 
-After the TAP device is created and brought up like in the previous example, the simulation
-can be run. The simulated ping application of the sender host generates the
+The configurations of the ``TestExtUpperEthernetInterfaceInHost2.sh`` shell script are
+very similar to the ones explained in the previous example. After the TAP device is
+created and brought up, the simulation is be run. In this example however,
+the simulated ping application of the sender host generates the
 ECHO REQUEST messages. The message is routed towards the receiver host inside the
 simulation. The receiver host's Ethernet interface writes the messages into the
 TAP device. The host computer gets the requests and replies by sending an
@@ -162,12 +184,16 @@ ECHO REPLY message addressed to the sender host. The :ned:`ExtUpperEthernetInter
 the receiver host reads the TAP device and forwards the messages towards the sender host inside
 the simulation. The results of the pinging can be found in the ``inet.out`` file.
 
+.. figure:: ExtUpperEthernetInterfaceInHost1.svg
+   :width: 100%
+   :align: center
+
 ExtLowerEthernetInterfaceInHost2
 --------------------------------
 
 In this example, a real ping application in the sender host sends the ping request messages
 to the simulated receiver host.
-In the previous two examples, not only one of the hosts were simulated, but the link between them
+In the previous two examples, not only one of the hosts was part of the simulation, but the link between them
 as well. In this example however, the link will be also set up by the real OS.
 For this kind of separation we use the :ned:`ExtLowerEthernetInterface` as the receiver host's
 Ethernet interface. This represents an Ethernet network interface which has its lower part in the
@@ -178,8 +204,11 @@ in the simulation as if received on the interface. The lower part of the network
 realized in the real world using a real ethernet socket of the host computer which is running the
 simulation. This device requires a pair of connected virtual ethernet interface in the host OS.
 
-For the sender host is fully real, only the receiver host needs some configurations
-in the ini file:
+Only the receiver host needs to be configured in the ini file, because the sender
+host is fully real.
+
+.. For the sender host is fully real, only the receiver host needs some configurations
+.. in the ini file:
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
@@ -195,8 +224,8 @@ contained in the ``TestExtLowerEthernetInterfaceInHost2.sh`` shell script:
    :start-at: # create virtual ethernet link: veth0 <--> veth1
    :end-at: sudo route add -net 192.168.2.0 netmask 255.255.255.0 dev veth0
 
-After the veth pair is successfully created, the simulation can be run and the ping
-application can be started:
+After the veth pair is successfully created, the simulation is run and the ping
+application is started:
 
 .. literalinclude:: ../TestExtLowerEthernetInterfaceInHost2.sh
    :language: sh
@@ -218,7 +247,7 @@ This time a simulated ping application in the sender host sends ping request mes
 to the real receiver host. The :ned:`ExtLowerEthernetInterface` is now used as the sender host's
 ethernet interface.
 
-Now that the sender host is the simulated one, besides its ethernet interface the ping
+Now that the sender host is simulated, besides its ethernet interface the ping
 application needs to be configured as well:
 
 .. literalinclude:: ../omnetpp.ini
@@ -228,11 +257,11 @@ application needs to be configured as well:
 
 The veth devices are created with the help of the script file. The destination address
 for the ping application in the sender host needs to be the same as the IP address of ``veth1``.
-When the veth devices are properly configured and brought up, the simulation can be started.
+When the veth devices are properly configured and brought up, the simulation is started.
 
 The simulated ping application in the sender host sends the PING REQUEST messages towards the receiver host.
 The :ned:`ExtLowerEthernetInterface` of the sender host writes the message into the ``veth0``
-virtuel ethernet device. The message the arrives at ``veth1`` and is processed be the host OS.
+virtual ethernet device. The message the arrives at ``veth1`` and is processed be the host OS.
 A PING REPLY message is then routed through the veth devices, where the :ned:`ExtLowerEthernetInterface`
 of the sender host read ``veth0`` and processes the reply message. The output is written into the
 ``inet.out`` file.
@@ -255,7 +284,8 @@ only difference being the type of the interface.
    :end-at: *.host1.wlan[0].copyConfiguration = "copyFromExt"
 
 This device requires a TAP device in the host OS. The configurations needed for the host OS are also
-identical to the previous ones.
+identical to the previous ones and are provided in the ``TestExtUpperIeee80211InterfaceInHost1.sh``
+script file.
 
 The real ping application of the host computer generates the ECHO REQUEST messages.
 The message is routed through the virtual TAP interface. The sender node's wlan
@@ -281,7 +311,7 @@ This example is very similar to the ``ExtUpperEthernetInterfaceInHost2`` example
 that here we use the the host's wlan interface instead of its Ethernet interface.
 
 After the TAP device is created and brought up like in the previous example, the simulation
-can be run. The simulated ping application of the sender host generates the
+is run. The simulated ping application of the sender host generates the
 ECHO REQUEST messages. The message is routed towards the receiver host inside the
 simulation. The receiver host's wlan interface writes the messages into the
 TAP device. The host computer gets the requests and replies by sending an
