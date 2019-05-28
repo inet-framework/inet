@@ -49,16 +49,6 @@ class INET_API MacBase : public MacProtocolBase
     virtual void handleStartOperation(LifecycleOperation *operation) override;
     virtual void handleStopOperation(LifecycleOperation *operation) override;
     virtual void handleCrashOperation(LifecycleOperation *operation) override;
-
-    /**
-     * should clear queue and emit signal "packetDropped" with entire packets
-     */
-    virtual void flushQueue(PacketDropDetails& details) = 0;
-
-    /**
-     * should clear queue silently
-     */
-    virtual void clearQueue() = 0;
 };
 
 } // namespace inet

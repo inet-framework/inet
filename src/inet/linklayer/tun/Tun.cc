@@ -116,15 +116,5 @@ void Tun::handleUpperCommand(cMessage *message)
         throw cRuntimeError("Unknown command: %s", message->getName());
 }
 
-void Tun::flushQueue(PacketDropDetails& details)
-{
-    // does not have a queue, do nothing
-}
-
-void Tun::clearQueue()
-{
-    // does not have a queue, do nothing
-}
-
 } // namespace inet
 

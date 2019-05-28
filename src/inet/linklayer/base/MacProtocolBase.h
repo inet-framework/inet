@@ -69,6 +69,16 @@ class INET_API MacProtocolBase : public LayeredProtocolBase, public cListener
     virtual void deleteCurrentTxFrame();
     virtual void dropCurrentTxFrame(PacketDropDetails& details);
     virtual void popFromTransmissionQueue();
+
+    /**
+     * should clear queue and emit signal "packetDropped" with entire packets
+     */
+    virtual void flushQueue(PacketDropDetails& details);
+
+    /**
+     * should clear queue silently
+     */
+    virtual void clearQueue();
 };
 
 } // namespace inet

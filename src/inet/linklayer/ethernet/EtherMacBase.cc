@@ -432,22 +432,6 @@ bool EtherMacBase::verifyCrcAndLength(Packet *packet)
     return true;
 }
 
-void EtherMacBase::flushQueue(PacketDropDetails& details)
-{
-    // code would look slightly nicer with a pop() function that returns nullptr if empty
-    while (!transmissionQueue->isEmpty()) {
-        Packet *msg = transmissionQueue->popPacket();
-        emit(packetDroppedSignal, msg, &details);
-        delete msg;
-    }
-}
-
-void EtherMacBase::clearQueue()
-{
-    while (!transmissionQueue->isEmpty())
-        delete transmissionQueue->popPacket();
-}
-
 void EtherMacBase::refreshConnection()
 {
     Enter_Method_Silent();

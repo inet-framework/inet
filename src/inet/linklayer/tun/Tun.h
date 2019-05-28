@@ -31,8 +31,6 @@ class INET_API Tun : public MacBase
 
     protected:
         virtual void configureInterfaceEntry() override;
-        virtual void flushQueue(PacketDropDetails& details) override;
-        virtual void clearQueue() override;
 
     public:
         virtual int numInitStages() const override { return NUM_INIT_STAGES; }

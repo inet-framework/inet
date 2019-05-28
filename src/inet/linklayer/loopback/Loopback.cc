@@ -75,16 +75,6 @@ void Loopback::handleUpperPacket(Packet *packet)
     send(packet, upperLayerOutGateId);
 }
 
-void Loopback::flushQueue(PacketDropDetails& details)
-{
-    // do nothing, lo interface doesn't have any queue
-}
-
-void Loopback::clearQueue()
-{
-    // do nothing, lo interface doesn't have any queue
-}
-
 void Loopback::refreshDisplay() const
 {
     MacBase::refreshDisplay();

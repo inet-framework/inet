@@ -112,5 +112,23 @@ void MacProtocolBase::popFromTransmissionQueue()
     currentTxFrame = transmissionQueue->popPacket();
 }
 
+void MacProtocolBase::flushQueue(PacketDropDetails& details)
+{
+    // code would look slightly nicer with a pop() function that returns nullptr if empty
+    if (transmissionQueue)
+        while (!transmissionQueue->isEmpty()) {
+            auto packet = transmissionQueue->popPacket();
+            emit(packetDroppedSignal, packet, &details); //FIXME this signal lumps together packets from the network and packets from higher layers! separate them
+            delete packet;
+        }
+}
+
+void MacProtocolBase::clearQueue()
+{
+    if (transmissionQueue)
+        while (!transmissionQueue->isEmpty())
+            delete transmissionQueue->popPacket();
+}
+
 } // namespace inet
 

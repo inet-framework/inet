@@ -197,8 +197,6 @@ class INET_API EtherMacBase : public MacBase
 
     // MacBase
     virtual void configureInterfaceEntry() override;
-    virtual void flushQueue(PacketDropDetails& details) override;
-    virtual void clearQueue() override;
 
     // display
     virtual void refreshDisplay() const override;

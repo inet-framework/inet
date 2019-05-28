@@ -66,8 +66,6 @@ class INET_API Ppp : public MacBase
 
     // MacBase functions
     virtual void configureInterfaceEntry() override;
-    virtual void flushQueue(PacketDropDetails& details) override;
-    virtual void clearQueue() override;
 
   public:
     virtual ~Ppp();
