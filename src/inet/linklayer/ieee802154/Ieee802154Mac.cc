@@ -222,23 +222,13 @@ void Ieee802154Mac::updateStatusIdle(t_mac_event event, cMessage *msg)
 {
     switch (event) {
         case EV_SEND_REQUEST:
-            if (transmissionQueue->getNumPackets() < queueLength) {
-                transmissionQueue->pushPacket(static_cast<Packet *>(msg));
+            transmissionQueue->pushPacket(static_cast<Packet *>(msg));
+            if (!transmissionQueue->isEmpty()) {
                 EV_DETAIL << "(1) FSM State IDLE_1, EV_SEND_REQUEST and [TxBuff avail]: startTimerBackOff -> BACKOFF." << endl;
                 updateMacState(BACKOFF_2);
                 NB = 0;
                 //BE = macMinBE;
                 startTimer(TIMER_BACKOFF);
-            }
-            else {
-                // queue is full, message has to be deleted
-                EV_DETAIL << "(12) FSM State IDLE_1, EV_SEND_REQUEST and [TxBuff not avail]: dropping packet -> IDLE." << endl;
-                PacketDropDetails details;
-                details.setReason(QUEUE_OVERFLOW);
-                details.setLimit(queueLength);
-                emit(packetDroppedSignal, msg, &details);
-                delete msg;
-                updateMacState(IDLE_1);
             }
             break;
 
@@ -608,22 +598,7 @@ void Ieee802154Mac::updateStatusTransmitAck(t_mac_event event, cMessage *msg)
 void Ieee802154Mac::updateStatusNotIdle(cMessage *msg)
 {
     EV_DETAIL << "(20) FSM State NOT IDLE, EV_SEND_REQUEST. Is a TxBuffer available ?" << endl;
-    if (transmissionQueue->getNumPackets() < queueLength) {
-        transmissionQueue->pushPacket(static_cast<Packet *>(msg));
-        EV_DETAIL << "(21) FSM State NOT IDLE, EV_SEND_REQUEST"
-                  << " and [TxBuff avail]: enqueue packet and don't move." << endl;
-    }
-    else {
-        // queue is full, message has to be deleted
-        EV_DETAIL << "(22) FSM State NOT IDLE, EV_SEND_REQUEST"
-                  << " and [TxBuff not avail]: dropping packet and don't move."
-                  << endl;
-        PacketDropDetails details;
-        details.setReason(QUEUE_OVERFLOW);
-        details.setLimit(queueLength);
-        emit(packetDroppedSignal, msg, &details);
-        delete msg;
-    }
+    transmissionQueue->pushPacket(static_cast<Packet *>(msg));
 }
 
 /**
