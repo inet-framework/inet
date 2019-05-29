@@ -15,7 +15,6 @@
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/NetworkCommunicationFingerprintCalculator.h"
-#include "inet/common/packet/Packet.h"
 
 namespace inet {
 
@@ -42,28 +41,10 @@ bool NetworkCommunicationFingerprintCalculator::addEventIngredient(cEvent *event
                 hasher->add(senderNode->getFullPath().c_str());
                 hasher->add(arrivalNode->getFullPath().c_str());
                 break;
-            case NETWORK_INTERFACE_PATH:
-                if (auto senderInterface = findContainingNicModule(cpacket->getSenderModule()))
-                    hasher->add(senderInterface->getInterfaceFullPath().c_str());
-                if (auto arrivalInterface = findContainingNicModule(cpacket->getArrivalModule()))
-                    hasher->add(arrivalInterface->getInterfaceFullPath().c_str());
-                break;
-            case PACKET_DATA: {
-                auto packet = dynamic_cast<Packet *>(cpacket);
-                if (packet == nullptr)
-                    packet = check_and_cast<Packet *>(cpacket->getEncapsulatedPacket());
-                if (packet->getTotalLength().get() % 8 == 0) {
-                    const auto& content = packet->peekAllAsBytes();
-                    for (auto byte : content->getBytes())
-                        hasher->add(byte);
-                }
-                else {
-                    const auto& content = packet->peekAllAsBits();
-                    for (auto bit : content->getBits())
-                        hasher->add(bit);
-                }
-                break;
-            }
+//            case NETWORK_INTERFACE_PATH:
+//                break;
+//            case PACKET_DATA:
+//                break;
             default:
                 throw cRuntimeError("Unknown fingerprint ingredient '%c' (%d)", ingredient, ingredient);
         }
@@ -75,10 +56,7 @@ void NetworkCommunicationFingerprintCalculator::addEvent(cEvent *event)
 {
     if (event->isMessage() && static_cast<cMessage *>(event)->isPacket()) {
         auto cpacket = static_cast<cPacket *>(event);
-        auto packet = dynamic_cast<Packet *>(cpacket);
-        if (packet == nullptr)
-            packet = dynamic_cast<Packet *>(cpacket->getEncapsulatedPacket());
-        if (packet != nullptr) {
+        if (cpacket != nullptr) {
             auto senderNode = findContainingNode(cpacket->getSenderModule());
             auto arrivalNode = findContainingNode(cpacket->getArrivalModule());
             if (senderNode != arrivalNode)
