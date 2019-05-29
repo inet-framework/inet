@@ -33,6 +33,14 @@ void DimensionalTransmitterBase::initialize(int stage)
     }
 }
 
+// TODO: delme
+template<typename T>
+const char *getUnit(T t) { return ""; }
+template<>
+const char *getUnit(simtime_t s) { return "s"; }
+template<>
+const char *getUnit(Hz v) { return "Hz"; }
+
 template<typename T>
 std::vector<DimensionalTransmitterBase::GainEntry<T>> DimensionalTransmitterBase::parseGains(const char *text) const
 {
@@ -40,24 +48,46 @@ std::vector<DimensionalTransmitterBase::GainEntry<T>> DimensionalTransmitterBase
     cStringTokenizer tokenizer(text);
     tokenizer.nextToken();
     while (tokenizer.hasMoreTokens()) {
-        char *end;
         auto where = tokenizer.nextToken();
-        double length = strtod(where + 1, &end) / 100;
-        T offset = T(strtod(end + 1, &end));
+        char *end = (char *)where + 1;
+// TODO: replace this BS with the expression evaluator when it supports simtime_t and bindings
+//      Allowed syntax:
+//        s|c|e
+//        s|c|e+-quantity
+//        s|c|e+-b|d
+//        s|c|e+-b|d+-quantity
+//        s|c|e+-b|d*number
+//        s|c|e+-b|d*number+-quantity
+        double lengthMultiplier = 0;
+        if ((*(where + 1) == '+' || *(where + 1) == '-') &&
+            (*(where + 2) == 'b' || *(where + 2) == 'd'))
+        {
+            if (*(where + 3) == '*')
+                lengthMultiplier = strtod(where + 4, &end);
+            else {
+                lengthMultiplier = 1;
+                end += 2;
+            }
+            if (*(where + 1) == '-')
+                lengthMultiplier *= -1;
+        }
+        T offset = T(0);
+        if (end && strlen(end) != 0)
+            offset = T(cNEDValue::parseQuantity(end, getUnit(T(0))));
         double gain = strtod(tokenizer.nextToken(), &end);
         if (end && !strcmp(end, "dB"))
             gain = math::dB2fraction(gain);
         if (gain < 0 || gain > 1)
             throw cRuntimeError("Gain must be in the range [0, 1]");
         auto interpolator = math::createInterpolator<T, double>(tokenizer.nextToken());
-        gains.push_back(GainEntry<T>(interpolator, *where, length, offset, gain));
+        gains.push_back(GainEntry<T>(interpolator, *where, lengthMultiplier, offset, gain));
     }
     return gains;
 }
 
 void DimensionalTransmitterBase::parseTimeGains(const char *text)
 {
-    if (strcmp(text, "smaller start 0dB either end 0dB greater")) {
+    if (strcmp(text, "smaller s 0dB either e 0dB greater")) {
         firstTimeInterpolator = math::createInterpolator<simtime_t, double>(cStringTokenizer(text).nextToken());
         timeGains = parseGains<simtime_t>(text);
     }
@@ -70,7 +100,7 @@ void DimensionalTransmitterBase::parseTimeGains(const char *text)
 
 void DimensionalTransmitterBase::parseFrequencyGains(const char *text)
 {
-    if (strcmp(text, "smaller start 0dB either end 0dB greater")) {
+    if (strcmp(text, "smaller s 0dB either e 0dB greater")) {
         firstFrequencyInterpolator = math::createInterpolator<Hz, double>(cStringTokenizer(text).nextToken());
         frequencyGains = parseGains<Hz>(text);
     }
