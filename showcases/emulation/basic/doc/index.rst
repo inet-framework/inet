@@ -19,19 +19,23 @@ The network
 
 All of the following examples present a simple conceptual network and a simple scenario.
 The network consists of two hosts, one of which - may it be real or simulated
-- pings the other one. In each configuration, a different part of the conceptual network
+- pings the other one:
+
+.. figure:: imgs/conceptual_embedded_text.svg
+   :width: 100%
+   :align: center
+
+In each configuration, a different part of the conceptual network
 is extracted into the real world. The simulated part of the network is configured
 form the ini file as usual, though not only the simulated, but the real part needs
 to be configured as well. For each example, all commands for the configuration of
 the host computer are contained by the ``Test<ConfigurationName>.sh`` shell scripts.
 These scripts are self-contained and ready to be run under Linux.
 
-This showcase presents the separation features using the Ethernet interface as
+This showcase presents the separation features using mainly the Ethernet interface as
 the separation point between the real and the simulated environment in various ways.
 
-In the configurations of the simulation, the sender host is always referred
-as ``host1`` and the receiver host as ``host2``.
-.. TODO: rename "host1" and "host2" to "sender" and "receiver"
+.. TODO: maybe a fully simulated scenario would be appropriate at the beginning.
 
 Real Sender, Simulated Connection and Receiver
 ----------------------------------------------
@@ -62,8 +66,8 @@ the external TAP device, therefore these properties do not need to be configured
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
-   :start-at: *.host1.eth[0].typename = "ExtUpperEthernetInterface"
-   :end-at: *.host1.eth[0].copyConfiguration = "copyFromExt"
+   :start-at: *.sender.eth[0].typename = "ExtUpperEthernetInterface"
+   :end-at: *.sender.eth[0].copyConfiguration = "copyFromExt"
 
 .. The IP address and other configuratons of the Ethernet interface are not explicitly configured,
 .. but instead they are set to be copied form the TAP device.
@@ -74,21 +78,21 @@ of the ping request messages.
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
-   :start-at: *.configurator.config = xml("<config><interface hosts='host2' names='eth0' address='192.168.2.2' netmask='255.255.255.0'
-   :end-at: *.configurator.config = xml("<config><interface hosts='host2' names='eth0' address='192.168.2.2' netmask='255.255.255.0'
+   :start-at: *.configurator.config = xml("<config><interface hosts='receiver' names='eth0' address='192.168.2.2' netmask='255.255.255.0'
+   :end-at: *.configurator.config = xml("<config><interface hosts='receiver' names='eth0' address='192.168.2.2' netmask='255.255.255.0'
 
 The simulated part of the network is now properly configured.
 The further configurations affect the real OS and are contained in the
-``TestExtUpperEthernetInterfaceInHost1.sh`` shell script.
+``TestExtUpperEthernetInterfaceInSender.sh`` shell script.
 
-.. At this point, the ``TestExtUpperEthernetInterfaceInHost1.sh`` shell script
+.. At this point, the ``TestExtUpperEthernetInterfaceInSender.sh`` shell script
 .. can be run from the terminal. This script file contains all the required
 .. commands to create the TAP device, run the simulation and save the results.
 
 In the host computer, the above mentioned TAP device is created and an
 IP address from within the same subnet as the receiver host is assigned to it:
 
-.. literalinclude:: ../TestExtUpperEthernetInterfaceInHost1.sh
+.. literalinclude:: ../TestExtUpperEthernetInterfaceInSender.sh
    :language: sh
    :start-at: # create TAP interface
    :end-at: sudo ip link set dev tap0 up
@@ -103,7 +107,7 @@ from the real OS of the host computer.
 .. While it is running, the ping command with
 .. the IP address of the simulated receiver host is run from the terminal.
 
-.. literalinclude:: ../TestExtUpperEthernetInterfaceInHost1.sh
+.. literalinclude:: ../TestExtUpperEthernetInterfaceInSender.sh
    :language: sh
    :start-at: # run simulation
    :end-at: ping -c 2 -W 2 192.168.2.2 > ping.out
@@ -121,7 +125,7 @@ file.
 The following schematic image illustrates the structure of the network and
 the route of the messages:
 
-.. figure:: ExtUpperEthernetInterfaceInHost1.svg
+.. figure:: imgs/ExtUpperEthernetInterfaceInSender_embedded_text.svg
    :width: 100%
    :align: center
 
@@ -132,7 +136,7 @@ The script file also takes care of examining whether the emulation was
 successful by checking the content of the ``ping.out`` file.
 At the end, the TAP device is also destroyed:
 
-.. literalinclude:: ../TestExtUpperEthernetInterfaceInHost1.sh
+.. literalinclude:: ../TestExtUpperEthernetInterfaceInSender.sh
    :language: sh
    :start-at: # check output
    :end-at: sudo ip tuntap del mode tap dev tap0
@@ -150,16 +154,16 @@ host computer is above it. This kind of separation is again achieved using the
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
-   :start-at: *.host2.eth[0].typename = "ExtUpperEthernetInterface"
-   :end-at: *.host2.eth[0].copyConfiguration = "copyFromExt"
+   :start-at: *.receiver.eth[0].typename = "ExtUpperEthernetInterface"
+   :end-at: *.receiver.eth[0].copyConfiguration = "copyFromExt"
 
 The IP address of the simulated sender host's Ethernet interface is set as
 the following:
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
-   :start-at: *.configurator.config = xml("<config><interface hosts='host1' names='eth0' address='192.168.2.1' netmask='255.255.255.0'
-   :end-at: *.configurator.config = xml("<config><interface hosts='host1' names='eth0' address='192.168.2.1' netmask='255.255.255.0'
+   :start-at: *.configurator.config = xml("<config><interface hosts='sender' names='eth0' address='192.168.2.1' netmask='255.255.255.0'
+   :end-at: *.configurator.config = xml("<config><interface hosts='sender' names='eth0' address='192.168.2.1' netmask='255.255.255.0'
 
 Since the ping application sending the ping request messages is in the simulated
 sender host, it is configured in the ``omnetpp.ini`` file. The destination address
@@ -167,10 +171,10 @@ is set to the IP address that is going to be assigned to the TAP device.
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
-   :start-at: *.host1.numApps = 1
-   :end-at: *.host1.app[0].printPing = true
+   :start-at: *.sender.numApps = 1
+   :end-at: *.sender.app[0].printPing = true
 
-The configurations of the ``TestExtUpperEthernetInterfaceInHost2.sh`` shell script are
+The configurations of the ``TestExtUpperEthernetInterfaceInReceiver.sh`` shell script are
 very similar to the ones explained in the previous example. After the TAP device is
 created and brought up, the simulation is be run. In this example however,
 the simulated ping application of the sender host generates the
@@ -181,7 +185,7 @@ ECHO REPLY message addressed to the sender host. The :ned:`ExtUpperEthernetInter
 the receiver host reads the TAP device and forwards the messages towards the sender host inside
 the simulation. The results of the pinging can be found in the ``inet.out`` file.
 
-.. figure:: ExtUpperEthernetInterfaceInHost1.svg
+.. figure:: imgs/ExtUpperEthernetInterfaceInReceiver_embedded_text.svg
    :width: 100%
    :align: center
 
@@ -212,14 +216,14 @@ host is fully real.
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
-   :start-after: description = "real ping application in host1 sends ping requests to host2 using ExtLowerEthernetInterface in host2"
-   :end-at: *.host2.eth[0].copyConfiguration = "copyFromExt"
+   :start-after: description = "real ping application in sender sends ping requests to receiver using ExtLowerEthernetInterface in receiver"
+   :end-at: *.receiver.eth[0].copyConfiguration = "copyFromExt"
 
 In the host OS, the above mentioned veth devices need to be created and brought up. A route
 for the virtual link also needs to be added. The steps for the configuration are
-contained in the ``TestExtLowerEthernetInterfaceInHost2.sh`` shell script:
+contained in the ``TestExtLowerEthernetInterfaceInReceiver.sh`` shell script:
 
-.. literalinclude:: ../TestExtLowerEthernetInterfaceInHost2.sh
+.. literalinclude:: ../TestExtLowerEthernetInterfaceInReceiver.sh
    :language: sh
    :start-at: # create virtual ethernet link: veth0 <--> veth1
    :end-at: sudo route add -net 192.168.2.0 netmask 255.255.255.0 dev veth0
@@ -227,7 +231,7 @@ contained in the ``TestExtLowerEthernetInterfaceInHost2.sh`` shell script:
 After the veth pair is successfully created, the simulation is run and the ping
 application is started:
 
-.. literalinclude:: ../TestExtLowerEthernetInterfaceInHost2.sh
+.. literalinclude:: ../TestExtLowerEthernetInterfaceInReceiver.sh
    :language: sh
    :start-at: # run simulation
    :end-at: ping -c 2 -W 2 192.168.2.2 > ping.out
@@ -240,7 +244,7 @@ The :ned:`ExtLowerEthernetInterface` of the receiver host writes the message int
 the veth device, which is then sent to the sender host in the real OS. The results
 are saved into the ``ping.out`` file.
 
-.. figure:: ExtUpperEthernetInterfaceInHost1.svg
+.. figure:: imgs/ExtLowerEthernetInterfaceInReceiver_embedded_text.svg
    :width: 100%
    :align: center
 
@@ -258,8 +262,8 @@ application needs to be configured as well:
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
-   :start-after: description = "simulated ping application in host1 sends ping requests to host2 using ExtLowerEthernetInterface in host1"
-   :end-at: *.host1.eth[0].device = "veth0
+   :start-after: description = "simulated ping application in sender sends ping requests to receiver using ExtLowerEthernetInterface in sender"
+   :end-at: *.sender.eth[0].device = "veth0
 
 The veth devices are created with the help of the script file. The destination address
 for the ping application in the sender host needs to be the same as the IP address of ``veth1``.
@@ -272,7 +276,7 @@ A PING REPLY message is then routed through the veth devices, where the :ned:`Ex
 of the sender host read ``veth0`` and processes the reply message. The output is written into the
 ``inet.out`` file.
 
-.. figure:: ExtUpperEthernetInterfaceInHost1.svg
+.. figure:: imgs/ExtLowerEthernetInterfaceInSender_embedded_text.svg
    :width: 100%
    :align: center
 
