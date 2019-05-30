@@ -10,7 +10,7 @@ sudo ip addr add 192.168.2.1/24 dev tap0
 sudo ip link set dev tap0 up
 
 # run simulation
-inet -u Cmdenv -c ExtUpperEthernetInterfaceInHost1 --sim-time-limit=2s &> inet.out &
+inet -u Cmdenv -c ExtUpperEthernetInterfaceInSender --sim-time-limit=2s &> inet.out &
 sleep 1
 
 # ping into simulation

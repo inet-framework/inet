@@ -10,7 +10,7 @@ sudo ip addr add 192.168.2.2/24 dev tun0
 sudo ip link set dev tun0 up
 
 # run simulation
-inet -u Cmdenv -c ExtUpperIpv4NetworkLayerInHost2 &> inet.out &
+inet -u Cmdenv -c ExtUpperIpv4NetworkLayerInReceiver &> inet.out &
 
 # check output
 if grep -q "from 192.168.2.2" "inet.out"; then echo $0 ": PASS"; else echo $0 ": FAIL"; fi

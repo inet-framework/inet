@@ -14,7 +14,7 @@ sudo ip link set veth1 up
 sudo route add -net 192.168.2.0 netmask 255.255.255.0 dev veth0
 
 # run simulation
-inet -u Cmdenv -c ExtLowerEthernetInterfaceInHost2 --sim-time-limit=2s &> inet.out &
+inet -u Cmdenv -c ExtLowerEthernetInterfaceInReceiver --sim-time-limit=2s &> inet.out &
 sleep 1
 
 # ping into simulation
