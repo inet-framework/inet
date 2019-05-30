@@ -9,7 +9,7 @@ import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 
 
 //
-// Both host1 and host2 are simulated but may be partially external.
+// Both sender and receiver are simulated but may be partially external.
 //
 network NoExtHostsEthernetShowcase
 {
@@ -20,33 +20,33 @@ network NoExtHostsEthernetShowcase
             parameters:
                 @display("p=100,100;is=s");
         }
-        host1: StandardHost {
+        sender: StandardHost {
             parameters:
                 @display("p=300,150");
         }
-        host2: StandardHost {
+        receiver: StandardHost {
             parameters:
                 @display("p=500,150");
         }
     connections allowunconnected:
-        host1.ethg++ <--> Eth100M <--> host2.ethg++;
+        sender.ethg++ <--> Eth100M <--> receiver.ethg++;
 }
 
 //
-// Host1 is simulated and Host2 is external.
+// sender is simulated and receiver is external.
 //
-network ExtHost2EthernetShowcase
+network ExtReceiverEthernetShowcase
 {
     parameters:
         @display("bgb=600,300");
         @figure[link](type=line; points=320,150,480,150; lineOpacity=0.2);
-        @figure[host2](type=icon; image="device/pc2"; pos=500,150; opacity=0.2);
+        @figure[receiver](type=icon; image="device/pc2"; pos=500,150; opacity=0.2);
     submodules:
         configurator: Ipv4NetworkConfigurator {
             parameters:
                 @display("p=100,100;is=s");
         }
-        host1: StandardHost {
+        sender: StandardHost {
             parameters:
                 @display("p=300,150");
         }
@@ -54,20 +54,20 @@ network ExtHost2EthernetShowcase
 }
 
 //
-// Host2 is external
+// receiver is external
 //
-network ExtHost1EthernetShowcase
+network ExtSenderEthernetShowcase
 {
     parameters:
         @display("bgb=600,300");
         @figure[link](type=line; points=320,150,480,150; lineOpacity=0.2);
-        @figure[host1](type=icon; image="device/pc2"; pos=300,150; opacity=0.2);
+        @figure[receiver](type=icon; image="device/pc2"; pos=300,150; opacity=0.2);
     submodules:
         configurator: Ipv4NetworkConfigurator {
             parameters:
                 @display("p=100,100;is=s");
         }
-        host2: StandardHost {
+        receiver: StandardHost {
             parameters:
                 @display("p=500,150");
         }
@@ -76,7 +76,7 @@ network ExtHost1EthernetShowcase
 
 
 //
-// Both host1 and host2 are simulated but may be partially external.
+// Both sender and receiver are simulated but may be partially external.
 //
 network NoExtHostsIeee80211Showcase
 {
@@ -91,31 +91,31 @@ network NoExtHostsIeee80211Showcase
             parameters:
                 @display("p=100,200;is=s");
         }
-        host1: AdhocHost {
+        sender: AdhocHost {
             parameters:
                 @display("p=300,150");
         }
-        host2: AdhocHost {
+        receiver: AdhocHost {
             parameters:
                 @display("p=500,150");
         }
 }
 
 //
-// Host1 is simulated and Host2 is external.
+// sender is simulated and receiver is external.
 //
-network ExtHost2Ieee80211Showcase
+network ExtReceiverIeee80211Showcase
 {
     parameters:
         @display("bgb=600,300");
         @figure[link](type=line; points=320,150,480,150; lineOpacity=0.2);
-        @figure[host2](type=icon; image="device/pc2"; pos=500,150; opacity=0.2);
+        @figure[receiver](type=icon; image="device/pc2"; pos=500,150; opacity=0.2);
     submodules:
         configurator: Ipv4NetworkConfigurator {
             parameters:
                 @display("p=100,100;is=s");
         }
-        host1: AdhocHost {
+        sender: AdhocHost {
             parameters:
                 @display("p=300,150");
         }
@@ -123,20 +123,20 @@ network ExtHost2Ieee80211Showcase
 }
 
 //
-// Host2 is external
+// receiver is external
 //
-network ExtHost1Ieee80211Showcase
+network ExtSenderIeee80211Showcase
 {
     parameters:
         @display("bgb=600,300");
         @figure[link](type=line; points=320,150,480,150; lineOpacity=0.2);
-        @figure[host1](type=icon; image="device/pc2"; pos=300,150; opacity=0.2);
+        @figure[sender](type=icon; image="device/pc2"; pos=300,150; opacity=0.2);
     submodules:
         configurator: Ipv4NetworkConfigurator {
             parameters:
                 @display("p=100,100;is=s");
         }
-        host2: AdhocHost {
+        receiver: AdhocHost {
             parameters:
                 @display("p=500,150");
         }
