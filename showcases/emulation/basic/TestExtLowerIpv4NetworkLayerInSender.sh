@@ -14,7 +14,7 @@ sudo ip link set veth1 up
 sudo route add -net 192.168.2.0 netmask 255.255.255.0 dev veth0
 
 # run simulation
-inet -u Cmdenv -c ExtLowerIpv4NetworkLayerInHost1 --sim-time-limit=2s &> inet.out
+inet -u Cmdenv -c ExtLowerIpv4NetworkLayerInSender --sim-time-limit=2s &> inet.out
 
 # check output
 if grep -q "from 192.168.2.2" "inet.out"; then echo $0 ": PASS"; else echo $0 ": FAIL"; fi
