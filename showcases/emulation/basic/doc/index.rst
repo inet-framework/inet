@@ -40,8 +40,6 @@ the separation point between the real and the simulated environment in various w
 Real Sender, Simulated Connection and Receiver
 ----------------------------------------------
 
-.. real sender host, simulated connection and receiver host
-
 This example simulation presents a real ping application sending ping requests
 to a simulated node. The separation between the simulation and the real world
 takes place in the Ethernet interface of the sender host. The part of the network below
@@ -58,7 +56,7 @@ in the host OS. The simulation sends and receives packets through the TAP device
 the OS file API.
 
 The sender host's Ethernet interface is configured in the ini file. The type of the interface
-is set to :ned:`ExtUpperEthernetInterface`, and the TAP device that it uses is called
+is :ned:`ExtUpperEthernetInterface`, and the name of the TAP device that it uses is
 ``tap0``. The interface is set to copy the remaining configurations, such as IP address, from
 the external TAP device, therefore these properties do not need to be configured here.
 
@@ -241,8 +239,7 @@ Each message is routed through the connected virtual ethernet interfaces ``veth0
 The receiver node's Ethernet interface reads ``veth1`` and the ECHO REQUEST message is passed forward
 inside the simulation. The receiver host gets the message and replies to it.
 The :ned:`ExtLowerEthernetInterface` of the receiver host writes the message into
-the veth device, which is then sent to the sender host in the real OS. The results
-are saved into the ``ping.out`` file.
+the veth device, which is then sent to the sender host in the real OS.
 
 .. figure:: imgs/ExtLowerEthernetInterfaceInReceiver_embedded_text.svg
    :width: 100%
@@ -273,8 +270,7 @@ The simulated ping application in the sender host sends the PING REQUEST message
 The :ned:`ExtLowerEthernetInterface` of the sender host writes the message into the ``veth0``
 virtual ethernet device. The message the arrives at ``veth1`` and is processed be the host OS.
 A PING REPLY message is then routed through the veth devices, where the :ned:`ExtLowerEthernetInterface`
-of the sender host read ``veth0`` and processes the reply message. The output is written into the
-``inet.out`` file.
+of the sender host read ``veth0`` and processes the reply message.
 
 .. figure:: imgs/ExtLowerEthernetInterfaceInSender_embedded_text.svg
    :width: 100%
@@ -291,6 +287,13 @@ parts of the network. Some other possibilities are the following:
 - :ned:`ExtLowerUdp`
 .. - :ned:`ExtLowerIpv4NetworkLayer`
 .. - :ned:`ExtUpperIpv4NetworkLayer`
+
+The usage of the :ned:`ExtUpperIeee80211Interface` in the WLAN interface of the hosts requires
+a nearly identical configuration as the :ned:`ExtUpperEthernetInterface`. Therefore there is
+no need to go further into details with this module. The ``ExtUpperIeee80211Interface``
+is not implemented yet.
+
+.. TODO: explain why it is not possible to implement the ExtUpperIeee80211Interface
 
 Further Information
 -------------------
