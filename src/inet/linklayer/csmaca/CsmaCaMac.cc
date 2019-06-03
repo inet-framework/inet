@@ -168,7 +168,7 @@ void CsmaCaMac::handleUpperPacket(Packet *packet)
     txQueue->pushPacket(frame);
     if (fsm.getState() != IDLE)
         EV << "deferring upper message transmission in " << fsm.getStateName() << " state\n";
-    else {
+    else if (!txQueue->isEmpty()){
         popTxQueue();
         handleWithFsm(currentTxFrame);
     }

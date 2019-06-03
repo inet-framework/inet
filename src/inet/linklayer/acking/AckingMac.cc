@@ -137,7 +137,7 @@ void AckingMac::handleUpperPacket(Packet *packet)
     txQueue->pushPacket(packet);
     if (currentTxFrame || radio->getTransmissionState() == IRadio::TRANSMISSION_STATE_TRANSMITTING)
         EV << "Delaying transmission of " << packet << ".\n";
-    else {
+    else if (!txQueue->isEmpty()){
         popTxQueue();
         startTransmitting();
     }
