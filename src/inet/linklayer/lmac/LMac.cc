@@ -659,23 +659,6 @@ void LMac::encapsulate(Packet *netwPkt)
     EV_DETAIL << "pkt encapsulated\n";
 }
 
-void LMac::flushQueue()
-{
-    while (!txQueue->isEmpty()) {
-        auto packet = txQueue->popPacket();
-        PacketDropDetails details;
-        details.setReason(INTERFACE_DOWN);
-        emit(packetDroppedSignal, packet, &details); //FIXME this signal lumps together packets from the network and packets from higher layers! separate them
-        delete packet;
-    }
-}
-
-void LMac::clearQueue()
-{
-    while (!txQueue->isEmpty())
-        delete txQueue->popPacket();
-}
-
 void LMac::attachSignal(Packet *macPkt)
 {
     //calc signal duration

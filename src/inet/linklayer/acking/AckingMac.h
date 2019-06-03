@@ -55,8 +55,6 @@ class INET_API AckingMac : public MacProtocolBase
   protected:
     /** implements MacBase functions */
     //@{
-    virtual void flushQueue();
-    virtual void clearQueue();
     virtual void configureInterfaceEntry() override;
     //@}
 

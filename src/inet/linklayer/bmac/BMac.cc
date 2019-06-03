@@ -600,23 +600,6 @@ void BMac::receiveSignal(cComponent *source, simsignal_t signalID, long value, c
     }
 }
 
-void BMac::flushQueue()
-{
-    while (!txQueue->isEmpty()) {
-        auto packet = txQueue->popPacket();
-        PacketDropDetails details;
-        details.setReason(INTERFACE_DOWN);
-        emit(packetDroppedSignal, packet, &details); //FIXME this signal lumps together packets from the network and packets from higher layers! separate them
-        delete packet;
-    }
-}
-
-void BMac::clearQueue()
-{
-    while (!txQueue->isEmpty())
-        delete txQueue->popPacket();
-}
-
 void BMac::attachSignal(Packet *macPkt)
 {
     //calc signal duration

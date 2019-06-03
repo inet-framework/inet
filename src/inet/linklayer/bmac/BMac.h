@@ -199,10 +199,6 @@ class INET_API BMac : public MacProtocolBase, public IMacProtocol
     /** @brief Internal function to attach a signal to the packet */
     void attachSignal(Packet *macPkt);
 
-    virtual void flushQueue();
-
-    virtual void clearQueue();
-
     void decapsulate(Packet *packet);
     void encapsulate(Packet *packet);
 };

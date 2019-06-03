@@ -191,10 +191,6 @@ class INET_API LMac : public MacProtocolBase, public IMacProtocol
 
     /** @brief Internal function to attach a signal to the packet */
     void attachSignal(Packet *macPkt);
-
-    virtual void flushQueue();
-
-    virtual void clearQueue();
 };
 
 } // namespace inet

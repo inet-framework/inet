@@ -46,25 +46,6 @@ AckingMac::~AckingMac()
     cancelAndDelete(ackTimeoutMsg);
 }
 
-void AckingMac::flushQueue()
-{
-    ASSERT(txQueue);
-    while (!txQueue->isEmpty()) {
-        auto packet = txQueue->popPacket();
-        PacketDropDetails details;
-        details.setReason(INTERFACE_DOWN);
-        emit(packetDroppedSignal, packet, &details);
-        delete packet;
-    }
-}
-
-void AckingMac::clearQueue()
-{
-    ASSERT(txQueue);
-    while (!txQueue->isEmpty())
-        delete txQueue->popPacket();
-}
-
 void AckingMac::initialize(int stage)
 {
     MacProtocolBase::initialize(stage);
