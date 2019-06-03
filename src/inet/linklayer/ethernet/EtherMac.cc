@@ -605,7 +605,9 @@ void EtherMac::handleEndTxPeriod()
     EV_INFO << "Transmission of " << currentTxFrame << " successfully completed.\n";
     deleteCurrentTxFrame();
     lastTxFinishTime = simTime();
-    getNextFrameFromQueue();  // note: cannot be moved into handleEndIFGPeriod(), because in burst mode we need to know whether to send filled IFG or not
+    // note: cannot be moved into handleEndIFGPeriod(), because in burst mode we need to know whether to send filled IFG or not
+    if (!txQueue->isEmpty())
+        popTxQueue();
 
     // only count transmissions in totalSuccessfulRxTxTime if channel is half-duplex
     if (!duplexMode) {
@@ -724,7 +726,8 @@ void EtherMac::handleRetransmission()
         dropCurrentTxFrame(details);
         changeTransmissionState(TX_IDLE_STATE);
         backoffs = 0;
-        getNextFrameFromQueue();
+        if (!txQueue->isEmpty())
+            popTxQueue();
         beginSendFrames();
         return;
     }

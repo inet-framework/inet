@@ -187,7 +187,6 @@ class INET_API EtherMacBase : public MacProtocolBase
     virtual void printParameters();
 
     // helpers
-    virtual void getNextFrameFromQueue();
     virtual void processConnectDisconnect();
     virtual void encapsulate(Packet *packet);
     virtual void decapsulate(Packet *packet);

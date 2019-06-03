@@ -565,12 +565,6 @@ void EtherMacBase::printParameters()
               << endl;
 }
 
-void EtherMacBase::getNextFrameFromQueue()
-{
-    if (!txQueue->isEmpty())
-        popTxQueue();
-}
-
 void EtherMacBase::finish()
 {
     if (!disabled) {
