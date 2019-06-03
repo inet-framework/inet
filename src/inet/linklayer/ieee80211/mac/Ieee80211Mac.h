@@ -120,7 +120,7 @@ class INET_API Ieee80211Mac : public MacProtocolBase
 
     void deleteCurrentTxFrame() override { throw cRuntimeError("model error"); }
     void dropCurrentTxFrame(PacketDropDetails& details) override { throw cRuntimeError("model error"); }
-    void popFromTransmissionQueue() override { throw cRuntimeError("model error"); }
+    void popTxQueue() override { throw cRuntimeError("model error"); }
 };
 
 } // namespace ieee80211

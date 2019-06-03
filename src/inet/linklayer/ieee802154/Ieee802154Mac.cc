@@ -103,7 +103,7 @@ void Ieee802154Mac::initialize(int stage)
         rxAckTimer = new cMessage("timer-rxAck");
         macState = IDLE_1;
         txAttempts = 0;
-        transmissionQueue = check_and_cast<queueing::IPacketQueue *>(getSubmodule("queue"));
+        txQueue = check_and_cast<queueing::IPacketQueue *>(getSubmodule("queue"));
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
         cModule *radioModule = getModuleFromPar<cModule>(par("radioModule"), this);
@@ -222,8 +222,8 @@ void Ieee802154Mac::updateStatusIdle(t_mac_event event, cMessage *msg)
 {
     switch (event) {
         case EV_SEND_REQUEST:
-            transmissionQueue->pushPacket(static_cast<Packet *>(msg));
-            if (!transmissionQueue->isEmpty()) {
+            txQueue->pushPacket(static_cast<Packet *>(msg));
+            if (!txQueue->isEmpty()) {
                 EV_DETAIL << "(1) FSM State IDLE_1, EV_SEND_REQUEST and [TxBuff avail]: startTimerBackOff -> BACKOFF." << endl;
                 updateMacState(BACKOFF_2);
                 NB = 0;
@@ -353,7 +353,7 @@ void Ieee802154Mac::updateStatusCCA(t_mac_event event, cMessage *msg)
                 updateMacState(TRANSMITFRAME_4);
                 radio->setRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
                 if (currentTxFrame == nullptr)
-                    popFromTransmissionQueue();
+                    popTxQueue();
                 Packet *mac = currentTxFrame->dup();
                 attachSignal(mac, simTime() + aTurnaroundTime);
                 //sendDown(msg);
@@ -598,7 +598,7 @@ void Ieee802154Mac::updateStatusTransmitAck(t_mac_event event, cMessage *msg)
 void Ieee802154Mac::updateStatusNotIdle(cMessage *msg)
 {
     EV_DETAIL << "(20) FSM State NOT IDLE, EV_SEND_REQUEST. Is a TxBuffer available ?" << endl;
-    transmissionQueue->pushPacket(static_cast<Packet *>(msg));
+    txQueue->pushPacket(static_cast<Packet *>(msg));
 }
 
 /**
@@ -649,8 +649,8 @@ void Ieee802154Mac::executeMac(t_mac_event event, cMessage *msg)
 
 void Ieee802154Mac::manageQueue()
 {
-    if (currentTxFrame != nullptr || !transmissionQueue->isEmpty()) {
-        EV_DETAIL << "(manageQueue) there are " << transmissionQueue->getNumPackets() + (currentTxFrame == nullptr ? 0 : 1) << " packets to send, entering backoff wait state." << endl;
+    if (currentTxFrame != nullptr || !txQueue->isEmpty()) {
+        EV_DETAIL << "(manageQueue) there are " << txQueue->getNumPackets() + (currentTxFrame == nullptr ? 0 : 1) << " packets to send, entering backoff wait state." << endl;
         if (transmissionAttemptInterruptedByRx) {
             // resume a transmission cycle which was interrupted by
             // a frame reception during CCA check

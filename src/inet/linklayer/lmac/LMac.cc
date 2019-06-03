@@ -53,7 +53,7 @@ void LMac::initialize(int stage)
         controlDuration = (double)(headerLength.get() + numSlots + 16) / (double)bitrate;     //FIXME replace 16 to a constant
         EV << "Control packets take : " << controlDuration << " seconds to transmit\n";
 
-        transmissionQueue = check_and_cast<queueing::IPacketQueue *>(getSubmodule("queue"));
+        txQueue = check_and_cast<queueing::IPacketQueue *>(getSubmodule("queue"));
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
         cModule *radioModule = getModuleFromPar<cModule>(par("radioModule"), this);
@@ -130,8 +130,8 @@ void LMac::configureInterfaceEntry()
 void LMac::handleUpperPacket(Packet *packet)
 {
     encapsulate(packet);
-    transmissionQueue->pushPacket(packet);
-    EV_DETAIL << "packet put in queue\n  queue size: " << transmissionQueue->getNumPackets() << " macState: " << macState
+    txQueue->pushPacket(packet);
+    EV_DETAIL << "packet put in queue\n  queue size: " << txQueue->getNumPackets() << " macState: " << macState
               << "; mySlot is " << mySlot << "; current slot is " << currSlot << endl;
 }
 
@@ -427,8 +427,8 @@ void LMac::handleSelfMessage(cMessage *msg)
 
         case SEND_CONTROL:
             if (msg->getKind() == LMAC_SEND_CONTROL) {
-                if (!SETUP_PHASE && currentTxFrame == nullptr && !transmissionQueue->isEmpty())
-                    currentTxFrame = transmissionQueue->popPacket();
+                if (!SETUP_PHASE && currentTxFrame == nullptr && !txQueue->isEmpty())
+                    currentTxFrame = txQueue->popPacket();
                 // send first a control message, so that non-receiving nodes can switch off.
                 EV << "Sending a control packet.\n";
                 auto control = makeShared<LMacHeader>();
@@ -661,8 +661,8 @@ void LMac::encapsulate(Packet *netwPkt)
 
 void LMac::flushQueue()
 {
-    while (!transmissionQueue->isEmpty()) {
-        auto packet = transmissionQueue->popPacket();
+    while (!txQueue->isEmpty()) {
+        auto packet = txQueue->popPacket();
         PacketDropDetails details;
         details.setReason(INTERFACE_DOWN);
         emit(packetDroppedSignal, packet, &details); //FIXME this signal lumps together packets from the network and packets from higher layers! separate them
@@ -672,8 +672,8 @@ void LMac::flushQueue()
 
 void LMac::clearQueue()
 {
-    while (!transmissionQueue->isEmpty())
-        delete transmissionQueue->popPacket();
+    while (!txQueue->isEmpty())
+        delete txQueue->popPacket();
 }
 
 void LMac::attachSignal(Packet *macPkt)

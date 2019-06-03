@@ -65,7 +65,7 @@ void XMac::initialize(int stage)
         lastDataPktSrcAddr  = MacAddress::BROADCAST_ADDRESS;
 
         macState = INIT;
-        transmissionQueue = check_and_cast<queueing::IPacketQueue *>(getSubmodule("queue"));
+        txQueue = check_and_cast<queueing::IPacketQueue *>(getSubmodule("queue"));
         WATCH(macState);
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
@@ -187,12 +187,12 @@ void XMac::handleUpperPacket(Packet *packet)
     encapsulate(packet);
     EV_DETAIL << "CSMA received a message from upper layer, name is " << packet->getName() << ", CInfo removed, mac addr=" << packet->peekAtFront<XMacHeader>()->getDestAddr() << endl;
     EV_DETAIL << "pkt encapsulated, length: " << packet->getBitLength() << "\n";
-    transmissionQueue->pushPacket(packet);
-    EV_DEBUG << "Max queue length: " << transmissionQueue->getMaxNumPackets() << ", packet put in queue"
-              "\n  queue size: " << transmissionQueue->getNumPackets() << " macState: "
+    txQueue->pushPacket(packet);
+    EV_DEBUG << "Max queue length: " << txQueue->getMaxNumPackets() << ", packet put in queue"
+              "\n  queue size: " << txQueue->getNumPackets() << " macState: "
               << macState << endl;
     // force wakeup now
-    if (!transmissionQueue->isEmpty() && wakeup->isScheduled() && (macState == SLEEP)) {
+    if (!txQueue->isEmpty() && wakeup->isScheduled() && (macState == SLEEP)) {
         cancelEvent(wakeup);
         scheduleAt(simTime() + dblrand()*0.01f, wakeup);
     }
@@ -278,7 +278,7 @@ void XMac::handleSelfMessage(cMessage *msg)
         if (msg->getKind() == XMAC_CCA_TIMEOUT)
         {
             // channel is clear and we wanna SEND
-            if (!transmissionQueue->isEmpty())
+            if (!txQueue->isEmpty())
             {
                 radio->setRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
                 changeDisplayColor(YELLOW);
@@ -377,7 +377,7 @@ void XMac::handleSelfMessage(cMessage *msg)
         if (msg->getKind() == XMAC_SWITCHING_FINISHED) {
             if (radio->getRadioMode() == IRadio::RADIO_MODE_TRANSMITTER) {
                 if (currentTxFrame == nullptr)
-                    popFromTransmissionQueue();
+                    popTxQueue();
                 auto pkt_preamble = currentTxFrame->peekAtFront<XMacHeader>();
                 sendPreamble(pkt_preamble->getDestAddr());
             }
@@ -442,7 +442,7 @@ void XMac::handleSelfMessage(cMessage *msg)
             // remove the packet just served from the queue
             deleteCurrentTxFrame();
             // if something in the queue, wakeup soon.
-            if (!transmissionQueue->isEmpty())
+            if (!txQueue->isEmpty())
                 scheduleAt(simTime() + dblrand()*checkInterval, wakeup);
             else
                 scheduleAt(simTime() + slotDuration, wakeup);
@@ -479,7 +479,7 @@ void XMac::handleSelfMessage(cMessage *msg)
                 cancelEvent(data_timeout);
 
                 // if something in the queue, wakeup soon.
-                if (!transmissionQueue->isEmpty())
+                if (!txQueue->isEmpty())
                     scheduleAt(simTime() + dblrand()*checkInterval, wakeup);
                 else
                     scheduleAt(simTime() + slotDuration, wakeup);
@@ -501,7 +501,7 @@ void XMac::handleSelfMessage(cMessage *msg)
         if (msg->getKind() == XMAC_DATA_TIMEOUT) {
             EV << "node " << address << " : State WAIT_DATA, message XMAC_DATA_TIMEOUT, new state SLEEP" << endl;
             // if something in the queue, wakeup soon.
-            if (!transmissionQueue->isEmpty())
+            if (!txQueue->isEmpty())
                 scheduleAt(simTime() + dblrand()*checkInterval, wakeup);
             else
                 scheduleAt(simTime() + slotDuration, wakeup);
@@ -559,7 +559,7 @@ void XMac::sendDataPacket()
 {
     nbTxDataPackets++;
     if (currentTxFrame == nullptr)
-        popFromTransmissionQueue();
+        popTxQueue();
     auto packet = currentTxFrame->dup();
     const auto& hdr = packet->peekAtFront<XMacHeader>();
     lastDataPktDestAddr = hdr->getDestAddr();

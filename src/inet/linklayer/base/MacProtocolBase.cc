@@ -104,20 +104,20 @@ void MacProtocolBase::dropCurrentTxFrame(PacketDropDetails& details)
     currentTxFrame = nullptr;
 }
 
-void MacProtocolBase::popFromTransmissionQueue()
+void MacProtocolBase::popTxQueue()
 {
     if (currentTxFrame != nullptr)
         throw cRuntimeError("Model error: incomplete transmission exists");
-    ASSERT(transmissionQueue != nullptr);
-    currentTxFrame = transmissionQueue->popPacket();
+    ASSERT(txQueue != nullptr);
+    currentTxFrame = txQueue->popPacket();
 }
 
 void MacProtocolBase::flushQueue(PacketDropDetails& details)
 {
     // code would look slightly nicer with a pop() function that returns nullptr if empty
-    if (transmissionQueue)
-        while (!transmissionQueue->isEmpty()) {
-            auto packet = transmissionQueue->popPacket();
+    if (txQueue)
+        while (!txQueue->isEmpty()) {
+            auto packet = txQueue->popPacket();
             emit(packetDroppedSignal, packet, &details); //FIXME this signal lumps together packets from the network and packets from higher layers! separate them
             delete packet;
         }
@@ -125,9 +125,9 @@ void MacProtocolBase::flushQueue(PacketDropDetails& details)
 
 void MacProtocolBase::clearQueue()
 {
-    if (transmissionQueue)
-        while (!transmissionQueue->isEmpty())
-            delete transmissionQueue->popPacket();
+    if (txQueue)
+        while (!txQueue->isEmpty())
+            delete txQueue->popPacket();
 }
 
 void MacProtocolBase::handleMessageWhenDown(cMessage *msg)

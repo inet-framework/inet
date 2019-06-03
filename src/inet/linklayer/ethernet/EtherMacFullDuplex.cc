@@ -170,7 +170,7 @@ void EtherMacFullDuplex::handleUpperPacket(Packet *packet)
 
     // store frame and possibly begin transmitting
     EV_DETAIL << "Frame " << frame << " arrived from higher layers, enqueueing\n";
-    transmissionQueue->pushPacket(packet);
+    txQueue->pushPacket(packet);
 
     if (transmitState == TX_IDLE_STATE) {
         if (currentTxFrame == nullptr)

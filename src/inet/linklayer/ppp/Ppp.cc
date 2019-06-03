@@ -69,7 +69,7 @@ void Ppp::initialize(int stage)
         subscribe(POST_MODEL_CHANGE, this);
         emit(transmissionStateChangedSignal, 0L);
 
-        transmissionQueue = check_and_cast<queueing::IPacketQueue *>(getSubmodule("queue"));
+        txQueue = check_and_cast<queueing::IPacketQueue *>(getSubmodule("queue"));
     }
 }
 
@@ -151,8 +151,8 @@ void Ppp::refreshOutGateConnection(bool connected)
         interfaceEntry->setDatarate(datarate);
     }
 
-    if (connected && !endTransmissionEvent->isScheduled() && !transmissionQueue->isEmpty()) {
-        popFromTransmissionQueue();
+    if (connected && !endTransmissionEvent->isScheduled() && !txQueue->isEmpty()) {
+        popTxQueue();
         startTransmitting();
     }
 }
@@ -193,7 +193,7 @@ void Ppp::handleMessageWhenUp(cMessage *message)
 {
     MacProtocolBase::handleMessageWhenUp(message);
     if (operationalState == State::STOPPING_OPERATION) {
-        if (transmissionQueue->isEmpty()) {
+        if (txQueue->isEmpty()) {
             interfaceEntry->setCarrier(false);
             interfaceEntry->setState(InterfaceEntry::State::DOWN);
             startActiveOperationExtraTimeOrFinish(par("stopOperationExtraTime"));
@@ -208,8 +208,8 @@ void Ppp::handleSelfMessage(cMessage *message)
         // Transmission finished, we can start next one.
         EV_INFO << "Transmission successfully completed.\n";
         emit(transmissionStateChangedSignal, 0L);
-        if (!transmissionQueue->isEmpty()) {
-            popFromTransmissionQueue();
+        if (!txQueue->isEmpty()) {
+            popTxQueue();
             startTransmitting();
         }
     }
@@ -229,9 +229,9 @@ void Ppp::handleUpperPacket(Packet *packet)
         delete packet;
         return;
     }
-    transmissionQueue->pushPacket(packet);
-    if (!endTransmissionEvent->isScheduled() && !transmissionQueue->isEmpty()) {
-        popFromTransmissionQueue();
+    txQueue->pushPacket(packet);
+    if (!endTransmissionEvent->isScheduled() && !txQueue->isEmpty()) {
+        popTxQueue();
         startTransmitting();
     }
 }
@@ -284,7 +284,7 @@ void Ppp::refreshDisplay() const
                 result = std::to_string(numDroppedIfaceDown + numDroppedBitErr);
                 break;
             case 'q':
-                result = std::to_string(transmissionQueue->getNumPackets());
+                result = std::to_string(txQueue->getNumPackets());
                 break;
             case 'b':
                 if (datarateChannel == nullptr)
@@ -313,7 +313,7 @@ void Ppp::refreshDisplay() const
     const char *color = "";
     if (datarateChannel != nullptr) {
         if (endTransmissionEvent->isScheduled())
-            color = transmissionQueue->getNumPackets() >= 3 ? "red" : "yellow";
+            color = txQueue->getNumPackets() >= 3 ? "red" : "yellow";
     }
     else
         color = "#707070";
@@ -347,7 +347,7 @@ void Ppp::decapsulate(Packet *packet)
 
 void Ppp::handleStopOperation(LifecycleOperation *operation)
 {
-    if (!transmissionQueue->isEmpty()) {
+    if (!txQueue->isEmpty()) {
         interfaceEntry->setState(InterfaceEntry::State::GOING_DOWN);
         delayActiveOperationFinish(par("stopOperationTimeout"));
     }

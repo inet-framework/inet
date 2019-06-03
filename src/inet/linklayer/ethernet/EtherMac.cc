@@ -245,10 +245,10 @@ void EtherMac::handleUpperPacket(Packet *packet)
 
     // store frame and possibly begin transmitting
     EV_DETAIL << "Frame " << packet << " arrived from higher layer, enqueueing\n";
-    transmissionQueue->pushPacket(packet);
+    txQueue->pushPacket(packet);
 
-    if (!currentTxFrame && !transmissionQueue->isEmpty())
-        currentTxFrame = transmissionQueue->popPacket();
+    if (!currentTxFrame && !txQueue->isEmpty())
+        currentTxFrame = txQueue->popPacket();
 
     if ((duplexMode || receiveState == RX_IDLE_STATE) && transmitState == TX_IDLE_STATE) {
         EV_DETAIL << "No incoming carrier signals detected, frame clear to send\n";
@@ -766,7 +766,7 @@ void EtherMac::printState()
 
     EV_DETAIL << ",  backoffs: " << backoffs;
     EV_DETAIL << ",  numConcurrentRxTransmissions: " << numConcurrentTransmissions;
-    EV_DETAIL << ",  queueLength: " << transmissionQueue->getNumPackets();
+    EV_DETAIL << ",  queueLength: " << txQueue->getNumPackets();
     EV_DETAIL << endl;
 
 #undef CASE

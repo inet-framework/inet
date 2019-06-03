@@ -48,9 +48,9 @@ AckingMac::~AckingMac()
 
 void AckingMac::flushQueue()
 {
-    ASSERT(transmissionQueue);
-    while (!transmissionQueue->isEmpty()) {
-        auto packet = transmissionQueue->popPacket();
+    ASSERT(txQueue);
+    while (!txQueue->isEmpty()) {
+        auto packet = txQueue->popPacket();
         PacketDropDetails details;
         details.setReason(INTERFACE_DOWN);
         emit(packetDroppedSignal, packet, &details);
@@ -60,9 +60,9 @@ void AckingMac::flushQueue()
 
 void AckingMac::clearQueue()
 {
-    ASSERT(transmissionQueue);
-    while (!transmissionQueue->isEmpty())
-        delete transmissionQueue->popPacket();
+    ASSERT(txQueue);
+    while (!txQueue->isEmpty())
+        delete txQueue->popPacket();
 }
 
 void AckingMac::initialize(int stage)
@@ -81,14 +81,14 @@ void AckingMac::initialize(int stage)
         radio = check_and_cast<IRadio *>(radioModule);
         transmissionState = IRadio::TRANSMISSION_STATE_UNDEFINED;
 
-        transmissionQueue = check_and_cast<queueing::IPacketQueue *>(getSubmodule("queue"));
+        txQueue = check_and_cast<queueing::IPacketQueue *>(getSubmodule("queue"));
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
         radio->setRadioMode(fullDuplex ? IRadio::RADIO_MODE_TRANSCEIVER : IRadio::RADIO_MODE_RECEIVER);
         if (useAck)
             ackTimeoutMsg = new cMessage("link-break");
-        if (!transmissionQueue->isEmpty()) {
-            popFromTransmissionQueue();
+        if (!txQueue->isEmpty()) {
+            popTxQueue();
             startTransmitting();
         }
     }
@@ -121,8 +121,8 @@ void AckingMac::receiveSignal(cComponent *source, simsignal_t signalID, long val
         IRadio::TransmissionState newRadioTransmissionState = static_cast<IRadio::TransmissionState>(value);
         if (transmissionState == IRadio::TRANSMISSION_STATE_TRANSMITTING && newRadioTransmissionState == IRadio::TRANSMISSION_STATE_IDLE) {
             radio->setRadioMode(fullDuplex ? IRadio::RADIO_MODE_TRANSCEIVER : IRadio::RADIO_MODE_RECEIVER);
-            if (!currentTxFrame && !transmissionQueue->isEmpty()) {
-                popFromTransmissionQueue();
+            if (!currentTxFrame && !txQueue->isEmpty()) {
+                popTxQueue();
                 startTransmitting();
             }
         }
@@ -153,11 +153,11 @@ void AckingMac::startTransmitting()
 void AckingMac::handleUpperPacket(Packet *packet)
 {
     EV << "Received " << packet << " for transmission\n";
-    transmissionQueue->pushPacket(packet);
+    txQueue->pushPacket(packet);
     if (currentTxFrame || radio->getTransmissionState() == IRadio::TRANSMISSION_STATE_TRANSMITTING)
         EV << "Delaying transmission of " << packet << ".\n";
     else {
-        popFromTransmissionQueue();
+        popTxQueue();
         startTransmitting();
     }
 }
@@ -201,8 +201,8 @@ void AckingMac::handleSelfMessage(cMessage *message)
         PacketDropDetails details;
         details.setReason(OTHER_PACKET_DROP);
         dropCurrentTxFrame(details);
-        if (!transmissionQueue->isEmpty()) {
-            popFromTransmissionQueue();
+        if (!txQueue->isEmpty()) {
+            popTxQueue();
             startTransmitting();
         }
     }
@@ -222,8 +222,8 @@ void AckingMac::acked(Packet *frame)
     EV_DEBUG << "AckingMac::acked(" << frame->getFullName() << ") is accepted\n";
     cancelEvent(ackTimeoutMsg);
         deleteCurrentTxFrame();
-        if (!transmissionQueue->isEmpty()) {
-            popFromTransmissionQueue();
+        if (!txQueue->isEmpty()) {
+            popTxQueue();
             startTransmitting();
         }
 }

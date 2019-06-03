@@ -78,7 +78,7 @@ void CsmaCaMac::initialize(int stage)
         mediumStateChange = new cMessage("MediumStateChange");
 
         // set up internal queue
-        transmissionQueue = check_and_cast<queueing::IPacketQueue *>(getSubmodule("queue"));
+        txQueue = check_and_cast<queueing::IPacketQueue *>(getSubmodule("queue"));
 
         // state variables
         fsm.setName("CsmaCaMac State Machine");
@@ -165,11 +165,11 @@ void CsmaCaMac::handleUpperPacket(Packet *packet)
     const auto& macHeader = frame->peekAtFront<CsmaCaMacHeader>();
     EV << "frame " << frame << " received from higher layer, receiver = " << macHeader->getReceiverAddress() << endl;
     ASSERT(!macHeader->getReceiverAddress().isUnspecified());
-    transmissionQueue->pushPacket(frame);
+    txQueue->pushPacket(frame);
     if (fsm.getState() != IDLE)
         EV << "deferring upper message transmission in " << fsm.getStateName() << " state\n";
     else {
-        popFromTransmissionQueue();
+        popTxQueue();
         handleWithFsm(currentTxFrame);
     }
 }
@@ -355,8 +355,8 @@ void CsmaCaMac::handleWithFsm(cMessage *msg)
             handleWithFsm(mediumStateChange);
         else if (currentTxFrame != nullptr)
             handleWithFsm(currentTxFrame);
-        else if (!transmissionQueue->isEmpty()) {
-            popFromTransmissionQueue();
+        else if (!txQueue->isEmpty()) {
+            popTxQueue();
             handleWithFsm(currentTxFrame);
         }
     }

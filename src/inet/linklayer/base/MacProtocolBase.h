@@ -43,7 +43,7 @@ class INET_API MacProtocolBase : public LayeredProtocolBase, public cListener
     Packet *currentTxFrame = nullptr;
 
     /** Messages received from upper layer and to be transmitted later */
-    queueing::IPacketQueue *transmissionQueue = nullptr;
+    queueing::IPacketQueue *txQueue = nullptr;
 
     cModule *hostModule = nullptr;
 
@@ -70,7 +70,7 @@ class INET_API MacProtocolBase : public LayeredProtocolBase, public cListener
 
     virtual void deleteCurrentTxFrame();
     virtual void dropCurrentTxFrame(PacketDropDetails& details);
-    virtual void popFromTransmissionQueue();
+    virtual void popTxQueue();
 
     /**
      * should clear queue and emit signal "packetDropped" with entire packets

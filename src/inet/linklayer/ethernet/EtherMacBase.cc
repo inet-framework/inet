@@ -214,7 +214,7 @@ void EtherMacBase::initialize(int stage)
 
 void EtherMacBase::initializeQueue()
 {
-    transmissionQueue = check_and_cast<queueing::IPacketQueue *>(getSubmodule("queue"));
+    txQueue = check_and_cast<queueing::IPacketQueue *>(getSubmodule("queue"));
 }
 
 void EtherMacBase::initializeFlags()
@@ -284,7 +284,7 @@ void EtherMacBase::handleStartOperation(LifecycleOperation *operation)
 
 void EtherMacBase::handleStopOperation(LifecycleOperation *operation)
 {
-    if (currentTxFrame != nullptr || !transmissionQueue->isEmpty()) {
+    if (currentTxFrame != nullptr || !txQueue->isEmpty()) {
         interfaceEntry->setState(InterfaceEntry::State::GOING_DOWN);
         delayActiveOperationFinish(par("stopOperationTimeout"));
     }
@@ -308,7 +308,7 @@ void EtherMacBase::handleCrashOperation(LifecycleOperation *operation)
 void EtherMacBase::processAtHandleMessageFinished()
 {
     if (operationalState == State::STOPPING_OPERATION) {
-        if (currentTxFrame == nullptr && transmissionQueue->isEmpty()) {
+        if (currentTxFrame == nullptr && txQueue->isEmpty()) {
             EV << "Ethernet Queue is empty, MAC stopped\n";
             connected = false;
             interfaceEntry->setCarrier(false);
@@ -360,8 +360,8 @@ void EtherMacBase::processConnectDisconnect()
         }
 
         // Clear queue
-        while (!transmissionQueue->isEmpty()) {
-            Packet *msg = transmissionQueue->popPacket();
+        while (!txQueue->isEmpty()) {
+            Packet *msg = txQueue->popPacket();
             EV_DETAIL << "Interface is not connected, dropping packet " << msg << endl;
             numDroppedPkFromHLIfaceDown++;
             PacketDropDetails details;
@@ -567,8 +567,8 @@ void EtherMacBase::printParameters()
 
 void EtherMacBase::getNextFrameFromQueue()
 {
-    if (!transmissionQueue->isEmpty())
-        popFromTransmissionQueue();
+    if (!txQueue->isEmpty())
+        popTxQueue();
 }
 
 void EtherMacBase::finish()
@@ -627,7 +627,7 @@ void EtherMacBase::refreshDisplay() const
                 result = std::to_string(numDroppedPkFromHLIfaceDown + numDroppedIfaceDown + numDroppedBitError + numDroppedNotForUs);
                 break;
             case 'q':
-                result = std::to_string(transmissionQueue->getNumPackets());
+                result = std::to_string(txQueue->getNumPackets());
                 break;
             case 'b':
                 if (transmissionChannel == nullptr)
