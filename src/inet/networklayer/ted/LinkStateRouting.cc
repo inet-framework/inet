@@ -208,7 +208,9 @@ void LinkStateRouting::sendToPeer(Ipv4Address peer, const std::vector<TeLinkStat
         out->setLinkInfo(j, list[j]);
 
     out->setRequest(req);
-    B length = B(72) * out->getLinkInfoArraySize();
+    //B length = B(72) * out->getLinkInfoArraySize();
+    //B length = B(113 * out->getLinkInfoArraySize()) + B(6) + B(25);
+    B length = B(113 * out->getLinkInfoArraySize()) + B(6);
     out->setChunkLength(length);
     pk->insertAtBack(out);
 
