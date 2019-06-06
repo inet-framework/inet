@@ -306,6 +306,50 @@ class INET_API MemoryOutputStream {
             writeUint32Be(address.words()[i]);
     }
     //@}
+
+    /** @name other useful streaming functions */
+    //@{
+    /**
+     * Writes n bits of a 64 bit unsigned integer to the end of the stream in big
+     * endian byte order and MSB to LSB bit order.
+     */
+    void writeNBitsOfUint64Be(uint64_t value, uint8_t n){
+        // TODO: throw exception
+        if(n <= 0) throw cRuntimeError("Can not write 0 or less bits.");
+        uint64_t mul = 1;
+        for(int i = 0; i < n - 1; ++i){
+            mul *= 2;
+        }
+        for(int i = 0; i < n; ++i){
+            writeBit(value & mul == mul);
+            mul /= 2;
+        }
+
+    }
+
+    /**
+     * Writes a double value on 64 bits to the end of the stream.
+     */
+    void writeDoubleOn64Bits(double value){
+        int exp;
+        double frac;
+
+        frac = frexp(value, &exp);
+
+        if(frac < 0) {
+            writeBit(true);
+            frac *= -1;
+        }
+        else writeBit(false);
+
+        exp += 1023;
+        writeNBitsOfUint64Be(exp, 11);
+
+        uint64_t num = (uint64_t)(1e14 * frac);
+        writeNBitsOfUint64Be(num, 52);
+    }
+    //@}
+
 };
 
 } // namespace

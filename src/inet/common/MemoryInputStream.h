@@ -404,6 +404,44 @@ class INET_API MemoryInputStream {
         return Ipv6Address(d[0], d[1], d[2], d[3]);
     }
     //@}
+
+    /** @name other useful streaming functions */
+    //@{
+    /**
+     * Reads n bits of a 64 bit unsigned integer at the current position of the
+     * stream in big endian byte order and MSB to LSB bit order.
+     */
+    uint64_t readNBitsToUint64Be(uint8_t n){
+        // TODO: throw exception
+        if(n <= 0) throw cRuntimeError("Can not read 0 or less bits.");
+        uint64_t mul = 1;
+        uint64_t num = 0;
+        for(int i = 0; i < n - 1; ++i){
+            mul *= 2;
+        }
+        for(int i = 0; i < n; ++i){
+            num += readBit() ? mul : 0;
+            mul /= 2;
+        }
+        return num;
+    }
+
+    /**
+     * Reads a double value (64 bits) at the current position of the stream.
+     */
+    double readDoubleAs64BitValue(){
+        int sign = 1;
+        if(readBit()) sign = -1;
+
+        int exp = readNBitsToUint64Be(11);
+        exp -= 1023;
+
+        return sign * ((double)readNBitsToUint64Be(52) / 1e14) * pow(2, exp);
+    }
+    //@}
+
+
+
 };
 
 } // namespace
