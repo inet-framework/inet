@@ -37,6 +37,7 @@ simple StationaryMobility extends MobilityBase
         double initialElevation @unit(deg) = default(0deg);
         double initialBank @unit(deg) = default(0deg);
         bool initFromDisplayString = default(true); // enables one time initialization from the subject module's display string
+        bool updateFromDisplayString = default(true); // enables continuous initialization from the subject module's display string
         @class(StationaryMobility);
 }
 
