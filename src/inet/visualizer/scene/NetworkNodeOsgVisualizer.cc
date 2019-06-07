@@ -26,9 +26,9 @@ namespace inet {
 
 namespace visualizer {
 
-Define_Module(NetworkNodeOsgVisualizer);
-
 #ifdef WITH_OSG
+
+Define_Module(NetworkNodeOsgVisualizer);
 
 void NetworkNodeOsgVisualizer::initialize(int stage)
 {
