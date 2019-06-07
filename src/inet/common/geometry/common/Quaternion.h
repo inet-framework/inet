@@ -52,6 +52,9 @@ class INET_API Quaternion
     void setV(const Coord& v) { this->v = v; }
 
     //! basic operations
+    bool operator==(const Quaternion& q) { return s == q.s && v == q.v; }
+    bool operator!=(const Quaternion& q) { return !(*this == q); }
+
     Quaternion &operator =(const Quaternion &q) { s = q.s; v = q.v; return *this; }
 
     const Quaternion operator +(const Quaternion &q) const { return Quaternion(s+q.s, v+q.v); }
