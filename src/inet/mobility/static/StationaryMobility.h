@@ -32,7 +32,13 @@ namespace inet {
 class INET_API StationaryMobility : public MobilityBase
 {
   protected:
+    bool updateFromDisplayString;
+
+  protected:
+    virtual void initialize(int stage) override;
     virtual void handleSelfMessage(cMessage *message) override { throw cRuntimeError("Invalid operation"); }
+    virtual void refreshDisplay() const override;
+    virtual void updateMobilityState();
 
   public:
     virtual Quaternion getCurrentAngularPosition() override { return lastOrientation; }
