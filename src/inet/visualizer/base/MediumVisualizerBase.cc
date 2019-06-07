@@ -17,6 +17,7 @@
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
+#include "inet/physicallayer/analogmodel/packetlevel/DimensionalTransmission.h"
 #include "inet/visualizer/base/MediumVisualizerBase.h"
 
 namespace inet {
@@ -73,6 +74,16 @@ void MediumVisualizerBase::initialize(int stage)
         communicationRangeLineWidth = par("communicationRangeLineWidth");
         signalPropagationAnimationSpeed = par("signalPropagationAnimationSpeed");
         signalTransmissionAnimationSpeed = par("signalTransmissionAnimationSpeed");
+        displaySpectrums = par("displaySpectrums");
+        spectrumFigureWidth = par("spectrumFigureWidth");
+        spectrumFigureHeight = par("spectrumFigureHeight");
+        spectrumAutoFrequencyAxis = par("spectrumAutoFrequencyAxis");
+        spectrumMinFrequency = Hz(par("spectrumMinFrequency"));
+        spectrumMaxFrequency = Hz(par("spectrumMaxFrequency"));
+        spectrumAutoPowerAxis = par("spectrumAutoPowerAxis");
+        spectrumMinPower = mW(math::dBm2mW(par("spectrumMinPower")));
+        spectrumMaxPower = mW(math::dBm2mW(par("spectrumMaxPower")));
+        mediumPowerFunction = makeShared<math::SumFunction<W, m, m, m, simtime_t, Hz>>();
         radioMedium = getModuleFromPar<IRadioMedium>(par("mediumModule"), this, false);
         if (radioMedium != nullptr) {
             cModule *radioMediumModule = check_and_cast<cModule *>(radioMedium);
@@ -169,6 +180,31 @@ bool MediumVisualizerBase::matchesTransmission(const ITransmission *transmission
             return false;
     }
     return packetFilter.matches(transmission->getPacket());
+}
+
+void MediumVisualizerBase::handleSignalAdded(const physicallayer::ITransmission *transmission)
+{
+    if (auto dimensionalTransmission = dynamic_cast<const DimensionalTransmission *>(transmission)) {
+        mps propagationSpeed = radioMedium->getPropagation()->getPropagationSpeed();
+        math::Point<m, m, m> startPosition(m(transmission->getStartPosition().x), m(transmission->getStartPosition().y), m(transmission->getStartPosition().z));
+        const auto& startOrientation = transmission->getStartOrientation();
+        auto transmissionPowerFunction = dimensionalTransmission->getPower();
+        auto transmitterAntennaGainFunction = makeShared<AntennaGainFunction>(transmission->getTransmitter()->getAntenna()->getGain().get());
+        auto pathLossFunction = makeShared<PathLossFunction>(radioMedium->getPathLoss());
+        const Ptr<const math::IFunction<double, m, m, m, m, m, m, Hz>>& obstacleLossFunction = radioMedium->getObstacleLoss() != nullptr ? makeShared<ObstacleLossFunction>(radioMedium->getObstacleLoss()) : nullptr;
+        auto receptionPowerFunction = makeShared<ReceptionPowerFunction>(propagationSpeed, startPosition, startOrientation, transmissionPowerFunction, transmitterAntennaGainFunction, pathLossFunction, obstacleLossFunction);
+        mediumPowerFunction->addElement(receptionPowerFunction);
+        receptionPowerFunctions[transmission] = receptionPowerFunction;
+    }
+}
+
+void MediumVisualizerBase::handleSignalRemoved(const physicallayer::ITransmission *transmission)
+{
+    auto it = receptionPowerFunctions.find(transmission);
+    if (it != receptionPowerFunctions.end()) {
+        mediumPowerFunction->removeElement(it->second);
+        receptionPowerFunctions.erase(it);
+    }
 }
 
 } // namespace visualizer
