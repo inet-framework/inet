@@ -19,6 +19,7 @@
 #define __INET_MEDIUMVISUALIZERBASE_H
 
 #include "inet/common/packet/PacketFilter.h"
+#include "inet/physicallayer/common/packetlevel/PowerFunction.h"
 #include "inet/physicallayer/contract/packetlevel/IRadioMedium.h"
 #include "inet/visualizer/base/VisualizerBase.h"
 #include "inet/visualizer/util/ColorSet.h"
@@ -69,12 +70,25 @@ class INET_API MediumVisualizerBase : public VisualizerBase, public cListener
     cFigure::Color communicationRangeLineColor;
     cFigure::LineStyle communicationRangeLineStyle;
     double communicationRangeLineWidth = NaN;
+    bool displaySpectrums = false;
+    double spectrumFigureWidth = NaN;
+    double spectrumFigureHeight = NaN;
+    bool spectrumAutoFrequencyAxis = false;
+    Hz spectrumMinFrequency = Hz(NaN);
+    Hz spectrumMaxFrequency = Hz(NaN);
+    bool spectrumAutoPowerAxis = false;
+    WpHz spectrumMinPower = WpHz(NaN);
+    WpHz spectrumMaxPower = WpHz(NaN);
+    Placement spectrumPlacementHint;
+    double spectrumPlacementPriority;
     //@}
 
     /** @name State */
     //@{
     double defaultSignalPropagationAnimationSpeed = NaN;
     double defaultSignalTransmissionAnimationSpeed = NaN;
+    std::map<const physicallayer::ITransmission *, Ptr<const math::IFunction<WpHz, math::Domain<m, m, m, simtime_t, Hz>>>> receptionPowerFunctions;
+    Ptr<math::SumFunction<WpHz, math::Domain<m, m, m, simtime_t, Hz>>> mediumPowerFunction;
     //@}
 
   protected:
@@ -89,8 +103,8 @@ class INET_API MediumVisualizerBase : public VisualizerBase, public cListener
     virtual void handleRadioAdded(const physicallayer::IRadio *radio) = 0;
     virtual void handleRadioRemoved(const physicallayer::IRadio *radio) = 0;
 
-    virtual void handleSignalAdded(const physicallayer::ITransmission *transmission) = 0;
-    virtual void handleSignalRemoved(const physicallayer::ITransmission *transmission) = 0;
+    virtual void handleSignalAdded(const physicallayer::ITransmission *transmission);
+    virtual void handleSignalRemoved(const physicallayer::ITransmission *transmission);
 
     virtual void handleSignalDepartureStarted(const physicallayer::ITransmission *transmission) = 0;
     virtual void handleSignalDepartureEnded(const physicallayer::ITransmission *transmission) = 0;

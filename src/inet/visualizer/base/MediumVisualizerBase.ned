@@ -68,6 +68,18 @@ simple MediumVisualizerBase extends VisualizerBase
         string interferenceRangeLineStyle = default("solid"); // interference range circle line style, solid by default
         double interferenceRangeLineWidth = default(1); // interference range circle line width, 1 by default
 
+        bool displaySpectrums = default(false);
+        double spectrumFigureWidth = default(100);
+        double spectrumFigureHeight = default(60);
+        bool spectrumAutoFrequencyAxis = default(true);
+        double spectrumMinFrequency @unit(Hz) = default(inf Hz);
+        double spectrumMaxFrequency @unit(Hz) = default(-inf Hz);
+        bool spectrumAutoPowerAxis = default(true);
+        double spectrumMinPower @unit(dBmWpMHz) = default(inf dBmWpMHz);
+        double spectrumMaxPower @unit(dBmWpMHz) = default(-inf dBmWpMHz);
+        string spectrumPlacementHint = default("bottomCenter"); // annotation placement hint, space separated list of any, top, bottom, left, right, topLeft, topCenter, topRight, etc. 
+        double spectrumPlacementPriority = default(-1); // determines the order of annotation positioning
+
         @class(MediumVisualizerBase);
 }
 

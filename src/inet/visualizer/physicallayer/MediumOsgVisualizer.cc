@@ -420,6 +420,7 @@ void MediumOsgVisualizer::handleRadioRemoved(const IRadio *radio)
 void MediumOsgVisualizer::handleSignalAdded(const ITransmission *transmission)
 {
     Enter_Method_Silent();
+    MediumVisualizerBase::handleSignalAdded(transmission);
     if (displaySignals) {
         transmissions.push_back(transmission);
         auto node = createSignalNode(transmission);
@@ -433,6 +434,7 @@ void MediumOsgVisualizer::handleSignalAdded(const ITransmission *transmission)
 void MediumOsgVisualizer::handleSignalRemoved(const ITransmission *transmission)
 {
     Enter_Method_Silent();
+    MediumVisualizerBase::handleSignalRemoved(transmission);
     if (displaySignals) {
         transmissions.erase(std::remove(transmissions.begin(), transmissions.end(), transmission));
         auto node = removeSignalOsgNode(transmission);
