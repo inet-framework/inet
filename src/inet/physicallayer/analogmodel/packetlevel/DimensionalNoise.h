@@ -18,8 +18,7 @@
 #ifndef __INET_DIMENSIONALNOISE_H
 #define __INET_DIMENSIONALNOISE_H
 
-#include "inet/common/mapping/MappingBase.h"
-#include "inet/common/mapping/MappingUtils.h"
+#include "inet/common/math/Functions.h"
 #include "inet/physicallayer/base/packetlevel/NarrowbandNoiseBase.h"
 
 namespace inet {
@@ -29,14 +28,13 @@ namespace physicallayer {
 class INET_API DimensionalNoise : public NarrowbandNoiseBase
 {
   protected:
-    const ConstMapping *power;
+    const Ptr<const math::IFunction<W, simtime_t, Hz>> power;
 
   public:
-    DimensionalNoise(simtime_t startTime, simtime_t endTime, Hz carrierFrequency, Hz bandwidth, const ConstMapping *power);
-    virtual ~DimensionalNoise() { delete power; }
+    DimensionalNoise(simtime_t startTime, simtime_t endTime, Hz carrierFrequency, Hz bandwidth, const Ptr<const math::IFunction<W, simtime_t, Hz>>& power);
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
-    virtual const ConstMapping *getPower() const { return power; }
+    virtual const Ptr<const math::IFunction<W, simtime_t, Hz>>& getPower() const { return power; }
 
     virtual W computeMinPower(simtime_t startTime, simtime_t endTime) const override;
     virtual W computeMaxPower(simtime_t startTime, simtime_t endTime) const override;

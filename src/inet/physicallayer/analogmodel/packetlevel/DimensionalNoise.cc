@@ -21,7 +21,7 @@ namespace inet {
 
 namespace physicallayer {
 
-DimensionalNoise::DimensionalNoise(simtime_t startTime, simtime_t endTime, Hz carrierFrequency, Hz bandwidth, const ConstMapping *power) :
+DimensionalNoise::DimensionalNoise(simtime_t startTime, simtime_t endTime, Hz carrierFrequency, Hz bandwidth, const Ptr<const math::IFunction<W, simtime_t, Hz>>& power) :
     NarrowbandNoiseBase(startTime, endTime, carrierFrequency, bandwidth),
     power(power)
 {
@@ -30,11 +30,9 @@ DimensionalNoise::DimensionalNoise(simtime_t startTime, simtime_t endTime, Hz ca
 std::ostream& DimensionalNoise::printToStream(std::ostream& stream, int level) const
 {
     stream << "DimensionalNoise";
-    if (level <= PRINT_LEVEL_DETAIL)
-        stream << ", powerDimensionSet = " << power->getDimensionSet();
     if (level <= PRINT_LEVEL_DEBUG)
-        stream << ", powerMax = " << MappingUtils::findMax(*power)
-               << ", powerMin = " << MappingUtils::findMin(*power);
+        stream << ", powerMax = " << power->getMax()
+               << ", powerMin = " << power->getMin();
     if (level <= PRINT_LEVEL_TRACE)
         stream << ", power = " << power;
     return NarrowbandNoiseBase::printToStream(stream, level);
@@ -42,37 +40,19 @@ std::ostream& DimensionalNoise::printToStream(std::ostream& stream, int level) c
 
 W DimensionalNoise::computeMinPower(simtime_t startTime, simtime_t endTime) const
 {
-    const DimensionSet& dimensions = power->getDimensionSet();
-    Argument start(dimensions);
-    Argument end(dimensions);
-    if (dimensions.hasDimension(Dimension::time)) {
-        start.setTime(startTime);
-        end.setTime(endTime);
-    }
-    if (dimensions.hasDimension(Dimension::frequency)) {
-        start.setArgValue(Dimension::frequency, carrierFrequency.get() - bandwidth.get() / 2);
-        end.setArgValue(Dimension::frequency, carrierFrequency.get() + bandwidth.get() / 2);
-    }
-    W minPower = W(MappingUtils::findMin(*power, start, end));
-    EV_DEBUG << "Computing minimum noise power: start = " << start << ", end = " << end << " -> " << minPower << endl;
+    math::Point<simtime_t, Hz> startPoint(startTime, carrierFrequency - bandwidth / 2);
+    math::Point<simtime_t, Hz> endPoint(endTime, carrierFrequency + bandwidth / 2);
+    W minPower = power->getMin(math::Interval<simtime_t, Hz>(startPoint, endPoint));
+    EV_DEBUG << "Computing minimum noise power: start = " << startPoint << ", end = " << endPoint << " -> " << minPower << endl;
     return minPower;
 }
 
 W DimensionalNoise::computeMaxPower(simtime_t startTime, simtime_t endTime) const
 {
-    const DimensionSet& dimensions = power->getDimensionSet();
-    Argument start(dimensions);
-    Argument end(dimensions);
-    if (dimensions.hasDimension(Dimension::time)) {
-        start.setTime(startTime);
-        end.setTime(endTime);
-    }
-    if (dimensions.hasDimension(Dimension::frequency)) {
-        start.setArgValue(Dimension::frequency, carrierFrequency.get() - bandwidth.get() / 2);
-        end.setArgValue(Dimension::frequency, carrierFrequency.get() + bandwidth.get() / 2);
-    }
-    W maxPower = W(MappingUtils::findMax(*power, start, end));
-    EV_DEBUG << "Computing maximum noise power: start = " << start << ", end = " << end << " -> " << maxPower << endl;
+    math::Point<simtime_t, Hz> startPoint(startTime, carrierFrequency - bandwidth / 2);
+    math::Point<simtime_t, Hz> endPoint(endTime, carrierFrequency + bandwidth / 2);
+    W maxPower = power->getMax(math::Interval<simtime_t, Hz>(startPoint, endPoint));
+    EV_DEBUG << "Computing maximum noise power: start = " << startPoint << ", end = " << endPoint << " -> " << maxPower << endl;
     return maxPower;
 }
 
