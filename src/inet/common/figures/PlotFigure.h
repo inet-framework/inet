@@ -69,6 +69,7 @@ class INET_API PlotFigure : public cGroupFigure, public inet::IIndicatorFigure
 
     virtual const Point getSize() const override { return getBounds().getSize(); }
     virtual void setValue(int series, simtime_t timestamp, double value) override;
+    virtual void clearValues(int series) { ASSERT(series == 0); values.clear(); }
 
     //getters and setters
     const Rectangle& getBounds() const;
