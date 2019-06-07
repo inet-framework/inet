@@ -100,7 +100,6 @@ void PlotFigure::setTimeWindow(simtime_t timeWindow)
         return;
 
     this->timeWindow = timeWindow;
-    refresh();
 }
 
 simtime_t PlotFigure::getTimeTickSize() const
@@ -114,7 +113,6 @@ void PlotFigure::setTimeTickSize(simtime_t size)
         return;
 
     timeTickSize = size;
-    refresh();
 }
 
 const cFigure::Color& PlotFigure::getLineColor() const
@@ -271,7 +269,6 @@ void PlotFigure::setValue(int series, simtime_t timestamp, double value)
     ASSERT(series == 0);
 
     values.push_front(std::pair<simtime_t, double>(timestamp, value));
-    refresh();
 }
 
 void PlotFigure::layout()
