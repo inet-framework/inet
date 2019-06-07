@@ -43,33 +43,22 @@ double DimensionalSnir::computeMin() const
     const DimensionalNoise *dimensionalNoise = check_and_cast<const DimensionalNoise *>(noise);
     const DimensionalReception *dimensionalReception = check_and_cast<const DimensionalReception *>(reception);
     EV_DEBUG << "Reception power begin " << endl;
-    dimensionalReception->getPower()->print(EVSTREAM);
+    EV_DEBUG << *dimensionalReception->getPower() << endl;
     EV_DEBUG << "Reception power end" << endl;
-    const ConstMapping *noisePower = dimensionalNoise->getPower();
-    const ConstMapping *receptionPower = dimensionalReception->getPower();
-    const ConstMapping *snirMapping = MappingUtils::divide(*receptionPower, *noisePower);
+    auto noisePower = dimensionalNoise->getPower();
+    auto receptionPower = dimensionalReception->getPower();
+    auto snir = receptionPower->divide(noisePower);
     const simtime_t startTime = reception->getStartTime();
     const simtime_t endTime = reception->getEndTime();
     Hz carrierFrequency = dimensionalReception->getCarrierFrequency();
     Hz bandwidth = dimensionalReception->getBandwidth();
-    const DimensionSet& dimensions = receptionPower->getDimensionSet();
-    Argument startArgument(dimensions);
-    Argument endArgument(dimensions);
-    if (dimensions.hasDimension(Dimension::time)) {
-        startArgument.setTime(startTime);
-        // NOTE: to exclude the moment where the reception power starts to be 0 again
-        endArgument.setTime(MappingUtils::pre(endTime));
-    }
-    if (dimensions.hasDimension(Dimension::frequency)) {
-        startArgument.setArgValue(Dimension::frequency, (carrierFrequency - bandwidth / 2).get());
-        endArgument.setArgValue(Dimension::frequency, nexttoward((carrierFrequency + bandwidth / 2).get(), 0));
-    }
+    Point<simtime_t, Hz> startPoint(startTime, carrierFrequency - bandwidth / 2);
+    Point<simtime_t, Hz> endPoint(endTime, carrierFrequency + bandwidth / 2);
     EV_DEBUG << "SNIR begin " << endl;
-    snirMapping->print(EVSTREAM);
+    EV_DEBUG << *snir << endl;
     EV_DEBUG << "SNIR end" << endl;
-    double minSNIR = MappingUtils::findMin(*snirMapping, startArgument, endArgument);
-    EV_DEBUG << "Computing minimum SNIR: start = " << startArgument << ", end = " << endArgument << " -> minimum SNIR = " << minSNIR << endl;
-    delete snirMapping;
+    double minSNIR = snir->getMin(Interval<simtime_t, Hz>(startPoint, endPoint, 0b0));
+    EV_DEBUG << "Computing minimum SNIR: start = " << startPoint << ", end = " << endPoint << " -> minimum SNIR = " << minSNIR << endl;
     return minSNIR;
 }
 
@@ -79,33 +68,22 @@ double DimensionalSnir::computeMax() const
     const DimensionalNoise *dimensionalNoise = check_and_cast<const DimensionalNoise *>(noise);
     const DimensionalReception *dimensionalReception = check_and_cast<const DimensionalReception *>(reception);
     EV_DEBUG << "Reception power begin " << endl;
-    dimensionalReception->getPower()->print(EVSTREAM);
+    EV_DEBUG <<* dimensionalReception->getPower() << endl;
     EV_DEBUG << "Reception power end" << endl;
-    const ConstMapping *noisePower = dimensionalNoise->getPower();
-    const ConstMapping *receptionPower = dimensionalReception->getPower();
-    const ConstMapping *snirMapping = MappingUtils::divide(*receptionPower, *noisePower);
+    auto noisePower = dimensionalNoise->getPower();
+    auto receptionPower = dimensionalReception->getPower();
+    auto snir = receptionPower->divide(noisePower);
     const simtime_t startTime = reception->getStartTime();
     const simtime_t endTime = reception->getEndTime();
     Hz carrierFrequency = dimensionalReception->getCarrierFrequency();
     Hz bandwidth = dimensionalReception->getBandwidth();
-    const DimensionSet& dimensions = receptionPower->getDimensionSet();
-    Argument startArgument(dimensions);
-    Argument endArgument(dimensions);
-    if (dimensions.hasDimension(Dimension::time)) {
-        startArgument.setTime(startTime);
-        // NOTE: to exclude the moment where the reception power starts to be 0 again
-        endArgument.setTime(MappingUtils::pre(endTime));
-    }
-    if (dimensions.hasDimension(Dimension::frequency)) {
-        startArgument.setArgValue(Dimension::frequency, (carrierFrequency - bandwidth / 2).get());
-        endArgument.setArgValue(Dimension::frequency, nexttoward((carrierFrequency + bandwidth / 2).get(), 0));
-    }
     EV_DEBUG << "SNIR begin " << endl;
-    snirMapping->print(EVSTREAM);
+    EV_DEBUG << *snir << endl;
     EV_DEBUG << "SNIR end" << endl;
-    double maxSNIR = MappingUtils::findMax(*snirMapping, startArgument, endArgument);
-    EV_DEBUG << "Computing maximum SNIR: start = " << startArgument << ", end = " << endArgument << " -> maximum SNIR = " << maxSNIR << endl;
-    delete snirMapping;
+    Point<simtime_t, Hz> startPoint(startTime, carrierFrequency - bandwidth / 2);
+    Point<simtime_t, Hz> endPoint(endTime, carrierFrequency + bandwidth / 2);
+    double maxSNIR = snir->getMax(Interval<simtime_t, Hz>(startPoint, endPoint, 0b0));
+    EV_DEBUG << "Computing maximum SNIR: start = " << startPoint << ", end = " << endPoint << " -> maximum SNIR = " << maxSNIR << endl;
     return maxSNIR;
 }
 
