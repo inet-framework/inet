@@ -198,16 +198,33 @@ void MobilityBase::refreshDisplay() const
     cDisplayString& displayString = this->getDisplayString();
     displayString.setTagArg("t", 0, text);
     if (subjectModule != nullptr && par("updateDisplayString")) {
+        // position
         auto position = const_cast<MobilityBase *>(this)->getCurrentPosition();
         EV_TRACE << "current position = " << position << endl;
         auto subjectModulePosition = canvasProjection->computeCanvasPoint(position);
         char buf[32];
         snprintf(buf, sizeof(buf), "%lf", subjectModulePosition.x);
         buf[sizeof(buf) - 1] = 0;
-        subjectModule->getDisplayString().setTagArg("p", 0, buf);
+        auto& displayString = subjectModule->getDisplayString();
+        displayString.setTagArg("p", 0, buf);
         snprintf(buf, sizeof(buf), "%lf", subjectModulePosition.y);
         buf[sizeof(buf) - 1] = 0;
-        subjectModule->getDisplayString().setTagArg("p", 1, buf);
+        displayString.setTagArg("p", 1, buf);
+        // angle
+        double angle = 0;
+        auto angularPosition = const_cast<MobilityBase *>(this)->getCurrentAngularPosition();
+        if (angularPosition != Quaternion::IDENTITY) {
+            Quaternion swing;
+            Quaternion twist;
+            Coord vector = canvasProjection->computeCanvasPointInverse(cFigure::Point(0, 0), 1);
+            vector.normalize();
+            angularPosition.getSwingAndTwist(vector, swing, twist);
+            Coord axis;
+            twist.getRotationAxisAndAngle(axis, angle);
+            angle = math::rad2deg(axis.z >= 0 ? angle : -angle);
+        }
+        snprintf(buf, sizeof(buf), "%lf", angle);
+        displayString.setTagArg("a", 0, buf);
     }
 }
 
