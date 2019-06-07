@@ -49,6 +49,24 @@ static const char *PKEY_BOUNDS = "bounds";
 PlotFigure::PlotFigure(const char *name) : cGroupFigure(name)
 {
     addChildren();
+    setNumSeries(1);
+}
+
+void PlotFigure::setNumSeries(int numSeries)
+{
+    this->numSeries = numSeries;
+    seriesValues.resize(numSeries);
+    for (auto plotFigure : seriesPlotFigures) {
+        removeFigure(plotFigure);
+        delete plotFigure;
+    }
+    seriesPlotFigures.clear();
+    for (int i = 0; i < numSeries; i++) {
+        auto plotFigure = new cPathFigure("plot");
+        plotFigure->setLineColor(INIT_PLOT_COLOR);
+        addFigure(plotFigure);
+        seriesPlotFigures.push_back(plotFigure);
+    }
 }
 
 const cFigure::Rectangle& PlotFigure::getBounds() const
@@ -115,14 +133,14 @@ void PlotFigure::setTimeTickSize(simtime_t size)
     timeTickSize = size;
 }
 
-const cFigure::Color& PlotFigure::getLineColor() const
+const cFigure::Color& PlotFigure::getLineColor(int series) const
 {
-    return plotFigure->getLineColor();
+    return seriesPlotFigures[series]->getLineColor();
 }
 
-void PlotFigure::setLineColor(const Color& color)
+void PlotFigure::setLineColor(int series, const Color& color)
 {
-    plotFigure->setLineColor(color);
+    seriesPlotFigures[series]->setLineColor(color);
 }
 
 double PlotFigure::getMinValue() const
@@ -212,8 +230,10 @@ void PlotFigure::parse(cProperty *property)
         setValueTickSize(atoi(s));
     if ((s = property->getValue(PKEY_TIME_WINDOW)) != nullptr)
         setTimeWindow(atoi(s));
-    if ((s = property->getValue(PKEY_LINE_COLOR)) != nullptr)
-        setLineColor(parseColor(s));
+    if ((s = property->getValue(PKEY_LINE_COLOR)) != nullptr) {
+        for (int i = 0; i < numSeries; i++)
+            setLineColor(i, parseColor(s));
+    }
     if ((s = property->getValue(PKEY_MIN_VALUE)) != nullptr)
         setMinValue(atof(s));
     if ((s = property->getValue(PKEY_MAX_VALUE)) != nullptr)
@@ -250,25 +270,20 @@ const char **PlotFigure::getAllowedPropertyKeys() const
 
 void PlotFigure::addChildren()
 {
-    plotFigure = new cPathFigure("plot");
     labelFigure = new cTextFigure("label");
     backgroundFigure = new cRectangleFigure("bounds");
 
     backgroundFigure->setFilled(true);
     backgroundFigure->setFillColor(INIT_BACKGROUND_COLOR);
-    plotFigure->setLineColor(INIT_PLOT_COLOR);
     labelFigure->setAnchor(ANCHOR_N);
 
     addFigure(backgroundFigure);
-    addFigure(plotFigure);
     addFigure(labelFigure);
 }
 
 void PlotFigure::setValue(int series, simtime_t timestamp, double value)
 {
-    ASSERT(series == 0);
-
-    values.push_front(std::pair<simtime_t, double>(timestamp, value));
+    seriesValues[series].push_front(std::pair<simtime_t, double>(timestamp, value));
 }
 
 void PlotFigure::layout()
@@ -306,6 +321,7 @@ void PlotFigure::redrawValueTicks()
 
             number->setAnchor(ANCHOR_W);
             number->setFont(Font("", bounds.height * NUMBER_SIZE_PERCENT * numberSizeFactor));
+            auto plotFigure = seriesPlotFigures[seriesPlotFigures.size() - 1];
             tick->insertBelow(plotFigure);
             dashLine->insertBelow(plotFigure);
             number->insertBelow(plotFigure);
@@ -373,6 +389,7 @@ void PlotFigure::redrawTimeTicks()
 
             number->setAnchor(ANCHOR_N);
             number->setFont(Font("", bounds.height * NUMBER_SIZE_PERCENT * numberSizeFactor));
+            auto plotFigure = seriesPlotFigures[seriesPlotFigures.size() - 1];
             tick->insertBelow(plotFigure);
             dashLine->insertBelow(plotFigure);
             number->insertBelow(plotFigure);
@@ -422,48 +439,52 @@ void PlotFigure::refresh()
     simtime_t minX = simTime() - timeWindow;
     simtime_t maxX = simTime();
 
-    plotFigure->clearPath();
+    for (int i = 0; i < numSeries; i++) {
+        auto values = seriesValues[i];
+        auto plotFigure = seriesPlotFigures[i];
+        plotFigure->clearPath();
 
-    if (values.size() < 2)
-        return;
-    if (minX > values.front().first) {
-        values.clear();
-        return;
-    }
-
-    auto r = getBounds();
-    auto it = values.begin();
-    double startX = r.x + r.width - (maxX - it->first).dbl() / timeWindow * r.width;
-    double startY = r.y + (max - it->second) / std::abs(max - min) * r.height;
-    plotFigure->addMoveTo(startX, startY);
-
-    ++it;
-    do {
-        double endX = r.x + r.width - (maxX - it->first).dbl() / timeWindow * r.width;
-        double endY = r.y + (max - it->second) / std::abs(max - min) * r.height;
-
-        double originalStartX = startX;
-        double originalStartY = startY;
-        double originalEndX = endX;
-        double originalEndY = endY;
-        if (InstrumentUtil::CohenSutherlandLineClip(startX, startY, endX, endY, r.x, r.x + r.width, r.y, r.y + r.height)) {
-            if (originalStartX != startX || originalStartY != startY)
-                plotFigure->addMoveTo(startX, startY);
-
-            plotFigure->addLineTo(endX, endY);
+        if (values.size() < 2)
+            continue;
+        if (minX > values.front().first) {
+            values.clear();
+            continue;
         }
 
-        if (minX > it->first)
-            break;
+        auto r = getBounds();
+        auto it = values.begin();
+        double startX = r.x + r.width - (maxX - it->first).dbl() / timeWindow * r.width;
+        double startY = std::min(100.0, r.y + (max - it->second) / std::abs(max - min) * r.height); // KLUDGE:
+        plotFigure->addMoveTo(startX, startY);
 
-        startX = originalEndX;
-        startY = originalEndY;
         ++it;
-    } while (it != values.end());
+        do {
+            double endX = r.x + r.width - (maxX - it->first).dbl() / timeWindow * r.width;
+            double endY = std::min(100.0, r.y + (max - it->second) / std::abs(max - min) * r.height); // KLUDGE:
 
-    // Delete old elements
-    if (it != values.end())
-        values.erase(++it, values.end());
+            double originalStartX = startX;
+            double originalStartY = startY;
+            double originalEndX = endX;
+            double originalEndY = endY;
+            if (InstrumentUtil::CohenSutherlandLineClip(startX, startY, endX, endY, r.x, r.x + r.width, r.y, r.y + r.height)) {
+                if (originalStartX != startX || originalStartY != startY)
+                    plotFigure->addMoveTo(startX, startY);
+
+                plotFigure->addLineTo(endX, endY);
+            }
+
+            if (minX > it->first)
+                break;
+
+            startX = originalEndX;
+            startY = originalEndY;
+            ++it;
+        } while (it != values.end());
+
+        // Delete old elements
+        if (it != values.end())
+            values.erase(++it, values.end());
+    }
 }
 
 } // namespace inet

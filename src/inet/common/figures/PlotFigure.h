@@ -36,12 +36,13 @@ class INET_API PlotFigure : public cGroupFigure, public inet::IIndicatorFigure
             tick(tick), dashLine(dashLine), number(number) {}
     };
 
-    cPathFigure *plotFigure;
+    std::vector<cPathFigure *> seriesPlotFigures;
     cTextFigure *labelFigure;
     cRectangleFigure *backgroundFigure;
     std::vector<Tick> timeTicks;
     std::vector<Tick> valueTicks;
 
+    int numSeries = -1;
     simtime_t timeWindow = 10;
     double valueTickSize = 2.5;
     simtime_t timeTickSize = 3;
@@ -49,7 +50,7 @@ class INET_API PlotFigure : public cGroupFigure, public inet::IIndicatorFigure
     double numberSizeFactor = 1;
     double min = 0;
     double max = 10;
-    std::list<std::pair<simtime_t, double>> values;
+    std::vector<std::list<std::pair<simtime_t, double>>> seriesValues;
 
   protected:
     void redrawValueTicks();
@@ -67,9 +68,12 @@ class INET_API PlotFigure : public cGroupFigure, public inet::IIndicatorFigure
 
     virtual void refreshDisplay() override;
 
+    virtual void setNumSeries(int numSeries);
+    virtual int getNumSeries() const { return numSeries; }
+
     virtual const Point getSize() const override { return getBounds().getSize(); }
     virtual void setValue(int series, simtime_t timestamp, double value) override;
-    virtual void clearValues(int series) { ASSERT(series == 0); values.clear(); }
+    virtual void clearValues(int series) { seriesValues[series].clear(); }
 
     //getters and setters
     const Rectangle& getBounds() const;
@@ -87,8 +91,8 @@ class INET_API PlotFigure : public cGroupFigure, public inet::IIndicatorFigure
     simtime_t getTimeTickSize() const;
     void setTimeTickSize(simtime_t size);
 
-    const Color& getLineColor() const;
-    void setLineColor(const Color& color);
+    const Color& getLineColor(int series) const;
+    void setLineColor(int series, const Color& color);
 
     double getMinValue() const;
     void setMinValue(double value);
