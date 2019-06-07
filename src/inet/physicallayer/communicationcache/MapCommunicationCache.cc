@@ -89,7 +89,7 @@ void MapCommunicationCache::removeTransmission(const ITransmission *transmission
                 const IRadio *radio = receptionIt.first;
                 const RadioCacheEntry &radioCacheEntry = radioCache[radio];
                 const ReceptionCacheEntry &recpeionCacheEntry = receptionIt.second;
-                const Interval *interval = recpeionCacheEntry.interval;
+                const IntervalTree::Interval *interval = recpeionCacheEntry.interval;
                 if (interval != nullptr)
                     radioCacheEntry.receptionIntervals->deleteNode(interval);
             }

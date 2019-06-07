@@ -130,7 +130,7 @@ void VectorCommunicationCache::removeNonInterferingTransmissions()
             while (radioIt != radioCache.cend() && receptionIt != receptionCacheEntries->cend()) {
                 const RadioCacheEntry &radioCacheEntry = *radioIt;
                 const ReceptionCacheEntry &recpeionCacheEntry = *receptionIt;
-                const Interval *interval = recpeionCacheEntry.interval;
+                const IntervalTree::Interval *interval = recpeionCacheEntry.interval;
                 if (interval != nullptr)
                     radioCacheEntry.receptionIntervals->deleteNode(interval);
                 radioIt++;
