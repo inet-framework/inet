@@ -498,7 +498,7 @@ void RadioMedium::addTransmission(const IRadio *transmitterRadio, const ITransmi
     for (const auto receiverRadio : radios) {
         if (receiverRadio != nullptr && receiverRadio != transmitterRadio) {
             const IArrival *arrival = propagation->computeArrival(transmission, receiverRadio->getAntenna()->getMobility());
-            const Interval *interval = new Interval(arrival->getStartTime(), arrival->getEndTime(), (void *)transmission);
+            const IntervalTree::Interval *interval = new IntervalTree::Interval(arrival->getStartTime(), arrival->getEndTime(), (void *)transmission);
             const IListening *listening = receiverRadio->getReceiver()->createListening(receiverRadio, arrival->getStartTime(), arrival->getEndTime(), arrival->getStartPosition(), arrival->getEndPosition());
             const simtime_t arrivalEndTime = arrival->getEndTime();
             if (arrivalEndTime > maxArrivalEndTime)

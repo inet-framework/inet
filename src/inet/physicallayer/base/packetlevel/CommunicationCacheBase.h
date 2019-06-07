@@ -63,7 +63,7 @@ class INET_API CommunicationCacheBase : public cModule, public ICommunicationCac
          */
         const ISignal *signal;
         const IArrival *arrival;
-        const Interval *interval;
+        const IntervalTree::Interval *interval;
         const IListening *listening;
         const IReception *reception;
         const IInterference *interference;
@@ -141,8 +141,8 @@ class INET_API CommunicationCacheBase : public cModule, public ICommunicationCac
     virtual void setCachedArrival(const IRadio *receiver, const ITransmission *transmission, const IArrival *arrival) override;
     virtual void removeCachedArrival(const IRadio *receiver, const ITransmission *transmission) override;
 
-    virtual const Interval *getCachedInterval(const IRadio *receiver, const ITransmission *transmission) override;
-    virtual void setCachedInterval(const IRadio *receiver, const ITransmission *transmission, const Interval *interval) override;
+    virtual const IntervalTree::Interval *getCachedInterval(const IRadio *receiver, const ITransmission *transmission) override;
+    virtual void setCachedInterval(const IRadio *receiver, const ITransmission *transmission, const IntervalTree::Interval *interval) override;
     virtual void removeCachedInterval(const IRadio *receiver, const ITransmission *transmission) override;
 
     virtual const IListening *getCachedListening(const IRadio *receiver, const ITransmission *transmission) override;
