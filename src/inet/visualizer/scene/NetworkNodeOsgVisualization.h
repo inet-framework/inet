@@ -18,7 +18,7 @@
 #ifndef __INET_NETWORKNODEOSGVISUALIZATION_H
 #define __INET_NETWORKNODEOSGVISUALIZATION_H
 
-#include "inet/common/INETDefs.h"
+#include "inet/visualizer/base/NetworkNodeVisualizerBase.h"
 
 #ifdef WITH_OSG
 #include <osg/Group>
@@ -32,7 +32,7 @@ namespace visualizer {
 
 #ifdef WITH_OSG
 
-class INET_API NetworkNodeOsgVisualization : public osg::PositionAttitudeTransform
+class INET_API NetworkNodeOsgVisualization : public NetworkNodeVisualizerBase::NetworkNodeVisualization, public osg::PositionAttitudeTransform
 {
   protected:
     class INET_API Annotation {

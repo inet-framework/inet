@@ -24,6 +24,20 @@
 
 namespace inet {
 
+// TODO: replace these with standard omnet notifications when they become available
+class INET_API cPreModuleInitNotification : public cModelChangeNotification
+{
+  public:
+    cModule *module;
+};
+
+// TODO: replace these with standard omnet notifications when they become available
+class INET_API cPostModuleInitNotification : public cModelChangeNotification
+{
+  public:
+    cModule *module;
+};
+
 /**
  * Scenario Manager (experimental) which executes a script specified in XML.
  * ScenarioManager has a few built-in commands such as \<set-param>,

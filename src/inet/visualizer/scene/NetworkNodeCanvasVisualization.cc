@@ -34,8 +34,8 @@ NetworkNodeCanvasVisualization::Annotation::Annotation(cFigure *figure, const cF
 }
 
 NetworkNodeCanvasVisualization::NetworkNodeCanvasVisualization(cModule *networkNode, double annotationSpacing, double placementPenalty) :
+    NetworkNodeVisualizerBase::NetworkNodeVisualization(networkNode),
     cGroupFigure(networkNode->getFullName()),
-    networkNode(networkNode),
     annotationSpacing(annotationSpacing),
     placementPenalty(placementPenalty)
 {

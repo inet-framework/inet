@@ -210,7 +210,13 @@ void ScenarioManager::processCreateModuleCommand(cXMLElement *node)
     }
     module->finalizeParameters();
     module->buildInside();
+    cPreModuleInitNotification pre;
+    pre.module = module;
+    emit(POST_MODEL_CHANGE, &pre);
     module->callInitialize();
+    cPostModuleInitNotification post;
+    post.module = module;
+    emit(POST_MODEL_CHANGE, &post);
 }
 
 void ScenarioManager::processDeleteModuleCommand(cXMLElement *node)

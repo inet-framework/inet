@@ -26,9 +26,9 @@ namespace inet {
 
 namespace visualizer {
 
-Define_Module(NetworkNodeOsgVisualizer);
-
 #ifdef WITH_OSG
+
+Define_Module(NetworkNodeOsgVisualizer);
 
 void NetworkNodeOsgVisualizer::initialize(int stage)
 {
@@ -36,13 +36,11 @@ void NetworkNodeOsgVisualizer::initialize(int stage)
     if (!hasGUI()) return;
     if (stage == INITSTAGE_LOCAL) {
         displayModuleName = par("displayModuleName");
-        auto scene = inet::osg::TopLevelScene::getSimulationScene(visualizationTargetModule);
         for (cModule::SubmoduleIterator it(visualizationSubjectModule); !it.end(); it++) {
             auto networkNode = *it;
             if (isNetworkNode(networkNode) && nodeFilter.matches(networkNode)) {
-                auto positionAttitudeTransform = createNetworkNodeVisualization(networkNode);
-                setNetworkNodeVisualization(networkNode, positionAttitudeTransform);
-                scene->addChild(positionAttitudeTransform);
+                auto visualization = createNetworkNodeVisualization(networkNode);
+                addNetworkNodeVisualization(visualization);
             }
         }
     }
@@ -71,9 +69,20 @@ NetworkNodeOsgVisualization *NetworkNodeOsgVisualizer::getNetworkNodeVisualizati
     return it == networkNodeVisualizations.end() ? nullptr : it->second;
 }
 
-void NetworkNodeOsgVisualizer::setNetworkNodeVisualization(const cModule *networkNode, NetworkNodeOsgVisualization *networkNodeVisualization)
+void NetworkNodeOsgVisualizer::addNetworkNodeVisualization(NetworkNodeVisualization *networkNodeVisualization)
 {
-    networkNodeVisualizations[networkNode] = networkNodeVisualization;
+    auto networkNodeOsgVisualization = check_and_cast<NetworkNodeOsgVisualization *>(networkNodeVisualization);
+    networkNodeVisualizations[networkNodeOsgVisualization->networkNode] = networkNodeOsgVisualization;
+    auto scene = inet::osg::TopLevelScene::getSimulationScene(visualizationTargetModule);
+    scene->addChild(networkNodeOsgVisualization);
+}
+
+void NetworkNodeOsgVisualizer::removeNetworkNodeVisualization(NetworkNodeVisualization *networkNodeVisualization)
+{
+    auto networkNodeOsgVisualization = check_and_cast<NetworkNodeOsgVisualization *>(networkNodeVisualization);
+    networkNodeVisualizations.erase(networkNodeVisualizations.find(networkNodeOsgVisualization->networkNode));
+    auto scene = inet::osg::TopLevelScene::getSimulationScene(visualizationTargetModule);
+    scene->removeChild(networkNodeOsgVisualization);
 }
 
 #endif // ifdef WITH_OSG
