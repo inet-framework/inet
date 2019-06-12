@@ -22,6 +22,7 @@
 #include "inet/common/packet/recorder/PcapRecorder.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/StringFormat.h"
+#include "inet/common/stlutils.h"
 
 namespace inet {
 
@@ -100,8 +101,9 @@ void PcapRecorder::initialize()
         }
     }
 
+    pcapLinkType = par("pcapLinkType");
     if (*file) {
-        pcapWriter.openPcap(file, snaplen, par("pcapLinkType"));
+        pcapWriter.openPcap(file, snaplen, pcapLinkType);
         pcapWriter.setFlushParameter(par("alwaysFlush").boolValue());
     }
 
@@ -158,12 +160,11 @@ void PcapRecorder::recordPacket(cPacket *msg, bool l2r)
 
     if (packet && packetFilter.matches(packet) && (dumpBadFrames || !packet->hasBitError())) {
         auto protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
-        for (auto dumpProtocol : dumpProtocols) {
-            if (protocol == dumpProtocol) {
-                pcapWriter.writePacket(simTime(), packet);
-                numRecorded++;
-                break;
-            }
+        if (contains(dumpProtocols, protocol)) {
+            if (!matchesLinkType(protocol))
+                throw cRuntimeError("The protocol '%s' doesn't matches for pcap linktype %d", protocol->getName(), pcapLinkType);
+            pcapWriter.writePacket(simTime(), packet);
+            numRecorded++;
         }
     }
 }
@@ -172,6 +173,26 @@ void PcapRecorder::finish()
 {
     packetDumper.dump("", "pcapRecorder finished");
     pcapWriter.closePcap();
+}
+
+bool PcapRecorder::matchesLinkType(const Protocol *protocol) const
+{
+    if (protocol == nullptr)
+        return false;
+    else if (*protocol == Protocol::ethernetMac)
+        return pcapLinkType == LINKTYPE_ETHERNET;
+    else if (*protocol == Protocol::ppp)
+        return pcapLinkType == LINKTYPE_PPP_WITH_DIR;
+    else if (*protocol == Protocol::ieee80211Mac)
+        return pcapLinkType == LINKTYPE_IEEE802_11;
+    else if (*protocol == Protocol::ipv4)
+        return pcapLinkType == LINKTYPE_RAW || pcapLinkType == LINKTYPE_IPV4;
+    else if (*protocol == Protocol::ipv6)
+        return pcapLinkType == LINKTYPE_RAW || pcapLinkType == LINKTYPE_IPV6;
+    else if (*protocol == Protocol::ieee802154)
+        return pcapLinkType == LINKTYPE_IEEE802_15_4 || pcapLinkType == LINKTYPE_IEEE802_15_4_NOFCS;
+    else
+        return true;
 }
 
 } // namespace inet
