@@ -25,9 +25,9 @@ namespace inet {
 
 namespace visualizer {
 
-#ifdef WITH_OSG
 class INET_API NetworkNodeOsgVisualizer : public NetworkNodeVisualizerBase
 {
+#ifdef WITH_OSG
 
   protected:
     bool displayModuleName;
@@ -44,8 +44,8 @@ class INET_API NetworkNodeOsgVisualizer : public NetworkNodeVisualizerBase
   public:
     virtual NetworkNodeOsgVisualization *getNetworkNodeVisualization(const cModule *networkNode) const override;
 
-};
 #endif // ifdef WITH_OSG
+};
 
 } // namespace visualizer
 
