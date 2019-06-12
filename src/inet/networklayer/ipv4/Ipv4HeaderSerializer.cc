@@ -189,7 +189,7 @@ const Ptr<Chunk> Ipv4HeaderSerializer::deserialize(MemoryInputStream& stream) co
         ipv4Header->markIncomplete();
     }
 
-    ipv4Header->setCrc(iphdr.ip_sum);
+    ipv4Header->setCrc(ntohs(iphdr.ip_sum));
     ipv4Header->setCrcMode(CRC_COMPUTED);
 
     return ipv4Header;
