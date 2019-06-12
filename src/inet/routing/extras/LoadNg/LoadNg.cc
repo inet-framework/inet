@@ -1277,7 +1277,7 @@ void LoadNg::handleHelloMessage(const Ptr<Rrep>& helloMessage)
     // if the neighbor moves away and a neighbor timeout occurs.
 
     unsigned int latestDestSeqNum = helloMessage->getSeqNum();
-    simtime_t newLifeTime = simTime() + allowedHelloLoss * helloInterval;
+    simtime_t newLifeTime = simTime() + activeRouteTimeout;
 
     if (!routeHelloOriginator || routeHelloOriginator->getSource() != this)
         createRoute(helloOriginatorAddr, helloOriginatorAddr, 1, latestDestSeqNum, true, newLifeTime, metricType, metricNeg );

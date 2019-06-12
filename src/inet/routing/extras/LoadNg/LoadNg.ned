@@ -66,7 +66,7 @@ simple LoadNg like IManetRouting
 
         double helloInterval @unit(s) = default(1s); // every helloInterval seconds a node broadcasts Hello messages (if it is necessary)
         int allowedHelloLoss = default(2); // allowedHelloLoss * helloInterval is the lifetime value for Hello messages
-        double activeRouteTimeout @unit(s) = default(3s); // the timeout value for cached routes If Hello messages are used, then the
+        double activeRouteTimeout @unit(s) = default(4s); // the timeout value for cached routes If Hello messages are used, then the
                                                             // ACTIVE_ROUTE_TIMEOUT parameter value MUST be more than the value
                                                             // (ALLOWED_HELLO_LOSS * HELLO_INTERVAL).
         int netDiameter = default(35); // the maximum possible number of hops between two nodes in the network
@@ -82,10 +82,10 @@ simple LoadNg like IManetRouting
 
         double myRouteTimeout @unit(s) = default(2 * activeRouteTimeout); // the value of the lifetime field that a destination node places in RREPs
         double deletePeriod @unit(s) = default(5 * max(activeRouteTimeout, helloInterval)); // the time after which an expired route is deleted
-        double blacklistTimeout @unit(s) = default(rreqRetries * netTraversalTime); // the time after which a blacklisted node is removed from the blacklist
+        double blacklistTimeout @unit(s) = default(2 * netTraversalTime * (1/rreqRatelimit));  // the time after which a blacklisted node is removed from the blacklist, B_HOLD_TIME  =  2 x  NET_TRAVERSAL_TIME x RREQ_RETRIES,
         double netTraversalTime @unit(s) = default(2 * nodeTraversalTime * netDiameter); // an estimation of the traversal time for the complete network
         double nextHopWait @unit(s) = default(nodeTraversalTime + 0.01s); // timeout for a RREP-ACK
-        double pathDiscoveryTime @unit(s) = default(2 * netTraversalTime); // buffer timeout for each broadcasted RREQ message
+        double pathDiscoveryTime @unit(s) = default(2 * netTraversalTime); // buffer timeout for each broadcasted RREQ message                
     gates:
         input ipIn;
         output ipOut;
