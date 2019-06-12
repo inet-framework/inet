@@ -722,6 +722,7 @@ void Aodv::sendAODVPacket(const Ptr<AodvControlPacket>& packet, const L3Address&
     auto udpHeader = makeShared<UdpHeader>();
     udpHeader->setSourcePort(aodvUDPPort);
     udpHeader->setDestinationPort(aodvUDPPort);
+    udpHeader->setTotalLengthField(udpPacket->getDataLength()+udpHeader->getChunkLength());
     udpHeader->setCrcMode(CRC_DISABLED);
     udpPacket->insertAtFront(udpHeader);
     // TODO: was udpPacket->copyTags(*packet);
