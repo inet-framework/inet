@@ -91,7 +91,6 @@ struct UnreachableNode
 class Rerr extends AodvControlPacket
 {
     packetType = RERR;
-    unsigned int destCount;
     bool noDeleteFlag;    // No delete flag; set when a node has performed a local repair of a link, and upstream nodes should not delete the route.
     unsigned int reserved = 0;    // Sent as 0; ignored on reception.
     UnreachableNode unreachableNodes[];    // The unreachable destinations included in the message; MUST be at least 1.

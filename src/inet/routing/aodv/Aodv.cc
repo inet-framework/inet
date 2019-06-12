@@ -1099,7 +1099,6 @@ const Ptr<Rerr> Aodv::createRERR(const std::vector<UnreachableNode>& unreachable
     unsigned int destCount = unreachableNodes.size();
 
     rerr->setPacketType(RERR);
-    rerr->setDestCount(destCount);
     rerr->setUnreachableNodesArraySize(destCount);
 
     for (unsigned int i = 0; i < destCount; i++) {
