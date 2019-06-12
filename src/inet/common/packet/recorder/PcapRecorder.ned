@@ -52,7 +52,7 @@ simple PcapRecorder
     parameters:
         bool verbose = default(false);  // whether to log packets on the module output
         string pcapFile = default(""); // the PCAP file to be written
-        int pcapNetwork = default(0); // the network type header field in the PCAP file, see http://www.tcpdump.org/linktypes.html (1=ethernet, 204=ppp, 105=IEEE 802.11, ...)
+        int pcapLinkType; // the network type header field in the PCAP file, see http://www.tcpdump.org/linktypes.html (1=ethernet, 204=ppp, 105=IEEE 802.11, ...)
         int snaplen = default(65535);  // maximum number of bytes to record per packet
         bool dumpBadFrames = default(true); // enable dump of frames with hasBitError
         string moduleNamePatterns = default("wlan[*] eth[*] ppp[*] ext[*]"); // space-separated list of sibling module names to listen on

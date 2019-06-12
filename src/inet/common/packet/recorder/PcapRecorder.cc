@@ -101,7 +101,7 @@ void PcapRecorder::initialize()
     }
 
     if (*file) {
-        pcapWriter.openPcap(file, snaplen, par("pcapNetwork"));
+        pcapWriter.openPcap(file, snaplen, par("pcapLinkType"));
         pcapWriter.setFlushParameter(par("alwaysFlush").boolValue());
     }
 
