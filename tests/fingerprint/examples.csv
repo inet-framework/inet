@@ -14,7 +14,7 @@
 
 /examples/aodv/,                     -f omnetpp.ini -c IPv4SlowMobility -r 0,          50s,          5fc2-edac/tplx, PASS, wireless adhoc
 /examples/aodv/,                     -f omnetpp.ini -c IPv4ModerateFastMobility -r 0,  50s,          2b2b-08ae/tplx, PASS, wireless adhoc
-/examples/aodv/,                     -f omnetpp.ini -c IPv4FastMobility -r 0,          50s,          6663-0765/tplx, PASS, wireless adhoc
+/examples/aodv/,                     -f omnetpp.ini -c IPv4FastMobility -r 0,          50s,          bcc8-57ee/tplx, PASS, wireless adhoc
 /examples/aodv/,                     -f omnetpp.ini -c Static -r 0,                    50s,          ae67-3a3e/tplx, PASS, wireless adhoc
 /examples/aodv/,                     -f omnetpp.ini -c Dynamic -r 0,                   60s,          279f-d7be/tplx, PASS, wireless adhoc
 /examples/aodv/,                     -f omnetpp.ini -c MoreDynamic -r 0,              100s,          ee98-c385/tplx, PASS, wireless adhoc

@@ -422,7 +422,6 @@ const Ptr<Rrep> Aodv::createRREP(const Ptr<Rreq>& rreq, IRoute *destRoute, IRout
     // the corresponding fields in the RREP message.
 
     rrep->setDestAddr(rreq->getDestAddr());
-    rrep->setOriginatorSeqNum(rreq->getOriginatorSeqNum());
 
     // OriginatorAddr = The IP address of the node which originated the RREQ
     // for which the route is supplied.
@@ -434,6 +433,8 @@ const Ptr<Rrep> Aodv::createRREP(const Ptr<Rreq>& rreq, IRoute *destRoute, IRout
     // (see section 6.6.2).
 
     if (rreq->getDestAddr() == getSelfIPAddress()) {    // node is itself the requested destination
+        // 6.6.1. Route Reply Generation by the Destination
+
         // If the generating node is the destination itself, it MUST increment
         // its own sequence number by one if the sequence number in the RREQ
         // packet is equal to that incremented value.
@@ -455,8 +456,10 @@ const Ptr<Rrep> Aodv::createRREP(const Ptr<Rreq>& rreq, IRoute *destRoute, IRout
         rrep->setLifeTime(myRouteTimeout);
     }
     else {    // intermediate node
-              // it copies its known sequence number for the destination into
-              // the Destination Sequence Number field in the RREP message.
+        // 6.6.2. Route Reply Generation by an Intermediate Node
+
+        // it copies its known sequence number for the destination into
+        // the Destination Sequence Number field in the RREP message.
         AodvRouteData *destRouteData = check_and_cast<AodvRouteData *>(destRoute->getProtocolData());
         AodvRouteData *originatorRouteData = check_and_cast<AodvRouteData *>(originatorRoute->getProtocolData());
         rrep->setDestSeqNum(destRouteData->getDestSeqNum());
@@ -528,6 +531,8 @@ const Ptr<Rrep> Aodv::createGratuitousRREP(const Ptr<Rreq>& rreq, IRoute *origin
 
 void Aodv::handleRREP(const Ptr<Rrep>& rrep, const L3Address& sourceAddr)
 {
+    // 6.7. Receiving and Forwarding Route Replies
+
     EV_INFO << "AODV Route Reply arrived with source addr: " << sourceAddr << " originator addr: " << rrep->getOriginatorAddr()
             << " destination addr: " << rrep->getDestAddr() << endl;
 
@@ -546,10 +551,10 @@ void Aodv::handleRREP(const Ptr<Rrep>& rrep, const L3Address& sourceAddr)
 
     if (!previousHopRoute || previousHopRoute->getSource() != this) {
         // create without valid sequence number
-        previousHopRoute = createRoute(sourceAddr, sourceAddr, 1, false, rrep->getOriginatorSeqNum(), true, simTime() + activeRouteTimeout);
+        previousHopRoute = createRoute(sourceAddr, sourceAddr, 1, false, rrep->getDestSeqNum(), true, simTime() + activeRouteTimeout);
     }
     else
-        updateRoutingTable(previousHopRoute, sourceAddr, 1, false, rrep->getOriginatorSeqNum(), true, simTime() + activeRouteTimeout);
+        updateRoutingTable(previousHopRoute, sourceAddr, 1, false, rrep->getDestSeqNum(), true, simTime() + activeRouteTimeout);
 
     // Next, the node then increments the hop count value in the RREP by one,
     // to account for the new hop through the intermediate node
@@ -1099,7 +1104,6 @@ const Ptr<Rerr> Aodv::createRERR(const std::vector<UnreachableNode>& unreachable
     unsigned int destCount = unreachableNodes.size();
 
     rerr->setPacketType(RERR);
-    rerr->setDestCount(destCount);
     rerr->setUnreachableNodesArraySize(destCount);
 
     for (unsigned int i = 0; i < destCount; i++) {
