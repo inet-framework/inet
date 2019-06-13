@@ -453,7 +453,7 @@ const Ptr<Rrep> Aodv::createRREP(const Ptr<Rreq>& rreq, IRoute *destRoute, IRout
 
         // The destination node copies the value MY_ROUTE_TIMEOUT
         // into the Lifetime field of the RREP.
-        rrep->setLifeTime(myRouteTimeout);
+        rrep->setLifeTime(myRouteTimeout.trunc(SIMTIME_MS));
     }
     else {    // intermediate node
         // 6.6.2. Route Reply Generation by an Intermediate Node
@@ -488,7 +488,7 @@ const Ptr<Rrep> Aodv::createRREP(const Ptr<Rreq>& rreq, IRoute *destRoute, IRout
         // The Lifetime field of the RREP is calculated by subtracting the
         // current time from the expiration time in its route table entry.
 
-        rrep->setLifeTime(destRouteData->getLifeTime() - simTime());
+        rrep->setLifeTime((destRouteData->getLifeTime() - simTime()).trunc(SIMTIME_MS));
     }
 
     rrep->setChunkLength(B(20));
