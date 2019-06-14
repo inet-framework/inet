@@ -501,9 +501,9 @@
 # /examples/wireless/nic/,             -f omnetpp.ini -c AbstractApskDimensionalRadio -r 0, ---100s,   0000-0000/tplx, ERROR, wireless # AbstractApskDimensionalRadio extended
 /examples/wireless/nic/,             -f omnetpp.ini -c AbstractIeee80211ScalarRadio -r 0,         100s,     3434-b40c/tplx, PASS, wireless
 # /examples/wireless/nic/,             -f omnetpp.ini -c AbstractIeee80211DimensionalRadio -r 0   # AbstractIeee80211DimensionalRadio extended
-/examples/wireless/nic/,             -f omnetpp.ini -c AckingMacWithUnitDiskRadio -r 0,           100s,     4077-925f/tplx, PASS, wireless
-/examples/wireless/nic/,             -f omnetpp.ini -c AckingMacWithApskScalarRadio -r 0,         100s,     a94d-fd9c/tplx, PASS, wireless
-/examples/wireless/nic/,             -f omnetpp.ini -c AckingMacWithApskDimensionalRadio -r 0,    100s,     a94d-fd9c/tplx, PASS, wireless
+/examples/wireless/nic/,             -f omnetpp.ini -c AckingMacWithUnitDiskRadio -r 0,           100s,     5bc8-eefd/tplx, PASS, wireless
+/examples/wireless/nic/,             -f omnetpp.ini -c AckingMacWithApskScalarRadio -r 0,         100s,     9693-d5eb/tplx, PASS, wireless
+/examples/wireless/nic/,             -f omnetpp.ini -c AckingMacWithApskDimensionalRadio -r 0,    100s,     9693-d5eb/tplx, PASS, wireless
 /examples/wireless/nic/,             -f omnetpp.ini -c LMacWithUnitDiskRadio -r 0,                100s,     3eb7-63a1/tplx, PASS, wireless
 /examples/wireless/nic/,             -f omnetpp.ini -c LMacWithApskScalarRadio -r 0,              100s,     1df4-f850/tplx, PASS, wireless
 /examples/wireless/nic/,             -f omnetpp.ini -c LMacWithApskDimensionalRadio -r 0,         100s,     1df4-f850/tplx, PASS, wireless
