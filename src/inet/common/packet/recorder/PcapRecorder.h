@@ -28,6 +28,7 @@
 namespace inet {
 
 enum PcapLinkType {
+    LINKTYPE_INVALID = -1,
     /** BSD loopback encapsulation */
     LINKTYPE_NULL = 0,
     /** IEEE 802.3 Ethernet */
@@ -225,7 +226,8 @@ class INET_API PcapRecorder : public cSimpleModule, protected cListener
     bool dumpBadFrames = false;
     PacketFilter packetFilter;
     int numRecorded = 0;
-    uint32_t pcapLinkType = (uint32_t)-1;
+    PcapLinkType pcapLinkType = LINKTYPE_INVALID;
+    bool recordPcap = false;
 
   public:
     PcapRecorder();
@@ -241,6 +243,7 @@ class INET_API PcapRecorder : public cSimpleModule, protected cListener
     virtual void recordPacket(const cPacket *msg, bool l2r);
     virtual bool matchesLinkType(const Protocol *protocol) const;
     virtual Packet *tryConvertToLinkType(const Packet* packet) const;
+    virtual PcapLinkType protocolToLinkType(const Protocol *protocol) const;
 };
 
 } // namespace inet
