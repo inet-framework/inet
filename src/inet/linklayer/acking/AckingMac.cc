@@ -171,11 +171,16 @@ void AckingMac::handleLowerPacket(Packet *packet)
     }
 
     if (!dropFrameNotForUs(packet)) {
-        int senderModuleId = macHeader->getSrcModuleId();
-        AckingMac *senderMac = dynamic_cast<AckingMac *>(getSimulation()->getModule(senderModuleId));
-        // TODO: this whole out of bounds ack mechanism is fishy
-        if (senderMac && senderMac->useAck)
-            senderMac->acked(packet);
+        // send Ack if needed
+        auto dest = macHeader->getDest();
+        bool needsAck = !(dest.isBroadcast() || dest.isMulticast() || dest.isUnspecified()); // same condition as in sender
+        if (needsAck) {
+            int senderModuleId = macHeader->getSrcModuleId();
+            AckingMac *senderMac = check_and_cast<AckingMac *>(getSimulation()->getModule(senderModuleId));
+            if (senderMac->useAck)
+                senderMac->acked(packet);
+        }
+
         // decapsulate and attach control info
         decapsulate(packet);
         EV << "Passing up contained packet '" << packet->getName() << "' to higher layer\n";
