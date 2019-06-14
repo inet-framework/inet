@@ -216,6 +216,18 @@ enum PcapLinkType {
  */
 class INET_API PcapRecorder : public cSimpleModule, protected cListener
 {
+  public:
+    class INET_API IHelper {
+      public:
+        /// returns pcapLinkType for given protocol or returns LINKTYPE_INVALID. Protocol storable as or convertable to pcapLinkType.
+        virtual PcapLinkType protocolToLinkType(const Protocol *protocol) const = 0;
+
+        /// returns true when the protocol storable as pcapLinkType without conversion.
+        virtual bool matchesLinkType(PcapLinkType pcapLinkType, const Protocol *protocol) const = 0;
+
+        /// Create a new Packet or return nullptr. The new packet contains the original packet converted to pcapLinkType format.
+        virtual Packet *tryConvertToLinkType(const Packet* packet, PcapLinkType pcapLinkType, const Protocol *protocol) const = 0;
+    };
   protected:
     typedef std::map<simsignal_t, bool> SignalList;
     std::vector<const Protocol *> dumpProtocols;
@@ -228,6 +240,7 @@ class INET_API PcapRecorder : public cSimpleModule, protected cListener
     int numRecorded = 0;
     PcapLinkType pcapLinkType = LINKTYPE_INVALID;
     bool recordPcap = false;
+    std::vector<IHelper *> helpers;
 
   public:
     PcapRecorder();

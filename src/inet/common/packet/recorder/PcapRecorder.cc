@@ -68,6 +68,13 @@ void PcapRecorder::initialize()
             dumpProtocols.push_back(Protocol::getProtocol(protocolTokenizer.nextToken()));
     }
 
+    {
+        cStringTokenizer protocolTokenizer(par("helpers"));
+
+        while (protocolTokenizer.hasMoreTokens())
+            helpers.push_back(check_and_cast<IHelper *>(createOne(protocolTokenizer.nextToken())));
+    }
+
     const char *moduleNames = par("moduleNamePatterns");
     cStringTokenizer moduleTokenizer(moduleNames);
 
@@ -208,8 +215,13 @@ bool PcapRecorder::matchesLinkType(const Protocol *protocol) const
         return pcapLinkType == LINKTYPE_RAW || pcapLinkType == LINKTYPE_IPV6;
     else if (*protocol == Protocol::ieee802154)
         return pcapLinkType == LINKTYPE_IEEE802_15_4 || pcapLinkType == LINKTYPE_IEEE802_15_4_NOFCS;
-    else
-        return true;
+    else {
+        for (auto helper: helpers) {
+            if (helper->matchesLinkType(pcapLinkType, protocol))
+                return true;
+        }
+    }
+    return false;
 }
 
 PcapLinkType PcapRecorder::protocolToLinkType(const Protocol *protocol) const
@@ -226,12 +238,22 @@ PcapLinkType PcapRecorder::protocolToLinkType(const Protocol *protocol) const
         return LINKTYPE_RAW;
     else if (*protocol == Protocol::ieee802154)
         return LINKTYPE_IEEE802_15_4;
-    else
-        return LINKTYPE_INVALID;
+    else {
+        for (auto helper: helpers) {
+            auto lt = helper->protocolToLinkType(protocol);
+            if (lt != LINKTYPE_INVALID)
+                return lt;
+        }
+    }
+    return LINKTYPE_INVALID;
 }
 
 Packet *PcapRecorder::tryConvertToLinkType(const Packet* packet, const Protocol *protocol) const
 {
+    for (IHelper *helper: helpers) {
+        if (auto newPacket = helper->tryConvertToLinkType(packet, pcapLinkType, protocol))
+            return newPacket;
+    }
     return nullptr;
 }
 
