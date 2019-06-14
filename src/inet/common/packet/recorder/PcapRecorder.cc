@@ -171,7 +171,7 @@ void PcapRecorder::recordPacket(const cPacket *msg, bool l2r)
                 pcapWriter.setFlushParameter(par("alwaysFlush").boolValue());
             }
             if (!matchesLinkType(protocol)) {
-                auto convertedPacket = tryConvertToLinkType(packet);
+                auto convertedPacket = tryConvertToLinkType(packet, protocol);
                 if (convertedPacket) {
                     pcapWriter.writePacket(simTime(), convertedPacket);
                     numRecorded++;
@@ -230,7 +230,7 @@ PcapLinkType PcapRecorder::protocolToLinkType(const Protocol *protocol) const
         return LINKTYPE_INVALID;
 }
 
-Packet *PcapRecorder::tryConvertToLinkType(const Packet* packet) const
+Packet *PcapRecorder::tryConvertToLinkType(const Packet* packet, const Protocol *protocol) const
 {
     return nullptr;
 }
