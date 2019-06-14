@@ -23,7 +23,7 @@ Define_Module(StationaryMobility);
 
 void StationaryMobility::initialize(int stage)
 {
-    MobilityBase::initialize(stage);
+    StationaryMobilityBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL)
         updateFromDisplayString = par("updateFromDisplayString");
 }
@@ -33,7 +33,7 @@ void StationaryMobility::refreshDisplay() const
     if (updateFromDisplayString)
         const_cast<StationaryMobility *>(this)->updateMobilityState();
     else
-        MobilityBase::refreshDisplay();
+        StationaryMobilityBase::refreshDisplay();
 }
 
 void StationaryMobility::updateMobilityState()

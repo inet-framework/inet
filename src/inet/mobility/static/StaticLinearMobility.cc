@@ -32,8 +32,7 @@ StaticLinearMobility::StaticLinearMobility()
 
 void StaticLinearMobility::initialize(int stage)
 {
-    StationaryMobility::initialize(stage);
-
+    StationaryMobilityBase::initialize(stage);
     EV_TRACE << "initializing StaticLinearMobility stage " << stage << endl;
     if (stage == INITSTAGE_LOCAL) {
         initialX = par("initialX");
@@ -61,7 +60,7 @@ void StaticLinearMobility::setInitialPosition()
 
 void StaticLinearMobility::finish()
 {
-    MobilityBase::finish();
+    StationaryMobilityBase::finish();
     recordScalar("x", lastPosition.x);
     recordScalar("y", lastPosition.y);
 }
