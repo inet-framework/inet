@@ -290,34 +290,7 @@ bool RedMarker::markPacket(Packet *packet)
 
   EtherEncap::addPaddingAndFcs(packet, FCS_DECLARED_CORRECT);
 
-
-//
-//  auto networkHeader = getNetworkProtocolHeader(packet);
-//
-//  Ipv4Header* ipv4Header = static_cast<Ipv4Header*>(networkHeader);
-//
-//  //  auto ipv4Header = packet->peekAtFront<Ipv4Header>();
-////  auto ipv4Header = removeNetworkProtocolHeader<Ipv4Header>(packet);
-//
-//  //congestion experiencd CE
-//  ipv4Header->setExplicitCongestionNotification(3);
-//  insertNetworkProtocolHeader(packet, Protocol::ipv4, ipv4Header);
-
   return true;
-
-
-//#ifdef WITH_IPv6
-//  if (protocol == &Protocol::ipv6) {
-//      packet->trimFront();
-//      const auto& ipv6Header = packet->removeAtFront<Ipv6Header>();
-//      ipv6Header->setDiffServCodePoint(dscp);
-//      packet->insertAtFront(ipv6Header);
-//      return true;
-//  }
-//#endif // ifdef WITH_IPv6
-
-  return false;
-
 
 }
 
