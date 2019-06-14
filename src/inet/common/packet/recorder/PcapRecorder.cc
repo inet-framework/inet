@@ -40,7 +40,6 @@ PcapRecorder::PcapRecorder() : cSimpleModule(), pcapWriter()
 
 void PcapRecorder::initialize()
 {
-    const char *file = par("pcapFile");
     snaplen = this->par("snaplen");
     dumpBadFrames = par("dumpBadFrames");
     packetDumper.setVerbose(par("verbose"));
@@ -102,6 +101,7 @@ void PcapRecorder::initialize()
     }
 
     pcapLinkType = par("pcapLinkType");
+    const char *file = par("pcapFile");
     if (*file) {
         pcapWriter.openPcap(file, snaplen, pcapLinkType);
         pcapWriter.setFlushParameter(par("alwaysFlush").boolValue());
@@ -161,8 +161,16 @@ void PcapRecorder::recordPacket(const cPacket *msg, bool l2r)
     if (packet && packetFilter.matches(packet) && (dumpBadFrames || !packet->hasBitError())) {
         auto protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
         if (contains(dumpProtocols, protocol)) {
-            if (!matchesLinkType(protocol))
+            if (!matchesLinkType(protocol)) {
+                auto convertedPacket = tryConvertToLinkType(packet);
+                if (convertedPacket) {
+                    pcapWriter.writePacket(simTime(), convertedPacket);
+                    numRecorded++;
+                    delete convertedPacket;
+                    return;
+                }
                 throw cRuntimeError("The protocol '%s' doesn't match pcap linktype %d", protocol->getName(), pcapLinkType);
+            }
             pcapWriter.writePacket(simTime(), packet);
             numRecorded++;
         }
@@ -193,6 +201,11 @@ bool PcapRecorder::matchesLinkType(const Protocol *protocol) const
         return pcapLinkType == LINKTYPE_IEEE802_15_4 || pcapLinkType == LINKTYPE_IEEE802_15_4_NOFCS;
     else
         return true;
+}
+
+Packet *PcapRecorder::tryConvertToLinkType(const Packet* packet) const
+{
+    return nullptr;
 }
 
 } // namespace inet
