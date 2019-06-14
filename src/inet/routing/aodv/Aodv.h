@@ -138,6 +138,9 @@ class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase
     // internal
     std::multimap<L3Address, Packet *> targetAddressToDelayedPackets;    // queue for the datagrams we have no route for
 
+    //crcMode
+    CrcMode crcMode = CRC_MODE_UNDEFINED;
+
   protected:
     void handleMessageWhenUp(cMessage *msg) override;
     void initialize(int stage) override;

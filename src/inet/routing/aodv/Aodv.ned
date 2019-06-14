@@ -44,6 +44,7 @@ simple Aodv like IManetRouting
         string routingTableModule = default("^.ipv4.routingTable");
         string interfaceTableModule = default("^.interfaceTable");
         string networkProtocolModule = default("^.ipv4.ip");
+        string crcMode @enum("disabled", "declared", "computed") = default("declared");
 
         bool askGratuitousRREP = default(false); // see RFC 3561: 6.6.3
         bool useHelloMessages = default(false); // see RFC 3561: 6.9

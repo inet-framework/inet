@@ -85,6 +85,8 @@ void Aodv::initialize(int stage)
         blacklistTimer = new cMessage("BlackListTimer");
         if (useHelloMessages)
             helloMsgTimer = new cMessage("HelloMsgTimer");
+        const char *crcModeString = par("crcMode");
+        crcMode = parseCrcMode(crcModeString);
     }
     else if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
         registerService(Protocol::manet, nullptr, gate("ipIn"));
@@ -723,10 +725,19 @@ void Aodv::sendAODVPacket(const Ptr<AodvControlPacket>& packet, const L3Address&
     udpHeader->setSourcePort(aodvUDPPort);
     udpHeader->setDestinationPort(aodvUDPPort);
     udpHeader->setTotalLengthField(udpPacket->getDataLength()+udpHeader->getChunkLength());
-    udpHeader->setCrcMode(CRC_DISABLED);
+    /////
+    // FIXME: was udpHeader->setCrcMode(CRC_DISABLED);
+    /*if(crcMode == "computed")
+        udpHeader->setCrcMode(CRC_COMPUTED);
+    else
+        udpHeader->setCrcMode(CRC_DISABLED);*/
+    udpHeader->setCrcMode(crcMode);
+    /////
     udpPacket->insertAtFront(udpHeader);
     // TODO: was udpPacket->copyTags(*packet);
-    udpPacket->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::manet);
+    // FIXME: was udpPacket->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::manet);
+    udpPacket->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::udp);
+    // FIXME: sockets needed
     udpPacket->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
     udpPacket->addTagIfAbsent<InterfaceReq>()->setInterfaceId(ifEntry->getInterfaceId());
     auto addresses = udpPacket->addTagIfAbsent<L3AddressReq>();
