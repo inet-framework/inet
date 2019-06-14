@@ -34,6 +34,7 @@ Ieee80211UnitDiskTransmitter::Ieee80211UnitDiskTransmitter() :
 
 void Ieee80211UnitDiskTransmitter::initialize(int stage)
 {
+    Ieee80211TransmitterBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         communicationRange = m(par("communicationRange"));
         interferenceRange = m(par("interferenceRange"));
