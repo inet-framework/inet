@@ -238,7 +238,7 @@ class INET_API PcapRecorder : public cSimpleModule, protected cListener
     virtual void updateDisplayString() const;
     virtual void finish() override;
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
-    virtual void recordPacket(cPacket *msg, bool l2r);
+    virtual void recordPacket(const cPacket *msg, bool l2r);
     virtual bool matchesLinkType(const Protocol *protocol) const;
 };
 

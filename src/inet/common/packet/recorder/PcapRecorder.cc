@@ -148,7 +148,7 @@ void PcapRecorder::receiveSignal(cComponent *source, simsignal_t signalID, cObje
     }
 }
 
-void PcapRecorder::recordPacket(cPacket *msg, bool l2r)
+void PcapRecorder::recordPacket(const cPacket *msg, bool l2r)
 {
     EV << "PcapRecorder::recordPacket(" << msg->getFullPath() << ", " << l2r << ")\n";
     packetDumper.dumpPacket(l2r, msg);
@@ -156,13 +156,13 @@ void PcapRecorder::recordPacket(cPacket *msg, bool l2r)
     if (!pcapWriter.isOpen())
         return;
 
-    auto packet = dynamic_cast<Packet *>(msg);
+    auto packet = dynamic_cast<const Packet *>(msg);
 
     if (packet && packetFilter.matches(packet) && (dumpBadFrames || !packet->hasBitError())) {
         auto protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
         if (contains(dumpProtocols, protocol)) {
             if (!matchesLinkType(protocol))
-                throw cRuntimeError("The protocol '%s' doesn't matches for pcap linktype %d", protocol->getName(), pcapLinkType);
+                throw cRuntimeError("The protocol '%s' doesn't match pcap linktype %d", protocol->getName(), pcapLinkType);
             pcapWriter.writePacket(simTime(), packet);
             numRecorded++;
         }
