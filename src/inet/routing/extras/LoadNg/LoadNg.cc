@@ -591,6 +591,17 @@ void LoadNg::updateRoutingTable(IRoute *route, const L3Address& nextHop, unsigne
 {
     EV_DETAIL << "Updating existing route: " << route << endl;
 
+    auto it = neigbords.find(nextHop);
+    if (it == neigbords.end()) {
+        // include in the list
+        NeigborElement elem;
+        elem.lastNotification = simTime();
+        neigbords[nextHop] = elem;
+    }
+    else
+        it->second.lastNotification = simTime();
+
+
     route->setNextHop(nextHop);
     route->setMetric(hopCount);
     LoadNgRouteData *routingData = check_and_cast<LoadNgRouteData *>(route->getProtocolData());
@@ -809,6 +820,16 @@ IRoute *LoadNg::createRoute(const L3Address& destAddr, const L3Address& nextHop,
         unsigned int hopCount, int64_t destSeqNum,
         bool isActive, simtime_t lifeTime, int metricType, unsigned int metric)
 {
+    auto it = neigbords.find(nextHop);
+    if (it == neigbords.end()) {
+        // include in the list
+        NeigborElement elem;
+        elem.lastNotification = simTime();
+        neigbords[nextHop] = elem;
+    }
+    else
+        it->second.lastNotification = simTime();
+
     // create a new route
     IRoute *newRoute = routingTable->createRoute();
 

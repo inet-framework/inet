@@ -32,12 +32,21 @@ struct UnreachableNode
     unsigned int seqNum;
 };
 
+class NeigborData {
+    L3Address addr;
+    unsigned int seqNum;
+    bool isBidir;
+}
+
+
 enum LoadNgControlPacketType
-{
+{    
     RREQ = 1;
     RREP = 2;
     RERR = 3;
     RREPACK = 4;
+    HELLO = 5;
+    HELLOROOT = 6;
 };
 
 enum LoadNgControlMetrics
@@ -209,3 +218,21 @@ message WaitForRrep
     unsigned int lastTTL;
     bool fromInvalidEntry;
 }
+
+class Hello extends LoadNgControlPacket
+{
+    packetType = HELLO;
+    origAddr = true;
+    hopLimits = true;
+    hopCounts = true;
+    seqField = true;
+    addrLen = 3;
+    L3Address originatorAddr;
+    unsigned int hopLimit;
+    unsigned int hopCount;
+    unsigned int seqNum;
+    TlvOptions tlvOptions;
+    NeigborData neighAddrs[]; // it should be a block of type TLV + 2 B
+    TlvOptions addressTlvOptions;  
+}
+

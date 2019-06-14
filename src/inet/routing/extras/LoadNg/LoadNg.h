@@ -75,6 +75,18 @@ class INET_API LoadNg : public RoutingProtocolBase, public NetfilterBase::HookBa
         }
     };
 
+    class NeigborElement {
+    public:
+        simtime_t lastNotification;
+        int64_t seqNumber = -1;
+        bool isBidirectional = false;
+        std::map<L3Address, bool> listNeigbours;
+        int32_t distRoot = -1;
+    };
+    std::map<L3Address, NeigborElement> neigbords;
+
+    // bool checkNeigborList();
+
     // context
     IL3AddressType *addressType = nullptr;    // to support both Ipv4 and v6 addresses.
 
