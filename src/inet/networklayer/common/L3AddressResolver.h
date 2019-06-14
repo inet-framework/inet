@@ -73,6 +73,8 @@ class INET_API L3AddressResolver
     virtual bool getInterfaceModulePathAddress(L3Address& ret, InterfaceEntry *ie, bool mask);
     // internal
     virtual bool getInterfaceModuleIdAddress(L3Address& ret, InterfaceEntry *ie, bool mask);
+    // internal
+    virtual void doCollectNetworkNodes(cModule *parent, std::vector<cModule*>& result);
 
   public:
     enum {
@@ -194,6 +196,11 @@ class INET_API L3AddressResolver
      * Like interfaceTableOf(), but doesn't throw error if not found.
      */
     virtual NextHopRoutingTable *findNextHopRoutingTableOf(cModule *host);
+
+    /**
+     * Collect modules that represent network nodes, as denoted by the @networkNode(true) annotation.
+     */
+    virtual std::vector<cModule*> collectNetworkNodes();
 
     /**
      * Find the Host with the specified address.
