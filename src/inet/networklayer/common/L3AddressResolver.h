@@ -199,6 +199,16 @@ class INET_API L3AddressResolver
      * Find the Host with the specified address.
      */
     virtual cModule *findHostWithAddress(const L3Address& addr);
+
+    /**
+     * Find the interface with the specified MAC address. Returns nullptr if not found.
+     */
+    virtual InterfaceEntry *findInterfaceWithMacAddress(const MacAddress& addr);
+
+    /**
+     * Find the host with the specified MAC address. Returns nullptr if not found.
+     */
+    virtual cModule *findHostWithMacAddress(const MacAddress& addr);
     //@}
 };
 

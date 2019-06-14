@@ -555,5 +555,34 @@ cModule *L3AddressResolver::findHostWithAddress(const L3Address& add)
     return nullptr;
 }
 
+InterfaceEntry *L3AddressResolver::findInterfaceWithMacAddress(const MacAddress& addr)
+{
+    if (addr.isUnspecified() || addr.isBroadcast() || addr.isMulticast())
+        return nullptr;
+
+    // TODO: FIXME: this is a very bad idea, because it can be very slow for a large network
+    cTopology topo("topo");
+    topo.extractByProperty("networkNode");
+
+    for (int i = 0; i < topo.getNumNodes(); i++) {
+        cModule *mod = topo.getNode(i)->getModule();
+        IInterfaceTable *itable = L3AddressResolver().findInterfaceTableOf(mod);
+        if (itable != nullptr) {
+            for (int i = 0; i < itable->getNumInterfaces(); i++) {
+                InterfaceEntry *entry = itable->getInterface(i);
+                if (entry->getMacAddress() == addr)
+                    return entry;
+            }
+        }
+    }
+    return nullptr;
+}
+
+cModule *L3AddressResolver::findHostWithMacAddress(const MacAddress& addr)
+{
+    InterfaceEntry *entry = findInterfaceWithMacAddress(addr);
+    return entry ? entry->getInterfaceTable()->getHostModule() : nullptr;
+}
+
 } // namespace inet
 
