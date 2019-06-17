@@ -80,7 +80,7 @@ and can be inspected in the runtime GUI. The routing table of host A
 (10.0.0.2) can be reached via host R1 (10.0.0.3), as specified by the
 gateway (gw) value.
 
-.. figure:: wireless-step4-rt.png
+.. figure:: media/wireless-step4-rt.png
    :width: 100%
 
 When the first packet sent by host A arrives at host R1, a dotted dark
@@ -107,7 +107,7 @@ they don't transmit. This is because they receive the transmissions at
 the physical layer, but they discard the packets at the link layer
 because it is not addressed to them.
 
-.. video:: step4-4-1.mp4
+.. video:: media/step4-4-1.mp4
 
    <!--internal video recording, playback speed 0.72, fadeOutMode animationTime, fadeOutTime 1.5s, normal run until event #184-->
    <!--crop green background: top bottom left right 8 5 8 5 width 655-->

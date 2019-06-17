@@ -40,7 +40,7 @@ through host R2, which is again just two hops.
 
 
 
-.. video:: wireless-step14-1.mp4
+.. video:: media/wireless-step14-1.mp4
    :width: 655
    :height: 575
 

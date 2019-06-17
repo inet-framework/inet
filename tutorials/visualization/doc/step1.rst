@@ -56,7 +56,7 @@ network phenomenons is enabled.
 As you can see in the following image, in 2D visualization you can see
 only the ``visualizer`` module on the playground.
 
-.. figure:: step1_result_2d.png
+.. figure:: media/step1_result_2d.png
    :width: 100%
 
 Sources:

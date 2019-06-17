@@ -68,7 +68,7 @@ packets to host B. This can be seen in the animation below.
 
 
 
-.. video:: wireless-step10.mp4
+.. video:: media/wireless-step10.mp4
    :width: 655
    :height: 575
 
@@ -91,7 +91,7 @@ traffic continues.
 The AODV route discovery messages can be seen in the following packet
 log:
 
-.. figure:: wireless-step10-packetlog.png
+.. figure:: media/wireless-step10-packetlog.png
    :width: 100%
 
 The number of successfully received packets at host B has roughly

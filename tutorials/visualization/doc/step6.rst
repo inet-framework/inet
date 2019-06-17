@@ -47,7 +47,7 @@ communication range of ``accessPoint0``.
 The following video displays nodes' mobility using default
 visualization.
 
-.. video:: step6_model_2d.mp4
+.. video:: media/step6_model_2d.mp4
    :width: 698
 
 Visualization settings
@@ -72,7 +72,7 @@ The following code snippet shows how these features are configured.
 Results
 -------
 
-.. video:: step6_result_2d.mp4
+.. video:: media/step6_result_2d.mp4
    :width: 698
 
 .. todo::

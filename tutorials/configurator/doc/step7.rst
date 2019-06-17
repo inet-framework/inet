@@ -31,7 +31,7 @@ All three parts in this step use the :ned:`ConfiguratorB` network defined
 in :download:`ConfiguratorB.ned <../ConfiguratorB.ned>`. The network
 looks like this:
 
-.. figure:: step7network.png
+.. figure:: media/step7network.png
    :width: 100%
 
 The network is comprised of three areas, each containing two local area
@@ -57,12 +57,12 @@ Results
 
 The assigned addresses are shown in the image below:
 
-.. figure:: step7a_addresses.png
+.. figure:: media/step7a_addresses.png
    :width: 100%
 
 The size of some of the routing tables are the following:
 
-.. figure:: step7a_rt_2.png
+.. figure:: media/step7a_rt_2.png
 
 
 The routing tables of a host (``area1lan2host2``) and a router
@@ -168,7 +168,7 @@ Results
 
 The addresses are the same, but the routing table sizes have gone down:
 
-.. figure:: step7b_rt_2.png
+.. figure:: media/step7b_rt_2.png
 
 The routing tables of a host, an area router and the backbone router are
 the following:
@@ -262,13 +262,13 @@ Results
 
 The image below shows the assigned addresses.
 
-.. figure:: step7c_addresses.png
+.. figure:: media/step7c_addresses.png
    :width: 100%
 
 The sizes of some of the routing tables are displayed on the following
 image.
 
-.. figure:: step7c_rt_2.png
+.. figure:: media/step7c_rt_2.png
 
 The routing tables are the following:
 

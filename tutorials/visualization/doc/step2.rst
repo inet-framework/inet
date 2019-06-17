@@ -48,7 +48,7 @@ configured in the ini file.
 Results
 -------
 
-.. figure:: step2_result_boston3d.png
+.. figure:: media/step2_result_boston3d.png
    :width: 100%
 
 .. 3d, real world context, camera zoom, rotate...,

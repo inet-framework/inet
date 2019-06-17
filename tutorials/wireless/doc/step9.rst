@@ -73,7 +73,7 @@ packets to reinforce it.
 
 
 
-.. video:: wireless-step9-1.mp4
+.. video:: media/wireless-step9-1.mp4
    :width: 655
    :height: 575
 

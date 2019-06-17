@@ -22,7 +22,7 @@ TODO: video
 
 
 
-   .. video:: step4.mp4
+   .. video:: media/step4.mp4
 
 Here are two images of the RIP table of ``router1``.
 
@@ -45,6 +45,6 @@ TODO: what happens
 
 TODO: screenshots or routing tables / RIP packets
 
-.. |image0| image:: step4_3.png
-.. |image1| image:: step4_4.png
+.. |image0| image:: media/step4_3.png
+.. |image1| image:: media/step4_4.png
 

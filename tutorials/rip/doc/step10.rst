@@ -14,7 +14,7 @@ The RIP messages are only sent among the routers, but not the hosts.
 
 
 
-   .. video:: step10.mp4
+   .. video:: media/step10.mp4
 
 
 

@@ -18,7 +18,7 @@ The network we want to configure is :ned:`ConfiguratorA`, defined in
 ``ConfiguratorA.ned``. It looks like
 this:
 
-.. figure:: step1network.png
+.. figure:: media/step1network.png
    :width: 100%
 
 The network contains three routers, each connected to the other two.
@@ -101,7 +101,7 @@ while making sure that different subnets got different address prefixes
 and netmasks, as instructed by the ``assignDisjunctSubnetAddresses``
 parameter.
 
-.. figure:: step1addresses.png
+.. figure:: media/step1addresses.png
    :width: 100%
 
 Note that the configurator assigned a 29-bit netmask to the hosts and

@@ -39,12 +39,12 @@ Here is a video of ``host0`` pinging ``host6``:
 
 
 
-   .. video:: step1_2.mp4
+   .. video:: media/step1_2.mp4
 
 
 
    <!--internal video recording, animation speed none, playback speed 2.138, zoom 0.77-->
 
-.. |image0| image:: step1network.png
-.. |image1| image:: step1routes.png
+.. |image0| image:: media/step1network.png
+.. |image1| image:: media/step1routes.png
 

@@ -37,7 +37,7 @@ Wireless hosts connect to ``router0`` via ``accessPoint0``,
 
 The following image shows how the network looks like.
 
-.. figure:: step15_model_network.png
+.. figure:: media/step15_model_network.png
 
 Video stream application
 ~~~~~~~~~~~~~~~~~~~~~~~~

@@ -97,13 +97,13 @@ The image below shows host A's ``energyBalance`` variable at the end of
 the simulation. The negative energy value signifies the consumption of
 energy.
 
-.. figure:: wireless-step8-energy-2.png
+.. figure:: media/wireless-step8-energy-2.png
 
 The ``residualCapacity`` statistic of hosts A, R1 and B are plotted on the
 following diagram. The diagram shows that host A has consumed the most
 power because it transmitted more than the other nodes.
 
-.. figure:: wireless-step8.png
+.. figure:: media/wireless-step8.png
 
 **Number of packets received by host B: 1393**
 

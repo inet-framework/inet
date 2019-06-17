@@ -31,7 +31,7 @@ address can be accessed as shown in the following picture. Accessing IP
 address takes a little time and the other nodes' address can not be
 seen.
 
-.. figure:: step8_model_ipaddress_in_inspector.png
+.. figure:: media/step8_model_ipaddress_in_inspector.png
    :width: 100%
 
 This visualizer displays IPv4 or IPv6 address for each interface of each
@@ -61,7 +61,7 @@ Results
 By using :ned:`InterfaceTableVisualizer` we get much better overview about
 the IP address of the nodes.
 
-.. figure:: step8_result_2d_ipaddress.png
+.. figure:: media/step8_result_2d_ipaddress.png
    :width: 100%
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`,

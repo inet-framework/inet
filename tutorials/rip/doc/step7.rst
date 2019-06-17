@@ -24,7 +24,7 @@ route metrics increase incrementally (count-to-infinity):
 
 
 
-   .. video:: step7.mp4
+   .. video:: media/step7.mp4
 
 
 

@@ -90,7 +90,7 @@ route is formed, and traffic continues to use this route until host R1
 moves out of communication range. After that, the A-R2-R3-B route is
 used, as seen in the previous steps.
 
-.. video:: wireless-step11-1.mp4
+.. video:: media/wireless-step11-1.mp4
    :width: 655
    :height: 575
 

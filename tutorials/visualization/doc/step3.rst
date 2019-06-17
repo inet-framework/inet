@@ -38,7 +38,7 @@ This step is configured as follows:
 Results
 -------
 
-.. figure:: step3_result_playground.png
+.. figure:: media/step3_result_playground.png
    :width: 100%
 
 .. 3d img, axes, playground

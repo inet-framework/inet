@@ -93,7 +93,7 @@ of the first packet at host B is over.
 
 
 
-.. video:: step2_1.mp4
+.. video:: media/step2_1.mp4
    :width: 655
    :height: 575
 
@@ -114,7 +114,7 @@ UDPData-0 and UDPData-1 are transmitted back-to-back because there's no
 gap between them. UDPData-2 and UDPData-3 are also transmitted
 back-to-back.
 
-.. figure:: wireless-step2-seq3.png
+.. figure:: media/wireless-step2-seq3.png
    :width: 100%
 
 **Number of packets received by host B: 2017**

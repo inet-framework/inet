@@ -15,7 +15,7 @@ This step uses the :ned:`ConfiguratorE` network, defined in
 :download:`ConfiguratorE.ned <../ConfiguratorE.ned>`. The network
 looks like this:
 
-.. figure:: step12network.png
+.. figure:: media/step12network.png
    :width: 100%
 
 The core of the network is composed of three routers connected to each
@@ -38,7 +38,7 @@ rather than hop count, is best suited to configure routes in this LAN.
 Routes in the rest of the network can be configured properly based on
 the hop count metric.
 
-.. figure:: step12ranges.png
+.. figure:: media/step12ranges.png
 
 The configuration for this step in omnetpp.ini is the following:
 
@@ -84,7 +84,7 @@ Results
 
 The routes are visualized on the following image.
 
-.. figure:: step12routes_2.png
+.. figure:: media/step12routes_2.png
    :width: 100%
 
 As intended, ``area1host1`` connects to the network via ``area1host2``.
@@ -120,7 +120,7 @@ actually for reaching 10.0.0.19 directly.
 
 The following video shows ``area1host1`` pinging ``area2host1``:
 
-.. video:: Step12_2_cropped.mp4
+.. video:: media/Step12_2_cropped.mp4
    :width: 698
 
    <!--internal video recording playback speed 2 animation speed none zoom 1.0 from sendPing(1) to #1734 crop 140 380 150 440-->

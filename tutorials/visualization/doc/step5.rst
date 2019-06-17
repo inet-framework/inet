@@ -22,7 +22,7 @@ will be configured in later steps.
 The following picture shows what the network looks like and what the
 default appearance of the :ned:`WirelessHost` nodes looks like.
 
-.. figure:: step5_model_default_appearance_2d.png
+.. figure:: media/step5_model_default_appearance_2d.png
 
 To use a 3D model instead of a 2D icon, set the ``osgModel`` parameter
 of the network node. Examine the following code snippet.
@@ -62,14 +62,14 @@ Results
 -------
 .. 3D visualization
 
-.. video:: step5_result_3d_enc.mp4
+.. video:: media/step5_result_3d_enc.mp4
 
-.. video:: step5_result_3d_v2_enc.mp4
+.. video:: media/step5_result_3d_v2_enc.mp4
    :width: 698
 
 .. 2D visualization
 
-.. figure:: step5_result_2d.png
+.. figure:: media/step5_result_2d.png
    :width: 100%
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`,

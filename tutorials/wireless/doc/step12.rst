@@ -92,7 +92,7 @@ fail, as in the case of :ned:`UnitDiskRadio`.
 
 
 
-.. video:: wireless-step12-1.mp4
+.. video:: media/wireless-step12-1.mp4
    :width: 655
    :height: 575
 
@@ -104,7 +104,7 @@ In host A, the MAC receives the packet UDPData-408 from the radio. The
 MAC drops the packet because of bit errors; this can be seen in the
 following log:
 
-.. figure:: wireless-step12-log.png
+.. figure:: media/wireless-step12-log.png
    :width: 100%
 
 **Number of packets received by host B: 665**

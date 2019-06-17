@@ -24,7 +24,7 @@ Thus routing loops are prevented.
 
 
 
-   .. video:: step8.mp4
+   .. video:: media/step8.mp4
 
 On the following image, ``router2`` sends a RIP Response message to
 ``router3``. The message contains the route to the (currently
@@ -36,5 +36,5 @@ on the image to enlarge):
 
 |image0|
 
-.. |image0| image:: step8_1.png
+.. |image0| image:: media/step8_1.png
 

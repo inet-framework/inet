@@ -89,7 +89,7 @@ Mbit/s ethernet cables. Since routes are optimized for data rate,
 packets from ``router0`` to ``router2`` will go via ``router1`` because
 this path has higher bandwidth.
 
-.. figure:: step4routes_3.png
+.. figure:: media/step4routes_3.png
 
 Results
 ~~~~~~~
@@ -100,7 +100,7 @@ that routes going backward, from hosts 6--8 to hosts 0--2, go through
 ``router1``. No traffic is routed between ``router0`` and ``router2`` at
 all (as opposed to Step 4 and 5.)
 
-.. figure:: step6aroutes.png
+.. figure:: media/step6aroutes.png
    :width: 100%
 
 The routing table of ``router0`` is as follows:
@@ -133,7 +133,7 @@ The following video shows ``host1`` pinging ``host7`` and ``host0``
 pinging ``host6``. Routes towards ``host1`` are visualized. The packets
 don't use the link between ``router0`` and ``router2``.
 
-.. video:: Step6A_1_cropped.mp4
+.. video:: media/Step6A_1_cropped.mp4
    :width: 698
 
    <!--internal video recording run until 1s playback speed 1.5 animation speed none zoom 0.77 crop 30 70 150 80-->
@@ -142,7 +142,7 @@ One can easily check that no routes go through the link between
 ``router0`` and ``router2`` by setting the destination filter to ``"*"``
 in the visualizer. This indicates all routes in the network:
 
-.. figure:: step6allroutes.png
+.. figure:: media/step6allroutes.png
    :width: 100%
 
 Part B - Manually specifying link cost
@@ -190,7 +190,7 @@ Results
 
 The routes towards ``host1`` are visualized on the following image:
 
-.. figure:: step6broutes.png
+.. figure:: media/step6broutes.png
    :width: 100%
 
 The routes are the same as in Part A, where the data rate metric was
@@ -200,7 +200,7 @@ is "turned off" by specifying an infinite cost for it. The following
 video shows ``host1`` pinging ``host7``. Routes towards ``host1`` are
 visualized. The ping packets take the diverted route in both directions:
 
-.. video:: Step6A_1_cropped.mp4
+.. video:: media/Step6A_1_cropped.mp4
    :width: 698
 
    <!--internal video recording run until 1s playback speed 1.5 animation speed none zoom 0.77 crop 30 70 150 80-->

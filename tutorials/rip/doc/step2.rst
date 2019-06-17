@@ -23,7 +23,7 @@ Rip convergence:
 
 
 
-   .. video:: step2_3.mp4
+   .. video:: media/step2_3.mp4
 
 
 
@@ -33,7 +33,7 @@ Ping (basically the same as in step 1, so not sure it's needed):
 
 
 
-   .. video:: step2_3_ping.mp4
+   .. video:: media/step2_3_ping.mp4
 
 
 

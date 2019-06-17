@@ -56,7 +56,7 @@ With ACKs enabled, each successfully received packet is acknowledged.
 The animation below depicts a packet transmission from host R1, and the
 corresponding ACK from host B.
 
-.. video:: wireless-step7-1.mp4
+.. video:: media/wireless-step7-1.mp4
    :width: 655
    :height: 575
 
@@ -64,7 +64,7 @@ corresponding ACK from host B.
 
 The UDPData + ACK sequences can be seen in the sequence chart below:
 
-.. figure:: wireless-step7-seq-2.png
+.. figure:: media/wireless-step7-seq-2.png
    :width: 100%
 
 In the following chart, the UDPData packet sequence numbers that are
@@ -72,7 +72,7 @@ received by host B's UDPApp, are plotted against time. This chart
 contains the statistics of the previous step (ACK off, blue) and the
 current step (ACK on, red).
 
-.. figure:: wireless-step7-seqno.png
+.. figure:: media/wireless-step7-seqno.png
    :width: 100%
 
 When ACKs are turned on, each successfully received UDPData packet has
@@ -92,10 +92,10 @@ numbers, signifying lost packets. The second one (red) is for the
 current step, where the difference is always 1, as there are no lost
 packets.
 
-.. image:: wireless-step7-seqdiff6.png
+.. image:: media/wireless-step7-seqdiff6.png
    :width: 100%
 
-.. image:: wireless-step7-seqdiff7.png
+.. image:: media/wireless-step7-seqdiff7.png
    :width: 100%
 
 **Number of packets received by host B: 1393**

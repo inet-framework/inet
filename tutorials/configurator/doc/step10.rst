@@ -28,7 +28,7 @@ This step uses the :ned:`ConfiguratorD` network, defined in
 :download:`ConfiguratorD.ned <../ConfiguratorD.ned>`. The network
 looks like this:
 
-.. figure:: step10network.png
+.. figure:: media/step10network.png
    :width: 100%
 
 It contains seven ``AODVRouters`` laid out in a chain.
@@ -75,7 +75,7 @@ thus, all arrows are within the circles. Routes lead through adjacent
 hosts in the chain. In each segment of the path, correct reception is
 possible.
 
-.. figure:: step10a_routes.png
+.. figure:: media/step10a_routes.png
    :width: 100%
 
 Part B: Unconfigured routing tables, prepared for MANET routing
@@ -104,13 +104,13 @@ destinations.
 Results
 ~~~~~~~
 
-.. figure:: step10b.png
+.. figure:: media/step10b.png
    :width: 100%
 
 As instructed, the configurator didn't add any routes, as indicated by
 the lack of arrows. The routing tables are empty.
 
-.. figure:: step10b_rt.png
+.. figure:: media/step10b_rt.png
 
 Part C: Routing tables configured using AODV protocol
 -----------------------------------------------------
@@ -139,7 +139,7 @@ AODV is a reactive protocol, so unused routes expire after a while. This
 happens to the routes to ``host2``, as it's not in the path between
 ``host1`` and ``host7``. This is displayed in the following video.
 
-.. video:: step10C_4.mp4
+.. video:: media/step10C_4.mp4
    :width: 706
    :height: 650
 

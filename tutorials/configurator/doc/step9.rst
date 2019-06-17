@@ -15,7 +15,7 @@ The model
 This step uses the :ned:`ConfiguratorC` network, defined in
 :download:`ConfiguratorC.ned <../ConfiguratorC.ned>`.
 
-.. figure:: step8network.png
+.. figure:: media/step8network.png
    :width: 100%
 
 The configuration for this step in omnetpp.ini is the following:
@@ -65,7 +65,7 @@ Results
 The addresses and routes are visualized below. The state of the network
 at the start of the simulation is shown on the following image:
 
-.. figure:: step9routes_2.png
+.. figure:: media/step9routes_2.png
    :width: 100%
 
 The hosts of ``area1lan3``, ``area2lan1``, and ``area3lan3`` have
@@ -124,7 +124,7 @@ unspecified hosts are highlighted):
 In the following video, ``area1lan3host2`` sends a ping packet to
 ``area3lan3host2``:
 
-.. video:: Step9_2.mp4
+.. video:: media/Step9_2.mp4
    :width: 698
 
 No routes are visualized initially because ``area3lan3host2`` (the

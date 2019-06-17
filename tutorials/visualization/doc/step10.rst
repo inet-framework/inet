@@ -56,7 +56,7 @@ relative path to the *inet/images* folder.
 Results
 -------
 
-.. video:: step10_result_2d_trans_rec.mp4
+.. video:: media/step10_result_2d_trans_rec.mp4
    :width: 698
 
 .. todo::

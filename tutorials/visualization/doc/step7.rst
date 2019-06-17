@@ -34,7 +34,7 @@ true.
 Results
 -------
 
-.. figure:: step7_result_2d.png
+.. figure:: media/step7_result_2d.png
    :width: 100%
 
 .. todo::

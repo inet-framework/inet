@@ -21,7 +21,7 @@ automatic configuration, packets from ``router0``'s subnet would go
 through ``router2`` to reach ``host7`` (as in the previous step.) We
 want them to go through ``router1`` instead.
 
-.. figure:: step4network.png
+.. figure:: media/step4network.png
    :width: 100%
 
 Configuration
@@ -123,7 +123,7 @@ it has a longer netmask (plus it's also earlier in the table).
 The following animation depicts ``host1`` pinging ``host7`` and
 ``host0`` pinging ``host6``. Routes to ``host7`` are visualized.
 
-.. video:: Step5A_1_cropped.mp4
+.. video:: media/Step5A_1_cropped.mp4
    :width: 698
 
    <!--internal video recording run until 1s playback speed 1.5 animation speed none zoom 0.77 crop 30 70 150 80-->
@@ -195,7 +195,7 @@ The following is the animation of ``host1`` pinging ``host7`` and
 ``host0`` pinging ``host6``, similarly to Part A. Routes to ``host7``
 are visualized.
 
-.. video:: Step5B_1_cropped.mp4
+.. video:: media/Step5B_1_cropped.mp4
    :width: 698
 
    <!--internal video recording run until 1s playback speed 1.5 animation speed none zoom 0.77 crop 30 70 150 80-->

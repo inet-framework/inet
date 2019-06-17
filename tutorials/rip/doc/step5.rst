@@ -26,7 +26,7 @@ scheduled update (at 60s).
 
 
 
-   .. video:: step5.mp4
+   .. video:: media/step5.mp4
 
 
 

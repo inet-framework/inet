@@ -107,7 +107,7 @@ Results
 
 The visualized routes are displayed on the following image:
 
-.. figure:: step4routes.png
+.. figure:: media/step4routes.png
    :width: 100%
 
 Routes from all nodes to ``host7`` are visualized. Note that arrows
@@ -178,7 +178,7 @@ the hosts.
 
 Below is a video of ``host1`` pinging ``host7``.
 
-.. video:: Step4_2_cropped.mp4
+.. video:: media/Step4_2_cropped.mp4
    :width: 698
 
    <!--internal video recording playback speed 1.38 animation speed none

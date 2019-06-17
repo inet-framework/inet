@@ -20,7 +20,7 @@ Wifi association process
 
 The following image shows the wifi association process:
 
-.. image:: step8_model_ipaddress_in_inspector.png
+.. image:: media/step8_model_ipaddress_in_inspector.png
    :width: 100%
 
 Visualizer
@@ -41,7 +41,7 @@ visualized as a signal sign icon. We set ``displacementHint`` to
 Results
 -------
 
-.. video:: step9_result_2d_assoc.mp4
+.. video:: media/step9_result_2d_assoc.mp4
    :width: 698
 
 .. todo::

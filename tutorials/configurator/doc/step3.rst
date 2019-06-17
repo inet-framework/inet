@@ -77,7 +77,7 @@ Results
 
 The assigned addresses are shown in the following image.
 
-.. figure:: step3address.png
+.. figure:: media/step3address.png
    :width: 100%
 
 The addresses are assigned as intended. This is useful because it is

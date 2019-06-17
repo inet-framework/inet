@@ -26,7 +26,7 @@ to host3 at 270s). Note the incrementally increasing hop count
 
 
 
-   .. video:: step6_1.mp4
+   .. video:: media/step6_1.mp4
 
 
 
@@ -36,7 +36,7 @@ Rip start, link break, counting to infinity, ping packets:
 
 
 
-   .. video:: step6_2.mp4
+   .. video:: media/step6_2.mp4
 
 Ping packets go back and forth between the two routers, indicating the
 presence of the routing loop. The ping packet times out after 8 hops,

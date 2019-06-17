@@ -41,7 +41,7 @@ Results
 
 The following video shows what happens when we start the simulation.
 
-.. video:: step11_result_2d_propsignal.mp4
+.. video:: media/step11_result_2d_propsignal.mp4
    :width: 698
 
 The signal propagation process consists of three phases:
