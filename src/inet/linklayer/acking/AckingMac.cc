@@ -171,11 +171,16 @@ void AckingMac::handleLowerPacket(Packet *packet)
     }
 
     if (!dropFrameNotForUs(packet)) {
-        int senderModuleId = macHeader->getSrcModuleId();
-        AckingMac *senderMac = dynamic_cast<AckingMac *>(getSimulation()->getModule(senderModuleId));
-        // TODO: this whole out of bounds ack mechanism is fishy
-        if (senderMac && senderMac->useAck)
-            senderMac->acked(packet);
+        // send Ack if needed
+        auto dest = macHeader->getDest();
+        bool needsAck = !(dest.isBroadcast() || dest.isMulticast() || dest.isUnspecified()); // same condition as in sender
+        if (needsAck) {
+            int senderModuleId = macHeader->getSrcModuleId();
+            AckingMac *senderMac = check_and_cast<AckingMac *>(getSimulation()->getModule(senderModuleId));
+            if (senderMac->useAck)
+                senderMac->acked(packet);
+        }
+
         // decapsulate and attach control info
         decapsulate(packet);
         EV << "Passing up contained packet '" << packet->getName() << "' to higher layer\n";
@@ -206,18 +211,15 @@ void AckingMac::acked(Packet *frame)
     Enter_Method_Silent();
     ASSERT(useAck);
 
-    EV_DEBUG << "AckingMac::acked(" << frame->getFullName() << ") is ";
+    if (lastSentPk == nullptr)
+        throw cRuntimeError("Unexpected ACK received");
 
-    if (lastSentPk && lastSentPk->getTreeId() == frame->getTreeId()) {
-        EV_DEBUG << "accepted\n";
-        cancelEvent(ackTimeoutMsg);
-        delete lastSentPk;
-        lastSentPk = nullptr;
-        if (!queue->isEmpty())
-            startTransmitting(queue->popPacket());
-    }
-    else
-        EV_DEBUG << "unaccepted\n";
+    EV_DEBUG << "AckingMac::acked(" << frame->getFullName() << ") is accepted\n";
+    cancelEvent(ackTimeoutMsg);
+    delete lastSentPk;
+    lastSentPk = nullptr;
+    if (!queue->isEmpty())
+        startTransmitting(queue->popPacket());
 }
 
 void AckingMac::encapsulate(Packet *packet)

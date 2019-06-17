@@ -129,7 +129,7 @@ void Ieee80211MacHeaderSerializer::parseDataOrMgmtFrame(MemoryInputStream &strea
     frame->setFromDS(fc1 & 0x2);
     frame->setMoreFragments(fc1 & 0x4);
     frame->setRetry(fc1 & 0x8);
-    frame->setDuration(SimTime(stream.readUint16Be() / 1000.0)); // i_dur
+    frame->setDuration(SimTime(stream.readUint16Be(), SIMTIME_US)); // i_dur
     frame->setReceiverAddress(stream.readMacAddress());
     frame->setTransmitterAddress(stream.readMacAddress());
     frame->setAddress3(stream.readMacAddress());
@@ -152,7 +152,7 @@ const Ptr<Chunk> Ieee80211MacHeaderSerializer::deserialize(MemoryInputStream& st
 {
     uint8_t type = stream.readByte();
     uint8_t fc_1 = stream.readByte();  (void)fc_1; // fc_1
-    if (!(type & 0x30)) {
+    if (!(type & 0x0C)) {
         auto managementHeader = makeShared<Ieee80211MgmtHeader>();
         parseDataOrMgmtFrame(stream, managementHeader, type == 0x08 ? ST_DATA : ST_DATA_WITH_QOS, fc_1);
         return managementHeader;
@@ -167,7 +167,7 @@ const Ptr<Chunk> Ieee80211MacHeaderSerializer::deserialize(MemoryInputStream& st
             ackFrame->setFromDS(false);
             ackFrame->setRetry(false);
             ackFrame->setMoreFragments(false);
-            ackFrame->setDuration(SimTime((double)stream.readUint16Be()/1000.0));    //i_dur
+            ackFrame->setDuration(SimTime(stream.readUint16Be(), SIMTIME_US));    //i_dur
             ackFrame->setReceiverAddress(stream.readMacAddress());
             return ackFrame;
         }
