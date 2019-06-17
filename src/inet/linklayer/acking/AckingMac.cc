@@ -197,7 +197,7 @@ void AckingMac::acked(Packet *frame)
     Enter_Method_Silent();
     ASSERT(useAck);
 
-    if (lastSentPk == nullptr)
+    if (currentTxFrame == nullptr)
         throw cRuntimeError("Unexpected ACK received");
 
     EV_DEBUG << "AckingMac::acked(" << frame->getFullName() << ") is accepted\n";
