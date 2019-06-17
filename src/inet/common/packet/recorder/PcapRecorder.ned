@@ -63,6 +63,7 @@ simple PcapRecorder
         string packetFilter = default("*"); // which packets are considered, matches all packets by default
         string packetDataFilter = default("*"); // which packets are considered based on the data they contain, matches all packets by default
         string helpers = default("");    // usable PcapRecorder::IHelper helpers for accept packettype and store/convert packet as specified linktype
+                                         // currently available: "inet::AckingMacToEthernetPcapRecorderHelper"
         bool alwaysFlush = default(false); // flush the pcapFile after each write to ensure that all packets are captured in case of a crash
         string displayStringTextFormat = default("rec: %n pks");
         @display("i=block/blackboard");
