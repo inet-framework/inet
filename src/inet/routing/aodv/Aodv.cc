@@ -25,16 +25,20 @@
 #include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/common/L3Tools.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/networklayer/ipv4/IcmpHeader.h"
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #include "inet/networklayer/ipv4/Ipv4Route.h"
 #include "inet/routing/aodv/Aodv.h"
+#include "inet/transportlayer/common/L4PortTag_m.h"
 #include "inet/transportlayer/contract/udp/UdpControlInfo.h"
 
 namespace inet {
 namespace aodv {
 
 Define_Module(Aodv);
+
+const int KIND_DELAYEDSEND = 100;
 
 void Aodv::initialize(int stage)
 {
@@ -89,8 +93,6 @@ void Aodv::initialize(int stage)
         crcMode = parseCrcMode(crcModeString);
     }
     else if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
-        registerService(Protocol::manet, nullptr, gate("ipIn"));
-        registerProtocol(Protocol::manet, gate("ipOut"), nullptr);
         networkProtocol->registerHook(0, this);
         host->subscribe(linkBrokenSignal, this);
     }
@@ -113,55 +115,46 @@ void Aodv::handleMessageWhenUp(cMessage *msg)
             handleRREPACKTimer();
         else if (msg == blacklistTimer)
             handleBlackListTimer();
+        else if (msg->getKind() == KIND_DELAYEDSEND) {
+            socket.send((Packet*)msg->getContextPointer());
+            delete msg;
+        }
         else
             throw cRuntimeError("Unknown self message");
     }
-    else {
-        auto packet = check_and_cast<Packet *>(msg);
-        auto protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
+    else
+        socket.processMessage(msg);
+}
 
-        if (protocol == &Protocol::icmpv4) {
-            IcmpHeader *icmpPacket = check_and_cast<IcmpHeader *>(msg);
-            // ICMP packet arrived, dropped
-            delete icmpPacket;
-        }
-        else if (protocol == &Protocol::icmpv6) {
-            IcmpHeader *icmpPacket = check_and_cast<IcmpHeader *>(msg);
-            // ICMP packet arrived, dropped
-            delete icmpPacket;
-        }
-        else if (true) {  //FIXME protocol == ???
-            Packet *udpPacket = check_and_cast<Packet *>(msg);
-            udpPacket->popAtFront<UdpHeader>();
-            L3Address sourceAddr = udpPacket->getTag<L3AddressInd>()->getSrcAddress();
-            // KLUDGE: I added this -1 after TTL decrement has been moved in Ipv4
-            unsigned int arrivalPacketTTL = udpPacket->getTag<HopLimitInd>()->getHopLimit() - 1;
-            const auto& ctrlPacket = udpPacket->popAtFront<AodvControlPacket>();
-//            ctrlPacket->copyTags(*msg);
+void Aodv::processPacket(Packet *packet)
+{
+    L3Address sourceAddr = packet->getTag<L3AddressInd>()->getSrcAddress();
+    // KLUDGE: I added this -1 after TTL decrement has been moved in Ipv4
+    unsigned int arrivalPacketTTL = packet->getTag<HopLimitInd>()->getHopLimit() - 1;
+    const auto& aodvPacket = packet->popAtFront<AodvControlPacket>();
+    //TODO aodvPacket->copyTags(*udpPacket);
 
-            switch (ctrlPacket->getPacketType()) {
-                case RREQ:
-                    handleRREQ(dynamicPtrCast<Rreq>(ctrlPacket->dupShared()), sourceAddr, arrivalPacketTTL);
-                    break;
+    switch (aodvPacket->getPacketType()) {
+        case RREQ:
+            handleRREQ(dynamicPtrCast<Rreq>(aodvPacket->dupShared()), sourceAddr, arrivalPacketTTL);
+            break;
 
-                case RREP:
-                    handleRREP(dynamicPtrCast<Rrep>(ctrlPacket->dupShared()), sourceAddr);
-                    break;
+        case RREP:
+            handleRREP(dynamicPtrCast<Rrep>(aodvPacket->dupShared()), sourceAddr);
+            break;
 
-                case RERR:
-                    handleRERR(dynamicPtrCast<const Rerr>(ctrlPacket), sourceAddr);
-                    break;
+        case RERR:
+            handleRERR(dynamicPtrCast<const Rerr>(aodvPacket), sourceAddr);
+            break;
 
-                case RREPACK:
-                    handleRREPACK(dynamicPtrCast<const RrepAck>(ctrlPacket), sourceAddr);
-                    break;
+        case RREPACK:
+            handleRREPACK(dynamicPtrCast<const RrepAck>(aodvPacket), sourceAddr);
+            break;
 
-                default:
-                    throw cRuntimeError("AODV Control Packet arrived with undefined packet type: %d", ctrlPacket->getPacketType());
-            }
-            delete udpPacket;
-        }
+        default:
+            throw cRuntimeError("AODV Control Packet arrived with undefined packet type: %d", aodvPacket->getPacketType());
     }
+    delete packet;
 }
 
 INetfilter::IHook::Result Aodv::ensureRouteForDatagram(Packet *datagram)
@@ -711,48 +704,50 @@ void Aodv::updateRoutingTable(IRoute *route, const L3Address& nextHop, unsigned 
     scheduleExpungeRoutes();
 }
 
-void Aodv::sendAODVPacket(const Ptr<AodvControlPacket>& packet, const L3Address& destAddr, unsigned int timeToLive, double delay)
+void Aodv::sendAODVPacket(const Ptr<AodvControlPacket>& aodvPacket, const L3Address& destAddr, unsigned int timeToLive, double delay)
 {
     ASSERT(timeToLive != 0);
 
-    // TODO: Implement: support for multiple interfaces
-    InterfaceEntry *ifEntry = interfaceTable->getInterfaceByName("wlan0");
+    const char *className = aodvPacket->getClassName();
+    Packet *packet = new Packet(!strncmp("inet::", className, 6) ? className + 6 : className);
+    packet->insertAtBack(aodvPacket);
 
-    auto className = packet->getClassName();
-    Packet *udpPacket = new Packet(!strncmp("inet::", className, 6) ? className + 6 : className);
-    udpPacket->insertAtBack(packet);
-    auto udpHeader = makeShared<UdpHeader>();
-    udpHeader->setSourcePort(aodvUDPPort);
-    udpHeader->setDestinationPort(aodvUDPPort);
-    udpHeader->setTotalLengthField(udpPacket->getDataLength()+udpHeader->getChunkLength());
-    /////
-    // FIXME: was udpHeader->setCrcMode(CRC_DISABLED);
-    /*if(crcMode == "computed")
-        udpHeader->setCrcMode(CRC_COMPUTED);
-    else
-        udpHeader->setCrcMode(CRC_DISABLED);*/
-    udpHeader->setCrcMode(crcMode);
-    /////
-    udpPacket->insertAtFront(udpHeader);
-    // TODO: was udpPacket->copyTags(*packet);
-    // FIXME: was udpPacket->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::manet);
-    udpPacket->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::udp);
-    // FIXME: sockets needed
-    udpPacket->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
-    udpPacket->addTagIfAbsent<InterfaceReq>()->setInterfaceId(ifEntry->getInterfaceId());
-    auto addresses = udpPacket->addTagIfAbsent<L3AddressReq>();
-    addresses->setSrcAddress(getSelfIPAddress());
-    addresses->setDestAddress(destAddr);
-    udpPacket->addTagIfAbsent<HopLimitReq>()->setHopLimit(timeToLive);
+    int interfaceId = interfaceTable->getInterfaceByName("wlan0")->getId(); // TODO: Implement: support for multiple interfaces
+    packet->addTag<InterfaceReq>()->setInterfaceId(interfaceId);
+    packet->addTag<HopLimitReq>()->setHopLimit(timeToLive);
+    packet->addTagIfAbsent<L3AddressReq>()->setDestAddress(destAddr);
+    packet->addTagIfAbsent<L4PortReq>()->setDestPort(aodvUDPPort);
 
     if (destAddr.isBroadcast())
         lastBroadcastTime = simTime();
 
     if (delay == 0)
-        send(udpPacket, "ipOut");
-    else
-        sendDelayed(udpPacket, delay, "ipOut");
+        socket.send(packet);
+    else {
+        cMessage *timer = new cMessage("aodv-send-jitter", KIND_DELAYEDSEND);
+        timer->setContextPointer(packet);
+        scheduleAt(simTime()+delay, timer);
+    }
 }
+
+void Aodv::socketDataArrived(UdpSocket *socket, Packet *packet)
+{
+    // process incoming packet
+    processPacket(packet);
+}
+
+void Aodv::socketErrorArrived(UdpSocket *socket, Indication *indication)
+{
+    EV_WARN << "Ignoring UDP error report " << indication->getName() << endl;
+    delete indication;
+}
+
+void Aodv::socketClosed(UdpSocket *socket)
+{
+    if (operationalState == State::STOPPING_OPERATION)
+        startActiveOperationExtraTimeOrFinish(par("stopOperationExtraTime"));
+}
+
 
 void Aodv::handleRREQ(const Ptr<Rreq>& rreq, const L3Address& sourceAddr, unsigned int timeToLive)
 {
@@ -1194,6 +1189,10 @@ void Aodv::handleStartOperation(LifecycleOperation *operation)
 {
     rebootTime = simTime();
 
+    socket.setOutputGate(gate("socketOut"));
+    socket.setCallback(this);
+    socket.bind(L3Address(), aodvUDPPort);
+
     // RFC 5148:
     // Jitter SHOULD be applied by reducing this delay by a random amount, so that
     // the delay between consecutive transmissions of messages of the same type is
@@ -1206,11 +1205,13 @@ void Aodv::handleStartOperation(LifecycleOperation *operation)
 
 void Aodv::handleStopOperation(LifecycleOperation *operation)
 {
+    socket.close();
     clearState();
 }
 
 void Aodv::handleCrashOperation(LifecycleOperation *operation)
 {
+    socket.destroy();
     clearState();
 }
 
