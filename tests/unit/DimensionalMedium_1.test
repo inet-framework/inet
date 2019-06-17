@@ -1,0 +1,106 @@
+%description:
+This test checks the correctness of the dimensional transmission medium.
+
+%includes:
+#include "inet/common/math/Functions.h"
+#include "inet/physicallayer/common/packetlevel/PowerFunction.h"
+#include "inet/physicallayer/base/packetlevel/DimensionalTransmitterBase.h"
+#include "inet/physicallayer/pathloss/FreeSpacePathLoss.h"
+#include "inet/physicallayer/antenna/IsotropicAntenna.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::math;
+using namespace inet::physicallayer;
+using namespace inet::units::values;
+
+class DimensionalMediumTest : public DimensionalTransmitterBase
+{
+  public:
+    void test1();
+};
+
+void DimensionalMediumTest::test1()
+{
+    mps propagationSpeed(299792458);
+    auto pathLoss = new FreeSpacePathLoss();
+    auto pathLossFunction = makeShared<PathLossFunction>(pathLoss);
+    auto antenna = new IsotropicAntenna();
+    auto transmitterAntennaGainFunction = makeShared<AntennaGainFunction>(antenna->getGain().get());
+    auto obstacleLossFunction = makeShared<ConstantFunction<double, m, m, m, m, m, m, Hz>>(1);
+
+    parseTimeGains("smaller s 0dB either e 0dB greater");
+
+    auto backgroundNoise = makeShared<ConstantFunction<W, m, m, m, simtime_t, Hz>>(pW(1));
+    std::cout << "Background noise: " << *backgroundNoise << std::endl;
+
+    auto transmissionFunction1 = createPowerFunction(0, 20, GHz(1), MHz(20), mW(100));
+    std::cout << "Transmission 1: " << *transmissionFunction1 << std::endl;
+    auto receptionFunction1 = makeShared<ReceptionPowerFunction>(propagationSpeed, Point<m, m, m>(m(10), m(0), m(0)), Quaternion(), transmissionFunction1, transmitterAntennaGainFunction, pathLossFunction, obstacleLossFunction);
+    //std::cout << "Reception 1: " << *receptionFunction1 << std::endl;
+
+    auto transmissionFunction2 = createPowerFunction(0, 20, GHz(1), MHz(20), mW(10));
+    std::cout << "Transmission 2: " << *transmissionFunction2 << std::endl;
+    auto receptionFunction2 = makeShared<ReceptionPowerFunction>(propagationSpeed, Point<m, m, m>(m(-10), m(0), m(0)), Quaternion(), transmissionFunction2, transmitterAntennaGainFunction, pathLossFunction, obstacleLossFunction);
+    //std::cout << "Reception 2: " << *receptionFunction2 << std::endl;
+
+    auto interferenceFunction = makeShared<SumFunction<W, m, m, m, simtime_t, Hz>>(std::vector<Ptr<const IFunction<W, m, m, m, simtime_t, Hz>>>({backgroundNoise, receptionFunction2}));
+
+    auto snirFunction = receptionFunction1->divide(interferenceFunction);
+    //std::cout << "SNIR: " << *snirFunction << std::endl;
+
+    Point<m, m, m> position(m(0), m(0), m(0));
+    simtime_t startTime = 10 / propagationSpeed.get();
+    simtime_t endTime = startTime + 20;
+    simtime_t symbolTime = 10;
+    Hz startFrequency = MHz(990);
+    Hz endFrequency = MHz(1010);
+    Hz subcarrierBandwidth = MHz(10);
+    for (simtime_t time = startTime; time < endTime; time += symbolTime) {
+        for (Hz frequency = startFrequency; frequency < endFrequency; frequency += subcarrierBandwidth) {
+            Point<m, m, m, simtime_t, Hz> lower(std::get<0>(position), std::get<1>(position), std::get<2>(position), time, frequency);
+            Point<m, m, m, simtime_t, Hz> upper(std::get<0>(position), std::get<1>(position), std::get<2>(position), time + symbolTime, frequency + subcarrierBandwidth);
+            Interval<m, m, m, simtime_t, Hz> interval(lower, upper);
+            double snirMean = snirFunction->getMean(interval);
+            std::cout << "  interval = " << interval << ", SNIR mean = " << snirMean << std::endl;
+        }
+    }
+    delete antenna;
+    delete pathLoss;
+}
+
+%activity:
+DimensionalMediumTest tester;
+tester.test1();
+
+%contains: stdout
+Background noise: f {
+  i [(-inf m, -inf m, -inf m, -4611686.018427387903, -inf Hz) ... (inf m, inf m, inf m, 4611686.018427387903, inf GHz)] -> { @(-inf m, -inf m, -inf m, -4611686.018427387903, -inf Hz) = 1 pW, @(inf m, -inf m, -inf m, -4611686.018427387903, -inf Hz) = 1 pW, @(-inf m, inf m, -inf m, -4611686.018427387903, -inf Hz) = 1 pW, @(inf m, inf m, -inf m, -4611686.018427387903, -inf Hz) = 1 pW, @(-inf m, -inf m, inf m, -4611686.018427387903, -inf Hz) = 1 pW, @(inf m, -inf m, inf m, -4611686.018427387903, -inf Hz) = 1 pW, @(-inf m, inf m, inf m, -4611686.018427387903, -inf Hz) = 1 pW, @(inf m, inf m, inf m, -4611686.018427387903, -inf Hz) = 1 pW, @(-inf m, -inf m, -inf m, 4611686.018427387903, -inf Hz) = 1 pW, @(inf m, -inf m, -inf m, 4611686.018427387903, -inf Hz) = 1 pW, @(-inf m, inf m, -inf m, 4611686.018427387903, -inf Hz) = 1 pW, @(inf m, inf m, -inf m, 4611686.018427387903, -inf Hz) = 1 pW, @(-inf m, -inf m, inf m, 4611686.018427387903, -inf Hz) = 1 pW, @(inf m, -inf m, inf m, 4611686.018427387903, -inf Hz) = 1 pW, @(-inf m, inf m, inf m, 4611686.018427387903, -inf Hz) = 1 pW, @(inf m, inf m, inf m, 4611686.018427387903, -inf Hz) = 1 pW, @(-inf m, -inf m, -inf m, -4611686.018427387903, inf GHz) = 1 pW, @(inf m, -inf m, -inf m, -4611686.018427387903, inf GHz) = 1 pW, @(-inf m, inf m, -inf m, -4611686.018427387903, inf GHz) = 1 pW, @(inf m, inf m, -inf m, -4611686.018427387903, inf GHz) = 1 pW, @(-inf m, -inf m, inf m, -4611686.018427387903, inf GHz) = 1 pW, @(inf m, -inf m, inf m, -4611686.018427387903, inf GHz) = 1 pW, @(-inf m, inf m, inf m, -4611686.018427387903, inf GHz) = 1 pW, @(inf m, inf m, inf m, -4611686.018427387903, inf GHz) = 1 pW, @(-inf m, -inf m, -inf m, 4611686.018427387903, inf GHz) = 1 pW, @(inf m, -inf m, -inf m, 4611686.018427387903, inf GHz) = 1 pW, @(-inf m, inf m, -inf m, 4611686.018427387903, inf GHz) = 1 pW, @(inf m, inf m, -inf m, 4611686.018427387903, inf GHz) = 1 pW, @(-inf m, -inf m, inf m, 4611686.018427387903, inf GHz) = 1 pW, @(inf m, -inf m, inf m, 4611686.018427387903, inf GHz) = 1 pW, @(-inf m, inf m, inf m, 4611686.018427387903, inf GHz) = 1 pW, @(inf m, inf m, inf m, 4611686.018427387903, inf GHz) = 1 pW, min = 1 pW, max = 1 pW, mean = 1 pW }
+} min = 1 pW, max = 1 pW, mean = 1 pW
+Transmission 1: f {
+  i [(-4611686.018427387903, -inf Hz) ... (0, 990 MHz)] -> { @(-4611686.018427387903, -inf Hz) = 0 W, @(0, -inf Hz) = 0 W, @(-4611686.018427387903, 990 MHz) = 0 W, @(0, 990 MHz) = 100 mW, min = 0 W, max = 0 W, mean = 0 W }
+  i [(0, -inf Hz) ... (20, 990 MHz)] -> { @(0, -inf Hz) = 0 W, @(20, -inf Hz) = 0 W, @(0, 990 MHz) = 100 mW, @(20, 990 MHz) = 0 W, min = 0 W, max = 0 W, mean = 0 W }
+  i [(20, -inf Hz) ... (4611686.018427387903, 990 MHz)] -> { @(20, -inf Hz) = 0 W, @(4611686.018427387903, -inf Hz) = 0 W, @(20, 990 MHz) = 0 W, @(4611686.018427387903, 990 MHz) = 0 W, min = 0 W, max = 0 W, mean = 0 W }
+  i [(-4611686.018427387903, 990 MHz) ... (0, 1.01 GHz)] -> { @(-4611686.018427387903, 990 MHz) = 0 W, @(0, 990 MHz) = 100 mW, @(-4611686.018427387903, 1.01 GHz) = 0 W, @(0, 1.01 GHz) = 0 W, min = 0 W, max = 0 W, mean = 0 W }
+  i [(0, 990 MHz) ... (20, 1.01 GHz)] -> { @(0, 990 MHz) = 100 mW, @(20, 990 MHz) = 0 W, @(0, 1.01 GHz) = 0 W, @(20, 1.01 GHz) = 0 W, min = 100 mW, max = 100 mW, mean = 100 mW }
+  i [(20, 990 MHz) ... (4611686.018427387903, 1.01 GHz)] -> { @(20, 990 MHz) = 0 W, @(4611686.018427387903, 990 MHz) = 0 W, @(20, 1.01 GHz) = 0 W, @(4611686.018427387903, 1.01 GHz) = 0 W, min = 0 W, max = 0 W, mean = 0 W }
+  i [(-4611686.018427387903, 1.01 GHz) ... (0, inf GHz)] -> { @(-4611686.018427387903, 1.01 GHz) = 0 W, @(0, 1.01 GHz) = 0 W, @(-4611686.018427387903, inf GHz) = 0 W, @(0, inf GHz) = 0 W, min = 0 W, max = 0 W, mean = 0 W }
+  i [(0, 1.01 GHz) ... (20, inf GHz)] -> { @(0, 1.01 GHz) = 0 W, @(20, 1.01 GHz) = 0 W, @(0, inf GHz) = 0 W, @(20, inf GHz) = 0 W, min = 0 W, max = 0 W, mean = 0 W }
+  i [(20, 1.01 GHz) ... (4611686.018427387903, inf GHz)] -> { @(20, 1.01 GHz) = 0 W, @(4611686.018427387903, 1.01 GHz) = 0 W, @(20, inf GHz) = 0 W, @(4611686.018427387903, inf GHz) = 0 W, min = 0 W, max = 0 W, mean = 0 W }
+} min = 0 W, max = 100 mW, mean = 0 W
+Transmission 2: f {
+  i [(-4611686.018427387903, -inf Hz) ... (0, 990 MHz)] -> { @(-4611686.018427387903, -inf Hz) = 0 W, @(0, -inf Hz) = 0 W, @(-4611686.018427387903, 990 MHz) = 0 W, @(0, 990 MHz) = 10 mW, min = 0 W, max = 0 W, mean = 0 W }
+  i [(0, -inf Hz) ... (20, 990 MHz)] -> { @(0, -inf Hz) = 0 W, @(20, -inf Hz) = 0 W, @(0, 990 MHz) = 10 mW, @(20, 990 MHz) = 0 W, min = 0 W, max = 0 W, mean = 0 W }
+  i [(20, -inf Hz) ... (4611686.018427387903, 990 MHz)] -> { @(20, -inf Hz) = 0 W, @(4611686.018427387903, -inf Hz) = 0 W, @(20, 990 MHz) = 0 W, @(4611686.018427387903, 990 MHz) = 0 W, min = 0 W, max = 0 W, mean = 0 W }
+  i [(-4611686.018427387903, 990 MHz) ... (0, 1.01 GHz)] -> { @(-4611686.018427387903, 990 MHz) = 0 W, @(0, 990 MHz) = 10 mW, @(-4611686.018427387903, 1.01 GHz) = 0 W, @(0, 1.01 GHz) = 0 W, min = 0 W, max = 0 W, mean = 0 W }
+  i [(0, 990 MHz) ... (20, 1.01 GHz)] -> { @(0, 990 MHz) = 10 mW, @(20, 990 MHz) = 0 W, @(0, 1.01 GHz) = 0 W, @(20, 1.01 GHz) = 0 W, min = 10 mW, max = 10 mW, mean = 10 mW }
+  i [(20, 990 MHz) ... (4611686.018427387903, 1.01 GHz)] -> { @(20, 990 MHz) = 0 W, @(4611686.018427387903, 990 MHz) = 0 W, @(20, 1.01 GHz) = 0 W, @(4611686.018427387903, 1.01 GHz) = 0 W, min = 0 W, max = 0 W, mean = 0 W }
+  i [(-4611686.018427387903, 1.01 GHz) ... (0, inf GHz)] -> { @(-4611686.018427387903, 1.01 GHz) = 0 W, @(0, 1.01 GHz) = 0 W, @(-4611686.018427387903, inf GHz) = 0 W, @(0, inf GHz) = 0 W, min = 0 W, max = 0 W, mean = 0 W }
+  i [(0, 1.01 GHz) ... (20, inf GHz)] -> { @(0, 1.01 GHz) = 0 W, @(20, 1.01 GHz) = 0 W, @(0, inf GHz) = 0 W, @(20, inf GHz) = 0 W, min = 0 W, max = 0 W, mean = 0 W }
+  i [(20, 1.01 GHz) ... (4611686.018427387903, inf GHz)] -> { @(20, 1.01 GHz) = 0 W, @(4611686.018427387903, 1.01 GHz) = 0 W, @(20, inf GHz) = 0 W, @(4611686.018427387903, inf GHz) = 0 W, min = 0 W, max = 0 W, mean = 0 W }
+} min = 0 W, max = 10 mW, mean = 0 W
+  interval = [(0 m, 0 m, 0 m, 0.000000033356, 990 MHz) ... (0 m, 0 m, 0 m, 10.000000033356, 1 GHz)], SNIR mean = 9.99982
+  interval = [(0 m, 0 m, 0 m, 0.000000033356, 1 GHz) ... (0 m, 0 m, 0 m, 10.000000033356, 1.01 GHz)], SNIR mean = 9.99982
+  interval = [(0 m, 0 m, 0 m, 10.000000033356, 990 MHz) ... (0 m, 0 m, 0 m, 20.000000033356, 1 GHz)], SNIR mean = 9.99982
+  interval = [(0 m, 0 m, 0 m, 10.000000033356, 1 GHz) ... (0 m, 0 m, 0 m, 20.000000033356, 1.01 GHz)], SNIR mean = 9.99982
