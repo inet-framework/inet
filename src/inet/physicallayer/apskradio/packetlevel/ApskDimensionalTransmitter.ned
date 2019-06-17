@@ -39,8 +39,6 @@ import inet.physicallayer.base.packetlevel.NarrowbandTransmitterBase;
 module ApskDimensionalTransmitter extends NarrowbandTransmitterBase
 {
     parameters:
-        string dimensions = default("time");                // dimensions of power: time and/or frequency
-        string interpolationMode @enum("linear", "sample-hold") = default("sample-hold");
         string timeGains = default("smaller s 0dB either e 0dB greater");      // sequence of interpolation method, time, gain tuples; time can be an expression, gain is in [dB] or [0..1]; default value is a flat signal
         string frequencyGains = default("smaller s 0dB either e 0dB greater"); // sequence of interpolation method, frequency, gain tuples; frequency can be an expression, gain is in [dB] or [0..1]; default value is a flat signal
         modulation = default("BPSK");
