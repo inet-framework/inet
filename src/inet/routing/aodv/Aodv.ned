@@ -18,7 +18,8 @@
 
 package inet.routing.aodv;
 
-import inet.routing.contract.IManetRouting;
+import inet.applications.contract.IApp;
+
 
 //
 // Ad hoc On-Demand Distance Vector Routing Protocol module.
@@ -36,7 +37,7 @@ import inet.routing.contract.IManetRouting;
 // This implementation is based on RFC 3561. For more information, you may
 // refer to the following link: https://tools.ietf.org/html/rfc3561.html.
 //
-simple Aodv like IManetRouting
+simple Aodv like IApp
 {
     parameters:
         @class("aodv::Aodv");
@@ -44,7 +45,7 @@ simple Aodv like IManetRouting
         string routingTableModule = default("^.ipv4.routingTable");
         string interfaceTableModule = default("^.interfaceTable");
         string networkProtocolModule = default("^.ipv4.ip");
-        string crcMode @enum("disabled", "declared", "computed") = default("declared");
+        string crcMode @enum("disabled","declared","computed") = default("declared");
 
         bool askGratuitousRREP = default(false); // see RFC 3561: 6.6.3
         bool useHelloMessages = default(false); // see RFC 3561: 6.9
