@@ -211,18 +211,15 @@ void AckingMac::acked(Packet *frame)
     Enter_Method_Silent();
     ASSERT(useAck);
 
-    EV_DEBUG << "AckingMac::acked(" << frame->getFullName() << ") is ";
+    if (lastSentPk == nullptr)
+        throw cRuntimeError("Unexpected ACK received");
 
-    if (lastSentPk && lastSentPk->getTreeId() == frame->getTreeId()) {
-        EV_DEBUG << "accepted\n";
-        cancelEvent(ackTimeoutMsg);
-        delete lastSentPk;
-        lastSentPk = nullptr;
-        if (!queue->isEmpty())
-            startTransmitting(queue->popPacket());
-    }
-    else
-        EV_DEBUG << "unaccepted\n";
+    EV_DEBUG << "AckingMac::acked(" << frame->getFullName() << ") is accepted\n";
+    cancelEvent(ackTimeoutMsg);
+    delete lastSentPk;
+    lastSentPk = nullptr;
+    if (!queue->isEmpty())
+        startTransmitting(queue->popPacket());
 }
 
 void AckingMac::encapsulate(Packet *packet)
