@@ -32,6 +32,10 @@
 #include "inet/networklayer/ipv4/Ipv4Route.h"
 #include "inet/routing/extras/LoadNg/LoadNg.h"
 
+    // TODO: Evaluate the topology in the sender.
+    // TODO: Include Disjktra
+    // TODO: actualize routes using hello information
+
 namespace inet {
 namespace inetmanet {
 
@@ -153,6 +157,10 @@ void LoadNg::handleMessageWhenUp(cMessage *msg)
 
                 case RREPACK:
                     handleRREPACK(dynamicPtrCast<const RrepAck>(ctrlPacket), sourceAddr);
+                    break;
+
+                case HELLO:
+                    handleHelloMessage(dynamicPtrCast<const Hello>(ctrlPacket));
                     break;
 
                 default:
@@ -458,11 +466,14 @@ void LoadNg::handleRREP(const Ptr<Rrep>& rrep, const L3Address& sourceAddr)
     if (!rrep->getSeqField()) // bad format
         return;
 
-    if (rrep->getDestAddr().isUnspecified()) {
+    // the hello is now a sparate type.
+   /*if (rrep->getDestAddr().isUnspecified()) {
         EV_INFO << "This Route Reply is a Hello Message" << endl;
         handleHelloMessage(rrep);
         return;
     }
+    */
+
     // When a node receives a RREP message, it searches (using longest-
     // prefix matching) for a route to the previous hop.
 
@@ -591,15 +602,22 @@ void LoadNg::updateRoutingTable(IRoute *route, const L3Address& nextHop, unsigne
 {
     EV_DETAIL << "Updating existing route: " << route << endl;
 
-    auto it = neigbords.find(nextHop);
-    if (it == neigbords.end()) {
+    auto it = neighbords.find(nextHop);
+    if (it != neighbords.end()) {
         // include in the list
         NeigborElement elem;
         elem.lastNotification = simTime();
-        neigbords[nextHop] = elem;
+        if (nextHop == route->getDestinationAsGeneric()) {
+            elem.seqNumber = destSeqNum;
+        }
+        neighbords[nextHop] = elem;
     }
-    else
+    else {
         it->second.lastNotification = simTime();
+        if (nextHop == route->getDestinationAsGeneric()) {
+            it->second.seqNumber = destSeqNum;
+         }
+    }
 
 
     route->setNextHop(nextHop);
@@ -758,8 +776,7 @@ void LoadNg::handleRREQ(const Ptr<Rreq>& rreq, const L3Address& sourceAddr, unsi
         //   (iii)     the sequence number is unknown.
 
         if (rreqSeqNum > routeSeqNum ||
-            (rreqSeqNum == routeSeqNum && newHopCount < routeHopCount))
-        {
+            (rreqSeqNum == routeSeqNum && newHopCount < routeHopCount)) {
             updateRoutingTable(reverseRoute, sourceAddr, hopCount, newSeqNum, true, newLifeTime, metricType, metric );
         }
     }
@@ -820,15 +837,20 @@ IRoute *LoadNg::createRoute(const L3Address& destAddr, const L3Address& nextHop,
         unsigned int hopCount, int64_t destSeqNum,
         bool isActive, simtime_t lifeTime, int metricType, unsigned int metric)
 {
-    auto it = neigbords.find(nextHop);
-    if (it == neigbords.end()) {
+    auto it = neighbords.find(nextHop);
+    if (it != neighbords.end()) {
         // include in the list
         NeigborElement elem;
         elem.lastNotification = simTime();
-        neigbords[nextHop] = elem;
+        if (nextHop == destAddr)
+            elem.seqNumber = destSeqNum;
+        neighbords[nextHop] = elem;
     }
-    else
+    else {
         it->second.lastNotification = simTime();
+        if (nextHop == destAddr)
+            it->second.seqNumber = destSeqNum;
+    }
 
     // create a new route
     IRoute *newRoute = routingTable->createRoute();
@@ -1199,7 +1221,7 @@ void LoadNg::sendGRREP(const Ptr<Rrep>& grrep, const L3Address& destAddr, unsign
     sendAODVPacket(grrep, nextHop, timeToLive, 0);
 }
 
-const Ptr<Rrep> LoadNg::createHelloMessage()
+const Ptr<Hello> LoadNg::createHelloMessage()
 {
     // called a Hello message, with the RREP
     // message fields set as follows:
@@ -1212,19 +1234,40 @@ const Ptr<Rrep> LoadNg::createHelloMessage()
     //
     //    Lifetime                       ALLOWED_HELLO_LOSS *HELLO_INTERVAL
 
-    auto helloMessage = makeShared<Rrep>(); // TODO: "AODV-HelloMsg");
-    helloMessage->setPacketType(RREP);
-    helloMessage->setDestAddr(getSelfIPAddress());
+    auto helloMessage = makeShared<Hello>(); // TODO: "AODV-HelloMsg");
+    helloMessage->setPacketType(HELLO);
     helloMessage->setSeqNum(sequenceNum);
+    helloMessage->setOriginatorAddr(getSelfIPAddress());
     helloMessage->setHopCount(0);
-    helloMessage->setChunkLength(B(34));
+    // include neighbors list
+    if (!(neighbords.empty())) {
+        int s = 4 + (neighbords.size()-1)*1 + std::ceil(double(neighbords.size()*2)/8.0);
 
+        if (s < 41)
+            helloMessage->setNeighAddrsArraySize(neighbords.size());
+        else {
+            helloMessage->setNeighAddrsArraySize(30);
+            s = 4 + (30-1)*1 + std::ceil(double(30*2)/8.0);
+        }
+        int k = 0;
+        for (auto elem : neighbords){
+            NeigborData nData;
+            nData.setAddr(elem.first);
+            nData.setIsBidir(elem.second.isBidirectional);
+            nData.setPendingConfirmation(elem.second.pendingConfirmation);
+            nData.setSeqNum(elem.second.seqNumber);
+            helloMessage->setNeighAddrs(k, nData);
+            k++;
+            if (k >= helloMessage->getNeighAddrsArraySize())
+                break;
+        }
+        // size
+        helloMessage->setChunkLength(B(34) + B(s));
+    }
    // include metrict.
     auto metric = new LoadNgMetricOption();
     metric->setValue(0);
     helloMessage->getTlvOptionsForUpdate().insertTlvOption(metric);
-
-
     return helloMessage;
 }
 
@@ -1253,27 +1296,53 @@ void LoadNg::sendHelloMessagesIfNeeded()
         }
     }
 
+    simtime_t nextHello = simTime() + helloInterval - *periodicJitter;
     if (hasActiveRoute && (lastBroadcastTime == 0 || simTime() - lastBroadcastTime > helloInterval)) {
         EV_INFO << "It is hello time, broadcasting Hello Messages with TTL=1" << endl;
+        sequenceNum++;
         auto helloMessage = createHelloMessage();
+        helloMessage->setLifetime(nextHello);
         sendAODVPacket(helloMessage, addressType->getBroadcastAddress(), 1, 0);
     }
 
-    scheduleAt(simTime() + helloInterval - *periodicJitter, helloMsgTimer);
+    scheduleAt(nextHello, helloMsgTimer);
 }
 
-void LoadNg::handleHelloMessage(const Ptr<Rrep>& helloMessage)
+void LoadNg::handleHelloMessage(const Ptr<const Hello>& helloMessage)
 {
-    const L3Address& helloOriginatorAddr = helloMessage->getDestAddr();
+    const L3Address& helloOriginatorAddr = helloMessage->getOriginatorAddr();
+
+
+    auto it = neighbords.find(helloOriginatorAddr);
+    bool topoChange = false;
+    if (it != neighbords.end()) {
+        // refresh
+        if (helloMessage->getSeqNum() <= it->second.seqNumber)
+            return;
+    }
+    else {
+        // add
+        NeigborElement elem;
+        elem.isBidirectional = false;
+        neighbords[helloOriginatorAddr] = elem;
+        it = neighbords.find(helloOriginatorAddr);
+        topoChange = true;
+    }
+
+    it->second.lifeTime = helloMessage->getLifetime();
+    it->second.lastNotification = simTime();
+    it->second.pendingConfirmation = false;
+    it->second.seqNumber = helloMessage->getSeqNum();
+
     IRoute *routeHelloOriginator = routingTable->findBestMatchingRoute(helloOriginatorAddr);
 
     int metricType = -1;
     unsigned int metric = 255;
     unsigned int metricNeg = 255;
-    auto metricPos = helloMessage->getTlvOptionsForUpdate().findByType(METRIC);
+    auto metricPos = helloMessage->getTlvOptions().findByType(METRIC);
 
     if (metricPos != -1) {
-        auto metricTlv = check_and_cast<LoadNgMetricOption *>(helloMessage->getTlvOptionsForUpdate().getTlvOptionForUpdate(metricPos));
+        auto metricTlv = check_and_cast<const LoadNgMetricOption *>(helloMessage->getTlvOptions().getTlvOption(metricPos));
         if (metricTlv->getExtensionFlag())
             metricType = metricTlv->getExtension();
         if (metricTlv->getValueFlag())
@@ -1284,6 +1353,41 @@ void LoadNg::handleHelloMessage(const Ptr<Rrep>& helloMessage)
         }
     }
 
+    for (int k = 0 ; k < helloMessage->getNeighAddrsArraySize(); k++) {
+        auto nData = helloMessage->getNeighAddrs(k);
+        if (nData.getAddr() == this->getSelfIPAddress()) {
+            // bi dir
+            if (!it->second.isBidirectional) {
+                it->second.isBidirectional = true;
+                topoChange = true;
+            }
+        }
+        else {
+            // include in the list
+            auto itAux = it->second.listNeigbours.find(nData.getAddr());
+            if (itAux != it->second.listNeigbours.end()) {
+                // check changes.
+                // check if this node is also a common neighbor.
+                auto addr = itAux->first;
+                auto itNeigAux = neighbords.find(addr);
+                if (itNeigAux != neighbords.end() && itNeigAux->second.seqNumber < itAux->second.seqNum) {
+                    itNeigAux->second.pendingConfirmation = true;
+                    topoChange = true;
+                }
+            }
+            else {
+                // add
+                topoChange = true;
+            }
+        }
+    }
+
+    if (it->second.isBidirectional && !it->second.pendingConfirmation) {
+        // if the link is biDirectional, delete from blacklist
+        auto blackListIt = blacklist.find(it->first);
+        if (blackListIt != blacklist.end())
+            blacklist.erase(blackListIt);
+    }
 
     // Whenever a node receives a Hello message from a neighbor, the node
     // SHOULD make sure that it has an active route to the neighbor, and
@@ -1308,6 +1412,50 @@ void LoadNg::handleHelloMessage(const Ptr<Rrep>& helloMessage)
         updateRoutingTable(routeHelloOriginator, helloOriginatorAddr, 1, latestDestSeqNum, true, std::max(lifeTime, newLifeTime), metricType, metricNeg);
     }
 
+    // check neighbor timeout
+
+    for (auto it = neighbords.begin(); it != neighbords.end(); ) {
+        if (it->second.lastNotification < simTime()) {
+            topoChange = true;
+            if (simTime() - it->second.lastNotification > (maxHelloInterval + 2)) {
+                // erase
+                neighbords.erase(it++);
+            }
+            else {
+                it->second.isBidirectional = false;
+                it->second.pendingConfirmation = true;
+                ++it;
+                // include in blaclist?
+            }
+        }
+        else
+            ++it;
+    }
+
+    if (topoChange) {
+        helloInterval = minHelloInterval;
+        if (!helloMsgTimer->isScheduled()) {
+            // schedule immediately
+            scheduleAt(simTime(), helloMsgTimer);
+        }
+        else {
+            simtime_t schduled = helloMsgTimer->getSendingTime();
+            simtime_t arrival = helloMsgTimer->getArrivalTime();
+            simtime_t interval = arrival - schduled;
+            if (interval > minHelloInterval) {
+                // Schedule immediately
+                cancelEvent(helloMsgTimer);
+                scheduleAt(simTime(), helloMsgTimer);
+            }
+        }
+    }
+    else {
+        helloInterval += 2.0;
+        if (helloInterval > maxHelloInterval) {
+            helloInterval = maxHelloInterval;
+        }
+    }
+
     // TODO: This feature has not implemented yet.
     // A node MAY determine connectivity by listening for packets from its
     // set of neighbors.  If, within the past DELETE_PERIOD, it has received
@@ -1316,6 +1464,7 @@ void LoadNg::handleHelloMessage(const Ptr<Rrep>& helloMessage)
     // ALLOWED_HELLO_LOSS * HELLO_INTERVAL milliseconds, the node SHOULD
     // assume that the link to this neighbor is currently lost.  When this
     // happens, the node SHOULD proceed as in Section 6.11.
+
 }
 
 void LoadNg::expungeRoutes()

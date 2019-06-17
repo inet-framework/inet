@@ -34,10 +34,10 @@ struct UnreachableNode
 
 class NeigborData {
     L3Address addr;
-    unsigned int seqNum;
+    bool pendingConfirmation; 
     bool isBidir;
+    unsigned int seqNum;
 }
-
 
 enum LoadNgControlPacketType
 {    
@@ -120,7 +120,7 @@ class AddressBlock extends TlvOptionBase {   //2 + (num address * size address)
     bool indexStartFlag = false;
     bool indexStopFlag = false;
     bool valueFlag = false;
-    L3Address address[];    
+    L3Address address[];
 }
 
 
@@ -231,6 +231,7 @@ class Hello extends LoadNgControlPacket
     unsigned int hopLimit;
     unsigned int hopCount;
     unsigned int seqNum;
+    simtime_t lifetime;
     TlvOptions tlvOptions;
     NeigborData neighAddrs[]; // it should be a block of type TLV + 2 B
     TlvOptions addressTlvOptions;  

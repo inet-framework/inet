@@ -33,6 +33,7 @@
 #include "inet/routing/base/RoutingProtocolBase.h"
 #include "inet/transportlayer/contract/udp/UdpSocket.h"
 #include "inet/transportlayer/udp/UdpHeader_m.h"
+#include "inet/common/DijktraKShortest.h"
 
 namespace inet {
 namespace inetmanet {
@@ -75,15 +76,24 @@ class INET_API LoadNg : public RoutingProtocolBase, public NetfilterBase::HookBa
         }
     };
 
+    class NodeStatus {
+    public:
+        bool isBidirectional = false;
+        bool pendingConfirmation = false; // the latest notification has failed.
+        int64_t seqNum = -1;
+    };
+
     class NeigborElement {
     public:
         simtime_t lastNotification;
+        simtime_t lifeTime;
         int64_t seqNumber = -1;
         bool isBidirectional = false;
-        std::map<L3Address, bool> listNeigbours;
+        bool pendingConfirmation = false; // the latest notification has failed.
+        std::map<L3Address, NodeStatus> listNeigbours;
         int32_t distRoot = -1;
     };
-    std::map<L3Address, NeigborElement> neigbords;
+    std::map<L3Address, NeigborElement> neighbords;
 
     // bool checkNeigborList();
 
@@ -105,6 +115,9 @@ class INET_API LoadNg : public RoutingProtocolBase, public NetfilterBase::HookBa
     simtime_t maxJitter;
     simtime_t activeRouteTimeout;
     simtime_t helloInterval;
+    simtime_t minHelloInterval;
+    simtime_t maxHelloInterval;
+
     unsigned int netDiameter = 0;
     unsigned int rreqRetries = 0;
     unsigned int rreqRatelimit = 0;
@@ -172,7 +185,7 @@ class INET_API LoadNg : public RoutingProtocolBase, public NetfilterBase::HookBa
 
     /* Control packet creators */
     const Ptr<RrepAck> createRREPACK();
-    const Ptr<Rrep> createHelloMessage();
+    const Ptr<Hello> createHelloMessage();
     const Ptr<Rreq> createRREQ(const L3Address& destAddr);
     const Ptr<Rrep> createRREP(const Ptr<Rreq>& rreq, IRoute *destRoute, IRoute *originatorRoute, const L3Address& sourceAddr);
     const Ptr<Rrep> createGratuitousRREP(const Ptr<Rreq>& rreq, IRoute *originatorRoute);
@@ -182,7 +195,7 @@ class INET_API LoadNg : public RoutingProtocolBase, public NetfilterBase::HookBa
     void handleRREP(const Ptr<Rrep>& rrep, const L3Address& sourceAddr);
     void handleRREQ(const Ptr<Rreq>& rreq, const L3Address& sourceAddr, unsigned int timeToLive);
     void handleRERR(const Ptr<const Rerr>& rerr, const L3Address& sourceAddr);
-    void handleHelloMessage(const Ptr<Rrep>& helloMessage);
+    void handleHelloMessage(const Ptr<const Hello>& helloMessage);
     void handleRREPACK(const Ptr<const RrepAck>& rrepACK, const L3Address& neighborAddr);
 
     /* Control Packet sender methods */
