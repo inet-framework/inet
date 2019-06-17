@@ -169,9 +169,8 @@ void CsmaCaMac::handleUpperPacket(Packet *packet)
     if (fsm.getState() != IDLE)
         EV << "deferring upper message transmission in " << fsm.getStateName() << " state\n";
     else {
-        ASSERT(currentTransmission == nullptr);
-        currentTransmission = transmissionQueue->popPacket();
-        handleWithFsm(currentTransmission);
+        popFromTransmissionQueue();
+        handleWithFsm(currentTxFrame);
     }
 }
 
@@ -354,11 +353,11 @@ void CsmaCaMac::handleWithFsm(cMessage *msg)
     if (fsm.getState() == IDLE) {
         if (isReceiving())
             handleWithFsm(mediumStateChange);
-        else if (currentTransmission != nullptr)
-            handleWithFsm(currentTransmission);
+        else if (currentTxFrame != nullptr)
+            handleWithFsm(currentTxFrame);
         else if (!transmissionQueue->isEmpty()) {
-            currentTransmission = transmissionQueue->popPacket();
-            handleWithFsm(currentTransmission);
+            popFromTransmissionQueue();
+            handleWithFsm(currentTxFrame);
         }
     }
     if (isLowerMessage(msg) && frame->getOwner() == this && endSifs->getContextPointer() != frame)
@@ -543,7 +542,7 @@ void CsmaCaMac::sendAckFrame()
  */
 void CsmaCaMac::finishCurrentTransmission()
 {
-    deleteCurrentTransmission();
+    deleteCurrentTxFrame();
     resetTransmissionVariables();
 }
 
@@ -552,7 +551,7 @@ void CsmaCaMac::giveUpCurrentTransmission()
     auto packet = getCurrentTransmission();
     emitPacketDropSignal(packet, RETRY_LIMIT_REACHED, retryLimit);
     emit(linkBrokenSignal, packet);
-    deleteCurrentTransmission();
+    deleteCurrentTxFrame();
     resetTransmissionVariables();
     numGivenUp++;
 }
@@ -567,14 +566,8 @@ void CsmaCaMac::retryCurrentTransmission()
 
 Packet *CsmaCaMac::getCurrentTransmission()
 {
-    ASSERT(currentTransmission != nullptr);
-    return currentTransmission;
-}
-
-void CsmaCaMac::deleteCurrentTransmission()
-{
-    delete currentTransmission;
-    currentTransmission = nullptr;
+    ASSERT(currentTxFrame != nullptr);
+    return currentTxFrame;
 }
 
 void CsmaCaMac::resetTransmissionVariables()

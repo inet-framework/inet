@@ -76,12 +76,6 @@ class INET_API CsmaCaMac : public MacProtocolBase
 
     /** Number of frame retransmission attempts. */
     int retryCounter = -1;
-
-    /** Messages received from upper layer and to be transmitted later */
-    queueing::IPacketQueue *transmissionQueue = nullptr;
-
-    /** Currently transmitted frame if any */
-    Packet *currentTransmission = nullptr;
     //@}
 
     /** @name Timer messages */
@@ -189,7 +183,6 @@ class INET_API CsmaCaMac : public MacProtocolBase
     virtual void giveUpCurrentTransmission();
     virtual void retryCurrentTransmission();
     virtual Packet *getCurrentTransmission();
-    virtual void deleteCurrentTransmission();
     virtual void resetTransmissionVariables();
     virtual void emitPacketDropSignal(Packet *frame, PacketDropReason reason, int limit = -1);
 

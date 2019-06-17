@@ -43,15 +43,14 @@ AckingMac::AckingMac()
 
 AckingMac::~AckingMac()
 {
-    delete lastSentPk;
     cancelAndDelete(ackTimeoutMsg);
 }
 
 void AckingMac::flushQueue()
 {
-    ASSERT(queue);
-    while (!queue->isEmpty()) {
-        auto packet = queue->popPacket();
+    ASSERT(transmissionQueue);
+    while (!transmissionQueue->isEmpty()) {
+        auto packet = transmissionQueue->popPacket();
         PacketDropDetails details;
         details.setReason(INTERFACE_DOWN);
         emit(packetDroppedSignal, packet, &details);
@@ -61,9 +60,9 @@ void AckingMac::flushQueue()
 
 void AckingMac::clearQueue()
 {
-    ASSERT(queue);
-    while (!queue->isEmpty())
-        delete queue->popPacket();
+    ASSERT(transmissionQueue);
+    while (!transmissionQueue->isEmpty())
+        delete transmissionQueue->popPacket();
 }
 
 void AckingMac::initialize(int stage)
@@ -82,14 +81,16 @@ void AckingMac::initialize(int stage)
         radio = check_and_cast<IRadio *>(radioModule);
         transmissionState = IRadio::TRANSMISSION_STATE_UNDEFINED;
 
-        queue = check_and_cast<queueing::IPacketQueue *>(getSubmodule("queue"));
+        transmissionQueue = check_and_cast<queueing::IPacketQueue *>(getSubmodule("queue"));
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
         radio->setRadioMode(fullDuplex ? IRadio::RADIO_MODE_TRANSCEIVER : IRadio::RADIO_MODE_RECEIVER);
         if (useAck)
             ackTimeoutMsg = new cMessage("link-break");
-        if (!queue->isEmpty())
-            startTransmitting(queue->popPacket());
+        if (!transmissionQueue->isEmpty()) {
+            popFromTransmissionQueue();
+            startTransmitting();
+        }
     }
 }
 
@@ -120,27 +121,28 @@ void AckingMac::receiveSignal(cComponent *source, simsignal_t signalID, long val
         IRadio::TransmissionState newRadioTransmissionState = static_cast<IRadio::TransmissionState>(value);
         if (transmissionState == IRadio::TRANSMISSION_STATE_TRANSMITTING && newRadioTransmissionState == IRadio::TRANSMISSION_STATE_IDLE) {
             radio->setRadioMode(fullDuplex ? IRadio::RADIO_MODE_TRANSCEIVER : IRadio::RADIO_MODE_RECEIVER);
-            if (!lastSentPk && !queue->isEmpty())
-                startTransmitting(queue->popPacket());
+            if (!currentTxFrame && !transmissionQueue->isEmpty()) {
+                popFromTransmissionQueue();
+                startTransmitting();
+            }
         }
         transmissionState = newRadioTransmissionState;
     }
 }
 
-void AckingMac::startTransmitting(Packet *msg)
+void AckingMac::startTransmitting()
 {
     // if there's any control info, remove it; then encapsulate the packet
-    if (lastSentPk)
-        throw cRuntimeError("Model error: unacked send");
-    MacAddress dest = msg->getTag<MacAddressReq>()->getDestAddress();
-    encapsulate(check_and_cast<Packet *>(msg));
-
-    if (!dest.isBroadcast() && !dest.isMulticast() && !dest.isUnspecified()) {    // unicast
-        if (useAck) {
-            lastSentPk = msg->dup();
-            scheduleAt(simTime() + ackTimeout, ackTimeoutMsg);
-        }
+    MacAddress dest = currentTxFrame->getTag<MacAddressReq>()->getDestAddress();
+    Packet *msg = currentTxFrame;
+    if (useAck && !dest.isBroadcast() && !dest.isMulticast() && !dest.isUnspecified()) {    // unicast
+        msg = currentTxFrame->dup();
+        scheduleAt(simTime() + ackTimeout, ackTimeoutMsg);
     }
+    else
+        currentTxFrame = nullptr;
+
+    encapsulate(msg);
 
     // send
     EV << "Starting transmission of " << msg << endl;
@@ -151,11 +153,13 @@ void AckingMac::startTransmitting(Packet *msg)
 void AckingMac::handleUpperPacket(Packet *packet)
 {
     EV << "Received " << packet << " for transmission\n";
-    queue->pushPacket(packet);
-    if (lastSentPk || radio->getTransmissionState() == IRadio::TRANSMISSION_STATE_TRANSMITTING)
+    transmissionQueue->pushPacket(packet);
+    if (currentTxFrame || radio->getTransmissionState() == IRadio::TRANSMISSION_STATE_TRANSMITTING)
         EV << "Delaying transmission of " << packet << ".\n";
-    else
-        startTransmitting(queue->popPacket());
+    else {
+        popFromTransmissionQueue();
+        startTransmitting();
+    }
 }
 
 void AckingMac::handleLowerPacket(Packet *packet)
@@ -191,15 +195,16 @@ void AckingMac::handleLowerPacket(Packet *packet)
 void AckingMac::handleSelfMessage(cMessage *message)
 {
     if (message == ackTimeoutMsg) {
-        EV_DETAIL << "AckingMac: timeout: " << lastSentPk->getFullName() << " is lost\n";
-        auto macHeader = lastSentPk->popAtFront<AckingMacHeader>();
-        lastSentPk->addTagIfAbsent<PacketProtocolTag>()->setProtocol(ProtocolGroup::ethertype.getProtocol(macHeader->getNetworkProtocol()));
+        EV_DETAIL << "AckingMac: timeout: " << currentTxFrame->getFullName() << " is lost\n";
         // packet lost
-        emit(linkBrokenSignal, lastSentPk);
-        delete lastSentPk;
-        lastSentPk = nullptr;
-        if (!queue->isEmpty())
-            startTransmitting(queue->popPacket());
+        emit(linkBrokenSignal, currentTxFrame);
+        PacketDropDetails details;
+        details.setReason(OTHER_PACKET_DROP);
+        dropCurrentTxFrame(details);
+        if (!transmissionQueue->isEmpty()) {
+            popFromTransmissionQueue();
+            startTransmitting();
+        }
     }
     else {
         MacProtocolBase::handleSelfMessage(message);
@@ -216,10 +221,11 @@ void AckingMac::acked(Packet *frame)
 
     EV_DEBUG << "AckingMac::acked(" << frame->getFullName() << ") is accepted\n";
     cancelEvent(ackTimeoutMsg);
-    delete lastSentPk;
-    lastSentPk = nullptr;
-    if (!queue->isEmpty())
-        startTransmitting(queue->popPacket());
+        deleteCurrentTxFrame();
+        if (!transmissionQueue->isEmpty()) {
+            popFromTransmissionQueue();
+            startTransmitting();
+        }
 }
 
 void AckingMac::encapsulate(Packet *packet)

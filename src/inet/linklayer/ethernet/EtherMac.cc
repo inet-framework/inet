@@ -245,10 +245,10 @@ void EtherMac::handleUpperPacket(Packet *packet)
 
     // store frame and possibly begin transmitting
     EV_DETAIL << "Frame " << packet << " arrived from higher layer, enqueueing\n";
-    txQueue->pushPacket(packet);
+    transmissionQueue->pushPacket(packet);
 
-    if (!curTxFrame && !txQueue->isEmpty())
-        curTxFrame = txQueue->popPacket();
+    if (!currentTxFrame && !transmissionQueue->isEmpty())
+        currentTxFrame = transmissionQueue->popPacket();
 
     if ((duplexMode || receiveState == RX_IDLE_STATE) && transmitState == TX_IDLE_STATE) {
         EV_DETAIL << "No incoming carrier signals detected, frame clear to send\n";
@@ -505,11 +505,11 @@ B EtherMac::calculatePaddedFrameLength(Packet *frame)
 
 void EtherMac::startFrameTransmission()
 {
-    ASSERT(curTxFrame);
+    ASSERT(currentTxFrame);
 
-    EV_INFO << "Transmission of " << curTxFrame << " started.\n";
+    EV_INFO << "Transmission of " << currentTxFrame << " started.\n";
 
-    Packet *frame = curTxFrame->dup();
+    Packet *frame = currentTxFrame->dup();
 
     const auto& hdr = frame->peekAtFront<EthernetMacHeader>();
     ASSERT(hdr);
@@ -585,16 +585,16 @@ void EtherMac::handleEndTxPeriod()
 
     currentSendPkTreeID = 0;
 
-    if (curTxFrame == nullptr)
+    if (currentTxFrame == nullptr)
         throw cRuntimeError("Frame under transmission cannot be found");
 
     numFramesSent++;
-    numBytesSent += curTxFrame->getByteLength();
-    emit(packetSentToLowerSignal, curTxFrame);    //consider: emit with start time of frame
+    numBytesSent += currentTxFrame->getByteLength();
+    emit(packetSentToLowerSignal, currentTxFrame);    //consider: emit with start time of frame
 
-    const auto& header = curTxFrame->peekAtFront<EthernetMacHeader>();
+    const auto& header = currentTxFrame->peekAtFront<EthernetMacHeader>();
     if (header->getTypeOrLength() == ETHERTYPE_FLOW_CONTROL) {
-        const auto& controlFrame = curTxFrame->peekDataAt<EthernetControlFrame>(header->getChunkLength(), b(-1));
+        const auto& controlFrame = currentTxFrame->peekDataAt<EthernetControlFrame>(header->getChunkLength(), b(-1));
         if (controlFrame->getOpCode() == ETHERNET_CONTROL_PAUSE) {
             const auto& pauseFrame = dynamicPtrCast<const EthernetPauseFrame>(controlFrame);
             numPauseFramesSent++;
@@ -602,9 +602,8 @@ void EtherMac::handleEndTxPeriod()
         }
     }
 
-    EV_INFO << "Transmission of " << curTxFrame << " successfully completed.\n";
-    delete curTxFrame;
-    curTxFrame = nullptr;
+    EV_INFO << "Transmission of " << currentTxFrame << " successfully completed.\n";
+    deleteCurrentTxFrame();
     lastTxFinishTime = simTime();
     getNextFrameFromQueue();  // note: cannot be moved into handleEndIFGPeriod(), because in burst mode we need to know whether to send filled IFG or not
 
@@ -676,7 +675,7 @@ void EtherMac::handleEndBackoffPeriod()
     if (transmitState != BACKOFF_STATE)
         throw cRuntimeError("At end of BACKOFF and not in BACKOFF_STATE");
 
-    if (curTxFrame == nullptr)
+    if (currentTxFrame == nullptr)
         throw cRuntimeError("At end of BACKOFF and no frame to transmit");
 
     if (receiveState == RX_IDLE_STATE) {
@@ -722,9 +721,7 @@ void EtherMac::handleRetransmission()
         PacketDropDetails details;
         details.setReason(RETRY_LIMIT_REACHED);
         details.setLimit(MAX_ATTEMPTS);
-        emit(packetDroppedSignal, curTxFrame, &details);
-        delete curTxFrame;
-        curTxFrame = nullptr;
+        dropCurrentTxFrame(details);
         changeTransmissionState(TX_IDLE_STATE);
         backoffs = 0;
         getNextFrameFromQueue();
@@ -769,7 +766,7 @@ void EtherMac::printState()
 
     EV_DETAIL << ",  backoffs: " << backoffs;
     EV_DETAIL << ",  numConcurrentRxTransmissions: " << numConcurrentTransmissions;
-    EV_DETAIL << ",  queueLength: " << txQueue->getNumPackets();
+    EV_DETAIL << ",  queueLength: " << transmissionQueue->getNumPackets();
     EV_DETAIL << endl;
 
 #undef CASE
@@ -903,14 +900,14 @@ void EtherMac::fillIFGIfInBurst()
 
     EV_TRACE << "fillIFGIfInBurst(): t=" << simTime() << ", framesSentInBurst=" << framesSentInBurst << ", bytesSentInBurst=" << bytesSentInBurst << endl;
 
-    if (curTxFrame
+    if (currentTxFrame
         && endIFGMsg->isScheduled()
         && (transmitState == WAIT_IFG_STATE)
         && (simTime() == lastTxFinishTime)
         && (simTime() == endIFGMsg->getSendingTime())
         && (framesSentInBurst > 0)
         && (framesSentInBurst < curEtherDescr->maxFramesInBurst)
-        && (bytesSentInBurst + INTERFRAME_GAP_BITS + PREAMBLE_BYTES + SFD_BYTES + calculatePaddedFrameLength(curTxFrame)
+        && (bytesSentInBurst + INTERFRAME_GAP_BITS + PREAMBLE_BYTES + SFD_BYTES + calculatePaddedFrameLength(currentTxFrame)
             <= curEtherDescr->maxBytesInBurst)
         )
     {
@@ -950,7 +947,7 @@ void EtherMac::scheduleEndPausePeriod(int pauseUnits)
 
 void EtherMac::beginSendFrames()
 {
-    if (curTxFrame) {
+    if (currentTxFrame) {
         // Other frames are queued, therefore wait IFG period and transmit next frame
         EV_DETAIL << "Will transmit next frame in output queue after IFG period\n";
         startFrameTransmission();

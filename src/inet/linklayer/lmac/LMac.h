@@ -83,7 +83,6 @@ class INET_API LMac : public MacProtocolBase, public IMacProtocol
         , numSlots(0)
         , currSlot()
         , reservedMobileSlots(0)
-        , queue()
         , radio(nullptr)
         , transmissionState(physicallayer::IRadio::TRANSMISSION_STATE_UNDEFINED)
         , wakeup(nullptr)
@@ -177,10 +176,6 @@ class INET_API LMac : public MacProtocolBase, public IMacProtocol
     /** @brief The first couple of slots are reserved for nodes with special needs to avoid changing slots for them (mobile nodes) */
     int reservedMobileSlots;
 
-    /** @brief A queue to store packets from upper layer in case another
-       packet is still waiting for transmission..*/
-    queueing::IPacketQueue *queue = nullptr;
-
     /** @brief The radio. */
     physicallayer::IRadio *radio;
     physicallayer::IRadio::TransmissionState transmissionState;
@@ -192,9 +187,6 @@ class INET_API LMac : public MacProtocolBase, public IMacProtocol
     cMessage *checkChannel;
     cMessage *start_lmac;
     cMessage *send_control;
-
-    /** Currently transmitted frame if any */
-    Packet *currentTransmission = nullptr;
 
     /** @brief the bit rate at which we transmit */
     double bitrate;

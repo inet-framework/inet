@@ -93,10 +93,6 @@ class INET_API BMac : public MacProtocolBase, public IMacProtocol
     virtual void handleCrashOperation(LifecycleOperation *operation) override {}    //TODO implementation
 
   protected:
-    /** @brief A queue to store packets from upper layer in case another
-       packet is still waiting for transmission.*/
-    queueing::IPacketQueue *queue = nullptr;
-
     /** @brief The radio. */
     physicallayer::IRadio *radio = nullptr;
     physicallayer::IRadio::TransmissionState transmissionState = physicallayer::IRadio::TRANSMISSION_STATE_UNDEFINED;
@@ -147,9 +143,6 @@ class INET_API BMac : public MacProtocolBase, public IMacProtocol
     };
     /** @brief The current state of the protocol */
     States macState = static_cast<States>(-1);
-
-    /** Currently transmitted frame if any */
-    Packet *currentTransmission = nullptr;
 
     // messages used in the FSM
     cMessage *resend_data = nullptr;

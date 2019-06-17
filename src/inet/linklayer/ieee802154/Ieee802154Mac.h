@@ -82,7 +82,6 @@ class INET_API Ieee802154Mac : public MacProtocolBase, public IMacProtocol
         , initialCW(0)
         , txPower(0)
         , NB(0)
-        , queue()
         , queueLength(0)
         , txAttempts(0)
         , bitrate(0)
@@ -269,10 +268,6 @@ class INET_API Ieee802154Mac : public MacProtocolBase, public IMacProtocol
     /** @brief number of backoff performed until now for current frame */
     int NB;
 
-    /** @brief A queue to store packets from upper layer in case another
-       packet is still waiting for transmission..*/
-    queueing::IPacketQueue *queue = nullptr;
-
     /** @brief length of the queue*/
     unsigned int queueLength;
 
@@ -287,9 +282,6 @@ class INET_API Ieee802154Mac : public MacProtocolBase, public IMacProtocol
 
     /** @brief The bit length of the ACK packet.*/
     int ackLength;
-
-    /** Currently transmitted frame if any */
-    Packet *currentTransmission = nullptr;
 
   protected:
     /** @brief Generate new interface address*/

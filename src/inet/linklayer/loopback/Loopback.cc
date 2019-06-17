@@ -75,7 +75,7 @@ void Loopback::handleUpperPacket(Packet *packet)
     send(packet, upperLayerOutGateId);
 }
 
-void Loopback::flushQueue()
+void Loopback::flushQueue(PacketDropDetails& details)
 {
     // do nothing, lo interface doesn't have any queue
 }

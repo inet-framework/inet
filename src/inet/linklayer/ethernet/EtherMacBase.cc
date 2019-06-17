@@ -166,8 +166,6 @@ EtherMacBase::EtherMacBase()
 
 EtherMacBase::~EtherMacBase()
 {
-    delete curTxFrame;
-
     cancelAndDelete(endTxMsg);
     cancelAndDelete(endIFGMsg);
     cancelAndDelete(endPauseMsg);
@@ -180,7 +178,7 @@ void EtherMacBase::initialize(int stage)
         physInGate = gate("phys$i");
         physOutGate = gate("phys$o");
         transmissionChannel = nullptr;
-        curTxFrame = nullptr;
+        currentTxFrame = nullptr;
 
         initializeFlags();
 
@@ -214,7 +212,7 @@ void EtherMacBase::initialize(int stage)
 
 void EtherMacBase::initializeQueue()
 {
-    txQueue = check_and_cast<queueing::IPacketQueue *>(getSubmodule("queue"));
+    transmissionQueue = check_and_cast<queueing::IPacketQueue *>(getSubmodule("queue"));
 }
 
 void EtherMacBase::initializeFlags()
@@ -284,7 +282,7 @@ void EtherMacBase::handleStartOperation(LifecycleOperation *operation)
 
 void EtherMacBase::handleStopOperation(LifecycleOperation *operation)
 {
-    if (curTxFrame != nullptr || !txQueue->isEmpty()) {
+    if (currentTxFrame != nullptr || !transmissionQueue->isEmpty()) {
         interfaceEntry->setState(InterfaceEntry::State::GOING_DOWN);
         delayActiveOperationFinish(par("stopOperationTimeout"));
     }
@@ -308,7 +306,7 @@ void EtherMacBase::handleCrashOperation(LifecycleOperation *operation)
 void EtherMacBase::processAtHandleMessageFinished()
 {
     if (operationalState == State::STOPPING_OPERATION) {
-        if (curTxFrame == nullptr && txQueue->isEmpty()) {
+        if (currentTxFrame == nullptr && transmissionQueue->isEmpty()) {
             EV << "Ethernet Queue is empty, MAC stopped\n";
             connected = false;
             interfaceEntry->setCarrier(false);
@@ -350,20 +348,18 @@ void EtherMacBase::processConnectDisconnect()
         cancelEvent(endIFGMsg);
         cancelEvent(endPauseMsg);
 
-        if (curTxFrame) {
-            EV_DETAIL << "Interface is not connected, dropping packet " << curTxFrame << endl;
+        if (currentTxFrame) {
+            EV_DETAIL << "Interface is not connected, dropping packet " << currentTxFrame << endl;
             numDroppedPkFromHLIfaceDown++;
             PacketDropDetails details;
             details.setReason(INTERFACE_DOWN);
-            emit(packetDroppedSignal, curTxFrame, &details);
-            delete curTxFrame;
-            curTxFrame = nullptr;
+            dropCurrentTxFrame(details);
             lastTxFinishTime = -1.0;    // so that it never equals to the current simtime, used for Burst mode detection.
         }
 
         // Clear queue
-        while (!txQueue->isEmpty()) {
-            Packet *msg = txQueue->popPacket();
+        while (!transmissionQueue->isEmpty()) {
+            Packet *msg = transmissionQueue->popPacket();
             EV_DETAIL << "Interface is not connected, dropping packet " << msg << endl;
             numDroppedPkFromHLIfaceDown++;
             PacketDropDetails details;
@@ -436,13 +432,11 @@ bool EtherMacBase::verifyCrcAndLength(Packet *packet)
     return true;
 }
 
-void EtherMacBase::flushQueue()
+void EtherMacBase::flushQueue(PacketDropDetails& details)
 {
     // code would look slightly nicer with a pop() function that returns nullptr if empty
-    while (!txQueue->isEmpty()) {
-        Packet *msg = txQueue->popPacket();
-        PacketDropDetails details;
-        details.setReason(INTERFACE_DOWN);
+    while (!transmissionQueue->isEmpty()) {
+        Packet *msg = transmissionQueue->popPacket();
         emit(packetDroppedSignal, msg, &details);
         delete msg;
     }
@@ -450,8 +444,8 @@ void EtherMacBase::flushQueue()
 
 void EtherMacBase::clearQueue()
 {
-    while (!txQueue->isEmpty())
-        delete txQueue->popPacket();
+    while (!transmissionQueue->isEmpty())
+        delete transmissionQueue->popPacket();
 }
 
 void EtherMacBase::refreshConnection()
@@ -587,9 +581,8 @@ void EtherMacBase::printParameters()
 
 void EtherMacBase::getNextFrameFromQueue()
 {
-    ASSERT(nullptr == curTxFrame);
-    if (!txQueue->isEmpty())
-        curTxFrame = txQueue->popPacket();
+    if (!transmissionQueue->isEmpty())
+        popFromTransmissionQueue();
 }
 
 void EtherMacBase::finish()
@@ -648,7 +641,7 @@ void EtherMacBase::refreshDisplay() const
                 result = std::to_string(numDroppedPkFromHLIfaceDown + numDroppedIfaceDown + numDroppedBitError + numDroppedNotForUs);
                 break;
             case 'q':
-                result = std::to_string(txQueue->getNumPackets());
+                result = std::to_string(transmissionQueue->getNumPackets());
                 break;
             case 'b':
                 if (transmissionChannel == nullptr)

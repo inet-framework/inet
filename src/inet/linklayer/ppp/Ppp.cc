@@ -129,7 +129,9 @@ void Ppp::refreshOutGateConnection(bool connected)
                 datarateChannel->forceTransmissionFinishTime(SIMTIME_ZERO);
         }
 
-        flushQueue();
+        PacketDropDetails details;
+        details.setReason(INTERFACE_DOWN);      //TODO choose a correct PacketDropReason value
+        flushQueue(details);
     }
 
     cChannel *oldChannel = datarateChannel;
@@ -334,13 +336,11 @@ cPacket *Ppp::decapsulate(Packet *packet)
     return packet;
 }
 
-void Ppp::flushQueue()
+void Ppp::flushQueue(PacketDropDetails& details)
 {
     // code would look slightly nicer with a pop() function that returns nullptr if empty
     while (!queue->isEmpty()) {
         auto packet = queue->popPacket();
-        PacketDropDetails details;
-        details.setReason(INTERFACE_DOWN);
         emit(packetDroppedSignal, packet, &details); //FIXME this signal lumps together packets from the network and packets from higher layers! separate them
         delete packet;
     }

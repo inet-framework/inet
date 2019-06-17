@@ -69,6 +69,8 @@ void MacBase::handleStopOperation(LifecycleOperation *operation)
 {
     PacketDropDetails details;
     details.setReason(INTERFACE_DOWN);
+    if (currentTxFrame)
+        dropCurrentTxFrame(details);
     flushQueue(details);
     interfaceEntry->setCarrier(false);
     interfaceEntry->setState(InterfaceEntry::State::DOWN);
@@ -76,6 +78,7 @@ void MacBase::handleStopOperation(LifecycleOperation *operation)
 
 void MacBase::handleCrashOperation(LifecycleOperation *operation)
 {
+    deleteCurrentTxFrame();
     clearQueue();
     interfaceEntry->setCarrier(false);
     interfaceEntry->setState(InterfaceEntry::State::DOWN);

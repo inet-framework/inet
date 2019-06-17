@@ -105,7 +105,6 @@ class INET_API EtherMacBase : public MacBase
     bool frameBursting = false;    // frame bursting on/off (Gigabit Ethernet)
 
     // gate pointers, etc.
-    queueing::IPacketQueue *txQueue = nullptr;    // the output queue
     cChannel *transmissionChannel = nullptr;    // transmission channel
     cGate *physInGate = nullptr;    // pointer to the "phys$i" gate
     cGate *physOutGate = nullptr;    // pointer to the "phys$o" gate
@@ -116,7 +115,6 @@ class INET_API EtherMacBase : public MacBase
     MacReceiveState receiveState = static_cast<MacReceiveState>(-1);    // "receive state" of the MAC
     simtime_t lastTxFinishTime;    // time of finishing the last transmission
     int pauseUnitsRequested = 0;    // requested pause duration, or zero -- examined at endTx
-    Packet *curTxFrame = nullptr;    // frame being transmitted
 
     // self messages
     cMessage *endTxMsg = nullptr, *endIFGMsg = nullptr, *endPauseMsg = nullptr;
@@ -199,7 +197,7 @@ class INET_API EtherMacBase : public MacBase
 
     // MacBase
     virtual void configureInterfaceEntry() override;
-    virtual void flushQueue() override;
+    virtual void flushQueue(PacketDropDetails& details) override;
     virtual void clearQueue() override;
 
     // display

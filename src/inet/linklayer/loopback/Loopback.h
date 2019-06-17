@@ -39,7 +39,7 @@ class INET_API Loopback : public MacBase
 
   protected:
     virtual void configureInterfaceEntry() override;
-    virtual void flushQueue() override;
+    virtual void flushQueue(PacketDropDetails& details) override;
     virtual void clearQueue() override;
 
   public:

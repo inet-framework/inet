@@ -54,6 +54,10 @@ class INET_API ShortcutMac : public MacProtocolBase
     virtual void handleStartOperation(LifecycleOperation *operation) override {}    //TODO implementation
     virtual void handleStopOperation(LifecycleOperation *operation) override {}    //TODO implementation
     virtual void handleCrashOperation(LifecycleOperation *operation) override {}    //TODO implementation
+
+    void deleteCurrentTxFrame() override { throw cRuntimeError("model error"); }
+    void dropCurrentTxFrame(PacketDropDetails& details) override { throw cRuntimeError("model error"); }
+    void popFromTransmissionQueue() override { throw cRuntimeError("model error"); }
 };
 
 } // namespace inet

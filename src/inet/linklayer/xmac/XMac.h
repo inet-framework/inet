@@ -65,7 +65,6 @@ class INET_API XMac : public MacProtocolBase, public IMacProtocol
   public:
     XMac()
         : MacProtocolBase()
-        , queue()
         , nbTxDataPackets(0), nbTxPreambles(0), nbRxDataPackets(0), nbRxPreambles(0)
         , nbMissedAcks(0), nbRecvdAcks(0), nbDroppedDataPackets(0), nbTxAcks(0)
         , macState(INIT)
@@ -112,10 +111,6 @@ class INET_API XMac : public MacProtocolBase, public IMacProtocol
     virtual void clearQueue();
     virtual void configureInterfaceEntry() override;
     //@}
-
-    /** @brief A queue to store packets from upper layer in case another
-    packet is still waiting for transmission.*/
-    queueing::IPacketQueue *queue = nullptr;
 
     /** @name Different tracked statistics.*/
     /*@{*/
@@ -164,9 +159,6 @@ class INET_API XMac : public MacProtocolBase, public IMacProtocol
       };
     /** @brief The current state of the protocol */
     States macState;
-
-    /** Currently transmitted frame if any */
-    Packet *currentTransmission = nullptr;
 
     // messages used in the FSM
     cMessage *resend_data;
