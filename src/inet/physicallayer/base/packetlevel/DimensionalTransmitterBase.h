@@ -18,58 +18,53 @@
 #ifndef __INET_DIMENSIONALTRANSMITTERBASE_H
 #define __INET_DIMENSIONALTRANSMITTERBASE_H
 
-#include "inet/common/mapping/MappingBase.h"
 #include "inet/physicallayer/contract/packetlevel/IPrintableObject.h"
 
 namespace inet {
 
 namespace physicallayer {
 
+using namespace inet::math;
+
 class INET_API DimensionalTransmitterBase : public virtual IPrintableObject
 {
   protected:
-    class TimeGainEntry {
+    template<typename T>
+    class GainEntry {
       public:
-        char timeUnit;
-        double time;
+        const IInterpolator<T, double> *interpolator;
+        const char where;
+        double length;
+        T offset;
         double gain;
 
       public:
-        TimeGainEntry(char timeUnit, double time, double gain) :
-            timeUnit(timeUnit),
-            time(time),
-            gain(gain)
-        {}
-    };
-
-    class FrequencyGainEntry {
-      public:
-        char frequencyUnit;
-        double frequency;
-        double gain;
-
-      public:
-        FrequencyGainEntry(char frequencyUnit, double frequency, double gain) :
-            frequencyUnit(frequencyUnit),
-            frequency(frequency),
-            gain(gain)
-        {}
+        GainEntry(const IInterpolator<T, double> *interpolator, const char where, double length, T offset, double gain) :
+            interpolator(interpolator), where(where), length(length), offset(offset), gain(gain) { }
     };
 
   protected:
-    DimensionSet dimensions;
-    Mapping::InterpolationMethod interpolationMode;
-    std::vector<TimeGainEntry> timeGains;
-    std::vector<FrequencyGainEntry> frequencyGains;
-
+    const IInterpolator<simtime_t, double> *firstTimeInterpolator = nullptr;
+    const IInterpolator<Hz, double> *firstFrequencyInterpolator = nullptr;
+    std::vector<GainEntry<simtime_t>> timeGains;
+    std::vector<GainEntry<Hz>> frequencyGains;
+    const char *timeGainsNormalization = nullptr;
+    const char *frequencyGainsNormalization = nullptr;
   protected:
     virtual void initialize(int stage);
 
-    virtual ConstMapping *createPowerMapping(const simtime_t startTime, const simtime_t endTime, Hz carrierFrequency, Hz bandwidth, W power) const;
+    template<typename T>
+    std::vector<GainEntry<T>> parseGains(const char *text) const;
+
+    virtual void parseTimeGains(const char *text);
+    virtual void parseFrequencyGains(const char *text);
+
+    template<typename T>
+    const Ptr<const IFunction<double, Domain<T>>> normalize(const Ptr<const IFunction<double, Domain<T>>>& function, const char *normalization) const;
+
+    virtual Ptr<const IFunction<WpHz, Domain<simtime_t, Hz>>> createPowerFunction(const simtime_t startTime, const simtime_t endTime, Hz carrierFrequency, Hz bandwidth, W power) const;
 
   public:
-    DimensionalTransmitterBase();
-
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 };
 
