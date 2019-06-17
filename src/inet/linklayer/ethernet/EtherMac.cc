@@ -385,6 +385,9 @@ void EtherMac::processMsgFromNetwork(EthernetSignal *signal)
         return;
     }
 
+    if (signal->getSrcMacFullDuplex() != duplexMode)
+        throw cRuntimeError("Ethernet misconfiguration: MACs on the same link must be all in full duplex mode, or all in half-duplex mode");
+
     // detect cable length violation in half-duplex mode
     if (!duplexMode) {
         simtime_t propagationTime = simTime() - signal->getSendingTime();
@@ -530,6 +533,7 @@ void EtherMac::startFrameTransmission()
     *newPacketProtocolTag = *oldPacketProtocolTag;
     delete oldPacketProtocolTag;
     auto signal = new EthernetSignal(frame->getName());
+    signal->setSrcMacFullDuplex(duplexMode);
     currentSendPkTreeID = signal->getTreeId();
     if (sendRawBytes) {
         auto rawFrame = new Packet(frame->getName(), frame->peekAllAsBytes());
@@ -806,6 +810,9 @@ void EtherMac::frameReceptionComplete()
         delete signal;
         return;
     }
+    if (signal->getSrcMacFullDuplex() != duplexMode)
+        throw cRuntimeError("Ethernet misconfiguration: MACs on the same link must be all in full duplex mode, or all in half-duplex mode");
+
     bool hasBitError = signal->hasBitError();
     auto packet = check_and_cast<Packet *>(signal->decapsulate());
     delete signal;

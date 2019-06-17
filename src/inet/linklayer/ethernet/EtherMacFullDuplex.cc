@@ -118,6 +118,7 @@ void EtherMacFullDuplex::startFrameTransmission()
     *newPacketProtocolTag = *oldPacketProtocolTag;
     delete oldPacketProtocolTag;
     auto signal = new EthernetSignal(frame->getName());
+    signal->setSrcMacFullDuplex(duplexMode);
     if (sendRawBytes) {
         signal->encapsulate(new Packet(frame->getName(), frame->peekAllAsBytes()));
         delete frame;
@@ -202,6 +203,9 @@ void EtherMacFullDuplex::processMsgFromNetwork(EthernetSignal *signal)
 
         return;
     }
+
+    if (signal->getSrcMacFullDuplex() != duplexMode)
+        throw cRuntimeError("Ethernet misconfiguration: MACs on the same link must be all in full duplex mode, or all in half-duplex mode");
 
     if (dynamic_cast<EthernetFilledIfgSignal *>(signal))
         throw cRuntimeError("There is no burst mode in full-duplex operation: EtherFilledIfg is unexpected");
