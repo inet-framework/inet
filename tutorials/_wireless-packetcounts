@@ -1,0 +1,20 @@
+Wireless
+
+step	before	after	notes
+-----------------------------
+
+step1	2017	2017
+step2	2017	2017
+step3	0	0
+step4	1125	1124	!
+step5	183	181	!
+step6	1374	1346	!
+step7	1393	1355	!!
+step8	1393	1355	!!
+step9	547	533	!
+step10	956	966	!
+step11	784	753	!!
+step12	665	685	!!
+step13	679	690	!!	Physical links going through the wall?
+step14	1045	1140	!!
+

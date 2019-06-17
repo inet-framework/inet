@@ -1,0 +1,9 @@
+<config>
+	<interface hosts="host{0-2}" address="10.0.0.x"/>
+	<interface hosts="host{3-5}" address="10.0.1.x"/>
+	<interface hosts="host{6-8}" address="10.0.2.x"/>
+	<interface hosts="router0" towards="host0" address="10.0.0.x"/>
+	<interface hosts="router1" towards="host3" address="10.0.1.x"/>
+	<interface hosts="router2" towards="host6" address="10.0.2.x"/>
+	<interface hosts="router*" address="10.1.x.x"/>
+</config>

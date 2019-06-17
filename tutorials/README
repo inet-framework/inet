@@ -1,0 +1,11 @@
+About INET Tutorials
+====================
+
+This repository is normally checked out as a submodule of the
+INET Framework repository. In addition to containing the tutorial's
+simulations themselves (NED files, ini files and all), this repository also
+serves as input for the INET documentation.
+
+See $INET/doc/src/README for more information on building the documentation.
+
+
