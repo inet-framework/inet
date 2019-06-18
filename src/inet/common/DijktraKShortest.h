@@ -291,6 +291,7 @@ public:
     virtual void addEdge(const NodeId & dest_node, Edge*, LinkArray &);
     virtual void deleteEdge(const NodeId &, const NodeId &, LinkArray &);
     virtual Edge* removeEdge(const NodeId & originNode, const NodeId & last_node, LinkArray & linkArray);
+    virtual const Edge* getEdge(const NodeId & originNode, const NodeId & last_node, LinkArray & linkArray);
 
     virtual void cleanLinkArray();
     virtual void clearAll();
@@ -298,6 +299,8 @@ public:
     virtual void addEdge(const NodeId & dest_node, const NodeId & last_node, const double &cost, const double &cost2);
     virtual void addEdge(const NodeId & dest_node, Edge *);
     virtual void deleteEdge(const NodeId &, const NodeId &);
+    virtual const Edge* getEdge(const NodeId & originNode, const NodeId & last_node);
+
     virtual void setRoot(const NodeId & dest_node);
     virtual void run(const NodeId &, const LinkArray &, RouteMap &);
     virtual void runUntil(const NodeId &, const NodeId &, const LinkArray &, RouteMap &);

@@ -884,6 +884,21 @@ Dijkstra::Edge * Dijkstra::removeEdge(const NodeId & originNode, const NodeId & 
     return (nullptr);
 }
 
+const Dijkstra::Edge * Dijkstra::getEdge(const NodeId & originNode, const NodeId & last_node, LinkArray & linkArray)
+{
+    auto it = linkArray.find(originNode);
+    if (it != linkArray.end()) {
+        for (auto itAux = it->second.begin(); itAux != it->second.end(); ++itAux) {
+            Edge *edge = *itAux;
+            if (last_node == edge->last_node_) {
+                return (edge);
+            }
+        }
+    }
+    return (nullptr);
+}
+
+
 void Dijkstra::addEdge(const NodeId & originNode, const NodeId & last_node, const double &cost,  const double &cost2)
 {
     addEdge(originNode, last_node, cost, cost2, linkArray);
@@ -897,6 +912,11 @@ void Dijkstra::addEdge(const NodeId & originNode, Edge * edge)
 void Dijkstra::deleteEdge(const NodeId & originNode, const NodeId & last_node)
 {
     deleteEdge(originNode, last_node, linkArray);
+}
+
+const Dijkstra::Edge *Dijkstra::getEdge(const NodeId & originNode, const NodeId & last_node)
+{
+    return getEdge(originNode, last_node, linkArray);
 }
 
 void Dijkstra::setRoot(const NodeId & dest_node)
