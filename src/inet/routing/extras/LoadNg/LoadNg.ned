@@ -64,7 +64,6 @@ simple LoadNg like IManetRouting
         double maxJitter @unit(s) = default(5ms);
         volatile double jitter @unit(s) = default(uniform(0ms, maxJitter)); // jitter for broadcasts
 
-        double helloInterval @unit(s) = default(1s); // every helloInterval seconds a node broadcasts Hello messages (if it is necessary)
         int allowedHelloLoss = default(2); // allowedHelloLoss * helloInterval is the lifetime value for Hello messages
         double activeRouteTimeout @unit(s) = default(4s); // the timeout value for cached routes If Hello messages are used, then the
                                                             // ACTIVE_ROUTE_TIMEOUT parameter value MUST be more than the value
@@ -85,7 +84,12 @@ simple LoadNg like IManetRouting
         double blacklistTimeout @unit(s) = default(2 * netTraversalTime * (1/rreqRatelimit));  // the time after which a blacklisted node is removed from the blacklist, B_HOLD_TIME  =  2 x  NET_TRAVERSAL_TIME x RREQ_RETRIES,
         double netTraversalTime @unit(s) = default(2 * nodeTraversalTime * netDiameter); // an estimation of the traversal time for the complete network
         double nextHopWait @unit(s) = default(nodeTraversalTime + 0.01s); // timeout for a RREP-ACK
-        double pathDiscoveryTime @unit(s) = default(2 * netTraversalTime); // buffer timeout for each broadcasted RREQ message                
+        double pathDiscoveryTime @unit(s) = default(2 * netTraversalTime); // buffer timeout for each broadcasted RREQ message
+
+        double helloInterval @unit(s) = default(1s); // every helloInterval seconds a node broadcasts Hello messages (if it is necessary)        
+        double minHelloInterval @unit(s) = default(helloInterval); // timeout for a RREP-ACK
+        double maxHelloInterval  @unit(s) = default(helloInterval * 10); // timeout for a RREP-ACK
+        bool useDisjkstra = default(true);
     gates:
         input ipIn;
         output ipOut;

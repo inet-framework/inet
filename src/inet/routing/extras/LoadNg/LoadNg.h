@@ -95,6 +95,8 @@ class INET_API LoadNg : public RoutingProtocolBase, public NetfilterBase::HookBa
     };
     std::map<L3Address, NeigborElement> neighbords;
 
+    Dijkstra *dijkstra = nullptr;
+
     // bool checkNeigborList();
 
     // context

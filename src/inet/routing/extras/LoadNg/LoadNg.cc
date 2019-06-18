@@ -90,12 +90,19 @@ void LoadNg::initialize(int stage)
         blacklistTimer = new cMessage("BlackListTimer");
         if (useHelloMessages)
             helloMsgTimer = new cMessage("HelloMsgTimer");
+
+        minHelloInterval = par("minHelloInterval");
+        maxHelloInterval = par("maxHelloInterval");
     }
     else if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
         registerService(Protocol::manet, nullptr, gate("ipIn"));
         registerProtocol(Protocol::manet, gate("ipOut"), nullptr);
         networkProtocol->registerHook(0, this);
         host->subscribe(linkBrokenSignal, this);
+        if (par("useDisjkstra")) {
+            dijkstra = new Dijkstra();
+            dijkstra->setRoot(this->getSelfIPAddress());
+        }
     }
 }
 
@@ -337,7 +344,7 @@ void LoadNg::sendRREP(const Ptr<Rrep>& rrep, const L3Address& destAddr, unsigned
 
     IRoute *destRoute = routingTable->findBestMatchingRoute(destAddr);
     const L3Address& nextHop = destRoute->getNextHopAsGeneric();
-    LoadNgRouteData *destRouteData = check_and_cast<LoadNgRouteData *>(destRoute->getProtocolData());
+    //LoadNgRouteData *destRouteData = check_and_cast<LoadNgRouteData *>(destRoute->getProtocolData());
 
     // The node we received the Route Request for is our neighbor,
     // it is probably an unidirectional link
@@ -1241,13 +1248,13 @@ const Ptr<Hello> LoadNg::createHelloMessage()
     helloMessage->setHopCount(0);
     // include neighbors list
     if (!(neighbords.empty())) {
-        int s = 4 + (neighbords.size()-1)*1 + std::ceil(double(neighbords.size()*2)/8.0);
+        int s = 6 + 4 + (neighbords.size()-1)*1 + std::ceil(double(neighbords.size()*2)/8.0); // fields 6 bytes, 4 bytes, address, 1 byte for the rest address, two bits per address of control
 
-        if (s < 41)
+        if (s < 47)
             helloMessage->setNeighAddrsArraySize(neighbords.size());
         else {
             helloMessage->setNeighAddrsArraySize(30);
-            s = 4 + (30-1)*1 + std::ceil(double(30*2)/8.0);
+            s = 6 + 4 + (30-1)*1 + std::ceil(double(30*2)/8.0);
         }
         int k = 0;
         for (auto elem : neighbords){
@@ -1283,7 +1290,6 @@ void LoadNg::sendHelloMessagesIfNeeded()
     // active route.
     bool hasActiveRoute = false;
     return;
-
 
     for (int i = 0; i < routingTable->getNumRoutes(); i++) {
         IRoute *route = routingTable->getRoute(i);
@@ -1389,6 +1395,36 @@ void LoadNg::handleHelloMessage(const Ptr<const Hello>& helloMessage)
             blacklist.erase(blackListIt);
     }
 
+    if (topoChange) {
+        auto endLink = this->getSelfIPAddress();
+        auto startLink = it->first;
+
+        if (dijkstra) {
+            if (it->second.isBidirectional && !it->second.pendingConfirmation) {
+                // check if exist link
+                dijkstra->addEdge(startLink, endLink, 1.0, 0);
+                dijkstra->addEdge(endLink, startLink, 1.0, 0);
+                // TODO: add 2 hops neighbors
+                for (auto elem : it->second.listNeigbours) {
+                    if (elem.second.isBidirectional && !elem.second.pendingConfirmation) {
+                        dijkstra->addEdge(it->first, elem.first, 1.0, 0);
+                        dijkstra->addEdge(elem.first, it->first, 1.0, 0);
+                    }
+                }
+            }
+            else if (!it->second.isBidirectional || it->second.pendingConfirmation) {
+                dijkstra->deleteEdge(startLink, endLink);
+                dijkstra->deleteEdge(endLink, startLink);
+                for (auto elem : it->second.listNeigbours) {
+                    if (!elem.second.isBidirectional || elem.second.pendingConfirmation) {
+                        dijkstra->deleteEdge(it->first, elem.first);
+                        dijkstra->deleteEdge(elem.first, it->first);
+                    }
+                }
+            }
+        }
+    }
+
     // Whenever a node receives a Hello message from a neighbor, the node
     // SHOULD make sure that it has an active route to the neighbor, and
     // create one if necessary.  If a route already exists, then the
@@ -1413,26 +1449,42 @@ void LoadNg::handleHelloMessage(const Ptr<const Hello>& helloMessage)
     }
 
     // check neighbor timeout
-
     for (auto it = neighbords.begin(); it != neighbords.end(); ) {
         if (it->second.lastNotification < simTime()) {
             topoChange = true;
+            if (dijkstra) {
+                dijkstra->deleteEdge(this->getSelfIPAddress(), it->first);
+                dijkstra->deleteEdge(it->first, this->getSelfIPAddress());
+                for (auto elem: it->second.listNeigbours) {
+                    if (!elem.second.isBidirectional || elem.second.pendingConfirmation) {
+                        dijkstra->deleteEdge(it->first, elem.first);
+                        dijkstra->deleteEdge(elem.first, it->first);
+                    }
+                }
+            }
             if (simTime() - it->second.lastNotification > (maxHelloInterval + 2)) {
                 // erase
+
                 neighbords.erase(it++);
             }
             else {
                 it->second.isBidirectional = false;
                 it->second.pendingConfirmation = true;
                 ++it;
-                // include in blaclist?
+                // include in blacklist?
             }
         }
         else
             ++it;
     }
 
+
     if (topoChange) {
+        if (dijkstra) {
+            dijkstra->run();
+            //
+        }
+
         helloInterval = minHelloInterval;
         if (!helloMsgTimer->isScheduled()) {
             // schedule immediately
@@ -1732,6 +1784,9 @@ void LoadNg::handleBlackListTimer()
 
 LoadNg::~LoadNg()
 {
+    neighbords.clear();
+    if (dijkstra)
+        delete dijkstra;
     clearState();
     delete helloMsgTimer;
     delete expungeTimer;
