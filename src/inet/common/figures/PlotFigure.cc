@@ -171,16 +171,6 @@ void PlotFigure::setMaxValue(double value)
     layout();
 }
 
-const char *PlotFigure::getLabel() const
-{
-    return labelFigure->getText();
-}
-
-void PlotFigure::setLabel(const char *text)
-{
-    labelFigure->setText(text);
-}
-
 int PlotFigure::getLabelOffset() const
 {
     return labelOffset;
@@ -271,14 +261,20 @@ const char **PlotFigure::getAllowedPropertyKeys() const
 void PlotFigure::addChildren()
 {
     labelFigure = new cTextFigure("label");
+    labelFigure->setAnchor(ANCHOR_N);
+    xAxisLabelFigure = new cTextFigure("X axis label");
+    xAxisLabelFigure->setAnchor(ANCHOR_NW);
+    yAxisLabelFigure = new cTextFigure("Y axis label");
+    yAxisLabelFigure->setAnchor(ANCHOR_SE);
     backgroundFigure = new cRectangleFigure("bounds");
 
     backgroundFigure->setFilled(true);
     backgroundFigure->setFillColor(INIT_BACKGROUND_COLOR);
-    labelFigure->setAnchor(ANCHOR_N);
 
     addFigure(backgroundFigure);
     addFigure(labelFigure);
+    addFigure(xAxisLabelFigure);
+    addFigure(yAxisLabelFigure);
 }
 
 void PlotFigure::setValue(int series, simtime_t timestamp, double value)
@@ -293,6 +289,8 @@ void PlotFigure::layout()
     Rectangle b = getBounds();
     double fontSize = timeTicks.size() > 0 && timeTicks[0].number ? timeTicks[0].number->getFont().pointSize : 12;
     labelFigure->setPosition(Point(b.getCenter().x, b.y + b.height + fontSize * LABEL_Y_DISTANCE_FACTOR + labelOffset));
+    xAxisLabelFigure->setPosition(Point(b.x + b.width, b.y + b.height));
+    yAxisLabelFigure->setPosition(Point(b.x, b.y));
 }
 
 void PlotFigure::redrawValueTicks()
@@ -310,6 +308,9 @@ void PlotFigure::redrawValueTicks()
         valueTickYposAdjust[1] = fontSize / 2;
     }
 
+    Font font("", bounds.height * NUMBER_SIZE_PERCENT * numberSizeFactor);
+    yAxisLabelFigure->setFont(font);
+
     // Allocate ticks and numbers if needed
     if ((size_t)numTicks > valueTicks.size())
         while ((size_t)numTicks > valueTicks.size()) {
@@ -320,7 +321,7 @@ void PlotFigure::redrawValueTicks()
             dashLine->setLineStyle(LINE_DASHED);
 
             number->setAnchor(ANCHOR_W);
-            number->setFont(Font("", bounds.height * NUMBER_SIZE_PERCENT * numberSizeFactor));
+            number->setFont(font);
             auto plotFigure = seriesPlotFigures[seriesPlotFigures.size() - 1];
             tick->insertBelow(plotFigure);
             dashLine->insertBelow(plotFigure);
@@ -354,7 +355,7 @@ void PlotFigure::redrawValueTicks()
         }
 
         char buf[32];
-        sprintf(buf, "%g", min + i * valueTickSize);
+        sprintf(buf, yValueFormat, min + i * valueTickSize);
         valueTicks[i].number->setText(buf);
         valueTicks[i].number->setPosition(Point(x + bounds.height * NUMBER_DISTANCE_FROM_TICK, y + valueTickYposAdjust[i % 2]));
     }
@@ -378,6 +379,9 @@ void PlotFigure::redrawTimeTicks()
 
     int numTimeTicks = (timeWindow - shifting) / timeTickSize + 1;
 
+    Font font("", bounds.height * NUMBER_SIZE_PERCENT * numberSizeFactor);
+    xAxisLabelFigure->setFont(font);
+
     // Allocate ticks and numbers if needed
     if ((size_t)numTimeTicks > timeTicks.size())
         while ((size_t)numTimeTicks > timeTicks.size()) {
@@ -388,7 +392,7 @@ void PlotFigure::redrawTimeTicks()
             dashLine->setLineStyle(LINE_DASHED);
 
             number->setAnchor(ANCHOR_N);
-            number->setFont(Font("", bounds.height * NUMBER_SIZE_PERCENT * numberSizeFactor));
+            number->setFont(font);
             auto plotFigure = seriesPlotFigures[seriesPlotFigures.size() - 1];
             tick->insertBelow(plotFigure);
             dashLine->insertBelow(plotFigure);
@@ -424,7 +428,7 @@ void PlotFigure::redrawTimeTicks()
         char buf[32];
         simtime_t number = minX.dbl() + i * timeTickSize + shifting;
 
-        sprintf(buf, "%g", number.dbl());
+        sprintf(buf, xValueFormat, number.dbl());
         timeTicks[i].number->setText(buf);
         timeTicks[i].number->setPosition(Point(x, y + bounds.height * NUMBER_DISTANCE_FROM_TICK));
     }

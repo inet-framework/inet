@@ -38,6 +38,8 @@ class INET_API PlotFigure : public cGroupFigure, public inet::IIndicatorFigure
 
     std::vector<cPathFigure *> seriesPlotFigures;
     cTextFigure *labelFigure;
+    cTextFigure *xAxisLabelFigure;
+    cTextFigure *yAxisLabelFigure;
     cRectangleFigure *backgroundFigure;
     std::vector<Tick> timeTicks;
     std::vector<Tick> valueTicks;
@@ -50,6 +52,9 @@ class INET_API PlotFigure : public cGroupFigure, public inet::IIndicatorFigure
     double numberSizeFactor = 1;
     double min = 0;
     double max = 10;
+    const char *xValueFormat = "%g";
+    const char *yValueFormat = "%g";
+
     std::vector<std::list<std::pair<simtime_t, double>>> seriesValues;
 
   protected:
@@ -100,8 +105,17 @@ class INET_API PlotFigure : public cGroupFigure, public inet::IIndicatorFigure
     double getMaxValue() const;
     void setMaxValue(double value);
 
-    const char *getLabel() const;
-    void setLabel(const char *text);
+    void setXValueFormat(const char *format) { xValueFormat = format; }
+    void setYValueFormat(const char *format) { yValueFormat = format; }
+
+    const char* getXAxisLabel() const { return xAxisLabelFigure->getText(); }
+    void setXAxisLabel(const char* text) { xAxisLabelFigure->setText(text); }
+
+    const char* getYAxisLabel() const { return yAxisLabelFigure->getText(); }
+    void setYAxisLabel(const char* text) { yAxisLabelFigure->setText(text); }
+
+    const char* getLabel() const { return labelFigure->getText(); }
+    void setLabel(const char* text) { labelFigure->setText(text); }
 
     int getLabelOffset() const;
     void setLabelOffset(int offset);
