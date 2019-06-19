@@ -32,9 +32,12 @@
 #include "inet/networklayer/ipv4/Ipv4Route.h"
 #include "inet/routing/extras/LoadNg/LoadNg.h"
 
-    // TODO: Evaluate the topology in the sender.
-    // TODO: Include Disjktra
-    // TODO: actualize routes using hello information
+// TODO: Evaluate the topology in the sender.
+// TODO: actualize routes using hello information
+// TODO: Recalculate Dijkstra using the transmission errors
+// TODO: Fill the routing tables using the routes computes by Dijkstra
+// TODO: Calculate the route to the sink using Hellos
+// TODO: measure link quality metrics and to use them for routing.
 
 namespace inet {
 namespace inetmanet {
@@ -609,15 +612,15 @@ void LoadNg::updateRoutingTable(IRoute *route, const L3Address& nextHop, unsigne
 {
     EV_DETAIL << "Updating existing route: " << route << endl;
 
-    auto it = neighbords.find(nextHop);
-    if (it != neighbords.end()) {
+    auto it = neighbors.find(nextHop);
+    if (it != neighbors.end()) {
         // include in the list
         NeigborElement elem;
         elem.lastNotification = simTime();
         if (nextHop == route->getDestinationAsGeneric()) {
             elem.seqNumber = destSeqNum;
         }
-        neighbords[nextHop] = elem;
+        neighbors[nextHop] = elem;
     }
     else {
         it->second.lastNotification = simTime();
@@ -679,6 +682,12 @@ void LoadNg::handleRREQ(const Ptr<Rreq>& rreq, const L3Address& sourceAddr, unsi
             << " destination addr: " << rreq->getDestAddr() << endl;
 
     // A node ignores all RREQs received from any node in its blacklist set.
+
+    auto itNeig = neighbors.find(sourceAddr);
+    if (itNeig == neighbors.end() || !itNeig->second.isBidirectional || itNeig->second.pendingConfirmation) {
+        EV_INFO << "The sender node " << sourceAddr << " is not in the neighbors list or is not bi-directional. Ignoring the Route Request" << endl;
+        return;
+    }
 
     auto blackListIt = blacklist.find(sourceAddr);
     if (blackListIt != blacklist.end()) {
@@ -844,14 +853,14 @@ IRoute *LoadNg::createRoute(const L3Address& destAddr, const L3Address& nextHop,
         unsigned int hopCount, int64_t destSeqNum,
         bool isActive, simtime_t lifeTime, int metricType, unsigned int metric)
 {
-    auto it = neighbords.find(nextHop);
-    if (it != neighbords.end()) {
+    auto it = neighbors.find(nextHop);
+    if (it != neighbors.end()) {
         // include in the list
         NeigborElement elem;
         elem.lastNotification = simTime();
         if (nextHop == destAddr)
             elem.seqNumber = destSeqNum;
-        neighbords[nextHop] = elem;
+        neighbors[nextHop] = elem;
     }
     else {
         it->second.lastNotification = simTime();
@@ -1189,6 +1198,7 @@ void LoadNg::forwardRREP(const Ptr<Rrep>& rrep, const L3Address& destAddr, unsig
 void LoadNg::forwardRREQ(const Ptr<Rreq>& rreq, unsigned int timeToLive)
 {
     EV_INFO << "Forwarding the Route Request message with TTL= " << timeToLive << endl;
+    // TODO: unidirectional rreq
     sendAODVPacket(rreq, addressType->getBroadcastAddress(), timeToLive, *jitterPar);
 }
 
@@ -1247,17 +1257,17 @@ const Ptr<Hello> LoadNg::createHelloMessage()
     helloMessage->setOriginatorAddr(getSelfIPAddress());
     helloMessage->setHopCount(0);
     // include neighbors list
-    if (!(neighbords.empty())) {
-        int s = 6 + 4 + (neighbords.size()-1)*1 + std::ceil(double(neighbords.size()*2)/8.0); // fields 6 bytes, 4 bytes, address, 1 byte for the rest address, two bits per address of control
+    if (!(neighbors.empty())) {
+        int s = 6 + 4 + (neighbors.size()-1)*1 + std::ceil(double(neighbors.size()*2)/8.0); // fields 6 bytes, 4 bytes, address, 1 byte for the rest address, two bits per address of control
 
         if (s < 47)
-            helloMessage->setNeighAddrsArraySize(neighbords.size());
+            helloMessage->setNeighAddrsArraySize(neighbors.size());
         else {
             helloMessage->setNeighAddrsArraySize(30);
             s = 6 + 4 + (30-1)*1 + std::ceil(double(30*2)/8.0);
         }
         int k = 0;
-        for (auto elem : neighbords){
+        for (auto elem : neighbors){
             NeigborData nData;
             nData.setAddr(elem.first);
             nData.setIsBidir(elem.second.isBidirectional);
@@ -1319,9 +1329,10 @@ void LoadNg::handleHelloMessage(const Ptr<const Hello>& helloMessage)
     const L3Address& helloOriginatorAddr = helloMessage->getOriginatorAddr();
 
 
-    auto it = neighbords.find(helloOriginatorAddr);
+    auto it = neighbors.find(helloOriginatorAddr);
     bool topoChange = false;
-    if (it != neighbords.end()) {
+    bool changeTimerNotification = false;
+    if (it != neighbors.end()) {
         // refresh
         if (helloMessage->getSeqNum() <= it->second.seqNumber)
             return;
@@ -1330,9 +1341,10 @@ void LoadNg::handleHelloMessage(const Ptr<const Hello>& helloMessage)
         // add
         NeigborElement elem;
         elem.isBidirectional = false;
-        neighbords[helloOriginatorAddr] = elem;
-        it = neighbords.find(helloOriginatorAddr);
+        neighbors[helloOriginatorAddr] = elem;
+        it = neighbors.find(helloOriginatorAddr);
         topoChange = true;
+        changeTimerNotification = true;
     }
 
     it->second.lifeTime = helloMessage->getLifetime();
@@ -1366,6 +1378,7 @@ void LoadNg::handleHelloMessage(const Ptr<const Hello>& helloMessage)
             if (!it->second.isBidirectional) {
                 it->second.isBidirectional = true;
                 topoChange = true;
+                changeTimerNotification = true;
             }
         }
         else {
@@ -1375,14 +1388,15 @@ void LoadNg::handleHelloMessage(const Ptr<const Hello>& helloMessage)
                 // check changes.
                 // check if this node is also a common neighbor.
                 auto addr = itAux->first;
-                auto itNeigAux = neighbords.find(addr);
+                auto itNeigAux = neighbors.find(addr);
                 if (itNeigAux != neighbords.end() && itNeigAux->second.seqNumber < itAux->second.seqNum) {
                     itNeigAux->second.pendingConfirmation = true;
                     topoChange = true;
+                    changeTimerNotification = true;
                 }
             }
             else {
-                // add
+                // add, but it don't change the the hello of this node, the timer doesn't change
                 topoChange = true;
             }
         }
@@ -1449,7 +1463,7 @@ void LoadNg::handleHelloMessage(const Ptr<const Hello>& helloMessage)
     }
 
     // check neighbor timeout
-    for (auto it = neighbords.begin(); it != neighbords.end(); ) {
+    for (auto it = neighbors.begin(); it != neighbors.end(); ) {
         if (it->second.lastNotification < simTime()) {
             topoChange = true;
             if (dijkstra) {
@@ -1465,7 +1479,7 @@ void LoadNg::handleHelloMessage(const Ptr<const Hello>& helloMessage)
             if (simTime() - it->second.lastNotification > (maxHelloInterval + 2)) {
                 // erase
 
-                neighbords.erase(it++);
+                neighbors.erase(it++);
             }
             else {
                 it->second.isBidirectional = false;
@@ -1478,13 +1492,16 @@ void LoadNg::handleHelloMessage(const Ptr<const Hello>& helloMessage)
             ++it;
     }
 
-
-    if (topoChange) {
-        if (dijkstra) {
+    if (nullptr != dijkstra) {
+        if (topoChange)
             dijkstra->run();
-            //
-        }
+    }
+    // add the information of the hello to the routing table
 
+
+
+
+    if (changeTimerNotification) {
         helloInterval = minHelloInterval;
         if (!helloMsgTimer->isScheduled()) {
             // schedule immediately
@@ -1507,6 +1524,7 @@ void LoadNg::handleHelloMessage(const Ptr<const Hello>& helloMessage)
             helloInterval = maxHelloInterval;
         }
     }
+
 
     // TODO: This feature has not implemented yet.
     // A node MAY determine connectivity by listening for packets from its
@@ -1784,7 +1802,7 @@ void LoadNg::handleBlackListTimer()
 
 LoadNg::~LoadNg()
 {
-    neighbords.clear();
+    neighbors.clear();
     if (dijkstra)
         delete dijkstra;
     clearState();

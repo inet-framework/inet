@@ -93,7 +93,7 @@ class INET_API LoadNg : public RoutingProtocolBase, public NetfilterBase::HookBa
         std::map<L3Address, NodeStatus> listNeigbours;
         int32_t distRoot = -1;
     };
-    std::map<L3Address, NeigborElement> neighbords;
+    std::map<L3Address, NeigborElement> neighbors;
 
     Dijkstra *dijkstra = nullptr;
 
