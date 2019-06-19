@@ -25,7 +25,7 @@
 /showcases/mobility/spatial/,        -f omnetpp.ini -c Drone -r 0,                  100s,         a626-644b/tplx, PASS,
 
 # /showcases/routing/manet/,           -f omnetpp.ini -c MobileNodesBase -r 0,        100s,         0000-0000/tplx, PASS,   # MobileNodesBase extended
-/showcases/routing/manet/,           -f omnetpp.ini -c Aodv -r 0,                   100s,         4b33-b7f2/tplx, PASS,
+/showcases/routing/manet/,           -f omnetpp.ini -c Aodv -r 0,                   100s,         e7c8-f441/tplx, PASS,
 /showcases/routing/manet/,           -f omnetpp.ini -c Dsdv -r 0,                   100s,         838c-e88d/tplx, PASS,
 /showcases/routing/manet/,           -f omnetpp.ini -c Gpsr -r 0,                   100s,         73e8-b4d6/tplx, PASS,
 
