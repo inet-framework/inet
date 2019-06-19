@@ -29,6 +29,10 @@ enum AodvControlPacketType
     RREP = 2;
     RERR = 3;
     RREPACK = 4;
+    RREQ_IPv6 = 16;
+    RREP_IPv6 = 17;
+    RERR_IPv6 = 18;
+    RREPACK_IPv6 = 19;
 };
 
 //
@@ -36,8 +40,7 @@ enum AodvControlPacketType
 //
 class AodvControlPacket extends FieldsChunk
 {
-    chunkLength = B(1);
-    unsigned int packetType;
+    uint16_t packetType = 0xFFFF;       // packet type, stored in one byte
 }
 
 //
@@ -45,8 +48,8 @@ class AodvControlPacket extends FieldsChunk
 //
 class Rreq extends AodvControlPacket
 {
-    chunkLength = B(24);
-    packetType = RREQ;
+    // chunkLength = B(24) or B(48)
+    // packetType = RREQ or RREQ_IPv6
     bool joinFlag;    // Join flag; reserved for multicast.
     bool repairFlag;    // Repair flag; reserved for multicast.
     bool gratuitousRREPFlag;    // Gratuitous RREP flag; indicates whether a gratuitous RREP should be unicast to the node specified in the Destination IP Address field
@@ -66,7 +69,8 @@ class Rreq extends AodvControlPacket
 //
 class Rrep extends AodvControlPacket
 {
-    packetType = RREP;
+    // chunkLength = B(20) or B(44)
+    // packetType = RREP or RREP_IPv6
     bool repairFlag;    // Repair flag; used for multicast.
     bool ackRequiredFlag;    // Acknowledgment required.
     uint16_t reserved = 0;    // Sent as 0; ignored on reception.
@@ -92,7 +96,8 @@ struct UnreachableNode
 //
 class Rerr extends AodvControlPacket
 {
-    packetType = RERR;
+    // chunkLength = B(4 + N * (4+4)) or B(4 + N * (4+16))
+    // packetType = RERR or RERR_IPv6
     bool noDeleteFlag;    // No delete flag; set when a node has performed a local repair of a link, and upstream nodes should not delete the route.
     uint16_t reserved = 0;    // Sent as 0; ignored on reception.
     UnreachableNode unreachableNodes[];    // The unreachable destinations included in the message; MUST be at least 1.
@@ -104,12 +109,12 @@ class Rerr extends AodvControlPacket
 class RrepAck extends AodvControlPacket
 {
     chunkLength = B(2);
-    packetType = RREPACK;
+    // packetType = RREPACK or RREPACK_IPv6
     uint8_t reserved = 0;
 }
 
 //
-// Represents a timer for a Route Reply packet
+// Represents an internal timer for a Route Reply packet in Aodv module
 //
 message WaitForRrep
 {

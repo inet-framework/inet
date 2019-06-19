@@ -95,6 +95,7 @@ void Aodv::initialize(int stage)
     else if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
         networkProtocol->registerHook(0, this);
         host->subscribe(linkBrokenSignal, this);
+        usingIpv6 = (routingTable->getRouterIdAsGeneric().getType() == L3Address::IPv6);
     }
 }
 
@@ -127,6 +128,30 @@ void Aodv::handleMessageWhenUp(cMessage *msg)
         socket.processMessage(msg);
 }
 
+void Aodv::checkIpVersionAndPacketTypeCompatibility(AodvControlPacketType packetType)
+{
+    switch (packetType) {
+        case RREQ:
+        case RREP:
+        case RERR:
+        case RREPACK:
+            if (usingIpv6)
+                throw cRuntimeError("AODV Control Packet arrived with non-IPv6 packet type %d, but AODV configured for IPv6 routing", packetType);
+            break;
+
+        case RREQ_IPv6:
+        case RREP_IPv6:
+        case RERR_IPv6:
+        case RREPACK_IPv6:
+            if (!usingIpv6)
+                throw cRuntimeError("AODV Control Packet arrived with IPv6 packet type %d, but AODV configured for non-IPv6 routing", packetType);
+            break;
+
+        default:
+            throw cRuntimeError("AODV Control Packet arrived with undefined packet type: %d", packetType);
+    }
+}
+
 void Aodv::processPacket(Packet *packet)
 {
     L3Address sourceAddr = packet->getTag<L3AddressInd>()->getSrcAddress();
@@ -135,27 +160,39 @@ void Aodv::processPacket(Packet *packet)
     const auto& aodvPacket = packet->popAtFront<AodvControlPacket>();
     //TODO aodvPacket->copyTags(*udpPacket);
 
-    switch (aodvPacket->getPacketType()) {
+    auto packetType = static_cast<AodvControlPacketType>(aodvPacket->getPacketType());
+    switch (packetType) {
         case RREQ:
-            handleRREQ(dynamicPtrCast<Rreq>(aodvPacket->dupShared()), sourceAddr, arrivalPacketTTL);
-            break;
+        case RREQ_IPv6:
+            checkIpVersionAndPacketTypeCompatibility(packetType);
+            handleRREQ(CHK(dynamicPtrCast<Rreq>(aodvPacket->dupShared())), sourceAddr, arrivalPacketTTL);
+            delete packet;
+            return;
 
         case RREP:
-            handleRREP(dynamicPtrCast<Rrep>(aodvPacket->dupShared()), sourceAddr);
-            break;
+        case RREP_IPv6:
+            checkIpVersionAndPacketTypeCompatibility(packetType);
+            handleRREP(CHK(dynamicPtrCast<Rrep>(aodvPacket->dupShared())), sourceAddr);
+            delete packet;
+            return;
 
         case RERR:
-            handleRERR(dynamicPtrCast<const Rerr>(aodvPacket), sourceAddr);
-            break;
+        case RERR_IPv6:
+            checkIpVersionAndPacketTypeCompatibility(packetType);
+            handleRERR(CHK(dynamicPtrCast<const Rerr>(aodvPacket)), sourceAddr);
+            delete packet;
+            return;
 
         case RREPACK:
-            handleRREPACK(dynamicPtrCast<const RrepAck>(aodvPacket), sourceAddr);
-            break;
+        case RREPACK_IPv6:
+            checkIpVersionAndPacketTypeCompatibility(packetType);
+            handleRREPACK(CHK(dynamicPtrCast<const RrepAck>(aodvPacket)), sourceAddr);
+            delete packet;
+            return;
 
         default:
-            throw cRuntimeError("AODV Control Packet arrived with undefined packet type: %d", aodvPacket->getPacketType());
+            throw cRuntimeError("AODV Control Packet arrived with undefined packet type: %d", packetType);
     }
-    delete packet;
 }
 
 INetfilter::IHook::Result Aodv::ensureRouteForDatagram(Packet *datagram)
@@ -352,11 +389,11 @@ void Aodv::sendRREP(const Ptr<Rrep>& rrep, const L3Address& destAddr, unsigned i
 const Ptr<Rreq> Aodv::createRREQ(const L3Address& destAddr)
 {
     auto rreqPacket = makeShared<Rreq>(); // TODO: "AODV-RREQ");
+    rreqPacket->setPacketType(usingIpv6 ? RREQ_IPv6 : RREQ);
+    rreqPacket->setChunkLength(usingIpv6 ? B(48) : B(24));
 
     rreqPacket->setGratuitousRREPFlag(askGratuitousRREP);
     IRoute *lastKnownRoute = routingTable->findBestMatchingRoute(destAddr);
-
-    rreqPacket->setPacketType(RREQ);
 
     // The Originator Sequence Number in the RREQ message is the
     // node's own sequence number, which is incremented prior to
@@ -404,14 +441,14 @@ const Ptr<Rreq> Aodv::createRREQ(const L3Address& destAddr)
 
     RreqIdentifier rreqIdentifier(getSelfIPAddress(), rreqId);
     rreqsArrivalTime[rreqIdentifier] = simTime();
-    rreqPacket->setChunkLength(B(24));
     return rreqPacket;
 }
 
 const Ptr<Rrep> Aodv::createRREP(const Ptr<Rreq>& rreq, IRoute *destRoute, IRoute *originatorRoute, const L3Address& lastHopAddr)
 {
     auto rrep = makeShared<Rrep>(); // TODO: "AODV-RREP");
-    rrep->setPacketType(RREP);
+    rrep->setPacketType(usingIpv6 ? RREP_IPv6 : RREP);
+    rrep->setChunkLength(usingIpv6 ? B(44) : B(20));
 
     // When generating a RREP message, a node copies the Destination IP
     // Address and the Originator Sequence Number from the RREQ message into
@@ -487,7 +524,6 @@ const Ptr<Rrep> Aodv::createRREP(const Ptr<Rreq>& rreq, IRoute *destRoute, IRout
         rrep->setLifeTime((destRouteData->getLifeTime() - simTime()).trunc(SIMTIME_MS));
     }
 
-    rrep->setChunkLength(B(20));
     return rrep;
 }
 
@@ -495,6 +531,9 @@ const Ptr<Rrep> Aodv::createGratuitousRREP(const Ptr<Rreq>& rreq, IRoute *origin
 {
     ASSERT(originatorRoute != nullptr);
     auto grrep = makeShared<Rrep>(); // TODO: "AODV-GRREP");
+    grrep->setPacketType(usingIpv6 ? RREP_IPv6 : RREP);
+    grrep->setChunkLength(usingIpv6 ? B(44) : B(20));
+
     AodvRouteData *routeData = check_and_cast<AodvRouteData *>(originatorRoute->getProtocolData());
 
     // Hop Count                        The Hop Count as indicated in the
@@ -514,14 +553,11 @@ const Ptr<Rrep> Aodv::createGratuitousRREP(const Ptr<Rreq>& rreq, IRoute *origin
     //                                  towards the originator of the RREQ,
     //                                  as known by the intermediate node.
 
-    grrep->setPacketType(RREP);
     grrep->setHopCount(originatorRoute->getMetric());
     grrep->setDestAddr(rreq->getOriginatorAddr());
     grrep->setDestSeqNum(rreq->getOriginatorSeqNum());
     grrep->setOriginatorAddr(rreq->getDestAddr());
     grrep->setLifeTime(routeData->getLifeTime());
-
-    grrep->setChunkLength(B(20));
     return grrep;
 }
 
@@ -1109,9 +1145,9 @@ void Aodv::handleLinkBreakSendRERR(const L3Address& unreachableAddr)
 const Ptr<Rerr> Aodv::createRERR(const std::vector<UnreachableNode>& unreachableNodes)
 {
     auto rerr = makeShared<Rerr>(); // TODO: "AODV-RERR");
-    unsigned int destCount = unreachableNodes.size();
+    rerr->setPacketType(usingIpv6 ? RERR_IPv6 : RERR);
 
-    rerr->setPacketType(RERR);
+    unsigned int destCount = unreachableNodes.size();
     rerr->setUnreachableNodesArraySize(destCount);
 
     for (unsigned int i = 0; i < destCount; i++) {
@@ -1121,7 +1157,8 @@ const Ptr<Rerr> Aodv::createRERR(const std::vector<UnreachableNode>& unreachable
         rerr->setUnreachableNodes(i, node);
     }
 
-    rerr->setChunkLength(B(4 + 4 * 2 * destCount));
+    rerr->setChunkLength(B(4 + destCount * (usingIpv6 ? (4 + 16) : (4 + 4))));
+
     return rerr;
 }
 
@@ -1334,12 +1371,13 @@ const Ptr<Rrep> Aodv::createHelloMessage()
     //    Lifetime                       ALLOWED_HELLO_LOSS *HELLO_INTERVAL
 
     auto helloMessage = makeShared<Rrep>(); // TODO: "AODV-HelloMsg");
-    helloMessage->setPacketType(RREP);
+    helloMessage->setPacketType(usingIpv6 ? RREP_IPv6 : RREP);
+    helloMessage->setChunkLength(usingIpv6 ? B(44) : B(20));
+
     helloMessage->setDestAddr(getSelfIPAddress());
     helloMessage->setDestSeqNum(sequenceNum);
     helloMessage->setHopCount(0);
     helloMessage->setLifeTime(allowedHelloLoss * helloInterval);
-    helloMessage->setChunkLength(B(20));
 
     return helloMessage;
 }
@@ -1612,10 +1650,9 @@ bool Aodv::updateValidRouteLifeTime(const L3Address& destAddr, simtime_t lifetim
 
 const Ptr<RrepAck> Aodv::createRREPACK()
 {
-    auto rrepACK = makeShared<RrepAck>(); // TODO: "AODV-RREPACK");
-    rrepACK->setPacketType(RREPACK);
-    rrepACK->setChunkLength(B(2));
-    return rrepACK;
+    auto rrepAck = makeShared<RrepAck>(); // TODO: "AODV-RREPACK");
+    rrepAck->setPacketType(usingIpv6 ? RREPACK_IPv6 : RREPACK);
+    return rrepAck;
 }
 
 void Aodv::sendRREPACK(const Ptr<RrepAck>& rrepACK, const L3Address& destAddr)
