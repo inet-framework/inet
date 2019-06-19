@@ -56,8 +56,8 @@ class INET_API AttenuationFunction : public FunctionBase<double, simtime_t, Hz>
     }
 
     virtual void partition(const Interval<simtime_t, Hz>& i, const std::function<void (const Interval<simtime_t, Hz>&, const IFunction<double, simtime_t, Hz> *)> f) const override {
-//        Hz frequency = MHz(100) * round(unit(std::get<1>(i.getLower()) / MHz(100)).get());
-//        ASSERT(frequency == MHz(100) * round(unit(std::get<1>(i.getUpper()) / MHz(100)).get()));
+//        Hz frequency = MHz(1000) * round(unit(std::get<1>(i.getLower()) / MHz(1000)).get());
+//        ASSERT(frequency == MHz(1000) * round(unit(std::get<1>(i.getUpper()) / MHz(1000)).get()));
         Hz frequency = (std::get<1>(i.getLower()) + std::get<1>(i.getUpper())) / 2;
         ConstantFunction<double, simtime_t, Hz> g(getAttenuation(frequency));
         f(i, &g);
@@ -90,7 +90,7 @@ class INET_API ReceptionPowerFunction : public FunctionBase<W, m, m, m, simtime_
         m dx = x - startX;
         m dy = y - startY;
         m dz = z - startZ;
-        Hz frequency = MHz(100) * round(unit(std::get<4>(p) / MHz(100)).get());;
+        Hz frequency = MHz(1000) * round(unit(std::get<4>(p) / MHz(1000)).get());;
         m distance = m(sqrt(dx * dx + dy * dy + dz * dz));
         auto direction = Quaternion::rotationFromTo(Coord::X_AXIS, Coord(dx.get(), dy.get(), dz.get()));
         auto antennaLocalDirection = startOrientation.inverse() * direction;
@@ -130,9 +130,9 @@ class INET_API ReceptionPowerFunction : public FunctionBase<W, m, m, m, simtime_
         const auto& lower = i.getLower();
         const auto& upper = i.getUpper();
         if (std::get<0>(lower) == std::get<0>(upper) && std::get<1>(lower) == std::get<1>(upper) && std::get<2>(lower) == std::get<2>(upper)) {
-            // TODO: parameter for MHz(100) quantization
-            Hz frequency = MHz(100) * round(unit(std::get<4>(lower) / MHz(100)).get());
-            ASSERT(frequency == MHz(100) * round(unit(std::get<4>(upper) / MHz(100)).get()));
+            // TODO: parameter for MHz(1000) quantization
+            Hz frequency = MHz(1000) * round(unit(std::get<4>(lower) / MHz(1000)).get());
+            ASSERT(frequency == MHz(1000) * round(unit(std::get<4>(upper) / MHz(1000)).get()));
             double attenuation = getAttenuation(Point<m, m, m, simtime_t, Hz>(std::get<0>(lower), std::get<1>(lower), std::get<2>(lower), 0, frequency));
             m x = std::get<0>(lower);
             m y = std::get<1>(lower);

@@ -33,8 +33,8 @@ class INET_API Interval
   protected:
     template<size_t ... IS>
     Interval<T ...> intersectImpl(const Interval<T ...>& o, integer_sequence<size_t, IS...>) const {
-        Point<T ...> l({ (std::max(std::get<IS>(lower), std::get<IS>(o.lower))) } ... );
-        Point<T ...> u({ (std::min(std::get<IS>(upper), std::get<IS>(o.upper))) } ... );
+        Point<T ...> l( (std::max(std::get<IS>(lower), std::get<IS>(o.lower)))  ... );
+        Point<T ...> u( (std::min(std::get<IS>(upper), std::get<IS>(o.upper)))  ... );
         return Interval<T ...>(l, u);
     }
 
