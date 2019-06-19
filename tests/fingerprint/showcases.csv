@@ -25,7 +25,7 @@
 /showcases/mobility/spatial/,        -f omnetpp.ini -c Drone -r 0,                  100s,         a626-644b/tplx, PASS,
 
 # /showcases/routing/manet/,           -f omnetpp.ini -c MobileNodesBase -r 0,        100s,         0000-0000/tplx, PASS,   # MobileNodesBase extended
-/showcases/routing/manet/,           -f omnetpp.ini -c Aodv -r 0,                   100s,         e7c8-f441/tplx, PASS,
+/showcases/routing/manet/,           -f omnetpp.ini -c Aodv -r 0,                   100s,         1459-6726/tplx, PASS,
 /showcases/routing/manet/,           -f omnetpp.ini -c Dsdv -r 0,                   100s,         838c-e88d/tplx, PASS,
 /showcases/routing/manet/,           -f omnetpp.ini -c Gpsr -r 0,                   100s,         73e8-b4d6/tplx, PASS,
 
@@ -36,7 +36,7 @@
 /showcases/visualizer/datalinkactivity/, -f omnetpp.ini -c EnablingVisualizationWireless -r 0,                  500s,            31cf-4e16/tplx, PASS,
 /showcases/visualizer/datalinkactivity/, -f omnetpp.ini -c Filtering -r 0,                                      500s,            654c-43e6/tplx, PASS,
 /showcases/visualizer/datalinkactivity/, -f omnetpp.ini -c ActivityLevel -r 0,      100s,         a8a0-31de/tplx, PASS,
-/showcases/visualizer/datalinkactivity/, -f omnetpp.ini -c Dynamic -r 0,                                        500s,            717f-ae78/tplx, PASS,
+/showcases/visualizer/datalinkactivity/, -f omnetpp.ini -c Dynamic -r 0,                                        500s,            1d9c-e877/tplx, PASS,
 
 # /showcases/visualizer/earth/,        -f omnetpp.ini -c DefaultSettings -r 0,                                    500s,            0000-0000/tplx, PASS,   # Osg doesn't work in command line DefaultSettings extended
 # /showcases/visualizer/earth/,        -f omnetpp.ini -c TempConfig -r 0,                                         500s,            0000-0000/tplx, PASS,
@@ -69,7 +69,7 @@
 
 /showcases/visualizer/networkpathactivity/, -f omnetpp.ini -c EnablingVisualization -r 0,                       500s,            47ee-3b66/tplx, PASS,
 /showcases/visualizer/networkpathactivity/, -f omnetpp.ini -c StaticNetworkPaths -r 0,                          500s,            560b-7e44/tplx, PASS,
-/showcases/visualizer/networkpathactivity/, -f omnetpp.ini -c Mobile -r 0,                                      500s,            cd60-7798/tplx, PASS,
+/showcases/visualizer/networkpathactivity/, -f omnetpp.ini -c Mobile -r 0,                                      500s,            ae39-a96b/tplx, PASS,
 /showcases/visualizer/networkpathactivity/, -f omnetpp.ini -c ChangingPaths -r 0,                               250s,            5338-103a/tplx, PASS,
 
 /showcases/visualizer/obstacleloss/, -f omnetpp.ini -c EnablingVisualization -r 0,                              250s,            2410-572d/tplx, PASS,
@@ -97,7 +97,7 @@
 /showcases/visualizer/routingtable/, -f omnetpp.ini -c DisplayingAll -r 0,                            500s,            0000-0000/tplx, PASS,
 /showcases/visualizer/routingtable/, -f omnetpp.ini -c Unfiltered -r 0,                               500s,            0000-0000/tplx, PASS,
 /showcases/visualizer/routingtable/, -f omnetpp.ini -c Filtered -r 0,                                 500s,            0000-0000/tplx, PASS,
-/showcases/visualizer/routingtable/, -f omnetpp.ini -c Dynamic -r 0,                                  500s,            2369-6dd6/tplx, PASS,
+/showcases/visualizer/routingtable/, -f omnetpp.ini -c Dynamic -r 0,                                  500s,            b033-feef/tplx, PASS,
 
 /showcases/visualizer/statistic/,    -f omnetpp.ini -c PingRtt -r 0,                                            500s,            534a-6846/tplx, PASS,
 /showcases/visualizer/statistic/,    -f omnetpp.ini -c PacketErrorRate -r 0,                                    25s,            4198-24a2/tplx, PASS,
