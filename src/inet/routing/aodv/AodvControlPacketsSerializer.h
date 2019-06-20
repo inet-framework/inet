@@ -18,7 +18,8 @@
 
 #include "inet/common/packet/serializer/FieldsChunkSerializer.h"
 
-namespace inet::aodv {
+namespace inet {
+namespace aodv {
 
 /**
  * Converts between AodvControlPackets and binary (network byte order) Aodv control packets.
@@ -33,7 +34,8 @@ class INET_API AodvControlPacketsSerializer : public FieldsChunkSerializer
     AodvControlPacketsSerializer() : FieldsChunkSerializer() {}
 };
 
-} // namespace inet::aodv
+} // namespace aodv
+} // namespace inet
 
 #endif // ifndef __INET_AODVCONTROLPACKETSSERIALIZER_H
 
