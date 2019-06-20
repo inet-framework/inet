@@ -36,6 +36,7 @@ enum AodvControlPacketType
 //
 class AodvControlPacket extends FieldsChunk
 {
+    chunkLength = B(1);
     unsigned int packetType;
 }
 
@@ -44,6 +45,7 @@ class AodvControlPacket extends FieldsChunk
 //
 class Rreq extends AodvControlPacket
 {
+    chunkLength = B(24);
     packetType = RREQ;
     bool joinFlag;    // Join flag; reserved for multicast.
     bool repairFlag;    // Repair flag; reserved for multicast.
@@ -101,6 +103,7 @@ class Rerr extends AodvControlPacket
 //
 class RrepAck extends AodvControlPacket
 {
+    chunkLength = B(2);
     packetType = RREPACK;
     uint8_t reserved = 0;
 }
