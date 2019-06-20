@@ -314,22 +314,18 @@ class INET_API MemoryOutputStream {
      * endian byte order and MSB to LSB bit order.
      */
     void writeNBitsOfUint64Be(uint64_t value, uint8_t n){
-        // TODO: throw exception
-        if(n <= 0) throw cRuntimeError("Can not write 0 or less bits.");
-        uint64_t mul = 1;
-        for(int i = 0; i < n - 1; ++i){
-            mul *= 2;
-        }
+        if (n == 0 || n > 64)
+            throw cRuntimeError("Can not write 0 bit or more than 64 bits.");
+        uint64_t mul = 1 << (n-1);
         for(int i = 0; i < n; ++i){
-            writeBit(value & mul == mul);
-            mul /= 2;
+            writeBit((value & mul) != 0);
+            mul >>= 1;
         }
-
     }
     //@}
 };
 
-} // namespace
+} // namespace inet
 
 #endif // #ifndef __INET_MEMORYOUTPUTSTREAM_H_
 
