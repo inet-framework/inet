@@ -425,23 +425,7 @@ class INET_API MemoryInputStream {
         }
         return num;
     }
-
-    /**
-     * Reads a double value (64 bits) at the current position of the stream.
-     */
-    double readDoubleAs64BitValue(){
-        int sign = 1;
-        if(readBit()) sign = -1;
-
-        int exp = readNBitsToUint64Be(11);
-        exp -= 1023;
-
-        return sign * ((double)readNBitsToUint64Be(52) / 1e14) * pow(2, exp);
-    }
     //@}
-
-
-
 };
 
 } // namespace

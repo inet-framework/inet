@@ -326,30 +326,7 @@ class INET_API MemoryOutputStream {
         }
 
     }
-
-    /**
-     * Writes a double value on 64 bits to the end of the stream.
-     */
-    void writeDoubleOn64Bits(double value){
-        int exp;
-        double frac;
-
-        frac = frexp(value, &exp);
-
-        if(frac < 0) {
-            writeBit(true);
-            frac *= -1;
-        }
-        else writeBit(false);
-
-        exp += 1023;
-        writeNBitsOfUint64Be(exp, 11);
-
-        uint64_t num = (uint64_t)(1e14 * frac);
-        writeNBitsOfUint64Be(num, 52);
-    }
     //@}
-
 };
 
 } // namespace
