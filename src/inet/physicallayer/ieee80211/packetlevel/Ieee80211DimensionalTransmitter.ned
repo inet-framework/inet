@@ -28,6 +28,10 @@ import inet.physicallayer.base.packetlevel.DimensionalTransmitterBase;
 // See also ~Ieee80211DimensionalReceiver, ~Ieee80211DimensionalRadio, and
 // ~Ieee80211DimensionalRadioMedium.
 //
+// Some example values for the frequencyGains parameter:
+// - default (flat signal): "smaller s 0dB either e 0dB greater"
+// - 802.11a/g/n/ac OFDM spectral mask (for 20/40/80/160MHz bandwidth): "smaller c-b*1.5 -40dB linear c-b -28dB linear c-b*0.5-1MHz -20dB linear c-b*0.5+1MHz 0dB linear c+b*0.5-1MHz 0dB linear c+b*0.5+1MHz -20dB linear c+b -28dB linear c+b*1.5 -40dB greater"
+//
 module Ieee80211DimensionalTransmitter extends DimensionalTransmitterBase
 {
     parameters:
