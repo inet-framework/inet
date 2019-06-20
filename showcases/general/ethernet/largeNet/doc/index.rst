@@ -25,8 +25,8 @@ About Ethernet
 
 Ethernet is a family of computer networking technologies commonly used
 in local area networks (LAN), metropolitan area networks (MAN) and wide
-are networks (WAN). Systems communicating over Ethernet divide a stream
-of data into shorte pieces called frames. Each frame contains source and
+area networks (WAN). Systems communicating over Ethernet divide a stream
+of data into short pieces called frames. Each frame contains source and
 destination addresses, and error-checking data so that damaged frames
 can be detected and discarded. As per the OSI model, Ethernet provides
 services up to and including the data link layer.
@@ -37,7 +37,7 @@ About LAN
 A local area network (LAN) is a computer network that interconnects
 computers within a limited area such as a residence, school, laboratory,
 university campus or office building. By contrast, a wide area network
-(WAN) not only covers a larger geographic distance, but also generally
+(WAN) not only covers a larger geographic distance but also generally
 involves leased telecommunication circuits. Ethernet and Wi-Fi are the
 two most common technologies in use for local area networks.
 
@@ -61,7 +61,7 @@ logical link, while the MAC provides flow control and multiplexing for
 the transmission medium.
 
 When sending data to another device on the network, the MAC block
-encapsulates higher-level frames into frames appropriate for
+encapsulates higher-level frames into frames appropriate for the
 transmission medium, adds a frame check sequence to identify
 transmission errors, and then forwards the data to the physical layer as
 soon as the appropriate channel access method permits it. Controlling
@@ -69,7 +69,7 @@ when data is sent and when to wait is necessary to avoid congestion and
 collisions, especially for topologies with collision domains (bus, ring,
 mesh, point-to-multipoint topologies). Additionally, the MAC is also
 responsible for compensating for congestion and collision by initiating
-retransmission if a jam signal is detected, and/or negotiating slower
+retransmission if a jam signal is detected, and/or negotiating a slower
 transmission rate if necessary. When receiving data from the physical
 layer, the MAC block ensures data integrity by verifying the sender's
 frame check sequence, and strips off the sender's preamble and padding
@@ -82,7 +82,7 @@ The model
 ---------
 
 The Ethernet model contains a MAC model (``EtherMAC``), LLC model
-(``EtherLLC``) as well a bus (:ned:`EtherBus`, for modelling coaxial cable)
+(``EtherLLC``) as well a bus (:ned:`EtherBus`, for modeling coaxial cable)
 and a hub (:ned:`EtherHub`) model. A switch model (:ned:`EtherSwitch`) is also
 provided. - :ned:`EtherHost` is a sample node with an Ethernet NIC. -
 :ned:`EtherSwitch`, :ned:`EtherBus`, :ned:`EtherHub` model switching hub,
@@ -90,13 +90,13 @@ repeating hub and coaxial cable. - basic components of the model:
 ``EtherMAC``, ``EtherLLC``/:ned:`EtherEncap` module types,
 ``MACRelayUnit``, ``EtherFrame`` message type, ``MACAddress`` class.
 
-**Note:** *Nowadays almost all Ethernet networks operate using
+**Note:** *Nowadays, almost all Ethernet networks operate using
 full-duplex point-to-point connections between hosts and switches. This
-means that there are no collisions, and the behaviour of the MAC
+means that there are no collisions, and the behavior of the MAC
 component is much simpler than in classic Ethernet that used coaxial
 cables and hubs. The INET framework contains two MAC modules for
 Ethernet: the ``EtherMACFullDuplex`` is simpler to understand and easier
-to extend, because it supports only full-duplex connections. The
+to extend because it supports only full-duplex connections. The
 ``EtherMAC`` module implements the full MAC functionality including
 CSMa/showcases/CD, and it can operate both half-duplex and full-duplex mode.*
 
@@ -141,7 +141,7 @@ Configuration and behaviour
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 As stated above, this showcase demonstrates how easily different
-Ethernet LANs can be connected making use of MAC auto-configuration.
+Ethernet LANs can be connected by making use of MAC auto-configuration.
 After setting up the connections in the ``LargeNet.ned`` file, no
 complex configuration is needed in the ``LargeNet.ini`` file:
 
@@ -170,7 +170,7 @@ internal queue named ``txQueue`` to queue up packets waiting for
 transmission. Conceptually, ``txQueue`` is of infinite size, but for
 better diagnostics one can specify a hard limit in the ``txQueueuLimit``
 parameter. If this limit is exceeded, the simulation stops with an
-error. In this example :ned:`DropTailQueue` is used instead, in order to
+error. In this example, :ned:`DropTailQueue` is used instead, in order to
 observe the drop statistics (as well):
 
 .. literalinclude:: ../largeNet.ini
@@ -196,7 +196,7 @@ vector-recording disabled, and cherry-pick the desired statistics:
    :start-at: scalar- and vector-recording disabled
    :end-before: number of hosts
 
-Otherwise the generated file could easily reach gigabyte size.
+Otherwise, the generated file could easily reach gigabyte size.
 
 In this showcase, two statistics are observed in order to demonstrate
 how the traffic rate (and congestion rate) at critical parts of the
@@ -210,12 +210,12 @@ and the number of collisions (``collisions``):
    :end-before: #####
 
 **Note:** *The ``collision`` signal is an extra signal generated by the
-``EtherMAC`` module. Collision occurs, when a frame is received, while
+``EtherMAC`` module. Collision occurs when a frame is received, while
 the transmission or reception of another signal is in progress, or when
-transmission is started, while receiving a frame is in progress.*
+transmission is started while receiving a frame is in progress.*
 
 For further examination of the model, let's assume that the goal is to
-design a high performance Ethernet campus area network (CAN). A campus
+design a high-performance Ethernet campus area network (CAN). A campus
 network is a computer network made up of an interconnection of local
 area networks (LANs) within a limited geographical area. In real life,
 the requirements for performance, capacity and network ports are given
@@ -240,17 +240,17 @@ LargeNet_notOverloaded
 ~~~~~~~~~~~~~~~~~~~~~~
 
 As expected, the 500 hosts, producing an average of 2 requests in a
-second, can not consume the network's capacity. As the statistic shows,
+second, cannot consume the network's capacity. As the statistic shows,
 no packets are dropped.
 
 The number of collisions with this configuration is also insignificant.
 However, we can see that the critical parts of the network from the
 point of view of ``collisions`` are the ``largeLAN`` models. This
-occurs, because these subnetworks inplement a topology containing bus
+occurs because these subnetworks implement a topology containing bus
 and hub, and these networks contain the highest number of hosts.
 
 A network of this topology, technology and configuration (traffic rate,
-number of hosts) would be a high performance Ethernet network with no
+number of hosts) would be a high-performance Ethernet network with no
 data-loss and low delay.
 
 LargeNet_overloadedBySendIntervall
@@ -274,7 +274,7 @@ surprising that the highest drop rates occur at the connections between
 the switches ``switchBB[]``, ``switchB``, ``switchC`` and ``switchD``,
 because the majority of the packets follow this route.
 
-The number of collisions conspicuously increased. This phenomena occurs,
+The number of collisions conspicuously increased. This phenomenon occurs
 because although the number of hosts on the LANs is the same as it was
 with the ``LargeNet_notOverloaded`` configuration, the data rate of the
 hosts is much higher.
@@ -295,7 +295,7 @@ present on the :ned:`LargeNet` network:
    :start-at: LargeNet.n = 15
    :end-before: #####
 
-Conceptually the same result is get with the this configuration, as with
+Conceptually the same result is get with this configuration, as with
 the ``LargeNet_overloadedBySendIntervall`` one, meaning an overloaded
 network. The highest drop rate occurs at ``switchB.eth[18]``, meaning
 that the connection between the backbone switches and ``switchB`` is the
