@@ -20,7 +20,7 @@ nodes can be created and deleted during the course of the simulation.
 This is in contrast to static networks where the same nodes are present
 in the entire course of the simulation.
 
-This showcase demonstrates dynamic networks, and contains an example
+This showcase demonstrates dynamic networks and contains an example
 simulation in which wireless nodes are created, exist for some time, and
 then they are deleted. While in existence, they move around and send
 ping request messages.
@@ -92,7 +92,7 @@ parameters, create or destroy modules, etc. The XML script contains a
 elements, which specify the commands. These have attributes. Each
 command has to specify a time value, at which the command should be
 executed. Some elements have a ``t`` attribute to specify the time. The
-time can be also specified with the ``<at>`` element. Under the ``<at>``
+time can also be specified with the ``<at>`` element. Under the ``<at>``
 element, there can be multiple other elements which will be executed at
 the time specified by the ``<at>`` element. (For a more comprehensive
 description of the :ned:`ScenarioManager` and the available commands, refer
@@ -100,7 +100,7 @@ to the `ScenarioManager NED
 documentation <https://omnetpp.org/doc/inet/api-current/neddoc/index.html?p=inet.common.scenario.ScenarioManager.html>`__
 in the INET Reference.)
 
-Modules can be created with the ``<create-module>`` element. This has
+Modules can be created with the ``<create-module>`` element. This element has
 three attributes:
 
 -  ``type``: specifies the NED type of the module to be created, in the
