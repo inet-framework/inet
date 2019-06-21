@@ -47,7 +47,7 @@ the Ethernet interface is run in the simulation, while the real host's protocol 
 is used above the Ethernet interface. This kind of separation can be achieved using
 the :ned:`ExtUpperEthernetInterface` as the sender host's Ethernet interface.
 
-The :ned:`ExtUpperEthernetInterface` represents an Ethernet network interface which
+The :ned:`ExtUpperEthernetInterface` represents an Ethernet network interface that
 has its upper part in the real world and its lower part in the simulation. Packets
 received by the simulated network interface from the network will be received on the
 real interface. Packets received by the real network interface from above will be sent
@@ -87,7 +87,7 @@ The further configurations affect the real OS and are contained in the
 .. can be run from the terminal. This script file contains all the required
 .. commands to create the TAP device, run the simulation and save the results.
 
-In the host computer, the above mentioned TAP device is created and an
+In the host computer, the above-mentioned TAP device is created and an
 IP address from within the same subnet as the receiver host is assigned to it:
 
 .. literalinclude:: ../TestExtUpperEthernetInterfaceInSender.sh
@@ -217,7 +217,7 @@ host is fully real.
    :start-after: description = "real ping application in sender sends ping requests to receiver using ExtLowerEthernetInterface in receiver"
    :end-at: *.receiver.eth[0].copyConfiguration = "copyFromExt"
 
-In the host OS, the above mentioned veth devices need to be created and brought up. A route
+In the host OS, the above-mentioned veth devices need to be created and brought up. A route
 for the virtual link also needs to be added. The steps for the configuration are
 contained in the ``TestExtLowerEthernetInterfaceInReceiver.sh`` shell script:
 
