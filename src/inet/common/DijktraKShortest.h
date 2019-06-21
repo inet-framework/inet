@@ -308,6 +308,10 @@ public:
     virtual void runUntil(const NodeId &);
     virtual bool getRoute(const NodeId &nodeId, std::vector<NodeId> &pathNode);
     virtual bool getRoute(const NodeId &, std::vector<NodeId> &, const RouteMap &);
+
+    virtual void getRoutes(std::map<NodeId, std::vector<NodeId>> &);
+    virtual void getRoutes(std::map<NodeId, std::vector<NodeId>> &, const RouteMap &);
+
     virtual void setMethod(Method p) {method = p;}
 };
 

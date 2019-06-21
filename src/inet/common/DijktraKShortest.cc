@@ -1102,6 +1102,39 @@ bool Dijkstra::getRoute(const NodeId &nodeId, std::vector<NodeId> &pathNode)
     return (getRoute(nodeId, pathNode, routeMap));
 }
 
+void Dijkstra::getRoutes(std::map<NodeId, std::vector<NodeId>> &paths) {
+    getRoutes(paths, routeMap);
+}
+
+
+void Dijkstra::getRoutes(std::map<NodeId, std::vector<NodeId>> &paths, const RouteMap &routeMap)
+{
+    for (const auto &elem : routeMap) {
+        std::vector<NodeId> path;
+        std::vector<NodeId> pathNode;
+        NodeId currentNode = elem.first;
+        auto it = routeMap.find(currentNode);
+
+        while (currentNode != rootNode) {
+            path.push_back(currentNode);
+            currentNode = it->second.idPrev;
+            it = routeMap.find(currentNode);
+            if (it == routeMap.end())
+                throw cRuntimeError("error in data");
+        }
+
+        path.push_back(rootNode);
+        pathNode.clear();
+        while (!path.empty()) {
+            pathNode.push_back(path.back());
+            path.pop_back();
+        }
+        paths[elem.first] = pathNode;
+    }
+}
+
+
+
 void Dijkstra::setFromTopo(const cTopology *topo, L3Address::AddressType type )
 {
     for (int i = 0; i < topo->getNumNodes(); i++) {
