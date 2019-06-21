@@ -88,6 +88,7 @@ class INET_API LoadNg : public RoutingProtocolBase, public NetfilterBase::HookBa
         simtime_t lastNotification;
         simtime_t lifeTime;
         int64_t seqNumber = -1;
+        uint64_t helloIdentify;
         bool isBidirectional = false;
         bool pendingConfirmation = false; // the latest notification has failed.
         std::map<L3Address, NodeStatus> listNeigbours;
@@ -143,8 +144,10 @@ class INET_API LoadNg : public RoutingProtocolBase, public NetfilterBase::HookBa
     simtime_t pathDiscoveryTime;
 
     // state
-    unsigned int rreqId = 0;    // when sending a new RREQ packet, rreqID incremented by one from the last id used by this node
+    unsigned int rreqId = 0;    // Not used, to remove
     unsigned int sequenceNum = 0;    // it helps to prevent loops in the routes (RFC 3561 6.1 p11.)
+    uint64_t helloIdentifier = 0; // used to identify the hello and no increase the seq number
+
     std::map<L3Address, WaitForRrep *> waitForRREPTimers;    // timeout for Route Replies
     std::map<RreqIdentifier, simtime_t, RreqIdentifierCompare> rreqsArrivalTime;    // maps RREQ id to its arriving time
     L3Address failedNextHop;    // next hop to the destination who failed to send us RREP-ACK

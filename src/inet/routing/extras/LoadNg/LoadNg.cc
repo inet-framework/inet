@@ -289,6 +289,12 @@ void LoadNg::sendRREQ(const Ptr<Rreq>& rreq, const L3Address& destAddr, unsigned
         return;
     }
 
+    if (rreq->getHopLimit() == 0) {
+        EV_WARN << "Hop limit 0. Canceling sending RERR" << endl;
+        return;
+    }
+
+
     auto rrepTimer = waitForRREPTimers.find(rreq->getDestAddr());
     WaitForRrep *rrepTimerMsg = nullptr;
     if (rrepTimer != waitForRREPTimers.end()) {
@@ -350,6 +356,11 @@ void LoadNg::sendRREP(const Ptr<Rrep>& rrep, const L3Address& destAddr, unsigned
     // corresponding destination node is updated by adding to it
     // the next hop node to which the RREP is forwarded.
 
+    if (rrep->getHopLimit() == 0) {
+        EV_WARN << "Hop limit 0. Canceling sending RREP" << endl;
+        return;
+    }
+
     IRoute *destRoute = routingTable->findBestMatchingRoute(destAddr);
     const L3Address& nextHop = destRoute->getNextHopAsGeneric();
     //LoadNgRouteData *destRouteData = check_and_cast<LoadNgRouteData *>(destRoute->getProtocolData());
@@ -389,6 +400,7 @@ const Ptr<Rreq> LoadNg::createRREQ(const L3Address& destAddr)
     // insertion in a RREQ.
     sequenceNum++;
 
+    rreqPacket->setHopLimits(par("maxHopLimit"));
     rreqPacket->setSeqNum(sequenceNum);
 
     rreqPacket->setOriginatorAddr(getSelfIPAddress());
@@ -442,6 +454,7 @@ const Ptr<Rrep> LoadNg::createRREP(const Ptr<Rreq>& rreq, IRoute *destRoute, IRo
 
     sequenceNum++;
     rrep->setSeqNum(sequenceNum);
+    rrep->setHopLimits(par("maxHopLimit"));
 
     if (rrep->getOriginatorAddr().getType() == L3Address::IPv4)
         rrep->setAddrLen(3);
@@ -481,6 +494,8 @@ void LoadNg::handleRREP(const Ptr<Rrep>& rrep, const L3Address& sourceAddr)
     if (!rrep->getSeqField()) // bad format
         return;
 
+    rrep->setHopLimits(rrep->getHopLimit()-1);
+
     // the hello is now a sparate type.
    /*if (rrep->getDestAddr().isUnspecified()) {
         EV_INFO << "This Route Reply is a Hello Message" << endl;
@@ -506,9 +521,16 @@ void LoadNg::handleRREP(const Ptr<Rrep>& rrep, const L3Address& sourceAddr)
         if (metricTlv->getValueFlag())
             metric = metricTlv->getValue();
         if (metricType == HOPCOUNT) {
-            if (metric != 255) {
-                metric++;
+            if (metricType == HOPCOUNT) {
+                if (metric < 255)
+                    metric++;
                 metricTlv->setValue(metric);
+                metricNeg = 1;
+            }
+            else {
+                // unknow metric set to hopcount
+                metricTlv->setType(HOPCOUNT);
+                metricTlv->setValue(255);
             }
             metricNeg = 1;
         }
@@ -535,6 +557,11 @@ void LoadNg::handleRREP(const Ptr<Rrep>& rrep, const L3Address& sourceAddr)
 
     if (originRoute && originRoute->getSource() == this) {    // already exists
         orgRouteData = check_and_cast<LoadNgRouteData *>(originRoute->getProtocolData());
+
+        // 11.1.  Identifying Invalid RREQ or RREP Messages,
+        if (seqNum < orgRouteData->getDestSeqNum()) // invalid message
+            return;
+
         orgRouteData->setIsBidirectiona(true);
 
         if (orgRouteData->getDestSeqNum() == -1) {
@@ -604,8 +631,10 @@ void LoadNg::handleRREP(const Ptr<Rrep>& rrep, const L3Address& sourceAddr)
         // corresponding destination node is updated by adding to it
         // the next hop node to which the RREP is forwarded.
 
-        auto outgoingRREP = dynamicPtrCast<Rrep>(rrep->dupShared());
-        forwardRREP(outgoingRREP, destRoute->getNextHopAsGeneric(), 100);
+        if (rrep->getHopCount() > 0) {
+            auto outgoingRREP = dynamicPtrCast<Rrep>(rrep->dupShared());
+            forwardRREP(outgoingRREP, destRoute->getNextHopAsGeneric(), 100);
+        }
     }
     else {    // create forward route for the destination: this path will be used by the originator to send data packets
         /** received routing message is an RREP and no routing entry was found **/
@@ -716,11 +745,19 @@ void LoadNg::handleRREQ(const Ptr<Rreq>& rreq, const L3Address& sourceAddr, unsi
         if (metricTlv->getValueFlag())
             metric = metricTlv->getValue();
         if (metricType == HOPCOUNT) {
-            metric++;
+            if (metric < 255)
+                metric++;
+            metricTlv->setValue(metric);
             metricNeg = 1;
+        }
+        else {
+            // unknow metric set to hopcount
+            metricTlv->setType(HOPCOUNT);
+            metricTlv->setValue(255);
         }
     }
 
+    rreq->setHopLimits(rreq->getHopLimit()-1);
 
     IRoute *previousHopRoute = routingTable->findBestMatchingRoute(sourceAddr);
 
@@ -732,6 +769,7 @@ void LoadNg::handleRREQ(const Ptr<Rreq>& rreq, const L3Address& sourceAddr, unsi
         auto loadNgRouteData = check_and_cast<LoadNgRouteData *> (previousHopRoute->getProtocolData());
         updateRoutingTable(previousHopRoute, sourceAddr, 1, loadNgRouteData->getDestSeqNum(), true, simTime() + activeRouteTimeout, metricType, metricNeg);
     }
+
     // First, it first increments the hop count value in the RREQ by one, to
     // account for the new hop through the intermediate node.
 
@@ -782,6 +820,8 @@ void LoadNg::handleRREQ(const Ptr<Rreq>& rreq, const L3Address& sourceAddr, unsi
     else {
         LoadNgRouteData *routeData = check_and_cast<LoadNgRouteData *>(reverseRoute->getProtocolData());
         int routeSeqNum = routeData->getDestSeqNum();
+        oldSeqNum = routeSeqNum;
+
         int newSeqNum = std::max(routeSeqNum, rreqSeqNum);
         int newHopCount = rreq->getHopCount();    // Note: already incremented by 1.
         int routeHopCount = reverseRoute->getMetric();
@@ -802,6 +842,16 @@ void LoadNg::handleRREQ(const Ptr<Rreq>& rreq, const L3Address& sourceAddr, unsi
         }
     }
 
+    // check 11.1. (1)
+    if (rreq->getOriginatorAddr() == getSelfIPAddress())
+        return;
+
+
+    // check 11.1. (2)
+    if (oldSeqNum >= rreq->getSeqNum())
+        return;
+
+
     // A node generates a RREP if either:
     //
     // (i)       it is itself the destination, or
@@ -820,15 +870,6 @@ void LoadNg::handleRREQ(const Ptr<Rreq>& rreq, const L3Address& sourceAddr, unsi
         return;    // discard RREQ, in this case, we do not forward it.
     }
 
-    if (rreq->getOriginatorAddr() == getSelfIPAddress())
-        return;
-
-    // check (ii)
-    if (oldSeqNum >= rreq->getSeqNum())
-    {
-        EV_INFO << "I am an intermediate node who has information about a route to " << rreq->getDestAddr() << endl;
-        return;
-    }
 
     // If a node does not generate a RREP (following the processing rules in
     // section 6.6), and if the incoming IP header has TTL larger than 1,
@@ -846,7 +887,7 @@ void LoadNg::handleRREQ(const Ptr<Rreq>& rreq, const L3Address& sourceAddr, unsi
     // incoming RREQ is larger than the value currently maintained by the
     // forwarding node.
 
-    if (timeToLive > 0 && (simTime() > rebootTime + deletePeriod || rebootTime == 0)) {
+    if (rreq->getHopLimit() > 0 && (simTime() > rebootTime + deletePeriod || rebootTime == 0)) {
         auto outgoingRREQ = dynamicPtrCast<Rreq>(rreq->dupShared());
         forwardRREQ(outgoingRREQ, timeToLive);
     }
@@ -1029,6 +1070,7 @@ const Ptr<Rerr> LoadNg::createRERR(const std::vector<UnreachableNode>& unreachab
 
     rerr->setPacketType(RERR);
     rerr->setUnreachableNodesArraySize(destCount);
+    rerr->setHopLimits(par("maxHopLimit"));
 
     for (unsigned int i = 0; i < destCount; i++) {
         UnreachableNode node;
@@ -1096,9 +1138,12 @@ void LoadNg::handleRERR(const Ptr<const Rerr>& rerr, const L3Address& sourceAddr
 
     if (unreachableNeighbors.size() > 0 && (simTime() > rebootTime + deletePeriod || rebootTime == 0)) {
         EV_INFO << "Sending RERR to inform our neighbors about link breaks." << endl;
-        auto newRERR = createRERR(unreachableNeighbors);
-        sendAODVPacket(newRERR, addressType->getBroadcastAddress(), 1, 0);
-        rerrCount++;
+        if (rerr->getHopLimit() > 1) {
+            auto newRERR = createRERR(unreachableNeighbors);
+            newRERR->setHopLimit(rerr->getHopLimit()-1);
+            sendAODVPacket(newRERR, addressType->getBroadcastAddress(), 1, 0);
+            rerrCount++;
+        }
     }
 }
 
@@ -1180,6 +1225,11 @@ void LoadNg::forwardRREP(const Ptr<Rrep>& rrep, const L3Address& destAddr, unsig
 {
     EV_INFO << "Forwarding the Route Reply to the node " << rrep->getOriginatorAddr() << " which originated the Route Request" << endl;
 
+    if (rrep->getHopLimit() == 0) {
+        EV_WARN << "Hop limit 0. Canceling sending RREP" << endl;
+        return;
+    }
+
     IRoute *destRoute = routingTable->findBestMatchingRoute(destAddr);
     LoadNgRouteData *destRouteData = check_and_cast<LoadNgRouteData *>(destRoute->getProtocolData());
 
@@ -1204,6 +1254,10 @@ void LoadNg::forwardRREQ(const Ptr<Rreq>& rreq, unsigned int timeToLive)
 {
     EV_INFO << "Forwarding the Route Request message with TTL= " << timeToLive << endl;
     // TODO: unidirectional rreq
+    if (rreq->getHopLimit() == 0) {
+        EV_WARN << "Hop limit 0. Canceling sending RREQ" << endl;
+        return;
+    }
     sendAODVPacket(rreq, addressType->getBroadcastAddress(), timeToLive, *jitterPar);
 }
 
@@ -1239,6 +1293,10 @@ void LoadNg::sendGRREP(const Ptr<Rrep>& grrep, const L3Address& destAddr, unsign
 
     IRoute *destRoute = routingTable->findBestMatchingRoute(destAddr);
     const L3Address& nextHop = destRoute->getNextHopAsGeneric();
+    if (grrep->getHopLimit() == 0) {
+        EV_WARN << "Hop limit 0. Canceling sending RREQ" << endl;
+        return;
+    }
 
     sendAODVPacket(grrep, nextHop, timeToLive, 0);
 }
@@ -1366,6 +1424,9 @@ const Ptr<Hello> LoadNg::createHelloMessage()
     helloMessage->setSeqNum(sequenceNum);
     helloMessage->setOriginatorAddr(getSelfIPAddress());
     helloMessage->setHopCount(0);
+    helloMessage->setHelloIdentifier(helloIdentifier++);
+    helloMessage->setHopLimit(1);
+
     // include neighbors list
 
 
@@ -1427,7 +1488,7 @@ void LoadNg::sendHelloMessagesIfNeeded()
     simtime_t nextHello = simTime() + helloInterval - *periodicJitter;
     if (hasActiveRoute && (lastBroadcastTime == 0 || simTime() - lastBroadcastTime > helloInterval)) {
         EV_INFO << "It is hello time, broadcasting Hello Messages with TTL=1" << endl;
-        sequenceNum++;
+        // sequenceNum++;
         auto helloMessage = createHelloMessage();
         helloMessage->setLifetime(nextHello);
         sendAODVPacket(helloMessage, addressType->getBroadcastAddress(), 1, 0);
@@ -1476,8 +1537,13 @@ void LoadNg::handleHelloMessage(const Ptr<const Hello>& helloMessage)
         if (metricTlv->getValueFlag())
             metric = metricTlv->getValue();
         if (metricType == HOPCOUNT) {
-            metric++;
+            if (metric < 255)
+                metric++;
             metricNeg = 1;
+        }
+        else {
+            // unknow metric set to hopcount
+            metric = 255;
         }
     }
 
@@ -1792,6 +1858,7 @@ void LoadNg::sendRERRWhenNoRouteToForward(const L3Address& unreachableAddr)
         EV_WARN << "A node should not generate more than RERR_RATELIMIT RERR messages per second. Canceling sending RERR" << endl;
         return;
     }
+
     std::vector<UnreachableNode> unreachableNodes;
     UnreachableNode node;
     node.addr = unreachableAddr;

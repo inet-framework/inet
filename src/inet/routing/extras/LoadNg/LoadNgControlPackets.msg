@@ -190,6 +190,7 @@ class Rerr extends LoadNgControlPacket
     hopCounts = false;
     seqField = false;
     addrLen = 3;
+    unsigned int hopLimit;
     TlvOptions tlvOptions;
     UnreachableNode unreachableNodes[]; // it should be a block of type TLV + 2 B    
     TlvOptions addressTlvOptions;
@@ -227,6 +228,7 @@ class Hello extends LoadNgControlPacket
     hopCounts = true;
     seqField = true;
     addrLen = 3;
+    uint64_t helloIdentifier;
     L3Address originatorAddr;
     unsigned int hopLimit;
     unsigned int hopCount;

@@ -69,6 +69,8 @@ simple LoadNg like IManetRouting
                                                             // ACTIVE_ROUTE_TIMEOUT parameter value MUST be more than the value
                                                             // (ALLOWED_HELLO_LOSS * HELLO_INTERVAL).
         int netDiameter = default(35); // the maximum possible number of hops between two nodes in the network
+        int maxHopLimit = default(netDiameter);
+        
         double nodeTraversalTime @unit(s) = default(0.04s); // an estimation of the average one-hop traversal time
         int rerrRatelimit = default(10); // maximum number of RERR messages that the AODV may originate in 1s.
         int rreqRetries = default(2); // specifies the number of times AODV will repeat an expanded ring search for a destination
