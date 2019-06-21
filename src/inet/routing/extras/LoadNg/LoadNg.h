@@ -231,6 +231,8 @@ class INET_API LoadNg : public RoutingProtocolBase, public NetfilterBase::HookBa
     void delayDatagram(Packet *datagram);
 
     /* Helper functions */
+    void checkNeigList();
+    void runDijkstra();
     L3Address getSelfIPAddress() const;
     void sendAODVPacket(const Ptr<LoadNgControlPacket>& packet, const L3Address& destAddr, unsigned int timeToLive, double delay);
     void clearState();

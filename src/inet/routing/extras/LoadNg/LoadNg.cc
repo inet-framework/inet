@@ -32,12 +32,16 @@
 #include "inet/networklayer/ipv4/Ipv4Route.h"
 #include "inet/routing/extras/LoadNg/LoadNg.h"
 
-// TODO: Evaluate the topology in the sender.
-// TODO: actualize routes using hello information
+// DONE: actualize routes using hello information,
+// DONE: Fill the routing tables using the routes computes by Dijkstra
+
+// TODO: Extract alternative routes from Dijkstra if the principal fails.
 // TODO: Recalculate Dijkstra using the transmission errors
-// TODO: Fill the routing tables using the routes computes by Dijkstra
 // TODO: Calculate the route to the sink using Hellos
 // TODO: measure link quality metrics and to use them for routing.
+// TODO: Modify the link layer that quality measures could arrive to upper layers
+// TODO: Modify the link layer to force that a percentage of links could be only unidirectional
+// TODO: Modify the link layer to force a predetermine lost packets in predetermined links.
 
 namespace inet {
 namespace inetmanet {
@@ -111,6 +115,7 @@ void LoadNg::initialize(int stage)
 
 void LoadNg::handleMessageWhenUp(cMessage *msg)
 {
+    checkNeigList();
     if (msg->isSelfMessage()) {
         if (auto waitForRrep = dynamic_cast<WaitForRrep *>(msg))
             handleWaitForRREP(waitForRrep);
@@ -1238,6 +1243,111 @@ void LoadNg::sendGRREP(const Ptr<Rrep>& grrep, const L3Address& destAddr, unsign
     sendAODVPacket(grrep, nextHop, timeToLive, 0);
 }
 
+void LoadNg::runDijkstra()
+{
+    dijkstra->run();
+    std::map<L3Address, std::vector<L3Address>> paths;
+    dijkstra->getRoutes(paths);
+    for (int i = 0; routingTable->getNumRoutes(); i++) {
+        IRoute *destRoute = routingTable->getRoute(i);
+        //const L3Address& nextHop = destRoute->getNextHopAsGeneric();
+        auto itDest = paths.find(destRoute->getDestinationAsGeneric());
+        if (itDest != paths.end()) {
+            // actualize
+            auto neigh = itDest->second[1];
+            auto itAux = neighbors.find(neigh);
+            if (itAux == neighbors.end())
+                throw cRuntimeError("Path error found");
+            LoadNgRouteData *routingData = check_and_cast<LoadNgRouteData *>(destRoute->getProtocolData());
+            simtime_t newLifeTime = routingData->getLifeTime();
+            if (newLifeTime < itAux->second.lifeTime + 3 * minHelloInterval)
+                newLifeTime = itAux->second.lifeTime + 3 * minHelloInterval;
+
+            if (neigh == itDest->first) {
+                updateRoutingTable(destRoute, itDest->first, 1, itAux->second.seqNumber, true, newLifeTime, HOPCOUNT, 1 );
+            }
+            else {
+                auto itAux2 = itAux->second.listNeigbours.find(neigh);
+                if (itAux2 == itAux->second.listNeigbours.end())
+                    throw cRuntimeError("Path error found");
+                updateRoutingTable(destRoute, neigh, 2, itAux2->second.seqNum, true, newLifeTime, HOPCOUNT, 2 );
+            }
+            paths.erase(itDest);
+        }
+        else {
+            // remove
+            routingTable->removeRoute(destRoute);
+            // Purge all routes with the same next hop?
+        }
+    }
+    for (const auto &elem : paths) {
+
+        auto neigh = elem.second[1];
+        auto itAux = neighbors.find(neigh);
+        if (itAux == neighbors.end())
+            throw cRuntimeError("Path error found");
+
+        auto newLifeTime = itAux->second.lifeTime + 3 * minHelloInterval;
+        if (neigh == elem.first) {
+            createRoute(elem.first, elem.first, 1, itAux->second.seqNumber, true, newLifeTime, HOPCOUNT, 1 );
+        }
+        else {
+            auto itAux2 = itAux->second.listNeigbours.find(neigh);
+            if (itAux2 == itAux->second.listNeigbours.end())
+                throw cRuntimeError("Path error found");
+            createRoute(elem.first, neigh, 2, itAux2->second.seqNum, true, newLifeTime, HOPCOUNT, 2 );
+        }
+    }
+}
+
+void LoadNg::checkNeigList()
+{
+    bool recompute = false;
+    for (auto it = neighbors.begin(); it != neighbors.end();) {
+        if (simTime() < it->second.lifeTime + 3 * minHelloInterval) {
+            // change topology,
+            if (dijkstra && it->second.isBidirectional) {
+                dijkstra->deleteEdge(this->getSelfIPAddress(), it->first);
+                dijkstra->deleteEdge(it->first, this->getSelfIPAddress());
+                for (auto elem : it->second.listNeigbours) {
+                    if (elem.second.isBidirectional) {
+                        dijkstra->deleteEdge(elem.first, it->first);
+                        dijkstra->deleteEdge(it->first, elem.first);
+                    }
+                }
+            }
+            // delete it
+            recompute = true;
+            neighbors.erase(it++);
+        }
+        else {
+            if (simTime() < it->second.lifeTime + minHelloInterval) {
+                helloInterval = minHelloInterval;
+                it->second.pendingConfirmation = true;
+                if (!helloMsgTimer->isScheduled()) {
+                    // schedule immediately
+                    scheduleAt(simTime(), helloMsgTimer);
+                }
+                else {
+                    simtime_t schduled = helloMsgTimer->getSendingTime();
+                    simtime_t arrival = helloMsgTimer->getArrivalTime();
+                    simtime_t interval = arrival - schduled;
+                    if (interval > minHelloInterval) {
+                        // Schedule immediately
+                        cancelEvent(helloMsgTimer);
+                        scheduleAt(simTime(), helloMsgTimer);
+                    }
+                }
+            }
+            ++it;
+        }
+    }
+    if (recompute && dijkstra) {
+        runDijkstra();
+    }
+}
+
+
 const Ptr<Hello> LoadNg::createHelloMessage()
 {
     // called a Hello message, with the RREP
@@ -1257,6 +1367,8 @@ const Ptr<Hello> LoadNg::createHelloMessage()
     helloMessage->setOriginatorAddr(getSelfIPAddress());
     helloMessage->setHopCount(0);
     // include neighbors list
+
+
     if (!(neighbors.empty())) {
         int s = 6 + 4 + (neighbors.size()-1)*1 + std::ceil(double(neighbors.size()*2)/8.0); // fields 6 bytes, 4 bytes, address, 1 byte for the rest address, two bits per address of control
 
@@ -1327,8 +1439,6 @@ void LoadNg::sendHelloMessagesIfNeeded()
 void LoadNg::handleHelloMessage(const Ptr<const Hello>& helloMessage)
 {
     const L3Address& helloOriginatorAddr = helloMessage->getOriginatorAddr();
-
-
     auto it = neighbors.find(helloOriginatorAddr);
     bool topoChange = false;
     bool changeTimerNotification = false;
@@ -1371,33 +1481,97 @@ void LoadNg::handleHelloMessage(const Ptr<const Hello>& helloMessage)
         }
     }
 
+    std::map<L3Address, NodeStatus> nodeStatus;
     for (int k = 0 ; k < helloMessage->getNeighAddrsArraySize(); k++) {
         auto nData = helloMessage->getNeighAddrs(k);
-        if (nData.getAddr() == this->getSelfIPAddress()) {
-            // bi dir
-            if (!it->second.isBidirectional) {
-                it->second.isBidirectional = true;
+        NodeStatus status;
+        status.isBidirectional = nData.isBidir();
+        status.pendingConfirmation = nData.getPendingConfirmation();
+        status.seqNum = nData.getSeqNum();
+        nodeStatus[nData.getAddr()] = status;
+    }
+
+    // First check nodes that are in the list, remove nodes that are not in the new list, and actualize the others
+    for (auto itAux = it->second.listNeigbours.begin(); itAux != it->second.listNeigbours.end(); ) {
+        auto itStatus =  nodeStatus.find(itAux->first);
+        if (itStatus ==  nodeStatus.end()) {
+            if (itAux->second.isBidirectional && dijkstra) {
                 topoChange = true;
-                changeTimerNotification = true;
+                dijkstra->deleteEdge(itAux->first, it->first);
+                dijkstra->deleteEdge(it->first, itAux->first);
             }
+            it->second.listNeigbours.erase(itAux++);
         }
         else {
-            // include in the list
-            auto itAux = it->second.listNeigbours.find(nData.getAddr());
+            // now check change of status
+            if (itAux->second.isBidirectional != itStatus->second.isBidirectional ||
+                    itAux->second.pendingConfirmation != itStatus->second.pendingConfirmation) {
+                // status change actualize
+                topoChange = true;
+                // actualize Dijkstra
+                if (itStatus->second.isBidirectional && !itStatus->second.pendingConfirmation) {
+                    dijkstra->addEdge(itStatus->first, itAux->first, 1.0, 0);
+                    dijkstra->addEdge(itAux->first, itStatus->first, 1.0, 0);
+                }
+                else {
+                    dijkstra->deleteEdge(itStatus->first, itAux->first);
+                    dijkstra->deleteEdge(itAux->first, itStatus->first);
+                }
+            }
+            ++itAux;
+
+            // check if common neighbor
+            auto itAux = it->second.listNeigbours.find(itStatus->first);
             if (itAux != it->second.listNeigbours.end()) {
                 // check changes.
                 // check if this node is also a common neighbor.
                 auto addr = itAux->first;
                 auto itNeigAux = neighbors.find(addr);
-                if (itNeigAux != neighbords.end() && itNeigAux->second.seqNumber < itAux->second.seqNum) {
+                if (itNeigAux != neighbors.end() && itNeigAux->second.seqNumber < itAux->second.seqNum) {
                     itNeigAux->second.pendingConfirmation = true;
                     topoChange = true;
                     changeTimerNotification = true;
                 }
             }
-            else {
-                // add, but it don't change the the hello of this node, the timer doesn't change
-                topoChange = true;
+            nodeStatus.erase(itStatus);
+        }
+    }
+
+    auto itCheckBiDir = nodeStatus.find(this->getSelfIPAddress());
+    if (itCheckBiDir == nodeStatus.end()) {
+        if (it->second.isBidirectional && !it->second.pendingConfirmation) {
+            topoChange = true;
+            changeTimerNotification = true;
+            dijkstra->deleteEdge( this->getSelfIPAddress(), it->first);
+            dijkstra->deleteEdge(it->first,  this->getSelfIPAddress());
+            it->second.isBidirectional = true;
+        }
+    }
+    else {
+        // bi-dir
+        if (!it->second.isBidirectional) {
+            topoChange = true;
+            changeTimerNotification = true;
+            dijkstra->addEdge( this->getSelfIPAddress(), it->first, 1.0, 0);
+            dijkstra->addEdge(it->first,  this->getSelfIPAddress(), 1.0, 0);
+            it->second.isBidirectional = true;
+        }
+        if (itCheckBiDir->second.pendingConfirmation) // the other node needs confirmation
+            changeTimerNotification = true;
+    }
+
+    // Add new elements
+    for (auto elem : nodeStatus) {
+        if (elem.first == this->getSelfIPAddress())
+            continue;
+        // include in the list
+        it->second.listNeigbours[elem.first] = elem.second;
+        if (elem.second.isBidirectional && !elem.second.pendingConfirmation) {
+            // configuration change
+            topoChange = true;
+            if (dijkstra) {
+                dijkstra->addEdge(elem.first, it->first, 1.0, 0);
+                dijkstra->addEdge(it->first, elem.first, 1.0, 0);
             }
         }
     }
@@ -1409,34 +1583,8 @@ void LoadNg::handleHelloMessage(const Ptr<const Hello>& helloMessage)
             blacklist.erase(blackListIt);
     }
 
-    if (topoChange) {
-        auto endLink = this->getSelfIPAddress();
-        auto startLink = it->first;
-
-        if (dijkstra) {
-            if (it->second.isBidirectional && !it->second.pendingConfirmation) {
-                // check if exist link
-                dijkstra->addEdge(startLink, endLink, 1.0, 0);
-                dijkstra->addEdge(endLink, startLink, 1.0, 0);
-                // TODO: add 2 hops neighbors
-                for (auto elem : it->second.listNeigbours) {
-                    if (elem.second.isBidirectional && !elem.second.pendingConfirmation) {
-                        dijkstra->addEdge(it->first, elem.first, 1.0, 0);
-                        dijkstra->addEdge(elem.first, it->first, 1.0, 0);
-                    }
-                }
-            }
-            else if (!it->second.isBidirectional || it->second.pendingConfirmation) {
-                dijkstra->deleteEdge(startLink, endLink);
-                dijkstra->deleteEdge(endLink, startLink);
-                for (auto elem : it->second.listNeigbours) {
-                    if (!elem.second.isBidirectional || elem.second.pendingConfirmation) {
-                        dijkstra->deleteEdge(it->first, elem.first);
-                        dijkstra->deleteEdge(elem.first, it->first);
-                    }
-                }
-            }
-        }
+    if (topoChange && dijkstra) {
+        runDijkstra();
     }
 
     // Whenever a node receives a Hello message from a neighbor, the node
@@ -1452,7 +1600,7 @@ void LoadNg::handleHelloMessage(const Ptr<const Hello>& helloMessage)
     // if the neighbor moves away and a neighbor timeout occurs.
 
     unsigned int latestDestSeqNum = helloMessage->getSeqNum();
-    simtime_t newLifeTime = simTime() + activeRouteTimeout;
+    simtime_t newLifeTime = helloMessage->getLifetime() + 3 * minHelloInterval;
 
     if (!routeHelloOriginator || routeHelloOriginator->getSource() != this)
         createRoute(helloOriginatorAddr, helloOriginatorAddr, 1, latestDestSeqNum, true, newLifeTime, metricType, metricNeg );
@@ -1462,45 +1610,7 @@ void LoadNg::handleHelloMessage(const Ptr<const Hello>& helloMessage)
         updateRoutingTable(routeHelloOriginator, helloOriginatorAddr, 1, latestDestSeqNum, true, std::max(lifeTime, newLifeTime), metricType, metricNeg);
     }
 
-    // check neighbor timeout
-    for (auto it = neighbors.begin(); it != neighbors.end(); ) {
-        if (it->second.lastNotification < simTime()) {
-            topoChange = true;
-            if (dijkstra) {
-                dijkstra->deleteEdge(this->getSelfIPAddress(), it->first);
-                dijkstra->deleteEdge(it->first, this->getSelfIPAddress());
-                for (auto elem: it->second.listNeigbours) {
-                    if (!elem.second.isBidirectional || elem.second.pendingConfirmation) {
-                        dijkstra->deleteEdge(it->first, elem.first);
-                        dijkstra->deleteEdge(elem.first, it->first);
-                    }
-                }
-            }
-            if (simTime() - it->second.lastNotification > (maxHelloInterval + 2)) {
-                // erase
-
-                neighbors.erase(it++);
-            }
-            else {
-                it->second.isBidirectional = false;
-                it->second.pendingConfirmation = true;
-                ++it;
-                // include in blacklist?
-            }
-        }
-        else
-            ++it;
-    }
-
-    if (nullptr != dijkstra) {
-        if (topoChange)
-            dijkstra->run();
-    }
     // add the information of the hello to the routing table
-
-
-
-
     if (changeTimerNotification) {
         helloInterval = minHelloInterval;
         if (!helloMsgTimer->isScheduled()) {
