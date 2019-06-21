@@ -40,7 +40,7 @@ enum AodvControlPacketType
 //
 class AodvControlPacket extends FieldsChunk
 {
-    uint16_t packetType = 0xFFFF;       // packet type, stored in one byte
+    AodvControlPacketType packetType = static_cast<AodvControlPacketType>(-1);       // packet type, stored in one byte
 }
 
 //

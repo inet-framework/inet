@@ -160,7 +160,7 @@ void Aodv::processPacket(Packet *packet)
     const auto& aodvPacket = packet->popAtFront<AodvControlPacket>();
     //TODO aodvPacket->copyTags(*udpPacket);
 
-    auto packetType = static_cast<AodvControlPacketType>(aodvPacket->getPacketType());
+    auto packetType = aodvPacket->getPacketType();
     switch (packetType) {
         case RREQ:
         case RREQ_IPv6:
