@@ -18,6 +18,7 @@
 
 import inet.common.INETDefs;
 import inet.common.packet.chunk.Chunk;
+import inet.common.packet.Packet;
 import inet.networklayer.common.L3Address;
 
 namespace inet::aodv;
@@ -111,5 +112,13 @@ message WaitForRrep
     L3Address destAddr;
     unsigned int lastTTL;
     bool fromInvalidEntry;
+}
+
+//
+// Represents a timer for delayed sending
+//
+message PacketHolderMessage
+{
+    Packet *ownedPacket @owned;
 }
 

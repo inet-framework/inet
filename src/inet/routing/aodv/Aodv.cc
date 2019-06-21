@@ -116,8 +116,9 @@ void Aodv::handleMessageWhenUp(cMessage *msg)
         else if (msg == blacklistTimer)
             handleBlackListTimer();
         else if (msg->getKind() == KIND_DELAYEDSEND) {
-            socket.send((Packet*)msg->getContextPointer());
-            delete msg;
+            auto timer = check_and_cast<PacketHolderMessage*>(msg);
+            socket.send(timer->dropOwnedPacket());
+            delete timer;
         }
         else
             throw cRuntimeError("Unknown self message");
@@ -724,8 +725,8 @@ void Aodv::sendAODVPacket(const Ptr<AodvControlPacket>& aodvPacket, const L3Addr
     if (delay == 0)
         socket.send(packet);
     else {
-        cMessage *timer = new cMessage("aodv-send-jitter", KIND_DELAYEDSEND);
-        timer->setContextPointer(packet);
+        auto *timer = new PacketHolderMessage("aodv-send-jitter", KIND_DELAYEDSEND);
+        timer->setOwnedPacket(packet);
         scheduleAt(simTime()+delay, timer);
     }
 }
