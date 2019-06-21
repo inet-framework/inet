@@ -154,6 +154,7 @@ const Ptr<Chunk> AodvControlPacketsSerializer::deserialize(MemoryInputStream& st
         }
         default: {
             aodvControlPacket->markIncorrect();
+            return aodvControlPacket;
         }
     }
 }
