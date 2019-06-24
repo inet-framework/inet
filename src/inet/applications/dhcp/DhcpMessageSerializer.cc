@@ -49,11 +49,11 @@ void DhcpMessageSerializer::serialize(MemoryOutputStream& stream, const Ptr<cons
     int e = 0;
 
     const char* sname = dhcpMessage->getSname();
-    if(sname != nullptr){
-        if(strlen(sname) > 64)
+    if (sname != nullptr) {
+        if (strlen(sname) > 64)
             throw cRuntimeError("Cannot serialize DHCP message: server host name (sname) exceeds the allowed 64 byte limit.");
         // write the string until '\0'
-        for(e = 0; sname[e] != '\0'; ++e){
+        for (e = 0; sname[e] != '\0'; ++e) {
             stream.writeByte(sname[e]);
         }
         // write the '\0'
@@ -63,11 +63,11 @@ void DhcpMessageSerializer::serialize(MemoryOutputStream& stream, const Ptr<cons
     }
 
     const char* file = dhcpMessage->getFile();
-    if(file != nullptr){
-        if(strlen(file) > 128)
+    if (file != nullptr) {
+        if (strlen(file) > 128)
             throw cRuntimeError("Cannot serialize DHCP message: file name (file) exceeds the allowed 128 byte limit.");
         // write the string until '\0'
-        for(e = 0; file[e] != '\0'; ++e){
+        for (e = 0; file[e] != '\0'; ++e) {
             stream.writeByte(file[e]);
         }
         // write the '\0'
@@ -94,7 +94,7 @@ void DhcpMessageSerializer::serialize(MemoryOutputStream& stream, const Ptr<cons
     // | 1 byte | 1 byte | Length byte(s) |
 
     // DHCP Message Type
-    if(options.getMessageType() != static_cast<inet::DhcpMessageType>(-1)){
+    if (options.getMessageType() != static_cast<inet::DhcpMessageType>(-1)) {
         stream.writeByte(DHCP_MSG_TYPE);
         stream.writeByte(1);
         stream.writeByte(options.getMessageType());
@@ -104,29 +104,29 @@ void DhcpMessageSerializer::serialize(MemoryOutputStream& stream, const Ptr<cons
     // Host Name Option
     const char* hostName = options.getHostName();
     // FIXME: nullptr and strcmp does not seem to work
-    if(hostName != nullptr && false){
+    if (hostName != nullptr && false) {
         stream.writeByte(HOSTNAME);
         uint16_t size = sizeof(hostName) / sizeof(hostName[0]) - 1;
         stream.writeByte(size);
-        for(size_t i = 0; hostName[i] != '\0'; ++i){
+        for (size_t i = 0; hostName[i] != '\0'; ++i) {
             stream.writeByte(hostName[i]);
         }
         length += (2 + size);
     }
 
     // Parameter Request List
-    if(options.getParameterRequestListArraySize() > 0){
+    if (options.getParameterRequestListArraySize() > 0) {
         stream.writeByte(PARAM_LIST);
         uint16_t size = options.getParameterRequestListArraySize();
         stream.writeByte(size);
-        for(size_t i = 0; i < options.getParameterRequestListArraySize(); ++i){
+        for (size_t i = 0; i < options.getParameterRequestListArraySize(); ++i) {
             stream.writeUint8(options.getParameterRequestList(i));
         }
         length += (2 + size);
     }
 
     // Client-Identifier
-    if(!options.getClientIdentifier().isUnspecified()){
+    if (!options.getClientIdentifier().isUnspecified()) {
         stream.writeByte(CLIENT_ID);
         uint8_t size = 1 + 6;
         stream.writeByte(size);
@@ -137,7 +137,7 @@ void DhcpMessageSerializer::serialize(MemoryOutputStream& stream, const Ptr<cons
     }
 
     // Requested IP Address
-    if(!options.getRequestedIp().isUnspecified()){
+    if (!options.getRequestedIp().isUnspecified()) {
         stream.writeByte(REQUESTED_IP);
         stream.writeByte(4);
         stream.writeIpv4Address(options.getRequestedIp());
@@ -145,7 +145,7 @@ void DhcpMessageSerializer::serialize(MemoryOutputStream& stream, const Ptr<cons
     }
 
     // Subnet Mask
-    if(!options.getSubnetMask().isUnspecified()){
+    if (!options.getSubnetMask().isUnspecified()) {
         stream.writeByte(SUBNET_MASK);
         stream.writeByte(4);
         stream.writeIpv4Address(options.getSubnetMask());
@@ -153,40 +153,40 @@ void DhcpMessageSerializer::serialize(MemoryOutputStream& stream, const Ptr<cons
     }
 
     // Router
-    if(options.getRouterArraySize() > 0){
+    if (options.getRouterArraySize() > 0) {
         stream.writeByte(ROUTER);
         uint16_t size = options.getRouterArraySize() * 4;   //IPv4_ADDRESS_SIZE
         stream.writeByte(size);
-        for(size_t i = 0; i < options.getRouterArraySize(); ++i){
+        for (size_t i = 0; i < options.getRouterArraySize(); ++i) {
             stream.writeIpv4Address(options.getRouter(i));
         }
         length += (2 + size);
     }
 
     // Domain Name Server Option
-    if(options.getDnsArraySize() > 0){
+    if (options.getDnsArraySize() > 0) {
         stream.writeByte(DNS);
         uint16_t size = options.getDnsArraySize() * 4;   //IPv4_ADDRESS_SIZE
         stream.writeByte(size);
-        for(size_t i = 0; i < options.getDnsArraySize(); ++i){
+        for (size_t i = 0; i < options.getDnsArraySize(); ++i) {
             stream.writeIpv4Address(options.getDns(i));
         }
         length += (2 + size);
     }
 
     // Network Time Protocol Servers Option
-    if(options.getNtpArraySize() > 0){
+    if (options.getNtpArraySize() > 0) {
         stream.writeByte(NTP_SRV);
         uint16_t size = options.getNtpArraySize() * 4;   //IPv4_ADDRESS_SIZE
         stream.writeByte(size);
-        for(size_t i = 0; i < options.getNtpArraySize(); ++i){
+        for (size_t i = 0; i < options.getNtpArraySize(); ++i) {
             stream.writeIpv4Address(options.getNtp(i));
         }
         length += (2 + size);
     }
 
     // Server Identifier
-    if(!options.getServerIdentifier().isUnspecified()){
+    if (!options.getServerIdentifier().isUnspecified()) {
         stream.writeByte(SERVER_ID);
         stream.writeByte(4);
         stream.writeIpv4Address(options.getServerIdentifier());
@@ -194,7 +194,7 @@ void DhcpMessageSerializer::serialize(MemoryOutputStream& stream, const Ptr<cons
     }
 
     // Renewal (T1) Time Value
-    if(!options.getRenewalTime().isZero()){
+    if (!options.getRenewalTime().isZero()) {
         stream.writeByte(RENEWAL_TIME);
         stream.writeByte(4);
         stream.writeUint32Be(options.getRenewalTime().inUnit(SIMTIME_S));
@@ -202,7 +202,7 @@ void DhcpMessageSerializer::serialize(MemoryOutputStream& stream, const Ptr<cons
     }
 
     // Rebinding (T2) Time Value
-    if(!options.getRebindingTime().isZero()){
+    if (!options.getRebindingTime().isZero()) {
         stream.writeByte(REBIND_TIME);
         stream.writeByte(4);
         stream.writeUint32Be(options.getRebindingTime().inUnit(SIMTIME_S));
@@ -210,7 +210,7 @@ void DhcpMessageSerializer::serialize(MemoryOutputStream& stream, const Ptr<cons
     }
 
     // IP Address Lease Time
-    if(!options.getLeaseTime().isZero()){
+    if (!options.getLeaseTime().isZero()) {
         stream.writeByte(LEASE_TIME);
         stream.writeByte(4);
         stream.writeUint32Be(options.getLeaseTime().inUnit(SIMTIME_S));
@@ -249,13 +249,13 @@ const Ptr<Chunk> DhcpMessageSerializer::deserialize(MemoryInputStream& stream) c
     stream.readUint64Be();
 
     char sname[64];
-    for(int i = 0; i < 64; ++i){
+    for (int i = 0; i < 64; ++i) {
         sname[i] = stream.readByte();
     }
     dhcpMessage->setSname(sname);
 
     char file[128];
-    for(int i = 0; i < 128; ++i){
+    for (int i = 0; i < 128; ++i) {
         file[i] = stream.readByte();
     }
     dhcpMessage->setFile(file);
@@ -273,8 +273,8 @@ const Ptr<Chunk> DhcpMessageSerializer::deserialize(MemoryInputStream& stream) c
     DhcpOptions& options = dhcpMessage->getOptionsForUpdate();
     uint8_t code = stream.readByte();
 
-    while(code != 255){
-        switch(code){
+    while (code != 255) {
+        switch(code) {
             case DHCP_MSG_TYPE: {
                 uint8_t size = stream.readByte();
                 ASSERT(size == 1);
@@ -295,7 +295,7 @@ const Ptr<Chunk> DhcpMessageSerializer::deserialize(MemoryInputStream& stream) c
             case PARAM_LIST: {
                 uint8_t size = stream.readByte();
                 options.setParameterRequestListArraySize(size);
-                for(uint8_t i = 0; i < size; ++i){
+                for (uint8_t i = 0; i < size; ++i) {
                     options.setParameterRequestList(i, static_cast<DhcpOptionCode>(stream.readUint8()));
                 }
                 length += 2 + size;
@@ -328,7 +328,7 @@ const Ptr<Chunk> DhcpMessageSerializer::deserialize(MemoryInputStream& stream) c
                 ASSERT((size % 4) == 0);   // n * IPv4_ADDRESS_SIZE
                 uint8_t dim = size / 4;   //IPv4_ADDRESS_SIZE
                 options.setRouterArraySize(dim);
-                for(uint8_t i = 0; i < dim; ++i){
+                for (uint8_t i = 0; i < dim; ++i) {
                     options.setRouter(i, stream.readIpv4Address());
                 }
                 length += 2 + size;
@@ -339,7 +339,7 @@ const Ptr<Chunk> DhcpMessageSerializer::deserialize(MemoryInputStream& stream) c
                 ASSERT((size % 4) == 0);   // n * IPv4_ADDRESS_SIZE
                 uint8_t dim = size / 4;   //IPv4_ADDRESS_SIZE
                 options.setDnsArraySize(dim);
-                for(uint8_t i = 0; i < dim; ++i){
+                for (uint8_t i = 0; i < dim; ++i) {
                     options.setDns(i, stream.readIpv4Address());
                 }
                 length += 2 + size;
@@ -350,7 +350,7 @@ const Ptr<Chunk> DhcpMessageSerializer::deserialize(MemoryInputStream& stream) c
                 ASSERT((size % 4) == 0);   // n * IPv4_ADDRESS_SIZE
                 uint8_t dim = size / 4;   //IPv4_ADDRESS_SIZE
                 options.setNtpArraySize(dim);
-                for(uint8_t i = 0; i < dim; ++i){
+                for (uint8_t i = 0; i < dim; ++i) {
                     options.setNtp(i, stream.readIpv4Address());
                 }
                 length += 2 + size;
