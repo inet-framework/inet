@@ -31,6 +31,7 @@
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #include "inet/networklayer/ipv4/Ipv4Route.h"
 #include "inet/routing/extras/LoadNg/LoadNg.h"
+#include "inet/routing/extras/LoadNg/DeepFirstForwardTag_m.h"
 
 // DONE: actualize routes using hello information,
 // DONE: Fill the routing tables using the routes computes by Dijkstra
@@ -42,6 +43,7 @@
 // TODO: Modify the link layer that quality measures could arrive to upper layers
 // TODO: Modify the link layer to force that a percentage of links could be only unidirectional
 // TODO: Modify the link layer to force a predetermine lost packets in predetermined links.
+// TODO: Add FFD tag to the packets stolen from network layer.
 
 namespace inet {
 namespace inetmanet {
@@ -1431,13 +1433,27 @@ const Ptr<Hello> LoadNg::createHelloMessage()
 
 
     if (!(neighbors.empty())) {
-        int s = 6 + 4 + (neighbors.size()-1)*1 + std::ceil(double(neighbors.size()*2)/8.0); // fields 6 bytes, 4 bytes, address, 1 byte for the rest address, two bits per address of control
+        int s = (neighbors.size()-1)*1 + std::ceil(double(neighbors.size()*2)/8.0) + 6;
+        if (this->getSelfIPAddress().getType() == L3Address::IPv4)
+            s += 4;
+        else if (this->getSelfIPAddress().getType() == L3Address::IPv6)
+            s += 16;
+        else if (this->getSelfIPAddress().getType() == L3Address::MAC)
+            s += 6;
+        else
+            throw cRuntimeError("");
 
         if (s < 47)
             helloMessage->setNeighAddrsArraySize(neighbors.size());
         else {
+            s = 6 + (30-1)*1 + std::ceil(double(30*2)/8.0);
             helloMessage->setNeighAddrsArraySize(30);
-            s = 6 + 4 + (30-1)*1 + std::ceil(double(30*2)/8.0);
+            if (this->getSelfIPAddress().getType() == L3Address::IPv4)
+                s += 4;
+            else if (this->getSelfIPAddress().getType() == L3Address::IPv6)
+                s += 16;
+            else if (this->getSelfIPAddress().getType() == L3Address::MAC)
+                s += 6;
         }
         int k = 0;
         for (auto elem : neighbors){

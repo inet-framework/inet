@@ -96,6 +96,55 @@ class INET_API LoadNg : public RoutingProtocolBase, public NetfilterBase::HookBa
     };
     std::map<L3Address, NeigborElement> neighbors;
 
+    // DFF information sets
+    bool activeFFD = false;
+    uint64_t ffdForwardSeqNum = 0;
+
+
+    class DffTupleId {
+        L3Address origin;
+        uint64_t seqNumber = 0;
+        inline bool operator<(const DffTupleId& b) const
+        {
+            if (origin != b.origin)
+                return origin < b.origin;
+            else
+                return seqNumber < b.seqNumber;
+        };
+        inline bool operator >(const DffTupleId& b) const
+        {
+            if (origin != b.origin)
+                return origin > b.origin;
+            else
+                return seqNumber > b.seqNumber;
+        };
+        inline bool operator == (const DffTupleId& b) const
+        {
+            if (origin == b.origin && seqNumber == b.seqNumber)
+                return true;
+            else
+                return false;
+        };
+        DffTupleId& operator = (const DffTupleId& b)
+        {
+            if (this == &b) return *this;
+            origin = b.origin;
+            seqNumber = b.seqNumber;
+            return *this;
+        };
+    };
+
+    class DffTuple {
+    public:
+        L3Address destination;
+        L3Address prevHop;
+        simtime_t time;
+        std::deque<L3Address> nextHopNeigList;
+    };
+    std::map<DffTupleId, DffTuple> dffSet;
+
+    // End DFF information sets
+
     Dijkstra *dijkstra = nullptr;
 
     // bool checkNeigborList();
@@ -115,6 +164,7 @@ class INET_API LoadNg : public RoutingProtocolBase, public NetfilterBase::HookBa
     bool askGratuitousRREP = false;
     bool useHelloMessages = false;
     bool destinationOnlyFlag = false;
+
     simtime_t maxJitter;
     simtime_t activeRouteTimeout;
     simtime_t helloInterval;
