@@ -100,6 +100,7 @@ class DhcpMessage extends FieldsChunk
     unsigned int xid; // transaction ID, a random number chosen by the client, used by the client and server to associate messages and responses between a client and a server
     int secs; // filled in by client, seconds elapsed since client began address acquisition or renewal process
     bool broadcast; // the broadcast bit in the flags field
+    uint16_t mbz = 0; // MUST BE ZERO (reserved for future use)
     Ipv4Address ciaddr; // client IP address; only filled in if client is in BOUND, RENEW or REBINDING state and can respond to Arp requests
     Ipv4Address yiaddr; // 'your' (client) IP address
     Ipv4Address giaddr; // relay agent IP address, used in booting via a relay agent
