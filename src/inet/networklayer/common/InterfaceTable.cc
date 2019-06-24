@@ -260,6 +260,14 @@ InterfaceEntry *InterfaceTable::getInterface(int pos) const
 
 InterfaceEntry *InterfaceTable::getInterfaceById(int id) const
 {
+    InterfaceEntry *ie = findInterfaceById(id);
+    if (ie == nullptr)
+        throw cRuntimeError("getInterfaceById(): no interface with ID=%d", id);
+    return ie;
+}
+
+InterfaceEntry *InterfaceTable::findInterfaceById(int id) const
+{
     id -= INTERFACEIDS_START;
     return (id < 0 || id >= (int)idToInterface.size()) ? nullptr : idToInterface[id];
 }

@@ -18,6 +18,7 @@
 
 import inet.common.INETDefs;
 import inet.common.packet.chunk.Chunk;
+import inet.common.packet.Packet;
 import inet.networklayer.common.L3Address;
 
 namespace inet::aodv;
@@ -28,6 +29,10 @@ enum AodvControlPacketType
     RREP = 2;
     RERR = 3;
     RREPACK = 4;
+    RREQ_IPv6 = 16;
+    RREP_IPv6 = 17;
+    RERR_IPv6 = 18;
+    RREPACK_IPv6 = 19;
 };
 
 //
@@ -35,7 +40,7 @@ enum AodvControlPacketType
 //
 class AodvControlPacket extends FieldsChunk
 {
-    unsigned int packetType;
+    AodvControlPacketType packetType = static_cast<AodvControlPacketType>(-1);       // packet type, stored in one byte
 }
 
 //
@@ -43,13 +48,14 @@ class AodvControlPacket extends FieldsChunk
 //
 class Rreq extends AodvControlPacket
 {
-    packetType = RREQ;
+    // chunkLength = B(24) or B(48)
+    // packetType = RREQ or RREQ_IPv6
     bool joinFlag;    // Join flag; reserved for multicast.
     bool repairFlag;    // Repair flag; reserved for multicast.
     bool gratuitousRREPFlag;    // Gratuitous RREP flag; indicates whether a gratuitous RREP should be unicast to the node specified in the Destination IP Address field
     bool destOnlyFlag;    // Destination only flag; indicates only the destination may respond to this RREQ
     bool unknownSeqNumFlag;    // Unknown sequence number; indicates the destination sequence number is unknown
-    unsigned int reserved = 0;    // Sent as 0; ignored on reception.
+    uint16_t reserved = 0;    // Sent as 0; ignored on reception.
     unsigned int hopCount;    // The number of hops from the Originator IP Address to the node handling the request.
     uint32_t rreqId;    // A sequence number uniquely identifying the particular RREQ when taken in conjunction with the originating node's IP address.
     L3Address destAddr;    // The IP address of the destination for which a route is desired.
@@ -63,10 +69,11 @@ class Rreq extends AodvControlPacket
 //
 class Rrep extends AodvControlPacket
 {
-    packetType = RREP;
+    // chunkLength = B(20) or B(44)
+    // packetType = RREP or RREP_IPv6
     bool repairFlag;    // Repair flag; used for multicast.
     bool ackRequiredFlag;    // Acknowledgment required.
-    unsigned int reserved = 0;    // Sent as 0; ignored on reception.
+    uint16_t reserved = 0;    // Sent as 0; ignored on reception.
     unsigned int prefixSize;    // If nonzero, the 5-bit Prefix Size specifies that the indicated next hop may be used for any nodes with the same routing prefix (as defined by the Prefix Size) as the requested destination.
     unsigned int hopCount;    // The number of hops from the Originator IP Address to the Destination IP Address.  For multicast route requests this indicates the number of hops to the multicast tree member sending the RREP.
     L3Address destAddr;    // The IP address of the destination for which a route is supplied.
@@ -89,9 +96,10 @@ struct UnreachableNode
 //
 class Rerr extends AodvControlPacket
 {
-    packetType = RERR;
+    // chunkLength = B(4 + N * (4+4)) or B(4 + N * (4+16))
+    // packetType = RERR or RERR_IPv6
     bool noDeleteFlag;    // No delete flag; set when a node has performed a local repair of a link, and upstream nodes should not delete the route.
-    unsigned int reserved = 0;    // Sent as 0; ignored on reception.
+    uint16_t reserved = 0;    // Sent as 0; ignored on reception.
     UnreachableNode unreachableNodes[];    // The unreachable destinations included in the message; MUST be at least 1.
 }
 
@@ -100,16 +108,26 @@ class Rerr extends AodvControlPacket
 //
 class RrepAck extends AodvControlPacket
 {
-    packetType = RREPACK;
+    chunkLength = B(2);
+    // packetType = RREPACK or RREPACK_IPv6
+    uint8_t reserved = 0;
 }
 
 //
-// Represents a timer for a Route Reply packet
+// Represents an internal timer for a Route Reply packet in Aodv module
 //
 message WaitForRrep
 {
     L3Address destAddr;
     unsigned int lastTTL;
     bool fromInvalidEntry;
+}
+
+//
+// Represents a timer for delayed sending
+//
+message PacketHolderMessage
+{
+    Packet *ownedPacket @owned;
 }
 

@@ -83,7 +83,6 @@ class INET_API LMac : public MacProtocolBase, public IMacProtocol
         , numSlots(0)
         , currSlot()
         , reservedMobileSlots(0)
-        , queue()
         , radio(nullptr)
         , transmissionState(physicallayer::IRadio::TRANSMISSION_STATE_UNDEFINED)
         , wakeup(nullptr)
@@ -116,11 +115,6 @@ class INET_API LMac : public MacProtocolBase, public IMacProtocol
     /** @brief Encapsulate the NetwPkt into an MacPkt */
     virtual void encapsulate(Packet *);
     virtual void decapsulate(Packet *);
-
-    // OperationalBase:
-    virtual void handleStartOperation(LifecycleOperation *operation) override {}    //TODO implementation
-    virtual void handleStopOperation(LifecycleOperation *operation) override {}    //TODO implementation
-    virtual void handleCrashOperation(LifecycleOperation *operation) override {}    //TODO implementation
 
   protected:
     /** @brief Generate new interface address*/
@@ -177,10 +171,6 @@ class INET_API LMac : public MacProtocolBase, public IMacProtocol
     /** @brief The first couple of slots are reserved for nodes with special needs to avoid changing slots for them (mobile nodes) */
     int reservedMobileSlots;
 
-    /** @brief A queue to store packets from upper layer in case another
-       packet is still waiting for transmission..*/
-    queueing::IPacketQueue *queue = nullptr;
-
     /** @brief The radio. */
     physicallayer::IRadio *radio;
     physicallayer::IRadio::TransmissionState transmissionState;
@@ -201,10 +191,6 @@ class INET_API LMac : public MacProtocolBase, public IMacProtocol
 
     /** @brief Internal function to attach a signal to the packet */
     void attachSignal(Packet *macPkt);
-
-    virtual void flushQueue();
-
-    virtual void clearQueue();
 };
 
 } // namespace inet

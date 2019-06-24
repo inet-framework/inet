@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<BGPConfig xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="BGP.xsd">
+
+    <TimerParams>
+        <connectRetryTime> 120 </connectRetryTime>
+        <holdTime>         180 </holdTime>
+        <keepAliveTime>    60  </keepAliveTime>
+        <startDelay>       50  </startDelay>   <!--long enough for the intra-AS routing protocol to converge-->
+    </TimerParams>
+
+    <AS id="64500">
+    	<!--router RA-->
+        <Router interAddr="10.0.0.1">
+            <Network address='10.0.0.0' />
+        </Router>
+    </AS>
+    
+    <AS id="64600">
+    	<!--router RB1-->
+        <Router interAddr="20.0.0.1">
+            <Neighbor address='20.0.0.5' nextHopSelf='true' />
+            <Neighbor address='20.0.0.2' nextHopSelf='true' localPreference='100' />
+        </Router>
+                        
+        <!--router RB2-->
+        <Router interAddr="20.0.0.5">
+            <Neighbor address='20.0.0.1' nextHopSelf='true' />
+            <Neighbor address='20.0.0.2' nextHopSelf='true' localPreference='600' />
+        </Router>        
+        
+        <!--router RB3-->
+        <Router interAddr="20.0.0.2"/>
+    </AS>
+
+    <AS id="64700">
+    	<!--router RC1-->
+        <Router interAddr="30.0.0.1"/>
+    </AS>
+
+    <!--bi-directional E-BGP session between RA and RB1-->
+    <Session id="1">
+        <Router exterAddr="192.168.0.2"/>
+        <Router exterAddr="192.168.0.1"/>
+    </Session>
+    
+    <!--bi-directional E-BGP session between RA and RB2-->
+    <Session id="2">
+        <Router exterAddr="192.168.0.6"/>
+        <Router exterAddr="192.168.0.5"/>
+    </Session>
+    
+    <!--bi-directional E-BGP session between RC and RB2-->
+    <Session id="3">
+        <Router exterAddr="192.168.0.10"/>
+        <Router exterAddr="192.168.0.9"/>
+    </Session>
+
+</BGPConfig>

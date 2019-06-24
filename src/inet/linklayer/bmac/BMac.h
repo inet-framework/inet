@@ -87,16 +87,7 @@ class INET_API BMac : public MacProtocolBase, public IMacProtocol
     /** @brief Handle control messages from lower layer */
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details) override;
 
-    // OperationalBase:
-    virtual void handleStartOperation(LifecycleOperation *operation) override {}    //TODO implementation
-    virtual void handleStopOperation(LifecycleOperation *operation) override {}    //TODO implementation
-    virtual void handleCrashOperation(LifecycleOperation *operation) override {}    //TODO implementation
-
   protected:
-    /** @brief A queue to store packets from upper layer in case another
-       packet is still waiting for transmission.*/
-    queueing::IPacketQueue *queue = nullptr;
-
     /** @brief The radio. */
     physicallayer::IRadio *radio = nullptr;
     physicallayer::IRadio::TransmissionState transmissionState = physicallayer::IRadio::TRANSMISSION_STATE_UNDEFINED;
@@ -207,10 +198,6 @@ class INET_API BMac : public MacProtocolBase, public IMacProtocol
 
     /** @brief Internal function to attach a signal to the packet */
     void attachSignal(Packet *macPkt);
-
-    virtual void flushQueue();
-
-    virtual void clearQueue();
 
     void decapsulate(Packet *packet);
     void encapsulate(Packet *packet);

@@ -54,7 +54,8 @@ Packet *PriorityScheduler::getPacket(int index)
 void PriorityScheduler::removePacket(Packet *packet)
 {
     for (auto collection : collections) {
-        for (int j = 0; j < collection->getNumPackets(); j++) {
+        int numPackets = collection->getNumPackets();
+        for (int j = 0; j < numPackets; j++) {
             if (collection->getPacket(j) == packet) {
                 collection->removePacket(packet);
                 return;

@@ -1,0 +1,92 @@
+\section{Creating and Running Simulations}
+
+\subsection{Setting up a simulation}
+
+The INET Framework builds upon OMNeT++, and uses the same concept: modules
+that communicate by message passing. Hosts, routers, switches and other
+network devices are represented by OMNeT++ compound modules.
+
+To create a simulation, you would write a NED file that contains the network,
+i.e. routers, hosts and other network devices connected together. You can
+use a text editor or the IDE's graphical editor to create the network.
+
+Modules in the network contain a lot of unassigned parameters, which need
+to be assigned before the simulation can be run.
+The name of the network to be simulated, parameter values
+and other configuration option need to be specified in the \ttt{omnetpp.ini}
+file.
+
+\ttt{omnetpp.ini} contains parameter assignments as \textit{key=value}
+lines, where each key is a wildcard pattern. The simulator matches these
+wildcard patterns against full path of the parameter in the module tree
+(something like \ttt{Test.host[2].tcp.nagleEnabled}), and value from
+the first match will be assigned for the parameter. If no matching line is
+found, the default value in the NED file will be used. (If there is no
+default value either, the value will be interactively prompted for, or, in
+case of a batch run, an error will be raised.)
+
+There are two kinds of wildcards: a single asterisk \ttt{*} matches at most
+one component name in the path string, while double asterisk \ttt{**} may
+match multiple components. Technically: \ttt{*} never matches a dot or a
+square bracket (\ttt{.}, \ttt{[}, \ttt{]}), while \ttt{**} can match any of
+them. Patterns are also capable of expressing index ranges
+(\ttt{**.host[1..3,5,8].tcp.nagleEnabled}) and ranges of numbers embedded
+in names (\ttt{**.switch\{2..3\}.relayUnitType}).
+
+OMNeT++ allows several configurations to be put into the \ttt{omnetpp.ini}
+file under \ttt{[Config <name>]} section headers, and the right
+configuration can be selected via command-line options when the simulation
+is run. Configurations can also build on each other: \ttt{extends=<name>}
+lines can be used to set up an inheritance tree among them. This feature
+allows minimizing clutter in ini files by letting you factor out common
+parts. (Another ways of factoring out common parts are ini file inclusion
+and specifying multiple ini files to a simulation.) Settings in the
+\ttt{[General]} section apply to all configurations, i.e. \ttt{[General]}
+is the root of the section inheritance tree.
+
+Parameter studies can be defined by specifying multiple values for a
+parameter, with the \ttt{\$\{10,50,100..500 step 100, 1000\}} syntax;
+a repeat count can also be specified.
+
+
+\subsection{Running simulations}
+
+TODO how to run
+
+\subsection{Result Collection and Analysis}
+
+how to configure result collection
+
+how to analyze results
+
+
+
+\subsection{Setting up a wired network simulation}
+
+For an introduction, in this section we show you how to set up simulations
+of wired networks using PPP or Ethernet links with autoconfigured static IP
+routing. (If your simulation involves more, such as manually configured
+routing tables, dynamic routing, MPLS, or IPv6 or other features and protocols,
+you'll find info about them in later chapters.)
+
+Such a network can be assembled using the predefined \nedtype{StandardHost}
+and \nedtype{Router} modules. For automatic IP address assignment and
+static IP routing we can use the \nedtype{Ipv4NetworkConfigurator} utility
+module.
+
+TODO:  ethg, pppg;  automatically expand (++)
+
+todo which modules are needed into it, what they do, etc.
+
+how to add apps, etc
+
+
+\subsection{Setting up a wireless network simulation}
+
+In this section we show you how to set up wireless network simulations using
+IEEE 802.11 links with autoconfigured static IP routing. Such a network can be
+assembled using the predefined \nedtype{WirelessHost} and \nedtype{AccessPoint}
+modules. \nedtype{RadioMedium} is also required for wireless simulations. It
+keeps track of which nodes are within interference distance of other nodes.
+
+

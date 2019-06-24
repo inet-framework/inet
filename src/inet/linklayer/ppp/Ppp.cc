@@ -44,14 +44,17 @@ Ppp::~Ppp()
 
 void Ppp::initialize(int stage)
 {
-    MacBase::initialize(stage);
+    MacProtocolBase::initialize(stage);
 
     // all initialization is done in the first stage
     if (stage == INITSTAGE_LOCAL) {
         displayStringTextFormat = par("displayStringTextFormat");
         sendRawBytes = par("sendRawBytes");
         endTransmissionEvent = new cMessage("pppEndTxEvent");
+        lowerLayerInGateId = findGate("phys$i");
         physOutGate = gate("phys$o");
+        lowerLayerOutGateId = physOutGate->getId();
+
         // we're connected if other end of connection path is an input gate
         bool connected = physOutGate->getPathEndGate()->getType() == cGate::INPUT;
         // if we're connected, get the gate with transmission rate
@@ -66,7 +69,7 @@ void Ppp::initialize(int stage)
         subscribe(POST_MODEL_CHANGE, this);
         emit(transmissionStateChangedSignal, 0L);
 
-        queue = check_and_cast<queueing::IPacketQueue *>(getSubmodule("queue"));
+        txQueue = check_and_cast<queueing::IPacketQueue *>(getSubmodule("queue"));
     }
 }
 
@@ -93,7 +96,7 @@ void Ppp::configureInterfaceEntry()
 
 void Ppp::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
-    MacBase::receiveSignal(source, signalID, obj, details);
+    MacProtocolBase::receiveSignal(source, signalID, obj, details);
 
     if (signalID != POST_MODEL_CHANGE)
         return;
@@ -129,7 +132,9 @@ void Ppp::refreshOutGateConnection(bool connected)
                 datarateChannel->forceTransmissionFinishTime(SIMTIME_ZERO);
         }
 
-        flushQueue();
+        PacketDropDetails details;
+        details.setReason(INTERFACE_DOWN);      //TODO choose a correct PacketDropReason value
+        flushQueue(details);
     }
 
     cChannel *oldChannel = datarateChannel;
@@ -146,14 +151,17 @@ void Ppp::refreshOutGateConnection(bool connected)
         interfaceEntry->setDatarate(datarate);
     }
 
-    if (connected && !endTransmissionEvent->isScheduled() && !queue->isEmpty())
-        startTransmitting(queue->popPacket());
+    if (connected && !endTransmissionEvent->isScheduled() && !txQueue->isEmpty()) {
+        popTxQueue();
+        startTransmitting();
+    }
 }
 
-void Ppp::startTransmitting(Packet *msg)
+void Ppp::startTransmitting()
 {
     // if there's any control info, remove it; then encapsulate the packet
-    Packet *pppFrame = encapsulate(msg);
+    Packet *pppFrame = currentTxFrame->dup();
+    encapsulate(pppFrame);
 
     // send
     EV_INFO << "Transmission of " << pppFrame << " started.\n";
@@ -183,9 +191,9 @@ void Ppp::startTransmitting(Packet *msg)
 
 void Ppp::handleMessageWhenUp(cMessage *message)
 {
-    MacBase::handleMessageWhenUp(message);
+    MacProtocolBase::handleMessageWhenUp(message);
     if (operationalState == State::STOPPING_OPERATION) {
-        if (queue->isEmpty()) {
+        if (txQueue->isEmpty()) {
             interfaceEntry->setCarrier(false);
             interfaceEntry->setState(InterfaceEntry::State::DOWN);
             startActiveOperationExtraTimeOrFinish(par("stopOperationExtraTime"));
@@ -196,11 +204,14 @@ void Ppp::handleMessageWhenUp(cMessage *message)
 void Ppp::handleSelfMessage(cMessage *message)
 {
     if (message == endTransmissionEvent) {
+        deleteCurrentTxFrame();
         // Transmission finished, we can start next one.
         EV_INFO << "Transmission successfully completed.\n";
         emit(transmissionStateChangedSignal, 0L);
-        if (!queue->isEmpty())
-            startTransmitting(queue->popPacket());
+        if (!txQueue->isEmpty()) {
+            popTxQueue();
+            startTransmitting();
+        }
     }
     else
         throw cRuntimeError("Unknown self message");
@@ -218,9 +229,11 @@ void Ppp::handleUpperPacket(Packet *packet)
         delete packet;
         return;
     }
-    queue->pushPacket(packet);
-    if (!endTransmissionEvent->isScheduled() && !queue->isEmpty())
-        startTransmitting(queue->popPacket());
+    txQueue->pushPacket(packet);
+    if (!endTransmissionEvent->isScheduled() && !txQueue->isEmpty()) {
+        popTxQueue();
+        startTransmitting();
+    }
 }
 
 void Ppp::handleLowerPacket(Packet *packet)
@@ -246,17 +259,17 @@ void Ppp::handleLowerPacket(Packet *packet)
         if (pppHeader == nullptr || pppTrailer == nullptr)
             throw cRuntimeError("Invalid PPP packet: PPP header or Trailer is missing");
         emit(rxPkOkSignal, packet);
-        cPacket *payload = decapsulate(packet);
+        decapsulate(packet);
         numRcvdOK++;
-        emit(packetSentToUpperSignal, payload);
-        EV_INFO << "Sending " << payload << " to upper layer.\n";
-        send(payload, "upperLayerOut");
+        emit(packetSentToUpperSignal, packet);
+        EV_INFO << "Sending " << packet << " to upper layer.\n";
+        send(packet, "upperLayerOut");
     }
 }
 
 void Ppp::refreshDisplay() const
 {
-    MacBase::refreshDisplay();
+    MacProtocolBase::refreshDisplay();
 
     auto text = StringFormat::formatString(displayStringTextFormat, [&] (char directive) {
         static std::string result;
@@ -271,7 +284,7 @@ void Ppp::refreshDisplay() const
                 result = std::to_string(numDroppedIfaceDown + numDroppedBitErr);
                 break;
             case 'q':
-                result = std::to_string(queue->getNumPackets());
+                result = std::to_string(txQueue->getNumPackets());
                 break;
             case 'b':
                 if (datarateChannel == nullptr)
@@ -300,26 +313,25 @@ void Ppp::refreshDisplay() const
     const char *color = "";
     if (datarateChannel != nullptr) {
         if (endTransmissionEvent->isScheduled())
-            color = queue->getNumPackets() >= 3 ? "red" : "yellow";
+            color = txQueue->getNumPackets() >= 3 ? "red" : "yellow";
     }
     else
         color = "#707070";
     getDisplayString().setTagArg("i", 1, color);
 }
 
-Packet *Ppp::encapsulate(Packet *msg)
+void Ppp::encapsulate(Packet *msg)
 {
-    auto packet = check_and_cast<Packet*>(msg);
+    auto packet = msg;
     auto pppHeader = makeShared<PppHeader>();
     pppHeader->setProtocol(ProtocolGroup::pppprotocol.getProtocolNumber(msg->getTag<PacketProtocolTag>()->getProtocol()));
     packet->insertAtFront(pppHeader);
     auto pppTrailer = makeShared<PppTrailer>();
     packet->insertAtBack(pppTrailer);
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ppp);
-    return packet;
 }
 
-cPacket *Ppp::decapsulate(Packet *packet)
+void Ppp::decapsulate(Packet *packet)
 {
     const auto& pppHeader = packet->popAtFront<PppHeader>();
     const auto& pppTrailer = packet->popAtBack<PppTrailer>(PPP_TRAILER_LENGTH);
@@ -331,30 +343,11 @@ cPacket *Ppp::decapsulate(Packet *packet)
     auto payloadProtocol = ProtocolGroup::pppprotocol.getProtocol(pppHeader->getProtocol());
     packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(payloadProtocol);
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(payloadProtocol);
-    return packet;
-}
-
-void Ppp::flushQueue()
-{
-    // code would look slightly nicer with a pop() function that returns nullptr if empty
-    while (!queue->isEmpty()) {
-        auto packet = queue->popPacket();
-        PacketDropDetails details;
-        details.setReason(INTERFACE_DOWN);
-        emit(packetDroppedSignal, packet, &details); //FIXME this signal lumps together packets from the network and packets from higher layers! separate them
-        delete packet;
-    }
-}
-
-void Ppp::clearQueue()
-{
-    while (!queue->isEmpty())
-        delete queue->popPacket();
 }
 
 void Ppp::handleStopOperation(LifecycleOperation *operation)
 {
-    if (!queue->isEmpty()) {
+    if (!txQueue->isEmpty()) {
         interfaceEntry->setState(InterfaceEntry::State::GOING_DOWN);
         delayActiveOperationFinish(par("stopOperationTimeout"));
     }

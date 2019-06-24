@@ -1,0 +1,61 @@
+<?xml version="1.0"?>
+<OSPFASConfig xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="OSPF.xsd">
+
+  <!-- Areas -->
+  <Area id="0.0.0.0">
+    <AddressRange address="R3>R4" mask="R3>R4" />
+    <AddressRange address="R4>R3" mask="R4>R3" />
+  </Area>
+
+  <Area id="0.0.0.1">
+    <AddressRange address="R1>switch1" mask="R1>switch1" />
+    <AddressRange address="R1>R2" mask="R1>R2" />
+    <AddressRange address="R1>R3" mask="R1>R3" />        
+    
+    <AddressRange address="R2>switch2" mask="R2>switch2" />
+    <AddressRange address="R2>R1" mask="R2>R1" />
+    <AddressRange address="R2>R3" mask="R2>R3" />        
+
+    <AddressRange address="R3>R1" mask="R3>R1" />
+    <AddressRange address="R3>R2" mask="R3>R2" />
+  </Area>
+
+  <Area id="0.0.0.2">
+    <AddressRange address="R4>R5" mask="R4>R5" />
+    
+    <AddressRange address="R5>R4" mask="R5>R4" />
+    <AddressRange address="R5>switch3" mask="R5>switch3" />
+  </Area>
+
+  <!-- Routers -->
+  <Router name="R1" RFC1583Compatible="true">
+    <BroadcastInterface ifName="eth0" areaID="0.0.0.1" interfaceMode="Passive" />
+    <PointToPointInterface ifName="ppp0" areaID="0.0.0.1" />
+    <PointToPointInterface ifName="ppp1" areaID="0.0.0.1" />
+  </Router>
+
+  <Router name="R2" RFC1583Compatible="true">
+    <BroadcastInterface ifName="eth0" areaID="0.0.0.1" interfaceMode="Passive" />
+    <PointToPointInterface ifName="ppp0" areaID="0.0.0.1" />
+    <PointToPointInterface ifName="ppp1" areaID="0.0.0.1" />
+  </Router>
+
+  <Router name="R3" RFC1583Compatible="true">
+    <PointToPointInterface ifName="ppp0" areaID="0.0.0.1" />
+    <PointToPointInterface ifName="ppp1" areaID="0.0.0.1" />
+    <PointToPointInterface ifName="ppp2" areaID="0.0.0.0" />
+    <ExternalInterface toward="N1" advertisedExternalNetworkAddress="120.100.90.20" advertisedExternalNetworkMask="255.255.255.0" externalInterfaceOutputCost="10" externalInterfaceOutputType="Type2" />
+  </Router>
+
+  <Router name="R4" RFC1583Compatible="true">
+    <PointToPointInterface ifName="ppp0" areaID="0.0.0.2" />
+    <PointToPointInterface ifName="ppp1" areaID="0.0.0.0" />
+  </Router>
+
+  <Router name="R5" RFC1583Compatible="true">
+    <BroadcastInterface ifName="eth0" areaID="0.0.0.2" interfaceMode="Passive" />
+    <PointToPointInterface ifName="ppp0" areaID="0.0.0.2" />
+    <ExternalInterface toward="N2" advertisedExternalNetworkAddress="120.100.90.20" advertisedExternalNetworkMask="255.255.255.0" externalInterfaceOutputCost="5" externalInterfaceOutputType="Type2" />
+  </Router>
+
+</OSPFASConfig>

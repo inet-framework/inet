@@ -1,0 +1,6 @@
+<scenario>
+    <at t="60">
+        <disconnect src-module="R1" src-gate="ethg$o[0]" />
+        <disconnect src-module="switch1" src-gate="ethg$o[1]" />
+    </at>
+</scenario>

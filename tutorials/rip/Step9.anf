@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scave:Analysis xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:scave="http://www.omnetpp.org/omnetpp/scave">
+  <inputs>
+    <inputs name="/inet/tutorials/rip/results/Step9-*.vec"/>
+    <inputs name="/inet/tutorials/rip/results/Step9-*.sca"/>
+  </inputs>
+  <datasets>
+    <datasets name="packetReceived:vector(packetBytes)">
+      <items xsi:type="scave:Add" filterPattern="module(RipNetworkA.host6.app[0]) AND name(&quot;packetReceived:vector(packetBytes)&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:LineChart" name="packetReceived:vector(packetBytes)"/>
+    </datasets>
+  </datasets>
+  <chartSheets/>
+</scave:Analysis>

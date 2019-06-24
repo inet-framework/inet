@@ -1,0 +1,74 @@
+- CRASH:	RadioMedium.cc				line 715: listener->radioRemoved(radio);
+			MediumOSGVisualizer.cc		line 325: auto module = const_cast<cModule *>(check_and_cast<const cModule *>(radio));
+			No source available for "0x72657a"
+
+- Step 6 & 7: in anf file, there is no rcvdPkSeqNo statistic
+
+- ieee80211Visualizer: Lehetne rajta cimke: ssid, jelerösség
+
+- egymásra lógnak a 3dben az interfaceTableVisualizer és a ieee80211Visualizer
+
+- amelyik node-nál nincs bekapcsolva interfaceTableVisualizer, ott a ieee80211Visualizer es a mediumVisualizer.displayTransmissions / mediumVisualizer.displayReceptions egymásra lóg
+
+- 2dben nem jelenik meg a transmission/reception ikon
+
+- nodeFilter, interfaceFilter list legyen vagy expression
+
+- networkRouteVisualizer.lineColor nem működik sem 2D-ben, sem 3D-ben
+
+- 3d-ben nem lehet változtatni a packetdropVisualizer.iconTintColor-t
+
+- linkBreakVisualizer pozíciója nem jó 3dben
+
+- mediumVisualizer.communicationRangeColor & mediumVisualizer.interferenceRangeColor 2d-ben működik, 3d-ben nem
+
+- PhysicalLinkCanvasVisualizer & PhysicalLinkOsgVisualizer default lineColor és lineStyle megegyezhetne
+
+- DataLinkCanvasVisualizer & DataLinkOsgVisualizer default lineColor és lineStyle megegyezhetne
+
+- PhysicalLinkVisualizer nyilai 3d-ben nem látszanak rendesen, indulhatnának a source node szélétől, mehetnének a destination node széléig, nem a közepéig
+
+- 3d-ben PhysicalLinkVisualizer.lineStyle DataLinkVisualizer.lineStyle  csak "solid" lehet. "Dotted" vagy "dashed" csak 2d-ben látszik
+
+- 3d-ben infoVisualizer és mediumVisualizer.displayTransmissions / mediumVisualizer.displayReceptions egymáson van
+
+- obstacleLossVisualizer.displayIntersectionTrail & obstacleLossVisualizer.displayFaceNormalVectorTrail 2d-ben és 3d-ben ellentétes színnel van jelölve: egyikben pirossal, másikban feketével. Vagy 2d-ben vagy 3d-ben ki kéne cserélni a színeket.
+
+- mediumVisualizer.transmissionImage-nek és mediumVisualizer.receptionImage-nek, nem lehetne default-ból valami képe?
+
+- RouteVisualizerBase.lineStyle paraméter direkt nincs?
+--------------------------------------------------------------------------------------------------------------------------------
+- a playground hol latszik, hol meg nem, a kamera allasatol es a zoomtol fuggoen
+
+- mediumVisualizerBase-ben displayCommunicationRange kommentje nem jó, "...ENABLED by default" --> "... DISABLED by default"
+
+- Step2-ben SceneOsgEarthVisualizer-t használunk, ehhez muszáj coordinateSystemModule. Vagy a SceneOsgEarthVisualizer-t kell átírni, vagy a Step2-t & Step3-t
+
+- 3D-ben: .osgModelColor = "red" nem működik a boxman-eken
+
+- transportConnectionVisualizer nem tünteti el a jeleit, ha a kapcsolat lezárul
+
+- 2D-ben: transmission/reception: ha 1x-es zoomnál van jó helyen az ikon, ha zoomolok, akkor arréb kerül a node-tól
+----------------------------------------------------------------------------------------------------
+Wireless:
+
+omnetpp.ini TODO items (they are here because the generated HTML tutorial should not have TODO items in it):
+
+[Config Wireless01]
+*.host*.wlan[0].typename = "IdealWirelessNic" # TODO: merge IdealWirelessNic into WirelessNic and use that here
+*.host*.wlan[0].mac.fullDuplex = false # TODO: make false the default
+# TODO: revise this after merging IdealWirelessNic into WirelessNic
+# TODO: *.host*.wlan[0].bitrate = 1Mbps
+
+[Config Wireless10]
+*.hostType = "AODVRouter" # TODO: configure routing protocol only instead of replacing the host type
+
+[Config Wireless12]
+*.radioMedium.mediumLimitCache.carrierFrequency = 2GHz # TODO: cant we get rid of this?
+
+Wireless13: how to reproduce the bit error rate chart in the documentation
+--------------------------------------------------------------------------------------------------------------------
+Configurator tutorial:
+!- step11A-B: no routes shown (actually, missing routes)
+- step12: too many routes shown (it is also slow)
+

@@ -176,6 +176,13 @@ class INET_API InterfaceTable : public OperationalBase, public IInterfaceTable, 
      * to interface deletions/additions. Returns nullptr if there is no such
      * interface (This allows detecting stale IDs without raising an error.)
      */
+    virtual InterfaceEntry *findInterfaceById(int id) const override;
+
+    /**
+     * Returns an interface by its Id. Ids are guaranteed to be invariant
+     * to interface deletions/additions. Throws an error if there is no such
+     * interface.
+     */
     virtual InterfaceEntry *getInterfaceById(int id) const override;
 
     /**

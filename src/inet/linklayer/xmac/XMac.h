@@ -65,7 +65,6 @@ class INET_API XMac : public MacProtocolBase, public IMacProtocol
   public:
     XMac()
         : MacProtocolBase()
-        , queue()
         , nbTxDataPackets(0), nbTxPreambles(0), nbRxDataPackets(0), nbRxPreambles(0)
         , nbMissedAcks(0), nbRecvdAcks(0), nbDroppedDataPackets(0), nbTxAcks(0)
         , macState(INIT)
@@ -100,22 +99,11 @@ class INET_API XMac : public MacProtocolBase, public IMacProtocol
 
     void receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details) override;
 
-    // OperationalBase:
-    virtual void handleStartOperation(LifecycleOperation *operation) override {}    //TODO implementation
-    virtual void handleStopOperation(LifecycleOperation *operation) override {}    //TODO implementation
-    virtual void handleCrashOperation(LifecycleOperation *operation) override {}    //TODO implementation
-
   protected:
     /** implements MacBase functions */
     //@{
-    virtual void flushQueue();
-    virtual void clearQueue();
     virtual void configureInterfaceEntry() override;
     //@}
-
-    /** @brief A queue to store packets from upper layer in case another
-    packet is still waiting for transmission.*/
-    queueing::IPacketQueue *queue = nullptr;
 
     /** @name Different tracked statistics.*/
     /*@{*/

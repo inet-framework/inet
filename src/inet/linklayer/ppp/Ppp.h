@@ -23,7 +23,7 @@
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/packet/Packet.h"
-#include "inet/linklayer/base/MacBase.h"
+#include "inet/linklayer/base/MacProtocolBase.h"
 #include "inet/linklayer/ppp/PppFrame_m.h"
 
 namespace inet {
@@ -33,7 +33,7 @@ class InterfaceEntry;
 /**
  * PPP implementation.
  */
-class INET_API Ppp : public MacBase
+class INET_API Ppp : public MacProtocolBase
 {
   protected:
     const char *displayStringTextFormat = nullptr;
@@ -42,7 +42,6 @@ class INET_API Ppp : public MacBase
     cChannel *datarateChannel = nullptr;    // nullptr if we're not connected
 
     cMessage *endTransmissionEvent = nullptr;
-    queueing::IPacketQueue *queue = nullptr;
 
     std::string oldConnColor;
 
@@ -56,9 +55,9 @@ class INET_API Ppp : public MacBase
     static simsignal_t rxPkOkSignal;
 
   protected:
-    virtual void startTransmitting(Packet *msg);
-    virtual Packet *encapsulate(Packet *msg);
-    virtual cPacket *decapsulate(Packet *packet);
+    virtual void startTransmitting();
+    virtual void encapsulate(Packet *msg);
+    virtual void decapsulate(Packet *packet);
     virtual void refreshDisplay() const override;
     virtual void refreshOutGateConnection(bool connected);
 
@@ -67,8 +66,6 @@ class INET_API Ppp : public MacBase
 
     // MacBase functions
     virtual void configureInterfaceEntry() override;
-    virtual void flushQueue() override;
-    virtual void clearQueue() override;
 
   public:
     virtual ~Ppp();

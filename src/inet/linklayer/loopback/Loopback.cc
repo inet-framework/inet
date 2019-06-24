@@ -39,8 +39,10 @@ Loopback::~Loopback()
 
 void Loopback::initialize(int stage)
 {
-    MacBase::initialize(stage);
+    MacProtocolBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
+        lowerLayerInGateId = -1;
+        lowerLayerOutGateId = -1;
         numSent = numRcvdOK = 0;
         WATCH(numSent);
         WATCH(numRcvdOK);
@@ -75,19 +77,9 @@ void Loopback::handleUpperPacket(Packet *packet)
     send(packet, upperLayerOutGateId);
 }
 
-void Loopback::flushQueue()
-{
-    // do nothing, lo interface doesn't have any queue
-}
-
-void Loopback::clearQueue()
-{
-    // do nothing, lo interface doesn't have any queue
-}
-
 void Loopback::refreshDisplay() const
 {
-    MacBase::refreshDisplay();
+    MacProtocolBase::refreshDisplay();
 
     /* TBD find solution for displaying IPv4 address without dependence on IPv4 or IPv6
             Ipv4Address addr = interfaceEntry->getProtocolData<Ipv4InterfaceData>()->getIPAddress();
