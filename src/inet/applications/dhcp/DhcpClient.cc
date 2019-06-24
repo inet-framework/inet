@@ -551,7 +551,7 @@ void DhcpClient::sendRequest()
     request->getOptionsForUpdate().setParameterRequestList(1, ROUTER);
     request->getOptionsForUpdate().setParameterRequestList(2, DNS);
     request->getOptionsForUpdate().setParameterRequestList(3, NTP_SRV);
-    length += (2 + 4 * sizeof(uint64_t));
+    length += (2 + request->getOptions.getParameterRequestListArraySize());
 
     L3Address destAddr;
 
@@ -625,7 +625,7 @@ void DhcpClient::sendDiscover()
     discover->getOptionsForUpdate().setParameterRequestList(1, ROUTER);
     discover->getOptionsForUpdate().setParameterRequestList(2, DNS);
     discover->getOptionsForUpdate().setParameterRequestList(3, NTP_SRV);
-    length += (2 + 4 * sizeof(uint64_t));
+    length += (2 + discover->getOptions().getParameterRequestListArraySize());
 
     // magic cookie and the end field
     length += 5;
