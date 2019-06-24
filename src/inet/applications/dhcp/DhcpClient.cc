@@ -540,33 +540,34 @@ void DhcpClient::sendRequest()
     request->setChaddr(macAddress);    // my mac address;
     request->setSname("");    // no server name given
     request->setFile("");    // no file given
-    request->getOptionsForUpdate().setMessageType(DHCPREQUEST);
+    auto& options = request->getOptionsForUpdate();
+    options.setMessageType(DHCPREQUEST);
     length += 3;
-    request->getOptionsForUpdate().setClientIdentifier(macAddress);
+    options.setClientIdentifier(macAddress);
     length += 9;
 
     // set the parameters to request
-    request->getOptionsForUpdate().setParameterRequestListArraySize(4);
-    request->getOptionsForUpdate().setParameterRequestList(0, SUBNET_MASK);
-    request->getOptionsForUpdate().setParameterRequestList(1, ROUTER);
-    request->getOptionsForUpdate().setParameterRequestList(2, DNS);
-    request->getOptionsForUpdate().setParameterRequestList(3, NTP_SRV);
-    length += (2 + request->getOptions.getParameterRequestListArraySize());
+    options.setParameterRequestListArraySize(4);
+    options.setParameterRequestList(0, SUBNET_MASK);
+    options.setParameterRequestList(1, ROUTER);
+    options.setParameterRequestList(2, DNS);
+    options.setParameterRequestList(3, NTP_SRV);
+    length += (2 + options.getParameterRequestListArraySize());
 
     L3Address destAddr;
 
     // RFC 4.3.6 Table 4
     if (clientState == INIT_REBOOT) {
-        request->getOptionsForUpdate().setRequestedIp(lease->ip);
+        options.setRequestedIp(lease->ip);
         length += 6;
         request->setCiaddr(Ipv4Address());    // zero
         destAddr = Ipv4Address::ALLONES_ADDRESS;
         EV_INFO << "Sending DHCPREQUEST asking for IP " << lease->ip << " via broadcast." << endl;
     }
     else if (clientState == REQUESTING) {
-        request->getOptionsForUpdate().setServerIdentifier(lease->serverId);
+        options.setServerIdentifier(lease->serverId);
         length += 6;
-        request->getOptionsForUpdate().setRequestedIp(lease->ip);
+        options.setRequestedIp(lease->ip);
         length += 6;
         request->setCiaddr(Ipv4Address());    // zero
         destAddr = Ipv4Address::ALLONES_ADDRESS;
@@ -612,20 +613,21 @@ void DhcpClient::sendDiscover()
     discover->setChaddr(macAddress);    // my mac address
     discover->setSname("");    // no server name given
     discover->setFile("");    // no file given
-    discover->getOptionsForUpdate().setMessageType(DHCPDISCOVER);
+    auto& options = discover->getOptionsForUpdate();
+    options.setMessageType(DHCPDISCOVER);
     length += 3;
-    discover->getOptionsForUpdate().setClientIdentifier(macAddress);
+    options.setClientIdentifier(macAddress);
     length += 9;
-    discover->getOptionsForUpdate().setRequestedIp(Ipv4Address());
+    options.setRequestedIp(Ipv4Address());
     //length += 6; not added because unspecified
 
     // set the parameters to request
-    discover->getOptionsForUpdate().setParameterRequestListArraySize(4);
-    discover->getOptionsForUpdate().setParameterRequestList(0, SUBNET_MASK);
-    discover->getOptionsForUpdate().setParameterRequestList(1, ROUTER);
-    discover->getOptionsForUpdate().setParameterRequestList(2, DNS);
-    discover->getOptionsForUpdate().setParameterRequestList(3, NTP_SRV);
-    length += (2 + discover->getOptions().getParameterRequestListArraySize());
+    options.setParameterRequestListArraySize(4);
+    options.setParameterRequestList(0, SUBNET_MASK);
+    options.setParameterRequestList(1, ROUTER);
+    options.setParameterRequestList(2, DNS);
+    options.setParameterRequestList(3, NTP_SRV);
+    length += (2 + options.getParameterRequestListArraySize());
 
     // magic cookie and the end field
     length += 5;
@@ -654,9 +656,10 @@ void DhcpClient::sendDecline(Ipv4Address declinedIp)
     decline->setChaddr(macAddress);    // my MAC address
     decline->setSname("");    // no server name given
     decline->setFile("");    // no file given
-    decline->getOptionsForUpdate().setMessageType(DHCPDECLINE);
+    auto& options = decline->getOptionsForUpdate();
+    options.setMessageType(DHCPDECLINE);
     length += 3;
-    decline->getOptionsForUpdate().setRequestedIp(declinedIp);
+    options.setRequestedIp(declinedIp);
     length += 6;
 
     // magic cookie and the end field

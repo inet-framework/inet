@@ -35,13 +35,13 @@ void DhcpMessageSerializer::serialize(MemoryOutputStream& stream, const Ptr<cons
     stream.writeUint32Be(dhcpMessage->getXid());
     stream.writeUint16Be(dhcpMessage->getSecs());
     stream.writeBit(dhcpMessage->getBroadcast());
-    stream.writeNBitsOfUint64Be(dhcpMessage->getMbz(), 15);
+    stream.writeNBitsOfUint64Be(dhcpMessage->getReserved(), 15);
     stream.writeIpv4Address(dhcpMessage->getCiaddr());
     stream.writeIpv4Address(dhcpMessage->getYiaddr());
     // FIXME: siaddr is missing from the packet representation
     stream.writeUint32Be(0);
     stream.writeIpv4Address(dhcpMessage->getGiaddr());
-    stream.writeNBitsOfUint64Be(dhcpMessage->getChaddr().getInt(), 48);
+    stream.writeMacAddress(dhcpMessage->getChaddr());
     stream.writeByte(0);
     stream.writeByte(0);
     stream.writeUint64Be(0);
@@ -50,8 +50,8 @@ void DhcpMessageSerializer::serialize(MemoryOutputStream& stream, const Ptr<cons
 
     const char* sname = dhcpMessage->getSname();
     if(sname != nullptr){
-        if(sizeof(sname)/sizeof(sname[0]) > 64)
-            throw cRuntimeError("Cannot serialize DHCP message: server host name (sname) exceeds the allowed 16 byte limit.");
+        if(strlen(sname) > 64)
+            throw cRuntimeError("Cannot serialize DHCP message: server host name (sname) exceeds the allowed 64 byte limit.");
         // write the string until '\0'
         for(e = 0; sname[e] != '\0'; ++e){
             stream.writeByte(sname[e]);
@@ -64,7 +64,7 @@ void DhcpMessageSerializer::serialize(MemoryOutputStream& stream, const Ptr<cons
 
     const char* file = dhcpMessage->getFile();
     if(file != nullptr){
-        if(sizeof(file)/sizeof(file[0]) > 128)
+        if(strlen(file) > 128)
             throw cRuntimeError("Cannot serialize DHCP message: file name (file) exceeds the allowed 128 byte limit.");
         // write the string until '\0'
         for(e = 0; file[e] != '\0'; ++e){
@@ -117,10 +117,10 @@ void DhcpMessageSerializer::serialize(MemoryOutputStream& stream, const Ptr<cons
     // Parameter Request List
     if(options.getParameterRequestListArraySize() > 0){
         stream.writeByte(PARAM_LIST);
-        uint16_t size = options.getParameterRequestListArraySize() * sizeof(uint64_t);
+        uint16_t size = options.getParameterRequestListArraySize();
         stream.writeByte(size);
         for(size_t i = 0; i < options.getParameterRequestListArraySize(); ++i){
-            stream.writeUint64Be(options.getParameterRequestList(i));
+            stream.writeUint8(options.getParameterRequestList(i));
         }
         length += (2 + size);
     }
@@ -132,7 +132,7 @@ void DhcpMessageSerializer::serialize(MemoryOutputStream& stream, const Ptr<cons
         stream.writeByte(size);
         // TODO: arp hardware type?
         stream.writeByte(1);
-        stream.writeNBitsOfUint64Be(options.getClientIdentifier().getInt(), 48);
+        stream.writeMacAddress(options.getClientIdentifier());
         length += (2 + size);
     }
 
@@ -155,7 +155,7 @@ void DhcpMessageSerializer::serialize(MemoryOutputStream& stream, const Ptr<cons
     // Router
     if(options.getRouterArraySize() > 0){
         stream.writeByte(ROUTER);
-        uint16_t size = options.getRouterArraySize() * sizeof(uint32_t);
+        uint16_t size = options.getRouterArraySize() * 4;   //IPv4_ADDRESS_SIZE
         stream.writeByte(size);
         for(size_t i = 0; i < options.getRouterArraySize(); ++i){
             stream.writeIpv4Address(options.getRouter(i));
@@ -166,7 +166,7 @@ void DhcpMessageSerializer::serialize(MemoryOutputStream& stream, const Ptr<cons
     // Domain Name Server Option
     if(options.getDnsArraySize() > 0){
         stream.writeByte(DNS);
-        uint16_t size = options.getDnsArraySize() * sizeof(uint32_t);
+        uint16_t size = options.getDnsArraySize() * 4;   //IPv4_ADDRESS_SIZE
         stream.writeByte(size);
         for(size_t i = 0; i < options.getDnsArraySize(); ++i){
             stream.writeIpv4Address(options.getDns(i));
@@ -177,7 +177,7 @@ void DhcpMessageSerializer::serialize(MemoryOutputStream& stream, const Ptr<cons
     // Network Time Protocol Servers Option
     if(options.getNtpArraySize() > 0){
         stream.writeByte(NTP_SRV);
-        uint16_t size = options.getNtpArraySize() * sizeof(uint32_t);
+        uint16_t size = options.getNtpArraySize() * 4;   //IPv4_ADDRESS_SIZE
         stream.writeByte(size);
         for(size_t i = 0; i < options.getNtpArraySize(); ++i){
             stream.writeIpv4Address(options.getNtp(i));
@@ -198,7 +198,7 @@ void DhcpMessageSerializer::serialize(MemoryOutputStream& stream, const Ptr<cons
         stream.writeByte(RENEWAL_TIME);
         stream.writeByte(4);
         stream.writeUint32Be(options.getRenewalTime().inUnit(SIMTIME_S));
-        length += 6;
+        length += 2 + 4;
     }
 
     // Rebinding (T2) Time Value
@@ -206,7 +206,7 @@ void DhcpMessageSerializer::serialize(MemoryOutputStream& stream, const Ptr<cons
         stream.writeByte(REBIND_TIME);
         stream.writeByte(4);
         stream.writeUint32Be(options.getRebindingTime().inUnit(SIMTIME_S));
-        length += 6;
+        length += 2 + 4;
     }
 
     // IP Address Lease Time
@@ -214,7 +214,7 @@ void DhcpMessageSerializer::serialize(MemoryOutputStream& stream, const Ptr<cons
         stream.writeByte(LEASE_TIME);
         stream.writeByte(4);
         stream.writeUint32Be(options.getLeaseTime().inUnit(SIMTIME_S));
-        length += 6;
+        length += 2 + 4;
     }
 
     // End Option
@@ -237,13 +237,13 @@ const Ptr<Chunk> DhcpMessageSerializer::deserialize(MemoryInputStream& stream) c
     dhcpMessage->setXid(stream.readUint32Be());
     dhcpMessage->setSecs(stream.readUint16Be());
     dhcpMessage->setBroadcast(stream.readBit());
-    dhcpMessage->setMbz(stream.readNBitsToUint64Be(15));
-    dhcpMessage->setCiaddr(Ipv4Address(stream.readIpv4Address()));
-    dhcpMessage->setYiaddr(Ipv4Address(stream.readIpv4Address()));
+    dhcpMessage->setReserved(stream.readNBitsToUint64Be(15));
+    dhcpMessage->setCiaddr(stream.readIpv4Address());
+    dhcpMessage->setYiaddr(stream.readIpv4Address());
     // FIXME: siaddr is missing from the packet representation
     stream.readUint32Be();
-    dhcpMessage->setGiaddr(Ipv4Address(stream.readIpv4Address()));
-    dhcpMessage->setChaddr(MacAddress(stream.readNBitsToUint64Be(48)));
+    dhcpMessage->setGiaddr(stream.readIpv4Address());
+    dhcpMessage->setChaddr(stream.readMacAddress());
     stream.readByte();
     stream.readByte();
     stream.readUint64Be();
@@ -263,125 +263,138 @@ const Ptr<Chunk> DhcpMessageSerializer::deserialize(MemoryInputStream& stream) c
     // The first four octets of the 'options' field of the DHCP message
     // contain the (decimal) values 99, 130, 83 and 99, respectively (this
     // is the same magic cookie as is defined in RFC 1497 [17]).
-
-    stream.readByte();
-    stream.readByte();
-    stream.readByte();
-    stream.readByte();
+    uint8_t b1 = stream.readByte();
+    uint8_t b2 = stream.readByte();
+    uint8_t b3 = stream.readByte();
+    uint8_t b4 = stream.readByte();
+    ASSERT(b1 == 99 && b2 == 130 && b3 == 83 && b4 == 99);
     length += 4;
 
-    DhcpOptions options;
+    DhcpOptions& options = dhcpMessage->getOptionsForUpdate();
     uint8_t code = stream.readByte();
 
     while(code != 255){
         switch(code){
             case DHCP_MSG_TYPE: {
-                stream.readByte();
+                uint8_t size = stream.readByte();
+                ASSERT(size == 1);
                 options.setMessageType((DhcpMessageType)stream.readByte());
-                length += 3;
+                length += 2 + size;
                 break;
             }
             case HOSTNAME: {
                 uint8_t size = stream.readByte();
                 char* hostName = new char[size + 1];
-                uint8_t i = 0;
-                for(; i < size; ++i){
-                    hostName[i] = stream.readByte();
-                }
-                hostName[i] = '\0';
+                stream.readBytes((uint8_t*)hostName, B(size));
+                hostName[size] = '\0';
                 options.setHostName(hostName);
                 delete[] hostName;
-                length += (2 + size);
+                length += 2 + size;
                 break;
             }
             case PARAM_LIST: {
-                uint8_t size = stream.readByte() / sizeof(uint64_t);
+                uint8_t size = stream.readByte();
                 options.setParameterRequestListArraySize(size);
                 for(uint8_t i = 0; i < size; ++i){
-                    options.setParameterRequestList(i, stream.readUint64Be());
+                    options.setParameterRequestList(i, static_cast<DhcpOptionCode>(stream.readUint8()));
                 }
-                length += (2 + size);
+                length += 2 + size;
                 break;
             }
             case CLIENT_ID: {
-                stream.readByte();
-                // TODO: arp hardware type?
-                stream.readByte();
-                options.setClientIdentifier(MacAddress(stream.readNBitsToUint64Be(48)));
-                length += 9;
+                uint8_t size = stream.readByte();
+                uint8_t type = stream.readByte();
+                ASSERT(size == 7 && type == 1);
+                options.setClientIdentifier(stream.readMacAddress());
+                length += 2 + size;
                 break;
             }
             case REQUESTED_IP: {
-                stream.readByte();
-                options.setRequestedIp(Ipv4Address(stream.readIpv4Address()));
-                length += 6;
+                uint8_t size = stream.readByte();
+                ASSERT(size == 4);   //IPv4_ADDRESS_SIZE
+                options.setRequestedIp(stream.readIpv4Address());
+                length += 2 + size;
                 break;
             }
             case SUBNET_MASK: {
-                stream.readByte();
-                options.setSubnetMask(Ipv4Address(stream.readIpv4Address()));
-                length += 6;
+                uint8_t size = stream.readByte();
+                ASSERT(size == 4);   //IPv4_ADDRESS_SIZE
+                options.setSubnetMask(stream.readIpv4Address());
+                length += 2 + size;
                 break;
             }
             case ROUTER: {
-                uint8_t size = stream.readByte() / sizeof(uint32_t);
-                options.setRouterArraySize(size);
-                for(uint8_t i = 0; i < size; ++i){
-                    options.setRouter(i, Ipv4Address(stream.readIpv4Address()));
+                uint8_t size = stream.readByte();
+                ASSERT((size % 4) == 0);   // n * IPv4_ADDRESS_SIZE
+                uint8_t dim = size / 4;   //IPv4_ADDRESS_SIZE
+                options.setRouterArraySize(dim);
+                for(uint8_t i = 0; i < dim; ++i){
+                    options.setRouter(i, stream.readIpv4Address());
                 }
-                length += (2 + size * sizeof(uint32_t));
+                length += 2 + size;
                 break;
             }
             case DNS: {
-                uint8_t size = stream.readByte() / sizeof(uint32_t);
-                options.setDnsArraySize(size);
-                for(uint8_t i = 0; i < size; ++i){
-                    options.setDns(i, Ipv4Address(stream.readIpv4Address()));
+                uint8_t size = stream.readByte();
+                ASSERT((size % 4) == 0);   // n * IPv4_ADDRESS_SIZE
+                uint8_t dim = size / 4;   //IPv4_ADDRESS_SIZE
+                options.setDnsArraySize(dim);
+                for(uint8_t i = 0; i < dim; ++i){
+                    options.setDns(i, stream.readIpv4Address());
                 }
-                length += (2 + size * sizeof(uint32_t));
+                length += 2 + size;
                 break;
             }
             case NTP_SRV: {
-                uint8_t size = stream.readByte() / sizeof(uint32_t);
-                options.setNtpArraySize(size);
-                for(uint8_t i = 0; i < size; ++i){
-                    options.setNtp(i, Ipv4Address(stream.readIpv4Address()));
+                uint8_t size = stream.readByte();
+                ASSERT((size % 4) == 0);   // n * IPv4_ADDRESS_SIZE
+                uint8_t dim = size / 4;   //IPv4_ADDRESS_SIZE
+                options.setNtpArraySize(dim);
+                for(uint8_t i = 0; i < dim; ++i){
+                    options.setNtp(i, stream.readIpv4Address());
                 }
-                length += (2 + size * sizeof(uint32_t));
+                length += 2 + size;
                 break;
             }
             case SERVER_ID: {
-                stream.readByte();
-                options.setServerIdentifier(Ipv4Address(stream.readIpv4Address()));
-                length += 6;
+                uint8_t size = stream.readByte();
+                ASSERT(size == 4);   // IPv4_ADDRESS_SIZE
+                options.setServerIdentifier(stream.readIpv4Address());
+                length += 2 + size;
                 break;
             }
             case RENEWAL_TIME: {
-                stream.readByte();
+                uint8_t size = stream.readByte();
+                ASSERT(size == 4);   // Time size
                 options.setRenewalTime(SimTime(stream.readUint32Be(), SIMTIME_S));
-                length += 6;
+                length += 2 + size;
                 break;
             }
             case REBIND_TIME: {
-                stream.readByte();
+                uint8_t size = stream.readByte();
+                ASSERT(size == 4);   // Time size
                 options.setRebindingTime(SimTime(stream.readUint32Be(), SIMTIME_S));
-                length += 6;
+                length += 2 + size;
                 break;
             }
             case LEASE_TIME: {
-                stream.readByte();
+                uint8_t size = stream.readByte();
+                ASSERT(size == 4);   // Time size
                 options.setLeaseTime(SimTime(stream.readUint32Be(), SIMTIME_S));
-                length += 6;
+                length += 2 + size;
                 break;
             }
             default: {
+                uint8_t size = stream.readByte();
                 dhcpMessage->markIncorrect();
+                std::vector<uint8_t> buffer;
+                stream.readBytes(buffer, B(size));
+                length += 2 + size;
                 break;
             }
         }
         code = stream.readByte();
     }
-    dhcpMessage->setOptions(options);
     ++length;
 
     dhcpMessage->setChunkLength(B(length));
@@ -389,21 +402,4 @@ const Ptr<Chunk> DhcpMessageSerializer::deserialize(MemoryInputStream& stream) c
 }
 
 } // namespace inet
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
