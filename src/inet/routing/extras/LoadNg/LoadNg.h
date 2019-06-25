@@ -143,9 +143,13 @@ class INET_API LoadNg : public RoutingProtocolBase, public NetfilterBase::HookBa
     };
     std::map<DffTupleId, DffTuple> dffSet;
 
+    std::map<L3Address, std::vector<std::vector<L3Address>>> alternativePaths;
+
+
     // End DFF information sets
 
     Dijkstra *dijkstra = nullptr;
+    DijkstraKshortest *dijkstraKs = nullptr;
 
     // bool checkNeigborList();
 
@@ -284,8 +288,9 @@ class INET_API LoadNg : public RoutingProtocolBase, public NetfilterBase::HookBa
     void delayDatagram(Packet *datagram);
 
     /* Helper functions */
-    void checkNeigList();
-    void runDijkstra();
+    virtual void checkNeigList();
+    virtual void runDijkstra();
+    virtual void runDijkstraKs();
     L3Address getSelfIPAddress() const;
     void sendAODVPacket(const Ptr<LoadNgControlPacket>& packet, const L3Address& destAddr, unsigned int timeToLive, double delay);
     void clearState();

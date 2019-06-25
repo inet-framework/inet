@@ -91,7 +91,7 @@ simple LoadNg like IManetRouting
         double helloInterval @unit(s) = default(1s); // every helloInterval seconds a node broadcasts Hello messages (if it is necessary)        
         double minHelloInterval @unit(s) = default(helloInterval); // timeout for a RREP-ACK
         double maxHelloInterval  @unit(s) = default(helloInterval * 10); // timeout for a RREP-ACK
-        bool useDisjkstra = default(true);
+        bool useDijkstra = default(true);
     gates:
         input ipIn;
         output ipOut;

@@ -305,6 +305,45 @@ void DijkstraKshortest::addEdge (const NodeId & originNode, const NodeId & last_
     linkArray[originNode].push_back(link);
 }
 
+void DijkstraKshortest::deleteEdge(const NodeId & originNode, const NodeId & last_node)
+{
+    DijkstraKshortest::Edge * e = removeEdge(originNode, last_node);
+    if (e != nullptr)
+        delete e;
+}
+
+DijkstraKshortest::Edge * DijkstraKshortest::removeEdge(const NodeId & originNode, const NodeId & last_node)
+{
+    auto it = linkArray.find(originNode);
+    if (it != linkArray.end()) {
+        for (auto itAux = it->second.begin(); itAux != it->second.end(); ++itAux) {
+            Edge *edge = *itAux;
+            if (last_node == edge->last_node_) {
+                it->second.erase(itAux);
+                routeMap.clear();
+                return (edge);
+            }
+        }
+    }
+    return (nullptr);
+}
+
+const DijkstraKshortest::Edge * DijkstraKshortest::getEdge(const NodeId & originNode, const NodeId & last_node)
+{
+    auto it = linkArray.find(originNode);
+    if (it != linkArray.end()) {
+        for (auto itAux = it->second.begin(); itAux != it->second.end(); ++itAux) {
+            Edge *edge = *itAux;
+            if (last_node == edge->last_node_) {
+                return (edge);
+            }
+        }
+    }
+    return (nullptr);
+}
+
+
+
 void DijkstraKshortest::setRoot(const NodeId & dest_node)
 {
     rootNode = dest_node;
@@ -662,6 +701,39 @@ bool DijkstraKshortest::getRoute(const NodeId &nodeId,std::vector<NodeId> &pathN
         path.pop_back();
     }
     return true;
+}
+
+
+void DijkstraKshortest::getAllRoutes(std::map<NodeId, std::vector<std::vector<NodeId>>> & routes)
+{
+    routes.clear();
+    for (auto elem : routeMap) {
+        std::vector<std::vector<NodeId>> nodePaths;
+
+        for (int i = 0; i < elem.second.size(); i++) {
+            std::vector<NodeId> path;
+            std::vector<NodeId> pathNode;
+            NodeId currentNode = elem.first;
+            int idx = i;
+            auto it = routeMap.find(currentNode);
+            while (currentNode != rootNode) {
+                path.push_back(currentNode);
+                currentNode = it->second[idx].idPrev;
+                idx = it->second[idx].idPrevIdx;
+                it = routeMap.find(currentNode);
+                if (it == routeMap.end())
+                    throw cRuntimeError("error in data");
+                if (idx >= (int) it->second.size())
+                    throw cRuntimeError("error in data");
+            }
+            while (!path.empty()) {
+                pathNode.push_back(path.back());
+                path.pop_back();
+            }
+            nodePaths.push_back(path);
+        }
+        routes[elem.first] = nodePaths;
+    }
 }
 
 void DijkstraKshortest::setRouteMapK()

@@ -146,6 +146,15 @@ public:
     virtual void initMinAndMaxWs();
     virtual void initMinAndMaxSw();
     virtual void cleanLinkArray();
+
+    virtual void deleteEdge(const NodeId &, const NodeId &);
+    virtual Edge* removeEdge(const NodeId & originNode, const NodeId & last_node);
+    virtual const Edge* getEdge(const NodeId & originNode, const NodeId & last_node);
+
+    virtual void addEdge (const NodeId & dest_node, const NodeId & last_node,double cost) {
+        addEdge (dest_node, last_node,cost,1,1000,1000);
+    }
+
     virtual void addEdge (const NodeId & dest_node, const NodeId & last_node,double cost,double delay,double bw,double quality);
     virtual void addEdgeWs (const NodeId & dest_node, const NodeId & last_node, double costAdd, double concave);
     virtual void addEdgeSw (const NodeId & dest_node, const NodeId & last_node, double costAdd, double concave);
@@ -154,6 +163,8 @@ public:
     virtual void runUntil (const NodeId &);
     virtual int getNumRoutes(const NodeId &nodeId);
     virtual bool getRoute(const NodeId &nodeId,std::vector<NodeId> &pathNode,int k=0);
+    virtual void getAllRoutes(std::map<NodeId, std::vector<std::vector<NodeId> > > & routes);
+
     virtual void setRouteMapK();
     virtual void getRouteMapK(const NodeId &nodeId, Kroutes &routes);
 };

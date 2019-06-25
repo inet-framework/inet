@@ -108,9 +108,15 @@ void LoadNg::initialize(int stage)
         registerProtocol(Protocol::manet, gate("ipOut"), nullptr);
         networkProtocol->registerHook(0, this);
         host->subscribe(linkBrokenSignal, this);
-        if (par("useDisjkstra")) {
+        if (par("useDijkstra")) {
             dijkstra = new Dijkstra();
             dijkstra->setRoot(this->getSelfIPAddress());
+            if (activeFFD) {
+                dijkstraKs = new  DijkstraKshortest(5);
+                dijkstraKs->initMinAndMax();
+                dijkstraKs->setRoot(this->getSelfIPAddress());
+
+            }
         }
     }
 }
@@ -1360,6 +1366,67 @@ void LoadNg::runDijkstra()
     }
 }
 
+void LoadNg::runDijkstraKs()
+{
+
+    throw cRuntimeError("runDijkstraKs unsuported yet");
+
+    dijkstraKs->run();
+    //std::map<L3Address, std::vector<std::vector<L3Address>>>paths;
+
+    dijkstraKs->getAllRoutes(alternativePaths);
+//    for (int i = 0; routingTable->getNumRoutes(); i++) {
+//        IRoute *destRoute = routingTable->getRoute(i);
+//        //const L3Address& nextHop = destRoute->getNextHopAsGeneric();
+//        auto itDest = paths.find(destRoute->getDestinationAsGeneric());
+//        if (itDest != paths.end()) {
+//            // actualize
+//            auto neigh = itDest->second[1];
+//            auto itAux = neighbors.find(neigh);
+//            if (itAux == neighbors.end())
+//                throw cRuntimeError("Path error found");
+//            LoadNgRouteData *routingData = check_and_cast<LoadNgRouteData *>(destRoute->getProtocolData());
+//            simtime_t newLifeTime = routingData->getLifeTime();
+//            if (newLifeTime < itAux->second.lifeTime + 3 * minHelloInterval)
+//                newLifeTime = itAux->second.lifeTime + 3 * minHelloInterval;
+//
+//            if (neigh == itDest->first) {
+//                updateRoutingTable(destRoute, itDest->first, 1, itAux->second.seqNumber, true, newLifeTime, HOPCOUNT, 1 );
+//            }
+//            else {
+//                auto itAux2 = itAux->second.listNeigbours.find(neigh);
+//                if (itAux2 == itAux->second.listNeigbours.end())
+//                    throw cRuntimeError("Path error found");
+//                updateRoutingTable(destRoute, neigh, 2, itAux2->second.seqNum, true, newLifeTime, HOPCOUNT, 2 );
+//            }
+//            paths.erase(itDest);
+//        }
+//        else {
+//            // remove
+//            routingTable->removeRoute(destRoute);
+//            // Purge all routes with the same next hop?
+//        }
+//    }
+//    for (const auto &elem : paths) {
+//
+//        auto neigh = elem.second[1];
+//        auto itAux = neighbors.find(neigh);
+//        if (itAux == neighbors.end())
+//            throw cRuntimeError("Path error found");
+//
+//        auto newLifeTime = itAux->second.lifeTime + 3 * minHelloInterval;
+//        if (neigh == elem.first) {
+//            createRoute(elem.first, elem.first, 1, itAux->second.seqNumber, true, newLifeTime, HOPCOUNT, 1 );
+//        }
+//        else {
+//            auto itAux2 = itAux->second.listNeigbours.find(neigh);
+//            if (itAux2 == itAux->second.listNeigbours.end())
+//                throw cRuntimeError("Path error found");
+//            createRoute(elem.first, neigh, 2, itAux2->second.seqNum, true, newLifeTime, HOPCOUNT, 2 );
+//        }
+//    }
+}
+
 void LoadNg::checkNeigList()
 {
     bool recompute = false;
@@ -1376,6 +1443,17 @@ void LoadNg::checkNeigList()
                     }
                 }
             }
+            if (dijkstraKs && it->second.isBidirectional) {
+                dijkstraKs->deleteEdge(this->getSelfIPAddress(), it->first);
+                dijkstraKs->deleteEdge(it->first, this->getSelfIPAddress());
+                for (auto elem : it->second.listNeigbours) {
+                    if (elem.second.isBidirectional) {
+                        dijkstraKs->deleteEdge(elem.first, it->first);
+                        dijkstraKs->deleteEdge(it->first, elem.first);
+                    }
+                }
+            }
+
             // delete it
             recompute = true;
             neighbors.erase(it++);
@@ -1405,6 +1483,10 @@ void LoadNg::checkNeigList()
     if (recompute && dijkstra) {
         runDijkstra();
     }
+    if (recompute && dijkstraKs) {
+        runDijkstraKs();
+    }
+
 }
 
 
@@ -1582,6 +1664,11 @@ void LoadNg::handleHelloMessage(const Ptr<const Hello>& helloMessage)
                 dijkstra->deleteEdge(itAux->first, it->first);
                 dijkstra->deleteEdge(it->first, itAux->first);
             }
+            if (itAux->second.isBidirectional && dijkstraKs) {
+                topoChange = true;
+                dijkstraKs->deleteEdge(itAux->first, it->first);
+                dijkstraKs->deleteEdge(it->first, itAux->first);
+            }
             it->second.listNeigbours.erase(itAux++);
         }
         else {
@@ -1591,14 +1678,27 @@ void LoadNg::handleHelloMessage(const Ptr<const Hello>& helloMessage)
                 // status change actualize
                 topoChange = true;
                 // actualize Dijkstra
-                if (itStatus->second.isBidirectional && !itStatus->second.pendingConfirmation) {
-                    dijkstra->addEdge(itStatus->first, itAux->first, 1.0, 0);
-                    dijkstra->addEdge(itAux->first, itStatus->first, 1.0, 0);
+                if (dijkstra) {
+                    if (itStatus->second.isBidirectional && !itStatus->second.pendingConfirmation) {
+                        dijkstra->addEdge(itStatus->first, itAux->first, 1.0, 0);
+                        dijkstra->addEdge(itAux->first, itStatus->first, 1.0, 0);
+                    }
+                    else {
+                        dijkstra->deleteEdge(itStatus->first, itAux->first);
+                        dijkstra->deleteEdge(itAux->first, itStatus->first);
+                    }
                 }
-                else {
-                    dijkstra->deleteEdge(itStatus->first, itAux->first);
-                    dijkstra->deleteEdge(itAux->first, itStatus->first);
+                if (dijkstraKs) {
+                    if (itStatus->second.isBidirectional && !itStatus->second.pendingConfirmation) {
+                        dijkstraKs->addEdge(itStatus->first, itAux->first, 1.0);
+                        dijkstraKs->addEdge(itAux->first, itStatus->first, 1.0);
+                    }
+                    else {
+                        dijkstraKs->deleteEdge(itStatus->first, itAux->first);
+                        dijkstraKs->deleteEdge(itAux->first, itStatus->first);
+                    }
                 }
+
             }
             ++itAux;
 
@@ -1624,9 +1724,11 @@ void LoadNg::handleHelloMessage(const Ptr<const Hello>& helloMessage)
         if (it->second.isBidirectional && !it->second.pendingConfirmation) {
             topoChange = true;
             changeTimerNotification = true;
-            dijkstra->deleteEdge( this->getSelfIPAddress(), it->first);
-            dijkstra->deleteEdge(it->first,  this->getSelfIPAddress());
-            it->second.isBidirectional = true;
+            if (dijkstra) {
+                dijkstra->deleteEdge( this->getSelfIPAddress(), it->first);
+                dijkstra->deleteEdge(it->first,  this->getSelfIPAddress());
+            }
+            it->second.isBidirectional = false;
         }
     }
     else {
@@ -1634,9 +1736,16 @@ void LoadNg::handleHelloMessage(const Ptr<const Hello>& helloMessage)
         if (!it->second.isBidirectional) {
             topoChange = true;
             changeTimerNotification = true;
-            dijkstra->addEdge( this->getSelfIPAddress(), it->first, 1.0, 0);
-            dijkstra->addEdge(it->first,  this->getSelfIPAddress(), 1.0, 0);
+            if (dijkstra) {
+                dijkstra->addEdge( this->getSelfIPAddress(), it->first, 1.0, 0);
+                dijkstra->addEdge(it->first,  this->getSelfIPAddress(), 1.0, 0);
+            }
+            if (dijkstraKs) {
+                dijkstraKs->addEdge( this->getSelfIPAddress(), it->first, 1.0);
+                dijkstraKs->addEdge(it->first,  this->getSelfIPAddress(), 1.0);
+            }
             it->second.isBidirectional = true;
+
         }
         if (itCheckBiDir->second.pendingConfirmation) // the other node needs confirmation
             changeTimerNotification = true;
@@ -1655,6 +1764,10 @@ void LoadNg::handleHelloMessage(const Ptr<const Hello>& helloMessage)
                 dijkstra->addEdge(elem.first, it->first, 1.0, 0);
                 dijkstra->addEdge(it->first, elem.first, 1.0, 0);
             }
+            if (dijkstraKs) {
+                dijkstraKs->addEdge(elem.first, it->first, 1.0);
+                dijkstraKs->addEdge(it->first, elem.first, 1.0);
+            }
         }
     }
 
@@ -1667,6 +1780,9 @@ void LoadNg::handleHelloMessage(const Ptr<const Hello>& helloMessage)
 
     if (topoChange && dijkstra) {
         runDijkstra();
+    }
+    if (topoChange && dijkstraKs) {
+        runDijkstraKs();
     }
 
     // Whenever a node receives a Hello message from a neighbor, the node
@@ -1998,6 +2114,8 @@ LoadNg::~LoadNg()
     neighbors.clear();
     if (dijkstra)
         delete dijkstra;
+    if (dijkstraKs)
+        delete dijkstraKs;
     clearState();
     delete helloMsgTimer;
     delete expungeTimer;
