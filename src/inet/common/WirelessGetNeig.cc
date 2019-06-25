@@ -44,17 +44,15 @@ WirelessGetNeig::WirelessGetNeig() {
             throw cRuntimeError("node or mobility module not found");
         nodeInfo info;
         info.mob = mod;
-        info.itable = L3AddressResolver().findInterfaceTableOf(
-                destNode->getModule());
-        Ipv4Address addr =
-                L3AddressResolver().getAddressFrom(info.itable).toIpv4();
-        listNodes[addr.getInt()] = info;
+        info.itable = L3AddressResolver().findInterfaceTableOf(destNode->getModule());
+        auto addr = L3AddressResolver().getAddressFrom(info.itable);
+        listNodes[addr] = info;
+
         for (int i = 0; i < info.itable->getNumInterfaces(); i++) {
             InterfaceEntry * entry = info.itable->getInterface(i);
             if (entry->isLoopback())
                 continue;
-            listNodesMac[entry->getMacAddress()] = info;
-
+            listNodesMac[L3Address(entry->getMacAddress())] = info;
         }
     }
 }
@@ -62,107 +60,115 @@ WirelessGetNeig::WirelessGetNeig() {
 WirelessGetNeig::~WirelessGetNeig() {
     // TODO Auto-generated destructor stub
     listNodes.clear();
+    listNodesMac.clear();
 }
 
-void WirelessGetNeig::getNeighbours(const Ipv4Address &node,
-        std::vector<Ipv4Address>&list, const double &distance) {
+void WirelessGetNeig::getNeighbours(const L3Address &node,
+        std::vector<L3Address>&list, const double &distance) {
+
+    if (node.getType() != L3Address::IPv4 && node.getType() != L3Address::MAC)
+        throw cRuntimeError("Address type not supported");
+
     list.clear();
+    if (node.getType() == L3Address::IPv4) {
+        auto it = listNodes.find(node);
+        if (it == listNodes.end())
+            throw cRuntimeError("node not found");
+        Coord pos = it->second.mob->getCurrentPosition();
+        for (it = listNodes.begin(); it != listNodes.end(); ++it) {
+            if (it->first == node)
+                continue;
+            if (pos.distance(it->second.mob->getCurrentPosition()) < distance) {
+                list.push_back(it->first);
+            }
+        }
 
-    auto it = listNodes.find(node.getInt());
-    if (it == listNodes.end())
-        throw cRuntimeError("node not found");
+    }
+    else {
+        auto it = listNodesMac.find(node);
+        if (it == listNodesMac.end())
+            throw cRuntimeError("node not found");
 
-    Coord pos = it->second.mob->getCurrentPosition();
-    for (it = listNodes.begin(); it != listNodes.end(); ++it) {
-        if (it->first == node.getInt())
-            continue;
-        if (pos.distance(it->second.mob->getCurrentPosition()) < distance) {
-            list.push_back(Ipv4Address(it->first));
+        Coord pos = it->second.mob->getCurrentPosition();
+        for (it = listNodesMac.begin(); it != listNodesMac.end(); ++it) {
+            if (it->first == node)
+                continue;
+            if (pos.distance(it->second.mob->getCurrentPosition()) < distance) {
+                list.push_back(it->first);
+            }
         }
     }
 }
 
-void WirelessGetNeig::getNeighbours(const MacAddress &node, std::vector<MacAddress>&list, const double &distance) {
+void WirelessGetNeig::getNeighbours(const L3Address &node, std::vector<L3Address>&list, const double &distance, std::vector<Coord> & coord) {
+
+    if (node.getType() != L3Address::IPv4 && node.getType() != L3Address::MAC)
+        throw cRuntimeError("Address type not supported");
+
     list.clear();
 
-    auto it = listNodesMac.find(node);
-    if (it == listNodesMac.end())
-        throw cRuntimeError("node not found");
-
-    Coord pos = it->second.mob->getCurrentPosition();
-    for (it = listNodesMac.begin(); it != listNodesMac.end(); ++it) {
-        if (it->first == node)
-            continue;
-        if (pos.distance(it->second.mob->getCurrentPosition()) < distance) {
-            list.push_back(MacAddress(it->first));
+    if (node.getType() == L3Address::IPv4 ) {
+        auto it = listNodes.find(node);
+        if (it == listNodes.end())
+            throw cRuntimeError("node not found");
+        Coord pos = it->second.mob->getCurrentPosition();
+        for (it = listNodes.begin(); it != listNodes.end(); ++it) {
+            if (it->first == node)
+                continue;
+            if (pos.distance(it->second.mob->getCurrentPosition()) < distance) {
+                list.push_back(it->first);
+                coord.push_back(pos);
+            }
         }
     }
-}
+    else {
+        auto it = listNodesMac.find(node);
+        if (it == listNodesMac.end())
+            throw cRuntimeError("node not found");
 
-void WirelessGetNeig::getNeighbours(const Ipv4Address &node, std::vector<Ipv4Address>&list, const double &distance, std::vector<Coord> & coord) {
-    list.clear();
-
-    auto it = listNodes.find(node.getInt());
-    if (it == listNodes.end())
-        throw cRuntimeError("node not found");
-
-    Coord pos = it->second.mob->getCurrentPosition();
-    for (it = listNodes.begin(); it != listNodes.end(); ++it) {
-        if (it->first == node.getInt())
-            continue;
-        if (pos.distance(it->second.mob->getCurrentPosition()) < distance) {
-            list.push_back(Ipv4Address(it->first));
-            coord.push_back(pos);
+        Coord pos = it->second.mob->getCurrentPosition();
+        for (it = listNodesMac.begin(); it != listNodesMac.end(); ++it) {
+            if (it->first == node)
+                continue;
+            if (pos.distance(it->second.mob->getCurrentPosition()) < distance) {
+                list.push_back(it->first);
+                coord.push_back(pos);
+            }
         }
     }
+
 }
 
-void WirelessGetNeig::getNeighbours(const MacAddress &node, std::vector<MacAddress>&list, const double &distance, std::vector<Coord> &coord) {
-    list.clear();
+EulerAngles WirelessGetNeig::getDirection(const L3Address &node, const L3Address &dest, double &distance) {
 
-    auto it = listNodesMac.find(node);
-    if (it == listNodesMac.end())
-        throw cRuntimeError("node not found");
+    if (node.getType() != L3Address::IPv4 && node.getType() != L3Address::MAC)
+        throw cRuntimeError("Address type not supported");
+    Coord pos,pos2;
 
-    Coord pos = it->second.mob->getCurrentPosition();
-    for (it = listNodesMac.begin(); it != listNodesMac.end(); ++it) {
-        if (it->first == node)
-            continue;
-        if (pos.distance(it->second.mob->getCurrentPosition()) < distance) {
-            list.push_back(MacAddress(it->first));
-            coord.push_back(pos);
-        }
+    if (node.getType() == L3Address::IPv4 ) {
+        auto it = listNodes.find(node);
+        if (it == listNodes.end())
+            throw cRuntimeError("node not found");
+        auto it2 = listNodes.find(dest);
+        if (it2 == listNodes.end())
+            throw cRuntimeError("node not found");
+        pos = it->second.mob->getCurrentPosition();
+        pos2 = it2->second.mob->getCurrentPosition();
+        distance = pos.distance(pos2);
     }
-}
+    else {
+        auto it = listNodesMac.find(node);
+        if (it == listNodesMac.end())
+            throw cRuntimeError("node not found");
 
-EulerAngles WirelessGetNeig::getDirection(const Ipv4Address &node, const Ipv4Address &dest, double &distance) {
-    auto it = listNodes.find(node.getInt());
-    if (it == listNodes.end())
-        throw cRuntimeError("node not found");
+        auto it2 = listNodesMac.find(dest);
+        if (it2 == listNodesMac.end())
+            throw cRuntimeError("node not found");
 
-    auto it2 = listNodes.find(dest.getInt());
-    if (it2 == listNodes.end())
-        throw cRuntimeError("node not found");
-
-    Coord pos = it->second.mob->getCurrentPosition();
-    Coord pos2 = it2->second.mob->getCurrentPosition();
-    distance = pos.distance(pos2);
-    return EulerAngles(rad(pos.angle(pos2)),rad(0),rad(0));
-}
-
-EulerAngles WirelessGetNeig::getDirection(const MacAddress &node, const MacAddress &dest, double &distance) {
-    auto it = listNodesMac.find(node);
-    if (it == listNodesMac.end())
-        throw cRuntimeError("node not found");
-
-    auto it2 = listNodesMac.find(dest);
-    if (it2 == listNodesMac.end())
-        throw cRuntimeError("node not found");
-
-    Coord pos = it->second.mob->getCurrentPosition();
-    Coord pos2 = it2->second.mob->getCurrentPosition();
-    distance = pos.distance(pos2);
-
+        pos = it->second.mob->getCurrentPosition();
+        pos2 = it2->second.mob->getCurrentPosition();
+        distance = pos.distance(pos2);
+    }
     return EulerAngles(rad(pos.angle(pos2)),rad(0),rad(0));
 }
 

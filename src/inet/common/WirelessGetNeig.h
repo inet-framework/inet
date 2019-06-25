@@ -22,6 +22,7 @@
 #include <vector>
 #include <map>
 #include "inet/common/geometry/common/Coord.h"
+#include "inet/networklayer/common/L3Address.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/common/geometry/common/EulerAngles.h"
@@ -38,20 +39,17 @@ class WirelessGetNeig : public cOwnedObject
             IMobility* mob;
             IInterfaceTable* itable;
         };
-        typedef std::map<uint32_t,nodeInfo> ListNodes;
-        typedef std::map<MacAddress,nodeInfo> ListNodesMac;
+        typedef std::map<L3Address,nodeInfo> ListNodes;
+        typedef std::map<L3Address,nodeInfo> ListNodesMac;
 
         ListNodes listNodes;
         ListNodesMac listNodesMac;
     public:
         WirelessGetNeig();
         virtual ~WirelessGetNeig();
-        virtual void getNeighbours(const Ipv4Address &node, std::vector<Ipv4Address>&, const double &distance);
-        virtual void getNeighbours(const MacAddress &node, std::vector<MacAddress>&, const double &distance);
-        virtual void getNeighbours(const Ipv4Address &node, std::vector<Ipv4Address>&, const double &distance, std::vector<Coord> &);
-        virtual void getNeighbours(const MacAddress &node, std::vector<MacAddress>&, const double &distance, std::vector<Coord> &);
-        virtual EulerAngles getDirection(const Ipv4Address &, const Ipv4Address&, double &distance);
-        virtual EulerAngles getDirection(const MacAddress &, const MacAddress&, double &distance);
+        virtual void getNeighbours(const L3Address &node, std::vector<L3Address>&, const double &distance);
+        virtual void getNeighbours(const L3Address &node, std::vector<L3Address>&, const double &distance, std::vector<Coord> &);
+        virtual EulerAngles getDirection(const L3Address &, const L3Address&, double &distance);
 };
 
 
