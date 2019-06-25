@@ -295,7 +295,7 @@ void DhcpServer::sendNak(const Ptr<const DhcpMessage>& msg)
     Packet *pk = new Packet("DHCPNAK");
     const auto& nak = makeShared<DhcpMessage>();
     nak->setOp(BOOTREPLY);
-    nak->setChunkLength(B(308));    // DHCPNAK packet size
+    uint16_t length = 236;    // packet size without the options field
     nak->setHtype(1);    // ethernet
     nak->setHlen(6);    // hardware address length (6 octets)
     nak->setHops(0);
@@ -305,7 +305,14 @@ void DhcpServer::sendNak(const Ptr<const DhcpMessage>& msg)
     nak->setGiaddr(msg->getGiaddr());    // next server IP
     nak->setChaddr(msg->getChaddr());
     nak->getOptionsForUpdate().setServerIdentifier(ie->getProtocolData<Ipv4InterfaceData>()->getIPAddress());
+    length += 6;
     nak->getOptionsForUpdate().setMessageType(DHCPNAK);
+    length += 3;
+
+    // magic cookie and the end field
+    length += 5;
+
+    nak->setChunkLength(B(length));
 
     pk->insertAtBack(nak);
     /* RFC 2131, 4.1
@@ -326,7 +333,7 @@ void DhcpServer::sendAck(DhcpLease *lease, const Ptr<const DhcpMessage>& packet)
     Packet *pk = new Packet("DHCPACK");
     const auto& ack = makeShared<DhcpMessage>();
     ack->setOp(BOOTREPLY);
-    ack->setChunkLength(B(308));    // DHCP ACK packet size
+    uint16_t length = 236;    // packet size without the options field
     ack->setHtype(1);    // ethernet
     ack->setHlen(6);    // hardware address length (6 octets)
     ack->setHops(0);
@@ -340,19 +347,33 @@ void DhcpServer::sendAck(DhcpLease *lease, const Ptr<const DhcpMessage>& packet)
     ack->setSname("");    // no server name given
     ack->setFile("");    // no file given
     ack->getOptionsForUpdate().setMessageType(DHCPACK);
+    length += 3;
 
     // add the lease options
     ack->getOptionsForUpdate().setSubnetMask(lease->subnetMask);
-    ack->getOptionsForUpdate().setRenewalTime(leaseTime * 0.5);    // RFC 4.4.5
-    ack->getOptionsForUpdate().setRebindingTime(leaseTime * 0.875);
-    ack->getOptionsForUpdate().setLeaseTime(leaseTime);
+    length += 6;
+    ack->getOptionsForUpdate().setRenewalTime(SimTime(leaseTime * 0.5).trunc(SIMTIME_S));    // RFC 4.4.5
+    length += 6;
+    ack->getOptionsForUpdate().setRebindingTime(SimTime(leaseTime * 0.875).trunc(SIMTIME_S));
+    length += 6;
+    ack->getOptionsForUpdate().setLeaseTime(SimTime(leaseTime).trunc(SIMTIME_S));
+    length += 6;
     ack->getOptionsForUpdate().setRouterArraySize(1);
     ack->getOptionsForUpdate().setRouter(0, lease->gateway);
+    length += (2 + 1 * sizeof(uint32_t));
     ack->getOptionsForUpdate().setDnsArraySize(1);
     ack->getOptionsForUpdate().setDns(0, lease->dns);
+    length += (2 + 1 * sizeof(uint32_t));
 
     // add the server ID as the RFC says
     ack->getOptionsForUpdate().setServerIdentifier(ie->getProtocolData<Ipv4InterfaceData>()->getIPAddress());
+    length += 6;
+
+    // magic cookie and the end field
+    length += 5;
+
+    ack->setChunkLength(B(length));
+
     pk->insertAtBack(ack);
 
     // register the lease time
@@ -393,7 +414,7 @@ void DhcpServer::sendOffer(DhcpLease *lease, const Ptr<const DhcpMessage>& packe
     Packet *pk = new Packet("DHCPOFFER");
     const auto& offer = makeShared<DhcpMessage>();
     offer->setOp(BOOTREPLY);
-    offer->setChunkLength(B(308));    // DHCP OFFER packet size
+    uint16_t length = 236;    // packet size without the options field
     offer->setHtype(1);    // ethernet
     offer->setHlen(6);    // hardware address lenght (6 octets)
     offer->setHops(0);
@@ -408,19 +429,32 @@ void DhcpServer::sendOffer(DhcpLease *lease, const Ptr<const DhcpMessage>& packe
     offer->setSname("");    // no server name given
     offer->setFile("");    // no file given
     offer->getOptionsForUpdate().setMessageType(DHCPOFFER);
+    length += 3;
 
     // add the offer options
     offer->getOptionsForUpdate().setSubnetMask(lease->subnetMask);
-    offer->getOptionsForUpdate().setRenewalTime(leaseTime * 0.5);    // RFC 4.4.5
-    offer->getOptionsForUpdate().setRebindingTime(leaseTime * 0.875);
-    offer->getOptionsForUpdate().setLeaseTime(leaseTime);
+    length += 6;
+    offer->getOptionsForUpdate().setRenewalTime(SimTime(leaseTime * 0.5).trunc(SIMTIME_S));    // RFC 4.4.5
+    length += 6;
+    offer->getOptionsForUpdate().setRebindingTime(SimTime(leaseTime * 0.875).trunc(SIMTIME_S));
+    length += 6;
+    offer->getOptionsForUpdate().setLeaseTime(SimTime(leaseTime).trunc(SIMTIME_S));
+    length += 6;
     offer->getOptionsForUpdate().setRouterArraySize(1);
     offer->getOptionsForUpdate().setRouter(0, lease->gateway);
+    length += (2 + 1 * sizeof(uint32_t));
     offer->getOptionsForUpdate().setDnsArraySize(1);
     offer->getOptionsForUpdate().setDns(0, lease->dns);
+    length += (2 + 1 * sizeof(uint32_t));
 
     // add the server_id as the RFC says
     offer->getOptionsForUpdate().setServerIdentifier(ie->getProtocolData<Ipv4InterfaceData>()->getIPAddress());
+    length += 6;
+
+    // magic cookie and the end field
+    length += 5;
+
+    offer->setChunkLength(B(length));
 
     // register the offering time // todo: ?
     lease->leaseTime = simTime();
