@@ -27,7 +27,7 @@
 
 // checking chunk implementation is disabled by default
 #ifndef CHUNK_CHECK_IMPLEMENTATION_ENABLED
-#define CHUNK_CHECK_IMPLEMENTATION_ENABLED 0
+#define CHUNK_CHECK_IMPLEMENTATION_ENABLED 1
 #endif
 
 #if CHUNK_CHECK_IMPLEMENTATION_ENABLED
@@ -39,7 +39,7 @@
 // checking chunk usage is enabled in debug mode and disabled in release mode by default
 #ifndef CHUNK_CHECK_USAGE_ENABLED
 #ifdef NDEBUG
-#define CHUNK_CHECK_USAGE_ENABLED 0
+#define CHUNK_CHECK_USAGE_ENABLED 1
 #else
 #define CHUNK_CHECK_USAGE_ENABLED 1
 #endif

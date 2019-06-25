@@ -19,7 +19,7 @@
 
 namespace inet {
 
-bool Chunk::enableImplicitChunkSerialization = false;
+bool Chunk::enableImplicitChunkSerialization = true;
 int Chunk::nextId = 0;
 const b Chunk::unspecifiedLength = b(-std::numeric_limits<int64_t>::max());
 
