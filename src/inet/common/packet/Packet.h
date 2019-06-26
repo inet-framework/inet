@@ -184,11 +184,15 @@ class INET_API Packet : public cPacket
     const Ptr<const T> peekAtFront(b length = b(-1), int flags = 0) const {
         auto dataLength = getDataLength();
         CHUNK_CHECK_USAGE(b(-1) <= length && length <= dataLength, "length is invalid");
-        const auto& chunk = content->peek<T>(frontIterator, length, flags);
-        if (chunk == nullptr || chunk->getChunkLength() <= dataLength)
+        if (backIterator.getPosition() == b(0) || (length != b(-1) && length <= dataLength)) {
+            const auto& chunk = content->peek<T>(frontIterator, length, flags);
             return chunk;
-        else
-            return content->peek<T>(frontIterator, dataLength, flags);
+        }
+        else {
+            auto available = content->peek(frontIterator, dataLength);
+            const auto& chunk = available->peek<T>(Chunk::ForwardIterator(b(0)), length, flags);
+            return chunk;
+        }
     }
 
     /**
