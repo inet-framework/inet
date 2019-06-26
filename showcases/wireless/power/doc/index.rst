@@ -49,7 +49,7 @@ hosts transmit infrequently, it is assumed that the probability of
 collisions will be very low.
 
 Energy Storage, Generation, and Management
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Hosts are configured to contain a :ned:`SimpleEpEnergyStorage` module.
 :ned:`SimpleEpEnergyStorage` keeps a record of stored energy in Joules, and

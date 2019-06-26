@@ -38,14 +38,12 @@ needs_sphinx = '1.7'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-#    'sphinx.ext.imgmath',
     'sphinx.ext.mathjax',
     'sphinx.ext.extlinks',
     'sphinx.ext.ifconfig',
     'sphinx.ext.todo',
     'sphinx.ext.githubpages',
     'sphinx.ext.graphviz',
-    'sphinx.ext.imgconverter',
     'tools.doxylink',
 ]
 
