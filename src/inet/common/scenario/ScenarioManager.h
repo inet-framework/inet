@@ -61,24 +61,24 @@ class INET_API ScenarioManager : public cSimpleModule
 
   protected:
     // utilities
-    virtual cModule *getRequiredModule(cXMLElement *node, const char *attr);
-    virtual cGate *getRequiredGate(cXMLElement *node, const char *modattr, const char *gateattr);
-    void createConnection(cXMLElementList& paramList, cChannelType *channelType,
+    virtual cModule *getRequiredModule(const cXMLElement *node, const char *attr);
+    virtual cGate *getRequiredGate(const cXMLElement *node, const char *modattr, const char *gateattr);
+    void createConnection(const cXMLElementList& paramList, cChannelType *channelType,
             cGate *srcGate, cGate *destGate);
 
     // dispatch to command processors
-    virtual void processCommand(cXMLElement *node);
+    virtual void processCommand(const cXMLElement *node);
 
     // command processors
-    virtual void processAtCommand(cXMLElement *node);
-    virtual void processSetParamCommand(cXMLElement *node);
-    virtual void processSetChannelParamCommand(cXMLElement *node);
-    virtual void processCreateModuleCommand(cXMLElement *node);
-    virtual void processDeleteModuleCommand(cXMLElement *node);
-    virtual void processConnectCommand(cXMLElement *node);
-    virtual void processDisconnectCommand(cXMLElement *node);
-    virtual void processModuleSpecificCommand(cXMLElement *node);
-    virtual void processLifecycleCommand(cXMLElement *node);
+    virtual void processAtCommand(const cXMLElement *node);
+    virtual void processSetParamCommand(const cXMLElement *node);
+    virtual void processSetChannelParamCommand(const cXMLElement *node);
+    virtual void processCreateModuleCommand(const cXMLElement *node);
+    virtual void processDeleteModuleCommand(const cXMLElement *node);
+    virtual void processConnectCommand(const cXMLElement *node);
+    virtual void processDisconnectCommand(const cXMLElement *node);
+    virtual void processModuleSpecificCommand(const cXMLElement *node);
+    virtual void processLifecycleCommand(const cXMLElement *node);
 
   public:
     ScenarioManager() {}

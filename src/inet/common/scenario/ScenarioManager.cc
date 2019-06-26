@@ -60,7 +60,7 @@ void ScenarioManager::handleMessage(cMessage *msg)
     numDone++;
 }
 
-void ScenarioManager::processCommand(cXMLElement *node)
+void ScenarioManager::processCommand(const cXMLElement *node)
 {
     const char *tag = node->getTagName();
     EV << "processing <" << tag << "> command...\n";
@@ -104,7 +104,7 @@ static bool parseIndexedName(const char *s, std::string& name, int& index)
     }
 }
 
-cModule *ScenarioManager::getRequiredModule(cXMLElement *node, const char *attr)
+cModule *ScenarioManager::getRequiredModule(const cXMLElement *node, const char *attr)
 {
     const char *moduleAttr = xmlutils::getMandatoryFilledAttribute(*node, attr);
     cModule *mod = getModuleByPath(moduleAttr);
@@ -113,7 +113,7 @@ cModule *ScenarioManager::getRequiredModule(cXMLElement *node, const char *attr)
     return mod;
 }
 
-cGate *ScenarioManager::getRequiredGate(cXMLElement *node, const char *modAttr, const char *gateAttr)
+cGate *ScenarioManager::getRequiredGate(const cXMLElement *node, const char *modAttr, const char *gateAttr)
 {
     cModule *mod = getRequiredModule(node, modAttr);
     const char *gateStr = xmlutils::getMandatoryFilledAttribute(*node, gateAttr);
@@ -126,13 +126,13 @@ cGate *ScenarioManager::getRequiredGate(cXMLElement *node, const char *modAttr, 
     return g;
 }
 
-void ScenarioManager::processAtCommand(cXMLElement *node)
+void ScenarioManager::processAtCommand(const cXMLElement *node)
 {
-    for (cXMLElement *child = node->getFirstChild(); child; child = child->getNextSibling())
+    for (const cXMLElement *child = node->getFirstChild(); child; child = child->getNextSibling())
         processCommand(child);
 }
 
-void ScenarioManager::processModuleSpecificCommand(cXMLElement *node)
+void ScenarioManager::processModuleSpecificCommand(const cXMLElement *node)
 {
     // find which module we'll need to invoke
     cModule *mod = getRequiredModule(node, "module");
@@ -148,7 +148,7 @@ void ScenarioManager::processModuleSpecificCommand(cXMLElement *node)
     scriptable->processCommand(*node);
 }
 
-void ScenarioManager::processSetParamCommand(cXMLElement *node)
+void ScenarioManager::processSetParamCommand(const cXMLElement *node)
 {
     // process <set-param> command
     cModule *mod = getRequiredModule(node, "module");
@@ -163,7 +163,7 @@ void ScenarioManager::processSetParamCommand(cXMLElement *node)
     param.parse(valueAttr);
 }
 
-void ScenarioManager::processSetChannelParamCommand(cXMLElement *node)
+void ScenarioManager::processSetChannelParamCommand(const cXMLElement *node)
 {
     // process <set-channel-param> command
     cGate *g = getRequiredGate(node, "src-module", "src-gate");
@@ -188,7 +188,7 @@ void ScenarioManager::processSetChannelParamCommand(cXMLElement *node)
     param.parse(valueAttr);
 }
 
-void ScenarioManager::processCreateModuleCommand(cXMLElement *node)
+void ScenarioManager::processCreateModuleCommand(const cXMLElement *node)
 {
     const char *moduleTypeName = xmlutils::getMandatoryFilledAttribute(*node, "type");
     const char *submoduleName = xmlutils::getMandatoryFilledAttribute(*node, "submodule");
@@ -219,7 +219,7 @@ void ScenarioManager::processCreateModuleCommand(cXMLElement *node)
     emit(POST_MODEL_CHANGE, &post);
 }
 
-void ScenarioManager::processDeleteModuleCommand(cXMLElement *node)
+void ScenarioManager::processDeleteModuleCommand(const cXMLElement *node)
 {
     const char *modulePath = xmlutils::getMandatoryFilledAttribute(*node, "module");
     cModule *module = getSimulation()->getSystemModule()->getModuleByPath(modulePath);
@@ -229,7 +229,7 @@ void ScenarioManager::processDeleteModuleCommand(cXMLElement *node)
     module->deleteModule();
 }
 
-void ScenarioManager::createConnection(cXMLElementList& paramList, cChannelType *channelType, cGate *srcGate, cGate *destGate)
+void ScenarioManager::createConnection(const cXMLElementList& paramList, cChannelType *channelType, cGate *srcGate, cGate *destGate)
 {
     if (!channelType)
         srcGate->connectTo(destGate);
@@ -249,7 +249,7 @@ void ScenarioManager::createConnection(cXMLElementList& paramList, cChannelType 
     }
 }
 
-void ScenarioManager::processConnectCommand(cXMLElement *node)
+void ScenarioManager::processConnectCommand(const cXMLElement *node)
 {
     cGate *srcGate;
     cModule *srcMod = getRequiredModule(node, "src-module");
@@ -296,7 +296,7 @@ void ScenarioManager::processConnectCommand(cXMLElement *node)
     }
 }
 
-void ScenarioManager::processDisconnectCommand(cXMLElement *node)
+void ScenarioManager::processDisconnectCommand(const cXMLElement *node)
 {
     // process <disconnect> command
     cModule *srcMod = getRequiredModule(node, "src-module");
@@ -343,7 +343,7 @@ void ScenarioManager::processDisconnectCommand(cXMLElement *node)
     }
 }
 
-void ScenarioManager::processLifecycleCommand(cXMLElement *node)
+void ScenarioManager::processLifecycleCommand(const cXMLElement *node)
 {
     // resolve target module
     const char *target = node->getAttribute("module");
