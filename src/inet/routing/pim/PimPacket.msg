@@ -22,6 +22,7 @@ import inet.common.INETDefs;
 import inet.common.Units;
 import inet.common.packet.chunk.Chunk;
 import inet.networklayer.contract.ipv4.Ipv4Address;
+import inet.transportlayer.common.CrcMode;
 
 namespace inet;
 
@@ -43,7 +44,7 @@ enum PimPacketType
    Graft = 6;
    GraftAck = 7;
    CandidateRPAdvertisement = 8;
-   StateRefresh = 9;
+   StateRefresh = 9;    //TODO: 9 is not found in RFC
 }
 
 enum PimHelloOptionType
@@ -112,8 +113,26 @@ class JoinPruneGroup extends cObject
 // Header
 class PimPacket extends FieldsChunk
 {
-    short         version = 2;
-    PimPacketType type;
+    short          version = 2;
+    PimPacketType  type;
+    int            reserved = 0;
+    uint16_t       crc = 0;         // The checksum is a standard IP checksum, i.e., the 16-bit one's
+                                    // complement of the one's complement sum of the entire PIM
+                                    // message, excluding the "Multicast data packet" section of the
+                                    // Register message.  For computing the checksum, the checksum
+                                    // field is zeroed.  If the packet's length is not an integral
+                                    // number of 16-bit words, the packet is padded with a trailing
+                                    // byte of zero before performing the checksum.
+                                    //
+                                    // For IPv6, the checksum also includes the IPv6 "pseudo-header",
+                                    // as specified in RFC 2460, Section 8.1 [5].  This "pseudo-header"
+                                    // is prepended to the PIM header for the purposes of calculating
+                                    // the checksum.  The "Upper-Layer Packet Length" in the pseudo-
+                                    // header is set to the length of the PIM message, except in
+                                    // Register messages where it is set to the length of the PIM
+                                    // register header (8).  The Next Header value used in the pseudo-
+                                    // header is 103.
+    CrcMode        crcMode = CRC_MODE_UNDEFINED;
 }
 
 // Hello message
@@ -128,7 +147,7 @@ class PimHello extends PimPacket
 // DM, SM
 class PimJoinPrune extends PimPacket
 {
-    type= JoinPrune;
+    type = JoinPrune;
     Ipv4Address        upstreamNeighborAddress;
     int                holdTime;
     //int                numGroups;
