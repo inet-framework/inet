@@ -92,8 +92,12 @@ class INET_API LoadNg : public RoutingProtocolBase, public NetfilterBase::HookBa
         bool isBidirectional = false;
         bool pendingConfirmation = false; // the latest notification has failed.
         std::map<L3Address, NodeStatus> listNeigbours;
+        std::deque<simtime_t> helloTime;
         int32_t distRoot = -1;
+        int32_t metricToRoot;
     };
+
+
     std::map<L3Address, NeigborElement> neighbors;
 
     // DFF information sets
@@ -168,6 +172,12 @@ class INET_API LoadNg : public RoutingProtocolBase, public NetfilterBase::HookBa
     bool askGratuitousRREP = false;
     bool useHelloMessages = false;
     bool destinationOnlyFlag = false;
+
+    //
+    bool isRoot = false; // this node is a root;
+    bool measureEtx = false;
+    int numHellosEtx = 10;
+
 
     simtime_t maxJitter;
     simtime_t activeRouteTimeout;

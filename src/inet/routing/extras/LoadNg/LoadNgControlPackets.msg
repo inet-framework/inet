@@ -37,6 +37,8 @@ class NeigborData {
     bool pendingConfirmation; 
     bool isBidir;
     unsigned int seqNum;
+    uint8_t metric;
+    uint8_t numHelloRec;
 }
 
 enum LoadNgControlPacketType
@@ -60,6 +62,7 @@ enum LoadNgControl
     METRIC = 124;
     ADDRTYPE = 128;
     FLAGS = 129;
+    SINK = 130;
 };
 
 enum AddrTypeCodes
@@ -123,6 +126,14 @@ class AddressBlock extends TlvOptionBase {   //2 + (num address * size address)
     L3Address address[];
 }
 
+
+class LoadNgSink extends LoadNgOption { // size 6 B
+    type = SINK;
+    length = 8;   // total length of option
+    uint8_t hops;
+    uint8_t metric; 
+    L3Address addressSink; 
+}
 
 //
 // Base packet for AODV Control Packets

@@ -35,15 +35,18 @@
 
 // DONE: actualize routes using hello information,
 // DONE: Fill the routing tables using the routes computes by Dijkstra
+// DONE: Modify the link layer to force that a percentage of links could be only unidirectional
+// DONE: Compute k-shortest paths for using with DFF
 
 // TODO: Extract alternative routes from Dijkstra if the principal fails.
 // TODO: Recalculate Dijkstra using the transmission errors
-// TODO: Calculate the route to the sink using Hellos
-// TODO: measure link quality metrics and to use them for routing.
+// TODO: Calculate the route to the sink using Hellos, TODO: Propagate distance to root, DONE: define TLV for this
+// TODO: measure link quality metrics and to use them for routing. TODO: Measure ETX, DONE: include fields
 // TODO: Modify the link layer that quality measures could arrive to upper layers
-// TODO: Modify the link layer to force that a percentage of links could be only unidirectional
 // TODO: Modify the link layer to force a predetermine lost packets in predetermined links.
-// TODO: Add FFD tag to the packets stolen from network layer.
+// TODO: Add DFF tag to the packets stolen from network layer.
+
+
 
 namespace inet {
 namespace inetmanet {
@@ -102,6 +105,11 @@ void LoadNg::initialize(int stage)
 
         minHelloInterval = par("minHelloInterval");
         maxHelloInterval = par("maxHelloInterval");
+        if (measureEtx) {
+            helloInterval = maxHelloInterval = minHelloInterval;
+            //
+            sendHelloMessagesIfNeeded();
+        }
     }
     else if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
         registerService(Protocol::manet, nullptr, gate("ipIn"));
@@ -118,6 +126,7 @@ void LoadNg::initialize(int stage)
 
             }
         }
+
     }
 }
 
@@ -1566,6 +1575,13 @@ void LoadNg::sendHelloMessagesIfNeeded()
     // sent a broadcast (e.g., a RREQ or an appropriate layer 2 message)
     // within the last HELLO_INTERVAL.  If it has not, it MAY broadcast
     // a RREP with TTL = 1
+
+    if (measureEtx) {
+        // new to scheduleHello
+        simtime_t nextHello = simTime() + helloInterval - *periodicJitter;
+        scheduleAt(nextHello, helloMsgTimer);
+        return;
+    }
 
     // A node SHOULD only use hello messages if it is part of an
     // active route.
