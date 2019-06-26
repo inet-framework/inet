@@ -24,6 +24,7 @@
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
+#include "inet/networklayer/ipv4/Ipv4.h"
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 #include "inet/routing/pim/modes/PimSm.h"
@@ -68,6 +69,8 @@ void PimSm::initialize(int stage)
         registerProbeTime = par("registerProbeTime");
         assertTime = par("assertTime");
         assertOverrideInterval = par("assertOverrideInterval");
+        const char *crcModeString = par("crcMode");
+        crcMode = parseCrcMode(crcModeString);
     }
 }
 
@@ -1432,6 +1435,8 @@ void PimSm::sendPIMRegisterNull(Ipv4Address multOrigin, Ipv4Address multGroup)
         ipv4Header->setProtocolId(IP_PROT_PIM);
         ipv4Header->setHeaderLength(IPv4_MIN_HEADER_LENGTH);
         ipv4Header->setTotalLengthField(IPv4_MIN_HEADER_LENGTH);
+        ipv4Header->setCrcMode(crcMode);
+        Ipv4::insertCrc(ipv4Header);
         pk->insertAtBack(ipv4Header);
 
         emit(sentRegisterPkSignal, pk);

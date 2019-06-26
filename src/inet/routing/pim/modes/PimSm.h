@@ -213,6 +213,7 @@ class INET_API PimSm : public PimBase, protected cListener
     double registerProbeTime = 0;
     double assertTime = 0;
     double assertOverrideInterval = 0;
+    CrcMode crcMode = CRC_MODE_UNDEFINED;
 
     // signals
     static simsignal_t sentRegisterPkSignal;
