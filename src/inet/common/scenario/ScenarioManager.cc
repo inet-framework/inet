@@ -20,6 +20,7 @@
 #include "inet/common/lifecycle/LifecycleOperation.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/scenario/ScenarioManager.h"
+#include "inet/common/scenario/ScenarioTimer_m.h"
 
 namespace inet {
 
@@ -41,8 +42,8 @@ void ScenarioManager::initialize()
 
         // schedule self-message
         simtime_t t = SimTime::parse(tAttr);
-        cMessage *msg = new cMessage("scenario-event");
-        msg->setContextPointer(node);
+        auto msg = new ScenarioTimer("scenario-event");
+        msg->setXmlNode(node);
         scheduleAt(t, msg);
 
         // count it
@@ -52,7 +53,7 @@ void ScenarioManager::initialize()
 
 void ScenarioManager::handleMessage(cMessage *msg)
 {
-    cXMLElement *node = (cXMLElement *)msg->getContextPointer();
+    auto node = check_and_cast<ScenarioTimer *>(msg)->getXmlNode();
     delete msg;
 
     processCommand(node);
