@@ -58,7 +58,7 @@ The network contains two :ned:`StandardHost`'s, a ``source`` host and a
 ``destination`` host. In this configuration, the ``source`` host will be
 pinging the ``destination`` host.
 
-.. figure:: NetworkPathSimple.png
+.. figure:: media/NetworkPathSimple.png
    :width: 80%
    :align: center
 
@@ -73,7 +73,7 @@ parameter to true.
 
 The following video shows what happens when we start the simulation.
 
-.. video:: EnablingVisualization_v0614.m4v
+.. video:: media/EnablingVisualization_v0614.m4v
    :width: 560
    :align: center
 
@@ -103,7 +103,7 @@ ini file.
 
 We use the following network for this showcase:
 
-.. figure:: NetworkPathComplex_v0703.png
+.. figure:: media/NetworkPathComplex_v0703.png
    :width: 100%
 
 The network consists of five ``routers`` (``router0..router4``), four
@@ -128,7 +128,7 @@ completely before the next ping packet arrives.
 
 The following video shows what happens when the simulation is run.
 
-.. video:: StaticNetworkPaths_v0703.m4v
+.. video:: media/StaticNetworkPaths_v0703.m4v
    :width: 698
 
 Each arrow has a different color indicating different paths. You can see
@@ -151,7 +151,7 @@ have been chosen so that the network is connected, but nodes can
 typically only communicate by using multi-hop paths. The nodes will also
 randomly roam within predefined borders.
 
-.. figure:: NetworkPathMobileShowcase_v0606.png
+.. figure:: media/NetworkPathMobileShowcase_v0606.png
    :width: 100%
 
 The routing protocol is AODV, a reactive (on-demand) MANET routing
@@ -171,7 +171,7 @@ We use the following configuration for the visualization.
 
 The following video shows what happens when the simulation is run.
 
-.. video:: Mobile_v0614.m4v
+.. video:: media/Mobile_v0614.m4v
    :width: 698
 
 Blue circles are displays the communication range of ``source`` and
@@ -212,7 +212,7 @@ access points (``accessPoint0`` and ``accessPoint1``).
 
 The following image displays the network for this example.
 
-.. figure:: NetworkPathChanging.png
+.. figure:: media/NetworkPathChanging.png
    :width: 100%
 
 IP addresses are assigned manually, using the configuration file
@@ -236,7 +236,7 @@ visualization.
 In the following video we can examine that how network path activity
 visualization follows the routing changes in a complex network.
 
-.. video:: ChangingPaths_v0614.m4v
+.. video:: media/ChangingPaths_v0614.m4v
    :width: 698
 
 At the beginning of the video, ping traffic is routed through

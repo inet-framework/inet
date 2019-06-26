@@ -242,7 +242,7 @@ configuration in :download:`omnetpp.ini <../omnetpp.ini>`. This
 configuration uses the ``ManetProtocolShowcaseA`` network. The network
 looks like the following:
 
-.. figure:: networkA.png
+.. figure:: media/networkA.png
    :width: 60%
    :align: center
 
@@ -302,7 +302,7 @@ better - react to topology changes faster - with lower timeout values.
 However, setting the timeout values too low results in increased routing
 protocol overhead.
 
-.. video:: Aodv5_s.mp4
+.. video:: media/Aodv5_s.mp4
    :width: 420
    :align: center
 
@@ -339,7 +339,7 @@ by broadcasting an RREQ message. When a new route is discovered
 The following log excerpt shows ``node6`` handling the first RREQ and
 RREP messages:
 
-.. figure:: aodvlog3.png
+.. figure:: media/aodvlog3.png
    :width: 100%
 
 DSDV
@@ -388,7 +388,7 @@ being created at the beginning of the simulation. Note that the black
 arrows represent routes, and routes from all nodes to all destinations
 are visualized here.
 
-.. video:: Dsdv1.mp4
+.. video:: media/Dsdv1.mp4
    :width: 420
    :align: center
 
@@ -396,7 +396,7 @@ are visualized here.
 
 The following video shows ``source`` pinging ``destination``:
 
-.. video:: DsdvPing1.mp4
+.. video:: media/DsdvPing1.mp4
    :width: 420
    :align: center
 
@@ -410,7 +410,7 @@ configuration in :download:`omnetpp.ini <../omnetpp.ini>`. It uses the
 ``ManetRoutingProtocolsShowcaseB`` network. The network looks like the
 following:
 
-.. figure:: networkB.png
+.. figure:: media/networkB.png
    :width: 100%
 
 Just as with the previous two configurations, the nodes are
@@ -433,7 +433,7 @@ The hosts' routing protocol type is set to :ned:`Gpsr`:
 
 The following video shows running the simulation from the beginning:
 
-.. video:: Gpsr1.mp4
+.. video:: media/Gpsr1.mp4
    :width: 698
    :align: center
 
@@ -470,7 +470,7 @@ in communication range (those that a beacon was received from) and uses
 that for routing decisions. Here is ``node12``'s neighbor position
 table:
 
-.. figure:: positions.png
+.. figure:: media/positions.png
    :width: 100%
 
 The table links node positions with IP addresses (it also contains the

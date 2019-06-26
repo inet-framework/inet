@@ -112,7 +112,7 @@ The simulation can be run by choosing the ``PcapRecording``
 configuration from the ini file. The simulation uses the following
 network:
 
-.. figure:: network2.png
+.. figure:: media/network2.png
    :width: 100%
 
 The network contains two ``adhocHost``\ s named ``host1`` and ``host2``,
@@ -177,7 +177,7 @@ The :par:`packetDataFilter` parameter's value ``*ArpPacket`` matches the
 ``inet::ArpPacket`` class. There is an ARP request packet open in the
 packet inspector on the following image:
 
-.. figure:: arppacketclass.png
+.. figure:: media/arppacketclass.png
    :width: 60%
    :align: center
 
@@ -249,7 +249,7 @@ Results
 
 The following video shows the traffic in the network:
 
-.. video:: pcap1.mp4
+.. video:: media/pcap1.mp4
    :width: 698
 
    <!--internal video recording, playback speed 1, no animation speed, run until first sendTimer (t=0.002), step, stop at about 10.5 seconds simulation time-->
@@ -261,36 +261,36 @@ sequence number, CRC, etc. Click to zoom.)
 
 TCP data, in ``ethHost1`` (sent from ``ethHost1`` to ``ethHost2``):
 
-.. figure:: ethHost9.png
+.. figure:: media/ethHost9.png
    :width: 100%
 
 Ping request, in ``router1``'s eth interface (sent from ``ethHost1`` to
 ``router1``):
 
-.. figure:: routerEth2_2.png
+.. figure:: media/routerEth2_2.png
    :width: 100%
 
 TCP ACK, in ``router1``'s ppp interface (sent from ``ethHost1`` to
 ``ethHost2``):
 
-.. figure:: routerPPP3.png
+.. figure:: media/routerPPP3.png
    :width: 100%
 
 UDP data packet, in ``host1``'s wlan interface (sent from ``host1`` to
 ``host2``):
 
-.. figure:: wifi5.png
+.. figure:: media/wifi5.png
    :width: 100%
 
 The following screenshot shows ``ethHost1.pcap`` opened with TCPDump:
 
-.. figure:: tcpdump.png
+.. figure:: media/tcpdump.png
    :width: 100%
 
 TCP data packet, in ``ethHost2``, recorded at the IPv4 module (sent from
 ``ethHost1`` to ``ethHost2``):
 
-.. figure:: rawip.png
+.. figure:: media/rawip.png
    :width: 100%
 
 The following images are the PCAP traces from ``host2`` and ``router2``,
@@ -299,12 +299,12 @@ where the set of recorded packets were narrowed with
 
 The ARP packets from ``host2``:
 
-.. figure:: arp.png
+.. figure:: media/arp.png
    :width: 100%
 
 The TCP data packets from ``router2``:
 
-.. figure:: tcpdata.png
+.. figure:: media/tcpdata.png
    :width: 100%
 
 Discussion

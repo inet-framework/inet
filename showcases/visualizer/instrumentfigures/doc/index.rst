@@ -24,41 +24,41 @@ Some of the instrument figure types available in INET are the following:
 
 - *gauge:* A circular gauge similar to a speedometer or pressure indicator.
 
-.. figure:: gauge.png
+.. figure:: media/gauge.png
    :align: center
    :width: 150
 
 - *linearGauge:* A horizontal linear gauge similar to a VU meter.
 
-.. figure:: linear.png
+.. figure:: media/linear.png
    :align: center
    :width: 300
 
 - *progressMeter:* A horizontal progress bar.
 
-.. figure:: progress.png
+.. figure:: media/progress.png
    :align: center
 
 - *counter:* An integer counter.
 
-.. figure:: counter.png
+.. figure:: media/counter.png
    :align: center
 
 - *thermometer:* A vertical meter visually similar to a real-life thermometer.
 
-.. figure:: thermometer.png
+.. figure:: media/thermometer.png
    :align: center
    :width: 100
 
 - *indexedImage:* A figure that displays one of several images: the first image for the value 0, the second image for the value of 1, and so on.
 
-.. image:: trafficlights.png
+.. image:: media/trafficlights.png
    :width: 30%
    :align: center
 
 - *plot:* An XY chart that plots a statistic in the function of time.
 
-.. figure:: plot.png
+.. figure:: media/plot.png
    :align: center
 
 
@@ -68,7 +68,7 @@ The Network
 The configuration for this showcase demonstrates the use of several
 instrument figures. It uses the following network:
 
-.. figure:: network3.png
+.. figure:: media/network3.png
    :width: 80%
    :align: center
 
@@ -168,7 +168,7 @@ Running the Simulation
 
 This video illustrates what happens when the simulation is run:
 
-.. video:: instruments.mp4
+.. video:: media/instruments.mp4
    :width: 100%
    :align: center
 

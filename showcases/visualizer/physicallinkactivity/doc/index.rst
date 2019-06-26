@@ -52,7 +52,7 @@ The network contains two :ned:`AdhocHost`'s, ``source`` and ``destination``.
 The ``linkVisualizer's`` type is :ned:`PhysicalLinkVisualizer`. In this
 simulation, ``source`` will be pinging ``destination``.
 
-.. figure:: PhysicalLinkVisualizerSimple.png
+.. figure:: media/PhysicalLinkVisualizerSimple.png
    :width: 100%
 
 Physical link activity visualization is enabled by setting the
@@ -65,7 +65,7 @@ Physical link activity visualization is enabled by setting the
 
 The following animation shows what happens when we start the simulation.
 
-.. video:: EnablingVisualization_v0614.m4v
+.. video:: media/EnablingVisualization_v0614.m4v
    :width: 698
 
 At the beginning of the animation, a red strip appears and moves from
@@ -101,7 +101,7 @@ The communication ranges of the nodes (blue circles in the picture) have
 been reduced so that ``source`` and ``destination`` cannot receive
 frames correctly from each other.
 
-.. figure:: Filtering_sh_all_comm_ranges.png
+.. figure:: media/Filtering_sh_all_comm_ranges.png
    :width: 100%
 
 For this network, the type of ``visualizer`` module is
@@ -120,7 +120,7 @@ The following video shows what happens when the simulation is run. The
 video was captured from the point when the hosts had already associated
 with ``accessPoint``.
 
-.. video:: Filtering_v0614.m4v
+.. video:: media/Filtering_v0614.m4v
    :width: 698
 
 You can see that although there are also ACK frames, Beacon frames and
@@ -144,7 +144,7 @@ also randomly roam within predefined borders. The communication range of
 nodes is reduced so that nodes can typically communicate only with some
 closer nodes.
 
-.. figure:: PhysicalLinkVisualizerDynamic.png
+.. figure:: media/PhysicalLinkVisualizerDynamic.png
    :width: 100%
 
 The nodes send UDP packets in every second by using an :ned:`UdpBasicApp`
@@ -165,7 +165,7 @@ Here is the configuration of the visualization.
 The following video shows what happens when we run the simulation. (If
 the video does not show up, try refreshing the page with Ctrl+Shift+R.)
 
-.. video:: Mobile_v0614.m4v
+.. video:: media/Mobile_v0614.m4v
    :width: 698
 
 Here, physical link activity looks like a connection graph, where

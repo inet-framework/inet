@@ -79,7 +79,7 @@ All other parameters of the visualizer are left on default.
 
 When the simulation is run, the network looks like this:
 
-.. figure:: displayroutes4.png
+.. figure:: media/displayroutes4.png
    :width: 80%
    :align: center
 
@@ -132,7 +132,7 @@ network compared to the simulation in the previous section. The
 simulations demonstrate the visualization when it is unfiltered and when
 it is filtered. The network looks like the following:
 
-.. figure:: filtersnetwork.png
+.. figure:: media/filtersnetwork.png
    :width: 80%
    :align: center
 
@@ -150,7 +150,7 @@ matching routing entries towards all destinations from all routing
 tables are visualized. With the default settings, the network looks like
 the following:
 
-.. figure:: fullmesh.png
+.. figure:: media/fullmesh.png
    :width: 80%
    :align: center
 
@@ -178,7 +178,7 @@ Note that ``router`` needs to be included because the route from
 
 The visualized routing entries look like the following:
 
-.. figure:: routes.png
+.. figure:: media/routes.png
    :width: 80%
    :align: center
 
@@ -187,7 +187,7 @@ and the changes take effect immediately. Just select the
 :ned:`RoutingTableVisualizer` module, and the parameters are listed in the
 inspector panel:
 
-.. figure:: parameters.png
+.. figure:: media/parameters.png
    :width: 100%
 
 Visualizing changing routing tables
@@ -218,7 +218,7 @@ configures the routing tables. To reduce clutter, we set the
 
 The following animation depicts what happens when the simulation is run.
 
-.. video:: routingtablevisualizer2.mp4
+.. video:: media/routingtablevisualizer2.mp4
    :width: 698
 
 When ``destinationHost`` starts to move downwards, packets get routed

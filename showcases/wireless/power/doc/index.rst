@@ -33,7 +33,7 @@ finished, we will analyze the recorded energy storage statistics.
 The simulations will be run using 20 hosts. Here is what the network
 will look like when the simulation is run:
 
-.. figure:: network4.png
+.. figure:: media/network4.png
    :width: 80%
    :align: center
 
@@ -130,7 +130,7 @@ next to each host indicate energy levels, and a red "x" on a host's icon
 means that the host is down. Note how energy levels change while the
 simulation is running.
 
-.. video:: power2.mp4
+.. video:: media/power2.mp4
    :width: 560
    :align: center
 
@@ -149,7 +149,7 @@ zigzags associated with receptions and transmissions. When hosts get
 fully charged, they maintain the maximum charge level while the
 generator is charging.
 
-.. figure:: residualcapacity3.png
+.. figure:: media/residualcapacity3.png
    :width: 100%
 
 The plot below shows the energy storage level (red curve) and the energy
@@ -172,13 +172,13 @@ increased power consumption associated with transmitting (it requires
 smooth (there are still some drawing artifacts due to multiple line
 segments, but that can be ignored).
 
-.. figure:: host12_3.png
+.. figure:: media/host12_3.png
    :width: 100%
 
 The following plot shows how the energy level of ``host[12]`` changes
 during a transmission while charging.
 
-.. figure:: host12-2.png
+.. figure:: media/host12-2.png
    :width: 100%
 
 ``host[0]`` is different from the other hosts in that it doesn't send
@@ -190,7 +190,7 @@ blue curve). This is so because is its energy consumption is still
 dominated by reception: the host spends most of its time listening, and
 only a fraction of time transmitting.
 
-.. figure:: consumption4.png
+.. figure:: media/consumption4.png
    :width: 100%
 
 The following plot shows a ping request-ping reply exchange (with the
@@ -203,7 +203,7 @@ indeed consume more power when transmitting than the generator
 generates. However, transmissions are very short and very rare, so one
 needs to zoom in on the graph to see this effect.
 
-.. figure:: ping-ack2.png
+.. figure:: media/ping-ack2.png
    :width: 80%
 
 Discussion

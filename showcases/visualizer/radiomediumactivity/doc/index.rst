@@ -54,7 +54,7 @@ choosing the ``DisplayingPropagationTransmissionsReceptions``
 configuration from the ini file. The simulation uses the following
 network:
 
-.. figure:: simplenetwork.png
+.. figure:: media/simplenetwork.png
    :width: 100%
 
 The scene size is about 900x600 meters. The network contains two
@@ -73,14 +73,14 @@ following visualizer settings:
 
 When the simulation is run the network looks like this:
 
-.. figure:: simple.png
+.. figure:: media/simple.png
    :width: 100%
 
 Parts of the communication range circles are visible in the image. With
 the current radio settings, the interference ranges are much larger than
 the communication ranges. One has to zoom out for them to be visible:
 
-.. figure:: interferencerange.png
+.. figure:: media/interferencerange.png
    :width: 100%
 
 The communication and interference ranges are estimated for each node,
@@ -102,7 +102,7 @@ optimization.)
 The following video illustrates the visualization of propagating
 signals:
 
-.. video:: propagation9.mp4
+.. video:: media/propagation9.mp4
    :width: 698
 
 ``host1`` sends an ARP request packet to ``host2``, which sends an
@@ -163,7 +163,7 @@ until the "last bit" has traveled past the farthest node. In this
 phase, the simulation slows down again. The transition between the two
 simulation speeds is smooth.
 
-.. figure:: phases.png
+.. figure:: media/phases.png
    :width: 100%
 
 Also, it can happen that the simulation doesn't slow down because the
@@ -240,7 +240,7 @@ The configuration
 
 The example configuration for this section uses the following network:
 
-.. figure:: multiplenodesnetwork.png
+.. figure:: media/multiplenodesnetwork.png
    :width: 100%
 
 The scene size is 1000x500 meters. The network contains three
@@ -271,12 +271,12 @@ communication and interference range circles are not enabled in this
 simulation; the following screenshot illustrates where the communication
 range circles would be if they were enabled:
 
-.. figure:: relay_ranges.png
+.. figure:: media/relay_ranges.png
    :width: 100%
 
 When the simulation is run, this happens:
 
-.. video:: MultipleNodes14.mp4
+.. video:: media/MultipleNodes14.mp4
    :width: 698
 
    <!--internal video recording, animation speed none, playback speed 1.00-->
@@ -298,7 +298,7 @@ Interfering signals
 This configuration demonstrates how the visualization of interfering
 signals looks like. It uses the following network:
 
-.. figure:: interferencenetwork.png
+.. figure:: media/interferencenetwork.png
    :width: 100%
 
 The scene size is 1000x500 meters. The network contains three
@@ -314,7 +314,7 @@ effectively.
 
 Here is what happens when the simulation is run:
 
-.. video:: interference.mp4
+.. video:: media/interference.mp4
    :width: 698
 
 The two sources can't detect each other's transmissions, but they receive

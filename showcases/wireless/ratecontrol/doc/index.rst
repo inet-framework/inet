@@ -69,7 +69,7 @@ of the scene, acting as an obstacle. The line of transmission will
 intersect the obstacle at certain times, which will degrade
 transmissions.
 
-.. figure:: network2.png
+.. figure:: media/network2.png
    :width: 100%
 
 Configuration
@@ -97,10 +97,10 @@ are moving. When using rate control, ``sinkHost`` manages to receive
 more transmission successfully when transmissions go through the
 forest.
 
-.. video:: noratecontrol3.mp4
+.. video:: media/noratecontrol3.mp4
    :width: 698
 
-.. video:: aarf3.mp4
+.. video:: media/aarf3.mp4
    :width: 698
 
 Bitrate and throughput are recorded during the simulations. The
@@ -108,10 +108,10 @@ following plots show the nominal data bitrate and the actual application
 level throughput for the two configurations (the values are in s and
 bps).
 
-.. figure:: noratecontrol2.png
+.. figure:: media/noratecontrol2.png
    :width: 100%
 
-.. figure:: aarf2.png
+.. figure:: media/aarf2.png
    :width: 100%
 
 In the configuration where there is no rate control, the nominal bitrate
@@ -127,10 +127,10 @@ zero. There are intervals where it decreases to zero, even though the
 rate is set to the lowest level (6 Mbps). Throughput and nominal data
 rate for the two scenarios can be compared on the following plots.
 
-.. image:: throughput2.png
+.. image:: media/throughput2.png
    :width: 100%
 
-.. image:: bitrate2.png
+.. image:: media/bitrate2.png
    :width: 100%
 
 The received packet count at ``sinkHost`` is 18366 for 'No rate

@@ -56,7 +56,7 @@ One can click on the packet drop icon to display information about the
 packet drop in the inspector panel, such as the packet drop reason,
 or the module where the packet was dropped:
 
-.. figure:: inspector2.png
+.. figure:: media/inspector2.png
    :width: 70%
    :align: center
 
@@ -77,7 +77,7 @@ to queue overflow. This simulation can be run by choosing the
 bottleneck link where packets will be dropped due to an overflowing
 queue:
 
-.. figure:: queuefullnetwork.png
+.. figure:: media/queuefullnetwork.png
    :width: 80%
    :align: center
 
@@ -115,18 +115,18 @@ and packets start accumulating in the queue of the switch. When the
 queue fills up, the switch starts dropping packets. This scenario is illustrated
 in this animation:
 
-.. video:: queueoverflow1.mp4
+.. video:: media/queueoverflow1.mp4
    :width: 628
 
 Here is the queue in the switch's eth1 interface, showing the number of
 packet drops:
 
-.. figure:: ethqueue.png
+.. figure:: media/ethqueue.png
    :align: center
 
 This log excerpt shows the packet drop:
 
-.. figure:: log_queuefull_3.png
+.. figure:: media/log_queuefull_3.png
 
 
 ARP resolution failed
@@ -137,7 +137,7 @@ configuration for this example is ``ArpResolutionFailed`` in the ini
 file. Packets will be dropped because the MAC address of the destination
 cannot be resolved. The network for this configuration is the following:
 
-.. figure:: arpfailednetwork.png
+.. figure:: media/arpfailednetwork.png
    :align: center
 
 It contains only one host, an :ned:`AdhocHost`.
@@ -149,12 +149,12 @@ dropped.
 
 The following animation illustrates this:
 
-.. video:: arp1.mp4
+.. video:: media/arp1.mp4
    :width: 366
 
 This excerpt shows this in the log:
 
-.. figure:: log_arpfailed_2.png
+.. figure:: media/log_arpfailed_2.png
    :width: 100%
 
 MAC retry limit reached
@@ -165,7 +165,7 @@ communicate while out of communication range. The simulation can be run
 by selecting the ``MACRetryLimitReached`` configuration from the ini
 file. The configuration uses the following network:
 
-.. figure:: maclimitnetwork.png
+.. figure:: media/maclimitnetwork.png
    :align: center
 
 It contains two :ned:`AdhocHost`'s, named ``source`` and ``destination``.
@@ -177,12 +177,12 @@ ping packets, but it doesn't receive any ACK in reply. The ``source's``
 MAC module drops the packets after the retry limit has been reached.
 This scenario is illustrated in the following animation:
 
-.. video:: retry.mp4
+.. video:: media/retry.mp4
    :width: 512
 
 These events looks like the following in the logs:
 
-.. figure:: log_macretrylimit_2.png
+.. figure:: media/log_macretrylimit_2.png
    :width: 100%
 
 No route to destination
@@ -192,7 +192,7 @@ In this example, packets will be dropped due to the lack of static
 routes. The configuration is ``NoRouteToDestination`` in the ini file.
 The network is the following:
 
-.. figure:: noroutenetwork.png
+.. figure:: media/noroutenetwork.png
    :width: 60%
    :align: center
 
@@ -203,12 +203,12 @@ and ``host1`` is configured to ping ``host2``.
 The ping packets can't be routed, thus the IP module drops them. This scenario is
 illustrated in the following video:
 
-.. video:: noroute.mp4
+.. video:: media/noroute.mp4
    :width: 416
 
 Here is also a log excerpt illustrating this:
 
-.. figure:: log_noroute_2.png
+.. figure:: media/log_noroute_2.png
 
 Interface not connected
 -----------------------
@@ -217,7 +217,7 @@ In this example (``InterfaceNotConnected`` configuration in the ini
 file), packet drops occur due to a disabled wired connection between the
 hosts:
 
-.. figure:: unroutablenetwork.png
+.. figure:: media/unroutablenetwork.png
    :align: center
 
 It contains two :ned:`StandardHost`'s, connected with an ethernet cable. The
@@ -228,13 +228,13 @@ Since the cable between the hosts is configured to be disabled, the MAC
 module is unable to send the packets and drops them. This is
 illustrated in the following animation:
 
-.. video:: notconnected.mp4
+.. video:: media/notconnected.mp4
    :width: 414
 
 Note the packet drop animation at ``host1``. The packet drops are also
 evidenced in the log:
 
-.. figure:: log_notconnected_2.png
+.. figure:: media/log_notconnected_2.png
    :width: 100%
 
 Further information

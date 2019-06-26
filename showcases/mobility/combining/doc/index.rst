@@ -31,7 +31,7 @@ The model
 
 Example simulations in this showcase, except for the last one, use the following network:
 
-.. image:: scene.png
+.. image:: media/scene.png
    :width: 50%
    :align: center
 
@@ -85,7 +85,7 @@ offset 45 degrees.
 
 Here is a video of the simulation running:
 
-.. video:: Attached2_2.mp4
+.. video:: media/Attached2_2.mp4
    :width: 50%
 
 The hosts keep a formation around ``host[0]``. Note that as ``host[0]``
@@ -110,14 +110,14 @@ scene. The other hosts use :ned:`AttachedMobility`, and are
 attached to ``host[0]`` with various offsets, summarized on the
 following image:
 
-.. image:: circular.png
+.. image:: media/circular.png
    :width: 50%
    :align: center
 
 The attached hosts keep the offset from ``host[0]``, and they
 move circularly as the coordinate system of ``host[0]`` moves and rotates:
 
-.. video:: Attached3.mp4
+.. video:: media/Attached3.mp4
    :width: 50%
 
 The relative positions of the hosts are constant. For example, it appears as if
@@ -157,7 +157,7 @@ submodules can be referenced with :par:`mobility.element[0].typeName = XY`.
 This is also visible if we take a look at the inside of ``host[0]``'s
 mobility submodule:
 
-.. image:: MobilityElements.png
+.. image:: media/MobilityElements.png
    :width: 40%
    :align: center
 
@@ -165,13 +165,13 @@ In the following image you can see that the position and velocity
 of the :ned:`SuperpositioningMobility` module is indeed the sum of the position
 and velocity of the contained submodules (visible in the previous image):
 
-.. image:: MobilitySum.png
+.. image:: media/MobilitySum.png
    :width: 40%
    :align: center
 
 On the following video, you can see the resulting motion:
 
-.. video:: Superpositioning1.mp4
+.. video:: media/Superpositioning1.mp4
    :width: 50%
 
 Example: Orbiting a Node
@@ -209,7 +209,7 @@ module needs to include negative values for the X and Y coordinates.
 
 The following video shows the resulting movement of the hosts:
 
-.. video:: Superpositioning2.mp4
+.. video:: media/Superpositioning2.mp4
    :width: 50%
 
 Example: Mars Rover
@@ -226,7 +226,7 @@ The simulation contains the following nodes:
 
 The following image shows the initial layout of the scene:
 
-.. image:: AntennaOrientation_layout.png
+.. image:: media/AntennaOrientation_layout.png
    :width: 75%
    :align: center
 
@@ -283,7 +283,7 @@ unrealistically large.
 
 The following video shows the results:
 
-.. video:: AntennaOrientation.mp4
+.. video:: media/AntennaOrientation.mp4
    :width: 75%
 
 Discussion

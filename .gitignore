@@ -11,6 +11,7 @@ src/inet/features.h
 src/inet/opp_defines.h
 precompiled_*.h.*
 /3rdparty
+/media
 **/MoBAN_Pattern*.txt
 
 # output and result files
@@ -27,7 +28,6 @@ precompiled_*.h.*
 /examples/*/*/cache/
 /tutorials/*/cache/
 /tutorials/*/data/
-/tutorials/wireless/html/
 /tests/*/work/
 /tests/*/*/work/
 /tests/*/results*/

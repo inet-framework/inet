@@ -59,7 +59,7 @@ sense when the other is transmitting. The wall is enabled or disabled in
 the various simulations. Hosts A and C both send UDP packets to Host B,
 which is able to receive the transmissions of both hosts.
 
-.. figure:: network.png
+.. figure:: media/network.png
    :width: 80%
    :align: center
 
@@ -100,7 +100,7 @@ retransmitted packets also collide, because the packets are long
 compared to the backoff period. Finally, Host C manages to send its
 packet without interference.
 
-.. video:: WallOnRtsOff2.mp4
+.. video:: media/WallOnRtsOff2.mp4
    :width: 560
    :align: center
 
@@ -108,7 +108,7 @@ packet without interference.
 
 Here is what a collision looks like in the log:
 
-.. figure:: collision.png
+.. figure:: media/collision.png
    :width: 60%
    :align: center
 
@@ -126,13 +126,13 @@ and since they are short, the collisions don't take up much time.
 The following sequence chart has been recorded from the simulation and
 depicts an RTS collision.
 
-.. figure:: rtscollision.png
+.. figure:: media/rtscollision.png
    :width: 60%
    :align: center
 
 The following animation shows the RTS/CTS and data frame exchange.
 
-.. video:: WallOnRtsOn.mp4
+.. video:: media/WallOnRtsOn.mp4
    :width: 560
    :align: center
 
@@ -141,7 +141,7 @@ makes the communication more coordinated, as the nodes know when to
 transmit to avoid collisions. It also illustrates that RTS and
 CTS frames are much shorter than data frames.
 
-.. figure:: rts-seq.png
+.. figure:: media/rts-seq.png
    :width: 100%
 
 The number of received packets at Host B (RTS/CTS on): **1971**

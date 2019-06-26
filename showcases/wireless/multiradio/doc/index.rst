@@ -34,7 +34,7 @@ to have multiple wireless interfaces.
 To test the router, we'll use two hosts, one on each wireless LAN.
 The network will look like the following:
 
-.. figure:: network.png
+.. figure:: media/network.png
    :width: 70%
    :align: center
 
@@ -70,7 +70,7 @@ as disks, and successful transmissions between nodes' data link layers are visua
 The transmissions for the two different networks (both disks and arrows) are colored
 differently (red for wlan2.4 and blue for wlan5.)
 
-.. video:: ping3.mp4
+.. video:: media/ping3.mp4
    :width: 698
 
 .. run until sendPing, zoom 1.3, no animation speed, playback speed 0.4

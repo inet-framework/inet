@@ -34,7 +34,7 @@ the association is complete, data exchange can begin.
 
 The example simulation will use the following network:
 
-.. figure:: network2.png
+.. figure:: media/network2.png
    :width: 80%
    :align: center
 
@@ -53,7 +53,7 @@ Results
 
 The following animation shows what happens when the simulation is run:
 
-.. video:: handover1.mp4
+.. video:: media/handover1.mp4
    :width: 560
    :align: center
 
@@ -70,7 +70,7 @@ Response. As AP1 is on channel 2, the host sends out three Probe
 Requests before it gets a Probe Response. This frame exchange is shown in the following
 packet log.
 
-.. figure:: scan.png
+.. figure:: media/scan.png
    :width: 100%
 
 When the host gets the Probe Response, it initiates the authentication
@@ -80,12 +80,12 @@ associated with AP1, a text bubble appears at the host indicating that
 it is associated with the AP. The authentication and association
 processes are shown in the packet log below.
 
-.. figure:: assoc.png
+.. figure:: media/assoc.png
    :width: 100%
 
 This animation shows the handover.
 
-.. video:: handover2.mp4
+.. video:: media/handover2.mp4
    :width: 560
    :align: center
 
@@ -117,16 +117,16 @@ leaves AP2's communication range.
 The host's ``mgmt`` module contains a variable that indicates which
 access point the host is associated with.
 
-.. figure:: assocap2.png
+.. figure:: media/assocap2.png
    :width: 100%
 
 The ``mgmt`` modules of access points maintain a list of hosts that are
 associated with them.
 
-.. figure:: stalist1.png
+.. figure:: media/stalist1.png
    :width: 100%
 
-.. figure:: stalist2.png
+.. figure:: media/stalist2.png
    :width: 100%
 
 Discussion

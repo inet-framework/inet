@@ -70,7 +70,7 @@ In addition to the two hosts named ``source`` and ``destination``,
 the network also contains a :ned:`PhysicalEnvironment` module, an
 :ned:`Ipv4NetworkConfigurator`, and a :ned:`Ieee80211ScalarRadioMedium`:
 
-.. figure:: network.png
+.. figure:: media/network.png
    :width: 80%
    :align: center
 
@@ -135,12 +135,12 @@ The power of the received signal vs. distance, using
 :ned:`TwoRayInterference` path loss module types, is displayed on the
 following plot:
 
-.. image:: tworay.*
+.. image:: media/tworay.*
    :width: 100%
 
 Here is the same plot zoomed in:
 
-.. image:: tworay2.*
+.. image:: media/tworay2.*
    :width: 100%
 
 It is apparent that the two-ray ground reflection model yields the same
@@ -155,14 +155,14 @@ The next plot displays the power of the received signal vs. distance
 using the :ned:`RicianFading` and :ned:`LogNormalShadowing` models, and the
 :ned:`FreeSpacePathLoss` model for reference:
 
-.. image:: ricianlognormal.*
+.. image:: media/ricianlognormal.*
    :width: 100%
 
 The sharp visual change in the "raggedness" of the curves near 100m is
 due to the data points becoming less dense. Here is the same plot zoomed
 in on the near-field:
 
-.. image:: ricianlognormal2.*
+.. image:: media/ricianlognormal2.*
    :width: 100%
 
 Further Information

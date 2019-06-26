@@ -41,7 +41,7 @@ default visualizer settings. It can be run by choosing the
 ``OneNetwork`` configuration from the ini file. The simulation uses the
 following network:
 
-.. figure:: simplenetwork.png
+.. figure:: media/simplenetwork.png
    :width: 60%
    :align: center
 
@@ -63,7 +63,7 @@ The visualization is activated with the visualizer's
 When the simulation is run for a while, the network will look like the
 following. Note the icons above the host and the access point.
 
-.. figure:: displayassoc.png
+.. figure:: media/displayassoc.png
    :width: 60%
    :align: center
 
@@ -80,7 +80,7 @@ the icons being color-coded. When the association processes take place,
 the network will look like the following. Note the different SSIDs
 (``alpha``, ``bravo``) and the colors.
 
-.. figure:: advanced2.png
+.. figure:: media/advanced2.png
    :width: 80%
    :align: center
 
@@ -102,7 +102,7 @@ circles. The following animation shows what happens when the simulation
 is run. Note how the indicator above the host changes after each
 handover.
 
-.. video::  handover10.mp4
+.. video:: media/handover10.mp4
    :width: 580
 
    <!--internal video recording, animation speed node, run in fast mode-->

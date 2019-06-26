@@ -31,7 +31,7 @@ OpenSceneGraph (OSG). To try these examples yourself, make sure that your
 OMNeT++ installation has been compiled with OSG support. If it is not,
 you won't be able to switch to 3D view using the globe icon on the Qtenv toolbar.
 
-.. figure:: QtenvToolbar.png
+.. figure:: media/QtenvToolbar.png
    :scale: 100%
    :align: center
 
@@ -41,7 +41,7 @@ The model
 The simulations use the :ned:`MobilityShowcase3D` network. It contains a
 configurable number of mobile nodes (hosts) and an :ned:`IntegratedVisualizer` module.
 
-.. figure:: Playground2D.png
+.. figure:: media/Playground2D.png
    :scale: 80%
    :align: center
 
@@ -67,7 +67,7 @@ at the time of writing, not all features are implemented in :ned:`MobilityOsgVis
 
 When simulations are run, the scene looks like the following in 3D view:
 
-.. figure:: 3DPlayground.png
+.. figure:: media/3DPlayground.png
    :scale: 100%
    :align: center
 
@@ -101,7 +101,7 @@ a spiral path. This looks like the following in the configuration:
 
 The following video shows the resulting spiral motion:
 
-.. video:: Spiral.mp4
+.. video:: media/Spiral.mp4
    :width: 50%
    :align: center
 
@@ -133,7 +133,7 @@ to ramble in three dimensions.
 
 The following video shows the movement of the drones:
 
-.. video:: Drone.mp4
+.. video:: media/Drone.mp4
    :width: 50%
    :align: center
 

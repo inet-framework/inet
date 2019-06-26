@@ -144,7 +144,7 @@ playground.
 The simulation can be "run" (it does nothing) by selecting the ``Canvas``
 configuration from ``omnetpp.ini``. You should see the following:
 
-.. figure:: IconsOnCanvas_v0111.png
+.. figure:: media/IconsOnCanvas_v0111.png
    :width: 40%
    :align: center
 
@@ -165,7 +165,7 @@ by enabling it in :ned:`IntegratedVisualizer`.
 When you run the ``Basic3D`` configuration on the ini file, you should
 see something like the following:
 
-.. figure:: IconsOnOsgscene_v0111.png
+.. figure:: media/IconsOnOsgscene_v0111.png
    :width: 80%
    :align: center
 
@@ -190,7 +190,7 @@ You can run the simulation by selecting the ``Using3DModels`` configuration
 from the ini file. The following animation shows how the nodes look
 like after we have replaced their icons with 3D models.
 
-.. video:: ModelsLoaded.mp4
+.. video:: media/ModelsLoaded.mp4
    :width: 698
 
 The ``pedestrian`` node is represented by an animated walking boxman, and
@@ -205,7 +205,7 @@ match the orientation of the node. For example, when we add motion
 to our previous configuration (select ``AddingMovement`` from the ini file),
 the boxman will walk sideways:
 
-.. video:: PedestrianMovesSideways.mp4
+.. video:: media/PedestrianMovesSideways.mp4
    :width: 698
 
 The orientation of the 3D model can be initialized by the ``rot`` pseudo
@@ -219,7 +219,7 @@ rotated 90 degrees counterclockwise around the Z axis.
    :end-at: 90.rot
    :language: ini
 
-.. video:: NodesOrientationIsRight.mp4
+.. video:: media/NodesOrientationIsRight.mp4
    :width: 698
 
 The above animation shows that both 3D models' orientation is correct.

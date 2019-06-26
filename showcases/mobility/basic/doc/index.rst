@@ -49,7 +49,7 @@ The size of the scene is 400x400x0 meters. It contains a configurable
 number of hosts and an :ned:`IntegratedVisualizer` module to
 visualize some aspects of mobility. The following image shows the layout of the network:
 
-.. figure:: scene.png
+.. figure:: media/scene.png
    :scale: 100%
    :align: center
 
@@ -113,7 +113,7 @@ zero for acceleration and a random value for the angle.
 
 The following video shows the motion of the nodes:
 
-.. video:: LinearMobility.mp4
+.. video:: media/LinearMobility.mp4
    :width: 50%
 
 The video shows that the seven hosts are placed randomly on the scene with a
@@ -135,7 +135,7 @@ with different radii, directions and speeds:
 
 You can see the result of the configuration on the following video:
 
-.. video:: CircleMobility.mp4
+.. video:: media/CircleMobility.mp4
    :width: 50%
 
 TurtleMobility
@@ -172,7 +172,7 @@ small time intervals for forward motion, and small turning angles:
 
 It looks like the following when the simulation is run:
 
-.. video:: TurtleMobility.mp4
+.. video:: media/TurtleMobility.mp4
    :width: 50%
 
 GaussMarkovMobility
@@ -199,7 +199,7 @@ The mobility module is set to totally random motion, with a variance of 0.5.
 
 The following video shows the resulted random motion:
 
-.. video:: GaussMarkovMobility.mp4
+.. video:: media/GaussMarkovMobility.mp4
    :width: 50%
 
 FacingMobility
@@ -218,7 +218,7 @@ mobility module, the :par:`targetMobility` parameter to ``host2``'s mobility mod
 the orientation of ``host3`` points in the direction of the
 ``host1``-``host2`` vector:
 
-.. figure:: FacingMobility.png
+.. figure:: media/FacingMobility.png
    :width: 50%
    :align: center
 
@@ -235,7 +235,7 @@ are configured to face ``host[0]`` using :ned:`FacingMobility`:
 
 The following video shows how all of the nodes are facing ``host[0]`` as it moves:
 
-.. video:: FacingMobility.mp4
+.. video:: media/FacingMobility.mp4
    :width: 50%
 
 BonnMotionMobility
@@ -270,7 +270,7 @@ t=3s, etc.
 
 The movement of the nodes looks like the following when the simulation is run:
 
-.. video:: BonnmotionMobility.mp4
+.. video:: media/BonnmotionMobility.mp4
    :width: 50%
 
 Stationary Placement
@@ -301,7 +301,7 @@ We specify only the :par:`numHosts` parameter; the other parameters of the
 mobility are left on their defaults. Thus the layout conforms to the
 available space:
 
-.. figure:: StaticGridMobility.png
+.. figure:: media/StaticGridMobility.png
    :scale: 100%
    :align: center
 
@@ -324,7 +324,7 @@ The configuration for the example simulation in omnetpp.ini is the following:
 
 The configuration just sets the mobility type. Here is what it looks like when the simulation is run:
 
-.. figure:: StationaryMobility.png
+.. figure:: media/StationaryMobility.png
    :scale: 100%
    :align: center
 

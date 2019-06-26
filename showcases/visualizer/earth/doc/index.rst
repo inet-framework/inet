@@ -35,7 +35,7 @@ Boston into the simulation. It can be run by choosing the
 ``DefaultSettings`` configuration from the ini file. It uses the
 following network:
 
-.. figure:: defaultnetwork.png
+.. figure:: media/defaultnetwork.png
    :width: 20%
    :align: center
 
@@ -100,7 +100,7 @@ The map is displayed on the 3D scene. Since there are no nodes or
 objects in the network, the size of the scene is zero and the screen
 floor is not visible.
 
-.. figure:: defaultmap.png
+.. figure:: media/defaultmap.png
    :width: 100%
 
 
@@ -118,7 +118,7 @@ The objects could affect radio transmissions if an obstacle loss model were set.
 The network for this configuration extends the network from the previous
 section with a :ned:`PhysicalEnvironment` module:
 
-.. figure:: objectsnetwork.png
+.. figure:: media/objectsnetwork.png
    :width: 20%
    :align: center
 
@@ -142,7 +142,7 @@ The objects that represent blocks of buildings are displayed as semi-transparent
 red blocks, and the group of trees at the park's edge is displayed as a
 semi-transparent green block.
 
-.. figure:: objectsmap.png
+.. figure:: media/objectsmap.png
    :width: 100%
 
 
@@ -155,7 +155,7 @@ configuration from the ini file. The network for this configuration
 extends the previous network with a radio medium and a network
 configurator module. It also adds four :ned:`AdhocHost`'s:
 
-.. figure:: nodesnetwork.png
+.. figure:: media/nodesnetwork.png
    :width: 50%
    :align: center
 
@@ -184,14 +184,14 @@ and tick *Include marker*. The marker can be
 dragged on the map, and the coordinates of the marker's location can
 be read (and copy-pasted into the ini file) from the *Share* panel.
 
-.. figure:: openstreetmap.png
+.. figure:: media/openstreetmap.png
    :width: 100%
 
 The scene with the nodes looks like the following when the simulation is run.
 The scene floor is visible against the map, and you can verify that the nodes
 have been placed at the specified coordinates.
 
-.. figure:: nodesmap2.png
+.. figure:: media/nodesmap2.png
    :width: 100%
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`EarthVisualizationShowcase.ned <../EarthVisualizationShowcase.ned>`

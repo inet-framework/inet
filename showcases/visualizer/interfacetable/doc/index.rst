@@ -69,7 +69,7 @@ Enabling the visualization
 The first example demonstrates the default operation of the visualizer.
 The simulation uses the following network:
 
-.. figure:: simplenetwork.png
+.. figure:: media/simplenetwork.png
    :width: 60%
    :align: center
 
@@ -87,7 +87,7 @@ The interface names and the assigned IP addresses are displayed at the
 gates where the interfaces are connected. When the simulation is run,
 the network looks like the following:
 
-.. figure:: simple.png
+.. figure:: media/simple.png
    :width: 60%
    :align: center
 
@@ -99,7 +99,7 @@ visualizer in a dynamic scenario, as well as demonstrate filtering. The
 simulation can be run by choosing the ``AdvancedFeatures`` configuration
 from the ini file. It uses the following network:
 
-.. figure:: advancednetwork.png
+.. figure:: media/advancednetwork.png
    :width: 80%
    :align: center
 
@@ -123,7 +123,7 @@ and the router are visualized. The wireless hosts have unspecified
 addresses, thus no interface indicator is displayed. The network looks
 like this:
 
-.. figure:: advancedbeginning.png
+.. figure:: media/advancedbeginning.png
    :width: 80%
    :align: center
 
@@ -132,7 +132,7 @@ When the wireless hosts have been associated with the access point and
 received their addresses from the DHCP server, the new addresses will be
 displayed. The network will look like this:
 
-.. figure:: advanced.png
+.. figure:: media/advanced.png
    :width: 80%
    :align: center
 
