@@ -1,0 +1,8 @@
+<scenario>
+    <at t="10">
+        <create-module type="inet.node.inet.WirelessHost" parent="." submodule="someHost"/>
+    </at>
+    <at t="20">
+        <delete-module module="someHost"/>
+    </at>
+</scenario>

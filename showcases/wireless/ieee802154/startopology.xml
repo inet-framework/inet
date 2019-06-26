@@ -1,0 +1,6 @@
+<config>
+	<interface hosts="controller" address="10.0.0.1" netmask="255.255.x.x"/>
+	<interface hosts="**" address="10.0.x.x" netmask="255.255.x.x"/>
+	<route hosts="controller" interface="wlan0" destination="*" gateway="*"/>
+	<route hosts="lamp* sensor*" destination="*" gateway="10.0.0.1"/>
+</config>

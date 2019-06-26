@@ -1,0 +1,14 @@
+<scenario>
+    <at t="5">
+        <shutdown module="router1"/>
+    </at>
+    <at t="10">
+        <startup module="router1"/>
+    </at>
+    <at t="15">
+        <shutdown module="router3"/>
+    </at>
+    <at t="20">
+        <startup module="router3"/>
+    </at>
+</scenario>

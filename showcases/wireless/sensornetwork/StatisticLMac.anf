@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scave:Analysis xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:scave="http://www.omnetpp.org/omnetpp/scave">
+  <inputs>
+    <inputs name="/inet/showcases/wireless/sensornetwork/results/StatisticLMac-*.sca"/>
+  </inputs>
+  <datasets>
+    <datasets name="packetReceived:count SensorNetworkShowcaseB.server.app[0]">
+      <items xsi:type="scave:Add" filterPattern="module(SensorNetworkShowcaseB.server.app[0]) AND name(packetReceived:count)"/>
+      <items xsi:type="scave:BarChart" name="LMac"/>
+    </datasets>
+  </datasets>
+  <chartSheets/>
+</scave:Analysis>
