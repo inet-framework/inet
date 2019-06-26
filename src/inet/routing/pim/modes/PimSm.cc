@@ -235,37 +235,34 @@ void PimSm::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj
 {
     Enter_Method_Silent();
     printSignalBanner(signalID, obj, details);
-    Route *route;
-    const Ipv4Header *ipv4Header;
-    PimInterface *pimInterface;
 
     if (signalID == ipv4MulticastGroupRegisteredSignal) {
         EV << "pimSM::receiveChangeNotification - NEW IGMP ADDED" << endl;
         const Ipv4MulticastGroupInfo *info = check_and_cast<const Ipv4MulticastGroupInfo *>(obj);
-        pimInterface = pimIft->getInterfaceById(info->ie->getInterfaceId());
+        PimInterface *pimInterface = pimIft->getInterfaceById(info->ie->getInterfaceId());
         if (pimInterface && pimInterface->getMode() == PimInterface::SparseMode)
             multicastReceiverAdded(info->ie, info->groupAddress);
     }
     else if (signalID == ipv4MulticastGroupUnregisteredSignal) {
         EV << "pimSM::receiveChangeNotification - IGMP REMOVED" << endl;
         const Ipv4MulticastGroupInfo *info = check_and_cast<const Ipv4MulticastGroupInfo *>(obj);
-        pimInterface = pimIft->getInterfaceById(info->ie->getInterfaceId());
+        PimInterface *pimInterface = pimIft->getInterfaceById(info->ie->getInterfaceId());
         if (pimInterface && pimInterface->getMode() == PimInterface::SparseMode)
             multicastReceiverRemoved(info->ie, info->groupAddress);
     }
     else if (signalID == ipv4NewMulticastSignal) {
         EV << "PimSM::receiveChangeNotification - NEW MULTICAST" << endl;
-        ipv4Header = check_and_cast<const Ipv4Header *>(obj);
+        const Ipv4Header *ipv4Header = check_and_cast<const Ipv4Header *>(obj);
         Ipv4Address srcAddr = ipv4Header->getSrcAddress();
         Ipv4Address destAddr = ipv4Header->getDestAddress();
         unroutableMulticastPacketArrived(srcAddr, destAddr);
     }
     else if (signalID == ipv4DataOnRpfSignal) {
         EV << "pimSM::receiveChangeNotification - DATA ON RPF" << endl;
-        ipv4Header = check_and_cast<const Ipv4Header *>(obj);
+        const Ipv4Header *ipv4Header = check_and_cast<const Ipv4Header *>(obj);
         PimInterface *incomingInterface = getIncomingInterface(check_and_cast<InterfaceEntry *>(details));
         if (incomingInterface && incomingInterface->getMode() == PimInterface::SparseMode) {
-            route = findRouteG(ipv4Header->getDestAddress());
+            Route *route = findRouteG(ipv4Header->getDestAddress());
             if (route)
                 multicastPacketArrivedOnRpfInterface(route);
             route = findRouteSG(ipv4Header->getSrcAddress(), ipv4Header->getDestAddress());
@@ -274,11 +271,12 @@ void PimSm::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj
         }
     }
     else if (signalID == ipv4DataOnNonrpfSignal) {
-        ipv4Header = check_and_cast<const Ipv4Header *>(obj);
+        const Ipv4Header *ipv4Header = check_and_cast<const Ipv4Header *>(obj);
         PimInterface *incomingInterface = getIncomingInterface(check_and_cast<InterfaceEntry *>(details));
         if (incomingInterface && incomingInterface->getMode() == PimInterface::SparseMode) {
             Ipv4Address srcAddr = ipv4Header->getSrcAddress();
             Ipv4Address destAddr = ipv4Header->getDestAddress();
+            Route *route;
             if ((route = findRouteSG(srcAddr, destAddr)) != nullptr)
                 multicastPacketArrivedOnNonRpfInterface(route, incomingInterface->getInterfaceId());
             else if ((route = findRouteG(destAddr)) != nullptr)
@@ -290,7 +288,7 @@ void PimSm::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj
         Packet *pk = check_and_cast<Packet *>(obj);
         const auto& ipv4Header = pk->peekAtFront<Ipv4Header>();
         PimInterface *incomingInterface = getIncomingInterface(check_and_cast<InterfaceEntry *>(details));
-        route = findRouteSG(ipv4Header->getSrcAddress(), ipv4Header->getDestAddress());
+        Route *route = findRouteSG(ipv4Header->getSrcAddress(), ipv4Header->getDestAddress());
         if (incomingInterface && incomingInterface->getMode() == PimInterface::SparseMode)
             multicastPacketForwarded(pk);
     }
