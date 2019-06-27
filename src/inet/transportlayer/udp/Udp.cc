@@ -144,6 +144,15 @@ void Udp::initialize(int stage)
     }
     else if (stage == INITSTAGE_TRANSPORT_LAYER) {
         if (crcMode == CRC_COMPUTED) {
+            //TODO:
+            // Unlike IPv4, when UDP packets are originated by an IPv6 node,
+            // the UDP checksum is not optional.  That is, whenever
+            // originating a UDP packet, an IPv6 node must compute a UDP
+            // checksum over the packet and the pseudo-header, and, if that
+            // computation yields a result of zero, it must be changed to hex
+            // FFFF for placement in the UDP header.  IPv6 receivers must
+            // discard UDP packets containing a zero checksum, and should log
+            // the error.
 #ifdef WITH_IPv4
             auto ipv4 = dynamic_cast<INetfilter *>(getModuleByPath("^.ipv4.ip"));
             if (ipv4 != nullptr)
