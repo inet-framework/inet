@@ -1,5 +1,6 @@
 //
 // Copyright (C) 2013 Brno University of Technology (http://nes.fit.vutbr.cz/ansa)
+// Copyright (C) 2019 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -21,6 +22,7 @@
 import inet.common.INETDefs;
 import inet.common.Units;
 import inet.common.packet.chunk.Chunk;
+import inet.networklayer.common.L3Address;
 import inet.networklayer.contract.ipv4.Ipv4Address;
 import inet.transportlayer.common.CrcMode;
 
@@ -65,12 +67,13 @@ class HelloOption extends cObject
 class HoldtimeOption extends HelloOption
 {
     type = Holdtime;
-    uint16_t holdTime;
+    uint16_t holdTime; // (in seconds)
 }
 
 class LanPruneDelayOption extends HelloOption
 {
     type = LANPruneDelay;
+    bool     T = false;
     uint16_t propagationDelay;
     uint16_t overrideInterval;
 }
@@ -87,26 +90,36 @@ class GenerationIdOption extends HelloOption
     uint32_t generationID;
 }
 
-//class AddressListOption extends HelloOption
-//{
-//    Ipv4Address secondaryAddresses[];
-//}
+class AddressListOption extends HelloOption
+{
+    L3Address secondaryAddresses[];
+}
 
 struct EncodedAddress
 {
-    Ipv4Address IPaddress;
     bool        S;
     bool        W;                //WC bit
     bool        R;                //RPT bit
+    Ipv4Address IPaddress;    //TODO: replace to L3Address
 }
 
-// Record for Join/Prune message
-// in structure it is not possible to use dynamic arrays, iit is needed to use class
-class JoinPruneGroup extends cObject
+struct EncodedGroupAddress
 {
-    Ipv4Address     groupAddress;
-    EncodedAddress  joinedSourceAddress[];
-    EncodedAddress  prunedSourceAddress[];
+    bool        B;
+    short       reserved = 0;
+    bool        Z;
+    short       maskLength;
+    Ipv4Address IPaddress;    //TODO: replace to L3Address
+}
+
+struct EncodedSourceAddress
+{
+    short       reserved = 0;
+    bool        S;
+    bool        W;                //WC bit
+    bool        R;                //RPT bit
+    short       maskLength;
+    Ipv4Address IPaddress;    //TODO: replace to L3Address
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -143,14 +156,23 @@ class PimHello extends PimPacket
     HelloOption *options[] @owned @allowReplace;
 }
 
+// Record for Join/Prune message
+// in structure it is not possible to use dynamic arrays, iit is needed to use class
+class JoinPruneGroup extends cObject
+{
+    Ipv4Address     groupAddress;    //TODO: replace to L3Address
+    EncodedSourceAddress  joinedSourceAddress[];
+    EncodedSourceAddress  prunedSourceAddress[];
+}
+
 // Join/Prune message
 // DM, SM
 class PimJoinPrune extends PimPacket
 {
     type = JoinPrune;
-    Ipv4Address        upstreamNeighborAddress;
+    Ipv4Address        upstreamNeighborAddress;    //TODO: replace to L3Address
+    int                reserved2 = 0;
     int                holdTime;
-    //int                numGroups;
     JoinPruneGroup    joinPruneGroups[];
 }
 
@@ -200,6 +222,7 @@ class PimRegister extends PimPacket
     type = Register;
     bool            B;
     bool            N;
+    uint32_t        reserved2;
 }
 
 // Register-Stop message
@@ -207,7 +230,7 @@ class PimRegister extends PimPacket
 class PimRegisterStop extends PimPacket
 {
     type = RegisterStop;
-    Ipv4Address        groupAddress;
-    Ipv4Address        sourceAddress;
+    Ipv4Address           groupAddress;    //TODO: replace to EncodedGroupAddress
+    Ipv4Address           sourceAddress;    //TODO: replace to EncodedUnicastAddress
 }
 
