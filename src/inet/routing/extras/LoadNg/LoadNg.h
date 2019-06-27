@@ -81,6 +81,8 @@ class INET_API LoadNg : public RoutingProtocolBase, public NetfilterBase::HookBa
         bool isBidirectional = false;
         bool pendingConfirmation = false; // the latest notification has failed.
         int64_t seqNum = -1;
+        uint8_t metric;
+        uint8_t numHelloRec;
     };
 
     class NeigborElement {
@@ -93,6 +95,7 @@ class INET_API LoadNg : public RoutingProtocolBase, public NetfilterBase::HookBa
         bool pendingConfirmation = false; // the latest notification has failed.
         std::map<L3Address, NodeStatus> listNeigbours;
         std::deque<simtime_t> helloTime;
+        uint8_t metric = 255;
         int32_t distRoot = -1;
         int32_t metricToRoot;
     };

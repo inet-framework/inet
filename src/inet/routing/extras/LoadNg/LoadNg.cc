@@ -37,11 +37,12 @@
 // DONE: Fill the routing tables using the routes computes by Dijkstra
 // DONE: Modify the link layer to force that a percentage of links could be only unidirectional
 // DONE: Compute k-shortest paths for using with DFF
+// DONE: Measure ETX, DONE: include fields
 
 // TODO: Extract alternative routes from Dijkstra if the principal fails.
 // TODO: Recalculate Dijkstra using the transmission errors
 // TODO: Calculate the route to the sink using Hellos, TODO: Propagate distance to root, DONE: define TLV for this
-// TODO: measure link quality metrics and to use them for routing. TODO: Measure ETX, DONE: include fields
+// TODO: measure link quality metrics and to use them for routing.
 // TODO: Modify the link layer that quality measures could arrive to upper layers
 // TODO: Modify the link layer to force a predetermine lost packets in predetermined links.
 // TODO: Add DFF tag to the packets stolen from network layer.
@@ -1547,13 +1548,21 @@ const Ptr<Hello> LoadNg::createHelloMessage()
                 s += 6;
         }
         int k = 0;
-        for (auto elem : neighbors){
+        for (auto &elem : neighbors){
             NeigborData nData;
             nData.setAddr(elem.first);
             nData.setIsBidir(elem.second.isBidirectional);
             nData.setPendingConfirmation(elem.second.pendingConfirmation);
             nData.setSeqNum(elem.second.seqNumber);
             helloMessage->setNeighAddrs(k, nData);
+
+            if (measureEtx) {
+                // delete old entries.
+                while (!elem.second.helloTime.empty() && (simTime() - elem.second.helloTime.front()) > numHellosEtx * minHelloInterval)
+                    elem.second.helloTime.pop_front();
+                nData.setNumHelloRec(elem.second.helloTime.size());
+            }
+
             k++;
             if (k >= helloMessage->getNeighAddrsArraySize())
                 break;
@@ -1579,6 +1588,9 @@ void LoadNg::sendHelloMessagesIfNeeded()
     if (measureEtx) {
         // new to scheduleHello
         simtime_t nextHello = simTime() + helloInterval - *periodicJitter;
+        auto helloMessage = createHelloMessage();
+        helloMessage->setLifetime(nextHello);
+        sendAODVPacket(helloMessage, addressType->getBroadcastAddress(), 1, 0);
         scheduleAt(nextHello, helloMsgTimer);
         return;
     }
@@ -1637,6 +1649,14 @@ void LoadNg::handleHelloMessage(const Ptr<const Hello>& helloMessage)
     it->second.pendingConfirmation = false;
     it->second.seqNumber = helloMessage->getSeqNum();
 
+
+    if (measureEtx) {
+        it->second.helloTime.push_back(simTime());
+        // delete old entries.
+        while (!it->second.helloTime.empty() && (simTime() - it->second.helloTime.front()) > numHellosEtx * minHelloInterval)
+            it->second.helloTime.pop_front();
+    }
+
     IRoute *routeHelloOriginator = routingTable->findBestMatchingRoute(helloOriginatorAddr);
 
     int metricType = -1;
@@ -1668,11 +1688,18 @@ void LoadNg::handleHelloMessage(const Ptr<const Hello>& helloMessage)
         status.isBidirectional = nData.isBidir();
         status.pendingConfirmation = nData.getPendingConfirmation();
         status.seqNum = nData.getSeqNum();
+        status.metric = nData.getMetric();
+        status.numHelloRec = nData.getNumHelloRec();
         nodeStatus[nData.getAddr()] = status;
     }
 
     // First check nodes that are in the list, remove nodes that are not in the new list, and actualize the others
     for (auto itAux = it->second.listNeigbours.begin(); itAux != it->second.listNeigbours.end(); ) {
+        //
+        if (this->getSelfIPAddress() == itAux->first) {
+            ++itAux;
+            continue;
+        }
         auto itStatus =  nodeStatus.find(itAux->first);
         if (itStatus ==  nodeStatus.end()) {
             if (itAux->second.isBidirectional && dijkstra) {
@@ -1745,6 +1772,7 @@ void LoadNg::handleHelloMessage(const Ptr<const Hello>& helloMessage)
                 dijkstra->deleteEdge(it->first,  this->getSelfIPAddress());
             }
             it->second.isBidirectional = false;
+            it->second.metric = 255;
         }
     }
     else {
@@ -1762,7 +1790,21 @@ void LoadNg::handleHelloMessage(const Ptr<const Hello>& helloMessage)
             }
             it->second.isBidirectional = true;
 
+            // Compute ETX if is needed.
+            if (measureEtx) {
+                if (itCheckBiDir->second.numHelloRec == 0)
+                    it->second.metric = 255;
+                else {
+                    double val = (itCheckBiDir->second.numHelloRec * it->second.helloTime.size())/numHellosEtx;
+                    val = 1/val;
+                    if (val > 255)
+                        it->second.metric = 255;
+                    else
+                        it->second.metric = val;
+                }
+            }
         }
+
         if (itCheckBiDir->second.pendingConfirmation) // the other node needs confirmation
             changeTimerNotification = true;
     }
