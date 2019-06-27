@@ -504,14 +504,14 @@ void PimDm::processJoinPrunePacket(Packet *pk)
 
         // go through list of joined sources
         for (unsigned int j = 0; j < group.getJoinedSourceAddressArraySize(); j++) {
-            const EncodedAddress& source = group.getJoinedSourceAddress(j);
+            const auto& source = group.getJoinedSourceAddress(j);
             Route *route = findRoute(source.IPaddress, groupAddr);
             processJoin(route, incomingInterface->getInterfaceId(), numRpfNeighbors, upstreamNeighborAddress);
         }
 
         // go through list of pruned sources
         for (unsigned int j = 0; j < group.getPrunedSourceAddressArraySize(); j++) {
-            const EncodedAddress& source = group.getPrunedSourceAddress(j);
+            const auto& source = group.getPrunedSourceAddress(j);
             Route *route = findRoute(source.IPaddress, groupAddr);
             processPrune(route, incomingInterface->getInterfaceId(), pkt->getHoldTime(), numRpfNeighbors, upstreamNeighborAddress);
         }
@@ -697,7 +697,7 @@ void PimDm::processGraftPacket(Packet *pk)
         Ipv4Address groupAddr = group.getGroupAddress();
 
         for (unsigned int j = 0; j < group.getJoinedSourceAddressArraySize(); j++) {
-            const EncodedAddress& source = group.getJoinedSourceAddress(j);
+            const auto& source = group.getJoinedSourceAddress(j);
             processGraft(source.IPaddress, groupAddr, sender, incomingInterface->getInterfaceId());
         }
     }
@@ -786,7 +786,7 @@ void PimDm::processGraftAckPacket(Packet *pk)
         Ipv4Address groupAddr = group.getGroupAddress();
 
         for (unsigned int j = 0; j < group.getJoinedSourceAddressArraySize(); j++) {
-            const EncodedAddress& source = group.getJoinedSourceAddress(j);
+            const auto& source = group.getJoinedSourceAddress(j);
             Route *route = findRoute(source.IPaddress, groupAddr);
             UpstreamInterface *upstream = route->upstreamInterface;
 
@@ -1453,7 +1453,7 @@ void PimDm::sendPrunePacket(Ipv4Address nextHop, Ipv4Address src, Ipv4Address gr
     JoinPruneGroup& group = msg->getJoinPruneGroupsForUpdate(0);
     group.setGroupAddress(grp);
     group.setPrunedSourceAddressArraySize(1);
-    EncodedAddress& address = group.getPrunedSourceAddressForUpdate(0);
+    auto& address = group.getPrunedSourceAddressForUpdate(0);
     address.IPaddress = src;
 
     msg->setChunkLength(PIM_HEADER_LENGTH + B(8) + ENCODED_GROUP_ADDRESS_LENGTH + B(4) + ENCODED_SOURCE_ADDRESS_LENGTH);
@@ -1483,7 +1483,7 @@ void PimDm::sendJoinPacket(Ipv4Address nextHop, Ipv4Address src, Ipv4Address grp
     JoinPruneGroup& group = msg->getJoinPruneGroupsForUpdate(0);
     group.setGroupAddress(grp);
     group.setJoinedSourceAddressArraySize(1);
-    EncodedAddress& address = group.getJoinedSourceAddressForUpdate(0);
+    auto& address = group.getJoinedSourceAddressForUpdate(0);
     address.IPaddress = src;
 
     msg->setChunkLength(PIM_HEADER_LENGTH + B(8) + ENCODED_GROUP_ADDRESS_LENGTH + B(4) + ENCODED_SOURCE_ADDRESS_LENGTH);
@@ -1515,7 +1515,7 @@ void PimDm::sendGraftPacket(Ipv4Address nextHop, Ipv4Address src, Ipv4Address gr
     JoinPruneGroup& group = msg->getJoinPruneGroupsForUpdate(0);
     group.setGroupAddress(grp);
     group.setJoinedSourceAddressArraySize(1);
-    EncodedAddress& address = group.getJoinedSourceAddressForUpdate(0);
+    auto& address = group.getJoinedSourceAddressForUpdate(0);
     address.IPaddress = src;
 
     msg->setChunkLength(PIM_HEADER_LENGTH + B(8) + ENCODED_GROUP_ADDRESS_LENGTH + B(4) + ENCODED_SOURCE_ADDRESS_LENGTH);

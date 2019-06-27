@@ -314,7 +314,7 @@ void PimSm::processJoinPrunePacket(Packet *pk)
 
         // go through list of joined sources
         for (unsigned int j = 0; j < group.getJoinedSourceAddressArraySize(); j++) {
-            const EncodedAddress& source = group.getJoinedSourceAddress(j);
+            const auto& source = group.getJoinedSourceAddress(j);
             if (source.S) {
                 if (source.W) // (*,G) Join
                     processJoinG(groupAddr, source.IPaddress, upstreamNeighbor, holdTime, inInterface);
@@ -327,7 +327,7 @@ void PimSm::processJoinPrunePacket(Packet *pk)
 
         // go through list of pruned sources
         for (unsigned int j = 0; j < group.getPrunedSourceAddressArraySize(); j++) {
-            const EncodedAddress& source = group.getPrunedSourceAddress(j);
+            const auto& source = group.getPrunedSourceAddress(j);
             if (source.S) {
                 if (source.W) // (*,G) Prune
                     processPruneG(groupAddr, upstreamNeighbor, inInterface);
@@ -1353,7 +1353,7 @@ void PimSm::sendPIMJoin(Ipv4Address group, Ipv4Address source, Ipv4Address upstr
     JoinPruneGroup& multGroup = msg->getJoinPruneGroupsForUpdate(0);
     multGroup.setGroupAddress(group);
     multGroup.setJoinedSourceAddressArraySize(1);
-    EncodedAddress& encodedAddr = multGroup.getJoinedSourceAddressForUpdate(0);
+    auto& encodedAddr = multGroup.getJoinedSourceAddressForUpdate(0);
     encodedAddr.IPaddress = source;
     encodedAddr.S = true;
     encodedAddr.W = (routeType == G);
@@ -1390,7 +1390,7 @@ void PimSm::sendPIMPrune(Ipv4Address group, Ipv4Address source, Ipv4Address upst
     JoinPruneGroup& multGroup = msg->getJoinPruneGroupsForUpdate(0);
     multGroup.setGroupAddress(group);
     multGroup.setPrunedSourceAddressArraySize(1);
-    EncodedAddress& encodedAddr = multGroup.getPrunedSourceAddressForUpdate(0);
+    auto& encodedAddr = multGroup.getPrunedSourceAddressForUpdate(0);
     encodedAddr.IPaddress = source;
     encodedAddr.S = true;
     encodedAddr.W = (routeType == G);
