@@ -25,7 +25,6 @@
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 #include "inet/networklayer/ipv4/Ipv4Route.h"
-#include "inet/routing/pim/Pim.h"
 #include "inet/routing/pim/PimPacket_m.h"
 #include "inet/routing/pim/modes/PimBase.h"
 #include "inet/routing/pim/tables/PimInterfaceTable.h"
@@ -175,7 +174,6 @@ class INET_API PimDm : public PimBase, protected cListener
     double sourceActiveInterval = 0;
     double stateRefreshInterval = 0;
     double assertTime = 0;
-    Pim *pimModule = nullptr;
 
     // signals
     static simsignal_t sentGraftPkSignal;

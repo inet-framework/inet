@@ -25,6 +25,7 @@
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
 #include "inet/routing/base/RoutingProtocolBase.h"
+#include "inet/routing/pim/Pim.h"
 #include "inet/routing/pim/PimPacket_m.h"
 #include "inet/routing/pim/tables/PimInterfaceTable.h"
 #include "inet/routing/pim/tables/PimNeighborTable.h"
@@ -161,6 +162,7 @@ class INET_API PimBase : public RoutingProtocolBase
     IInterfaceTable *ift = nullptr;
     PimInterfaceTable *pimIft = nullptr;
     PimNeighborTable *pimNbt = nullptr;
+    Pim *pimModule = nullptr;
 
     bool isUp = false;
     bool isEnabled = false;

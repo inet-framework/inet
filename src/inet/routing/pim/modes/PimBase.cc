@@ -62,6 +62,7 @@ void PimBase::initialize(int stage)
         helloPeriod = par("helloPeriod");
         holdTime = par("holdTime");
         designatedRouterPriority = mode == PimInterface::SparseMode ? par("designatedRouterPriority") : -1;
+        pimModule = check_and_cast<Pim *>(getParentModule());
     }
 }
 
@@ -143,6 +144,8 @@ void PimBase::sendHelloPacket(PimInterface *pimInterface)
     }
 
     msg->setChunkLength(byteLength);
+    msg->setCrcMode(pimModule->getCrcMode());
+    Pim::insertCrc(msg);
     pk->insertAtFront(msg);
     pk->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::pim);
     pk->addTagIfAbsent<InterfaceReq>()->setInterfaceId(pimInterface->getInterfaceId());

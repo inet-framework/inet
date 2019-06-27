@@ -60,7 +60,6 @@ void PimDm::initialize(int stage)
         sourceActiveInterval = par("sourceActiveInterval");
         stateRefreshInterval = par("stateRefreshInterval");
         assertTime = par("assertTime");
-        pimModule = check_and_cast<Pim *>(getParentModule());
     }
 }
 
@@ -1458,6 +1457,8 @@ void PimDm::sendPrunePacket(Ipv4Address nextHop, Ipv4Address src, Ipv4Address gr
     address.IPaddress = src;
 
     msg->setChunkLength(PIM_HEADER_LENGTH + B(8) + ENCODED_GROUP_ADDRESS_LENGTH + B(4) + ENCODED_SOURCE_ADDRESS_LENGTH);
+    msg->setCrcMode(pimModule->getCrcMode());
+    Pim::insertCrc(msg);
     packet->insertAtFront(msg);
 
     emit(sentJoinPrunePkSignal, packet);
@@ -1486,6 +1487,8 @@ void PimDm::sendJoinPacket(Ipv4Address nextHop, Ipv4Address src, Ipv4Address grp
     address.IPaddress = src;
 
     msg->setChunkLength(PIM_HEADER_LENGTH + B(8) + ENCODED_GROUP_ADDRESS_LENGTH + B(4) + ENCODED_SOURCE_ADDRESS_LENGTH);
+    msg->setCrcMode(pimModule->getCrcMode());
+    Pim::insertCrc(msg);
     packet->insertAtFront(msg);
 
     emit(sentJoinPrunePkSignal, packet);
@@ -1516,6 +1519,8 @@ void PimDm::sendGraftPacket(Ipv4Address nextHop, Ipv4Address src, Ipv4Address gr
     address.IPaddress = src;
 
     msg->setChunkLength(PIM_HEADER_LENGTH + B(8) + ENCODED_GROUP_ADDRESS_LENGTH + B(4) + ENCODED_SOURCE_ADDRESS_LENGTH);
+    msg->setCrcMode(pimModule->getCrcMode());
+    Pim::insertCrc(msg);
     packet->insertAtFront(msg);
 
     emit(sentGraftPkSignal, packet);
@@ -1542,6 +1547,8 @@ void PimDm::sendGraftAckPacket(Packet *pk, const Ptr<const PimGraft>& graftPacke
     Packet *packet = new Packet("PIMGraftAck");
     auto msg = dynamicPtrCast<PimGraft>(graftPacket->dupShared());
     msg->setType(GraftAck);
+    msg->setCrcMode(pimModule->getCrcMode());
+    Pim::insertCrc(msg);
     packet->insertAtFront(msg);
 
     emit(sentGraftAckPkSignal, packet);
@@ -1569,6 +1576,8 @@ void PimDm::sendStateRefreshPacket(Ipv4Address originator, Route *route, Downstr
             + ENCODED_UNICODE_ADDRESS_LENGTH
             + ENCODED_UNICODE_ADDRESS_LENGTH
             + B(12));
+    msg->setCrcMode(pimModule->getCrcMode());
+    Pim::insertCrc(msg);
     packet->insertAtFront(msg);
 
     emit(sentStateRefreshPkSignal, packet);
@@ -1592,6 +1601,8 @@ void PimDm::sendAssertPacket(Ipv4Address source, Ipv4Address group, AssertMetric
             + ENCODED_GROUP_ADDRESS_LENGTH
             + ENCODED_UNICODE_ADDRESS_LENGTH
             + B(8));
+    pkt->setCrcMode(pimModule->getCrcMode());
+    Pim::insertCrc(pkt);
     packet->insertAtFront(pkt);
 
     emit(sentAssertPkSignal, packet);
