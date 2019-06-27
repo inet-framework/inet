@@ -1456,7 +1456,7 @@ void PimDm::sendPrunePacket(Ipv4Address nextHop, Ipv4Address src, Ipv4Address gr
     auto& address = group.getPrunedSourceAddressForUpdate(0);
     address.IPaddress = src;
 
-    msg->setChunkLength(PIM_HEADER_LENGTH + B(8) + ENCODED_GROUP_ADDRESS_LENGTH + B(4) + ENCODED_SOURCE_ADDRESS_LENGTH);
+    msg->setChunkLength(PIM_HEADER_LENGTH + ENCODED_UNICODE_ADDRESS_LENGTH + B(4) + ENCODED_GROUP_ADDRESS_LENGTH + B(4) + ENCODED_SOURCE_ADDRESS_LENGTH);
     msg->setCrcMode(pimModule->getCrcMode());
     Pim::insertCrc(msg);
     packet->insertAtFront(msg);
@@ -1486,7 +1486,7 @@ void PimDm::sendJoinPacket(Ipv4Address nextHop, Ipv4Address src, Ipv4Address grp
     auto& address = group.getJoinedSourceAddressForUpdate(0);
     address.IPaddress = src;
 
-    msg->setChunkLength(PIM_HEADER_LENGTH + B(8) + ENCODED_GROUP_ADDRESS_LENGTH + B(4) + ENCODED_SOURCE_ADDRESS_LENGTH);
+    msg->setChunkLength(PIM_HEADER_LENGTH + ENCODED_UNICODE_ADDRESS_LENGTH + B(4) + ENCODED_GROUP_ADDRESS_LENGTH + B(4) + ENCODED_SOURCE_ADDRESS_LENGTH);
     msg->setCrcMode(pimModule->getCrcMode());
     Pim::insertCrc(msg);
     packet->insertAtFront(msg);
@@ -1518,7 +1518,7 @@ void PimDm::sendGraftPacket(Ipv4Address nextHop, Ipv4Address src, Ipv4Address gr
     auto& address = group.getJoinedSourceAddressForUpdate(0);
     address.IPaddress = src;
 
-    msg->setChunkLength(PIM_HEADER_LENGTH + B(8) + ENCODED_GROUP_ADDRESS_LENGTH + B(4) + ENCODED_SOURCE_ADDRESS_LENGTH);
+    msg->setChunkLength(PIM_HEADER_LENGTH + ENCODED_UNICODE_ADDRESS_LENGTH + B(4) + ENCODED_GROUP_ADDRESS_LENGTH + B(4) + ENCODED_SOURCE_ADDRESS_LENGTH);
     msg->setCrcMode(pimModule->getCrcMode());
     Pim::insertCrc(msg);
     packet->insertAtFront(msg);
