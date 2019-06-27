@@ -23,6 +23,7 @@
 #include "inet/common/INETDefs.h"
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #include "inet/networklayer/ipv4/Ipv4Route.h"
+#include "inet/routing/pim/Pim.h"
 #include "inet/routing/pim/modes/PimBase.h"
 
 namespace inet {
@@ -213,7 +214,7 @@ class INET_API PimSm : public PimBase, protected cListener
     double registerProbeTime = 0;
     double assertTime = 0;
     double assertOverrideInterval = 0;
-    CrcMode crcMode = CRC_MODE_UNDEFINED;
+    Pim *pimModule = nullptr;
 
     // signals
     static simsignal_t sentRegisterPkSignal;

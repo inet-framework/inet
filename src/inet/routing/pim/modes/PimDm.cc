@@ -60,6 +60,7 @@ void PimDm::initialize(int stage)
         sourceActiveInterval = par("sourceActiveInterval");
         stateRefreshInterval = par("stateRefreshInterval");
         assertTime = par("assertTime");
+        pimModule = check_and_cast<Pim *>(getParentModule());
     }
 }
 

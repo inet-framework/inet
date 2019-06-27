@@ -69,8 +69,7 @@ void PimSm::initialize(int stage)
         registerProbeTime = par("registerProbeTime");
         assertTime = par("assertTime");
         assertOverrideInterval = par("assertOverrideInterval");
-        const char *crcModeString = par("crcMode");
-        crcMode = parseCrcMode(crcModeString);
+        pimModule = check_and_cast<Pim *>(getParentModule());
     }
 }
 
@@ -1433,7 +1432,7 @@ void PimSm::sendPIMRegisterNull(Ipv4Address multOrigin, Ipv4Address multGroup)
         ipv4Header->setProtocolId(IP_PROT_PIM);
         ipv4Header->setHeaderLength(IPv4_MIN_HEADER_LENGTH);
         ipv4Header->setTotalLengthField(IPv4_MIN_HEADER_LENGTH);
-        ipv4Header->setCrcMode(crcMode);
+        ipv4Header->setCrcMode(pimModule->getCrcMode());
         Ipv4::insertCrc(ipv4Header);
         pk->insertAtBack(ipv4Header);
 

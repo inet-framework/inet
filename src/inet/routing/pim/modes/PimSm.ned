@@ -60,7 +60,6 @@ simple PimSm
         string pimNeighborTableModule;
         string RP = default("");
         int designatedRouterPriority = default(-1);
-        string crcMode @enum("declared", "computed") = default("declared");
 
         volatile double triggeredHelloDelay @unit(s) = uniform(0s,5s);
         double helloPeriod @unit(s) = 30s;
