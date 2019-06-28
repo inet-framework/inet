@@ -23,7 +23,6 @@ import inet.common.INETDefs;
 import inet.common.Units;
 import inet.common.packet.chunk.Chunk;
 import inet.networklayer.common.L3Address;
-import inet.networklayer.contract.ipv4.Ipv4Address;
 import inet.transportlayer.common.CrcMode;
 
 namespace inet;
@@ -46,7 +45,7 @@ enum PimPacketType
    Graft = 6;
    GraftAck = 7;
    CandidateRPAdvertisement = 8;
-   StateRefresh = 9;    //TODO: 9 is not found in RFC
+   StateRefresh = 9;    // in RFC 3973
 }
 
 enum PimHelloOptionType
@@ -57,6 +56,30 @@ enum PimHelloOptionType
    GenerationID = 20;
    StateRefreshCapable = 21;
    AddressList = 24;
+}
+
+struct EncodedUnicastAddress
+{
+    L3Address unicastAddress;
+}
+
+struct EncodedGroupAddress
+{
+    bool        B;
+    short       reserved = 0;
+    bool        Z;
+    short       maskLength = 32;    //TODO Remove initializer, 32 for IPv4 only!!!
+    L3Address   groupAddress;
+}
+
+struct EncodedSourceAddress
+{
+    short       reserved = 0;
+    bool        S;
+    bool        W;                //WC bit
+    bool        R;                //RPT bit
+    short       maskLength = 32;    //TODO Remove initializer, 32 for IPv4 only!!!
+    L3Address   sourceAddress;
 }
 
 class HelloOption extends cObject
@@ -92,34 +115,7 @@ class GenerationIdOption extends HelloOption
 
 class AddressListOption extends HelloOption
 {
-    L3Address secondaryAddresses[];
-}
-
-struct EncodedAddress
-{
-    bool        S;
-    bool        W;                //WC bit
-    bool        R;                //RPT bit
-    Ipv4Address IPaddress;    //TODO: replace to L3Address
-}
-
-struct EncodedGroupAddress
-{
-    bool        B;
-    short       reserved = 0;
-    bool        Z;
-    short       maskLength;
-    Ipv4Address IPaddress;    //TODO: replace to L3Address
-}
-
-struct EncodedSourceAddress
-{
-    short       reserved = 0;
-    bool        S;
-    bool        W;                //WC bit
-    bool        R;                //RPT bit
-    short       maskLength;
-    Ipv4Address IPaddress;    //TODO: replace to L3Address
+    EncodedUnicastAddress secondaryAddresses[];
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -128,7 +124,7 @@ class PimPacket extends FieldsChunk
 {
     short          version = 2;
     PimPacketType  type;
-    int            reserved = 0;
+    short          reserved = 0;    // 8 bits
     uint16_t       crc = 0;         // The checksum is a standard IP checksum, i.e., the 16-bit one's
                                     // complement of the one's complement sum of the entire PIM
                                     // message, excluding the "Multicast data packet" section of the
@@ -157,10 +153,10 @@ class PimHello extends PimPacket
 }
 
 // Record for Join/Prune message
-// in structure it is not possible to use dynamic arrays, iit is needed to use class
+// in structure it is not possible to use dynamic arrays, it is needed to use class
 class JoinPruneGroup extends cObject
 {
-    Ipv4Address     groupAddress;    //TODO: replace to L3Address
+    EncodedGroupAddress   groupAddress;
     EncodedSourceAddress  joinedSourceAddress[];
     EncodedSourceAddress  prunedSourceAddress[];
 }
@@ -170,10 +166,10 @@ class JoinPruneGroup extends cObject
 class PimJoinPrune extends PimPacket
 {
     type = JoinPrune;
-    Ipv4Address        upstreamNeighborAddress;    //TODO: replace to L3Address
-    int                reserved2 = 0;
-    int                holdTime;
-    JoinPruneGroup    joinPruneGroups[];
+    EncodedUnicastAddress  upstreamNeighborAddress;    //TODO: replace to L3Address
+    int                    reserved2 = 0;
+    int                    holdTime;    // in seconds
+    JoinPruneGroup         joinPruneGroups[];
 }
 
 // Assert message
@@ -181,11 +177,11 @@ class PimJoinPrune extends PimPacket
 class PimAssert extends PimPacket
 {
     type = Assert;
-    Ipv4Address        groupAddress;
-    Ipv4Address        sourceAddress;
-    bool               R;
-    int                metric;
-    int                metricPreference;
+    EncodedGroupAddress    groupAddress;
+    EncodedUnicastAddress  sourceAddress;
+    bool                   R;
+    int                    metric;
+    int                    metricPreference;
 }
 
 // Graft message, only message send by unicast
@@ -205,15 +201,19 @@ class PimGraft extends PimJoinPrune
 class PimStateRefresh extends PimPacket
 {
     type = StateRefresh;
-    Ipv4Address        groupAddress;
-    Ipv4Address        sourceAddress;
-    Ipv4Address        originatorAddress;
-    int                metric;
-    int                metricPreference;
-    short              maskLen;
-    short              ttl;
-    bool               P;
-    int                interval;
+    EncodedGroupAddress    groupAddress;
+    EncodedUnicastAddress  sourceAddress;
+    EncodedUnicastAddress  originatorAddress;
+    bool                   R;
+    int                    metricPreference;
+    int                    metric;
+    short                  maskLen;
+    short                  ttl;
+    bool                   P;
+    bool                   N;
+    bool                   O;
+    short                  reserved2;
+    short                  interval;
 }
 // Register message
 // SM
@@ -230,7 +230,7 @@ class PimRegister extends PimPacket
 class PimRegisterStop extends PimPacket
 {
     type = RegisterStop;
-    Ipv4Address           groupAddress;    //TODO: replace to EncodedGroupAddress
-    Ipv4Address           sourceAddress;    //TODO: replace to EncodedUnicastAddress
+    EncodedGroupAddress    groupAddress;
+    EncodedUnicastAddress  sourceAddress;
 }
 
