@@ -306,22 +306,22 @@ void PimSm::processJoinPrunePacket(Packet *pk)
     InterfaceEntry *inInterface = ift->getInterfaceById(pk->getTag<InterfaceInd>()->getInterfaceId());
 
     int holdTime = pkt->getHoldTime();
-    Ipv4Address upstreamNeighbor = pkt->getUpstreamNeighborAddress();
+    Ipv4Address upstreamNeighbor = pkt->getUpstreamNeighborAddress().unicastAddress.toIpv4();
 
     for (unsigned int i = 0; i < pkt->getJoinPruneGroupsArraySize(); i++) {
         JoinPruneGroup group = pkt->getJoinPruneGroups(i);
-        Ipv4Address groupAddr = group.getGroupAddress();
+        Ipv4Address groupAddr = group.getGroupAddress().groupAddress.toIpv4();
 
         // go through list of joined sources
         for (unsigned int j = 0; j < group.getJoinedSourceAddressArraySize(); j++) {
             const auto& source = group.getJoinedSourceAddress(j);
             if (source.S) {
                 if (source.W) // (*,G) Join
-                    processJoinG(groupAddr, source.IPaddress, upstreamNeighbor, holdTime, inInterface);
+                    processJoinG(groupAddr, source.sourceAddress.toIpv4(), upstreamNeighbor, holdTime, inInterface);
                 else if (source.R) // (S,G,rpt) Join
-                    processJoinSGrpt(source.IPaddress, groupAddr, upstreamNeighbor, holdTime, inInterface);
+                    processJoinSGrpt(source.sourceAddress.toIpv4(), groupAddr, upstreamNeighbor, holdTime, inInterface);
                 else // (S,G) Join
-                    processJoinSG(source.IPaddress, groupAddr, upstreamNeighbor, holdTime, inInterface);
+                    processJoinSG(source.sourceAddress.toIpv4(), groupAddr, upstreamNeighbor, holdTime, inInterface);
             }
         }
 
@@ -332,9 +332,9 @@ void PimSm::processJoinPrunePacket(Packet *pk)
                 if (source.W) // (*,G) Prune
                     processPruneG(groupAddr, upstreamNeighbor, inInterface);
                 else if (source.R) // (S,G,rpt) Prune
-                    processPruneSGrpt(source.IPaddress, groupAddr, upstreamNeighbor, inInterface);
+                    processPruneSGrpt(source.sourceAddress.toIpv4(), groupAddr, upstreamNeighbor, inInterface);
                 else // (S,G) Prune
-                    processPruneSG(source.IPaddress, groupAddr, upstreamNeighbor, inInterface);
+                    processPruneSG(source.sourceAddress.toIpv4(), groupAddr, upstreamNeighbor, inInterface);
             }
         }
     }
@@ -615,7 +615,7 @@ void PimSm::processRegisterStopPacket(Packet *pk)
     emit(rcvdRegisterStopPkSignal, pk);
 
     // TODO support wildcard source address
-    Route *routeSG = findRouteSG(pkt->getSourceAddress(), pkt->getGroupAddress());
+    Route *routeSG = findRouteSG(pkt->getSourceAddress().unicastAddress.toIpv4(), pkt->getGroupAddress().groupAddress.toIpv4());
     if (routeSG) {
         if (routeSG->registerState == Route::RS_JOIN || routeSG->registerState == Route::RS_JOIN_PENDING) {
             routeSG->registerState = Route::RS_PRUNE;
@@ -637,8 +637,8 @@ void PimSm::processAssertPacket(Packet *pk)
 {
     const auto& pkt = pk->peekAtFront<PimAssert>();
     int incomingInterfaceId = pk->getTag<InterfaceInd>()->getInterfaceId();
-    Ipv4Address source = pkt->getSourceAddress();
-    Ipv4Address group = pkt->getGroupAddress();
+    Ipv4Address source = pkt->getSourceAddress().unicastAddress.toIpv4();
+    Ipv4Address group = pkt->getGroupAddress().groupAddress.toIpv4();
     AssertMetric receivedMetric = AssertMetric(pkt->getR(), pkt->getMetricPreference(), pkt->getMetric(), pk->getTag<L3AddressInd>()->getSrcAddress().toIpv4());
 
     EV_INFO << "Received Assert(" << (source.isUnspecified() ? "*" : source.str()) << ", " << group << ")"
@@ -1346,15 +1346,17 @@ void PimSm::sendPIMJoin(Ipv4Address group, Ipv4Address source, Ipv4Address upstr
     Packet *pk = new Packet("PIMJoin");
     const auto& msg = makeShared<PimJoinPrune>();
     msg->setType(JoinPrune);
-    msg->setUpstreamNeighborAddress(upstreamNeighbor);
+    msg->getUpstreamNeighborAddressForUpdate().unicastAddress = upstreamNeighbor;
     msg->setHoldTime(joinPruneHoldTime());
 
     msg->setJoinPruneGroupsArraySize(1);
     JoinPruneGroup& multGroup = msg->getJoinPruneGroupsForUpdate(0);
-    multGroup.setGroupAddress(group);
+    auto& groupAddr = multGroup.getGroupAddressForUpdate();
+    groupAddr.groupAddress = group;
+    //TODO other fields of groupAddr
     multGroup.setJoinedSourceAddressArraySize(1);
     auto& encodedAddr = multGroup.getJoinedSourceAddressForUpdate(0);
-    encodedAddr.IPaddress = source;
+    encodedAddr.sourceAddress = source;
     encodedAddr.S = true;
     encodedAddr.W = (routeType == G);
     encodedAddr.R = (routeType == G);
@@ -1383,15 +1385,15 @@ void PimSm::sendPIMPrune(Ipv4Address group, Ipv4Address source, Ipv4Address upst
     Packet *pk = new Packet("PIMPrune");
     const auto& msg = makeShared<PimJoinPrune>();
     msg->setType(JoinPrune);
-    msg->setUpstreamNeighborAddress(upstreamNeighbor);
+    msg->getUpstreamNeighborAddressForUpdate().unicastAddress = upstreamNeighbor;
     msg->setHoldTime(joinPruneHoldTime());
 
     msg->setJoinPruneGroupsArraySize(1);
     JoinPruneGroup& multGroup = msg->getJoinPruneGroupsForUpdate(0);
-    multGroup.setGroupAddress(group);
+    multGroup.getGroupAddressForUpdate().groupAddress = group;
     multGroup.setPrunedSourceAddressArraySize(1);
     auto& encodedAddr = multGroup.getPrunedSourceAddressForUpdate(0);
-    encodedAddr.IPaddress = source;
+    encodedAddr.sourceAddress = source;
     encodedAddr.S = true;
     encodedAddr.W = (routeType == G);
     encodedAddr.R = (routeType == G);
@@ -1482,8 +1484,8 @@ void PimSm::sendPIMRegisterStop(Ipv4Address source, Ipv4Address dest, Ipv4Addres
 
     // set PIM packet
     msg->setType(RegisterStop);
-    msg->setSourceAddress(multSource);
-    msg->setGroupAddress(multGroup);
+    msg->getSourceAddressForUpdate().unicastAddress = multSource;
+    msg->getGroupAddressForUpdate().groupAddress = multGroup;
 
     msg->setChunkLength(B(PIM_HEADER_LENGTH + ENCODED_GROUP_ADDRESS_LENGTH + ENCODED_UNICODE_ADDRESS_LENGTH));
     msg->setCrcMode(pimModule->getCrcMode());
@@ -1503,8 +1505,9 @@ void PimSm::sendPIMAssert(Ipv4Address source, Ipv4Address group, AssertMetric me
 
     Packet *pk = new Packet("PimAssert");
     const auto& pkt = makeShared<PimAssert>();
-    pkt->setGroupAddress(group);
-    pkt->setSourceAddress(source);
+    pkt->getGroupAddressForUpdate().groupAddress = group;
+    //TODO set other fields of groupAddress
+    pkt->getSourceAddressForUpdate().unicastAddress = source;
     pkt->setR(rptBit);
     pkt->setMetricPreference(metric.preference);
     pkt->setMetric(metric.metric);
