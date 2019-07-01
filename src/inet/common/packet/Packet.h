@@ -268,6 +268,7 @@ class INET_API Packet : public cPacket
         auto dataLength = getDataLength();
         CHUNK_CHECK_USAGE(b(0) <= length && length <= dataLength, "length is invalid");
         const auto& chunk = content->peek<T>(backIterator, length, flags);
+        //TODO revise it: check length vs dataLength, doesn't read popped data!
         if (chunk == nullptr || chunk->getChunkLength() <= dataLength)
             return chunk;
         else
