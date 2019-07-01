@@ -31,7 +31,7 @@ void PppProtocolDissector::dissect(Packet *packet, const Protocol *protocol, ICa
 {
     callback.startProtocolDataUnit(&Protocol::ppp);
     const auto& header = packet->popAtFront<PppHeader>();
-    const auto& trailer = packet->popAtBack<PppTrailer>();
+    const auto& trailer = packet->popAtBack<PppTrailer>(PPP_TRAILER_LENGTH);
     callback.visitChunk(header, &Protocol::ppp);
     auto payloadProtocol = ProtocolGroup::pppprotocol.findProtocol(header->getProtocol());
     callback.dissectPacket(packet, payloadProtocol);
