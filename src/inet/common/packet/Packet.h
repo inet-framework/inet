@@ -264,9 +264,9 @@ class INET_API Packet : public cPacket
      * is a combination of Chunk::PeekFlag enumeration members.
      */
     template <typename T>
-    const Ptr<const T> peekAtBack(b length = b(-1), int flags = 0) const {
+    const Ptr<const T> peekAtBack(b length, int flags = 0) const {
         auto dataLength = getDataLength();
-        CHUNK_CHECK_USAGE(b(-1) <= length && length <= dataLength, "length is invalid");
+        CHUNK_CHECK_USAGE(b(0) <= length && length <= dataLength, "length is invalid");
         const auto& chunk = content->peek<T>(backIterator, length, flags);
         if (chunk == nullptr || chunk->getChunkLength() <= dataLength)
             return chunk;
@@ -281,8 +281,8 @@ class INET_API Packet : public cPacket
      * flags parameter is a combination of Chunk::PeekFlag enumeration members.
      */
     template <typename T>
-    const Ptr<const T> popAtBack(b length = b(-1), int flags = 0) {
-        CHUNK_CHECK_USAGE(b(-1) <= length && length <= getDataLength(), "length is invalid");
+    const Ptr<const T> popAtBack(b length, int flags = 0) {
+        CHUNK_CHECK_USAGE(b(0) <= length && length <= getDataLength(), "length is invalid");
         const auto& chunk = peekAtBack<T>(length, flags);
         if (chunk != nullptr) {
             content->moveIterator(backIterator, chunk->getChunkLength());
