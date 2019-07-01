@@ -1554,8 +1554,10 @@ void PimSm::forwardMulticastData(Packet *data, int outInterfaceId)
     // set control info
     data->addTagIfAbsent<PacketProtocolTag>()->setProtocol(ipv4Header->getProtocol());
     data->addTagIfAbsent<InterfaceReq>()->setInterfaceId(outInterfaceId);
-    // XXX data->addTagIfAbsent<L3AddressReq>()->setSource(datagram->getSrcAddress()); // FIXME IP won't accept if the source is non-local
-    data->addTagIfAbsent<L3AddressReq>()->setDestAddress(ipv4Header->getDestAddress());
+    auto addrTag = data->addTagIfAbsent<L3AddressReq>();
+    addrTag->setSrcAddress(ipv4Header->getSrcAddress());
+    addrTag->setNonLocalSrcAddress(true);
+    addrTag->setDestAddress(ipv4Header->getDestAddress());
     data->addTagIfAbsent<HopLimitReq>()->setHopLimit(MAX_TTL - 2);    //one minus for source DR router and one for RP router // XXX specification???
     data->trim();
     send(data, "ipOut");
