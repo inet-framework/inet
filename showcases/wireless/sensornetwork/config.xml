@@ -1,0 +1,25 @@
+<config>
+   <interface hosts="sensor4" names="wlan0" address="10.0.0.1" netmask="255.255.255.248" metric="104167"/>
+   <interface hosts="sensor1" names="wlan0" address="10.0.0.2" netmask="255.255.255.248" metric="104167"/>
+   <interface hosts="sensor2" names="wlan0" address="10.0.0.3" netmask="255.255.255.248" metric="104167"/>
+   <interface hosts="sensor3" names="wlan0" address="10.0.0.4" netmask="255.255.255.248" metric="104167"/>
+   <interface hosts="gateway" names="wlan0" address="10.0.0.5" netmask="255.255.255.248" metric="104167"/>
+   <interface hosts="gateway" names="eth0" address="10.0.0.9" netmask="255.255.255.252" metric="20"/>
+   <interface hosts="server" names="eth0" address="10.0.0.10" netmask="255.255.255.252" metric="20"/>
+   <multicast-group hosts="gateway" interfaces="eth0" address="224.0.0.1 224.0.0.2"/>
+   <multicast-group hosts="server" interfaces="eth0" address="224.0.0.1"/>
+   <wireless interfaces="sensor4%wlan0 sensor1%wlan0 sensor2%wlan0 sensor3%wlan0 gateway%wlan0"/>
+   <route hosts="sensor4" destination="*" netmask="*" gateway="10.0.0.5" interface="wlan0" metric="0"/>
+   <route hosts="sensor1" destination="*" netmask="*" gateway="10.0.0.5" interface="wlan0" metric="0"/>
+   <route hosts="sensor2" destination="*" netmask="*" gateway="10.0.0.5" interface="wlan0" metric="0"/>
+   <route hosts="sensor3" destination="*" netmask="*" gateway="10.0.0.5" interface="wlan0" metric="0"/>
+   <route hosts="gateway" destination="10.0.0.8" netmask="255.255.255.252" gateway="*" interface="eth0" metric="0"/>
+   <route hosts="gateway" destination="10.0.0.8" netmask="255.255.255.252" gateway="*" interface="eth0" metric="20"/>
+   <route hosts="gateway" destination="10.0.0.0" netmask="255.255.255.248" gateway="*" interface="wlan0" metric="0"/>
+   <route hosts="gateway" destination="10.0.0.0" netmask="255.255.255.248" gateway="*" interface="wlan0" metric="104167"/>
+   <route hosts="gateway" destination="127.0.0.0" netmask="255.0.0.0" gateway="*" interface="lo0" metric="1"/>
+   <route hosts="server" destination="10.0.0.8" netmask="255.255.255.252" gateway="*" interface="eth0" metric="0"/>
+   <route hosts="server" destination="10.0.0.8" netmask="255.255.255.252" gateway="*" interface="eth0" metric="20"/>
+   <route hosts="server" destination="127.0.0.0" netmask="255.0.0.0" gateway="*" interface="lo0" metric="1"/>
+   <route hosts="server" destination="*" netmask="*" gateway="10.0.0.9" interface="eth0" metric="0"/>
+</config>

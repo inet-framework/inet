@@ -406,10 +406,10 @@
 /examples/ospfv2/simpletest/,        -f omnetpp.ini -c ShutdownAndRestart -r 0,     500s,            0bd3-3afb/tplx, PASS,
 /examples/ospfv2/simpletest/,        -f omnetpp.ini -c CrashAndReboot -r 0,         500s,            4711-a233/tplx, PASS,
 
-/examples/pim/dm/assert/,            -f omnetpp.ini -c General -r 0,                300s,            4163-b361/tplx, PASS,
-/examples/pim/dm/basic/,             -f omnetpp.ini -c General -r 0,                300s,            5a6f-7c7f/tplx, PASS,
+/examples/pim/dm/assert/,            -f omnetpp.ini -c General -r 0,                300s,            aa30-ccf7/tplx, PASS,
+/examples/pim/dm/basic/,             -f omnetpp.ini -c General -r 0,                300s,            7704-6ffd/tplx, PASS,
 /examples/pim/iptv/,                 -f omnetpp.ini -c PIM_SM -r 0,                  35s,            050f-89d2/tplx, PASS, ospf
-/examples/pim/iptv/,                 -f omnetpp.ini -c PIM_DM -r 0,                  35s,            58f8-95ac/tplx, PASS, ospf
+/examples/pim/iptv/,                 -f omnetpp.ini -c PIM_DM -r 0,                  35s,            d6c6-feab/tplx, PASS, ospf
 /examples/pim/sm/basic/,             -f omnetpp.ini -c Scenario1 -r 0,              100s,            9c89-7246/tplx, PASS,
 /examples/pim/sm/basic/,             -f omnetpp.ini -c Scenario2 -r 0,              150s,            6bec-e273/tplx, PASS,
 /examples/pim/sm/basic/,             -f omnetpp.ini -c Scenario3 -r 0,              300s,            9a9f-a68e/tplx, PASS,

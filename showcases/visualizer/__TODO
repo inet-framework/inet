@@ -1,0 +1,160 @@
+InterfaceTableVisualizer:
+- jobb paraméternév lenne a displayInterfaceData (displayInterfaceTables azt sugallja, hogy táblázatot rajzol ki)
+
+MobilityVisualizer:
+
+MediumVisualizer
+- X távolsággal menjen tovább a signal rajzolása, mint az utolsó receiver
+- A signal eleje és vége felgyorsulva távozzon az utolsó node-tól
+- A signal vége lelassulva lépjen be a transmittáló node-nál (még a vége előtt lassuljon le) 
+- ha NaN az animation speed akkor legyen valami automatic value (legyen ez a default?)
+- a fade legyen aranyos az automatic-hoz, ha az van megadva
+- signal power for transmissions and receptions
+- power label-t lehessen kikapcsolni
+?- overflow bug? ha nagy a playground (300km), nincsenek körök
+?- ha belezoomolsz a 300km-es playgroundra, közel lévő modulokra, eltűnik a submodule
+- a reception indicationnél lehetne 3 különböző színű ikon a 3 különböző reception statehez (impossible, ignoring, attempted, esetleg successful)
+  ezeket lehessen állítani paraméterekkel
+- format stringel lehessen állítani hogy mit ír ki a reception/transmission ikon
+
+TransportConnectionVisualizer
+
+?- Lehessen enforce-olni, hogy megjelenjen a betű
+?- A betűkód legyen unique, ne csak színnel együtt (A, B, ..., AA, AB, ... AAA AAB ...)
+- Lehetne format string (ports, átvitt byte-ok száma, stb.)
+
+Propagation
+
+Általános
+- Mindenhova: ned doc link -> a visualizerekre
+- Kéne egy label formatter minden nyilas visualizerre
+
+Indicator
+
+Ieee80211
+- a jelerősség függvényében változzon az icon, ez legyen kikapcsolható
+- lehessen ki/be kapcsolni az icont meg a labelt
+?- az SSID legyen az icon mellett jobbra -> könnyebben olvasható, és legyen kisebb ikon
+
+InfoVisualizer
++ Amikor a statistic value-ja 0, akkor '-' van kiírva
+- InfoVisualizerShowcase: ha format = "%d" akkor nem csak a contention state van kiírva hanem exp. access is, de ez lehet hogy feature
+			  nagyon gyorsan eltűnik a kiírás amikor nem IDLE, nem lehet elolvasni
+- A placement default-ból top, de egymás mellé rakja őket. Zavaró lehet, hogy az "IDLE" átvált "DEFER+exp access"-re, és megváltozik a doboz helye + mérete
++ when content = "str" some strange symbols appear
+
+StatisticVisualizer
++ Amikor a statistic value-ja 0, akkor '-' van kiírva
++ crashes because of %u in the format string
++ A statistic visualization és a transport connection visualization overlap-el, nem egymás felett van. Pl advanced showcase
+
+ObstacleLossVisualizer
+- loss label-t lehessen kikapcsolni
+
+SceneVisualizer
+- Az animation speed-et lehessen kontrollálni a szimulációs idő függvényében
+
+DatalinkVisualizer & PhysicallinkVisualizer:
+
+NetworkPathVisualizer:
+- VideoStrmPk bug: ha olyan packet-ek mennek egyszerre, amiknek ugyanaz a nevük, akkor a nyíl következő töréspontja mindig a packetek következő időbeli felbukkanásához vezet.
+    Pl. NetworkPathActivity showcase --> Config StaticNetworkPaths --> packetFilter=ping-et ki kell kommentezni --> Run
+
+PacketDropVisualizer:
+
+- lehessen szűrni reason szerint
+
+PathVisualizer-ek:
+
+
+IPv4NetworkConfigurator:
+
+?- a netmaskRoutes miatt olyan szabály is hozzáadódik a routing táblához, ami hibás. Pont a korrekt szabály felett van, és a csomagok nem találnak oda
+
+PhysicalLink:
+- Hibásan vett csomagokra ne húzzon be nyilat / vagy máshogyan
+
+IPv4
+?- A broadcast UDP-s csomagok elnyelődnek / nem mennek ki / ForceBroadcast paraméter az IPv4-ben WTF?
+
+TCP
+?- EndToEndDelay statistic always 0 (e.g. advanced showcase), it uses messageAge filter, which relies on creation timestamp, and that is 0 due to the packet being allocated in TCP, there's no easy solution
+
+TransportRoute:
+- TCP-vel nem működik, csak UDP-vel
+- TransportRouteVisualizer-nek lehetne portFilter-e, hogy csak bizonyos portokon folyó kommunikációk transport route-jait láthassuk
+- VideoStrmPk bug: ha olyan packet-ek mennek egyszerre, amiknek ugyanaz a nevük, akkor a nyíl következő töréspontja mindig a packetek következő időbeli felbukkanásához vezet.
+    Pl. TransportPathActivity --> Config Filtering --> packetFilter-t és nodeFilter-t ki kell kommentezni --> Run
+
+NetworkNode:
+- Boxman model-nek nem tudom változtatni a színét *.pedestrian.osgModelColor = "red" paraméterrel (pedestrian a node neve a példámban)
+- Boxman ahogy fel-le mozog, a modell belelóg a saját nevébe és ettől nem látsik a node neve
+- *.visualizer.*.networkNodeVisualizer.nodeFilter = "*" --> Ha a nodeFilterben a default érték helyett bármi más van, akkor a szimuláció hibára fut és el sem indul már
+- Megváltoztatom az icon-t az i tag-gel: @display("p=113,156;i=device/cellphone2,#ff0000");
+    - az icont megváltoztatja, de az icon színét csak 2d-ben változtatja meg, 3dben nem
+
+SceneOsgEarthVisualizer
+?- lehessen beállítani a kezdeti kamera pozíciót
+- akkor is működnie kéne, ha nincs megadva a playgroundLongitude/playgroundLatitude, mert ez csak kényelmi funkció, ami arra való hogy "jók legyenek" a descartes koordináták (a jók alatt azt értjük hogy szépek)
+
+RoutingTableVisualizer:
+- Feature: parameter for max number of routes shown from a certain node to another
+
+Általános
+
+Configurator tutorial:
+?- interfaceTableVisualizer doesn't show the netmask (shows 10.0.0.1 instead of 10.0.0.1/29)
++ step9: no routes shown at start, they're displayed later when the simulation is run
+!- step11A-B: no routes shown (actually, missing routes)
++ step8a: no route shown from area3lan3host1 to area3lan3host3 -> used to be
+- step12: too many routes shown (it is also slow)
+
+Wireless showcases:
++ LevelOfDetail:		crash. something wrong with the mac.
++ HiddenNode:		exactly the same amount of packets in configs 1 and 3
+			check_and_cast(): Cannot cast 'inet::physicallayer::INoise*' to type 'const 						inet::physicallayer::NarrowbandNoiseBase *' -- in module (inet::physicallayer::Ieee80211Radio) 						HiddenNodeExample.hostA.wlan[0].radio (id=36), during network initialization
++ RateControl:		the charts are not the same as before.
+- RateControl:		rate adaptation instead of rate control?
++ Power:			error
+
+Wireless tutorial:
+- Step 8: energyBalance is nan J
+
+DONE:
+
++ nincs subscribe-olva a dropPkFromHLIfaceDownSignal-ra és a dropPkIfaceDownSignal-ra ? A hibaüzenet "Interface is not connected -- dropping packet"
+
+InterfaceTableVisualizer:
++ interfaceFilter = "not(lo*)" <- ez lehetne a default
++ ha nincs IP címe a node-nak (pl switch) akkor ne írja ki hogy switch.eth2
+
+RoutingTableVisualizer:
++ nem fordul el a label a nyillal
+
+MediumVisualizer
++ associated object for transmissions
++ canvasVisualizerben nincs unit a méter típusú paramétereknél
+
+Általános
++ A video recording az első frame-et kihagyja
+
+Ieee80211
++ amikor icon = "", elcrash-el
+
+InfoVisualizer
++ when content = "str" some strange symbols appear
+
+StatisticVisualizer
++ crashes because of %u in the format string
+- crash in advanced (a4e6d13 ("power xxx", 2017-06-01)), in StatisticVisualizerBase when trying to print unit, when the format string contains %u
+
+SceneVisualizer
++ viewScale parameter
+
+Configurator tutorial
++ step10A: crash
++ step12: crash
+
+Throughput
++ in g mode the application-level throughput is less than in a-mode.
+
