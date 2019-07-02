@@ -50,14 +50,14 @@ struct OspfOptions
 class OspfPacket extends FieldsChunk
 {
     char version = 2;
-    OspfPacketType type = HELLO_PACKET;
+    OspfPacketType type = static_cast<OspfPacketType>(-1);
 
     Ipv4Address routerID;
     Ipv4Address areaID;
-    
+
     uint16_t crc = 0;
     CrcMode crcMode = CRC_MODE_UNDEFINED;
-    
+
     short authenticationType = 0;
     char authentication[8];
 }
@@ -67,6 +67,7 @@ class OspfPacket extends FieldsChunk
 //
 class OspfHelloPacket extends OspfPacket
 {
+    type = HELLO_PACKET;
     Ipv4Address networkMask;
 
     short helloInterval = 5;
@@ -98,11 +99,12 @@ class OspfLsaHeader extends cObject
 {
     unsigned short lsAge = 0;
     OspfOptions lsOptions;
-    LsaType lsType = ROUTERLSA_TYPE;
+    LsaType lsType = static_cast<LsaType>(-1);
     Ipv4Address linkStateID;
     Ipv4Address advertisingRouter;
     long lsSequenceNumber = 0;
     uint16_t lsCrc = 0;
+    CrcMode lsCrcMode = CRC_MODE_UNDEFINED;
     unsigned short lsaLength = 0;
 }
 
@@ -143,9 +145,12 @@ class Link extends cObject
 //
 class OspfRouterLsa extends OspfLsa
 {
+    // header.lsType = ROUTERLSA_TYPE;
+    unsigned short reserved1 = 0;   // 5 bit
     bool V_VirtualLinkEndpoint = false;
     bool E_ASBoundaryRouter = false;
     bool B_AreaBorderRouter = false;
+    unsigned short reserved2 = 0;   // 8 bit
     unsigned short numberOfLinks = 0;
     Link links[];
 }
@@ -155,6 +160,7 @@ class OspfRouterLsa extends OspfLsa
 //
 class OspfNetworkLsa extends OspfLsa
 {
+    // header.lsType = NETWORKLSA_TYPE;
     Ipv4Address networkMask;
     Ipv4Address attachedRouters[];
 }
@@ -164,6 +170,7 @@ class OspfNetworkLsa extends OspfLsa
 //
 class OspfSummaryLsa extends OspfLsa
 {
+    // header.lsType = SUMMARYLSA_NETWORKS_TYPE;
     Ipv4Address networkMask;
     unsigned long routeCost = 1;
     TosData tosData[];
@@ -171,8 +178,9 @@ class OspfSummaryLsa extends OspfLsa
 
 struct ExternalTosInfo
 {
-    TosData tosData;
-    bool E_ExternalMetricType;
+    unsigned short tos;
+    bool E_ExternalMetricType = false;
+    unsigned long routeCost = 1;
     Ipv4Address forwardingAddress;
     long externalRouteTag;
 }
@@ -183,10 +191,6 @@ struct ExternalTosInfo
 class OspfAsExternalLsaContents extends cObject
 {
     Ipv4Address networkMask;
-    bool E_ExternalMetricType = false;
-    unsigned long routeCost = 1;
-    Ipv4Address forwardingAddress;
-    long externalRouteTag = 0;
     ExternalTosInfo externalTOSInfo[];
 }
 
@@ -195,6 +199,7 @@ class OspfAsExternalLsaContents extends cObject
 //
 class OspfAsExternalLsa extends OspfLsa
 {
+    // header.lsType = AS_EXTERNAL_LSA_TYPE;
     OspfAsExternalLsaContents contents;
 }
 
@@ -202,11 +207,7 @@ class OspfAsExternalLsa extends OspfLsa
 // should be a byte long bitfield
 struct OspfDdOptions
 {
-    bool unused_1;
-    bool unused_2;
-    bool unused_3;
-    bool unused_4;
-    bool unused_5;
+    unsigned short unused = 0;  // 5 bit
     bool I_Init;
     bool M_More;
     bool MS_MasterSlave;
@@ -221,7 +222,7 @@ class OspfDatabaseDescriptionPacket extends OspfPacket
     OspfOptions options;
     OspfDdOptions ddOptions;
     unsigned long ddSequenceNumber;
-    OspfLsaHeader lsaHeaders[];
+    OspfLsaHeader lsaHeaders[];     //TODO
 }
 
 struct LsaRequest
@@ -244,11 +245,7 @@ class OspfLinkStateRequestPacket extends OspfPacket
 //
 class OspfLinkStateUpdatePacket extends OspfPacket
 {
-    unsigned long numberOfLSAs;
-    OspfRouterLsa routerLSAs[];
-    OspfNetworkLsa networkLSAs[];
-    OspfSummaryLsa summaryLSAs[];
-    OspfAsExternalLsa asExternalLSAs[];
+    OspfLsa *ospfLSAs[] @owned @allowReplace;
 }
 
 //
@@ -256,5 +253,6 @@ class OspfLinkStateUpdatePacket extends OspfPacket
 //
 class OspfLinkStateAcknowledgementPacket extends OspfPacket
 {
-    OspfLsaHeader lsaHeaders[];
+    OspfLsaHeader lsaHeaders[];     //TODO
 }
+
