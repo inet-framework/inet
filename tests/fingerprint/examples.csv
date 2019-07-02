@@ -391,17 +391,17 @@
 /examples/objectcache/,              -f omnetpp.ini -c GridObjectCache -r 0,        20s,             6e86-53c4/tplx, PASS, wireless
 /examples/objectcache/,              -f omnetpp.ini -c BvhObjectCache -r 0,         20s,             6e86-53c4/tplx, PASS, wireless
 
-/examples/ospfv2/areas/,             -f omnetpp.ini -c General -r 0,                500s,            09a8-4db0/tplx, PASS,
+/examples/ospfv2/areas/,             -f omnetpp.ini -c General -r 0,                500s,            c5ac-41e2/tplx, PASS,
 /examples/ospfv2/areatests/,         -f omnetpp.ini -c backbone -r 0,               100s,            cdd9-68a1/tplx, PASS,
 /examples/ospfv2/areatests/,         -f omnetpp.ini -c backboneandonestub -r 0,     100s,            9472-af05/tplx, PASS,
-/examples/ospfv2/areatests/,         -f omnetpp.ini -c backboneandtwostubs -r 0,    100s,            70f6-d4ba/tplx, PASS,
+/examples/ospfv2/areatests/,         -f omnetpp.ini -c backboneandtwostubs -r 0,    100s,            9b6b-3366/tplx, PASS,
 /examples/ospfv2/areatests/,         -f omnetpp.ini -c mininet-A -r 0,              100s,            d37c-3fdb/tplx, PASS,
 /examples/ospfv2/areatests/,         -f omnetpp.ini -c mininet-B -r 0,              100s,            d37c-3fdb/tplx, PASS,
 /examples/ospfv2/backbone/,          -f omnetpp.ini -c General -r 0,                100s,            3fc5-2ac0/tplx, PASS,
 /examples/ospfv2/dynamictest/,       -f omnetpp.ini -c static -r 0,                 1000s,           d3ec-315d/tplx, PASS,
 /examples/ospfv2/dynamictest/,       -f omnetpp.ini -c dynamic1 -r 0,               1000s,           f820-7bf7/tplx, PASS,
 /examples/ospfv2/dynamictest/,       -f omnetpp.ini -c dynamic2 -r 0,               1000s,           e08c-2607/tplx, PASS,
-/examples/ospfv2/fulltest/,          -f omnetpp.ini -c General -r 0,                100s,            ba8a-b801/tplx, PASS,
+/examples/ospfv2/fulltest/,          -f omnetpp.ini -c General -r 0,                100s,            662a-ec76/tplx, PASS,
 /examples/ospfv2/simpletest/,        -f omnetpp.ini -c AlwaysUp -r 0,               500s,            e8e1-0009/tplx, PASS,
 /examples/ospfv2/simpletest/,        -f omnetpp.ini -c ShutdownAndRestart -r 0,     500s,            0bd3-3afb/tplx, PASS,
 /examples/ospfv2/simpletest/,        -f omnetpp.ini -c CrashAndReboot -r 0,         500s,            4711-a233/tplx, PASS,
