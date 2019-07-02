@@ -186,10 +186,7 @@ inline bool operator!=(const NextHop& leftHop, const NextHop& rightHop)
     return !(leftHop == rightHop);
 }
 
-B calculateLSASize(const OspfRouterLsa *routerLSA);
-B calculateLSASize(const OspfNetworkLsa *networkLSA);
-B calculateLSASize(const OspfSummaryLsa *summaryLSA);
-B calculateLSASize(const OspfAsExternalLsa *asExternalLSA);
+B calculateLSASize(const OspfLsa *lsa);
 
 std::ostream& operator<<(std::ostream& ostr, const OspfLsaHeader& lsa);
 inline std::ostream& operator<<(std::ostream& ostr, const OspfLsa& lsa) { ostr << lsa.getHeader(); return ostr; }

@@ -54,60 +54,38 @@ void LinkStateUpdateHandler::processPacket(Packet *packet, OspfInterface *intf, 
     if (neighbor->getState() >= Neighbor::EXCHANGE_STATE) {
         AreaId areaID = lsUpdatePacket->getAreaID();
         Area *area = router->getAreaByID(areaID);
-        LsaType currentType = ROUTERLSA_TYPE;
-        unsigned int currentLSAIndex = 0;
+//        LsaType currentType = ROUTERLSA_TYPE;
+//        unsigned int currentLSAIndex = 0;
 
         EV_INFO << "  Processing packet contents:\n";
 
-        while (currentType <= AS_EXTERNAL_LSA_TYPE) {
-            unsigned int lsaCount = 0;
+//        while (currentType <= AS_EXTERNAL_LSA_TYPE) {
+//            unsigned int lsaCount = 0;
+//
+//            switch (currentType) {
+//                case ROUTERLSA_TYPE:
+//                    lsaCount = lsUpdatePacket->getRouterLSAsArraySize();
+//                    break;
+//
+//                case NETWORKLSA_TYPE:
+//                    lsaCount = lsUpdatePacket->getNetworkLSAsArraySize();
+//                    break;
+//
+//                case SUMMARYLSA_NETWORKS_TYPE:
+//                case SUMMARYLSA_ASBOUNDARYROUTERS_TYPE:
+//                    lsaCount = lsUpdatePacket->getSummaryLSAsArraySize();
+//                    break;
+//
+//                case AS_EXTERNAL_LSA_TYPE:
+//                    lsaCount = lsUpdatePacket->getAsExternalLSAsArraySize();
+//                    break;
+//
+//                default:
+//                    throw cRuntimeError("Invalid currentType:%d", currentType);
+//            }
 
-            switch (currentType) {
-                case ROUTERLSA_TYPE:
-                    lsaCount = lsUpdatePacket->getRouterLSAsArraySize();
-                    break;
-
-                case NETWORKLSA_TYPE:
-                    lsaCount = lsUpdatePacket->getNetworkLSAsArraySize();
-                    break;
-
-                case SUMMARYLSA_NETWORKS_TYPE:
-                case SUMMARYLSA_ASBOUNDARYROUTERS_TYPE:
-                    lsaCount = lsUpdatePacket->getSummaryLSAsArraySize();
-                    break;
-
-                case AS_EXTERNAL_LSA_TYPE:
-                    lsaCount = lsUpdatePacket->getAsExternalLSAsArraySize();
-                    break;
-
-                default:
-                    throw cRuntimeError("Invalid currentType:%d", currentType);
-            }
-
-            for (unsigned int i = 0; i < lsaCount; i++) {
-                const OspfLsa *currentLSA;
-
-                switch (currentType) {
-                    case ROUTERLSA_TYPE:
-                        currentLSA = (&(lsUpdatePacket->getRouterLSAs(i)));
-                        break;
-
-                    case NETWORKLSA_TYPE:
-                        currentLSA = (&(lsUpdatePacket->getNetworkLSAs(i)));
-                        break;
-
-                    case SUMMARYLSA_NETWORKS_TYPE:
-                    case SUMMARYLSA_ASBOUNDARYROUTERS_TYPE:
-                        currentLSA = (&(lsUpdatePacket->getSummaryLSAs(i)));
-                        break;
-
-                    case AS_EXTERNAL_LSA_TYPE:
-                        currentLSA = (&(lsUpdatePacket->getAsExternalLSAs(i)));
-                        break;
-
-                    default:
-                        throw cRuntimeError("Invalid currentType:%d", currentType);
-                }
+            for (unsigned int i = 0; i < lsUpdatePacket->getOspfLSAsArraySize(); i++) {
+                const OspfLsa *currentLSA = lsUpdatePacket->getOspfLSAs(i);
 
                 if (!validateLSChecksum(currentLSA)) {
                     continue;
@@ -123,7 +101,7 @@ void LinkStateUpdateHandler::processPacket(Packet *packet, OspfInterface *intf, 
                     continue;
                 }
 
-                LsaProcessingMarker marker(currentLSAIndex++);
+                LsaProcessingMarker marker(i);
                 EV_DETAIL << "    " << currentLSA->getHeader() << "\n";
 
                 //FIXME area maybe nullptr
@@ -267,11 +245,11 @@ void LinkStateUpdateHandler::processPacket(Packet *packet, OspfInterface *intf, 
                     }
                 }
             }
-            currentType = static_cast<LsaType>(currentType + 1);
-            if (currentType == SUMMARYLSA_NETWORKS_TYPE) {
-                currentType = static_cast<LsaType>(currentType + 1);
-            }
-        }
+//            currentType = static_cast<LsaType>(currentType + 1);
+//            if (currentType == SUMMARYLSA_NETWORKS_TYPE) {
+//                currentType = static_cast<LsaType>(currentType + 1);
+//            }
+//        }
     }
 
     if (shouldRebuildRoutingTable)

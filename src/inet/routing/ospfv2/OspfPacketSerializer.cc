@@ -74,7 +74,7 @@ void OspfPacketSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
     }
     else if(type == LINKSTATE_UPDATE_PACKET) {
         const auto& updatePacket = staticPtrCast<const OspfLinkStateUpdatePacket>(ospfPacket);
-
+#if 0   // TODO redesign
         stream.writeUint32Be(updatePacket->getNumberOfLSAs());
         for(uint32_t i = 0; i < updatePacket->getRouterLSAsArraySize(); i++) {
             const OspfRouterLsa& routerLSA = updatePacket->getRouterLSAs(i);
@@ -96,6 +96,7 @@ void OspfPacketSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
             serializeLsaHeader(stream, asExternalLSA.getHeader());
             serializeAsExternalLsa(stream, asExternalLSA);
         }
+#endif
     }
     else if(type == LINKSTATE_ACKNOWLEDGEMENT_PACKET) {
         const auto& ackPacket = staticPtrCast<const OspfLinkStateAcknowledgementPacket>(ospfPacket);
@@ -165,6 +166,7 @@ const Ptr<Chunk> OspfPacketSerializer::deserialize(MemoryInputStream& stream) co
         }
     }
     else if(type == LINKSTATE_UPDATE_PACKET) {
+#if 0   // TODO redesign
         OspfLinkStateUpdatePacket *updatePacket = static_cast<OspfLinkStateUpdatePacket *>(ospfPacket.get());
 
         uint32_t numLSAs = stream.readUint32Be();
@@ -206,6 +208,7 @@ const Ptr<Chunk> OspfPacketSerializer::deserialize(MemoryInputStream& stream) co
                 asExternalCounter++;
             }
         }
+#endif
     }
     else if(type == LINKSTATE_ACKNOWLEDGEMENT_PACKET) {
         OspfLinkStateAcknowledgementPacket *ackPacket = static_cast<OspfLinkStateAcknowledgementPacket *>(ospfPacket.get());
@@ -425,8 +428,8 @@ bool OspfPacketSerializer::decerializeSummaryLsa(MemoryInputStream& stream, Ospf
 
 void OspfPacketSerializer::serializeAsExternalLsa(MemoryOutputStream& stream, const OspfAsExternalLsa& asExternalLsa)
 {
+#if 0   //TODO redesign
     stream.writeIpv4Address(asExternalLsa.getContents().getNetworkMask());
-
     uint32_t routeCost = asExternalLsa.getContents().getRouteCost();
     if(asExternalLsa.getContents().getE_ExternalMetricType())
         routeCost |= 1 << 31;
@@ -447,11 +450,13 @@ void OspfPacketSerializer::serializeAsExternalLsa(MemoryOutputStream& stream, co
         stream.writeIpv4Address(asExternalLsa.getContents().getForwardingAddress());
         stream.writeUint32Be(asExternalLsa.getContents().getExternalRouteTag());
     }
+#endif
 }
 
 bool OspfPacketSerializer::decerializeAsExternalLsa(MemoryInputStream& stream, OspfAsExternalLsa *asExternalLsa)
 {
     asExternalLsa->getContentsForUpdate().setNetworkMask(stream.readIpv4Address());
+#if 0   //TODO redesign
     uint32_t routeCost = stream.readUint32Be();
     asExternalLsa->getContentsForUpdate().setRouteCost(routeCost);
     asExternalLsa->getContentsForUpdate().setE_ExternalMetricType(((routeCost & (1 << 31)) != 0));
@@ -478,7 +483,7 @@ bool OspfPacketSerializer::decerializeAsExternalLsa(MemoryInputStream& stream, O
 
         asExternalLsa->getContentsForUpdate().setExternalTOSInfo(i, *extTos);
     }
-
+#endif
     return true;
 }
 
@@ -526,6 +531,7 @@ uint8_t OspfPacketSerializer::ddFlagsToByte(const OspfDdOptions& options)
 {
     uint8_t c = 0;
 
+#if 0   //TODO redesign
     if(options.unused_1)
         c |= 1 << 7;
     if(options.unused_2)
@@ -536,6 +542,7 @@ uint8_t OspfPacketSerializer::ddFlagsToByte(const OspfDdOptions& options)
         c |= 1 << 4;
     if(options.unused_5)
         c |= 1 << 3;
+#endif
     if(options.I_Init)
         c |= 1 << 2;
     if(options.M_More)
@@ -550,11 +557,13 @@ const OspfDdOptions OspfPacketSerializer::byteToDdFlags(uint8_t c)
 {
     OspfDdOptions option = {};
 
+#if 0   //TODO redesign
     option.unused_1 = (c & (1 << 7)) != 0;
     option.unused_2 = (c & (1 << 6)) != 0;
     option.unused_3 = (c & (1 << 5)) != 0;
     option.unused_4 = (c & (1 << 4)) != 0;
     option.unused_5 = (c & (1 << 3)) != 0;
+#endif
     option.I_Init = (c & (1 << 2)) != 0;
     option.M_More = (c & (1 << 1)) != 0;
     option.MS_MasterSlave = (c & (1 << 0)) != 0;

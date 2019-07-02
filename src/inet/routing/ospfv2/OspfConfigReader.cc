@@ -327,19 +327,22 @@ void OspfConfigReader::loadExternalRoute(const cXMLElement& externalRouteConfig)
         networkAddress.mask = ipv4NetmaskFromAddressString(getMandatoryFilledAttribute(externalRouteConfig, "advertisedExternalNetworkMask"));
         networkAddress.address = networkAddress.address & networkAddress.mask;
         asExternalRoute.setNetworkMask(networkAddress.mask);
+        asExternalRoute.setExternalTOSInfoArraySize(1);
+        auto& tosInfo = asExternalRoute.getExternalTOSInfoForUpdate(0);
 
         int routeCost = getIntAttrOrPar(externalRouteConfig, "externalInterfaceOutputCost");
-        asExternalRoute.setRouteCost(routeCost);
+        tosInfo.tos = 0;
+        tosInfo.routeCost = routeCost;
 
         std::string metricType = getStrAttrOrPar(externalRouteConfig, "externalInterfaceOutputType");
         if (metricType == "Type1")
-            asExternalRoute.setE_ExternalMetricType(false);
+            tosInfo.E_ExternalMetricType = false;
         else if (metricType == "Type2")
-            asExternalRoute.setE_ExternalMetricType(true);
+            tosInfo.E_ExternalMetricType = true;
         else
             throw cRuntimeError("Invalid 'externalInterfaceOutputType' at interface '%s' at ", ie->getInterfaceName(), externalRouteConfig.getSourceLocation());
 
-        asExternalRoute.setForwardingAddress(ipv4AddressFromAddressString(getStrAttrOrPar(externalRouteConfig, "forwardingAddress")));
+        tosInfo.forwardingAddress = ipv4AddressFromAddressString(getStrAttrOrPar(externalRouteConfig, "forwardingAddress"));
 
         long externalRouteTagVal = 0;    // default value
         const char *externalRouteTag = externalRouteConfig.getAttribute("externalRouteTag");
@@ -349,7 +352,7 @@ void OspfConfigReader::loadExternalRoute(const cXMLElement& externalRouteConfig)
             if (*endp)
                 throw cRuntimeError("Invalid externalRouteTag='%s' at %s", externalRouteTag, externalRouteConfig.getSourceLocation());
         }
-        asExternalRoute.setExternalRouteTag(externalRouteTagVal);
+        tosInfo.externalRouteTag = externalRouteTagVal;
 
         // add the external route to the OSPF data structure
         ospfRouter->updateExternalRoute(networkAddress.address, asExternalRoute, ifIndex);
@@ -494,10 +497,13 @@ void OspfConfigReader::initiateDefaultRouteDistribution()
         OspfAsExternalLsaContents asExternalRoute;
         asExternalRoute.setNetworkMask(networkAddress.mask);
         // default route is advertised with cost of 1 of 'type 2' external metric
-        asExternalRoute.setRouteCost(1);
-        asExternalRoute.setE_ExternalMetricType(true);
-        asExternalRoute.setForwardingAddress(ipv4AddressFromAddressString("0.0.0.0"));
-        asExternalRoute.setExternalRouteTag(0);
+        asExternalRoute.setExternalTOSInfoArraySize(1);
+        auto& tosInfo = asExternalRoute.getExternalTOSInfoForUpdate(0);
+        tosInfo.E_ExternalMetricType = true;
+        tosInfo.tos = 0;
+        tosInfo.externalRouteTag = 0;
+        tosInfo.forwardingAddress = ipv4AddressFromAddressString("0.0.0.0");
+        tosInfo.routeCost = 1;
 
         // add the external route to the OSPF data structure
         ospfRouter->updateExternalRoute(networkAddress.address, asExternalRoute);
