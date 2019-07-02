@@ -177,6 +177,16 @@ inline double dBm2mW(double dBm) { return pow(10.0, dBm / 10.0); }
 inline double mW2dBm(double mW) { return 10 * log10(mW); }
 
 /**
+ * Converts a dBmW/MHz value into W/Hz.
+ */
+inline double dBmWpMHz2WpHz(double dBmWpMHz) { return pow(10.0, dBmWpMHz / 10.0) / 1000000.0 / 1000.0; }
+
+/**
+ * Convert a W/Hz value to dBmW/MHz.
+ */
+inline double wpHz2dBmWpMHz(double wpHz) { return 10.0 * log10(wpHz * 1000000.0 * 1000.0); }
+
+/**
  * Convert a degree value to radian.
  */
 inline double deg2rad(double deg) { return deg * M_PI / 180; }
