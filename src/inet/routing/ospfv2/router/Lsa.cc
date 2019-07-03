@@ -76,49 +76,56 @@ bool operator==(const OspfOptions& leftOptions, const OspfOptions& rightOptions)
 
 B calculateLSASize(const OspfLsa *lsa)
 {
-    B lsaLength = OSPF_LSA_HEADER_LENGTH;
     switch(lsa->getHeader().getLsType()) {
         case LsaType::ROUTERLSA_TYPE: {
-            lsaLength += OSPF_ROUTERLSA_HEADER_LENGTH;
             auto routerLsa = check_and_cast<const OspfRouterLsa*>(lsa);
-            for (uint32_t i = 0; i < routerLsa->getLinksArraySize(); i++) {
-                const Link& link = routerLsa->getLinks(i);
-                lsaLength += OSPF_LINK_HEADER_LENGTH + (OSPF_TOS_LENGTH * link.getTosDataArraySize());
-            }
-            break;
+            return calculateLsaSize(*routerLsa);
         }
         case LsaType::NETWORKLSA_TYPE: {
             auto networkLsa = check_and_cast<const OspfNetworkLsa*>(lsa);
-            lsaLength += OSPF_NETWORKLSA_MASK_LENGTH + (OSPF_NETWORKLSA_ADDRESS_LENGTH * networkLsa->getAttachedRoutersArraySize());
-            break;
+            return calculateLsaSize(*networkLsa);
         }
         case LsaType::SUMMARYLSA_NETWORKS_TYPE:
         case LsaType::SUMMARYLSA_ASBOUNDARYROUTERS_TYPE: {
-            auto summaryLSA = check_and_cast<const OspfSummaryLsa*>(lsa);
-            lsaLength += OSPF_SUMMARYLSA_HEADER_LENGTH + (OSPF_TOS_LENGTH * summaryLSA->getTosDataArraySize());
-            break;
+            auto summaryLsa = check_and_cast<const OspfSummaryLsa*>(lsa);
+            return calculateLsaSize(*summaryLsa);
         }
         case LsaType::AS_EXTERNAL_LSA_TYPE: {
-            auto asExternalLSA = check_and_cast<const OspfAsExternalLsa*>(lsa);
-            lsaLength += OSPF_ASEXTERNALLSA_HEADER_LENGTH + (OSPF_ASEXTERNALLSA_TOS_INFO_LENGTH * asExternalLSA->getContents().getExternalTOSInfoArraySize());
-            break;
+            auto asExternalLsa = check_and_cast<const OspfAsExternalLsa*>(lsa);
+            return calculateLsaSize(*asExternalLsa);
         }
         default:
             throw cRuntimeError("Unknown LsaType value: %d", (int)lsa->getHeader().getLsType());
+            break;
+    }
+}
+
+B calculateLsaSize(const OspfRouterLsa& lsa)
+{
+    B lsaLength = OSPF_LSA_HEADER_LENGTH + OSPF_ROUTERLSA_HEADER_LENGTH;
+    for (uint32_t i = 0; i < lsa.getLinksArraySize(); i++) {
+        const Link& link = lsa.getLinks(i);
+        lsaLength += OSPF_LINK_HEADER_LENGTH + (OSPF_TOS_LENGTH * link.getTosDataArraySize());
     }
     return lsaLength;
 }
 
-B calculateLSASize(const OspfSummaryLsa *summaryLSA)
+B calculateLsaSize(const OspfNetworkLsa& lsa)
 {
-    return OSPF_LSA_HEADER_LENGTH + OSPF_SUMMARYLSA_HEADER_LENGTH
-           + (OSPF_TOS_LENGTH * summaryLSA->getTosDataArraySize());
+    return OSPF_LSA_HEADER_LENGTH + OSPF_NETWORKLSA_MASK_LENGTH
+            + (OSPF_NETWORKLSA_ADDRESS_LENGTH * lsa.getAttachedRoutersArraySize());
 }
 
-B calculateLSASize(const OspfAsExternalLsa *asExternalLSA)
+B calculateLsaSize(const OspfSummaryLsa& lsa)
+{
+    return OSPF_LSA_HEADER_LENGTH + OSPF_SUMMARYLSA_HEADER_LENGTH
+           + (OSPF_TOS_LENGTH * lsa.getTosDataArraySize());
+}
+
+B calculateLsaSize(const OspfAsExternalLsa& lsa)
 {
     return OSPF_LSA_HEADER_LENGTH + OSPF_ASEXTERNALLSA_HEADER_LENGTH
-           + (OSPF_ASEXTERNALLSA_TOS_INFO_LENGTH * asExternalLSA->getContents().getExternalTOSInfoArraySize());
+           + (OSPF_ASEXTERNALLSA_TOS_INFO_LENGTH * lsa.getContents().getExternalTOSInfoArraySize());
 }
 
 std::ostream& operator<<(std::ostream& ostr, const OspfLsaHeader& lsaHeader)
