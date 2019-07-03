@@ -9,11 +9,11 @@ General Wireless:
 .. toctree::
    :maxdepth: 1
 
-   power/doc/index
    pathloss/doc/index
+   directionalantennas/doc/index
    sensornetwork/doc/index
    ieee802154/doc/index
-   directionalantennas/doc/index
+   power/doc/index
 .. levelofdetail/doc/index
 .. scaling/doc/index
 
