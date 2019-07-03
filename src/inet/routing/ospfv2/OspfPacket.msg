@@ -131,18 +131,19 @@ struct TosData
     unsigned long tosMetric;
 }
 
+// Router LSA Link section (RFC 1583 Section A.4.2.)
 class Link extends cObject
 {
     Ipv4Address linkID;
     unsigned long linkData = 0;
     LinkType type = POINTTOPOINT_LINK;
     unsigned char numberOfTOS = 0;
-    unsigned long linkCost = 1;
+    unsigned long linkCost = 1;     // TOS 0 metric
     TosData tosData[];
 }
 
 //
-// Represents an OSPF Router LSA
+// Represents an OSPF Router LSA (RFC 1583 Section A.4.2.)
 //
 class OspfRouterLsa extends OspfLsa
 {
@@ -174,7 +175,7 @@ class OspfSummaryLsa extends OspfLsa
     // header.lsType = SUMMARYLSA_NETWORKS_TYPE;
     Ipv4Address networkMask;
     unsigned long routeCost = 1;
-    TosData tosData[];
+    TosData tosData[];  // 1 element required, count of tosData not stored, calculate it from length of LSA
 }
 
 struct ExternalTosInfo
