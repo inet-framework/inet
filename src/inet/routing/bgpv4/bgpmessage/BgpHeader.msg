@@ -78,6 +78,7 @@ class BgpKeepAliveMessage extends BgpHeader
 
 struct BgpParameterValues
 {
+    // FIXME: rfc1654 ?? definitely not in rfc4271
     short authCode;
     long authenticationData;
 }
@@ -144,7 +145,7 @@ struct BgpUpdateAttributeType
 class BgpUpdatePathAttributes extends cObject
 {
     BgpUpdateAttributeType type; // 2 octets
-    unsigned short length; // 2 octets
+    unsigned short length; // 2 octets or just 1 depending on the value of extended length bit
 }
 
 // ORIGIN (RFC4271 Section 4.3, Type code 1):
@@ -180,6 +181,7 @@ enum BgpUpdateAtomicAggregateValues
 
 class BgpUpdatePathAttributesAtomicAggregate extends BgpUpdatePathAttributes
 {
+    // FIXME: ATOMIC_AGGREGATE is a well-known discretionary attribute of length 0.
     BgpUpdateAtomicAggregateValues value;
 }
 
@@ -201,6 +203,8 @@ struct BgpUpdateNlri
 //
 class BgpUpdatePathAttributeList extends cObject
 {
+    // FIXME: The same attribute (attribute with the same type) cannot appear more than once
+    // within the Path Attributes field of a particular UPDATE message. -> arrays not needed
     BgpUpdatePathAttributesOrigin origin; // mandatory attribute
     BgpUpdatePathAttributesAsPath asPath[]; // mandatory attribute
     BgpUpdatePathAttributesNextHop nextHop; // mandatory attribute
@@ -230,7 +234,7 @@ class BgpUpdateMessage extends BgpHeader
     chunkLength = BGP_HEADER_OCTETS + BGP_EMPTY_UPDATE_OCTETS;
 
     BgpUpdateWithdrawnRoutes withdrawnRoutes[];
-    BgpUpdatePathAttributeList pathAttributeList[]; // optional field (size is either 0 or 1)
+    BgpUpdatePathAttributeList pathAttributeList[]; // optional field (size is either 0 or 1) // FIXME
     BgpUpdateNlri NLRI;
 }
 
