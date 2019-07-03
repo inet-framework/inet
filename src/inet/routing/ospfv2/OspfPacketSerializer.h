@@ -28,30 +28,26 @@ namespace ospf {
  */
 class INET_API OspfPacketSerializer : public FieldsChunkSerializer
 {
-private:
+  private:
     static void serializeOspfHeader(MemoryOutputStream& stream, const IntrusivePtr<const OspfPacket>& ospfPacket);
     static uint16_t deserializeOspfHeader(MemoryInputStream& stream, IntrusivePtr<OspfPacket>& ospfPacket);
 
-    static void serializeLsaHeader(MemoryOutputStream& stream, const OspfLsaHeader& lsaHeader);
-    static bool decerializeLsaHeader(MemoryInputStream& stream, OspfLsaHeader *lsaHeader);
-
     static void serializeRouterLsa(MemoryOutputStream& stream, const OspfRouterLsa& routerLsa);
-    static bool decerializeRouterLsa(MemoryInputStream& stream, OspfRouterLsa *routerLsa);
+    static void deserializeRouterLsa(MemoryInputStream& stream, const Ptr<OspfLinkStateUpdatePacket> updatePacket, OspfRouterLsa& routerLsa);
 
     static void serializeNetworkLsa(MemoryOutputStream& stream, const OspfNetworkLsa& networkLsa);
-    static bool decerializeNetworkLsa(MemoryInputStream& stream, OspfNetworkLsa *networkLsa);
+    static void deserializeNetworkLsa(MemoryInputStream& stream, const Ptr<OspfLinkStateUpdatePacket> updatePacket, OspfNetworkLsa& networkLsa);
 
     static void serializeSummaryLsa(MemoryOutputStream& stream, const OspfSummaryLsa& summaryLsa);
-    static bool decerializeSummaryLsa(MemoryInputStream& stream, OspfSummaryLsa *summaryLsa);
+    static void deserializeSummaryLsa(MemoryInputStream& stream, const Ptr<OspfLinkStateUpdatePacket> updatePacket, OspfSummaryLsa& summaryLsa);
 
     static void serializeAsExternalLsa(MemoryOutputStream& stream, const OspfAsExternalLsa& asExternalLsa);
-    static bool decerializeAsExternalLsa(MemoryInputStream& stream, OspfAsExternalLsa *asExternalLsa);
+    static void deserializeAsExternalLsa(MemoryInputStream& stream, const Ptr<OspfLinkStateUpdatePacket> updatePacket, OspfAsExternalLsa& asExternalLsa);
 
-    static uint8_t ospfOptionToByte(const OspfOptions& options);
-    static const OspfOptions byteToOspfOption(uint8_t c);
+    static void serializeOspfOptions(MemoryOutputStream& stream, const OspfOptions& options);
+    static void deserializeOspfOptions(MemoryInputStream& stream, OspfOptions& options);
 
-    static uint8_t ddFlagsToByte(const OspfDdOptions& options);
-    static const OspfDdOptions byteToDdFlags(uint8_t c);
+    static void copyHeaderFields(const Ptr<OspfPacket> from, Ptr<OspfPacket> to);
 
   protected:
     virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
@@ -59,6 +55,11 @@ private:
 
   public:
     OspfPacketSerializer() : FieldsChunkSerializer() {}
+
+    static void serializeLsa(MemoryOutputStream& stream, const OspfLsa& routerLsa);
+    static void deserializeLsa(MemoryInputStream& stream, const Ptr<OspfLinkStateUpdatePacket> updatePacket, int i);
+    static void serializeLsaHeader(MemoryOutputStream& stream, const OspfLsaHeader& lsaHeader);
+    static void deserializeLsaHeader(MemoryInputStream& stream, OspfLsaHeader& lsaHeader);
 };
 
 } // namespace ospf
