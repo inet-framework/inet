@@ -124,10 +124,11 @@ enum LinkType
     VIRTUAL_LINK = 4;
 }
 
+// (RFC 1583 Section A.4.2.)
 struct TosData
 {
     unsigned char tos;
-    unsigned char tosMetric[3];
+    unsigned long tosMetric;
 }
 
 class Link extends cObject
