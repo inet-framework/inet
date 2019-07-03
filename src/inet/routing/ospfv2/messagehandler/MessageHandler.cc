@@ -474,10 +474,7 @@ void MessageHandler::printLinkStateRequestPacket(const OspfLinkStateRequestPacke
 
     unsigned int requestCount = requestPacket->getRequestsArraySize();
     for (unsigned int i = 0; i < requestCount; i++) {
-        const LsaRequest& request = requestPacket->getRequests(i);
-        EV_DETAIL << "  type=" << request.lsType
-                  << ", LSID=" << request.linkStateID
-                  << ", advertisingRouter=" << request.advertisingRouter << "\n";
+        EV_DETAIL << "  " << requestPacket->getRequests(i) << "\n";
     }
 }
 

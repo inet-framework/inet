@@ -192,14 +192,16 @@ B calculateLsaSize(const OspfNetworkLsa& lsa);
 B calculateLsaSize(const OspfSummaryLsa& lsa);
 B calculateLsaSize(const OspfAsExternalLsa& lsa);
 
+std::ostream& operator<<(std::ostream& ostr, const LsaRequest& lsaReq);
 std::ostream& operator<<(std::ostream& ostr, const OspfLsaHeader& lsa);
-inline std::ostream& operator<<(std::ostream& ostr, const OspfLsa& lsa) { ostr << lsa.getHeader(); return ostr; }
+std::ostream& operator<<(std::ostream& ostr, const OspfLsa& lsa);
 std::ostream& operator<<(std::ostream& ostr, const OspfNetworkLsa& lsa);
 std::ostream& operator<<(std::ostream& ostr, const TosData& tos);
 std::ostream& operator<<(std::ostream& ostr, const Link& link);
 std::ostream& operator<<(std::ostream& ostr, const OspfRouterLsa& lsa);
 std::ostream& operator<<(std::ostream& ostr, const OspfSummaryLsa& lsa);
 std::ostream& operator<<(std::ostream& ostr, const ExternalTosInfo& tos);
+std::ostream& operator<<(std::ostream& ostr, const OspfAsExternalLsaContents& contents);
 std::ostream& operator<<(std::ostream& ostr, const OspfAsExternalLsa& lsa);
 
 } // namespace ospf
