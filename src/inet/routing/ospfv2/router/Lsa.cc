@@ -190,9 +190,7 @@ std::ostream& operator<<(std::ostream& ostr, const OspfNetworkLsa& lsa)
 std::ostream& operator<<(std::ostream& ostr, const TosData& tos)
 {
     ostr << "tos: " << (int)tos.tos
-         << "metric:";
-    for (int i = 0; i < 3; i++)
-        ostr << " " << (int)tos.tosMetric[i];
+         << "metric: " << tos.tosMetric;
     return ostr;
 }
 
