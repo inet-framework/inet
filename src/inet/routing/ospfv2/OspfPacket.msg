@@ -180,6 +180,7 @@ class OspfSummaryLsa extends OspfLsa
 
 struct ExternalTosInfo
 {
+    // TODO: tosData (?)
     unsigned short tos;
     bool E_ExternalMetricType = false;
     unsigned long routeCost = 1;
