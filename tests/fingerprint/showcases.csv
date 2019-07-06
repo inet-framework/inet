@@ -114,6 +114,14 @@
 /showcases/visualizer/transportpathactivity/, -f omnetpp.ini -c EnablingPathVisualizationWireless -r 0,         500s,            e56a-1601/tplx, PASS,
 /showcases/visualizer/transportpathactivity/, -f omnetpp.ini -c Filtering -r 0,     100s,         9c6e-9da8/tplx, PASS,
 
+/showcases/wireless/aggregation/,     -f omnetpp.ini -c NoAggregation -r 0,                                       10s,            3f27-d17d/tplx, PASS,
+/showcases/wireless/aggregation/,     -f omnetpp.ini -c Aggregation -r 0,                                        10s,            e77e-c7d7/tplx, PASS,
+/showcases/wireless/aggregation/,     -f omnetpp.ini -c VoicePriorityAggregation -r 0,                                      10s,            714d-115b/tplx, PASS,
+
+/showcases/wireless/blockack/,     -f omnetpp.ini -c NoFragmentation -r 0,                                       1s,            880b-85ff/tplx, PASS,
+/showcases/wireless/blockack/,     -f omnetpp.ini -c Fragmentation -r 0,                                        1s,            7956-7a57/tplx, PASS,
+/showcases/wireless/blockack/,     -f omnetpp.ini -c MixedTraffic -r 0,                                      1s,            3da6-5f8c/tplx, PASS,
+
 /showcases/wireless/errorrate/,      -f omnetpp.ini -c General -r '$bitrate==6 && $distance==50',               500s,            be46-e137/tplx, PASS,
 /showcases/wireless/errorrate/,      -f omnetpp.ini -c General -r '$bitrate==9 && $distance==50',               500s,            172a-437d/tplx, PASS,
 /showcases/wireless/errorrate/,      -f omnetpp.ini -c General -r '$bitrate==12 && $distance==50',              500s,            cb47-a5f4/tplx, PASS,
@@ -138,6 +146,11 @@
 /showcases/wireless/errorrate/,      -f omnetpp.ini -c General -r '$bitrate==36 && $distance==350',             500s,            107d-575d/tplx, PASS,
 /showcases/wireless/errorrate/,      -f omnetpp.ini -c General -r '$bitrate==48 && $distance==350',             500s,            beaf-13ba/tplx, PASS,
 /showcases/wireless/errorrate/,      -f omnetpp.ini -c General -r '$bitrate==54 && $distance==350',             500s,            2b49-f8f4/tplx, PASS,
+
+/showcases/wireless/fragmentation/,     -f omnetpp.ini -c DCFnofrag -r 0,                                       10s,            cf93-8075/tplx, PASS,
+/showcases/wireless/fragmentation/,     -f omnetpp.ini -c DCFfrag -r 0,                                        10s,            24b3-1a50/tplx, PASS,
+/showcases/wireless/fragmentation/,     -f omnetpp.ini -c HCFfrag -r 0,                                      10s,            94d2-1ed1/tplx, PASS,
+/showcases/wireless/fragmentation/,     -f omnetpp.ini -c HCFfragblockack -r 0,                                      10s,            2228-e2df/tplx, PASS,
 
 /showcases/wireless/handover/,       -f omnetpp.ini -c General -r 0,                                            250s,            a20a-6761/tplx, PASS,
 
@@ -182,6 +195,9 @@
 /showcases/wireless/pathloss/,       -f omnetpp.ini -c General -r 0,                100s,         c37d-91e0/tplx, PASS,
 
 /showcases/wireless/power/,          -f omnetpp.ini -c General -r 0,                                            100s,            a890-eb5a/tplx, PASS,
+
+/showcases/wireless/qos/,     -f omnetpp.ini -c NonQos -r 0,                                       10s,            0684-b9e7/tplx, PASS,
+/showcases/wireless/qos/,     -f omnetpp.ini -c Qos -r 0,                                        10s,            c2f4-a6aa/tplx, PASS,
 
 /showcases/wireless/ratecontrol/,    -f omnetpp.ini -c General -r '$rateControl==""',                           25s,            e1f1-e8c6/tplx, PASS,
 /showcases/wireless/ratecontrol/,    -f omnetpp.ini -c General -r '$rateControl=="AarfRateControl"',            25s,            e71a-6ae8/tplx, PASS,
