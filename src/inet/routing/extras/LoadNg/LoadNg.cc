@@ -736,7 +736,7 @@ void LoadNg::handleRREQ(const Ptr<Rreq>& rreq, const L3Address& sourceAddr, unsi
     // A node ignores all RREQs received from any node in its blacklist set.
 
     auto itNeig = neighbors.find(sourceAddr);
-    if (itNeig == neighbors.end() || !itNeig->second.isBidirectional || itNeig->second.pendingConfirmation) {
+    if (useHelloMessages && (itNeig == neighbors.end() || !itNeig->second.isBidirectional || itNeig->second.pendingConfirmation)) {
         EV_INFO << "The sender node " << sourceAddr << " is not in the neighbors list or is not bi-directional. Ignoring the Route Request" << endl;
         return;
     }
@@ -1554,7 +1554,6 @@ const Ptr<Hello> LoadNg::createHelloMessage()
             nData.setIsBidir(elem.second.isBidirectional);
             nData.setPendingConfirmation(elem.second.pendingConfirmation);
             nData.setSeqNum(elem.second.seqNumber);
-            helloMessage->setNeighAddrs(k, nData);
 
             if (measureEtx) {
                 // delete old entries.
@@ -1562,6 +1561,8 @@ const Ptr<Hello> LoadNg::createHelloMessage()
                     elem.second.helloTime.pop_front();
                 nData.setNumHelloRec(elem.second.helloTime.size());
             }
+
+            helloMessage->setNeighAddrs(k, nData);
 
             k++;
             if (k >= helloMessage->getNeighAddrsArraySize())
@@ -1631,7 +1632,7 @@ void LoadNg::handleHelloMessage(const Ptr<const Hello>& helloMessage)
     bool changeTimerNotification = false;
     if (it != neighbors.end()) {
         // refresh
-        if (helloMessage->getSeqNum() <= it->second.seqNumber)
+        if (helloMessage->getSeqNum() < it->second.seqNumber)
             return;
     }
     else {
@@ -1694,6 +1695,7 @@ void LoadNg::handleHelloMessage(const Ptr<const Hello>& helloMessage)
     }
 
     // First check nodes that are in the list, remove nodes that are not in the new list, and actualize the others
+    // Check if the list of neighbors of this node has change
     for (auto itAux = it->second.listNeigbours.begin(); itAux != it->second.listNeigbours.end(); ) {
         //
         if (this->getSelfIPAddress() == itAux->first) {
@@ -1834,6 +1836,9 @@ void LoadNg::handleHelloMessage(const Ptr<const Hello>& helloMessage)
         auto blackListIt = blacklist.find(it->first);
         if (blackListIt != blacklist.end())
             blacklist.erase(blackListIt);
+    }
+    else {
+        blacklist[it->first] = simTime() + blacklistTimeout;
     }
 
     if (topoChange && dijkstra) {
