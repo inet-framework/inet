@@ -26,6 +26,7 @@
 #include "inet/routing/ospfv2/messagehandler/MessageHandler.h"
 #include "inet/routing/ospfv2/router/OspfArea.h"
 #include "inet/routing/ospfv2/router/OspfRouter.h"
+#include "inet/routing/ospfv2/OspfPacketSerializer.h"
 
 namespace inet {
 
@@ -532,6 +533,18 @@ Packet *OspfInterface::createUpdatePacket(const OspfLsa *lsa)
             lsaHeader.setLsAge(lsAge);
             auto lsaSize = calculateLSASize(lsa);
             packetLength += lsaSize;
+
+            lsaHeader.setLsCrcMode(crcMode);
+            // making sure the crc field is zero
+            lsaHeader.setLsCrc(0x0000);
+            if(crcMode == CRC_COMPUTED) {
+                MemoryOutputStream stream;
+                lsaHeader.setLsAge(0);
+                OspfPacketSerializer::serializeLsa(stream, *lsa);
+                uint16_t crc = TcpIpChecksum::checksum(stream.getData());
+                lsaHeader.setLsAge(lsAge);
+                lsaHeader.setLsCrc(crc);
+            }
         }
         break;
 
