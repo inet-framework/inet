@@ -150,6 +150,7 @@ bool Router::installLSA(const OspfLsa *lsa, AreaId areaID    /*= BACKBONE_AREAID
 
         case AS_EXTERNAL_LSA_TYPE: {
             const OspfAsExternalLsa *ospfASExternalLSA = check_and_cast<const OspfAsExternalLsa *>(lsa);
+            ASSERT(ospfASExternalLSA->getHeader().getLsaLength() != 0);
             return installASExternalLSA(ospfASExternalLSA);
         }
         break;
@@ -234,6 +235,7 @@ bool Router::installASExternalLSA(const OspfAsExternalLsa *lsa)
     else {
         AsExternalLsa *lsaCopy = new AsExternalLsa(*lsa);
         asExternalLSAsByID[lsaKey] = lsaCopy;
+        ASSERT(lsaCopy->getHeader().getLsaLength() != 0);
         asExternalLSAs.push_back(lsaCopy);
         return true;
     }

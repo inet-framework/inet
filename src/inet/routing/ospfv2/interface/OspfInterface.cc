@@ -532,6 +532,7 @@ Packet *OspfInterface::createUpdatePacket(const OspfLsa *lsa)
             }
             lsaHeader.setLsAge(lsAge);
             auto lsaSize = calculateLSASize(lsa);
+            ASSERT(lsaSize == B(lsaHeader.getLsaLength()));
             packetLength += lsaSize;
 
             lsaHeader.setLsCrcMode(crcMode);

@@ -315,6 +315,8 @@ std::ostream& operator<<(std::ostream& ostr, const OspfAsExternalLsa& lsa)
 
 std::ostream& operator<<(std::ostream& ostr, const OspfLsa& lsa)
 {
+    ASSERT(lsa.getHeader().getLsCrcMode() != CrcMode::CRC_MODE_UNDEFINED);
+    ASSERT(lsa.getHeader().getLsaLength() != 0);
 
     switch (lsa.getHeader().getLsType()) {
         case ROUTERLSA_TYPE:
