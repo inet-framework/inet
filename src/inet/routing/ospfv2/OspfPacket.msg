@@ -102,10 +102,10 @@ class OspfLsaHeader extends cObject
     LsaType lsType = static_cast<LsaType>(-1);
     Ipv4Address linkStateID;
     Ipv4Address advertisingRouter;
-    long lsSequenceNumber = 0;
+    int32_t lsSequenceNumber = 0;
     uint16_t lsCrc = 0;
     CrcMode lsCrcMode = CRC_MODE_UNDEFINED;
-    unsigned short lsaLength = 0;
+    uint16_t lsaLength = 0;
 }
 
 //
