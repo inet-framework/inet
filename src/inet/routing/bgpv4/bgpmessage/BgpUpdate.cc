@@ -65,8 +65,8 @@ void BgpUpdateMessage::setPathAttributeList(const BgpUpdatePathAttributeList& pa
 void BgpUpdateMessage::setNLRI(const BgpUpdateNlri& NLRI_var)
 {
     //FIXME length = B(1) + B((length+7)/8)
-    B oldLen = BgpUpdateMessage_Base::NLRI.length == 0 ? B(0) : B(5);
-    B newLen = NLRI_var.length == 0 ? B(0) : B(5);
+    B oldLen = BgpUpdateMessage_Base::NLRI.length == 0 ? B(0) : (B(1) + B((BgpUpdateMessage_Base::NLRI.length + 7) / 8));
+    B newLen = NLRI_var.length == 0 ? B(0) : (B(1) + B((NLRI_var.length + 7) / 8));
     setChunkLength(getChunkLength() - oldLen + newLen);
     BgpUpdateMessage_Base::NLRI = NLRI_var;
 }
