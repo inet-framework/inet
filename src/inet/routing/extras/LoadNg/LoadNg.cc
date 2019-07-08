@@ -33,6 +33,7 @@
 #include "inet/routing/extras/LoadNg/LoadNg.h"
 #include "inet/routing/extras/LoadNg/DeepFirstForwardTag_m.h"
 
+
 // DONE: actualize routes using hello information,
 // DONE: Fill the routing tables using the routes computes by Dijkstra
 // DONE: Modify the link layer to force that a percentage of links could be only unidirectional
@@ -46,6 +47,7 @@
 // TODO: Modify the link layer that quality measures could arrive to upper layers
 // TODO: Modify the link layer to force a predetermine lost packets in predetermined links.
 // TODO: Add DFF tag to the packets stolen from network layer.
+// TODO: Solve unidirectional problem, find a route when not bidirectional path exist, double RREQ.
 
 
 
@@ -153,8 +155,11 @@ void LoadNg::handleMessageWhenUp(cMessage *msg)
             throw cRuntimeError("Unknown self message");
     }
     else {
+
         auto packet = check_and_cast<Packet *>(msg);
         auto protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
+        auto signalPowerInd = packet->findTag<SignalPowerInd>();
+        auto snirInd = packet->findTag<SnirInd>();
 
         if (protocol == &Protocol::icmpv4) {
             IcmpHeader *icmpPacket = check_and_cast<IcmpHeader *>(msg);
@@ -193,7 +198,7 @@ void LoadNg::handleMessageWhenUp(cMessage *msg)
                     break;
 
                 case HELLO:
-                    handleHelloMessage(dynamicPtrCast<const Hello>(ctrlPacket));
+                    handleHelloMessage(dynamicPtrCast<const Hello>(ctrlPacket), signalPowerInd, snirInd);
                     break;
 
                 default:
@@ -362,7 +367,7 @@ void LoadNg::sendRREQ(const Ptr<Rreq>& rreq, const L3Address& destAddr, unsigned
     scheduleAt(simTime() + ringTraversalTime, rrepTimerMsg);
 
     EV_INFO << "Sending a Route Request with target " << rreq->getDestAddr() << " and TTL= " << timeToLive << endl;
-    sendAODVPacket(rreq, destAddr, timeToLive, *jitterPar);
+    sendLoadNgPacket(rreq, destAddr, timeToLive, *jitterPar);
     rreqCount++;
 }
 
@@ -403,7 +408,7 @@ void LoadNg::sendRREP(const Ptr<Rrep>& rrep, const L3Address& destAddr, unsigned
 
         scheduleAt(simTime() + nextHopWait, rrepAckTimer);
     }
-    sendAODVPacket(rrep, nextHop, timeToLive, 0);
+    sendLoadNgPacket(rrep, nextHop, timeToLive, 0);
 }
 
 const Ptr<Rreq> LoadNg::createRREQ(const L3Address& destAddr)
@@ -701,7 +706,7 @@ void LoadNg::updateRoutingTable(IRoute *route, const L3Address& nextHop, unsigne
     scheduleExpungeRoutes();
 }
 
-void LoadNg::sendAODVPacket(const Ptr<LoadNgControlPacket>& packet, const L3Address& destAddr, unsigned int timeToLive, double delay)
+void LoadNg::sendLoadNgPacket(const Ptr<LoadNgControlPacket>& packet, const L3Address& destAddr, unsigned int timeToLive, double delay)
 {
     ASSERT(timeToLive != 0);
 
@@ -1078,7 +1083,7 @@ void LoadNg::handleLinkBreakSendRERR(const L3Address& unreachableAddr)
 
     // broadcast
     EV_INFO << "Broadcasting Route Error message with TTL=1" << endl;
-    sendAODVPacket(rerr, addressType->getBroadcastAddress(), 1, *jitterPar);
+    sendLoadNgPacket(rerr, addressType->getBroadcastAddress(), 1, *jitterPar);
 }
 
 const Ptr<Rerr> LoadNg::createRERR(const std::vector<UnreachableNode>& unreachableNodes)
@@ -1159,7 +1164,7 @@ void LoadNg::handleRERR(const Ptr<const Rerr>& rerr, const L3Address& sourceAddr
         if (rerr->getHopLimit() > 1) {
             auto newRERR = createRERR(unreachableNeighbors);
             newRERR->setHopLimit(rerr->getHopLimit()-1);
-            sendAODVPacket(newRERR, addressType->getBroadcastAddress(), 1, 0);
+            sendLoadNgPacket(newRERR, addressType->getBroadcastAddress(), 1, 0);
             rerrCount++;
         }
     }
@@ -1265,7 +1270,7 @@ void LoadNg::forwardRREP(const Ptr<Rrep>& rrep, const L3Address& destAddr, unsig
             cancelEvent(rrepAckTimer);
         scheduleAt(simTime() + nextHopWait, rrepAckTimer);
     }
-    sendAODVPacket(rrep, destAddr, 100, *jitterPar);
+    sendLoadNgPacket(rrep, destAddr, 100, *jitterPar);
 }
 
 void LoadNg::forwardRREQ(const Ptr<Rreq>& rreq, unsigned int timeToLive)
@@ -1276,7 +1281,7 @@ void LoadNg::forwardRREQ(const Ptr<Rreq>& rreq, unsigned int timeToLive)
         EV_WARN << "Hop limit 0. Canceling sending RREQ" << endl;
         return;
     }
-    sendAODVPacket(rreq, addressType->getBroadcastAddress(), timeToLive, *jitterPar);
+    sendLoadNgPacket(rreq, addressType->getBroadcastAddress(), timeToLive, *jitterPar);
 }
 
 void LoadNg::completeRouteDiscovery(const L3Address& target)
@@ -1316,7 +1321,7 @@ void LoadNg::sendGRREP(const Ptr<Rrep>& grrep, const L3Address& destAddr, unsign
         return;
     }
 
-    sendAODVPacket(grrep, nextHop, timeToLive, 0);
+    sendLoadNgPacket(grrep, nextHop, timeToLive, 0);
 }
 
 void LoadNg::runDijkstra()
@@ -1591,7 +1596,7 @@ void LoadNg::sendHelloMessagesIfNeeded()
         simtime_t nextHello = simTime() + helloInterval - *periodicJitter;
         auto helloMessage = createHelloMessage();
         helloMessage->setLifetime(nextHello);
-        sendAODVPacket(helloMessage, addressType->getBroadcastAddress(), 1, 0);
+        sendLoadNgPacket(helloMessage, addressType->getBroadcastAddress(), 1, 0);
         scheduleAt(nextHello, helloMsgTimer);
         return;
     }
@@ -1618,14 +1623,21 @@ void LoadNg::sendHelloMessagesIfNeeded()
         // sequenceNum++;
         auto helloMessage = createHelloMessage();
         helloMessage->setLifetime(nextHello);
-        sendAODVPacket(helloMessage, addressType->getBroadcastAddress(), 1, 0);
+        sendLoadNgPacket(helloMessage, addressType->getBroadcastAddress(), 1, 0);
     }
 
     scheduleAt(nextHello, helloMsgTimer);
 }
 
-void LoadNg::handleHelloMessage(const Ptr<const Hello>& helloMessage)
+void LoadNg::handleHelloMessage(const Ptr<const Hello>& helloMessage, SignalPowerInd * powerInd, SnirInd * snirInd)
 {
+    double power = NaN;
+    double snir = NaN;
+    if (powerInd)
+        power = powerInd->getPower().get();
+    if (snirInd)
+        snir = snirInd->getMaximumSnir();
+
     const L3Address& helloOriginatorAddr = helloMessage->getOriginatorAddr();
     auto it = neighbors.find(helloOriginatorAddr);
     bool topoChange = false;
@@ -2071,7 +2083,7 @@ void LoadNg::sendRERRWhenNoRouteToForward(const L3Address& unreachableAddr)
 
     rerrCount++;
     EV_INFO << "Broadcasting Route Error message with TTL=1" << endl;
-    sendAODVPacket(rerr, addressType->getBroadcastAddress(), 1, *jitterPar);    // TODO: unicast if there exists a route to the source
+    sendLoadNgPacket(rerr, addressType->getBroadcastAddress(), 1, *jitterPar);    // TODO: unicast if there exists a route to the source
 }
 
 void LoadNg::cancelRouteDiscovery(const L3Address& destAddr)
@@ -2116,7 +2128,7 @@ const Ptr<RrepAck> LoadNg::createRREPACK()
 void LoadNg::sendRREPACK(const Ptr<RrepAck>& rrepACK, const L3Address& destAddr)
 {
     EV_INFO << "Sending Route Reply ACK to " << destAddr << endl;
-    sendAODVPacket(rrepACK, destAddr, 100, 0);
+    sendLoadNgPacket(rrepACK, destAddr, 100, 0);
 }
 
 void LoadNg::handleRREPACK(const Ptr<const RrepAck>& rrepACK, const L3Address& neighborAddr)

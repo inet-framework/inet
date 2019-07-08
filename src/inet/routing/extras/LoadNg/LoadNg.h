@@ -34,6 +34,7 @@
 #include "inet/transportlayer/contract/udp/UdpSocket.h"
 #include "inet/transportlayer/udp/UdpHeader_m.h"
 #include "inet/common/DijktraKShortest.h"
+#include "inet/physicallayer/common/packetlevel/SignalTag_m.h"
 
 namespace inet {
 namespace inetmanet {
@@ -267,7 +268,7 @@ class INET_API LoadNg : public RoutingProtocolBase, public NetfilterBase::HookBa
     void handleRREP(const Ptr<Rrep>& rrep, const L3Address& sourceAddr);
     void handleRREQ(const Ptr<Rreq>& rreq, const L3Address& sourceAddr, unsigned int timeToLive);
     void handleRERR(const Ptr<const Rerr>& rerr, const L3Address& sourceAddr);
-    void handleHelloMessage(const Ptr<const Hello>& helloMessage);
+    void handleHelloMessage(const Ptr<const Hello>& helloMessage, SignalPowerInd *, SnirInd *);
     void handleRREPACK(const Ptr<const RrepAck>& rrepACK, const L3Address& neighborAddr);
 
     /* Control Packet sender methods */
@@ -305,7 +306,7 @@ class INET_API LoadNg : public RoutingProtocolBase, public NetfilterBase::HookBa
     virtual void runDijkstra();
     virtual void runDijkstraKs();
     L3Address getSelfIPAddress() const;
-    void sendAODVPacket(const Ptr<LoadNgControlPacket>& packet, const L3Address& destAddr, unsigned int timeToLive, double delay);
+    void sendLoadNgPacket(const Ptr<LoadNgControlPacket>& packet, const L3Address& destAddr, unsigned int timeToLive, double delay);
     void clearState();
 
     /* Lifecycle */
