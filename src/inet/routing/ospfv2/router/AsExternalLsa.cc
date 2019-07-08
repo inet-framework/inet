@@ -18,7 +18,6 @@
 #include "inet/routing/ospfv2/router/Lsa.h"
 
 namespace inet {
-
 namespace ospf {
 
 bool AsExternalLsa::update(const OspfAsExternalLsa *lsa)
@@ -28,11 +27,8 @@ bool AsExternalLsa::update(const OspfAsExternalLsa *lsa)
     resetInstallTime();
     if (different) {
         clearNextHops();
-        return true;
     }
-    else {
-        return false;
-    }
+    return different;
 }
 
 bool AsExternalLsa::differsFrom(const OspfAsExternalLsa *asExternalLSA) const
@@ -77,6 +73,5 @@ bool AsExternalLsa::differsFrom(const OspfAsExternalLsa *asExternalLSA) const
 }
 
 } // namespace ospf
-
 } // namespace inet
 
