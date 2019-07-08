@@ -24,7 +24,8 @@ namespace physicallayer {
 DimensionalSnir::DimensionalSnir(const DimensionalReception *reception, const DimensionalNoise *noise) :
     SnirBase(reception, noise),
     minSNIR(NaN),
-    maxSNIR(NaN)
+    maxSNIR(NaN),
+    meanSNIR(NaN)
 {
 }
 
@@ -108,6 +109,31 @@ double DimensionalSnir::computeMax() const
     return maxSNIR;
 }
 
+double DimensionalSnir::computeMean() const
+{
+    // TODO: factor out common part
+    const DimensionalNoise *dimensionalNoise = check_and_cast<const DimensionalNoise *>(noise);
+    const DimensionalReception *dimensionalReception = check_and_cast<const DimensionalReception *>(reception);
+    EV_TRACE << "Reception power begin " << endl;
+    EV_TRACE << *dimensionalReception->getPower() << endl;
+    EV_TRACE << "Reception power end" << endl;
+    auto noisePower = dimensionalNoise->getPower();
+    auto receptionPower = dimensionalReception->getPower();
+    auto snir = receptionPower->divide(noisePower);
+    const simtime_t startTime = reception->getStartTime();
+    const simtime_t endTime = reception->getEndTime();
+    Hz carrierFrequency = dimensionalReception->getCarrierFrequency();
+    Hz bandwidth = dimensionalReception->getBandwidth();
+    Point<simtime_t, Hz> startPoint(startTime, carrierFrequency - bandwidth / 2);
+    Point<simtime_t, Hz> endPoint(endTime, carrierFrequency + bandwidth / 2);
+    EV_TRACE << "SNIR begin " << endl;
+    EV_TRACE << *snir << endl;
+    EV_TRACE << "SNIR end" << endl;
+    double meanSNIR = snir->getMean(Interval<simtime_t, Hz>(startPoint, endPoint, 0b0));
+    EV_DEBUG << "Computing mean SNIR: start = " << startPoint << ", end = " << endPoint << " -> mean SNIR = " << meanSNIR << endl;
+    return meanSNIR;
+}
+
 double DimensionalSnir::getMin() const
 {
     if (std::isnan(minSNIR))
@@ -120,6 +146,13 @@ double DimensionalSnir::getMax() const
     if (std::isnan(maxSNIR))
         maxSNIR = computeMax();
     return maxSNIR;
+}
+
+double DimensionalSnir::getMean() const
+{
+    if (std::isnan(meanSNIR))
+        meanSNIR = computeMean();
+    return meanSNIR;
 }
 
 } // namespace physicallayer

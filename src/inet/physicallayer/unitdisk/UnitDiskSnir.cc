@@ -42,6 +42,11 @@ double UnitDiskSnir::getMax() const
     return NaN;
 }
 
+double UnitDiskSnir::getMean() const
+{
+    return NaN;
+}
+
 } // namespace physicallayer
 
 } // namespace inet

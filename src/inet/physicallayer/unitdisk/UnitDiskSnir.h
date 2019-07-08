@@ -33,6 +33,7 @@ class INET_API UnitDiskSnir : public SnirBase
 
     virtual double getMin() const override;
     virtual double getMax() const override;
+    virtual double getMean() const override;
 };
 
 } // namespace physicallayer
