@@ -691,35 +691,37 @@ void BgpRouter::updateSendProcess(const unsigned char type, SessionId sessionInd
 
             unsigned int nbAS = entry->getASCount();
             content.setAsPathArraySize(1);
-            content.getAsPathForUpdate(0).setValueArraySize(1);
-            content.getAsPathForUpdate(0).getValueForUpdate(0).setType(AS_SEQUENCE);
-            content.getAsPathForUpdate(0).getValueForUpdate(0).setLength(0);
+            auto& asPath = content.getAsPathForUpdate(0);
+            asPath.setValueArraySize(1);
+            asPath.getValueForUpdate(0).setType(AS_SEQUENCE);
+            asPath.getValueForUpdate(0).setLength(0);
             if((elem).second->getType() == EGP) {
                 // RFC 4271 : set My AS in first position if it is not already
                 if (entry->getAS(0) != myAsId) {
-                    content.getAsPathForUpdate(0).getValueForUpdate(0).setAsValueArraySize(nbAS + 1);
-                    content.getAsPathForUpdate(0).getValueForUpdate(0).setLength(nbAS + 1);
-                    content.getAsPathForUpdate(0).getValueForUpdate(0).setAsValue(0, myAsId);
+                    asPath.getValueForUpdate(0).setAsValueArraySize(nbAS + 1);
+                    asPath.getValueForUpdate(0).setLength(nbAS + 1);
+                    asPath.getValueForUpdate(0).setAsValue(0, myAsId);
                     for (unsigned int j = 1; j < nbAS + 1; j++)
-                        content.getAsPathForUpdate(0).getValueForUpdate(0).setAsValue(j, entry->getAS(j - 1));
+                        asPath.getValueForUpdate(0).setAsValue(j, entry->getAS(j - 1));
                 }
                 else {
-                    content.getAsPathForUpdate(0).getValueForUpdate(0).setAsValueArraySize(nbAS);
-                    content.getAsPathForUpdate(0).getValueForUpdate(0).setLength(nbAS);
+                    asPath.getValueForUpdate(0).setAsValueArraySize(nbAS);
+                    asPath.getValueForUpdate(0).setLength(nbAS);
                     for (unsigned int j = 0; j < nbAS; j++)
-                        content.getAsPathForUpdate(0).getValueForUpdate(0).setAsValue(j, entry->getAS(j));
+                        asPath.getValueForUpdate(0).setAsValue(j, entry->getAS(j));
                 }
             }
             // no AS number is added when the route is being advertised between internal peers
             else if((elem).second->getType() == IGP) {
-                content.getAsPathForUpdate(0).getValueForUpdate(0).setAsValueArraySize(nbAS);
-                content.getAsPathForUpdate(0).getValueForUpdate(0).setLength(nbAS);
+                asPath.getValueForUpdate(0).setAsValueArraySize(nbAS);
+                asPath.getValueForUpdate(0).setLength(nbAS);
                 for (unsigned int j = 0; j < nbAS; j++)
-                    content.getAsPathForUpdate(0).getValueForUpdate(0).setAsValue(j, entry->getAS(j));
+                    asPath.getValueForUpdate(0).setAsValue(j, entry->getAS(j));
 
                 content.setLocalPrefArraySize(1);
-                content.getLocalPrefForUpdate(0).setLength(4);
-                content.getLocalPrefForUpdate(0).setValue(_BGPSessions[sessionIndex]->getLocalPreference());
+                auto& localPref = content.getLocalPrefForUpdate(0);
+                localPref.setLength(4);
+                localPref.setValue(_BGPSessions[sessionIndex]->getLocalPreference());
             }
             content.getAsPathForUpdate(0).setLength(2 + 2 * content.getAsPathForUpdate(0).getValueForUpdate(0).getAsValueArraySize());
 
