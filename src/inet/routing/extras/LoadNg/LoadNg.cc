@@ -237,6 +237,14 @@ INetfilter::IHook::Result LoadNg::ensureRouteForDatagram(Packet *datagram)
         }
         else {
             bool isInactive = routeData && !routeData->isActive();
+
+            // TODO: check in the neighbor list if you have an alternative
+
+            if (!routingTable->isLocalAddress(sourceAddr)) {
+                sendRERRWhenNoRouteToForward(destAddr);
+                return DROP;
+            }
+
             // A node disseminates a RREQ when it determines that it needs a route
             // to a destination and does not have one available.  This can happen if
             // the destination is previously unknown to the node, or if a previously
