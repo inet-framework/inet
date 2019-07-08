@@ -175,15 +175,18 @@ std::ostream& operator<<(std::ostream& ostr, const OspfLsaHeader& lsaHeader)
 std::ostream& operator<<(std::ostream& ostr, const OspfNetworkLsa& lsa)
 {
     unsigned int cnt = lsa.getAttachedRoutersArraySize();
-    ostr << "numAttachedRouters: " << cnt << ", ";
-    ostr << "Attached routers: ";
+    ostr << lsa.getHeader();
+    ostr << ", numAttachedRouters: " << cnt;
     if (cnt) {
+        ostr << ", Attached routers: {";
         for (unsigned int i = 0; i < cnt; i++) {
-            ostr << lsa.getAttachedRouters(i) << " ";
+            if (i)
+                ostr << ", ";
+            ostr << lsa.getAttachedRouters(i);
         }
+        ostr << "}";
     }
     ostr << ", Mask: " << lsa.getNetworkMask();
-    ostr << ", " << lsa.getHeader();
     return ostr;
 }
 
@@ -230,7 +233,9 @@ std::ostream& operator<<(std::ostream& ostr, const Link& link)
     if (cnt) {
         ostr << ", tos: {";
         for (unsigned int i = 0; i < cnt; i++) {
-            ostr << " " << link.getTosData(i);
+            if (i)
+                ostr << ", ";
+            ostr << link.getTosData(i);
         }
         ostr << "}";
     }
@@ -249,11 +254,12 @@ std::ostream& operator<<(std::ostream& ostr, const OspfRouterLsa& lsa)
     if (cnt) {
         ostr << "Links: {";
         for (unsigned int i = 0; i < cnt; i++) {
+            if (i)
+                ostr << ",";
             ostr << " {" << lsa.getLinks(i) << "}";
         }
-        ostr << "}, ";
+        ostr << "}";
     }
-    ostr << lsa.getHeader();
     return ostr;
 }
 
@@ -266,11 +272,12 @@ std::ostream& operator<<(std::ostream& ostr, const OspfSummaryLsa& lsa)
     if (cnt) {
         ostr << ", tosData: {";
         for (unsigned int i = 0; i < cnt; i++) {
-            ostr << " " << lsa.getTosData(i);
+            if (i)
+                ostr << ", ";
+            ostr << lsa.getTosData(i);
         }
-        ostr << "}, ";
+        ostr << "}";
     }
-    ostr << lsa.getHeader();
     return ostr;
 }
 
@@ -291,9 +298,11 @@ std::ostream& operator<<(std::ostream& ostr, const OspfAsExternalLsaContents& co
     if (cnt) {
         ostr << ", tosData: {";
         for (unsigned int i = 0; i < cnt; i++) {
-            ostr << " " << contents.getExternalTOSInfo(i);
+            if (i)
+                ostr << ", ";
+            ostr << contents.getExternalTOSInfo(i);
         }
-        ostr << "}, ";
+        ostr << "}";
     }
     return ostr;
 }
@@ -306,6 +315,7 @@ std::ostream& operator<<(std::ostream& ostr, const OspfAsExternalLsa& lsa)
 
 std::ostream& operator<<(std::ostream& ostr, const OspfLsa& lsa)
 {
+
     switch (lsa.getHeader().getLsType()) {
         case ROUTERLSA_TYPE:
             ostr << *check_and_cast<const RouterLsa *>(&lsa);
