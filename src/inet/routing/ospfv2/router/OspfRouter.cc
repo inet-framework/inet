@@ -18,6 +18,7 @@
 #include <algorithm>
 
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
+#include "inet/routing/ospfv2/router/Lsa.h"
 #include "inet/routing/ospfv2/router/OspfRouter.h"
 
 namespace inet {
@@ -1429,6 +1430,8 @@ void Router::updateExternalRoute(Ipv4Address networkAddress, const OspfAsExterna
     asExternalLSA->setSource(LsaTrackingInfo::ORIGINATED);
 
     externalRoutes[networkAddress] = externalRouteContents;
+
+    lsaHeader.setLsaLength(B(calculateLsaSize(*asExternalLSA)).get());
 
     bool rebuild = installASExternalLSA(asExternalLSA);
     floodLSA(asExternalLSA, BACKBONE_AREAID);

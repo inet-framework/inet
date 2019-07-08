@@ -1,5 +1,6 @@
 //
 // Copyright (C) 2006 Andras Babos and Andras Varga
+// Copyright (C) 2019 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -1014,9 +1015,7 @@ NetworkLsa *Area::originateNetworkLSA(const OspfInterface *intf)
         networkLSA->setAttachedRouters(netIndex, Ipv4Address(parentRouter->getRouterID()));
 
         // update the length field in the LSA header
-        uint32_t totalSize = (OSPF_LSA_HEADER_LENGTH + OSPF_NETWORKLSA_MASK_LENGTH +
-                B(networkLSA->getAttachedRoutersArraySize() * (OSPF_NETWORKLSA_ADDRESS_LENGTH).get()) ).get();
-        lsaHeader.setLsaLength(totalSize);
+        lsaHeader.setLsaLength(B(calculateLsaSize(*networkLSA)).get());
 
         return networkLSA;
     }
@@ -1139,6 +1138,9 @@ SummaryLsa *Area::originateSummaryLSA(const OspfRoutingTableEntry *entry,
 
             summaryLSA->setSource(LsaTrackingInfo::ORIGINATED);
 
+            // update the length field in the LSA header
+            lsaHeader.setLsaLength(B(calculateLsaSize(*summaryLSA)).get());
+
             return summaryLSA;
         }
     }
@@ -1171,6 +1173,9 @@ SummaryLsa *Area::originateSummaryLSA(const OspfRoutingTableEntry *entry,
                     lsaHeader.setLsSequenceNumber(INITIAL_SEQUENCE_NUMBER);
                     lsaHeader.setLinkStateID(newLinkStateID);
 
+                    // update the length field in the LSA header
+                    lsaHeader.setLsaLength(B(calculateLsaSize(*summaryLSA)).get());
+
                     return summaryLSA;
                 }
             }
@@ -1193,6 +1198,9 @@ SummaryLsa *Area::originateSummaryLSA(const OspfRoutingTableEntry *entry,
                 summaryLSA->setTosDataArraySize(0);
 
                 summaryLSA->setSource(LsaTrackingInfo::ORIGINATED);
+
+                // update the length field in the LSA header
+                lsaHeader.setLsaLength(B(calculateLsaSize(*summaryLSA)).get());
 
                 return summaryLSA;
             }
@@ -1231,6 +1239,9 @@ SummaryLsa *Area::originateSummaryLSA(const OspfRoutingTableEntry *entry,
                         lsaHeader.setLsSequenceNumber(INITIAL_SEQUENCE_NUMBER);
                         lsaHeader.setLinkStateID(newLinkStateID);
 
+                        // update the length field in the LSA header
+                        lsaHeader.setLsaLength(B(calculateLsaSize(*summaryLSA)).get());
+
                         return summaryLSA;
                     }
                 }
@@ -1253,6 +1264,9 @@ SummaryLsa *Area::originateSummaryLSA(const OspfRoutingTableEntry *entry,
                     summaryLSA->setTosDataArraySize(0);
 
                     summaryLSA->setSource(LsaTrackingInfo::ORIGINATED);
+
+                    // update the length field in the LSA header
+                    lsaHeader.setLsaLength(B(calculateLsaSize(*summaryLSA)).get());
 
                     return summaryLSA;
                 }
@@ -1302,6 +1316,9 @@ SummaryLsa *Area::originateSummaryLSA(const OspfRoutingTableEntry *entry,
                         lsaHeader.setLsSequenceNumber(INITIAL_SEQUENCE_NUMBER);
                         lsaHeader.setLinkStateID(newLinkStateID);
 
+                        // update the length field in the LSA header
+                        lsaHeader.setLsaLength(B(calculateLsaSize(*summaryLSA)).get());
+
                         return summaryLSA;
                     }
                     else {
@@ -1333,6 +1350,9 @@ SummaryLsa *Area::originateSummaryLSA(const OspfRoutingTableEntry *entry,
 
                         summaryLSA->setSource(LsaTrackingInfo::ORIGINATED);
 
+                        // update the length field in the LSA header
+                        lsaHeader.setLsaLength(B(calculateLsaSize(*summaryLSA)).get());
+
                         return summaryLSA;
                     }
                 }
@@ -1363,6 +1383,9 @@ SummaryLsa *Area::originateSummaryLSA_Stub()
     summaryLSA->setTosDataArraySize(0);
 
     summaryLSA->setSource(LsaTrackingInfo::ORIGINATED);
+
+    // update the length field in the LSA header
+    lsaHeader.setLsaLength(B(calculateLsaSize(*summaryLSA)).get());
 
     return summaryLSA;
 }

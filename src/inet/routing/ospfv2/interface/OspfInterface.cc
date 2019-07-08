@@ -520,15 +520,18 @@ Packet *OspfInterface::createUpdatePacket(const OspfLsa *lsa)
         case AS_EXTERNAL_LSA_TYPE: {
             updatePacket->setOspfLSAsArraySize(1);
             updatePacket->setOspfLSAs(0, lsa->dup());
-            unsigned short lsAge = updatePacket->getOspfLSAs(0)->getHeader().getLsAge();
+            auto lsa = updatePacket->getOspfLSAsForUpdate(0);
+            auto& lsaHeader = lsa->getHeaderForUpdate();
+            unsigned short lsAge = lsaHeader.getLsAge();
             if (lsAge < MAX_AGE - interfaceTransmissionDelay) {
                 lsAge += interfaceTransmissionDelay;
             }
             else {
                 lsAge = MAX_AGE;
             }
-            updatePacket->getOspfLSAsForUpdate(0)->getHeaderForUpdate().setLsAge(lsAge);
-            packetLength += calculateLSASize(lsa);
+            lsaHeader.setLsAge(lsAge);
+            auto lsaSize = calculateLSASize(lsa);
+            packetLength += lsaSize;
         }
         break;
 
