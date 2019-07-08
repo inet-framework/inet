@@ -193,7 +193,7 @@ struct BgpUpdateWithdrawnRoutes
 
 struct BgpUpdateNlri
 {
-    unsigned char length; // 1 octet
+    unsigned char length = 0; // 1 octet
     Ipv4Address prefix; // 4 octets
 }
 
