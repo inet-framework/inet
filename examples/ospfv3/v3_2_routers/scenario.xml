@@ -1,0 +1,15 @@
+<scenario>
+    <at t="90">
+        <disconnect src-module="Router1" src-gate="ethg$o[0]" />
+        <disconnect src-module="Router2" src-gate="ethg$o[0]" />		
+  	</at>
+  	<at t="200">
+        <connect src-module="Router1" src-gate="ethg[0]"
+                 dest-module="Router2" dest-gate="ethg[0]"
+                 channel-type="inet.common.misc.ThruputMeteringChannel">
+            <param name="delay" value="0.1us" />
+            <param name="datarate" value="100Mbps" />
+            <param name="thruputDisplayFormat" value='"#N"' />
+        </connect>
+    </at>
+</scenario>
