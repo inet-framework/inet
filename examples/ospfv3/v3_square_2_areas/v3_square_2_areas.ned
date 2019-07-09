@@ -20,11 +20,7 @@ network v3_square_2_areas
     submodules:
         configurator: Ipv4NetworkConfigurator {
             parameters:
-                //                            "<interface among='Router1 Router2' address='10.10.10.x' netmask='255.255.255.0' />"+
-                //                            "<interface among='Router2 Router3' address='10.10.20.x' netmask='255.255.255.0' />"+
                 config = xml("<config>"+
-//                            "<interface among='Router1 Router2' address='10.10.10.x' netmask='255.255.255.0' />"+
-//                            "<interface among='Router2 Router3' address='10.10.20.x' netmask='255.255.255.0' />"+
                              "<interface among='Router1 Host1' address='172.16.10.x' netmask='255.255.255.0' />"+
                             "</config>");
                 @display("p=147,54");
@@ -37,7 +33,7 @@ network v3_square_2_areas
         }
         Router2: Ospfv3Router {
             parameters:
-                @display("p=116,115");
+                @display("p=101,115");
             gates:
                 ethg[2];
         }
@@ -54,7 +50,7 @@ network v3_square_2_areas
                 ethg[2];
         }
         Host1: StandardHost {
-            @display("p=29,260");
+            @display("p=28,256");
             gates:
                 ethg[1];
         }
