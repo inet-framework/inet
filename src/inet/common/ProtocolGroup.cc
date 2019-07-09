@@ -105,6 +105,7 @@ ProtocolGroup ProtocolGroup::ipprotocol("ipprotocol", {
     { 48, &Protocol::dsr },
     { 58, &Protocol::icmpv6 },
     { 89, &Protocol::ospf },
+    { 90, &Protocol::ospfv3 },
     { 103, &Protocol::pim },
     { 132, &Protocol::sctp },
     { 135, &Protocol::mobileipv6 },

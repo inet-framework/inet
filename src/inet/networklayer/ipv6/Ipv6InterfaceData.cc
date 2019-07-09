@@ -293,6 +293,15 @@ const Ipv6Address& Ipv6InterfaceData::getAddress(int i) const
     return addresses[i].address;
 }
 
+const Ipv6Address& Ipv6InterfaceData::getGlblAddress() const
+{
+    for (const auto & elem : addresses)
+        if (elem.address.isGlobal())
+            return elem.address;
+
+    return Ipv6Address::UNSPECIFIED_ADDRESS;
+}
+
 bool Ipv6InterfaceData::isTentativeAddress(int i) const
 {
     ASSERT(i >= 0 && i < (int)addresses.size());

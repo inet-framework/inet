@@ -86,6 +86,7 @@ class INET_API Protocol
     static const Protocol mobileipv6;
     static const Protocol mpls;
     static const Protocol ospf;
+    static const Protocol ospfv3;
     static const Protocol pim;
     static const Protocol ppp;
     static const Protocol rip;

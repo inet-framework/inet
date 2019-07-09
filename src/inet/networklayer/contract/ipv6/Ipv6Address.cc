@@ -44,6 +44,8 @@ const Ipv6Address Ipv6Address::ALL_ROUTERS_5("FF05::2");
 const Ipv6Address Ipv6Address::SOLICITED_NODE_PREFIX("FF02:0:0:0:0:1:FF00:0");
 const Ipv6Address Ipv6Address::LINKLOCAL_PREFIX("FE80::");
 const Ipv6Address Ipv6Address::LL_MANET_ROUTERS("FF02:0:0:0:0:0:0:6D");
+const Ipv6Address Ipv6Address::ALL_OSPF_ROUTERS_MCAST("FF02:0:0:0:0:0:0:5");
+const Ipv6Address Ipv6Address::ALL_OSPF_DESIGNATED_ROUTERS_MCAST("FF02:0:0:0:0:0:0:6");
 
 // Helper: Parses at most 8 colon-separated 16-bit hex numbers ("groups"),
 // and returns their count. Advances s just over the last hex digit converted.
