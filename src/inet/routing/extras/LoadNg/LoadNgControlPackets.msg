@@ -161,11 +161,11 @@ class Rreq extends LoadNgControlPacket
     hopCounts = true;
     seqField = true;
     addrLen = 3;
-    L3Address originatorAddr;
     unsigned int hopLimit;
     unsigned int hopCount;
     unsigned int seqNum;
     TlvOptions tlvOptions;
+    L3Address originatorAddr;
     L3Address destAddr; // it should be a block of type TLV + 2 B
     TlvOptions addressTlvOptions;  
 }
@@ -181,11 +181,11 @@ class Rrep extends LoadNgControlPacket
     hopCounts = true;
     seqField = true;
     addrLen = 3;
-    L3Address originatorAddr;
     unsigned int hopLimit;
     unsigned int hopCount;
     unsigned int seqNum;
     TlvOptions tlvOptions;
+    L3Address originatorAddr;    
     L3Address destAddr; // it should be a block of type TLV + 2 B
     TlvOptions addressTlvOptions;
 }
@@ -201,6 +201,8 @@ class Rerr extends LoadNgControlPacket
     hopCounts = false;
     seqField = false;
     addrLen = 3;
+    L3Address originatorAddr;    
+    L3Address destAddr; // it should be a block of type TLV + 2 B
     unsigned int hopLimit;
     TlvOptions tlvOptions;
     UnreachableNode unreachableNodes[]; // it should be a block of type TLV + 2 B    
@@ -218,7 +220,6 @@ class RrepAck extends LoadNgControlPacket
     hopCounts = false;
     seqField = false;
     addrLen = 3;
-    L3Address originatorAddr;
 }
 
 //
@@ -239,8 +240,8 @@ class Hello extends LoadNgControlPacket
     hopCounts = true;
     seqField = true;
     addrLen = 3;
+    L3Address originatorAddr;  
     uint64_t helloIdentifier;
-    L3Address originatorAddr;
     unsigned int hopLimit;
     unsigned int hopCount;
     unsigned int seqNum;
