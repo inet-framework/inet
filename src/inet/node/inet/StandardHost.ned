@@ -45,5 +45,5 @@ module StandardHost extends ApplicationLayerNodeBase
         ipv4.proxyARP = default(false);
         *.routingTableModule = default("^.ipv4.routingTable");
         
-        hasIpv6 = default(true);
+//        hasIpv6 = default(true);
 }
