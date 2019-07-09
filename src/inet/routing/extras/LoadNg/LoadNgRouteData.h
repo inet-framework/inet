@@ -73,6 +73,9 @@ class INET_API LoadNgRouteData : public cObject
     unsigned int getMetric() {return this->metric;}
     void setMetric(unsigned int val) {this->metric = val;}
 
+    unsigned int getHopCount() {return this->hopCount;}
+    void setHopCount(unsigned int val) {this->hopCount = val;}
+
     virtual std::string str() const;
 };
 
