@@ -41,13 +41,14 @@
 // DONE: Measure ETX, DONE: include fields
 
 // TODO: Extract alternative routes from Dijkstra if the principal fails.
-// TODO: Recalculate Dijkstra using the transmission errors
+// TODO: Recalculate Dijkstra using the transmission errors: DONE PARTIAL,
 // TODO: Calculate the route to the sink using Hellos, TODO: Propagate distance to root, DONE: define TLV for this
 // TODO: measure link quality metrics and to use them for routing.
 // TODO: Modify the link layer that quality measures could arrive to upper layers
 // TODO: Modify the link layer to force a predetermine lost packets in predetermined links.
 // TODO: Add DFF tag to the packets stolen from network layer.
 // TODO: Solve unidirectional problem, find a route when not bidirectional path exist, double RREQ.
+// TODO: the protocol LoadNg must handle the packets in this case, the final destination address must be included in a header and the Ip address must be broadcast.
 
 
 

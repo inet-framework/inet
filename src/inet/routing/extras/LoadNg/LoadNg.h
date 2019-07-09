@@ -104,6 +104,18 @@ class INET_API LoadNg : public RoutingProtocolBase, public NetfilterBase::HookBa
 
     std::map<L3Address, NeigborElement> neighbors;
 
+// Unidirectional paths,
+    // This paths are send unidirectional, in a broadcast Packet, and without ACK, the return route can be different, it is necessary a special type of RREQ.
+    struct UnidirPaths {
+        Dijkstra::Route path;
+        simtime_t lifetime;
+    };
+    std::map<L3Address,UnidirPaths> unidirectionalPaths;
+    std::map<L3Address, WaitForRrep *> waitForRreqUniTimers;
+    std::map<L3Address, WaitForRrep *> waitForRrepUniTimers;
+// TODO: the protocol LoadNg must handle the packets in this case, the final destination address must be included in a header and the Ip address must be broadcast.
+//end unidirectional structs
+
     // DFF information sets
     bool activeFFD = false;
     uint64_t ffdForwardSeqNum = 0;
