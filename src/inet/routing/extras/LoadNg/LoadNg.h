@@ -288,8 +288,8 @@ class INET_API LoadNg : public RoutingProtocolBase, public NetfilterBase::HookBa
     void handleWaitForRREP(WaitForRrep *rrepTimer);
 
     /* General functions to handle route errors */
-    void sendRERRWhenNoRouteToForward(const L3Address& unreachableAddr);
-    void handleLinkBreakSendRERR(const L3Address& unreachableAddr);
+    void sendRERRWhenNoRouteToForward(const L3Address& unreachableAddr, const L3Address &);
+    void handleLinkBreakSendRERR(const L3Address& unreachableAddr, const L3Address& origin, const L3Address& destination);
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
 
     /* Netfilter hooks */

@@ -241,7 +241,7 @@ INetfilter::IHook::Result LoadNg::ensureRouteForDatagram(Packet *datagram)
             // TODO: check in the neighbor list if you have an alternative
 
             if (!routingTable->isLocalAddress(sourceAddr)) {
-                sendRERRWhenNoRouteToForward(destAddr);
+                sendRERRWhenNoRouteToForward(destAddr, sourceAddr);
                 return DROP;
             }
 
@@ -669,7 +669,7 @@ void LoadNg::handleRREP(const Ptr<Rrep>& rrep, const L3Address& sourceAddr)
     }
     else {    // create forward route for the destination: this path will be used by the originator to send data packets
         /** received routing message is an RREP and no routing entry was found **/
-        sendRERRWhenNoRouteToForward(rrep->getOriginatorAddr());
+        sendRERRWhenNoRouteToForward(rrep->getDestAddr(), rrep->getOriginatorAddr());
     }
 }
 
@@ -704,10 +704,12 @@ void LoadNg::updateRoutingTable(IRoute *route, const L3Address& nextHop, unsigne
     routingData->setDestSeqNum(destSeqNum);
     routingData->setIsActive(isActive);
 
+
     if (metricType != -1) {
         routingData->setMetricType(metricType);
         routingData->setMetric(metric);
     }
+    routingData->setHopCount(hopCount);
 
     EV_DETAIL << "Route updated: " << route << endl;
 
@@ -970,6 +972,7 @@ IRoute *LoadNg::createRoute(const L3Address& destAddr, const L3Address& nextHop,
     newProtocolData->setLifeTime(lifeTime);
     newProtocolData->setMetricType(metricType);
     newProtocolData->setMetric(metric);
+    newProtocolData->setHopCount(hopCount);
 
     newRoute->setProtocolData(newProtocolData);
 
@@ -989,6 +992,7 @@ void LoadNg::receiveSignal(cComponent *source, simsignal_t signalID, cObject *ob
         const auto& networkHeader = findNetworkProtocolHeader(datagram);
         if (networkHeader != nullptr) {
             L3Address unreachableAddr = networkHeader->getDestinationAddress();
+            L3Address sourceAddress = networkHeader->getSourceAddress();
             if (unreachableAddr.getAddressType() == addressType) {
                 // A node initiates processing for a RERR message in three situations:
                 //
@@ -997,17 +1001,36 @@ void LoadNg::receiveSignal(cComponent *source, simsignal_t signalID, cObject *ob
                 //           route repair, if attempted, was unsuccessful), or
 
                 // TODO: Implement: local repair
+                // check if the node is accessible using Dijkstra
 
-                IRoute *route = routingTable->findBestMatchingRoute(unreachableAddr);
-
+                IRoute *route = routingTable->findBestMatchingRoute(
+                        unreachableAddr);
+                if (dijkstra) {
+                    if (route && route->getSource() == this) {
+                        auto edge = dijkstra->getEdge(this->getSelfIPAddress(), route->getNextHopAsGeneric());
+                        if (edge) {
+                            dijkstra->deleteEdge(this->getSelfIPAddress(), route->getNextHopAsGeneric());
+                            dijkstra->deleteEdge(route->getNextHopAsGeneric(), this->getSelfIPAddress());
+                            runDijkstra();
+                        }
+                        std::vector<L3Address> pathNode;
+                        if (dijkstra->getRoute(unreachableAddr, pathNode)) {
+                            // alternative route
+                            route->setNextHop(pathNode[1]);
+                            // re-inject the packet
+                            networkProtocol->enqueueRoutingHook(datagram->dup(), IHook::Type::PREROUTING);
+                            return;
+                        }
+                    }
+                }
                 if (route && route->getSource() == this)
-                    handleLinkBreakSendRERR(route->getNextHopAsGeneric());
+                    handleLinkBreakSendRERR(route->getNextHopAsGeneric(), sourceAddress, unreachableAddr);
             }
         }
     }
 }
 
-void LoadNg::handleLinkBreakSendRERR(const L3Address& unreachableAddr)
+void LoadNg::handleLinkBreakSendRERR(const L3Address& unreachableAddr, const L3Address& source, const L3Address& destination)
 {
     // For case (i), the node first makes a list of unreachable destinations
     // consisting of the unreachable neighbor and any additional
@@ -1086,7 +1109,24 @@ void LoadNg::handleLinkBreakSendRERR(const L3Address& unreachableAddr)
     if (unreachableNodes.empty())
         return;
 
-    auto rerr = createRERR(unreachableNodes);
+    // extract the route to the previous node
+    auto nextAddress = addressType->getBroadcastAddress();
+    IRoute *route = routingTable->findBestMatchingRoute(source);
+    int ttl = 1;
+     if (route && route->getSource() == this) {
+         LoadNgRouteData *routeData = check_and_cast<LoadNgRouteData *>(route->getProtocolData());
+         if (routeData->isActive()) {
+             nextAddress = route->getNextHopAsGeneric();
+             ttl = route->getMetric();
+         }
+     }
+     if (nextAddress.isBroadcast()) // Only unicast
+         return;
+
+     auto rerr = createRERR(unreachableNodes);
+     rerr->setOriginatorAddr(this->getSelfIPAddress());
+     rerr->setDestAddr(source);
+
     rerrCount++;
 
     // broadcast
@@ -1156,6 +1196,8 @@ void LoadNg::handleRERR(const Ptr<const Rerr>& rerr, const L3Address& sourceAddr
                     //    node.seqNum = routeData->getDestSeqNum();
                     //    unreachableNeighbors.push_back(node);
                     //}
+                    // Delete the link from the list.
+
                     scheduleExpungeRoutes();
                 }
             }
@@ -1167,12 +1209,41 @@ void LoadNg::handleRERR(const Ptr<const Rerr>& rerr, const L3Address& sourceAddr
         return;
     }
 
-    if (unreachableNeighbors.size() > 0 && (simTime() > rebootTime + deletePeriod || rebootTime == 0)) {
-        EV_INFO << "Sending RERR to inform our neighbors about link breaks." << endl;
+    if (routingTable->isLocalAddress(rerr->getDestAddr())) // No propagate more
+        return;
+
+    if (unreachableNeighbors.size() > 0
+            && (simTime() > rebootTime + deletePeriod || rebootTime == 0)) {
+        EV_INFO << "Sending RERR to inform our neighbors about link breaks."
+                       << endl;
         if (rerr->getHopLimit() > 1) {
+
+
+            // extract the route to the previous node
+            auto nextAddress = addressType->getBroadcastAddress();
+            IRoute *route = routingTable->findBestMatchingRoute(rerr->getDestAddr());
+            int ttl = 1;
+            if (route && route->getSource() == this) {
+                LoadNgRouteData *routeData = check_and_cast<LoadNgRouteData *>(
+                        route->getProtocolData());
+                if (routeData->isActive()) {
+                    nextAddress = route->getNextHopAsGeneric();
+                    ttl = route->getMetric();
+                }
+            }
+
+            if (nextAddress.isBroadcast()) // Only unicast
+                return;
+            if (!rerr->getDestAddr().isBroadcast()
+                    && routingTable->isLocalAddress(rerr->getDestAddr()))
+                return;
+
             auto newRERR = createRERR(unreachableNeighbors);
-            newRERR->setHopLimit(rerr->getHopLimit()-1);
-            sendLoadNgPacket(newRERR, addressType->getBroadcastAddress(), 1, 0);
+            newRERR->setOriginatorAddr(rerr->getOriginatorAddr());
+            newRERR->setDestAddr(rerr->getDestAddr());
+
+            newRERR->setHopLimit(rerr->getHopLimit() - 1);
+            sendLoadNgPacket(newRERR, nextAddress, 1, 0);
             rerrCount++;
         }
     }
@@ -1349,8 +1420,9 @@ void LoadNg::runDijkstra()
                 throw cRuntimeError("Path error found");
             LoadNgRouteData *routingData = check_and_cast<LoadNgRouteData *>(destRoute->getProtocolData());
             simtime_t newLifeTime = routingData->getLifeTime();
-            if (newLifeTime < itAux->second.lifeTime + 3 * minHelloInterval)
-                newLifeTime = itAux->second.lifeTime + 3 * minHelloInterval;
+            if (newLifeTime < itAux->second.lifeTime + par("allowedHelloLoss") * helloInterval)
+                newLifeTime = itAux->second.lifeTime + par("allowedHelloLoss") * helloInterval;
+;
 
             if (neigh == itDest->first) {
                 updateRoutingTable(destRoute, itDest->first, 1, itAux->second.seqNumber, true, newLifeTime, HOPCOUNT, 1 );
@@ -1376,7 +1448,7 @@ void LoadNg::runDijkstra()
         if (itAux == neighbors.end())
             throw cRuntimeError("Path error found");
 
-        auto newLifeTime = itAux->second.lifeTime + 3 * minHelloInterval;
+        auto newLifeTime = itAux->second.lifeTime + par("allowedHelloLoss") * helloInterval;
         if (neigh == elem.first) {
             createRoute(elem.first, elem.first, 1, itAux->second.seqNumber, true, newLifeTime, HOPCOUNT, 1 );
         }
@@ -1454,7 +1526,7 @@ void LoadNg::checkNeigList()
 {
     bool recompute = false;
     for (auto it = neighbors.begin(); it != neighbors.end();) {
-        if (simTime() < it->second.lifeTime + 3 * minHelloInterval) {
+        if (simTime() < it->second.lifeTime + par("allowedHelloLoss") * helloInterval) {
             // change topology,
             if (dijkstra && it->second.isBidirectional) {
                 dijkstra->deleteEdge(this->getSelfIPAddress(), it->first);
@@ -1476,7 +1548,18 @@ void LoadNg::checkNeigList()
                     }
                 }
             }
-
+            // remove route to this neighbor and all routes that use this neighbor
+            std::vector<IRoute *> routesToDelete;
+            for (int i = 0; i< routingTable->getNumRoutes(); i++) {
+                IRoute * route = routingTable->getRoute(i);
+                if (route->getNextHopAsGeneric() == it->first) {
+                    routesToDelete.push_back(route);
+                }
+            }
+            while (!routesToDelete.empty()) {
+                routingTable->deleteRoute(routesToDelete.back());
+                routesToDelete.pop_back();
+            }
             // delete it
             recompute = true;
             neighbors.erase(it++);
@@ -2059,15 +2142,17 @@ INetfilter::IHook::Result LoadNg::datagramForwardHook(Packet *datagram)
         //    Before this time, the entry SHOULD NOT be deleted.
         routeDestData->setLifeTime(simTime() + deletePeriod);
 
-        sendRERRWhenNoRouteToForward(destAddr);
+        if (!routingTable->isLocalAddress(sourceAddr))
+            sendRERRWhenNoRouteToForward(destAddr, sourceAddr);
     }
     else if (!routeDest || routeDest->getSource() != this) // doesn't exist at all
-        sendRERRWhenNoRouteToForward(destAddr);
+        if (!routingTable->isLocalAddress(sourceAddr))
+            sendRERRWhenNoRouteToForward(destAddr, sourceAddr);
 
     return ACCEPT;
 }
 
-void LoadNg::sendRERRWhenNoRouteToForward(const L3Address& unreachableAddr)
+void LoadNg::sendRERRWhenNoRouteToForward(const L3Address& unreachableAddr, const L3Address &destAddr)
 {
     if (rerrCount >= rerrRatelimit) {
         EV_WARN << "A node should not generate more than RERR_RATELIMIT RERR messages per second. Canceling sending RERR" << endl;
@@ -2087,11 +2172,29 @@ void LoadNg::sendRERRWhenNoRouteToForward(const L3Address& unreachableAddr)
         node.seqNum = 0;
 
     unreachableNodes.push_back(node);
-    auto rerr = createRERR(unreachableNodes);
+
+    // extract the route to the previous node
+    auto nextAddress = addressType->getBroadcastAddress();
+    IRoute *route = routingTable->findBestMatchingRoute(destAddr);
+    int ttl = 1;
+     if (route && route->getSource() == this) {
+         LoadNgRouteData *routeData = check_and_cast<LoadNgRouteData *>(route->getProtocolData());
+         if (routeData->isActive()) {
+             nextAddress = route->getNextHopAsGeneric();
+             ttl = route->getMetric();
+         }
+     }
+     if (nextAddress.isBroadcast()) // Only unicast
+         return;
+
+     auto rerr = createRERR(unreachableNodes);
+     rerr->setOriginatorAddr(this->getSelfIPAddress());
+     rerr->setDestAddr(destAddr);
+
 
     rerrCount++;
     EV_INFO << "Broadcasting Route Error message with TTL=1" << endl;
-    sendLoadNgPacket(rerr, addressType->getBroadcastAddress(), 1, *jitterPar);    // TODO: unicast if there exists a route to the source
+    sendLoadNgPacket(rerr, nextAddress, ttl, *jitterPar);    // TODO: unicast if there exists a route to the source
 }
 
 void LoadNg::cancelRouteDiscovery(const L3Address& destAddr)
