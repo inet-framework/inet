@@ -19,7 +19,7 @@
 package inet.node.ospfv3;
 
 import inet.node.inet.Router;
-import inet.routing.ospfv3.OSPFv3;
+import inet.routing.ospfv3.Ospfv3;
 import inet.routing.contract.IOspfv3;
 
 

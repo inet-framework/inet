@@ -85,7 +85,7 @@ module Router extends ApplicationLayerNodeBase
             parameters:
                 @display("p=1125,76");
         }
-         ospfv3: <"OSPFv3"> like IOspfv3 if hasOSPFv3 {
+         ospfv3: <"Ospfv3"> like IOspfv3 if hasOSPFv3 {
             parameters:
                 @display("p=825,226");
          }
