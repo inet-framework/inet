@@ -59,6 +59,19 @@ Define_Module(LoadNg);
 
 const int KIND_DELAYEDSEND = 100;
 
+
+inline std::ostream& operator<<(std::ostream& out, const LoadNg::NeigborElement& d)
+{
+    out << "Bidir="<< d.isBidirectional <<"  Neig list ";
+    for (auto elem : d.listNeigbours)
+    {
+        out << "add = " << elem.first << " bidir = " <<  elem.second.isBidirectional;
+        out << " <> ";
+    }
+    return out;
+}
+
+
 void LoadNg::initialize(int stage)
 {
     if (stage == INITSTAGE_ROUTING_PROTOCOLS)
@@ -114,6 +127,7 @@ void LoadNg::initialize(int stage)
             //
             sendHelloMessagesIfNeeded();
         }
+        WATCH_MAP(neighbors);
     }
     else if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
         registerService(Protocol::manet, nullptr, gate("ipIn"));
