@@ -1160,9 +1160,15 @@ void Dijkstra::runUntil(const NodeId &target, const NodeId &rootNode, const Link
 
 bool Dijkstra::getRoute(const NodeId &nodeId, std::vector<NodeId> &pathNode, const RouteMap &routeMap)
 {
+    if (nodeId == rootNode) {
+        pathNode.clear();
+        return true;
+    }
+
     auto it = routeMap.find(nodeId);
     if (it == routeMap.end())
         return (false);
+
     std::vector<NodeId> path;
     NodeId currentNode = nodeId;
 
@@ -1198,6 +1204,8 @@ void Dijkstra::getRoutes(std::map<NodeId, std::vector<NodeId>> &paths, const Rou
     for (const auto &elem : routeMap) {
         std::vector<NodeId> path;
         std::vector<NodeId> pathNode;
+        if (elem.first == rootNode)
+            continue;
         NodeId currentNode = elem.first;
         auto it = routeMap.find(currentNode);
 
