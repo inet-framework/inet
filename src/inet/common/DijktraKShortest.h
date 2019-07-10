@@ -159,6 +159,8 @@ public:
     virtual void addEdgeWs (const NodeId & dest_node, const NodeId & last_node, double costAdd, double concave);
     virtual void addEdgeSw (const NodeId & dest_node, const NodeId & last_node, double costAdd, double concave);
     virtual void setRoot(const NodeId & dest_node);
+    virtual bool nodeExist(const NodeId &);
+
     virtual void run();
     virtual void runUntil (const NodeId &);
     virtual int getNumRoutes(const NodeId &nodeId);
@@ -311,6 +313,9 @@ public:
     virtual void addEdge(const NodeId & dest_node, Edge *);
     virtual void deleteEdge(const NodeId &, const NodeId &);
     virtual const Edge* getEdge(const NodeId & originNode, const NodeId & last_node);
+
+
+    virtual bool nodeExist(const NodeId &);
 
     virtual void setRoot(const NodeId & dest_node);
     virtual void run(const NodeId &, const LinkArray &, RouteMap &);

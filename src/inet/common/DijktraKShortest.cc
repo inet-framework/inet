@@ -350,6 +350,13 @@ void DijkstraKshortest::setRoot(const NodeId & dest_node)
 
 }
 
+bool DijkstraKshortest::nodeExist(const NodeId &) {
+    auto it = linkArray.find(rootNode);
+    if (it == linkArray.end())
+        return false;
+    return true;
+}
+
 void DijkstraKshortest::run()
 {
     std::multiset<SetElem> heap;
@@ -1009,6 +1016,13 @@ void Dijkstra::runUntil(const NodeId &target)
 void Dijkstra::run(const NodeId &rootNode, const LinkArray &linkArray, RouteMap &routeMap)
 {
     runUntil(UndefinedAddr, rootNode, linkArray, routeMap);
+}
+
+bool Dijkstra::nodeExist(const NodeId &) {
+    auto it = linkArray.find(rootNode);
+    if (it == linkArray.end())
+        return false;
+    return true;
 }
 
 void Dijkstra::runUntil(const NodeId &target, const NodeId &rootNode, const LinkArray &linkArray, RouteMap &routeMap)

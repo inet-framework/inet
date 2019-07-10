@@ -50,6 +50,10 @@ simple LoadNg like IManetRouting
         bool useHelloMessages = default(false); // see RFC 3561: 6.9
         bool useIntelligentHello = default(true);
         int udpPort = default(654);
+        
+        double helloInterval @unit(s) = default(1s); // every helloInterval seconds a node broadcasts Hello messages (if it is necessary)        
+        double minHelloInterval @unit(s) = default(helloInterval); // timeout for a RREP-ACK
+        double maxHelloInterval  @unit(s) = default(helloInterval); // timeout for a RREP-ACK
 
         double maxPeriodicJitter @unit(s) = default(helloInterval / 4); // it MUST NOT be negative; it MUST NOT be greater than MESSAGE_INTERVAL/2; it SHOULD NOT be greater than MESSAGE_INTERVAL/4.
         volatile double periodicJitter @unit(s) = default(uniform(0s, maxPeriodicJitter)); // jitter for externally triggered message generation and message forwarding
@@ -86,9 +90,7 @@ simple LoadNg like IManetRouting
         double nextHopWait @unit(s) = default(nodeTraversalTime + 0.01s); // timeout for a RREP-ACK
         double pathDiscoveryTime @unit(s) = default(2 * netTraversalTime); // buffer timeout for each broadcasted RREQ message
 
-        double helloInterval @unit(s) = default(1s); // every helloInterval seconds a node broadcasts Hello messages (if it is necessary)        
-        double minHelloInterval @unit(s) = default(helloInterval); // timeout for a RREP-ACK
-        double maxHelloInterval  @unit(s) = default(helloInterval * 10); // timeout for a RREP-ACK
+        
         bool useDijkstra = default(true);
     gates:
         input ipIn;

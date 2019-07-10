@@ -687,7 +687,7 @@ void LoadNg::updateRoutingTable(IRoute *route, const L3Address& nextHop, unsigne
     EV_DETAIL << "Updating existing route: " << route << endl;
 
     auto it = neighbors.find(nextHop);
-    if (it != neighbors.end()) {
+    if (it == neighbors.end()) {
         // include in the list
         NeigborElement elem;
         elem.lastNotification = simTime();
@@ -946,7 +946,7 @@ IRoute *LoadNg::createRoute(const L3Address& destAddr, const L3Address& nextHop,
         bool isActive, simtime_t lifeTime, int metricType, unsigned int metric)
 {
     auto it = neighbors.find(nextHop);
-    if (it != neighbors.end()) {
+    if (it == neighbors.end()) {
         // include in the list
         NeigborElement elem;
         elem.lastNotification = simTime();
@@ -1418,6 +1418,9 @@ void LoadNg::sendGRREP(const Ptr<Rrep>& grrep, const L3Address& destAddr, unsign
 
 void LoadNg::runDijkstra()
 {
+    dijkstra->cleanRoutes();
+    if (!dijkstra->nodeExist(this->getSelfIPAddress()))
+        return;
     dijkstra->run();
     std::map<L3Address, std::vector<L3Address>> paths;
     dijkstra->getRoutes(paths);
@@ -1539,7 +1542,7 @@ void LoadNg::checkNeigList()
 {
     bool recompute = false;
     for (auto it = neighbors.begin(); it != neighbors.end();) {
-        if (simTime() < it->second.lifeTime + par("allowedHelloLoss") * helloInterval) {
+        if (simTime() > it->second.lifeTime + par("allowedHelloLoss") * helloInterval) {
             // change topology,
             if (dijkstra && it->second.isBidirectional) {
                 dijkstra->deleteEdge(this->getSelfIPAddress(), it->first);
