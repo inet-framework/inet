@@ -57,6 +57,8 @@ namespace inetmanet {
 
 Define_Module(LoadNg);
 
+const int KIND_DELAYEDSEND = 100;
+
 void LoadNg::initialize(int stage)
 {
     if (stage == INITSTAGE_ROUTING_PROTOCOLS)
@@ -75,9 +77,7 @@ void LoadNg::initialize(int stage)
         networkProtocol = getModuleFromPar<INetfilter>(par("networkProtocolModule"), this);
 
         aodvUDPPort = par("udpPort");
-        askGratuitousRREP = par("askGratuitousRREP");
         useHelloMessages = par("useHelloMessages");
-        destinationOnlyFlag = par("destinationOnlyFlag");
         activeRouteTimeout = par("activeRouteTimeout");
         helloInterval = par("helloInterval");
         allowedHelloLoss = par("allowedHelloLoss");
@@ -152,6 +152,14 @@ void LoadNg::handleMessageWhenUp(cMessage *msg)
             handleRREPACKTimer();
         else if (msg == blacklistTimer)
             handleBlackListTimer();
+        else if (msg->getKind() == KIND_DELAYEDSEND) {
+            auto timer = check_and_cast<PacketHolderMessage*>(msg);
+            send(timer->dropOwnedPacket(), "ipOut");
+            auto it = pendingSend.find(timer);
+            if (it != pendingSend.end())
+                pendingSend.erase(it);
+            delete timer;
+        }
         else
             throw cRuntimeError("Unknown self message");
     }
@@ -740,8 +748,12 @@ void LoadNg::sendLoadNgPacket(const Ptr<LoadNgControlPacket>& packet, const L3Ad
         lastBroadcastTime = simTime();
     if (delay == 0)
         send(udpPacket, "ipOut");
-    else
-        sendDelayed(udpPacket, delay, "ipOut");
+    else {
+        auto *timer = new PacketHolderMessage("LoadNg-send-jitter", KIND_DELAYEDSEND);
+        timer->setOwnedPacket(udpPacket);
+        pendingSend.insert(timer);
+        scheduleAt(simTime()+delay, timer);
+    }
 }
 
 void LoadNg::handleRREQ(const Ptr<Rreq>& rreq, const L3Address& sourceAddr, unsigned int timeToLive)
@@ -1617,6 +1629,7 @@ const Ptr<Hello> LoadNg::createHelloMessage()
     helloMessage->setHopCount(0);
     helloMessage->setHelloIdentifier(helloIdentifier++);
     helloMessage->setHopLimit(1);
+    helloMessage->setChunkLength(B(34));
 
     // include neighbors list
 
@@ -1666,7 +1679,7 @@ const Ptr<Hello> LoadNg::createHelloMessage()
                 break;
         }
         // size
-        helloMessage->setChunkLength(B(34) + B(s));
+        helloMessage->setChunkLength(helloMessage->getChunkLength() + B(s));
     }
    // include metrict.
     auto metric = new LoadNgMetricOption();
@@ -1693,10 +1706,19 @@ void LoadNg::sendHelloMessagesIfNeeded()
         return;
     }
 
+    if (!par("useIntelligentHello").boolValue()) {
+        // send hello
+        simtime_t nextHello = simTime() + helloInterval - *periodicJitter;
+        auto helloMessage = createHelloMessage();
+        helloMessage->setLifetime(nextHello);
+        sendLoadNgPacket(helloMessage, addressType->getBroadcastAddress(), 1, 0);
+        scheduleAt(nextHello, helloMsgTimer);
+        return;
+    }
+
     // A node SHOULD only use hello messages if it is part of an
     // active route.
     bool hasActiveRoute = false;
-    return;
 
     for (int i = 0; i < routingTable->getNumRoutes(); i++) {
         IRoute *route = routingTable->getRoute(i);

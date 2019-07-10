@@ -22,7 +22,7 @@
 #define __INET_AODV_H
 
 #include <map>
-
+#include <set>
 #include "inet/common/INETDefs.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
@@ -165,6 +165,7 @@ class INET_API LoadNg : public RoutingProtocolBase, public NetfilterBase::HookBa
 
     std::map<L3Address, std::vector<std::vector<L3Address>>> alternativePaths;
 
+    std::set<PacketHolderMessage *> pendingSend;
 
     // End DFF information sets
 
@@ -185,9 +186,7 @@ class INET_API LoadNg : public RoutingProtocolBase, public NetfilterBase::HookBa
     // AODV parameters: the following parameters are configurable, see the NED file for more info.
     unsigned int rerrRatelimit = 0;
     unsigned int aodvUDPPort = 0;
-    bool askGratuitousRREP = false;
     bool useHelloMessages = false;
-    bool destinationOnlyFlag = false;
 
     //
     bool isRoot = false; // this node is a root;

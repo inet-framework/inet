@@ -47,8 +47,8 @@ simple LoadNg like IManetRouting
         string interfaceTableModule = default("^.interfaceTable");
         string networkProtocolModule = default("^.ipv4.ip");
 
-        bool askGratuitousRREP = default(false); // see RFC 3561: 6.6.3
         bool useHelloMessages = default(false); // see RFC 3561: 6.9
+        bool useIntelligentHello = default(true);
         int udpPort = default(654);
 
         double maxPeriodicJitter @unit(s) = default(helloInterval / 4); // it MUST NOT be negative; it MUST NOT be greater than MESSAGE_INTERVAL/2; it SHOULD NOT be greater than MESSAGE_INTERVAL/4.

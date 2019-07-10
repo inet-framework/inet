@@ -18,6 +18,7 @@
 
 import inet.common.INETDefs;
 import inet.common.packet.chunk.Chunk;
+import inet.common.packet.Packet;
 import inet.networklayer.common.L3Address;
 import inet.common.TlvOptions;
 
@@ -250,4 +251,13 @@ class Hello extends LoadNgControlPacket
     NeigborData neighAddrs[]; // it should be a block of type TLV + 2 B
     TlvOptions addressTlvOptions;  
 }
+
+//
+// Represents a timer for delayed sending
+//
+message PacketHolderMessage
+{
+    Packet *ownedPacket @owned;
+}
+
 
