@@ -313,7 +313,7 @@ class INET_API LoadNg : public RoutingProtocolBase, public NetfilterBase::HookBa
     void delayDatagram(Packet *datagram);
 
     /* Helper functions */
-    virtual void checkNeigList();
+    virtual void checkNeigList(cMessage *);
     virtual void runDijkstra();
     virtual void runDijkstraKs();
     L3Address getSelfIPAddress() const;

@@ -136,7 +136,7 @@ void LoadNg::initialize(int stage)
 
 void LoadNg::handleMessageWhenUp(cMessage *msg)
 {
-    checkNeigList();
+    checkNeigList(msg);
     if (msg->isSelfMessage()) {
         if (msg->isScheduled())
             cancelEvent(msg);
@@ -1540,7 +1540,7 @@ void LoadNg::runDijkstraKs()
 //    }
 }
 
-void LoadNg::checkNeigList()
+void LoadNg::checkNeigList(cMessage *timer)
 {
     bool recompute = false;
     for (auto it = neighbors.begin(); it != neighbors.end();) {
@@ -1586,18 +1586,20 @@ void LoadNg::checkNeigList()
             if (simTime() < it->second.lifeTime + minHelloInterval) {
                 helloInterval = minHelloInterval;
                 it->second.pendingConfirmation = true;
-                if (!helloMsgTimer->isScheduled()) {
-                    // schedule immediately
-                    scheduleAt(simTime(), helloMsgTimer);
-                }
-                else {
-                    simtime_t schduled = helloMsgTimer->getSendingTime();
-                    simtime_t arrival = helloMsgTimer->getArrivalTime();
-                    simtime_t interval = arrival - schduled;
-                    if (interval > minHelloInterval) {
-                        // Schedule immediately
-                        cancelEvent(helloMsgTimer);
+                if (timer != helloMsgTimer) {
+                    if (!helloMsgTimer->isScheduled()) {
+                        // schedule immediately
                         scheduleAt(simTime(), helloMsgTimer);
+                    }
+                    else {
+                        simtime_t schduled = helloMsgTimer->getSendingTime();
+                        simtime_t arrival = helloMsgTimer->getArrivalTime();
+                        simtime_t interval = arrival - schduled;
+                        if (interval > minHelloInterval) {
+                            // Schedule immediately
+                            cancelEvent(helloMsgTimer);
+                            scheduleAt(simTime(), helloMsgTimer);
+                        }
                     }
                 }
             }
