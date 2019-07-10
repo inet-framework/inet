@@ -22,6 +22,7 @@ import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.networklayer.ipv4.RoutingTableRecorder;
 import inet.node.aodv.AodvRouter;
 import inet.physicallayer.unitdisk.UnitDiskRadioMedium;
+import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 
 
 network LOADNGNetwork
@@ -30,7 +31,7 @@ network LOADNGNetwork
         int numHosts;
         @display("bgb=650,650");
     submodules:
-        radioMedium: UnitDiskRadioMedium {
+        radioMedium: Ieee80211ScalarRadioMedium {
             parameters:
                 @display("p=100,200;is=s");
         }
