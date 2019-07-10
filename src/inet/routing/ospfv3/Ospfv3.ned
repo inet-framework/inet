@@ -34,11 +34,11 @@ module Ospfv3 like IOspfv3
         output networkLayerOut @labels(Ipv6ControlInfo/down);
 
     submodules:
-        Ospfv3Splitter: Ospfv3Splitter {
+        ospfv3Splitter: Ospfv3Splitter {
             @display("p=254,176");
         }
 
     connections:
-        networkLayerIn --> Ospfv3Splitter.ipIn;
-        networkLayerOut <-- Ospfv3Splitter.ipOut;
+        networkLayerIn --> ospfv3Splitter.ipIn;
+        networkLayerOut <-- ospfv3Splitter.ipOut;
 }
