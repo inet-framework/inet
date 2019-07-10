@@ -138,6 +138,9 @@ void LoadNg::handleMessageWhenUp(cMessage *msg)
 {
     checkNeigList();
     if (msg->isSelfMessage()) {
+        if (msg->isScheduled())
+            cancelEvent(msg);
+
         if (auto waitForRrep = dynamic_cast<WaitForRrep *>(msg))
             handleWaitForRREP(waitForRrep);
         else if (msg == helloMsgTimer)
@@ -1424,7 +1427,7 @@ void LoadNg::runDijkstra()
     dijkstra->run();
     std::map<L3Address, std::vector<L3Address>> paths;
     dijkstra->getRoutes(paths);
-    for (int i = 0; routingTable->getNumRoutes(); i++) {
+    for (int i = 0; i < routingTable->getNumRoutes(); i++) {
         IRoute *destRoute = routingTable->getRoute(i);
         //const L3Address& nextHop = destRoute->getNextHopAsGeneric();
         auto itDest = paths.find(destRoute->getDestinationAsGeneric());
@@ -1438,7 +1441,6 @@ void LoadNg::runDijkstra()
             simtime_t newLifeTime = routingData->getLifeTime();
             if (newLifeTime < itAux->second.lifeTime + par("allowedHelloLoss") * helloInterval)
                 newLifeTime = itAux->second.lifeTime + par("allowedHelloLoss") * helloInterval;
-;
 
             if (neigh == itDest->first) {
                 updateRoutingTable(destRoute, itDest->first, 1, itAux->second.seqNumber, true, newLifeTime, HOPCOUNT, 1 );
@@ -1486,7 +1488,7 @@ void LoadNg::runDijkstraKs()
     //std::map<L3Address, std::vector<std::vector<L3Address>>>paths;
 
     dijkstraKs->getAllRoutes(alternativePaths);
-//    for (int i = 0; routingTable->getNumRoutes(); i++) {
+//    for (int i = 0; i < routingTable->getNumRoutes(); i++) {
 //        IRoute *destRoute = routingTable->getRoute(i);
 //        //const L3Address& nextHop = destRoute->getNextHopAsGeneric();
 //        auto itDest = paths.find(destRoute->getDestinationAsGeneric());
@@ -1702,20 +1704,20 @@ void LoadNg::sendHelloMessagesIfNeeded()
     if (measureEtx) {
         // new to scheduleHello
         simtime_t nextHello = simTime() + helloInterval - *periodicJitter;
+        scheduleAt(nextHello, helloMsgTimer);
         auto helloMessage = createHelloMessage();
         helloMessage->setLifetime(nextHello);
         sendLoadNgPacket(helloMessage, addressType->getBroadcastAddress(), 1, 0);
-        scheduleAt(nextHello, helloMsgTimer);
         return;
     }
 
     if (!par("useIntelligentHello").boolValue()) {
         // send hello
         simtime_t nextHello = simTime() + helloInterval - *periodicJitter;
+        scheduleAt(nextHello, helloMsgTimer);
         auto helloMessage = createHelloMessage();
         helloMessage->setLifetime(nextHello);
         sendLoadNgPacket(helloMessage, addressType->getBroadcastAddress(), 1, 0);
-        scheduleAt(nextHello, helloMsgTimer);
         return;
     }
 
