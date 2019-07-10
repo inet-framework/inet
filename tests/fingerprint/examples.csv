@@ -23,13 +23,13 @@
 /examples/aodv/,                     -f omnetpp.ini -c SimpleLifecycle -r 0,          100s,          f767-8898/tplx, PASS, wireless adhoc
 /examples/aodv/,                     -f omnetpp.ini -c ShortestPath -r 0,             100s,          527c-cbb3/tplx, PASS, wireless adhoc
 
-/examples/bgpv4/Bgp2RoutersInAS/,    -f omnetpp.ini -c General -r 0,                1000s,           812d-470b/tplx, PASS, ospf
-/examples/bgpv4/Bgp3Routers/,        -f omnetpp.ini -c General -r 0,                1000s,           ef15-65a3/tplx, PASS, ospf
-/examples/bgpv4/BgpCompleteTest/,    -f omnetpp.ini -c General -r 0,                1000s,           14e3-79a7/tplx, PASS, ospf
+/examples/bgpv4/Bgp2RoutersInAS/,    -f omnetpp.ini -c General -r 0,                1000s,           a3d4-d878/tplx, PASS, ospf
+/examples/bgpv4/Bgp3Routers/,        -f omnetpp.ini -c General -r 0,                1000s,           af59-8993/tplx, PASS, ospf
+/examples/bgpv4/BgpCompleteTest/,    -f omnetpp.ini -c General -r 0,                1000s,           1c5d-cf47/tplx, PASS, ospf
 /examples/bgpv4/BgpOpen/,            -f omnetpp.ini -c General -r 0,                62s,             0a30-c671/tplx, PASS, ospf
-/examples/bgpv4/BgpUpdate/,          -f omnetpp.ini -c General -r 0,                30s,             8cb1-6ae3/tplx, PASS, ospf
-/examples/bgpv4/BgpAndOspf/,         -f omnetpp.ini -c General -r 0,                1000s,           238c-fad8/tplx, PASS, ospf
-/examples/bgpv4/BgpAndOspfSimple/,   -f omnetpp.ini -c General -r 0,                1000s,           56dc-b2f1/tplx, PASS, ospf
+/examples/bgpv4/BgpUpdate/,          -f omnetpp.ini -c General -r 0,                30s,             8402-dd94/tplx, PASS, ospf
+/examples/bgpv4/BgpAndOspf/,         -f omnetpp.ini -c General -r 0,                1000s,           76b5-ed88/tplx, PASS, ospf
+/examples/bgpv4/BgpAndOspfSimple/,   -f omnetpp.ini -c General -r 0,                1000s,           8cb3-958f/tplx, PASS, ospf
 
 /examples/dhcp/,                     -f omnetpp.ini -c WiredDHCP -r 0,              5000s,           c794-6756/tplx, PASS,
 /examples/dhcp/,                     -f omnetpp.ini -c WirelessDHCP -r 0,           500s,            3b7d-c9e9/tplx, PASS, wireless

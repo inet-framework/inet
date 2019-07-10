@@ -151,6 +151,7 @@ class BgpUpdatePathAttributes extends cObject
 // ORIGIN (RFC4271 Section 4.3, Type code 1):
 class BgpUpdatePathAttributesOrigin extends BgpUpdatePathAttributes
 {
+    length = 1;
     BgpSessionType value;
 }
 
@@ -163,12 +164,14 @@ class BgpUpdatePathAttributesAsPath extends BgpUpdatePathAttributes
 //NEXT_HOP (RFC4271 Section 4.3, Type code 3):
 class BgpUpdatePathAttributesNextHop extends BgpUpdatePathAttributes
 {
+    length = 4;
     Ipv4Address value;
 }
 
 //LOCAL_PREF (RFC4271 Section 4.3, Type code 5):
 class BgpUpdatePathAttributesLocalPref extends BgpUpdatePathAttributes
 {
+    length = 4;
     unsigned int value;
 }
 
@@ -182,6 +185,7 @@ enum BgpUpdateAtomicAggregateValues
 class BgpUpdatePathAttributesAtomicAggregate extends BgpUpdatePathAttributes
 {
     // FIXME: ATOMIC_AGGREGATE is a well-known discretionary attribute of length 0.
+    length = 0;
     BgpUpdateAtomicAggregateValues value;
 }
 

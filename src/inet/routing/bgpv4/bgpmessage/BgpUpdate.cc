@@ -25,33 +25,61 @@ Register_Class(BgpUpdateMessage)
 
 unsigned short BgpUpdateMessage::computePathAttributesBytes(const BgpUpdatePathAttributeList& pathAttrs)
 {
-    unsigned short nb_path_attr = 2 + pathAttrs.getAsPathArraySize()
-        + pathAttrs.getLocalPrefArraySize()
-        + pathAttrs.getAtomicAggregateArraySize();
-
-    // BgpUpdatePathAttributes (4)
-    unsigned short contentBytes = nb_path_attr * 4;
-    // BgpUpdatePathAttributesOrigin (1)
+    unsigned short contentBytes = 0;
+    // BgpUpdatePathAttributesOrigin
+    contentBytes += pathAttrs.getOrigin().getType().flags.estendedLengthBit ? 4 : 3;
+    ASSERT(pathAttrs.getOrigin().getLength() == 1);
     contentBytes += 1;
+
     // BgpUpdatePathAttributesAsPath
-    for (size_t i = 0; i < pathAttrs.getAsPathArraySize(); i++)
-        contentBytes += 2 + pathAttrs.getAsPath(i).getLength(); // type (1) + length (1) + value
-    // BgpUpdatePathAttributesNextHop (4)
+    for (size_t i = 0; i < pathAttrs.getAsPathArraySize(); i++) {
+        auto& attr = pathAttrs.getAsPath(i);
+        contentBytes += attr.getType().flags.estendedLengthBit ? 4 : 3;
+#ifndef NDEBUG
+        {
+            unsigned short s = 0;
+            for (size_t j = 0; j < attr.getValueArraySize(); j++) {
+                ASSERT(attr.getValue(j).getLength() == attr.getValue(j).getAsValueArraySize());
+                s += 2 + 2 * attr.getValue(j).getAsValueArraySize();
+            }
+            ASSERT(s == attr.getLength());
+        }
+#endif
+        contentBytes += attr.getLength(); // type (1) + length (1) + value
+    }
+
+    // BgpUpdatePathAttributesNextHop
+    contentBytes += pathAttrs.getNextHop().getType().flags.estendedLengthBit ? 4 : 3;
+    ASSERT(pathAttrs.getNextHop().getLength() == 4);
     contentBytes += 4;
-    // BgpUpdatePathAttributesLocalPref (4)
-    contentBytes = 4 * pathAttrs.getLocalPrefArraySize();
+
+    // BgpUpdatePathAttributesLocalPref
+    for (size_t i = 0; i < pathAttrs.getLocalPrefArraySize(); i++) {
+        auto& attr = pathAttrs.getLocalPref(i);
+        contentBytes += attr.getType().flags.estendedLengthBit ? 4 : 3;
+        ASSERT(attr.getLength() == 4);
+        contentBytes += 4;
+    }
+
+    // BgpUpdatePathAttributesAtomicAggregate
+    for (size_t i = 0; i < pathAttrs.getAtomicAggregateArraySize(); i++) {
+        auto& attr = pathAttrs.getAtomicAggregate(i);
+        contentBytes += attr.getType().flags.estendedLengthBit ? 4 : 3;
+        ASSERT(attr.getLength() == 0);
+    }
+
     return contentBytes;
 }
 
 void BgpUpdateMessage::setPathAttributeList(const BgpUpdatePathAttributeList& pathAttrs)
 {
     unsigned int old_bytes = getPathAttributeListArraySize() == 0 ? 0 : computePathAttributesBytes(getPathAttributeList(0));
-    unsigned int delta_bytes = computePathAttributesBytes(pathAttrs) - old_bytes;
+    unsigned int new_bytes = computePathAttributesBytes(pathAttrs);
 
     setPathAttributeListArraySize(1);
     BgpUpdateMessage_Base::setPathAttributeList(0, pathAttrs);
 
-    setChunkLength(getChunkLength() + B(delta_bytes));
+    setChunkLength(getChunkLength() + B(new_bytes - old_bytes));
 }
 
 void BgpUpdateMessage::setNLRI(const BgpUpdateNlri& NLRI_var)

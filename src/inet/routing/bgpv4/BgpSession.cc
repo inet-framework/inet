@@ -138,7 +138,6 @@ void BgpSession::sendOpenMessage()
 void BgpSession::sendUpdateMessage(BgpUpdatePathAttributeList &content, BgpUpdateNlri &NLRI)
 {
     const auto& updateMsg = makeShared<BgpUpdateMessage>();
-    updateMsg->setPathAttributeListArraySize(1);
     updateMsg->setPathAttributeList(content);
     updateMsg->setNLRI(NLRI);
 
