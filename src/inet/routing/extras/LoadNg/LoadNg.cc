@@ -62,11 +62,13 @@ const int KIND_DELAYEDSEND = 100;
 
 inline std::ostream& operator<<(std::ostream& out, const LoadNg::NeigborElement& d)
 {
-    out << "Bidir="<< d.isBidirectional << "Pending " << d.pendingConfirmation << " Neig list ";
+    int metric = d.metric;
+    out << "Bidir="<< d.isBidirectional << " Pending " << d.pendingConfirmation << " Metric= "<< metric << " Neig list ";
     for (auto elem : d.listNeigbours)
     {
+        int metric = elem.second.metric;
         out << "add = " << elem.first << " bidir = " <<  elem.second.isBidirectional << "Pending " << elem.second.pendingConfirmation
-        << " metric = "<< (int)elem.second.metric << " <> ";
+        << " metric = "<< metric << " <> ";
     }
     return out;
 }
@@ -1698,6 +1700,7 @@ const Ptr<Hello> LoadNg::createHelloMessage()
             nData.setIsBidir(elem.second.isBidirectional);
             nData.setPendingConfirmation(elem.second.pendingConfirmation);
             nData.setSeqNum(elem.second.seqNumber);
+            nData.setMetric(elem.second.metric);
 
             if (measureEtx) {
                 // delete old entries.
@@ -1974,7 +1977,8 @@ void LoadNg::handleHelloMessage(const Ptr<const Hello>& helloMessage, SignalPowe
             if (itCheckBiDir->second.numHelloRec == 0)
                 it->second.metric = 255;
             else {
-                double val = (itCheckBiDir->second.numHelloRec * it->second.helloTime.size())/numHellosEtx;
+                double val = (itCheckBiDir->second.numHelloRec * it->second.helloTime.size())/(numHellosEtx*numHellosEtx);
+                if (val > 1) val = 1;
                 val = 1/val;
                 if (val > 255)
                     it->second.metric = 255;
