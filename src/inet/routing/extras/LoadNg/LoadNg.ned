@@ -49,6 +49,7 @@ simple LoadNg like IManetRouting
 
         bool useHelloMessages = default(false); // see RFC 3561: 6.9
         bool useIntelligentHello = default(true);
+        bool measureEtx = default(false);
         int udpPort = default(654);
         
         double helloInterval @unit(s) = default(1s); // every helloInterval seconds a node broadcasts Hello messages (if it is necessary)        
