@@ -62,11 +62,11 @@ const int KIND_DELAYEDSEND = 100;
 
 inline std::ostream& operator<<(std::ostream& out, const LoadNg::NeigborElement& d)
 {
-    out << "Bidir="<< d.isBidirectional <<"  Neig list ";
+    out << "Bidir="<< d.isBidirectional << "Pending " << d.pendingConfirmation << " Neig list ";
     for (auto elem : d.listNeigbours)
     {
-        out << "add = " << elem.first << " bidir = " <<  elem.second.isBidirectional;
-        out << " <> ";
+        out << "add = " << elem.first << " bidir = " <<  elem.second.isBidirectional << "Pending " << elem.second.pendingConfirmation
+        << " metric = "<< (int)elem.second.metric << " <> ";
     }
     return out;
 }
@@ -120,13 +120,10 @@ void LoadNg::initialize(int stage)
         if (useHelloMessages)
             helloMsgTimer = new cMessage("HelloMsgTimer");
 
+        measureEtx = par("measureEtx");
+
         minHelloInterval = par("minHelloInterval");
         maxHelloInterval = par("maxHelloInterval");
-        if (measureEtx) {
-            helloInterval = maxHelloInterval = minHelloInterval;
-            //
-            sendHelloMessagesIfNeeded();
-        }
         WATCH_MAP(neighbors);
     }
     else if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
@@ -1289,6 +1286,13 @@ void LoadNg::handleStartOperation(LifecycleOperation *operation)
     // equal to (MESSAGE_INTERVAL - jitter), where jitter is the random value.
     if (useHelloMessages)
         scheduleAt(simTime() + helloInterval - *periodicJitter, helloMsgTimer);
+    if (measureEtx) {
+        helloInterval = maxHelloInterval = minHelloInterval;
+        //
+        if (helloMsgTimer->isScheduled())
+            cancelEvent(helloMsgTimer);
+        sendHelloMessagesIfNeeded();
+    }
 
     scheduleAt(simTime() + 1, counterTimer);
 }
@@ -1460,7 +1464,10 @@ void LoadNg::runDijkstra()
                 updateRoutingTable(destRoute, itDest->first, 1, itAux->second.seqNumber, true, newLifeTime, HOPCOUNT, 1 );
             }
             else {
-                auto itAux2 = itAux->second.listNeigbours.find(neigh);
+                if (itDest->second.size() <= 2)
+                    throw cRuntimeError("Incorrect size");
+                auto dest = itDest->second[2];
+                auto itAux2 = itAux->second.listNeigbours.find(dest);
                 if (itAux2 == itAux->second.listNeigbours.end())
                     throw cRuntimeError("Path error found");
                 updateRoutingTable(destRoute, neigh, 2, itAux2->second.seqNum, true, newLifeTime, HOPCOUNT, 2 );
@@ -1485,9 +1492,13 @@ void LoadNg::runDijkstra()
             createRoute(elem.first, elem.first, 1, itAux->second.seqNumber, true, newLifeTime, HOPCOUNT, 1 );
         }
         else {
-            auto itAux2 = itAux->second.listNeigbours.find(neigh);
+            if (elem.second.size() <= 2)
+                throw cRuntimeError("Incorrect size");
+            auto destination = elem.second[2];
+            auto itAux2 = itAux->second.listNeigbours.find(destination);
             if (itAux2 == itAux->second.listNeigbours.end())
                 throw cRuntimeError("Path error found");
+
             createRoute(elem.first, neigh, 2, itAux2->second.seqNum, true, newLifeTime, HOPCOUNT, 2 );
         }
     }
@@ -1597,7 +1608,7 @@ void LoadNg::checkNeigList(cMessage *timer)
             neighbors.erase(it++);
         }
         else {
-            if (simTime() < it->second.lifeTime + minHelloInterval) {
+            if (simTime() > it->second.lifeTime + minHelloInterval) {
                 helloInterval = minHelloInterval;
                 it->second.pendingConfirmation = true;
                 if (timer != helloMsgTimer) {
@@ -1682,6 +1693,8 @@ const Ptr<Hello> LoadNg::createHelloMessage()
         for (auto &elem : neighbors){
             NeigborData nData;
             nData.setAddr(elem.first);
+            if (!elem.second.isBidirectional)
+                EV << "Check";
             nData.setIsBidir(elem.second.isBidirectional);
             nData.setPendingConfirmation(elem.second.pendingConfirmation);
             nData.setSeqNum(elem.second.seqNumber);
@@ -1720,10 +1733,10 @@ void LoadNg::sendHelloMessagesIfNeeded()
     if (measureEtx) {
         // new to scheduleHello
         simtime_t nextHello = simTime() + helloInterval - *periodicJitter;
-        scheduleAt(nextHello, helloMsgTimer);
         auto helloMessage = createHelloMessage();
         helloMessage->setLifetime(nextHello);
         sendLoadNgPacket(helloMessage, addressType->getBroadcastAddress(), 1, 0);
+        scheduleAt(nextHello, helloMsgTimer);
         return;
     }
 
@@ -1734,6 +1747,7 @@ void LoadNg::sendHelloMessagesIfNeeded()
         auto helloMessage = createHelloMessage();
         helloMessage->setLifetime(nextHello);
         sendLoadNgPacket(helloMessage, addressType->getBroadcastAddress(), 1, 0);
+        scheduleAt(nextHello, helloMsgTimer);
         return;
     }
 
@@ -1865,33 +1879,44 @@ void LoadNg::handleHelloMessage(const Ptr<const Hello>& helloMessage, SignalPowe
         }
         else {
             // now check change of status
-            if (itAux->second.isBidirectional != itStatus->second.isBidirectional ||
-                    itAux->second.pendingConfirmation != itStatus->second.pendingConfirmation) {
-                // status change actualize
+            if (itAux->second.isBidirectional == false)
+                EV << "Check \n";
+            Dijkstra::Edge *edge1 = nullptr;
+            Dijkstra::Edge *edge2 = nullptr;
+            if (dijkstra) {
+                edge1 = const_cast<Dijkstra::Edge *>(dijkstra->getEdge(itStatus->first, itAux->first));
+                edge2 = const_cast<Dijkstra::Edge *>(dijkstra->getEdge(itAux->first, itStatus->first));
+            }
+
+
+
+            if (itStatus->second.isBidirectional && !itStatus->second.pendingConfirmation && edge1 == nullptr) {
+                // Add
                 topoChange = true;
-                // actualize Dijkstra
                 if (dijkstra) {
-                    if (itStatus->second.isBidirectional && !itStatus->second.pendingConfirmation) {
-                        dijkstra->addEdge(itStatus->first, itAux->first, 1.0, 0);
-                        dijkstra->addEdge(itAux->first, itStatus->first, 1.0, 0);
-                    }
-                    else {
-                        dijkstra->deleteEdge(itStatus->first, itAux->first);
-                        dijkstra->deleteEdge(itAux->first, itStatus->first);
-                    }
+                    dijkstra->addEdge(itStatus->first, itAux->first, 1.0, 0);
+                    dijkstra->addEdge(itAux->first, itStatus->first, 1.0, 0);
                 }
                 if (dijkstraKs) {
-                    if (itStatus->second.isBidirectional && !itStatus->second.pendingConfirmation) {
-                        dijkstraKs->addEdge(itStatus->first, itAux->first, 1.0);
-                        dijkstraKs->addEdge(itAux->first, itStatus->first, 1.0);
-                    }
-                    else {
-                        dijkstraKs->deleteEdge(itStatus->first, itAux->first);
-                        dijkstraKs->deleteEdge(itAux->first, itStatus->first);
-                    }
+                    dijkstraKs->addEdge(itStatus->first, itAux->first, 1.0);
+                    dijkstraKs->addEdge(itAux->first, itStatus->first, 1.0);
                 }
-
             }
+            else if ((!itStatus->second.isBidirectional
+                    || itStatus->second.pendingConfirmation)
+                    && edge1 != nullptr) {
+                topoChange = true;
+                if (dijkstra) {
+                    dijkstra->deleteEdge(itStatus->first, itAux->first);
+                    dijkstra->deleteEdge(itAux->first, itStatus->first);
+                }
+                if (dijkstraKs) {
+                    dijkstraKs->deleteEdge(itStatus->first, itAux->first);
+                    dijkstraKs->deleteEdge(itAux->first, itStatus->first);
+                }
+            }
+
+            itAux->second = itStatus->second;
             ++itAux;
 
             // check if common neighbor
@@ -1913,7 +1938,7 @@ void LoadNg::handleHelloMessage(const Ptr<const Hello>& helloMessage, SignalPowe
 
     auto itCheckBiDir = nodeStatus.find(this->getSelfIPAddress());
     if (itCheckBiDir == nodeStatus.end()) {
-        if (it->second.isBidirectional && !it->second.pendingConfirmation) {
+        if (it->second.isBidirectional ) {
             topoChange = true;
             changeTimerNotification = true;
             if (dijkstra) {
@@ -1926,6 +1951,8 @@ void LoadNg::handleHelloMessage(const Ptr<const Hello>& helloMessage, SignalPowe
     }
     else {
         // bi-dir
+        if (it->second.isBidirectional)
+            it->second.pendingConfirmation = false;
         if (!it->second.isBidirectional) {
             topoChange = true;
             changeTimerNotification = true;
@@ -1938,20 +1965,23 @@ void LoadNg::handleHelloMessage(const Ptr<const Hello>& helloMessage, SignalPowe
                 dijkstraKs->addEdge(it->first,  this->getSelfIPAddress(), 1.0);
             }
             it->second.isBidirectional = true;
+            it->second.pendingConfirmation = false;
 
-            // Compute ETX if is needed.
-            if (measureEtx) {
-                if (itCheckBiDir->second.numHelloRec == 0)
+
+        }
+        // Compute ETX if is needed.
+        if (measureEtx) {
+            if (itCheckBiDir->second.numHelloRec == 0)
+                it->second.metric = 255;
+            else {
+                double val = (itCheckBiDir->second.numHelloRec * it->second.helloTime.size())/numHellosEtx;
+                val = 1/val;
+                if (val > 255)
                     it->second.metric = 255;
-                else {
-                    double val = (itCheckBiDir->second.numHelloRec * it->second.helloTime.size())/numHellosEtx;
-                    val = 1/val;
-                    if (val > 255)
-                        it->second.metric = 255;
-                    else
-                        it->second.metric = val;
-                }
+                else
+                    it->second.metric = val;
             }
+            // now should actualize the routing table
         }
 
         if (itCheckBiDir->second.pendingConfirmation) // the other node needs confirmation
@@ -2008,7 +2038,7 @@ void LoadNg::handleHelloMessage(const Ptr<const Hello>& helloMessage, SignalPowe
     // if the neighbor moves away and a neighbor timeout occurs.
 
     unsigned int latestDestSeqNum = helloMessage->getSeqNum();
-    simtime_t newLifeTime = helloMessage->getLifetime() + 3 * minHelloInterval;
+    simtime_t newLifeTime = helloMessage->getLifetime() + par("allowedHelloLoss") * minHelloInterval;
 
     if (!routeHelloOriginator || routeHelloOriginator->getSource() != this)
         createRoute(helloOriginatorAddr, helloOriginatorAddr, 1, latestDestSeqNum, true, newLifeTime, metricType, metricNeg );
@@ -2016,6 +2046,39 @@ void LoadNg::handleHelloMessage(const Ptr<const Hello>& helloMessage, SignalPowe
         LoadNgRouteData *routeData = check_and_cast<LoadNgRouteData *>(routeHelloOriginator->getProtocolData());
         simtime_t lifeTime = routeData->getLifeTime();
         updateRoutingTable(routeHelloOriginator, helloOriginatorAddr, 1, latestDestSeqNum, true, std::max(lifeTime, newLifeTime), metricType, metricNeg);
+    }
+
+    // Now, it is necessary to refresh two hops routes that have this node like next hop
+    //
+    for (int i = 0; i < routingTable->getNumRoutes(); i++) {
+        IRoute *route = routingTable->getRoute(i);
+        if (route->getDestinationAsGeneric() != route->getNextHopAsGeneric() &&
+                route->getNextHopAsGeneric() == helloOriginatorAddr) {
+            if (dijkstra) {
+                std::vector<NodeId> pathNode;
+                if (dijkstra->getRoute(route->getDestinationAsGeneric(), pathNode)) {
+                    if (pathNode[1] == helloOriginatorAddr) {
+                        auto itAux = it->second.listNeigbours.find(route->getDestinationAsGeneric());
+                        if (itAux == it->second.listNeigbours.end())
+                            throw cRuntimeError("");
+                        auto seqNum = itAux->second.seqNum;
+                        updateRoutingTable(route, helloOriginatorAddr, 1, seqNum, true, newLifeTime, metricType, metricNeg);
+                    }
+                }
+            }
+        }
+    }
+
+    // and finally, include the rest of two hop nodes
+    for (auto elem: it->second.listNeigbours) {
+        if (elem.first == this->getSelfIPAddress())
+            continue;
+        if (elem.second.isBidirectional || elem.second.pendingConfirmation)
+            continue;
+        auto route = routingTable->findBestMatchingRoute(elem.first);
+        if (route == nullptr) {
+            createRoute(elem.first, helloOriginatorAddr, 2, elem.second.seqNum, true, newLifeTime, metricType, metricNeg );
+        }
     }
 
     // add the information of the hello to the routing table
