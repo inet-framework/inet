@@ -265,7 +265,7 @@ INetfilter::IHook::Result LoadNg::ensureRouteForDatagram(Packet *datagram)
 
             // TODO: check in the neighbor list if you have an alternative
 
-            if (!routingTable->isLocalAddress(sourceAddr)) {
+            if (!sourceAddr.isUnspecified() && !routingTable->isLocalAddress(sourceAddr)) {
                 sendRERRWhenNoRouteToForward(destAddr, sourceAddr);
                 return DROP;
             }
@@ -456,7 +456,7 @@ const Ptr<Rreq> LoadNg::createRREQ(const L3Address& destAddr)
     // insertion in a RREQ.
     sequenceNum++;
 
-    rreqPacket->setHopLimits(par("maxHopLimit"));
+    rreqPacket->setHopLimit(par("maxHopLimit"));
     rreqPacket->setSeqNum(sequenceNum);
 
     rreqPacket->setOriginatorAddr(getSelfIPAddress());
@@ -510,7 +510,7 @@ const Ptr<Rrep> LoadNg::createRREP(const Ptr<Rreq>& rreq, IRoute *destRoute, IRo
 
     sequenceNum++;
     rrep->setSeqNum(sequenceNum);
-    rrep->setHopLimits(par("maxHopLimit"));
+    rrep->setHopLimit(par("maxHopLimit"));
 
     if (rrep->getOriginatorAddr().getType() == L3Address::IPv4)
         rrep->setAddrLen(3);
@@ -550,7 +550,7 @@ void LoadNg::handleRREP(const Ptr<Rrep>& rrep, const L3Address& sourceAddr)
     if (!rrep->getSeqField()) // bad format
         return;
 
-    rrep->setHopLimits(rrep->getHopLimit()-1);
+    rrep->setHopLimit(rrep->getHopLimit()-1);
 
     // the hello is now a sparate type.
    /*if (rrep->getDestAddr().isUnspecified()) {
@@ -565,6 +565,16 @@ void LoadNg::handleRREP(const Ptr<Rrep>& rrep, const L3Address& sourceAddr)
 
     // If needed, a route is created for the previous hop,
     // but without a valid sequence number (see section 6.2)
+
+
+    char myAddress[30];
+    char sAddr[30];
+    char dest[30];
+    char origin[30];
+    strcpy(myAddress, this->getSelfIPAddress().str().c_str());
+    strcpy(sAddr, sourceAddr.str().c_str());
+    strcpy(dest, rrep->getDestAddr().str().c_str());
+    strcpy(origin, rrep->getOriginatorAddr().str().c_str());
 
     int metricType = -1;
     unsigned int metric = 255;
@@ -681,8 +691,8 @@ void LoadNg::handleRREP(const Ptr<Rrep>& rrep, const L3Address& sourceAddr)
     else if (destRoute && destRoute->getSource() == this) {    // already exists
         destRouteData = check_and_cast<LoadNgRouteData *>(destRoute->getProtocolData());
         // Upon comparison, the existing entry is updated only in the following circumstances:
-        updateRoutingTable(destRoute, rrep->getDestAddr(), destRoute->getMetric(), destRouteData->getDestSeqNum(), true, simTime() + activeRouteTimeout, destRouteData->getMetric(), destRouteData->getMetric());
-
+        //updateRoutingTable(destRoute, destRoute->getNextHopAsGeneric(), destRoute->getMetric(), destRouteData->getDestSeqNum(), true, simTime() + activeRouteTimeout, destRouteData->getMetric(), destRouteData->getMetric());
+        updateValidRouteLifeTime(rrep->getDestAddr(), simTime() + activeRouteTimeout);
         // When any node transmits a RREP, the precursor list for the
         // corresponding destination node is updated by adding to it
         // the next hop node to which the RREP is forwarded.
@@ -745,6 +755,27 @@ void LoadNg::sendLoadNgPacket(const Ptr<LoadNgControlPacket>& packet, const L3Ad
 {
     ASSERT(timeToLive != 0);
 
+    if (packet->getHopLimits()) {
+        auto rreq = dynamicPtrCast<const Rreq>(packet);
+        if (rreq && rreq->getHopLimit() == 0) {
+            EV_WARN << "Hop limit 0. Canceling sending Packet Rreq" << endl;
+            return;
+        }
+        else {
+            auto rrep = dynamicPtrCast<const Rrep>(packet);
+            if (rrep && rrep->getHopLimit() == 0) {
+                EV_WARN << "Hop limit 0. Canceling sending Packet Rrep" << endl;
+                return;
+            }
+            else {
+                auto rerr = dynamicPtrCast<const Rerr>(packet);
+                if (rerr && rerr->getHopLimit() == 0) {
+                    EV_WARN << "Hop limit 0. Canceling sending Packet Rerr" << endl;
+                    return;
+                }
+            }
+        }
+    }
     // TODO: Implement: support for multiple interfaces
     InterfaceEntry *ifEntry = interfaceTable->getInterfaceByName("wlan0");
 
@@ -819,7 +850,7 @@ void LoadNg::handleRREQ(const Ptr<Rreq>& rreq, const L3Address& sourceAddr, unsi
         }
     }
 
-    rreq->setHopLimits(rreq->getHopLimit()-1);
+    rreq->setHopLimit(rreq->getHopLimit()-1);
 
     IRoute *previousHopRoute = routingTable->findBestMatchingRoute(sourceAddr);
 
@@ -834,6 +865,10 @@ void LoadNg::handleRREQ(const Ptr<Rreq>& rreq, const L3Address& sourceAddr, unsi
 
     // First, it first increments the hop count value in the RREQ by one, to
     // account for the new hop through the intermediate node.
+
+    // check 11.1. (1)
+    if (rreq->getOriginatorAddr() == getSelfIPAddress())
+        return;
 
     rreq->setHopCount(rreq->getHopCount() + 1);
 
@@ -904,11 +939,6 @@ void LoadNg::handleRREQ(const Ptr<Rreq>& rreq, const L3Address& sourceAddr, unsi
         }
     }
 
-    // check 11.1. (1)
-    if (rreq->getOriginatorAddr() == getSelfIPAddress())
-        return;
-
-
     // check 11.1. (2)
     if (oldSeqNum >= rreq->getSeqNum())
         return;
@@ -961,6 +991,8 @@ IRoute *LoadNg::createRoute(const L3Address& destAddr, const L3Address& nextHop,
         unsigned int hopCount, int64_t destSeqNum,
         bool isActive, simtime_t lifeTime, int metricType, unsigned int metric)
 {
+    if (destAddr == this->getSelfIPAddress())
+        throw cRuntimeError("never ");
     auto it = neighbors.find(nextHop);
     if (it == neighbors.end()) {
         // include in the list
@@ -1170,7 +1202,7 @@ const Ptr<Rerr> LoadNg::createRERR(const std::vector<UnreachableNode>& unreachab
 
     rerr->setPacketType(RERR);
     rerr->setUnreachableNodesArraySize(destCount);
-    rerr->setHopLimits(par("maxHopLimit"));
+    rerr->setHopLimit(par("maxHopLimit"));
 
     for (unsigned int i = 0; i < destCount; i++) {
         UnreachableNode node;
@@ -1293,9 +1325,9 @@ void LoadNg::handleStartOperation(LifecycleOperation *operation)
         //
         if (helloMsgTimer->isScheduled())
             cancelEvent(helloMsgTimer);
-        sendHelloMessagesIfNeeded();
+       // sendHelloMessagesIfNeeded();
+        scheduleAt(simTime() + *periodicJitter, helloMsgTimer);
     }
-
     scheduleAt(simTime() + 1, counterTimer);
 }
 
@@ -1371,6 +1403,12 @@ void LoadNg::forwardRREP(const Ptr<Rrep>& rrep, const L3Address& destAddr, unsig
     IRoute *destRoute = routingTable->findBestMatchingRoute(destAddr);
     LoadNgRouteData *destRouteData = check_and_cast<LoadNgRouteData *>(destRoute->getProtocolData());
 
+
+    char myAddress[30];
+    char dest[30];
+    strcpy(myAddress, this->getSelfIPAddress().str().c_str());
+    strcpy(dest, destAddr.str().c_str());
+
     if (!destRouteData->getIsBidirectiona() && destRoute->getNextHopAsGeneric() == destAddr) {
         // It is possible that a RREP transmission may fail, especially if the
         // RREQ transmission triggering the RREP occurs over a unidirectional
@@ -1396,7 +1434,11 @@ void LoadNg::forwardRREQ(const Ptr<Rreq>& rreq, unsigned int timeToLive)
         EV_WARN << "Hop limit 0. Canceling sending RREQ" << endl;
         return;
     }
-    sendLoadNgPacket(rreq, addressType->getBroadcastAddress(), timeToLive, *jitterPar);
+    auto next = routingTable->getNextHopForDestination(rreq->getDestAddr());
+    if (next.isUnspecified())
+        sendLoadNgPacket(rreq, addressType->getBroadcastAddress(), 1, *jitterPar);
+    else
+        sendLoadNgPacket(rreq, next, rreq->getHopLimit(), 0);
 }
 
 void LoadNg::completeRouteDiscovery(const L3Address& target)
@@ -1406,6 +1448,15 @@ void LoadNg::completeRouteDiscovery(const L3Address& target)
 
     auto lt = targetAddressToDelayedPackets.lower_bound(target);
     auto ut = targetAddressToDelayedPackets.upper_bound(target);
+
+    auto route = routingTable->findBestMatchingRoute(target);
+    if (route == nullptr)
+        throw cRuntimeError("Error no valid route");
+
+    LoadNgRouteData *routeDestData = check_and_cast<LoadNgRouteData *>(route->getProtocolData());
+
+    if (!routeDestData->isActive())
+        throw cRuntimeError("Error no valid route");
 
     // reinject the delayed datagrams
     for (auto it = lt; it != ut; it++) {
@@ -1610,7 +1661,7 @@ void LoadNg::checkNeigList(cMessage *timer)
             neighbors.erase(it++);
         }
         else {
-            if (simTime() > it->second.lifeTime + minHelloInterval) {
+            if (simTime() > it->second.lifeTime + 2 * minHelloInterval) {
                 helloInterval = minHelloInterval;
                 it->second.pendingConfirmation = true;
                 if (timer != helloMsgTimer) {
@@ -1695,8 +1746,6 @@ const Ptr<Hello> LoadNg::createHelloMessage()
         for (auto &elem : neighbors){
             NeigborData nData;
             nData.setAddr(elem.first);
-            if (!elem.second.isBidirectional)
-                EV << "Check";
             nData.setIsBidir(elem.second.isBidirectional);
             nData.setPendingConfirmation(elem.second.pendingConfirmation);
             nData.setSeqNum(elem.second.seqNumber);
@@ -1882,8 +1931,6 @@ void LoadNg::handleHelloMessage(const Ptr<const Hello>& helloMessage, SignalPowe
         }
         else {
             // now check change of status
-            if (itAux->second.isBidirectional == false)
-                EV << "Check \n";
             Dijkstra::Edge *edge1 = nullptr;
             Dijkstra::Edge *edge2 = nullptr;
             if (dijkstra) {
@@ -2058,6 +2105,7 @@ void LoadNg::handleHelloMessage(const Ptr<const Hello>& helloMessage, SignalPowe
         IRoute *route = routingTable->getRoute(i);
         if (route->getDestinationAsGeneric() != route->getNextHopAsGeneric() &&
                 route->getNextHopAsGeneric() == helloOriginatorAddr) {
+
             if (dijkstra) {
                 std::vector<NodeId> pathNode;
                 if (dijkstra->getRoute(route->getDestinationAsGeneric(), pathNode)) {
