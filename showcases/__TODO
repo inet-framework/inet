@@ -12,6 +12,7 @@ BUGS:
 
 - Fragmentation showcase: there is a block ack bug (not acking properly, the simulation slows down)
 - Txop showcase: ca8ab95: aggregated frames larger than the maxAMSDUsize are being created
+- Txop: it is not checked if the last frame's duration fits in the TXOP limit
 
 
 MISC:
