@@ -13,6 +13,7 @@
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
 #include "inet/networklayer/ipv4/IgmpMessage.h"
+#include "inet/networklayer/ipv4/Igmpv3.h"
 #include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 
@@ -46,13 +47,6 @@ class INET_API IGMPTester : public cSimpleModule, public IScriptable
 };
 
 Define_Module(IGMPTester);
-
-static ostream &operator<<(ostream &out, const Ipv4AddressVector addresses)
-{
-    for (int i = 0; i < (int)addresses.size(); i++)
-        out << (i>0?" ":"") << addresses[i];
-    return out;
-}
 
 static ostream &operator<<(ostream &out, const IgmpMessage* msg)
 {

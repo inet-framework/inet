@@ -39,11 +39,7 @@ class IRoutingTable;
 
 class INET_API Igmpv3 : public cSimpleModule, protected cListener
 {
-public:
-    typedef std::vector<Ipv4Address> Ipv4AddressVector;
-
   protected:
-
     enum RouterState {
         IGMPV3_RS_INITIAL,
         IGMPV3_RS_QUERIER,
@@ -307,7 +303,7 @@ public:
     static uint8_t codeTime(uint16_t timevalue);
 };
 
-inline std::ostream& operator<<(std::ostream& out, const Igmpv3::Ipv4AddressVector addresses)
+inline std::ostream& operator<<(std::ostream& out, const Ipv4AddressVector addresses)
 {
     out << "(";
     for (size_t i = 0; i < addresses.size(); i++)
