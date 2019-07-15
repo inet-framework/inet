@@ -45,8 +45,6 @@ simple Aodv like IApp
         string routingTableModule = default("^.ipv4.routingTable");
         string interfaceTableModule = default("^.interfaceTable");
         string networkProtocolModule = default("^.ipv4.ip");
-        string crcMode @enum("disabled","declared","computed") = default("declared");
-
         bool askGratuitousRREP = default(false); // see RFC 3561: 6.6.3
         bool useHelloMessages = default(false); // see RFC 3561: 6.9
         bool useLocalRepair = default(false); // see RFC 3561: 6.12 *not implemented yet*
