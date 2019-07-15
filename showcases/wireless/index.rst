@@ -31,5 +31,7 @@ IEEE 802.11:
    fragmentation/doc/index
    qos/doc/index
    blockack/doc/index
+   aggregation/doc/index
+   txop/doc/index
 .. crosstalk/doc/index
 .. infrastructure/doc/index
