@@ -114,9 +114,9 @@
 /showcases/visualizer/transportpathactivity/, -f omnetpp.ini -c EnablingPathVisualizationWireless -r 0,         500s,            e56a-1601/tplx, PASS,
 /showcases/visualizer/transportpathactivity/, -f omnetpp.ini -c Filtering -r 0,     100s,         9c6e-9da8/tplx, PASS,
 
-/showcases/wireless/blockack/,     -f omnetpp.ini -c NoFragmentation -r 0,                                       1s,            880b-85ff/tplx, PASS,
-/showcases/wireless/blockack/,     -f omnetpp.ini -c Fragmentation -r 0,                                        1s,            7956-7a57/tplx, PASS,
-/showcases/wireless/blockack/,     -f omnetpp.ini -c MixedTraffic -r 0,                                      1s,            3da6-5f8c/tplx, PASS,
+/showcases/wireless/blockack/,     -f omnetpp.ini -c NoFragmentation -r 0,                                        1s,            880b-85ff/tplx, PASS,
+/showcases/wireless/blockack/,     -f omnetpp.ini -c Fragmentation -r 0,                                          1s,            3584-7148/tplx, PASS,
+/showcases/wireless/blockack/,     -f omnetpp.ini -c MixedTraffic -r 0,                                           1s,            3da6-5f8c/tplx, PASS,
 
 /showcases/wireless/errorrate/,      -f omnetpp.ini -c General -r '$bitrate==6 && $distance==50',               500s,            be46-e137/tplx, PASS,
 /showcases/wireless/errorrate/,      -f omnetpp.ini -c General -r '$bitrate==9 && $distance==50',               500s,            172a-437d/tplx, PASS,
