@@ -527,7 +527,7 @@ class INET_API Packet : public cPacket
      * of back popped part must be zero before calling this function. The flags
      * parameter is a combination of Chunk::PeekFlag enumeration members.
      */
-    const Ptr<Chunk> removeAtBack(b length = b(-1), int flags = 0);
+    const Ptr<Chunk> removeAtBack(b length, int flags = 0);
 
     /**
      * Removes the designated part and returns it as a mutable chunk in the
@@ -554,7 +554,7 @@ class INET_API Packet : public cPacket
      */
     template <typename T>
     const Ptr<T> removeAtBack(b length, int flags = 0) {
-        CHUNK_CHECK_USAGE(b(-1) <= length && length <= getDataLength(), "length is invalid");
+        CHUNK_CHECK_USAGE(b(1) <= length && length <= getDataLength(), "length is invalid");
         CHUNK_CHECK_USAGE(backIterator.getPosition() == b(0), "back popped length is non-zero");
         const auto& chunk = popAtBack<T>(length, flags);
         trimBack();
