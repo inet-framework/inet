@@ -70,7 +70,7 @@ void Tx::transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& head
         macAddressInd->setSrcAddress(twoAddressHeader->getTransmitterAddress());
     }
     packet->insertAtFront(updatedHeader);
-    const auto& updatedTrailer = packet->removeAtBack<Ieee80211MacTrailer>();
+    const auto& updatedTrailer = packet->removeAtBack<Ieee80211MacTrailer>(B(4));
     updatedTrailer->setFcsMode(mac->getFcsMode());
     if (mac->getFcsMode() == FCS_COMPUTED) {
         const auto& fcsBytes = packet->peekAllAsBytes();
