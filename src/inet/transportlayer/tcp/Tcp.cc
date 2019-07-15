@@ -89,9 +89,7 @@ void Tcp::initialize(int stage)
         useDataNotification = par("useDataNotification");
 
         const char *crcModeString = par("crcMode");
-        crcMode = parseCrcMode(crcModeString);
-        if (crcMode == CRC_DISABLED)
-            throw cRuntimeError("Unknown crc mode: '%s'", crcModeString);
+        crcMode = parseCrcMode(crcModeString, false);
         msl = par("msl");
     }
     else if (stage == INITSTAGE_TRANSPORT_LAYER) {

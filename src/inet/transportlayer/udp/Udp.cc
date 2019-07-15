@@ -126,7 +126,7 @@ void Udp::initialize(int stage)
         WATCH_MAP(socketsByPortMap);
 
         const char *crcModeString = par("crcMode");
-        crcMode = parseCrcMode(crcModeString);
+        crcMode = parseCrcMode(crcModeString, true);
 
         lastEphemeralPort = EPHEMERAL_PORTRANGE_START;
         ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
