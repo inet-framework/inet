@@ -485,7 +485,7 @@ void Igmpv2::processQuery(InterfaceEntry *ie, Packet *packet)
 
     Ipv4Address groupAddr = igmpQry->getGroupAddress();
     const Ptr<const Igmpv2Query>& v2Query = dynamicPtrCast<const Igmpv2Query>(igmpQry);
-    simtime_t maxRespTime = v2Query ? v2Query->getMaxRespTime() : 10.0;
+    simtime_t maxRespTime = SimTime(v2Query ? v2Query->getMaxRespTimeCode() : 100, (SimTimeUnit)-1);
 
     if (groupAddr.isUnspecified()) {
         // general query
@@ -657,7 +657,7 @@ void Igmpv2::sendQuery(InterfaceEntry *ie, const Ipv4Address& groupAddr, double 
         const auto& msg = makeShared<Igmpv2Query>();
         msg->setType(IGMP_MEMBERSHIP_QUERY);
         msg->setGroupAddress(groupAddr);
-        msg->setMaxRespTime(maxRespTime);
+        msg->setMaxRespTimeCode(SimTime(maxRespTime).inUnit((SimTimeUnit)-1));
         msg->setChunkLength(B(8));
         packet->insertAtFront(msg);
         sendToIP(packet, ie, groupAddr.isUnspecified() ? Ipv4Address::ALL_HOSTS_MCAST : groupAddr);

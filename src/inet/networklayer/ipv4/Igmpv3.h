@@ -296,13 +296,15 @@ public:
 
     virtual void multicastSourceListChanged(InterfaceEntry *ie, Ipv4Address group, const Ipv4MulticastSourceList& sourceList);
 
+  public:
     /**
      * Function for computing the time value in seconds from an encoded value.
      * Codes in the [1,127] interval are the number of 1/10 seconds,
      * codes above 127 are contain a 3-bit exponent and a four bit mantissa
      * and represents the (mantissa + 16) * 2^(3+exp) number of 1/10 seconds.
      */
-    virtual double decodeTime(unsigned char code);
+    static uint16_t decodeTime(uint8_t code);
+    static uint8_t codeTime(uint16_t timevalue);
 };
 
 inline std::ostream& operator<<(std::ostream& out, const Igmpv3::Ipv4AddressVector addresses)

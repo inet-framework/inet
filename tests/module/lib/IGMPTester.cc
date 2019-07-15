@@ -67,13 +67,13 @@ static ostream &operator<<(ostream &out, const IgmpMessage* msg)
             if (auto v3Query = dynamic_cast<const Igmpv3Query*>(msg))
             {
                 out << ", sourceList=" << v3Query->getSourceList()
-                    << ", maxRespTime=" << v3Query->getMaxRespTime()
+                    << ", maxRespTime=" << SimTime(Igmpv3::decodeTime(v3Query->getMaxRespTimeCode()), (SimTimeUnit)-1)
                     << ", suppressRouterProc=" << (int)v3Query->getSuppressRouterProc()
                     << ", robustnessVariable=" << (int)v3Query->getRobustnessVariable()
-                    << ", queryIntervalCode=" << (int)v3Query->getQueryIntervalCode();
+                    << ", queryIntervalCode=" << SimTime(Igmpv3::decodeTime(v3Query->getQueryIntervalCode()), SIMTIME_S);
             }
             else if (auto v2Query = dynamic_cast<const Igmpv2Query*>(msg))
-                out << ", maxRespTime=" << v2Query->getMaxRespTime();
+                out << ", maxRespTime=" << SimTime(v2Query->getMaxRespTimeCode(), (SimTimeUnit)-1);
             break;
         }
         case IGMPV1_MEMBERSHIP_REPORT:
@@ -228,7 +228,7 @@ void IGMPTester::processSendCommand(const cXMLElement &node)
         const auto& msg = makeShared<Igmpv3Query>();
         msg->setType(IGMP_MEMBERSHIP_QUERY);
         msg->setGroupAddress(group);
-        msg->setMaxRespTime(0.1 * maxRespCode);
+        msg->setMaxRespTimeCode(Igmpv3::codeTime(maxRespCode));
         msg->setSourceList(sources);
         msg->setChunkLength(B(12 + (4 * sources.size())));
         packet->insertAtFront(msg);

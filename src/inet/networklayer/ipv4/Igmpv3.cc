@@ -518,7 +518,7 @@ void Igmpv3::processQuery(Packet *packet)
 
     Ipv4Address groupAddr = msg->getGroupAddress();
     Ipv4AddressVector queriedSources = msg->getSourceList();
-    double maxRespTime = msg->getMaxRespTime().dbl();
+    double maxRespTime = 0.1 * decodeTime(msg->getMaxRespTimeCode());
 
     ASSERT(ie->isMulticast());
 
@@ -897,7 +897,7 @@ void Igmpv3::sendGeneralQuery(RouterInterfaceData *interfaceData, double maxResp
         Packet *packet = new Packet("Igmpv3 query");
         const auto& msg = makeShared<Igmpv3Query>();
         msg->setType(IGMP_MEMBERSHIP_QUERY);
-        msg->setMaxRespTime(maxRespTime);
+        msg->setMaxRespTimeCode(codeTime((uint16_t)(maxRespTime*10.0)));
         msg->setChunkLength(B(12));
         packet->insertAtFront(msg);
         sendQueryToIP(packet, interfaceData->ie, Ipv4Address::ALL_HOSTS_MCAST);
@@ -925,7 +925,7 @@ void Igmpv3::sendGroupSpecificQuery(RouterGroupData *groupData)
         const auto& msg = makeShared<Igmpv3Query>();
         msg->setType(IGMP_MEMBERSHIP_QUERY);
         msg->setGroupAddress(groupData->groupAddr);
-        msg->setMaxRespTime(lastMemberQueryInterval);
+        msg->setMaxRespTimeCode(codeTime((uint16_t)(10.0*lastMemberQueryInterval)));
         msg->setSuppressRouterProc(suppressFlag);
         msg->setChunkLength(B(12));
         packet->insertAtFront(msg);
@@ -970,7 +970,7 @@ void Igmpv3::sendGroupAndSourceSpecificQuery(RouterGroupData *groupData, const I
         const auto& msg = makeShared<Igmpv3Query>();
         msg->setType(IGMP_MEMBERSHIP_QUERY);
         msg->setGroupAddress(groupData->groupAddr);
-        msg->setMaxRespTime(lastMemberQueryInterval);
+        msg->setMaxRespTimeCode(codeTime((uint16_t)(10.0 * lastMemberQueryInterval)));
         msg->setSourceList(sources);
         msg->setChunkLength(B(12 + (4 * sources.size())));
         packet->insertAtFront(msg);
@@ -1326,18 +1326,40 @@ Ipv4AddressVector Igmpv3::set_union(const Ipv4AddressVector& first, const Ipv4Ad
 
 // Miscellaneous
 
-double Igmpv3::decodeTime(unsigned char code)
+uint16_t Igmpv3::decodeTime(uint8_t code)
 {
-    unsigned time;
+    uint16_t time;
     if (code < 128)
         time = code;
     else {
-        unsigned mantis = code & 0x15;
+        unsigned mantis = code & 0x0f;
         unsigned exp = (code >> 4) & 0x07;
         time = (mantis | 0x10) << (exp + 3);
     }
 
-    return (double)time / 10.0;
+    return time;
+}
+
+uint8_t Igmpv3::codeTime(uint16_t time)
+{
+    uint8_t code;
+    if (time < 128)
+        code = (uint8_t)time;
+    else if (time >= (0x1f << 10))
+        code = 0xff;
+    else {
+        unsigned exp = 0;
+        time >>= 3;
+        while (time > 0x1f) {
+            time >>= 1;
+            exp++;
+        }
+        ASSERT(exp <= 7);
+        ASSERT(time <= 15);
+        code = 0x80 | ((exp << 4) & 0x70) | (time & 0x0f);
+    }
+
+    return code;
 }
 
 const std::string Igmpv3::getRouterStateString(Igmpv3::RouterState rs)
