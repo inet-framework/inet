@@ -30,5 +30,5 @@ enum CrcMode
 
 
 cplusplus {{
-INET_API CrcMode parseCrcMode(const char *crcModeString);
+INET_API CrcMode parseCrcMode(const char *crcModeString, bool allowDisable);
 }}
