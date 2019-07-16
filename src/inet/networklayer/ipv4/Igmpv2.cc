@@ -29,6 +29,7 @@
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/ipv4/Igmpv2.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
+#include "inet/networklayer/ipv4/Ipv4OptionsTag_m.h"
 #include "inet/networklayer/ipv4/Ipv4RoutingTable.h"
 
 namespace inet {
@@ -695,7 +696,9 @@ void Igmpv2::sendReport(InterfaceEntry *ie, HostGroupData *group)
     msg->setChunkLength(B(8));
     insertCrc(msg, packet);
     packet->insertAtFront(msg);
-    // TODO add Router Alert option
+    // TODO fill Router Alert option
+    auto raOption = new Ipv4OptionRouterAlert();
+    packet->addTag<Ipv4OptionsReq>()->insertOption(raOption);
     sendToIP(packet, ie, group->groupAddr);
     numReportsSent++;
 }
@@ -711,7 +714,9 @@ void Igmpv2::sendLeave(InterfaceEntry *ie, HostGroupData *group)
     msg->setChunkLength(B(8));
     insertCrc(msg, packet);
     packet->insertAtFront(msg);
-    // TODO add Router Alert option
+    // TODO fill Router Alert option
+    auto raOption = new Ipv4OptionRouterAlert();
+    packet->addTag<Ipv4OptionsReq>()->insertOption(raOption);
     sendToIP(packet, ie, Ipv4Address::ALL_ROUTERS_MCAST);
     numLeavesSent++;
 }

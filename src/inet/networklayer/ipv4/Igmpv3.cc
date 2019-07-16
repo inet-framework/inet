@@ -28,10 +28,12 @@
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/checksum/TcpIpChecksum.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
+#include "inet/networklayer/common/DscpTag_m.h"
 #include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/ipv4/Igmpv3.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
+#include "inet/networklayer/ipv4/Ipv4OptionsTag_m.h"
 #include "inet/networklayer/ipv4/Ipv4RoutingTable.h"
 
 namespace inet {
@@ -999,7 +1001,6 @@ void Igmpv3::sendGroupAndSourceSpecificQuery(RouterGroupData *groupData, const I
     }
 }
 
-// TODO add Router Alert option, set Type of Service to 0xc0
 void Igmpv3::sendReportToIP(Packet *msg, InterfaceEntry *ie, Ipv4Address dest)
 {
     ASSERT(ie->isMulticast());
@@ -1011,8 +1012,11 @@ void Igmpv3::sendReportToIP(Packet *msg, InterfaceEntry *ie, Ipv4Address dest)
     msg->addTagIfAbsent<L3AddressReq>()->setDestAddress(dest);
     msg->addTagIfAbsent<HopLimitReq>()->setHopLimit(1);
 
-    // TODO add Router Alert option
+    // TODO fill Router Alert option
+    auto raOption = new Ipv4OptionRouterAlert();
+    msg->addTag<Ipv4OptionsReq>()->insertOption(raOption);
     // TODO set Type of Service to 0xc0
+    //msg->addTag<DscpReq>()->setDifferentiatedServicesCodePoint(0xc0 >> 2);
     send(msg, "ipOut");
 }
 
@@ -1027,8 +1031,11 @@ void Igmpv3::sendQueryToIP(Packet *msg, InterfaceEntry *ie, Ipv4Address dest)
     msg->addTagIfAbsent<L3AddressReq>()->setDestAddress(dest);
     msg->addTagIfAbsent<HopLimitReq>()->setHopLimit(1);
 
-    // TODO add Router Alert option
-    // TODO set Type of Service to 0xc0
+    // TODO fill Router Alert option
+    auto raOption = new Ipv4OptionRouterAlert();
+    msg->addTag<Ipv4OptionsReq>()->insertOption(raOption);
+    // set Type of Service to 0xc0
+    msg->addTag<DscpReq>()->setDifferentiatedServicesCodePoint(0xc0 >> 2);
     send(msg, "ipOut");
 }
 
