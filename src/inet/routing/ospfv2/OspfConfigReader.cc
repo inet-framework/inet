@@ -245,7 +245,7 @@ void OspfConfigReader::loadInterfaceParameters(const cXMLElement& ifConfig, Inte
     }
 
     const char* ospfCrcMode = par("crcMode");
-    intf->setCrcMode(parseCrcMode(ospfCrcMode, true));
+    intf->setCrcMode(parseCrcMode(ospfCrcMode, false));
 
     Metric cost = getIntAttrOrPar(ifConfig, "interfaceOutputCost");
     if(cost == 0)
@@ -434,7 +434,9 @@ void OspfConfigReader::loadVirtualLink(const cXMLElement& virtualLinkConfig, cXM
     intf->setTransmissionDelay(getIntAttrOrPar(virtualLinkConfig, "interfaceTransmissionDelay"));
     intf->setHelloInterval(getIntAttrOrPar(virtualLinkConfig, "helloInterval"));
     intf->setRouterDeadInterval(getIntAttrOrPar(virtualLinkConfig, "routerDeadInterval"));
-    intf->setCrcMode(CRC_DISABLED); // TODO:
+
+    const char* ospfCrcMode = par("crcMode");
+    intf->setCrcMode(parseCrcMode(ospfCrcMode, false));
 
     loadAuthenticationConfig(intf, virtualLinkConfig);
 
