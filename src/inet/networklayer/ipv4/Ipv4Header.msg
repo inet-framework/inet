@@ -149,6 +149,16 @@ class Ipv4OptionStreamId extends Ipv4Option
     short streamId;
 }
 
+//
+// Option Structure: Stream ID
+//
+class Ipv4OptionRouterAlert extends Ipv4Option
+{
+    type = IPOPTION_ROUTER_ALERT;
+    length = 4;
+    uint16_t routerAlert = 0;
+}
+
 class Ipv4OptionUnknown extends Ipv4Option
 {
     // type = any
