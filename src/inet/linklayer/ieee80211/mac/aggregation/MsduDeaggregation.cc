@@ -59,7 +59,7 @@ std::vector<Packet *> *MsduDeaggregation::deaggregateFrame(Packet *aggregatedFra
     EV_DEBUG << "Deaggregating A-MSDU " << *aggregatedFrame << " into multiple packets.\n";
     std::vector<Packet *> *frames = new std::vector<Packet *>();
     const auto& amsduHeader = aggregatedFrame->popAtFront<Ieee80211DataHeader>();
-    aggregatedFrame->popAtBack<Ieee80211MacTrailer>();
+    aggregatedFrame->popAtBack<Ieee80211MacTrailer>(B(4));
     int tid = amsduHeader->getTid();
     int paddingLength = 0;
     cStringTokenizer tokenizer(aggregatedFrame->getName(), "+");

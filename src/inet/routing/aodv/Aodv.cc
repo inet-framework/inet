@@ -89,8 +89,6 @@ void Aodv::initialize(int stage)
         blacklistTimer = new cMessage("BlackListTimer");
         if (useHelloMessages)
             helloMsgTimer = new cMessage("HelloMsgTimer");
-        const char *crcModeString = par("crcMode");
-        crcMode = parseCrcMode(crcModeString);
     }
     else if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
         networkProtocol->registerHook(0, this);
