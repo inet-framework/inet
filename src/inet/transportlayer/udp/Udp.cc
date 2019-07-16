@@ -486,6 +486,9 @@ void Udp::processICMPv4Error(Packet *packet)
         icmp = getModuleFromPar<Icmp>(par("icmpModule"), this);
     if (!icmp->verifyCrc(packet)) {
         EV_WARN << "incoming ICMP packet has wrong CRC, dropped\n";
+        PacketDropDetails details;
+        details.setReason(INCORRECTLY_RECEIVED);
+        emit(packetDroppedSignal, packet, &details);
         delete packet;
         return;
     }
@@ -538,6 +541,9 @@ void Udp::processICMPv6Error(Packet *packet)
         icmpv6 = getModuleFromPar<Icmpv6>(par("icmpv6Module"), this);
     if (!icmpv6->verifyCrc(packet)) {
         EV_WARN << "incoming ICMPv6 packet has wrong CRC, dropped\n";
+        PacketDropDetails details;
+        details.setReason(INCORRECTLY_RECEIVED);
+        emit(packetDroppedSignal, packet, &details);
         delete packet;
         return;
     }

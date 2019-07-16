@@ -187,6 +187,9 @@ void Tcp::handleMessageWhenUp(cMessage *msg)
 
             if (!checkCrc(tcpHeader, packet)) {
                 EV_WARN << "Tcp segment has wrong CRC, dropped\n";
+                PacketDropDetails details;
+                details.setReason(INCORRECTLY_RECEIVED);
+                emit(packetDroppedSignal, packet, &details);
                 delete packet;
                 return;
             }
