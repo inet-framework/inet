@@ -160,11 +160,13 @@ void OspfConfigReader::loadAreaFromXML(const cXMLElement& asConfig, AreaId areaI
     areaXPath += areaID.str(false);
     areaXPath += "']";
 
+    auto crcMode = parseCrcMode(par("crcMode"), false);
+
     cXMLElement *areaConfig = asConfig.getElementByPath(areaXPath.c_str());
     if (areaConfig == nullptr) {
         if(areaID != Ipv4Address("0.0.0.0"))
             throw cRuntimeError("No configuration for Area ID: %s at %s", areaID.str(false).c_str(), asConfig.getSourceLocation());
-        Area *area = new Area(ift, areaID);
+        Area *area = new Area(crcMode, ift, areaID);
         area->addWatches();
         ospfRouter->addArea(area);
         return;
@@ -172,7 +174,7 @@ void OspfConfigReader::loadAreaFromXML(const cXMLElement& asConfig, AreaId areaI
 
     EV_DEBUG << "    loading info for Area id = " << areaID.str(false) << "\n";
 
-    Area *area = new Area(ift, areaID);
+    Area *area = new Area(crcMode, ift, areaID);
     area->addWatches();
     cXMLElementList areaDetails = areaConfig->getChildren();
     for (auto & areaDetail : areaDetails) {
@@ -244,8 +246,7 @@ void OspfConfigReader::loadInterfaceParameters(const cXMLElement& ifConfig, Inte
                 interfaceType.c_str(), ifName.c_str(), ifIndex, ifConfig.getSourceLocation());
     }
 
-    const char* ospfCrcMode = par("crcMode");
-    intf->setCrcMode(parseCrcMode(ospfCrcMode, false));
+    intf->setCrcMode(parseCrcMode(par("crcMode"), false));
 
     Metric cost = getIntAttrOrPar(ifConfig, "interfaceOutputCost");
     if(cost == 0)

@@ -37,6 +37,7 @@ class Router;
 class INET_API Area : public cObject
 {
   private:
+    CrcMode crcMode;
     IInterfaceTable *ift;
     AreaId areaID;
     std::map<Ipv4AddressRange, bool> advertiseAddressRanges;
@@ -57,7 +58,7 @@ class INET_API Area : public cObject
     Router *parentRouter;
 
   public:
-    Area(IInterfaceTable *ift, AreaId id = BACKBONE_AREAID);
+    Area(CrcMode crcMode, IInterfaceTable *ift, AreaId id = BACKBONE_AREAID);
     virtual ~Area();
 
     void setAreaID(AreaId areaId) { areaID = areaId; }
