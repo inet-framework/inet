@@ -1,5 +1,6 @@
 //
 // Copyright (C) 2006 Andras Babos and Andras Varga
+// Copyright (C) 2019 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -21,12 +22,13 @@
 #include "inet/common/checksum/TcpIpChecksum.h"
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
+#include "inet/routing/ospfv2/OspfCrc.h"
+#include "inet/routing/ospfv2/OspfPacketSerializer.h"
 #include "inet/routing/ospfv2/interface/OspfInterface.h"
 #include "inet/routing/ospfv2/interface/OspfInterfaceStateDown.h"
 #include "inet/routing/ospfv2/messagehandler/MessageHandler.h"
 #include "inet/routing/ospfv2/router/OspfArea.h"
 #include "inet/routing/ospfv2/router/OspfRouter.h"
-#include "inet/routing/ospfv2/OspfPacketSerializer.h"
 
 namespace inet {
 
@@ -221,20 +223,11 @@ void OspfInterface::sendHelloPacket(Ipv4Address destination, short ttl)
 
     helloPacket->setChunkLength(OSPF_HEADER_LENGTH + OSPF_HELLO_HEADER_LENGTH + B(initedNeighborCount * 4));
 
-    helloPacket->setCrcMode(crcMode);
-    // making sure the crc field is zero
-    helloPacket->setCrc(0x0000);
-    // RFC 2328: OSPF checksum is calculated over the entire OSPF packet, excluding the 64-bit authentication field.
-    if(crcMode == CRC_COMPUTED) {
-        MemoryOutputStream stream;
-        Chunk::serialize(stream, helloPacket);
-        uint16_t crc = TcpIpChecksum::checksum(stream.getData());
-        helloPacket->setCrc(crc);
-    }
-
     for (int i = 0; i < 8; i++) {
         helloPacket->setAuthentication(i, authenticationKey.bytes[i]);
     }
+
+    setOspfCrc(helloPacket, crcMode);
 
     Packet *pk = new Packet();
     pk->insertAtBack(helloPacket);
@@ -257,20 +250,11 @@ void OspfInterface::sendLsAcknowledgement(const OspfLsaHeader *lsaHeader, Ipv4Ad
 
     lsAckPacket->setChunkLength(OSPF_HEADER_LENGTH + OSPF_LSA_HEADER_LENGTH);
 
-    lsAckPacket->setCrcMode(crcMode);
-    // making sure the crc field is zero
-    lsAckPacket->setCrc(0x0000);
-    // RFC 2328: OSPF checksum is calculated over the entire OSPF packet, excluding the 64-bit authentication field.
-    if(crcMode == CRC_COMPUTED) {
-        MemoryOutputStream stream;
-        Chunk::serialize(stream, lsAckPacket);
-        uint16_t crc = TcpIpChecksum::checksum(stream.getData());
-        lsAckPacket->setCrc(crc);
-    }
-
     for (int i = 0; i < 8; i++) {
         lsAckPacket->setAuthentication(i, authenticationKey.bytes[i]);
     }
+
+    setOspfCrc(lsAckPacket, crcMode);
 
     Packet *pk = new Packet();
     pk->insertAtBack(lsAckPacket);
@@ -533,19 +517,8 @@ Packet *OspfInterface::createUpdatePacket(const OspfLsa *lsa)
             lsaHeader.setLsAge(lsAge);
             auto lsaSize = calculateLSASize(lsa);
             ASSERT(lsaSize == B(lsaHeader.getLsaLength()));
+            setLsaCrc(*lsa, crcMode);
             packetLength += lsaSize;
-
-            lsaHeader.setLsCrcMode(crcMode);
-            // making sure the crc field is zero
-            lsaHeader.setLsCrc(0x0000);
-            if(crcMode == CRC_COMPUTED) {
-                MemoryOutputStream stream;
-                lsaHeader.setLsAge(0);
-                OspfPacketSerializer::serializeLsa(stream, *lsa);
-                uint16_t crc = TcpIpChecksum::checksum(stream.getData());
-                lsaHeader.setLsAge(lsAge);
-                lsaHeader.setLsCrc(crc);
-            }
         }
         break;
 
@@ -555,20 +528,11 @@ Packet *OspfInterface::createUpdatePacket(const OspfLsa *lsa)
 
     updatePacket->setChunkLength(packetLength);
 
-    updatePacket->setCrcMode(crcMode);
-    // making sure the crc field is zero
-    updatePacket->setCrc(0x0000);
-    // RFC 2328: OSPF checksum is calculated over the entire OSPF packet, excluding the 64-bit authentication field.
-    if(crcMode == CRC_COMPUTED) {
-        MemoryOutputStream stream;
-        Chunk::serialize(stream, updatePacket);
-        uint16_t crc = TcpIpChecksum::checksum(stream.getData());
-        updatePacket->setCrc(crc);
-    }
-
     for (int j = 0; j < 8; j++) {
         updatePacket->setAuthentication(j, authenticationKey.bytes[j]);
     }
+
+    setOspfCrc(updatePacket, crcMode);
 
     Packet *pk = new Packet();
     pk->insertAtBack(updatePacket);
@@ -627,20 +591,11 @@ void OspfInterface::sendDelayedAcknowledgements()
 
                 ackPacket->setChunkLength(packetSize - IPv4_MAX_HEADER_LENGTH);
 
-                ackPacket->setCrcMode(crcMode);
-                // making sure the crc field is zero
-                ackPacket->setCrc(0x0000);
-                // RFC 2328: OSPF checksum is calculated over the entire OSPF packet, excluding the 64-bit authentication field.
-                if(crcMode == CRC_COMPUTED) {
-                    MemoryOutputStream stream;
-                    Chunk::serialize(stream, ackPacket);
-                    uint16_t crc = TcpIpChecksum::checksum(stream.getData());
-                    ackPacket->setCrc(crc);
-                }
-
                 for (int i = 0; i < 8; i++) {
                     ackPacket->setAuthentication(i, authenticationKey.bytes[i]);
                 }
+
+                setOspfCrc(ackPacket, crcMode);
 
                 Packet *pk = new Packet();
                 pk->insertAtBack(ackPacket);
