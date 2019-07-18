@@ -97,7 +97,7 @@ void Packet::setBackOffset(b offset)
 const Ptr<const Chunk> Packet::peekAtBack(b length, int flags) const
 {
     auto dataLength = getDataLength();
-    CHUNK_CHECK_USAGE(b(-1) <= length && length <= dataLength, "length is invalid");
+    CHUNK_CHECK_USAGE(b(1) <= length && length <= dataLength, "length is invalid");
     const auto& chunk = content->peek(backIterator, length, flags);
     if (chunk == nullptr || chunk->getChunkLength() <= dataLength)
         return chunk;
@@ -107,7 +107,7 @@ const Ptr<const Chunk> Packet::peekAtBack(b length, int flags) const
 
 const Ptr<const Chunk> Packet::popAtBack(b length, int flags)
 {
-    CHUNK_CHECK_USAGE(b(-1) <= length && length <= getDataLength(), "length is invalid");
+    CHUNK_CHECK_USAGE(b(1) <= length && length <= getDataLength(), "length is invalid");
     const auto& chunk = peekAtBack(length, flags);
     if (chunk != nullptr) {
         content->moveIterator(backIterator, chunk->getChunkLength());
@@ -269,7 +269,7 @@ const Ptr<Chunk> Packet::removeAtFront(b length, int flags)
 
 const Ptr<Chunk> Packet::removeAtBack(b length, int flags)
 {
-    CHUNK_CHECK_USAGE(b(-1) <= length && length <= getDataLength(), "length is invalid");
+    CHUNK_CHECK_USAGE(b(1) <= length && length <= getDataLength(), "length is invalid");
     CHUNK_CHECK_USAGE(backIterator.getPosition() == b(0), "popped trailer length is non-zero");
     const auto& chunk = popAtBack(length, flags);
     trimBack();

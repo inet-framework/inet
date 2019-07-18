@@ -312,6 +312,30 @@ class INET_API MemoryInputStream {
     }
 
     /**
+     * Reads a 24 bit unsigned integer at the current position of the stream in
+     * big endian byte order and MSB to LSB bit order.
+     */
+    uint32_t readUint24Be() {
+        uint32_t value = 0;
+        value |= (static_cast<uint32_t>(readByte()) << 16);
+        value |= (static_cast<uint32_t>(readByte()) << 8);
+        value |= (static_cast<uint32_t>(readByte()) << 0);
+        return value;
+    }
+
+    /**
+     * Reads a 24 bit unsigned integer at the current position of the stream in
+     * little endian byte order and MSB to LSB bit order.
+     */
+    uint32_t readUint24Le() {
+        uint32_t value = 0;
+        value |= (static_cast<uint32_t>(readByte()) << 0);
+        value |= (static_cast<uint32_t>(readByte()) << 8);
+        value |= (static_cast<uint32_t>(readByte()) << 16);
+        return value;
+    }
+
+    /**
      * Reads a 32 bit unsigned integer at the current position of the stream in
      * big endian byte order and MSB to LSB bit order.
      */

@@ -226,6 +226,26 @@ class INET_API MemoryOutputStream {
     }
 
     /**
+     * Writes a 24 bit unsigned integer to the end of the stream in big endian
+     * byte order and MSB to LSB bit order.
+     */
+    void writeUint24Be(uint32_t value) {
+        writeByte(static_cast<uint8_t>(value >> 16));
+        writeByte(static_cast<uint8_t>(value >> 8));
+        writeByte(static_cast<uint8_t>(value >> 0));
+    }
+
+    /**
+     * Writes a 24 bit unsigned integer to the end of the stream in little endian
+     * byte order and MSB to LSB bit order.
+     */
+    void writeUint24Le(uint32_t value) {
+        writeByte(static_cast<uint8_t>(value >> 0));
+        writeByte(static_cast<uint8_t>(value >> 8));
+        writeByte(static_cast<uint8_t>(value >> 16));
+    }
+
+    /**
      * Writes a 32 bit unsigned integer to the end of the stream in big endian
      * byte order and MSB to LSB bit order.
      */

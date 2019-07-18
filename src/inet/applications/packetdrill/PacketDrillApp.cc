@@ -83,13 +83,7 @@ void PacketDrillApp::initialize(int stage)
         localPort = par("localPort");
         remotePort = par("remotePort");
         const char *crcModeString = par("crcMode");
-        if (!strcmp(crcModeString, "declared")) {
-            crcMode = CRC_DECLARED_CORRECT;
-        } else if (!strcmp(crcModeString, "computed")) {
-            crcMode = CRC_COMPUTED;
-        } else {
-            throw cRuntimeError("Unknown crc mode: '%s'", crcModeString);
-        }
+        crcMode = parseCrcMode(crcModeString, false);
         const char *interface = par("interface");
         //const char *interfaceTableModule = par("interfaceTableModule");
         IInterfaceTable *interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);

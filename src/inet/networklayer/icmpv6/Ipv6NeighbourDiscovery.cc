@@ -90,12 +90,7 @@ void Ipv6NeighbourDiscovery::initialize(int stage)
 
     if (stage == INITSTAGE_LOCAL) {
         const char *crcModeString = par("crcMode");
-        if (!strcmp(crcModeString, "declared"))
-            crcMode = CRC_DECLARED_CORRECT;
-        else if (!strcmp(crcModeString, "computed"))
-            crcMode = CRC_COMPUTED;
-        else
-            throw cRuntimeError("unknown CRC mode: '%s'", crcModeString);
+        crcMode = parseCrcMode(crcModeString, false);
     }
     else if (stage == INITSTAGE_NETWORK_LAYER) {
         cModule *node = findContainingNode(this);

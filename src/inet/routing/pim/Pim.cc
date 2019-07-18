@@ -39,7 +39,7 @@ void Pim::initialize(int stage)
 
     if (stage == INITSTAGE_LOCAL) {
         const char *crcModeString = par("crcMode");
-        crcMode = parseCrcMode(crcModeString);
+        crcMode = parseCrcMode(crcModeString, false);
     }
     else if (stage == INITSTAGE_TRANSPORT_LAYER) {
         if (crcMode == CRC_COMPUTED) {

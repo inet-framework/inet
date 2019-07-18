@@ -43,12 +43,7 @@ void Icmp::initialize(int stage)
     cSimpleModule::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         const char *crcModeString = par("crcMode");
-        if (!strcmp(crcModeString, "declared"))
-            crcMode = CRC_DECLARED_CORRECT;
-        else if (!strcmp(crcModeString, "computed"))
-            crcMode = CRC_COMPUTED;
-        else
-            throw cRuntimeError("unknown CRC mode: '%s'", crcModeString);
+        crcMode = parseCrcMode(crcModeString, false);
     }
     else if (stage == INITSTAGE_NETWORK_LAYER) {
         registerService(Protocol::icmpv4, gate("transportIn"), gate("ipIn"));
@@ -184,6 +179,9 @@ void Icmp::processICMPMessage(Packet *packet)
     if (!verifyCrc(packet)) {
         EV_WARN << "incoming ICMP packet has wrong CRC, dropped\n";
         // drop packet
+        PacketDropDetails details;
+        details.setReason(INCORRECTLY_RECEIVED);
+        emit(packetDroppedSignal, packet, &details);
         delete packet;
         return;
     }
