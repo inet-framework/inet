@@ -48,6 +48,7 @@
 #include "inet/networklayer/ipv4/Ipv4.h"
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
+#include "inet/networklayer/ipv4/Ipv4OptionsTag_m.h"
 
 namespace inet {
 
@@ -1013,6 +1014,18 @@ void Ipv4::encapsulate(Packet *transportPacket)
     else
         ttl = defaultTimeToLive;
     ipv4Header->setTimeToLive(ttl);
+
+    if (Ipv4OptionsReq *optReq = transportPacket->removeTagIfPresent<Ipv4OptionsReq>()) {
+        for (size_t i = 0; i < optReq->getOptionArraySize(); i++) {
+            auto opt = optReq->dropOption(i);
+            ipv4Header->addOption(opt);
+            ipv4Header->addChunkLength(B(opt->getLength()));
+        }
+        delete optReq;
+    }
+
+    ASSERT(ipv4Header->getChunkLength() <= IPv4_MAX_HEADER_LENGTH);
+    ipv4Header->setHeaderLength(ipv4Header->getChunkLength());
     ipv4Header->setTotalLengthField(ipv4Header->getChunkLength() + transportPacket->getDataLength());
     ipv4Header->setCrcMode(crcMode);
     ipv4Header->setCrc(0);

@@ -9,10 +9,9 @@ showcases were created in the hope that they will be directly useful for
 INET users doing related simulations.
 
 You can browse the showcase pages on this web site. The source code of
-the simulations (NED, ini and other files) and the web live in the
-`inet-framework/inet-showcases <https://github.com/inet-framework/inet-showcases>`_
-GitHub repository, which also appears as the `showcases/` subdirectory
-of the INET Framework repository.
+the simulations (NED, ini and other files) and the web pages are in the
+`showcases/` subdirectory of the
+`INET repository <https://github.com/inet-framework/inet/tree/master/showcases>`_.
 
 The following showcases are available:
 

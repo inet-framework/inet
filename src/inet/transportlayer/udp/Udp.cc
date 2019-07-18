@@ -1315,9 +1315,11 @@ void Udp::insertCrc(const Protocol *networkProtocol, const L3Address& srcAddress
             // if the CRC mode is computed, then compute the CRC and set it
             // this computation is delayed after the routing decision, see INetfilter hook
             udpHeader->setCrc(0x0000); // make sure that the CRC is 0 in the Udp header before computing the CRC
+            udpHeader->setCrcMode(CRC_DISABLED);    // for serializer/deserializer checks only: deserializer sets the crcMode to disabled when crc is 0
             auto udpData = packet->peekData();
             auto crc = computeCrc(networkProtocol, srcAddress, destAddress, udpHeader, udpData);
             udpHeader->setCrc(crc);
+            udpHeader->setCrcMode(CRC_COMPUTED);
             break;
         }
         default:
