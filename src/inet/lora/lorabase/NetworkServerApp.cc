@@ -132,12 +132,13 @@ void NetworkServerApp::finish()
 
     receivedRSSI.recordAs("receivedRSSI");
     recordScalar("totalReceivedPackets", totalReceivedPackets);
-    for(auto &elem : receivedPackets)  {
-        delete elem.rcvdPacket;
-        if (elem.endOfWaiting && elem.endOfWaiting->isScheduled())
-            cancelAndDelete(elem.endOfWaiting);
+    while(!receivedPackets.empty())  {
+        delete receivedPackets.back().rcvdPacket;
+        if (receivedPackets.back().endOfWaiting && receivedPackets.back().endOfWaiting->isScheduled())
+            cancelAndDelete(receivedPackets.back().endOfWaiting);
         else
-            delete elem.endOfWaiting;
+            delete receivedPackets.back().endOfWaiting;
+        receivedPackets.pop_back();
     }
 
     // clean vector to avoid problems in the destructor

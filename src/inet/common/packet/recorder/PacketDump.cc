@@ -360,17 +360,17 @@ void PacketDump::dump(const char *label, const char *msg)
     out << buf << msg << endl;
 }
 
-void PacketDump::dumpPacket(bool l2r, cPacket *msg)
+void PacketDump::dumpPacket(bool l2r, const cPacket *msg)
 {
     std::ostream& out = *outp;
-    auto packet = dynamic_cast<Packet *>(msg);
+    auto packet = dynamic_cast<const Packet *>(msg);
     if (packet == nullptr)
         return;
 
     std::string leftAddr = "A";
     std::string rightAddr = "B";
-    packet = packet->dup();
-    while(const auto& chunk = packet->popAtFront(b(-1), Chunk::PF_ALLOW_NULLPTR)) {
+    auto packetCopy = packet->dup();
+    while(const auto& chunk = packetCopy->popAtFront(b(-1), Chunk::PF_ALLOW_NULLPTR)) {
 #ifdef WITH_IPv4
         if (const auto& ipv4Hdr = dynamicPtrCast<const Ipv4Header>(chunk)) {
             leftAddr = ipv4Hdr->getSourceAddress().str();
@@ -395,7 +395,7 @@ void PacketDump::dumpPacket(bool l2r, cPacket *msg)
 #endif // ifdef WITH_IPv6
 #ifdef WITH_SCTP
         if (const auto& sctpMessage = dynamicPtrCast<const sctp::SctpHeader>(chunk)) {
-            sctpDump("", packet, sctpMessage, std::string(l2r ? leftAddr : rightAddr), std::string(l2r ?  rightAddr: leftAddr));
+            sctpDump("", packetCopy, sctpMessage, std::string(l2r ? leftAddr : rightAddr), std::string(l2r ?  rightAddr: leftAddr));
         }
         else
 #endif // ifdef WITH_SCTP
@@ -409,7 +409,7 @@ void PacketDump::dumpPacket(bool l2r, cPacket *msg)
             out << chunk->str();
         }
     }
-    delete packet;
+    delete packetCopy;
 }
 
 #ifdef WITH_UDP

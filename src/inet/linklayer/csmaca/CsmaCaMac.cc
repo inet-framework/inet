@@ -78,7 +78,7 @@ void CsmaCaMac::initialize(int stage)
         mediumStateChange = new cMessage("MediumStateChange");
 
         // set up internal queue
-        transmissionQueue = check_and_cast<queueing::IPacketQueue *>(getSubmodule("queue"));
+        txQueue = check_and_cast<queueing::IPacketQueue *>(getSubmodule("queue"));
 
         // state variables
         fsm.setName("CsmaCaMac State Machine");
@@ -165,11 +165,13 @@ void CsmaCaMac::handleUpperPacket(Packet *packet)
     const auto& macHeader = frame->peekAtFront<CsmaCaMacHeader>();
     EV << "frame " << frame << " received from higher layer, receiver = " << macHeader->getReceiverAddress() << endl;
     ASSERT(!macHeader->getReceiverAddress().isUnspecified());
-    transmissionQueue->pushPacket(frame);
+    txQueue->pushPacket(frame);
     if (fsm.getState() != IDLE)
         EV << "deferring upper message transmission in " << fsm.getStateName() << " state\n";
-    else
-        handleWithFsm(transmissionQueue->getPacket(0));
+    else if (!txQueue->isEmpty()){
+        popTxQueue();
+        handleWithFsm(currentTxFrame);
+    }
 }
 
 void CsmaCaMac::handleLowerPacket(Packet *packet)
@@ -351,8 +353,12 @@ void CsmaCaMac::handleWithFsm(cMessage *msg)
     if (fsm.getState() == IDLE) {
         if (isReceiving())
             handleWithFsm(mediumStateChange);
-        else if (!transmissionQueue->isEmpty())
-            handleWithFsm(transmissionQueue->getPacket(0));
+        else if (currentTxFrame != nullptr)
+            handleWithFsm(currentTxFrame);
+        else if (!txQueue->isEmpty()) {
+            popTxQueue();
+            handleWithFsm(currentTxFrame);
+        }
     }
     if (isLowerMessage(msg) && frame->getOwner() == this && endSifs->getContextPointer() != frame)
         delete frame;
@@ -536,7 +542,7 @@ void CsmaCaMac::sendAckFrame()
  */
 void CsmaCaMac::finishCurrentTransmission()
 {
-    popTransmissionQueue();
+    deleteCurrentTxFrame();
     resetTransmissionVariables();
 }
 
@@ -545,7 +551,7 @@ void CsmaCaMac::giveUpCurrentTransmission()
     auto packet = getCurrentTransmission();
     emitPacketDropSignal(packet, RETRY_LIMIT_REACHED, retryLimit);
     emit(linkBrokenSignal, packet);
-    popTransmissionQueue();
+    deleteCurrentTxFrame();
     resetTransmissionVariables();
     numGivenUp++;
 }
@@ -560,13 +566,8 @@ void CsmaCaMac::retryCurrentTransmission()
 
 Packet *CsmaCaMac::getCurrentTransmission()
 {
-    return static_cast<Packet *>(transmissionQueue->getPacket(0));
-}
-
-void CsmaCaMac::popTransmissionQueue()
-{
-    EV << "dropping frame from transmission queue\n";
-    delete transmissionQueue->popPacket();
+    ASSERT(currentTxFrame != nullptr);
+    return currentTxFrame;
 }
 
 void CsmaCaMac::resetTransmissionVariables()

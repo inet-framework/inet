@@ -31,27 +31,28 @@ class INET_API IPacketCollection
   public:
     /**
      * Returns maximum allowed number of packets in the collection.
+     * The value -1 means no such limit.
      */
     virtual int getMaxNumPackets() = 0;
 
     /**
-     * Returns the number of available packets in the collection.
+     * Returns the number of available packets in the collection in the range [0, inf).
      */
     virtual int getNumPackets() = 0;
 
     /**
      * Returns maximum allowed total length of all packets in the collection.
+     * The value -1 means no such limit.
      */
     virtual b getMaxTotalLength() = 0;
 
     /**
-     * Returns the total length of all packets in the collection.
+     * Returns the total length of all packets in the collection in the range [0, inf).
      */
     virtual b getTotalLength() = 0;
 
     /**
-     * Returns the packet at the given index.
-     * Throws error when index is out of range.
+     * Returns the packet at the given index. Throws error when the index is out of range.
      */
     virtual Packet *getPacket(int index) = 0;
 

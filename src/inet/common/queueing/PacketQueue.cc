@@ -126,6 +126,28 @@ void PacketQueue::removePacket(Packet *packet)
     }
 }
 
+bool PacketQueue::canPushSomePacket(cGate *gate)
+{
+    if (packetDropperFunction)
+        return true;
+    if (getMaxNumPackets() != -1 && getNumPackets() >= getMaxNumPackets())
+        return false;
+    if (getMaxTotalLength() != b(-1) && getTotalLength() >= getMaxTotalLength())
+        return false;
+    return true;
+}
+
+bool PacketQueue::canPushPacket(Packet *packet, cGate *gate)
+{
+    if (packetDropperFunction)
+        return true;
+    if (getMaxNumPackets() != -1 && getNumPackets() >= getMaxNumPackets())
+        return false;
+    if (getMaxTotalLength() != b(-1) && getMaxTotalLength() - getTotalLength() < packet->getDataLength())
+        return false;
+    return true;
+}
+
 void PacketQueue::handlePacketRemoved(Packet *packet)
 {
     queue.remove(packet);

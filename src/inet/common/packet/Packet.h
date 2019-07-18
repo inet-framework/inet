@@ -184,11 +184,15 @@ class INET_API Packet : public cPacket
     const Ptr<const T> peekAtFront(b length = b(-1), int flags = 0) const {
         auto dataLength = getDataLength();
         CHUNK_CHECK_USAGE(b(-1) <= length && length <= dataLength, "length is invalid");
-        const auto& chunk = content->peek<T>(frontIterator, length, flags);
-        if (chunk == nullptr || chunk->getChunkLength() <= dataLength)
+        if (backIterator.getPosition() == b(0) || (length != b(-1) && length <= dataLength)) {
+            const auto& chunk = content->peek<T>(frontIterator, length, flags);
             return chunk;
-        else
-            return content->peek<T>(frontIterator, dataLength, flags);
+        }
+        else {
+            auto available = content->peek(frontIterator, dataLength);
+            const auto& chunk = available->peek<T>(Chunk::ForwardIterator(b(0)), length, flags);
+            return chunk;
+        }
     }
 
     /**
@@ -260,10 +264,11 @@ class INET_API Packet : public cPacket
      * is a combination of Chunk::PeekFlag enumeration members.
      */
     template <typename T>
-    const Ptr<const T> peekAtBack(b length = b(-1), int flags = 0) const {
+    const Ptr<const T> peekAtBack(b length, int flags = 0) const {
         auto dataLength = getDataLength();
-        CHUNK_CHECK_USAGE(b(-1) <= length && length <= dataLength, "length is invalid");
+        CHUNK_CHECK_USAGE(b(0) <= length && length <= dataLength, "length is invalid");
         const auto& chunk = content->peek<T>(backIterator, length, flags);
+        //TODO revise it: check length vs dataLength, doesn't read popped data!
         if (chunk == nullptr || chunk->getChunkLength() <= dataLength)
             return chunk;
         else
@@ -277,8 +282,8 @@ class INET_API Packet : public cPacket
      * flags parameter is a combination of Chunk::PeekFlag enumeration members.
      */
     template <typename T>
-    const Ptr<const T> popAtBack(b length = b(-1), int flags = 0) {
-        CHUNK_CHECK_USAGE(b(-1) <= length && length <= getDataLength(), "length is invalid");
+    const Ptr<const T> popAtBack(b length, int flags = 0) {
+        CHUNK_CHECK_USAGE(b(0) <= length && length <= getDataLength(), "length is invalid");
         const auto& chunk = peekAtBack<T>(length, flags);
         if (chunk != nullptr) {
             content->moveIterator(backIterator, chunk->getChunkLength());
@@ -522,7 +527,7 @@ class INET_API Packet : public cPacket
      * of back popped part must be zero before calling this function. The flags
      * parameter is a combination of Chunk::PeekFlag enumeration members.
      */
-    const Ptr<Chunk> removeAtBack(b length = b(-1), int flags = 0);
+    const Ptr<Chunk> removeAtBack(b length, int flags = 0);
 
     /**
      * Removes the designated part and returns it as a mutable chunk in the
@@ -548,8 +553,8 @@ class INET_API Packet : public cPacket
      * The flags parameter is a combination of Chunk::PeekFlag enumeration members.
      */
     template <typename T>
-    const Ptr<T> removeAtBack(b length = b(-1), int flags = 0) {
-        CHUNK_CHECK_USAGE(b(-1) <= length && length <= getDataLength(), "length is invalid");
+    const Ptr<T> removeAtBack(b length, int flags = 0) {
+        CHUNK_CHECK_USAGE(b(1) <= length && length <= getDataLength(), "length is invalid");
         CHUNK_CHECK_USAGE(backIterator.getPosition() == b(0), "back popped length is non-zero");
         const auto& chunk = popAtBack<T>(length, flags);
         trimBack();

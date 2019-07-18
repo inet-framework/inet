@@ -48,6 +48,7 @@
 #include "inet/networklayer/ipv4/Ipv4.h"
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
+#include "inet/networklayer/ipv4/Ipv4OptionsTag_m.h"
 
 namespace inet {
 
@@ -81,12 +82,7 @@ void Ipv4::initialize(int stage)
         transportInGateBaseId = gateBaseId("transportIn");
 
         const char *crcModeString = par("crcMode");
-        if (!strcmp(crcModeString, "declared"))
-            crcMode = CRC_DECLARED_CORRECT;
-        else if (!strcmp(crcModeString, "computed"))
-            crcMode = CRC_COMPUTED;
-        else
-            throw cRuntimeError("Unknown crc mode: '%s'", crcModeString);
+        crcMode = parseCrcMode(crcModeString, false);
 
         defaultTimeToLive = par("timeToLive");
         defaultMCTimeToLive = par("multicastTimeToLive");
@@ -964,6 +960,7 @@ void Ipv4::encapsulate(Packet *transportPacket)
 
     auto l3AddressReq = transportPacket->removeTag<L3AddressReq>();
     Ipv4Address src = l3AddressReq->getSrcAddress().toIpv4();
+    bool nonLocalSrcAddress = l3AddressReq->getNonLocalSrcAddress();
     Ipv4Address dest = l3AddressReq->getDestAddress().toIpv4();
     delete l3AddressReq;
 
@@ -984,8 +981,8 @@ void Ipv4::encapsulate(Packet *transportPacket)
     // when source address was given, use it; otherwise it'll get the address
     // of the outgoing interface after routing
     if (!src.isUnspecified()) {
+        if (!nonLocalSrcAddress && rt->getInterfaceByAddress(src) == nullptr)
         // if interface parameter does not match existing interface, do not send datagram
-        if (rt->getInterfaceByAddress(src) == nullptr)
             throw cRuntimeError("Wrong source address %s in (%s)%s: no interface with such address",
                     src.str().c_str(), transportPacket->getClassName(), transportPacket->getFullName());
 
@@ -1017,6 +1014,18 @@ void Ipv4::encapsulate(Packet *transportPacket)
     else
         ttl = defaultTimeToLive;
     ipv4Header->setTimeToLive(ttl);
+
+    if (Ipv4OptionsReq *optReq = transportPacket->removeTagIfPresent<Ipv4OptionsReq>()) {
+        for (size_t i = 0; i < optReq->getOptionArraySize(); i++) {
+            auto opt = optReq->dropOption(i);
+            ipv4Header->addOption(opt);
+            ipv4Header->addChunkLength(B(opt->getLength()));
+        }
+        delete optReq;
+    }
+
+    ASSERT(ipv4Header->getChunkLength() <= IPv4_MAX_HEADER_LENGTH);
+    ipv4Header->setHeaderLength(ipv4Header->getChunkLength());
     ipv4Header->setTotalLengthField(ipv4Header->getChunkLength() + transportPacket->getDataLength());
     ipv4Header->setCrcMode(crcMode);
     ipv4Header->setCrc(0);

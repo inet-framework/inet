@@ -1,0 +1,547 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scave:Analysis xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:scave="http://www.omnetpp.org/omnetpp/scave">
+  <inputs>
+    <inputs name="/inet/showcases/wireless/levelofdetail/results/*.sca"/>
+  </inputs>
+  <datasets>
+    <datasets name="Packet loss">
+      <items xsi:type="scave:Add" filterPattern="distance"/>
+      <items xsi:type="scave:Add" filterPattern="&quot;ping loss rate (%)&quot;"/>
+      <items xsi:type="scave:ScatterChart" name="Packet loss vs distance" xDataPattern="module(_runattrs_) AND name(distance)">
+        <filters xsi:type="scave:Select" filterPattern="distance OR &quot;ping loss rate (%)&quot;"/>
+        <properties name="X.Axis.Title" value="distance [m]"/>
+        <properties name="Y.Axis.Title" value="Packet loss [%]"/>
+        <properties name="Y.Axis.Max" value="110.0"/>
+        <properties name="Legend.Display" value="true"/>
+        <properties name="X.Axis.Min" value="110.0"/>
+        <properties name="X.Axis.Max" value="610.0"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;bit&quot; fecType=&quot;&quot; modulation=&quot;BPSK&quot;" value="bit - no FEC - BPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;bit&quot; fecType=&quot;&quot; modulation=&quot;QAM-16&quot;" value="bit - no FEC - QAM-16"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;bit&quot; fecType=&quot;&quot; modulation=&quot;QAM-64&quot;" value="bit - no FEC - QAM-64"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;bit&quot; fecType=&quot;&quot; modulation=&quot;QPSK&quot;" value="bit - no FEC - QPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;bit&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;BPSK&quot;" value="bit - conv.coder - BPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;bit&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;QAM-16&quot;" value="bit - conv.coder - QAM-16"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;bit&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;QAM-64&quot;" value="bit - conv.coder - QAM-64"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;bit&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;QPSK&quot;" value="bit - conv.coder - QPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;packet&quot; fecType=&quot;&quot; modulation=&quot;BPSK&quot;" value="packet - no FEC - BPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;packet&quot; fecType=&quot;&quot; modulation=&quot;QAM-16&quot;" value="packet - no FEC - QAM-16"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;packet&quot; fecType=&quot;&quot; modulation=&quot;QAM-64&quot;" value="packet - no FEC - QAM-64"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;packet&quot; fecType=&quot;&quot; modulation=&quot;QPSK&quot;" value="packet - no FEC - QPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;packet&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;BPSK&quot;" value="packet - conv.coder - BPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;packet&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;QAM-16&quot;" value="packet - conv.coder - QAM-16"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;packet&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;QAM-64&quot;" value="packet - conv.coder - QAM-64"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;packet&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;QPSK&quot;" value="packet - conv.coder - QPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;symbol&quot; fecType=&quot;&quot; modulation=&quot;BPSK&quot;" value="symbol - no FEC - BPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;symbol&quot; fecType=&quot;&quot; modulation=&quot;QAM-16&quot;" value="symbol - no FEC - QAM-16"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;symbol&quot; fecType=&quot;&quot; modulation=&quot;QAM-64&quot;" value="symbol - no FEC - QAM-64"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;symbol&quot; fecType=&quot;&quot; modulation=&quot;QPSK&quot;" value="symbol - no FEC - QPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;symbol&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;BPSK&quot;" value="symbol - conv.coder - BPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;symbol&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;QAM-16&quot;" value="symbol - conv.coder - QAM-16"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;symbol&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;QAM-64&quot;" value="symbol - conv.coder - QAM-64"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;symbol&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;QPSK&quot;" value="symbol - conv.coder - QPSK"/>
+        <properties name="Symbols.Type/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;BPSK&quot; fecType=&quot;&quot; detail=&quot;bit&quot;" value="Dot"/>
+        <properties name="Line.Color/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;BPSK&quot; fecType=&quot;&quot; detail=&quot;bit&quot;" value="blue"/>
+        <properties name="Symbols.Type/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;BPSK&quot; fecType=&quot;&quot; detail=&quot;packet&quot;" value="Square"/>
+        <properties name="Line.Color/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;BPSK&quot; fecType=&quot;&quot; detail=&quot;packet&quot;" value="blue"/>
+        <properties name="Symbols.Type/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;BPSK&quot; fecType=&quot;&quot; detail=&quot;symbol&quot;" value="Triangle"/>
+        <properties name="Line.Color/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;BPSK&quot; fecType=&quot;&quot; detail=&quot;symbol&quot;" value="blue"/>
+        <properties name="Symbols.Type/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;BPSK&quot; fecType=&quot;ConvolutionalCoder&quot; detail=&quot;bit&quot;" value="Dot"/>
+        <properties name="Line.Color/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;BPSK&quot; fecType=&quot;ConvolutionalCoder&quot; detail=&quot;bit&quot;" value="midnightblue"/>
+        <properties name="Symbols.Type/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;BPSK&quot; fecType=&quot;ConvolutionalCoder&quot; detail=&quot;packet&quot;" value="Square"/>
+        <properties name="Line.Color/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;BPSK&quot; fecType=&quot;ConvolutionalCoder&quot; detail=&quot;packet&quot;" value="midnightblue"/>
+        <properties name="Symbols.Type/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;BPSK&quot; fecType=&quot;ConvolutionalCoder&quot; detail=&quot;symbol&quot;" value="Triangle"/>
+        <properties name="Line.Color/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;BPSK&quot; fecType=&quot;ConvolutionalCoder&quot; detail=&quot;symbol&quot;" value="midnightblue"/>
+        <properties name="Symbols.Type/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QAM-16&quot; fecType=&quot;&quot; detail=&quot;bit&quot;" value="Dot"/>
+        <properties name="Line.Color/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QAM-16&quot; fecType=&quot;&quot; detail=&quot;bit&quot;" value="gold"/>
+        <properties name="Symbols.Type/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QAM-16&quot; fecType=&quot;&quot; detail=&quot;packet&quot;" value="Square"/>
+        <properties name="Line.Color/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QAM-16&quot; fecType=&quot;&quot; detail=&quot;packet&quot;" value="gold"/>
+        <properties name="Symbols.Type/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QAM-16&quot; fecType=&quot;&quot; detail=&quot;symbol&quot;" value="Triangle"/>
+        <properties name="Line.Color/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QAM-16&quot; fecType=&quot;&quot; detail=&quot;symbol&quot;" value="gold"/>
+        <properties name="Symbols.Type/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QAM-16&quot; fecType=&quot;ConvolutionalCoder&quot; detail=&quot;bit&quot;" value="Dot"/>
+        <properties name="Line.Color/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QAM-16&quot; fecType=&quot;ConvolutionalCoder&quot; detail=&quot;bit&quot;" value="darkorange"/>
+        <properties name="Symbols.Type/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QAM-16&quot; fecType=&quot;ConvolutionalCoder&quot; detail=&quot;packet&quot;" value="Square"/>
+        <properties name="Line.Color/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QAM-16&quot; fecType=&quot;ConvolutionalCoder&quot; detail=&quot;packet&quot;" value="darkorange"/>
+        <properties name="Symbols.Type/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QAM-16&quot; fecType=&quot;ConvolutionalCoder&quot; detail=&quot;symbol&quot;" value="Triangle"/>
+        <properties name="Line.Color/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QAM-16&quot; fecType=&quot;ConvolutionalCoder&quot; detail=&quot;symbol&quot;" value="darkorange"/>
+        <properties name="Symbols.Type/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QAM-64&quot; fecType=&quot;&quot; detail=&quot;bit&quot;" value="Dot"/>
+        <properties name="Line.Color/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QAM-64&quot; fecType=&quot;&quot; detail=&quot;bit&quot;" value="forestgreen"/>
+        <properties name="Symbols.Type/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QAM-64&quot; fecType=&quot;&quot; detail=&quot;packet&quot;" value="Square"/>
+        <properties name="Line.Color/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QAM-64&quot; fecType=&quot;&quot; detail=&quot;packet&quot;" value="forestgreen"/>
+        <properties name="Symbols.Type/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QAM-64&quot; fecType=&quot;&quot; detail=&quot;symbol&quot;" value="Triangle"/>
+        <properties name="Line.Color/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QAM-64&quot; fecType=&quot;&quot; detail=&quot;symbol&quot;" value="forestgreen"/>
+        <properties name="Symbols.Type/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QAM-64&quot; fecType=&quot;ConvolutionalCoder&quot; detail=&quot;bit&quot;" value="Dot"/>
+        <properties name="Line.Color/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QAM-64&quot; fecType=&quot;ConvolutionalCoder&quot; detail=&quot;bit&quot;" value="darkgreen"/>
+        <properties name="Symbols.Type/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QAM-64&quot; fecType=&quot;ConvolutionalCoder&quot; detail=&quot;packet&quot;" value="Square"/>
+        <properties name="Line.Color/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QAM-64&quot; fecType=&quot;ConvolutionalCoder&quot; detail=&quot;packet&quot;" value="darkgreen"/>
+        <properties name="Symbols.Type/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QAM-64&quot; fecType=&quot;ConvolutionalCoder&quot; detail=&quot;symbol&quot;" value="Triangle"/>
+        <properties name="Line.Color/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QAM-64&quot; fecType=&quot;ConvolutionalCoder&quot; detail=&quot;symbol&quot;" value="darkgreen"/>
+        <properties name="Symbols.Type/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QPSK&quot; fecType=&quot;&quot; detail=&quot;bit&quot;" value="Dot"/>
+        <properties name="Line.Color/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QPSK&quot; fecType=&quot;&quot; detail=&quot;bit&quot;" value="red"/>
+        <properties name="Symbols.Type/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QPSK&quot; fecType=&quot;&quot; detail=&quot;packet&quot;" value="Square"/>
+        <properties name="Line.Color/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QPSK&quot; fecType=&quot;&quot; detail=&quot;packet&quot;" value="red"/>
+        <properties name="Symbols.Type/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QPSK&quot; fecType=&quot;&quot; detail=&quot;symbol&quot;" value="Triangle"/>
+        <properties name="Line.Color/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QPSK&quot; fecType=&quot;&quot; detail=&quot;symbol&quot;" value="red"/>
+        <properties name="Symbols.Type/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QPSK&quot; fecType=&quot;ConvolutionalCoder&quot; detail=&quot;bit&quot;" value="Dot"/>
+        <properties name="Line.Color/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QPSK&quot; fecType=&quot;ConvolutionalCoder&quot; detail=&quot;bit&quot;" value="#A40000"/>
+        <properties name="Symbols.Type/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QPSK&quot; fecType=&quot;ConvolutionalCoder&quot; detail=&quot;packet&quot;" value="Square"/>
+        <properties name="Line.Color/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QPSK&quot; fecType=&quot;ConvolutionalCoder&quot; detail=&quot;packet&quot;" value="#A40000"/>
+        <properties name="Symbols.Type/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QPSK&quot; fecType=&quot;ConvolutionalCoder&quot; detail=&quot;symbol&quot;" value="Triangle"/>
+        <properties name="Line.Color/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QPSK&quot; fecType=&quot;ConvolutionalCoder&quot; detail=&quot;symbol&quot;" value="#A40000"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;BPSK&quot; fecType=&quot;&quot; detail=&quot;bit&quot;" value="BPSK - bit - no FEC"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;BPSK&quot; fecType=&quot;&quot; detail=&quot;packet&quot;" value="BPSK - packet - no FEC"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;BPSK&quot; fecType=&quot;&quot; detail=&quot;symbol&quot;" value="BPSK - symbol - no FEC"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;BPSK&quot; fecType=&quot;ConvolutionalCoder&quot; detail=&quot;bit&quot;" value="BPSK - bit - FEC"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;BPSK&quot; fecType=&quot;ConvolutionalCoder&quot; detail=&quot;packet&quot;" value="BPSK - packet - FEC"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;BPSK&quot; fecType=&quot;ConvolutionalCoder&quot; detail=&quot;symbol&quot;" value="BPSK - symbol - FEC"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QAM-16&quot; fecType=&quot;&quot; detail=&quot;bit&quot;" value="QAM-16 - bit - no FEC"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QAM-16&quot; fecType=&quot;&quot; detail=&quot;packet&quot;" value="QAM-16 - packet - no FEC"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QAM-16&quot; fecType=&quot;&quot; detail=&quot;symbol&quot;" value="QAM-16 - symbol - no FEC"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QAM-16&quot; fecType=&quot;ConvolutionalCoder&quot; detail=&quot;bit&quot;" value="QAM-16 - bit - FEC"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QAM-16&quot; fecType=&quot;ConvolutionalCoder&quot; detail=&quot;packet&quot;" value="QAM-16 - packet - FEC"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QAM-16&quot; fecType=&quot;ConvolutionalCoder&quot; detail=&quot;symbol&quot;" value="QAM-16 - symbol - FEC"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QAM-64&quot; fecType=&quot;&quot; detail=&quot;bit&quot;" value="QAM-64 - bit - no FEC"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QAM-64&quot; fecType=&quot;&quot; detail=&quot;packet&quot;" value="QAM-64 - packet - no FEC"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QAM-64&quot; fecType=&quot;&quot; detail=&quot;symbol&quot;" value="QAM-64 - symbol - no FEC"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QAM-64&quot; fecType=&quot;ConvolutionalCoder&quot; detail=&quot;bit&quot;" value="QAM-64 - bit - FEC"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QAM-64&quot; fecType=&quot;ConvolutionalCoder&quot; detail=&quot;packet&quot;" value="QAM-64 - packet - FEC"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QAM-64&quot; fecType=&quot;ConvolutionalCoder&quot; detail=&quot;symbol&quot;" value="QAM-64 - symbol - FEC"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QPSK&quot; fecType=&quot;&quot; detail=&quot;bit&quot;" value="QPSK - bit - no FEC"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QPSK&quot; fecType=&quot;&quot; detail=&quot;packet&quot;" value="QPSK - packet - no FEC"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QPSK&quot; fecType=&quot;&quot; detail=&quot;symbol&quot;" value="QPSK - symbol - no FEC"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QPSK&quot; fecType=&quot;ConvolutionalCoder&quot; detail=&quot;bit&quot;" value="QPSK - bit - FEC"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QPSK&quot; fecType=&quot;ConvolutionalCoder&quot; detail=&quot;packet&quot;" value="QPSK - packet - FEC"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QPSK&quot; fecType=&quot;ConvolutionalCoder&quot; detail=&quot;symbol&quot;" value="QPSK - symbol - FEC"/>
+        <isoDataPattern>modulation(*)</isoDataPattern>
+        <isoDataPattern>fecType(*)</isoDataPattern>
+        <isoDataPattern>detail(*)</isoDataPattern>
+      </items>
+      <items xsi:type="scave:ScatterChart" name="" xDataPattern="module(.) AND name(distance)">
+        <filters xsi:type="scave:Select" filterPattern="distance or &quot;ping loss rate (%)&quot; or attr:modulation(&quot;\&quot;BPSK\&quot;&quot;)  "/>
+      </items>
+      <items xsi:type="scave:BarChart" name="">
+        <filters xsi:type="scave:Select" filterPattern="a:elapsedtime OR attr:detail(*) OR attr:fecType(*) OR attr:modulation(*) OR attr:distance(110)     "/>
+        <groupByFields>module</groupByFields>
+        <barFields>measurement</barFields>
+      </items>
+      <items xsi:type="scave:BarChart" name="">
+        <filters xsi:type="scave:Select" filterPattern="name(a:elapsedTime) OR attr:distance(110)  "/>
+      </items>
+    </datasets>
+    <datasets name="Packet loss 2">
+      <items xsi:type="scave:Add" filterPattern="distance"/>
+      <items xsi:type="scave:Add" filterPattern="&quot;ping loss rate (%)&quot;"/>
+      <items xsi:type="scave:ScatterChart" name="Packet loss vs distance" xDataPattern="module(_runattrs_) AND name(distance)">
+        <filters xsi:type="scave:Select" filterPattern="distance OR &quot;ping loss rate (%)&quot; AND itervar:fecType(&quot;\&quot;\&quot;&quot;) AND itervar:modulation(&quot;\&quot;BPSK\&quot;&quot;)  "/>
+        <properties name="Graph.Title" value="BPSK, No FEC"/>
+        <properties name="X.Axis.Title" value="Distance [m]"/>
+        <properties name="Y.Axis.Title" value="Packet loss [%]"/>
+        <properties name="Y.Axis.Max" value="110.0"/>
+        <properties name="Legend.Display" value="true"/>
+        <properties name="Legend.Position" value="Inside"/>
+        <properties name="X.Axis.Min" value="110.0"/>
+        <properties name="X.Axis.Max" value="610.0"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;bit&quot; fecType=&quot;&quot; modulation=&quot;BPSK&quot;" value="bit"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;bit&quot; fecType=&quot;&quot; modulation=&quot;QAM-16&quot;" value="bit - no FEC - QAM-16"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;bit&quot; fecType=&quot;&quot; modulation=&quot;QAM-64&quot;" value="bit - no FEC - QAM-64"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;bit&quot; fecType=&quot;&quot; modulation=&quot;QPSK&quot;" value="bit - no FEC - QPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;bit&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;BPSK&quot;" value="bit - conv.coder - BPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;bit&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;QAM-16&quot;" value="bit - conv.coder - QAM-16"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;bit&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;QAM-64&quot;" value="bit - conv.coder - QAM-64"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;bit&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;QPSK&quot;" value="bit - conv.coder - QPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;packet&quot; fecType=&quot;&quot; modulation=&quot;BPSK&quot;" value="packet"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;packet&quot; fecType=&quot;&quot; modulation=&quot;QAM-16&quot;" value="packet - no FEC - QAM-16"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;packet&quot; fecType=&quot;&quot; modulation=&quot;QAM-64&quot;" value="packet - no FEC - QAM-64"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;packet&quot; fecType=&quot;&quot; modulation=&quot;QPSK&quot;" value="packet - no FEC - QPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;packet&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;BPSK&quot;" value="packet - conv.coder - BPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;packet&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;QAM-16&quot;" value="packet - conv.coder - QAM-16"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;packet&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;QAM-64&quot;" value="packet - conv.coder - QAM-64"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;packet&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;QPSK&quot;" value="packet - conv.coder - QPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;symbol&quot; fecType=&quot;&quot; modulation=&quot;BPSK&quot;" value="symbol"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;symbol&quot; fecType=&quot;&quot; modulation=&quot;QAM-16&quot;" value="symbol - no FEC - QAM-16"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;symbol&quot; fecType=&quot;&quot; modulation=&quot;QAM-64&quot;" value="symbol - no FEC - QAM-64"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;symbol&quot; fecType=&quot;&quot; modulation=&quot;QPSK&quot;" value="symbol - no FEC - QPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;symbol&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;BPSK&quot;" value="symbol - conv.coder - BPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;symbol&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;QAM-16&quot;" value="symbol - conv.coder - QAM-16"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;symbol&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;QAM-64&quot;" value="symbol - conv.coder - QAM-64"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;symbol&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;QPSK&quot;" value="symbol - conv.coder - QPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;BPSK&quot; fecType=&quot;&quot; detail=&quot;bit&quot;" value="bit"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;BPSK&quot; fecType=&quot;&quot; detail=&quot;packet&quot;" value="packet"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;BPSK&quot; fecType=&quot;&quot; detail=&quot;symbol&quot;" value="symbol"/>
+        <properties name="Symbols.Type/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;BPSK&quot; fecType=&quot;&quot; detail=&quot;bit&quot;" value="Dot"/>
+        <properties name="Symbols.Type/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;BPSK&quot; fecType=&quot;&quot; detail=&quot;packet&quot;" value="Square"/>
+        <properties name="Symbols.Type/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;BPSK&quot; fecType=&quot;&quot; detail=&quot;symbol&quot;" value="Triangle"/>
+        <isoDataPattern>modulation(*)</isoDataPattern>
+        <isoDataPattern>fecType(*)</isoDataPattern>
+        <isoDataPattern>detail(*)</isoDataPattern>
+      </items>
+      <items xsi:type="scave:ScatterChart" name="Packet loss vs distance" xDataPattern="module(_runattrs_) AND name(distance)">
+        <filters xsi:type="scave:Select" filterPattern="distance OR &quot;ping loss rate (%)&quot; AND itervar:fecType(&quot;\&quot;\&quot;&quot;) AND itervar:modulation(&quot;\&quot;QPSK\&quot;&quot;)  "/>
+        <properties name="Graph.Title" value="QPSK, No FEC"/>
+        <properties name="X.Axis.Title" value="Distance [m]"/>
+        <properties name="Y.Axis.Title" value="Packet loss [%]"/>
+        <properties name="Y.Axis.Max" value="110.0"/>
+        <properties name="Legend.Display" value="true"/>
+        <properties name="Legend.Position" value="Inside"/>
+        <properties name="X.Axis.Min" value="110.0"/>
+        <properties name="X.Axis.Max" value="610.0"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;bit&quot; fecType=&quot;&quot; modulation=&quot;BPSK&quot;" value="bit - no FEC - BPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;bit&quot; fecType=&quot;&quot; modulation=&quot;QAM-16&quot;" value="bit - no FEC - QAM-16"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;bit&quot; fecType=&quot;&quot; modulation=&quot;QAM-64&quot;" value="bit - no FEC - QAM-64"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;bit&quot; fecType=&quot;&quot; modulation=&quot;QPSK&quot;" value="bit"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;bit&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;BPSK&quot;" value="bit - conv.coder - BPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;bit&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;QAM-16&quot;" value="bit - conv.coder - QAM-16"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;bit&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;QAM-64&quot;" value="bit - conv.coder - QAM-64"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;bit&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;QPSK&quot;" value="bit - conv.coder - QPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;packet&quot; fecType=&quot;&quot; modulation=&quot;BPSK&quot;" value="packet - no FEC - BPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;packet&quot; fecType=&quot;&quot; modulation=&quot;QAM-16&quot;" value="packet - no FEC - QAM-16"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;packet&quot; fecType=&quot;&quot; modulation=&quot;QAM-64&quot;" value="packet - no FEC - QAM-64"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;packet&quot; fecType=&quot;&quot; modulation=&quot;QPSK&quot;" value="packet"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;packet&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;BPSK&quot;" value="packet - conv.coder - BPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;packet&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;QAM-16&quot;" value="packet - conv.coder - QAM-16"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;packet&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;QAM-64&quot;" value="packet - conv.coder - QAM-64"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;packet&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;QPSK&quot;" value="packet - conv.coder - QPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;symbol&quot; fecType=&quot;&quot; modulation=&quot;BPSK&quot;" value="symbol - no FEC - BPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;symbol&quot; fecType=&quot;&quot; modulation=&quot;QAM-16&quot;" value="symbol - no FEC - QAM-16"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;symbol&quot; fecType=&quot;&quot; modulation=&quot;QAM-64&quot;" value="symbol - no FEC - QAM-64"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;symbol&quot; fecType=&quot;&quot; modulation=&quot;QPSK&quot;" value="symbol"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;symbol&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;BPSK&quot;" value="symbol - conv.coder - BPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;symbol&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;QAM-16&quot;" value="symbol - conv.coder - QAM-16"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;symbol&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;QAM-64&quot;" value="symbol - conv.coder - QAM-64"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;symbol&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;QPSK&quot;" value="symbol - conv.coder - QPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QPSK&quot; fecType=&quot;&quot; detail=&quot;bit&quot;" value="bit"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QPSK&quot; fecType=&quot;&quot; detail=&quot;packet&quot;" value="packet"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QPSK&quot; fecType=&quot;&quot; detail=&quot;symbol&quot;" value="symbol"/>
+        <properties name="Symbols.Type/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QPSK&quot; fecType=&quot;&quot; detail=&quot;bit&quot;" value="Dot"/>
+        <properties name="Symbols.Type/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QPSK&quot; fecType=&quot;&quot; detail=&quot;packet&quot;" value="Square"/>
+        <properties name="Symbols.Type/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QPSK&quot; fecType=&quot;&quot; detail=&quot;symbol&quot;" value="Triangle"/>
+        <isoDataPattern>modulation(*)</isoDataPattern>
+        <isoDataPattern>fecType(*)</isoDataPattern>
+        <isoDataPattern>detail(*)</isoDataPattern>
+      </items>
+      <items xsi:type="scave:ScatterChart" name="Packet loss vs distance" xDataPattern="module(_runattrs_) AND name(distance)">
+        <filters xsi:type="scave:Select" filterPattern="distance OR &quot;ping loss rate (%)&quot; AND itervar:fecType(&quot;\&quot;\&quot;&quot;) AND itervar:modulation(&quot;\&quot;QAM-16\&quot;&quot;)  "/>
+        <properties name="Graph.Title" value="QAM-16, No FEC"/>
+        <properties name="X.Axis.Title" value="Distance [m]"/>
+        <properties name="Y.Axis.Title" value="Packet loss [%]"/>
+        <properties name="Y.Axis.Max" value="110.0"/>
+        <properties name="Legend.Display" value="true"/>
+        <properties name="Legend.Position" value="Inside"/>
+        <properties name="X.Axis.Min" value="110.0"/>
+        <properties name="X.Axis.Max" value="610.0"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;bit&quot; fecType=&quot;&quot; modulation=&quot;BPSK&quot;" value="bit - no FEC - BPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;bit&quot; fecType=&quot;&quot; modulation=&quot;QAM-16&quot;" value="bit - no FEC - QAM-16"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;bit&quot; fecType=&quot;&quot; modulation=&quot;QAM-64&quot;" value="bit - no FEC - QAM-64"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;bit&quot; fecType=&quot;&quot; modulation=&quot;QPSK&quot;" value="bit - no FEC - QPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;bit&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;BPSK&quot;" value="bit - conv.coder - BPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;bit&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;QAM-16&quot;" value="bit - conv.coder - QAM-16"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;bit&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;QAM-64&quot;" value="bit - conv.coder - QAM-64"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;bit&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;QPSK&quot;" value="bit - conv.coder - QPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;packet&quot; fecType=&quot;&quot; modulation=&quot;BPSK&quot;" value="packet - no FEC - BPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;packet&quot; fecType=&quot;&quot; modulation=&quot;QAM-16&quot;" value="packet - no FEC - QAM-16"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;packet&quot; fecType=&quot;&quot; modulation=&quot;QAM-64&quot;" value="packet - no FEC - QAM-64"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;packet&quot; fecType=&quot;&quot; modulation=&quot;QPSK&quot;" value="packet - no FEC - QPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;packet&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;BPSK&quot;" value="packet - conv.coder - BPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;packet&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;QAM-16&quot;" value="packet - conv.coder - QAM-16"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;packet&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;QAM-64&quot;" value="packet - conv.coder - QAM-64"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;packet&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;QPSK&quot;" value="packet - conv.coder - QPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;symbol&quot; fecType=&quot;&quot; modulation=&quot;BPSK&quot;" value="symbol - no FEC - BPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;symbol&quot; fecType=&quot;&quot; modulation=&quot;QAM-16&quot;" value="symbol - no FEC - QAM-16"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;symbol&quot; fecType=&quot;&quot; modulation=&quot;QAM-64&quot;" value="symbol - no FEC - QAM-64"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;symbol&quot; fecType=&quot;&quot; modulation=&quot;QPSK&quot;" value="symbol - no FEC - QPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;symbol&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;BPSK&quot;" value="symbol - conv.coder - BPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;symbol&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;QAM-16&quot;" value="symbol - conv.coder - QAM-16"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;symbol&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;QAM-64&quot;" value="symbol - conv.coder - QAM-64"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;symbol&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;QPSK&quot;" value="symbol - conv.coder - QPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QAM-16&quot; fecType=&quot;&quot; detail=&quot;bit&quot;" value="bit"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QAM-16&quot; fecType=&quot;&quot; detail=&quot;packet&quot;" value="packet"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QAM-16&quot; fecType=&quot;&quot; detail=&quot;symbol&quot;" value="symbol"/>
+        <properties name="Symbols.Type/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QAM-16&quot; fecType=&quot;&quot; detail=&quot;bit&quot;" value="Dot"/>
+        <properties name="Symbols.Type/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QAM-16&quot; fecType=&quot;&quot; detail=&quot;packet&quot;" value="Square"/>
+        <properties name="Symbols.Type/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QAM-16&quot; fecType=&quot;&quot; detail=&quot;symbol&quot;" value="Triangle"/>
+        <properties name="Line.Color" value="darkblue"/>
+        <properties name="Line.Color/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QAM-16&quot; fecType=&quot;&quot; detail=&quot;packet&quot;" value="#EF2929"/>
+        <properties name="Line.Color/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QAM-16&quot; fecType=&quot;&quot; detail=&quot;symbol&quot;" value="darkgreen"/>
+        <isoDataPattern>modulation(*)</isoDataPattern>
+        <isoDataPattern>fecType(*)</isoDataPattern>
+        <isoDataPattern>detail(*)</isoDataPattern>
+      </items>
+      <items xsi:type="scave:ScatterChart" name="Packet loss vs distance" xDataPattern="module(_runattrs_) AND name(distance)">
+        <filters xsi:type="scave:Select" filterPattern="distance OR &quot;ping loss rate (%)&quot; AND itervar:fecType(&quot;\&quot;\&quot;&quot;) AND itervar:modulation(&quot;\&quot;QAM-64\&quot;&quot;)  "/>
+        <properties name="Graph.Title" value="QAM-64, No FEC"/>
+        <properties name="X.Axis.Title" value="Distance [m]"/>
+        <properties name="Y.Axis.Title" value="Packet loss [%]"/>
+        <properties name="Y.Axis.Max" value="110.0"/>
+        <properties name="Legend.Display" value="true"/>
+        <properties name="Legend.Position" value="Inside"/>
+        <properties name="X.Axis.Min" value="110.0"/>
+        <properties name="X.Axis.Max" value="610.0"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;bit&quot; fecType=&quot;&quot; modulation=&quot;BPSK&quot;" value="bit - no FEC - BPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;bit&quot; fecType=&quot;&quot; modulation=&quot;QAM-16&quot;" value="bit - no FEC - QAM-16"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;bit&quot; fecType=&quot;&quot; modulation=&quot;QAM-64&quot;" value="bit - no FEC - QAM-64"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;bit&quot; fecType=&quot;&quot; modulation=&quot;QPSK&quot;" value="bit - no FEC - QPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;bit&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;BPSK&quot;" value="bit - conv.coder - BPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;bit&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;QAM-16&quot;" value="bit - conv.coder - QAM-16"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;bit&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;QAM-64&quot;" value="bit - conv.coder - QAM-64"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;bit&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;QPSK&quot;" value="bit - conv.coder - QPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;packet&quot; fecType=&quot;&quot; modulation=&quot;BPSK&quot;" value="packet - no FEC - BPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;packet&quot; fecType=&quot;&quot; modulation=&quot;QAM-16&quot;" value="packet - no FEC - QAM-16"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;packet&quot; fecType=&quot;&quot; modulation=&quot;QAM-64&quot;" value="packet - no FEC - QAM-64"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;packet&quot; fecType=&quot;&quot; modulation=&quot;QPSK&quot;" value="packet - no FEC - QPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;packet&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;BPSK&quot;" value="packet - conv.coder - BPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;packet&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;QAM-16&quot;" value="packet - conv.coder - QAM-16"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;packet&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;QAM-64&quot;" value="packet - conv.coder - QAM-64"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;packet&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;QPSK&quot;" value="packet - conv.coder - QPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;symbol&quot; fecType=&quot;&quot; modulation=&quot;BPSK&quot;" value="symbol - no FEC - BPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;symbol&quot; fecType=&quot;&quot; modulation=&quot;QAM-16&quot;" value="symbol - no FEC - QAM-16"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;symbol&quot; fecType=&quot;&quot; modulation=&quot;QAM-64&quot;" value="symbol - no FEC - QAM-64"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;symbol&quot; fecType=&quot;&quot; modulation=&quot;QPSK&quot;" value="symbol - no FEC - QPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;symbol&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;BPSK&quot;" value="symbol - conv.coder - BPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;symbol&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;QAM-16&quot;" value="symbol - conv.coder - QAM-16"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;symbol&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;QAM-64&quot;" value="symbol - conv.coder - QAM-64"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;symbol&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;QPSK&quot;" value="symbol - conv.coder - QPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QAM-64&quot; fecType=&quot;&quot; detail=&quot;bit&quot;" value="bit"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QAM-64&quot; fecType=&quot;&quot; detail=&quot;packet&quot;" value="packet"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QAM-64&quot; fecType=&quot;&quot; detail=&quot;symbol&quot;" value="symbol"/>
+        <properties name="Symbols.Type/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QAM-64&quot; fecType=&quot;&quot; detail=&quot;bit&quot;" value="Dot"/>
+        <properties name="Symbols.Type/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QAM-64&quot; fecType=&quot;&quot; detail=&quot;packet&quot;" value="Square"/>
+        <properties name="Symbols.Type/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QAM-64&quot; fecType=&quot;&quot; detail=&quot;symbol&quot;" value="Triangle"/>
+        <properties name="Line.Color/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QAM-64&quot; fecType=&quot;&quot; detail=&quot;bit&quot;" value="darkblue"/>
+        <properties name="Line.Color/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QAM-64&quot; fecType=&quot;&quot; detail=&quot;packet&quot;" value="#EF2929"/>
+        <properties name="Line.Color/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QAM-64&quot; fecType=&quot;&quot; detail=&quot;symbol&quot;" value="darkgreen"/>
+        <isoDataPattern>modulation(*)</isoDataPattern>
+        <isoDataPattern>fecType(*)</isoDataPattern>
+        <isoDataPattern>detail(*)</isoDataPattern>
+      </items>
+      <items xsi:type="scave:ScatterChart" name="Packet loss vs distance" xDataPattern="module(_runattrs_) AND name(distance)">
+        <filters xsi:type="scave:Select" filterPattern="distance OR &quot;ping loss rate (%)&quot; AND itervar:fecType(&quot;\&quot;ConvolutionalCoder\&quot;&quot;) AND itervar:modulation(&quot;\&quot;BPSK\&quot;&quot;)  "/>
+        <properties name="Graph.Title" value="BPSK, FEC"/>
+        <properties name="X.Axis.Title" value="Distance [m]"/>
+        <properties name="Y.Axis.Title" value="Packet loss [%]"/>
+        <properties name="Y.Axis.Max" value="110.0"/>
+        <properties name="Legend.Display" value="true"/>
+        <properties name="Legend.Position" value="Inside"/>
+        <properties name="X.Axis.Min" value="110.0"/>
+        <properties name="X.Axis.Max" value="610.0"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;bit&quot; fecType=&quot;&quot; modulation=&quot;BPSK&quot;" value="bit - no FEC - BPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;bit&quot; fecType=&quot;&quot; modulation=&quot;QAM-16&quot;" value="bit - no FEC - QAM-16"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;bit&quot; fecType=&quot;&quot; modulation=&quot;QAM-64&quot;" value="bit - no FEC - QAM-64"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;bit&quot; fecType=&quot;&quot; modulation=&quot;QPSK&quot;" value="bit - no FEC - QPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;bit&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;BPSK&quot;" value="bit - conv.coder - BPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;bit&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;QAM-16&quot;" value="bit - conv.coder - QAM-16"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;bit&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;QAM-64&quot;" value="bit - conv.coder - QAM-64"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;bit&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;QPSK&quot;" value="bit - conv.coder - QPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;packet&quot; fecType=&quot;&quot; modulation=&quot;BPSK&quot;" value="packet - no FEC - BPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;packet&quot; fecType=&quot;&quot; modulation=&quot;QAM-16&quot;" value="packet - no FEC - QAM-16"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;packet&quot; fecType=&quot;&quot; modulation=&quot;QAM-64&quot;" value="packet - no FEC - QAM-64"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;packet&quot; fecType=&quot;&quot; modulation=&quot;QPSK&quot;" value="packet - no FEC - QPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;packet&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;BPSK&quot;" value="packet - conv.coder - BPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;packet&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;QAM-16&quot;" value="packet - conv.coder - QAM-16"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;packet&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;QAM-64&quot;" value="packet - conv.coder - QAM-64"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;packet&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;QPSK&quot;" value="packet - conv.coder - QPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;symbol&quot; fecType=&quot;&quot; modulation=&quot;BPSK&quot;" value="symbol - no FEC - BPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;symbol&quot; fecType=&quot;&quot; modulation=&quot;QAM-16&quot;" value="symbol - no FEC - QAM-16"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;symbol&quot; fecType=&quot;&quot; modulation=&quot;QAM-64&quot;" value="symbol - no FEC - QAM-64"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;symbol&quot; fecType=&quot;&quot; modulation=&quot;QPSK&quot;" value="symbol - no FEC - QPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;symbol&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;BPSK&quot;" value="symbol - conv.coder - BPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;symbol&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;QAM-16&quot;" value="symbol - conv.coder - QAM-16"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;symbol&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;QAM-64&quot;" value="symbol - conv.coder - QAM-64"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;symbol&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;QPSK&quot;" value="symbol - conv.coder - QPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;BPSK&quot; fecType=&quot;ConvolutionalCoder&quot; detail=&quot;bit&quot;" value="bit"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;BPSK&quot; fecType=&quot;ConvolutionalCoder&quot; detail=&quot;packet&quot;" value="packet"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;BPSK&quot; fecType=&quot;ConvolutionalCoder&quot; detail=&quot;symbol&quot;" value="symbol"/>
+        <properties name="Symbols.Type/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;BPSK&quot; fecType=&quot;ConvolutionalCoder&quot; detail=&quot;bit&quot;" value="Dot"/>
+        <properties name="Symbols.Type/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;BPSK&quot; fecType=&quot;ConvolutionalCoder&quot; detail=&quot;packet&quot;" value="Square"/>
+        <properties name="Symbols.Type/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;BPSK&quot; fecType=&quot;ConvolutionalCoder&quot; detail=&quot;symbol&quot;" value="Triangle"/>
+        <properties name="Line.Color/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;BPSK&quot; fecType=&quot;ConvolutionalCoder&quot; detail=&quot;packet&quot;" value="#EF2929"/>
+        <properties name="Line.Color/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;BPSK&quot; fecType=&quot;ConvolutionalCoder&quot; detail=&quot;symbol&quot;" value="darkgreen"/>
+        <isoDataPattern>modulation(*)</isoDataPattern>
+        <isoDataPattern>fecType(*)</isoDataPattern>
+        <isoDataPattern>detail(*)</isoDataPattern>
+      </items>
+      <items xsi:type="scave:ScatterChart" name="Packet loss vs distance" xDataPattern="module(_runattrs_) AND name(distance)">
+        <filters xsi:type="scave:Select" filterPattern="distance OR &quot;ping loss rate (%)&quot; AND itervar:fecType(&quot;\&quot;ConvolutionalCoder\&quot;&quot;) AND itervar:modulation(&quot;\&quot;QPSK\&quot;&quot;)  "/>
+        <properties name="Graph.Title" value="QPSK, FEC"/>
+        <properties name="X.Axis.Title" value="Distance [m]"/>
+        <properties name="Y.Axis.Title" value="Packet loss [%]"/>
+        <properties name="Y.Axis.Max" value="110.0"/>
+        <properties name="Legend.Display" value="true"/>
+        <properties name="Legend.Position" value="Inside"/>
+        <properties name="X.Axis.Min" value="110.0"/>
+        <properties name="X.Axis.Max" value="610.0"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;bit&quot; fecType=&quot;&quot; modulation=&quot;BPSK&quot;" value="bit - no FEC - BPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;bit&quot; fecType=&quot;&quot; modulation=&quot;QAM-16&quot;" value="bit - no FEC - QAM-16"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;bit&quot; fecType=&quot;&quot; modulation=&quot;QAM-64&quot;" value="bit - no FEC - QAM-64"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;bit&quot; fecType=&quot;&quot; modulation=&quot;QPSK&quot;" value="bit - no FEC - QPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;bit&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;BPSK&quot;" value="bit - conv.coder - BPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;bit&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;QAM-16&quot;" value="bit - conv.coder - QAM-16"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;bit&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;QAM-64&quot;" value="bit - conv.coder - QAM-64"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;bit&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;QPSK&quot;" value="bit - conv.coder - QPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;packet&quot; fecType=&quot;&quot; modulation=&quot;BPSK&quot;" value="packet - no FEC - BPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;packet&quot; fecType=&quot;&quot; modulation=&quot;QAM-16&quot;" value="packet - no FEC - QAM-16"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;packet&quot; fecType=&quot;&quot; modulation=&quot;QAM-64&quot;" value="packet - no FEC - QAM-64"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;packet&quot; fecType=&quot;&quot; modulation=&quot;QPSK&quot;" value="packet - no FEC - QPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;packet&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;BPSK&quot;" value="packet - conv.coder - BPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;packet&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;QAM-16&quot;" value="packet - conv.coder - QAM-16"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;packet&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;QAM-64&quot;" value="packet - conv.coder - QAM-64"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;packet&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;QPSK&quot;" value="packet - conv.coder - QPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;symbol&quot; fecType=&quot;&quot; modulation=&quot;BPSK&quot;" value="symbol - no FEC - BPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;symbol&quot; fecType=&quot;&quot; modulation=&quot;QAM-16&quot;" value="symbol - no FEC - QAM-16"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;symbol&quot; fecType=&quot;&quot; modulation=&quot;QAM-64&quot;" value="symbol - no FEC - QAM-64"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;symbol&quot; fecType=&quot;&quot; modulation=&quot;QPSK&quot;" value="symbol - no FEC - QPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;symbol&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;BPSK&quot;" value="symbol - conv.coder - BPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;symbol&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;QAM-16&quot;" value="symbol - conv.coder - QAM-16"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;symbol&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;QAM-64&quot;" value="symbol - conv.coder - QAM-64"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;symbol&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;QPSK&quot;" value="symbol - conv.coder - QPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QPSK&quot; fecType=&quot;ConvolutionalCoder&quot; detail=&quot;bit&quot;" value="bit"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QPSK&quot; fecType=&quot;ConvolutionalCoder&quot; detail=&quot;packet&quot;" value="packet"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QPSK&quot; fecType=&quot;ConvolutionalCoder&quot; detail=&quot;symbol&quot;" value="symbol"/>
+        <properties name="Symbols.Type/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QPSK&quot; fecType=&quot;ConvolutionalCoder&quot; detail=&quot;bit&quot;" value="Dot"/>
+        <properties name="Symbols.Type/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QPSK&quot; fecType=&quot;ConvolutionalCoder&quot; detail=&quot;packet&quot;" value="Square"/>
+        <properties name="Symbols.Type/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QPSK&quot; fecType=&quot;ConvolutionalCoder&quot; detail=&quot;symbol&quot;" value="Triangle"/>
+        <isoDataPattern>modulation(*)</isoDataPattern>
+        <isoDataPattern>fecType(*)</isoDataPattern>
+        <isoDataPattern>detail(*)</isoDataPattern>
+      </items>
+      <items xsi:type="scave:ScatterChart" name="Packet loss vs distance" xDataPattern="module(_runattrs_) AND name(distance)">
+        <filters xsi:type="scave:Select" filterPattern="distance OR &quot;ping loss rate (%)&quot; AND itervar:fecType(&quot;\&quot;ConvolutionalCoder\&quot;&quot;) AND itervar:modulation(&quot;\&quot;QAM-16\&quot;&quot;)  "/>
+        <properties name="Graph.Title" value="QAM-16, FEC"/>
+        <properties name="X.Axis.Title" value="Distance [m]"/>
+        <properties name="Y.Axis.Title" value="Packet loss [%]"/>
+        <properties name="Y.Axis.Max" value="110.0"/>
+        <properties name="Legend.Display" value="true"/>
+        <properties name="Legend.Position" value="Inside"/>
+        <properties name="X.Axis.Min" value="110.0"/>
+        <properties name="X.Axis.Max" value="610.0"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;bit&quot; fecType=&quot;&quot; modulation=&quot;BPSK&quot;" value="bit - no FEC - BPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;bit&quot; fecType=&quot;&quot; modulation=&quot;QAM-16&quot;" value="bit - no FEC - QAM-16"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;bit&quot; fecType=&quot;&quot; modulation=&quot;QAM-64&quot;" value="bit - no FEC - QAM-64"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;bit&quot; fecType=&quot;&quot; modulation=&quot;QPSK&quot;" value="bit - no FEC - QPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;bit&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;BPSK&quot;" value="bit - conv.coder - BPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;bit&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;QAM-16&quot;" value="bit"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;bit&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;QAM-64&quot;" value="bit - conv.coder - QAM-64"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;bit&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;QPSK&quot;" value="bit - conv.coder - QPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;packet&quot; fecType=&quot;&quot; modulation=&quot;BPSK&quot;" value="packet - no FEC - BPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;packet&quot; fecType=&quot;&quot; modulation=&quot;QAM-16&quot;" value="packet - no FEC - QAM-16"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;packet&quot; fecType=&quot;&quot; modulation=&quot;QAM-64&quot;" value="packet - no FEC - QAM-64"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;packet&quot; fecType=&quot;&quot; modulation=&quot;QPSK&quot;" value="packet - no FEC - QPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;packet&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;BPSK&quot;" value="packet - conv.coder - BPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;packet&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;QAM-16&quot;" value="packet"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;packet&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;QAM-64&quot;" value="packet - conv.coder - QAM-64"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;packet&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;QPSK&quot;" value="packet - conv.coder - QPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;symbol&quot; fecType=&quot;&quot; modulation=&quot;BPSK&quot;" value="symbol - no FEC - BPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;symbol&quot; fecType=&quot;&quot; modulation=&quot;QAM-16&quot;" value="symbol - no FEC - QAM-16"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;symbol&quot; fecType=&quot;&quot; modulation=&quot;QAM-64&quot;" value="symbol - no FEC - QAM-64"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;symbol&quot; fecType=&quot;&quot; modulation=&quot;QPSK&quot;" value="symbol - no FEC - QPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;symbol&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;BPSK&quot;" value="symbol - conv.coder - BPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;symbol&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;QAM-16&quot;" value="symbol"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;symbol&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;QAM-64&quot;" value="symbol - conv.coder - QAM-64"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;symbol&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;QPSK&quot;" value="symbol - conv.coder - QPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QAM-16&quot; fecType=&quot;ConvolutionalCoder&quot; detail=&quot;bit&quot;" value="bit"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QAM-16&quot; fecType=&quot;ConvolutionalCoder&quot; detail=&quot;packet&quot;" value="packet"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QAM-16&quot; fecType=&quot;ConvolutionalCoder&quot; detail=&quot;symbol&quot;" value="symbol"/>
+        <properties name="Symbols.Type/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QAM-16&quot; fecType=&quot;ConvolutionalCoder&quot; detail=&quot;packet&quot;" value="Square"/>
+        <properties name="Symbols.Type/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QAM-16&quot; fecType=&quot;ConvolutionalCoder&quot; detail=&quot;symbol&quot;" value="Triangle"/>
+        <properties name="Symbols.Type/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QAM-16&quot; fecType=&quot;ConvolutionalCoder&quot; detail=&quot;bit&quot;" value="Dot"/>
+        <properties name="Line.Color/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QAM-16&quot; fecType=&quot;ConvolutionalCoder&quot; detail=&quot;bit&quot;" value="darkblue"/>
+        <properties name="Line.Color/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QAM-16&quot; fecType=&quot;ConvolutionalCoder&quot; detail=&quot;symbol&quot;" value="darkgreen"/>
+        <isoDataPattern>modulation(*)</isoDataPattern>
+        <isoDataPattern>fecType(*)</isoDataPattern>
+        <isoDataPattern>detail(*)</isoDataPattern>
+      </items>
+      <items xsi:type="scave:ScatterChart" name="Packet loss vs distance" xDataPattern="module(_runattrs_) AND name(distance)">
+        <filters xsi:type="scave:Select" filterPattern="distance OR &quot;ping loss rate (%)&quot; AND itervar:fecType(&quot;\&quot;ConvolutionalCoder\&quot;&quot;) AND itervar:modulation(&quot;\&quot;QAM-64\&quot;&quot;)  "/>
+        <properties name="Graph.Title" value="QAM-64, FEC"/>
+        <properties name="X.Axis.Title" value="Distance [m]"/>
+        <properties name="Y.Axis.Title" value="Packet loss [%]"/>
+        <properties name="Y.Axis.Max" value="110.0"/>
+        <properties name="Legend.Display" value="true"/>
+        <properties name="Legend.Position" value="Inside"/>
+        <properties name="X.Axis.Min" value="110.0"/>
+        <properties name="X.Axis.Max" value="610.0"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;bit&quot; fecType=&quot;&quot; modulation=&quot;BPSK&quot;" value="bit - no FEC - BPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;bit&quot; fecType=&quot;&quot; modulation=&quot;QAM-16&quot;" value="bit - no FEC - QAM-16"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;bit&quot; fecType=&quot;&quot; modulation=&quot;QAM-64&quot;" value="bit - no FEC - QAM-64"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;bit&quot; fecType=&quot;&quot; modulation=&quot;QPSK&quot;" value="bit - no FEC - QPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;bit&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;BPSK&quot;" value="bit - conv.coder - BPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;bit&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;QAM-16&quot;" value="bit - conv.coder - QAM-16"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;bit&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;QAM-64&quot;" value="bit - conv.coder - QAM-64"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;bit&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;QPSK&quot;" value="bit - conv.coder - QPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;packet&quot; fecType=&quot;&quot; modulation=&quot;BPSK&quot;" value="packet - no FEC - BPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;packet&quot; fecType=&quot;&quot; modulation=&quot;QAM-16&quot;" value="packet - no FEC - QAM-16"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;packet&quot; fecType=&quot;&quot; modulation=&quot;QAM-64&quot;" value="packet - no FEC - QAM-64"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;packet&quot; fecType=&quot;&quot; modulation=&quot;QPSK&quot;" value="packet - no FEC - QPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;packet&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;BPSK&quot;" value="packet - conv.coder - BPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;packet&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;QAM-16&quot;" value="packet - conv.coder - QAM-16"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;packet&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;QAM-64&quot;" value="packet - conv.coder - QAM-64"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;packet&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;QPSK&quot;" value="packet - conv.coder - QPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;symbol&quot; fecType=&quot;&quot; modulation=&quot;BPSK&quot;" value="symbol - no FEC - BPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;symbol&quot; fecType=&quot;&quot; modulation=&quot;QAM-16&quot;" value="symbol - no FEC - QAM-16"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;symbol&quot; fecType=&quot;&quot; modulation=&quot;QAM-64&quot;" value="symbol - no FEC - QAM-64"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;symbol&quot; fecType=&quot;&quot; modulation=&quot;QPSK&quot;" value="symbol - no FEC - QPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;symbol&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;BPSK&quot;" value="symbol - conv.coder - BPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;symbol&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;QAM-16&quot;" value="symbol - conv.coder - QAM-16"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;symbol&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;QAM-64&quot;" value="symbol - conv.coder - QAM-64"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;symbol&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;QPSK&quot;" value="symbol - conv.coder - QPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QAM-64&quot; fecType=&quot;ConvolutionalCoder&quot; detail=&quot;packet&quot;" value="packet"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QAM-64&quot; fecType=&quot;ConvolutionalCoder&quot; detail=&quot;bit&quot;" value="bit"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QAM-64&quot; fecType=&quot;ConvolutionalCoder&quot; detail=&quot;symbol&quot;" value="symbol"/>
+        <properties name="Symbols.Type/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QAM-64&quot; fecType=&quot;ConvolutionalCoder&quot; detail=&quot;bit&quot;" value="Triangle"/>
+        <properties name="Symbols.Type/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QAM-64&quot; fecType=&quot;ConvolutionalCoder&quot; detail=&quot;packet&quot;" value="Square"/>
+        <properties name="Symbols.Type/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QAM-64&quot; fecType=&quot;ConvolutionalCoder&quot; detail=&quot;symbol&quot;" value="Dot"/>
+        <properties name="Line.Color/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QAM-64&quot; fecType=&quot;ConvolutionalCoder&quot; detail=&quot;bit&quot;" value="darkblue"/>
+        <properties name="Line.Color/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QAM-64&quot; fecType=&quot;ConvolutionalCoder&quot; detail=&quot;packet&quot;" value="#EF2929"/>
+        <properties name="Line.Color/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QAM-64&quot; fecType=&quot;ConvolutionalCoder&quot; detail=&quot;symbol&quot;" value="darkgreen"/>
+        <isoDataPattern>modulation(*)</isoDataPattern>
+        <isoDataPattern>fecType(*)</isoDataPattern>
+        <isoDataPattern>detail(*)</isoDataPattern>
+      </items>
+      <items xsi:type="scave:ScatterChart" name="Packet loss vs distance" xDataPattern="module(_runattrs_) AND name(distance)">
+        <filters xsi:type="scave:Select" filterPattern="distance OR &quot;ping loss rate (%)&quot; AND itervar:detail(&quot;\&quot;symbol\&quot;&quot;) AND itervar:fecType(&quot;\&quot;\&quot;&quot;) "/>
+        <isoDataPattern>modulation(*)</isoDataPattern>
+      </items>
+      <items xsi:type="scave:ScatterChart" name="Symbol level, all modulations, no FEC" xDataPattern="module(_runattrs_) AND name(distance)">
+        <filters xsi:type="scave:Select" filterPattern="distance OR &quot;ping loss rate (%)&quot; AND itervar:fecType(&quot;\&quot;\&quot;&quot;) AND itervar:detail(&quot;\&quot;symbol\&quot;&quot;)"/>
+        <properties name="Graph.Title" value="Symbol, no FEC"/>
+        <properties name="X.Axis.Title" value="Distance [m]"/>
+        <properties name="Y.Axis.Title" value="Packet loss [%]"/>
+        <properties name="Legend.Display" value="true"/>
+        <properties name="Legend.Position" value="Inside"/>
+        <properties name="Line.Color/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;BPSK&quot; fecType=&quot;&quot; detail=&quot;symbol&quot;" value="blue"/>
+        <properties name="Line.Color/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QPSK&quot; fecType=&quot;&quot; detail=&quot;symbol&quot;" value="red"/>
+        <properties name="Line.Color/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QAM-16&quot; fecType=&quot;&quot; detail=&quot;symbol&quot;" value="orange"/>
+        <properties name="Line.Color/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QAM-64&quot; fecType=&quot;&quot; detail=&quot;symbol&quot;" value="darkgreen"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;BPSK&quot; fecType=&quot;&quot; detail=&quot;symbol&quot;" value="BPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QAM-16&quot; fecType=&quot;&quot; detail=&quot;symbol&quot;" value="QAM-16"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QAM-64&quot; fecType=&quot;&quot; detail=&quot;symbol&quot;" value="QAM-64"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QPSK&quot; fecType=&quot;&quot; detail=&quot;symbol&quot;" value="QPSK"/>
+        <properties name="Symbols.Type" value="Triangle"/>
+        <isoDataPattern>modulation(*)</isoDataPattern>
+        <isoDataPattern>fecType(*)</isoDataPattern>
+        <isoDataPattern>detail(*)</isoDataPattern>
+      </items>
+      <items xsi:type="scave:ScatterChart" name="Symbol level, all modulations, FEC" xDataPattern="module(_runattrs_) AND name(distance)">
+        <filters xsi:type="scave:Select" filterPattern="distance OR &quot;ping loss rate (%)&quot; AND itervar:fecType(&quot;\&quot;ConvolutionalCoder\&quot;&quot;)  AND itervar:detail(&quot;\&quot;symbol\&quot;&quot;)"/>
+        <properties name="Graph.Title" value="Symbol, FEC"/>
+        <properties name="X.Axis.Title" value="Distance [m]"/>
+        <properties name="Y.Axis.Title" value="Packet loss [%]"/>
+        <properties name="Legend.Display" value="true"/>
+        <properties name="Legend.Position" value="Inside"/>
+        <properties name="Line.Color/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;BPSK&quot; fecType=&quot;ConvolutionalCoder&quot; detail=&quot;symbol&quot;" value="blue"/>
+        <properties name="Line.Color/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QPSK&quot; fecType=&quot;ConvolutionalCoder&quot; detail=&quot;symbol&quot;" value="red"/>
+        <properties name="Line.Color/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QAM-16&quot; fecType=&quot;ConvolutionalCoder&quot; detail=&quot;symbol&quot;" value="orange"/>
+        <properties name="Line.Color/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QAM-64&quot; fecType=&quot;ConvolutionalCoder&quot; detail=&quot;symbol&quot;" value="darkgreen"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;BPSK&quot; fecType=&quot;ConvolutionalCoder&quot; detail=&quot;symbol&quot;" value="BPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QAM-16&quot; fecType=&quot;ConvolutionalCoder&quot; detail=&quot;symbol&quot;" value="QAM-16"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QAM-64&quot; fecType=&quot;ConvolutionalCoder&quot; detail=&quot;symbol&quot;" value="QAM-64"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - modulation=&quot;QPSK&quot; fecType=&quot;ConvolutionalCoder&quot; detail=&quot;symbol&quot;" value="QPSK"/>
+        <properties name="Symbols.Type" value="Triangle"/>
+        <isoDataPattern>modulation(*)</isoDataPattern>
+        <isoDataPattern>fecType(*)</isoDataPattern>
+        <isoDataPattern>detail(*)</isoDataPattern>
+      </items>
+    </datasets>
+  </datasets>
+  <chartSheets>
+    <chartSheets name="default" charts="//@datasets/@datasets.0/@items.2 //@datasets/@datasets.0/@items.3 //@datasets/@datasets.0/@items.4 //@datasets/@datasets.0/@items.5 //@datasets/@datasets.1/@items.2 //@datasets/@datasets.1/@items.3 //@datasets/@datasets.1/@items.4 //@datasets/@datasets.1/@items.5 //@datasets/@datasets.1/@items.6 //@datasets/@datasets.1/@items.7 //@datasets/@datasets.1/@items.8 //@datasets/@datasets.1/@items.9 //@datasets/@datasets.1/@items.10 //@datasets/@datasets.1/@items.11 //@datasets/@datasets.1/@items.12"/>
+  </chartSheets>
+</scave:Analysis>

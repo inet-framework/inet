@@ -89,12 +89,6 @@ class LoRaMac : public MacProtocolBase
     /** Number of frame retransmission attempts. */
     int retryCounter = -1;
 
-    /** Messages received from upper layer and to be transmitted later */
-    queueing::IPacketQueue *transmissionQueue = nullptr;
-
-    /** Currently transmitted frame if any */
-    Packet *currentTransmission = nullptr;
-
     //@}
 
     /** @name Timer messages */
@@ -192,7 +186,6 @@ class LoRaMac : public MacProtocolBase
     //@{
     virtual void finishCurrentTransmission();
     virtual Packet *getCurrentTransmission();
-    virtual void popTransmissionQueue();
 
     virtual bool isReceiving();
     virtual bool isAck(const Ptr<const LoRaMacFrame> &frame);

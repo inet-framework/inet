@@ -528,7 +528,7 @@ void DhcpClient::sendRequest()
     Packet *packet = new Packet("DHCPREQUEST");
     const auto& request = makeShared<DhcpMessage>();
     request->setOp(BOOTREQUEST);
-    request->setChunkLength(B(280));    // DHCP request packet size
+    uint16_t length = 236;  // packet size without the options field
     request->setHtype(1);    // ethernet
     request->setHlen(6);    // hardware Address length (6 octets)
     request->setHops(0);
@@ -540,28 +540,35 @@ void DhcpClient::sendRequest()
     request->setChaddr(macAddress);    // my mac address;
     request->setSname("");    // no server name given
     request->setFile("");    // no file given
-    request->getOptionsForUpdate().setMessageType(DHCPREQUEST);
-    request->getOptionsForUpdate().setClientIdentifier(macAddress);
+    auto& options = request->getOptionsForUpdate();
+    options.setMessageType(DHCPREQUEST);
+    length += 3;
+    options.setClientIdentifier(macAddress);
+    length += 9;
 
     // set the parameters to request
-    request->getOptionsForUpdate().setParameterRequestListArraySize(4);
-    request->getOptionsForUpdate().setParameterRequestList(0, SUBNET_MASK);
-    request->getOptionsForUpdate().setParameterRequestList(1, ROUTER);
-    request->getOptionsForUpdate().setParameterRequestList(2, DNS);
-    request->getOptionsForUpdate().setParameterRequestList(3, NTP_SRV);
+    options.setParameterRequestListArraySize(4);
+    options.setParameterRequestList(0, SUBNET_MASK);
+    options.setParameterRequestList(1, ROUTER);
+    options.setParameterRequestList(2, DNS);
+    options.setParameterRequestList(3, NTP_SRV);
+    length += (2 + options.getParameterRequestListArraySize());
 
     L3Address destAddr;
 
     // RFC 4.3.6 Table 4
     if (clientState == INIT_REBOOT) {
-        request->getOptionsForUpdate().setRequestedIp(lease->ip);
+        options.setRequestedIp(lease->ip);
+        length += 6;
         request->setCiaddr(Ipv4Address());    // zero
         destAddr = Ipv4Address::ALLONES_ADDRESS;
         EV_INFO << "Sending DHCPREQUEST asking for IP " << lease->ip << " via broadcast." << endl;
     }
     else if (clientState == REQUESTING) {
-        request->getOptionsForUpdate().setServerIdentifier(lease->serverId);
-        request->getOptionsForUpdate().setRequestedIp(lease->ip);
+        options.setServerIdentifier(lease->serverId);
+        length += 6;
+        options.setRequestedIp(lease->ip);
+        length += 6;
         request->setCiaddr(Ipv4Address());    // zero
         destAddr = Ipv4Address::ALLONES_ADDRESS;
         EV_INFO << "Sending DHCPREQUEST asking for IP " << lease->ip << " via broadcast." << endl;
@@ -578,6 +585,12 @@ void DhcpClient::sendRequest()
     }
     else
         throw cRuntimeError("Invalid state");
+
+    // magic cookie and the end field
+    length += 5;
+
+    request->setChunkLength(B(length));
+
     packet->insertAtBack(request);
     sendToUdp(packet, clientPort, destAddr, serverPort);
 }
@@ -590,7 +603,7 @@ void DhcpClient::sendDiscover()
     Packet *packet = new Packet("DHCPDISCOVER");
     const auto& discover = makeShared<DhcpMessage>();
     discover->setOp(BOOTREQUEST);
-    discover->setChunkLength(B(280));    // DHCP Discover packet size;
+    uint16_t length = 236;      // packet size without the options field
     discover->setHtype(1);    // ethernet
     discover->setHlen(6);    // hardware Address lenght (6 octets)
     discover->setHops(0);
@@ -600,16 +613,26 @@ void DhcpClient::sendDiscover()
     discover->setChaddr(macAddress);    // my mac address
     discover->setSname("");    // no server name given
     discover->setFile("");    // no file given
-    discover->getOptionsForUpdate().setMessageType(DHCPDISCOVER);
-    discover->getOptionsForUpdate().setClientIdentifier(macAddress);
-    discover->getOptionsForUpdate().setRequestedIp(Ipv4Address());
+    auto& options = discover->getOptionsForUpdate();
+    options.setMessageType(DHCPDISCOVER);
+    length += 3;
+    options.setClientIdentifier(macAddress);
+    length += 9;
+    options.setRequestedIp(Ipv4Address());
+    //length += 6; not added because unspecified
 
     // set the parameters to request
-    discover->getOptionsForUpdate().setParameterRequestListArraySize(4);
-    discover->getOptionsForUpdate().setParameterRequestList(0, SUBNET_MASK);
-    discover->getOptionsForUpdate().setParameterRequestList(1, ROUTER);
-    discover->getOptionsForUpdate().setParameterRequestList(2, DNS);
-    discover->getOptionsForUpdate().setParameterRequestList(3, NTP_SRV);
+    options.setParameterRequestListArraySize(4);
+    options.setParameterRequestList(0, SUBNET_MASK);
+    options.setParameterRequestList(1, ROUTER);
+    options.setParameterRequestList(2, DNS);
+    options.setParameterRequestList(3, NTP_SRV);
+    length += (2 + options.getParameterRequestListArraySize());
+
+    // magic cookie and the end field
+    length += 5;
+
+    discover->setChunkLength(B(length));
 
     packet->insertAtBack(discover);
 
@@ -623,7 +646,7 @@ void DhcpClient::sendDecline(Ipv4Address declinedIp)
     Packet *packet = new Packet("DHCPDECLINE");
     const auto& decline = makeShared<DhcpMessage>();
     decline->setOp(BOOTREQUEST);
-    decline->setChunkLength(B(280));    // DHCPDECLINE packet size
+    uint16_t length = 236;    // packet size without the options field
     decline->setHtype(1);    // ethernet
     decline->setHlen(6);    // hardware Address length (6 octets)
     decline->setHops(0);
@@ -633,8 +656,16 @@ void DhcpClient::sendDecline(Ipv4Address declinedIp)
     decline->setChaddr(macAddress);    // my MAC address
     decline->setSname("");    // no server name given
     decline->setFile("");    // no file given
-    decline->getOptionsForUpdate().setMessageType(DHCPDECLINE);
-    decline->getOptionsForUpdate().setRequestedIp(declinedIp);
+    auto& options = decline->getOptionsForUpdate();
+    options.setMessageType(DHCPDECLINE);
+    length += 3;
+    options.setRequestedIp(declinedIp);
+    length += 6;
+
+    // magic cookie and the end field
+    length += 5;
+
+    decline->setChunkLength(B(length));
 
     packet->insertAtBack(decline);
 

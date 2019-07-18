@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<OSPFASConfig xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="OSPF.xsd">
+  
+  <Router name="R1" RFC1583Compatible="true">
+    <PointToPointInterface ifName="ppp0" interfaceOutputCost='0' helloInterval="10" />
+    <BroadcastInterface ifName="eth0" interfaceOutputCost='0' />
+  </Router>
+  
+  <Router name="R2" RFC1583Compatible="true">
+    <PointToPointInterface ifName="ppp0" interfaceOutputCost='0' helloInterval="15" />
+    <PointToPointInterface ifName="ppp1" interfaceOutputCost='0' />
+  </Router>
+  
+  <Router name="R4" RFC1583Compatible="true">
+    <BroadcastInterface ifName="eth0" interfaceOutputCost='0' />
+    <BroadcastInterface ifName="eth1" interfaceOutputCost='0' />
+  </Router>
+  
+  <Router name="R5" RFC1583Compatible="true">
+    <BroadcastInterface ifName="eth0" interfaceOutputCost='0' />
+    <PointToPointInterface ifName="eth1" interfaceOutputCost='0' />
+  </Router>
+  
+  <Router name="**" RFC1583Compatible="true">
+     <BroadcastInterface ifName='eth[*]' areaID='0.0.0.0' interfaceOutputCost='0' />
+     <PointToPointInterface ifName='ppp[*]' areaID='0.0.0.0' interfaceOutputCost='0' />
+  </Router>
+
+</OSPFASConfig>

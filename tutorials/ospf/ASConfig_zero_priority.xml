@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<OSPFASConfig xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="OSPF.xsd">
+
+  <Router name="R1" RFC1583Compatible="true">
+    <BroadcastInterface ifName="eth0" />
+    <BroadcastInterface ifName="eth1" routerPriority="0" />
+  </Router>
+  
+  <Router name="R2" RFC1583Compatible="true">
+    <BroadcastInterface ifName="eth0" />
+    <BroadcastInterface ifName="eth1" routerPriority="0" />
+  </Router>
+  
+  <Router name="R3" RFC1583Compatible="true">
+    <BroadcastInterface ifName="eth0" routerPriority="0" />
+    <BroadcastInterface ifName="eth1" />
+  </Router>
+  
+  <Router name="R4" RFC1583Compatible="true">
+    <BroadcastInterface ifName="eth0" routerPriority="0" />
+    <BroadcastInterface ifName="eth1" />
+  </Router>
+  
+  <Router name="R5" RFC1583Compatible="true">
+    <BroadcastInterface ifName="eth0" routerPriority="0" />
+    <BroadcastInterface ifName="eth1" />
+  </Router>
+  
+  <Router name="R6" RFC1583Compatible="true">
+    <BroadcastInterface ifName="eth0" routerPriority="0" />
+    <BroadcastInterface ifName="eth1" />
+  </Router>
+
+</OSPFASConfig>

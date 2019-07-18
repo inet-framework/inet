@@ -40,20 +40,20 @@ void EtherPhy::handleMessage(cMessage *message)
     if (message->getArrivalGate() == upperLayerInGate) {
         Packet *packet = check_and_cast<Packet *>(message);
         auto phyHeader = makeShared<EthernetPhyHeader>();
-        phyHeader->setSrcMacFullDuplex(true);
         packet->insertAtFront(phyHeader);
         packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernetPhy);
         auto signal = new EthernetSignal(packet->getName());
+        signal->setSrcMacFullDuplex(true);
         signal->encapsulate(packet);
         send(signal, "phys$o");
     }
     else if (message->getArrivalGate() == physInGate) {
         auto signal = check_and_cast<EthernetSignal *>(message);
+        if (!signal->getSrcMacFullDuplex())
+            throw cRuntimeError("Ethernet misconfiguration: MACs on the same link must be all in full duplex mode, or all in half-duplex mode");
         auto packet = check_and_cast<Packet *>(signal->decapsulate());
         delete signal;
         auto phyHeader = packet->popAtFront<EthernetPhyHeader>();
-        if (!phyHeader->getSrcMacFullDuplex())
-            throw cRuntimeError("Ethernet misconfiguration: MACs on the same link must be all in full duplex mode, or all in half-duplex mode");
         packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);
         send(packet, "upperLayerOut");
     }

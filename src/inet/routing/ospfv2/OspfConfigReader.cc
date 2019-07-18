@@ -244,15 +244,8 @@ void OspfConfigReader::loadInterfaceParameters(const cXMLElement& ifConfig, Inte
                 interfaceType.c_str(), ifName.c_str(), ifIndex, ifConfig.getSourceLocation());
     }
 
-    std::string ospfCrcMode = par("crcMode").stdstringValue();
-    if(ospfCrcMode == "disabled")
-        intf->setCrcMode(CRC_DISABLED);
-    else if(ospfCrcMode == "computed")
-        intf->setCrcMode(CRC_COMPUTED);
-    else {
-        delete intf;
-        throw cRuntimeError("Unknown Ospf CRC mode '%s'", ospfCrcMode.c_str());
-    }
+    const char* ospfCrcMode = par("crcMode");
+    intf->setCrcMode(parseCrcMode(ospfCrcMode, true));
 
     Metric cost = getIntAttrOrPar(ifConfig, "interfaceOutputCost");
     if(cost == 0)

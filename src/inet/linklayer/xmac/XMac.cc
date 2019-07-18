@@ -65,7 +65,7 @@ void XMac::initialize(int stage)
         lastDataPktSrcAddr  = MacAddress::BROADCAST_ADDRESS;
 
         macState = INIT;
-        queue = check_and_cast<queueing::IPacketQueue *>(getSubmodule("queue"));
+        txQueue = check_and_cast<queueing::IPacketQueue *>(getSubmodule("queue"));
         WATCH(macState);
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
@@ -141,23 +141,6 @@ XMac::~XMac()
     cancelAndDelete(switching_done);
 }
 
-void XMac::flushQueue()
-{
-    while (!queue->isEmpty()) {
-        auto packet = queue->popPacket();
-        PacketDropDetails details;
-        details.setReason(INTERFACE_DOWN);
-        emit(packetDroppedSignal, packet, &details); //FIXME this signal lumps together packets from the network and packets from higher layers! separate them
-        delete packet;
-    }
-}
-
-void XMac::clearQueue()
-{
-    while (!queue->isEmpty())
-        delete queue->popPacket();
-}
-
 void XMac::finish()
 {
     // record stats
@@ -204,12 +187,12 @@ void XMac::handleUpperPacket(Packet *packet)
     encapsulate(packet);
     EV_DETAIL << "CSMA received a message from upper layer, name is " << packet->getName() << ", CInfo removed, mac addr=" << packet->peekAtFront<XMacHeader>()->getDestAddr() << endl;
     EV_DETAIL << "pkt encapsulated, length: " << packet->getBitLength() << "\n";
-    queue->pushPacket(packet);
-    EV_DEBUG << "Max queue length: " << queue->getMaxNumPackets() << ", packet put in queue"
-              "\n  queue size: " << queue->getNumPackets() << " macState: "
+    txQueue->pushPacket(packet);
+    EV_DEBUG << "Max queue length: " << txQueue->getMaxNumPackets() << ", packet put in queue"
+              "\n  queue size: " << txQueue->getNumPackets() << " macState: "
               << macState << endl;
     // force wakeup now
-    if (!queue->isEmpty() && wakeup->isScheduled() && (macState == SLEEP)) {
+    if (!txQueue->isEmpty() && wakeup->isScheduled() && (macState == SLEEP)) {
         cancelEvent(wakeup);
         scheduleAt(simTime() + dblrand()*0.01f, wakeup);
     }
@@ -295,7 +278,7 @@ void XMac::handleSelfMessage(cMessage *msg)
         if (msg->getKind() == XMAC_CCA_TIMEOUT)
         {
             // channel is clear and we wanna SEND
-            if (queue->getNumPackets() > 0)
+            if (!txQueue->isEmpty())
             {
                 radio->setRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
                 changeDisplayColor(YELLOW);
@@ -393,7 +376,9 @@ void XMac::handleSelfMessage(cMessage *msg)
         // radio switch from above
         if (msg->getKind() == XMAC_SWITCHING_FINISHED) {
             if (radio->getRadioMode() == IRadio::RADIO_MODE_TRANSMITTER) {
-                auto pkt_preamble = queue->getPacket(0)->peekAtFront<XMacHeader>();
+                if (currentTxFrame == nullptr)
+                    popTxQueue();
+                auto pkt_preamble = currentTxFrame->peekAtFront<XMacHeader>();
                 sendPreamble(pkt_preamble->getDestAddr());
             }
             return;
@@ -455,9 +440,9 @@ void XMac::handleSelfMessage(cMessage *msg)
         if (msg->getKind() == XMAC_DATA_TX_OVER) {
             EV_DEBUG << "node " << address << " : State WAIT_TX_DATA_OVER, message XMAC_DATA_TX_OVER, new state  SLEEP" << endl;
             // remove the packet just served from the queue
-            delete queue->popPacket();
+            deleteCurrentTxFrame();
             // if something in the queue, wakeup soon.
-            if (queue->getNumPackets() > 0)
+            if (!txQueue->isEmpty())
                 scheduleAt(simTime() + dblrand()*checkInterval, wakeup);
             else
                 scheduleAt(simTime() + slotDuration, wakeup);
@@ -494,7 +479,7 @@ void XMac::handleSelfMessage(cMessage *msg)
                 cancelEvent(data_timeout);
 
                 // if something in the queue, wakeup soon.
-                if (queue->getNumPackets() > 0)
+                if (!txQueue->isEmpty())
                     scheduleAt(simTime() + dblrand()*checkInterval, wakeup);
                 else
                     scheduleAt(simTime() + slotDuration, wakeup);
@@ -516,7 +501,7 @@ void XMac::handleSelfMessage(cMessage *msg)
         if (msg->getKind() == XMAC_DATA_TIMEOUT) {
             EV << "node " << address << " : State WAIT_DATA, message XMAC_DATA_TIMEOUT, new state SLEEP" << endl;
             // if something in the queue, wakeup soon.
-            if (queue->getNumPackets() > 0)
+            if (!txQueue->isEmpty())
                 scheduleAt(simTime() + dblrand()*checkInterval, wakeup);
             else
                 scheduleAt(simTime() + slotDuration, wakeup);
@@ -573,7 +558,9 @@ void XMac::handleLowerPacket(Packet *msg)
 void XMac::sendDataPacket()
 {
     nbTxDataPackets++;
-    auto packet = queue->getPacket(0)->dup();
+    if (currentTxFrame == nullptr)
+        popTxQueue();
+    auto packet = currentTxFrame->dup();
     const auto& hdr = packet->peekAtFront<XMacHeader>();
     lastDataPktDestAddr = hdr->getDestAddr();
     ASSERT(hdr->getType() == XMAC_DATA);

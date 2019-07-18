@@ -26,7 +26,7 @@
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/queueing/contract/IPacketQueue.h"
-#include "inet/linklayer/base/MacBase.h"
+#include "inet/linklayer/base/MacProtocolBase.h"
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
@@ -39,7 +39,7 @@ class EthernetSignal;
 /**
  * Base class for Ethernet MAC implementations.
  */
-class INET_API EtherMacBase : public MacBase
+class INET_API EtherMacBase : public MacProtocolBase
 {
   public:
         enum MacTransmitState {
@@ -105,7 +105,6 @@ class INET_API EtherMacBase : public MacBase
     bool frameBursting = false;    // frame bursting on/off (Gigabit Ethernet)
 
     // gate pointers, etc.
-    queueing::IPacketQueue *txQueue = nullptr;    // the output queue
     cChannel *transmissionChannel = nullptr;    // transmission channel
     cGate *physInGate = nullptr;    // pointer to the "phys$i" gate
     cGate *physOutGate = nullptr;    // pointer to the "phys$o" gate
@@ -116,7 +115,6 @@ class INET_API EtherMacBase : public MacBase
     MacReceiveState receiveState = static_cast<MacReceiveState>(-1);    // "receive state" of the MAC
     simtime_t lastTxFinishTime;    // time of finishing the last transmission
     int pauseUnitsRequested = 0;    // requested pause duration, or zero -- examined at endTx
-    Packet *curTxFrame = nullptr;    // frame being transmitted
 
     // self messages
     cMessage *endTxMsg = nullptr, *endIFGMsg = nullptr, *endPauseMsg = nullptr;
@@ -189,7 +187,6 @@ class INET_API EtherMacBase : public MacBase
     virtual void printParameters();
 
     // helpers
-    virtual void getNextFrameFromQueue();
     virtual void processConnectDisconnect();
     virtual void encapsulate(Packet *packet);
     virtual void decapsulate(Packet *packet);
@@ -199,8 +196,6 @@ class INET_API EtherMacBase : public MacBase
 
     // MacBase
     virtual void configureInterfaceEntry() override;
-    virtual void flushQueue() override;
-    virtual void clearQueue() override;
 
     // display
     virtual void refreshDisplay() const override;

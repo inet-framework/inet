@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scave:Analysis xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:scave="http://www.omnetpp.org/omnetpp/scave">
+  <inputs>
+    <inputs name="/inet/showcases/wireless/errorrate/results/General-*.vec"/>
+    <inputs name="/inet/showcases/wireless/errorrate/results/General-*.sca"/>
+  </inputs>
+  <datasets>
+    <datasets name="Error rate">
+      <items xsi:type="scave:Add" filterPattern="distance"/>
+      <items xsi:type="scave:Add" filterPattern="bitrate"/>
+      <items xsi:type="scave:Add" filterPattern="module(*.destinationHost.*) AND minSnir:histogram:mean"/>
+      <items xsi:type="scave:Add" filterPattern="module(*.destinationHost.*) AND packetErrorRate:histogram:mean"/>
+      <items xsi:type="scave:ComputeScalar" scalarName="throughput" valueExpr="'bitrate' * (1 - *.destinationHost.wlan[0].radio.'packetErrorRate:histogram:mean')" moduleExpr="" groupByExpr=""/>
+      <items xsi:type="scave:ScatterChart" name="SNIR vs distance" xDataPattern="module(_runattrs_) AND name(distance)">
+        <filters xsi:type="scave:Select" filterPattern="bitrate OR distance OR minSnir:histogram:mean"/>
+        <properties name="Graph.Title" value="SNIR vs distance"/>
+        <properties name="X.Axis.Title" value="Distance [m]"/>
+        <properties name="Y.Axis.Title" value="Signal-to-noise-plus-interference-ratio"/>
+        <properties name="Legend.Display" value="true"/>
+        <properties name="Line.Name/ErrorRateTest.sourceHost.wlan[0].radio minSNIR:histogram:mean - . bitrate=6.0" value="6 mbps"/>
+        <properties name="Line.Name/ErrorRateTest.sourceHost.wlan[0].radio minSNIR:histogram:mean - . bitrate=12.0" value="12 mbps"/>
+        <properties name="Line.Name/ErrorRateTest.sourceHost.wlan[0].radio minSNIR:histogram:mean - . bitrate=24.0" value="24 mbps"/>
+        <properties name="Line.Name/ErrorRateTest.sourceHost.wlan[0].radio minSNIR:histogram:mean - . bitrate=36.0" value="36 mbps"/>
+        <properties name="Line.Name/ErrorRateTest.sourceHost.wlan[0].radio minSNIR:histogram:mean - . bitrate=54.0" value="54 mbps"/>
+        <properties name="Line.Name/ErrorRateExample.destinationHost.wlan[0].radio minSNIR:histogram:mean - . bitrate=6.0" value="6 Mbps"/>
+        <properties name="Line.Name/ErrorRateExample.destinationHost.wlan[0].radio minSNIR:histogram:mean - . bitrate=12.0" value="12 Mbps"/>
+        <properties name="Line.Name/ErrorRateExample.destinationHost.wlan[0].radio minSNIR:histogram:mean - . bitrate=24.0" value="24 Mbps"/>
+        <properties name="Line.Name/ErrorRateExample.destinationHost.wlan[0].radio minSNIR:histogram:mean - . bitrate=36.0" value="36 Mbps"/>
+        <properties name="Line.Name/ErrorRateExample.destinationHost.wlan[0].radio minSNIR:histogram:mean - . bitrate=54.0" value="54 Mbps"/>
+        <properties name="Line.Name/ErrorRateExample.destinationHost.wlan[0].radio minSNIR:histogram:mean - . bitrate=9.0" value="9 Mbps"/>
+        <properties name="Line.Name/ErrorRateExample.destinationHost.wlan[0].radio minSNIR:histogram:mean - . bitrate=18.0" value="18 Mbps"/>
+        <properties name="Line.Name/ErrorRateExample.destinationHost.wlan[0].radio minSNIR:histogram:mean - . bitrate=48.0" value="48 Mbps"/>
+        <properties name="Line.Name/ErrorRateExample.destinationHost.wlan[0].radio minSNIR:histogram:mean - _runattrs_ bitrate=6.0" value="6 Mbps"/>
+        <properties name="Line.Name/ErrorRateExample.destinationHost.wlan[0].radio minSNIR:histogram:mean - _runattrs_ bitrate=9.0" value="9 Mbps"/>
+        <properties name="Line.Name/ErrorRateExample.destinationHost.wlan[0].radio minSNIR:histogram:mean - _runattrs_ bitrate=12.0" value="12 Mbps"/>
+        <properties name="Line.Name/ErrorRateExample.destinationHost.wlan[0].radio minSNIR:histogram:mean - _runattrs_ bitrate=18.0" value="18 Mbps"/>
+        <properties name="Line.Name/ErrorRateExample.destinationHost.wlan[0].radio minSNIR:histogram:mean - _runattrs_ bitrate=24.0" value="24 Mbps"/>
+        <properties name="Line.Name/ErrorRateExample.destinationHost.wlan[0].radio minSNIR:histogram:mean - _runattrs_ bitrate=36.0" value="36 Mbps"/>
+        <properties name="Line.Name/ErrorRateExample.destinationHost.wlan[0].radio minSNIR:histogram:mean - _runattrs_ bitrate=48.0" value="48 Mbps"/>
+        <properties name="Line.Name/ErrorRateExample.destinationHost.wlan[0].radio minSNIR:histogram:mean - _runattrs_ bitrate=54.0" value="54 Mbps"/>
+        <properties name="Symbols.Type" value="None"/>
+        <properties name="Line.Type" value="Linear"/>
+        <properties name="Symbols.Type/ErrorRateShowcase.destinationHost.wlan[0].radio minSnir:histogram:mean - _runattrs_ bitrate=6.0" value="None"/>
+        <properties name="Line.Type/ErrorRateShowcase.destinationHost.wlan[0].radio minSnir:histogram:mean - _runattrs_ bitrate=6.0" value="Linear"/>
+        <properties name="Line.Name/ErrorRateShowcase.destinationHost.wlan[0].radio minSnir:histogram:mean - _runattrs_ bitrate=6.0" value="6 Mbps"/>
+        <properties name="Symbols.Type/ErrorRateShowcase.destinationHost.wlan[0].radio minSnir:histogram:mean - _runattrs_ bitrate=9.0" value="None"/>
+        <properties name="Line.Type/ErrorRateShowcase.destinationHost.wlan[0].radio minSnir:histogram:mean - _runattrs_ bitrate=9.0" value="Linear"/>
+        <properties name="Line.Name/ErrorRateShowcase.destinationHost.wlan[0].radio minSnir:histogram:mean - _runattrs_ bitrate=9.0" value="9 Mbps"/>
+        <properties name="Symbols.Type/ErrorRateShowcase.destinationHost.wlan[0].radio minSnir:histogram:mean - _runattrs_ bitrate=12.0" value="None"/>
+        <properties name="Line.Type/ErrorRateShowcase.destinationHost.wlan[0].radio minSnir:histogram:mean - _runattrs_ bitrate=12.0" value="Linear"/>
+        <properties name="Line.Name/ErrorRateShowcase.destinationHost.wlan[0].radio minSnir:histogram:mean - _runattrs_ bitrate=12.0" value="12 Mbps"/>
+        <properties name="Symbols.Type/ErrorRateShowcase.destinationHost.wlan[0].radio minSnir:histogram:mean - _runattrs_ bitrate=18.0" value="None"/>
+        <properties name="Line.Type/ErrorRateShowcase.destinationHost.wlan[0].radio minSnir:histogram:mean - _runattrs_ bitrate=18.0" value="Linear"/>
+        <properties name="Line.Name/ErrorRateShowcase.destinationHost.wlan[0].radio minSnir:histogram:mean - _runattrs_ bitrate=18.0" value="18 Mbps"/>
+        <properties name="Symbols.Type/ErrorRateShowcase.destinationHost.wlan[0].radio minSnir:histogram:mean - _runattrs_ bitrate=24.0" value="None"/>
+        <properties name="Line.Type/ErrorRateShowcase.destinationHost.wlan[0].radio minSnir:histogram:mean - _runattrs_ bitrate=24.0" value="Linear"/>
+        <properties name="Line.Name/ErrorRateShowcase.destinationHost.wlan[0].radio minSnir:histogram:mean - _runattrs_ bitrate=24.0" value="24 Mbps"/>
+        <properties name="Symbols.Type/ErrorRateShowcase.destinationHost.wlan[0].radio minSnir:histogram:mean - _runattrs_ bitrate=36.0" value="None"/>
+        <properties name="Line.Type/ErrorRateShowcase.destinationHost.wlan[0].radio minSnir:histogram:mean - _runattrs_ bitrate=36.0" value="Linear"/>
+        <properties name="Line.Name/ErrorRateShowcase.destinationHost.wlan[0].radio minSnir:histogram:mean - _runattrs_ bitrate=36.0" value="36 Mbps"/>
+        <properties name="Symbols.Type/ErrorRateShowcase.destinationHost.wlan[0].radio minSnir:histogram:mean - _runattrs_ bitrate=48.0" value="None"/>
+        <properties name="Line.Type/ErrorRateShowcase.destinationHost.wlan[0].radio minSnir:histogram:mean - _runattrs_ bitrate=48.0" value="Linear"/>
+        <properties name="Line.Name/ErrorRateShowcase.destinationHost.wlan[0].radio minSnir:histogram:mean - _runattrs_ bitrate=48.0" value="48 Mbps"/>
+        <properties name="Symbols.Type/ErrorRateShowcase.destinationHost.wlan[0].radio minSnir:histogram:mean - _runattrs_ bitrate=54.0" value="None"/>
+        <properties name="Line.Type/ErrorRateShowcase.destinationHost.wlan[0].radio minSnir:histogram:mean - _runattrs_ bitrate=54.0" value="Linear"/>
+        <properties name="Line.Name/ErrorRateShowcase.destinationHost.wlan[0].radio minSnir:histogram:mean - _runattrs_ bitrate=54.0" value="54 Mbps"/>
+        <isoDataPattern>module(_runattrs_) AND name(bitrate)</isoDataPattern>
+      </items>
+      <items xsi:type="scave:ScatterChart" name="PER vs distance" xDataPattern="module(_runattrs_) AND name(distance)">
+        <filters xsi:type="scave:Select" filterPattern="bitrate OR distance OR packetErrorRate:histogram:mean"/>
+        <properties name="Graph.Title" value="PER vs distance"/>
+        <properties name="X.Axis.Title" value="Distance [m]"/>
+        <properties name="Y.Axis.Title" value="Packet error rate"/>
+        <properties name="Y.Axis.Log" value="true"/>
+        <properties name="Legend.Display" value="true"/>
+        <properties name="Line.Name/ErrorRateTest.sourceHost.wlan[0].radio packetErrorRate:histogram:mean - . bitrate=6.0" value="6 mbps"/>
+        <properties name="Line.Name/ErrorRateTest.sourceHost.wlan[0].radio packetErrorRate:histogram:mean - . bitrate=12.0" value="12 mbps"/>
+        <properties name="Line.Name/ErrorRateTest.sourceHost.wlan[0].radio packetErrorRate:histogram:mean - . bitrate=24.0" value="24 mbps"/>
+        <properties name="Line.Name/ErrorRateTest.sourceHost.wlan[0].radio packetErrorRate:histogram:mean - . bitrate=36.0" value="36 mpbs"/>
+        <properties name="Line.Name/ErrorRateTest.sourceHost.wlan[0].radio packetErrorRate:histogram:mean - . bitrate=54.0" value="54 mbps"/>
+        <properties name="Line.Name/ErrorRateExample.destinationHost.wlan[0].radio packetErrorRate:histogram:mean - . bitrate=6.0" value="6 Mbps"/>
+        <properties name="Line.Name/ErrorRateExample.destinationHost.wlan[0].radio packetErrorRate:histogram:mean - . bitrate=12.0" value="12 Mbps"/>
+        <properties name="Line.Name/ErrorRateExample.destinationHost.wlan[0].radio packetErrorRate:histogram:mean - . bitrate=24.0" value="24 Mbps"/>
+        <properties name="Line.Name/ErrorRateExample.destinationHost.wlan[0].radio packetErrorRate:histogram:mean - . bitrate=36.0" value="36 Mbps"/>
+        <properties name="Line.Name/ErrorRateExample.destinationHost.wlan[0].radio packetErrorRate:histogram:mean - . bitrate=54.0" value="54 Mbps"/>
+        <properties name="Line.Name/ErrorRateExample.destinationHost.wlan[0].radio packetErrorRate:histogram:mean - . bitrate=9.0" value="9 Mbps"/>
+        <properties name="Line.Name/ErrorRateExample.destinationHost.wlan[0].radio packetErrorRate:histogram:mean - . bitrate=18.0" value="18 Mbps"/>
+        <properties name="Line.Name/ErrorRateExample.destinationHost.wlan[0].radio packetErrorRate:histogram:mean - . bitrate=48.0" value="48 Mbps"/>
+        <properties name="Line.Name/ErrorRateExample.destinationHost.wlan[0].radio packetErrorRate:histogram:mean - _runattrs_ bitrate=6.0" value="6 Mbps"/>
+        <properties name="Line.Name/ErrorRateExample.destinationHost.wlan[0].radio packetErrorRate:histogram:mean - _runattrs_ bitrate=9.0" value="9 Mbps"/>
+        <properties name="Line.Name/ErrorRateExample.destinationHost.wlan[0].radio packetErrorRate:histogram:mean - _runattrs_ bitrate=12.0" value="12 Mbps"/>
+        <properties name="Line.Name/ErrorRateExample.destinationHost.wlan[0].radio packetErrorRate:histogram:mean - _runattrs_ bitrate=18.0" value="18 Mbps"/>
+        <properties name="Line.Name/ErrorRateExample.destinationHost.wlan[0].radio packetErrorRate:histogram:mean - _runattrs_ bitrate=24.0" value="24 Mbps"/>
+        <properties name="Line.Name/ErrorRateExample.destinationHost.wlan[0].radio packetErrorRate:histogram:mean - _runattrs_ bitrate=36.0" value="36 Mbps"/>
+        <properties name="Line.Name/ErrorRateExample.destinationHost.wlan[0].radio packetErrorRate:histogram:mean - _runattrs_ bitrate=48.0" value="48 Mbps"/>
+        <properties name="Line.Name/ErrorRateExample.destinationHost.wlan[0].radio packetErrorRate:histogram:mean - _runattrs_ bitrate=54.0" value="54 Mbps"/>
+        <properties name="Symbols.Type" value="None"/>
+        <properties name="Line.Type" value="Linear"/>
+        <properties name="Symbols.Type/ErrorRateShowcase.destinationHost.wlan[0].radio packetErrorRate:histogram:mean - _runattrs_ bitrate=6.0" value="None"/>
+        <properties name="Line.Type/ErrorRateShowcase.destinationHost.wlan[0].radio packetErrorRate:histogram:mean - _runattrs_ bitrate=6.0" value="Linear"/>
+        <properties name="Line.Name/ErrorRateShowcase.destinationHost.wlan[0].radio packetErrorRate:histogram:mean - _runattrs_ bitrate=6.0" value="6 Mbps"/>
+        <properties name="Symbols.Type/ErrorRateShowcase.destinationHost.wlan[0].radio packetErrorRate:histogram:mean - _runattrs_ bitrate=9.0" value="None"/>
+        <properties name="Line.Type/ErrorRateShowcase.destinationHost.wlan[0].radio packetErrorRate:histogram:mean - _runattrs_ bitrate=9.0" value="Linear"/>
+        <properties name="Line.Name/ErrorRateShowcase.destinationHost.wlan[0].radio packetErrorRate:histogram:mean - _runattrs_ bitrate=9.0" value="9 Mbps"/>
+        <properties name="Symbols.Type/ErrorRateShowcase.destinationHost.wlan[0].radio packetErrorRate:histogram:mean - _runattrs_ bitrate=12.0" value="None"/>
+        <properties name="Line.Type/ErrorRateShowcase.destinationHost.wlan[0].radio packetErrorRate:histogram:mean - _runattrs_ bitrate=12.0" value="Linear"/>
+        <properties name="Line.Name/ErrorRateShowcase.destinationHost.wlan[0].radio packetErrorRate:histogram:mean - _runattrs_ bitrate=12.0" value="12 Mbps"/>
+        <properties name="Symbols.Type/ErrorRateShowcase.destinationHost.wlan[0].radio packetErrorRate:histogram:mean - _runattrs_ bitrate=18.0" value="None"/>
+        <properties name="Line.Type/ErrorRateShowcase.destinationHost.wlan[0].radio packetErrorRate:histogram:mean - _runattrs_ bitrate=18.0" value="Linear"/>
+        <properties name="Line.Name/ErrorRateShowcase.destinationHost.wlan[0].radio packetErrorRate:histogram:mean - _runattrs_ bitrate=18.0" value="18 Mbps"/>
+        <properties name="Symbols.Type/ErrorRateShowcase.destinationHost.wlan[0].radio packetErrorRate:histogram:mean - _runattrs_ bitrate=24.0" value="None"/>
+        <properties name="Line.Type/ErrorRateShowcase.destinationHost.wlan[0].radio packetErrorRate:histogram:mean - _runattrs_ bitrate=24.0" value="Linear"/>
+        <properties name="Line.Name/ErrorRateShowcase.destinationHost.wlan[0].radio packetErrorRate:histogram:mean - _runattrs_ bitrate=24.0" value="24 Mbps"/>
+        <properties name="Symbols.Type/ErrorRateShowcase.destinationHost.wlan[0].radio packetErrorRate:histogram:mean - _runattrs_ bitrate=36.0" value="None"/>
+        <properties name="Line.Type/ErrorRateShowcase.destinationHost.wlan[0].radio packetErrorRate:histogram:mean - _runattrs_ bitrate=36.0" value="Linear"/>
+        <properties name="Line.Name/ErrorRateShowcase.destinationHost.wlan[0].radio packetErrorRate:histogram:mean - _runattrs_ bitrate=36.0" value="36 Mbps"/>
+        <properties name="Symbols.Type/ErrorRateShowcase.destinationHost.wlan[0].radio packetErrorRate:histogram:mean - _runattrs_ bitrate=48.0" value="None"/>
+        <properties name="Line.Type/ErrorRateShowcase.destinationHost.wlan[0].radio packetErrorRate:histogram:mean - _runattrs_ bitrate=48.0" value="Linear"/>
+        <properties name="Line.Name/ErrorRateShowcase.destinationHost.wlan[0].radio packetErrorRate:histogram:mean - _runattrs_ bitrate=48.0" value="48 Mbps"/>
+        <properties name="Symbols.Type/ErrorRateShowcase.destinationHost.wlan[0].radio packetErrorRate:histogram:mean - _runattrs_ bitrate=54.0" value="None"/>
+        <properties name="Line.Type/ErrorRateShowcase.destinationHost.wlan[0].radio packetErrorRate:histogram:mean - _runattrs_ bitrate=54.0" value="Linear"/>
+        <properties name="Line.Name/ErrorRateShowcase.destinationHost.wlan[0].radio packetErrorRate:histogram:mean - _runattrs_ bitrate=54.0" value="54 Mbps"/>
+        <isoDataPattern>module(_runattrs_) AND name(bitrate)</isoDataPattern>
+      </items>
+      <items xsi:type="scave:ScatterChart" name="PER vs SNIR" xDataPattern="module(ErrorRateShowcase.destinationHost.wlan[0].radio) AND name(minSnir:histogram:mean)">
+        <filters xsi:type="scave:Select" filterPattern="bitrate OR minSnir:histogram:mean OR packetErrorRate:histogram:mean"/>
+        <properties name="Graph.Title" value="PER vs SNIR"/>
+        <properties name="X.Axis.Title" value="Signal-to-noise-plus-interference-ratio"/>
+        <properties name="Y.Axis.Title" value="Packet error rate"/>
+        <properties name="Y.Axis.Log" value="true"/>
+        <properties name="Legend.Display" value="true"/>
+        <properties name="Line.Name/ErrorRateTest.sourceHost.wlan[0].radio packetErrorRate:histogram:mean - . bitrate=6.0" value="6 mpbs"/>
+        <properties name="Line.Name/ErrorRateTest.sourceHost.wlan[0].radio packetErrorRate:histogram:mean - . bitrate=12.0" value="12 mbps"/>
+        <properties name="Line.Name/ErrorRateTest.sourceHost.wlan[0].radio packetErrorRate:histogram:mean - . bitrate=24.0" value="24 mbps"/>
+        <properties name="Line.Name/ErrorRateTest.sourceHost.wlan[0].radio packetErrorRate:histogram:mean - . bitrate=36.0" value="36 mbps"/>
+        <properties name="Line.Name/ErrorRateTest.sourceHost.wlan[0].radio packetErrorRate:histogram:mean - . bitrate=54.0" value="54 mbps"/>
+        <properties name="Line.Name/ErrorRateExample.destinationHost.wlan[0].radio packetErrorRate:histogram:mean - . bitrate=6.0" value="6 Mbps"/>
+        <properties name="Line.Name/ErrorRateExample.destinationHost.wlan[0].radio packetErrorRate:histogram:mean - . bitrate=12.0" value="12 Mbps"/>
+        <properties name="Line.Name/ErrorRateExample.destinationHost.wlan[0].radio packetErrorRate:histogram:mean - . bitrate=24.0" value="24 Mbps"/>
+        <properties name="Line.Name/ErrorRateExample.destinationHost.wlan[0].radio packetErrorRate:histogram:mean - . bitrate=36.0" value="36 Mbps"/>
+        <properties name="Line.Name/ErrorRateExample.destinationHost.wlan[0].radio packetErrorRate:histogram:mean - . bitrate=54.0" value="54 Mbps"/>
+        <properties name="Line.Name/ErrorRateExample.destinationHost.wlan[0].radio packetErrorRate:histogram:mean - . bitrate=9.0" value="9 Mbps"/>
+        <properties name="Line.Name/ErrorRateExample.destinationHost.wlan[0].radio packetErrorRate:histogram:mean - . bitrate=18.0" value="18 Mbps"/>
+        <properties name="Line.Name/ErrorRateExample.destinationHost.wlan[0].radio packetErrorRate:histogram:mean - . bitrate=48.0" value="48 Mbps"/>
+        <properties name="Line.Name/ErrorRateExample.destinationHost.wlan[0].radio packetErrorRate:histogram:mean - _runattrs_ bitrate=6.0" value="6 Mbps"/>
+        <properties name="Line.Name/ErrorRateExample.destinationHost.wlan[0].radio packetErrorRate:histogram:mean - _runattrs_ bitrate=9.0" value="9 Mbps"/>
+        <properties name="Line.Name/ErrorRateExample.destinationHost.wlan[0].radio packetErrorRate:histogram:mean - _runattrs_ bitrate=12.0" value="12 Mbps"/>
+        <properties name="Line.Name/ErrorRateExample.destinationHost.wlan[0].radio packetErrorRate:histogram:mean - _runattrs_ bitrate=18.0" value="18 Mbps"/>
+        <properties name="Line.Name/ErrorRateExample.destinationHost.wlan[0].radio packetErrorRate:histogram:mean - _runattrs_ bitrate=24.0" value="24 Mbps"/>
+        <properties name="Line.Name/ErrorRateExample.destinationHost.wlan[0].radio packetErrorRate:histogram:mean - _runattrs_ bitrate=36.0" value="36 Mbps"/>
+        <properties name="Line.Name/ErrorRateExample.destinationHost.wlan[0].radio packetErrorRate:histogram:mean - _runattrs_ bitrate=48.0" value="48 Mbps"/>
+        <properties name="Line.Name/ErrorRateExample.destinationHost.wlan[0].radio packetErrorRate:histogram:mean - _runattrs_ bitrate=54.0" value="54 Mbps"/>
+        <properties name="Symbols.Type" value="None"/>
+        <properties name="Line.Type" value="Linear"/>
+        <properties name="Symbols.Type/ErrorRateShowcase.destinationHost.wlan[0].radio packetErrorRate:histogram:mean - _runattrs_ bitrate=6.0" value="None"/>
+        <properties name="Line.Type/ErrorRateShowcase.destinationHost.wlan[0].radio packetErrorRate:histogram:mean - _runattrs_ bitrate=6.0" value="Linear"/>
+        <properties name="Line.Name/ErrorRateShowcase.destinationHost.wlan[0].radio packetErrorRate:histogram:mean - _runattrs_ bitrate=6.0" value="6 Mbps"/>
+        <properties name="Symbols.Type/ErrorRateShowcase.destinationHost.wlan[0].radio packetErrorRate:histogram:mean - _runattrs_ bitrate=9.0" value="None"/>
+        <properties name="Line.Type/ErrorRateShowcase.destinationHost.wlan[0].radio packetErrorRate:histogram:mean - _runattrs_ bitrate=9.0" value="Linear"/>
+        <properties name="Line.Name/ErrorRateShowcase.destinationHost.wlan[0].radio packetErrorRate:histogram:mean - _runattrs_ bitrate=9.0" value="9 Mbps"/>
+        <properties name="Symbols.Type/ErrorRateShowcase.destinationHost.wlan[0].radio packetErrorRate:histogram:mean - _runattrs_ bitrate=12.0" value="None"/>
+        <properties name="Line.Type/ErrorRateShowcase.destinationHost.wlan[0].radio packetErrorRate:histogram:mean - _runattrs_ bitrate=12.0" value="Linear"/>
+        <properties name="Line.Name/ErrorRateShowcase.destinationHost.wlan[0].radio packetErrorRate:histogram:mean - _runattrs_ bitrate=12.0" value="12 Mbps"/>
+        <properties name="Symbols.Type/ErrorRateShowcase.destinationHost.wlan[0].radio packetErrorRate:histogram:mean - _runattrs_ bitrate=18.0" value="None"/>
+        <properties name="Line.Type/ErrorRateShowcase.destinationHost.wlan[0].radio packetErrorRate:histogram:mean - _runattrs_ bitrate=18.0" value="Linear"/>
+        <properties name="Line.Name/ErrorRateShowcase.destinationHost.wlan[0].radio packetErrorRate:histogram:mean - _runattrs_ bitrate=18.0" value="18 Mbps"/>
+        <properties name="Symbols.Type/ErrorRateShowcase.destinationHost.wlan[0].radio packetErrorRate:histogram:mean - _runattrs_ bitrate=24.0" value="None"/>
+        <properties name="Line.Type/ErrorRateShowcase.destinationHost.wlan[0].radio packetErrorRate:histogram:mean - _runattrs_ bitrate=24.0" value="Linear"/>
+        <properties name="Line.Name/ErrorRateShowcase.destinationHost.wlan[0].radio packetErrorRate:histogram:mean - _runattrs_ bitrate=24.0" value="24 Mbps"/>
+        <properties name="Symbols.Type/ErrorRateShowcase.destinationHost.wlan[0].radio packetErrorRate:histogram:mean - _runattrs_ bitrate=36.0" value="None"/>
+        <properties name="Line.Type/ErrorRateShowcase.destinationHost.wlan[0].radio packetErrorRate:histogram:mean - _runattrs_ bitrate=36.0" value="Linear"/>
+        <properties name="Line.Name/ErrorRateShowcase.destinationHost.wlan[0].radio packetErrorRate:histogram:mean - _runattrs_ bitrate=36.0" value="36 Mbps"/>
+        <properties name="Symbols.Type/ErrorRateShowcase.destinationHost.wlan[0].radio packetErrorRate:histogram:mean - _runattrs_ bitrate=48.0" value="None"/>
+        <properties name="Line.Type/ErrorRateShowcase.destinationHost.wlan[0].radio packetErrorRate:histogram:mean - _runattrs_ bitrate=48.0" value="Linear"/>
+        <properties name="Line.Name/ErrorRateShowcase.destinationHost.wlan[0].radio packetErrorRate:histogram:mean - _runattrs_ bitrate=48.0" value="48 Mbps"/>
+        <properties name="Symbols.Type/ErrorRateShowcase.destinationHost.wlan[0].radio packetErrorRate:histogram:mean - _runattrs_ bitrate=54.0" value="None"/>
+        <properties name="Line.Type/ErrorRateShowcase.destinationHost.wlan[0].radio packetErrorRate:histogram:mean - _runattrs_ bitrate=54.0" value="Linear"/>
+        <properties name="Line.Name/ErrorRateShowcase.destinationHost.wlan[0].radio packetErrorRate:histogram:mean - _runattrs_ bitrate=54.0" value="54 Mbps"/>
+        <properties name="X.Axis.Log" value="true"/>
+        <isoDataPattern>module(_runattrs_) AND name(bitrate)</isoDataPattern>
+      </items>
+      <items xsi:type="scave:ScatterChart" name="Effective bitrate vs distance" xDataPattern="module(_runattrs_) AND name(distance)">
+        <filters xsi:type="scave:Select" filterPattern="bitrate OR distance OR throughput"/>
+        <properties name="Graph.Title" value="Effective bitrate vs distance"/>
+        <properties name="X.Axis.Title" value="Distance [m]"/>
+        <properties name="Y.Axis.Title" value="Effective bitrate [Mbps]"/>
+        <properties name="Legend.Display" value="true"/>
+        <properties name="Line.Name/. throughput - . bitrate=6.0" value="6 Mbps"/>
+        <properties name="Line.Name/. throughput - . bitrate=12.0" value="12 Mbps"/>
+        <properties name="Line.Name/. throughput - . bitrate=24.0" value="24 Mbps"/>
+        <properties name="Line.Name/. throughput - . bitrate=36.0" value="36 Mbps"/>
+        <properties name="Line.Name/. throughput - . bitrate=54.0" value="54 Mbps"/>
+        <properties name="Line.Name/. throughput - . bitrate=9.0" value="9 Mbps"/>
+        <properties name="Line.Name/. throughput - . bitrate=18.0" value="18 Mbps"/>
+        <properties name="Line.Name/. throughput - . bitrate=48.0" value="48 Mbps"/>
+        <properties name="Line.Name/_runattrs_ throughput - _runattrs_ bitrate=6.0" value="6 Mbps"/>
+        <properties name="Line.Name/_runattrs_ throughput - _runattrs_ bitrate=9.0" value="9 Mbps"/>
+        <properties name="Line.Name/_runattrs_ throughput - _runattrs_ bitrate=12.0" value="12 Mbps"/>
+        <properties name="Line.Name/_runattrs_ throughput - _runattrs_ bitrate=18.0" value="18 Mbps"/>
+        <properties name="Line.Name/_runattrs_ throughput - _runattrs_ bitrate=24.0" value="24 Mbps"/>
+        <properties name="Line.Name/_runattrs_ throughput - _runattrs_ bitrate=36.0" value="36 Mbps"/>
+        <properties name="Line.Name/_runattrs_ throughput - _runattrs_ bitrate=48.0" value="48 Mbps"/>
+        <properties name="Line.Name/_runattrs_ throughput - _runattrs_ bitrate=54.0" value="54 Mbps"/>
+        <properties name="Symbols.Type" value="None"/>
+        <properties name="Line.Type" value="Linear"/>
+        <isoDataPattern>module(_runattrs_) AND name(bitrate)</isoDataPattern>
+      </items>
+    </datasets>
+  </datasets>
+  <chartSheets>
+    <chartSheets name="default" charts="//@datasets/@datasets.0/@items.5 //@datasets/@datasets.0/@items.7 //@datasets/@datasets.0/@items.6 //@datasets/@datasets.0/@items.8"/>
+  </chartSheets>
+</scave:Analysis>

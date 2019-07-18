@@ -52,7 +52,8 @@ simple PcapRecorder
     parameters:
         bool verbose = default(false);  // whether to log packets on the module output
         string pcapFile = default(""); // the PCAP file to be written
-        int pcapNetwork = default(0); // the network type header field in the PCAP file, see http://www.tcpdump.org/linktypes.html (1=ethernet, 204=ppp, 105=IEEE 802.11, ...)
+        int pcapLinkType = default(-1); // the network type header field in the PCAP file, see http://www.tcpdump.org/linktypes.html (1=ethernet, 204=ppp, 105=IEEE 802.11, ...)
+                                        // (-1 means autodetect based on first recordable packet)
         int snaplen = default(65535);  // maximum number of bytes to record per packet
         bool dumpBadFrames = default(true); // enable dump of frames with hasBitError
         string moduleNamePatterns = default("wlan[*] eth[*] ppp[*] ext[*]"); // space-separated list of sibling module names to listen on
@@ -61,6 +62,8 @@ simple PcapRecorder
         string dumpProtocols = default("ethernetmac ppp ieee80211mac"); // space-separated list of protocol names as defined in the Protocol class
         string packetFilter = default("*"); // which packets are considered, matches all packets by default
         string packetDataFilter = default("*"); // which packets are considered based on the data they contain, matches all packets by default
+        string helpers = default("");    // usable PcapRecorder::IHelper helpers for accept packettype and store/convert packet as specified linktype
+                                         // currently available: "inet::AckingMacToEthernetPcapRecorderHelper"
         bool alwaysFlush = default(false); // flush the pcapFile after each write to ensure that all packets are captured in case of a crash
         string displayStringTextFormat = default("rec: %n pks");
         @display("i=block/blackboard");

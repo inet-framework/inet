@@ -133,7 +133,13 @@ void Ipv4HeaderSerializer::serializeOption(MemoryOutputStream& stream, const Tlv
             }
             break;
         }
-        case IPOPTION_ROUTER_ALERT:
+        case IPOPTION_ROUTER_ALERT: {
+            auto *opt = check_and_cast<const Ipv4OptionRouterAlert *>(option);
+            ASSERT(length == 4);
+            stream.writeUint16Be(opt->getRouterAlert());
+            break;
+        }
+
         case IPOPTION_SECURITY:
         default: {
             throw cRuntimeError("Unknown Ipv4Option type=%d (not in an TlvOptionRaw option)", type);
@@ -189,7 +195,7 @@ const Ptr<Chunk> Ipv4HeaderSerializer::deserialize(MemoryInputStream& stream) co
         ipv4Header->markIncomplete();
     }
 
-    ipv4Header->setCrc(iphdr.ip_sum);
+    ipv4Header->setCrc(ntohs(iphdr.ip_sum));
     ipv4Header->setCrcMode(CRC_COMPUTED);
 
     return ipv4Header;
@@ -272,6 +278,16 @@ TlvOptionBase *Ipv4HeaderSerializer::deserializeOption(MemoryInputStream& stream
         }
 
         case IPOPTION_ROUTER_ALERT:
+            length = stream.readByte();
+            if (length == 4) {
+                auto *option = new Ipv4OptionRouterAlert();
+                option->setType(type);
+                option->setLength(length);
+                option->setRouterAlert(stream.readUint16Be());
+                return option;
+            }
+            break;
+
         case IPOPTION_SECURITY:
         default:
             length = stream.readByte();

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scave:Analysis xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:scave="http://www.omnetpp.org/omnetpp/scave">
+  <inputs>
+    <inputs name="/inet/showcases/wireless/sensornetwork/results/StatisticBMac-slotDuration=0.19-#*.sca"/>
+    <inputs name="/inet/showcases/wireless/sensornetwork/results/StatisticXMac-gwSlotDuration=0.14,snSlotDuration=2.5#2a0.14-#*.sca"/>
+    <inputs name="/inet/showcases/wireless/sensornetwork/results/StatisticLMac-slotDuration=0.05-#*.sca"/>
+  </inputs>
+  <datasets>
+    <datasets name="PowerConsumption">
+      <items xsi:type="scave:Add" filterPattern="module(*.server.app[0]) AND name(packetReceived:count)  "/>
+      <items xsi:type="scave:Add" filterPattern="name(residualEnergyCapacity:last) "/>
+      <items xsi:type="scave:Add" filterPattern="name(packetSent:count) "/>
+      <items xsi:type="scave:ComputeScalar" scalarName="meanResidualCapacity" valueExpr="-mean('residualEnergyCapacity:last')" moduleExpr="SensorNetworkShowcaseB" groupByExpr="experiment" averageReplications="true"/>
+      <items xsi:type="scave:ComputeScalar" scalarName="sumResidualCapacity" valueExpr="sum(*.sensor*.energyStorage.'residualEnergyCapacity:last')*-1+(*.gateway.energyStorage.'residualEnergyCapacity:last')*-1" moduleExpr="*.server" groupByExpr="measurement + replication"/>
+      <items xsi:type="scave:BarChart" name="Network total power consumption">
+        <filters xsi:type="scave:Select" filterPattern="meanResidualCapacity"/>
+        <properties name="Graph.Title" value="Network total power consumption"/>
+        <averagedFields>measurement</averagedFields>
+      </items>
+      <items xsi:type="scave:BarChart" name="Total number of packets received">
+        <filters xsi:type="scave:Select" filterPattern="name(packetReceived:count) AND module(*.server.app[0]) "/>
+        <properties name="Graph.Title" value="Total number of packets received"/>
+        <averagedFields>measurement</averagedFields>
+      </items>
+      <items xsi:type="scave:ComputeScalar" scalarName="relativePowerConsumption" valueExpr="'sumResidualCapacity'/*.server.app[0].'packetReceived:count'" moduleExpr="" groupByExpr=""/>
+      <items xsi:type="scave:BarChart" name="Power consumption per packet">
+        <filters xsi:type="scave:Select" filterPattern="name(relativePowerConsumption) "/>
+        <properties name="Graph.Title" value="Power consumption per packet"/>
+      </items>
+      <items xsi:type="scave:ComputeScalar" scalarName="sumPacketsSent" valueExpr="sum(*.sensor*.app[0].'packetSent:count') " moduleExpr="*.server" groupByExpr=""/>
+      <items xsi:type="scave:ComputeScalar" scalarName="sumPacketReceived" valueExpr="sum('packetReceived:count') " moduleExpr="*.server" groupByExpr=""/>
+      <items xsi:type="scave:ComputeScalar" scalarName="packetLoss" valueExpr="1-'sumPacketReceived'/'sumPacketsSent'" moduleExpr="*.server" groupByExpr=""/>
+      <items xsi:type="scave:BarChart" name="Packet loss">
+        <filters xsi:type="scave:Select" filterPattern="name(packetLoss) "/>
+        <properties name="Graph.Title" value="Packet loss"/>
+        <properties name="Y.Axis.Max" value="0.15"/>
+        <averagedFields>measurement</averagedFields>
+      </items>
+    </datasets>
+  </datasets>
+  <chartSheets>
+    <chartSheets name="default" charts="//@datasets/@datasets.0/@items.6 //@datasets/@datasets.0/@items.5 //@datasets/@datasets.0/@items.8 //@datasets/@datasets.0/@items.12"/>
+  </chartSheets>
+</scave:Analysis>

@@ -91,7 +91,7 @@ void LoRaMac::initialize(int stage)
         mediumStateChange = new cMessage("MediumStateChange");
 
         // set up internal queue
-        transmissionQueue = check_and_cast<queueing::IPacketQueue *>(getSubmodule("queue"));
+        txQueue = check_and_cast<queueing::IPacketQueue *>(getSubmodule("queue"));
 
         // state variables
         fsm.setName("LoRaMac State Machine");
@@ -181,11 +181,13 @@ void LoRaMac::handleUpperMessage(cMessage *msg)
 
     EV << "frame " << pktEncap << " received from higher layer, receiver = " << frame->getReceiverAddress() << endl;
 
-    transmissionQueue->pushPacket(pktEncap);
+    txQueue->pushPacket(pktEncap);
     if (fsm.getState() != IDLE)
         EV << "deferring upper message transmission in " << fsm.getStateName() << " state\n";
-    else
-        handleWithFsm(transmissionQueue->getPacket(0));
+    else {
+        popTxQueue();
+        handleWithFsm(currentTxFrame);
+    }
 }
 
 void LoRaMac::handleLowerMessage(cMessage *msg)
@@ -248,7 +250,6 @@ void LoRaMac::handleWithFsm(cMessage *msg)
             FSMA_Event_Transition(Receive-Unicast-Not-For,
                                   isLowerMessage(msg) && !isForUs(frame),
                                   LISTENING_1,
-                delete pkt;
             );
             FSMA_Event_Transition(Receive-Unicast,
                                   isLowerMessage(msg) && isForUs(frame),
@@ -290,7 +291,6 @@ void LoRaMac::handleWithFsm(cMessage *msg)
             FSMA_Event_Transition(Receive2-Unicast-Not-For,
                                   isLowerMessage(msg) && !isForUs(frame),
                                   LISTENING_2,
-                delete pkt;
             );
             FSMA_Event_Transition(Receive2-Unicast,
                                   isLowerMessage(msg) && isForUs(frame),
@@ -303,9 +303,28 @@ void LoRaMac::handleWithFsm(cMessage *msg)
                                   msg == droppedPacket,
                                   LISTENING_2,
             );
-
         }
     }
+
+    if (fsm.getState() == IDLE) {
+        if (isReceiving())
+            handleWithFsm(mediumStateChange);
+        else if (currentTxFrame != nullptr)
+            handleWithFsm(currentTxFrame);
+        else if (!txQueue->isEmpty()) {
+            popTxQueue();
+            handleWithFsm(currentTxFrame);
+        }
+    }
+    if (endSifs) {
+        if (isLowerMessage(msg) && pkt->getOwner() == this && (endSifs->getContextPointer() != pkt))
+            delete pkt;
+    }
+    else {
+        if (isLowerMessage(msg) && pkt->getOwner() == this)
+            delete pkt;
+    }
+    getDisplayString().setTagArg("t", 0, fsm.getStateName());
 }
 
 void LoRaMac::receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details)
@@ -399,8 +418,6 @@ void LoRaMac::sendDataFrame(Packet *frameToSend)
 
 void LoRaMac::sendAckFrame()
 {
-
-
     auto frameToAck = static_cast<Packet *>(endSifs->getContextPointer());
     endSifs->setContextPointer(nullptr);
     auto macHeader = makeShared<CsmaCaMacAckHeader>();
@@ -430,18 +447,14 @@ void LoRaMac::finishCurrentTransmission()
     scheduleAt(simTime() + waitDelay1Time + listening1Time, endListening_1);
     scheduleAt(simTime() + waitDelay1Time + listening1Time + waitDelay2Time, endDelay_2);
     scheduleAt(simTime() + waitDelay1Time + listening1Time + waitDelay2Time + listening2Time, endListening_2);
-    popTransmissionQueue();
+    deleteCurrentTxFrame();
+    //popTxQueue();
 }
 
 Packet *LoRaMac::getCurrentTransmission()
 {
-    return static_cast<Packet *>(transmissionQueue->getPacket(0));
-}
-
-void LoRaMac::popTransmissionQueue()
-{
-    EV << "dropping frame from transmission queue\n";
-    delete transmissionQueue->popPacket();
+    ASSERT(currentTxFrame != nullptr);
+    return currentTxFrame;
 }
 
 bool LoRaMac::isReceiving()

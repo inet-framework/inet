@@ -26,6 +26,14 @@
 namespace inet {
 
 Register_Serializer(IgmpMessage, IgmpHeaderSerializer);
+Register_Serializer(IgmpQuery, IgmpHeaderSerializer);
+Register_Serializer(Igmpv1Query, IgmpHeaderSerializer);
+Register_Serializer(Igmpv1Report, IgmpHeaderSerializer);
+Register_Serializer(Igmpv2Query, IgmpHeaderSerializer);
+Register_Serializer(Igmpv2Report, IgmpHeaderSerializer);
+Register_Serializer(Igmpv2Leave, IgmpHeaderSerializer);
+Register_Serializer(Igmpv3Query, IgmpHeaderSerializer);
+Register_Serializer(Igmpv3Report, IgmpHeaderSerializer);
 
 void IgmpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {

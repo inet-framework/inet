@@ -48,21 +48,17 @@ class INET_API AckingMac : public MacProtocolBase
 
     physicallayer::IRadio *radio = nullptr;
     physicallayer::IRadio::TransmissionState transmissionState = physicallayer::IRadio::TRANSMISSION_STATE_UNDEFINED;
-    queueing::IPacketQueue *queue = nullptr;
 
-    Packet *lastSentPk = nullptr;
     simtime_t ackTimeout;
     cMessage *ackTimeoutMsg = nullptr;
 
   protected:
     /** implements MacBase functions */
     //@{
-    virtual void flushQueue();
-    virtual void clearQueue();
     virtual void configureInterfaceEntry() override;
     //@}
 
-    virtual void startTransmitting(Packet *msg);
+    virtual void startTransmitting();
     virtual bool dropFrameNotForUs(Packet *frame);
     virtual void encapsulate(Packet *msg);
     virtual void decapsulate(Packet *frame);
@@ -77,11 +73,6 @@ class INET_API AckingMac : public MacProtocolBase
     virtual void handleLowerPacket(Packet *packet) override;
     virtual void handleSelfMessage(cMessage *message) override;
     //@}
-
-    // OperationalBase:
-    virtual void handleStartOperation(LifecycleOperation *operation) override {}    //TODO implementation
-    virtual void handleStopOperation(LifecycleOperation *operation) override {}    //TODO implementation
-    virtual void handleCrashOperation(LifecycleOperation *operation) override {}    //TODO implementation
 
   public:
     AckingMac();

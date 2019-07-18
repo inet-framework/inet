@@ -312,6 +312,30 @@ class INET_API MemoryInputStream {
     }
 
     /**
+     * Reads a 24 bit unsigned integer at the current position of the stream in
+     * big endian byte order and MSB to LSB bit order.
+     */
+    uint32_t readUint24Be() {
+        uint32_t value = 0;
+        value |= (static_cast<uint32_t>(readByte()) << 16);
+        value |= (static_cast<uint32_t>(readByte()) << 8);
+        value |= (static_cast<uint32_t>(readByte()) << 0);
+        return value;
+    }
+
+    /**
+     * Reads a 24 bit unsigned integer at the current position of the stream in
+     * little endian byte order and MSB to LSB bit order.
+     */
+    uint32_t readUint24Le() {
+        uint32_t value = 0;
+        value |= (static_cast<uint32_t>(readByte()) << 0);
+        value |= (static_cast<uint32_t>(readByte()) << 8);
+        value |= (static_cast<uint32_t>(readByte()) << 16);
+        return value;
+    }
+
+    /**
      * Reads a 32 bit unsigned integer at the current position of the stream in
      * big endian byte order and MSB to LSB bit order.
      */
@@ -404,9 +428,29 @@ class INET_API MemoryInputStream {
         return Ipv6Address(d[0], d[1], d[2], d[3]);
     }
     //@}
+
+    /** @name other useful streaming functions */
+    //@{
+    /**
+     * Reads n bits of a 64 bit unsigned integer at the current position of the
+     * stream in big endian byte order and MSB to LSB bit order.
+     */
+    uint64_t readNBitsToUint64Be(uint8_t n) {
+        if (n == 0 || n > 64)
+            throw cRuntimeError("Can not read 0 bit or more than 64 bits.");
+        uint64_t mul = 1 << (n - 1);
+        uint64_t num = 0;
+        for (int i = 0; i < n; ++i) {
+            if (readBit())
+                num |= mul;
+            mul >>= 1;
+        }
+        return num;
+    }
+    //@}
 };
 
-} // namespace
+} // namespace inet
 
 #endif // #ifndef __INET_MEMORYINPUTSTREAM_H_
 

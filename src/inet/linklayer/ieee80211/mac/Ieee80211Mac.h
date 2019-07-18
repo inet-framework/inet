@@ -117,6 +117,10 @@ class INET_API Ieee80211Mac : public MacProtocolBase
 
     virtual void processUpperFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header);
     virtual void processLowerFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header);
+
+    void deleteCurrentTxFrame() override { throw cRuntimeError("model error"); }
+    void dropCurrentTxFrame(PacketDropDetails& details) override { throw cRuntimeError("model error"); }
+    void popTxQueue() override { throw cRuntimeError("model error"); }
 };
 
 } // namespace ieee80211

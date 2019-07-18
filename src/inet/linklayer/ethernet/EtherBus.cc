@@ -225,6 +225,7 @@ void EtherBus::handleMessage(cMessage *msg)
         int direction = msg->getKind();
         BusTap *thistap = (BusTap *)msg->getContextPointer();
         int tapPoint = thistap->id;
+        msg->setContextPointer(nullptr);
 
         EV << "Event " << msg << " on tap " << tapPoint << ", sending out frame\n";
 

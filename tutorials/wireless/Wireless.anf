@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scave:Analysis xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:scave="http://www.omnetpp.org/omnetpp/scave">
+  <inputs>
+    <inputs name="/inet/tutorials/wireless/results/Wireless*.vec"/>
+    <inputs name="/inet/tutorials/wireless/results/Wireless*.sca"/>
+  </inputs>
+  <datasets>
+    <datasets name="Received packet seq numbers in Step 6 and 7">
+      <items xsi:type="scave:Add" filterPattern="module(*.hostB.app[0]) AND name(rcvdPkSeqNo:vector) AND (file(*results/Wireless06-#0.vec) OR file(*results/Wireless07-#0.vec))" type="VECTOR"/>
+      <items xsi:type="scave:LineChart" name="Received packet seq numbers in Step 6 and 7" lineNameFormat=""/>
+      <items xsi:type="scave:Apply" operation="difference"/>
+      <items xsi:type="scave:LineChart" name="Jumps in received packet seq numbers in Step 6 and 7" lineNameFormat=""/>
+    </datasets>
+    <datasets name="Received packet counts">
+      <items xsi:type="scave:Add" filterPattern="module(*.hostB.app[0]) AND name(rcvdPk:count)"/>
+      <items xsi:type="scave:BarChart" name="Received packet counts"/>
+    </datasets>
+    <datasets name="bitErrorRate:vector WirelessC.hostR1.wlan[0].radio">
+      <items xsi:type="scave:Add" filterPattern="module(WirelessC.hostR1.wlan[0].radio) AND name(bitErrorRate:vector) AND (file(*results/Wireless12-#0.vec) OR file(*results/Wireless13-#0.vec)) " type="VECTOR"/>
+      <items xsi:type="scave:LineChart" name="bitErrorRate:vector WirelessC.hostR1.wlan[0].radio" lineNameFormat="">
+        <properties name="Y.Axis.Max" value="2.0E-4"/>
+        <properties name="Legend.Display" value="true"/>
+        <properties name="X.Axis.Max" value="11.0"/>
+        <properties name="Line.Name//inet/tutorials/wireless/results/Wireless12-#0.vec Wireless12-0-20190220-11:21:26-8405 Wireless12" value="free space path loss"/>
+        <properties name="Line.Name//inet/tutorials/wireless/results/Wireless13-#0.vec Wireless13-0-20190220-11:21:38-8405 Wireless13" value="two ray ground reflection"/>
+        <properties name="Line.Type" value="Dots"/>
+      </items>
+    </datasets>
+  </datasets>
+  <chartSheets>
+    <chartSheets name="default" charts="//@datasets/@datasets.0/@items.3"/>
+  </chartSheets>
+</scave:Analysis>

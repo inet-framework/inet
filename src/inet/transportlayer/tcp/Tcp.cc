@@ -89,9 +89,7 @@ void Tcp::initialize(int stage)
         useDataNotification = par("useDataNotification");
 
         const char *crcModeString = par("crcMode");
-        crcMode = parseCrcMode(crcModeString);
-        if (crcMode == CRC_DISABLED)
-            throw cRuntimeError("Unknown crc mode: '%s'", crcModeString);
+        crcMode = parseCrcMode(crcModeString, false);
         msl = par("msl");
     }
     else if (stage == INITSTAGE_TRANSPORT_LAYER) {
@@ -189,6 +187,9 @@ void Tcp::handleMessageWhenUp(cMessage *msg)
 
             if (!checkCrc(tcpHeader, packet)) {
                 EV_WARN << "Tcp segment has wrong CRC, dropped\n";
+                PacketDropDetails details;
+                details.setReason(INCORRECTLY_RECEIVED);
+                emit(packetDroppedSignal, packet, &details);
                 delete packet;
                 return;
             }

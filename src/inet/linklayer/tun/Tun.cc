@@ -34,7 +34,11 @@ Define_Module(Tun);
 
 void Tun::initialize(int stage)
 {
-    MacBase::initialize(stage);
+    MacProtocolBase::initialize(stage);
+    if (stage == INITSTAGE_LOCAL) {
+        lowerLayerInGateId = findGate("phys$i");
+        lowerLayerOutGateId = findGate("phys$o");
+    }
 }
 
 void Tun::configureInterfaceEntry()
@@ -114,16 +118,6 @@ void Tun::handleUpperCommand(cMessage *message)
     }
     else
         throw cRuntimeError("Unknown command: %s", message->getName());
-}
-
-void Tun::flushQueue()
-{
-    // does not have a queue, do nothing
-}
-
-void Tun::clearQueue()
-{
-    // does not have a queue, do nothing
 }
 
 } // namespace inet

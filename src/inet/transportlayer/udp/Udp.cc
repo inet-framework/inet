@@ -126,7 +126,7 @@ void Udp::initialize(int stage)
         WATCH_MAP(socketsByPortMap);
 
         const char *crcModeString = par("crcMode");
-        crcMode = parseCrcMode(crcModeString);
+        crcMode = parseCrcMode(crcModeString, true);
 
         lastEphemeralPort = EPHEMERAL_PORTRANGE_START;
         ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
@@ -144,6 +144,15 @@ void Udp::initialize(int stage)
     }
     else if (stage == INITSTAGE_TRANSPORT_LAYER) {
         if (crcMode == CRC_COMPUTED) {
+            //TODO:
+            // Unlike IPv4, when UDP packets are originated by an IPv6 node,
+            // the UDP checksum is not optional.  That is, whenever
+            // originating a UDP packet, an IPv6 node must compute a UDP
+            // checksum over the packet and the pseudo-header, and, if that
+            // computation yields a result of zero, it must be changed to hex
+            // FFFF for placement in the UDP header.  IPv6 receivers must
+            // discard UDP packets containing a zero checksum, and should log
+            // the error.
 #ifdef WITH_IPv4
             auto ipv4 = dynamic_cast<INetfilter *>(getModuleByPath("^.ipv4.ip"));
             if (ipv4 != nullptr)
@@ -477,6 +486,9 @@ void Udp::processICMPv4Error(Packet *packet)
         icmp = getModuleFromPar<Icmp>(par("icmpModule"), this);
     if (!icmp->verifyCrc(packet)) {
         EV_WARN << "incoming ICMP packet has wrong CRC, dropped\n";
+        PacketDropDetails details;
+        details.setReason(INCORRECTLY_RECEIVED);
+        emit(packetDroppedSignal, packet, &details);
         delete packet;
         return;
     }
@@ -529,6 +541,9 @@ void Udp::processICMPv6Error(Packet *packet)
         icmpv6 = getModuleFromPar<Icmpv6>(par("icmpv6Module"), this);
     if (!icmpv6->verifyCrc(packet)) {
         EV_WARN << "incoming ICMPv6 packet has wrong CRC, dropped\n";
+        PacketDropDetails details;
+        details.setReason(INCORRECTLY_RECEIVED);
+        emit(packetDroppedSignal, packet, &details);
         delete packet;
         return;
     }
@@ -1300,9 +1315,11 @@ void Udp::insertCrc(const Protocol *networkProtocol, const L3Address& srcAddress
             // if the CRC mode is computed, then compute the CRC and set it
             // this computation is delayed after the routing decision, see INetfilter hook
             udpHeader->setCrc(0x0000); // make sure that the CRC is 0 in the Udp header before computing the CRC
+            udpHeader->setCrcMode(CRC_DISABLED);    // for serializer/deserializer checks only: deserializer sets the crcMode to disabled when crc is 0
             auto udpData = packet->peekData();
             auto crc = computeCrc(networkProtocol, srcAddress, destAddress, udpHeader, udpData);
             udpHeader->setCrc(crc);
+            udpHeader->setCrcMode(CRC_COMPUTED);
             break;
         }
         default:

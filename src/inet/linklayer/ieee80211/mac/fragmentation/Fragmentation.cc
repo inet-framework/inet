@@ -29,7 +29,7 @@ std::vector<Packet *> *Fragmentation::fragmentFrame(Packet *frame, const std::ve
     B offset = B(0);
     std::vector<Packet *> *fragments = new std::vector<Packet *>();
     const auto& frameHeader = frame->popAtFront<Ieee80211DataOrMgmtHeader>();
-    frame->popAtBack<Ieee80211MacTrailer>();
+    frame->popAtBack<Ieee80211MacTrailer>(B(4));
     for (size_t i = 0; i < fragmentSizes.size(); i++) {
         bool lastFragment = i == fragmentSizes.size() - 1;
         std::string name = std::string(frame->getName()) + "-frag" + std::to_string(i);

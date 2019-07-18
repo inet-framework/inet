@@ -23,6 +23,7 @@ namespace queueing {
 
 void PacketQueueingElementBase::animateSend(Packet *packet, cGate *gate)
 {
+    return;
     auto envir = getEnvir();
     if (envir->isGUI()) {
         packet->setSentFrom(gate->getOwnerModule(), gate->getId(), simTime());

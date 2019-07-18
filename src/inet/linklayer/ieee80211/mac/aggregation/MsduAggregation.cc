@@ -72,7 +72,7 @@ Packet *MsduAggregation::aggregateFrames(std::vector<Packet *> *frames)
         auto msduSubframeHeader = makeShared<Ieee80211MsduSubframeHeader>();
         auto frame = frames->at(i);
         const auto& header = frame->popAtFront<Ieee80211DataHeader>();
-        frame->popAtBack<Ieee80211MacTrailer>();
+        frame->popAtBack<Ieee80211MacTrailer>(B(4));
         auto msdu = frame->peekData();
         msduSubframeHeader->setLength(B(msdu->getChunkLength()).get());
         setSubframeAddress(msduSubframeHeader, header);

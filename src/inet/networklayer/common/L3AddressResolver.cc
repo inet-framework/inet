@@ -504,19 +504,31 @@ NextHopRoutingTable *L3AddressResolver::findNextHopRoutingTableOf(cModule *host)
 #endif // ifdef WITH_NEXTHOP
 }
 
+std::vector<cModule*> L3AddressResolver::collectNetworkNodes()
+{
+    std::vector<cModule*> result;
+    doCollectNetworkNodes(getSimulation()->getSystemModule(), result);
+    return result;
+}
+
+void L3AddressResolver::doCollectNetworkNodes(cModule *parent, std::vector<cModule*>& result)
+{
+    for (cModule::SubmoduleIterator it(parent); !it.end(); ++it) {
+        cModule *submodule = *it;
+        if (submodule->getProperties()->getAsBool("networkNode"))
+            result.push_back(submodule);
+        else
+            doCollectNetworkNodes(submodule, result);
+    }
+}
+
 cModule *L3AddressResolver::findHostWithAddress(const L3Address& add)
 {
     if (add.isUnspecified() || add.isMulticast())
         return nullptr;
 
-    // TODO: FIXME: this is a very bad idea, because it can be very slow for a large network
-    cTopology topo("topo");
-    topo.extractByProperty("networkNode");
-
-    // fill in isIPNode, ift and rt members in nodeInfo[]
-
-    for (int i = 0; i < topo.getNumNodes(); i++) {
-        cModule *mod = topo.getNode(i)->getModule();
+    auto networkNodes = collectNetworkNodes();
+    for (cModule *mod : networkNodes) {
         IInterfaceTable *itable = L3AddressResolver().findInterfaceTableOf(mod);
         if (itable != nullptr) {
             for (int i = 0; i < itable->getNumInterfaces(); i++) {
@@ -553,6 +565,31 @@ cModule *L3AddressResolver::findHostWithAddress(const L3Address& add)
         }
     }
     return nullptr;
+}
+
+InterfaceEntry *L3AddressResolver::findInterfaceWithMacAddress(const MacAddress& addr)
+{
+    if (addr.isUnspecified() || addr.isBroadcast() || addr.isMulticast())
+        return nullptr;
+
+    auto networkNodes = collectNetworkNodes();
+    for (cModule *mod : networkNodes) {
+        IInterfaceTable *itable = L3AddressResolver().findInterfaceTableOf(mod);
+        if (itable != nullptr) {
+            for (int i = 0; i < itable->getNumInterfaces(); i++) {
+                InterfaceEntry *entry = itable->getInterface(i);
+                if (entry->getMacAddress() == addr)
+                    return entry;
+            }
+        }
+    }
+    return nullptr;
+}
+
+cModule *L3AddressResolver::findHostWithMacAddress(const MacAddress& addr)
+{
+    InterfaceEntry *entry = findInterfaceWithMacAddress(addr);
+    return entry ? entry->getInterfaceTable()->getHostModule() : nullptr;
 }
 
 } // namespace inet
