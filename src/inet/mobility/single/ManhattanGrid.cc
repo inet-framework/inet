@@ -22,7 +22,8 @@
 #include "inet/common/geometry/common/GeographicCoordinateSystem.h"
 #include "inet/common/geometry/common/Quaternion.h"
 #include "inet/mobility/single/ManhattanGrid.h"
-#include  <cmath>
+#include <algorithm>
+#include <cmath>
 
 namespace inet {
 
