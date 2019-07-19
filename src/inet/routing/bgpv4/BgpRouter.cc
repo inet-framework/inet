@@ -423,18 +423,10 @@ void BgpRouter::socketDataArrived(TcpSocket *socket, Packet *msg, bool urgent)
 {
     _currSessionId = findIdFromSocketConnId(_BGPSessions, socket->getSocketId());
     if (_currSessionId != static_cast<SessionId>(-1)) {
-        const Ptr<const Chunk>& chunk = msg->peekAll();
-        auto cType = chunk->getChunkType();
-        if(cType == Chunk::CT_FIELDS) {
-            processChunks(*check_and_cast<const BgpHeader *>(chunk.get()));
+        while (msg->getByteLength() > 0) {
+            const auto& chunk = msg->popAtFront<BgpHeader>();
+            processChunks(*(chunk.get()));
         }
-        else if(cType == Chunk::CT_SEQUENCE) {
-            for (const auto& elementChunk : staticPtrCast<const SequenceChunk>(chunk)->getChunks()) {
-                processChunks(*check_and_cast<const BgpHeader *>(elementChunk.get()));
-            }
-        }
-        else
-            throw cRuntimeError("Invalid chunk type %d", cType);
     }
     delete msg;
 }
