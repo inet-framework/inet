@@ -57,7 +57,25 @@ Ospfv3Interface::Ospfv3Interface(const char* name, cModule* routerModule, Ospfv3
 
 Ospfv3Interface::~Ospfv3Interface()
 {
-
+    this->getArea()->getInstance()->getProcess()->clearTimer(helloTimer);
+    this->getArea()->getInstance()->getProcess()->clearTimer(waitTimer);
+    this->getArea()->getInstance()->getProcess()->clearTimer(acknowledgementTimer);
+    delete helloTimer;
+    delete waitTimer;
+    delete acknowledgementTimer;
+    if (previousState != nullptr) {
+        delete previousState;
+    }
+    delete state;
+    long neighborCount = neighbors.size();
+    for (long i = 0; i < neighborCount; i++) {
+        delete neighbors[i];
+    }
+    long lsaCount = linkLSAList.size();
+    for (long j = 0; j < lsaCount; j++) {
+        delete linkLSAList[j];
+    }
+    linkLSAList.clear();
 }//destructor
 
 void Ospfv3Interface::processEvent(Ospfv3Interface::Ospfv3InterfaceEvent event)
@@ -710,6 +728,7 @@ void Ospfv3Interface::processDDPacket(Packet* packet){
                     neighbor->retransmitDatabaseDescriptionPacket();
                 }
             }
+            delete(packet);
         }
         break;
 
@@ -740,6 +759,7 @@ void Ospfv3Interface::processDDPacket(Packet* packet){
                     }
                 }
             }
+            delete(packet);
         }
         break;
 
@@ -861,7 +881,6 @@ void Ospfv3Interface::processLSR(Packet* packet, Ospfv3Neighbor* neighbor){
         }
 
         if(!error) {
-            int updateCount = lsas.size();
             int hopLimit = (this->getType() == Ospfv3Interface::VIRTUAL_TYPE) ? VIRTUAL_LINK_TTL : 1;
 
             Packet* updatePacket = this->prepareUpdatePacket(lsas);
@@ -1548,7 +1567,7 @@ void Ospfv3Interface::sendDelayedAcknowledgements()
 ////-------------------------------------------- Flooding ---------------------------------------------//
 bool Ospfv3Interface::floodLSA(const Ospfv3Lsa* lsa, Ospfv3Interface* interface, Ospfv3Neighbor* neighbor)
 {
-    std::cout << this->getArea()->getInstance()->getProcess()->getRouterID() << " - FLOOD LSA INTERFACE!!" << endl;
+    //std::cout << this->getArea()->getInstance()->getProcess()->getRouterID() << " - FLOOD LSA INTERFACE!!" << endl;
     bool floodedBackOut = false;
 
     if (
