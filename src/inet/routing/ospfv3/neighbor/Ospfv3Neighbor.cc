@@ -54,7 +54,22 @@ Ospfv3Neighbor::Ospfv3Neighbor(Ipv4Address newId, Ospfv3Interface* parent)
 
 Ospfv3Neighbor::~Ospfv3Neighbor()
 {
-
+    reset();
+    Ospfv3Process *proc = this->getInterface()->getArea()->getInstance()->getProcess();
+    proc->clearTimer(inactivityTimer);
+    proc->clearTimer(pollTimer);
+    proc->clearTimer(ddRetransmissionTimer);
+    proc->clearTimer(updateRetransmissionTimer);
+    proc->clearTimer(requestRetransmissionTimer);
+    delete inactivityTimer;
+    delete pollTimer;
+    delete ddRetransmissionTimer;
+    delete updateRetransmissionTimer;
+    delete requestRetransmissionTimer;
+    if (previousState != nullptr) {
+        delete previousState;
+    }
+    delete state;
 }//destructor
 Ospfv3Neighbor::Ospfv3NeighborStateType Ospfv3Neighbor::getState() const
 {

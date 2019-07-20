@@ -14,7 +14,11 @@ Ospfv3Splitter::Ospfv3Splitter()
 
 Ospfv3Splitter::~Ospfv3Splitter()
 {
-
+    processesModules.clear();
+    /*long processCount = processesModules.size();
+    for (long i = 0; i < processCount; i++) {
+        delete processesModules[i];
+    }*/
 }
 
 void Ospfv3Splitter::initialize(int stage)

@@ -21,6 +21,31 @@ Ospfv3Area::Ospfv3Area(Ipv4Address areaID, Ospfv3Instance* parent, Ospfv3AreaTyp
 
 Ospfv3Area::~Ospfv3Area()
 {
+    int interfaceNum = interfaceList.size();
+    for (int i = 0; i < interfaceNum; i++) {
+        delete (interfaceList[i]);
+    }
+    interfaceList.clear();
+    long lsaCount = routerLSAList.size();
+    for (long j = 0; j < lsaCount; j++) {
+        delete routerLSAList[j];
+    }
+    routerLSAList.clear();
+    lsaCount = networkLSAList.size();
+    for (long k = 0; k < lsaCount; k++) {
+        delete networkLSAList[k];
+    }
+    networkLSAList.clear();
+    lsaCount = interAreaPrefixLSAList.size();
+    for (long m = 0; m < lsaCount; m++) {
+        delete interAreaPrefixLSAList[m];
+    }
+    interAreaPrefixLSAList.clear();
+    lsaCount = intraAreaPrefixLSAList.size();
+    for (long m = 0; m < lsaCount; m++) {
+        delete intraAreaPrefixLSAList[m];
+    }
+    intraAreaPrefixLSAList.clear();
 }
 
 void Ospfv3Area::init()
@@ -921,7 +946,7 @@ void Ospfv3Area::deleteRouterLSA(int index) {
 bool Ospfv3Area::floodLSA(const Ospfv3Lsa* lsa, Ospfv3Interface* interface, Ospfv3Neighbor* neighbor)
 {
     EV_DEBUG << "Flooding from Area to all interfaces\n";
-    std::cout << this->getInstance()->getProcess()->getRouterID() << " - FLOOD LSA AREA!!" << endl;
+    //std::cout << this->getInstance()->getProcess()->getRouterID() << " - FLOOD LSA AREA!!" << endl;
     bool floodedBackOut = false;
     long interfaceCount = this->interfaceList.size();
 
