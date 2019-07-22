@@ -23,6 +23,7 @@
 #include "inet/routing/bgpv4/BgpCommon_m.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
+#include "inet/networklayer/ipv6/Ipv6Header_m.h"
 
 namespace inet {
 
@@ -48,17 +49,27 @@ const unsigned char NEW_SESSION_ESTABLISHED = 92;
 const unsigned char ASLOOP_NO_DETECTED = 93;
 const unsigned char ASLOOP_DETECTED = 94;
 
+const unsigned char WITHDRAWN_ROUTE = 95;
+
 typedef Ipv4Address NextHop;
+typedef Ipv6Address Nexthop6;
 typedef unsigned short AsId;
 typedef unsigned long SessionId;
 
 struct SessionInfo
 {
+    //support for multi address-family
+    bool multiAddress = false;
     SessionId sessionID = 0;
     BgpSessionType sessionType = INCOMPLETE;
     AsId ASValue = 0;
     Ipv4Address routerID;
+    Ipv4Address localAddr;
     Ipv4Address peerAddr;
+    std::vector<Ipv4Address> routesFromPeer;
+    std::vector<Ipv6Address> routesFromPeer6;
+    Ipv6Address localAddr6;
+    Ipv6Address peerAddr6;
     InterfaceEntry *linkIntf = nullptr;
     TcpSocket *socket = nullptr;
     TcpSocket *socketListen = nullptr;

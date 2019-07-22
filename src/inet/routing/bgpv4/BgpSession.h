@@ -1,5 +1,6 @@
 //
 // Copyright (C) 2010 Helene Lageber
+//    2019 Adrian Novak - multi address-family support
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -39,6 +40,7 @@ class INET_API BgpSession : public cObject
     virtual ~BgpSession();
 
     void startConnection();
+    void restartConnection();
     void restartsHoldTimer();
     void restartsKeepAliveTimer();
     void restartsConnectRetryTimer(bool start = true);
@@ -48,8 +50,11 @@ class INET_API BgpSession : public cObject
     void listenConnectionFromPeer() { _bgpRouting.listenConnectionFromPeer(_info.sessionID); }
     void openTCPConnectionToPeer() { _bgpRouting.openTCPConnectionToPeer(_info.sessionID); }
     SessionId findAndStartNextSession(BgpSessionType type) { return _bgpRouting.findNextSession(type, true); }
+    SessionId findAndStartNextSessionTmp(BgpSessionType type) { return _bgpRouting.findNextSession(type, false); }
 
     //setters for creating and editing the information in the Bgp session:
+    void setNetworkFromPeer(Ipv4Address address);
+    void setNetworkFromPeer6(Ipv6Address address);
     void setInfo(SessionInfo info);
     void setTimers(simtime_t *delayTab);
     void setlinkIntf(InterfaceEntry *intf) { _info.linkIntf = intf; }
@@ -63,13 +68,34 @@ class INET_API BgpSession : public cObject
     BgpSessionType getType() { return _info.sessionType; }
     InterfaceEntry *getLinkIntf() { return _info.linkIntf; }
     Ipv4Address getPeerAddr() { return _info.peerAddr; }
+    Ipv4Address getLocalAddr() { return _info.localAddr; }
     TcpSocket *getSocket() { return _info.socket; }
     TcpSocket *getSocketListen() { return _info.socketListen; }
     IIpv4RoutingTable *getIPRoutingTable() { return _bgpRouting.getIPRoutingTable(); }
     std::vector<RoutingTableEntry *> getBGPRoutingTable() { return _bgpRouting.getBGPRoutingTable(); }
     Macho::Machine<fsm::TopState>& getFSM() { return *_fsm; }
-    bool checkExternalRoute(const Ipv4Route *ospfRoute) { return _bgpRouting.checkExternalRoute(ospfRoute); }
+//    bool checkExternalRoute(const Ipv4Route *ospfRoute) { return _bgpRouting.checkExternalRoute(ospfRoute); }
     void updateSendProcess(RoutingTableEntry *entry) { return _bgpRouting.updateSendProcess(NEW_SESSION_ESTABLISHED, _info.sessionID, entry); }
+    void updateSendProcess6(RoutingTableEntry6 *entry) { return _bgpRouting.updateSendProcess6(NEW_SESSION_ESTABLISHED, _info.sessionID, entry); }
+    void updateSendWithdrawnProcess(Ipv4Route *entry) { return _bgpRouting.updateSendProcess(WITHDRAWN_ROUTE, _info.sessionID, static_cast<RoutingTableEntry *>(entry)); }
+    void updateSendWithdrawnProcess6(Ipv6Route *entry) { return _bgpRouting.updateSendProcess6(WITHDRAWN_ROUTE, _info.sessionID, static_cast<RoutingTableEntry6 *>(entry)); }
+
+    bool isMultiAddress() { return _info.multiAddress; }
+    Ipv6Address getPeerAddr6() { return _info.peerAddr6; }
+    Ipv6Address getLocalAddr6() { return _info.localAddr6; }
+    Ipv6RoutingTable *getIPRoutingTable6() { return _bgpRouting.getIPRoutingTable6(); }
+    std::vector<RoutingTableEntry6 *> getBGPRoutingTable6() { return _bgpRouting.getBGPRoutingTable6(); }
+    std::vector<Ipv4Address> getNetworksToAdvertise() { return _bgpRouting.getNetworksToAdvertise(); }
+    std::vector<Ipv6Address> getNetworksToAdvertise6() { return _bgpRouting.getNetworksToAdvertise6(); }
+    int isInRoutingTable(Ipv4Address network) { return _bgpRouting.isInRoutingTable( _bgpRouting.getIPRoutingTable(), network); }
+    int isInRoutingTable6(Ipv6Address network) { return _bgpRouting.isInRoutingTable6( _bgpRouting.getIPRoutingTable6(), network); }
+    const char * getDeviceName() { return _bgpRouting.getParentModule()->getName(); }
+
+    std::vector<Ipv4Address> getNetworksFromPeer() { return _info.routesFromPeer; }
+    std::vector<Ipv6Address> getNetworksFromPeer6() { return _info.routesFromPeer6; }
+
+    bool deleteFromRT(Ipv4Route *entry) { return _bgpRouting.deleteBGPRoutingEntry(static_cast<RoutingTableEntry *>(entry)); }
+    bool deleteFromRT6(Ipv6Route *entry) { return _bgpRouting.deleteBGPRoutingEntry6(static_cast<RoutingTableEntry6 *>(entry)); }
 
   private:
     SessionInfo _info;

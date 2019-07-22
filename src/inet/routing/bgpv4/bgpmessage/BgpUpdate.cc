@@ -23,13 +23,13 @@ namespace bgp {
 
 Register_Class(BgpUpdateMessage)
 
-void BgpUpdateMessage::setWithdrawnRoutesArraySize(size_t size)
-{
-    unsigned short delta_size = size - getWithdrawnRoutesArraySize();
-    unsigned short delta_bytes = delta_size * 5;    // 5 = Withdrawn Route length
-    BgpUpdateMessage_Base::setWithdrawnRoutesArraySize(size);
-    setChunkLength(getChunkLength() + B(delta_bytes));
-}
+//void BgpUpdateMessage::setWithdrawnRoutesArraySize(size_t size)
+//{
+//    unsigned short delta_size = size - getWithdrawnRoutesArraySize();
+//    unsigned short delta_bytes = delta_size * 5;    // 5 = Withdrawn Route length
+//    BgpUpdateMessage_Base::setWithdrawnRoutesArraySize(size);
+//    setChunkLength(getChunkLength() + B(delta_bytes));
+//}
 
 unsigned short BgpUpdateMessage::computePathAttributesBytes(const BgpUpdatePathAttributeList& pathAttrs)
 {
@@ -67,6 +67,47 @@ void BgpUpdateMessage::setNLRI(const BgpUpdateNlri& NLRI_var)
     //FIXME bug: the length always incremented
     setChunkLength(getChunkLength() + B(5));    //5 = NLRI (length (1) + Ipv4Address (4))
     BgpUpdateMessage_Base::NLRI = NLRI_var;
+}
+
+Register_Class(BgpUpdateMessage6)
+
+//void BgpUpdateMessage6::setWithdrawnRoutesArraySize(size_t size)
+//{
+//    unsigned short delta_size = size - getWithdrawnRoutesArraySize();
+//    unsigned short delta_bytes = delta_size * 17;    // 17 = Withdrawn Route length
+//    BgpUpdateMessage6_Base::setWithdrawnRoutesArraySize(size);
+//    setChunkLength(getChunkLength() + B(delta_bytes));
+//}
+
+unsigned short BgpUpdateMessage6::computePathAttributesBytes(const BgpUpdatePathAttributeList6& pathAttrs)
+{
+    unsigned short nb_path_attr = 2 + pathAttrs.getAsPathArraySize()
+        + pathAttrs.getLocalPrefArraySize()
+        + pathAttrs.getAtomicAggregateArraySize();
+
+    // BgpUpdatePathAttributes (4)
+    unsigned short contentBytes = nb_path_attr * 4;
+    // BgpUpdatePathAttributesOrigin (1)
+    contentBytes += 1;
+    // BgpUpdatePathAttributesAsPath
+    for (size_t i = 0; i < pathAttrs.getAsPathArraySize(); i++)
+        contentBytes += 2 + pathAttrs.getAsPath(i).getLength(); // type (1) + length (1) + value
+    // BgpUpdatePathAttributesNextHop (4)
+    contentBytes += 4;
+    // BgpUpdatePathAttributesLocalPref (4)
+    contentBytes = 4 * pathAttrs.getLocalPrefArraySize();
+    return contentBytes;
+}
+
+void BgpUpdateMessage6::setPathAttributeList(const BgpUpdatePathAttributeList6& pathAttrs)
+{
+    unsigned int old_bytes = getPathAttributeListArraySize() == 0 ? 0 : computePathAttributesBytes(getPathAttributeList(0));
+    unsigned int delta_bytes = computePathAttributesBytes(pathAttrs) - old_bytes;
+
+    setPathAttributeListArraySize(1);
+    BgpUpdateMessage6_Base::setPathAttributeList(0, pathAttrs);
+
+    setChunkLength(getChunkLength() + B(delta_bytes));
 }
 
 } // namespace bgp
