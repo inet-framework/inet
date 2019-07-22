@@ -199,7 +199,7 @@ std::string Ospfv3Instance::detailedInfo() const
     std::stringstream out;
     int processID = this->getProcess()->getProcessID();
     Ipv4Address routerID = this->getProcess()->getRouterID();
-    out << "OSPFv3 " << processID << " address-family ";
+    out << "Ospfv3 " << processID << " address-family ";
 
     if(this->addressFamily == IPV4INSTANCE)
         out << "IPv4 (router-id " << routerID << ")\n\n";

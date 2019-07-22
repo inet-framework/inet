@@ -364,7 +364,7 @@ void Ospfv3Process::parseConfig(cXMLElement* interfaceConfig)
                 //check for multiple definition of one instance
                 Ospfv3Instance* instance = this->getInstanceById(instIdNum);
                 //if(instance != nullptr)
-                // throw cRuntimeError("Multiple OSPFv3 instance with the same instance ID configured for process %d on interface %s", this->getProcessID(), interfaceName);
+                // throw cRuntimeError("Multiple Ospfv3 instance with the same instance ID configured for process %d on interface %s", this->getProcessID(), interfaceName);
 
                 if(instance == nullptr) {
                     if(strcmp(addressFamily, "IPv4")==0)
@@ -738,14 +738,14 @@ void Ospfv3Process::sendPacket(Packet *packet, Ipv6Address destination, const ch
     {
         case HELLO_PACKET:
         {
-            packet->setName("OSPFv3_HelloPacket");
+            packet->setName("Ospfv3_HelloPacket");
 //            const auto& helloPacket = packet->peekAtFront<Ospfv3HelloPacket>();
 //            printHelloPacket(helloPacket.get(), destination, outputIfIndex);
         }
         break;
         case DATABASE_DESCRIPTION:
         {
-            packet->setName("OSPFv3_DDPacket");
+            packet->setName("Ospfv3_DDPacket");
 //            const auto& ddPacket = packet->peekAtFront<Ospfv3DatabaseDescription>();
 //            printDatabaseDescriptionPacket(ddPacket.get(), destination, outputIfIndex);
         }
@@ -753,7 +753,7 @@ void Ospfv3Process::sendPacket(Packet *packet, Ipv6Address destination, const ch
 
         case LSR:
         {
-            packet->setName("OSPFv3_LSRPacket");
+            packet->setName("Ospfv3_LSRPacket");
 //            const auto& requestPacket = packet->peekAtFront<Ospfv3LinkStateRequest>();
 //            printLinkStateRequestPacket(requestPacket.get(), destination, outputIfIndex);
         }
@@ -761,7 +761,7 @@ void Ospfv3Process::sendPacket(Packet *packet, Ipv6Address destination, const ch
 
         case LSU:
         {
-            packet->setName("OSPFv3_LSUPacket");
+            packet->setName("Ospfv3_LSUPacket");
 //            const auto& updatePacket = packet->peekAtFront<Ospfv3LsUpdate>();
 //            printLinkStateUpdatePacket(updatePacket.get(), destination, outputIfIndex);
         }
@@ -769,7 +769,7 @@ void Ospfv3Process::sendPacket(Packet *packet, Ipv6Address destination, const ch
 
         case LS_ACK:
         {
-            packet->setName("OSPFv3_LSAckPacket");
+            packet->setName("Ospfv3_LSAckPacket");
 //            const auto& ackPacket = packet->peekAtFront<Ospfv3LsAck>();
 //            printLinkStateAcknowledgementPacket(ackPacket.get(), destination, outputIfIndex);
         }

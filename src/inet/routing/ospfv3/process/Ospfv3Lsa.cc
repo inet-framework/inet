@@ -18,7 +18,7 @@ Ospfv3SpfVertex::Ospfv3SpfVertex(Ospfv3Lsa* asocLSA, int distance)
 unsigned int calculateLSASize(const Ospfv3Lsa *lsaC)
 {
     auto lsa = lsaC->dup(); // make editable copy of lsa
-    //OSPFv3LSAType lsaType = static_cast<OSPFv3LSAType>(lsa->getHeader().getLsaType());
+    //Ospfv3LSAType lsaType = static_cast<Ospfv3LSAType>(lsa->getHeader().getLsaType());
     uint16_t code = lsa->getHeader().getLsaType();
     unsigned int lsaLength;
 
