@@ -16,6 +16,10 @@ Ospfv3Instance::Ospfv3Instance(int instanceId, Ospfv3Process* parentProcess, int
 
 Ospfv3Instance::~Ospfv3Instance()
 {
+    long areaCount = areas.size();
+    for (long i = 0; i < areaCount; i++) {
+        delete areas[i];
+    }
 }
 
 bool Ospfv3Instance::hasArea(Ipv4Address areaId)
@@ -141,6 +145,10 @@ void Ospfv3Instance::processPacket(Packet* pk)
                 default:
                     break;
                 }
+            }
+            else
+            {
+                delete(pk);
             }
         }
     }
