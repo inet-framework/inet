@@ -4,7 +4,7 @@
 #include <omnetpp.h>
 
 #include "../Ospfv3Common.h"
-#include "inet/routing/ospfv3/OSPFv3Packet_m.h"
+#include "inet/routing/ospfv3/Ospfv3Packet_m.h"
 #include "inet/routing/ospfv3/Ospfv3Timers.h"
 #include "inet/common/INETDefs.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"

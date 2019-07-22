@@ -170,7 +170,7 @@ void Ospfv3Splitter::addNewProcess(cXMLElement* process, cXMLElement* interfaces
 {
     cModuleType* newProcessType = cModuleType::find("inet.routing.ospfv3.process.Ospfv3Process");
     if(newProcessType==nullptr)
-        throw cRuntimeError("OSPFv3Routing: Ospfv3Process module was not found");
+        throw cRuntimeError("Ospfv3Routing: Ospfv3Process module was not found");
 
     std::string processID = std::string(process->getAttribute("id"));
     cXMLElementList idList = process->getElementsByTagName("RouterID");

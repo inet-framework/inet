@@ -3711,7 +3711,7 @@ std::string Ospfv3Area::detailedInfo() const
 {//TODO - adjust so that it pnly prints LSAs that are there
     std::stringstream out;
 
-    out << "OSPFv3 1 address-family ";
+    out << "Ospfv3 1 address-family ";
     if(this->getInstance()->getAddressFamily()==IPV4INSTANCE)
         out << "ipv4 (router-id ";
     else

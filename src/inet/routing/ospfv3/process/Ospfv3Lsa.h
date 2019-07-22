@@ -4,11 +4,11 @@
 #include <omnetpp.h>
 
 #include "../Ospfv3Common.h"
-#include "inet/routing/ospfv3/OSPFv3Packet_m.h"
+#include "inet/routing/ospfv3/Ospfv3Packet_m.h"
 #include "inet/common/INETDefs.h"
 
-// NexHop is defined in OSPFv3Common.h
-// Every OSPFv3 class representing pakcet is extedned by Routing and Tracking info,
+// NexHop is defined in Ospfv3Common.h
+// Every Ospfv3 class representing pakcet is extedned by Routing and Tracking info,
 // which are needed for calculating SPF and wtchting time since LSA is written down into LSDB
 
 namespace inet {
