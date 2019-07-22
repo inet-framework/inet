@@ -56,8 +56,10 @@ simple Bgp like IBgp
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module
         string routingTableModule;
+        string routingTableModule6;
         string ospfRoutingModule;
         @display("i=block/network2");
+        //xml bgpConfig;
         xml bgpConfig;
     gates:
         input socketIn;

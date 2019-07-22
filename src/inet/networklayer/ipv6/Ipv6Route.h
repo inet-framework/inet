@@ -56,7 +56,7 @@ class INET_API Ipv6Route : public cObject, public IRoute
         dUnknown = 255
     };
 
-  protected:
+  private:
     Ipv6RoutingTable *_rt;    // TODO introduce IIPv6RoutingTable
     Ipv6Address _destPrefix;
     short _prefixLength;
@@ -73,6 +73,9 @@ class INET_API Ipv6Route : public cObject, public IRoute
     void changed(int fieldCode);
 
   public:
+    Ipv6Route() : _rt(nullptr), _interfacePtr(nullptr), _sourceType(MANUAL), _adminDist(dUnknown),
+        _metric(0), _source(nullptr), _protocolData(nullptr) {}
+
     /**
      * Constructor. The destination prefix and the route source is passed
      * to the constructor and cannot be changed afterwards.

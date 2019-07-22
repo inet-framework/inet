@@ -1,5 +1,6 @@
 //
 // Copyright (C) 2010 Helene Lageber
+//    2019 Adrian Novak - multi address-family support
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -129,7 +130,7 @@ SUBSTATE(Idle, TopState) {
     void ManualStart() override;
 
   private:
-    void entry() override { std::cout << "Idle::entry" << std::endl; }
+    void entry() override;
     void exit() override { std::cout << "Idle::exit" << std::endl; }
 };
 
@@ -216,7 +217,7 @@ SUBSTATE(Established, TopState) {
 
   private:
     void entry() override;
-    void exit() override { std::cout << "Established::exit" << std::endl; }
+    void exit() override;
 };
 
 } // namespace fsm

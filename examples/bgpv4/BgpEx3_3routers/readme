@@ -1,0 +1,19 @@
+created by Adrian Novak (FIT VUT Brno) - BGPv4 with multi address-family support
+BgpEx3_3routers simulation example
+new configuration file was created
+OSPF dependency was removed, this functionality was replaced by static routes
+BGP works with IPv4 and IPv6 in one simulation
+
+Topology
+6 routers - R1, R2, R3, R4, R5, R6
+R1 - AS100 - external peering with R2
+R2 - AS200 - external peering with R1, internal peering with R3, R5
+R3 - AS200 - external peering with R4, internal peering with R2, R5
+R4 - AS300 - external peering with R3 
+R5 - AS200 - external peering with R6, internal peering with R2, R3 
+R6 - AS400 - external peering with R5 
+
+Example supports 3 scenarios
+1 - normal
+2 - link drops at t = 50s between R1 and R2
+3 - link drops at t = 50s and recovers at t = 225s 
