@@ -5,7 +5,7 @@
 #include <string>
 
 #include "../Ospfv3Common.h"
-#include "inet/routing/ospfv3/OSPFv3Packet_m.h"
+#include "inet/routing/ospfv3/Ospfv3Packet_m.h"
 #include "inet/routing/ospfv3/Ospfv3Timers.h"
 #include "inet/routing/ospfv3/process/Ospfv3Area.h"
 #include "inet/routing/ospfv3/process/Ospfv3Instance.h"

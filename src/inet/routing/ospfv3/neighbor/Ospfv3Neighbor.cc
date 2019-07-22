@@ -49,7 +49,7 @@ Ospfv3Neighbor::Ospfv3Neighbor(Ipv4Address newId, Ospfv3Interface* parent)
     requestRetransmissionTimer = new cMessage();
     requestRetransmissionTimer->setKind(NEIGHBOR_REQUEST_RETRANSMISSION_TIMER);
     requestRetransmissionTimer->setContextPointer(this);
-    requestRetransmissionTimer->setName("OSPFv3sNeighbor::NeighborRequestRetransmissionTimer");
+    requestRetransmissionTimer->setName("Ospfv3sNeighbor::NeighborRequestRetransmissionTimer");
 }//constructor
 
 Ospfv3Neighbor::~Ospfv3Neighbor()
