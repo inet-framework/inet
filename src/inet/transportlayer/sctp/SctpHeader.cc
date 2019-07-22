@@ -145,7 +145,7 @@ SctpChunk *SctpHeader::removeLastChunk()
     SctpChunk *msg = sctpChunkList.back();
     sctpChunkList.pop_back();
     drop(msg);
-    this->setChunkLength(B(B(this->getChunkLength()).get() + ADD_PADDING(msg->getByteLength())));
+    this->addChunkLength(B(ADD_PADDING(msg->getByteLength())));
     return msg;
 }
 
