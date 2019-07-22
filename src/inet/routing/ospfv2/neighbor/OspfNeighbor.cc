@@ -183,6 +183,7 @@ const char *Neighbor::getStateString(Neighbor::NeighborStateType stateType)
 void Neighbor::sendDatabaseDescriptionPacket(bool init)
 {
     const auto& ddPacket = makeShared<OspfDatabaseDescriptionPacket>();
+    auto crcMode = parentInterface->getCrcMode();
 
     ddPacket->setType(DATABASE_DESCRIPTION_PACKET);
     ddPacket->setRouterID(Ipv4Address(parentInterface->getArea()->getRouter()->getRouterID()));
@@ -215,10 +216,9 @@ void Neighbor::sendDatabaseDescriptionPacket(bool init)
         // delete included LSAs from summary list
         // (they are still in lastTransmittedDDPacket)
         while ((!databaseSummaryList.empty()) && (packetSize <= (maxPacketSize - OSPF_LSA_HEADER_LENGTH))) {
-            unsigned long headerCount = ddPacket->getLsaHeadersArraySize();
             OspfLsaHeader *lsaHeader = *(databaseSummaryList.begin());
-            ddPacket->setLsaHeadersArraySize(headerCount + 1);
-            ddPacket->setLsaHeaders(headerCount, *lsaHeader);
+            setLsaHeaderCrc(*lsaHeader, crcMode);
+            ddPacket->insertLsaHeaders(*lsaHeader);
             delete lsaHeader;
             databaseSummaryList.pop_front();
             packetSize += OSPF_LSA_HEADER_LENGTH;
@@ -246,7 +246,7 @@ void Neighbor::sendDatabaseDescriptionPacket(bool init)
         ddPacket->setAuthentication(i, authKey.bytes[i]);
     }
 
-    setOspfCrc(ddPacket, parentInterface->getCrcMode());
+    setOspfCrc(ddPacket, crcMode);
 
     Packet *pk = new Packet();
     pk->insertAtBack(ddPacket);
@@ -664,6 +664,7 @@ void Neighbor::retransmitUpdatePacket()
         if (includeLSA) {
             packetLength += lsaSize;
             unsigned int ospfLSACount = updatePacket->getOspfLSAsArraySize();
+            setLsaCrc(*ospfLsa, parentInterface->getCrcMode());
 
             updatePacket->setOspfLSAsArraySize(ospfLSACount + 1);
             updatePacket->setOspfLSAs(ospfLSACount, ospfLsa->dup());
