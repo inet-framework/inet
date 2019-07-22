@@ -84,6 +84,32 @@ void setLsaCrc(OspfLsa& lsa, CrcMode crcMode)
     }
 }
 
+void setLsaHeaderCrc(OspfLsaHeader& lsaHeader, CrcMode crcMode)
+{
+    lsaHeader.setLsCrcMode(crcMode);
+    switch (crcMode) {
+        case CrcMode::CRC_DECLARED_CORRECT:
+            lsaHeader.setLsCrc(0xC00D);
+            break;
+        case CrcMode::CRC_DECLARED_INCORRECT:
+            lsaHeader.setLsCrc(0xBAAD);
+            break;
+        case CrcMode::CRC_COMPUTED: {
+            lsaHeader.setLsCrc(0);
+            MemoryOutputStream stream;
+            auto lsAge = lsaHeader.getLsAge();
+            lsaHeader.setLsAge(0);    // disable lsAge from CRC
+            OspfPacketSerializer::serializeLsaHeader(stream, lsaHeader);
+            uint16_t crc = TcpIpChecksum::checksum(stream.getData());
+            lsaHeader.setLsAge(lsAge);    // restore lsAge
+            lsaHeader.setLsCrc(crc);
+            break;
+        }
+        default:
+            throw cRuntimeError("Unknown CRC mode: %d", (int)crcMode);
+    }
+}
+
 } // namespace ospf
 } // namespace inet
 
