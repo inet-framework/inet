@@ -17,8 +17,8 @@
         <!-- DenyAS: deny routes learned by AS in IN  and OUT traffic -->
         <!-- DenyASIN : deny routes learned by AS in IN traffic -->
         <!-- DenyASOUT: deny routes learned by AS in OUT traffic -->
-        <DenyRouteIN Address="192.171.0.0" Netmask="255.255.0.0"/>
-        <DenyRouteOUT Address="192.168.0.0" Netmask="255.255.0.0"/>
+        <!-- DenyRouteIN Address="192.171.0.0" Netmask="255.255.0.0"-->
+        <!-- DenyRouteOUT Address="192.168.0.0" Netmask="255.255.0.0"-->
     </AS>
 
     <AS id="65248">
