@@ -950,7 +950,7 @@ void BgpRouter::printUpdateMessage(const BgpUpdateMessage& updateMsg)
             }
             case BgpUpdateAttributeTypeCode::ATOMIC_AGGREGATE: {
                 auto& attr = *check_and_cast<const BgpUpdatePathAttributesAtomicAggregate*>(updateMsg.getPathAttributes(i));
-                EV_INFO << "    ATOMIC_AGGREGATE: " << attr.getValue() << "\n";
+                EV_INFO << "    ATOMIC_AGGREGATE" << "\n";
                 break;
             }
         }

@@ -182,19 +182,12 @@ class BgpUpdatePathAttributesLocalPref extends BgpUpdatePathAttributes
 }
 
 //ATOMIC_AGGREGATE (RFC4271 Section 4.3, Type code 6):
-enum BgpUpdateAtomicAggregateValues
-{
-    NO_SPECIFIC_ROUTE = 0;
-    SPECIFIC_ROUTE = 1;
-}
-
 class BgpUpdatePathAttributesAtomicAggregate extends BgpUpdatePathAttributes
 {
     typeCode = ATOMIC_AGGREGATE;
     optionalBit = false;
     transitiveBit = true;
     length = 0;
-    BgpUpdateAtomicAggregateValues value;
 }
 
 class BgpUpdatePathAttributesAggregator extends BgpUpdatePathAttributes

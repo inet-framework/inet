@@ -147,7 +147,6 @@ void BgpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const 
                     }
                     case ATOMIC_AGGREGATE: {
                         const BgpUpdatePathAttributesAtomicAggregate* atomicAggregate = static_cast<const BgpUpdatePathAttributesAtomicAggregate*>(pathAttributes);
-                        stream.writeByte(atomicAggregate->getValue());
                         break;
                     }
                     case AGGREGATOR: {
@@ -370,7 +369,6 @@ const Ptr<Chunk> BgpHeaderSerializer::deserialize(MemoryInputStream& stream) con
                         atomicAggregate->setReserved(0);
                         atomicAggregate->setLength(pathAttributeLength);
                         atomicAggregate->setTypeCode(typeCode);
-                        atomicAggregate->setValue(static_cast<BgpUpdateAtomicAggregateValues>(stream.readByte()));
                         bgpUpdateMessage->setPathAttributes(i, atomicAggregate);
                         break;
                     }
