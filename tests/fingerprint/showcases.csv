@@ -114,9 +114,9 @@
 /showcases/visualizer/transportpathactivity/, -f omnetpp.ini -c EnablingPathVisualizationWireless -r 0,         500s,            e56a-1601/tplx, PASS,
 /showcases/visualizer/transportpathactivity/, -f omnetpp.ini -c Filtering -r 0,     100s,         9c6e-9da8/tplx, PASS,
 
-/showcases/wireless/aggregation/,     -f omnetpp.ini -c NoAggregation -r 0,                                       10s,            3f27-d17d/tplx, PASS,
-/showcases/wireless/aggregation/,     -f omnetpp.ini -c Aggregation -r 0,                                        10s,            e77e-c7d7/tplx, PASS,
-/showcases/wireless/aggregation/,     -f omnetpp.ini -c VoicePriorityAggregation -r 0,                                      10s,            714d-115b/tplx, PASS,
+/showcases/wireless/aggregation/,     -f omnetpp.ini -c NoAggregation -r 0,                                      1s,            f454-e681/tplx, PASS,
+/showcases/wireless/aggregation/,     -f omnetpp.ini -c Aggregation -r 0,                                        1s,            6298-e38f/tplx, PASS,
+/showcases/wireless/aggregation/,     -f omnetpp.ini -c VoicePriorityAggregation -r 0,                           1s,            c0db-ba46/tplx, PASS,
 
 /showcases/wireless/blockack/,     -f omnetpp.ini -c NoFragmentation -r 0,                                        1s,            880b-85ff/tplx, PASS,
 /showcases/wireless/blockack/,     -f omnetpp.ini -c Fragmentation -r 0,                                          1s,            3584-7148/tplx, PASS,
@@ -147,10 +147,10 @@
 /showcases/wireless/errorrate/,      -f omnetpp.ini -c General -r '$bitrate==48 && $distance==350',             500s,            beaf-13ba/tplx, PASS,
 /showcases/wireless/errorrate/,      -f omnetpp.ini -c General -r '$bitrate==54 && $distance==350',             500s,            2b49-f8f4/tplx, PASS,
 
-/showcases/wireless/fragmentation/,     -f omnetpp.ini -c DCFnofrag -r 0,                                       10s,            cf93-8075/tplx, PASS,
-/showcases/wireless/fragmentation/,     -f omnetpp.ini -c DCFfrag -r 0,                                        10s,            24b3-1a50/tplx, PASS,
-/showcases/wireless/fragmentation/,     -f omnetpp.ini -c HCFfrag -r 0,                                      10s,            94d2-1ed1/tplx, PASS,
-/showcases/wireless/fragmentation/,     -f omnetpp.ini -c HCFfragblockack -r 0,                                      10s,            2228-e2df/tplx, PASS,
+/showcases/wireless/fragmentation/,     -f omnetpp.ini -c DCFnofrag -r 0,                                       1s,            9740-84ff/tplx, PASS,
+/showcases/wireless/fragmentation/,     -f omnetpp.ini -c DCFfrag -r 0,                                         1s,            8511-865d/tplx, PASS,
+/showcases/wireless/fragmentation/,     -f omnetpp.ini -c HCFfrag -r 0,                                         1s,            ea80-255c/tplx, PASS,
+/showcases/wireless/fragmentation/,     -f omnetpp.ini -c HCFfragblockack -r 0,                                 1s,            053e-bdc1/tplx, PASS,
 
 /showcases/wireless/handover/,       -f omnetpp.ini -c General -r 0,                                            250s,            a20a-6761/tplx, PASS,
 
@@ -199,20 +199,20 @@
 /showcases/wireless/qos/,     -f omnetpp.ini -c NonQos -r 0,                                       10s,            0684-b9e7/tplx, PASS,
 /showcases/wireless/qos/,     -f omnetpp.ini -c Qos -r 0,                                        10s,            c2f4-a6aa/tplx, PASS,
 
-/showcases/wireless/ratecontrol/,    -f omnetpp.ini -c General -r '$rateControl==""',                           25s,            e1f1-e8c6/tplx, PASS,
-/showcases/wireless/ratecontrol/,    -f omnetpp.ini -c General -r '$rateControl=="AarfRateControl"',            25s,            e71a-6ae8/tplx, PASS,
+/showcases/wireless/ratecontrol/,    -f omnetpp.ini -c General -r 0,                  14s,            6847-9c4d/tplx, PASS,
+/showcases/wireless/ratecontrol/,    -f omnetpp.ini -c General -r 1,                  12s,            be20-a730/tplx, PASS,
 
 # /showcases/wireless/scaling/,        -f omnetpp.ini -c PingBase -r 0,               100s,         0000-0000/tplx, PASS,   # PingBase extended
 # /showcases/wireless/scaling/,        -f omnetpp.ini -c UDPBase -r 0,                100s,         0000-0000/tplx, PASS,   # UDPBase extended
 # /showcases/wireless/scaling/,        -f omnetpp.ini -c IdealRadioMediumBase -r 0,   100s,         0000-0000/tplx, PASS,   # IdealRadioMediumBase extended
 # /showcases/wireless/scaling/,        -f omnetpp.ini -c ScalarRadioMediumBase -r 0,  100s,         0000-0000/tplx, PASS,   # ScalarRadioMediumBase extended
 # /showcases/wireless/scaling/,        -f omnetpp.ini -c Ieee80211Base -r 0,          100s,         0000-0000/tplx, PASS,   # Ieee80211Base extended
-/showcases/wireless/scaling/,        -f omnetpp.ini -c Ieee80211Ping -r 0,                                      500s,            44e9-728f/tplx, PASS,
-/showcases/wireless/scaling/,        -f omnetpp.ini -c Ieee80211Udp -r 0,                                       500s,            03b6-5da3/tplx, PASS,
-/showcases/wireless/scaling/,        -f omnetpp.ini -c ApskRadioPing -r 0,                                      500s,            25cc-4933/tplx, PASS,
-/showcases/wireless/scaling/,        -f omnetpp.ini -c ApskRadioUdp -r 0,                                       500s,            418a-1ded/tplx, PASS,
-/showcases/wireless/scaling/,        -f omnetpp.ini -c IdealRadioPing -r 0,                                     500s,            37e4-12cc/tplx, PASS,
-/showcases/wireless/scaling/,        -f omnetpp.ini -c IdealRadioUdp -r 0,                                      500s,            b428-a77d/tplx, PASS,
+#/showcases/wireless/scaling/,        -f omnetpp.ini -c Ieee80211Ping -r 0,                                      500s,            44e9-728f/tplx, PASS,
+#/showcases/wireless/scaling/,        -f omnetpp.ini -c Ieee80211Udp -r 0,                                       500s,            03b6-5da3/tplx, PASS,
+#/showcases/wireless/scaling/,        -f omnetpp.ini -c ApskRadioPing -r 0,                                      500s,            25cc-4933/tplx, PASS,
+#/showcases/wireless/scaling/,        -f omnetpp.ini -c ApskRadioUdp -r 0,                                       500s,            418a-1ded/tplx, PASS,
+#/showcases/wireless/scaling/,        -f omnetpp.ini -c IdealRadioPing -r 0,                                     500s,            37e4-12cc/tplx, PASS,
+#/showcases/wireless/scaling/,        -f omnetpp.ini -c IdealRadioUdp -r 0,                                      500s,            b428-a77d/tplx, PASS,
 
 /showcases/wireless/sensornetwork/,  -f omnetpp.ini -c BMac -r 0,                   100s,         15eb-71a9/tplx, PASS,
 /showcases/wireless/sensornetwork/,  -f omnetpp.ini -c XMac -r 0,                   100s,         ca86-df2f/tplx, PASS,
