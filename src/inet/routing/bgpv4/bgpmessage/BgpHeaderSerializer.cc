@@ -111,12 +111,12 @@ void BgpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const 
                     stream.writeUint16Be(pathAttributes->getLength());
                 switch (typeCode) {
                     case ORIGIN: {
-                        const BgpUpdatePathAttributesOrigin* origin = static_cast<const BgpUpdatePathAttributesOrigin*>(pathAttributes);
+                        const BgpUpdatePathAttributesOrigin* origin = check_and_cast<const BgpUpdatePathAttributesOrigin*>(pathAttributes);
                         stream.writeByte(origin->getValue());
                         break;
                     }
                     case AS_PATH: {
-                        const BgpUpdatePathAttributesAsPath* asPath = static_cast<const BgpUpdatePathAttributesAsPath*>(pathAttributes);
+                        const BgpUpdatePathAttributesAsPath* asPath = check_and_cast<const BgpUpdatePathAttributesAsPath*>(pathAttributes);
                         for (size_t e = 0; e < asPath->getValueArraySize(); ++e) {
                             const auto& value = asPath->getValue(e);
                             stream.writeByte(value.getType());
@@ -131,26 +131,26 @@ void BgpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const 
                         break;
                     }
                     case NEXT_HOP: {
-                        const BgpUpdatePathAttributesNextHop* nextHop = static_cast<const BgpUpdatePathAttributesNextHop*>(pathAttributes);
+                        const BgpUpdatePathAttributesNextHop* nextHop = check_and_cast<const BgpUpdatePathAttributesNextHop*>(pathAttributes);
                         stream.writeIpv4Address(nextHop->getValue());
                         break;
                     }
                     case MULTI_EXIT_DISC: {
-                        const BgpUpdatePathAttributesMultiExitDisc* multiExitDisc = static_cast<const BgpUpdatePathAttributesMultiExitDisc*>(pathAttributes);
+                        const BgpUpdatePathAttributesMultiExitDisc* multiExitDisc = check_and_cast<const BgpUpdatePathAttributesMultiExitDisc*>(pathAttributes);
                         stream.writeUint32Be(multiExitDisc->getValue());
                         break;
                     }
                     case LOCAL_PREF: {
-                        const BgpUpdatePathAttributesLocalPref* localPref = static_cast<const BgpUpdatePathAttributesLocalPref*>(pathAttributes);
+                        const BgpUpdatePathAttributesLocalPref* localPref = check_and_cast<const BgpUpdatePathAttributesLocalPref*>(pathAttributes);
                         stream.writeUint32Be(localPref->getValue());
                         break;
                     }
                     case ATOMIC_AGGREGATE: {
-                        const BgpUpdatePathAttributesAtomicAggregate* atomicAggregate = static_cast<const BgpUpdatePathAttributesAtomicAggregate*>(pathAttributes);
+                        const BgpUpdatePathAttributesAtomicAggregate* atomicAggregate = check_and_cast<const BgpUpdatePathAttributesAtomicAggregate*>(pathAttributes);
                         break;
                     }
                     case AGGREGATOR: {
-                        const BgpUpdatePathAttributesAggregator* aggregator = static_cast<const BgpUpdatePathAttributesAggregator*>(pathAttributes);
+                        const BgpUpdatePathAttributesAggregator* aggregator = check_and_cast<const BgpUpdatePathAttributesAggregator*>(pathAttributes);
                         stream.writeUint16Be(aggregator->getAsNumber());
                         stream.writeIpv4Address(aggregator->getBgpSpeaker());
                         break;
@@ -291,6 +291,10 @@ const Ptr<Chunk> BgpHeaderSerializer::deserialize(MemoryInputStream& stream) con
                         origin->setReserved(0);
                         origin->setLength(pathAttributeLength);
                         origin->setTypeCode(typeCode);
+                        if (optionalBit || !transitiveBit || pathAttributeLength != 1) {
+                            bgpUpdateMessage->markIncorrect();
+                            return bgpUpdateMessage;
+                        }
                         origin->setValue(static_cast<BgpSessionType>(stream.readByte()));
                         bgpUpdateMessage->setPathAttributes(i, origin);
                         break;
@@ -304,6 +308,10 @@ const Ptr<Chunk> BgpHeaderSerializer::deserialize(MemoryInputStream& stream) con
                         asPath->setReserved(0);
                         asPath->setLength(pathAttributeLength);
                         asPath->setTypeCode(typeCode);
+                        if (optionalBit || !transitiveBit) {
+                            bgpUpdateMessage->markIncorrect();
+                            return bgpUpdateMessage;
+                        }
                         for (size_t e = 0; pathAttributeLength > 0; ++e) {
                             asPath->setValueArraySize(e + 1);
                             BgpAsPathSegment* value = new BgpAsPathSegment();
@@ -330,6 +338,10 @@ const Ptr<Chunk> BgpHeaderSerializer::deserialize(MemoryInputStream& stream) con
                         nextHop->setReserved(0);
                         nextHop->setLength(pathAttributeLength);
                         nextHop->setTypeCode(typeCode);
+                        if (optionalBit || !transitiveBit || pathAttributeLength != 4) {
+                            bgpUpdateMessage->markIncorrect();
+                            return bgpUpdateMessage;
+                        }
                         nextHop->setValue(stream.readIpv4Address());
                         bgpUpdateMessage->setPathAttributes(i, nextHop);
                         break;
@@ -343,6 +355,10 @@ const Ptr<Chunk> BgpHeaderSerializer::deserialize(MemoryInputStream& stream) con
                         multiExitDisc->setReserved(0);
                         multiExitDisc->setLength(pathAttributeLength);
                         multiExitDisc->setTypeCode(typeCode);
+                        if (!optionalBit || transitiveBit || pathAttributeLength != 4) {
+                            bgpUpdateMessage->markIncorrect();
+                            return bgpUpdateMessage;
+                        }
                         multiExitDisc->setValue(stream.readUint32Be());
                         bgpUpdateMessage->setPathAttributes(i, multiExitDisc);
                         break;
@@ -356,6 +372,10 @@ const Ptr<Chunk> BgpHeaderSerializer::deserialize(MemoryInputStream& stream) con
                         localPref->setReserved(0);
                         localPref->setLength(pathAttributeLength);
                         localPref->setTypeCode(typeCode);
+                        if (optionalBit || !transitiveBit || pathAttributeLength != 4) {
+                            bgpUpdateMessage->markIncorrect();
+                            return bgpUpdateMessage;
+                        }
                         localPref->setValue(stream.readUint32Be());
                         bgpUpdateMessage->setPathAttributes(i, localPref);
                         break;
@@ -369,6 +389,10 @@ const Ptr<Chunk> BgpHeaderSerializer::deserialize(MemoryInputStream& stream) con
                         atomicAggregate->setReserved(0);
                         atomicAggregate->setLength(pathAttributeLength);
                         atomicAggregate->setTypeCode(typeCode);
+                        if (optionalBit || !transitiveBit || pathAttributeLength != 0) {
+                            bgpUpdateMessage->markIncorrect();
+                            return bgpUpdateMessage;
+                        }
                         bgpUpdateMessage->setPathAttributes(i, atomicAggregate);
                         break;
                     }
@@ -381,6 +405,10 @@ const Ptr<Chunk> BgpHeaderSerializer::deserialize(MemoryInputStream& stream) con
                         aggregator->setReserved(0);
                         aggregator->setLength(pathAttributeLength);
                         aggregator->setTypeCode(typeCode);
+                        if (!optionalBit || !transitiveBit || pathAttributeLength != 6) {
+                            bgpUpdateMessage->markIncorrect();
+                            return bgpUpdateMessage;
+                        }
                         aggregator->setAsNumber(stream.readUint16Be());
                         aggregator->setBgpSpeaker(stream.readIpv4Address());
                         bgpUpdateMessage->setPathAttributes(i, aggregator);
@@ -400,13 +428,11 @@ const Ptr<Chunk> BgpHeaderSerializer::deserialize(MemoryInputStream& stream) con
                     }
                 }
             }
-            uint8_t nlri_size = (totalLength - BGP_HEADER_OCTETS.get() - tmp_withdrawnRoutesLength - tmp_totalPathAttributeLength - 4);
-            std::cout << "nlri_size: " << std::to_string(nlri_size) << endl;
+            int nlri_size = (totalLength - BGP_HEADER_OCTETS.get() - tmp_withdrawnRoutesLength - tmp_totalPathAttributeLength - 4);
             for (size_t i = 0; nlri_size > 0; ++i) {
                 BgpUpdateNlri* nlri = new BgpUpdateNlri();
                 bgpUpdateMessage->setNLRIArraySize(i + 1);
                 uint8_t length = stream.readByte();
-                std::cout << "lenght: " << std::to_string(length) << endl;
                 nlri->length = length;
                 uint32_t prefix = stream.readNBitsToUint64Be(length);
                 nlri->prefix = Ipv4Address(prefix<<(32 - length));
