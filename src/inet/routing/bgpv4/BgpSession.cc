@@ -1,5 +1,6 @@
 //
 // Copyright (C) 2010 Helene Lageber
+//    2019 Adrian Novak - multi address-family support
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -47,12 +48,27 @@ BgpSession::~BgpSession()
     delete _fsm;
 }
 
+void BgpSession::setNetworkFromPeer(Ipv4Address address)
+{
+    _info.routesFromPeer.push_back(address);
+}
+
+void BgpSession::setNetworkFromPeer6(Ipv6Address address)
+{
+    _info.routesFromPeer6.push_back(address);
+}
+
+
 void BgpSession::setInfo(SessionInfo info)
 {
+    _info.multiAddress = info.multiAddress;
+    _info.localAddr = info.localAddr;
+    _info.localAddr6 = info.localAddr6;
     _info.sessionType = info.sessionType;
     _info.ASValue = info.ASValue;
     _info.routerID = info.routerID;
     _info.peerAddr = info.peerAddr;
+    _info.peerAddr6 = info.peerAddr6;
     _info.sessionID = info.sessionID;
     _info.linkIntf = info.linkIntf;
     _info.socket = new TcpSocket();
@@ -63,10 +79,11 @@ void BgpSession::setTimers(simtime_t *delayTab)
     _connectRetryTime = delayTab[0];
     _holdTime = delayTab[1];
     _keepAliveTime = delayTab[2];
-    if (_info.sessionType == IGP) {
-        _StartEventTime = delayTab[3];
-    }
-    else if (delayTab[3] != SIMTIME_ZERO) {
+//    if (_info.sessionType == IGP) {
+//        _StartEventTime = delayTab[3];
+//    }
+//    else
+    if (delayTab[3] != SIMTIME_ZERO) {
         _StartEventTime = delayTab[3];
         _ptrStartEvent = new cMessage("BGP Start", START_EVENT_KIND);
         _bgpRouting.getScheduleAt(_bgpRouting.getSimTime() + _StartEventTime, _ptrStartEvent);
@@ -95,6 +112,16 @@ void BgpSession::startConnection()
     }
 }
 
+void BgpSession::restartConnection()
+{
+    if (_ptrStartEvent == nullptr) {
+        _ptrStartEvent = new cMessage("BGP Start", START_EVENT_KIND);
+    }
+    //std::cout<<_StartEventTime<<std::endl;
+    _bgpRouting.getScheduleAt(_bgpRouting.getSimTime() + _StartEventTime , _ptrStartEvent);
+    _ptrStartEvent->setContextPointer(this);
+}
+
 void BgpSession::restartsHoldTimer()
 {
     if (_holdTime != 0) {
@@ -112,18 +139,45 @@ void BgpSession::restartsKeepAliveTimer()
 void BgpSession::restartsConnectRetryTimer(bool start)
 {
     _bgpRouting.getCancelEvent(_ptrConnectRetryTimer);
-    if (!start) {
+    /*
+     * xnovak1j change from !start to start
+     * */
+    if (start) {
         _bgpRouting.getScheduleAt(_bgpRouting.getSimTime() + _connectRetryTime, _ptrConnectRetryTimer);
     }
 }
 
 void BgpSession::sendOpenMessage()
 {
+    BgpOptionalParameters content;
+    content.parameterType = Capability;
+    content.parameterLength = 6;
+    content.parameterValue.capabilityCode = Multiprotocol_extension_capability;
+    content.parameterValue.capabilityLength = 4;
+    //xnovak1j  - capability extension
+    if(_info.multiAddress) {
+        content.parameterValue.capabilityValue.AFI = Ipv6;
+    } else {
+        content.parameterValue.capabilityValue.AFI = Ipv4;
+    }
+    content.parameterValue.capabilityValue.SAFI = unicast;
+
     Packet *pk = new Packet("BgpOpen");
     const auto& openMsg = makeShared<BgpOpenMessage>();
     openMsg->setMyAS(_info.ASValue);
     openMsg->setHoldTime(_holdTime);
-    openMsg->setBGPIdentifier(_info.socket->getLocalAddress().toIpv4());
+
+
+    if(_info.multiAddress) {
+        openMsg->setBGPIdentifier(_info.routerID);
+    } else {
+        openMsg->setBGPIdentifier(_info.socket->getLocalAddress().toIpv4());
+    }
+
+    /*xnovak1j - capability option for multiprotocol in optional parameters*/
+    openMsg->setOptionalParametersArraySize(1);
+    openMsg->setOptionalParameters(0, content);
+
     pk->insertAtFront(openMsg);
     _info.socket->send(pk);
     _openMsgSent++;

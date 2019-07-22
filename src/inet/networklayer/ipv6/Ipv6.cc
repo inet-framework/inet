@@ -528,6 +528,7 @@ void Ipv6::routeMulticastPacket(Packet *packet, const InterfaceEntry *destIE, co
         }
 
         // make sure scope of multicast address is large enough to be forwarded to other links
+        //std::cout<<destAddr<<std::endl;
         if (destAddr.getMulticastScope() <= 2) {
             EV_INFO << "multicast dest address is link-local (or smaller) scope\n";
             delete packet;

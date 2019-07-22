@@ -27,6 +27,6 @@ module BgpRouter extends Router
 {
     parameters:
         hasBgp = true;
-        hasOspf = true;
+        //hasOspf = true;
 }
 

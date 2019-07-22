@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<BGPConfig xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="BGP.xsd">
+	<TimerParams>
+        <connectRetryTime> 120 </connectRetryTime>
+        <holdTime> 180 </holdTime>
+        <keepAliveTime> 60 </keepAliveTime>
+        <startDelay> 15 </startDelay>
+    </TimerParams>
+    
+    <Devices>
+    	<Router name="R1" id="100.0.1.1">
+    		<Interfaces>
+    			<Interface id="lo0">
+    				<Ipv4 address="100.0.1.1" netmask="255.255.255.252" />
+    				<Ipv6 address="fd00:100:0:100::1/64" />
+    			</Interface>
+    			<Interface id="eth0">
+    				<Ipv4 address="10.0.12.1" netmask="255.255.255.252" />
+    				<Ipv6 address="fd00:12:12::0/127" />	
+    			</Interface>
+    		</Interfaces>
+    		<Bgp as="100">
+    			<Address-family id="Ipv4">
+    				<!--DenyRouteIN address="200.0.2.0" netmask="255.255.255.0"/>	
+    				<DenyRouteOUT address="172.10.8.0" netmask="255.255.255.0"/>
+    				<DenyRoute address="172.10.8.0" netmask="255.255.255.0"/>
+    				<DenyASIN as="200" />
+    				<DenyASOUT as="100" / -->
+    				
+    				<Neighbor address="10.0.12.2" remote-as="200" />
+    				<Network address="100.0.1.0" />
+    			</Address-family>
+    			<Address-family id="Ipv6">
+    				<!-- DenyRouteIN address="fd00:12:12::0/127" />
+    				<DenyRouteOUT address="fd00:12:12::0/127" />
+    				<DenyRoute address="fd00:12:12::0/127" / >
+    				<DenyAS as="300" / -->
+    			
+    				<Neighbor address="fd00:12:12::1" remote-as="200" />
+    				<Network address="fd00:100:0:100::" />
+    			</Address-family>
+    		</Bgp>
+    	</Router>
+    	
+    	<Router name="R2" id="200.0.2.1">
+    		<Interfaces>
+    			<Interface id="eth0">
+    				<Ipv4 address="10.0.12.2" netmask="255.255.255.252" />
+    				<Ipv6 address="fd00:12:12::1/127" />
+    			</Interface>
+    			<Interface id="eth1">
+    				<Ipv4 address="10.0.23.1" netmask="255.255.255.252" />
+    				<Ipv6 address="fd00:23:23::0/127" />
+    			</Interface>
+    			<Interface id="eth2">
+    				<Ipv4 address="10.0.25.1" netmask="255.255.255.252" />
+    				<Ipv6 address="fd00:25:25::0/127" />
+    			</Interface>
+    		</Interfaces>   
+    		<Bgp as="200">
+    			<Address-family id="Ipv4">
+    				<Neighbor address="10.0.12.1" remote-as="100" />
+    				<Neighbor address="10.0.23.2" remote-as="200" />
+    				<Neighbor address="10.0.25.2" remote-as="200" />
+    			</Address-family>
+    			<Address-family id="Ipv6">
+    				<Neighbor address="fd00:12:12::0" remote-as="100" />
+    				<Neighbor address="fd00:23:23::1" remote-as="200" />
+    				<Neighbor address="fd00:25:25::1" remote-as="200" />
+    			</Address-family>	
+    		</Bgp>		
+    	</Router>
+    	
+    	<Router name="R3" id="200.0.3.1">
+    		<Interfaces>
+    			<Interface id="eth0">
+					<Ipv4 address="10.0.23.2" netmask="255.255.255.252" />
+    				<Ipv6 address="fd00:23:23::1/127" />
+    			</Interface>
+    			<Interface id="eth1">
+    				<Ipv4 address="10.0.35.1" netmask="255.255.255.252" />
+    				<Ipv6 address="fd00:35:35::0/127" />
+    			</Interface>    			
+    		</Interfaces>
+    		<Bgp as="200">
+    			<Address-family id="Ipv4">
+    				<Neighbor address="10.0.23.1" remote-as="200" />
+    				<Neighbor address="10.0.35.2" remote-as="200" />
+    				   				
+    				<!-- DenyASIN as="100" / -->
+    			</Address-family>
+    			<Address-family id="Ipv6">
+    				<Neighbor address="fd00:23:23::0" remote-as="200" />
+    				<Neighbor address="fd00:35:35::1" remote-as="200" />
+    				
+    			</Address-family>	
+    		</Bgp>
+    	</Router>
+    	  	
+    	<Router name="R5" id="200.0.5.1">
+    		<Interfaces>
+    			<Interface id="eth0">
+    				<Ipv4 address="10.0.35.2" netmask="255.255.255.252" />
+    				<Ipv6 address="fd00:35:35::1/127" />
+    			</Interface>
+    			<Interface id="eth1">
+    				<Ipv4 address="10.0.25.2" netmask="255.255.255.252" />
+    				<Ipv6 address="fd00:25:25::1/127" />
+    			</Interface>   			
+    		</Interfaces>
+    		<Bgp as="200">
+    			<Address-family id="Ipv4">
+    				<Neighbor address="10.0.25.1" remote-as="200" />
+    				<Neighbor address="10.0.35.1" remote-as="200" />
+    								
+    				<!-- DenyASIN as="100" / -->
+    			</Address-family>
+    			<Address-family id="Ipv6">
+    				<Neighbor address="fd00:25:25::0" remote-as="200" />
+    				<Neighbor address="fd00:35:35::0" remote-as="200" />
+    				
+    			</Address-family>	
+    		</Bgp>
+    	</Router>
+    	
+    </Devices>
+              
+ </BGPConfig> 

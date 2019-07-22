@@ -1,0 +1,8 @@
+<config>
+	<interface hosts='H1' names='eth0' address='100.0.1.2' netmask='255.255.255.252'/>
+	<interface hosts='H2' names='eth0' address='200.0.2.2' netmask='255.255.255.252'/>
+	<interface hosts='H3' names='eth0' address='200.0.3.2' netmask='255.255.255.252'/>
+	<interface hosts='H4' names='eth0' address='100.0.4.2' netmask='255.255.255.252'/> 
+	
+	<route hosts='H*' destination='*' netmask='*' interface='eth0'/>
+</config>

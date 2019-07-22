@@ -28,7 +28,7 @@ namespace bgp {
 class INET_API RoutingTableEntry : public Ipv4Route
 {
   public:
-    typedef unsigned char RoutingPathType;
+    typedef unsigned short RoutingPathType;
 
     RoutingTableEntry(void);
     RoutingTableEntry(const Ipv4Route *entry);
