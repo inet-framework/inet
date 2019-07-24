@@ -1,0 +1,47 @@
+1. refactoring nem változtatja meg a fingerprintet (illustrate with images)
+2. átnevezés (tplx megváltoztatja a fingerprintet)(change előtt lefuttat tlx-el)(change után is)(a fingerprint jó)
+3. új event (protocol implementáció lecserél)(fingerprint megváltozik)(change előtt NID lefuttat)(change után is)(a fingerprint jó)
+3.5 filterezés (valami elrontja de nem számít ezért kihagy)(pl visualizer eventek?)
+4. amikor a NID is megváltozik (pl új protocol implementáció új protocol feature-ökkel)
+
+0. create a csv file (how does it even work? add a git repo?) HOGY FOGJÁK KIPRÓBÁLNI? csv az eredeti (change-ek előtti) fingerprintekkel
+ha megváltoztatják a dolgokat akkor megváltozik a fingerprint
+
+fingerprintshowcase.csv -> a fingerprint folderben (vagy a showcase folderben)
+
+1. some network with udp. refactor the udp. maybe something that fits in one screen. no change
+
+changes in the code can ruin the fingerprints in multiple simulations not just the one that someone is working on / used in the showcase as an example
+
+videos of the whole process?
+
+
+update
+
+so actually, there is a working base thing checked in the repo
+then everyone makes the described changes on their own
+there is a detailed description as to how to make these changes (illustrate the steps)
+and show that the fingerprints change...or not
+
+
+
+so
+
+should illustrate the fingerprint changes with just one simulation (though it changes the fingerprint for others)
+
+1,2,3 -> use the same network (general...wireless + wired and something happens?)
+4 -> use Dimensional instead of scalar? that doesn't change the implementation, it uses a different model (a good example is the new 802.11 MAC)
+-> dimensional-be kicserél realistic signal shape-re boxcarról
+
+1: some code that fits into one screen/screenshot
+2: change the name of a host for example
+3: change from scalar to dimensional
+3.5: can the same be used? exclude the radio
+4:
+
+star topology: there is a central base config + default tplx fingerprint
+and there are changes
+
+HOW TO PRESENT THIS
+
+-pl wifi -> wifi authentikáció nélkül -> FP nem jó -> ki kell hagyni az elejét (ha lehet ilyet?)
