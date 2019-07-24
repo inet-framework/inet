@@ -71,17 +71,22 @@ void PlotFigure::setNumSeries(int numSeries)
     }
 }
 
+void PlotFigure::setPlotSize(const Point& p)
+{
+    const auto& backgroundBounds = backgroundFigure->getBounds();
+    backgroundFigure->setBounds(Rectangle(backgroundBounds.x, backgroundBounds.y, p.x, p.y));
+    layout();
+}
+
 const cFigure::Rectangle& PlotFigure::getBounds() const
 {
-    return backgroundFigure->getBounds();
+    return bounds;
 }
 
 void PlotFigure::setBounds(const Rectangle& rect)
 {
-    if (backgroundFigure->getBounds() == rect)
-        return;
-
-    backgroundFigure->setBounds(rect);
+    const auto& backgroundBounds = backgroundFigure->getBounds();
+    backgroundFigure->setBounds(Rectangle(backgroundBounds.x + rect.x - bounds.x, backgroundBounds.y + rect.y - bounds.y, rect.width - (bounds.width - backgroundBounds.width), rect.height - (bounds.height - backgroundBounds.height)));
     layout();
 }
 
@@ -188,7 +193,7 @@ int PlotFigure::getLabelOffset() const
 
 void PlotFigure::setLabelOffset(int offset)
 {
-    if(labelOffset != offset)   {
+    if (labelOffset != offset) {
         labelOffset = offset;
         layout();
     }
@@ -296,20 +301,39 @@ void PlotFigure::setValue(int series, double x, double y)
     seriesValues[series].push_front({x, y});
 }
 
+static cFigure::Rectangle rectangleUnion(const cFigure::Rectangle& r1, const cFigure::Rectangle& r2)
+{
+    auto x1 = std::min(r1.x, r2.x);
+    auto y1 = std::min(r1.y, r2.y);
+    auto x2 = std::max(r1.x + r1.width, r2.x + r2.width);
+    auto y2 = std::max(r1.y + r1.height, r2.y + r2.height);
+    return cFigure::Rectangle(x1, y1, x2 - x1, y2 - y1);
+}
+
 void PlotFigure::layout()
 {
     redrawYTicks();
 
-    Rectangle b = getBounds();
+    Rectangle b = backgroundFigure->getBounds();
     double fontSize = xTicks.size() > 0 && xTicks[0].number ? xTicks[0].number->getFont().pointSize : 12;
     labelFigure->setPosition(Point(b.getCenter().x, b.y + b.height + fontSize * LABEL_Y_DISTANCE_FACTOR + labelOffset));
-    xAxisLabelFigure->setPosition(Point(b.x + b.width / 2, b.y));
-    yAxisLabelFigure->setPosition(Point(-b.height / 2, 0));
+    xAxisLabelFigure->setPosition(Point(b.x + b.width / 2, b.y - 3));
+    yAxisLabelFigure->setPosition(Point(-b.height / 2, -3));
+
+    bounds = backgroundFigure->getBounds();
+    bounds = rectangleUnion(bounds, labelFigure->getBounds());
+    bounds = rectangleUnion(bounds, xAxisLabelFigure->getBounds());
+    bounds = rectangleUnion(bounds, yAxisLabelFigure->getBounds());
+    for (auto& tick : xTicks)
+        bounds = rectangleUnion(bounds, tick.number->getBounds());
+    for (auto& tick : yTicks)
+        bounds = rectangleUnion(bounds, tick.number->getBounds());
+    setTransform(cFigure::Transform().translate(0, 0));
 }
 
 void PlotFigure::redrawYTicks()
 {
-    Rectangle bounds = getBounds();
+    Rectangle bounds = backgroundFigure->getBounds();
     int numTicks = std::abs(maxY - minY) / yTickSize + 1;
 
     int fontSize = bounds.height * NUMBER_SIZE_PERCENT * numberSizeFactor;
@@ -371,7 +395,7 @@ void PlotFigure::redrawYTicks()
         char buf[32];
         sprintf(buf, yValueFormat, minY + i * yTickSize);
         yTicks[i].number->setText(buf);
-        yTicks[i].number->setPosition(Point(x + bounds.height * NUMBER_DISTANCE_FROM_TICK, y + valueTickYposAdjust[i % 2]));
+        yTicks[i].number->setPosition(Point(x + 3 + bounds.height * NUMBER_DISTANCE_FROM_TICK, y + valueTickYposAdjust[i % 2]));
     }
 }
 
@@ -382,7 +406,7 @@ void PlotFigure::refreshDisplay()
 
 void PlotFigure::redrawXTicks()
 {
-    Rectangle bounds = getBounds();
+    Rectangle bounds = backgroundFigure->getBounds();
     double minX = std::isnan(timeWindow) ? this->minX : simTime().dbl() - timeWindow;
     double maxX = std::isnan(timeWindow) ? this->maxX : simTime().dbl();
 
@@ -472,16 +496,16 @@ void PlotFigure::refresh()
             continue;
         }
 
-        auto r = getBounds();
+        auto r = backgroundFigure->getBounds();
         auto it = values.begin();
         double startX = r.x + r.width - (maxX - it->first) / (maxX - minX) * r.width;
-        double startY = std::min(100.0, r.y + (maxY - it->second) / std::abs(maxY - minY) * r.height); // KLUDGE:
+        double startY = std::min(r.y + 100 * r.height, r.y + (maxY - it->second) / std::abs(maxY - minY) * r.height);
         plotFigure->addMoveTo(startX, startY);
 
         ++it;
         do {
             double endX = r.x + r.width - (maxX - it->first) / (maxX - minX) * r.width;
-            double endY = std::min(100.0, r.y + (maxY - it->second) / std::abs(maxY - minY) * r.height); // KLUDGE:
+            double endY = std::min(r.y + 100 * r.height, r.y + (maxY - it->second) / std::abs(maxY - minY) * r.height);
 
             double originalStartX = startX;
             double originalStartY = startY;

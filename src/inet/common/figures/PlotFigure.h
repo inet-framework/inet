@@ -44,6 +44,7 @@ class INET_API PlotFigure : public cGroupFigure, public inet::IIndicatorFigure
     std::vector<Tick> xTicks;
     std::vector<Tick> yTicks;
 
+    Rectangle bounds;
     int numSeries = -1;
     double timeWindow = NaN;
     double yTickSize = 2.5;
@@ -84,6 +85,8 @@ class INET_API PlotFigure : public cGroupFigure, public inet::IIndicatorFigure
     virtual void clearValues(int series) { seriesValues[series].clear(); }
 
     //getters and setters
+    void setPlotSize(const Point& p);
+
     const Rectangle& getBounds() const;
     void setBounds(const Rectangle& rect);
 
