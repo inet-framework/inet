@@ -950,7 +950,18 @@ void BgpRouter::printUpdateMessage(const BgpUpdateMessage& updateMsg)
             }
             case BgpUpdateAttributeTypeCode::ATOMIC_AGGREGATE: {
                 auto& attr = *check_and_cast<const BgpUpdatePathAttributesAtomicAggregate*>(updateMsg.getPathAttributes(i));
+                (void)attr;
                 EV_INFO << "    ATOMIC_AGGREGATE" << "\n";
+                break;
+            }
+            case BgpUpdateAttributeTypeCode::AGGREGATOR: {
+                auto& attr = *check_and_cast<const BgpUpdatePathAttributesAggregator*>(updateMsg.getPathAttributes(i));
+                EV_INFO << "    AGGREGATOR: " << attr.getAsNumber() << ", " << attr.getBgpSpeaker() << "\n";
+                break;
+            }
+            case BgpUpdateAttributeTypeCode::MULTI_EXIT_DISC: {
+                auto& attr = *check_and_cast<const BgpUpdatePathAttributesMultiExitDisc*>(updateMsg.getPathAttributes(i));
+                EV_INFO << "    MULTI_EXIT_DISC: " << attr.getValue() << "\n";
                 break;
             }
         }
