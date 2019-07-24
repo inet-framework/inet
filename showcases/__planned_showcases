@@ -1,0 +1,11 @@
+Planned Showcases:
+------------------
+
+-Fingerprints
+-Hardware-in-the-loop: real AODV, simulated network -> real BABEL in examples
+-Hardware-in-the-loop: simulated AODV, real network
+-Corruption mode: corruption level and its effects on protocols (independent from wifi -> APSK radio)
+-Dimensional analog model
+-Throughput: add ht/vht mode
+-Hud (distinct logical and physical views)
+
