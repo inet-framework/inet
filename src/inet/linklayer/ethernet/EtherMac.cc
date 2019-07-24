@@ -497,7 +497,7 @@ void EtherMac::handleEndIFGPeriod()
 B EtherMac::calculateMinFrameLength()
 {
     bool inBurst = frameBursting && framesSentInBurst;
-    B minFrameLength = duplexMode ? curEtherDescr->frameMinBytes : (inBurst ? curEtherDescr->frameInBurstMinBytes : curEtherDescr->halfDuplexFrameMinBytes);
+    B minFrameLength = duplexMode ? MIN_ETHERNET_FRAME_BYTES : (inBurst ? curEtherDescr->frameInBurstMinBytes : curEtherDescr->halfDuplexFrameMinBytes);
 
     return minFrameLength;
 }
