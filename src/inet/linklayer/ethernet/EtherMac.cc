@@ -243,6 +243,8 @@ void EtherMac::handleUpperPacket(Packet *packet)
         frame = newFrame;
     }
 
+    addPaddingAndSetFcs(packet, MIN_ETHERNET_FRAME_BYTES);  // calculate valid FCS
+
     // store frame and possibly begin transmitting
     EV_DETAIL << "Frame " << packet << " arrived from higher layer, enqueueing\n";
     txQueue->pushPacket(packet);
@@ -519,8 +521,6 @@ void EtherMac::startFrameTransmission()
     ASSERT(!hdr->getSrc().isUnspecified());
 
     B minFrameLengthWithExtension = calculateMinFrameLength();
-    addPaddingAndSetFcs(frame, curEtherDescr->frameMinBytes);  // calculate valid FCS
-
     B extensionLength = minFrameLengthWithExtension > frame->getDataLength() ? (minFrameLengthWithExtension - frame->getDataLength()) : B(0);
 
     // add preamble and SFD (Starting Frame Delimiter), then send out
