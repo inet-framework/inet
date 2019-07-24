@@ -19,7 +19,8 @@
 
 #include "inet/common/packet/serializer/FieldsChunkSerializer.h"
 
-namespace inet::bgp {
+namespace inet {
+namespace bgp {
 
 /**
  * Converts between BgpHeader and binary (network byte order) BGP messages.
@@ -34,7 +35,8 @@ class INET_API BgpHeaderSerializer : public FieldsChunkSerializer
     BgpHeaderSerializer() : FieldsChunkSerializer() {}
 };
 
-} // namespace inet::bgp
+} // namespace bgp
+} // namespace inet
 
 
 #endif /* INET_ROUTING_BGPV4_BGPMESSAGE_BGPHEADERSERIALIZER_H_ */

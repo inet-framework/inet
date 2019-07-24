@@ -19,7 +19,8 @@
 #include "inet/routing/bgpv4/bgpmessage/BgpUpdate.h"
 #include "inet/routing/bgpv4/bgpmessage/BgpHeaderSerializer.h"
 
-namespace inet::bgp {
+namespace inet {
+namespace bgp {
 
 Register_Serializer(BgpHeader, BgpHeaderSerializer);
 Register_Serializer(BgpKeepAliveMessage, BgpHeaderSerializer);
@@ -147,6 +148,7 @@ void BgpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const 
                     }
                     case ATOMIC_AGGREGATE: {
                         const BgpUpdatePathAttributesAtomicAggregate* atomicAggregate = check_and_cast<const BgpUpdatePathAttributesAtomicAggregate*>(pathAttributes);
+                        (void)atomicAggregate;  // unused
                         break;
                     }
                     case AGGREGATOR: {
@@ -469,24 +471,6 @@ const Ptr<Chunk> BgpHeaderSerializer::deserialize(MemoryInputStream& stream) con
     }
 }
 
-} // namespace inet::bgp
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+} // namespace bgp
+} // namespace inet
 
