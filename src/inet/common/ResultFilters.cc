@@ -235,7 +235,6 @@ void LiveThroughputFilter::init(cComponent *component, cProperty *attrsProperty)
 LiveThroughputFilter::~LiveThroughputFilter()
 {
     if (event) {
-        ASSERT(event->isScheduled());
         getSimulation()->getFES()->remove(event);
         delete event;
     }

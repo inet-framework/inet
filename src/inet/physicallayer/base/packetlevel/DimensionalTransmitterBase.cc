@@ -169,7 +169,6 @@ Ptr<const IFunction<WpHz, Domain<simtime_t, Hz>>> DimensionalTransmitterBase::cr
                 fs[frequency] = {entry.gain, entry.interpolator};
             }
             frequencyGainFunction = makeShared<OneDimensionalInterpolatedFunction<double, Hz>>(fs);
-            auto x = frequencyGainFunction->getValue(Point<Hz>(GHz(2.482)));
         }
         else
             frequencyGainFunction = makeShared<OneDimensionalBoxcarFunction<double, Hz>>(carrierFrequency - bandwidth / 2, carrierFrequency + bandwidth / 2, 1);

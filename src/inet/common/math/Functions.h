@@ -185,7 +185,7 @@ class INET_API ConstantFunction : public FunctionBase<R, D>
 
     virtual R getConstantValue() const { return r; }
 
-    virtual Interval<R> getRange() const { return Interval<R>(r, r, 0b1); }
+    virtual Interval<R> getRange() const override { return Interval<R>(r, r, 0b1); }
 
     virtual R getValue(const typename D::P& p) const override { return r; }
 
@@ -213,7 +213,7 @@ class INET_API OneDimensionalBoxcarFunction : public FunctionBase<R, Domain<X>>
         ASSERT(r > R(0));
     }
 
-    virtual Interval<R> getRange() const { return Interval<R>(R(0), r, 0b1); }
+    virtual Interval<R> getRange() const override { return Interval<R>(R(0), r, 0b1); }
 
     virtual R getValue(const Point<X>& p) const override {
         return std::get<0>(p) < lower || std::get<0>(p) >= upper ? R(0) : r;
@@ -263,7 +263,7 @@ class INET_API TwoDimensionalBoxcarFunction : public FunctionBase<R, Domain<X, Y
         ASSERT(r > R(0));
     }
 
-    virtual Interval<R> getRange() const { return Interval<R>(R(0), r, 0b1); }
+    virtual Interval<R> getRange() const override { return Interval<R>(R(0), r, 0b1); }
 
     virtual R getValue(const Point<X, Y>& p) const override {
         return std::get<0>(p) < lowerX || std::get<0>(p) >= upperX || std::get<1>(p) < lowerY || std::get<1>(p) >= upperY ? R(0) : r;
@@ -308,8 +308,8 @@ class INET_API LinearInterpolatedFunction : public FunctionBase<R, D>
     virtual double getA() const { return toDouble(rUpper - rLower) / toDouble(upper.get(dimension) - lower.get(dimension)); }
     virtual double getB() const { return (toDouble(rLower) * upper.get(dimension) - toDouble(rUpper) * lower.get(dimension)) / (upper.get(dimension) - lower.get(dimension)); }
 
-    virtual Interval<R> getRange() const { return Interval<R>(std::min(rLower, rUpper), std::max(rLower, rUpper), 0b1); }
-    virtual typename D::I getDomain() const { return typename D::I(lower, upper, 0); };
+    virtual Interval<R> getRange() const override { return Interval<R>(std::min(rLower, rUpper), std::max(rLower, rUpper), 0b1); }
+    virtual typename D::I getDomain() const override { return typename D::I(lower, upper, 0); };
 
     virtual R getValue(const typename D::P& p) const override {
         double alpha = (p - lower).get(dimension) / (upper - lower).get(dimension);
@@ -383,9 +383,9 @@ class INET_API BilinearInterpolatedFunction : public FunctionBase<R, D>
     virtual int getDimension1() const { return dimension1; }
     virtual int getDimension2() const { return dimension2; }
 
-    virtual Interval<R> getRange() const { return Interval<R>(std::min(std::min(rLowerLower, rLowerUpper), std::min(rUpperLower, rUpperUpper)),
-                                                              std::max(std::max(rLowerLower, rLowerUpper), std::max(rUpperLower, rUpperUpper)), 0b1); }
-    virtual typename D::I getDomain() const { throw cRuntimeError("TODO"); };
+    virtual Interval<R> getRange() const override { return Interval<R>(std::min(std::min(rLowerLower, rLowerUpper), std::min(rUpperLower, rUpperUpper)),
+                                                                       std::max(std::max(rLowerLower, rLowerUpper), std::max(rUpperLower, rUpperUpper)), 0b1); }
+    virtual typename D::I getDomain() const override { throw cRuntimeError("TODO"); };
 
     virtual R getValue(const typename D::P& p) const override {
         double lowerAlpha = (p - lowerLower).get(dimension1) / (upperLower - lowerLower).get(dimension1);
@@ -1284,7 +1284,7 @@ class INET_API ExtrudedFunction : public FunctionBase<R, Domain<X, Y>>
         f->partition(i1, [&] (const Interval<Y>& i2, const IFunction<R, Domain<Y>> *h) {
             Point<X, Y> lower(std::get<0>(i.getLower()), std::get<0>(i2.getLower()));
             Point<X, Y> upper(std::get<0>(i.getUpper()), std::get<0>(i2.getUpper()));
-            Interval<X, Y> i3(lower, upper, i.getClosed() & 0b10 | i2.getClosed());
+            Interval<X, Y> i3(lower, upper, (i.getClosed() & 0b10) | i2.getClosed());
             if (auto ch = dynamic_cast<const ConstantFunction<R, Domain<Y>> *>(h)) {
                 ConstantFunction<R, Domain<X, Y>> j(ch->getConstantValue());
                 g(i3, &j);

@@ -204,7 +204,7 @@ inline Point<TS1 ..., TS2 ...> concatImpl(const Point<TS1 ...>& p1, integer_sequ
 
 template<typename ... T, size_t ... IS>
 inline std::ostream& print(std::ostream& os, const Point<T ...>& p, integer_sequence<size_t, IS...>) {
-    std::initializer_list<bool> { (os << (IS == 0 ? "" : ", ") << std::get<IS>(p) ) ... };
+    std::initializer_list<bool>({(bool)(os << (IS == 0 ? "" : ", ") << std::get<IS>(p)) ... });
     return os;
 }
 

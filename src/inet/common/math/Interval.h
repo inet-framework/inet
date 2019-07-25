@@ -19,6 +19,7 @@
 #include <bitset>
 #include <functional>
 #include <numeric>
+#include <type_traits>
 #include "inet/common/math/Point.h"
 
 namespace inet {
@@ -48,7 +49,7 @@ class INET_API Interval
         bool result = lower < p;
         if (result) {
             unsigned int b = 1 << std::tuple_size<std::tuple<T ...>>::value >> 1;
-            std::initializer_list<bool> bs({ result &= ((closed & (b >> IS)) ? std::get<IS>(p) <= std::get<IS>(upper) : std::get<IS>(p) < std::get<IS>(upper)) ... });
+            std::initializer_list<bool>({ result &= ((closed & (b >> IS)) ? std::get<IS>(p) <= std::get<IS>(upper) : std::get<IS>(p) < std::get<IS>(upper)) ... });
         }
         return result;
     }
@@ -115,9 +116,10 @@ void iterateBoundaries(const Interval<T0>& i, const std::function<void (const Po
 }
 
 template<typename T0, typename ... TS>
-void iterateBoundaries(const Interval<T0, TS ...>& i, const std::function<void (const Point<T0, TS ...>&)> f) {
+typename std::enable_if<sizeof ... (TS) != 0, void>::type
+iterateBoundaries(const Interval<T0, TS ...>& i, const std::function<void (const Point<T0, TS ...>&)> f) {
     Interval<TS ...> i1(tail(i.getLower()), tail(i.getUpper()), i.getClosed() >> 1);
-    iterateBoundaries(i1, std::function<void (const Point<TS ...>&)>([&] (const Point<TS ...>& q) {
+    iterateBoundaries<TS ...>(i1, std::function<void (const Point<TS ...>&)>([&] (const Point<TS ...>& q) {
         f(concat(Point<T0>(head(i.getLower())), q));
         f(concat(Point<T0>(head(i.getUpper())), q));
     }));
