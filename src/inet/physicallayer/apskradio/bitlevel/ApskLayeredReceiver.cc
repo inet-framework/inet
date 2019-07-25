@@ -61,9 +61,9 @@ void ApskLayeredReceiver::initialize(int stage)
         demodulator = dynamic_cast<IDemodulator *>(getSubmodule("demodulator"));
         pulseFilter = dynamic_cast<IPulseFilter *>(getSubmodule("pulseFilter"));
         analogDigitalConverter = dynamic_cast<IAnalogDigitalConverter *>(getSubmodule("analogDigitalConverter"));
-        energyDetection = mW(math::dBm2mW(par("energyDetection")));
+        energyDetection = mW(math::dBmW2mW(par("energyDetection")));
         // TODO: temporary parameters
-        sensitivity = mW(math::dBm2mW(par("sensitivity")));
+        sensitivity = mW(math::dBmW2mW(par("sensitivity")));
         carrierFrequency = Hz(par("carrierFrequency"));
         bandwidth = Hz(par("bandwidth"));
         snirThreshold = math::dB2fraction(par("snirThreshold"));

@@ -34,7 +34,7 @@ void IsotropicScalarBackgroundNoise::initialize(int stage)
 {
     cModule::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        power = mW(math::dBm2mW(par("power")));
+        power = mW(math::dBmW2mW(par("power")));
     }
 }
 

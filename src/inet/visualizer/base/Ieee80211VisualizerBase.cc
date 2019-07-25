@@ -182,7 +182,7 @@ void Ieee80211VisualizerBase::receiveSignal(cComponent *source, simsignal_t sign
 std::string Ieee80211VisualizerBase::getIcon(W power) const
 {
     int index;
-    auto powerDbm = inet::math::mW2dBm(mW(power).get());
+    auto powerDbm = math::mW2dBmW(mW(power).get());
     if (std::isnan(powerDbm))
         index = icons.size() - 1;
     else if (powerDbm < minPowerDbm)

@@ -57,8 +57,8 @@ void Ieee80211LayeredOfdmReceiver::initialize(int stage)
         pulseFilter = dynamic_cast<IPulseFilter *>(getSubmodule("pulseFilter"));
         analogDigitalConverter = dynamic_cast<IAnalogDigitalConverter *>(getSubmodule("analogDigitalConverter"));
 
-        energyDetection = mW(math::dBm2mW(par("energyDetection")));
-        sensitivity = mW(math::dBm2mW(par("sensitivity")));
+        energyDetection = mW(math::dBmW2mW(par("energyDetection")));
+        sensitivity = mW(math::dBmW2mW(par("sensitivity")));
         carrierFrequency = Hz(par("carrierFrequency"));
         bandwidth = Hz(par("bandwidth"));
         snirThreshold = math::dB2fraction(par("snirThreshold"));

@@ -42,8 +42,8 @@ void FlatReceiverBase::initialize(int stage)
     NarrowbandReceiverBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         errorModel = dynamic_cast<IErrorModel *>(getSubmodule("errorModel"));
-        energyDetection = mW(math::dBm2mW(par("energyDetection")));
-        sensitivity = mW(math::dBm2mW(par("sensitivity")));
+        energyDetection = mW(math::dBmW2mW(par("energyDetection")));
+        sensitivity = mW(math::dBmW2mW(par("sensitivity")));
     }
 }
 

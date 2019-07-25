@@ -33,7 +33,7 @@ void Ieee802154NarrowbandScalarReceiver::initialize(int stage)
 {
     FlatReceiverBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        minInterferencePower = mW(math::dBm2mW(par("minInterferencePower")));
+        minInterferencePower = mW(math::dBmW2mW(par("minInterferencePower")));
     }
 }
 
