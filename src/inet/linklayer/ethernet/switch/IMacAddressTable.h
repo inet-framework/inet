@@ -79,6 +79,11 @@ class INET_API IMacAddressTable
     virtual void readAddressTable(const char *fileName) = 0;
 
     /**
+     * For lifecycle: initialize entries for the vlanAddressTable by reading them from a file (if specified by a parameter)
+     */
+    virtual void initializeTable() = 0;
+
+    /**
      * For lifecycle: clears all entries from the vlanAddressTable.
      */
     virtual void clearTable() = 0;

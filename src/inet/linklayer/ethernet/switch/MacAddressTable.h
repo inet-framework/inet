@@ -24,6 +24,8 @@ namespace inet {
 
 /**
  * This module handles the mapping between ports and MAC addresses. See the NED definition for details.
+ * NOTE that ports (portno parameters) are actually the corresponding ID of the port interface.
+ * i.e. this is an interfaceId and NOT an index of the some kind in a gate vector.
  */
 class INET_API MacAddressTable : public cSimpleModule, public IMacAddressTable
 {
@@ -31,7 +33,7 @@ class INET_API MacAddressTable : public cSimpleModule, public IMacAddressTable
     struct AddressEntry
     {
         unsigned int vid = 0;    // VLAN ID
-        int portno = -1;    // Input port
+        int portno = -1;    // Input port (interface id)
         simtime_t insertionTime;    // Arrival time of Lookup Address Table entry
         AddressEntry() {}
         AddressEntry(unsigned int vid, int portno, simtime_t insertionTime) :
@@ -82,13 +84,13 @@ class INET_API MacAddressTable : public cSimpleModule, public IMacAddressTable
     virtual int getPortForAddress(const MacAddress& address, unsigned int vid = 0) override;
 
     /**
-     * @brief Register a new MAC address at AddressTable.
+     * @brief Register a new MAC address at AddressTable. portno is the interface ID of the port
      * @return True if refreshed. False if it is new.
      */
     virtual bool updateTableWithAddress(int portno, const MacAddress& address, unsigned int vid = 0) override;
 
     /**
-     *  @brief Clears portno cache
+     *  @brief Clears portno cache (portno is the interface ID of the port)
      */
     // TODO: find a better name
     virtual void flush(int portno) override;
@@ -122,6 +124,11 @@ class INET_API MacAddressTable : public cSimpleModule, public IMacAddressTable
      * Pre-reads in entries for Address Table during initialization.
      */
     virtual void readAddressTable(const char *fileName) override;
+
+    /**
+     * For lifecycle: initialize entries for the vlanAddressTable by reading them from a file (if specified by a parameter)
+     */
+    virtual void initializeTable() override;
 
     /**
      * For lifecycle: clears all entries from the vlanAddressTable.

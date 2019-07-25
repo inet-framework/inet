@@ -270,7 +270,7 @@ void Ieee8021dRelay::start()
     else
         throw cRuntimeError("No non-loopback interface found!");
 
-    macTable->clearTable();
+    macTable->initializeTable();
 }
 
 void Ieee8021dRelay::stop()

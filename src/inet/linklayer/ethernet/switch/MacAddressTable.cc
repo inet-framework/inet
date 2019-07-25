@@ -33,23 +33,13 @@ std::ostream& operator<<(std::ostream& os, const MacAddressTable::AddressEntry& 
 
 MacAddressTable::MacAddressTable()
 {
-    addressTable = new AddressTable();
-    // Set addressTable for VLAN ID 0
-    vlanAddressTable[0] = addressTable;
 }
 
 void MacAddressTable::initialize()
 {
     agingTime = par("agingTime");
     lastPurge = SIMTIME_ZERO;
-
-    // Option to pre-read in Address Table. To turn it off, set addressTableFile to empty string
-    const char *addressTableFile = par("addressTableFile");
-    if (addressTableFile && *addressTableFile)
-        readAddressTable(addressTableFile);
-
-    AddressTable& addressTable = *this->addressTable;    // magic to hide the '*' from the name of the watch below
-    WATCH_MAP(addressTable);
+    initializeTable();
 }
 
 /**
@@ -294,9 +284,9 @@ void MacAddressTable::readAddressTable(const char *fileName)
 
     //  Syntax of the file goes as:
     //  VLAN ID, address in hexadecimal representation, portno
-    //  1    ffffffff    1
-    //  1    ffffeed1    2
-    //  2    aabcdeff    3
+    //  1    ffffffff    100
+    //  1    ffffeed1    101
+    //  2    aabcdeff    102
     //
     //  etc...
     //
@@ -330,13 +320,33 @@ void MacAddressTable::readAddressTable(const char *fileName)
         AddressTable *table = getTableForVid(entry.vid);
 
         if (table == nullptr) {
+            // MAC Address Table does not exist for VLAN ID vid, so we create it
             table = new AddressTable();
+
+            // set 'the addressTable' to VLAN ID 0
+            if (entry.vid == 0)
+                addressTable = table;
+
             vlanAddressTable[entry.vid] = table;
         }
 
         (*table)[MacAddress(hexaddress)] = entry;
     }
     fclose(fp);
+}
+
+void MacAddressTable::initializeTable()
+{
+    clearTable();
+    // Option to pre-read in Address Table. To turn it off, set addressTableFile to empty string
+    const char *addressTableFile = par("addressTableFile");
+    if (addressTableFile && *addressTableFile)
+        readAddressTable(addressTableFile);
+
+    if (this->addressTable != nullptr) {  // setup a WATCH on VLANID 0 if present
+        AddressTable& addressTable = *this->addressTable;    // magic to hide the '*' from the name of the watch below
+        WATCH_MAP(addressTable);
+    }
 }
 
 void MacAddressTable::clearTable()

@@ -155,7 +155,7 @@ void MacRelayUnit::handleAndDispatchFrame(Packet *packet)
 
 void MacRelayUnit::start()
 {
-    macTable->clearTable();
+    macTable->initializeTable();
 }
 
 void MacRelayUnit::stop()
