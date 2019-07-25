@@ -44,13 +44,10 @@ const Ptr<const IFunction<WpHz, Domain<simtime_t, Hz>>> DimensionalAnalogModelBa
     const Coord receptionStartPosition = arrival->getStartPosition();
     double transmitterAntennaGain = computeAntennaGain(transmission->getTransmitterAntennaGain(), transmissionStartPosition, arrival->getStartPosition(), transmission->getStartOrientation());
     double receiverAntennaGain = computeAntennaGain(receiverRadio->getAntenna()->getGain().get(), arrival->getStartPosition(), transmissionStartPosition, arrival->getStartOrientation());
-    EV_DEBUG << "Transmission power begin " << endl;
-    EV_DEBUG << *transmissionPower << endl;
-    EV_DEBUG << "Transmission power end" << endl;
-    EV_DEBUG << "Reception power begin " << endl;
-    EV_DEBUG << *receptionPower << endl;
-    EV_DEBUG << "Reception power end" << endl;
     const auto& transmissionPowerFunction = dimensionalSignalAnalogModel->getPower();
+    EV_TRACE << "Transmission power begin " << endl;
+    EV_TRACE << *transmissionPowerFunction << endl;
+    EV_TRACE << "Transmission power end" << endl;
     Point<simtime_t, Hz> propagationShift(arrival->getStartTime() - transmission->getStartTime(), Hz(0));
     const auto& propagatedTransmissionPowerFunction = makeShared<ShiftFunction<WpHz, Domain<simtime_t, Hz>>>(transmissionPowerFunction, propagationShift);
     Ptr<const IFunction<double, Domain<simtime_t, Hz>>> attenuationFunction = makeShared<FrequencyAttenuationFunction>(radioMedium, transmitterAntennaGain, receiverAntennaGain, transmissionStartPosition, receptionStartPosition);
@@ -66,6 +63,9 @@ const Ptr<const IFunction<WpHz, Domain<simtime_t, Hz>>> DimensionalAnalogModelBa
         const auto& approximatedAttenuationFunction = makeShared<ApproximatedFunction<double, Domain<simtime_t, Hz>, 1, Hz>>(lower, upper, step, &CenterInterpolator<Hz, double>::singleton, attenuationFunction);
         receptionPower = propagatedTransmissionPowerFunction->multiply(approximatedAttenuationFunction);
     }
+    EV_TRACE << "Reception power begin " << endl;
+    EV_TRACE << *receptionPower << endl;
+    EV_TRACE << "Reception power end" << endl;
     return receptionPower;
 }
 

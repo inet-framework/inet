@@ -42,9 +42,9 @@ double DimensionalSnir::computeMin() const
     // TODO: factor out common part
     const DimensionalNoise *dimensionalNoise = check_and_cast<const DimensionalNoise *>(noise);
     const DimensionalReception *dimensionalReception = check_and_cast<const DimensionalReception *>(reception);
-    EV_DEBUG << "Reception power begin " << endl;
-    EV_DEBUG << *dimensionalReception->getPower() << endl;
-    EV_DEBUG << "Reception power end" << endl;
+    EV_TRACE << "Reception power begin " << endl;
+    EV_TRACE << *dimensionalReception->getPower() << endl;
+    EV_TRACE << "Reception power end" << endl;
     auto noisePower = dimensionalNoise->getPower();
     auto receptionPower = dimensionalReception->getPower();
     auto snir = receptionPower->divide(noisePower);
@@ -54,9 +54,9 @@ double DimensionalSnir::computeMin() const
     Hz bandwidth = dimensionalReception->getBandwidth();
     Point<simtime_t, Hz> startPoint(startTime, carrierFrequency - bandwidth / 2);
     Point<simtime_t, Hz> endPoint(endTime, carrierFrequency + bandwidth / 2);
-    EV_DEBUG << "SNIR begin " << endl;
-    EV_DEBUG << *snir << endl;
-    EV_DEBUG << "SNIR end" << endl;
+    EV_TRACE << "SNIR begin " << endl;
+    EV_TRACE << *snir << endl;
+    EV_TRACE << "SNIR end" << endl;
     double minSNIR = snir->getMin(Interval<simtime_t, Hz>(startPoint, endPoint, 0b0));
     EV_DEBUG << "Computing minimum SNIR: start = " << startPoint << ", end = " << endPoint << " -> minimum SNIR = " << minSNIR << endl;
     return minSNIR;
@@ -77,11 +77,11 @@ double DimensionalSnir::computeMax() const
     const simtime_t endTime = reception->getEndTime();
     Hz carrierFrequency = dimensionalReception->getCarrierFrequency();
     Hz bandwidth = dimensionalReception->getBandwidth();
-    EV_DEBUG << "SNIR begin " << endl;
-    EV_DEBUG << *snir << endl;
-    EV_DEBUG << "SNIR end" << endl;
     Point<simtime_t, Hz> startPoint(startTime, carrierFrequency - bandwidth / 2);
     Point<simtime_t, Hz> endPoint(endTime, carrierFrequency + bandwidth / 2);
+    EV_TRACE << "SNIR begin " << endl;
+    EV_TRACE << *snir << endl;
+    EV_TRACE << "SNIR end" << endl;
     double maxSNIR = snir->getMax(Interval<simtime_t, Hz>(startPoint, endPoint, 0b0));
     EV_DEBUG << "Computing maximum SNIR: start = " << startPoint << ", end = " << endPoint << " -> maximum SNIR = " << maxSNIR << endl;
     return maxSNIR;
