@@ -39,11 +39,7 @@ class IRoutingTable;
 
 class INET_API Igmpv3 : public cSimpleModule, protected cListener
 {
-public:
-    typedef std::vector<Ipv4Address> Ipv4AddressVector;
-
   protected:
-
     enum RouterState {
         IGMPV3_RS_INITIAL,
         IGMPV3_RS_QUERIER,
@@ -222,6 +218,9 @@ public:
     double lastMemberQueryTime;
     double unsolicitedReportInterval;
 
+    //crcMode
+    CrcMode crcMode = CRC_MODE_UNDEFINED;
+
     // group counters
     int numGroups = 0;
     int numHostGroups  = 0;
@@ -296,16 +295,23 @@ public:
 
     virtual void multicastSourceListChanged(InterfaceEntry *ie, Ipv4Address group, const Ipv4MulticastSourceList& sourceList);
 
+  public:
+    static void insertCrc(CrcMode crcMode, const Ptr<IgmpMessage>& igmpMsg, Packet *payload);
+    void insertCrc(const Ptr<IgmpMessage>& igmpMsg, Packet *payload) { insertCrc(crcMode, igmpMsg, payload); }
+    bool verifyCrc(const Packet *packet);
+
+  public:
     /**
      * Function for computing the time value in seconds from an encoded value.
      * Codes in the [1,127] interval are the number of 1/10 seconds,
      * codes above 127 are contain a 3-bit exponent and a four bit mantissa
      * and represents the (mantissa + 16) * 2^(3+exp) number of 1/10 seconds.
      */
-    virtual double decodeTime(unsigned char code);
+    static uint16_t decodeTime(uint8_t code);
+    static uint8_t codeTime(uint16_t timevalue);
 };
 
-inline std::ostream& operator<<(std::ostream& out, const Igmpv3::Ipv4AddressVector addresses)
+inline std::ostream& operator<<(std::ostream& out, const Ipv4AddressVector addresses)
 {
     out << "(";
     for (size_t i = 0; i < addresses.size(); i++)

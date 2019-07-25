@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scave:Analysis xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:scave="http://www.omnetpp.org/omnetpp/scave">
+  <inputs>
+    <inputs name="/inet/showcases/wireless/aggregation/results/Aggregation-*.vec"/>
+    <inputs name="/inet/showcases/wireless/aggregation/results/Aggregation-*.sca"/>
+    <inputs name="/inet/showcases/wireless/aggregation/results/NoAggregation-#0.sca"/>
+    <inputs name="/inet/showcases/wireless/aggregation/results/NoAggregation-#0.vec"/>
+    <inputs name="/inet/showcases/wireless/aggregation/results/VoicePriorityAggregation-#0.*"/>
+  </inputs>
+  <datasets>
+    <datasets name="aggregation">
+      <items xsi:type="scave:Add" filterPattern="module(*.host2.app[0]) AND name(packetReceived:count)"/>
+      <items xsi:type="scave:BarChart" name="Number of packets received">
+        <filters xsi:type="scave:Select" filterPattern="file(/inet/showcases/wireless/aggregation/results/Aggregation-#0.sca) OR file(/inet/showcases/wireless/aggregation/results/NoAggregation-#0.sca) OR file(/inet/showcases/wireless/aggregation/results/VoicePriorityAggregation-#0.sca)"/>
+        <properties name="Graph.Title" value="Number of packets received"/>
+      </items>
+    </datasets>
+    <datasets name="throughput:vector AggregationShowcase.host2.app[0]">
+      <items xsi:type="scave:Add" filterPattern="module(AggregationShowcase.host2.app[0]) AND name(throughput:vector) AND (file(/inet/showcases/wireless/aggregation/results/Aggregation-#0.vec) OR file(/inet/showcases/wireless/aggregation/results/NoAggregation-#0.vec) OR file(/inet/showcases/wireless/aggregation/results/VoicePriorityAggregation-#0.vec)   )" type="VECTOR"/>
+      <items xsi:type="scave:Apply" operation="divide-by">
+        <params name="a" value="1000000"/>
+      </items>
+      <items xsi:type="scave:Group" name="Throughput">
+        <items xsi:type="scave:Apply" operation="slidingwinavg">
+          <params name="windowSize" value="10"/>
+        </items>
+        <items xsi:type="scave:LineChart" name="Average throughput" lineNameFormat="">
+          <properties name="Graph.Title" value="Average throughput"/>
+          <properties name="X.Axis.Title" value="Time [s]"/>
+          <properties name="Y.Axis.Title" value="Average throughput [Mbps]"/>
+          <properties name="Legend.Display" value="true"/>
+          <properties name="Line.Name/VoicePriorityAggregation-0-20190107-13:27:13-22623 VoicePriorityAggregation" value="VoicePriorityAggregation"/>
+          <properties name="Line.Name/Aggregation-0-20190107-13:27:13-22611 Aggregation" value="Aggregation"/>
+          <properties name="Line.Name/NoAggregation-0-20190107-13:27:13-22613 NoAggregation" value="NoAggregation"/>
+          <properties name="Line.Name/Aggregation-0-20190107-17:02:27-3799 Aggregation" value="Aggregation"/>
+          <properties name="Line.Name/NoAggregation-0-20190107-17:02:27-3772 NoAggregation" value="NoAggregation"/>
+          <properties name="Line.Name/VoicePriorityAggregation-0-20190107-17:02:27-3813 VoicePriorityAggregation" value="VoicePriorityAggregation"/>
+        </items>
+      </items>
+    </datasets>
+    <datasets name="endToEndDelay:vector AggregationShowcase.host2.app[0]">
+      <items xsi:type="scave:Add" filterPattern="module(AggregationShowcase.host2.app[0]) AND name(endToEndDelay:vector)" type="VECTOR"/>
+      <items xsi:type="scave:LineChart" name="End-to-end delay" lineNameFormat="">
+        <filters xsi:type="scave:Select" filterPattern="file(/inet/showcases/wireless/aggregation/results/NoAggregation-#0.vec) OR file(/inet/showcases/wireless/aggregation/results/Aggregation-#0.vec) OR file(/inet/showcases/wireless/aggregation/results/VoicePriorityAggregation-#0.vec)   " type="VECTOR"/>
+        <properties name="Graph.Title" value="End-to-end delay"/>
+        <properties name="X.Axis.Title" value="Time [s]"/>
+        <properties name="Y.Axis.Title" value="End-to-end delay [s]"/>
+        <properties name="Legend.Display" value="true"/>
+        <properties name="Line.Name//inet/showcases/wireless/aggregation/results/DelayAggregation-#0.vec DelayAggregation-0-20190107-17:02:27-3815 DelayAggregation" value="Aggregation"/>
+        <properties name="Line.Name//inet/showcases/wireless/aggregation/results/DelayNoAggregation-#0.vec DelayNoAggregation-0-20190107-17:02:27-3816 DelayNoAggregation" value="NoAggregation"/>
+        <properties name="Line.Name//inet/showcases/wireless/aggregation/results/DelayVoicePriorityAggregation-#0.vec DelayVoicePriorityAggregation-0-20190107-17:02:27-3758 DelayVoicePriorityAggregation" value="VoicePriorityAggregation"/>
+        <properties name="Line.Name//inet/showcases/wireless/aggregation/results/Aggregation-#0.vec Aggregation-0-20190207-15:24:53-3001 Aggregation" value="Aggregation"/>
+        <properties name="Line.Name//inet/showcases/wireless/aggregation/results/NoAggregation-#0.vec NoAggregation-0-20190207-15:24:53-3002 NoAggregation" value="NoAggregation"/>
+        <properties name="Line.Name//inet/showcases/wireless/aggregation/results/VoicePriorityAggregation-#0.vec VoicePriorityAggregation-0-20190207-15:24:53-3003 VoicePriorityAggregation" value="VoicePriorityAggregation"/>
+        <properties name="Symbols.Type//inet/showcases/wireless/aggregation/results/Aggregation-#0.vec Aggregation-0-20190207-15:24:53-3001 Aggregation" value="Triangle"/>
+        <properties name="Line.Color//inet/showcases/wireless/aggregation/results/Aggregation-#0.vec Aggregation-0-20190207-15:24:53-3001 Aggregation" value="darkgreen"/>
+        <properties name="Symbols.Type//inet/showcases/wireless/aggregation/results/NoAggregation-#0.vec NoAggregation-0-20190207-15:24:53-3002 NoAggregation" value="Dot"/>
+        <properties name="Line.Color//inet/showcases/wireless/aggregation/results/NoAggregation-#0.vec NoAggregation-0-20190207-15:24:53-3002 NoAggregation" value="red"/>
+        <properties name="Symbols.Type//inet/showcases/wireless/aggregation/results/VoicePriorityAggregation-#0.vec VoicePriorityAggregation-0-20190207-15:24:53-3003 VoicePriorityAggregation" value="Square"/>
+        <properties name="Line.Color//inet/showcases/wireless/aggregation/results/VoicePriorityAggregation-#0.vec VoicePriorityAggregation-0-20190207-15:24:53-3003 VoicePriorityAggregation" value="darkblue"/>
+      </items>
+    </datasets>
+  </datasets>
+  <chartSheets>
+    <chartSheets name="default" charts="//@datasets/@datasets.0/@items.1 //@datasets/@datasets.1/@items.2/@items.1 //@datasets/@datasets.2/@items.1"/>
+  </chartSheets>
+</scave:Analysis>

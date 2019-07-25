@@ -17,7 +17,9 @@ import inet.common.INETDefs;
 import inet.common.Units;
 
 cplusplus {{
+#include "inet/common/packet/chunk/BitCountChunk.h"
 #include "inet/common/packet/chunk/BitsChunk.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/common/packet/chunk/Chunk.h"
 #include "inet/common/packet/chunk/cPacketChunk.h"
@@ -54,16 +56,32 @@ class Chunk extends cObject
     RegionTagSet::cObjectRegionTag tags[] @packetData(false);
 }
 
+class BitCountChunk extends Chunk
+{
+    @existingClass;
+    @descriptor(readonly);
+    bool data;
+}
+
 class BitsChunk extends Chunk
 {
     @existingClass;
     @descriptor(readonly);
+    bool bit[];
+}
+
+class ByteCountChunk extends Chunk
+{
+    @existingClass;
+    @descriptor(readonly);
+    uint8_t data;
 }
 
 class BytesChunk extends Chunk
 {
     @existingClass;
     @descriptor(readonly);
+    uint8_t byte[];
 }
 
 class SequenceChunk extends Chunk

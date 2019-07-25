@@ -1,5 +1,6 @@
 //
 // Copyright (C) 2006 Andras Babos and Andras Varga
+// Copyright (C) 2019 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -21,6 +22,8 @@
 #include "inet/common/checksum/TcpIpChecksum.h"
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
+#include "inet/routing/ospfv2/OspfCrc.h"
+#include "inet/routing/ospfv2/OspfPacketSerializer.h"
 #include "inet/routing/ospfv2/interface/OspfInterface.h"
 #include "inet/routing/ospfv2/interface/OspfInterfaceStateDown.h"
 #include "inet/routing/ospfv2/messagehandler/MessageHandler.h"
@@ -220,20 +223,11 @@ void OspfInterface::sendHelloPacket(Ipv4Address destination, short ttl)
 
     helloPacket->setChunkLength(OSPF_HEADER_LENGTH + OSPF_HELLO_HEADER_LENGTH + B(initedNeighborCount * 4));
 
-    helloPacket->setCrcMode(crcMode);
-    // making sure the crc field is zero
-    helloPacket->setCrc(0x0000);
-    // RFC 2328: OSPF checksum is calculated over the entire OSPF packet, excluding the 64-bit authentication field.
-    if(crcMode == CRC_COMPUTED) {
-        MemoryOutputStream stream;
-        Chunk::serialize(stream, helloPacket);
-        uint16_t crc = TcpIpChecksum::checksum(stream.getData());
-        helloPacket->setCrc(crc);
-    }
-
     for (int i = 0; i < 8; i++) {
         helloPacket->setAuthentication(i, authenticationKey.bytes[i]);
     }
+
+    setOspfCrc(helloPacket, crcMode);
 
     Packet *pk = new Packet();
     pk->insertAtBack(helloPacket);
@@ -256,20 +250,11 @@ void OspfInterface::sendLsAcknowledgement(const OspfLsaHeader *lsaHeader, Ipv4Ad
 
     lsAckPacket->setChunkLength(OSPF_HEADER_LENGTH + OSPF_LSA_HEADER_LENGTH);
 
-    lsAckPacket->setCrcMode(crcMode);
-    // making sure the crc field is zero
-    lsAckPacket->setCrc(0x0000);
-    // RFC 2328: OSPF checksum is calculated over the entire OSPF packet, excluding the 64-bit authentication field.
-    if(crcMode == CRC_COMPUTED) {
-        MemoryOutputStream stream;
-        Chunk::serialize(stream, lsAckPacket);
-        uint16_t crc = TcpIpChecksum::checksum(stream.getData());
-        lsAckPacket->setCrc(crc);
-    }
-
     for (int i = 0; i < 8; i++) {
         lsAckPacket->setAuthentication(i, authenticationKey.bytes[i]);
     }
+
+    setOspfCrc(lsAckPacket, crcMode);
 
     Packet *pk = new Packet();
     pk->insertAtBack(lsAckPacket);
@@ -503,113 +488,56 @@ bool OspfInterface::floodLsa(const OspfLsa *lsa, OspfInterface *intf, Neighbor *
 
 Packet *OspfInterface::createUpdatePacket(const OspfLsa *lsa)
 {
-    LsaType lsaType = static_cast<LsaType>(lsa->getHeader().getLsType());
-    const OspfRouterLsa *routerLSA = (lsaType == ROUTERLSA_TYPE) ? dynamic_cast<const OspfRouterLsa *>(lsa) : nullptr;
-    const OspfNetworkLsa *networkLSA = (lsaType == NETWORKLSA_TYPE) ? dynamic_cast<const OspfNetworkLsa *>(lsa) : nullptr;
-    const OspfSummaryLsa *summaryLSA = ((lsaType == SUMMARYLSA_NETWORKS_TYPE) ||
-                                  (lsaType == SUMMARYLSA_ASBOUNDARYROUTERS_TYPE)) ? dynamic_cast<const OspfSummaryLsa *>(lsa) : nullptr;
-    const OspfAsExternalLsa *asExternalLSA = (lsaType == AS_EXTERNAL_LSA_TYPE) ? dynamic_cast<const OspfAsExternalLsa *>(lsa) : nullptr;
+    LsaType lsaType = lsa->getHeader().getLsType();
+    const auto& updatePacket = makeShared<OspfLinkStateUpdatePacket>();
+    B packetLength = OSPF_HEADER_LENGTH + B(sizeof(uint32_t));    // OSPF header + place for number of advertisements
 
-    if (((lsaType == ROUTERLSA_TYPE) && (routerLSA != nullptr)) ||
-        ((lsaType == NETWORKLSA_TYPE) && (networkLSA != nullptr)) ||
-        (((lsaType == SUMMARYLSA_NETWORKS_TYPE) || (lsaType == SUMMARYLSA_ASBOUNDARYROUTERS_TYPE)) && (summaryLSA != nullptr)) ||
-        ((lsaType == AS_EXTERNAL_LSA_TYPE) && (asExternalLSA != nullptr)))
-    {
-        const auto& updatePacket = makeShared<OspfLinkStateUpdatePacket>();
-        B packetLength = OSPF_HEADER_LENGTH + B(sizeof(uint32_t));    // OSPF header + place for number of advertisements
+    updatePacket->setType(LINKSTATE_UPDATE_PACKET);
+    updatePacket->setRouterID(Ipv4Address(parentArea->getRouter()->getRouterID()));
+    updatePacket->setAreaID(Ipv4Address(areaID));
+    updatePacket->setAuthenticationType(authenticationType);
 
-        updatePacket->setType(LINKSTATE_UPDATE_PACKET);
-        updatePacket->setRouterID(Ipv4Address(parentArea->getRouter()->getRouterID()));
-        updatePacket->setAreaID(Ipv4Address(areaID));
-        updatePacket->setAuthenticationType(authenticationType);
-
-        updatePacket->setNumberOfLSAs(1);
-
-        switch (lsaType) {
-            case ROUTERLSA_TYPE: {
-                updatePacket->setRouterLSAsArraySize(1);
-                updatePacket->setRouterLSAs(0, *routerLSA);
-                unsigned short lsAge = updatePacket->getRouterLSAs(0).getHeader().getLsAge();
-                if (lsAge < MAX_AGE - interfaceTransmissionDelay) {
-                    updatePacket->getRouterLSAsForUpdate(0).getHeaderForUpdate().setLsAge(lsAge + interfaceTransmissionDelay);
-                }
-                else {
-                    updatePacket->getRouterLSAsForUpdate(0).getHeaderForUpdate().setLsAge(MAX_AGE);
-                }
-                packetLength += calculateLSASize(routerLSA);
+    switch (lsaType) {
+        case ROUTERLSA_TYPE:
+        case NETWORKLSA_TYPE:
+        case SUMMARYLSA_NETWORKS_TYPE:
+        case SUMMARYLSA_ASBOUNDARYROUTERS_TYPE:
+        case AS_EXTERNAL_LSA_TYPE: {
+            updatePacket->setOspfLSAsArraySize(1);
+            updatePacket->setOspfLSAs(0, lsa->dup());
+            auto lsa = updatePacket->getOspfLSAsForUpdate(0);
+            auto& lsaHeader = lsa->getHeaderForUpdate();
+            unsigned short lsAge = lsaHeader.getLsAge();
+            if (lsAge < MAX_AGE - interfaceTransmissionDelay) {
+                lsAge += interfaceTransmissionDelay;
             }
-            break;
-
-            case NETWORKLSA_TYPE: {
-                updatePacket->setNetworkLSAsArraySize(1);
-                updatePacket->setNetworkLSAs(0, *networkLSA);
-                unsigned short lsAge = updatePacket->getNetworkLSAs(0).getHeader().getLsAge();
-                if (lsAge < MAX_AGE - interfaceTransmissionDelay) {
-                    updatePacket->getNetworkLSAsForUpdate(0).getHeaderForUpdate().setLsAge(lsAge + interfaceTransmissionDelay);
-                }
-                else {
-                    updatePacket->getNetworkLSAsForUpdate(0).getHeaderForUpdate().setLsAge(MAX_AGE);
-                }
-                packetLength += calculateLSASize(networkLSA);
+            else {
+                lsAge = MAX_AGE;
             }
-            break;
-
-            case SUMMARYLSA_NETWORKS_TYPE:
-            case SUMMARYLSA_ASBOUNDARYROUTERS_TYPE: {
-                updatePacket->setSummaryLSAsArraySize(1);
-                updatePacket->setSummaryLSAs(0, *summaryLSA);
-                unsigned short lsAge = updatePacket->getSummaryLSAs(0).getHeader().getLsAge();
-                if (lsAge < MAX_AGE - interfaceTransmissionDelay) {
-                    updatePacket->getSummaryLSAsForUpdate(0).getHeaderForUpdate().setLsAge(lsAge + interfaceTransmissionDelay);
-                }
-                else {
-                    updatePacket->getSummaryLSAsForUpdate(0).getHeaderForUpdate().setLsAge(MAX_AGE);
-                }
-                packetLength += calculateLSASize(summaryLSA);
-            }
-            break;
-
-            case AS_EXTERNAL_LSA_TYPE: {
-                updatePacket->setAsExternalLSAsArraySize(1);
-                updatePacket->setAsExternalLSAs(0, *asExternalLSA);
-                unsigned short lsAge = updatePacket->getAsExternalLSAs(0).getHeader().getLsAge();
-                if (lsAge < MAX_AGE - interfaceTransmissionDelay) {
-                    updatePacket->getAsExternalLSAsForUpdate(0).getHeaderForUpdate().setLsAge(lsAge + interfaceTransmissionDelay);
-                }
-                else {
-                    updatePacket->getAsExternalLSAsForUpdate(0).getHeaderForUpdate().setLsAge(MAX_AGE);
-                }
-                packetLength += calculateLSASize(asExternalLSA);
-            }
-            break;
-
-            default:
-                throw cRuntimeError("Invalid LSA type: %d", lsaType);
+            lsaHeader.setLsAge(lsAge);
+            auto lsaSize = calculateLSASize(lsa);
+            ASSERT(lsaSize == B(lsaHeader.getLsaLength()));
+            setLsaCrc(*lsa, crcMode);
+            packetLength += lsaSize;
         }
+        break;
 
-        updatePacket->setChunkLength(packetLength);
-
-        updatePacket->setCrcMode(crcMode);
-        // making sure the crc field is zero
-        updatePacket->setCrc(0x0000);
-        // RFC 2328: OSPF checksum is calculated over the entire OSPF packet, excluding the 64-bit authentication field.
-        if(crcMode == CRC_COMPUTED) {
-            MemoryOutputStream stream;
-            Chunk::serialize(stream, updatePacket);
-            uint16_t crc = TcpIpChecksum::checksum(stream.getData());
-            updatePacket->setCrc(crc);
-        }
-
-        for (int j = 0; j < 8; j++) {
-            updatePacket->setAuthentication(j, authenticationKey.bytes[j]);
-        }
-
-        Packet *pk = new Packet();
-        pk->insertAtBack(updatePacket);
-
-        return pk;
+        default:
+            throw cRuntimeError("Invalid LSA type: %d", lsaType);
     }
-    return nullptr;
+
+    updatePacket->setChunkLength(packetLength);
+
+    for (int j = 0; j < 8; j++) {
+        updatePacket->setAuthentication(j, authenticationKey.bytes[j]);
+    }
+
+    setOspfCrc(updatePacket, crcMode);
+
+    Packet *pk = new Packet();
+    pk->insertAtBack(updatePacket);
+
+    return pk;
 }
 
 void OspfInterface::addDelayedAcknowledgement(const OspfLsaHeader& lsaHeader)
@@ -663,20 +591,11 @@ void OspfInterface::sendDelayedAcknowledgements()
 
                 ackPacket->setChunkLength(packetSize - IPv4_MAX_HEADER_LENGTH);
 
-                ackPacket->setCrcMode(crcMode);
-                // making sure the crc field is zero
-                ackPacket->setCrc(0x0000);
-                // RFC 2328: OSPF checksum is calculated over the entire OSPF packet, excluding the 64-bit authentication field.
-                if(crcMode == CRC_COMPUTED) {
-                    MemoryOutputStream stream;
-                    Chunk::serialize(stream, ackPacket);
-                    uint16_t crc = TcpIpChecksum::checksum(stream.getData());
-                    ackPacket->setCrc(crc);
-                }
-
                 for (int i = 0; i < 8; i++) {
                     ackPacket->setAuthentication(i, authenticationKey.bytes[i]);
                 }
+
+                setOspfCrc(ackPacket, crcMode);
 
                 Packet *pk = new Packet();
                 pk->insertAtBack(ackPacket);

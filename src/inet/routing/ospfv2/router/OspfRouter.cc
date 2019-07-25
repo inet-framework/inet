@@ -18,6 +18,7 @@
 #include <algorithm>
 
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
+#include "inet/routing/ospfv2/router/Lsa.h"
 #include "inet/routing/ospfv2/router/OspfRouter.h"
 
 namespace inet {
@@ -149,6 +150,7 @@ bool Router::installLSA(const OspfLsa *lsa, AreaId areaID    /*= BACKBONE_AREAID
 
         case AS_EXTERNAL_LSA_TYPE: {
             const OspfAsExternalLsa *ospfASExternalLSA = check_and_cast<const OspfAsExternalLsa *>(lsa);
+            ASSERT(ospfASExternalLSA->getHeader().getLsaLength() != 0);
             return installASExternalLSA(ospfASExternalLSA);
         }
         break;
@@ -203,10 +205,11 @@ bool Router::installASExternalLSA(const OspfAsExternalLsa *lsa)
     auto lsaIt = asExternalLSAsByID.find(lsaKey);
     if ((lsaIt != asExternalLSAsByID.end()) &&
         reachable &&
-        (lsaIt->second->getContents().getE_ExternalMetricType() == lsa->getContents().getE_ExternalMetricType()) &&
-        (lsaIt->second->getContents().getRouteCost() == lsa->getContents().getRouteCost()) &&
-        (lsa->getContents().getForwardingAddress().getInt() != 0) &&    // forwarding address != 0.0.0.0
-        (lsaIt->second->getContents().getForwardingAddress() == lsa->getContents().getForwardingAddress()))
+        (lsaIt->second->getContents().getExternalTOSInfo(0).E_ExternalMetricType == lsa->getContents().getExternalTOSInfo(0).E_ExternalMetricType) &&
+        (lsaIt->second->getContents().getExternalTOSInfo(0).tos == lsa->getContents().getExternalTOSInfo(0).tos) &&
+        (lsaIt->second->getContents().getExternalTOSInfo(0).routeCost == lsa->getContents().getExternalTOSInfo(0).routeCost) &&
+        (lsa->getContents().getExternalTOSInfo(0).forwardingAddress.getInt() != 0) &&    // forwarding address != 0.0.0.0
+        (lsaIt->second->getContents().getExternalTOSInfo(0).forwardingAddress == lsa->getContents().getExternalTOSInfo(0).forwardingAddress))
     {
         if (routerID > advertisingRouter) {
             return false;
@@ -232,6 +235,7 @@ bool Router::installASExternalLSA(const OspfAsExternalLsa *lsa)
     else {
         AsExternalLsa *lsaCopy = new AsExternalLsa(*lsa);
         asExternalLSAsByID[lsaKey] = lsaCopy;
+        ASSERT(lsaCopy->getHeader().getLsaLength() != 0);
         asExternalLSAs.push_back(lsaCopy);
         return true;
     }
@@ -918,14 +922,14 @@ OspfRoutingTableEntry *Router::getPreferredEntry(const OspfLsa& lsa, bool skipSe
 
     const OspfLsaHeader& lsaHeader = lsa.getHeader();
     const OspfAsExternalLsa *asExternalLSA = dynamic_cast<const OspfAsExternalLsa *>(&lsa);
-    unsigned long externalCost = (asExternalLSA != nullptr) ? asExternalLSA->getContents().getRouteCost() : 0;
+    unsigned long externalCost = (asExternalLSA != nullptr) ? asExternalLSA->getContents().getExternalTOSInfo(0).routeCost : 0;
     unsigned short lsAge = lsaHeader.getLsAge();
     RouterId originatingRouter = lsaHeader.getAdvertisingRouter();
     bool selfOriginated = (originatingRouter == routerID);
     Ipv4Address forwardingAddress;    // 0.0.0.0
 
     if (asExternalLSA != nullptr)
-        forwardingAddress = asExternalLSA->getContents().getForwardingAddress();
+        forwardingAddress = asExternalLSA->getContents().getExternalTOSInfo(0).forwardingAddress;
 
     if ((externalCost == LS_INFINITY) || (lsAge == MAX_AGE) || (skipSelfOriginated && selfOriginated))    // (1) and(2)
         return nullptr;
@@ -973,7 +977,7 @@ void Router::calculateASExternalRoutes(std::vector<OspfRoutingTableEntry *>& new
     for (uint32_t i = 0; i < asExternalLSAs.size(); i++) {
         AsExternalLsa *currentLSA = asExternalLSAs[i];
         const OspfLsaHeader& currentHeader = currentLSA->getHeader();
-        unsigned short externalCost = currentLSA->getContents().getRouteCost();
+        unsigned short externalCost = currentLSA->getContents().getExternalTOSInfo(0).routeCost;
         RouterId originatingRouter = currentHeader.getAdvertisingRouter();
 
         OspfRoutingTableEntry *preferredEntry = getPreferredEntry(*currentLSA, true, &newRoutingTable);
@@ -985,7 +989,7 @@ void Router::calculateASExternalRoutes(std::vector<OspfRoutingTableEntry *>& new
         Metric preferredCost = preferredEntry->getCost();
         OspfRoutingTableEntry *destinationEntry = lookup(destination, &newRoutingTable);    // (5)
         if (destinationEntry == nullptr) {
-            bool type2ExternalMetric = currentLSA->getContents().getE_ExternalMetricType();
+            bool type2ExternalMetric = currentLSA->getContents().getExternalTOSInfo(0).E_ExternalMetricType;
             OspfRoutingTableEntry *newEntry = new OspfRoutingTableEntry(ift);
 
             newEntry->setDestination(destination);
@@ -1015,7 +1019,7 @@ void Router::calculateASExternalRoutes(std::vector<OspfRoutingTableEntry *>& new
         }
         else {
             OspfRoutingTableEntry::RoutingPathType destinationPathType = destinationEntry->getPathType();
-            bool type2ExternalMetric = currentLSA->getContents().getE_ExternalMetricType();
+            bool type2ExternalMetric = currentLSA->getContents().getExternalTOSInfo(0).E_ExternalMetricType;
             unsigned int nextHopCount = preferredEntry->getNextHopCount();
 
             if ((destinationPathType == OspfRoutingTableEntry::INTRAAREA) ||
@@ -1147,8 +1151,8 @@ LinkStateId Router::getUniqueLinkStateID(const Ipv4AddressRange& destination,
             asExternalLSA->getHeaderForUpdate().setLsAge(0);
             asExternalLSA->getHeaderForUpdate().setLsSequenceNumber((sequenceNumber == MAX_SEQUENCE_NUMBER) ? INITIAL_SEQUENCE_NUMBER : sequenceNumber + 1);
             asExternalLSA->getContentsForUpdate().setNetworkMask(destination.mask);
-            asExternalLSA->getContentsForUpdate().setE_ExternalMetricType(externalMetricIsType2);
-            asExternalLSA->getContentsForUpdate().setRouteCost(destinationCost);
+            asExternalLSA->getContentsForUpdate().getExternalTOSInfoForUpdate(0).E_ExternalMetricType = externalMetricIsType2;
+            asExternalLSA->getContentsForUpdate().getExternalTOSInfoForUpdate(0).routeCost = destinationCost;
 
             lsaToReoriginate = asExternalLSA;
 
@@ -1401,12 +1405,12 @@ void Router::updateExternalRoute(Ipv4Address networkAddress, const OspfAsExterna
             entry->setNetmask(externalRouteContents.getNetworkMask());
             entry->setInterface(ift->getInterfaceById(ifIndex));
             entry->setSourceType(IRoute::MANUAL);
-            entry->setMetric(externalRouteContents.getRouteCost());
+            entry->setMetric(externalRouteContents.getExternalTOSInfo(0).routeCost);
             rt->addRoute(entry);    // IIpv4RoutingTable deletes entry pointer
         }
         else {
             ASSERT(entry);
-            entry->setMetric(externalRouteContents.getRouteCost());
+            entry->setMetric(externalRouteContents.getExternalTOSInfo(0).routeCost);
         }
     }
 
@@ -1428,6 +1432,8 @@ void Router::updateExternalRoute(Ipv4Address networkAddress, const OspfAsExterna
     asExternalLSA->setSource(LsaTrackingInfo::ORIGINATED);
 
     externalRoutes[networkAddress] = externalRouteContents;
+
+    lsaHeader.setLsaLength(B(calculateLsaSize(*asExternalLSA)).get());
 
     bool rebuild = installASExternalLSA(asExternalLSA);
     floodLSA(asExternalLSA, BACKBONE_AREAID);
@@ -1500,10 +1506,10 @@ void Router::printAsExternalLsa()
         EV_INFO << "    Length: " << head.getLsaLength() << std::endl;
 
         EV_INFO << "    Network Mask: " << entry->getContents().getNetworkMask().str(false) << std::endl;
-        EV_INFO << "    Metric: " << entry->getContents().getRouteCost() << std::endl;
-        EV_INFO << "    E flag: " << ((entry->getContents().getE_ExternalMetricType() == true) ? "set" : "unset") << std::endl;
-        EV_INFO << "    Forwarding Address: " << entry->getContents().getForwardingAddress().str(false) << std::endl;
-        EV_INFO << "    External Route Tag: " << entry->getContents().getExternalRouteTag() << std::endl;
+        EV_INFO << "    Metric: " << entry->getContents().getExternalTOSInfo(0).routeCost << std::endl;
+        EV_INFO << "    E flag: " << ((entry->getContents().getExternalTOSInfo(0).E_ExternalMetricType == true) ? "set" : "unset") << std::endl;
+        EV_INFO << "    Forwarding Address: " << entry->getContents().getExternalTOSInfo(0).forwardingAddress.str(false) << std::endl;
+        EV_INFO << "    External Route Tag: " << entry->getContents().getExternalTOSInfo(0).externalRouteTag << std::endl;
         // todo: add ExternalTosInfo externalTOSInfo[];
         EV_INFO << std::endl;
     }
