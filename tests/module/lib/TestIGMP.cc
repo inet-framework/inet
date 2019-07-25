@@ -33,7 +33,7 @@ class INET_API TestIGMP : public Igmpv2, public IScriptable
     virtual void initialize(int stage) override;
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
     virtual void configureInterface(InterfaceEntry *ie) override;
-    virtual void processIgmpMessage(Packet *packet, const Ptr<const IgmpMessage>& igmp) override;
+    virtual void processIgmpMessage(Packet *packet) override;
     virtual void processHostGroupTimer(cMessage *msg) override;
     virtual void processQueryTimer(cMessage *msg) override;
     virtual void processLeaveTimer(cMessage *msg) override;
@@ -97,9 +97,10 @@ void TestIGMP::configureInterface(InterfaceEntry *ie)
 }
 
 
-void TestIGMP::processIgmpMessage(Packet *packet, const Ptr<const IgmpMessage>& igmp)
+void TestIGMP::processIgmpMessage(Packet *packet)
 {
     InterfaceEntry *ie = ift->getInterfaceById(packet->getTag<InterfaceInd>()->getInterfaceId());
+    const auto& igmp = packet->peekAtFront<IgmpMessage>();
     Ipv4Address group = Ipv4Address::UNSPECIFIED_ADDRESS;
     switch (igmp->getType())
     {
@@ -127,21 +128,21 @@ void TestIGMP::processIgmpMessage(Packet *packet, const Ptr<const IgmpMessage>& 
     {
         case IGMP_MEMBERSHIP_QUERY:
             startEvent("query received", stateMask, ie, &group);
-            Igmpv2::processIgmpMessage(packet, igmp);
+            Igmpv2::processIgmpMessage(packet);
             endEvent(stateMask, ie, &group);
             break;
         case IGMPV2_MEMBERSHIP_REPORT:
             startEvent("report received", stateMask, ie, &group);
-            Igmpv2::processIgmpMessage(packet, igmp);
+            Igmpv2::processIgmpMessage(packet);
             endEvent(stateMask, ie, &group);
             break;
         case IGMPV2_LEAVE_GROUP:
             startEvent("leave received", stateMask, ie, &group);
-            Igmpv2::processIgmpMessage(packet, igmp);
+            Igmpv2::processIgmpMessage(packet);
             endEvent(stateMask, ie, &group);
             break;
         default:
-            Igmpv2::processIgmpMessage(packet, igmp);
+            Igmpv2::processIgmpMessage(packet);
             break;
     }
 }

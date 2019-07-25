@@ -66,7 +66,7 @@ Ieee8021qHeader *Ieee8021qEncap::findVlanTag(const Ptr<EthernetMacHeader>& ether
 Ieee8021qHeader *Ieee8021qEncap::addVlanTag(const Ptr<EthernetMacHeader>& ethernetMacHeader)
 {
     auto vlanTag = new Ieee8021qHeader();
-    ethernetMacHeader->setChunkLength(ethernetMacHeader->getChunkLength() + B(4));
+    ethernetMacHeader->addChunkLength(B(4));
     if (*vlanTagType == 'c')
         ethernetMacHeader->setCTag(vlanTag);
     else if (*vlanTagType == 's')
@@ -78,7 +78,7 @@ Ieee8021qHeader *Ieee8021qEncap::addVlanTag(const Ptr<EthernetMacHeader>& ethern
 
 Ieee8021qHeader *Ieee8021qEncap::removeVlanTag(const Ptr<EthernetMacHeader>& ethernetMacHeader)
 {
-    ethernetMacHeader->setChunkLength(ethernetMacHeader->getChunkLength() - B(4));
+    ethernetMacHeader->addChunkLength(B(-4));
     if (*vlanTagType == 'c')
         return ethernetMacHeader->dropCTag();
     else if (*vlanTagType == 's')

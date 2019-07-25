@@ -21,6 +21,7 @@
 #include "inet/common/packet/printer/ProtocolPrinterRegistry.h"
 #include "inet/networklayer/ipv4/IgmpMessage_m.h"
 #include "inet/networklayer/ipv4/IgmpProtocolPrinter.h"
+#include "inet/networklayer/ipv4/Igmpv3.h"
 
 namespace inet {
 
@@ -44,7 +45,7 @@ void IgmpProtocolPrinter::print(const Ptr<const Chunk>& chunk, const Protocol *p
                         context.infoColumn << ", general";
                     else
                         context.infoColumn << ", group " << header->getGroupAddress();
-                    context.infoColumn << ", maxRespTime=" << header->getMaxRespTime();
+                    context.infoColumn << ", maxRespTime=" << SimTime(header->getMaxRespTimeCode(), (SimTimeUnit)-1);
                 }
                 else if (auto header = dynamicPtrCast<const Igmpv3Query>(chunk)) {
                     context.infoColumn << "IGMPv3 QRY";
@@ -52,11 +53,11 @@ void IgmpProtocolPrinter::print(const Ptr<const Chunk>& chunk, const Protocol *p
                         context.infoColumn << ", general";
                     else
                         context.infoColumn << ", group " << header->getGroupAddress();
-                    context.infoColumn << ", maxRespTime=" << header->getMaxRespTime();
+                    context.infoColumn << ", maxRespTime=" << SimTime(Igmpv3::decodeTime(header->getMaxRespTimeCode()), (SimTimeUnit)-1);
                     if (header->getSuppressRouterProc())
                         context.infoColumn << " Suppress";
                     context.infoColumn << ", QRV=" << header->getRobustnessVariable();
-                    context.infoColumn << ", QQIC=" << header->getQueryIntervalCode();
+                    context.infoColumn << ", QQIC=" << SimTime(Igmpv3::decodeTime(header->getQueryIntervalCode()), SIMTIME_S);
                     if (header->getSourceList().size() > 0) {
                         context.infoColumn << ", SRC={";
                         for(auto it = header->getSourceList().begin(); it != header->getSourceList().end(); ++it) {

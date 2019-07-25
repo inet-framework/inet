@@ -423,18 +423,10 @@ void BgpRouter::socketDataArrived(TcpSocket *socket, Packet *msg, bool urgent)
 {
     _currSessionId = findIdFromSocketConnId(_BGPSessions, socket->getSocketId());
     if (_currSessionId != static_cast<SessionId>(-1)) {
-        const Ptr<const Chunk>& chunk = msg->peekAll();
-        auto cType = chunk->getChunkType();
-        if(cType == Chunk::CT_FIELDS) {
-            processChunks(*check_and_cast<const BgpHeader *>(chunk.get()));
+        while (msg->getByteLength() > 0) {
+            const auto& chunk = msg->popAtFront<BgpHeader>();
+            processChunks(*(chunk.get()));
         }
-        else if(cType == Chunk::CT_SEQUENCE) {
-            for (const auto& elementChunk : staticPtrCast<const SequenceChunk>(chunk)->getChunks()) {
-                processChunks(*check_and_cast<const BgpHeader *>(elementChunk.get()));
-            }
-        }
-        else
-            throw cRuntimeError("Invalid chunk type %d", cType);
     }
     delete msg;
 }
@@ -490,15 +482,23 @@ void BgpRouter::processMessage(const BgpUpdateMessage& msg)
 
     BgpRoutingTableEntry *entry = new BgpRoutingTableEntry();
     entry->setLocalPreference(bgpModule->par("localPreference").intValue());
-    entry->setDestination(msg.getNLRI().prefix);
+    entry->setDestination(msg.getNLRI(0).prefix);
 
     Ipv4Address netMask(Ipv4Address::ALLONES_ADDRESS);
-    netMask = Ipv4Address::makeNetmask(msg.getNLRI().length);
+    netMask = Ipv4Address::makeNetmask(msg.getNLRI(0).length);
     entry->setNetmask(netMask);
 
-    unsigned int ASValueCount = msg.getPathAttributeList(0).getAsPath(0).getValue(0).getAsValueArraySize();
-    for (unsigned int j = 0; j < ASValueCount; j++)
-        entry->addAS(msg.getPathAttributeList(0).getAsPath(0).getValue(0).getAsValue(j));
+    for (size_t i = 0; i < msg.getPathAttributesArraySize(); i++) {
+        if (msg.getPathAttributes(i)->getTypeCode() == BgpUpdateAttributeTypeCode::AS_PATH) {
+            auto& asPath = *check_and_cast<const BgpUpdatePathAttributesAsPath*>(msg.getPathAttributes(i));
+            for(uint32_t k = 0; k < asPath.getValueArraySize(); k++) {
+                const BgpAsPathSegment& asPathVal = asPath.getValue(k);
+                for(uint32_t n = 0; n < asPathVal.getAsValueArraySize(); n++) {
+                    entry->addAS(asPathVal.getAsValue(n));
+                }
+            }
+        }
+    }
 
     unsigned char decisionProcessResult = asLoopDetection(entry, myAsId);
 
@@ -533,10 +533,34 @@ unsigned char BgpRouter::decisionProcess(const BgpUpdateMessage& msg, BgpRouting
 
     /*If the AS_PATH attribute of a BGP route contains an AS loop, the BGP
        route should be excluded from the decision process. */
+#if 0
     entry->setPathType(msg.getPathAttributeList(0).getOrigin().getValue());
     entry->setGateway(msg.getPathAttributeList(0).getNextHop().getValue());
     if(msg.getPathAttributeList(0).getLocalPrefArraySize() != 0)
         entry->setLocalPreference(msg.getPathAttributeList(0).getLocalPref(0).getValue());
+#else
+    for (size_t i = 0; i < msg.getPathAttributesArraySize(); i++) {
+        switch (msg.getPathAttributes(i)->getTypeCode()) {
+            case BgpUpdateAttributeTypeCode::ORIGIN: {
+                auto attr = check_and_cast<const BgpUpdatePathAttributesOrigin *>(msg.getPathAttributes(i));
+                entry->setPathType(attr->getValue());
+                break;
+            }
+            case BgpUpdateAttributeTypeCode::NEXT_HOP: {
+                auto attr = check_and_cast<const BgpUpdatePathAttributesNextHop *>(msg.getPathAttributes(i));
+                entry->setGateway(attr->getValue());
+                break;
+            }
+            case BgpUpdateAttributeTypeCode::LOCAL_PREF: {
+                auto attr = check_and_cast<const BgpUpdatePathAttributesLocalPref *>(msg.getPathAttributes(i));
+                entry->setLocalPreference(attr->getValue());
+                break;
+            }
+            default:
+                break;
+        }
+    }
+#endif
 
     BgpSessionType type = _BGPSessions[sessionIndex]->getType();
     if(type == IGP) {
@@ -687,48 +711,56 @@ void BgpRouter::updateSendProcess(const unsigned char type, SessionId sessionInd
                 type == NEW_SESSION_ESTABLISHED)
         {
             BgpUpdateNlri NLRI;
-            BgpUpdatePathAttributeList content;
+            std::vector<BgpUpdatePathAttributes*> content;
 
             unsigned int nbAS = entry->getASCount();
-            content.setAsPathArraySize(1);
-            content.getAsPathForUpdate(0).setValueArraySize(1);
-            content.getAsPathForUpdate(0).getValueForUpdate(0).setType(AS_SEQUENCE);
+            auto asPath = new BgpUpdatePathAttributesAsPath();
+            content.push_back(asPath);
+            asPath->setValueArraySize(1);
+            asPath->getValueForUpdate(0).setType(AS_SEQUENCE);
+            asPath->getValueForUpdate(0).setLength(0);
             if((elem).second->getType() == EGP) {
                 // RFC 4271 : set My AS in first position if it is not already
                 if (entry->getAS(0) != myAsId) {
-                    content.getAsPathForUpdate(0).getValueForUpdate(0).setAsValueArraySize(nbAS + 1);
-                    content.getAsPathForUpdate(0).getValueForUpdate(0).setLength(1);
-                    content.getAsPathForUpdate(0).getValueForUpdate(0).setAsValue(0, myAsId);
+                    asPath->getValueForUpdate(0).setAsValueArraySize(nbAS + 1);
+                    asPath->getValueForUpdate(0).setLength(nbAS + 1);
+                    asPath->getValueForUpdate(0).setAsValue(0, myAsId);
                     for (unsigned int j = 1; j < nbAS + 1; j++)
-                        content.getAsPathForUpdate(0).getValueForUpdate(0).setAsValue(j, entry->getAS(j - 1));
+                        asPath->getValueForUpdate(0).setAsValue(j, entry->getAS(j - 1));
                 }
                 else {
-                    content.getAsPathForUpdate(0).getValueForUpdate(0).setAsValueArraySize(nbAS);
-                    content.getAsPathForUpdate(0).getValueForUpdate(0).setLength(1);
+                    asPath->getValueForUpdate(0).setAsValueArraySize(nbAS);
+                    asPath->getValueForUpdate(0).setLength(nbAS);
                     for (unsigned int j = 0; j < nbAS; j++)
-                        content.getAsPathForUpdate(0).getValueForUpdate(0).setAsValue(j, entry->getAS(j));
+                        asPath->getValueForUpdate(0).setAsValue(j, entry->getAS(j));
                 }
             }
             // no AS number is added when the route is being advertised between internal peers
             else if((elem).second->getType() == IGP) {
-                content.getAsPathForUpdate(0).getValueForUpdate(0).setAsValueArraySize(nbAS);
-                content.getAsPathForUpdate(0).getValueForUpdate(0).setLength(1);
+                asPath->getValueForUpdate(0).setAsValueArraySize(nbAS);
+                asPath->getValueForUpdate(0).setLength(nbAS);
                 for (unsigned int j = 0; j < nbAS; j++)
-                    content.getAsPathForUpdate(0).getValueForUpdate(0).setAsValue(j, entry->getAS(j));
+                    asPath->getValueForUpdate(0).setAsValue(j, entry->getAS(j));
 
-                content.setLocalPrefArraySize(1);
-                content.getLocalPrefForUpdate(0).setLength(1);
-                content.getLocalPrefForUpdate(0).setValue(_BGPSessions[sessionIndex]->getLocalPreference());
+                auto localPref = new BgpUpdatePathAttributesLocalPref();
+                content.push_back(localPref);
+                localPref->setLength(4);
+                localPref->setValue(_BGPSessions[sessionIndex]->getLocalPreference());
             }
+            asPath->setLength(2 + 2 * asPath->getValue(0).getAsValueArraySize());
 
+            auto nextHopAttr = new BgpUpdatePathAttributesNextHop;
+            content.push_back(nextHopAttr);
             if(sType == EGP || _BGPSessions[sessionIndex]->getNextHopSelf()) {
                 InterfaceEntry *iftEntry = (elem).second->getLinkIntf();
-                content.getNextHopForUpdate().setValue(iftEntry->getProtocolData<Ipv4InterfaceData>()->getIPAddress());
+                nextHopAttr->setValue(iftEntry->getProtocolData<Ipv4InterfaceData>()->getIPAddress());
             }
             else
-                content.getNextHopForUpdate().setValue(entry->getGateway());
+                nextHopAttr->setValue(entry->getGateway());
 
-            content.getOriginForUpdate().setValue((BgpSessionType)entry->getPathType());
+            auto originAttr = new BgpUpdatePathAttributesOrigin;
+            content.push_back(originAttr);
+            originAttr->setValue((BgpSessionType)entry->getPathType());
 
             Ipv4Address netMask = entry->getNetmask();
             NLRI.prefix = entry->getDestination().doAnd(netMask);
@@ -863,13 +895,14 @@ void BgpRouter::printOpenMessage(const BgpOpenMessage& openMsg)
     EV_INFO << "  My AS: " << openMsg.getMyAS() << "\n";
     EV_INFO << "  Hold time: " << openMsg.getHoldTime() << "s \n";
     EV_INFO << "  BGP Id: " << openMsg.getBGPIdentifier() << "\n";
-    if(openMsg.getOptionalParametersArraySize() == 0)
+    if(openMsg.getOptionalParameterArraySize() == 0)
         EV_INFO << "  Optional parameters: empty \n";
-    for(uint32_t i = 0; i < openMsg.getOptionalParametersArraySize(); i++) {
-        const BgpOptionalParameters& optParams = openMsg.getOptionalParameters(i);
+    for(uint32_t i = 0; i < openMsg.getOptionalParameterArraySize(); i++) {
+        auto optParam = openMsg.getOptionalParameter(i);
+        ASSERT(optParam != nullptr);
         EV_INFO << "  Optional parameter " << i+1 << ": \n";
-        EV_INFO << "    Parameter type: " << optParams.parameterType << "\n";
-        EV_INFO << "    Parameter length: " << optParams.parameterLength << "\n";
+        EV_INFO << "    Parameter type: " << optParam->getParameterType() << "\n";
+        EV_INFO << "    Parameter length: " << optParam->getParameterValueLength() << "\n";
     }
 }
 
@@ -883,48 +916,63 @@ void BgpRouter::printUpdateMessage(const BgpUpdateMessage& updateMsg)
         EV_INFO << "    length: " << (int)withdrwan.length << "\n";
         EV_INFO << "    prefix: " << withdrwan.prefix << "\n";
     }
-    if(updateMsg.getPathAttributeListArraySize() == 0)
+    if(updateMsg.getPathAttributesArraySize() == 0)
         EV_INFO << "  Path attribute: empty \n";
-    for(uint32_t i = 0; i < updateMsg.getPathAttributeListArraySize(); i++) {
-        const BgpUpdatePathAttributeList& pathAttrib = updateMsg.getPathAttributeList(i);
-        EV_INFO << "  Path attribute " << i+1 << ": \n";
-        EV_INFO << "    ORIGIN: " << BgpSession::getTypeString(pathAttrib.getOrigin().getValue()) << "\n";
-        EV_INFO << "    AS_PATH: ";
-        if(pathAttrib.getAsPathArraySize() == 0)
-            EV_INFO << "empty";
-        for(uint32_t j = 0; j < pathAttrib.getAsPathArraySize(); j++) {
-            const BgpUpdatePathAttributesAsPath& asPath = pathAttrib.getAsPath(j);
-            for(uint32_t k = 0; k < asPath.getValueArraySize(); k++) {
-                const BgpAsPathSegment& asPathVal = asPath.getValue(k);
-                for(uint32_t n = 0; n < asPathVal.getAsValueArraySize(); n++) {
-                    EV_INFO << asPathVal.getAsValue(n) << " ";
+    for(uint32_t i = 0; i < updateMsg.getPathAttributesArraySize(); i++) {
+        EV_INFO << "  Path attribute " << i+1 << ": [len:" << updateMsg.getPathAttributes(i)->getLength() <<"]\n";
+        switch (updateMsg.getPathAttributes(i)->getTypeCode()) {
+            case BgpUpdateAttributeTypeCode::ORIGIN: {
+                auto& attr = *check_and_cast<const BgpUpdatePathAttributesOrigin*>(updateMsg.getPathAttributes(i));
+                EV_INFO << "    ORIGIN: " << BgpSession::getTypeString(attr.getValue()) << "\n";
+                break;
+            }
+            case BgpUpdateAttributeTypeCode::AS_PATH: {
+                auto& asPath = *check_and_cast<const BgpUpdatePathAttributesAsPath*>(updateMsg.getPathAttributes(i));
+                EV_INFO << "    AS_PATH:";
+                for(uint32_t k = 0; k < asPath.getValueArraySize(); k++) {
+                    const BgpAsPathSegment& asPathVal = asPath.getValue(k);
+                    for(uint32_t n = 0; n < asPathVal.getAsValueArraySize(); n++) {
+                        EV_INFO << " " << asPathVal.getAsValue(n);
+                    }
                 }
+                EV_INFO << "\n";
+                break;
+            }
+            case BgpUpdateAttributeTypeCode::NEXT_HOP: {
+                auto& attr = *check_and_cast<const BgpUpdatePathAttributesNextHop*>(updateMsg.getPathAttributes(i));
+                EV_INFO << "    NEXT_HOP: " << attr.getValue().str(false) << "\n";
+                break;
+            }
+            case BgpUpdateAttributeTypeCode::LOCAL_PREF: {
+                auto& attr = *check_and_cast<const BgpUpdatePathAttributesLocalPref*>(updateMsg.getPathAttributes(i));
+                EV_INFO << "    LOCAL_PREF: " << attr.getValue() << "\n";
+                break;
+            }
+            case BgpUpdateAttributeTypeCode::ATOMIC_AGGREGATE: {
+                auto& attr = *check_and_cast<const BgpUpdatePathAttributesAtomicAggregate*>(updateMsg.getPathAttributes(i));
+                (void)attr;
+                EV_INFO << "    ATOMIC_AGGREGATE" << "\n";
+                break;
+            }
+            case BgpUpdateAttributeTypeCode::AGGREGATOR: {
+                auto& attr = *check_and_cast<const BgpUpdatePathAttributesAggregator*>(updateMsg.getPathAttributes(i));
+                EV_INFO << "    AGGREGATOR: " << attr.getAsNumber() << ", " << attr.getBgpSpeaker() << "\n";
+                break;
+            }
+            case BgpUpdateAttributeTypeCode::MULTI_EXIT_DISC: {
+                auto& attr = *check_and_cast<const BgpUpdatePathAttributesMultiExitDisc*>(updateMsg.getPathAttributes(i));
+                EV_INFO << "    MULTI_EXIT_DISC: " << attr.getValue() << "\n";
+                break;
             }
         }
-        EV_INFO << "\n";
-        EV_INFO << "    NEXT_HOP: " << pathAttrib.getNextHop().getValue().str(false) << "\n";
-        EV_INFO << "    LOCAL_PREF: ";
-        if(pathAttrib.getLocalPrefArraySize() == 0)
-            EV_INFO << "empty";
-        for(uint32_t j = 0; j < pathAttrib.getLocalPrefArraySize(); j++) {
-            const BgpUpdatePathAttributesLocalPref& localPref = pathAttrib.getLocalPref(j);
-            EV_INFO << localPref.getValue() << " ";
-        }
-        EV_INFO << "\n";
-        EV_INFO << "    ATOMIC_AGGREGATE: ";
-        if(pathAttrib.getAtomicAggregateArraySize() == 0)
-            EV_INFO << "empty";
-        for(uint32_t j = 0; j < pathAttrib.getAtomicAggregateArraySize(); j++) {
-            const BgpUpdatePathAttributesAtomicAggregate& attomicAgg = pathAttrib.getAtomicAggregate(j);
-            EV_INFO << attomicAgg.getValue() << " ";
-        }
-        EV_INFO << "\n";
     }
 
-    const auto NLRI_Base = dynamic_cast<const BgpUpdateMessage_Base *>(&updateMsg)->getNLRI();
-    EV_INFO << "  Network Layer Reachability Information (NLRI): \n";
-    EV_INFO << "    NLRI length: " << (int)NLRI_Base.length << "\n";
-    EV_INFO << "    NLRI prefix: " << NLRI_Base.prefix << "\n";
+    if (updateMsg.getNLRIArraySize() > 0) {
+        auto NLRI_Base = updateMsg.getNLRI(0);
+        EV_INFO << "  Network Layer Reachability Information (NLRI): \n";
+        EV_INFO << "    NLRI length: " << (int)NLRI_Base.length << "\n";
+        EV_INFO << "    NLRI prefix: " << NLRI_Base.prefix << "\n";
+    }
 }
 
 //  void printNotificationMessage(const BgpNotificationMessage& notificationMsg)

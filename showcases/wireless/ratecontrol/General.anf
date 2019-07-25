@@ -6,7 +6,7 @@
   </inputs>
   <datasets>
     <datasets name="AARFRateControl">
-      <items xsi:type="scave:Add" filterPattern="name(datarate:vector) AND module(*.dcf.*) AND file(/inet/showcases/wireless/ratecontrol/results/General-rateControl=AarfRateControl-#0.vec) AND module(*.sourceHost.*)  " type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="name(datarateChanged:vector) AND module(*.dcf.*) AND file(/inet/showcases/wireless/ratecontrol/results/General-rateControl=AarfRateControl-#0.vec) AND module(*.sourceHost.*)  " type="VECTOR"/>
       <items xsi:type="scave:Add" filterPattern="name(throughput:vector) AND file(/inet/showcases/wireless/ratecontrol/results/General-rateControl=AarfRateControl-#0.vec)  " type="VECTOR"/>
       <items xsi:type="scave:LineChart" name="AARFRateControl" lineNameFormat="">
         <properties name="Graph.Title" value="AARFRateControl"/>
@@ -90,7 +90,7 @@
       </items>
     </datasets>
     <datasets name="Databitrate">
-      <items xsi:type="scave:Add" filterPattern="name(datarate:vector) AND module(*.sourceHost.*)  AND module(*.dcf.*) " type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="name(datarateChanged:vector) AND module(*.sourceHost.*)  AND module(*.dcf.*) " type="VECTOR"/>
       <items xsi:type="scave:Compute" operation="expression">
         <params name="expression" value="54000000"/>
       </items>

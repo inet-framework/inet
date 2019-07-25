@@ -62,6 +62,7 @@ class INET_API BitsChunk : public Chunk
     const std::vector<bool>& getBits() const { return bits; }
     void setBits(const std::vector<bool>& bits);
 
+    size_t getBitArraySize() const { return bits.size(); }
     bool getBit(int index) const { return bits.at(index); }
     void setBit(int index, bool bit);
     //@}

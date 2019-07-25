@@ -146,7 +146,7 @@ simple Ospf like IOspf
     parameters:
         string interfaceTableModule;
         string routingTableModule;
-        string crcMode @enum("disabled", "computed") = default("disabled");
+        string crcMode @enum("declared", "computed") = default("declared");
         volatile double startupTime @unit(s) = default(0s); // delay before starting OSPF
         // xml containing the full OSPF AS configuration
         xml ospfConfig = default(xml("<OSPFASConfig> \

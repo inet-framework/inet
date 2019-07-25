@@ -1,5 +1,6 @@
 //
 // Copyright (C) 2010 Helene Lageber
+// Copyright (C) 2019 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -35,8 +36,8 @@ const B BGP_EMPTY_UPDATE_OCTETS = B(4); // UnfeasibleRoutesLength (2) + TotalPat
 class BgpAsPathSegment extends cObject
 {
     BgpPathSegmentType type;
-    unsigned char length;
-    unsigned short asValue[];
+    uint8_t length;
+    uint16_t asValue[];
 }
 
 
@@ -62,7 +63,9 @@ enum BgpType
 class BgpHeader extends FieldsChunk
 {
     chunkLength = BGP_HEADER_OCTETS;
-    BgpType type;
+    uint8_t marker[16] = 0xFF;
+    uint16_t totalLength = B(BGP_HEADER_OCTETS).get();
+    BgpType type = static_cast<BgpType>(-1);
 }
 
 //
@@ -76,46 +79,34 @@ class BgpKeepAliveMessage extends BgpHeader
     type = BGP_KEEPALIVE;
 }
 
-struct BgpParameterValues
-{
-    short authCode;
-    long authenticationData;
-}
-
-struct BgpOptionalParameters
+class BgpOptionalParameterBase
 {
     short parameterType;
-    unsigned short parameterLength;
-    BgpParameterValues parameterValues;
+    unsigned short parameterValueLength;
 }
 
+//TODO add accepted BgpOptionalParameter variants
+
+class BgpOptionalParameterRaw extends BgpOptionalParameterBase
+{
+    char value[];
+}
 
 //
 // Represents a BGPv4 OPEN message.
-//
-// Fields modelled:
-// - Version: 1 octet (BGP version)
-// - My Autonomous system: 2 octets  (AS of the sender)
-// - Hold Time: 2 octets (nbr de secondes que l'emetteur propose pour le compteur de renetue)
-// - BGP Identifier: 4 octets
-// - Optional Param Length: 1 octet (if = 0, no optional parameters)
-// - Optional Parameters:
-//    - Parameter Type
-//    - Parameter Length
-//    - Parameter Values (variable size)
-//    - Auth code
-//    - Authentication Data
 //
 class BgpOpenMessage extends BgpHeader
 {
     type = BGP_OPEN;
     chunkLength = BGP_HEADER_OCTETS + BGP_OPEN_OCTETS;
+    totalLength = B(BGP_HEADER_OCTETS + BGP_OPEN_OCTETS).get();
 
-    char version = 4;
-    unsigned short myAS;
-    simtime_t holdTime;
-    Ipv4Address BGPIdentifier;
-    BgpOptionalParameters optionalParameters[];
+    uint8_t version = 4;    // BGP Version, 1 octet
+    uint16_t myAS;    // My Autonomous system, 2 octets
+    simtime_t holdTime;    // Hold Time in seconds, 2 octets
+    Ipv4Address BGPIdentifier;    // 4 octets
+    unsigned short optionalParametersLength;    // 1 octet, total length (in bytes) of optionalParameters[] (if = 0, no optional parameters)
+    BgpOptionalParameterBase *optionalParameter[] @owned;
 }
 
 enum BgpUpdateAttributeTypeCode
@@ -123,64 +114,90 @@ enum BgpUpdateAttributeTypeCode
     ORIGIN = 1;
     AS_PATH = 2;
     NEXT_HOP = 3;
+    MULTI_EXIT_DISC = 4;
     LOCAL_PREF = 5;
     ATOMIC_AGGREGATE = 6;
-}
-
-struct BgpUpdateAttributeFlags
-{
-    bool optionalBit;
-    bool transitiveBit;
-    bool partialBit;
-    bool estendedLengthBit;
-}
-
-struct BgpUpdateAttributeType
-{
-    BgpUpdateAttributeFlags flags;
-    BgpUpdateAttributeTypeCode typeCode;
+    AGGREGATOR = 7;
 }
 
 class BgpUpdatePathAttributes extends cObject
 {
-    BgpUpdateAttributeType type; // 2 octets
-    unsigned short length; // 2 octets
+    bool optionalBit = false;    // 1 bit, Optional bit. It defines whether the attribute is optional (if set to 1) or well-known (if set to 0).
+    bool transitiveBit = false;    // 1 bit, Transitive bit. It defines whether an optional attribute is transitive (if set to 1) or non-transitive (if set to 0). Transitive bit MUST be set to 1 for well-known attributes
+    bool partialBit = false;    // 1 bit, Partial bit. It defines whether the information contained in the optional transitive attribute is partial (if set to 1) or complete (if set to 0).  For well-known attributes and for optional non-transitive attributes, the Partial bit MUST be set to 0.
+    bool extendedLengthBit = false;    // 1 bit, Extended Length bit. It defines whether the Attribute Length is one octet (if set to 0) or two octets (if set to 1).
+    unsigned short reserved = 0;    // 4 bit
+    BgpUpdateAttributeTypeCode typeCode;    // 1 octet
+    unsigned short length; // 2 octets or just 1 depending on the value of flags.extendedLengthBit
 }
 
 // ORIGIN (RFC4271 Section 4.3, Type code 1):
 class BgpUpdatePathAttributesOrigin extends BgpUpdatePathAttributes
 {
+    typeCode = ORIGIN;
+    optionalBit = false;
+    transitiveBit = true;
+    length = 1;
     BgpSessionType value;
 }
 
 // AS_PATH (RFC4271 Section 4.3, Type code 2):
 class BgpUpdatePathAttributesAsPath extends BgpUpdatePathAttributes
 {
+    typeCode = AS_PATH;
+    optionalBit = false;
+    transitiveBit = true;
+    length = 0;
     BgpAsPathSegment value[];
 }
 
 //NEXT_HOP (RFC4271 Section 4.3, Type code 3):
 class BgpUpdatePathAttributesNextHop extends BgpUpdatePathAttributes
 {
+    typeCode = NEXT_HOP;
+    optionalBit = false;
+    transitiveBit = true;
+    length = 4;
     Ipv4Address value;
+}
+
+//MULTI_EXIT_DISC (RFC4271 Section 4.3, Type code 4):
+class BgpUpdatePathAttributesMultiExitDisc extends BgpUpdatePathAttributes
+{
+    typeCode = MULTI_EXIT_DISC;
+    optionalBit = true;
+    transitiveBit = false;
+    length = 4;
+    uint32_t value;
 }
 
 //LOCAL_PREF (RFC4271 Section 4.3, Type code 5):
 class BgpUpdatePathAttributesLocalPref extends BgpUpdatePathAttributes
 {
-    unsigned int value;
+    typeCode = LOCAL_PREF;
+    optionalBit = false;
+    transitiveBit = true;
+    length = 4;
+    uint32_t value;
 }
 
 //ATOMIC_AGGREGATE (RFC4271 Section 4.3, Type code 6):
-enum BgpUpdateAtomicAggregateValues
-{
-    NO_SPECIFIC_ROUTE = 0;
-    SPECIFIC_ROUTE = 1;
-}
-
 class BgpUpdatePathAttributesAtomicAggregate extends BgpUpdatePathAttributes
 {
-    BgpUpdateAtomicAggregateValues value;
+    typeCode = ATOMIC_AGGREGATE;
+    optionalBit = false;
+    transitiveBit = true;
+    length = 0;
+}
+
+class BgpUpdatePathAttributesAggregator extends BgpUpdatePathAttributes
+{
+    typeCode = AGGREGATOR;
+    optionalBit = true;
+    transitiveBit = true;
+    length = 6;
+    uint16_t asNumber;
+    Ipv4Address bgpSpeaker;
 }
 
 struct BgpUpdateWithdrawnRoutes
@@ -191,46 +208,41 @@ struct BgpUpdateWithdrawnRoutes
 
 struct BgpUpdateNlri
 {
-    unsigned char length; // 1 octet
-    Ipv4Address prefix; // 4 octets
-}
-
-//
-// Represents the list of path attributes in a BGPv4 UPDATE message.
-// See RFC 4271, section 4.3
-//
-class BgpUpdatePathAttributeList extends cObject
-{
-    BgpUpdatePathAttributesOrigin origin; // mandatory attribute
-    BgpUpdatePathAttributesAsPath asPath[]; // mandatory attribute
-    BgpUpdatePathAttributesNextHop nextHop; // mandatory attribute
-    BgpUpdatePathAttributesLocalPref localPref[]; // optional attribute
-    BgpUpdatePathAttributesAtomicAggregate atomicAggregate[]; // optional attribute
+    // uint32_t pathIdentifier      // specified in RFC 7911, optional 4 octets, wireshark detect existing of this field with heuristical algorithm
+    uint8_t length = 0; // length of prefix in bits, 1 octet
+    Ipv4Address prefix; // 1-4 octets, based on length ((length + 7) / 8)
 }
 
 //
 // Represents a BGPv4 UPDATE message.
 //
-// BGP UPDATE fields modelled:
-//   - Unfeasible routes length: 2 octets (number of withdrawn routes)
-//   - Withdrawn routes : variable size  (list of IP prefixes of unfeasible routes)
-//   - Total Path Attributes Length: 1 octet (if = 0, no Path Attributes)
-//   - Path Attributes:
-//     - Attribute Type (2 octets)
-//     - Attribute Length
-//     - Attribute Values (variable size)
-// - Network Layer Reachability Information: (variable size)
-//    - Length : 1 octet
-//    - prefix : variable size (contains the IP prefix; Ipv4: 4 octets)
+// see RFC 4271 Section 4.3
 //
 class BgpUpdateMessage extends BgpHeader
 {
-    @customize;     // update chunkLength when changed   //FIXME setNLRI() always increment length with 5 bytes
     type = BGP_UPDATE;
     chunkLength = BGP_HEADER_OCTETS + BGP_EMPTY_UPDATE_OCTETS;
+    totalLength = B(BGP_HEADER_OCTETS + BGP_EMPTY_UPDATE_OCTETS).get();
+
+    uint16_t withDrawnRoutesLength = 0;    // This 2-octets unsigned integer indicates the total length of
+                                           // the Withdrawn Routes field in octets.  Its value allows the
+                                           // length of the Network Layer Reachability Information field to
+                                           // be determined, as specified below.
+                                           //
+                                           // A value of 0 indicates that no routes are being withdrawn from
+                                           // service, and that the WITHDRAWN ROUTES field is not present in
+                                           // this UPDATE message.
 
     BgpUpdateWithdrawnRoutes withdrawnRoutes[];
-    BgpUpdatePathAttributeList pathAttributeList[]; // optional field (size is either 0 or 1)
-    BgpUpdateNlri NLRI;
+    uint16_t totalPathAttributeLength = 0;    // This 2-octets unsigned integer indicates the total length of
+                                              // Path Attributes field in octets.  Its value allows the length
+                                              // of the Network Layer Reachability field to be determined as
+                                              // specified below.
+                                              //
+                                              // A value of 0 indicates that neither the Network Layer
+                                              // Reachability Information field nor the Path Attribute field is
+                                              // present in this UPDATE message.
+    BgpUpdatePathAttributes* pathAttributes[] @owned @allowReplace;
+    BgpUpdateNlri NLRI[];
 }
 

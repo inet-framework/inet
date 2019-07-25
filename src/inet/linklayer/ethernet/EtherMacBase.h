@@ -80,7 +80,6 @@ class INET_API EtherMacBase : public MacProtocolBase
     {
         double txrate;
         double halfBitTime;    // transmission time of a half bit
-        B frameMinBytes;    // minimal frame length
         // for half-duplex operation:
         short int maxFramesInBurst;
         B maxBytesInBurst;    // including IFG and preamble, etc.

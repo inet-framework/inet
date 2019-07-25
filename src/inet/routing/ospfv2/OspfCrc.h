@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2010 Helene Lageber
+// Copyright (C) 2019 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -14,19 +14,28 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
+// author: Zoltan Bojthe
+//
 
-#ifndef __INET_BGPUPDATE_H
-#define __INET_BGPUPDATE_H
+#ifndef __INET_OSPFCRC_H
+#define __INET_OSPFCRC_H
 
-#include "inet/routing/bgpv4/bgpmessage/BgpHeader_m.h"
+#include <vector>
+
+#include "inet/common/INETDefs.h"
+#include "inet/routing/ospfv2/OspfPacket_m.h"
 
 namespace inet {
-namespace bgp {
 
-INET_API unsigned short computePathAttributeBytes(const BgpUpdatePathAttributes& pathAttr);
+namespace ospf {
 
-} // namespace bgp
+INET_API void setOspfCrc(const Ptr<OspfPacket>& ospfPacket, CrcMode crcMode);
+INET_API void setLsaCrc(OspfLsa& lsa, CrcMode crcMode);
+INET_API void setLsaHeaderCrc(OspfLsaHeader& lsaHeader, CrcMode crcMode);
+
+} // namespace ospf
+
 } // namespace inet
 
-#endif // ifndef __INET_BGPUPDATE_H
+#endif // ifndef __INET_OSPFCRC_H
 

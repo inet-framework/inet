@@ -77,7 +77,7 @@ private:
     void restartsConnectRetryTimer(bool start = true);
 
     void sendOpenMessage();
-    void sendUpdateMessage(BgpUpdatePathAttributeList &content, BgpUpdateNlri &NLRI);
+    void sendUpdateMessage(std::vector<BgpUpdatePathAttributes *>& content, BgpUpdateNlri &NLRI);
     void sendNotificationMessage();
     void sendKeepAliveMessage();
 

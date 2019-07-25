@@ -474,10 +474,7 @@ void MessageHandler::printLinkStateRequestPacket(const OspfLinkStateRequestPacke
 
     unsigned int requestCount = requestPacket->getRequestsArraySize();
     for (unsigned int i = 0; i < requestCount; i++) {
-        const LsaRequest& request = requestPacket->getRequests(i);
-        EV_DETAIL << "  type=" << request.lsType
-                  << ", LSID=" << request.linkStateID
-                  << ", advertisingRouter=" << request.advertisingRouter << "\n";
+        EV_DETAIL << "  " << requestPacket->getRequests(i) << "\n";
     }
 }
 
@@ -486,82 +483,92 @@ void MessageHandler::printLinkStateUpdatePacket(const OspfLinkStateUpdatePacket 
     EV_INFO << "Sending Link State Update packet to " << destination << " on interface[" << outputIfIndex << "] with updates:\n";
 
     unsigned int i = 0;
-    unsigned int updateCount = updatePacket->getRouterLSAsArraySize();
+    unsigned int updateCount = updatePacket->getOspfLSAsArraySize();
 
     for (i = 0; i < updateCount; i++) {
-        const OspfRouterLsa& lsa = updatePacket->getRouterLSAs(i);
-        EV_DETAIL << "  " << lsa.getHeader() << "\n";
+        const OspfLsa *ospfLsa = updatePacket->getOspfLSAs(i);
+        EV_DETAIL << "  " << ospfLsa->getHeader() << "\n";
 
-        EV_DETAIL << "  bits="
-                  << ((lsa.getV_VirtualLinkEndpoint()) ? "V " : "_ ")
-                  << ((lsa.getE_ASBoundaryRouter()) ? "E " : "_ ")
-                  << ((lsa.getB_AreaBorderRouter()) ? "B" : "_")
-                  << "\n";
-        EV_DETAIL << "  links:\n";
+        switch (ospfLsa->getHeader().getLsType()) {
+            case LsaType::ROUTERLSA_TYPE: {
+                const OspfRouterLsa& lsa = *check_and_cast<const OspfRouterLsa*>(ospfLsa);
+                EV_DETAIL << "  bits="
+                          << ((lsa.getV_VirtualLinkEndpoint()) ? "V " : "_ ")
+                          << ((lsa.getE_ASBoundaryRouter()) ? "E " : "_ ")
+                          << ((lsa.getB_AreaBorderRouter()) ? "B" : "_")
+                          << "\n";
+                EV_DETAIL << "  links:\n";
 
-        unsigned int linkCount = lsa.getLinksArraySize();
-        for (unsigned int j = 0; j < linkCount; j++) {
-            const Link& link = lsa.getLinks(j);
-            EV_DETAIL << "    ID=" << link.getLinkID();
-            EV_DETAIL << ", data="
-                      << link.getLinkData() << " (" << Ipv4Address(link.getLinkData()) << ")"
-                      << ", type=";
-            switch (link.getType()) {
-                case POINTTOPOINT_LINK:
-                    EV_INFO << "PointToPoint";
-                    break;
+                unsigned int linkCount = lsa.getLinksArraySize();
+                for (unsigned int j = 0; j < linkCount; j++) {
+                    const Link& link = lsa.getLinks(j);
+                    EV_DETAIL << "    ID=" << link.getLinkID();
+                    EV_DETAIL << ", data="
+                              << link.getLinkData() << " (" << Ipv4Address(link.getLinkData()) << ")"
+                              << ", type=";
+                    switch (link.getType()) {
+                        case POINTTOPOINT_LINK:
+                            EV_INFO << "PointToPoint";
+                            break;
 
-                case TRANSIT_LINK:
-                    EV_INFO << "Transit";
-                    break;
+                        case TRANSIT_LINK:
+                            EV_INFO << "Transit";
+                            break;
 
-                case STUB_LINK:
-                    EV_INFO << "Stub";
-                    break;
+                        case STUB_LINK:
+                            EV_INFO << "Stub";
+                            break;
 
-                case VIRTUAL_LINK:
-                    EV_INFO << "Virtual";
-                    break;
+                        case VIRTUAL_LINK:
+                            EV_INFO << "Virtual";
+                            break;
 
-                default:
-                    EV_INFO << "Unknown";
-                    break;
+                        default:
+                            EV_INFO << "Unknown";
+                            break;
+                    }
+                    EV_DETAIL << ", cost=" << link.getLinkCost() << "\n";
+                }
+                break;
             }
-            EV_DETAIL << ", cost=" << link.getLinkCost() << "\n";
+            case LsaType::NETWORKLSA_TYPE: {
+                const OspfNetworkLsa& lsa = *check_and_cast<const OspfNetworkLsa*>(ospfLsa);
+                EV_DETAIL << "  netMask=" << lsa.getNetworkMask() << "\n";
+                EV_DETAIL << "  attachedRouters:\n";
+
+                unsigned int routerCount = lsa.getAttachedRoutersArraySize();
+                for (unsigned int j = 0; j < routerCount; j++) {
+                    EV_DETAIL << "    " << lsa.getAttachedRouters(j) << "\n";
+                }
+                break;
+            }
+            case LsaType::SUMMARYLSA_NETWORKS_TYPE:
+            case LsaType::SUMMARYLSA_ASBOUNDARYROUTERS_TYPE: {
+                const OspfSummaryLsa& lsa = *check_and_cast<const OspfSummaryLsa*>(ospfLsa);
+                EV_DETAIL << "  netMask=" << lsa.getNetworkMask() << "\n";
+                EV_DETAIL << "  cost=" << lsa.getRouteCost() << "\n";
+                break;
+            }
+            case LsaType::AS_EXTERNAL_LSA_TYPE: {
+                const OspfAsExternalLsa& lsa = *check_and_cast<const OspfAsExternalLsa*>(ospfLsa);
+
+                const OspfAsExternalLsaContents& contents = lsa.getContents();
+                EV_DETAIL << "  netMask=" << contents.getNetworkMask() << "\n";
+                unsigned int tosCount = contents.getExternalTOSInfoArraySize();
+                for (unsigned int j = 0; j < tosCount; j++) {
+                    EV_DETAIL << "  " << j << ": "
+                              << "  bits=" << ((contents.getExternalTOSInfo(j).E_ExternalMetricType) ? "E" : "_")
+                              << "  tos=" << contents.getExternalTOSInfo(j).tos
+                              << "  cost=" << contents.getExternalTOSInfo(j).routeCost
+                              << "  forward=" << contents.getExternalTOSInfo(j).forwardingAddress
+                              << "  routeTag=" << contents.getExternalTOSInfo(j).externalRouteTag
+                              << "\n";
+                }
+                break;
+            }
+            default:
+                break;
         }
-    }
-
-    updateCount = updatePacket->getNetworkLSAsArraySize();
-    for (i = 0; i < updateCount; i++) {
-        const OspfNetworkLsa& lsa = updatePacket->getNetworkLSAs(i);
-        EV_DETAIL << "  " << lsa.getHeader() << "\n";
-        EV_DETAIL << "  netMask=" << lsa.getNetworkMask() << "\n";
-        EV_DETAIL << "  attachedRouters:\n";
-
-        unsigned int routerCount = lsa.getAttachedRoutersArraySize();
-        for (unsigned int j = 0; j < routerCount; j++) {
-            EV_DETAIL << "    " << lsa.getAttachedRouters(j) << "\n";
-        }
-    }
-
-    updateCount = updatePacket->getSummaryLSAsArraySize();
-    for (i = 0; i < updateCount; i++) {
-        const OspfSummaryLsa& lsa = updatePacket->getSummaryLSAs(i);
-        EV_DETAIL << "  " << lsa.getHeader() << "\n";
-        EV_DETAIL << "  netMask=" << lsa.getNetworkMask() << "\n";
-        EV_DETAIL << "  cost=" << lsa.getRouteCost() << "\n";
-    }
-
-    updateCount = updatePacket->getAsExternalLSAsArraySize();
-    for (i = 0; i < updateCount; i++) {
-        const OspfAsExternalLsa& lsa = updatePacket->getAsExternalLSAs(i);
-        EV_DETAIL << "  " << lsa.getHeader() << "\n";
-
-        const OspfAsExternalLsaContents& contents = lsa.getContents();
-        EV_DETAIL << "  netMask=" << contents.getNetworkMask() << "\n";
-        EV_DETAIL << "  bits=" << ((contents.getE_ExternalMetricType()) ? "E\n" : "_\n");
-        EV_DETAIL << "  cost=" << contents.getRouteCost() << "\n";
-        EV_DETAIL << "  forward=" << contents.getForwardingAddress() << "\n";
     }
 }
 

@@ -105,8 +105,6 @@ void EtherMacFullDuplex::startFrameTransmission()
     ASSERT(hdr);
     ASSERT(!hdr->getSrc().isUnspecified());
 
-    addPaddingAndSetFcs(frame, curEtherDescr->frameMinBytes);
-
     // add preamble and SFD (Starting Frame Delimiter), then send out
     encapsulate(frame);
 
@@ -168,6 +166,8 @@ void EtherMacFullDuplex::handleUpperPacket(Packet *packet)
         packet->insertAtFront(newFrame);
         frame = newFrame;
     }
+
+    addPaddingAndSetFcs(packet, MIN_ETHERNET_FRAME_BYTES);  // calculate valid FCS
 
     // store frame and possibly begin transmitting
     EV_DETAIL << "Frame " << frame << " arrived from higher layers, enqueueing\n";

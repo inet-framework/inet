@@ -18,7 +18,6 @@
 #include "inet/routing/ospfv2/router/Lsa.h"
 
 namespace inet {
-
 namespace ospf {
 
 bool AsExternalLsa::update(const OspfAsExternalLsa *lsa)
@@ -28,11 +27,8 @@ bool AsExternalLsa::update(const OspfAsExternalLsa *lsa)
     resetInstallTime();
     if (different) {
         clearNextHops();
-        return true;
     }
-    else {
-        return false;
-    }
+    return different;
 }
 
 bool AsExternalLsa::differsFrom(const OspfAsExternalLsa *asExternalLSA) const
@@ -52,10 +48,6 @@ bool AsExternalLsa::differsFrom(const OspfAsExternalLsa *asExternalLSA) const
         unsigned int thisTosInfoCount = thisContents.getExternalTOSInfoArraySize();
 
         differentBody = ((thisContents.getNetworkMask() != lsaContents.getNetworkMask()) ||
-                         (thisContents.getE_ExternalMetricType() != lsaContents.getE_ExternalMetricType()) ||
-                         (thisContents.getRouteCost() != lsaContents.getRouteCost()) ||
-                         (thisContents.getForwardingAddress() != lsaContents.getForwardingAddress()) ||
-                         (thisContents.getExternalRouteTag() != lsaContents.getExternalRouteTag()) ||
                          (thisTosInfoCount != lsaContents.getExternalTOSInfoArraySize()));
 
         if (!differentBody) {
@@ -63,14 +55,13 @@ bool AsExternalLsa::differsFrom(const OspfAsExternalLsa *asExternalLSA) const
                 const ExternalTosInfo& thisTOSInfo = thisContents.getExternalTOSInfo(i);
                 const ExternalTosInfo& lsaTOSInfo = lsaContents.getExternalTOSInfo(i);
 
-                if ((thisTOSInfo.tosData.tos != lsaTOSInfo.tosData.tos) ||
-                    (thisTOSInfo.tosData.tosMetric[0] != lsaTOSInfo.tosData.tosMetric[0]) ||
-                    (thisTOSInfo.tosData.tosMetric[1] != lsaTOSInfo.tosData.tosMetric[1]) ||
-                    (thisTOSInfo.tosData.tosMetric[2] != lsaTOSInfo.tosData.tosMetric[2]) ||
-                    (thisTOSInfo.E_ExternalMetricType != lsaTOSInfo.E_ExternalMetricType) ||
-                    (thisTOSInfo.forwardingAddress != lsaTOSInfo.forwardingAddress) ||
-                    (thisTOSInfo.externalRouteTag != lsaTOSInfo.externalRouteTag))
-                {
+                if (
+                        (thisTOSInfo.E_ExternalMetricType != lsaTOSInfo.E_ExternalMetricType) ||
+                        (thisTOSInfo.routeCost != lsaTOSInfo.routeCost) ||
+                        (thisTOSInfo.forwardingAddress != lsaTOSInfo.forwardingAddress) ||
+                        (thisTOSInfo.externalRouteTag != lsaTOSInfo.externalRouteTag) ||
+                        (thisTOSInfo.tos != lsaTOSInfo.tos)
+                        ) {
                     differentBody = true;
                     break;
                 }
@@ -82,6 +73,5 @@ bool AsExternalLsa::differsFrom(const OspfAsExternalLsa *asExternalLSA) const
 }
 
 } // namespace ospf
-
 } // namespace inet
 

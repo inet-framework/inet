@@ -98,7 +98,7 @@ Packet *MsduAggregation::aggregateFrames(std::vector<Packet *> *frames)
     amsduHeader->setAMsduPresent(true);
     amsduHeader->setReceiverAddress(ra);
     amsduHeader->setTid(tid);
-    amsduHeader->setChunkLength(amsduHeader->getChunkLength() + QOSCONTROL_PART_LENGTH);
+    amsduHeader->addChunkLength(QOSCONTROL_PART_LENGTH);
     // TODO: set addr3 and addr4 according to fromDS and toDS.
     aggregatedFrame->insertAtFront(amsduHeader);
     aggregatedFrame->insertAtBack(makeShared<Ieee80211MacTrailer>());

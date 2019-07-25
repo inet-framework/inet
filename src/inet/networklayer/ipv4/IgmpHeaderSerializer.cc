@@ -43,12 +43,11 @@ void IgmpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
     {
         case IGMP_MEMBERSHIP_QUERY: {
             stream.writeByte(IGMP_MEMBERSHIP_QUERY);    // type
-            if (auto v3pkt = dynamicPtrCast<const Igmpv3Query>(igmpMessage)) {
-                ASSERT(v3pkt->getMaxRespTime() < 12.8); // TODO: floating point case, see RFC 3376 4.1.1
-                stream.writeByte(v3pkt->getMaxRespTime().inUnit((SimTimeUnit)-1));
+            if (auto v2pkt = dynamicPtrCast<const Igmpv2Query>(igmpMessage)) {
+                stream.writeByte(v2pkt->getMaxRespTimeCode());
             }
-            else if (auto v2pkt = dynamicPtrCast<const Igmpv2Query>(igmpMessage))
-                stream.writeByte(v2pkt->getMaxRespTime().inUnit((SimTimeUnit)-1));
+            else if (auto v1pkt = dynamicPtrCast<const Igmpv1Query>(igmpMessage))
+                stream.writeByte(v1pkt->getUnused());
             stream.writeUint16Be(igmpMessage->getCrc());
             stream.writeIpv4Address(check_and_cast<const IgmpQuery*>(igmpMessage.get())->getGroupAddress());
             if (auto v3pkt = dynamicPtrCast<const Igmpv3Query>(igmpMessage))
@@ -131,14 +130,13 @@ const Ptr<Chunk> IgmpHeaderSerializer::deserialize(MemoryInputStream& stream) co
             else if (stream.getLength() - startPos == B(8)) {        // RFC 3376 Section 7.1
                 auto pkt = makeShared<Igmpv2Query>();
                 packet = pkt;
-                pkt->setMaxRespTime(SimTime(code, (SimTimeUnit)-1));
+                pkt->setMaxRespTimeCode(code);
                 pkt->setGroupAddress(stream.readIpv4Address());
             }
             else {
                 auto pkt = makeShared<Igmpv3Query>();
                 packet = pkt;
-                ASSERT(code < 128); // TODO: floating point case, see RFC 3376 4.1.1
-                pkt->setMaxRespTime(SimTime(code, (SimTimeUnit)-1));
+                pkt->setMaxRespTimeCode(code);
                 pkt->setGroupAddress(stream.readIpv4Address());
                 unsigned char x = stream.readByte(); //
                 pkt->setSuppressRouterProc((x & 0x8) != 0);

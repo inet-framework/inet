@@ -627,7 +627,7 @@ void Gpsr::setGpsrOptionOnNetworkDatagram(Packet *packet, const Ptr<const Networ
         ipv4Header->addOption(gpsrOption);
         B newHlen = ipv4Header->calculateHeaderByteLength();
         ipv4Header->setHeaderLength(newHlen);
-        ipv4Header->setChunkLength(ipv4Header->getChunkLength() + B(newHlen - oldHlen));  // it was ipv4Header->addByteLength(newHlen - oldHlen);
+        ipv4Header->addChunkLength(newHlen - oldHlen);
         ipv4Header->setTotalLengthField(ipv4Header->getTotalLengthField() + newHlen - oldHlen);
         insertNetworkProtocolHeader(packet, Protocol::ipv4, ipv4Header);
     }
@@ -647,7 +647,7 @@ void Gpsr::setGpsrOptionOnNetworkDatagram(Packet *packet, const Ptr<const Networ
         hdr->getTlvOptionsForUpdate().insertTlvOption(gpsrOption);
         hdr->setByteLength(B(utils::roundUp(2 + B(hdr->getTlvOptions().getLength()).get(), 8)));
         B newHlen = ipv6Header->calculateHeaderByteLength();
-        ipv6Header->setChunkLength(ipv6Header->getChunkLength() + (newHlen - oldHlen));
+        ipv6Header->addChunkLength(newHlen - oldHlen);
         insertNetworkProtocolHeader(packet, Protocol::ipv6, ipv6Header);
     }
     else
@@ -659,7 +659,7 @@ void Gpsr::setGpsrOptionOnNetworkDatagram(Packet *packet, const Ptr<const Networ
         int oldHlen = nextHopHeader->getTlvOptions().getLength();
         nextHopHeader->getTlvOptionsForUpdate().insertTlvOption(gpsrOption);
         int newHlen = nextHopHeader->getTlvOptions().getLength();
-        nextHopHeader->setChunkLength(nextHopHeader->getChunkLength() + B(newHlen - oldHlen));
+        nextHopHeader->addChunkLength(B(newHlen - oldHlen));
         insertNetworkProtocolHeader(packet, Protocol::nextHopForwarding, nextHopHeader);
     }
     else

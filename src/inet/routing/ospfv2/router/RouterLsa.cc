@@ -68,9 +68,7 @@ bool RouterLsa::differsFrom(const OspfRouterLsa *routerLSA) const
                     unsigned int tosCount = thisLink.getTosDataArraySize();
                     for (unsigned int j = 0; j < tosCount; j++) {
                         bool differentTOS = ((thisLink.getTosData(j).tos != lsaLink.getTosData(j).tos) ||
-                                             (thisLink.getTosData(j).tosMetric[0] != lsaLink.getTosData(j).tosMetric[0]) ||
-                                             (thisLink.getTosData(j).tosMetric[1] != lsaLink.getTosData(j).tosMetric[1]) ||
-                                             (thisLink.getTosData(j).tosMetric[2] != lsaLink.getTosData(j).tosMetric[2]));
+                                             (thisLink.getTosData(j).tosMetric != lsaLink.getTosData(j).tosMetric));
 
                         if (differentTOS) {
                             differentLink = true;
