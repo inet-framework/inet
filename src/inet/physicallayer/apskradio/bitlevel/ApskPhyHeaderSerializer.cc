@@ -27,26 +27,39 @@ Register_Serializer(ApskPhyHeader, ApskPhyHeaderSerializer);
 
 void ApskPhyHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk, b offset, b length) const
 {
+    auto startPosition = stream.getLength();
     const auto& phyHeader = staticPtrCast<const ApskPhyHeader>(chunk);
-    stream.writeUint16Be(0);
-    stream.writeUint16Be(phyHeader->getLengthField());
+    stream.writeUint16Be(b(phyHeader->getHeaderLengthField()).get());
+    stream.writeUint16Be(b(phyHeader->getPayloadLengthField()).get());
     auto crcMode = phyHeader->getCrcMode();
     if (crcMode != CRC_DISABLED && crcMode != CRC_COMPUTED)
         throw cRuntimeError("Cannot serialize Apsk Phy header without turned off or properly computed CRC, try changing the value of crcMode parameter for Udp");
     stream.writeUint16Be(phyHeader->getCrc());
     //TODO write protocol
+
+    int64_t remainders = B(phyHeader->getChunkLength() - (stream.getLength() - startPosition)).get();
+    if (remainders < 0)
+        throw cRuntimeError("ApskPhyHeader length = %d smaller than required %d bytes", (int)B(phyHeader->getChunkLength()).get(), (int)B(stream.getLength() - startPosition).get());
+    stream.writeByteRepeatedly('?', remainders);
 }
 
 const Ptr<Chunk> ApskPhyHeaderSerializer::deserialize(MemoryInputStream& stream, const std::type_info& typeInfo) const
 {
+    auto startPosition = stream.getPosition();
     auto phyHeader = makeShared<ApskPhyHeader>();
-    stream.readUint16Be();
-    phyHeader->setLengthField(stream.readUint16Be());
+    b headerLength = b(stream.readUint16Be());
+    phyHeader->setHeaderLengthField(headerLength);
+    phyHeader->setChunkLength(headerLength);
+    phyHeader->setPayloadLengthField(b(stream.readUint16Be()));
     auto crc = stream.readUint16Be();
     phyHeader->setCrc(crc);
     phyHeader->setCrcMode(crc == 0 ? CRC_DISABLED : CRC_COMPUTED);
-    return phyHeader;
     //TODO read protocol
+
+    B remainders = headerLength - (stream.getPosition() - startPosition);
+    ASSERT(remainders >= B(0));
+    stream.readByteRepeatedly('?', B(remainders).get());
+    return phyHeader;
 }
 
 } // namespace physicallayer
