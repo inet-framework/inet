@@ -59,12 +59,13 @@ class INET_API Interval
         unsigned int b = 1 << std::tuple_size<std::tuple<T ...>>::value >> 1;
         Point<T ...> l( std::max(std::get<IS>(lower), std::get<IS>(o.lower)) ... );
         Point<T ...> u( std::min(std::get<IS>(upper), std::get<IS>(o.upper)) ... );
-        std::initializer_list<unsigned int> cs({ ((b >> IS) & (std::get<IS>(lower) > std::get<IS>(u) || std::get<IS>(upper) < std::get<IS>(l) ? 0 :
-                                                              (std::get<IS>(upper) == std::get<IS>(o.upper) ? (closed & o.closed) :
-                                                              (std::get<IS>(upper) < std::get<IS>(o.upper) ? closed : o.closed)))) ... });
+        unsigned int c = 0;
+        std::initializer_list<unsigned int>({ c += ((b >> IS) & (std::get<IS>(lower) > std::get<IS>(u) || std::get<IS>(upper) < std::get<IS>(l) ? 0 :
+                                                                (std::get<IS>(upper) == std::get<IS>(o.upper) ? (closed & o.closed) :
+                                                                (std::get<IS>(upper) < std::get<IS>(o.upper) ? closed : o.closed)))) ... });
         Point<T ...> l1( std::min(std::get<IS>(upper), std::get<IS>(l)) ... );
         Point<T ...> u1( std::max(std::get<IS>(lower), std::get<IS>(u)) ... );
-        return Interval<T ...>(l1, u1, std::accumulate(cs.begin(), cs.end(), 0));
+        return Interval<T ...>(l1, u1, c);
     }
 
     template<size_t ... IS>
@@ -76,10 +77,11 @@ class INET_API Interval
     }
 
     template<size_t ... IS>
-    bool isEmptyIntervalImpl(integer_sequence<size_t, IS...>) const {
+    bool isEmptyImpl(integer_sequence<size_t, IS...>) const {
         unsigned int b = 1 << std::tuple_size<std::tuple<T ...>>::value >> 1;
-        std::initializer_list<bool> bs({ ((closed & (b >> IS)) ? false : std::get<IS>(lower) == std::get<IS>(upper)) ... });
-        return std::any_of(bs.begin(), bs.end(), [] (bool b) { return b; });
+        bool result = false;
+        std::initializer_list<bool>({ result |= ((closed & (b >> IS)) ? false : std::get<IS>(lower) == std::get<IS>(upper)) ... });
+        return result;
     }
 
   public:
@@ -106,9 +108,8 @@ class INET_API Interval
     }
 
     bool isEmpty() const {
-        return isEmptyIntervalImpl(index_sequence_for<T ...>{});
+        return isEmptyImpl(index_sequence_for<T ...>{});
     }
-
 };
 
 template<typename T0>

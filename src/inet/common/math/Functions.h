@@ -674,7 +674,7 @@ class INET_API ReciprocalFunction : public FunctionBase<R, D>
     const int dimension;
 
   protected:
-    double getIntegral(const typename D::P& p) const {
+    virtual double getIntegralFunctionValue(const typename D::P& p) const {
         // https://www.wolframalpha.com/input/?i=integrate+(a+*+x+%2B+b)+%2F+(c+*+x+%2B+d)
         double x = p.get(dimension);
         return (a * c * x + (b * c - a * d) * std::log(d + c * x)) / (c * c);
@@ -711,7 +711,11 @@ class INET_API ReciprocalFunction : public FunctionBase<R, D>
     }
 
     virtual R getMean(const typename D::I& i) const override {
-        return R(getIntegral(i.getUpper()) - getIntegral(i.getLower())) / (i.getUpper().get(dimension) - i.getLower().get(dimension));
+        return getIntegral(i) / (i.getUpper().get(dimension) - i.getLower().get(dimension));
+    }
+
+    virtual R getIntegral(const typename D::I& i) const override {
+        return R(getIntegralFunctionValue(i.getUpper()) - getIntegralFunctionValue(i.getLower()));
     }
 };
 
