@@ -1227,7 +1227,20 @@ void Dijkstra::getRoutes(std::map<NodeId, std::vector<NodeId>> &paths, const Rou
     }
 }
 
+double Dijkstra::getCost(const NodeId &id) {
+    return getCost(id, routeMap);
+}
 
+
+double Dijkstra::getCost(const NodeId &nodeId, const RouteMap &routeMap) {
+    if (nodeId == rootNode)
+        return 0;
+
+    auto it = routeMap.find(nodeId);
+    if (it == routeMap.end())
+        return -1;
+    return it->second.cost;
+}
 
 void Dijkstra::setFromTopo(const cTopology *topo, L3Address::AddressType type )
 {

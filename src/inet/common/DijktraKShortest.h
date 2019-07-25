@@ -138,6 +138,8 @@ protected:
 public:
     DijkstraKshortest(int);
     virtual ~DijkstraKshortest();
+    virtual bool isRouteMapEmpty() {return routeMap.empty();}
+    virtual void clearRouteMap() {routeMap.clear();}
     virtual void setFromTopo(const cTopology *,L3Address::AddressType = L3Address::IPv4);
     virtual void setLimits(const std::vector<double> &);
     virtual void resetLimits(){limitsData.clear();}
@@ -284,6 +286,9 @@ public:
 
     Dijkstra();
     virtual ~Dijkstra();
+
+    virtual bool isRouteMapEmpty() {return routeMap.empty();}
+    virtual void clearRouteMap() {routeMap.clear();}
     virtual void discoverPartitionedLinks(std::vector<NodeId> &pathNode, const LinkArray &, NodePairs &);
     virtual void discoverAllPartitionedLinks(const LinkArray & topo, NodePairs &links);
 
@@ -327,6 +332,9 @@ public:
 
     virtual void getRoutes(std::map<NodeId, std::vector<NodeId>> &);
     virtual void getRoutes(std::map<NodeId, std::vector<NodeId>> &, const RouteMap &);
+
+    virtual double getCost(const NodeId &, const RouteMap &);
+    virtual double getCost(const NodeId &);
 
     virtual void setMethod(Method p) {method = p;}
 };
