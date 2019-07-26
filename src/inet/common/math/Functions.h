@@ -475,11 +475,11 @@ class INET_API OneDimensionalInterpolatedFunction : public FunctionBase<R, Domai
                     ConstantFunction<R, Domain<X>> g(it->second.first);
                     f(i1, &g);
                 }
-                else if (dynamic_cast<const SmallerInterpolator<X, R> *>(interpolator)) {
+                else if (dynamic_cast<const LeftInterpolator<X, R> *>(interpolator)) {
                     ConstantFunction<R, Domain<X>> g(it->second.first); // TODO: what about the ends?
                     f(i1, &g);
                 }
-                else if (dynamic_cast<const GreaterInterpolator<X, R> *>(interpolator)) {
+                else if (dynamic_cast<const RightInterpolator<X, R> *>(interpolator)) {
                     ConstantFunction<R, Domain<X>> g(jt->second.first); // TODO: what about the ends?
                     f(i1, &g);
                 }

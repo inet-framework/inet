@@ -63,12 +63,11 @@ class INET_API EitherInterpolator : public InterpolatorBase<X, Y>
 template<typename X, typename Y>
 EitherInterpolator<X, Y> EitherInterpolator<X, Y>::singleton;
 
-// TODO: LeftInterpolator
 template<typename X, typename Y>
-class INET_API SmallerInterpolator : public InterpolatorBase<X, Y>
+class INET_API LeftInterpolator : public InterpolatorBase<X, Y>
 {
   public:
-    static SmallerInterpolator<X, Y> singleton;
+    static LeftInterpolator<X, Y> singleton;
 
   public:
     virtual Y getValue(const X x1, const Y y1, const X x2, const Y y2, const X x) const override {
@@ -83,14 +82,13 @@ class INET_API SmallerInterpolator : public InterpolatorBase<X, Y>
 };
 
 template<typename X, typename Y>
-SmallerInterpolator<X, Y> SmallerInterpolator<X, Y>::singleton;
+LeftInterpolator<X, Y> LeftInterpolator<X, Y>::singleton;
 
-// TODO: RightInterpolator
 template<typename X, typename Y>
-class INET_API GreaterInterpolator : public InterpolatorBase<X, Y>
+class INET_API RightInterpolator : public InterpolatorBase<X, Y>
 {
   public:
-    static GreaterInterpolator<X, Y> singleton;
+    static RightInterpolator<X, Y> singleton;
 
   public:
     virtual Y getValue(const X x1, const Y y1, const X x2, const Y y2, const X x) const override {
@@ -105,7 +103,7 @@ class INET_API GreaterInterpolator : public InterpolatorBase<X, Y>
 };
 
 template<typename X, typename Y>
-GreaterInterpolator<X, Y> GreaterInterpolator<X, Y>::singleton;
+RightInterpolator<X, Y> RightInterpolator<X, Y>::singleton;
 
 template<typename X, typename Y>
 class INET_API CenterInterpolator : public InterpolatorBase<X, Y>
@@ -150,6 +148,48 @@ template<typename X, typename Y>
 CloserInterpolator<X, Y> CloserInterpolator<X, Y>::singleton;
 
 template<typename X, typename Y>
+class INET_API SmallerInterpolator : public InterpolatorBase<X, Y>
+{
+  public:
+    static SmallerInterpolator<X, Y> singleton;
+
+  public:
+    virtual Y getValue(const X x1, const Y y1, const X x2, const Y y2, const X x) const override {
+        ASSERT(x1 <= x && x <= x2);
+        return std::min(y1, y2);
+    }
+
+    virtual Y getMean(const X x1, const Y y1, const X x2, const Y y2) const override {
+        ASSERT(x1 <= x2);
+        return std::min(y1, y2);
+    }
+};
+
+template<typename X, typename Y>
+SmallerInterpolator<X, Y> SmallerInterpolator<X, Y>::singleton;
+
+template<typename X, typename Y>
+class INET_API GreaterInterpolator : public InterpolatorBase<X, Y>
+{
+  public:
+    static GreaterInterpolator<X, Y> singleton;
+
+  public:
+    virtual Y getValue(const X x1, const Y y1, const X x2, const Y y2, const X x) const override {
+        ASSERT(x1 <= x && x <= x2);
+        return std::max(y1, y2);
+    }
+
+    virtual Y getMean(const X x1, const Y y1, const X x2, const Y y2) const override {
+        ASSERT(x1 <= x2);
+        return std::max(y1, y2);
+    }
+};
+
+template<typename X, typename Y>
+GreaterInterpolator<X, Y> GreaterInterpolator<X, Y>::singleton;
+
+template<typename X, typename Y>
 class INET_API LinearInterpolator : public InterpolatorBase<X, Y>
 {
   public:
@@ -181,14 +221,18 @@ template<typename X, typename Y>
 const IInterpolator<X, Y> *createInterpolator(const char *text) {
     if (!strcmp("either", text))
         return &EitherInterpolator<X, Y>::singleton;
-    else if (!strcmp("smaller", text))
-        return &SmallerInterpolator<X, Y>::singleton;
-    else if (!strcmp("greater", text))
-        return &GreaterInterpolator<X, Y>::singleton;
+    else if (!strcmp("left", text))
+        return &LeftInterpolator<X, Y>::singleton;
+    else if (!strcmp("right", text))
+        return &RightInterpolator<X, Y>::singleton;
     else if (!strcmp("center", text))
         return &CenterInterpolator<X, Y>::singleton;
     else if (!strcmp("closer", text))
         return &CloserInterpolator<X, Y>::singleton;
+    else if (!strcmp("smaller", text))
+        return &SmallerInterpolator<X, Y>::singleton;
+    else if (!strcmp("greater", text))
+        return &GreaterInterpolator<X, Y>::singleton;
     else if (!strcmp("linear", text))
         return &LinearInterpolator<X, Y>::singleton;
     else
