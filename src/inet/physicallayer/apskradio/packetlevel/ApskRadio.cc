@@ -85,6 +85,7 @@ void ApskRadio::encapsulate(Packet *packet) const
     auto paddingLength = computePaddingLength(headerLength + B(phyHeader->getLengthField()), nullptr, getModulation());
     if (paddingLength != b(0))
         packet->insertAtBack(makeShared<BitCountChunk>(paddingLength));
+    EV_DEBUG << "ApskRadio::encapsulate: packetLength=" << packet->getDataLength() << ", headerLength=" << headerLength << ", paddingLength=" << paddingLength << endl;
     packet->getTag<PacketProtocolTag>()->setProtocol(&Protocol::apskPhy);
 }
 
