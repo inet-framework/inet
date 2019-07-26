@@ -16,9 +16,11 @@
 
 #include <map>
 
+#include "inet/common/ModuleAccess.h"
 #include "inet/common/StringFormat.h"
 #include "inet/linklayer/ethernet/switch/MacAddressTable.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
+#include "inet/networklayer/contract/IInterfaceTable.h"
 
 namespace inet {
 
@@ -42,6 +44,7 @@ void MacAddressTable::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         agingTime = par("agingTime");
         lastPurge = SIMTIME_ZERO;
+        ifTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
     }
 }
 
@@ -290,16 +293,7 @@ void MacAddressTable::readAddressTable(const char *fileName)
     if (fp == nullptr)
         throw cRuntimeError("cannot open address table file `%s'", fileName);
 
-    //  Syntax of the file goes as:
-    //  VLAN ID, address in hexadecimal representation, portno
-    //  1    ffffffff    100
-    //  1    ffffeed1    101
-    //  2    aabcdeff    102
-    //
-    //  etc...
-    //
-    //  Each iteration of the loop reads in an entire line i.e. up to '\n' or EOF characters
-    //  and uses strtok to extract tokens from the resulting string
+    // parse address table file:
     char *line;
     for (int lineno = 0; (line = fgetline(fp)) != nullptr; delete [] line) {
         lineno++;
@@ -308,23 +302,35 @@ void MacAddressTable::readAddressTable(const char *fileName)
         if (line[0] == '#')
             continue;
 
+        // scan in MAC address
+        char *macAddressStr = strtok(line, " \t");
+        // scan in port name
+        char *portName = strtok(nullptr, " \t");
         // scan in VLAN ID
-        char *vlanID = strtok(line, " \t");
-        // scan in hexaddress
-        char *hexaddress = strtok(nullptr, " \t");
-        // scan in port number
-        char *portno = strtok(nullptr, " \t");
+        char *vlanIdStr = strtok(nullptr, " \t");
 
-        // empty line?
-        if (!vlanID)
+        // empty line or comment?
+        if (!macAddressStr || *macAddressStr == '#')
             continue;
 
         // broken line?
-        if (!portno || !hexaddress)
+        if (!macAddressStr || !portName)
             throw cRuntimeError("line %d invalid in address table file `%s'", lineno, fileName);
 
+        //parse columns:
+        L3Address addr;
+        if (! L3AddressResolver().tryResolve(macAddressStr, addr, L3AddressResolver::ADDR_MAC))
+            throw cRuntimeError("error in line %d in address table file `%s': MAC address '%s' unresolved", lineno, fileName, macAddressStr);
+        MacAddress macAddress = addr.toMac();
+        auto ie = ifTable->getInterfaceByName(portName);
+        if (ie == nullptr)
+            throw cRuntimeError("error in line %d in address table file `%s': interface '%s' not found", lineno, fileName, portName);
+        int portId = ie->getInterfaceId();
+
+        unsigned int vlanId = vlanIdStr ? atoi(vlanIdStr) : 0;
+
         // Create an entry with address and portno and insert into table
-        AddressEntry entry(atoi(vlanID), atoi(portno), 0);
+        AddressEntry entry(vlanId, portId, 0);
         AddressTable *table = getTableForVid(entry.vid);
 
         if (table == nullptr) {
@@ -338,7 +344,7 @@ void MacAddressTable::readAddressTable(const char *fileName)
             vlanAddressTable[entry.vid] = table;
         }
 
-        (*table)[MacAddress(hexaddress)] = entry;
+        (*table)[macAddress] = entry;
     }
     fclose(fp);
 }
