@@ -1216,11 +1216,8 @@ class INET_API ApproximatedFunction : public FunctionBase<R, D>
             return f->getValue(p1);
         }
         else {
-            // TODO: what if toDouble(x / step) is integer?
-            // TODO: calculate left + step instead?
             X x1 = std::max(lower, step * floor(toDouble(x / step)));
             X x2 = std::min(upper, step * ceil(toDouble(x / step)));
-//            ASSERT(x1 != x2);
             typename D::P p1 = p;
             std::get<DIMENSION>(p1) = x1;
             typename D::P p2 = p;
@@ -1236,7 +1233,6 @@ class INET_API ApproximatedFunction : public FunctionBase<R, D>
         const auto& upper = i.getUpper();
         X min = step * floor(toDouble(std::get<DIMENSION>(lower) / step));
         X max = step * ceil(toDouble(std::get<DIMENSION>(upper) / step));
-//        ASSERT(min != max);
         for (X x = min; x < max; x += step) {
             X x1 = std::max(std::get<DIMENSION>(lower), x);
             X x2 = std::min(std::get<DIMENSION>(upper), x + step);
