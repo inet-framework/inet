@@ -84,6 +84,7 @@
 /examples/ethernet/lans/,            -f mixed.ini -c MixedLAN -r 0,                 100s,            efd9-d2ce/tplx, PASS,
 /examples/ethernet/lans/,            -f omnetpp.ini -c MixedLAN1 -r 0,              500s,            2474-c929/tplx, PASS,
 /examples/ethernet/lans/,            -f switch.ini -c SwitchedLAN1 -r 0,            5000s,           ce1d-dd0a/tplx, PASS,
+/examples/ethernet/lans/,            -f switch.ini -c SwitchedLanPreconf -r 0,      1000s,           80ad-491e/tplx, PASS,
 /examples/ethernet/lans/,            -f twoHosts.ini -c TwoHosts1 -r 0,             200s,            8616-e9c4/tplx, PASS,
 
 /examples/ethernet/vlan/,            -f omnetpp.ini -c NoVlan -r 0,                 10ms,            7414-9578/tplx, PASS,
