@@ -55,6 +55,7 @@ ApskLayeredReceiver::ApskLayeredReceiver() :
 
 void ApskLayeredReceiver::initialize(int stage)
 {
+    SnirReceiverBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         errorModel = dynamic_cast<ILayeredErrorModel *>(getSubmodule("errorModel"));
         decoder = dynamic_cast<IDecoder *>(getSubmodule("decoder"));
@@ -66,7 +67,6 @@ void ApskLayeredReceiver::initialize(int stage)
         sensitivity = mW(math::dBmW2mW(par("sensitivity")));
         carrierFrequency = Hz(par("carrierFrequency"));
         bandwidth = Hz(par("bandwidth"));
-        snirThreshold = math::dB2fraction(par("snirThreshold"));
         const char *levelOfDetailStr = par("levelOfDetail");
         if (strcmp("packet", levelOfDetailStr) == 0)
             levelOfDetail = PACKET_DOMAIN;

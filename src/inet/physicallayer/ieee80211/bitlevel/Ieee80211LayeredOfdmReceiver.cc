@@ -48,6 +48,7 @@ Define_Module(Ieee80211LayeredOfdmReceiver);
 
 void Ieee80211LayeredOfdmReceiver::initialize(int stage)
 {
+    SnirReceiverBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         errorModel = dynamic_cast<ILayeredErrorModel *>(getSubmodule("errorModel"));
         dataDecoder = dynamic_cast<IDecoder *>(getSubmodule("dataDecoder"));
@@ -61,7 +62,6 @@ void Ieee80211LayeredOfdmReceiver::initialize(int stage)
         sensitivity = mW(math::dBmW2mW(par("sensitivity")));
         carrierFrequency = Hz(par("carrierFrequency"));
         bandwidth = Hz(par("bandwidth"));
-        snirThreshold = math::dB2fraction(par("snirThreshold"));
         channelSpacing = Hz(par("channelSpacing"));
         isCompliant = par("isCompliant");
         if (isCompliant && (dataDecoder || signalDecoder || dataDemodulator || signalDemodulator || pulseFilter || analogDigitalConverter))
