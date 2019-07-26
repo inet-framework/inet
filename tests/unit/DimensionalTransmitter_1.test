@@ -60,7 +60,7 @@ class DimensionalTransmitterTest : public DimensionalTransmitterBase
 
 void DimensionalTransmitterTest::testTime1()
 {
-	parseTimeGains("smaller s 0dB either e 0dB greater");
+    parseTimeGains("left s 0dB either e 0dB right");
     auto p = createPowerFunction(10, 30, GHz(1), MHz(200), W(1));
     std::cout << *p << std::endl;
     for (int i = 0; i <= 45; i += 5)
@@ -70,7 +70,7 @@ void DimensionalTransmitterTest::testTime1()
 
 void DimensionalTransmitterTest::testTime2()
 {
-	parseTimeGains("smaller s 0dB either e 0dB greater");
+    parseTimeGains("left s 0dB either e 0dB right");
     auto p1 = createPowerFunction(10, 30, GHz(1), MHz(200), W(1));
     auto p2 = createPowerFunction(20, 40, GHz(1), MHz(200), W(10));
     std::cout << *p1 << std::endl;
@@ -84,7 +84,7 @@ void DimensionalTransmitterTest::testTime2()
 
 void DimensionalTransmitterTest::testFrequency1()
 {
-	parseFrequencyGains("smaller s 0dB either e 0dB greater");
+    parseFrequencyGains("left s 0dB either e 0dB right");
     auto p = createPowerFunction(10, 30, GHz(1), MHz(200), W(1));
     std::cout << *p << std::endl;
     for (int i = 800; i <= 1250; i += 50)
@@ -94,7 +94,7 @@ void DimensionalTransmitterTest::testFrequency1()
 
 void DimensionalTransmitterTest::testFrequency2()
 {
-	parseFrequencyGains("smaller s 0dB either e 0dB greater");
+    parseFrequencyGains("left s 0dB either e 0dB right");
     auto p1 = createPowerFunction(10, 30, GHz(1), MHz(200), W(1));
     auto p2 = createPowerFunction(10, 30, GHz(1.1), MHz(200), W(10));
     std::cout << *p1 << std::endl;
@@ -108,8 +108,8 @@ void DimensionalTransmitterTest::testFrequency2()
 
 void DimensionalTransmitterTest::testDual1()
 {
-	parseTimeGains("smaller s 0dB either e 0dB greater");
-	parseFrequencyGains("smaller s 0dB either e 0dB greater");
+    parseTimeGains("left s 0dB either e 0dB right");
+    parseFrequencyGains("left s 0dB either e 0dB right");
     auto p = createPowerFunction(10, 30, GHz(1), MHz(200), W(1));
     std::cout << *p << std::endl;
     for (int i = 0; i <= 45; i += 5)
@@ -120,8 +120,8 @@ void DimensionalTransmitterTest::testDual1()
 
 void DimensionalTransmitterTest::testDual2()
 {
-	parseTimeGains("smaller s 0dB either e 0dB greater");
-	parseFrequencyGains("smaller s 0dB either e 0dB greater");
+    parseTimeGains("left s 0dB either e 0dB right");
+    parseFrequencyGains("left s 0dB either e 0dB right");
     auto p1 = createPowerFunction(10, 30, GHz(1), MHz(200), W(1));
     auto p2 = createPowerFunction(20, 40, GHz(1.1), MHz(200), W(10));
     std::cout << *p1 << std::endl;
@@ -136,8 +136,8 @@ void DimensionalTransmitterTest::testDual2()
 
 void DimensionalTransmitterTest::testDual3()
 {
-	parseTimeGains("smaller s 0dB either e 0dB greater");
-	parseFrequencyGains("smaller s 0dB either e 0dB greater");
+    parseTimeGains("left s 0dB either e 0dB right");
+    parseFrequencyGains("left s 0dB either e 0dB right");
     auto p1 = createPowerFunction(20, 30, GHz(1.1), MHz(400), W(2));
     auto p2 = createPowerFunction(10, 40, GHz(1.1), MHz(200), W(10));
     std::cout << *p1 << std::endl;
@@ -152,7 +152,7 @@ void DimensionalTransmitterTest::testDual3()
 
 void DimensionalTransmitterTest::testDivide()
 {
-	parseTimeGains("smaller s 0dB linear c 0.5 linear e 0dB greater");
+    parseTimeGains("left s 0dB linear c 0.5 linear e 0dB right");
     auto p1 = createPowerFunction(10, 30, GHz(1), MHz(200), W(1));
     auto p2 = createPowerFunction(20, 40, GHz(1), MHz(200), W(10));
     std::cout << *p1 << std::endl;

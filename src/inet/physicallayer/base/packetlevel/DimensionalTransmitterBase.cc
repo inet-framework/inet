@@ -83,7 +83,7 @@ std::vector<DimensionalTransmitterBase::GainEntry<T>> DimensionalTransmitterBase
 
 void DimensionalTransmitterBase::parseTimeGains(const char *text)
 {
-    if (strcmp(text, "smaller s 0dB either e 0dB greater")) {
+    if (strcmp(text, "left s 0dB either e 0dB right")) {
         firstTimeInterpolator = createInterpolator<simtime_t, double>(cStringTokenizer(text).nextToken());
         timeGains = parseGains<simtime_t>(text);
     }
@@ -95,7 +95,7 @@ void DimensionalTransmitterBase::parseTimeGains(const char *text)
 
 void DimensionalTransmitterBase::parseFrequencyGains(const char *text)
 {
-    if (strcmp(text, "smaller s 0dB either e 0dB greater")) {
+    if (strcmp(text, "left s 0dB either e 0dB right")) {
         firstFrequencyInterpolator = createInterpolator<Hz, double>(cStringTokenizer(text).nextToken());
         frequencyGains = parseGains<Hz>(text);
     }

@@ -30,7 +30,7 @@ void DimensionalMediumTest::test1()
     auto transmitterAntennaGainFunction = makeShared<AntennaGainFunction>(antenna->getGain().get());
     auto obstacleLossFunction = makeShared<ConstantFunction<double, Domain<m, m, m, m, m, m, Hz>>>(1);
 
-    parseTimeGains("smaller s 0dB either e 0dB greater");
+    parseTimeGains("left s 0dB either e 0dB right");
 
     auto backgroundNoise = makeShared<ConstantFunction<WpHz, Domain<m, m, m, simtime_t, Hz>>>(pW(1) / MHz(20));
     std::cout << "Background noise: " << *backgroundNoise << std::endl;
