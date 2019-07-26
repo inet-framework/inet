@@ -155,12 +155,10 @@ void MacRelayUnit::handleAndDispatchFrame(Packet *packet)
 
 void MacRelayUnit::start()
 {
-    macTable->initializeTable();
 }
 
 void MacRelayUnit::stop()
 {
-    macTable->clearTable();
 }
 
 void MacRelayUnit::learn(MacAddress srcAddr, int arrivalInterfaceId)
