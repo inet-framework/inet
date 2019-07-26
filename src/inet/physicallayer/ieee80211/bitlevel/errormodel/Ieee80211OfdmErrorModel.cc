@@ -36,6 +36,7 @@ Define_Module(Ieee80211OfdmErrorModel);
 
 void Ieee80211OfdmErrorModel::initialize(int stage)
 {
+    Ieee80211NistErrorModel::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         dataSymbolErrorRate = par("dataSymbolErrorRate");
         dataBitErrorRate = par("dataBitErrorRate");
