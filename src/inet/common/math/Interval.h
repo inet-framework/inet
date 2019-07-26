@@ -84,7 +84,9 @@ class INET_API Interval
 
   public:
     Interval(const Point<T ...>& lower, const Point<T ...>& upper, unsigned int closed) : lower(lower), upper(upper), closed(closed) {
+#ifndef NDEBUG
         checkImpl(index_sequence_for<T ...>{});
+#endif
     }
 
     const Point<T ...>& getLower() const { return lower; }
