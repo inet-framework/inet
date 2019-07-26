@@ -18,6 +18,7 @@
 
 #include "inet/common/StringFormat.h"
 #include "inet/linklayer/ethernet/switch/MacAddressTable.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
 
 namespace inet {
 
@@ -35,11 +36,13 @@ MacAddressTable::MacAddressTable()
 {
 }
 
-void MacAddressTable::initialize()
+void MacAddressTable::initialize(int stage)
 {
-    agingTime = par("agingTime");
-    lastPurge = SIMTIME_ZERO;
-    initializeTable();
+    OperationalBase::initialize(stage);
+    if (stage == INITSTAGE_LOCAL) {
+        agingTime = par("agingTime");
+        lastPurge = SIMTIME_ZERO;
+    }
 }
 
 /**
@@ -68,6 +71,11 @@ static char *fgetline(FILE *fp)
 }
 
 void MacAddressTable::handleMessage(cMessage *)
+{
+    throw cRuntimeError("This module doesn't process messages");
+}
+
+void MacAddressTable::handleMessageWhenUp(cMessage *)
 {
     throw cRuntimeError("This module doesn't process messages");
 }

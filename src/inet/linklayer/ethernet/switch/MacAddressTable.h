@@ -17,6 +17,8 @@
 #ifndef __INET_MACADDRESSTABLE_H
 #define __INET_MACADDRESSTABLE_H
 
+#include "inet/common/lifecycle/ModuleOperations.h"
+#include "inet/common/lifecycle/OperationalBase.h"
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/linklayer/ethernet/switch/IMacAddressTable.h"
 
@@ -27,7 +29,7 @@ namespace inet {
  * NOTE that ports (portno parameters) are actually the corresponding ID of the port interface.
  * i.e. this is an interfaceId and NOT an index of the some kind in a gate vector.
  */
-class INET_API MacAddressTable : public cSimpleModule, public IMacAddressTable
+class INET_API MacAddressTable : public OperationalBase, public IMacAddressTable
 {
   protected:
     struct AddressEntry
@@ -57,8 +59,10 @@ class INET_API MacAddressTable : public cSimpleModule, public IMacAddressTable
 
   protected:
 
-    virtual void initialize() override;
+    virtual void initialize(int stage) override;
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void handleMessage(cMessage *msg) override;
+    virtual void handleMessageWhenUp(cMessage *msg) override;
     virtual void refreshDisplay() const override;
     virtual void updateDisplayString() const;
 
@@ -140,6 +144,15 @@ class INET_API MacAddressTable : public cSimpleModule, public IMacAddressTable
      */
     virtual void setAgingTime(simtime_t agingTime) override;
     virtual void resetDefaultAging() override;
+
+    //@{ For lifecycle
+    virtual void handleStartOperation(LifecycleOperation *operation) override { initializeTable(); }
+    virtual void handleStopOperation(LifecycleOperation *operation) override { clearTable(); }
+    virtual void handleCrashOperation(LifecycleOperation *operation) override { clearTable(); }
+    virtual bool isInitializeStage(int stage) override { return stage == INITSTAGE_LINK_LAYER; }
+    virtual bool isModuleStartStage(int stage) override { return stage == ModuleStartOperation::STAGE_LINK_LAYER; }
+    virtual bool isModuleStopStage(int stage) override { return stage == ModuleStopOperation::STAGE_LINK_LAYER; }
+    //@}
 };
 
 } // namespace inet
