@@ -105,7 +105,10 @@ int SdesItem::getLength() const
     // bytes needed for this sdes item are
     // one byte for type, one for length
     // and the string
-    return _length + 2;
+    // was: return _length + 2;
+    // yes, but _length has an initial value of 2
+    // to which the content length is added
+    return _length;
 }
 
 //
