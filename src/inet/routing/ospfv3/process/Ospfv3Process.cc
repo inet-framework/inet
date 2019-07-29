@@ -544,6 +544,7 @@ void Ospfv3Process::handleTimer(cMessage* msg)
                 (*it)->init();
 
             this->debugDump();
+            delete msg;
         break;
 
         case HELLO_TIMER:
@@ -552,11 +553,13 @@ void Ospfv3Process::handleTimer(cMessage* msg)
             if(!(interface=reinterpret_cast<Ospfv3Interface*>(msg->getContextPointer())))
             {
                 //TODO - error
+                delete msg;
             }
             else {
                 EV_DEBUG << "Process received msg, sending event HELLO_TIMER_EVENT\n";
                 interface->processEvent(Ospfv3Interface::HELLO_TIMER_EVENT);
             }
+//            delete msg;
         }
         break;
 
@@ -566,6 +569,7 @@ void Ospfv3Process::handleTimer(cMessage* msg)
             if(!(interface=reinterpret_cast<Ospfv3Interface*>(msg->getContextPointer())))
             {
                 //TODO - error
+                delete msg;
             }
             else {
                 EV_DEBUG << "Process received msg, sending event WAIT_TIMER_EVENT\n";
