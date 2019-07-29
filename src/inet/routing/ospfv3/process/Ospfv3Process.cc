@@ -609,6 +609,7 @@ void Ospfv3Process::handleTimer(cMessage* msg)
                     if(currNei->getNeighborID() == neighbor->getNeighborID()){
 //                        neighbor->processEvent(Ospfv3Neighbor::INACTIVITY_TIMER);
                         intf->removeNeighborByID(neighbor->getNeighborID());
+                        delete neighbor;
                         break;
                     }
                 }
