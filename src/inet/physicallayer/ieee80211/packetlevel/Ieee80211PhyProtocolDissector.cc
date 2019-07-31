@@ -32,17 +32,25 @@ Register_Protocol_Dissector(&Protocol::ieee80211Phy, Ieee80211PhyProtocolDissect
 
 void Ieee80211PhyProtocolDissector::dissect(Packet *packet, const Protocol *protocol, ICallback& callback) const
 {
+    auto trailerOffset = packet->getBackOffset();
+    auto macEndOffset = packet->getFrontOffset();
     const auto& header = packet->popAtFront<inet::physicallayer::Ieee80211PhyHeader>();
+    macEndOffset += B(header->getLengthField());
     callback.startProtocolDataUnit(&Protocol::ieee80211Phy);
-    const auto& trailer = packet->peekAtBack();
-    // TODO: KLUDGE: padding length
-    auto ieee80211PhyPadding = dynamicPtrCast<const BitCountChunk>(trailer);
-    if (ieee80211PhyPadding != nullptr)
-        packet->setBackOffset(packet->getBackOffset() - ieee80211PhyPadding->getChunkLength());
+    bool incorrect = (macEndOffset > trailerOffset || header->getLengthField() < header->getChunkLength());
+    if (incorrect) {
+        callback.markIncorrect();
+        macEndOffset = trailerOffset;
+    }
     callback.visitChunk(header, &Protocol::ieee80211Phy);
+    packet->setBackOffset(macEndOffset);
     callback.dissectPacket(packet, &Protocol::ieee80211Mac);
-    if (ieee80211PhyPadding != nullptr)
-        callback.visitChunk(ieee80211PhyPadding, nullptr);
+    packet->setBackOffset(trailerOffset);
+    auto paddingLength = packet->getDataLength();
+    if (paddingLength > b(0)) {
+        const auto& padding = packet->popAtFront(paddingLength);        // remove padding (type is not EthernetPadding!)
+        callback.visitChunk(padding, &Protocol::ethernetPhy);
+    }
     callback.endProtocolDataUnit(&Protocol::ieee80211Phy);
 }
 
