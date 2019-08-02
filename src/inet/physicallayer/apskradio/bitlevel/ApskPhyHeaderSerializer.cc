@@ -37,10 +37,12 @@ void ApskPhyHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<co
     stream.writeUint16Be(phyHeader->getCrc());
     //TODO write protocol
 
-    int64_t remainders = B(phyHeader->getChunkLength() - (stream.getLength() - startPosition)).get();
-    if (remainders < 0)
+    b remainders = phyHeader->getChunkLength() - (stream.getLength() - startPosition);
+    if (remainders < b(0))
         throw cRuntimeError("ApskPhyHeader length = %d smaller than required %d bytes", (int)B(phyHeader->getChunkLength()).get(), (int)B(stream.getLength() - startPosition).get());
-    stream.writeByteRepeatedly('?', remainders);
+    uint8_t remainderbits = remainders.get() % 8;
+    stream.writeByteRepeatedly('?', B(remainders - b(remainderbits)).get());
+    stream.writeBitRepeatedly(false, remainderbits);
 }
 
 const Ptr<Chunk> ApskPhyHeaderSerializer::deserialize(MemoryInputStream& stream, const std::type_info& typeInfo) const
@@ -56,9 +58,15 @@ const Ptr<Chunk> ApskPhyHeaderSerializer::deserialize(MemoryInputStream& stream,
     phyHeader->setCrcMode(crc == 0 ? CRC_DISABLED : CRC_COMPUTED);
     //TODO read protocol
 
-    B remainders = headerLength - (stream.getPosition() - startPosition);
-    ASSERT(remainders >= B(0));
-    stream.readByteRepeatedly('?', B(remainders).get());
+    b remainders = headerLength - (stream.getPosition() - startPosition);
+    if (remainders < b(0)) {
+        phyHeader->markIncorrect();
+    }
+    else {
+        uint8_t remainderbits = remainders.get() % 8;
+        stream.readByteRepeatedly('?', B(remainders - b(remainderbits)).get());
+        stream.readBitRepeatedly(false, remainderbits);
+    }
     return phyHeader;
 }
 
