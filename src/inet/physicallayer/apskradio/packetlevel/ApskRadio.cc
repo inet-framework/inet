@@ -92,6 +92,8 @@ void ApskRadio::encapsulate(Packet *packet) const
 void ApskRadio::decapsulate(Packet *packet) const
 {
     const auto& phyHeader = packet->popAtFront<ApskPhyHeader>(b(-1), Chunk::PF_ALLOW_INCORRECT);
+    if (phyHeader->isIncorrect())
+        packet->setBitError(true);
     b headerLength = phyHeader->getChunkLength();
 
 #if 0
