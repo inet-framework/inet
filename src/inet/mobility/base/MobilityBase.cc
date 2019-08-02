@@ -137,6 +137,7 @@ void MobilityBase::setInitialPosition()
 {
     // reading the coordinates from omnetpp.ini makes predefined scenarios a lot easier
     bool filled = false;
+    bool posEqWithDisplayString = false;
     auto coordinateSystem = getModuleFromPar<IGeographicCoordinateSystem>(par("coordinateSystemModule"), this, false);
     if (subjectModule != nullptr && hasPar("initFromDisplayString") && par("initFromDisplayString")) {
         const char *s = subjectModule->getDisplayString().getTagArg("p", 2);
@@ -149,6 +150,7 @@ void MobilityBase::setInitialPosition()
             lastPosition.z = hasPar("initialZ") ? par("initialZ") : 0.0;
             lastPosition = canvasProjection->computeCanvasPointInverse(cFigure::Point(lastPosition.x, lastPosition.y), lastPosition.z);
         }
+        posEqWithDisplayString = true;
     }
     // not all mobility models have "initialX", "initialY" and "initialZ" parameters
     else if (coordinateSystem == nullptr && hasPar("initialX") && hasPar("initialY") && hasPar("initialZ")) {
@@ -166,6 +168,8 @@ void MobilityBase::setInitialPosition()
     }
     if (!filled)
         lastPosition = getRandomPosition();
+    if (!posEqWithDisplayString)
+        updateDisplay();
 }
 
 void MobilityBase::checkPosition()
@@ -197,7 +201,14 @@ void MobilityBase::refreshDisplay() const
     auto text = format.formatString(&directiveResolver);
     cDisplayString& displayString = this->getDisplayString();
     displayString.setTagArg("t", 0, text);
-    if (subjectModule != nullptr && par("updateDisplayString")) {
+    if (par("updateDisplayString")) {
+        updateDisplay();
+    }
+}
+
+void MobilityBase::updateDisplay() const
+{
+    if (subjectModule != nullptr) {
         // position
         auto position = const_cast<MobilityBase *>(this)->getCurrentPosition();
         EV_TRACE << "current position = " << position << endl;
