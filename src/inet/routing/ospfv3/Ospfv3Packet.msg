@@ -21,12 +21,12 @@ class Ospfv3Packet extends FieldsChunk
 {
 	char version = 3;
 	char type;
-	uint16_t packetLength;
+	unsigned short packetLength;
 	
     Ipv4Address routerID;
     Ipv4Address areaID;
     
-    uint16_t checksum;
+    unsigned short checksum;
     char instanceID;
 }
 
@@ -53,8 +53,8 @@ class Ospfv3HelloPacket extends Ospfv3Packet
 	
 	Ospfv3Options options;
 	
-	uint16_t helloInterval;
-	uint16_t deadInterval;
+	unsigned short helloInterval;
+	unsigned short deadInterval;
 	
 	Ipv4Address designatedRouterID;
 	Ipv4Address backupDesignatedRouterID;
@@ -76,16 +76,16 @@ class Ospfv3HelloPacket extends Ospfv3Packet
 //triplet {lsType, linkStateID, advertisingRouter} uniquely identify the LSA
 class Ospfv3LsaHeader extends cObject
 {
-    uint16_t lsaAge;
-    uint16_t lsaType;
+    unsigned short lsaAge;
+    unsigned short lsaType;
     
     Ipv4Address linkStateID;
     Ipv4Address advertisingRouter;
     
     uint32_t lsaSequenceNumber;
     
-    uint16_t lsaChecksum;
-    uint16_t lsaLength;
+    unsigned short lsaChecksum;
+    unsigned short lsaLength;
 }
 
 class Ospfv3Lsa extends cObject
@@ -249,8 +249,8 @@ class Ospfv3LinkLsa  extends Ospfv3Lsa
 // Intra-Area-Prefix-LSAs 
 class Ospfv3IntraAreaPrefixLsa  extends Ospfv3Lsa
 {
-    uint16_t numPrefixes;
-    uint16_t referencedLSType;
+    unsigned short numPrefixes;
+    unsigned short referencedLSType;
     Ipv4Address referencedLSID;
     Ipv4Address referencedAdvRtr;
     

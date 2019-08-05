@@ -76,7 +76,6 @@ void Ospfv3Splitter::handleMessage(cMessage* msg)
 
                     if(it->second.second!=-1) {
                         cMessage* copy = msg->dup();
-//                        copy->setControlInfo(msg->getControlInfo()->dup());
                         this->send(copy, "processOut", it->second.second);
                     }
                 }
