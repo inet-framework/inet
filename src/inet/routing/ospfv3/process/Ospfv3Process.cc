@@ -13,8 +13,6 @@ Ospfv3Process::Ospfv3Process()
 
 Ospfv3Process::~Ospfv3Process()
 {
-    std::cout << "VOLAM TO Z ROUTERU  " << this->getRouterID() << endl;
-
     long instanceCount = instances.size();
     for (long i = 0; i < instanceCount; i++) {
         delete instances[i];

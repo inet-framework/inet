@@ -325,13 +325,6 @@ void Ospfv3Interface::processHelloPacket(Packet* packet)
                 Ipv4Address newBackupRouterID = hello->getBackupDesignatedRouterID();
                 Ipv4Address dRouterID;
 
-
-                /*
-                 * Potialto to vyzera ze ide porovnat DR ID stare a nove z packetu.
-                 * Tu porovna ci typ intf je VIRTUAL_TYPE a ci je s��asne sused DOWN
-                 * Ak �no, nastav� susedovi (?) prioritu pod�a router priority z hello packetu
-                 * a tiez zmeni dead interval.  preco ?
-                 * */
                 if ((this->interfaceType == Ospfv3InterfaceType::VIRTUAL_TYPE) &&
                         (neighbor->getState() == Ospfv3Neighbor::DOWN_STATE))
                 {

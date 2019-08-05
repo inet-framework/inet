@@ -12,7 +12,6 @@ void Ospfv3InterfaceState::changeState(Ospfv3Interface *interface, Ospfv3Interfa
     Ospfv3Interface::Ospfv3InterfaceType intfType = interface->getType();
     bool shouldRebuildRoutingTable = false;
 
-    std::cout << "CHANGE STATE: " << interface->getArea()->getInstance()->getProcess()->getRouterID() << ", area " << interface->getArea()->getAreaID() << ", intf " << interface->getIntName() << ", curr st: " << currentState->getInterfaceStateString()<< ", new st: " << newState->getInterfaceStateString() << "\n";
     EV_DEBUG << "CHANGE STATE: " << interface->getArea()->getInstance()->getProcess()->getRouterID() << ", area " << interface->getArea()->getAreaID() << ", intf " << interface->getIntName() << ", curr st: " << currentState->getInterfaceStateString() << ", new st: " << newState->getInterfaceStateString() << "\n";
 
 

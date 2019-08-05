@@ -79,9 +79,6 @@ void Ospfv3NeighborState::changeState(Ospfv3Neighbor *neighbor, Ospfv3NeighborSt
                         networkLSA->getHeaderForUpdate().setLsaAge(MAX_AGE);
                         networkLSA->incrementInstallTime();
                     }
-                    std::cout << "neighbor router ID = " << neighbor->getInterface()->getArea()->getInstance()->getProcess()->getRouterID() << endl;
-                    std::cout << "neighbor NetworkLSA getCount = " << neighbor->getInterface()->getArea()->getNetworkLSACount() << endl;
-
                     neighbor->getInterface()->getArea()->floodLSA(networkLSA);
                 }
             }
@@ -92,8 +89,6 @@ void Ospfv3NeighborState::changeState(Ospfv3Neighbor *neighbor, Ospfv3NeighborSt
     if (nextState == Ospfv3Neighbor::DOWN_STATE) //this neigbor was shuted down
     {
         // invalidate all LSA type 3, which I know from this neighbor
-        // n�jdi mi v�etky intra-arey, ktor� maj� adv Router ID tento neighbor ID
-        // v druh�ch are�ch, n�jdi v�etky inter-area , ktor� maj� prefix t�chto najden�ch intra area
         // set MAX_AGE
         if (thisArea->getInstance()->getAreaCount() > 1) // this is ABR
         {
