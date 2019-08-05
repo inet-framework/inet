@@ -536,52 +536,54 @@ void Ospfv3Neighbor::retransmitUpdatePacket()
 //    messageHandler->sendPacket(updatePacket, neighborIPAddress, parentInterface->getIfIndex(), ttl);
 }
 
-void Ospfv3Neighbor::addToRetransmissionList(const Ospfv3Lsa *lsaC)
+void Ospfv3Neighbor::addToRetransmissionList(const Ospfv3Lsa *lsa)
 {
     auto it = linkStateRetransmissionList.begin();
     for ( ; it != linkStateRetransmissionList.end(); it++) {
-        if (((*it)->getHeader().getLinkStateID() == lsaC->getHeader().getLinkStateID()) &&
-            ((*it)->getHeader().getAdvertisingRouter().getInt() == lsaC->getHeader().getAdvertisingRouter().getInt()))
+        if (((*it)->getHeader().getLinkStateID() == lsa->getHeader().getLinkStateID()) &&
+            ((*it)->getHeader().getAdvertisingRouter().getInt() == lsa->getHeader().getAdvertisingRouter().getInt()))
         {
             break;
         }
     }
 
-    Ospfv3Lsa *lsaCopy = nullptr;
-    switch (lsaC->getHeader().getLsaType()) {
-        case ROUTER_LSA:
-            lsaCopy = new Ospfv3RouterLsa(*(check_and_cast<Ospfv3RouterLsa *>(const_cast<Ospfv3Lsa*>(lsaC))));
-            break;
-
-        case NETWORK_LSA:
-            lsaCopy = new Ospfv3NetworkLsa(*(check_and_cast<Ospfv3NetworkLsa *>(const_cast<Ospfv3Lsa*>(lsaC))));
-            break;
-
-        case INTER_AREA_PREFIX_LSA:
-            lsaCopy = new Ospfv3InterAreaPrefixLsa(*(check_and_cast<Ospfv3InterAreaPrefixLsa* >(const_cast<Ospfv3Lsa*>(lsaC))));
-            break;
-//        case AS_EXTERNAL_LSA_TYPE:
-//            lsaCopy = new OSPFASExternalLSA(*(check_and_cast<OSPFASExternalLSA *>(lsa)));
+    Ospfv3Lsa *lsaCopy = lsa->dup();
+//    switch (lsaC->getHeader().getLsaType()) {
+//        case ROUTER_LSA:
+//            lsaCopy = new Ospfv3RouterLsa((const_cast<Ospfv3Lsa*>(lsaC))));
 //            break;
+//
+//        case NETWORK_LSA:
+//            lsaCopy = new Ospfv3NetworkLsa(*(check_and_cast<Ospfv3NetworkLsa *>(const_cast<Ospfv3Lsa*>(lsaC))));
+//            break;
+//
+//        case INTER_AREA_PREFIX_LSA:
+//            lsaCopy = new Ospfv3InterAreaPrefixLsa(*(check_and_cast<Ospfv3InterAreaPrefixLsa* >(const_cast<Ospfv3Lsa*>(lsaC))));
+//            break;
+////        case AS_EXTERNAL_LSA_TYPE:
+////            lsaCopy = new OSPFASExternalLSA(*(check_and_cast<OSPFASExternalLSA *>(lsa)));
+////            break;
+//
+//        case LINK_LSA:
+//            lsaCopy = new Ospfv3LinkLsa(*(check_and_cast<Ospfv3LinkLsa *>(const_cast<Ospfv3Lsa*>(lsaC))));
+//            break;
+//
+//        case INTRA_AREA_PREFIX_LSA:
+//            lsaCopy = new Ospfv3IntraAreaPrefixLsa(*(check_and_cast<Ospfv3IntraAreaPrefixLsa *>(const_cast<Ospfv3Lsa*>(lsaC))));
+//            break;
+//
+//        default:
+//            ASSERT(false);    // error
+//            break;
+//    }
 
-        case LINK_LSA:
-            lsaCopy = new Ospfv3LinkLsa(*(check_and_cast<Ospfv3LinkLsa *>(const_cast<Ospfv3Lsa*>(lsaC))));
-            break;
-
-        case INTRA_AREA_PREFIX_LSA:
-            lsaCopy = new Ospfv3IntraAreaPrefixLsa(*(check_and_cast<Ospfv3IntraAreaPrefixLsa *>(const_cast<Ospfv3Lsa*>(lsaC))));
-            break;
-
-        default:
-            ASSERT(false);    // error
-            break;
-    }
-
+    // if LSA is on retransmission list then replace it
     if (it != linkStateRetransmissionList.end()) {
         delete (*it);
         *it = static_cast<Ospfv3Lsa *>(lsaCopy);
     }
     else {
+        //if not then add it
         linkStateRetransmissionList.push_back(static_cast<Ospfv3Lsa *>(lsaCopy));
     }
 }
