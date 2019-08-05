@@ -1060,7 +1060,7 @@ static void testSlicing()
     ASSERT(chunk2->getChunkLength() == B(5));
     ASSERT(dynamicPtrCast<const ByteCountChunk>(chunk2) != nullptr);
 
-    // 2. BytesChunk always returns BytesChunk
+    // 2. BytesChunk returns BytesChunk
     auto bytesChunk1 = makeImmutableBytesChunk(makeVector(10));
     const auto& chunk3 = bytesChunk1->peek(B(0), B(10));
     const auto& chunk4 = bytesChunk1->peek(B(0), B(5));
@@ -1074,6 +1074,17 @@ static void testSlicing()
     ASSERT(dynamicPtrCast<const BytesChunk>(chunk4) != nullptr);
     const auto& bytesChunk3 = staticPtrCast<const BytesChunk>(chunk4);
     ASSERT(std::equal(bytesChunk3->getBytes().begin(), bytesChunk3->getBytes().end(), makeVector(5).begin()));
+
+    // 2b. BytesChunk sometimes returns other
+    auto bytesChunk2b = makeImmutableBytesChunk(makeVector(10));
+    const auto& chunk2b1 = bytesChunk2b->peek(B(0), b(20));
+    ASSERT(chunk2b1 != nullptr);
+    ASSERT(chunk2b1->getChunkLength() == b(20));
+    ASSERT(dynamicPtrCast<const SliceChunk>(chunk2b1) != nullptr);
+    const auto& chunk2b2 = bytesChunk2b->peek(b(20), b(60));
+    ASSERT(chunk2b2 != nullptr);
+    ASSERT(chunk2b2->getChunkLength() == b(60));
+    ASSERT(dynamicPtrCast<const SliceChunk>(chunk2b2) != nullptr);
 
     // 3a. SliceChunk returns a SliceChunk containing the requested slice of the chunk that is used by the original SliceChunk
     auto applicationHeader1 = makeImmutableApplicationHeader(42);
