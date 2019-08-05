@@ -204,7 +204,7 @@ void Ospfv3Neighbor::sendDDPacket(bool init)
     Ospfv3DdOptions ddOptions;
     ddPacket->setSequenceNumber(this->ddSequenceNumber);
 
-    int packetSize = OSPFV3_HEADER_LENGTH + OSPFV3_DD_HEADER_LENGTH;
+    B packetSize = OSPFV3_HEADER_LENGTH + OSPFV3_DD_HEADER_LENGTH;
 
     if (init || databaseSummaryList.empty()) {
         ddPacket->setLsaHeadersArraySize(0);
@@ -235,8 +235,8 @@ void Ospfv3Neighbor::sendDDPacket(bool init)
 
     ddPacket->setDdOptions(ddOptions);
 
-    ddPacket->setPacketLength(packetSize);
-    ddPacket->setChunkLength(B(packetSize));
+    ddPacket->setPacketLength(packetSize.get());
+    ddPacket->setChunkLength(packetSize);
     Packet *pk = new Packet();
     pk->insertAtBack(ddPacket);
 
@@ -268,7 +268,7 @@ void Ospfv3Neighbor::sendLinkStateRequestPacket()
     //long maxPacketSize = (((IP_MAX_HEADER_BYTES + OSPF_HEADER_LENGTH + OSPF_REQUEST_LENGTH) > parentInterface->getMTU()) ?
     //                      IPV4_DATAGRAM_LENGTH :
     //                      parentInterface->getMTU()) - IP_MAX_HEADER_BYTES;
-    long packetSize = OSPFV3_HEADER_LENGTH;
+    B packetSize = OSPFV3_HEADER_LENGTH;
 
     if (linkStateRequestList.empty()) {
         requestPacket->setRequestsArraySize(0);
@@ -293,7 +293,7 @@ void Ospfv3Neighbor::sendLinkStateRequestPacket()
         }
     }
 
-    requestPacket->setChunkLength(B(packetSize));
+    requestPacket->setChunkLength(packetSize);
     //TODO - ttl and checksum
 
     Packet *pk = new Packet();
@@ -355,18 +355,18 @@ void Ospfv3Neighbor::retransmitUpdatePacket()
 
     bool packetFull = false;
     unsigned short lsaCount = 0;
-    unsigned long packetLength = OSPFV3_HEADER_LENGTH + OSPFV3_LSA_HEADER_LENGTH;
+    B packetLength = OSPFV3_HEADER_LENGTH + OSPFV3_LSA_HEADER_LENGTH;
     auto it = linkStateRetransmissionList.begin();
 
     while (!packetFull && (it != linkStateRetransmissionList.end())) {
         uint16_t lsaType = (*it)->getHeader().getLsaType();
-        Ospfv3RouterLsa *routerLSA = (lsaType == ROUTER_LSA) ? dynamic_cast<Ospfv3RouterLsa *>(*it) : nullptr;
-        Ospfv3NetworkLsa *networkLSA = (lsaType == NETWORK_LSA) ? dynamic_cast<Ospfv3NetworkLsa *>(*it) : nullptr;
-        Ospfv3LinkLsa *linkLSA = (lsaType == LINK_LSA) ? dynamic_cast<Ospfv3LinkLsa *>(*it) : nullptr;
-        Ospfv3InterAreaPrefixLsa *interAreaPrefixLSA = (lsaType == INTER_AREA_PREFIX_LSA) ? dynamic_cast<Ospfv3InterAreaPrefixLsa *>(*it) : nullptr;
-        Ospfv3IntraAreaPrefixLsa *intraAreaPrefixLSA = (lsaType == INTRA_AREA_PREFIX_LSA) ? dynamic_cast<Ospfv3IntraAreaPrefixLsa *>(*it) : nullptr;
+        const Ospfv3RouterLsa *routerLSA = (lsaType == ROUTER_LSA) ? dynamic_cast<Ospfv3RouterLsa *>(*it) : nullptr;
+        const Ospfv3NetworkLsa *networkLSA = (lsaType == NETWORK_LSA) ? dynamic_cast<Ospfv3NetworkLsa *>(*it) : nullptr;
+        const Ospfv3LinkLsa *linkLSA = (lsaType == LINK_LSA) ? dynamic_cast<Ospfv3LinkLsa *>(*it) : nullptr;
+        const Ospfv3InterAreaPrefixLsa *interAreaPrefixLSA = (lsaType == INTER_AREA_PREFIX_LSA) ? dynamic_cast<Ospfv3InterAreaPrefixLsa *>(*it) : nullptr;
+        const Ospfv3IntraAreaPrefixLsa *intraAreaPrefixLSA = (lsaType == INTRA_AREA_PREFIX_LSA) ? dynamic_cast<Ospfv3IntraAreaPrefixLsa *>(*it) : nullptr;
 //        OSPFASExternalLSA *asExternalLSA = (lsaType == AS_EXTERNAL_LSA_TYPE) ? dynamic_cast<OSPFASExternalLSA *>(*it) : nullptr;
-        long lsaSize = 0;
+        B lsaSize;
         bool includeLSA = false;
 
         switch (lsaType) {
@@ -405,7 +405,7 @@ void Ospfv3Neighbor::retransmitUpdatePacket()
                 break;
         }
 
-        if (packetLength + lsaSize < this->getInterface()->getInterfaceMTU()) {
+        if (B(packetLength + lsaSize).get() < this->getInterface()->getInterfaceMTU()) {
             includeLSA = true;
             lsaCount++;
         }
@@ -538,39 +538,38 @@ void Ospfv3Neighbor::retransmitUpdatePacket()
 
 void Ospfv3Neighbor::addToRetransmissionList(const Ospfv3Lsa *lsaC)
 {
-    auto lsa = lsaC->dup(); // make editable copy of lsa
     auto it = linkStateRetransmissionList.begin();
     for ( ; it != linkStateRetransmissionList.end(); it++) {
-        if (((*it)->getHeader().getLinkStateID() == lsa->getHeader().getLinkStateID()) &&
-            ((*it)->getHeader().getAdvertisingRouter().getInt() == lsa->getHeader().getAdvertisingRouter().getInt()))
+        if (((*it)->getHeader().getLinkStateID() == lsaC->getHeader().getLinkStateID()) &&
+            ((*it)->getHeader().getAdvertisingRouter().getInt() == lsaC->getHeader().getAdvertisingRouter().getInt()))
         {
             break;
         }
     }
 
     Ospfv3Lsa *lsaCopy = nullptr;
-    switch (lsa->getHeader().getLsaType()) {
+    switch (lsaC->getHeader().getLsaType()) {
         case ROUTER_LSA:
-            lsaCopy = new Ospfv3RouterLsa(*(check_and_cast<Ospfv3RouterLsa *>(lsa)));
+            lsaCopy = new Ospfv3RouterLsa(*(check_and_cast<Ospfv3RouterLsa *>(const_cast<Ospfv3Lsa*>(lsaC))));
             break;
 
         case NETWORK_LSA:
-            lsaCopy = new Ospfv3NetworkLsa(*(check_and_cast<Ospfv3NetworkLsa *>(lsa)));
+            lsaCopy = new Ospfv3NetworkLsa(*(check_and_cast<Ospfv3NetworkLsa *>(const_cast<Ospfv3Lsa*>(lsaC))));
             break;
 
         case INTER_AREA_PREFIX_LSA:
-            lsaCopy = new Ospfv3InterAreaPrefixLsa(*(check_and_cast<Ospfv3InterAreaPrefixLsa* >(lsa)));
+            lsaCopy = new Ospfv3InterAreaPrefixLsa(*(check_and_cast<Ospfv3InterAreaPrefixLsa* >(const_cast<Ospfv3Lsa*>(lsaC))));
             break;
 //        case AS_EXTERNAL_LSA_TYPE:
 //            lsaCopy = new OSPFASExternalLSA(*(check_and_cast<OSPFASExternalLSA *>(lsa)));
 //            break;
 
         case LINK_LSA:
-            lsaCopy = new Ospfv3LinkLsa(*(check_and_cast<Ospfv3LinkLsa *>(lsa)));
+            lsaCopy = new Ospfv3LinkLsa(*(check_and_cast<Ospfv3LinkLsa *>(const_cast<Ospfv3Lsa*>(lsaC))));
             break;
 
         case INTRA_AREA_PREFIX_LSA:
-            lsaCopy = new Ospfv3IntraAreaPrefixLsa(*(check_and_cast<Ospfv3IntraAreaPrefixLsa *>(lsa)));
+            lsaCopy = new Ospfv3IntraAreaPrefixLsa(*(check_and_cast<Ospfv3IntraAreaPrefixLsa *>(const_cast<Ospfv3Lsa*>(lsaC))));
             break;
 
         default:

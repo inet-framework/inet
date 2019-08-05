@@ -79,3 +79,8 @@ backups
 *~
 xxx
 /tmp/
+.tmplib*
+src/.tmp3220
+/.tmp.*
+src/.tmp.*
+src/.tmp*

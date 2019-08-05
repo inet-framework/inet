@@ -924,8 +924,8 @@ Packet* Ospfv3Interface::prepareLSUHeader()
     updatePacket->setAreaID(this->getArea()->getAreaID());
     updatePacket->setInstanceID(this->getArea()->getInstance()->getInstanceID());
 
-    updatePacket->setPacketLength(OSPFV3_HEADER_LENGTH+4);//+4 to include the LSAcount
-    updatePacket->setChunkLength(B(OSPFV3_HEADER_LENGTH+4));
+    updatePacket->setPacketLength(OSPFV3_HEADER_LENGTH.get() + 4);//+4 to include the LSAcount
+    updatePacket->setChunkLength(OSPFV3_HEADER_LENGTH+(B)4);
     updatePacket->setLsaCount(0);
 
     Packet *pk = new Packet();
@@ -943,8 +943,8 @@ Packet* Ospfv3Interface::prepareUpdatePacket(std::vector<Ospfv3Lsa*> lsas)
     updatePacket->setAreaID(this->getArea()->getAreaID());
     updatePacket->setInstanceID(this->getArea()->getInstance()->getInstanceID());
 
-    updatePacket->setPacketLength(OSPFV3_HEADER_LENGTH+4);//+4 to include the LSAcount
-    updatePacket->setChunkLength(B(OSPFV3_HEADER_LENGTH+4));
+//    updatePacket->setPacketLength(OSPFV3_HEADER_LENGTH+4);//+4 to include the LSAcount
+//    updatePacket->setChunkLength(B(OSPFV3_HEADER_LENGTH+4));
 
     updatePacket->setLsaCount(0);
 
@@ -952,7 +952,8 @@ Packet* Ospfv3Interface::prepareUpdatePacket(std::vector<Ospfv3Lsa*> lsas)
         Ospfv3Lsa* lsa = lsas[j];
 
         int count = updatePacket->getLsaCount();
-        uint16_t packetLength = updatePacket->getPacketLength();
+//        B packetLength = updatePacket->getPacketLength();
+        B packetLength = OSPFV3_HEADER_LENGTH + B(sizeof(uint32_t));
 
 //        Ospfv3LsaHeader header = lsa->getHeader();
         uint16_t code = lsa->getHeader().getLsaType();
@@ -965,9 +966,9 @@ Packet* Ospfv3Interface::prepareUpdatePacket(std::vector<Ospfv3Lsa*> lsas)
                 updatePacket->setRouterLSAsArraySize(pos+1);
                 updatePacket->setRouterLSAs(pos, *routerLSA);
                 updatePacket->setLsaCount(count+1);
-                packetLength += calculateLSASize(lsa);
-                updatePacket->setPacketLength(packetLength);
-                updatePacket->setChunkLength(B(packetLength));
+                packetLength += calculateLSASize(routerLSA);
+                updatePacket->setPacketLength(packetLength.get());
+                updatePacket->setChunkLength(packetLength);
                 //TODO - check max age
                 break;
             }
@@ -978,8 +979,8 @@ Packet* Ospfv3Interface::prepareUpdatePacket(std::vector<Ospfv3Lsa*> lsas)
                 updatePacket->setNetworkLSAsArraySize(pos+1);
                 updatePacket->setNetworkLSAs(pos, *networkLSA);
                 updatePacket->setLsaCount(count+1);
-                packetLength += calculateLSASize(lsa);
-                updatePacket->setPacketLength(packetLength);
+                packetLength += calculateLSASize(networkLSA);
+                updatePacket->setPacketLength(packetLength.get());
                 updatePacket->setChunkLength(B(packetLength));
                 break;
             }
@@ -991,9 +992,9 @@ Packet* Ospfv3Interface::prepareUpdatePacket(std::vector<Ospfv3Lsa*> lsas)
                 updatePacket->setInterAreaPrefixLSAsArraySize(pos+1);
                 updatePacket->setInterAreaPrefixLSAs(pos, *prefixLSA);
                 updatePacket->setLsaCount(count+1);
-                packetLength += calculateLSASize(lsa);
-                updatePacket->setPacketLength(packetLength);
-                updatePacket->setChunkLength(B(packetLength));
+                packetLength += calculateLSASize(prefixLSA);
+                updatePacket->setPacketLength(packetLength.get());
+                updatePacket->setChunkLength(packetLength);
                 break;
             }
 
@@ -1016,9 +1017,9 @@ Packet* Ospfv3Interface::prepareUpdatePacket(std::vector<Ospfv3Lsa*> lsas)
                 updatePacket->setLinkLSAsArraySize(pos+1);
                 updatePacket->setLinkLSAs(pos, *linkLSA);
                 updatePacket->setLsaCount(count+1);
-                packetLength += calculateLSASize(lsa);
-                updatePacket->setPacketLength(packetLength);
-                updatePacket->setChunkLength(B(packetLength));
+                packetLength += calculateLSASize(linkLSA);
+                updatePacket->setPacketLength(packetLength.get());
+                updatePacket->setChunkLength(packetLength);
                 break;
             }
 
@@ -1029,9 +1030,9 @@ Packet* Ospfv3Interface::prepareUpdatePacket(std::vector<Ospfv3Lsa*> lsas)
                 updatePacket->setIntraAreaPrefixLSAsArraySize(pos+1);
                 updatePacket->setIntraAreaPrefixLSAs(pos, *prefixLSA);
                 updatePacket->setLsaCount(count+1);
-                packetLength += calculateLSASize(lsa);
-                updatePacket->setPacketLength(packetLength);
-                updatePacket->setChunkLength(B(packetLength));
+                packetLength += calculateLSASize(prefixLSA);
+                updatePacket->setPacketLength(packetLength.get());
+                updatePacket->setChunkLength(packetLength);
                 break;
             }
         }
@@ -1506,7 +1507,7 @@ void Ospfv3Interface::sendDelayedAcknowledgements()
         if (ackCount > 0) {
             while (!(elem.second.empty())) {
                 const auto& ackPacket = makeShared<Ospfv3LsAck>();
-                long packetSize = OSPFV3_HEADER_LENGTH;
+                B packetSize = OSPFV3_HEADER_LENGTH;
 
                 ackPacket->setType(LS_ACK);
                 ackPacket->setRouterID(this->getArea()->getInstance()->getProcess()->getRouterID());
@@ -1523,8 +1524,8 @@ void Ospfv3Interface::sendDelayedAcknowledgements()
                     packetSize += OSPFV3_LSA_HEADER_LENGTH;
                 }
 
-                ackPacket->setPacketLength(packetSize);
-                ackPacket->setChunkLength(B(packetSize));
+                ackPacket->setPacketLength(packetSize.get());
+                ackPacket->setChunkLength(packetSize);
 
                 int ttl = (interfaceType == Ospfv3Interface::VIRTUAL_TYPE) ? VIRTUAL_LINK_TTL : 1;
 
@@ -1789,8 +1790,8 @@ LinkLSA* Ospfv3Interface::originateLinkLSA()
     lsaHeader.setAdvertisingRouter(this->getArea()->getInstance()->getProcess()->getRouterID());
     lsaHeader.setLsaSequenceNumber(this->linkLSASequenceNumber++);
 //    lsaHeader.setLsaChecksum(); TODO
-
-    uint16_t packetLength=OSPFV3_LSA_HEADER_LENGTH + OSPFV3_LINK_LSA_BODY_LENGTH;
+    OSPFV3_LSA_HEADER_LENGTH.get();
+    uint16_t packetLength=(OSPFV3_LSA_HEADER_LENGTH.get() + OSPFV3_LINK_LSA_BODY_LENGTH.get());
 
     //Then the LSA Body
     linkLSA->setRouterPriority(this->getRouterPriority());
