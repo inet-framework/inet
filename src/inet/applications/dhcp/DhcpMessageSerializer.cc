@@ -106,7 +106,7 @@ void DhcpMessageSerializer::serialize(MemoryOutputStream& stream, const Ptr<cons
     // FIXME: nullptr and strcmp does not seem to work
     if (hostName != nullptr && false) {
         stream.writeByte(HOSTNAME);
-        uint16_t size = sizeof(hostName) / sizeof(hostName[0]) - 1;
+        uint16_t size = strlen(hostName);
         stream.writeByte(size);
         for (size_t i = 0; hostName[i] != '\0'; ++i) {
             stream.writeByte(hostName[i]);

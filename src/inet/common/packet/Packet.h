@@ -230,20 +230,18 @@ class INET_API Packet : public cPacket
 
     /**
      * Returns the designated part as an immutable chunk in its current
-     * representation. If the length is unspecified, then the length of the
-     * result is chosen according to the current representation. The flags
-     * parameter is a combination of Chunk::PeekFlag enumeration members.
+     * representation. The flags parameter is a combination of Chunk::PeekFlag
+     * enumeration members.
      */
-    const Ptr<const Chunk> peekAtBack(b length = b(-1), int flags = 0) const;
+    const Ptr<const Chunk> peekAtBack(b length, int flags = 0) const;
 
     /**
      * Pops the designated part and returns it as an immutable chunk in its
      * current representation. Decreases the back offset with the length of the
-     * returned chunk. If the length is unspecified, then the length of the
-     * result is chosen according to the current representation. The flags
-     * parameter is a combination of Chunk::PeekFlag enumeration members.
+     * returned chunk. The flags parameter is a combination of Chunk::PeekFlag
+     * enumeration members.
      */
-    const Ptr<const Chunk> popAtBack(b length = b(-1), int flags = 0);
+    const Ptr<const Chunk> popAtBack(b length, int flags = 0);
 
     /**
      * Returns true if the designated part is available in the requested
@@ -251,17 +249,16 @@ class INET_API Packet : public cPacket
      * result is chosen according to the current representation.
      */
     template <typename T>
-    bool hasAtBack(b length = b(-1)) const {
-        CHUNK_CHECK_USAGE(b(-1) <= length && length <= getDataLength(), "length is invalid");
+    bool hasAtBack(b length) const {
+        CHUNK_CHECK_USAGE(b(0) <= length && length <= getDataLength(), "length is invalid");
         return content->has<T>(backIterator, length);
     }
 
     /**
      * Returns the designated part as an immutable chunk in the requested
      * representation. Decreases the back offset with the length of the returned
-     * chunk. If the length is unspecified, then the length of the result is
-     * chosen according to the current representation. The flags parameter
-     * is a combination of Chunk::PeekFlag enumeration members.
+     * chunk. The flags parameter is a combination of Chunk::PeekFlag enumeration
+     * members.
      */
     template <typename T>
     const Ptr<const T> peekAtBack(b length, int flags = 0) const {
@@ -522,10 +519,9 @@ class INET_API Packet : public cPacket
 
     /**
      * Removes the designated part and returns it as a mutable chunk in its
-     * current representation. If the length is unspecified, then the length of
-     * the result is chosen according to the current representation. The length
-     * of back popped part must be zero before calling this function. The flags
-     * parameter is a combination of Chunk::PeekFlag enumeration members.
+     * current representation. The length of back popped part must be zero
+     * before calling this function. The flags parameter is a combination of
+     * Chunk::PeekFlag enumeration members.
      */
     const Ptr<Chunk> removeAtBack(b length, int flags = 0);
 
@@ -554,7 +550,7 @@ class INET_API Packet : public cPacket
      */
     template <typename T>
     const Ptr<T> removeAtBack(b length, int flags = 0) {
-        CHUNK_CHECK_USAGE(b(1) <= length && length <= getDataLength(), "length is invalid");
+        CHUNK_CHECK_USAGE(b(0) <= length && length <= getDataLength(), "length is invalid");
         CHUNK_CHECK_USAGE(backIterator.getPosition() == b(0), "back popped length is non-zero");
         const auto& chunk = popAtBack<T>(length, flags);
         trimBack();

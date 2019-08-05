@@ -157,7 +157,7 @@ std::vector<const ITransmission *> *CommunicationCacheBase::computeInterferingTr
     RadioCacheEntry *radioCacheEntry = getRadioCacheEntry(radio);
     std::vector<const ITransmission *> *interferingTransmissions = new std::vector<const ITransmission *>();
     if (radioCacheEntry->receptionIntervals != nullptr) {
-        std::deque<const Interval *> interferingIntervals = radioCacheEntry->receptionIntervals->query(startTime, endTime);
+        std::deque<const IntervalTree::Interval *> interferingIntervals = radioCacheEntry->receptionIntervals->query(startTime, endTime);
         for (auto interferingInterval : interferingIntervals) {
             const ITransmission *interferingTransmission = (ITransmission *)interferingInterval->value;
             interferingTransmissions->push_back(interferingTransmission);
@@ -218,13 +218,13 @@ void CommunicationCacheBase::removeCachedArrival(const IRadio *receiver, const I
         cacheEntry->arrival = nullptr;
 }
 
-const Interval *CommunicationCacheBase::getCachedInterval(const IRadio *receiver, const ITransmission *transmission)
+const IntervalTree::Interval *CommunicationCacheBase::getCachedInterval(const IRadio *receiver, const ITransmission *transmission)
 {
     ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(receiver, transmission);
     return cacheEntry ? cacheEntry->interval : nullptr;
 }
 
-void CommunicationCacheBase::setCachedInterval(const IRadio *receiver, const ITransmission *transmission, const Interval *interval)
+void CommunicationCacheBase::setCachedInterval(const IRadio *receiver, const ITransmission *transmission, const IntervalTree::Interval *interval)
 {
     ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(receiver, transmission);
     if (cacheEntry == nullptr)

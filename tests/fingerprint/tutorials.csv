@@ -91,6 +91,6 @@
 /tutorials/wireless/,                -f omnetpp.ini -c Wireless09 -r 0,                         25s,           c9fd-537e/tplx, PASS, wireless adhoc # Wireless09 extended
 /tutorials/wireless/,                -f omnetpp.ini -c Wireless10 -r 0,                         25s,           8666-089d/tplx, PASS, wireless adhoc # Wireless10 extended
 /tutorials/wireless/,                -f omnetpp.ini -c Wireless11 -r 0,                         25s,           e1db-fc80/tplx, PASS, wireless adhoc # Wireless11 extended
-/tutorials/wireless/,                -f omnetpp.ini -c Wireless12 -r 0,                         25s,           0c5e-7420/tplx, PASS, wireless adhoc # Wireless12 extended
-/tutorials/wireless/,                -f omnetpp.ini -c Wireless13 -r 0,                         25s,           60b8-7bc1/tplx, PASS, wireless adhoc # Wireless13 extended
-/tutorials/wireless/,                -f omnetpp.ini -c Wireless14 -r 0,                         25s,           e6a6-5723/tplx, PASS, wireless adhoc
+/tutorials/wireless/,                -f omnetpp.ini -c Wireless12 -r 0,                         25s,           ad6b-54c5/tplx, PASS, wireless adhoc # Wireless12 extended
+/tutorials/wireless/,                -f omnetpp.ini -c Wireless13 -r 0,                         25s,           c989-9688/tplx, PASS, wireless adhoc # Wireless13 extended
+/tutorials/wireless/,                -f omnetpp.ini -c Wireless14 -r 0,                         25s,           b881-2901/tplx, PASS, wireless adhoc

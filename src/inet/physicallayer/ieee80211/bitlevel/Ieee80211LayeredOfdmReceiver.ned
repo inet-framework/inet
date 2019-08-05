@@ -17,12 +17,13 @@
 
 package inet.physicallayer.ieee80211.bitlevel;
 
-import inet.physicallayer.contract.packetlevel.IReceiver;
+import inet.physicallayer.base.packetlevel.SnirReceiverBase;
 import inet.physicallayer.contract.bitlevel.IAnalogDigitalConverter;
 import inet.physicallayer.contract.bitlevel.IDecoder;
 import inet.physicallayer.contract.bitlevel.IDemodulator;
 import inet.physicallayer.contract.bitlevel.ILayeredErrorModel;
 import inet.physicallayer.contract.bitlevel.IPulseFilter;
+import inet.physicallayer.contract.packetlevel.IReceiver;
 
 //
 // This module implements an IEEE 802.11 OFDM receiver.
@@ -33,7 +34,7 @@ import inet.physicallayer.contract.bitlevel.IPulseFilter;
 // this receiver module is symmetric to it.
 //
 //
-module Ieee80211LayeredOfdmReceiver like IReceiver
+module Ieee80211LayeredOfdmReceiver extends SnirReceiverBase like IReceiver
 {
     parameters:
         bool isCompliant = default(true);
@@ -42,7 +43,6 @@ module Ieee80211LayeredOfdmReceiver like IReceiver
         double sensitivity @unit(dBm); // TODO: @unit(W) + dBm/dBW <--> W
         double carrierFrequency @unit(Hz);
         double bandwidth @unit(Hz);
-        double snirThreshold @unit(dB);
         double channelSpacing @unit(Hz);
         @class(Ieee80211LayeredOfdmReceiver);
 

@@ -1,0 +1,5 @@
+# MAC Address     PortName       VLAN Id
+  hostA           eth0
+  hostB           eth1
+  hostC           eth2
+  hostD           eth3

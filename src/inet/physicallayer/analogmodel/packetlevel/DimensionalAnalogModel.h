@@ -18,7 +18,6 @@
 #ifndef __INET_DIMENSIONALANALOGMODEL_H
 #define __INET_DIMENSIONALANALOGMODEL_H
 
-#include "inet/common/mapping/MappingBase.h"
 #include "inet/physicallayer/base/packetlevel/DimensionalAnalogModelBase.h"
 
 namespace inet {

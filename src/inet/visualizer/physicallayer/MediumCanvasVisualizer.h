@@ -19,6 +19,7 @@
 #define __INET_MEDIUMCANVASVISUALIZER_H
 
 #include "inet/common/figures/HeatMapFigure.h"
+#include "inet/common/figures/PlotFigure.h"
 #include "inet/common/figures/TrailFigure.h"
 #include "inet/common/geometry/common/CanvasProjection.h"
 #include "inet/physicallayer/contract/packetlevel/IReceptionDecision.h"
@@ -79,10 +80,10 @@ class INET_API MediumCanvasVisualizer : public MediumVisualizerBase
      * The propagating signal figures.
      */
     std::map<const physicallayer::ITransmission *, cFigure *> signalFigures;
-    //@}
-
-    /** @name Figures */
-    //@{
+    /**
+     * The list of spectrum figures.
+     */
+    std::map<const cModule *, PlotFigure *> spectrumFigures;
     /**
      * The layer figure that contains the figures representing the ongoing communications.
      */
@@ -96,6 +97,7 @@ class INET_API MediumCanvasVisualizer : public MediumVisualizerBase
   protected:
     virtual void initialize(int stage) override;
     virtual void refreshDisplay() const override;
+    virtual void refreshSpectrumFigure(const cModule *module, PlotFigure *figure) const;
     virtual void setAnimationSpeed();
 
     virtual cFigure *getSignalDepartureFigure(const physicallayer::IRadio *radio) const;

@@ -124,7 +124,7 @@ void MacRelayUnit::handleAndDispatchFrame(Packet *packet)
 
     // Finds output port of destination address and sends to output port
     // if not found then broadcasts to all other ports instead
-    int outputInterfaceId = macTable->getPortForAddress(frame->getDest());
+    int outputInterfaceId = macTable->getInterfaceIdForAddress(frame->getDest());
     // should not send out the same frame on the same ethernet port
     // (although wireless ports are ok to receive the same message)
     if (arrivalInterfaceId == outputInterfaceId) {
@@ -155,12 +155,10 @@ void MacRelayUnit::handleAndDispatchFrame(Packet *packet)
 
 void MacRelayUnit::start()
 {
-    macTable->clearTable();
 }
 
 void MacRelayUnit::stop()
 {
-    macTable->clearTable();
 }
 
 void MacRelayUnit::learn(MacAddress srcAddr, int arrivalInterfaceId)

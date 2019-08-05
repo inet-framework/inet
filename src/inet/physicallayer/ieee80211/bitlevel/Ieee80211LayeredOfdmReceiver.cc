@@ -48,6 +48,7 @@ Define_Module(Ieee80211LayeredOfdmReceiver);
 
 void Ieee80211LayeredOfdmReceiver::initialize(int stage)
 {
+    SnirReceiverBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         errorModel = dynamic_cast<ILayeredErrorModel *>(getSubmodule("errorModel"));
         dataDecoder = dynamic_cast<IDecoder *>(getSubmodule("dataDecoder"));
@@ -57,11 +58,10 @@ void Ieee80211LayeredOfdmReceiver::initialize(int stage)
         pulseFilter = dynamic_cast<IPulseFilter *>(getSubmodule("pulseFilter"));
         analogDigitalConverter = dynamic_cast<IAnalogDigitalConverter *>(getSubmodule("analogDigitalConverter"));
 
-        energyDetection = mW(math::dBm2mW(par("energyDetection")));
-        sensitivity = mW(math::dBm2mW(par("sensitivity")));
+        energyDetection = mW(math::dBmW2mW(par("energyDetection")));
+        sensitivity = mW(math::dBmW2mW(par("sensitivity")));
         carrierFrequency = Hz(par("carrierFrequency"));
         bandwidth = Hz(par("bandwidth"));
-        snirThreshold = math::dB2fraction(par("snirThreshold"));
         channelSpacing = Hz(par("channelSpacing"));
         isCompliant = par("isCompliant");
         if (isCompliant && (dataDecoder || signalDecoder || dataDemodulator || signalDemodulator || pulseFilter || analogDigitalConverter))
@@ -394,6 +394,7 @@ const IReceptionResult *Ieee80211LayeredOfdmReceiver::computeReceptionResult(con
     auto snirInd = packet->addTagIfAbsent<SnirInd>();
     snirInd->setMinimumSnir(snir->getMin());
     snirInd->setMaximumSnir(snir->getMax());
+    snirInd->setAverageSnir(snir->getMean());
     packet->addTagIfAbsent<ErrorRateInd>(); // TODO: should be done  setPacketErrorRate(packetModel->getPER());
     auto modeInd = packet->addTagIfAbsent<Ieee80211ModeInd>();
     modeInd->setMode(transmission->getMode());

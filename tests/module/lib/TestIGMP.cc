@@ -116,6 +116,8 @@ void TestIGMP::processIgmpMessage(Packet *packet)
         case IGMPV2_LEAVE_GROUP:
             group = packet->peekAtFront<Igmpv2Leave>()->getGroupAddress();
             break;
+        case IGMPV3_MEMBERSHIP_REPORT:
+            break;
     }
     int stateMask = 0;
     if (rt->isMulticastForwardingEnabled())

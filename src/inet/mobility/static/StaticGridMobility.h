@@ -19,8 +19,7 @@
 #ifndef __INET_STATICGRIDMOBILITY_H
 #define __INET_STATICGRIDMOBILITY_H
 
-#include "inet/common/INETDefs.h"
-#include "inet/mobility/static/StationaryMobility.h"
+#include "inet/mobility/base/StationaryMobilityBase.h"
 
 namespace inet {
 
@@ -31,7 +30,7 @@ namespace inet {
  * @ingroup mobility
  * @author Isabel Dietrich
  */
-class INET_API StaticGridMobility : public StationaryMobility
+class INET_API StaticGridMobility : public StationaryMobilityBase
 {
   protected:
     /** @brief Initializes the position according to the mobility model. */

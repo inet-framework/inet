@@ -161,7 +161,7 @@ W MediumLimitCache::computeMaxTransmissionPower() const
 
 W MediumLimitCache::computeMinInterferencePower() const
 {
-    W minInterferencePower = mW(math::dBm2mW(par("minInterferencePower")));
+    W minInterferencePower = mW(math::dBmW2mW(par("minInterferencePower")));
     for (const auto radio : radios) {
         if (radio != nullptr)
             minInterferencePower = minIgnoreNaN(minInterferencePower, radio->getReceiver()->getMinInterferencePower());
@@ -171,7 +171,7 @@ W MediumLimitCache::computeMinInterferencePower() const
 
 W MediumLimitCache::computeMinReceptionPower() const
 {
-    W minReceptionPower = mW(math::dBm2mW(par("minReceptionPower")));
+    W minReceptionPower = mW(math::dBmW2mW(par("minReceptionPower")));
     for (const auto radio : radios) {
         if (radio != nullptr)
             minReceptionPower = minIgnoreNaN(minReceptionPower, radio->getReceiver()->getMinReceptionPower());

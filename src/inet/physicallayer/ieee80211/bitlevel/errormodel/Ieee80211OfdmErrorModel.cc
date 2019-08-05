@@ -36,6 +36,7 @@ Define_Module(Ieee80211OfdmErrorModel);
 
 void Ieee80211OfdmErrorModel::initialize(int stage)
 {
+    Ieee80211NistErrorModel::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         dataSymbolErrorRate = par("dataSymbolErrorRate");
         dataBitErrorRate = par("dataBitErrorRate");
@@ -81,13 +82,13 @@ const IReceptionBitModel *Ieee80211OfdmErrorModel::computeBitModel(const Layered
     BitVector *corruptedBits = new BitVector(*bits);
     const ScalarTransmissionSignalAnalogModel *analogModel = check_and_cast<const ScalarTransmissionSignalAnalogModel *>(transmission->getAnalogModel());
     if (auto apskSignalModulation = dynamic_cast<const IApskModulation *>(signalModulation)) {
-        double signalFieldBer = std::isnan(signalBitErrorRate) ? apskSignalModulation->calculateBER(snir->getMin(), analogModel->getBandwidth(), signalBitRate) : signalBitErrorRate;
+        double signalFieldBer = std::isnan(signalBitErrorRate) ? apskSignalModulation->calculateBER(getScalarSnir(snir), analogModel->getBandwidth(), signalBitRate) : signalBitErrorRate;
         corruptBits(corruptedBits, signalFieldBer, 0, signalBitLength);
     }
     else
         throw cRuntimeError("Unknown signal modulation");
     if (auto apskDataModulation = dynamic_cast<const IApskModulation *>(dataModulation)) {
-        double dataFieldBer = std::isnan(dataBitErrorRate) ? apskDataModulation->calculateBER(snir->getMin(), analogModel->getBandwidth(), dataBitRate) : dataBitErrorRate;
+        double dataFieldBer = std::isnan(dataBitErrorRate) ? apskDataModulation->calculateBER(getScalarSnir(snir), analogModel->getBandwidth(), dataBitRate) : dataBitErrorRate;
         corruptBits(corruptedBits, dataFieldBer, signalBitLength, corruptedBits->getSize());
     }
     else
@@ -106,8 +107,8 @@ const IReceptionSymbolModel *Ieee80211OfdmErrorModel::computeSymbolModel(const L
     const std::vector<ApskSymbol> *constellationForDataField = dataModulation->getConstellation();
     const std::vector<ApskSymbol> *constellationForSignalField = BpskModulation::singleton.getConstellation();
     const ScalarTransmissionSignalAnalogModel *analogModel = check_and_cast<const ScalarTransmissionSignalAnalogModel *>(transmission->getAnalogModel());
-    double signalSER = std::isnan(signalSymbolErrorRate) ? BpskModulation::singleton.calculateSER(snir->getMin(), analogModel->getBandwidth(), transmissionBitModel->getHeaderBitRate()) : signalSymbolErrorRate;
-    double dataSER = std::isnan(dataSymbolErrorRate) ? dataModulation->calculateSER(snir->getMin(), analogModel->getBandwidth(), transmissionBitModel->getDataBitRate()) : dataSymbolErrorRate;
+    double signalSER = std::isnan(signalSymbolErrorRate) ? BpskModulation::singleton.calculateSER(getScalarSnir(snir), analogModel->getBandwidth(), transmissionBitModel->getHeaderBitRate()) : signalSymbolErrorRate;
+    double dataSER = std::isnan(dataSymbolErrorRate) ? dataModulation->calculateSER(getScalarSnir(snir), analogModel->getBandwidth(), transmissionBitModel->getDataBitRate()) : dataSymbolErrorRate;
     const std::vector<const ISymbol *> *symbols = transmissionSymbolModel->getSymbols();
     std::vector<const ISymbol *> *corruptedSymbols = new std::vector<const ISymbol *>();
     // Only the first symbol is signal field symbol

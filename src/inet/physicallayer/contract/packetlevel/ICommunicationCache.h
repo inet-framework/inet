@@ -69,8 +69,8 @@ class INET_API ICommunicationCache : public IPrintableObject
     virtual void setCachedArrival(const IRadio *receiver, const ITransmission *transmission, const IArrival *arrival) = 0;
     virtual void removeCachedArrival(const IRadio *receiver, const ITransmission *transmission) = 0;
 
-    virtual const Interval *getCachedInterval(const IRadio *receiver, const ITransmission *transmission) = 0;
-    virtual void setCachedInterval(const IRadio *receiver, const ITransmission *transmission, const Interval *interval) = 0;
+    virtual const IntervalTree::Interval *getCachedInterval(const IRadio *receiver, const ITransmission *transmission) = 0;
+    virtual void setCachedInterval(const IRadio *receiver, const ITransmission *transmission, const IntervalTree::Interval *interval) = 0;
     virtual void removeCachedInterval(const IRadio *receiver, const ITransmission *transmission) = 0;
 
     virtual const IListening *getCachedListening(const IRadio *receiver, const ITransmission *transmission) = 0;

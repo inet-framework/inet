@@ -35,12 +35,20 @@ class INET_API ErrorModelBase : public cModule, public IErrorModel
         CM_BIT
     };
 
+    enum class SnirMode {
+        SM_UNDEFINED = -1,
+        SM_MIN,
+        SM_MEAN
+    };
+
   protected:
     CorruptionMode corruptionMode = CorruptionMode::CM_UNDEFINED;
+    SnirMode snirMode = SnirMode::SM_UNDEFINED;
 
   protected:
     virtual void initialize(int stage) override;
 
+    virtual double getScalarSnir(const ISnir *snir) const;
     virtual bool hasProbabilisticError(b length, double ber) const;
 
     virtual Packet *corruptBits(const Packet *packet, double ber, bool& isCorrupted) const;

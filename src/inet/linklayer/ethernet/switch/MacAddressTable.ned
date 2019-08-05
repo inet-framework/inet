@@ -26,6 +26,13 @@ import inet.linklayer.contract.IMacAddressTable;
 //
 // If needed, address tables can be pre-loaded from text files at the beginning
 // of the simulation; this controlled by the addressTableFile module parameter.
+// File format:
+//   line oriented table with space or TAB delimited columns.
+//   columns:
+//     MAC address: string, resolving with ~L3AddressResolver as MAC_ADDR
+//     portName: interface name, e.g. eth3
+//     VLAN ID: optional, numeric value, default value is 0
+//   empty lines and commented out lines starts with '#' are allowed.
 //
 simple MacAddressTable like IMacAddressTable
 {
@@ -33,5 +40,7 @@ simple MacAddressTable like IMacAddressTable
         @display("i=block/table2");
         double agingTime @unit(s) = default(120s);
         string addressTableFile = default("");
+        string interfaceTableModule;
         string displayStringTextFormat = default("addr: %a\nvlan: %v");
 }
+

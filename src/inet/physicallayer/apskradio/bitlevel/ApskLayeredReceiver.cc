@@ -55,18 +55,18 @@ ApskLayeredReceiver::ApskLayeredReceiver() :
 
 void ApskLayeredReceiver::initialize(int stage)
 {
+    SnirReceiverBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         errorModel = dynamic_cast<ILayeredErrorModel *>(getSubmodule("errorModel"));
         decoder = dynamic_cast<IDecoder *>(getSubmodule("decoder"));
         demodulator = dynamic_cast<IDemodulator *>(getSubmodule("demodulator"));
         pulseFilter = dynamic_cast<IPulseFilter *>(getSubmodule("pulseFilter"));
         analogDigitalConverter = dynamic_cast<IAnalogDigitalConverter *>(getSubmodule("analogDigitalConverter"));
-        energyDetection = mW(math::dBm2mW(par("energyDetection")));
+        energyDetection = mW(math::dBmW2mW(par("energyDetection")));
         // TODO: temporary parameters
-        sensitivity = mW(math::dBm2mW(par("sensitivity")));
+        sensitivity = mW(math::dBmW2mW(par("sensitivity")));
         carrierFrequency = Hz(par("carrierFrequency"));
         bandwidth = Hz(par("bandwidth"));
-        snirThreshold = math::dB2fraction(par("snirThreshold"));
         const char *levelOfDetailStr = par("levelOfDetail");
         if (strcmp("packet", levelOfDetailStr) == 0)
             levelOfDetail = PACKET_DOMAIN;
@@ -165,6 +165,7 @@ const IReceptionResult *ApskLayeredReceiver::computeReceptionResult(const IListe
     auto snirInd = packet->addTagIfAbsent<SnirInd>();
     snirInd->setMinimumSnir(snir->getMin());
     snirInd->setMaximumSnir(snir->getMax());
+    snirInd->setAverageSnir(snir->getMean());
     return new LayeredReceptionResult(reception, decisions, packetModel, bitModel, symbolModel, sampleModel, analogModel);
 }
 
