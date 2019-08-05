@@ -14,6 +14,7 @@
 //
 
 #include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/common/packet/chunk/SliceChunk.h"
 
 namespace inet {
 
@@ -49,12 +50,19 @@ const Ptr<Chunk> BytesChunk::peekUnchecked(PeekPredicate predicate, PeekConverte
         if (predicate == nullptr || predicate(result))
             return result;
     }
-    // 3. peeking without conversion returns a BytesChunk
+    // 3. peeking without conversion returns a BytesChunk or SliceChunk
     if (converter == nullptr) {
-        auto chunk = makeShared<BytesChunk>(std::vector<uint8_t>(bytes.begin() + B(iterator.getPosition()).get(), length == b(-1) ? bytes.end() : bytes.begin() + B(iterator.getPosition() + length).get()));
-        chunk->tags.copyTags(tags, iterator.getPosition(), b(0), chunk->getChunkLength());
-        chunk->markImmutable();
-        return chunk;
+        // 3. peeking complete bytes without conversion returns a BytesChunk or SliceChunk
+        if (b(iterator.getPosition()).get() % 8 == 0 && (length == b(-1) || length.get() % 8 == 0)) {
+            auto chunk = makeShared<BytesChunk>(std::vector<uint8_t>(bytes.begin() + B(iterator.getPosition()).get(), length == b(-1) ? bytes.end() : bytes.begin() + B(iterator.getPosition() + length).get()));
+            chunk->tags.copyTags(tags, iterator.getPosition(), b(0), chunk->getChunkLength());
+            chunk->markImmutable();
+            return chunk;
+        }
+        else {
+            // 4. peeking incomplete bytes without conversion returns a SliceChunk
+            return peekConverted<SliceChunk>(iterator, length, flags);
+        }
     }
     // 4. peeking with conversion
     return converter(const_cast<BytesChunk *>(this)->shared_from_this(), iterator, length, flags);
