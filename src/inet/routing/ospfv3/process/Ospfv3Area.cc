@@ -1350,8 +1350,6 @@ void Ospfv3Area::originateDefaultInterAreaPrefixLSA(Ospfv3Area* toArea)
 bool Ospfv3Area::installInterAreaPrefixLSA(const Ospfv3InterAreaPrefixLsa* lsa)
 {
     const Ospfv3LsaHeader &header = lsa->getHeader();
-    cout << this->getInstance()->getProcess()->getRouterID() << "  -  " << this->getAreaID() << endl;
-
     EV_DEBUG << "\n\nInstalling Inter-Area-Prefix LSA:\nLink State ID: " << header.getLinkStateID() << "\nAdvertising router: " << header.getAdvertisingRouter();
     EV_DEBUG << "\nLS Seq Number: " << header.getLsaSequenceNumber() << endl;
 
@@ -2148,8 +2146,6 @@ void Ospfv3Area::calculateShortestPathTree(std::vector<Ospfv3RoutingTableEntry* 
         return;
 
     lsaCount = routerLSAList.size();
-    cout << "lsaCount = " << lsaCount << endl;
-
     for (i = 0; i < lsaCount; i++) {
         routerLSAList[i]->clearNextHops();
     }
@@ -3351,7 +3347,7 @@ std::vector<NextHop> *Ospfv3Area::calculateNextHops(Ospfv3Lsa *destination, Ospf
         NetworkLSA *networkLSA = dynamic_cast<NetworkLSA *>(parent);
         if (networkLSA != nullptr)
         {
-           if (networkLSA->getParent() != spfTreeRoot) { //ak som network a moj parent nie je spfTreeRoot, vrat v�etky nexthopy
+           if (networkLSA->getParent() != spfTreeRoot) { //if i am network and my parent is not spfTreeRoot, return all nextHops
                unsigned int nextHopCount = networkLSA->getNextHopCount();
                for (i = 0; i < nextHopCount; i++) {
                    if (!this->nextHopAlreadyExists(hops, networkLSA->getNextHop(i)))
