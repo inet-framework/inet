@@ -822,16 +822,15 @@ bool Ospfv3Process::floodLSA(const Ospfv3Lsa* lsa, Ipv4Address areaID, Ospfv3Int
     return floodedBackOut;
 }
 
-bool Ospfv3Process::installLSA(const Ospfv3Lsa *lsaC, int instanceID, Ipv4Address areaID    /*= BACKBONE_AREAID*/, Ospfv3Interface* intf)
+bool Ospfv3Process::installLSA(const Ospfv3Lsa *lsa, int instanceID, Ipv4Address areaID    /*= BACKBONE_AREAID*/, Ospfv3Interface* intf)
 {
-    auto lsa = lsaC->dup(); // make editable copy of lsa
     EV_DEBUG << "Ospfv3Process::installLSA\n";
     switch (lsa->getHeader().getLsaType()) {
         case ROUTER_LSA: {
             Ospfv3Instance* instance = this->getInstanceById(instanceID);
             Ospfv3Area* area = instance->getAreaById(areaID);
             if (area!=nullptr) {
-                Ospfv3RouterLsa *ospfRouterLSA = check_and_cast<Ospfv3RouterLsa *>(lsa);
+                Ospfv3RouterLsa *ospfRouterLSA = check_and_cast<Ospfv3RouterLsa *>(const_cast<Ospfv3Lsa*>(lsa));
                 return area->installRouterLSA(ospfRouterLSA);
             }
         }
@@ -841,7 +840,7 @@ bool Ospfv3Process::installLSA(const Ospfv3Lsa *lsaC, int instanceID, Ipv4Addres
             Ospfv3Instance* instance = this->getInstanceById(instanceID);
             Ospfv3Area* area = instance->getAreaById(areaID);
             if (area!=nullptr) {
-                Ospfv3NetworkLsa *ospfNetworkLSA = check_and_cast<Ospfv3NetworkLsa *>(lsa);
+                Ospfv3NetworkLsa *ospfNetworkLSA = check_and_cast<Ospfv3NetworkLsa *>(const_cast<Ospfv3Lsa*>(lsa));
                 return area->installNetworkLSA(ospfNetworkLSA);
             }
         }
@@ -851,7 +850,7 @@ bool Ospfv3Process::installLSA(const Ospfv3Lsa *lsaC, int instanceID, Ipv4Addres
             Ospfv3Instance* instance = this->getInstanceById(instanceID);
             Ospfv3Area* area = instance->getAreaById(areaID);
             if (area!=nullptr) {
-                Ospfv3InterAreaPrefixLsa *ospfInterAreaLSA = check_and_cast<Ospfv3InterAreaPrefixLsa *>(lsa);
+                Ospfv3InterAreaPrefixLsa *ospfInterAreaLSA = check_and_cast<Ospfv3InterAreaPrefixLsa *>(const_cast<Ospfv3Lsa*>(lsa));
                 return area->installInterAreaPrefixLSA(ospfInterAreaLSA);
             }
         }
@@ -861,7 +860,7 @@ bool Ospfv3Process::installLSA(const Ospfv3Lsa *lsaC, int instanceID, Ipv4Addres
             Ospfv3Instance* instance = this->getInstanceById(instanceID);
             Ospfv3Area* area = instance->getAreaById(areaID);
             if (area!=nullptr) {
-                Ospfv3LinkLsa *ospfLinkLSA = check_and_cast<Ospfv3LinkLsa *>(lsa);
+                Ospfv3LinkLsa *ospfLinkLSA = check_and_cast<Ospfv3LinkLsa *>(const_cast<Ospfv3Lsa*>(lsa));
                 return intf->installLinkLSA(ospfLinkLSA);
             }
         }
@@ -871,7 +870,7 @@ bool Ospfv3Process::installLSA(const Ospfv3Lsa *lsaC, int instanceID, Ipv4Addres
             Ospfv3Instance* instance = this->getInstanceById(instanceID);
             Ospfv3Area* area = instance->getAreaById(areaID);
             if(area!=nullptr) {
-                Ospfv3IntraAreaPrefixLsa* intraLSA = check_and_cast<Ospfv3IntraAreaPrefixLsa *>(lsa);
+                Ospfv3IntraAreaPrefixLsa* intraLSA = check_and_cast<Ospfv3IntraAreaPrefixLsa *>(const_cast<Ospfv3Lsa*>(lsa));
                 return area->installIntraAreaPrefixLSA(intraLSA);
             }
         }

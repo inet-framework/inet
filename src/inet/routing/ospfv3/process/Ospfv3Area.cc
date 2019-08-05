@@ -843,9 +843,8 @@ RouterLSA* Ospfv3Area::getRouterLSAbyKey(LSAKeyType LSAKey)
 }
 
 //add LSA message into list of all router-LSA for this area
-bool Ospfv3Area::installRouterLSA(const Ospfv3RouterLsa *lsaC)
+bool Ospfv3Area::installRouterLSA(const Ospfv3RouterLsa *lsa)
 {
-    auto lsa = lsaC->dup(); // make editable copy of lsa
     LSAKeyType lsaKey;
     lsaKey.linkStateID = lsa->getHeader().getLinkStateID();
     lsaKey.advertisingRouter = lsa->getHeader().getAdvertisingRouter();
@@ -865,7 +864,7 @@ bool Ospfv3Area::installRouterLSA(const Ospfv3RouterLsa *lsaC)
 }//installRouterLSA
 
 
-bool Ospfv3Area::updateRouterLSA(RouterLSA* currentLsa, Ospfv3RouterLsa* newLsa)
+bool Ospfv3Area::updateRouterLSA(RouterLSA* currentLsa,const Ospfv3RouterLsa* newLsa)
 {
     bool different = routerLSADiffersFrom(currentLsa, newLsa);
     (*currentLsa) = (*newLsa);
@@ -880,7 +879,7 @@ bool Ospfv3Area::updateRouterLSA(RouterLSA* currentLsa, Ospfv3RouterLsa* newLsa)
 }//updateRouterLSA
 
 
-bool Ospfv3Area::routerLSADiffersFrom(Ospfv3RouterLsa* currentLsa, Ospfv3RouterLsa* newLsa)
+bool Ospfv3Area::routerLSADiffersFrom(Ospfv3RouterLsa* currentLsa,const Ospfv3RouterLsa* newLsa)
 {
     const Ospfv3LsaHeader& thisHeader = currentLsa->getHeader();
     const Ospfv3LsaHeader& lsaHeader = newLsa->getHeader();
@@ -1041,7 +1040,7 @@ NetworkLSA* Ospfv3Area::originateNetworkLSA(Ospfv3Interface* interface)
         lsaHeader.setAdvertisingRouter(this->getInstance()->getProcess()->getRouterID());
         lsaHeader.setLsaSequenceNumber(this->getCurrentNetworkSequence());
         this->incrementNetworkSequence();
-        uint16_t packetLength = OSPFV3_LSA_HEADER_LENGTH + 4; // 4 for options field
+        uint16_t packetLength = OSPFV3_LSA_HEADER_LENGTH.get() + 4; // 4 for options field
 
         // body
         networkLsa->setOspfOptions(lsOptions);
@@ -1076,9 +1075,8 @@ NetworkLSA* Ospfv3Area::getNetworkLSAbyKey(LSAKeyType LSAKey)
     return nullptr;
 }//getRouterLSAByKey
 
-bool Ospfv3Area::installNetworkLSA(const Ospfv3NetworkLsa *lsaC)
+bool Ospfv3Area::installNetworkLSA(const Ospfv3NetworkLsa *lsa)
 {
-    auto lsa = lsaC->dup(); // make editable copy of lsa
     LSAKeyType lsaKey;
     lsaKey.linkStateID = lsa->getHeader().getLinkStateID();
     lsaKey.advertisingRouter = lsa->getHeader().getAdvertisingRouter();
@@ -1097,7 +1095,7 @@ bool Ospfv3Area::installNetworkLSA(const Ospfv3NetworkLsa *lsaC)
 }//installNetworkLSA
 
 
-bool Ospfv3Area::updateNetworkLSA(NetworkLSA* currentLsa, Ospfv3NetworkLsa* newLsa)
+bool Ospfv3Area::updateNetworkLSA(NetworkLSA* currentLsa,const Ospfv3NetworkLsa* newLsa)
 {
     bool different = networkLSADiffersFrom(currentLsa, newLsa);
     (*currentLsa) = (*newLsa);
@@ -1112,7 +1110,7 @@ bool Ospfv3Area::updateNetworkLSA(NetworkLSA* currentLsa, Ospfv3NetworkLsa* newL
 }//updateNetworkLSA
 
 
-bool Ospfv3Area::networkLSADiffersFrom(Ospfv3NetworkLsa* currentLsa, Ospfv3NetworkLsa* newLsa)
+bool Ospfv3Area::networkLSADiffersFrom(Ospfv3NetworkLsa* currentLsa,const Ospfv3NetworkLsa* newLsa)
 {
     const Ospfv3LsaHeader& thisHeader = currentLsa->getHeader();
     const Ospfv3LsaHeader& lsaHeader = newLsa->getHeader();
@@ -1259,7 +1257,7 @@ void Ospfv3Area::originateInterAreaPrefixLSA(const Ospfv3Lsa* prefLsa, Ospfv3Are
             continue;
 
         const Ospfv3InterAreaPrefixLsa *lsa = check_and_cast<const Ospfv3InterAreaPrefixLsa *>(prefLsa);
-        int packetLength = OSPFV3_LSA_HEADER_LENGTH+OSPFV3_INTER_AREA_PREFIX_LSA_HEADER_LENGTH;
+        B packetLength = OSPFV3_LSA_HEADER_LENGTH+OSPFV3_INTER_AREA_PREFIX_LSA_HEADER_LENGTH;
         int prefixCount = 0;
 
         InterAreaPrefixLSA* newLsa = nullptr;
@@ -1316,7 +1314,7 @@ void Ospfv3Area::originateInterAreaPrefixLSA(const Ospfv3Lsa* prefLsa, Ospfv3Are
 
 void Ospfv3Area::originateDefaultInterAreaPrefixLSA(Ospfv3Area* toArea)
 {
-    int packetLength = OSPFV3_LSA_HEADER_LENGTH+OSPFV3_INTER_AREA_PREFIX_LSA_HEADER_LENGTH;
+    B packetLength = OSPFV3_LSA_HEADER_LENGTH+OSPFV3_INTER_AREA_PREFIX_LSA_HEADER_LENGTH;
     int prefixCount = 0;
 
     //Only one Inter-Area-Prefix LSA for an area so only one header will suffice
@@ -1349,9 +1347,8 @@ void Ospfv3Area::originateDefaultInterAreaPrefixLSA(Ospfv3Area* toArea)
     //TODO - length!!!
 }
 
-bool Ospfv3Area::installInterAreaPrefixLSA(const Ospfv3InterAreaPrefixLsa* lsaC)
+bool Ospfv3Area::installInterAreaPrefixLSA(const Ospfv3InterAreaPrefixLsa* lsa)
 {
-    auto lsa = lsaC->dup(); // make editable copy of lsa
     const Ospfv3LsaHeader &header = lsa->getHeader();
     cout << this->getInstance()->getProcess()->getRouterID() << "  -  " << this->getAreaID() << endl;
 
@@ -1394,7 +1391,7 @@ bool Ospfv3Area::installInterAreaPrefixLSA(const Ospfv3InterAreaPrefixLsa* lsaC)
     }
 }
 
-bool Ospfv3Area::updateInterAreaPrefixLSA(InterAreaPrefixLSA* currentLsa, Ospfv3InterAreaPrefixLsa* newLsa)
+bool Ospfv3Area::updateInterAreaPrefixLSA(InterAreaPrefixLSA* currentLsa,const Ospfv3InterAreaPrefixLsa* newLsa)
 {
     bool different = interAreaPrefixLSADiffersFrom(currentLsa, newLsa);
     (*currentLsa) = (*newLsa);
@@ -1408,7 +1405,7 @@ bool Ospfv3Area::updateInterAreaPrefixLSA(InterAreaPrefixLSA* currentLsa, Ospfv3
     }
 }
 
-bool Ospfv3Area::interAreaPrefixLSADiffersFrom(Ospfv3InterAreaPrefixLsa* currentLsa, Ospfv3InterAreaPrefixLsa* newLsa)
+bool Ospfv3Area::interAreaPrefixLSADiffersFrom(Ospfv3InterAreaPrefixLsa* currentLsa,const Ospfv3InterAreaPrefixLsa* newLsa)
 {
     const Ospfv3LsaHeader& thisHeader = currentLsa->getHeader();
     const Ospfv3LsaHeader& lsaHeader = newLsa->getHeader();
@@ -1434,7 +1431,7 @@ bool Ospfv3Area::interAreaPrefixLSADiffersFrom(Ospfv3InterAreaPrefixLsa* current
 }
 
 // return nullptr, if newLsa is not a duplicate
-InterAreaPrefixLSA* Ospfv3Area::InterAreaPrefixLSAAlreadyExists(Ospfv3InterAreaPrefixLsa *newLsa)
+InterAreaPrefixLSA* Ospfv3Area::InterAreaPrefixLSAAlreadyExists(const Ospfv3InterAreaPrefixLsa *newLsa)
 {
     for (auto it= this->interAreaPrefixLSAList.begin(); it!=this->interAreaPrefixLSAList.end(); it++)
     {
@@ -1465,7 +1462,7 @@ InterAreaPrefixLSA* Ospfv3Area::findInterAreaPrefixLSAbyAddress(const L3Address 
 //----------------------------------------- Intra-Area-Prefix LSA (LSA 9) ------------------------------------------//
 IntraAreaPrefixLSA* Ospfv3Area::originateIntraAreaPrefixLSA() //this is for non-BROADCAST links
 {
-    int packetLength = OSPFV3_LSA_HEADER_LENGTH+OSPFV3_INTRA_AREA_PREFIX_LSA_HEADER_LENGTH;
+    B packetLength = OSPFV3_LSA_HEADER_LENGTH+OSPFV3_INTRA_AREA_PREFIX_LSA_HEADER_LENGTH;
     int prefixCount = 0;
 
     //Only one Inter-Area-Prefix LSA for an area so only one header will suffice
@@ -1660,7 +1657,7 @@ IntraAreaPrefixLSA* Ospfv3Area::originateNetIntraAreaPrefixLSA(NetworkLSA* netwo
 }
 
 // return nullptr, if newLsa is not a duplicate
-IntraAreaPrefixLSA* Ospfv3Area::IntraAreaPrefixLSAAlreadyExists(Ospfv3IntraAreaPrefixLsa *newLsa)
+IntraAreaPrefixLSA* Ospfv3Area::IntraAreaPrefixLSAAlreadyExists(const Ospfv3IntraAreaPrefixLsa *newLsa)
 {
     for (auto it= this->intraAreaPrefixLSAList.begin(); it!=this->intraAreaPrefixLSAList.end(); it++)
     {
@@ -1701,10 +1698,9 @@ IntraAreaPrefixLSA* Ospfv3Area::IntraAreaPrefixLSAAlreadyExists(Ospfv3IntraAreaP
     return nullptr;
 }
 
-bool Ospfv3Area::installIntraAreaPrefixLSA(const Ospfv3IntraAreaPrefixLsa *lsaC)
+bool Ospfv3Area::installIntraAreaPrefixLSA(const Ospfv3IntraAreaPrefixLsa *lsa)
 {
-    auto lsa = lsaC->dup(); // make editable copy of lsa
-    Ospfv3LsaHeader &header = lsa->getHeaderForUpdate();
+    const Ospfv3LsaHeader &header = lsa->getHeader();
 
     EV_DEBUG << "Installing Intra-Area-Prefix LSA:\nLink State ID: " << header.getLinkStateID() << "\nAdvertising router: " << header.getAdvertisingRouter();
     EV_DEBUG << "\nLS Seq Number: " << header.getLsaSequenceNumber() << "\nReferenced LSA Type: " << lsa->getReferencedLSType();
@@ -1745,7 +1741,7 @@ bool Ospfv3Area::installIntraAreaPrefixLSA(const Ospfv3IntraAreaPrefixLsa *lsaC)
             {
                 for (int prefR = 0; prefR < prefLSA->getPrefixesArraySize(); prefR++)
                 {
-                    L3Address netPref = lsa->getPrefixesForUpdate(prefN).addressPrefix;
+                    L3Address netPref = lsa->getPrefixes(prefN).addressPrefix;
                     short netPrefixLen = lsa->getPrefixes(prefN).prefixLen;
                     if(prefLSA->getReferencedLSType() == ROUTER_LSA)
                     {
@@ -1839,7 +1835,7 @@ bool Ospfv3Area::installIntraAreaPrefixLSA(const Ospfv3IntraAreaPrefixLsa *lsaC)
 }//installIntraAreaPrefixLSA
 
 
-bool Ospfv3Area::updateIntraAreaPrefixLSA(IntraAreaPrefixLSA* currentLsa, Ospfv3IntraAreaPrefixLsa* newLsa)
+bool Ospfv3Area::updateIntraAreaPrefixLSA(IntraAreaPrefixLSA* currentLsa,const Ospfv3IntraAreaPrefixLsa* newLsa)
 {
     bool different = intraAreaPrefixLSADiffersFrom(currentLsa, newLsa);
     (*currentLsa) = (*newLsa);
@@ -1853,7 +1849,7 @@ bool Ospfv3Area::updateIntraAreaPrefixLSA(IntraAreaPrefixLSA* currentLsa, Ospfv3
     }
 }//updateIntraAreaPrefixLSA
 
-bool Ospfv3Area::intraAreaPrefixLSADiffersFrom(Ospfv3IntraAreaPrefixLsa* currentLsa, Ospfv3IntraAreaPrefixLsa* newLsa)
+bool Ospfv3Area::intraAreaPrefixLSADiffersFrom(Ospfv3IntraAreaPrefixLsa* currentLsa,const Ospfv3IntraAreaPrefixLsa* newLsa)
 {
     const Ospfv3LsaHeader& thisHeader = currentLsa->getHeader();
     const Ospfv3LsaHeader& lsaHeader = newLsa->getHeader();

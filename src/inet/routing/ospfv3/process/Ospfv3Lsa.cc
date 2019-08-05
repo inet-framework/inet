@@ -15,60 +15,44 @@ Ospfv3SpfVertex::Ospfv3SpfVertex(Ospfv3Lsa* asocLSA, int distance)
     }
 }
 
-unsigned int calculateLSASize(const Ospfv3Lsa *lsaC)
+
+//for ROUTER_LSA
+B calculateLSASize(const Ospfv3RouterLsa *routerLSA)
 {
-    auto lsa = lsaC->dup(); // make editable copy of lsa
-    //Ospfv3LSAType lsaType = static_cast<Ospfv3LSAType>(lsa->getHeader().getLsaType());
-    uint16_t code = lsa->getHeader().getLsaType();
-    unsigned int lsaLength;
+    return OSPFV3_LSA_HEADER_LENGTH + OSPFV3_ROUTER_LSA_HEADER_LENGTH +
+            (OSPFV3_ROUTER_LSA_BODY_LENGTH * routerLSA->getRoutersArraySize());
+}
 
-    switch(code){
-        case ROUTER_LSA:
-        {
-            Ospfv3RouterLsa* routerLSA = dynamic_cast<Ospfv3RouterLsa* >(lsa);
-            lsaLength = OSPFV3_LSA_HEADER_LENGTH + OSPFV3_ROUTER_LSA_HEADER_LENGTH;
-            unsigned short linkCount = routerLSA->getRoutersArraySize();
-            lsaLength += linkCount*OSPFV3_ROUTER_LSA_BODY_LENGTH;
+// for NETWORK_LSA
+B calculateLSASize(const Ospfv3NetworkLsa *networkLSA)
+{
+    return  OSPFV3_LSA_HEADER_LENGTH + OSPFV3_NETWORK_LSA_HEADER_LENGTH +
+            (OSPFV3_NETWORK_LSA_ATTACHED_LENGTH * networkLSA->getAttachedRouterArraySize());
+}
 
-            break;
-        }
-        case NETWORK_LSA:
-        {
-            Ospfv3NetworkLsa* networkLSA = dynamic_cast<Ospfv3NetworkLsa* >(lsa);
-            lsaLength = OSPFV3_LSA_HEADER_LENGTH + OSPFV3_NETWORK_LSA_HEADER_LENGTH;
-            unsigned short attachedCount = networkLSA->getAttachedRouterArraySize();
-            lsaLength += attachedCount*OSPFV3_NETWORK_LSA_ATTACHED_LENGTH;
+// for  INTER_AREA_PREFIX_LSA
+B calculateLSASize(const Ospfv3InterAreaPrefixLsa *prefixLSA)
+{
+    return OSPFV3_LSA_HEADER_LENGTH + OSPFV3_INTER_AREA_PREFIX_LSA_HEADER_LENGTH + OSPFV3_INTER_AREA_PREFIX_LSA_BODY_LENGTH;
+}
 
-            break;
-        }
-        case INTER_AREA_PREFIX_LSA:
-        {
-            Ospfv3InterAreaPrefixLsa* prefixLSA = dynamic_cast<Ospfv3InterAreaPrefixLsa* >(lsa);
-            lsaLength = OSPFV3_LSA_HEADER_LENGTH + OSPFV3_INTER_AREA_PREFIX_LSA_HEADER_LENGTH + OSPFV3_INTER_AREA_PREFIX_LSA_BODY_LENGTH;
-
-            break;
-        }
-        case LINK_LSA:
-        {
-            Ospfv3LinkLsa* linkLSA = dynamic_cast<Ospfv3LinkLsa* >(lsa);
-            lsaLength = OSPFV3_LSA_HEADER_LENGTH + OSPFV3_LINK_LSA_BODY_LENGTH;
-            unsigned short linkCount = linkLSA->getNumPrefixes();
-            lsaLength += linkCount*OSPFV3_LINK_LSA_PREFIX_LENGTH;
-
-            break;
-        }
-        case INTRA_AREA_PREFIX_LSA:
-        {
-            Ospfv3IntraAreaPrefixLsa* prefixLSA = dynamic_cast<Ospfv3IntraAreaPrefixLsa* >(lsa);
-            lsaLength = OSPFV3_LSA_HEADER_LENGTH + OSPFV3_INTRA_AREA_PREFIX_LSA_HEADER_LENGTH;
-            unsigned short prefixCount = prefixLSA->getNumPrefixes();
-            lsaLength += prefixCount*OSPFV3_INTRA_AREA_PREFIX_LSA_PREFIX_LENGTH;
-
-            break;
-        }
+// for LINK_LSA
+B calculateLSASize(const Ospfv3LinkLsa *linkLSA)
+{
+    B lsaLength = OSPFV3_LSA_HEADER_LENGTH + OSPFV3_LINK_LSA_BODY_LENGTH;
+    uint32_t prefixCount = linkLSA->getNumPrefixes();
+    for (int i = 0; i < prefixCount; i++)
+    {
+        lsaLength += OSPFV3_LINK_LSA_PREFIX_LENGTH;
     }
-
     return lsaLength;
+}
+
+// for INTRA_AREA_PREFIX_LSA
+B calculateLSASize(const Ospfv3IntraAreaPrefixLsa *prefixLSA)
+{
+    return OSPFV3_LSA_HEADER_LENGTH + OSPFV3_INTRA_AREA_PREFIX_LSA_HEADER_LENGTH +
+            (OSPFV3_INTRA_AREA_PREFIX_LSA_PREFIX_LENGTH * prefixLSA->getNumPrefixes());
 }
 
 std::ostream& operator<<(std::ostream& ostr, const Ospfv3LsaHeader& lsaHeader)
