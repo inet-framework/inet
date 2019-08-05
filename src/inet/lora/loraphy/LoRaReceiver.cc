@@ -131,7 +131,7 @@ bool LoRaReceiver::isPacketCollided(const IReception *reception, IRadioSignal::S
     double P_threshold = 6;
     W signalRSSI_w = loRaReception->getPower();
     double signalRSSI_mw = signalRSSI_w.get()*1000;
-    double signalRSSI_dBm = math::mW2dBm(signalRSSI_mw);
+    double signalRSSI_dBm = math::mW2dBmW(signalRSSI_mw);
     for (auto interferingReception : *interferingReceptions) {
         bool overlap = false;
         bool frequencyColision = false;
@@ -159,7 +159,7 @@ bool LoRaReceiver::isPacketCollided(const IReception *reception, IRadioSignal::S
 
         W interferenceRSSI_w = loRaInterference->getPower();
         double interferenceRSSI_mw = interferenceRSSI_w.get()*1000;
-        double interferenceRSSI_dBm = math::mW2dBm(interferenceRSSI_mw);
+        double interferenceRSSI_dBm = math::mW2dBmW(interferenceRSSI_mw);
 
         if(signalRSSI_dBm - interferenceRSSI_dBm < P_threshold)
         {
@@ -278,50 +278,50 @@ W LoRaReceiver::getSensitivity(const LoRaReception *reception) const
 {
     //function returns sensitivity -- according to LoRa documentation, it changes with LoRa parameters
     //Sensitivity values from Semtech SX1272/73 datasheet, table 10, Rev 3.1, March 2017
-    W sensitivity = W(math::dBm2mW(-126.5) / 1000);
+    W sensitivity = W(math::dBmW2mW(-126.5) / 1000);
     if(reception->getLoRaSF() == 6)
     {
-        if(reception->getLoRaBW() == Hz(125000)) sensitivity = W(math::dBm2mW(-121) / 1000);
-        if(reception->getLoRaBW() == Hz(250000)) sensitivity = W(math::dBm2mW(-118) / 1000);
-        if(reception->getLoRaBW() == Hz(500000)) sensitivity = W(math::dBm2mW(-111) / 1000);
+        if(reception->getLoRaBW() == Hz(125000)) sensitivity = W(math::dBmW2mW(-121) / 1000);
+        if(reception->getLoRaBW() == Hz(250000)) sensitivity = W(math::dBmW2mW(-118) / 1000);
+        if(reception->getLoRaBW() == Hz(500000)) sensitivity = W(math::dBmW2mW(-111) / 1000);
     }
 
     if (reception->getLoRaSF() == 7)
     {
-        if(reception->getLoRaBW() == Hz(125000)) sensitivity = W(math::dBm2mW(-124) / 1000);
-        if(reception->getLoRaBW() == Hz(250000)) sensitivity = W(math::dBm2mW(-122) / 1000);
-        if(reception->getLoRaBW() == Hz(500000)) sensitivity = W(math::dBm2mW(-116) / 1000);
+        if(reception->getLoRaBW() == Hz(125000)) sensitivity = W(math::dBmW2mW(-124) / 1000);
+        if(reception->getLoRaBW() == Hz(250000)) sensitivity = W(math::dBmW2mW(-122) / 1000);
+        if(reception->getLoRaBW() == Hz(500000)) sensitivity = W(math::dBmW2mW(-116) / 1000);
     }
 
     if(reception->getLoRaSF() == 8)
     {
-        if(reception->getLoRaBW() == Hz(125000)) sensitivity = W(math::dBm2mW(-127) / 1000);
-        if(reception->getLoRaBW() == Hz(250000)) sensitivity = W(math::dBm2mW(-125) / 1000);
-        if(reception->getLoRaBW() == Hz(500000)) sensitivity = W(math::dBm2mW(-119) / 1000);
+        if(reception->getLoRaBW() == Hz(125000)) sensitivity = W(math::dBmW2mW(-127) / 1000);
+        if(reception->getLoRaBW() == Hz(250000)) sensitivity = W(math::dBmW2mW(-125) / 1000);
+        if(reception->getLoRaBW() == Hz(500000)) sensitivity = W(math::dBmW2mW(-119) / 1000);
     }
     if(reception->getLoRaSF() == 9)
     {
-        if(reception->getLoRaBW() == Hz(125000)) sensitivity = W(math::dBm2mW(-130) / 1000);
-        if(reception->getLoRaBW() == Hz(250000)) sensitivity = W(math::dBm2mW(-128) / 1000);
-        if(reception->getLoRaBW() == Hz(500000)) sensitivity = W(math::dBm2mW(-122) / 1000);
+        if(reception->getLoRaBW() == Hz(125000)) sensitivity = W(math::dBmW2mW(-130) / 1000);
+        if(reception->getLoRaBW() == Hz(250000)) sensitivity = W(math::dBmW2mW(-128) / 1000);
+        if(reception->getLoRaBW() == Hz(500000)) sensitivity = W(math::dBmW2mW(-122) / 1000);
     }
     if(reception->getLoRaSF() == 10)
     {
-        if(reception->getLoRaBW() == Hz(125000)) sensitivity = W(math::dBm2mW(-133) / 1000);
-        if(reception->getLoRaBW() == Hz(250000)) sensitivity = W(math::dBm2mW(-130) / 1000);
-        if(reception->getLoRaBW() == Hz(500000)) sensitivity = W(math::dBm2mW(-125) / 1000);
+        if(reception->getLoRaBW() == Hz(125000)) sensitivity = W(math::dBmW2mW(-133) / 1000);
+        if(reception->getLoRaBW() == Hz(250000)) sensitivity = W(math::dBmW2mW(-130) / 1000);
+        if(reception->getLoRaBW() == Hz(500000)) sensitivity = W(math::dBmW2mW(-125) / 1000);
     }
     if(reception->getLoRaSF() == 11)
     {
-        if(reception->getLoRaBW() == Hz(125000)) sensitivity = W(math::dBm2mW(-135) / 1000);
-        if(reception->getLoRaBW() == Hz(250000)) sensitivity = W(math::dBm2mW(-132) / 1000);
-        if(reception->getLoRaBW() == Hz(500000)) sensitivity = W(math::dBm2mW(-128) / 1000);
+        if(reception->getLoRaBW() == Hz(125000)) sensitivity = W(math::dBmW2mW(-135) / 1000);
+        if(reception->getLoRaBW() == Hz(250000)) sensitivity = W(math::dBmW2mW(-132) / 1000);
+        if(reception->getLoRaBW() == Hz(500000)) sensitivity = W(math::dBmW2mW(-128) / 1000);
     }
     if(reception->getLoRaSF() == 12)
     {
-        if(reception->getLoRaBW() == Hz(125000)) sensitivity = W(math::dBm2mW(-137) / 1000);
-        if(reception->getLoRaBW() == Hz(250000)) sensitivity = W(math::dBm2mW(-135) / 1000);
-        if(reception->getLoRaBW() == Hz(500000)) sensitivity = W(math::dBm2mW(-129) / 1000);
+        if(reception->getLoRaBW() == Hz(125000)) sensitivity = W(math::dBmW2mW(-137) / 1000);
+        if(reception->getLoRaBW() == Hz(250000)) sensitivity = W(math::dBmW2mW(-135) / 1000);
+        if(reception->getLoRaBW() == Hz(500000)) sensitivity = W(math::dBmW2mW(-129) / 1000);
     }
     return sensitivity;
 }

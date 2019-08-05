@@ -37,50 +37,50 @@ std::ostream& LoRaAnalogModel::printToStream(std::ostream& stream, int level) co
 const W LoRaAnalogModel::getBackgroundNoisePower(const LoRaBandListening *listening) const {
     //const LoRaBandListening *loRaListening = check_and_cast<const LoRaBandListening *>(listening);
     //Sensitivity values from Semtech SX1272/73 datasheet, table 10, Rev 3.1, March 2017
-    W noisePower = W(math::dBm2mW(-126.5) / 1000);
+    W noisePower = W(math::dBmW2mW(-126.5) / 1000);
     if(listening->getLoRaSF() == 6)
     {
-        if(listening->getLoRaBW() == Hz(125000)) noisePower = W(math::dBm2mW(-121) / 1000);
-        if(listening->getLoRaBW() == Hz(250000)) noisePower = W(math::dBm2mW(-118) / 1000);
-        if(listening->getLoRaBW() == Hz(500000)) noisePower = W(math::dBm2mW(-111) / 1000);
+        if(listening->getLoRaBW() == Hz(125000)) noisePower = W(math::dBmW2mW(-121) / 1000);
+        if(listening->getLoRaBW() == Hz(250000)) noisePower = W(math::dBmW2mW(-118) / 1000);
+        if(listening->getLoRaBW() == Hz(500000)) noisePower = W(math::dBmW2mW(-111) / 1000);
     }
 
     if (listening->getLoRaSF() == 7)
     {
-        if(listening->getLoRaBW() == Hz(125000)) noisePower = W(math::dBm2mW(-124) / 1000);
-        if(listening->getLoRaBW() == Hz(250000)) noisePower = W(math::dBm2mW(-122) / 1000);
-        if(listening->getLoRaBW() == Hz(500000)) noisePower = W(math::dBm2mW(-116) / 1000);
+        if(listening->getLoRaBW() == Hz(125000)) noisePower = W(math::dBmW2mW(-124) / 1000);
+        if(listening->getLoRaBW() == Hz(250000)) noisePower = W(math::dBmW2mW(-122) / 1000);
+        if(listening->getLoRaBW() == Hz(500000)) noisePower = W(math::dBmW2mW(-116) / 1000);
     }
 
     if(listening->getLoRaSF() == 8)
     {
-        if(listening->getLoRaBW() == Hz(125000)) noisePower = W(math::dBm2mW(-127) / 1000);
-        if(listening->getLoRaBW() == Hz(250000)) noisePower = W(math::dBm2mW(-125) / 1000);
-        if(listening->getLoRaBW() == Hz(500000)) noisePower = W(math::dBm2mW(-119) / 1000);
+        if(listening->getLoRaBW() == Hz(125000)) noisePower = W(math::dBmW2mW(-127) / 1000);
+        if(listening->getLoRaBW() == Hz(250000)) noisePower = W(math::dBmW2mW(-125) / 1000);
+        if(listening->getLoRaBW() == Hz(500000)) noisePower = W(math::dBmW2mW(-119) / 1000);
     }
     if(listening->getLoRaSF() == 9)
     {
-        if(listening->getLoRaBW() == Hz(125000)) noisePower = W(math::dBm2mW(-130) / 1000);
-        if(listening->getLoRaBW() == Hz(250000)) noisePower = W(math::dBm2mW(-128) / 1000);
-        if(listening->getLoRaBW() == Hz(500000)) noisePower = W(math::dBm2mW(-122) / 1000);
+        if(listening->getLoRaBW() == Hz(125000)) noisePower = W(math::dBmW2mW(-130) / 1000);
+        if(listening->getLoRaBW() == Hz(250000)) noisePower = W(math::dBmW2mW(-128) / 1000);
+        if(listening->getLoRaBW() == Hz(500000)) noisePower = W(math::dBmW2mW(-122) / 1000);
     }
     if(listening->getLoRaSF() == 10)
     {
-        if(listening->getLoRaBW() == Hz(125000)) noisePower = W(math::dBm2mW(-133) / 1000);
-        if(listening->getLoRaBW() == Hz(250000)) noisePower = W(math::dBm2mW(-130) / 1000);
-        if(listening->getLoRaBW() == Hz(500000)) noisePower = W(math::dBm2mW(-125) / 1000);
+        if(listening->getLoRaBW() == Hz(125000)) noisePower = W(math::dBmW2mW(-133) / 1000);
+        if(listening->getLoRaBW() == Hz(250000)) noisePower = W(math::dBmW2mW(-130) / 1000);
+        if(listening->getLoRaBW() == Hz(500000)) noisePower = W(math::dBmW2mW(-125) / 1000);
     }
     if(listening->getLoRaSF() == 11)
     {
-        if(listening->getLoRaBW() == Hz(125000)) noisePower = W(math::dBm2mW(-135) / 1000);
-        if(listening->getLoRaBW() == Hz(250000)) noisePower = W(math::dBm2mW(-132) / 1000);
-        if(listening->getLoRaBW() == Hz(500000)) noisePower = W(math::dBm2mW(-128) / 1000);
+        if(listening->getLoRaBW() == Hz(125000)) noisePower = W(math::dBmW2mW(-135) / 1000);
+        if(listening->getLoRaBW() == Hz(250000)) noisePower = W(math::dBmW2mW(-132) / 1000);
+        if(listening->getLoRaBW() == Hz(500000)) noisePower = W(math::dBmW2mW(-128) / 1000);
     }
     if(listening->getLoRaSF() == 12)
     {
-        if(listening->getLoRaBW() == Hz(125000)) noisePower = W(math::dBm2mW(-137) / 1000);
-        if(listening->getLoRaBW() == Hz(250000)) noisePower = W(math::dBm2mW(-135) / 1000);
-        if(listening->getLoRaBW() == Hz(500000)) noisePower = W(math::dBm2mW(-129) / 1000);
+        if(listening->getLoRaBW() == Hz(125000)) noisePower = W(math::dBmW2mW(-137) / 1000);
+        if(listening->getLoRaBW() == Hz(250000)) noisePower = W(math::dBmW2mW(-135) / 1000);
+        if(listening->getLoRaBW() == Hz(500000)) noisePower = W(math::dBmW2mW(-129) / 1000);
     }
     return noisePower;
 }
