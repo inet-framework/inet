@@ -33,11 +33,6 @@ import inet.applications.contract.IApp;
 //
 // The server can serve several clients, and several streams per client.
 //
-// Statistics:
-//
-// reqStreamBytes: statistic of bytelength of requested video streams.
-// packetSent: statistic of sent packets and sent bytes.
-//
 // @see ~UdpVideoStreamClient
 //
 simple UdpVideoStreamServer like IApp

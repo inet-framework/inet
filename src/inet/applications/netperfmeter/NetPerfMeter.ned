@@ -41,7 +41,7 @@ import inet.applications.contract.IApp;
 // protocols, e.g. TCP vs. SCTP.
 //
 // The model closely mimics the operation of the real-world NetPerfMeter
-// application (https://www.uni-due.de/~be0001/netperfmeter/), a tool for
+// application (https://www.uni-due.de/~~be0001/netperfmeter/), a tool for
 // measuring UDP, TCP, MPTCP, SCTP and DCCP performance over IPv4 and IPv6.
 // Since the parametrisation and features are similar to the real-world
 // application, the model also makes comparisons of simulation results and

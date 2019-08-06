@@ -20,7 +20,7 @@ package inet.common.queueing.base;
 //
 // This is a base module for various packet sink modules.
 //
-// @see IPacketSink
+// @see ~IPacketSink
 //
 simple PacketSinkBase extends PacketProcessorBase
 {

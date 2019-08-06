@@ -25,12 +25,14 @@ import inet.physicallayer.base.packetlevel.NarrowbandTransmitterBase;
 // representation and the configured modulation.
 //
 // Allowed expressions for time and frequency coordinates in the gains parameters:
+// <pre>
 //   s|c|e
 //   s|c|e+-quantity
 //   s|c|e+-b|d
 //   s|c|e+-b|d+-quantity
 //   s|c|e+-b|d*number
 //   s|c|e+-b|d*number+-quantity
+// </pre>
 // where s = start, c = center, b = bandwidth, d = duration. For example: c-b*0.5-1MHz
 //
 module DimensionalTransmitterBase extends NarrowbandTransmitterBase

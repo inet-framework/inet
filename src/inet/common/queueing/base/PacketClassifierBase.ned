@@ -22,7 +22,7 @@ package inet.common.queueing.base;
 // must implement a single packet classifier function which determines the index
 // of the output gate for the next pushed packet.
 //
-// @see IPacketClassifier
+// @see ~IPacketClassifier
 //
 simple PacketClassifierBase extends PacketSinkBase
 {

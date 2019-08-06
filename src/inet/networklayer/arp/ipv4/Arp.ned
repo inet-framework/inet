@@ -24,7 +24,7 @@ import inet.networklayer.contract.IArp;
 // Implements the Address Resolution Protocol for IPv4 and IEEE 802 6-byte
 // MAC addresses.
 //
-// ARP packets are represented by the ~ARPPacket class.
+// ARP packets are represented by the ~ArpPacket class.
 //
 // Communication Between ARP and IPv4 modules:
 // IPv4 module call the ARP::getMACAddressFor(ipv4Address) method for get the MACAddress

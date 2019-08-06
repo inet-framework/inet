@@ -25,7 +25,7 @@ import inet.physicallayer.contract.packetlevel.IAnalogModel;
 // based on the distance between the transmitter and the receiver. It doesn't
 // support noise and signal to noise ratio calculations.
 //
-// See also ~UnitDiskRadio, ~UnitDiskRadioMedium, ~UnitDiskTransmitter, and
+// @see ~UnitDiskRadio, ~UnitDiskRadioMedium, ~UnitDiskTransmitter,
 // ~UnitDiskReceiver.
 //
 module UnitDiskAnalogModel like IAnalogModel

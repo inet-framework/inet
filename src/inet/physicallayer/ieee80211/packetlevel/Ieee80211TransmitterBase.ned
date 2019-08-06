@@ -24,7 +24,7 @@ import inet.physicallayer.base.packetlevel.NarrowbandTransmitterBase;
 // It supports switching channels, configuring different operation modes, and
 // preamble modes.
 //
-// See also ~Ieee80211ReceiverBase, ~Ieee80211ScalarTransmitter, and
+// @see ~Ieee80211ReceiverBase, ~Ieee80211ScalarTransmitter,
 // ~Ieee80211DimensionalTransmitter.
 //
 module Ieee80211TransmitterBase extends NarrowbandTransmitterBase

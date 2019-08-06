@@ -47,7 +47,7 @@ import inet.physicallayer.contract.packetlevel.IReceiver;
 // purpose of this model is to provide a basic infrastructure for further
 // development and experimentation.
 //
-// See also ~ApskDemodulator, ~ApskDecoder, and ~ApskLayeredTransmitter.
+// @see ~ApskDemodulator, ~ApskDecoder, ~ApskLayeredTransmitter.
 //
 module ApskLayeredReceiver extends SnirReceiverBase like IReceiver
 {

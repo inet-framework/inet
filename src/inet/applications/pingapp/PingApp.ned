@@ -31,17 +31,17 @@ import inet.applications.contract.IApp;
 // hosts in the network (i.e. routing tables were set up properly).
 //
 // Start/stop time, sendInterval etc. can be specified via parameters. An address
-// may be given in the dotted decimal notation (or, for Ipv6, in the usual
+// may be given in the dotted decimal notation (or, for IPv6, in the usual
 // notation with colons), or with the module name.
 // (The L3AddressResolver class is used to resolve the address.)
-
+//
 // To specify the number of ping requests sent to a single destination address,
 // use the 'count' parameter. After the specified number of ping requests was
 // sent to a destination address, the application goes to sleep for 'sleepDuration'.
 // Once the sleep timer has expired, the application switches to the next destination
 // and starts pinging again. The application stops pinging once all destination
 // addresses were tested or the simulation time reaches 'stopTime'.
-
+//
 // To disable send, specify empty destAddr.
 //
 // Every ping request is sent out with a sequence number, and replies are
@@ -53,9 +53,7 @@ import inet.applications.contract.IApp;
 // out-of-sequence arrival. So the number of really lost pings will be
 // "lost" minus "out-of-order" (assuming there's no duplicate or bogus reply).
 //
-// Uses ~PingPayload as payload for the ICMP(v6) Echo Request/Reply packets.
-//
-// @see ~PingPayload, ~Icmp, ~Icmpv6
+// @see ~Icmp, ~Icmpv6
 //
 simple PingApp like IApp
 {

@@ -20,9 +20,6 @@ package inet.common.queueing;
 import inet.common.queueing.base.PacketServerBase;
 import inet.common.queueing.contract.IPacketServer;
 
-//
-// %n number of available tokens
-//
 simple TokenBasedServer extends PacketServerBase like IPacketServer
 {
     parameters:

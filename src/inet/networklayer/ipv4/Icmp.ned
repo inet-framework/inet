@@ -33,9 +33,10 @@ package inet.networklayer.ipv4;
 // Receive echo/timestamp message from pingIn: encapsulate in ICMP header
 // and send to IPSend
 //
-// author: Jochen Reber
-// date: 2.5.00, 9.5.00, 20.5.00, 9.6.00
-// redesign: Andras Varga 1.3.2004
+// @author: Jochen Reber
+// @date: 2.5.2000, 9.5.2000, 20.5.2000, 9.6.2000
+// @author: Andras Varga
+// @date: 1.3.2004
 //
 simple Icmp
 {

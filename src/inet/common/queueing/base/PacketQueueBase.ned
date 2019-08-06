@@ -22,15 +22,15 @@ package inet.common.queueing.base;
 // statistics.
 //
 // Available display string format directives:
-//  %p - number of packet
-//  %l - total length
-//  %u - number of pushed packets
-//  %o - number of popped packets
-//  %r - number of removed packets
-//  %d - number of dropped packets
-//  %n - name of next popped packet
+// - %p - number of packet
+// - %l - total length
+// - %u - number of pushed packets
+// - %o - number of popped packets
+// - %r - number of removed packets
+// - %d - number of dropped packets
+// - %n - name of next popped packet
 //
-// @see IPacketQueue
+// @see ~IPacketQueue
 //
 simple PacketQueueBase
 {

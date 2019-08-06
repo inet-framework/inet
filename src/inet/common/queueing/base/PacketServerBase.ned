@@ -20,7 +20,7 @@ package inet.common.queueing.base;
 //
 // This is a base module for various packet server modules.
 //
-// @see IPacketServer
+// @see ~IPacketServer
 //
 simple PacketServerBase extends PacketSinkBase
 {

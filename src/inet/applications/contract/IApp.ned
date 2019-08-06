@@ -18,6 +18,9 @@
 
 package inet.applications.contract;
 
+//
+// Generic application interface.
+//
 moduleinterface IApp
 {
     parameters:

@@ -8,10 +8,6 @@ import inet.transportlayer.rtp.Rtcp;
 import inet.transportlayer.rtp.Rtp;
 import ned.IdealChannel;
 
-
-//
-// TODO document!
-//
 module RtpHost extends StandardHost
 {
     parameters:

@@ -25,7 +25,7 @@ import inet.physicallayer.ieee80211.packetlevel.errormodel.Ieee80211NistErrorMod
 // OFDM means that the physical layer uses OFDM modulation.
 //
 // The Ieee80211OfdmErrorModel, depending of the level of detail
-// (see @see ~Ieee80211LayeredOfdmTransmitter and @see ~Ieee80211LayeredOfdmReceiver),
+// (see: ~Ieee80211LayeredOfdmTransmitter and ~Ieee80211LayeredOfdmReceiver),
 // produces erroneous bits, symbols, samples or just simply
 // determines whether a packet is erroneous or not.
 //

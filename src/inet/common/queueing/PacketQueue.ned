@@ -50,7 +50,7 @@ import inet.common.queueing.contract.IPacketQueue;
 // which also takes care of dropping packets from either this queue or some
 // other queues as necessary.
 //
-// @see IPacketBuffer
+// @see ~IPacketBuffer
 //
 simple PacketQueue extends PacketQueueBase like IPacketQueue
 {

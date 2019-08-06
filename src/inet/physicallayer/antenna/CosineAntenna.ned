@@ -25,10 +25,10 @@ import inet.physicallayer.base.packetlevel.AntennaBase;
 // various directional antennas.
 //
 // Gain is computed from the angle as follows:
-// 
+// <pre>
 //   exponent = -3 / (20 * log10(cos(beamWidth) / 4))
 //   gain = maxGain * abs(cos(angle / 2)) ^ exponent
-//
+// </pre>
 // This module represents the cosine antenna model found in 
 //
 // Li Chunjian, "Efficient Antenna Patterns for Three-Sector WCDMA Systems",

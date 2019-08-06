@@ -44,8 +44,8 @@ package inet.common.packet.recorder;
 // ~Ipv6Header classes), possibly encapsulated into other (L2, PHY, etc)
 // frames at any depth. Packets not containing IP packets are discarded.
 // The following higher layer protocol messages (inside IP packets) are
-// recognized and dumped/recorded: Ipv4Header, SctpMessage, TcpHeader,
-// IcmpMessage.
+// recognized and dumped/recorded: ~Ipv4Header, ~SctpHeader, ~TcpHeader,
+// ~IcmpHeader.
 //
 simple PcapRecorder
 {
