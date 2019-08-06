@@ -73,7 +73,7 @@ class INET_API EtherMacBase : public MacProtocolBase
     };
 
     enum {
-        NUM_OF_ETHERDESCRS = 8
+        NUM_OF_ETHERDESCRS = 9
     };
 
     struct EtherDescr
