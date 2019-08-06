@@ -13,7 +13,8 @@ enum Ospfv3Timers{
     NEIGHBOR_UPDATE_RETRANSMISSION_TIMER = 6,
     NEIGHBOR_REQUEST_RETRANSMISSION_TIMER = 7,
     ACKNOWLEDGEMENT_TIMER = 8,
-    DATABASE_AGE_TIMER = 9
+    DATABASE_AGE_TIMER = 9,
+    HELLO_TIMER_INIT = 10 // timer set by process, for initialisation of hello msgs
 };
 
 }//namespace inet
