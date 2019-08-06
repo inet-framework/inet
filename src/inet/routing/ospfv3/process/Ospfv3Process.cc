@@ -545,7 +545,8 @@ void Ospfv3Process::handleTimer(cMessage* msg)
             delete msg;
         break;
 
-        case HELLO_TIMER:
+        case HELLO_TIMER_INIT:  // timer set by process, for initialisation of hello msgs
+        case HELLO_TIMER:       // timer set by interface every 10 sec
         {
             Ospfv3Interface* interface;
             if(!(interface=reinterpret_cast<Ospfv3Interface*>(msg->getContextPointer())))
@@ -696,7 +697,7 @@ void Ospfv3Process::activateProcess()
     Enter_Method_Silent();
     this->isActive=true;
     cMessage* init = new cMessage();
-    init->setKind(HELLO_TIMER);
+    init->setKind(HELLO_TIMER_INIT);
     scheduleAt(simTime(), init);
 }//activateProcess
 
