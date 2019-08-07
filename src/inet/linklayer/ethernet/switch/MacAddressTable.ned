@@ -29,9 +29,9 @@ import inet.linklayer.contract.IMacAddressTable;
 // File format:
 //   line oriented table with space or TAB delimited columns.
 //   columns:
-//     MAC address: string, resolving with ~L3AddressResolver as MAC_ADDR
-//     portName: interface name, e.g. eth3
-//     VLAN ID: optional, numeric value, default value is 0
+//     VLAN ID:      numeric value, 0 means no vlan
+//     MAC address:  string, resolving with ~L3AddressResolver as MAC_ADDR
+//     Interface:    interface name, e.g. eth3 (or interface id, e.g. 103)
 //   empty lines and commented out lines starts with '#' are allowed.
 //
 simple MacAddressTable like IMacAddressTable
