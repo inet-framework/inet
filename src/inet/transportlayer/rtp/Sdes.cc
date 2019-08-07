@@ -28,7 +28,7 @@ Register_Class(SdesItem);
 SdesItem::SdesItem() : cObject()
 {
     _type = SDES_UNDEF;
-    _length = 2;
+    _length = 0;
     _content = "";
 }
 
@@ -41,7 +41,7 @@ SdesItem::SdesItem(SdesItemType type, const char *content) : cObject()
     // an sdes item requires one byte for the type field,
     // one byte for the length field and bytes for
     // the content string
-    _length = 2 + _content.length();
+    _length = _content.length();
 }
 
 SdesItem::SdesItem(const SdesItem& sdesItem) : cObject(sdesItem)
@@ -100,15 +100,18 @@ const char *SdesItem::getContent() const
     return _content.c_str();
 }
 
-int SdesItem::getLength() const
+int SdesItem::getLengthField() const
+{
+    // _length contains the length of value without length of Type and Length fields
+    return _length;
+}
+
+int SdesItem::getSdesTotalLength() const
 {
     // bytes needed for this sdes item are
     // one byte for type, one for length
     // and the string
-    // was: return _length + 2;
-    // yes, but _length has an initial value of 2
-    // to which the content length is added
-    return _length;
+    return _length + 2;
 }
 
 //
@@ -177,7 +180,7 @@ void SdesChunk::addSDESItem(SdesItem *sdesItem)
             SdesItem *compareItem = check_and_cast<SdesItem *>(get(i));
             if (compareItem->getType() == sdesItem->getType()) {
                 remove(compareItem);
-                _length = _length - compareItem->getLength();
+                _length = _length - compareItem->getSdesTotalLength();
                 delete compareItem;
             }
         }
@@ -185,7 +188,7 @@ void SdesChunk::addSDESItem(SdesItem *sdesItem)
 
     //sdesItem->setOwner(this);
     add(sdesItem);
-    _length += sdesItem->getLength();
+    _length += sdesItem->getSdesTotalLength();
 }
 
 uint32 SdesChunk::getSsrc() const

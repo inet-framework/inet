@@ -59,7 +59,7 @@ void serializeSdesChunk(MemoryOutputStream& stream, const SdesChunk* sdesChunk) 
         const SdesItem* sdesItem = static_cast<const SdesItem*>(sdesChunk->get(e));
         if (sdesItem != nullptr) {
             stream.writeByte(sdesItem->getType());
-            uint8_t length = sdesItem->getLength() - 2;
+            uint8_t length = sdesItem->getLengthField();
             stream.writeByte(length);
             stream.writeBytes((uint8_t*)sdesItem->getContent(), B(length));
             numBytes += 2 + length;
