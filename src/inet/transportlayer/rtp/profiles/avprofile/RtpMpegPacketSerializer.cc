@@ -17,7 +17,8 @@
 #include "inet/transportlayer/rtp/profiles/avprofile/RtpMpegPacket_m.h"
 #include "inet/transportlayer/rtp/profiles/avprofile/RtpMpegPacketSerializer.h"
 
-namespace inet::rtp {
+namespace inet {
+namespace rtp {
 
 Register_Serializer(RtpMpegHeader, RtpMpegPacketSerializer);
 
@@ -62,22 +63,6 @@ const Ptr<Chunk> RtpMpegPacketSerializer::deserialize(MemoryInputStream& stream)
     return rtpMpegHeader;
 }
 
-} // namespace inet::rtp
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+} // namespace rtp
+} // namespace inet
 
