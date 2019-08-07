@@ -476,7 +476,7 @@ void Radio::endReception(cMessage *timer)
         auto macFrame = medium->receivePacket(this, signal);
 
         // FIXME:
-        // Where we can check the phy header is correct or not? decapsulate() drops the phy header.
+        // Where we can check the phy header is correct or not? decapsulate() drops the phy header. Some phy header contains a protocol field. When phy header incorrect, where we send up the payload?
         // When phy header has checksum field and checksum is incorrect, we should drop the frame here instead of sends to upper layer.
         // Is missing the isReceptionSuccessful flag, too?
 

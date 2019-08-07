@@ -20,7 +20,6 @@
 #include "inet/physicallayer/apskradio/bitlevel/ApskPhyHeaderSerializer.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 Register_Serializer(ApskPhyHeader, ApskPhyHeaderSerializer);
@@ -58,7 +57,8 @@ const Ptr<Chunk> ApskPhyHeaderSerializer::deserialize(MemoryInputStream& stream,
     phyHeader->setCrcMode(crc == 0 ? CRC_DISABLED : CRC_COMPUTED);
     //TODO read protocol
 
-    b remainders = headerLength - (stream.getPosition() - startPosition);
+    b curLength = stream.getPosition() - startPosition;
+    b remainders = headerLength - curLength;
     if (remainders < b(0)) {
         phyHeader->markIncorrect();
     }
@@ -67,10 +67,10 @@ const Ptr<Chunk> ApskPhyHeaderSerializer::deserialize(MemoryInputStream& stream,
         stream.readByteRepeatedly('?', B(remainders - b(remainderbits)).get());
         stream.readBitRepeatedly(false, remainderbits);
     }
+    phyHeader->setChunkLength(stream.getPosition() - startPosition);
     return phyHeader;
 }
 
 } // namespace physicallayer
-
 } // namespace inet
 

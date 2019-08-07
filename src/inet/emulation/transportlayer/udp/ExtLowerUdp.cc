@@ -21,6 +21,7 @@
 #include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
+#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/emulation/transportlayer/udp/ExtLowerUdp.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/transportlayer/common/L4PortTag_m.h"
@@ -44,6 +45,10 @@ void ExtLowerUdp::initialize(int stage)
         if (auto scheduler = dynamic_cast<RealTimeScheduler *>(getSimulation()->getScheduler())) {
             rtScheduler = scheduler;
         }
+    }
+    else if (stage == INITSTAGE_TRANSPORT_LAYER) {
+        registerService(Protocol::udp, gate("appIn"), gate("ipIn"));
+        registerProtocol(Protocol::udp, gate("ipOut"), gate("appOut"));
     }
 }
 

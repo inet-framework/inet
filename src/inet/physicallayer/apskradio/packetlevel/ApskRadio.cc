@@ -91,8 +91,8 @@ void ApskRadio::encapsulate(Packet *packet) const
 
 void ApskRadio::decapsulate(Packet *packet) const
 {
-    const auto& phyHeader = packet->popAtFront<ApskPhyHeader>(b(-1), Chunk::PF_ALLOW_INCORRECT);
-    if (phyHeader->isIncorrect())
+    const auto& phyHeader = packet->popAtFront<ApskPhyHeader>(b(-1), Chunk::PF_ALLOW_INCORRECT|Chunk::PF_ALLOW_INCOMPLETE);
+    if (phyHeader->isIncorrect() || phyHeader->isIncomplete() || phyHeader->isImproperlyRepresented())
         packet->setBitError(true);
     b headerLength = phyHeader->getChunkLength();
 
@@ -105,8 +105,20 @@ void ApskRadio::decapsulate(Packet *packet) const
 #endif
 
     auto paddingLength = computePaddingLength(headerLength + phyHeader->getPayloadLengthField(), nullptr, getModulation());
-    if (paddingLength != b(0))
-        packet->popAtBack(paddingLength, Chunk::PF_ALLOW_INCORRECT);
+    if (paddingLength > b(0)) {
+        if (paddingLength <= packet->getDataLength())
+            packet->popAtBack(paddingLength, Chunk::PF_ALLOW_INCORRECT);
+        else
+            packet->setBitError(true);
+    }
+
+    //FIXME KLUDGE? higher layers accepts only byte length packets started on byte position
+    if (packet->getBitLength() % 8 != 0 || headerLength.get() % 8 != 0)
+        packet->setBitError(true);
+
+    if (phyHeader->getPayloadLengthField() > packet->getDataLength())
+        packet->setBitError(true);
+
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(phyHeader->getPayloadProtocol());
 }
 

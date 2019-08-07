@@ -18,20 +18,30 @@
 DIR=`dirname $0`
 OUT=$DIR/../src
 
-TOOL=""
-MODE=""
+#
+# Note: We intentionally do NOT initialize the TOOL and MODE variables, in order
+# to allow usage like this:
+#
+#  $ TOOL=echo inet_dbg                       ==> print actual command line
+#  $ TOOL=nemiver inet_dbg                    ==> debug using nemiver
+#  $ TOOL="gdb --args" inet_dbg               ==> debug using gdb
+#  $ TOOL="valgrind --tool=memcheck --" inet  ==> find memory problems using valgrind
+#
 
 if [ "$1" = "--release" ]; then
+   # Equivalent to: MODE=release inet
    MODE="release"
    shift;
 fi
 
 if [ "$1" = "--debug" ]; then
+   # Equivalent to: MODE=debug inet
    MODE="debug"
    shift;
 fi
 
 if [ "$1" = "--printcmd" ] || [ "$1" = "-p" ]; then
+   # Equivalent to: TOOL=echo inet
    TOOL="echo"
    shift;
 fi
