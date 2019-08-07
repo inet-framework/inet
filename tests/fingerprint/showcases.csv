@@ -1,7 +1,7 @@
 # working directory, command line arguments, simulation time limit, fingerprint, expected result, tags
-/showcases/general/diffserv/,        -f omnetpp.ini -c VoIP_WithoutQoS -r 0,        50s,         851c-be8c/tplx, PASS,
-/showcases/general/diffserv/,        -f omnetpp.ini -c VoIP_WithPolicing -r 0,      50s,         7794-d114/tplx, PASS,
-/showcases/general/diffserv/,        -f omnetpp.ini -c VoIP_WithPolicingAndQueueing -r 0, 50s,   27f0-7d69/tplx, PASS,
+/showcases/general/diffserv/,        -f omnetpp.ini -c VoIP_WithoutQoS -r 0,        50s,         38f3-24b2/tplx, PASS,
+/showcases/general/diffserv/,        -f omnetpp.ini -c VoIP_WithPolicing -r 0,      50s,         32a6-52f1/tplx, PASS,
+/showcases/general/diffserv/,        -f omnetpp.ini -c VoIP_WithPolicingAndQueueing -r 0, 50s,   6b50-8438/tplx, PASS,
 
 /showcases/general/dynamic/,         -f omnetpp.ini -c General -r 0,                100s,         aa91-2c95/tplx, PASS,
 

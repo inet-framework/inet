@@ -266,7 +266,10 @@ void VoipStreamReceiver::decodePacket(Packet *pk)
     uint8_t buff[len];
     vp->getBytes().copyDataToBuffer(buff, len);
     curConn.writeAudioFrame(buff, len);
-    FINGERPRINT_ADD_EXTRA_DATA2((const char *)buff, len);
+    if (vp->getType() == VOICE)
+        FINGERPRINT_ADD_EXTRA_DATA2((const char *)buff, len);
+    if (vp->getType() == SILENCE)
+        FINGERPRINT_ADD_EXTRA_DATA(vp->getSamplesPerPacket());
 }
 
 void VoipStreamReceiver::finish()
