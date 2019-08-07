@@ -47,6 +47,15 @@
 .,  -f ethernet-twohosts.ini -r '$datarate==10Gbps  && $csmacd==false && $duplex==true  && $burst==false && $queue=="EtherQosQueue" && $repetition==0', , 7e2e-b9d6/tplx, PASS,
 .,  -f ethernet-twohosts.ini -r '$datarate==10Gbps  && $csmacd==false && $duplex==true  && $burst==false && $queue=="DropTailQueue" && $repetition==0', , 46d7-c297/tplx, PASS,
 
+.,  -f ethernet-twohosts.ini -r '$datarate==25Gbps  && $csmacd==true  && $duplex==true  && $burst==true  && $queue=="EtherQosQueue" && $repetition==0', , 6955-9fad/tplx, PASS,
+.,  -f ethernet-twohosts.ini -r '$datarate==25Gbps  && $csmacd==true  && $duplex==true  && $burst==true  && $queue=="DropTailQueue" && $repetition==0', , d565-7b69/tplx, PASS,
+.,  -f ethernet-twohosts.ini -r '$datarate==25Gbps  && $csmacd==true  && $duplex==true  && $burst==false && $queue=="EtherQosQueue" && $repetition==0', , 8924-a0c3/tplx, PASS,
+.,  -f ethernet-twohosts.ini -r '$datarate==25Gbps  && $csmacd==true  && $duplex==true  && $burst==false && $queue=="DropTailQueue" && $repetition==0', , 64b0-a914/tplx, PASS,
+.,  -f ethernet-twohosts.ini -r '$datarate==25Gbps  && $csmacd==false && $duplex==true  && $burst==true  && $queue=="EtherQosQueue" && $repetition==0', , 9063-7f66/tplx, PASS,
+.,  -f ethernet-twohosts.ini -r '$datarate==25Gbps  && $csmacd==false && $duplex==true  && $burst==true  && $queue=="DropTailQueue" && $repetition==0', , 4c91-81d7/tplx, PASS,
+.,  -f ethernet-twohosts.ini -r '$datarate==25Gbps  && $csmacd==false && $duplex==true  && $burst==false && $queue=="EtherQosQueue" && $repetition==0', , f3ed-cced/tplx, PASS,
+.,  -f ethernet-twohosts.ini -r '$datarate==25Gbps  && $csmacd==false && $duplex==true  && $burst==false && $queue=="DropTailQueue" && $repetition==0', , 3acb-24b3/tplx, PASS,
+
 .,  -f ethernet-twohosts.ini -r '$datarate==40Gbps  && $csmacd==true  && $duplex==true  && $burst==true  && $queue=="EtherQosQueue" && $repetition==0', , dbca-9e2a/tplx, PASS,
 .,  -f ethernet-twohosts.ini -r '$datarate==40Gbps  && $csmacd==true  && $duplex==true  && $burst==true  && $queue=="DropTailQueue" && $repetition==0', , af52-1e61/tplx, PASS,
 .,  -f ethernet-twohosts.ini -r '$datarate==40Gbps  && $csmacd==true  && $duplex==true  && $burst==false && $queue=="EtherQosQueue" && $repetition==0', , e58f-a584/tplx, PASS,
@@ -64,3 +73,22 @@
 .,  -f ethernet-twohosts.ini -r '$datarate==100Gbps && $csmacd==false && $duplex==true  && $burst==true  && $queue=="DropTailQueue" && $repetition==0', , f700-dea3/tplx, PASS,
 .,  -f ethernet-twohosts.ini -r '$datarate==100Gbps && $csmacd==false && $duplex==true  && $burst==false && $queue=="EtherQosQueue" && $repetition==0', , c2ff-ef3f/tplx, PASS,
 .,  -f ethernet-twohosts.ini -r '$datarate==100Gbps && $csmacd==false && $duplex==true  && $burst==false && $queue=="DropTailQueue" && $repetition==0', , 3ce0-38e1/tplx, PASS,
+
+.,  -f ethernet-twohosts.ini -r '$datarate==200Gbps && $csmacd==true  && $duplex==true  && $burst==true  && $queue=="EtherQosQueue" && $repetition==0', , 6790-b259/tplx, PASS,
+.,  -f ethernet-twohosts.ini -r '$datarate==200Gbps && $csmacd==true  && $duplex==true  && $burst==true  && $queue=="DropTailQueue" && $repetition==0', , 0489-0ecf/tplx, PASS,
+.,  -f ethernet-twohosts.ini -r '$datarate==200Gbps && $csmacd==true  && $duplex==true  && $burst==false && $queue=="EtherQosQueue" && $repetition==0', , b3ba-2618/tplx, PASS,
+.,  -f ethernet-twohosts.ini -r '$datarate==200Gbps && $csmacd==true  && $duplex==true  && $burst==false && $queue=="DropTailQueue" && $repetition==0', , 78f5-71c2/tplx, PASS,
+.,  -f ethernet-twohosts.ini -r '$datarate==200Gbps && $csmacd==false && $duplex==true  && $burst==true  && $queue=="EtherQosQueue" && $repetition==0', , bb94-1210/tplx, PASS,
+.,  -f ethernet-twohosts.ini -r '$datarate==200Gbps && $csmacd==false && $duplex==true  && $burst==true  && $queue=="DropTailQueue" && $repetition==0', , 62dd-6f90/tplx, PASS,
+.,  -f ethernet-twohosts.ini -r '$datarate==200Gbps && $csmacd==false && $duplex==true  && $burst==false && $queue=="EtherQosQueue" && $repetition==0', , 6a14-32bb/tplx, PASS,
+.,  -f ethernet-twohosts.ini -r '$datarate==200Gbps && $csmacd==false && $duplex==true  && $burst==false && $queue=="DropTailQueue" && $repetition==0', , 993d-0757/tplx, PASS,
+
+.,  -f ethernet-twohosts.ini -r '$datarate==400Gbps && $csmacd==true  && $duplex==true  && $burst==true  && $queue=="EtherQosQueue" && $repetition==0', , bdef-a82d/tplx, PASS,
+.,  -f ethernet-twohosts.ini -r '$datarate==400Gbps && $csmacd==true  && $duplex==true  && $burst==true  && $queue=="DropTailQueue" && $repetition==0', , 338b-0d22/tplx, PASS,
+.,  -f ethernet-twohosts.ini -r '$datarate==400Gbps && $csmacd==true  && $duplex==true  && $burst==false && $queue=="EtherQosQueue" && $repetition==0', , bc29-39fe/tplx, PASS,
+.,  -f ethernet-twohosts.ini -r '$datarate==400Gbps && $csmacd==true  && $duplex==true  && $burst==false && $queue=="DropTailQueue" && $repetition==0', , 56e0-9149/tplx, PASS,
+.,  -f ethernet-twohosts.ini -r '$datarate==400Gbps && $csmacd==false && $duplex==true  && $burst==true  && $queue=="EtherQosQueue" && $repetition==0', , a58f-e4bd/tplx, PASS,
+.,  -f ethernet-twohosts.ini -r '$datarate==400Gbps && $csmacd==false && $duplex==true  && $burst==true  && $queue=="DropTailQueue" && $repetition==0', , d68b-fdb8/tplx, PASS,
+.,  -f ethernet-twohosts.ini -r '$datarate==400Gbps && $csmacd==false && $duplex==true  && $burst==false && $queue=="EtherQosQueue" && $repetition==0', , b315-7654/tplx, PASS,
+.,  -f ethernet-twohosts.ini -r '$datarate==400Gbps && $csmacd==false && $duplex==true  && $burst==false && $queue=="DropTailQueue" && $repetition==0', , 0e81-19d5/tplx, PASS,
+
