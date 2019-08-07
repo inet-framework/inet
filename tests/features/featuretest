@@ -5,6 +5,8 @@
 
 set -e
 
+FEATURETOOL=opp_featuretool
+
 # Set the SKIPPED_FEATURES environment variable to empty string to allow enabling
 # the features that require NSC or libav*.
 if [ -z ${SKIPPED_FEATURES+x} ]; then
@@ -44,7 +46,7 @@ rm -rf $LOG_DIR; mkdir -p $LOG_DIR
 cd ../..
 
 echo "Running feature build and run tests..."
-base_features=$(./bin/inet_featuretool list | grep -v _examples | awk '{print $2;}' | awk "NR % ${SPLIT_TOTAL} == ${SPLIT_INDEX}")
+base_features=$($FEATURETOOL list | grep -v _examples | awk '{print $2;}' | awk "NR % ${SPLIT_TOTAL} == ${SPLIT_INDEX}")
 if [ -n "$skipped_features" ]; then
   echo "Skipping the following features: $skipped_features"
 fi
@@ -59,7 +61,7 @@ if [ "$SPLIT_INDEX" = "0" ]; then
   if [ "$testindex" -lt "$SKIP_TESTS" ] ; then
     echo "*** $testindex. all_disabled: SKIPPED"
   else
-    ./bin/inet_featuretool -q disable -f all
+    $FEATURETOOL -q disable -f all
     runtest all_disabled || exitcode=1
   fi
   testindex=$((testindex+1))
@@ -68,9 +70,9 @@ if [ "$SPLIT_INDEX" = "0" ]; then
   if [ "$testindex" -lt "$SKIP_TESTS" ] ; then
     echo "*** $testindex. default: SKIPPED"
   else
-    ./bin/inet_featuretool -q reset
+    $FEATURETOOL -q reset
     if [ -n "$skipped_features" ]; then
-      ./bin/inet_featuretool -q disable -f $skipped_features
+      $FEATURETOOL -q disable -f $skipped_features
     fi
     runtest default || exitcode=1
   fi
@@ -80,9 +82,9 @@ if [ "$SPLIT_INDEX" = "0" ]; then
   if [ "$testindex" -lt "$SKIP_TESTS" ] ; then
     echo "*** $testindex. all_enabled: SKIPPED"
   else
-    ./bin/inet_featuretool -q enable -f all
+    $FEATURETOOL -q enable -f all
     if [ -n "$skipped_features" ]; then
-      ./bin/inet_featuretool -q disable -f $skipped_features
+      $FEATURETOOL -q disable -f $skipped_features
     fi
     runtest all_enabled || exitcode=1
   fi
@@ -94,8 +96,8 @@ for feature in $base_features; do
   if echo $skipped_features | grep -q $feature || [ "$testindex" -lt "$SKIP_TESTS" ] ; then
     echo "*** $testindex. ${feature}_enabled: SKIPPED"
   else
-    ./bin/inet_featuretool -q disable -f all
-    ./bin/inet_featuretool -q enable -f $feature
+    $FEATURETOOL -q disable -f all
+    $FEATURETOOL -q enable -f $feature
     runtest ${feature}_enabled || exitcode=1
   fi
   testindex=$((testindex+1))
@@ -103,14 +105,14 @@ done
 
 # test with each feature disabled - one by one
 for feature in $base_features; do
-  ./bin/inet_featuretool -q enable -f all
+  $FEATURETOOL -q enable -f all
   if [ -n "$skipped_features" ]; then
-    ./bin/inet_featuretool -q disable -f $skipped_features
+    $FEATURETOOL -q disable -f $skipped_features
   fi
   if echo $skipped_features | grep -q $feature  || [ "$testindex" -lt "$SKIP_TESTS" ] ; then
     echo "*** $testindex. ${feature}_disabled: SKIPPED"
   else
-    ./bin/inet_featuretool -q disable -f $feature
+    $FEATURETOOL -q disable -f $feature
     runtest ${feature}_disabled || exitcode=1
   fi
   testindex=$((testindex+1))

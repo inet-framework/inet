@@ -1,3 +1,4 @@
+FEATURETOOL = opp_featuretool
 FEATURES_H = src/inet/features.h
 
 .PHONY: all clean cleanall makefiles makefiles-so makefiles-lib makefiles-exe checkmakefiles doxy doc submodule-init
@@ -18,13 +19,13 @@ MAKEMAKE_OPTIONS := -f --deep -o INET -O out -pINET -I.
 makefiles: makefiles-so
 
 makefiles-so: $(FEATURES_H)
-	@FEATURE_OPTIONS=$$(./bin/inet_featuretool options -f -l) && cd src && opp_makemake --make-so $(MAKEMAKE_OPTIONS) $$FEATURE_OPTIONS
+	@FEATURE_OPTIONS=$$($(FEATURETOOL) options -f -l) && cd src && opp_makemake --make-so $(MAKEMAKE_OPTIONS) $$FEATURE_OPTIONS
 
 makefiles-lib: $(FEATURES_H)
-	@FEATURE_OPTIONS=$$(./bin/inet_featuretool options -f -l) && cd src && opp_makemake --make-lib $(MAKEMAKE_OPTIONS) $$FEATURE_OPTIONS
+	@FEATURE_OPTIONS=$$($(FEATURETOOL) options -f -l) && cd src && opp_makemake --make-lib $(MAKEMAKE_OPTIONS) $$FEATURE_OPTIONS
 
 makefiles-exe: $(FEATURES_H)
-	@FEATURE_OPTIONS=$$(./bin/inet_featuretool options -f -l) && cd src && opp_makemake $(MAKEMAKE_OPTIONS) $$FEATURE_OPTIONS
+	@FEATURE_OPTIONS=$$($(FEATURETOOL) options -f -l) && cd src && opp_makemake $(MAKEMAKE_OPTIONS) $$FEATURE_OPTIONS
 
 checkmakefiles: submodule-init
 	@if [ ! -f src/Makefile ]; then \
@@ -46,7 +47,7 @@ submodule-init:
 
 # generate an include file that contains all the WITH_FEATURE macros according to the current enablement of features
 $(FEATURES_H): $(wildcard .oppfeaturestate) .oppfeatures
-	@./bin/inet_featuretool defines >$(FEATURES_H)
+	@$(FEATURETOOL) defines >$(FEATURES_H)
 
 doc:
 	cd doc/src && $(MAKE)
