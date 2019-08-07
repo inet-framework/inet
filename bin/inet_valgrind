@@ -1,9 +1,7 @@
 #!/bin/sh
 #
-# This script is inteded to run valgrind with the most commonly used command
-# line arguments to check INET simulations. The typical command line to check
-# the INET release version would be something like:
-# 'inet_valgrind $(inet --release -p -u Cmdenv)'.
+# This script is intended to run valgrind with the most commonly used command
+# line arguments to check INET simulations.
 #
 
-valgrind $INET_VALGRIND_OPTIONS "$@"
+TOOL="valgrind $INET_VALGRIND_OPTIONS" inet "$@"
