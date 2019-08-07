@@ -40,7 +40,7 @@ Define_NED_Function2(nedf_hasVisualizer,
 cNEDValue nedf_hasModule(cComponent *context, cNEDValue argv[], int argc)
 {
     cRegistrationList *types = componentTypes.getInstance();
-    if (argv[0].getType() != cNEDValue::STR)
+    if (argv[0].getType() != cNEDValue::STRING)
         throw cRuntimeError("hasModule(): string arguments expected");
     const char *name = argv[0].stringValue();
     cComponentType *c;
@@ -168,7 +168,7 @@ cNEDValue nedf_firstAvailableOrEmpty(cComponent *context, cNEDValue argv[], int 
     cRegistrationList *types = componentTypes.getInstance();
     for (int i=0; i<argc; i++)
     {
-        if (argv[i].getType() != cNEDValue::STR)
+        if (argv[i].getType() != cNEDValue::STRING)
             throw cRuntimeError("firstAvailable(): string arguments expected");
         const char *name = argv[i].stringValue();
         cComponentType *c;
@@ -230,7 +230,7 @@ cNedValue nedf_xmlattr(cComponent *contextComponent, cNedValue argv[], int argc)
 {
     if (argv[0].getType() != cNEDValue::XML)
         throw cRuntimeError("xmlattr(): xmlNode argument must be an xml node");
-    if (argv[1].getType() != cNEDValue::STR)
+    if (argv[1].getType() != cNEDValue::STRING)
         throw cRuntimeError("xmlattr(): attributeName argument must be a string");
 
     cXMLElement *node = argv[0].xmlValue();
