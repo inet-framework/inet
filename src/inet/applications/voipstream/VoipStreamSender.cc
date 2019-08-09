@@ -340,8 +340,6 @@ Packet *VoipStreamSender::generatePacket()
         outFile.write(sampleBuffer.readPtr(), inBytes);
     sampleBuffer.notifyRead(inBytes);
 
-    vp->getBytesForUpdate().setDataFromBuffer(opacket.data, opacket.size);
-
     if (isSilent) {
         pk->setName("SILENCE");
         vp->setType(SILENCE);
@@ -350,6 +348,7 @@ Packet *VoipStreamSender::generatePacket()
     else {
         pk->setName("VOICE");
         vp->setType(VOICE);
+        vp->getBytesForUpdate().setDataFromBuffer(opacket.data, opacket.size);
         vp->setChunkLength(B(voipHeaderSize + opacket.size));
     }
 

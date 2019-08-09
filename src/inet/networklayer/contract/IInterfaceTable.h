@@ -154,9 +154,7 @@ class INET_API IInterfaceTable
 
     /**
      * Returns the first interface with the isLoopback flag set.
-     * (If there's no loopback, it returns nullptr -- but this
-     * should never happen because InterfaceTable itself registers a
-     * loopback interface on startup.)
+     * If there's no loopback, it returns nullptr.
      */
     virtual InterfaceEntry *getFirstLoopbackInterface() const = 0;
 

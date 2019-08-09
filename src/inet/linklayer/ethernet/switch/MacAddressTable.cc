@@ -296,32 +296,47 @@ void MacAddressTable::readAddressTable(const char *fileName)
         if (line[0] == '#')
             continue;
 
+        // scan in VLAN ID
+        char *vlanIdStr = strtok(line, " \t");
         // scan in MAC address
-        char *macAddressStr = strtok(line, " \t");
+        char *macAddressStr = strtok(nullptr, " \t");
         // scan in interface name
         char *interfaceName = strtok(nullptr, " \t");
-        // scan in VLAN ID
-        char *vlanIdStr = strtok(nullptr, " \t");
+
+        char *endptr = nullptr;
 
         // empty line or comment?
-        if (!macAddressStr || *macAddressStr == '#')
+        if (!vlanIdStr || *vlanIdStr == '#')
             continue;
 
         // broken line?
-        if (!macAddressStr || !interfaceName)
+        if (!vlanIdStr || !macAddressStr || !interfaceName)
             throw cRuntimeError("line %d invalid in address table file `%s'", lineno, fileName);
 
-        //parse columns:
+        // parse columns:
+
+        //   parse VLAN ID:
+        unsigned int vlanId = strtol(vlanIdStr, &endptr, 10);
+        if (!endptr || *endptr)
+            throw cRuntimeError("error in line %d in address table file `%s': VLAN ID '%s' unresolved", lineno, fileName, vlanIdStr);
+
+        //   parse MAC address:
         L3Address addr;
         if (! L3AddressResolver().tryResolve(macAddressStr, addr, L3AddressResolver::ADDR_MAC))
             throw cRuntimeError("error in line %d in address table file `%s': MAC address '%s' unresolved", lineno, fileName, macAddressStr);
         MacAddress macAddress = addr.toMac();
+
+        //   parse interface:
+        int interfaceId = -1;
         auto ie = ifTable->getInterfaceByName(interfaceName);
+        if (ie == nullptr) {
+            long int num = strtol(interfaceName, &endptr, 10);
+            if (endptr && *endptr == '\0')
+                ie = ifTable->findInterfaceById(num);
+        }
         if (ie == nullptr)
             throw cRuntimeError("error in line %d in address table file `%s': interface '%s' not found", lineno, fileName, interfaceName);
-        int interfaceId = ie->getInterfaceId();
-
-        unsigned int vlanId = vlanIdStr ? atoi(vlanIdStr) : 0;
+        interfaceId = ie->getInterfaceId();
 
         // Create an entry with address and interfaceId and insert into table
         AddressEntry entry(vlanId, interfaceId, 0);

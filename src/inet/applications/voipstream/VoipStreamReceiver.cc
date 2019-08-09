@@ -234,18 +234,6 @@ void VoipStreamReceiver::closeConnection()
 void VoipStreamReceiver::decodePacket(Packet *pk)
 {
     const auto& vp = pk->peekAtFront<VoipStreamPacket>();
-    switch (vp->getType()) {
-        case VOICE:
-            emit(packetHasVoiceSignal, 1);
-            break;
-
-        case SILENCE:
-            emit(packetHasVoiceSignal, 0);
-            break;
-
-        default:
-            throw cRuntimeError("The received VoipStreamPacket has unknown type %d", vp->getType());
-    }
     uint16_t newSeqNo = vp->getSeqNo();
     if (newSeqNo > curConn.seqNo + 1)
         emit(lostPacketsSignal, newSeqNo - (curConn.seqNo + 1));
@@ -262,11 +250,23 @@ void VoipStreamReceiver::decodePacket(Packet *pk)
     emit(delaySignal, curConn.lastPacketFinish - pk->getCreationTime());
     curConn.seqNo = newSeqNo;
 
-    int len = vp->getBytes().getDataArraySize();
-    uint8_t buff[len];
-    vp->getBytes().copyDataToBuffer(buff, len);
-    curConn.writeAudioFrame(buff, len);
-    FINGERPRINT_ADD_EXTRA_DATA2((const char *)buff, len);
+    if (vp->getType() == VOICE) {
+        emit(packetHasVoiceSignal, 1);
+        int len = vp->getBytes().getDataArraySize();
+        uint8_t buff[len];
+        vp->getBytes().copyDataToBuffer(buff, len);
+        curConn.writeAudioFrame(buff, len);
+        FINGERPRINT_ADD_EXTRA_DATA2((const char *)buff, len);
+    }
+    else if (vp->getType() == SILENCE) {
+        emit(packetHasVoiceSignal, 0);
+        int silenceSamples = vp->getSamplesPerPacket();
+        curConn.writeLostSamples(silenceSamples);
+        curConn.lastPacketFinish += silenceSamples * (1.0 / curConn.sampleRate);
+        FINGERPRINT_ADD_EXTRA_DATA(silenceSamples);
+    }
+    else
+        throw cRuntimeError("The received VoipStreamPacket has unknown type %d", vp->getType());
 }
 
 void VoipStreamReceiver::finish()
