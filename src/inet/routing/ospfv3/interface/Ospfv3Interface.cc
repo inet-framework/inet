@@ -1265,6 +1265,7 @@ void Ospfv3Interface::processLSU(Packet* packet, Ospfv3Neighbor* neighbor){
                                 lsaKey.LSType = currentLSA->getHeader().getLsaType();
                                 neighbor->removeFromRequestList(lsaKey);
                             }
+                            delete lsaCopy;
                         }
                         else {
                             if (ackFlags.lsaIsNewer) {
@@ -1640,6 +1641,7 @@ bool Ospfv3Interface::floodLSA(const Ospfv3Lsa* lsa, Ospfv3Interface* interface,
                     Ospfv3Lsa* lsaCopy = lsa->dup();
                     lsas.push_back(lsaCopy);
                     Packet* updatePacket = this->prepareUpdatePacket(lsas);
+                    delete lsaCopy;
 
                     if (updatePacket != nullptr) {
                         EV_DEBUG << "Prepared LSUpdate packet is ready\n";
@@ -1877,9 +1879,9 @@ LinkLSA* Ospfv3Interface::getLinkLSAbyKey(LSAKeyType lsaKey)
     return nullptr;
 }
 
-bool Ospfv3Interface::installLinkLSA(const Ospfv3LinkLsa *lsaC)
+bool Ospfv3Interface::installLinkLSA(const Ospfv3LinkLsa *lsa)
 {
-    auto lsa = lsaC->dup(); // make editable copy of lsa
+//    auto lsa = lsaC->dup(); // make editable copy of lsa
 //    EV_DEBUG << "Link LSA is being installed in database \n";
     LSAKeyType lsaKey;
     lsaKey.linkStateID = lsa->getHeader().getLinkStateID();
@@ -1899,10 +1901,11 @@ bool Ospfv3Interface::installLinkLSA(const Ospfv3LinkLsa *lsaC)
     }
 }//installLinkLSA
 
-bool Ospfv3Interface::updateLinkLSA(LinkLSA* currentLsa, Ospfv3LinkLsa* newLsa)
+bool Ospfv3Interface::updateLinkLSA(LinkLSA* currentLsa,const Ospfv3LinkLsa* newLsa)
 {
     bool different = linkLSADiffersFrom(currentLsa, newLsa);
-    (*currentLsa) = (*newLsa);
+//    (*currentLsa) = (*newLsa);
+    currentLsa = new LinkLSA(* newLsa);
 //    currentLsa->getHeaderForUpdate().setLsaAge(0);//reset the age
     if (different) {
         return true;
@@ -1912,7 +1915,7 @@ bool Ospfv3Interface::updateLinkLSA(LinkLSA* currentLsa, Ospfv3LinkLsa* newLsa)
     }
 }
 
-bool Ospfv3Interface::linkLSADiffersFrom(Ospfv3LinkLsa* currentLsa, Ospfv3LinkLsa* newLsa)
+bool Ospfv3Interface::linkLSADiffersFrom(Ospfv3LinkLsa* currentLsa,const Ospfv3LinkLsa* newLsa)
 {
     const Ospfv3LsaHeader& thisHeader = currentLsa->getHeader();
     const Ospfv3LsaHeader& lsaHeader = newLsa->getHeader();

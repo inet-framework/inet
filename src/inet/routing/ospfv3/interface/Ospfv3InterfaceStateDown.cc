@@ -21,6 +21,7 @@ void Ospfv3InterfaceStateDown::processEvent(Ospfv3Interface* interface, Ospfv3In
         if(!interface->isInterfacePassive()){
             LinkLSA *lsa = interface->originateLinkLSA();
             interface->installLinkLSA(lsa);
+            delete lsa;
             interface->getArea()->getInstance()->getProcess()->setTimer(interface->getHelloTimer(), 0);
             interface->getArea()->getInstance()->getProcess()->setTimer(interface->getAcknowledgementTimer(), interface->getAckDelay());
 
@@ -66,11 +67,14 @@ void Ospfv3InterfaceStateDown::processEvent(Ospfv3Interface* interface, Ospfv3In
         else if(interface->isInterfacePassive()) {
             LinkLSA *lsa = interface->originateLinkLSA();
             interface->installLinkLSA(lsa);
+            delete lsa;
             IntraAreaPrefixLSA *prefLsa = interface->getArea()->originateIntraAreaPrefixLSA();
             if (prefLsa != nullptr)
+            {
                 if (!interface->getArea()->installIntraAreaPrefixLSA(prefLsa))
                     EV_DEBUG << "Intra Area Prefix LSA for network beyond interface " << interface->getIntName() << " was not created!\n";
-
+                delete prefLsa;
+            }
             changeState(interface, new Ospfv3InterfacePassive, this);
         }
         if (event == Ospfv3Interface::LOOP_IND_EVENT) {

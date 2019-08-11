@@ -57,7 +57,7 @@ void Ospfv3InterfaceState::changeState(Ospfv3Interface *interface, Ospfv3Interfa
 
                 newLSA->getHeaderForUpdate().setLsaSequenceNumber(sequenceNumber + 1);
                 shouldRebuildRoutingTable |= interface->getArea()->installRouterLSA(newLSA);
-
+                routerLSA = interface->getArea()->findRouterLSA(interface->getArea()->getInstance()->getProcess()->getRouterID());
                 interface->getArea()->setSpfTreeRoot(routerLSA);
                 interface->getArea()->floodLSA(newLSA);
                 delete newLSA;
@@ -70,6 +70,7 @@ void Ospfv3InterfaceState::changeState(Ospfv3Interface *interface, Ospfv3Interfa
             shouldRebuildRoutingTable |= interface->getArea()->installRouterLSA(newLSA);
             if (shouldRebuildRoutingTable)
             {
+                routerLSA = interface->getArea()->findRouterLSA(interface->getArea()->getInstance()->getProcess()->getRouterID());
                 interface->getArea()->setSpfTreeRoot(routerLSA);
                 interface->getArea()->floodLSA(newLSA);
             }
@@ -103,22 +104,28 @@ void Ospfv3InterfaceState::changeState(Ospfv3Interface *interface, Ospfv3Interfa
         }
 
         EV_DEBUG << "Changing state -> new Router LSA\n";
-        RouterLSA* routerLsa = interface->getArea()->originateRouterLSA();
-        if (routerLsa != nullptr)
+        RouterLSA* newLSA = interface->getArea()->originateRouterLSA();
+        if (newLSA != nullptr)
         {
-            if (interface->getArea()->installRouterLSA(routerLsa))
+            if (interface->getArea()->installRouterLSA(newLSA))
             {
-                interface->getArea()->setSpfTreeRoot(routerLsa);
-                interface->getArea()->floodLSA(routerLsa);
-
+                routerLSA = interface->getArea()->findRouterLSA(interface->getArea()->getInstance()->getProcess()->getRouterID());
+                interface->getArea()->setSpfTreeRoot(routerLSA);
+                interface->getArea()->floodLSA(newLSA);
             }
+            delete newLSA;
         }
         if (interface->getType() == Ospfv3Interface::POINTTOPOINT_TYPE || (interface->getArea()->hasAnyPassiveInterface()))
         {
             Ospfv3IntraAreaPrefixLsa* prefLSA  = interface->getArea()->originateIntraAreaPrefixLSA();
             if (prefLSA != nullptr)
+            {
                 if (interface->getArea()->installIntraAreaPrefixLSA(prefLSA))
+                {
                     interface->getArea()->floodLSA(prefLSA);
+                }
+                delete prefLSA;
+            }
 
         }
 
@@ -132,8 +139,11 @@ void Ospfv3InterfaceState::changeState(Ospfv3Interface *interface, Ospfv3Interfa
             {
                 Ospfv3IntraAreaPrefixLsa* prefLSA  = interface->getArea()->originateIntraAreaPrefixLSA();
                 if (prefLSA != nullptr)
+                {
                     if (interface->getArea()->installIntraAreaPrefixLSA(prefLSA))
                         interface->getArea()->floodLSA(prefLSA);
+                    delete prefLSA;
+                }
             }
         }
         shouldRebuildRoutingTable = true;
@@ -145,19 +155,20 @@ void Ospfv3InterfaceState::changeState(Ospfv3Interface *interface, Ospfv3Interfa
             shouldRebuildRoutingTable |= interface->getArea()->installNetworkLSA(newLSA);
             if (shouldRebuildRoutingTable)
             {
-                Ospfv3IntraAreaPrefixLsa* prefLSA = interface->getArea()->originateNetIntraAreaPrefixLSA(newLSA, interface, true);
+                Ospfv3IntraAreaPrefixLsa* prefLSA = interface->getArea()->originateNetIntraAreaPrefixLSA(newLSA, interface, false);
                 if (prefLSA != nullptr)
                 {
                     interface->getArea()->installIntraAreaPrefixLSA(prefLSA);
                     InterfaceEntry* ie = interface->containingProcess->ift->getInterfaceById(interface->getInterfaceId());
                     Ipv6InterfaceData *ipv6int = ie->ipv6Data();
                     ipv6int->joinMulticastGroup(Ipv6Address::ALL_OSPF_DESIGNATED_ROUTERS_MCAST);
-//                    ipv6int->assignAddress(Ipv6Address::ALL_OSPF_DESIGNATED_ROUTERS_MCAST, false, 0, 0);
 
                     interface->getArea()->floodLSA(newLSA);
                     interface->getArea()->floodLSA(prefLSA);
                 }
+                delete prefLSA;
             }
+            delete newLSA;
         }
         else
         {
@@ -180,6 +191,7 @@ void Ospfv3InterfaceState::changeState(Ospfv3Interface *interface, Ospfv3Interfa
         {
             shouldRebuildRoutingTable |= interface->getArea()->installIntraAreaPrefixLSA(prefLSA);
             interface->getArea()->floodLSA(prefLSA);
+            delete prefLSA;
         }
     }
 
