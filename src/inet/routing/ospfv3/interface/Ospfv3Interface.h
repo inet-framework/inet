@@ -81,13 +81,13 @@ class INET_API Ospfv3Interface : public cObject
 
     struct AcknowledgementFlags
     {
-        bool floodedBackOut;
-        bool lsaIsNewer;
-        bool lsaIsDuplicate;
-        bool impliedAcknowledgement;
-        bool lsaReachedMaxAge;
-        bool noLSAInstanceInDatabase;
-        bool anyNeighborInExchangeOrLoadingState;
+        bool floodedBackOut             = false;
+        bool lsaIsNewer                 = false;
+        bool lsaIsDuplicate             = false;
+        bool impliedAcknowledgement     = false;
+        bool lsaReachedMaxAge           = false;
+        bool noLSAInstanceInDatabase    = false;
+        bool anyNeighborInExchangeOrLoadingState= false;
     };
 
     cModule* containingModule=nullptr;
@@ -184,8 +184,8 @@ class INET_API Ospfv3Interface : public cObject
     LinkLSA* getLinkLSA(int i){return this->linkLSAList.at(i);}
     LinkLSA* getLinkLSAbyKey(LSAKeyType lsaKey);
 //    void installLinkLSA(LinkLSA *lsa);
-    bool updateLinkLSA(LinkLSA* currentLsa, Ospfv3LinkLsa* newLsa);
-    bool linkLSADiffersFrom(Ospfv3LinkLsa* currentLsa, Ospfv3LinkLsa* newLsa);
+    bool updateLinkLSA(LinkLSA* currentLsa,const Ospfv3LinkLsa* newLsa);
+    bool linkLSADiffersFrom(Ospfv3LinkLsa* currentLsa,const Ospfv3LinkLsa* newLsa);
     LinkLSA* findLinkLSAbyAdvRouter (Ipv4Address advRouter);
 
     void sendLSAcknowledgement(const Ospfv3LsaHeader *lsaHeader, Ipv6Address destination);

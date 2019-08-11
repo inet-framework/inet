@@ -65,7 +65,10 @@ void Ospfv3Area::init()
     Ospfv3IntraAreaPrefixLsa* prefixLsa = this->originateIntraAreaPrefixLSA();
     EV_DEBUG << "Creating InterAreaPrefixLSA from IntraAreaPrefixLSA\n";
     if (prefixLsa != nullptr)
+    {
         this->installIntraAreaPrefixLSA(prefixLsa);                 // INTRA !!!
+        delete prefixLsa;
+    }
 
     if((this->getAreaType() == Ospfv3AreaType::STUB) && (this->getInstance()->getAreaCount()>1))
         this->originateDefaultInterAreaPrefixLSA(this);
@@ -452,8 +455,8 @@ void Ospfv3Area::ageDatabase()
                 if (newLSA != nullptr) {
 //                    newLSA->getHeaderForUpdate().setLsaSequenceNumber(sequenceNumber + 1);
                     shouldRebuildRoutingTable |= updateIntraAreaPrefixLSA(lsa,newLSA);
-                    if (lsa != newLSA)
-                        delete newLSA;
+//                    if (lsa != newLSA)
+                    delete newLSA;
                 }
                 else {    // no neighbors on the network -> old NetworkLSA must be flushed
                     lsa->getHeaderForUpdate().setLsaAge(MAX_AGE);
@@ -604,7 +607,7 @@ void Ospfv3Area::ageDatabase()
                             {
                                 if (iapLSA->getHeader().getLsaAge() != MAX_AGE)
                                 {
-                                    area->originateInterAreaPrefixLSA(iapLSA, area, true);
+                                    area->originateInterAreaPrefixLSA(iapLSA, area, false);
                                 }
                                 else
                                 {
@@ -867,7 +870,8 @@ bool Ospfv3Area::installRouterLSA(const Ospfv3RouterLsa *lsa)
 bool Ospfv3Area::updateRouterLSA(RouterLSA* currentLsa,const Ospfv3RouterLsa* newLsa)
 {
     bool different = routerLSADiffersFrom(currentLsa, newLsa);
-    (*currentLsa) = (*newLsa);
+//    (*currentLsa) = (*newLsa);
+    currentLsa = new RouterLSA(* newLsa);
     currentLsa->resetInstallTime();
 //    currentLsa->getHeaderForUpdate().setLsaAge(0);//reset the age
     if (different) {
@@ -933,8 +937,7 @@ void Ospfv3Area::deleteRouterLSA(int index) {
            IntraAreaPrefixLSA* prefLSA = this->intraAreaPrefixLSAList[i];
            prefLSA->getHeaderForUpdate().setLsaAge(MAX_AGE);
            this->floodLSA(prefLSA);
-           this->intraAreaPrefixLSAList.erase(this->intraAreaPrefixLSAList.begin()+i);
-           EV_DEBUG << "Deleting old Router-LSA, also deleting appropriate Intra-Area-Prefix-LSA\n";
+           EV_DEBUG << "Deleting old Router-LSA, set age of appropriate Intra-Area-Prefix-LSA to MAX_AGE\n";
            break;
        }
     }
@@ -1098,9 +1101,9 @@ bool Ospfv3Area::installNetworkLSA(const Ospfv3NetworkLsa *lsa)
 bool Ospfv3Area::updateNetworkLSA(NetworkLSA* currentLsa,const Ospfv3NetworkLsa* newLsa)
 {
     bool different = networkLSADiffersFrom(currentLsa, newLsa);
-    (*currentLsa) = (*newLsa);
+    currentLsa = new NetworkLSA(*newLsa);
+//    (*currentLsa) = (*newLsa);
     currentLsa->resetInstallTime();
-//    currentLsa->getHeaderForUpdate().setLsaAge(0);//reset the age
     if (different) {
         return true;
     }
@@ -1229,6 +1232,7 @@ void Ospfv3Area::originateInterAreaPrefixLSA(Ospfv3IntraAreaPrefixLsa* lsa, Ospf
                 if (area->installInterAreaPrefixLSA(newLsa))
                         area->floodLSA(newLsa);
             }
+//            delete newLsa;
 
         }
         if (duplicateForArea == this->getInstance()->getAreaCount()-1)
@@ -1248,7 +1252,7 @@ void Ospfv3Area::originateInterAreaPrefixLSA(const Ospfv3Lsa* prefLsa, Ospfv3Are
     lsaKey.LSType = prefLsa->getHeader().getLsaType();
 
     //this check is mainly for dealing with shut downs
-    Ospfv3Lsa *lsaInDatabase = this->getInstance()->getProcess()->findLSA(lsaKey, fromArea->getAreaID(), fromArea->getInstance()->getInstanceID());
+//    Ospfv3Lsa *lsaInDatabase = this->getInstance()->getProcess()->findLSA(lsaKey, fromArea->getAreaID(), fromArea->getInstance()->getInstanceID());
 
     for(int i = 0; i < this->getInstance()->getAreaCount(); i++)
     {
@@ -1258,24 +1262,25 @@ void Ospfv3Area::originateInterAreaPrefixLSA(const Ospfv3Lsa* prefLsa, Ospfv3Are
 
         const Ospfv3InterAreaPrefixLsa *lsa = check_and_cast<const Ospfv3InterAreaPrefixLsa *>(prefLsa);
         B packetLength = OSPFV3_LSA_HEADER_LENGTH+OSPFV3_INTER_AREA_PREFIX_LSA_HEADER_LENGTH;
-        int prefixCount = 0;
+//        int prefixCount = 0;
 
         InterAreaPrefixLSA* newLsa = nullptr;
 
-        if (lsaInDatabase != nullptr) //I've probably made already LSA type 3 from this prefLsa
-            for (int inter = 0; inter < area->getInterAreaPrefixLSACount(); inter++)
-            {
-               InterAreaPrefixLSA* iterLsa = area->getInterAreaPrefixLSA(inter);
-               if ((iterLsa->getHeader().getAdvertisingRouter() == this->getInstance()->getProcess()->getRouterID()) &&
-                       (iterLsa->getPrefix() == lsa->getPrefix()) &&
-                       (iterLsa->getPrefixLen() == lsa->getPrefixLen()))
-               {
-                   // this have already been processed.  So update old one and flood it away
-                   newLsa = iterLsa;
-                   break;
-               }
-
-            }
+//        this part of code was put aside because it was hard work with memory correctly
+//        if (lsaInDatabase != nullptr) //I've probably made already LSA type 3 from this prefLsa
+//            for (int inter = 0; inter < area->getInterAreaPrefixLSACount(); inter++)
+//            {
+//               InterAreaPrefixLSA* iterLsa = area->getInterAreaPrefixLSA(inter);
+//               if ((iterLsa->getHeader().getAdvertisingRouter() == this->getInstance()->getProcess()->getRouterID()) &&
+//                       (iterLsa->getPrefix() == lsa->getPrefix()) &&
+//                       (iterLsa->getPrefixLen() == lsa->getPrefixLen()))
+//               {
+//                   // this have already been processed.  So update old one and flood it away
+//                   newLsa = iterLsa;
+//                   break;
+//               }
+//
+//            }
         if (newLsa == nullptr)
         {
             //Only one Inter-Area-Prefix LSA for an area so only one header will suffice
@@ -1301,13 +1306,12 @@ void Ospfv3Area::originateInterAreaPrefixLSA(const Ospfv3Lsa* prefLsa, Ospfv3Are
         newLsa->setPrefixLen(lsa->getPrefixLen());
         newLsa->setPrefix(lsa->getPrefix());
 
-
-//        area->installInterAreaPrefixLSA(newLsa);
         if (area->installInterAreaPrefixLSA(newLsa))
             area->floodLSA(newLsa);
-        else if (lsaInDatabase)
-            area->floodLSA(newLsa);
+//        else if (lsaInDatabase)
+//            area->floodLSA(newLsa);
 
+        delete newLsa;
     }
     //TODO - length!!!
 }
@@ -1315,7 +1319,7 @@ void Ospfv3Area::originateInterAreaPrefixLSA(const Ospfv3Lsa* prefLsa, Ospfv3Are
 void Ospfv3Area::originateDefaultInterAreaPrefixLSA(Ospfv3Area* toArea)
 {
     B packetLength = OSPFV3_LSA_HEADER_LENGTH+OSPFV3_INTER_AREA_PREFIX_LSA_HEADER_LENGTH;
-    int prefixCount = 0;
+//    int prefixCount = 0;
 
     //Only one Inter-Area-Prefix LSA for an area so only one header will suffice
     InterAreaPrefixLSA* newLsa = new InterAreaPrefixLSA();
@@ -1344,6 +1348,7 @@ void Ospfv3Area::originateDefaultInterAreaPrefixLSA(Ospfv3Area* toArea)
         newLsa->setPrefix(defaultPref);
     }
     toArea->installInterAreaPrefixLSA(newLsa);
+    delete newLsa;
     //TODO - length!!!
 }
 
@@ -1392,7 +1397,8 @@ bool Ospfv3Area::installInterAreaPrefixLSA(const Ospfv3InterAreaPrefixLsa* lsa)
 bool Ospfv3Area::updateInterAreaPrefixLSA(InterAreaPrefixLSA* currentLsa,const Ospfv3InterAreaPrefixLsa* newLsa)
 {
     bool different = interAreaPrefixLSADiffersFrom(currentLsa, newLsa);
-    (*currentLsa) = (*newLsa);
+//    (*currentLsa) = (*newLsa);
+    currentLsa = new InterAreaPrefixLSA(* newLsa);
 //    currentLsa->getHeaderForUpdate().setLsaAge(0);//reset the age
     currentLsa->resetInstallTime();
     if (different) {
@@ -1559,14 +1565,15 @@ IntraAreaPrefixLSA* Ospfv3Area::originateIntraAreaPrefixLSA() //this is for non-
         }
         return nullptr;
     }
-    // check if this LSA has not been already created
-    IntraAreaPrefixLSA* prefixLsa = IntraAreaPrefixLSAAlreadyExists(newLsa);
-    if (prefixLsa != nullptr)
-    {
-       this->subtractIntraAreaPrefixLinkStateID();
-       delete (newLsa);
-       return prefixLsa;
-    }
+
+    // check if this LSA has not been already created (code was commented beacause of correct work with memory)
+//    IntraAreaPrefixLSA* prefixLsa = IntraAreaPrefixLSAAlreadyExists(newLsa);
+//    if (prefixLsa != nullptr)
+//    {
+//       this->subtractIntraAreaPrefixLinkStateID();
+//       delete (newLsa);
+//       return prefixLsa;
+//    }
     this->incrementIntraAreaPrefixSequence();
     return newLsa;
 }//originateIntraAreaPrefixLSA
@@ -1824,7 +1831,7 @@ bool Ospfv3Area::installIntraAreaPrefixLSA(const Ospfv3IntraAreaPrefixLsa *lsa)
         this->intraAreaPrefixLSAList.push_back(lsaCopy);
 
         if (this->getInstance()->getAreaCount() > 1)
-            originateInterAreaPrefixLSA(lsaCopy, this , true);
+            originateInterAreaPrefixLSA(lsaCopy, this , false);
 
         return true;
     }
@@ -1836,7 +1843,8 @@ bool Ospfv3Area::installIntraAreaPrefixLSA(const Ospfv3IntraAreaPrefixLsa *lsa)
 bool Ospfv3Area::updateIntraAreaPrefixLSA(IntraAreaPrefixLSA* currentLsa,const Ospfv3IntraAreaPrefixLsa* newLsa)
 {
     bool different = intraAreaPrefixLSADiffersFrom(currentLsa, newLsa);
-    (*currentLsa) = (*newLsa);
+    currentLsa = new IntraAreaPrefixLSA(*newLsa);
+//    *currentLsa = *newLsa;
     currentLsa->resetInstallTime();
 //    currentLsa->getHeaderForUpdate().setLsaAge(0);//reset the age
     if (different) {
@@ -2135,8 +2143,8 @@ void Ospfv3Area::calculateShortestPathTree(std::vector<Ospfv3RoutingTableEntry* 
                 routerLSA = findRouterLSA(routerID);
                 spfTreeRoot = routerLSA;
                 floodLSA(newLSA);       //spread LSA to whole network
-                delete newLSA;
             }
+            delete newLSA;
         }
         else
             spfTreeRoot = routerLSA;

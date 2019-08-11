@@ -191,9 +191,9 @@ class INET_API Ospfv3Area : public cObject
     std::map<int, Ospfv3Interface*> interfaceByIndex;
     int instanceType;
     Ospfv3Instance* containingInstance;
-    bool externalRoutingCapability;
+    bool externalRoutingCapability = false;
     int stubDefaultCost;
-    bool transitCapability;
+    bool transitCapability = false;
 
     std::map<Ipv4Address, RouterLSA *> routerLSAsByID;
     std::map<Ipv4Address, NetworkLSA *> networkLSAsByID;
