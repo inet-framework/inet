@@ -188,7 +188,7 @@ Without QoS
 As expected, the quality of the received sound using the
 ``VoIP_WithoutQoS`` configuration is very low:
 
-.. audio:: VoIP_WithoutQoS_results.wav
+.. audio:: media/VoIP_WithoutQoS_results.wav
 
 The jaggedness in the received audio is because approximately half
 of the VoIP packets sent by ``voipPhone1`` are dropped by :ned:`DropTailQueue`
@@ -226,7 +226,7 @@ no VoIP packets are dropped.
 The changes result in better sound quality. Dropouts can now only be observed
 at the beginning of the recording:
 
-.. audio:: VoIP_WithPolicing_results.wav
+.. audio:: media/VoIP_WithPolicing_results.wav
 
 The following plot shows the delay of the VoIP packets:
 
@@ -263,7 +263,7 @@ Some delay still remains, of course, but the best audio quality could be
 reached with this configuration. The initial dropouts that were present in
 the previous configuration are almost inaudible now.
 
-.. audio:: VoIP_WithPolicingAndQueueing_results.wav
+.. audio:: media/VoIP_WithPolicingAndQueueing_results.wav
 
 As seen from the next plot, the delay of voice packets has been reduced to about 0.11s:
 
