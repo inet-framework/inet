@@ -1,6 +1,14 @@
 Recent changes in the INET Framework
 ====================================
 
+INET 3.6.6 (August 2019) - stable
+---------------------------------
+
+This release contains a bug fix for an issue where clang did not export
+the typinfo symbols for classes on Windows. This caused link errors on
+dependent projets. It requires OMNeT++ 5.3 or later.
+
+
 INET 3.6.5 (April 2019) - stable
 --------------------------------
 
