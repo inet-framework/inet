@@ -1,17 +1,32 @@
+.DEFAULT_GOAL := all-pch
+
 #
 # Use the older message compiler. New compiler was introduced in OMNeT++ 5.3
 #
 MSGC:=$(MSGC) --msg4
 
-#
-# on windows we have to link with the ws2_32 (winsock2) library as it is no longer added
-# to the omnetpp system libraries by default (as of OMNeT++ 5.1)
-#
 ifeq ($(PLATFORM),win32.x86_64)
+  #
+  # on windows we have to link with the ws2_32 (winsock2) library as it is no longer added
+  # to the omnetpp system libraries by default (as of OMNeT++ 5.1)
+  #
   LIBS += -lws2_32
   DEFINES += -DINET_EXPORT
   ENABLE_AUTO_IMPORT=-Wl,--enable-auto-import
   LDFLAGS := $(filter-out $(ENABLE_AUTO_IMPORT), $(LDFLAGS))
+
+  # FIX for clang not exporting typinfo and other thunks on Windows
+  ifeq ($(CC),clang)
+    DEFFILE = $O/typeinfo.def
+    LDFLAGS += $(DEFFILE)
+
+$(DEFFILE): $(OBJS)  $(wildcard $(EXTRA_OBJS)) Makefile $(CONFIGFILE)
+	@echo Creating .DEF file for $(TARGET) - needed to fix an issue where clang is not exporting typinfo for classes on Windows
+	$(Q)echo >.tmp$$$$ $(OBJS) $(EXTRA_OBJS) && $(DLLTOOL) --export-all-symbols --kill-at -z all$$$$.def @.tmp$$$$ && grep -E '( *_ZTI)|( *_ZThn)|EXPORTS' all$$$$.def | sed 's/ @.*//' >$(DEFFILE) && rm .tmp$$$$ all$$$$.def
+
+$O/$(TARGET): $(DEFFILE)
+
+  endif
 endif
 
 #
