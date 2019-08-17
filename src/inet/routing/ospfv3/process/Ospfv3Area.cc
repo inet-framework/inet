@@ -374,6 +374,7 @@ void Ospfv3Area::ageDatabase()
                         delete newLSA;
 
                         floodLSA(lsa);
+                        delete lsa;
                     }
                     else {    // no neighbors on the network -> old NetworkLSA must be deleted
                         delete networkLSAList[i];
@@ -463,6 +464,7 @@ void Ospfv3Area::ageDatabase()
                     lsa->incrementInstallTime();
                 }
                floodLSA(lsa);
+               delete lsa;
            }
         }
 
@@ -531,6 +533,7 @@ void Ospfv3Area::ageDatabase()
                         delete newLSA;
 
                         floodLSA(lsa);
+                        delete lsa;
                     }
                     else
                     {    // no neighbors on the network -> old NetworkLSA must be flushed
