@@ -1513,12 +1513,12 @@ IntraAreaPrefixLSA* Ospfv3Area::originateIntraAreaPrefixLSA() //this is for non-
                 {
                     Ipv4InterfaceData* ipv4Data = ie->ipv4Data();
                     Ipv4Address ipAdd = ipv4Data->getIPAddress();
-                    Ospfv3LsaPrefix *prefix = new Ospfv3LsaPrefix();
-                    prefix->prefixLen= ipv4Data->getNetmask().getNetmaskLength();
-                    prefix->metric = METRIC;
-                    prefix->addressPrefix=L3Address(ipAdd.getPrefix(prefix->prefixLen));
+                    Ospfv3LsaPrefix prefix;
+                    prefix.prefixLen= ipv4Data->getNetmask().getNetmaskLength();
+                    prefix.metric = METRIC;
+                    prefix.addressPrefix=L3Address(ipAdd.getPrefix(prefix.prefixLen));
                     newLsa->setPrefixesArraySize(currentPrefix);
-                    newLsa->setPrefixes(currentPrefix-1, *prefix);
+                    newLsa->setPrefixes(currentPrefix-1, prefix);
                     prefixCount++;
                     currentPrefix++;
                 }
@@ -1526,17 +1526,17 @@ IntraAreaPrefixLSA* Ospfv3Area::originateIntraAreaPrefixLSA() //this is for non-
                 {
                     Ipv6Address ipv6 = ipv6int->getAddress(i);
                     if(ipv6.isGlobal()) {//Only all the global prefixes belong to the Intra-Area-Prefix LSA
-                        Ospfv3LsaPrefix *prefix = new Ospfv3LsaPrefix();
+                        Ospfv3LsaPrefix prefix;
                         int rIndex = this->getInstance()->getProcess()->isInRoutingTable6(this->getInstance()->getProcess()->rt6, ipv6);
                         if (rIndex >= 0)
-                            prefix->prefixLen = this->getInstance()->getProcess()->rt6->getRoute(rIndex)->getPrefixLength();
+                            prefix.prefixLen = this->getInstance()->getProcess()->rt6->getRoute(rIndex)->getPrefixLength();
                         else
-                            prefix->prefixLen = 64;
-                        prefix->metric = METRIC;
-                        prefix->addressPrefix=ipv6.getPrefix(prefix->prefixLen);
+                            prefix.prefixLen = 64;
+                        prefix.metric = METRIC;
+                        prefix.addressPrefix=ipv6.getPrefix(prefix.prefixLen);
 
                         newLsa->setPrefixesArraySize(currentPrefix);
-                        newLsa->setPrefixes(currentPrefix-1, *prefix);
+                        newLsa->setPrefixes(currentPrefix-1, prefix);
                         prefixCount++;
                         currentPrefix++;
                     }
@@ -1612,12 +1612,12 @@ IntraAreaPrefixLSA* Ospfv3Area::originateNetIntraAreaPrefixLSA(NetworkLSA* netwo
         {
             Ipv4InterfaceData* ipv4Data = ie->ipv4Data();
             Ipv4Address ipAdd = ipv4Data->getIPAddress();
-            Ospfv3LsaPrefix *prefix = new Ospfv3LsaPrefix();
-            prefix->prefixLen= ipv4Data->getNetmask().getNetmaskLength();
-            prefix->metric = METRIC;
-            prefix->addressPrefix=L3Address(ipAdd.getPrefix(prefix->prefixLen));
+            Ospfv3LsaPrefix prefix;
+            prefix.prefixLen= ipv4Data->getNetmask().getNetmaskLength();
+            prefix.metric = METRIC;
+            prefix.addressPrefix=L3Address(ipAdd.getPrefix(prefix.prefixLen));
             newLsa->setPrefixesArraySize(currentPrefix);
-            newLsa->setPrefixes(currentPrefix-1, *prefix);
+            newLsa->setPrefixes(currentPrefix-1, prefix);
             prefixCount++;
             currentPrefix++;
 
@@ -1627,17 +1627,17 @@ IntraAreaPrefixLSA* Ospfv3Area::originateNetIntraAreaPrefixLSA(NetworkLSA* netwo
             Ipv6Address ipv6 = ipv6int->getAddress(i);
         //        Ipv6Address ipv6 = ipv6int->getAdvPrefix(i).prefix;
             if(ipv6.isGlobal()) {//Only all the global prefixes belong to the Intra-Area-Prefix LSA
-                Ospfv3LsaPrefix *prefix = new Ospfv3LsaPrefix();
+                Ospfv3LsaPrefix prefix;
                 int rIndex = this->getInstance()->getProcess()->isInRoutingTable6(this->getInstance()->getProcess()->rt6, ipv6);
                 if (rIndex >= 0)
-                    prefix->prefixLen = this->getInstance()->getProcess()->rt6->getRoute(rIndex)->getPrefixLength();
+                    prefix.prefixLen = this->getInstance()->getProcess()->rt6->getRoute(rIndex)->getPrefixLength();
                 else
-                    prefix->prefixLen = 64;
-                prefix->metric = METRIC;
-                prefix->addressPrefix=ipv6.getPrefix(prefix->prefixLen);
+                    prefix.prefixLen = 64;
+                prefix.metric = METRIC;
+                prefix.addressPrefix=ipv6.getPrefix(prefix.prefixLen);
 
                 newLsa->setPrefixesArraySize(currentPrefix);
-                newLsa->setPrefixes(currentPrefix-1, *prefix);
+                newLsa->setPrefixes(currentPrefix-1, prefix);
                 prefixCount++;
                 currentPrefix++;
             }
