@@ -944,7 +944,7 @@ void Ospfv3Area::deleteRouterLSA(int index) {
            break;
        }
     }
-
+    delete delRouter;
     this->routerLSAList.erase(this->routerLSAList.begin()+index);
 }
 
@@ -1761,6 +1761,7 @@ bool Ospfv3Area::installIntraAreaPrefixLSA(const Ospfv3IntraAreaPrefixLsa *lsa)
                         if(routerPref.getPrefix(routerPrefixLen) == netPref.getPrefix(netPrefixLen))
                         {
                             EV_DEBUG << "Deleting old IntraAreaPrefixLSA, install new one IntraAreaPrefixLSA\n";
+                            delete intraAreaPrefixLSAList.at(in);
                             this->intraAreaPrefixLSAList.erase(this->intraAreaPrefixLSAList.begin()+in);
                             erase = true;
                             break;
