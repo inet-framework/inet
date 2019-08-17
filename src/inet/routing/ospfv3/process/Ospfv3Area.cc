@@ -374,6 +374,7 @@ void Ospfv3Area::ageDatabase()
                         delete newLSA;
 
                         floodLSA(lsa);
+                        delete lsa;
                     }
                     else {    // no neighbors on the network -> old NetworkLSA must be deleted
                         delete networkLSAList[i];
@@ -463,6 +464,7 @@ void Ospfv3Area::ageDatabase()
                     lsa->incrementInstallTime();
                 }
                floodLSA(lsa);
+               delete lsa;
            }
         }
 
@@ -531,6 +533,7 @@ void Ospfv3Area::ageDatabase()
                         delete newLSA;
 
                         floodLSA(lsa);
+                        delete lsa;
                     }
                     else
                     {    // no neighbors on the network -> old NetworkLSA must be flushed
@@ -871,8 +874,8 @@ bool Ospfv3Area::updateRouterLSA(RouterLSA* currentLsa,const Ospfv3RouterLsa* ne
 {
     bool different = routerLSADiffersFrom(currentLsa, newLsa);
 //    (*currentLsa) = (*newLsa);
-    currentLsa = new RouterLSA(* newLsa);
-    currentLsa->resetInstallTime();
+//    currentLsa = new RouterLSA(* newLsa);
+//    currentLsa->resetInstallTime();
 //    currentLsa->getHeaderForUpdate().setLsaAge(0);//reset the age
     if (different) {
         return true;
@@ -941,7 +944,7 @@ void Ospfv3Area::deleteRouterLSA(int index) {
            break;
        }
     }
-
+    delete delRouter;
     this->routerLSAList.erase(this->routerLSAList.begin()+index);
 }
 
@@ -1101,9 +1104,10 @@ bool Ospfv3Area::installNetworkLSA(const Ospfv3NetworkLsa *lsa)
 bool Ospfv3Area::updateNetworkLSA(NetworkLSA* currentLsa,const Ospfv3NetworkLsa* newLsa)
 {
     bool different = networkLSADiffersFrom(currentLsa, newLsa);
-    currentLsa = new NetworkLSA(*newLsa);
-//    (*currentLsa) = (*newLsa);
-    currentLsa->resetInstallTime();
+//    currentLsa = new NetworkLSA(*newLsa);
+////    (*currentLsa) = (*newLsa);
+//    currentLsa->resetInstallTime();
+//    delete currentLsa;
     if (different) {
         return true;
     }
@@ -1240,6 +1244,7 @@ void Ospfv3Area::originateInterAreaPrefixLSA(Ospfv3IntraAreaPrefixLsa* lsa, Ospf
             //new LSA was not installed anywhere, so subtract LinkStateID counter
             this->getInstance()->subtractInterAreaPrefixLinkStateID();
         }
+        delete newLsa;
     }
     //TODO - length!!!
 }
@@ -1398,9 +1403,9 @@ bool Ospfv3Area::updateInterAreaPrefixLSA(InterAreaPrefixLSA* currentLsa,const O
 {
     bool different = interAreaPrefixLSADiffersFrom(currentLsa, newLsa);
 //    (*currentLsa) = (*newLsa);
-    currentLsa = new InterAreaPrefixLSA(* newLsa);
+//    currentLsa = new InterAreaPrefixLSA(* newLsa);
 //    currentLsa->getHeaderForUpdate().setLsaAge(0);//reset the age
-    currentLsa->resetInstallTime();
+//    currentLsa->resetInstallTime();
     if (different) {
         return true;
     }
@@ -1513,12 +1518,12 @@ IntraAreaPrefixLSA* Ospfv3Area::originateIntraAreaPrefixLSA() //this is for non-
                 {
                     Ipv4InterfaceData* ipv4Data = ie->ipv4Data();
                     Ipv4Address ipAdd = ipv4Data->getIPAddress();
-                    Ospfv3LsaPrefix *prefix = new Ospfv3LsaPrefix();
-                    prefix->prefixLen= ipv4Data->getNetmask().getNetmaskLength();
-                    prefix->metric = METRIC;
-                    prefix->addressPrefix=L3Address(ipAdd.getPrefix(prefix->prefixLen));
+                    Ospfv3LsaPrefix prefix;
+                    prefix.prefixLen= ipv4Data->getNetmask().getNetmaskLength();
+                    prefix.metric = METRIC;
+                    prefix.addressPrefix=L3Address(ipAdd.getPrefix(prefix.prefixLen));
                     newLsa->setPrefixesArraySize(currentPrefix);
-                    newLsa->setPrefixes(currentPrefix-1, *prefix);
+                    newLsa->setPrefixes(currentPrefix-1, prefix);
                     prefixCount++;
                     currentPrefix++;
                 }
@@ -1526,17 +1531,17 @@ IntraAreaPrefixLSA* Ospfv3Area::originateIntraAreaPrefixLSA() //this is for non-
                 {
                     Ipv6Address ipv6 = ipv6int->getAddress(i);
                     if(ipv6.isGlobal()) {//Only all the global prefixes belong to the Intra-Area-Prefix LSA
-                        Ospfv3LsaPrefix *prefix = new Ospfv3LsaPrefix();
+                        Ospfv3LsaPrefix prefix;
                         int rIndex = this->getInstance()->getProcess()->isInRoutingTable6(this->getInstance()->getProcess()->rt6, ipv6);
                         if (rIndex >= 0)
-                            prefix->prefixLen = this->getInstance()->getProcess()->rt6->getRoute(rIndex)->getPrefixLength();
+                            prefix.prefixLen = this->getInstance()->getProcess()->rt6->getRoute(rIndex)->getPrefixLength();
                         else
-                            prefix->prefixLen = 64;
-                        prefix->metric = METRIC;
-                        prefix->addressPrefix=ipv6.getPrefix(prefix->prefixLen);
+                            prefix.prefixLen = 64;
+                        prefix.metric = METRIC;
+                        prefix.addressPrefix=ipv6.getPrefix(prefix.prefixLen);
 
                         newLsa->setPrefixesArraySize(currentPrefix);
-                        newLsa->setPrefixes(currentPrefix-1, *prefix);
+                        newLsa->setPrefixes(currentPrefix-1, prefix);
                         prefixCount++;
                         currentPrefix++;
                     }
@@ -1612,12 +1617,12 @@ IntraAreaPrefixLSA* Ospfv3Area::originateNetIntraAreaPrefixLSA(NetworkLSA* netwo
         {
             Ipv4InterfaceData* ipv4Data = ie->ipv4Data();
             Ipv4Address ipAdd = ipv4Data->getIPAddress();
-            Ospfv3LsaPrefix *prefix = new Ospfv3LsaPrefix();
-            prefix->prefixLen= ipv4Data->getNetmask().getNetmaskLength();
-            prefix->metric = METRIC;
-            prefix->addressPrefix=L3Address(ipAdd.getPrefix(prefix->prefixLen));
+            Ospfv3LsaPrefix prefix;
+            prefix.prefixLen= ipv4Data->getNetmask().getNetmaskLength();
+            prefix.metric = METRIC;
+            prefix.addressPrefix=L3Address(ipAdd.getPrefix(prefix.prefixLen));
             newLsa->setPrefixesArraySize(currentPrefix);
-            newLsa->setPrefixes(currentPrefix-1, *prefix);
+            newLsa->setPrefixes(currentPrefix-1, prefix);
             prefixCount++;
             currentPrefix++;
 
@@ -1627,17 +1632,17 @@ IntraAreaPrefixLSA* Ospfv3Area::originateNetIntraAreaPrefixLSA(NetworkLSA* netwo
             Ipv6Address ipv6 = ipv6int->getAddress(i);
         //        Ipv6Address ipv6 = ipv6int->getAdvPrefix(i).prefix;
             if(ipv6.isGlobal()) {//Only all the global prefixes belong to the Intra-Area-Prefix LSA
-                Ospfv3LsaPrefix *prefix = new Ospfv3LsaPrefix();
+                Ospfv3LsaPrefix prefix;
                 int rIndex = this->getInstance()->getProcess()->isInRoutingTable6(this->getInstance()->getProcess()->rt6, ipv6);
                 if (rIndex >= 0)
-                    prefix->prefixLen = this->getInstance()->getProcess()->rt6->getRoute(rIndex)->getPrefixLength();
+                    prefix.prefixLen = this->getInstance()->getProcess()->rt6->getRoute(rIndex)->getPrefixLength();
                 else
-                    prefix->prefixLen = 64;
-                prefix->metric = METRIC;
-                prefix->addressPrefix=ipv6.getPrefix(prefix->prefixLen);
+                    prefix.prefixLen = 64;
+                prefix.metric = METRIC;
+                prefix.addressPrefix=ipv6.getPrefix(prefix.prefixLen);
 
                 newLsa->setPrefixesArraySize(currentPrefix);
-                newLsa->setPrefixes(currentPrefix-1, *prefix);
+                newLsa->setPrefixes(currentPrefix-1, prefix);
                 prefixCount++;
                 currentPrefix++;
             }
@@ -1757,6 +1762,7 @@ bool Ospfv3Area::installIntraAreaPrefixLSA(const Ospfv3IntraAreaPrefixLsa *lsa)
                         if(routerPref.getPrefix(routerPrefixLen) == netPref.getPrefix(netPrefixLen))
                         {
                             EV_DEBUG << "Deleting old IntraAreaPrefixLSA, install new one IntraAreaPrefixLSA\n";
+                            delete intraAreaPrefixLSAList.at(in);
                             this->intraAreaPrefixLSAList.erase(this->intraAreaPrefixLSAList.begin()+in);
                             erase = true;
                             break;
@@ -1843,9 +1849,10 @@ bool Ospfv3Area::installIntraAreaPrefixLSA(const Ospfv3IntraAreaPrefixLsa *lsa)
 bool Ospfv3Area::updateIntraAreaPrefixLSA(IntraAreaPrefixLSA* currentLsa,const Ospfv3IntraAreaPrefixLsa* newLsa)
 {
     bool different = intraAreaPrefixLSADiffersFrom(currentLsa, newLsa);
-    currentLsa = new IntraAreaPrefixLSA(*newLsa);
-//    *currentLsa = *newLsa;
-    currentLsa->resetInstallTime();
+//    delete currentLsa;
+//    currentLsa = new IntraAreaPrefixLSA(*newLsa);
+////    *currentLsa = *newLsa;
+//    currentLsa->resetInstallTime();
 //    currentLsa->getHeaderForUpdate().setLsaAge(0);//reset the age
     if (different) {
         return true;
