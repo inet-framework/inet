@@ -1243,6 +1243,7 @@ void Ospfv3Area::originateInterAreaPrefixLSA(Ospfv3IntraAreaPrefixLsa* lsa, Ospf
             //new LSA was not installed anywhere, so subtract LinkStateID counter
             this->getInstance()->subtractInterAreaPrefixLinkStateID();
         }
+        delete newLsa;
     }
     //TODO - length!!!
 }
