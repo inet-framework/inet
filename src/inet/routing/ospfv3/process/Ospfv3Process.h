@@ -86,13 +86,13 @@ class INET_API Ospfv3Process : protected cListener, public cSimpleModule
   private:
     std::vector<Ospfv3Instance*> instances;
     std::map<int, Ospfv3Instance*> instancesById;
-    int processID;
+    int processID = 0;
     Ipv4Address routerID;
     bool isActive=false;
     void debugDump();
     std::vector<Ospfv3RoutingTableEntry *> routingTableIPv6;
     std::vector<Ospfv3Ipv4RoutingTableEntry *> routingTableIPv4;
-    cMessage *ageTimer;
+    cMessage *ageTimer = nullptr;
 
   protected:
     virtual void initialize(int stage) override;
