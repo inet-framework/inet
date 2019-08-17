@@ -874,8 +874,8 @@ bool Ospfv3Area::updateRouterLSA(RouterLSA* currentLsa,const Ospfv3RouterLsa* ne
 {
     bool different = routerLSADiffersFrom(currentLsa, newLsa);
 //    (*currentLsa) = (*newLsa);
-    currentLsa = new RouterLSA(* newLsa);
-    currentLsa->resetInstallTime();
+//    currentLsa = new RouterLSA(* newLsa);
+//    currentLsa->resetInstallTime();
 //    currentLsa->getHeaderForUpdate().setLsaAge(0);//reset the age
     if (different) {
         return true;
@@ -1104,9 +1104,10 @@ bool Ospfv3Area::installNetworkLSA(const Ospfv3NetworkLsa *lsa)
 bool Ospfv3Area::updateNetworkLSA(NetworkLSA* currentLsa,const Ospfv3NetworkLsa* newLsa)
 {
     bool different = networkLSADiffersFrom(currentLsa, newLsa);
-    currentLsa = new NetworkLSA(*newLsa);
-//    (*currentLsa) = (*newLsa);
-    currentLsa->resetInstallTime();
+//    currentLsa = new NetworkLSA(*newLsa);
+////    (*currentLsa) = (*newLsa);
+//    currentLsa->resetInstallTime();
+//    delete currentLsa;
     if (different) {
         return true;
     }
@@ -1402,9 +1403,9 @@ bool Ospfv3Area::updateInterAreaPrefixLSA(InterAreaPrefixLSA* currentLsa,const O
 {
     bool different = interAreaPrefixLSADiffersFrom(currentLsa, newLsa);
 //    (*currentLsa) = (*newLsa);
-    currentLsa = new InterAreaPrefixLSA(* newLsa);
+//    currentLsa = new InterAreaPrefixLSA(* newLsa);
 //    currentLsa->getHeaderForUpdate().setLsaAge(0);//reset the age
-    currentLsa->resetInstallTime();
+//    currentLsa->resetInstallTime();
     if (different) {
         return true;
     }
@@ -1848,9 +1849,10 @@ bool Ospfv3Area::installIntraAreaPrefixLSA(const Ospfv3IntraAreaPrefixLsa *lsa)
 bool Ospfv3Area::updateIntraAreaPrefixLSA(IntraAreaPrefixLSA* currentLsa,const Ospfv3IntraAreaPrefixLsa* newLsa)
 {
     bool different = intraAreaPrefixLSADiffersFrom(currentLsa, newLsa);
-    currentLsa = new IntraAreaPrefixLSA(*newLsa);
-//    *currentLsa = *newLsa;
-    currentLsa->resetInstallTime();
+//    delete currentLsa;
+//    currentLsa = new IntraAreaPrefixLSA(*newLsa);
+////    *currentLsa = *newLsa;
+//    currentLsa->resetInstallTime();
 //    currentLsa->getHeaderForUpdate().setLsaAge(0);//reset the age
     if (different) {
         return true;
