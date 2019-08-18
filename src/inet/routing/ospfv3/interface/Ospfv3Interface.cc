@@ -32,7 +32,7 @@ Ospfv3Interface::Ospfv3Interface(const char* name, cModule* routerModule, Ospfv3
     this->ift = check_and_cast<IInterfaceTable *>(containingModule->getSubmodule("interfaceTable"));
 
     InterfaceEntry *ie = this->ift->getInterfaceByName(this->interfaceName.c_str());
-    Ipv6InterfaceData *ipv6int = ie->ipv6Data();
+    Ipv6InterfaceData *ipv6int = ie->findProtocolData<Ipv6InterfaceData>();
     this->interfaceId = ift->getInterfaceById(ie->getInterfaceId())->getInterfaceId();
     this->interfaceLLIP = ipv6int->getLinkLocalAddress();//TODO - check
     this->interfaceType = interfaceType;
@@ -1796,7 +1796,7 @@ LinkLSA* Ospfv3Interface::originateLinkLSA()
     linkLSA->setOspfOptions(lsOptions);
 
     InterfaceEntry* ie = this->ift->getInterfaceByName(this->interfaceName.c_str());
-    Ipv6InterfaceData* ipv6Data = ie->ipv6Data();
+    Ipv6InterfaceData* ipv6Data = ie->findProtocolData<Ipv6InterfaceData>();
 
    int numPrefixes;
     if(this->getArea()->getInstance()->getAddressFamily() == IPV4INSTANCE)
@@ -1810,7 +1810,7 @@ LinkLSA* Ospfv3Interface::originateLinkLSA()
     }
     for(int i=0; i<numPrefixes; i++) {
         if(this->getArea()->getInstance()->getAddressFamily() == IPV4INSTANCE) {
-            Ipv4InterfaceData* ipv4Data = ie->ipv4Data();
+            Ipv4InterfaceData* ipv4Data = ie->findProtocolData<Ipv4InterfaceData>();
             Ipv4Address ipAdd = ipv4Data->getIPAddress();
 
             // set also ipv4 link local address
@@ -1994,11 +1994,11 @@ std::string Ospfv3Interface::detailedInfo() const
     out << "Interface " << this->getIntName() << "\n"; //TODO - isUP?
     out << "Link Local Address ";//TODO - for over all addresses
     InterfaceEntry* ie = this->ift->getInterfaceByName(this->getIntName().c_str());
-    Ipv6InterfaceData *ipv6int = ie->ipv6Data();
+    Ipv6InterfaceData *ipv6int = ie->findProtocolData<Ipv6InterfaceData>();
     out << ipv6int->getLinkLocalAddress() << ", Interface ID " << this->interfaceId << "\n";
 
     if(this->getArea()->getInstance()->getAddressFamily() == IPV4INSTANCE) {
-        Ipv4InterfaceData* ipv4int = ie->ipv4Data();
+        Ipv4InterfaceData* ipv4int = ie->findProtocolData<Ipv4InterfaceData>();
         out << "Internet Address " << ipv4int->getIPAddress() << endl;
     }
 

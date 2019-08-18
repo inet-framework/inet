@@ -1503,7 +1503,7 @@ IntraAreaPrefixLSA* Ospfv3Area::originateIntraAreaPrefixLSA() //this is for non-
         if((*it)->getTransitNetInt() == false || !(*it)->hasAnyNeighborInState(Ospfv3Neighbor::FULL_STATE))
         {
             InterfaceEntry *ie = this->getInstance()->getProcess()->ift->getInterfaceByName((*it)->getIntName().c_str());
-            Ipv6InterfaceData* ipv6int = ie->ipv6Data();
+            Ipv6InterfaceData* ipv6int = ie->findProtocolData<Ipv6InterfaceData>();
 
             int numPrefixes;
             if(!v6) // is this LSA for IPv4 or Ipv6 AF ?
@@ -1516,7 +1516,7 @@ IntraAreaPrefixLSA* Ospfv3Area::originateIntraAreaPrefixLSA() //this is for non-
             for(int i=0; i<numPrefixes; i++) {
                 if(this->getInstance()->getAddressFamily() == IPV4INSTANCE)
                 {
-                    Ipv4InterfaceData* ipv4Data = ie->ipv4Data();
+                    Ipv4InterfaceData* ipv4Data = ie->findProtocolData<Ipv4InterfaceData>();
                     Ipv4Address ipAdd = ipv4Data->getIPAddress();
                     Ospfv3LsaPrefix prefix;
                     prefix.prefixLen= ipv4Data->getNetmask().getNetmaskLength();
@@ -1588,7 +1588,7 @@ IntraAreaPrefixLSA* Ospfv3Area::originateNetIntraAreaPrefixLSA(NetworkLSA* netwo
     EV_DEBUG << "Originate New NETWORK INTRA AREA LSA\n";
     // get IPv6 data
     InterfaceEntry *ie = this->getInstance()->getProcess()->ift->getInterfaceByName(interface->getIntName().c_str());
-    Ipv6InterfaceData* ipv6int = ie->ipv6Data();
+    Ipv6InterfaceData* ipv6int = ie->findProtocolData<Ipv6InterfaceData>();
     Ospfv3LsaHeader &header = networkLSA->getHeaderForUpdate();
 
     IntraAreaPrefixLSA* newLsa = new IntraAreaPrefixLSA();
@@ -1615,7 +1615,7 @@ IntraAreaPrefixLSA* Ospfv3Area::originateNetIntraAreaPrefixLSA(NetworkLSA* netwo
     for(int i=0; i < numPrefixes; i++) {
         if(this->getInstance()->getAddressFamily() == IPV4INSTANCE)
         {
-            Ipv4InterfaceData* ipv4Data = ie->ipv4Data();
+            Ipv4InterfaceData* ipv4Data = ie->findProtocolData<Ipv4InterfaceData>();
             Ipv4Address ipAdd = ipv4Data->getIPAddress();
             Ospfv3LsaPrefix prefix;
             prefix.prefixLen= ipv4Data->getNetmask().getNetmaskLength();
