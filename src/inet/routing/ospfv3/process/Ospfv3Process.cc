@@ -118,7 +118,7 @@ int Ospfv3Process::isInRoutingTable6(Ipv6RoutingTable *rtTable, Ipv6Address addr
 int Ospfv3Process::isInInterfaceTable(IInterfaceTable *ifTable, Ipv4Address addr)
 {
     for (int i = 0; i < ifTable->getNumInterfaces(); i++) {
-        if (ifTable->getInterface(i)->ipv4Data()->getIPAddress() == addr) {
+        if (ifTable->getInterface(i)->findProtocolData<Ipv4InterfaceData>()->getIPAddress() == addr) {
             return i;
         }
     }
@@ -128,8 +128,8 @@ int Ospfv3Process::isInInterfaceTable(IInterfaceTable *ifTable, Ipv4Address addr
 int Ospfv3Process::isInInterfaceTable6(IInterfaceTable *ifTable, Ipv6Address addr)
 {
     for (int i = 0; i < ifTable->getNumInterfaces(); i++) {
-        for (int j = 0; j < ifTable->getInterface(i)->ipv6Data()->getNumAddresses(); j++) {
-            if (ifTable->getInterface(i)->ipv6Data()->getAddress(j) == addr) {
+        for (int j = 0; j < ifTable->getInterface(i)->findProtocolData<Ipv6InterfaceData>()->getNumAddresses(); j++) {
+            if (ifTable->getInterface(i)->findProtocolData<Ipv6InterfaceData>()->getAddress(j) == addr) {
                 return i;
             }
         }
@@ -165,7 +165,7 @@ void Ospfv3Process::parseConfig(cXMLElement* interfaceConfig)
 
             std::string add6 = addr6c;
             std::string prefix6 = add6.substr(0, add6.find("/"));
-            Ipv6InterfaceData * intfData6 = myInterface->ipv6Data();
+            Ipv6InterfaceData * intfData6 = myInterface->findProtocolData<Ipv6InterfaceData>();
             int prefLength;
             Ipv6Address address6;
             if (!(address6.tryParseAddrWithPrefix(addr6c, prefLength)))
@@ -195,7 +195,7 @@ void Ospfv3Process::parseConfig(cXMLElement* interfaceConfig)
          //interface ipv4 configuration
          Ipv4Address addr;
          Ipv4Address mask;
-         Ipv4InterfaceData * intfData = myInterface->ipv4Data(); //new Ipv4InterfaceData();
+         Ipv4InterfaceData * intfData = myInterface->findProtocolData<Ipv4InterfaceData>(); //new Ipv4InterfaceData();
          bool alreadySet = false;
 
 
@@ -729,7 +729,7 @@ void Ospfv3Process::addInstance(Ospfv3Instance* newInstance)
 void Ospfv3Process::sendPacket(Packet *packet, Ipv6Address destination, const char* ifName, short hopLimit)
 {
     InterfaceEntry *ie = this->ift->getInterfaceByName(ifName);
-    Ipv6InterfaceData *ipv6int = ie->ipv6Data();
+    Ipv6InterfaceData *ipv6int = ie->findProtocolData<Ipv6InterfaceData>();
 
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ospfv3);
     packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
