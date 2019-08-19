@@ -457,14 +457,14 @@ void Ospfv3Area::ageDatabase()
 //                    newLSA->getHeaderForUpdate().setLsaSequenceNumber(sequenceNumber + 1);
                     shouldRebuildRoutingTable |= updateIntraAreaPrefixLSA(lsa,newLSA);
 //                    if (lsa != newLSA)
-                    delete newLSA;
+                    //delete newLSA;
                 }
                 else {    // no neighbors on the network -> old NetworkLSA must be flushed
                     lsa->getHeaderForUpdate().setLsaAge(MAX_AGE);
                     lsa->incrementInstallTime();
                 }
                floodLSA(lsa);
-               delete lsa;
+               //delete lsa;
            }
         }
 
@@ -530,10 +530,10 @@ void Ospfv3Area::ageDatabase()
                     if (newLSA != nullptr) {
                         newLSA->getHeaderForUpdate().setLsaSequenceNumber((sequenceNumber == MAX_SEQUENCE_NUMBER) ? INITIAL_SEQUENCE_NUMBER : sequenceNumber + 1);
                         shouldRebuildRoutingTable |= updateIntraAreaPrefixLSA(lsa,newLSA);
-                        delete newLSA;
+//                        delete newLSA;
 
                         floodLSA(lsa);
-                        delete lsa;
+//                        delete lsa;
                     }
                     else
                     {    // no neighbors on the network -> old NetworkLSA must be flushed
@@ -873,7 +873,7 @@ bool Ospfv3Area::installRouterLSA(const Ospfv3RouterLsa *lsa)
 bool Ospfv3Area::updateRouterLSA(RouterLSA* currentLsa,const Ospfv3RouterLsa* newLsa)
 {
     bool different = routerLSADiffersFrom(currentLsa, newLsa);
-//    (*currentLsa) = (*newLsa);
+    (*currentLsa) = (*newLsa);
 //    currentLsa = new RouterLSA(* newLsa);
 //    currentLsa->resetInstallTime();
 //    currentLsa->getHeaderForUpdate().setLsaAge(0);//reset the age
@@ -1105,7 +1105,7 @@ bool Ospfv3Area::updateNetworkLSA(NetworkLSA* currentLsa,const Ospfv3NetworkLsa*
 {
     bool different = networkLSADiffersFrom(currentLsa, newLsa);
 //    currentLsa = new NetworkLSA(*newLsa);
-////    (*currentLsa) = (*newLsa);
+    (*currentLsa) = (*newLsa);
 //    currentLsa->resetInstallTime();
 //    delete currentLsa;
     if (different) {
@@ -1402,7 +1402,7 @@ bool Ospfv3Area::installInterAreaPrefixLSA(const Ospfv3InterAreaPrefixLsa* lsa)
 bool Ospfv3Area::updateInterAreaPrefixLSA(InterAreaPrefixLSA* currentLsa,const Ospfv3InterAreaPrefixLsa* newLsa)
 {
     bool different = interAreaPrefixLSADiffersFrom(currentLsa, newLsa);
-//    (*currentLsa) = (*newLsa);
+    (*currentLsa) = (*newLsa);
 //    currentLsa = new InterAreaPrefixLSA(* newLsa);
 //    currentLsa->getHeaderForUpdate().setLsaAge(0);//reset the age
 //    currentLsa->resetInstallTime();
@@ -1851,7 +1851,7 @@ bool Ospfv3Area::updateIntraAreaPrefixLSA(IntraAreaPrefixLSA* currentLsa,const O
     bool different = intraAreaPrefixLSADiffersFrom(currentLsa, newLsa);
 //    delete currentLsa;
 //    currentLsa = new IntraAreaPrefixLSA(*newLsa);
-////    *currentLsa = *newLsa;
+    *currentLsa = *newLsa;
 //    currentLsa->resetInstallTime();
 //    currentLsa->getHeaderForUpdate().setLsaAge(0);//reset the age
     if (different) {
