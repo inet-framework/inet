@@ -237,6 +237,8 @@ evidenced in the log:
 .. figure:: media/log_notconnected_2.png
    :width: 100%
 
+Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`PacketDropVisualizationShowcase.ned <../PacketDropVisualizationShowcase.ned>`
+
 Further information
 -------------------
 

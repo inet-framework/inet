@@ -131,6 +131,8 @@ mode. For example, the rate control algorithm could change to the slower
 bitrate at around the critical point, about where the curves for two
 adjacent bitrate modes intersect.
 
+Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`ErrorRateShowcase.ned <../ErrorRateShowcase.ned>`
+
 Discussion
 ----------
 

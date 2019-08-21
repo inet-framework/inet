@@ -213,6 +213,8 @@ The order of annotation positioning can be controlled by using the
 :par:`placementPriority` parameter that takes an integer. Zero is the
 largest priority.
 
+Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`StylingShowcase.ned <../StylingShowcase.ned>`
+
 More Information
 ----------------
 

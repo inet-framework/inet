@@ -338,6 +338,8 @@ Generally, several signals being present at a receiving node doesn't
 necessarily cause a collision. One of the signals might not be strong
 enough to garble the other transmission.
 
+Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`RadioMediumActivityVisualizationShowcase.ned <../RadioMediumActivityVisualizationShowcase.ned>`
+
 More information
 ----------------
 

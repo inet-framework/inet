@@ -134,13 +134,13 @@ communication range. When ``destination`` turns back and gets into the
 range again, the packet error rate starts to decrease, reaching zero
 when it gets close to ``source``.
 
+Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`StatisticVisualizationShowcase.ned <../StatisticVisualizationShowcase.ned>`
+
 Further information
 -------------------
 
 For further information, refer to the :ned:`StatisticVisualizer` NED
 documentation.
-
-Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`StatisticVisualizationShowcase.ned <../StatisticVisualizationShowcase.ned>`
 
 Discussion
 ----------

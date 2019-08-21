@@ -197,6 +197,7 @@ The following picture (a zoomed in view of the ``plot1`` figure) clearly
 shows these fluctuations. It also shows packet error rate as a function
 of distance (due to constant speed).
 
+Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`InstrumentShowcase.ned <../InstrumentShowcase.ned>`
 
 Further information
 -------------------

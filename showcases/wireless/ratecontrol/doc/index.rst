@@ -135,6 +135,8 @@ rate for the two scenarios can be compared on the following plots.
 The received packet count at ``sinkHost`` is 18366 for 'No rate
 control', and 35966 for 'AarfRateControl'.
 
+Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`RateControlShowcase.ned <../RateControlShowcase.ned>`
+
 Conclusion
 ~~~~~~~~~~
 

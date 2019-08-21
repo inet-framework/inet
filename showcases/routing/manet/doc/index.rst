@@ -489,6 +489,8 @@ in this showcase:
 -  `GPSR: Greedy Perimeter Stateless Routing for Wireless
    Networks <http://www.icir.org/bkarp/jobs/gpsr-mobicom2000.pdf>`__
 
+Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`ManetProtocolsShowcase.ned <../ManetProtocolsShowcase.ned>`
+
 Discussion
 ----------
 

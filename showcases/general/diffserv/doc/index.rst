@@ -270,6 +270,8 @@ As seen from the next plot, the delay of voice packets has been reduced to about
 .. figure:: media/VoIP_WithPolicingAndQueueing_delay.png
    :width: 100%
 
+Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`DiffservNetwork.ned <../DiffservNetwork.ned>`
+
 Discussion
 ----------
 

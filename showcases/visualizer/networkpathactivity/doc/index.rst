@@ -255,6 +255,8 @@ this, ping traffic flows through ``router1`` again. At the end of the
 video, ``router3`` turns on, but it does not have an effect on the
 network traffic.
 
+Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`NetworkPathVisualizerShowcase.ned <../NetworkPathVisualizerShowcase.ned>`
+
 More Information
 ----------------
 

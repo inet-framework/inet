@@ -120,6 +120,8 @@ following a preamble and a physical header in a single transmission.
 Recent versions of the INET Framework support these 802.11 features, but
 they are out of scope for this simulation example.
 
+Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`Throughput.ned <../Throughput.ned>`
+
 Further information
 -------------------
 
