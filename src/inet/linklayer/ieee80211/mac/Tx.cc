@@ -97,7 +97,7 @@ void Tx::radioTransmissionFinished()
         transmitting = false;
         ASSERT(txCallback != nullptr);
         const auto& header = frame->peekAtFront<Ieee80211MacHeader>();
-        auto duration = header->getDuration();
+        auto duration = header->getDurationField();
         auto tmpFrame = frame;
         auto tmpTxCallback = txCallback;
         frame = nullptr;

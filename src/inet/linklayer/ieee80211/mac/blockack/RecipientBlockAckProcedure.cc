@@ -34,7 +34,7 @@ void RecipientBlockAckProcedure::processReceivedBlockAckReq(Packet *blockAckPack
         if (ackPolicy->isBlockAckNeeded(basicBlockAckReq, agreement)) {
             auto blockAck = buildBlockAck(basicBlockAckReq, agreement);
             auto duration = ackPolicy->computeBasicBlockAckDurationField(blockAckPacketReq, basicBlockAckReq);
-            blockAck->setDuration(duration);
+            blockAck->setDurationField(duration);
             auto blockAckPacket = new Packet("BasicBlockAck", blockAck);
             EV_DEBUG << "Duration for " << blockAckPacket->getName() << " is set to " << duration << " s.\n";
             callback->transmitControlResponseFrame(blockAckPacket, blockAck, blockAckPacketReq, basicBlockAckReq);
