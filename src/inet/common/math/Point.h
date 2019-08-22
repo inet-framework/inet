@@ -17,10 +17,18 @@
 #define __INET_MATH_POINT_H_
 
 #include "inet/common/IndexSequence.h"
+#include "inet/common/Units.h"
 
 namespace inet {
 
 namespace math {
+
+template<typename T>
+inline void outputUnit(std::ostream& os, T v) { units::output_unit<typename T::unit>::fn(os); }
+template<>
+inline void outputUnit(std::ostream& os, double v) { os << "unit"; }
+template<>
+inline void outputUnit(std::ostream& os, simtime_t v) { os << "s"; }
 
 template<typename T>
 inline double toDouble(T v) { return v.get(); }
