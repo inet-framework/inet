@@ -83,7 +83,7 @@ void Ospfv3Process::handleMessage(cMessage* msg)
             Ospfv3Instance* instance = this->getInstanceById(packet->getInstanceID());
             if(instance == nullptr){//Is there an instance with this number?
                 EV_DEBUG << "Instance with this ID not found, dropping\n";
-                delete msg;//TODO - some warning??
+                delete msg;
             }
             else {
                 instance->processPacket(pk);
@@ -358,7 +358,7 @@ void Ospfv3Process::parseConfig(cXMLElement* interfaceConfig)
                 else
                     instIdNum = atoi(instId);
 
-                //TODO - check range of instance ID
+                //TODO - check range of instance ID.
                 //check for multiple definition of one instance
                 Ospfv3Instance* instance = this->getInstanceById(instIdNum);
                 //if(instance != nullptr)
@@ -374,7 +374,7 @@ void Ospfv3Process::parseConfig(cXMLElement* interfaceConfig)
                     this->addInstance(instance);
                 }
 
-                //TODO - multiarea configuration??
+                // multiarea configuration is not supported
                 cXMLElementList areasList = (*instIt)->getElementsByTagName("Area");
                 for(auto areasIt=areasList.begin(); areasIt!=areasList.end(); areasIt++)
                 {
@@ -448,7 +448,8 @@ void Ospfv3Process::parseConfig(cXMLElement* interfaceConfig)
                             Ipv6AddressRange ipv6addRange; //add directly networks into addressRange for given area
                             ipv6addRange.prefix = address6; //add only network prefix
                             ipv6addRange.prefixLength = prefLength;
-                            area->addAddressRange(ipv6addRange, true); //TODO:  add tag Advertise and exclude link-local (?)
+                            area->addAddressRange(ipv6addRange, true);
+                            //TODO:  Address added into Adressrange have Advertise always set to true. Exclude link-local (?)
                         }
                         cXMLElementList ipv4AddrList = (*interfaceIt)->getElementsByTagName("IPAddress");
                         if (ipv4AddrList.size() == 1)
@@ -469,7 +470,7 @@ void Ospfv3Process::parseConfig(cXMLElement* interfaceConfig)
                                 const char * mask4c = ipv4Rec->getNodeValue();
                                 ipv4addRange.mask = Ipv4Address(mask4c);
                             }
-                            area->addAddressRange(ipv4addRange, true); //TODO:  add tag Advertise and exclude link-local (?)
+                            area->addAddressRange(ipv4addRange, true);
                         }
                        EV_DEBUG << "I am " << this->getOwner()->getOwner()->getName() << " on int " << newInterface->getInterfaceLLIP() << " with area " << area->getAreaID() <<"\n";
                         area->addInterface(newInterface);
@@ -551,7 +552,7 @@ void Ospfv3Process::handleTimer(cMessage* msg)
             Ospfv3Interface* interface;
             if(!(interface=reinterpret_cast<Ospfv3Interface*>(msg->getContextPointer())))
             {
-                //TODO - error
+                //TODO - Print some error (?)
                 delete msg;
             }
             else {
@@ -567,7 +568,7 @@ void Ospfv3Process::handleTimer(cMessage* msg)
             Ospfv3Interface* interface;
             if(!(interface=reinterpret_cast<Ospfv3Interface*>(msg->getContextPointer())))
             {
-                //TODO - error
+                //TODO - Print some error (?)
                 delete msg;
             }
             else {
@@ -585,7 +586,6 @@ void Ospfv3Process::handleTimer(cMessage* msg)
                 delete msg;
             }
             else {
-//                printEvent("Acknowledgement Timer expired", intf);
                 intf->processEvent(Ospfv3Interface::ACKNOWLEDGEMENT_TIMER_EVENT);
             }
         }
@@ -606,7 +606,6 @@ void Ospfv3Process::handleTimer(cMessage* msg)
                 for(int i=0; i<neighborCnt; i++){
                     Ospfv3Neighbor* currNei = intf->getNeighbor(i);
                     if(currNei->getNeighborID() == neighbor->getNeighborID()){
-//                        neighbor->processEvent(Ospfv3Neighbor::INACTIVITY_TIMER);
                         intf->removeNeighborByID(neighbor->getNeighborID());
                         delete neighbor;
                         break;
@@ -922,7 +921,7 @@ void Ospfv3Process::rebuildRoutingTable()
             }
         }
 
-        //4)On BDR - Transit area LSAs(summary) are examined - find better paths then in 2) and 3)  TODO
+        //4)On BDR - Transit area LSAs(summary) are examined - find better paths then in 2) and 3)  TODO - this part of protocol is not supported yet
        /* if (hasTransitAreas) {
             for (i = 0; i < areaCount; i++) {
                 if (currInst->getArea(i)->getTransitCapability()) {
@@ -934,7 +933,7 @@ void Ospfv3Process::rebuildRoutingTable()
             }
         }*/
 
-        //5) Routes to external destinations are calculated TODO
+        //5) Routes to external destinations are calculated TODO - this part of protocol is not supported yet
        // calculateASExternalRoutes(newTableIPv6, newTableIPv4);
 
         // backup the routing table
@@ -1000,7 +999,6 @@ void Ospfv3Process::rebuildRoutingTable()
                             route->setMetric    (routingTableIPv6[i]->getMetric());
                             route->setInterface (routingTableIPv6[i]->getInterface());
                             route->setExpiryTime(routingTableIPv6[i]->getExpiryTime());
-//                            route->setAdminDist (routingTableIPv6[i]->getAdminDist());
                             route->setAdminDist (Ipv6Route::dOSPF);
 
                             rt6->addRoutingProtocolRoute(route);
@@ -1031,7 +1029,6 @@ void Ospfv3Process::rebuildRoutingTable()
                             route->setNextHop       (routingTableIPv4[i]->getNextHop(0).hopAddress);
                             route->setMetric        (routingTableIPv4[i]->getMetric());
                             route->setInterface     (routingTableIPv4[i]->getInterface());
-//                            route->setAdminDist     (routingTableIPv4[i]->getAdminDist());
                             route->setAdminDist     ((Ipv4Route::dOSPF));
                             rt4->addRoute(route);
                         }

@@ -34,7 +34,7 @@ Ospfv3Interface::Ospfv3Interface(const char* name, cModule* routerModule, Ospfv3
     InterfaceEntry *ie = this->ift->getInterfaceByName(this->interfaceName.c_str());
     Ipv6InterfaceData *ipv6int = ie->findProtocolData<Ipv6InterfaceData>();
     this->interfaceId = ift->getInterfaceById(ie->getInterfaceId())->getInterfaceId();
-    this->interfaceLLIP = ipv6int->getLinkLocalAddress();//TODO - check
+    this->interfaceLLIP = ipv6int->getLinkLocalAddress();
     this->interfaceType = interfaceType;
     this->passiveInterface = passive;
     this->transitNetworkInterface = false; //false at first
@@ -146,7 +146,7 @@ bool Ospfv3Interface::ageDatabase()
         LinkLSA *lsa = linkLSAList[i];
         unsigned short lsAge = lsa->getHeader().getLsaAge();
         bool selfOriginated = (lsa->getHeader().getAdvertisingRouter() == this->getArea()->getInstance()->getProcess()->getRouterID());
-//        TODO
+//        TODO unreachability is not managed, Should be on places where it is as a comment
 //        bool unreachable = parentRouter->isDestinationUnreachable(lsa);
 
         if ((selfOriginated && (lsAge < (LS_REFRESH_TIME - 1))) || (!selfOriginated && (lsAge < (MAX_AGE - 1)))) {
@@ -246,7 +246,6 @@ Packet* Ospfv3Interface::prepareHello()
     //OSPF common packet header first
     helloPacket->setVersion(3);
     helloPacket->setType(HELLO_PACKET);
-    //TODO - packet length
     helloPacket->setRouterID(this->getArea()->getInstance()->getProcess()->getRouterID());
     helloPacket->setAreaID(this->containingArea->getAreaID());
     helloPacket->setInstanceID(this->getArea()->getInstance()->getInstanceID());
@@ -267,7 +266,7 @@ Packet* Ospfv3Interface::prepareHello()
 
     helloPacket->setOptions(options);
     length+=8;
-    //TODO - set options
+    ///TODO - Options for Hello Packet is not set.
     helloPacket->setHelloInterval(this->getHelloInterval());
     helloPacket->setDeadInterval(this->getDeadInterval());
     helloPacket->setDesignatedRouterID(this->getDesignatedID());
@@ -303,7 +302,6 @@ void Ospfv3Interface::processHelloPacket(Packet* packet)
 {
     EV_DEBUG <<"Hello packet was received on interface " << this->getIntName() << "\n";
     const auto& hello = packet->peekAtFront<Ospfv3HelloPacket>();
-//    Ospfv3HelloPacket* hello = check_and_cast<Ospfv3HelloPacket*>(packet);
     bool neighborChanged = false;
     bool backupSeen = false;
     bool neighborsDRStateChanged = false;
@@ -311,7 +309,7 @@ void Ospfv3Interface::processHelloPacket(Packet* packet)
     bool shouldRebuildRoutingTable=false;
     //comparing hello and dead values
     if((hello->getHelloInterval()==this->getHelloInterval()) && (hello->getDeadInterval()==this->getDeadInterval())) {
-        if(true) {//TODO - this will check the E-bit
+        if(true) {//this will check the E-bit
             Ipv4Address sourceId = hello->getRouterID();
             Ospfv3Neighbor* neighbor = this->getNeighborById(sourceId);
 
@@ -962,7 +960,6 @@ Packet* Ospfv3Interface::prepareUpdatePacket(std::vector<Ospfv3Lsa*> lsas)
                 packetLength += calculateLSASize(routerLSA);
                 updatePacket->setPacketLength(packetLength.get());
                 updatePacket->setChunkLength(packetLength);
-                //TODO - check max age
                 break;
             }
             case NETWORK_LSA:
@@ -1046,7 +1043,7 @@ void Ospfv3Interface::processLSU(Packet* packet, Ospfv3Neighbor* neighbor){
         Ipv4Address areaID = lsUpdatePacket->getAreaID();
 
         //First I get count from one array
-        while (currentType >= ROUTER_LSA && currentType <= INTRA_AREA_PREFIX_LSA){//AS_EXTERNAL_LSA) {TODO
+        while (currentType >= ROUTER_LSA && currentType <= INTRA_AREA_PREFIX_LSA){
             unsigned int lsaCount = 0;
             switch (currentType) {
             case ROUTER_LSA:
@@ -1109,12 +1106,8 @@ void Ospfv3Interface::processLSU(Packet* packet, Ospfv3Neighbor* neighbor){
                     currentLSA = (&(lsUpdatePacket->getInterAreaPrefixLSAs(i)));
                     break;
 
-                case INTER_AREA_ROUTER_LSA:
-                    //  TODO
-                    break;
-
+                case INTER_AREA_ROUTER_LSA: //TODO this LSAs are not implemented yet, so they are not processed (with acutal code, this case should never happen)
                 case AS_EXTERNAL_LSA:
-                    //  TODO
                     break;
 
                 case NSSA_LSA:
@@ -1248,7 +1241,7 @@ void Ospfv3Interface::processLSU(Packet* packet, Ospfv3Neighbor* neighbor){
                     this->acknowledgeLSA(currentLSA->getHeader(), ackFlags, lsUpdatePacket->getRouterID());
                     if ((currentLSA->getHeader().getAdvertisingRouter() == this->getArea()->getInstance()->getProcess()->getRouterID()) ||
                             ((lsaType == NETWORK_LSA) &&
-                            (currentLSA->getHeader().getAdvertisingRouter() == this->getArea()->getInstance()->getProcess()->getRouterID())))// &&//TODO
+                            (currentLSA->getHeader().getAdvertisingRouter() == this->getArea()->getInstance()->getProcess()->getRouterID())))
                     {
                         if (ackFlags.noLSAInstanceInDatabase) {
                             auto lsaCopy = currentLSA->dup();
@@ -1298,12 +1291,6 @@ void Ospfv3Interface::processLSU(Packet* packet, Ospfv3Neighbor* neighbor){
                 {
                     continue;
                 }
-                //TODO - LSA is on request list
-                //TODO - database copy is more recent
-                //TODO - Otherwise as long as the database copy has not been sent in link state update send it to the neighbor directly
-
-
-
             }//for (unsigned int i = 0; i < lsaCount; i++)
 
             currentType++;
@@ -1784,13 +1771,13 @@ LinkLSA* Ospfv3Interface::originateLinkLSA()
     lsaHeader.setLinkStateID(Ipv4Address(this->getInterfaceId()));
     lsaHeader.setAdvertisingRouter(this->getArea()->getInstance()->getProcess()->getRouterID());
     lsaHeader.setLsaSequenceNumber(this->linkLSASequenceNumber++);
-//    lsaHeader.setLsaChecksum(); TODO
+//    lsaHeader.setLsaChecksum(); TODO Checksum for LinkLSA is not calculated.
     OSPFV3_LSA_HEADER_LENGTH.get();
     uint16_t packetLength=(OSPFV3_LSA_HEADER_LENGTH.get() + OSPFV3_LINK_LSA_BODY_LENGTH.get());
 
     //Then the LSA Body
     linkLSA->setRouterPriority(this->getRouterPriority());
-    //TODO - options
+    //TODO - LSA Options for LinkLSA is not set.
     Ospfv3Options lsOptions;
     memset(&lsOptions, 0, sizeof(Ospfv3Options));
     linkLSA->setOspfOptions(lsOptions);
@@ -1990,8 +1977,8 @@ std::string Ospfv3Interface::detailedInfo() const
             backupIP = (*it)->getNeighborIP();
     }
 
-    out << "Interface " << this->getIntName() << "\n"; //TODO - isUP?
-    out << "Link Local Address ";//TODO - for over all addresses
+    out << "Interface " << this->getIntName() << "\n";
+    out << "Link Local Address ";
     InterfaceEntry* ie = this->ift->getInterfaceByName(this->getIntName().c_str());
     Ipv6InterfaceData *ipv6int = ie->findProtocolData<Ipv6InterfaceData>();
     out << ipv6int->getLinkLocalAddress() << ", Interface ID " << this->interfaceId << "\n";
@@ -2007,7 +1994,7 @@ std::string Ospfv3Interface::detailedInfo() const
     out << "Router ID " << this->getArea()->getInstance()->getProcess()->getRouterID() << endl;
 
     out << "Network Type " << this->ospfv3IntTypeOutput[this->getType()];
-    out << ", Cost: " << this->getInterfaceCost() << endl;//TODO - type needs to be a string
+    out << ", Cost: " << this->getInterfaceCost() << endl;
 
     out << "Transmit Delay is " << this->getTransDelayInterval() << " sec, ";
     out << "State " << this->ospfv3IntStateOutput[this->getState()];

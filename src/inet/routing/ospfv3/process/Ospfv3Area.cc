@@ -315,7 +315,6 @@ void Ospfv3Area::ageDatabase()
             lsa->incrementInstallTime();
         }
         if (selfOriginated && (lsAge == (LS_REFRESH_TIME - 1))) {
-//            TODO
 //            if (unreachable) {
 //                lsa->getHeader().setLsaAge(MAX_AGE);
 //                floodLSA(lsa);
@@ -425,7 +424,6 @@ void Ospfv3Area::ageDatabase()
            lsa->incrementInstallTime();
         }
         if (selfOriginated && (lsAge == (LS_REFRESH_TIME - 1))) {
-        //            TODO
         //            if (unreachable) {
         //                lsa->getHeader().setLsaAge(MAX_AGE);
         //                floodLSA(lsa);
@@ -578,7 +576,6 @@ void Ospfv3Area::ageDatabase()
         //---------------------------------------------------------------------------------------------------
         if (selfOriginated && (lsaAge == (LS_REFRESH_TIME - 1)))
         {
-               //            TODO
                //            if (unreachable) {
                //                lsa->getHeader().setLsaAge(MAX_AGE);
                //                floodLSA(lsa);
@@ -703,11 +700,6 @@ void Ospfv3Area::ageDatabase()
                 }
             }
         }
-//        if (crNew)
-//        {
-//            delete lsa;
-//            interAreaPrefixLSAList[i] = nullptr;
-//        }
     }
 
     auto interIt = interAreaPrefixLSAList.begin();
@@ -735,7 +727,7 @@ void Ospfv3Area::ageDatabase()
     if (shouldRebuildRoutingTable) {
         getInstance()->getProcess()->rebuildRoutingTable();
     }
-    //TODO: add aging for missing LSAs
+    //TODO: Protocol creates only some LSA. After new LSA will be added, aging for them need to be also added.
 }
 
 ////------------------------------------- Router LSA --------------------------------------//
@@ -760,13 +752,13 @@ RouterLSA* Ospfv3Area::originateRouterLSA()
     lsaHeader.setLsaAge(0);
     //The LSA Type is 0x2001
     lsaHeader.setLsaType(ROUTER_LSA);
-    lsaHeader.setLinkStateID(this->getInstance()->getProcess()->getRouterID()); //TODO this depend on number of originated Router-LSA by this process. For now, there is always only one Router-LSA from one process
+    lsaHeader.setLinkStateID(this->getInstance()->getProcess()->getRouterID()); //TODO Link State ID  depend on number of originated Router-LSA by this process. For now, there is always only one Router-LSA from one process
     lsaHeader.setAdvertisingRouter(this->getInstance()->getProcess()->getRouterID());
     lsaHeader.setLsaSequenceNumber(this->getCurrentRouterSequence());
 
     if(this->getInstance()->getAreaCount()>1)
         routerLSA->setBBit(true);
-    //TODO - set options
+    //TODO - LSA Options for RouterLSA is not set.
 
     for(int i=0; i<interfaceCount; i++)
     {
@@ -842,17 +834,8 @@ RouterLSA* Ospfv3Area::originateRouterLSA()
             case Ospfv3Interface::UNKNOWN_TYPE:
             default:
                 break;
-
-
         }
     }
-
-//    RouterLSA *oldLSA = routerLSAAlreadyExists(routerLSA);
-//    if (oldLSA != nullptr)
-//    {
-//        delete (routerLSA);
-//        return oldLSA;
-//    }
 
     this->incrementRouterSequence();
     return routerLSA;
@@ -991,7 +974,7 @@ void Ospfv3Area::deleteRouterLSA(int index) {
     for(int i=0; i<prefixCount; i++) {
        Ospfv3IntraAreaPrefixLsa* lsa = this->intraAreaPrefixLSAList.at(i);
 
-       // odtrani dane LSA aj z intraAreaPrefixLSAList
+       // remove Intra-area-prefix LSA  which corespond with removed Router LSA
        if (lsa->getReferencedAdvRtr() == routerHeader.getAdvertisingRouter() &&
                lsa->getReferencedLSID() == routerHeader.getLinkStateID() &&
                lsa->getReferencedLSType() == ROUTER_LSA) {
@@ -1095,6 +1078,7 @@ NetworkLSA* Ospfv3Area::originateNetworkLSA(Ospfv3Interface* interface)
         Ospfv3LsaHeader& lsaHeader = networkLsa->getHeaderForUpdate();
         Ospfv3Options lsOptions;
         memset(&lsOptions, 0, sizeof(Ospfv3Options));
+        //TODO - LSA Options for NetworkLSA is not set.
 
         //First set the LSA Header
         lsaHeader.setLsaAge(0);
@@ -1305,7 +1289,7 @@ void Ospfv3Area::originateInterAreaPrefixLSA(Ospfv3IntraAreaPrefixLsa* lsa, Ospf
         }
         delete newLsa;
     }
-    //TODO - length of lsa is missing!
+    //TODO - Length of lsa is missing! Total size of LSA displayed in GUI is incorrect. Always shows only header size + 1 lsa prefix. But the size in LSA itself is correct.
 }
 
 void Ospfv3Area::originateInterAreaPrefixLSA(const Ospfv3Lsa* prefLsa, Ospfv3Area* fromArea)
@@ -1314,9 +1298,6 @@ void Ospfv3Area::originateInterAreaPrefixLSA(const Ospfv3Lsa* prefLsa, Ospfv3Are
     lsaKey.linkStateID = prefLsa->getHeader().getLinkStateID();
     lsaKey.advertisingRouter = prefLsa->getHeader().getAdvertisingRouter();
     lsaKey.LSType = prefLsa->getHeader().getLsaType();
-
-    //this check is mainly for dealing with shut downs
-//    Ospfv3Lsa *lsaInDatabase = this->getInstance()->getProcess()->findLSA(lsaKey, fromArea->getAreaID(), fromArea->getInstance()->getInstanceID());
 
     for(int i = 0; i < this->getInstance()->getAreaCount(); i++)
     {
@@ -1375,7 +1356,7 @@ void Ospfv3Area::originateInterAreaPrefixLSA(const Ospfv3Lsa* prefLsa, Ospfv3Are
 
         delete newLsa;
     }
-    //TODO - length of lsa is missing!
+    //TODO - Length of lsa is missing! Total size of LSA displayed in GUI is incorrect. Always shows only header size + 1 lsa prefix. But the size in LSA itself is correct.
 }
 
 void Ospfv3Area::originateDefaultInterAreaPrefixLSA(Ospfv3Area* toArea)
@@ -1411,7 +1392,7 @@ void Ospfv3Area::originateDefaultInterAreaPrefixLSA(Ospfv3Area* toArea)
     }
     toArea->installInterAreaPrefixLSA(newLsa);
     delete newLsa;
-    //TODO - length of lsa is missing!
+    //TODO - Length of lsa is missing! Total size of LSA displayed in GUI is incorrect. Always shows only header size + 1 lsa prefix. But the size in LSA itself is correct.
 }
 
 bool Ospfv3Area::installInterAreaPrefixLSA(const Ospfv3InterAreaPrefixLsa* lsa)
@@ -1461,7 +1442,7 @@ bool Ospfv3Area::updateInterAreaPrefixLSA(InterAreaPrefixLSA* currentLsa,const O
     bool different = interAreaPrefixLSADiffersFrom(currentLsa, newLsa);
     (*currentLsa) = (*newLsa);
 //    currentLsa->getHeaderForUpdate().setLsaAge(0);//reset the age
-//    currentLsa->resetInstallTime();
+    currentLsa->resetInstallTime();
     if (different) {
         return true;
     }
@@ -1606,7 +1587,7 @@ IntraAreaPrefixLSA* Ospfv3Area::originateIntraAreaPrefixLSA() //this is for non-
         }
     }
 
-    //TODO - length of packet is missing!
+    //TODO - Length of lsa is missing! Total size of LSA displayed in GUI is incorrect. Always shows only header size + 1 lsa prefix. But the size in LSA itself is correct.
     newLsa->setNumPrefixes(prefixCount);
 
     if (prefixCount == 0) //check if this LSA is not without prefixes
@@ -1854,7 +1835,8 @@ bool Ospfv3Area::installIntraAreaPrefixLSA(const Ospfv3IntraAreaPrefixLsa *lsa)
                         L3Address netPref = prefLSA->getPrefixes(prefN).addressPrefix;
                         short netPrefixLen = prefLSA->getPrefixes(prefN).prefixLen;
                         if(routerPref.getPrefix(routerPrefixLen) == netPref.getPrefix(netPrefixLen)) {
-                            EV_DEBUG << "Came LSA type 9 with referenced prefix of LSType 1, have one with LSType 2, doing nothing\n"; //TODO: This become relevant when there will be support for active changing of type of link
+                            EV_DEBUG << "Came LSA type 9 with referenced prefix of LSType 1, have one with LSType 2, doing nothing\n";
+                            //TODO:This become relevant when there will be support for active changing of type of link
                         }
                     }
                 }
@@ -3765,7 +3747,7 @@ void Ospfv3Area::debugDump()
 }//debugDump
 
 std::string Ospfv3Area::detailedInfo() const
-{//TODO - adjust so that it pnly prints LSAs that are there
+{
     std::stringstream out;
 
     out << "Ospfv3 1 address-family ";
@@ -3959,8 +3941,6 @@ std::string Ospfv3Area::detailedInfo() const
     }
     out << "\n\n";
 */
-
-
 
     return out.str();
 

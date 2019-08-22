@@ -155,7 +155,6 @@ void Ospfv3Neighbor::initFirstAdjacency()
 
 unsigned long Ospfv3Neighbor::getUniqueULong()
 {
-    // FIXME!!! Should come from a global unique number generator module.
     return ddSequenceNumberInitSeed++;
 }
 
@@ -240,9 +239,7 @@ void Ospfv3Neighbor::sendDDPacket(bool init)
     Packet *pk = new Packet();
     pk->insertAtBack(ddPacket);
 
-    //TODO - virtual link hopLimit
-    //TODO - checksum
-
+    //TODO - ddPacket does not include Virtual Links and HopLimit. Also Checksum is not calculated
     if(this->getInterface()->getType() == Ospfv3Interface::POINTTOPOINT_TYPE){
         EV_DEBUG << "(P2P link ) Send DD Packet to OSPF MCAST\n";
             this->getInterface()->getArea()->getInstance()->getProcess()->sendPacket(pk,Ipv6Address::ALL_OSPF_ROUTERS_MCAST, this->getInterface()->getIntName().c_str());
@@ -258,7 +255,6 @@ void Ospfv3Neighbor::sendDDPacket(bool init)
 
 void Ospfv3Neighbor::sendLinkStateRequestPacket()
 {
-//    Ospfv3LinkStateRequest *requestPacket = new Ospfv3LinkStateRequest();
     const auto& requestPacket = makeShared<Ospfv3LinkStateRequest>();
     requestPacket->setType(LSR);
     requestPacket->setRouterID(this->getInterface()->getArea()->getInstance()->getProcess()->getRouterID());
@@ -294,7 +290,7 @@ void Ospfv3Neighbor::sendLinkStateRequestPacket()
     }
 
     requestPacket->setChunkLength(packetSize);
-    //TODO - ttl and checksum
+    //TODO - TTL and Checksum calculation  for LS Request is not implemented yet
 
     Packet *pk = new Packet();
     pk->insertAtBack(requestPacket);
