@@ -16,7 +16,6 @@
 #ifndef __INET_MATH_IFUNCTION_H_
 #define __INET_MATH_IFUNCTION_H_
 
-#include "inet/common/math/IInterpolator.h"
 #include "inet/common/math/Interval.h"
 #include "inet/common/math/Point.h"
 #include "inet/common/Ptr.h"

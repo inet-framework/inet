@@ -77,7 +77,7 @@ void copyTupleElements(const S& source, integer_sequence<size_t, SIS ...>, D& de
     std::initializer_list<double>({ toDouble(std::get<DIS>(destination) = std::get<SIS>(source)) ... });
 }
 
-}
+} // namespace internal
 
 template<typename ... T>
 class INET_API Point : public std::tuple<T ...>
@@ -216,7 +216,7 @@ inline std::ostream& print(std::ostream& os, const Point<T ...>& p, integer_sequ
     return os;
 }
 
-}
+} // namespace internal
 
 template<typename T, typename ... TS>
 T head(const Point<T, TS ...>& p) {
