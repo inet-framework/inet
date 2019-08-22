@@ -203,7 +203,7 @@ void Ospfv3Area::ageDatabase()
         RouterLSA *lsa = routerLSAList[i];
         unsigned short lsAge = lsa->getHeader().getLsaAge();
         bool selfOriginated = (lsa->getHeader().getAdvertisingRouter() == this->getInstance()->getProcess()->getRouterID());
-//        TODO unreachability is not managed, Should be on places where it is commented
+//        TODO unreachability is not managed, Should be on places where it is as a comment
 //        bool unreachable = parentRouter->isDestinationUnreachable(lsa);
 
         if ((selfOriginated && (lsAge < (LS_REFRESH_TIME - 1))) || (!selfOriginated && (lsAge < (MAX_AGE - 1)))) {
@@ -488,7 +488,7 @@ void Ospfv3Area::ageDatabase()
                 {
                    if (this->getInstance()->getAreaCount() > 1) //this is ABR
                    {
-                       //ivalidate all INTER LSA in ohter areas, which have been made from this INTRA LSA
+                       //invalidate all INTER LSA in ohter areas, which have been made from this INTRA LSA
                        for (int ar = 0; ar < this->getInstance()->getAreaCount(); ar++ )
                        {
                            Ospfv3Area* area = this->getInstance()->getArea(ar);
@@ -575,8 +575,66 @@ void Ospfv3Area::ageDatabase()
             }
             lsa->incrementInstallTime();
         }
-        // FIXME: refresh for inter-Area-Prefix-LSA is not working.
-        //          Router need to refresh LSA so it need to go into other Area and from there make another LSA type 3 and flood him to this area
+        //---------------------------------------------------------------------------------------------------
+        if (selfOriginated && (lsaAge == (LS_REFRESH_TIME - 1)))
+        {
+               //            TODO
+               //            if (unreachable) {
+               //                lsa->getHeader().setLsaAge(MAX_AGE);
+               //                floodLSA(lsa);
+               //                lsa->incrementInstallTime();
+               //            }
+               //            else {
+              long sequenceNumber = lsa->getHeader().getLsaSequenceNumber();
+              if (sequenceNumber == MAX_SEQUENCE_NUMBER) {
+                  lsa->getHeaderForUpdate().setLsaAge(MAX_AGE);
+                  floodLSA(lsa);
+                  lsa->incrementInstallTime();
+              }
+              else
+              {
+//                      InterAreaPrefixLSA *newLSA = nullptr;
+                  // If this is ABR, go to area where this LSA is created and make new.
+                  if (this->getInstance()->getAreaCount() > 1)//if its self-originate, find corresponding INTRA LSA
+                  {
+                      bool lsaFromFarArea = true;
+                      for(int ar = 0; ar < this->getInstance()->getAreaCount(); ar++)
+                      {
+                          Ospfv3Area* area = this->getInstance()->getArea(ar);
+                          if(area->getAreaID() == this->getAreaID())
+                              continue;
+
+                          IntraAreaPrefixLSA* iapLSA = nullptr;
+                          iapLSA = area->findIntraAreaPrefixByAddress(lsa->getPrefix(), lsa->getPrefixLen());
+                          if (iapLSA != nullptr) // corresponding intra-LSA has been found
+                          {
+                              area->originateInterAreaPrefixLSA(iapLSA, area, false);
+                              lsaFromFarArea = false;
+                              break;
+
+                          }
+                      }
+                      if (lsaFromFarArea) // corresponding intra-LSA has NOT been found
+                      {
+
+                          for(int ar = 0; ar < this->getInstance()->getAreaCount(); ar++)
+                          {
+                              Ospfv3Area* area = this->getInstance()->getArea(ar);
+                              if(area->getAreaID() == this->getAreaID())
+                                    continue;
+                              // search then for correspoding INTER LSA with same prefix
+                              InterAreaPrefixLSA* interLSA = area->findInterAreaPrefixLSAbyAddress(lsa->getPrefix(), lsa->getPrefixLen());
+                              if (interLSA != nullptr && interLSA->getHeader().getLsaAge() != MAX_AGE)
+                              {
+                                  area->originateInterAreaPrefixLSA(interLSA, area);
+                              }
+                          }
+                      }
+
+                  }
+
+              }
+        }
 
         if (lsaAge == MAX_AGE)
         {
@@ -723,7 +781,7 @@ RouterLSA* Ospfv3Area::originateRouterLSA()
         }
 
         Ospfv3RouterLsaBody routerLSABody;
-        memset(&routerLSABody, 0, sizeof(Ospfv3RouterLsaBody)); //FIXME : this sometimes makes first 'router' in router-LSA msgs not valid.
+        memset(&routerLSABody, 0, sizeof(Ospfv3RouterLsaBody));
 
         switch(intf->getType())
         {
@@ -1104,7 +1162,6 @@ bool Ospfv3Area::installNetworkLSA(const Ospfv3NetworkLsa *lsa)
 bool Ospfv3Area::updateNetworkLSA(NetworkLSA* currentLsa,const Ospfv3NetworkLsa* newLsa)
 {
     bool different = networkLSADiffersFrom(currentLsa, newLsa);
-//    currentLsa = new NetworkLSA(*newLsa);
     (*currentLsa) = (*newLsa);
 //    currentLsa->resetInstallTime();
 //    delete currentLsa;
@@ -1233,8 +1290,10 @@ void Ospfv3Area::originateInterAreaPrefixLSA(Ospfv3IntraAreaPrefixLsa* lsa, Ospf
             }
             else
             {
-                if (area->installInterAreaPrefixLSA(newLsa))
-                        area->floodLSA(newLsa);
+//                if (area->installInterAreaPrefixLSA(newLsa))
+//                        area->floodLSA(newLsa);
+                area->installInterAreaPrefixLSA(newLsa);
+                area->floodLSA(newLsa);
             }
 //            delete newLsa;
 
@@ -1246,7 +1305,7 @@ void Ospfv3Area::originateInterAreaPrefixLSA(Ospfv3IntraAreaPrefixLsa* lsa, Ospf
         }
         delete newLsa;
     }
-    //TODO - length!!!
+    //TODO - length of lsa is missing!
 }
 
 void Ospfv3Area::originateInterAreaPrefixLSA(const Ospfv3Lsa* prefLsa, Ospfv3Area* fromArea)
@@ -1313,12 +1372,10 @@ void Ospfv3Area::originateInterAreaPrefixLSA(const Ospfv3Lsa* prefLsa, Ospfv3Are
 
         if (area->installInterAreaPrefixLSA(newLsa))
             area->floodLSA(newLsa);
-//        else if (lsaInDatabase)
-//            area->floodLSA(newLsa);
 
         delete newLsa;
     }
-    //TODO - length!!!
+    //TODO - length of lsa is missing!
 }
 
 void Ospfv3Area::originateDefaultInterAreaPrefixLSA(Ospfv3Area* toArea)
@@ -1354,7 +1411,7 @@ void Ospfv3Area::originateDefaultInterAreaPrefixLSA(Ospfv3Area* toArea)
     }
     toArea->installInterAreaPrefixLSA(newLsa);
     delete newLsa;
-    //TODO - length!!!
+    //TODO - length of lsa is missing!
 }
 
 bool Ospfv3Area::installInterAreaPrefixLSA(const Ospfv3InterAreaPrefixLsa* lsa)
@@ -1403,7 +1460,6 @@ bool Ospfv3Area::updateInterAreaPrefixLSA(InterAreaPrefixLSA* currentLsa,const O
 {
     bool different = interAreaPrefixLSADiffersFrom(currentLsa, newLsa);
     (*currentLsa) = (*newLsa);
-//    currentLsa = new InterAreaPrefixLSA(* newLsa);
 //    currentLsa->getHeaderForUpdate().setLsaAge(0);//reset the age
 //    currentLsa->resetInstallTime();
     if (different) {
@@ -1550,7 +1606,7 @@ IntraAreaPrefixLSA* Ospfv3Area::originateIntraAreaPrefixLSA() //this is for non-
         }
     }
 
-    //TODO - length!!!
+    //TODO - length of packet is missing!
     newLsa->setNumPrefixes(prefixCount);
 
     if (prefixCount == 0) //check if this LSA is not without prefixes
@@ -1805,7 +1861,7 @@ bool Ospfv3Area::installIntraAreaPrefixLSA(const Ospfv3IntraAreaPrefixLsa *lsa)
             }
         }
     }
-    //chcek if this is not same LSA as router already know
+    //check if this is not same LSA as router already know
     IntraAreaPrefixLSA* lsaInDatabase = (IntraAreaPrefixLSA*)this->getLSAbyKey(lsaKey);
     if (lsaInDatabase == nullptr)
          lsaInDatabase = IntraAreaPrefixLSAAlreadyExists(lsa);
@@ -1849,8 +1905,6 @@ bool Ospfv3Area::installIntraAreaPrefixLSA(const Ospfv3IntraAreaPrefixLsa *lsa)
 bool Ospfv3Area::updateIntraAreaPrefixLSA(IntraAreaPrefixLSA* currentLsa,const Ospfv3IntraAreaPrefixLsa* newLsa)
 {
     bool different = intraAreaPrefixLSADiffersFrom(currentLsa, newLsa);
-//    delete currentLsa;
-//    currentLsa = new IntraAreaPrefixLSA(*newLsa);
     *currentLsa = *newLsa;
 //    currentLsa->resetInstallTime();
 //    currentLsa->getHeaderForUpdate().setLsaAge(0);//reset the age
@@ -2009,10 +2063,6 @@ Ospfv3Lsa* Ospfv3Area::getLSAbyKey(LSAKeyType LSAKey)
         }
         break;
     }
-    //TODO - link lsa from interface
-    //TODO - as external from top data structure
-
-
     return nullptr;
 }
 
@@ -3324,7 +3374,7 @@ std::vector<NextHop> *Ospfv3Area::calculateNextHops(Ospfv3Lsa *destination, Ospf
                        }
                     }
                     if (intfType == Ospfv3Interface::POINTTOMULTIPOINT_TYPE) {
-                        EV_DEBUG << "P2MP in in next hop calculation not implemented yes\n"; //TODO
+                        EV_DEBUG << "P2MP in in next hop calculation not implemented\n"; //TODO
                     }
                 } // for ()
             }
@@ -3519,7 +3569,7 @@ void Ospfv3Area::recheckInterAreaPrefixLSAs( std::vector<Ospfv3RoutingTableEntry
         for (int rIndex = 0; rIndex < routerLSA->getRoutersArraySize(); rIndex++)
         {
             LSAKeyType lsaKey;
-            lsaKey.linkStateID = (Ipv4Address)routerLSA->getRouters(rIndex).neighborInterfaceID; //TODO : what if it is another link for network
+            lsaKey.linkStateID = (Ipv4Address)routerLSA->getRouters(rIndex).neighborInterfaceID;
             lsaKey.advertisingRouter = routerLSA->getRouters(rIndex).neighborRouterID;
             lsaKey.LSType = routerLSA->getRouters(rIndex).type;
 
@@ -3679,7 +3729,7 @@ void Ospfv3Area::recheckInterAreaPrefixLSAs( std::vector<Ospfv3Ipv4RoutingTableE
                 if ((routingEntry->getArea() == areaID) &&
                     (((routingEntry->getDestinationType() & Ospfv3Ipv4RoutingTableEntry::AREA_BORDER_ROUTER_DESTINATION) != 0) ||
                      ((routingEntry->getDestinationType() & Ospfv3Ipv4RoutingTableEntry::AS_BOUNDARY_ROUTER_DESTINATION) != 0)) &&
-                    (routingEntry->getDestination() == iapLSA->getPrefixes(pfxs).addressPrefix.toIpv4())) // zistujem ci destination je router, ktory tuto LSA 3 spravu vytvoril
+                    (routingEntry->getDestination() == iapLSA->getPrefixes(pfxs).addressPrefix.toIpv4())) // check wheter destination is a originating router of this LSA 3
                 {
                     borderRouterEntry = routingEntry;;
                     currentCost += borderRouterEntry->getCost();
