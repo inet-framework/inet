@@ -16,6 +16,7 @@
 #ifndef __INET_MATH_IFUNCTION_H_
 #define __INET_MATH_IFUNCTION_H_
 
+#include "inet/common/math/Domain.h"
 #include "inet/common/math/Interval.h"
 #include "inet/common/math/Point.h"
 #include "inet/common/Ptr.h"
@@ -23,36 +24,6 @@
 namespace inet {
 
 namespace math {
-
-/**
- * This class represents the domain of a mathematical function.
- */
-template<typename ... T>
-class INET_API Domain
-{
-  public:
-    typedef Point<T ...> P;
-    typedef Interval<T ...> I;
-};
-
-namespace internal {
-
-template<typename ... T, size_t ... IS>
-inline std::ostream& print(std::ostream& os, const Domain<T ...>& d, integer_sequence<size_t, IS...>) {
-    std::initializer_list<bool>({(os << (IS == 0 ? "" : ", "), outputUnit(os, T(0)), true) ... });
-    return os;
-}
-
-} // namespace internal
-
-template<typename ... T>
-inline std::ostream& operator<<(std::ostream& os, const Domain<T ...>& d)
-{
-    os << "(";
-    internal::print(os, d, index_sequence_for<T ...>{});
-    os << ")";
-    return os;
-}
 
 /**
  * This interface represents a mathematical function from domain D to range R.
@@ -162,22 +133,22 @@ class INET_API IFunction :
      * Divides this function with the provided function.
      */
     virtual const Ptr<const IFunction<double, D>> divide(const Ptr<const IFunction<R, D>>& o) const = 0;
+
+    /**
+     * Prints this function in human readable form to the provided stream for the whole domain.
+     */
+    virtual void print(std::ostream& os) const = 0;
+
+    /**
+     * Prints this function in human readable form to the provided stream for the given domain.
+     */
+    virtual void print(std::ostream& os, const typename D::I& i) const = 0;
 };
 
 template<typename R, typename ... T>
-inline std::ostream& operator<<(std::ostream& os, const IFunction<R, Domain<T ...> >& f)
-{
-    os << "f" << Domain<T ...>() << " -> ";
-    outputUnit(os, R(0));
-    os << " {" << std::endl;
-    f.partition(f.getDomain(), [&] (const Interval<T ...>& i, const IFunction<R, Domain<T ...>> *g) {
-        os << "  i " << i << " -> { ";
-        iterateBoundaries<T ...>(i, std::function<void (const Point<T ...>&)>([&] (const Point<T ...>& p) {
-            os << "@" << p << " = " << f.getValue(p) << ", ";
-        }));
-        os << "min = " << g->getMin(i) << ", max = " << g->getMax(i) << ", mean = " << g->getMean(i) << " }" << std::endl;
-    });
-    return os << "} min = " << f.getMin() << ", max = " << f.getMax() << ", mean = " << f.getMean();
+inline std::ostream& operator<<(std::ostream& os, const IFunction<R, Domain<T ...> >& f) {
+    f.print(os);
+    return os;
 }
 
 } // namespace math

@@ -16,6 +16,7 @@
 #ifndef __INET_MATH_POINT_H_
 #define __INET_MATH_POINT_H_
 
+#include "inet/common/geometry/common/Quaternion.h"
 #include "inet/common/IndexSequence.h"
 #include "inet/common/Units.h"
 
@@ -29,6 +30,8 @@ template<>
 inline void outputUnit(std::ostream& os, double v) { os << "unit"; }
 template<>
 inline void outputUnit(std::ostream& os, simtime_t v) { os << "s"; }
+template<>
+inline void outputUnit(std::ostream& os, Quaternion v) { os << "quaternion"; }
 
 template<typename T>
 inline double toDouble(T v) { return v.get(); }

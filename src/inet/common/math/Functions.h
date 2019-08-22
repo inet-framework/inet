@@ -74,6 +74,12 @@ class INET_API ApproximatedFunction;
 template<typename R, typename D>
 class INET_API FunctionBase : public IFunction<R, D>
 {
+  protected:
+    template<typename ... T>
+    void iterateBoundaries(const Interval<T ...>& i, const std::function<void (const Point<T ...>&)> f) const {
+        iterateBoundaries<T ...>(i, f);
+    }
+
   public:
     virtual Interval<R> getRange() const override {
         return Interval<R>(getLowerBoundary<R>(), getUpperBoundary<R>(), 0b1);
@@ -142,6 +148,25 @@ class INET_API FunctionBase : public IFunction<R, D>
     virtual const Ptr<const IFunction<double, D>> divide(const Ptr<const IFunction<R, D>>& o) const override {
         return makeShared<DivisionFunction<R, D>>(const_cast<FunctionBase<R, D> *>(this)->shared_from_this(), o);
     }
+
+    virtual void print(std::ostream& os) const override {
+        os << "function" << D() << " -> ";
+        outputUnit(os, R());
+        os << " {" << std::endl;
+        this->partition(getDomain(), [&] (const typename D::I& i, const IFunction<R, D> *g) {
+            os << "  ";
+            g->print(os, i);
+        });
+        os << "} min = " << getMin() << ", max = " << getMax() << ", mean = " << getMean();
+    }
+
+    virtual void print(std::ostream& os, const typename D::I& i) const override {
+        os << "over " << i << " -> { ";
+        this->iterateBoundaries(i, std::function<void (const typename D::P&)>([&] (const typename D::P& p) {
+            os << "@" << p << " = " << this->getValue(p) << ", ";
+        }));
+        os << "min = " << getMin(i) << ", max = " << getMax(i) << ", mean = " << getMean(i) << " }" << std::endl;
+    }
 };
 
 template<typename R, typename D, int DIMS, typename RI, typename DI>
@@ -198,6 +223,10 @@ class INET_API ConstantFunction : public FunctionBase<R, D>
     virtual R getMax(const typename D::I& i) const override { return r; }
     virtual R getMean(const typename D::I& i) const override { return r; }
     virtual R getIntegral(const typename D::I& i) const override { return r == R(0) ? r : r * i.getVolume(); }
+
+    virtual void print(std::ostream& os, const typename D::I& i) const override {
+        os << "constant over " << i << " -> " << r << std::endl;
+    }
 };
 
 template<typename R, typename X>
@@ -334,6 +363,10 @@ class INET_API LinearInterpolatedFunction : public FunctionBase<R, D>
 
     virtual R getMean(const typename D::I& i) const override {
         return getValue((i.getLower() + i.getUpper()) / 2);
+    }
+
+    virtual void print(std::ostream& os, const typename D::I& i) const override {
+        os << "linear over " << i << " -> from " << getValue(i.getLower()) << " to " << getValue(i.getUpper()) << std::endl;
     }
 };
 
@@ -716,6 +749,11 @@ class INET_API ReciprocalFunction : public FunctionBase<R, D>
 
     virtual R getIntegral(const typename D::I& i) const override {
         return R(getIntegralFunctionValue(i.getUpper()) - getIntegralFunctionValue(i.getLower()));
+    }
+
+    virtual void print(std::ostream& os, const typename D::I& i) const override {
+        os << "reciprocal ";
+        FunctionBase<R, D>::print(os, i);
     }
 };
 

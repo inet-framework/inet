@@ -112,25 +112,37 @@ class INET_API Interval
     }
 };
 
-template<typename T0>
-void iterateBoundaries(const Interval<T0>& i, const std::function<void (const Point<T0>&)> f) {
-    f(i.getLower());
-    f(i.getUpper());
+inline void iterateBoundaries(const Interval<>& i, const std::function<void (const Point<>&)> f) {
+    f(Point<>());
 }
 
 template<typename T0, typename ... TS>
-typename std::enable_if<sizeof ... (TS) != 0, void>::type
-iterateBoundaries(const Interval<T0, TS ...>& i, const std::function<void (const Point<T0, TS ...>&)> f) {
+inline void iterateBoundaries(const Interval<T0, TS ...>& i, const std::function<void (const Point<T0, TS ...>&)> f) {
     Interval<TS ...> i1(tail(i.getLower()), tail(i.getUpper()), i.getClosed() >> 1);
-    iterateBoundaries<TS ...>(i1, std::function<void (const Point<TS ...>&)>([&] (const Point<TS ...>& q) {
+    iterateBoundaries(i1, std::function<void (const Point<TS ...>&)>([&] (const Point<TS ...>& q) {
         f(concat(Point<T0>(head(i.getLower())), q));
         f(concat(Point<T0>(head(i.getUpper())), q));
     }));
 }
 
+namespace internal {
+
+template<typename ... T, size_t ... IS>
+inline std::ostream& print(std::ostream& os, const Interval<T ...>& i, integer_sequence<size_t, IS...>) {
+    const auto& lower = i.getLower();
+    const auto& upper = i.getUpper();
+    auto closed = i.getClosed();
+    unsigned int b = 1 << std::tuple_size<std::tuple<T ...>>::value >> 1;
+    (void)std::initializer_list<bool>{(os << (IS == 0 ? "" : " x "), os << "[" << std::get<IS>(lower) << " ... " << std::get<IS>(upper) << ((closed & (b >> IS)) ? "]" : ")"), true) ... };
+    return os;
+}
+
+} // namespace internal
+
 template<typename ... T>
 inline std::ostream& operator<<(std::ostream& os, const Interval<T ...>& i) {
-    return os << "[" << i.getLower() << " ... " << i.getUpper() << "] " << std::bitset<std::tuple_size<std::tuple<T ...>>::value>(i.getClosed());
+    internal::print(os, i, index_sequence_for<T ...>{});
+    return os;
 }
 
 } // namespace math

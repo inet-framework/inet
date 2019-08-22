@@ -261,6 +261,9 @@ class INET_API AntennaGainFunction : public IFunction<double, Domain<Quaternion>
     virtual const Ptr<const IFunction<double, Domain<Quaternion>>> subtract(const Ptr<const IFunction<double, Domain<Quaternion>>>& o) const override { throw cRuntimeError("TODO"); }
     virtual const Ptr<const IFunction<double, Domain<Quaternion>>> multiply(const Ptr<const IFunction<double, Domain<Quaternion>>>& o) const override { throw cRuntimeError("TODO"); }
     virtual const Ptr<const IFunction<double, Domain<Quaternion>>> divide(const Ptr<const IFunction<double, Domain<Quaternion>>>& o) const override { throw cRuntimeError("TODO"); }
+
+    virtual void print(std::ostream& os) const override { os << "TODO"; }
+    virtual void print(std::ostream& os, const Interval<Quaternion>& i) const override { os << "TODO"; }
 };
 
 } // namespace physicallayer
