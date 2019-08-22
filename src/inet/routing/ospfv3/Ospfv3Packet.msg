@@ -130,7 +130,7 @@ struct Ospfv3LinkLsaPrefix
     bool xBit;
     bool laBit;
     bool nuBit;
-    uint8_t prefixLen;
+    uint16_t prefixLen;
     
     //TODO address prefix
     L3Address addressPrefix;
