@@ -1904,8 +1904,7 @@ bool Ospfv3Interface::installLinkLSA(const Ospfv3LinkLsa *lsa)
 bool Ospfv3Interface::updateLinkLSA(LinkLSA* currentLsa,const Ospfv3LinkLsa* newLsa)
 {
     bool different = linkLSADiffersFrom(currentLsa, newLsa);
-//    (*currentLsa) = (*newLsa);
-    currentLsa = new LinkLSA(* newLsa);
+    (*currentLsa) = (*newLsa);
 //    currentLsa->getHeaderForUpdate().setLsaAge(0);//reset the age
     if (different) {
         return true;
