@@ -51,6 +51,11 @@ Ieee80211Radio::Ieee80211Radio() :
 void Ieee80211Radio::initialize(int stage)
 {
     FlatRadioBase::initialize(stage);
+
+    if (stage == INITSTAGE_LOCAL) {
+        const char *crcModeString = par("crcMode");
+        crcMode = parseCrcMode(crcModeString, true);
+    }
     if (stage == INITSTAGE_PHYSICAL_LAYER) {
         int channelNumber = par("channelNumber");
         if (channelNumber != -1)
@@ -141,6 +146,100 @@ void Ieee80211Radio::setChannelNumber(int newChannelNumber)
     emit(listeningChangedSignal, 0);
 }
 
+void Ieee80211Radio::insertCrc(const Ptr<Ieee80211PhyHeader>& phyHeader) const
+{
+    if (auto header = dynamic_cast<Ieee80211FhssPhyHeader*>(phyHeader.get())) {
+        header->setCrcMode(crcMode);
+        switch (crcMode) {
+          case CRC_COMPUTED:
+            header->setCrc(0);    //TODO calculate CRC
+            break;
+          case CRC_DECLARED_CORRECT:
+              header->setCrc(0xC00D);
+              break;
+          case CRC_DECLARED_INCORRECT:
+              header->setCrc(0xBAAD);
+              break;
+          default:
+              throw cRuntimeError("Invalid CRC mode: %i", (int)crcMode);
+        }
+    }
+    else if (auto header = dynamic_cast<Ieee80211IrPhyHeader*>(phyHeader.get())) {
+        header->setCrcMode(crcMode);
+        switch (crcMode) {
+          case CRC_COMPUTED:
+            header->setCrc(0);    //TODO calculate CRC
+            break;
+          case CRC_DECLARED_CORRECT:
+              header->setCrc(0xC00D);
+              break;
+          case CRC_DECLARED_INCORRECT:
+              header->setCrc(0xBAAD);
+              break;
+          default:
+              throw cRuntimeError("Invalid CRC mode: %i", (int)crcMode);
+        }
+    }
+    else if (auto header = dynamic_cast<Ieee80211DsssPhyHeader*>(phyHeader.get())) {
+        header->setCrcMode(crcMode);
+        switch (crcMode) {
+          case CRC_COMPUTED:
+            header->setCrc(0);    //TODO calculate CRC
+            break;
+          case CRC_DECLARED_CORRECT:
+              header->setCrc(0xC00D);
+              break;
+          case CRC_DECLARED_INCORRECT:
+              header->setCrc(0xBAAD);
+              break;
+          default:
+              throw cRuntimeError("Invalid CRC mode: %i", (int)crcMode);
+        }
+    }
+}
+
+bool Ieee80211Radio::verifyCrc(const Ptr<const Ieee80211PhyHeader>& phyHeader) const
+{
+    if (auto header = dynamicPtrCast<const Ieee80211FhssPhyHeader>(phyHeader)) {
+        switch (header->getCrcMode()) {
+          case CRC_COMPUTED:
+            return true;    //TODO calculate and check CRC
+          case CRC_DECLARED_CORRECT:
+            return true;
+          case CRC_DECLARED_INCORRECT:
+            return false;
+          default:
+            throw cRuntimeError("Invalid CRC mode: %i", (int)crcMode);
+        }
+    }
+    else if (auto header = dynamicPtrCast<const Ieee80211IrPhyHeader>(phyHeader)) {
+        switch (header->getCrcMode()) {
+          case CRC_COMPUTED:
+            return true;    //TODO calculate and check CRC
+          case CRC_DECLARED_CORRECT:
+            return true;
+          case CRC_DECLARED_INCORRECT:
+            return false;
+          default:
+            throw cRuntimeError("Invalid CRC mode: %i", (int)crcMode);
+        }
+    }
+    else if (auto header = dynamicPtrCast<const Ieee80211DsssPhyHeader>(phyHeader)) {
+        switch (header->getCrcMode()) {
+          case CRC_COMPUTED:
+            return true;    //TODO calculate and check CRC
+          case CRC_DECLARED_CORRECT:
+            return true;
+          case CRC_DECLARED_INCORRECT:
+            return false;
+          default:
+            throw cRuntimeError("Invalid CRC mode: %i", (int)crcMode);
+        }
+    }
+    else
+        return true;
+}
+
 void Ieee80211Radio::encapsulate(Packet *packet) const
 {
     auto ieee80211Transmitter = check_and_cast<const Ieee80211TransmitterBase *>(transmitter);
@@ -148,7 +247,9 @@ void Ieee80211Radio::encapsulate(Packet *packet) const
     auto phyHeader = mode->getHeaderMode()->createHeader();
     phyHeader->setChunkLength(b(mode->getHeaderMode()->getLength()));
     phyHeader->setLengthField(B(packet->getTotalLength()));
+    insertCrc(phyHeader);
     packet->insertAtFront(phyHeader);
+
     auto tailLength = dynamic_cast<const Ieee80211OfdmMode *>(mode) ? b(6) : b(0);
     auto paddingLength = mode->getDataMode()->getPaddingLength(B(phyHeader->getLengthField()));
     if (tailLength + paddingLength != b(0)) {
@@ -179,7 +280,7 @@ void Ieee80211Radio::decapsulate(Packet *packet) const
 {
     auto mode = packet->getTag<Ieee80211ModeInd>()->getMode();
     const auto& phyHeader = popIeee80211PhyHeaderAtFront(packet, b(-1), Chunk::PF_ALLOW_INCORRECT | Chunk::PF_ALLOW_INCOMPLETE | Chunk::PF_ALLOW_IMPROPERLY_REPRESENTED);
-    if (phyHeader->isIncorrect() || phyHeader->isIncomplete() || phyHeader->isImproperlyRepresented())
+    if (phyHeader->isIncorrect() || phyHeader->isIncomplete() || phyHeader->isImproperlyRepresented() || !verifyCrc(phyHeader))
         packet->setBitError(true);
     auto tailLength = dynamic_cast<const Ieee80211OfdmMode *>(mode) ? b(6) : b(0);
     auto paddingLength = mode->getDataMode()->getPaddingLength(B(phyHeader->getLengthField()));
