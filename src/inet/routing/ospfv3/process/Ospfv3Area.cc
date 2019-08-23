@@ -1289,7 +1289,7 @@ void Ospfv3Area::originateInterAreaPrefixLSA(Ospfv3IntraAreaPrefixLsa* lsa, Ospf
         }
         delete newLsa;
     }
-    //TODO - Length of lsa is missing! Total size of LSA displayed in GUI is incorrect. Always shows only header size + 1 lsa prefix. But the size in LSA itself is correct.
+    //TODO - Length of lsa is missing! Total size of LSA displayed in GUI is incorrect. But the size in LSA itself is correct.
 }
 
 void Ospfv3Area::originateInterAreaPrefixLSA(const Ospfv3Lsa* prefLsa, Ospfv3Area* fromArea)
@@ -1305,14 +1305,20 @@ void Ospfv3Area::originateInterAreaPrefixLSA(const Ospfv3Lsa* prefLsa, Ospfv3Are
         if(area->getAreaID() == fromArea->getAreaID())
             continue;
 
+        // cast unspecified LSA into InterAreaPrefix LSA
         const Ospfv3InterAreaPrefixLsa *lsa = check_and_cast<const Ospfv3InterAreaPrefixLsa *>(prefLsa);
+
+        //find out wheter such LSA in actual area exists
+        InterAreaPrefixLSA *lsaInDatabase = area->findInterAreaPrefixLSAbyAddress(lsa->getPrefix(),lsa->getPrefixLen());
+
         B packetLength = OSPFV3_LSA_HEADER_LENGTH+OSPFV3_INTER_AREA_PREFIX_LSA_HEADER_LENGTH;
 //        int prefixCount = 0;
 
-        InterAreaPrefixLSA* newLsa = nullptr;
+        InterAreaPrefixLSA* newLsa = new InterAreaPrefixLSA();
 
-//        this part of code was put aside because it was hard work with memory correctly
-//        if (lsaInDatabase != nullptr) //I've probably made already LSA type 3 from this prefLsa
+        //this part of code was put aside because it was hard work with memory correctly
+        if (lsaInDatabase != nullptr) //I've probably made already LSA type 3 from this prefLsa
+            (*newLsa) = (*lsaInDatabase);
 //            for (int inter = 0; inter < area->getInterAreaPrefixLSACount(); inter++)
 //            {
 //               InterAreaPrefixLSA* iterLsa = area->getInterAreaPrefixLSA(inter);
@@ -1321,15 +1327,15 @@ void Ospfv3Area::originateInterAreaPrefixLSA(const Ospfv3Lsa* prefLsa, Ospfv3Are
 //                       (iterLsa->getPrefixLen() == lsa->getPrefixLen()))
 //               {
 //                   // this have already been processed.  So update old one and flood it away
-//                   newLsa = iterLsa;
+//                   (*newLsa) = (*iterLsa);
 //                   break;
 //               }
 //
 //            }
-        if (newLsa == nullptr)
+        else// (newLsa == nullptr)
         {
             //Only one Inter-Area-Prefix LSA for an area so only one header will suffice
-            newLsa = new InterAreaPrefixLSA();
+//            newLsa = new InterAreaPrefixLSA();
             Ospfv3LsaHeader& newHeader = newLsa->getHeaderForUpdate();
             newHeader.setLsaType(INTER_AREA_PREFIX_LSA);
             newHeader.setLinkStateID(area->getInstance()->getNewInterAreaPrefixLinkStateID());
@@ -1356,7 +1362,7 @@ void Ospfv3Area::originateInterAreaPrefixLSA(const Ospfv3Lsa* prefLsa, Ospfv3Are
 
         delete newLsa;
     }
-    //TODO - Length of lsa is missing! Total size of LSA displayed in GUI is incorrect. Always shows only header size + 1 lsa prefix. But the size in LSA itself is correct.
+    //TODO - Length of lsa is missing! Total size of LSA displayed in GUI is incorrect. But the size in LSA itself is correct.
 }
 
 void Ospfv3Area::originateDefaultInterAreaPrefixLSA(Ospfv3Area* toArea)
@@ -1392,7 +1398,7 @@ void Ospfv3Area::originateDefaultInterAreaPrefixLSA(Ospfv3Area* toArea)
     }
     toArea->installInterAreaPrefixLSA(newLsa);
     delete newLsa;
-    //TODO - Length of lsa is missing! Total size of LSA displayed in GUI is incorrect. Always shows only header size + 1 lsa prefix. But the size in LSA itself is correct.
+    //TODO - Length of lsa is missing! Total size of LSA displayed in GUI is incorrect. But the size in LSA itself is correct.
 }
 
 bool Ospfv3Area::installInterAreaPrefixLSA(const Ospfv3InterAreaPrefixLsa* lsa)
@@ -1573,7 +1579,12 @@ IntraAreaPrefixLSA* Ospfv3Area::originateIntraAreaPrefixLSA() //this is for non-
                         if (rIndex >= 0)
                             prefix.prefixLen = this->getInstance()->getProcess()->rt6->getRoute(rIndex)->getPrefixLength();
                         else
-                            prefix.prefixLen = 64;
+                        {
+                            // network is in routing table no more. There is so far no other way to get prefixLen just from config.xml
+                            // LSA with this ip will be removed
+                            continue;
+
+                        }
                         prefix.metric = METRIC;
                         prefix.addressPrefix=ipv6.getPrefix(prefix.prefixLen);
 
@@ -1587,7 +1598,7 @@ IntraAreaPrefixLSA* Ospfv3Area::originateIntraAreaPrefixLSA() //this is for non-
         }
     }
 
-    //TODO - Length of lsa is missing! Total size of LSA displayed in GUI is incorrect. Always shows only header size + 1 lsa prefix. But the size in LSA itself is correct.
+    //TODO - Length of lsa is missing! Total size of LSA displayed in GUI is incorrect. But the size in LSA itself is correct.
     newLsa->setNumPrefixes(prefixCount);
 
     if (prefixCount == 0) //check if this LSA is not without prefixes
@@ -3356,7 +3367,7 @@ std::vector<NextHop> *Ospfv3Area::calculateNextHops(Ospfv3Lsa *destination, Ospf
                        }
                     }
                     if (intfType == Ospfv3Interface::POINTTOMULTIPOINT_TYPE) {
-                        EV_DEBUG << "P2MP in in next hop calculation not implemented\n"; //TODO
+                        throw cRuntimeError("P2MP in in next hop calculation not implemented yet");
                     }
                 } // for ()
             }

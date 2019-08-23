@@ -1108,6 +1108,7 @@ void Ospfv3Interface::processLSU(Packet* packet, Ospfv3Neighbor* neighbor){
 
                 case INTER_AREA_ROUTER_LSA: //TODO this LSAs are not implemented yet, so they are not processed (with acutal code, this case should never happen)
                 case AS_EXTERNAL_LSA:
+                    throw cRuntimeError("ProcessLSU - managing LSA of type 4 or 5 - not implemented yet! ");
                     break;
 
                 case NSSA_LSA:
@@ -1810,7 +1811,7 @@ LinkLSA* Ospfv3Interface::originateLinkLSA()
             prefix.pBit = false;
             prefix.xBit = false;
             prefix.prefixLen = ipv4Data->getNetmask().getNetmaskLength();
-            prefix.addressPrefix = L3Address(ipAdd.getPrefix(prefix.prefixLen));//TODO - this is smaller than 16B
+            prefix.addressPrefix = L3Address(ipAdd.getPrefix(prefix.prefixLen));
 
             linkLSA->setPrefixesArraySize(linkLSA->getPrefixesArraySize()+1);
             linkLSA->setPrefixes(i, prefix);
