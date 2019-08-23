@@ -1,0 +1,63 @@
+<!-- period: 2.7196624457720255s -->
+<scenario>
+<at t="0.0">
+    <create-module type="inet.showcases.general.dynamic.DynamicHost" parent="." submodule="sourceNode0"/>
+</at>
+<at t="4.0">
+    <delete-module module="sourceNode0"/>
+</at>
+<at t="2.7196624457720255">
+    <create-module type="inet.showcases.general.dynamic.DynamicHost" parent="." submodule="sourceNode1"/>
+</at>
+<at t="6.719662445772025">
+    <delete-module module="sourceNode1"/>
+</at>
+<at t="5.439324891544051">
+    <create-module type="inet.showcases.general.dynamic.DynamicHost" parent="." submodule="sourceNode2"/>
+</at>
+<at t="9.43932489154405">
+    <delete-module module="sourceNode2"/>
+</at>
+<at t="8.158987337316077">
+    <create-module type="inet.showcases.general.dynamic.DynamicHost" parent="." submodule="sourceNode3"/>
+</at>
+<at t="12.158987337316077">
+    <delete-module module="sourceNode3"/>
+</at>
+<at t="10.878649783088102">
+    <create-module type="inet.showcases.general.dynamic.DynamicHost" parent="." submodule="sourceNode4"/>
+</at>
+<at t="14.878649783088102">
+    <delete-module module="sourceNode4"/>
+</at>
+<at t="13.598312228860127">
+    <create-module type="inet.showcases.general.dynamic.DynamicHost" parent="." submodule="sourceNode5"/>
+</at>
+<at t="17.598312228860127">
+    <delete-module module="sourceNode5"/>
+</at>
+<at t="16.317974674632154">
+    <create-module type="inet.showcases.general.dynamic.DynamicHost" parent="." submodule="sourceNode6"/>
+</at>
+<at t="20.317974674632154">
+    <delete-module module="sourceNode6"/>
+</at>
+<at t="19.037637120404177">
+    <create-module type="inet.showcases.general.dynamic.DynamicHost" parent="." submodule="sourceNode7"/>
+</at>
+<at t="23.037637120404177">
+    <delete-module module="sourceNode7"/>
+</at>
+<at t="21.757299566176204">
+    <create-module type="inet.showcases.general.dynamic.DynamicHost" parent="." submodule="sourceNode8"/>
+</at>
+<at t="25.757299566176204">
+    <delete-module module="sourceNode8"/>
+</at>
+<at t="24.47696201194823">
+    <create-module type="inet.showcases.general.dynamic.DynamicHost" parent="." submodule="sourceNode9"/>
+</at>
+<at t="28.47696201194823">
+    <delete-module module="sourceNode9"/>
+</at>
+</scenario>
