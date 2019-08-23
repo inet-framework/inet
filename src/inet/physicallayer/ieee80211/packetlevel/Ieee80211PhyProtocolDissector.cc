@@ -35,7 +35,7 @@ void Ieee80211PhyProtocolDissector::dissect(Packet *packet, const Protocol *prot
     auto trailerOffset = packet->getBackOffset();
     auto macEndOffset = packet->getFrontOffset();
     const auto& header = packet->popAtFront<inet::physicallayer::Ieee80211PhyHeader>();
-    macEndOffset += B(header->getLengthField());
+    macEndOffset += header->getChunkLength() + B(header->getLengthField());
     callback.startProtocolDataUnit(&Protocol::ieee80211Phy);
     bool incorrect = (macEndOffset > trailerOffset || header->getLengthField() < header->getChunkLength());
     if (incorrect) {
