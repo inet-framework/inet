@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scave:Analysis xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:scave="http://www.omnetpp.org/omnetpp/scave">
+  <inputs>
+    <inputs name="/inet/samples/scaling/results/Ieee80211Ping-*.sca"/>
+    <inputs name="/inet/samples/scaling/results/Ieee80211Udp-*.sca"/>
+    <inputs name="/inet/samples/scaling/results/ApskRadioPing-*.sca"/>
+    <inputs name="/inet/samples/scaling/results/ApskRadioUdp-*.sca"/>
+    <inputs name="/inet/samples/scaling/results/IdealRadioPing-*.sca"/>
+    <inputs name="/inet/samples/scaling/results/IdealRadioUdp-*.sca"/>
+  </inputs>
+  <datasets>
+    <datasets name="IdealRadio">
+      <items xsi:type="scave:Add" filterPattern="run(IdealRadio*) AND name(a:elapsedTime)"/>
+      <items xsi:type="scave:Add" filterPattern="name(count) "/>
+      <items xsi:type="scave:ScatterChart" name="" xDataPattern="module(.) AND name(count)">
+        <properties name="Graph.Title" value="IdealRadio"/>
+        <properties name="Y.Axis.Log" value="true"/>
+        <properties name="X.Axis.Log" value="true"/>
+        <isoDataPattern>attr:configname(*)</isoDataPattern>
+      </items>
+    </datasets>
+    <datasets name="APSKScalarRadio">
+      <items xsi:type="scave:Add" filterPattern="run(ApskRadio*) AND name(a:elapsedTime)"/>
+      <items xsi:type="scave:Add" filterPattern="name(count) "/>
+      <items xsi:type="scave:ScatterChart" name="" xDataPattern="module(.) AND name(count)">
+        <properties name="Graph.Title" value="APSKScalarRadio"/>
+        <properties name="Y.Axis.Log" value="true"/>
+        <properties name="X.Axis.Log" value="true"/>
+        <isoDataPattern>attr:configname(*)</isoDataPattern>
+      </items>
+    </datasets>
+    <datasets name="Ieee80211ScalarRadio">
+      <items xsi:type="scave:Add" filterPattern="run(Ieee80211*) AND name(a:elapsedTime)"/>
+      <items xsi:type="scave:Add" filterPattern="name(count) "/>
+      <items xsi:type="scave:ScatterChart" name="" xDataPattern="module(.) AND name(count)">
+        <properties name="Graph.Title" value="Ieee80211ScalarRadio"/>
+        <properties name="Y.Axis.Log" value="true"/>
+        <properties name="X.Axis.Log" value="true"/>
+        <isoDataPattern>attr:configname(*)</isoDataPattern>
+      </items>
+    </datasets>
+  </datasets>
+  <chartSheets>
+    <chartSheets name="default" charts="//@datasets/@datasets.0/@items.2 //@datasets/@datasets.1/@items.2 //@datasets/@datasets.2/@items.2"/>
+  </chartSheets>
+</scave:Analysis>
