@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+	<AnalogueModels>
+		<AnalogueModel type="UWBIRStochasticPathlossModel">  
+			<parameter name="PL0" type="double" value="-47"/> 
+			<parameter name="mu_gamma" type="double" value="1.7"/>
+			<parameter name="sigma_gamma" type="double" value="0.3"/>
+			<parameter name="mu_sigma" type="double" value="1.6"/>
+			<parameter name="sigma_sigma" type="double" value="0.5"/>
+			<parameter name="isEnabled" type="bool" value="true"/>
+			<parameter name="shadowing" type="bool" value="true"/>
+		</AnalogueModel>
+	</AnalogueModels>
+	<Decider type="DeciderUWBIRED">
+		<parameter name="sensitivity" type="double" value="0.5"/>
+		<parameter name="syncThreshold" type="double" value="2"/> <!-- = 3dB -->
+		<parameter name="syncAlwaysSucceeds" type="bool" value="true"/>
+		<parameter name="trace" type="bool" value="false"/>
+		<parameter name="stats" type="bool" value="true"/>
+	</Decider>
+</root>
