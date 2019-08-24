@@ -1117,18 +1117,6 @@
         linkerFlags = ""
         />
     <feature
-        id="visualizationtutorial"
-        name="Visualization tutorial"
-        description = "A step-by-step tutorial starting from the basics, and introducing new features and concepts related to visualizing state and behavior of communication networks."
-        initiallyEnabled = "true"
-        requires = "visualization physicalenvironment Ieee80211 IPv4 AODV"
-        labels = "tutorial visualization"
-        nedPackages = "inet.tutorials.visualization"
-        extraSourceFolders = ""
-        compileFlags = ""
-        linkerFlags = ""
-        />
-    <feature
         id="configuratortutorial"
         name="Configurator tutorial"
         description = "A step-by-step tutorial starting from the basics, and introducing new features and concepts related to automatic IP address and routing table configuartion."
