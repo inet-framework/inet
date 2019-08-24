@@ -24,9 +24,6 @@ import inet.visualizer.integrated.IntegratedVisualizer;
 import inet.visualizer.physicallayer.PhysicalLinkVisualizer;
 
 
-//
-// TODO documentation
-//
 network PhysicalLinkVisualizerEnablingShowcase
 {
     @display("bgb=600,300");
@@ -52,9 +49,6 @@ network PhysicalLinkVisualizerEnablingShowcase
 }
 
 
-//
-// TODO documentation
-//
 network PhysicalLinkVisualizerFilteringShowcase
 {
     @display("bgb=780,330");
@@ -85,9 +79,6 @@ network PhysicalLinkVisualizerFilteringShowcase
         }
 }
 
-//
-// TODO documentation
-//
 network PhysicalLinkVisualizerMobileShowcase
 {
     @display("bgb=660,630");

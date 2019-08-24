@@ -27,9 +27,6 @@ import inet.visualizer.integrated.IntegratedVisualizer;
 import inet.visualizer.linklayer.DataLinkVisualizer;
 
 
-//
-// TODO documentation
-//
 network DataLinkVisualizerEnablingWiredShowcase
 {
     @display("bgb=700,250");
@@ -53,9 +50,6 @@ network DataLinkVisualizerEnablingWiredShowcase
 }
 
 
-//
-// TODO documentation
-//
 network DataLinkVisualizerEnablingWirelessShowcase
 {
     @display("bgb=700,250");
@@ -80,9 +74,6 @@ network DataLinkVisualizerEnablingWirelessShowcase
         }
 }
 
-//
-// TODO documentation
-//
 network DataLinkVisualizerActivityLevelShowcase
 {
     @display("bgb=700,250");
@@ -110,9 +101,6 @@ network DataLinkVisualizerActivityLevelShowcase
         }
 }
 
-//
-// TODO documentation
-//
 network DataLinkVisualizerFilteringShowcase
 {
     @display("bgb=900,600");
@@ -166,9 +154,6 @@ network DataLinkVisualizerFilteringShowcase
         etherSwitch2.ethg++ <--> Eth100M <--> host1.ethg++;
 }
 
-//
-// TODO documentation
-//
 network DataLinkVisualizerMobileShowcase
 {
     @display("bgb=620,500");
@@ -182,12 +167,6 @@ network DataLinkVisualizerMobileShowcase
         radioMedium: Ieee80211ScalarRadioMedium {
             @display("p=70,250");
         }
-//        rreqVisualizer: DataLinkVisualizer {
-//        	@display("p=70,350");
-//        }
-//        rrepVisualizer: DataLinkVisualizer {
-//            @display("p=70,450");
-//        }
         destination: AodvRouter {
             @display("p=512.272,249.796");
         }

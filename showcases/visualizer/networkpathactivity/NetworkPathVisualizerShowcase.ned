@@ -28,9 +28,6 @@ import inet.visualizer.integrated.IntegratedVisualizer;
 import inet.visualizer.networklayer.NetworkRouteVisualizer;
 
 
-//
-// TODO documentation
-//
 network NetworkPathSimpleShowcase
 {
     @display("bgb=600,250");
@@ -54,9 +51,6 @@ network NetworkPathSimpleShowcase
         source.ethg++ <--> Eth100M <--> destination.ethg++;
 }
 
-//
-// TODO documentation
-//
 network NetworkPathComplexShowcase
 {
     @display("bgb=1050,720");
@@ -142,9 +136,6 @@ network NetworkPathComplexShowcase
         router0.pppg++ <--> Eth100M <--> router4.pppg++;
 }
 
-//
-// TODO documentation
-//
 network NetworkPathMobileShowcase
 {
     @display("bgb=660,630");
@@ -181,9 +172,6 @@ network NetworkPathMobileShowcase
         }
 }
 
-//
-// TODO documentation
-//
 network NetworkPathRIPShowcase
 {
     @display("bgb=1100,680");
