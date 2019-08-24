@@ -28,7 +28,7 @@ simple TokenBasedServer extends PacketServerBase like IPacketServer
     parameters:
         int initialNumTokens = default(0);
         int maxNumTokens = default(-1);
-        volatile double tokenProductionInterval @unit(s) = default(0);
+        volatile double tokenProductionInterval @unit(s) = default(0s);
         volatile int tokenConsumptionPerPacket = default(1);
         volatile int tokenConsumptionPerBit = default(0);
         displayStringTextFormat = default("contains %n tk\nserved %p pk (%l)"); // determines display string text above the submodule
