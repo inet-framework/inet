@@ -147,6 +147,7 @@ void MediumCanvasVisualizer::refreshSpectrumFigure(const cModule *module, PlotFi
     if (wlan0 != nullptr) {
         auto radio = check_and_cast<IRadio *>(wlan0->getSubmodule("radio"));
         antenna = radio->getAntenna();
+#ifdef WITH_RADIO
         auto dimensionalTransmission = dynamic_cast<const DimensionalTransmission *>(radio->getTransmissionInProgress());
         if (spectrumAutoFrequencyAxis && dimensionalTransmission != nullptr) {
             dimensionalTransmission->getPower()->partition(dimensionalTransmission->getPower()->getDomain(), [&] (const Interval<simtime_t, Hz>& i, const IFunction<WpHz, Domain<simtime_t, Hz>> *f) {
@@ -158,6 +159,7 @@ void MediumCanvasVisualizer::refreshSpectrumFigure(const cModule *module, PlotFi
                 nonCostThisPtr->spectrumMaxFrequency = std::max(spectrumMaxFrequency, std::get<1>(i.getUpper()));
             });
         }
+#endif
         transmission = radio->getReceptionInProgress();
     }
     if (antenna == nullptr)
