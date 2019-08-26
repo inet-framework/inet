@@ -111,12 +111,12 @@ enum GroupRecordType
     BLOCK_OLD_SOURCE = 6;
 }
 
-struct GroupRecord
+class GroupRecord
 {
     int recordType enum(GroupRecordType);
     Ipv4Address groupAddress;
     Ipv4AddressVector sourceList;
-    uint8_t auxDataLen = 0;
+    uint32_t auxData[];
 };
 
 class Igmpv3Report extends IgmpMessage
@@ -125,6 +125,5 @@ class Igmpv3Report extends IgmpMessage
     uint8_t resv1 = 0;
     uint16_t resv2 = 0;
     GroupRecord groupRecord[];
-    uint8_t additionalData[];
 }
 
