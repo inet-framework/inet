@@ -91,12 +91,15 @@ void IgmpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
             stream.writeUint16Be(numOfRecords);
             for (unsigned int i = 0; i < numOfRecords; i++) {
                 const GroupRecord& groupRecord = igmpv3Report->getGroupRecord(i);
-                stream.writeByte(groupRecord.recordType);
-                stream.writeByte(groupRecord.auxDataLen);
-                stream.writeUint16Be(groupRecord.sourceList.size());
-                stream.writeIpv4Address(groupRecord.groupAddress);
-                for (auto src: groupRecord.sourceList) {
+                stream.writeByte(groupRecord.getRecordType());
+                stream.writeByte(groupRecord.getAuxDataArraySize());
+                stream.writeUint16Be(groupRecord.getSourceList().size());
+                stream.writeIpv4Address(groupRecord.getGroupAddress());
+                for (auto src: groupRecord.getSourceList()) {
                     stream.writeIpv4Address(src);
+                }
+                for (size_t i = 0; i < groupRecord.getAuxDataArraySize(); ++i) {
+                    stream.writeUint32Be(groupRecord.getAuxData(i));
                 }
             }
             break;
@@ -184,24 +187,21 @@ const Ptr<Chunk> IgmpHeaderSerializer::deserialize(MemoryInputStream& stream) co
                 igmpv3Report->setGroupRecordArraySize(numOfRecords);
                 for (uint16_t i = 0; i < numOfRecords; ++i) {
                     GroupRecord groupRecord;
-                    groupRecord.recordType = stream.readByte();
+                    groupRecord.setRecordType(stream.readByte());
                     uint8_t auxDataLen = stream.readByte();
-                    if (auxDataLen > 0)
-                        igmpv3Report->markIncorrect();
-                    groupRecord.auxDataLen = auxDataLen;
+                    groupRecord.setAuxDataArraySize(auxDataLen);
                     uint8_t numOfSources = stream.readUint16Be();
-                    groupRecord.groupAddress = stream.readIpv4Address();
+                    groupRecord.setGroupAddress(stream.readIpv4Address());
                     for (uint8_t j = 0; j < numOfSources; j++) {
-                        groupRecord.sourceList.push_back(stream.readIpv4Address());
+                        groupRecord.getSourceListForUpdate().push_back(stream.readIpv4Address());
+                    }
+                    for (size_t k = 0; k < auxDataLen; ++k) {
+                        groupRecord.setAuxData(k, stream.readUint32Be());
                     }
                     igmpv3Report->setGroupRecord(i, groupRecord);
                 }
-                uint8_t remainingLength = B(stream.getRemainingLength()).get();
-                if (remainingLength > 0) {
-                    igmpv3Report->setAdditionalDataArraySize(remainingLength);
-                    for (size_t i = 0; i < remainingLength; ++i)
-                        igmpv3Report->setAdditionalData(i, stream.readByte());
-                }
+                while (stream.getRemainingLength() > B(0))
+                    stream.readByte();
                 return igmpv3Report;
         }
         default: {
