@@ -30,7 +30,7 @@ namespace inet {
 
 Define_Module(PcapRecorder);
 
-simsignal_t PcapRecorder::pcapFrameRecordedSignal = registerSignal("pcapFrameRecorded");
+simsignal_t PcapRecorder::packetRecordedSignal = registerSignal("packetRecorded");
 
 PcapRecorder::~PcapRecorder()
 {
@@ -184,7 +184,7 @@ void PcapRecorder::recordPacket(const cPacket *msg, bool l2r)
                 if (convertedPacket) {
                     pcapWriter.writePacket(simTime(), convertedPacket);
                     numRecorded++;
-                    emit(pcapFrameRecordedSignal, packet);
+                    emit(packetRecordedSignal, packet);
                     delete convertedPacket;
                     return;
                 }
@@ -192,7 +192,7 @@ void PcapRecorder::recordPacket(const cPacket *msg, bool l2r)
             }
             pcapWriter.writePacket(simTime(), packet);
             numRecorded++;
-            emit(pcapFrameRecordedSignal, packet);
+            emit(packetRecordedSignal, packet);
         }
     }
 }
