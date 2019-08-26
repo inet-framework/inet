@@ -47,8 +47,8 @@ void ExtLowerUdp::initialize(int stage)
         }
     }
     else if (stage == INITSTAGE_TRANSPORT_LAYER) {
-        registerService(Protocol::udp, gate("appIn"), gate("ipIn"));
-        registerProtocol(Protocol::udp, gate("ipOut"), gate("appOut"));
+        registerService(Protocol::udp, gate("appIn"), nullptr);
+        registerProtocol(Protocol::udp, nullptr, gate("appOut"));
     }
 }
 
