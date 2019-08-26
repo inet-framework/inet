@@ -1,3 +1,7 @@
+ - where should the radio check for incorrect (corrupted) PHY headers? this is completely missing right now, should this be done from the receiver or the radio class (probably before decapsulation)?
+   in general, setting the bit error flag in the packet is not an option, because it might lose the fine detail of a corrupted packet (e.g. chunk level or bit level corruption)
+   in addition to MAC CRC, PHY headers may also contain parity bits and/or CRC, so a radio should probably be able to stop receiving a signal right after the header and skip the data part altogether   
+
  - review dup calls for performance reasons, verify if they are justified
  - extract analog model from transmission/reception to avoid having too many classes
  - always add a PhyFrame, even in the simple case? or better yet rename RadioFrame to PhyFrame and make them the transmission/reception the analog model of it
