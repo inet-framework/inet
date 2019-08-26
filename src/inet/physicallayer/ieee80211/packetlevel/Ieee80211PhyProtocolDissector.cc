@@ -32,20 +32,20 @@ Register_Protocol_Dissector(&Protocol::ieee80211Phy, Ieee80211PhyProtocolDissect
 
 void Ieee80211PhyProtocolDissector::dissect(Packet *packet, const Protocol *protocol, ICallback& callback) const
 {
-    auto trailerOffset = packet->getBackOffset();
-    auto macEndOffset = packet->getFrontOffset();
-    const auto& header = packet->popAtFront<inet::physicallayer::Ieee80211PhyHeader>();
-    macEndOffset += header->getChunkLength() + B(header->getLengthField());
     callback.startProtocolDataUnit(&Protocol::ieee80211Phy);
-    bool incorrect = (macEndOffset > trailerOffset || header->getLengthField() < header->getChunkLength());
+    auto originalBackOffset = packet->getBackOffset();
+    auto payloadEndOffset = packet->getFrontOffset();
+    const auto& header = packet->popAtFront<inet::physicallayer::Ieee80211PhyHeader>();
+    callback.visitChunk(header, &Protocol::ieee80211Phy);
+    payloadEndOffset += header->getChunkLength() + B(header->getLengthField());
+    bool incorrect = (payloadEndOffset > originalBackOffset || header->getLengthField() < header->getChunkLength());
     if (incorrect) {
         callback.markIncorrect();
-        macEndOffset = trailerOffset;
+        payloadEndOffset = originalBackOffset;
     }
-    callback.visitChunk(header, &Protocol::ieee80211Phy);
-    packet->setBackOffset(macEndOffset);
+    packet->setBackOffset(payloadEndOffset);
     callback.dissectPacket(packet, &Protocol::ieee80211Mac);
-    packet->setBackOffset(trailerOffset);
+    packet->setBackOffset(originalBackOffset);
     auto paddingLength = packet->getDataLength();
     if (paddingLength > b(0)) {
         const auto& padding = packet->popAtFront(paddingLength);        // remove padding (type is not EthernetPadding!)
