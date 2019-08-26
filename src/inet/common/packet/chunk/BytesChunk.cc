@@ -59,10 +59,9 @@ const Ptr<Chunk> BytesChunk::peekUnchecked(PeekPredicate predicate, PeekConverte
             chunk->markImmutable();
             return chunk;
         }
-        else {
+        else
             // 4. peeking incomplete bytes without conversion returns a SliceChunk
             return peekConverted<SliceChunk>(iterator, length, flags);
-        }
     }
     // 4. peeking with conversion
     return converter(const_cast<BytesChunk *>(this)->shared_from_this(), iterator, length, flags);
