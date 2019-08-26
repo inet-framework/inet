@@ -259,7 +259,7 @@ class INET_API OneDimensionalBoxcarFunction : public FunctionBase<R, Domain<X>>
             ConstantFunction<R, Domain<X>> g(r);
             f(i2, &g);
         }
-        const auto& i3 = i.intersect(Interval<X>(Point<X>(upper), getUpperBoundary<X>(), 0));
+        const auto& i3 = i.intersect(Interval<X>(Point<X>(upper), getUpperBoundary<X>(), 0b1));
         if (!i3.isEmpty()) {
             ConstantFunction<R, Domain<X>> g(R(0));
             f(i3, &g);
@@ -301,15 +301,15 @@ class INET_API TwoDimensionalBoxcarFunction : public FunctionBase<R, Domain<X, Y
     virtual void partition(const Interval<X, Y>& i, const std::function<void (const Interval<X, Y>&, const IFunction<R, Domain<X, Y>> *)> f) const override {
         callf(i.intersect(Interval<X, Y>(Point<X, Y>(getLowerBoundary<X>(), getLowerBoundary<Y>()), Point<X, Y>(X(lowerX), Y(lowerY)), 0)), f, R(0));
         callf(i.intersect(Interval<X, Y>(Point<X, Y>(X(lowerX), getLowerBoundary<Y>()), Point<X, Y>(X(upperX), Y(lowerY)), 0)), f, R(0));
-        callf(i.intersect(Interval<X, Y>(Point<X, Y>(X(upperX), getLowerBoundary<Y>()), Point<X, Y>(getUpperBoundary<X>(), Y(lowerY)), 0)), f, R(0));
+        callf(i.intersect(Interval<X, Y>(Point<X, Y>(X(upperX), getLowerBoundary<Y>()), Point<X, Y>(getUpperBoundary<X>(), Y(lowerY)), 0b10)), f, R(0));
 
         callf(i.intersect(Interval<X, Y>(Point<X, Y>(getLowerBoundary<X>(), Y(lowerY)), Point<X, Y>(X(lowerX), Y(upperY)), 0)), f, R(0));
         callf(i.intersect(Interval<X, Y>(Point<X, Y>(X(lowerX), Y(lowerY)), Point<X, Y>(X(upperX), Y(upperY)), 0)), f, r);
-        callf(i.intersect(Interval<X, Y>(Point<X, Y>(X(upperX), Y(lowerY)), Point<X, Y>(getUpperBoundary<X>(), Y(upperY)), 0)), f, R(0));
+        callf(i.intersect(Interval<X, Y>(Point<X, Y>(X(upperX), Y(lowerY)), Point<X, Y>(getUpperBoundary<X>(), Y(upperY)), 0b10)), f, R(0));
 
-        callf(i.intersect(Interval<X, Y>(Point<X, Y>(getLowerBoundary<X>(), Y(upperY)), Point<X, Y>(X(lowerX), getUpperBoundary<Y>()), 0)), f, R(0));
-        callf(i.intersect(Interval<X, Y>(Point<X, Y>(X(lowerX), Y(upperY)), Point<X, Y>(X(upperX), getUpperBoundary<Y>()), 0)), f, R(0));
-        callf(i.intersect(Interval<X, Y>(Point<X, Y>(X(upperX), Y(upperY)), Point<X, Y>(getUpperBoundary<X>(), getUpperBoundary<Y>()), 0)), f, R(0));
+        callf(i.intersect(Interval<X, Y>(Point<X, Y>(getLowerBoundary<X>(), Y(upperY)), Point<X, Y>(X(lowerX), getUpperBoundary<Y>()), 0b01)), f, R(0));
+        callf(i.intersect(Interval<X, Y>(Point<X, Y>(X(lowerX), Y(upperY)), Point<X, Y>(X(upperX), getUpperBoundary<Y>()), 0b01)), f, R(0));
+        callf(i.intersect(Interval<X, Y>(Point<X, Y>(X(upperX), Y(upperY)), Point<X, Y>(getUpperBoundary<X>(), getUpperBoundary<Y>()), 0b11)), f, R(0));
     }
 
     virtual bool isFinite(const Interval<X, Y>& i) const override { return std::isfinite(toDouble(r)); }
@@ -501,7 +501,9 @@ class INET_API OneDimensionalInterpolatedFunction : public FunctionBase<R, Domai
         for (auto it = lt; it != ut; it++) {
             auto jt = it;
             jt++;
-            auto i1 = i.intersect(Interval<X>(Point<X>(it->first), Point<X>(jt->first), 0));
+            auto kt = jt;
+            kt++;
+            auto i1 = i.intersect(Interval<X>(Point<X>(it->first), Point<X>(jt->first), kt == rs.end() ? 0b1 : 0b0));
             if (!i1.isEmpty()) {
                 const auto interpolator = it->second.second;
                 if (dynamic_cast<const EitherInterpolator<X, R> *>(interpolator)) {
