@@ -77,7 +77,7 @@ using make_bits_to_indices_sequence = typename bits_to_indices_sequence<DIMS, SI
 
 template<typename S, size_t ... SIS, typename D, size_t ... DIS>
 void copyTupleElements(const S& source, integer_sequence<size_t, SIS ...>, D& destination, integer_sequence<size_t, DIS ...>) {
-    std::initializer_list<double>({ toDouble(std::get<DIS>(destination) = std::get<SIS>(source)) ... });
+    (void)std::initializer_list<double>{ toDouble(std::get<DIS>(destination) = std::get<SIS>(source)) ... };
 }
 
 } // namespace internal
@@ -92,13 +92,13 @@ class INET_API Point : public std::tuple<T ...>
     template<size_t ... IS>
     double getImpl(int index, integer_sequence<size_t, IS...>) const {
         double result = 0;
-        std::initializer_list<double>({ result = (IS == index ? toDouble(std::get<IS>(*this)) : result) ... });
+        (void)std::initializer_list<double>{ result = (IS == index ? toDouble(std::get<IS>(*this)) : result) ... };
         return result;
     }
 
     template<size_t ... IS>
     void setImpl(int index, double value, integer_sequence<size_t, IS...>) {
-        std::initializer_list<double>({ (IS == index ? toDouble(std::get<IS>(*this) = T(value)) : 0) ... });
+        (void)std::initializer_list<double>{ (IS == index ? toDouble(std::get<IS>(*this) = T(value)) : 0) ... };
     }
 
     template<size_t ... IS>
@@ -124,14 +124,14 @@ class INET_API Point : public std::tuple<T ...>
     template<size_t ... IS>
     bool smaller(const Point<T ...>& o, integer_sequence<size_t, IS ...>) const {
         bool result = true;
-        std::initializer_list<bool>({ result &= std::get<IS>(*this) < std::get<IS>(o) ... });
+        (void)std::initializer_list<bool>{ result &= std::get<IS>(*this) < std::get<IS>(o) ... };
         return result;
     }
 
     template<size_t ... IS>
     bool greater(const Point<T ...>& o, integer_sequence<size_t, IS ...>) const {
         bool result = true;
-        std::initializer_list<bool>({ result &= std::get<IS>(*this) > std::get<IS>(o) ... });
+        (void)std::initializer_list<bool>{ result &= std::get<IS>(*this) > std::get<IS>(o) ... };
         return result;
     }
 
@@ -215,7 +215,7 @@ inline Point<TS1 ..., TS2 ...> concatImpl(const Point<TS1 ...>& p1, integer_sequ
 
 template<typename ... T, size_t ... IS>
 inline std::ostream& print(std::ostream& os, const Point<T ...>& p, integer_sequence<size_t, IS...>) {
-    std::initializer_list<bool>({(bool)(os << (IS == 0 ? "" : ", ") << std::get<IS>(p)) ... });
+    (void)std::initializer_list<bool>{(os << (IS == 0 ? "" : ", ") << std::get<IS>(p), true) ... };
     return os;
 }
 

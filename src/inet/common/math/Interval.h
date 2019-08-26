@@ -37,7 +37,7 @@ class INET_API Interval
   protected:
     template<size_t ... IS>
     void checkImpl(integer_sequence<size_t, IS...>) const {
-        std::initializer_list<bool> bs({ std::get<IS>(upper) < std::get<IS>(lower) ... });
+        std::initializer_list<bool> bs{ std::get<IS>(upper) < std::get<IS>(lower) ... };
         if (std::any_of(bs.begin(), bs.end(), [] (bool b) { return b; }))
             throw cRuntimeError("Invalid arguments");
         if (closed != (closed & ((1 << std::tuple_size<std::tuple<T ...>>::value) - 1)))
@@ -49,7 +49,7 @@ class INET_API Interval
         bool result = lower < p;
         if (result) {
             unsigned int b = 1 << std::tuple_size<std::tuple<T ...>>::value >> 1;
-            std::initializer_list<bool>({ result &= ((closed & (b >> IS)) ? std::get<IS>(p) <= std::get<IS>(upper) : std::get<IS>(p) < std::get<IS>(upper)) ... });
+            (void)std::initializer_list<bool>{ result &= ((closed & (b >> IS)) ? std::get<IS>(p) <= std::get<IS>(upper) : std::get<IS>(p) < std::get<IS>(upper)) ... };
         }
         return result;
     }
@@ -60,9 +60,9 @@ class INET_API Interval
         Point<T ...> l( std::max(std::get<IS>(lower), std::get<IS>(o.lower)) ... );
         Point<T ...> u( std::min(std::get<IS>(upper), std::get<IS>(o.upper)) ... );
         unsigned int c = 0;
-        std::initializer_list<unsigned int>({ c += ((b >> IS) & (std::get<IS>(lower) > std::get<IS>(u) || std::get<IS>(upper) < std::get<IS>(l) ? 0 :
-                                                                (std::get<IS>(upper) == std::get<IS>(o.upper) ? (closed & o.closed) :
-                                                                (std::get<IS>(upper) < std::get<IS>(o.upper) ? closed : o.closed)))) ... });
+        (void)std::initializer_list<unsigned int>{ c += ((b >> IS) & (std::get<IS>(lower) > std::get<IS>(u) || std::get<IS>(upper) < std::get<IS>(l) ? 0 :
+                                                                     (std::get<IS>(upper) == std::get<IS>(o.upper) ? (closed & o.closed) :
+                                                                     (std::get<IS>(upper) < std::get<IS>(o.upper) ? closed : o.closed)))) ... };
         Point<T ...> l1( std::min(std::get<IS>(upper), std::get<IS>(l)) ... );
         Point<T ...> u1( std::max(std::get<IS>(lower), std::get<IS>(u)) ... );
         return Interval<T ...>(l1, u1, c);
@@ -72,7 +72,7 @@ class INET_API Interval
     double getVolumeImpl(integer_sequence<size_t, IS...>) const {
         double result = 1;
         unsigned int b = 1 << std::tuple_size<std::tuple<T ...>>::value >> 1;
-        std::initializer_list<double>({ result *= ((closed & (b >> IS)) && std::get<IS>(upper) == std::get<IS>(lower) ? 1 : toDouble(std::get<IS>(upper) - std::get<IS>(lower))) ... });
+        (void)std::initializer_list<double>{ result *= ((closed & (b >> IS)) && std::get<IS>(upper) == std::get<IS>(lower) ? 1 : toDouble(std::get<IS>(upper) - std::get<IS>(lower))) ... };
         return result;
     }
 
@@ -80,7 +80,7 @@ class INET_API Interval
     bool isEmptyImpl(integer_sequence<size_t, IS...>) const {
         unsigned int b = 1 << std::tuple_size<std::tuple<T ...>>::value >> 1;
         bool result = false;
-        std::initializer_list<bool>({ result |= ((closed & (b >> IS)) ? false : std::get<IS>(lower) == std::get<IS>(upper)) ... });
+        (void)std::initializer_list<bool>{ result |= ((closed & (b >> IS)) ? false : std::get<IS>(lower) == std::get<IS>(upper)) ... };
         return result;
     }
 
