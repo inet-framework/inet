@@ -179,12 +179,13 @@ class INET_API DomainLimitedFunction : public FunctionBase<R, D>
 {
   protected:
     const Ptr<const IFunction<R, D>> f;
+    const Interval<R> range;
     const typename D::I domain;
 
   public:
-    DomainLimitedFunction(const Ptr<const IFunction<R, D>>& f, const typename D::I& domain) : f(f), domain(domain) { }
+    DomainLimitedFunction(const Ptr<const IFunction<R, D>>& f, const typename D::I& domain) : f(f), range(Interval<R>(f->getMin(domain), f->getMax(domain), 0b1)), domain(domain) { }
 
-    virtual Interval<R> getRange() const override { return Interval<R>(this->getMin(domain), this->getMax(domain)); };
+    virtual Interval<R> getRange() const override { return range; };
     virtual typename D::I getDomain() const override { return domain; };
 
     virtual R getValue(const typename D::P& p) const override {
@@ -198,6 +199,12 @@ class INET_API DomainLimitedFunction : public FunctionBase<R, D>
             f->partition(i1, g);
     }
 };
+
+template<typename R, typename D>
+Ptr<const DomainLimitedFunction<R, D>> makeFirstQuadrantLimitedFunction(const Ptr<const IFunction<R, D>>& f) {
+    typename D::I i(D::P::getZero(), D::P::getUpperBoundaries(), (1 << std::tuple_size<typename D::P::type>::value) - 1);
+    return makeShared<DomainLimitedFunction<R, D>>(f, i);
+}
 
 template<typename R, typename D>
 class INET_API ConstantFunction : public FunctionBase<R, D>
