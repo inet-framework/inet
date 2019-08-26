@@ -1455,7 +1455,8 @@ void Igmpv3::insertCrc(CrcMode crcMode, const Ptr<IgmpMessage>& igmpMsg, Packet 
             igmpMsg->setCrc(0x0000); // make sure that the CRC is 0 in the header before computing the CRC
             MemoryOutputStream igmpStream;
             Chunk::serialize(igmpStream, igmpMsg);
-            Chunk::serialize(igmpStream, packet->peekDataAsBytes());
+            if (packet->getDataLength() > b(0))
+                Chunk::serialize(igmpStream, packet->peekDataAsBytes());
             uint16_t crc = TcpIpChecksum::checksum(igmpStream.getData());
             igmpMsg->setCrc(crc);
             break;
