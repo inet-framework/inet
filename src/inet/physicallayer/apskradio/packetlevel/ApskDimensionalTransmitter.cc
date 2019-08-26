@@ -50,7 +50,7 @@ const ITransmission *ApskDimensionalTransmitter::createTransmission(const IRadio
 {
     auto phyHeader = packet->peekAtFront<ApskPhyHeader>();
     ASSERT(phyHeader->getChunkLength() == headerLength);
-    auto dataLength = packet->getTotalLength() - headerLength;
+    auto dataLength = packet->getTotalLength() - phyHeader->getChunkLength();
     W transmissionPower = computeTransmissionPower(packet);
     Hz transmissionCarrierFrequency = computeCarrierFrequency(packet);
     Hz transmissionBandwidth = computeBandwidth(packet);
