@@ -8,6 +8,11 @@ This release contains a bug fix for an issue where clang did not export
 the typinfo symbols for classes on Windows. This caused link errors on
 dependent projets. It requires OMNeT++ 5.3 or later.
 
+General:
+
+  - Added NetworkCommunicationFingerprintCalculator, to be able to generate
+    INET 4 compatible fingerprints that are based on network communication.
+
 
 INET 3.6.5 (April 2019) - stable
 --------------------------------
