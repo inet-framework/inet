@@ -36,7 +36,7 @@ class INET_API StationaryMobility : public StationaryMobilityBase
   protected:
     virtual void initialize(int stage) override;
     virtual void refreshDisplay() const override;
-    virtual void updateMobilityState();
+    virtual void updateMobilityStateFromDisplayString();
 };
 
 } // namespace inet

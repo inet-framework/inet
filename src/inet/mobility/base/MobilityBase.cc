@@ -136,40 +136,35 @@ void MobilityBase::initializePosition()
 void MobilityBase::setInitialPosition()
 {
     // reading the coordinates from omnetpp.ini makes predefined scenarios a lot easier
-    bool filled = false;
-    bool posEqWithDisplayString = false;
     auto coordinateSystem = getModuleFromPar<IGeographicCoordinateSystem>(par("coordinateSystemModule"), this, false);
     if (subjectModule != nullptr && hasPar("initFromDisplayString") && par("initFromDisplayString")) {
         const char *s = subjectModule->getDisplayString().getTagArg("p", 2);
         if (s && *s)
             throw cRuntimeError("The coordinates of '%s' are invalid. Please remove automatic arrangement"
                                 " (3rd argument of 'p' tag) from '@display' attribute.", subjectModule->getFullPath().c_str());
-        filled = parseIntTo(subjectModule->getDisplayString().getTagArg("p", 0), lastPosition.x) &&
-                 parseIntTo(subjectModule->getDisplayString().getTagArg("p", 1), lastPosition.y);
+        bool filled = parseIntTo(subjectModule->getDisplayString().getTagArg("p", 0), lastPosition.x) &&
+                      parseIntTo(subjectModule->getDisplayString().getTagArg("p", 1), lastPosition.y);
         if (filled) {
             lastPosition.z = hasPar("initialZ") ? par("initialZ") : 0.0;
             lastPosition = canvasProjection->computeCanvasPointInverse(cFigure::Point(lastPosition.x, lastPosition.y), lastPosition.z);
         }
-        posEqWithDisplayString = true;
+        else
+            lastPosition = getRandomPosition();
     }
     // not all mobility models have "initialX", "initialY" and "initialZ" parameters
     else if (coordinateSystem == nullptr && hasPar("initialX") && hasPar("initialY") && hasPar("initialZ")) {
         lastPosition.x = par("initialX");
         lastPosition.y = par("initialY");
         lastPosition.z = par("initialZ");
-        filled = true;
     }
     else if (coordinateSystem != nullptr && hasPar("initialLatitude") && hasPar("initialLongitude") && hasPar("initialAltitude")) {
         auto initialLatitude = deg(par("initialLatitude"));
         auto initialLongitude = deg(par("initialLongitude"));
         auto initialAltitude = m(par("initialAltitude"));
         lastPosition = coordinateSystem->computeSceneCoordinate(GeoCoord(initialLatitude, initialLongitude, initialAltitude));
-        filled = true;
     }
-    if (!filled)
-        lastPosition = getRandomPosition();
-    if (!posEqWithDisplayString)
-        updateDisplay();
+    if (par("updateDisplayString"))
+        updateDisplayStringFromMobilityState();
 }
 
 void MobilityBase::checkPosition()
@@ -199,14 +194,12 @@ void MobilityBase::refreshDisplay() const
 {
     DirectiveResolver directiveResolver(const_cast<MobilityBase *>(this));
     auto text = format.formatString(&directiveResolver);
-    cDisplayString& displayString = this->getDisplayString();
-    displayString.setTagArg("t", 0, text);
-    if (par("updateDisplayString")) {
-        updateDisplay();
-    }
+    getDisplayString().setTagArg("t", 0, text);
+    if (par("updateDisplayString"))
+        updateDisplayStringFromMobilityState();
 }
 
-void MobilityBase::updateDisplay() const
+void MobilityBase::updateDisplayStringFromMobilityState() const
 {
     if (subjectModule != nullptr) {
         // position
