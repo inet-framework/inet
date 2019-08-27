@@ -41,7 +41,7 @@ class INET_API FunctionChecker
                 if (i.contains(p)) {
                     R rF = f->getValue(p);
                     R rG = g->getValue(p);
-                    ASSERT(rF == rG);
+                    ASSERT(rF == rG || (std::isnan(toDouble(rF)) && std::isnan(toDouble(rG))));
                 }
             });
             iterateBoundaries(i, check);
