@@ -30,12 +30,12 @@ using namespace inet::math;
 class INET_API DimensionalReception : public FlatReceptionBase
 {
   protected:
-    const Ptr<const IFunction<WpHz, Domain<simtime_t, Hz>>> power;
+    const Ptr<const IFunction<WpHz, Domain<simsec, Hz>>> power;
 
   public:
-    DimensionalReception(const IRadio *radio, const ITransmission *transmission, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const Quaternion startOrientation, const Quaternion endOrientation, Hz carrierFrequency, Hz bandwidth, const Ptr<const IFunction<WpHz, Domain<simtime_t, Hz>>>& power);
+    DimensionalReception(const IRadio *radio, const ITransmission *transmission, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const Quaternion startOrientation, const Quaternion endOrientation, Hz carrierFrequency, Hz bandwidth, const Ptr<const IFunction<WpHz, Domain<simsec, Hz>>>& power);
 
-    virtual const Ptr<const IFunction<WpHz, Domain<simtime_t, Hz>>>& getPower() const { return power; }
+    virtual const Ptr<const IFunction<WpHz, Domain<simsec, Hz>>>& getPower() const { return power; }
     virtual W computeMinPower(simtime_t startTime, simtime_t endTime) const override;
 };
 

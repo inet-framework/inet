@@ -86,7 +86,7 @@ void MediumVisualizerBase::initialize(int stage)
         spectrumPlacementHint = parsePlacement(par("spectrumPlacementHint"));
         spectrumPlacementPriority = par("spectrumPlacementPriority");
         // TODO: background noise is not included in mediumPowerFunction
-        mediumPowerFunction = makeShared<SumFunction<WpHz, Domain<m, m, m, simtime_t, Hz>>>();
+        mediumPowerFunction = makeShared<SumFunction<WpHz, Domain<m, m, m, simsec, Hz>>>();
         radioMedium = getModuleFromPar<IRadioMedium>(par("mediumModule"), this, false);
         if (radioMedium != nullptr) {
             cModule *radioMediumModule = check_and_cast<cModule *>(radioMedium);
@@ -200,7 +200,7 @@ void MediumVisualizerBase::handleSignalAdded(const physicallayer::ITransmission 
         const auto& startOrientation = transmission->getStartOrientation();
         const Ptr<const IFunction<double, Domain<m, m, m, m, m, m, Hz>>>& obstacleLossFunction = radioMedium->getObstacleLoss() != nullptr ? makeShared<ObstacleLossFunction>(radioMedium->getObstacleLoss()) : nullptr;
         const auto& attenuationFunction = makeShared<SpaceAndFrequencyAttenuationFunction>(transmitterAntennaGainFunction, pathLossFunction, obstacleLossFunction, startPosition, startOrientation, propagationSpeed);
-        const auto& approximatedAtteunuationFunction = makeShared<ApproximatedFunction<double, Domain<m, m, m, simtime_t, Hz>, 4, Hz>>(lower, upper, step, &CenterInterpolator<Hz, double>::singleton, attenuationFunction);
+        const auto& approximatedAtteunuationFunction = makeShared<ApproximatedFunction<double, Domain<m, m, m, simsec, Hz>, 4, Hz>>(lower, upper, step, &CenterInterpolator<Hz, double>::singleton, attenuationFunction);
         const auto& propagatedTransmissionPowerFunction = makeShared<PropagatedTransmissionPowerFunction>(transmissionPowerFunction, startPosition, propagationSpeed);
         const auto& receptionPowerFunction = propagatedTransmissionPowerFunction->multiply(approximatedAtteunuationFunction);
         mediumPowerFunction->addElement(receptionPowerFunction);

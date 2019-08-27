@@ -50,13 +50,13 @@ class INET_API Ieee802154UwbIrTransmitter : public TransmitterBase
     simtime_t getPhyMaxFrameDuration() const;
     simtime_t getThdr() const;
 
-    virtual void generateSyncPreamble(std::map<simtime_t, WpHz>& data, simtime_t& time, const simtime_t startTime) const;
-    virtual void generateSFD(std::map<simtime_t, WpHz>& data, simtime_t& time, const simtime_t startTime) const;
-    virtual void generatePhyHeader(std::map<simtime_t, WpHz>& data, simtime_t& time, const simtime_t startTime) const;
-    virtual void generateBurst(std::map<simtime_t, WpHz>& data, simtime_t& time, const simtime_t startTime, const simtime_t burstStart, short polarity) const;
-    virtual void generatePulse(std::map<simtime_t, WpHz>& data, simtime_t& time, const simtime_t startTime, short polarity, double peak, const simtime_t chip) const;
+    virtual void generateSyncPreamble(std::map<simsec, WpHz>& data, simtime_t& time, const simtime_t startTime) const;
+    virtual void generateSFD(std::map<simsec, WpHz>& data, simtime_t& time, const simtime_t startTime) const;
+    virtual void generatePhyHeader(std::map<simsec, WpHz>& data, simtime_t& time, const simtime_t startTime) const;
+    virtual void generateBurst(std::map<simsec, WpHz>& data, simtime_t& time, const simtime_t startTime, const simtime_t burstStart, short polarity) const;
+    virtual void generatePulse(std::map<simsec, WpHz>& data, simtime_t& time, const simtime_t startTime, short polarity, double peak, const simtime_t chip) const;
 
-    virtual Ptr<const IFunction<WpHz, Domain<simtime_t, Hz>>> generateIEEE802154AUWBSignal(const simtime_t startTime, std::vector<bool> *bits) const;
+    virtual Ptr<const IFunction<WpHz, Domain<simsec, Hz>>> generateIEEE802154AUWBSignal(const simtime_t startTime, std::vector<bool> *bits) const;
 
   public:
     Ieee802154UwbIrTransmitter();

@@ -21,7 +21,7 @@ namespace inet {
 
 namespace physicallayer {
 
-DimensionalNoise::DimensionalNoise(simtime_t startTime, simtime_t endTime, Hz carrierFrequency, Hz bandwidth, const Ptr<const IFunction<WpHz, Domain<simtime_t, Hz>>>& power) :
+DimensionalNoise::DimensionalNoise(simtime_t startTime, simtime_t endTime, Hz carrierFrequency, Hz bandwidth, const Ptr<const IFunction<WpHz, Domain<simsec, Hz>>>& power) :
     NarrowbandNoiseBase(startTime, endTime, carrierFrequency, bandwidth),
     power(power)
 {
@@ -40,18 +40,18 @@ std::ostream& DimensionalNoise::printToStream(std::ostream& stream, int level) c
 
 W DimensionalNoise::computeMinPower(simtime_t startTime, simtime_t endTime) const
 {
-    Point<simtime_t> startPoint(startTime);
-    Point<simtime_t> endPoint(endTime);
-    W minPower = integrate<WpHz, Domain<simtime_t, Hz>, 0b10, W, Domain<simtime_t>>(power)->getMin(Interval<simtime_t>(startPoint, endPoint, 0b1));
+    Point<simsec> startPoint{simsec(startTime)};
+    Point<simsec> endPoint{simsec(endTime)};
+    W minPower = integrate<WpHz, Domain<simsec, Hz>, 0b10, W, Domain<simsec>>(power)->getMin(Interval<simsec>(startPoint, endPoint, 0b1));
     EV_DEBUG << "Computing minimum noise power: start = " << startPoint << ", end = " << endPoint << " -> " << minPower << endl;
     return minPower;
 }
 
 W DimensionalNoise::computeMaxPower(simtime_t startTime, simtime_t endTime) const
 {
-    Point<simtime_t> startPoint(startTime);
-    Point<simtime_t> endPoint(endTime);
-    W maxPower = integrate<WpHz, Domain<simtime_t, Hz>, 0b10, W, Domain<simtime_t>>(power)->getMax(Interval<simtime_t>(startPoint, endPoint, 0b1));
+    Point<simsec> startPoint{simsec(startTime)};
+    Point<simsec> endPoint{simsec(endTime)};
+    W maxPower = integrate<WpHz, Domain<simsec, Hz>, 0b10, W, Domain<simsec>>(power)->getMax(Interval<simsec>(startPoint, endPoint, 0b1));
     EV_DEBUG << "Computing maximum noise power: start = " << startPoint << ", end = " << endPoint << " -> " << maxPower << endl;
     return maxPower;
 }

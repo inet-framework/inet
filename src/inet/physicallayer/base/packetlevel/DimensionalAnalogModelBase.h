@@ -36,7 +36,7 @@ class INET_API DimensionalAnalogModelBase : public AnalogModelBase
     virtual void initialize(int stage) override;
 
   public:
-    virtual const Ptr<const IFunction<WpHz, Domain<simtime_t, Hz>>> computeReceptionPower(const IRadio *radio, const ITransmission *transmission, const IArrival *arrival) const;
+    virtual const Ptr<const IFunction<WpHz, Domain<simsec, Hz>>> computeReceptionPower(const IRadio *radio, const ITransmission *transmission, const IArrival *arrival) const;
     virtual const INoise *computeNoise(const IListening *listening, const IInterference *interference) const override;
     virtual const INoise *computeNoise(const IReception *reception, const INoise *noise) const override;
     virtual const ISnir *computeSNIR(const IReception *reception, const INoise *noise) const override;
