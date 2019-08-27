@@ -48,8 +48,8 @@ void Ieee80211PhyProtocolDissector::dissect(Packet *packet, const Protocol *prot
     packet->setBackOffset(originalBackOffset);
     auto paddingLength = packet->getDataLength();
     if (paddingLength > b(0)) {
-        const auto& padding = packet->popAtFront(paddingLength);        // remove padding (type is not EthernetPadding!)
-        callback.visitChunk(padding, &Protocol::ethernetPhy);
+        const auto& padding = packet->popAtFront(paddingLength);
+        callback.visitChunk(padding, &Protocol::ieee80211Phy);
     }
     callback.endProtocolDataUnit(&Protocol::ieee80211Phy);
 }
