@@ -17,13 +17,11 @@
 #define __INET_MATH_INTERPOLATORS_H_
 
 #include "inet/common/math/IInterpolator.h"
-#include "inet/common/Units.h"
+#include "inet/common/math/Point.h"
 
 namespace inet {
 
 namespace math {
-
-using namespace inet::units::values;
 
 template<typename X, typename Y>
 class INET_API InterpolatorBase : public IInterpolator<X, Y>
@@ -198,12 +196,12 @@ class INET_API LinearInterpolator : public InterpolatorBase<X, Y>
   public:
     virtual Y getValue(const X x1, const Y y1, const X x2, const Y y2, const X x) const override {
         ASSERT(x1 <= x && x <= x2);
-        if (x1 == x2) {
-            ASSERT(y1 == y2);
+        if (x1 == x)
             return y1;
-        }
+        else if (x2 == x)
+            return y2;
         else {
-            auto a = unit((x - x1) / (x2 - x1)).get();
+            auto a = toDouble(x - x1) / toDouble(x2 - x1);
             return y1 * (1 - a) + y2 * a;
         }
     }
