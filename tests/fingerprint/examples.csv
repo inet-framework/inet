@@ -446,10 +446,10 @@
 /examples/wireless/antenna/,         -f omnetpp.ini -c OrbitY -r 0,                 3610s,           0d26-383d/tplx, PASS, wireless
 /examples/wireless/antenna/,         -f omnetpp.ini -c OrbitZ -r 0,                 3610s,           805e-457a/tplx, PASS, wireless
 
-/examples/wireless/corruptionmode/,  -f omnetpp.ini -c PacketCorruptionMode -r 0,   10s,         99ff-76d8/tplx, PASS,
-/examples/wireless/corruptionmode/,  -f omnetpp.ini -c ChunkCorruptionMode -r 0,    10s,         24a4-7124/tplx, PASS,
-/examples/wireless/corruptionmode/,  -f omnetpp.ini -c ByteCorruptionMode -r 0,     10s,         48d8-2063/tplx, PASS,
-/examples/wireless/corruptionmode/,  -f omnetpp.ini -c BitCorruptionMode -r 0,      10s,         adf4-e779/tplx, PASS,
+/examples/wireless/corruptionmode/,  -f omnetpp.ini -c PacketCorruptionMode -r 0,   10s,         8919-144b/tplx, PASS,
+/examples/wireless/corruptionmode/,  -f omnetpp.ini -c ChunkCorruptionMode -r 0,    10s,         97cf-2379/tplx, PASS,
+/examples/wireless/corruptionmode/,  -f omnetpp.ini -c ByteCorruptionMode -r 0,     10s,         783e-f887/tplx, PASS,
+/examples/wireless/corruptionmode/,  -f omnetpp.ini -c BitCorruptionMode -r 0,      10s,         3590-3528/tplx, PASS,
 
 /examples/wireless/crosstalk/,       -f omnetpp.ini -c General -r 0,                2s,           9600-7246/tplx, PASS, wireless
 
@@ -511,9 +511,9 @@
 /examples/wireless/nic/,             -f omnetpp.ini -c CSMAWithUnitDiskRadio -r 0,                100s,     6107-d47a/tplx, PASS, wireless
 /examples/wireless/nic/,             -f omnetpp.ini -c CSMAWithApskScalarRadio -r 0,              100s,     6107-d47a/tplx, PASS, wireless
 /examples/wireless/nic/,             -f omnetpp.ini -c CSMAWithApskDimensionalRadio -r 0,         100s,     6107-d47a/tplx, PASS, wireless
-/examples/wireless/nic/,             -f omnetpp.ini -c CsmaCaWithUnitDiskRadio -r 0,              100s,    ba8b-5541/tplx, PASS, wireless
-/examples/wireless/nic/,             -f omnetpp.ini -c CsmaCaWithApskScalarRadio -r 0,            100s,    ba8b-5541/tplx, PASS, wireless
-/examples/wireless/nic/,             -f omnetpp.ini -c CsmaCaWithApskDimensionalRadio -r 0,       100s,    ba8b-5541/tplx, PASS, wireless
+/examples/wireless/nic/,             -f omnetpp.ini -c CsmaCaWithUnitDiskRadio -r 0,              100s,    5460-47e3/tplx, PASS, wireless
+/examples/wireless/nic/,             -f omnetpp.ini -c CsmaCaWithApskScalarRadio -r 0,            100s,    5460-47e3/tplx, PASS, wireless
+/examples/wireless/nic/,             -f omnetpp.ini -c CsmaCaWithApskDimensionalRadio -r 0,       100s,    5460-47e3/tplx, PASS, wireless
 /examples/wireless/nic/,             -f omnetpp.ini -c BMacWithUnitDiskRadio -r 0,                100s,     fd72-0743/tplx, PASS, wireless
 /examples/wireless/nic/,             -f omnetpp.ini -c BMacWithApskScalarRadio -r 0,              100s,     b88a-feef/tplx, PASS, wireless
 /examples/wireless/nic/,             -f omnetpp.ini -c BMacWithApskDimensionalRadio -r 0,         100s,     b88a-feef/tplx, PASS, wireless
