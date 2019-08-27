@@ -447,7 +447,7 @@
 /examples/wireless/antenna/,         -f omnetpp.ini -c OrbitZ -r 0,                 3610s,           805e-457a/tplx, PASS, wireless
 
 /examples/wireless/corruptionmode/,  -f omnetpp.ini -c PacketCorruptionMode -r 0,   10s,         8919-144b/tplx, PASS,
-/examples/wireless/corruptionmode/,  -f omnetpp.ini -c ChunkCorruptionMode -r 0,    10s,         97cf-2379/tplx, PASS,
+/examples/wireless/corruptionmode/,  -f omnetpp.ini -c ChunkCorruptionMode -r 0,    10s,         9fe0-014a/tplx, PASS,
 /examples/wireless/corruptionmode/,  -f omnetpp.ini -c ByteCorruptionMode -r 0,     10s,         783e-f887/tplx, PASS,
 /examples/wireless/corruptionmode/,  -f omnetpp.ini -c BitCorruptionMode -r 0,      10s,         3590-3528/tplx, PASS,
 
