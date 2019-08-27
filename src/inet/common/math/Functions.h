@@ -74,12 +74,6 @@ class INET_API ApproximatedFunction;
 template<typename R, typename D>
 class INET_API FunctionBase : public IFunction<R, D>
 {
-  protected:
-    template<typename ... T>
-    void iterateBoundaries(const Interval<T ...>& i, const std::function<void (const Point<T ...>&)> f) const {
-        iterateBoundaries<T ...>(i, f);
-    }
-
   public:
     virtual Interval<R> getRange() const override {
         return Interval<R>(getLowerBoundary<R>(), getUpperBoundary<R>(), 0b1);
@@ -162,7 +156,7 @@ class INET_API FunctionBase : public IFunction<R, D>
 
     virtual void print(std::ostream& os, const typename D::I& i) const override {
         os << "over " << i << " -> { ";
-        this->iterateBoundaries(i, std::function<void (const typename D::P&)>([&] (const typename D::P& p) {
+        iterateBoundaries(i, std::function<void (const typename D::P&)>([&] (const typename D::P& p) {
             os << "@" << p << " = " << this->getValue(p) << ", ";
         }));
         os << "min = " << getMin(i) << ", max = " << getMax(i) << ", mean = " << getMean(i) << " }" << std::endl;
