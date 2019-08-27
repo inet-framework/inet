@@ -36,6 +36,8 @@ inline void outputUnit(std::ostream& os, Quaternion v) { os << "quaternion"; }
 template<typename T>
 inline double toDouble(T v) { return v.get(); }
 template<>
+inline double toDouble(simsec v) { return v.get().dbl(); }
+template<>
 inline double toDouble(double v) { return v; }
 template<>
 inline double toDouble(simtime_t v) { return v.dbl(); }
@@ -43,12 +45,16 @@ inline double toDouble(simtime_t v) { return v.dbl(); }
 template<typename T>
 inline T getLowerBoundary() { return T(-INFINITY); }
 template<>
+inline simsec getLowerBoundary() { return simsec(-SimTime::getMaxTime() / 2); }
+template<>
 inline double getLowerBoundary() { return -INFINITY; }
 template<>
 inline simtime_t getLowerBoundary() { return -SimTime::getMaxTime() / 2; }
 
 template<typename T>
 inline T getUpperBoundary() { return T(INFINITY); }
+template<>
+inline simsec getUpperBoundary() { return simsec(SimTime::getMaxTime() / 2); }
 template<>
 inline double getUpperBoundary() { return INFINITY; }
 template<>
