@@ -192,6 +192,22 @@ class INET_API DomainLimitedFunction : public FunctionBase<R, D>
         if (!i1.isEmpty())
             f->partition(i1, g);
     }
+
+    virtual R getMin(const typename D::I& i) const override {
+        return f->getMin(i.intersect(domain));
+    }
+
+    virtual R getMax(const typename D::I& i) const override {
+        return f->getMax(i.intersect(domain));
+    }
+
+    virtual R getMean(const typename D::I& i) const override {
+        return f->getMean(i.intersect(domain));
+    }
+
+    virtual R getIntegral(const typename D::I& i) const override {
+        return f->getIntegral(i.intersect(domain));
+    }
 };
 
 template<typename R, typename D>
