@@ -416,6 +416,8 @@ void CsmaCaMac::decapsulate(Packet *frame)
     frame->addTagIfAbsent<UserPriorityInd>()->setUserPriority(macHeader->getPriority());
     auto networkProtocol = macHeader->getNetworkProtocol();
     auto transportProtocol = ProtocolGroup::ethertype.getProtocol(networkProtocol);
+    if (headerLength > macHeader->getChunkLength())
+        frame->popAtFront(headerLength - macHeader->getChunkLength());
     frame->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(transportProtocol);
     frame->addTagIfAbsent<PacketProtocolTag>()->setProtocol(transportProtocol);
 }
