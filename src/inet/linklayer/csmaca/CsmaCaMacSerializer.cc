@@ -27,17 +27,26 @@ Register_Serializer(CsmaCaMacTrailer, CsmaCaMacTrailerSerializer);
 
 void CsmaCaMacHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
+    auto startPos = stream.getLength();
     if (auto macHeader = dynamicPtrCast<const CsmaCaMacDataHeader>(chunk)) {
-        stream.writeByte(0x00);
+        stream.writeUint8(macHeader->getType());
+        auto length = macHeader->getHeaderLengthField();
+        stream.writeUint8(length);
         stream.writeMacAddress(macHeader->getReceiverAddress());
         stream.writeMacAddress(macHeader->getTransmitterAddress());
         stream.writeUint16Be(macHeader->getNetworkProtocol());
         stream.writeByte(macHeader->getPriority());
+        if (macHeader->getChunkLength() > stream.getLength() - startPos)
+            stream.writeByteRepeatedly('?', B(macHeader->getChunkLength() - (stream.getLength() - startPos)).get());
     }
     else if (auto macHeader = dynamicPtrCast<const CsmaCaMacAckHeader>(chunk)) {
-        stream.writeByte(0x01);
+        stream.writeUint8(0x01);
+        auto length = macHeader->getHeaderLengthField();
+        stream.writeUint8(length);
         stream.writeMacAddress(macHeader->getReceiverAddress());
         stream.writeMacAddress(macHeader->getTransmitterAddress());
+        if (macHeader->getChunkLength() > stream.getLength() - startPos)
+            stream.writeByteRepeatedly('?', B(macHeader->getChunkLength() - (stream.getLength() - startPos)).get());
     }
     else
         throw cRuntimeError("CsmaCaMacSerializer: cannot serialize chunk");
@@ -45,20 +54,30 @@ void CsmaCaMacHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<
 
 const Ptr<Chunk> CsmaCaMacHeaderSerializer::deserialize(MemoryInputStream& stream) const
 {
-    uint8_t type = stream.readByte();
+    auto startPos = stream.getPosition();
+    CsmaCaMacHeaderType type = static_cast<CsmaCaMacHeaderType>(stream.readUint8());
+    uint8_t length = stream.readUint8();
     switch(type) {
-        case 0x00: {
+        case CSMA_DATA: {
             auto macHeader = makeShared<CsmaCaMacDataHeader>();
+            macHeader->setType(type);
+            macHeader->setHeaderLengthField(length);
             macHeader->setReceiverAddress(stream.readMacAddress());
             macHeader->setTransmitterAddress(stream.readMacAddress());
             macHeader->setNetworkProtocol(stream.readUint16Be());
             macHeader->setPriority(stream.readByte());
+            if (B(length) > stream.getPosition() - startPos)
+                stream.readByteRepeatedly('?', length - B(stream.getPosition() - startPos).get());
             return macHeader;
         }
-        case 0x01: {
+        case CSMA_ACK: {
             auto macHeader = makeShared<CsmaCaMacAckHeader>();
+            macHeader->setType(type);
+            macHeader->setHeaderLengthField(length);
             macHeader->setReceiverAddress(stream.readMacAddress());
             macHeader->setTransmitterAddress(stream.readMacAddress());
+            if (B(length) > stream.getPosition() - startPos)
+                stream.readByteRepeatedly('?', length - B(stream.getPosition() - startPos).get());
             return macHeader;
         }
         default:

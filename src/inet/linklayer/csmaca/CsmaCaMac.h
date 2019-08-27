@@ -37,8 +37,8 @@ class INET_API CsmaCaMac : public MacProtocolBase
     FcsMode fcsMode;
     bool useAck = true;
     double bitrate = NaN;
-    b headerLength = b(-1);
-    b ackLength = b(-1);
+    B headerLength = B(-1);
+    B ackLength = B(-1);
     simtime_t ackTimeout = -1;
     simtime_t slotTime = -1;
     simtime_t sifsTime = -1;
