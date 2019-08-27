@@ -172,8 +172,8 @@ class INET_API PropagatedTransmissionPowerFunction : public FunctionBase<WpHz, D
                     ConstantFunction<WpHz, Domain<m, m, m, simsec, Hz>> h(cg->getConstantValue());
                     f(i3, &h);
                 }
-                else if (auto lg = dynamic_cast<const LinearInterpolatedFunction<WpHz, Domain<simsec, Hz>> *>(g)) {
-                    LinearInterpolatedFunction<WpHz, Domain<m, m, m, simsec, Hz>> h(i3.getLower(), i3.getUpper(), lg->getValue(i2.getLower()), lg->getValue(i2.getUpper()), lg->getDimension() + 3);
+                else if (auto lg = dynamic_cast<const LinearFunction<WpHz, Domain<simsec, Hz>> *>(g)) {
+                    LinearFunction<WpHz, Domain<m, m, m, simsec, Hz>> h(i3.getLower(), i3.getUpper(), lg->getValue(i2.getLower()), lg->getValue(i2.getUpper()), lg->getDimension() + 3);
                     f(i3, &h);
                 }
                 else
