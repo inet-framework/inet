@@ -129,9 +129,23 @@ class INET_API Point : public std::tuple<T ...>
     }
 
     template<size_t ... IS>
+    bool smallerOrEqual(const Point<T ...>& o, integer_sequence<size_t, IS ...>) const {
+        bool result = true;
+        (void)std::initializer_list<bool>{ result &= std::get<IS>(*this) <= std::get<IS>(o) ... };
+        return result;
+    }
+
+    template<size_t ... IS>
     bool greater(const Point<T ...>& o, integer_sequence<size_t, IS ...>) const {
         bool result = true;
         (void)std::initializer_list<bool>{ result &= std::get<IS>(*this) > std::get<IS>(o) ... };
+        return result;
+    }
+
+    template<size_t ... IS>
+    bool greaterOrEqual(const Point<T ...>& o, integer_sequence<size_t, IS ...>) const {
+        bool result = true;
+        (void)std::initializer_list<bool>{ result &= std::get<IS>(*this) >= std::get<IS>(o) ... };
         return result;
     }
 
@@ -167,7 +181,7 @@ class INET_API Point : public std::tuple<T ...>
     }
 
     bool operator<=(const Point<T ...>& o) const {
-        return *this == o || *this < o;
+        return smallerOrEqual(o, index_sequence_for<T ...>{});
     }
 
     bool operator>(const Point<T ...>& o) const {
@@ -175,7 +189,7 @@ class INET_API Point : public std::tuple<T ...>
     }
 
     bool operator>=(const Point<T ...>& o) const {
-        return *this == o || *this > o;
+        return greaterOrEqual(o, index_sequence_for<T ...>{});
     }
 
     template<typename P, int DIMS>

@@ -46,7 +46,7 @@ class INET_API Interval
 
     template<size_t ... IS>
     bool containsImpl(const Point<T ...>& p, integer_sequence<size_t, IS...>) const {
-        bool result = lower < p;
+        bool result = lower <= p;
         if (result) {
             unsigned int b = 1 << std::tuple_size<std::tuple<T ...>>::value >> 1;
             (void)std::initializer_list<bool>{ result &= ((closed & (b >> IS)) ? std::get<IS>(p) <= std::get<IS>(upper) : std::get<IS>(p) < std::get<IS>(upper)) ... };
