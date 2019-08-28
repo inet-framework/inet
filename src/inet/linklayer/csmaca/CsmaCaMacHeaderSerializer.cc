@@ -40,7 +40,7 @@ void CsmaCaMacHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<
             stream.writeByteRepeatedly('?', B(macHeader->getChunkLength() - (stream.getLength() - startPos)).get());
     }
     else if (auto macHeader = dynamicPtrCast<const CsmaCaMacAckHeader>(chunk)) {
-        stream.writeUint8(0x01);
+        stream.writeUint8(macHeader->getType());
         auto length = macHeader->getHeaderLengthField();
         stream.writeUint8(length);
         stream.writeMacAddress(macHeader->getReceiverAddress());
