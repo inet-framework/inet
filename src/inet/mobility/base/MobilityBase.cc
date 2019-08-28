@@ -147,24 +147,30 @@ void MobilityBase::setInitialPosition()
         if (filled) {
             lastPosition.z = hasPar("initialZ") ? par("initialZ") : 0.0;
             lastPosition = canvasProjection->computeCanvasPointInverse(cFigure::Point(lastPosition.x, lastPosition.y), lastPosition.z);
+            EV_DEBUG << "position initialized from displayString and initialZ parameter: " << lastPosition << endl;
         }
-        else
+        else {
             lastPosition = getRandomPosition();
+            EV_DEBUG << "position initialized by random values: " << lastPosition << endl;
+        }
     }
     // not all mobility models have "initialX", "initialY" and "initialZ" parameters
     else if (coordinateSystem == nullptr && hasPar("initialX") && hasPar("initialY") && hasPar("initialZ")) {
         lastPosition.x = par("initialX");
         lastPosition.y = par("initialY");
         lastPosition.z = par("initialZ");
+        EV_DEBUG << "position initialized from initialX/Y/Z parameters: " << lastPosition << endl;
     }
     else if (coordinateSystem != nullptr && hasPar("initialLatitude") && hasPar("initialLongitude") && hasPar("initialAltitude")) {
         auto initialLatitude = deg(par("initialLatitude"));
         auto initialLongitude = deg(par("initialLongitude"));
         auto initialAltitude = m(par("initialAltitude"));
         lastPosition = coordinateSystem->computeSceneCoordinate(GeoCoord(initialLatitude, initialLongitude, initialAltitude));
+        EV_DEBUG << "position initialized from initialLatitude/Longitude/Altitude parameters: " << lastPosition << endl;
     }
     else {
         lastPosition = getRandomPosition();
+        EV_DEBUG << "position initialized by random values: " << lastPosition << endl;
     }
     if (par("updateDisplayString"))
         updateDisplayStringFromMobilityState();
