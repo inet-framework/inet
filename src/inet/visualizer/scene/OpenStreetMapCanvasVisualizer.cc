@@ -56,8 +56,11 @@ void OpenStreetMapCanvasVisualizer::initialize(int stage)
         drawMap(map);
 
         cDisplayString& displayString = visualizationTargetModule->getDisplayString();
-        if (!displayString.containsTag("bgb")) {
-            EV << "Canvas background box size not specified (no \"bgb\" tag), adjusting it to include map bounds\n";
+        if (displayString.containsTag("bgb")) {
+            EV << "Display string sets background box size (bgb tag), respecting that\n";
+        }
+        else {
+            EV << "Display string does not specify background box size (bgb tag), setting it to include map bounds\n";
             const osm::Bounds& bounds = map.getBounds();
             cFigure::Point bottomRight = toCanvas(map, bounds.minlat, bounds.maxlon);
             displayString.setTagArg("bgb", 0, bottomRight.x);
