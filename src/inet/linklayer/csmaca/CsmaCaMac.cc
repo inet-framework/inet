@@ -660,4 +660,16 @@ uint32_t CsmaCaMac::computeFcs(const Ptr<const BytesChunk>& bytes)
     return computedFcs;
 }
 
+void CsmaCaMac::handleStopOperation(LifecycleOperation *operation)
+{
+    MacProtocolBase::handleStopOperation(operation);
+    resetTransmissionVariables();
+}
+
+void CsmaCaMac::handleCrashOperation(LifecycleOperation *operation)
+{
+    MacProtocolBase::handleCrashOperation(operation);
+    resetTransmissionVariables();
+}
+
 } // namespace inet

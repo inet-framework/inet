@@ -197,17 +197,8 @@ class INET_API CsmaCaMac : public MacProtocolBase
     //@}
 
     // OperationalBase:
-    virtual void handleStopOperation(LifecycleOperation *operation) override
-    {
-        MacProtocolBase::handleStopOperation(operation);
-        resetTransmissionVariables();
-    }
-
-    virtual void handleCrashOperation(LifecycleOperation *operation) override
-    {
-        MacProtocolBase::handleCrashOperation(operation);
-        resetTransmissionVariables();
-    }
+    virtual void handleStopOperation(LifecycleOperation *operation) override;
+    virtual void handleCrashOperation(LifecycleOperation *operation) override;
 };
 
 } // namespace inet
