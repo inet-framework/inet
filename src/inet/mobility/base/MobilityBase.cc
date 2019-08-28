@@ -163,6 +163,9 @@ void MobilityBase::setInitialPosition()
         auto initialAltitude = m(par("initialAltitude"));
         lastPosition = coordinateSystem->computeSceneCoordinate(GeoCoord(initialLatitude, initialLongitude, initialAltitude));
     }
+    else {
+        lastPosition = getRandomPosition();
+    }
     if (par("updateDisplayString"))
         updateDisplayStringFromMobilityState();
 }
