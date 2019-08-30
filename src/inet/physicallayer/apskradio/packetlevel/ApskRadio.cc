@@ -82,9 +82,17 @@ void ApskRadio::encapsulate(Packet *packet) const
     phyHeader->setHeaderLengthField(headerLength);
     packet->insertAtFront(phyHeader);
 
+    // FIXME: if paddingLength is calculated to be a number not divisible with 8 (byte), then a fingerprint mismatch occurs
+    // because in the Radio.cc line 402 the packet is replaced by its serialized self returned by the function
+    // peekAsBytes(). So in the serialized version the packet is padded to the 8 bit boundary causing a fingerprint
+    // mismatch.
     auto paddingLength = computePaddingLength(headerLength + phyHeader->getPayloadLengthField(), nullptr, getModulation());
-    if (paddingLength != b(0))
-        packet->insertAtBack(makeShared<BitCountChunk>(paddingLength));
+    if (paddingLength != b(0)) {
+        if (b(paddingLength).get() % 8 != 0)
+            packet->insertAtBack(makeShared<BitCountChunk>(b(paddingLength) + b((8 - b(paddingLength).get() % 8))));
+        else
+            packet->insertAtBack(makeShared<BitCountChunk>(paddingLength));
+    }
     EV_DEBUG << "ApskRadio::encapsulate: packetLength=" << packet->getDataLength() << ", headerLength=" << headerLength << ", paddingLength=" << paddingLength << endl;
     packet->getTag<PacketProtocolTag>()->setProtocol(&Protocol::apskPhy);
 }
