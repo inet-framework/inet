@@ -20,5 +20,44 @@
 package inet.transportlayer.tcp;
 
 simple TcpConnection {
+    parameters:
+        @signal[state];    // FSM state
+        @signal[sndWnd];    // snd_wnd
+        @signal[rcvWnd];    // rcv_wnd
+        @signal[rcvAdv];    // current advertised window (=rcv_adv)
+        @signal[sndNxt];    // sent seqNo
+        @signal[sndAck];    // sent ackNo
+        @signal[rcvSeq];    // received seqNo
+        @signal[rcvAck];    // received ackNo (=snd_una)
+        @signal[unacked];    // number of bytes unacknowledged
+        @signal[dupAcks];    // current number of received dupAcks
+        @signal[pipe];    // current sender's estimate of bytes outstanding in the network
+        @signal[sndSacks];    // number of sent Sacks
+        @signal[rcvSacks];    // number of received Sacks
+        @signal[rcvOooSeg];    // number of received out-of-order segments
+        @signal[rcvNASeg];    // number of received not acceptable segments
+        @signal[sackedBytes];    // current number of received sacked bytes
+        @signal[tcpRcvQueueBytes];    // current amount of used bytes in tcp receive queue
+        @signal[tcpRcvQueueDrops];    // number of drops in tcp receive queue
+
+        //TODO revise interpolationmode:
+        @statistic[state](record=vector; interpolationmode=none);
+        @statistic[sndWnd](record=vector; interpolationmode=none);    // snd_wnd
+        @statistic[rcvWnd](record=vector; interpolationmode=none);    // rcv_wnd
+        @statistic[rcvAdv](record=vector; interpolationmode=none);    // current advertised window (=rcv_adv)
+        @statistic[sndNxt](record=vector; interpolationmode=none);    // sent seqNo
+        @statistic[sndAck](record=vector; interpolationmode=none);    // sent ackNo
+        @statistic[rcvSeq](record=vector; interpolationmode=none);    // received seqNo
+        @statistic[rcvAck](record=vector; interpolationmode=none);    // received ackNo (=snd_una)
+        @statistic[unacked](record=vector; interpolationmode=none);    // number of bytes unacknowledged
+        @statistic[dupAcks](record=vector; interpolationmode=none);    // current number of received dupAcks
+        @statistic[pipe](record=vector; interpolationmode=none);    // current sender's estimate of bytes outstanding in the network
+        @statistic[sndSacks](record=vector; interpolationmode=none);    // number of sent Sacks
+        @statistic[rcvSacks](record=vector; interpolationmode=none);    // number of received Sacks
+        @statistic[rcvOooSeg](record=vector; interpolationmode=none);    // number of received out-of-order segments
+        @statistic[rcvNASeg](record=vector; interpolationmode=none);    // number of received not acceptable segments
+        @statistic[sackedBytes](record=vector; interpolationmode=none);    // current number of received sacked bytes
+        @statistic[tcpRcvQueueBytes](record=vector; interpolationmode=none);    // current amount of used bytes in tcp receive queue
+        @statistic[tcpRcvQueueDrops](record=vector; interpolationmode=none);    // number of drops in tcp receive queue
 }
 

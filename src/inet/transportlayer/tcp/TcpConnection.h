@@ -313,6 +313,26 @@ class INET_API TcpStateVariables : public cObject
 class INET_API TcpConnection : public cSimpleModule
 {
   public:
+    static simsignal_t tcpConnectionAddedSignal;
+    static simsignal_t stateSignal;    // FSM state
+    static simsignal_t sndWndSignal;    // snd_wnd
+    static simsignal_t rcvWndSignal;    // rcv_wnd
+    static simsignal_t rcvAdvSignal;    // current advertised window (=rcv_adv)
+    static simsignal_t sndNxtSignal;    // sent seqNo
+    static simsignal_t sndAckSignal;    // sent ackNo
+    static simsignal_t rcvSeqSignal;    // received seqNo
+    static simsignal_t rcvAckSignal;    // received ackNo (=snd_una)
+    static simsignal_t unackedSignal;    // number of bytes unacknowledged
+    static simsignal_t dupAcksSignal;    // current number of received dupAcks
+    static simsignal_t pipeSignal;    // current sender's estimate of bytes outstanding in the network
+    static simsignal_t sndSacksSignal;    // number of sent Sacks
+    static simsignal_t rcvSacksSignal;    // number of received Sacks
+    static simsignal_t rcvOooSegSignal;    // number of received out-of-order segments
+    static simsignal_t rcvNASegSignal;    // number of received not acceptable segments
+    static simsignal_t sackedBytesSignal;    // current number of received sacked bytes
+    static simsignal_t tcpRcvQueueBytesSignal;    // current amount of used bytes in tcp receive queue
+    static simsignal_t tcpRcvQueueDropsSignal;    // number of drops in tcp receive queue
+
     // connection identification by apps: socketId
     int socketId = -1;    // identifies connection within the app
     int getSocketId() const { return socketId; }
@@ -358,27 +378,6 @@ class INET_API TcpConnection : public cSimpleModule
     cMessage *connEstabTimer = nullptr;
     cMessage *finWait2Timer = nullptr;
     cMessage *synRexmitTimer = nullptr;    // for retransmitting SYN and SYN+ACK
-
-    // statistics
-    cOutVector *sndWndVector = nullptr;    // snd_wnd
-    cOutVector *rcvWndVector = nullptr;    // rcv_wnd
-    cOutVector *rcvAdvVector = nullptr;    // current advertised window (=rcv_adv)
-    cOutVector *sndNxtVector = nullptr;    // sent seqNo
-    cOutVector *sndAckVector = nullptr;    // sent ackNo
-    cOutVector *rcvSeqVector = nullptr;    // received seqNo
-    cOutVector *rcvAckVector = nullptr;    // received ackNo (=snd_una)
-    cOutVector *unackedVector = nullptr;    // number of bytes unacknowledged
-
-    cOutVector *dupAcksVector = nullptr;    // current number of received dupAcks
-    cOutVector *pipeVector = nullptr;    // current sender's estimate of bytes outstanding in the network
-    cOutVector *sndSacksVector = nullptr;    // number of sent Sacks
-    cOutVector *rcvSacksVector = nullptr;    // number of received Sacks
-    cOutVector *rcvOooSegVector = nullptr;    // number of received out-of-order segments
-    cOutVector *rcvNASegVector = nullptr;    // number of received not acceptable segments
-
-    cOutVector *sackedBytesVector = nullptr;    // current number of received sacked bytes
-    cOutVector *tcpRcvQueueBytesVector = nullptr;    // current amount of used bytes in tcp receive queue
-    cOutVector *tcpRcvQueueDropsVector = nullptr;    // number of drops in tcp receive queue
 
   protected:
     /** @name FSM transitions: analysing events and executing state transitions */
