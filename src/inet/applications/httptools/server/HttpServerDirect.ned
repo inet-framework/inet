@@ -38,7 +38,7 @@ simple HttpServerDirect like IHttpDirectApp
         double activationTime @unit(s) = default(0s);       // The initial activation delay. Zero to disable.
         double linkSpeed @unit(bps) = default(11Mbps);      // Used to model transmission delays.
         xml config;                                         // The XML configuration file for random sites.
-        string httpControllerModule = default("httpController"); // ModulePath for ~HttpController module.
+        string httpControllerModule = default("httpController"); // Module path for the ~HttpController module.
         @lifecycleSupport;
     gates:
         input httpIn @directIn;

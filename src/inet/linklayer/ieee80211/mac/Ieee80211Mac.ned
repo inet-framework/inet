@@ -43,9 +43,7 @@ import inet.linklayer.ieee80211.mac.coordinationfunction.Hcf;
 //
 // <b>Limitations</b>
 //
-// The following features not supported:
-// - 1) power management
-// - 2) polling (PCF).
+// Power management and polling (PCF) are not supported.
 //
 // Physical layer algorithms such as frequency hopping and
 // direct sequence spread spectrum are not modelled directly.

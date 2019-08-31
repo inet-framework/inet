@@ -32,7 +32,7 @@ simple HttpServerEvilB extends HttpServer
 {
     parameters:
         @class(HttpServerEvilB);
-        int minBadRequests;     // Specifies the lower bound of bad requests caused to be sent to the victim by the browser.
-        int maxBadRequests;     // Specifies the upper bound of bad requests caused to be sent to the victim by the browser.
+        int minBadRequests;     // Specifies the lower bound of bad requests to be sent to the victim by the browser.
+        int maxBadRequests;     // Specifies the upper bound of bad requests to be sent to the victim by the browser.
 }
 

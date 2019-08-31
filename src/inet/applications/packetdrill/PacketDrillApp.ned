@@ -29,6 +29,7 @@ import inet.applications.contract.IApp;
 // controlling the transport protocol, and verify the sending of packets, all
 // at specified times. The ported version provides a simple and powerful
 // method of testing transport protocols implemented in INET.
+//
 simple PacketDrillApp like IApp
 {
     parameters:

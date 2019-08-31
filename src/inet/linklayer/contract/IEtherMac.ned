@@ -32,14 +32,14 @@ package inet.linklayer.contract;
 // The module does not perform encapsulation or decapsulation of frames --
 // this is done by higher layers (~EtherEncap).
 //
-// When a frame is received from the higher layers, it must be an ~EtherFrame,
-// and with all protocol fields filled out
-// (including the destination MAC address). The source address, if left empty,
-// will be filled in. Then frame is queued and transmitted according
-// to the CSMA/CD protocol.
+// When a frame is received from the higher layers, it must be an Ethernet frame,
+// and with all protocol fields filled out (including the destination MAC address).
+// The source address, if left empty, will be filled in. Then the frame is queued
+// and transmitted according to the CSMA/CD protocol.
 //
-// Data frames received from the network are EtherFrames. They are passed to
+// Data frames received from the network are Ethernet frames. They are passed to
 // the higher layers without modification.
+// 
 // Also, the module properly responds to PAUSE frames, but never sends them
 // by itself -- however, it transmits PAUSE frames received from upper layers.
 // See <a href="ether-pause.html">PAUSE handling</a> for more info.

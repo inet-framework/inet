@@ -17,13 +17,13 @@
 package inet.networklayer.ipv6;
 
 //
-// Implements the Ipv6 protocol.
+// Implements the IPv6 protocol.
 //
-// The Ipv6 protocol header is represented by the ~Ipv6Header message class.
+// The IPv6 protocol header is represented by the ~Ipv6Header message class.
 //
 // <b>Interfacing with higher layer protocols</b>
 //
-// To send a packet over Ipv6 from a higher layer protocol, the module should
+// To send a packet over IPv6 from a higher layer protocol, the module should
 // fill in an ~L3AddressReq object, attach it to the packet with Packet's
 // addTag() method, then send the packet to the ~Ipv6 module.
 //
@@ -51,7 +51,7 @@ package inet.networklayer.ipv6;
 //
 // <b>Performance model, QoS</b>
 //
-// In the current form, ~Ipv6 contains a FIFO which queues up ~Ipv6Header-s;
+// In the current form, ~Ipv6 contains a FIFO which queues up IPv6 frames;
 // these are processed in order. The processing time is determined by the
 // procDelay module parameter.
 //
