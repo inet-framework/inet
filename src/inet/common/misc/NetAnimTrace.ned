@@ -19,7 +19,7 @@ package inet.common.misc;
 
 //
 // Records a NetAnim trace, using network-level modules and their connections.
-// See https://www.nsnam.org/wiki/NetAnim
+// See <a href="https://www.nsnam.org/wiki/NetAnim" target="_blank">https://www.nsnam.org/wiki/NetAnim</a>.
 //
 // Note: NetAnim does not have a built-in layouter, and requires explicit
 // node coordinates to be written into the file. This module takes node

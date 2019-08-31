@@ -33,8 +33,7 @@ package inet.linklayer.ethernet;
 //   and sent to MAC. The ~EtherType is taken from the ~PacketProtocolTag tag
 //   attached to the packet. The source address will be filled in by ~EtherMac.
 // - also accepts SENDPAUSE command (message kind=IEEE802CTRL_SENDPAUSE) from
-//   higher layer: it will send a PAUSE frame, as described in
-//   <a href="ether-pause.html">PAUSE frames</a>.
+//   higher layer: it will send a PAUSE frame (~EthernetPauseFrame).
 // - Ethernet frames arriving from MAC will be decapsulated, and sent up to the
 //   higher layers. Accepts ~EthernetMacHeader, ~Ieee8022LlcHeader, and
 //   ~Ieee8022LlcSnapHeader too.

@@ -22,8 +22,6 @@ package inet.linklayer.contract;
 // should implement this (i.e. declared as: EtherMac like IEtherMac).
 // The existing implementations are these: ~EtherMac and ~EtherMacFullDuplex.
 //
-// Doesn't do encapsulation/decapsulation; see ~EtherEncap for that.
-//
 // Expected environment:
 // - phys$i and phys$o should be connected to the "network"
 // - upperLayerIn and upperLayerOut are usually connected to ~EtherEncap (in hosts)

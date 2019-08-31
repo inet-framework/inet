@@ -33,13 +33,14 @@ package inet.linklayer.ieee80211.mgmt;
 // When simulating an AP that has other (Ethernet or wireless) interfaces
 // as well, this module can be connected to a ~IMacRelayUnit which performs
 // bridging of Ethernet frames. This module will perform conversion from/to
-// ~EtherFrame for ~IMacRelayUnit.
+// <a href="src-inet-linklayer-ethernet-EtherFrame.msg.html">EtherFrame</a>
+// for ~IMacRelayUnit.
 //
 // This module never switches channels, that is, it will operate on the channel
 // the physical layer is configured for (see channelNumber in ~Ieee80211Radio).
 //
 // This module checks if there is an other module connected above the management
-// module (e.g. RelayUnit) and sends a copy of the frame there and at the same time
+// module (e.g. relay unit) and sends a copy of the frame there and at the same time
 // sends the frame back to the wireless interface. The relay unit will send it out
 // on the interface which is towards the destination or will broadcast it on all
 // interfaces (except on which it was received).

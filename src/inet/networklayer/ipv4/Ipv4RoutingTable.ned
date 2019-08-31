@@ -34,7 +34,6 @@ import inet.networklayer.contract.IRoutingTable;
 //
 // The routing table is read from a file (parameter routingFile);
 // the file can also fill in or overwrite interface settings.
-// The file format is documented <a href="irt.html">here</a>.
 //
 // Note that many protocols don't require routerId to be routable, but some
 // others do -- so it is probably a good idea to set up routable routerIds.

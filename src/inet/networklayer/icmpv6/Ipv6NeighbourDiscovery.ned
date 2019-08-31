@@ -20,9 +20,6 @@ package inet.networklayer.icmpv6;
 //
 // Implements IPv6 Neighbour Discovery.
 //
-// An overview of the Ipv6 implementation in the INET Framework is
-// provided <a href="ipv6overview.html">here</a>.
-//
 // @see ~Ipv6, ~Ipv6RoutingTable, ~Icmpv6
 //
 simple Ipv6NeighbourDiscovery

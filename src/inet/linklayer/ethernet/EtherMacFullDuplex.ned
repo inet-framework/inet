@@ -50,8 +50,8 @@ import inet.linklayer.contract.IEtherMac;
 // - 40Gb Ethernet (full-duplex mode)
 // - 100Gb Ethernet (full-duplex mode)
 //
-// Supports all three Ethernet frame types. (It handles ~EtherFrame message class;
-// specific frame classes (Ethernet-II, IEEE 802.3) are subclassed from that one.)
+// Supports all three Ethernet frame types. (It handles
+// <a href="src-inet-linklayer-ethernet-EtherFrame.msg.html">EtherFrame</a> messages)
 // RAW mode (only used by the IPX protocol) is not supported.
 //
 // <b>Operation</b>
@@ -74,7 +74,8 @@ import inet.linklayer.contract.IEtherMac;
 // The module does not perform encapsulation or decapsulation of frames --
 // this is done by higher layers (~EtherEncap).
 //
-// When a frame is received from the higher layers, it must be an ~EtherFrame,
+// When a frame is received from the higher layers, it must be an
+// <a href="src-inet-linklayer-ethernet-EtherFrame.msg.html">EtherFrame</a>,
 // and with all protocol fields filled out
 // (including the destination MAC address). The source address, if left empty,
 // will be filled in. Then frame is queued and transmitted.
@@ -83,9 +84,6 @@ import inet.linklayer.contract.IEtherMac;
 // the higher layers without modification.
 // Also, the module properly responds to PAUSE frames, but never sends them
 // by itself -- however, it transmits PAUSE frames received from upper layers.
-// See <a href="ether-pause.html">PAUSE handling</a> for more info.
-//
-// For more info see <a href="ether-overview.html">Ethernet Model Overview</a>.
 //
 // <b>Disabling and disconnecting</b>
 //
@@ -94,10 +92,9 @@ import inet.linklayer.contract.IEtherMac;
 // it receives. It is currently not supported to dynamically connect/disconnect
 // a MAC.
 //
-//
 // <b>Queueing</b>
 //
-// In routers, MAC relies on an external queue module (see ~IOutputQueue)
+// In routers, MAC relies on an external queue module
 // to model finite buffer, implement QoS and/or RED, and requests packets
 // from this external queue one-by-one.
 //
@@ -107,13 +104,7 @@ import inet.linklayer.contract.IEtherMac;
 // one can specify a hard limit in the txQueueLimit parameter -- if this is
 // exceeded, the simulation stops with an error.
 //
-//
-// <b>Physical layer messaging</b>
-//
-// Please see <a href="physical.html">Messaging on the physical layer</a>.
-//
-// @see ~EtherMac, ~EthernetInterface, ~IOutputQueue, ~EtherEncap, ~Ieee8022Llc
-// @see ~EtherFrame, ~EthernetIIFrame, ~EtherFrameWithLlc, ~Ieee802Ctrl
+// @see ~EtherMac, ~EthernetInterface ~EtherEncap, ~Ieee8022Llc
 //
 module EtherMacFullDuplex like IEtherMac
 {

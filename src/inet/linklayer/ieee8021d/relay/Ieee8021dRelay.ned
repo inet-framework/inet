@@ -18,17 +18,18 @@ package inet.linklayer.ieee8021d.relay;
 import inet.linklayer.contract.IMacRelayUnit;
 
 //
-// This modul forwards frames (~EtherFrame) based on their destination MAC addresses to appropriate ports.
+// This modul forwards frames (<a href="src-inet-linklayer-ethernet-EtherFrame.msg.html">EtherFrame</a>)
+// based on their destination MAC addresses to appropriate ports.
 //
 // It can work in two mode:
 // - STP unaware mode (If no module connected to its STP gate):
-//     Looks up the frames destination address in the ~MACAddressTable, if it found the address, sends through
+//     Looks up the frames destination address in the ~MacAddressTable, if it found the address, sends through
 //	   that port, or otherwise broadcasts it.
-// - STP aware mode (If an ~STP or ~RSTP module connected to its STP gate):
+// - STP aware mode (If an ~Stp or ~Rstp module connected to its STP gate):
 //     Handles BPDU frames.
 //     If relaying a message also checks the port's status in the InterfaceTable.
 //
-// @see EtherFrame, MacAddressTable, Stp, Rstp
+// @see ~MacAddressTable, ~Stp, ~Rstp
 //
 simple Ieee8021dRelay like IMacRelayUnit
 {
