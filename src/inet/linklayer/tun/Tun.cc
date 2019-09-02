@@ -76,11 +76,11 @@ void Tun::handleUpperPacket(Packet *packet)
             Packet *copy = packet->dup();
             copy->setKind(TUN_I_DATA);
             copy->clearTags();
-            copy->addTagIfAbsent<SocketInd>()->setSocketId(socketId);
-            copy->addTagIfAbsent<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
-            copy->addTagIfAbsent<PacketProtocolTag>()->setProtocol(packet->getTag<PacketProtocolTag>()->getProtocol());
+            copy->addTag<SocketInd>()->setSocketId(socketId);
+            copy->addTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
+            copy->addTag<PacketProtocolTag>()->setProtocol(packet->getTag<PacketProtocolTag>()->getProtocol());
             auto npTag = packet->getTag<NetworkProtocolInd>();
-            auto newnpTag = copy->addTagIfAbsent<NetworkProtocolInd>();
+            auto newnpTag = copy->addTag<NetworkProtocolInd>();
             *newnpTag = *npTag;
             send(copy, "upperLayerOut");
         }

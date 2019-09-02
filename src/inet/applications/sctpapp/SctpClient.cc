@@ -289,8 +289,7 @@ void SctpClient::socketEstablished(SctpSocket *socket, unsigned long int buffer)
 void SctpClient::sendQueueRequest()
 {
     Request *cmsg = new Request("SCTP_C_QUEUE_MSGS_LIMIT");
-    auto& tags = getTags(cmsg);
-    SctpInfoReq *qinfo = tags.addTagIfAbsent<SctpInfoReq>();
+    SctpInfoReq *qinfo = cmsg->addTag<SctpInfoReq>();
     qinfo->setText(queueSize);
     cmsg->setKind(SCTP_C_QUEUE_MSGS_LIMIT);
     qinfo->setSocketId(socket.getSocketId());
@@ -335,7 +334,7 @@ void SctpClient::socketDataArrived(SctpSocket *socket, Packet *msg, bool)
         const auto& smsg = msg->peekData();
         auto cmsg = new Packet("ApplicationPacket");
         cmsg->insertAtBack(smsg);
-        auto cmd = cmsg->addTagIfAbsent<SctpSendReq>();
+        auto cmd = cmsg->addTag<SctpSendReq>();
         cmd->setLast(true);
         cmd->setSocketId(ind->getSocketId());
         cmd->setPrValue(0);
@@ -391,7 +390,7 @@ void SctpClient::sendRequest(bool last)
     applicationData->setBytes(vec);
     applicationData->addTag<CreationTimeTag>()->setCreationTime(simTime());
     applicationPacket->insertAtBack(applicationData);
-    auto sctpSendReq = applicationPacket->addTagIfAbsent<SctpSendReq>();
+    auto sctpSendReq = applicationPacket->addTag<SctpSendReq>();
     sctpSendReq->setLast(last);
     sctpSendReq->setPrMethod(par("prMethod"));
     sctpSendReq->setPrValue(par("prValue"));
@@ -478,11 +477,9 @@ void SctpClient::handleTimer(cMessage *msg)
 void SctpClient::socketDataNotificationArrived(SctpSocket *socket, Message *msg)
 {
     Message *message = check_and_cast<Message *>(msg);
-    auto& intags = getTags(message);
-    SctpCommandReq *ind = intags.findTag<SctpCommandReq>();
+    SctpCommandReq *ind = message->findTag<SctpCommandReq>();
     Request *cmesg = new Request("SCTP_C_RECEIVE");
-    auto& outtags = getTags(cmesg);
-    SctpSendReq *cmd = outtags.addTagIfAbsent<SctpSendReq>();
+    SctpSendReq *cmd = cmesg->addTag<SctpSendReq>();
     cmd->setSocketId(ind->getSocketId());
     cmd->setSid(ind->getSid());
     cmd->setNumMsgs(ind->getNumMsgs());
@@ -495,8 +492,7 @@ void SctpClient::shutdownReceivedArrived(SctpSocket *socket)
 {
     if (numRequestsToSend == 0) {
         Message *cmsg = new Message("SCTP_C_NO_OUTSTANDING");
-        auto& tags = getTags(cmsg);
-        SctpCommandReq *qinfo = tags.addTagIfAbsent<SctpCommandReq>();
+        SctpCommandReq *qinfo = cmsg->addTag<SctpCommandReq>();
         cmsg->setKind(SCTP_C_NO_OUTSTANDING);
         qinfo->setSocketId(socket->getSocketId());
         socket->sendNotification(cmsg);
@@ -554,9 +550,7 @@ void SctpClient::socketStatusArrived(SctpSocket *socket, SctpStatusReq *status)
 void SctpClient::setPrimaryPath(const char *str)
 {
     Request *cmsg = new Request("SCTP_C_PRIMARY");
-    auto& tags = getTags(cmsg);
-
-    SctpPathInfoReq *pinfo = tags.addTagIfAbsent<SctpPathInfoReq>();
+    SctpPathInfoReq *pinfo = cmsg->addTag<SctpPathInfoReq>();
 
     if (strcmp(str, "") != 0) {
         pinfo->setRemoteAddress(L3Address(str));
@@ -581,8 +575,7 @@ void SctpClient::sendStreamResetNotification()
     unsigned short int type = par("streamResetType");
     if (type >= 6 && type <= 9) {
         Message *cmsg = new Message("SCTP_C_STREAM_RESET");
-        auto& tags = getTags(cmsg);
-        SctpResetReq *rinfo = tags.addTagIfAbsent<SctpResetReq>();
+        SctpResetReq *rinfo = cmsg->addTag<SctpResetReq>();
         rinfo->setSocketId(socket.getSocketId());
         rinfo->setRemoteAddr(socket.getRemoteAddr());
         rinfo->setRequestType(type);

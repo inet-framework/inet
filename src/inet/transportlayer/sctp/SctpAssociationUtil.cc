@@ -1870,8 +1870,7 @@ void SctpAssociation::sendDataArrivedNotification(uint16 sid)
 
     Indication *cmsg = new Indication("SCTP_I_DATA_NOTIFICATION");
     cmsg->setKind(SCTP_I_DATA_NOTIFICATION);
-    auto& tags = getTags(cmsg);
-    auto cmd = tags.addTagIfAbsent<SctpCommandReq>();
+    auto cmd = cmsg->addTag<SctpCommandReq>();
     cmd->setSocketId(assocId);
     cmd->setSid(sid);
     cmd->setNumMsgs(1);
@@ -2050,8 +2049,7 @@ void SctpAssociation::pushUlp()
             auto applicationData = makeShared<BytesChunk>();
             applicationData->setBytes(vec);
             applicationData->addTag<CreationTimeTag>()->setCreationTime(smsg->getCreationTime());
-            auto& tags = getTags(applicationPacket);
-            SctpRcvReq *cmd = tags.addTagIfAbsent<SctpRcvReq>();
+            SctpRcvReq *cmd = applicationPacket->addTag<SctpRcvReq>();
             applicationPacket->setKind(SCTP_I_DATA);
             cmd->setSocketId(assocId);
             cmd->setGate(appGateIndex);
@@ -2839,8 +2837,7 @@ void SctpAssociation::pathStatusIndication(const SctpPathVariables *path,
 {
     Indication *msg = new Indication("StatusInfo");
     msg->setKind(SCTP_I_STATUS);
-    auto& tags = getTags(msg);
-    SctpStatusReq *cmd = tags.addTagIfAbsent<SctpStatusReq>();
+    SctpStatusReq *cmd = msg->addTag<SctpStatusReq>();
     cmd->setPathId(path->remoteAddress);
     cmd->setSocketId(assocId);
     cmd->setActive(status);

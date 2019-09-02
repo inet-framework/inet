@@ -236,8 +236,8 @@ void Ieee80211MgmtSta::beaconLost()
 void Ieee80211MgmtSta::sendManagementFrame(const char *name, const Ptr<Ieee80211MgmtFrame>& body, int subtype, const MacAddress& address)
 {
     auto packet = new Packet(name);
-    packet->addTagIfAbsent<MacAddressReq>()->setDestAddress(address);
-    packet->addTagIfAbsent<Ieee80211SubtypeReq>()->setSubtype(subtype);
+    packet->addTag<MacAddressReq>()->setDestAddress(address);
+    packet->addTag<Ieee80211SubtypeReq>()->setSubtype(subtype);
     packet->insertAtBack(body);
     sendDown(packet);
 }

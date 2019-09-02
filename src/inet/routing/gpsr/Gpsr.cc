@@ -238,12 +238,12 @@ void Gpsr::sendBeacon(const Ptr<GpsrBeacon>& beacon)
     udpHeader->setDestinationPort(GPSR_UDP_PORT);
     udpHeader->setCrcMode(CRC_DISABLED);
     udpPacket->insertAtFront(udpHeader);
-    auto addresses = udpPacket->addTagIfAbsent<L3AddressReq>();
+    auto addresses = udpPacket->addTag<L3AddressReq>();
     addresses->setSrcAddress(getSelfAddress());
     addresses->setDestAddress(addressType->getLinkLocalManetRoutersMulticastAddress());
-    udpPacket->addTagIfAbsent<HopLimitReq>()->setHopLimit(255);
-    udpPacket->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::manet);
-    udpPacket->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
+    udpPacket->addTag<HopLimitReq>()->setHopLimit(255);
+    udpPacket->addTag<PacketProtocolTag>()->setProtocol(&Protocol::manet);
+    udpPacket->addTag<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
     sendUdpPacket(udpPacket);
 }
 

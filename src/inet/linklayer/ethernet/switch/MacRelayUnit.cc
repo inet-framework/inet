@@ -142,7 +142,7 @@ void MacRelayUnit::handleAndDispatchFrame(Packet *packet)
         auto newPacketProtocolTag = packet->addTag<PacketProtocolTag>();
         *newPacketProtocolTag = *oldPacketProtocolTag;
         delete oldPacketProtocolTag;
-        packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(outputInterfaceId);
+        packet->addTag<InterfaceReq>()->setInterfaceId(outputInterfaceId);
         packet->trim();
         emit(packetSentToLowerSignal, packet);
         send(packet, "ifOut");

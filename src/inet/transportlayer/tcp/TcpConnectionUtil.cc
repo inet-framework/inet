@@ -298,7 +298,7 @@ void TcpConnection::sendIndicationToApp(int code, const int id)
     auto indication = new Indication(indicationName(code), code);
     TcpCommand *ind = new TcpCommand();
     ind->setUserId(id);
-    indication->addTagIfAbsent<SocketInd>()->setSocketId(socketId);
+    indication->addTag<SocketInd>()->setSocketId(socketId);
     indication->setControlInfo(ind);
     sendToApp(indication);
 }
@@ -314,7 +314,7 @@ void TcpConnection::sendAvailableIndicationToApp()
     ind->setLocalPort(localPort);
     ind->setRemotePort(remotePort);
 
-    indication->addTagIfAbsent<SocketInd>()->setSocketId(listeningSocketId);
+    indication->addTag<SocketInd>()->setSocketId(listeningSocketId);
     indication->setControlInfo(ind);
     sendToApp(indication);
 }
@@ -328,7 +328,7 @@ void TcpConnection::sendEstabIndicationToApp()
     ind->setRemoteAddr(remoteAddr);
     ind->setLocalPort(localPort);
     ind->setRemotePort(remotePort);
-    indication->addTagIfAbsent<SocketInd>()->setSocketId(socketId);
+    indication->addTag<SocketInd>()->setSocketId(socketId);
     indication->setControlInfo(ind);
     sendToApp(indication);
 }
@@ -344,13 +344,13 @@ void TcpConnection::sendAvailableDataToApp()
         if (tcpMain->useDataNotification) {
             auto indication = new Indication("Data Notification", TCP_I_DATA_NOTIFICATION); // TBD currently we never send TCP_I_URGENT_DATA
             TcpCommand *cmd = new TcpCommand();
-            indication->addTagIfAbsent<SocketInd>()->setSocketId(socketId);
+            indication->addTag<SocketInd>()->setSocketId(socketId);
             indication->setControlInfo(cmd);
             sendToApp(indication);
         } else {
             while (auto msg = receiveQueue->extractBytesUpTo(state->rcv_nxt)) {
                 msg->setKind(TCP_I_DATA);    // TBD currently we never send TCP_I_URGENT_DATA
-                msg->addTagIfAbsent<SocketInd>()->setSocketId(socketId);
+                msg->addTag<SocketInd>()->setSocketId(socketId);
                 sendToApp(msg);
             }
         }

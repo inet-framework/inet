@@ -111,8 +111,8 @@ Ieee80211MgmtAp::StaInfo *Ieee80211MgmtAp::lookupSenderSTA(const Ptr<const Ieee8
 void Ieee80211MgmtAp::sendManagementFrame(const char *name, const Ptr<Ieee80211MgmtFrame>& body, int subtype, const MacAddress& destAddr)
 {
     auto packet = new Packet(name);
-    packet->addTagIfAbsent<MacAddressReq>()->setDestAddress(destAddr);
-    packet->addTagIfAbsent<Ieee80211SubtypeReq>()->setSubtype(subtype);
+    packet->addTag<MacAddressReq>()->setDestAddress(destAddr);
+    packet->addTag<Ieee80211SubtypeReq>()->setSubtype(subtype);
     packet->insertAtBack(body);
     sendDown(packet);
 }

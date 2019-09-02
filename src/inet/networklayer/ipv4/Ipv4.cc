@@ -176,7 +176,7 @@ void Ipv4::handleRequest(Request *request)
             auto indication = new Indication("closed", IPv4_I_SOCKET_CLOSED);
             auto ctrl = new Ipv4SocketClosedIndication();
             indication->setControlInfo(ctrl);
-            indication->addTagIfAbsent<SocketInd>()->setSocketId(socketId);
+            indication->addTag<SocketInd>()->setSocketId(socketId);
             send(indication, "transportOut");
         }
         delete request;

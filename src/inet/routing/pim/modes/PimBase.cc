@@ -147,12 +147,12 @@ void PimBase::sendHelloPacket(PimInterface *pimInterface)
     msg->setCrcMode(pimModule->getCrcMode());
     Pim::insertCrc(msg);
     pk->insertAtFront(msg);
-    pk->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::pim);
-    pk->addTagIfAbsent<InterfaceReq>()->setInterfaceId(pimInterface->getInterfaceId());
-    pk->addTagIfAbsent<DispatchProtocolInd>()->setProtocol(&Protocol::pim);
-    pk->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
-    pk->addTagIfAbsent<L3AddressReq>()->setDestAddress(ALL_PIM_ROUTERS_MCAST);
-    pk->addTagIfAbsent<HopLimitReq>()->setHopLimit(1);
+    pk->addTag<PacketProtocolTag>()->setProtocol(&Protocol::pim);
+    pk->addTag<InterfaceReq>()->setInterfaceId(pimInterface->getInterfaceId());
+    pk->addTag<DispatchProtocolInd>()->setProtocol(&Protocol::pim);
+    pk->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
+    pk->addTag<L3AddressReq>()->setDestAddress(ALL_PIM_ROUTERS_MCAST);
+    pk->addTag<HopLimitReq>()->setHopLimit(1);
 
     emit(sentHelloPkSignal, pk);
 
