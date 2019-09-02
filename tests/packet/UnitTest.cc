@@ -1075,7 +1075,7 @@ static void testSlicing()
     const auto& bytesChunk3 = staticPtrCast<const BytesChunk>(chunk4);
     ASSERT(std::equal(bytesChunk3->getBytes().begin(), bytesChunk3->getBytes().end(), makeVector(5).begin()));
 
-    // 2b. BytesChunk sometimes returns other
+    // 2b. BytesChunk sometimes returns SliceChunk because the position or offset is not aligned to byte boundary
     auto bytesChunk2b = makeImmutableBytesChunk(makeVector(10));
     const auto& chunk2b1 = bytesChunk2b->peek(B(0), b(20));
     ASSERT(chunk2b1 != nullptr);

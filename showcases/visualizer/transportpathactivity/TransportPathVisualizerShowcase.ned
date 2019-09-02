@@ -25,9 +25,6 @@ import inet.visualizer.integrated.IntegratedVisualizer;
 import inet.visualizer.transportlayer.TransportRouteVisualizer;
 
 
-//
-// TODO documentation
-//
 network TransportPathVisualizerSimpleWiredShowcase
 {
     @display("bgb=500,250");
@@ -49,9 +46,6 @@ network TransportPathVisualizerSimpleWiredShowcase
 }
 
 
-//
-// TODO documentation
-//
 network TransportPathVisualizerSimpleWirelessShowcase
 {
     @display("bgb=500,250");
@@ -73,9 +67,6 @@ network TransportPathVisualizerSimpleWirelessShowcase
         }
 }
 
-//
-// TODO documentation
-//
 network TransportPathVisualizerFilteringShowcase
 {
     @display("bgb=1024,700");

@@ -67,8 +67,8 @@ module CsmaCaMac extends MacProtocolBase like IMacProtocol
         int maxQueueSize = default(-1); // maximum queue length in frames
         bool useAck = default(true);
         double bitrate @unit(bps);
-        int headerLength @unit(B) = default(16B); // minimum 16B, see CsmaCaMacDataHeader
-        int ackLength @unit(B) = default(13B); // minimum 13B, see CsmaCaMacAckHeader
+        int headerLength @unit(B) = default(17B); // maximum 255 byte, minimum 17B for serializing, see CsmaCaMacDataHeader
+        int ackLength @unit(B) = default(14B); // maximum 255 byte, minimum 14B for serializing, see CsmaCaMacAckHeader
         double sifsTime @unit(s) = default(10us);
         double slotTime @unit(s) = default(20us);
         double difsTime @unit(s) = default(sifsTime + 2 * slotTime);

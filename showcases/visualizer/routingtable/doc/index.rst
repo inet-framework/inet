@@ -15,9 +15,8 @@ The visualization currently supports IPv4.
 This showcase contains three simulation models of increasing complexity,
 each demonstrating different features of routing table visualization.
 
-INET version: ``3.6``
-
-Source files location: `inet/showcases/visualizer/routingtable <https://github.com/inet-framework/inet-showcases/tree/master/visualizer/routingtable>`__
+| INET version: ``3.6``
+| Source files location: `inet/showcases/visualizer/routingtable <https://github.com/inet-framework/inet-showcases/tree/master/visualizer/routingtable>`__
 
 About the visualizer
 --------------------
@@ -232,6 +231,8 @@ tables for a while, then they time out and are removed. When
 ``destinationHost`` gets to the top of the scene, the process
 starts over again. The visualizer continually reacts to changes in the
 routing tables and updates the visualization accordingly.
+
+Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`RoutingTableVisualizationShowcase.ned <../RoutingTableVisualizationShowcase.ned>`
 
 More information
 ----------------

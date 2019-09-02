@@ -26,9 +26,6 @@ import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 import inet.visualizer.integrated.IntegratedVisualizer;
 
 
-//
-// TODO documentation
-//
 network StylingShowcase
 {
     @display("bgb=600,250");
@@ -50,9 +47,6 @@ network StylingShowcase
         }
 }
 
-//
-// TODO documentation
-//
 network AnnotationShowcase
 {
     @display("bgb=600,250");
@@ -76,3 +70,4 @@ network AnnotationShowcase
             @display("p=329,67");
         }
 }
+

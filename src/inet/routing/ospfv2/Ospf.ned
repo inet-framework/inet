@@ -96,7 +96,7 @@ import inet.routing.contract.IOspf;
 //     - @areaID - An optional attribute containing the area ID in dotted decimal notation
 //     - @attachedHost - IPv4 address of attached host
 //     - @linkCost - An optional attribute specifying the associated cost (>=0 and <1000)
-
+//
 //   - <LoopbackInterface>
 //     - @ifName - A unique name of the loopback interface (e.g. lo1)
 //     - @areaID - An optional attribute containing the area ID in dotted decimal notation
@@ -130,7 +130,7 @@ import inet.routing.contract.IOspf;
 //     - @externalInterfaceOutputType - Type1 (no external metric) or Type2 (external metric)
 //     - @forwardingAddress - Optional (set 0.0.0.0 by default)
 //     - @externalRouteTag - Optional (set 0 by default)
-
+//
 //   - <VirtualLink>
 //     - @endPointRouterID - the router ID of the endpoint of the virtual link (required)
 //     - @transitAreaID - the ID of the area which is used for tansit

@@ -22,7 +22,7 @@ package inet.common.queueing.base;
 // must implement a single packet scheduler function which determines the index
 // of the input gate for the popped packet.
 //
-// @see IPacketScheduler
+// @see ~IPacketScheduler
 //
 simple PacketSchedulerBase extends PacketProcessorBase
 {

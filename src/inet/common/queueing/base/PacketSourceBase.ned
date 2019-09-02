@@ -22,7 +22,7 @@ package inet.common.queueing.base;
 // randomly with regard to packet length and packet data. The representation of
 // packet data can also be configured.
 //
-// @see IPacketSource
+// @see ~IPacketSource
 //
 simple PacketSourceBase extends PacketProcessorBase
 {

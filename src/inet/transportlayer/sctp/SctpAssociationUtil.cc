@@ -87,21 +87,21 @@ uint32 SctpAssociation::getBytesInFlightOfStream(uint16 sid)
 {
     auto streamIterator = sendStreams.find(sid);
     assert(streamIterator != sendStreams.end());
-    return (streamIterator->second)->getBytesInFlight();
+    return streamIterator->second->getBytesInFlight();
 }
 
 bool SctpAssociation::orderedQueueEmptyOfStream(uint16 sid)
 {
     auto streamIterator = sendStreams.find(sid);
     assert(streamIterator != sendStreams.end());
-    return (streamIterator->second)->getStreamQ()->isEmpty();
+    return streamIterator->second->getStreamQ()->isEmpty();
 }
 
 bool SctpAssociation::unorderedQueueEmptyOfStream(uint16 sid)
 {
     auto streamIterator = sendStreams.find(sid);
     assert(streamIterator != sendStreams.end());
-    return (streamIterator->second)->getUnorderedStreamQ()->isEmpty();
+    return streamIterator->second->getUnorderedStreamQ()->isEmpty();
 }
 
 
@@ -109,14 +109,14 @@ bool SctpAssociation::getFragInProgressOfStream(uint16 sid)
 {
     auto streamIterator = sendStreams.find(sid);
     assert(streamIterator != sendStreams.end());
-    return (streamIterator->second)->getFragInProgress();
+    return streamIterator->second->getFragInProgress();
 }
 
 void SctpAssociation::setFragInProgressOfStream(uint16 sid, bool frag)
 {
     auto streamIterator = sendStreams.find(sid);
     assert(streamIterator != sendStreams.end());
-    return (streamIterator->second)->setFragInProgress(frag);
+    return streamIterator->second->setFragInProgress(frag);
 }
 
 void SctpAssociation::checkPseudoCumAck(const SctpPathVariables *path)
@@ -146,7 +146,7 @@ void SctpAssociation::printSctpPathMap() const
     }
 }
 
-const char *SctpAssociation::stateName(const int32 state)
+const char *SctpAssociation::stateName(int32 state)
 {
 #define CASE(x)    case x: \
         s = #x + 7; break
@@ -165,7 +165,7 @@ const char *SctpAssociation::stateName(const int32 state)
 #undef CASE
 }
 
-const char *SctpAssociation::eventName(const int32 event)
+const char *SctpAssociation::eventName(int32 event)
 {
 #define CASE(x)    case x: \
         s = #x + 7; break
@@ -212,7 +212,7 @@ const char *SctpAssociation::eventName(const int32 event)
 }
 
 //TODO move this function to contrib
-const char *SctpAssociation::indicationName(const int32 code)
+const char *SctpAssociation::indicationName(int32 code)
 {
 #define CASE(x)    case x: \
         s = #x + 7; break
@@ -442,7 +442,7 @@ void SctpAssociation::signalConnectionTimeout()
     sendIndicationToApp(SCTP_I_TIMED_OUT);
 }
 
-void SctpAssociation::sendIndicationToApp(const int32 code, const int32 value)
+void SctpAssociation::sendIndicationToApp(int32 code, int32 value)
 {
     EV_INFO << "sendIndicationToApp: " << indicationName(code) << endl;
     assert(code != SCTP_I_SENDQUEUE_ABATED);
@@ -2314,8 +2314,8 @@ void SctpAssociation::advancePeerTsn()
 }
 
 SctpDataVariables *SctpAssociation::getOutboundDataChunk(const SctpPathVariables *path,
-        const int32 availableSpace,
-        const int32 availableCwnd)
+        int32 availableSpace,
+        int32 availableCwnd)
 {
     /* are there chunks in the transmission queue ? If Yes -> dequeue and return it */
     EV_INFO << "getOutboundDataChunk(" << path->remoteAddress << "):"
@@ -2571,8 +2571,8 @@ void SctpAssociation::fragmentOutboundDataMsgs() {
 }
 
 SctpDataMsg *SctpAssociation::dequeueOutboundDataMsg(SctpPathVariables *path,
-        const int32 availableSpace,
-        const int32 availableCwnd)
+        int32 availableSpace,
+        int32 availableCwnd)
 {
     SctpDataMsg *datMsg = nullptr;
     cPacketQueue *streamQ = nullptr;

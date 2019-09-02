@@ -55,6 +55,7 @@ class Igmpv1Report extends IgmpMessage
 {
     chunkLength = B(8);
     type = IGMPV1_MEMBERSHIP_REPORT;
+    uint8_t unused = 0;
     Ipv4Address groupAddress;
 }
 
@@ -68,6 +69,7 @@ class Igmpv2Report extends IgmpMessage
 {
     chunkLength = B(8);
     type = IGMPV2_MEMBERSHIP_REPORT;
+    uint8_t maxRespTime = 0;
     Ipv4Address groupAddress;
 }
 
@@ -75,6 +77,7 @@ class Igmpv2Leave extends IgmpMessage
 {
     chunkLength = B(8);
     type = IGMPV2_LEAVE_GROUP;
+    uint8_t maxRespTime = 0;
     Ipv4Address groupAddress;
 }
 
@@ -108,16 +111,19 @@ enum GroupRecordType
     BLOCK_OLD_SOURCE = 6;
 }
 
-struct GroupRecord
+class GroupRecord
 {
     int recordType enum(GroupRecordType);
     Ipv4Address groupAddress;
     Ipv4AddressVector sourceList;
+    uint32_t auxData[];
 };
 
 class Igmpv3Report extends IgmpMessage
 {
     type = IGMPV3_MEMBERSHIP_REPORT;
+    uint8_t resv1 = 0;
+    uint16_t resv2 = 0;
     GroupRecord groupRecord[];
 }
 

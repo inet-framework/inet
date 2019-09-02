@@ -21,25 +21,25 @@ package inet.transportlayer.udp;
 import inet.transportlayer.contract.IUdp;
 
 //
-// Udp protocol implementation, for IPv4 (~Ipv4) and IPv6 (~Ipv6).
+// UDP protocol implementation, for IPv4 (~Ipv4) and IPv6 (~Ipv6).
 //
-// The Udp protocol header is represented by the class ~UdpHeader.
+// The UDP protocol header is represented by the class ~UdpHeader.
 //
 // <b>Communication with clients (applications)</b>
 //
 // The module can (should) be connected to several applications.
-// For sending an Udp packet, the application should attach an ~UdpControlInfo
+// For sending an UDP packet, the application should attach an ~UdpControlInfo
 // object to the payload, and send it to ~Udp.
 // ~Udp will also attach an ~UdpControlInfo object to any payload
 // message in sends up to the application.
 //
 // For receiving Udp packets, the connected applications should first
-// "bind" to the given Udp port. This can be done by sending an
+// "bind" to the given UDP port. This can be done by sending an
 // arbitrary message with message kind UDP_C_BIND and an ~UdpControlInfo
 // attached with srcPort filled in.
 //
 // When UDP receives an ICMP error (~IcmpHeader or ~Icmpv6Header)
-// that refers to an Udp socket, it reports the error to the corresponding
+// that refers to an UDP socket, it reports the error to the corresponding
 // application by sending a message with kind UDP_I_ERROR.
 //
 // <b>Communication with the IP (IPv4/IPv6) layer</b>
@@ -47,13 +47,13 @@ import inet.transportlayer.contract.IUdp;
 // The ~Udp model relies on sending and receiving ~L3AddressReq/~L3AddressInd
 // tags attached to UDP packets.
 //
-// CRC operation modes for outgoing Udp packets (crcMode parameter in Udp module):
+// CRC operation modes for outgoing UDP packets (crcMode parameter in UDP module):
 //  - "disabled" means the outgoing packet will have its CRC set to 0 (serializable)
 //  - "declared" means the outgoing packet will have the correct CRC declared
 //     without actually computing it, the value is set to 0xC00D (not serializable)
 //  - "computed" means the outgoing packet will have the correctly computed CRC
 //     as defined by the RFC (serializable)
-// CRC operation modes for incoming Udp packets (crcMode field in UdpHeader chunk):
+// CRC operation modes for incoming UDP packets (crcMode field in ~UdpHeader chunk):
 //  - CRC_DISABLED means the incoming packet must have its CRC set to 0 (serializable)
 //  - CRC_DECLARED_CORRECT means the incoming packet is assumed to have a
 //    correct CRC without the actual value (not serializable)

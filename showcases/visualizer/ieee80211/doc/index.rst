@@ -107,6 +107,8 @@ handover.
 
    <!--internal video recording, animation speed node, run in fast mode-->
 
+Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`Ieee80211VisualizationShowcase.ned <../Ieee80211VisualizationShowcase.ned>`
+
 Further information
 -------------------
 

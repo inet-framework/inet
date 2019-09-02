@@ -24,8 +24,8 @@ import inet.physicallayer.base.packetlevel.DimensionalTransmitterBase;
 // transmission power (that changes over time and/or frequency) in their analog
 // representation and the configured modulation.
 //
-// See also ~ApskDimensionalReceiver, ~ApskDimensionalRadio,
-// ~ApskDimensionalRadioMedium, and ~APSKDimensionalAnalogModel.
+// @see ~ApskDimensionalReceiver, ~ApskDimensionalRadio,
+// ~ApskDimensionalRadioMedium.
 //
 module ApskDimensionalTransmitter extends DimensionalTransmitterBase
 {

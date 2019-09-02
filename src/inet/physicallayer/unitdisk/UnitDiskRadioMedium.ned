@@ -24,7 +24,7 @@ import inet.physicallayer.common.packetlevel.RadioMedium;
 // physical layer behavior. It must be used in conjunction with the ~UnitDiskRadio
 // model.
 //
-// See also ~UnitDiskRadio, ~UnitDiskAnalogModel, ~UnitDiskTransmitter, and
+// @see ~UnitDiskRadio, ~UnitDiskAnalogModel, ~UnitDiskTransmitter,
 // ~UnitDiskReceiver.
 //
 module UnitDiskRadioMedium extends RadioMedium

@@ -26,7 +26,7 @@ import inet.routing.contract.IManetRouting;
 // The implementation supports both GG and RNG planarization algorithms.
 //
 // For more information on the routing algorithm, see the GPSR paper
-// http://www.eecs.harvard.edu/~htk/publication/2000-mobi-karp-kung.pdf
+// http://www.eecs.harvard.edu/~~htk/publication/2000-mobi-karp-kung.pdf
 //
 simple Gpsr like IManetRouting
 {

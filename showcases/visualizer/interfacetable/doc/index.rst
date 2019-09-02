@@ -17,9 +17,8 @@ This showcase contains two example simulations. The first one demonstrates the
 visualization with the visualizer's default settings; the second one is
 about the advanced features.
 
-INET version: ``4.0``
-
-Source files location: `inet/showcases/visualizer/interfacetable <https://github.com/inet-framework/inet-showcases/tree/master/visualizer/interfacetable>`__
+| INET version: ``4.0``
+| Source files location: `inet/showcases/visualizer/interfacetable <https://github.com/inet-framework/inet-showcases/tree/master/visualizer/interfacetable>`__
 
 About the visualizer
 --------------------
@@ -135,6 +134,8 @@ displayed. The network will look like this:
 .. figure:: media/advanced.png
    :width: 80%
    :align: center
+
+Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`InterfaceTableVisualizationShowcase.ned <../InterfaceTableVisualizationShowcase.ned>`
 
 Further information
 -------------------

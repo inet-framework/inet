@@ -85,6 +85,8 @@ However, it is now possible to see that the movement of ``host3`` is not
 actually random, but rather, it moves along a circle. The ``host1`` and
 ``host2`` nodes can also be easily tracked because of the visualization.
 
+Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`MobilityVisualizerShowcase.ned <../MobilityVisualizerShowcase.ned>`
+
 More Information
 ----------------
 

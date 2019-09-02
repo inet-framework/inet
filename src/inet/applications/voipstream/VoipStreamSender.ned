@@ -29,7 +29,7 @@ import inet.applications.contract.IApp;
 // number of milliseconds of voice. Those values come from module parameters.
 // Packets that are all silence (all samples are below a given threshold in
 // absolute value) are transmitted as special "silence" packets. The module
-// does not simulate any particular VoIP protocol (e.g. Rtp), but instead
+// does not simulate any particular VoIP protocol (e.g. RTP), but instead
 // accepts a "header size" parameter that can be set accordingly.
 //
 simple VoipStreamSender like IApp

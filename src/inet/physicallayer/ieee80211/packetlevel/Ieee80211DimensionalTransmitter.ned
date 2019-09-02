@@ -25,7 +25,7 @@ import inet.physicallayer.base.packetlevel.DimensionalTransmitterBase;
 // their analog representation. The bit domain, symbol domain, and sample
 // domains of the transmissions are not represented.
 //
-// See also ~Ieee80211DimensionalReceiver, ~Ieee80211DimensionalRadio, and
+// @see ~Ieee80211DimensionalReceiver, ~Ieee80211DimensionalRadio,
 // ~Ieee80211DimensionalRadioMedium.
 //
 module Ieee80211DimensionalTransmitter extends DimensionalTransmitterBase

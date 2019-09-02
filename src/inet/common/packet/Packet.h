@@ -230,18 +230,20 @@ class INET_API Packet : public cPacket
 
     /**
      * Returns the designated part as an immutable chunk in its current
-     * representation. The flags parameter is a combination of Chunk::PeekFlag
-     * enumeration members.
+     * representation. If the length is unspecified, then the length of the
+     * result is chosen according to the current representation. The flags
+     * parameter is a combination of Chunk::PeekFlag enumeration members.
      */
-    const Ptr<const Chunk> peekAtBack(b length, int flags = 0) const;
+    const Ptr<const Chunk> peekAtBack(b length = b(-1), int flags = 0) const;
 
     /**
      * Pops the designated part and returns it as an immutable chunk in its
      * current representation. Decreases the back offset with the length of the
-     * returned chunk. The flags parameter is a combination of Chunk::PeekFlag
-     * enumeration members.
+     * returned chunk. If the length is unspecified, then the length of the
+     * result is chosen according to the current representation. The flags
+     * parameter is a combination of Chunk::PeekFlag enumeration members.
      */
-    const Ptr<const Chunk> popAtBack(b length, int flags = 0);
+    const Ptr<const Chunk> popAtBack(b length = b(-1), int flags = 0);
 
     /**
      * Returns true if the designated part is available in the requested
@@ -519,11 +521,12 @@ class INET_API Packet : public cPacket
 
     /**
      * Removes the designated part and returns it as a mutable chunk in its
-     * current representation. The length of back popped part must be zero
-     * before calling this function. The flags parameter is a combination of
-     * Chunk::PeekFlag enumeration members.
+     * current representation. If the length is unspecified, then the length of
+     * the result is chosen according to the current representation. The length
+     * of back popped part must be zero before calling this function. The flags
+     * parameter is a combination of Chunk::PeekFlag enumeration members.
      */
-    const Ptr<Chunk> removeAtBack(b length, int flags = 0);
+    const Ptr<Chunk> removeAtBack(b length = b(-1), int flags = 0);
 
     /**
      * Removes the designated part and returns it as a mutable chunk in the

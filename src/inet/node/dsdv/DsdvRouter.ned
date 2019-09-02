@@ -22,7 +22,7 @@ import inet.node.inet.AdhocHost;
 import inet.routing.dsdv.Dsdv;
 
 //
-// A Dsdv router.
+// A DSDV router.
 //
 module DsdvRouter extends AdhocHost
 {

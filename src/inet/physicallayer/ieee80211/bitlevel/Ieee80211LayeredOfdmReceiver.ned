@@ -29,10 +29,9 @@ import inet.physicallayer.contract.packetlevel.IReceiver;
 // This module implements an IEEE 802.11 OFDM receiver.
 // The implemenation details are based on the following standard:
 // IEEE Std 802.11-2012 PART 11: WIRELESS LAN MAC AND PHY SPECIFICATIONS
-
-// Please check the @see ~Ieee80211LayeredOfdmTransmitter documentation first, since
-// this receiver module is symmetric to it.
 //
+// Please check the ~Ieee80211LayeredOfdmTransmitter documentation first, since
+// this receiver module is symmetric to it.
 //
 module Ieee80211LayeredOfdmReceiver extends SnirReceiverBase like IReceiver
 {

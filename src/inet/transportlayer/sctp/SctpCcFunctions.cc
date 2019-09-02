@@ -349,7 +349,7 @@ uint32 SctpAssociation::updateOLIA(uint32 w, const uint32 s,
     } else {
         increase = (int32) min(path->pmtu, ackedBytes);  // slow start
     }
-    return (w + increase);
+    return w + increase;
 }
 
 void SctpAssociation::recordCwndUpdate(SctpPathVariables* path)

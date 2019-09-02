@@ -46,7 +46,7 @@ import inet.physicallayer.contract.bitlevel.IPulseShaper;
 // of this model is to provide a basic infrastructure for further development and
 // experimentation.
 //
-// See also ~ApskEncoder, ~ApskModulator, and ~ApskLayeredReceiver.
+// @see ~ApskEncoder, ~ApskModulator, ~ApskLayeredReceiver.
 //
 module ApskLayeredTransmitter like ITransmitter
 {

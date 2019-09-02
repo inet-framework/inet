@@ -25,7 +25,7 @@ import inet.physicallayer.contract.packetlevel.ITransmitter;
 // supports an ideal communication channel with configuring the range parameters
 // to infinity.
 //
-// See also ~UnitDiskReceiver, ~UnitDiskRadio, ~UnitDiskRadioMedium, and
+// @see ~UnitDiskReceiver, ~UnitDiskRadio, ~UnitDiskRadioMedium,
 // ~UnitDiskAnalogModel.
 //
 module UnitDiskTransmitter like ITransmitter

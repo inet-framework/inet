@@ -936,7 +936,7 @@ void SctpAssociation::tsnWasReneged(SctpDataVariables *chunk,
 // SACK processing code iterates over all TSNs in the RTX queue.
 // Calls cucProcessGapReports() for each TSN, setting isAcked=TRUE
 // for chunks being acked, isAcked=FALSE otherwise.
-inline void SctpAssociation::cucProcessGapReports(const SctpDataVariables *chunk,
+void SctpAssociation::cucProcessGapReports(const SctpDataVariables *chunk,
         SctpPathVariables *path,
         const bool isAcked)
 {

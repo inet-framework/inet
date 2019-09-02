@@ -206,6 +206,8 @@ needs to zoom in on the graph to see this effect.
 .. figure:: media/ping-ack2.png
    :width: 80%
 
+Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`PowerConsumptionShowcase.ned <../PowerConsumptionShowcase.ned>`
+
 Discussion
 ----------
 

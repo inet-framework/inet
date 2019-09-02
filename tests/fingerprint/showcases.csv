@@ -3,7 +3,7 @@
 /showcases/general/diffserv/,        -f omnetpp.ini -c VoIP_WithPolicing -r 0,      50s,         32a6-52f1/tplx, PASS,
 /showcases/general/diffserv/,        -f omnetpp.ini -c VoIP_WithPolicingAndQueueing -r 0, 50s,   6b50-8438/tplx, PASS,
 
-/showcases/general/dynamic/,         -f omnetpp.ini -c General -r 0,                100s,         aa91-2c95/tplx, PASS,
+# /showcases/general/dynamic/,         -f omnetpp.ini -c General -r 0,                100s,         aa91-2c95/tplx, PASS,
 
 /showcases/general/pcaprecording/,   -f omnetpp.ini -c PcapRecording -r 0,          10s,         9514-7936/tplx, PASS,
 
@@ -29,8 +29,8 @@
 /showcases/routing/manet/,           -f omnetpp.ini -c Dsdv -r 0,                   100s,         838c-e88d/tplx, PASS,
 /showcases/routing/manet/,           -f omnetpp.ini -c Gpsr -r 0,                   100s,         73e8-b4d6/tplx, PASS,
 
-/showcases/visualizer/advanced/,     -f omnetpp.ini -c IncludingMultipleVisualizerModules -r 0, 100s, 1b92-4be3/tplx, PASS,
-/showcases/visualizer/advanced/,     -f omnetpp.ini -c Wireless -r 0,               5s,         1543-37d9/tplx, PASS,
+# /showcases/visualizer/advanced/,     -f omnetpp.ini -c IncludingMultipleVisualizerModules -r 0, 100s, 1b92-4be3/tplx, PASS,
+# /showcases/visualizer/advanced/,     -f omnetpp.ini -c Wireless -r 0,               5s,         1543-37d9/tplx, PASS,
 
 /showcases/visualizer/datalinkactivity/, -f omnetpp.ini -c EnablingVisualizationWired -r 0,                     500s,            08ae-caa7/tplx, PASS,
 /showcases/visualizer/datalinkactivity/, -f omnetpp.ini -c EnablingVisualizationWireless -r 0,                  500s,            31cf-4e16/tplx, PASS,
@@ -72,10 +72,10 @@
 /showcases/visualizer/networkpathactivity/, -f omnetpp.ini -c Mobile -r 0,                                      500s,            ae39-a96b/tplx, PASS,
 /showcases/visualizer/networkpathactivity/, -f omnetpp.ini -c ChangingPaths -r 0,                               250s,            5338-103a/tplx, PASS,
 
-/showcases/visualizer/obstacleloss/, -f omnetpp.ini -c EnablingVisualization -r 0,                              250s,            2410-572d/tplx, PASS,
-/showcases/visualizer/obstacleloss/, -f omnetpp.ini -c MultipleObstacles -r 0,                                  500s,            89ca-0f0a/tplx, PASS,
+# /showcases/visualizer/obstacleloss/, -f omnetpp.ini -c EnablingVisualization -r 0,                              250s,            2410-572d/tplx, PASS,
+# /showcases/visualizer/obstacleloss/, -f omnetpp.ini -c MultipleObstacles -r 0,                                  500s,            89ca-0f0a/tplx, PASS,
 
-/showcases/visualizer/osgdemo/,      -f omnetpp.ini -c General -r 0,                100s,         0000-0000/tplx, ERROR,
+# /showcases/visualizer/osgdemo/,      -f omnetpp.ini -c General -r 0,                100s,         0000-0000/tplx, ERROR,
 
 /showcases/visualizer/packetdrop/,   -f omnetpp.ini -c QueueOverflow -r 0,                                      2002ms,            6e86-f03b/tplx, PASS,
 /showcases/visualizer/packetdrop/,   -f omnetpp.ini -c ArpResolutionFailed -r 0,                                500s,            9f65-bc35/tplx, PASS,
@@ -162,33 +162,33 @@
 # /showcases/wireless/ieee802154/,     -f omnetpp.ini -c Ieee802154 -r 0,             100s,         0000-0000/tplx, PASS,   # Ieee802154 extended
 /showcases/wireless/ieee802154/,     -f omnetpp.ini -c Ieee802154Power -r 0,        100s,         ad59-4f17/tplx, PASS,
 
-/showcases/wireless/infrastructure/, -f omnetpp.ini -c Infrastructure -r 0,         100s,         9d0d-9919/tplx, PASS,
-/showcases/wireless/infrastructure/, -f omnetpp.ini -c Adhoc -r 0,                  100s,         22b8-9750/tplx, PASS,
+# /showcases/wireless/infrastructure/, -f omnetpp.ini -c Infrastructure -r 0,         100s,         9d0d-9919/tplx, PASS,
+# /showcases/wireless/infrastructure/, -f omnetpp.ini -c Adhoc -r 0,                  100s,         22b8-9750/tplx, PASS,
 
-/showcases/wireless/levelofdetail/,  -f omnetpp.ini -c General -r '$detail=="packet" && $modulation=="BPSK" && $fecType=="ConvolutionalCoder" && $distance==150',   100s,            cb4d-0ac2/tplx, PASS,
-/showcases/wireless/levelofdetail/,  -f omnetpp.ini -c General -r '$detail=="bit" && $modulation=="BPSK" && $fecType=="ConvolutionalCoder" && $distance==200',      100s,            5c76-f18c/tplx, PASS,
-/showcases/wireless/levelofdetail/,  -f omnetpp.ini -c General -r '$detail=="symbol" && $modulation=="BPSK" && $fecType=="ConvolutionalCoder" && $distance==250',   100s,            652e-7408/tplx, PASS,
-/showcases/wireless/levelofdetail/,  -f omnetpp.ini -c General -r '$detail=="packet" && $modulation=="BPSK" && $fecType=="" && $distance==300',                     100s,            817b-3226/tplx, PASS,
-/showcases/wireless/levelofdetail/,  -f omnetpp.ini -c General -r '$detail=="bit" && $modulation=="BPSK" && $fecType=="" && $distance==350',                        100s,            6f7a-5306/tplx, PASS,
-/showcases/wireless/levelofdetail/,  -f omnetpp.ini -c General -r '$detail=="symbol" && $modulation=="BPSK" && $fecType=="" && $distance==450',                     100s,            42d0-556a/tplx, PASS,
-/showcases/wireless/levelofdetail/,  -f omnetpp.ini -c General -r '$detail=="packet" && $modulation=="QPSK" && $fecType=="ConvolutionalCoder" && $distance==500',   100s,            66a8-a675/tplx, PASS,
-/showcases/wireless/levelofdetail/,  -f omnetpp.ini -c General -r '$detail=="bit" && $modulation=="QPSK" && $fecType=="ConvolutionalCoder" && $distance==600',      100s,            e43c-748c/tplx, PASS,
-/showcases/wireless/levelofdetail/,  -f omnetpp.ini -c General -r '$detail=="symbol" && $modulation=="QPSK" && $fecType=="ConvolutionalCoder" && $distance==500',   100s,            81a8-b4b3/tplx, PASS,
-/showcases/wireless/levelofdetail/,  -f omnetpp.ini -c General -r '$detail=="packet" && $modulation=="QPSK" && $fecType=="" && $distance==400',                     100s,            733a-9606/tplx, PASS,
-/showcases/wireless/levelofdetail/,  -f omnetpp.ini -c General -r '$detail=="bit" && $modulation=="QPSK" && $fecType=="" && $distance==300',                        100s,            93f8-a920/tplx, PASS,
-/showcases/wireless/levelofdetail/,  -f omnetpp.ini -c General -r '$detail=="symbol" && $modulation=="QPSK" && $fecType=="" && $distance==200',                     100s,            3646-b600/tplx, PASS,
-/showcases/wireless/levelofdetail/,  -f omnetpp.ini -c General -r '$detail=="packet" && $modulation=="QAM-16" && $fecType=="ConvolutionalCoder" && $distance==150', 100s,            0217-b642/tplx, PASS,
-/showcases/wireless/levelofdetail/,  -f omnetpp.ini -c General -r '$detail=="bit" && $modulation=="QAM-16" && $fecType=="ConvolutionalCoder" && $distance==250',    100s,            fd3e-a384/tplx, PASS,
-/showcases/wireless/levelofdetail/,  -f omnetpp.ini -c General -r '$detail=="symbol" && $modulation=="QAM-16" && $fecType=="ConvolutionalCoder" && $distance==350', 100s,            724a-c674/tplx, PASS,
-/showcases/wireless/levelofdetail/,  -f omnetpp.ini -c General -r '$detail=="packet" && $modulation=="QAM-16" && $fecType=="" && $distance==425',                   100s,            a632-7b6e/tplx, PASS,
-/showcases/wireless/levelofdetail/,  -f omnetpp.ini -c General -r '$detail=="bit" && $modulation=="QAM-16" && $fecType=="" && $distance==500',                      100s,            53b9-36f5/tplx, PASS,
-/showcases/wireless/levelofdetail/,  -f omnetpp.ini -c General -r '$detail=="symbol" && $modulation=="QAM-16" && $fecType=="" && $distance==610',                   100s,            9852-c9bc/tplx, PASS,
-/showcases/wireless/levelofdetail/,  -f omnetpp.ini -c General -r '$detail=="packet" && $modulation=="QAM-64" && $fecType=="ConvolutionalCoder" && $distance==110', 100s,            dd06-6579/tplx, PASS,
-/showcases/wireless/levelofdetail/,  -f omnetpp.ini -c General -r '$detail=="bit" && $modulation=="QAM-64" && $fecType=="ConvolutionalCoder" && $distance==250',    100s,            0981-f7ff/tplx, PASS,
-/showcases/wireless/levelofdetail/,  -f omnetpp.ini -c General -r '$detail=="symbol" && $modulation=="QAM-64" && $fecType=="ConvolutionalCoder" && $distance==400', 100s,            505e-a078/tplx, PASS,
-/showcases/wireless/levelofdetail/,  -f omnetpp.ini -c General -r '$detail=="packet" && $modulation=="QAM-64" && $fecType=="" && $distance==550',                   100s,            91fb-ddb5/tplx, PASS,
-/showcases/wireless/levelofdetail/,  -f omnetpp.ini -c General -r '$detail=="bit" && $modulation=="QAM-64" && $fecType=="" && $distance==225',                      100s,            7794-9306/tplx, PASS,
-/showcases/wireless/levelofdetail/,  -f omnetpp.ini -c General -r '$detail=="symbol" && $modulation=="QAM-64" && $fecType=="" && $distance==125',                   100s,            54ce-ce35/tplx, PASS,
+# /showcases/wireless/levelofdetail/,  -f omnetpp.ini -c General -r '$detail=="packet" && $modulation=="BPSK" && $fecType=="ConvolutionalCoder" && $distance==150',   100s,            cb4d-0ac2/tplx, PASS,
+# /showcases/wireless/levelofdetail/,  -f omnetpp.ini -c General -r '$detail=="bit" && $modulation=="BPSK" && $fecType=="ConvolutionalCoder" && $distance==200',      100s,            5c76-f18c/tplx, PASS,
+# /showcases/wireless/levelofdetail/,  -f omnetpp.ini -c General -r '$detail=="symbol" && $modulation=="BPSK" && $fecType=="ConvolutionalCoder" && $distance==250',   100s,            652e-7408/tplx, PASS,
+# /showcases/wireless/levelofdetail/,  -f omnetpp.ini -c General -r '$detail=="packet" && $modulation=="BPSK" && $fecType=="" && $distance==300',                     100s,            817b-3226/tplx, PASS,
+# /showcases/wireless/levelofdetail/,  -f omnetpp.ini -c General -r '$detail=="bit" && $modulation=="BPSK" && $fecType=="" && $distance==350',                        100s,            6f7a-5306/tplx, PASS,
+# /showcases/wireless/levelofdetail/,  -f omnetpp.ini -c General -r '$detail=="symbol" && $modulation=="BPSK" && $fecType=="" && $distance==450',                     100s,            42d0-556a/tplx, PASS,
+# /showcases/wireless/levelofdetail/,  -f omnetpp.ini -c General -r '$detail=="packet" && $modulation=="QPSK" && $fecType=="ConvolutionalCoder" && $distance==500',   100s,            66a8-a675/tplx, PASS,
+# /showcases/wireless/levelofdetail/,  -f omnetpp.ini -c General -r '$detail=="bit" && $modulation=="QPSK" && $fecType=="ConvolutionalCoder" && $distance==600',      100s,            e43c-748c/tplx, PASS,
+# /showcases/wireless/levelofdetail/,  -f omnetpp.ini -c General -r '$detail=="symbol" && $modulation=="QPSK" && $fecType=="ConvolutionalCoder" && $distance==500',   100s,            81a8-b4b3/tplx, PASS,
+# /showcases/wireless/levelofdetail/,  -f omnetpp.ini -c General -r '$detail=="packet" && $modulation=="QPSK" && $fecType=="" && $distance==400',                     100s,            733a-9606/tplx, PASS,
+# /showcases/wireless/levelofdetail/,  -f omnetpp.ini -c General -r '$detail=="bit" && $modulation=="QPSK" && $fecType=="" && $distance==300',                        100s,            93f8-a920/tplx, PASS,
+# /showcases/wireless/levelofdetail/,  -f omnetpp.ini -c General -r '$detail=="symbol" && $modulation=="QPSK" && $fecType=="" && $distance==200',                     100s,            3646-b600/tplx, PASS,
+# /showcases/wireless/levelofdetail/,  -f omnetpp.ini -c General -r '$detail=="packet" && $modulation=="QAM-16" && $fecType=="ConvolutionalCoder" && $distance==150', 100s,            0217-b642/tplx, PASS,
+# /showcases/wireless/levelofdetail/,  -f omnetpp.ini -c General -r '$detail=="bit" && $modulation=="QAM-16" && $fecType=="ConvolutionalCoder" && $distance==250',    100s,            fd3e-a384/tplx, PASS,
+# /showcases/wireless/levelofdetail/,  -f omnetpp.ini -c General -r '$detail=="symbol" && $modulation=="QAM-16" && $fecType=="ConvolutionalCoder" && $distance==350', 100s,            724a-c674/tplx, PASS,
+# /showcases/wireless/levelofdetail/,  -f omnetpp.ini -c General -r '$detail=="packet" && $modulation=="QAM-16" && $fecType=="" && $distance==425',                   100s,            a632-7b6e/tplx, PASS,
+# /showcases/wireless/levelofdetail/,  -f omnetpp.ini -c General -r '$detail=="bit" && $modulation=="QAM-16" && $fecType=="" && $distance==500',                      100s,            53b9-36f5/tplx, PASS,
+# /showcases/wireless/levelofdetail/,  -f omnetpp.ini -c General -r '$detail=="symbol" && $modulation=="QAM-16" && $fecType=="" && $distance==610',                   100s,            9852-c9bc/tplx, PASS,
+# /showcases/wireless/levelofdetail/,  -f omnetpp.ini -c General -r '$detail=="packet" && $modulation=="QAM-64" && $fecType=="ConvolutionalCoder" && $distance==110', 100s,            dd06-6579/tplx, PASS,
+# /showcases/wireless/levelofdetail/,  -f omnetpp.ini -c General -r '$detail=="bit" && $modulation=="QAM-64" && $fecType=="ConvolutionalCoder" && $distance==250',    100s,            0981-f7ff/tplx, PASS,
+# /showcases/wireless/levelofdetail/,  -f omnetpp.ini -c General -r '$detail=="symbol" && $modulation=="QAM-64" && $fecType=="ConvolutionalCoder" && $distance==400', 100s,            505e-a078/tplx, PASS,
+# /showcases/wireless/levelofdetail/,  -f omnetpp.ini -c General -r '$detail=="packet" && $modulation=="QAM-64" && $fecType=="" && $distance==550',                   100s,            91fb-ddb5/tplx, PASS,
+# /showcases/wireless/levelofdetail/,  -f omnetpp.ini -c General -r '$detail=="bit" && $modulation=="QAM-64" && $fecType=="" && $distance==225',                      100s,            7794-9306/tplx, PASS,
+# /showcases/wireless/levelofdetail/,  -f omnetpp.ini -c General -r '$detail=="symbol" && $modulation=="QAM-64" && $fecType=="" && $distance==125',                   100s,            54ce-ce35/tplx, PASS,
 
 /showcases/wireless/multiradio/,     -f omnetpp.ini -c General -r 0,      100s,         cf4a-9de1/tplx, PASS,
 
@@ -224,5 +224,5 @@
 
 /showcases/wireless/throughput/,     -f omnetpp.ini -c General -r 0,                1s,         ed65-fd19/tplx, PASS,
 
-/showcases/wireless/txop/,     -f omnetpp.ini -c General -r 0,                5s,         2d14-ccc4/tplx, PASS,
+/showcases/wireless/txop/,     -f omnetpp.ini -c General -r 0,                5s,         00a5-f292/tplx, PASS,
 

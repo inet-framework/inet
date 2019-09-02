@@ -31,7 +31,7 @@ module ResponseProducer like IPacketProducer
             @display("p=200,100,row,200");
         }
         server[numKind]: TokenBasedServer {
-            tokenProductionInterval = default(0);
+            tokenProductionInterval = default(0s);
             @display("p=200,200,row,200");
         }
         multiplexer: PacketMultiplexer {

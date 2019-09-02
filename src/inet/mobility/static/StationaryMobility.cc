@@ -30,13 +30,17 @@ void StationaryMobility::initialize(int stage)
 
 void StationaryMobility::refreshDisplay() const
 {
-    if (updateFromDisplayString)
-        const_cast<StationaryMobility *>(this)->updateMobilityState();
+    if (updateFromDisplayString) {
+        const_cast<StationaryMobility *>(this)->updateMobilityStateFromDisplayString();
+        DirectiveResolver directiveResolver(const_cast<StationaryMobility *>(this));
+        auto text = format.formatString(&directiveResolver);
+        getDisplayString().setTagArg("t", 0, text);
+    }
     else
         StationaryMobilityBase::refreshDisplay();
 }
 
-void StationaryMobility::updateMobilityState()
+void StationaryMobility::updateMobilityStateFromDisplayString()
 {
     char *end;
     double depth;

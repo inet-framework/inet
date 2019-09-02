@@ -41,7 +41,7 @@ import inet.common.queueing.contract.IPacketQueue;
 // There is no buffering done on received packets -- they are just decapsulated
 // and sent up immediately.
 //
-// @see ~PppInterface, ~IOutputQueue, ~PppFrame
+// @see ~PppInterface
 //
 module Ppp
 {

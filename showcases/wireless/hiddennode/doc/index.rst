@@ -163,6 +163,8 @@ The number of received packets at Host B (wall removed, RTS/CTS off):
 **1966**\  The number of received packets at Host B (wall removed,
 RTS/CTS on): **1987**
 
+Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`HiddenNodeShowcase.ned <../HiddenNodeShowcase.ned>`
+
 Discussion
 ----------
 

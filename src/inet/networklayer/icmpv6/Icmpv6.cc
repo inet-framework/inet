@@ -363,10 +363,8 @@ void Icmpv6::insertCrc(CrcMode crcMode, const Ptr<Icmpv6Header>& icmpHeader, Pac
             icmpHeader->setChksum(0x0000); // make sure that the CRC is 0 in the header before computing the CRC
             MemoryOutputStream icmpStream;
             Chunk::serialize(icmpStream, icmpHeader);
-            if (packet->getByteLength() > 0) {
-                auto icmpDataBytes = packet->peekDataAsBytes();
-                Chunk::serialize(icmpStream, icmpDataBytes);
-            }
+            if (packet->getByteLength() > 0)
+                Chunk::serialize(icmpStream, packet->peekDataAsBytes());
             uint16_t crc = TcpIpChecksum::checksum(icmpStream.getData());
             icmpHeader->setChksum(crc);
             break;

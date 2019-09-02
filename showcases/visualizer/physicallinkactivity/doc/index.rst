@@ -176,6 +176,8 @@ other), the physical link between them breaks. When two nodes come close
 (move within each other's communication range), there will be physical
 link activity between them again.
 
+Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`PhysicallinkVisualizerShowcase.ned <../PhysicallinkVisualizerShowcase.ned>`
+
 More Information
 ----------------
 

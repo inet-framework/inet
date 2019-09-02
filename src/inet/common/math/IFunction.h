@@ -16,7 +16,6 @@
 #ifndef __INET_MATH_IFUNCTION_H_
 #define __INET_MATH_IFUNCTION_H_
 
-#include "inet/common/math/IInterpolator.h"
 #include "inet/common/math/Interval.h"
 #include "inet/common/math/Point.h"
 #include "inet/common/Ptr.h"
@@ -35,6 +34,25 @@ class INET_API Domain
     typedef Point<T ...> P;
     typedef Interval<T ...> I;
 };
+
+namespace internal {
+
+template<typename ... T, size_t ... IS>
+inline std::ostream& print(std::ostream& os, const Domain<T ...>& d, integer_sequence<size_t, IS...>) {
+    std::initializer_list<bool>({(os << (IS == 0 ? "" : ", "), outputUnit(os, T(0)), true) ... });
+    return os;
+}
+
+} // namespace internal
+
+template<typename ... T>
+inline std::ostream& operator<<(std::ostream& os, const Domain<T ...>& d)
+{
+    os << "(";
+    internal::print(os, d, index_sequence_for<T ...>{});
+    os << ")";
+    return os;
+}
 
 /**
  * This interface represents a mathematical function from domain D to range R.
@@ -149,7 +167,9 @@ class INET_API IFunction :
 template<typename R, typename ... T>
 inline std::ostream& operator<<(std::ostream& os, const IFunction<R, Domain<T ...> >& f)
 {
-    os << "f {" << std::endl;
+    os << "f" << Domain<T ...>() << " -> ";
+    outputUnit(os, R(0));
+    os << " {" << std::endl;
     f.partition(f.getDomain(), [&] (const Interval<T ...>& i, const IFunction<R, Domain<T ...>> *g) {
         os << "  i " << i << " -> { ";
         iterateBoundaries<T ...>(i, std::function<void (const Point<T ...>&)>([&] (const Point<T ...>& p) {

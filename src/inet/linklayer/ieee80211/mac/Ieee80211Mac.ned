@@ -30,8 +30,7 @@ import inet.linklayer.ieee80211.mac.coordinationfunction.Hcf;
 //
 // Implementation of the 802.11b MAC protocol. This module is intended
 // to be used in combination with the ~Ieee80211Radio module as the physical
-// layer. (The ~SnrEval80211 and ~Decider80211 modules should also work if
-// per-packet bitrate setting gets implemented.)
+// layer.
 //
 // Encapsulation/decapsulation must be done in the upper layers. (It is
 // typically in the 802.11 management module, see in ~Ieee80211Interface).
@@ -44,7 +43,8 @@ import inet.linklayer.ieee80211.mac.coordinationfunction.Hcf;
 //
 // <b>Limitations</b>
 //
-// The following features not supported: 1) power management, 2) polling (PCF).
+// Power management and polling (PCF) are not supported.
+//
 // Physical layer algorithms such as frequency hopping and
 // direct sequence spread spectrum are not modelled directly.
 //

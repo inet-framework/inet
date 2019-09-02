@@ -187,6 +187,7 @@ bool MediumVisualizerBase::matchesTransmission(const ITransmission *transmission
 
 void MediumVisualizerBase::handleSignalAdded(const physicallayer::ITransmission *transmission)
 {
+#ifdef WITH_RADIO
     if (auto dimensionalTransmission = dynamic_cast<const DimensionalTransmission *>(transmission)) {
         auto transmissionPowerFunction = dimensionalTransmission->getPower();
         const auto& transmitterAntennaGainFunction = makeShared<AntennaGainFunction>(transmission->getTransmitter()->getAntenna()->getGain().get());
@@ -205,6 +206,7 @@ void MediumVisualizerBase::handleSignalAdded(const physicallayer::ITransmission 
         mediumPowerFunction->addElement(receptionPowerFunction);
         receptionPowerFunctions[transmission] = receptionPowerFunction;
     }
+#endif
 }
 
 void MediumVisualizerBase::handleSignalRemoved(const physicallayer::ITransmission *transmission)

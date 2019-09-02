@@ -194,6 +194,8 @@ both source-destination pairs, the traffic is visualized only
 between ``source1`` and ``destination1`` because of the :par:`nodeFilter`
 parameter setting.
 
+Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`TransportPathVisualizerShowcase.ned <../TransportPathVisualizerShowcase.ned>`
+
 More Information
 ----------------
 

@@ -22,7 +22,7 @@ package inet.common.queueing.base;
 // implement a single packet matcher function which determines if a packet is to
 // be passed through or filtered out.
 //
-// @see IPacketFilter
+// @see ~IPacketFilter
 //
 simple PacketFilterBase
 {

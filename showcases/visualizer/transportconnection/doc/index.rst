@@ -17,9 +17,8 @@ number of connections in individual nodes and the whole network.
 This showcase demonstrates the visualization of TCP connections via two
 example simulations.
 
-INET version: ``3.6``
-
-Source files location: `inet/showcases/visualizer/transportconnection <https://github.com/inet-framework/inet-showcases/tree/master/visualizer/transportconnection>`__
+| INET version: ``3.6``
+| Source files location: `inet/showcases/visualizer/transportconnection <https://github.com/inet-framework/inet-showcases/tree/master/visualizer/transportconnection>`__
 
 About the visualizer
 --------------------
@@ -148,6 +147,8 @@ looks like this:
 
    ![](letters.png)
    -->
+
+Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`TransportConnectionVisualizationShowcase.ned <../TransportConnectionVisualizationShowcase.ned>`
 
 Further information
 -------------------

@@ -88,8 +88,8 @@ static ostream &operator<<(ostream &out, const IgmpMessage* msg)
             for (unsigned int i = 0; i < report->getGroupRecordArraySize(); i++)
             {
                 const GroupRecord &record = report->getGroupRecord(i);
-                out << (i>0?", ":"") << record.groupAddress << "=";
-                switch (record.recordType)
+                out << (i>0?", ":"") << record.getGroupAddress() << "=";
+                switch (record.getRecordType())
                 {
                     case MODE_IS_INCLUDE:        out << "IS_IN" ; break;
                     case MODE_IS_EXCLUDE:        out << "IS_EX" ; break;
@@ -98,8 +98,8 @@ static ostream &operator<<(ostream &out, const IgmpMessage* msg)
                     case ALLOW_NEW_SOURCES:      out << "ALLOW" ; break;
                     case BLOCK_OLD_SOURCE:       out << "BLOCK" ; break;
                 }
-                if (!record.sourceList.empty())
-                    out << " " << record.sourceList;
+                if (!record.getSourceList().empty())
+                    out << " " << record.getSourceList();
             }
             break;
         }
@@ -259,17 +259,17 @@ void IGMPTester::processSendCommand(const cXMLElement &node)
             ASSERT(groupStr);
 
             GroupRecord &record = msg->getGroupRecordForUpdate(i);
-            record.groupAddress = Ipv4Address(groupStr);
-            parseIPv4AddressVector(sourcesStr, record.sourceList);
-            record.recordType = recordTypeStr == "IS_IN" ? MODE_IS_INCLUDE :
+            record.setGroupAddress(Ipv4Address(groupStr));
+            parseIPv4AddressVector(sourcesStr, record.getSourceListForUpdate());
+            record.setRecordType(recordTypeStr == "IS_IN" ? MODE_IS_INCLUDE :
                                 recordTypeStr == "IS_EX" ? MODE_IS_EXCLUDE :
                                 recordTypeStr == "TO_IN" ? CHANGE_TO_INCLUDE_MODE :
                                 recordTypeStr == "TO_EX" ? CHANGE_TO_EXCLUDE_MODE :
                                 recordTypeStr == "ALLOW" ? ALLOW_NEW_SOURCES :
-                                recordTypeStr == "BLOCK" ? BLOCK_OLD_SOURCE : 0;
-            ASSERT(record.groupAddress.isMulticast());
-            ASSERT(record.recordType);
-            byteLength += 8 + record.sourceList.size() * 4;    // 8 byte header + n * 4 byte (Ipv4Address)
+                                recordTypeStr == "BLOCK" ? BLOCK_OLD_SOURCE : 0);
+            ASSERT(record.getGroupAddress().isMulticast());
+            ASSERT(record.getRecordType());
+            byteLength += 8 + record.getSourceList().size() * 4;    // 8 byte header + n * 4 byte (Ipv4Address)
         }
         msg->setChunkLength(B(byteLength));
         Igmpv3::insertCrc(crcMode, msg, packet);

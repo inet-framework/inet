@@ -18,7 +18,7 @@
 package inet.linklayer.contract;
 
 //
-// This interface provides an abstraction for different network protocols.
+// This interface provides an abstraction for different MAC protocols.
 //
 moduleinterface IMacProtocol
 {

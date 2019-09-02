@@ -242,7 +242,7 @@ class INET_API PcapRecorder : public cSimpleModule, protected cListener
     bool recordPcap = false;
     std::vector<IHelper *> helpers;
 
-    static simsignal_t pcapFrameRecordedSignal;
+    static simsignal_t packetRecordedSignal;
 
   public:
     PcapRecorder();

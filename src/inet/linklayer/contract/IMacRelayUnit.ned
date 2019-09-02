@@ -20,7 +20,7 @@ package inet.linklayer.contract;
 //
 // Module interface for modules providing Ethernet switch functionality.
 // These modules handle the mapping between ports and MAC addresses,
-// and forward frames (~EtherFrame) to appropriate ports.
+// and forward frames to appropriate ports.
 //
 // Functions:
 // - relays frames based on their dest MAC addresses (dest-->port mapping)
@@ -38,7 +38,6 @@ package inet.linklayer.contract;
 // parameters a ~IMacRelayUnit should have. Concrete inplementations add
 // capacity and performance aspects to the model (number of frames processed
 // per second, amount of memory available in the switch, etc.)
-// C++ implementations can subclass from the class <tt>MACRelayUnitBase</tt>.
 //
 // Known implementations are ~MacRelayUnit and ~Ieee8021dRelay.
 //

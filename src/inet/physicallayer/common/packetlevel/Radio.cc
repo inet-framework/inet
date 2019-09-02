@@ -451,6 +451,7 @@ void Radio::continueReception(cMessage *timer)
         EV_INFO << "Reception started: " << (isReceptionAttempted ? "\x1b[1mattempting\x1b[0m" : "\x1b[1mnot attempting\x1b[0m") << " " << (ISignal *)signal << " " << IRadioSignal::getSignalPartName(nextPart) << " as " << reception << endl;
         if (!isReceptionAttempted)
             receptionTimer = nullptr;
+        // TODO: FIXME: see handling packets with incorrect PHY headers in the TODO file
     }
     else {
         EV_INFO << "Reception ended: \x1b[1mignoring\x1b[0m " << (ISignal *)signal << " " << IRadioSignal::getSignalPartName(previousPart) << " as " << reception << endl;
@@ -474,12 +475,7 @@ void Radio::endReception(cMessage *timer)
         auto isReceptionSuccessful = medium->getReceptionDecision(this, signal->getListening(), transmission, part)->isReceptionSuccessful();
         EV_INFO << "Reception ended: " << (isReceptionSuccessful ? "\x1b[1msuccessfully\x1b[0m" : "\x1b[1munsuccessfully\x1b[0m") << " for " << (ISignal *)signal << " " << IRadioSignal::getSignalPartName(part) << " as " << reception << endl;
         auto macFrame = medium->receivePacket(this, signal);
-
-        // FIXME:
-        // Where we can check the phy header is correct or not? decapsulate() drops the phy header. Some phy header contains a protocol field. When phy header incorrect, where we send up the payload?
-        // When phy header has checksum field and checksum is incorrect, we should drop the frame here instead of sends to upper layer.
-        // Is missing the isReceptionSuccessful flag, too?
-
+        // TODO: FIXME: see handling packets with incorrect PHY headers in the TODO file
         decapsulate(macFrame);
         sendUp(macFrame);
         receptionTimer = nullptr;

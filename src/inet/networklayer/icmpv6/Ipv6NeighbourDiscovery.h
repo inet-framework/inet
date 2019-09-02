@@ -351,11 +351,6 @@ class INET_API Ipv6NeighbourDiscovery : public cSimpleModule, public LifecycleUn
 
     /************Neighbour Advertisment Stuff)*****************************/
 
-#ifdef WITH_xMIPv6
-    Ipv6NeighbourAdvertisement *createAndSendNaPacket(Ipv6NeighbourSolicitation *ns,
-            const Ipv6Address& nsSrcAddr, const Ipv6Address& nsDestAddr, InterfaceEntry *ie);
-#endif /* WITH_xMIPv6 */
-
     virtual void sendSolicitedNa(Packet *packet, const Ipv6NeighbourSolicitation *ns, InterfaceEntry *ie);
 
 #ifdef WITH_xMIPv6
@@ -391,17 +386,6 @@ class INET_API Ipv6NeighbourDiscovery : public cSimpleModule, public LifecycleUn
      * (RFC 3775 7.5.).
      */
     virtual bool canServeWirelessNodes(InterfaceEntry *ie);
-#endif /* WITH_xMIPv6 */
-
-    /**
-     *  RFC2463 Section 3.1: Destination Unreachable Message
-     *  Send an unreachable message to the Ipv6 module.
-     *  TODO: Relocate to Icmpv6 module
-     */
-    /*Icmpv6DestUnreachableMsg *createAndSendUnreachableMessage(
-        const Ipv6Address& destAddress, InterfaceEntry *ie);*/
-
-#ifdef WITH_xMIPv6
 
   public:
     void invalidateNeigbourCache();

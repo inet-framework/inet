@@ -28,7 +28,7 @@ package inet.common.scenario;
 // ~ScenarioManager executes a script specified in XML. It has a few
 // built-in commands, while other commands are dispatched to be carried out
 // by given simple modules. (The C++ class of these simple modules' needs
-// to implement the IScriptable interface, and the processCommand() method
+// to implement the ~IScriptable interface, and the processCommand() method
 // must be redefined accordingly).
 //
 // An example script:
@@ -70,20 +70,20 @@ package inet.common.scenario;
 // then only the <at> command is needed to have a t attribute.
 //
 // Supported attributes:
-//    - <set-param>: module, par, value.
-//    - <set-channel-param>: src-module, src-gate, par, value.
-//    - <connect>: src-module, src-gate, dest-module, dest-gate, channel-type
-//        - <param>: name, value
-//    - <disconnect>: src-module, src-gate
-//          note: if src-gate names an inout gate, both directions will be disconnected.
-//    - <create-module>: parent, submodule, type, vector
-//          parent: parent path
-//          submodule: name of created module
-//          type: type of created module
-//          vector: boolean, if true, the module created as vector element with next index,
-//                  if false, the module created as a single module,
-//                  if missing, detects existing vector by submodule name
-//    - <delete-module>: module
+// - <set-param>: module, par, value.
+// - <set-channel-param>: src-module, src-gate, par, value.
+// - <connect>: src-module, src-gate, dest-module, dest-gate, channel-type
+//     - <param>: name, value
+// - <disconnect>: src-module, src-gate
+//       note: if src-gate names an inout gate, both directions will be disconnected.
+// - <create-module>: parent, submodule, type, vector
+//       parent: parent path
+//       submodule: name of created module
+//       type: type of created module
+//       vector: boolean, if true, the module created as vector element with next index,
+//               if false, the module created as a single module,
+//               if missing, detects existing vector by submodule name
+// - <delete-module>: module
 //
 simple ScenarioManager
 {

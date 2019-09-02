@@ -22,9 +22,7 @@ package inet.common.queueing;
 //
 // It has n input and n output gates (specified by the 'numGates'
 // parameter). Packets arrived at the ith input gate are
-// forwarded to the ith output gate, or dropped. The output
-// gates must be connected to simple modules implementing
-// the IQueueAccess C++ interface (e.g. FifoQueue).
+// forwarded to the ith output gate, or dropped.
 //
 // The module sums the used buffer space of the queues attached
 // to the output gates. If it is below a minimum threshold,
