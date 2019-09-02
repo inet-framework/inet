@@ -14,4 +14,5 @@ Developer's Guide
    ch-packets
    ch-sockets
    ch-testing
+   ch-migrationguide
    ch-authors-guide
