@@ -55,10 +55,10 @@ FunctionTest tester;
 tester.test1();
 
 %contains: stdout
-Background noise: f {
+Background noise: f(s, Hz) -> WpHz {
   i [(-4611686.018427387903, -inf Hz) ... (4611686.018427387903, inf GHz)] 11 -> { @(-4611686.018427387903, -inf Hz) = 5e-08 WpHz, @(4611686.018427387903, -inf Hz) = 5e-08 WpHz, @(-4611686.018427387903, inf GHz) = 5e-08 WpHz, @(4611686.018427387903, inf GHz) = 5e-08 WpHz, min = 5e-08 WpHz, max = 5e-08 WpHz, mean = 5e-08 WpHz }
 } min = 5e-08 WpHz, max = 5e-08 WpHz, mean = 5e-08 WpHz
-Transmission: f {
+Transmission: f(s, Hz) -> WpHz {
   i [(-4611686.018427387903, -inf Hz) ... (10, 900 MHz)] 00 -> { @(-4611686.018427387903, -inf Hz) = 0 WpHz, @(10, -inf Hz) = 0 WpHz, @(-4611686.018427387903, 900 MHz) = 0 WpHz, @(10, 900 MHz) = 5e-07 WpHz, min = 0 WpHz, max = 0 WpHz, mean = 0 WpHz }
   i [(10, -inf Hz) ... (30, 900 MHz)] 00 -> { @(10, -inf Hz) = 0 WpHz, @(30, -inf Hz) = 0 WpHz, @(10, 900 MHz) = 5e-07 WpHz, @(30, 900 MHz) = 0 WpHz, min = 0 WpHz, max = 0 WpHz, mean = 0 WpHz }
   i [(30, -inf Hz) ... (4611686.018427387903, 900 MHz)] 00 -> { @(30, -inf Hz) = 0 WpHz, @(4611686.018427387903, -inf Hz) = 0 WpHz, @(30, 900 MHz) = 0 WpHz, @(4611686.018427387903, 900 MHz) = 0 WpHz, min = 0 WpHz, max = 0 WpHz, mean = 0 WpHz }
@@ -70,10 +70,10 @@ Transmission: f {
   i [(30, 1.1 GHz) ... (4611686.018427387903, inf GHz)] 00 -> { @(30, 1.1 GHz) = 0 WpHz, @(4611686.018427387903, 1.1 GHz) = 0 WpHz, @(30, inf GHz) = 0 WpHz, @(4611686.018427387903, inf GHz) = 0 WpHz, min = 0 WpHz, max = 0 WpHz, mean = 0 WpHz }
 } min = 0 WpHz, max = 5e-07 WpHz, mean = 0 WpHz
 Propagation: (10, 0 Hz)
-Attenuation: f {
+Attenuation: f(s, Hz) -> unit {
   i [(-4611686.018427387903, -inf Hz) ... (4611686.018427387903, inf GHz)] 11 -> { @(-4611686.018427387903, -inf Hz) = 0.5, @(4611686.018427387903, -inf Hz) = 0.5, @(-4611686.018427387903, inf GHz) = 0.5, @(4611686.018427387903, inf GHz) = 0.5, min = 0.5, max = 0.5, mean = 0.5 }
 } min = 0.5, max = 0.5, mean = 0.5
-Reception: f {
+Reception: f(s, Hz) -> WpHz {
   i [(-4611676.018427387903, -inf Hz) ... (20, 900 MHz)] 00 -> { @(-4611676.018427387903, -inf Hz) = 0 WpHz, @(20, -inf Hz) = 0 WpHz, @(-4611676.018427387903, 900 MHz) = 0 WpHz, @(20, 900 MHz) = 2.5e-07 WpHz, min = 0 WpHz, max = 0 WpHz, mean = 0 WpHz }
   i [(20, -inf Hz) ... (40, 900 MHz)] 00 -> { @(20, -inf Hz) = 0 WpHz, @(40, -inf Hz) = 0 WpHz, @(20, 900 MHz) = 2.5e-07 WpHz, @(40, 900 MHz) = 0 WpHz, min = 0 WpHz, max = 0 WpHz, mean = 0 WpHz }
   i [(40, -inf Hz) ... (4611686.018427387903, 900 MHz)] 10 -> { @(40, -inf Hz) = 0 WpHz, @(4611686.018427387903, -inf Hz) = 0 WpHz, @(40, 900 MHz) = 0 WpHz, @(4611686.018427387903, 900 MHz) = 0 WpHz, min = 0 WpHz, max = 0 WpHz, mean = 0 WpHz }
@@ -84,7 +84,7 @@ Reception: f {
   i [(20, 1.1 GHz) ... (40, inf GHz)] 00 -> { @(20, 1.1 GHz) = 0 WpHz, @(40, 1.1 GHz) = 0 WpHz, @(20, inf GHz) = 0 WpHz, @(40, inf GHz) = 0 WpHz, min = 0 WpHz, max = 0 WpHz, mean = 0 WpHz }
   i [(40, 1.1 GHz) ... (4611686.018427387903, inf GHz)] 10 -> { @(40, 1.1 GHz) = 0 WpHz, @(4611686.018427387903, 1.1 GHz) = 0 WpHz, @(40, inf GHz) = 0 WpHz, @(4611686.018427387903, inf GHz) = 0 WpHz, min = 0 WpHz, max = 0 WpHz, mean = 0 WpHz }
 } min = 0 WpHz, max = 2.5e-07 WpHz, mean = 0 WpHz
-SNIR: f {
+SNIR: f(s, Hz) -> unit {
   i [(-4611676.018427387903, -inf Hz) ... (20, 900 MHz)] 00 -> { @(-4611676.018427387903, -inf Hz) = 0, @(20, -inf Hz) = 0, @(-4611676.018427387903, 900 MHz) = 0, @(20, 900 MHz) = 5, min = 0, max = 0, mean = 0 }
   i [(20, -inf Hz) ... (40, 900 MHz)] 00 -> { @(20, -inf Hz) = 0, @(40, -inf Hz) = 0, @(20, 900 MHz) = 5, @(40, 900 MHz) = 0, min = 0, max = 0, mean = 0 }
   i [(40, -inf Hz) ... (4611686.018427387903, 900 MHz)] 10 -> { @(40, -inf Hz) = 0, @(4611686.018427387903, -inf Hz) = 0, @(40, 900 MHz) = 0, @(4611686.018427387903, 900 MHz) = 0, min = 0, max = 0, mean = 0 }
@@ -95,7 +95,7 @@ SNIR: f {
   i [(20, 1.1 GHz) ... (40, inf GHz)] 00 -> { @(20, 1.1 GHz) = 0, @(40, 1.1 GHz) = 0, @(20, inf GHz) = 0, @(40, inf GHz) = 0, min = 0, max = 0, mean = 0 }
   i [(40, 1.1 GHz) ... (4611686.018427387903, inf GHz)] 10 -> { @(40, 1.1 GHz) = 0, @(4611686.018427387903, 1.1 GHz) = 0, @(40, inf GHz) = 0, @(4611686.018427387903, inf GHz) = 0, min = 0, max = 0, mean = 0 }
 } min = 0, max = 5, mean = 0
-SNIR2: f {
+SNIR2: f(s) -> unit {
   i [-4611676.018427387903 ... 20] 0 -> { @-4611676.018427387903 = 0, @20 = 0, min = 0, max = 0, mean = 0 }
   i [20 ... 40] 0 -> { @20 = 0, @40 = 0, min = 0, max = 0, mean = 0 }
   i [40 ... 4611686.018427387903] 0 -> { @40 = 0, @4611686.018427387903 = 0, min = 0, max = 0, mean = 0 }
