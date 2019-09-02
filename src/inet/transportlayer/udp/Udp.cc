@@ -232,7 +232,7 @@ void Udp::processCommandFromApp(cMessage *msg)
             auto indication = new Indication("closed", UDP_I_SOCKET_CLOSED);
             auto udpCtrl = new UdpSocketClosedIndication();
             indication->setControlInfo(udpCtrl);
-            indication->addTagIfAbsent<SocketInd>()->setSocketId(socketId);
+            indication->addTag<SocketInd>()->setSocketId(socketId);
             send(indication, "appOut");
 
             break;
@@ -335,6 +335,7 @@ void Udp::processPacketFromApp(Packet *packet)
     int srcPort = -1, destPort = -1;
 
     int socketId = packet->getTag<SocketReq>()->getSocketId();
+
     SockDesc *sd = getOrCreateSocket(socketId);
 
     auto addressReq = packet->addTagIfAbsent<L3AddressReq>();
@@ -372,11 +373,11 @@ void Udp::processPacketFromApp(Packet *packet)
 
 
     if (packet->findTag<MulticastReq>() == nullptr)
-        packet->addTagIfAbsent<MulticastReq>()->setMulticastLoop(sd->multicastLoop);
+        packet->addTag<MulticastReq>()->setMulticastLoop(sd->multicastLoop);
     if (sd->ttl != -1 && packet->findTag<HopLimitReq>() == nullptr)
-        packet->addTagIfAbsent<HopLimitReq>()->setHopLimit(sd->ttl);
+        packet->addTag<HopLimitReq>()->setHopLimit(sd->ttl);
     if (packet->findTag<DscpReq>() == nullptr)
-        packet->addTagIfAbsent<DscpReq>()->setDifferentiatedServicesCodePoint(sd->typeOfService);
+        packet->addTag<DscpReq>()->setDifferentiatedServicesCodePoint(sd->typeOfService);
 
     const Protocol *l3Protocol = nullptr;
     // TODO: apps use ModuleIdAddress if the network interface doesn't have an IP address configured, and UDP uses NextHopForwarding which results in a weird error in MessageDispatcher
@@ -416,7 +417,7 @@ void Udp::processUDPPacket(Packet *udpPacket)
     emit(packetReceivedFromLowerSignal, udpPacket);
     emit(packetReceivedSignal, udpPacket);
 
-    delete udpPacket->removeTagIfPresent<PacketProtocolTag>();
+    delete udpPacket->removeTag<PacketProtocolTag>();
     b udpHeaderPopPosition = udpPacket->getFrontOffset();
     auto udpHeader = udpPacket->popAtFront<UdpHeader>(b(-1), Chunk::PF_ALLOW_INCORRECT);
 
@@ -887,11 +888,13 @@ void Udp::sendUpErrorIndication(SockDesc *sd, const L3Address& localAddr, ushort
     UdpErrorIndication *udpCtrl = new UdpErrorIndication();
     indication->setControlInfo(udpCtrl);
     //FIXME notifyMsg->addTagIfAbsent<InterfaceInd>()->setInterfaceId(interfaceId);
-    indication->addTagIfAbsent<SocketInd>()->setSocketId(sd->sockId);
-    indication->addTagIfAbsent<L3AddressInd>()->setSrcAddress(localAddr);
-    indication->addTagIfAbsent<L3AddressInd>()->setDestAddress(remoteAddr);
-    indication->addTagIfAbsent<L4PortInd>()->setSrcPort(sd->localPort);
-    indication->addTagIfAbsent<L4PortInd>()->setDestPort(remotePort);
+    indication->addTag<SocketInd>()->setSocketId(sd->sockId);
+    auto addresses = indication->addTag<L3AddressInd>();
+    addresses->setSrcAddress(localAddr);
+    addresses->setDestAddress(remoteAddr);
+    auto ports = indication->addTag<L4PortInd>();
+    ports->setSrcPort(sd->localPort);
+    ports->setDestPort(remotePort);
 
     send(indication, "appOut");
 }
