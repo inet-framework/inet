@@ -334,7 +334,9 @@ void Udp::processPacketFromApp(Packet *packet)
     L3Address srcAddr, destAddr;
     int srcPort = -1, destPort = -1;
 
-    int socketId = packet->getTag<SocketReq>()->getSocketId();
+    auto socketReq = packet->removeTag<SocketReq>();
+    int socketId = socketReq->getSocketId();
+    delete socketReq;
 
     SockDesc *sd = getOrCreateSocket(socketId);
 
@@ -403,6 +405,7 @@ void Udp::processPacketFromApp(Packet *packet)
     }
     insertTransportProtocolHeader(packet, Protocol::udp, udpHeader);
     packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(l3Protocol);
+    packet->setKind(0);
 
     EV_INFO << "Sending app packet " << packet->getName() << " over " << l3Protocol->getName() << ".\n";
     emit(packetSentSignal, packet);
@@ -870,6 +873,7 @@ void Udp::sendUp(Ptr<const UdpHeader>& header, Packet *payload, SockDesc *sd, us
 
     // send payload with UdpControlInfo up to the application
     payload->setKind(UDP_I_DATA);
+    delete payload->removeTagIfPresent<PacketProtocolTag>();
     delete payload->removeTagIfPresent<DispatchProtocolReq>();
     payload->addTagIfAbsent<SocketInd>()->setSocketId(sd->sockId);
     payload->addTagIfAbsent<TransportProtocolInd>()->setProtocol(&Protocol::udp);
