@@ -798,68 +798,68 @@ TcpEventCode TcpConnection::processSegmentInListen(Packet *packet, const Ptr<con
 
 TcpEventCode TcpConnection::processSegmentInListenFoo(Packet *packet, const Ptr<const TcpHeader>& tcpseg, L3Address srcAddr, L3Address destAddr)
 {
-        //"
-        //  Set RCV.NXT to SEG.SEQ+1, IRS is set to SEG.SEQ and any other
-        //  control or text should be queued for processing later.  ISS
-        //  should be selected and a SYN segment sent of the form:
-        //
-        //    <SEQ=ISS><ACK=RCV.NXT><CTL=SYN,ACK>
-        //
-        //  SND.NXT is set to ISS+1 and SND.UNA to ISS.  The connection
-        //  state should be changed to SYN-RECEIVED.
-        //"
-        state->rcv_nxt = tcpseg->getSequenceNo() + 1;
-        state->rcv_adv = state->rcv_nxt + state->rcv_wnd;
+    //"
+    //  Set RCV.NXT to SEG.SEQ+1, IRS is set to SEG.SEQ and any other
+    //  control or text should be queued for processing later.  ISS
+    //  should be selected and a SYN segment sent of the form:
+    //
+    //    <SEQ=ISS><ACK=RCV.NXT><CTL=SYN,ACK>
+    //
+    //  SND.NXT is set to ISS+1 and SND.UNA to ISS.  The connection
+    //  state should be changed to SYN-RECEIVED.
+    //"
+    state->rcv_nxt = tcpseg->getSequenceNo() + 1;
+    state->rcv_adv = state->rcv_nxt + state->rcv_wnd;
 
-        emit(rcvAdvSignal, state->rcv_adv);
+    emit(rcvAdvSignal, state->rcv_adv);
 
-        state->irs = tcpseg->getSequenceNo();
-        receiveQueue->init(state->rcv_nxt);    // FIXME may init twice...
-        selectInitialSeqNum();
+    state->irs = tcpseg->getSequenceNo();
+    receiveQueue->init(state->rcv_nxt);    // FIXME may init twice...
+    selectInitialSeqNum();
 
-        // although not mentioned in RFC 793, seems like we have to pick up
-        // initial snd_wnd from the segment here.
-        updateWndInfo(tcpseg, true);
+    // although not mentioned in RFC 793, seems like we have to pick up
+    // initial snd_wnd from the segment here.
+    updateWndInfo(tcpseg, true);
 
-        if (tcpseg->getHeaderLength() > TCP_MIN_HEADER_LENGTH) // Header options present?
-            readHeaderOptions(tcpseg);
+    if (tcpseg->getHeaderLength() > TCP_MIN_HEADER_LENGTH) // Header options present?
+        readHeaderOptions(tcpseg);
 
-        state->ack_now = true;
-        sendSynAck();
-        startSynRexmitTimer();
+    state->ack_now = true;
+    sendSynAck();
+    startSynRexmitTimer();
 
-        if (!connEstabTimer->isScheduled())
-            scheduleTimeout(connEstabTimer, TCP_TIMEOUT_CONN_ESTAB);
+    if (!connEstabTimer->isScheduled())
+        scheduleTimeout(connEstabTimer, TCP_TIMEOUT_CONN_ESTAB);
 
-        //"
-        // Note that any other incoming control or data (combined with SYN)
-        // will be processed in the SYN-RECEIVED state, but processing of SYN
-        // and ACK should not be repeated.
-        //"
-        // We don't send text in SYN or SYN+ACK, but accept it. Otherwise
-        // there isn't much left to do: RST, SYN, ACK, FIN got processed already,
-        // so there's only URG and PSH left to handle.
-        //
-        if (B(packet->getByteLength()) > tcpseg->getHeaderLength()) {
-            updateRcvQueueVars();
+    //"
+    // Note that any other incoming control or data (combined with SYN)
+    // will be processed in the SYN-RECEIVED state, but processing of SYN
+    // and ACK should not be repeated.
+    //"
+    // We don't send text in SYN or SYN+ACK, but accept it. Otherwise
+    // there isn't much left to do: RST, SYN, ACK, FIN got processed already,
+    // so there's only URG and PSH left to handle.
+    //
+    if (B(packet->getByteLength()) > tcpseg->getHeaderLength()) {
+        updateRcvQueueVars();
 
-            if (hasEnoughSpaceForSegmentInReceiveQueue(packet, tcpseg)) {    // enough freeRcvBuffer in rcvQueue for new segment?
-                receiveQueue->insertBytesFromSegment(packet, tcpseg);
-            }
-            else {    // not enough freeRcvBuffer in rcvQueue for new segment
-                state->tcpRcvQueueDrops++;    // update current number of tcp receive queue drops
-
-                emit(tcpRcvQueueDropsSignal, state->tcpRcvQueueDrops);
-
-                EV_WARN << "RcvQueueBuffer has run out, dropping segment\n";
-                return TCP_E_IGNORE;
-            }
+        if (hasEnoughSpaceForSegmentInReceiveQueue(packet, tcpseg)) {    // enough freeRcvBuffer in rcvQueue for new segment?
+            receiveQueue->insertBytesFromSegment(packet, tcpseg);
         }
+        else {    // not enough freeRcvBuffer in rcvQueue for new segment
+            state->tcpRcvQueueDrops++;    // update current number of tcp receive queue drops
 
-        if (tcpseg->getUrgBit() || tcpseg->getPshBit())
-            EV_DETAIL << "Ignoring URG and PSH bits in SYN\n"; // TBD
+            emit(tcpRcvQueueDropsSignal, state->tcpRcvQueueDrops);
 
-        return TCP_E_RCV_SYN;    // this will take us to SYN_RCVD
+            EV_WARN << "RcvQueueBuffer has run out, dropping segment\n";
+            return TCP_E_IGNORE;
+        }
+    }
+
+    if (tcpseg->getUrgBit() || tcpseg->getPshBit())
+        EV_DETAIL << "Ignoring URG and PSH bits in SYN\n"; // TBD
+
+    return TCP_E_RCV_SYN;    // this will take us to SYN_RCVD
 }
 
 TcpEventCode TcpConnection::processSegmentInSynSent(Packet *packet, const Ptr<const TcpHeader>& tcpseg, L3Address srcAddr, L3Address destAddr)
