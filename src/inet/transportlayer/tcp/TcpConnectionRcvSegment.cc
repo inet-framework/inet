@@ -785,7 +785,19 @@ TcpEventCode TcpConnection::processSegmentInListen(Packet *packet, const Ptr<con
         else {
             tcpMain->updateSockPair(this, destAddr, srcAddr, tcpseg->getDestPort(), tcpseg->getSrcPort());
         }
+        return processSegmentInListenFoo(packet, tcpseg, srcAddr, destAddr);
+    }
 
+    //"
+    //  fourth other text or control
+    //   So you are unlikely to get here, but if you do, drop the segment, and return.
+    //"
+    EV_WARN << "Unexpected segment: dropping it\n";
+    return TCP_E_IGNORE;
+}
+
+TcpEventCode TcpConnection::processSegmentInListenFoo(Packet *packet, const Ptr<const TcpHeader>& tcpseg, L3Address srcAddr, L3Address destAddr)
+{
         //"
         //  Set RCV.NXT to SEG.SEQ+1, IRS is set to SEG.SEQ and any other
         //  control or text should be queued for processing later.  ISS
@@ -848,14 +860,6 @@ TcpEventCode TcpConnection::processSegmentInListen(Packet *packet, const Ptr<con
             EV_DETAIL << "Ignoring URG and PSH bits in SYN\n"; // TBD
 
         return TCP_E_RCV_SYN;    // this will take us to SYN_RCVD
-    }
-
-    //"
-    //  fourth other text or control
-    //   So you are unlikely to get here, but if you do, drop the segment, and return.
-    //"
-    EV_WARN << "Unexpected segment: dropping it\n";
-    return TCP_E_IGNORE;
 }
 
 TcpEventCode TcpConnection::processSegmentInSynSent(Packet *packet, const Ptr<const TcpHeader>& tcpseg, L3Address srcAddr, L3Address destAddr)
