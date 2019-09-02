@@ -1,0 +1,26 @@
+* tags: should be exists
+* optTags: processed when exists
+* xTags: should not exists, removed
+
+gates:
+    input appIn @labels(UdpControlInfo/down)
+        kind: UDP_C_BIND, type: Request, ctrl: UdpBindCommand, tags: SocketReq
+        kind: UDP_C_CONNECT, type: Request, ctrl: UdpConnectCommand, tags: SocketReq
+        kind: UDP_C_CLOSE, type: Request, ctrl: ?, tags: SocketReq
+        kind: UDP_C_DESTROY, type: Request, ctrl: ?, tags: SocketReq
+        kind: UDP_C_DATA, type: Packet, ctrl: nullptr, tags: SocketReq, optTags: L3AddressReq, L4PortReq, InterfaceReq, MulticastReq, HopLimitReq, DscpReq
+        kind: UDP_C_SETOPTION, type: Request, ctrl: UdpSetOptionCommand, tags: SocketReq
+
+    input ipIn @labels(UdpHeader,Ipv4ControlInfo/up,Ipv6ControlInfo/up)
+        kind: *, type: Packet, tags: PacketProtocolTag(protocol: udp), L3AddressInd
+        kind: *, type: Packet, tags: PacketProtocolTag(protocol: icmpv4)
+        kind: *, type: Packet, tags: PacketProtocolTag(protocol: icmpv6)
+
+    output appOut @labels(UdpControlInfo/up)
+        kind: UDP_I_DATA, type: Packet, ctrl: nullptr, tags: SocketInd, TransportProtocolInd, L3AddressInd, L4PortInd, xTags: PacketProtocolTag, DispatchProtocolReq
+        kind: UDP_I_ERROR, type: Indication, ctrl: UdpErrorIndication, tags: SocketInd, L3AddressInd, L4PortInd
+        kind: UDP_I_SOCKET_CLOSED, type: Indication, ctrl: UdpSocketClosedIndication, tags: SocketInd
+
+    output ipOut @labels(UdpHeader,Ipv4ControlInfo/down,Ipv6ControlInfo/down)
+        kind: 0, type: Packet, ctrl=nullptr, protocol: udp, tags: L3AddressReq, MulticastReq, DscpReq, TransportProtocolInd, PacketProtocolTag, DispatchProtocolReq, optTags: InterfaceReq, HopLimitReq, xTags: SocketReq
+
