@@ -174,6 +174,7 @@ void Udp::handleMessageWhenUp(cMessage *msg)
     // received from IP layer
     if (msg->arrivedOn("ipIn")) {
         Packet *packet = check_and_cast<Packet *>(msg);
+        ASSERT(packet->getControlInfo() == nullptr);
         auto protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
         if (protocol == &Protocol::udp) {
             processUDPPacket(packet);
@@ -187,9 +188,12 @@ void Udp::handleMessageWhenUp(cMessage *msg)
         else
             throw cRuntimeError("Unknown protocol: %s(%d)", protocol->getName(), protocol->getId());
     }
-    else {    // received from application layer
+    else if (msg->arrivedOn("appIn")) {
+        // received from application layer
         processCommandFromApp(msg);
     }
+    else
+        throw cRuntimeError("Message arrived on unknown gate: %s", msg->getArrivalGate()->getFullName());
 }
 
 void Udp::refreshDisplay() const
