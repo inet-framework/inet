@@ -35,7 +35,7 @@ motion pretty much always has a subject. For example, mobility models
 are used to describe the motion of wireless network nodes. In wireless
 networks, the signal strength depends on the position and orientation of
 transmitting and receiving nodes, which in turn determines the success
-of packet reception. In order to simulate this, the ``WirelessHost``
+of packet reception. In order to simulate this, the :ned:`WirelessHost`
 module contains a mobility submodule which describes its motion.
 
 In contrast, wired network nodes generally don't have mobility
@@ -55,7 +55,7 @@ display strings in the NED file, which tell the graphical runtime
 environment where to draw the icons representing the modules on the
 canvas (and also in the IDE). Display string p-tags are two-dimensional
 (X and Y), and their purpose is to contol where to draw the submodule
-icons. For example, a ``StandardHost`` with p tag set to the coordinates
+icons. For example, a :ned:`StandardHost` with p tag set to the coordinates
 (93,167):
 
 .. literalinclude:: ../MobilityShowcase.ned
@@ -122,7 +122,7 @@ random value inside the constraint area.
 
 Other mobility modules (e.g. those that describe completely
 deterministic trajectory) initialize position with other parameters. For
-example, the ``CircleMobility`` module (describing circular motion) has
+example, the :ned:`CircleMobility` module (describing circular motion) has
 parameters to define the center and the radius of the circle, and also
 the starting angle. The starting angle parameter is what does the
 initial positioning, along the circle defined by the other parameters.
@@ -130,7 +130,7 @@ initial positioning, along the circle defined by the other parameters.
 Generic Parameters
 ~~~~~~~~~~~~~~~~~~
 
-All mobility modules in INET extend ``MobilityBase``. It has some
+All mobility modules in INET extend :ned:`MobilityBase`. It has some
 generic parameters, which are thus common to all mobility modules, such
 as the following:
 
@@ -159,7 +159,7 @@ as the following:
 Visualizing state of mobility modules
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The ``MobilityVisualizer`` module can display certain states of mobility
+The :ned:`MobilityVisualizer` module can display certain states of mobility
 modules:
 
 -  **Position** as a colored dot (useful when the mobility doesn't have

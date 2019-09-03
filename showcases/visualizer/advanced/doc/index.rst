@@ -50,7 +50,7 @@ example, one can configure different path visualizations for different
 parts of the network.
 
 This showcase describes the various types of compound visualizer
-modules, such as ``IntegratedVisualizer``. It demonstrates the use of
+modules, such as :ned:`IntegratedVisualizer`. It demonstrates the use of
 multiple visualizers with two example simulations, and shows how the
 visualization settings can be modified at runtime. Finally, it
 demonstrates how to add your own visualizer types to the existing
@@ -64,8 +64,8 @@ About visualizer module types
 -----------------------------
 
 INET contains visualizer simple modules suitable for a single
-visualization task, such as ``RoutingTableCanvasVisualizer`` or
-``InterfaceTableOsgVisualizer``. However, there are visualizer compound
+visualization task, such as :ned:`RoutingTableCanvasVisualizer` or
+:ned:`InterfaceTableOsgVisualizer`. However, there are visualizer compound
 modules, which contain multiple single-task visualizer simple modules.
 One has to include just one compound visualizer module in the network,
 and multiple visualizers can be configured from the ini file. The
@@ -79,14 +79,14 @@ visualization. 2D visualization is implemented by
 ``Canvas   visualizer`` modules, while 3D visualization is handled by
 ``Osg visualizers``. The visualizer simple modules have the word
 ``Canvas`` or ``Osg`` in their type names, e.g.
-``RoutingTableCanvasVisualizer`` or ``StatisticOsgVisualizer``.
+:ned:`RoutingTableCanvasVisualizer` or :ned:`StatisticOsgVisualizer`.
 
 **Compound modules of Canvas and Osg visualizers**
 
 There are compound modules containing the Canvas and Osg versions of
-single-task visualizers, e.g. the ``RoutingTableVisualizer`` compound
-module contains a ``RoutingTableCanvasVisualizer`` and a
-``RoutingTableOsgVisualizer`` simple module. These single-task compound
+single-task visualizers, e.g. the :ned:`RoutingTableVisualizer` compound
+module contains a :ned:`RoutingTableCanvasVisualizer` and a
+:ned:`RoutingTableOsgVisualizer` simple module. These single-task compound
 visualizers can provide both 2D and 3D visualizations (i.e. the
 RoutingTableVisualizer module can visualize routing tables in both 2D
 and 3D.) A rule of thumb is if the type name doesn't contain either
@@ -97,7 +97,7 @@ and 3D.) A rule of thumb is if the type name doesn't contain either
 
 **Integrated Canvas and Osg visualizers**
 
-The ``IntegratedCanvasVisualizer`` and ``IntegratedOsgVisualizer``
+The :ned:`IntegratedCanvasVisualizer` and :ned:`IntegratedOsgVisualizer`
 compound modules each contain all available Canvas and Osg visualizer
 types, respectively.
 
@@ -106,8 +106,8 @@ types, respectively.
 
 **Integrated visualizer**
 
-The ``IntegratedVisualizer`` contains an ``IntegratedCanvasVisualizer``
-and a ``IntegratedOsgVisualizer``. Thus it contains all available
+The :ned:`IntegratedVisualizer` contains an :ned:`IntegratedCanvasVisualizer`
+and a :ned:`IntegratedOsgVisualizer`. Thus it contains all available
 visualizers.
 
 .. figure:: integrated.png
@@ -119,12 +119,12 @@ Multi-visualizers are compound visualizer modules containing submodule
 vectors of visualizer simple modules. Such visualizers are useful if
 multiple visualizers of the same type are required for creating complex
 visualizations. The available multi visualizer modules are
-``IntegratedMultiCanvasVisualizer`` and
-``IntegratedMultiOsgVisualizer``, each containing submodule vectors of
+:ned:`IntegratedMultiCanvasVisualizer` and
+:ned:`IntegratedMultiOsgVisualizer`, each containing submodule vectors of
 canvas and osg visualizer simple modules. The
-``IntegratedMultiVisualizer`` contains both an
-``IntegratedMultiCanvasVisualizer`` and an
-``IntegratedMultiOsgVisualizer``, similarly to ``IntegratedVisualizer``.
+:ned:`IntegratedMultiVisualizer` contains both an
+:ned:`IntegratedMultiCanvasVisualizer` and an
+:ned:`IntegratedMultiOsgVisualizer`, similarly to :ned:`IntegratedVisualizer`.
 By default, the canvas and osg multi visualizers contain one submodule
 of each visualizer simple module. The number of submodules can be
 specified for each visualizer submodule with parameters, e.g.
@@ -152,20 +152,20 @@ specified for each visualizer submodule with parameters, e.g.
    <p>V2</p>
 
    The various visualizations are handled by specific visualizer simple modules. Visualizations in 2D are implemented by
-   `Canvas` visualizer simple modules, while visualizations in 3D are handled by `Osg` visualizer simple modules. The visualizer simple modules have the word `Canvas` or `Osg` in their type name, e.g. `RoutingTableCanvasVisualizer` or `InterfaceTableOsgVisualizer`.
+   `Canvas` visualizer simple modules, while visualizations in 3D are handled by `Osg` visualizer simple modules. The visualizer simple modules have the word `Canvas` or `Osg` in their type name, e.g. :ned:`RoutingTableCanvasVisualizer` or :ned:`InterfaceTableOsgVisualizer`.
 
    There are compound modules which contain both the Canvas and the Osg version of a specific visualizer simple module,
-   e.g. `RoutingTableVisualizer` contains a `RoutingTableCanvasVisualizer` and a `RoutingTableOsgVisualizer` simple module. Thus these specific compound visualizers can provide both 2D and 3D visualizations (i.e. the RoutingTableVisualizer can visualize routing tables in both 2D and 3D).
+   e.g. :ned:`RoutingTableVisualizer` contains a :ned:`RoutingTableCanvasVisualizer` and a :ned:`RoutingTableOsgVisualizer` simple module. Thus these specific compound visualizers can provide both 2D and 3D visualizations (i.e. the RoutingTableVisualizer can visualize routing tables in both 2D and 3D).
    The rule of thumb is if the type name doesn't contain either
    `Canvas` or `Osg`, the module contains both kinds of visualizers.
 
    There are integrated visualizer compound modules, which contain multiple specific visualizer simple modules. There are three kinds of integrated visualizers:
 
-   The `IntegratedCanvasVisualizer` contains all Canvas visualizer simple modules, while the `IntegratedOsgVisualizer` contains all Osg visualizer simple modules.
+   The :ned:`IntegratedCanvasVisualizer` contains all Canvas visualizer simple modules, while the :ned:`IntegratedOsgVisualizer` contains all Osg visualizer simple modules.
 
-   The `IntegratedVisualizer` contains an `IntegratedCanvasVisualizer` and an `IntegratedOsgVisualizer`. Thus it contains all available visualizer simple modules.
+   The :ned:`IntegratedVisualizer` contains an :ned:`IntegratedCanvasVisualizer` and an :ned:`IntegratedOsgVisualizer`. Thus it contains all available visualizer simple modules.
 
-   By including an `IntegratedVisualizer` in the network, the features of all contained visualizers are available in
+   By including an :ned:`IntegratedVisualizer` in the network, the features of all contained visualizers are available in
    the simulation using the network, both in 2D and 3D.
    The parameters of the visualizer simple modules can be configured from the ini file.
 
@@ -174,10 +174,10 @@ specified for each visualizer submodule with parameters, e.g.
    <p>V3</p>
 
    The various visualizations are handled by specific visualizer simple modules. Visualizations in 2D are implemented by
-   `Canvas` visualizer simple modules, while visualizations in 3D are handled by `Osg` visualizer simple modules. The visualizer simple modules have the word `Canvas` or `Osg` in their type name, e.g. `RoutingTableCanvasVisualizer` or `InterfaceTableOsgVisualizer`.
+   `Canvas` visualizer simple modules, while visualizations in 3D are handled by `Osg` visualizer simple modules. The visualizer simple modules have the word `Canvas` or `Osg` in their type name, e.g. :ned:`RoutingTableCanvasVisualizer` or :ned:`InterfaceTableOsgVisualizer`.
 
    There are compound modules which contain both the Canvas and the Osg version of a specific visualizer simple module,
-   e.g. `RoutingTableVisualizer` contains a `RoutingTableCanvasVisualizer` and a `RoutingTableOsgVisualizer` simple module. Thus these specific compound visualizers can provide both 2D and 3D visualizations (i.e. the RoutingTableVisualizer can visualize routing tables in both 2D and 3D).
+   e.g. :ned:`RoutingTableVisualizer` contains a :ned:`RoutingTableCanvasVisualizer` and a :ned:`RoutingTableOsgVisualizer` simple module. Thus these specific compound visualizers can provide both 2D and 3D visualizations (i.e. the RoutingTableVisualizer can visualize routing tables in both 2D and 3D).
    The rule of thumb is if the type name doesn't contain either
    `Canvas` or `Osg`, the module contains both kinds of visualizers.
 
@@ -185,18 +185,18 @@ specified for each visualizer submodule with parameters, e.g.
 
    There are integrated visualizer compound modules, which contain multiple specific visualizer simple modules. There are three kinds of integrated visualizers:
 
-   The `IntegratedCanvasVisualizer` contains all Canvas visualizer simple modules, while the `IntegratedOsgVisualizer` contains all Osg visualizer simple modules.
+   The :ned:`IntegratedCanvasVisualizer` contains all Canvas visualizer simple modules, while the :ned:`IntegratedOsgVisualizer` contains all Osg visualizer simple modules.
 
    ![](integratedcanvasosg.png)
 
-   The `IntegratedVisualizer` contains an `IntegratedCanvasVisualizer` and an `IntegratedOsgVisualizer`. Thus it contains all available visualizer simple modules.
+   The :ned:`IntegratedVisualizer` contains an :ned:`IntegratedCanvasVisualizer` and an :ned:`IntegratedOsgVisualizer`. Thus it contains all available visualizer simple modules.
 
    ![](integrated.png)
 
    -->
 
-By including an ``IntegratedVisualizer`` or
-``IntegratedMultiVisualizer`` in the network, the features of all
+By including an :ned:`IntegratedVisualizer` or
+:ned:`IntegratedMultiVisualizer` in the network, the features of all
 contained visualizers are available in the simulation using the network,
 both in 2D and 3D. The parameters of the visualizer simple modules can
 be configured from the ini file.
@@ -233,11 +233,11 @@ the following network:
    :width: 100%
 
 The hosts and the server in the network are ``StandardHosts``. The
-network contains two ``IntegratedVisualizer`` modules, named
+network contains two :ned:`IntegratedVisualizer` modules, named
 ``visualizer1`` and ``visualizer2``.
 
 The ``server`` runs an UDP video stream server
-(``UdpVideoStreamServer``), and two ``TCPSessionApps``. These
+(:ned:`UdpVideoStreamServer`), and two ``TCPSessionApps``. These
 applications are configured to send UDP and TCP streams to certain
 hosts:
 
@@ -248,8 +248,8 @@ hosts:
 
 The goal is to visualize UDP and TCP streams with different colors, so
 it is easier to differentiate between them. We configure the
-``NetworkRouteVisualizer`` in ``visualizer1`` to display TCP packet
-paths with blue arrows, and the ``NetworkRouteVisualizer`` in
+:ned:`NetworkRouteVisualizer` in ``visualizer1`` to display TCP packet
+paths with blue arrows, and the :ned:`NetworkRouteVisualizer` in
 ``visualizer2`` to indicate UDP packet paths with red arrows.
 
 .. code-block: none
@@ -268,9 +268,9 @@ the ACK, SYN+ACK, and SYN. The other visualizer is configured to
 visualize all UDP packets (packets with 'Video' in their names, which
 covers all UDP packets in the network).
 
-The ``StatisticVisualizer`` in ``visualizer1`` is configured to display
+The :ned:`StatisticVisualizer` in ``visualizer1`` is configured to display
 the number of received UDP packets in the affected nodes. The other
-``StatisticVisualizer`` in ``visualizer2`` is configured to indicate the
+:ned:`StatisticVisualizer` in ``visualizer2`` is configured to indicate the
 total size of the received TCP data.
 
 .. code-block:: none
@@ -287,7 +287,7 @@ total size of the received TCP data.
    *.visualizer2.statisticVisualizer.sourceFilter = "**.tcpApp[*]"
    *.visualizer2.statisticVisualizer.format = "TCP data received: %v %u"
 
-Additionally, the ``TransportConnectionVisualizer`` in ``visualizer1``
+Additionally, the :ned:`TransportConnectionVisualizer` in ``visualizer1``
 is enabled, and set to visualize transport connections in the network,
 i.e. the TCP connections. The set of colors for the icons to use is set
 to yellow and green.
@@ -296,7 +296,7 @@ to yellow and green.
 
    <!--
    V2
-   Additionally, the `TransportConnectionVisualizer` in
+   Additionally, the :ned:`TransportConnectionVisualizer` in
    `visualizer1` is enabled, and set to visualize transport
    connections in the network, i.e. the TCP connections. The set of colors for the icons to use is set to blue and darkblue to differentiate the two TCP connections.
    -->
@@ -309,7 +309,7 @@ to yellow and green.
 
    *.visualizer1.transportConnectionVisualizer.displayTransportConnections = true *.visualizer1.transportConnectionVisualizer.iconColor = "green, yellow"
 
-The ``NetworkNodeVisualizer`` module creates the visualization figures
+The :ned:`NetworkNodeVisualizer` module creates the visualization figures
 for all other visualizers. By default, the two visualizer modules in the
 network each use their own NetworkNodeVisualizer. The
 NetworkNodeVisualizer modules would create overlapping visualizations,
@@ -334,7 +334,7 @@ at the server is just two, which are the two video stream request
 packets from the hosts. The received UDP packets at ``hosts 2 and 4``
 keep increasing. The received TCP data is displayed above the TCP hosts.
 TCP connection visualization icons are differentiated based on the
-letters in the icons, as the ``TransportConnectionVisualizer`` is using
+letters in the icons, as the :ned:`TransportConnectionVisualizer` is using
 just one color.
 
 Visualizing multiple radio mediums
@@ -387,7 +387,7 @@ transmissions (e.g. they are out of range or operate on different
 channels or frequency domainsa), the simulation can be optimized by
 putting each wireless network on a different radio medium.
 
-The ``MediumVisualizer`` module can visualize transmissions from just
+The :ned:`MediumVisualizer` module can visualize transmissions from just
 one radio medium, so more visualizer modules are needed if there are
 multiple radio medium modules. This example simulation features two
 wireless networks, which operate in different frequency bands (2.4 and 5

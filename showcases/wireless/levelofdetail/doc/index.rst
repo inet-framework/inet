@@ -29,8 +29,8 @@ The model
 Layered radio
 ~~~~~~~~~~~~~
 
-The model uses ``ApskScalarRadio`` with ``ApskLayeredTransmitter`` and
-``ApskLayeredReceiver``. The latter two implements the layered radio
+The model uses :ned:`ApskScalarRadio` with :ned:`ApskLayeredTransmitter` and
+:ned:`ApskLayeredReceiver`. The latter two implements the layered radio
 features. When operating in 'packet' domain, the error model computes
 packet errors, bits are not computed. In 'bit' domain, the error model
 computes erroneous bits. In the 'symbol' domain, the encoding and
@@ -56,7 +56,7 @@ the bit error rate.
 Calculating error rates
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-The ``ApskLayeredReceiver`` module uses the ``ApskLayeredErrorModel`` by
+The :ned:`ApskLayeredReceiver` module uses the :ned:`ApskLayeredErrorModel` by
 default. The error model calculates packet error rate (PER), bit error
 rate (BER) and symbol error rate (SER), depending on the level of detail
 used. The error rates are calculated from the SNIR, the transmission's
@@ -90,7 +90,7 @@ There are four axes in the parameter study:
 -  **Distance** runs from 210m to 710m in steps of 5m
 -  **Level of detail** for the transmissions are 'packet', 'bit' and
    'symbol'
--  **Forward error correction** (FEC) is either ``ConvolutionalCoder``
+-  **Forward error correction** (FEC) is either :ned:`ConvolutionalCoder`
    or not using forward error correction
 -  **Modulations** used are 'BPSK', 'QPSK', 'QAM-16' and 'QAM-64'
 
