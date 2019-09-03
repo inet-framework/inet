@@ -1,0 +1,295 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<analysis version="2">
+    <inputs>
+        <input pattern="/inet/showcases/wireless/coexistence/results/*Only-*.vec"/>
+        <input pattern="/inet/showcases/wireless/coexistence/results/*Only-*.sca"/>
+        <input pattern="results/Coexistence-*.vec"/>
+        <input pattern="results/Coexistence-*.sca"/>
+    </inputs>
+    <charts>
+        <chart icon="icons/full/obj/barchart.png" id="817" name="Wifi performance" template="barchart_mpl" type="MATPLOTLIB">
+            <script><![CDATA[from omnetpp.scave import results, chart
+import matplotlib.pyplot as plt
+import pandas as pd
+from matplotlib.pyplot import xticks
+
+params = chart.get_properties()
+
+# This expression selects the results (you might be able to logically simplify it)
+filter_expression = params["filter"]
+
+# The data is returned as a Pandas DataFrame
+df = results.get_scalars(filter_expression, include_attrs=True, include_runattrs=True, include_itervars=True)
+
+# You can perform any transformations on the data here
+
+print(df)
+
+title, legend = chart.extract_label_columns(df)
+
+for i, c in legend:
+    df[c] = pd.to_numeric(df[c], errors="ignore")
+
+print(df)
+plt.title("Wifi performance")
+
+df = pd.pivot_table(df, index='experiment', values='value')
+
+df.sort_values(by="experiment", axis='index', inplace=True, ascending=False)
+print(df)
+
+df.columns=['Number of packets received']
+df.index=['Wifi only','Wifi+WPAN coexistence']
+
+df.plot(kind='bar', ax=plt.gca(), zorder=2, align='center', width=0.8, figsize=(8,6))
+
+plt.legend()
+plt.grid(axis='y', linestyle='--')
+xticks(rotation=0)
+
+plt.xlabel('')
+
+ax = plt.gca()
+for p in ax.patches:
+    ax.annotate(str(round(p.get_height(),2)), (p.get_x() + p.get_width() / 2, p.get_height() - 200),
+                horizontalalignment='center', verticalalignment='top', color='white', size=12)
+    
+bottom, top = plt.ylim()
+plt.ylim(bottom, top*1.05)
+
+#plt.tight_layout()
+
+#plt.savefig('rcvdpackets.png', dpi=120, bbox_inches='tight')
+plt.savefig('wifiperformance.png', dpi=120, bbox_inches='tight', transparent=True)
+]]></script>
+            <dialogPage id="Main" label="Main"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<xswt xmlns:x="http://sweet_swt.sf.net/xswt">
+
+  <import xmlns="http://sweet_swt.sf.net/xswt">
+    <package name="java.lang"/>
+    <package name="org.eclipse.swt.widgets" />
+    <package name="org.eclipse.swt.graphics" />
+    <package name="org.eclipse.swt.layout" />
+    <package name="org.eclipse.swt.custom" />
+    <package name="org.omnetpp.common.wizard.support" />
+    <package name="org.omnetpp.ned.editor.wizards.support" />
+    <package name="org.omnetpp.cdt.wizard.support" />
+  </import>
+  <layout x:class="GridLayout" numColumns="2"/>
+
+  <x:children>
+
+    <!-- page generated from the following spec:
+Names {
+	chartName,
+},
+Options {
+	Use antialias?,
+	Use caching?,
+},
+Colors {
+	backgroundColor
+}    
+    -->
+    
+    <!-- Names { -->
+    <group text="Names">
+      <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+      <layout x:class="GridLayout" numColumns="2"/>
+      <x:children>
+
+    <!-- chartName -->
+    <label text="Chart name:"/>
+    <text x:id="chart_name" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </text>
+
+    <!--  -->
+
+    <!-- } -->
+      </x:children>
+    </group>
+
+    <!-- Colors { -->
+    <group text="Colors">
+      <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+      <layout x:class="GridLayout" numColumns="2"/>
+      <x:children>
+
+    <!-- backgroundColor -->
+    <label text="Background color:"/>
+    <ColorChooser x:id="background_color" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </ColorChooser>
+
+    <!-- } -->
+      </x:children>
+    </group>
+
+  </x:children>
+</xswt>
+]]></dialogPage>
+            <dialogPage id="Input" label="Input"><![CDATA[<?xml version='1.0' encoding='UTF-8'?>
+<xswt xmlns:x='http://sweet_swt.sf.net/xswt'>
+  <import xmlns='http://sweet_swt.sf.net/xswt'>
+    <package name='java.lang'/>
+    <package name='org.eclipse.swt.widgets' />
+    <package name='org.eclipse.swt.graphics' />
+    <package name='org.eclipse.swt.layout' />
+    <package name='org.eclipse.swt.custom' />
+  </import>
+  <layout x:class='GridLayout' numColumns='1'/>
+  <x:children>
+    <label text="Filter expression:"/>
+    <text x:id="filter" x:style="BORDER|MULTI" x:id.isFilter="true"> 
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="true"/>
+    </text>
+  </x:children>
+</xswt>]]></dialogPage>
+            <property name="filter" value="name(packetReceived:count) AND module(CoexistenceShowcase.wifiHost2.app[0])&#10;AND (  runattr:experiment(Coexistence) OR  runattr:experiment(WifiOnly) )"/>
+            <property name="background_color" value=""/>
+        </chart>
+        <chart icon="icons/full/obj/barchart.png" id="854" name="Wpan performance" template="barchart_mpl" type="MATPLOTLIB">
+            <script><![CDATA[from omnetpp.scave import results, chart
+import matplotlib.pyplot as plt
+import pandas as pd
+from matplotlib.pyplot import xticks
+
+params = chart.get_properties()
+
+# This expression selects the results (you might be able to logically simplify it)
+filter_expression = params["filter"]
+
+# The data is returned as a Pandas DataFrame
+df = results.get_scalars(filter_expression, include_attrs=True, include_runattrs=True, include_itervars=True)
+
+# You can perform any transformations on the data here
+
+print(df)
+
+title, legend = chart.extract_label_columns(df)
+
+for i, c in legend:
+    df[c] = pd.to_numeric(df[c], errors="ignore")
+
+print(df)
+plt.title("WPAN performance")
+
+df = pd.pivot_table(df, index='experiment', values='value')
+
+df.sort_values(by="experiment", axis='index', inplace=True, ascending=False)
+print(df)
+
+df.columns=['Number of packets received']
+df.index=['WPAN only','Wifi+WPAN coexistence']
+
+df.plot(kind='bar', ax=plt.gca(), zorder=2, align='center', width=0.8, figsize=(8,6))
+
+plt.legend()
+plt.grid(axis='y', linestyle='--')
+xticks(rotation=0)
+
+plt.xlabel('')
+
+ax = plt.gca()
+for p in ax.patches:
+    ax.annotate(str(p.get_height()), (p.get_x() + p.get_width() / 2, p.get_height() - 2),
+                horizontalalignment='center', verticalalignment='top', color='white', size=12)
+    
+bottom, top = plt.ylim()
+plt.ylim(bottom, top*1.1)
+
+#plt.tight_layout()
+
+#plt.savefig('rcvdpackets.png', dpi=120, bbox_inches='tight')
+plt.savefig('wpanperformance.png', dpi=120, bbox_inches='tight', transparent=True)
+]]></script>
+            <dialogPage id="Main" label="Main"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<xswt xmlns:x="http://sweet_swt.sf.net/xswt">
+
+  <import xmlns="http://sweet_swt.sf.net/xswt">
+    <package name="java.lang"/>
+    <package name="org.eclipse.swt.widgets" />
+    <package name="org.eclipse.swt.graphics" />
+    <package name="org.eclipse.swt.layout" />
+    <package name="org.eclipse.swt.custom" />
+    <package name="org.omnetpp.common.wizard.support" />
+    <package name="org.omnetpp.ned.editor.wizards.support" />
+    <package name="org.omnetpp.cdt.wizard.support" />
+  </import>
+  <layout x:class="GridLayout" numColumns="2"/>
+
+  <x:children>
+
+    <!-- page generated from the following spec:
+Names {
+	chartName,
+},
+Options {
+	Use antialias?,
+	Use caching?,
+},
+Colors {
+	backgroundColor
+}    
+    -->
+    
+    <!-- Names { -->
+    <group text="Names">
+      <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+      <layout x:class="GridLayout" numColumns="2"/>
+      <x:children>
+
+    <!-- chartName -->
+    <label text="Chart name:"/>
+    <text x:id="chart_name" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </text>
+
+    <!--  -->
+
+    <!-- } -->
+      </x:children>
+    </group>
+
+    <!-- Colors { -->
+    <group text="Colors">
+      <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+      <layout x:class="GridLayout" numColumns="2"/>
+      <x:children>
+
+    <!-- backgroundColor -->
+    <label text="Background color:"/>
+    <ColorChooser x:id="background_color" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </ColorChooser>
+
+    <!-- } -->
+      </x:children>
+    </group>
+
+  </x:children>
+</xswt>
+]]></dialogPage>
+            <dialogPage id="Input" label="Input"><![CDATA[<?xml version='1.0' encoding='UTF-8'?>
+<xswt xmlns:x='http://sweet_swt.sf.net/xswt'>
+  <import xmlns='http://sweet_swt.sf.net/xswt'>
+    <package name='java.lang'/>
+    <package name='org.eclipse.swt.widgets' />
+    <package name='org.eclipse.swt.graphics' />
+    <package name='org.eclipse.swt.layout' />
+    <package name='org.eclipse.swt.custom' />
+  </import>
+  <layout x:class='GridLayout' numColumns='1'/>
+  <x:children>
+    <label text="Filter expression:"/>
+    <text x:id="filter" x:style="BORDER|MULTI" x:id.isFilter="true"> 
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="true"/>
+    </text>
+  </x:children>
+</xswt>]]></dialogPage>
+            <property name="filter" value="module(&quot;CoexistenceShowcase.wpanHost2.app[0]&quot;) AND name(packetReceived:count) AND ((runattr:experiment(WpanOnly) OR runattr:experiment(Coexistence)))"/>
+            <property name="background_color" value=""/>
+        </chart>
+    </charts>
+</analysis>
