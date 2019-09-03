@@ -122,6 +122,11 @@
 /showcases/wireless/blockack/,     -f omnetpp.ini -c Fragmentation -r 0,                                          1s,            3584-7148/tplx, PASS,
 /showcases/wireless/blockack/,     -f omnetpp.ini -c MixedTraffic -r 0,                                           1s,            3da6-5f8c/tplx, PASS,
 
+/showcases/wireless/crosstalk/,     -f omnetpp.ini -c CompletelyOverlappingFrequencyBands -r 0,                                        1s,            7dfb-19da/tplx, PASS,
+/showcases/wireless/crosstalk/,     -f omnetpp.ini -c IndependentFrequencyBandsOneScalarRadioMediumModule -r 0,                                          1s,            de9b-9811/tplx, PASS,
+/showcases/wireless/crosstalk/,     -f omnetpp.ini -c IndependentFrequencyBandsTwoScalarRadioMediumModules -r 0,                                           1s,            e44c-b765/tplx, PASS,
+/showcases/wireless/crosstalk/,     -f omnetpp.ini -c PartiallyOverlappingFrequencyBands -r 0,                                           1s,            1e9a-0c74/tplx, PASS,
+
 /showcases/wireless/coexistence/,     -f omnetpp.ini -c Coexistence -r 0,                                        5s,            d9c8-b044/tplx, PASS,
 /showcases/wireless/coexistence/,     -f omnetpp.ini -c Coexistence -r 1,                                          5s,            fe29-d0cc/tplx, PASS,
 /showcases/wireless/coexistence/,     -f omnetpp.ini -c Coexistence -r 2,                                           5s,            613d-6a1d/tplx, PASS,
