@@ -32,7 +32,7 @@ Source files location: `inet/showcases/general/dynamic <https://github.com/inet-
 The model
 ---------
 
-The ``ScenarioManager`` module can be used to create and destroy nodes
+The :ned:`ScenarioManager` module can be used to create and destroy nodes
 during simulations (it can also change many aspects of the configuration
 while the simulation is running, but those features are out of scope for
 this showcase.) The scenario manager module takes an XML script input.
@@ -52,7 +52,7 @@ nodes should be created or deleted and when, etc.
    The ScenarioManager takes an XML config file. This has a <scenario> tag
    and the creation and destruction of nodes can be done with the create and delete tag
 
-   The `ScenarioManager` executes an XML script. The script shedules events to take place at
+   The :ned:`ScenarioManager` executes an XML script. The script shedules events to take place at
    certain times during the simulation. It can change module parameters, add or remove connections,
    change parameters of connections, and create or delete network nodes.
 
@@ -79,10 +79,10 @@ nodes should be created or deleted and when, etc.
 
    -->
 
-The ``ScenarioManager`` module
+The :ned:`ScenarioManager` module
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The ``ScenarioManager`` module executes an XML script. The XML script
+The :ned:`ScenarioManager` module executes an XML script. The XML script
 can be specified inline with the ``xml()`` function, or as an external
 XML file with the ``xmldoc()`` function. The script specifies commands
 to be executed at certain times during the simulation. The commands can
@@ -95,7 +95,7 @@ executed. Some elements have a ``t`` attribute to specify the time. The
 time can be also specified with the ``<at>`` element. Under the ``<at>``
 element, there can be multiple other elements which will be executed at
 the time specified by the ``<at>`` element. (For a more comprehensive
-description of the ``ScenarioManager`` and the available commands, refer
+description of the :ned:`ScenarioManager` and the available commands, refer
 to the `ScenarioManager NED
 documentation <https://omnetpp.org/doc/inet/api-current/neddoc/index.html?p=inet.common.scenario.ScenarioManager.html>`__
 in the INET Reference.)
@@ -122,9 +122,9 @@ The created modules will have a random position inside the parent module
    its an error, and if it doesnt have a mobility module,
    the contraints cannot be set. -->
 
-The created modules need to have a mobility module (``WirelessHost`` and
+The created modules need to have a mobility module (:ned:`WirelessHost` and
 derivatives have one by default, but other modules might not, e.g.
-``StandardHost``. A mobility module type needs to be specified for these
+:ned:`StandardHost`. A mobility module type needs to be specified for these
 hosts.) Also, mobility constraints need to be set to limit the random
 position of the created nodes (otherwise an error occurs.)
 
@@ -136,7 +136,7 @@ Here is an example script:
 
 .. literalinclude:: ../example.xml
 
-This XML script will create a ``WirelessHost`` named ``someHost`` in the
+This XML script will create a :ned:`WirelessHost` named ``someHost`` in the
 network at 10 seconds simulation-time, and delete it at 20 seconds
 simulation-time.
 
@@ -157,7 +157,7 @@ dynamically created modules will take effect when they are spawn.
 
    <!-- TODO: Ipv4NetworkConfigurator cant be used -->
 
-Note that ``Ipv4NetworkConfigurator`` is not compatible with dynamically
+Note that :ned:`Ipv4NetworkConfigurator` is not compatible with dynamically
 created nodes. More on this in the configuration section.
 
 The configuration
@@ -172,18 +172,18 @@ uses the following network:
 .. figure:: network2.png
    :width: 100%
 
-The network contains an ``IntegratedCanvasVisualizer``, an
-``Ieee80211ScalarRadioMedium``, and a ``ScenarioManager`` module. It
+The network contains an :ned:`IntegratedCanvasVisualizer`, an
+:ned:`Ieee80211ScalarRadioMedium`, and a :ned:`ScenarioManager` module. It
 also contains a host named ``destinationNode``, whose type is
-``DynamicHost``.
+:ned:`DynamicHost`.
 
-The ``DynamicHost`` type is defined in the NED file,
+The :ned:`DynamicHost` type is defined in the NED file,
 :download:`DynamicShowcase.ned <../DynamicShowcase.ned>`. It is
-basically an ``AdhocHost``, but it is configured to use a per-host
-``HostAutoConfigurator`` module instead of the global
+basically an :ned:`AdhocHost`, but it is configured to use a per-host
+:ned:`HostAutoConfigurator` module instead of the global
 ``IPv4NetworkConfigurator``. The reason for this is that
-``Ipv4NetworkConfigurator`` doesn't support IP address assignment in
-dynamic scenarios. Here is the NED definition of ``DynamicHost``:
+:ned:`Ipv4NetworkConfigurator` doesn't support IP address assignment in
+dynamic scenarios. Here is the NED definition of :ned:`DynamicHost`:
 
 .. literalinclude:: ../DynamicShowcase.ned
    :start-at: DynamicHost
@@ -198,7 +198,7 @@ to confine the position of the newly created nodes to the playground:
 
 .. <!-- The nodes are created at a random position, constrained by the mobility settings -->
 
-The ``HostAutoConfigurator``'s ``interfaces`` parameter needs to be set
+The :ned:`HostAutoConfigurator`'s ``interfaces`` parameter needs to be set
 to the hosts' wlan interface:
 
 .. literalinclude:: ../omnetpp.ini
@@ -210,7 +210,7 @@ to the hosts' wlan interface:
    random angle, same speed -->
 
 The destination host is configured to be stationary, and the source
-hosts are configured to have ``LinearMobility``, and move around in
+hosts are configured to have :ned:`LinearMobility`, and move around in
 random directions:
 
 .. literalinclude:: ../omnetpp.ini
@@ -219,7 +219,7 @@ random directions:
 
 The XML scenario used for this simulation is defined in
 :download:`scenario.xml <../scenario.xml>`. The scenario creates 10
-``DynamicHost``\ s named ``sourceNodeX`` (where is X is the index)
+:ned:`DynamicHost`\ s named ``sourceNodeX`` (where is X is the index)
 periodically, with a period of 2.71 seconds. Each host is deleted 4
 seconds after creation.
 

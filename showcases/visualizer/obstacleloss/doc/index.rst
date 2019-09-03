@@ -27,7 +27,7 @@ About the visualizer
 --------------------
 
 The ``ObstacleLossVisualizer`` module (part of the
-``IntegratedVisualizer`` included in the network) can display the
+:ned:`IntegratedVisualizer` included in the network) can display the
 intersection between physical objects and propagating radio signals. It
 can display the magnitude of power loss in dB. Additionally, the face
 normal vectors can be displayed at both ends of the intersection.

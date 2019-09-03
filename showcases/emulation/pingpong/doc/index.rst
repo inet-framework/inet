@@ -88,7 +88,7 @@ The showcase involves three different configurations:
 -  ``Emulated2``: One of the nodes and the 100Mbps Ethernet connection is
    simulated, the other node is in the real operating environment.
 
-In all the three examples the ``PingApp`` of the simulated ``host1``
+In all the three examples the :ned:`PingApp` of the simulated ``host1``
 sends ping packets with the destination address of ``192.168.2.2``.
 
 .. literalinclude:: ../omnetpp.ini
@@ -120,7 +120,7 @@ created and configured. This is achieved as the following:
    devices. The veth devices are always created in interconnected pairs.
 
 We can see that ``vethb`` gets the IP address ``192.168.2.2``, which is
-the same as the destination Address of ``host1``'s ``PingApp``. In this
+the same as the destination Address of ``host1``'s :ned:`PingApp`. In this
 emulation ``host1`` pings ``vethb`` through ``vetha``.
 
 .. literalinclude:: ../omnetpp.ini
