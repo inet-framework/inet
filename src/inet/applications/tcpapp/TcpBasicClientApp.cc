@@ -80,8 +80,8 @@ void TcpBasicClientApp::sendRequest()
 {
     long requestLength = par("requestLength");
     long replyLength = par("replyLength");
-    if (requestLength < 1)
-        requestLength = 1;
+    if (requestLength < 17)
+        requestLength = 17;
     if (replyLength < 1)
         replyLength = 1;
 

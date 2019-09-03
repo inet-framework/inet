@@ -124,6 +124,8 @@ void TelnetApp::handleTimer(cMessage *msg)
 
 void TelnetApp::sendGenericAppMsg(int numBytes, int expectedReplyBytes)
 {
+    if (numBytes < 17)
+        numBytes = 17;
     EV_INFO << "sending " << numBytes << " bytes, expecting " << expectedReplyBytes << endl;
 
     const auto& payload = makeShared<GenericAppMsg>();

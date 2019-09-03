@@ -126,7 +126,10 @@ void TcpGenericServerApp::handleMessage(cMessage *msg)
                 Packet *outPacket = new Packet(msg->getName(), TCP_C_SEND);
                 outPacket->addTag<SocketReq>()->setSocketId(connId);
                 const auto& payload = makeShared<GenericAppMsg>();
-                payload->setChunkLength(requestedBytes);
+                if (requestedBytes < B(17))
+                    payload->setChunkLength(B(17));
+                else
+                    payload->setChunkLength(requestedBytes);
                 payload->setExpectedReplyLength(B(0));
                 payload->setReplyDelay(0);
                 payload->addTag<CreationTimeTag>()->setCreationTime(simTime());
