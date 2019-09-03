@@ -13,7 +13,7 @@ include Ethernet LAN models ranging from the simplest ones, like two
 hosts directly connected to each other via twisted pair, to more complex
 ones using mixed connection types and a higher number of hosts.
 
-This showcase presents the ``LargeNet`` model, which demonstrates how
+This showcase presents the :ned:`LargeNet` model, which demonstrates how
 one can fit models of LANs together with little effort, and how it can
 be used for network analysis.
 
@@ -82,12 +82,12 @@ The model
 ---------
 
 The Ethernet model contains a MAC model (``EtherMAC``), LLC model
-(``EtherLLC``) as well a bus (``EtherBus``, for modelling coaxial cable)
-and a hub (``EtherHub``) model. A switch model (``EtherSwitch``) is also
-provided. - ``EtherHost`` is a sample node with an Ethernet NIC. -
-``EtherSwitch``, ``EtherBus``, ``EtherHub`` model switching hub,
+(``EtherLLC``) as well a bus (:ned:`EtherBus`, for modelling coaxial cable)
+and a hub (:ned:`EtherHub`) model. A switch model (:ned:`EtherSwitch`) is also
+provided. - :ned:`EtherHost` is a sample node with an Ethernet NIC. -
+:ned:`EtherSwitch`, :ned:`EtherBus`, :ned:`EtherHub` model switching hub,
 repeating hub and coaxial cable. - basic components of the model:
-``EtherMAC``, ``EtherLLC``/``EtherEncap`` module types,
+``EtherMAC``, ``EtherLLC``/:ned:`EtherEncap` module types,
 ``MACRelayUnit``, ``EtherFrame`` message type, ``MACAddress`` class.
 
 **Note:** *Nowadays almost all Ethernet networks operate using
@@ -103,7 +103,7 @@ CSMa/showcases/CD, and it can operate both half-duplex and full-duplex mode.*
 The network
 ~~~~~~~~~~~
 
-``LargeNet`` model implements a large Ethernet campus backbone. The
+:ned:`LargeNet` model implements a large Ethernet campus backbone. The
 model mixes all kinds of Ethernet technology: Gigabit Ethernet, 100Mb
 full duplex, 100Mb half duplex, 10Mb UTP, 10Mb bus, switched hubs and
 repeating hubs. There is a chain of "backbone" switches
@@ -120,7 +120,7 @@ devices. (`MediumLAN layout <mediumLAN_layout.png>`__) - ``LargeLAN:``
 consists of a switch, a hub, and an Ethernet bus connected to one port
 of the hub. (`LargeLAN layout <largeLAN_layout.png>`__)
 
-The topology of the ``LargeNet`` model can be seen in the
+The topology of the :ned:`LargeNet` model can be seen in the
 ``LargeNet.ned`` file:
 
 .. figure:: LargeNet_layout.png
@@ -157,7 +157,7 @@ mapping between ports and MAC addresses, and forward frames
 (``EtherFrame``) to appropriate ports.*
 
 The number of switches and LANs and the number of the hosts in each LAN
-is configured by setting the input parameters of the ``LargeNet``
+is configured by setting the input parameters of the :ned:`LargeNet`
 network:
 
 .. literalinclude:: ../largeNet.ini
@@ -170,7 +170,7 @@ internal queue named ``txQueue`` to queue up packets waiting for
 transmission. Conceptually, ``txQueue`` is of infinite size, but for
 better diagnostics one can specify a hard limit in the ``txQueueuLimit``
 parameter. If this limit is exceeded, the simulation stops with an
-error. In this example ``DropTailQueue`` is used instead, in order to
+error. In this example :ned:`DropTailQueue` is used instead, in order to
 observe the drop statistics (as well):
 
 .. literalinclude:: ../largeNet.ini
@@ -269,7 +269,7 @@ configuration:
 
 As a result, the generated traffic is more than 10 times higher than it
 was with the previous configuration. The number of packets dropped by
-the ``DropTailQueue`` of switches increased dramatically. It is not
+the :ned:`DropTailQueue` of switches increased dramatically. It is not
 surprising that the highest drop rates occur at the connections between
 the switches ``switchBB[]``, ``switchB``, ``switchC`` and ``switchD``,
 because the majority of the packets follow this route.
@@ -288,7 +288,7 @@ LargeNet_overloadedByNumberOfHosts
 
 The other way to control the traffic is to increase or decrease the
 number of hosts. With this configuration, there are nearly 7500 hosts
-present on the ``LargeNet`` network:
+present on the :ned:`LargeNet` network:
 
 .. literalinclude:: ../largeNet.ini
    :language: ini
