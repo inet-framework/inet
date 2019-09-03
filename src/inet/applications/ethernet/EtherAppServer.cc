@@ -101,6 +101,8 @@ void EtherAppServer::socketDataArrived(Ieee8022LlcSocket*, Packet *msg)
     for (int k = 0; replyBytes > 0; k++) {
         int l = replyBytes > MAX_REPLY_CHUNK_SIZE ? MAX_REPLY_CHUNK_SIZE : replyBytes;
         replyBytes -= l;
+        if (l < 12)
+            l = 12;
 
         std::ostringstream s;
         s << msg->getName() << "-resp-" << k;

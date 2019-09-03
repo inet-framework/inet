@@ -166,6 +166,8 @@ void EtherAppClient::sendPacket()
     const auto& data = makeShared<EtherAppReq>();
 
     long len = *reqLength;
+    if (len < 12)
+        len = 12;
     data->setChunkLength(B(len));
     data->setRequestId(seqNum);
 
