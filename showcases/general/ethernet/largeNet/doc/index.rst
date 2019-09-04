@@ -17,8 +17,8 @@ This showcase presents the :ned:`LargeNet` model, which demonstrates how
 one can fit models of LANs together with little effort, and how it can
 be used for network analysis.
 
-INET version: ``4.0``
-Source files location: `inet/showcases/general/ethernet <https://github.com/inet-framework/inet-showcases/tree/master/general/ethernet/lans>`__
+| INET version: ``4.0``
+| Source files location: `inet/showcases/general/ethernet <https://github.com/inet-framework/inet-showcases/tree/master/general/ethernet/lans>`__
 
 About Ethernet
 --------------
