@@ -1247,6 +1247,9 @@ void Ospfv3Area::originateInterAreaPrefixLSA(Ospfv3IntraAreaPrefixLsa* lsa, Ospf
         newLsa->setPrefixLen(prefix.prefixLen);
         newLsa->setPrefix(prefix.addressPrefix);
 
+        B packetLength = calculateLSASize(newLsa);
+        newHeader.setLsaLength(packetLength.get());
+
         int duplicateForArea = 0;
         for(int i = 0; i < this->getInstance()->getAreaCount(); i++)
         {
@@ -1289,7 +1292,7 @@ void Ospfv3Area::originateInterAreaPrefixLSA(Ospfv3IntraAreaPrefixLsa* lsa, Ospf
         }
         delete newLsa;
     }
-    //TODO - Length of lsa is missing! Total size of LSA displayed in GUI is incorrect. But the size in LSA itself is correct.
+
 }
 
 void Ospfv3Area::originateInterAreaPrefixLSA(const Ospfv3Lsa* prefLsa, Ospfv3Area* fromArea)
@@ -1311,7 +1314,7 @@ void Ospfv3Area::originateInterAreaPrefixLSA(const Ospfv3Lsa* prefLsa, Ospfv3Are
         //find out wheter such LSA in actual area exists
         InterAreaPrefixLSA *lsaInDatabase = area->findInterAreaPrefixLSAbyAddress(lsa->getPrefix(),lsa->getPrefixLen());
 
-        B packetLength = OSPFV3_LSA_HEADER_LENGTH+OSPFV3_INTER_AREA_PREFIX_LSA_HEADER_LENGTH;
+//        B packetLength = OSPFV3_LSA_HEADER_LENGTH + OSPFV3_INTER_AREA_PREFIX_LSA_HEADER_LENGTH;
 //        int prefixCount = 0;
 
         InterAreaPrefixLSA* newLsa = new InterAreaPrefixLSA();
@@ -1357,17 +1360,18 @@ void Ospfv3Area::originateInterAreaPrefixLSA(const Ospfv3Lsa* prefLsa, Ospfv3Are
         newLsa->setPrefixLen(lsa->getPrefixLen());
         newLsa->setPrefix(lsa->getPrefix());
 
+        newHeader2.setLsaLength(calculateLSASize(newLsa).get());
         if (area->installInterAreaPrefixLSA(newLsa))
             area->floodLSA(newLsa);
 
         delete newLsa;
     }
-    //TODO - Length of lsa is missing! Total size of LSA displayed in GUI is incorrect. But the size in LSA itself is correct.
+
 }
 
 void Ospfv3Area::originateDefaultInterAreaPrefixLSA(Ospfv3Area* toArea)
 {
-    B packetLength = OSPFV3_LSA_HEADER_LENGTH+OSPFV3_INTER_AREA_PREFIX_LSA_HEADER_LENGTH;
+    B packetLength = OSPFV3_LSA_HEADER_LENGTH + OSPFV3_INTER_AREA_PREFIX_LSA_HEADER_LENGTH;
 //    int prefixCount = 0;
 
     //Only one Inter-Area-Prefix LSA for an area so only one header will suffice
@@ -1388,17 +1392,22 @@ void Ospfv3Area::originateDefaultInterAreaPrefixLSA(Ospfv3Area* toArea)
     newLsa->setMetric(1);
     newLsa->setPrefixLen(0);
 
+
+
     if(this->getInstance()->getAddressFamily() == IPV4INSTANCE) {
         Ipv4Address defaultPref = Ipv4Address("0.0.0.0");
         newLsa->setPrefix(defaultPref);
+        packetLength += B(0) + OSPFV3_LSA_PREFIX_HEADER_LENGTH; //4B PrefixLength + PrefixOptions + Metric; 0B Address Prefix
     }
     else{
         Ipv6Address defaultPref = Ipv6Address("::");
         newLsa->setPrefix(defaultPref);
+        packetLength += B(4 * ((0 + 31) / 32)) + OSPFV3_LSA_PREFIX_HEADER_LENGTH;
     }
+    newHeader.setLsaLength(calculateLSASize(newLsa).get());
     toArea->installInterAreaPrefixLSA(newLsa);
     delete newLsa;
-    //TODO - Length of lsa is missing! Total size of LSA displayed in GUI is incorrect. But the size in LSA itself is correct.
+
 }
 
 bool Ospfv3Area::installInterAreaPrefixLSA(const Ospfv3InterAreaPrefixLsa* lsa)
@@ -1514,7 +1523,7 @@ InterAreaPrefixLSA* Ospfv3Area::findInterAreaPrefixLSAbyAddress(const L3Address 
 //----------------------------------------- Intra-Area-Prefix LSA (LSA 9) ------------------------------------------//
 IntraAreaPrefixLSA* Ospfv3Area::originateIntraAreaPrefixLSA() //this is for non-BROADCAST links
 {
-    B packetLength = OSPFV3_LSA_HEADER_LENGTH+OSPFV3_INTRA_AREA_PREFIX_LSA_HEADER_LENGTH;
+    B packetLength = OSPFV3_LSA_HEADER_LENGTH + OSPFV3_INTRA_AREA_PREFIX_LSA_HEADER_LENGTH;
     int prefixCount = 0;
 
     //Only one Inter-Area-Prefix LSA for an area so only one header will suffice
@@ -1564,11 +1573,12 @@ IntraAreaPrefixLSA* Ospfv3Area::originateIntraAreaPrefixLSA() //this is for non-
                     Ospfv3LsaPrefix prefix;
                     prefix.prefixLen= ipv4Data->getNetmask().getNetmaskLength();
                     prefix.metric = METRIC;
-                    prefix.addressPrefix=L3Address(ipAdd.getPrefix(prefix.prefixLen));
+                    prefix.addressPrefix = L3Address(ipAdd.getPrefix(prefix.prefixLen));
                     newLsa->setPrefixesArraySize(currentPrefix);
                     newLsa->setPrefixes(currentPrefix-1, prefix);
                     prefixCount++;
                     currentPrefix++;
+                    packetLength += B(4) + OSPFV3_LSA_PREFIX_HEADER_LENGTH;
                 }
                 else
                 {
@@ -1586,19 +1596,23 @@ IntraAreaPrefixLSA* Ospfv3Area::originateIntraAreaPrefixLSA() //this is for non-
 
                         }
                         prefix.metric = METRIC;
+                        //TODO addressPrefix SHOULD be in multiples of 32-bit words, based on prefixLen ((PrefixLength + 31) / 32) 32-bit words as stated in https://tools.ietf.org/html/rfc5340#appendix-A.4.1
                         prefix.addressPrefix=ipv6.getPrefix(prefix.prefixLen);
 
                         newLsa->setPrefixesArraySize(currentPrefix);
                         newLsa->setPrefixes(currentPrefix-1, prefix);
                         prefixCount++;
                         currentPrefix++;
+
+                        packetLength += B(4 * ((prefix.prefixLen + 31) / 32)) + OSPFV3_LSA_PREFIX_HEADER_LENGTH; // the prefix is multiples of 32bits
                     }
                 }
             }
         }
     }
 
-    //TODO - Length of lsa is missing! Total size of LSA displayed in GUI is incorrect. But the size in LSA itself is correct.
+
+    newHeader.setLsaLength(packetLength.get());
     newLsa->setNumPrefixes(prefixCount);
 
     if (prefixCount == 0) //check if this LSA is not without prefixes
@@ -1634,6 +1648,8 @@ IntraAreaPrefixLSA* Ospfv3Area::originateIntraAreaPrefixLSA() //this is for non-
 IntraAreaPrefixLSA* Ospfv3Area::originateNetIntraAreaPrefixLSA(NetworkLSA* networkLSA, Ospfv3Interface* interface, bool checkDuplicate)
 {
     EV_DEBUG << "Originate New NETWORK INTRA AREA LSA\n";
+    B packetLength = OSPFV3_LSA_HEADER_LENGTH + OSPFV3_INTRA_AREA_PREFIX_LSA_HEADER_LENGTH;
+
     // get IPv6 data
     InterfaceEntry *ie = this->getInstance()->getProcess()->ift->getInterfaceByName(interface->getIntName().c_str());
     Ipv6InterfaceData* ipv6int = ie->findProtocolData<Ipv6InterfaceData>();
@@ -1673,6 +1689,7 @@ IntraAreaPrefixLSA* Ospfv3Area::originateNetIntraAreaPrefixLSA(NetworkLSA* netwo
             newLsa->setPrefixes(currentPrefix-1, prefix);
             prefixCount++;
             currentPrefix++;
+            packetLength += B(4) + OSPFV3_LSA_PREFIX_HEADER_LENGTH;
 
         }
         else
@@ -1693,11 +1710,13 @@ IntraAreaPrefixLSA* Ospfv3Area::originateNetIntraAreaPrefixLSA(NetworkLSA* netwo
                 newLsa->setPrefixes(currentPrefix-1, prefix);
                 prefixCount++;
                 currentPrefix++;
+                packetLength += B(4 * ((prefix.prefixLen + 31) / 32)) + OSPFV3_LSA_PREFIX_HEADER_LENGTH; // the prefix is aligned 32bits
             }
         }
     }
 
     newLsa->setNumPrefixes(prefixCount);
+    newHeader.setLsaLength(packetLength.get());
 
     // check if created LSA type 9 would be other or same as previous
     if (checkDuplicate)
