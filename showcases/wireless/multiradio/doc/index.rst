@@ -1,5 +1,3 @@
-:orphan:
-
 Multiple Wireless Interfaces
 ============================
 
