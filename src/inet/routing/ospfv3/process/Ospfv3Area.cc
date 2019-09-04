@@ -1535,13 +1535,15 @@ IntraAreaPrefixLSA* Ospfv3Area::originateIntraAreaPrefixLSA() //this is for non-
     newHeader.setAdvertisingRouter(this->getInstance()->getProcess()->getRouterID());
     newHeader.setLsaSequenceNumber(this->getCurrentIntraAreaPrefixSequence());
 
+
+
     //for each Router LSA there is a corresponding Intra-Area-Prefix LSA
-    for(auto it=this->routerLSAList.begin(); it!=this->routerLSAList.end(); it++)
+    for(auto it = this->routerLSAList.begin(); it != this->routerLSAList.end(); it++)
     {
         const Ospfv3LsaHeader &routerHeader = (*it)->getHeader();
-        if(routerHeader.getAdvertisingRouter()!=this->getInstance()->getProcess()->getRouterID())
+        if(routerHeader.getAdvertisingRouter() != this->getInstance()->getProcess()->getRouterID()){
             continue;
-        else {
+        }else {
             newLsa->setReferencedLSType(ROUTER_LSA);
             newLsa->setReferencedLSID(routerHeader.getLinkStateID());
             newLsa->setReferencedAdvRtr(routerHeader.getAdvertisingRouter());
