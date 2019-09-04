@@ -1773,8 +1773,8 @@ LinkLSA* Ospfv3Interface::originateLinkLSA()
     lsaHeader.setAdvertisingRouter(this->getArea()->getInstance()->getProcess()->getRouterID());
     lsaHeader.setLsaSequenceNumber(this->linkLSASequenceNumber++);
 //    lsaHeader.setLsaChecksum(); TODO Checksum for LinkLSA is not calculated.
-    OSPFV3_LSA_HEADER_LENGTH.get();
-    uint16_t packetLength=(OSPFV3_LSA_HEADER_LENGTH.get() + OSPFV3_LINK_LSA_BODY_LENGTH.get());
+//    OSPFV3_LSA_HEADER_LENGTH.get();
+    uint16_t packetLength = (OSPFV3_LSA_HEADER_LENGTH.get() + OSPFV3_LINK_LSA_BODY_LENGTH.get());
 
     //Then the LSA Body
     linkLSA->setRouterPriority(this->getRouterPriority());
@@ -1815,7 +1815,7 @@ LinkLSA* Ospfv3Interface::originateLinkLSA()
 
             linkLSA->setPrefixesArraySize(linkLSA->getPrefixesArraySize()+1);
             linkLSA->setPrefixes(i, prefix);
-            packetLength+=20;
+            packetLength += 4;
             linkLSA->setNumPrefixes(linkLSA->getNumPrefixes() + 1);
         }
         else {
@@ -1840,7 +1840,7 @@ LinkLSA* Ospfv3Interface::originateLinkLSA()
 
                 linkLSA->setPrefixesArraySize(linkLSA->getPrefixesArraySize()+1);
                 linkLSA->setPrefixes(linkLSA->getPrefixesArraySize()-1, prefix);
-                packetLength+=20;
+                packetLength += 4 * ((prefix.prefixLen + 31) / 32) + 4;
                 linkLSA->setNumPrefixes(linkLSA->getNumPrefixes() + 1);
             }
         }
