@@ -1,4 +1,5 @@
-package inet.examples.bgpv4.oldExamples.Bgp2RoutersInAS;
+
+package inet.examples.bgpv4.BgpAndOspf;
 
 import inet.common.misc.ThruputMeteringChannel;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
@@ -18,138 +19,115 @@ network BGPTest
                 datarate = 100Mbps;
                 thruputDisplayFormat = "#N";
         }
+
     submodules:
-        A1: BgpRouter {
+        A: BgpRouter {
             parameters:
                 @display("p=700,230");
             gates:
-                pppg[2];
-        }
-        A2: BgpRouter {
-            parameters:
-                @display("p=850,230");
-            gates:
-                pppg[2];
+                pppg[3];
         }
         B: BgpRouter {
             parameters:
-                @display("p=700,130");
-            gates:
-                pppg[2];
-        }
-        C: BgpRouter {
-            parameters:
-                @display("p=850,130");
+                @display("p=850,230");
             gates:
                 pppg[3];
         }
         RA1: OspfRouter {
             parameters:
-                @display("p=700,330;i=device/router");
+                @display("p=550,130;i=device/router");
             gates:
-                pppg[3];
+                pppg[2];
+                ethg[1];
         }
         RA2: OspfRouter {
             parameters:
-                @display("p=850,330;i=device/router");
-            gates:
-                pppg[3];
-        }
-        RA3: OspfRouter {
-            parameters:
-                @display("p=775,430;i=device/router");
+                @display("p=550,330;i=device/router");
             gates:
                 pppg[2];
                 ethg[1];
         }
         RB1: OspfRouter {
             parameters:
-                @display("p=550,130;i=device/router");
-            gates:
-                pppg[1];
-                ethg[1];
-        }
-        RC1: OspfRouter {
-            parameters:
                 @display("p=1000,130;i=device/router");
             gates:
                 pppg[2];
                 ethg[1];
         }
-        RC2: OspfRouter {
+        RB2: OspfRouter {
             parameters:
                 @display("p=1000,330;i=device/router");
             gates:
                 pppg[2];
                 ethg[1];
         }
-        PA3: EtherSwitch {
-            parameters:
-                @display("p=775,530;i=device/switch");
-            gates:
-                ethg[3];
-        }
-        PB1: EtherSwitch {
+        PA1: EtherSwitch {
             parameters:
                 @display("p=400,130;i=device/switch");
             gates:
                 ethg[3];
         }
-        PC1: EtherSwitch {
+        PA2: EtherSwitch {
+            parameters:
+                @display("p=400,330;i=device/switch");
+            gates:
+                ethg[3];
+        }
+        PB1: EtherSwitch {
             parameters:
                 @display("p=1150,130;i=device/switch");
             gates:
                 ethg[3];
         }
-        PC2: EtherSwitch {
+        PB2: EtherSwitch {
             parameters:
                 @display("p=1150,330;i=device/switch");
             gates:
                 ethg[3];
         }
-        HA31: StandardHost {
-            parameters:
-                @display("p=700,630;i=device/pc");
-            gates:
-                ethg[1];
-        }
-        HA32: StandardHost {
-            parameters:
-                @display("p=850,630;i=device/pc");
-            gates:
-                ethg[1];
-        }
-        HB11: StandardHost {
+        HA11: StandardHost {
             parameters:
                 @display("p=250,80;i=device/pc");
             gates:
                 ethg[1];
         }
-        HB12: StandardHost {
+        HA12: StandardHost {
             parameters:
                 @display("p=250,180;i=device/pc");
             gates:
                 ethg[1];
         }
-        HC11: StandardHost {
+        HA21: StandardHost {
+            parameters:
+                @display("p=250,280;i=device/pc");
+            gates:
+                ethg[1];
+        }
+        HA22: StandardHost {
+            parameters:
+                @display("p=250,380;i=device/pc");
+            gates:
+                ethg[1];
+        }
+        HB11: StandardHost {
             parameters:
                 @display("p=1300,80;i=device/pc");
             gates:
                 ethg[1];
         }
-        HC12: StandardHost {
+        HB12: StandardHost {
             parameters:
                 @display("p=1300,180;i=device/pc");
             gates:
                 ethg[1];
         }
-        HC21: StandardHost {
+        HB21: StandardHost {
             parameters:
                 @display("p=1300,280;i=device/pc");
             gates:
                 ethg[1];
         }
-        HC22: StandardHost {
+        HB22: StandardHost {
             parameters:
                 @display("p=1300,380;i=device/pc");
             gates:
@@ -165,41 +143,34 @@ network BGPTest
             addSubnetRoutes = false;
         }
     connections:
-        //LAN RA3
-        HA31.ethg[0] <--> LINK_100 <--> PA3.ethg[0];
-        HA32.ethg[0] <--> LINK_100 <--> PA3.ethg[1];
-        PA3.ethg[2] <--> LINK_100 <--> RA3.ethg[0];
-
-        //LAN RB1
-        HB11.ethg[0] <--> LINK_100 <--> PB1.ethg[0];
-        HB12.ethg[0] <--> LINK_100 <--> PB1.ethg[1];
-        PB1.ethg[2] <--> LINK_100 <--> RB1.ethg[0];
-
-        //LAN C1 et C2
-        HC11.ethg[0] <--> LINK_100 <--> PC1.ethg[0];
-        HC12.ethg[0] <--> LINK_100 <--> PC1.ethg[1];
-        HC21.ethg[0] <--> LINK_100 <--> PC2.ethg[0];
-        HC22.ethg[0] <--> LINK_100 <--> PC2.ethg[1];
-        PC1.ethg[2] <--> LINK_100 <--> RC1.ethg[0];
-        PC2.ethg[2] <--> LINK_100 <--> RC2.ethg[0];
+        //LAN A1 et A2
+        HA11.ethg[0] <--> LINK_100 <--> PA1.ethg[0];
+        HA12.ethg[0] <--> LINK_100 <--> PA1.ethg[1];
+        HA21.ethg[0] <--> LINK_100 <--> PA2.ethg[0];
+        HA22.ethg[0] <--> LINK_100 <--> PA2.ethg[1];
+        PA1.ethg[2] <--> LINK_100 <--> RA1.ethg[0];
+        PA2.ethg[2] <--> LINK_100 <--> RA2.ethg[0];
 
         //OSPF A
-        RA1.pppg[2] <--> LINK_100 <--> RA3.pppg[0];
-        RA2.pppg[2] <--> LINK_100 <--> RA3.pppg[1];
         RA1.pppg[1] <--> LINK_100 <--> RA2.pppg[1];
-        RA1.pppg[0] <--> LINK_100 <--> A1.pppg[1];
-        RA2.pppg[0] <--> LINK_100 <--> A2.pppg[1];
-
-        //OSPF B
-        RB1.pppg[0] <--> LINK_100 <--> B.pppg[1];
-
-        //OSPF C
-        RC1.pppg[1] <--> LINK_100 <--> RC2.pppg[1];
-        RC1.pppg[0] <--> LINK_100 <--> C.pppg[1];
-        RC2.pppg[0] <--> LINK_100 <--> C.pppg[2];
+        RA1.pppg[0] <--> LINK_100 <--> A.pppg[1];
+        RA2.pppg[0] <--> LINK_100 <--> A.pppg[2];
 
         //BGP
-        A1.pppg[0] <--> LINK_100 <--> B.pppg[0];
-        A2.pppg[0] <--> LINK_100 <--> C.pppg[0];
+        A.pppg[0] <--> LINK_100 <--> B.pppg[0];
+
+        //LAN B1 et B2
+        HB11.ethg[0] <--> LINK_100 <--> PB1.ethg[0];
+        HB12.ethg[0] <--> LINK_100 <--> PB1.ethg[1];
+        HB21.ethg[0] <--> LINK_100 <--> PB2.ethg[0];
+        HB22.ethg[0] <--> LINK_100 <--> PB2.ethg[1];
+        PB1.ethg[2] <--> LINK_100 <--> RB1.ethg[0];
+        PB2.ethg[2] <--> LINK_100 <--> RB2.ethg[0];
+
+        //OSPF B
+        RB1.pppg[1] <--> LINK_100 <--> RB2.pppg[1];
+        RB1.pppg[0] <--> LINK_100 <--> B.pppg[1];
+        RB2.pppg[0] <--> LINK_100 <--> B.pppg[2];
 }
+
 

@@ -1,4 +1,4 @@
-package inet.examples.bgpv4.oldExamples.BgpCompleteTest;
+package inet.examples.bgpv4.BgpCompleteTest;
 
 import inet.common.misc.ThruputMeteringChannel;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
