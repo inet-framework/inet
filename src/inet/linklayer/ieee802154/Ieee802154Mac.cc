@@ -374,11 +374,16 @@ void Ieee802154Mac::updateStatusCCA(t_mac_event event, cMessage *msg)
                     EV_DETAIL << "Tried " << NB << " backoffs, all reported a busy "
                               << "channel. Dropping the packet." << endl;
                     txAttempts = 0;
-                    nbDroppedFrames++;
-                    PacketDropDetails details;
-                    details.setReason(CONGESTION);
-                    details.setLimit(macMaxCSMABackoffs);
-                    dropCurrentTxFrame(details);
+                    if (currentTxFrame) {
+                        nbDroppedFrames++;
+                        PacketDropDetails details;
+                        details.setReason(CONGESTION);
+                        details.setLimit(macMaxCSMABackoffs);
+                        dropCurrentTxFrame(details);
+                    }
+                    else {
+                        EV_ERROR << "too many Backoffs, but currentTxFrame is empty\n";    //TODO is it good, or model error?
+                    }
                     manageQueue();
                 }
                 else {
