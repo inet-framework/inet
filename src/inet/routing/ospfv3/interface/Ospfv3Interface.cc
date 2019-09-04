@@ -1816,6 +1816,7 @@ LinkLSA* Ospfv3Interface::originateLinkLSA()
             linkLSA->setPrefixesArraySize(linkLSA->getPrefixesArraySize()+1);
             linkLSA->setPrefixes(i, prefix);
             packetLength+=20;
+            linkLSA->setNumPrefixes(linkLSA->getNumPrefixes() + 1);
         }
         else {
             EV_DEBUG << "Creating Link LSA for address: " << ipv6Data->getLinkLocalAddress() << "\n";
@@ -1840,11 +1841,12 @@ LinkLSA* Ospfv3Interface::originateLinkLSA()
                 linkLSA->setPrefixesArraySize(linkLSA->getPrefixesArraySize()+1);
                 linkLSA->setPrefixes(linkLSA->getPrefixesArraySize()-1, prefix);
                 packetLength+=20;
+                linkLSA->setNumPrefixes(linkLSA->getNumPrefixes() + 1);
             }
         }
     }
 
-    linkLSA->setNumPrefixes(numPrefixes);
+
     lsaHeader.setLsaLength(packetLength);
 
     return linkLSA;
