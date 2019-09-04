@@ -69,11 +69,13 @@ const B OSPFV3_NETWORK_LSA_ATTACHED_LENGTH          = B(4);
 const B OSPFV3_INTER_AREA_PREFIX_LSA_HEADER_LENGTH  = B(4);
 const B OSPFV3_INTER_AREA_PREFIX_LSA_BODY_LENGTH    = B(24);
 
+
 const B OSPFV3_INTRA_AREA_PREFIX_LSA_HEADER_LENGTH  = B(12);
 const B OSPFV3_INTRA_AREA_PREFIX_LSA_PREFIX_LENGTH  = B(20);
 
 const B OSPFV3_LINK_LSA_BODY_LENGTH                 = B(24);
 const B OSPFV3_LINK_LSA_PREFIX_LENGTH               = B(20);  //this is just temporary - the prefix now has fixed size
+const B OSPFV3_LSA_PREFIX_HEADER_LENGTH        = B(4); //fixed part of prefix - PrefixLength (1B), PrefixOptions (1B), "0" (2B)
 
 #define ROUTER_LSA_FUNCTION_CODE 1
 

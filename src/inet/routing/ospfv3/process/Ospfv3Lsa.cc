@@ -33,7 +33,8 @@ B calculateLSASize(const Ospfv3NetworkLsa *networkLSA)
 // for  INTER_AREA_PREFIX_LSA
 B calculateLSASize(const Ospfv3InterAreaPrefixLsa *prefixLSA)
 {
-    return OSPFV3_LSA_HEADER_LENGTH + OSPFV3_INTER_AREA_PREFIX_LSA_HEADER_LENGTH + OSPFV3_INTER_AREA_PREFIX_LSA_BODY_LENGTH;
+//    return OSPFV3_LSA_HEADER_LENGTH + OSPFV3_INTER_AREA_PREFIX_LSA_HEADER_LENGTH + OSPFV3_INTER_AREA_PREFIX_LSA_BODY_LENGTH;
+    return OSPFV3_LSA_HEADER_LENGTH + OSPFV3_INTER_AREA_PREFIX_LSA_HEADER_LENGTH + OSPFV3_LSA_PREFIX_HEADER_LENGTH + B( ((prefixLSA->getPrefixLen() +31)/32) * 4 );
 }
 
 // for LINK_LSA
@@ -43,7 +44,8 @@ B calculateLSASize(const Ospfv3LinkLsa *linkLSA)
     uint32_t prefixCount = linkLSA->getNumPrefixes();
     for (int i = 0; i < prefixCount; i++)
     {
-        lsaLength += OSPFV3_LINK_LSA_PREFIX_LENGTH;
+        lsaLength += OSPFV3_LSA_PREFIX_HEADER_LENGTH;
+        lsaLength += B(((linkLSA->getPrefixes(i).prefixLen + 31) / 32) * 4);
     }
     return lsaLength;
 }
@@ -51,8 +53,17 @@ B calculateLSASize(const Ospfv3LinkLsa *linkLSA)
 // for INTRA_AREA_PREFIX_LSA
 B calculateLSASize(const Ospfv3IntraAreaPrefixLsa *prefixLSA)
 {
-    return OSPFV3_LSA_HEADER_LENGTH + OSPFV3_INTRA_AREA_PREFIX_LSA_HEADER_LENGTH +
-            (OSPFV3_INTRA_AREA_PREFIX_LSA_PREFIX_LENGTH * prefixLSA->getNumPrefixes());
+    B lsaLength = OSPFV3_LSA_HEADER_LENGTH + OSPFV3_INTRA_AREA_PREFIX_LSA_HEADER_LENGTH;
+
+    uint32_t prefixCount = prefixLSA->getNumPrefixes();
+    for (int i = 0; i < prefixCount; i++)
+    {
+        lsaLength += OSPFV3_LSA_PREFIX_HEADER_LENGTH;
+        lsaLength += B(((prefixLSA->getPrefixes(i).prefixLen + 31) / 32) * 4);
+    }
+
+
+            return lsaLength;
 }
 
 std::ostream& operator<<(std::ostream& ostr, const Ospfv3LsaHeader& lsaHeader)
