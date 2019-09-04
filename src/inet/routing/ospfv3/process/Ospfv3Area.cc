@@ -1397,12 +1397,12 @@ void Ospfv3Area::originateDefaultInterAreaPrefixLSA(Ospfv3Area* toArea)
     if(this->getInstance()->getAddressFamily() == IPV4INSTANCE) {
         Ipv4Address defaultPref = Ipv4Address("0.0.0.0");
         newLsa->setPrefix(defaultPref);
-        packetLength += B(0 + OSPFV3_LSA_PREFIX_HEADER_LENGTH); //4B PrefixLength + PrefixOptions + Metric; 0B Address Prefix
+        packetLength += B(0) + OSPFV3_LSA_PREFIX_HEADER_LENGTH; //4B PrefixLength + PrefixOptions + Metric; 0B Address Prefix
     }
     else{
         Ipv6Address defaultPref = Ipv6Address("::");
         newLsa->setPrefix(defaultPref);
-        packetLength += B(4 * ((0 + 31) / 32) + OSPFV3_LSA_PREFIX_HEADER_LENGTH);
+        packetLength += B(4 * ((0 + 31) / 32)) + OSPFV3_LSA_PREFIX_HEADER_LENGTH;
     }
     newHeader.setLsaLength(calculateLSASize(newLsa).get());
     toArea->installInterAreaPrefixLSA(newLsa);
@@ -1580,7 +1580,7 @@ IntraAreaPrefixLSA* Ospfv3Area::originateIntraAreaPrefixLSA() //this is for non-
                     newLsa->setPrefixes(currentPrefix-1, prefix);
                     prefixCount++;
                     currentPrefix++;
-                    packetLength += B(4 + OSPFV3_LSA_PREFIX_HEADER_LENGTH);
+                    packetLength += B(4) + OSPFV3_LSA_PREFIX_HEADER_LENGTH;
                 }
                 else
                 {
@@ -1606,7 +1606,7 @@ IntraAreaPrefixLSA* Ospfv3Area::originateIntraAreaPrefixLSA() //this is for non-
                         prefixCount++;
                         currentPrefix++;
 
-                        packetLength += B(4 * ((prefix.prefixLen + 31) / 32) + OSPFV3_LSA_PREFIX_HEADER_LENGTH); // the prefix is multiples of 32bits
+                        packetLength += B(4 * ((prefix.prefixLen + 31) / 32)) + OSPFV3_LSA_PREFIX_HEADER_LENGTH; // the prefix is multiples of 32bits
                     }
                 }
             }
@@ -1691,7 +1691,7 @@ IntraAreaPrefixLSA* Ospfv3Area::originateNetIntraAreaPrefixLSA(NetworkLSA* netwo
             newLsa->setPrefixes(currentPrefix-1, prefix);
             prefixCount++;
             currentPrefix++;
-            packetLength += B(4 + OSPFV3_LSA_PREFIX_HEADER_LENGTH);
+            packetLength += B(4) + OSPFV3_LSA_PREFIX_HEADER_LENGTH;
 
         }
         else
@@ -1712,7 +1712,7 @@ IntraAreaPrefixLSA* Ospfv3Area::originateNetIntraAreaPrefixLSA(NetworkLSA* netwo
                 newLsa->setPrefixes(currentPrefix-1, prefix);
                 prefixCount++;
                 currentPrefix++;
-                packetLength += B(4 * ((prefix.prefixLen + 31) / 32) + OSPFV3_LSA_PREFIX_HEADER_LENGTH); // the prefix is aligned 32bits
+                packetLength += B(4 * ((prefix.prefixLen + 31) / 32)) + OSPFV3_LSA_PREFIX_HEADER_LENGTH; // the prefix is aligned 32bits
             }
         }
     }
