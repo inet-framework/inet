@@ -1108,7 +1108,7 @@ void Ospfv3Interface::processLSU(Packet* packet, Ospfv3Neighbor* neighbor){
 
                 case INTER_AREA_ROUTER_LSA: //TODO this LSAs are not implemented yet, so they are not processed (with acutal code, this case should never happen)
                 case AS_EXTERNAL_LSA:
-                    throw cRuntimeError("ProcessLSU - managing LSA of type 4 or 5 - not implemented yet! ")
+                    throw cRuntimeError("ProcessLSU - managing LSA of type 4 or 5 - not implemented yet! ");
                     break;
 
                 case NSSA_LSA:
