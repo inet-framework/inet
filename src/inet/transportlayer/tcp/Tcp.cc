@@ -85,7 +85,6 @@ void Tcp::initialize(int stage)
         WATCH_PTRMAP(tcpConnMap);
         WATCH_PTRMAP(tcpAppConnMap);
 
-        recordStatistics = par("recordStats");
         useDataNotification = par("useDataNotification");
 
         const char *crcModeString = par("crcMode");

@@ -49,8 +49,7 @@ void TcpReno::recalculateSlowStartThreshold()
     // uint32 flight_size = state->snd_max - state->snd_una;
     state->ssthresh = std::max(flight_size / 2, 2 * state->snd_mss);
 
-    if (ssthreshVector)
-        ssthreshVector->record(state->ssthresh);
+    conn->emit(ssthreshSignal, state->ssthresh);
 }
 
 void TcpReno::processRexmitTimer(TcpEventCode& event)
@@ -77,8 +76,7 @@ void TcpReno::processRexmitTimer(TcpEventCode& event)
     recalculateSlowStartThreshold();
     state->snd_cwnd = state->snd_mss;
 
-    if (cwndVector)
-        cwndVector->record(state->snd_cwnd);
+    conn->emit(cwndSignal, state->snd_cwnd);
 
     EV_INFO << "Begin Slow Start: resetting cwnd to " << state->snd_cwnd
             << ", ssthresh=" << state->ssthresh << "\n";
@@ -99,8 +97,7 @@ void TcpReno::receivedDataAck(uint32 firstSeqAcked)
         EV_INFO << "Fast Recovery: setting cwnd to ssthresh=" << state->ssthresh << "\n";
         state->snd_cwnd = state->ssthresh;
 
-        if (cwndVector)
-            cwndVector->record(state->snd_cwnd);
+        conn->emit(cwndSignal, state->snd_cwnd);
     }
     else {
         //
@@ -124,8 +121,7 @@ void TcpReno::receivedDataAck(uint32 firstSeqAcked)
             // int bytesAcked = state->snd_una - firstSeqAcked;
             // state->snd_cwnd += bytesAcked * state->snd_mss;
 
-            if (cwndVector)
-                cwndVector->record(state->snd_cwnd);
+            conn->emit(cwndSignal, state->snd_cwnd);
 
             EV_INFO << "cwnd=" << state->snd_cwnd << "\n";
         }
@@ -138,8 +134,7 @@ void TcpReno::receivedDataAck(uint32 firstSeqAcked)
 
             state->snd_cwnd += incr;
 
-            if (cwndVector)
-                cwndVector->record(state->snd_cwnd);
+            conn->emit(cwndSignal, state->snd_cwnd);
 
             //
             // Note: some implementations use extra additive constant mss / 8 here
@@ -246,8 +241,7 @@ void TcpReno::receivedDuplicateAck()
         // "set cwnd to ssthresh plus 3 * SMSS." (RFC 2581)
         state->snd_cwnd = state->ssthresh + 3 * state->snd_mss;    // 20051129 (1)
 
-        if (cwndVector)
-            cwndVector->record(state->snd_cwnd);
+        conn->emit(cwndSignal, state->snd_cwnd);
 
         EV_DETAIL << " set cwnd=" << state->snd_cwnd << ", ssthresh=" << state->ssthresh << "\n";
 
@@ -303,8 +297,7 @@ void TcpReno::receivedDuplicateAck()
         state->snd_cwnd += state->snd_mss;
         EV_DETAIL << "Reno on dupAcks > DUPTHRESH(=3): Fast Recovery: inflating cwnd by SMSS, new cwnd=" << state->snd_cwnd << "\n";
 
-        if (cwndVector)
-            cwndVector->record(state->snd_cwnd);
+        conn->emit(cwndSignal, state->snd_cwnd);
 
         // Note: Steps (A) - (C) of RFC 3517, page 7 ("Once a TCP is in the loss recovery phase the following procedure MUST be used for each arriving ACK")
         // should not be used here!

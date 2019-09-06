@@ -40,6 +40,15 @@ simple TcpConnection {
         @signal[tcpRcvQueueBytes];    // current amount of used bytes in tcp receive queue
         @signal[tcpRcvQueueDrops];    // number of drops in tcp receive queue
 
+        //TcpAlgorithm signals:
+        @signal[cwnd];    // will record changes to snd_cwnd
+        @signal[ssthresh];    // will record changes to ssthresh
+        @signal[rtt];    // will record measured RTT
+        @signal[srtt];    // will record smoothed RTT
+        @signal[rttvar];    // will record RTT variance (rttvar)
+        @signal[rto];    // will record retransmission timeout
+        @signal[numRtos];    // will record total number of RTOs
+
         //TODO revise interpolationmode:
         @statistic[state](record=vector; interpolationmode=none);
         @statistic[sndWnd](record=vector; interpolationmode=none);    // snd_wnd
@@ -59,5 +68,13 @@ simple TcpConnection {
         @statistic[sackedBytes](record=vector; interpolationmode=none);    // current number of received sacked bytes
         @statistic[tcpRcvQueueBytes](record=vector; interpolationmode=none);    // current amount of used bytes in tcp receive queue
         @statistic[tcpRcvQueueDrops](record=vector; interpolationmode=none);    // number of drops in tcp receive queue
+
+        @statistic[cwnd](record=vector; interpolationmode=none);    // will record changes to snd_cwnd
+        @statistic[ssthresh](record=vector; interpolationmode=none);    // will record changes to ssthresh
+        @statistic[rtt](record=vector; interpolationmode=none);    // will record measured RTT
+        @statistic[srtt](record=vector; interpolationmode=none);    // will record smoothed RTT
+        @statistic[rttvar](record=vector; interpolationmode=none);    // will record RTT variance (rttvar)
+        @statistic[rto](record=vector; interpolationmode=none);    // will record retransmission timeout
+        @statistic[numRtos](record=vector; interpolationmode=none);    // will record total number of RTOs
 }
 

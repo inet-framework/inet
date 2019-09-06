@@ -151,8 +151,6 @@ class INET_API Tcp : public OperationalBase
     virtual void refreshDisplay() const override;
 
   public:
-    bool recordStatistics = false;    // output vectors on/off
-
     bool useDataNotification = false;
     CrcMode crcMode = CRC_MODE_UNDEFINED;
     int msl;
