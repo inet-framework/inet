@@ -208,13 +208,15 @@ TcpConnection *TcpConnection::cloneListeningConnection()
 //    TcpConnection *conn = new TcpConnection();
 //    conn->initConnection(tcpMain, socketId);
     auto moduleType = cModuleType::get("inet.transportlayer.tcp.TcpConnection");
+    int newSocketId = getEnvir()->getUniqueNumber();
     char submoduleName[24];
-    sprintf(submoduleName, "conn-%d", socketId);
+    sprintf(submoduleName, "conn-%d", newSocketId);
     auto conn = check_and_cast<TcpConnection *>(moduleType->create(submoduleName, tcpMain));
     conn->finalizeParameters();
     conn->buildInside();
-    conn->initConnection(tcpMain, socketId);
+    conn->initConnection(tcpMain, newSocketId);
     conn->callInitialize();
+    conn->listeningSocketId = socketId;
 
     // following code to be kept consistent with initConnection()
     const char *sendQueueClass = sendQueue->getClassName();
@@ -234,7 +236,7 @@ TcpConnection *TcpConnection::cloneListeningConnection()
     conn->tcpAlgorithm->setConnection(conn);
 
     conn->state = conn->tcpAlgorithm->getStateVariables();
-    configureStateVariables();
+    conn->configureStateVariables();
     conn->tcpAlgorithm->initialize();
 
     // put it into LISTEN, with our localAddr/localPort

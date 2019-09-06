@@ -481,19 +481,11 @@ void Tcp::updateSockPair(TcpConnection *conn, L3Address localAddr, L3Address rem
 
 void Tcp::addForkedConnection(TcpConnection *conn, TcpConnection *newConn, L3Address localAddr, L3Address remoteAddr, int localPort, int remotePort)
 {
-    // update conn's socket pair, and register newConn (which'll keep LISTENing)
-    updateSockPair(conn, localAddr, remoteAddr, localPort, remotePort);
-    addSockPair(newConn, newConn->localAddr, newConn->remoteAddr, newConn->localPort, newConn->remotePort);
+    // update conn's socket pair, and register newConn
+    addSockPair(newConn, localAddr, remoteAddr, localPort, remotePort);
 
-    // conn will get a new socketId...
+    // newConn will live on with the new socketId
     AppConnKey key;
-    key.socketId = conn->socketId;
-    tcpAppConnMap.erase(key);
-    conn->listeningSocketId = conn->socketId;
-    key.socketId = conn->socketId = getEnvir()->getUniqueNumber();
-    tcpAppConnMap[key] = conn;
-
-    // ...and newConn will live on with the old socketId
     key.socketId = newConn->socketId;
     tcpAppConnMap[key] = newConn;
 }
