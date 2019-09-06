@@ -280,15 +280,15 @@ bool RedMarker::markPacket(Packet *packet)
 
   packet->setFrontOffset(b(0));
   auto macHeader = packet->popAtFront<EthernetMacHeader>();
-  packet->popAtBack<EthernetFcs>(ETHER_FCS_BYTES);
+  auto ethFcs = packet->popAtBack<EthernetFcs>(ETHER_FCS_BYTES);
 
   const auto& ipv4Header = removeNetworkProtocolHeader<Ipv4Header>(packet);
-  ipv4Header->setExplicitCongestionNotification(3);
+  ipv4Header->setExplicitCongestionNotification(IP_ECN_CE);
   insertNetworkProtocolHeader(packet, Protocol::ipv4, ipv4Header);
 
   packet->insertAtFront(macHeader);
 
-  EtherEncap::addPaddingAndFcs(packet, FCS_DECLARED_CORRECT);
+  EtherEncap::addPaddingAndFcs(packet, ethFcs->getFcsMode());
 
   return true;
 
