@@ -245,7 +245,7 @@ void Stp::generateBPDU(int interfaceId, const MacAddress& address, bool tcFlag, 
 
     bpdu->setProtocolIdentifier(0);
     bpdu->setProtocolVersionIdentifier(0);
-    bpdu->setBpduType(0);    // 0 if configuration BPDU
+    bpdu->setBpduType(CONFIG_BDPU);
 
     bpdu->setBridgeAddress(bridgeAddress);
     bpdu->setBridgePriority(bridgePriority);
