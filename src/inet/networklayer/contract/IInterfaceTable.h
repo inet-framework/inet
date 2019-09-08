@@ -168,6 +168,11 @@ class INET_API IInterfaceTable
      * Returns all multicast group address, with it's interfaceId
      */
     virtual MulticastGroupList collectMulticastGroups() const = 0;
+
+    /**
+     * Returns the base MAC address
+     */
+    virtual MacAddress getBaseMacAddress() const = 0;
 };
 
 } // namespace inet

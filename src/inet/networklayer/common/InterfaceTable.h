@@ -70,6 +70,7 @@ class INET_API InterfaceTable : public OperationalBase, public IInterfaceTable, 
 {
   protected:
     cModule *host;    // cached pointer
+    MacAddress baseMacAddr;
 
     // primary storage for interfaces: vector indexed by id; may contain NULLs;
     // slots are never reused to ensure id uniqueness
@@ -241,6 +242,8 @@ class INET_API InterfaceTable : public OperationalBase, public IInterfaceTable, 
      * Returns all multicast group address, with it's interfaceId
      */
     virtual MulticastGroupList collectMulticastGroups() const override;
+
+    virtual MacAddress getBaseMacAddress() const override;
 };
 
 } // namespace inet

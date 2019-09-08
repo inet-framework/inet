@@ -72,6 +72,17 @@ void InterfaceTable::initialize(int stage)
         host = getContainingNode(this);
         WATCH_PTRVECTOR(idToInterface);
     }
+    else if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION) {
+        if(host && host->hasPar("baseMacAddress")) {
+            std::string baseMac = host->par("baseMacAddress");
+            if(baseMac.empty())
+                baseMacAddr = MacAddress::generateAutoAddress();
+            else
+                baseMacAddr.setAddress(baseMac.c_str());
+
+            WATCH(baseMacAddr);
+        }
+    }
 }
 
 void InterfaceTable::refreshDisplay() const
@@ -551,6 +562,11 @@ MulticastGroupList InterfaceTable::collectMulticastGroups() const
 #endif // ifdef WITH_IPv6
     }
     return mglist;
+}
+
+MacAddress InterfaceTable::getBaseMacAddress() const
+{
+    return baseMacAddr;
 }
 
 } // namespace inet
