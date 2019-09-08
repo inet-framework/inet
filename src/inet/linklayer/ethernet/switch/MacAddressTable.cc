@@ -170,6 +170,8 @@ bool MacAddressTable::updateTableWithAddress(int interfaceId, const MacAddress& 
         if (vid == 0)
             addressTable = table;
 
+        WATCH_MAP(*addressTable);
+
         vlanAddressTable[vid] = table;
         iter = table->end();
     }
