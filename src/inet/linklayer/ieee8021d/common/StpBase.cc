@@ -56,17 +56,13 @@ void StpBase::initialize(int stage)
 
 void StpBase::start()
 {
-    ie = chooseInterface();
-
-    if (ie)
-        bridgeAddress = ie->getMacAddress(); // get the bridge's MAC address
-    else
-        throw cRuntimeError("No non-loopback interface found!");
+    bridgeAddress = ifTable->getBaseMacAddress();
+    ASSERT(bridgeAddress != MacAddress::UNSPECIFIED_ADDRESS);
 }
 
 void StpBase::stop()
 {
-    ie = nullptr;
+
 }
 
 void StpBase::colorLink(InterfaceEntry *ie, bool forwarding) const
@@ -166,20 +162,6 @@ int StpBase::getRootInterfaceId() const
     }
 
     return -1;
-}
-
-InterfaceEntry *StpBase::chooseInterface()
-{
-    // TODO: Currently, we assume that the first non-loopback interface is an Ethernet interface
-    //       since STP and RSTP work on EtherSwitches.
-    //       NOTE that, we doesn't check if the returning interface is an Ethernet interface!
-    for (int i = 0; i < ifTable->getNumInterfaces(); i++) {
-        InterfaceEntry *current = ifTable->getInterface(i);
-        if (!current->isLoopback())
-            return current;
-    }
-
-    return nullptr;
 }
 
 void StpBase::handleStartOperation(LifecycleOperation *operation)

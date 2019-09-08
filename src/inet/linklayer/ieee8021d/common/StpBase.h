@@ -46,7 +46,6 @@ class INET_API StpBase : public OperationalBase, public cListener
     cModule *switchModule = nullptr;
     IMacAddressTable *macTable = nullptr;
     IInterfaceTable *ifTable = nullptr;
-    InterfaceEntry *ie = nullptr;
 
   public:
     StpBase();
@@ -96,11 +95,6 @@ class INET_API StpBase : public OperationalBase, public cListener
      * @return The port's InterfaceEntry, throws error if it doesn't exist.
      */
     InterfaceEntry *getPortInterfaceEntry(unsigned int interfaceId);
-
-    /*
-     * Returns the first non-loopback interface.
-     */
-    virtual InterfaceEntry *chooseInterface();
 };
 
 } // namespace inet
