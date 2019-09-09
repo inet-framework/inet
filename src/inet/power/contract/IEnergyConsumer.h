@@ -11,7 +11,6 @@
 #include "inet/power/base/PowerDefs.h"
 
 namespace inet {
-
 namespace power {
 
 class IEnergySource;
@@ -38,7 +37,6 @@ class INET_API IEnergyConsumer
 };
 
 } // namespace power
-
 } // namespace inet
 
 #endif

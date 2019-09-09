@@ -11,7 +11,6 @@
 #include "inet/common/scenario/ScenarioManager.h"
 
 namespace inet {
-
 namespace visualizer {
 
 void NetworkNodeVisualizerBase::initialize(int stage)
@@ -72,6 +71,5 @@ void NetworkNodeVisualizerBase::receiveSignal(cComponent *source, simsignal_t si
 }
 
 } // namespace visualizer
-
 } // namespace inet
 

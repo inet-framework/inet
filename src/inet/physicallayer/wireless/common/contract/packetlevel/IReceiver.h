@@ -20,7 +20,6 @@
 #include "inet/physicallayer/wireless/common/contract/packetlevel/RadioControlInfo_m.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 /**
@@ -133,7 +132,6 @@ class INET_API IReceiver : public virtual IPrintableObject
 };
 
 } // namespace physicallayer
-
 } // namespace inet
 
 #endif

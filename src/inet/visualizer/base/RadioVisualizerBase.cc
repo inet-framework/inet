@@ -10,7 +10,6 @@
 #include "inet/common/ModuleAccess.h"
 
 namespace inet {
-
 namespace visualizer {
 
 using namespace inet::physicallayer;
@@ -144,6 +143,5 @@ void RadioVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, 
 }
 
 } // namespace visualizer
-
 } // namespace inet
 

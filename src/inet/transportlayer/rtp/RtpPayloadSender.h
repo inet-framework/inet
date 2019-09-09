@@ -13,7 +13,6 @@
 #include "inet/common/SimpleModule.h"
 
 namespace inet {
-
 namespace rtp {
 
 // Forward declarations:
@@ -200,7 +199,6 @@ class INET_API RtpPayloadSender : public SimpleModule
 };
 
 } // namespace rtp
-
 } // namespace inet
 
 #endif

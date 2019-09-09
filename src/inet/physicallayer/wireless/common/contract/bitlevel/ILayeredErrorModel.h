@@ -12,7 +12,6 @@
 #include "inet/physicallayer/wireless/common/contract/packetlevel/ISnir.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 /**
@@ -52,7 +51,6 @@ class INET_API ILayeredErrorModel : public IPrintableObject
 };
 
 } // namespace physicallayer
-
 } // namespace inet
 
 #endif

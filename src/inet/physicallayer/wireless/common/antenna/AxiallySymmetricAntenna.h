@@ -11,7 +11,6 @@
 #include "inet/physicallayer/wireless/common/base/packetlevel/AntennaBase.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 class INET_API AxiallySymmetricAntenna : public AntennaBase
@@ -45,7 +44,6 @@ class INET_API AxiallySymmetricAntenna : public AntennaBase
 };
 
 } // namespace physicallayer
-
 } // namespace inet
 
 #endif

@@ -14,7 +14,6 @@
 #include "inet/common/math/Point.h"
 
 namespace inet {
-
 namespace math {
 
 /**
@@ -165,7 +164,6 @@ class INET_API IFunction : public cObject, public SharedBase<IFunction<R, D>>
 };
 
 } // namespace math
-
 } // namespace inet
 
 #endif

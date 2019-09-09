@@ -16,7 +16,6 @@
 #include "inet/visualizer/osg/util/OsgUtils.h"
 
 namespace inet {
-
 namespace visualizer {
 
 using namespace inet::physicallayer;
@@ -103,6 +102,5 @@ void TracingObstacleLossOsgVisualizer::setAlpha(const ObstacleLossVisualization 
 }
 
 } // namespace visualizer
-
 } // namespace inet
 

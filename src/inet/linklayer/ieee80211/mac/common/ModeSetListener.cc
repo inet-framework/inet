@@ -28,6 +28,6 @@ void ModeSetListener::receiveSignal(cComponent *source, simsignal_t signalID, cO
         modeSet = check_and_cast<physicallayer::Ieee80211ModeSet *>(obj);
 }
 
-} /* namespace ieee80211 */
-} /* namespace inet */
+} // namespace ieee80211
+} // namespace inet
 

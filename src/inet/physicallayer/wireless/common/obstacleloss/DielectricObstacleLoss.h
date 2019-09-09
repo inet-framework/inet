@@ -17,7 +17,6 @@
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 /**
@@ -88,7 +87,6 @@ class INET_API DielectricObstacleLoss : public TracingObstacleLossBase
 };
 
 } // namespace physicallayer
-
 } // namespace inet
 
 #endif

@@ -10,7 +10,6 @@
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
 
 namespace inet {
-
 namespace visualizer {
 
 Define_Module(PhysicalLinkCanvasVisualizer);
@@ -35,6 +34,5 @@ const LinkVisualizerBase::LinkVisualization *PhysicalLinkCanvasVisualizer::creat
 }
 
 } // namespace visualizer
-
 } // namespace inet
 

@@ -20,7 +20,6 @@
 #include "inet/environment/contract/IPhysicalEnvironment.h"
 
 namespace inet {
-
 namespace physicalenvironment {
 
 /**
@@ -93,7 +92,6 @@ class INET_API PhysicalEnvironment : public Module, public IPhysicalEnvironment
 };
 
 } // namespace physicalenvironment
-
 } // namespace inet
 
 #endif

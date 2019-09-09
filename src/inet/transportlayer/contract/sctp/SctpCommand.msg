@@ -215,3 +215,4 @@ class SctpPathInfo extends cNamedObject
 {
     L3Address remoteAddress;
 }
+

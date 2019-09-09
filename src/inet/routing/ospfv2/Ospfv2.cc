@@ -60,7 +60,6 @@ void Ospfv2::handleMessageWhenUp(cMessage *msg)
     }
     else
         ospfRouter->getMessageHandler()->messageReceived(msg);
-
 }
 
 void Ospfv2::createOspfRouter()

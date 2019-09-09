@@ -38,7 +38,6 @@
 #include "lwip/ip_addr.h"
 
 namespace inet {
-
 namespace tcp {
 
 #ifdef __cplusplus
@@ -61,7 +60,6 @@ u16_t inet_chksum_pseudo_partial(struct pbuf *p,
 #endif
 
 } // namespace tcp
-
 } // namespace inet
 
 #endif /* __LWIP_INET_H__ */

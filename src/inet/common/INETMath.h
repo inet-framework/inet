@@ -244,7 +244,6 @@ static_assert(!std::is_integral<T>::value, "maxnan() is only meant for doubles a
 }
 
 } // namespace math
-
 } // namespace inet
 
 #endif

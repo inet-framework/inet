@@ -8,7 +8,6 @@
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 simsignal_t IRadio::radioModeChangedSignal = cComponent::registerSignal("radioModeChanged");
@@ -63,6 +62,5 @@ const char *IRadio::getRadioTransmissionStateName(TransmissionState transmission
 }
 
 } // namespace physicallayer
-
 } // namespace inet
 

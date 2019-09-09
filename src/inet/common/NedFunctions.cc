@@ -9,7 +9,6 @@
 #include "inet/common/INETDefs.h"
 
 namespace inet {
-
 namespace utils {
 
 cNEDValue nedf_hasModule(cComponent *context, cNEDValue argv[], int argc)
@@ -341,6 +340,5 @@ Define_NED_Function2(nedf_iterate,
         );
 
 } // namespace utils
-
 } // namespace inet
 

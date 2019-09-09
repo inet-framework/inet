@@ -18,7 +18,6 @@
 #include "inet/routing/ospfv2/router/Ospfv2RoutingTableEntry.h"
 
 namespace inet {
-
 namespace ospfv2 {
 
 /**
@@ -375,7 +374,6 @@ class INET_API Router
 };
 
 } // namespace ospfv2
-
 } // namespace inet
 
 #endif

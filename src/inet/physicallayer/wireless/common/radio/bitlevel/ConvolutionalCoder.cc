@@ -556,6 +556,6 @@ ConvolutionalCoder::~ConvolutionalCoder()
     delete[] decimalToInputSymbol;
 }
 
-} /* namespace physicallayer */
-} /* namespace inet */
+} // namespace physicallayer
+} // namespace inet
 

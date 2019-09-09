@@ -12,7 +12,6 @@
 #include "inet/common/Units.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 using namespace inet::units::values;
@@ -85,7 +84,6 @@ class INET_API Ieee80211CompliantBands
 };
 
 } // namespace physicallayer
-
 } // namespace inet
 
 #endif

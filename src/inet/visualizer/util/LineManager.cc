@@ -10,7 +10,6 @@
 #include <algorithm>
 
 namespace inet {
-
 namespace visualizer {
 
 
@@ -143,6 +142,5 @@ Coord LineManager::getLineShift(int sourceModuleId, int destinationModuleId, con
 }
 
 } // namespace visualizer
-
 } // namespace inet
 

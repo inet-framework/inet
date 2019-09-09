@@ -16,7 +16,6 @@
 #include "inet/common/geometry/shape/polyhedron/Polyhedron.h"
 
 namespace inet {
-
 namespace visualizer {
 
 using namespace inet::physicalenvironment;
@@ -140,6 +139,5 @@ void PhysicalEnvironmentCanvasVisualizer::computeFacePoints(const IPhysicalObjec
 }
 
 } // namespace visualizer
-
 } // namespace inet
 

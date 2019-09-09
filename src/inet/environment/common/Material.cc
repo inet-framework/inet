@@ -10,7 +10,6 @@
 #include "inet/common/INETMath.h"
 
 namespace inet {
-
 namespace physicalenvironment {
 
 Material::Material(const char *name, Ohmm resistivity, double relativePermittivity, double relativePermeability) :
@@ -37,6 +36,5 @@ mps Material::getPropagationSpeed() const
 }
 
 } // namespace physicalenvironment
-
 } // namespace inet
 

@@ -12,7 +12,6 @@
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 /**
@@ -111,7 +110,6 @@ class INET_API IMediumLimitCache : public virtual IPrintableObject
 };
 
 } // namespace physicallayer
-
 } // namespace inet
 
 #endif

@@ -63,6 +63,6 @@ const Ieee80211OfdmCode Ieee80211OfdmCompliantCodes::ofdmCC5_6QAM256Interleaving
 const Ieee80211OfdmCode Ieee80211OfdmCompliantCodes::ofdmCC3_4QAM1024Interleaving(&Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, &Ieee80211OfdmCompliantCodes::ofdmQAM1024Interleaving, &Ieee80211OfdmCompliantCodes::ofdmScrambling);
 const Ieee80211OfdmCode Ieee80211OfdmCompliantCodes::ofdmCC5_6QAM1024Interleaving(&Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, &Ieee80211OfdmCompliantCodes::ofdmQAM1024Interleaving, &Ieee80211OfdmCompliantCodes::ofdmScrambling);
 
-} /* namespace physicallayer */
-} /* namespace inet */
+} // namespace physicallayer
+} // namespace inet
 

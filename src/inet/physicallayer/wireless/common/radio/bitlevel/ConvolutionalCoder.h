@@ -143,8 +143,8 @@ class INET_API ConvolutionalCoder : public IFecCoder
     /* IPrintable object */
     std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
 };
-} /* namespace physicallayer */
-} /* namespace inet */
+} // namespace physicallayer
+} // namespace inet
 
 #endif
 

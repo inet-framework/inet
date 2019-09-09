@@ -18,7 +18,6 @@
 #include "inet/visualizer/osg/util/OsgUtils.h"
 
 namespace inet {
-
 namespace visualizer {
 
 void SceneOsgVisualizerBase::initializeScene()
@@ -194,6 +193,5 @@ osg::BoundingSphere SceneOsgVisualizerBase::getNetworkBoundingSphere()
 }
 
 } // namespace visualizer
-
 } // namespace inet
 

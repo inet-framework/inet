@@ -8,7 +8,6 @@
 #include "inet/visualizer/util/NetworkNodeFilter.h"
 
 namespace inet {
-
 namespace visualizer {
 
 void NetworkNodeFilter::setPattern(const char *pattern)
@@ -23,6 +22,5 @@ bool NetworkNodeFilter::matches(const cModule *module) const
 }
 
 } // namespace visualizer
-
 } // namespace inet
 

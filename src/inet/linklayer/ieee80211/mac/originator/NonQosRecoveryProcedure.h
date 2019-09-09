@@ -70,8 +70,8 @@ class INET_API NonQosRecoveryProcedure : public SimpleModule, public IRecoveryPr
     virtual int getShortRetryLimit() { return shortRetryLimit; }
 };
 
-} /* namespace ieee80211 */
-} /* namespace inet */
+} // namespace ieee80211
+} // namespace inet
 
 #endif
 

@@ -17,7 +17,6 @@
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 Define_Module(ApskLayeredTransmitter);
@@ -182,6 +181,5 @@ const ITransmission *ApskLayeredTransmitter::createTransmission(const IRadio *tr
 }
 
 } // namespace physicallayer
-
 } // namespace inet
 

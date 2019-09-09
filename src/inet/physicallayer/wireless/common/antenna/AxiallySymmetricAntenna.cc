@@ -10,7 +10,6 @@
 #include "inet/common/stlutils.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 Define_Module(AxiallySymmetricAntenna);
@@ -86,6 +85,5 @@ double AxiallySymmetricAntenna::AntennaGain::computeGain(const Quaternion& direc
 }
 
 } // namespace physicallayer
-
 } // namespace inet
 

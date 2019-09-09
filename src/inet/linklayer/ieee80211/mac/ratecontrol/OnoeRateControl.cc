@@ -103,6 +103,6 @@ const IIeee80211Mode *OnoeRateControl::getRate()
     return currentMode;
 }
 
-} /* namespace ieee80211 */
-} /* namespace inet */
+} // namespace ieee80211
+} // namespace inet
 

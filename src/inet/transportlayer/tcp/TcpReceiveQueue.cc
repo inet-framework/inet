@@ -8,7 +8,6 @@
 #include "inet/transportlayer/tcp/TcpReceiveQueue.h"
 
 namespace inet {
-
 namespace tcp {
 
 Register_Class(TcpReceiveQueue);
@@ -159,6 +158,5 @@ uint32_t TcpReceiveQueue::getFirstSeqNo()
 }
 
 } // namespace tcp
-
 } // namespace inet
 

@@ -7,7 +7,6 @@
 #include "inet/routing/ospfv2/router/Lsa.h"
 
 namespace inet {
-
 namespace ospfv2 {
 
 bool SummaryLsa::update(const Ospfv2SummaryLsa *lsa)
@@ -45,7 +44,7 @@ bool SummaryLsa::differsFrom(const Ospfv2SummaryLsa *summaryLSA) const
                 auto thisTosData = getTosData(i);
                 auto lsaTosData = summaryLSA->getTosData(i);
                 if ((thisTosData.tos != summaryLSA->getTosData(i).tos) ||
-                    (thisTosData.tosMetric != lsaTosData.tosMetric))
+                        (thisTosData.tosMetric != lsaTosData.tosMetric))
                 {
                     differentBody = true;
                     break;
@@ -58,6 +57,5 @@ bool SummaryLsa::differsFrom(const Ospfv2SummaryLsa *summaryLSA) const
 }
 
 } // namespace ospfv2
-
 } // namespace inet
 

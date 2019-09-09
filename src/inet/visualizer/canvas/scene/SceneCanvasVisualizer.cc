@@ -10,7 +10,6 @@
 #include "inet/common/ModuleAccess.h"
 
 namespace inet {
-
 namespace visualizer {
 
 Define_Module(SceneCanvasVisualizer);
@@ -229,6 +228,5 @@ void SceneCanvasVisualizer::displayDescription(const char *descriptionFigurePath
 }
 
 } // namespace visualizer
-
 } // namespace inet
 

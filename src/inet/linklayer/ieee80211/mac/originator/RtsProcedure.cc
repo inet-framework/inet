@@ -22,6 +22,6 @@ void RtsProcedure::processTransmittedRts(const Ptr<const Ieee80211RtsFrame>& rts
     numSentRts++;
 }
 
-} /* namespace ieee80211 */
-} /* namespace inet */
+} // namespace ieee80211
+} // namespace inet
 

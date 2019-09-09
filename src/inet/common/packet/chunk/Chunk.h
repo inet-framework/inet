@@ -869,7 +869,7 @@ const Ptr<T> makeExclusivelyOwnedMutableChunk(const Ptr<const T>& chunk)
 
 typedef TemporarySharedPtr<Chunk> ChunkTemporarySharedPtr;
 
-} // namespace
+} // namespace inet
 
 #endif
 

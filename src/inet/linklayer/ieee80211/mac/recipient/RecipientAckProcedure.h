@@ -30,8 +30,8 @@ class INET_API RecipientAckProcedure : public IRecipientAckProcedure
     virtual void processTransmittedAck(const Ptr<const Ieee80211AckFrame>& ack) override;
 };
 
-} /* namespace ieee80211 */
-} /* namespace inet */
+} // namespace ieee80211
+} // namespace inet
 
 #endif
 

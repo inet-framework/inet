@@ -15,7 +15,6 @@
 #include <string>
 
 namespace inet {
-
 namespace physicallayer {
 
 void BerParseFile::clearBerTable()
@@ -348,6 +347,5 @@ BerParseFile::~BerParseFile()
 }
 
 } // namespace physicallayer
-
 } // namespace inet
 

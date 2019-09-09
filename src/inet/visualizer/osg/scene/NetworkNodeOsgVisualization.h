@@ -15,7 +15,6 @@
 #include "inet/visualizer/base/NetworkNodeVisualizerBase.h"
 
 namespace inet {
-
 namespace visualizer {
 
 class INET_API NetworkNodeOsgVisualization : public NetworkNodeVisualizerBase::NetworkNodeVisualization, public osg::PositionAttitudeTransform
@@ -52,7 +51,6 @@ class INET_API NetworkNodeOsgVisualization : public NetworkNodeVisualizerBase::N
 };
 
 } // namespace visualizer
-
 } // namespace inet
 
 #endif

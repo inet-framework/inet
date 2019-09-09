@@ -12,7 +12,6 @@
 #include "inet/mobility/contract/IMobility.h"
 
 namespace inet {
-
 namespace visualizer {
 
 using namespace inet::physicalenvironment;
@@ -61,6 +60,5 @@ Box SceneVisualizerBase::getSceneBounds()
 }
 
 } // namespace visualizer
-
 } // namespace inet
 

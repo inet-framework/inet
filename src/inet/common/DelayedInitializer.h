@@ -37,7 +37,7 @@ template<typename T> class INET_API DelayedInitializer
     }
 };
 
-} /* namespace inet */
+} // namespace inet
 
 #endif
 

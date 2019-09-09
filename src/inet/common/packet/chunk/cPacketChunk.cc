@@ -80,5 +80,5 @@ std::ostream& cPacketChunk::printFieldsToStream(std::ostream& stream, int level,
     return stream;
 }
 
-} // namespace
+} // namespace inet
 

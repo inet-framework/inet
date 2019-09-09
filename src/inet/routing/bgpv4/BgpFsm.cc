@@ -9,9 +9,7 @@
 #include "inet/routing/bgpv4/BgpSession.h"
 
 namespace inet {
-
 namespace bgp {
-
 namespace fsm {
 
 // TopState
@@ -512,7 +510,5 @@ void Established::UpdateMsgEvent()
 }
 
 } // namespace fsm
-
 } // namespace bgp
-
 } // namespace inet

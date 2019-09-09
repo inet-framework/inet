@@ -153,5 +153,5 @@ std::ostream& BitCountChunk::printFieldsToStream(std::ostream& stream, int level
     return stream;
 }
 
-} // namespace
+} // namespace inet
 

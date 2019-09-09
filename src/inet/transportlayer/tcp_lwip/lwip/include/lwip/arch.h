@@ -43,7 +43,6 @@
 #include "arch/cc.h"
 
 namespace inet {
-
 namespace tcp {
 
 /** Temporary: define format string for size_t if not defined in cc.h */
@@ -235,7 +234,6 @@ extern int errno;
 #endif
 
 } // namespace tcp
-
 } // namespace inet
 
 #endif /* __LWIP_ARCH_H__ */

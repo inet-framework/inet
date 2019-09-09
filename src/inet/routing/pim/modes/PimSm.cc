@@ -1243,7 +1243,6 @@ void PimSm::multicastPacketForwarded(Packet *pk)
         return;
 
     // send Register message to RP
-
     if (routeSG->registerState == Route::RS_JOIN) {
         // refresh KAT timer
         if (routeSG->keepAliveTimer) {

@@ -15,7 +15,6 @@
 #endif
 
 namespace inet {
-
 namespace visualizer {
 
 Define_Module(Ieee80211CanvasVisualizer);
@@ -107,6 +106,5 @@ void Ieee80211CanvasVisualizer::removeIeee80211Visualization(const Ieee80211Visu
 }
 
 } // namespace visualizer
-
 } // namespace inet
 

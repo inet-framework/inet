@@ -23,7 +23,6 @@
 #include "inet/physicallayer/wireless/common/base/packetlevel/PhysicalLayerDefs.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 // This class was created by porting some C++ code from the IEEE802154A class in MiXiM.
@@ -94,7 +93,6 @@ class INET_API Ieee802154UwbIrMode
 };
 
 } // namespace physicallayer
-
 } // namespace inet
 
 #endif

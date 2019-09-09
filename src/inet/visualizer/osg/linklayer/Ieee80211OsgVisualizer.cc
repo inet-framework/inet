@@ -14,7 +14,6 @@
 #include "inet/visualizer/osg/util/OsgUtils.h"
 
 namespace inet {
-
 namespace visualizer {
 
 Define_Module(Ieee80211OsgVisualizer);
@@ -76,6 +75,5 @@ void Ieee80211OsgVisualizer::removeIeee80211Visualization(const Ieee80211Visuali
 }
 
 } // namespace visualizer
-
 } // namespace inet
 

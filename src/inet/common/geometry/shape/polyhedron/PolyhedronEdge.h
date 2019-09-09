@@ -49,7 +49,7 @@ class INET_API PolyhedronEdge
     bool operator==(const PolyhedronEdge& rhs) const;
 };
 
-} /* namespace inet */
+} // namespace inet
 
 #endif
 

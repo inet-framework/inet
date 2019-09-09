@@ -17,7 +17,6 @@
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtApBase.h"
 
 namespace inet {
-
 namespace ieee80211 {
 
 void Ieee80211MgmtApBase::initialize(int stage)
@@ -33,6 +32,5 @@ void Ieee80211MgmtApBase::initialize(int stage)
 }
 
 } // namespace ieee80211
-
 } // namespace inet
 

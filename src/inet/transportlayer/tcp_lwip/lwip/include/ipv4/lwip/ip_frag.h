@@ -41,7 +41,6 @@
 #include "lwip/lwip_ip.h"
 
 namespace inet {
-
 namespace tcp {
 
 #ifdef __cplusplus
@@ -78,7 +77,6 @@ err_t ip_frag(struct pbuf *p, struct netif *netif, struct ip_addr *dest);
 #endif
 
 } // namespace tcp
-
 } //namespace inet
 
 

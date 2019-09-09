@@ -17,7 +17,6 @@
 #include "inet/networklayer/common/L3AddressResolver.h"
 
 namespace inet {
-
 namespace visualizer {
 
 void VisualizerBase::initialize(int stage)
@@ -100,6 +99,5 @@ void VisualizerBase::mapChunks(const Ptr<const Chunk>& chunk, const std::functio
 }
 
 } // namespace visualizer
-
 } // namespace inet
 

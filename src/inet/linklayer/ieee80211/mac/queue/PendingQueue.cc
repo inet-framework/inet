@@ -57,6 +57,6 @@ static int classifyMgmtOverMulticastOverUnicast(Packet *packet)
 
 Register_Packet_Classifier_Function(MgmtOverMulticastOverUnicastClassifier, classifyMgmtOverMulticastOverUnicast);
 
-} /* namespace inet */
-} /* namespace ieee80211 */
+} // namespace inet
+} // namespace ieee80211
 

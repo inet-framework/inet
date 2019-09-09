@@ -9,7 +9,6 @@
 #define __INET_DYMODEFS_H
 
 namespace inet {
-
 namespace dymo {
 
 // TODO use generic MANET port
@@ -26,7 +25,6 @@ enum DymoRouteState {
 };
 
 } // namespace dymo
-
 } // namespace inet
 
 #endif

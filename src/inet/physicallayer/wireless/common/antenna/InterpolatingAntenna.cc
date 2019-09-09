@@ -8,7 +8,6 @@
 #include "inet/physicallayer/wireless/common/antenna/InterpolatingAntenna.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 Define_Module(InterpolatingAntenna);
@@ -102,6 +101,5 @@ double InterpolatingAntenna::AntennaGain::computeGain(const Quaternion& directio
 }
 
 } // namespace physicallayer
-
 } // namespace inet
 

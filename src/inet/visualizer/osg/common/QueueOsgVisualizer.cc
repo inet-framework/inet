@@ -10,7 +10,6 @@
 #include "inet/common/ModuleAccess.h"
 
 namespace inet {
-
 namespace visualizer {
 
 Define_Module(QueueOsgVisualizer);
@@ -57,6 +56,5 @@ void QueueOsgVisualizer::refreshQueueVisualization(const QueueVisualization *que
 }
 
 } // namespace visualizer
-
 } // namespace inet
 

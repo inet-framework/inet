@@ -11,7 +11,6 @@
 #include "inet/physicallayer/wireless/common/modulation/4GfskModulation.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 Ieee80211FhssDataMode::Ieee80211FhssDataMode(const GfskModulationBase *modulation) :
@@ -47,6 +46,5 @@ const simtime_t Ieee80211FhssMode::getRifsTime() const
 }
 
 } // namespace physicallayer
-
 } // namespace inet
 

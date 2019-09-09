@@ -251,3 +251,4 @@ cplusplus(Ipv4Header) {{
     // utility: verify checksum
     virtual bool verifyChecksum() const;
 }}
+

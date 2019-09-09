@@ -10,7 +10,6 @@
 #include "inet/common/ModuleAccess.h"
 
 namespace inet {
-
 namespace visualizer {
 
 Define_Module(NetworkNodeCanvasVisualizer);
@@ -92,6 +91,5 @@ void NetworkNodeCanvasVisualizer::removeNetworkNodeVisualization(NetworkNodeVisu
 }
 
 } // namespace visualizer
-
 } // namespace inet
 

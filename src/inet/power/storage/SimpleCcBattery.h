@@ -14,7 +14,6 @@
 #include "inet/power/base/CcEnergyStorageBase.h"
 
 namespace inet {
-
 namespace power {
 
 class INET_API SimpleCcBattery : public CcEnergyStorageBase, public LifecycleController
@@ -56,7 +55,6 @@ class INET_API SimpleCcBattery : public CcEnergyStorageBase, public LifecycleCon
 };
 
 } // namespace power
-
 } // namespace inet
 
 #endif

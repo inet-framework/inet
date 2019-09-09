@@ -12,7 +12,6 @@
 #include "inet/common/figures/IIndicatorFigure.h"
 
 namespace inet {
-
 namespace visualizer {
 
 Define_Module(StatisticCanvasVisualizer);
@@ -121,6 +120,5 @@ void StatisticCanvasVisualizer::refreshStatisticVisualization(const StatisticVis
 }
 
 } // namespace visualizer
-
 } // namespace inet
 

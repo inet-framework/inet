@@ -44,7 +44,6 @@
 #include "lwip/err.h"
 
 namespace inet {
-
 namespace tcp {
 
 #ifdef __cplusplus
@@ -222,7 +221,6 @@ err_t             netconn_gethostbyname(const char *name, struct ip_addr *addr);
 #endif
 
 } // namespace tcp
-
 } // namespace inet
 
 #endif /* LWIP_NETCONN */

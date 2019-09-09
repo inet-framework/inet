@@ -10,7 +10,6 @@
 #include "inet/common/ProtocolTag_m.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 void ErrorModelBase::initialize(int stage)
@@ -149,6 +148,5 @@ Packet *ErrorModelBase::computeCorruptedPacket(const ISnir *snir) const
 }
 
 } // namespace physicallayer
-
 } // namespace inet
 

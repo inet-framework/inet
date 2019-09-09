@@ -55,7 +55,6 @@
 
 
 namespace inet {
-
 namespace tcp {
 
 /*-----------------------------------*/
@@ -905,7 +904,6 @@ extern struct tcp_pcb *tcp_tmp_pcb;      /* Only used for temporary storage. */
 #endif /* LWIP_TCP */
 
 } // namespace tcp
-
 } // namespace inet
 
 #endif /* __LWIP_TCP_H__ */

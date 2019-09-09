@@ -12,7 +12,6 @@
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 
 namespace inet {
-
 namespace ieee80211 {
 
 /**
@@ -29,7 +28,6 @@ class INET_API Ieee80211MgmtFrameSerializer : public FieldsChunkSerializer
 };
 
 } // namespace ieee80211
-
 } // namespace inet
 
 #endif

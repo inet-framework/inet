@@ -10,7 +10,6 @@
 #include "inet/common/ModuleAccess.h"
 
 namespace inet {
-
 namespace visualizer {
 
 Define_Module(NetworkConnectionCanvasVisualizer);
@@ -39,6 +38,5 @@ void NetworkConnectionCanvasVisualizer::createNetworkConnectionVisualization(cMo
 }
 
 } // namespace visualizer
-
 } // namespace inet
 

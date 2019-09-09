@@ -44,5 +44,5 @@ ProtocolPrinterRegistry& ProtocolPrinterRegistry::getInstance()
     return getSimulationOrSharedDataManager()->getSharedVariable<ProtocolPrinterRegistry>(handle);
 }
 
-} // namespace
+} // namespace inet
 

@@ -50,6 +50,6 @@ bool OriginatorBlockAckAgreementPolicy::isDelbaAccepted(const Ptr<const Ieee8021
     return true;
 }
 
-} /* namespace ieee80211 */
-} /* namespace inet */
+} // namespace ieee80211
+} // namespace inet
 

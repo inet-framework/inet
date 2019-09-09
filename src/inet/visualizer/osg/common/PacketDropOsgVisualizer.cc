@@ -12,7 +12,6 @@
 #include "inet/visualizer/osg/util/OsgUtils.h"
 
 namespace inet {
-
 namespace visualizer {
 
 Define_Module(PacketDropOsgVisualizer);
@@ -87,6 +86,5 @@ void PacketDropOsgVisualizer::setAlpha(const PacketDropVisualization *packetDrop
 }
 
 } // namespace visualizer
-
 } // namespace inet
 

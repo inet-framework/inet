@@ -40,8 +40,8 @@ class INET_API Ieee80211OfdmInterleaver : public IInterleaver
     const Ieee80211OfdmInterleaving *getInterleaving() const override { return interleaving; }
 };
 
-} /* namespace physicallayer */
-} /* namespace inet */
+} // namespace physicallayer
+} // namespace inet
 
 #endif
 

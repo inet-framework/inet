@@ -17,7 +17,6 @@
 #include "inet/physicallayer/wireless/common/modulation/QpskModulation.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 ApskModulationBase::ApskModulationBase(const std::vector<ApskSymbol> *constellation) :
@@ -89,6 +88,5 @@ ShortBitVector ApskModulationBase::demapToBitRepresentation(const ApskSymbol *sy
 }
 
 } // namespace physicallayer
-
 } // namespace inet
 

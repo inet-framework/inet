@@ -18,7 +18,6 @@
 #include "inet/routing/ospfv2/router/Ospfv2Common.h"
 
 namespace inet {
-
 namespace ospfv2 {
 
 class Ospfv2Area;
@@ -190,7 +189,6 @@ class INET_API Ospfv2Interface : public cObject
 };
 
 } // namespace ospfv2
-
 } // namespace inet
 
 #endif

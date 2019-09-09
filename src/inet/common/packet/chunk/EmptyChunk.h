@@ -52,7 +52,7 @@ class INET_API EmptyChunk : public Chunk
     }
 };
 
-} // namespace
+} // namespace inet
 
 #endif
 

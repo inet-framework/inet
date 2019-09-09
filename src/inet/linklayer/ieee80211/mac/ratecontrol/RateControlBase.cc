@@ -51,6 +51,6 @@ void RateControlBase::receiveSignal(cComponent *source, simsignal_t signalID, cO
     }
 }
 
-} /* namespace ieee80211 */
-} /* namespace inet */
+} // namespace ieee80211
+} // namespace inet
 

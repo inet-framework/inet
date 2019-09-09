@@ -8,7 +8,6 @@
 #include "inet/transportlayer/tcp_common/TcpHeader.h"
 
 namespace inet {
-
 namespace tcp {
 
 Register_Class(Sack);
@@ -112,6 +111,5 @@ std::string TcpHeader::str() const
 }
 
 } // namespace tcp
-
 } // namespace inet
 

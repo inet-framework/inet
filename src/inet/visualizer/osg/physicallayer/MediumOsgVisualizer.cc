@@ -484,6 +484,5 @@ void MediumOsgVisualizer::handleSignalArrivalEnded(const IReception *reception)
 #endif // ifdef INET_WITH_PHYSICALLAYERWIRELESSCOMMON
 
 } // namespace visualizer
-
 } // namespace inet
 

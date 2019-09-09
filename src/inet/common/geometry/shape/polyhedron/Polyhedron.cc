@@ -408,5 +408,5 @@ Polyhedron::~Polyhedron()
         delete elem;
 }
 
-} /* namespace inet */
+} // namespace inet
 

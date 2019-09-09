@@ -107,7 +107,6 @@
 #include "lwip/tcpip.h"
 
 namespace inet {
-
 namespace tcp {
 
 #define PBUF_POOL_IS_EMPTY() pbuf_pool_is_empty()
@@ -165,14 +164,12 @@ pbuf_pool_is_empty()
 }
 
 } // namespace tcp
-
 } // namespace inet
 
 #endif /* PBUF_POOL_FREE_OOSEQ */
 #endif /* !TCP_QUEUE_OOSEQ || NO_SYS */
 
 namespace inet {
-
 namespace tcp {
 
 /**
@@ -957,6 +954,5 @@ pbuf_coalesce(struct pbuf *p, pbuf_layer layer)
 }
 
 } // namespace tcp
-
 } // namespace inet
 

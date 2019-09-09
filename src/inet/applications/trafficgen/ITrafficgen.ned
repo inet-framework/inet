@@ -26,3 +26,4 @@ moduleinterface ITrafficgen
 		input generatorIn @labels(trafficGen/up);
         output generatorOut @labels(trafficGen/down);	
 }
+

@@ -94,6 +94,6 @@ simtime_t RecipientQosAckPolicy::computeBasicBlockAckDurationField(Packet *packe
     return basicBlockAckReq->getDurationField() - modeSet->getSifsTime() - computeBasicBlockAckDuration(packet, basicBlockAckReq);
 }
 
-} /* namespace ieee80211 */
-} /* namespace inet */
+} // namespace ieee80211
+} // namespace inet
 

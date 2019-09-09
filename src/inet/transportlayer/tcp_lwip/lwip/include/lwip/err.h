@@ -36,7 +36,6 @@
 #include "lwip/arch.h"
 
 namespace inet {
-
 namespace tcp {
 
 #ifdef __cplusplus
@@ -89,7 +88,6 @@ extern const char *lwip_strerr(err_t err);
 #endif
 
 } // namespace tcp
-
 } // namespace inet
 
 #endif /* __LWIP_ERR_H__ */

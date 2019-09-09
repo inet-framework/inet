@@ -12,7 +12,6 @@ import inet.linklayer.contract.IEthernetLayer;
 import inet.linklayer.contract.IIeee8022Llc;
 import inet.networklayer.common.InterfaceTable;
 
-
 //
 // An example host with one Ethernet interface and an Ethernet traffic
 // generator directly connected to it. This host model does not contain

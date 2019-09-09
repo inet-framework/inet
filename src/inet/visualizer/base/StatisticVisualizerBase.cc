@@ -11,7 +11,6 @@
 #include "omnetpp/cstatisticbuilder.h"
 
 namespace inet {
-
 namespace visualizer {
 
 Register_ResultRecorder("statisticVisualizerLastValueRecorder", StatisticVisualizerBase::LastValueRecorder);
@@ -243,6 +242,5 @@ void StatisticVisualizerBase::refreshStatisticVisualization(const StatisticVisua
 }
 
 } // namespace visualizer
-
 } // namespace inet
 

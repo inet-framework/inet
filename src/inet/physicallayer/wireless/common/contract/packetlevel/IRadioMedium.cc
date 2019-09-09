@@ -8,7 +8,6 @@
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 simsignal_t IRadioMedium::radioAddedSignal = cComponent::registerSignal("radioAdded");
@@ -24,6 +23,5 @@ simsignal_t IRadioMedium::signalArrivalStartedSignal = cComponent::registerSigna
 simsignal_t IRadioMedium::signalArrivalEndedSignal = cComponent::registerSignal("signalArrivalEnded");
 
 } // namespace physicallayer
-
 } // namespace inet
 

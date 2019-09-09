@@ -11,7 +11,6 @@
 #include "inet/common/geometry/common/Coord.h"
 
 namespace inet {
-
 namespace visualizer {
 
 class INET_API LineManager
@@ -72,7 +71,6 @@ class INET_API LineManager
 };
 
 } // namespace visualizer
-
 } // namespace inet
 
 #endif

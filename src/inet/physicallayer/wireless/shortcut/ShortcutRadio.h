@@ -13,7 +13,6 @@
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 // TODO emit signals required by IRadio interface
@@ -64,7 +63,6 @@ class INET_API ShortcutRadio : public PhysicalLayerBase, public virtual IRadio
 };
 
 } // namespace physicallayer
-
 } // namespace inet
 
 #endif

@@ -37,8 +37,8 @@ class INET_API RecipientBlockAckAgreementPolicy : public SimpleModule, public IR
     virtual int getMaximumAllowedBufferSize() const override { return maximumAllowedBufferSize; }
 };
 
-} /* namespace ieee80211 */
-} /* namespace inet */
+} // namespace ieee80211
+} // namespace inet
 
 #endif
 

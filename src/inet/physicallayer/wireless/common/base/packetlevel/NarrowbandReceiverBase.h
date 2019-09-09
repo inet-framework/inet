@@ -13,7 +13,6 @@
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IModulation.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 // REFACTOR TODO
@@ -50,7 +49,6 @@ class INET_API NarrowbandReceiverBase : public SnirReceiverBase
 };
 
 } // namespace physicallayer
-
 } // namespace inet
 
 #endif

@@ -30,8 +30,8 @@ class INET_API RecipientBlockAckProcedure : public IRecipientBlockAckProcedure
     virtual void processTransmittedBlockAck(const Ptr<const Ieee80211BlockAck>& blockAck) override;
 };
 
-} /* namespace ieee80211 */
-} /* namespace inet */
+} // namespace ieee80211
+} // namespace inet
 
 #endif
 

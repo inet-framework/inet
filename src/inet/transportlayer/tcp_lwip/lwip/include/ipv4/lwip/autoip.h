@@ -53,7 +53,6 @@
 #include "netif/etharp.h"
 
 namespace inet {
-
 namespace tcp {
 
 #ifdef __cplusplus
@@ -118,7 +117,6 @@ void autoip_network_changed(struct netif *netif);
 #endif /* LWIP_AUTOIP */
 
 } // namespace tcp
-
 } // namespace inet
 
 #endif /* __LWIP_AUTOIP_H__ */

@@ -74,8 +74,8 @@ class INET_API QosRateSelection : public IQosRateSelection, public ModeSetListen
     virtual void frameTransmitted(Packet *packet, const Ptr<const Ieee80211MacHeader>& header);
 };
 
-} /* namespace ieee80211 */
-} /* namespace inet */
+} // namespace ieee80211
+} // namespace inet
 
 #endif
 

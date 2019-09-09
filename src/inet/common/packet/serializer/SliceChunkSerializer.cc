@@ -25,5 +25,5 @@ const Ptr<Chunk> SliceChunkSerializer::deserialize(MemoryInputStream& stream, co
     throw cRuntimeError("Invalid operation");
 }
 
-} // namespace
+} // namespace inet
 

@@ -15,7 +15,6 @@
 #include "inet/visualizer/util/QueueFilter.h"
 
 namespace inet {
-
 namespace visualizer {
 
 class INET_API QueueVisualizerBase : public VisualizerBase
@@ -68,7 +67,6 @@ class INET_API QueueVisualizerBase : public VisualizerBase
 };
 
 } // namespace visualizer
-
 } // namespace inet
 
 #endif

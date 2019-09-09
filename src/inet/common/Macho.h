@@ -2170,7 +2170,6 @@ Snapshot<TOP>::Snapshot(Machine<TOP>& machine)
 #endif // ifdef MACHO_SNAPSHOTS
 
 } // namespace Macho
-
 } // namespace inet
 
 #endif

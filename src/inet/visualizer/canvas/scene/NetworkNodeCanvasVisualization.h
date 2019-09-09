@@ -12,7 +12,6 @@
 #include "inet/visualizer/util/Placement.h"
 
 namespace inet {
-
 namespace visualizer {
 
 class INET_API NetworkNodeCanvasVisualization : public NetworkNodeVisualizerBase::NetworkNodeVisualization, public cGroupFigure
@@ -62,7 +61,6 @@ class INET_API NetworkNodeCanvasVisualization : public NetworkNodeVisualizerBase
 };
 
 } // namespace visualizer
-
 } // namespace inet
 
 #endif

@@ -17,7 +17,6 @@
 #include "PacketDump.h"
 
 namespace inet {
-
 namespace tcp {
 
 /**

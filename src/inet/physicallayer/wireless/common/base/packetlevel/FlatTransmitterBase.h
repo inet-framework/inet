@@ -11,7 +11,6 @@
 #include "inet/physicallayer/wireless/common/base/packetlevel/NarrowbandTransmitterBase.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 // REFACTOR TODO
@@ -49,7 +48,6 @@ class INET_API FlatTransmitterBase : public NarrowbandTransmitterBase
 };
 
 } // namespace physicallayer
-
 } // namespace inet
 
 #endif

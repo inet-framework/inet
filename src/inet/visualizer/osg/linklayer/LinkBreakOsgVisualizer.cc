@@ -14,7 +14,6 @@
 #include "inet/visualizer/osg/util/OsgUtils.h"
 
 namespace inet {
-
 namespace visualizer {
 
 Define_Module(LinkBreakOsgVisualizer);
@@ -81,6 +80,5 @@ void LinkBreakOsgVisualizer::setAlpha(const LinkBreakVisualization *linkBreakVis
 }
 
 } // namespace visualizer
-
 } // namespace inet
 

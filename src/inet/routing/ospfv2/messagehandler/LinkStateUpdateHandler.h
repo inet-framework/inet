@@ -11,7 +11,6 @@
 #include "inet/routing/ospfv2/router/Ospfv2Common.h"
 
 namespace inet {
-
 namespace ospfv2 {
 
 class INET_API LinkStateUpdateHandler : public IMessageHandler
@@ -38,7 +37,6 @@ class INET_API LinkStateUpdateHandler : public IMessageHandler
 };
 
 } // namespace ospfv2
-
 } // namespace inet
 
 #endif

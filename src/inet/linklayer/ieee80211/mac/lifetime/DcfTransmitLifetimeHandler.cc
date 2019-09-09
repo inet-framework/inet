@@ -38,6 +38,6 @@ bool DcfTransmitLifetimeHandler::isLifetimeExpired(const Ptr<const Ieee80211Data
     return (simTime() - it->second) >= maxTransmitLifetime;
 }
 
-} /* namespace ieee80211 */
-} /* namespace inet */
+} // namespace ieee80211
+} // namespace inet
 

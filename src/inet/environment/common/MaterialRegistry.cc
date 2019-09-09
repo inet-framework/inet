@@ -10,7 +10,6 @@
 #include "inet/common/INETMath.h"
 
 namespace inet {
-
 namespace physicalenvironment {
 
 MaterialRegistry::MaterialRegistry()
@@ -53,6 +52,5 @@ MaterialRegistry& MaterialRegistry::getInstance()
 }
 
 } // namespace physicalenvironment
-
 } // namespace inet
 

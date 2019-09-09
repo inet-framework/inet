@@ -41,7 +41,6 @@
 #include "inet/transportlayer/udp/UdpHeader_m.h"
 
 namespace inet {
-
 namespace sctp {
 
 Define_Module(SctpAssociation);
@@ -3069,5 +3068,5 @@ void SctpAssociation::recordScalars()
 }
 
 } // namespace sctp
-
 } // namespace inet
+

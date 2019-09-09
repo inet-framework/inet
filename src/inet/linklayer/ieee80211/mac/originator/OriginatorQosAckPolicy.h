@@ -46,8 +46,8 @@ class INET_API OriginatorQosAckPolicy : public ModeSetListener, public IOriginat
     virtual simtime_t getBlockAckTimeout(Packet *packet, const Ptr<const Ieee80211BlockAckReq>& blockAckReq) const override;
 };
 
-} /* namespace ieee80211 */
-} /* namespace inet */
+} // namespace ieee80211
+} // namespace inet
 
 #endif
 

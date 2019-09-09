@@ -13,7 +13,6 @@
 #include "inet/common/geometry/object/LineSegment.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 using namespace inet::physicalenvironment;
@@ -75,6 +74,5 @@ void IdealObstacleLoss::TotalObstacleLossComputation::visit(const cObject *objec
 }
 
 } // namespace physicallayer
-
 } // namespace inet
 

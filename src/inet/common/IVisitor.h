@@ -20,7 +20,7 @@ class INET_API IVisitor
     virtual ~IVisitor() {}
 };
 
-} /* namespace inet */
+} // namespace inet
 
 #endif
 

@@ -137,7 +137,7 @@ inline std::string Quaternion::str() const
     return os.str();
 }
 
-} /* namespace inet */
+} // namespace inet
 
 #endif
 

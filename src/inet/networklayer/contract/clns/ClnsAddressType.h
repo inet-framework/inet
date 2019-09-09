@@ -40,7 +40,7 @@ class INET_API CLNSAddressType : public IL3AddressType
     virtual L3Address getLinkLocalAddress(const NetworkInterface *ie) const override { return ClnsAddress::UNSPECIFIED_ADDRESS; }
 };
 
-} /* namespace inet */
+} // namespace inet
 
 #endif
 

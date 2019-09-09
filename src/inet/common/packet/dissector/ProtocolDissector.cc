@@ -22,5 +22,5 @@ void DefaultProtocolDissector::dissect(Packet *packet, const Protocol *protocol,
     callback.endProtocolDataUnit(protocol);
 }
 
-} // namespace
+} // namespace inet
 

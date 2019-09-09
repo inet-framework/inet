@@ -64,3 +64,4 @@ class TcpConnection extends cSimpleModule
     TcpAlgorithm *tcpAlgorithm;
     int fsmState;
 };
+

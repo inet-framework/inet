@@ -18,7 +18,6 @@
 #include "inet/environment/contract/IPhysicalObject.h"
 
 namespace inet {
-
 namespace physicalenvironment {
 
 class INET_API IPhysicalEnvironment
@@ -39,7 +38,6 @@ class INET_API IPhysicalEnvironment
 };
 
 } // namespace physicalenvironment
-
 } // namespace inet
 
 #endif

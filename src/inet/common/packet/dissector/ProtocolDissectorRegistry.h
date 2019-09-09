@@ -31,7 +31,7 @@ class INET_API ProtocolDissectorRegistry
     static ProtocolDissectorRegistry& getInstance();
 };
 
-} // namespace
+} // namespace inet
 
 #endif
 

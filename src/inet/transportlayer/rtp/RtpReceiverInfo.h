@@ -13,7 +13,6 @@
 #include "inet/transportlayer/rtp/RtpParticipantInfo.h"
 
 namespace inet {
-
 namespace rtp {
 
 /**
@@ -197,7 +196,6 @@ class INET_API RtpReceiverInfo : public RtpParticipantInfo
 };
 
 } // namespace rtp
-
 } // namespace inet
 
 #endif

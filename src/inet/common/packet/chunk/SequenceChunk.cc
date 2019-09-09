@@ -402,5 +402,5 @@ std::ostream& SequenceChunk::printToStream(std::ostream& stream, int level, int 
     return stream << "]";
 }
 
-} // namespace
+} // namespace inet
 

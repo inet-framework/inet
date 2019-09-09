@@ -111,7 +111,7 @@ class INET_API SliceChunk : public Chunk
     //@}
 };
 
-} // namespace
+} // namespace inet
 
 #endif
 

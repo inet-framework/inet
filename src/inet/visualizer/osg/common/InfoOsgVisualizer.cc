@@ -10,7 +10,6 @@
 #include "inet/common/ModuleAccess.h"
 
 namespace inet {
-
 namespace visualizer {
 
 Define_Module(InfoOsgVisualizer);
@@ -65,6 +64,5 @@ void InfoOsgVisualizer::refreshInfoVisualization(const InfoVisualization *infoVi
 }
 
 } // namespace visualizer
-
 } // namespace inet
 

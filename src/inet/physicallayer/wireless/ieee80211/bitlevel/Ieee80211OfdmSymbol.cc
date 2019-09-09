@@ -8,7 +8,6 @@
 #include "inet/physicallayer/wireless/ieee80211/bitlevel/Ieee80211OfdmSymbol.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 Ieee80211OfdmSymbol::~Ieee80211OfdmSymbol()
@@ -44,6 +43,6 @@ std::ostream& operator<<(std::ostream& out, const Ieee80211OfdmSymbol& symbol)
     return out;
 }
 
-} /* namespace physicallayer */
-} /* namespace inet */
+} // namespace physicallayer
+} // namespace inet
 

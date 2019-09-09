@@ -23,8 +23,8 @@ class INET_API RtsProcedure : public IRtsProcedure
     virtual void processTransmittedRts(const Ptr<const Ieee80211RtsFrame>& rtsFrame) override;
 };
 
-} /* namespace ieee80211 */
-} /* namespace inet */
+} // namespace ieee80211
+} // namespace inet
 
 #endif
 

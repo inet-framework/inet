@@ -8,12 +8,10 @@
 #include "inet/power/contract/IEpEnergyConsumer.h"
 
 namespace inet {
-
 namespace power {
 
 simsignal_t IEpEnergyConsumer::powerConsumptionChangedSignal = cComponent::registerSignal("powerConsumptionChanged");
 
 } // namespace power
-
 } // namespace inet
 

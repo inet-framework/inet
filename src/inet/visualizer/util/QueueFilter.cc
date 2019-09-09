@@ -8,7 +8,6 @@
 #include "inet/visualizer/util/QueueFilter.h"
 
 namespace inet {
-
 namespace visualizer {
 
 void QueueFilter::setPattern(const char *pattern)
@@ -23,6 +22,5 @@ bool QueueFilter::matches(const queueing::IPacketQueue *queue) const
 }
 
 } // namespace visualizer
-
 } // namespace inet
 

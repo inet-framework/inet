@@ -41,8 +41,8 @@ class INET_API RecipientBlockAckAgreement : public cObject
     friend std::ostream& operator<<(std::ostream& os, const RecipientBlockAckAgreement& agreement);
 };
 
-} /* namespace ieee80211 */
-} /* namespace inet */
+} // namespace ieee80211
+} // namespace inet
 
 #endif
 

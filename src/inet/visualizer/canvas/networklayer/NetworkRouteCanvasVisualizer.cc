@@ -28,7 +28,6 @@
 #endif
 
 namespace inet {
-
 namespace visualizer {
 
 Define_Module(NetworkRouteCanvasVisualizer);
@@ -104,6 +103,5 @@ const PathCanvasVisualizerBase::PathVisualization *NetworkRouteCanvasVisualizer:
 }
 
 } // namespace visualizer
-
 } // namespace inet
 

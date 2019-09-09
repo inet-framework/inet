@@ -14,7 +14,6 @@
 #include <osg/NodeVisitor>
 
 namespace inet {
-
 namespace osg {
 
 using namespace ::osg;
@@ -58,7 +57,6 @@ class INET_API TopLevelScene : public Group
 };
 
 } // namespace osg
-
 } // namespace inet
 
 #endif

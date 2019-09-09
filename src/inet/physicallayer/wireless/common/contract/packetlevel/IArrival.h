@@ -14,7 +14,6 @@
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioSignal.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 /**
@@ -50,7 +49,6 @@ class INET_API IArrival : public virtual IPrintableObject
 };
 
 } // namespace physicallayer
-
 } // namespace inet
 
 #endif

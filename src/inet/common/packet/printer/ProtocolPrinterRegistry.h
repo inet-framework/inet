@@ -31,7 +31,7 @@ class INET_API ProtocolPrinterRegistry
     static ProtocolPrinterRegistry& getInstance();
 };
 
-} // namespace
+} // namespace inet
 
 #endif
 

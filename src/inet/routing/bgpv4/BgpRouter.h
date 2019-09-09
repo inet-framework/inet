@@ -18,7 +18,6 @@
 #include "inet/transportlayer/contract/tcp/TcpSocket.h"
 
 namespace inet {
-
 namespace bgp {
 
 class BgpSession;
@@ -177,7 +176,6 @@ class INET_API BgpRouter : public TcpSocket::BufferingCallback
 };
 
 } // namespace bgp
-
 } // namespace inet
 
 #endif

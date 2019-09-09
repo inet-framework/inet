@@ -31,8 +31,8 @@ class INET_API QosCtsPolicy : public ModeSetListener, public ICtsPolicy
     virtual bool isCtsNeeded(const Ptr<const Ieee80211RtsFrame>& rtsFrame) const override;
 };
 
-} /* namespace ieee80211 */
-} /* namespace inet */
+} // namespace ieee80211
+} // namespace inet
 
 #endif
 

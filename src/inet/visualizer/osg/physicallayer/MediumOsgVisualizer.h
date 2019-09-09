@@ -18,7 +18,6 @@
 #endif // INET_WITH_PHYSICALLAYERWIRELESSCOMMON
 
 namespace inet {
-
 namespace visualizer {
 
 class INET_API MediumOsgVisualizer : public MediumVisualizerBase
@@ -91,7 +90,6 @@ class INET_API MediumOsgVisualizer : public MediumVisualizerBase
 };
 
 } // namespace visualizer
-
 } // namespace inet
 
 #endif

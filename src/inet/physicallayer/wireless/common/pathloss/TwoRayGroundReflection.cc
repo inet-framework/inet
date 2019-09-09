@@ -19,7 +19,6 @@
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 using namespace inet::physicalenvironment;
@@ -79,6 +78,5 @@ double TwoRayGroundReflection::computePathLoss(const ITransmission *transmission
 }
 
 } // namespace physicallayer
-
 } // namespace inet
 

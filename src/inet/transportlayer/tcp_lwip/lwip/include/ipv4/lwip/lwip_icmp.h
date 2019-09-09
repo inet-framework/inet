@@ -38,7 +38,6 @@
 #include "lwip/netif.h"
 
 namespace inet {
-
 namespace tcp {
 
 #ifdef __cplusplus
@@ -113,7 +112,6 @@ void icmp_time_exceeded(struct pbuf *p, enum icmp_te_type t);
 #endif
 
 } // namespace tcp
-
 } // namespace inet
 
 

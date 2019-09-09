@@ -16,7 +16,6 @@
 #include "inet/transportlayer/rtp/RtpProfile.h"
 
 namespace inet {
-
 namespace rtp {
 
 /**
@@ -37,7 +36,6 @@ class INET_API RtpAvProfile : public RtpProfile
 };
 
 } // namespace rtp
-
 } // namespace inet
 
 #endif

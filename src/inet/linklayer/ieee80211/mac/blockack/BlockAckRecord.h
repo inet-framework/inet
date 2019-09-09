@@ -38,8 +38,8 @@ class INET_API BlockAckRecord
     Tid getTid() { return tid; }
 };
 
-} /* namespace ieee80211 */
-} /* namespace inet */
+} // namespace ieee80211
+} // namespace inet
 
 #endif
 

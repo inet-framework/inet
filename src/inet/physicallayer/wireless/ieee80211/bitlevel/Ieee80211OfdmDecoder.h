@@ -46,8 +46,8 @@ class INET_API Ieee80211OfdmDecoder : public IDecoder
     const Ieee80211OfdmCode *getCode() const { return code; }
 };
 
-} /* namespace physicallayer */
-} /* namespace inet */
+} // namespace physicallayer
+} // namespace inet
 
 #endif
 

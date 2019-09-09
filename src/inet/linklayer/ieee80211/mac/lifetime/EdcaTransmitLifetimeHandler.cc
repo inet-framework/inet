@@ -52,6 +52,6 @@ AccessCategory EdcaTransmitLifetimeHandler::mapTidToAc(int tid)
     }
 }
 
-} /* namespace ieee80211 */
-} /* namespace inet */
+} // namespace ieee80211
+} // namespace inet
 

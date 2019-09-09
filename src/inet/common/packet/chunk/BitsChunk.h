@@ -83,7 +83,7 @@ class INET_API BitsChunk : public Chunk
     //@}
 };
 
-} // namespace
+} // namespace inet
 
 #endif
 

@@ -12,7 +12,6 @@
 #include "inet/common/geometry/common/Coord.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 /**
@@ -32,7 +31,6 @@ class INET_API IObstacleLoss : public virtual IPrintableObject
 };
 
 } // namespace physicallayer
-
 } // namespace inet
 
 #endif

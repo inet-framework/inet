@@ -17,7 +17,6 @@
 #include "inet/networklayer/common/NetworkInterface.h"
 
 namespace inet {
-
 namespace visualizer {
 
 class INET_API VisualizerBase : public SimpleModule
@@ -39,7 +38,6 @@ class INET_API VisualizerBase : public SimpleModule
 };
 
 } // namespace visualizer
-
 } // namespace inet
 
 #endif

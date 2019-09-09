@@ -5,7 +5,6 @@
 #include "inet/physicallayer/wireless/common/pathloss/BreakpointPathLoss.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 Define_Module(BreakpointPathLoss);
@@ -76,6 +75,5 @@ m BreakpointPathLoss::computeRange(mps propagationSpeed, Hz frequency, double lo
 }
 
 } // namespace physicallayer
-
 } // namespace inet
 

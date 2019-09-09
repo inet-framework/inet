@@ -8,7 +8,6 @@
 #include "inet/common/INETUtils.h"
 
 namespace inet {
-
 namespace utils {
 
 std::string ltostr(long i)
@@ -255,6 +254,5 @@ std::vector<std::vector<intval_t>> asIntMatrix(const cValueArray* matrix)
 }
 
 } // namespace utils
-
 } // namespace inet
 

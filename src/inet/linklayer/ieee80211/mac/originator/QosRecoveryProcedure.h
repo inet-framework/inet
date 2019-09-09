@@ -79,8 +79,8 @@ class INET_API QosRecoveryProcedure : public SimpleModule, public IRecoveryProce
     virtual int getShortRetryLimit() { return shortRetryLimit; }
 };
 
-} /* namespace ieee80211 */
-} /* namespace inet */
+} // namespace ieee80211
+} // namespace inet
 
 #endif
 

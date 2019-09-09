@@ -10,7 +10,6 @@
 #include "inet/common/ModuleAccess.h"
 
 namespace inet {
-
 namespace visualizer {
 
 using namespace inet::physicallayer;
@@ -58,6 +57,5 @@ void RadioOsgVisualizer::refreshRadioVisualization(const RadioVisualization *rad
 }
 
 } // namespace visualizer
-
 } // namespace inet
 

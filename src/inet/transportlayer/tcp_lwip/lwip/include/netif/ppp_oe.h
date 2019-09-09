@@ -102,7 +102,6 @@ PACK_STRUCT_END
 #  include "arch/epstruct.h"
 
 namespace inet {
-
 namespace tcp {
 
 #endif
@@ -164,7 +163,6 @@ extern int pppoe_hdrlen;
 #endif /* PPPOE_SUPPORT */
 
 } // namespace tcp
-
 } // namespace inet
 
 #endif /* PPP_OE_H */

@@ -13,7 +13,6 @@
 #include "inet/visualizer/base/PacketDropVisualizerBase.h"
 
 namespace inet {
-
 namespace visualizer {
 
 class INET_API PacketDropCanvasVisualizer : public PacketDropVisualizerBase
@@ -46,7 +45,6 @@ class INET_API PacketDropCanvasVisualizer : public PacketDropVisualizerBase
 };
 
 } // namespace visualizer
-
 } // namespace inet
 
 #endif

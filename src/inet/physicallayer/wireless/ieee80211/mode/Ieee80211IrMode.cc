@@ -11,7 +11,6 @@
 #include "inet/physicallayer/wireless/common/modulation/4PpmModulation.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 Ieee80211IrPreambleMode::Ieee80211IrPreambleMode(int syncSlotLength) :
@@ -58,6 +57,5 @@ const simtime_t Ieee80211IrMode::getRifsTime() const
 }
 
 } // namespace physicallayer
-
 } // namespace inet
 

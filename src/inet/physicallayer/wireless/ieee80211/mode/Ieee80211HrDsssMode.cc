@@ -8,7 +8,6 @@
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211HrDsssMode.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 Ieee80211HrDsssPreambleMode::Ieee80211HrDsssPreambleMode(const Ieee80211HrDsssPreambleType preambleType) :
@@ -80,6 +79,5 @@ const simtime_t Ieee80211HrDsssMode::getRifsTime() const
 }
 
 } // namespace physicallayer
-
 } // namespace inet
 

@@ -37,7 +37,6 @@
 #include "lwip/netif.h"
 
 namespace inet {
-
 namespace tcp {
 
 #ifdef __cplusplus
@@ -52,7 +51,6 @@ void slipif_poll(struct netif *netif);
 #endif
 
 } // namespace tcp
-
 } // namespace inet
 
 #endif

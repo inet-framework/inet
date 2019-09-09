@@ -12,7 +12,6 @@
 #include "inet/transportlayer/tcp_common/TcpHeader.h"
 
 namespace inet {
-
 namespace tcp {
 
 /**
@@ -32,7 +31,6 @@ class INET_API TcpHeaderSerializer : public FieldsChunkSerializer
 };
 
 } // namespace tcp
-
 } // namespace inet
 
 #endif

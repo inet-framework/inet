@@ -8,7 +8,6 @@
 #include "inet/visualizer/util/AnimationPosition.h"
 
 namespace inet {
-
 namespace visualizer {
 
 AnimationPosition::AnimationPosition() :
@@ -53,6 +52,5 @@ AnimationPosition& AnimationPosition::operator=(const AnimationPosition& other)
 }
 
 } // namespace visualizer
-
 } // namespace inet
 

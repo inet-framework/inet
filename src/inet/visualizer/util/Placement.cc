@@ -8,7 +8,6 @@
 #include "inet/visualizer/util/Placement.h"
 
 namespace inet {
-
 namespace visualizer {
 
 Placement parsePlacement(const char *s)
@@ -52,6 +51,5 @@ Placement parsePlacement(const char *s)
 }
 
 } // namespace visualizer
-
 } // namespace inet
 

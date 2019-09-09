@@ -13,7 +13,6 @@
 #include "inet/visualizer/base/TracingObstacleLossVisualizerBase.h"
 
 namespace inet {
-
 namespace visualizer {
 
 class INET_API TracingObstacleLossCanvasVisualizer : public TracingObstacleLossVisualizerBase
@@ -59,7 +58,6 @@ class INET_API TracingObstacleLossCanvasVisualizer : public TracingObstacleLossV
 };
 
 } // namespace visualizer
-
 } // namespace inet
 
 #endif

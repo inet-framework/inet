@@ -11,7 +11,6 @@
 #include "inet/environment/common/Material.h"
 
 namespace inet {
-
 namespace physicalenvironment {
 
 class INET_API IMaterialRegistry
@@ -21,7 +20,6 @@ class INET_API IMaterialRegistry
 };
 
 } // namespace physicalenvironment
-
 } // namespace inet
 
 #endif

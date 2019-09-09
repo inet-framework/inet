@@ -37,7 +37,6 @@
 #include "lwip/err.h"
 
 namespace inet {
-
 namespace tcp {
 
 #ifdef __cplusplus
@@ -55,7 +54,6 @@ err_t loopif_init(struct netif *netif);
 #endif
 
 } // namespace tcp
-
 } // namespace inet
 
 #endif /* __NETIF_LOOPIF_H__ */

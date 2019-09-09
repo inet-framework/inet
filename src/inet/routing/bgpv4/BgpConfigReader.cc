@@ -10,7 +10,6 @@
 #include "inet/routing/bgpv4/BgpSession.h"
 
 namespace inet {
-
 namespace bgp {
 
 BgpConfigReader::BgpConfigReader(cModule *bgpModule, IInterfaceTable *ift) :
@@ -323,6 +322,5 @@ const char *BgpConfigReader::getStrAttrOrPar(const cXMLElement& ifConfig, const 
 }
 
 } // namespace bgp
-
 } // namespace inet
 

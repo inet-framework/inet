@@ -14,7 +14,6 @@
 #include "inet/visualizer/canvas/scene/NetworkNodeCanvasVisualizer.h"
 
 namespace inet {
-
 namespace visualizer {
 
 class INET_API InfoCanvasVisualizer : public InfoVisualizerBase
@@ -45,7 +44,6 @@ class INET_API InfoCanvasVisualizer : public InfoVisualizerBase
 };
 
 } // namespace visualizer
-
 } // namespace inet
 
 #endif

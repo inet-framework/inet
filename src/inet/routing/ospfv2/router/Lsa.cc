@@ -7,7 +7,6 @@
 #include "inet/routing/ospfv2/router/Lsa.h"
 
 namespace inet {
-
 namespace ospfv2 {
 
 bool operator<(const Ospfv2LsaHeader& leftLSA, const Ospfv2LsaHeader& rightLSA)

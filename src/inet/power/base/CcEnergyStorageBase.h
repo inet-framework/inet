@@ -14,7 +14,6 @@
 #include "inet/power/contract/ICcEnergyStorage.h"
 
 namespace inet {
-
 namespace power {
 
 class INET_API CcEnergyStorageBase : public SimpleModule, public CcEnergySourceBase, public CcEnergySinkBase, public virtual ICcEnergyStorage
@@ -36,7 +35,6 @@ class INET_API CcEnergyStorageBase : public SimpleModule, public CcEnergySourceB
 };
 
 } // namespace power
-
 } // namespace inet
 
 #endif

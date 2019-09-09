@@ -11,7 +11,6 @@
 #include "inet/power/base/EpEnergyStorageBase.h"
 
 namespace inet {
-
 namespace power {
 
 /**
@@ -40,7 +39,6 @@ class INET_API IdealEpEnergyStorage : public EpEnergyStorageBase
 };
 
 } // namespace power
-
 } // namespace inet
 
 #endif

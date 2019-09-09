@@ -15,7 +15,6 @@
 #include "inet/visualizer/canvas/scene/NetworkNodeCanvasVisualizer.h"
 
 namespace inet {
-
 namespace visualizer {
 
 class INET_API RadioCanvasVisualizer : public RadioVisualizerBase
@@ -56,7 +55,6 @@ class INET_API RadioCanvasVisualizer : public RadioVisualizerBase
 };
 
 } // namespace visualizer
-
 } // namespace inet
 
 #endif

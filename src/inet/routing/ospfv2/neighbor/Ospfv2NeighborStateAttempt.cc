@@ -14,7 +14,6 @@
 #include "inet/routing/ospfv2/router/Ospfv2Router.h"
 
 namespace inet {
-
 namespace ospfv2 {
 
 void NeighborStateAttempt::processEvent(Neighbor *neighbor, Neighbor::NeighborEventType event)
@@ -42,6 +41,5 @@ void NeighborStateAttempt::processEvent(Neighbor *neighbor, Neighbor::NeighborEv
 }
 
 } // namespace ospfv2
-
 } // namespace inet
 

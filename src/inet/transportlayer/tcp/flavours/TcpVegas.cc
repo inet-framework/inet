@@ -11,7 +11,6 @@
 #include "inet/transportlayer/tcp/Tcp.h"
 
 namespace inet {
-
 namespace tcp {
 
 Register_Class(TcpVegas);
@@ -343,6 +342,5 @@ void TcpVegas::segmentRetransmitted(uint32_t fromseq, uint32_t toseq)
 }
 
 } // namespace tcp
-
 } // namespace inet
 

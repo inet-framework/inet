@@ -58,6 +58,5 @@ void EnergyStorageOsgVisualizer::refreshEnergyStorageVisualization(const EnergyS
 }
 
 } // namespace visualizer
-
 } // namespace inet
 

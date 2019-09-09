@@ -41,6 +41,6 @@ simtime_t OriginatorAckPolicy::getAckTimeout(Packet *packet, const Ptr<const Iee
     return ackTimeout == -1 ? modeSet->getSifsTime() + modeSet->getSlotTime() + rateSelection->computeResponseAckFrameMode(packet, header)->getPhyRxStartDelay() : ackTimeout;
 }
 
-} /* namespace ieee80211 */
-} /* namespace inet */
+} // namespace ieee80211
+} // namespace inet
 

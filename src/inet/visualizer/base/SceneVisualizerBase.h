@@ -12,7 +12,6 @@
 #include "inet/visualizer/base/VisualizerBase.h"
 
 namespace inet {
-
 namespace visualizer {
 
 class INET_API SceneVisualizerBase : public VisualizerBase
@@ -27,7 +26,6 @@ class INET_API SceneVisualizerBase : public VisualizerBase
 };
 
 } // namespace visualizer
-
 } // namespace inet
 
 #endif

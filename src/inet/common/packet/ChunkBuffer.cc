@@ -182,5 +182,5 @@ std::string ChunkBuffer::str() const
     return os.str();
 }
 
-} // namespace
+} // namespace inet
 

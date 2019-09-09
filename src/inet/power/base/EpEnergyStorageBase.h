@@ -14,7 +14,6 @@
 #include "inet/power/contract/IEpEnergyStorage.h"
 
 namespace inet {
-
 namespace power {
 
 class INET_API EpEnergyStorageBase : public SimpleModule, public EpEnergySourceBase, public EpEnergySinkBase, public virtual IEpEnergyStorage
@@ -36,7 +35,6 @@ class INET_API EpEnergyStorageBase : public SimpleModule, public EpEnergySourceB
 };
 
 } // namespace power
-
 } // namespace inet
 
 #endif

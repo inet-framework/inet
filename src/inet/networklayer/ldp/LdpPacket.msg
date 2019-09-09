@@ -108,3 +108,4 @@ class LdpAddress extends LdpPacket
     string family;
     string addresses[];
 }
+

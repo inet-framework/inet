@@ -11,7 +11,6 @@
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IReception.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 /**
@@ -52,7 +51,6 @@ class INET_API IReceptionDecision : public virtual IPrintableObject
 };
 
 } // namespace physicallayer
-
 } // namespace inet
 
 #endif

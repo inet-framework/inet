@@ -8,7 +8,6 @@
 #include "inet/visualizer/util/ModuleFilter.h"
 
 namespace inet {
-
 namespace visualizer {
 
 void ModuleFilter::setPattern(const char *pattern)
@@ -23,6 +22,5 @@ bool ModuleFilter::matches(const cModule *module) const
 }
 
 } // namespace visualizer
-
 } // namespace inet
 

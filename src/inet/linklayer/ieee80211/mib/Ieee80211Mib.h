@@ -12,7 +12,6 @@
 #include "inet/linklayer/common/MacAddress.h"
 
 namespace inet {
-
 namespace ieee80211 {
 
 class INET_API Ieee80211Mib : public SimpleModule
@@ -67,7 +66,6 @@ class INET_API Ieee80211Mib : public SimpleModule
 };
 
 } // namespace ieee80211
-
 } // namespace inet
 
 #endif

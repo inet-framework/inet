@@ -84,7 +84,6 @@ int getColor(cPacket *packet);
 void setColor(cPacket *packet, int color);
 
 } // namespace DiffservUtil
-
 } // namespace inet
 
 #endif

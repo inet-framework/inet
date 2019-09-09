@@ -12,7 +12,6 @@
 #include "inet/common/Macho.h"
 
 namespace inet {
-
 namespace bgp {
 
 class BgpSession;
@@ -209,7 +208,6 @@ SUBSTATE(Established, TopState) {
 };
 
 } // namespace fsm
-
 } // namespace bgp
 
 } // namespace inet

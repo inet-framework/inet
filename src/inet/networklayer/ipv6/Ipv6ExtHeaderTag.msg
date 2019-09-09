@@ -34,3 +34,4 @@ class Ipv6ExtHeaderReq extends Ipv6ExtHeaderTagBase
 class Ipv6ExtHeaderInd extends Ipv6ExtHeaderTagBase
 {
 }
+

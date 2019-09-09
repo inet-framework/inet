@@ -15,7 +15,6 @@
 #include "inet/visualizer/osg/util/OsgUtils.h"
 
 namespace inet {
-
 namespace visualizer {
 
 Define_Module(NetworkConnectionOsgVisualizer);
@@ -44,6 +43,5 @@ void NetworkConnectionOsgVisualizer::createNetworkConnectionVisualization(cModul
 }
 
 } // namespace visualizer
-
 } // namespace inet
 

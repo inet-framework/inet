@@ -50,7 +50,6 @@ extern "C" {
 /* Create the list of all memory pools managed by memp. MEMP_MAX represents a nullptr pool at the end */
 
 namespace inet {
-
 namespace tcp {
 
 typedef enum {
@@ -93,7 +92,6 @@ extern const u16_t memp_sizes[MEMP_MAX];
 #endif /* MEMP_MEM_MALLOC || MEM_USE_POOLS */
 
 } // namespace tcp
-
 } // namespace inet
 
 #if MEMP_MEM_MALLOC
@@ -101,7 +99,6 @@ extern const u16_t memp_sizes[MEMP_MAX];
 #include "inet/transportlayer/tcp_lwip/lwip/include/lwip/mem.h"
 
 namespace inet {
-
 namespace tcp {
 
 inline void memp_init() {}
@@ -114,13 +111,11 @@ inline void memp_free(memp_t type, void * mem) { mem_free(mem); }
 */
 
 } // namespace tcp
-
 } // namespace inet
 
 #else /* MEMP_MEM_MALLOC */
 
 namespace inet {
-
 namespace tcp {
 
 #if MEM_USE_POOLS
@@ -142,7 +137,6 @@ void *memp_malloc(memp_t type);
 void  memp_free(memp_t type, void *mem);
 
 } // namespace tcp
-
 } // namespace inet
 
 #endif /* MEMP_MEM_MALLOC */

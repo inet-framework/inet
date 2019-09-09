@@ -184,5 +184,5 @@ std::ostream& BytesChunk::printFieldsToStream(std::ostream& stream, int level, i
     return stream;
 }
 
-} // namespace
+} // namespace inet
 

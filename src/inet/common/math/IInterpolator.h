@@ -11,7 +11,6 @@
 #include "inet/common/INETDefs.h"
 
 namespace inet {
-
 namespace math {
 
 /**
@@ -47,7 +46,6 @@ class INET_API IInterpolator : public cObject
 };
 
 } // namespace math
-
 } // namespace inet
 
 #endif

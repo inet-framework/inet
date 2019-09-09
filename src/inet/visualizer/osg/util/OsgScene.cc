@@ -8,7 +8,6 @@
 #include "inet/visualizer/osg/util/OsgScene.h"
 
 namespace inet {
-
 namespace osg {
 
 template<typename T>
@@ -52,6 +51,5 @@ SimulationScene *TopLevelScene::getSimulationScene(cModule *module)
 }
 
 } // namespace osg
-
 } // namespace inet
 

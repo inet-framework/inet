@@ -67,8 +67,8 @@ class INET_API OriginatorBlockAckAgreement : public cObject
     virtual simtime_t getExpirationTime() { return expirationTime; }
 };
 
-} /* namespace ieee80211 */
-} /* namespace inet */
+} // namespace ieee80211
+} // namespace inet
 
 #endif
 

@@ -8,7 +8,6 @@
 #include "inet/physicallayer/wireless/common/antenna/ParabolicAntenna.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 Define_Module(ParabolicAntenna);
@@ -56,6 +55,5 @@ double ParabolicAntenna::AntennaGain::computeGain(const Quaternion& direction) c
 }
 
 } // namespace physicallayer
-
 } // namespace inet
 

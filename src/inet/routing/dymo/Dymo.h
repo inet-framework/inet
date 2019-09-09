@@ -22,7 +22,6 @@
 #include "inet/transportlayer/udp/UdpHeader_m.h"
 
 namespace inet {
-
 namespace dymo {
 
 /**
@@ -218,7 +217,6 @@ class INET_API Dymo : public RoutingProtocolBase, public cListener, public Netfi
 };
 
 } // namespace dymo
-
 } // namespace inet
 
 #endif

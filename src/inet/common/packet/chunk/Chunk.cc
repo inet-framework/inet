@@ -213,5 +213,5 @@ const Ptr<Chunk> Chunk::deserialize(MemoryInputStream& stream, const std::type_i
     return chunk;
 }
 
-} // namespace
+} // namespace inet
 

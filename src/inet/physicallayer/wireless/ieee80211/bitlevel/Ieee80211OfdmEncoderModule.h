@@ -12,7 +12,6 @@
 #include "inet/physicallayer/wireless/ieee80211/bitlevel/Ieee80211OfdmEncoder.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 class INET_API Ieee80211OfdmEncoderModule : public IEncoder, public SimpleModule
@@ -36,8 +35,9 @@ class INET_API Ieee80211OfdmEncoderModule : public IEncoder, public SimpleModule
     const Ieee80211OfdmCode *getCode() const override { return code; }
     virtual const ITransmissionBitModel *encode(const ITransmissionPacketModel *packetModel) const override;
 };
-} /* namespace physicallayer */
-} /* namespace inet */
+
+} // namespace physicallayer
+} // namespace inet
 
 #endif
 

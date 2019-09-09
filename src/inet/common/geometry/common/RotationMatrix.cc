@@ -118,5 +118,5 @@ Quaternion RotationMatrix::toQuaternion() const
     return Quaternion(w, x, y, z);
 }
 
-} /* namespace inet */
+} // namespace inet
 

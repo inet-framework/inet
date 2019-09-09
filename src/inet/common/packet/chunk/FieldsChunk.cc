@@ -130,5 +130,5 @@ std::ostream& FieldsChunk::printFieldsToStream(std::ostream& stream, int level, 
     return stream;
 }
 
-} // namespace
+} // namespace inet
 

@@ -90,6 +90,6 @@ std::vector<Packet *> *BasicMsduAggregationPolicy::computeAggregateFrames(queuei
     }
 }
 
-} /* namespace ieee80211 */
-} /* namespace inet */
+} // namespace ieee80211
+} // namespace inet
 

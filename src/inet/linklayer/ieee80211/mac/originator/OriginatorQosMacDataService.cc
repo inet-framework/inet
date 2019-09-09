@@ -127,6 +127,6 @@ OriginatorQosMacDataService::~OriginatorQosMacDataService()
     delete fragmentation;
 }
 
-} /* namespace ieee80211 */
-} /* namespace inet */
+} // namespace ieee80211
+} // namespace inet
 

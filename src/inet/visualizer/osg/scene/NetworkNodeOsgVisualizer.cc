@@ -14,7 +14,6 @@
 #include "inet/visualizer/osg/util/OsgUtils.h"
 
 namespace inet {
-
 namespace visualizer {
 
 Define_Module(NetworkNodeOsgVisualizer);
@@ -89,6 +88,5 @@ void NetworkNodeOsgVisualizer::removeNetworkNodeVisualization(NetworkNodeVisuali
 }
 
 } // namespace visualizer
-
 } // namespace inet
 

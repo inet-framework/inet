@@ -11,7 +11,6 @@
 #include "inet/visualizer/osg/util/OsgUtils.h"
 
 namespace inet {
-
 namespace visualizer {
 
 Define_Module(StatisticOsgVisualizer);
@@ -75,6 +74,5 @@ void StatisticOsgVisualizer::refreshStatisticVisualization(const StatisticVisual
 }
 
 } // namespace visualizer
-
 } // namespace inet
 

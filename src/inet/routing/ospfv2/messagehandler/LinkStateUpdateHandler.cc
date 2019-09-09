@@ -13,7 +13,6 @@
 #include "inet/routing/ospfv2/router/Ospfv2Router.h"
 
 namespace inet {
-
 namespace ospfv2 {
 
 using namespace ospf;
@@ -307,6 +306,5 @@ void LinkStateUpdateHandler::acknowledgeLSA(const Ospfv2LsaHeader& lsaHeader,
 }
 
 } // namespace ospfv2
-
 } // namespace inet
 

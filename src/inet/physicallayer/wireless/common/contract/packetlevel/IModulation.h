@@ -12,7 +12,6 @@
 #include "inet/common/Units.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 using namespace inet::units::values;
@@ -39,7 +38,6 @@ class INET_API IModulation : public virtual IPrintableObject, public cObject
 };
 
 } // namespace physicallayer
-
 } // namespace inet
 
 #endif

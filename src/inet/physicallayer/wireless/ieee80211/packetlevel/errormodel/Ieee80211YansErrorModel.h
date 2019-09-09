@@ -16,7 +16,6 @@
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/errormodel/Ieee80211ErrorModelBase.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 /**
@@ -67,7 +66,6 @@ class INET_API Ieee80211YansErrorModel : public Ieee80211ErrorModelBase
 };
 
 } // namespace physicallayer
-
 } // namespace inet
 
 #endif

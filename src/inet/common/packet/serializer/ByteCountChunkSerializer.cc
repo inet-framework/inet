@@ -32,5 +32,5 @@ const Ptr<Chunk> ByteCountChunkSerializer::deserialize(MemoryInputStream& stream
     return byteCountChunk;
 }
 
-} // namespace
+} // namespace inet
 

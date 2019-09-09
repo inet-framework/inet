@@ -119,6 +119,5 @@ void Ieee80211Portal::decapsulate(Packet *packet)
 }
 
 } // namespace ieee80211
-
 } // namespace inet
 

@@ -11,7 +11,6 @@
 #include "inet/routing/ospfv2/router/Ospfv2Common.h"
 
 namespace inet {
-
 namespace ospfv2 {
 
 using namespace ospf;
@@ -512,6 +511,5 @@ void Ospfv2PacketSerializer::copyHeaderFields(const Ptr<Ospfv2Packet> from, Ptr<
 }
 
 } // namespace ospfv2
-
 } // namespace inet
 

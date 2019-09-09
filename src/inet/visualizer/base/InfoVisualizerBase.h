@@ -14,7 +14,6 @@
 #include "inet/visualizer/util/Placement.h"
 
 namespace inet {
-
 namespace visualizer {
 
 class INET_API InfoVisualizerBase : public VisualizerBase
@@ -78,7 +77,6 @@ class INET_API InfoVisualizerBase : public VisualizerBase
 };
 
 } // namespace visualizer
-
 } // namespace inet
 
 #endif

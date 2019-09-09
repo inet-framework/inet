@@ -48,3 +48,4 @@ cplusplus(ArpPacket) {{
   public:
     virtual std::string str() const override;
 }}
+

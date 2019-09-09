@@ -11,7 +11,6 @@
 #include "inet/common/INETDefs.h"
 
 namespace inet {
-
 namespace rtp {
 
 /**
@@ -199,7 +198,6 @@ class INET_API SdesChunk : public cArray
 };
 
 } // namespace rtp
-
 } // namespace inet
 
 #endif

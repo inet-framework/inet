@@ -83,5 +83,5 @@ PolyhedronEdge *PolyhedronFace::findEdge(PolyhedronEdge *edge)
     return nullptr;
 }
 
-} /* namespace inet */
+} // namespace inet
 

@@ -53,6 +53,6 @@ void BlockAckRecord::removeAckStates(SequenceNumberCyclic sequenceNumber)
     }
 }
 
-} /* namespace ieee80211 */
-} /* namespace inet */
+} // namespace ieee80211
+} // namespace inet
 

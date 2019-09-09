@@ -27,6 +27,6 @@ std::string SecurityPolicy::str() const
     return out.str();
 }
 
-}    // namespace ipsec
-}    // namespace inet
+} // namespace ipsec
+} // namespace inet
 

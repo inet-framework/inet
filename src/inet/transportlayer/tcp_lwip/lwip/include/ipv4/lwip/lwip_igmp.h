@@ -43,7 +43,6 @@
 #if LWIP_IGMP /* don't build if not configured for use in lwipopts.h */
 
 namespace inet {
-
 namespace tcp {
 
 #ifdef __cplusplus
@@ -162,7 +161,6 @@ void   igmp_send( struct igmp_group *group, u8_t type);
 #endif
 
 } // namespace tcp
-
 } // namespace inet
 
 #endif /* LWIP_IGMP */
