@@ -96,7 +96,7 @@ cplusplus(SctpHeader::parsimUnpack) {{
     doParsimUnpacking(b, sctpChunkList);
 }}
 
-class SctpChunk extends cPacket
+packet SctpChunk
 {
     @packetData;
     // Chunk Type
@@ -106,7 +106,7 @@ class SctpChunk extends cPacket
     char chunkName[];
 }
 
-class SctpInitChunk extends SctpChunk
+packet SctpInitChunk extends SctpChunk
 {
     // Initiate Tag
     uint32_t initTag;
@@ -130,7 +130,7 @@ class SctpInitChunk extends SctpChunk
     uint8_t random[]; //Random Parameter for SCTP AUTH
 }
 
-class SctpInitAckChunk extends SctpChunk
+packet SctpInitAckChunk extends SctpChunk
 {
     // Initiate Tag
     uint32_t initTag;
@@ -156,7 +156,7 @@ class SctpInitAckChunk extends SctpChunk
     uint16_t hmacTypes[];
 }
 
-class SctpCookieEchoChunk extends SctpChunk
+packet SctpCookieEchoChunk extends SctpChunk
 {
     char cookie[];
     SctpCookie *stateCookie;
@@ -173,11 +173,11 @@ class SctpCookie extends cNamedObject
     uint32_t length;
 }
 
-class SctpCookieAckChunk extends SctpChunk
+packet SctpCookieAckChunk extends SctpChunk
 {
 }
 
-class SctpDataMsg extends cPacket
+packet SctpDataMsg extends cPacket
 {
     // Chunk Flags
     bool eBit = 0;
@@ -198,7 +198,7 @@ class SctpDataMsg extends cPacket
     bool sackNow;
 }
 
-class SctpDataChunk extends SctpChunk
+packet SctpDataChunk extends SctpChunk
 {
     // Chunk Flags
     bool eBit = 0;
@@ -217,14 +217,14 @@ class SctpDataChunk extends SctpChunk
     simtime_t firstSendTime;
 }
 
-class SctpForwardTsnChunk extends SctpChunk
+packet SctpForwardTsnChunk extends SctpChunk
 {
     uint32_t newCumTsn;
     uint16_t sid[];
     short ssn[]; // set -1 in case of unordered delivery
 }
 
-class SctpSackChunk extends SctpChunk
+packet SctpSackChunk extends SctpChunk
 {
     // Cumulative TSN Ack
     uint32_t cumTsnAck;
@@ -249,41 +249,41 @@ class SctpSackChunk extends SctpChunk
     bool   nrSubtractRGaps = false;
 }
 
-class SctpAbortChunk extends SctpChunk
+packet SctpAbortChunk extends SctpChunk
 {
     // Chunk Flags
     bool T_Bit = 0;
 }
 
-class SctpHeartbeatChunk extends SctpChunk
+packet SctpHeartbeatChunk extends SctpChunk
 {
     L3Address remoteAddr;
     simtime_t timeField;
     char info[];
 }
 
-class SctpHeartbeatAckChunk extends SctpChunk
+packet SctpHeartbeatAckChunk extends SctpChunk
 {
     L3Address remoteAddr;
     simtime_t timeField;
     char info[];
 }
 
-class SctpShutdownChunk extends SctpChunk
+packet SctpShutdownChunk extends SctpChunk
 {
     uint32_t cumTsnAck;
 }
 
-class SctpShutdownAckChunk extends SctpChunk
+packet SctpShutdownAckChunk extends SctpChunk
 {
 }
 
-class SctpShutdownCompleteChunk extends SctpChunk
+packet SctpShutdownCompleteChunk extends SctpChunk
 {
     bool TBit = 0;
 }
 
-class SctpErrorChunk extends SctpChunk
+packet SctpErrorChunk extends SctpChunk
 {
     bool TBit = 0;
     bool MBit = 0;
@@ -343,13 +343,13 @@ cplusplus(SctpErrorChunk::parsimUnpack) {{
     doParsimUnpacking(b, parameterList);
 }}
 
-class SctpParameter extends cPacket
+packet SctpParameter
 {
     @packetData;
     uint16_t parameterType;
 }
 
-class SctpPacketDropChunk extends SctpChunk
+packet SctpPacketDropChunk extends SctpChunk
 {
     bool cFlag;
     bool tFlag;
@@ -360,7 +360,7 @@ class SctpPacketDropChunk extends SctpChunk
     uint16_t truncLength;
 }
 
-class SctpStreamResetChunk extends SctpChunk
+packet SctpStreamResetChunk extends SctpChunk
 {
     SctpParameter *parameters[] @custom;
 }
@@ -419,7 +419,7 @@ cplusplus(SctpStreamResetChunk::parsimUnpack) {{
     doParsimUnpacking(b, parameterList);
 }}
 
-class SctpOutgoingSsnResetRequestParameter extends SctpParameter
+packet SctpOutgoingSsnResetRequestParameter extends SctpParameter
 {
     uint32_t srReqSn; //Stream Reset Request Sequence Number: initialized with the initial TSN, then incremented
     uint32_t srResSn; //Stream Reset Response Sequence Number
@@ -427,18 +427,18 @@ class SctpOutgoingSsnResetRequestParameter extends SctpParameter
     uint16_t streamNumbers[];
 }
 
-class SctpIncomingSsnResetRequestParameter extends SctpParameter
+packet SctpIncomingSsnResetRequestParameter extends SctpParameter
 {
     uint32_t srReqSn; //Stream Reset Request Sequence Number
     uint16_t streamNumbers[];
 }
 
-class SctpSsnTsnResetRequestParameter extends SctpParameter
+packet SctpSsnTsnResetRequestParameter extends SctpParameter
 {
     uint32_t srReqSn; //Stream Reset Request Sequence Number
 }
 
-class SctpStreamResetResponseParameter extends SctpParameter
+packet SctpStreamResetResponseParameter extends SctpParameter
 {
     uint32_t srResSn; //Stream Reset Response Sequence Number
     uint32_t result;
@@ -446,14 +446,14 @@ class SctpStreamResetResponseParameter extends SctpParameter
     uint32_t receiversNextTsn = 0;
 }
 
-class SctpAddStreamsRequestParameter extends SctpParameter
+packet SctpAddStreamsRequestParameter extends SctpParameter
 {
     uint32_t srReqSn; //Stream Reset Request Sequence Number
     uint16_t numberOfStreams;
     uint16_t reserved = 0;
 }
 
-class SctpResetTimer extends cPacket
+packet SctpResetTimer
 {
     uint32_t inSN; //Stream Reset Response Sequence Number for Incoming Reset Request
     bool inAcked;   // false, when timer is running for the Reset Response Sequence Number, true otherwise
@@ -461,7 +461,7 @@ class SctpResetTimer extends cPacket
     bool outAcked;
 }
 
-class SctpAuthenticationChunk extends SctpChunk
+packet SctpAuthenticationChunk extends SctpChunk
 {
     uint16_t sharedKey;
     uint16_t hMacIdentifier;
@@ -469,7 +469,7 @@ class SctpAuthenticationChunk extends SctpChunk
     uint32_t HMAC[];
 }
 
-class SctpAsconfChunk extends SctpChunk
+packet SctpAsconfChunk extends SctpChunk
 {
     uint32_t serialNumber;
     L3Address addressParam;
@@ -532,7 +532,7 @@ cplusplus(SctpAsconfChunk::parsimUnpack) {{
     doParsimUnpacking(b, parameterList);
 }}
 
-class SctpAsconfAckChunk extends SctpChunk
+packet SctpAsconfAckChunk extends SctpChunk
 {
     uint32_t serialNumber;
     SctpParameter *asconfResponse[] @custom;
@@ -593,46 +593,46 @@ cplusplus(SctpAsconfAckChunk::parsimUnpack) {{
     doParsimUnpacking(b, parameterList);
 }}
 
-class SctpAddIPParameter extends SctpParameter
+packet SctpAddIPParameter extends SctpParameter
 {
     uint32_t requestCorrelationId; //assigned by the sender to identify each request parameter
     L3Address addressParam;
 }
 
-class SctpDeleteIPParameter extends SctpParameter
+packet SctpDeleteIPParameter extends SctpParameter
 {
     uint32_t requestCorrelationId; //assigned by the sender to identify each request parameter
     L3Address addressParam;
 }
 
-class SctpSetPrimaryIPParameter extends SctpParameter
+packet SctpSetPrimaryIPParameter extends SctpParameter
 {
     uint32_t requestCorrelationId; //assigned by the sender to identify each request parameter
     L3Address addressParam;
 }
 
-class SctpSupportedExtensionsParameter extends SctpParameter
+packet SctpSupportedExtensionsParameter extends SctpParameter
 {
     uint16_t sctpChunkTypes[];
 }
 
-class SctpErrorCauseParameter extends SctpParameter
+packet SctpErrorCauseParameter extends SctpParameter
 {
     uint32_t responseCorrelationId;
     uint32_t errorCauseType;
 }
 
-class SctpSimpleErrorCauseParameter extends SctpParameter
+packet SctpSimpleErrorCauseParameter extends SctpParameter
 {
     uint16_t value;
 }
 
-class SctpSuccessIndication extends SctpParameter
+packet SctpSuccessIndication extends SctpParameter
 {
     uint32_t responseCorrelationId;
 }
 
-class NatMessage extends cMessage
+message NatMessage
 {
     bool        multi;
     uint16_t      peer1;
@@ -642,3 +642,4 @@ class NatMessage extends cMessage
     L3Address     peer2Addresses[];
     uint32_t      portPeer2;
 }
+
