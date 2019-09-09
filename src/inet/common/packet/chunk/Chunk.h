@@ -287,10 +287,11 @@ class INET_API Chunk : public cObject,
      */
     enum PeekFlag {
         PF_ALLOW_NULLPTR                = (1 << 0),
-        PF_ALLOW_INCOMPLETE             = (1 << 1),
-        PF_ALLOW_INCORRECT              = (1 << 2),
-        PF_ALLOW_IMPROPERLY_REPRESENTED = (1 << 3),
-        PF_ALLOW_SERIALIZATION          = (1 << 4),
+        PF_ALLOW_EMPTY                  = (1 << 1),
+        PF_ALLOW_INCOMPLETE             = (1 << 2),
+        PF_ALLOW_INCORRECT              = (1 << 3),
+        PF_ALLOW_IMPROPERLY_REPRESENTED = (1 << 4),
+        PF_ALLOW_SERIALIZATION          = (1 << 5),
         PF_ALLOW_ALL                    = -1
     };
 
@@ -410,7 +411,11 @@ class INET_API Chunk : public cObject,
     const Ptr<T> checkPeekResult(const Ptr<T>& chunk, int flags) const {
         if (chunk == nullptr) {
             if (!(flags & PF_ALLOW_NULLPTR))
-                throw cRuntimeError("Returning an empty chunk is not allowed according to the flags: %x", flags);
+                throw cRuntimeError("Returning an empty chunk (nullptr) is not allowed according to the flags: %x", flags);
+        }
+        else if (chunk->getChunkType() == CT_EMPTY) {
+            if (!(flags & PF_ALLOW_EMPTY))
+                throw cRuntimeError("Returning an empty chunk (EmptyChunk) is not allowed according to the flags: %x", flags);
         }
         else {
             if (chunk->isIncomplete() && !(flags & PF_ALLOW_INCOMPLETE))

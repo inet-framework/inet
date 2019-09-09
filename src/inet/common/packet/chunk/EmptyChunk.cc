@@ -37,7 +37,7 @@ const Ptr<Chunk> EmptyChunk::peekUnchecked(PeekPredicate predicate, PeekConverte
     CHUNK_CHECK_USAGE(length == b(0) || length == b(-1), "length is invalid");
     // 1. peeking returns nullptr
     if (predicate == nullptr || predicate(nullptr))
-        return nullptr;
+        return EmptyChunk::getEmptyChunk(flags);
     // 2. peeking returns this chunk
     auto result = const_cast<EmptyChunk *>(this)->shared_from_this();
     if (predicate == nullptr || predicate(result))

@@ -14,6 +14,7 @@
 //
 
 #include "inet/common/packet/chunk/BitCountChunk.h"
+#include "inet/common/packet/chunk/EmptyChunk.h"
 
 namespace inet {
 
@@ -46,7 +47,7 @@ const Ptr<Chunk> BitCountChunk::peekUnchecked(PeekPredicate predicate, PeekConve
     // 1. peeking an empty part returns nullptr
     if (length == b(0) || (iterator.getPosition() == chunkLength && length == b(-1))) {
         if (predicate == nullptr || predicate(nullptr))
-            return nullptr;
+            return EmptyChunk::getEmptyChunk(flags);
     }
     // 2. peeking the whole part returns this chunk
     if (iterator.getPosition() == b(0) && (length == b(-1) || length == chunkLength)) {

@@ -14,6 +14,7 @@
 //
 
 #include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/common/packet/chunk/EmptyChunk.h"
 #include "inet/common/packet/chunk/SliceChunk.h"
 
 namespace inet {
@@ -42,7 +43,7 @@ const Ptr<Chunk> BytesChunk::peekUnchecked(PeekPredicate predicate, PeekConverte
     // 1. peeking an empty part returns nullptr
     if (length == b(0) || (iterator.getPosition() == chunkLength && length == b(-1))) {
         if (predicate == nullptr || predicate(nullptr))
-            return nullptr;
+            return EmptyChunk::getEmptyChunk(flags);
     }
     // 2. peeking the whole part returns this chunk
     if (iterator.getPosition() == b(0) && (length == b(-1) || length == chunkLength)) {
