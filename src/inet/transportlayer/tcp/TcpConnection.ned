@@ -49,32 +49,31 @@ simple TcpConnection {
         @signal[rto];    // will record retransmission timeout
         @signal[numRtos];    // will record total number of RTOs
 
-        //TODO revise interpolationmode:
-        @statistic[state](record=vector; interpolationmode=none);
-        @statistic[sndWnd](record=vector; interpolationmode=none);    // snd_wnd
-        @statistic[rcvWnd](record=vector; interpolationmode=none);    // rcv_wnd
-        @statistic[rcvAdv](record=vector; interpolationmode=none);    // current advertised window (=rcv_adv)
-        @statistic[sndNxt](record=vector; interpolationmode=none);    // sent seqNo
-        @statistic[sndAck](record=vector; interpolationmode=none);    // sent ackNo
-        @statistic[rcvSeq](record=vector; interpolationmode=none);    // received seqNo
-        @statistic[rcvAck](record=vector; interpolationmode=none);    // received ackNo (=snd_una)
-        @statistic[unacked](record=vector; interpolationmode=none);    // number of bytes unacknowledged
-        @statistic[dupAcks](record=vector; interpolationmode=none);    // current number of received dupAcks
-        @statistic[pipe](record=vector; interpolationmode=none);    // current sender's estimate of bytes outstanding in the network
-        @statistic[sndSacks](record=vector; interpolationmode=none);    // number of sent Sacks
-        @statistic[rcvSacks](record=vector; interpolationmode=none);    // number of received Sacks
-        @statistic[rcvOooSeg](record=vector; interpolationmode=none);    // number of received out-of-order segments
-        @statistic[rcvNASeg](record=vector; interpolationmode=none);    // number of received not acceptable segments
-        @statistic[sackedBytes](record=vector; interpolationmode=none);    // current number of received sacked bytes
-        @statistic[tcpRcvQueueBytes](record=vector; interpolationmode=none);    // current amount of used bytes in tcp receive queue
-        @statistic[tcpRcvQueueDrops](record=vector; interpolationmode=none);    // number of drops in tcp receive queue
+        @statistic[state](record=vector; interpolationmode=sample-hold);
+        @statistic[sndWnd](record=vector; interpolationmode=sample-hold);    // snd_wnd
+        @statistic[rcvWnd](record=vector; interpolationmode=sample-hold);    // rcv_wnd
+        @statistic[rcvAdv](record=vector; interpolationmode=sample-hold);    // current advertised window (=rcv_adv)
+        @statistic[sndNxt](record=vector; interpolationmode=sample-hold);    // sent seqNo
+        @statistic[sndAck](record=vector; interpolationmode=sample-hold);    // sent ackNo
+        @statistic[rcvSeq](record=vector; interpolationmode=sample-hold);    // received seqNo
+        @statistic[rcvAck](record=vector; interpolationmode=sample-hold);    // received ackNo (=snd_una)
+        @statistic[unacked](record=vector; interpolationmode=sample-hold);    // number of bytes unacknowledged
+        @statistic[dupAcks](record=vector; interpolationmode=sample-hold);    // current number of received dupAcks
+        @statistic[pipe](record=vector; interpolationmode=sample-hold);    // current sender's estimate of bytes outstanding in the network
+        @statistic[sndSacks](record=vector; interpolationmode=sample-hold);    // number of sent Sacks
+        @statistic[rcvSacks](record=vector; interpolationmode=sample-hold);    // number of received Sacks
+        @statistic[rcvOooSeg](record=vector; interpolationmode=sample-hold);    // number of received out-of-order segments
+        @statistic[rcvNASeg](record=vector; interpolationmode=sample-hold);    // number of received not acceptable segments
+        @statistic[sackedBytes](record=vector; interpolationmode=sample-hold);    // current number of received sacked bytes
+        @statistic[tcpRcvQueueBytes](record=vector; interpolationmode=sample-hold);    // current amount of used bytes in tcp receive queue
+        @statistic[tcpRcvQueueDrops](record=vector; interpolationmode=sample-hold);    // number of drops in tcp receive queue
 
-        @statistic[cwnd](record=vector; interpolationmode=none);    // will record changes to snd_cwnd
-        @statistic[ssthresh](record=vector; interpolationmode=none);    // will record changes to ssthresh
-        @statistic[rtt](record=vector; interpolationmode=none);    // will record measured RTT
-        @statistic[srtt](record=vector; interpolationmode=none);    // will record smoothed RTT
-        @statistic[rttvar](record=vector; interpolationmode=none);    // will record RTT variance (rttvar)
-        @statistic[rto](record=vector; interpolationmode=none);    // will record retransmission timeout
-        @statistic[numRtos](record=vector; interpolationmode=none);    // will record total number of RTOs
+        @statistic[cwnd](record=vector; interpolationmode=sample-hold);    // will record changes to snd_cwnd
+        @statistic[ssthresh](record=vector; interpolationmode=sample-hold);    // will record changes to ssthresh
+        @statistic[rtt](record=vector; interpolationmode=sample-hold);    // will record measured RTT
+        @statistic[srtt](record=vector; interpolationmode=sample-hold);    // will record smoothed RTT
+        @statistic[rttvar](record=vector; interpolationmode=sample-hold);    // will record RTT variance (rttvar)
+        @statistic[rto](record=vector; interpolationmode=sample-hold);    // will record retransmission timeout
+        @statistic[numRtos](record=vector; interpolationmode=sample-hold);    // will record total number of RTOs
 }
 
