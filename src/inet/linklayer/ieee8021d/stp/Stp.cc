@@ -320,9 +320,7 @@ void Stp::generateTCN()
             const auto& tcn = makeShared<Bpdu>();
             tcn->setProtocolIdentifier(0);
             tcn->setProtocolVersionIdentifier(0);
-
-            // 1 if Topology Change Notification BPDU
-            tcn->setBpduType(1);
+            tcn->setBpduType(TCN_BPDU);
 
             auto macAddressReq = packet->addTag<MacAddressReq>();
             macAddressReq->setSrcAddress(bridgeAddress);
