@@ -19,6 +19,32 @@ import inet.linklayer.common.MacAddress;
 
 namespace inet;
 
+struct BpduFlags  // flags: 1 byte
+{                                      
+    bool tcaFlag;           //   Topology Change Acknowledgment flag
+    uint8_t reserved = 0;   //   unused 6 bits of Flags
+    bool tcFlag;            //   Topology Change flag
+}
+
+struct RootIdentifier
+{
+    uint16_t rootPriority;  // 2 bytes, priority of the tree root
+    MacAddress rootAddress; // 6 bytes, address of the tree root
+}
+
+struct BridgeIdentifier
+{
+    uint16_t bridgePriority;  // 2 bytes, priority of sender bridge
+    MacAddress bridgeAddress; // 6 bytes, address of sender bridge
+}
+
+struct PortIdentifier
+{
+    unsigned int portPriority;  // 1 byte, priority of sender port
+    unsigned int portNum;       // 1 byte, port number (ethg[] gate index) of sender port
+                                // (or 4 bit priority (shifted with 4 bit) and 12 bit portnum (in 802.1D-2004))
+}
+
 //
 // Represents a BPDU (Bridge PDU) used by the STP and RSTP protocols,
 // as defined in the 802.1D-1998 specification.
@@ -26,30 +52,17 @@ namespace inet;
 class Bpdu extends FieldsChunk
 {
     chunkLength = B(35);
+    
     uint16_t protocolIdentifier;              // 2 bytes, 0 for STP, 1 for RSTP (TODO use them)
     unsigned int protocolVersionIdentifier;   // 1 byte, version ID, currently 0
-
     unsigned int bpduType;                    // 1 byte, 0 for Configuration BPDU, 1 for Topology Change Notification BPDU
-
-                                              // flags: 1 byte
-    bool tcaFlag;                             //   Topology Change Acknowledgment flag
-    uint8_t reserved = 0;                     //   unused 6 bits of Flags
-    bool tcFlag;                              //   Topology Change flag
-
-    uint16_t rootPriority;                    // 2 bytes, priority of the tree root (part of Root Identifier)
-    MacAddress rootAddress;                   // 6 bytes, address of the tree root (part of Root Identifier)
+	BpduFlags bpduFlags;
+    RootIdentifier rootIdentifier;    
     uint32_t rootPathCost;                    // 4 bytes, cost to the root
-
-    uint16_t bridgePriority;                  // 2 bytes, priority of sender bridge (part of Bridge Identifier)
-    MacAddress bridgeAddress;                 // 6 bytes, address of sender bridge (part of Bridge Identifier)
-
-    unsigned int portPriority;                // 1 byte, priority of sender port (part of Port Identifier)
-    unsigned int portNum;                     // 1 byte, port number (ethg[] gate index) of sender port (part of Port Identifier)
-                                              // (or 4 bit priority (shifted with 4 bit) and 12 bit portnum (in 802.1D-2004))
-
+    BridgeIdentifier bridgeIdentifier;
+    PortIdentifier portIdentifier;    
     simtime_t messageAge;                     // 2 bytes, Message Age (in 256ths of a second)
     simtime_t maxAge;                         // 2 bytes, maximum lifetime of the BPDU (in 256ths of a second)
     simtime_t helloTime;                      // 2 bytes, Hello Time of the sender bridge (in 256ths of a second)
     simtime_t forwardDelay;                   // 2 bytes, Forward Delay timer of the sender bridge (in 256ths of a second)
 }
-

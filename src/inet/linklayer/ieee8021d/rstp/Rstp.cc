@@ -213,7 +213,7 @@ void Rstp::handleHelloTime(cMessage *msg)
 void Rstp::checkTC(const Ptr<const Bpdu>& frame, int arrivalInterfaceId)
 {
     Ieee8021dInterfaceData *port = getPortInterfaceData(arrivalInterfaceId);
-    if ((frame->getTcFlag() == true) && (port->getState() == Ieee8021dInterfaceData::FORWARDING)) {
+    if ((frame->getBpduFlags().tcFlag == true) && (port->getState() == Ieee8021dInterfaceData::FORWARDING)) {
         EV_DETAIL << "TCN received" << endl;
         findContainingNode(this)->bubble("TCN received");
         for (unsigned int i = 0; i < numPorts; i++) {
@@ -233,8 +233,9 @@ void Rstp::handleBackup(const Ptr<const Bpdu>& frame, unsigned int arrivalInterf
 {
     EV_DETAIL << "More than one port in the same LAN" << endl;
     Ieee8021dInterfaceData *port = getPortInterfaceData(arrivalInterfaceId);
-    if ((frame->getPortPriority() < port->getPortPriority())
-        || ((frame->getPortPriority() == port->getPortPriority()) && (frame->getPortNum() < arrivalInterfaceId)))
+    if ((frame->getPortIdentifier().portPriority < port->getPortPriority())
+        || ((frame->getPortIdentifier().portPriority == port->getPortPriority())
+                && (frame->getPortIdentifier().portNum < arrivalInterfaceId)))
     {
         // flushing arrival port
         macTable->flush(arrivalInterfaceId);
@@ -243,24 +244,33 @@ void Rstp::handleBackup(const Ptr<const Bpdu>& frame, unsigned int arrivalInterf
         port->setLostBPDU(0);
         EV_DETAIL << "Setting port " << arrivalInterfaceId << "to backup" << endl;
     }
-    else if (frame->getPortPriority() > port->getPortPriority()
-             || (frame->getPortPriority() == port->getPortPriority() && frame->getPortNum() > arrivalInterfaceId))
+    else if (frame->getPortIdentifier().portPriority > port->getPortPriority()
+             || (frame->getPortIdentifier().portPriority == port->getPortPriority()
+                     && frame->getPortIdentifier().portNum > arrivalInterfaceId))
     {
-        Ieee8021dInterfaceData *port2 = getPortInterfaceData(frame->getPortNum());
-        // flushing sender port
-        macTable->flush(frame->getPortNum());    // portNum is sender port number, it is not arrival port
+        // portNum is sender port number, it is not arrival port
+        unsigned int portNum = frame->getPortIdentifier().portNum;
+
+        Ieee8021dInterfaceData *port2 = getPortInterfaceData(portNum);
+        macTable->flush(portNum);
+
+        EV_DETAIL << "Setting port " << portNum << "to backup" << endl;
+
         port2->setRole(Ieee8021dInterfaceData::BACKUP);
         port2->setState(Ieee8021dInterfaceData::DISCARDING);
         port2->setLostBPDU(0);
-        EV_DETAIL << "Setting port " << frame->getPortNum() << "to backup" << endl;
     }
     else {
-        Ieee8021dInterfaceData *port2 = getPortInterfaceData(frame->getPortNum());
-        // unavoidable loop, received its own message at the same port
-        // switch to disabled
-        EV_DETAIL << "Unavoidable loop. Received its own message at the same port. Setting port " << frame->getPortNum() << " to disabled." << endl;
-        // flushing that port
-        macTable->flush(frame->getPortNum());    // portNum is sender port number, it is not arrival port
+        // portNum is sender port number, it is not arrival port
+        unsigned int portNum = frame->getPortIdentifier().portNum;
+
+        Ieee8021dInterfaceData *port2 = getPortInterfaceData(portNum);
+        macTable->flush(portNum);
+
+        // unavoidable loop, received its own message at the same port switch to disabled
+        EV_DETAIL << "Unavoidable loop. Received its own message at the same port. "
+                "Setting port " << portNum << " to disabled." << endl;
+
         port2->setRole(Ieee8021dInterfaceData::DISABLED);
         port2->setState(Ieee8021dInterfaceData::DISCARDING);
     }
@@ -295,16 +305,18 @@ void Rstp::processBPDU(const Ptr<const Bpdu>& frame, unsigned int arrivalInterfa
     //first:  vs best received BPDU for that port --------->case
     //second: vs root BPDU--------------------------------->case1
     //third:  vs BPDU that would be sent from this Bridge.->case2
+
     Ieee8021dInterfaceData *arrivalPort = getPortInterfaceData(arrivalInterfaceId);
     bool flood = false;
     if (compareInterfacedata(arrivalInterfaceId, frame, arrivalPort->getLinkCost()) > 0    //better root
-        && frame->getRootAddress().compareTo(bridgeAddress) != 0) // root will not participate in a loop with its own address
+        && frame->getRootIdentifier().rootAddress.compareTo(bridgeAddress) != 0) // root will not participate in a loop with its own address
         flood = processBetterSource(frame, arrivalInterfaceId);
-    else if (frame->getBridgeAddress().compareTo(arrivalPort->getBridgeAddress()) == 0    // worse or similar, but the same source
-             && frame->getRootAddress().compareTo(bridgeAddress) != 0) // root will not participate
+    else if (frame->getBridgeIdentifier().bridgeAddress.compareTo(arrivalPort->getBridgeAddress()) == 0    // worse or similar, but the same source
+             && frame->getRootIdentifier().rootAddress.compareTo(bridgeAddress) != 0) // root will not participate
         flood = processSameSource(frame, arrivalInterfaceId);
+
     if (flood) {
-        sendBPDUs();    //expedited BPDU
+        sendBPDUs();    // expedited BPDU
         sendTCNtoRoot();
     }
 }
@@ -577,15 +589,24 @@ void Rstp::sendTCNtoRoot()
             if (simTime() < rootPort->getTCWhile()) {
                 Packet *packet = new Packet("BPDU");
                 const auto& frame = makeShared<Bpdu>();
-                frame->setRootPriority(rootPort->getRootPriority());
-                frame->setRootAddress(rootPort->getRootAddress());
-                frame->setMessageAge(rootPort->getAge());
+
+                BpduFlags bpduFlags;
+                bpduFlags.tcaFlag = false;
+                bpduFlags.tcFlag = true;
+                frame->setBpduFlags(bpduFlags);
+                RootIdentifier rootId;
+                rootId.rootPriority = rootPort->getRootPriority();
+                rootId.rootAddress = rootPort->getRootAddress();
+                frame->setRootIdentifier(rootId);
                 frame->setRootPathCost(rootPort->getRootPathCost());
-                frame->setBridgePriority(bridgePriority);
-                frame->setTcaFlag(false);
-                frame->setPortNum(r);
-                frame->setBridgeAddress(bridgeAddress);
-                frame->setTcFlag(true);
+                BridgeIdentifier bridgeId;
+                bridgeId.bridgePriority = bridgePriority;
+                bridgeId.bridgeAddress = bridgeAddress;
+                frame->setBridgeIdentifier(bridgeId);
+                PortIdentifier portId;
+                portId.portNum = r;
+                frame->setPortIdentifier(portId);
+                frame->setMessageAge(rootPort->getAge());
                 frame->setMaxAge(maxAge);
                 frame->setHelloTime(helloTime);
                 frame->setForwardDelay(forwardDelay);
@@ -635,25 +656,38 @@ void Rstp::sendBPDU(int interfaceId)
         Packet *packet = new Packet("BPDU");
         const auto& frame = makeShared<Bpdu>();
         if (r != -1) {
-            frame->setRootPriority(rootPort->getRootPriority());
-            frame->setRootAddress(rootPort->getRootAddress());
+            RootIdentifier rootId;
+            rootId.rootPriority = rootPort->getRootPriority();
+            rootId.rootAddress = rootPort->getRootAddress();
+            frame->setRootIdentifier(rootId);
+
             frame->setMessageAge(rootPort->getAge());
             frame->setRootPathCost(rootPort->getRootPathCost());
         }
         else {
-            frame->setRootPriority(bridgePriority);
-            frame->setRootAddress(bridgeAddress);
+            RootIdentifier rootId;
+            rootId.rootPriority = bridgePriority;
+            rootId.rootAddress = bridgeAddress;
+            frame->setRootIdentifier(rootId);
+
             frame->setMessageAge(0);
             frame->setRootPathCost(0);
         }
-        frame->setBridgePriority(bridgePriority);
-        frame->setTcaFlag(false);
-        frame->setPortNum(interfaceId);
-        frame->setBridgeAddress(bridgeAddress);
-        if (simTime() < iport->getTCWhile())
-            frame->setTcFlag(true);
-        else
-            frame->setTcFlag(false);
+
+        BridgeIdentifier bridgeId;
+        bridgeId.bridgePriority = bridgePriority;
+        bridgeId.bridgeAddress = bridgeAddress;
+        frame->setBridgeIdentifier(bridgeId);
+
+        BpduFlags bpduFlags;
+        bpduFlags.tcaFlag = false;
+        bpduFlags.tcFlag = (simTime() < iport->getTCWhile()) ? true : false;
+        frame->setBpduFlags(bpduFlags);
+
+        PortIdentifier portId;
+        portId.portNum = interfaceId;
+        frame->setPortIdentifier(portId);
+
         frame->setMaxAge(maxAge);
         frame->setHelloTime(helloTime);
         frame->setForwardDelay(forwardDelay);
@@ -743,14 +777,19 @@ void Rstp::initPorts()
 void Rstp::updateInterfacedata(const Ptr<const Bpdu>& frame, unsigned int portNum)
 {
     Ieee8021dInterfaceData *ifd = getPortInterfaceData(portNum);
-    ifd->setRootPriority(frame->getRootPriority());
-    ifd->setRootAddress(frame->getRootAddress());
+
+    ifd->setRootPriority(frame->getRootIdentifier().rootPriority);
+    ifd->setRootAddress(frame->getRootIdentifier().rootAddress);
+
     ifd->setRootPathCost(frame->getRootPathCost() + ifd->getLinkCost());
+
+    ifd->setBridgePriority(frame->getBridgeIdentifier().bridgePriority);
+    ifd->setBridgeAddress(frame->getBridgeIdentifier().bridgeAddress);
+
+    ifd->setPortPriority(frame->getPortIdentifier().portPriority);
+    ifd->setPortNum(frame->getPortIdentifier().portNum);
+
     ifd->setAge(frame->getMessageAge() + 1);
-    ifd->setBridgePriority(frame->getBridgePriority());
-    ifd->setBridgeAddress(frame->getBridgeAddress());
-    ifd->setPortPriority(frame->getPortPriority());
-    ifd->setPortNum(frame->getPortNum());
     ifd->setLostBPDU(0);
 }
 
@@ -775,26 +814,26 @@ Rstp::CompareResult Rstp::contestInterfacedata(const Ptr<const Bpdu>& msg, unsig
     Ieee8021dInterfaceData *rootPort = getPortInterfaceData(r);
     Ieee8021dInterfaceData *ifd = getPortInterfaceData(interfaceId);
 
-    return compareRSTPData(rootPort->getRootPriority(), msg->getRootPriority(),
-            rootPort->getRootAddress(), msg->getRootAddress(),
+    return compareRSTPData(rootPort->getRootPriority(), msg->getRootIdentifier().rootPriority,
+            rootPort->getRootAddress(), msg->getRootIdentifier().rootAddress,
             rootPort->getRootPathCost(), msg->getRootPathCost(),
-            bridgePriority, msg->getBridgePriority(),
-            bridgeAddress, msg->getBridgeAddress(),
-            ifd->getPortPriority(), msg->getPortPriority(),
-            interfaceId, msg->getPortNum());
+            bridgePriority, msg->getBridgeIdentifier().bridgePriority,
+            bridgeAddress, msg->getBridgeIdentifier().bridgeAddress,
+            ifd->getPortPriority(), msg->getPortIdentifier().portPriority,
+            interfaceId, msg->getPortIdentifier().portNum);
 }
 
 Rstp::CompareResult Rstp::compareInterfacedata(unsigned int interfaceId, const Ptr<const Bpdu>& msg, int linkCost)
 {
     Ieee8021dInterfaceData *ifd = getPortInterfaceData(interfaceId);
 
-    return compareRSTPData(ifd->getRootPriority(), msg->getRootPriority(),
-            ifd->getRootAddress(), msg->getRootAddress(),
+    return compareRSTPData(ifd->getRootPriority(), msg->getRootIdentifier().rootPriority,
+            ifd->getRootAddress(), msg->getRootIdentifier().rootAddress,
             ifd->getRootPathCost(), msg->getRootPathCost() + linkCost,
-            ifd->getBridgePriority(), msg->getBridgePriority(),
-            ifd->getBridgeAddress(), msg->getBridgeAddress(),
-            ifd->getPortPriority(), msg->getPortPriority(),
-            ifd->getPortNum(), msg->getPortNum());
+            ifd->getBridgePriority(), msg->getBridgeIdentifier().bridgePriority,
+            ifd->getBridgeAddress(), msg->getBridgeIdentifier().bridgeAddress,
+            ifd->getPortPriority(), msg->getPortIdentifier().portPriority,
+            ifd->getPortNum(), msg->getPortIdentifier().portNum);
 }
 
 Rstp::CompareResult Rstp::compareRSTPData(int rootPriority1, int rootPriority2,
