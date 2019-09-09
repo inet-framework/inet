@@ -10,7 +10,6 @@
 #include "inet/physicallayer/wireless/common/signal/Arrival.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 Define_Module(ConstantTimePropagation);
@@ -49,6 +48,5 @@ std::ostream& ConstantTimePropagation::printToStream(std::ostream& stream, int l
 }
 
 } // namespace physicallayer
-
 } // namespace inet
 

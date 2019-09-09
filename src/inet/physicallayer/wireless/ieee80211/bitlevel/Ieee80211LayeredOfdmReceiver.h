@@ -95,8 +95,8 @@ class INET_API Ieee80211LayeredOfdmReceiver : public SnirReceiverBase
     virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
 };
 
-} /* namespace physicallayer */
-} /* namespace inet */
+} // namespace physicallayer
+} // namespace inet
 
 #endif
 

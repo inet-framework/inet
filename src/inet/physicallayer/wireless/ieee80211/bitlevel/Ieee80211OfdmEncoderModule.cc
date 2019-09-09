@@ -39,6 +39,6 @@ Ieee80211OfdmEncoderModule::~Ieee80211OfdmEncoderModule()
     delete encoder;
 }
 
-} /* namespace physicallayer */
-} /* namespace inet */
+} // namespace physicallayer
+} // namespace inet
 

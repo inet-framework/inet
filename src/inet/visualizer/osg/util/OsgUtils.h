@@ -24,7 +24,6 @@
 #include <osgText/Text>
 
 namespace inet {
-
 namespace osg {
 
 using namespace ::osg;
@@ -88,7 +87,6 @@ class INET_API LineNode : public Group
 };
 
 } // namespace osg
-
 } // namespace inet
 
 #endif

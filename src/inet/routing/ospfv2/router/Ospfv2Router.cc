@@ -11,7 +11,6 @@
 #include "inet/routing/ospfv2/router/Lsa.h"
 
 namespace inet {
-
 namespace ospfv2 {
 
 Router::Router(cSimpleModule *containingModule, IInterfaceTable *ift, IIpv4RoutingTable *rt) :
@@ -1514,6 +1513,5 @@ bool Router::isDirectRoute(Ospfv2RoutingTableEntry& entry)
 }
 
 } // namespace ospfv2
-
 } // namespace inet
 

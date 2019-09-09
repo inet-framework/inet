@@ -43,3 +43,4 @@ class PppTrailer extends FieldsChunk
     short fcs = 0;      // frame check sequence, 2 byte
     short flag = 0x7e;  // 1 byte, omitted for successive PPP packets
 }
+

@@ -8,7 +8,6 @@
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211DsssOfdmMode.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 Ieee80211DsssOfdmMode::Ieee80211DsssOfdmMode(const char *name, const Ieee80211DsssPreambleMode *dsssPreambleMode, const Ieee80211DsssHeaderMode *dsssHeaderMode, const Ieee80211OfdmPreambleMode *ofdmPreambleMode, const Ieee80211OfdmSignalMode *ofdmSignalMode, const Ieee80211OfdmDataMode *ofdmDataMode) :
@@ -27,6 +26,5 @@ const simtime_t Ieee80211DsssOfdmMode::getRifsTime() const
 }
 
 } // namespace physicallayer
-
 } // namespace inet
 

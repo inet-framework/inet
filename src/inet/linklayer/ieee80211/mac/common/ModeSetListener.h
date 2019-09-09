@@ -25,8 +25,8 @@ class INET_API ModeSetListener : public SimpleModule, public cListener
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
 };
 
-} /* namespace ieee80211 */
-} /* namespace inet */
+} // namespace ieee80211
+} // namespace inet
 
 #endif
 

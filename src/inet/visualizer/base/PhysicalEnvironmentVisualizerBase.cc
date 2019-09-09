@@ -10,7 +10,6 @@
 #include "inet/common/ModuleAccess.h"
 
 namespace inet {
-
 namespace visualizer {
 
 using namespace inet::physicalenvironment;
@@ -26,6 +25,5 @@ void PhysicalEnvironmentVisualizerBase::initialize(int stage)
 }
 
 } // namespace visualizer
-
 } // namespace inet
 

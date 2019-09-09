@@ -16,7 +16,6 @@
 #include <osgDB/ReadFile>
 
 namespace inet {
-
 namespace osg {
 
 Vec3Array *createCircleVertices(const Coord& center, double radius, int polygonSize)
@@ -373,6 +372,5 @@ void LineNode::setEnd(const Coord& end)
 }
 
 } // namespace osg
-
 } // namespace inet
 

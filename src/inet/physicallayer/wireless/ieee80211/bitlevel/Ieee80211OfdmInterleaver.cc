@@ -8,7 +8,6 @@
 #include "inet/physicallayer/wireless/ieee80211/bitlevel/Ieee80211OfdmInterleaver.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 std::ostream& Ieee80211OfdmInterleaver::printToStream(std::ostream& stream, int level, int evFlags) const
@@ -71,6 +70,6 @@ Ieee80211OfdmInterleaver::Ieee80211OfdmInterleaver(const Ieee80211OfdmInterleavi
     s = std::max(numberOfCodedBitsPerSubcarrier / 2, 1);
 }
 
-} /* namespace physicallayer */
-} /* namespace inet */
+} // namespace physicallayer
+} // namespace inet
 

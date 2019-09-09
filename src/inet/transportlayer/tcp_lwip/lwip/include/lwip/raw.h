@@ -42,7 +42,6 @@
 #include "lwip/ip_addr.h"
 
 namespace inet {
-
 namespace tcp {
 
 #ifdef __cplusplus
@@ -97,7 +96,6 @@ u8_t             raw_input      (struct pbuf *p, struct netif *inp);
 #endif
 
 } // namespace tcp
-
 } // namespace inet
 
 #endif /* LWIP_RAW */

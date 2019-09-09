@@ -53,7 +53,6 @@ extern "C" {
 #endif
 
 namespace inet {
-
 namespace tcp {
 
 PACK_STRUCT_BEGIN
@@ -66,7 +65,6 @@ struct udp_hdr {
 PACK_STRUCT_END
 
 } // namespace tcp
-
 } // namespace inet
 
 #ifdef PACK_STRUCT_USE_INCLUDES
@@ -79,7 +77,6 @@ PACK_STRUCT_END
 #define UDP_FLAGS_CONNECTED  0x04U
 
 namespace inet {
-
 namespace tcp {
 
 struct udp_pcb {
@@ -160,7 +157,6 @@ void udp_debug_print(struct udp_hdr *udphdr);
 #endif
 
 } // namespace tcp
-
 } // namespace inet
 
 #ifdef __cplusplus

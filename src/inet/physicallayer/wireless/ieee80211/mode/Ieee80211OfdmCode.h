@@ -70,8 +70,8 @@ class INET_API Ieee80211OfdmCompliantCodes
     static const Ieee80211OfdmCode ofdmCC5_6QAM1024Interleaving;
 };
 
-} /* namespace physicallayer */
-} /* namespace inet */
+} // namespace physicallayer
+} // namespace inet
 
 #endif
 

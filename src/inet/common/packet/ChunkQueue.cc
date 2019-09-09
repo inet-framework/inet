@@ -119,5 +119,5 @@ std::string ChunkQueue::str() const
     return stream.str();
 }
 
-} // namespace
+} // namespace inet
 

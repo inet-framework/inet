@@ -11,7 +11,6 @@
 #include "inet/physicallayer/wireless/common/base/packetlevel/MqamModulationBase.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 /**
@@ -36,7 +35,6 @@ class INET_API QbpskModulation : public MqamModulationBase
 };
 
 } // namespace physicallayer
-
 } // namespace inet
 
 #endif

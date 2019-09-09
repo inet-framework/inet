@@ -234,5 +234,5 @@ SpatialGrid::LineSegmentIterator& SpatialGrid::LineSegmentIterator::operator++()
     return *this;
 }
 
-} /* namespace inet */
+} // namespace inet
 

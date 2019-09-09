@@ -8,7 +8,6 @@
 #include "inet/power/storage/IdealEpEnergyStorage.h"
 
 namespace inet {
-
 namespace power {
 
 Define_Module(IdealEpEnergyStorage);
@@ -46,6 +45,5 @@ void IdealEpEnergyStorage::updateEnergyBalance()
 }
 
 } // namespace power
-
 } // namespace inet
 

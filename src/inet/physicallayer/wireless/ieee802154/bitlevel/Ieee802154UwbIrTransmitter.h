@@ -27,7 +27,6 @@
 #include "inet/physicallayer/wireless/ieee802154/bitlevel/Ieee802154UwbIrMode.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 using namespace inet::math;
@@ -62,7 +61,6 @@ class INET_API Ieee802154UwbIrTransmitter : public TransmitterBase
 };
 
 } // namespace physicallayer
-
 } // namespace inet
 
 #endif

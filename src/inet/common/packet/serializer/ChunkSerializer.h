@@ -37,7 +37,7 @@ class INET_API ChunkSerializer : public cObject
     virtual const Ptr<Chunk> deserialize(MemoryInputStream& stream, const std::type_info& typeInfo) const = 0;
 };
 
-} // namespace
+} // namespace inet
 
 #endif
 

@@ -8,7 +8,6 @@
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtAdhoc.h"
 
 namespace inet {
-
 namespace ieee80211 {
 
 Define_Module(Ieee80211MgmtAdhoc);
@@ -82,6 +81,5 @@ void Ieee80211MgmtAdhoc::handleProbeResponseFrame(Packet *packet, const Ptr<cons
 }
 
 } // namespace ieee80211
-
 } // namespace inet
 

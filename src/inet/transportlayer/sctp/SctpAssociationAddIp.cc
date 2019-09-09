@@ -10,8 +10,8 @@
 #include "inet/transportlayer/sctp/SctpAssociation.h"
 
 namespace inet {
-
 namespace sctp {
+
 void SctpAssociation::sendAsconf(const char *type, const bool remote)
 {
     SctpAuthenticationChunk *authChunk = nullptr;
@@ -302,6 +302,5 @@ SctpSuccessIndication *SctpAssociation::createSuccessIndication(const uint32_t c
 }
 
 } // namespace sctp
-
 } // namespace inet
 

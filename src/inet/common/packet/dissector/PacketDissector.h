@@ -172,7 +172,7 @@ class INET_API PacketDissector
     void dissectPacket(Packet *packet, const Protocol *protocol, b extraFrontOffset = b(0), b extraBackOffset = b(0)) const;
 };
 
-} // namespace
+} // namespace inet
 
 #endif
 

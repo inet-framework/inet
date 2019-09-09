@@ -18,7 +18,6 @@
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
 
 namespace inet {
-
 namespace ieee80211 {
 
 using namespace inet::physicallayer;
@@ -161,6 +160,5 @@ void Ieee80211MgmtBase::stop()
 }
 
 } // namespace ieee80211
-
 } // namespace inet
 

@@ -40,8 +40,8 @@ class INET_API FrameSequenceHandler : public IFrameSequenceHandler
     virtual ~FrameSequenceHandler();
 };
 
-} /* namespace ieee80211 */
-} /* namespace inet */
+} // namespace ieee80211
+} // namespace inet
 
 #endif
 

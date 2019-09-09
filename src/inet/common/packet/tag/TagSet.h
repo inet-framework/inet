@@ -204,7 +204,7 @@ inline T *TagSet::removeTagIfPresent()
 
 #undef SELFDOC_FUNCTION_T
 
-} // namespace
+} // namespace inet
 
 #endif
 

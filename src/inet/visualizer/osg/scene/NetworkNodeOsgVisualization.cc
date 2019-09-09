@@ -20,7 +20,6 @@
 #include "inet/visualizer/osg/util/OsgUtils.h"
 
 namespace inet {
-
 namespace visualizer {
 
 NetworkNodeOsgVisualization::Annotation::Annotation(osg::Node *node, osg::Vec3d size, double priority) :
@@ -201,6 +200,5 @@ void NetworkNodeOsgVisualization::removeAnnotation(int index)
 }
 
 } // namespace visualizer
-
 } // namespace inet
 

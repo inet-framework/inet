@@ -8,12 +8,10 @@
 #include "inet/power/contract/IEpEnergySink.h"
 
 namespace inet {
-
 namespace power {
 
 simsignal_t IEpEnergySink::powerGenerationChangedSignal = cComponent::registerSignal("powerGenerationChanged");
 
 } // namespace power
-
 } // namespace inet
 

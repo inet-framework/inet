@@ -10,7 +10,6 @@
 #include "inet/common/ModuleAccess.h"
 
 namespace inet {
-
 namespace visualizer {
 
 MobilityVisualizerBase::MobilityVisualization::MobilityVisualization(IMobility *mobility) :
@@ -145,6 +144,5 @@ void MobilityVisualizerBase::receiveSignal(cComponent *source, simsignal_t signa
 }
 
 } // namespace visualizer
-
 } // namespace inet
 

@@ -12,7 +12,6 @@
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IErrorModel.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 // REFACTOR TODO
@@ -51,7 +50,6 @@ class INET_API FlatReceiverBase : public NarrowbandReceiverBase
 };
 
 } // namespace physicallayer
-
 } // namespace inet
 
 #endif

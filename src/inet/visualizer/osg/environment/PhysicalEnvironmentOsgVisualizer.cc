@@ -22,7 +22,6 @@
 #include "inet/visualizer/osg/util/OsgUtils.h"
 
 namespace inet {
-
 namespace visualizer {
 
 using namespace inet::physicalenvironment;
@@ -117,6 +116,5 @@ void PhysicalEnvironmentOsgVisualizer::refreshDisplay() const
 }
 
 } // namespace visualizer
-
 } // namespace inet
 

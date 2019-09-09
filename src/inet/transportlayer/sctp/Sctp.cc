@@ -29,7 +29,6 @@
 #endif // ifdef INET_WITH_IPv4
 
 namespace inet {
-
 namespace sctp {
 
 Define_Module(Sctp);
@@ -951,5 +950,5 @@ void Sctp::sendToApp(cMessage *msg)
 }
 
 } // namespace sctp
-
 } // namespace inet
+

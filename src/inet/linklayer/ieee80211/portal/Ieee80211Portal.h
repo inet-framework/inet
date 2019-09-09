@@ -15,7 +15,6 @@
 #include "inet/linklayer/ieee80211/llc/IIeee80211Llc.h"
 
 namespace inet {
-
 namespace ieee80211 {
 
 class INET_API Ieee80211Portal : public SimpleModule, public IIeee80211Llc
@@ -37,7 +36,6 @@ class INET_API Ieee80211Portal : public SimpleModule, public IIeee80211Llc
 };
 
 } // namespace ieee80211
-
 } // namespace inet
 
 #endif

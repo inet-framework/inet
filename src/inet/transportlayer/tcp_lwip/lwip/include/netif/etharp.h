@@ -46,7 +46,6 @@
 
 
 namespace inet {
-
 namespace tcp {
 
 #ifdef __cplusplus
@@ -193,7 +192,6 @@ extern const struct eth_addr ethbroadcast, ethzero;
 #endif
 
 } // namespace tcp
-
 } // namespace inet
 
 #endif /* LWIP_ARP */

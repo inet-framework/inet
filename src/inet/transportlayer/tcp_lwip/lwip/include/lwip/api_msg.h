@@ -45,7 +45,6 @@
 #include "lwip/api.h"
 
 namespace inet {
-
 namespace tcp {
 
 #ifdef __cplusplus
@@ -162,7 +161,6 @@ void netconn_free(struct netconn *conn);
 #endif
 
 } // namespace tcp
-
 } // namespace inet
 
 #endif /* LWIP_NETCONN */

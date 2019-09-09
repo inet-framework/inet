@@ -7,7 +7,6 @@
 #include "inet/transportlayer/rtp/Reports_m.h"
 
 namespace inet {
-
 namespace rtp {
 
 //
@@ -58,6 +57,5 @@ void ReceptionReport::dump(std::ostream& os) const
 }
 
 } // namespace rtp
-
 } // namespace inet
 

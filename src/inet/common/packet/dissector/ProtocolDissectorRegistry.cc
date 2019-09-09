@@ -41,5 +41,5 @@ ProtocolDissectorRegistry& ProtocolDissectorRegistry::getInstance()
     return getSimulationOrSharedDataManager()->getSharedVariable<ProtocolDissectorRegistry>(handle);
 }
 
-} // namespace
+} // namespace inet
 

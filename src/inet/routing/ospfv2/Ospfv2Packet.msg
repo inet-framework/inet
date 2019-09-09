@@ -256,3 +256,4 @@ class Ospfv2LinkStateAcknowledgementPacket extends Ospfv2Packet
 {
     Ospfv2LsaHeader lsaHeaders[];     //TODO
 }
+

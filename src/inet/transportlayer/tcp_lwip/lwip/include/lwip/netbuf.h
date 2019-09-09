@@ -37,7 +37,6 @@
 #include "lwip/ip_addr.h"
 
 namespace inet {
-
 namespace tcp {
 
 #ifdef __cplusplus
@@ -88,7 +87,6 @@ void              netbuf_first    (struct netbuf *buf);
 #endif
 
 } // namespace tcp
-
 } // namespace inet
 
 #endif /* __LWIP_NETBUF_H__ */

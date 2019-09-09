@@ -32,5 +32,5 @@ Box inet::Box::computeBoundingBox(const std::vector<Coord>& points)
     return Box(min, max);
 }
 
-} /* namespace inet */
+} // namespace inet
 

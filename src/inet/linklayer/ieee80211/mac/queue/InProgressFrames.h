@@ -56,8 +56,8 @@ class INET_API InProgressFrames : public SimpleModule
     virtual void clearDroppedFrames();
 };
 
-} /* namespace ieee80211 */
-} /* namespace inet */
+} // namespace ieee80211
+} // namespace inet
 
 #endif
 

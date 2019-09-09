@@ -8,7 +8,6 @@
 #include "inet/power/base/CcEnergyStorageBase.h"
 
 namespace inet {
-
 namespace power {
 
 void CcEnergyStorageBase::initialize(int stage)
@@ -68,6 +67,5 @@ void CcEnergyStorageBase::receiveSignal(cComponent *source, simsignal_t signal, 
 }
 
 } // namespace power
-
 } // namespace inet
 

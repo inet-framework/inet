@@ -246,6 +246,6 @@ void QosRateSelection::frameTransmitted(Packet *packet, const Ptr<const Ieee8021
     lastTransmittedFrameMode[receiverAddr] = getMode(packet, header);
 }
 
-} /* namespace ieee80211 */
-} /* namespace inet */
+} // namespace ieee80211
+} // namespace inet
 

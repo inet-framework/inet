@@ -12,7 +12,6 @@
 #include "inet/common/ModuleAccess.h"
 
 namespace inet {
-
 namespace visualizer {
 
 using namespace inet::physicalenvironment;
@@ -123,6 +122,5 @@ void TracingObstacleLossVisualizerBase::removeAllObstacleLossVisualizations()
 }
 
 } // namespace visualizer
-
 } // namespace inet
 

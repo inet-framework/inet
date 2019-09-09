@@ -12,7 +12,6 @@
 #include "inet/common/geometry/common/Quaternion.h"
 
 namespace inet {
-
 namespace math {
 
 template<typename T>
@@ -249,7 +248,6 @@ inline std::ostream& operator<<(std::ostream& os, const Point<T ...>& p) {
 }
 
 } // namespace math
-
 } // namespace inet
 
 // Add specialization for std::tuple_size to make Point work with tuple-like protocol

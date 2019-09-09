@@ -18,7 +18,6 @@
 #include "inet/physicallayer/wireless/common/pathloss/FreeSpacePathLoss.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 /**
@@ -41,7 +40,6 @@ class INET_API RicianFading : public FreeSpacePathLoss
 };
 
 } // namespace physicallayer
-
 } // namespace inet
 
 #endif

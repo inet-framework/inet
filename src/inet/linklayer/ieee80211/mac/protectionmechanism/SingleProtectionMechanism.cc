@@ -181,6 +181,6 @@ simtime_t SingleProtectionMechanism::computeDurationField(Packet *packet, const 
         throw cRuntimeError("Unknown frame type");
 }
 
-} /* namespace ieee80211 */
-} /* namespace inet */
+} // namespace ieee80211
+} // namespace inet
 

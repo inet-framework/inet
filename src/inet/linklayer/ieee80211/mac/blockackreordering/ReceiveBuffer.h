@@ -46,8 +46,8 @@ class INET_API ReceiveBuffer
     bool isFull() { ASSERT(length <= bufferSize); return length == bufferSize; }
 };
 
-} /* namespace ieee80211 */
-} /* namespace inet */
+} // namespace ieee80211
+} // namespace inet
 
 #endif
 

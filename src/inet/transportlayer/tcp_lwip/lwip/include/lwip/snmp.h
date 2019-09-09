@@ -38,7 +38,6 @@
 #include "lwip/lwip_udp.h"
 
 namespace inet {
-
 namespace tcp {
 
 #ifdef __cplusplus
@@ -366,7 +365,6 @@ void snmp_get_snmpenableauthentraps(u8_t *value);
 #endif
 
 } // namespace tcp
-
 } // namespace inet
 
 #endif /* __LWIP_SNMP_H__ */

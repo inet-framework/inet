@@ -42,3 +42,4 @@ class TedChangeInfo extends cObject
 {
     int tedLinkIndices[];
 }
+

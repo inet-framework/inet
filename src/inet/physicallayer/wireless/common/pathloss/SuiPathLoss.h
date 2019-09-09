@@ -19,7 +19,6 @@
 #include "inet/physicallayer/wireless/common/base/packetlevel/PathLossBase.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 /**
@@ -49,7 +48,6 @@ class INET_API SuiPathLoss : public PathLossBase
 };
 
 } // namespace physicallayer
-
 } // namespace inet
 
 #endif

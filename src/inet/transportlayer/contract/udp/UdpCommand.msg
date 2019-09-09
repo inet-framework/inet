@@ -367,3 +367,4 @@ class UdpSetMulticastSourceFilterCommand extends UdpSetOptionCommand
     UdpSourceFilterMode filterMode;
     L3Address sourceList[];
 }
+

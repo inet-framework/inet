@@ -17,7 +17,6 @@
 #include "inet/common/stlutils.h"
 
 namespace inet {
-
 namespace physicalenvironment {
 
 Define_Module(PhysicalEnvironment);
@@ -458,6 +457,5 @@ void PhysicalEnvironment::visitObjects(const IVisitor *visitor, const LineSegmen
 }
 
 } // namespace physicalenvironment
-
 } // namespace inet
 

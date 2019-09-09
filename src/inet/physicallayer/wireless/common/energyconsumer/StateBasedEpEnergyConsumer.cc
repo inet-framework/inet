@@ -10,7 +10,6 @@
 #include "inet/common/ModuleAccess.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 using namespace inet::power;
@@ -152,6 +151,5 @@ W StateBasedEpEnergyConsumer::computePowerConsumption() const
 }
 
 } // namespace physicallayer
-
 } // namespace inet
 

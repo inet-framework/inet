@@ -36,5 +36,5 @@ ChunkSerializerRegistry& ChunkSerializerRegistry::getInstance()
     return getSimulationOrSharedDataManager()->getSharedVariable<ChunkSerializerRegistry>(handle);
 }
 
-} // namespace
+} // namespace inet
 

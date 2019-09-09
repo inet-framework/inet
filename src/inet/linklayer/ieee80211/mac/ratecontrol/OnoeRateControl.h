@@ -45,8 +45,8 @@ class INET_API OnoeRateControl : public RateControlBase
     virtual void frameReceived(Packet *frame) override;
 };
 
-} /* namespace ieee80211 */
-} /* namespace inet */
+} // namespace ieee80211
+} // namespace inet
 
 #endif
 

@@ -11,7 +11,6 @@
 #include "inet/common/geometry/common/Quaternion.h"
 
 namespace inet {
-
 namespace visualizer {
 
 using namespace inet::physicallayer;
@@ -250,6 +249,5 @@ double RadioCanvasVisualizer::getGainRadius(double gain, double maxGain) const
 }
 
 } // namespace visualizer
-
 } // namespace inet
 

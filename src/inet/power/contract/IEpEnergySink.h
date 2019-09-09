@@ -11,7 +11,6 @@
 #include "inet/power/contract/IEnergySink.h"
 
 namespace inet {
-
 namespace power {
 
 /**
@@ -36,7 +35,6 @@ class INET_API IEpEnergySink : public virtual IEnergySink
 };
 
 } // namespace power
-
 } // namespace inet
 
 #endif

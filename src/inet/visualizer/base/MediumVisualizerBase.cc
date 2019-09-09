@@ -16,7 +16,6 @@
 #endif // INET_WITH_PHYSICALLAYERWIRELESSCOMMON
 
 namespace inet {
-
 namespace visualizer {
 
 #ifdef INET_WITH_PHYSICALLAYERWIRELESSCOMMON
@@ -373,6 +372,5 @@ void MediumVisualizerBase::handleSignalArrivalStarted(const physicallayer::IRece
 #endif // INET_WITH_PHYSICALLAYERWIRELESSCOMMON
 
 } // namespace visualizer
-
 } // namespace inet
 

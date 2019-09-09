@@ -11,7 +11,6 @@
 #include "inet/visualizer/osg/util/OsgUtils.h"
 
 namespace inet {
-
 namespace visualizer {
 
 Define_Module(TransportConnectionOsgVisualizer);
@@ -87,6 +86,5 @@ void TransportConnectionOsgVisualizer::removeConnectionVisualization(const Trans
 }
 
 } // namespace visualizer
-
 } // namespace inet
 

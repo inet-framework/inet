@@ -18,7 +18,6 @@
 #include "inet/visualizer/base/LinkBreakVisualizerBase.h"
 
 namespace inet {
-
 namespace visualizer {
 
 LinkBreakVisualizerBase::LinkBreakVisualization::LinkBreakVisualization(int transmitterModuleId, int receiverModuleId) :
@@ -184,6 +183,5 @@ void LinkBreakVisualizerBase::removeAllLinkBreakVisualizations()
 }
 
 } // namespace visualizer
-
 } // namespace inet
 

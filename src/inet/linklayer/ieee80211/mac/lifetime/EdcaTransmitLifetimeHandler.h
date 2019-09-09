@@ -34,8 +34,8 @@ class INET_API EdcaTransmitLifetimeHandler : public ITransmitLifetimeHandler
     virtual bool isLifetimeExpired(const Ptr<const Ieee80211DataHeader>& header);
 };
 
-} /* namespace ieee80211 */
-} /* namespace inet */
+} // namespace ieee80211
+} // namespace inet
 
 #endif
 

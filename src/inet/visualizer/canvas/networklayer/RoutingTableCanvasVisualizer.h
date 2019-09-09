@@ -13,7 +13,6 @@
 #include "inet/visualizer/base/RoutingTableVisualizerBase.h"
 
 namespace inet {
-
 namespace visualizer {
 
 class INET_API RoutingTableCanvasVisualizer : public RoutingTableVisualizerBase
@@ -58,7 +57,6 @@ class INET_API RoutingTableCanvasVisualizer : public RoutingTableVisualizerBase
 };
 
 } // namespace visualizer
-
 } // namespace inet
 
 #endif

@@ -130,8 +130,8 @@ class INET_API Dcf : public ICoordinationFunction, public IFrameSequenceHandler:
     virtual void corruptedFrameReceived() override;
 };
 
-} /* namespace ieee80211 */
-} /* namespace inet */
+} // namespace ieee80211
+} // namespace inet
 
 #endif
 

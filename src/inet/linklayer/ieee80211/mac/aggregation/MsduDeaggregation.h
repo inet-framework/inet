@@ -22,8 +22,8 @@ class INET_API MsduDeaggregation : public IMsduDeaggregation, public cObject
     virtual std::vector<Packet *> *deaggregateFrame(Packet *frame) override;
 };
 
-} /* namespace ieee80211 */
-} /* namespace inet */
+} // namespace ieee80211
+} // namespace inet
 
 #endif
 

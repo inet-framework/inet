@@ -8,7 +8,6 @@
 #include "inet/power/base/EpEnergyStorageBase.h"
 
 namespace inet {
-
 namespace power {
 
 void EpEnergyStorageBase::initialize(int stage)
@@ -68,6 +67,5 @@ void EpEnergyStorageBase::receiveSignal(cComponent *source, simsignal_t signal, 
 }
 
 } // namespace power
-
 } // namespace inet
 

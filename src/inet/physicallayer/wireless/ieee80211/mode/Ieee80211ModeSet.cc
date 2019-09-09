@@ -19,7 +19,6 @@
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211VhtMode.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 Register_Abstract_Class(Ieee80211ModeSet);
@@ -624,6 +623,5 @@ const Ieee80211ModeSet *Ieee80211ModeSet::getModeSet(const char *mode)
 }
 
 } // namespace physicallayer
-
 } // namespace inet
 

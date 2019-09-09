@@ -38,7 +38,6 @@
 #include "lwip/memp.h"
 
 namespace inet {
-
 namespace tcp {
 
 #ifdef __cplusplus
@@ -285,7 +284,6 @@ void stats_display_sys(struct stats_sys *sys);
 #endif
 
 } // namespace tcp
-
 } // namespace inet
 
 #endif /* __LWIP_STATS_H__ */

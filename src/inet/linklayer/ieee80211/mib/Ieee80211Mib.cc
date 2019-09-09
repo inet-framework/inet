@@ -8,7 +8,6 @@
 #include "inet/linklayer/ieee80211/mib/Ieee80211Mib.h"
 
 namespace inet {
-
 namespace ieee80211 {
 
 Define_Module(Ieee80211Mib);
@@ -46,6 +45,5 @@ void Ieee80211Mib::refreshDisplay() const
 }
 
 } // namespace ieee80211
-
 } // namespace inet
 

@@ -28,7 +28,6 @@
 #define MAXBUFLEN    1 << 16
 
 namespace inet {
-
 namespace sctp {
 
 Register_Serializer(SctpHeader, SctpHeaderSerializer);
@@ -2196,6 +2195,5 @@ void SctpHeaderSerializer::calculateSharedKey()
 }
 
 } // namespace sctp
-
 } // namespace inet
 

@@ -14,7 +14,6 @@
 #include "inet/environment/contract/IPhysicalObject.h"
 
 namespace inet {
-
 namespace physicalenvironment {
 
 /**
@@ -83,7 +82,6 @@ class INET_API PhysicalObject : public cNamedObject, public IPhysicalObject
 };
 
 } // namespace physicalenvironment
-
 } // namespace inet
 
 #endif

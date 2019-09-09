@@ -22,7 +22,6 @@
 #include "inet/transportlayer/rtp/profiles/avprofile/RtpMpegPacket_m.h"
 
 namespace inet {
-
 namespace rtp {
 
 Define_Module(RtpAvProfilePayload32Sender);
@@ -177,6 +176,5 @@ bool RtpAvProfilePayload32Sender::sendPacket()
 }
 
 } // namespace rtp
-
 } // namespace inet
 

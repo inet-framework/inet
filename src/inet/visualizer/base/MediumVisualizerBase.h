@@ -22,7 +22,6 @@
 #endif // INET_WITH_PHYSICALLAYERWIRELESSCOMMON
 
 namespace inet {
-
 namespace visualizer {
 
 
@@ -160,7 +159,6 @@ class INET_API MediumVisualizerBase : public VisualizerBase, public cListener
 };
 
 } // namespace visualizer
-
 } // namespace inet
 
 #endif

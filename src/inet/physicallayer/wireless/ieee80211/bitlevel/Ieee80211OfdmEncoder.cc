@@ -20,7 +20,6 @@
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211OfdmModulation.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 std::ostream& Ieee80211OfdmEncoder::printToStream(std::ostream& stream, int level, int evFlags) const
@@ -91,6 +90,6 @@ Ieee80211OfdmEncoder::~Ieee80211OfdmEncoder()
     delete scrambler;
 }
 
-} /* namespace physicallayer */
-} /* namespace inet */
+} // namespace physicallayer
+} // namespace inet
 

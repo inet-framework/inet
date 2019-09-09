@@ -177,5 +177,5 @@ void PacketDissector::dissectPacket(Packet *packet, const Protocol *protocol, b 
     packet->setBackOffset(backOffset);
 }
 
-} // namespace
+} // namespace inet
 

@@ -161,5 +161,5 @@ std::ostream& ByteCountChunk::printFieldsToStream(std::ostream& stream, int leve
     return stream;
 }
 
-} // namespace
+} // namespace inet
 

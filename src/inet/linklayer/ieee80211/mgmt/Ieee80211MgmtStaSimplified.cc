@@ -10,7 +10,6 @@
 #include "inet/networklayer/common/L3AddressResolver.h"
 
 namespace inet {
-
 namespace ieee80211 {
 
 Define_Module(Ieee80211MgmtStaSimplified);
@@ -99,6 +98,5 @@ void Ieee80211MgmtStaSimplified::handleProbeResponseFrame(Packet *packet, const 
 }
 
 } // namespace ieee80211
-
 } // namespace inet
 

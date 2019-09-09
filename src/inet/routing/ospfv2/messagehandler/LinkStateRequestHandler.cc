@@ -12,7 +12,6 @@
 #include "inet/routing/ospfv2/router/Ospfv2Router.h"
 
 namespace inet {
-
 namespace ospfv2 {
 
 LinkStateRequestHandler::LinkStateRequestHandler(Router *containingRouter) :
@@ -97,6 +96,5 @@ void LinkStateRequestHandler::processPacket(Packet *packet, Ospfv2Interface *int
 }
 
 } // namespace ospfv2
-
 } // namespace inet
 

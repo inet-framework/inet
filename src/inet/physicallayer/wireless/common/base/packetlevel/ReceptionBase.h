@@ -13,7 +13,6 @@
 #include "inet/physicallayer/wireless/common/contract/packetlevel/ITransmission.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 class INET_API ReceptionBase : public virtual IReception, public cObject
@@ -73,7 +72,6 @@ class INET_API ReceptionBase : public virtual IReception, public cObject
 };
 
 } // namespace physicallayer
-
 } // namespace inet
 
 #endif

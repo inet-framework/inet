@@ -12,7 +12,6 @@
 #include "inet/common/stlutils.h"
 
 namespace inet {
-
 namespace power {
 
 const IEnergyConsumer *EnergySourceBase::getEnergyConsumer(int index) const
@@ -35,6 +34,5 @@ void EnergySourceBase::removeEnergyConsumer(const IEnergyConsumer *energyConsume
 }
 
 } // namespace power
-
 } // namespace inet
 

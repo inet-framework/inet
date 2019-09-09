@@ -16,7 +16,6 @@
 #include "inet/visualizer/osg/util/OsgScene.h"
 
 namespace inet {
-
 namespace visualizer {
 
 LinkOsgVisualizerBase::LinkOsgVisualization::LinkOsgVisualization(inet::osg::LineNode *node, int sourceModuleId, int destinationModuleId) :
@@ -92,6 +91,5 @@ void LinkOsgVisualizerBase::setAlpha(const LinkVisualization *link, double alpha
 }
 
 } // namespace visualizer
-
 } // namespace inet
 

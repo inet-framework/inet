@@ -10,7 +10,6 @@
 #include "inet/common/ModuleAccess.h"
 
 namespace inet {
-
 namespace visualizer {
 
 using namespace inet::power;
@@ -82,6 +81,5 @@ void EnergyStorageCanvasVisualizer::refreshEnergyStorageVisualization(const Ener
 }
 
 } // namespace visualizer
-
 } // namespace inet
 

@@ -12,7 +12,6 @@
 #include "inet/physicallayer/wireless/common/contract/bitlevel/ISymbol.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 class INET_API Ieee80211OfdmSymbol : public ISymbol
@@ -31,8 +30,9 @@ class INET_API Ieee80211OfdmSymbol : public ISymbol
     void pushApskSymbol(const ApskSymbol *apskSymbol, int subcarrierIndex);
     void clearSymbols() { subcarrierSymbols.resize(53, nullptr); }
 };
-} /* namespace physicallayer */
-} /* namespace inet */
+
+} // namespace physicallayer
+} // namespace inet
 
 #endif
 

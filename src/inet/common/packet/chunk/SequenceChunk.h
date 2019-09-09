@@ -120,7 +120,7 @@ class INET_API SequenceChunk : public Chunk
     virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
 };
 
-} // namespace
+} // namespace inet
 
 #endif
 

@@ -13,7 +13,6 @@
 #include "inet/mobility/contract/IMobility.h"
 
 namespace inet {
-
 namespace visualizer {
 
 LinkCanvasVisualizerBase::LinkCanvasVisualization::LinkCanvasVisualization(LabeledLineFigure *figure, int sourceModuleId, int destinationModuleId) :
@@ -112,6 +111,5 @@ void LinkCanvasVisualizerBase::refreshLinkVisualization(const LinkVisualization 
 }
 
 } // namespace visualizer
-
 } // namespace inet
 

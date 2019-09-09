@@ -10,7 +10,6 @@
 #include "inet/routing/ospfv2/messagehandler/IMessageHandler.h"
 
 namespace inet {
-
 namespace ospfv2 {
 
 class INET_API DatabaseDescriptionHandler : public IMessageHandler
@@ -25,7 +24,6 @@ class INET_API DatabaseDescriptionHandler : public IMessageHandler
 };
 
 } // namespace ospfv2
-
 } // namespace inet
 
 #endif

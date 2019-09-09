@@ -8,7 +8,6 @@
 #include "inet/physicallayer/wireless/common/modulation/DsssOqpsk16Modulation.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 const DsssOqpsk16Modulation DsssOqpsk16Modulation::singleton;
@@ -80,6 +79,5 @@ double DsssOqpsk16Modulation::calculateSER(double snir, Hz bandwidth, bps bitrat
 }
 
 } // namespace physicallayer
-
 } // namespace inet
 

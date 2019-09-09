@@ -31,7 +31,6 @@
 #include "inet/common/INETMath.h" // M_PI
 
 namespace inet {
-
 namespace units {
 
 namespace internal // Boost would call this "detail"
@@ -314,7 +313,6 @@ inline void doParsimUnpacking(cCommBuffer *buffer, value<Value, Units>& a)
 // Implementation
 
 namespace units {
-
 namespace internal {
 
 // Ensures (at compile-time) that the template argument is true.
@@ -790,7 +788,6 @@ struct scaling_factor<translate<U, N, D>>
     namespace units { UNIT_DISPLAY_NAME(unit, string) }
 
 namespace units {
-
 namespace internal {
 
 // This is the default unit formatting mechanism
@@ -1556,7 +1553,6 @@ Value tan(const value<Value, Unit>& angle)
 }
 
 } // namespace units
-
 } // namespace inet
 
 #endif

@@ -12,7 +12,6 @@
 #include "inet/physicallayer/wireless/common/contract/packetlevel/RadioControlInfo_m.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 Define_Module(NarrowbandRadioBase);
@@ -65,6 +64,5 @@ void NarrowbandRadioBase::setBandwidth(Hz newBandwidth)
 }
 
 } // namespace physicallayer
-
 } // namespace inet
 

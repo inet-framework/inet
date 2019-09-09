@@ -13,7 +13,6 @@
 #include "inet/common/geometry/object/LineSegment.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 using namespace inet::physicalenvironment;
@@ -142,6 +141,5 @@ void DielectricObstacleLoss::TotalObstacleLossComputation::visit(const cObject *
 }
 
 } // namespace physicallayer
-
 } // namespace inet
 

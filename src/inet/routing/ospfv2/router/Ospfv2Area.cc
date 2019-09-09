@@ -13,7 +13,6 @@
 #include "inet/routing/ospfv2/router/Ospfv2Router.h"
 
 namespace inet {
-
 namespace ospfv2 {
 
 Ospfv2Area::Ospfv2Area(ChecksumMode checksumMode, IInterfaceTable *ift, AreaId id) :
@@ -2624,6 +2623,5 @@ std::string Ospfv2Area::getInterfaceInfo() const
 }
 
 } // namespace ospfv2
-
 } // namespace inet
 

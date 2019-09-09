@@ -14,7 +14,6 @@
 #include "inet/physicallayer/wireless/common/radio/packetlevel/ReceptionDecision.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 Define_Module(Ieee802154UwbIrReceiver);
@@ -167,6 +166,5 @@ std::pair<double, double> Ieee802154UwbIrReceiver::integrateWindow(simtime_t_cre
 }
 
 } // namespace physicallayer
-
 } // namespace inet
 

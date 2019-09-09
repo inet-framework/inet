@@ -8,7 +8,6 @@
 #include "inet/power/base/EpEnergySinkBase.h"
 
 namespace inet {
-
 namespace power {
 
 W EpEnergySinkBase::computeTotalPowerGeneration() const
@@ -41,6 +40,5 @@ void EpEnergySinkBase::removeEnergyGenerator(const IEnergyGenerator *energyGener
 }
 
 } // namespace power
-
 } // namespace inet
 

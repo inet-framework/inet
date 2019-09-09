@@ -8,7 +8,6 @@
 
 
 /************************************************************
-
    To add new streamSchedulers
    - the appropriate functions have to be implemented, preferably
     in this file.
@@ -17,8 +16,6 @@
    - in SctpAssociationBase.cc in the contructor for SctpAssociation
     the new functions have to be assigned. Compare the entries
     for ROUND_ROBIN.
-
-
 ************************************************************/
 
 #include <math.h>

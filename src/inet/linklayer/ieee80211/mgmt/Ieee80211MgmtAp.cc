@@ -19,7 +19,6 @@
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Radio.h"
 
 namespace inet {
-
 namespace ieee80211 {
 
 using namespace physicallayer;
@@ -352,6 +351,5 @@ void Ieee80211MgmtAp::stop()
 }
 
 } // namespace ieee80211
-
 } // namespace inet
 

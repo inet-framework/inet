@@ -33,8 +33,8 @@ class INET_API ConvolutionalCoderModule : public SimpleModule, public IFecCoder
     virtual const ConvolutionalCode *getForwardErrorCorrection() const override { return convolutionalCoder->getForwardErrorCorrection(); }
 };
 
-} /* namespace physicallayer */
-} /* namespace inet */
+} // namespace physicallayer
+} // namespace inet
 
 #endif
 

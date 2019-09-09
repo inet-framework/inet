@@ -8,14 +8,12 @@
 #define __INET_LSA_H
 
 #include <math.h>
-
 #include <vector>
 
 #include "inet/routing/ospfv2/Ospfv2Packet_m.h"
 #include "inet/routing/ospfv2/router/Ospfv2Common.h"
 
 namespace inet {
-
 namespace ospfv2 {
 
 struct NextHop
@@ -194,7 +192,6 @@ std::ostream& operator<<(std::ostream& ostr, const Ospfv2AsExternalLsaContents& 
 std::ostream& operator<<(std::ostream& ostr, const Ospfv2AsExternalLsa& lsa);
 
 } // namespace ospfv2
-
 } // namespace inet
 
 #endif

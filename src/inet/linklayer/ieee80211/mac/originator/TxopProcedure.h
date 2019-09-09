@@ -65,8 +65,8 @@ class INET_API TxopDurationFilter : public cObjectResultFilter
     using cObjectResultFilter::receiveSignal;
 };
 
-} /* namespace ieee80211 */
-} /* namespace inet */
+} // namespace ieee80211
+} // namespace inet
 
 #endif
 

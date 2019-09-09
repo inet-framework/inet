@@ -64,8 +64,8 @@ class INET_API Dcaf : public IChannelAccess, public IContention::ICallback, publ
     virtual int getCw() override { return cw; }
 };
 
-} /* namespace ieee80211 */
-} /* namespace inet */
+} // namespace ieee80211
+} // namespace inet
 
 #endif
 

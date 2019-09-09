@@ -9,7 +9,6 @@
 #include "inet/common/INETUtils.h"
 
 namespace inet {
-
 namespace tcp {
 
 #define PACK_STRUCT_STRUCT __attribute__ (( __packed__ ))
@@ -59,7 +58,6 @@ typedef int32_t s32_t;
 #define U32_F   "u"
 
 } // namespace tcp
-
 } //namespace inet
 
 #endif

@@ -35,7 +35,6 @@
 #include "lwip/arch.h"
 
 namespace inet {
-
 namespace tcp {
 
 /** lower two bits indicate debug level
@@ -113,7 +112,6 @@ constexpr bool lwip_halt_predicate(unsigned int debug)
 #endif /* LWIP_DEBUG */
 
 } // namespace tcp
-
 } // namespace inet
 
 #endif /* __LWIP_DEBUG_H__ */

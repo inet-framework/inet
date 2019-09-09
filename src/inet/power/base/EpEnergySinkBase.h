@@ -13,7 +13,6 @@
 #include "inet/power/contract/IEpEnergySink.h"
 
 namespace inet {
-
 namespace power {
 
 class INET_API EpEnergySinkBase : public EnergySinkBase, public virtual IEpEnergySink, public cListener
@@ -33,7 +32,6 @@ class INET_API EpEnergySinkBase : public EnergySinkBase, public virtual IEpEnerg
 };
 
 } // namespace power
-
 } // namespace inet
 
 #endif

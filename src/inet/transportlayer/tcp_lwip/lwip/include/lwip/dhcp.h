@@ -112,7 +112,6 @@ PACK_STRUCT_END
 #  include "arch/epstruct.h"
 
 namespace inet {
-
 namespace tcp {
 
 #endif
@@ -249,7 +248,6 @@ void dhcp_fine_tmr(void);
 #endif /* LWIP_DHCP */
 
 } // namespace tcp
-
 } // namespace inet
 
 #endif /*__LWIP_DHCP_H__*/

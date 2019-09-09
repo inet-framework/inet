@@ -42,7 +42,6 @@
 
 
 namespace inet {
-
 namespace tcp {
 
 #ifdef __cplusplus
@@ -213,7 +212,6 @@ void ip_debug_print(struct pbuf *p);
 #endif
 
 } // namespace tcp
-
 } // namespace inet
 
 

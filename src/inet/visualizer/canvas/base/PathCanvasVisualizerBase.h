@@ -13,7 +13,6 @@
 #include "inet/visualizer/base/PathVisualizerBase.h"
 
 namespace inet {
-
 namespace visualizer {
 
 class INET_API PathCanvasVisualizerBase : public PathVisualizerBase
@@ -45,7 +44,6 @@ class INET_API PathCanvasVisualizerBase : public PathVisualizerBase
 };
 
 } // namespace visualizer
-
 } // namespace inet
 
 #endif

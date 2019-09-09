@@ -10,7 +10,6 @@
 #include <algorithm>
 
 namespace inet {
-
 namespace visualizer {
 
 bool QueueVisualizerBase::QueueVisitor::visit(cObject *object)
@@ -96,6 +95,5 @@ void QueueVisualizerBase::removeAllQueueVisualizations()
 }
 
 } // namespace visualizer
-
 } // namespace inet
 

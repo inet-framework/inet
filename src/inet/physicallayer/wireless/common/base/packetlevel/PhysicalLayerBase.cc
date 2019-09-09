@@ -10,7 +10,6 @@
 #include "inet/common/Simsignals.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 void PhysicalLayerBase::initialize(int stage)
@@ -56,6 +55,5 @@ bool PhysicalLayerBase::isLowerMessage(cMessage *message) const
 }
 
 } // namespace physicallayer
-
 } // namespace inet
 

@@ -13,7 +13,6 @@
 #include "inet/visualizer/osg/scene/NetworkNodeOsgVisualizer.h"
 
 namespace inet {
-
 namespace visualizer {
 
 class INET_API TransportConnectionOsgVisualizer : public TransportConnectionVisualizerBase
@@ -41,7 +40,6 @@ class INET_API TransportConnectionOsgVisualizer : public TransportConnectionVisu
 };
 
 } // namespace visualizer
-
 } // namespace inet
 
 #endif

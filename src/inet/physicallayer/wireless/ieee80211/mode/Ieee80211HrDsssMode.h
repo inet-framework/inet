@@ -13,7 +13,6 @@
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeBase.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 enum Ieee80211HrDsssPreambleType {
@@ -173,7 +172,6 @@ class INET_API Ieee80211HrDsssCompliantModes
 };
 
 } // namespace physicallayer
-
 } // namespace inet
 
 #endif

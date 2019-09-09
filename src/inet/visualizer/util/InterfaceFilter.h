@@ -12,7 +12,6 @@
 #include "inet/networklayer/common/NetworkInterface.h"
 
 namespace inet {
-
 namespace visualizer {
 
 /**
@@ -31,7 +30,6 @@ class INET_API InterfaceFilter
 };
 
 } // namespace visualizer
-
 } // namespace inet
 
 #endif

@@ -485,7 +485,6 @@ class INET_API TcpConnection : public SimpleModule
 };
 
 } // namespace tcp
-
 } // namespace inet
 
 #endif

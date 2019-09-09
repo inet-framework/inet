@@ -1097,6 +1097,5 @@ bool BgpRouter::isReachable(const Ipv4Address addr) const
 }
 
 } // namespace bgp
-
 } // namespace inet
 

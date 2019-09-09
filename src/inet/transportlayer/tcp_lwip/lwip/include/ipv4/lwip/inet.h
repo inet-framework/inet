@@ -35,7 +35,6 @@
 #include "lwip/opt.h"
 
 namespace inet {
-
 namespace tcp {
 
 #ifdef __cplusplus
@@ -119,7 +118,6 @@ u32_t ntohl(u32_t x);
 #endif
 
 } // namespace tcp
-
 } // namespace inet
 
 #endif /* __LWIP_INET_H__ */

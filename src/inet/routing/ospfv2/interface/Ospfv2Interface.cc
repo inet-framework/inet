@@ -8,7 +8,6 @@
 #include "inet/routing/ospfv2/interface/Ospfv2Interface.h"
 
 #include <memory.h>
-
 #include <vector>
 
 #include "inet/common/checksum/Checksum.h"
@@ -22,7 +21,6 @@
 #include "inet/routing/ospfv2/router/Ospfv2Router.h"
 
 namespace inet {
-
 namespace ospfv2 {
 
 using namespace ospf;
@@ -671,6 +669,5 @@ std::string Ospfv2Interface::getNeighbors()
 }
 
 } // namespace ospfv2
-
 } // namespace inet
 

@@ -12,7 +12,6 @@
 #include "inet/physicallayer/wireless/ieee80211/bitlevel/Ieee80211OfdmInterleaver.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 class INET_API Ieee80211OfdmInterleaverModule : public SimpleModule, public IInterleaver
@@ -33,8 +32,9 @@ class INET_API Ieee80211OfdmInterleaverModule : public SimpleModule, public IInt
     virtual BitVector deinterleave(const BitVector& bits) const override { return interleaver->deinterleave(bits); }
     virtual const Ieee80211OfdmInterleaving *getInterleaving() const override { return interleaver->getInterleaving(); }
 };
-} /* namespace physicallayer */
-} /* namespace inet */
+
+} // namespace physicallayer
+} // namespace inet
 
 #endif
 

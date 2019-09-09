@@ -142,7 +142,7 @@ inline std::ostream& operator<<(std::ostream& os, const ChunkBuffer *buffer) { r
 
 inline std::ostream& operator<<(std::ostream& os, const ChunkBuffer& buffer) { return os << buffer.str(); }
 
-} // namespace
+} // namespace inet
 
 #endif
 

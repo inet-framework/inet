@@ -246,6 +246,6 @@ bool QosRecoveryProcedure::isMulticastFrame(Packet *packet, const Ptr<const Ieee
     return false;
 }
 
-} /* namespace ieee80211 */
-} /* namespace inet */
+} // namespace ieee80211
+} // namespace inet
 

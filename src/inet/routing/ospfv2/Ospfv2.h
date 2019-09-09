@@ -17,7 +17,6 @@
 #include "inet/routing/ospfv2/router/Ospfv2Router.h"
 
 namespace inet {
-
 namespace ospfv2 {
 
 /**
@@ -68,7 +67,6 @@ class INET_API Ospfv2 : public RoutingProtocolBase, protected cListener
 };
 
 } // namespace ospfv2
-
 } // namespace inet
 
 #endif

@@ -616,6 +616,5 @@ const Ptr<Chunk> Ieee80211MacTrailerSerializer::deserialize(MemoryInputStream& s
 }
 
 } // namespace ieee80211
-
 } // namespace inet
 

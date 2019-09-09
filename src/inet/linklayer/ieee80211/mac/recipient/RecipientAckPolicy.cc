@@ -62,6 +62,6 @@ simtime_t RecipientAckPolicy::computeAckDurationField(Packet *packet, const Ptr<
     return 0;
 }
 
-} /* namespace ieee80211 */
-} /* namespace inet */
+} // namespace ieee80211
+} // namespace inet
 

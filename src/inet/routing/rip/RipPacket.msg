@@ -60,3 +60,4 @@ class RipPacket extends FieldsChunk
     // version is fixed: 2
     RipEntry entry[];
 }
+

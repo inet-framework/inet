@@ -54,5 +54,5 @@ Indication::Indication(const Indication& other) :
 {
 }
 
-} // namespace
+} // namespace inet
 

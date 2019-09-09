@@ -8,7 +8,6 @@
 #include "inet/routing/dymo/DymoRouteData.h"
 
 namespace inet {
-
 namespace dymo {
 
 DymoRouteData::DymoRouteData()

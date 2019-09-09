@@ -32,7 +32,7 @@ class INET_API ChunkSerializerRegistry
     static ChunkSerializerRegistry& getInstance();
 };
 
-} // namespace
+} // namespace inet
 
 #endif
 

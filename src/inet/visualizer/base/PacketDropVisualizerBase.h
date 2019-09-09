@@ -19,7 +19,6 @@
 #include "inet/visualizer/util/NetworkNodeFilter.h"
 
 namespace inet {
-
 namespace visualizer {
 
 class INET_API PacketDrop : public PacketDropDetails
@@ -116,7 +115,6 @@ class INET_API PacketDropVisualizerBase : public VisualizerBase, public cListene
 };
 
 } // namespace visualizer
-
 } // namespace inet
 
 #endif

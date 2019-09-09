@@ -10,7 +10,6 @@
 #include "inet/common/ModuleAccess.h"
 
 namespace inet {
-
 namespace visualizer {
 
 Define_Module(LinkBreakCanvasVisualizer);
@@ -87,6 +86,5 @@ void LinkBreakCanvasVisualizer::setAlpha(const LinkBreakVisualization *linkBreak
 }
 
 } // namespace visualizer
-
 } // namespace inet
 

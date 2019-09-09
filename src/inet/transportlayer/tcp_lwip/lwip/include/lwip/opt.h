@@ -46,7 +46,6 @@
 #include "lwip/debug.h"
 
 namespace inet {
-
 namespace tcp {
 
 /*
@@ -1842,7 +1841,6 @@ namespace tcp {
 #endif
 
 } // namespace tcp
-
 } // namespace inet
 
 #endif /* __LWIP_OPT_H__ */

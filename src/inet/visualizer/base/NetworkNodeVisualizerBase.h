@@ -12,7 +12,6 @@
 #include "inet/visualizer/util/NetworkNodeFilter.h"
 
 namespace inet {
-
 namespace visualizer {
 
 class INET_API NetworkNodeVisualizerBase : public VisualizerBase, public cListener
@@ -49,7 +48,6 @@ class INET_API NetworkNodeVisualizerBase : public VisualizerBase, public cListen
 };
 
 } // namespace visualizer
-
 } // namespace inet
 
 #endif

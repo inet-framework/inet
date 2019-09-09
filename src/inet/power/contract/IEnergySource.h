@@ -11,7 +11,6 @@
 #include "inet/power/contract/IEnergyConsumer.h"
 
 namespace inet {
-
 namespace power {
 
 /**
@@ -53,7 +52,6 @@ class INET_API IEnergySource
 };
 
 } // namespace power
-
 } // namespace inet
 
 #endif

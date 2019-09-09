@@ -33,8 +33,8 @@ class INET_API Pcf : public ICoordinationFunction, public SimpleModule
     virtual void corruptedFrameReceived() override { throw cRuntimeError("Unimplemented!"); }
 };
 
-} /* namespace ieee80211 */
-} /* namespace inet */
+} // namespace ieee80211
+} // namespace inet
 
 #endif
 

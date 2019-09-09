@@ -11,7 +11,6 @@
 #include "inet/networklayer/common/L3AddressTag_m.h"
 
 namespace inet {
-
 namespace tcp {
 
 TCPTesterBase::TCPTesterBase() : cSimpleModule()

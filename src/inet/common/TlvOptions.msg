@@ -49,3 +49,4 @@ cplusplus(TlvOptions) {{
      */
     int findByType(short int type, int firstPos=0) const;
 }}
+

@@ -8,7 +8,6 @@
 #include "inet/visualizer/util/InterfaceFilter.h"
 
 namespace inet {
-
 namespace visualizer {
 
 void InterfaceFilter::setPattern(const char *pattern)
@@ -23,6 +22,5 @@ bool InterfaceFilter::matches(const NetworkInterface *networkInterface) const
 }
 
 } // namespace visualizer
-
 } // namespace inet
 

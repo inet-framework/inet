@@ -15,7 +15,6 @@
 #include "inet/physicallayer/wireless/common/pathloss/RayleighFading.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 Define_Module(RayleighFading);
@@ -39,6 +38,5 @@ double RayleighFading::computePathLoss(mps propagationSpeed, Hz frequency, m dis
 }
 
 } // namespace physicallayer
-
 } // namespace inet
 

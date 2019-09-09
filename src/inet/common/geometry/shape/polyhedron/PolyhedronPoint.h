@@ -37,7 +37,7 @@ class INET_API PolyhedronPoint : public Coord
     PolyhedronPoint();
 };
 
-} /* namespace inet */
+} // namespace inet
 
 #endif
 

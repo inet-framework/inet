@@ -45,5 +45,5 @@ const Ptr<Chunk> EmptyChunk::convertChunk(const std::type_info& typeInfo, const 
     return makeShared<EmptyChunk>();
 }
 
-} // namespace
+} // namespace inet
 

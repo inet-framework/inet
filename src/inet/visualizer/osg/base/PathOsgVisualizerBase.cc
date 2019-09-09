@@ -16,7 +16,6 @@
 #include "inet/visualizer/osg/util/OsgUtils.h"
 
 namespace inet {
-
 namespace visualizer {
 
 PathOsgVisualizerBase::PathOsgVisualization::PathOsgVisualization(const char *label, const std::vector<int>& path, osg::Node *node) :
@@ -82,6 +81,5 @@ void PathOsgVisualizerBase::setAlpha(const PathVisualization *pathVisualization,
 }
 
 } // namespace visualizer
-
 } // namespace inet
 

@@ -11,7 +11,6 @@
 #include "inet/routing/bgpv4/BgpCommon.h"
 
 namespace inet {
-
 namespace bgp {
 
 class INET_API BgpRoutingTableEntry : public Ipv4Route
@@ -137,7 +136,6 @@ inline std::string BgpRoutingTableEntry::str() const
 }
 
 } // namespace bgp
-
 } // namespace inet
 
 #endif

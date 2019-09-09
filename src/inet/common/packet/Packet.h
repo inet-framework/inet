@@ -1497,7 +1497,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
 #undef SELFDOC_FUNCTION_CHUNK
 #undef SELFDOC_FUNCTION_T
 
-} // namespace
+} // namespace inet
 
 #endif
 

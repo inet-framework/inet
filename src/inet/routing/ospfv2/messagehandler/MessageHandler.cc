@@ -14,7 +14,6 @@
 #include "inet/routing/ospfv2/router/Ospfv2Router.h"
 
 namespace inet {
-
 namespace ospfv2 {
 
 using namespace ospf;
@@ -575,6 +574,5 @@ void MessageHandler::printLinkStateAcknowledgementPacket(const Ospfv2LinkStateAc
 }
 
 } // namespace ospfv2
-
 } // namespace inet
 

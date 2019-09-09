@@ -204,6 +204,5 @@ void setColor(cPacket *packet, int color)
 }
 
 } // namespace DiffservUtil
-
 } // namespace inet
 

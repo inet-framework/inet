@@ -22,7 +22,6 @@
 #include "inet/physicallayer/wireless/common/radio/bitlevel/SignalPacketModel.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 class INET_API ApskLayeredReceiver : public SnirReceiverBase
@@ -73,7 +72,6 @@ class INET_API ApskLayeredReceiver : public SnirReceiverBase
 };
 
 } // namespace physicallayer
-
 } // namespace inet
 
 #endif

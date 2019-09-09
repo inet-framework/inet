@@ -334,7 +334,6 @@ const Ieee80211OfdmMode& Ieee80211OfdmCompliantModes::getCompliantMode(unsigned 
         return *mode;
 }
 
-
 // Preamble modes
 const Ieee80211OfdmPreambleMode Ieee80211OfdmCompliantModes::ofdmPreambleModeCS5MHz(MHz(5));
 const Ieee80211OfdmPreambleMode Ieee80211OfdmCompliantModes::ofdmPreambleModeCS10MHz(MHz(10));

@@ -38,3 +38,4 @@ enum BgpProcessResult
     ASLOOP_NO_DETECTED = 93;
     ASLOOP_DETECTED = 94;
 }
+

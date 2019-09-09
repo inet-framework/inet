@@ -23,8 +23,8 @@ class INET_API BasicMpduAggregationPolicy : public IMpduAggregationPolicy, publi
     virtual std::vector<Packet *> *computeAggregateFrames(std::vector<Packet *> *frames) override;
 };
 
-} /* namespace ieee80211 */
-} /* namespace inet */
+} // namespace ieee80211
+} // namespace inet
 
 #endif
 

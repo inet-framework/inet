@@ -22,6 +22,6 @@ std::vector<Packet *> *BasicMpduAggregationPolicy::computeAggregateFrames(std::v
     return nullptr;
 }
 
-} /* namespace ieee80211 */
-} /* namespace inet */
+} // namespace ieee80211
+} // namespace inet
 

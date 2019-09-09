@@ -20,7 +20,6 @@ Ieee80211VhtCode::Ieee80211VhtCode(
     interleaving(interleaving),
     scrambling(scrambling)
 {
-
 }
 
 const Ieee80211VhtCode *Ieee80211VhtCompliantCodes::getCompliantCode(const Ieee80211ConvolutionalCode *convolutionalCode, const Ieee80211OfdmModulation *stream1Modulation, const Ieee80211OfdmModulation *stream2Modulation, const Ieee80211OfdmModulation *stream3Modulation, const Ieee80211OfdmModulation *stream4Modulation, const Ieee80211OfdmModulation *stream5Modulation, const Ieee80211OfdmModulation *stream6Modulation, const Ieee80211OfdmModulation *stream7Modulation, const Ieee80211OfdmModulation *stream8Modulation, Hz bandwidth, bool withScrambling)
@@ -52,6 +51,6 @@ Ieee80211VhtCode::~Ieee80211VhtCode()
     delete interleaving;
 }
 
-} /* namespace physicallayer */
-} /* namespace inet */
+} // namespace physicallayer
+} // namespace inet
 

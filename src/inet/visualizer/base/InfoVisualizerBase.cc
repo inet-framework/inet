@@ -10,7 +10,6 @@
 #include <algorithm>
 
 namespace inet {
-
 namespace visualizer {
 
 InfoVisualizerBase::InfoVisualization::InfoVisualization(int moduleId) :
@@ -124,6 +123,5 @@ std::string InfoVisualizerBase::getInfoVisualizationText(cModule *module) const
 }
 
 } // namespace visualizer
-
 } // namespace inet
 

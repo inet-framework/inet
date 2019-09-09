@@ -4,7 +4,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-
 #include "inet/common/TlvOptions_m.h"
 
 namespace inet {

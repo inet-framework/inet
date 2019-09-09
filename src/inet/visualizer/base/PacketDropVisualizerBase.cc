@@ -14,7 +14,6 @@
 #include "inet/mobility/contract/IMobility.h"
 
 namespace inet {
-
 namespace visualizer {
 
 PacketDrop::PacketDrop(PacketDropReason reason, const cPacket *packet, const int moduleId, const Coord& position) :
@@ -166,7 +165,6 @@ void PacketDropVisualizerBase::refreshDisplay() const
 void PacketDropVisualizerBase::subscribe()
 {
     visualizationSubjectModule->subscribe(packetDroppedSignal, this);
-
 }
 
 void PacketDropVisualizerBase::unsubscribe()
@@ -225,6 +223,5 @@ std::string PacketDropVisualizerBase::getPacketDropVisualizationText(const Packe
 }
 
 } // namespace visualizer
-
 } // namespace inet
 

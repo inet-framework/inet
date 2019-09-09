@@ -11,7 +11,6 @@
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtFrame_m.h"
 
 namespace inet {
-
 namespace ieee80211 {
 
 Register_Serializer(Ieee80211AssociationRequestFrame, Ieee80211MgmtFrameSerializer);
@@ -435,6 +434,5 @@ const Ptr<Chunk> Ieee80211MgmtFrameSerializer::deserialize(MemoryInputStream& st
 }
 
 } // namespace ieee80211
-
 } // namespace inet
 

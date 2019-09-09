@@ -25,7 +25,6 @@
 #endif // INET_WITH_PHYSICALLAYERWIRELESSCOMMON
 
 namespace inet {
-
 namespace visualizer {
 
 class INET_API MediumCanvasVisualizer : public MediumVisualizerBase
@@ -155,7 +154,6 @@ class INET_API MediumCanvasVisualizer : public MediumVisualizerBase
 };
 
 } // namespace visualizer
-
 } // namespace inet
 
 #endif

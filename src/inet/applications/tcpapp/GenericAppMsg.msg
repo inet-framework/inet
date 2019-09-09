@@ -28,3 +28,4 @@ class GenericAppMsg extends FieldsChunk
     bool serverClose;        // with TCP: if true, server should close the
                              // connection after sending the reply
 }
+

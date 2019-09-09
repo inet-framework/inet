@@ -8,12 +8,10 @@
 #include "inet/power/contract/ICcEnergyGenerator.h"
 
 namespace inet {
-
 namespace power {
 
 simsignal_t ICcEnergyGenerator::currentGenerationChangedSignal = cComponent::registerSignal("currentGenerationChanged");
 
 } // namespace power
-
 } // namespace inet
 

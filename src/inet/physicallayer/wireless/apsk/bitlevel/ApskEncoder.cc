@@ -11,7 +11,6 @@
 #include "inet/physicallayer/wireless/apsk/packetlevel/ApskPhyHeader_m.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 Define_Module(ApskEncoder);
@@ -99,6 +98,5 @@ const ITransmissionBitModel *ApskEncoder::encode(const ITransmissionPacketModel 
 }
 
 } // namespace physicallayer
-
 } // namespace inet
 

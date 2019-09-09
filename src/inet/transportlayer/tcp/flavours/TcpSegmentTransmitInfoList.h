@@ -11,7 +11,6 @@
 #include "inet/transportlayer/tcp/flavours/TcpBaseAlg.h"
 
 namespace inet {
-
 namespace tcp {
 
 class INET_API TcpSegmentTransmitInfoList
@@ -48,7 +47,6 @@ class INET_API TcpSegmentTransmitInfoList
 };
 
 } // namespace tcp
-
 } // namespace inet
 
 #endif

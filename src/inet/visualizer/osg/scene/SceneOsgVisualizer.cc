@@ -15,7 +15,6 @@
 #include "inet/visualizer/osg/util/OsgUtils.h"
 
 namespace inet {
-
 namespace visualizer {
 
 Define_Module(SceneOsgVisualizer);
@@ -56,6 +55,5 @@ void SceneOsgVisualizer::initializeViewpoint()
 }
 
 } // namespace visualizer
-
 } // namespace inet
 

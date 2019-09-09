@@ -125,7 +125,6 @@ class INET_API TcpReceiveQueue : public cObject
 };
 
 } // namespace tcp
-
 } // namespace inet
 
 #endif

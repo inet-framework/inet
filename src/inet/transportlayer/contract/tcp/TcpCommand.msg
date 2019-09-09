@@ -238,3 +238,4 @@ class TcpStatusInfo extends TcpCommand
 
     bool fin_ack_rcvd;
 }
+

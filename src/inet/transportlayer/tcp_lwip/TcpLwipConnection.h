@@ -104,7 +104,6 @@ class INET_API TcpLwipConnection : public SimpleModule
 };
 
 } // namespace tcp
-
 } // namespace inet
 
 #endif

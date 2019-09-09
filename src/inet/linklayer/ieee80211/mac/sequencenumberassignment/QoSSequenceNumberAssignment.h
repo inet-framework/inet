@@ -39,8 +39,8 @@ class INET_API QoSSequenceNumberAssignment : public ISequenceNumberAssignment
     virtual void assignSequenceNumber(const Ptr<Ieee80211DataOrMgmtHeader>& header) override;
 };
 
-} /* namespace ieee80211 */
-} /* namespace inet */
+} // namespace ieee80211
+} // namespace inet
 
 #endif
 

@@ -35,3 +35,4 @@ class RtpParticipantInfo extends cNamedObject
     // Used for storing the port for ~RTCP by this endsystem.
     int RTCPPort = PORT_UNDEF;
 };
+

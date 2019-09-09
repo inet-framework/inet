@@ -108,7 +108,7 @@ class INET_API SpatialGrid
     SpatialGrid(const Coord& voxelSizes, const Coord& constraintAreaMin, const Coord& constraintAreaMax);
 };
 
-} /* namespace inet */
+} // namespace inet
 
 #endif
 

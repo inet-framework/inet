@@ -20,7 +20,6 @@
 #include "inet/transportlayer/rtp/RtpPayloadReceiver.h"
 
 namespace inet {
-
 namespace rtp {
 
 /**
@@ -70,7 +69,6 @@ class INET_API RtpAvProfilePayload32Receiver : public RtpPayloadReceiver
 };
 
 } // namespace rtp
-
 } // namespace inet
 
 #endif

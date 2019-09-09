@@ -14,7 +14,6 @@
 #include "inet/common/INETDefs.h"
 
 namespace inet {
-
 namespace utils {
 
 /**
@@ -106,7 +105,6 @@ INET_API void makePathForFile(const char *filename);
 INET_API std::vector<std::vector<intval_t>> asIntMatrix(const cValueArray* array);
 
 } // namespace utils
-
 } // namespace inet
 
 #endif

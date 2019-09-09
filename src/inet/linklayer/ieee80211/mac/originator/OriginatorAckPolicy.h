@@ -30,8 +30,8 @@ class INET_API OriginatorAckPolicy : public ModeSetListener, public IOriginatorA
     virtual simtime_t getAckTimeout(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header) const override;
 };
 
-} /* namespace ieee80211 */
-} /* namespace inet */
+} // namespace ieee80211
+} // namespace inet
 
 #endif
 

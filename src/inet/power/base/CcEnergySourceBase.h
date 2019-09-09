@@ -13,7 +13,6 @@
 #include "inet/power/contract/ICcEnergySource.h"
 
 namespace inet {
-
 namespace power {
 
 class INET_API CcEnergySourceBase : public EnergySourceBase, public virtual ICcEnergySource, public cListener
@@ -33,7 +32,6 @@ class INET_API CcEnergySourceBase : public EnergySourceBase, public virtual ICcE
 };
 
 } // namespace power
-
 } // namespace inet
 
 #endif

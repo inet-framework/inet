@@ -78,7 +78,6 @@ void AarfRateControl::frameTransmitted(Packet *frame, int retryCount, bool isSuc
     }
     else
         probing = false;
-
 }
 
 void AarfRateControl::multiplyIncreaseThreshold(double factor)
@@ -119,6 +118,6 @@ const IIeee80211Mode *AarfRateControl::getRate()
     return currentMode;
 }
 
-} /* namespace ieee80211 */
-} /* namespace inet */
+} // namespace ieee80211
+} // namespace inet
 

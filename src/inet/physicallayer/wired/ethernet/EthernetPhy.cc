@@ -13,7 +13,6 @@
 #include "inet/physicallayer/wired/ethernet/EthernetSignal_m.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 Define_Module(EthernetPhy);
@@ -54,6 +53,5 @@ void EthernetPhy::handleMessage(cMessage *message)
 }
 
 } // namespace physicallayer
-
 } // namespace inet
 

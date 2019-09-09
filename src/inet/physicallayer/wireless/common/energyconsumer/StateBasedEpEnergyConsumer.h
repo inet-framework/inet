@@ -15,7 +15,6 @@
 #include "inet/power/contract/IEpEnergySource.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 /**
@@ -63,7 +62,6 @@ class INET_API StateBasedEpEnergyConsumer : public SimpleModule, public power::I
 };
 
 } // namespace physicallayer
-
 } // namespace inet
 
 #endif

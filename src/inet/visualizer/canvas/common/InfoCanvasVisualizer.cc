@@ -10,7 +10,6 @@
 #include "inet/common/ModuleAccess.h"
 
 namespace inet {
-
 namespace visualizer {
 
 Define_Module(InfoCanvasVisualizer);
@@ -84,6 +83,5 @@ void InfoCanvasVisualizer::refreshInfoVisualization(const InfoVisualization *inf
 }
 
 } // namespace visualizer
-
 } // namespace inet
 

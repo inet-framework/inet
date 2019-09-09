@@ -12,7 +12,6 @@
 #include "inet/physicallayer/wireless/common/contract/packetlevel/ICommunicationCache.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 class INET_API CommunicationCacheBase : public Module, public ICommunicationCache
@@ -185,7 +184,6 @@ class INET_API CommunicationCacheBase : public Module, public ICommunicationCach
 };
 
 } // namespace physicallayer
-
 } // namespace inet
 
 #endif

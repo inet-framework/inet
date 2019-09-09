@@ -10,7 +10,6 @@
 #include "inet/common/ModuleAccess.h"
 
 namespace inet {
-
 namespace visualizer {
 
 Define_Module(TransportConnectionCanvasVisualizer);
@@ -114,6 +113,5 @@ void TransportConnectionCanvasVisualizer::setConnectionLabelsVisible(bool visibl
 }
 
 } // namespace visualizer
-
 } // namespace inet
 

@@ -15,10 +15,9 @@
 #include "inet/visualizer/osg/scene/SceneOsgEarthVisualizer.h"
 
 namespace inet {
-
-using namespace visualizer;
-
 namespace physicalenvironment {
+
+using namespace inet::visualizer;
 
 Define_Module(OsgEarthGround);
 
@@ -65,7 +64,6 @@ Coord OsgEarthGround::computeGroundNormal(const Coord& position) const
 }
 
 } // namespace physicalenvironment
-
 } // namespace inet
 
 #endif // defined(WITH_OSGEARTH) && defined(INET_WITH_VISUALIZATIONOSG)

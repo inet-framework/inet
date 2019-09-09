@@ -43,7 +43,6 @@ extern "C" {
 #include <stddef.h> /* for size_t */
 
 namespace inet {
-
 namespace tcp {
 
 typedef size_t mem_size_t;
@@ -109,7 +108,6 @@ void  mem_free(void *mem);
 #endif
 
 } // namespace tcp
-
 } // namespace inet
 
 #endif /* __LWIP_MEM_H__ */

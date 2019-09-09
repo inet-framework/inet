@@ -44,7 +44,6 @@
 #include "lwip/pbuf.h"
 
 namespace inet {
-
 namespace tcp {
 
 #if LWIP_DHCP
@@ -266,7 +265,6 @@ void netif_poll_all(void);
 #endif /* ENABLE_LOOPBACK */
 
 } // namespace tcp
-
 } // namespace inet
 
 #endif /* __LWIP_NETIF_H__ */

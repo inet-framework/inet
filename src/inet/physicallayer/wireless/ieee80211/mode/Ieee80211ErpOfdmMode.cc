@@ -14,7 +14,6 @@ Ieee80211ErpOfdmMode::Ieee80211ErpOfdmMode(const char *name, bool isErpOnly, con
     Ieee80211OfdmMode(name, preambleMode, signalMode, dataMode, MHz(20), MHz(20)), // review the channel spacing
     isErpOnly(isErpOnly)
 {
-
 }
 
 const Ieee80211ErpOfdmMode Ieee80211ErpOfdmCompliantModes::erpOfdmMode6Mbps("erpOfdmMode6Mbps", false, &Ieee80211OfdmCompliantModes::ofdmPreambleModeCS20MHz, &Ieee80211OfdmCompliantModes::ofdmHeaderMode6MbpsRate13, &Ieee80211OfdmCompliantModes::ofdmDataMode6MbpsCS20MHz);
@@ -40,6 +39,6 @@ const simtime_t Ieee80211ErpOfdmMode::getRifsTime() const
     return -1;
 }
 
-} /* namespace physicallayer */
-} /* namespace inet */
+} // namespace physicallayer
+} // namespace inet
 

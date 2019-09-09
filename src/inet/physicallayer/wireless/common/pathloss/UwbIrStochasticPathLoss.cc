@@ -15,7 +15,6 @@
 #include "inet/physicallayer/wireless/common/pathloss/UwbIrStochasticPathLoss.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 const Hz UwbIrStochasticPathLoss::fc = MHz(4492.8); // mandatory band 3, center frequency
@@ -102,6 +101,5 @@ double UwbIrStochasticPathLoss::computePathLoss(mps propagationSpeed, Hz frequen
 }
 
 } // namespace physicallayer
-
 } // namespace inet
 

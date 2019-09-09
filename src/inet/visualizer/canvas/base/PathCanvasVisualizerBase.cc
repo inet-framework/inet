@@ -12,7 +12,6 @@
 #include "inet/mobility/contract/IMobility.h"
 
 namespace inet {
-
 namespace visualizer {
 
 static inline double determinant(double a1, double a2, double b1, double b2)
@@ -178,6 +177,5 @@ void PathCanvasVisualizerBase::refreshPathVisualization(const PathVisualization 
 }
 
 } // namespace visualizer
-
 } // namespace inet
 

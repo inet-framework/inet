@@ -13,7 +13,6 @@
 #include "inet/power/base/EpEnergyStorageBase.h"
 
 namespace inet {
-
 namespace power {
 
 /**
@@ -93,7 +92,6 @@ class INET_API SimpleEpEnergyStorage : public EpEnergyStorageBase, public Lifecy
 };
 
 } // namespace power
-
 } // namespace inet
 
 #endif

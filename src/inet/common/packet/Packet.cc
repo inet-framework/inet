@@ -352,5 +352,5 @@ std::string Packet::str() const
     return stream.str();
 }
 
-} // namespace
+} // namespace inet
 

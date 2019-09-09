@@ -155,6 +155,5 @@ void SctpReceiveStream::setExpectedStreamSeqNum(int32_t seqNum) {
 }
 
 } // namespace sctp
-
 } // namespace inet
 

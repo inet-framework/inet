@@ -223,7 +223,6 @@ void GaugeFigure::parse(cProperty *property)
         setColorStrip(s);
     if ((s = property->getValue(PKEY_INITIAL_VALUE)) != nullptr)
         setValue(0, simTime(), utils::atod(s));
-
 }
 
 const char **GaugeFigure::getAllowedPropertyKeys() const

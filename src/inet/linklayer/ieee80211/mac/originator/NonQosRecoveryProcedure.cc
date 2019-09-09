@@ -244,6 +244,6 @@ bool NonQosRecoveryProcedure::isMulticastFrame(const Ptr<const Ieee80211MacHeade
     return false;
 }
 
-} /* namespace ieee80211 */
-} /* namespace inet */
+} // namespace ieee80211
+} // namespace inet
 

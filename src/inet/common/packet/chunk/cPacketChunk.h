@@ -57,7 +57,7 @@ class INET_API cPacketChunk : public Chunk
     //@}
 };
 
-} // namespace
+} // namespace inet
 
 #endif
 

@@ -44,7 +44,6 @@
 #include "lwip/netif.h"
 
 namespace inet {
-
 namespace tcp {
 
 #ifdef __cplusplus
@@ -141,7 +140,6 @@ struct tcpip_msg {
 #endif
 
 } // namespace tcp
-
 } // namespace inet
 
 #endif /* !NO_SYS */

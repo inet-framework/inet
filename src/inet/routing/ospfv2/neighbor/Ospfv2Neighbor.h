@@ -15,7 +15,6 @@
 #include "inet/routing/ospfv2/router/Ospfv2Common.h"
 
 namespace inet {
-
 namespace ospfv2 {
 
 class NeighborState;
@@ -202,7 +201,6 @@ inline bool operator!=(Neighbor::DdPacketId leftID, Neighbor::DdPacketId rightID
 }
 
 } // namespace ospfv2
-
 } // namespace inet
 
 #endif

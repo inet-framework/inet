@@ -9,7 +9,6 @@
 #include "inet/transportlayer/rtp/RtpPacket_m.h"
 
 namespace inet {
-
 namespace rtp {
 
 Register_Serializer(RtpHeader, RtpPacketSerializer);
@@ -53,6 +52,5 @@ const Ptr<Chunk> RtpPacketSerializer::deserialize(MemoryInputStream& stream) con
 }
 
 } // namespace rtp
-
 } // namespace inet
 

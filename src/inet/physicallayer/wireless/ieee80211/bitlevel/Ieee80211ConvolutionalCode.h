@@ -12,7 +12,6 @@
 #include "inet/physicallayer/wireless/common/radio/bitlevel/ConvolutionalCoder.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 /* By default, it supports the following code rates often used by IEEE802.11 PHY:
@@ -38,8 +37,9 @@ class INET_API Ieee80211ConvolutionalCode : public ConvolutionalCode
   public:
     Ieee80211ConvolutionalCode(int codeRateK, int codeRateN);
 };
-} /* namespace physicallayer */
-} /* namespace inet */
+
+} // namespace physicallayer
+} // namespace inet
 
 #endif
 

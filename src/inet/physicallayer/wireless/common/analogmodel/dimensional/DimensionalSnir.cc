@@ -9,7 +9,6 @@
 #include "inet/physicallayer/wireless/common/analogmodel/dimensional/DimensionalReceptionAnalogModel.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 DimensionalSnir::DimensionalSnir(const IReception *reception, const INoise *noise) :
@@ -134,6 +133,5 @@ const Ptr<const IFunction<double, Domain<simsec, Hz>>> DimensionalSnir::getSnir(
 }
 
 } // namespace physicallayer
-
 } // namespace inet
 

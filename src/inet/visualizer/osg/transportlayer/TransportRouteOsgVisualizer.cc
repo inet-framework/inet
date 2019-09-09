@@ -24,7 +24,6 @@
 #endif
 
 namespace inet {
-
 namespace visualizer {
 
 Define_Module(TransportRouteOsgVisualizer);
@@ -75,6 +74,5 @@ bool TransportRouteOsgVisualizer::isPathElement(cModule *module) const
 }
 
 } // namespace visualizer
-
 } // namespace inet
 

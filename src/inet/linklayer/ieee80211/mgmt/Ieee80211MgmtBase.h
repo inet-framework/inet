@@ -20,7 +20,6 @@
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
 
 namespace inet {
-
 namespace ieee80211 {
 
 /**
@@ -95,7 +94,6 @@ class INET_API Ieee80211MgmtBase : public OperationalBase, public cListener
 };
 
 } // namespace ieee80211
-
 } // namespace inet
 
 #endif

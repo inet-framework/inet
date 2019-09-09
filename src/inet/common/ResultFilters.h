@@ -13,9 +13,7 @@
 #include <regex>
 
 namespace inet {
-
 namespace utils {
-
 namespace filters {
 
 class INET_API VoidPtrWrapper : public cObject
@@ -692,9 +690,7 @@ class INET_API LocalSignalFilter : public cObjectResultFilter
 };
 
 } // namespace filters
-
 } // namespace utils
-
 } // namespace inet
 
 #endif

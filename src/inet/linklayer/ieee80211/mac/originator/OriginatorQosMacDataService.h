@@ -53,8 +53,8 @@ class INET_API OriginatorQosMacDataService : public IOriginatorMacDataService, p
     virtual std::vector<Packet *> *extractFramesToTransmit(queueing::IPacketQueue *pendingQueue) override;
 };
 
-} /* namespace ieee80211 */
-} /* namespace inet */
+} // namespace ieee80211
+} // namespace inet
 
 #endif
 

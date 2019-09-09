@@ -10,7 +10,6 @@
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 CommunicationCacheBase::RadioCacheEntry::RadioCacheEntry(const RadioCacheEntry& other) :
@@ -553,6 +552,5 @@ void CommunicationCacheBase::removeCachedSignal(const IRadio *receiver, const IT
 }
 
 } // namespace physicallayer
-
 } // namespace inet
 

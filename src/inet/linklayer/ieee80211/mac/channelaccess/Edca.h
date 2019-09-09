@@ -47,8 +47,8 @@ class INET_API Edca : public SimpleModule
     virtual void releaseChannelAccess(AccessCategory ac, IChannelAccess::ICallback *callback);
 };
 
-} /* namespace ieee80211 */
-} /* namespace inet */
+} // namespace ieee80211
+} // namespace inet
 
 #endif
 

@@ -15,7 +15,6 @@
 #include "inet/routing/ospfv2/router/Ospfv2Router.h"
 
 namespace inet {
-
 namespace ospfv2 {
 
 /**
@@ -105,7 +104,6 @@ class INET_API Ospfv2ConfigReader
 };
 
 } // namespace ospfv2
-
 } // namespace inet
 
 #endif

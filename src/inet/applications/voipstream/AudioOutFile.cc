@@ -229,3 +229,4 @@ AudioOutFile::~AudioOutFile()
 }
 
 } // namespace inet
+

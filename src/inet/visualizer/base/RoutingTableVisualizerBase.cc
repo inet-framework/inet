@@ -17,7 +17,6 @@
 #endif
 
 namespace inet {
-
 namespace visualizer {
 
 RoutingTableVisualizerBase::RouteVisualization::RouteVisualization(const Ipv4Route *route, int nodeModuleId, int nextHopModuleId) :
@@ -450,6 +449,5 @@ std::string RoutingTableVisualizerBase::getMulticastRouteVisualizationText(const
 }
 
 } // namespace visualizer
-
 } // namespace inet
 

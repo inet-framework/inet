@@ -11,7 +11,6 @@
 #define __INET_TCPHDR_H
 
 namespace inet {
-
 namespace tcp {
 
 #  define TH_FIN     0x01
@@ -49,7 +48,6 @@ struct tcphdr
 };    // TODO  __attribute__((packed));
 
 } // namespace tcp
-
 } // namespace inet
 
 #endif
