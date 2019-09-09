@@ -50,12 +50,12 @@ const Ptr<Chunk> FieldsChunk::peekUnchecked(PeekPredicate predicate, PeekConvert
     b chunkLength = getChunkLength();
     CHUNK_CHECK_USAGE(b(0) <= iterator.getPosition() && iterator.getPosition() <= chunkLength, "iterator is out of range");
     // 1. peeking an empty part returns nullptr
-    if (length == b(0) || (iterator.getPosition() == chunkLength && length == b(-1))) {
+    if (length == b(0) || (iterator.getPosition() == chunkLength && length < b(0))) {
         if (predicate == nullptr || predicate(nullptr))
             return EmptyChunk::getEmptyChunk(flags);
     }
     // 2. peeking the whole part returns this chunk
-    if (iterator.getPosition() == b(0) && (length == b(-1) || length == chunkLength)) {
+    if (iterator.getPosition() == b(0) && (-length >= chunkLength || length == chunkLength)) {
         auto result = const_cast<FieldsChunk *>(this)->shared_from_this();
         if (predicate == nullptr || predicate(result))
             return result;
