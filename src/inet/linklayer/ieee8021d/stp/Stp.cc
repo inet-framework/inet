@@ -34,6 +34,7 @@ const double Stp::tickInterval = 1;
 
 Stp::Stp()
 {
+
 }
 
 void Stp::initialize(int stage)
@@ -247,28 +248,42 @@ void Stp::generateBPDU(int interfaceId, const MacAddress& address, bool tcFlag, 
     bpdu->setProtocolVersionIdentifier(0);
     bpdu->setBpduType(CONFIG_BDPU);
 
-    bpdu->setBridgeAddress(bridgeAddress);
-    bpdu->setBridgePriority(bridgePriority);
+    if (topologyChangeNotification) {
+        if (isRoot || tcFlag) {
+            BpduFlags bpduFlags;
+            bpduFlags.tcFlag = true;
+            bpduFlags.tcaFlag = false;
+            bpdu->setBpduFlags(bpduFlags);
+        }
+        else if (tcaFlag) {
+            BpduFlags bpduFlags;
+            bpduFlags.tcFlag = false;
+            bpduFlags.tcaFlag = true;
+            bpdu->setBpduFlags(bpduFlags);
+        }
+    }
+
+    RootIdentifier rootId;
+    rootId.rootPriority = rootPriority;
+    rootId.rootAddress = rootAddress;
+    bpdu->setRootIdentifier(rootId);
+
     bpdu->setRootPathCost(rootPathCost);
-    bpdu->setRootAddress(rootAddress);
-    bpdu->setRootPriority(rootPriority);
-    bpdu->setPortNum(interfaceId);
-    bpdu->setPortPriority(getPortInterfaceData(interfaceId)->getPriority());
+
+    BridgeIdentifier bridgeId;
+    bridgeId.bridgePriority = bridgePriority;
+    bridgeId.bridgeAddress = bridgeAddress;
+    bpdu->setBridgeIdentifier(bridgeId);
+
+    PortIdentifier portId;
+    portId.portPriority = getPortInterfaceData(interfaceId)->getPriority();
+    portId.portNum = interfaceId;
+    bpdu->setPortIdentifier(portId);
+
     bpdu->setMessageAge(0);
     bpdu->setMaxAge(currentMaxAge);
     bpdu->setHelloTime(currentHelloTime);
     bpdu->setForwardDelay(currentFwdDelay);
-
-    if (topologyChangeNotification) {
-        if (isRoot || tcFlag) {
-            bpdu->setTcFlag(true);
-            bpdu->setTcaFlag(false);
-        }
-        else if (tcaFlag) {
-            bpdu->setTcFlag(false);
-            bpdu->setTcaFlag(true);
-        }
-    }
 
     packet->insertAtBack(bpdu);
     send(packet, "relayOut");
@@ -281,6 +296,7 @@ void Stp::checkParametersChange()
         currentMaxAge = maxAge;
         currentFwdDelay = forwardDelay;
     }
+
     if (currentBridgePriority != bridgePriority) {
         currentBridgePriority = bridgePriority;
         reset();
@@ -340,7 +356,7 @@ void Stp::handleBPDU(Packet *packet, const Ptr<const Bpdu>& bpdu)
     int arrivalGate = packet->getTag<InterfaceInd>()->getInterfaceId();
     Ieee8021dInterfaceData *port = getPortInterfaceData(arrivalGate);
 
-    if (bpdu->getTcaFlag()) {
+    if (bpdu->getBpduFlags().tcaFlag) {
         topologyChangeRecvd = true;
         topologyChangeNotification = false;
     }
@@ -356,7 +372,7 @@ void Stp::handleBPDU(Packet *packet, const Ptr<const Bpdu>& bpdu)
     else if (port->getRole() == Ieee8021dInterfaceData::ROOT) {
         EV_INFO << "Configuration BPDU " << bpdu << " arrived from Root Switch." << endl;
 
-        if (bpdu->getTcFlag()) {
+        if (bpdu->getBpduFlags().tcFlag) {
             EV_DEBUG << "MacAddressTable aging time set to " << currentFwdDelay << "." << endl;
             macTable->setAgingTime(currentFwdDelay);
 
@@ -456,6 +472,7 @@ void Stp::handleTCN(Packet *packet, const Ptr<const Bpdu>& tcn)
         outPacket->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ethernetMac);
         send(outPacket, "relayOut");
     }
+
     delete packet;
 }
 
@@ -464,17 +481,15 @@ bool Stp::isSuperiorBPDU(int interfaceId, const Ptr<const Bpdu>& bpdu)
     Ieee8021dInterfaceData *port = getPortInterfaceData(interfaceId);
     Ieee8021dInterfaceData *xBpdu = new Ieee8021dInterfaceData();
 
-    int result;
-
-    xBpdu->setRootPriority(bpdu->getRootPriority());
-    xBpdu->setRootAddress(bpdu->getRootAddress());
+    xBpdu->setRootPriority(bpdu->getRootIdentifier().rootPriority);
+    xBpdu->setRootAddress(bpdu->getRootIdentifier().rootAddress);
     xBpdu->setRootPathCost(bpdu->getRootPathCost() + port->getLinkCost());
-    xBpdu->setBridgePriority(bpdu->getBridgePriority());
-    xBpdu->setBridgeAddress(bpdu->getBridgeAddress());
-    xBpdu->setPortPriority(bpdu->getPortPriority());
-    xBpdu->setPortNum(bpdu->getPortNum());
+    xBpdu->setBridgePriority(bpdu->getBridgeIdentifier().bridgePriority);
+    xBpdu->setBridgeAddress(bpdu->getBridgeIdentifier().bridgeAddress);
+    xBpdu->setPortPriority(bpdu->getPortIdentifier().portPriority);
+    xBpdu->setPortNum(bpdu->getPortIdentifier().portNum);
 
-    result = comparePorts(port, xBpdu);
+    int result = comparePorts(port, xBpdu);
 
     // port is superior
     if (result > 0) {
@@ -482,8 +497,8 @@ bool Stp::isSuperiorBPDU(int interfaceId, const Ptr<const Bpdu>& bpdu)
         return false;
     }
 
+    // BPDU is superior
     if (result < 0) {
-        // BPDU is superior
         port->setFdWhile(0);    // renew info
         port->setState(Ieee8021dInterfaceData::DISCARDING);
         setSuperiorBPDU(interfaceId, bpdu);    // renew information
@@ -504,13 +519,13 @@ void Stp::setSuperiorBPDU(int interfaceId, const Ptr<const Bpdu>& bpdu)
 
     Ieee8021dInterfaceData *portData = getPortInterfaceData(interfaceId);
 
-    portData->setRootPriority(bpdu->getRootPriority());
-    portData->setRootAddress(bpdu->getRootAddress());
+    portData->setRootPriority(bpdu->getRootIdentifier().rootPriority);
+    portData->setRootAddress(bpdu->getRootIdentifier().rootAddress);
     portData->setRootPathCost(bpdu->getRootPathCost() + portData->getLinkCost());
-    portData->setBridgePriority(bpdu->getBridgePriority());
-    portData->setBridgeAddress(bpdu->getBridgeAddress());
-    portData->setPortPriority(bpdu->getPortPriority());
-    portData->setPortNum(bpdu->getPortNum());
+    portData->setBridgePriority(bpdu->getBridgeIdentifier().bridgePriority);
+    portData->setBridgeAddress(bpdu->getBridgeIdentifier().bridgeAddress);
+    portData->setPortPriority(bpdu->getPortIdentifier().portPriority);
+    portData->setPortNum(bpdu->getPortIdentifier().portNum);
     portData->setMaxAge(bpdu->getMaxAge());
     portData->setFwdDelay(bpdu->getForwardDelay());
     portData->setHelloTime(bpdu->getHelloTime());
@@ -590,9 +605,11 @@ void Stp::selectRootPort()
             best = currentPort;
             continue;
         }
+
         if (result < 0) {
             continue;
         }
+
         if (currentPort->getPriority() < best->getPriority()) {
             xRootIdx = i;
             best = currentPort;
@@ -605,6 +622,7 @@ void Stp::selectRootPort()
         EV_DETAIL << "Port=" << xRootInterfaceId << " selected as root port." << endl;
         topologyChangeNotification = true;
     }
+
     rootInterfaceId = xRootInterfaceId;
     getPortInterfaceData(rootInterfaceId)->setRole(Ieee8021dInterfaceData::ROOT);
     rootPathCost = best->getRootPathCost();
@@ -656,6 +674,7 @@ void Stp::selectDesignatedPorts()
             continue;
         }
     }
+
     delete bridgeGlobal;
 }
 
