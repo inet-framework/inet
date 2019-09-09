@@ -43,7 +43,6 @@ void Stp::initialize(int stage)
 
     if (stage == INITSTAGE_LOCAL) {
         tick = new cMessage("STP_TICK", 0);
-        WATCH(bridgeAddress);
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
         registerService(Protocol::stp, nullptr, gate("relayIn"));
@@ -74,6 +73,13 @@ void Stp::start()
     currentFwdDelay = forwardDelay;
     helloTime = 0;
     setAllDesignated();
+
+    WATCH(bridgePriority);
+    WATCH(bridgeAddress);
+    WATCH(isRoot);
+    WATCH(rootPriority);
+    WATCH(rootAddress);
+    WATCH(rootPathCost);
 
     scheduleAt(simTime() + tickInterval, tick);
 }
