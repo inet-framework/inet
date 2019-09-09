@@ -29,7 +29,6 @@ class AddressVector { @existingClass; }
 //
 enum SctpErrorCode
 {
-
 }
 
 //
@@ -102,7 +101,7 @@ enum SctpFlags {
     COMPLETE_MESG_ORDERED   = 0;
 };
 
-class SctpSimpleMessage extends cPacket
+packet SctpSimpleMessage
 {
     uint32_t dataLen;     //TODO remove it, use set/getDataArraySize() functions only
     uint8_t data[];
