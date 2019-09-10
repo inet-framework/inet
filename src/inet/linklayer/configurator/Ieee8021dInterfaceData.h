@@ -34,7 +34,7 @@ namespace inet {
 class INET_API Ieee8021dInterfaceData : public InterfaceProtocolData
 {
   public:
-    enum PortRole { ALTERNATE, NOTASSIGNED, DISABLED, DESIGNATED, BACKUP, ROOT };
+    enum PortRole { NOTASSIGNED, ROOT, DESIGNATED, ALTERNATE, DISABLED, BACKUP /*rstp only*/ };
 
     enum PortState { DISCARDING, LEARNING, FORWARDING };
 

@@ -360,6 +360,8 @@ void Stp::handleBPDU(Packet *packet, const Ptr<const Bpdu>& bpdu)
     int arrivalGate = packet->getTag<InterfaceInd>()->getInterfaceId();
     Ieee8021dInterfaceData *port = getPortInterfaceData(arrivalGate);
 
+    EV_DETAIL << switchModule->getFullName() << " received a BPDU on port=" << port->getInterfaceEntry()->getFullName() << endl;
+
     if (bpdu->getBpduFlags().tcaFlag) {
         topologyChangeRecvd = true;
         topologyChangeNotification = false;
