@@ -27,6 +27,12 @@ Register_Serializer(Ieee8022LlcSnapHeader, Ieee8022LlcHeaderSerializer);
 void Ieee8022LlcHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     const auto& llcHeader = CHK(dynamicPtrCast<const Ieee8022LlcHeader>(chunk));
+    // FIXME: ssap and dsap have incorrect (-1) values, which should not be serialized
+    /*if (llcHeader->getSsap() < 0)
+        throw cRuntimeError("Invalid ssap value.");
+    stream.writeByte(llcHeader->getSsap());
+    if (llcHeader->getDsap() < 0)
+        throw cRuntimeError("Invalid dsap value.");*/
     stream.writeByte(llcHeader->getSsap());
     stream.writeByte(llcHeader->getDsap());
     auto control = llcHeader->getControl();
@@ -43,7 +49,6 @@ void Ieee8022LlcHeaderSerializer::serialize(MemoryOutputStream& stream, const Pt
 
 const Ptr<Chunk> Ieee8022LlcHeaderSerializer::deserialize(MemoryInputStream& stream) const
 {
-    Ptr<Ieee8022LlcHeader> llcHeader = nullptr;
     uint8_t ssap = stream.readByte();
     uint8_t dsap = stream.readByte();
     uint16_t ctrl = stream.readByte();
@@ -53,12 +58,18 @@ const Ptr<Chunk> Ieee8022LlcHeaderSerializer::deserialize(MemoryInputStream& str
         auto snapHeader = makeShared<Ieee8022LlcSnapHeader>();
         snapHeader->setOui(((uint32_t)stream.readByte() << 16) + stream.readUint16Be());
         snapHeader->setProtocolId(stream.readUint16Be());
-        llcHeader = snapHeader;
+        if (ssap == 255) snapHeader->setSsap(-1);
+        else snapHeader->setSsap(ssap);
+        if (dsap == 255) snapHeader->setDsap(-1);
+        else snapHeader->setDsap(dsap);
+        snapHeader->setControl(ctrl);
+        return snapHeader;
     }
-    else
-        llcHeader = makeShared<Ieee8022LlcHeader>();
-    llcHeader->setDsap(dsap);
-    llcHeader->setSsap(ssap);
+    Ptr<Ieee8022LlcHeader> llcHeader = makeShared<Ieee8022LlcHeader>();
+    if (ssap == 255) llcHeader->setSsap(-1);
+    else llcHeader->setSsap(ssap);
+    if (dsap == 255) llcHeader->setDsap(-1);
+    else llcHeader->setDsap(dsap);
     llcHeader->setControl(ctrl);
     return llcHeader;
 }
