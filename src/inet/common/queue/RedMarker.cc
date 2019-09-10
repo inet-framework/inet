@@ -120,7 +120,14 @@ void RedMarker::handleMessage(cMessage *msg)
         }
         else
         {
-          shouldMark(packet);
+          if(shouldMark(packet))
+          {
+            if(packetDropped)
+            {
+              packetDropped = false;
+              return;
+            }
+          }
 
         }
         packet->setFrontOffset(headerOffset);
@@ -134,7 +141,7 @@ void RedMarker::handleMessage(cMessage *msg)
 
 
   if (shouldDrop(packet)){
-    std::cout<< "RedMarker: Dropping packet "<< std::endl;
+    EV_DETAIL<< "RedMarker: Dropping packet\n";
     dropPacket(packet);
     return;
   }
@@ -183,8 +190,8 @@ bool RedMarker::shouldMark(Packet *packet)
             dropPacket(packet);
             packetDropped = true;
             return true;
-        } else
-    if (minth <= avg && avg < maxth)
+    }
+    else if (minth <= avg && avg < maxth)
     {
         count[i]++;
         const double pb = maxp * (avg - minth) / (maxth - minth);
