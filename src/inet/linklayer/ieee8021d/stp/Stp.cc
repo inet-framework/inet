@@ -43,6 +43,8 @@ void Stp::initialize(int stage)
 
     if (stage == INITSTAGE_LOCAL) {
         tick = new cMessage("STP_TICK", 0);
+        disabledInterfaces = par("disabledInterfaces").stdstringValue();
+        disabledInterfaceMatcher.setPattern(disabledInterfaces.c_str(), false, true, false);
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
         registerService(Protocol::stp, nullptr, gate("relayIn"));
@@ -95,7 +97,15 @@ void Stp::initPortTable()
 void Stp::initInterfacedata(unsigned int interfaceId)
 {
     Ieee8021dInterfaceData *ifd = getPortInterfaceData(interfaceId);
-    ifd->setRole(Ieee8021dInterfaceData::NOTASSIGNED);
+
+    if( disabledInterfaceMatcher.matches(ifd->getInterfaceEntry()->getInterfaceName()) ||
+            disabledInterfaceMatcher.matches(ifd->getInterfaceEntry()->getInterfaceFullPath().c_str())) {
+        ifd->setRole(Ieee8021dInterfaceData::DISABLED);
+    }
+    else {
+        ifd->setRole(Ieee8021dInterfaceData::NOTASSIGNED);
+    }
+
     ifd->setState(Ieee8021dInterfaceData::DISCARDING);
     ifd->setRootPriority(bridgePriority);
     ifd->setRootAddress(bridgeAddress);
@@ -113,6 +123,16 @@ void Stp::handleMessageWhenUp(cMessage *msg)
     if (!msg->isSelfMessage()) {
         Packet *packet = check_and_cast<Packet*>(msg);
         const auto& bpdu = packet->peekAtFront<Bpdu>();
+
+        // IEEE 802.1D-1998 (Section 8.4.5)
+        // BPDUs received on a disabled port shall not be processed by the STP
+        int arrivalGate = packet->getTag<InterfaceInd>()->getInterfaceId();
+        Ieee8021dInterfaceData *port = getPortInterfaceData(arrivalGate);
+        if(port->getRole() == Ieee8021dInterfaceData::DISABLED) {
+            EV_DETAIL << "Incoming port is disabled. Discarding the received BPDU." << endl;
+            delete packet;
+            return;
+        }
 
         if (bpdu->getBpduType() == CONFIG_BDPU)
             handleBPDU(packet, bpdu);
@@ -241,6 +261,10 @@ void Stp::generateHelloBDPUs()
 
 void Stp::generateBPDU(int interfaceId, const MacAddress& address, bool tcFlag, bool tcaFlag)
 {
+    Ieee8021dInterfaceData *ifd = getPortInterfaceData(interfaceId);
+    if(ifd && ifd->getRole() == Ieee8021dInterfaceData::DISABLED)
+        return;
+
     Packet *packet = new Packet("BPDU");
     const auto& bpdu = makeShared<Bpdu>();
     auto macAddressReq = packet->addTag<MacAddressReq>();
@@ -360,7 +384,7 @@ void Stp::handleBPDU(Packet *packet, const Ptr<const Bpdu>& bpdu)
     int arrivalGate = packet->getTag<InterfaceInd>()->getInterfaceId();
     Ieee8021dInterfaceData *port = getPortInterfaceData(arrivalGate);
 
-    EV_DETAIL << switchModule->getFullName() << " received a BPDU on port=" << port->getInterfaceEntry()->getFullName() << endl;
+    EV_DETAIL << switchModule->getFullName() << " received a CONFIG BPDU on port=" << port->getInterfaceEntry()->getFullName() << endl;
 
     if (bpdu->getBpduFlags().tcaFlag) {
         topologyChangeRecvd = true;
@@ -455,10 +479,13 @@ int Stp::compareBridgeIDs(unsigned int aPriority, MacAddress aAddress, unsigned 
 
 void Stp::handleTCN(Packet *packet, const Ptr<const Bpdu>& tcn)
 {
-    EV_INFO << "Topology Change Notification BDPU " << tcn << " arrived." << endl;
+    int arrivalGate = packet->getTag<InterfaceInd>()->getInterfaceId();
+    Ieee8021dInterfaceData *port = getPortInterfaceData(arrivalGate);
+
+    EV_DETAIL << switchModule->getFullName() << " received a TCN BPDU on port=" << port->getInterfaceEntry()->getFullName() << endl;
+
     topologyChangeNotification = true;
 
-    int arrivalGate = packet->getTag<InterfaceInd>()->getInterfaceId();
     MacAddressInd *addressInd = packet->getTag<MacAddressInd>();
     MacAddress srcAddress = addressInd->getSrcAddress();
     MacAddress destAddress = addressInd->getDestAddress();
@@ -604,6 +631,8 @@ void Stp::selectRootPort()
 
     for (unsigned int i = 0; i < numPorts; i++) {
         currentPort = ifTable->getInterface(i)->getProtocolData<Ieee8021dInterfaceData>();
+        if(currentPort->getRole() == Ieee8021dInterfaceData::DISABLED)
+            continue;
         currentPort->setRole(Ieee8021dInterfaceData::NOTASSIGNED);
         result = comparePorts(currentPort, best);
         if (result > 0) {
@@ -625,7 +654,7 @@ void Stp::selectRootPort()
 
     unsigned int xRootInterfaceId = ifTable->getInterface(xRootIdx)->getInterfaceId();
     if (rootInterfaceId != xRootInterfaceId) {
-        EV_DETAIL << "Port=" << xRootInterfaceId << " selected as root port." << endl;
+        EV_DETAIL << "Port=" << ifTable->getInterface(xRootIdx)->getFullName() << " selected as root port." << endl;
         topologyChangeNotification = true;
     }
 

@@ -47,6 +47,8 @@ class INET_API Stp : public StpBase
     bool isRoot = false;
     unsigned int rootInterfaceId = 0;
     std::vector<unsigned int> desPorts;    // set of designated ports
+    std::string disabledInterfaces = "";
+    cPatternMatcher disabledInterfaceMatcher;
 
     // Discovered values
     unsigned int rootPathCost = 0;

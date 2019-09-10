@@ -65,6 +65,10 @@ simple Stp like ISpanningTree
         // Shows the spanning tree by coloring connections in the network graphics.
         // Label ethernet interface with port role and status. Mark root switch
         bool visualize = default(false);
+        
+        // excluded interfaces from the spanning tree algorithms.
+        // default is empty and all ports are included in the STP
+        string disabledInterfaces = default("");
 
         @display("i=block/network2");
     gates:
