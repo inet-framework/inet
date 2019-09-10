@@ -187,7 +187,7 @@ void BMac::sendPreamble()
     auto packet = new Packet("Preamble");
     preamble->setType(BMAC_PREAMBLE);
     packet->insertAtFront(preamble);
-    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::bmac);
+    packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::bmac);
     attachSignal(packet);
     sendDown(packet);
     nbTxPreambles++;
@@ -207,7 +207,7 @@ void BMac::sendMacAck()
     auto packet = new Packet("BMacAck");
     ack->setType(BMAC_ACK);
     packet->insertAtFront(ack);
-    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::bmac);
+    packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::bmac);
     attachSignal(packet);
     sendDown(packet);
     nbTxAcks++;

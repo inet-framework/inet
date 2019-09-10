@@ -16,6 +16,7 @@
 #ifndef __INET_MATH_POINT_H_
 #define __INET_MATH_POINT_H_
 
+#include "inet/common/geometry/common/Quaternion.h"
 #include "inet/common/IndexSequence.h"
 #include "inet/common/Units.h"
 
@@ -29,9 +30,13 @@ template<>
 inline void outputUnit(std::ostream& os, double v) { os << "unit"; }
 template<>
 inline void outputUnit(std::ostream& os, simtime_t v) { os << "s"; }
+template<>
+inline void outputUnit(std::ostream& os, Quaternion v) { os << "quaternion"; }
 
 template<typename T>
 inline double toDouble(T v) { return v.get(); }
+template<>
+inline double toDouble(simsec v) { return v.get().dbl(); }
 template<>
 inline double toDouble(double v) { return v; }
 template<>
@@ -40,12 +45,16 @@ inline double toDouble(simtime_t v) { return v.dbl(); }
 template<typename T>
 inline T getLowerBoundary() { return T(-INFINITY); }
 template<>
+inline simsec getLowerBoundary() { return simsec(-SimTime::getMaxTime() / 2); }
+template<>
 inline double getLowerBoundary() { return -INFINITY; }
 template<>
 inline simtime_t getLowerBoundary() { return -SimTime::getMaxTime() / 2; }
 
 template<typename T>
 inline T getUpperBoundary() { return T(INFINITY); }
+template<>
+inline simsec getUpperBoundary() { return simsec(SimTime::getMaxTime() / 2); }
 template<>
 inline double getUpperBoundary() { return INFINITY; }
 template<>
@@ -74,7 +83,7 @@ using make_bits_to_indices_sequence = typename bits_to_indices_sequence<DIMS, SI
 
 template<typename S, size_t ... SIS, typename D, size_t ... DIS>
 void copyTupleElements(const S& source, integer_sequence<size_t, SIS ...>, D& destination, integer_sequence<size_t, DIS ...>) {
-    std::initializer_list<double>({ toDouble(std::get<DIS>(destination) = std::get<SIS>(source)) ... });
+    (void)std::initializer_list<double>{ toDouble(std::get<DIS>(destination) = std::get<SIS>(source)) ... };
 }
 
 } // namespace internal
@@ -89,13 +98,13 @@ class INET_API Point : public std::tuple<T ...>
     template<size_t ... IS>
     double getImpl(int index, integer_sequence<size_t, IS...>) const {
         double result = 0;
-        std::initializer_list<double>({ result = (IS == index ? toDouble(std::get<IS>(*this)) : result) ... });
+        (void)std::initializer_list<double>{ result = (IS == index ? toDouble(std::get<IS>(*this)) : result) ... };
         return result;
     }
 
     template<size_t ... IS>
     void setImpl(int index, double value, integer_sequence<size_t, IS...>) {
-        std::initializer_list<double>({ (IS == index ? toDouble(std::get<IS>(*this) = T(value)) : 0) ... });
+        (void)std::initializer_list<double>{ (IS == index ? toDouble(std::get<IS>(*this) = T(value)) : 0) ... };
     }
 
     template<size_t ... IS>
@@ -121,14 +130,28 @@ class INET_API Point : public std::tuple<T ...>
     template<size_t ... IS>
     bool smaller(const Point<T ...>& o, integer_sequence<size_t, IS ...>) const {
         bool result = true;
-        std::initializer_list<bool>({ result &= std::get<IS>(*this) < std::get<IS>(o) ... });
+        (void)std::initializer_list<bool>{ result &= std::get<IS>(*this) < std::get<IS>(o) ... };
+        return result;
+    }
+
+    template<size_t ... IS>
+    bool smallerOrEqual(const Point<T ...>& o, integer_sequence<size_t, IS ...>) const {
+        bool result = true;
+        (void)std::initializer_list<bool>{ result &= std::get<IS>(*this) <= std::get<IS>(o) ... };
         return result;
     }
 
     template<size_t ... IS>
     bool greater(const Point<T ...>& o, integer_sequence<size_t, IS ...>) const {
         bool result = true;
-        std::initializer_list<bool>({ result &= std::get<IS>(*this) > std::get<IS>(o) ... });
+        (void)std::initializer_list<bool>{ result &= std::get<IS>(*this) > std::get<IS>(o) ... };
+        return result;
+    }
+
+    template<size_t ... IS>
+    bool greaterOrEqual(const Point<T ...>& o, integer_sequence<size_t, IS ...>) const {
+        bool result = true;
+        (void)std::initializer_list<bool>{ result &= std::get<IS>(*this) >= std::get<IS>(o) ... };
         return result;
     }
 
@@ -164,7 +187,7 @@ class INET_API Point : public std::tuple<T ...>
     }
 
     bool operator<=(const Point<T ...>& o) const {
-        return *this == o || *this < o;
+        return smallerOrEqual(o, index_sequence_for<T ...>{});
     }
 
     bool operator>(const Point<T ...>& o) const {
@@ -172,7 +195,7 @@ class INET_API Point : public std::tuple<T ...>
     }
 
     bool operator>=(const Point<T ...>& o) const {
-        return *this == o || *this > o;
+        return greaterOrEqual(o, index_sequence_for<T ...>{});
     }
 
     template<typename P, int DIMS>
@@ -212,7 +235,7 @@ inline Point<TS1 ..., TS2 ...> concatImpl(const Point<TS1 ...>& p1, integer_sequ
 
 template<typename ... T, size_t ... IS>
 inline std::ostream& print(std::ostream& os, const Point<T ...>& p, integer_sequence<size_t, IS...>) {
-    std::initializer_list<bool>({(bool)(os << (IS == 0 ? "" : ", ") << std::get<IS>(p)) ... });
+    (void)std::initializer_list<bool>{(os << (IS == 0 ? "" : ", ") << std::get<IS>(p), true) ... };
     return os;
 }
 

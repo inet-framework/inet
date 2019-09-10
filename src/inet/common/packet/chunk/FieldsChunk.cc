@@ -13,6 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
+#include "inet/common/packet/chunk/EmptyChunk.h"
 #include "inet/common/packet/chunk/FieldsChunk.h"
 #include "inet/common/packet/chunk/SliceChunk.h"
 
@@ -51,7 +52,7 @@ const Ptr<Chunk> FieldsChunk::peekUnchecked(PeekPredicate predicate, PeekConvert
     // 1. peeking an empty part returns nullptr
     if (length == b(0) || (iterator.getPosition() == chunkLength && length == b(-1))) {
         if (predicate == nullptr || predicate(nullptr))
-            return nullptr;
+            return EmptyChunk::getEmptyChunk(flags);
     }
     // 2. peeking the whole part returns this chunk
     if (iterator.getPosition() == b(0) && (length == b(-1) || length == chunkLength)) {

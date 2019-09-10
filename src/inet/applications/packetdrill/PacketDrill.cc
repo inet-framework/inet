@@ -277,7 +277,7 @@ Packet* PacketDrill::buildSCTPPacket(int address_family, enum direction_t direct
     if (direction == DIRECTION_INBOUND) {
         sctpmsg->setSrcPort(app->getRemotePort());
         sctpmsg->setDestPort(app->getLocalPort());
-        auto addressReq = packet->addTagIfAbsent<L3AddressReq>();
+        auto addressReq = packet->addTag<L3AddressReq>();
         addressReq->setSrcAddress(app->getRemoteAddress());
         addressReq->setDestAddress(app->getLocalAddress());
         sctpmsg->setVTag(app->getPeerVTag());
@@ -405,7 +405,7 @@ Packet* PacketDrill::buildSCTPPacket(int address_family, enum direction_t direct
     } else if (direction == DIRECTION_OUTBOUND) {
         sctpmsg->setSrcPort(app->getLocalPort());
         sctpmsg->setDestPort(app->getRemotePort());
-        auto addressReq = packet->addTagIfAbsent<L3AddressReq>();
+        auto addressReq = packet->addTag<L3AddressReq>();
         addressReq->setSrcAddress(app->getLocalAddress());
         addressReq->setDestAddress(app->getRemoteAddress());
         sctpmsg->setVTag(app->getLocalVTag());

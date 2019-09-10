@@ -151,7 +151,7 @@ void NextHopForwarding::handleCommand(Request *request)
             auto indication = new Indication("closed", L3_I_SOCKET_CLOSED);
             auto ctrl = new L3SocketClosedIndication();
             indication->setControlInfo(ctrl);
-            indication->addTagIfAbsent<SocketInd>()->setSocketId(socketId);
+            indication->addTag<SocketInd>()->setSocketId(socketId);
             send(indication, "transportOut");
         }
         delete request;
@@ -495,8 +495,9 @@ void NextHopForwarding::decapsulate(Packet *packet)
     auto payloadProtocol = header->getProtocol();
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(payloadProtocol);
     packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(payloadProtocol);
-    packet->addTagIfAbsent<NetworkProtocolInd>()->setProtocol(&Protocol::nextHopForwarding);
-    packet->addTagIfAbsent<NetworkProtocolInd>()->setNetworkProtocolHeader(header);
+    auto networkProtocolInd = packet->addTagIfAbsent<NetworkProtocolInd>();
+    networkProtocolInd->setProtocol(&Protocol::nextHopForwarding);
+    networkProtocolInd->setNetworkProtocolHeader(header);
     auto l3AddressInd = packet->addTagIfAbsent<L3AddressInd>();
     l3AddressInd->setSrcAddress(header->getSourceAddress());
     l3AddressInd->setDestAddress(header->getDestinationAddress());

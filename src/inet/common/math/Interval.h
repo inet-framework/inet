@@ -37,7 +37,7 @@ class INET_API Interval
   protected:
     template<size_t ... IS>
     void checkImpl(integer_sequence<size_t, IS...>) const {
-        std::initializer_list<bool> bs({ std::get<IS>(upper) < std::get<IS>(lower) ... });
+        std::initializer_list<bool> bs{ std::get<IS>(upper) < std::get<IS>(lower) ... };
         if (std::any_of(bs.begin(), bs.end(), [] (bool b) { return b; }))
             throw cRuntimeError("Invalid arguments");
         if (closed != (closed & ((1 << std::tuple_size<std::tuple<T ...>>::value) - 1)))
@@ -46,10 +46,10 @@ class INET_API Interval
 
     template<size_t ... IS>
     bool containsImpl(const Point<T ...>& p, integer_sequence<size_t, IS...>) const {
-        bool result = lower < p;
+        bool result = lower <= p;
         if (result) {
             unsigned int b = 1 << std::tuple_size<std::tuple<T ...>>::value >> 1;
-            std::initializer_list<bool>({ result &= ((closed & (b >> IS)) ? std::get<IS>(p) <= std::get<IS>(upper) : std::get<IS>(p) < std::get<IS>(upper)) ... });
+            (void)std::initializer_list<bool>{ result &= ((closed & (b >> IS)) ? std::get<IS>(p) <= std::get<IS>(upper) : std::get<IS>(p) < std::get<IS>(upper)) ... };
         }
         return result;
     }
@@ -60,9 +60,9 @@ class INET_API Interval
         Point<T ...> l( std::max(std::get<IS>(lower), std::get<IS>(o.lower)) ... );
         Point<T ...> u( std::min(std::get<IS>(upper), std::get<IS>(o.upper)) ... );
         unsigned int c = 0;
-        std::initializer_list<unsigned int>({ c += ((b >> IS) & (std::get<IS>(lower) > std::get<IS>(u) || std::get<IS>(upper) < std::get<IS>(l) ? 0 :
-                                                                (std::get<IS>(upper) == std::get<IS>(o.upper) ? (closed & o.closed) :
-                                                                (std::get<IS>(upper) < std::get<IS>(o.upper) ? closed : o.closed)))) ... });
+        (void)std::initializer_list<unsigned int>{ c += ((b >> IS) & (std::get<IS>(lower) > std::get<IS>(u) || std::get<IS>(upper) < std::get<IS>(l) ? 0 :
+                                                                     (std::get<IS>(upper) == std::get<IS>(o.upper) ? (closed & o.closed) :
+                                                                     (std::get<IS>(upper) < std::get<IS>(o.upper) ? closed : o.closed)))) ... };
         Point<T ...> l1( std::min(std::get<IS>(upper), std::get<IS>(l)) ... );
         Point<T ...> u1( std::max(std::get<IS>(lower), std::get<IS>(u)) ... );
         return Interval<T ...>(l1, u1, c);
@@ -72,7 +72,7 @@ class INET_API Interval
     double getVolumeImpl(integer_sequence<size_t, IS...>) const {
         double result = 1;
         unsigned int b = 1 << std::tuple_size<std::tuple<T ...>>::value >> 1;
-        std::initializer_list<double>({ result *= ((closed & (b >> IS)) && std::get<IS>(upper) == std::get<IS>(lower) ? 1 : toDouble(std::get<IS>(upper) - std::get<IS>(lower))) ... });
+        (void)std::initializer_list<double>{ result *= ((closed & (b >> IS)) && std::get<IS>(upper) == std::get<IS>(lower) ? 1 : toDouble(std::get<IS>(upper) - std::get<IS>(lower))) ... };
         return result;
     }
 
@@ -80,7 +80,7 @@ class INET_API Interval
     bool isEmptyImpl(integer_sequence<size_t, IS...>) const {
         unsigned int b = 1 << std::tuple_size<std::tuple<T ...>>::value >> 1;
         bool result = false;
-        std::initializer_list<bool>({ result |= ((closed & (b >> IS)) ? false : std::get<IS>(lower) == std::get<IS>(upper)) ... });
+        (void)std::initializer_list<bool>{ result |= ((closed & (b >> IS)) ? false : std::get<IS>(lower) == std::get<IS>(upper)) ... };
         return result;
     }
 
@@ -112,25 +112,37 @@ class INET_API Interval
     }
 };
 
-template<typename T0>
-void iterateBoundaries(const Interval<T0>& i, const std::function<void (const Point<T0>&)> f) {
-    f(i.getLower());
-    f(i.getUpper());
+inline void iterateBoundaries(const Interval<>& i, const std::function<void (const Point<>&)> f) {
+    f(Point<>());
 }
 
 template<typename T0, typename ... TS>
-typename std::enable_if<sizeof ... (TS) != 0, void>::type
-iterateBoundaries(const Interval<T0, TS ...>& i, const std::function<void (const Point<T0, TS ...>&)> f) {
+inline void iterateBoundaries(const Interval<T0, TS ...>& i, const std::function<void (const Point<T0, TS ...>&)> f) {
     Interval<TS ...> i1(tail(i.getLower()), tail(i.getUpper()), i.getClosed() >> 1);
-    iterateBoundaries<TS ...>(i1, std::function<void (const Point<TS ...>&)>([&] (const Point<TS ...>& q) {
+    iterateBoundaries(i1, std::function<void (const Point<TS ...>&)>([&] (const Point<TS ...>& q) {
         f(concat(Point<T0>(head(i.getLower())), q));
         f(concat(Point<T0>(head(i.getUpper())), q));
     }));
 }
 
+namespace internal {
+
+template<typename ... T, size_t ... IS>
+inline std::ostream& print(std::ostream& os, const Interval<T ...>& i, integer_sequence<size_t, IS...>) {
+    const auto& lower = i.getLower();
+    const auto& upper = i.getUpper();
+    auto closed = i.getClosed();
+    unsigned int b = 1 << std::tuple_size<std::tuple<T ...>>::value >> 1;
+    (void)std::initializer_list<bool>{(os << (IS == 0 ? "" : " x "), os << "[" << std::get<IS>(lower) << " ... " << std::get<IS>(upper) << ((closed & (b >> IS)) ? "]" : ")"), true) ... };
+    return os;
+}
+
+} // namespace internal
+
 template<typename ... T>
 inline std::ostream& operator<<(std::ostream& os, const Interval<T ...>& i) {
-    return os << "[" << i.getLower() << " ... " << i.getUpper() << "] " << std::bitset<std::tuple_size<std::tuple<T ...>>::value>(i.getClosed());
+    internal::print(os, i, index_sequence_for<T ...>{});
+    return os;
 }
 
 } // namespace math

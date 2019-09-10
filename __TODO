@@ -1,3 +1,6 @@
+ - merge OPSFv3 into INET when it becomes available and rename OSPF to OSPFv2
+ - merge BGPv4 into INET when it becomes available
+ - implement additional INET specific fingerprint ingredients: network interface configuration, routing table, mobility state, etc.
  - review all names in packet queueing and mathematical function API
  - topic/packetapi
  - revive unit tests
@@ -8,6 +11,7 @@
  - isotropic backround noise can't have a flat power over frequency, it should have a power which integrates over all frequencies
  - extend timeGains/frequencyGains parsing with OMNeT++ 6.0 expression parser support (#ifdef)
  - background noise infinite energy???????
+ - add background noise to transmission medium spectrum visualization
  - UWB-IR radio is not dimensional in frequency 7GHz spectrum, 2D linear/reciprocal problem!!!
  - PlotFigure margin
  - PowerFunction frequency quantization:

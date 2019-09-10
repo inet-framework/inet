@@ -111,7 +111,7 @@ void UdpBasicApp::sendPacket()
     str << packetName << "-" << numSent;
     Packet *packet = new Packet(str.str().c_str());
     if(dontFragment)
-        packet->addTagIfAbsent<FragmentationReq>()->setDontFragment(true);
+        packet->addTag<FragmentationReq>()->setDontFragment(true);
     const auto& payload = makeShared<ApplicationPacket>();
     payload->setChunkLength(B(par("messageLength")));
     payload->setSequenceNumber(numSent);

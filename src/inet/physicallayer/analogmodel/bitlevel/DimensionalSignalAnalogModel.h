@@ -30,27 +30,27 @@ using namespace inet::math;
 class INET_API DimensionalSignalAnalogModel : public NarrowbandSignalAnalogModel, public IDimensionalSignal
 {
   protected:
-    const Ptr<const IFunction<WpHz, Domain<simtime_t, Hz>>> power;
+    const Ptr<const IFunction<WpHz, Domain<simsec, Hz>>> power;
 
   public:
-    DimensionalSignalAnalogModel(const simtime_t duration, Hz carrierFrequency, Hz bandwidth, const Ptr<const IFunction<WpHz, Domain<simtime_t, Hz>>>& power);
+    DimensionalSignalAnalogModel(const simtime_t duration, Hz carrierFrequency, Hz bandwidth, const Ptr<const IFunction<WpHz, Domain<simsec, Hz>>>& power);
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 
-    virtual const Ptr<const IFunction<WpHz, Domain<simtime_t, Hz>>>& getPower() const override { return power; }
+    virtual const Ptr<const IFunction<WpHz, Domain<simsec, Hz>>>& getPower() const override { return power; }
     virtual W computeMinPower(simtime_t startTime, simtime_t endTime) const override;
 };
 
 class INET_API DimensionalTransmissionSignalAnalogModel : public DimensionalSignalAnalogModel, public virtual ITransmissionAnalogModel
 {
   public:
-    DimensionalTransmissionSignalAnalogModel(const simtime_t duration, Hz carrierFrequency, Hz bandwidth, const Ptr<const IFunction<WpHz, Domain<simtime_t, Hz>>>& power);
+    DimensionalTransmissionSignalAnalogModel(const simtime_t duration, Hz carrierFrequency, Hz bandwidth, const Ptr<const IFunction<WpHz, Domain<simsec, Hz>>>& power);
 };
 
 class INET_API DimensionalReceptionSignalAnalogModel : public DimensionalSignalAnalogModel, public virtual IReceptionAnalogModel
 {
   public:
-    DimensionalReceptionSignalAnalogModel(const simtime_t duration, Hz carrierFrequency, Hz bandwidth, const Ptr<const IFunction<WpHz, Domain<simtime_t, Hz>>>& power);
+    DimensionalReceptionSignalAnalogModel(const simtime_t duration, Hz carrierFrequency, Hz bandwidth, const Ptr<const IFunction<WpHz, Domain<simsec, Hz>>>& power);
 };
 
 } // namespace physicallayer

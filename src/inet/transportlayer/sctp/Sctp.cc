@@ -266,12 +266,11 @@ void Sctp::handleMessage(cMessage *msg)
         if (msg->getKind() == SCTP_C_GETSOCKETOPTIONS) {
             auto controlInfo = tags.getTag<SctpSendReq>();
             Indication* cmsg = new Indication("SendSocketOptions", SCTP_I_SENDSOCKETOPTIONS);
-            auto& indtags = getTags(cmsg);
-            auto indication = indtags.addTagIfAbsent<SctpCommandReq>();
+            auto indication = cmsg->addTag<SctpCommandReq>();
             indication->setSocketId(controlInfo->getSocketId());
             socketOptions = collectSocketOptions();
             cmsg->setContextPointer((void*) socketOptions);
-            cmsg->addTagIfAbsent<SocketInd>()->setSocketId(assocId);
+            cmsg->addTag<SocketInd>()->setSocketId(assocId);
             send(cmsg, "appOut");
             delete msg;
         } else {
@@ -397,11 +396,11 @@ void Sctp::sendAbortFromMain(Ptr<SctpHeader>& sctpmsg, L3Address fromAddr, L3Add
     msg->insertSctpChunks(abortChunk);
     Packet *pkt = new Packet("ABORT");
 
-    auto addresses = pkt->addTagIfAbsent<L3AddressReq>();
+    auto addresses = pkt->addTag<L3AddressReq>();
     addresses->setSrcAddress(fromAddr);
     addresses->setDestAddress(toAddr);
     IL3AddressType *addressType = toAddr.getAddressType();
-    pkt->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
+    pkt->addTag<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
     insertTransportProtocolHeader(pkt, Protocol::sctp, msg);
     send_to_ip(pkt);
 }
@@ -428,11 +427,11 @@ void Sctp::sendShutdownCompleteFromMain(Ptr<SctpHeader>& sctpmsg, L3Address from
     msg->insertSctpChunks(scChunk);
 
     Packet *pkt = new Packet("SHUTDOWN_COMPLETE");
-    auto addresses = pkt->addTagIfAbsent<L3AddressReq>();
+    auto addresses = pkt->addTag<L3AddressReq>();
     addresses->setSrcAddress(fromAddr);
     addresses->setDestAddress(toAddr);
     IL3AddressType *addressType = toAddr.getAddressType();
-    pkt->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
+    pkt->addTag<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
     insertTransportProtocolHeader(pkt, Protocol::sctp, msg);
     send_to_ip(pkt);
 }

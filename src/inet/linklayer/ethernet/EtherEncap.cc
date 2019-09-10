@@ -102,7 +102,7 @@ void EtherEncap::processCommandFromHigherLayer(Request *msg)
         auto indication = new Indication("closed", ETHERNET_I_SOCKET_CLOSED);
         auto ctrl = new EthernetSocketClosedIndication();
         indication->setControlInfo(ctrl);
-        indication->addTagIfAbsent<SocketInd>()->setSocketId(socketId);
+        indication->addTag<SocketInd>()->setSocketId(socketId);
         send(indication, "transportOut");
     }
     else if (dynamic_cast<EthernetDestroyCommand *>(ctrl) != nullptr) {

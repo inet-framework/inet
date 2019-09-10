@@ -44,9 +44,9 @@ class INET_API DimensionalTransmitterBase : public virtual IPrintableObject
     };
 
   protected:
-    const IInterpolator<simtime_t, double> *firstTimeInterpolator = nullptr;
+    const IInterpolator<simsec, double> *firstTimeInterpolator = nullptr;
     const IInterpolator<Hz, double> *firstFrequencyInterpolator = nullptr;
-    std::vector<GainEntry<simtime_t>> timeGains;
+    std::vector<GainEntry<simsec>> timeGains;
     std::vector<GainEntry<Hz>> frequencyGains;
     const char *timeGainsNormalization = nullptr;
     const char *frequencyGainsNormalization = nullptr;
@@ -62,7 +62,7 @@ class INET_API DimensionalTransmitterBase : public virtual IPrintableObject
     template<typename T>
     const Ptr<const IFunction<double, Domain<T>>> normalize(const Ptr<const IFunction<double, Domain<T>>>& function, const char *normalization) const;
 
-    virtual Ptr<const IFunction<WpHz, Domain<simtime_t, Hz>>> createPowerFunction(const simtime_t startTime, const simtime_t endTime, Hz carrierFrequency, Hz bandwidth, W power) const;
+    virtual Ptr<const IFunction<WpHz, Domain<simsec, Hz>>> createPowerFunction(const simtime_t startTime, const simtime_t endTime, Hz carrierFrequency, Hz bandwidth, W power) const;
 
   public:
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;

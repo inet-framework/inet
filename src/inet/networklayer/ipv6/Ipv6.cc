@@ -154,7 +154,7 @@ void Ipv6::handleRequest(Request *request)
             auto indication = new Indication("closed", IPv6_I_SOCKET_CLOSED);
             auto ctrl = new Ipv6SocketClosedIndication();
             indication->setControlInfo(ctrl);
-            indication->addTagIfAbsent<SocketInd>()->setSocketId(socketId);
+            indication->addTag<SocketInd>()->setSocketId(socketId);
             send(indication, "transportOut");
         }
         delete request;

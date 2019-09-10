@@ -20,7 +20,7 @@
 namespace inet {
 namespace physicallayer {
 
-DimensionalSignalAnalogModel::DimensionalSignalAnalogModel(const simtime_t duration, Hz carrierFrequency, Hz bandwidth, const Ptr<const IFunction<WpHz, Domain<simtime_t, Hz>>>& power) :
+DimensionalSignalAnalogModel::DimensionalSignalAnalogModel(const simtime_t duration, Hz carrierFrequency, Hz bandwidth, const Ptr<const IFunction<WpHz, Domain<simsec, Hz>>>& power) :
     NarrowbandSignalAnalogModel(duration, carrierFrequency, bandwidth),
     power(power)
 {
@@ -39,19 +39,19 @@ std::ostream& DimensionalSignalAnalogModel::printToStream(std::ostream& stream, 
 
 W DimensionalSignalAnalogModel::computeMinPower(simtime_t startTime, simtime_t endTime) const
 {
-    Point<simtime_t> startPoint(startTime);
-    Point<simtime_t> endPoint(endTime);
-    W minPower = integrate<WpHz, Domain<simtime_t, Hz>, 0b10, W, Domain<simtime_t>>(power)->getMin(Interval<simtime_t>(startPoint, endPoint, 0b1));
+    Point<simsec> startPoint{simsec(startTime)};
+    Point<simsec> endPoint{simsec(endTime)};
+    W minPower = integrate<WpHz, Domain<simsec, Hz>, 0b10, W, Domain<simsec>>(power)->getMin(Interval<simsec>(startPoint, endPoint, 0b1));
     EV_DEBUG << "Computing minimum reception power: start = " << startPoint << ", end = " << endPoint << " -> minimum reception power = " << minPower << endl;
     return minPower;
 }
 
-DimensionalTransmissionSignalAnalogModel::DimensionalTransmissionSignalAnalogModel(const simtime_t duration, Hz carrierFrequency, Hz bandwidth, const Ptr<const IFunction<WpHz, Domain<simtime_t, Hz>>>& power) :
+DimensionalTransmissionSignalAnalogModel::DimensionalTransmissionSignalAnalogModel(const simtime_t duration, Hz carrierFrequency, Hz bandwidth, const Ptr<const IFunction<WpHz, Domain<simsec, Hz>>>& power) :
     DimensionalSignalAnalogModel(duration, carrierFrequency, bandwidth, power)
 {
 }
 
-DimensionalReceptionSignalAnalogModel::DimensionalReceptionSignalAnalogModel(const simtime_t duration, Hz carrierFrequency, Hz bandwidth, const Ptr<const IFunction<WpHz, Domain<simtime_t, Hz>>>& power) :
+DimensionalReceptionSignalAnalogModel::DimensionalReceptionSignalAnalogModel(const simtime_t duration, Hz carrierFrequency, Hz bandwidth, const Ptr<const IFunction<WpHz, Domain<simsec, Hz>>>& power) :
     DimensionalSignalAnalogModel(duration, carrierFrequency, bandwidth, power)
 {
 }

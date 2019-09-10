@@ -174,6 +174,7 @@ void Udp::handleMessageWhenUp(cMessage *msg)
     // received from IP layer
     if (msg->arrivedOn("ipIn")) {
         Packet *packet = check_and_cast<Packet *>(msg);
+        ASSERT(packet->getControlInfo() == nullptr);
         auto protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
         if (protocol == &Protocol::udp) {
             processUDPPacket(packet);
@@ -187,9 +188,12 @@ void Udp::handleMessageWhenUp(cMessage *msg)
         else
             throw cRuntimeError("Unknown protocol: %s(%d)", protocol->getName(), protocol->getId());
     }
-    else {    // received from application layer
+    else if (msg->arrivedOn("appIn")) {
+        // received from application layer
         processCommandFromApp(msg);
     }
+    else
+        throw cRuntimeError("Message arrived on unknown gate: %s", msg->getArrivalGate()->getFullName());
 }
 
 void Udp::refreshDisplay() const
@@ -228,7 +232,7 @@ void Udp::processCommandFromApp(cMessage *msg)
             auto indication = new Indication("closed", UDP_I_SOCKET_CLOSED);
             auto udpCtrl = new UdpSocketClosedIndication();
             indication->setControlInfo(udpCtrl);
-            indication->addTagIfAbsent<SocketInd>()->setSocketId(socketId);
+            indication->addTag<SocketInd>()->setSocketId(socketId);
             send(indication, "appOut");
 
             break;
@@ -330,7 +334,10 @@ void Udp::processPacketFromApp(Packet *packet)
     L3Address srcAddr, destAddr;
     int srcPort = -1, destPort = -1;
 
-    int socketId = packet->getTag<SocketReq>()->getSocketId();
+    auto socketReq = packet->removeTag<SocketReq>();
+    int socketId = socketReq->getSocketId();
+    delete socketReq;
+
     SockDesc *sd = getOrCreateSocket(socketId);
 
     auto addressReq = packet->addTagIfAbsent<L3AddressReq>();
@@ -368,11 +375,11 @@ void Udp::processPacketFromApp(Packet *packet)
 
 
     if (packet->findTag<MulticastReq>() == nullptr)
-        packet->addTagIfAbsent<MulticastReq>()->setMulticastLoop(sd->multicastLoop);
+        packet->addTag<MulticastReq>()->setMulticastLoop(sd->multicastLoop);
     if (sd->ttl != -1 && packet->findTag<HopLimitReq>() == nullptr)
-        packet->addTagIfAbsent<HopLimitReq>()->setHopLimit(sd->ttl);
+        packet->addTag<HopLimitReq>()->setHopLimit(sd->ttl);
     if (packet->findTag<DscpReq>() == nullptr)
-        packet->addTagIfAbsent<DscpReq>()->setDifferentiatedServicesCodePoint(sd->typeOfService);
+        packet->addTag<DscpReq>()->setDifferentiatedServicesCodePoint(sd->typeOfService);
 
     const Protocol *l3Protocol = nullptr;
     // TODO: apps use ModuleIdAddress if the network interface doesn't have an IP address configured, and UDP uses NextHopForwarding which results in a weird error in MessageDispatcher
@@ -398,6 +405,7 @@ void Udp::processPacketFromApp(Packet *packet)
     }
     insertTransportProtocolHeader(packet, Protocol::udp, udpHeader);
     packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(l3Protocol);
+    packet->setKind(0);
 
     EV_INFO << "Sending app packet " << packet->getName() << " over " << l3Protocol->getName() << ".\n";
     emit(packetSentSignal, packet);
@@ -412,7 +420,7 @@ void Udp::processUDPPacket(Packet *udpPacket)
     emit(packetReceivedFromLowerSignal, udpPacket);
     emit(packetReceivedSignal, udpPacket);
 
-    delete udpPacket->removeTagIfPresent<PacketProtocolTag>();
+    delete udpPacket->removeTag<PacketProtocolTag>();
     b udpHeaderPopPosition = udpPacket->getFrontOffset();
     auto udpHeader = udpPacket->popAtFront<UdpHeader>(b(-1), Chunk::PF_ALLOW_INCORRECT);
 
@@ -865,6 +873,7 @@ void Udp::sendUp(Ptr<const UdpHeader>& header, Packet *payload, SockDesc *sd, us
 
     // send payload with UdpControlInfo up to the application
     payload->setKind(UDP_I_DATA);
+    delete payload->removeTagIfPresent<PacketProtocolTag>();
     delete payload->removeTagIfPresent<DispatchProtocolReq>();
     payload->addTagIfAbsent<SocketInd>()->setSocketId(sd->sockId);
     payload->addTagIfAbsent<TransportProtocolInd>()->setProtocol(&Protocol::udp);
@@ -883,11 +892,13 @@ void Udp::sendUpErrorIndication(SockDesc *sd, const L3Address& localAddr, ushort
     UdpErrorIndication *udpCtrl = new UdpErrorIndication();
     indication->setControlInfo(udpCtrl);
     //FIXME notifyMsg->addTagIfAbsent<InterfaceInd>()->setInterfaceId(interfaceId);
-    indication->addTagIfAbsent<SocketInd>()->setSocketId(sd->sockId);
-    indication->addTagIfAbsent<L3AddressInd>()->setSrcAddress(localAddr);
-    indication->addTagIfAbsent<L3AddressInd>()->setDestAddress(remoteAddr);
-    indication->addTagIfAbsent<L4PortInd>()->setSrcPort(sd->localPort);
-    indication->addTagIfAbsent<L4PortInd>()->setDestPort(remotePort);
+    indication->addTag<SocketInd>()->setSocketId(sd->sockId);
+    auto addresses = indication->addTag<L3AddressInd>();
+    addresses->setSrcAddress(localAddr);
+    addresses->setDestAddress(remoteAddr);
+    auto ports = indication->addTag<L4PortInd>();
+    ports->setSrcPort(sd->localPort);
+    ports->setDestPort(remotePort);
 
     send(indication, "appOut");
 }

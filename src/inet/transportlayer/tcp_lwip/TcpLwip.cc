@@ -618,8 +618,8 @@ void TcpLwip::ip_output(LwipTcpLayer::tcp_pcb *pcb, L3Address const& srcP, L3Add
 
     IL3AddressType *addressType = destP.getAddressType();
 
-    packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
-    auto addresses = packet->addTagIfAbsent<L3AddressReq>();
+    packet->addTag<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
+    auto addresses = packet->addTag<L3AddressReq>();
     addresses->setSrcAddress(srcP);
     addresses->setDestAddress(destP);
     if (conn) {

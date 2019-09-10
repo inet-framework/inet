@@ -147,8 +147,8 @@ void PacketDrillApp::socketDataArrived(TcpSocket *socket, Packet *msg, bool urge
     {
         auto *msg = new Request("data request", TCP_C_READ);
         TcpCommand *cmd = new TcpCommand();
-        msg->addTagIfAbsent<SocketReq>()->setSocketId(tcpConnId);
-        msg->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::tcp);
+        msg->addTag<SocketReq>()->setSocketId(tcpConnId);
+        msg->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::tcp);
         msg->setControlInfo(cmd);
         send(msg, "socketOut");       //send to TCP
         recvFromSet = false;
@@ -212,11 +212,10 @@ void PacketDrillApp::socketDataNotificationArrived(SctpSocket *socket, Message *
 {
     if (recvFromSet) {
         Packet* cmsg = new Packet("ReceiveRequest", SCTP_C_RECEIVE);
-        auto& tags = getTags(cmsg);
-        SctpSendReq *cmd = tags.addTagIfAbsent<SctpSendReq>();
+        SctpSendReq *cmd = cmsg->addTag<SctpSendReq>();
         cmd->setSocketId(sctpAssocId);
-        cmsg->addTagIfAbsent<SocketReq>()->setSocketId(sctpAssocId);
-        cmsg->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::sctp);
+        cmsg->addTag<SocketReq>()->setSocketId(sctpAssocId);
+        cmsg->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::sctp);
         cmd->setSid(0);
         send(cmsg, "socketOut");       //send to SCTP
         recvFromSet = false;
@@ -897,7 +896,7 @@ int PacketDrillApp::syscallWrite(struct syscall_spec *syscall, cQueue *args, cha
 
             cmsg->setKind(SCTP_C_SEND_ORDERED);
             cmsg->insertAtBack(applicationData);
-            auto sendCommand = cmsg->addTagIfAbsent<SctpSendReq>();
+            auto sendCommand = cmsg->addTag<SctpSendReq>();
             sendCommand->setLast(true);
             sendCommand->setSocketId(-1);
             sendCommand->setSendUnordered(false);
@@ -1025,8 +1024,7 @@ int PacketDrillApp::syscallSetsockopt(struct syscall_spec *syscall, cQueue *args
         case EXPR_SCTP_RESET_STREAMS: {
             struct sctp_reset_streams_expr *rs = exp->getResetStreams();
             Message *cmsg = new Message("SCTP_C_STREAM_RESET");
-            auto& tags = getTags(cmsg);
-            SctpResetReq *rinfo = tags.addTagIfAbsent<SctpResetReq>();
+            SctpResetReq *rinfo = cmsg->addTag<SctpResetReq>();
             rinfo->setSocketId(-1);
             rinfo->setFd(rs->srs_assoc_id->getNum());
             rinfo->setRemoteAddr(sctpSocket.getRemoteAddr());
@@ -1059,8 +1057,7 @@ int PacketDrillApp::syscallSetsockopt(struct syscall_spec *syscall, cQueue *args
         case EXPR_SCTP_ADD_STREAMS: {
             struct sctp_add_streams_expr *as = exp->getAddStreams();
             Message *cmsg = new Message("SCTP_C_STREAM_RESET");
-            auto& tags = getTags(cmsg);
-            SctpResetReq *rinfo = tags.addTagIfAbsent<SctpResetReq>();
+            SctpResetReq *rinfo = cmsg->addTag<SctpResetReq>();
             rinfo->setSocketId(-1);
             rinfo->setFd(as->sas_assoc_id->getNum());
             rinfo->setRemoteAddr(sctpSocket.getRemoteAddr());
@@ -1131,8 +1128,7 @@ int PacketDrillApp::syscallSetsockopt(struct syscall_spec *syscall, cQueue *args
                     break;
                 case SCTP_RESET_ASSOC: {
                     Message *cmsg = new Message("SCTP_C_STREAM_RESET");
-                    auto& tags = getTags(cmsg);
-                    SctpResetReq *rinfo = tags.addTagIfAbsent<SctpResetReq>();
+                    SctpResetReq *rinfo = cmsg->addTag<SctpResetReq>();
                     rinfo->setSocketId(-1);
                     rinfo->setFd(value);
                     rinfo->setRemoteAddr(sctpSocket.getRemoteAddr());
@@ -1290,7 +1286,7 @@ int PacketDrillApp::syscallSctpSendmsg(struct syscall_spec *syscall, cQueue *arg
     applicationData->addTag<CreationTimeTag>()->setCreationTime(simTime());
     cmsg->insertAtBack(applicationData);
 
-    auto sendCommand = cmsg->addTagIfAbsent<SctpSendReq>();
+    auto sendCommand = cmsg->addTag<SctpSendReq>();
     sendCommand->setLast(true);
     sendCommand->setSocketId(sctpAssocId);
     sendCommand->setSid(stream_no);
@@ -1342,7 +1338,7 @@ int PacketDrillApp::syscallSctpSend(struct syscall_spec *syscall, cQueue *args, 
     applicationData->addTag<CreationTimeTag>()->setCreationTime(simTime());
     cmsg->insertAtBack(applicationData);
 
-    auto sendCommand = cmsg->addTagIfAbsent<SctpSendReq>();
+    auto sendCommand = cmsg->addTag<SctpSendReq>();
     sendCommand->setLast(true);
     sendCommand->setSocketId(-1);
     sendCommand->setSid(sid);
@@ -1380,20 +1376,19 @@ int PacketDrillApp::syscallRead(PacketDrillEvent *event, struct syscall_spec *sy
                 case IP_PROT_TCP: {
                     Request *msg = new Request("dataRequest", TCP_C_READ);
                     TcpCommand *tcpcmd = new TcpCommand();
-                    msg->addTagIfAbsent<SocketReq>()->setSocketId(tcpConnId);
-                    msg->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::tcp);
+                    msg->addTag<SocketReq>()->setSocketId(tcpConnId);
+                    msg->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::tcp);
                     msg->setControlInfo(tcpcmd);
                     send(msg, "socketOut");       //send to TCP
                     break;
                 }
                 case IP_PROT_SCTP: {
                     Packet* pkt = new Packet("dataRequest", SCTP_C_RECEIVE);
-                    auto& tags = getTags(pkt);
-                    SctpSendReq *sctpcmd = tags.addTagIfAbsent<SctpSendReq>();
+                    SctpSendReq *sctpcmd = pkt->addTag<SctpSendReq>();
                     sctpcmd->setSocketId(sctpAssocId);
                     sctpcmd->setSid(0);
-                    pkt->addTagIfAbsent<SocketReq>()->setSocketId(sctpAssocId);
-                    pkt->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::sctp);
+                    pkt->addTag<SocketReq>()->setSocketId(sctpAssocId);
+                    pkt->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::sctp);
                     send(pkt, "socketOut");       //send to SCTP
                     break;
                 }
@@ -1492,8 +1487,8 @@ int PacketDrillApp::syscallClose(struct syscall_spec *syscall, cQueue *args, cha
         case IP_PROT_TCP: {
             Request *msg = new Request("close", TCP_C_CLOSE);
             TcpCommand *cmd = new TcpCommand();
-            msg->addTagIfAbsent<SocketReq>()->setSocketId(tcpConnId);
-            msg->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::tcp);
+            msg->addTag<SocketReq>()->setSocketId(tcpConnId);
+            msg->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::tcp);
             msg->setControlInfo(cmd);
             send(msg, "socketOut");       //send to TCP
             break;

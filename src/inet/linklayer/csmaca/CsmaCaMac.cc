@@ -540,7 +540,7 @@ void CsmaCaMac::sendAckFrame()
     if (fcsMode == FCS_COMPUTED)
         macTrailer->setFcs(computeFcs(frame->peekAllAsBytes()));
     frame->insertAtBack(macTrailer);
-    auto macAddressInd = frame->addTagIfAbsent<MacAddressInd>();
+    auto macAddressInd = frame->addTag<MacAddressInd>();
     macAddressInd->setSrcAddress(macHeader->getTransmitterAddress());
     macAddressInd->setDestAddress(macHeader->getReceiverAddress());
     frame->addTag<PacketProtocolTag>()->setProtocol(&Protocol::csmaCaMac);

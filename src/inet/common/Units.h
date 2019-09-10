@@ -154,7 +154,8 @@ class value
         return value<Value, compose<Units, OtherUnits> >(get() * other.get());
     }
 
-    value operator*(const value_type& v) const
+    template<typename OtherValue>
+    value operator*(OtherValue v) const
     {
         return value(get() * v);
     }
@@ -1206,6 +1207,7 @@ typedef value<double, units::unit> unit;
 typedef value<double, units::m> m;
 typedef value<double, units::kg> kg;
 typedef value<double, units::s> s;
+typedef value<simtime_t, units::s> simsec;
 typedef value<double, units::K> K;
 typedef value<double, units::A> A;
 typedef value<double, units::mol> mol;
@@ -1390,6 +1392,22 @@ std::ostream& operator<<(std::ostream& os, const value<Value, units::bps>& value
     else {
         os << value.get() << ' ';
         output_unit<units::bps>::fn(os);
+    }
+    return os;
+}
+
+inline std::ostream& operator<<(std::ostream& os, const value<simtime_t, units::s>& value)
+{
+    // TODO: KLUDGE: there's no direct infinity support in simtime_t
+    static auto positiveInfinity = SimTime::getMaxTime() / 2;
+    static auto negativeInfinity = -SimTime::getMaxTime() / 2;
+    if (value.get() == positiveInfinity)
+        os << "inf s";
+    else if (value.get() == negativeInfinity)
+        os << "-inf s";
+    else {
+        os << value.get() << ' ';
+        output_unit<units::s>::fn(os);
     }
     return os;
 }

@@ -167,8 +167,8 @@ void Icmpv6::processEchoRequest(Packet *requestPacket, const Ptr<const Icmpv6Ech
     replyPacket->insertAtFront(replyHeader);
 
     auto addressInd = requestPacket->getTag<L3AddressInd>();
-    replyPacket->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::icmpv6);
-    auto addressReq = replyPacket->addTagIfAbsent<L3AddressReq>();
+    replyPacket->addTag<PacketProtocolTag>()->setProtocol(&Protocol::icmpv6);
+    auto addressReq = replyPacket->addTag<L3AddressReq>();
     addressReq->setDestAddress(addressInd->getSrcAddress());
 
     if (addressInd->getDestAddress().isMulticast()    /*TODO check for anycast too*/) {
@@ -238,8 +238,8 @@ void Icmpv6::sendErrorMessage(Packet *origDatagram, Icmpv6Type type, int code)
     const auto& ipv6Header = origDatagram->peekAtFront<Ipv6Header>();
     if (ipv6Header->getSrcAddress().isUnspecified()) {
         // pretend it came from the IP layer
-        errorMsg->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::icmpv6);
-        errorMsg->addTagIfAbsent<L3AddressInd>()->setSrcAddress(Ipv6Address::LOOPBACK_ADDRESS);    // FIXME maybe use configured loopback address
+        errorMsg->addTag<PacketProtocolTag>()->setProtocol(&Protocol::icmpv6);
+        errorMsg->addTag<L3AddressInd>()->setSrcAddress(Ipv6Address::LOOPBACK_ADDRESS);    // FIXME maybe use configured loopback address
 
         // then process it locally
         processICMPv6Message(errorMsg);

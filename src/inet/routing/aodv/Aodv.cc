@@ -750,8 +750,8 @@ void Aodv::sendAODVPacket(const Ptr<AodvControlPacket>& aodvPacket, const L3Addr
     int interfaceId = interfaceTable->getInterfaceByName(par("interface"))->getInterfaceId(); // TODO: Implement: support for multiple interfaces
     packet->addTag<InterfaceReq>()->setInterfaceId(interfaceId);
     packet->addTag<HopLimitReq>()->setHopLimit(timeToLive);
-    packet->addTagIfAbsent<L3AddressReq>()->setDestAddress(destAddr);
-    packet->addTagIfAbsent<L4PortReq>()->setDestPort(aodvUDPPort);
+    packet->addTag<L3AddressReq>()->setDestAddress(destAddr);
+    packet->addTag<L4PortReq>()->setDestPort(aodvUDPPort);
 
     if (destAddr.isBroadcast())
         lastBroadcastTime = simTime();
