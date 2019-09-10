@@ -3,13 +3,14 @@ Fingerprint:
 1. change ami nem változtatja meg a fingerprintet (method extraction (a fingerprint nagy valószínűséggel megvéd a regression-től)
 2. átnevezés demonstrál (p kidob)
 3. új event keletkezik -> tplx nem jó -> NID kell (network communication fingerprint calculator)
+3.5. filterezés -> amit megváltoztattál és elronja a fingerprintet azt kihagyod, mert nem lényeges (modulokat kihagysz pl)
 4. amikor a NID is megváltozik (?)
-5. eltérés van és nem lehet a fingerprinttel bizonyítani hogy nincs regression (de tudod hogy hol kezd el eltérni a szimuláció futásában)
-ezt hogy lehet könnyen megállapítani a két verzió között -> az eseményeket meg tudod vizsgálni -> lehet hogy utána már nem veszed észre hogy hibás
+5. eltérés van és nem lehet a fingerprinttel bizonyítani hogy nincs regression (de tudod hogy hol kezd el eltérni a szimuláció 
+futásában) ezt hogy lehet könnyen megállapítani a két verzió között -> az eseményeket meg tudod vizsgálni -> lehet hogy utána már 
+nem veszed észre hogy hibás (diffingerprint -> hol kezd el eltérni)
 6. a NID sem jó, de statisztikailag jó -> (?)
-7. filterezés -> amit megváltoztattál és elronja a fingerprintet azt kihagyod, mert nem lényeges
 
-több példa felsorol mindegyikhez...
+több példa felsorol mindegyikhez...-> elég 1 jó példa mert nagyon hosszú lesz :/
 
 NID az jó ha lecserélsz egy protocol implementációt egy másikra -> a tplx nem jó
 
@@ -20,3 +21,7 @@ a NID high level; a protocol internal state-jét nem veszi figyelembe
 -de a NID-es működik
 
 A címe nem fingerprint (az a tool) -> Identifying regressions during model development...vmi ilyesmi
+
+regression/refactoring with safety -> 2 külön dolog
+
+
