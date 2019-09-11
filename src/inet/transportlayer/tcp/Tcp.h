@@ -23,8 +23,8 @@
 #include <set>
 
 #include "inet/common/INETDefs.h"
+#include "inet/common/LayeredProtocolBase.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
-#include "inet/common/lifecycle/OperationalBase.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/transportlayer/common/CrcMode_m.h"
@@ -93,7 +93,7 @@ class TcpReceiveQueue;
  * The concrete TcpAlgorithm class to use can be chosen per connection (in OPEN)
  * or in a module parameter.
  */
-class INET_API Tcp : public OperationalBase
+class INET_API Tcp : public LayeredProtocolBase
 {
   public:
     static simsignal_t tcpConnectionAddedSignal;
@@ -162,8 +162,17 @@ class INET_API Tcp : public OperationalBase
   protected:
     virtual void initialize(int stage) override;
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
-    virtual void handleMessageWhenUp(cMessage *msg) override;
     virtual void finish() override;
+
+    virtual void handleSelfMessage(cMessage *message) override;
+
+    virtual void handleUpperCommand(cMessage *message) override;
+
+    virtual void handleUpperPacket(Packet *packet) override;
+    virtual void handleLowerPacket(Packet *packet) override;
+
+    virtual bool isUpperMessage(cMessage *message) override;
+    virtual bool isLowerMessage(cMessage *message) override;
 
   public:
     /**
@@ -210,7 +219,7 @@ class INET_API Tcp : public OperationalBase
     // called at shutdown/crash
     virtual void reset();
 
-    bool checkCrc(const Ptr<const TcpHeader>& tcpHeader, Packet *pk);
+    bool checkCrc(Packet *pk);
     int getMsl() { return msl; }
 };
 

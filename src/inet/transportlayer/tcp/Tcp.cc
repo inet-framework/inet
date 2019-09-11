@@ -119,8 +119,10 @@ Tcp::~Tcp()
 }
 
 // packet contains the tcpHeader
-bool Tcp::checkCrc(const Ptr<const TcpHeader>& tcpHeader, Packet *packet)
+bool Tcp::checkCrc(Packet *packet)
 {
+    auto tcpHeader = packet->peekAtFront<TcpHeader>();
+
     switch (tcpHeader->getCrcMode()) {
         case CRC_COMPUTED: {
             //check CRC:
@@ -158,82 +160,94 @@ bool Tcp::checkCrc(const Ptr<const TcpHeader>& tcpHeader, Packet *packet)
     throw cRuntimeError("unknown CRC mode: %d", tcpHeader->getCrcMode());
 }
 
-void Tcp::handleMessageWhenUp(cMessage *msg)
+void Tcp::handleSelfMessage(cMessage *msg)
 {
-    if (msg->isSelfMessage()) {
-        TcpConnection *conn = (TcpConnection *)msg->getContextPointer();
-        bool ret = conn->processTimer(msg);
-        if (!ret)
-            removeConnection(conn);
+    TcpConnection *conn = (TcpConnection *)msg->getContextPointer();
+    bool ret = conn->processTimer(msg);
+    if (!ret)
+        removeConnection(conn);
+}
+
+void Tcp::handleUpperCommand(cMessage *msg)
+{
+    auto& tags = getTags(msg);
+    int socketId = tags.getTag<SocketReq>()->getSocketId();
+
+    TcpConnection *conn = findConnForApp(socketId);
+
+    if (!conn) {
+        conn = createConnection(socketId);
+
+        // add into appConnMap here; it'll be added to connMap during processing
+        // the OPEN command in TcpConnection's processAppCommand().
+        AppConnKey key;
+        key.socketId = socketId;
+        tcpAppConnMap[key] = conn;
+
+        EV_INFO << "Tcp connection created for " << msg << "\n";
     }
-    else if (msg->arrivedOn("ipIn")) {
-        Packet *packet = check_and_cast<Packet *>(msg);
-        auto protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
-        if (protocol == &Protocol::icmpv4 || protocol == &Protocol::icmpv6)  {
-            EV_DETAIL << "ICMP error received -- discarding\n";    // FIXME can ICMP packets really make it up to Tcp???
-            delete msg;
+    bool ret = conn->processAppCommand(msg);
+    if (!ret)
+        removeConnection(conn);
+}
+
+void Tcp::handleUpperPacket(Packet *packet)
+{
+    handleUpperCommand(packet);
+}
+
+void Tcp::handleLowerPacket(Packet *packet)
+{
+    auto protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
+    if (protocol == &Protocol::tcp) {
+        if (!checkCrc(packet)) {
+            EV_WARN << "Tcp segment has wrong CRC, dropped\n";
+            PacketDropDetails details;
+            details.setReason(INCORRECTLY_RECEIVED);
+            emit(packetDroppedSignal, packet, &details);
+            delete packet;
+            return;
         }
-        else if (protocol == &Protocol::tcp) {
-            // must be a TcpHeader
-            auto tcpHeader = packet->peekAtFront<TcpHeader>();
 
-            // get src/dest addresses
-            L3Address srcAddr, destAddr;
+        // must be a TcpHeader
+        auto tcpHeader = packet->peekAtFront<TcpHeader>();
 
-            srcAddr = packet->getTag<L3AddressInd>()->getSrcAddress();
-            destAddr = packet->getTag<L3AddressInd>()->getDestAddress();
-            //interfaceId = controlInfo->getInterfaceId();
+        // get src/dest addresses
+        L3Address srcAddr, destAddr;
+        srcAddr = packet->getTag<L3AddressInd>()->getSrcAddress();
+        destAddr = packet->getTag<L3AddressInd>()->getDestAddress();
 
-            if (!checkCrc(tcpHeader, packet)) {
-                EV_WARN << "Tcp segment has wrong CRC, dropped\n";
-                PacketDropDetails details;
-                details.setReason(INCORRECTLY_RECEIVED);
-                emit(packetDroppedSignal, packet, &details);
-                delete packet;
-                return;
-            }
-
-            // process segment
-            TcpConnection *conn = findConnForSegment(tcpHeader, srcAddr, destAddr);
-            if (conn) {
-                bool ret = conn->processTCPSegment(packet, tcpHeader, srcAddr, destAddr);
-                if (!ret)
-                    removeConnection(conn);
-            }
-            else {
-                segmentArrivalWhileClosed(packet, tcpHeader, srcAddr, destAddr);
-            }
+        // process segment
+        TcpConnection *conn = findConnForSegment(tcpHeader, srcAddr, destAddr);
+        if (conn) {
+            bool ret = conn->processTCPSegment(packet, tcpHeader, srcAddr, destAddr);
+            if (!ret)
+                removeConnection(conn);
         }
-        else
-            throw cRuntimeError("Unknown protocol: '%s'", (protocol != nullptr ? protocol->getName() : "<nullptr>"));
+        else {
+            segmentArrivalWhileClosed(packet, tcpHeader, srcAddr, destAddr);
+        }
     }
-    else {    // must be from app
-        auto& tags = getTags(msg);
-        int socketId = tags.getTag<SocketReq>()->getSocketId();
-
-        TcpConnection *conn = findConnForApp(socketId);
-
-        if (!conn) {
-            conn = createConnection(socketId);
-
-            // add into appConnMap here; it'll be added to connMap during processing
-            // the OPEN command in TcpConnection's processAppCommand().
-            AppConnKey key;
-            key.socketId = socketId;
-            tcpAppConnMap[key] = conn;
-
-            EV_INFO << "Tcp connection created for " << msg << "\n";
-        }
-        bool ret = conn->processAppCommand(msg);
-        if (!ret)
-            removeConnection(conn);
+    else if (protocol == &Protocol::icmpv4 || protocol == &Protocol::icmpv6)  {
+        EV_DETAIL << "ICMP error received -- discarding\n";    // FIXME can ICMP packets really make it up to Tcp???
+        delete packet;
     }
+    else
+        throw cRuntimeError("Unknown protocol: '%s'", (protocol != nullptr ? protocol->getName() : "<nullptr>"));
+}
+
+bool Tcp::isUpperMessage(cMessage *msg)
+{
+    return msg->arrivedOn("appIn");
+}
+
+bool Tcp::isLowerMessage(cMessage *msg)
+{
+    return msg->arrivedOn("ipIn");
 }
 
 TcpConnection *Tcp::createConnection(int socketId)
 {
-//    return new TcpConnection(this, socketId);
-
     auto moduleType = cModuleType::get("inet.transportlayer.tcp.TcpConnection");
     char submoduleName[24];
     sprintf(submoduleName, "conn-%d", socketId);

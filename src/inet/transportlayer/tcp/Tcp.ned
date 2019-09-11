@@ -213,6 +213,8 @@ simple Tcp like ITcp
         @display("i=block/wheelbarrow");
         @signal[tcpConnectionAdded];
         @signal[tcpConnectionRemoved];
+        @signal[packetReceivedFromUpper](type=cPacket);
+        @signal[packetReceivedFromLower](type=cPacket);
     gates:
         input appIn @labels(TcpCommand/down);
         input ipIn @labels(TcpHeader,Ipv4ControlInfo/up,Ipv6ControlInfo/up);
