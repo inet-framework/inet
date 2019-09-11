@@ -38,7 +38,7 @@ void RedDropper::initialize()
 {
     AlgorithmicDropperBase::initialize();
 
-    wq = par("wq").doubleValue();
+    wq = par("wq");
     if (wq < 0.0 || wq > 1.0)
         throw cRuntimeError("Invalid value for wq parameter: %g", wq);
 
