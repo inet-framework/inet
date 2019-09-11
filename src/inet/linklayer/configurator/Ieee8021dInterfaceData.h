@@ -44,7 +44,6 @@ class INET_API Ieee8021dInterfaceData : public InterfaceProtocolData
         /* The following values have same meaning in both STP and RSTP.
          * See Ieee8021dBDPU for more info.
          */
-        unsigned int priority;
         unsigned int linkCost;
         bool edge;
 
@@ -130,10 +129,6 @@ class INET_API Ieee8021dInterfaceData : public InterfaceProtocolData
     unsigned int getPortPriority() const { return portData.portPriority; }
 
     void setPortPriority(unsigned int portPriority) { portData.portPriority = portPriority; }
-
-    unsigned int getPriority() const { return portData.priority; }
-
-    void setPriority(unsigned int priority) { portData.priority = priority; }
 
     PortRole getRole() const { return portData.role; }
 

@@ -43,6 +43,7 @@ void L2NodeConfigurator::initialize(int stage)
 bool L2NodeConfigurator::handleOperationStage(LifecycleOperation *operation, IDoneCallback *doneCallback)
 {
     Enter_Method_Silent();
+
     if (dynamic_cast<ModuleStartOperation *>(operation)) {
         if (static_cast<ModuleStartOperation::Stage>(operation->getCurrentStage()) == ModuleStartOperation::STAGE_LINK_LAYER) {
             prepareNode();
@@ -55,6 +56,7 @@ bool L2NodeConfigurator::handleOperationStage(LifecycleOperation *operation, IDo
         /*nothing to do*/;
     else
         throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());
+
     return true;
 }
 
@@ -73,9 +75,8 @@ void L2NodeConfigurator::prepareInterface(InterfaceEntry *interfaceEntry)
 void L2NodeConfigurator::configureNode()
 {
     ASSERT(networkConfigurator);
-    // std::cout << "configureNode(): " << interfaceTable->getNumInterfaces() << endl;
     for (int i = 0; i < interfaceTable->getNumInterfaces(); i++)
-        networkConfigurator->configureInterface(interfaceTable->getInterface(i));
+        networkConfigurator->addToConfigureInterface(interfaceTable->getInterface(i));
 }
 
 void L2NodeConfigurator::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
@@ -87,7 +88,7 @@ void L2NodeConfigurator::receiveSignal(cComponent *source, simsignal_t signalID,
         InterfaceEntry *ie = check_and_cast<InterfaceEntry *>(obj);
         prepareInterface(ie);
         if (networkConfigurator)
-            networkConfigurator->configureInterface(ie);
+            networkConfigurator->addToConfigureInterface(ie);
     }
 }
 
