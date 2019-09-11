@@ -18,6 +18,8 @@
 #ifndef __INET_DIMENSIONALTRANSMITTERBASE_H
 #define __INET_DIMENSIONALTRANSMITTERBASE_H
 
+#include "inet/common/math/IFunction.h"
+#include "inet/common/math/IInterpolator.h"
 #include "inet/physicallayer/contract/packetlevel/IPrintableObject.h"
 
 namespace inet {
