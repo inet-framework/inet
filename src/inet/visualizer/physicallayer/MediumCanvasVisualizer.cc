@@ -176,8 +176,9 @@ void MediumCanvasVisualizer::refreshSpectrumFigure(const cModule *module, PlotFi
         figure->setMinX(GHz(minFrequency).get());
         figure->setMaxX(GHz(maxFrequency).get());
         figure->setXTickCount(3);
-        Point<m, m, m, simsec, Hz> l(m(position.x), m(position.y), m(position.z), simsec(simTime()), minFrequency);
-        Point<m, m, m, simsec, Hz> u(m(position.x), m(position.y), m(position.z), simsec(simTime()), maxFrequency);
+        auto now = simTime();
+        Point<m, m, m, simsec, Hz> l(m(position.x), m(position.y), m(position.z), simsec(now), minFrequency);
+        Point<m, m, m, simsec, Hz> u(m(position.x), m(position.y), m(position.z), simsec(now), maxFrequency);
         Interval<m, m, m, simsec, Hz> i(l, u, 0b11110);
         bool directionalAntenna = antenna != nullptr && (antenna->getGain()->getMinGain() != 1 || antenna->getGain()->getMaxGain() != 1);
         const auto& receptionPowerFunction = transmission != nullptr ? receptionPowerFunctions.find(transmission)->second : nullptr;
@@ -217,7 +218,6 @@ void MediumCanvasVisualizer::refreshSpectrumFigure(const cModule *module, PlotFi
             else {
                 totalPower1 = mediumPowerFunction->getValue(l1);
                 totalPower2 = mediumPowerFunction->getValue(u1);
-//                std::cout << l1 << " = " << totalPower1 << ", " << u1 << " = " << totalPower2 << std::endl;
                 if (receptionPowerFunction != nullptr) {
                     signalPower1 = receptionPowerFunction->getValue(l1);
                     signalPower2 = receptionPowerFunction->getValue(u1);

@@ -85,7 +85,6 @@ void MediumVisualizerBase::initialize(int stage)
         spectrumMaxPower = WpHz(dBmWpMHz2WpHz(par("spectrumMaxPower")));
         spectrumPlacementHint = parsePlacement(par("spectrumPlacementHint"));
         spectrumPlacementPriority = par("spectrumPlacementPriority");
-        // TODO: background noise is not included in mediumPowerFunction
         mediumPowerFunction = makeShared<SumFunction<WpHz, Domain<m, m, m, simsec, Hz>>>();
         radioMedium = getModuleFromPar<IRadioMedium>(par("mediumModule"), this, false);
         if (radioMedium != nullptr) {
@@ -99,6 +98,10 @@ void MediumVisualizerBase::initialize(int stage)
             radioMediumModule->subscribe(IRadioMedium::signalArrivalStartedSignal, this);
             radioMediumModule->subscribe(IRadioMedium::signalArrivalEndedSignal, this);
         }
+    }
+    else if (stage == INITSTAGE_PHYSICAL_LAYER) {
+        if (auto backgroundNoise = radioMedium->getBackgroundNoise())
+            mediumPowerFunction->addElement(makeShared<BackgroundNoisePowerFunction>(backgroundNoise));
     }
     else if (stage == INITSTAGE_LAST) {
         if (std::isnan(signalPropagationAnimationSpeed) && radioMedium != nullptr) {
