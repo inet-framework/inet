@@ -134,6 +134,7 @@ class INET_API L2NetworkConfigurator : public cSimpleModule
     virtual Topology::LinkOut *findLinkOut(Node *node, int gateId);
     virtual void configureInterface(InterfaceEntry *interfaceEntry);
     void configureInterface(InterfaceInfo *interfaceInfo);
+    unsigned int getRecommendedPortCost(Node *node, InterfaceEntry *ie);
 
   public:
     /**
