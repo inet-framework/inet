@@ -29,7 +29,7 @@ package inet.linklayer.configurator;
 // priority 32768:
 // <pre>
 // <config>
-//   <interface hosts='**' ports='5' cost='19' priority='32768'/>
+//   <interface hosts='**' ports='5' portCost='19' portPriority='32768'/>
 // </config>
 // <pre>
 //
@@ -39,6 +39,6 @@ simple L2NetworkConfigurator
 {
     parameters:
         @display("i=block/cogwheel");
-        xml config = default(xml("<config><interface hosts='**' ports='**' cost='19' priority='128' edge='false'/></config>"));
+        xml config = default(xml("<config><interface hosts='**' ports='**' portCost='19' portPriority='128' edge='false'/></config>"));
 }
 

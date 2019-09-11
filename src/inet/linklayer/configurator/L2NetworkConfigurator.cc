@@ -46,15 +46,30 @@ void L2NetworkConfigurator::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL)
         configuration = par("config");
-    else if (stage == INITSTAGE_NETWORK_CONFIGURATION)
+    else if (stage == INITSTAGE_LINK_LAYER)
         ensureConfigurationComputed(topology);
 }
 
-L2NetworkConfigurator::InterfaceInfo::InterfaceInfo(Node *node, Node *childNode, InterfaceEntry *interfaceEntry)
+void L2NetworkConfigurator::ensureConfigurationComputed(L2Topology& topology)
 {
-    this->node = node;
-    this->interfaceEntry = interfaceEntry;
-    this->childNode = childNode;
+    if (topology.getNumNodes() == 0)
+        computeConfiguration();
+}
+
+void L2NetworkConfigurator::computeConfiguration()
+{
+    long initializeStartTime = clock();
+
+    // extract topology into the L2Topology object
+    TIME(extractTopology(topology));
+
+    // read the configuration from XML; it will serve as input for port assignment
+    TIME(readInterfaceConfiguration(rootNode));
+
+    for(auto &entry : interfaces)
+        configureInterface(entry);
+
+    printElapsedTime("initialize", initializeStartTime);
 }
 
 void L2NetworkConfigurator::extractTopology(L2Topology& topology)
@@ -113,6 +128,15 @@ void L2NetworkConfigurator::extractTopology(L2Topology& topology)
     }
 }
 
+Topology::LinkOut *L2NetworkConfigurator::findLinkOut(Node *node, int gateId)
+{
+    for (int i = 0; i < node->getNumOutLinks(); i++)
+        if (node->getLinkOut(i)->getLocalGateId() == gateId)
+            return node->getLinkOut(i);
+
+    return nullptr;
+}
+
 void L2NetworkConfigurator::readInterfaceConfiguration(Node *rootNode)
 {
     std::set<InterfaceEntry *> matchedBefore;
@@ -129,8 +153,8 @@ void L2NetworkConfigurator::readInterfaceConfiguration(Node *rootNode)
         const char *portsAttr = interfaceElement->getAttribute("ports");    // switch gate indices, like "0 1 2"
 
         // Begin RSTP properties, for more information see RSTP module
-        const char *cost = interfaceElement->getAttribute("cost");
-        const char *priority = interfaceElement->getAttribute("priority");
+        const char *cost = interfaceElement->getAttribute("portCost");
+        const char *priority = interfaceElement->getAttribute("portPriority");
         const char *edge = interfaceElement->getAttribute("edge");
         // End RSTP properties
 
@@ -186,11 +210,12 @@ void L2NetworkConfigurator::readInterfaceConfiguration(Node *rootNode)
 
                             // priority
                             if (isNotEmpty(priority))
-                                currentNode->interfaceInfos[i]->portData.priority = atoi(priority);
+                                currentNode->interfaceInfos[i]->portData.portPriority = atoi(priority);
 
-                            //edge
+                            // edge
                             if (isNotEmpty(edge))
                                 currentNode->interfaceInfos[i]->portData.edge = strcmp(edge, "true") ? false : true;
+
                             EV_DEBUG << hostModule->getFullPath() << ":" << ifEntry->getInterfaceName() << endl;
 
                             matchedBefore.insert(ifEntry);
@@ -208,32 +233,6 @@ void L2NetworkConfigurator::readInterfaceConfiguration(Node *rootNode)
                     e.what());
         }
     }
-}
-
-void L2NetworkConfigurator::computeConfiguration()
-{
-    long initializeStartTime = clock();
-    // extract topology into the L2Topology object
-    TIME(extractTopology(topology));
-    // read the configuration from XML; it will serve as input for port assignment
-    TIME(readInterfaceConfiguration(rootNode));
-    printElapsedTime("initialize", initializeStartTime);
-}
-
-void L2NetworkConfigurator::ensureConfigurationComputed(L2Topology& topology)
-{
-    if (topology.getNumNodes() == 0)
-        computeConfiguration();
-}
-
-Topology::LinkOut *L2NetworkConfigurator::findLinkOut(Node *node, int gateId)
-{
-    for (int i = 0; i < node->getNumOutLinks(); i++)
-        if (node->getLinkOut(i)->getLocalGateId() == gateId)
-            return node->getLinkOut(i);
-
-
-    return nullptr;
 }
 
 bool L2NetworkConfigurator::linkContainsMatchingHostExcept(InterfaceInfo *currentInfo, Matcher& hostMatcher,
@@ -256,6 +255,11 @@ bool L2NetworkConfigurator::linkContainsMatchingHostExcept(InterfaceInfo *curren
         return true;
 
     return false;
+}
+
+void L2NetworkConfigurator::addToConfigureInterface(InterfaceEntry *interfaceEntry)
+{
+    interfaces.push_back(interfaceEntry);
 }
 
 void L2NetworkConfigurator::configureInterface(InterfaceEntry *interfaceEntry)
@@ -281,7 +285,7 @@ void L2NetworkConfigurator::configureInterface(InterfaceInfo *interfaceInfo)
     Ieee8021dInterfaceData *interfaceData = interfaceEntry->getProtocolData<Ieee8021dInterfaceData>();
 
     interfaceData->setLinkCost(interfaceInfo->portData.linkCost);
-    interfaceData->setPriority(interfaceInfo->portData.priority);
+    interfaceData->setPortPriority(interfaceInfo->portData.portPriority);
     interfaceData->setEdge(interfaceInfo->portData.edge);
 }
 
@@ -313,8 +317,14 @@ bool L2NetworkConfigurator::Matcher::matches(const char *s)
         if (elem->matches(s))
             return true;
 
-
     return false;
+}
+
+L2NetworkConfigurator::InterfaceInfo::InterfaceInfo(Node *node, Node *childNode, InterfaceEntry *interfaceEntry)
+{
+    this->node = node;
+    this->interfaceEntry = interfaceEntry;
+    this->childNode = childNode;
 }
 
 } // namespace inet

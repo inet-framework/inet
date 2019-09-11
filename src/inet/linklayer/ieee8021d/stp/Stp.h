@@ -228,7 +228,7 @@ inline std::ostream& operator<<(std::ostream& os, Ieee8021dInterfaceData *p)
 
     os << " " << p->getRole() << " " << p->getState() << " ";
     os << p->getLinkCost() << " ";
-    os << p->getPriority() << " ";
+    os << p->getPortPriority() << " ";
 
     return os;
 }

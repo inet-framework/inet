@@ -106,6 +106,8 @@ void Stp::initInterfacedata(unsigned int interfaceId)
         ifd->setRole(Ieee8021dInterfaceData::NOTASSIGNED);
     }
 
+    // note: port cost and port priority are configured by the L2NetworkConfigurator
+
     ifd->setState(Ieee8021dInterfaceData::DISCARDING);
     ifd->setRootPriority(bridgePriority);
     ifd->setRootAddress(bridgeAddress);
@@ -113,7 +115,6 @@ void Stp::initInterfacedata(unsigned int interfaceId)
     ifd->setAge(0);
     ifd->setBridgePriority(bridgePriority);
     ifd->setBridgeAddress(bridgeAddress);
-    ifd->setPortPriority(-1);
     ifd->setPortNum(-1);
     ifd->setLostBPDU(0);
 }
@@ -306,7 +307,7 @@ void Stp::generateBPDU(int interfaceId, const MacAddress& address, bool tcFlag, 
     bpdu->setBridgeIdentifier(bridgeId);
 
     PortIdentifier portId;
-    portId.portPriority = getPortInterfaceData(interfaceId)->getPriority();
+    portId.portPriority = getPortInterfaceData(interfaceId)->getPortPriority();
     portId.portNum = interfaceId;
     bpdu->setPortIdentifier(portId);
 
@@ -645,7 +646,7 @@ void Stp::selectRootPort()
             continue;
         }
 
-        if (currentPort->getPriority() < best->getPriority()) {
+        if (currentPort->getPortPriority() < best->getPortPriority()) {
             xRootIdx = i;
             best = currentPort;
             continue;
@@ -689,7 +690,7 @@ void Stp::selectDesignatedPorts()
         if (portData->getRole() == Ieee8021dInterfaceData::ROOT || portData->getRole() == Ieee8021dInterfaceData::DISABLED)
             continue;
 
-        bridgeGlobal->setPortPriority(portData->getPriority());
+        bridgeGlobal->setPortPriority(portData->getPortPriority());
         int interfaceId = ie->getInterfaceId();
         bridgeGlobal->setPortNum(interfaceId);
 

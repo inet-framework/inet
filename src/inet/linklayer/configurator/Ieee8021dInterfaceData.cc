@@ -23,7 +23,6 @@ namespace inet {
 
 Ieee8021dInterfaceData::PortInfo::PortInfo()
 {
-    priority = 0;
     linkCost = 1;
     edge = false;
 
@@ -47,17 +46,16 @@ Ieee8021dInterfaceData::Ieee8021dInterfaceData()
 
 std::string Ieee8021dInterfaceData::str() const
 {
-    std::stringstream out;
-    out << "role:" << getRoleName() << " state:" << getStateName();
-    return out.str();
+    return detailedInfo();
 }
 
 std::string Ieee8021dInterfaceData::detailedInfo() const
 {
     std::stringstream out;
-    out << "role:" << getRoleName() << "\tstate:" << getStateName() << "\n";
-    out << "priority:" << getPriority() << "\n";
-    out << "linkCost:" << getLinkCost() << "\n";
+    out << "role:" << getRoleName();
+    out << " state:" << getStateName();
+    out << " priority:" << getPortPriority();
+    out << " linkCost:" << getLinkCost();
 
     return out.str();
 }
