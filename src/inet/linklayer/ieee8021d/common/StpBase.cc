@@ -23,12 +23,9 @@
 
 namespace inet {
 
-static const char *ENABLED_LINK_COLOR = "#000000";
-static const char *DISABLED_LINK_COLOR = "#bbbbbb";
-static const char *ROOT_SWITCH_COLOR = "#a5ffff";
-
 StpBase::StpBase()
 {
+
 }
 
 void StpBase::initialize(int stage)
@@ -42,6 +39,10 @@ void StpBase::initialize(int stage)
 
     if (stage == INITSTAGE_LOCAL) {
         visualize = par("visualize");
+        colorLinkEnabled = par("colorLinkEnabled").stdstringValue();
+        colorLinkDisabled = par("colorLinkDisabled").stdstringValue();
+        colorRootBridge = par("colorRootBridge").stdstringValue();
+
         bridgePriority = par("bridgePriority");
 
         maxAge = par("maxAge");
@@ -77,21 +78,21 @@ void StpBase::colorLink(InterfaceEntry *ie, bool forwarding) const
 
         if (outGate && inGate && inGatePrev && outGateNext && outGatePrev && inGatePrev2) {
             if (forwarding) {
-                outGatePrev->getDisplayString().setTagArg("ls", 0, ENABLED_LINK_COLOR);
-                inGate->getDisplayString().setTagArg("ls", 0, ENABLED_LINK_COLOR);
+                outGatePrev->getDisplayString().setTagArg("ls", 0, colorLinkEnabled.c_str());
+                inGate->getDisplayString().setTagArg("ls", 0, colorLinkEnabled.c_str());
             }
             else {
-                outGatePrev->getDisplayString().setTagArg("ls", 0, DISABLED_LINK_COLOR);
-                inGate->getDisplayString().setTagArg("ls", 0, DISABLED_LINK_COLOR);
+                outGatePrev->getDisplayString().setTagArg("ls", 0, colorLinkDisabled.c_str());
+                inGate->getDisplayString().setTagArg("ls", 0, colorLinkDisabled.c_str());
             }
 
-            if ((!inGatePrev2->getDisplayString().containsTag("ls") || strcmp(inGatePrev2->getDisplayString().getTagArg("ls", 0), ENABLED_LINK_COLOR) == 0) && forwarding) {
-                outGate->getDisplayString().setTagArg("ls", 0, ENABLED_LINK_COLOR);
-                inGatePrev->getDisplayString().setTagArg("ls", 0, ENABLED_LINK_COLOR);
+            if ((!inGatePrev2->getDisplayString().containsTag("ls") || strcmp(inGatePrev2->getDisplayString().getTagArg("ls", 0), colorLinkEnabled.c_str()) == 0) && forwarding) {
+                outGate->getDisplayString().setTagArg("ls", 0, colorLinkEnabled.c_str());
+                inGatePrev->getDisplayString().setTagArg("ls", 0, colorLinkEnabled.c_str());
             }
             else {
-                outGate->getDisplayString().setTagArg("ls", 0, DISABLED_LINK_COLOR);
-                inGatePrev->getDisplayString().setTagArg("ls", 0, DISABLED_LINK_COLOR);
+                outGate->getDisplayString().setTagArg("ls", 0, colorLinkDisabled.c_str());
+                inGatePrev->getDisplayString().setTagArg("ls", 0, colorLinkDisabled.c_str());
             }
         }
     }
@@ -129,7 +130,7 @@ void StpBase::refreshDisplay() const
 
         // mark root switch
         if (isUp() && getRootInterfaceId() == -1)
-            switchModule->getDisplayString().setTagArg("i", 1, ROOT_SWITCH_COLOR);
+            switchModule->getDisplayString().setTagArg("i", 1, colorRootBridge.c_str());
         else
             switchModule->getDisplayString().setTagArg("i", 1, "");
     }

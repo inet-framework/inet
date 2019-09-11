@@ -34,6 +34,10 @@ class INET_API StpBase : public OperationalBase, public cListener
 {
   protected:
     bool visualize = false;    // if true it visualize the spanning tree
+    std::string colorLinkEnabled = "";
+    std::string colorLinkDisabled = "";
+    std::string colorRootBridge = "";
+
     unsigned int numPorts = 0;    // number of ports
 
     unsigned int bridgePriority = 0;    // bridge's priority
