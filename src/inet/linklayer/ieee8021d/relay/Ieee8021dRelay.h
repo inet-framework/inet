@@ -53,7 +53,6 @@ class INET_API Ieee8021dRelay : public LayeredProtocolBase
     MacAddress bridgeAddress;
     IInterfaceTable *ifTable = nullptr;
     IMacAddressTable *macTable = nullptr;
-    InterfaceEntry *ie = nullptr;
     bool isStpAware = false;
 
     typedef std::pair<MacAddress, MacAddress> MacAddressPair;
@@ -127,10 +126,6 @@ class INET_API Ieee8021dRelay : public LayeredProtocolBase
 
     bool isForwardingInterface(InterfaceEntry *ie);
 
-    /*
-     * Returns the first non-loopback interface.
-     */
-    virtual InterfaceEntry *chooseInterface();
     virtual void finish() override;
 };
 

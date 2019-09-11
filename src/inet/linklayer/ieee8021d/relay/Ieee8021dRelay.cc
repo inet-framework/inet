@@ -262,32 +262,13 @@ Ieee8021dInterfaceData *Ieee8021dRelay::getPortInterfaceData(unsigned int interf
 
 void Ieee8021dRelay::start()
 {
-    ie = chooseInterface();
-    if (ie) {
-        bridgeAddress = ie->getMacAddress(); // get the bridge's MAC address
-        registerAddress(bridgeAddress); // register bridge's MAC address
-    }
-    else
-        throw cRuntimeError("No non-loopback interface found!");
+    bridgeAddress = ifTable->getBaseMacAddress();
+    registerAddress(bridgeAddress);
 }
 
 void Ieee8021dRelay::stop()
 {
-    ie = nullptr;
-}
 
-InterfaceEntry *Ieee8021dRelay::chooseInterface()
-{
-    // TODO: Currently, we assume that the first non-loopback interface is an Ethernet interface
-    //       since relays work on EtherSwitches.
-    //       NOTE that, we don't check if the returning interface is an Ethernet interface!
-    for (int i = 0; i < ifTable->getNumInterfaces(); i++) {
-        InterfaceEntry *current = ifTable->getInterface(i);
-        if (!current->isLoopback())
-            return current;
-    }
-
-    return nullptr;
 }
 
 void Ieee8021dRelay::finish()
