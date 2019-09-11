@@ -104,10 +104,10 @@ template<typename X, typename Y>
 RightInterpolator<X, Y> RightInterpolator<X, Y>::singleton;
 
 template<typename X, typename Y>
-class INET_API CenterInterpolator : public InterpolatorBase<X, Y>
+class INET_API AverageInterpolator : public InterpolatorBase<X, Y>
 {
   public:
-    static CenterInterpolator<X, Y> singleton;
+    static AverageInterpolator<X, Y> singleton;
 
   public:
     virtual Y getValue(const X x1, const Y y1, const X x2, const Y y2, const X x) const override {
@@ -122,7 +122,7 @@ class INET_API CenterInterpolator : public InterpolatorBase<X, Y>
 };
 
 template<typename X, typename Y>
-CenterInterpolator<X, Y> CenterInterpolator<X, Y>::singleton;
+AverageInterpolator<X, Y> AverageInterpolator<X, Y>::singleton;
 
 template<typename X, typename Y>
 class INET_API CloserInterpolator : public InterpolatorBase<X, Y>
@@ -146,10 +146,10 @@ template<typename X, typename Y>
 CloserInterpolator<X, Y> CloserInterpolator<X, Y>::singleton;
 
 template<typename X, typename Y>
-class INET_API SmallerInterpolator : public InterpolatorBase<X, Y>
+class INET_API MinimumInterpolator : public InterpolatorBase<X, Y>
 {
   public:
-    static SmallerInterpolator<X, Y> singleton;
+    static MinimumInterpolator<X, Y> singleton;
 
   public:
     virtual Y getValue(const X x1, const Y y1, const X x2, const Y y2, const X x) const override {
@@ -164,13 +164,13 @@ class INET_API SmallerInterpolator : public InterpolatorBase<X, Y>
 };
 
 template<typename X, typename Y>
-SmallerInterpolator<X, Y> SmallerInterpolator<X, Y>::singleton;
+MinimumInterpolator<X, Y> MinimumInterpolator<X, Y>::singleton;
 
 template<typename X, typename Y>
-class INET_API GreaterInterpolator : public InterpolatorBase<X, Y>
+class INET_API MaximumInterpolator : public InterpolatorBase<X, Y>
 {
   public:
-    static GreaterInterpolator<X, Y> singleton;
+    static MaximumInterpolator<X, Y> singleton;
 
   public:
     virtual Y getValue(const X x1, const Y y1, const X x2, const Y y2, const X x) const override {
@@ -185,7 +185,7 @@ class INET_API GreaterInterpolator : public InterpolatorBase<X, Y>
 };
 
 template<typename X, typename Y>
-GreaterInterpolator<X, Y> GreaterInterpolator<X, Y>::singleton;
+MaximumInterpolator<X, Y> MaximumInterpolator<X, Y>::singleton;
 
 template<typename X, typename Y>
 class INET_API LinearInterpolator : public InterpolatorBase<X, Y>
@@ -223,14 +223,14 @@ const IInterpolator<X, Y> *createInterpolator(const char *text) {
         return &LeftInterpolator<X, Y>::singleton;
     else if (!strcmp("right", text))
         return &RightInterpolator<X, Y>::singleton;
-    else if (!strcmp("center", text))
-        return &CenterInterpolator<X, Y>::singleton;
+    else if (!strcmp("average", text))
+        return &AverageInterpolator<X, Y>::singleton;
     else if (!strcmp("closer", text))
         return &CloserInterpolator<X, Y>::singleton;
-    else if (!strcmp("smaller", text))
-        return &SmallerInterpolator<X, Y>::singleton;
-    else if (!strcmp("greater", text))
-        return &GreaterInterpolator<X, Y>::singleton;
+    else if (!strcmp("minimum", text))
+        return &MinimumInterpolator<X, Y>::singleton;
+    else if (!strcmp("maximum", text))
+        return &MaximumInterpolator<X, Y>::singleton;
     else if (!strcmp("linear", text))
         return &LinearInterpolator<X, Y>::singleton;
     else
