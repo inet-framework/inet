@@ -18,6 +18,8 @@
 
 #include "inet/common/geometry/common/Coord.h"
 #include "inet/common/math/Functions.h"
+#include "inet/physicallayer/analogmodel/packetlevel/DimensionalNoise.h"
+#include "inet/physicallayer/common/packetlevel/BandListening.h"
 #include "inet/physicallayer/contract/packetlevel/IRadioMedium.h"
 
 namespace inet {
@@ -112,6 +114,56 @@ class INET_API SpaceAndFrequencyAttenuationFunction : public FunctionBase<double
     }
 
     virtual bool isFinite(const Interval<m, m, m, simsec, Hz>& i) const override { return true; }
+};
+
+class INET_API BackgroundNoisePowerFunction : public FunctionBase<WpHz, Domain<m, m, m, simsec, Hz>>
+{
+  protected:
+    Ptr<const IFunction<WpHz, Domain<simsec, Hz>>> powerFunction;
+
+  public:
+    BackgroundNoisePowerFunction(const IBackgroundNoise* backgroundNoise) {
+        Hz minFrequency = Hz(0);
+        Hz maxFrequency = GHz(10);
+        Coord minPosition;
+        Coord maxPosition;
+        BandListening listening(nullptr, 0, getUpperBoundary<simtime_t>(), minPosition, maxPosition, (minFrequency + maxFrequency) / 2, maxFrequency - minFrequency);
+        auto noise = backgroundNoise->computeNoise(&listening);
+        if (auto dimensionalNoise = dynamic_cast<const DimensionalNoise *>(noise))
+            powerFunction = dimensionalNoise->getPower();
+        else
+            throw cRuntimeError("TODO");
+    }
+
+    virtual WpHz getValue(const Point<m, m, m, simsec, Hz>& p) const override {
+        return powerFunction->getValue(Point<simsec, Hz>(std::get<3>(p), std::get<4>(p)));
+    }
+
+    virtual void partition(const Interval<m, m, m, simsec, Hz>& i, const std::function<void (const Interval<m, m, m, simsec, Hz>&, const IFunction<WpHz, Domain<m, m, m, simsec, Hz>> *)> f) const override {
+        const auto& lower = i.getLower();
+        const auto& upper = i.getUpper();
+        if (std::get<0>(lower) == std::get<0>(upper) && std::get<1>(lower) == std::get<1>(upper) && std::get<2>(lower) == std::get<2>(upper) && (i.getClosed() & 0b11100) == 0b11100) {
+            Point<simsec, Hz> l1(std::get<3>(lower), std::get<4>(i.getLower()));
+            Point<simsec, Hz> u1(std::get<3>(upper), std::get<4>(i.getUpper()));
+            Interval<simsec, Hz> i1(l1, u1, i.getClosed() & 0b11);
+            powerFunction->partition(i1, [&] (const Interval<simsec, Hz>& i2, const IFunction<WpHz, Domain<simsec, Hz>> *g) {
+                Interval<m, m, m, simsec, Hz> i3(
+                    Point<m, m, m, simsec, Hz>(std::get<0>(lower), std::get<1>(lower), std::get<2>(lower), std::get<0>(i2.getLower()), std::get<1>(i2.getLower())),
+                    Point<m, m, m, simsec, Hz>(std::get<0>(upper), std::get<1>(upper), std::get<2>(upper), std::get<0>(i2.getUpper()), std::get<1>(i2.getUpper())),
+                    0b11100 | i2.getClosed());
+                if (auto cg = dynamic_cast<const ConstantFunction<WpHz, Domain<simsec, Hz>> *>(g)) {
+                    ConstantFunction<WpHz, Domain<m, m, m, simsec, Hz>> h(cg->getConstantValue());
+                    f(i3, &h);
+                }
+                else if (auto lg = dynamic_cast<const LinearFunction<WpHz, Domain<simsec, Hz>> *>(g)) {
+                    LinearFunction<WpHz, Domain<m, m, m, simsec, Hz>> h(i3.getLower(), i3.getUpper(), lg->getValue(i2.getLower()), lg->getValue(i2.getUpper()), lg->getDimension() + 3);
+                    f(i3, &h);
+                }
+                else
+                    throw cRuntimeError("TODO");
+            });
+        }
+    }
 };
 
 class INET_API PropagatedTransmissionPowerFunction : public FunctionBase<WpHz, Domain<m, m, m, simsec, Hz>>
