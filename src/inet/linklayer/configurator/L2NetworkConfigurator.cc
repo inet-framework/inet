@@ -207,14 +207,24 @@ void L2NetworkConfigurator::readInterfaceConfiguration(Node *rootNode)
                             // cost
                             if (isNotEmpty(cost))
                                 currentNode->interfaceInfos[i]->portData.linkCost = atoi(cost);
+                            else {
+                                unsigned int defaultPortCost = getRecommendedPortCost(currentNode, currentNode->interfaceInfos[i]->interfaceEntry);
+                                currentNode->interfaceInfos[i]->portData.linkCost = defaultPortCost;
+                            }
 
                             // priority
                             if (isNotEmpty(priority))
                                 currentNode->interfaceInfos[i]->portData.portPriority = atoi(priority);
+                            else {
+                                currentNode->interfaceInfos[i]->portData.portPriority = 128;
+                            }
 
                             // edge
                             if (isNotEmpty(edge))
                                 currentNode->interfaceInfos[i]->portData.edge = strcmp(edge, "true") ? false : true;
+                            else {
+                                currentNode->interfaceInfos[i]->portData.edge = false;
+                            }
 
                             EV_DEBUG << hostModule->getFullPath() << ":" << ifEntry->getInterfaceName() << endl;
 
@@ -287,6 +297,32 @@ void L2NetworkConfigurator::configureInterface(InterfaceInfo *interfaceInfo)
     interfaceData->setLinkCost(interfaceInfo->portData.linkCost);
     interfaceData->setPortPriority(interfaceInfo->portData.portPriority);
     interfaceData->setEdge(interfaceInfo->portData.edge);
+}
+
+unsigned int L2NetworkConfigurator::getRecommendedPortCost(Node *node, InterfaceEntry *ie)
+{
+    Topology::LinkOut *linkOut = findLinkOut(node, ie->getNodeOutputGateId());
+    double datarate = linkOut->getLocalGate()->getChannel()->getNominalDatarate(); // in bps
+
+    // based on Table 17-3 in IEEE 802.1D-2004
+    if(datarate <= 100000)
+        return 200000000;
+    else if(datarate > 100000 && datarate <= 1000000)
+        return 20000000;
+    else if(datarate > 1000000 && datarate <= 10000000)
+        return 2000000;
+    else if(datarate > 10000000 && datarate <= 100000000)
+        return 200000;
+    else if(datarate > 100000000 && datarate <= 1000000000)
+        return 20000;
+    else if(datarate > 1000000000 && datarate <= 10000000000)
+        return 2000;
+    else if(datarate > 10000000000 && datarate <= 100000000000)
+        return 200;
+    else if(datarate > 100000000000 && datarate <= 1000000000000)
+        return 20;
+
+    return 2;
 }
 
 L2NetworkConfigurator::Matcher::~Matcher()
