@@ -66,6 +66,11 @@ simple Stp like ISpanningTree
         // Label ethernet interface with port role and status. Mark root switch
         bool visualize = default(false);
         
+        // only when visualize is true
+        string colorLinkEnabled = default("#000000");
+        string colorLinkDisabled = default("#bbbbbb");
+        string colorRootBridge = default("#cc3300");
+        
         // excluded interfaces from the spanning tree algorithms.
         // default is empty and all ports are included in the STP
         string disabledInterfaces = default("");
