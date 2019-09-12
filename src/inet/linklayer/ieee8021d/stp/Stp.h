@@ -40,7 +40,6 @@ class INET_API Stp : public StpBase
 {
   public:
     typedef Ieee8021dInterfaceData::PortInfo PortInfo;
-    enum BdpuType { CONFIG_BDPU = 0, TCN_BPDU = 1 };
 
   protected:
     static const double tickInterval;    // interval between two ticks
