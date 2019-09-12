@@ -135,9 +135,9 @@ void Stp::handleMessageWhenUp(cMessage *msg)
             return;
         }
 
-        if (bpdu->getBpduType() == CONFIG_BDPU)
+        if (bpdu->getBpduType() == BDPU_TYPE_CONFIG)
             handleBPDU(packet, bpdu);
-        else if (bpdu->getBpduType() == TCN_BPDU)
+        else if (bpdu->getBpduType() == TBDPU_TYPE_CN)
             handleTCN(packet, bpdu);
     }
     else {
@@ -276,8 +276,8 @@ void Stp::generateBPDU(int interfaceId, const MacAddress& address, bool tcFlag, 
     packet->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ethernetMac);
 
     bpdu->setProtocolIdentifier(0);
-    bpdu->setProtocolVersionIdentifier(0);
-    bpdu->setBpduType(CONFIG_BDPU);
+    bpdu->setProtocolVersionIdentifier(PROTO_VERSION_STP);
+    bpdu->setBpduType(BDPU_TYPE_CONFIG);
 
     if (topologyChangeNotification) {
         if (isRoot || tcFlag) {
@@ -344,8 +344,8 @@ void Stp::generateTCN()
             Packet *packet = new Packet("BPDU");
             const auto& tcn = makeShared<Bpdu>();
             tcn->setProtocolIdentifier(0);
-            tcn->setProtocolVersionIdentifier(0);
-            tcn->setBpduType(TCN_BPDU);
+            tcn->setProtocolVersionIdentifier(PROTO_VERSION_STP);
+            tcn->setBpduType(TBDPU_TYPE_CN);
 
             auto macAddressReq = packet->addTag<MacAddressReq>();
             macAddressReq->setSrcAddress(bridgeAddress);

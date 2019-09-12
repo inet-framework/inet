@@ -642,22 +642,31 @@ void Rstp::sendTCNtoRoot()
                 Packet *packet = new Packet("BPDU");
                 const auto& frame = makeShared<Bpdu>();
 
+                frame->setProtocolIdentifier(0);
+                frame->setProtocolVersionIdentifier(PROTO_VERSION_RSTP);
+                frame->setBpduType(BDPU_TYPE_RSTP); // todo: check
+
                 BpduFlags bpduFlags;
                 bpduFlags.tcaFlag = false;
                 bpduFlags.tcFlag = true;
                 frame->setBpduFlags(bpduFlags);
+
                 RootIdentifier rootId;
                 rootId.rootPriority = rootPort->getRootPriority();
                 rootId.rootAddress = rootPort->getRootAddress();
                 frame->setRootIdentifier(rootId);
+
                 frame->setRootPathCost(rootPort->getRootPathCost());
+
                 BridgeIdentifier bridgeId;
                 bridgeId.bridgePriority = bridgePriority;
                 bridgeId.bridgeAddress = bridgeAddress;
                 frame->setBridgeIdentifier(bridgeId);
+
                 PortIdentifier portId;
                 portId.portNum = r;
                 frame->setPortIdentifier(portId);
+
                 frame->setMessageAge(rootPort->getAge());
                 frame->setMaxAge(maxAge);
                 frame->setHelloTime(helloTime);
@@ -708,6 +717,11 @@ void Rstp::sendBPDU(int interfaceId)
     if (iport->getRole() != Ieee8021dInterfaceData::DISABLED) {
         Packet *packet = new Packet("BPDU");
         const auto& frame = makeShared<Bpdu>();
+
+        frame->setProtocolIdentifier(0);
+        frame->setProtocolVersionIdentifier(PROTO_VERSION_RSTP);
+        frame->setBpduType(BDPU_TYPE_RSTP);
+
         if (r != -1) {
             RootIdentifier rootId;
             rootId.rootPriority = rootPort->getRootPriority();
@@ -738,6 +752,7 @@ void Rstp::sendBPDU(int interfaceId)
         frame->setBpduFlags(bpduFlags);
 
         PortIdentifier portId;
+        portId.portPriority = getPortInterfaceData(interfaceId)->getPortPriority();
         portId.portNum = interfaceId;
         frame->setPortIdentifier(portId);
 
