@@ -22,6 +22,7 @@
 #include <map>
 #include <set>
 #include <algorithm>
+#include <limits>
 #include "inet/networklayer/common/L3Address.h"
 
 namespace inet{
@@ -202,18 +203,25 @@ public:
         NodeId iD;
         Method m;
         double cost;
-        double cost2 = -1;
+        double costConcave = std::numeric_limits<double>::quiet_NaN();
+        double costAdd2 = std::numeric_limits<double>::quiet_NaN();
+        double costConcave2 = std::numeric_limits<double>::quiet_NaN();
         SetElem()
         {
             iD = UndefinedAddr;
-            cost = 1e30;
-            cost2 = 0;
+            cost = std::numeric_limits<double>::max();
+            costConcave = 0;
+            costAdd2 = std::numeric_limits<double>::max();
+            costConcave2 = 0;
+
             m = basic;
         }
         SetElem& operator=(const SetElem& val)
         {
             this->iD = val.iD;
-            this->cost2 = val.cost2;
+            this->costConcave = val.costConcave;
+            this->costConcave2 = val.costConcave2;
+            this->costAdd2 = val.costAdd2;
             this->cost = val.cost;
             return *this;
         }
@@ -224,12 +232,15 @@ public:
     class State
     {
     public:
-        double cost = 1e30;
-        double cost2 = 0;
+        double cost = std::numeric_limits<double>::max();
+        double costConcave = 0;
+        double costAdd2 = std::numeric_limits<double>::max();
+        double costConcave2 = 0;
         NodeId idPrev;
         StateLabel label;
         State();
         State(const double &cost, const double &);
+        State(const double &cost, const double &, const double &, const double &);
         virtual ~State();
     };
 
@@ -237,11 +248,13 @@ public:
     {
         NodeId last_node_; // last node to reach node X
         double cost;
-        double cost2;
+        double costConcave;
+        double costAdd2 = std::numeric_limits<double>::max();
+        double costConcave2 = 0;
         Edge()
         {
-            cost = 1e30;
-            cost2 = 0;
+            cost = std::numeric_limits<double>::max();
+            costConcave = 0;
             last_node_ = UndefinedAddr;
         }
 
@@ -249,7 +262,7 @@ public:
         {
             last_node_ = other.last_node_;
             cost = other.cost;
-            cost2 = other.cost2;
+            costConcave = other.costConcave;
         }
 
         virtual Edge *dup() const {return new Edge(*this);}
@@ -271,7 +284,7 @@ public:
 
         virtual double& Cost2()
         {
-            return cost2;
+            return costConcave;
         }
 
     };
@@ -332,6 +345,7 @@ public:
 
     virtual void getRoutes(std::map<NodeId, std::vector<NodeId>> &);
     virtual void getRoutes(std::map<NodeId, std::vector<NodeId>> &, const RouteMap &);
+    virtual unsigned int getNumRoutes() {return routeMap.size();}
 
     virtual double getCost(const NodeId &, const RouteMap &);
     virtual double getCost(const NodeId &);

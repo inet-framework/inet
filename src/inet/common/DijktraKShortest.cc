@@ -825,11 +825,11 @@ inline bool operator <(const Dijkstra::SetElem& x, const Dijkstra::SetElem& y)
     if (x.m == Dijkstra::widestshortest) {
         if (x.cost != y.cost)
             return (x.cost < y.cost);
-        return (x.cost2 > y.cost2);
+        return (x.costConcave > y.costConcave);
     }
     if (x.m == Dijkstra::shortestwidest) {
-        if (x.cost2 != y.cost2)
-            return (x.cost2 > y.cost2);
+        if (x.costConcave != y.costConcave)
+            return (x.costConcave > y.costConcave);
         return (x.cost < y.cost);
     }
     return (x.cost < y.cost);
@@ -840,11 +840,11 @@ inline bool operator >(const Dijkstra::SetElem& x, const Dijkstra::SetElem& y)
     if (x.m == Dijkstra::widestshortest) {
         if (x.cost != y.cost)
             return (x.cost > y.cost);
-        return (x.cost2 < y.cost2);
+        return (x.costConcave < y.costConcave);
     }
     if (x.m == Dijkstra::shortestwidest) {
-        if (x.cost2 != y.cost2)
-            return (x.cost2 < y.cost2);
+        if (x.costConcave != y.costConcave)
+            return (x.costConcave < y.costConcave);
         return (x.cost > y.cost);
     }
     return (x.cost > y.cost);
@@ -858,7 +858,7 @@ Dijkstra::State::State(): idPrev(UndefinedAddr), label(tent)
 Dijkstra::State::State(const double &costData, const double &c ) :Dijkstra::State::State()
 {
     cost = costData;
-    cost2 = c;
+    costConcave = c;
 }
 
 Dijkstra::State::~State()
@@ -1035,7 +1035,7 @@ void Dijkstra::runUntil(const NodeId &target, const NodeId &rootNode, const Link
     if (it == linkArray.end())
         throw cRuntimeError("Node not found");
 
-    State state(0,1e300);
+    State state(0, std::numeric_limits<double>::max());
     state.label = perm;
     routeMap[rootNode] = state;
 
@@ -1047,29 +1047,29 @@ void Dijkstra::runUntil(const NodeId &target, const NodeId &rootNode, const Link
     while (!heap.empty()) {
         auto itHeap = heap.begin();
         double cost1It = itHeap->cost;
-        double cost2It = itHeap->cost2;
+        double cost2It = itHeap->costConcave;
         // search min
         for (auto it = heap.begin(); it!=heap.end(); ++it)
         {
             if (method == Method::widestshortest) {
-                if (it->cost < cost1It || (it->cost == cost1It && it->cost2 > cost2It)) {
+                if (it->cost < cost1It || (it->cost == cost1It && it->costConcave > cost2It)) {
                     itHeap = it;
                     cost1It = itHeap->cost;
-                    cost2It = itHeap->cost2;
+                    cost2It = itHeap->costConcave;
                 }
             }
             else if (method == Method::shortestwidest) {
-                if (it->cost2 > cost2It || (it->cost2 == cost2It && it->cost < cost1It)) {
+                if (it->costConcave > cost2It || (it->costConcave == cost2It && it->cost < cost1It)) {
                     itHeap = it;
                     cost1It = itHeap->cost;
-                    cost2It = itHeap->cost2;
+                    cost2It = itHeap->costConcave;
                 }
             }
             else {
                 if (it->cost < cost1It) {
                     itHeap = it;
                     cost1It = itHeap->cost;
-                    cost2It = itHeap->cost2;
+                    cost2It = itHeap->costConcave;
                 }
             }
         }
@@ -1098,22 +1098,34 @@ void Dijkstra::runUntil(const NodeId &target, const NodeId &rootNode, const Link
             Edge* current_edge = (linkIt->second)[i];
             double cost;
             double cost2;
+            double costAdd2 = std::numeric_limits<double>::quiet_NaN();
+            double costConcave2 = std::numeric_limits<double>::quiet_NaN();
             auto itNext = routeMap.find(current_edge->last_node());
             cost = current_edge->cost + it->second.cost;
-            cost2 = std::min(current_edge->cost2, it->second.cost2);
+            cost2 = std::min(current_edge->costConcave, it->second.costConcave);
+
+            if (current_edge->costAdd2 != std::numeric_limits<double>::quiet_NaN() && std::numeric_limits<double>::quiet_NaN() != it->second.costAdd2)
+                costAdd2 = current_edge->costAdd2 + it->second.costAdd2;
+            if (current_edge->costConcave2 != std::numeric_limits<double>::quiet_NaN() && std::numeric_limits<double>::quiet_NaN() != it->second.costConcave2)
+                costConcave2 = std::min(current_edge->costConcave2, it->second.costConcave2);
 
            if (itNext == routeMap.end()) {
                 State state;
                 state.idPrev = elem.iD;
                 state.cost = cost;
-                state.cost2 = cost2;
+                state.costConcave = cost2;
+                state.costAdd2 = costAdd2;
+                state.costConcave2 = costConcave2;
+
                 state.label = tent;
                 routeMap[current_edge->last_node()] = state;
 
                 SetElem newElem;
                 newElem.iD = current_edge->last_node();
                 newElem.cost = cost;
-                newElem.cost2 = cost2;
+                newElem.costConcave = cost2;
+                newElem.costAdd2 = costAdd2;
+                newElem.costConcave2 = costConcave2;
                 heap.push_back(newElem);
                 //heap.insert(newElem);
             }
@@ -1122,7 +1134,7 @@ void Dijkstra::runUntil(const NodeId &target, const NodeId &rootNode, const Link
                     continue;
 
                 double maxCost = itNext->second.cost;
-                double maxCost2 = itNext->second.cost2;
+                double maxCost2 = itNext->second.costConcave;
                 bool actualize = false;
 
                 if (method == Method::widestshortest) {
@@ -1140,6 +1152,9 @@ void Dijkstra::runUntil(const NodeId &target, const NodeId &rootNode, const Link
 
                 if (actualize) {
                     itNext->second.cost = cost;
+                    itNext->second.costConcave = cost2;
+                    itNext->second.costAdd2 = costAdd2;
+                    itNext->second.costConcave2 = costConcave2;
                     itNext->second.idPrev = elem.iD;
                     SetElem newElem;
                     newElem.iD = current_edge->last_node();
