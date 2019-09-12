@@ -62,6 +62,7 @@ void Stp::start()
     StpBase::start();
 
     initPortTable();
+
     currentBridgePriority = bridgePriority;
     isRoot = true;
     topologyChangeNotification = true;
@@ -74,6 +75,7 @@ void Stp::start()
     currentMaxAge = maxAge;
     currentFwdDelay = forwardDelay;
     helloTime = 0;
+
     setAllDesignated();
 
     WATCH(bridgePriority);
@@ -117,6 +119,25 @@ void Stp::initInterfacedata(unsigned int interfaceId)
     ifd->setBridgeAddress(bridgeAddress);
     ifd->setPortNum(-1);
     ifd->setLostBPDU(0);
+}
+
+void Stp::setAllDesignated()
+{
+    // all ports of the root switch are designated ports
+    EV_DETAIL << "All ports become designated." << endl;    // todo
+
+    desPorts.clear();
+    for (unsigned int i = 0; i < numPorts; i++) {
+        InterfaceEntry *ie = ifTable->getInterface(i);
+        Ieee8021dInterfaceData *portData = ie->getProtocolData<Ieee8021dInterfaceData>();
+        ASSERT(portData != nullptr);
+        if (portData->getRole() == Ieee8021dInterfaceData::DISABLED)
+            continue;
+
+        int interfaceId = ie->getInterfaceId();
+        portData->setRole(Ieee8021dInterfaceData::DESIGNATED);
+        desPorts.push_back(interfaceId);
+    }
 }
 
 void Stp::handleMessageWhenUp(cMessage *msg)
@@ -358,25 +379,6 @@ void Stp::generateTCN()
             EV_INFO << "The topology has changed. Sending Topology Change Notification BPDU " << tcn << " to the Root Switch." << endl;
             send(packet, "relayOut");
         }
-    }
-}
-
-void Stp::setAllDesignated()
-{
-    // all ports of the root switch are designated ports
-    EV_DETAIL << "All ports become designated." << endl;    // todo
-
-    desPorts.clear();
-    for (unsigned int i = 0; i < numPorts; i++) {
-        InterfaceEntry *ie = ifTable->getInterface(i);
-        Ieee8021dInterfaceData *portData = ie->getProtocolData<Ieee8021dInterfaceData>();
-        ASSERT(portData != nullptr);
-        if (portData->getRole() == Ieee8021dInterfaceData::DISABLED)
-            continue;
-
-        int interfaceId = ie->getInterfaceId();
-        portData->setRole(Ieee8021dInterfaceData::DESIGNATED);
-        desPorts.push_back(interfaceId);
     }
 }
 
@@ -704,6 +706,7 @@ void Stp::selectDesignatedPorts()
             portData->setRole(Ieee8021dInterfaceData::DESIGNATED);
             continue;
         }
+
         if (result < 0) {
             EV_DETAIL << "Port=" << ie->getFullName() << " goes into alternate role." << endl;
             portData->setRole(Ieee8021dInterfaceData::ALTERNATE);
@@ -748,4 +751,3 @@ void Stp::stop()
 }
 
 } // namespace inet
-

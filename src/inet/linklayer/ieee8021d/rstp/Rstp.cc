@@ -78,6 +78,7 @@ void Rstp::initPorts()
             jPort->setRole(Ieee8021dInterfaceData::DESIGNATED);
             jPort->setState(Ieee8021dInterfaceData::FORWARDING);
         }
+
         initInterfacedata(interfaceId);
         macTable->flush(interfaceId);
     }
