@@ -15,26 +15,18 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-// Author
+package inet.common.queueing;
 
-package inet.common.queue;
-
-import inet.common.queue.RedMarker;
-import inet.common.queue.FifoQueue;
-import inet.common.queue.IOutputQueue;
-
-
-module RedMarkerQueue like IOutputQueue
+//
+// TODO auto-generated module
+//
+simple RedMarker extends RedDropper
 {
-    gates:
-        input in;
-        output out;
-
-    submodules:
-        red: RedMarker;
-        fifo: FifoQueue;
-    connections:
-        in --> red.in[0];
-        red.out[0] --> fifo.in++;
-        fifo.out --> out;
+    parameters:
+        @class(RedMarker);
+        int frameQueueCapacity = default(120);
+        double mark = default(0.0);
+        @signal[markingProb](type=double);
+        @statistic[marked](title="marking Prob"; source="markingProb"; record=mean,vector(count); interpolationmode=none);
 }
+

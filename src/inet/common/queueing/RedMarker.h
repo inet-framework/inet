@@ -15,19 +15,40 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package inet.common.queue;
+#ifndef __INET_REDMARKER_H_
+#define __INET_REDMARKER_H_
 
+#include "inet/common/INETDefs.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/common/queueing/RedDropper.h"
 
-import inet.common.queue.RedDropper;
-//
-// TODO auto-generated module
-//
-simple RedMarker extends RedDropper
+namespace inet {
+namespace queueing {
+
+class INET_API RedMarker : public RedDropper
 {
-    parameters:
-        @class(RedMarker);
-		int frameQueueCapacity = default(120);
-        string marks = default("0");  
-        @signal[markingProb](type=double);
-        @statistic[marked](title="marking Prob"; source="markingProb"; record=mean,vector(count); interpolationmode=none);
-}
+  public:
+    RedMarker();
+
+  protected:
+    double mark;
+    bool markNext;
+
+  private:
+    int frameQueueCapacity;
+
+  protected:
+
+    enum Action { MARK, DROP, SEND };
+    virtual ~RedMarker();
+    virtual void initialize(int stage) override;
+    Action chooseAction(Packet *packet);
+    virtual bool matchesPacket(Packet *packet) override;
+    bool markPacket(Packet *packet);
+};
+
+} // namespace queueing
+} // namespace inet
+
+#endif
+

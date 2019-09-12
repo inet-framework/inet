@@ -15,43 +15,18 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#ifndef __INET_REDMARKER_H_
-#define __INET_REDMARKER_H_
+// Author
 
+package inet.common.queueing;
 
-
-#include "inet/common/INETDefs.h"
-#include "inet/common/queue/RedDropper.h"
-#include "inet/common/packet/Packet.h"
-
-
-
-namespace inet {
-
-
-class INET_API RedMarker : public RedDropper
+module RedMarkerQueue extends CompoundPacketQueue
 {
-  public:
-    RedMarker();
+    submodules:
+        red: RedMarker;
+        fifo: PacketQueue;
+    connections:
+        in --> red.in;
+        red.out --> fifo.in;
+        fifo.out --> out;
+}
 
-  protected:
-    double *marks;
-    bool markNext;
-
-  private:
-    bool packetDropped = false;
-    int frameQueueCapacity;
-
-  protected:
-
-    virtual ~RedMarker();
-    virtual void initialize() override;
-    virtual void handleMessage(cMessage *msg) override;
-    bool shouldMark(Packet *packet);
-    virtual bool shouldDrop(cPacket *packet) override;
-    bool markPacket(Packet *packet);
-};
-
-} //namespace
-
-#endif
