@@ -37,6 +37,11 @@ Stp::Stp()
 
 }
 
+Stp::~Stp()
+{
+    cancelAndDelete(tick);
+}
+
 void Stp::initialize(int stage)
 {
     StpBase::initialize(stage);
@@ -50,11 +55,6 @@ void Stp::initialize(int stage)
         registerService(Protocol::stp, nullptr, gate("relayIn"));
         registerProtocol(Protocol::stp, gate("relayOut"), nullptr);
     }
-}
-
-Stp::~Stp()
-{
-    cancelAndDelete(tick);
 }
 
 void Stp::start()
