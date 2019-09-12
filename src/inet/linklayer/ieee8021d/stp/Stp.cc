@@ -110,7 +110,7 @@ void Stp::initInterfacedata(unsigned int interfaceId)
 
     // note: port cost and port priority are configured by the L2NetworkConfigurator
 
-    ifd->setState(Ieee8021dInterfaceData::DISCARDING);
+    ifd->setState(Ieee8021dInterfaceData::BLOCKING);
     ifd->setRootPriority(bridgePriority);
     ifd->setRootAddress(bridgeAddress);
     ifd->setRootPathCost(0);
@@ -244,7 +244,7 @@ void Stp::checkTimers()
         if (port->getRole() == Ieee8021dInterfaceData::ROOT || port->getRole() == Ieee8021dInterfaceData::DESIGNATED) {
             if (port->getFdWhile() >= currentFwdDelay) {
                 switch (port->getState()) {
-                    case Ieee8021dInterfaceData::DISCARDING:
+                    case Ieee8021dInterfaceData::BLOCKING:
                         EV_DETAIL << "Port=" << interfaceId << " goes into learning state." << endl;
                         port->setState(Ieee8021dInterfaceData::LEARNING);
                         port->setFdWhile(0);
@@ -263,9 +263,9 @@ void Stp::checkTimers()
             }
         }
         else {
-            EV_DETAIL << "Port=" << interfaceId << " goes into discarding state." << endl;
+            EV_DETAIL << "Port=" << interfaceId << " goes into BLOCKING state." << endl;
             port->setFdWhile(0);
-            port->setState(Ieee8021dInterfaceData::DISCARDING);
+            port->setState(Ieee8021dInterfaceData::BLOCKING);
         }
     }
 }
@@ -536,7 +536,7 @@ bool Stp::isSuperiorBPDU(int interfaceId, const Ptr<const Bpdu>& bpdu)
     // BPDU is superior
     if (result < 0) {
         port->setFdWhile(0);    // renew info
-        port->setState(Ieee8021dInterfaceData::DISCARDING);
+        port->setState(Ieee8021dInterfaceData::BLOCKING);
         setSuperiorBPDU(interfaceId, bpdu);    // renew information
         delete xBpdu;
         return true;
