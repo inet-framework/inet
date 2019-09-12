@@ -56,6 +56,7 @@ std::string Ieee8021dInterfaceData::detailedInfo() const
     out << " state:" << getStateName();
     out << " priority:" << getPortPriority();
     out << " linkCost:" << getLinkCost();
+    out << " isEdge:" << isEdge();
 
     return out.str();
 }
