@@ -40,9 +40,9 @@ struct BridgeIdentifier
 
 struct PortIdentifier
 {
-    unsigned int portPriority;  // 1 byte, priority of sender port
-    unsigned int portNum;       // 1 byte, port number (ethg[] gate index) of sender port
-                                // (or 4 bit priority (shifted with 4 bit) and 12 bit portnum (in 802.1D-2004))
+    uint8_t portPriority;  // 1 byte, priority of sender port
+    uint8_t portNum;       // 1 byte, port number (ethg[] gate index) of sender port
+                           // (or 4 bit priority (shifted with 4 bit) and 12 bit portnum (in 802.1D-2004))
 }
 
 //
@@ -53,16 +53,16 @@ class Bpdu extends FieldsChunk
 {
     chunkLength = B(35);
     
-    uint16_t protocolIdentifier;              // 2 bytes, 0 for STP, 1 for RSTP (TODO use them)
-    unsigned int protocolVersionIdentifier;   // 1 byte, version ID, currently 0
-    unsigned int bpduType;                    // 1 byte, 0 for Configuration BPDU, 1 for Topology Change Notification BPDU
+    uint16_t protocolIdentifier;        // 2 bytes, 0 for STP, 1 for RSTP (TODO use them)
+    uint8_t protocolVersionIdentifier;  // 1 byte, version ID, currently 0
+    uint8_t bpduType;                   // 1 byte, 0 for Configuration BPDU, 1 for Topology Change Notification BPDU
 	BpduFlags bpduFlags;
     RootIdentifier rootIdentifier;    
-    uint32_t rootPathCost;                    // 4 bytes, cost to the root
+    uint32_t rootPathCost;              // 4 bytes, cost to the root
     BridgeIdentifier bridgeIdentifier;
     PortIdentifier portIdentifier;    
-    simtime_t messageAge;                     // 2 bytes, Message Age (in 256ths of a second)
-    simtime_t maxAge;                         // 2 bytes, maximum lifetime of the BPDU (in 256ths of a second)
-    simtime_t helloTime;                      // 2 bytes, Hello Time of the sender bridge (in 256ths of a second)
-    simtime_t forwardDelay;                   // 2 bytes, Forward Delay timer of the sender bridge (in 256ths of a second)
+    simtime_t messageAge;               // 2 bytes, Message Age (in 256ths of a second)
+    simtime_t maxAge;                   // 2 bytes, maximum lifetime of the BPDU (in 256ths of a second)
+    simtime_t helloTime;                // 2 bytes, Hello Time of the sender bridge (in 256ths of a second)
+    simtime_t forwardDelay;             // 2 bytes, Forward Delay timer of the sender bridge (in 256ths of a second)
 }
