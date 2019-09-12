@@ -645,7 +645,7 @@ void Rstp::sendTCNtoRoot()
 
                 frame->setProtocolIdentifier(0);
                 frame->setProtocolVersionIdentifier(PROTO_VERSION_RSTP);
-                frame->setBpduType(BDPU_TYPE_RSTP); // todo: check
+                frame->setBpduType(BPDU_TYPE_RSTP); // todo: check
 
                 BpduFlags bpduFlags;
                 bpduFlags.tcaFlag = false;
@@ -721,7 +721,7 @@ void Rstp::sendBPDU(int interfaceId)
 
         frame->setProtocolIdentifier(0);
         frame->setProtocolVersionIdentifier(PROTO_VERSION_RSTP);
-        frame->setBpduType(BDPU_TYPE_RSTP);
+        frame->setBpduType(BPDU_TYPE_RSTP);
 
         if (r != -1) {
             RootIdentifier rootId;

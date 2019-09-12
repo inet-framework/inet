@@ -84,6 +84,8 @@ void Stp::start()
     WATCH(rootPriority);
     WATCH(rootAddress);
     WATCH(rootPathCost);
+    WATCH(topologyChangeNotification);
+    WATCH(topologyChangeRecvd);
 
     scheduleAt(simTime() + tickInterval, tick);
 }
@@ -156,9 +158,9 @@ void Stp::handleMessageWhenUp(cMessage *msg)
             return;
         }
 
-        if (bpdu->getBpduType() == BDPU_TYPE_CONFIG)
+        if (bpdu->getBpduType() == BPDU_TYPE_CONFIG)
             handleBPDU(packet, bpdu);
-        else if (bpdu->getBpduType() == TBDPU_TYPE_CN)
+        else if (bpdu->getBpduType() == BPDU_TYPE_TCN)
             handleTCN(packet, bpdu);
     }
     else {
@@ -224,13 +226,14 @@ void Stp::checkTimers()
 
         if (port->getAge() >= currentMaxAge) {
             EV_DETAIL << "Port=" << i << " reached its maximum age. Setting it to the default port info." << endl;
+            initInterfacedata(interfaceId);
             if (port->getRole() == Ieee8021dInterfaceData::ROOT) {
-                initInterfacedata(interfaceId);
-                lostRoot();
+                topologyChangeNotification = true;
+                tryRoot();
             }
             else {
-                initInterfacedata(interfaceId);
-                lostAlternate();
+                selectDesignatedPorts();
+                topologyChangeNotification = true;
             }
         }
     }
@@ -298,7 +301,7 @@ void Stp::generateBPDU(int interfaceId, const MacAddress& address, bool tcFlag, 
 
     bpdu->setProtocolIdentifier(0);
     bpdu->setProtocolVersionIdentifier(PROTO_VERSION_STP);
-    bpdu->setBpduType(BDPU_TYPE_CONFIG);
+    bpdu->setBpduType(BPDU_TYPE_CONFIG);
 
     if (topologyChangeNotification) {
         if (isRoot || tcFlag) {
@@ -351,7 +354,17 @@ void Stp::checkParametersChange()
 
     if (currentBridgePriority != bridgePriority) {
         currentBridgePriority = bridgePriority;
-        reset();
+
+        // upon booting all switches believe themselves to be the root
+        isRoot = true;
+        rootPriority = bridgePriority;
+        rootAddress = bridgeAddress;
+        rootPathCost = 0;
+        currentHelloTime = helloTime;
+        currentMaxAge = maxAge;
+        currentFwdDelay = forwardDelay;
+
+        setAllDesignated();
     }
 }
 
@@ -360,23 +373,26 @@ void Stp::generateTCN()
     // there is something to notify
     if (topologyChangeNotification || !topologyChangeRecvd) {
         if (getPortInterfaceData(rootInterfaceId)->getRole() == Ieee8021dInterfaceData::ROOT) {
-            // exist root port to notifying
+
+            EV_INFO << "The topology has changed. Sending TCN BPDU to the Root Switch." << endl;
             topologyChangeNotification = false;
+
             Packet *packet = new Packet("BPDU");
-            const auto& tcn = makeShared<Bpdu>();
-            tcn->setProtocolIdentifier(0);
-            tcn->setProtocolVersionIdentifier(PROTO_VERSION_STP);
-            tcn->setBpduType(TBDPU_TYPE_CN);
 
             auto macAddressReq = packet->addTag<MacAddressReq>();
             macAddressReq->setSrcAddress(bridgeAddress);
             macAddressReq->setDestAddress(MacAddress::STP_MULTICAST_ADDRESS);
+
             packet->addTag<InterfaceReq>()->setInterfaceId(rootInterfaceId);
             packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::stp);
             packet->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ethernetMac);
 
+            const auto& tcn = makeShared<Bpdu>();
+            tcn->setProtocolIdentifier(0);
+            tcn->setProtocolVersionIdentifier(PROTO_VERSION_STP);
+            tcn->setBpduType(BPDU_TYPE_TCN);
+
             packet->insertAtBack(tcn);
-            EV_INFO << "The topology has changed. Sending Topology Change Notification BPDU " << tcn << " to the Root Switch." << endl;
             send(packet, "relayOut");
         }
     }
@@ -715,31 +731,6 @@ void Stp::selectDesignatedPorts()
     }
 
     delete bridgeGlobal;
-}
-
-void Stp::lostRoot()
-{
-    topologyChangeNotification = true;
-    tryRoot();
-}
-
-void Stp::lostAlternate()
-{
-    selectDesignatedPorts();
-    topologyChangeNotification = true;
-}
-
-void Stp::reset()
-{
-    // upon booting all switches believe themselves to be the root
-    isRoot = true;
-    rootPriority = bridgePriority;
-    rootAddress = bridgeAddress;
-    rootPathCost = 0;
-    currentHelloTime = helloTime;
-    currentMaxAge = maxAge;
-    currentFwdDelay = forwardDelay;
-    setAllDesignated();
 }
 
 void Stp::stop()

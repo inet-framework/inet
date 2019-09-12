@@ -137,13 +137,6 @@ class INET_API Stp : public StpBase
     void setAllDesignated();
 
     /*
-     * Helper functions to handle state changes
-     */
-    void lostRoot();
-    void lostAlternate();
-    void reset();
-
-    /*
      * Determine who is eligible to become the root switch
      */
     bool checkRootEligibility();
