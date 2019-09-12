@@ -75,6 +75,11 @@ simple Rstp like ISpanningTree
         // Label ethernet interface with port role and status. Mark root switch
         bool visualize = default(false);
 
+        // only when visualize is true
+        string colorLinkEnabled = default("#000000");
+        string colorLinkDisabled = default("#bbbbbb");
+        string colorRootBridge = default("#cc3300");
+        
         // If true, edge ports immediately become designated/forwarding, else it will have to wait to get designated.
         bool autoEdge = default(true);
 
