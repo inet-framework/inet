@@ -226,12 +226,13 @@ void Stp::checkTimers()
 
         if (port->getAge() >= currentMaxAge) {
             EV_DETAIL << "Port=" << i << " reached its maximum age. Setting it to the default port info." << endl;
-            initInterfacedata(interfaceId);
             if (port->getRole() == Ieee8021dInterfaceData::ROOT) {
+                initInterfacedata(interfaceId);
                 topologyChangeNotification = true;
                 tryRoot();
             }
             else {
+                initInterfacedata(interfaceId);
                 selectDesignatedPorts();
                 topologyChangeNotification = true;
             }
@@ -303,15 +304,18 @@ void Stp::generateBPDU(int interfaceId, const MacAddress& address, bool tcFlag, 
     bpdu->setProtocolVersionIdentifier(PROTO_VERSION_STP);
     bpdu->setBpduType(BPDU_TYPE_CONFIG);
 
+    BpduFlags bpduFlags;
     if (topologyChangeNotification) {
         if (isRoot || tcFlag) {
-            BpduFlags bpduFlags;
+            EV_INFO << "Sending CONFIG BPDU with Topology Change (TC) flag to port "
+                    << ifd->getInterfaceEntry()->getFullName() << endl;
             bpduFlags.tcFlag = true;
             bpduFlags.tcaFlag = false;
             bpdu->setBpduFlags(bpduFlags);
         }
         else if (tcaFlag) {
-            BpduFlags bpduFlags;
+            EV_INFO << "Sending CONFIG BPDU with Topology Change ACK (TCA) flag to port "
+                    << ifd->getInterfaceEntry()->getFullName() << endl;
             bpduFlags.tcFlag = false;
             bpduFlags.tcaFlag = true;
             bpdu->setBpduFlags(bpduFlags);
@@ -374,7 +378,7 @@ void Stp::generateTCN()
     if (topologyChangeNotification || !topologyChangeRecvd) {
         if (getPortInterfaceData(rootInterfaceId)->getRole() == Ieee8021dInterfaceData::ROOT) {
 
-            EV_INFO << "The topology has changed. Sending TCN BPDU to the Root Switch." << endl;
+            EV_INFO << "Sending TCN BPDU to the root Switch (the topology has changed)." << endl;
             topologyChangeNotification = false;
 
             Packet *packet = new Packet("BPDU");
@@ -501,7 +505,8 @@ void Stp::handleTCN(Packet *packet, const Ptr<const Bpdu>& tcn)
     int arrivalGate = packet->getTag<InterfaceInd>()->getInterfaceId();
     Ieee8021dInterfaceData *port = getPortInterfaceData(arrivalGate);
 
-    EV_DETAIL << switchModule->getFullName() << " received a TCN BPDU on port=" << port->getInterfaceEntry()->getFullName() << endl;
+    EV_DETAIL << switchModule->getFullName() << " received a TCN BPDU on port="
+            << port->getInterfaceEntry()->getFullName() << endl;
 
     topologyChangeNotification = true;
 
@@ -509,8 +514,7 @@ void Stp::handleTCN(Packet *packet, const Ptr<const Bpdu>& tcn)
     MacAddress srcAddress = addressInd->getSrcAddress();
     MacAddress destAddress = addressInd->getDestAddress();
 
-    // send ACK to the sender
-    EV_INFO << "Sending Topology Change Notification ACK." << endl;
+    // send TC/TCA to the sender
     generateBPDU(arrivalGate, srcAddress, false, true);
 
     if (!isRoot) {
@@ -522,6 +526,8 @@ void Stp::handleTCN(Packet *packet, const Ptr<const Bpdu>& tcn)
         macAddressReq->setDestAddress(destAddress);
         outPacket->addTag<PacketProtocolTag>()->setProtocol(&Protocol::stp);
         outPacket->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ethernetMac);
+        EV_DETAIL << switchModule->getFullName() << " forwards the received TCN BPDU on port="
+                << getPortInterfaceData(rootInterfaceId)->getInterfaceEntry()->getFullName() << endl;
         send(outPacket, "relayOut");
     }
 
