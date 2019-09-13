@@ -262,15 +262,17 @@ void Rstp::handleUpgrade(cMessage *msg)
 
 void Rstp::handleIncomingFrame(Packet *packet)
 {
-    const Ptr<const Bpdu>& frame = packet->peekAtFront<Bpdu>();
-    // incoming BPDU handling
-    // checking message age
     int arrivalInterfaceId = packet->getTag<InterfaceInd>()->getInterfaceId();
-    MacAddress src = packet->getTag<MacAddressInd>()->getSrcAddress();
     EV_INFO << "BPDU received at port " << arrivalInterfaceId << "." << endl;
+
+    MacAddress src = packet->getTag<MacAddressInd>()->getSrcAddress();
+    const Ptr<const Bpdu>& frame = packet->peekAtFront<Bpdu>();
+
+    // checking message age
     if (frame->getMessageAge() < maxAge) {
-        // checking TC
+
         checkTC(frame, arrivalInterfaceId);    // sets TCWhile if arrival port was FORWARDING
+
         // checking possible backup
         if (src.compareTo(bridgeAddress) == 0) // more than one port in the same LAN
             handleBackup(frame, arrivalInterfaceId);
