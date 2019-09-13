@@ -274,7 +274,7 @@ void Rstp::handleIncomingFrame(Packet *packet)
         checkTC(frame, arrivalInterfaceId);    // sets TCWhile if arrival port was FORWARDING
 
         // checking possible backup
-        if (src.compareTo(bridgeAddress) == 0) // more than one port in the same LAN
+        if (sameSwitch(src)) // more than one port in the same LAN segment
             handleBackup(frame, arrivalInterfaceId);
         else
             processBPDU(frame, arrivalInterfaceId);
@@ -681,7 +681,7 @@ void Rstp::sendTCNtoRoot()
                 packet->insertAtBack(frame);
 
                 auto macAddressReq = packet->addTag<MacAddressReq>();
-                macAddressReq->setSrcAddress(bridgeAddress);
+                macAddressReq->setSrcAddress(rootPort->getInterfaceEntry()->getMacAddress());
                 macAddressReq->setDestAddress(MacAddress::STP_MULTICAST_ADDRESS);
                 packet->addTag<InterfaceReq>()->setInterfaceId(r);
 
@@ -769,7 +769,7 @@ void Rstp::sendBPDU(int interfaceId)
         packet->insertAtBack(frame);
 
         auto macAddressReq = packet->addTag<MacAddressReq>();
-        macAddressReq->setSrcAddress(bridgeAddress);
+        macAddressReq->setSrcAddress(getPortInterfaceData(interfaceId)->getInterfaceEntry()->getMacAddress());
         macAddressReq->setDestAddress(MacAddress::STP_MULTICAST_ADDRESS);
         packet->addTag<InterfaceReq>()->setInterfaceId(interfaceId);
         packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::stp);
@@ -911,6 +911,20 @@ void Rstp::flushOtherPorts(unsigned int portId)
         if ((unsigned int)interfaceId != portId)
             macTable->flush(interfaceId);
     }
+}
+
+bool Rstp::sameSwitch(MacAddress src)
+{
+    for (int i = 0; i < ifTable->getNumInterfaces(); i++) {
+        InterfaceEntry *current = ifTable->getInterface(i);
+        if (!current->isLoopback()) {
+            if(src.compareTo(current->getMacAddress()) == 0) {
+                return true;
+            }
+        }
+    }
+
+    return false;
 }
 
 void Rstp::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
