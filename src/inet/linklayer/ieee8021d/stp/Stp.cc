@@ -294,7 +294,7 @@ void Stp::generateBPDU(int interfaceId, const MacAddress& address, bool tcFlag, 
     Packet *packet = new Packet("BPDU");
     const auto& bpdu = makeShared<Bpdu>();
     auto macAddressReq = packet->addTag<MacAddressReq>();
-    macAddressReq->setSrcAddress(bridgeAddress);
+    macAddressReq->setSrcAddress(ifd->getInterfaceEntry()->getMacAddress());
     macAddressReq->setDestAddress(address);
     packet->addTag<InterfaceReq>()->setInterfaceId(interfaceId);
     packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::stp);
@@ -384,7 +384,7 @@ void Stp::generateTCN()
             Packet *packet = new Packet("BPDU");
 
             auto macAddressReq = packet->addTag<MacAddressReq>();
-            macAddressReq->setSrcAddress(bridgeAddress);
+            macAddressReq->setSrcAddress(getPortInterfaceData(rootInterfaceId)->getInterfaceEntry()->getMacAddress());
             macAddressReq->setDestAddress(MacAddress::STP_MULTICAST_ADDRESS);
 
             packet->addTag<InterfaceReq>()->setInterfaceId(rootInterfaceId);
@@ -522,7 +522,7 @@ void Stp::handleTCN(Packet *packet, const Ptr<const Bpdu>& tcn)
         outPacket->insertAtBack(tcn);
         outPacket->addTag<InterfaceReq>()->setInterfaceId(rootInterfaceId);
         auto macAddressReq = outPacket->addTag<MacAddressReq>();
-        macAddressReq->setSrcAddress(bridgeAddress);
+        macAddressReq->setSrcAddress(getPortInterfaceData(rootInterfaceId)->getInterfaceEntry()->getMacAddress());
         macAddressReq->setDestAddress(destAddress);
         outPacket->addTag<PacketProtocolTag>()->setProtocol(&Protocol::stp);
         outPacket->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ethernetMac);
