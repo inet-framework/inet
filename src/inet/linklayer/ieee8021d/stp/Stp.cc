@@ -144,7 +144,15 @@ void Stp::setAllDesignated()
 
 void Stp::handleMessageWhenUp(cMessage *msg)
 {
-    if (!msg->isSelfMessage()) {
+    if (msg->isSelfMessage()) {
+        if (msg == tick) {
+            handleTick();
+            scheduleAt(simTime() + 1, tick);
+        }
+        else
+            throw cRuntimeError("Unknown self-message received");
+    }
+    else {
         Packet *packet = check_and_cast<Packet*>(msg);
         const auto& bpdu = packet->peekAtFront<Bpdu>();
 
@@ -162,14 +170,6 @@ void Stp::handleMessageWhenUp(cMessage *msg)
             handleBPDU(packet, bpdu);
         else if (bpdu->getBpduType() == BPDU_TYPE_TCN)
             handleTCN(packet, bpdu);
-    }
-    else {
-        if (msg == tick) {
-            handleTick();
-            scheduleAt(simTime() + 1, tick);
-        }
-        else
-            throw cRuntimeError("Unknown self-message received");
     }
 }
 
@@ -678,10 +678,8 @@ void Stp::selectRootPort()
     }
 
     unsigned int xRootInterfaceId = ifTable->getInterface(xRootIdx)->getInterfaceId();
-    if (rootInterfaceId != xRootInterfaceId) {
-        EV_DETAIL << "Port=" << ifTable->getInterface(xRootIdx)->getFullName() << " selected as root port." << endl;
+    if (rootInterfaceId != xRootInterfaceId)
         topologyChangeNotification = true;
-    }
 
     rootInterfaceId = xRootInterfaceId;
     getPortInterfaceData(rootInterfaceId)->setRole(Ieee8021dInterfaceData::ROOT);
@@ -723,7 +721,6 @@ void Stp::selectDesignatedPorts()
         result = comparePorts(bridgeGlobal, portData);
 
         if (result > 0) {
-            EV_DETAIL << "Port=" << ie->getFullName() << " is elected as designated portData." << endl;
             desPorts.push_back(interfaceId);
             portData->setRole(Ieee8021dInterfaceData::DESIGNATED);
             continue;

@@ -132,7 +132,12 @@ class INET_API Ieee8021dInterfaceData : public InterfaceProtocolData
 
     PortRole getRole() const { return portData.role; }
 
-    void setRole(PortRole role) { portData.role = role; }
+    void setRole(PortRole role) {
+        EV_DETAIL << getInterfaceEntry()->getFullName()
+                << ": role changed " << getRoleName(portData.role)
+                << " --> " << getRoleName(role) << std::endl;
+        portData.role = role;
+    }
 
     const MacAddress& getRootAddress() const { return portData.rootAddress; }
 
@@ -148,7 +153,12 @@ class INET_API Ieee8021dInterfaceData : public InterfaceProtocolData
 
     PortState getState() const { return portData.state; }
 
-    void setState(PortState state) { portData.state = state; }
+    void setState(PortState state) {
+        EV_DETAIL << getInterfaceEntry()->getFullName()
+                << ": state changed " << getStateName(portData.state)
+                << " --> " << getStateName(state) << std::endl;
+        portData.state = state;
+    }
 
     bool isEdge() const { return portData.edge; }
 
