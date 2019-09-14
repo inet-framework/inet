@@ -33,9 +33,9 @@ namespace inet {
 class INET_API StpBase : public OperationalBase, public cListener
 {
 public:
-    enum BdpuType { BPDU_TYPE_CONFIG = 0,
-        BPDU_TYPE_TCN = 1,
-        BPDU_TYPE_RSTP = 2 };
+    enum BdpuType { BPDU_TYPE_CONFIG = 0x00,
+        BPDU_TYPE_TCN = 0x80,
+        BPDU_TYPE_RSTP = 0x02 };
 
     enum ProtocolVersion { PROTO_VERSION_STP = 0,
         PROTO_VERSION_RSTP = 2,
