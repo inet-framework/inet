@@ -17,6 +17,7 @@
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
+#include "inet/physicallayer/analogmodel/packetlevel/DimensionalAnalogModel.h"
 #include "inet/physicallayer/analogmodel/packetlevel/DimensionalTransmission.h"
 #include "inet/visualizer/base/MediumVisualizerBase.h"
 
@@ -202,11 +203,19 @@ void MediumVisualizerBase::handleSignalAdded(const physicallayer::ITransmission 
         mps propagationSpeed = radioMedium->getPropagation()->getPropagationSpeed();
         Point<m, m, m> startPosition(m(transmission->getStartPosition().x), m(transmission->getStartPosition().y), m(transmission->getStartPosition().z));
         const auto& startOrientation = transmission->getStartOrientation();
-        const Ptr<const IFunction<double, Domain<m, m, m, m, m, m, Hz>>>& obstacleLossFunction = radioMedium->getObstacleLoss() != nullptr ? makeShared<ObstacleLossFunction>(radioMedium->getObstacleLoss()) : nullptr;
-        const auto& attenuationFunction = makeShared<SpaceAndFrequencyAttenuationFunction>(transmitterAntennaGainFunction, pathLossFunction, obstacleLossFunction, startPosition, startOrientation, propagationSpeed);
-        const auto& approximatedAtteunuationFunction = makeShared<ApproximatedFunction<double, Domain<m, m, m, simsec, Hz>, 4, Hz>>(lower, upper, step, &CenterInterpolator<Hz, double>::singleton, attenuationFunction);
         const auto& propagatedTransmissionPowerFunction = makeShared<PropagatedTransmissionPowerFunction>(transmissionPowerFunction, startPosition, propagationSpeed);
-        const auto& receptionPowerFunction = propagatedTransmissionPowerFunction->multiply(approximatedAtteunuationFunction);
+        Ptr<const IFunction<WpHz, Domain<m, m, m, simsec, Hz>>> receptionPowerFunction;
+        const Ptr<const IFunction<double, Domain<m, m, m, m, m, m, Hz>>>& obstacleLossFunction = radioMedium->getObstacleLoss() != nullptr ? makeShared<ObstacleLossFunction>(radioMedium->getObstacleLoss()) : nullptr;
+        bool attenuateWithCarrierFrequency = check_and_cast<const DimensionalAnalogModel *>(radioMedium->getAnalogModel())->par("attenuateWithCarrierFrequency");
+        if (attenuateWithCarrierFrequency) {
+            const auto& attenuationFunction = makeShared<SpaceDependentAttenuationFunction>(transmitterAntennaGainFunction, pathLossFunction, obstacleLossFunction, startPosition, startOrientation, propagationSpeed, dimensionalTransmission->getCarrierFrequency());
+            receptionPowerFunction = propagatedTransmissionPowerFunction->multiply(attenuationFunction);
+        }
+        else {
+            const auto& attenuationFunction = makeShared<SpaceAndFrequencyDependentAttenuationFunction>(transmitterAntennaGainFunction, pathLossFunction, obstacleLossFunction, startPosition, startOrientation, propagationSpeed);
+            const auto& approximatedAtteunuationFunction = makeShared<ApproximatedFunction<double, Domain<m, m, m, simsec, Hz>, 4, Hz>>(lower, upper, step, &AverageInterpolator<Hz, double>::singleton, attenuationFunction);
+            receptionPowerFunction = propagatedTransmissionPowerFunction->multiply(approximatedAtteunuationFunction);
+        }
         mediumPowerFunction->addElement(receptionPowerFunction);
         receptionPowerFunctions[transmission] = receptionPowerFunction;
     }

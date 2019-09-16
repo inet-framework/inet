@@ -140,12 +140,16 @@ void MediumCanvasVisualizer::refreshDisplay() const
 void MediumCanvasVisualizer::refreshSpectrumFigure(const cModule *module, PlotFigure *figure) const
 {
     auto nonCostThisPtr = const_cast<MediumCanvasVisualizer *>(this);
+    const IRadio *radio = dynamic_cast<const IRadio *>(module);
+    if (radio == nullptr) {
+        auto wlan0 = module->getSubmodule("wlan", 0);
+        if (wlan0 != nullptr)
+            radio = check_and_cast<IRadio *>(wlan0->getSubmodule("radio"));
+    }
     // TODO: what about multiple radios? what if it's not called wlan, etc.?
-    auto wlan0 = module->getSubmodule("wlan", 0);
     const IAntenna *antenna = nullptr;
     const ITransmission *transmission = nullptr;
-    if (wlan0 != nullptr) {
-        auto radio = check_and_cast<IRadio *>(wlan0->getSubmodule("radio"));
+    if (radio != nullptr) {
         antenna = radio->getAntenna();
 #ifdef WITH_RADIO
         auto dimensionalTransmission = dynamic_cast<const DimensionalTransmission *>(radio->getTransmissionInProgress());
@@ -184,11 +188,14 @@ void MediumCanvasVisualizer::refreshSpectrumFigure(const cModule *module, PlotFi
         const auto& receptionPowerFunction = transmission != nullptr ? receptionPowerFunctions.find(transmission)->second : nullptr;
         mediumPowerFunction->partition(i, [&] (const Interval<m, m, m, simsec, Hz>& i1, const IFunction<WpHz, Domain<m, m, m, simsec, Hz>> *f) {
             WpHz totalPower1(0), totalPower2(0), signalPower1(0), signalPower2(0);
-            const auto& l1 = i1.getLower();
-            const auto& u1 = i1.getUpper();
+            auto l1 = i1.getLower();
+            auto u1 = i1.getUpper();
+            // NOTE: the interval is closed at the lower boundary and open at the upper boundary
+            //       we want to have the limit of the function's value at the upper boundary from the left
+            std::get<4>(u1) = Hz(std::nextafter(std::get<4>(u1).get(), std::get<4>(l1).get()));
             auto x1 = GHz(std::get<4>(l1)).get();
             auto x2 = GHz(std::get<4>(u1)).get();
-            if (directionalAntenna) {
+            if (directionalAntenna && false) {
                 for (auto mediumPowerElementFunction : mediumPowerFunction->getElements()) {
                     double gain = 1;
                     if (auto rf = dynamicPtrCast<const MultiplicationFunction<WpHz, Domain<m, m, m, simsec, Hz>>>(mediumPowerElementFunction)) {
@@ -216,8 +223,8 @@ void MediumCanvasVisualizer::refreshSpectrumFigure(const cModule *module, PlotFi
                 }
             }
             else {
-                totalPower1 = mediumPowerFunction->getValue(l1);
-                totalPower2 = mediumPowerFunction->getValue(u1);
+                totalPower1 = f->getValue(l1);
+                totalPower2 = f->getValue(u1);
                 if (receptionPowerFunction != nullptr) {
                     signalPower1 = receptionPowerFunction->getValue(l1);
                     signalPower2 = receptionPowerFunction->getValue(u1);
