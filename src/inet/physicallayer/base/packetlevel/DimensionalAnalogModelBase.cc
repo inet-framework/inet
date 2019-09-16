@@ -50,7 +50,7 @@ const Ptr<const IFunction<WpHz, Domain<simsec, Hz>>> DimensionalAnalogModelBase:
     EV_TRACE << "Transmission power end" << endl;
     Point<simsec, Hz> propagationShift(simsec(arrival->getStartTime() - transmission->getStartTime()), Hz(0));
     const auto& propagatedTransmissionPowerFunction = makeShared<ShiftFunction<WpHz, Domain<simsec, Hz>>>(transmissionPowerFunction, propagationShift);
-    Ptr<const IFunction<double, Domain<simsec, Hz>>> attenuationFunction = makeShared<FrequencyAttenuationFunction>(radioMedium, transmitterAntennaGain, receiverAntennaGain, transmissionStartPosition, receptionStartPosition);
+    Ptr<const IFunction<double, Domain<simsec, Hz>>> attenuationFunction = makeShared<FrequencyDependentAttenuationFunction>(radioMedium, transmitterAntennaGain, receiverAntennaGain, transmissionStartPosition, receptionStartPosition);
     Ptr<const IFunction<WpHz, Domain<simsec, Hz>>> receptionPower;
     if (attenuateWithCarrierFrequency) {
         const auto& constantAttenuationFunction = makeShared<ConstantFunction<double, Domain<simsec, Hz>>>(attenuationFunction->getValue(Point<simsec, Hz>(simsec(0), dimensionalTransmission->getCarrierFrequency())));
@@ -60,7 +60,7 @@ const Ptr<const IFunction<WpHz, Domain<simsec, Hz>>> DimensionalAnalogModelBase:
         Hz lower = dimensionalTransmission->getCarrierFrequency() - dimensionalTransmission->getBandwidth() / 2;
         Hz upper = dimensionalTransmission->getCarrierFrequency() + dimensionalTransmission->getBandwidth() / 2;
         Hz step = dimensionalTransmission->getBandwidth() / 10; // TODO: parameter for 10
-        const auto& approximatedAttenuationFunction = makeShared<ApproximatedFunction<double, Domain<simsec, Hz>, 1, Hz>>(lower, upper, step, &CenterInterpolator<Hz, double>::singleton, attenuationFunction);
+        const auto& approximatedAttenuationFunction = makeShared<ApproximatedFunction<double, Domain<simsec, Hz>, 1, Hz>>(lower, upper, step, &AverageInterpolator<Hz, double>::singleton, attenuationFunction);
         receptionPower = propagatedTransmissionPowerFunction->multiply(approximatedAttenuationFunction);
     }
     EV_TRACE << "Reception power begin " << endl;
