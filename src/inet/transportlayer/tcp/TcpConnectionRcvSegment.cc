@@ -780,14 +780,14 @@ TcpEventCode TcpConnection::processSegmentInListen(Packet *packet, const Ptr<con
             tcpMain->addForkedConnection(this, conn, destAddr, srcAddr, tcpseg->getDestPort(), tcpseg->getSrcPort());
             EV_DETAIL << "Connection forked: new connection got new socketId=" << conn->socketId << ", "
                                                                                            "old connection keeps LISTENing with socketId=" << socketId << "\n";
-            TcpEventCode forkEvent = conn->processSegmentInListenFoo(packet, tcpseg, srcAddr, destAddr);
+            TcpEventCode forkEvent = conn->processSynInListen(packet, tcpseg, srcAddr, destAddr);
             conn->performStateTransition(forkEvent);
 
             return TCP_E_IGNORE;
         }
         else {
             tcpMain->updateSockPair(this, destAddr, srcAddr, tcpseg->getDestPort(), tcpseg->getSrcPort());
-            return processSegmentInListenFoo(packet, tcpseg, srcAddr, destAddr);
+            return processSynInListen(packet, tcpseg, srcAddr, destAddr);
         }
     }
 
@@ -799,7 +799,7 @@ TcpEventCode TcpConnection::processSegmentInListen(Packet *packet, const Ptr<con
     return TCP_E_IGNORE;
 }
 
-TcpEventCode TcpConnection::processSegmentInListenFoo(Packet *packet, const Ptr<const TcpHeader>& tcpseg, L3Address srcAddr, L3Address destAddr)
+TcpEventCode TcpConnection::processSynInListen(Packet *packet, const Ptr<const TcpHeader>& tcpseg, L3Address srcAddr, L3Address destAddr)
 {
     //"
     //  Set RCV.NXT to SEG.SEQ+1, IRS is set to SEG.SEQ and any other
