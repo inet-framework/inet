@@ -39,16 +39,16 @@ void DimensionalMediumTest::test1()
     auto transmissionFunction1 = createPowerFunction(0, 20, GHz(1), MHz(20), mW(100));
     std::cout << "Transmission 1: " << *transmissionFunction1 << std::endl;
     auto propagatedTransmissionFunction1 = makeShared<PropagatedTransmissionPowerFunction>(transmissionFunction1, Point<m, m, m>(m(10), m(0), m(0)), propagationSpeed);
-    auto attenuationFunction1 = makeShared<SpaceAndFrequencyAttenuationFunction>(transmitterAntennaGainFunction, pathLossFunction, obstacleLossFunction, Point<m, m, m>(m(10), m(0), m(0)), Quaternion(), propagationSpeed);
-    auto approximatedAttenuationFunction1 = makeShared<ApproximatedFunction<double, Domain<m, m, m, simsec, Hz>, 4, Hz>>(MHz(990), MHz(1100), MHz(1), &CenterInterpolator<Hz, double>::singleton, attenuationFunction1);
+    auto attenuationFunction1 = makeShared<SpaceAndFrequencyDependentAttenuationFunction>(transmitterAntennaGainFunction, pathLossFunction, obstacleLossFunction, Point<m, m, m>(m(10), m(0), m(0)), Quaternion(), propagationSpeed);
+    auto approximatedAttenuationFunction1 = makeShared<ApproximatedFunction<double, Domain<m, m, m, simsec, Hz>, 4, Hz>>(MHz(990), MHz(1100), MHz(1), &AverageInterpolator<Hz, double>::singleton, attenuationFunction1);
     auto receptionFunction1 = propagatedTransmissionFunction1->multiply(approximatedAttenuationFunction1);
     //std::cout << "Reception 1: " << *receptionFunction1 << std::endl;
 
     auto transmissionFunction2 = createPowerFunction(0, 20, GHz(1), MHz(20), mW(10));
     std::cout << "Transmission 2: " << *transmissionFunction2 << std::endl;
     auto propagatedTransmissionFunction2 = makeShared<PropagatedTransmissionPowerFunction>(transmissionFunction2, Point<m, m, m>(m(-10), m(0), m(0)), propagationSpeed);
-    auto attenuationFunction2 = makeShared<SpaceAndFrequencyAttenuationFunction>(transmitterAntennaGainFunction, pathLossFunction, obstacleLossFunction, Point<m, m, m>(m(-10), m(0), m(0)), Quaternion(), propagationSpeed);
-    auto approximatedAttenuationFunction2 = makeShared<ApproximatedFunction<double, Domain<m, m, m, simsec, Hz>, 4, Hz>>(MHz(990), MHz(1100), MHz(1), &CenterInterpolator<Hz, double>::singleton, attenuationFunction2);
+    auto attenuationFunction2 = makeShared<SpaceAndFrequencyDependentAttenuationFunction>(transmitterAntennaGainFunction, pathLossFunction, obstacleLossFunction, Point<m, m, m>(m(-10), m(0), m(0)), Quaternion(), propagationSpeed);
+    auto approximatedAttenuationFunction2 = makeShared<ApproximatedFunction<double, Domain<m, m, m, simsec, Hz>, 4, Hz>>(MHz(990), MHz(1100), MHz(1), &AverageInterpolator<Hz, double>::singleton, attenuationFunction2);
     auto receptionFunction2 = propagatedTransmissionFunction2->multiply(approximatedAttenuationFunction2);
     //std::cout << "Reception 2: " << *receptionFunction2 << std::endl;
 
@@ -83,27 +83,61 @@ DimensionalMediumTest tester;
 tester.test1();
 
 %contains: stdout
-Background noise: function(m, m, m, s, Hz) -> WpHz {
-  constant over [-inf m ... inf m] x [-inf m ... inf m] x [-inf m ... inf m] x [0 s ... inf s] x [0 Hz ... inf GHz] -> 5e-20 WpHz
-} min = 5e-20 WpHz, max = 5e-20 WpHz, mean = 5e-20 WpHz
-Transmission 1: function(s, Hz) -> WpHz {
-  constant over [0 s ... 20 s) x [0 Hz ... 990 MHz) -> 0 WpHz
-  constant over [20 s ... inf s] x [0 Hz ... 990 MHz) -> 0 WpHz
-  constant over [0 s ... 20 s) x [990 MHz ... 1.01 GHz) -> 5e-09 WpHz
-  constant over [20 s ... inf s] x [990 MHz ... 1.01 GHz) -> 0 WpHz
-  constant over [0 s ... 20 s) x [1.01 GHz ... inf GHz] -> 0 WpHz
-  constant over [20 s ... inf s] x [1.01 GHz ... inf GHz] -> 0 WpHz
-} min = 0 WpHz, max = 5e-09 WpHz, mean = 0 WpHz
-Transmission 2: function(s, Hz) -> WpHz {
-  constant over [0 s ... 20 s) x [0 Hz ... 990 MHz) -> 0 WpHz
-  constant over [20 s ... inf s] x [0 Hz ... 990 MHz) -> 0 WpHz
-  constant over [0 s ... 20 s) x [990 MHz ... 1.01 GHz) -> 5e-10 WpHz
-  constant over [20 s ... inf s] x [990 MHz ... 1.01 GHz) -> 0 WpHz
-  constant over [0 s ... 20 s) x [1.01 GHz ... inf GHz] -> 0 WpHz
-  constant over [20 s ... inf s] x [1.01 GHz ... inf GHz] -> 0 WpHz
-} min = 0 WpHz, max = 5e-10 WpHz, mean = 0 WpHz
+Background noise: function(m, m, m, s, Hz) → WpHz {
+  domain = [-inf m … inf m] x [-inf m … inf m] x [-inf m … inf m] x [0 s … inf s] x [0 Hz … inf GHz] → range = [5e-20 WpHz]
+  structure =
+    (DomainLimited, domain = [-inf m … inf m] x [-inf m … inf m] x [-inf m … inf m] x [0 s … inf s] x [0 Hz … inf GHz]
+      Constant 5e-20 WpHz)
+  partitioning = {
+    constant over [-inf m … inf m] x [-inf m … inf m] x [-inf m … inf m] x [0 s … inf s] x [0 Hz … inf GHz]
+      → 5e-20 WpHz
+  } min = 5e-20 WpHz, max = 5e-20 WpHz, mean = 5e-20 WpHz
+}
+
+Transmission 1: function(s, Hz) → WpHz {
+  domain = [0 s … inf s] x [0 Hz … inf GHz] → range = [0 WpHz … 5e-09 WpHz]
+  structure =
+    (DomainLimited, domain = [0 s … inf s] x [0 Hz … inf GHz]
+      (TwoDimensionalBoxcar, [0 s … 20 s] x [990 MHz … 1.01 GHz] → 5e-09 WpHz))
+  partitioning = {
+    constant over [0 s … 20 s) x [0 Hz … 990 MHz)
+      → 0 WpHz
+    constant over [20 s … inf s] x [0 Hz … 990 MHz)
+      → 0 WpHz
+    constant over [0 s … 20 s) x [990 MHz … 1.01 GHz)
+      → 5e-09 WpHz
+    constant over [20 s … inf s] x [990 MHz … 1.01 GHz)
+      → 0 WpHz
+    constant over [0 s … 20 s) x [1.01 GHz … inf GHz]
+      → 0 WpHz
+    constant over [20 s … inf s] x [1.01 GHz … inf GHz]
+      → 0 WpHz
+  } min = 0 WpHz, max = 5e-09 WpHz, mean = 0 WpHz
+}
+
+Transmission 2: function(s, Hz) → WpHz {
+  domain = [0 s … inf s] x [0 Hz … inf GHz] → range = [0 WpHz … 5e-10 WpHz]
+  structure =
+    (DomainLimited, domain = [0 s … inf s] x [0 Hz … inf GHz]
+      (TwoDimensionalBoxcar, [0 s … 20 s] x [990 MHz … 1.01 GHz] → 5e-10 WpHz))
+  partitioning = {
+    constant over [0 s … 20 s) x [0 Hz … 990 MHz)
+      → 0 WpHz
+    constant over [20 s … inf s] x [0 Hz … 990 MHz)
+      → 0 WpHz
+    constant over [0 s … 20 s) x [990 MHz … 1.01 GHz)
+      → 5e-10 WpHz
+    constant over [20 s … inf s] x [990 MHz … 1.01 GHz)
+      → 0 WpHz
+    constant over [0 s … 20 s) x [1.01 GHz … inf GHz]
+      → 0 WpHz
+    constant over [20 s … inf s] x [1.01 GHz … inf GHz]
+      → 0 WpHz
+  } min = 0 WpHz, max = 5e-10 WpHz, mean = 0 WpHz
+}
+
 SNIR:
-  interval = [0 m ... 0 m] x [0 m ... 0 m] x [0 m ... 0 m] x [0.000000033356 s ... 10.000000033356 s) x [990 MHz ... 1 GHz), SNIR mean = 9.99983
-  interval = [0 m ... 0 m] x [0 m ... 0 m] x [0 m ... 0 m] x [0.000000033356 s ... 10.000000033356 s) x [1 GHz ... 1.01 GHz), SNIR mean = 9.99982
-  interval = [0 m ... 0 m] x [0 m ... 0 m] x [0 m ... 0 m] x [10.000000033356 s ... 20.000000033356 s) x [990 MHz ... 1 GHz), SNIR mean = 9.99983
-  interval = [0 m ... 0 m] x [0 m ... 0 m] x [0 m ... 0 m] x [10.000000033356 s ... 20.000000033356 s) x [1 GHz ... 1.01 GHz), SNIR mean = 9.99982
+  interval = [0 m] x [0 m] x [0 m] x [0.000000033356 s … 10.000000033356 s) x [990 MHz … 1 GHz), SNIR mean = 9.99983
+  interval = [0 m] x [0 m] x [0 m] x [0.000000033356 s … 10.000000033356 s) x [1 GHz … 1.01 GHz), SNIR mean = 9.99982
+  interval = [0 m] x [0 m] x [0 m] x [10.000000033356 s … 20.000000033356 s) x [990 MHz … 1 GHz), SNIR mean = 9.99983
+  interval = [0 m] x [0 m] x [0 m] x [10.000000033356 s … 20.000000033356 s) x [1 GHz … 1.01 GHz), SNIR mean = 9.99982

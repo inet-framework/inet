@@ -83,13 +83,13 @@ tester.testTimeW(RightInterpolator<simtime_t, W>());
 tester.testHzDouble(RightInterpolator<Hz, double>());
 tester.testHzW(RightInterpolator<Hz, W>());
 
-std::cout << "Center" << endl;
-tester.testDoubleDouble(CenterInterpolator<double, double>());
-tester.testDoubleW(CenterInterpolator<double, W>());
-tester.testTimeDouble(CenterInterpolator<simtime_t, double>());
-tester.testTimeW(CenterInterpolator<simtime_t, W>());
-tester.testHzDouble(CenterInterpolator<Hz, double>());
-tester.testHzW(CenterInterpolator<Hz, W>());
+std::cout << "Average" << endl;
+tester.testDoubleDouble(AverageInterpolator<double, double>());
+tester.testDoubleW(AverageInterpolator<double, W>());
+tester.testTimeDouble(AverageInterpolator<simtime_t, double>());
+tester.testTimeW(AverageInterpolator<simtime_t, W>());
+tester.testHzDouble(AverageInterpolator<Hz, double>());
+tester.testHzW(AverageInterpolator<Hz, W>());
 
 std::cout << "Closer" << endl;
 tester.testDoubleDouble(CloserInterpolator<double, double>());
@@ -99,21 +99,21 @@ tester.testTimeW(CloserInterpolator<simtime_t, W>());
 tester.testHzDouble(CloserInterpolator<Hz, double>());
 tester.testHzW(CloserInterpolator<Hz, W>());
 
-std::cout << "Smaller" << endl;
-tester.testDoubleDouble(SmallerInterpolator<double, double>());
-tester.testDoubleW(SmallerInterpolator<double, W>());
-tester.testTimeDouble(SmallerInterpolator<simtime_t, double>());
-tester.testTimeW(SmallerInterpolator<simtime_t, W>());
-tester.testHzDouble(SmallerInterpolator<Hz, double>());
-tester.testHzW(SmallerInterpolator<Hz, W>());
+std::cout << "Minimum" << endl;
+tester.testDoubleDouble(MinimumInterpolator<double, double>());
+tester.testDoubleW(MinimumInterpolator<double, W>());
+tester.testTimeDouble(MinimumInterpolator<simtime_t, double>());
+tester.testTimeW(MinimumInterpolator<simtime_t, W>());
+tester.testHzDouble(MinimumInterpolator<Hz, double>());
+tester.testHzW(MinimumInterpolator<Hz, W>());
 
-std::cout << "Greater" << endl;
-tester.testDoubleDouble(GreaterInterpolator<double, double>());
-tester.testDoubleW(GreaterInterpolator<double, W>());
-tester.testTimeDouble(GreaterInterpolator<simtime_t, double>());
-tester.testTimeW(GreaterInterpolator<simtime_t, W>());
-tester.testHzDouble(GreaterInterpolator<Hz, double>());
-tester.testHzW(GreaterInterpolator<Hz, W>());
+std::cout << "Maximum" << endl;
+tester.testDoubleDouble(MaximumInterpolator<double, double>());
+tester.testDoubleW(MaximumInterpolator<double, W>());
+tester.testTimeDouble(MaximumInterpolator<simtime_t, double>());
+tester.testTimeW(MaximumInterpolator<simtime_t, W>());
+tester.testHzDouble(MaximumInterpolator<Hz, double>());
+tester.testHzW(MaximumInterpolator<Hz, W>());
 
 std::cout << "Linear" << endl;
 tester.testDoubleDouble(LinearInterpolator<double, double>());
@@ -186,7 +186,7 @@ Right
 1 W
 1 W
 1 W
-Center
+Average
 0.5
 0.5
 0.5
@@ -248,7 +248,7 @@ Closer
 1 W
 1 W
 1 W
-Smaller
+Minimum
 0
 0
 0
@@ -279,7 +279,7 @@ Smaller
 0 W
 0 W
 0 W
-Greater
+Maximum
 1
 1
 1

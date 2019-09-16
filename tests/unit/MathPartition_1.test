@@ -18,9 +18,7 @@ class FunctionTest
     void printPartitioning(const typename D::I& i, const Ptr<const IFunction<R, D>>& f) {
     	FunctionChecker<R, D>(f).check();
         std::cout << "\nPartitioning " << i << std::endl;
-	    f->partition(i, [&] (const typename D::I& i1, const IFunction<R, D> *f1) {
-            f1->print(std::cout, i1);
-	    });
+	    f->printPartitioning(std::cout, i);
     }
 
   public:
@@ -86,106 +84,164 @@ tester.test1();
 %contains: stdout
 ConstantFunction
 
-Partitioning [-inf ... inf]
-constant over [-inf ... inf] -> 10
+Partitioning [-inf … inf]
+constant over [-inf … inf]
+  → 10
 
 OneDimensionalBoxcarFunction
 
-Partitioning [-inf ... inf]
-constant over [-inf ... -1) -> 0
-constant over [-1 ... 1) -> 10
-constant over [1 ... inf] -> 0
+Partitioning [-inf … inf]
+constant over [-inf … -1)
+  → 0
+constant over [-1 … 1)
+  → 10
+constant over [1 … inf]
+  → 0
 
-Partitioning [-10 ... 0)
-constant over [-10 ... -1) -> 0
-constant over [-1 ... 0) -> 10
+Partitioning [-10 … 0)
+constant over [-10 … -1)
+  → 0
+constant over [-1 … 0)
+  → 10
 
-Partitioning [0 ... 10)
-constant over [0 ... 1) -> 10
-constant over [1 ... 10) -> 0
+Partitioning [0 … 10)
+constant over [0 … 1)
+  → 10
+constant over [1 … 10)
+  → 0
 
 AdditionFunction
 
-Partitioning [-inf ... inf]
-constant over [-inf ... -1) -> 0
-constant over [-1 ... 0) -> 10
-constant over [0 ... 1) -> 11
-constant over [1 ... 2) -> 1
-constant over [2 ... inf] -> 0
+Partitioning [-inf … inf]
+constant over [-inf … -1)
+  → 0
+constant over [-1 … 0)
+  → 10
+constant over [0 … 1)
+  → 11
+constant over [1 … 2)
+  → 1
+constant over [2 … inf]
+  → 0
 
-Partitioning [-10 ... 0)
-constant over [-10 ... -1) -> 0
-constant over [-1 ... 0) -> 10
+Partitioning [-10 … 0)
+constant over [-10 … -1)
+  → 0
+constant over [-1 … 0)
+  → 10
 
-Partitioning [0 ... 10)
-constant over [0 ... 1) -> 11
-constant over [1 ... 2) -> 1
-constant over [2 ... 10) -> 0
+Partitioning [0 … 10)
+constant over [0 … 1)
+  → 11
+constant over [1 … 2)
+  → 1
+constant over [2 … 10)
+  → 0
 
 MultiplicationFunction
 
-Partitioning [-inf ... inf]
-constant over [-inf ... -1) -> 0
-constant over [-1 ... 0) -> 0
-constant over [0 ... 1) -> 10
-constant over [1 ... inf] -> 0
+Partitioning [-inf … inf]
+constant over [-inf … -1)
+  → 0
+constant over [-1 … 0)
+  → 0
+constant over [0 … 1)
+  → 10
+constant over [1 … inf]
+  → 0
 
-Partitioning [-10 ... 0)
-constant over [-10 ... -1) -> 0
-constant over [-1 ... 0) -> 0
+Partitioning [-10 … 0)
+constant over [-10 … -1)
+  → 0
+constant over [-1 … 0)
+  → 0
 
-Partitioning [0 ... 10)
-constant over [0 ... 1) -> 10
-constant over [1 ... 10) -> 0
+Partitioning [0 … 10)
+constant over [0 … 1)
+  → 10
+constant over [1 … 10)
+  → 0
 
 OneDimensionalInterpolatedFunction
 
-Partitioning [-inf ... inf]
-constant over [-inf ... -1) -> 0
-linear over [-1 ... 0) -> from 0 to 10
-linear over [0 ... 1) -> from 10 to 0
-constant over [1 ... inf] -> 0
+Partitioning [-inf … inf]
+constant over [-inf … -1)
+  → 0
+linear in dim. 0 over [-1 … 0)
+  → 0 … 10
+linear in dim. 0 over [0 … 1)
+  → 10 … 0
+constant over [1 … inf]
+  → 0
 
 MultiplicationFunction optimization
 
-Partitioning [-inf ... inf]
-constant over [-inf ... inf] -> 0
+Partitioning [-inf … inf]
+constant over [-inf … inf]
+  → 0
 
 OrthogonalCombinatorFunction
 
-Partitioning [-inf ... inf] x [-inf ... inf]
-constant over [-inf ... -1) x [-inf ... 0) -> 0
-constant over [-inf ... -1) x [0 ... 2) -> 0
-constant over [-inf ... -1) x [2 ... inf] -> 0
-constant over [-1 ... 1) x [-inf ... 0) -> 0
-constant over [-1 ... 1) x [0 ... 2) -> 10
-constant over [-1 ... 1) x [2 ... inf] -> 0
-constant over [1 ... inf] x [-inf ... 0) -> 0
-constant over [1 ... inf] x [0 ... 2) -> 0
-constant over [1 ... inf] x [2 ... inf] -> 0
+Partitioning [-inf … inf] x [-inf … inf]
+constant over [-inf … -1) x [-inf … 0)
+  → 0
+constant over [-inf … -1) x [0 … 2)
+  → 0
+constant over [-inf … -1) x [2 … inf]
+  → 0
+constant over [-1 … 1) x [-inf … 0)
+  → 0
+constant over [-1 … 1) x [0 … 2)
+  → 10
+constant over [-1 … 1) x [2 … inf]
+  → 0
+constant over [1 … inf] x [-inf … 0)
+  → 0
+constant over [1 … inf] x [0 … 2)
+  → 0
+constant over [1 … inf] x [2 … inf]
+  → 0
 
 TwoDimensionalBoxcarFunction
 
-Partitioning [-inf ... inf] x [-inf ... inf]
-constant over [-inf ... -1) x [-inf ... 0) -> 0
-constant over [-1 ... 1) x [-inf ... 0) -> 0
-constant over [1 ... inf] x [-inf ... 0) -> 0
-constant over [-inf ... -1) x [0 ... 2) -> 0
-constant over [-1 ... 1) x [0 ... 2) -> 10
-constant over [1 ... inf] x [0 ... 2) -> 0
-constant over [-inf ... -1) x [2 ... inf] -> 0
-constant over [-1 ... 1) x [2 ... inf] -> 0
-constant over [1 ... inf] x [2 ... inf] -> 0
+Partitioning [-inf … inf] x [-inf … inf]
+constant over [-inf … -1) x [-inf … 0)
+  → 0
+constant over [-1 … 1) x [-inf … 0)
+  → 0
+constant over [1 … inf] x [-inf … 0)
+  → 0
+constant over [-inf … -1) x [0 … 2)
+  → 0
+constant over [-1 … 1) x [0 … 2)
+  → 10
+constant over [1 … inf] x [0 … 2)
+  → 0
+constant over [-inf … -1) x [2 … inf]
+  → 0
+constant over [-1 … 1) x [2 … inf]
+  → 0
+constant over [1 … inf] x [2 … inf]
+  → 0
 
 DivisionFunction
 
-Partitioning [-inf ... inf] x [-inf ... inf]
-constant over [-inf ... -1) x [-inf ... 0) -> -nan
-constant over [-inf ... -1) x [0 ... 2) -> -nan
-constant over [-inf ... -1) x [2 ... inf] -> -nan
-constant over [-1 ... 1) x [-inf ... 0) -> -nan
-constant over [-1 ... 1) x [0 ... 2) -> 1
-constant over [-1 ... 1) x [2 ... inf] -> -nan
-constant over [1 ... inf] x [-inf ... 0) -> -nan
-constant over [1 ... inf] x [0 ... 2) -> -nan
-constant over [1 ... inf] x [2 ... inf] -> -nan
+Partitioning [-inf … inf] x [-inf … inf]
+constant over [-inf … -1) x [-inf … 0)
+  → -nan
+constant over [-inf … -1) x [0 … 2)
+  → -nan
+constant over [-inf … -1) x [2 … inf]
+  → -nan
+constant over [-1 … 1) x [-inf … 0)
+  → -nan
+constant over [-1 … 1) x [0 … 2)
+  → 1
+constant over [-1 … 1) x [2 … inf]
+  → -nan
+constant over [1 … inf] x [-inf … 0)
+  → -nan
+constant over [1 … inf] x [0 … 2)
+  → -nan
+constant over [1 … inf] x [2 … inf]
+  → -nan
