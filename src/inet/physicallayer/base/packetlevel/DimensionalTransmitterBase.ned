@@ -33,7 +33,7 @@ import inet.physicallayer.base.packetlevel.NarrowbandTransmitterBase;
 //   s|c|e+-b|d*number
 //   s|c|e+-b|d*number+-quantity
 // </pre>
-// where s = start, c = center, b = bandwidth, d = duration. For example: c-b*0.5-1MHz
+// where s = start, e = end, c = center frequency, b = bandwidth, d = duration. For example: c-b*0.5-1MHz
 //
 module DimensionalTransmitterBase extends NarrowbandTransmitterBase
 {
