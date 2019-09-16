@@ -26,7 +26,7 @@ namespace math {
  * This interface represents a mathematical interpolation between two points (X, Y).
  */
 template<typename X, typename Y>
-class INET_API IInterpolator
+class INET_API IInterpolator : public cObject
 {
   public:
     virtual ~IInterpolator() { }

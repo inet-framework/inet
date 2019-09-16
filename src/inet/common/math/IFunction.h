@@ -29,7 +29,7 @@ namespace math {
  * This interface represents a mathematical function from domain D to range R.
  */
 template<typename R, typename D>
-class INET_API IFunction :
+class INET_API IFunction : public cObject,
 #if INET_PTR_IMPLEMENTATION == INET_STD_SHARED_PTR
     public std::enable_shared_from_this<Chunk>
 #elif INET_PTR_IMPLEMENTATION == INET_INTRUSIVE_PTR
@@ -45,6 +45,11 @@ class INET_API IFunction :
      * Returns the valid range of the function as a closed interval.
      */
     virtual Interval<R> getRange() const = 0;
+
+    /**
+     * Returns the valid range of the function as a closed interval for the given domain.
+     */
+    virtual Interval<R> getRange(const typename D::I& i) const = 0;
 
     /**
      * Returns the valid domain of the function as a closed interval.
@@ -137,12 +142,27 @@ class INET_API IFunction :
     /**
      * Prints this function in human readable form to the provided stream for the whole domain.
      */
-    virtual void print(std::ostream& os) const = 0;
+    virtual void print(std::ostream& os, int level = 0) const = 0;
 
     /**
-     * Prints this function in human readable form to the provided stream for the given domain.
+     * Prints this function in a human readable form to the provided stream for the given domain.
      */
-    virtual void print(std::ostream& os, const typename D::I& i) const = 0;
+    virtual void print(std::ostream& os, const typename D::I& i, int level = 0) const = 0;
+
+    /**
+     * Prints the partitioning of this function in a human readable form to the provided stream for the given domain.
+     */
+    virtual void printPartitioning(std::ostream& os, const typename D::I& i, int level = 0) const = 0;
+
+    /**
+     * Prints a single partition of this function in a human readable form to the provided stream for the given domain.
+     */
+    virtual void printPartition(std::ostream& os, const typename D::I& i, int level = 0) const = 0;
+
+    /**
+     * Prints the internal data structure of this function in a human readable form to the provided stream.
+     */
+    virtual void printStructure(std::ostream& os, int level = 0) const = 0;
 };
 
 template<typename R, typename ... T>

@@ -76,6 +76,10 @@ class INET_API FunctionBase : public IFunction<R, D>
 {
   public:
     virtual Interval<R> getRange() const override {
+        return getRange(getDomain());
+    }
+
+    virtual Interval<R> getRange(const typename D::I& i) const override {
         return Interval<R>(getLowerBoundary<R>(), getUpperBoundary<R>(), 0b1);
     }
 
@@ -143,23 +147,44 @@ class INET_API FunctionBase : public IFunction<R, D>
         return makeShared<DivisionFunction<R, D>>(const_cast<FunctionBase<R, D> *>(this)->shared_from_this(), o);
     }
 
-    virtual void print(std::ostream& os) const override {
-        os << "function" << D() << " -> ";
-        outputUnit(os, R());
-        os << " {" << std::endl;
-        this->partition(getDomain(), [&] (const typename D::I& i, const IFunction<R, D> *g) {
-            os << "  ";
-            g->print(os, i);
-        });
-        os << "} min = " << getMin() << ", max = " << getMax() << ", mean = " << getMean();
+    virtual void print(std::ostream& os, int level = 0) const override {
+        print(os, getDomain(), level);
     }
 
-    virtual void print(std::ostream& os, const typename D::I& i) const override {
-        os << "over " << i << " -> { ";
+    virtual void print(std::ostream& os, const typename D::I& i, int level = 0) const override {
+        os << std::string(level, ' ') << "function" << D() << " → ";
+        outputUnit(os, R());
+        os << std::string(level, ' ') << " {\n  domain = " << i << " → range = " << getRange() << "\n";
+        os << std::string(level, ' ') << "  structure =\n    ";
+        printStructure(os, level + 4);
+        os << std::string(level, ' ') << "\n";
+        os << std::string(level, ' ') << "  partitioning = {\n";
+        printPartitioning(os, i, level + 4);
+        os << std::string(level, ' ') << "  } min = " << getMin(i) << ", max = " << getMax(i) << ", mean = " << getMean(i) << "\n}\n";
+    }
+
+    virtual void printPartitioning(std::ostream& os, const typename D::I& i, int level) const override {
+        this->partition(i, [&] (const typename D::I& i1, const IFunction<R, D> *g) {
+            os << std::string(level, ' ');
+            g->printPartition(os, i1, level);
+        });
+    }
+
+    virtual void printPartition(std::ostream& os, const typename D::I& i, int level = 0) const override {
+        os << "over " << i << " → {";
         iterateBoundaries(i, std::function<void (const typename D::P&)>([&] (const typename D::P& p) {
-            os << "@" << p << " = " << this->getValue(p) << ", ";
+            os << "\n" << std::string(level + 2, ' ') << "at " << p << " → " << this->getValue(p);
         }));
-        os << "min = " << getMin(i) << ", max = " << getMax(i) << ", mean = " << getMean(i) << " }" << std::endl;
+        os << "\n" << std::string(level, ' ') << "} min = " << getMin(i) << ", max = " << getMax(i) << ", mean = " << getMean(i) << "\n";
+    }
+
+    virtual void printStructure(std::ostream& os, int level = 0) const override {
+        auto className = this->getClassName();
+        if (!strncmp(className, "inet::math::", 12))
+            className += 12;
+        else if (!strncmp(className, "inet::", 6))
+            className += 6;
+        os << className;
     }
 };
 
@@ -208,6 +233,12 @@ class INET_API DomainLimitedFunction : public FunctionBase<R, D>
     virtual R getIntegral(const typename D::I& i) const override {
         return f->getIntegral(i.intersect(domain));
     }
+
+    virtual void printStructure(std::ostream& os, int level = 0) const override {
+        os << "(DomainLimited, domain = " << domain << "\n" << std::string(level + 2, ' ');
+        f->printStructure(os, level + 2);
+        os << ")";
+    }
 };
 
 template<typename R, typename D>
@@ -241,8 +272,12 @@ class INET_API ConstantFunction : public FunctionBase<R, D>
     virtual R getMean(const typename D::I& i) const override { return r; }
     virtual R getIntegral(const typename D::I& i) const override { return r == R(0) ? r : r * i.getVolume(); }
 
-    virtual void print(std::ostream& os, const typename D::I& i) const override {
-        os << "constant over " << i << " -> " << r << std::endl;
+    virtual void printPartition(std::ostream& os, const typename D::I& i, int level = 0) const override {
+        os << "constant over " << i << "\n" << std::string(level + 2, ' ') << "→ " << r << std::endl;
+    }
+
+    virtual void printStructure(std::ostream& os, int level = 0) const override {
+        os << "Constant " << r;
     }
 };
 
@@ -284,6 +319,10 @@ class INET_API OneDimensionalBoxcarFunction : public FunctionBase<R, Domain<X>>
     }
 
     virtual bool isFinite(const Interval<X>& i) const override { return std::isfinite(toDouble(r)); }
+
+    virtual void printStructure(std::ostream& os, int level = 0) const override {
+        os << "(OneDimensionalBoxcar, [" << lower << " … " << upper << "] → " << r << ")";
+    }
 };
 
 template<typename R, typename X, typename Y>
@@ -330,6 +369,10 @@ class INET_API TwoDimensionalBoxcarFunction : public FunctionBase<R, Domain<X, Y
     }
 
     virtual bool isFinite(const Interval<X, Y>& i) const override { return std::isfinite(toDouble(r)); }
+
+    virtual void printStructure(std::ostream& os, int level = 0) const override {
+        os << "(TwoDimensionalBoxcar, [" << lowerX << " … " << upperX << "] x [" << lowerY << " … " << upperY << "] → " << r << ")";
+    }
 };
 
 template<typename R, typename D>
@@ -382,8 +425,13 @@ class INET_API LinearFunction : public FunctionBase<R, D>
         return getValue((i.getLower() + i.getUpper()) / 2);
     }
 
-    virtual void print(std::ostream& os, const typename D::I& i) const override {
-        os << "linear over " << i << " -> from " << getValue(i.getLower()) << " to " << getValue(i.getUpper()) << std::endl;
+    virtual void printPartition(std::ostream& os, const typename D::I& i, int level = 0) const override {
+        os << "linear in dim. " << dimension << " over " << i << "\n"
+           << std::string(level + 2, ' ') << "→ " << getValue(i.getLower()) << " … " << getValue(i.getUpper()) << std::endl;
+    }
+
+    virtual void printStructure(std::ostream& os, int level = 0) const override {
+        os << "Linear, " << lower << " … " << upper << " → " << rLower << " … " << rUpper;
     }
 };
 
@@ -467,6 +515,11 @@ class INET_API BilinearFunction : public FunctionBase<R, D>
     virtual R getMean(const typename D::I& i) const override {
         return getValue((i.getLower() + i.getUpper()) / 2);
     }
+
+    virtual void printPartition(std::ostream& os, const typename D::I& i, int level = 0) const override {
+        os << "bilinear in dims. " << dimension1 << ", " << dimension2 << " over " << i << "\n"
+           << std::string(level + 2, ' ') << "→ " << getValue(i.getLower()) << " … " << getValue(i.getUpper()) << std::endl;
+    }
 };
 
 template<typename R, typename X>
@@ -546,6 +599,32 @@ class INET_API OneDimensionalInterpolatedFunction : public FunctionBase<R, Domai
     }
 
     virtual bool isFinite(const Interval<X>& i) const override { return true; }
+
+    virtual void printStructure(std::ostream& os, int level = 0) const override {
+        os << "(OneDimensionalInterpolated";
+        auto size = rs.size();
+        for (auto entry : rs) {
+            const char *interpolatorClassName = nullptr;
+            if (entry.second.second != nullptr) {
+                interpolatorClassName = entry.second.second->getClassName();
+                if (!strncmp(interpolatorClassName, "inet::math::", 12))
+                    interpolatorClassName += 12;
+                else if (!strncmp(interpolatorClassName, "inet::", 6))
+                    interpolatorClassName += 6;
+            }
+            if (size < 8) {
+                os << ", " << entry.first << " → " << entry.second.first;
+                if (interpolatorClassName != nullptr)
+                    os << ", " << interpolatorClassName;
+            }
+            else {
+                os << "\n" << std::string(level + 2, ' ') << entry.first << " → " << entry.second.first;
+                if (interpolatorClassName != nullptr)
+                    os << "\n" << std::string(level + 4, ' ') << interpolatorClassName;
+            }
+        }
+        os << ")";
+    }
 };
 
 //template<typename R, typename X, typename Y>
@@ -622,6 +701,14 @@ class INET_API OrthogonalCombinatorFunction : public FunctionBase<R, Domain<X, Y
   public:
     OrthogonalCombinatorFunction(const Ptr<const IFunction<R, Domain<X>>>& f, const Ptr<const IFunction<double, Domain<Y>>>& g) : f(f), g(g) { }
 
+    virtual Interval<X, Y> getDomain() const override {
+        const auto& fDomain = f->getDomain();
+        const auto& gDomain = g->getDomain();
+        Point<X, Y> lower(std::get<0>(fDomain.getLower()), std::get<0>(gDomain.getLower()));
+        Point<X, Y> upper(std::get<0>(fDomain.getUpper()), std::get<0>(gDomain.getUpper()));
+        return Interval<X, Y>(lower, upper, fDomain.getClosed() << 1 | gDomain.getClosed());
+    }
+
     virtual R getValue(const Point<X, Y>& p) const override {
         return f->getValue(std::get<0>(p)) * g->getValue(std::get<1>(p));
     }
@@ -661,6 +748,14 @@ class INET_API OrthogonalCombinatorFunction : public FunctionBase<R, Domain<X, Y
             });
         });
     }
+
+    virtual void printStructure(std::ostream& os, int level = 0) const override {
+        os << "(# ";
+        f->printStructure(os, level + 3);
+        os << "\n" << std::string(level + 3, ' ');
+        g->printStructure(os, level + 3);
+        os << ")";
+    }
 };
 
 template<typename R, typename D>
@@ -672,6 +767,8 @@ class INET_API ShiftFunction : public FunctionBase<R, D>
 
   public:
     ShiftFunction(const Ptr<const IFunction<R, D>>& f, const typename D::P& s) : f(f), s(s) { }
+
+    virtual typename D::I getDomain() const override { return f->getDomain(); }
 
     virtual R getValue(const typename D::P& p) const override {
         return f->getValue(p - s);
@@ -690,6 +787,12 @@ class INET_API ShiftFunction : public FunctionBase<R, D>
                 simplifyAndCall(typename D::I(j.getLower() + s, j.getUpper() + s, j.getClosed()), &h, g);
             }
         });
+    }
+
+    virtual void printStructure(std::ostream& os, int level = 0) const override {
+        os << "(Shift, s = " << s << "\n" << std::string(level + 2, ' ');
+        f->printStructure(os, level + 2);
+        os << ")";
     }
 };
 
@@ -770,9 +873,9 @@ class INET_API ReciprocalFunction : public FunctionBase<R, D>
         return R(getIntegralFunctionValue(i.getUpper()) - getIntegralFunctionValue(i.getLower()));
     }
 
-    virtual void print(std::ostream& os, const typename D::I& i) const override {
-        os << "reciprocal ";
-        FunctionBase<R, D>::print(os, i);
+    virtual void printPartition(std::ostream& os, const typename D::I& i, int level = 0) const override {
+        os << "reciprocal in dim. " << dimension << " over " << i << "\n"
+           << std::string(level + 2, ' ') << "→ " << getValue(i.getLower()) << " … " << getValue(i.getUpper()) << std::endl;
     }
 };
 
@@ -835,6 +938,10 @@ class INET_API AdditionFunction : public FunctionBase<R, D>
 
   public:
     AdditionFunction(const Ptr<const IFunction<R, D>>& f1, const Ptr<const IFunction<R, D>>& f2) : f1(f1), f2(f2) { }
+
+    virtual typename D::I getDomain() const override {
+        return f1->getDomain().intersect(f2->getDomain());
+    }
 
     virtual R getValue(const typename D::P& p) const override {
         return f1->getValue(p) + f2->getValue(p);
@@ -899,6 +1006,14 @@ class INET_API AdditionFunction : public FunctionBase<R, D>
     virtual bool isFinite(const typename D::I& i) const override {
         return f1->isFinite(i) & f2->isFinite(i);
     }
+
+    virtual void printStructure(std::ostream& os, int level = 0) const override {
+        os << "(+ ";
+        f1->printStructure(os, level + 3);
+        os << "\n" << std::string(level + 3, ' ');
+        f2->printStructure(os, level + 3);
+        os << ")";
+    }
 };
 
 template<typename R, typename D>
@@ -910,6 +1025,10 @@ class INET_API SubtractionFunction : public FunctionBase<R, D>
 
   public:
     SubtractionFunction(const Ptr<const IFunction<R, D>>& f1, const Ptr<const IFunction<R, D>>& f2) : f1(f1), f2(f2) { }
+
+    virtual typename D::I getDomain() const override {
+        return f1->getDomain().intersect(f2->getDomain());
+    }
 
     virtual R getValue(const typename D::P& p) const override {
         return f1->getValue(p) - f2->getValue(p);
@@ -955,6 +1074,14 @@ class INET_API SubtractionFunction : public FunctionBase<R, D>
     virtual bool isFinite(const typename D::I& i) const override {
         return f1->isFinite(i) & f2->isFinite(i);
     }
+
+    virtual void printStructure(std::ostream& os, int level = 0) const override {
+        os << "(- ";
+        f1->printStructure(os, level + 3);
+        os << "\n" << std::string(level + 3, ' ');
+        f2->printStructure(os, level + 3);
+        os << ")";
+    }
 };
 
 template<typename R, typename D>
@@ -966,6 +1093,10 @@ class INET_API MultiplicationFunction : public FunctionBase<R, D>
 
   public:
     MultiplicationFunction(const Ptr<const IFunction<R, D>>& f1, const Ptr<const IFunction<double, D>>& f2) : f1(f1), f2(f2) { }
+
+    virtual typename D::I getDomain() const override {
+        return f1->getDomain().intersect(f2->getDomain());
+    }
 
     virtual const Ptr<const IFunction<R, D>>& getF1() const { return f1; }
 
@@ -1018,6 +1149,14 @@ class INET_API MultiplicationFunction : public FunctionBase<R, D>
     virtual bool isFinite(const typename D::I& i) const override {
         return f1->isFinite(i) & f2->isFinite(i);
     }
+
+    virtual void printStructure(std::ostream& os, int level = 0) const override {
+        os << "(* ";
+        f1->printStructure(os, level + 3);
+        os << "\n" << std::string(level + 3, ' ');
+        f2->printStructure(os, level + 3);
+        os << ")";
+    }
 };
 
 template<typename R, typename D>
@@ -1029,6 +1168,10 @@ class INET_API DivisionFunction : public FunctionBase<double, D>
 
   public:
     DivisionFunction(const Ptr<const IFunction<R, D>>& f1, const Ptr<const IFunction<R, D>>& f2) : f1(f1), f2(f2) { }
+
+    virtual typename D::I getDomain() const override {
+        return f1->getDomain().intersect(f2->getDomain());
+    }
 
     virtual double getValue(const typename D::P& p) const override {
         return unit(f1->getValue(p) / f2->getValue(p)).get();
@@ -1075,6 +1218,14 @@ class INET_API DivisionFunction : public FunctionBase<double, D>
     }
 
     virtual bool isFinite(const typename D::I& i) const override { return false; }
+
+    virtual void printStructure(std::ostream& os, int level = 0) const override {
+        os << "(/ ";
+        f1->printStructure(os, level + 3);
+        os << "\n" << std::string(level + 3, ' ');
+        f2->printStructure(os, level + 3);
+        os << ")";
+    }
 };
 
 template<typename R, typename D>
@@ -1095,6 +1246,13 @@ class INET_API SumFunction : public FunctionBase<R, D>
 
     virtual void removeElement(const Ptr<const IFunction<R, D>>& f) {
         fs.erase(std::remove(fs.begin(), fs.end(), f), fs.end());
+    }
+
+    virtual typename D::I getDomain() const override {
+        typename D::I domain(D::P::getLowerBoundaries(), D::P::getUpperBoundaries(), (1 << std::tuple_size<typename D::P::type>::value) - 1);
+        for (auto f : fs)
+            domain = domain.intersect(f->getDomain());
+        return domain;
     }
 
     virtual R getValue(const typename D::P& p) const override {
@@ -1153,6 +1311,19 @@ class INET_API SumFunction : public FunctionBase<R, D>
             if (!f->isFinite(i))
                 return false;
         return true;
+    }
+
+    virtual void printStructure(std::ostream& os, int level = 0) const override {
+        os << "(Σ ";
+        bool first = true;
+        for (auto f : fs) {
+            if (first)
+                first = false;
+            else
+                os << "\n" << std::string(level + 3, ' ');
+            f->printStructure(os, level + 3);
+        }
+        os << ")";
     }
 };
 
@@ -1249,6 +1420,12 @@ class INET_API IntegratedFunction : public FunctionBase<RI, DI>
     virtual void partition(const typename DI::I& i, std::function<void (const typename DI::I&, const IFunction<RI, DI> *)> g) const override {
         throw cRuntimeError("TODO");
     }
+
+    virtual void printStructure(std::ostream& os, int level = 0) const override {
+        os << "(Integrated\n" << std::string(level + 2, ' ');
+        f->printStructure(os, level + 2);
+        os << ")";
+    }
 };
 
 template<typename R, typename D, int DIMENSION, typename X>
@@ -1308,18 +1485,22 @@ class INET_API ApproximatedFunction : public FunctionBase<R, D>
                 typename D::I i1(p1, p2, i.getClosed());
                 simplifyAndCall(i1, &h, g);
             }
-            else if (dynamic_cast<const CenterInterpolator<X, R> *>(interpolator)) {
+            else {
                 ConstantFunction<R, D> h(interpolator->getValue(x1, r1, x2, r2, (x1 + x2) / 2));
                 typename D::I i1(p1, p2, i.getClosed());
                 simplifyAndCall(i1, &h, g);
             }
-            else
-                throw cRuntimeError("TODO");
         }
     }
 
     virtual bool isFinite(const typename D::I& i) const override {
         return f->isFinite(i);
+    }
+
+    virtual void printStructure(std::ostream& os, int level = 0) const override {
+        os << "(Approximated\n" << std::string(level + 2, ' ');
+        f->printStructure(os, level + 2);
+        os << ")";
     }
 };
 
@@ -1360,6 +1541,12 @@ class INET_API ExtrudedFunction : public FunctionBase<R, Domain<X, Y>>
     virtual bool isFinite(const Interval<X, Y>& i) const override {
         Interval<Y> i1(Point<Y>(std::get<1>(i.getLower())), Point<Y>(std::get<1>(i.getUpper())), i.getClosed() & 0b01);
         return f->isFinite(i1);
+    }
+
+    virtual void printStructure(std::ostream& os, int level = 0) const override {
+        os << "(Extruded\n" << std::string(level + 2, ' ');
+        f->printStructure(os, level + 2);
+        os << ")";
     }
 };
 
