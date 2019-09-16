@@ -185,7 +185,8 @@ bool MediumVisualizerBase::matchesTransmission(const ITransmission *transmission
         if (!interfaceFilter.matches(interfaceEntry))
             return false;
     }
-    return packetFilter.matches(transmission->getPacket());
+    auto packet = transmission->getPacket();
+    return packet == nullptr || packetFilter.matches(packet);
 }
 
 void MediumVisualizerBase::handleSignalAdded(const physicallayer::ITransmission *transmission)

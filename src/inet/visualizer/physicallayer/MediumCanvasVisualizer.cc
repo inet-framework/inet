@@ -415,7 +415,9 @@ cGroupFigure* MediumCanvasVisualizer::createSignalFigure(const ITransmission* tr
     cLabelFigure* nameFigure = new cLabelFigure("packet name");
     nameFigure->setPosition(position);
     nameFigure->setTags((std::string("propagating_signal packet_name label ") + tags).c_str());
-    nameFigure->setText(transmission->getPacket()->getName());
+    auto packet = transmission->getPacket();
+    if (packet != nullptr)
+        nameFigure->setText(packet->getName());
     nameFigure->setColor(color);
     groupFigure->addFigure(nameFigure);
     return groupFigure;
