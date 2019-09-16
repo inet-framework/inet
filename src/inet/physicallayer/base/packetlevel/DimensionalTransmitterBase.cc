@@ -192,6 +192,7 @@ Ptr<const IFunction<WpHz, Domain<simsec, Hz>>> DimensionalTransmitterBase::creat
                     default: throw cRuntimeError("Unknown qualifier");
                 }
                 frequency += bandwidth * entry.length + entry.offset;
+                ASSERT(!std::isnan(frequency.get()));
                 fs[frequency] = {entry.gain, entry.interpolator};
             }
             frequencyGainFunction = makeShared<OneDimensionalInterpolatedFunction<double, Hz>>(fs);
