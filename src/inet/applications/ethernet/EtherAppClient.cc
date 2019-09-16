@@ -164,15 +164,16 @@ void EtherAppClient::sendPacket()
 
     Packet *datapacket = new Packet(msgname, IEEE802CTRL_DATA);
     const auto& data = makeShared<EtherAppReq>();
-    data->addTag<CreationTimeTag>()->setCreationTime(simTime());
-
-    data->setRequestId(seqNum);
 
     long len = *reqLength;
     data->setChunkLength(B(len));
+    data->setRequestId(seqNum);
 
     long respLen = *respLength;
     data->setResponseBytes(respLen);
+
+    data->addTag<CreationTimeTag>()->setCreationTime(simTime());
+
     datapacket->insertAtBack(data);
 
     datapacket->addTag<MacAddressReq>()->setDestAddress(destMacAddress);
