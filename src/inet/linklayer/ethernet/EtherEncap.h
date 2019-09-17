@@ -46,15 +46,14 @@ class INET_API EtherEncap : public Ieee8022Llc
 
     struct Socket
     {
-      int socketId = -1;
-      MacAddress sourceAddress;
-      MacAddress destinationAddress;
-      const Protocol *protocol = nullptr;
-      int vlanId = -1;
+        int socketId = -1;
+        MacAddress sourceAddress;
+        MacAddress destinationAddress;
+        const Protocol *protocol = nullptr;
+        int vlanId = -1;
 
-      Socket(int socketId) : socketId(socketId) {}
-
-      bool matches(Packet *packet, const Ptr<const EthernetMacHeader>& ethernetMacHeader);
+        Socket(int socketId) : socketId(socketId) {}
+        bool matches(Packet *packet, const Ptr<const EthernetMacHeader>& ethernetMacHeader);
     };
 
     std::map<int, Socket *> socketIdToSocketMap;
