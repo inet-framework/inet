@@ -39,37 +39,18 @@ Register_Serializer(Ipv6Header, Ipv6HeaderSerializer);
 void Ipv6HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     const auto& ipv6Header = staticPtrCast<const Ipv6Header>(chunk);
-    unsigned int i;
-    uint32_t flowinfo;
-
-    EV << "Serialize Ipv6 packet\n";
-
+    stream.writeNBitsOfUint64Be(ipv6Header->getVersion(), 4);
+    stream.writeNBitsOfUint64Be(ipv6Header->getTrafficClass(), 8);
+    stream.writeNBitsOfUint64Be(ipv6Header->getFlowLabel(), 20);
+    stream.writeUint16Be(B(ipv6Header->getPayloadLength()).get());
+    stream.writeByte(ipv6Header->getExtensionHeaderArraySize() != 0 ? ipv6Header->getExtensionHeader(0)->getExtensionType() : ipv6Header->getProtocolId());
+    stream.writeByte(ipv6Header->getHopLimit());
+    stream.writeIpv6Address(ipv6Header->getSrcAddress());
+    stream.writeIpv6Address(ipv6Header->getDestAddress());
     B nextHdrCodePos = stream.getLength() + B(6);
-    struct ip6_hdr ip6h;
-
-    flowinfo = 0x06;
-    flowinfo <<= 8;
-    flowinfo |= ipv6Header->getTrafficClass();
-    flowinfo <<= 20;
-    flowinfo |= ipv6Header->getFlowLabel();
-    ip6h.ip6_flow = htonl(flowinfo);
-    ip6h.ip6_hlim = htons(ipv6Header->getHopLimit());
-
-    ip6h.ip6_nxt = ipv6Header->getExtensionHeaderArraySize() != 0 ? ipv6Header->getExtensionHeader(0)->getExtensionType() : ipv6Header->getProtocolId();
-
-    for (i = 0; i < 4; i++) {
-        ip6h.ip6_src.__u6_addr.__u6_addr32[i] = htonl(ipv6Header->getSrcAddress().words()[i]);
-    }
-    for (i = 0; i < 4; i++) {
-        ip6h.ip6_dst.__u6_addr.__u6_addr32[i] = htonl(ipv6Header->getDestAddress().words()[i]);
-    }
-
-    ip6h.ip6_plen = htons(B(ipv6Header->getPayloadLength()).get());
-
-    stream.writeBytes((uint8_t *)&ip6h, IPv6_HEADER_BYTES);
 
     //FIXME serialize extension headers
-    for (i = 0; i < ipv6Header->getExtensionHeaderArraySize(); i++) {
+    for (size_t i = 0; i < ipv6Header->getExtensionHeaderArraySize(); i++) {
         const Ipv6ExtensionHeader *extHdr = ipv6Header->getExtensionHeader(i);
         stream.writeByte(i + 1 < ipv6Header->getExtensionHeaderArraySize() ? ipv6Header->getExtensionHeader(i + 1)->getExtensionType() : ipv6Header->getProtocolId());
         ASSERT((B(extHdr->getByteLength()).get() & 7) == 0);
@@ -123,33 +104,93 @@ void Ipv6HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
 
 const Ptr<Chunk> Ipv6HeaderSerializer::deserialize(MemoryInputStream& stream) const
 {
-    uint8_t buffer[B(IPv6_HEADER_BYTES).get()];
-    stream.readBytes(buffer, IPv6_HEADER_BYTES);
-    auto dest = makeShared<Ipv6Header>();
-    const struct ip6_hdr& ip6h = *static_cast<const struct ip6_hdr *>((void *)&buffer);
-    uint32_t flowinfo = ntohl(ip6h.ip6_flow);
-    dest->setFlowLabel(flowinfo & 0xFFFFF);
-    flowinfo >>= 20;
-    dest->setTrafficClass(flowinfo & 0xFF);
+    auto ipv6Header = makeShared<Ipv6Header>();
+    if (stream.readNBitsToUint64Be(4) != 6)
+        ipv6Header->markIncorrect();
+    ipv6Header->setTrafficClass(stream.readNBitsToUint64Be(8));
+    ipv6Header->setFlowLabel(stream.readNBitsToUint64Be(20));
+    ipv6Header->setPayloadLength(B(stream.readUint16Be()));
+    IpProtocolId nextHeaderId = static_cast<IpProtocolId>(stream.readByte());
+    ipv6Header->setProtocolId(nextHeaderId);
+    ipv6Header->setHopLimit(stream.readByte());
+    ipv6Header->setSrcAddress(stream.readIpv6Address());
+    ipv6Header->setDestAddress(stream.readIpv6Address());
+    bool mbool = true;
+    while(mbool) {
+        switch (nextHeaderId) {
+            case IP_PROT_IPv6EXT_HOP: {
+                ipv6Header->setExtensionHeaderArraySize(ipv6Header->getExtensionHeaderArraySize() + 1);
+                Ipv6HopByHopOptionsHeader *extHdr = new Ipv6HopByHopOptionsHeader();
+                extHdr->setExtensionType(nextHeaderId);
+                nextHeaderId = static_cast<IpProtocolId>(stream.readByte());
+                uint8_t hdrExtLen = stream.readByte();
+                stream.readByteRepeatedly(0, hdrExtLen + 8 - 2);    // TODO
+                ipv6Header->setExtensionHeader(ipv6Header->getExtensionHeaderArraySize() - 1, extHdr);
+                break;
+            }
+            case IP_PROT_IPv6EXT_DEST: {
+                ipv6Header->setExtensionHeaderArraySize(ipv6Header->getExtensionHeaderArraySize() + 1);
+                Ipv6DestinationOptionsHeader *extHdr = new Ipv6DestinationOptionsHeader();
+                extHdr->setExtensionType(nextHeaderId);
+                nextHeaderId = static_cast<IpProtocolId>(stream.readByte());
+                uint8_t hdrExtLen = stream.readByte();
+                stream.readByteRepeatedly(0, hdrExtLen + 8 - 2);    // TODO
+                ipv6Header->setExtensionHeader(ipv6Header->getExtensionHeaderArraySize() - 1, extHdr);
+                break;
+            }
+            case IP_PROT_IPv6EXT_ROUTING: {
+                ipv6Header->setExtensionHeaderArraySize(ipv6Header->getExtensionHeaderArraySize() + 1);
+                Ipv6RoutingHeader *extHdr = new Ipv6RoutingHeader();
+                extHdr->setExtensionType(nextHeaderId);
+                nextHeaderId = static_cast<IpProtocolId>(stream.readByte());
+                uint8_t hdrExtLen = stream.readByte();
+                extHdr->setRoutingType(stream.readByte());
+                extHdr->setSegmentsLeft(stream.readByte());
+                stream.readByteRepeatedly(0, hdrExtLen + 8 - 4);    // TODO
+                ipv6Header->setExtensionHeader(ipv6Header->getExtensionHeaderArraySize() - 1, extHdr);
+                break;
+            }
+            case IP_PROT_IPv6EXT_FRAGMENT: {
+                ipv6Header->setExtensionHeaderArraySize(ipv6Header->getExtensionHeaderArraySize() + 1);
+                Ipv6FragmentHeader *extHdr = new Ipv6FragmentHeader();
+                extHdr->setExtensionType(nextHeaderId);
+                nextHeaderId = static_cast<IpProtocolId>(stream.readByte());
+                stream.readByte();
+                extHdr->setFragmentOffset(stream.readNBitsToUint64Be(13));
+                stream.readNBitsToUint64Be(3);
+                extHdr->setMoreFragments(stream.readBit());
+                extHdr->setIdentification(stream.readUint32Be());
+                ipv6Header->setExtensionHeader(ipv6Header->getExtensionHeaderArraySize() - 1, extHdr);
+                break;
+            }
+            case IP_PROT_IPv6EXT_AUTH: {
+                ipv6Header->setExtensionHeaderArraySize(ipv6Header->getExtensionHeaderArraySize() + 1);
+                Ipv6AuthenticationHeader *extHdr = new Ipv6AuthenticationHeader();
+                extHdr->setExtensionType(nextHeaderId);
+                nextHeaderId = static_cast<IpProtocolId>(stream.readByte());
+                uint8_t hdrExtLen = stream.readByte();
+                stream.readByteRepeatedly(0, hdrExtLen + 8 - 2);    // TODO
+                ipv6Header->setExtensionHeader(ipv6Header->getExtensionHeaderArraySize() - 1, extHdr);
+                break;
+            }
+            case IP_PROT_IPv6EXT_ESP: {
+                ipv6Header->setExtensionHeaderArraySize(ipv6Header->getExtensionHeaderArraySize() + 1);
+                Ipv6EncapsulatingSecurityPayloadHeader *extHdr = new Ipv6EncapsulatingSecurityPayloadHeader();
+                extHdr->setExtensionType(nextHeaderId);
+                nextHeaderId = static_cast<IpProtocolId>(stream.readByte());
+                uint8_t hdrExtLen = stream.readByte();
+                stream.readByteRepeatedly(0, hdrExtLen + 8 - 2);    // TODO
+                ipv6Header->setExtensionHeader(ipv6Header->getExtensionHeaderArraySize() - 1, extHdr);
+                break;
+            }
+            default: {
+                mbool = false;
+                break;
+            }
+        }
 
-    dest->setProtocolId(static_cast<IpProtocolId>(ip6h.ip6_nxt));
-    dest->setHopLimit(ntohs(ip6h.ip6_hlim));
-
-    Ipv6Address temp;
-    temp.set(ntohl(ip6h.ip6_src.__u6_addr.__u6_addr32[0]),
-             ntohl(ip6h.ip6_src.__u6_addr.__u6_addr32[1]),
-             ntohl(ip6h.ip6_src.__u6_addr.__u6_addr32[2]),
-             ntohl(ip6h.ip6_src.__u6_addr.__u6_addr32[3]));
-    dest->setSrcAddress(temp);
-
-    temp.set(ntohl(ip6h.ip6_dst.__u6_addr.__u6_addr32[0]),
-             ntohl(ip6h.ip6_dst.__u6_addr.__u6_addr32[1]),
-             ntohl(ip6h.ip6_dst.__u6_addr.__u6_addr32[2]),
-             ntohl(ip6h.ip6_dst.__u6_addr.__u6_addr32[3]));
-    dest->setDestAddress(temp);
-    dest->setPayloadLength(B(ip6h.ip6_plen));
-
-    return dest;
+    }
+    return ipv6Header;
 }
 
 } // namespace inet
