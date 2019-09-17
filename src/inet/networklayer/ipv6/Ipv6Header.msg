@@ -55,13 +55,13 @@ cplusplus(Ipv6ExtensionHeader) {{
 // Ipv6 datagram. RFC 2460 Section 3.
 //
 // Header fields not explicitly modelled:
-//    - version (=6): represented by the class name itself
 //    - payload length: will be calculated from encapsulated message length
 //      and extension headers' length
 //
 class Ipv6Header extends NetworkHeaderBase
 {
     chunkLength = IPv6_HEADER_BYTES;
+    uint8_t version = 6;
     Ipv6Address srcAddress;
     Ipv6Address destAddress;
     B payloadLength = B(-1);    // The size of the payload in octets, including any extension headers. The length is set to zero when a Hop-by-Hop extension header carries a Jumbo Payload option.
