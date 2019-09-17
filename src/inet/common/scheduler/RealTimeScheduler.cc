@@ -171,11 +171,9 @@ cEvent *RealTimeScheduler::takeNextEvent()
 
     // calculate target time
     cEvent *event = sim->getFES()->peekFirst();
-    if (!event) {
-        // This way targetTime will always be "as far in the future as possible", considering
-        // how integer overflows work in conjunction with comparisons in C++ (in practice...)
-        targetTime = baseTime + INT64_MAX;
-    }
+    if (!event)
+        // as far into the future as reasonable (hoping we will never overflow - it is unlikely)
+        targetTime = INT64_MAX;
     else {
         // use time of next event
         simtime_t eventSimtime = event->getArrivalTime();
