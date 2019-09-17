@@ -30,7 +30,6 @@ import inet.transportlayer.contract.ITcp;
 simple TcpLwip like ITcp
 {
     parameters:
-        bool recordStats = default(true); // recording of seqNum etc. into output vectors enabled/disabled
         string sendQueueClass = default("");    //# TODO: Obsolete!!!
         string receiveQueueClass = default(""); //# TODO: Obsolete!!!
         string crcMode @enum("declared", "computed") = default("declared");

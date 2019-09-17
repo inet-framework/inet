@@ -98,8 +98,6 @@ void TcpLwip::initialize(int stage)
 
         WATCH_MAP(tcpAppConnMapM);
 
-        recordStatisticsM = par("recordStats");
-
         pLwipTcpLayerM = new LwipTcpLayer(*this);
         pLwipFastTimerM = new cMessage("lwip_fast_timer");
         EV_INFO << "TcpLwip " << this << " has stack " << pLwipTcpLayerM << "\n";
@@ -312,7 +310,16 @@ err_t TcpLwip::lwip_tcp_event(void *arg, LwipTcpLayer::tcp_pcb *pcb,
 err_t TcpLwip::tcp_event_accept(TcpLwipConnection& conn, LwipTcpLayer::tcp_pcb *pcb, err_t err)
 {
     int newConnId = getEnvir()->getUniqueNumber();
-    TcpLwipConnection *newConn = new TcpLwipConnection(conn, newConnId, pcb);
+
+    auto moduleType = cModuleType::get("inet.transportlayer.tcp_lwip.TcpLwipConnection");
+    char submoduleName[24];
+    sprintf(submoduleName, "conn-%d", newConnId);
+    auto newConn = check_and_cast<TcpLwipConnection *>(moduleType->create(submoduleName, this));
+    newConn->finalizeParameters();
+    newConn->buildInside();
+    newConn->initConnection(conn, newConnId, pcb);
+    newConn->callInitialize();
+
     // add into appConnMap
     tcpAppConnMapM[newConnId] = newConn;
 
@@ -411,7 +418,16 @@ void TcpLwip::handleAppMessage(cMessage *msgP)
 
     if (!conn) {
         // add into appConnMap
-        conn = new TcpLwipConnection(*this, connId);
+
+        auto moduleType = cModuleType::get("inet.transportlayer.tcp_lwip.TcpLwipConnection");
+        char submoduleName[24];
+        sprintf(submoduleName, "conn-%d", connId);
+        conn = check_and_cast<TcpLwipConnection *>(moduleType->create(submoduleName, this));
+        conn->finalizeParameters();
+        conn->buildInside();
+        conn->initConnection(*this, connId);
+        conn->callInitialize();
+
         tcpAppConnMapM[connId] = conn;
 
         EV_INFO << this << ": TCP connection created for " << msgP << "\n";

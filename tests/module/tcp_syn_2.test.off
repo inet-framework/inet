@@ -15,15 +15,16 @@ output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
 snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
 #[Cmdenv]
-cmdenv-event-banners=false
+#cmdenv-event-banners=false
 cmdenv-express-mode=false
 
 #[Parameters]
 *.testing=true
 
 ####cmdenv-log-format=""
-*.tcptester.cmdenv-ev-output=true
-**.cmdenv-ev-output=false
+cmdenv-log-prefix="[%c]: "
+#*.tcptester.cmdenv-ev-output=true
+#**.cmdenv-ev-output=false
 
 *.cli_app.active=true
 *.srv_app.active=true

@@ -207,13 +207,14 @@ simple Tcp like ITcp
         int mss = default(536); // Maximum Segment Size (RFC 793) (header option)
         int msl @unit(s) = default(120s);   // Maximum Segment Lifetime
         string tcpAlgorithmClass @enum("TcpVegas", "TcpWestwood", "TcpNewReno", "TcpReno", "TcpTahoe", "TcpNoCongestionControl") = default("TcpReno");
-        bool recordStats = default(true); // recording of seqNum etc. into output vectors enabled/disabled
         bool useDataNotification = default(false); // turn the notifications for arrived data on or off
         double stopOperationExtraTime @unit(s) = default(0s);    // extra time after lifecycle stop operation finished
         double stopOperationTimeout @unit(s) = default(2s);    // timeout value for lifecycle stop operation
         @display("i=block/wheelbarrow");
         @signal[tcpConnectionAdded];
         @signal[tcpConnectionRemoved];
+        @signal[packetReceivedFromUpper](type=cPacket);
+        @signal[packetReceivedFromLower](type=cPacket);
     gates:
         input appIn @labels(TcpCommand/down);
         input ipIn @labels(TcpHeader,Ipv4ControlInfo/up,Ipv6ControlInfo/up);

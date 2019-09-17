@@ -94,11 +94,19 @@ std::string TcpBaseAlgStateVariables::detailedInfo() const
     return out.str();
 }
 
+
+simsignal_t TcpBaseAlg::cwndSignal = cComponent::registerSignal("cwnd");    // will record changes to snd_cwnd
+simsignal_t TcpBaseAlg::ssthreshSignal = cComponent::registerSignal("ssthresh");    // will record changes to ssthresh
+simsignal_t TcpBaseAlg::rttSignal = cComponent::registerSignal("rtt");    // will record measured RTT
+simsignal_t TcpBaseAlg::srttSignal = cComponent::registerSignal("srtt");    // will record smoothed RTT
+simsignal_t TcpBaseAlg::rttvarSignal = cComponent::registerSignal("rttvar");    // will record RTT variance (rttvar)
+simsignal_t TcpBaseAlg::rtoSignal = cComponent::registerSignal("rto");    // will record retransmission timeout
+simsignal_t TcpBaseAlg::numRtosSignal = cComponent::registerSignal("numRtos");    // will record total number of RTOs
+
 TcpBaseAlg::TcpBaseAlg() : TcpAlgorithm(),
     state((TcpBaseAlgStateVariables *&)TcpAlgorithm::state)
 {
     rexmitTimer = persistTimer = delayedAckTimer = keepAliveTimer = nullptr;
-    cwndVector = ssthreshVector = rttVector = srttVector = rttvarVector = rtoVector = numRtosVector = nullptr;
 }
 
 TcpBaseAlg::~TcpBaseAlg()
@@ -114,15 +122,6 @@ TcpBaseAlg::~TcpBaseAlg()
         delete cancelEvent(delayedAckTimer);
     if (keepAliveTimer)
         delete cancelEvent(keepAliveTimer);
-
-    // delete statistics objects
-    delete cwndVector;
-    delete ssthreshVector;
-    delete rttVector;
-    delete srttVector;
-    delete rttvarVector;
-    delete rtoVector;
-    delete numRtosVector;
 }
 
 void TcpBaseAlg::initialize()
@@ -138,16 +137,6 @@ void TcpBaseAlg::initialize()
     persistTimer->setContextPointer(conn);
     delayedAckTimer->setContextPointer(conn);
     keepAliveTimer->setContextPointer(conn);
-
-    if (conn->getTcpMain()->recordStatistics) {
-        cwndVector = new cOutVector("cwnd");
-        ssthreshVector = new cOutVector("ssthresh");
-        rttVector = new cOutVector("measured RTT");
-        srttVector = new cOutVector("smoothed RTT");
-        rttvarVector = new cOutVector("RTTVAR");
-        rtoVector = new cOutVector("RTO");
-        numRtosVector = new cOutVector("numRTOs");
-    }
 }
 
 void TcpBaseAlg::established(bool active)
@@ -272,8 +261,7 @@ void TcpBaseAlg::processRexmitTimer(TcpEventCode& event)
 
     state->numRtos++;
 
-    if (numRtosVector)
-        numRtosVector->record(state->numRtos);
+    conn->emit(numRtosSignal, state->numRtos);
 
     // if sacked_enabled reset sack related flags
     if (state->sack_enabled) {
@@ -400,17 +388,10 @@ void TcpBaseAlg::rttMeasurementComplete(simtime_t tSent, simtime_t tAcked)
     EV_DETAIL << "Measured RTT=" << (newRTT * 1000) << "ms, updated SRTT=" << (srtt * 1000)
               << "ms, new RTO=" << (rto * 1000) << "ms\n";
 
-    if (rttVector)
-        rttVector->record(newRTT);
-
-    if (srttVector)
-        srttVector->record(srtt);
-
-    if (rttvarVector)
-        rttvarVector->record(rttvar);
-
-    if (rtoVector)
-        rtoVector->record(rto);
+    conn->emit(rttSignal, newRTT);
+    conn->emit(srttSignal, srtt);
+    conn->emit(rttvarSignal, rttvar);
+    conn->emit(rtoSignal, rto);
 }
 
 void TcpBaseAlg::rttMeasurementCompleteUsingTS(uint32 echoedTS)

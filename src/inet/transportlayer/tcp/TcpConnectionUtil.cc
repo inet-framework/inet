@@ -205,7 +205,18 @@ void TcpConnection::printSegmentBrief(Packet *packet, const Ptr<const TcpHeader>
 
 TcpConnection *TcpConnection::cloneListeningConnection()
 {
-    TcpConnection *conn = new TcpConnection(tcpMain, socketId);
+//    TcpConnection *conn = new TcpConnection();
+//    conn->initConnection(tcpMain, socketId);
+    auto moduleType = cModuleType::get("inet.transportlayer.tcp.TcpConnection");
+    int newSocketId = getEnvir()->getUniqueNumber();
+    char submoduleName[24];
+    sprintf(submoduleName, "conn-%d", newSocketId);
+    auto conn = check_and_cast<TcpConnection *>(moduleType->create(submoduleName, tcpMain));
+    conn->finalizeParameters();
+    conn->buildInside();
+    conn->initConnection(tcpMain, newSocketId);
+    conn->callInitialize();
+    conn->listeningSocketId = socketId;
 
     // following code to be kept consistent with initConnection()
     const char *sendQueueClass = sendQueue->getClassName();
@@ -225,7 +236,7 @@ TcpConnection *TcpConnection::cloneListeningConnection()
     conn->tcpAlgorithm->setConnection(conn);
 
     conn->state = conn->tcpAlgorithm->getStateVariables();
-    configureStateVariables();
+    conn->configureStateVariables();
     conn->tcpAlgorithm->initialize();
 
     // put it into LISTEN, with our localAddr/localPort
@@ -241,11 +252,10 @@ TcpConnection *TcpConnection::cloneListeningConnection()
 void TcpConnection::sendToIP(Packet *packet, const Ptr<TcpHeader>& tcpseg)
 {
     // record seq (only if we do send data) and ackno
-    if (sndNxtVector && packet->getByteLength() > B(tcpseg->getChunkLength()).get())
-        sndNxtVector->record(tcpseg->getSequenceNo());
+    if (packet->getByteLength() > B(tcpseg->getChunkLength()).get())
+        emit(sndNxtSignal, tcpseg->getSequenceNo());
 
-    if (sndAckVector)
-        sndAckVector->record(tcpseg->getAckNo());
+    emit(sndAckSignal, tcpseg->getAckNo());
 
     // final touches on the segment before sending
     tcpseg->setSrcPort(localPort);
@@ -284,7 +294,7 @@ void TcpConnection::sendToIP(Packet *pkt, const Ptr<TcpHeader>& tcpseg, L3Addres
     addresses->setSrcAddress(src);
     addresses->setDestAddress(dest);
     insertTransportProtocolHeader(pkt, Protocol::tcp, tcpseg);
-    check_and_cast<Tcp *>(getSimulation()->getContextModule())->send(pkt, "ipOut");
+    tcpMain->send(pkt, "ipOut");
 }
 
 void TcpConnection::signalConnectionTimeout()
@@ -803,8 +813,7 @@ bool TcpConnection::sendData(bool fullSegmentsOnly, uint32 congestionWindow)
     if (seqGreater(state->snd_nxt, state->snd_max))
         state->snd_max = state->snd_nxt;
 
-    if (unackedVector)
-        unackedVector->record(state->snd_max - state->snd_una);
+    emit(unackedSignal, state->snd_max - state->snd_una);
 
     // notify (once is enough)
     tcpAlgorithm->ackSent();
@@ -841,8 +850,7 @@ bool TcpConnection::sendProbe()
     // something we really sent)
     state->snd_max = state->snd_nxt;
 
-    if (unackedVector)
-        unackedVector->record(state->snd_max - state->snd_una);
+    emit(unackedSignal, state->snd_max - state->snd_una);
 
     // notify
     tcpAlgorithm->ackSent();
@@ -871,8 +879,7 @@ void TcpConnection::retransmitOneSegment(bool called_at_rto)
         tcpAlgorithm->segmentRetransmitted(state->snd_nxt, state->snd_nxt + 1);
         state->snd_max = ++state->snd_nxt;
 
-        if (unackedVector)
-            unackedVector->record(state->snd_max - state->snd_una);
+        emit(unackedSignal, state->snd_max - state->snd_una);
     }
     else {
         ASSERT(bytes != 0);
@@ -913,8 +920,7 @@ void TcpConnection::retransmitData()
         sendFin();
         state->snd_max = ++state->snd_nxt;
 
-        if (unackedVector)
-            unackedVector->record(state->snd_max - state->snd_una);
+        emit(unackedSignal, state->snd_max - state->snd_una);
         return;
     }
 
@@ -1306,8 +1312,7 @@ void TcpConnection::updateRcvQueueVars()
     state->usedRcvBuffer = state->maxRcvBuffer - state->freeRcvBuffer;
 
     // update receive queue related statistics
-    if (tcpRcvQueueBytesVector)
-        tcpRcvQueueBytesVector->record(state->usedRcvBuffer);
+    emit(tcpRcvQueueBytesSignal, state->usedRcvBuffer);
 
 //    tcpEV << "receiveQ: receiveQLength=" << receiveQueue->getQueueLength() << " maxRcvBuffer=" << state->maxRcvBuffer << " usedRcvBuffer=" << state->usedRcvBuffer << " freeRcvBuffer=" << state->freeRcvBuffer << "\n";
 }
@@ -1340,14 +1345,12 @@ unsigned short TcpConnection::updateRcvWnd()
     if (win > 0 && seqGE(state->rcv_nxt + win, state->rcv_adv)) {
         state->rcv_adv = state->rcv_nxt + win;
 
-        if (rcvAdvVector)
-            rcvAdvVector->record(state->rcv_adv);
+        emit(rcvAdvSignal, state->rcv_adv);
     }
 
     state->rcv_wnd = win;
 
-    if (rcvWndVector)
-        rcvWndVector->record(state->rcv_wnd);
+    emit(rcvWndSignal, state->rcv_wnd);
 
     // scale rcv_wnd:
     uint32 scaled_rcv_wnd = state->rcv_wnd;
@@ -1384,8 +1387,7 @@ void TcpConnection::updateWndInfo(const Ptr<const TcpHeader>& tcpseg, bool doAlw
         state->snd_wl1 = tcpseg->getSequenceNo();
         state->snd_wl2 = tcpseg->getAckNo();
 
-        if (sndWndVector)
-            sndWndVector->record(state->snd_wnd);
+        emit(sndWndSignal, state->snd_wnd);
     }
 }
 
@@ -1450,8 +1452,7 @@ void TcpConnection::sendOneNewSegment(bool fullSegmentsOnly, uint32 congestionWi
                     if (seqGreater(state->snd_nxt, state->snd_max))
                         state->snd_max = state->snd_nxt;
 
-                    if (unackedVector)
-                        unackedVector->record(state->snd_max - state->snd_una);
+                    emit(unackedSignal, state->snd_max - state->snd_una);
 
                     // reset snd_nxt if needed
                     if (state->afterRto)

@@ -31,6 +31,28 @@
 namespace inet {
 namespace tcp {
 
+Define_Module(TcpConnection);
+
+simsignal_t TcpConnection::stateSignal = registerSignal("state");    // FSM state
+simsignal_t TcpConnection::sndWndSignal = registerSignal("sndWnd");    // snd_wnd
+simsignal_t TcpConnection::rcvWndSignal = registerSignal("rcvWnd");    // rcv_wnd
+simsignal_t TcpConnection::rcvAdvSignal = registerSignal("rcvAdv");    // current advertised window (=rcv_adv)
+simsignal_t TcpConnection::sndNxtSignal = registerSignal("sndNxt");    // sent seqNo
+simsignal_t TcpConnection::sndAckSignal = registerSignal("sndAck");    // sent ackNo
+simsignal_t TcpConnection::rcvSeqSignal = registerSignal("rcvSeq");    // received seqNo
+simsignal_t TcpConnection::rcvAckSignal = registerSignal("rcvAck");    // received ackNo (=snd_una)
+simsignal_t TcpConnection::unackedSignal = registerSignal("unacked");    // number of bytes unacknowledged
+simsignal_t TcpConnection::dupAcksSignal = registerSignal("dupAcks");    // current number of received dupAcks
+simsignal_t TcpConnection::pipeSignal = registerSignal("pipe");    // current sender's estimate of bytes outstanding in the network
+simsignal_t TcpConnection::sndSacksSignal = registerSignal("sndSacks");    // number of sent Sacks
+simsignal_t TcpConnection::rcvSacksSignal = registerSignal("rcvSacks");    // number of received Sacks
+simsignal_t TcpConnection::rcvOooSegSignal = registerSignal("rcvOooSeg");    // number of received out-of-order segments
+simsignal_t TcpConnection::rcvNASegSignal = registerSignal("rcvNASeg");    // number of received not acceptable segments
+simsignal_t TcpConnection::sackedBytesSignal = registerSignal("sackedBytes");    // current number of received sacked bytes
+simsignal_t TcpConnection::tcpRcvQueueBytesSignal = registerSignal("tcpRcvQueueBytes");    // current amount of used bytes in tcp receive queue
+simsignal_t TcpConnection::tcpRcvQueueDropsSignal = registerSignal("tcpRcvQueueDrops");    // number of drops in tcp receive queue
+
+
 TcpStateVariables::TcpStateVariables()
 {
     // set everything to 0 -- real init values will be set manually
@@ -169,9 +191,9 @@ std::string TcpStateVariables::detailedInfo() const
     return out.str();
 }
 
-TcpConnection::TcpConnection(Tcp *mod) :
-        tcpMain(mod)
+TcpConnection::TcpConnection(Tcp *mod)
 {
+    tcpMain = mod;
     // Note: this ctor is NOT used to create live connections, only
     // temporary ones to invoke segmentArrivalWhileClosed() on
 }
@@ -180,14 +202,12 @@ TcpConnection::TcpConnection(Tcp *mod) :
 // FSM framework, TCP FSM
 //
 
-TcpConnection::TcpConnection(Tcp *_mod, int _socketId)
+void TcpConnection::initConnection(Tcp *_mod, int _socketId)
 {
     tcpMain = _mod;
     socketId = _socketId;
 
-    char fsmname[24];
-    sprintf(fsmname, "fsm-%d", socketId);
-    fsm.setName(fsmname);
+    fsm.setName(getName());
     fsm.setState(TCP_S_INIT);
 
     // queues and algorithm will be created on active or passive open
@@ -201,27 +221,6 @@ TcpConnection::TcpConnection(Tcp *_mod, int _socketId)
     connEstabTimer->setContextPointer(this);
     finWait2Timer->setContextPointer(this);
     synRexmitTimer->setContextPointer(this);
-
-    // statistics
-    if (getTcpMain()->recordStatistics) {
-        sndWndVector = new cOutVector("send window");
-        rcvWndVector = new cOutVector("receive window");
-        rcvAdvVector = new cOutVector("advertised window");
-        sndNxtVector = new cOutVector("sent seq");
-        sndAckVector = new cOutVector("sent ack");
-        rcvSeqVector = new cOutVector("rcvd seq");
-        rcvAckVector = new cOutVector("rcvd ack");
-        unackedVector = new cOutVector("unacked bytes");
-        dupAcksVector = new cOutVector("rcvd dupAcks");
-        pipeVector = new cOutVector("pipe");
-        sndSacksVector = new cOutVector("sent sacks");
-        rcvSacksVector = new cOutVector("rcvd sacks");
-        rcvOooSegVector = new cOutVector("rcvd oooseg");
-        rcvNASegVector = new cOutVector("rcvd naseg");
-        sackedBytesVector = new cOutVector("rcvd sackedBytes");
-        tcpRcvQueueBytesVector = new cOutVector("tcpRcvQueueBytes");
-        tcpRcvQueueDropsVector = new cOutVector("tcpRcvQueueDrops");
-    }
 }
 
 TcpConnection::~TcpConnection()
@@ -240,25 +239,6 @@ TcpConnection::~TcpConnection()
         delete cancelEvent(finWait2Timer);
     if (synRexmitTimer)
         delete cancelEvent(synRexmitTimer);
-
-    // statistics
-    delete sndWndVector;
-    delete rcvWndVector;
-    delete rcvAdvVector;
-    delete sndNxtVector;
-    delete sndAckVector;
-    delete rcvSeqVector;
-    delete rcvAckVector;
-    delete unackedVector;
-    delete dupAcksVector;
-    delete sndSacksVector;
-    delete rcvSacksVector;
-    delete rcvOooSegVector;
-    delete rcvNASegVector;
-    delete tcpRcvQueueBytesVector;
-    delete tcpRcvQueueDropsVector;
-    delete pipeVector;
-    delete sackedBytesVector;
 }
 
 bool TcpConnection::processTimer(cMessage *msg)
