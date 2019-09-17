@@ -175,7 +175,7 @@ void SctpAssociation::process_SEND(SctpEventCode& event, SctpCommandReq *sctpCom
     }
 
     SctpDataMsg *datMsg = new SctpDataMsg();
-    SctpSimpleMessage *smsg = new SctpSimpleMessage();
+    SctpSimpleMessage *smsg = new SctpSimpleMessage("data");
     smsg->setDataArraySize(sendBytes);
     std::vector<uint8_t> vec = applicationData->getBytes();
     for (int i = 0; i < sendBytes; i++)

@@ -578,6 +578,7 @@ void SctpAssociation::sendInit()
     sctpmsg->setChunkLength(B(SCTP_COMMON_HEADER));
     SctpInitChunk *initChunk = new SctpInitChunk();
     initChunk->setSctpChunkType(INIT);
+    initChunk->setName("INIT");
     initChunk->setInitTag((uint32)(fmod(RNGCONTEXT intrand(INT32_MAX), 1.0 + (double)(unsigned)0xffffffffUL)) & 0xffffffffUL);
 
     peerVTag = initChunk->getInitTag();
@@ -793,6 +794,7 @@ void SctpAssociation::sendInitAck(SctpInitChunk *initChunk)
     EV_INFO << "sendInitAck at " << localAddr << ". Provided InitTag=" << initChunk->getInitTag() << "\n";
     SctpInitAckChunk *initAckChunk = new SctpInitAckChunk();
     initAckChunk->setSctpChunkType(INIT_ACK);
+    initAckChunk->setName("INIT_ACK");
     SctpCookie *cookie = new SctpCookie();
     cookie->setCreationTime(simTime());
     cookie->setLocalTieTagArraySize(32);
@@ -968,7 +970,7 @@ void SctpAssociation::sendCookieEcho(SctpInitAckChunk *initAckChunk)
 
     sctpcookieecho->setSrcPort(localPort);
     sctpcookieecho->setDestPort(remotePort);
-    SctpCookieEchoChunk *cookieEchoChunk = new SctpCookieEchoChunk();
+    SctpCookieEchoChunk *cookieEchoChunk = new SctpCookieEchoChunk("COOKIE_ECHO");
     cookieEchoChunk->setSctpChunkType(COOKIE_ECHO);
     int32 len = initAckChunk->getCookieArraySize();
     cookieEchoChunk->setCookieArraySize(len);
@@ -1038,7 +1040,7 @@ void SctpAssociation::sendHeartbeat(const SctpPathVariables *path)
 
     sctpHeartbeatbeat->setSrcPort(localPort);
     sctpHeartbeatbeat->setDestPort(remotePort);
-    SctpHeartbeatChunk *heartbeatChunk = new SctpHeartbeatChunk();
+    SctpHeartbeatChunk *heartbeatChunk = new SctpHeartbeatChunk("HEARTBEAT");
     heartbeatChunk->setSctpChunkType(HEARTBEAT);
     heartbeatChunk->setRemoteAddr(path->remoteAddress);
     heartbeatChunk->setTimeField(simTime());
@@ -1064,7 +1066,7 @@ void SctpAssociation::sendHeartbeatAck(const SctpHeartbeatChunk *heartbeatChunk,
     sctpHeartbeatAck->setChunkLength(B(SCTP_COMMON_HEADER));
     sctpHeartbeatAck->setSrcPort(localPort);
     sctpHeartbeatAck->setDestPort(remotePort);
-    SctpHeartbeatAckChunk *heartbeatAckChunk = new SctpHeartbeatAckChunk();
+    SctpHeartbeatAckChunk *heartbeatAckChunk = new SctpHeartbeatAckChunk("HEARTBEAT_ACK");
     heartbeatAckChunk->setSctpChunkType(HEARTBEAT_ACK);
     heartbeatAckChunk->setRemoteAddr(heartbeatChunk->getRemoteAddr());
     heartbeatAckChunk->setTimeField(heartbeatChunk->getTimeField());
@@ -1099,7 +1101,7 @@ void SctpAssociation::sendCookieAck(const L3Address& dest)
 
     sctpcookieack->setSrcPort(localPort);
     sctpcookieack->setDestPort(remotePort);
-    SctpCookieAckChunk *cookieAckChunk = new SctpCookieAckChunk();
+    SctpCookieAckChunk *cookieAckChunk = new SctpCookieAckChunk("COOKIE_ACK");
     cookieAckChunk->setSctpChunkType(COOKIE_ACK);
     cookieAckChunk->setByteLength(SCTP_COOKIE_ACK_LENGTH);
     if (state->auth && state->peerAuth && typeInChunkList(COOKIE_ACK)) {
@@ -1125,7 +1127,7 @@ void SctpAssociation::sendShutdownAck(const L3Address& dest)
 
         sctpshutdownack->setSrcPort(localPort);
         sctpshutdownack->setDestPort(remotePort);
-        SctpShutdownAckChunk *shutdownAckChunk = new SctpShutdownAckChunk();
+        SctpShutdownAckChunk *shutdownAckChunk = new SctpShutdownAckChunk("SHUTDOWN_ACK");
         shutdownAckChunk->setSctpChunkType(SHUTDOWN_ACK);
         shutdownAckChunk->setByteLength(SCTP_COOKIE_ACK_LENGTH);
         sctpshutdownack->insertSctpChunks(shutdownAckChunk);
@@ -1150,7 +1152,7 @@ void SctpAssociation::sendShutdownComplete()
 
     sctpshutdowncomplete->setSrcPort(localPort);
     sctpshutdowncomplete->setDestPort(remotePort);
-    SctpShutdownCompleteChunk *shutdownCompleteChunk = new SctpShutdownCompleteChunk();
+    SctpShutdownCompleteChunk *shutdownCompleteChunk = new SctpShutdownCompleteChunk("SHUTDOWN_COMPLETE");
     shutdownCompleteChunk->setSctpChunkType(SHUTDOWN_COMPLETE);
     shutdownCompleteChunk->setTBit(0);
     shutdownCompleteChunk->setByteLength(SCTP_SHUTDOWN_ACK_LENGTH);
@@ -1169,7 +1171,7 @@ void SctpAssociation::sendAbort(uint16 tBit)
 
     msg->setSrcPort(localPort);
     msg->setDestPort(remotePort);
-    SctpAbortChunk *abortChunk = new SctpAbortChunk();
+    SctpAbortChunk *abortChunk = new SctpAbortChunk("ABORT");
     abortChunk->setSctpChunkType(ABORT);
     abortChunk->setT_Bit(tBit);
     abortChunk->setByteLength(SCTP_ABORT_CHUNK_LENGTH);
@@ -1197,7 +1199,7 @@ void SctpAssociation::sendShutdown()
 
     msg->setSrcPort(localPort);
     msg->setDestPort(remotePort);
-    SctpShutdownChunk *shutdownChunk = new SctpShutdownChunk();
+    SctpShutdownChunk *shutdownChunk = new SctpShutdownChunk("SHUTDOWN");
     shutdownChunk->setSctpChunkType(SHUTDOWN);
     //shutdownChunk->setCumTsnAck(state->lastTsnAck);
     shutdownChunk->setCumTsnAck(state->gapList.getCumAckTsn());
@@ -1613,10 +1615,11 @@ SctpSackChunk *SctpAssociation::createSack()
     SctpSackChunk *sackChunk = new SctpSackChunk();
     if (state->nrSack == true) {
         sackChunk->setSctpChunkType(NR_SACK);
-       // sackChunk->setName("NR_SACK");
+        sackChunk->setName("NR_SACK");
     }
     else {
         sackChunk->setSctpChunkType(SACK);
+        sackChunk->setName("SACK");
     }
     sackChunk->setCumTsnAck(state->gapList.getCumAckTsn());
     EV_DEBUG << "SACK: set cumTsnAck to " << sackChunk->getCumTsnAck() << endl;
@@ -2094,7 +2097,7 @@ void SctpAssociation::pushUlp()
 
 SctpDataChunk *SctpAssociation::transformDataChunk(SctpDataVariables *chunk)
 {
-    SctpDataChunk *dataChunk = new SctpDataChunk();
+    SctpDataChunk *dataChunk = new SctpDataChunk("DATA");
     SctpSimpleMessage *msg = check_and_cast<SctpSimpleMessage *>(chunk->userData->dup());
     dataChunk->setSctpChunkType(DATA);
     dataChunk->setBBit(chunk->bbit);

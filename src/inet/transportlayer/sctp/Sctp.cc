@@ -381,7 +381,7 @@ void Sctp::sendAbortFromMain(Ptr<SctpHeader>& sctpmsg, L3Address fromAddr, L3Add
     msg->setCrcMode(crcMode);
     msg->setChecksumOk(true);
 
-    SctpAbortChunk *abortChunk = new SctpAbortChunk();
+    SctpAbortChunk *abortChunk = new SctpAbortChunk("ABORT");
     abortChunk->setSctpChunkType(ABORT);
     if (sctpmsg->getSctpChunksArraySize() > 0 && ((sctpmsg->getSctpChunks(0)))->getSctpChunkType() == INIT) {
         const SctpInitChunk *initChunk = check_and_cast<const SctpInitChunk *>(sctpmsg->getSctpChunks(0));
@@ -418,7 +418,7 @@ void Sctp::sendShutdownCompleteFromMain(Ptr<SctpHeader>& sctpmsg, L3Address from
     msg->setCrcMode(crcMode);
     msg->setChecksumOk(true);
 
-    SctpShutdownCompleteChunk *scChunk = new SctpShutdownCompleteChunk();
+    SctpShutdownCompleteChunk *scChunk = new SctpShutdownCompleteChunk("SHUTDOWN_COMPLETE");
     scChunk->setSctpChunkType(SHUTDOWN_COMPLETE);
     scChunk->setTBit(1);
     msg->setVTag(sctpmsg->getVTag());
