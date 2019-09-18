@@ -907,7 +907,7 @@ static void testIteration()
         index2++;
         if (chunk2 != nullptr)
             sequenceChunk1->moveIterator(iterator2, chunk2->getChunkLength());
-        chunk2 = sequenceChunk1->peek(iterator2, b(-1), Chunk::PF_ALLOW_NULLPTR);
+        chunk2 = sequenceChunk1->peek(iterator2, Chunk::unspecifiedLength, Chunk::PF_ALLOW_NULLPTR);
     }
     ASSERT(index2 == 3);
 
@@ -929,7 +929,7 @@ static void testIteration()
         index3++;
         if (chunk3 != nullptr)
             sequenceChunk1->moveIterator(iterator3, chunk3->getChunkLength());
-        chunk3 = sequenceChunk1->peek(iterator3, b(-1), Chunk::PF_ALLOW_NULLPTR);
+        chunk3 = sequenceChunk1->peek(iterator3, Chunk::unspecifiedLength, Chunk::PF_ALLOW_NULLPTR);
     }
     ASSERT(index2 == 3);
 }
