@@ -39,7 +39,18 @@ class INET_API InterpolatorBase : public IInterpolator<X, Y>
 };
 
 template<typename X, typename Y>
-class INET_API EitherInterpolator : public InterpolatorBase<X, Y>
+class INET_API ConstantInterpolatorBase : public InterpolatorBase<X, Y>
+{
+    virtual Y getMean(const X x1, const Y y1, const X x2, const Y y2) const override {
+        auto v1 = this->getValue(x1, y1, x2, y2, x1);
+        auto v2 = this->getValue(x1, y1, x2, y2, x2);
+        ASSERT(v1 == v2);
+        return v1;
+    }
+};
+
+template<typename X, typename Y>
+class INET_API EitherInterpolator : public ConstantInterpolatorBase<X, Y>
 {
   public:
     static EitherInterpolator<X, Y> singleton;
@@ -50,19 +61,13 @@ class INET_API EitherInterpolator : public InterpolatorBase<X, Y>
         ASSERT(y1 == y2);
         return y1;
     }
-
-    virtual Y getMean(const X x1, const Y y1, const X x2, const Y y2) const override {
-        ASSERT(x1 <= x2);
-        ASSERT(y1 == y2);
-        return y1;
-    }
 };
 
 template<typename X, typename Y>
 EitherInterpolator<X, Y> EitherInterpolator<X, Y>::singleton;
 
 template<typename X, typename Y>
-class INET_API LeftInterpolator : public InterpolatorBase<X, Y>
+class INET_API LeftInterpolator : public ConstantInterpolatorBase<X, Y>
 {
   public:
     static LeftInterpolator<X, Y> singleton;
@@ -72,18 +77,13 @@ class INET_API LeftInterpolator : public InterpolatorBase<X, Y>
         ASSERT(x1 <= x && x <= x2);
         return y1;
     }
-
-    virtual Y getMean(const X x1, const Y y1, const X x2, const Y y2) const override {
-        ASSERT(x1 <= x2);
-        return y1;
-    }
 };
 
 template<typename X, typename Y>
 LeftInterpolator<X, Y> LeftInterpolator<X, Y>::singleton;
 
 template<typename X, typename Y>
-class INET_API RightInterpolator : public InterpolatorBase<X, Y>
+class INET_API RightInterpolator : public ConstantInterpolatorBase<X, Y>
 {
   public:
     static RightInterpolator<X, Y> singleton;
@@ -93,18 +93,13 @@ class INET_API RightInterpolator : public InterpolatorBase<X, Y>
         ASSERT(x1 <= x && x <= x2);
         return y2;
     }
-
-    virtual Y getMean(const X x1, const Y y1, const X x2, const Y y2) const override {
-        ASSERT(x1 <= x2);
-        return y2;
-    }
 };
 
 template<typename X, typename Y>
 RightInterpolator<X, Y> RightInterpolator<X, Y>::singleton;
 
 template<typename X, typename Y>
-class INET_API AverageInterpolator : public InterpolatorBase<X, Y>
+class INET_API AverageInterpolator : public ConstantInterpolatorBase<X, Y>
 {
   public:
     static AverageInterpolator<X, Y> singleton;
@@ -114,15 +109,42 @@ class INET_API AverageInterpolator : public InterpolatorBase<X, Y>
         ASSERT(x1 <= x && x <= x2);
         return (y1 + y2) / 2;
     }
-
-    virtual Y getMean(const X x1, const Y y1, const X x2, const Y y2) const override {
-        ASSERT(x1 <= x2);
-        return (y1 + y2) / 2;
-    }
 };
 
 template<typename X, typename Y>
 AverageInterpolator<X, Y> AverageInterpolator<X, Y>::singleton;
+
+template<typename X, typename Y>
+class INET_API MinimumInterpolator : public ConstantInterpolatorBase<X, Y>
+{
+  public:
+    static MinimumInterpolator<X, Y> singleton;
+
+  public:
+    virtual Y getValue(const X x1, const Y y1, const X x2, const Y y2, const X x) const override {
+        ASSERT(x1 <= x && x <= x2);
+        return std::min(y1, y2);
+    }
+};
+
+template<typename X, typename Y>
+MinimumInterpolator<X, Y> MinimumInterpolator<X, Y>::singleton;
+
+template<typename X, typename Y>
+class INET_API MaximumInterpolator : public ConstantInterpolatorBase<X, Y>
+{
+  public:
+    static MaximumInterpolator<X, Y> singleton;
+
+  public:
+    virtual Y getValue(const X x1, const Y y1, const X x2, const Y y2, const X x) const override {
+        ASSERT(x1 <= x && x <= x2);
+        return std::max(y1, y2);
+    }
+};
+
+template<typename X, typename Y>
+MaximumInterpolator<X, Y> MaximumInterpolator<X, Y>::singleton;
 
 template<typename X, typename Y>
 class INET_API CloserInterpolator : public InterpolatorBase<X, Y>
@@ -144,48 +166,6 @@ class INET_API CloserInterpolator : public InterpolatorBase<X, Y>
 
 template<typename X, typename Y>
 CloserInterpolator<X, Y> CloserInterpolator<X, Y>::singleton;
-
-template<typename X, typename Y>
-class INET_API MinimumInterpolator : public InterpolatorBase<X, Y>
-{
-  public:
-    static MinimumInterpolator<X, Y> singleton;
-
-  public:
-    virtual Y getValue(const X x1, const Y y1, const X x2, const Y y2, const X x) const override {
-        ASSERT(x1 <= x && x <= x2);
-        return std::min(y1, y2);
-    }
-
-    virtual Y getMean(const X x1, const Y y1, const X x2, const Y y2) const override {
-        ASSERT(x1 <= x2);
-        return std::min(y1, y2);
-    }
-};
-
-template<typename X, typename Y>
-MinimumInterpolator<X, Y> MinimumInterpolator<X, Y>::singleton;
-
-template<typename X, typename Y>
-class INET_API MaximumInterpolator : public InterpolatorBase<X, Y>
-{
-  public:
-    static MaximumInterpolator<X, Y> singleton;
-
-  public:
-    virtual Y getValue(const X x1, const Y y1, const X x2, const Y y2, const X x) const override {
-        ASSERT(x1 <= x && x <= x2);
-        return std::max(y1, y2);
-    }
-
-    virtual Y getMean(const X x1, const Y y1, const X x2, const Y y2) const override {
-        ASSERT(x1 <= x2);
-        return std::max(y1, y2);
-    }
-};
-
-template<typename X, typename Y>
-MaximumInterpolator<X, Y> MaximumInterpolator<X, Y>::singleton;
 
 template<typename X, typename Y>
 class INET_API LinearInterpolator : public InterpolatorBase<X, Y>
