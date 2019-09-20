@@ -75,6 +75,12 @@ void FunctionTest::test1()
     std::cout << "\nDivisionFunction\n";
     auto f10 = f8->divide(f9);
     printPartitioning<double, Domain<double, double>>(f10->getDomain(), f10);
+
+    std::cout << "\nGaussFunction\n";
+    auto f11 = makeShared<GaussFunction<double, double>>(0, 10);
+    auto f12 = makeShared<ApproximatedFunction<double, Domain<double>, 0, double>>(-10, 10, 1, &AverageInterpolator<double, double>::singleton, f11);
+	FunctionChecker<double, Domain<double>>(f12).check(Interval<double>(Point<double>(1.3), Point<double>(2.1), 0));
+    printPartitioning<double, Domain<double>>(f12->getDomain(), f12);
 }
 
 %activity:
@@ -245,3 +251,51 @@ constant over [1 … inf] x [0 … 2)
   → -nan
 constant over [1 … inf] x [2 … inf]
   → -nan
+
+GaussFunction
+
+Partitioning [-inf … inf]
+constant over [-inf … -10)
+  → 0.0241971
+constant over [-10 … -9)
+  → 0.0254028
+constant over [-9 … -8)
+  → 0.0277888
+constant over [-8 … -7)
+  → 0.0300973
+constant over [-7 … -6)
+  → 0.0322739
+constant over [-6 … -5)
+  → 0.0342645
+constant over [-5 … -4)
+  → 0.0360168
+constant over [-4 … -3)
+  → 0.0374829
+constant over [-3 … -2)
+  → 0.0386215
+constant over [-2 … -1)
+  → 0.0393998
+constant over [-1 … 0)
+  → 0.0397947
+constant over [0 … 1)
+  → 0.0397947
+constant over [1 … 2)
+  → 0.0393998
+constant over [2 … 3)
+  → 0.0386215
+constant over [3 … 4)
+  → 0.0374829
+constant over [4 … 5)
+  → 0.0360168
+constant over [5 … 6)
+  → 0.0342645
+constant over [6 … 7)
+  → 0.0322739
+constant over [7 … 8)
+  → 0.0300973
+constant over [8 … 9)
+  → 0.0277888
+constant over [9 … 10)
+  → 0.0254028
+constant over [10 … inf]
+  → 0.0241971
