@@ -36,16 +36,20 @@ class INET_API FunctionChecker
     FunctionChecker(const Ptr<const IFunction<R, D>>& f) : f(f) { }
 
     void check() const {
-        f->partition(f->getDomain(), [&] (const typename D::I& i, const IFunction<R, D> *g) {
+        check(f->getDomain());
+    }
+
+    void check(const typename D::I& i) const {
+        f->partition(i, [&] (const typename D::I& i1, const IFunction<R, D> *g) {
             auto check = std::function<void (const typename D::P&)>([&] (const typename D::P& p) {
-                if (i.contains(p)) {
+                if (i1.contains(p)) {
                     R rF = f->getValue(p);
                     R rG = g->getValue(p);
                     ASSERT(rF == rG || (std::isnan(toDouble(rF)) && std::isnan(toDouble(rG))));
                 }
             });
-            iterateBoundaries(i, check);
-            check((i.getLower() + i.getUpper()) / 2);
+            iterateBoundaries(i1, check);
+            check((i1.getLower() + i1.getUpper()) / 2);
         });
     }
 };
@@ -576,20 +580,17 @@ class INET_API OneDimensionalInterpolatedFunction : public FunctionBase<R, Domai
             auto i1 = i.intersect(Interval<X>(Point<X>(it->first), Point<X>(jt->first), kt == rs.end() ? 0b1 : 0b0));
             if (!i1.isEmpty()) {
                 const auto interpolator = it->second.second;
-                if (dynamic_cast<const EitherInterpolator<X, R> *>(interpolator)) {
-                    ConstantFunction<R, Domain<X>> g(it->second.first);
-                    f(i1, &g);
-                }
-                else if (dynamic_cast<const LeftInterpolator<X, R> *>(interpolator)) {
-                    ConstantFunction<R, Domain<X>> g(it->second.first); // TODO: what about the ends?
-                    f(i1, &g);
-                }
-                else if (dynamic_cast<const RightInterpolator<X, R> *>(interpolator)) {
-                    ConstantFunction<R, Domain<X>> g(jt->second.first); // TODO: what about the ends?
+                auto xLower = std::get<0>(i1.getLower());
+                auto xUpper = std::get<0>(i1.getUpper());
+                if (dynamic_cast<const ConstantInterpolatorBase<X, R> *>(interpolator)) {
+                    auto value = interpolator->getValue(it->first, it->second.first, jt->first, jt->second.first, (xLower + xUpper) / 2);
+                    ConstantFunction<R, Domain<X>> g(value);
                     f(i1, &g);
                 }
                 else if (dynamic_cast<const LinearInterpolator<X, R> *>(interpolator)) {
-                    LinearFunction<R, Domain<X>> g(Point<X>(it->first), Point<X>(jt->first), it->second.first, jt->second.first, 0);
+                    auto yLower = interpolator->getValue(it->first, it->second.first, jt->first, jt->second.first, xLower);
+                    auto yUpper = interpolator->getValue(it->first, it->second.first, jt->first, jt->second.first, xUpper);
+                    LinearFunction<R, Domain<X>> g(xLower, xUpper, yLower, yUpper, 0);
                     simplifyAndCall(i1, &g, f);
                 }
                 else
@@ -1272,7 +1273,7 @@ class INET_API SumFunction : public FunctionBase<R, D>
 
     virtual void partition(int index, const typename D::I& i, const std::function<void (const typename D::I&, const IFunction<R, D> *)> f, const IFunction<R, D> *g) const {
         if (index == (int)fs.size())
-            f(i, g);
+            simplifyAndCall(i, g, f);
         else {
             fs[index]->partition(i, [&] (const typename D::I& i1, const IFunction<R, D> *h) {
                 if (auto cg = dynamic_cast<const ConstantFunction<R, D> *>(g)) {
@@ -1457,8 +1458,8 @@ class INET_API ApproximatedFunction : public FunctionBase<R, D>
             return f->getValue(p1);
         }
         else {
-            X x1 = std::max(lower, step * floor(toDouble(x / step)));
-            X x2 = std::min(upper, step * ceil(toDouble(x / step)));
+            X x1 = lower + step * floor(toDouble((x - lower) / step));
+            X x2 = std::min(upper, x1 + step);
             typename D::P p1 = p;
             std::get<DIMENSION>(p1) = x1;
             typename D::P p2 = p;
@@ -1470,29 +1471,54 @@ class INET_API ApproximatedFunction : public FunctionBase<R, D>
     }
 
     virtual void partition(const typename D::I& i, std::function<void (const typename D::I&, const IFunction<R, D> *)> g) const override {
-        const auto& lower = i.getLower();
-        const auto& upper = i.getUpper();
-        X min = step * floor(toDouble(std::get<DIMENSION>(lower) / step));
-        X max = step * ceil(toDouble(std::get<DIMENSION>(upper) / step));
+        unsigned int b = 1 << std::tuple_size<typename D::P::type>::value >> 1;
+        auto closed = i.getClosed() & ~(b >> DIMENSION);
+        const auto& pl = i.getLower();
+        const auto& pu = i.getUpper();
+        if (std::get<DIMENSION>(pl) < lower) {
+            typename D::P p = pu;
+            std::get<DIMENSION>(p) = std::min(lower, std::get<DIMENSION>(pu));
+            ConstantFunction<R, D> h(f->getValue(p));
+            typename D::I i1(pl, p, closed);
+            if (!i1.isEmpty())
+                g(i1, &h);
+        }
+        X xl = std::max(lower, std::get<DIMENSION>(pl));
+        X xu = std::min(upper, std::get<DIMENSION>(pu));
+        X min = lower + step * floor(toDouble((xl - lower) / step));
+        X max = lower + step * ceil(toDouble((xu - lower) / step));
         for (X x = min; x < max; x += step) {
-            X x1 = std::max(std::get<DIMENSION>(lower), x);
-            X x2 = std::min(std::get<DIMENSION>(upper), x + step);
-            typename D::P p1 = lower;
-            std::get<DIMENSION>(p1) = x1;
-            typename D::P p2 = upper;
-            std::get<DIMENSION>(p2) = x2;
-            R r1 = f->getValue(p1);
-            R r2 = f->getValue(p2);
-            if (dynamic_cast<const LinearInterpolator<X, R> *>(interpolator)) {
-                LinearFunction<R, D> h(p1, p2, r1, r2, DIMENSION);
-                typename D::I i1(p1, p2, i.getClosed());
-                simplifyAndCall(i1, &h, g);
+            X x1 = x;
+            X x2 = x + step;
+            typename D::P p1 = pl;
+            typename D::P p2 = pu;
+            std::get<DIMENSION>(p1) = std::max(xl, x1);
+            std::get<DIMENSION>(p2) = std::min(xu, x2);
+            typename D::I i1(p1, p2, closed);
+            if (!i1.isEmpty()) {
+                std::get<DIMENSION>(p1) = x1;
+                std::get<DIMENSION>(p2) = x2;
+                R r1 = f->getValue(p1);
+                R r2 = f->getValue(p2);
+                if (dynamic_cast<const ConstantInterpolatorBase<X, R> *>(interpolator)) {
+                    ConstantFunction<R, D> h(interpolator->getValue(x1, r1, x2, r2, (x1 + x2) / 2));
+                    g(i1, &h);
+                }
+                else if (dynamic_cast<const LinearInterpolator<X, R> *>(interpolator)) {
+                    LinearFunction<R, D> h(p1, p2, r1, r2, DIMENSION);
+                    simplifyAndCall(i1, &h, g);
+                }
+                else
+                    throw cRuntimeError("TODO");
             }
-            else {
-                ConstantFunction<R, D> h(interpolator->getValue(x1, r1, x2, r2, (x1 + x2) / 2));
-                typename D::I i1(p1, p2, i.getClosed());
-                simplifyAndCall(i1, &h, g);
-            }
+        }
+        if (std::get<DIMENSION>(pu) > upper) {
+            typename D::P p = pl;
+            std::get<DIMENSION>(p) = std::max(upper, std::get<DIMENSION>(pl));
+            ConstantFunction<R, D> h(f->getValue(p));
+            typename D::I i1(p, pu, i.getClosed());
+            if (!i1.isEmpty())
+                g(i1, &h);
         }
     }
 
