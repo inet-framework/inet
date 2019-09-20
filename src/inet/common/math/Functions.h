@@ -672,24 +672,27 @@ class INET_API OneDimensionalInterpolatedFunction : public FunctionBase<R, Domai
 //    }
 //};
 
-//template<typename R, typename D>
-//class INET_API GaussFunction : public Function<R, D>
-//{
-//  protected:
-//    const R mean;
-//    const R stddev;
-//
-//  public:
-//    GaussFunction(R mean, R stddev) : mean(mean), stddev(stddev) { }
-//
-//    virtual R getValue(const typename D::P& p) const override {
-//        throw cRuntimeError("TODO");
-//    }
-//
-//    virtual void partition(const typename D::I& i, const std::function<void (const typename D::I&, const IFunction<R, D> *)> f) const override {
-//        throw cRuntimeError("TODO");
-//    }
-//};
+template<typename R, typename X>
+class INET_API GaussFunction : public FunctionBase<R, Domain<X>>
+{
+  protected:
+    const X mean;
+    const X stddev;
+
+  public:
+    GaussFunction(X mean, X stddev) : mean(mean), stddev(stddev) { }
+
+    virtual R getValue(const Point<X>& p) const override {
+        static const double c = 1 / sqrt(2 * M_PI);
+        X x = std::get<0>(p);
+        double a = toDouble((x - mean) / stddev);
+        return R(c / toDouble(stddev) * std::exp(-0.5 * a * a));
+    }
+
+    virtual void partition(const Interval<X>& i, const std::function<void (const Interval<X>&, const IFunction<R, Domain<X>> *)> f) const override {
+        throw cRuntimeError("Invalid operation");
+    }
+};
 
 template<typename R, typename X, typename Y>
 class INET_API OrthogonalCombinatorFunction : public FunctionBase<R, Domain<X, Y>>
