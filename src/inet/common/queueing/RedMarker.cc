@@ -99,6 +99,8 @@ bool RedMarker::matchesPacket(Packet *packet)
             }
         }
     }
+    //TODO maybe using next line instead of modified copy & paste:
+    // return RedDropper::matchesPacket(packet);
 
     // For packets that does not support marking - shouldDrop is called instead
     const int queueLength = collection->getNumPackets();
