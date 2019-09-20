@@ -71,6 +71,7 @@ simple MediumVisualizerBase extends VisualizerBase
         bool displaySpectrums = default(false);
         double spectrumFigureWidth = default(100);
         double spectrumFigureHeight = default(60);
+        double spectrumFigureInterpolationSize = default(5);
         bool spectrumAutoFrequencyAxis = default(true);
         double spectrumMinFrequency @unit(Hz) = default(inf Hz);
         double spectrumMaxFrequency @unit(Hz) = default(-inf Hz);

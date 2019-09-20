@@ -73,6 +73,7 @@ class INET_API MediumVisualizerBase : public VisualizerBase, public cListener
     bool displaySpectrums = false;
     double spectrumFigureWidth = NaN;
     double spectrumFigureHeight = NaN;
+    double spectrumFigureInterpolationSize = NaN;
     bool spectrumAutoFrequencyAxis = false;
     Hz spectrumMinFrequency = Hz(NaN);
     Hz spectrumMaxFrequency = Hz(NaN);
