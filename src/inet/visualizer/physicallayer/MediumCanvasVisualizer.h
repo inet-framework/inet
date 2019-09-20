@@ -97,7 +97,13 @@ class INET_API MediumCanvasVisualizer : public MediumVisualizerBase
   protected:
     virtual void initialize(int stage) override;
     virtual void refreshDisplay() const override;
-    virtual void refreshSpectrumFigure(const cModule *module, PlotFigure *figure) const;
+    virtual void refreshSpectrumFigure(const cModule *networkNode, PlotFigure *figure) const;
+    virtual std::tuple<const physicallayer::ITransmission *, const physicallayer::ITransmission *, const physicallayer::IAntenna *, IMobility *> extractSpectrumFigureParameters(const cModule *networkNode) const;
+    virtual void refreshSpectrumFigurePowerFunction(const Ptr<const math::IFunction<WpHz, math::Domain<m, m, m, simsec, Hz>>>& powerFunction, const physicallayer::IAntenna *antenna, const Coord& position, PlotFigure *figure, int series) const;
+    virtual std::pair<WpHz, WpHz> computePowerForPartitionBoundaries(const Ptr<const math::IFunction<WpHz, math::Domain<m, m, m, simsec, Hz>>>& powerFunction, const math::Point<m, m, m, simsec, Hz>& lower, const math::Point<m, m, m, simsec, Hz>& upper, const math::IFunction<WpHz, math::Domain<m, m, m, simsec, Hz>> *partitonPowerFunction, const physicallayer::IAntenna *antenna, const Coord& position) const;
+    virtual std::pair<WpHz, WpHz> computePowerForDirectionalAntenna(const Ptr<const math::IFunction<WpHz, math::Domain<m, m, m, simsec, Hz>>>& powerFunction, const math::Point<m, m, m, simsec, Hz>& lower, const math::Point<m, m, m, simsec, Hz>& upper, const physicallayer::IAntenna *antenna, const Coord& position) const;
+    virtual void updateSpectrumFigureFrequencyLimits(const physicallayer::ITransmission *transmission);
+    virtual void updateSpectrumFigurePowerLimits(const math::Interval<m, m, m, simsec, Hz>& i, const math::IFunction<WpHz, math::Domain<m, m, m, simsec, Hz>> *f);
     virtual void setAnimationSpeed();
 
     virtual cFigure *getSignalDepartureFigure(const physicallayer::IRadio *radio) const;

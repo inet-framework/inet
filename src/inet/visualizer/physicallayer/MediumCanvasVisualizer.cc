@@ -137,132 +137,194 @@ void MediumCanvasVisualizer::refreshDisplay() const
             refreshSpectrumFigure(it.first, it.second);
 }
 
-void MediumCanvasVisualizer::refreshSpectrumFigure(const cModule *module, PlotFigure *figure) const
+void MediumCanvasVisualizer::refreshSpectrumFigure(const cModule *networkNode, PlotFigure *figure) const
 {
-    auto nonCostThisPtr = const_cast<MediumCanvasVisualizer *>(this);
-    const IRadio *radio = dynamic_cast<const IRadio *>(module);
-    if (radio == nullptr) {
-        auto wlan0 = module->getSubmodule("wlan", 0);
-        if (wlan0 != nullptr)
-            radio = check_and_cast<IRadio *>(wlan0->getSubmodule("radio"));
+    const ITransmission *transmissionInProgress;
+    const ITransmission *receptionInProgress;
+    const IAntenna *antenna;
+    IMobility *mobility;
+    std::tie(transmissionInProgress, receptionInProgress, antenna, mobility) = extractSpectrumFigureParameters(networkNode);
+    if (spectrumAutoFrequencyAxis) {
+        auto nonCostThisPtr = const_cast<MediumCanvasVisualizer *>(this);
+        if (transmissionInProgress != nullptr)
+            nonCostThisPtr->updateSpectrumFigureFrequencyLimits(transmissionInProgress);
+        if (receptionInProgress != nullptr)
+            nonCostThisPtr->updateSpectrumFigureFrequencyLimits(receptionInProgress);
     }
-    // TODO: what about multiple radios? what if it's not called wlan, etc.?
-    const IAntenna *antenna = nullptr;
-    const ITransmission *transmission = nullptr;
-    if (radio != nullptr) {
-        antenna = radio->getAntenna();
-#ifdef WITH_RADIO
-        auto dimensionalTransmission = dynamic_cast<const DimensionalTransmission *>(radio->getTransmissionInProgress());
-        if (spectrumAutoFrequencyAxis && dimensionalTransmission != nullptr) {
-            dimensionalTransmission->getPower()->partition(dimensionalTransmission->getPower()->getDomain(), [&] (const Interval<simsec, Hz>& i, const IFunction<WpHz, Domain<simsec, Hz>> *f) {
-                if (auto constantFunction = dynamic_cast<const ConstantFunction<WpHz, Domain<simsec, Hz>> *>(f)) {
-                    if (constantFunction->getConstantValue() == WpHz(0))
-                        return;
-                }
-                nonCostThisPtr->spectrumMinFrequency = std::min(spectrumMinFrequency, std::get<1>(i.getLower()));
-                nonCostThisPtr->spectrumMaxFrequency = std::max(spectrumMaxFrequency, std::get<1>(i.getUpper()));
-            });
-        }
-#endif
-        transmission = radio->getReceptionInProgress();
-    }
-    if (antenna == nullptr)
-        antenna = dynamic_cast<IAntenna *>(module->getSubmodule("antenna"));
     if (spectrumMinFrequency < spectrumMaxFrequency) {
         figure->clearValues(0);
         figure->clearValues(1);
         figure->clearValues(2);
-        auto mobility = check_and_cast<IMobility *>(module->getSubmodule("mobility"));
         auto position = mobility->getCurrentPosition();
-        auto marginFrequency = 0.05 * (spectrumMaxFrequency - spectrumMinFrequency);
-        auto minFrequency = spectrumMinFrequency - marginFrequency;
-        auto maxFrequency = spectrumMaxFrequency + marginFrequency;
-        figure->setMinX(GHz(minFrequency).get());
-        figure->setMaxX(GHz(maxFrequency).get());
-        figure->setXTickCount(3);
-        auto now = simTime();
-        Point<m, m, m, simsec, Hz> l(m(position.x), m(position.y), m(position.z), simsec(now), minFrequency);
-        Point<m, m, m, simsec, Hz> u(m(position.x), m(position.y), m(position.z), simsec(now), maxFrequency);
-        Interval<m, m, m, simsec, Hz> i(l, u, 0b11110);
-        bool directionalAntenna = antenna != nullptr && (antenna->getGain()->getMinGain() != 1 || antenna->getGain()->getMaxGain() != 1);
-        const auto& receptionPowerFunction = transmission != nullptr ? receptionPowerFunctions.find(transmission)->second : nullptr;
-        mediumPowerFunction->partition(i, [&] (const Interval<m, m, m, simsec, Hz>& i1, const IFunction<WpHz, Domain<m, m, m, simsec, Hz>> *f) {
-            WpHz totalPower1(0), totalPower2(0), signalPower1(0), signalPower2(0);
-            auto l1 = i1.getLower();
-            auto u1 = i1.getUpper();
-            // NOTE: the interval is closed at the lower boundary and open at the upper boundary
-            //       we want to have the limit of the function's value at the upper boundary from the left
-            std::get<4>(u1) = Hz(std::nextafter(std::get<4>(u1).get(), std::get<4>(l1).get()));
-            auto x1 = GHz(std::get<4>(l1)).get();
-            auto x2 = GHz(std::get<4>(u1)).get();
-            if (directionalAntenna && false) {
-                for (auto mediumPowerElementFunction : mediumPowerFunction->getElements()) {
-                    double gain = 1;
-                    if (auto rf = dynamicPtrCast<const MultiplicationFunction<WpHz, Domain<m, m, m, simsec, Hz>>>(mediumPowerElementFunction)) {
-                        if (auto tf = dynamicPtrCast<const PropagatedTransmissionPowerFunction>(rf->getF1())) {
-                            const Point<m, m, m>& startPosition = tf->getStartPosition();
-                            double dx = std::get<0>(startPosition).get() - position.x;
-                            double dy = std::get<1>(startPosition).get() - position.y;
-                            double dz = std::get<2>(startPosition).get() - position.z;
-                            if (dx != 0 || dy != 0 || dz != 0) {
-                                const Quaternion& startOrientation = antenna->getMobility()->getCurrentAngularPosition();
-                                auto direction = Quaternion::rotationFromTo(Coord::X_AXIS, Coord(dx, dy, dz));
-                                auto antennaLocalDirection = startOrientation.inverse() * direction;
-                                gain = antenna->getGain()->computeGain(antennaLocalDirection);
-                            }
-                        }
-                    }
-                    auto receptionPower1 = gain * mediumPowerElementFunction->getValue(l1);
-                    auto receptionPower2 = gain * mediumPowerElementFunction->getValue(u1);
-                    if (mediumPowerElementFunction == receptionPowerFunction) {
-                        signalPower1 = receptionPower1;
-                        signalPower2 = receptionPower2;
-                    }
-                    totalPower1 += receptionPower1;
-                    totalPower2 += receptionPower2;
-                }
-            }
-            else {
-                totalPower1 = f->getValue(l1);
-                totalPower2 = f->getValue(u1);
-                if (receptionPowerFunction != nullptr) {
-                    signalPower1 = receptionPowerFunction->getValue(l1);
-                    signalPower2 = receptionPowerFunction->getValue(u1);
-                }
-            }
-            if (receptionPowerFunction == nullptr) {
-                if (dynamic_cast<const ConstantFunction<WpHz, Domain<m, m, m, simsec, Hz>> *>(f)) {
-                    figure->setValue(0, x1, wpHz2dBmWpMHz(WpHz(totalPower1).get()));
-                    figure->setValue(0, x2, wpHz2dBmWpMHz(WpHz(totalPower1).get()));
-                }
-                else {
-                    figure->setValue(0, x1, wpHz2dBmWpMHz(WpHz(totalPower1).get()));
-                    figure->setValue(0, x2, wpHz2dBmWpMHz(WpHz(totalPower2).get()));
-                }
-            }
-            else {
-                figure->setValue(1, x1, wpHz2dBmWpMHz(WpHz(totalPower1 - signalPower1).get()));
-                figure->setValue(1, x2, wpHz2dBmWpMHz(WpHz(totalPower2 - signalPower2).get()));
-                figure->setValue(2, x1, wpHz2dBmWpMHz(WpHz(signalPower1).get()));
-                figure->setValue(2, x2, wpHz2dBmWpMHz(WpHz(signalPower2).get()));
-            }
-            if (spectrumAutoPowerAxis) {
-                WpHz minPower = f->getMin(i1);
-                if (minPower > WpHz(0))
-                    nonCostThisPtr->spectrumMinPower = std::min(spectrumMinPower, minPower);
-                nonCostThisPtr->spectrumMaxPower = std::max(spectrumMaxPower, f->getMax(i1));
-            }
-        });
+        if (receptionInProgress == nullptr)
+            refreshSpectrumFigurePowerFunction(mediumPowerFunction, antenna, position, figure, 0);
+        else {
+            const auto& signalPowerFunction = receptionPowerFunctions.find(receptionInProgress)->second;
+            // TODO: refactor to avoid rebuilding this all the time
+            auto noisePowerFunction = makeShared<SumFunction<WpHz, Domain<m, m, m, simsec, Hz>>>();
+            for (auto elementFunction : mediumPowerFunction->getElements())
+                if (elementFunction != signalPowerFunction)
+                    noisePowerFunction->addElement(elementFunction);
+            refreshSpectrumFigurePowerFunction(noisePowerFunction, antenna, position, figure, 1);
+            refreshSpectrumFigurePowerFunction(signalPowerFunction, antenna, position, figure, 2);
+        }
         double minValue = wpHz2dBmWpMHz(WpHz(spectrumMinPower).get());
         double maxValue = wpHz2dBmWpMHz(WpHz(spectrumMaxPower).get());
         if (minValue < maxValue) {
             double margin = 0.05 * (maxValue - minValue);
             figure->setMinY(minValue - margin);
             figure->setMaxY(maxValue + margin);
+            figure->setXTickCount(3);
             figure->setYTickCount(5);
         }
         figure->refreshDisplay();
     }
+}
+
+std::tuple<const ITransmission *, const ITransmission *, const IAntenna *, IMobility *> MediumCanvasVisualizer::extractSpectrumFigureParameters(const cModule *networkNode) const
+{
+    // TODO: what about multiple radios? what if it's not called wlan, this is quite accidental, etc.?
+    const IRadio *radio = dynamic_cast<const IRadio *>(networkNode);
+    if (radio == nullptr) {
+        auto wlan0 = networkNode->getSubmodule("wlan", 0);
+        if (wlan0 != nullptr)
+            radio = dynamic_cast<IRadio *>(wlan0->getSubmodule("radio"));
+    }
+    auto transmissionInProgress = radio != nullptr ? radio->getTransmissionInProgress() : nullptr;
+    auto receptionInProgress = radio != nullptr ? radio->getReceptionInProgress() : nullptr;
+    const IAntenna *antenna = nullptr;
+    if (radio != nullptr)
+        antenna = radio->getAntenna();
+    if (antenna == nullptr)
+        antenna = dynamic_cast<IAntenna *>(networkNode->getSubmodule("antenna"));
+    IMobility *mobility = nullptr;
+    if (antenna != nullptr)
+        mobility = antenna->getMobility();
+    else
+        mobility = check_and_cast<IMobility *>(networkNode->getSubmodule("mobility"));
+    return {transmissionInProgress, receptionInProgress, antenna, mobility};
+}
+
+void MediumCanvasVisualizer::refreshSpectrumFigurePowerFunction(const Ptr<const IFunction<WpHz, Domain<m, m, m, simsec, Hz>>>& powerFunction, const IAntenna *antenna, const Coord& position, PlotFigure *figure, int series) const
+{
+    auto nonCostThisPtr = const_cast<MediumCanvasVisualizer *>(this);
+    auto marginFrequency = 0.05 * (spectrumMaxFrequency - spectrumMinFrequency);
+    auto minFrequency = spectrumMinFrequency - marginFrequency;
+    auto maxFrequency = spectrumMaxFrequency + marginFrequency;
+    figure->setMinX(GHz(minFrequency).get());
+    figure->setMaxX(GHz(maxFrequency).get());
+    Point<m, m, m, simsec, Hz> l(m(position.x), m(position.y), m(position.z), simsec(simTime()), minFrequency);
+    Point<m, m, m, simsec, Hz> u(m(position.x), m(position.y), m(position.z), simsec(simTime()), maxFrequency);
+    Interval<m, m, m, simsec, Hz> i(l, u, 0b11110);
+    auto dx = GHz(maxFrequency - minFrequency).get() * spectrumFigureInterpolationSize / spectrumFigureWidth;
+    powerFunction->partition(i, [&] (const Interval<m, m, m, simsec, Hz>& j, const IFunction<WpHz, Domain<m, m, m, simsec, Hz>> *partitonPowerFunction) {
+        ASSERT((dynamic_cast<const ConstantFunction<WpHz, Domain<m, m, m, simsec, Hz>> *>(partitonPowerFunction) != nullptr || dynamic_cast<const LinearFunction<WpHz, Domain<m, m, m, simsec, Hz>> *>(partitonPowerFunction) != nullptr));
+        auto lower = j.getLower();
+        auto upper = j.getUpper();
+        // NOTE: the interval is closed at the lower boundary and open at the upper boundary
+        //       we want to have the limit of the function's value at the upper boundary from the left
+        if (std::get<4>(upper) != std::get<4>(lower))
+            std::get<4>(upper) = Hz(std::nextafter(std::get<4>(upper).get(), std::get<4>(lower).get()));
+        WpHz power1;
+        WpHz power2;
+        std::tie(power1, power2) = computePowerForPartitionBoundaries(powerFunction, lower, upper, partitonPowerFunction, antenna, position);
+        // TODO: the function f is assumed to be constant or linear between l1 and u1 but on a logarithmic axis the plot is non-linear
+        // TODO: the following interpolation should be part of the PlotFigure along with logarithmic axis support
+        auto x1 = GHz(std::get<4>(lower)).get();
+        auto x2 = GHz(std::get<4>(upper)).get();
+        for (double x = x1; x < x2; x += dx) {
+            double xi = x;
+            double xj = std::min(x2, x + dx);
+            double ai = (xi - x1) / (x2 - x1);
+            double aj = (xj - x1) / (x2 - x1);
+            auto yi = power1 * (1 - ai) + power2 * ai;
+            auto yj = power1 * (1 - aj) + power2 * aj;
+            figure->setValue(series, xi, wpHz2dBmWpMHz(WpHz(yi).get()));
+            figure->setValue(series, xj, wpHz2dBmWpMHz(WpHz(yj).get()));
+        }
+        if (spectrumAutoPowerAxis)
+            nonCostThisPtr->updateSpectrumFigurePowerLimits(j, partitonPowerFunction);
+    });
+}
+
+std::pair<WpHz, WpHz> MediumCanvasVisualizer::computePowerForPartitionBoundaries(const Ptr<const IFunction<WpHz, Domain<m, m, m, simsec, Hz>>>& powerFunction, const math::Point<m, m, m, simsec, Hz>& lower, const math::Point<m, m, m, simsec, Hz>& upper, const IFunction<WpHz, Domain<m, m, m, simsec, Hz>> *partitonPowerFunction, const IAntenna *antenna, const Coord& position) const
+{
+    WpHz totalPower1;
+    WpHz totalPower2;
+    if (antenna != nullptr && antenna->isDirectional()) {
+        if (auto sumFunction = dynamicPtrCast<const SumFunction<WpHz, Domain<m, m, m, simsec, Hz>>>(powerFunction)) {
+            totalPower1 = WpHz(0);
+            totalPower2 = WpHz(0);
+            for (auto elementFunction : sumFunction->getElements()) {
+                WpHz p1;
+                WpHz p2;
+                std::tie(p1, p2) = computePowerForDirectionalAntenna(elementFunction, lower, upper, antenna, position);
+                totalPower1 += p1;
+                totalPower2 += p2;
+            }
+        }
+        else
+            std::tie(totalPower1, totalPower2) = computePowerForDirectionalAntenna(powerFunction, lower, upper, antenna, position);
+    }
+    else {
+        totalPower1 = partitonPowerFunction->getValue(lower);
+        totalPower2 = partitonPowerFunction->getValue(upper);
+    }
+    ASSERT(!std::isnan(totalPower1.get()));
+    ASSERT(!std::isnan(totalPower2.get()));
+    return {totalPower1, totalPower2};
+}
+
+std::pair<WpHz, WpHz> MediumCanvasVisualizer::computePowerForDirectionalAntenna(const Ptr<const IFunction<WpHz, Domain<m, m, m, simsec, Hz>>>& powerFunction, const math::Point<m, m, m, simsec, Hz>& lower, const math::Point<m, m, m, simsec, Hz>& upper, const IAntenna *antenna, const Coord& position) const
+{
+    if (auto rf = dynamicPtrCast<const MultiplicationFunction<WpHz, Domain<m, m, m, simsec, Hz>>>(powerFunction)) {
+        if (auto tf = dynamicPtrCast<const PropagatedTransmissionPowerFunction>(rf->getF1())) {
+            const Point<m, m, m>& startPosition = tf->getStartPosition();
+            double dx = std::get<0>(startPosition).get() - position.x;
+            double dy = std::get<1>(startPosition).get() - position.y;
+            double dz = std::get<2>(startPosition).get() - position.z;
+            double gain = 1;
+            if (dx != 0 || dy != 0 || dz != 0) {
+                const Quaternion& startOrientation = antenna->getMobility()->getCurrentAngularPosition();
+                auto direction = Quaternion::rotationFromTo(Coord::X_AXIS, Coord(dx, dy, dz));
+                auto antennaLocalDirection = startOrientation.inverse() * direction;
+                gain = antenna->getGain()->computeGain(antennaLocalDirection);
+            }
+            WpHz power1 = gain * powerFunction->getValue(lower);
+            WpHz power2 = gain * powerFunction->getValue(upper);
+            ASSERT(!std::isnan(power1.get()));
+            ASSERT(!std::isnan(power2.get()));
+            return {power1, power2};
+        }
+    }
+    WpHz power1 = powerFunction->getValue(lower);
+    WpHz power2 = powerFunction->getValue(upper);
+    ASSERT(!std::isnan(power1.get()));
+    ASSERT(!std::isnan(power2.get()));
+    return {power1, power2};
+}
+
+void MediumCanvasVisualizer::updateSpectrumFigureFrequencyLimits(const ITransmission *transmission)
+{
+    if (auto dimensionalTransmission = dynamic_cast<const DimensionalTransmission *>(transmission)) {
+        const auto& powerFunction = dimensionalTransmission->getPower();
+        powerFunction->partition(powerFunction->getDomain(), [&] (const Interval<simsec, Hz>& i, const IFunction<WpHz, Domain<simsec, Hz>> *f) {
+            if (auto constantFunction = dynamic_cast<const ConstantFunction<WpHz, Domain<simsec, Hz>> *>(f)) {
+                if (constantFunction->getConstantValue() == WpHz(0))
+                    return;
+            }
+            spectrumMinFrequency = std::min(spectrumMinFrequency, std::get<1>(i.getLower()));
+            spectrumMaxFrequency = std::max(spectrumMaxFrequency, std::get<1>(i.getUpper()));
+        });
+    }
+}
+
+void MediumCanvasVisualizer::updateSpectrumFigurePowerLimits(const Interval<m, m, m, simsec, Hz>& i, const IFunction<WpHz, Domain<m, m, m, simsec, Hz>> *f)
+{
+    WpHz minPower = f->getMin(i);
+    if (minPower > WpHz(0))
+        spectrumMinPower = std::min(spectrumMinPower, minPower);
+    spectrumMaxPower = std::max(spectrumMaxPower, f->getMax(i));
 }
 
 void MediumCanvasVisualizer::setAnimationSpeed()
