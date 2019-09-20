@@ -109,9 +109,9 @@ Packet *UdpBasicBurst::createPacket()
     long msgByteLength = *messageLengthPar;
     Packet *pk = new Packet(msgName);
     const auto& payload = makeShared<ApplicationPacket>();
-    payload->addTag<CreationTimeTag>()->setCreationTime(simTime());
     payload->setChunkLength(B(msgByteLength));
     payload->setSequenceNumber(numSent);
+    payload->addTag<CreationTimeTag>()->setCreationTime(simTime());
     pk->insertAtBack(payload);
     pk->addPar("sourceId") = getId();
     pk->addPar("msgId") = numSent;

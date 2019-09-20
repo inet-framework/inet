@@ -907,7 +907,7 @@ static void testIteration()
         index2++;
         if (chunk2 != nullptr)
             sequenceChunk1->moveIterator(iterator2, chunk2->getChunkLength());
-        chunk2 = sequenceChunk1->peek(iterator2, b(-1), Chunk::PF_ALLOW_NULLPTR);
+        chunk2 = sequenceChunk1->peek(iterator2, Chunk::unspecifiedLength, Chunk::PF_ALLOW_NULLPTR);
     }
     ASSERT(index2 == 3);
 
@@ -929,7 +929,7 @@ static void testIteration()
         index3++;
         if (chunk3 != nullptr)
             sequenceChunk1->moveIterator(iterator3, chunk3->getChunkLength());
-        chunk3 = sequenceChunk1->peek(iterator3, b(-1), Chunk::PF_ALLOW_NULLPTR);
+        chunk3 = sequenceChunk1->peek(iterator3, Chunk::unspecifiedLength, Chunk::PF_ALLOW_NULLPTR);
     }
     ASSERT(index2 == 3);
 }
@@ -1206,6 +1206,45 @@ static void testPeeking()
     ASSERT(chunk4 != nullptr);
     ASSERT(chunk4->getChunkLength() == B(15));
     ASSERT(dynamicPtrCast<const BytesChunk>(chunk4) != nullptr);
+}
+
+static void testSequenceSerialization()
+{
+    { // 1. test sequence doesn't serializes front if not necessary
+    Packet packet;
+    auto header = makeShared<HeaderWithoutSerializer>();
+    packet.insertAtFront(header);
+    packet.insertAtBack(makeImmutableBytesChunk(makeVector(10)));
+    packet.insertAtBack(makeImmutableByteCountChunk(B(10)));
+    packet.popAtFront<HeaderWithoutSerializer>();
+    const auto& bytesChunk = packet.peekDataAsBytes();
+    ASSERT(bytesChunk != nullptr);
+    ASSERT(bytesChunk->getChunkLength() == B(20));
+    }
+
+    { // 2. test sequence doesn't serializes back if not necessary
+    Packet packet;
+    auto header = makeShared<HeaderWithoutSerializer>();
+    packet.insertAtBack(makeImmutableBytesChunk(makeVector(10)));
+    packet.insertAtBack(makeImmutableByteCountChunk(B(10)));
+    packet.insertAtBack(header);
+    packet.popAtBack<HeaderWithoutSerializer>(B(8));
+    const auto& bytesChunk = packet.peekDataAsBytes();
+    ASSERT(bytesChunk != nullptr);
+    ASSERT(bytesChunk->getChunkLength() == B(20));
+    }
+
+    { // 3. test sequence serialization fails if no serializer is present
+    Packet packet;
+    auto header = makeShared<HeaderWithoutSerializer>();
+    packet.insertAtBack(makeImmutableBytesChunk(makeVector(10)));
+    packet.insertAtBack(header);
+    packet.insertAtBack(makeImmutableByteCountChunk(B(10)));
+    const auto& dataChunk = packet.peekData();
+    ASSERT(dataChunk != nullptr);
+    ASSERT(dataChunk->getChunkLength() == B(28));
+    ASSERT_ERROR(packet.peekDataAsBytes(), "Cannot find serializer");
+    }
 }
 
 static void testSequence()
@@ -1893,6 +1932,7 @@ void UnitTest::initialize()
     testNesting();
     testPeeking();
     testSequence();
+    testSequenceSerialization();
     testChunkQueue();
     testChunkBuffer(getRNG(0));
     testReassemblyBuffer();

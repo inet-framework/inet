@@ -184,6 +184,13 @@ ExtLowerUdp::Socket *ExtLowerUdp::open(int socketId)
     int fd = ::socket(AF_INET, SOCK_DGRAM, 0);
     if (fd < 0)
         throw cRuntimeError("Cannot create socket: %d", fd);
+
+    // Setting this option makes it possible to kill the simulations
+    // and restart them right away using the same port numbers.
+    int enable = 1;
+    if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, (const char*)&enable, sizeof(int)) < 0)
+        throw cRuntimeError("ExtLowerUdp: cannot set socket option");
+
     socket->fd = fd;
     socketIdToSocketMap[socketId] = socket;
     fdToSocketMap[fd] = socket;

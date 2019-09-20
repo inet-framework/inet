@@ -62,7 +62,7 @@ void TcpCrcInsertion::insertCrc(const Protocol *networkProtocol, const L3Address
             // if the CRC mode is computed, then compute the CRC and set it
             // this computation is delayed after the routing decision, see INetfilter hook
             tcpHeader->setCrc(0x0000); // make sure that the CRC is 0 in the TCP header before computing the CRC
-            auto tcpData = (packet->getDataLength() > b(0)) ? packet->peekData() : staticPtrCast<const Chunk>(makeShared<const BytesChunk>());
+            auto tcpData = packet->peekData(Chunk::PF_ALLOW_EMPTY);
             auto crc = computeCrc(networkProtocol, srcAddress, destAddress, tcpHeader, tcpData);
             tcpHeader->setCrc(crc);
             break;

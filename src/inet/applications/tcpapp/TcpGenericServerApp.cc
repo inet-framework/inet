@@ -127,10 +127,10 @@ void TcpGenericServerApp::handleMessage(cMessage *msg)
                 outPacket->addTag<SocketReq>()->setSocketId(connId);
                 outPacket->setKind(TCP_C_SEND);
                 const auto& payload = makeShared<GenericAppMsg>();
-                payload->addTag<CreationTimeTag>()->setCreationTime(simTime());
                 payload->setChunkLength(requestedBytes);
                 payload->setExpectedReplyLength(B(0));
                 payload->setReplyDelay(0);
+                payload->addTag<CreationTimeTag>()->setCreationTime(simTime());
                 outPacket->insertAtBack(payload);
                 sendOrSchedule(outPacket, delay + msgDelay);
             }

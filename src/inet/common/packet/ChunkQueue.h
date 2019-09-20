@@ -115,7 +115,7 @@ class INET_API ChunkQueue : public cNamedObject
      */
     template <typename T>
     bool has(b length = b(-1)) const {
-        return content->has<T>(iterator, length);
+        return content->has<T>(iterator, length == b(-1) ? Chunk::unspecifiedLength : length);
     }
 
     /**
@@ -125,7 +125,7 @@ class INET_API ChunkQueue : public cNamedObject
      */
     template <typename T>
     const Ptr<const T> peek(b length = b(-1), int flags = 0) const {
-        return content->peek<T>(iterator, length, flags);
+        return content->peek<T>(iterator, length == b(-1) ? Chunk::unspecifiedLength : length, flags);
     }
 
     /**
@@ -137,7 +137,7 @@ class INET_API ChunkQueue : public cNamedObject
     const Ptr<const T> peekAt(b offset, b length = b(-1), int flags = 0) const {
         CHUNK_CHECK_USAGE(b(0) <= offset && offset <= getLength(), "offset is out of range");
         CHUNK_CHECK_USAGE(b(-1) <= length && offset + length <= getLength(), "length is invalid");
-        return content->peek<T>(Chunk::Iterator(true, iterator.getPosition() + offset, -1), length, flags);
+        return content->peek<T>(Chunk::Iterator(true, iterator.getPosition() + offset, -1), length == b(-1) ? Chunk::unspecifiedLength : length, flags);
     }
 
     /**
@@ -182,7 +182,7 @@ class INET_API ChunkQueue : public cNamedObject
      */
     template <typename T>
     const Ptr<const T> pop(b length = b(-1), int flags = 0) {
-        const auto& chunk = peek<T>(length, flags);
+        const auto& chunk = peek<T>(length == b(-1) ? Chunk::unspecifiedLength : length, flags);
         if (chunk != nullptr)
             moveIteratorOrRemove(chunk->getChunkLength());
         return chunk;
