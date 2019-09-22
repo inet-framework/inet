@@ -731,8 +731,7 @@ void Udp::processPacketFromApp(Packet *packet)
         throw cRuntimeError("send: unspecified destination address");
 
     if (destPort <= 0 || destPort > 65535)
-        throw cRuntimeError("send invalid remote port number %d", destPort);
-
+        throw cRuntimeError("send: invalid remote port number %d", destPort);
 
     if (packet->findTag<MulticastReq>() == nullptr)
         packet->addTag<MulticastReq>()->setMulticastLoop(sd->multicastLoop);
@@ -756,7 +755,12 @@ void Udp::processPacketFromApp(Packet *packet)
     // set source and destination port
     udpHeader->setSourcePort(srcPort);
     udpHeader->setDestinationPort(destPort);
-    udpHeader->setTotalLengthField(udpHeader->getChunkLength() + packet->getTotalLength());
+
+    B totalLength = udpHeader->getChunkLength() + packet->getTotalLength();
+    if(totalLength.get() > UDP_MAX_MESSAGE_SIZE)
+        throw cRuntimeError("send: total UDP message size exceeds %u", UDP_MAX_MESSAGE_SIZE);
+
+    udpHeader->setTotalLengthField(totalLength);
     if (crcMode == CRC_COMPUTED) {
         udpHeader->setCrcMode(CRC_COMPUTED);
         udpHeader->setCrc(0x0000);    // crcMode == CRC_COMPUTED is done in an INetfilter hook
