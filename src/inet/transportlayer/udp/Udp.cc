@@ -77,9 +77,6 @@ void Udp::initialize(int stage)
     OperationalBase::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
-        WATCH_PTRMAP(socketsByIdMap);
-        WATCH_MAP(socketsByPortMap);
-
         const char *crcModeString = par("crcMode");
         crcMode = parseCrcMode(crcModeString, true);
 
@@ -97,6 +94,9 @@ void Udp::initialize(int stage)
         WATCH(numPassedUp);
         WATCH(numDroppedWrongPort);
         WATCH(numDroppedBadChecksum);
+
+        WATCH_PTRMAP(socketsByIdMap);
+        WATCH_MAP(socketsByPortMap);
     }
     else if (stage == INITSTAGE_TRANSPORT_LAYER) {
         if (crcMode == CRC_COMPUTED) {
@@ -127,7 +127,10 @@ void Udp::initialize(int stage)
 
 void Udp::handleMessageWhenUp(cMessage *msg)
 {
-    if (msg->arrivedOn("appIn")) {
+    if (msg->isSelfMessage()) {
+        throw cRuntimeError("UDP does not use self message.");
+    }
+    else if (msg->arrivedOn("appIn")) {
         // received from application layer
         processCommandFromApp(msg);
     }
