@@ -119,11 +119,6 @@ class INET_API UdpSocket : public ISocket
      */
     int getSocketId() const override { return socketId; }
 
-    /**
-     * Generates a new socket id.
-     */
-    static int generateSocketId();
-
     /** @name Opening and closing connections, sending data */
     //@{
 
