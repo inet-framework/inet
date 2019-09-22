@@ -37,12 +37,7 @@ UdpSocket::UdpSocket()
 {
     // don't allow user-specified socketIds because they may conflict with
     // automatically assigned ones.
-    socketId = generateSocketId();
-}
-
-int UdpSocket::generateSocketId()
-{
-    return getEnvir()->getUniqueNumber();
+    socketId = getEnvir()->getUniqueNumber();
 }
 
 void UdpSocket::bind(int localPort)
