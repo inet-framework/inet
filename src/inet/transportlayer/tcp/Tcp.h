@@ -105,15 +105,6 @@ class INET_API Tcp : public OperationalBase
         EPHEMERAL_PORTRANGE_END   = 5000
     };
 
-    struct AppConnKey    // XXX this class is redundant since connId is already globally unique
-    {
-        int socketId;
-
-        inline bool operator<(const AppConnKey& b) const
-        {
-            return socketId < b.socketId;
-        }
-    };
     struct SockPair
     {
         L3Address localAddr;
@@ -135,7 +126,7 @@ class INET_API Tcp : public OperationalBase
     };
 
   protected:
-    typedef std::map<AppConnKey, TcpConnection *> TcpAppConnMap;
+    typedef std::map<int /*socketId*/, TcpConnection *> TcpAppConnMap;
     typedef std::map<SockPair, TcpConnection *> TcpConnMap;
     TcpCrcInsertion crcInsertion;
 

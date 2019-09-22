@@ -147,9 +147,7 @@ void Tcp::processCommandFromApp(cMessage *msg)
 
         // add into appConnMap here; it'll be added to connMap during processing
         // the OPEN command in TcpConnection's processAppCommand().
-        AppConnKey key;
-        key.socketId = socketId;
-        tcpAppConnMap[key] = conn;
+        tcpAppConnMap[socketId] = conn;
 
         EV_INFO << "Tcp connection created for " << msg << "\n";
     }
@@ -191,10 +189,7 @@ void Tcp::processTCPPacket(Packet *packet)
 
 TcpConnection *Tcp::findConnForApp(int socketId)
 {
-    AppConnKey key;
-    key.socketId = socketId;
-
-    auto i = tcpAppConnMap.find(key);
+    auto i = tcpAppConnMap.find(socketId);
     return i == tcpAppConnMap.end() ? nullptr : i->second;
 }
 
@@ -215,9 +210,7 @@ void Tcp::removeConnection(TcpConnection *conn)
 {
     EV_INFO << "Deleting Tcp connection\n";
 
-    AppConnKey key;
-    key.socketId = conn->socketId;
-    tcpAppConnMap.erase(key);
+    tcpAppConnMap.erase(conn->socketId);
 
     SockPair key2;
     key2.localAddr = conn->localAddr;
@@ -359,9 +352,7 @@ void Tcp::addForkedConnection(TcpConnection *conn, TcpConnection *newConn, L3Add
     addSockPair(newConn, localAddr, remoteAddr, localPort, remotePort);
 
     // newConn will live on with the new socketId
-    AppConnKey key;
-    key.socketId = newConn->socketId;
-    tcpAppConnMap[key] = newConn;
+    tcpAppConnMap[newConn->socketId] = newConn;
 }
 
 void Tcp::addSockPair(TcpConnection *conn, L3Address localAddr, L3Address remoteAddr, int localPort, int remotePort)
@@ -567,21 +558,17 @@ void Tcp::refreshDisplay() const
 
 std::ostream& operator<<(std::ostream& os, const Tcp::SockPair& sp)
 {
-    os << "loc=" << sp.localAddr << ":" << sp.localPort << " "
-       << "rem=" << sp.remoteAddr << ":" << sp.remotePort;
-    return os;
-}
-
-std::ostream& operator<<(std::ostream& os, const Tcp::AppConnKey& app)
-{
-    os << "socketId=" << app.socketId;
+    os << "locSocket=" << sp.localAddr << ":"<< sp.localPort << " "
+       << "remSocket=" << sp.remoteAddr << ":" << sp.remotePort;
     return os;
 }
 
 std::ostream& operator<<(std::ostream& os, const TcpConnection& conn)
 {
-    os << "socketId=" << conn.socketId << " " << TcpConnection::stateName(conn.getFsmState())
-       << " state={" << conn.getState()->str() << "}";
+    os << "socketId=" << conn.socketId << " ";
+    os << "fsmState=" << TcpConnection::stateName(conn.getFsmState()) << " ";
+    os << "connection=" << (conn.getState() == nullptr ? "<empty>" : conn.getState()->str()) << " ";
+    os << "ttl=" << (conn.ttl == -1 ? "<default>" : std::to_string(conn.ttl)) << " ";
     return os;
 }
 
