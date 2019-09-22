@@ -104,6 +104,8 @@ class INET_API Udp : public OperationalBase
         void deleteMulticastMembership(MulticastMembership *membership);
     };
 
+    friend std::ostream& operator<<(std::ostream& os, const Udp::SockDesc& sd);
+
     typedef std::list<SockDesc *> SockDescList;    // might contain duplicated local addresses if their reuseAddr flag is set
     typedef std::map<int, SockDesc *> SocketsByIdMap;
     typedef std::map<int, SockDescList> SocketsByPortMap;
