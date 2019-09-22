@@ -46,6 +46,8 @@ simple TelnetApp like IApp
         volatile double thinkTime @unit(s) = default(exponential(10s)); // user waits this much before starting to type new command
         volatile double idleInterval @unit(s) = default(exponential(300s)); // time gap between sessions
         volatile double reconnectInterval @unit(s) = default(30s);  // if connection breaks, user waits this much before trying to reconnect
+        int timeToLive = default(-1); // if not -1, set the TTL (IPv4) or Hop Limit (IPv6) field of sent packets to this value
+        int typeOfService = default(-1); // if not -1, set the ToS (IPv4) or Traffic Class (IPv6) field of sent packets to this value
         @display("i=block/telnet");
         @lifecycleSupport;
         double stopOperationExtraTime @unit(s) = default(-1s);    // extra time after lifecycle stop operation finished
