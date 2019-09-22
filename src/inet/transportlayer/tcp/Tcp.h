@@ -23,7 +23,7 @@
 #include <set>
 
 #include "inet/common/INETDefs.h"
-#include "inet/common/LayeredProtocolBase.h"
+#include "inet/common/lifecycle/OperationalBase.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/L3Address.h"
@@ -33,6 +33,7 @@
 #include "inet/transportlayer/tcp_common/TcpHeader.h"
 
 namespace inet {
+
 namespace tcp {
 
 // Forward declarations:
@@ -93,11 +94,16 @@ class TcpReceiveQueue;
  * The concrete TcpAlgorithm class to use can be chosen per connection (in OPEN)
  * or in a module parameter.
  */
-class INET_API Tcp : public LayeredProtocolBase
+class INET_API Tcp : public OperationalBase
 {
   public:
     static simsignal_t tcpConnectionAddedSignal;
     static simsignal_t tcpConnectionRemovedSignal;
+
+    enum PortRange {
+        EPHEMERAL_PORTRANGE_START = 1024,
+        EPHEMERAL_PORTRANGE_END   = 5000
+    };
 
     struct AppConnKey    // XXX this class is redundant since connId is already globally unique
     {
@@ -164,15 +170,10 @@ class INET_API Tcp : public LayeredProtocolBase
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void finish() override;
 
-    virtual void handleSelfMessage(cMessage *message) override;
-
-    virtual void handleUpperCommand(cMessage *message) override;
-
-    virtual void handleUpperPacket(Packet *packet) override;
-    virtual void handleLowerPacket(Packet *packet) override;
-
-    virtual bool isUpperMessage(cMessage *message) override;
-    virtual bool isLowerMessage(cMessage *message) override;
+    virtual void handleMessageWhenUp(cMessage *msg) override;
+    virtual void handleSelfMessage(cMessage *msg);
+    virtual void processCommandFromApp(cMessage *msg);
+    virtual void processTCPPacket(Packet *packet);
 
   public:
     /**
