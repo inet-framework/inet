@@ -42,6 +42,7 @@ class UdpHeader;
 class InterfaceEntry;
 
 const bool DEFAULT_MULTICAST_LOOP = true;
+const uint16_t UDP_MAX_MESSAGE_SIZE = 65535; // bytes
 
 /**
  * Implements the Udp protocol: encapsulates/decapsulates user data into/from Udp.
