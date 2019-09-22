@@ -99,6 +99,11 @@ class INET_API Tcp : public LayeredProtocolBase
     static simsignal_t tcpConnectionAddedSignal;
     static simsignal_t tcpConnectionRemovedSignal;
 
+    enum PortRange {
+        EPHEMERAL_PORTRANGE_START = 1024,
+        EPHEMERAL_PORTRANGE_END   = 5000
+    };
+
     struct AppConnKey    // XXX this class is redundant since connId is already globally unique
     {
         int socketId;
