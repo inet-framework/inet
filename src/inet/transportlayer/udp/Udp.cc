@@ -213,6 +213,13 @@ void Udp::processCommandFromApp(cMessage *msg)
                 std::vector<L3Address> sourceList;
                 for (size_t i = 0; i < cmd->getSourceListArraySize(); i++)
                     sourceList.push_back(cmd->getSourceList(i));
+                unblockMulticastSources(sd, ie, cmd->getMulticastAddr(), sourceList);
+            }
+            else if (auto cmd = dynamic_cast<UdpUnblockMulticastSourcesCommand *>(ctrl)) {
+                InterfaceEntry *ie = ift->getInterfaceById(cmd->getInterfaceId());
+                std::vector<L3Address> sourceList;
+                for (size_t i = 0; i < cmd->getSourceListArraySize(); i++)
+                    sourceList.push_back(cmd->getSourceList(i));
                 leaveMulticastSources(sd, ie, cmd->getMulticastAddr(), sourceList);
             }
             else if (auto cmd = dynamic_cast<UdpLeaveMulticastSourcesCommand *>(ctrl)) {
@@ -533,6 +540,37 @@ void Udp::blockMulticastSources(SockDesc *sd, InterfaceEntry *ie, L3Address mult
         auto it = std::find(excludedSources.begin(), excludedSources.end(), sourceAddress);
         if (it != excludedSources.end()) {
             excludedSources.push_back(sourceAddress);
+            changed = true;
+        }
+    }
+
+    if (changed) {
+        ie->changeMulticastGroupMembership(multicastAddress, MCAST_EXCLUDE_SOURCES, oldSources, MCAST_EXCLUDE_SOURCES, excludedSources);
+    }
+}
+
+void Udp::unblockMulticastSources(SockDesc *sd, InterfaceEntry *ie, L3Address multicastAddress, const std::vector<L3Address>& sourceList)
+{
+    ASSERT(ie && ie->isMulticast());
+    ASSERT(multicastAddress.isMulticast());
+
+    MulticastMembership *membership = sd->findMulticastMembership(multicastAddress, ie->getInterfaceId());
+    if (!membership)
+        throw cRuntimeError("Udp::unblockMulticastSources(): not a member of %s group in interface '%s'",
+                multicastAddress.str().c_str(), ie->getFullName());
+
+    if (membership->filterMode != UDP_EXCLUDE_MCAST_SOURCES)
+        throw cRuntimeError("Udp::unblockMulticastSources(): socket was not joined to all sources of %s group on interface '%s'",
+                multicastAddress.str().c_str(), ie->getFullName());
+
+    std::vector<L3Address> oldSources(membership->sourceList);
+    std::vector<L3Address>& excludedSources = membership->sourceList;
+    bool changed = false;
+    for (auto & elem : sourceList) {
+        const L3Address& sourceAddress = elem;
+        auto it = std::find(excludedSources.begin(), excludedSources.end(), sourceAddress);
+        if (it != excludedSources.end()) {
+            excludedSources.erase(it);
             changed = true;
         }
     }
@@ -1422,37 +1460,6 @@ Udp::SockDesc *Udp::getSocketById(int sockId)
     if (it == socketsByIdMap.end())
         throw cRuntimeError("socket id=%d doesn't exist (already closed?)", sockId);
     return it->second;
-}
-
-void Udp::unblockMulticastSources(SockDesc *sd, InterfaceEntry *ie, L3Address multicastAddress, const std::vector<L3Address>& sourceList)
-{
-    ASSERT(ie && ie->isMulticast());
-    ASSERT(multicastAddress.isMulticast());
-
-    MulticastMembership *membership = sd->findMulticastMembership(multicastAddress, ie->getInterfaceId());
-    if (!membership)
-        throw cRuntimeError("Udp::unblockMulticastSources(): not a member of %s group in interface '%s'",
-                multicastAddress.str().c_str(), ie->getFullName());
-
-    if (membership->filterMode != UDP_EXCLUDE_MCAST_SOURCES)
-        throw cRuntimeError("Udp::unblockMulticastSources(): socket was not joined to all sources of %s group on interface '%s'",
-                multicastAddress.str().c_str(), ie->getFullName());
-
-    std::vector<L3Address> oldSources(membership->sourceList);
-    std::vector<L3Address>& excludedSources = membership->sourceList;
-    bool changed = false;
-    for (auto & elem : sourceList) {
-        const L3Address& sourceAddress = elem;
-        auto it = std::find(excludedSources.begin(), excludedSources.end(), sourceAddress);
-        if (it != excludedSources.end()) {
-            excludedSources.erase(it);
-            changed = true;
-        }
-    }
-
-    if (changed) {
-        ie->changeMulticastGroupMembership(multicastAddress, MCAST_EXCLUDE_SOURCES, oldSources, MCAST_EXCLUDE_SOURCES, excludedSources);
-    }
 }
 
 } // namespace inet
