@@ -208,6 +208,32 @@ void TcpSocket::requestStatus()
     sendToTcp(request);
 }
 
+// ########################
+// TCP Socket Options Start
+// ########################
+
+void TcpSocket::setTimeToLive(int ttl)
+{
+    auto request = new Request("setTTL", TCP_C_SETOPTION);
+    TcpSetTimeToLiveCommand *cmd = new TcpSetTimeToLiveCommand();
+    cmd->setTtl(ttl);
+    request->setControlInfo(cmd);
+    sendToTcp(request);
+}
+
+void TcpSocket::setTypeOfService(unsigned char tos)
+{
+    auto request = new Request("setTOS", TCP_C_SETOPTION);
+    TcpTypeOfServiceCommand *cmd = new TcpTypeOfServiceCommand();
+    cmd->setTos(tos);
+    request->setControlInfo(cmd);
+    sendToTcp(request);
+}
+
+// ######################
+// TCP Socket Options End
+// ######################
+
 void TcpSocket::sendToTcp(cMessage *msg, int connId)
 {
     if (!gateToTcp)

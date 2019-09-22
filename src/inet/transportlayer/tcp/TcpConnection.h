@@ -92,6 +92,7 @@ enum TcpEventCode {
     TCP_E_STATUS,
     TCP_E_QUEUE_BYTES_LIMIT,
     TCP_E_READ,
+    TCP_E_SETOPTION,
 
     // TPDU types
     TCP_E_RCV_DATA,
@@ -349,6 +350,10 @@ class INET_API TcpConnection : public cSimpleModule
     int localPort = -1;
     int remotePort = -1;
 
+    // TCP options for this connection
+    int ttl = -1;
+    unsigned char typeOfService = 0;
+
   protected:
     Tcp *tcpMain = nullptr;    // Tcp module
 
@@ -402,6 +407,7 @@ class INET_API TcpConnection : public cSimpleModule
     virtual void process_STATUS(TcpEventCode& event, TcpCommand *tcpCommand, cMessage *msg);
     virtual void process_QUEUE_BYTES_LIMIT(TcpEventCode& event, TcpCommand *tcpCommand, cMessage *msg);
     virtual void process_READ_REQUEST(TcpEventCode& event, TcpCommand *tcpCommand, cMessage *msg);
+    virtual void process_OPTIONS(TcpEventCode& event, TcpCommand *tcpCommand, cMessage *msg);
     //@}
 
     /** @name Processing TCP segment arrivals. Invoked from processTCPSegment(). */

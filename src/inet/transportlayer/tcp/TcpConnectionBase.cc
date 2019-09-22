@@ -347,6 +347,10 @@ bool TcpConnection::processAppCommand(cMessage *msg)
             process_READ_REQUEST(event, tcpCommand, msg);
             break;
 
+        case TCP_E_SETOPTION:
+            process_OPTIONS(event, tcpCommand, msg);
+            break;
+
         default:
             throw cRuntimeError(tcpMain, "wrong event code");
     }
@@ -387,6 +391,9 @@ TcpEventCode TcpConnection::preanalyseAppCommandEvent(int commandCode)
 
         case TCP_C_READ:
             return TCP_E_READ;
+
+        case TCP_C_SETOPTION:
+            return TCP_E_SETOPTION;
 
         default:
             throw cRuntimeError(tcpMain, "Unknown message kind in app command");

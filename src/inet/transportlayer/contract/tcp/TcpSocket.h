@@ -329,6 +329,17 @@ class INET_API TcpSocket : public ISocket
     void requestStatus();
 
     /**
+     * Set the TTL (Ipv6: Hop Limit) field on sent packets.
+     */
+    void setTimeToLive(int ttl);
+
+    /**
+     * Sets the Ipv4 Type of Service / Ipv6 Traffic Class fields of packets
+     * sent from the TCP socket.
+     */
+    void setTypeOfService(unsigned char tos);
+
+    /**
      * Required to re-connect with a "used" TcpSocket object.
      * By default, a TcpSocket object is tied to a single TCP connection,
      * via the connectionId. When the connection gets closed or aborted,
