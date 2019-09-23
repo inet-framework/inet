@@ -53,7 +53,7 @@ module LoRaRadio extends FlatRadioBase
         //transmitterType = default("Ieee802154UWBIRTransmitter");
         //receiverType = default("Ieee802154UWBIRReceiver");
 
-        carrierFrequency = 868 MHz;
+        centerFrequency = 868 MHz;
         bandwidth = default(0.25 MHz);
 
         // 802.15.4-2006 (page 28)

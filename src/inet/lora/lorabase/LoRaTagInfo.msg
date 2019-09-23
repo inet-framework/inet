@@ -22,7 +22,7 @@ namespace inet::lora;
 
 class LoRaTag extends TagBase
 {
-    Hz carrierFrequency = MHz(812);
+    Hz centerFrequency = MHz(812);
     Hz bandwidth = kHz(125);
     int spreadFactor = 12;
     W power = mW(100);

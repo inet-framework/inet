@@ -56,7 +56,7 @@ void Ieee802154MacLoss::initialize(int stage)
         WirelessGetNeig *neig = new WirelessGetNeig();
         auto transmitter = radio->getTransmitter();
         auto narrow = dynamic_cast<const NarrowbandTransmitterBase *>(transmitter);
-        auto carrierFrequency = narrow->getCarrierFrequency();
+        auto centerFrequency = narrow->getCenterFrequency();
 
         auto power = narrow->getMaxPower();
         auto sens = radio->getReceiver()->getMinReceptionPower();
@@ -64,7 +64,7 @@ void Ieee802154MacLoss::initialize(int stage)
         auto radioMedium = radio->getMedium();
         auto pathLoss = radioMedium->getPathLoss();
         double loss = unit(sens / power).get();
-        auto dist = pathLoss->computeRange(radioMedium->getPropagation()->getPropagationSpeed(), carrierFrequency, loss);
+        auto dist = pathLoss->computeRange(radioMedium->getPropagation()->getPropagationSpeed(), centerFrequency, loss);
 
         std::vector<L3Address> list;
         neig->getNeighbours(L3Address(interfaceEntry->getMacAddress()), list, dist.get());

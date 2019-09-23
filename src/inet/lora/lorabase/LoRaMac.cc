@@ -361,7 +361,7 @@ Packet *LoRaMac::encapsulate(Packet *msg)
 
     frame->setTransmitterAddress(address);
     frame->setLoRaTP(tag->getPower().get());
-    frame->setLoRaCF(tag->getCarrierFrequency());
+    frame->setLoRaCF(tag->getCenterFrequency());
     frame->setLoRaSF(tag->getSpreadFactor());
     frame->setLoRaBW(tag->getBandwidth());
     frame->setLoRaCR(tag->getCodeRendundance());

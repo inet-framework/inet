@@ -58,7 +58,7 @@ void Ieee80211ScalarReceiverLoss::initialize(int stage)
         auto transmitter = check_and_cast<Ieee80211ScalarTransmitter *> (parent->getSubmodule("transmitter"));
         auto sens = this->sensitivity.get();
         auto pw = transmitter->getPower().get();
-        auto fq = transmitter->getCarrierFrequency().get();
+        auto fq = transmitter->getCenterFrequency().get();
         auto gr = parent->getAntenna()->getGain()->getMaxGain();
         auto distance = transmitter->getMaxCommunicationRange().get();
         double landa = 300000000.0/ fq;
@@ -156,7 +156,7 @@ const IReceptionResult *Ieee80211ScalarReceiverLoss::computeReceptionResult(cons
 
     auto cord1 = reception->getTransmission()->getStartPosition();
     auto cord2 = reception->getStartPosition();
-    double dist = cord1.distance(cord2);
+    //double dist = cord1.distance(cord2);
 
 
     auto uniLinkIt = uniLinks.find(txId);

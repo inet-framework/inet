@@ -33,10 +33,10 @@ class INET_API LoRaBandListening : public BandListening
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 
-    //virtual Hz getCarrierFrequency() const { return LoRaCF; }
+    //virtual Hz getCenterFrequency() const { return LoRaCF; }
     //virtual Hz getBandwidth() const { return LoRaBW; }
 
-    virtual Hz getLoRaCF() const { return carrierFrequency; }
+    virtual Hz getLoRaCF() const { return centerFrequency; }
     virtual int getLoRaSF() const { return LoRaSF; }
     virtual Hz getLoRaBW() const { return bandwidth; }
 };

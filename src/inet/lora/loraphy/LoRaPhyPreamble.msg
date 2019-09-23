@@ -26,7 +26,7 @@ import inet.linklayer.common.MacAddress;
 namespace inet::physicallayer;
 
 class LoRaPhyPreamble extends FieldsChunk {
-    Hz carrierFrequency;
+    Hz centerFrequency;
     Hz bandwidth;
     int spreadFactor;
     W power;

@@ -97,7 +97,7 @@ W LoRaAnalogModel::computeReceptionPower(const IRadio *receiverRadio, const ITra
     double transmitterAntennaGain = computeAntennaGain(transmission->getTransmitterAntennaGain(), transmission->getStartPosition(), arrival->getStartPosition(), transmission->getStartOrientation());
     double receiverAntennaGain = computeAntennaGain(receiverRadio->getAntenna()->getGain().get(), arrival->getStartPosition(), transmission->getStartPosition(), arrival->getStartOrientation());
     double pathLoss = radioMedium->getPathLoss()->computePathLoss(transmission, arrival);
-    double obstacleLoss = radioMedium->getObstacleLoss() ? radioMedium->getObstacleLoss()->computeObstacleLoss(narrowbandSignalAnalogModel->getCarrierFrequency(), transmission->getStartPosition(), receptionStartPosition) : 1;
+    double obstacleLoss = radioMedium->getObstacleLoss() ? radioMedium->getObstacleLoss()->computeObstacleLoss(narrowbandSignalAnalogModel->getCenterFrequency(), transmission->getStartPosition(), receptionStartPosition) : 1;
     W transmissionPower = scalarSignalAnalogModel->getPower();
     return transmissionPower * std::min(1.0, transmitterAntennaGain * receiverAntennaGain * pathLoss * obstacleLoss);
  }
@@ -122,7 +122,7 @@ const IReception *LoRaAnalogModel::computeReception(const IRadio *receiverRadio,
 const INoise *LoRaAnalogModel::computeNoise(const IListening *listening, const IInterference *interference) const
 {
     const LoRaBandListening *bandListening = check_and_cast<const LoRaBandListening *>(listening);
-    Hz commonCarrierFrequency = bandListening->getLoRaCF();
+    Hz commonCenterFrequency = bandListening->getLoRaCF();
     Hz commonBandwidth = bandListening->getLoRaBW();
     simtime_t noiseStartTime = SimTime::getMaxTime();
     simtime_t noiseEndTime = 0;
@@ -132,9 +132,9 @@ const INoise *LoRaAnalogModel::computeNoise(const IListening *listening, const I
         const ISignalAnalogModel *signalAnalogModel = reception->getAnalogModel();
         const INarrowbandSignal *narrowbandSignalAnalogModel = check_and_cast<const INarrowbandSignal *>(signalAnalogModel);
         const LoRaReception *loRaReception = check_and_cast<const LoRaReception *>(signalAnalogModel);
-        Hz signalCarrierFrequency = loRaReception->getLoRaCF();
+        Hz signalCenterFrequency = loRaReception->getLoRaCF();
         Hz signalBandwidth = loRaReception->getLoRaBW();
-        if((commonCarrierFrequency == signalCarrierFrequency && commonBandwidth == signalBandwidth))
+        if((commonCenterFrequency == signalCenterFrequency && commonBandwidth == signalBandwidth))
         {
             const IScalarSignal *scalarSignalAnalogModel = check_and_cast<const IScalarSignal *>(signalAnalogModel);
             W power = scalarSignalAnalogModel->getPower();
@@ -155,7 +155,7 @@ const INoise *LoRaAnalogModel::computeNoise(const IListening *listening, const I
             else
                 powerChanges->insert(std::pair<simtime_t, W>(endTime, -power));
         }
-        else if (areOverlappingBands(commonCarrierFrequency, commonBandwidth, narrowbandSignalAnalogModel->getCarrierFrequency(), narrowbandSignalAnalogModel->getBandwidth()))
+        else if (areOverlappingBands(commonCenterFrequency, commonBandwidth, narrowbandSignalAnalogModel->getCenterFrequency(), narrowbandSignalAnalogModel->getBandwidth()))
             throw cRuntimeError("Overlapping bands are not supported");
     }
 
@@ -181,7 +181,7 @@ const INoise *LoRaAnalogModel::computeNoise(const IListening *listening, const I
         EV_TRACE << "Noise at " << it->first << " = " << noise << endl;
     }
     EV_TRACE << "Noise power end" << endl;
-    return new ScalarNoise(noiseStartTime, noiseEndTime, commonCarrierFrequency, commonBandwidth, powerChanges);
+    return new ScalarNoise(noiseStartTime, noiseEndTime, commonCenterFrequency, commonBandwidth, powerChanges);
 }
 
 const ISnir *LoRaAnalogModel::computeSNIR(const IReception *reception, const INoise *noise) const

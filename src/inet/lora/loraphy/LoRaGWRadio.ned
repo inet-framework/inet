@@ -67,7 +67,7 @@ module LoRaGWRadio extends FlatRadioBase
         //transmitterType = default("Ieee802154UWBIRTransmitter");
         //receiverType = default("Ieee802154UWBIRReceiver");
                 
-        carrierFrequency = 2450 MHz;
+        centerFrequency = 2450 MHz;
        
 
         // B_20dB ATmega256RFR2 (page 564)

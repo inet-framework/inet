@@ -22,7 +22,7 @@ import inet.physicallayer.contract.packetlevel.IMediumLimitCache;
 module LoRaMediumCache like IMediumLimitCache
 {
     parameters:
-        double carrierFrequency @unit(Hz) = default(0Hz/0);       // TODO: rename to maxRangeCarrierFrequency?
+        double centerFrequency @unit(Hz) = default(0Hz/0);       // TODO: rename to maxRangeCarrierFrequency?
         double maxSpeed @unit(mps) = default(0mps/0);             // maxium speed on the medium, NaN means medium computes using mobility models
         double maxTransmissionPower @unit(W) = default(0.025118W);
         double minInterferencePower @unit(dBm) = default(0dBm/0); // TODO: @unit(W) + dBm/dBW <--> W

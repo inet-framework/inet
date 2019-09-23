@@ -86,7 +86,7 @@ void LoRaGWRadio::handleUpperPacket(Packet *packet)
     auto preamble = makeShared<LoRaPhyPreamble>();
     if (tag != nullptr) {
         preamble->setBandwidth(tag->getBandwidth());
-        preamble->setCarrierFrequency(tag->getCarrierFrequency());
+        preamble->setCenterFrequency(tag->getCenterFrequency());
         preamble->setCodeRendundance(tag->getCodeRendundance());
         preamble->setPower(tag->getPower());
         preamble->setSpreadFactor(tag->getSpreadFactor());

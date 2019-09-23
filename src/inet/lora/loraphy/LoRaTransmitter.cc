@@ -42,7 +42,7 @@ void LoRaTransmitter::initialize(int stage)
 
         bitrate = bps(par("bitrate"));
         power = W(par("power"));
-        carrierFrequency = Hz(par("carrierFrequency"));
+        centerFrequency = Hz(par("centerFrequency"));
         bandwidth = Hz(par("bandwidth"));
         LoRaTransmissionCreated = registerSignal("LoRaTransmissionCreated");
         std::string dataRate = par("dataRate").stdstringValue();
@@ -70,7 +70,7 @@ const ITransmission *LoRaTransmitter::createTransmission(const IRadio *transmitt
 
     const auto &frame = macFrame->peekAtFront<LoRaPhyPreamble>();
 
-    if ((frame->getCarrierFrequency() > MHz(400) && frame->getCarrierFrequency() < MHz(500)) || (frame->getCarrierFrequency() > MHz(800) && frame->getCarrierFrequency() < MHz(900))) {
+    if ((frame->getCenterFrequency() > MHz(400) && frame->getCenterFrequency() < MHz(500)) || (frame->getCenterFrequency() > MHz(800) && frame->getCenterFrequency() < MHz(900))) {
         for (int i = 0; i < LoraCompliantModes::LoraModeEuTotal; i++) {
             if (LoraCompliantModes::LoraModeEu[i]->getSpreadingFator() == frame->getSpreadFactor() && frame->getBandwidth() == LoraCompliantModes::LoraModeEu[i]->getBandwidth()) {
                 mode = (LoraCompliantModes::LoraModeEu[i]);
@@ -78,7 +78,7 @@ const ITransmission *LoRaTransmitter::createTransmission(const IRadio *transmitt
             }
         }
     }
-    else if (frame->getCarrierFrequency() > MHz(800) && frame->getCarrierFrequency() < MHz(900)) {
+    else if (frame->getCenterFrequency() > MHz(800) && frame->getCenterFrequency() < MHz(900)) {
         for (int i = 0; i < LoraCompliantModes::LoraModeUsaTotal; i++) {
             if (LoraCompliantModes::LoraModeEu[i]->getSpreadingFator() == frame->getSpreadFactor() && frame->getBandwidth() == LoraCompliantModes::LoraModeEu[i]->getBandwidth()) {
                 mode = (LoraCompliantModes::LoraModeUsa[i]);
@@ -88,7 +88,7 @@ const ITransmission *LoRaTransmitter::createTransmission(const IRadio *transmitt
     }
 
     if (mode == nullptr)
-        throw cRuntimeError("Invalid lora mode CF %f, BW %f SF %f ", frame->getCarrierFrequency(), frame->getBandwidth(), frame->getSpreadFactor());
+        throw cRuntimeError("Invalid lora mode CF %f, BW %f SF %f ", frame->getCenterFrequency(), frame->getBandwidth(), frame->getSpreadFactor());
 
     if (macFrame->getBitLength() > mode->getMpduMaxLength())
         throw cRuntimeError("to big"); // should discard or reduce the packet?
@@ -155,7 +155,7 @@ const ITransmission *LoRaTransmitter::createTransmission(const IRadio *transmitt
             startOrientation,
             endOrientation,
             transmissionPower,
-            frame->getCarrierFrequency(),
+            frame->getCenterFrequency(),
             frame->getSpreadFactor(),
             frame->getBandwidth(),
             frame->getCodeRendundance());
