@@ -202,7 +202,7 @@ std::tuple<const ITransmission *, const ITransmission *, const IAntenna *, IMobi
         mobility = antenna->getMobility();
     else
         mobility = check_and_cast<IMobility *>(networkNode->getSubmodule("mobility"));
-    return {transmissionInProgress, receptionInProgress, antenna, mobility};
+    return std::tuple<const ITransmission *, const ITransmission *, const IAntenna *, IMobility *>{transmissionInProgress, receptionInProgress, antenna, mobility};
 }
 
 void MediumCanvasVisualizer::refreshSpectrumFigurePowerFunction(const Ptr<const IFunction<WpHz, Domain<m, m, m, simsec, Hz>>>& powerFunction, const IAntenna *antenna, const Coord& position, PlotFigure *figure, int series) const
