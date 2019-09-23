@@ -191,11 +191,6 @@ std::string TcpStateVariables::detailedInfo() const
     return out.str();
 }
 
-TcpConnection::TcpConnection(Tcp *mod)
-{
-
-}
-
 //
 // FSM framework, TCP FSM
 //

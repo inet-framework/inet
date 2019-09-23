@@ -595,12 +595,6 @@ class INET_API TcpConnection : public cSimpleModule
     void initConnection(Tcp *mod, int socketId);
 
     /**
-     * Note: this ctor is NOT used to create live connections, only
-     * temporary ones so that TCPMain can invoke their segmentArrivalWhileClosed().
-     */
-    TcpConnection(Tcp *mod);
-
-    /**
      * Destructor.
      */
     virtual ~TcpConnection();
