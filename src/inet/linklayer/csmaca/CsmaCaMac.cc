@@ -57,21 +57,13 @@ void CsmaCaMac::initialize(int stage)
         headerLength = B(par("headerLength"));
         if (headerLength > B(255))
             throw cRuntimeError("The specified headerLength is too large");
-        if (headerLength < makeShared<CsmaCaMacDataHeader>()->getChunkLength()) {
-            if (fcsMode)
-                throw cRuntimeError("The specified headerLength is too short");
-            else
-                EV_WARN << "The specified headerLength (" << headerLength << ") is too short for serialization";
-        }
+        if (headerLength < makeShared<CsmaCaMacDataHeader>()->getChunkLength())
+            throw cRuntimeError("The specified headerLength is too short");
         ackLength = B(par("ackLength"));
         if (ackLength > B(255))
             throw cRuntimeError("The specified ackLength is too large");
-        if (ackLength < makeShared<CsmaCaMacAckHeader>()->getChunkLength()) {
-            if (fcsMode)
-                throw cRuntimeError("The specified ackLength is too short");
-            else
-                EV_WARN << "The specified ackLength (" << ackLength << ") is too short for serialization";
-        }
+        if (ackLength < makeShared<CsmaCaMacAckHeader>()->getChunkLength())
+            throw cRuntimeError("The specified ackLength is too short");
         ackTimeout = par("ackTimeout");
         slotTime = par("slotTime");
         sifsTime = par("sifsTime");
