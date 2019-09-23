@@ -25,36 +25,53 @@ namespace physicallayer {
 
 Define_Module(IsotropicDimensionalBackgroundNoise);
 
-IsotropicDimensionalBackgroundNoise::IsotropicDimensionalBackgroundNoise() :
-    power(W(NaN))
-{
-}
-
 void IsotropicDimensionalBackgroundNoise::initialize(int stage)
 {
     cModule::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
+        powerSpectralDensity = WpHz(dBmWpMHz2WpHz(par("powerSpectralDensity")));
         power = mW(dBmW2mW(par("power")));
+        bandwidth = Hz(par("bandwidth"));
+        if (std::isnan(powerSpectralDensity.get()) && std::isnan(power.get()))
+            throw cRuntimeError("One of powerSpectralDensity or power parameters must be specified");
+        if (!std::isnan(powerSpectralDensity.get()) && !std::isnan(power.get()))
+            throw cRuntimeError("Both of powerSpectralDensity and power parameters cannot be specified");
     }
 }
 
 std::ostream& IsotropicDimensionalBackgroundNoise::printToStream(std::ostream& stream, int level) const
 {
     stream << "IsotropicDimensionalBackgroundNoise";
-    if (level <= PRINT_LEVEL_DETAIL)
-        stream << ", power = " << power;
+    if (level <= PRINT_LEVEL_DETAIL) {
+        if (!std::isnan(powerSpectralDensity.get()))
+            stream << ", powerSpectralDensity = " << powerSpectralDensity;
+        else {
+            stream << ", power = " << power;
+            stream << ", bandwidth = " << bandwidth;
+        }
+    }
     return stream;
 }
 
 const INoise *IsotropicDimensionalBackgroundNoise::computeNoise(const IListening *listening) const
 {
     const BandListening *bandListening = check_and_cast<const BandListening *>(listening);
+    Hz centerFrequency = bandListening->getCenterFrequency();
+    Hz listeningBandwidth = bandListening->getBandwidth();
+    WpHz noisePowerSpectralDensity;
+    if (!std::isnan(powerSpectralDensity.get()))
+        noisePowerSpectralDensity = powerSpectralDensity;
+    else {
+        if (std::isnan(bandwidth.get()))
+            bandwidth = listeningBandwidth;
+        else if (bandwidth != listeningBandwidth)
+            throw cRuntimeError("Background noise bandwidth doesn't match listening bandwidth");
+        // NOTE: dividing by the bandwidth here makes sure the total background noise power in the listening band is the given power
+        noisePowerSpectralDensity = power / bandwidth;
+    }
+    const Ptr<const IFunction<WpHz, Domain<simsec, Hz>>>& powerFunction = makeShared<ConstantFunction<WpHz, Domain<simsec, Hz>>>(noisePowerSpectralDensity);
     const simtime_t startTime = listening->getStartTime();
     const simtime_t endTime = listening->getEndTime();
-    Hz centerFrequency = bandListening->getCenterFrequency();
-    Hz bandwidth = bandListening->getBandwidth();
-    // NOTE: dividing by the bandwidth here makes sure the total background noise power in the listening band is the given power
-    const Ptr<const IFunction<WpHz, Domain<simsec, Hz>>>& powerFunction = makeShared<ConstantFunction<WpHz, Domain<simsec, Hz>>>(power / bandwidth);
     return new DimensionalNoise(startTime, endTime, centerFrequency, bandwidth, makeFirstQuadrantLimitedFunction(powerFunction));
 }
 

@@ -27,13 +27,12 @@ namespace physicallayer {
 class INET_API IsotropicDimensionalBackgroundNoise : public cModule, public IBackgroundNoise
 {
   protected:
-    W power;
+    WpHz powerSpectralDensity = WpHz(NaN);
+    W power = W(NaN);
+    mutable Hz bandwidth = Hz(NaN);
 
   protected:
     virtual void initialize(int stage) override;
-
-  public:
-    IsotropicDimensionalBackgroundNoise();
 
   public:
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
