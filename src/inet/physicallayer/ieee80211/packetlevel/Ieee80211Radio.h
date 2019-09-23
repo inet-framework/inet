@@ -37,6 +37,8 @@ class INET_API Ieee80211Radio : public FlatRadioBase
      * The signal value is the new radio channel.
      */
     static simsignal_t radioChannelChangedSignal;
+    static const Ptr<const Ieee80211PhyHeader> popIeee80211PhyHeaderAtFront(Packet *packet, b length = b(-1), int flags = 0);
+    static const Ptr<const Ieee80211PhyHeader> peekIeee80211PhyHeaderAtFront(const Packet *packet, b length = b(-1), int flags = 0);
 
   protected:
     virtual void initialize(int stage) override;
