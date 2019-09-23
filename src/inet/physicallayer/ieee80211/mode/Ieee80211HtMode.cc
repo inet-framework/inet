@@ -26,11 +26,11 @@ namespace physicallayer {
 
 Ieee80211HtCompliantModes Ieee80211HtCompliantModes::singleton;
 
-Ieee80211HtMode::Ieee80211HtMode(const char *name, const Ieee80211HtPreambleMode* preambleMode, const Ieee80211HtDataMode* dataMode, const BandMode carrierFrequencyMode) :
+Ieee80211HtMode::Ieee80211HtMode(const char *name, const Ieee80211HtPreambleMode* preambleMode, const Ieee80211HtDataMode* dataMode, const BandMode centerFrequencyMode) :
         Ieee80211ModeBase(name),
         preambleMode(preambleMode),
         dataMode(dataMode),
-        carrierFrequencyMode(carrierFrequencyMode)
+        centerFrequencyMode(centerFrequencyMode)
 {
 }
 
@@ -297,9 +297,9 @@ const simtime_t Ieee80211HtDataMode::getDuration(b dataLength) const
 
 const simtime_t Ieee80211HtMode::getSlotTime() const
 {
-    if (carrierFrequencyMode == BAND_2_4GHZ)
+    if (centerFrequencyMode == BAND_2_4GHZ)
         return 20E-6;
-    else if (carrierFrequencyMode  == BAND_5GHZ)
+    else if (centerFrequencyMode  == BAND_5GHZ)
         return 9E-6;
     else
         throw cRuntimeError("Unsupported carrier frequency");
@@ -307,9 +307,9 @@ const simtime_t Ieee80211HtMode::getSlotTime() const
 
 inline const simtime_t Ieee80211HtMode::getSifsTime() const
 {
-    if (carrierFrequencyMode == BAND_2_4GHZ)
+    if (centerFrequencyMode == BAND_2_4GHZ)
         return 10E-6;
-    else if (carrierFrequencyMode == BAND_5GHZ)
+    else if (centerFrequencyMode == BAND_5GHZ)
         return 16E-6;
     else
         throw cRuntimeError("Sifs time is not defined for this carrier frequency"); // TODO
@@ -317,7 +317,7 @@ inline const simtime_t Ieee80211HtMode::getSifsTime() const
 
 const simtime_t Ieee80211HtMode::getShortSlotTime() const
 {
-    if (carrierFrequencyMode == BAND_2_4GHZ)
+    if (centerFrequencyMode == BAND_2_4GHZ)
         return 9E-6;
     else
         throw cRuntimeError("Short slot time is not defined for this carrier frequency"); // TODO
@@ -333,7 +333,7 @@ Ieee80211HtCompliantModes::~Ieee80211HtCompliantModes()
         delete entry.second;
 }
 
-const Ieee80211HtMode* Ieee80211HtCompliantModes::getCompliantMode(const Ieee80211Htmcs *mcsMode, Ieee80211HtMode::BandMode carrierFrequencyMode, Ieee80211HtPreambleMode::HighTroughputPreambleFormat preambleFormat, Ieee80211HtModeBase::GuardIntervalType guardIntervalType)
+const Ieee80211HtMode* Ieee80211HtCompliantModes::getCompliantMode(const Ieee80211Htmcs *mcsMode, Ieee80211HtMode::BandMode centerFrequencyMode, Ieee80211HtPreambleMode::HighTroughputPreambleFormat preambleFormat, Ieee80211HtModeBase::GuardIntervalType guardIntervalType)
 {
     const char *name =""; //TODO
     auto htModeId = std::make_tuple(mcsMode->getBandwidth(), mcsMode->getMcsIndex(), guardIntervalType);
@@ -353,7 +353,7 @@ const Ieee80211HtMode* Ieee80211HtCompliantModes::getCompliantMode(const Ieee802
             throw cRuntimeError("Unknown preamble format");
         const Ieee80211HtDataMode *dataMode = new Ieee80211HtDataMode(mcsMode, mcsMode->getBandwidth(), guardIntervalType);
         const Ieee80211HtPreambleMode *preambleMode = new Ieee80211HtPreambleMode(htSignal, legacySignal, preambleFormat, dataMode->getNumberOfSpatialStreams());
-        const Ieee80211HtMode *htMode = new Ieee80211HtMode(name, preambleMode, dataMode, carrierFrequencyMode);
+        const Ieee80211HtMode *htMode = new Ieee80211HtMode(name, preambleMode, dataMode, centerFrequencyMode);
         singleton.modeCache.insert(std::pair<std::tuple<Hz, unsigned int, Ieee80211HtModeBase::GuardIntervalType>, const Ieee80211HtMode *>(htModeId, htMode));
         return htMode;
     }

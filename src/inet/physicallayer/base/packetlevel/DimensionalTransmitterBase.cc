@@ -147,10 +147,10 @@ const Ptr<const IFunction<double, Domain<T>>> DimensionalTransmitterBase::normal
         throw cRuntimeError("Unknown normalization: '%s'", normalization);
 }
 
-Ptr<const IFunction<WpHz, Domain<simsec, Hz>>> DimensionalTransmitterBase::createPowerFunction(const simtime_t startTime, const simtime_t endTime, Hz carrierFrequency, Hz bandwidth, W power) const
+Ptr<const IFunction<WpHz, Domain<simsec, Hz>>> DimensionalTransmitterBase::createPowerFunction(const simtime_t startTime, const simtime_t endTime, Hz centerFrequency, Hz bandwidth, W power) const
 {
     if (timeGains.size() == 0 && frequencyGains.size() == 0)
-        return makeFirstQuadrantLimitedFunction(staticPtrCast<const IFunction<WpHz, Domain<simsec, Hz>>>(makeShared<TwoDimensionalBoxcarFunction<WpHz, simsec, Hz>>(simsec(startTime), simsec(endTime), carrierFrequency - bandwidth / 2, carrierFrequency + bandwidth / 2, power / bandwidth)));
+        return makeFirstQuadrantLimitedFunction(staticPtrCast<const IFunction<WpHz, Domain<simsec, Hz>>>(makeShared<TwoDimensionalBoxcarFunction<WpHz, simsec, Hz>>(simsec(startTime), simsec(endTime), centerFrequency - bandwidth / 2, centerFrequency + bandwidth / 2, power / bandwidth)));
     else {
         Ptr<const IFunction<double, Domain<simsec>>> timeGainFunction;
         if (timeGains.size() != 0) {
@@ -177,8 +177,8 @@ Ptr<const IFunction<WpHz, Domain<simsec, Hz>>> DimensionalTransmitterBase::creat
             timeGainFunction = makeShared<OneDimensionalBoxcarFunction<double, simsec>>(simsec(startTime), simsec(endTime), 1);
         Ptr<const IFunction<double, Domain<Hz>>> frequencyGainFunction;
         if (frequencyGains.size() != 0) {
-            auto startFrequency = carrierFrequency - bandwidth / 2;
-            auto endFrequency = carrierFrequency + bandwidth / 2;
+            auto startFrequency = centerFrequency - bandwidth / 2;
+            auto endFrequency = centerFrequency + bandwidth / 2;
             std::map<Hz, std::pair<double, const IInterpolator<Hz, double>*>> fs;
             fs[getLowerBoundary<Hz>()] = {0, firstFrequencyInterpolator};
             fs[getUpperBoundary<Hz>()] = {0, nullptr};
@@ -187,7 +187,7 @@ Ptr<const IFunction<WpHz, Domain<simsec, Hz>>> DimensionalTransmitterBase::creat
                 switch (entry.where) {
                     case 's': frequency = startFrequency; break;
                     case 'e': frequency = endFrequency; break;
-                    case 'c': frequency = carrierFrequency; break;
+                    case 'c': frequency = centerFrequency; break;
                     case ' ': frequency = Hz(0); break;
                     default: throw cRuntimeError("Unknown qualifier");
                 }
@@ -198,7 +198,7 @@ Ptr<const IFunction<WpHz, Domain<simsec, Hz>>> DimensionalTransmitterBase::creat
             frequencyGainFunction = makeShared<OneDimensionalInterpolatedFunction<double, Hz>>(fs);
         }
         else
-            frequencyGainFunction = makeShared<OneDimensionalBoxcarFunction<double, Hz>>(carrierFrequency - bandwidth / 2, carrierFrequency + bandwidth / 2, 1);
+            frequencyGainFunction = makeShared<OneDimensionalBoxcarFunction<double, Hz>>(centerFrequency - bandwidth / 2, centerFrequency + bandwidth / 2, 1);
         auto gainFunction = makeShared<OrthogonalCombinatorFunction<double, simsec, Hz>>(normalize<simsec>(timeGainFunction, timeGainsNormalization), normalize<Hz>(frequencyGainFunction, frequencyGainsNormalization));
         auto powerFunction = makeShared<ConstantFunction<WpHz, Domain<simsec, Hz>>>(power / Hz(1));
         return makeFirstQuadrantLimitedFunction(powerFunction->multiply(gainFunction));

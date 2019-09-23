@@ -54,7 +54,7 @@ const INoise *IsotropicScalarBackgroundNoise::computeNoise(const IListening *lis
     std::map<simtime_t, W> *powerChanges = new std::map<simtime_t, W>();
     powerChanges->insert(std::pair<simtime_t, W>(startTime, power));
     powerChanges->insert(std::pair<simtime_t, W>(endTime, -power));
-    return new ScalarNoise(startTime, endTime, bandListening->getCarrierFrequency(), bandListening->getBandwidth(), powerChanges);
+    return new ScalarNoise(startTime, endTime, bandListening->getCenterFrequency(), bandListening->getBandwidth(), powerChanges);
 }
 
 } // namespace physicallayer

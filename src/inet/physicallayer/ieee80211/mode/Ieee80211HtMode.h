@@ -240,14 +240,14 @@ class INET_API Ieee80211HtMode : public Ieee80211ModeBase
     protected:
         const Ieee80211HtPreambleMode *preambleMode;
         const Ieee80211HtDataMode *dataMode;
-        const BandMode carrierFrequencyMode;
+        const BandMode centerFrequencyMode;
 
     protected:
         virtual inline int getLegacyCwMin() const override { return 15; }
         virtual inline int getLegacyCwMax() const override { return 1023; }
 
     public:
-        Ieee80211HtMode(const char *name, const Ieee80211HtPreambleMode *preambleMode, const Ieee80211HtDataMode *dataMode, const BandMode carrierFrequencyMode);
+        Ieee80211HtMode(const char *name, const Ieee80211HtPreambleMode *preambleMode, const Ieee80211HtDataMode *dataMode, const BandMode centerFrequencyMode);
         virtual ~Ieee80211HtMode() { delete preambleMode; delete dataMode; }
 
         virtual const Ieee80211HtDataMode* getDataMode() const override { return dataMode; }
@@ -266,7 +266,7 @@ class INET_API Ieee80211HtMode : public Ieee80211ModeBase
         virtual inline const simtime_t getPreambleLength() const override { return 16E-6; }
         virtual inline const simtime_t getPlcpHeaderLength() const override { return 4E-6; }
         virtual inline int getMpduMaxLength() const override { return 65535; } // in octets
-        virtual BandMode getCarrierFrequencyMode() const { return carrierFrequencyMode; }
+        virtual BandMode getCenterFrequencyMode() const { return centerFrequencyMode; }
 
         virtual const simtime_t getDuration(b dataLength) const override { return preambleMode->getDuration() + dataMode->getDuration(dataLength); }
 };
@@ -473,7 +473,7 @@ class INET_API Ieee80211HtCompliantModes
         Ieee80211HtCompliantModes();
         virtual ~Ieee80211HtCompliantModes();
 
-        static const Ieee80211HtMode *getCompliantMode(const Ieee80211Htmcs *mcsMode, Ieee80211HtMode::BandMode carrierFrequencyMode, Ieee80211HtPreambleMode::HighTroughputPreambleFormat preambleFormat, Ieee80211HtModeBase::GuardIntervalType guardIntervalType);
+        static const Ieee80211HtMode *getCompliantMode(const Ieee80211Htmcs *mcsMode, Ieee80211HtMode::BandMode centerFrequencyMode, Ieee80211HtPreambleMode::HighTroughputPreambleFormat preambleFormat, Ieee80211HtModeBase::GuardIntervalType guardIntervalType);
 
 };
 

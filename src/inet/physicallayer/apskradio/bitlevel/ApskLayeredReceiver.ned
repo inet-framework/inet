@@ -55,7 +55,7 @@ module ApskLayeredReceiver extends SnirReceiverBase like IReceiver
         string levelOfDetail @enum("packet", "bit", "symbol", "sample") = default("symbol");
         double energyDetection @unit(dBm); // TODO: @unit(W) + dBm/dBW <--> W
         double sensitivity @unit(dBm); // TODO: @unit(W) + dBm/dBW <--> W
-        double carrierFrequency @unit(Hz);
+        double centerFrequency @unit(Hz);
         double bandwidth @unit(Hz);
         @display("i=block/wrx");
         @class(ApskLayeredReceiver);

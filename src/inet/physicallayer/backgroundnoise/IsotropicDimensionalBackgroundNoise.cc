@@ -51,11 +51,11 @@ const INoise *IsotropicDimensionalBackgroundNoise::computeNoise(const IListening
     const BandListening *bandListening = check_and_cast<const BandListening *>(listening);
     const simtime_t startTime = listening->getStartTime();
     const simtime_t endTime = listening->getEndTime();
-    Hz carrierFrequency = bandListening->getCarrierFrequency();
+    Hz centerFrequency = bandListening->getCenterFrequency();
     Hz bandwidth = bandListening->getBandwidth();
     // NOTE: dividing by the bandwidth here makes sure the total background noise power in the listening band is the given power
     const Ptr<const IFunction<WpHz, Domain<simsec, Hz>>>& powerFunction = makeShared<ConstantFunction<WpHz, Domain<simsec, Hz>>>(power / bandwidth);
-    return new DimensionalNoise(startTime, endTime, carrierFrequency, bandwidth, makeFirstQuadrantLimitedFunction(powerFunction));
+    return new DimensionalNoise(startTime, endTime, centerFrequency, bandwidth, makeFirstQuadrantLimitedFunction(powerFunction));
 }
 
 } // namespace physicallayer

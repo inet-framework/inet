@@ -52,7 +52,7 @@ const ITransmission *ApskDimensionalTransmitter::createTransmission(const IRadio
     ASSERT(phyHeader->getChunkLength() == headerLength);
     auto dataLength = packet->getTotalLength() - phyHeader->getChunkLength();
     W transmissionPower = computeTransmissionPower(packet);
-    Hz transmissionCarrierFrequency = computeCarrierFrequency(packet);
+    Hz transmissionCenterFrequency = computeCenterFrequency(packet);
     Hz transmissionBandwidth = computeBandwidth(packet);
     bps transmissionBitrate = computeTransmissionDataBitrate(packet);
     const simtime_t headerDuration = b(headerLength).get() / bps(transmissionBitrate).get();
@@ -64,8 +64,8 @@ const ITransmission *ApskDimensionalTransmitter::createTransmission(const IRadio
     const Coord endPosition = mobility->getCurrentPosition();
     const Quaternion startOrientation = mobility->getCurrentAngularPosition();
     const Quaternion endOrientation = mobility->getCurrentAngularPosition();
-    const auto& powerFunction = createPowerFunction(startTime, endTime, carrierFrequency, bandwidth, transmissionPower);
-    return new ApskDimensionalTransmission(transmitter, packet, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, modulation, headerLength, dataLength, transmissionCarrierFrequency, transmissionBandwidth, transmissionBitrate, powerFunction);
+    const auto& powerFunction = createPowerFunction(startTime, endTime, centerFrequency, bandwidth, transmissionPower);
+    return new ApskDimensionalTransmission(transmitter, packet, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, modulation, headerLength, dataLength, transmissionCenterFrequency, transmissionBandwidth, transmissionBitrate, powerFunction);
 }
 
 } // namespace physicallayer

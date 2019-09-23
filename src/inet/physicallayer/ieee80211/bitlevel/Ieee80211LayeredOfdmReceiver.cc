@@ -60,7 +60,7 @@ void Ieee80211LayeredOfdmReceiver::initialize(int stage)
 
         energyDetection = mW(math::dBmW2mW(par("energyDetection")));
         sensitivity = mW(math::dBmW2mW(par("sensitivity")));
-        carrierFrequency = Hz(par("carrierFrequency"));
+        centerFrequency = Hz(par("centerFrequency"));
         bandwidth = Hz(par("bandwidth"));
         channelSpacing = Hz(par("channelSpacing"));
         isCompliant = par("isCompliant");
@@ -102,7 +102,7 @@ std::ostream& Ieee80211LayeredOfdmReceiver::printToStream(std::ostream& stream, 
                << ", analogDigitalConverter = " << printObjectToString(analogDigitalConverter, level + 1)
                << ", energyDetection = " << energyDetection
                << ", sensitivity = " << energyDetection
-               << ", carrierFrequency = " << carrierFrequency
+               << ", centerFrequency = " << centerFrequency
                << ", bandwidth = " << bandwidth
                << ", channelSpacing = " << channelSpacing
                << ", snirThreshold = " << snirThreshold
@@ -406,7 +406,7 @@ const IReceptionResult *Ieee80211LayeredOfdmReceiver::computeReceptionResult(con
 const IListening *Ieee80211LayeredOfdmReceiver::createListening(const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition) const
 {
     // We assume that in compliant mode the bandwidth is always 20MHz.
-    return new BandListening(radio, startTime, endTime, startPosition, endPosition, carrierFrequency, isCompliant ? Hz(20000000) : bandwidth);
+    return new BandListening(radio, startTime, endTime, startPosition, endPosition, centerFrequency, isCompliant ? Hz(20000000) : bandwidth);
 }
 
 // TODO: copy
@@ -432,7 +432,7 @@ bool Ieee80211LayeredOfdmReceiver::computeIsReceptionPossible(const IListening *
     const LayeredReception *scalarReception = check_and_cast<const LayeredReception *>(reception);
     // TODO: scalar
     const ScalarReceptionSignalAnalogModel *analogModel = check_and_cast<const ScalarReceptionSignalAnalogModel *>(scalarReception->getAnalogModel());
-    if (bandListening->getCarrierFrequency() != analogModel->getCarrierFrequency() || bandListening->getBandwidth() != analogModel->getBandwidth()) {
+    if (bandListening->getCenterFrequency() != analogModel->getCenterFrequency() || bandListening->getBandwidth() != analogModel->getBandwidth()) {
         EV_DEBUG << "Computing reception possible: listening and reception bands are different -> reception is impossible" << endl;
         return false;
     }

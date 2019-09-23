@@ -34,7 +34,7 @@ class INET_API NarrowbandRadioBase : public Radio
     NarrowbandRadioBase();
 
     virtual void setModulation(const IModulation *newModulation);
-    virtual void setCarrierFrequency(Hz newCarrierFrequency);
+    virtual void setCenterFrequency(Hz newCenterFrequency);
     virtual void setBandwidth(Hz newBandwidth);
 };
 

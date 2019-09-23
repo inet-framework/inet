@@ -30,7 +30,7 @@ using namespace inet::math;
 class INET_API DimensionalAnalogModelBase : public AnalogModelBase
 {
   protected:
-    bool attenuateWithCarrierFrequency;
+    bool attenuateWithCenterFrequency;
 
   protected:
     virtual void initialize(int stage) override;

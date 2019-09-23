@@ -192,9 +192,9 @@ double MediumLimitCache::computeMaxAntennaGain() const
 m MediumLimitCache::computeMaxRange(W maxTransmissionPower, W minReceptionPower) const
 {
     // TODO: this is NaN by default
-    Hz carrierFrequency = Hz(par("carrierFrequency"));
+    Hz centerFrequency = Hz(par("centerFrequency"));
     double loss = unit(minReceptionPower / maxTransmissionPower).get() / maxAntennaGain / maxAntennaGain;
-    return radioMedium->getPathLoss()->computeRange(radioMedium->getPropagation()->getPropagationSpeed(), carrierFrequency, loss);
+    return radioMedium->getPathLoss()->computeRange(radioMedium->getPropagation()->getPropagationSpeed(), centerFrequency, loss);
 }
 
 m MediumLimitCache::computeMaxCommunicationRange() const

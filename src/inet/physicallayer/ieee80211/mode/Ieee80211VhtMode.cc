@@ -27,11 +27,11 @@ namespace physicallayer {
 
 Ieee80211VhtCompliantModes Ieee80211VhtCompliantModes::singleton;
 
-Ieee80211VhtMode::Ieee80211VhtMode(const char *name, const Ieee80211VhtPreambleMode* preambleMode, const Ieee80211VhtDataMode* dataMode, const BandMode carrierFrequencyMode) :
+Ieee80211VhtMode::Ieee80211VhtMode(const char *name, const Ieee80211VhtPreambleMode* preambleMode, const Ieee80211VhtDataMode* dataMode, const BandMode centerFrequencyMode) :
         Ieee80211ModeBase(name),
         preambleMode(preambleMode),
         dataMode(dataMode),
-        carrierFrequencyMode(carrierFrequencyMode)
+        centerFrequencyMode(centerFrequencyMode)
 {
 }
 
@@ -670,7 +670,7 @@ const simtime_t Ieee80211VhtDataMode::getDuration(b dataLength) const
 
 const simtime_t Ieee80211VhtMode::getSlotTime() const
 {
-    if (carrierFrequencyMode  == BAND_5GHZ)
+    if (centerFrequencyMode  == BAND_5GHZ)
         return 9E-6;
     else
         throw cRuntimeError("Unsupported carrier frequency");
@@ -678,7 +678,7 @@ const simtime_t Ieee80211VhtMode::getSlotTime() const
 
 inline const simtime_t Ieee80211VhtMode::getSifsTime() const
 {
-    if (carrierFrequencyMode == BAND_5GHZ)
+    if (centerFrequencyMode == BAND_5GHZ)
         return 16E-6;
     else
         throw cRuntimeError("Sifs time is not defined for this carrier frequency"); // TODO
@@ -699,7 +699,7 @@ Ieee80211VhtCompliantModes::~Ieee80211VhtCompliantModes()
         delete entry.second;
 }
 
-const Ieee80211VhtMode* Ieee80211VhtCompliantModes::getCompliantMode(const Ieee80211Vhtmcs *mcsMode, Ieee80211VhtMode::BandMode carrierFrequencyMode, Ieee80211VhtPreambleMode::HighTroughputPreambleFormat preambleFormat, Ieee80211VhtModeBase::GuardIntervalType guardIntervalType)
+const Ieee80211VhtMode* Ieee80211VhtCompliantModes::getCompliantMode(const Ieee80211Vhtmcs *mcsMode, Ieee80211VhtMode::BandMode centerFrequencyMode, Ieee80211VhtPreambleMode::HighTroughputPreambleFormat preambleFormat, Ieee80211VhtModeBase::GuardIntervalType guardIntervalType)
 {
     const char *name =""; //TODO
     unsigned int nss = mcsMode->getNumNss();
@@ -720,7 +720,7 @@ const Ieee80211VhtMode* Ieee80211VhtCompliantModes::getCompliantMode(const Ieee8
             throw cRuntimeError("Unknown preamble format");
         const Ieee80211VhtDataMode *dataMode = new Ieee80211VhtDataMode(mcsMode, mcsMode->getBandwidth(), guardIntervalType);
         const Ieee80211VhtPreambleMode *preambleMode = new Ieee80211VhtPreambleMode(htSignal, legacySignal, preambleFormat, dataMode->getNumberOfSpatialStreams());
-        const Ieee80211VhtMode *htMode = new Ieee80211VhtMode(name, preambleMode, dataMode, carrierFrequencyMode);
+        const Ieee80211VhtMode *htMode = new Ieee80211VhtMode(name, preambleMode, dataMode, centerFrequencyMode);
         singleton.modeCache.insert(std::pair<std::tuple<Hz, unsigned int, Ieee80211VhtModeBase::GuardIntervalType, unsigned int>, const Ieee80211VhtMode *>(htModeId, htMode));
         return htMode;
     }

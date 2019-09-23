@@ -76,7 +76,7 @@ class INET_API IRadioSignal
 class INET_API INarrowbandSignal
 {
   public:
-    virtual Hz getCarrierFrequency() const = 0;
+    virtual Hz getCenterFrequency() const = 0;
     virtual Hz getBandwidth() const = 0;
 
     virtual W computeMinPower(simtime_t startTime, simtime_t endTime) const = 0;

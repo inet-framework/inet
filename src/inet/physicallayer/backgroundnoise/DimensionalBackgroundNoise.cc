@@ -49,10 +49,10 @@ const INoise *DimensionalBackgroundNoise::computeNoise(const IListening *listeni
     const BandListening *bandListening = check_and_cast<const BandListening *>(listening);
     const simtime_t startTime = listening->getStartTime();
     const simtime_t endTime = listening->getEndTime();
-    Hz carrierFrequency = bandListening->getCarrierFrequency();
+    Hz centerFrequency = bandListening->getCenterFrequency();
     Hz bandwidth = bandListening->getBandwidth();
-    const auto& powerFunction = createPowerFunction(startTime, endTime, carrierFrequency, bandwidth, power);
-    return new DimensionalNoise(startTime, endTime, carrierFrequency, bandwidth, powerFunction);
+    const auto& powerFunction = createPowerFunction(startTime, endTime, centerFrequency, bandwidth, power);
+    return new DimensionalNoise(startTime, endTime, centerFrequency, bandwidth, powerFunction);
 }
 
 } // namespace physicallayer

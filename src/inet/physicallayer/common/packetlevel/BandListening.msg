@@ -25,7 +25,7 @@ class BandListening
 {
     @existingClass;
     @descriptor(readonly);
-    Hz carrierFrequency;
+    Hz centerFrequency;
     Hz bandwidth;
 }
 

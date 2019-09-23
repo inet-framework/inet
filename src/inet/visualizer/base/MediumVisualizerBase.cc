@@ -204,14 +204,14 @@ void MediumVisualizerBase::handleSignalAdded(const physicallayer::ITransmission 
         const auto& propagatedTransmissionPowerFunction = makeShared<PropagatedTransmissionPowerFunction>(transmissionPowerFunction, startPosition, propagationSpeed);
         Ptr<const IFunction<WpHz, Domain<m, m, m, simsec, Hz>>> receptionPowerFunction;
         const Ptr<const IFunction<double, Domain<m, m, m, m, m, m, Hz>>>& obstacleLossFunction = radioMedium->getObstacleLoss() != nullptr ? makeShared<ObstacleLossFunction>(radioMedium->getObstacleLoss()) : nullptr;
-        bool attenuateWithCarrierFrequency = check_and_cast<const DimensionalAnalogModel *>(radioMedium->getAnalogModel())->par("attenuateWithCarrierFrequency");
-        if (attenuateWithCarrierFrequency) {
-            const auto& attenuationFunction = makeShared<SpaceDependentAttenuationFunction>(transmitterAntennaGainFunction, pathLossFunction, obstacleLossFunction, startPosition, startOrientation, propagationSpeed, dimensionalTransmission->getCarrierFrequency());
+        bool attenuateWithCenterFrequency = check_and_cast<const DimensionalAnalogModel *>(radioMedium->getAnalogModel())->par("attenuateWithCenterFrequency");
+        if (attenuateWithCenterFrequency) {
+            const auto& attenuationFunction = makeShared<SpaceDependentAttenuationFunction>(transmitterAntennaGainFunction, pathLossFunction, obstacleLossFunction, startPosition, startOrientation, propagationSpeed, dimensionalTransmission->getCenterFrequency());
             receptionPowerFunction = propagatedTransmissionPowerFunction->multiply(attenuationFunction);
         }
         else {
-            Hz lower = dimensionalTransmission->getCarrierFrequency() - dimensionalTransmission->getBandwidth() / 2;
-            Hz upper = dimensionalTransmission->getCarrierFrequency() + dimensionalTransmission->getBandwidth() / 2;
+            Hz lower = dimensionalTransmission->getCenterFrequency() - dimensionalTransmission->getBandwidth() / 2;
+            Hz upper = dimensionalTransmission->getCenterFrequency() + dimensionalTransmission->getBandwidth() / 2;
             Hz step = dimensionalTransmission->getBandwidth() / 2;
             const auto& attenuationFunction = makeShared<SpaceAndFrequencyDependentAttenuationFunction>(transmitterAntennaGainFunction, pathLossFunction, obstacleLossFunction, startPosition, startOrientation, propagationSpeed);
             const auto& approximatedAtteunuationFunction = makeShared<ApproximatedFunction<double, Domain<m, m, m, simsec, Hz>, 4, Hz>>(lower, upper, step, &AverageInterpolator<Hz, double>::singleton, attenuationFunction);

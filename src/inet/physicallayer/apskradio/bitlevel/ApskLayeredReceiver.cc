@@ -47,7 +47,7 @@ ApskLayeredReceiver::ApskLayeredReceiver() :
     analogDigitalConverter(nullptr),
     energyDetection(W(NaN)),
     sensitivity(W(NaN)),
-    carrierFrequency(Hz(NaN)),
+    centerFrequency(Hz(NaN)),
     bandwidth(Hz(NaN)),
     snirThreshold(NaN)
 {
@@ -65,7 +65,7 @@ void ApskLayeredReceiver::initialize(int stage)
         energyDetection = mW(math::dBmW2mW(par("energyDetection")));
         // TODO: temporary parameters
         sensitivity = mW(math::dBmW2mW(par("sensitivity")));
-        carrierFrequency = Hz(par("carrierFrequency"));
+        centerFrequency = Hz(par("centerFrequency"));
         bandwidth = Hz(par("bandwidth"));
         const char *levelOfDetailStr = par("levelOfDetail");
         if (strcmp("packet", levelOfDetailStr) == 0)
@@ -98,7 +98,7 @@ std::ostream& ApskLayeredReceiver::printToStream(std::ostream& stream, int level
     stream << "ApskLayeredReceiver";
     if (level <= PRINT_LEVEL_DETAIL)
         stream << ", levelOfDetail = " << levelOfDetail
-               << ", carrierFrequency = " << carrierFrequency;
+               << ", centerFrequency = " << centerFrequency;
     if (level <= PRINT_LEVEL_TRACE)
         stream << ", errorModel = " << printObjectToString(errorModel, level + 1)
                << ", decoder = " << printObjectToString(decoder, level + 1)
@@ -171,7 +171,7 @@ const IReceptionResult *ApskLayeredReceiver::computeReceptionResult(const IListe
 
 const IListening *ApskLayeredReceiver::createListening(const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition) const
 {
-    return new BandListening(radio, startTime, endTime, startPosition, endPosition, carrierFrequency, bandwidth);
+    return new BandListening(radio, startTime, endTime, startPosition, endPosition, centerFrequency, bandwidth);
 }
 
 // TODO: copy
@@ -197,7 +197,7 @@ bool ApskLayeredReceiver::computeIsReceptionPossible(const IListening *listening
     const LayeredReception *scalarReception = check_and_cast<const LayeredReception *>(reception);
     // TODO: scalar
     const ScalarReceptionSignalAnalogModel *analogModel = check_and_cast<const ScalarReceptionSignalAnalogModel *>(scalarReception->getAnalogModel());
-    if (bandListening->getCarrierFrequency() != analogModel->getCarrierFrequency() || bandListening->getBandwidth() != analogModel->getBandwidth()) {
+    if (bandListening->getCenterFrequency() != analogModel->getCenterFrequency() || bandListening->getBandwidth() != analogModel->getBandwidth()) {
         EV_DEBUG << "Computing reception possible: listening and reception bands are different -> reception is impossible" << endl;
         return false;
     }
