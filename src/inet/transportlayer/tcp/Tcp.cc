@@ -257,9 +257,16 @@ TcpConnection *Tcp::findConnForSegment(const Ptr<const TcpHeader>& tcpseg, L3Add
 
 void Tcp::segmentArrivalWhileClosed(Packet *packet, const Ptr<const TcpHeader>& tcpseg, L3Address srcAddr, L3Address destAddr)
 {
-    TcpConnection *tmp = new TcpConnection(this);
-    tmp->segmentArrivalWhileClosed(packet, tcpseg, srcAddr, destAddr);
-    delete tmp;
+    auto moduleType = cModuleType::get("inet.transportlayer.tcp.TcpConnection");
+    char submoduleName[24];
+    sprintf(submoduleName, "conn-%ld", 231 + intrand(1000));
+    auto module = check_and_cast<TcpConnection *>(moduleType->create(submoduleName, this));
+    module->finalizeParameters();
+    module->buildInside();
+    module->initConnection(this, -1);
+
+    module->segmentArrivalWhileClosed(packet, tcpseg, srcAddr, destAddr);
+    delete module;
     delete packet;
 }
 
