@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2014 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -16,7 +16,7 @@
 //
 
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
-#include "inet/linklayer/csmaca/CsmaCaMacSerializer.h"
+#include "inet/linklayer/csmaca/CsmaCaMacHeaderSerializer.h"
 
 namespace inet {
 
