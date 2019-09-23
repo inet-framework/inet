@@ -366,6 +366,14 @@ void BgpRouter::openTCPConnectionToPeer(SessionId sessionID)
         if (intfEntry == nullptr)
             throw cRuntimeError("No configuration interface for external peer address: %s", _BGPSessions[sessionID]->getPeerAddr().str().c_str());
         socket->bind(intfEntry->getProtocolData<Ipv4InterfaceData>()->getIPAddress(), 0);
+
+        int ebgpMH = _BGPSessions[sessionID]->getEbgpMultihop();
+        if(ebgpMH > 1)
+            socket->setTimeToLive(ebgpMH);
+        else if(ebgpMH == 1)
+            socket->setTimeToLive(1);
+        else
+            throw cRuntimeError("ebgpMultihop should be >=1");
     }
     else if(_BGPSessions[sessionID]->getType() == IGP) {
         InterfaceEntry *intfEntry = _BGPSessions[sessionID]->getLinkIntf();
