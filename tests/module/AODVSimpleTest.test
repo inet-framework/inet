@@ -70,7 +70,7 @@ num-rngs = 3
 sim-time-limit = 100s
 
 # channel physical parameters
-*.radioMedium.mediumLimitCache.carrierFrequency = 2.4GHz
+*.radioMedium.mediumLimitCache.centerFrequency = 2.4GHz
 *.radioMedium.mediumLimitCache.maxTransmissionPower = 2.0mW
 
 # mobility

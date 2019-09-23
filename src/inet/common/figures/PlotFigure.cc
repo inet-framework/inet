@@ -328,7 +328,6 @@ void PlotFigure::layout()
         bounds = rectangleUnion(bounds, tick.number->getBounds());
     for (auto& tick : yTicks)
         bounds = rectangleUnion(bounds, tick.number->getBounds());
-    setTransform(cFigure::Transform().translate(0, 0));
 }
 
 void PlotFigure::redrawYTicks()

@@ -17,6 +17,7 @@
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
+#include "inet/physicallayer/analogmodel/packetlevel/DimensionalAnalogModel.h"
 #include "inet/physicallayer/analogmodel/packetlevel/DimensionalTransmission.h"
 #include "inet/visualizer/base/MediumVisualizerBase.h"
 
@@ -77,6 +78,7 @@ void MediumVisualizerBase::initialize(int stage)
         displaySpectrums = par("displaySpectrums");
         spectrumFigureWidth = par("spectrumFigureWidth");
         spectrumFigureHeight = par("spectrumFigureHeight");
+        spectrumFigureInterpolationSize = par("spectrumFigureInterpolationSize");
         spectrumAutoFrequencyAxis = par("spectrumAutoFrequencyAxis");
         spectrumMinFrequency = Hz(par("spectrumMinFrequency"));
         spectrumMaxFrequency = Hz(par("spectrumMaxFrequency"));
@@ -85,7 +87,6 @@ void MediumVisualizerBase::initialize(int stage)
         spectrumMaxPower = WpHz(dBmWpMHz2WpHz(par("spectrumMaxPower")));
         spectrumPlacementHint = parsePlacement(par("spectrumPlacementHint"));
         spectrumPlacementPriority = par("spectrumPlacementPriority");
-        // TODO: background noise is not included in mediumPowerFunction
         mediumPowerFunction = makeShared<SumFunction<WpHz, Domain<m, m, m, simsec, Hz>>>();
         radioMedium = getModuleFromPar<IRadioMedium>(par("mediumModule"), this, false);
         if (radioMedium != nullptr) {
@@ -98,6 +99,12 @@ void MediumVisualizerBase::initialize(int stage)
             radioMediumModule->subscribe(IRadioMedium::signalDepartureEndedSignal, this);
             radioMediumModule->subscribe(IRadioMedium::signalArrivalStartedSignal, this);
             radioMediumModule->subscribe(IRadioMedium::signalArrivalEndedSignal, this);
+        }
+    }
+    else if (stage == INITSTAGE_PHYSICAL_LAYER) {
+        if (radioMedium != nullptr) {
+            if (auto backgroundNoise = radioMedium->getBackgroundNoise())
+                mediumPowerFunction->addElement(makeShared<BackgroundNoisePowerFunction>(backgroundNoise));
         }
     }
     else if (stage == INITSTAGE_LAST) {
@@ -182,7 +189,8 @@ bool MediumVisualizerBase::matchesTransmission(const ITransmission *transmission
         if (!interfaceFilter.matches(interfaceEntry))
             return false;
     }
-    return packetFilter.matches(transmission->getPacket());
+    auto packet = transmission->getPacket();
+    return packet == nullptr || packetFilter.matches(packet);
 }
 
 void MediumVisualizerBase::handleSignalAdded(const physicallayer::ITransmission *transmission)
@@ -192,17 +200,25 @@ void MediumVisualizerBase::handleSignalAdded(const physicallayer::ITransmission 
         auto transmissionPowerFunction = dimensionalTransmission->getPower();
         const auto& transmitterAntennaGainFunction = makeShared<AntennaGainFunction>(transmission->getTransmitter()->getAntenna()->getGain().get());
         const auto& pathLossFunction = makeShared<PathLossFunction>(radioMedium->getPathLoss());
-        Hz lower = dimensionalTransmission->getCarrierFrequency() - dimensionalTransmission->getBandwidth() / 2;
-        Hz upper = dimensionalTransmission->getCarrierFrequency() + dimensionalTransmission->getBandwidth() / 2;
-        Hz step = dimensionalTransmission->getBandwidth() / 10;
         mps propagationSpeed = radioMedium->getPropagation()->getPropagationSpeed();
         Point<m, m, m> startPosition(m(transmission->getStartPosition().x), m(transmission->getStartPosition().y), m(transmission->getStartPosition().z));
         const auto& startOrientation = transmission->getStartOrientation();
-        const Ptr<const IFunction<double, Domain<m, m, m, m, m, m, Hz>>>& obstacleLossFunction = radioMedium->getObstacleLoss() != nullptr ? makeShared<ObstacleLossFunction>(radioMedium->getObstacleLoss()) : nullptr;
-        const auto& attenuationFunction = makeShared<SpaceAndFrequencyAttenuationFunction>(transmitterAntennaGainFunction, pathLossFunction, obstacleLossFunction, startPosition, startOrientation, propagationSpeed);
-        const auto& approximatedAtteunuationFunction = makeShared<ApproximatedFunction<double, Domain<m, m, m, simsec, Hz>, 4, Hz>>(lower, upper, step, &CenterInterpolator<Hz, double>::singleton, attenuationFunction);
         const auto& propagatedTransmissionPowerFunction = makeShared<PropagatedTransmissionPowerFunction>(transmissionPowerFunction, startPosition, propagationSpeed);
-        const auto& receptionPowerFunction = propagatedTransmissionPowerFunction->multiply(approximatedAtteunuationFunction);
+        Ptr<const IFunction<WpHz, Domain<m, m, m, simsec, Hz>>> receptionPowerFunction;
+        const Ptr<const IFunction<double, Domain<m, m, m, m, m, m, Hz>>>& obstacleLossFunction = radioMedium->getObstacleLoss() != nullptr ? makeShared<ObstacleLossFunction>(radioMedium->getObstacleLoss()) : nullptr;
+        bool attenuateWithCenterFrequency = check_and_cast<const DimensionalAnalogModel *>(radioMedium->getAnalogModel())->par("attenuateWithCenterFrequency");
+        if (attenuateWithCenterFrequency) {
+            const auto& attenuationFunction = makeShared<SpaceDependentAttenuationFunction>(transmitterAntennaGainFunction, pathLossFunction, obstacleLossFunction, startPosition, startOrientation, propagationSpeed, dimensionalTransmission->getCenterFrequency());
+            receptionPowerFunction = propagatedTransmissionPowerFunction->multiply(attenuationFunction);
+        }
+        else {
+            Hz lower = dimensionalTransmission->getCenterFrequency() - dimensionalTransmission->getBandwidth() / 2;
+            Hz upper = dimensionalTransmission->getCenterFrequency() + dimensionalTransmission->getBandwidth() / 2;
+            Hz step = dimensionalTransmission->getBandwidth() / 2;
+            const auto& attenuationFunction = makeShared<SpaceAndFrequencyDependentAttenuationFunction>(transmitterAntennaGainFunction, pathLossFunction, obstacleLossFunction, startPosition, startOrientation, propagationSpeed);
+            const auto& approximatedAtteunuationFunction = makeShared<ApproximatedFunction<double, Domain<m, m, m, simsec, Hz>, 4, Hz>>(lower, upper, step, &AverageInterpolator<Hz, double>::singleton, attenuationFunction);
+            receptionPowerFunction = propagatedTransmissionPowerFunction->multiply(approximatedAtteunuationFunction);
+        }
         mediumPowerFunction->addElement(receptionPowerFunction);
         receptionPowerFunctions[transmission] = receptionPowerFunction;
     }

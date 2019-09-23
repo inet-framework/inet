@@ -133,7 +133,7 @@ inline std::ostream& print(std::ostream& os, const Interval<T ...>& i, integer_s
     const auto& upper = i.getUpper();
     auto closed = i.getClosed();
     unsigned int b = 1 << std::tuple_size<std::tuple<T ...>>::value >> 1;
-    (void)std::initializer_list<bool>{(os << (IS == 0 ? "" : " x "), os << "[" << std::get<IS>(lower) << " ... " << std::get<IS>(upper) << ((closed & (b >> IS)) ? "]" : ")"), true) ... };
+    (void)std::initializer_list<bool>{(os << (IS == 0 ? "" : " x "), (std::get<IS>(lower) == std::get<IS>(upper) ? os << "[" << std::get<IS>(lower) << "]" : os << "[" << std::get<IS>(lower) << " … " << std::get<IS>(upper) << ((closed & (b >> IS)) ? "]" : ")"), true)) ... };
     return os;
 }
 

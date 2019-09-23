@@ -124,7 +124,7 @@ void Ieee80211TransmitterBase::setChannel(const Ieee80211Channel *channel)
     if (this->channel != channel) {
         delete this->channel;
         this->channel = channel;
-        setCarrierFrequency(channel->getCenterFrequency());
+        setCenterFrequency(channel->getCenterFrequency());
     }
 }
 

@@ -25,7 +25,7 @@ namespace physicallayer {
 
 NarrowbandTransmitterBase::NarrowbandTransmitterBase() :
     modulation(nullptr),
-    carrierFrequency(Hz(NaN)),
+    centerFrequency(Hz(NaN)),
     bandwidth(Hz(NaN))
 {
 }
@@ -35,7 +35,7 @@ void NarrowbandTransmitterBase::initialize(int stage)
     TransmitterBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         modulation = ApskModulationBase::findModulation(par("modulation"));
-        carrierFrequency = Hz(par("carrierFrequency"));
+        centerFrequency = Hz(par("centerFrequency"));
         bandwidth = Hz(par("bandwidth"));
     }
 }
@@ -44,16 +44,16 @@ std::ostream& NarrowbandTransmitterBase::printToStream(std::ostream& stream, int
 {
     if (level <= PRINT_LEVEL_TRACE)
         stream << ", modulation = " << printObjectToString(modulation, level + 1) 
-               << ", carrierFrequency = " << carrierFrequency
+               << ", centerFrequency = " << centerFrequency
                << ", bandwidth = " << bandwidth;
     return stream;
 }
 
 
-Hz NarrowbandTransmitterBase::computeCarrierFrequency(const Packet *packet) const
+Hz NarrowbandTransmitterBase::computeCenterFrequency(const Packet *packet) const
 {
     auto signalBandReq = const_cast<Packet *>(packet)->findTag<SignalBandReq>();
-    return signalBandReq != nullptr ? signalBandReq->getCarrierFrequency() : carrierFrequency;
+    return signalBandReq != nullptr ? signalBandReq->getCenterFrequency() : centerFrequency;
 }
 
 Hz NarrowbandTransmitterBase::computeBandwidth(const Packet *packet) const

@@ -56,7 +56,7 @@ class INET_API Ieee80211LayeredOfdmTransmitter : public TransmitterBase
 
     Hz bandwidth;
     Hz channelSpacing;
-    Hz carrierFrequency;
+    Hz centerFrequency;
     W power;
 
   protected:
@@ -95,7 +95,7 @@ class INET_API Ieee80211LayeredOfdmTransmitter : public TransmitterBase
     virtual m getMaxCommunicationRange() const override { return m(NaN); }
     virtual m getMaxInterferenceRange() const override { return m(NaN); }
     const Hz getBandwidth() const { return mode->getDataMode()->getBandwidth(); }
-    const Hz getCarrierFrequency() const { return carrierFrequency; }
+    const Hz getCenterFrequency() const { return centerFrequency; }
     const Hz getCarrierSpacing() const { return mode->getChannelSpacing(); }
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 };

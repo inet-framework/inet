@@ -18,6 +18,8 @@
 #ifndef __INET_DIMENSIONALTRANSMITTERBASE_H
 #define __INET_DIMENSIONALTRANSMITTERBASE_H
 
+#include "inet/common/math/IFunction.h"
+#include "inet/common/math/IInterpolator.h"
 #include "inet/physicallayer/contract/packetlevel/IPrintableObject.h"
 
 namespace inet {
@@ -62,7 +64,7 @@ class INET_API DimensionalTransmitterBase : public virtual IPrintableObject
     template<typename T>
     const Ptr<const IFunction<double, Domain<T>>> normalize(const Ptr<const IFunction<double, Domain<T>>>& function, const char *normalization) const;
 
-    virtual Ptr<const IFunction<WpHz, Domain<simsec, Hz>>> createPowerFunction(const simtime_t startTime, const simtime_t endTime, Hz carrierFrequency, Hz bandwidth, W power) const;
+    virtual Ptr<const IFunction<WpHz, Domain<simsec, Hz>>> createPowerFunction(const simtime_t startTime, const simtime_t endTime, Hz centerFrequency, Hz bandwidth, W power) const;
 
   public:
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;

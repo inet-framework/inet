@@ -189,7 +189,7 @@ some other parameters of the radio to arbitrary values:
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
-   :start-at: carrierFrequency
+   :start-at: centerFrequency
    :end-at: snirThreshold
 
 Routes are set up according to a star topology, with the gateway at the

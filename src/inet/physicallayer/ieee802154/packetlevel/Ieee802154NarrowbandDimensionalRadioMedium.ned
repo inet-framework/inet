@@ -25,7 +25,7 @@ module Ieee802154NarrowbandDimensionalRadioMedium extends RadioMedium
     parameters:
         backgroundNoise.typename = default("IsotropicDimensionalBackgroundNoise");
 
-        mediumLimitCache.carrierFrequency = 2450 MHz;
+        mediumLimitCache.centerFrequency = 2450 MHz;
 
         // 802.15.4-2006, page 266
         pathLoss.typename = default("BreakpointPathLoss");

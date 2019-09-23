@@ -27,7 +27,7 @@ module Ieee802154NarrowbandRadio extends FlatRadioBase
         transmitter.typename = default(signalAnalogRepresentation == "scalar" ? "Ieee802154ScalarTransmitter" : signalAnalogRepresentation == "dimensional" ? "Ieee802154DimensionalTransmitter" : "");
         receiver.typename = default(signalAnalogRepresentation == "scalar" ? "Ieee802154ScalarReceiver" : signalAnalogRepresentation == "dimensional" ? "Ieee802154DimensionalReceiver" : "");
 
-        carrierFrequency = default(2450 MHz);
+        centerFrequency = default(2450 MHz);
 
         // B_20dB ATmega256RFR2 (page 564)
         bandwidth = default(2.8 MHz);

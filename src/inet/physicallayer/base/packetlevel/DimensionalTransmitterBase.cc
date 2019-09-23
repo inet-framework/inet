@@ -44,10 +44,20 @@ std::vector<DimensionalTransmitterBase::GainEntry<T>> DimensionalTransmitterBase
     cStringTokenizer tokenizer(text);
     tokenizer.nextToken();
     while (tokenizer.hasMoreTokens()) {
-        auto where = tokenizer.nextToken();
-        char *end = (char *)where + 1;
+        char *token = const_cast<char *>(tokenizer.nextToken());
+        char where;
+        char *end;
+        if (*token == 's' || *token == 'c' || *token == 'e') {
+            where = *token;
+            end = token + 1;
+        }
+        else {
+            where = ' ';
+            end = token;
+        }
 // TODO: replace this BS with the expression evaluator when it supports simtime_t and bindings
 //      Allowed syntax:
+//        +-quantity
 //        s|c|e
 //        s|c|e+-quantity
 //        s|c|e+-b|d
@@ -55,16 +65,16 @@ std::vector<DimensionalTransmitterBase::GainEntry<T>> DimensionalTransmitterBase
 //        s|c|e+-b|d*number
 //        s|c|e+-b|d*number+-quantity
         double lengthMultiplier = 0;
-        if ((*(where + 1) == '+' || *(where + 1) == '-') &&
-            (*(where + 2) == 'b' || *(where + 2) == 'd'))
+        if ((*(token + 1) == '+' || *(token + 1) == '-') &&
+            (*(token + 2) == 'b' || *(token + 2) == 'd'))
         {
-            if (*(where + 3) == '*')
-                lengthMultiplier = strtod(where + 4, &end);
+            if (*(token + 3) == '*')
+                lengthMultiplier = strtod(token + 4, &end);
             else {
                 lengthMultiplier = 1;
                 end += 2;
             }
-            if (*(where + 1) == '-')
+            if (*(token + 1) == '-')
                 lengthMultiplier *= -1;
         }
         T offset = T(0);
@@ -76,7 +86,7 @@ std::vector<DimensionalTransmitterBase::GainEntry<T>> DimensionalTransmitterBase
         if (gain < 0)
             throw cRuntimeError("Gain must be in the range [0, inf)");
         auto interpolator = createInterpolator<T, double>(tokenizer.nextToken());
-        gains.push_back(GainEntry<T>(interpolator, *where, lengthMultiplier, offset, gain));
+        gains.push_back(GainEntry<T>(interpolator, where, lengthMultiplier, offset, gain));
     }
     return gains;
 }
@@ -137,10 +147,10 @@ const Ptr<const IFunction<double, Domain<T>>> DimensionalTransmitterBase::normal
         throw cRuntimeError("Unknown normalization: '%s'", normalization);
 }
 
-Ptr<const IFunction<WpHz, Domain<simsec, Hz>>> DimensionalTransmitterBase::createPowerFunction(const simtime_t startTime, const simtime_t endTime, Hz carrierFrequency, Hz bandwidth, W power) const
+Ptr<const IFunction<WpHz, Domain<simsec, Hz>>> DimensionalTransmitterBase::createPowerFunction(const simtime_t startTime, const simtime_t endTime, Hz centerFrequency, Hz bandwidth, W power) const
 {
     if (timeGains.size() == 0 && frequencyGains.size() == 0)
-        return makeFirstQuadrantLimitedFunction(staticPtrCast<const IFunction<WpHz, Domain<simsec, Hz>>>(makeShared<TwoDimensionalBoxcarFunction<WpHz, simsec, Hz>>(simsec(startTime), simsec(endTime), carrierFrequency - bandwidth / 2, carrierFrequency + bandwidth / 2, power / bandwidth)));
+        return makeFirstQuadrantLimitedFunction(staticPtrCast<const IFunction<WpHz, Domain<simsec, Hz>>>(makeShared<TwoDimensionalBoxcarFunction<WpHz, simsec, Hz>>(simsec(startTime), simsec(endTime), centerFrequency - bandwidth / 2, centerFrequency + bandwidth / 2, power / bandwidth)));
     else {
         Ptr<const IFunction<double, Domain<simsec>>> timeGainFunction;
         if (timeGains.size() != 0) {
@@ -150,7 +160,15 @@ Ptr<const IFunction<WpHz, Domain<simsec, Hz>>> DimensionalTransmitterBase::creat
             ts[getLowerBoundary<simsec>()] = {0, firstTimeInterpolator};
             ts[getUpperBoundary<simsec>()] = {0, nullptr};
             for (const auto & entry : timeGains) {
-                auto time = entry.where == 's' ? simsec(startTime) : (entry.where == 'e' ? simsec(endTime) : simsec(centerTime)) + simsec(duration) * entry.length + entry.offset;
+                simsec time;
+                switch (entry.where) {
+                    case 's': time = simsec(startTime); break;
+                    case 'e': time = simsec(endTime); break;
+                    case 'c': time = simsec(centerTime); break;
+                    case ' ': time = simsec(0); break;
+                    default: throw cRuntimeError("Unknown qualifier");
+                }
+                time += simsec(duration) * entry.length + entry.offset;
                 ts[time] = {entry.gain, entry.interpolator};
             }
             timeGainFunction = makeShared<OneDimensionalInterpolatedFunction<double, simsec>>(ts);
@@ -159,19 +177,28 @@ Ptr<const IFunction<WpHz, Domain<simsec, Hz>>> DimensionalTransmitterBase::creat
             timeGainFunction = makeShared<OneDimensionalBoxcarFunction<double, simsec>>(simsec(startTime), simsec(endTime), 1);
         Ptr<const IFunction<double, Domain<Hz>>> frequencyGainFunction;
         if (frequencyGains.size() != 0) {
-            auto startFrequency = carrierFrequency - bandwidth / 2;
-            auto endFrequency = carrierFrequency + bandwidth / 2;
+            auto startFrequency = centerFrequency - bandwidth / 2;
+            auto endFrequency = centerFrequency + bandwidth / 2;
             std::map<Hz, std::pair<double, const IInterpolator<Hz, double>*>> fs;
             fs[getLowerBoundary<Hz>()] = {0, firstFrequencyInterpolator};
             fs[getUpperBoundary<Hz>()] = {0, nullptr};
             for (const auto & entry : frequencyGains) {
-                Hz frequency = entry.where == 's' ? startFrequency : (entry.where == 'e' ? endFrequency : carrierFrequency) + bandwidth * entry.length + Hz(entry.offset);
+                Hz frequency;
+                switch (entry.where) {
+                    case 's': frequency = startFrequency; break;
+                    case 'e': frequency = endFrequency; break;
+                    case 'c': frequency = centerFrequency; break;
+                    case ' ': frequency = Hz(0); break;
+                    default: throw cRuntimeError("Unknown qualifier");
+                }
+                frequency += bandwidth * entry.length + entry.offset;
+                ASSERT(!std::isnan(frequency.get()));
                 fs[frequency] = {entry.gain, entry.interpolator};
             }
             frequencyGainFunction = makeShared<OneDimensionalInterpolatedFunction<double, Hz>>(fs);
         }
         else
-            frequencyGainFunction = makeShared<OneDimensionalBoxcarFunction<double, Hz>>(carrierFrequency - bandwidth / 2, carrierFrequency + bandwidth / 2, 1);
+            frequencyGainFunction = makeShared<OneDimensionalBoxcarFunction<double, Hz>>(centerFrequency - bandwidth / 2, centerFrequency + bandwidth / 2, 1);
         auto gainFunction = makeShared<OrthogonalCombinatorFunction<double, simsec, Hz>>(normalize<simsec>(timeGainFunction, timeGainsNormalization), normalize<Hz>(frequencyGainFunction, frequencyGainsNormalization));
         auto powerFunction = makeShared<ConstantFunction<WpHz, Domain<simsec, Hz>>>(power / Hz(1));
         return makeFirstQuadrantLimitedFunction(powerFunction->multiply(gainFunction));

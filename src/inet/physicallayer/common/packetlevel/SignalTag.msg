@@ -48,7 +48,7 @@ class SignalPowerInd extends SignalPowerTagBase
 //
 class SignalBandTagBase extends SignalTagBase
 {
-    Hz carrierFrequency = Hz(NaN); // carrier frequency in the range (0, +infinity) or NaN if not set.
+    Hz centerFrequency = Hz(NaN); // carrier frequency in the range (0, +infinity) or NaN if not set.
     Hz bandwidth = Hz(NaN);        // bandwidth in the rage (0, +infinity) or NaN if not set.
 }
 

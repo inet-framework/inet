@@ -30,7 +30,7 @@ module ApskLayeredScalarRadioMedium extends RadioMedium
         analogModel.typename = default("LayeredScalarAnalogModel");
         backgroundNoise.typename = default("IsotropicScalarBackgroundNoise");
         backgroundNoise.power = default(-110dBm);
-        mediumLimitCache.carrierFrequency = default(2.4GHz);
+        mediumLimitCache.centerFrequency = default(2.4GHz);
         mediumLimitCache.minReceptionPower = default(-85dBm);
         mediumLimitCache.minInterferencePower = default(-110dBm);
 }

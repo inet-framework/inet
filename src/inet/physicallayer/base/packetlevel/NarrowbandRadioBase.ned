@@ -25,9 +25,9 @@ import inet.physicallayer.common.packetlevel.Radio;
 module NarrowbandRadioBase extends Radio
 {
     parameters:
-        double carrierFrequency @unit(Hz);     // center frequency of the band where the radio transmits and receives signals on the medium
+        double centerFrequency @unit(Hz);     // center frequency of the band where the radio transmits and receives signals on the medium
         double bandwidth @unit(Hz);            // bandwidth of the band where the radio transmits and receives signals on the medium
-        *.carrierFrequency = default(carrierFrequency); // passed down to transmitter and receiver by default
+        *.centerFrequency = default(centerFrequency); // passed down to transmitter and receiver by default
         *.bandwidth = default(bandwidth);               // passed down to transmitter and receiver by default
 }
 

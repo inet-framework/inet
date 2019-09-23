@@ -496,7 +496,7 @@ void RadioMedium::addTransmission(const IRadio *transmitterRadio, const ITransmi
     communicationCache->addTransmission(transmission);
     simtime_t maxArrivalEndTime = transmission->getEndTime();
     for (const auto receiverRadio : radios) {
-        if (receiverRadio != nullptr && receiverRadio != transmitterRadio) {
+        if (receiverRadio != nullptr && receiverRadio != transmitterRadio && receiverRadio->getReceiver() != nullptr) {
             const IArrival *arrival = propagation->computeArrival(transmission, receiverRadio->getAntenna()->getMobility());
             const IntervalTree::Interval *interval = new IntervalTree::Interval(arrival->getStartTime(), arrival->getEndTime(), (void *)transmission);
             const IListening *listening = receiverRadio->getReceiver()->createListening(receiverRadio, arrival->getStartTime(), arrival->getEndTime(), arrival->getStartPosition(), arrival->getEndPosition());
@@ -519,25 +519,30 @@ void RadioMedium::addTransmission(const IRadio *transmitterRadio, const ITransmi
 ISignal *RadioMedium::createTransmitterSignal(const IRadio *radio, Packet *packet)
 {
     Enter_Method_Silent();
-    take(packet);
+    if (packet != nullptr)
+        take(packet);
     auto transmission = radio->getTransmitter()->createTransmission(radio, packet, simTime());
     auto signal = new Signal(transmission);
-    signal->setName(packet->getName());
     signal->setDuration(transmission->getDuration());
-    signal->encapsulate(packet);
+    if (packet != nullptr) {
+        signal->setName(packet->getName());
+        signal->encapsulate(packet);
+    }
     return signal;
 }
 
 ISignal *RadioMedium::createReceiverSignal(const ITransmission *transmission)
 {
     auto signal = new Signal(transmission);
-    auto transmitterPacket = transmission->getPacket();
-    auto receiverPacket = transmitterPacket->dup();
-    receiverPacket->clearTags();
-    receiverPacket->addTag<PacketProtocolTag>()->setProtocol(transmitterPacket->getTag<PacketProtocolTag>()->getProtocol());
-    signal->setName(receiverPacket->getName());
     signal->setDuration(transmission->getDuration());
-    signal->encapsulate(receiverPacket);
+    auto transmitterPacket = transmission->getPacket();
+    if (transmitterPacket != nullptr) {
+        auto receiverPacket = transmitterPacket->dup();
+        receiverPacket->clearTags();
+        receiverPacket->addTag<PacketProtocolTag>()->setProtocol(transmitterPacket->getTag<PacketProtocolTag>()->getProtocol());
+        signal->setName(receiverPacket->getName());
+        signal->encapsulate(receiverPacket);
+    }
     return signal;
 }
 
@@ -570,21 +575,20 @@ void RadioMedium::sendToAffectedRadios(IRadio *radio, const ISignal *transmitted
 
 void RadioMedium::sendToRadio(IRadio *transmitter, const IRadio *receiver, const ISignal *transmittedSignal)
 {
-    const Radio *transmitterRadio = check_and_cast<const Radio *>(transmitter);
-    const Radio *receiverRadio = check_and_cast<const Radio *>(receiver);
     const ITransmission *transmission = transmittedSignal->getTransmission();
-    if (receiverRadio != transmitterRadio && isPotentialReceiver(receiverRadio, transmission)) {
-        const IArrival *arrival = getArrival(receiverRadio, transmission);
+    if (receiver != transmitter && receiver->getReceiver() != nullptr && isPotentialReceiver(receiver, transmission)) {
+        const IArrival *arrival = getArrival(receiver, transmission);
         simtime_t propagationTime = arrival->getStartPropagationTime();
         EV_DEBUG << "Sending " << transmittedSignal
-                 << " from " << (IRadio *)transmitterRadio << " at " << transmission->getStartPosition()
-                 << " to " << (IRadio *)receiverRadio << " at " << arrival->getStartPosition()
+                 << " from " << transmitter << " at " << transmission->getStartPosition()
+                 << " to " << receiver << " at " << arrival->getStartPosition()
                  << " in " << propagationTime * 1E+6 << " us propagation time." << endl;
         auto receivedSignal = static_cast<Signal *>(createReceiverSignal(transmission));
-        cGate *gate = receiverRadio->getRadioGate()->getPathStartGate();
+        cGate *gate = receiver->getRadioGate()->getPathStartGate();
         ASSERT(dynamic_cast<IRadio *>(getSimulation()->getContextModule()) != nullptr);
-        const_cast<Radio *>(transmitterRadio)->sendDirect(receivedSignal, propagationTime, transmission->getDuration(), gate);
-        communicationCache->setCachedSignal(receiverRadio, transmission, receivedSignal);
+        auto transmitterModule = const_cast<cSimpleModule *>(check_and_cast<const cSimpleModule *>(transmitter));
+        transmitterModule->sendDirect(receivedSignal, propagationTime, transmission->getDuration(), gate);
+        communicationCache->setCachedSignal(receiver, transmission, receivedSignal);
         signalSendCount++;
     }
 }
@@ -631,10 +635,10 @@ const IListeningDecision *RadioMedium::listenOnMedium(const IRadio *radio, const
 
 bool RadioMedium::isPotentialReceiver(const IRadio *radio, const ITransmission *transmission) const
 {
-    const Radio *receiverRadio = check_and_cast<const Radio *>(radio);
-    if (radioModeFilter && receiverRadio->getRadioMode() != IRadio::RADIO_MODE_RECEIVER && receiverRadio->getRadioMode() != IRadio::RADIO_MODE_TRANSCEIVER)
+    const Radio *receiverRadio = dynamic_cast<const Radio *>(radio);
+    if (radioModeFilter && receiverRadio != nullptr && receiverRadio->getRadioMode() != IRadio::RADIO_MODE_RECEIVER && receiverRadio->getRadioMode() != IRadio::RADIO_MODE_TRANSCEIVER)
         return false;
-    else if (listeningFilter && !radio->getReceiver()->computeIsReceptionPossible(getListening(radio, transmission), transmission))
+    else if (listeningFilter && radio->getReceiver() != nullptr && !radio->getReceiver()->computeIsReceptionPossible(getListening(radio, transmission), transmission))
         return false;
     // TODO: where is the tag?
     else if (macAddressFilter && !matchesMacAddressFilter(radio, transmission->getPacket()))
