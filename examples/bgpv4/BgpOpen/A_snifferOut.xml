@@ -3,7 +3,18 @@
 <!-- checker xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="MessageChecker.xsd" -->
 <checker>
-    <message occurence="3"/> <!-- tcp: PassiveOPEN, ActiveOPEN Accept -->
+    <message occurence="1">
+        <fieldValue name="name" value="PassiveOPEN"/>
+    </message>
+    <message occurence="1">
+        <fieldValue name="name" value="setTTL"/>
+    </message>
+    <message occurence="1">
+        <fieldValue name="name" value="ActiveOPEN"/>
+    </message>
+    <message occurence="1">
+        <fieldValue name="name" value="ACCEPT"/>
+    </message>
     <message occurence="1">
         <fieldValue name="name" value="BgpOpen"/>
         <fieldValue name="byteLength" value="29"/>
