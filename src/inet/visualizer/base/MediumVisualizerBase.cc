@@ -102,8 +102,10 @@ void MediumVisualizerBase::initialize(int stage)
         }
     }
     else if (stage == INITSTAGE_PHYSICAL_LAYER) {
-        if (auto backgroundNoise = radioMedium->getBackgroundNoise())
-            mediumPowerFunction->addElement(makeShared<BackgroundNoisePowerFunction>(backgroundNoise));
+        if (radioMedium != nullptr) {
+            if (auto backgroundNoise = radioMedium->getBackgroundNoise())
+                mediumPowerFunction->addElement(makeShared<BackgroundNoisePowerFunction>(backgroundNoise));
+        }
     }
     else if (stage == INITSTAGE_LAST) {
         if (std::isnan(signalPropagationAnimationSpeed) && radioMedium != nullptr) {
