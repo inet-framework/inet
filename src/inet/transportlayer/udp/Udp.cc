@@ -124,37 +124,25 @@ void Udp::initialize(int stage)
     }
 }
 
-void Udp::handleMessageWhenUp(cMessage *msg)
+void Udp::handleLowerPacket(Packet *packet)
 {
-    if (msg->isSelfMessage()) {
-        throw cRuntimeError("UDP does not use self message.");
-    }
-    else if (msg->arrivedOn("appIn")) {
-        // received from application layer
-        processCommandFromApp(msg);
-    }
     // received from IP layer
-    else if (msg->arrivedOn("ipIn")) {
-        Packet *packet = check_and_cast<Packet *>(msg);
-        ASSERT(packet->getControlInfo() == nullptr);
-        auto protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
-        if (protocol == &Protocol::udp) {
-            processUDPPacket(packet);
-        }
-        else if (protocol == &Protocol::icmpv4) {
-            processICMPv4Error(packet); // assume it's an ICMP error
-        }
-        else if (protocol == &Protocol::icmpv6) {
-            processICMPv6Error(packet); // assume it's an ICMP error
-        }
-        else
-            throw cRuntimeError("Unknown protocol: %s(%d)", protocol->getName(), protocol->getId());
+    ASSERT(packet->getControlInfo() == nullptr);
+    auto protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
+    if (protocol == &Protocol::udp) {
+        processUDPPacket(packet);
+    }
+    else if (protocol == &Protocol::icmpv4) {
+        processICMPv4Error(packet); // assume it's an ICMP error
+    }
+    else if (protocol == &Protocol::icmpv6) {
+        processICMPv6Error(packet); // assume it's an ICMP error
     }
     else
-        throw cRuntimeError("Message arrived on unknown gate: %s", msg->getArrivalGate()->getFullName());
+        throw cRuntimeError("Unknown protocol: %s(%d)", protocol->getName(), protocol->getId());
 }
 
-void Udp::processCommandFromApp(cMessage *msg)
+void Udp::handleUpperCommand(cMessage *msg)
 {
     switch (msg->getKind()) {
         case UDP_C_BIND: {
@@ -249,10 +237,6 @@ void Udp::processCommandFromApp(cMessage *msg)
                 throw cRuntimeError("Unknown subclass of UdpSetOptionCommand received from app: %s", ctrl->getClassName());
             break;
         }
-
-        case UDP_C_DATA:
-            processPacketFromApp(check_and_cast<Packet *>(msg));
-            return;     // prevent delete of msg
 
         case UDP_C_CLOSE: {
             int socketId = check_and_cast<Request *>(msg)->getTag<SocketReq>()->getSocketId();
@@ -686,8 +670,11 @@ void Udp::setMulticastSourceFilter(SockDesc *sd, InterfaceEntry *ie, L3Address m
 // ####################### set options end #######################
 // ###############################################################
 
-void Udp::processPacketFromApp(Packet *packet)
+void Udp::handleUpperPacket(Packet *packet)
 {
+    if (packet->getKind() != UDP_C_DATA)
+        throw cRuntimeError("Unknown packet command code (message kind) %d received from app", packet->getKind());
+
     emit(packetReceivedFromUpperSignal, packet);
     L3Address srcAddr, destAddr;
     int srcPort = -1, destPort = -1;
