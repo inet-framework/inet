@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2013 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -23,74 +23,98 @@ namespace physicallayer {
 
 Define_Module(ReferenceCommunicationCache);
 
-ReferenceCommunicationCache::ReferenceCommunicationCache()
-{
-}
-
-ReferenceCommunicationCache::~ReferenceCommunicationCache()
-{
-}
-
 ReferenceCommunicationCache::RadioCacheEntry *ReferenceCommunicationCache::getRadioCacheEntry(const IRadio *radio)
 {
-    int radioId = radio->getId();
-    if ((int)radioCache.size() < radioId)
-        radioCache.resize(radioId);
-    return &radioCache[radioId];
+    return &radioCache[radio->getId()];
 }
 
 ReferenceCommunicationCache::TransmissionCacheEntry *ReferenceCommunicationCache::getTransmissionCacheEntry(const ITransmission *transmission)
 {
-    int transmissionId = transmission->getId();
-    if ((int)transmissionCache.size() < transmissionId)
-        transmissionCache.resize(transmissionId);
-    TransmissionCacheEntry *transmissionCacheEntry = &transmissionCache[transmissionId];
-    if (transmissionCacheEntry->receptionCacheEntries == nullptr)
-        transmissionCacheEntry->receptionCacheEntries = new std::vector<ReceptionCacheEntry>(radioCache.size());
-    return transmissionCacheEntry;
+    return &transmissionCache[transmission->getId()];
 }
 
 ReferenceCommunicationCache::ReceptionCacheEntry *ReferenceCommunicationCache::getReceptionCacheEntry(const IRadio *radio, const ITransmission *transmission)
 {
     TransmissionCacheEntry *transmissionCacheEntry = getTransmissionCacheEntry(transmission);
-    std::vector<ReceptionCacheEntry> *receptionCacheEntries = static_cast<std::vector<ReceptionCacheEntry> *>(transmissionCacheEntry->receptionCacheEntries);
+    auto *receptionCacheEntries = static_cast<std::vector<ReceptionCacheEntry> *>(transmissionCacheEntry->receptionCacheEntries);
     int radioId = radio->getId();
-    if ((int)receptionCacheEntries->size() < radioId)
-        receptionCacheEntries->resize(radioId);
+    if ((int)receptionCacheEntries->size() <= radioId)
+        receptionCacheEntries->resize(radioId + 1);
     return &(*receptionCacheEntries)[radioId];
 }
 
 void ReferenceCommunicationCache::addRadio(const IRadio *radio)
 {
-    radioCache.push_back(RadioCacheEntry());
+    int radioId = radio->getId();
+    if ((int)radioCache.size() <= radioId)
+        radioCache.resize(radioId + 1);
+    auto radioCacheEntry = getRadioCacheEntry(radio);
+    radioCacheEntry->radio = radio;
 }
 
 void ReferenceCommunicationCache::removeRadio(const IRadio *radio)
 {
+    // NOTE: no erase from the radio cache to test that it doesn't affect simulation results
+}
+
+const IRadio *ReferenceCommunicationCache::getRadio(int id) const
+{
+    for (const auto& radioCacheEntry : radioCache)
+        if (radioCacheEntry.radio->getId() == id)
+            return radioCacheEntry.radio;
+    return nullptr;
+}
+
+void ReferenceCommunicationCache::mapRadios(std::function<void (const IRadio *)> f) const
+{
+    for (const auto& radioCacheEntry : radioCache)
+        f(radioCacheEntry.radio);
 }
 
 void ReferenceCommunicationCache::addTransmission(const ITransmission *transmission)
 {
-    transmissionCache.push_back(TransmissionCacheEntry());
+    int transmissionId = transmission->getId();
+    if ((int)transmissionCache.size() <= transmissionId)
+        transmissionCache.resize(transmissionId + 1);
+    auto transmissionCacheEntry = getTransmissionCacheEntry(transmission);
+    transmissionCacheEntry->transmission = transmission;
+    transmissionCacheEntry->receptionCacheEntries = new std::vector<ReceptionCacheEntry>(radioCache.size() + 1);
 }
 
 void ReferenceCommunicationCache::removeTransmission(const ITransmission *transmission)
 {
+    // NOTE: no erase from the transmission cache to test that it doesn't affect simulation results
 }
 
-void ReferenceCommunicationCache::removeNonInterferingTransmissions()
+const ITransmission *ReferenceCommunicationCache::getTransmission(int id) const
 {
+    for (const auto& transmissionCacheEntry : transmissionCache)
+        if (transmissionCacheEntry.transmission->getId() == id)
+            return transmissionCacheEntry.transmission;
+    return nullptr;
+}
+
+void ReferenceCommunicationCache::mapTransmissions(std::function<void (const ITransmission *)> f) const
+{
+    for (const auto& transmissionCacheEntry : transmissionCache)
+        f(transmissionCacheEntry.transmission);
+}
+
+void ReferenceCommunicationCache::removeNonInterferingTransmissions(std::function<void (const ITransmission *transmission)> f)
+{
+    // NOTE: no erase from the transmission cache to test that it doesn't affect simulation results
 }
 
 std::vector<const ITransmission *> *ReferenceCommunicationCache::computeInterferingTransmissions(const IRadio *radio, const simtime_t startTime, const simtime_t endTime)
 {
+    // NOTE: ignore receptionIntervals to test that it doesn't affect simulation results
     std::vector<const ITransmission *> *interferingTransmissions = new std::vector<const ITransmission *>();
-    for (const auto &transmissionCacheEntry : transmissionCache) {
-        for (const auto &receptionCacheEntry : *static_cast<std::vector<ReceptionCacheEntry> *>(transmissionCacheEntry.receptionCacheEntries)) {
-            const IArrival *arrival = receptionCacheEntry.arrival;
-            if (arrival != nullptr && !(arrival->getEndTime() < startTime || endTime < arrival->getStartTime()))
-                interferingTransmissions->push_back(transmissionCacheEntry.signal->getTransmission());
-        }
+    for (const auto& transmissionCacheEntry : transmissionCache) {
+        auto receptionCacheEntries = static_cast<std::vector<ReceptionCacheEntry> *>(transmissionCacheEntry.receptionCacheEntries);
+        auto& receptionCacheEntry = receptionCacheEntries->at(radio->getId());
+        const IArrival *arrival = receptionCacheEntry.arrival;
+        if (arrival != nullptr && !(arrival->getEndTime() < startTime || endTime < arrival->getStartTime()))
+            interferingTransmissions->push_back(transmissionCacheEntry.transmission);
     }
     return interferingTransmissions;
 }

@@ -117,23 +117,6 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
     cMessage *removeNonInterferingTransmissionsTimer;
     //@}
 
-    /** @name State */
-    //@{
-    /**
-     * The list of radios that can transmit and receive radio signals on the
-     * radio medium. The radios follow each other in the order of their unique
-     * id. Radios are only removed from the beginning. This list may contain
-     * nullptr values.
-     */
-    std::vector<const IRadio *> radios;
-    /**
-     * The list of ongoing transmissions on the radio medium. The transmissions
-     * follow each other in the order of their unique id. Transmissions are only
-     * removed from the beginning. This list doesn't contain nullptr values.
-     */
-    std::vector<const ITransmission *> transmissions;
-    //@}
-
     /** @name Cache */
     //@{
     /**
@@ -145,7 +128,7 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
      */
     mutable INeighborCache *neighborCache;
     /**
-     * Caches intermediate results of the ongoing communication for all radios.
+     * Caches list of radios and transmissions along with intermediate results.
      */
     mutable ICommunicationCache *communicationCache;
     //@}
@@ -255,6 +238,11 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
     virtual void addTransmission(const IRadio *transmitter, const ITransmission *transmission);
 
     /**
+     * Removes a transmission from the radio medium.
+     */
+    virtual void removeTransmission(const ITransmission *transmission);
+
+    /**
      * Creates a new signal for the transmitter.
      */
     virtual ISignal *createTransmitterSignal(const IRadio *radio, Packet *packet);
@@ -306,15 +294,15 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
      */
     virtual void removeNonInterferingTransmissions();
 
-    virtual const std::vector<const IReception *> *computeInterferingReceptions(const IListening *listening, const std::vector<const ITransmission *> *transmissions) const;
-    virtual const std::vector<const IReception *> *computeInterferingReceptions(const IReception *reception, const std::vector<const ITransmission *> *transmissions) const;
+    virtual const std::vector<const IReception *> *computeInterferingReceptions(const IListening *listening) const;
+    virtual const std::vector<const IReception *> *computeInterferingReceptions(const IReception *reception) const;
 
     virtual const IReception *computeReception(const IRadio *receiver, const ITransmission *transmission) const;
-    virtual const IInterference *computeInterference(const IRadio *receiver, const IListening *listening, const std::vector<const ITransmission *> *transmissions) const;
-    virtual const IInterference *computeInterference(const IRadio *receiver, const IListening *listening, const ITransmission *transmission, const std::vector<const ITransmission *> *transmissions) const;
-    virtual const IReceptionDecision *computeReceptionDecision(const IRadio *receiver, const IListening *listening, const ITransmission *transmission, IRadioSignal::SignalPart part, const std::vector<const ITransmission *> *transmissions) const;
-    virtual const IReceptionResult *computeReceptionResult(const IRadio *receiver, const IListening *listening, const ITransmission *transmission, const std::vector<const ITransmission *> *transmissions) const;
-    virtual const IListeningDecision *computeListeningDecision(const IRadio *receiver, const IListening *listening, const std::vector<const ITransmission *> *transmissions) const;
+    virtual const IInterference *computeInterference(const IRadio *receiver, const IListening *listening) const;
+    virtual const IInterference *computeInterference(const IRadio *receiver, const IListening *listening, const ITransmission *transmission) const;
+    virtual const IReceptionDecision *computeReceptionDecision(const IRadio *receiver, const IListening *listening, const ITransmission *transmission, IRadioSignal::SignalPart part) const;
+    virtual const IReceptionResult *computeReceptionResult(const IRadio *receiver, const IListening *listening, const ITransmission *transmission) const;
+    virtual const IListeningDecision *computeListeningDecision(const IRadio *receiver, const IListening *listening) const;
     //@}
 
   public:
