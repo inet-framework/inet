@@ -432,16 +432,6 @@ bool Tcp::checkCrc(Packet *packet)
     throw cRuntimeError("unknown CRC mode: %d", tcpHeader->getCrcMode());
 }
 
-bool Tcp::isUpperMessage(cMessage *msg)
-{
-    return msg->arrivedOn("appIn");
-}
-
-bool Tcp::isLowerMessage(cMessage *msg)
-{
-    return msg->arrivedOn("ipIn");
-}
-
 void Tcp::refreshDisplay() const
 {
     OperationalBase::refreshDisplay();
