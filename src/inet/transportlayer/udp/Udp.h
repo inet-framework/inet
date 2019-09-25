@@ -179,13 +179,13 @@ class INET_API Udp : public TransportProtocolBase
     virtual void processUDPPacket(Packet *udpPacket);
 
     // process packets from application
-    virtual void handleUpperPacket(Packet *appData);
+    virtual void handleUpperPacket(Packet *appData) override;
 
     // process packets from network layr
-    virtual void handleLowerPacket(Packet *appData);
+    virtual void handleLowerPacket(Packet *appData) override;
 
     // process commands from application
-    virtual void handleUpperCommand(cMessage *msg);
+    virtual void handleUpperCommand(cMessage *msg) override;
 
     // create a blank Udp packet; override to subclass UdpHeader
     virtual UdpHeader *createUDPPacket();
