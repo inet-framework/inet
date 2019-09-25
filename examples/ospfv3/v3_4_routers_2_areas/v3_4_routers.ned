@@ -24,6 +24,8 @@ network v3_4_routers_2_areas
                 config = xml("<config>"+
                             "<interface among='Router1 Router2' address='10.10.10.x' netmask='255.255.255.0' />"+
                             "<interface among='Router2 Router3' address='10.10.20.x' netmask='255.255.255.0' />"+
+                            "<interface among='Router3 Router4' address='10.10.30.x' netmask='255.255.255.0' />"+
+                            "<interface among='Router3 Router5' address='10.10.40.x' netmask='255.255.255.0' />"+
                             "</config>");
                 @display("p=147,54");
         }
