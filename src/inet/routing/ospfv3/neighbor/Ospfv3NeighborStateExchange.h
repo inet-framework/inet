@@ -14,11 +14,13 @@ class INET_API Ospfv3NeighborStateExchange : public Ospfv3NeighborState
      * Link state requests may be sent in this state. Flooding procedure works on all adjacencies.
      */
   public:
-    void processEvent(Ospfv3Neighbor* neighbor, Ospfv3Neighbor::Ospfv3NeighborEventType event) override;
+    virtual void processEvent(Ospfv3Neighbor* neighbor, Ospfv3Neighbor::Ospfv3NeighborEventType event) override;
     virtual Ospfv3Neighbor::Ospfv3NeighborStateType getState() const override { return Ospfv3Neighbor::EXCHANGE_STATE; }
-    std::string getNeighborStateString(){return std::string("Ospfv3NeighborStateExchange");};
+    virtual std::string getNeighborStateString() override { return std::string("Ospfv3NeighborStateExchange"); }
     ~Ospfv3NeighborStateExchange(){};
 };
 
-}//namespace inet
+} //namespace inet
+
 #endif
+

@@ -13,11 +13,13 @@ class INET_API Ospfv3NeighborStateFull : public Ospfv3NeighborState
      * Full adjacency, they will appear in router and network LSAs.
      */
   public:
-    void processEvent(Ospfv3Neighbor* neighbor, Ospfv3Neighbor::Ospfv3NeighborEventType event) override;
+    virtual void processEvent(Ospfv3Neighbor* neighbor, Ospfv3Neighbor::Ospfv3NeighborEventType event) override;
     virtual Ospfv3Neighbor::Ospfv3NeighborStateType getState() const override { return Ospfv3Neighbor::FULL_STATE; }
-    std::string getNeighborStateString(){return std::string("Ospfv3NeighborStateFull");};
+    virtual std::string getNeighborStateString() override { return std::string("Ospfv3NeighborStateFull"); }
     ~Ospfv3NeighborStateFull(){};
 };
 
 }//namespace inet
+
 #endif
+

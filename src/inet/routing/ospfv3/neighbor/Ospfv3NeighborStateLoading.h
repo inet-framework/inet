@@ -13,11 +13,13 @@ class INET_API Ospfv3NeighborStateLoading : public Ospfv3NeighborState
      * LSRs are sent to the neighbor for LSAs that have been discovered but not received.
      */
   public:
-    void processEvent(Ospfv3Neighbor* neighbor, Ospfv3Neighbor::Ospfv3NeighborEventType event) override;
+    virtual void processEvent(Ospfv3Neighbor* neighbor, Ospfv3Neighbor::Ospfv3NeighborEventType event) override;
     virtual Ospfv3Neighbor::Ospfv3NeighborStateType getState() const override { return Ospfv3Neighbor::LOADING_STATE; }
-    std::string getNeighborStateString(){return std::string("Ospfv3NeighborStateLoading");};
+    virtual std::string getNeighborStateString() override { return std::string("Ospfv3NeighborStateLoading"); }
     ~Ospfv3NeighborStateLoading(){};
 };
 
 }//namespace inet
+
 #endif
+

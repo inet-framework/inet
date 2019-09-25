@@ -15,11 +15,13 @@ class INET_API Ospfv3NeighborStateInit : public Ospfv3NeighborState
      * in this or higher states are listed in hello.
      */
   public:
-    void processEvent(Ospfv3Neighbor* neighbor, Ospfv3Neighbor::Ospfv3NeighborEventType event) override;
+    virtual void processEvent(Ospfv3Neighbor* neighbor, Ospfv3Neighbor::Ospfv3NeighborEventType event) override;
     virtual Ospfv3Neighbor::Ospfv3NeighborStateType getState() const override { return Ospfv3Neighbor::INIT_STATE; }
-    std::string getNeighborStateString(){return std::string("Ospfv3NeighborStateInit");};
+    virtual std::string getNeighborStateString() override { return std::string("Ospfv3NeighborStateInit"); }
     ~Ospfv3NeighborStateInit(){};
 };
 
 }//namespace inet
+
 #endif
+

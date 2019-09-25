@@ -15,11 +15,13 @@ class INET_API Ospfv3NeighborStateExStart : public Ospfv3NeighborState
      * this or higher states are called adjacencies.
      */
   public:
-    void processEvent(Ospfv3Neighbor* neighbor, Ospfv3Neighbor::Ospfv3NeighborEventType event) override;
+    virtual void processEvent(Ospfv3Neighbor* neighbor, Ospfv3Neighbor::Ospfv3NeighborEventType event) override;
     virtual Ospfv3Neighbor::Ospfv3NeighborStateType getState() const override { return Ospfv3Neighbor::EXCHANGE_START_STATE; }
-    std::string getNeighborStateString(){return std::string("Ospfv3NeighborStateExStart");};
+    virtual std::string getNeighborStateString() override { return std::string("Ospfv3NeighborStateExStart"); }
     ~Ospfv3NeighborStateExStart(){};
 };
 
 }//namespace inet
+
 #endif
+

@@ -14,12 +14,13 @@ class INET_API Ospfv3NeighborStateAttempt : public Ospfv3NeighborState
      * should be made to establish connection. This is done by sending hello in hello intervals.
      */
   public:
-    void processEvent(Ospfv3Neighbor* neighbor, Ospfv3Neighbor::Ospfv3NeighborEventType event) override;
+    virtual void processEvent(Ospfv3Neighbor* neighbor, Ospfv3Neighbor::Ospfv3NeighborEventType event) override;
     virtual Ospfv3Neighbor::Ospfv3NeighborStateType getState() const override { return Ospfv3Neighbor::ATTEMPT_STATE; }
-    std::string getNeighborStateString(){return std::string("Ospfv3NeighborStateAttempt");};
+    virtual std::string getNeighborStateString() override { return std::string("Ospfv3NeighborStateAttempt"); }
     ~Ospfv3NeighborStateAttempt(){};
-
 };
 
 }//namespace inet
+
 #endif
+

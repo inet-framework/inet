@@ -14,12 +14,13 @@ class INET_API Ospfv3NeighborStateDown : public Ospfv3NeighborState
      * be sent to Down neighbors but at a reduced rate.
      */
   public:
-    void processEvent(Ospfv3Neighbor* neighbor, Ospfv3Neighbor::Ospfv3NeighborEventType event) override;
+    virtual void processEvent(Ospfv3Neighbor* neighbor, Ospfv3Neighbor::Ospfv3NeighborEventType event) override;
     virtual Ospfv3Neighbor::Ospfv3NeighborStateType getState() const override { return Ospfv3Neighbor::DOWN_STATE; }
-    std::string getNeighborStateString(){return std::string("Ospfv3NeighborStateDown");};
+    virtual std::string getNeighborStateString() override { return std::string("Ospfv3NeighborStateDown"); }
     ~Ospfv3NeighborStateDown(){};
-
 };
 
 }//namespace inet
+
 #endif
+
