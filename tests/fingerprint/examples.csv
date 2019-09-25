@@ -383,6 +383,10 @@
 /examples/mpls/testte_routing/,      -f omnetpp.ini -c General -r 0,                10s,             730c-a368/tplx, PASS,
 /examples/mpls/testte_tunnel/,       -f omnetpp.ini -c General -r 0,                50s,             44a8-5786/tplx, PASS,
 
+/examples/communicationcache/,       -f omnetpp.ini -c ReferenceCommunicationCache -r 0,  10s,       2f5a-2d0e/tplx, PASS, wireless
+/examples/communicationcache/,       -f omnetpp.ini -c MapCommunicationCache -r 0,        10s,       2f5a-2d0e/tplx, PASS, wireless
+/examples/communicationcache/,       -f omnetpp.ini -c VectorCommunicationCache -r 0,     10s,       2f5a-2d0e/tplx, PASS, wireless
+
 /examples/neighborcache/,            -f omnetpp.ini -c WithoutNeighborCache -r 0,      100s,         c0c5-f462/tplx, PASS, wireless
 /examples/neighborcache/,            -f omnetpp.ini -c QuadTreeNeighborCache -r 0,     100s,         0a95-02db/tplx, PASS, wireless
 /examples/neighborcache/,            -f omnetpp.ini -c NeighborListNeighborCache -r 0, 100s,         242a-d860/tplx, PASS, wireless
