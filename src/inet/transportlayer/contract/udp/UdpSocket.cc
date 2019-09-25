@@ -37,29 +37,7 @@ UdpSocket::UdpSocket()
 {
     // don't allow user-specified socketIds because they may conflict with
     // automatically assigned ones.
-    socketId = generateSocketId();
-}
-
-int UdpSocket::generateSocketId()
-{
-    return getEnvir()->getUniqueNumber();
-}
-
-void UdpSocket::sendToUDP(cMessage *msg)
-{
-    if (!gateToUdp)
-        throw cRuntimeError("UdpSocket: setOutputGate() must be invoked before socket can be used");
-
-    cObject *ctrl = msg->getControlInfo();
-    EV_TRACE << "UdpSocket: Send (" << msg->getClassName() << ")" << msg->getFullName();
-    if (ctrl)
-        EV_TRACE << "  control info: (" << ctrl->getClassName() << ")" << ctrl->getFullName();
-    EV_TRACE << endl;
-
-    auto& tags = getTags(msg);
-    tags.addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::udp);
-    tags.addTagIfAbsent<SocketReq>()->setSocketId(socketId);
-    check_and_cast<cSimpleModule *>(gateToUdp->getOwnerModule())->send(msg, gateToUdp);
+    socketId = getEnvir()->getUniqueNumber();
 }
 
 void UdpSocket::bind(int localPort)
@@ -132,14 +110,9 @@ void UdpSocket::destroy()
     sendToUDP(request);
 }
 
-void UdpSocket::setBroadcast(bool broadcast)
-{
-    auto request = new Request("setBroadcast", UDP_C_SETOPTION);
-    UdpSetBroadcastCommand *ctrl = new UdpSetBroadcastCommand();
-    ctrl->setBroadcast(broadcast);
-    request->setControlInfo(ctrl);
-    sendToUDP(request);
-}
+// ########################
+// UDP Socket Options Start
+// ########################
 
 void UdpSocket::setTimeToLive(int ttl)
 {
@@ -155,6 +128,15 @@ void UdpSocket::setTypeOfService(unsigned char tos)
     auto request = new Request("setTOS", UDP_C_SETOPTION);
     UdpSetTypeOfServiceCommand *ctrl = new UdpSetTypeOfServiceCommand();
     ctrl->setTos(tos);
+    request->setControlInfo(ctrl);
+    sendToUDP(request);
+}
+
+void UdpSocket::setBroadcast(bool broadcast)
+{
+    auto request = new Request("setBroadcast", UDP_C_SETOPTION);
+    UdpSetBroadcastCommand *ctrl = new UdpSetBroadcastCommand();
+    ctrl->setBroadcast(broadcast);
     request->setControlInfo(ctrl);
     sendToUDP(request);
 }
@@ -198,24 +180,6 @@ void UdpSocket::joinMulticastGroup(const L3Address& multicastAddr, int interface
     sendToUDP(request);
 }
 
-void UdpSocket::joinLocalMulticastGroups(MulticastGroupList mgl)
-{
-    if (mgl.size() > 0) {
-        UdpJoinMulticastGroupsCommand *ctrl = new UdpJoinMulticastGroupsCommand();
-        ctrl->setMulticastAddrArraySize(mgl.size());
-        ctrl->setInterfaceIdArraySize(mgl.size());
-
-        for (unsigned int j = 0; j < mgl.size(); ++j) {
-            ctrl->setMulticastAddr(j, mgl[j].multicastAddr);
-            ctrl->setInterfaceId(j, mgl[j].interfaceId);
-        }
-
-        auto request = new Request("joinMulticastGroups", UDP_C_SETOPTION);
-        request->setControlInfo(ctrl);
-        sendToUDP(request);
-    }
-}
-
 void UdpSocket::leaveMulticastGroup(const L3Address& multicastAddr)
 {
     auto request = new Request("leaveMulticastGroups", UDP_C_SETOPTION);
@@ -224,22 +188,6 @@ void UdpSocket::leaveMulticastGroup(const L3Address& multicastAddr)
     ctrl->setMulticastAddr(0, multicastAddr);
     request->setControlInfo(ctrl);
     sendToUDP(request);
-}
-
-void UdpSocket::leaveLocalMulticastGroups(MulticastGroupList mgl)
-{
-    if (mgl.size() > 0) {
-        UdpLeaveMulticastGroupsCommand *ctrl = new UdpLeaveMulticastGroupsCommand();
-        ctrl->setMulticastAddrArraySize(mgl.size());
-
-        for (unsigned int j = 0; j < mgl.size(); ++j) {
-            ctrl->setMulticastAddr(j, mgl[j].multicastAddr);
-        }
-
-        auto request = new Request("leaveMulticastGroups", UDP_C_SETOPTION);
-        request->setControlInfo(ctrl);
-        sendToUDP(request);
-    }
 }
 
 void UdpSocket::blockMulticastSources(int interfaceId, const L3Address& multicastAddr, const std::vector<L3Address>& sourceList)
@@ -268,10 +216,10 @@ void UdpSocket::unblockMulticastSources(int interfaceId, const L3Address& multic
     sendToUDP(request);
 }
 
-void UdpSocket::joinMulticastSources(int interfaceId, const L3Address& multicastAddr, const std::vector<L3Address>& sourceList)
+void UdpSocket::leaveMulticastSources(int interfaceId, const L3Address& multicastAddr, const std::vector<L3Address>& sourceList)
 {
-    auto request = new Request("joinMulticastSources", UDP_C_SETOPTION);
-    UdpJoinMulticastSourcesCommand *ctrl = new UdpJoinMulticastSourcesCommand();
+    auto request = new Request("leaveMulticastSources", UDP_C_SETOPTION);
+    UdpLeaveMulticastSourcesCommand *ctrl = new UdpLeaveMulticastSourcesCommand();
     ctrl->setInterfaceId(interfaceId);
     ctrl->setMulticastAddr(multicastAddr);
     ctrl->setSourceListArraySize(sourceList.size());
@@ -281,10 +229,10 @@ void UdpSocket::joinMulticastSources(int interfaceId, const L3Address& multicast
     sendToUDP(request);
 }
 
-void UdpSocket::leaveMulticastSources(int interfaceId, const L3Address& multicastAddr, const std::vector<L3Address>& sourceList)
+void UdpSocket::joinMulticastSources(int interfaceId, const L3Address& multicastAddr, const std::vector<L3Address>& sourceList)
 {
-    auto request = new Request("leaveMulticastSources", UDP_C_SETOPTION);
-    UdpLeaveMulticastSourcesCommand *ctrl = new UdpLeaveMulticastSourcesCommand();
+    auto request = new Request("joinMulticastSources", UDP_C_SETOPTION);
+    UdpJoinMulticastSourcesCommand *ctrl = new UdpJoinMulticastSourcesCommand();
     ctrl->setInterfaceId(interfaceId);
     ctrl->setMulticastAddr(multicastAddr);
     ctrl->setSourceListArraySize(sourceList.size());
@@ -309,11 +257,61 @@ void UdpSocket::setMulticastSourceFilter(int interfaceId, const L3Address& multi
     sendToUDP(request);
 }
 
-bool UdpSocket::belongsToSocket(cMessage *msg) const
+// Join to "local" multicast group
+void UdpSocket::joinLocalMulticastGroups(MulticastGroupList mgl)
 {
+    if (mgl.size() > 0) {
+        UdpJoinMulticastGroupsCommand *ctrl = new UdpJoinMulticastGroupsCommand();
+        ctrl->setMulticastAddrArraySize(mgl.size());
+        ctrl->setInterfaceIdArraySize(mgl.size());
+
+        for (unsigned int j = 0; j < mgl.size(); ++j) {
+            ctrl->setMulticastAddr(j, mgl[j].multicastAddr);
+            ctrl->setInterfaceId(j, mgl[j].interfaceId);
+        }
+
+        auto request = new Request("joinMulticastGroups", UDP_C_SETOPTION);
+        request->setControlInfo(ctrl);
+        sendToUDP(request);
+    }
+}
+
+// Leave from "local" multicast group
+void UdpSocket::leaveLocalMulticastGroups(MulticastGroupList mgl)
+{
+    if (mgl.size() > 0) {
+        UdpLeaveMulticastGroupsCommand *ctrl = new UdpLeaveMulticastGroupsCommand();
+        ctrl->setMulticastAddrArraySize(mgl.size());
+
+        for (unsigned int j = 0; j < mgl.size(); ++j) {
+            ctrl->setMulticastAddr(j, mgl[j].multicastAddr);
+        }
+
+        auto request = new Request("leaveMulticastGroups", UDP_C_SETOPTION);
+        request->setControlInfo(ctrl);
+        sendToUDP(request);
+    }
+}
+
+// ######################
+// UDP Socket Options end
+// ######################
+
+void UdpSocket::sendToUDP(cMessage *msg)
+{
+    if (!gateToUdp)
+        throw cRuntimeError("UdpSocket: setOutputGate() must be invoked before socket can be used");
+
+    cObject *ctrl = msg->getControlInfo();
+    EV_TRACE << "UdpSocket: Send (" << msg->getClassName() << ")" << msg->getFullName();
+    if (ctrl)
+        EV_TRACE << "  control info: (" << ctrl->getClassName() << ")" << ctrl->getFullName();
+    EV_TRACE << endl;
+
     auto& tags = getTags(msg);
-    auto socketInd = tags.findTag<SocketInd>();
-    return socketInd != nullptr && socketInd->getSocketId() == socketId;
+    tags.addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::udp);
+    tags.addTagIfAbsent<SocketReq>()->setSocketId(socketId);
+    check_and_cast<cSimpleModule *>(gateToUdp->getOwnerModule())->send(msg, gateToUdp);
 }
 
 std::string UdpSocket::getReceivedPacketInfo(Packet *pk)
@@ -371,6 +369,14 @@ void UdpSocket::processMessage(cMessage *msg)
             break;
     }
 }
+
+bool UdpSocket::belongsToSocket(cMessage *msg) const
+{
+    auto& tags = getTags(msg);
+    auto socketInd = tags.findTag<SocketInd>();
+    return socketInd != nullptr && socketInd->getSocketId() == socketId;
+}
+
 
 } // namespace inet
 

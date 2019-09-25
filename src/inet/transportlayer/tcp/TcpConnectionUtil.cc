@@ -37,6 +37,8 @@
 #include "inet/transportlayer/tcp/TcpSackRexmitQueue.h"
 #include "inet/transportlayer/tcp/TcpSendQueue.h"
 #include "inet/transportlayer/tcp_common/TcpHeader.h"
+#include "inet/networklayer/common/DscpTag_m.h"
+#include "inet/networklayer/common/HopLimitTag_m.h"
 
 namespace inet {
 namespace tcp {
@@ -272,29 +274,48 @@ void TcpConnection::sendToIP(Packet *packet, const Ptr<TcpHeader>& tcpseg)
 
     IL3AddressType *addressType = remoteAddr.getAddressType();
     packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
+
+    if (ttl != -1 && packet->findTag<HopLimitReq>() == nullptr)
+        packet->addTag<HopLimitReq>()->setHopLimit(ttl);
+
+    if (packet->findTag<DscpReq>() == nullptr)
+        packet->addTag<DscpReq>()->setDifferentiatedServicesCodePoint(typeOfService);
+
     auto addresses = packet->addTagIfAbsent<L3AddressReq>();
     addresses->setSrcAddress(localAddr);
     addresses->setDestAddress(remoteAddr);
+
     tcpseg->setCrc(0);
     tcpseg->setCrcMode(tcpMain->crcMode);
+
     insertTransportProtocolHeader(packet, Protocol::tcp, tcpseg);
+
     tcpMain->send(packet, "ipOut");
 }
 
-void TcpConnection::sendToIP(Packet *pkt, const Ptr<TcpHeader>& tcpseg, L3Address src, L3Address dest)
+void TcpConnection::sendToIP(Packet *packet, const Ptr<TcpHeader>& tcpseg, L3Address src, L3Address dest)
 {
     EV_STATICCONTEXT;
     EV_INFO << "Sending: ";
-    printSegmentBrief(pkt, tcpseg);
+    printSegmentBrief(packet, tcpseg);
 
     IL3AddressType *addressType = dest.getAddressType();
     ASSERT(tcpseg->getChunkLength() == tcpseg->getHeaderLength());
-    pkt->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
-    auto addresses = pkt->addTagIfAbsent<L3AddressReq>();
+    packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
+
+    if (ttl != -1 && packet->findTag<HopLimitReq>() == nullptr)
+        packet->addTag<HopLimitReq>()->setHopLimit(ttl);
+
+    if (packet->findTag<DscpReq>() == nullptr)
+        packet->addTag<DscpReq>()->setDifferentiatedServicesCodePoint(typeOfService);
+
+    auto addresses = packet->addTagIfAbsent<L3AddressReq>();
     addresses->setSrcAddress(src);
     addresses->setDestAddress(dest);
-    insertTransportProtocolHeader(pkt, Protocol::tcp, tcpseg);
-    tcpMain->send(pkt, "ipOut");
+
+    insertTransportProtocolHeader(packet, Protocol::tcp, tcpseg);
+
+    tcpMain->send(packet, "ipOut");
 }
 
 void TcpConnection::signalConnectionTimeout()

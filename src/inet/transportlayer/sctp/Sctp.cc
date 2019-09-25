@@ -85,7 +85,7 @@ void Sctp::bindPortForUDP()
     EV_INFO << "Binding to UDP port " << SCTP_UDP_PORT << endl;
 
     udpSocket.setOutputGate(gate("ipOut"));
-    udpSockId = udpSocket.generateSocketId();
+    udpSockId = getEnvir()->getUniqueNumber();
     EV_INFO << "UDP socket Id is " << udpSocket.getSocketId() << endl;
   //  udpSocket.bind(SCTP_UDP_PORT);
 }

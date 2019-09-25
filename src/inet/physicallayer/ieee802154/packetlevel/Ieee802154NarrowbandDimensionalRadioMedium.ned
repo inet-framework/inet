@@ -23,6 +23,7 @@ import inet.physicallayer.common.packetlevel.RadioMedium;
 module Ieee802154NarrowbandDimensionalRadioMedium extends RadioMedium
 {
     parameters:
+        analogModel.typename = default("DimensionalAnalogModel");
         backgroundNoise.typename = default("IsotropicDimensionalBackgroundNoise");
 
         mediumLimitCache.centerFrequency = 2450 MHz;

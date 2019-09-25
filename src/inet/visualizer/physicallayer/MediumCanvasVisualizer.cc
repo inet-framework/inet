@@ -30,7 +30,6 @@
 #include "inet/visualizer/physicallayer/MediumCanvasVisualizer.h"
 
 namespace inet {
-
 namespace visualizer {
 
 using namespace inet::physicallayer;
@@ -306,6 +305,7 @@ std::pair<WpHz, WpHz> MediumCanvasVisualizer::computePowerForDirectionalAntenna(
 
 void MediumCanvasVisualizer::updateSpectrumFigureFrequencyLimits(const ITransmission *transmission)
 {
+#ifdef WITH_RADIO
     if (auto dimensionalTransmission = dynamic_cast<const DimensionalTransmission *>(transmission)) {
         const auto& powerFunction = dimensionalTransmission->getPower();
         powerFunction->partition(powerFunction->getDomain(), [&] (const Interval<simsec, Hz>& i, const IFunction<WpHz, Domain<simsec, Hz>> *f) {
@@ -317,6 +317,7 @@ void MediumCanvasVisualizer::updateSpectrumFigureFrequencyLimits(const ITransmis
             spectrumMaxFrequency = std::max(spectrumMaxFrequency, std::get<1>(i.getUpper()));
         });
     }
+#endif // WITH_RADIO
 }
 
 void MediumCanvasVisualizer::updateSpectrumFigurePowerLimits(const Interval<m, m, m, simsec, Hz>& i, const IFunction<WpHz, Domain<m, m, m, simsec, Hz>> *f)
@@ -757,6 +758,5 @@ void MediumCanvasVisualizer::handleSignalArrivalEnded(const IReception *receptio
 }
 
 } // namespace visualizer
-
 } // namespace inet
 

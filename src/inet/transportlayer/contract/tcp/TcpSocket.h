@@ -154,12 +154,12 @@ class INET_API TcpSocket : public ISocket
 
   protected:
     int connId = -1;
-    State sockstate;
+    State sockstate = NOT_BOUND;
 
     L3Address localAddr;
-    int localPrt;
+    int localPrt = -1;
     L3Address remoteAddr;
-    int remotePrt;
+    int remotePrt = -1;
 
     ICallback *cb = nullptr;
     void *userData = nullptr;
@@ -327,6 +327,17 @@ class INET_API TcpSocket : public ISocket
      * called.
      */
     void requestStatus();
+
+    /**
+     * Set the TTL (Ipv6: Hop Limit) field on sent packets.
+     */
+    void setTimeToLive(int ttl);
+
+    /**
+     * Sets the Ipv4 Type of Service / Ipv6 Traffic Class fields of packets
+     * sent from the TCP socket.
+     */
+    void setTypeOfService(unsigned char tos);
 
     /**
      * Required to re-connect with a "used" TcpSocket object.

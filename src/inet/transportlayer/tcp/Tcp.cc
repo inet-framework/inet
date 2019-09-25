@@ -51,27 +51,13 @@ Define_Module(Tcp);
 simsignal_t Tcp::tcpConnectionAddedSignal = registerSignal("tcpConnectionAdded");
 simsignal_t Tcp::tcpConnectionRemovedSignal = registerSignal("tcpConnectionRemoved");
 
-#define EPHEMERAL_PORTRANGE_START    1024
-#define EPHEMERAL_PORTRANGE_END      5000
-
-static std::ostream& operator<<(std::ostream& os, const Tcp::SockPair& sp)
+Tcp::~Tcp()
 {
-    os << "loc=" << sp.localAddr << ":" << sp.localPort << " "
-       << "rem=" << sp.remoteAddr << ":" << sp.remotePort;
-    return os;
-}
-
-static std::ostream& operator<<(std::ostream& os, const Tcp::AppConnKey& app)
-{
-    os << "socketId=" << app.socketId;
-    return os;
-}
-
-static std::ostream& operator<<(std::ostream& os, const TcpConnection& conn)
-{
-    os << "socketId=" << conn.socketId << " " << TcpConnection::stateName(conn.getFsmState())
-       << " state={" << conn.getState()->str() << "}";
-    return os;
+    while (!tcpAppConnMap.empty()) {
+        auto i = tcpAppConnMap.begin();
+        delete i->second;
+        tcpAppConnMap.erase(i);
+    }
 }
 
 void Tcp::initialize(int stage)
@@ -79,17 +65,17 @@ void Tcp::initialize(int stage)
     OperationalBase::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
-        lastEphemeralPort = EPHEMERAL_PORTRANGE_START;
-        WATCH(lastEphemeralPort);
-
-        WATCH_PTRMAP(tcpConnMap);
-        WATCH_PTRMAP(tcpAppConnMap);
-
-        useDataNotification = par("useDataNotification");
-
         const char *crcModeString = par("crcMode");
         crcMode = parseCrcMode(crcModeString, false);
+
+        lastEphemeralPort = EPHEMERAL_PORTRANGE_START;
+
         msl = par("msl");
+        useDataNotification = par("useDataNotification");
+
+        WATCH(lastEphemeralPort);
+        WATCH_PTRMAP(tcpConnMap);
+        WATCH_PTRMAP(tcpAppConnMap);
     }
     else if (stage == INITSTAGE_TRANSPORT_LAYER) {
         registerService(Protocol::tcp, gate("appIn"), gate("ipIn"));
@@ -109,70 +95,21 @@ void Tcp::initialize(int stage)
     }
 }
 
-Tcp::~Tcp()
+void Tcp::finish()
 {
-    while (!tcpAppConnMap.empty()) {
-        auto i = tcpAppConnMap.begin();
-        delete i->second;
-        tcpAppConnMap.erase(i);
-    }
-}
-
-// packet contains the tcpHeader
-bool Tcp::checkCrc(Packet *packet)
-{
-    auto tcpHeader = packet->peekAtFront<TcpHeader>();
-
-    switch (tcpHeader->getCrcMode()) {
-        case CRC_COMPUTED: {
-            //check CRC:
-            auto networkProtocol = packet->getTag<NetworkProtocolInd>()->getProtocol();
-            const std::vector<uint8_t> tcpBytes = packet->peekDataAsBytes()->getBytes();
-            auto pseudoHeader = makeShared<TransportPseudoHeader>();
-            L3Address srcAddr = packet->getTag<L3AddressInd>()->getSrcAddress();
-            L3Address destAddr = packet->getTag<L3AddressInd>()->getDestAddress();
-            pseudoHeader->setSrcAddress(srcAddr);
-            pseudoHeader->setDestAddress(destAddr);
-            ASSERT(networkProtocol);
-            pseudoHeader->setNetworkProtocolId(networkProtocol->getId());
-            pseudoHeader->setProtocolId(IP_PROT_TCP);
-            pseudoHeader->setPacketLength(B(tcpBytes.size()));
-            // pseudoHeader length: ipv4: 12 bytes, ipv6: 40 bytes, generic: ???
-            if (networkProtocol == &Protocol::ipv4)
-                pseudoHeader->setChunkLength(B(12));
-            else if (networkProtocol == &Protocol::ipv6)
-                pseudoHeader->setChunkLength(B(40));
-            else
-                throw cRuntimeError("Unknown network protocol: %s", networkProtocol->getName());
-            MemoryOutputStream stream;
-            Chunk::serialize(stream, pseudoHeader);
-            Chunk::serialize(stream, packet->peekData());
-            uint16_t crc = TcpIpChecksum::checksum(stream.getData());
-            return (crc == 0);
-        }
-        case CRC_DECLARED_CORRECT:
-            return true;
-        case CRC_DECLARED_INCORRECT:
-            return false;
-        default:
-            break;
-    }
-    throw cRuntimeError("unknown CRC mode: %d", tcpHeader->getCrcMode());
+    EV_INFO << getFullPath() << ": finishing with " << tcpConnMap.size() << " connections open.\n";
 }
 
 void Tcp::handleSelfMessage(cMessage *msg)
 {
     TcpConnection *conn = (TcpConnection *)msg->getContextPointer();
-    bool ret = conn->processTimer(msg);
-    if (!ret)
+    if (!conn->processTimer(msg))
         removeConnection(conn);
 }
 
 void Tcp::handleUpperCommand(cMessage *msg)
 {
-    auto& tags = getTags(msg);
-    int socketId = tags.getTag<SocketReq>()->getSocketId();
-
+    int socketId = getTags(msg).getTag<SocketReq>()->getSocketId();
     TcpConnection *conn = findConnForApp(socketId);
 
     if (!conn) {
@@ -180,20 +117,24 @@ void Tcp::handleUpperCommand(cMessage *msg)
 
         // add into appConnMap here; it'll be added to connMap during processing
         // the OPEN command in TcpConnection's processAppCommand().
-        AppConnKey key;
-        key.socketId = socketId;
-        tcpAppConnMap[key] = conn;
+        tcpAppConnMap[socketId] = conn;
 
         EV_INFO << "Tcp connection created for " << msg << "\n";
     }
-    bool ret = conn->processAppCommand(msg);
-    if (!ret)
+
+    if (!conn->processAppCommand(msg))
         removeConnection(conn);
 }
 
 void Tcp::handleUpperPacket(Packet *packet)
 {
     handleUpperCommand(packet);
+}
+
+TcpConnection *Tcp::findConnForApp(int socketId)
+{
+    auto i = tcpAppConnMap.find(socketId);
+    return i == tcpAppConnMap.end() ? nullptr : i->second;
 }
 
 void Tcp::handleLowerPacket(Packet *packet)
@@ -236,16 +177,6 @@ void Tcp::handleLowerPacket(Packet *packet)
         throw cRuntimeError("Unknown protocol: '%s'", (protocol != nullptr ? protocol->getName() : "<nullptr>"));
 }
 
-bool Tcp::isUpperMessage(cMessage *msg)
-{
-    return msg->arrivedOn("appIn");
-}
-
-bool Tcp::isLowerMessage(cMessage *msg)
-{
-    return msg->arrivedOn("ipIn");
-}
-
 TcpConnection *Tcp::createConnection(int socketId)
 {
     auto moduleType = cModuleType::get("inet.transportlayer.tcp.TcpConnection");
@@ -259,12 +190,246 @@ TcpConnection *Tcp::createConnection(int socketId)
     return module;
 }
 
+void Tcp::removeConnection(TcpConnection *conn)
+{
+    EV_INFO << "Deleting Tcp connection\n";
+
+    tcpAppConnMap.erase(conn->socketId);
+
+    SockPair key2;
+    key2.localAddr = conn->localAddr;
+    key2.remoteAddr = conn->remoteAddr;
+    key2.localPort = conn->localPort;
+    key2.remotePort = conn->remotePort;
+    tcpConnMap.erase(key2);
+
+    // IMPORTANT: usedEphemeralPorts.erase(conn->localPort) is NOT GOOD because it
+    // deletes ALL occurrences of the port from the multiset.
+    auto it = usedEphemeralPorts.find(conn->localPort);
+
+    if (it != usedEphemeralPorts.end())
+        usedEphemeralPorts.erase(it);
+
+    emit(tcpConnectionRemovedSignal, conn);
+    conn->deleteModule();
+}
+
+TcpConnection *Tcp::findConnForSegment(const Ptr<const TcpHeader>& tcpseg, L3Address srcAddr, L3Address destAddr)
+{
+    SockPair key;
+    key.localAddr = destAddr;
+    key.remoteAddr = srcAddr;
+    key.localPort = tcpseg->getDestPort();
+    key.remotePort = tcpseg->getSrcPort();
+    SockPair save = key;
+
+    // try with fully qualified SockPair
+    auto i = tcpConnMap.find(key);
+    if (i != tcpConnMap.end())
+        return i->second;
+
+    // try with localAddr missing (only localPort specified in passive/active open)
+    key.localAddr = L3Address();
+    i = tcpConnMap.find(key);
+
+    if (i != tcpConnMap.end())
+        return i->second;
+
+    // try fully qualified local socket + blank remote socket (for incoming SYN)
+    key = save;
+    key.remoteAddr = L3Address();
+    key.remotePort = -1;
+    i = tcpConnMap.find(key);
+
+    if (i != tcpConnMap.end())
+        return i->second;
+
+    // try with blank remote socket, and localAddr missing (for incoming SYN)
+    key.localAddr = L3Address();
+    i = tcpConnMap.find(key);
+
+    if (i != tcpConnMap.end())
+        return i->second;
+
+    // given up
+    return nullptr;
+}
+
 void Tcp::segmentArrivalWhileClosed(Packet *packet, const Ptr<const TcpHeader>& tcpseg, L3Address srcAddr, L3Address destAddr)
 {
-    TcpConnection *tmp = new TcpConnection(this);
-    tmp->segmentArrivalWhileClosed(packet, tcpseg, srcAddr, destAddr);
-    delete tmp;
+    auto moduleType = cModuleType::get("inet.transportlayer.tcp.TcpConnection");
+    const char *submoduleName = "conn-temp";
+    auto module = check_and_cast<TcpConnection *>(moduleType->create(submoduleName, this));
+    module->finalizeParameters();
+    module->buildInside();
+    module->initConnection(this, -1);
+    module->segmentArrivalWhileClosed(packet, tcpseg, srcAddr, destAddr);
+    module->deleteModule();
     delete packet;
+}
+
+ushort Tcp::getEphemeralPort()
+{
+    // start at the last allocated port number + 1, and search for an unused one
+    ushort searchUntil = lastEphemeralPort++;
+    if (lastEphemeralPort == EPHEMERAL_PORTRANGE_END) // wrap
+        lastEphemeralPort = EPHEMERAL_PORTRANGE_START;
+
+    while (usedEphemeralPorts.find(lastEphemeralPort) != usedEphemeralPorts.end()) {
+        if (lastEphemeralPort == searchUntil) // got back to starting point?
+            throw cRuntimeError("Ephemeral port range %d..%d exhausted, all ports occupied", EPHEMERAL_PORTRANGE_START, EPHEMERAL_PORTRANGE_END);
+
+        lastEphemeralPort++;
+
+        if (lastEphemeralPort == EPHEMERAL_PORTRANGE_END) // wrap
+            lastEphemeralPort = EPHEMERAL_PORTRANGE_START;
+    }
+
+    // found a free one, return it
+    return lastEphemeralPort;
+}
+
+void Tcp::addForkedConnection(TcpConnection *conn, TcpConnection *newConn, L3Address localAddr, L3Address remoteAddr, int localPort, int remotePort)
+{
+    // update conn's socket pair, and register newConn
+    addSockPair(newConn, localAddr, remoteAddr, localPort, remotePort);
+
+    // newConn will live on with the new socketId
+    tcpAppConnMap[newConn->socketId] = newConn;
+}
+
+void Tcp::addSockPair(TcpConnection *conn, L3Address localAddr, L3Address remoteAddr, int localPort, int remotePort)
+{
+    // update addresses/ports in TcpConnection
+    SockPair key;
+    key.localAddr = conn->localAddr = localAddr;
+    key.remoteAddr = conn->remoteAddr = remoteAddr;
+    key.localPort = conn->localPort = localPort;
+    key.remotePort = conn->remotePort = remotePort;
+
+    // make sure connection is unique
+    auto it = tcpConnMap.find(key);
+    if (it != tcpConnMap.end()) {
+        // throw "address already in use" error
+        if (remoteAddr.isUnspecified() && remotePort == -1)
+            throw cRuntimeError("Address already in use: there is already a connection listening on %s:%d",
+                    localAddr.str().c_str(), localPort);
+        else
+            throw cRuntimeError("Address already in use: there is already a connection %s:%d to %s:%d",
+                    localAddr.str().c_str(), localPort, remoteAddr.str().c_str(), remotePort);
+    }
+
+    // then insert it into tcpConnMap
+    tcpConnMap[key] = conn;
+
+    // mark port as used
+    if (localPort >= EPHEMERAL_PORTRANGE_START && localPort < EPHEMERAL_PORTRANGE_END)
+        usedEphemeralPorts.insert(localPort);
+}
+
+void Tcp::updateSockPair(TcpConnection *conn, L3Address localAddr, L3Address remoteAddr, int localPort, int remotePort)
+{
+    // find with existing address/port pair...
+    SockPair key;
+    key.localAddr = conn->localAddr;
+    key.remoteAddr = conn->remoteAddr;
+    key.localPort = conn->localPort;
+    key.remotePort = conn->remotePort;
+    auto it = tcpConnMap.find(key);
+
+    ASSERT(it != tcpConnMap.end() && it->second == conn);
+
+    // ...and remove from the old place in tcpConnMap
+    tcpConnMap.erase(it);
+
+    // then update addresses/ports, and re-insert it with new key into tcpConnMap
+    key.localAddr = conn->localAddr = localAddr;
+    key.remoteAddr = conn->remoteAddr = remoteAddr;
+    ASSERT(conn->localPort == localPort);
+    key.remotePort = conn->remotePort = remotePort;
+    tcpConnMap[key] = conn;
+
+    // localPort doesn't change (see ASSERT above), so there's no need to update usedEphemeralPorts[].
+}
+
+TcpSendQueue *Tcp::createSendQueue()
+{
+    return new TcpSendQueue();
+}
+
+TcpReceiveQueue *Tcp::createReceiveQueue()
+{
+    return new TcpReceiveQueue();
+}
+
+void Tcp::handleStartOperation(LifecycleOperation *operation)
+{
+    //FIXME implementation
+}
+
+void Tcp::handleStopOperation(LifecycleOperation *operation)
+{
+    //FIXME close connections??? yes, because the applications may not close them!!!
+    reset();
+    delayActiveOperationFinish(par("stopOperationTimeout"));
+    startActiveOperationExtraTimeOrFinish(par("stopOperationExtraTime"));
+}
+
+void Tcp::handleCrashOperation(LifecycleOperation *operation)
+{
+    reset();
+}
+
+void Tcp::reset()
+{
+    for (auto & elem : tcpAppConnMap)
+        delete elem.second;
+    tcpAppConnMap.clear();
+    tcpConnMap.clear();
+    usedEphemeralPorts.clear();
+    lastEphemeralPort = EPHEMERAL_PORTRANGE_START;
+}
+
+// packet contains the tcpHeader
+bool Tcp::checkCrc(Packet *packet)
+{
+    auto tcpHeader = packet->peekAtFront<TcpHeader>();
+
+    switch (tcpHeader->getCrcMode()) {
+        case CRC_COMPUTED: {
+            //check CRC:
+            auto networkProtocol = packet->getTag<NetworkProtocolInd>()->getProtocol();
+            const std::vector<uint8_t> tcpBytes = packet->peekDataAsBytes()->getBytes();
+            auto pseudoHeader = makeShared<TransportPseudoHeader>();
+            L3Address srcAddr = packet->getTag<L3AddressInd>()->getSrcAddress();
+            L3Address destAddr = packet->getTag<L3AddressInd>()->getDestAddress();
+            pseudoHeader->setSrcAddress(srcAddr);
+            pseudoHeader->setDestAddress(destAddr);
+            ASSERT(networkProtocol);
+            pseudoHeader->setNetworkProtocolId(networkProtocol->getId());
+            pseudoHeader->setProtocolId(IP_PROT_TCP);
+            pseudoHeader->setPacketLength(B(tcpBytes.size()));
+            // pseudoHeader length: ipv4: 12 bytes, ipv6: 40 bytes, generic: ???
+            if (networkProtocol == &Protocol::ipv4)
+                pseudoHeader->setChunkLength(B(12));
+            else if (networkProtocol == &Protocol::ipv6)
+                pseudoHeader->setChunkLength(B(40));
+            else
+                throw cRuntimeError("Unknown network protocol: %s", networkProtocol->getName());
+            MemoryOutputStream stream;
+            Chunk::serialize(stream, pseudoHeader);
+            Chunk::serialize(stream, packet->peekData());
+            uint16_t crc = TcpIpChecksum::checksum(stream.getData());
+            return (crc == 0);
+        }
+        case CRC_DECLARED_CORRECT:
+            return true;
+        case CRC_DECLARED_INCORRECT:
+            return false;
+        default:
+            break;
+    }
+    throw cRuntimeError("unknown CRC mode: %d", tcpHeader->getCrcMode());
 }
 
 void Tcp::refreshDisplay() const
@@ -367,211 +532,23 @@ void Tcp::refreshDisplay() const
     getDisplayString().setTagArg("t", 0, buf2);
 }
 
-TcpConnection *Tcp::findConnForSegment(const Ptr<const TcpHeader>& tcpseg, L3Address srcAddr, L3Address destAddr)
+std::ostream& operator<<(std::ostream& os, const Tcp::SockPair& sp)
 {
-    SockPair key;
-    key.localAddr = destAddr;
-    key.remoteAddr = srcAddr;
-    key.localPort = tcpseg->getDestPort();
-    key.remotePort = tcpseg->getSrcPort();
-    SockPair save = key;
-
-    // try with fully qualified SockPair
-    auto i = tcpConnMap.find(key);
-    if (i != tcpConnMap.end())
-        return i->second;
-
-    // try with localAddr missing (only localPort specified in passive/active open)
-    key.localAddr = L3Address();
-    i = tcpConnMap.find(key);
-
-    if (i != tcpConnMap.end())
-        return i->second;
-
-    // try fully qualified local socket + blank remote socket (for incoming SYN)
-    key = save;
-    key.remoteAddr = L3Address();
-    key.remotePort = -1;
-    i = tcpConnMap.find(key);
-
-    if (i != tcpConnMap.end())
-        return i->second;
-
-    // try with blank remote socket, and localAddr missing (for incoming SYN)
-    key.localAddr = L3Address();
-    i = tcpConnMap.find(key);
-
-    if (i != tcpConnMap.end())
-        return i->second;
-
-    // given up
-    return nullptr;
+    os << "locSocket=" << sp.localAddr << ":"<< sp.localPort << " "
+       << "remSocket=" << sp.remoteAddr << ":" << sp.remotePort;
+    return os;
 }
 
-TcpConnection *Tcp::findConnForApp(int socketId)
+std::ostream& operator<<(std::ostream& os, const TcpConnection& conn)
 {
-    AppConnKey key;
-    key.socketId = socketId;
-
-    auto i = tcpAppConnMap.find(key);
-    return i == tcpAppConnMap.end() ? nullptr : i->second;
-}
-
-ushort Tcp::getEphemeralPort()
-{
-    // start at the last allocated port number + 1, and search for an unused one
-    ushort searchUntil = lastEphemeralPort++;
-    if (lastEphemeralPort == EPHEMERAL_PORTRANGE_END) // wrap
-        lastEphemeralPort = EPHEMERAL_PORTRANGE_START;
-
-    while (usedEphemeralPorts.find(lastEphemeralPort) != usedEphemeralPorts.end()) {
-        if (lastEphemeralPort == searchUntil) // got back to starting point?
-            throw cRuntimeError("Ephemeral port range %d..%d exhausted, all ports occupied", EPHEMERAL_PORTRANGE_START, EPHEMERAL_PORTRANGE_END);
-
-        lastEphemeralPort++;
-
-        if (lastEphemeralPort == EPHEMERAL_PORTRANGE_END) // wrap
-            lastEphemeralPort = EPHEMERAL_PORTRANGE_START;
-    }
-
-    // found a free one, return it
-    return lastEphemeralPort;
-}
-
-void Tcp::addSockPair(TcpConnection *conn, L3Address localAddr, L3Address remoteAddr, int localPort, int remotePort)
-{
-    // update addresses/ports in TcpConnection
-    SockPair key;
-    key.localAddr = conn->localAddr = localAddr;
-    key.remoteAddr = conn->remoteAddr = remoteAddr;
-    key.localPort = conn->localPort = localPort;
-    key.remotePort = conn->remotePort = remotePort;
-
-    // make sure connection is unique
-    auto it = tcpConnMap.find(key);
-    if (it != tcpConnMap.end()) {
-        // throw "address already in use" error
-        if (remoteAddr.isUnspecified() && remotePort == -1)
-            throw cRuntimeError("Address already in use: there is already a connection listening on %s:%d",
-                    localAddr.str().c_str(), localPort);
-        else
-            throw cRuntimeError("Address already in use: there is already a connection %s:%d to %s:%d",
-                    localAddr.str().c_str(), localPort, remoteAddr.str().c_str(), remotePort);
-    }
-
-    // then insert it into tcpConnMap
-    tcpConnMap[key] = conn;
-
-    // mark port as used
-    if (localPort >= EPHEMERAL_PORTRANGE_START && localPort < EPHEMERAL_PORTRANGE_END)
-        usedEphemeralPorts.insert(localPort);
-}
-
-void Tcp::updateSockPair(TcpConnection *conn, L3Address localAddr, L3Address remoteAddr, int localPort, int remotePort)
-{
-    // find with existing address/port pair...
-    SockPair key;
-    key.localAddr = conn->localAddr;
-    key.remoteAddr = conn->remoteAddr;
-    key.localPort = conn->localPort;
-    key.remotePort = conn->remotePort;
-    auto it = tcpConnMap.find(key);
-
-    ASSERT(it != tcpConnMap.end() && it->second == conn);
-
-    // ...and remove from the old place in tcpConnMap
-    tcpConnMap.erase(it);
-
-    // then update addresses/ports, and re-insert it with new key into tcpConnMap
-    key.localAddr = conn->localAddr = localAddr;
-    key.remoteAddr = conn->remoteAddr = remoteAddr;
-    ASSERT(conn->localPort == localPort);
-    key.remotePort = conn->remotePort = remotePort;
-    tcpConnMap[key] = conn;
-
-    // localPort doesn't change (see ASSERT above), so there's no need to update usedEphemeralPorts[].
-}
-
-void Tcp::addForkedConnection(TcpConnection *conn, TcpConnection *newConn, L3Address localAddr, L3Address remoteAddr, int localPort, int remotePort)
-{
-    // update conn's socket pair, and register newConn
-    addSockPair(newConn, localAddr, remoteAddr, localPort, remotePort);
-
-    // newConn will live on with the new socketId
-    AppConnKey key;
-    key.socketId = newConn->socketId;
-    tcpAppConnMap[key] = newConn;
-}
-
-void Tcp::removeConnection(TcpConnection *conn)
-{
-    EV_INFO << "Deleting Tcp connection\n";
-
-    AppConnKey key;
-    key.socketId = conn->socketId;
-    tcpAppConnMap.erase(key);
-
-    SockPair key2;
-    key2.localAddr = conn->localAddr;
-    key2.remoteAddr = conn->remoteAddr;
-    key2.localPort = conn->localPort;
-    key2.remotePort = conn->remotePort;
-    tcpConnMap.erase(key2);
-
-    // IMPORTANT: usedEphemeralPorts.erase(conn->localPort) is NOT GOOD because it
-    // deletes ALL occurrences of the port from the multiset.
-    auto it = usedEphemeralPorts.find(conn->localPort);
-
-    if (it != usedEphemeralPorts.end())
-        usedEphemeralPorts.erase(it);
-
-    emit(tcpConnectionRemovedSignal, conn);
-    delete conn;
-}
-
-void Tcp::finish()
-{
-    EV_INFO << getFullPath() << ": finishing with " << tcpConnMap.size() << " connections open.\n";
-}
-
-TcpSendQueue *Tcp::createSendQueue()
-{
-    return new TcpSendQueue();
-}
-
-TcpReceiveQueue *Tcp::createReceiveQueue()
-{
-    return new TcpReceiveQueue();
-}
-
-void Tcp::handleStartOperation(LifecycleOperation *operation)
-{
-    //FIXME implementation
-}
-
-void Tcp::handleStopOperation(LifecycleOperation *operation)
-{
-    //FIXME close connections??? yes, because the applications may not close them!!!
-    reset();
-    delayActiveOperationFinish(par("stopOperationTimeout"));
-    startActiveOperationExtraTimeOrFinish(par("stopOperationExtraTime"));
-}
-
-void Tcp::handleCrashOperation(LifecycleOperation *operation)
-{
-    reset();
-}
-
-void Tcp::reset()
-{
-    for (auto & elem : tcpAppConnMap)
-        delete elem.second;
-    tcpAppConnMap.clear();
-    tcpConnMap.clear();
-    usedEphemeralPorts.clear();
-    lastEphemeralPort = EPHEMERAL_PORTRANGE_START;
+    os << "socketId=" << conn.socketId << " ";
+    os << "fsmState=" << TcpConnection::stateName(conn.getFsmState()) << " ";
+    os << "connection=" << (conn.getState() == nullptr ? "<empty>" : conn.getState()->str()) << " ";
+    os << "ttl=" << (conn.ttl == -1 ? "<default>" : std::to_string(conn.ttl)) << " ";
+    return os;
 }
 
 } // namespace tcp
 } // namespace inet
+
 

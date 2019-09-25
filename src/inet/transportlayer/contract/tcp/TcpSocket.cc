@@ -27,21 +27,12 @@ TcpSocket::TcpSocket()
     // don't allow user-specified connIds because they may conflict with
     // automatically assigned ones.
     connId = getEnvir()->getUniqueNumber();
-    sockstate = NOT_BOUND;
-
-    localPrt = remotePrt = -1;
-    cb = nullptr;
-    userData = nullptr;
-
-    gateToTcp = nullptr;
 }
 
 TcpSocket::TcpSocket(cMessage *msg)
 {
     connId = check_and_cast<Indication *>(msg)->getTag<SocketInd>()->getSocketId();
     sockstate = CONNECTED;
-
-    localPrt = remotePrt = -1;
 
     if (msg->getKind() == TCP_I_AVAILABLE) {
         TcpAvailableInfo *availableInfo = check_and_cast<TcpAvailableInfo *>(msg->getControlInfo());
@@ -81,37 +72,6 @@ TcpSocket::~TcpSocket()
         cb->socketDeleted(this);
         cb = nullptr;
     }
-}
-
-const char *TcpSocket::stateName(TcpSocket::State state)
-{
-#define CASE(x)    case x: \
-        s = #x; break
-    const char *s = "unknown";
-    switch (state) {
-        CASE(NOT_BOUND);
-        CASE(BOUND);
-        CASE(LISTENING);
-        CASE(CONNECTING);
-        CASE(CONNECTED);
-        CASE(PEER_CLOSED);
-        CASE(LOCALLY_CLOSED);
-        CASE(CLOSED);
-        CASE(SOCKERROR);
-    }
-    return s;
-#undef CASE
-}
-
-void TcpSocket::sendToTcp(cMessage *msg, int connId)
-{
-    if (!gateToTcp)
-        throw cRuntimeError("TcpSocket: setOutputGate() must be invoked before socket can be used");
-
-    auto& tags = getTags(msg);
-    tags.addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::tcp);
-    tags.addTagIfAbsent<SocketReq>()->setSocketId(connId == -1 ? this->connId : connId);
-    check_and_cast<cSimpleModule *>(gateToTcp->getOwnerModule())->send(msg, gateToTcp);
 }
 
 void TcpSocket::bind(int lPort)
@@ -248,6 +208,43 @@ void TcpSocket::requestStatus()
     sendToTcp(request);
 }
 
+// ########################
+// TCP Socket Options Start
+// ########################
+
+void TcpSocket::setTimeToLive(int ttl)
+{
+    auto request = new Request("setTTL", TCP_C_SETOPTION);
+    TcpSetTimeToLiveCommand *cmd = new TcpSetTimeToLiveCommand();
+    cmd->setTtl(ttl);
+    request->setControlInfo(cmd);
+    sendToTcp(request);
+}
+
+void TcpSocket::setTypeOfService(unsigned char tos)
+{
+    auto request = new Request("setTOS", TCP_C_SETOPTION);
+    TcpTypeOfServiceCommand *cmd = new TcpTypeOfServiceCommand();
+    cmd->setTos(tos);
+    request->setControlInfo(cmd);
+    sendToTcp(request);
+}
+
+// ######################
+// TCP Socket Options End
+// ######################
+
+void TcpSocket::sendToTcp(cMessage *msg, int connId)
+{
+    if (!gateToTcp)
+        throw cRuntimeError("TcpSocket: setOutputGate() must be invoked before socket can be used");
+
+    auto& tags = getTags(msg);
+    tags.addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::tcp);
+    tags.addTagIfAbsent<SocketReq>()->setSocketId(connId == -1 ? this->connId : connId);
+    check_and_cast<cSimpleModule *>(gateToTcp->getOwnerModule())->send(msg, gateToTcp);
+}
+
 void TcpSocket::renewSocket()
 {
     connId = getEnvir()->getUniqueNumber();
@@ -256,11 +253,23 @@ void TcpSocket::renewSocket()
     sockstate = NOT_BOUND;
 }
 
-bool TcpSocket::belongsToSocket(cMessage *msg) const
+bool TcpSocket::isOpen() const
 {
-    auto& tags = getTags(msg);
-    auto socketInd = tags.findTag<SocketInd>();
-    return socketInd != nullptr && socketInd->getSocketId() == connId;
+    switch (sockstate) {
+    case BOUND:
+    case LISTENING:
+    case CONNECTING:
+    case CONNECTED:
+    case PEER_CLOSED:
+    case LOCALLY_CLOSED:
+    case SOCKERROR: //TODO check SOCKERROR is opened or is closed socket
+        return true;
+    case NOT_BOUND:
+    case CLOSED:
+        return false;
+    default:
+        throw cRuntimeError("invalid TcpSocket state: %d", sockstate);
+    }
 }
 
 void TcpSocket::setCallback(ICallback *callback)
@@ -353,23 +362,31 @@ void TcpSocket::processMessage(cMessage *msg)
     }
 }
 
-bool TcpSocket::isOpen() const
+bool TcpSocket::belongsToSocket(cMessage *msg) const
 {
-    switch (sockstate) {
-    case BOUND:
-    case LISTENING:
-    case CONNECTING:
-    case CONNECTED:
-    case PEER_CLOSED:
-    case LOCALLY_CLOSED:
-    case SOCKERROR: //TODO check SOCKERROR is opened or is closed socket
-        return true;
-    case NOT_BOUND:
-    case CLOSED:
-        return false;
-    default:
-        throw cRuntimeError("invalid TcpSocket state: %d", sockstate);
+    auto& tags = getTags(msg);
+    auto socketInd = tags.findTag<SocketInd>();
+    return socketInd != nullptr && socketInd->getSocketId() == connId;
+}
+
+const char *TcpSocket::stateName(TcpSocket::State state)
+{
+#define CASE(x)    case x: \
+        s = #x; break
+    const char *s = "unknown";
+    switch (state) {
+        CASE(NOT_BOUND);
+        CASE(BOUND);
+        CASE(LISTENING);
+        CASE(CONNECTING);
+        CASE(CONNECTED);
+        CASE(PEER_CLOSED);
+        CASE(LOCALLY_CLOSED);
+        CASE(CLOSED);
+        CASE(SOCKERROR);
     }
+    return s;
+#undef CASE
 }
 
 } // namespace inet

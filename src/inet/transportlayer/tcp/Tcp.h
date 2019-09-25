@@ -23,10 +23,10 @@
 #include <set>
 
 #include "inet/common/INETDefs.h"
-#include "inet/common/LayeredProtocolBase.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/L3Address.h"
+#include "inet/transportlayer/base/TransportProtocolBase.h"
 #include "inet/transportlayer/common/CrcMode_m.h"
 #include "inet/transportlayer/contract/tcp/TcpCommand_m.h"
 #include "inet/transportlayer/tcp_common/TcpCrcInsertionHook.h"
@@ -93,21 +93,17 @@ class TcpReceiveQueue;
  * The concrete TcpAlgorithm class to use can be chosen per connection (in OPEN)
  * or in a module parameter.
  */
-class INET_API Tcp : public LayeredProtocolBase
+class INET_API Tcp : public TransportProtocolBase
 {
   public:
     static simsignal_t tcpConnectionAddedSignal;
     static simsignal_t tcpConnectionRemovedSignal;
 
-    struct AppConnKey    // XXX this class is redundant since connId is already globally unique
-    {
-        int socketId;
-
-        inline bool operator<(const AppConnKey& b) const
-        {
-            return socketId < b.socketId;
-        }
+    enum PortRange {
+        EPHEMERAL_PORTRANGE_START = 1024,
+        EPHEMERAL_PORTRANGE_END   = 5000
     };
+
     struct SockPair
     {
         L3Address localAddr;
@@ -129,7 +125,7 @@ class INET_API Tcp : public LayeredProtocolBase
     };
 
   protected:
-    typedef std::map<AppConnKey, TcpConnection *> TcpAppConnMap;
+    typedef std::map<int /*socketId*/, TcpConnection *> TcpAppConnMap;
     typedef std::map<SockPair, TcpConnection *> TcpConnMap;
     TcpCrcInsertion crcInsertion;
 
@@ -165,14 +161,9 @@ class INET_API Tcp : public LayeredProtocolBase
     virtual void finish() override;
 
     virtual void handleSelfMessage(cMessage *message) override;
-
     virtual void handleUpperCommand(cMessage *message) override;
-
     virtual void handleUpperPacket(Packet *packet) override;
     virtual void handleLowerPacket(Packet *packet) override;
-
-    virtual bool isUpperMessage(cMessage *message) override;
-    virtual bool isLowerMessage(cMessage *message) override;
 
   public:
     /**
@@ -212,9 +203,6 @@ class INET_API Tcp : public LayeredProtocolBase
     virtual void handleStartOperation(LifecycleOperation *operation) override;
     virtual void handleStopOperation(LifecycleOperation *operation) override;
     virtual void handleCrashOperation(LifecycleOperation *operation) override;
-    virtual bool isInitializeStage(int stage) override { return stage == INITSTAGE_TRANSPORT_LAYER; }
-    virtual bool isModuleStartStage(int stage) override { return stage == ModuleStartOperation::STAGE_TRANSPORT_LAYER; }
-    virtual bool isModuleStopStage(int stage) override { return stage == ModuleStopOperation::STAGE_TRANSPORT_LAYER; }
 
     // called at shutdown/crash
     virtual void reset();

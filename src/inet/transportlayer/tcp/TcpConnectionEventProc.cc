@@ -180,6 +180,18 @@ void TcpConnection::process_READ_REQUEST(TcpEventCode& event, TcpCommand *tcpCom
     }
 }
 
+void TcpConnection::process_OPTIONS(TcpEventCode& event, TcpCommand *tcpCommand, cMessage *msg)
+{
+    ASSERT(event == TCP_E_SETOPTION);
+
+    if (auto cmd = dynamic_cast<TcpSetTimeToLiveCommand *>(tcpCommand))
+        ttl = cmd->getTtl();
+    else if (auto cmd = dynamic_cast<TcpTypeOfServiceCommand *>(tcpCommand))
+        typeOfService = cmd->getTos();
+    else
+        throw cRuntimeError("Unknown subclass of TcpSetOptionCommand received from app: %s", tcpCommand->getClassName());
+}
+
 void TcpConnection::process_CLOSE(TcpEventCode& event, TcpCommand *tcpCommand, cMessage *msg)
 {
     delete tcpCommand;

@@ -40,6 +40,7 @@ enum TcpCommandCode
     TCP_C_QUEUE_BYTES_LIMIT = 8; // set send queue limit (in bytes)
     TCP_C_READ = 9;          // send request to TCP to deliver data
     TCP_C_DESTROY = 10;      // send request to TCP to destroy the socket descriptor
+    TCP_C_SETOPTION = 11;    // setting TCP socket options
 }
 
 
@@ -143,8 +144,26 @@ class TcpOpenCommand extends TcpCommand
 //
 class TcpAcceptCommand extends TcpCommand
 {
+    
 }
 
+//
+// Base class for TCP socket option control info classes.
+//
+class TcpSetOptionCommand extends TcpCommand
+{
+    
+}
+
+class TcpSetTimeToLiveCommand extends TcpSetOptionCommand
+{
+    int ttl;    
+}
+
+class TcpTypeOfServiceCommand extends TcpSetOptionCommand
+{
+    char tos;   // ToS byte for Ipv4/Ipv6
+}
 
 //
 // Control info to be used with the SEND command.

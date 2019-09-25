@@ -23,12 +23,12 @@
 #include <map>
 
 #include "inet/common/Protocol.h"
-#include "inet/common/lifecycle/OperationalBase.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/networklayer/contract/INetfilter.h"
+#include "inet/transportlayer/base/TransportProtocolBase.h"
 #include "inet/transportlayer/common/CrcMode_m.h"
 #include "inet/transportlayer/common/TransportPseudoHeader_m.h"
 #include "inet/transportlayer/contract/udp/UdpControlInfo.h"
@@ -42,13 +42,14 @@ class UdpHeader;
 class InterfaceEntry;
 
 const bool DEFAULT_MULTICAST_LOOP = true;
+const uint16_t UDP_MAX_MESSAGE_SIZE = 65535; // bytes
 
 /**
  * Implements the Udp protocol: encapsulates/decapsulates user data into/from Udp.
  *
  * More info in the NED file.
  */
-class INET_API Udp : public OperationalBase
+class INET_API Udp : public TransportProtocolBase
 {
   public:
     class CrcInsertion : public NetfilterBase::HookBase {
@@ -103,6 +104,8 @@ class INET_API Udp : public OperationalBase
         void addMulticastMembership(MulticastMembership *membership);
         void deleteMulticastMembership(MulticastMembership *membership);
     };
+
+    friend std::ostream& operator<<(std::ostream& os, const Udp::SockDesc& sd);
 
     typedef std::list<SockDesc *> SockDescList;    // might contain duplicated local addresses if their reuseAddr flag is set
     typedef std::map<int, SockDesc *> SocketsByIdMap;
@@ -176,10 +179,13 @@ class INET_API Udp : public OperationalBase
     virtual void processUDPPacket(Packet *udpPacket);
 
     // process packets from application
-    virtual void processPacketFromApp(Packet *appData);
+    virtual void handleUpperPacket(Packet *appData) override;
+
+    // process packets from network layr
+    virtual void handleLowerPacket(Packet *appData) override;
 
     // process commands from application
-    virtual void processCommandFromApp(cMessage *msg);
+    virtual void handleUpperCommand(cMessage *msg) override;
 
     // create a blank Udp packet; override to subclass UdpHeader
     virtual UdpHeader *createUDPPacket();
@@ -188,13 +194,9 @@ class INET_API Udp : public OperationalBase
     virtual void handleStartOperation(LifecycleOperation *operation) override;
     virtual void handleStopOperation(LifecycleOperation *operation) override;
     virtual void handleCrashOperation(LifecycleOperation *operation) override;
-    virtual bool isInitializeStage(int stage) override { return stage == INITSTAGE_TRANSPORT_LAYER; }
-    virtual bool isModuleStartStage(int stage) override { return stage == ModuleStartOperation::STAGE_TRANSPORT_LAYER; }
-    virtual bool isModuleStopStage(int stage) override { return stage == ModuleStopOperation::STAGE_TRANSPORT_LAYER; }
-
-    // crc
 
   public:
+    // crc
     static void insertCrc(const Protocol *networkProtocol, const L3Address& srcAddress, const L3Address& destAddress, const Ptr<UdpHeader>& udpHeader, Packet *udpPayload);
     static bool verifyCrc(const Protocol *networkProtocol, const Ptr<const UdpHeader>& udpHeader, Packet *packet);
     static uint16_t computeCrc(const Protocol *networkProtocol, const L3Address& srcAddress, const L3Address& destAddress, const Ptr<const UdpHeader>& udpHeader, const Ptr<const Chunk>& udpData);
@@ -208,7 +210,6 @@ class INET_API Udp : public OperationalBase
   protected:
     virtual void initialize(int stage) override;
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
-    virtual void handleMessageWhenUp(cMessage *msg) override;
 };
 
 } // namespace inet

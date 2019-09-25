@@ -102,7 +102,7 @@ void MediumVisualizerBase::initialize(int stage)
         }
     }
     else if (stage == INITSTAGE_PHYSICAL_LAYER) {
-        if (radioMedium != nullptr) {
+        if (radioMedium != nullptr && displaySpectrums) {
             if (auto backgroundNoise = radioMedium->getBackgroundNoise())
                 mediumPowerFunction->addElement(makeShared<BackgroundNoisePowerFunction>(backgroundNoise));
         }
