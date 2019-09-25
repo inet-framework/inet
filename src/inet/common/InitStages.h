@@ -109,39 +109,44 @@ enum InitStages {
     INITSTAGE_NETWORK_ADDRESS_ASSIGNMENT = 5,
 
     /**
+     * Initialization of network addresses.
+     */
+    INITSTAGE_ROUTER_ID_ASSIGNMENT = 6,
+
+    /**
      * Initialization of static routing.
      */
-    INITSTAGE_STATIC_ROUTING = 6,
+    INITSTAGE_STATIC_ROUTING = 7,
 
     /**
      * Initialization of network layer protocols.
      */
-    INITSTAGE_NETWORK_LAYER = 7,
+    INITSTAGE_NETWORK_LAYER = 8,
 
     /**
      * Initialization of transport-layer protocols.
      */
-    INITSTAGE_TRANSPORT_LAYER = 8,
+    INITSTAGE_TRANSPORT_LAYER = 9,
 
     /**
      * Initialization of routing protocols.
      */
-    INITSTAGE_ROUTING_PROTOCOLS = 9,
+    INITSTAGE_ROUTING_PROTOCOLS = 10,
 
     /**
      * Initialization of applications.
      */
-    INITSTAGE_APPLICATION_LAYER = 10,
+    INITSTAGE_APPLICATION_LAYER = 11,
 
     /**
      * Operations that no other initializations can depend on, e.g. display string updates.
      */
-    INITSTAGE_LAST = 11,
+    INITSTAGE_LAST = 12,
 
     /**
      * The number of initialization stages.
      */
-    NUM_INIT_STAGES = 12,
+    NUM_INIT_STAGES = 13,
 };
 
 } // namespace inet
