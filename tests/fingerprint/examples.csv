@@ -411,6 +411,17 @@
 /examples/ospfv2/simpletest/,        -f omnetpp.ini -c ShutdownAndRestart -r 0,     500s,            0bd3-3afb/tplx, PASS,
 /examples/ospfv2/simpletest/,        -f omnetpp.ini -c CrashAndReboot -r 0,         500s,            4711-a233/tplx, PASS,
 
+/examples/ospfv3/multiple_areas_FINAL/, -f omnetpp.ini -c General -r 0,             500s,            067b-b41a/tplx, PASS,
+/examples/ospfv3/multiple_areas_FINAL/, -f omnetpp.ini -c LinkDown -r 0,            500s,            1403-1dc3/tplx, PASS,
+/examples/ospfv3/multiple_areas_FINAL/, -f omnetpp.ini -c LinkDownLinkUp -r 0,      500s,            3213-d7c9/tplx, PASS,
+/examples/ospfv3/small/,             -f omnetpp.ini -c General -r 0,                200s,            ab67-5bf6/tplx, PASS,
+/examples/ospfv3/v3_2_routers/,      -f omnetpp.ini -c General -r 0,                400s,            cb07-74fd/tplx, PASS,
+/examples/ospfv3/v3_2_routers/,      -f omnetpp.ini -c LinkDownAndUp -r 0,          400s,            acb5-113b/tplx, PASS,
+/examples/ospfv3/v3_3_areas/,        -f omnetpp.ini -c General -r 0,               3000s,            a3de-c6f1/tplx, PASS,
+/examples/ospfv3/v3_4_routers_2_areas/, -f omnetpp.ini -c General -r 0,             300s,            461f-fa8c/tplx, PASS,
+/examples/ospfv3/v3_mesh/,           -f omnetpp.ini -c General -r 0,                500s,            9fab-65a8/tplx, PASS,
+/examples/ospfv3/v3_square_2_areas/, -f omnetpp.ini -c General -r 0,                200s,            a3de-c6f1/tplx, PASS,
+
 /examples/pim/dm/assert/,            -f omnetpp.ini -c General -r 0,                300s,            29aa-ad30/tplx, PASS, igmp
 /examples/pim/dm/basic/,             -f omnetpp.ini -c General -r 0,                300s,            1ac4-5203/tplx, PASS, igmp
 /examples/pim/iptv/,                 -f omnetpp.ini -c PIM_SM -r 0,                  35s,            7cc8-99cc/tplx, PASS, igmp ospf
