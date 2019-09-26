@@ -14,26 +14,24 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
-// @author: Zoltan Bojthe
-//
 
-#include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
-#include "inet/routing/ospf/v2/Ospfv2Packet_m.h"
-#include "inet/routing/ospf/v2/Ospfv2ProtocolDissector.h"
+#ifndef __INET_OSPFDISSECTOR_H
+#define __INET_OSPFDISSECTOR_H
+
+#include "inet/common/INETDefs.h"
+#include "inet/common/packet/dissector/ProtocolDissector.h"
 
 namespace inet {
 namespace ospf {
 
-Register_Protocol_Dissector(&Protocol::ospf, Ospfv2ProtocolDissector);
-
-void Ospfv2ProtocolDissector::dissect(Packet *packet, const Protocol *protocol, ICallback& callback) const
+class INET_API OspfProtocolDissector : public ProtocolDissector
 {
-    auto header = packet->popAtFront<Ospfv2Packet>();
-    callback.startProtocolDataUnit(&Protocol::ospf);
-    callback.visitChunk(header, &Protocol::ospf);
-    callback.endProtocolDataUnit(&Protocol::ospf);
-}
+  public:
+    virtual void dissect(Packet *packet, const Protocol *protocol, ICallback& callback) const override;
+};
 
 } // namespace ospf
 } // namespace inet
+
+#endif // __INET_OSPFDISSECTOR_H
 
