@@ -310,3 +310,4 @@ class Ospfv3LsAck extends Ospfv3Packet{
     uint32_t lsas;
     Ospfv3LsaHeader lsaHeaders[];
 }
+
