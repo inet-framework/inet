@@ -189,7 +189,7 @@ void Ospfv3Neighbor::sendDDPacket(bool init)
     const auto& ddPacket = makeShared<Ospfv3DatabaseDescription>();
 
     //common header first
-    ddPacket->setType(DATABASE_DESCRIPTION);
+    ddPacket->setType(ospf::DATABASE_DESCRIPTION_PACKET);
     ddPacket->setRouterID(this->getInterface()->getArea()->getInstance()->getProcess()->getRouterID());
     ddPacket->setAreaID(this->getInterface()->getArea()->getAreaID());
     ddPacket->setInstanceID(this->getInterface()->getArea()->getInstance()->getInstanceID());
@@ -234,7 +234,7 @@ void Ospfv3Neighbor::sendDDPacket(bool init)
 
     ddPacket->setDdOptions(ddOptions);
 
-    ddPacket->setPacketLength(packetSize.get());
+    ddPacket->setPacketLengthField(packetSize.get());
     ddPacket->setChunkLength(packetSize);
     Packet *pk = new Packet();
     pk->insertAtBack(ddPacket);
@@ -253,7 +253,7 @@ void Ospfv3Neighbor::sendDDPacket(bool init)
 void Ospfv3Neighbor::sendLinkStateRequestPacket()
 {
     const auto& requestPacket = makeShared<Ospfv3LinkStateRequest>();
-    requestPacket->setType(LSR);
+    requestPacket->setType(ospf::LINKSTATE_REQUEST_PACKET);
     requestPacket->setRouterID(this->getInterface()->getArea()->getInstance()->getProcess()->getRouterID());
     requestPacket->setAreaID(this->getInterface()->getArea()->getAreaID());
     requestPacket->setInstanceID(this->getInterface()->getArea()->getInstance()->getInstanceID());
@@ -341,7 +341,7 @@ void Ospfv3Neighbor::retransmitUpdatePacket()
     EV_DEBUG << "Retransmitting update packet\n";
     const auto& updatePacket = makeShared<Ospfv3LsUpdate>();
 
-    updatePacket->setType(LSU);
+    updatePacket->setType(ospf::LINKSTATE_UPDATE_PACKET);
     updatePacket->setRouterID(this->getInterface()->getArea()->getInstance()->getProcess()->getRouterID());
     updatePacket->setAreaID(this->getInterface()->getArea()->getAreaID());
     updatePacket->setInstanceID(this->getInterface()->getArea()->getInstance()->getInstanceID());

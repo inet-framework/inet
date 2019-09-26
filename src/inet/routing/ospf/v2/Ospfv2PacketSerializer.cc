@@ -211,7 +211,7 @@ uint16_t Ospfv2PacketSerializer::deserializeOspfHeader(MemoryInputStream& stream
     int ospfType = stream.readUint8();
     if (ospfType > LINKSTATE_ACKNOWLEDGEMENT_PACKET)
         ospfPacket->markIncorrect();
-    ospfPacket->setType(static_cast<Ospfv2PacketType>(ospfType));
+    ospfPacket->setType(static_cast<OspfPacketType>(ospfType));
     uint16_t packetLength = stream.readUint16Be();
     ospfPacket->setChunkLength(B(packetLength));
     ospfPacket->setRouterID(stream.readIpv4Address());

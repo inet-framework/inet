@@ -104,38 +104,38 @@ void Ospfv3Instance::processPacket(Packet* pk)
             )
             {
                 // packet authentication
-                Ospfv3PacketType packetType = static_cast<Ospfv3PacketType>(packet->getType());
+                ospf::OspfPacketType packetType = static_cast<ospf::OspfPacketType>(packet->getType());
                 Ospfv3Neighbor* neighbor = nullptr;
 
                 // all packets except HelloPackets are sent only along adjacencies, so a Neighbor must exist
-                if (packetType != Ospfv3PacketType::HELLO_PACKET)
+                if (packetType != ospf::OspfPacketType::HELLO_PACKET)
                     neighbor = intf->getNeighborById(packet->getRouterID());
 
                 switch (packetType) {
-                case Ospfv3PacketType::HELLO_PACKET:
+                case ospf::OspfPacketType::HELLO_PACKET:
                     intf->processHelloPacket(pk);
                     break;
 
-                case Ospfv3PacketType::DATABASE_DESCRIPTION:
+                case ospf::OspfPacketType::DATABASE_DESCRIPTION_PACKET:
                     if (neighbor != nullptr) {
                         EV_DEBUG << "Instance is sending packet to interface\n";
                         intf->processDDPacket(pk);
                     }
                     break;
 
-                case Ospfv3PacketType::LSR:
+                case ospf::OspfPacketType::LINKSTATE_REQUEST_PACKET:
                     if (neighbor != nullptr) {
                         intf->processLSR(pk, neighbor);
                     }
                     break;
 
-                case Ospfv3PacketType::LSU:
+                case ospf::OspfPacketType::LINKSTATE_UPDATE_PACKET:
                     if (neighbor != nullptr) {
                         intf->processLSU(pk, neighbor);
                     }
                     break;
 
-                case Ospfv3PacketType::LS_ACK:
+                case ospf::OspfPacketType::LINKSTATE_ACKNOWLEDGEMENT_PACKET:
                     if (neighbor != nullptr) {
                         intf->processLSAck(pk, neighbor);
                     }

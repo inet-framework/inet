@@ -247,7 +247,7 @@ void MessageHandler::processPacket(Packet *pk, Ospfv2Interface *unused1, Neighbo
                 {
                     // packet authentication
                     if (authenticatePacket(packet.get())) {
-                        Ospfv2PacketType packetType = static_cast<Ospfv2PacketType>(packet->getType());
+                        OspfPacketType packetType = static_cast<OspfPacketType>(packet->getType());
                         Neighbor *neighbor = nullptr;
 
                         // all packets except HelloPackets are sent only along adjacencies, so a Neighbor must exist

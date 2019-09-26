@@ -18,18 +18,10 @@
 import inet.common.INETDefs;
 import inet.common.packet.chunk.Chunk;
 import inet.networklayer.contract.ipv4.Ipv4Address;
+import inet.routing.ospf.OspfPacket;
 import inet.transportlayer.common.CrcMode;
 
 namespace inet::ospf;
-
-enum Ospfv2PacketType
-{
-    HELLO_PACKET = 1;
-    DATABASE_DESCRIPTION_PACKET = 2;
-    LINKSTATE_REQUEST_PACKET = 3;
-    LINKSTATE_UPDATE_PACKET = 4;
-    LINKSTATE_ACKNOWLEDGEMENT_PACKET = 5;
-}
 
 // should be a byte long bitfield
 struct Ospfv2Options
@@ -47,19 +39,9 @@ struct Ospfv2Options
 //
 // Represents an OSPF packet header
 //
-class Ospfv2Packet extends FieldsChunk
+class Ospfv2Packet extends OspfPacket
 {
-    char version = 2;
-    Ospfv2PacketType type = static_cast<Ospfv2PacketType>(-1);
-
-    Ipv4Address routerID;
-    Ipv4Address areaID;
-
-    uint16_t crc = 0;
-    CrcMode crcMode = CRC_MODE_UNDEFINED;
-
-    short authenticationType = 0;
-    char authentication[8];
+    version = 2;
 }
 
 //

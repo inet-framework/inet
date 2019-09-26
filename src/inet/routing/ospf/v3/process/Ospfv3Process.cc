@@ -739,14 +739,14 @@ void Ospfv3Process::sendPacket(Packet *packet, Ipv6Address destination, const ch
 
     switch (ospfPacket->getType())
     {
-        case HELLO_PACKET:
+        case ospf::HELLO_PACKET:
         {
             packet->setName("Ospfv3_HelloPacket");
 //            const auto& helloPacket = packet->peekAtFront<Ospfv3HelloPacket>();
 //            printHelloPacket(helloPacket.get(), destination, outputIfIndex);
         }
         break;
-        case DATABASE_DESCRIPTION:
+        case ospf::DATABASE_DESCRIPTION_PACKET:
         {
             packet->setName("Ospfv3_DDPacket");
 //            const auto& ddPacket = packet->peekAtFront<Ospfv3DatabaseDescription>();
@@ -754,7 +754,7 @@ void Ospfv3Process::sendPacket(Packet *packet, Ipv6Address destination, const ch
         }
         break;
 
-        case LSR:
+        case ospf::LINKSTATE_REQUEST_PACKET:
         {
             packet->setName("Ospfv3_LSRPacket");
 //            const auto& requestPacket = packet->peekAtFront<Ospfv3LinkStateRequest>();
@@ -762,7 +762,7 @@ void Ospfv3Process::sendPacket(Packet *packet, Ipv6Address destination, const ch
         }
         break;
 
-        case LSU:
+        case ospf::LINKSTATE_UPDATE_PACKET:
         {
             packet->setName("Ospfv3_LSUPacket");
 //            const auto& updatePacket = packet->peekAtFront<Ospfv3LsUpdate>();
@@ -770,7 +770,7 @@ void Ospfv3Process::sendPacket(Packet *packet, Ipv6Address destination, const ch
         }
         break;
 
-        case LS_ACK:
+        case ospf::LINKSTATE_ACKNOWLEDGEMENT_PACKET:
         {
             packet->setName("Ospfv3_LSAckPacket");
 //            const auto& ackPacket = packet->peekAtFront<Ospfv3LsAck>();

@@ -4,29 +4,15 @@ import inet.common.packet.chunk.Chunk;
 import inet.networklayer.contract.ipv4.Ipv4Address;
 import inet.networklayer.contract.ipv6.Ipv6Address;
 import inet.networklayer.common.L3Address;
+import inet.routing.ospf.OspfPacket;
 
 
 namespace inet;
-enum Ospfv3PacketType
-{
-	HELLO_PACKET = 1;
-	DATABASE_DESCRIPTION = 2;
-	LSR = 3;
-	LSU = 4;
-	LS_ACK = 5;
-}
 
 //Common OSPFv3 packet header - this header is present in every OSPFv3 packet
-class Ospfv3Packet extends FieldsChunk
+class Ospfv3Packet extends ospf::OspfPacket
 {
-	char version = 3;
-	char type;
-	unsigned short packetLength;
-	
-    Ipv4Address routerID;
-    Ipv4Address areaID;
-    
-    unsigned short checksum;
+    version = 3;
     char instanceID;
 }
 
