@@ -13,8 +13,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_OSPFPACKETSERIALIZER_H
-#define __INET_OSPFPACKETSERIALIZER_H
+#ifndef __INET_OSPFV2PACKETSERIALIZER_H
+#define __INET_OSPFV2PACKETSERIALIZER_H
 
 #include "inet/common/packet/serializer/FieldsChunkSerializer.h"
 #include "inet/routing/ospf/v2/Ospfv2Packet_m.h"
@@ -22,6 +22,8 @@
 namespace inet {
 
 namespace ospf {
+
+class OspfPacketSerializer;
 
 /**
  * Converts between Ospfv2Packet and binary (network byte order) OSPF data.
@@ -60,10 +62,13 @@ class INET_API Ospfv2PacketSerializer : public FieldsChunkSerializer
     static void deserializeLsa(MemoryInputStream& stream, const Ptr<Ospfv2LinkStateUpdatePacket> updatePacket, int i);
     static void serializeLsaHeader(MemoryOutputStream& stream, const Ospfv2LsaHeader& lsaHeader);
     static void deserializeLsaHeader(MemoryInputStream& stream, Ospfv2LsaHeader& lsaHeader);
+
+    //TODO kludge, should register Ospfv2PacketSerializer to OspfPacketSerializer later.
+    friend class OspfPacketSerializer;
 };
 
 } // namespace ospf
 } // namespace inet
 
-#endif // ifndef __INET_OSPFPACKETSERIALIZER_H
+#endif // ifndef __INET_OSPFV2PACKETSERIALIZER_H
 
