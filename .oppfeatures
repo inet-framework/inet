@@ -414,7 +414,7 @@
         requires = "IPv4"
         labels = "routing"
         nedPackages = "
-                       inet.routing.ospfv2
+                       inet.routing.ospf.v2
                        inet.node.ospfv2
                       "
         extraSourceFolders = ""
