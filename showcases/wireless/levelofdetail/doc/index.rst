@@ -128,29 +128,29 @@ on the images to zoom:
 BPSK
 ~~~~
 
-.. image:: bpsk-nofec2.png
+.. image:: media/bpsk-nofec2.png
 
-.. image:: bpsk-fec2.png
+.. image:: media/bpsk-fec2.png
 
 QPSK
 ~~~~
 
-.. image:: qpsk-nofec2.png
+.. image:: media/qpsk-nofec2.png
 
-.. image:: qpsk-fec2.png
+.. image:: media/qpsk-fec2.png
 
 
 QAM-16
 ~~~~~~
 
-.. image:: qam16-nofec2.png
-.. image:: qam16-fec2.png
+.. image:: media/qam16-nofec2.png
+.. image:: media/qam16-fec2.png
 
 QAM-64
 ~~~~~~
 
-.. image:: qam64-nofec2.png
-.. image:: qam64-fec2.png
+.. image:: media/qam64-nofec2.png
+.. image:: media/qam64-fec2.png
 
 The two exceptions are QAM-16 and QAM-64 with forward error correction
 (they are indicated above with a red border.) QAM-16 and QAM-64 has 4
@@ -222,8 +222,8 @@ bits/symbol.)
 
 The following images show all modulations on the symbol detail level:
 
-.. image:: noFEC2.png
-.. image:: FEC2.png
+.. image:: media/noFEC2.png
+.. image:: media/FEC2.png
 
 Generally, the more complex modulations have less range. Also, it is
 apparent from the plots that forward error correction can extend the
@@ -238,11 +238,11 @@ correction use cases on one plot:
 
 V1
 
-.. image:: results2.png
+.. image:: media/results2.png
 
 V2
 
-.. figure:: all1.png
+.. figure:: media/all1.png
    :width: 100%
 
 Discussion

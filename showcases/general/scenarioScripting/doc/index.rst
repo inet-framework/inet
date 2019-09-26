@@ -47,7 +47,7 @@ The showcase presents two example simulations:
 
 The following image shows the layout of the network for the wireless simulation:
 
-.. figure:: Wireless_layout.png
+.. figure:: media/Wireless_layout.png
    :scale: 100%
    :align: center
 
@@ -56,7 +56,7 @@ The network contains only a ``destinationNode`` module, because the other nodes,
 
 The layout of the wired simulation looks like the following:
 
-.. figure:: Wired_layout.png
+.. figure:: media/Wired_layout.png
    :scale: 100%
    :align: center
 
@@ -175,7 +175,7 @@ We can simply confirm that these operations truely took place during the simulat
 if we take a look at the statistics. The following image shows the
 ``radioMode`` of the destination node:
 
-.. figure:: RadioMode.png
+.. figure:: media/RadioMode.png
    :scale: 100%
    :align: center
 
@@ -259,7 +259,7 @@ We can see that the desired actions were indeed executed by the :ned:`ScenarioMa
 during the simulation, if we take a look at the ``transmissionState`` statistic
 of ``backboneRouter``'s PPP interface:
 
-.. figure:: TransmissionState.png
+.. figure:: media/TransmissionState.png
    :scale: 100%
    :align: center
 

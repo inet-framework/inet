@@ -1,12 +1,18 @@
-ERRORS:
+ ERRORS:
 
 - Earth & Network node visualization showcases (and possibly others):
 *.visualizer.osgVisualizer.typename = "IntegratedOsgVisualizer" # TODO: remove when enabled by default
 - Transportconnection showcase: A runtime error occurred:
-Tag 'inet::Ipv4InterfaceData' is absent -- in module (inet::visualizer::TransportConnectionCanvasVisualizer) TransportConnectionVisualizationMultipleConnectionsShowcase.visualizer.canvasVisualizer.transportConnectionVisualizer (id=222), at t=0.00006972s, event #232
-- RadioVisualizer: displayAntennaLobes parameter is unused (cannot turn off antenna lobe visualization)
-- RoutingTableVisualizer: Tag 'inet::Ipv4InterfaceData' is absent -- in module (inet::visualizer::RoutingTableCanvasVisualizer)
+Tag 'inet::Ipv4InterfaceData' is absent -- in module (inet::visualizer::TransportConnectionCanvasVisualizer) TransportConnectionVisualizationMultipleConnectionsShowcase.visualizer.canvasVisualizer.transportConnectionVisualizer (id=222), at t=0.00006972s, event #232 
 - Earth showcase: 3rd config: the initial viewport is not centered on the nodes
+- HiddenNode: crash with all 4 configs (some error in Ieee80211MacProtocolDissector?)
+- Ratecontrol: 2nd config running very slowly when run with the gui in express mode
+
+BUGS:
+
+- Fragmentation showcase: there is a block ack bug (not acking properly, the simulation slows down)
+- Txop showcase: ca8ab95: aggregated frames larger than the maxAMSDUsize are being created
+
 
 MISC:
 
@@ -16,10 +22,8 @@ MISC:
 - Netmask routes default metric should be higher than the metric of routes added by the configurator ? need some sensible default
 - End-to-end-delay: needs byte-tags in the packet API. Fragmentation and packet timestamps are conflicting
 - Crosstalk: partially overlapping config: channels 1-2 doesn't cause interference between packets being transmitted at the same time
-- Ieee80211Visualizer doesn't work with simplified mgmt
 - RadioMedium: When signal power is 0, the medium shouldn't send the signal (for example when behind a wall + simple obstacle loss)
 - PcapRecorder: The timestamp in the pcap file (in wireshark) is not the same as the timestamp in the GUI
-- Ieee80211Visualizer should indicate channel number
 - Manetprotocols: f5f1406 ("manetprotocols", 2018-02-13): StatisticAodv3Uniform, runs 109, 122, 154, 153, 192, 225, 325, 360:
 check_and_cast(): Cannot cast (inet::Packet*)ICMP-error-#1-type11-code0 to type 'inet::IcmpHeader *' -- in module (inet::aodv::Aodv) ManetprotocolsShowcaseMoreNodes.node11.routing (id=1130), at t=36.108710008528s, event #1718648
 - Sensornetwork and Ieee802154 showcase: communication ranges not displayed
@@ -33,13 +37,35 @@ starts sending preambles and the original sensor node's mac is stuck in SEND mod
 Eventually all sensor nodes get into this state and the number of successfully sent packets is low ~5 packets
 - Ieee802154 showcase / StatisticVisualizer: 7594a70 ("sensornetwork", 2018-02-28): the statistic visualizer displays '-' as the number of received packets when there is one received packet
 - Ieee802154NarrowbandScalarRadio: the packet don't have PHY header (according to the inspector)
-- InfoVisualizer (and probably other visualizers): when DisplayHint = "bottom", the figure is on top of the module's name
 - Sensornetwork: mac headerLength is set to 8b, but by default it's 10b (BMac, LMac) and 80b (XMac). This setting seems to be required for the macs to work correctly.
 - SuperpositioningMobility should have faceForward (maybe all mobilities should?)
 - SuperpositioningMobility: support for enabling orientation and position separatelly
 - EntangledMobility vs AttachedMobility: support for enabling orientation and position separatelly
-- MobilityVisualizer: the commit a674546 ("Visualizer: Fixed crash caused by dynamically deleted mobility modules.", 2018-06-14) breaks visualization
-Lots of figures are added to the canvas
 - Mobility: inet: 29cf0ed (temp: ext interface video streaming, 2018-06-21) showcases: a1c3378 (mobility, 2018-06-21): negative time error
 - Throughput: run 15: handleCommand(): no commands supported -- in module (inet::ieee80211::Ieee80211MgmtAdhoc) Throughput.sourceHost.wlan[0].mgmt (id=24), at t=0.108461533953s, event #8801
+- RateControl:		rate adaptation instead of rate control?
+- DataLinkVisualizer: move activity parameter to DataLinkVisualizer from LinkVisualizerBase ?
+
+IPv4NetworkConfigurator:
+?- a netmaskRoutes miatt olyan szabály is hozzáadódik a routing táblához, ami hibás. Pont a korrekt szabály felett van, és a csomagok nem találnak oda
+
+IPv4
+?- A broadcast UDP-s csomagok elnyelődnek / nem mennek ki / ForceBroadcast paraméter az IPv4-ben WTF?
+
+TCP
+?- EndToEndDelay statistic always 0 (e.g. advanced showcase), it uses messageAge filter, which relies on creation timestamp, and that is 0 due to the packet being allocated in TCP, there's no easy solution
+
+DONE:
+
+Throughput
++ in g mode the application-level throughput is less than in a-mode.
+
++ LevelOfDetail:		crash. something wrong with the mac.
++ HiddenNode:		exactly the same amount of packets in configs 1 and 3
+			check_and_cast(): Cannot cast 'inet::physicallayer::INoise*' to type 'const 						inet::physicallayer::NarrowbandNoiseBase *' -- in module (inet::physicallayer::Ieee80211Radio) 						HiddenNodeExample.hostA.wlan[0].radio (id=36), during network initialization
++ RateControl:		the charts are not the same as before.
++ Power:			error
++ RoutingTableVisualizer: Tag 'inet::Ipv4InterfaceData' is absent -- in module (inet::visualizer::RoutingTableCanvasVisualizer)
++ Coexistence: inet: 42dd5dc (updated submodule refs for swarm, 2018-10-24) showcases: 0b13136 (coexistence, 2018-10-29): IndependentPerformance config, run 0:
+vector::reserve while processing statistic signal packetSentToUpper (id=58) with data type inet::Packet, emitted from (inet::physicallayer::FlatRadioBase)CoexistenceShowcase6.wpanHost1.wlan[0].radio -- in module (inet::physicallayer::FlatRadioBase) CoexistenceShowcase6.wpanHost1.wlan[0].radio (id=233), at t=5.20633785078s, event #471274 
 

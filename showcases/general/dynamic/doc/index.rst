@@ -169,7 +169,7 @@ periodically, will send ping requests to the destination node, and will
 be deleted after some time. The example simulation for this showcase
 uses the following network:
 
-.. figure:: network2.png
+.. figure:: media/network2.png
    :width: 100%
 
 The network contains an :ned:`IntegratedCanvasVisualizer`, an
@@ -228,7 +228,7 @@ Results
 
 What happens when the simulation is run is shown in the following video:
 
-.. video:: General1.mp4
+.. video:: media/General1.mp4
    :width: 698
 
 The hosts are being created, move in random directions, ping

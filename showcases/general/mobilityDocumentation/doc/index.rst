@@ -67,7 +67,7 @@ Position is used in the calculations of wireless communications, for
 example. For example, the position of a host (the host's mobility
 submodule selected in the inspector panel):
 
-.. figure:: position_inspector.png
+.. figure:: media/position_inspector.png
    :width: 50%
    :align: center
 
@@ -149,7 +149,7 @@ as the following:
    display above mobility submodules in the GUI. For example, displaying
    position and velocity can be achieved with ``"p: %p\nv: %v"`` format
    string:
-.. figure:: displaystringformat.png
+.. figure:: media/displaystringformat.png
    :width: 25%
    :align: center
 -  ``visualRepresentation``: Selects which module is moved by this

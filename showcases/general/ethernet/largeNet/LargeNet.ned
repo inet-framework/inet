@@ -27,7 +27,7 @@ import ned.DatarateChannel;
 
 
 //
-// A 100Mb/showcases/s Ethernet cable. Part of ~LargeNet.
+// A 100Mb/s Ethernet cable. Part of ~LargeNet.
 //
 channel cable extends DatarateChannel
 {

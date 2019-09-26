@@ -30,7 +30,7 @@ The showcase contains two example simulations, where two nodes communicate eithe
 an access point, in infrastructure mode, or directly, in ad hoc mode.
 The simulations use the following networks:
 
-.. figure:: network.png
+.. figure:: media/network.png
    :width: 80%
    :align: center
 
@@ -68,7 +68,7 @@ with the access point, and ``host1`` starts sending UDP packets to
 ``host2``. The packets are relayed by the access point. The following
 video depicts the UDP traffic:
 
-.. video:: Infrastructure4.mp4
+.. video:: media/Infrastructure4.mp4
    :width: 698
 
    <!--internal video recording, animation speed none, zoom 1.3x-->
@@ -84,7 +84,7 @@ display string by going into the host's or access point's wireless interface mod
 it should read ``infrastructure``. Here is the wireless interface module of ``host1``
 and ``accessPoint``:
 
-.. figure:: mib_infrastructure.png
+.. figure:: media/mib_infrastructure.png
    :width: 100%
 
 .. todo::
@@ -101,7 +101,7 @@ Ad Hoc Mode
 
 In the ad hoc mode simulation, ``host1`` is sending UDP packets to ``host2`` in the following video:
 
-.. video:: Adhoc3.mp4
+.. video:: media/Adhoc3.mp4
    :width: 698
 
    <!--internal video recording, animation speed none, zoom 1.3x-->
@@ -110,7 +110,7 @@ The wireless interface module of ``host1`` is displayed on the following image,
 showing the ``mib``, indicating that the interface operates in ad hoc mode and
 non-QoS mode, and its MAC address.
 
-.. figure:: adhocmib.png
+.. figure:: media/adhocmib.png
    :width: 60%
    :align: center
 
