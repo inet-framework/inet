@@ -2,32 +2,40 @@
 
 - Earth & Network node visualization showcases (and possibly others):
 *.visualizer.osgVisualizer.typename = "IntegratedOsgVisualizer" # TODO: remove when enabled by default
+- Transportconnection showcase: A runtime error occurred:
+Tag 'inet::Ipv4InterfaceData' is absent -- in module (inet::visualizer::TransportConnectionCanvasVisualizer) TransportConnectionVisualizationMultipleConnectionsShowcase.visualizer.canvasVisualizer.transportConnectionVisualizer (id=222), at t=0.00006972s, event #232 
 - Earth showcase: 3rd config: the initial viewport is not centered on the nodes
+- HiddenNode: crash with all 4 configs (some error in Ieee80211MacProtocolDissector?)
+- Ratecontrol: 2nd config running very slowly when run with the gui in express mode
 
 BUGS:
 
 - Fragmentation showcase: there is a block ack bug (not acking properly, the simulation slows down)
 - Txop showcase: ca8ab95: aggregated frames larger than the maxAMSDUsize are being created
-- Txop: it is not checked if the last frame's duration fits in the TXOP limit
-- VLAN: VLAN-tagged packet gets duplicated in switch even though it's unicast (ethernet/vlan showcase, VirtualInterfaces2 config)
 
 
 MISC:
 
-- TODO: add 'policy reason' to list of drop reasons in PacketDropVisualizerBase
 - StandardHost: velocity in display string should be in m/s instead of m
 - Ieee80211LevelOfDetail: packet level: Implicit chunk serialization is disabled to prevent unpredictable performance degradation (you may consider changing the Chunk::enableImplicitChunkSerialization flag or passing the PF_ALLOW_SERIALIZATION flag to peek) -- in module (inet::ieee80211::Rx) Ieee80211LevelofDetailShowcase.host[0].wlan[0].mac.rx (id=60), at t=0.374724514587s, event #15
 - Ieee80211LevelOfDetail: bit level when out of communication range: The calculated data field length = 4032 is greater then the actual bitvector length = 1392 -- in module (inet::physicallayer::Ieee80211OFDMRadio) Ieee80211LevelofDetailShowcase.host[0].wlan[0].
 - Netmask routes default metric should be higher than the metric of routes added by the configurator ? need some sensible default
 - End-to-end-delay: needs byte-tags in the packet API. Fragmentation and packet timestamps are conflicting
+- Crosstalk: partially overlapping config: channels 1-2 doesn't cause interference between packets being transmitted at the same time
 - RadioMedium: When signal power is 0, the medium shouldn't send the signal (for example when behind a wall + simple obstacle loss)
 - PcapRecorder: The timestamp in the pcap file (in wireshark) is not the same as the timestamp in the GUI
 - Manetprotocols: f5f1406 ("manetprotocols", 2018-02-13): StatisticAodv3Uniform, runs 109, 122, 154, 153, 192, 225, 325, 360:
 check_and_cast(): Cannot cast (inet::Packet*)ICMP-error-#1-type11-code0 to type 'inet::IcmpHeader *' -- in module (inet::aodv::Aodv) ManetprotocolsShowcaseMoreNodes.node11.routing (id=1130), at t=36.108710008528s, event #1718648
+- Sensornetwork and Ieee802154 showcase: communication ranges not displayed
 - ManetProtocols showcase: 2375584 ("manetprotocols", 2018-02-16): StatisticDymo config: 
 Cannot serialize Udp header without turned off or properly computed CRC, try changing the value of crcMode parameter for Udp -- in module (inet::ieee80211::Tx) ManetprotocolsShowcaseMoreNodes.source.wlan[0].mac.tx (id=47), at t=0.010319113618s, event #24
 (It doesn't throw error in Qtenv)
 - apps use ModuleIdAddress if the network interface doesn't have an IP address configured, and UDP uses GNP which results in a weird error in MessageDispatcher
+- XMac / sensornetwork showcase: at some slotTime values, the number of successfully sent packets drop. 
+A sensor sends preambles -> the gateway wakes up and sends ack -> the sensor node would send the data but another sensor node 
+starts sending preambles and the original sensor node's mac is stuck in SEND mode and doesnt do anything from this point. 
+Eventually all sensor nodes get into this state and the number of successfully sent packets is low ~5 packets
+- Ieee802154 showcase / StatisticVisualizer: 7594a70 ("sensornetwork", 2018-02-28): the statistic visualizer displays '-' as the number of received packets when there is one received packet
 - Ieee802154NarrowbandScalarRadio: the packet don't have PHY header (according to the inspector)
 - Sensornetwork: mac headerLength is set to 8b, but by default it's 10b (BMac, LMac) and 80b (XMac). This setting seems to be required for the macs to work correctly.
 - SuperpositioningMobility should have faceForward (maybe all mobilities should?)
@@ -37,10 +45,6 @@ Cannot serialize Udp header without turned off or properly computed CRC, try cha
 - Throughput: run 15: handleCommand(): no commands supported -- in module (inet::ieee80211::Ieee80211MgmtAdhoc) Throughput.sourceHost.wlan[0].mgmt (id=24), at t=0.108461533953s, event #8801
 - RateControl:		rate adaptation instead of rate control?
 - DataLinkVisualizer: move activity parameter to DataLinkVisualizer from LinkVisualizerBase ?
-- RadioVisualizer: rename displayRadios parameter to better reflect that its a master switch
-- Ieee80211Visualizer doesn't work with simplified mgmt
-- Ieee80211Visualizer should indicate channel number
-- InfoVisualizer (and probably other visualizers): when DisplayHint = "bottom", the figure is on top of the module's name
 
 IPv4NetworkConfigurator:
 ?- a netmaskRoutes miatt olyan szabály is hozzáadódik a routing táblához, ami hibás. Pont a korrekt szabály felett van, és a csomagok nem találnak oda
@@ -50,6 +54,20 @@ IPv4
 
 TCP
 ?- EndToEndDelay statistic always 0 (e.g. advanced showcase), it uses messageAge filter, which relies on creation timestamp, and that is 0 due to the packet being allocated in TCP, there's no easy solution
+
+DONE:
+
+Throughput
++ in g mode the application-level throughput is less than in a-mode.
+
++ LevelOfDetail:		crash. something wrong with the mac.
++ HiddenNode:		exactly the same amount of packets in configs 1 and 3
+			check_and_cast(): Cannot cast 'inet::physicallayer::INoise*' to type 'const 						inet::physicallayer::NarrowbandNoiseBase *' -- in module (inet::physicallayer::Ieee80211Radio) 						HiddenNodeExample.hostA.wlan[0].radio (id=36), during network initialization
++ RateControl:		the charts are not the same as before.
++ Power:			error
++ RoutingTableVisualizer: Tag 'inet::Ipv4InterfaceData' is absent -- in module (inet::visualizer::RoutingTableCanvasVisualizer)
++ Coexistence: inet: 42dd5dc (updated submodule refs for swarm, 2018-10-24) showcases: 0b13136 (coexistence, 2018-10-29): IndependentPerformance config, run 0:
+vector::reserve while processing statistic signal packetSentToUpper (id=58) with data type inet::Packet, emitted from (inet::physicallayer::FlatRadioBase)CoexistenceShowcase6.wpanHost1.wlan[0].radio -- in module (inet::physicallayer::FlatRadioBase) CoexistenceShowcase6.wpanHost1.wlan[0].radio (id=233), at t=5.20633785078s, event #471274 
 
 Planned Showcases:
 ------------------
