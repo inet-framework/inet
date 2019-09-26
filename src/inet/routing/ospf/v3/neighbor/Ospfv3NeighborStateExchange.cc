@@ -21,7 +21,6 @@
 #include "inet/routing/ospf/v3/neighbor/Ospfv3NeighborStateInit.h"
 #include "inet/routing/ospf/v3/neighbor/Ospfv3NeighborStateLoading.h"
 
-
 namespace inet{
 void Ospfv3NeighborStateExchange::processEvent(Ospfv3Neighbor *neighbor, Ospfv3Neighbor::Ospfv3NeighborEventType event)
 {
@@ -82,3 +81,4 @@ void Ospfv3NeighborStateExchange::processEvent(Ospfv3Neighbor *neighbor, Ospfv3N
     }
 }
 }//namespace inet
+

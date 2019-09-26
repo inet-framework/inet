@@ -348,8 +348,6 @@ std::ostream& operator<<(std::ostream& out, const Ospfv3Ipv4RoutingTableEntry& e
         << ", Type2Cost: " << entry.getType2Cost()
         << ", Origin: [";// << entry.getLinkStateOrigin()->getHeader().getLinkStateID()
 
-
-
     Ospfv3LsaHeader lsaHeader = entry.getLinkStateOrigin()->getHeader();
         out << "LSAHeader: age=" << lsaHeader.getLsaAge()
             << ", type=";
@@ -384,7 +382,6 @@ std::ostream& operator<<(std::ostream& out, const Ospfv3Ipv4RoutingTableEntry& e
             << endl
        << "], NextHops: ";
 
-
     unsigned int hopCount = entry.getNextHopCount();
     for (unsigned int i = 0; i < hopCount; i++) {
         out << entry.getNextHop(i).hopAddress << "/" << entry.getNextHop(i).advertisingRouter << "/" <<  entry.getNextHop(i).ifIndex << "  ";
@@ -393,5 +390,5 @@ std::ostream& operator<<(std::ostream& out, const Ospfv3Ipv4RoutingTableEntry& e
     return out;
 }
 
+} // namespace inet
 
-}

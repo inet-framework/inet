@@ -66,3 +66,4 @@ inline std::ostream& operator<<(std::ostream& ostr, const Ospfv3Instance& instan
 }
 }//namespace inet
 #endif
+

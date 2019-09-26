@@ -12,3 +12,4 @@ void Ospfv3InterfacePassive::processEvent(Ospfv3Interface* interface, Ospfv3Inte
     }
 }//processEvent
 }//namespace inet
+

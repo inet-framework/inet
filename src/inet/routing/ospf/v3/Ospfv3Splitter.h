@@ -51,4 +51,6 @@ class INET_API Ospfv3Splitter : protected cListener, public cSimpleModule
      virtual int numInitStages() const override { return NUM_INIT_STAGES; }
 };
 }//namespace inet
+
 #endif
+

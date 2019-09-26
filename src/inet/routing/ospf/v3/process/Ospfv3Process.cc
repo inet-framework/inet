@@ -1067,4 +1067,3 @@ void Ospfv3Process::rebuildRoutingTable()
 
 }//namespace inet
 
-

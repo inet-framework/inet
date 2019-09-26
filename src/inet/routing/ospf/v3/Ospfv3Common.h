@@ -412,3 +412,4 @@ inline bool operator==(const Ospfv3LsaHeader& leftLSA, const Ospfv3LsaHeader& ri
 }//namespace inet
 
 #endif
+

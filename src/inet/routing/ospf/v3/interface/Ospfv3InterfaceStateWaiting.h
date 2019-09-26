@@ -27,3 +27,4 @@ class INET_API Ospfv3InterfaceStateWaiting : public Ospfv3InterfaceState
 }//namespace inet
 
 #endif
+

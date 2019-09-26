@@ -19,3 +19,4 @@ void Ospfv3InterfaceStateLoopback::processEvent(Ospfv3Interface* interface, Ospf
     }
 }//processEvent
 }//namespace inet
+

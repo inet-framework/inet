@@ -177,9 +177,9 @@ class Ospfv3Neighbor{
     static unsigned long ddSequenceNumberInitSeed;
 
     int last_hello_received = 0;
-
-
 };
 
 }//namespace inet
+
 #endif
+

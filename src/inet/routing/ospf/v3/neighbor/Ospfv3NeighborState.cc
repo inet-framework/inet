@@ -148,3 +148,4 @@ void Ospfv3NeighborState::changeState(Ospfv3Neighbor *neighbor, Ospfv3NeighborSt
 }
 
 } // namespace inet
+

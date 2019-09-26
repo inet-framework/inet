@@ -26,3 +26,4 @@ class INET_API Ospfv3InterfaceStateDr : public Ospfv3InterfaceState
 }//namespace inet
 
 #endif
+

@@ -7,7 +7,6 @@
 //#include "INET/routing/ospf/v3/Ospfv3Timers.h"
 //#include <cmodule.h>
 
-
 namespace inet{
 
 void Ospfv3InterfaceStateDown::processEvent(Ospfv3Interface* interface, Ospfv3Interface::Ospfv3InterfaceEvent event)
@@ -86,3 +85,4 @@ void Ospfv3InterfaceStateDown::processEvent(Ospfv3Interface* interface, Ospfv3In
 
 
 }//namespace inet
+

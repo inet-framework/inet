@@ -8,7 +8,6 @@
 #include "inet/routing/ospf/v3/interface/Ospfv3InterfaceStateWaiting.h"
 #include "inet/common/INETDefs.h"
 
-
 namespace inet{
 
 class INET_API Ospfv3InterfaceStateDown : public Ospfv3InterfaceState
@@ -23,3 +22,4 @@ class INET_API Ospfv3InterfaceStateDown : public Ospfv3InterfaceState
 }//namespace inet
 
 #endif
+

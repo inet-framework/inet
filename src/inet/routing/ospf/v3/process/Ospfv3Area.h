@@ -12,7 +12,6 @@
 #include "inet/common/INETDefs.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
 
-
 namespace inet{
 
 class Ospfv3Instance;
@@ -61,7 +60,6 @@ class INET_API Ospfv3Area : public cObject
     bool hasAddressRange(Ipv6AddressRange addressRange) const;
     void addAddressRange(Ipv4AddressRange addressRange, bool advertise);
     bool hasAddressRange(Ipv4AddressRange addressRange) const;
-
 
     /* ROUTER LSA */
     RouterLSA* originateRouterLSA();//this originates one router LSA for one area
@@ -113,7 +111,6 @@ class INET_API Ospfv3Area : public cObject
     InterAreaPrefixLSA* InterAreaPrefixLSAAlreadyExists(const Ospfv3InterAreaPrefixLsa *newLsa);
     InterAreaPrefixLSA* findInterAreaPrefixLSAbyAddress(const L3Address address, int prefixLen);
 
-
     //* INTRA AREA PREFIX LSA */
     IntraAreaPrefixLSA* originateIntraAreaPrefixLSA();//this is for non-BROADCAST links
     IntraAreaPrefixLSA* originateNetIntraAreaPrefixLSA(NetworkLSA* networkLSA, Ospfv3Interface* interface, bool checkDuplicate);//this originates one router LSA for one area
@@ -139,7 +136,6 @@ class INET_API Ospfv3Area : public cObject
     bool isOnAnyRetransmissionList(LSAKeyType lsaKey) const;
     bool hasAnyNeighborInStates(int state) const;
     bool hasAnyPassiveInterface() const;
-
 
     void calculateShortestPathTree(std::vector<Ospfv3RoutingTableEntry* >& newTableIPv6, std::vector<Ospfv3Ipv4RoutingTableEntry* >& newTableIPv4);
     void calculateInterAreaRoutes(std::vector<Ospfv3RoutingTableEntry* >& newTable, std::vector<Ospfv3Ipv4RoutingTableEntry* >& newTableIPv4);
@@ -216,7 +212,6 @@ class INET_API Ospfv3Area : public cObject
     uint32_t intraAreaPrefixLSASequenceNumber = INITIAL_SEQUENCE_NUMBER;
 
     RouterLSA* spfTreeRoot=nullptr;
-
 };
 
 inline std::ostream& operator<<(std::ostream& ostr, const Ospfv3Area& area)
@@ -228,3 +223,4 @@ inline std::ostream& operator<<(std::ostream& ostr, const Ospfv3Area& area)
 }//namespace inet
 
 #endif
+

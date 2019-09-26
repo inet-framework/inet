@@ -2,7 +2,6 @@
 
 #include "inet/routing/ospf/v3/neighbor/Ospfv3NeighborStateDown.h"
 
-
 namespace inet{
 
 // FIXME!!! Should come from a global unique number generator module.
@@ -71,6 +70,7 @@ Ospfv3Neighbor::~Ospfv3Neighbor()
     }
     delete state;
 }//destructor
+
 Ospfv3Neighbor::Ospfv3NeighborStateType Ospfv3Neighbor::getState() const
 {
     return state->getState();
@@ -243,14 +243,11 @@ void Ospfv3Neighbor::sendDDPacket(bool init)
     if(this->getInterface()->getType() == Ospfv3Interface::POINTTOPOINT_TYPE){
         EV_DEBUG << "(P2P link ) Send DD Packet to OSPF MCAST\n";
             this->getInterface()->getArea()->getInstance()->getProcess()->sendPacket(pk,Ipv6Address::ALL_OSPF_ROUTERS_MCAST, this->getInterface()->getIntName().c_str());
-
-
     }
     else{
         EV_DEBUG << "Send DD Packet to " <<  this->getNeighborIP() << "\n";
         this->getInterface()->getArea()->getInstance()->getProcess()->sendPacket(pk,this->getNeighborIP(), this->getInterface()->getIntName().c_str());
     }
-
 }
 
 void Ospfv3Neighbor::sendLinkStateRequestPacket()

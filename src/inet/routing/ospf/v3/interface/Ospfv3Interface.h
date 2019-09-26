@@ -4,7 +4,7 @@
 #include <omnetpp.h>
 #include <string>
 
-#include "../Ospfv3Common.h"
+#include "inet/routing/ospf/v3/Ospfv3Common.h"
 #include "inet/routing/ospf/v3/neighbor/Ospfv3Neighbor.h"
 #include "inet/routing/ospf/v3/Ospfv3Packet_m.h"
 #include "inet/routing/ospf/v3/process/Ospfv3Area.h"
@@ -259,4 +259,6 @@ inline std::ostream& operator<<(std::ostream& ostr, const Ospfv3Interface& inter
 }
 
 }//namespace inet
+
 #endif
+

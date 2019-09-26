@@ -3,7 +3,7 @@
 
 #include <omnetpp.h>
 
-#include "../Ospfv3Common.h"
+#include "inet/routing/ospf/v3/Ospfv3Common.h"
 #include "inet/routing/ospf/v3/Ospfv3Packet_m.h"
 #include "inet/common/INETDefs.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
@@ -141,3 +141,4 @@ std::ostream& operator<<(std::ostream& out, const Ospfv3Ipv4RoutingTableEntry& e
 }//namespace inet
 
 #endif
+

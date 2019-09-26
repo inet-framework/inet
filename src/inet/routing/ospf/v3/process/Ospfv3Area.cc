@@ -4,9 +4,9 @@
 #include <stdio.h>
 #include <string.h>
 
-using namespace std;
-
 namespace inet{
+
+using namespace std;
 
 Ospfv3Area::Ospfv3Area(Ipv4Address areaID, Ospfv3Instance* parent, Ospfv3AreaType type)
 {
@@ -3975,6 +3975,6 @@ std::string Ospfv3Area::detailedInfo() const
 */
 
     return out.str();
-
 }//detailedInfo
 }//namespace inet
+
