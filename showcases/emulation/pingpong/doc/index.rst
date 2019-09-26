@@ -75,10 +75,9 @@ although ``host2`` is not part of the simulation:
 Configuration and behaviour
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. warning::
+Please make sure to follow the steps on the `previous page <file:///home/marcell/inet/doc/src/_build/html/showcases/emulation/index.html>`__
+to set the application permissions!
 
-   Please make sure to follow the steps on the `previous
-   page <../>`__ to set the application permissions!
 
 The showcase involves three different configurations:
 
@@ -113,10 +112,12 @@ created and configured. This is achieved as the following:
 
 .. literalinclude:: ../setup1.sh
 
-**Note:** *veth (virtual ethernet device): they can act as tunnels
-between network namespaces to create a bridge to a physical network
-device in another namespace, but can also be used as standalone network
-devices. The veth devices are always created in interconnected pairs.*
+.. note::
+
+   veth (virtual ethernet device): they can act as tunnels
+   between network namespaces to create a bridge to a physical network
+   device in another namespace, but can also be used as standalone network
+   devices. The veth devices are always created in interconnected pairs.
 
 We can see that ``vethb`` gets the IP address ``192.168.2.2``, which is
 the same as the destination Address of ``host1``'s ``PingApp``. In this
@@ -188,7 +189,8 @@ are influenced by the simulation, meaning that no extra traffic appears
 on them:
 
 .. video:: Simulated_EDIT.mp4
-   :width: 698
+   :width: 100%
+|
 
 Emulated1 configuration
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -203,8 +205,9 @@ beginning of the video, you can also take a look at the previous
 configurations that needed to be done for the emulation to run without
 errors:
 
-.. video::Emulated1_EDIT.mp4
-   :width: 698
+.. video:: Emulated1_EDIT.mp4
+   :width: 100%
+|
 
 The change in the traffic rate of ``vetha`` and ``vethb`` is conspicuous
 when the emulation is started.
@@ -220,8 +223,9 @@ bridge between the simulated and the real world. If we run the
 TAP interface, we can conclude that ``host1`` is indeed pinging the real
 TAP interface:
 
-.. video::Emulated2_EDIT.mp4
-   :width: 698
+.. video:: Emulated2_EDIT.mp4
+   :width: 100%
+|
 
 Conclusion
 ----------
