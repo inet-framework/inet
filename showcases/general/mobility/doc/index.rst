@@ -128,7 +128,7 @@ Position is used in the calculations of wireless communications, for
 example. For example, the position of a host (the host's mobility
 submodule selected in the inspector panel):
 
-.. figure:: position_inspector.png
+.. figure:: media/position_inspector.png
    :width: 100%
 
 Position is always relevant, even if the simulation is run without a
@@ -312,7 +312,7 @@ of the simulation:
 
 
 
-   .. video:: Simplest1.mp4
+   .. video:: media/Simplest1.mp4
 
 
 
@@ -375,7 +375,7 @@ Here is the simulation when running:
 
 
 
-   .. video:: Simplest2.mp4
+   .. video:: media/Simplest2.mp4
 
 
 
@@ -440,7 +440,7 @@ use one of two networks, :ned:`MobilityShowcaseA` and
 :download:`MobilityShowcase.ned <../MobilityShowcase.ned>`, looks like
 the following:
 
-.. figure:: staticnetwork2.png
+.. figure:: media/staticnetwork2.png
    :width: 100%
 
 The network contains seven :ned:`StandardHost`\ s (``host1`` to ``host7``),
@@ -469,7 +469,7 @@ there is no display string "p" tag:
 
 Here is what the network looks like in the IDE:
 
-.. figure:: bnetwork.png
+.. figure:: media/bnetwork.png
    :width: 100%
 
 Both networks also contain an :ned:`IntegratedVisualizer` module to
@@ -621,7 +621,7 @@ speed (the speed is 0 by default).
 
 
 
-   .. video:: Deterministic2.mp4
+   .. video:: media/Deterministic2.mp4
 
 \ **Stochastic movement**
 '''''''''''''''''''''''''
@@ -678,7 +678,7 @@ The mobility module is set to totally random motion, with a variance of
 
 
 
-   .. video:: Stochastic2.mp4
+   .. video:: media/Stochastic2.mp4
 
 
 
@@ -734,10 +734,10 @@ We specify the ``numHosts`` parameter, the other parameters of the
 mobility are left on their defaults. Thus the layout conforms to the
 available space:
 
-.. figure:: group1.png
+.. figure:: media/group1.png
    :width: 100%
 
-.. figure:: group2.png
+.. figure:: media/group2.png
    :width: 100%
 
 .. <!-- <pre>
@@ -789,7 +789,7 @@ mobility module, the target mobility to ``host2``'s mobility module. So
 the orientation of ``host3`` points in the direction of the
 ``host1``-``host2`` vector:
 
-.. figure:: facingexample.png
+.. figure:: media/facingexample.png
    :width: 100%
 
 Note that this screenshot is not from the example simulation for this
@@ -821,7 +821,7 @@ configured to face towards ``host7``'s mobility submodule.
 
 
 
-   .. video:: Facing1.mp4
+   .. video:: media/Facing1.mp4
 
 Categorizing mobility models according to **method of configuration**
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -852,7 +852,7 @@ etc. These motion elements can be used as building blocks for descibing
 complex motion. Motion elements can be repeated as well. See the example
 below. For the complete description of the XML language, see the `NED
 documentation of
-:ned:`TurtleMobility` <https://github.com/inet-framework/inet/blob/showcases/master/src/inet/mobility/single/TurtleMobility.ned>`__.
+:ned:`TurtleMobility` <https://github.com/inet-framework/inet/blob/master/src/inet/mobility/single/TurtleMobility.ned>`__.
 The mobility model's only ini parameter is ``turtleScript``, which
 specifies the XML file to use.
 
@@ -892,7 +892,7 @@ It looks like the following when the simulation is run:
 
 
    <p>
-   .. video:: scriptable.mp4
+   .. video:: media/scriptable.mp4
    </p>
 
 
@@ -902,7 +902,7 @@ It looks like the following when the simulation is run:
 Note that the flexibility of :ned:`TurtleMobility` allows for implementing
 the functionality of some of the other mobility models with a turtle
 script. There are some examples of this in the :ned:`TurtleMobility` NED
-documentation <https://github.com/inet-framework/inet/blob/showcases/master/src/inet/mobility/single/TurtleMobility.ned>`__.
+documentation <https://github.com/inet-framework/inet/blob/master/src/inet/mobility/single/TurtleMobility.ned>`__.
 
 Categorizing mobility models according to their **complexity**
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -965,7 +965,7 @@ Here is a video of the simulation running:
 
 
 
-   .. video:: Attached2_2.mp4
+   .. video:: media/Attached2_2.mp4
 
 The hosts keep a formation around ``host[0]``. Note that as ``host[0]``
 bounces back from the boundary of the constraint area, there is a jump
@@ -1002,7 +1002,7 @@ following image:
 
 .. <!-- TODO: more details -->
 
-.. figure:: circular.png
+.. figure:: media/circular.png
    :width: 100%
 
 .. <!-- TODO: host x is set to orbit on the opposite side from host 0 -> radius of the circle and the heading -->
@@ -1012,7 +1012,7 @@ move circularly as the coordinate system of ``host[0]`` rotates.
 
 
 
-   .. video:: Attached3.mp4
+   .. video:: media/Attached3.mp4
 
 The relative position of the hosts is constant. ``host[4]`` is
 configured to orbit on the opposite side of the circle. It appears as if
@@ -1081,7 +1081,7 @@ constraint area TODO
 
 
 
-   .. video:: Superposition1.mp4
+   .. video:: media/Superposition1.mp4
 
 More superpositioning examples here
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1131,11 +1131,11 @@ coordinates.
 
 
 
-   .. video:: Superposition2.mp4
+   .. video:: media/Superposition2.mp4
 
 TODO:
 
-.. figure:: velocity.png
+.. figure:: media/velocity.png
    :width: 100%
 
 Categorizing mobility models according to **time of positioning**
@@ -1421,7 +1421,7 @@ host. Element[1] is a :ned:`FacingMobility`, the antenna tracks its target.
 
 
 
-.. video:: antennaorientation2.mp4
+.. video:: media/antennaorientation2.mp4
 
-.. |image0| image:: displaystringformat.png
-.. |image1| image:: static.png
+.. |image0| image:: media/displaystringformat.png
+.. |image1| image:: media/static.png

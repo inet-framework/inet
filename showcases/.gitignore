@@ -4,5 +4,5 @@
 .cmdenv-log
 **/cache/*
 **/data/resources/*
-**/results/*
+**/results*/*
 **/frames/*

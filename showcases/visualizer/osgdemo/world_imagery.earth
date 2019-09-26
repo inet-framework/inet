@@ -7,7 +7,7 @@
 
 <!--
     <image name="Landsat" driver="wms">
-	<url>http://gisgeography.com/how-to-download-sentinel-satellite-data/showcases/</url>
+	<url>http://gisgeography.com/how-to-download-sentinel-satellite-data/</url>
 	<srs>EPSG:4326</srs>
 	<tile_size>512</tile_size>
 	<layers>global_mosaic</layers>

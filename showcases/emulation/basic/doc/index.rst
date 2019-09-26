@@ -21,7 +21,7 @@ All of the following examples present a simple conceptual network and a simple s
 The network consists of two hosts, one of which - may it be real or simulated
 - pings the other one:
 
-.. figure:: imgs/conceptual_embedded_text.svg
+.. figure:: media/imgs/conceptual_embedded_text.svg
    :width: 100%
    :align: center
 
@@ -123,7 +123,7 @@ file.
 The following schematic image illustrates the structure of the network and
 the route of the messages:
 
-.. figure:: imgs/ExtUpperEthernetInterfaceInSender_embedded_text.svg
+.. figure:: media/imgs/ExtUpperEthernetInterfaceInSender_embedded_text.svg
    :width: 100%
    :align: center
 
@@ -183,7 +183,7 @@ ECHO REPLY message addressed to the sender host. The :ned:`ExtUpperEthernetInter
 the receiver host reads the TAP device and forwards the messages towards the sender host inside
 the simulation. The results of the pinging can be found in the ``inet.out`` file.
 
-.. figure:: imgs/ExtUpperEthernetInterfaceInReceiver_embedded_text.svg
+.. figure:: media/imgs/ExtUpperEthernetInterfaceInReceiver_embedded_text.svg
    :width: 100%
    :align: center
 
@@ -241,7 +241,7 @@ inside the simulation. The receiver host gets the message and replies to it.
 The :ned:`ExtLowerEthernetInterface` of the receiver host writes the message into
 the veth device, which is then sent to the sender host in the real OS.
 
-.. figure:: imgs/ExtLowerEthernetInterfaceInReceiver_embedded_text.svg
+.. figure:: media/imgs/ExtLowerEthernetInterfaceInReceiver_embedded_text.svg
    :width: 100%
    :align: center
 
@@ -272,7 +272,7 @@ virtual ethernet device. The message the arrives at ``veth1`` and is processed b
 A PING REPLY message is then routed through the veth devices, where the :ned:`ExtLowerEthernetInterface`
 of the sender host read ``veth0`` and processes the reply message.
 
-.. figure:: imgs/ExtLowerEthernetInterfaceInSender_embedded_text.svg
+.. figure:: media/imgs/ExtLowerEthernetInterfaceInSender_embedded_text.svg
    :width: 100%
    :align: center
 
