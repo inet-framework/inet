@@ -7,6 +7,7 @@
 #include "inet/routing/ospf/v3/interface/Ospfv3InterfaceState.h"
 
 namespace inet {
+namespace ospf {
 
 /*
  * In this state the interface is waiting for the DR and BDR election. It does do by monitoring hello packets
@@ -23,6 +24,7 @@ class INET_API Ospfv3InterfaceStateWaiting : public Ospfv3InterfaceState
     std::string getInterfaceStateString() const override { return std::string("Ospfv3InterfaceStateWaiting"); };
 };
 
+} // namespace ospf
 }//namespace inet
 
 #endif // __INET_OSPFV3INTERFACESTATEWAITING_H_

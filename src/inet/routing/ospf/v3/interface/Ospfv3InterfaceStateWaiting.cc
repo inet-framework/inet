@@ -6,6 +6,7 @@
 #include "inet/routing/ospf/v3/interface/Ospfv3InterfaceStateWaiting.h"
 
 namespace inet {
+namespace ospf {
 
 void Ospfv3InterfaceStateWaiting::processEvent(Ospfv3Interface* interface, Ospfv3Interface::Ospfv3InterfaceEvent event)
 {
@@ -54,5 +55,6 @@ void Ospfv3InterfaceStateWaiting::processEvent(Ospfv3Interface* interface, Ospfv
     }
 }//processEvent
 
+} // namespace ospf
 }//namespace inet
 

@@ -6,7 +6,7 @@ import inet.networklayer.contract.ipv4.Ipv4Address;
 import inet.networklayer.contract.ipv6.Ipv6Address;
 import inet.routing.ospf.OspfPacket;
 
-namespace inet;
+namespace inet::ospf;
 
 //Common OSPFv3 packet header - this header is present in every OSPFv3 packet
 class Ospfv3Packet extends ospf::OspfPacket

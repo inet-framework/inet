@@ -7,6 +7,7 @@
 #include "inet/routing/ospf/v3/interface/Ospfv3InterfaceState.h"
 
 namespace inet {
+namespace ospf {
 
 /*
  * This router is neither DR nor BDR. The interface is on NBMA Network. It forms adjacencies
@@ -22,6 +23,7 @@ class INET_API Ospfv3InterfaceStateDrOther : public Ospfv3InterfaceState
     std::string getInterfaceStateString() const override { return std::string("Ospfv3InterfaceStateDrOther"); }
 };
 
+} // namespace ospf
 }//namespace inet
 
 #endif // __INET_OSPFV3INTERFACESTATEDROTHER_H_

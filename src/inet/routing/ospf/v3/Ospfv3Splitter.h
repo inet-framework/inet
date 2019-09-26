@@ -16,7 +16,9 @@
 #include "inet/routing/ospf/v3/Ospfv3Timers.h"
 #include "inet/routing/ospf/v3/process/Ospfv3Process.h"
 
+
 namespace inet {
+namespace ospf {
 
 int ospfv3InterfaceIndex=1;
 
@@ -47,7 +49,8 @@ class INET_API Ospfv3Splitter : protected cListener, public cSimpleModule
      virtual int numInitStages() const override { return NUM_INIT_STAGES; }
 };
 
-}//namespace inet
+} //namespace ospf
+} //namespace inet
 
 #endif // __INET_OSPFV3SPLITTER_H_
 

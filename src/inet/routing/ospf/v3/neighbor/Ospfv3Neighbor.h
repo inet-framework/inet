@@ -11,6 +11,7 @@
 #include "inet/routing/ospf/v3/Ospfv3Timers.h"
 
 namespace inet {
+namespace ospf {
 
 class Ospfv3NeighborState;
 class Ospfv3Interface;
@@ -183,6 +184,7 @@ class Ospfv3Neighbor
     int last_hello_received = 0;
 };
 
+} // namespace ospf
 }//namespace inet
 
 #endif // __INET_OSPFV3NEIGHBOR_H_

@@ -7,6 +7,7 @@
 #include "inet/routing/ospf/v3/interface/Ospfv3Interface.h"
 
 namespace inet {
+namespace ospf {
 
 class INET_API Ospfv3InterfaceState
 {
@@ -21,6 +22,7 @@ class INET_API Ospfv3InterfaceState
     void calculateDesignatedRouter(Ospfv3Interface *intf);
 };
 
+} // namespace ospf
 }//namespace inet
 
 #endif // __INET_OSPFV3INTERFACESTATE_H_

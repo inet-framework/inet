@@ -7,6 +7,8 @@
 #include "inet/routing/ospf/v3/interface/Ospfv3InterfaceState.h"
 
 namespace inet {
+namespace ospf {
+
 /*
  * Interface os looped back, it is unsiutable for normal traffic. It is still desirable to gain information
  * about the quality of this interface (ICMP...). Advertised as router LSA with single host route, whose dest IP
@@ -22,6 +24,7 @@ class INET_API Ospfv3InterfaceStateLoopback : public Ospfv3InterfaceState
     std::string getInterfaceStateString() const override { return std::string("Ospfv3InterfaceStateLoopback"); }
 };
 
+} // namespace ospf
 }//namespace inet
 
 #endif // __INET_OSPFV3INTERFACESTATELOOPBACK_H_

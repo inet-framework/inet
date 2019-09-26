@@ -19,6 +19,7 @@
 #include "inet/routing/ospf/v3/neighbor/Ospfv3NeighborState.h"
 
 namespace inet {
+namespace ospf {
 
 void Ospfv3NeighborState::changeState(Ospfv3Neighbor *neighbor, Ospfv3NeighborState *newState, Ospfv3NeighborState *currentState)
 {
@@ -135,5 +136,6 @@ void Ospfv3NeighborState::changeState(Ospfv3Neighbor *neighbor, Ospfv3NeighborSt
     }
 }
 
+} // namespace ospf
 } // namespace inet
 

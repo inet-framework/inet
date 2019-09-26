@@ -3,6 +3,7 @@
 #include "inet/routing/ospf/v3/process/Ospfv3Process.h"
 
 namespace inet {
+namespace ospf {
 
 Define_Module(Ospfv3Process);
 
@@ -1004,5 +1005,6 @@ void Ospfv3Process::rebuildRoutingTable()
     }
 } // end of rebuildRoutingTable
 
+} // namespace ospf
 }//namespace inet
 

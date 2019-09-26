@@ -10,6 +10,7 @@
 // which are needed for calculating SPF and wtchting time since LSA is written down into LSDB
 
 namespace inet {
+namespace ospf {
 
 class INET_API LSATrackingInfo
 {
@@ -194,6 +195,7 @@ std::ostream& operator<<(std::ostream& ostr, const Ospfv3RouterLsa& lsa);
 std::ostream& operator<<(std::ostream& ostr, const Ospfv3InterAreaPrefixLsa& lsa);
 std::ostream& operator<<(std::ostream& ostr, const Ospfv3AsExternalLsa& lsa);
 
+} // namespace ospf
 }//namespace inet
 
 #endif // __INET_OSPFV3LSA_H_

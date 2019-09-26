@@ -6,6 +6,7 @@
 #include "inet/common/INETDefs.h"
 
 namespace inet {
+namespace ospf {
 
 class INET_API Ospfv3NeighborStateFull : public Ospfv3NeighborState
 {
@@ -19,6 +20,7 @@ class INET_API Ospfv3NeighborStateFull : public Ospfv3NeighborState
     virtual std::string getNeighborStateString() override { return std::string("Ospfv3NeighborStateFull"); }
 };
 
+} // namespace ospf
 }//namespace inet
 
 #endif // __INET_OSPFV3NEIGHBORSTATEFULL_H_

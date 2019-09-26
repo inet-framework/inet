@@ -6,6 +6,7 @@
 #include "inet/routing/ospf/v3/Ospfv3Packet_m.h"
 
 namespace inet {
+namespace ospf {
 
 // intervals values
 #define OSPFV3_START            5
@@ -409,6 +410,7 @@ inline bool operator==(const Ospfv3LsaHeader& leftLSA, const Ospfv3LsaHeader& ri
 }
 //Packets
 
+} //namespace ospf
 }//namespace inet
 
 #endif // __INET_OSPFV3COMMON_H_

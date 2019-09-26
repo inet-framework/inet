@@ -17,6 +17,7 @@
 #include "inet/routing/ospf/v3/process/Ospfv3Process.h"
 
 namespace inet {
+namespace ospf {
 
 class Ospfv3Process;
 class Ospfv3Area;
@@ -64,6 +65,7 @@ inline std::ostream& operator<<(std::ostream& ostr, const Ospfv3Instance& instan
     return ostr;
 }
 
+} // namespace ospf
 }//namespace inet
 
 #endif // __INET_OSPFV3INSTANCE_H_

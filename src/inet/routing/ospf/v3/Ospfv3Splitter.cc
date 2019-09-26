@@ -4,6 +4,7 @@
 #include "inet/routing/ospf/v3/Ospfv3Splitter.h"
 
 namespace inet {
+namespace ospf {
 
 Define_Module(Ospfv3Splitter);
 
@@ -205,5 +206,6 @@ void Ospfv3Splitter::addNewProcess(cXMLElement* process, cXMLElement* interfaces
     this->processesModules.push_back(newProcessModule);
 }//addNewProcess
 
+} //namespace ospf
 }//namespace inet
 

@@ -7,6 +7,7 @@
 #include "inet/routing/ospf/v3/interface/Ospfv3InterfaceState.h"
 
 namespace inet {
+namespace ospf {
 
 /*
  * Adjacencies are established with every router on the network.
@@ -22,6 +23,7 @@ class INET_API Ospfv3InterfaceStateDr : public Ospfv3InterfaceState
     virtual std::string getInterfaceStateString() const override { return std::string("Ospfv3InterfaceStateDr"); }
 };
 
+} // namespace ospf
 }//namespace inet
 
 #endif // __INET_OSPFV3INTERFACESTATEDR_H_

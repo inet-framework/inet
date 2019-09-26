@@ -8,6 +8,7 @@
 #include "inet/routing/ospf/v3/interface/Ospfv3InterfaceStateWaiting.h"
 
 namespace inet {
+namespace ospf {
 
 class INET_API Ospfv3InterfaceStateDown : public Ospfv3InterfaceState
 {
@@ -18,6 +19,7 @@ class INET_API Ospfv3InterfaceStateDown : public Ospfv3InterfaceState
     std::string getInterfaceStateString() const override { return std::string("Ospfv3InterfaceStateDown"); };
 };
 
+} // namespace ospf
 }//namespace inet
 
 #endif // __INET_OSPFV3INTERFACESTATEDOWN_H_

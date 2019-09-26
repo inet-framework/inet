@@ -6,6 +6,7 @@
 #include "inet/routing/ospf/v3/neighbor/Ospfv3NeighborState.h"
 
 namespace inet {
+namespace ospf {
 
 class INET_API Ospfv3NeighborStateAttempt : public Ospfv3NeighborState
 {
@@ -20,6 +21,7 @@ class INET_API Ospfv3NeighborStateAttempt : public Ospfv3NeighborState
     ~Ospfv3NeighborStateAttempt() {};
 };
 
+} // namespace ospf
 }//namespace inet
 
 #endif // __INET_OSPFV3NEIGHBORSTATEATTEMPT_H_

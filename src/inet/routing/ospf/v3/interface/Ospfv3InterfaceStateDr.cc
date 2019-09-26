@@ -6,6 +6,7 @@
 #include "inet/routing/ospf/v3/interface/Ospfv3InterfaceStateLoopback.h"
 
 namespace inet {
+namespace ospf {
 
 void Ospfv3InterfaceStateDr::processEvent(Ospfv3Interface* interface, Ospfv3Interface::Ospfv3InterfaceEvent event)
 {
@@ -58,5 +59,6 @@ void Ospfv3InterfaceStateDr::processEvent(Ospfv3Interface* interface, Ospfv3Inte
     }
 }//processEvent
 
+} // namespace ospf
 }//namespace inet
 

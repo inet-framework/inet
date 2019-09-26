@@ -5,6 +5,7 @@
 #include "inet/routing/ospf/v3/interface/Ospfv3InterfaceStateDrOther.h"
 
 namespace inet {
+namespace ospf {
 
 void Ospfv3InterfaceState::changeState(Ospfv3Interface *interface, Ospfv3InterfaceState *newState, Ospfv3InterfaceState *currentState)
 {
@@ -509,5 +510,6 @@ void Ospfv3InterfaceState::calculateDesignatedRouter(Ospfv3Interface *intf) {
         intf->setBackupIP(intf->getInterfaceLLIP());
 }
 
+} // namespace ospf
 }//namespace inet
 

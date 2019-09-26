@@ -11,6 +11,7 @@
 #include "inet/routing/ospf/v3/process/Ospfv3RoutingTableEntry.h"
 
 namespace inet {
+namespace ospf {
 
 class Ospfv3Instance;
 class Ospfv3Interface;
@@ -218,6 +219,7 @@ inline std::ostream& operator<<(std::ostream& ostr, const Ospfv3Area& area)
     return ostr;
 }
 
+} // namespace ospf
 }//namespace inet
 
 #endif // __INET_OSPFV3AREA_H_

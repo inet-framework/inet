@@ -29,6 +29,7 @@
 #include "inet/routing/ospf/v3/process/Ospfv3RoutingTableEntry.h"
 
 namespace inet {
+namespace ospf {
 
 class Ospfv3Instance;
 
@@ -100,6 +101,7 @@ class INET_API Ospfv3Process : protected cListener, public cSimpleModule
     //list of as-external routes
 };
 
+} // namespace ospf
 }//namespace inet
 
 #endif // __INET_OSPFV3PROCESS_H_

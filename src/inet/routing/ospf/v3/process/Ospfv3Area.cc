@@ -6,6 +6,7 @@
 #include "inet/routing/ospf/v3/process/Ospfv3Area.h"
 
 namespace inet {
+namespace ospf {
 
 using namespace std;
 
@@ -3748,5 +3749,6 @@ std::string Ospfv3Area::detailedInfo() const
     return out.str();
 }//detailedInfo
 
+} // namespace ospf
 }//namespace inet
 

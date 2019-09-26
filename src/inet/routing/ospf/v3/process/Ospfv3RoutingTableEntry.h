@@ -12,6 +12,7 @@
 #include "inet/routing/ospf/v3/Ospfv3Packet_m.h"
 
 namespace inet {
+namespace ospf {
 
 class INET_API Ospfv3RoutingTableEntry : public Ipv6Route
 {
@@ -135,6 +136,7 @@ public:
 
 std::ostream& operator<<(std::ostream& out, const Ospfv3Ipv4RoutingTableEntry& entry);
 
+} // namespace ospf
 }//namespace inet
 
 #endif // __INET_OSPFV3ROUTINGTABLEENTRY_H_

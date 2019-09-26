@@ -6,6 +6,7 @@
 #include "inet/routing/ospf/v3/interface/Ospfv3InterfaceStatePointToPoint.h"
 
 namespace inet {
+namespace ospf {
 
 void Ospfv3InterfaceStatePointToPoint::processEvent(Ospfv3Interface* interface, Ospfv3Interface::Ospfv3InterfaceEvent event)
 {
@@ -40,5 +41,6 @@ void Ospfv3InterfaceStatePointToPoint::processEvent(Ospfv3Interface* interface, 
     }
 }//processEvent
 
+} // namespace ospf
 }//namespace inet
 

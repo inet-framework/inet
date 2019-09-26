@@ -3,6 +3,7 @@
 #include "inet/routing/ospf/v3/neighbor/Ospfv3NeighborStateDown.h"
 
 namespace inet {
+namespace ospf {
 
 // FIXME!!! Should come from a global unique number generator module.
 unsigned long Ospfv3Neighbor::ddSequenceNumberInitSeed = 0;
@@ -733,5 +734,6 @@ void Ospfv3Neighbor::deleteLastSentDDPacket()
     }
 }//deleteLastSentDDPacket
 
-}
+} // namespace ospf
+} // namespace inet
 
