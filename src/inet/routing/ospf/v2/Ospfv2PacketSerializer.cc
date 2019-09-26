@@ -189,7 +189,7 @@ void Ospfv2PacketSerializer::serializeOspfHeader(MemoryOutputStream& stream, con
 {
     stream.writeByte(ospfPacket->getVersion());
     stream.writeByte(ospfPacket->getType());
-    stream.writeUint16Be(B(ospfPacket->getChunkLength()).get());
+    stream.writeUint16Be(ospfPacket->getPacketLengthField());
     stream.writeIpv4Address(ospfPacket->getRouterID());
     stream.writeIpv4Address(ospfPacket->getAreaID());
     auto crcMode = ospfPacket->getCrcMode();
@@ -213,6 +213,7 @@ uint16_t Ospfv2PacketSerializer::deserializeOspfHeader(MemoryInputStream& stream
         ospfPacket->markIncorrect();
     ospfPacket->setType(static_cast<OspfPacketType>(ospfType));
     uint16_t packetLength = stream.readUint16Be();
+    ospfPacket->setPacketLengthField(packetLength);
     ospfPacket->setChunkLength(B(packetLength));
     ospfPacket->setRouterID(stream.readIpv4Address());
     ospfPacket->setAreaID(stream.readIpv4Address());
@@ -501,6 +502,7 @@ void Ospfv2PacketSerializer::copyHeaderFields(const Ptr<Ospfv2Packet> from, Ptr<
 {
     to->setVersion(from->getVersion());
     to->setType(from->getType());
+    to->setPacketLengthField(from->getPacketLengthField());
     to->setChunkLength(from->getChunkLength());
     to->setRouterID(from->getRouterID());
     to->setAreaID(from->getAreaID());

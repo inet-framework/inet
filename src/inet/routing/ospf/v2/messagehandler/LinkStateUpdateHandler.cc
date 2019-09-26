@@ -275,7 +275,8 @@ void LinkStateUpdateHandler::acknowledgeLSA(const Ospfv2LsaHeader& lsaHeader,
         ackPacket->setLsaHeadersArraySize(1);
         ackPacket->setLsaHeaders(0, lsaHeader);
 
-        ackPacket->setChunkLength(OSPF_HEADER_LENGTH + OSPF_LSA_HEADER_LENGTH);
+        ackPacket->setPacketLengthField(B(OSPF_HEADER_LENGTH + OSPF_LSA_HEADER_LENGTH).get());
+        ackPacket->setChunkLength(B(ackPacket->getPacketLengthField()));
 
         AuthenticationKeyType authKey = intf->getAuthenticationKey();
         for (int i = 0; i < 8; i++) {
