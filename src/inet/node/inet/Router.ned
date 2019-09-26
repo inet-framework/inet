@@ -22,7 +22,6 @@ import inet.node.base.ApplicationLayerNodeBase;
 import inet.routing.contract.IBgp;
 import inet.routing.contract.IOspf;
 import inet.routing.contract.IPim;
-import inet.routing.contract.IOspfv3;
 
 //
 // IPv4 router that supports wireless, Ethernet, PPP and external interfaces.
@@ -58,13 +57,12 @@ module Router extends ApplicationLayerNodeBase
         bool hasBgp = default(false);
         bool hasPim = default(false);
         bool hasDhcp = default(false);
-        bool hasOSPFv3 = default(false);
         hasUdp = default(hasRip || hasDhcp);
         hasTcp = default(hasBgp);
         *.routingTableModule = default("^.ipv4.routingTable");
 
     submodules:
-        ospf: <"Ospfv2"> like IOspf if hasOspf {
+        ospf: <default("Ospfv2")> like IOspf if hasOspf {
             parameters:
                 @display("p=975,226");
         }
@@ -85,11 +83,6 @@ module Router extends ApplicationLayerNodeBase
             parameters:
                 @display("p=1125,76");
         }
-         ospfv3: <"Ospfv3"> like IOspfv3 if hasOSPFv3 {
-            parameters:
-                @display("p=825,226");
-         }
-        
 
     connections allowunconnected:
         ospf.ipOut --> tn.in++ if hasOspf;
@@ -106,8 +99,5 @@ module Router extends ApplicationLayerNodeBase
 
         dhcp.socketOut --> at.in++ if hasDhcp;
         dhcp.socketIn <-- at.out++ if hasDhcp;
-        
-		ospfv3.networkLayerOut --> tn.in++ if hasOSPFv3;
-        ospfv3.networkLayerIn <-- tn.out++ if hasOSPFv3;
 }
 

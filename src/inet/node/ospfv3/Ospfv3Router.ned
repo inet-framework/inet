@@ -19,34 +19,17 @@
 package inet.node.ospfv3;
 
 import inet.node.inet.Router;
-import inet.routing.ospf.v3.Ospfv3;
-import inet.routing.contract.IOspfv3;
 
 
 //
-// An OSPFv2 router.
+// An OSPFv3 router.
 //
 module Ospfv3Router extends Router
 {
-	parameters:
-      //  hasOspfv3 = true;
+    parameters:
         hasIpv6 = true;
         *.routingTableModule6 = "^.ipv6.routingTable";
-//        bool hasOSPFv3 = default(true);
-		hasOSPFv3 = true;
-		xml configData = default(xmldoc("config.xml"));
-        
-   	submodules:
-//       ospfv3: OSPFv3Routing if hasOSPFv3 {
-//            parameters:
-//                @display("p=689,331");
-//        }
-//         ospfv3: <"Ospfv3"> like IOspfv3 if hasOSPFv3 {
-//            parameters:
-//                @display("p=825,226");
-//         }
-	connections allowunconnected:
-//		ospfv3.networkLayerOut --> tn.in++ if hasOspf;
-//        ospfv3.networkLayerIn <-- tn.out++ if hasOspf;
+        hasOspf = true;
+        ospf.typename = "Ospfv3";
 }
 
