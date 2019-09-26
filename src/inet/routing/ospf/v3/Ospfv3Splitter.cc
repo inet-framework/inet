@@ -31,8 +31,8 @@ void Ospfv3Splitter::initialize(int stage)
         routingModule=this->getParentModule();
 
         ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
-        registerService(Protocol::ospfv3, nullptr, gate("ipIn"));
-        registerProtocol(Protocol::ospfv3, gate("ipOut"), nullptr);
+        registerService(Protocol::ospf, nullptr, gate("ipIn"));
+        registerProtocol(Protocol::ospf, gate("ipOut"), nullptr);
 
         this->parseConfig(par("ospfv3RoutingConfig"), par("ospfv3IntConfig"));
 
@@ -60,7 +60,7 @@ void Ospfv3Splitter::handleMessage(cMessage* msg)
 //            }
 
            auto protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
-            if(protocol!=&Protocol::ospfv3){
+            if(protocol!=&Protocol::ospf){
                 delete msg;
                 return;
             }
