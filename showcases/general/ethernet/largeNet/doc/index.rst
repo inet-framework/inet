@@ -98,7 +98,7 @@ cables and hubs. The INET framework contains two MAC modules for
 Ethernet: the ``EtherMACFullDuplex`` is simpler to understand and easier
 to extend because it supports only full-duplex connections. The
 ``EtherMAC`` module implements the full MAC functionality including
-CSMa/showcases/CD, and it can operate both half-duplex and full-duplex mode.*
+CSMA/CD, and it can operate both half-duplex and full-duplex mode.*
 
 The network
 ~~~~~~~~~~~
@@ -123,13 +123,13 @@ of the hub. (`LargeLAN layout <largeLAN_layout.png>`__)
 The topology of the :ned:`LargeNet` model can be seen in the
 ``LargeNet.ned`` file:
 
-.. figure:: LargeNet_layout.png
+.. figure:: media/LargeNet_layout.png
    :width: 100%
    :align: center
 
 The application model which generates load on the simulated LAN is
 simple yet powerful. It can be used as a rough model for any
-request-response based protocol such as SMb/showcases/CIFS (the Windows file
+request-response based protocol such as SMB/CIFS (the Windows file
 sharing protocol), HTTP, or a database client-server protocol.
 
 Every computer runs a client application (``EtherAppCli``) which

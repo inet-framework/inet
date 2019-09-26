@@ -40,7 +40,7 @@ Enabling the visualization
 
 The configuration uses the following network:
 
-.. figure:: simplenetwork.png
+.. figure:: media/simplenetwork.png
    :width: 100%
 
 It contains two ``AdhocHosts``, and a wall between them. The hosts are
@@ -62,7 +62,7 @@ changed to yellow with the ``intersectionLineColor`` parameter:
 When the simulation is run, and ``source`` starts pinging
 ``destination``, the signals go through the wall:
 
-.. figure:: simple2.png
+.. figure:: media/simple2.png
    :width: 100%
 
 The intersection of the wall and the transmission is indicated with a
@@ -73,7 +73,7 @@ Multiple Obstacles
 
 The following configuration uses a more complex network:
 
-.. figure:: advancednetwork.png
+.. figure:: media/advancednetwork.png
    :width: 100%
 
 It contains two ``AdhocHosts``. In the middle of the playground, there
@@ -84,7 +84,7 @@ configured to go around the structure on a rectangular path. The
 ``destinationHost``. The following animation illustrates what happens
 when the simulation is run:
 
-.. video:: obstacleloss2_5.mp4
+.. video:: media/obstacleloss2_5.mp4
    :width: 698
 
 The hosts send ping packets through the structure. Even when the
@@ -102,7 +102,7 @@ video, that shows the simulation running in fast mode:
 
 
 
-.. video:: obstacleloss3.mp4"
+.. video:: media/obstacleloss3.mp4"
    :width: 698
 
 The fading time, as well several other parameters can be configured.

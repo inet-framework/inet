@@ -23,7 +23,7 @@ to extruded buildings.
 <!--
     <model name="buildings" driver="feature_geom">
         <features name="buildings" driver="ogr">
-            <url>data/showcases/boston_buildings_utm19.shp</url>
+            <url>data/boston_buildings_utm19.shp</url>
             <build_spatial_index>true</build_spatial_index>
         </features>
 
@@ -33,7 +33,7 @@ to extruded buildings.
 
         <styles>
             <library name="us_resources">
-                <url>data/showcases/resources/textures_us/catalog.xml</url>
+                <url>data/resources/textures_us/catalog.xml</url>
             </library>
 
             <style type="text/css">

@@ -92,7 +92,7 @@ RoutingTableVisualizer module can visualize routing tables in both 2D
 and 3D.) A rule of thumb is if the type name doesn't contain either
 ``Canvas`` or ``Osg``, the module contains both kinds of visualizers.
 
-.. figure:: compound.png
+.. figure:: media/compound.png
    :width: 100%
 
 **Integrated Canvas and Osg visualizers**
@@ -101,7 +101,7 @@ The :ned:`IntegratedCanvasVisualizer` and :ned:`IntegratedOsgVisualizer`
 compound modules each contain all available Canvas and Osg visualizer
 types, respectively.
 
-.. figure:: integratedcanvasosg.png
+.. figure:: media/integratedcanvasosg.png
    :width: 100%
 
 **Integrated visualizer**
@@ -110,7 +110,7 @@ The :ned:`IntegratedVisualizer` contains an :ned:`IntegratedCanvasVisualizer`
 and a :ned:`IntegratedOsgVisualizer`. Thus it contains all available
 visualizers.
 
-.. figure:: integrated.png
+.. figure:: media/integrated.png
    :width: 100%
 
 **Multi-visualizers**
@@ -131,8 +131,8 @@ specified for each visualizer submodule with parameters, e.g.
 ``numTransportConnectionVisualizers = 2`` or
 ``numDataLinkVisualizers = 3``.
 
-.. image:: multicanvas.png
-.. image:: multiintegrated2.png
+.. image:: media/multicanvas.png
+.. image:: media/multiintegrated2.png
 
 .. todo::
 
@@ -229,7 +229,7 @@ modules. The configurations for the simulations are defined in the
 omnetpp.ini file. TODO: rewrite for two configs The configuration uses
 the following network:
 
-.. figure:: network.png
+.. figure:: media/network.png
    :width: 100%
 
 The hosts and the server in the network are ``StandardHosts``. The
@@ -323,7 +323,7 @@ achieve this:
 
 When the simulation is run, this happens:
 
-.. video:: advanced3.mp4
+.. video:: media/advanced3.mp4
    :width: 698
 
 The server starts sending the UDP and TCP streams to the hosts. The
@@ -394,7 +394,7 @@ wireless networks, which operate in different frequency bands (2.4 and 5
 GHz.) The two networks are put on two different radio mediums, and two
 visualizer modules are used for visualizing transmissions.
 
-.. video:: Wireless2.mp4
+.. video:: media/Wireless2.mp4
    :width: 698
 
 Note that even though the two signals overlap, the transmissions are
@@ -431,16 +431,16 @@ the panel.)
    TODO: this image is too big
    -->
 
-.. figure:: modify_4.png
+.. figure:: media/modify_4.png
    :width: 100%
 
-.. figure:: modify_3.png
+.. figure:: media/modify_3.png
    :width: 100%
 
 Double click a parameter to select it, then double click on the value
 field to change it:
 
-.. figure:: modify2.png
+.. figure:: media/modify2.png
    :width: 100%
 
 The changes will take effect immediatelly.
