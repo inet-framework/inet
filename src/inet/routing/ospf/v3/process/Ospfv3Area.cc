@@ -1441,8 +1441,8 @@ bool Ospfv3Area::installInterAreaPrefixLSA(const Ospfv3InterAreaPrefixLsa* lsa)
 
     if (lsaInDatabase != nullptr) {
         this->removeFromAllRetransmissionLists(lsaKey);
-        return this->updateInterAreaPrefixLSA(lsaInDatabase, lsa);
         EV_DEBUG << "Only updating\n";
+        return this->updateInterAreaPrefixLSA(lsaInDatabase, lsa);
     }
     else {
         InterAreaPrefixLSA* lsaCopy = new InterAreaPrefixLSA(*lsa);
