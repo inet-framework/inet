@@ -1,5 +1,15 @@
 ====== inet-4.x ======
 
+2019-06-17  Andras Varga
+
+	Changed getInterfaceById() to raise an error on invalid IDs.
+	Added findInterfaceById() with old behavior.
+
+2019-03-20  Levente Mészáros
+
+	Changed hooks to maintain a list of netfilters to allow registering to
+	multiple simulatenously.
+
 2019-01-28  ------ inet-4.1.0 released ------
 
 2019-01-18  Zoltan Bojthe

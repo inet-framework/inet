@@ -1,5 +1,13 @@
 ====== inet-4.x ======
 
+2019-02-20  Levente Mészáros
+
+	Added UserPriorityPacketComparatorFunction needed to restore original CsmaCaMac functionality.
+
+2019-01-22  Levente Mészáros
+
+	Added InterfaceEntry NED base module to all interfaces.
+
 2019-01-28  ------ inet-4.1.0 released ------
 
 2018-12-12  Levente Mészáros

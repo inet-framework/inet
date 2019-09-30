@@ -1,5 +1,25 @@
 ====== inet-4.x ======
 
+2019-09-09  Zoltan Bojthe
+
+	Converted TcpLwipConnection to submodule of TcpLwip.
+
+2019-09-02  Zoltan Bojthe
+
+	Optimized Tag usage.
+
+2019-07-15  Zoltan Bojthe
+
+	Use parseCrcMode().
+
+2019-03-22  Levente Mészáros
+
+	Fixed receiving real binary data.
+
+	The received data occasionally contained garbage, because the Lwip buffer
+	was incorrectly copied into the Packet which was later sent to the
+	application.
+
 2019-01-28  ------ inet-4.1.0 released ------
 
 2018-10-25  Zoltan Bojthe

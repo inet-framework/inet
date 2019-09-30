@@ -1,5 +1,13 @@
 ====== inet-4.x ======
 
+2019-09-17  Zoltan Bojthe
+
+	Simplified serializing empty data part.
+
+2019-08-26  Zoltan Bojthe
+
+	Fixed CRC calculation for empty payload.
+
 2019-01-28  ------ inet-4.1.0 released ------
 
 2018-12-10  Zoltan Bojthe

@@ -1,5 +1,22 @@
 ====== inet-4.x ======
 
+2019-06-03  Zoltan Bojthe
+
+	Removed unneeded clearQueue() and flushQueue() functions already implemented in MacProtocolBase.
+	Renamed	transmissionQueue --> txQueue and popFromTransmissionQueue() --> popTxQueue().
+
+2019-05-27  Zoltan Bojthe
+
+	Removed pk0 local variable.
+
+2019-05-22  Zoltan Bojthe
+
+	Use popPacket() instead of getPacket(0).
+
+2019-03-14  Levente Mészáros
+
+	Replaced internal queue with IPacketQueue submodule.
+
 2019-01-28  ------ inet-4.1.0 released ------
 
 2018-10-08  Zoltan Bojthe

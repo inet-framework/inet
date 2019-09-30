@@ -1,5 +1,33 @@
 ====== inet-4.x ======
 
+2019-09-25  Zoltan Bojthe
+
+	Feature dependent code marked with #ifdef/endif.
+
+2019-09-16  Levente Mészáros
+
+	Added support for transmitting signals without an attached packet.
+
+2019-09-11  Levente Mészáros
+
+	Added background noise visualization to MediumCanvasVisualizer.
+
+2019-08-27  Levente Mészáros
+
+	Replaced simtime_t type with simsec in multidimensional analog domain signal representations.
+
+2019-06-17  Levente Mészáros
+
+	Implemented various display flags in RadioCanvasVisualizer.
+
+2019-06-07  Levente Mészáros
+
+	Added transmission medium signal power spectral density visualization.
+
+2019-02-20  Levente Mészáros
+
+	Draw circle for 0 dB gain and max gain.
+
 2019-01-28  ------ inet-4.1.0 released ------
 
 2018-10-19  Levente Mészáros

@@ -1,5 +1,19 @@
 ====== inet-4.x ======
 
+2019-07-17  Zoltan Bojthe
+
+	Added CRC calculator functions.
+
+2019-07-08  Zoltan Bojthe
+
+	Added ASSERTs for error detection.
+	Added lsa CRC calculation.
+	Fixed lsaLength.
+
+2019-07-02  Zoltan Bojthe
+
+	Followed redesigned packet format.
+
 2019-01-28  ------ inet-4.1.0 released ------
 
 2018-08-13  Mani Amoozadeh

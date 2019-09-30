@@ -1,5 +1,37 @@
 ====== inet-4.x ======
 
+2019-09-02  Zoltan Bojthe
+
+	Optimized Tag usage
+
+2019-07-01  Marcell Juhász
+
+	Added nonLocalSrcAddress flag to L3AddressReq.
+
+2019-06-17  Andras Varga
+
+	Changed getInterfaceById() to raise an error on invalid IDs.
+	Added findInterfaceById() with the old behavior.
+
+2019-06-14  Andras Varga
+
+	Added L3AddressResolver::collectNetworkNodes()
+	Added L3AddressResolver::findInterfaceWithMacAddress() and findHostWithMacAddress().
+
+2019-02-08  Zoltan Bojthe
+
+	Added missing doParsimPacking/doParsimUnpacking to L3Address.
+
+2019-02-07  Levente Mészáros
+
+	Fixed bug #66 in L3AddressResolver.
+
+2019-01-22  Levente Mészáros
+
+	Added displayStringTextFormat parameter handling to InterfaceEntry.
+	Extracted a separate updateDisplayString() method in InterfaceEntry.
+	Added InterfaceEntry NED base module to all interfaces.
+
 2019-01-28  ------ inet-4.1.0 released ------
 
 2019-01-14  Zoltan Bojthe

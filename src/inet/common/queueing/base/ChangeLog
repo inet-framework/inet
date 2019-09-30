@@ -1,0 +1,16 @@
+====== inet-4.x ======
+
+2018-10-03  Levente Mészáros
+
+	Added a new queueing package which replaces the old queue package. This new
+	package comes with a different API and a lot of new components. All old queue
+	components were either ported or completely replaced with components of the new
+	queueing package.
+
+	Add new base classes: PacketClassifierBase, PacketConsumerBase, PacketDuplicatorBase,
+	PacketFilterBase, PacketProcessorBase, PacketQueueBase, PacketQueueingElementBase,
+	PacketSchedulerBase, PacketServerBase, PacketSinkBase, and PacketSourceBase.
+
+	Added new NED modules: PacketClassifierBase, PacketFilterBase, PacketProcessorBase,
+	PacketQueueBase, PacketSchedulerBase, PacketServerBase, PacketSinkBase, and
+	PacketSourceBase.
