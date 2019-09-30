@@ -271,7 +271,7 @@ struct Ospfv3DdOptions{
     bool msBit;	//1=the router is the master, 0=router is the slave
 }
 
-class Ospfv3DatabaseDescription extends Ospfv3Packet
+class Ospfv3DatabaseDescriptionPacket extends Ospfv3Packet
 {
     type = ospf::DATABASE_DESCRIPTION_PACKET;
     uint8_t reserved1 = 0;
@@ -298,7 +298,8 @@ struct Ospfv3LsRequest{
 }
 
 //Link State Request packet
-class Ospfv3LinkStateRequest extends Ospfv3Packet{
+class Ospfv3LinkStateRequestPacket extends Ospfv3Packet
+{
     Ospfv3LsRequest requests[];
 }
 
@@ -325,7 +326,8 @@ class Ospfv3LsUpdate extends Ospfv3Packet{
 //
 
 //Link State Acknowledgement packet
-class Ospfv3LsAck extends Ospfv3Packet{
+class Ospfv3LinkStateAcknowledgementPacket extends Ospfv3Packet
+{
     uint32_t lsas;
     Ospfv3LsaHeader lsaHeaders[];
 }

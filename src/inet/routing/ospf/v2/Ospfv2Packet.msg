@@ -69,7 +69,7 @@ class Ospfv2HelloPacket extends Ospfv2Packet
 }
 
 
-enum LsaType
+enum Ospfv2LsaType
 {
     ROUTERLSA_TYPE = 1;
     NETWORKLSA_TYPE = 2;
@@ -85,7 +85,7 @@ class Ospfv2LsaHeader extends cObject
 {
     unsigned short lsAge = 0;
     Ospfv2Options lsOptions;
-    LsaType lsType = static_cast<LsaType>(-1);
+    Ospfv2LsaType lsType = static_cast<Ospfv2LsaType>(-1);
     Ipv4Address linkStateID;
     Ipv4Address advertisingRouter;
     int32_t lsSequenceNumber = 0;
@@ -111,21 +111,21 @@ enum LinkType
 }
 
 // (RFC 1583 Section A.4.2.)
-struct TosData
+struct Ospfv2TosData
 {
     unsigned char tos;
     unsigned long tosMetric;
 }
 
 // Router LSA Link section (RFC 1583 Section A.4.2.)
-class Link extends cObject
+class Ospfv2Link extends cObject
 {
     Ipv4Address linkID;
     unsigned long linkData = 0;
     LinkType type = POINTTOPOINT_LINK;
     unsigned char numberOfTOS = 0;
     unsigned long linkCost = 1;     // TOS 0 metric
-    TosData tosData[];
+    Ospfv2TosData tosData[];
 }
 
 //
@@ -140,7 +140,7 @@ class Ospfv2RouterLsa extends Ospfv2Lsa
     bool B_AreaBorderRouter = false;
     unsigned short reserved2 = 0;   // 8 bit
     unsigned short numberOfLinks = 0;
-    Link links[];
+    Ospfv2Link links[];
 }
 
 //
@@ -161,10 +161,10 @@ class Ospfv2SummaryLsa extends Ospfv2Lsa
     // header.lsType = SUMMARYLSA_NETWORKS_TYPE;
     Ipv4Address networkMask;
     unsigned long routeCost = 1;
-    TosData tosData[];  // 1 element required, count of tosData not stored, calculate it from length of LSA
+    Ospfv2TosData tosData[];  // 1 element required, count of tosData not stored, calculate it from length of LSA
 }
 
-struct ExternalTosInfo
+struct Ospfv2ExternalTosInfo
 {
     // TODO: tosData (?)
     unsigned short tos;
@@ -180,7 +180,7 @@ struct ExternalTosInfo
 class Ospfv2AsExternalLsaContents extends cObject
 {
     Ipv4Address networkMask;
-    ExternalTosInfo externalTOSInfo[];
+    Ospfv2ExternalTosInfo externalTOSInfo[];
 }
 
 //
@@ -214,7 +214,7 @@ class Ospfv2DatabaseDescriptionPacket extends Ospfv2Packet
     Ospfv2LsaHeader lsaHeaders[];     //TODO
 }
 
-struct LsaRequest
+struct Ospfv2LsaRequest
 {
     unsigned long lsType;
     Ipv4Address linkStateID;
@@ -226,7 +226,7 @@ struct LsaRequest
 //
 class Ospfv2LinkStateRequestPacket extends Ospfv2Packet
 {
-    LsaRequest requests[];
+    Ospfv2LsaRequest requests[];
 }
 
 //
