@@ -26,6 +26,7 @@
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/packet/Message.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
+#include "inet/networklayer/common/EcnTag_m.h"
 #include "inet/networklayer/common/IpProtocolId_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/transportlayer/common/L4Tools.h"
@@ -290,6 +291,11 @@ void TcpConnection::sendToIP(Packet *packet, const Ptr<TcpHeader>& tcpseg)
 
     insertTransportProtocolHeader(packet, Protocol::tcp, tcpseg);
 
+    auto ecnTag = packet->addTagIfAbsent<EcnReq>();
+    int64_t payload = packet->getByteLength() - tcpseg->getHeaderLength().get();
+    // do not set ECN on ACKs
+    ecnTag->setExplicitCongestionNotification((state->ecnActive && payload > 0) ? IP_ECN_ECT_0 : IP_ECN_NOT_ECT);
+
     tcpMain->send(packet, "ipOut");
 }
 
@@ -452,6 +458,8 @@ void TcpConnection::configureStateVariables()
             ASSERT(false);
         }
     }
+
+    state->ecnEnabled = tcpMain->par("ecnEnabled");
 }
 
 void TcpConnection::selectInitialSeqNum()
@@ -529,6 +537,10 @@ void TcpConnection::sendSyn()
     const auto& tcpseg = makeShared<TcpHeader>();
     tcpseg->setSequenceNo(state->iss);
     tcpseg->setSynBit(true);
+    if(state->ecnEnabled) {
+        tcpseg->setEceBit(true);
+        tcpseg->setCwrBit(true);
+    }
     updateRcvWnd();
     tcpseg->setWindow(state->rcv_wnd);
 
@@ -550,6 +562,14 @@ void TcpConnection::sendSynAck()
     tcpseg->setAckNo(state->rcv_nxt);
     tcpseg->setSynBit(true);
     tcpseg->setAckBit(true);
+
+    // RFC 3168 - ECN enabled and received ECN-setup SYN packet - send ECN-setup SYN-ACK back
+    if (state->ecnEnabled && state->ecnSetupSynReceived) {
+        tcpseg->setEceBit(true);
+        tcpseg->setCwrBit(false); //false is default, but explicitly setting it to keep with the RFC 3168
+        state->ecnSetupSynReceived = false;
+    }
+
     updateRcvWnd();
     tcpseg->setWindow(state->rcv_wnd);
 
@@ -622,6 +642,11 @@ void TcpConnection::sendAck()
     tcpseg->setSequenceNo(state->snd_nxt);
     tcpseg->setAckNo(state->rcv_nxt);
     tcpseg->setWindow(updateRcvWnd());
+
+    if(state->ecnActive && state->ecnCe) {
+        tcpseg->setEceBit(true);
+        state->ecnCe = false;
+    }
 
     // write header options
     writeHeaderOptions(tcpseg);

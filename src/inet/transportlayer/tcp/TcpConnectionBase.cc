@@ -139,6 +139,12 @@ TcpStateVariables::TcpStateVariables()
     tcpRcvQueueDrops = 0;
     sendQueueLimit = 0;
     queueUpdate = true;
+
+    ecnEnabled = false; // RFC 3168
+    ecnSetupSynReceived = false;
+    ecnActive = false;
+
+    ecnCe = false;
 }
 
 std::string TcpStateVariables::str() const
