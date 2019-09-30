@@ -12,8 +12,23 @@ namespace inet;
 //Common OSPFv3 packet header - this header is present in every OSPFv3 packet
 class Ospfv3Packet extends ospf::OspfPacket
 {
+    chunkLength = B(16);
     version = 3;
-    char instanceID;
+    int8_t instanceID;
+    uint8_t reserved = 0;
+
+    // RFC 5340 A.3.1.  The OSPF Packet Header: Checksum:
+    //   OSPF uses the standard checksum calculation for IPv6 applications:
+    //   The 16-bit one's complement of the one's complement sum of the
+    //   entire contents of the packet, starting with the OSPF packet
+    //   header, and prepending a "pseudo-header" of IPv6 header fields, as
+    //   specified in Section 8.1 of [IPV6].  The "Upper-Layer Packet
+    //   Length" in the pseudo-header is set to the value of the OSPF
+    //   packet header's length field.  The Next Header value used in the
+    //   pseudo-header is 89.  If the packet's length is not an integral
+    //   number of 16-bit words, the packet is padded with a byte of zero
+    //   before checksumming.  Before computing the checksum, the checksum
+    //   field in the OSPF packet header is set to 0.
 }
 
 //options for OSPFv3 packets - present in Hello, DD and certain LSAs
@@ -32,8 +47,9 @@ struct Ospfv3Options
 //
 //	OSPFv3 hello packet
 //
-class Ospfv3HelloPacket extends Ospfv3Packet 
+class Ospfv3HelloPacket extends Ospfv3Packet
 {
+    type = ospf::HELLO_PACKET;
 	uint32_t interfaceID;
 	char routerPriority;
 	
@@ -255,14 +271,17 @@ struct Ospfv3DdOptions{
     bool msBit;	//1=the router is the master, 0=router is the slave
 }
 
-class Ospfv3DatabaseDescription extends Ospfv3Packet {
+class Ospfv3DatabaseDescription extends Ospfv3Packet
+{
+    type = ospf::DATABASE_DESCRIPTION_PACKET;
+    uint8_t reserved1 = 0;
     Ospfv3Options options;
-    
     uint16_t interfaceMTU;
+    uint16_t reserved2 = 0;     // 13 bits
     Ospfv3DdOptions ddOptions;
-    
+
     uint32_t sequenceNumber;
-    
+
     Ospfv3LsaHeader lsaHeaders[];
 }
 

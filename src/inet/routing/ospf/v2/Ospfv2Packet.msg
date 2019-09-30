@@ -41,7 +41,11 @@ struct Ospfv2Options
 //
 class Ospfv2Packet extends OspfPacket
 {
+    chunkLength = B(24);
     version = 2;
+
+    short authenticationType = 0;   // 2 bytes
+    char authentication[8];         // 8 bytes
 }
 
 //

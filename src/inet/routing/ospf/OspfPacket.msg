@@ -36,7 +36,7 @@ enum OspfPacketType
 //
 class OspfPacket extends FieldsChunk
 {
-    chunkLength = B(24);
+    chunkLength = B(14);
     short version = -1;     // 1 byte
     OspfPacketType type = static_cast<OspfPacketType>(-1);    // 1 byte
     int packetLengthField;  // 2 bytes
@@ -46,8 +46,5 @@ class OspfPacket extends FieldsChunk
 
     uint16_t crc = 0;       // 2 bytes
     CrcMode crcMode = CRC_MODE_UNDEFINED;
-
-    short authenticationType = 0;   // 2 bytes
-    char authentication[8];         // 8 bytes
 }
 
