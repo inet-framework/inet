@@ -192,15 +192,15 @@ B calculateLsaSize(const Ospfv2NetworkLsa& lsa);
 B calculateLsaSize(const Ospfv2SummaryLsa& lsa);
 B calculateLsaSize(const Ospfv2AsExternalLsa& lsa);
 
-std::ostream& operator<<(std::ostream& ostr, const LsaRequest& lsaReq);
+std::ostream& operator<<(std::ostream& ostr, const Ospfv2LsaRequest& lsaReq);
 std::ostream& operator<<(std::ostream& ostr, const Ospfv2LsaHeader& lsa);
 std::ostream& operator<<(std::ostream& ostr, const Ospfv2Lsa& lsa);
 std::ostream& operator<<(std::ostream& ostr, const Ospfv2NetworkLsa& lsa);
-std::ostream& operator<<(std::ostream& ostr, const TosData& tos);
-std::ostream& operator<<(std::ostream& ostr, const Link& link);
+std::ostream& operator<<(std::ostream& ostr, const Ospfv2TosData& tos);
+std::ostream& operator<<(std::ostream& ostr, const Ospfv2Link& link);
 std::ostream& operator<<(std::ostream& ostr, const Ospfv2RouterLsa& lsa);
 std::ostream& operator<<(std::ostream& ostr, const Ospfv2SummaryLsa& lsa);
-std::ostream& operator<<(std::ostream& ostr, const ExternalTosInfo& tos);
+std::ostream& operator<<(std::ostream& ostr, const Ospfv2ExternalTosInfo& tos);
 std::ostream& operator<<(std::ostream& ostr, const Ospfv2AsExternalLsaContents& contents);
 std::ostream& operator<<(std::ostream& ostr, const Ospfv2AsExternalLsa& lsa);
 

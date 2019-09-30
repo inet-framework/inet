@@ -49,7 +49,7 @@ void LinkStateRequestHandler::processPacket(Packet *packet, Ospfv2Interface *int
         EV_INFO << "  Processing packet contents:\n";
 
         for (unsigned long i = 0; i < requestCount; i++) {
-            const LsaRequest& request = lsRequestPacket->getRequests(i);
+            const auto& request = lsRequestPacket->getRequests(i);
             LsaKeyType lsaKey;
 
             EV_INFO << "    LsaRequest: type=" << request.lsType
@@ -60,7 +60,7 @@ void LinkStateRequestHandler::processPacket(Packet *packet, Ospfv2Interface *int
             lsaKey.linkStateID = request.linkStateID;
             lsaKey.advertisingRouter = request.advertisingRouter;
 
-            Ospfv2Lsa *lsaInDatabase = router->findLSA(static_cast<LsaType>(request.lsType), lsaKey, intf->getArea()->getAreaID());
+            Ospfv2Lsa *lsaInDatabase = router->findLSA(static_cast<Ospfv2LsaType>(request.lsType), lsaKey, intf->getArea()->getAreaID());
 
             if (lsaInDatabase != nullptr) {
                 lsas.push_back(lsaInDatabase);

@@ -64,7 +64,7 @@ void LinkStateUpdateHandler::processPacket(Packet *packet, Ospfv2Interface *intf
                 continue;
             }
 
-            LsaType lsaType = static_cast<LsaType>(currentLSA->getHeader().getLsType());
+            Ospfv2LsaType lsaType = static_cast<Ospfv2LsaType>(currentLSA->getHeader().getLsType());
             if ((lsaType != ROUTERLSA_TYPE) &&
                 (lsaType != NETWORKLSA_TYPE) &&
                 (lsaType != SUMMARYLSA_NETWORKS_TYPE) &&

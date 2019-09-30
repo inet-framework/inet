@@ -146,7 +146,7 @@ const Ptr<Chunk> Ospfv2PacketSerializer::deserialize(MemoryInputStream& stream) 
                 requestPacket->markIncorrect();
             requestPacket->setRequestsArraySize(numReq);
             for (int i = 0; i < numReq; i++) {
-                LsaRequest *req = new LsaRequest();
+                auto *req = new Ospfv2LsaRequest();
                 req->lsType = stream.readUint32Be();
                 req->linkStateID = stream.readIpv4Address();
                 req->advertisingRouter = stream.readIpv4Address();
@@ -245,7 +245,7 @@ void Ospfv2PacketSerializer::deserializeLsaHeader(MemoryInputStream& stream, Osp
 {
     lsaHeader.setLsAge(stream.readUint16Be());
     deserializeOspfOptions(stream, lsaHeader.getLsOptionsForUpdate());
-    lsaHeader.setLsType(static_cast<LsaType>(stream.readByte()));
+    lsaHeader.setLsType(static_cast<Ospfv2LsaType>(stream.readByte()));
     lsaHeader.setLinkStateID(stream.readIpv4Address());
     lsaHeader.setAdvertisingRouter(stream.readIpv4Address());
     lsaHeader.setLsSequenceNumber(stream.readUint32Be());
@@ -264,7 +264,7 @@ void Ospfv2PacketSerializer::serializeRouterLsa(MemoryOutputStream& stream, cons
     uint16_t numLinks = routerLsa.getNumberOfLinks();
     stream.writeUint16Be(numLinks);
     for (int32_t i = 0; i < numLinks; ++i) {
-        const Link& link = routerLsa.getLinks(i);
+        const auto& link = routerLsa.getLinks(i);
         stream.writeIpv4Address(link.getLinkID());
         stream.writeUint32Be(link.getLinkData());
         stream.writeByte(link.getType());
@@ -272,7 +272,7 @@ void Ospfv2PacketSerializer::serializeRouterLsa(MemoryOutputStream& stream, cons
         stream.writeUint16Be(link.getLinkCost());
         uint32_t numTos = link.getTosDataArraySize();
         for (uint32_t j = 0; j < numTos; ++j) {
-            const TosData& tos = link.getTosData(j);
+            const auto& tos = link.getTosData(j);
             stream.writeByte(tos.tos);
             stream.writeByte(0);
             stream.writeUint16Be(tos.tosMetric);
@@ -291,7 +291,7 @@ void Ospfv2PacketSerializer::deserializeRouterLsa(MemoryInputStream& stream, con
     routerLsa.setNumberOfLinks(numLinks);
     routerLsa.setLinksArraySize(numLinks);
     for (int32_t i = 0; i < numLinks; ++i) {
-        Link *link = new Link();
+        auto *link = new Ospfv2Link();
         link->setLinkID(stream.readIpv4Address());
         link->setLinkData(stream.readUint32Be());
         link->setType(static_cast<LinkType>(stream.readByte()));
@@ -300,7 +300,7 @@ void Ospfv2PacketSerializer::deserializeRouterLsa(MemoryInputStream& stream, con
         uint32_t numTos = link->getNumberOfTOS();
         link->setTosDataArraySize(numTos);
         for (uint32_t j = 0; j < numTos; ++j) {
-            TosData *tos = new TosData();
+            auto *tos = new Ospfv2TosData();
             tos->tos = stream.readByte();
             if (stream.readByte() != 0)
                 updatePacket->markIncorrect();
@@ -339,7 +339,7 @@ void Ospfv2PacketSerializer::serializeSummaryLsa(MemoryOutputStream& stream, con
     stream.writeByte(0);
     stream.writeUint24Be(summaryLsa.getRouteCost());
     for (size_t i = 0; i < summaryLsa.getTosDataArraySize(); i++) {
-        const TosData& tos = summaryLsa.getTosData(i);
+        const auto& tos = summaryLsa.getTosData(i);
         stream.writeByte(tos.tos);
         stream.writeUint24Be(tos.tosMetric);
     }
@@ -358,7 +358,7 @@ void Ospfv2PacketSerializer::deserializeSummaryLsa(MemoryInputStream& stream, co
     else
         summaryLsa.setTosDataArraySize(numTos);
     for (int i = 0; i < numTos; i++) {
-        TosData *tos = new TosData();
+        auto *tos = new Ospfv2TosData();
         tos->tos = stream.readUint8();
         tos->tosMetric = stream.readUint24Be();
         summaryLsa.setTosData(i, *tos);
@@ -371,7 +371,7 @@ void Ospfv2PacketSerializer::serializeAsExternalLsa(MemoryOutputStream& stream, 
     stream.writeIpv4Address(contents.getNetworkMask());
 
     for (size_t i = 0; i < asExternalLsa.getContents().getExternalTOSInfoArraySize(); ++i) {
-        const ExternalTosInfo& exTos = contents.getExternalTOSInfo(i);
+        const auto& exTos = contents.getExternalTOSInfo(i);
         stream.writeBit(exTos.E_ExternalMetricType);
         stream.writeNBitsOfUint64Be(exTos.tos, 7);
         stream.writeUint24Be(exTos.routeCost);
@@ -392,7 +392,7 @@ void Ospfv2PacketSerializer::deserializeAsExternalLsa(MemoryInputStream& stream,
     else
         contents.setExternalTOSInfoArraySize(numExternalTos);
     for (int i = 0; i < numExternalTos; i++) {
-        ExternalTosInfo *extTos = new ExternalTosInfo();
+        auto *extTos = new Ospfv2ExternalTosInfo();
         extTos->E_ExternalMetricType = stream.readBit();
         extTos->tos = stream.readNBitsToUint64Be(7);
         extTos->routeCost = stream.readUint24Be();
@@ -406,7 +406,7 @@ void Ospfv2PacketSerializer::serializeLsa(MemoryOutputStream& stream, const Ospf
 {
     auto& lsaHeader = lsa.getHeader();
     serializeLsaHeader(stream, lsaHeader);
-    LsaType type = lsaHeader.getLsType();
+    Ospfv2LsaType type = lsaHeader.getLsType();
     switch (type) {
     case ROUTERLSA_TYPE: {
         const Ospfv2RouterLsa *routerLsa = static_cast<const Ospfv2RouterLsa *>(&lsa);
@@ -438,7 +438,7 @@ void Ospfv2PacketSerializer::deserializeLsa(MemoryInputStream& stream, const Ptr
 {
     Ospfv2LsaHeader *lsaHeader = new Ospfv2LsaHeader();
     deserializeLsaHeader(stream, *lsaHeader);
-    LsaType type = lsaHeader->getLsType();
+    Ospfv2LsaType type = lsaHeader->getLsType();
     switch (type) {
         case ROUTERLSA_TYPE: {
             Ospfv2RouterLsa *routerLsa = new Ospfv2RouterLsa();

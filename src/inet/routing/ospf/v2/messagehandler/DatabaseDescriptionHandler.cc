@@ -200,7 +200,7 @@ bool DatabaseDescriptionHandler::processDDPacket(const Ospfv2DatabaseDescription
 
     for (unsigned int i = 0; i < headerCount; i++) {
         const Ospfv2LsaHeader& currentHeader = ddPacket->getLsaHeaders(i);
-        LsaType lsaType = static_cast<LsaType>(currentHeader.getLsType());
+        Ospfv2LsaType lsaType = static_cast<Ospfv2LsaType>(currentHeader.getLsType());
 
         EV_DETAIL << "    " << currentHeader;
 

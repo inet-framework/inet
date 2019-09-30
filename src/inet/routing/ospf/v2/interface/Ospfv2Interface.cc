@@ -490,7 +490,7 @@ bool Ospfv2Interface::floodLsa(const Ospfv2Lsa *lsa, Ospfv2Interface *intf, Neig
 
 Packet *Ospfv2Interface::createUpdatePacket(const Ospfv2Lsa *lsa)
 {
-    LsaType lsaType = lsa->getHeader().getLsType();
+    Ospfv2LsaType lsaType = lsa->getHeader().getLsType();
     const auto& updatePacket = makeShared<Ospfv2LinkStateUpdatePacket>();
     B packetLength = OSPF_HEADER_LENGTH + B(sizeof(uint32_t));    // OSPF header + place for number of advertisements
 

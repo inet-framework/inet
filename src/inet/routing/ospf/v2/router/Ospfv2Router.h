@@ -137,7 +137,7 @@ class INET_API Router
      *                     identified by this parameter.
      * @return The pointer to the LSA if it was found, nullptr otherwise.
      */
-    Ospfv2Lsa *findLSA(LsaType lsaType, LsaKeyType lsaKey, AreaId areaID);
+    Ospfv2Lsa *findLSA(Ospfv2LsaType lsaType, LsaKeyType lsaKey, AreaId areaID);
 
     /**
      * Ages the LSAs in the Router's database.

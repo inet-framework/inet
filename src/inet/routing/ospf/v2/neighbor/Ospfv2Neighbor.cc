@@ -360,7 +360,7 @@ void Neighbor::sendLinkStateRequestPacket()
         while ((it != linkStateRequestList.end()) && (packetSize <= (maxPacketSize - OSPF_REQUEST_LENGTH))) {
             unsigned long requestCount = requestPacket->getRequestsArraySize();
             Ospfv2LsaHeader *requestHeader = (*it);
-            LsaRequest request;
+            Ospfv2LsaRequest request;
 
             request.lsType = requestHeader->getLsType();
             request.linkStateID = requestHeader->getLinkStateID();

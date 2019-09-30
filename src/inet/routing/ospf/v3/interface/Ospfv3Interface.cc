@@ -566,7 +566,7 @@ void Ospfv3Interface::processHelloPacket(Packet* packet)
 
 void Ospfv3Interface::processDDPacket(Packet* packet){
 //    Ospfv3DatabaseDescription* ddPacket = check_and_cast<Ospfv3DatabaseDescription* >(packet);
-    const auto& ddPacket = packet->peekAtFront<Ospfv3DatabaseDescription>();
+    const auto& ddPacket = packet->peekAtFront<Ospfv3DatabaseDescriptionPacket>();
     EV_DEBUG << "Process " << this->getArea()->getInstance()->getProcess()->getProcessID() << " received a DD Packet from neighbor " << ddPacket->getRouterID() << " on interface " << this->interfaceName << "\n";
 
     Ospfv3Neighbor* neighbor = this->getNeighborById(ddPacket->getRouterID());
@@ -764,7 +764,7 @@ void Ospfv3Interface::processDDPacket(Packet* packet){
 
 bool Ospfv3Interface::preProcessDDPacket(Packet* packet, Ospfv3Neighbor* neighbor, bool inExchangeStart)
 {
-    const auto& ddPacket = packet->peekAtFront<Ospfv3DatabaseDescription>();
+    const auto& ddPacket = packet->peekAtFront<Ospfv3DatabaseDescriptionPacket>();
     EV_INFO << "  Processing packet contents(ddOptions="
             << ((ddPacket->getDdOptions().iBit) ? "I " : "_ ")
             << ((ddPacket->getDdOptions().mBit) ? "M " : "_ ")
@@ -841,7 +841,7 @@ bool Ospfv3Interface::preProcessDDPacket(Packet* packet, Ospfv3Neighbor* neighbo
 ////--------------------------------------------- Link State Requests --------------------------------------------//
 
 void Ospfv3Interface::processLSR(Packet* packet, Ospfv3Neighbor* neighbor){
-    const auto& lsr = packet->peekAtFront<Ospfv3LinkStateRequest>();
+    const auto& lsr = packet->peekAtFront<Ospfv3LinkStateRequestPacket>();
     EV_DEBUG << "Processing LSR Packet from " << lsr->getRouterID() <<"\n";
     bool error = false;
     std::vector<Ospfv3Lsa *> lsas;
@@ -908,7 +908,7 @@ void Ospfv3Interface::processLSR(Packet* packet, Ospfv3Neighbor* neighbor){
 Packet* Ospfv3Interface::prepareLSUHeader()
 {
     EV_DEBUG << "Preparing LSU HEADER\n";
-    const auto& updatePacket = makeShared<Ospfv3LsUpdate>();
+    const auto& updatePacket = makeShared<Ospfv3LinkStateUpdatePacket>();
 
     updatePacket->setType(ospf::LINKSTATE_UPDATE_PACKET);
     updatePacket->setRouterID(this->getArea()->getInstance()->getProcess()->getRouterID());
@@ -927,7 +927,7 @@ Packet* Ospfv3Interface::prepareLSUHeader()
 Packet* Ospfv3Interface::prepareUpdatePacket(std::vector<Ospfv3Lsa*> lsas)
 {
     EV_DEBUG << "Preparing LSU\n";
-    const auto& updatePacket = makeShared<Ospfv3LsUpdate>();
+    const auto& updatePacket = makeShared<Ospfv3LinkStateUpdatePacket>();
 
     updatePacket->setType(ospf::LINKSTATE_UPDATE_PACKET);
     updatePacket->setRouterID(this->getArea()->getInstance()->getProcess()->getRouterID());
@@ -1034,7 +1034,7 @@ Packet* Ospfv3Interface::prepareUpdatePacket(std::vector<Ospfv3Lsa*> lsas)
 }//prepareUpdatePacekt
 
 void Ospfv3Interface::processLSU(Packet* packet, Ospfv3Neighbor* neighbor){
-    const auto& lsUpdatePacket = packet->peekAtFront<Ospfv3LsUpdate>();
+    const auto& lsUpdatePacket = packet->peekAtFront<Ospfv3LinkStateUpdatePacket>();
     bool rebuildRoutingTable = false;
 
     if(neighbor->getState()>=Ospfv3Neighbor::EXCHANGE_STATE) {
@@ -1311,7 +1311,7 @@ void Ospfv3Interface::processLSAck(Packet* packet, Ospfv3Neighbor* neighbor)
 {
 
     if (neighbor->getState() >= Ospfv3Neighbor::EXCHANGE_STATE) {
-        const auto& lsAckPacket = packet->peekAtFront<Ospfv3LsAck>();
+        const auto& lsAckPacket = packet->peekAtFront<Ospfv3LinkStateAcknowledgementPacket>();
 
         int lsaCount = lsAckPacket->getLsaHeadersArraySize();
 
@@ -1388,7 +1388,7 @@ void Ospfv3Interface::acknowledgeLSA(const Ospfv3LsaHeader& lsaHeader,
     }
 
     if (sendDirectAcknowledgment) {
-        const auto& ackPacket = makeShared<Ospfv3LsAck>();
+        const auto& ackPacket = makeShared<Ospfv3LinkStateAcknowledgementPacket>();
 
         ackPacket->setType(ospf::LINKSTATE_ACKNOWLEDGEMENT_PACKET);
         ackPacket->setRouterID(this->getArea()->getInstance()->getProcess()->getRouterID());
@@ -1433,7 +1433,7 @@ void Ospfv3Interface::acknowledgeLSA(const Ospfv3LsaHeader& lsaHeader,
 void Ospfv3Interface::sendLSAcknowledgement(const Ospfv3LsaHeader *lsaHeader, Ipv6Address destination)
 {
     Ospfv3Options options;
-    const auto& lsAckPacket = makeShared<Ospfv3LsAck>();
+    const auto& lsAckPacket = makeShared<Ospfv3LinkStateAcknowledgementPacket>();
 
     lsAckPacket->setType(ospf::LINKSTATE_ACKNOWLEDGEMENT_PACKET);
     lsAckPacket->setRouterID(this->getArea()->getInstance()->getProcess()->getRouterID());
@@ -1488,7 +1488,7 @@ void Ospfv3Interface::sendDelayedAcknowledgements()
         int ackCount = elem.second.size();
         if (ackCount > 0) {
             while (!(elem.second.empty())) {
-                const auto& ackPacket = makeShared<Ospfv3LsAck>();
+                const auto& ackPacket = makeShared<Ospfv3LinkStateAcknowledgementPacket>();
                 B packetSize = OSPFV3_HEADER_LENGTH;
 
                 ackPacket->setType(ospf::LINKSTATE_ACKNOWLEDGEMENT_PACKET);

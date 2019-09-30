@@ -241,7 +241,7 @@ bool Router::installASExternalLSA(const Ospfv2AsExternalLsa *lsa)
     }
 }
 
-Ospfv2Lsa *Router::findLSA(LsaType lsaType, LsaKeyType lsaKey, AreaId areaID)
+Ospfv2Lsa *Router::findLSA(Ospfv2LsaType lsaType, LsaKeyType lsaKey, AreaId areaID)
 {
     switch (lsaType) {
         case ROUTERLSA_TYPE: {
@@ -529,7 +529,7 @@ bool Router::isDestinationUnreachable(Ospfv2Lsa *lsa) const
             Ipv4Address firstNumberedIfAddress;
 
             for (unsigned int i = 0; i < linkCount; i++) {
-                const Link& link = routerLSA->getLinks(i);
+                const auto& link = routerLSA->getLinks(i);
 
                 if (link.getType() == POINTTOPOINT_LINK) {
                     if (link.getLinkID() == Ipv4Address(toRouterLSA->getHeader().getLinkStateID())) {
@@ -586,7 +586,7 @@ bool Router::isDestinationUnreachable(Ospfv2Lsa *lsa) const
                 // get the interface address pointing backwards on the shortest path tree
                 bool destinationFound = false;
                 for (unsigned int i = 0; i < linkCount; i++) {
-                    const Link& link = routerLSA->getLinks(i);
+                    const auto& link = routerLSA->getLinks(i);
 
                     if ((link.getType() == TRANSIT_LINK) &&
                         (link.getLinkID() == Ipv4Address(toNetworkLSA->getHeader().getLinkStateID())))

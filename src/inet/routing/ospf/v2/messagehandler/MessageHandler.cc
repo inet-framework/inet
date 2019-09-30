@@ -490,7 +490,7 @@ void MessageHandler::printLinkStateUpdatePacket(const Ospfv2LinkStateUpdatePacke
         EV_DETAIL << "  " << ospfLsa->getHeader() << "\n";
 
         switch (ospfLsa->getHeader().getLsType()) {
-            case LsaType::ROUTERLSA_TYPE: {
+            case Ospfv2LsaType::ROUTERLSA_TYPE: {
                 const Ospfv2RouterLsa& lsa = *check_and_cast<const Ospfv2RouterLsa*>(ospfLsa);
                 EV_DETAIL << "  bits="
                           << ((lsa.getV_VirtualLinkEndpoint()) ? "V " : "_ ")
@@ -501,7 +501,7 @@ void MessageHandler::printLinkStateUpdatePacket(const Ospfv2LinkStateUpdatePacke
 
                 unsigned int linkCount = lsa.getLinksArraySize();
                 for (unsigned int j = 0; j < linkCount; j++) {
-                    const Link& link = lsa.getLinks(j);
+                    const auto& link = lsa.getLinks(j);
                     EV_DETAIL << "    ID=" << link.getLinkID();
                     EV_DETAIL << ", data="
                               << link.getLinkData() << " (" << Ipv4Address(link.getLinkData()) << ")"
@@ -531,7 +531,7 @@ void MessageHandler::printLinkStateUpdatePacket(const Ospfv2LinkStateUpdatePacke
                 }
                 break;
             }
-            case LsaType::NETWORKLSA_TYPE: {
+            case Ospfv2LsaType::NETWORKLSA_TYPE: {
                 const Ospfv2NetworkLsa& lsa = *check_and_cast<const Ospfv2NetworkLsa*>(ospfLsa);
                 EV_DETAIL << "  netMask=" << lsa.getNetworkMask() << "\n";
                 EV_DETAIL << "  attachedRouters:\n";
@@ -542,14 +542,14 @@ void MessageHandler::printLinkStateUpdatePacket(const Ospfv2LinkStateUpdatePacke
                 }
                 break;
             }
-            case LsaType::SUMMARYLSA_NETWORKS_TYPE:
-            case LsaType::SUMMARYLSA_ASBOUNDARYROUTERS_TYPE: {
+            case Ospfv2LsaType::SUMMARYLSA_NETWORKS_TYPE:
+            case Ospfv2LsaType::SUMMARYLSA_ASBOUNDARYROUTERS_TYPE: {
                 const Ospfv2SummaryLsa& lsa = *check_and_cast<const Ospfv2SummaryLsa*>(ospfLsa);
                 EV_DETAIL << "  netMask=" << lsa.getNetworkMask() << "\n";
                 EV_DETAIL << "  cost=" << lsa.getRouteCost() << "\n";
                 break;
             }
-            case LsaType::AS_EXTERNAL_LSA_TYPE: {
+            case Ospfv2LsaType::AS_EXTERNAL_LSA_TYPE: {
                 const Ospfv2AsExternalLsa& lsa = *check_and_cast<const Ospfv2AsExternalLsa*>(ospfLsa);
 
                 const Ospfv2AsExternalLsaContents& contents = lsa.getContents();

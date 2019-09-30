@@ -52,8 +52,8 @@ bool AsExternalLsa::differsFrom(const Ospfv2AsExternalLsa *asExternalLSA) const
 
         if (!differentBody) {
             for (unsigned int i = 0; i < thisTosInfoCount; i++) {
-                const ExternalTosInfo& thisTOSInfo = thisContents.getExternalTOSInfo(i);
-                const ExternalTosInfo& lsaTOSInfo = lsaContents.getExternalTOSInfo(i);
+                const auto& thisTOSInfo = thisContents.getExternalTOSInfo(i);
+                const auto& lsaTOSInfo = lsaContents.getExternalTOSInfo(i);
 
                 if (
                         (thisTOSInfo.E_ExternalMetricType != lsaTOSInfo.E_ExternalMetricType) ||

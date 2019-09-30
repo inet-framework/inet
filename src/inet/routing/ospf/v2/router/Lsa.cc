@@ -77,20 +77,20 @@ bool operator==(const Ospfv2Options& leftOptions, const Ospfv2Options& rightOpti
 B calculateLSASize(const Ospfv2Lsa *lsa)
 {
     switch(lsa->getHeader().getLsType()) {
-        case LsaType::ROUTERLSA_TYPE: {
+        case Ospfv2LsaType::ROUTERLSA_TYPE: {
             auto routerLsa = check_and_cast<const Ospfv2RouterLsa*>(lsa);
             return calculateLsaSize(*routerLsa);
         }
-        case LsaType::NETWORKLSA_TYPE: {
+        case Ospfv2LsaType::NETWORKLSA_TYPE: {
             auto networkLsa = check_and_cast<const Ospfv2NetworkLsa*>(lsa);
             return calculateLsaSize(*networkLsa);
         }
-        case LsaType::SUMMARYLSA_NETWORKS_TYPE:
-        case LsaType::SUMMARYLSA_ASBOUNDARYROUTERS_TYPE: {
+        case Ospfv2LsaType::SUMMARYLSA_NETWORKS_TYPE:
+        case Ospfv2LsaType::SUMMARYLSA_ASBOUNDARYROUTERS_TYPE: {
             auto summaryLsa = check_and_cast<const Ospfv2SummaryLsa*>(lsa);
             return calculateLsaSize(*summaryLsa);
         }
-        case LsaType::AS_EXTERNAL_LSA_TYPE: {
+        case Ospfv2LsaType::AS_EXTERNAL_LSA_TYPE: {
             auto asExternalLsa = check_and_cast<const Ospfv2AsExternalLsa*>(lsa);
             return calculateLsaSize(*asExternalLsa);
         }
@@ -104,7 +104,7 @@ B calculateLsaSize(const Ospfv2RouterLsa& lsa)
 {
     B lsaLength = OSPF_LSA_HEADER_LENGTH + OSPF_ROUTERLSA_HEADER_LENGTH;
     for (uint32_t i = 0; i < lsa.getLinksArraySize(); i++) {
-        const Link& link = lsa.getLinks(i);
+        const auto& link = lsa.getLinks(i);
         lsaLength += OSPF_LINK_HEADER_LENGTH + (OSPF_TOS_LENGTH * link.getTosDataArraySize());
     }
     return lsaLength;
@@ -128,7 +128,7 @@ B calculateLsaSize(const Ospfv2AsExternalLsa& lsa)
            + (OSPF_ASEXTERNALLSA_TOS_INFO_LENGTH * lsa.getContents().getExternalTOSInfoArraySize());
 }
 
-std::ostream& operator<<(std::ostream& ostr, const LsaRequest& request)
+std::ostream& operator<<(std::ostream& ostr, const Ospfv2LsaRequest& request)
 {
     ostr << "type=" << request.lsType
          << ", LSID=" << request.linkStateID
@@ -190,14 +190,14 @@ std::ostream& operator<<(std::ostream& ostr, const Ospfv2NetworkLsa& lsa)
     return ostr;
 }
 
-std::ostream& operator<<(std::ostream& ostr, const TosData& tos)
+std::ostream& operator<<(std::ostream& ostr, const Ospfv2TosData& tos)
 {
     ostr << "tos: " << (int)tos.tos
          << "metric: " << tos.tosMetric;
     return ostr;
 }
 
-std::ostream& operator<<(std::ostream& ostr, const Link& link)
+std::ostream& operator<<(std::ostream& ostr, const Ospfv2Link& link)
 {
     ostr << "ID: " << link.getLinkID().str(false)
          << ", data: ";
@@ -281,7 +281,7 @@ std::ostream& operator<<(std::ostream& ostr, const Ospfv2SummaryLsa& lsa)
     return ostr;
 }
 
-std::ostream& operator<<(std::ostream& ostr, const ExternalTosInfo& tos)
+std::ostream& operator<<(std::ostream& ostr, const Ospfv2ExternalTosInfo& tos)
 {
     ostr << "Tos: {" << tos.tos
          << "}, MetricType: " << tos.E_ExternalMetricType

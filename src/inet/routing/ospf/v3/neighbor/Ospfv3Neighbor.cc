@@ -186,7 +186,7 @@ void Ospfv3Neighbor::clearRequestRetransmissionTimer()
 void Ospfv3Neighbor::sendDDPacket(bool init)
 {
     EV_DEBUG << "Start of function send DD Packet\n";
-    const auto& ddPacket = makeShared<Ospfv3DatabaseDescription>();
+    const auto& ddPacket = makeShared<Ospfv3DatabaseDescriptionPacket>();
 
     //common header first
     ddPacket->setType(ospf::DATABASE_DESCRIPTION_PACKET);
@@ -252,7 +252,7 @@ void Ospfv3Neighbor::sendDDPacket(bool init)
 
 void Ospfv3Neighbor::sendLinkStateRequestPacket()
 {
-    const auto& requestPacket = makeShared<Ospfv3LinkStateRequest>();
+    const auto& requestPacket = makeShared<Ospfv3LinkStateRequestPacket>();
     requestPacket->setType(ospf::LINKSTATE_REQUEST_PACKET);
     requestPacket->setRouterID(this->getInterface()->getArea()->getInstance()->getProcess()->getRouterID());
     requestPacket->setAreaID(this->getInterface()->getArea()->getAreaID());
@@ -339,7 +339,7 @@ void Ospfv3Neighbor::createDatabaseSummary()
 void Ospfv3Neighbor::retransmitUpdatePacket()
 {
     EV_DEBUG << "Retransmitting update packet\n";
-    const auto& updatePacket = makeShared<Ospfv3LsUpdate>();
+    const auto& updatePacket = makeShared<Ospfv3LinkStateUpdatePacket>();
 
     updatePacket->setType(ospf::LINKSTATE_UPDATE_PACKET);
     updatePacket->setRouterID(this->getInterface()->getArea()->getInstance()->getProcess()->getRouterID());
