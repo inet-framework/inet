@@ -1496,7 +1496,6 @@ void Ospfv3Interface::sendDelayedAcknowledgements()
                 ackPacket->setAreaID(this->getArea()->getAreaID());
                 ackPacket->setCrc(0);
                 ackPacket->setInstanceID(this->getArea()->getInstance()->getInstanceID());
-                ackPacket->setLsas(ackCount);
 
                 while (!elem.second.empty()) {
                     unsigned long headerCount = ackPacket->getLsaHeadersArraySize();

@@ -34,6 +34,7 @@ class Ospfv3Packet extends ospf::OspfPacket
 //options for OSPFv3 packets - present in Hello, DD and certain LSAs
 struct Ospfv3Options
 {
+    uint16_t reserved;  //reserved 16 bit
     bool reservedOne;   //reserved for compatibility with ospfv2
     bool reservedTwo;   //reserved for compatibility with ospfv2
     bool dcBit;         //demand circuits
@@ -50,21 +51,18 @@ struct Ospfv3Options
 class Ospfv3HelloPacket extends Ospfv3Packet
 {
     type = ospf::HELLO_PACKET;
-    uint32_t interfaceID;
-    char routerPriority;
-
-    Ospfv3Options options;
-
-    unsigned short helloInterval;
-    unsigned short deadInterval;
-
-    Ipv4Address designatedRouterID;
-    Ipv4Address backupDesignatedRouterID;
-    Ipv4Address neighborID[];
+    uint32_t interfaceID;                   // 32 bits
+    char routerPriority;                    //  8 bits
+    Ospfv3Options options;                  // 24 bits
+    uint16_t helloInterval;                 // [sec] 16 bits
+    uint16_t deadInterval;                  // [sec] 16 bits //TODO rename to routerDeadInterval
+    Ipv4Address designatedRouterID;         // 32 bits
+    Ipv4Address backupDesignatedRouterID;   // 32 bits
+    Ipv4Address neighborID[];               // N*32 bits
 }
 
 //
-//                  LSAs
+// LSAs
 //
 //struct OSPFv3LSAType
 //{
@@ -78,16 +76,15 @@ class Ospfv3HelloPacket extends Ospfv3Packet
 //triplet {lsType, linkStateID, advertisingRouter} uniquely identify the LSA
 class Ospfv3LsaHeader extends cObject
 {
-    unsigned short lsaAge;
-    unsigned short lsaType;
-
-    Ipv4Address linkStateID;
-    Ipv4Address advertisingRouter;
-
-    uint32_t lsaSequenceNumber;
-
-    unsigned short lsaChecksum;
-    unsigned short lsaLength;
+    unsigned short lsaAge;          // [sec] 16 bits
+    unsigned short options;         // 8 bits
+    unsigned short lsaType;         // 8 bits
+    Ipv4Address linkStateID;        // 32 bits
+    Ipv4Address advertisingRouter;  // 32 bits
+    uint32_t lsaSequenceNumber;     // 32 bits
+    uint16_t lsaChecksum;     // 16 bits
+    CrcMode lsCrcMode = CRC_MODE_UNDEFINED;
+    uint16_t lsaLength;
 }
 
 class Ospfv3Lsa extends cObject
@@ -110,34 +107,73 @@ enum Ospfv3LsaFunctionCode
 }
 
 //used for Intra-Area-Prefix LSA
-struct Ospfv3LsaPrefix
+struct Ospfv3LsaPrefixMetric
 {
+    bool reserved1 = 0;
+    bool reserved2 = 0;
+    bool reserved3 = 0;
     bool dnBit=0;
     bool pBit=0;
     bool xBit=0;
     bool laBit=0;
     bool nuBit=0;
     uint8_t prefixLen;
-
-    //TODO address prefix
-    L3Address addressPrefix;
     uint16_t metric; //for Intra-Area-Prefix LSA
+    L3Address addressPrefix;    // Address Prefix is an encoding of the prefix itself as an even multiple of 32-bit words,
+                                // padding with zero bits as necessary.  This encoding consumes ((PrefixLength + 31) / 32) 32-bit words.
 }
 
-//Address Prefix options
-struct Ospfv3LinkLsaPrefix
+cplusplus(Ospfv3LsaPrefixMetric) {{
+bool operator ==(const Ospfv3LsaPrefixMetric& b) const
 {
+	return (dnBit == b.dnBit)
+		&& (pBit == b.pBit)
+		&& (xBit == b.xBit)
+		&& (laBit == b.laBit)
+		&& (nuBit == b.nuBit)
+		&& (prefixLen == b.prefixLen)
+		&& (metric == b.metric)
+		&& (addressPrefix == b.addressPrefix)
+		;
+}
+
+bool operator !=(const Ospfv3LsaPrefixMetric& b) const { return ! (*this == b); }
+
+}}
+
+//Address Prefix options
+struct Ospfv3LsaPrefix0
+{
+    bool reserved1 = 0;
+    bool reserved2 = 0;
+    bool reserved3 = 0;
     bool dnBit;
     bool pBit;
     bool xBit;
     bool laBit;
     bool nuBit;
-    uint16_t prefixLen;
-
-    //TODO address prefix
-    L3Address addressPrefix;
-//    uint16_t metric; //for Intra-Area-Prefix LSA
+    uint8_t prefixLen;
+    uint16_t reserved = 0;
+    L3Address addressPrefix;    // Address Prefix is an encoding of the prefix itself as an even multiple of 32-bit words,
+                                // padding with zero bits as necessary.  This encoding consumes ((PrefixLength + 31) / 32) 32-bit words.
 }
+
+cplusplus(Ospfv3LsaPrefix0) {{
+bool operator ==(const Ospfv3LsaPrefix0& b) const
+{
+	return (dnBit == b.dnBit)
+		&& (pBit == b.pBit)
+		&& (xBit == b.xBit)
+		&& (laBit == b.laBit)
+		&& (nuBit == b.nuBit)
+		&& (prefixLen == b.prefixLen)
+		&& (addressPrefix == b.addressPrefix)
+		;
+}
+
+bool operator !=(const Ospfv3LsaPrefix0& b) const { return ! (*this == b); }
+
+}}
 
 //Router LSA
 enum Ospfv3RouterLsaType
@@ -181,14 +217,9 @@ class Ospfv3NetworkLsa  extends Ospfv3Lsa
 // Inter-Area-Prefix-LSAs
 class Ospfv3InterAreaPrefixLsa  extends Ospfv3Lsa
 {
-    bool dnBit;
-    bool pBit;
-    bool xBit;
-    bool laBit;
-    bool nuBit;
-    uint32_t metric;
-    uint8_t prefixLen;
-    L3Address prefix;
+    uint8_t reserved1 = 0;		// 8 bits
+    uint32_t metric;			// 24 bits
+    Ospfv3LsaPrefix0 prefix;
 }
 
 //Inter-Area-Router-LSAs
@@ -226,7 +257,7 @@ class Ospfv3NssaLsa  extends Ospfv3Lsa
     bool tBit;
     uint32_t metric;
 
-    Ospfv3LsaPrefix prefOptions;
+    Ospfv3LsaPrefixMetric prefOptions;
     uint16_t referencedLSType;
 
     Ipv6Address forwardingAddress;
@@ -245,7 +276,7 @@ class Ospfv3LinkLsa  extends Ospfv3Lsa
     L3Address linkLocalInterfaceAdd;
 
     uint32_t numPrefixes;
-    Ospfv3LinkLsaPrefix prefixes[];
+    Ospfv3LsaPrefix0 prefixes[];
 }
 
 // Intra-Area-Prefix-LSAs
@@ -256,38 +287,36 @@ class Ospfv3IntraAreaPrefixLsa  extends Ospfv3Lsa
     Ipv4Address referencedLSID;
     Ipv4Address referencedAdvRtr;
 
-    Ospfv3LsaPrefix prefixes[];
+    Ospfv3LsaPrefixMetric prefixes[];
 }
 
-//
-//          Database Description Packet
-//
 
-
-//options struct for Database Description packets
+// options struct for Database Description packets
 struct Ospfv3DdOptions
 {
+    uint16_t reserved = 0;     // 13 bits
     bool iBit;  //this packet is the initial DD packet
     bool mBit;  //more DD packets will follow
     bool msBit; //1=the router is the master, 0=router is the slave
 }
 
+//
+// Database Description Packet
+//
 class Ospfv3DatabaseDescriptionPacket extends Ospfv3Packet
 {
     type = ospf::DATABASE_DESCRIPTION_PACKET;
-    uint8_t reserved1 = 0;
-    Ospfv3Options options;
-    uint16_t interfaceMTU;
-    uint16_t reserved2 = 0;     // 13 bits
-    Ospfv3DdOptions ddOptions;
-
-    uint32_t sequenceNumber;
+    uint8_t reserved1 = 0;      //  8 bits
+    Ospfv3Options options;      // 24 bits
+    uint16_t interfaceMTU;      // 16 bits
+    Ospfv3DdOptions ddOptions;  // 16 bits
+    uint32_t sequenceNumber;    // 32 bits
 
     Ospfv3LsaHeader lsaHeaders[];
 }
 
 //
-//              Link State Request
+// Link State Request
 //
 
 //identity of requested LSA - there may be multiple LSAs requested in a single LSR
@@ -305,7 +334,7 @@ class Ospfv3LinkStateRequestPacket extends Ospfv3Packet
 }
 
 //
-//          Link State Update
+// Link State Update
 //
 
 //Link State Update packet
@@ -318,18 +347,17 @@ class Ospfv3LinkStateUpdatePacket extends Ospfv3Packet
     Ospfv3InterAreaPrefixLsa InterAreaPrefixLSAs[];
     Ospfv3LinkLsa LinkLSAs[];
     Ospfv3IntraAreaPrefixLsa IntraAreaPrefixLSAs[];
-//    Ospfv3Lsa LSAs[];
-    //TODO - template for any LSA??
+    // Ospfv3Lsa *LSAs[] @owned @allowReplace;
+    //TODO - see Ospfv2LinkStateUpdatePacket
 }
 
 //
-//          Link State Acknowledgement
+// Link State Acknowledgement
 //
 
 //Link State Acknowledgement packet
 class Ospfv3LinkStateAcknowledgementPacket extends Ospfv3Packet
 {
-    uint32_t lsas;
     Ospfv3LsaHeader lsaHeaders[];
 }
 
