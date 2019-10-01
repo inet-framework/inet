@@ -1463,7 +1463,7 @@ void Router::addExternalRouteInIPTable(Ipv4Address networkAddress, const Ospfv2A
         entry->setNetmask(externalRouteContents.getNetworkMask());
         entry->setInterface(ift->getInterfaceById(ifIndex));
         entry->setSourceType(IRoute::OSPF);
-        entry->setMetric(OSPF_BGP_DEFAULT_COST);
+        entry->setMetric(OSPFv2_BGP_DEFAULT_COST);
         rt->addRoute(entry);
     }
 }

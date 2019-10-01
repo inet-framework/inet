@@ -47,22 +47,22 @@ namespace ospf {
 #define VIRTUAL_LINK_TTL                       32
 
 const B IPV4_DATAGRAM_LENGTH                   = B(65536);
-const B OSPF_HEADER_LENGTH                     = B(24);
-const B OSPF_LSA_HEADER_LENGTH                 = B(20);
-const B OSPF_HELLO_HEADER_LENGTH               = B(20);
-const B OSPF_DD_HEADER_LENGTH                  = B(8);
-const B OSPF_REQUEST_LENGTH                    = B(12);
-const B OSPF_ROUTERLSA_HEADER_LENGTH           = B(4);
-const B OSPF_LINK_HEADER_LENGTH                = B(12);
-const B OSPF_TOS_LENGTH                        = B(4);
-const B OSPF_NETWORKLSA_MASK_LENGTH            = B(4);
-const B OSPF_NETWORKLSA_ADDRESS_LENGTH         = B(4);
-const B OSPF_SUMMARYLSA_HEADER_LENGTH          = B(8);
-const B OSPF_ASEXTERNALLSA_HEADER_LENGTH       = B(4);
-const B OSPF_ASEXTERNALLSA_TOS_INFO_LENGTH     = B(12);
+const B OSPFv2_HEADER_LENGTH                   = B(24);
+const B OSPFv2_LSA_HEADER_LENGTH               = B(20);
+const B OSPFv2_HELLO_HEADER_LENGTH             = B(20);
+const B OSPFv2_DD_HEADER_LENGTH                = B(8);
+const B OSPFv2_REQUEST_LENGTH                  = B(12);
+const B OSPFv2_ROUTERLSA_HEADER_LENGTH         = B(4);
+const B OSPFv2_LINK_HEADER_LENGTH              = B(12);
+const B OSPFv2_TOS_LENGTH                      = B(4);
+const B OSPFv2_NETWORKLSA_MASK_LENGTH          = B(4);
+const B OSPFv2_NETWORKLSA_ADDRESS_LENGTH       = B(4);
+const B OSPFv2_SUMMARYLSA_HEADER_LENGTH        = B(8);
+const B OSPFv2_ASEXTERNALLSA_HEADER_LENGTH     = B(4);
+const B OSPFv2_ASEXTERNALLSA_TOS_INFO_LENGTH   = B(12);
 
-#define OSPF_EXTERNAL_ROUTES_LEARNED_BY_BGP    179
-#define OSPF_BGP_DEFAULT_COST                  1
+#define OSPFv2_EXTERNAL_ROUTES_LEARNED_BY_BGP  179
+#define OSPFv2_BGP_DEFAULT_COST                1
 
 typedef unsigned long Metric;
 

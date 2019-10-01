@@ -175,9 +175,9 @@ void Ospfv2::insertExternalRoute(int ifIndex, const Ipv4AddressRange& netAddr)
     auto& tosInfo = newExternalContents.getExternalTOSInfoForUpdate(0);
     tosInfo.E_ExternalMetricType = false;
     tosInfo.tos = 0;
-    tosInfo.externalRouteTag = OSPF_EXTERNAL_ROUTES_LEARNED_BY_BGP;
+    tosInfo.externalRouteTag = OSPFv2_EXTERNAL_ROUTES_LEARNED_BY_BGP;
     //tosInfo.forwardingAddress = ;
-    tosInfo.routeCost = OSPF_BGP_DEFAULT_COST;
+    tosInfo.routeCost = OSPFv2_BGP_DEFAULT_COST;
 
     ospfRouter->updateExternalRoute(netAddr.address, newExternalContents, ifIndex);
 }
