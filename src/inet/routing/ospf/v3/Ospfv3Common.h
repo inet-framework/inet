@@ -1,13 +1,12 @@
-#ifndef __INET_OSPFV3ROUTING_H_
-#define __INET_OSPFV3ROUTING_H_
+#ifndef __INET_OSPFV3COMMON_H_
+#define __INET_OSPFV3COMMON_H_
 
-#include <omnetpp.h>
-
-#include "inet/routing/ospf/v3/Ospfv3Packet_m.h"
 #include "inet/common/INETDefs.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
+#include "inet/routing/ospf/v3/Ospfv3Packet_m.h"
 
-namespace inet{
+namespace inet {
+
 // intervals values
 #define OSPFV3_START            5
 #define METRIC                  10
@@ -33,7 +32,6 @@ namespace inet{
 #define LS_REFRESH_TIME         1800
 #define CHECK_AGE               300
 #define LS_INFINITY             16777215
-
 
 //#define IPV6_DATAGRAM_LENGTH    65535
 //#define OSPFV3_HEADER_LENGTH    16
@@ -255,12 +253,14 @@ inline bool operator==(const VertexID& leftID, const VertexID& rightID)
             && (leftID.routerID == rightID.routerID));
 }
 
-enum InstallSource {
+enum InstallSource
+{
     ORIGINATED = 0,
     FLOODED = 1
 };
 
-struct VertexLSA {
+struct VertexLSA
+{
     Ospfv3RouterLsa* routerLSA;
     Ospfv3NetworkLsa* networkLSA;
 };
@@ -411,5 +411,5 @@ inline bool operator==(const Ospfv3LsaHeader& leftLSA, const Ospfv3LsaHeader& ri
 
 }//namespace inet
 
-#endif
+#endif // __INET_OSPFV3COMMON_H_
 

@@ -1,8 +1,8 @@
-#include "inet/routing/ospf/v3/process/Ospfv3Instance.h"
 
 #include "inet/routing/ospf/v3/interface/Ospfv3Interface.h"
+#include "inet/routing/ospf/v3/process/Ospfv3Instance.h"
 
-namespace inet{
+namespace inet {
 
 Ospfv3Instance::Ospfv3Instance(int instanceId, Ospfv3Process* parentProcess, int addressFamily)
 {
@@ -24,7 +24,7 @@ Ospfv3Instance::~Ospfv3Instance()
 bool Ospfv3Instance::hasArea(Ipv4Address areaId)
 {
     std::map<Ipv4Address, Ospfv3Area*>::iterator areaIt = this->areasById.find(areaId);
-    if(areaIt == this->areasById.end())
+    if (areaIt == this->areasById.end())
         return false;
 
     return true;
@@ -39,18 +39,17 @@ void Ospfv3Instance::addArea(Ospfv3Area* newArea)
 Ospfv3Area* Ospfv3Instance::getAreaById(Ipv4Address areaId)
 {
     std::map<Ipv4Address, Ospfv3Area*>::iterator areaIt = this->areasById.find(areaId);
-    if(areaIt == this->areasById.end())
+    if (areaIt == this->areasById.end())
         return nullptr;
 
     return areaIt->second;
 }//getAreaById
 
-
 void Ospfv3Instance::processPacket(Packet* pk)
 {
     const auto& packet = pk->peekAtFront<Ospfv3Packet>();
     EV_INFO << "Process " << this->containingProcess->getProcessID() << " received packet: (" << packet->getClassName() << ")" << packet->getName() << "\n";
-    if(packet->getVersion()!=3) {
+    if (packet->getVersion()!=3) {
         delete pk;
         return;
     }
@@ -58,7 +57,7 @@ void Ospfv3Instance::processPacket(Packet* pk)
     int intfId = pk->getTag<InterfaceInd>()->getInterfaceId();
     Ipv4Address areaId = packet->getAreaID();
     Ospfv3Area* area = this->getAreaById(packet->getAreaID());
-    if(area!=nullptr) {
+    if (area!=nullptr) {
         Ospfv3Interface *intf = area->getInterfaceById(intfId);
 
         if (intf == nullptr) {
@@ -87,7 +86,6 @@ void Ospfv3Instance::processPacket(Packet* pk)
             }
         }
         if (intf != nullptr) {
-
             Ipv6Address destinationAddress =  pk->getTag<L3AddressInd>()->getDestAddress().toIpv6();
             Ipv6Address allDRouters = Ipv6Address::ALL_OSPF_DESIGNATED_ROUTERS_MCAST;
             Ospfv3Interface::Ospfv3InterfaceFaState interfaceState = intf->getState();
@@ -145,8 +143,7 @@ void Ospfv3Instance::processPacket(Packet* pk)
                     break;
                 }
             }
-            else
-            {
+            else {
                 delete(pk);
             }
         }
@@ -163,7 +160,7 @@ void Ospfv3Instance::removeFromAllRetransmissionLists(LSAKeyType lsaKey)
 
 void Ospfv3Instance::init()
 {
-    for(auto it = this->areas.begin(); it!=this->areas.end(); it++)
+    for (auto it = this->areas.begin(); it!=this->areas.end(); it++)
         (*it)->init();
 
     WATCH_PTRVECTOR(this->areas);
@@ -172,7 +169,7 @@ void Ospfv3Instance::init()
 void Ospfv3Instance::debugDump()
 {
     EV_DEBUG << "Instance " << this->getInstanceID() << "\n";
-    for(auto it=this->areas.begin();it!=this->areas.end(); it++) {
+    for (auto it=this->areas.begin();it!=this->areas.end(); it++) {
         EV_DEBUG << "\tArea id " << (*it)->getAreaID() << " has these interfaces:\n";
         (*it)->debugDump();
     }
@@ -200,22 +197,22 @@ std::string Ospfv3Instance::detailedInfo() const
     Ipv4Address routerID = this->getProcess()->getRouterID();
     out << "Ospfv3 " << processID << " address-family ";
 
-    if(this->addressFamily == IPV4INSTANCE)
+    if (this->addressFamily == IPV4INSTANCE)
         out << "IPv4 (router-id " << routerID << ")\n\n";
     else
         out << "IPv6 (router-id " << routerID << ")\n\n";
 
     out << "Neighbor ID\tPri\tState\t\tDead Time\tInterface ID\tInterface\n";
-    for(auto it=this->areas.begin(); it!=this->areas.end(); it++){
+    for (auto it=this->areas.begin(); it!=this->areas.end(); it++) {
         int intfCount = (*it)->getInterfaceCount();
-        for(int i=0; i<intfCount; i++) {
+        for (int i=0; i<intfCount; i++) {
             Ospfv3Interface* intf = (*it)->getInterface(i);
             int neiCount = intf->getNeighborCount();
-            for(int n=0; n<neiCount; n++) {
+            for (int n=0; n<neiCount; n++) {
                 Ospfv3Neighbor* neighbor = intf->getNeighbor(n);
                 out << neighbor->getNeighborID() << "\t";
                 out << neighbor->getNeighborPriority() << "\t";
-                switch(neighbor->getState()){
+                switch(neighbor->getState()) {
                     case Ospfv3Neighbor::DOWN_STATE:
                         out << "DOWN\t\t";
                         break;
@@ -229,7 +226,7 @@ std::string Ospfv3Instance::detailedInfo() const
                         break;
 
                     case Ospfv3Neighbor::TWOWAY_STATE:
-                        if(intf->getDesignatedID() == Ipv4Address::UNSPECIFIED_ADDRESS)
+                        if (intf->getDesignatedID() == Ipv4Address::UNSPECIFIED_ADDRESS)
                             out << "2WAY\t\t";
                         else
                             out << "2WAY/DROTHER\t";
@@ -248,9 +245,9 @@ std::string Ospfv3Instance::detailedInfo() const
                         break;
 
                     case Ospfv3Neighbor::FULL_STATE:
-                        if(neighbor->getNeighborID() == intf->getDesignatedID())
+                        if (neighbor->getNeighborID() == intf->getDesignatedID())
                             out << "FULL/DR\t\t";
-                        else if(neighbor->getNeighborID() == intf->getBackupID())
+                        else if (neighbor->getNeighborID() == intf->getBackupID())
                             out << "FULL/BDR\t\t";
                         else
                             out << "FULL/DROTHER\t";
@@ -258,7 +255,7 @@ std::string Ospfv3Instance::detailedInfo() const
                 }
 
                 int dead = intf->getDeadInterval() - ((int)simTime().dbl() - neighbor->getLastHelloTime());
-                if(dead < 0)
+                if (dead < 0)
                     dead = 0;
                 out << dead << "\t\t";//"00:00:40\t\t";
                 out << neighbor->getNeighborInterfaceID() << "\t\t";
@@ -269,5 +266,6 @@ std::string Ospfv3Instance::detailedInfo() const
 
     return out.str();
 }
+
 }//namespace inet
 

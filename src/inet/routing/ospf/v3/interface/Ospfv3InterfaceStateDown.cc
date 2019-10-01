@@ -1,23 +1,20 @@
-#include "inet/routing/ospf/v3/interface/Ospfv3InterfaceStateDown.h"
 
 #include "inet/routing/ospf/v3/interface/Ospfv3InterfacePassive.h"
+#include "inet/routing/ospf/v3/interface/Ospfv3InterfaceStateDown.h"
 #include "inet/routing/ospf/v3/interface/Ospfv3InterfaceStateDrOther.h"
 #include "inet/routing/ospf/v3/interface/Ospfv3InterfaceStateLoopback.h"
 #include "inet/routing/ospf/v3/interface/Ospfv3InterfaceStatePointToPoint.h"
-//#include "INET/routing/ospf/v3/Ospfv3Timers.h"
-//#include <cmodule.h>
 
-namespace inet{
+namespace inet {
 
 void Ospfv3InterfaceStateDown::processEvent(Ospfv3Interface* interface, Ospfv3Interface::Ospfv3InterfaceEvent event)
 {
     /*
      * Two different actions for P2P and for Broadcast (or NBMA)
      */
-    if(event == Ospfv3Interface::INTERFACE_UP_EVENT)
-    {
+    if (event == Ospfv3Interface::INTERFACE_UP_EVENT) {
         EV_DEBUG <<"Interface " << interface->getIntName() << " is in up state\n";
-        if(!interface->isInterfacePassive()){
+        if (!interface->isInterfacePassive()) {
             LinkLSA *lsa = interface->originateLinkLSA();
             interface->installLinkLSA(lsa);
             delete lsa;
@@ -63,13 +60,12 @@ void Ospfv3InterfaceStateDown::processEvent(Ospfv3Interface* interface, Ospfv3In
                 break;
             }
         }
-        else if(interface->isInterfacePassive()) {
+        else if (interface->isInterfacePassive()) {
             LinkLSA *lsa = interface->originateLinkLSA();
             interface->installLinkLSA(lsa);
             delete lsa;
             IntraAreaPrefixLSA *prefLsa = interface->getArea()->originateIntraAreaPrefixLSA();
-            if (prefLsa != nullptr)
-            {
+            if (prefLsa != nullptr) {
                 if (!interface->getArea()->installIntraAreaPrefixLSA(prefLsa))
                     EV_DEBUG << "Intra Area Prefix LSA for network beyond interface " << interface->getIntName() << " was not created!\n";
                 delete prefLsa;
@@ -82,7 +78,6 @@ void Ospfv3InterfaceStateDown::processEvent(Ospfv3Interface* interface, Ospfv3In
         }
     }
 }//processEvent
-
 
 }//namespace inet
 

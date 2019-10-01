@@ -1,6 +1,7 @@
+
 #include "inet/routing/ospf/v3/process/Ospfv3Lsa.h"
 
-namespace inet{
+namespace inet {
 
 Ospfv3SpfVertex::Ospfv3SpfVertex(Ospfv3Lsa* asocLSA, int distance)
 {
@@ -9,12 +10,10 @@ Ospfv3SpfVertex::Ospfv3SpfVertex(Ospfv3Lsa* asocLSA, int distance)
     this->type = asocLSA->getHeader().getLsaType();
     this->vertexID.routerID = asocLSA->getHeader().getLinkStateID();
 
-    if(type==NETWORK_LSA)
-    {
+    if (type == NETWORK_LSA) {
         this->vertexID.interfaceID = 1;
     }
 }
-
 
 //for ROUTER_LSA
 B calculateLSASize(const Ospfv3RouterLsa *routerLSA)
@@ -42,8 +41,7 @@ B calculateLSASize(const Ospfv3LinkLsa *linkLSA)
 {
     B lsaLength = OSPFV3_LSA_HEADER_LENGTH + OSPFV3_LINK_LSA_BODY_LENGTH;
     uint32_t prefixCount = linkLSA->getNumPrefixes();
-    for (uint32_t i = 0; i < prefixCount; i++)
-    {
+    for (uint32_t i = 0; i < prefixCount; i++) {
         lsaLength += OSPFV3_LSA_PREFIX_HEADER_LENGTH;
         lsaLength += B(((linkLSA->getPrefixes(i).prefixLen + 31) / 32) * 4);
     }
@@ -56,14 +54,11 @@ B calculateLSASize(const Ospfv3IntraAreaPrefixLsa *prefixLSA)
     B lsaLength = OSPFV3_LSA_HEADER_LENGTH + OSPFV3_INTRA_AREA_PREFIX_LSA_HEADER_LENGTH;
 
     uint32_t prefixCount = prefixLSA->getNumPrefixes();
-    for (uint32_t i = 0; i < prefixCount; i++)
-    {
+    for (uint32_t i = 0; i < prefixCount; i++) {
         lsaLength += OSPFV3_LSA_PREFIX_HEADER_LENGTH;
         lsaLength += B(((prefixLSA->getPrefixes(i).prefixLen + 31) / 32) * 4);
     }
-
-
-            return lsaLength;
+    return lsaLength;
 }
 
 std::ostream& operator<<(std::ostream& ostr, const Ospfv3LsaHeader& lsaHeader)
@@ -170,5 +165,5 @@ std::ostream& operator<<(std::ostream& ostr, const Ospfv3AsExternalLsa& lsa)
     return ostr;
 }
 
-}//namespace inet
+} //namespace inet
 

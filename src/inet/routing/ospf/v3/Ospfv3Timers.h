@@ -1,9 +1,10 @@
 #ifndef __INET_OSPFV3TIMERS_H_
 #define __INET_OSPFV3TIMERS_H_
 
-namespace inet{
+namespace inet {
 
-enum Ospfv3Timers{
+enum Ospfv3Timers
+{
     INIT_PROCESS = 0,
     HELLO_TIMER = 1,
     WAIT_TIMER = 2,
@@ -19,5 +20,5 @@ enum Ospfv3Timers{
 
 }//namespace inet
 
-#endif
+#endif // __INET_OSPFV3TIMERS_H_
 

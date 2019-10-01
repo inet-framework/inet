@@ -1,40 +1,34 @@
 #ifndef __INET_OSPFV3PROCESS_H_
 #define __INET_OSPFV3PROCESS_H_
 
-#include <omnetpp.h>
 #include <string>
 
-#include "../Ospfv3Common.h"
+#include "inet/common/INETDefs.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/common/Protocol.h"
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/linklayer/common/InterfaceTag_m.h"
+#include "inet/networklayer/common/HopLimitTag_m.h"
+#include "inet/networklayer/common/L3AddressTag_m.h"
+#include "inet/networklayer/contract/IInterfaceTable.h"
+#include "inet/networklayer/contract/ipv4/Ipv4Address.h"
+#include "inet/networklayer/contract/ipv6/Ipv6Address.h"
+#include "inet/networklayer/icmpv6/Icmpv6Header_m.h"
+#include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
+#include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
+#include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
+#include "inet/networklayer/ipv6/Ipv6RoutingTable.h"
+#include "inet/networklayer/ipv6/Ipv6Route.h"
+#include "inet/networklayer/ipv6/Ipv6RoutingTable.h"
+#include "inet/routing/ospf/v3/Ospfv3Common.h"
 #include "inet/routing/ospf/v3/Ospfv3Packet_m.h"
 #include "inet/routing/ospf/v3/Ospfv3Timers.h"
 #include "inet/routing/ospf/v3/process/Ospfv3Area.h"
 #include "inet/routing/ospf/v3/process/Ospfv3Instance.h"
 #include "inet/routing/ospf/v3/process/Ospfv3RoutingTableEntry.h"
-#include "inet/common/INETDefs.h"
-#include "inet/common/ModuleAccess.h"
-#include "inet/common/ProtocolTag_m.h"
-#include "inet/common/Protocol.h"
-#include "inet/common/packet/Packet.h"
 
-
-#include "inet/networklayer/contract/ipv4/Ipv4Address.h"
-#include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
-#include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
-
-#include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
-#include "inet/networklayer/ipv6/Ipv6RoutingTable.h"
-#include "inet/networklayer/ipv6/Ipv6Route.h"
-#include "inet/networklayer/contract/ipv6/Ipv6Address.h"
-#include "inet/networklayer/ipv6/Ipv6RoutingTable.h"
-
-#include "inet/linklayer/common/InterfaceTag_m.h"
-#include "inet/networklayer/common/HopLimitTag_m.h"
-#include "inet/networklayer/common/L3AddressTag_m.h"
-#include "inet/networklayer/icmpv6/Icmpv6Header_m.h"
-#include "inet/common/Protocol.h"
-
-namespace inet{
+namespace inet {
 
 class Ospfv3Instance;
 
@@ -43,12 +37,12 @@ class INET_API Ospfv3Process : protected cListener, public cSimpleModule
   public:
     Ospfv3Process();
     virtual ~Ospfv3Process();
-    int getProcessID() const {return this->processID;};
-    Ipv4Address getRouterID(){return this->routerID;};
-    bool isActivated(){return this->isActive;};
+    int getProcessID() const { return this->processID; };
+    Ipv4Address getRouterID() { return this->routerID; };
+    bool isActivated() { return this->isActive; };
     void activateProcess();
     void setTimer(cMessage* msg, double delay);
-    void clearTimer(cMessage* msg){this->cancelEvent(msg);}
+    void clearTimer(cMessage* msg) { this->cancelEvent(msg); }
     Ospfv3Instance* getInstanceById(int instanceId);
     void addInstance(Ospfv3Instance* newInstance);
     void sendPacket(Packet *packet, Ipv6Address destination, const char* ifName, short hopLimit = 1);
@@ -59,7 +53,7 @@ class INET_API Ospfv3Process : protected cListener, public cSimpleModule
     void calculateASExternalRoutes(std::vector<Ospfv3RoutingTableEntry* > newTableIPv6, std::vector<Ospfv3Ipv4RoutingTableEntry* > newTableIPv4);
 
     void ageDatabase();
-    cMessage* getAgeTimer(){return this->ageTimer;}
+    cMessage* getAgeTimer() { return this->ageTimer; }
 
     /**
      * Returns true if one of the Router's Areas the same address range configured as the
@@ -105,7 +99,8 @@ class INET_API Ospfv3Process : protected cListener, public cSimpleModule
     //list of external routes
     //list of as-external routes
 };
+
 }//namespace inet
 
-#endif
+#endif // __INET_OSPFV3PROCESS_H_
 

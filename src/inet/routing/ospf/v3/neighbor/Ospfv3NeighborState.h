@@ -1,11 +1,11 @@
 #ifndef __INET_OSPFV3NEIGHBORSTATE_H_
 #define __INET_OSPFV3NEIGHBORSTATE_H_
 
+#include "inet/common/INETDefs.h"
 #include "inet/routing/ospf/v3/interface/Ospfv3Interface.h"
 #include "inet/routing/ospf/v3/neighbor/Ospfv3Neighbor.h"
-#include "inet/common/INETDefs.h"
 
-namespace inet{
+namespace inet {
 
 class INET_API Ospfv3NeighborState
 {
@@ -16,10 +16,10 @@ class INET_API Ospfv3NeighborState
     virtual void processEvent(Ospfv3Neighbor* neighbor, Ospfv3Neighbor::Ospfv3NeighborEventType event) = 0;
     virtual Ospfv3Neighbor::Ospfv3NeighborStateType getState() const = 0;
     virtual std::string getNeighborStateString() = 0;
-    virtual ~Ospfv3NeighborState(){};
+    virtual ~Ospfv3NeighborState() {};
 };
 
 }//namespace inet
 
-#endif
+#endif // __INET_OSPFV3NEIGHBORSTATE_H_
 

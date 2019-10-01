@@ -1,11 +1,12 @@
-#include "inet/routing/ospf/v3/interface/Ospfv3InterfaceStateWaiting.h"
 
+#include "inet/routing/ospf/v3/Ospfv3Timers.h"
 #include "inet/routing/ospf/v3/interface/Ospfv3Interface.h"
 #include "inet/routing/ospf/v3/interface/Ospfv3InterfaceStateDown.h"
 #include "inet/routing/ospf/v3/interface/Ospfv3InterfaceStateLoopback.h"
-#include "inet/routing/ospf/v3/Ospfv3Timers.h"
+#include "inet/routing/ospf/v3/interface/Ospfv3InterfaceStateWaiting.h"
 
-namespace inet{
+namespace inet {
+
 void Ospfv3InterfaceStateWaiting::processEvent(Ospfv3Interface* interface, Ospfv3Interface::Ospfv3InterfaceEvent event)
 {
     /*
@@ -52,7 +53,6 @@ void Ospfv3InterfaceStateWaiting::processEvent(Ospfv3Interface* interface, Ospfv
         interface->sendDelayedAcknowledgements();
     }
 }//processEvent
-
 
 }//namespace inet
 

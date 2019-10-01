@@ -1,26 +1,22 @@
 #ifndef __INET_OSPFV3SPLITTER_H_
 #define __INET_OSPFV3SPLITTER_H_
 
-#include <omnetpp.h>
-//#include <cmodule.h>
 #include <string>
 
-#include "inet/routing/ospf/v3/Ospfv3Packet_m.h"
-#include "inet/routing/ospf/v3/Ospfv3Timers.h"
-#include "inet/routing/ospf/v3/process/Ospfv3Process.h"
-#include "inet/routing/ospf/v3/process/Ospfv3Process.h"
 #include "inet/common/INETDefs.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
-#include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
-#include "inet/networklayer/ipv6/Ipv6RoutingTable.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
 #include "inet/networklayer/contract/ipv6/Ipv6Address.h"
-#include "Ospfv3Common.h"
+#include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
+#include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
+#include "inet/networklayer/ipv6/Ipv6RoutingTable.h"
+#include "inet/routing/ospf/v3/Ospfv3Common.h"
+#include "inet/routing/ospf/v3/Ospfv3Packet_m.h"
+#include "inet/routing/ospf/v3/Ospfv3Timers.h"
+#include "inet/routing/ospf/v3/process/Ospfv3Process.h"
 
-
-namespace inet{
+namespace inet {
 
 int ospfv3InterfaceIndex=1;
 
@@ -50,7 +46,8 @@ class INET_API Ospfv3Splitter : protected cListener, public cSimpleModule
      virtual void handleMessage(cMessage* msg) override;
      virtual int numInitStages() const override { return NUM_INIT_STAGES; }
 };
+
 }//namespace inet
 
-#endif
+#endif // __INET_OSPFV3SPLITTER_H_
 

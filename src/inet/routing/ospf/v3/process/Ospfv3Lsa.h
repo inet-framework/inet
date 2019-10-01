@@ -1,11 +1,9 @@
 #ifndef __INET_OSPFV3LSA_H_
 #define __INET_OSPFV3LSA_H_
 
-#include <omnetpp.h>
-
-#include "../Ospfv3Common.h"
-#include "inet/routing/ospf/v3/Ospfv3Packet_m.h"
 #include "inet/common/INETDefs.h"
+#include "inet/routing/ospf/v3/Ospfv3Common.h"
+#include "inet/routing/ospf/v3/Ospfv3Packet_m.h"
 
 // NexHop is defined in Ospfv3Common.h
 // Every Ospfv3 class representing pakcet is extedned by Routing and Tracking info,
@@ -34,7 +32,6 @@ class INET_API LSATrackingInfo
     void resetInstallTime() { installTime = 0; }
     unsigned long getInstallTime() const { return installTime; }
 };
-
 
 class INET_API RoutingInfo
 {
@@ -179,10 +176,8 @@ class INET_API Ospfv3SpfVertex
     uint16_t type; //router or network lsa
     Ospfv3SpfVertex* parent = nullptr;
 
-
   public:
     Ospfv3SpfVertex(Ospfv3Lsa* asocLSA, int distance);
-
 };
 
 //unsigned int calculateLSASize(const Ospfv3Lsa *lsaC);
@@ -201,5 +196,5 @@ std::ostream& operator<<(std::ostream& ostr, const Ospfv3AsExternalLsa& lsa);
 
 }//namespace inet
 
-#endif
+#endif // __INET_OSPFV3LSA_H_
 

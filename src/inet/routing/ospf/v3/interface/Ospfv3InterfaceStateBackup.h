@@ -1,13 +1,12 @@
 #ifndef __INET_OSPFV3INTERFACESTATEBACKUP_H_
 #define __INET_OSPFV3INTERFACESTATEBACKUP_H_
 
-#include <omnetpp.h>
 #include <string>
 
-#include "inet/routing/ospf/v3/interface/Ospfv3InterfaceState.h"
 #include "inet/common/INETDefs.h"
+#include "inet/routing/ospf/v3/interface/Ospfv3InterfaceState.h"
 
-namespace inet{
+namespace inet {
 
 /*
  * The router is BDR, it will be promoted to DR in case of failure. It forms adjacencies with
@@ -30,4 +29,5 @@ class INET_API Ospfv3InterfaceStateBackup : public Ospfv3InterfaceState
 
 }//namespace inet
 
-#endif
+#endif // __INET_OSPFV3INTERFACESTATEBACKUP_H_
+

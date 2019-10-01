@@ -1,6 +1,8 @@
+
 #include "inet/routing/ospf/v3/process/Ospfv3RoutingTableEntry.h"
 
-namespace inet{
+namespace inet {
+
 Ospfv3RoutingTableEntry::Ospfv3RoutingTableEntry(IInterfaceTable *ift, Ipv6Address destPrefix, int prefixLength, SourceType sourceType) :
         Ipv6Route(destPrefix, prefixLength, sourceType),
         ift(ift),
@@ -13,14 +15,14 @@ Ospfv3RoutingTableEntry::Ospfv3RoutingTableEntry(IInterfaceTable *ift, Ipv6Addre
 
 Ospfv3RoutingTableEntry::Ospfv3RoutingTableEntry(const Ospfv3RoutingTableEntry& entry, Ipv6Address destPrefix, int prefixLength, SourceType sourceType) :
         Ipv6Route(destPrefix, prefixLength, sourceType),
-    destinationType(entry.destinationType),
-    optionalCapabilities(entry.optionalCapabilities),
-    area(entry.area),
-    pathType(entry.pathType),
-    cost(entry.cost),
-    type2Cost(entry.type2Cost),
-    linkStateOrigin(entry.linkStateOrigin),
-    nextHops(entry.nextHops)
+        destinationType(entry.destinationType),
+        optionalCapabilities(entry.optionalCapabilities),
+        area(entry.area),
+        pathType(entry.pathType),
+        cost(entry.cost),
+        type2Cost(entry.type2Cost),
+        linkStateOrigin(entry.linkStateOrigin),
+        nextHops(entry.nextHops)
 {
     this->setDestination(entry.getDestinationAsGeneric());
     this->setPrefixLength(prefixLength);
@@ -194,10 +196,7 @@ std::ostream& operator<<(std::ostream& out, const Ospfv3RoutingTableEntry& entry
     return out;
 }
 
-
-
 //-----------------------------------------------------------------------------------------------------------
-
 
 Ospfv3Ipv4RoutingTableEntry::Ospfv3Ipv4RoutingTableEntry(IInterfaceTable *ift, Ipv4Address destPrefix, int prefixLength, SourceType sourceType) :
         //Ipv6Route(destPrefix, prefixLength, sourceType),
@@ -212,14 +211,14 @@ Ospfv3Ipv4RoutingTableEntry::Ospfv3Ipv4RoutingTableEntry(IInterfaceTable *ift, I
 
 Ospfv3Ipv4RoutingTableEntry::Ospfv3Ipv4RoutingTableEntry(const Ospfv3Ipv4RoutingTableEntry& entry, Ipv4Address destPrefix, int prefixLength, SourceType sourceType) :
         //Ipv6Route(destPrefix, prefixLength, sourceType),
-    destinationType(entry.destinationType),
-    optionalCapabilities(entry.optionalCapabilities),
-    area(entry.area),
-    pathType(entry.pathType),
-    cost(entry.cost),
-    type2Cost(entry.type2Cost),
-    linkStateOrigin(entry.linkStateOrigin),
-    nextHops(entry.nextHops)
+        destinationType(entry.destinationType),
+        optionalCapabilities(entry.optionalCapabilities),
+        area(entry.area),
+        pathType(entry.pathType),
+        cost(entry.cost),
+        type2Cost(entry.type2Cost),
+        linkStateOrigin(entry.linkStateOrigin),
+        nextHops(entry.nextHops)
 {
     this->setDestination(entry.getDestinationAsGeneric());
     this->setPrefixLength(prefixLength);

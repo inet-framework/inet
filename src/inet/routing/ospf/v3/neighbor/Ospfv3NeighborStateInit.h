@@ -5,7 +5,7 @@
 #include "inet/routing/ospf/v3/neighbor/Ospfv3NeighborState.h"
 #include "inet/common/INETDefs.h"
 
-namespace inet{
+namespace inet {
 
 class INET_API Ospfv3NeighborStateInit : public Ospfv3NeighborState
 {
@@ -15,13 +15,13 @@ class INET_API Ospfv3NeighborStateInit : public Ospfv3NeighborState
      * in this or higher states are listed in hello.
      */
   public:
+    ~Ospfv3NeighborStateInit() {}
     virtual void processEvent(Ospfv3Neighbor* neighbor, Ospfv3Neighbor::Ospfv3NeighborEventType event) override;
     virtual Ospfv3Neighbor::Ospfv3NeighborStateType getState() const override { return Ospfv3Neighbor::INIT_STATE; }
     virtual std::string getNeighborStateString() override { return std::string("Ospfv3NeighborStateInit"); }
-    ~Ospfv3NeighborStateInit(){};
 };
 
 }//namespace inet
 
-#endif
+#endif // __INET_OSPFV3NEIGHBORSTATEINIT_H_
 

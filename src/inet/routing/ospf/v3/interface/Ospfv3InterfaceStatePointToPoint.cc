@@ -1,11 +1,12 @@
-#include "inet/routing/ospf/v3/interface/Ospfv3InterfaceStatePointToPoint.h"
 
+#include "inet/routing/ospf/v3/Ospfv3Timers.h"
 #include "inet/routing/ospf/v3/interface/Ospfv3Interface.h"
 #include "inet/routing/ospf/v3/interface/Ospfv3InterfaceStateDown.h"
 #include "inet/routing/ospf/v3/interface/Ospfv3InterfaceStateLoopback.h"
-#include "inet/routing/ospf/v3/Ospfv3Timers.h"
+#include "inet/routing/ospf/v3/interface/Ospfv3InterfaceStatePointToPoint.h"
 
-namespace inet{
+namespace inet {
+
 void Ospfv3InterfaceStatePointToPoint::processEvent(Ospfv3Interface* interface, Ospfv3Interface::Ospfv3InterfaceEvent event)
 {
     /*
@@ -38,5 +39,6 @@ void Ospfv3InterfaceStatePointToPoint::processEvent(Ospfv3Interface* interface, 
         interface->sendDelayedAcknowledgements();
     }
 }//processEvent
+
 }//namespace inet
 

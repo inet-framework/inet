@@ -15,9 +15,7 @@
 
 package inet.routing.ospf.v3;
 
-import inet.networklayer.contract.INetworkLayer;
 import inet.routing.contract.IOspf;
-
 
 module Ospfv3 like IOspf
 {
@@ -28,7 +26,7 @@ module Ospfv3 like IOspf
         *.interfaceTableModule = default(absPath(interfaceTableModule));
         *.routingTableModule = default(absPath(routingTableModule));
         *.routingTableModule6 = default(absPath(routingTableModule6));
-    @display("bgb=510,238;i=block/network2");
+        @display("bgb=510,238;i=block/network2");
     gates:
         input ipIn @labels(Ipv6ControlInfo/up);
         output ipOut @labels(Ipv6ControlInfo/down);
@@ -42,3 +40,4 @@ module Ospfv3 like IOspf
         ipIn --> ospfv3Splitter.ipIn;
         ipOut <-- ospfv3Splitter.ipOut;
 }
+

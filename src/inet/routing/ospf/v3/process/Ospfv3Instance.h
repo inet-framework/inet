@@ -1,24 +1,22 @@
 #ifndef __INET_OSPFV3INSTANCE_H_
 #define __INET_OSPFV3INSTANCE_H_
 
-#include <omnetpp.h>
 #include <string>
 
-#include "../Ospfv3Common.h"
-#include "inet/routing/ospf/v3/interface/Ospfv3Interface.h"
-#include "inet/routing/ospf/v3/neighbor/Ospfv3Neighbor.h"
-#include "inet/routing/ospf/v3/Ospfv3Packet_m.h"
-#include "inet/routing/ospf/v3/process/Ospfv3Area.h"
-#include "inet/routing/ospf/v3/process/Ospfv3Process.h"
 #include "inet/common/INETDefs.h"
-#include "inet/networklayer/contract/ipv4/Ipv4Address.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/common/ModuleAccess.h"
+#include "inet/networklayer/contract/ipv4/Ipv4Address.h"
+#include "inet/routing/ospf/v3/Ospfv3Common.h"
+#include "inet/routing/ospf/v3/Ospfv3Packet_m.h"
+#include "inet/routing/ospf/v3/interface/Ospfv3Interface.h"
+#include "inet/routing/ospf/v3/neighbor/Ospfv3Neighbor.h"
+#include "inet/routing/ospf/v3/process/Ospfv3Area.h"
+#include "inet/routing/ospf/v3/process/Ospfv3Process.h"
 
-#include "inet/common/packet/Packet.h"
-
-namespace inet{
+namespace inet {
 
 class Ospfv3Process;
 class Ospfv3Area;
@@ -29,25 +27,26 @@ class INET_API Ospfv3Instance : public cObject
   public:
     Ospfv3Instance(int instanceId, Ospfv3Process* parentProcess, int addressFamily);
     virtual ~Ospfv3Instance();
-    int getInstanceID(){return this->instanceID;};
-    int getAddressFamily(){return this->addressFamily;};
-    Ospfv3Process* getProcess() const {return this->containingProcess;}
+    int getInstanceID() { return this->instanceID; }
+    int getAddressFamily() { return this->addressFamily; }
+    Ospfv3Process* getProcess() const { return this->containingProcess; }
     void init();
     bool hasArea(Ipv4Address);
     void addArea(Ospfv3Area*);
     Ospfv3Area* getAreaById(Ipv4Address areaId);
-    Ospfv3Area* getArea(int i){return this->areas.at(i);}
+    Ospfv3Area* getArea(int i) { return this->areas.at(i); }
     void debugDump();
     Ipv4Address getNewInterAreaPrefixLinkStateID();
     void subtractInterAreaPrefixLinkStateID();
     void processPacket(Packet* pk);
-    int getUniqueId(){return ospfv3IfIndex++;}
-    int getAreaCount(){return this->areas.size();}
+    int getUniqueId() { return ospfv3IfIndex++; }
+    int getAreaCount() { return this->areas.size(); }
     void removeFromAllRetransmissionLists(LSAKeyType lsaKey);
     std::string detailedInfo() const override;
 
   public:
     IInterfaceTable* ift = nullptr;
+
   private:
     int addressFamily;
     int instanceID;
@@ -64,6 +63,8 @@ inline std::ostream& operator<<(std::ostream& ostr, const Ospfv3Instance& instan
     ostr << instance.detailedInfo();
     return ostr;
 }
+
 }//namespace inet
-#endif
+
+#endif // __INET_OSPFV3INSTANCE_H_
 

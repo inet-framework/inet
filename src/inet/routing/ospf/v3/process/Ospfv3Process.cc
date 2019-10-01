@@ -1,8 +1,8 @@
-#include "inet/routing/ospf/v3/process/Ospfv3Process.h"
 
 #include "inet/common/IProtocolRegistrationListener.h"
+#include "inet/routing/ospf/v3/process/Ospfv3Process.h"
 
-namespace inet{
+namespace inet {
 
 Define_Module(Ospfv3Process);
 
@@ -30,9 +30,9 @@ Ospfv3Process::~Ospfv3Process()
     delete ageTimer;
 }
 
-void Ospfv3Process::initialize(int stage){
-
-    if(stage == INITSTAGE_ROUTING_PROTOCOLS){
+void Ospfv3Process::initialize(int stage)
+{
+    if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
         this->containingModule=findContainingNode(this);
         ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
         rt6 = getModuleFromPar<Ipv6RoutingTable>(par("routingTableModule6"), this);
@@ -60,14 +60,13 @@ void Ospfv3Process::initialize(int stage){
         this->setTimer(ageTimer, 1.0);
     }
 }
+
 void Ospfv3Process::handleMessage(cMessage* msg)
 {
-    if(msg->isSelfMessage())
-    {
+    if (msg->isSelfMessage()) {
         this->handleTimer(msg);
     }
-    else
-    {
+    else {
         Packet *pk = check_and_cast<Packet *>(msg);
         const auto& packet = pk->peekAtFront<Ospfv3Packet>();
 
@@ -75,13 +74,13 @@ void Ospfv3Process::handleMessage(cMessage* msg)
         if (protocol == &Protocol::icmpv6) {
            EV_ERROR << "ICMPv6 error received -- discarding\n";
            delete msg;
-       }
+        }
 
-        if(packet->getRouterID()==this->getRouterID()) //is it this router who originated the message?
+        if (packet->getRouterID()==this->getRouterID()) //is it this router who originated the message?
             delete msg;
         else {
             Ospfv3Instance* instance = this->getInstanceById(packet->getInstanceID());
-            if(instance == nullptr){//Is there an instance with this number?
+            if (instance == nullptr) {//Is there an instance with this number?
                 EV_DEBUG << "Instance with this ID not found, dropping\n";
                 delete msg;
             }
@@ -103,12 +102,12 @@ int Ospfv3Process::isInRoutingTable(IIpv4RoutingTable *rtTable, Ipv4Address addr
     }
     return -1;
 }
+
 int Ospfv3Process::isInRoutingTable6(Ipv6RoutingTable *rtTable, Ipv6Address addr)
 {
     for (int i = 0; i < rtTable->getNumRoutes(); i++) {
         const Ipv6Route *entry = rtTable->getRoute(i);
-        if (addr.getPrefix(entry->getPrefixLength()) ==  entry->getDestPrefix().getPrefix(entry->getPrefixLength()))
-        {
+        if (addr.getPrefix(entry->getPrefixLength()) ==  entry->getDestPrefix().getPrefix(entry->getPrefixLength())) {
             return i;
         }
     }
@@ -142,9 +141,7 @@ void Ospfv3Process::parseConfig(cXMLElement* interfaceConfig)
     EV_DEBUG << "Parsing config on process " << this->processID << endl;
     //Take each interface
     cXMLElementList intList = interfaceConfig->getElementsByTagName("Interface");
-    for(auto interfaceIt=intList.begin(); interfaceIt!=intList.end(); interfaceIt++)
-    {
-
+    for (auto interfaceIt=intList.begin(); interfaceIt!=intList.end(); interfaceIt++) {
         const char* interfaceName = (*interfaceIt)->getAttribute("name");
         InterfaceEntry *myInterface = (ift->getInterfaceByName(interfaceName));
 
@@ -153,14 +150,13 @@ void Ospfv3Process::parseConfig(cXMLElement* interfaceConfig)
             Ipv4Address tmpipv4;
             tmpipv4.set(ipv41);
             int i = isInRoutingTable(rt4, tmpipv4);
-            if (i != -1){
+            if (i != -1) {
                 rt4->deleteRoute(rt4->getRoute(i));
             }
         }
         //interface ipv6 configuration
         cXMLElementList ipAddrList = (*interfaceIt)->getElementsByTagName("Ipv6Address");
-        for (auto & ipv6Rec : ipAddrList)
-        {
+        for (auto & ipv6Rec : ipAddrList) {
             const char * addr6c = ipv6Rec->getNodeValue();
 
             std::string add6 = addr6c;
@@ -177,8 +173,7 @@ void Ospfv3Process::parseConfig(cXMLElement* interfaceConfig)
             p.prefix = address6;
             p.prefixLength = prefLength;
 
-            if(isInInterfaceTable6(ift, address6) < 0)
-            {
+            if (isInInterfaceTable6(ift, address6) < 0) {
                 intfData6->assignAddress(address6, false, SIMTIME_ZERO, SIMTIME_ZERO);
 
                 // add this routes to routing table
@@ -192,57 +187,49 @@ void Ospfv3Process::parseConfig(cXMLElement* interfaceConfig)
             }
         }
 
-         //interface ipv4 configuration
-         Ipv4Address addr;
-         Ipv4Address mask;
-         Ipv4InterfaceData * intfData = myInterface->findProtocolData<Ipv4InterfaceData>(); //new Ipv4InterfaceData();
-         bool alreadySet = false;
+        //interface ipv4 configuration
+        Ipv4Address addr;
+        Ipv4Address mask;
+        Ipv4InterfaceData * intfData = myInterface->findProtocolData<Ipv4InterfaceData>(); //new Ipv4InterfaceData();
+        bool alreadySet = false;
 
+        cXMLElementList ipv4AddrList = (*interfaceIt)->getElementsByTagName("IPAddress");
+        if (ipv4AddrList.size() == 1) {
+            for (auto & ipv4Rec : ipv4AddrList) {
+                const char * addr4c = ipv4Rec->getNodeValue(); //from string make ipv4 address and store to interface config
+                addr = (Ipv4Address(addr4c));
+                if (isInInterfaceTable(ift, addr) >= 0) { // prevention from seting same interface by second process
+                    alreadySet = true;
+                    continue;
+                }
+                intfData->setIPAddress(addr);
+            }
+            if (!alreadySet) {
+                cXMLElementList ipv4MaskList = (*interfaceIt)->getElementsByTagName("Mask");
+                if (ipv4MaskList.size() != 1)
+                    throw cRuntimeError("Interface %s has more or less than one mask", interfaceName);
 
-         cXMLElementList ipv4AddrList = (*interfaceIt)->getElementsByTagName("IPAddress");
-         if (ipv4AddrList.size() == 1)
-         {
-             for (auto & ipv4Rec : ipv4AddrList)
-             {
-                 const char * addr4c = ipv4Rec->getNodeValue(); //from string make ipv4 address and store to interface config
-                 addr = (Ipv4Address(addr4c));
-                 if (isInInterfaceTable(ift, addr) >= 0) // prevention from seting same interface by second process
-                 {
-                     alreadySet = true;
-                     continue;
-                 }
-                 intfData->setIPAddress(addr);
-
-             }
-             if (!alreadySet)
-             {
-                 cXMLElementList ipv4MaskList = (*interfaceIt)->getElementsByTagName("Mask");
-                 if (ipv4MaskList.size() != 1)
-                     throw cRuntimeError("Interface %s has more or less than one mask", interfaceName);
-
-                 for (auto & ipv4Rec : ipv4MaskList)
-                 {
+                for (auto & ipv4Rec : ipv4MaskList) {
                     const char * mask4c = ipv4Rec->getNodeValue();
                     mask =  (Ipv4Address(mask4c));
                     intfData->setNetmask(mask);
 
                     //add directly connected ip address to routing table
-                   Ipv4Address networkAdd = (Ipv4Address((intfData->getIPAddress()).getInt() & (intfData->getNetmask()).getInt()));
-                   Ipv4Route *entry = new Ipv4Route;
+                    Ipv4Address networkAdd = (Ipv4Address((intfData->getIPAddress()).getInt() & (intfData->getNetmask()).getInt()));
+                    Ipv4Route *entry = new Ipv4Route;
 
-                   entry->setDestination(networkAdd);
-                   entry->setNetmask(intfData->getNetmask());
-                   entry->setInterface(myInterface);
-                   entry->setMetric(0);
-                   entry->setSourceType(IRoute::IFACENETMASK);
+                    entry->setDestination(networkAdd);
+                    entry->setNetmask(intfData->getNetmask());
+                    entry->setInterface(myInterface);
+                    entry->setMetric(0);
+                    entry->setSourceType(IRoute::IFACENETMASK);
 
-                   rt4->addRoute(entry);
-                 }
-             }
-
-         }
-         else if (ipv4AddrList.size() > 1)
-             throw cRuntimeError("Interface %s has more than one IPv4 address ", interfaceName);
+                    rt4->addRoute(entry);
+                }
+            }
+        }
+        else if (ipv4AddrList.size() > 1)
+            throw cRuntimeError("Interface %s has more than one IPv4 address ", interfaceName);
 
         const char* routerPriority = nullptr;
         const char* helloInterval = nullptr;
@@ -254,73 +241,72 @@ void Ospfv3Process::parseConfig(cXMLElement* interfaceConfig)
 
 
         cXMLElementList process = (*interfaceIt)->getElementsByTagName("Process");
-        if(process.size()>2)
+        if (process.size() > 2)
             throw cRuntimeError("More than two processes configured for interface %s", (*interfaceIt)->getAttribute("name"));
 
         //Check whether it belongs to this process
         int processCount = process.size();
-        for(int i = 0; i < processCount; i++){
+        for (int i = 0; i < processCount; i++) {
             int procId = atoi(process.at(i)->getAttribute("id"));
-            if(procId != this->processID)
+            if (procId != this->processID)
                 continue;
 
             EV_DEBUG << "Creating new interface "  << interfaceName << " in process " << procId << endl;
 
             //Parsing instances
             cXMLElementList instList = process.at(i)->getElementsByTagName("Instance");
-            for(auto instIt=instList.begin(); instIt!=instList.end(); instIt++)
-            {
+            for (auto instIt=instList.begin(); instIt!=instList.end(); instIt++) {
                 const char* instId = (*instIt)->getAttribute("instanceID");
                 const char* addressFamily = (*instIt)->getAttribute("AF");
 
                 //Get the router priority for this interface and instance
                 cXMLElementList interfaceOptions = (*instIt)->getElementsByTagName("RouterPriority");
-                if(interfaceOptions.size()>1)
+                if (interfaceOptions.size()>1)
                     throw cRuntimeError("Multiple router priority is configured for interface %s", interfaceName);
 
-                if(interfaceOptions.size()!=0)
+                if (interfaceOptions.size()!=0)
                     routerPriority = interfaceOptions.at(0)->getNodeValue();
 
                 //get the hello interval for this interface and instance
                 interfaceOptions = (*instIt)->getElementsByTagName("HelloInterval");
-                if(interfaceOptions.size()>1)
+                if (interfaceOptions.size()>1)
                     throw cRuntimeError("Multiple HelloInterval value is configured for interface %s", interfaceName);
 
-                if(interfaceOptions.size()!=0)
+                if (interfaceOptions.size()!=0)
                     helloInterval = interfaceOptions.at(0)->getNodeValue();
 
                 //get the dead interval for this interface and instance
                 interfaceOptions = (*instIt)->getElementsByTagName("DeadInterval");
-                if(interfaceOptions.size()>1)
+                if (interfaceOptions.size()>1)
                     throw cRuntimeError("Multiple DeadInterval value is configured for interface %s", interfaceName);
 
-                if(interfaceOptions.size()!=0)
+                if (interfaceOptions.size()!=0)
                     deadInterval = interfaceOptions.at(0)->getNodeValue();
 
                 //get the interface cost for this interface and instance
                 interfaceOptions = (*instIt)->getElementsByTagName("InterfaceCost");
-                if(interfaceOptions.size()>1)
+                if (interfaceOptions.size()>1)
                     throw cRuntimeError("Multiple InterfaceCost value is configured for interface %s", interfaceName);
 
-                if(interfaceOptions.size()!=0)
+                if (interfaceOptions.size() != 0)
                     interfaceCost = interfaceOptions.at(0)->getNodeValue();
 
                 //get the interface cost for this interface and instance
                 interfaceOptions = (*instIt)->getElementsByTagName("InterfaceType");
-                if(interfaceOptions.size()>1)
+                if (interfaceOptions.size()>1)
                     throw cRuntimeError("Multiple InterfaceType value is configured for interface %s", interfaceName);
 
-                if(interfaceOptions.size()!=0){
+                if (interfaceOptions.size() != 0) {
                     interfaceType = interfaceOptions.at(0)->getNodeValue();
-                    if(strcmp(interfaceType, "Broadcast")==0)
+                    if (strcmp(interfaceType, "Broadcast")==0)
                         interfaceTypeNum = Ospfv3Interface::BROADCAST_TYPE;
-                    else if(strcmp(interfaceType, "PointToPoint")==0)
+                    else if (strcmp(interfaceType, "PointToPoint")==0)
                         interfaceTypeNum = Ospfv3Interface::POINTTOPOINT_TYPE;
-                    else if(strcmp(interfaceType, "NBMA")==0)
+                    else if (strcmp(interfaceType, "NBMA")==0)
                         interfaceTypeNum = Ospfv3Interface::NBMA_TYPE;
-                    else if(strcmp(interfaceType, "PointToMultipoint")==0)
+                    else if (strcmp(interfaceType, "PointToMultipoint")==0)
                         interfaceTypeNum = Ospfv3Interface::POINTTOMULTIPOINT_TYPE;
-                    else if(strcmp(interfaceType, "Virtual")==0)
+                    else if (strcmp(interfaceType, "Virtual")==0)
                         interfaceTypeNum = Ospfv3Interface::VIRTUAL_TYPE;
                     else
                         interfaceTypeNum = Ospfv3Interface::UNKNOWN_TYPE;
@@ -330,25 +316,23 @@ void Ospfv3Process::parseConfig(cXMLElement* interfaceConfig)
 
                 //find out whether the interface is passive
                 interfaceOptions = (*instIt)->getElementsByTagName("PassiveInterface");
-                if(interfaceOptions.size()>1)
+                if (interfaceOptions.size() > 1)
                     throw cRuntimeError("Multiple PassiveInterface value is configured for interface %s", interfaceName);
 
-                if(interfaceOptions.size()!=0){
-                    if(strcmp(interfaceOptions.at(0)->getNodeValue(), "True")==0)
+                if (interfaceOptions.size() != 0) {
+                    if (strcmp(interfaceOptions.at(0)->getNodeValue(), "True") == 0)
                         passiveInterface = true;
                 }
 
-
-
                 int instIdNum;
 
-                if(instId==nullptr) {
+                if (instId == nullptr) {
                     EV_DEBUG << "Address Family " << addressFamily << endl;
-                    if(strcmp(addressFamily, "IPv4")==0) {
+                    if (strcmp(addressFamily, "IPv4") == 0) {
                         EV_DEBUG << "IPv4 instance\n";
                         instIdNum = DEFAULT_IPV4_INSTANCE;
                     }
-                    else if(strcmp(addressFamily, "IPv6")==0) {
+                    else if (strcmp(addressFamily, "IPv6") == 0) {
                         EV_DEBUG << "IPv6 instance\n";
                         instIdNum = DEFAULT_IPV6_INSTANCE;
                     }
@@ -361,11 +345,11 @@ void Ospfv3Process::parseConfig(cXMLElement* interfaceConfig)
                 //TODO - check range of instance ID.
                 //check for multiple definition of one instance
                 Ospfv3Instance* instance = this->getInstanceById(instIdNum);
-                //if(instance != nullptr)
+                //if (instance != nullptr)
                 // throw cRuntimeError("Multiple Ospfv3 instance with the same instance ID configured for process %d on interface %s", this->getProcessID(), interfaceName);
 
-                if(instance == nullptr) {
-                    if(strcmp(addressFamily, "IPv4")==0)
+                if (instance == nullptr) {
+                    if (strcmp(addressFamily, "IPv4") == 0)
                         instance = new Ospfv3Instance(instIdNum, this, IPV4INSTANCE);
                     else
                         instance = new Ospfv3Instance(instIdNum, this, IPV6INSTANCE);
@@ -376,55 +360,53 @@ void Ospfv3Process::parseConfig(cXMLElement* interfaceConfig)
 
                 // multiarea configuration is not supported
                 cXMLElementList areasList = (*instIt)->getElementsByTagName("Area");
-                for(auto areasIt=areasList.begin(); areasIt!=areasList.end(); areasIt++)
-                {
+                for (auto areasIt=areasList.begin(); areasIt!=areasList.end(); areasIt++) {
                     const char* areaId = (*areasIt)->getNodeValue();
                     Ipv4Address areaIP = Ipv4Address(areaId);
                     const char* areaType = (*areasIt)->getAttribute("type");
                     Ospfv3AreaType type = NORMAL;
 
-                    if(areaType != nullptr){
-                        if(strcmp(areaType, "stub") == 0)
+                    if (areaType != nullptr) {
+                        if (strcmp(areaType, "stub") == 0)
                             type = STUB;
-                        else if(strcmp(areaType, "nssa") == 0)
+                        else if (strcmp(areaType, "nssa") == 0)
                             type = NSSA;
                     }
 
                     const char* summary = (*areasIt)->getAttribute("summary");
 
-                    if(summary != nullptr){
-                        if(strcmp(summary, "no") == 0) {
-                            if(type == STUB)
+                    if (summary != nullptr) {
+                        if (strcmp(summary, "no") == 0) {
+                            if (type == STUB)
                                 type = TOTALLY_STUBBY;
-                            else if(type == NSSA)
+                            else if (type == NSSA)
                                 type = NSSA_TOTALLY_STUB;
                         }
                     }
 
                     //insert area if it's not already there and assign this interface
                     Ospfv3Area* area;
-                    if(!(instance->hasArea(areaIP))) {
+                    if (!(instance->hasArea(areaIP))) {
                         area = new Ospfv3Area(areaIP, instance, type);
                         instance->addArea(area);
                     }
                     else
                         area = instance->getAreaById(areaIP);
 
-                    if(!area->hasInterface(std::string(interfaceName)))
-                    {
+                    if (!area->hasInterface(std::string(interfaceName))) {
                         Ospfv3Interface* newInterface = new Ospfv3Interface(interfaceName, this->containingModule, this, interfaceTypeNum, passiveInterface);
-                        if(helloInterval!=nullptr)
+                        if (helloInterval != nullptr)
                             newInterface->setHelloInterval(atoi(helloInterval));
 
-                        if(deadInterval!=nullptr)
+                        if (deadInterval!=nullptr)
                             newInterface->setDeadInterval(atoi(deadInterval));
 
-                        if(interfaceCost!=nullptr)
+                        if (interfaceCost!=nullptr)
                             newInterface->setInterfaceCost(atoi(interfaceCost));
 
-                        if(routerPriority!=nullptr) {
+                        if (routerPriority!=nullptr) {
                             int rtrPrio = atoi(routerPriority);
-                            if(rtrPrio < 0 || rtrPrio > 255)
+                            if (rtrPrio < 0 || rtrPrio > 255)
                                 throw cRuntimeError("Router priority out of range on interface %s", interfaceName);
 
                             newInterface->setRouterPriority(rtrPrio);
@@ -433,8 +415,7 @@ void Ospfv3Process::parseConfig(cXMLElement* interfaceConfig)
                         newInterface->setArea(area);
 
                         cXMLElementList ipAddrList = (*interfaceIt)->getElementsByTagName("Ipv6Address");
-                        for (auto & ipv6Rec : ipAddrList)
-                        {
+                        for (auto & ipv6Rec : ipAddrList) {
                             const char * addr6c = ipv6Rec->getNodeValue();
                             std::string add6 = addr6c;
                             std::string prefix6 = add6.substr(0, add6.find("/"));
@@ -452,11 +433,9 @@ void Ospfv3Process::parseConfig(cXMLElement* interfaceConfig)
                             //TODO:  Address added into Adressrange have Advertise always set to true. Exclude link-local (?)
                         }
                         cXMLElementList ipv4AddrList = (*interfaceIt)->getElementsByTagName("IPAddress");
-                        if (ipv4AddrList.size() == 1)
-                        {
+                        if (ipv4AddrList.size() == 1) {
                             Ipv4AddressRange ipv4addRange; // also create addressRange for IPv4
-                            for (auto & ipv4Rec : ipv4AddrList)
-                            {
+                            for (auto & ipv4Rec : ipv4AddrList) {
                                 const char * addr4c = ipv4Rec->getNodeValue(); //from string make ipv4 address and store to interface config
                                 ipv4addRange.address = Ipv4Address(addr4c);
                             }
@@ -465,14 +444,13 @@ void Ospfv3Process::parseConfig(cXMLElement* interfaceConfig)
                             if (ipv4MaskList.size() != 1)
                                 throw cRuntimeError("Interface %s has more or less than one mask", interfaceName);
 
-                            for (auto & ipv4Rec : ipv4MaskList)
-                            {
+                            for (auto & ipv4Rec : ipv4MaskList) {
                                 const char * mask4c = ipv4Rec->getNodeValue();
                                 ipv4addRange.mask = Ipv4Address(mask4c);
                             }
                             area->addAddressRange(ipv4addRange, true);
                         }
-                       EV_DEBUG << "I am " << this->getOwner()->getOwner()->getName() << " on int " << newInterface->getInterfaceLLIP() << " with area " << area->getAreaID() <<"\n";
+                        EV_DEBUG << "I am " << this->getOwner()->getOwner()->getName() << " on int " << newInterface->getInterfaceLLIP() << " with area " << area->getAreaID() <<"\n";
                         area->addInterface(newInterface);
                     }
                 }
@@ -481,14 +459,12 @@ void Ospfv3Process::parseConfig(cXMLElement* interfaceConfig)
     }
 }//parseConfig
 
-
 void Ospfv3Process::ageDatabase()
 {
     bool shouldRebuildRoutingTable = false;
 
     long instanceCount = instances.size();
-    for (long i = 0; i < instanceCount; i++)
-    {
+    for (long i = 0; i < instanceCount; i++) {
         long areaCount = instances[i]->getAreaCount();
 
         for (long j = 0; j < areaCount; j++)
@@ -503,30 +479,26 @@ void Ospfv3Process::ageDatabase()
 bool Ospfv3Process::hasAddressRange(const Ipv6AddressRange& addressRange) const
 {
     long instanceCount = instances.size();
-    for (long i = 0; i < instanceCount; i++)
-    {
+    for (long i = 0; i < instanceCount; i++) {
         long areaCount = instances[i]->getAreaCount();
 
-        for (long j = 0; j < areaCount; j++)
-        {
-           if(instances[i]->getArea(j)->hasAddressRange(addressRange))
+        for (long j = 0; j < areaCount; j++) {
+           if (instances[i]->getArea(j)->hasAddressRange(addressRange))
                return true;
         }
     }
     return false;
 }
+
 // for IPv4 AF
 bool Ospfv3Process::hasAddressRange(const Ipv4AddressRange& addressRange) const
 {
     long instanceCount = instances.size();
-    for (long i = 0; i < instanceCount; i++)
-    {
+    for (long i = 0; i < instanceCount; i++) {
         long areaCount = instances[i]->getAreaCount();
 
-        for (long j = 0; j < areaCount; j++)
-        {
-           if(instances[i]->getArea(j)->hasAddressRange(addressRange))
-           {
+        for (long j = 0; j < areaCount; j++) {
+           if (instances[i]->getArea(j)->hasAddressRange(addressRange)) {
                return true;
            }
         }
@@ -536,10 +508,9 @@ bool Ospfv3Process::hasAddressRange(const Ipv4AddressRange& addressRange) const
 
 void Ospfv3Process::handleTimer(cMessage* msg)
 {
-    switch(msg->getKind())
-    {
+    switch (msg->getKind()) {
         case INIT_PROCESS:
-            for(auto it=this->instances.begin(); it!=this->instances.end(); it++)
+            for (auto it=this->instances.begin(); it!=this->instances.end(); it++)
                 (*it)->init();
 
             this->debugDump();
@@ -550,8 +521,7 @@ void Ospfv3Process::handleTimer(cMessage* msg)
         case HELLO_TIMER:       // timer set by interface every 10 sec
         {
             Ospfv3Interface* interface;
-            if(!(interface=reinterpret_cast<Ospfv3Interface*>(msg->getContextPointer())))
-            {
+            if (!(interface=reinterpret_cast<Ospfv3Interface*>(msg->getContextPointer()))) {
                 //TODO - Print some error (?)
                 delete msg;
             }
@@ -559,15 +529,13 @@ void Ospfv3Process::handleTimer(cMessage* msg)
                 EV_DEBUG << "Process received msg, sending event HELLO_TIMER_EVENT\n";
                 interface->processEvent(Ospfv3Interface::HELLO_TIMER_EVENT);
             }
-//            delete msg;
         }
         break;
 
         case WAIT_TIMER:
         {
             Ospfv3Interface* interface;
-            if(!(interface=reinterpret_cast<Ospfv3Interface*>(msg->getContextPointer())))
-            {
+            if (!(interface=reinterpret_cast<Ospfv3Interface*>(msg->getContextPointer()))) {
                 //TODO - Print some error (?)
                 delete msg;
             }
@@ -603,9 +571,9 @@ void Ospfv3Process::handleTimer(cMessage* msg)
                 neighbor->processEvent(Ospfv3Neighbor::INACTIVITY_TIMER);
                 Ospfv3Interface* intf = neighbor->getInterface();
                 int neighborCnt = intf->getNeighborCount();
-                for(int i=0; i<neighborCnt; i++){
+                for (int i=0; i<neighborCnt; i++) {
                     Ospfv3Neighbor* currNei = intf->getNeighbor(i);
-                    if(currNei->getNeighborID() == neighbor->getNeighborID()){
+                    if (currNei->getNeighborID() == neighbor->getNeighborID()) {
                         intf->removeNeighborByID(neighbor->getNeighborID());
                         delete neighbor;
                         break;
@@ -680,7 +648,6 @@ void Ospfv3Process::handleTimer(cMessage* msg)
         }
         break;
 
-
         default:
             break;
     }
@@ -703,14 +670,14 @@ void Ospfv3Process::activateProcess()
 void Ospfv3Process::debugDump()
 {
     EV_DEBUG << "Process " << this->getProcessID() << "\n";
-    for(auto it=this->instances.begin(); it!=this->instances.end(); it++)
+    for (auto it=this->instances.begin(); it!=this->instances.end(); it++)
         (*it)->debugDump();
 }//debugDump
 
 Ospfv3Instance* Ospfv3Process::getInstanceById(int instanceId)
 {
     std::map<int, Ospfv3Instance*>::iterator instIt = this->instancesById.find(instanceId);
-    if(instIt == this->instancesById.end())
+    if (instIt == this->instancesById.end())
         return nullptr;
 
     return instIt->second;
@@ -719,7 +686,7 @@ Ospfv3Instance* Ospfv3Process::getInstanceById(int instanceId)
 void Ospfv3Process::addInstance(Ospfv3Instance* newInstance)
 {
     Ospfv3Instance* check = this->getInstanceById(newInstance->getInstanceID());
-    if(check==nullptr){
+    if (check==nullptr) {
         this->instances.push_back(newInstance);
         this->instancesById[newInstance->getInstanceID()]=newInstance;
     }
@@ -737,41 +704,35 @@ void Ospfv3Process::sendPacket(Packet *packet, Ipv6Address destination, const ch
     packet->addTagIfAbsent<HopLimitReq>()->setHopLimit(hopLimit);
     const auto& ospfPacket = packet->peekAtFront<Ospfv3Packet>();
 
-    switch (ospfPacket->getType())
-    {
-        case ospf::HELLO_PACKET:
-        {
+    switch (ospfPacket->getType()) {
+        case ospf::HELLO_PACKET: {
             packet->setName("Ospfv3_HelloPacket");
 //            const auto& helloPacket = packet->peekAtFront<Ospfv3HelloPacket>();
 //            printHelloPacket(helloPacket.get(), destination, outputIfIndex);
         }
         break;
-        case ospf::DATABASE_DESCRIPTION_PACKET:
-        {
+        case ospf::DATABASE_DESCRIPTION_PACKET: {
             packet->setName("Ospfv3_DDPacket");
 //            const auto& ddPacket = packet->peekAtFront<Ospfv3DatabaseDescription>();
 //            printDatabaseDescriptionPacket(ddPacket.get(), destination, outputIfIndex);
         }
         break;
 
-        case ospf::LINKSTATE_REQUEST_PACKET:
-        {
+        case ospf::LINKSTATE_REQUEST_PACKET: {
             packet->setName("Ospfv3_LSRPacket");
 //            const auto& requestPacket = packet->peekAtFront<Ospfv3LinkStateRequest>();
 //            printLinkStateRequestPacket(requestPacket.get(), destination, outputIfIndex);
         }
         break;
 
-        case ospf::LINKSTATE_UPDATE_PACKET:
-        {
+        case ospf::LINKSTATE_UPDATE_PACKET: {
             packet->setName("Ospfv3_LSUPacket");
 //            const auto& updatePacket = packet->peekAtFront<Ospfv3LsUpdate>();
 //            printLinkStateUpdatePacket(updatePacket.get(), destination, outputIfIndex);
         }
         break;
 
-        case ospf::LINKSTATE_ACKNOWLEDGEMENT_PACKET:
-        {
+        case ospf::LINKSTATE_ACKNOWLEDGEMENT_PACKET: {
             packet->setName("Ospfv3_LSAckPacket");
 //            const auto& ackPacket = packet->peekAtFront<Ospfv3LsAck>();
 //            printLinkStateAcknowledgementPacket(ackPacket.get(), destination, outputIfIndex);
@@ -811,8 +772,7 @@ bool Ospfv3Process::floodLSA(const Ospfv3Lsa* lsa, Ipv4Address areaID, Ospfv3Int
             }
         }
         else {
-            Ospfv3Area* area = instance->getAreaById(areaID);
-            if (area != nullptr) {
+            if (Ospfv3Area* area = instance->getAreaById(areaID)) {
                 floodedBackOut = area->floodLSA(lsa, interface, neighbor);
             }
         }
@@ -827,8 +787,7 @@ bool Ospfv3Process::installLSA(const Ospfv3Lsa *lsa, int instanceID, Ipv4Address
     switch (lsa->getHeader().getLsaType()) {
         case ROUTER_LSA: {
             Ospfv3Instance* instance = this->getInstanceById(instanceID);
-            Ospfv3Area* area = instance->getAreaById(areaID);
-            if (area!=nullptr) {
+            if (Ospfv3Area* area = instance->getAreaById(areaID)) {
                 Ospfv3RouterLsa *ospfRouterLSA = check_and_cast<Ospfv3RouterLsa *>(const_cast<Ospfv3Lsa*>(lsa));
                 return area->installRouterLSA(ospfRouterLSA);
             }
@@ -837,8 +796,7 @@ bool Ospfv3Process::installLSA(const Ospfv3Lsa *lsa, int instanceID, Ipv4Address
 
         case NETWORK_LSA: {
             Ospfv3Instance* instance = this->getInstanceById(instanceID);
-            Ospfv3Area* area = instance->getAreaById(areaID);
-            if (area!=nullptr) {
+            if (Ospfv3Area* area = instance->getAreaById(areaID)) {
                 Ospfv3NetworkLsa *ospfNetworkLSA = check_and_cast<Ospfv3NetworkLsa *>(const_cast<Ospfv3Lsa*>(lsa));
                 return area->installNetworkLSA(ospfNetworkLSA);
             }
@@ -847,8 +805,7 @@ bool Ospfv3Process::installLSA(const Ospfv3Lsa *lsa, int instanceID, Ipv4Address
 
         case INTER_AREA_PREFIX_LSA: {
             Ospfv3Instance* instance = this->getInstanceById(instanceID);
-            Ospfv3Area* area = instance->getAreaById(areaID);
-            if (area!=nullptr) {
+            if (Ospfv3Area* area = instance->getAreaById(areaID)) {
                 Ospfv3InterAreaPrefixLsa *ospfInterAreaLSA = check_and_cast<Ospfv3InterAreaPrefixLsa *>(const_cast<Ospfv3Lsa*>(lsa));
                 return area->installInterAreaPrefixLSA(ospfInterAreaLSA);
             }
@@ -857,8 +814,8 @@ bool Ospfv3Process::installLSA(const Ospfv3Lsa *lsa, int instanceID, Ipv4Address
 
         case LINK_LSA: {
             Ospfv3Instance* instance = this->getInstanceById(instanceID);
-            Ospfv3Area* area = instance->getAreaById(areaID);
-            if (area!=nullptr) {
+            if (Ospfv3Area* area = instance->getAreaById(areaID)) {
+                //FIXME set but unused 'area' variable
                 Ospfv3LinkLsa *ospfLinkLSA = check_and_cast<Ospfv3LinkLsa *>(const_cast<Ospfv3Lsa*>(lsa));
                 return intf->installLinkLSA(ospfLinkLSA);
             }
@@ -867,8 +824,7 @@ bool Ospfv3Process::installLSA(const Ospfv3Lsa *lsa, int instanceID, Ipv4Address
 
         case INTRA_AREA_PREFIX_LSA: {
             Ospfv3Instance* instance = this->getInstanceById(instanceID);
-            Ospfv3Area* area = instance->getAreaById(areaID);
-            if(area!=nullptr) {
+            if (Ospfv3Area* area = instance->getAreaById(areaID)) {
                 Ospfv3IntraAreaPrefixLsa* intraLSA = check_and_cast<Ospfv3IntraAreaPrefixLsa *>(const_cast<Ospfv3Lsa*>(lsa));
                 return area->installIntraAreaPrefixLSA(intraLSA);
             }
@@ -892,23 +848,22 @@ void Ospfv3Process::rebuildRoutingTable()
     std::vector<Ospfv3RoutingTableEntry *> newTableIPv6;
     std::vector<Ospfv3Ipv4RoutingTableEntry *> newTableIPv4;
 
-    for(unsigned int k=0; k<instanceCount; k++) {
+    for (unsigned int k=0; k<instanceCount; k++) {
         Ospfv3Instance* currInst = this->instances.at(k);
         unsigned long areaCount = currInst->getAreaCount();
-        bool hasTransitAreas = false;
-
+        bool hasTransitAreas = false;    //FIXME set but not used variable
         unsigned long i;
 
         EV_INFO << "Rebuilding routing table for instance " << this->instances.at(k)->getInstanceID() << ":\n";
 
-        //2)Intra area routes are calculated using SPF algo
+        // 2) Intra area routes are calculated using SPF algo
         for (i = 0; i < areaCount; i++) {
             currInst->getArea(i)->calculateShortestPathTree(newTableIPv6, newTableIPv4);
             if (currInst->getArea(i)->getTransitCapability()) {
                 hasTransitAreas = true;
             }
         }
-//        3)Inter-area routes are calculated by examining summary-LSAs (on backbone only)
+        // 3) Inter-area routes are calculated by examining summary-LSAs (on backbone only)
         if (areaCount > 1) {
             Ospfv3Area *backbone = currInst->getAreaById(BACKBONE_AREAID);
             if (backbone != nullptr) {
@@ -921,8 +876,8 @@ void Ospfv3Process::rebuildRoutingTable()
             }
         }
 
-        //4)On BDR - Transit area LSAs(summary) are examined - find better paths then in 2) and 3)  TODO - this part of protocol is not supported yet
-       /* if (hasTransitAreas) {
+        // 4) On BDR - Transit area LSAs(summary) are examined - find better paths then in 2) and 3)  TODO - this part of protocol is not supported yet
+        /* if (hasTransitAreas) {
             for (i = 0; i < areaCount; i++) {
                 if (currInst->getArea(i)->getTransitCapability()) {
                     if (currInst->getAddressFamily() == IPV6INSTANCE)
@@ -934,16 +889,15 @@ void Ospfv3Process::rebuildRoutingTable()
         }*/
 
         //5) Routes to external destinations are calculated TODO - this part of protocol is not supported yet
-       // calculateASExternalRoutes(newTableIPv6, newTableIPv4);
+        // calculateASExternalRoutes(newTableIPv6, newTableIPv4);
 
         // backup the routing table
         unsigned long routeCount = routingTableIPv6.size();
         std::vector<Ospfv3RoutingTableEntry *> oldTableIPv6;
         std::vector<Ospfv3Ipv4RoutingTableEntry *> oldTableIPv4;
 
-        if (currInst->getAddressFamily() == IPV6INSTANCE) // IPv6 AF should not clear IPv4 Routing table and vice versa
-        {
-
+        if (currInst->getAddressFamily() == IPV6INSTANCE) {
+            // IPv6 AF should not clear IPv4 Routing table and vice versa
             oldTableIPv6.assign(routingTableIPv6.begin(), routingTableIPv6.end());
             routingTableIPv6.clear();
             routingTableIPv6.assign(newTableIPv6.begin(), newTableIPv6.end());
@@ -961,8 +915,7 @@ void Ospfv3Process::rebuildRoutingTable()
                 rt6->deleteRoute(eraseEntriesIPv6[i]);
             }
         }
-        else
-        {
+        else {
             oldTableIPv4.assign(routingTableIPv4.begin(), routingTableIPv4.end());
             routingTableIPv4.clear();
             routingTableIPv4.assign(newTableIPv4.begin(), newTableIPv4.end());
@@ -982,18 +935,14 @@ void Ospfv3Process::rebuildRoutingTable()
         }
 
         // add the new routing entries
-        if (currInst->getAddressFamily() == IPV6INSTANCE)
-        {
+        if (currInst->getAddressFamily() == IPV6INSTANCE) {
             routeCount = routingTableIPv6.size();
             EV_DEBUG  << "rebuild , routeCount - " << routeCount << "\n";
 
             for (i = 0; i < routeCount; i++) {
                 if (routingTableIPv6[i]->getDestinationType() == Ospfv3RoutingTableEntry::NETWORK_DESTINATION) {
-
-                    if (routingTableIPv6[i]->getNextHopCount() > 0)
-                    {
-                        if (routingTableIPv6[i]->getNextHop(0).hopAddress != Ipv6Address::UNSPECIFIED_ADDRESS)
-                        {
+                    if (routingTableIPv6[i]->getNextHopCount() > 0) {
+                        if (routingTableIPv6[i]->getNextHop(0).hopAddress != Ipv6Address::UNSPECIFIED_ADDRESS) {
                             Ipv6Route *route = new Ipv6Route(routingTableIPv6[i]->getDestinationAsGeneric().toIpv6(), routingTableIPv6[i]->getPrefixLength(), routingTableIPv6[i]->getSourceType());
                             route->setNextHop   (routingTableIPv6[i]->getNextHop(0).hopAddress);
                             route->setMetric    (routingTableIPv6[i]->getMetric());
@@ -1004,7 +953,6 @@ void Ospfv3Process::rebuildRoutingTable()
                             rt6->addRoutingProtocolRoute(route);
                         }
                     }
-
                 }
             }
 
@@ -1012,16 +960,12 @@ void Ospfv3Process::rebuildRoutingTable()
             for (i = 0; i < routeCount; i++)
                 delete (oldTableIPv6[i]);
         }
-        else
-        {
+        else {
             routeCount = routingTableIPv4.size();
             for (i = 0; i < routeCount; i++) {
-                if (routingTableIPv4[i]->getDestinationType() == Ospfv3Ipv4RoutingTableEntry::NETWORK_DESTINATION)
-                {
-                    if (routingTableIPv4[i]->getNextHopCount() > 0)
-                    {
-                        if (routingTableIPv4[i]->getNextHop(0).hopAddress != Ipv4Address::UNSPECIFIED_ADDRESS)
-                        {
+                if (routingTableIPv4[i]->getDestinationType() == Ospfv3Ipv4RoutingTableEntry::NETWORK_DESTINATION) {
+                    if (routingTableIPv4[i]->getNextHopCount() > 0) {
+                        if (routingTableIPv4[i]->getNextHop(0).hopAddress != Ipv4Address::UNSPECIFIED_ADDRESS) {
                             Ipv4Route *route = new Ipv4Route();
                             route->setDestination   (routingTableIPv4[i]->getDestinationAsGeneric().toIpv4());
                             route->setNetmask       (route->getDestination().makeNetmask(routingTableIPv4[i]->getPrefixLength()));
@@ -1033,7 +977,6 @@ void Ospfv3Process::rebuildRoutingTable()
                             rt4->addRoute(route);
                         }
                     }
-
                 }
             }
 
@@ -1042,25 +985,21 @@ void Ospfv3Process::rebuildRoutingTable()
                delete (oldTableIPv4[i]);
         }
 
-        if (currInst->getAddressFamily() == IPV6INSTANCE)
-        {
+        if (currInst->getAddressFamily() == IPV6INSTANCE) {
             EV_INFO << "Routing table was rebuilt.\n"
                     << "Results (IPv6):\n";
 
             routeCount = routingTableIPv6.size();
             for (i = 0; i < routeCount; i++)
                 EV_INFO << *routingTableIPv6[i] << "\n";
-
         }
-        else //IPV4INSTANCE
-        {
+        else { //IPV4INSTANCE
             EV_INFO << "Routing table was rebuilt.\n"
                     << "Results (IPv4):\n";
 
             routeCount = routingTableIPv6.size();
             for (i = 0; i < routeCount; i++)
                 EV_INFO << *routingTableIPv4[i] << "\n";
-
         }
     }
 } // end of rebuildRoutingTable

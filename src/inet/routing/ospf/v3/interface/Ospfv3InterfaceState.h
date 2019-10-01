@@ -1,13 +1,12 @@
 #ifndef __INET_OSPFV3INTERFACESTATE_H_
 #define __INET_OSPFV3INTERFACESTATE_H_
 
-#include <omnetpp.h>
 #include <string>
 
-#include "inet/routing/ospf/v3/interface/Ospfv3Interface.h"
 #include "inet/common/INETDefs.h"
+#include "inet/routing/ospf/v3/interface/Ospfv3Interface.h"
 
-namespace inet{
+namespace inet {
 
 class INET_API Ospfv3InterfaceState
 {
@@ -18,13 +17,11 @@ class INET_API Ospfv3InterfaceState
     virtual std::string getInterfaceStateString() const = 0;
 
   protected:
-
     void changeState(Ospfv3Interface *intf, Ospfv3InterfaceState *newState, Ospfv3InterfaceState *currentState);
     void calculateDesignatedRouter(Ospfv3Interface *intf);
-
 };
 
 }//namespace inet
 
-#endif
+#endif // __INET_OSPFV3INTERFACESTATE_H_
 

@@ -15,10 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
-#include "inet/routing/ospf/v3/neighbor/Ospfv3NeighborState.h"
-
 #include "inet/routing/ospf/v3/neighbor/Ospfv3Neighbor.h"
+#include "inet/routing/ospf/v3/neighbor/Ospfv3NeighborState.h"
 
 namespace inet {
 
@@ -86,29 +84,23 @@ void Ospfv3NeighborState::changeState(Ospfv3Neighbor *neighbor, Ospfv3NeighborSt
     }
 
     Ospfv3Area* thisArea = neighbor->getInterface()->getArea();
-    if (nextState == Ospfv3Neighbor::DOWN_STATE) //this neigbor was shuted down
-    {
+    if (nextState == Ospfv3Neighbor::DOWN_STATE) { //this neigbor was shuted down
         // invalidate all LSA type 3, which I know from this neighbor
         // set MAX_AGE
-        if (thisArea->getInstance()->getAreaCount() > 1) // this is ABR
-        {
-            for(int ar = 0; ar < thisArea->getInstance()->getAreaCount(); ar++)
-            {
+        if (thisArea->getInstance()->getAreaCount() > 1) { // this is ABR
+            for (int ar = 0; ar < thisArea->getInstance()->getAreaCount(); ar++) {
                 Ospfv3Area* area = thisArea->getInstance()->getArea(ar);
-                if(area->getAreaID() == thisArea->getAreaID()) //skip my Area
+                if (area->getAreaID() == thisArea->getAreaID()) //skip my Area
                     continue;
 
                 // in all other Areas invalidate all Inter-Area-Prefix LSAs with same prefix IP as all
                 // known Intra-Area-Prefix LSAs from this neighbor
-                for (int i = 0; i < thisArea->getIntraAreaPrefixLSACount(); i++)
-                {
+                for (int i = 0; i < thisArea->getIntraAreaPrefixLSACount(); i++) {
                     IntraAreaPrefixLSA *iapLSA = thisArea->getIntraAreaPrefixLSA(i);
-                    if (neighbor->getNeighborID() == iapLSA->getHeader().getAdvertisingRouter())
-                    {
+                    if (neighbor->getNeighborID() == iapLSA->getHeader().getAdvertisingRouter()) {
                         for (size_t k = 0; k <  iapLSA->getPrefixesArraySize(); k++) {
                             // go through all Inter-Area-Prefix LSA of other Area
-                            for (int j = 0; j <  area->getInterAreaPrefixLSACount(); j++)
-                            {
+                            for (int j = 0; j <  area->getInterAreaPrefixLSACount(); j++) {
                                 InterAreaPrefixLSA *interLSA = area->getInterAreaPrefixLSA(j);
                                 if ((interLSA->getHeader().getAdvertisingRouter() == thisArea->getInstance()->getProcess()->getRouterID()) &&
                                         (interLSA->getPrefix().addressPrefix == iapLSA->getPrefixes(k).addressPrefix) &&
@@ -126,13 +118,10 @@ void Ospfv3NeighborState::changeState(Ospfv3Neighbor *neighbor, Ospfv3NeighborSt
                 }
             }
         }
-        else // invalidate only INTRA LSA
-        {
-            for (int i = 0; i < thisArea->getIntraAreaPrefixLSACount(); i++)
-            {
+        else { // invalidate only INTRA LSA
+            for (int i = 0; i < thisArea->getIntraAreaPrefixLSACount(); i++) {
                 IntraAreaPrefixLSA *iapLSA = thisArea->getIntraAreaPrefixLSA(i);
-                if (neighbor->getNeighborID() == iapLSA->getHeader().getAdvertisingRouter())
-                {
+                if (neighbor->getNeighborID() == iapLSA->getHeader().getAdvertisingRouter()) {
                     // invalidate INTRA LSA too
                     iapLSA->getHeaderForUpdate().setLsaAge(MAX_AGE);
                     thisArea->floodLSA(iapLSA);

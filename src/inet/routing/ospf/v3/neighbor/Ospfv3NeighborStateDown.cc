@@ -5,13 +5,13 @@
  * INACTIVITY_TIMER - new state DOWN
  */
 
-#include "inet/routing/ospf/v3/neighbor/Ospfv3NeighborStateDown.h"
-
 #include "inet/routing/ospf/v3/neighbor/Ospfv3Neighbor.h"
 #include "inet/routing/ospf/v3/neighbor/Ospfv3NeighborStateAttempt.h"
+#include "inet/routing/ospf/v3/neighbor/Ospfv3NeighborStateDown.h"
 #include "inet/routing/ospf/v3/neighbor/Ospfv3NeighborStateInit.h"
 
-namespace inet{
+namespace inet {
+
 void Ospfv3NeighborStateDown::processEvent(Ospfv3Neighbor *neighbor, Ospfv3Neighbor::Ospfv3NeighborEventType event)
 {
     /*
@@ -49,5 +49,6 @@ void Ospfv3NeighborStateDown::processEvent(Ospfv3Neighbor *neighbor, Ospfv3Neigh
         neighbor->getInterface()->getArea()->getInstance()->getProcess()->setTimer(neighbor->getPollTimer(), neighbor->getNeighborDeadInterval());
     }
 }
+
 }//namespace inet
 

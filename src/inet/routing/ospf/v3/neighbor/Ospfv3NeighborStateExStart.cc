@@ -7,15 +7,15 @@
  * 1WAY_RECEIVED - new state INIT
  * 2WAY_RECEIVED - no change
  */
-#include "inet/routing/ospf/v3/neighbor/Ospfv3NeighborStateExStart.h"
-
 #include "inet/routing/ospf/v3/neighbor/Ospfv3Neighbor.h"
 #include "inet/routing/ospf/v3/neighbor/Ospfv3NeighborState2Way.h"
 #include "inet/routing/ospf/v3/neighbor/Ospfv3NeighborStateDown.h"
+#include "inet/routing/ospf/v3/neighbor/Ospfv3NeighborStateExStart.h"
 #include "inet/routing/ospf/v3/neighbor/Ospfv3NeighborStateExchange.h"
 #include "inet/routing/ospf/v3/neighbor/Ospfv3NeighborStateInit.h"
 
-namespace inet{
+namespace inet {
+
 void Ospfv3NeighborStateExStart::processEvent(Ospfv3Neighbor *neighbor, Ospfv3Neighbor::Ospfv3NeighborEventType event)
 {
     if ((event == Ospfv3Neighbor::KILL_NEIGHBOR) || (event == Ospfv3Neighbor::LINK_DOWN)) {
@@ -60,5 +60,6 @@ void Ospfv3NeighborStateExStart::processEvent(Ospfv3Neighbor *neighbor, Ospfv3Ne
         changeState(neighbor, new Ospfv3NeighborStateExchange, this);
     }
 }
+
 }//namespace inet
 

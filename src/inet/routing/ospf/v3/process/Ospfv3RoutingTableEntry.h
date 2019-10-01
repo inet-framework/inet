@@ -1,17 +1,15 @@
 #ifndef __INET_OSPFV3ROUTINGTABLEENTRY_H_
 #define __INET_OSPFV3ROUTINGTABLEENTRY_H_
 
-#include <omnetpp.h>
-
-#include "inet/routing/ospf/v3/Ospfv3Common.h"
-#include "inet/routing/ospf/v3/Ospfv3Packet_m.h"
 #include "inet/common/INETDefs.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
+#include "inet/networklayer/contract/IRoute.h"
+#include "inet/networklayer/ipv4/Ipv4Route.h"
+#include "inet/networklayer/ipv4/Ipv4RoutingTable.h"
 #include "inet/networklayer/ipv6/Ipv6RoutingTable.h"
 #include "inet/networklayer/ipv6/Ipv6Route.h"
-#include "inet/networklayer/contract/IRoute.h"
-#include "inet/networklayer/ipv4/Ipv4RoutingTable.h"
-#include "inet/networklayer/ipv4/Ipv4Route.h"
+#include "inet/routing/ospf/v3/Ospfv3Common.h"
+#include "inet/routing/ospf/v3/Ospfv3Packet_m.h"
 
 namespace inet {
 
@@ -75,11 +73,10 @@ public:
 
 std::ostream& operator<<(std::ostream& out, const Ospfv3RoutingTableEntry& entry);
 
-
 //------------------------------------------------------------------------------------------------------------
 class INET_API Ospfv3Ipv4RoutingTableEntry : public Ipv4Route
 {
-public:
+  public:
     enum RoutingPathType {
         INTRAAREA = 0,
         INTERAREA = 1,
@@ -140,5 +137,5 @@ std::ostream& operator<<(std::ostream& out, const Ospfv3Ipv4RoutingTableEntry& e
 
 }//namespace inet
 
-#endif
+#endif // __INET_OSPFV3ROUTINGTABLEENTRY_H_
 

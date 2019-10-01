@@ -1,11 +1,12 @@
-#include "inet/routing/ospf/v3/interface/Ospfv3InterfaceStateDrOther.h"
 
+#include "inet/routing/ospf/v3/Ospfv3Timers.h"
 #include "inet/routing/ospf/v3/interface/Ospfv3Interface.h"
 #include "inet/routing/ospf/v3/interface/Ospfv3InterfaceStateDown.h"
+#include "inet/routing/ospf/v3/interface/Ospfv3InterfaceStateDrOther.h"
 #include "inet/routing/ospf/v3/interface/Ospfv3InterfaceStateLoopback.h"
-#include "inet/routing/ospf/v3/Ospfv3Timers.h"
 
-namespace inet{
+namespace inet {
+
 void Ospfv3InterfaceStateDrOther::processEvent(Ospfv3Interface* interface, Ospfv3Interface::Ospfv3InterfaceEvent event)
 {
     /*
@@ -63,5 +64,6 @@ void Ospfv3InterfaceStateDrOther::processEvent(Ospfv3Interface* interface, Ospfv
 //        this->getArea()->getInstance()->getProcess()->setTimer(interface->getWaitTimer(), interface->getDeadInterval());
 //    }
 }//processEvent
+
 }//namespace inet
 

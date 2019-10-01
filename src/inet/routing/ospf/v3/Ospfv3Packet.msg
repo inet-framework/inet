@@ -1,11 +1,10 @@
 
 import inet.common.INETDefs;
 import inet.common.packet.chunk.Chunk;
+import inet.networklayer.common.L3Address;
 import inet.networklayer.contract.ipv4.Ipv4Address;
 import inet.networklayer.contract.ipv6.Ipv6Address;
-import inet.networklayer.common.L3Address;
 import inet.routing.ospf.OspfPacket;
-
 
 namespace inet;
 
@@ -289,7 +288,6 @@ class Ospfv3IntraAreaPrefixLsa  extends Ospfv3Lsa
 
     Ospfv3LsaPrefixMetric prefixes[];
 }
-
 
 // options struct for Database Description packets
 struct Ospfv3DdOptions

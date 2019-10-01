@@ -4,13 +4,13 @@
  * LL_DOWN - new state DOWN
  * INACTIVITY_TIMER - new state DOWN
  */
-#include "inet/routing/ospf/v3/neighbor/Ospfv3NeighborStateAttempt.h"
-
 #include "inet/routing/ospf/v3/neighbor/Ospfv3Neighbor.h"
+#include "inet/routing/ospf/v3/neighbor/Ospfv3NeighborStateAttempt.h"
 #include "inet/routing/ospf/v3/neighbor/Ospfv3NeighborStateDown.h"
 #include "inet/routing/ospf/v3/neighbor/Ospfv3NeighborStateInit.h"
 
-namespace inet{
+namespace inet {
+
 void Ospfv3NeighborStateAttempt::processEvent(Ospfv3Neighbor *neighbor, Ospfv3Neighbor::Ospfv3NeighborEventType event)
 {
     if ((event == Ospfv3Neighbor::KILL_NEIGHBOR) || (event == Ospfv3Neighbor::LINK_DOWN)) {
@@ -31,5 +31,6 @@ void Ospfv3NeighborStateAttempt::processEvent(Ospfv3Neighbor *neighbor, Ospfv3Ne
         changeState(neighbor, new Ospfv3NeighborStateInit, this);
     }
 }
+
 }//namespace inet
 

@@ -10,6 +10,7 @@ simple Ospfv3Process
         string routingTableModule;
         string routingTableModule6;
     gates:
-       input splitterIn @label(Ospfv3Packet/up); 
-       output splitterOut @label(Ospfv3Packet/down);
+        input splitterIn @label(Ospfv3Packet/up);
+        output splitterOut @label(Ospfv3Packet/down);
 }
+
