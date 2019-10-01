@@ -26,6 +26,11 @@ namespace math {
 
 using namespace inet::units::values;
 
+/**
+ * Verifies that partitioning on a domain is correct in the sense that the
+ * original function and the function over the partition return the same
+ * values at the corners and center of the subdomain.
+ */
 template<typename R, typename D>
 class INET_API FunctionChecker
 {
@@ -75,6 +80,9 @@ class INET_API IntegratedFunction;
 template<typename R, typename D, int DIMENSION, typename X>
 class INET_API ApproximatedFunction;
 
+/**
+ * Useful base class for most IFunction implementations with some default behavior.
+ */
 template<typename R, typename D>
 class INET_API FunctionBase : public IFunction<R, D>
 {
@@ -285,6 +293,9 @@ class INET_API ConstantFunction : public FunctionBase<R, D>
     }
 };
 
+/**
+ * Some constant value r between lower and upper and zero otherwise.
+ */
 template<typename R, typename X>
 class INET_API OneDimensionalBoxcarFunction : public FunctionBase<R, Domain<X>>
 {
@@ -329,6 +340,9 @@ class INET_API OneDimensionalBoxcarFunction : public FunctionBase<R, Domain<X>>
     }
 };
 
+/**
+ * Some constant value r between (lowerX, lowerY) and (upperX, upperY) and zero otherwise.
+ */
 template<typename R, typename X, typename Y>
 class INET_API TwoDimensionalBoxcarFunction : public FunctionBase<R, Domain<X, Y>>
 {
@@ -379,6 +393,9 @@ class INET_API TwoDimensionalBoxcarFunction : public FunctionBase<R, Domain<X, Y
     }
 };
 
+/**
+ * Linear in one dimension and constant in the others.
+ */
 template<typename R, typename D>
 class INET_API UnilinearFunction : public FunctionBase<R, D>
 {
@@ -439,6 +456,9 @@ class INET_API UnilinearFunction : public FunctionBase<R, D>
     }
 };
 
+/**
+ * Linear in two dimensions and constant in the others.
+ */
 template<typename R, typename D>
 class INET_API BilinearFunction : public FunctionBase<R, D>
 {
@@ -526,6 +546,9 @@ class INET_API BilinearFunction : public FunctionBase<R, D>
     }
 };
 
+/**
+ * Interpolated (e.g. constant, linear) between intervals defined by points on the X axis.
+ */
 template<typename R, typename X>
 class INET_API OneDimensionalInterpolatedFunction : public FunctionBase<R, Domain<X>>
 {
@@ -695,6 +718,9 @@ class INET_API GaussFunction : public FunctionBase<R, Domain<X>>
     }
 };
 
+/**
+ * Combines 2 one-dimensional functions into a two-dimensional function.
+ */
 template<typename R, typename X, typename Y>
 class INET_API OrthogonalCombinatorFunction : public FunctionBase<R, Domain<X, Y>>
 {
@@ -762,6 +788,9 @@ class INET_API OrthogonalCombinatorFunction : public FunctionBase<R, Domain<X, Y
     }
 };
 
+/**
+ * Shifts the domain of a function.
+ */
 template<typename R, typename D>
 class INET_API ShiftFunction : public FunctionBase<R, D>
 {
@@ -821,6 +850,9 @@ class INET_API ShiftFunction : public FunctionBase<R, D>
 //    }
 //};
 
+/**
+ * Reciprocal in a given dimension and constant in the others.
+ */
 template<typename R, typename D>
 class INET_API UnireciprocalFunction : public FunctionBase<R, D>
 {

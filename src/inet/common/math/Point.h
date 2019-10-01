@@ -88,6 +88,9 @@ void copyTupleElements(const S& source, integer_sequence<size_t, SIS ...>, D& de
 
 } // namespace internal
 
+/**
+ * N-dimensional point. Supports algebraic operations.
+ */
 template<typename ... T>
 class INET_API Point : public std::tuple<T ...>
 {
@@ -182,27 +185,33 @@ class INET_API Point : public std::tuple<T ...>
         return divide(d, index_sequence_for<T ...>{});
     }
 
+    /// Coordinate-wise comparison (condition must hold for each dimension).
     bool operator<(const Point<T ...>& o) const {
         return smaller(o, index_sequence_for<T ...>{});
     }
 
+    /// Coordinate-wise comparison (condition must hold for each dimension).
     bool operator<=(const Point<T ...>& o) const {
         return smallerOrEqual(o, index_sequence_for<T ...>{});
     }
 
+    /// Coordinate-wise comparison (condition must hold for each dimension).
     bool operator>(const Point<T ...>& o) const {
         return greater(o, index_sequence_for<T ...>{});
     }
 
+    /// Coordinate-wise comparison (condition must hold for each dimension).
     bool operator>=(const Point<T ...>& o) const {
         return greaterOrEqual(o, index_sequence_for<T ...>{});
     }
 
+    /// Copy the dimensions selected by the 1 bits of DIMS into p.
     template<typename P, int DIMS>
     void copyTo(P& p) const {
         internal::copyTupleElements(*this, index_sequence_for<T ...>{}, p, internal::make_bits_to_indices_sequence<DIMS, std::tuple_size<typename P::type>::value>{});
     }
 
+    /// Copy the coordinates selected by the 1 bits of DIMS from p.
     template<typename P, int DIMS>
     void copyFrom(const P& p) {
         internal::copyTupleElements(p, internal::make_bits_to_indices_sequence<DIMS, std::tuple_size<typename P::type>::value>{}, *this, index_sequence_for<T ...>{});
@@ -241,16 +250,19 @@ inline std::ostream& print(std::ostream& os, const Point<T ...>& p, integer_sequ
 
 } // namespace internal
 
+/// Returns the first coordinate of p.
 template<typename T, typename ... TS>
 T head(const Point<T, TS ...>& p) {
    return std::get<0>(p);
 }
 
+/// Returns all but the first coordinate of p.
 template<typename T, typename ... TS>
 Point<TS ...> tail(const Point<T, TS ...>& p) {
    return internal::tailImpl(make_index_sequence<sizeof...(TS)>() , p);
 }
 
+/// Returns a point by concatenating the coordinates of p1 and p2.
 template<typename ... TS1, typename ... TS2>
 Point<TS1 ..., TS2 ...> concat(const Point<TS1 ...>& p1, const Point<TS2 ...>& p2) {
     return internal::concatImpl(p1, index_sequence_for<TS1 ...>{}, p2, index_sequence_for<TS2 ...>{});

@@ -27,6 +27,8 @@ namespace math {
 
 /**
  * This interface represents a mathematical function from domain D to range R.
+ * R is a scalar type (double, simtime_t, quantity, etc.)
+ * D is a Domain<>.
  */
 template<typename R, typename D>
 class INET_API IFunction : public cObject,
@@ -42,17 +44,17 @@ class INET_API IFunction : public cObject,
     virtual ~IFunction() {}
 
     /**
-     * Returns the valid range of the function as a closed interval.
+     * Returns the valid range of the function as an interval.
      */
     virtual Interval<R> getRange() const = 0;
 
     /**
-     * Returns the valid range of the function as a closed interval for the given domain.
+     * Returns the valid range of the function as an interval for the given domain.
      */
     virtual Interval<R> getRange(const typename D::I& i) const = 0;
 
     /**
-     * Returns the valid domain of the function as a closed interval.
+     * Returns the valid domain of the function as an interval.
      */
     virtual typename D::I getDomain() const = 0;
 
@@ -64,8 +66,8 @@ class INET_API IFunction : public cObject,
     virtual R getValue(const typename D::P& p) const = 0;
 
     /**
-     * Subdivides the provided domain and calls back the provided function with
-     * the subdomains and the corresponding potentially simpler domain limited functions.
+     * Subdivides the provided domain and calls back f with the subdomains and
+     * the corresponding potentially simpler domain limited functions.
      */
     virtual void partition(const typename D::I& i, const std::function<void (const typename D::I&, const IFunction<R, D> *)> f) const = 0;
 

@@ -26,6 +26,9 @@ namespace inet {
 
 namespace math {
 
+/**
+ * N-dimensional interval (cuboid), given by its two opposite corners.
+ */
 template<typename ... T>
 class INET_API Interval
 {
@@ -103,10 +106,12 @@ class INET_API Interval
         return intersectImpl(o, index_sequence_for<T ...>{});
     }
 
+    /// Returns the volume in the dimensions denoted by the 1 bits of dims
     double getVolume() const {
         return getVolumeImpl(index_sequence_for<T ...>{});
     }
 
+    /// Returns true iff getVolume() == 0
     bool isEmpty() const {
         return isEmptyImpl(index_sequence_for<T ...>{});
     }
