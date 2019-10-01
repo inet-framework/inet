@@ -12,7 +12,6 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import math
 
-
 params = chart.get_properties()
 
 # This expression selects the results (you might be able to logically simplify it)
@@ -23,7 +22,6 @@ df = results.get_scalars(filter_expression, include_attrs=True, include_itervars
 
 print(df)
 
-#plt.figure(figsize=(12,6))
 fig, ax1 = plt.subplots(figsize=(12,6))
 
 title, legend = chart.extract_label_columns(df)
@@ -47,14 +45,9 @@ df /= 1000000 # Mega
 df *= 8       # bits
 df /= sim_time_limit       # per second
 
-
 print(df)
 
 df_an = df.copy()
-
-# for packetLength, s in df_an.iteritems():
-#     for bitrate, val in s.iteritems():
-#         df_an[packetLength][bitrate] = 2
 
 df_an = pd.DataFrame(
         {100: [326,258,210,174,154,134,126,122],
@@ -84,45 +77,15 @@ plt.ylim(0,40)
 
 ymin, ymax = plt.ylim()
 
-xmin, xmax = plt.xlim()
 plt.xlim(0,55)
 
-#plt.tight_layout()
+#extraticks = [6,9,12,18,24,36,48,54]
 
-# add 'B' to legend
-ax=plt.gca()
-handles, labels = ax.get_legend_handles_labels()
-newlabels = []
-for i in labels:
-    i += 'B (computed)'
-    newlabels.append(i)
-plt.legend()
+#plt.xticks([0,10,20,30,40,50] + extraticks)
 
-extraticks = [6,9,12,18,24,36,48,54]
-
-#plt.xticks([0,5,10,15,20,25,30,35,40,45,50,55])
-#plt.xticks(list(plt.xticks()[0]) + extraticks)
-plt.xticks([0,10,20,30,40,50] + extraticks)
-
-ticks, ticklabels = plt.xticks()
-
-#for i in ax.get_xticklabels():
-#    print(i)
-
-for i in ticklabels:
-    print(i)
-    
-#newcolors = 'r'
-    
-#for ticklabel, tickcolor in zip(plt.gca().get_xticklabels(), newcolors):
-#    ticklabel.set_color(newcolors)
-    
-#ax.yaxis.tick_right()
-#ax.yaxis.set_ticks_position('both')
-#plt.tick_params(labelleft=True, labelright=True)
+#ticks, ticklabels = plt.xticks()
 
 ax2 = ax1.twinx()
-#ax2.set_ylabel('sin', color='r')
 ax2.tick_params('y', colors='darkblue')
 ax2.zorder=-1
 
@@ -130,26 +93,14 @@ ax2.set_ylim(ymin, ymax)
 
 rightyticks = []
 
-displayAnalytical = True
-
-if displayAnalytical:
-    df_y = df_an.copy()
-else:
-    df_y = df.copy()
-
 # add values to right y axis
 rightyticks.append(df['100B simulated'].values[0])
 rightyticks.append(df['100B simulated'].values[7])
-#rightyticks.append(df['1000B simulated'].values[0])
-#rightyticks.append(df['1000B simulated'].values[1])
-#rightyticks.append(df['1000B simulated'].values[2])
 rightyticks.append(df['1000B simulated'].values[1])
 rightyticks.append(df['1000B simulated'].values[2])
 rightyticks.append(df['1000B simulated'].values[3])
-#rightyticks.append(df['1000B simulated'].values[4])
 rightyticks.append(df['2268B simulated'].values[4])
 rightyticks.append(df['1000B simulated'].values[6])
-#rightyticks.append(df['1000B simulated'].values[7])
 rightyticks.append(df['2268B simulated'].values[5])
 rightyticks.append(df['2268B simulated'].values[6])
 rightyticks.append(df['2268B simulated'].values[7])
@@ -158,10 +109,7 @@ print('rightyticks:',rightyticks)
 
 ax2.set_yticks(rightyticks)
 
-#plt.grid(axis='x')
 ax2.grid(axis='y', linestyle='--', color='lightblue')
-
-#ax2.set_axisbelow(True)
 
 plt.xticks([6,9,12,18,24,36,48,54])
     
