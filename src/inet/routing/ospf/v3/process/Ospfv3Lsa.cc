@@ -42,7 +42,7 @@ B calculateLSASize(const Ospfv3LinkLsa *linkLSA)
 {
     B lsaLength = OSPFV3_LSA_HEADER_LENGTH + OSPFV3_LINK_LSA_BODY_LENGTH;
     uint32_t prefixCount = linkLSA->getNumPrefixes();
-    for (int i = 0; i < prefixCount; i++)
+    for (uint32_t i = 0; i < prefixCount; i++)
     {
         lsaLength += OSPFV3_LSA_PREFIX_HEADER_LENGTH;
         lsaLength += B(((linkLSA->getPrefixes(i).prefixLen + 31) / 32) * 4);
@@ -56,7 +56,7 @@ B calculateLSASize(const Ospfv3IntraAreaPrefixLsa *prefixLSA)
     B lsaLength = OSPFV3_LSA_HEADER_LENGTH + OSPFV3_INTRA_AREA_PREFIX_LSA_HEADER_LENGTH;
 
     uint32_t prefixCount = prefixLSA->getNumPrefixes();
-    for (int i = 0; i < prefixCount; i++)
+    for (uint32_t i = 0; i < prefixCount; i++)
     {
         lsaLength += OSPFV3_LSA_PREFIX_HEADER_LENGTH;
         lsaLength += B(((prefixLSA->getPrefixes(i).prefixLen + 31) / 32) * 4);

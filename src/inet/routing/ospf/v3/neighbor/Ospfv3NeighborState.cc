@@ -105,8 +105,7 @@ void Ospfv3NeighborState::changeState(Ospfv3Neighbor *neighbor, Ospfv3NeighborSt
                     IntraAreaPrefixLSA *iapLSA = thisArea->getIntraAreaPrefixLSA(i);
                     if (neighbor->getNeighborID() == iapLSA->getHeader().getAdvertisingRouter())
                     {
-                        for(int k = 0; k <  iapLSA->getPrefixesArraySize(); k++)
-                        {
+                        for (size_t k = 0; k <  iapLSA->getPrefixesArraySize(); k++) {
                             // go through all Inter-Area-Prefix LSA of other Area
                             for (int j = 0; j <  area->getInterAreaPrefixLSACount(); j++)
                             {
