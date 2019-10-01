@@ -88,8 +88,9 @@ void RealTimeScheduler::advanceSimTime()
 {
     int64_t curTime = opp_get_monotonic_clock_nsecs();
     simtime_t t(curTime - baseTime, SIMTIME_NS);
-    if (sim->getFES()->isEmpty() || t < sim->getFES()->peekFirst()->getArrivalTime())
-        getSimulation()->setSimTime(t);
+    if (!sim->getFES()->isEmpty())
+        t = std::min(t, sim->getFES()->peekFirst()->getArrivalTime());
+    sim->setSimTime(t);
 }
 
 bool RealTimeScheduler::receiveWithTimeout(long usec)
