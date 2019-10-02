@@ -96,6 +96,8 @@ void VoipStreamReceiver::socketDataArrived(UdpSocket *socket, Packet *pk)
     else {
         checkSourceAndParameters(pk);
         ok = vp->getSeqNo() > curConn.seqNo && vp->getTimeStamp() > curConn.timeStamp;
+//        std::cout << (ok ? "ok" : "not ok ") << "seqno " << vp->getSeqNo() << "timestamp " << vp->getTimeStamp() << endl;
+        std::cout << (ok ? "ok " : "not ok ") << "seqno " << vp->getSeqNo() << (vp->getSeqNo() == vp->getTimeStamp() ? "" : "timestamp != seqno") << endl;
     }
 
     if (ok) {
