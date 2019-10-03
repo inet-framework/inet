@@ -112,14 +112,14 @@ class INET_API Interval
     }
 };
 
-inline void iterateBoundaries(const Interval<>& i, const std::function<void (const Point<>&)> f) {
+inline void iterateCorners(const Interval<>& i, const std::function<void (const Point<>&)> f) {
     f(Point<>());
 }
 
 template<typename T0, typename ... TS>
-inline void iterateBoundaries(const Interval<T0, TS ...>& i, const std::function<void (const Point<T0, TS ...>&)> f) {
+inline void iterateCorners(const Interval<T0, TS ...>& i, const std::function<void (const Point<T0, TS ...>&)> f) {
     Interval<TS ...> i1(tail(i.getLower()), tail(i.getUpper()), i.getClosed() >> 1);
-    iterateBoundaries(i1, std::function<void (const Point<TS ...>&)>([&] (const Point<TS ...>& q) {
+    iterateCorners(i1, std::function<void (const Point<TS ...>&)>([&] (const Point<TS ...>& q) {
         f(concat(Point<T0>(head(i.getLower())), q));
         f(concat(Point<T0>(head(i.getUpper())), q));
     }));

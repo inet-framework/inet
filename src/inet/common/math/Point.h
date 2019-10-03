@@ -25,13 +25,13 @@ namespace inet {
 namespace math {
 
 template<typename T>
-inline void outputUnit(std::ostream& os, T v) { units::output_unit<typename T::unit>::fn(os); }
+inline void printUnit(std::ostream& os, T v) { units::output_unit<typename T::unit>::fn(os); }
 template<>
-inline void outputUnit(std::ostream& os, double v) { os << "unit"; }
+inline void printUnit(std::ostream& os, double v) { os << "unit"; }
 template<>
-inline void outputUnit(std::ostream& os, simtime_t v) { os << "s"; }
+inline void printUnit(std::ostream& os, simtime_t v) { os << "s"; }
 template<>
-inline void outputUnit(std::ostream& os, Quaternion v) { os << "quaternion"; }
+inline void printUnit(std::ostream& os, Quaternion v) { os << "quaternion"; }
 
 template<typename T>
 inline double toDouble(T v) { return v.get(); }
@@ -43,22 +43,22 @@ template<>
 inline double toDouble(simtime_t v) { return v.dbl(); }
 
 template<typename T>
-inline T getLowerBoundary() { return T(-INFINITY); }
+inline T getLowerBound() { return T(-INFINITY); }
 template<>
-inline simsec getLowerBoundary() { return simsec(-SimTime::getMaxTime() / 2); }
+inline simsec getLowerBound() { return simsec(-SimTime::getMaxTime() / 2); }
 template<>
-inline double getLowerBoundary() { return -INFINITY; }
+inline double getLowerBound() { return -INFINITY; }
 template<>
-inline simtime_t getLowerBoundary() { return -SimTime::getMaxTime() / 2; }
+inline simtime_t getLowerBound() { return -SimTime::getMaxTime() / 2; }
 
 template<typename T>
-inline T getUpperBoundary() { return T(INFINITY); }
+inline T getUpperBound() { return T(INFINITY); }
 template<>
-inline simsec getUpperBoundary() { return simsec(SimTime::getMaxTime() / 2); }
+inline simsec getUpperBound() { return simsec(SimTime::getMaxTime() / 2); }
 template<>
-inline double getUpperBoundary() { return INFINITY; }
+inline double getUpperBound() { return INFINITY; }
 template<>
-inline simtime_t getUpperBoundary() { return SimTime::getMaxTime() / 2; }
+inline simtime_t getUpperBound() { return SimTime::getMaxTime() / 2; }
 
 namespace internal {
 
@@ -212,12 +212,12 @@ class INET_API Point : public std::tuple<T ...>
         return Point<T ...>{ T(0) ... };
     }
 
-    static Point<T ...> getLowerBoundaries() {
-        return Point<T ...>{ (getLowerBoundary<T>()) ... };
+    static Point<T ...> getLowerBounds() {
+        return Point<T ...>{ (getLowerBound<T>()) ... };
     }
 
-    static Point<T ...> getUpperBoundaries() {
-        return Point<T ...>{ (getUpperBoundary<T>()) ... };
+    static Point<T ...> getUpperBounds() {
+        return Point<T ...>{ (getUpperBound<T>()) ... };
     }
 };
 
