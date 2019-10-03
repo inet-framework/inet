@@ -1611,29 +1611,29 @@ class INET_API ExtrudedFunction : public FunctionBase<R, Domain<X, Y>>
     }
 };
 
-template<typename R, typename D>
-class INET_API MemoizedFunction : public FunctionBase<R, D>
-{
-  protected:
-    const Ptr<const IFunction<R, D>> f;
-
-  public:
-    MemoizedFunction(const Ptr<const IFunction<R, D>>& f) : f(f) {
-        f->partition(f->getDomain(), [] (const typename D::I& i, const IFunction<R, D> *g) {
-            // TODO: store all interval function pairs in a domain subdivision tree structure
-            throw cRuntimeError("TODO");
-        });
-    }
-
-    virtual R getValue(const typename D::P& p) const override {
-        f->getValue(p);
-    }
-
-    virtual void partition(const typename D::I& i, std::function<void (const typename D::I&, const IFunction<R, D> *)> g) const override {
-        // TODO: search in domain subdivision tree structure
-        throw cRuntimeError("TODO");
-    }
-};
+//template<typename R, typename D>
+//class INET_API MemoizedFunction : public FunctionBase<R, D>
+//{
+//  protected:
+//    const Ptr<const IFunction<R, D>> f;
+//
+//  public:
+//    MemoizedFunction(const Ptr<const IFunction<R, D>>& f) : f(f) {
+//        f->partition(f->getDomain(), [] (const typename D::I& i, const IFunction<R, D> *g) {
+//            // TODO: store all interval function pairs in a domain subdivision tree structure
+//            throw cRuntimeError("TODO");
+//        });
+//    }
+//
+//    virtual R getValue(const typename D::P& p) const override {
+//        f->getValue(p);
+//    }
+//
+//    virtual void partition(const typename D::I& i, std::function<void (const typename D::I&, const IFunction<R, D> *)> g) const override {
+//        // TODO: search in domain subdivision tree structure
+//        throw cRuntimeError("TODO");
+//    }
+//};
 
 template<typename R, typename D>
 void simplifyAndCall(const typename D::I& i, const IFunction<R, D> *f, const std::function<void (const typename D::I&, const IFunction<R, D> *)> g) {
