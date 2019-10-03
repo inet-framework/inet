@@ -28,7 +28,7 @@ Configuration
 The network contains two :ned:`WirelessHost`'s, at a distance of 1 meter,
 one of them acting as traffic source, the other one as traffic sink. The
 source host sends a UDP stream to the destination host in ad-hoc mode.
-The simulation is run with a small packet size of 100 bytes, and the
+The simulation is run with a small packet size of 100 bytes, 1000 bytes, and the
 default maximum unfragmented packet size in 802.11, 2236 bytes. (The
 maximum transfer unit in 802.11 by default is 2304 bytes, which
 corresponds to 2236 bytes of application data.) The simulation will be

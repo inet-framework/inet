@@ -45,7 +45,7 @@ void RedDropper::initialize(int stage)
         if (maxp < 0.0 || maxp > 1.0)
             throw cRuntimeError("Invalid value for maxp parameter: %g", maxp);
         if (pkrate < 0.0)
-            throw cRuntimeError("Invalid value for pkrates parameter: %g", pkrate);
+            throw cRuntimeError("Invalid value for pkrate parameter: %g", pkrate);
         auto outputGate = gate("out");
         collection = dynamic_cast<IPacketCollection *>(getConnectedModule(outputGate));
         if (collection == nullptr)
@@ -57,25 +57,21 @@ bool RedDropper::matchesPacket(Packet *packet)
 {
     const int queueLength = collection->getNumPackets();
 
-    if (queueLength > 0)
-    {
+    if (queueLength > 0) {
         // TD: This following calculation is only useful when the queue is not empty!
         avg = (1 - wq) * avg + wq * queueLength;
     }
-    else
-    {
+    else {
         // TD: Added behaviour for empty queue.
         const double m = SIMTIME_DBL(simTime() - q_time) * pkrate;
         avg = pow(1 - wq, m) * avg;
     }
 
-    if (minth <= avg && avg < maxth)
-    {
+    if (minth <= avg && avg < maxth) {
         count++;
         const double pb = maxp * (avg - minth) / (maxth - minth);
         const double pa = pb / (1 - count * pb); // TD: Adapted to work as in [Floyd93].
-        if (dblrand() < pa)
-        {
+        if (dblrand() < pa) {
             EV << "Random early packet drop (avg queue len=" << avg << ", pa=" << pa << ")\n";
             count = 0;
             return false;
@@ -91,8 +87,7 @@ bool RedDropper::matchesPacket(Packet *packet)
         count = 0;
         return false;
     }
-    else
-    {
+    else {
         count = -1;
     }
 
