@@ -146,9 +146,9 @@ void MediumCanvasVisualizer::refreshSpectrumFigure(const cModule *networkNode, P
     if (spectrumAutoFrequencyAxis) {
         auto nonCostThisPtr = const_cast<MediumCanvasVisualizer *>(this);
         if (transmissionInProgress != nullptr)
-            nonCostThisPtr->updateSpectrumFigureFrequencyLimits(transmissionInProgress);
+            nonCostThisPtr->updateSpectrumFigureFrequencyBounds(transmissionInProgress);
         if (receptionInProgress != nullptr)
-            nonCostThisPtr->updateSpectrumFigureFrequencyLimits(receptionInProgress);
+            nonCostThisPtr->updateSpectrumFigureFrequencyBounds(receptionInProgress);
     }
     if (spectrumMinFrequency < spectrumMaxFrequency) {
         figure->clearValues(0);
@@ -217,7 +217,7 @@ void MediumCanvasVisualizer::refreshSpectrumFigurePowerFunction(const Ptr<const 
     Interval<m, m, m, simsec, Hz> i(l, u, 0b11110);
     auto dx = GHz(maxFrequency - minFrequency).get() * spectrumFigureInterpolationSize / spectrumFigureWidth;
     powerFunction->partition(i, [&] (const Interval<m, m, m, simsec, Hz>& j, const IFunction<WpHz, Domain<m, m, m, simsec, Hz>> *partitonPowerFunction) {
-        ASSERT((dynamic_cast<const ConstantFunction<WpHz, Domain<m, m, m, simsec, Hz>> *>(partitonPowerFunction) != nullptr || dynamic_cast<const LinearFunction<WpHz, Domain<m, m, m, simsec, Hz>> *>(partitonPowerFunction) != nullptr));
+        ASSERT((dynamic_cast<const ConstantFunction<WpHz, Domain<m, m, m, simsec, Hz>> *>(partitonPowerFunction) != nullptr || dynamic_cast<const UnilinearFunction<WpHz, Domain<m, m, m, simsec, Hz>> *>(partitonPowerFunction) != nullptr));
         auto lower = j.getLower();
         auto upper = j.getUpper();
         // NOTE: the interval is closed at the lower boundary and open at the upper boundary
@@ -226,7 +226,7 @@ void MediumCanvasVisualizer::refreshSpectrumFigurePowerFunction(const Ptr<const 
             std::get<4>(upper) = Hz(std::nextafter(std::get<4>(upper).get(), std::get<4>(lower).get()));
         WpHz power1;
         WpHz power2;
-        std::tie(power1, power2) = computePowerForPartitionBoundaries(powerFunction, lower, upper, partitonPowerFunction, antenna, position);
+        std::tie(power1, power2) = computePowerForPartitionBounds(powerFunction, lower, upper, partitonPowerFunction, antenna, position);
         // TODO: the function f is assumed to be constant or linear between l1 and u1 but on a logarithmic axis the plot is non-linear
         // TODO: the following interpolation should be part of the PlotFigure along with logarithmic axis support
         auto x1 = GHz(std::get<4>(lower)).get();
@@ -242,11 +242,11 @@ void MediumCanvasVisualizer::refreshSpectrumFigurePowerFunction(const Ptr<const 
             figure->setValue(series, xj, wpHz2dBmWpMHz(WpHz(yj).get()));
         }
         if (spectrumAutoPowerAxis)
-            nonCostThisPtr->updateSpectrumFigurePowerLimits(j, partitonPowerFunction);
+            nonCostThisPtr->updateSpectrumFigurePowerBounds(j, partitonPowerFunction);
     });
 }
 
-std::pair<WpHz, WpHz> MediumCanvasVisualizer::computePowerForPartitionBoundaries(const Ptr<const IFunction<WpHz, Domain<m, m, m, simsec, Hz>>>& powerFunction, const math::Point<m, m, m, simsec, Hz>& lower, const math::Point<m, m, m, simsec, Hz>& upper, const IFunction<WpHz, Domain<m, m, m, simsec, Hz>> *partitonPowerFunction, const IAntenna *antenna, const Coord& position) const
+std::pair<WpHz, WpHz> MediumCanvasVisualizer::computePowerForPartitionBounds(const Ptr<const IFunction<WpHz, Domain<m, m, m, simsec, Hz>>>& powerFunction, const math::Point<m, m, m, simsec, Hz>& lower, const math::Point<m, m, m, simsec, Hz>& upper, const IFunction<WpHz, Domain<m, m, m, simsec, Hz>> *partitonPowerFunction, const IAntenna *antenna, const Coord& position) const
 {
     WpHz totalPower1;
     WpHz totalPower2;
@@ -303,7 +303,7 @@ std::pair<WpHz, WpHz> MediumCanvasVisualizer::computePowerForDirectionalAntenna(
     return {power1, power2};
 }
 
-void MediumCanvasVisualizer::updateSpectrumFigureFrequencyLimits(const ITransmission *transmission)
+void MediumCanvasVisualizer::updateSpectrumFigureFrequencyBounds(const ITransmission *transmission)
 {
 #ifdef WITH_RADIO
     if (auto dimensionalTransmission = dynamic_cast<const DimensionalTransmission *>(transmission)) {
@@ -320,7 +320,7 @@ void MediumCanvasVisualizer::updateSpectrumFigureFrequencyLimits(const ITransmis
 #endif // WITH_RADIO
 }
 
-void MediumCanvasVisualizer::updateSpectrumFigurePowerLimits(const Interval<m, m, m, simsec, Hz>& i, const IFunction<WpHz, Domain<m, m, m, simsec, Hz>> *f)
+void MediumCanvasVisualizer::updateSpectrumFigurePowerBounds(const Interval<m, m, m, simsec, Hz>& i, const IFunction<WpHz, Domain<m, m, m, simsec, Hz>> *f)
 {
     WpHz minPower = f->getMin(i);
     if (minPower > WpHz(0))
