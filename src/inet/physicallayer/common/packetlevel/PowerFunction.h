@@ -214,7 +214,7 @@ class INET_API BackgroundNoisePowerFunction : public FunctionBase<WpHz, Domain<m
         Hz maxFrequency = GHz(10);
         Coord minPosition;
         Coord maxPosition;
-        BandListening listening(nullptr, 0, getUpperBoundary<simtime_t>(), minPosition, maxPosition, (minFrequency + maxFrequency) / 2, maxFrequency - minFrequency);
+        BandListening listening(nullptr, 0, getUpperBound<simtime_t>(), minPosition, maxPosition, (minFrequency + maxFrequency) / 2, maxFrequency - minFrequency);
         auto noise = backgroundNoise->computeNoise(&listening);
         if (auto dimensionalNoise = dynamic_cast<const DimensionalNoise *>(noise))
             powerFunction = dimensionalNoise->getPower();
@@ -242,8 +242,8 @@ class INET_API BackgroundNoisePowerFunction : public FunctionBase<WpHz, Domain<m
                     ConstantFunction<WpHz, Domain<m, m, m, simsec, Hz>> h(cg->getConstantValue());
                     f(i3, &h);
                 }
-                else if (auto lg = dynamic_cast<const LinearFunction<WpHz, Domain<simsec, Hz>> *>(g)) {
-                    LinearFunction<WpHz, Domain<m, m, m, simsec, Hz>> h(i3.getLower(), i3.getUpper(), lg->getValue(i2.getLower()), lg->getValue(i2.getUpper()), lg->getDimension() + 3);
+                else if (auto lg = dynamic_cast<const UnilinearFunction<WpHz, Domain<simsec, Hz>> *>(g)) {
+                    UnilinearFunction<WpHz, Domain<m, m, m, simsec, Hz>> h(i3.getLower(), i3.getUpper(), lg->getValue(i2.getLower()), lg->getValue(i2.getUpper()), lg->getDimension() + 3);
                     f(i3, &h);
                 }
                 else
@@ -319,8 +319,8 @@ class INET_API PropagatedTransmissionPowerFunction : public FunctionBase<WpHz, D
                     ConstantFunction<WpHz, Domain<m, m, m, simsec, Hz>> h(cg->getConstantValue());
                     f(i3, &h);
                 }
-                else if (auto lg = dynamic_cast<const LinearFunction<WpHz, Domain<simsec, Hz>> *>(g)) {
-                    LinearFunction<WpHz, Domain<m, m, m, simsec, Hz>> h(i3.getLower(), i3.getUpper(), lg->getValue(i2.getLower()), lg->getValue(i2.getUpper()), lg->getDimension() + 3);
+                else if (auto lg = dynamic_cast<const UnilinearFunction<WpHz, Domain<simsec, Hz>> *>(g)) {
+                    UnilinearFunction<WpHz, Domain<m, m, m, simsec, Hz>> h(i3.getLower(), i3.getUpper(), lg->getValue(i2.getLower()), lg->getValue(i2.getUpper()), lg->getDimension() + 3);
                     f(i3, &h);
                 }
                 else

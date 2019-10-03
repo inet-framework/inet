@@ -32,7 +32,7 @@ void DimensionalMediumTest::test1()
 
     parseTimeGains("left s 0dB either e 0dB right");
 
-	auto domain = Interval<m, m, m, simsec, Hz>(Point<m, m, m, simsec, Hz>(getLowerBoundary<m>(), getLowerBoundary<m>(), getLowerBoundary<m>(), simsec(0), Hz(0)), Point<m, m, m, simsec, Hz>::getUpperBoundaries(), 0b11111);
+	auto domain = Interval<m, m, m, simsec, Hz>(Point<m, m, m, simsec, Hz>(getLowerBound<m>(), getLowerBound<m>(), getLowerBound<m>(), simsec(0), Hz(0)), Point<m, m, m, simsec, Hz>::getUpperBounds(), 0b11111);
     auto backgroundNoise = makeShared<DomainLimitedFunction<WpHz, Domain<m, m, m, simsec, Hz>>>(makeShared<ConstantFunction<WpHz, Domain<m, m, m, simsec, Hz>>>(pW(1) / MHz(20)), domain);
     std::cout << "Background noise: " << *backgroundNoise << std::endl;
 
