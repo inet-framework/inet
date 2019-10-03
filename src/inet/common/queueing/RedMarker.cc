@@ -16,23 +16,20 @@
 // 
 
 #include "inet/common/INETUtils.h"
+#include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/queueing/RedMarker.h"
+#ifdef WITH_ETHERNET
 #include "inet/linklayer/ethernet/EtherEncap.h"
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
 #include "inet/linklayer/ethernet/Ethernet.h"
+#endif // #ifdef WITH_ETHERNET
 
 #include "inet/networklayer/common/EcnTag_m.h"
 #include "inet/networklayer/common/L3Tools.h"
+#ifdef WITH_IPv4
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
-
-//#ifdef WITH_IPv6
-//#include "inet/networklayer/ipv6/Ipv6Header.h"
-//#endif // ifdef WITH_IPv6
-
-//#include "inet/networklayer/diffserv/Dscp_m.h"
-//
-//#include "inet/networklayer/diffserv/DiffservUtil.h"
+#endif // ifdef WITH_IPv4
 
 namespace inet {
 namespace queueing {
@@ -63,9 +60,11 @@ void RedMarker::initialize(int stage)
 
 bool RedMarker::matchesPacket(Packet *packet)
 {
+#ifdef WITH_ETHERNET
     auto ethHeader = packet->peekAtFront<EthernetMacHeader>();
     if (isEth2Header(*ethHeader)) {
         const Protocol *payloadProtocol = ProtocolGroup::ethertype.getProtocol(ethHeader->getTypeOrLength());
+#ifdef WITH_IPv4
         if (*payloadProtocol == Protocol::ipv4) {
             auto ipv4Header = packet->peekDataAt<Ipv4Header>(ethHeader->getChunkLength());
 
@@ -98,7 +97,10 @@ bool RedMarker::matchesPacket(Packet *packet)
                 }
             }
         }
+#endif // ifdef WITH_IPv4
     }
+#endif // #ifdef WITH_ETHERNET
+
     //TODO maybe using next line instead of modified copy & paste:
     // return RedDropper::matchesPacket(packet);
 
@@ -196,8 +198,9 @@ RedMarker::Action RedMarker::chooseAction(Packet *packet)
     return SEND;
 }
 
-bool RedMarker::markPacket(Packet *packet)
+void RedMarker::markPacket(Packet *packet)
 {
+#if defined(WITH_ETHERNET) && defined(WITH_IPv4)
     EV_DETAIL << "Marking packet with ECN \n";
 
     packet->trim();
@@ -212,7 +215,9 @@ bool RedMarker::markPacket(Packet *packet)
     packet->insertAtFront(macHeader);
     packet->insertAtBack(makeShared<EthernetFcs>(ethFcs->getFcsMode()));    //TODO CRC calculation?
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(protocol);
-    return true;
+#else
+    ASSERT(false);
+#endif // #if defined(WITH_ETHERNET) && defined(WITH_IPv4)
 }
 
 } // namespace queueing
