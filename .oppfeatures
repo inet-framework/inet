@@ -436,6 +436,35 @@
         linkerFlags = ""
         />
     <feature
+        id="OSPFv3"
+        name="OSPFv3"
+        description = "OSPFv3 support"
+        initiallyEnabled = "true"
+        requires = "IPv4 IPv6"
+        labels = "routing"
+        nedPackages = "
+                       inet.routing.ospf.v3
+                       inet.node.ospfv3
+                      "
+        extraSourceFolders = ""
+        compileFlags = "-DWITH_OSPFv3"
+        linkerFlags = ""
+        />
+    <feature
+        id="OSPFv3_examples"
+        name="OSPFv3 examples"
+        description = "Examples for OSPFv3"
+        initiallyEnabled = "true"
+        requires = "OSPFv3 UDP IPv4 IPv6 PPP Ethernet"
+        labels = "routing examples"
+        nedPackages = "
+                       inet.examples.ospfv3
+                      "
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
         id="BGPv4"
         name="BGPv4"
         description = "BGP support"
