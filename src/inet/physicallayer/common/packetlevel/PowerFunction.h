@@ -32,8 +32,8 @@ using namespace inet::math;
  * This mathematical function provides the signal attenuation for any given
  * time and frequency coordinates. This function assumes the transmitter and
  * the receiver are stationary for the duration of the transmission and the
- * reception. The function value is not time dependent but this definition
- * simplifies further computations.
+ * reception. The function value is not time dependent but having the time
+ * dimension in this definition simplifies further computations.
  */
 class INET_API FrequencyDependentAttenuationFunction : public FunctionBase<double, Domain<simsec, Hz>>
 {
@@ -77,8 +77,9 @@ class INET_API FrequencyDependentAttenuationFunction : public FunctionBase<doubl
 /**
  * This mathematical function provides the transmission signal attenuation for any given
  * space, time, and frequency coordinates. The function value is only dependent on the
- * space and frequency coordinates. The function value is not time dependent but this
- * definition simplifies further computations.
+ * space and frequency coordinates. This function assumes the transmitter and is stationary
+ * for the duration of the transmission. The function value is not time dependent but having
+ * the time dimension in this definition simplifies further computations.
  */
 class INET_API SpaceAndFrequencyDependentAttenuationFunction : public FunctionBase<double, Domain<m, m, m, simsec, Hz>>
 {
@@ -139,8 +140,10 @@ class INET_API SpaceAndFrequencyDependentAttenuationFunction : public FunctionBa
 /**
  * This mathematical function provides the transmission signal attenuation for any given
  * space, time, and frequency coordinates. The function value is only dependent on the
- * space coordinates. The function value is not time dependent but this definition
- * simplifies further computations.
+ * space coordinates. This function assumes the transmitter and is stationary for the
+ * duration of the transmission. The function value is not frequency and time dependent
+ * but having the frequency and time dimensions in this definition simplifies further
+ * computations.
  */
 class INET_API SpaceDependentAttenuationFunction : public FunctionBase<double, Domain<m, m, m, simsec, Hz>>
 {
@@ -203,6 +206,9 @@ class INET_API SpaceDependentAttenuationFunction : public FunctionBase<double, D
     }
 };
 
+/**
+ * This mathematical function provides the background noise power over space, time, and frequency.
+ */
 class INET_API BackgroundNoisePowerFunction : public FunctionBase<WpHz, Domain<m, m, m, simsec, Hz>>
 {
   protected:
@@ -261,6 +267,10 @@ class INET_API BackgroundNoisePowerFunction : public FunctionBase<WpHz, Domain<m
     }
 };
 
+/**
+ * This mathematical function provides the signal power of a transmission over
+ * space, time and frequency. Signal power attenuation is not applied.
+ */
 class INET_API PropagatedTransmissionPowerFunction : public FunctionBase<WpHz, Domain<m, m, m, simsec, Hz>>
 {
   protected:
@@ -338,6 +348,9 @@ class INET_API PropagatedTransmissionPowerFunction : public FunctionBase<WpHz, D
     }
 };
 
+/**
+ * This mathematical function provides the path loss over space and frequency.
+ */
 class INET_API PathLossFunction : public FunctionBase<double, Domain<mps, m, Hz>>
 {
   protected:
@@ -360,6 +373,9 @@ class INET_API PathLossFunction : public FunctionBase<double, Domain<mps, m, Hz>
     virtual void printStructure(std::ostream& os, int level = 0) const override { os << "(" << *pathLoss << ")"; }
 };
 
+/**
+ * This mathematical function provides the obstacle loss over frequency based on a straight path from start to end.
+ */
 class INET_API ObstacleLossFunction : public FunctionBase<double, Domain<m, m, m, m, m, m, Hz>>
 {
   protected:
@@ -382,6 +398,9 @@ class INET_API ObstacleLossFunction : public FunctionBase<double, Domain<m, m, m
     virtual void printStructure(std::ostream& os, int level = 0) const override { os << "(" << *obstacleLoss << ")"; }
 };
 
+/**
+ * This mathematical function provides the antenna gain over orientation.
+ */
 class INET_API AntennaGainFunction : public IFunction<double, Domain<Quaternion>>
 {
   protected:
