@@ -60,8 +60,8 @@ class INET_API Interval
     template<size_t ... IS>
     Interval<T ...> intersectImpl(const Interval<T ...>& o, integer_sequence<size_t, IS...>) const {
         unsigned int b = 1 << std::tuple_size<std::tuple<T ...>>::value >> 1;
-        Point<T ...> l( std::max(std::get<IS>(lower), std::get<IS>(o.lower)) ... );
-        Point<T ...> u( std::min(std::get<IS>(upper), std::get<IS>(o.upper)) ... );
+        Point<T ...> l( std::max(std::get<IS>(lower), std::get<IS>(o.lower)) ... ); (void)l;
+        Point<T ...> u( std::min(std::get<IS>(upper), std::get<IS>(o.upper)) ... ); (void)u;
         unsigned int c = 0;
         (void)std::initializer_list<unsigned int>{ c += ((b >> IS) & (std::get<IS>(lower) > std::get<IS>(u) || std::get<IS>(upper) < std::get<IS>(l) ? 0 :
                                                                      (std::get<IS>(upper) == std::get<IS>(o.upper) ? (closed & o.closed) :
@@ -136,7 +136,7 @@ template<typename ... T, size_t ... IS>
 inline std::ostream& print(std::ostream& os, const Interval<T ...>& i, integer_sequence<size_t, IS...>) {
     const auto& lower = i.getLower();
     const auto& upper = i.getUpper();
-    auto closed = i.getClosed();
+    auto closed = i.getClosed(); (void)closed;
     unsigned int b = 1 << std::tuple_size<std::tuple<T ...>>::value >> 1;
     (void)std::initializer_list<bool>{(os << (IS == 0 ? "" : " x "), (std::get<IS>(lower) == std::get<IS>(upper) ? os << "[" << std::get<IS>(lower) << "]" : os << "[" << std::get<IS>(lower) << " … " << std::get<IS>(upper) << ((closed & (b >> IS)) ? "]" : ")"), true)) ... };
     return os;
