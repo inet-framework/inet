@@ -19,7 +19,7 @@
 #define __INET_MEDIUMVISUALIZERBASE_H
 
 #include "inet/common/packet/PacketFilter.h"
-#include "inet/physicallayer/common/packetlevel/PowerFunction.h"
+#include "inet/physicallayer/common/packetlevel/PowerFunctions.h"
 #include "inet/physicallayer/contract/packetlevel/IRadioMedium.h"
 #include "inet/visualizer/base/VisualizerBase.h"
 #include "inet/visualizer/util/ColorSet.h"
