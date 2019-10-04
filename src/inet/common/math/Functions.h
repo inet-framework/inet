@@ -92,11 +92,11 @@ class INET_API FunctionBase : public IFunction<R, D>
     }
 
     virtual Interval<R> getRange(const typename D::I& i) const override {
-        return Interval<R>(getLowerBound<R>(), getUpperBound<R>(), 0b1);
+        return Interval<R>(getLowerBound<R>(), getUpperBound<R>(), 0b1, 0b1, 0b0);
     }
 
     virtual typename D::I getDomain() const override {
-        return typename D::I(D::P::getLowerBounds(), D::P::getUpperBounds(), (1 << std::tuple_size<typename D::P::type>::value) - 1);
+        return typename D::I(D::P::getLowerBounds(), D::P::getUpperBounds(), 0b0, 0b0, 0b0);
     }
 
     virtual bool isFinite() const override { return isFinite(getDomain()); }
@@ -214,10 +214,10 @@ class INET_API DomainLimitedFunction : public FunctionBase<R, D>
     const typename D::I domain;
 
   public:
-    DomainLimitedFunction(const Ptr<const IFunction<R, D>>& f, const typename D::I& domain) : f(f), range(Interval<R>(f->getMin(domain), f->getMax(domain), 0b1)), domain(domain) { }
+    DomainLimitedFunction(const Ptr<const IFunction<R, D>>& f, const typename D::I& domain) : f(f), range(Interval<R>(f->getMin(domain), f->getMax(domain), 0b1, 0b1, 0b0)), domain(domain) { }
 
-    virtual Interval<R> getRange() const override { return range; };
-    virtual typename D::I getDomain() const override { return domain; };
+    virtual Interval<R> getRange() const override { return range; }
+    virtual typename D::I getDomain() const override { return domain; }
 
     virtual R getValue(const typename D::P& p) const override {
         ASSERT(domain.contains(p));
@@ -255,7 +255,8 @@ class INET_API DomainLimitedFunction : public FunctionBase<R, D>
 
 template<typename R, typename D>
 Ptr<const DomainLimitedFunction<R, D>> makeFirstQuadrantLimitedFunction(const Ptr<const IFunction<R, D>>& f) {
-    typename D::I i(D::P::getZero(), D::P::getUpperBounds(), (1 << std::tuple_size<typename D::P::type>::value) - 1);
+    auto mask = (1 << std::tuple_size<typename D::P::type>::value) - 1;
+    typename D::I i(D::P::getZero(), D::P::getUpperBounds(), mask, 0, 0);
     return makeShared<DomainLimitedFunction<R, D>>(f, i);
 }
 
@@ -270,7 +271,7 @@ class INET_API ConstantFunction : public FunctionBase<R, D>
 
     virtual R getConstantValue() const { return r; }
 
-    virtual Interval<R> getRange() const override { return Interval<R>(r, r, 0b1); }
+    virtual Interval<R> getRange() const override { return Interval<R>(r, r, 0b1, 0b1, 0b0); }
 
     virtual R getValue(const typename D::P& p) const override { return r; }
 
@@ -309,24 +310,24 @@ class INET_API OneDimensionalBoxcarFunction : public FunctionBase<R, Domain<X>>
         ASSERT(r > R(0));
     }
 
-    virtual Interval<R> getRange() const override { return Interval<R>(R(0), r, 0b1); }
+    virtual Interval<R> getRange() const override { return Interval<R>(R(0), r, 0b1, 0b1, 0b0); }
 
     virtual R getValue(const Point<X>& p) const override {
         return std::get<0>(p) < lower || std::get<0>(p) >= upper ? R(0) : r;
     }
 
     virtual void partition(const Interval<X>& i, const std::function<void (const Interval<X>&, const IFunction<R, Domain<X>> *)> f) const override {
-        const auto& i1 = i.intersect(Interval<X>(getLowerBound<X>(), Point<X>(lower), 0));
+        const auto& i1 = i.intersect(Interval<X>(getLowerBound<X>(), Point<X>(lower), 0b0, 0b0, 0b0));
         if (!i1.isEmpty()) {
             ConstantFunction<R, Domain<X>> g(R(0));
             f(i1, &g);
         }
-        const auto& i2 = i.intersect(Interval<X>(Point<X>(lower), Point<X>(upper), 0));
+        const auto& i2 = i.intersect(Interval<X>(Point<X>(lower), Point<X>(upper), 0b1, 0b0, 0b0));
         if (!i2.isEmpty()) {
             ConstantFunction<R, Domain<X>> g(r);
             f(i2, &g);
         }
-        const auto& i3 = i.intersect(Interval<X>(Point<X>(upper), getUpperBound<X>(), 0b1));
+        const auto& i3 = i.intersect(Interval<X>(Point<X>(upper), getUpperBound<X>(), 0b1, 0b0, 0b0));
         if (!i3.isEmpty()) {
             ConstantFunction<R, Domain<X>> g(R(0));
             f(i3, &g);
@@ -366,24 +367,24 @@ class INET_API TwoDimensionalBoxcarFunction : public FunctionBase<R, Domain<X, Y
         ASSERT(r > R(0));
     }
 
-    virtual Interval<R> getRange() const override { return Interval<R>(R(0), r, 0b1); }
+    virtual Interval<R> getRange() const override { return Interval<R>(R(0), r, 0b1, 0b1, 0b0); }
 
     virtual R getValue(const Point<X, Y>& p) const override {
         return std::get<0>(p) < lowerX || std::get<0>(p) >= upperX || std::get<1>(p) < lowerY || std::get<1>(p) >= upperY ? R(0) : r;
     }
 
     virtual void partition(const Interval<X, Y>& i, const std::function<void (const Interval<X, Y>&, const IFunction<R, Domain<X, Y>> *)> f) const override {
-        callf(i.intersect(Interval<X, Y>(Point<X, Y>(getLowerBound<X>(), getLowerBound<Y>()), Point<X, Y>(X(lowerX), Y(lowerY)), 0)), f, R(0));
-        callf(i.intersect(Interval<X, Y>(Point<X, Y>(X(lowerX), getLowerBound<Y>()), Point<X, Y>(X(upperX), Y(lowerY)), 0)), f, R(0));
-        callf(i.intersect(Interval<X, Y>(Point<X, Y>(X(upperX), getLowerBound<Y>()), Point<X, Y>(getUpperBound<X>(), Y(lowerY)), 0b10)), f, R(0));
+        callf(i.intersect(Interval<X, Y>(Point<X, Y>(getLowerBound<X>(), getLowerBound<Y>()), Point<X, Y>(X(lowerX), Y(lowerY)), 0b00, 0b00, 0b00)), f, R(0));
+        callf(i.intersect(Interval<X, Y>(Point<X, Y>(X(lowerX), getLowerBound<Y>()), Point<X, Y>(X(upperX), Y(lowerY)), 0b10, 0b00, 0b00)), f, R(0));
+        callf(i.intersect(Interval<X, Y>(Point<X, Y>(X(upperX), getLowerBound<Y>()), Point<X, Y>(getUpperBound<X>(), Y(lowerY)), 0b10, 0b00, 0b00)), f, R(0));
 
-        callf(i.intersect(Interval<X, Y>(Point<X, Y>(getLowerBound<X>(), Y(lowerY)), Point<X, Y>(X(lowerX), Y(upperY)), 0)), f, R(0));
-        callf(i.intersect(Interval<X, Y>(Point<X, Y>(X(lowerX), Y(lowerY)), Point<X, Y>(X(upperX), Y(upperY)), 0)), f, r);
-        callf(i.intersect(Interval<X, Y>(Point<X, Y>(X(upperX), Y(lowerY)), Point<X, Y>(getUpperBound<X>(), Y(upperY)), 0b10)), f, R(0));
+        callf(i.intersect(Interval<X, Y>(Point<X, Y>(getLowerBound<X>(), Y(lowerY)), Point<X, Y>(X(lowerX), Y(upperY)), 0b01, 0b00, 0b00)), f, R(0));
+        callf(i.intersect(Interval<X, Y>(Point<X, Y>(X(lowerX), Y(lowerY)), Point<X, Y>(X(upperX), Y(upperY)), 0b11, 0b00, 0b00)), f, r);
+        callf(i.intersect(Interval<X, Y>(Point<X, Y>(X(upperX), Y(lowerY)), Point<X, Y>(getUpperBound<X>(), Y(upperY)), 0b11, 0b00, 0b00)), f, R(0));
 
-        callf(i.intersect(Interval<X, Y>(Point<X, Y>(getLowerBound<X>(), Y(upperY)), Point<X, Y>(X(lowerX), getUpperBound<Y>()), 0b01)), f, R(0));
-        callf(i.intersect(Interval<X, Y>(Point<X, Y>(X(lowerX), Y(upperY)), Point<X, Y>(X(upperX), getUpperBound<Y>()), 0b01)), f, R(0));
-        callf(i.intersect(Interval<X, Y>(Point<X, Y>(X(upperX), Y(upperY)), Point<X, Y>(getUpperBound<X>(), getUpperBound<Y>()), 0b11)), f, R(0));
+        callf(i.intersect(Interval<X, Y>(Point<X, Y>(getLowerBound<X>(), Y(upperY)), Point<X, Y>(X(lowerX), getUpperBound<Y>()), 0b01, 0b00, 0b00)), f, R(0));
+        callf(i.intersect(Interval<X, Y>(Point<X, Y>(X(lowerX), Y(upperY)), Point<X, Y>(X(upperX), getUpperBound<Y>()), 0b11, 0b00, 0b00)), f, R(0));
+        callf(i.intersect(Interval<X, Y>(Point<X, Y>(X(upperX), Y(upperY)), Point<X, Y>(getUpperBound<X>(), getUpperBound<Y>()), 0b11, 0b00, 0b00)), f, R(0));
     }
 
     virtual bool isFinite(const Interval<X, Y>& i) const override { return std::isfinite(toDouble(r)); }
@@ -418,8 +419,7 @@ class INET_API UnilinearFunction : public FunctionBase<R, D>
     virtual double getA() const { return toDouble(rUpper - rLower) / toDouble(upper.get(dimension) - lower.get(dimension)); }
     virtual double getB() const { return (toDouble(rLower) * upper.get(dimension) - toDouble(rUpper) * lower.get(dimension)) / (upper.get(dimension) - lower.get(dimension)); }
 
-    virtual Interval<R> getRange() const override { return Interval<R>(std::min(rLower, rUpper), std::max(rLower, rUpper), 0b1); }
-    virtual typename D::I getDomain() const override { return typename D::I(lower, upper, 0); };
+    virtual Interval<R> getRange() const override { return Interval<R>(std::min(rLower, rUpper), std::max(rLower, rUpper), 0b1, 0b1, 0b0); }
 
     virtual R getValue(const typename D::P& p) const override {
         double alpha = (p - lower).get(dimension) / (upper - lower).get(dimension);
@@ -484,12 +484,12 @@ class INET_API BilinearFunction : public FunctionBase<R, D>
         lowerUpper.set(dimension2, upper.get(dimension2));
         upperLower.set(dimension1, upper.get(dimension1));
         upperLower.set(dimension2, lower.get(dimension2));
-        return typename D::I(lowerUpper, upperLower, i.getClosed());
+        return typename D::I(lowerUpper, upperLower, i.getLowerClosed(), i.getUpperClosed(), i.getFixed());
     }
 
   public:
     BilinearFunction(const typename D::P& lowerLower, const typename D::P& lowerUpper, const typename D::P& upperLower, const typename D::P& upperUpper,
-                                 const R rLowerLower, const R rLowerUpper, const R rUpperLower, const R rUpperUpper, const int dimension1, const int dimension2) :
+                     const R rLowerLower, const R rLowerUpper, const R rUpperLower, const R rUpperUpper, const int dimension1, const int dimension2) :
         lowerLower(lowerLower), lowerUpper(lowerUpper), upperLower(upperLower), upperUpper(upperUpper),
         rLowerLower(rLowerLower), rLowerUpper(rLowerUpper), rUpperLower(rUpperLower), rUpperUpper(rUpperUpper),
         dimension1(dimension1), dimension2(dimension2) { }
@@ -506,8 +506,8 @@ class INET_API BilinearFunction : public FunctionBase<R, D>
     virtual int getDimension2() const { return dimension2; }
 
     virtual Interval<R> getRange() const override { return Interval<R>(std::min(std::min(rLowerLower, rLowerUpper), std::min(rUpperLower, rUpperUpper)),
-                                                                       std::max(std::max(rLowerLower, rLowerUpper), std::max(rUpperLower, rUpperUpper)), 0b1); }
-    virtual typename D::I getDomain() const override { throw cRuntimeError("TODO"); };
+                                                                       std::max(std::max(rLowerLower, rLowerUpper), std::max(rUpperLower, rUpperUpper)),
+                                                                       0b1, 0b1, 0b0); }
 
     virtual R getValue(const typename D::P& p) const override {
         double lowerAlpha = (p - lowerLower).get(dimension1) / (upperLower - lowerLower).get(dimension1);
@@ -600,7 +600,7 @@ class INET_API OneDimensionalInterpolatedFunction : public FunctionBase<R, Domai
             jt++;
             auto kt = jt;
             kt++;
-            auto i1 = i.intersect(Interval<X>(Point<X>(it->first), Point<X>(jt->first), kt == rs.end() ? 0b1 : 0b0));
+            auto i1 = i.intersect(Interval<X>(Point<X>(it->first), Point<X>(jt->first), 0b1, kt == rs.end() ? 0b1 : 0b0, 0b0));
             if (!i1.isEmpty()) {
                 const auto interpolator = it->second.second;
                 auto xLower = std::get<0>(i1.getLower());
@@ -736,7 +736,10 @@ class INET_API OrthogonalCombinatorFunction : public FunctionBase<R, Domain<X, Y
         const auto& gDomain = g->getDomain();
         Point<X, Y> lower(std::get<0>(fDomain.getLower()), std::get<0>(gDomain.getLower()));
         Point<X, Y> upper(std::get<0>(fDomain.getUpper()), std::get<0>(gDomain.getUpper()));
-        return Interval<X, Y>(lower, upper, fDomain.getClosed() << 1 | gDomain.getClosed());
+        auto lowerClosed = fDomain.getLowerClosed() << 1 | gDomain.getLowerClosed();
+        auto upperClosed = fDomain.getUpperClosed() << 1 | gDomain.getUpperClosed();
+        auto fixed = fDomain.getFixed() << 1 | gDomain.getFixed();
+        return Interval<X, Y>(lower, upper, lowerClosed, upperClosed, fixed);
     }
 
     virtual R getValue(const Point<X, Y>& p) const override {
@@ -744,21 +747,23 @@ class INET_API OrthogonalCombinatorFunction : public FunctionBase<R, Domain<X, Y
     }
 
     virtual void partition(const Interval<X, Y>& i, const std::function<void (const Interval<X, Y>&, const IFunction<R, Domain<X, Y>> *)> h) const override {
-        Interval<X> ix(Point<X>(std::get<0>(i.getLower())), Point<X>(std::get<0>(i.getUpper())), (i.getClosed() & 0b10) >> 1);
-        Interval<Y> iy(Point<Y>(std::get<1>(i.getLower())), Point<Y>(std::get<1>(i.getUpper())), (i.getClosed() & 0b01) >> 0);
+        Interval<X> ix(Point<X>(std::get<0>(i.getLower())), Point<X>(std::get<0>(i.getUpper())), (i.getLowerClosed() & 0b10) >> 1, (i.getUpperClosed() & 0b10) >> 1, (i.getFixed() & 0b10) >> 1);
+        Interval<Y> iy(Point<Y>(std::get<1>(i.getLower())), Point<Y>(std::get<1>(i.getUpper())), (i.getLowerClosed() & 0b01) >> 0, (i.getUpperClosed() & 0b01) >> 0, (i.getFixed() & 0b01) >> 0);
         f->partition(ix, [&] (const Interval<X>& ixf, const IFunction<R, Domain<X>> *if1) {
             g->partition(iy, [&] (const Interval<Y>& iyg, const IFunction<double, Domain<Y>> *if2) {
                 Point<X, Y> lower(std::get<0>(ixf.getLower()), std::get<0>(iyg.getLower()));
                 Point<X, Y> upper(std::get<0>(ixf.getUpper()), std::get<0>(iyg.getUpper()));
-                unsigned int closed = (ixf.getClosed() << 1) | (iyg.getClosed() << 0);
+                auto lowerClosed = (ixf.getLowerClosed() << 1) | (iyg.getLowerClosed() << 0);
+                auto upperClosed = (ixf.getUpperClosed() << 1) | (iyg.getUpperClosed() << 0);
+                auto fixed = (ixf.getFixed() << 1) | (iyg.getFixed() << 0);
                 if (auto cif1 = dynamic_cast<const ConstantFunction<R, Domain<X>> *>(if1)) {
                     if (auto cif2 = dynamic_cast<const ConstantFunction<double, Domain<Y>> *>(if2)) {
                         ConstantFunction<R, Domain<X, Y>> g(cif1->getConstantValue() * cif2->getConstantValue());
-                        h(Interval<X, Y>(lower, upper, closed), &g);
+                        h(Interval<X, Y>(lower, upper, lowerClosed, upperClosed, fixed), &g);
                     }
                     else if (auto lif2 = dynamic_cast<const UnilinearFunction<double, Domain<Y>> *>(if2)) {
                         UnilinearFunction<R, Domain<X, Y>> g(lower, upper, lif2->getValue(iyg.getLower()) * cif1->getConstantValue(), lif2->getValue(iyg.getUpper()) * cif1->getConstantValue(), 1);
-                        simplifyAndCall(Interval<X, Y>(lower, upper, closed), &g, h);
+                        simplifyAndCall(Interval<X, Y>(lower, upper, lowerClosed, upperClosed, fixed), &g, h);
                     }
                     else
                         throw cRuntimeError("TODO");
@@ -766,7 +771,7 @@ class INET_API OrthogonalCombinatorFunction : public FunctionBase<R, Domain<X, Y
                 else if (auto lif1 = dynamic_cast<const UnilinearFunction<R, Domain<X>> *>(if1)) {
                     if (auto cif2 = dynamic_cast<const ConstantFunction<double, Domain<Y>> *>(if2)) {
                         UnilinearFunction<R, Domain<X, Y>> g(lower, upper, lif1->getValue(ixf.getLower()) * cif2->getConstantValue(), lif1->getValue(ixf.getUpper()) * cif2->getConstantValue(), 0);
-                        simplifyAndCall(Interval<X, Y>(lower, upper, closed), &g, h);
+                        simplifyAndCall(Interval<X, Y>(lower, upper, lowerClosed, upperClosed, fixed), &g, h);
                     }
                     else {
                         // QuadraticFunction<double, Domain<X, Y>> g();
@@ -801,23 +806,27 @@ class INET_API ShiftFunction : public FunctionBase<R, D>
   public:
     ShiftFunction(const Ptr<const IFunction<R, D>>& f, const typename D::P& s) : f(f), s(s) { }
 
-    virtual typename D::I getDomain() const override { return f->getDomain(); }
+    virtual typename D::I getDomain() const override {
+        const auto& domain = f->getDomain();
+        typename D::I i(domain.getLower() + s, domain.getUpper() + s, domain.getLowerClosed(), domain.getLowerClosed(), domain.getFixed());
+        return i;
+    }
 
     virtual R getValue(const typename D::P& p) const override {
         return f->getValue(p - s);
     }
 
     virtual void partition(const typename D::I& i, const std::function<void (const typename D::I&, const IFunction<R, D> *)> g) const override {
-        f->partition(typename D::I(i.getLower() - s, i.getUpper() - s, i.getClosed()), [&] (const typename D::I& j, const IFunction<R, D> *jf) {
+        f->partition(typename D::I(i.getLower() - s, i.getUpper() - s, i.getLowerClosed(), i.getUpperClosed(), i.getFixed()), [&] (const typename D::I& j, const IFunction<R, D> *jf) {
             if (auto cjf = dynamic_cast<const ConstantFunction<R, D> *>(jf))
-                g(typename D::I(j.getLower() + s, j.getUpper() + s, j.getClosed()), jf);
+                g(typename D::I(j.getLower() + s, j.getUpper() + s, j.getLowerClosed(), j.getUpperClosed(), j.getFixed()), jf);
             else if (auto ljf = dynamic_cast<const UnilinearFunction<R, D> *>(jf)) {
                 UnilinearFunction<R, D> h(j.getLower() + s, j.getUpper() + s, ljf->getValue(j.getLower()), ljf->getValue(j.getUpper()), ljf->getDimension());
-                simplifyAndCall(typename D::I(j.getLower() + s, j.getUpper() + s, j.getClosed()), &h, g);
+                simplifyAndCall(typename D::I(j.getLower() + s, j.getUpper() + s, j.getLowerClosed(), j.getUpperClosed(), j.getFixed()), &h, g);
             }
             else {
                 ShiftFunction h(const_cast<IFunction<R, D> *>(jf)->shared_from_this(), s);
-                simplifyAndCall(typename D::I(j.getLower() + s, j.getUpper() + s, j.getClosed()), &h, g);
+                simplifyAndCall(typename D::I(j.getLower() + s, j.getUpper() + s, j.getLowerClosed(), j.getUpperClosed(), j.getFixed()), &h, g);
             }
         });
     }
@@ -1285,7 +1294,7 @@ class INET_API SumFunction : public FunctionBase<R, D>
     }
 
     virtual typename D::I getDomain() const override {
-        typename D::I domain(D::P::getLowerBounds(), D::P::getUpperBounds(), (1 << std::tuple_size<typename D::P::type>::value) - 1);
+        typename D::I domain(D::P::getLowerBounds(), D::P::getUpperBounds(), 0, 0, 0);
         for (auto f : fs)
             domain = domain.intersect(f->getDomain());
         return domain;
@@ -1375,7 +1384,7 @@ class INET_API IntegratedFunction<R, Domain<X, Y>, DIMS, RI, Domain<X>> : public
         Point<X, Y> l1(std::get<0>(p), getLowerBound<Y>());
         Point<X, Y> u1(std::get<0>(p), getUpperBound<Y>());
         RI ri(0);
-        Interval<X, Y> i1(l1, u1, DIMS);
+        Interval<X, Y> i1(l1, u1, DIMS, DIMS, DIMS);
         f->partition(i1, [&] (const Interval<X, Y>& i2, const IFunction<R, Domain<X, Y>> *g) {
             R r = g->getIntegral(i2);
             ri += RI(toDouble(r));
@@ -1386,7 +1395,7 @@ class INET_API IntegratedFunction<R, Domain<X, Y>, DIMS, RI, Domain<X>> : public
     virtual void partition(const Interval<X>& i, std::function<void (const Interval<X>&, const IFunction<RI, Domain<X>> *)> g) const override {
         Point<X, Y> l1(std::get<0>(i.getLower()), getLowerBound<Y>());
         Point<X, Y> u1(std::get<0>(i.getUpper()), getUpperBound<Y>());
-        Interval<X, Y> i1(l1, u1, (i.getClosed() & 0b1) << 1);
+        Interval<X, Y> i1(l1, u1, (i.getLowerClosed() & 0b1) << 1, (i.getUpperClosed() & 0b1) << 1, (i.getFixed() & 0b1) << 1);
         std::set<X> xs;
         f->partition(i1, [&] (const Interval<X, Y>& i2, const IFunction<R, Domain<X, Y>> *h) {
             xs.insert(std::get<0>(i2.getLower()));
@@ -1403,7 +1412,7 @@ class INET_API IntegratedFunction<R, Domain<X, Y>, DIMS, RI, Domain<X>> : public
                 // NOTE: use the lower X for both interval ends, because we assume a constant function and intervals are closed at the lower end
                 Point<X, Y> l3(xLower, getLowerBound<Y>());
                 Point<X, Y> u3(xLower, getUpperBound<Y>());
-                Interval<X, Y> i3(l3, u3, DIMS);
+                Interval<X, Y> i3(l3, u3, DIMS, DIMS, DIMS);
                 f->partition(i3, [&] (const Interval<X, Y>& i4, const IFunction<R, Domain<X, Y>> *h) {
                     if (dynamic_cast<const ConstantFunction<R, Domain<X, Y>> *>(h)) {
                         R r = h->getIntegral(i4);
@@ -1423,7 +1432,7 @@ class INET_API IntegratedFunction<R, Domain<X, Y>, DIMS, RI, Domain<X>> : public
                 ConstantFunction<RI, Domain<X>> h(ri);
                 Point<X> l5(xLower);
                 Point<X> u5(xUpper);
-                Interval<X> i5(l5, u5, 0);
+                Interval<X> i5(l5, u5, first ? (i.getLowerClosed() & 0b10) >> 1 : 0b1, 0b0, 0b0);
                 g(i5, &h);
             }
             xLower = xUpper;
@@ -1445,7 +1454,7 @@ class INET_API IntegratedFunction : public FunctionBase<RI, DI>
         p.template copyTo<typename D::P, DIMS>(l1);
         p.template copyTo<typename D::P, DIMS>(u1);
         RI ri(0);
-        typename D::I i1(l1, u1, DIMS);
+        typename D::I i1(l1, u1, DIMS, DIMS, DIMS);
         f->partition(i1, [&] (const typename D::I& i2, const IFunction<R, D> *g) {
             R r = g->getIntegral(i2);
             ri += RI(toDouble(r));
@@ -1503,15 +1512,17 @@ class INET_API ApproximatedFunction : public FunctionBase<R, D>
     }
 
     virtual void partition(const typename D::I& i, std::function<void (const typename D::I&, const IFunction<R, D> *)> g) const override {
-        unsigned int b = 1 << std::tuple_size<typename D::P::type>::value >> 1;
-        auto closed = i.getClosed() & ~(b >> DIMENSION);
+        unsigned char b = 1 << std::tuple_size<typename D::P::type>::value >> 1;
+        auto lowerClosed = i.getLowerClosed() & ~(b >> DIMENSION);
+        auto upperClosed = i.getUpperClosed() & ~(b >> DIMENSION);
+        auto fixed = i.getFixed() & ~(b >> DIMENSION);
         const auto& pl = i.getLower();
         const auto& pu = i.getUpper();
         if (std::get<DIMENSION>(pl) < lower) {
             typename D::P p = pu;
             std::get<DIMENSION>(p) = std::min(lower, std::get<DIMENSION>(pu));
             ConstantFunction<R, D> h(f->getValue(p));
-            typename D::I i1(pl, p, closed);
+            typename D::I i1(pl, p, lowerClosed, upperClosed, fixed);
             if (!i1.isEmpty())
                 g(i1, &h);
         }
@@ -1526,7 +1537,7 @@ class INET_API ApproximatedFunction : public FunctionBase<R, D>
             typename D::P p2 = pu;
             std::get<DIMENSION>(p1) = std::max(xl, x1);
             std::get<DIMENSION>(p2) = std::min(xu, x2);
-            typename D::I i1(p1, p2, closed);
+            typename D::I i1(p1, p2, lowerClosed | (b >> DIMENSION), upperClosed, fixed);
             if (!i1.isEmpty()) {
                 std::get<DIMENSION>(p1) = x1;
                 std::get<DIMENSION>(p2) = x2;
@@ -1548,7 +1559,7 @@ class INET_API ApproximatedFunction : public FunctionBase<R, D>
             typename D::P p = pl;
             std::get<DIMENSION>(p) = std::max(upper, std::get<DIMENSION>(pl));
             ConstantFunction<R, D> h(f->getValue(p));
-            typename D::I i1(p, pu, i.getClosed());
+            typename D::I i1(p, pu, i.getLowerClosed() | (b >> DIMENSION), i.getUpperClosed(), i.getFixed());
             if (!i1.isEmpty())
                 g(i1, &h);
         }
@@ -1579,11 +1590,11 @@ class INET_API ExtrudedFunction : public FunctionBase<R, Domain<X, Y>>
     }
 
     virtual void partition(const Interval<X, Y>& i, std::function<void (const Interval<X, Y>&, const IFunction<R, Domain<X, Y>> *)> g) const override {
-        Interval<Y> i1(Point<Y>(std::get<1>(i.getLower())), Point<Y>(std::get<1>(i.getUpper())), i.getClosed() & 0b01);
+        Interval<Y> i1(Point<Y>(std::get<1>(i.getLower())), Point<Y>(std::get<1>(i.getUpper())), i.getUpperClosed() & 0b01);
         f->partition(i1, [&] (const Interval<Y>& i2, const IFunction<R, Domain<Y>> *h) {
             Point<X, Y> lower(std::get<0>(i.getLower()), std::get<0>(i2.getLower()));
             Point<X, Y> upper(std::get<0>(i.getUpper()), std::get<0>(i2.getUpper()));
-            Interval<X, Y> i3(lower, upper, (i.getClosed() & 0b10) | i2.getClosed());
+            Interval<X, Y> i3(lower, upper, (i.getUpperClosed() & 0b10) | i2.getUpperClosed());
             if (auto ch = dynamic_cast<const ConstantFunction<R, Domain<Y>> *>(h)) {
                 ConstantFunction<R, Domain<X, Y>> j(ch->getConstantValue());
                 g(i3, &j);
@@ -1600,7 +1611,7 @@ class INET_API ExtrudedFunction : public FunctionBase<R, Domain<X, Y>>
     }
 
     virtual bool isFinite(const Interval<X, Y>& i) const override {
-        Interval<Y> i1(Point<Y>(std::get<1>(i.getLower())), Point<Y>(std::get<1>(i.getUpper())), i.getClosed() & 0b01);
+        Interval<Y> i1(Point<Y>(std::get<1>(i.getLower())), Point<Y>(std::get<1>(i.getUpper())), i.getUpperClosed() & 0b01);
         return f->isFinite(i1);
     }
 
