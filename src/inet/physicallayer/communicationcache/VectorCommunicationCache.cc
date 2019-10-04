@@ -33,7 +33,7 @@ VectorCommunicationCache::RadioCacheEntry *VectorCommunicationCache::getRadioCac
 {
     ASSERT(baseRadioId != -1);
     int radioIndex = radio->getId() - baseRadioId;
-    ASSERT(0 <= radioIndex && radioIndex < radioCache.size());
+    ASSERT(0 <= radioIndex && radioIndex < (int)radioCache.size());
     return &radioCache[radioIndex];
 }
 
@@ -41,7 +41,7 @@ VectorCommunicationCache::TransmissionCacheEntry *VectorCommunicationCache::getT
 {
     ASSERT(baseTransmissionId != -1);
     int transmissionIndex = transmission->getId() - baseTransmissionId;
-    ASSERT(0 <= transmissionIndex && transmissionIndex < transmissionCache.size());
+    ASSERT(0 <= transmissionIndex && transmissionIndex < (int)transmissionCache.size());
     return &transmissionCache[transmissionIndex];
 }
 
@@ -108,7 +108,7 @@ const IRadio *VectorCommunicationCache::getRadio(int id) const
 {
     ASSERT(baseRadioId != -1);
     int radioIndex = id - baseRadioId;
-    if (0 <= radioIndex && radioIndex < radioCache.size())
+    if (0 <= radioIndex && radioIndex < (int)radioCache.size())
         return radioCache[radioIndex].radio;
     else
         return nullptr;
@@ -146,7 +146,7 @@ const ITransmission *VectorCommunicationCache::getTransmission(int id) const
 {
     ASSERT(baseTransmissionId != -1);
     int transmissionIndex = id - baseTransmissionId;
-    if (0 <= transmissionIndex && transmissionIndex < transmissionCache.size())
+    if (0 <= transmissionIndex && transmissionIndex < (int)transmissionCache.size())
         return transmissionCache[transmissionIndex].transmission;
     else
         return nullptr;
