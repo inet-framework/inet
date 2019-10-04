@@ -46,6 +46,7 @@ Eventually all sensor nodes get into this state and the number of successfully s
 - Throughput: run 15: handleCommand(): no commands supported -- in module (inet::ieee80211::Ieee80211MgmtAdhoc) Throughput.sourceHost.wlan[0].mgmt (id=24), at t=0.108461533953s, event #8801
 - RateControl:		rate adaptation instead of rate control?
 - DataLinkVisualizer: move activity parameter to DataLinkVisualizer from LinkVisualizerBase ?
+- RadioVisualizer: rename displayRadios parameter to better reflect that its a master switch
 
 IPv4NetworkConfigurator:
 ?- a netmaskRoutes miatt olyan szabály is hozzáadódik a routing táblához, ami hibás. Pont a korrekt szabály felett van, és a csomagok nem találnak oda
