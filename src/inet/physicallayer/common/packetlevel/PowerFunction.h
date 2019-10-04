@@ -56,7 +56,13 @@ class INET_API FrequencyDependentAttenuationFunction : public FunctionBase<doubl
         auto propagationSpeed = radioMedium->getPropagation()->getPropagationSpeed();
         auto pathLoss = radioMedium->getPathLoss()->computePathLoss(propagationSpeed, frequency, distance);
         auto obstacleLoss = radioMedium->getObstacleLoss() ? radioMedium->getObstacleLoss()->computeObstacleLoss(frequency, transmissionPosition, receptionPosition) : 1;
-        return std::min(1.0, transmitterAntennaGain * receiverAntennaGain * pathLoss * obstacleLoss);
+        double gain = transmitterAntennaGain * receiverAntennaGain * pathLoss * obstacleLoss;
+        if (gain > 1.0) {
+            EV_STATICCONTEXT;
+            EV_WARN << "Signal power attenuation is zero.\n";
+            gain = 1.0;
+        }
+        return gain;
     }
 
     virtual void partition(const Interval<simsec, Hz>& i, const std::function<void (const Interval<simsec, Hz>&, const IFunction<double, Domain<simsec, Hz>> *)> f) const override {
@@ -112,7 +118,13 @@ class INET_API SpaceAndFrequencyDependentAttenuationFunction : public FunctionBa
         double transmitterAntennaGain = distance == m(0) ? 1 : transmitterAntennaGainFunction->getValue(Point<Quaternion>(antennaLocalDirection));
         double pathLoss = pathLossFunction->getValue(Point<mps, m, Hz>(propagationSpeed, distance, frequency));
         double obstacleLoss = obstacleLossFunction != nullptr ? obstacleLossFunction->getValue(Point<m, m, m, m, m, m, Hz>(startX, startY, startZ, x, y, z, frequency)) : 1;
-        return std::min(1.0, transmitterAntennaGain * pathLoss * obstacleLoss);
+        double gain = transmitterAntennaGain * pathLoss * obstacleLoss;
+        if (gain > 1.0) {
+            EV_STATICCONTEXT;
+            EV_WARN << "Signal power attenuation is zero.\n";
+            gain = 1.0;
+        }
+        return gain;
     }
 
     virtual void partition(const Interval<m, m, m, simsec, Hz>& i, const std::function<void (const Interval<m, m, m, simsec, Hz>&, const IFunction<double, Domain<m, m, m, simsec, Hz>> *)> f) const override {
@@ -176,7 +188,13 @@ class INET_API SpaceDependentAttenuationFunction : public FunctionBase<double, D
         double transmitterAntennaGain = distance == m(0) ? 1 : transmitterAntennaGainFunction->getValue(Point<Quaternion>(antennaLocalDirection));
         double pathLoss = pathLossFunction->getValue(Point<mps, m, Hz>(propagationSpeed, distance, frequency));
         double obstacleLoss = obstacleLossFunction != nullptr ? obstacleLossFunction->getValue(Point<m, m, m, m, m, m, Hz>(startX, startY, startZ, x, y, z, frequency)) : 1;
-        return std::min(1.0, transmitterAntennaGain * pathLoss * obstacleLoss);
+        double gain = transmitterAntennaGain * pathLoss * obstacleLoss;
+        if (gain > 1.0) {
+            EV_STATICCONTEXT;
+            EV_WARN << "Signal power attenuation is zero.\n";
+            gain = 1.0;
+        }
+        return gain;
     }
 
     virtual void partition(const Interval<m, m, m, simsec, Hz>& i, const std::function<void (const Interval<m, m, m, simsec, Hz>&, const IFunction<double, Domain<m, m, m, simsec, Hz>> *)> f) const override {
