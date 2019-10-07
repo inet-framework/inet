@@ -169,7 +169,7 @@ void DimensionalTransmitterTest::testDivide()
 //    std::cout << *result << std::endl;
     for (int i = 0; i <= 50; i += 1)
         printValue(result, SimTime(i));
-    Interval<simsec, Hz> i(Point<simsec, Hz>(simsec(20), GHz(0.9)), Point<simsec, Hz>(simsec(30), GHz(1.1)), 0);
+    Interval<simsec, Hz> i(Point<simsec, Hz>(simsec(20), GHz(0.9)), Point<simsec, Hz>(simsec(30), GHz(1.1)), 0b11, 0b00, 0b00);
     std::cout << "Min value: " << result->getMin(i) << std::endl;
     std::cout << "Max value: " << result->getMax(i) << std::endl;
     std::cout << "Mean value: " << result->getMean(i) << std::endl;

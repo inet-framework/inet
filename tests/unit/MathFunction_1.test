@@ -64,59 +64,59 @@ tester.test1();
 
 %contains: stdout
 Background noise: function(s, Hz) → WpHz {
-  domain = [0 s … inf s] x [0 Hz … inf GHz] → range = [5e-08 WpHz]
+  domain = [0 s … inf s) x [0 Hz … inf GHz) → range = [5e-08 WpHz]
   structure =
-    (DomainLimited, domain = [0 s … inf s] x [0 Hz … inf GHz]
+    (DomainLimited, domain = [0 s … inf s) x [0 Hz … inf GHz)
       Constant 5e-08 WpHz)
   partitioning = {
-    constant over [0 s … inf s] x [0 Hz … inf GHz]
+    constant over [0 s … inf s) x [0 Hz … inf GHz)
       → 5e-08 WpHz
   } min = 5e-08 WpHz, max = 5e-08 WpHz, mean = 5e-08 WpHz
 }
 
 Transmission: function(s, Hz) → WpHz {
-  domain = [0 s … inf s] x [0 Hz … inf GHz] → range = [0 WpHz … 5e-07 WpHz]
+  domain = [0 s … inf s) x [0 Hz … inf GHz) → range = [0 WpHz … 5e-07 WpHz]
   structure =
-    (DomainLimited, domain = [0 s … inf s] x [0 Hz … inf GHz]
+    (DomainLimited, domain = [0 s … inf s) x [0 Hz … inf GHz)
       (TwoDimensionalBoxcar, [10 s … 30 s] x [900 MHz … 1.1 GHz] → 5e-07 WpHz))
   partitioning = {
     constant over [0 s … 10 s) x [0 Hz … 900 MHz)
       → 0 WpHz
     constant over [10 s … 30 s) x [0 Hz … 900 MHz)
       → 0 WpHz
-    constant over [30 s … inf s] x [0 Hz … 900 MHz)
+    constant over [30 s … inf s) x [0 Hz … 900 MHz)
       → 0 WpHz
     constant over [0 s … 10 s) x [900 MHz … 1.1 GHz)
       → 0 WpHz
     constant over [10 s … 30 s) x [900 MHz … 1.1 GHz)
       → 5e-07 WpHz
-    constant over [30 s … inf s] x [900 MHz … 1.1 GHz)
+    constant over [30 s … inf s) x [900 MHz … 1.1 GHz)
       → 0 WpHz
-    constant over [0 s … 10 s) x [1.1 GHz … inf GHz]
+    constant over [0 s … 10 s) x [1.1 GHz … inf GHz)
       → 0 WpHz
-    constant over [10 s … 30 s) x [1.1 GHz … inf GHz]
+    constant over [10 s … 30 s) x [1.1 GHz … inf GHz)
       → 0 WpHz
-    constant over [30 s … inf s] x [1.1 GHz … inf GHz]
+    constant over [30 s … inf s) x [1.1 GHz … inf GHz)
       → 0 WpHz
   } min = 0 WpHz, max = 5e-07 WpHz, mean = 0 WpHz
 }
 
 Propagation: (10 s, 0 Hz)
 Attenuation: function(s, Hz) → unit {
-  domain = [-inf s … inf s] x [-inf Hz … inf GHz] → range = [0.5]
+  domain = (-inf s … inf s) x (-inf Hz … inf GHz) → range = [0.5]
   structure =
     Constant 0.5
   partitioning = {
-    constant over [-inf s … inf s] x [-inf Hz … inf GHz]
+    constant over (-inf s … inf s) x (-inf Hz … inf GHz)
       → 0.5
   } min = 0.5, max = 0.5, mean = 0.5
 }
 
 Reception: function(s, Hz) → WpHz {
-  domain = [0 s … inf s] x [0 Hz … inf GHz] → range = [-inf WpHz … inf WpHz]
+  domain = [10 s … inf s) x [0 Hz … inf GHz) → range = [-inf WpHz … inf WpHz]
   structure =
     (* (Shift, s = (10 s, 0 Hz)
-         (DomainLimited, domain = [0 s … inf s] x [0 Hz … inf GHz]
+         (DomainLimited, domain = [0 s … inf s) x [0 Hz … inf GHz)
            (TwoDimensionalBoxcar, [10 s … 30 s] x [900 MHz … 1.1 GHz] → 5e-07 WpHz)))
        Constant 0.5)
   partitioning = {
@@ -124,83 +124,83 @@ Reception: function(s, Hz) → WpHz {
       → 0 WpHz
     constant over [20 s … 40 s) x [0 Hz … 900 MHz)
       → 0 WpHz
-    constant over [40 s … inf s] x [0 Hz … 900 MHz)
+    constant over [40 s … inf s) x [0 Hz … 900 MHz)
       → 0 WpHz
     constant over [10 s … 20 s) x [900 MHz … 1.1 GHz)
       → 0 WpHz
     constant over [20 s … 40 s) x [900 MHz … 1.1 GHz)
       → 2.5e-07 WpHz
-    constant over [40 s … inf s] x [900 MHz … 1.1 GHz)
+    constant over [40 s … inf s) x [900 MHz … 1.1 GHz)
       → 0 WpHz
-    constant over [10 s … 20 s) x [1.1 GHz … inf GHz]
+    constant over [10 s … 20 s) x [1.1 GHz … inf GHz)
       → 0 WpHz
-    constant over [20 s … 40 s) x [1.1 GHz … inf GHz]
+    constant over [20 s … 40 s) x [1.1 GHz … inf GHz)
       → 0 WpHz
-    constant over [40 s … inf s] x [1.1 GHz … inf GHz]
+    constant over [40 s … inf s) x [1.1 GHz … inf GHz)
       → 0 WpHz
   } min = 0 WpHz, max = 2.5e-07 WpHz, mean = 0 WpHz
 }
 
 SNIR over time and frequency: function(s, Hz) → unit {
-  domain = [0 s … inf s] x [0 Hz … inf GHz] → range = [-inf … inf]
+  domain = [10 s … inf s) x [0 Hz … inf GHz) → range = [-inf … inf]
   structure =
     (/ (* (Shift, s = (10 s, 0 Hz)
-            (DomainLimited, domain = [0 s … inf s] x [0 Hz … inf GHz]
+            (DomainLimited, domain = [0 s … inf s) x [0 Hz … inf GHz)
               (TwoDimensionalBoxcar, [10 s … 30 s] x [900 MHz … 1.1 GHz] → 5e-07 WpHz)))
           Constant 0.5)
-       (DomainLimited, domain = [0 s … inf s] x [0 Hz … inf GHz]
+       (DomainLimited, domain = [0 s … inf s) x [0 Hz … inf GHz)
          Constant 5e-08 WpHz))
   partitioning = {
     constant over [10 s … 20 s) x [0 Hz … 900 MHz)
       → 0
     constant over [20 s … 40 s) x [0 Hz … 900 MHz)
       → 0
-    constant over [40 s … inf s] x [0 Hz … 900 MHz)
+    constant over [40 s … inf s) x [0 Hz … 900 MHz)
       → 0
     constant over [10 s … 20 s) x [900 MHz … 1.1 GHz)
       → 0
     constant over [20 s … 40 s) x [900 MHz … 1.1 GHz)
       → 5
-    constant over [40 s … inf s] x [900 MHz … 1.1 GHz)
+    constant over [40 s … inf s) x [900 MHz … 1.1 GHz)
       → 0
-    constant over [10 s … 20 s) x [1.1 GHz … inf GHz]
+    constant over [10 s … 20 s) x [1.1 GHz … inf GHz)
       → 0
-    constant over [20 s … 40 s) x [1.1 GHz … inf GHz]
+    constant over [20 s … 40 s) x [1.1 GHz … inf GHz)
       → 0
-    constant over [40 s … inf s] x [1.1 GHz … inf GHz]
+    constant over [40 s … inf s) x [1.1 GHz … inf GHz)
       → 0
   } min = 0, max = 5, mean = 0
 }
 
 Bandpass filter: function(s, Hz) → unit {
-  domain = [0 s … inf s] x [0 Hz … inf GHz] → range = [0 … 1]
+  domain = [0 s … inf s) x [0 Hz … inf GHz) → range = [0 … 1]
   structure =
-    (DomainLimited, domain = [0 s … inf s] x [0 Hz … inf GHz]
+    (DomainLimited, domain = [0 s … inf s) x [0 Hz … inf GHz)
       (TwoDimensionalBoxcar, [20 s … 40 s] x [900 MHz … 1.1 GHz] → 1))
   partitioning = {
     constant over [0 s … 20 s) x [0 Hz … 900 MHz)
       → 0
     constant over [20 s … 40 s) x [0 Hz … 900 MHz)
       → 0
-    constant over [40 s … inf s] x [0 Hz … 900 MHz)
+    constant over [40 s … inf s) x [0 Hz … 900 MHz)
       → 0
     constant over [0 s … 20 s) x [900 MHz … 1.1 GHz)
       → 0
     constant over [20 s … 40 s) x [900 MHz … 1.1 GHz)
       → 1
-    constant over [40 s … inf s] x [900 MHz … 1.1 GHz)
+    constant over [40 s … inf s) x [900 MHz … 1.1 GHz)
       → 0
-    constant over [0 s … 20 s) x [1.1 GHz … inf GHz]
+    constant over [0 s … 20 s) x [1.1 GHz … inf GHz)
       → 0
-    constant over [20 s … 40 s) x [1.1 GHz … inf GHz]
+    constant over [20 s … 40 s) x [1.1 GHz … inf GHz)
       → 0
-    constant over [40 s … inf s] x [1.1 GHz … inf GHz]
+    constant over [40 s … inf s) x [1.1 GHz … inf GHz)
       → 0
   } min = 0, max = 1, mean = 0
 }
 
 SNIR over time: function(s) → unit {
-  domain = [-inf s … inf s] → range = [-inf … inf]
+  domain = (-inf s … inf s) → range = [-inf … inf]
   structure =
     (/ IntegratedFunction
        IntegratedFunction)

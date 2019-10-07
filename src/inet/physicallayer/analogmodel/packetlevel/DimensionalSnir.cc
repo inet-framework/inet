@@ -57,7 +57,7 @@ double DimensionalSnir::computeMin() const
     EV_TRACE << "SNIR begin " << endl;
     EV_TRACE << *snir << endl;
     EV_TRACE << "SNIR end" << endl;
-    double minSNIR = snir->getMin(Interval<simsec, Hz>(startPoint, endPoint, 0b0));
+    double minSNIR = snir->getMin(Interval<simsec, Hz>(startPoint, endPoint, 0b1, 0b0, 0b0));
     EV_DEBUG << "Computing minimum SNIR: start = " << startPoint << ", end = " << endPoint << " -> minimum SNIR = " << minSNIR << endl;
     return minSNIR;
 }
@@ -82,7 +82,7 @@ double DimensionalSnir::computeMax() const
     EV_TRACE << "SNIR begin " << endl;
     EV_TRACE << *snir << endl;
     EV_TRACE << "SNIR end" << endl;
-    double maxSNIR = snir->getMax(Interval<simsec, Hz>(startPoint, endPoint, 0b0));
+    double maxSNIR = snir->getMax(Interval<simsec, Hz>(startPoint, endPoint, 0b1, 0b0, 0b0));
     EV_DEBUG << "Computing maximum SNIR: start = " << startPoint << ", end = " << endPoint << " -> maximum SNIR = " << maxSNIR << endl;
     return maxSNIR;
 }
@@ -107,7 +107,7 @@ double DimensionalSnir::computeMean() const
     EV_TRACE << "SNIR begin " << endl;
     EV_TRACE << *snir << endl;
     EV_TRACE << "SNIR end" << endl;
-    double meanSNIR = snir->getMean(Interval<simsec, Hz>(startPoint, endPoint, 0b0));
+    double meanSNIR = snir->getMean(Interval<simsec, Hz>(startPoint, endPoint, 0b1, 0b0, 0b0));
     EV_DEBUG << "Computing mean SNIR: start = " << startPoint << ", end = " << endPoint << " -> mean SNIR = " << meanSNIR << endl;
     return meanSNIR;
 }

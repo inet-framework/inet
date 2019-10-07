@@ -31,7 +31,7 @@ W DimensionalReception::computeMinPower(simtime_t startTime, simtime_t endTime) 
 {
     Point<simsec> startPoint{simsec(startTime)};
     Point<simsec> endPoint{simsec(endTime)};
-    W minPower = integrate<WpHz, Domain<simsec, Hz>, 0b10, W, Domain<simsec>>(power)->getMin(Interval<simsec>(startPoint, endPoint, 0b1));
+    W minPower = integrate<WpHz, Domain<simsec, Hz>, 0b10, W, Domain<simsec>>(power)->getMin(Interval<simsec>(startPoint, endPoint, 0b1, 0b1, 0b0));
     EV_DEBUG << "Computing minimum reception power: start = " << startPoint << ", end = " << endPoint << " -> minimum reception power = " << minPower << endl;
     return minPower;
 }

@@ -130,7 +130,7 @@ class INET_API SpaceAndFrequencyDependentAttenuationFunction : public FunctionBa
     virtual void partition(const Interval<m, m, m, simsec, Hz>& i, const std::function<void (const Interval<m, m, m, simsec, Hz>&, const IFunction<double, Domain<m, m, m, simsec, Hz>> *)> f) const override {
         const auto& lower = i.getLower();
         const auto& upper = i.getUpper();
-        if (std::get<0>(lower) == std::get<0>(upper) && std::get<1>(lower) == std::get<1>(upper) && std::get<2>(lower) == std::get<2>(upper) && (i.getClosed() & 0b11100) == 0b11100)
+        if (std::get<0>(lower) == std::get<0>(upper) && std::get<1>(lower) == std::get<1>(upper) && std::get<2>(lower) == std::get<2>(upper) && (i.getLowerClosed() & 0b11100) == 0b11100 && (i.getUpperClosed() & 0b11100) == 0b11100)
             throw cRuntimeError("Cannot partition");
         else
             throw cRuntimeError("TODO");
@@ -200,7 +200,7 @@ class INET_API SpaceDependentAttenuationFunction : public FunctionBase<double, D
     virtual void partition(const Interval<m, m, m, simsec, Hz>& i, const std::function<void (const Interval<m, m, m, simsec, Hz>&, const IFunction<double, Domain<m, m, m, simsec, Hz>> *)> f) const override {
         const auto& lower = i.getLower();
         const auto& upper = i.getUpper();
-        if (std::get<0>(lower) == std::get<0>(upper) && std::get<1>(lower) == std::get<1>(upper) && std::get<2>(lower) == std::get<2>(upper) && (i.getClosed() & 0b11100) == 0b11100) {
+        if (std::get<0>(lower) == std::get<0>(upper) && std::get<1>(lower) == std::get<1>(upper) && std::get<2>(lower) == std::get<2>(upper) && (i.getLowerClosed() & 0b11100) == 0b11100 && (i.getUpperClosed() & 0b11100) == 0b11100) {
             auto lowerValue = getValue(lower);
             auto upperValue = getValue(upper);
             ASSERT(lowerValue == upperValue);
@@ -253,15 +253,17 @@ class INET_API BackgroundNoisePowerFunction : public FunctionBase<WpHz, Domain<m
     virtual void partition(const Interval<m, m, m, simsec, Hz>& i, const std::function<void (const Interval<m, m, m, simsec, Hz>&, const IFunction<WpHz, Domain<m, m, m, simsec, Hz>> *)> f) const override {
         const auto& lower = i.getLower();
         const auto& upper = i.getUpper();
-        if (std::get<0>(lower) == std::get<0>(upper) && std::get<1>(lower) == std::get<1>(upper) && std::get<2>(lower) == std::get<2>(upper) && (i.getClosed() & 0b11100) == 0b11100) {
+        if (std::get<0>(lower) == std::get<0>(upper) && std::get<1>(lower) == std::get<1>(upper) && std::get<2>(lower) == std::get<2>(upper) && (i.getLowerClosed() & 0b11100) == 0b11100 && (i.getUpperClosed() & 0b11100) == 0b11100) {
             Point<simsec, Hz> l1(std::get<3>(lower), std::get<4>(i.getLower()));
             Point<simsec, Hz> u1(std::get<3>(upper), std::get<4>(i.getUpper()));
-            Interval<simsec, Hz> i1(l1, u1, i.getClosed() & 0b11);
+            Interval<simsec, Hz> i1(l1, u1, i.getLowerClosed() & 0b11, i.getUpperClosed() & 0b11, i.getFixed() & 0b11);
             powerFunction->partition(i1, [&] (const Interval<simsec, Hz>& i2, const IFunction<WpHz, Domain<simsec, Hz>> *g) {
                 Interval<m, m, m, simsec, Hz> i3(
                     Point<m, m, m, simsec, Hz>(std::get<0>(lower), std::get<1>(lower), std::get<2>(lower), std::get<0>(i2.getLower()), std::get<1>(i2.getLower())),
                     Point<m, m, m, simsec, Hz>(std::get<0>(upper), std::get<1>(upper), std::get<2>(upper), std::get<0>(i2.getUpper()), std::get<1>(i2.getUpper())),
-                    0b11100 | i2.getClosed());
+                    0b11100 | i2.getLowerClosed(),
+                    0b11100 | i2.getUpperClosed(),
+                    0b11100 | i2.getFixed());
                 if (auto cg = dynamic_cast<const ConstantFunction<WpHz, Domain<simsec, Hz>> *>(g)) {
                     ConstantFunction<WpHz, Domain<m, m, m, simsec, Hz>> h(cg->getConstantValue());
                     f(i3, &h);
@@ -323,7 +325,7 @@ class INET_API PropagatedTransmissionPowerFunction : public FunctionBase<WpHz, D
     virtual void partition(const Interval<m, m, m, simsec, Hz>& i, const std::function<void (const Interval<m, m, m, simsec, Hz>&, const IFunction<WpHz, Domain<m, m, m, simsec, Hz>> *)> f) const override {
         const auto& lower = i.getLower();
         const auto& upper = i.getUpper();
-        if (std::get<0>(lower) == std::get<0>(upper) && std::get<1>(lower) == std::get<1>(upper) && std::get<2>(lower) == std::get<2>(upper) && (i.getClosed() & 0b11100) == 0b11100) {
+        if (std::get<0>(lower) == std::get<0>(upper) && std::get<1>(lower) == std::get<1>(upper) && std::get<2>(lower) == std::get<2>(upper) && (i.getLowerClosed() & 0b11100) == 0b11100 && (i.getUpperClosed() & 0b11100) == 0b11100) {
             m x = std::get<0>(lower);
             m y = std::get<1>(lower);
             m z = std::get<2>(lower);
@@ -337,12 +339,14 @@ class INET_API PropagatedTransmissionPowerFunction : public FunctionBase<WpHz, D
             simsec propagationTime = simsec(distance / propagationSpeed);
             Point<simsec, Hz> l1(std::get<3>(lower) - propagationTime, std::get<4>(i.getLower()));
             Point<simsec, Hz> u1(std::get<3>(upper) - propagationTime, std::get<4>(i.getUpper()));
-            Interval<simsec, Hz> i1(l1, u1, i.getClosed() & 0b11);
+            Interval<simsec, Hz> i1(l1, u1, i.getLowerClosed() & 0b11, i.getUpperClosed() & 0b11, i.getFixed() & 0b11);
             transmissionPowerFunction->partition(i1, [&] (const Interval<simsec, Hz>& i2, const IFunction<WpHz, Domain<simsec, Hz>> *g) {
                 Interval<m, m, m, simsec, Hz> i3(
                     Point<m, m, m, simsec, Hz>(std::get<0>(lower), std::get<1>(lower), std::get<2>(lower), std::get<0>(i2.getLower()) + propagationTime, std::get<1>(i2.getLower())),
                     Point<m, m, m, simsec, Hz>(std::get<0>(upper), std::get<1>(upper), std::get<2>(upper), std::get<0>(i2.getUpper()) + propagationTime, std::get<1>(i2.getUpper())),
-                    0b11100 | i2.getClosed());
+                    0b11100 | i2.getLowerClosed(),
+                    0b11100 | i2.getUpperClosed(),
+                    0b11100 | i2.getFixed());
                 if (auto cg = dynamic_cast<const ConstantFunction<WpHz, Domain<simsec, Hz>> *>(g)) {
                     ConstantFunction<WpHz, Domain<m, m, m, simsec, Hz>> h(cg->getConstantValue());
                     f(i3, &h);
