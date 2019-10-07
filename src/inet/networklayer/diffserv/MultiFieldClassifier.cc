@@ -126,9 +126,13 @@ void MultiFieldClassifier::PacketDissectorCallback::visitChunk(const Ptr<const C
         auto srcPort = transportHeader->getSourcePort();
         auto destPort = transportHeader->getDestinationPort();
 
-        if (srcPortMin >= 0 && (srcPort < srcPortMin || srcPort > srcPortMax))
+        if (srcPortMin != -1 && (srcPort < (unsigned int)srcPortMin))
             return;
-        if (destPortMin >= 0 && (destPort < destPortMin || destPort > destPortMax))
+        if (srcPortMax != -1 && (srcPort > (unsigned int)srcPortMax))
+            return;
+        if (destPortMin != -1 && (destPort < (unsigned int)destPortMin))
+            return;
+        if (destPortMax != -1 && (destPort > (unsigned int)destPortMax))
             return;
         matchesL4 = true;
     }
