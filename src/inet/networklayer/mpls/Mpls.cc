@@ -113,6 +113,7 @@ bool Mpls::tryLabelAndForwardIpv4Datagram(Packet *packet)
     ASSERT(outLabel.size() > 0);
 
     const auto& mplsHeader = makeShared<MplsHeader>();
+    mplsHeader->setChunkLength(B(0));
     doStackOps(mplsHeader.get(), outLabel);
 
     EV_INFO << "forwarding packet to " << outInterface << endl;
@@ -164,6 +165,7 @@ void Mpls::doStackOps(MplsHeader *mplsHeader, const LabelOpVector& outLabel)
                 MplsLabel label;
                 label.setLabel(outLabel[i].label);
                 mplsHeader->pushLabel(label);
+                mplsHeader->addChunkLength(B(4));
                 break;
             }
             case SWAP_OPER: {
@@ -176,6 +178,7 @@ void Mpls::doStackOps(MplsHeader *mplsHeader, const LabelOpVector& outLabel)
             case POP_OPER:
                 ASSERT(mplsHeader->hasLabel());
                 mplsHeader->popLabel();
+                mplsHeader->addChunkLength(B(-4));
                 break;
 
             default:
