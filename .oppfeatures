@@ -689,7 +689,7 @@
         id="radio"
         name="Radio"
         description = "Radio support for wireless simulations"
-        requires = "power"
+        requires = ""
         labels = ""
         nedPackages = "
                        inet.physicallayer.analogmodel
