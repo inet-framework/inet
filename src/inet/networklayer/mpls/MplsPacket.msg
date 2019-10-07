@@ -24,10 +24,10 @@ namespace inet;
 //
 class MplsLabel extends cObject
 {
-    long Label;     // @bit(20)  Label value. A label with the value of 1 represents the router alert label.
-    short tc;       // @bit(3)   Traffic Class field for QoS (quality of service) priority and ECN (Explicit Congestion Notification). Prior to 2009 this field was called EXP.
+    uint32_t Label;     // @bit(20)  Label value. A label with the value of 1 represents the router alert label.
+    uint8_t tc;       // @bit(3)   Traffic Class field for QoS (quality of service) priority and ECN (Explicit Congestion Notification). Prior to 2009 this field was called EXP.
 //    bool s;         // @bit(1)   bottom of stack flag. If this is set, it signifies that the current label is the last in the stack.
-    short ttl;      // @bit(8)   time to live
+    uint8_t ttl;      // @bit(8)   time to live
 }
 
 class MplsHeader extends FieldsChunk
@@ -66,7 +66,5 @@ cplusplus(MplsHeader) {{
      * Returns the top label
      */
     inline MplsLabel getTopLabel() { ASSERT(labels_arraysize > 0); return labels[labels_arraysize - 1]; }
-
-    virtual b getChunkLength() const override { return b(32) * labels_arraysize; }
 }}
 
