@@ -18,8 +18,11 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/OsgScene.h"
 #include "inet/common/OsgUtils.h"
-#include "inet/physicallayer/pathloss/FreeSpacePathLoss.h"
 #include "inet/visualizer/physicallayer/MediumOsgVisualizer.h"
+
+#ifdef WITH_RADIO
+#include "inet/physicallayer/pathloss/FreeSpacePathLoss.h"
+#endif // WITH_RADIO
 
 #ifdef WITH_OSG
 #include <osg/Depth>
@@ -35,13 +38,14 @@
 
 namespace inet {
 
-using namespace physicallayer;
-
 namespace visualizer {
 
 Define_Module(MediumOsgVisualizer);
 
+#ifdef WITH_RADIO
 #ifdef WITH_OSG
+
+using namespace physicallayer;
 
 void MediumOsgVisualizer::initialize(int stage)
 {
@@ -495,6 +499,7 @@ void MediumOsgVisualizer::handleSignalArrivalEnded(const IReception *reception)
 }
 
 #endif // ifdef WITH_OSG
+#endif // ifdef WITH_RADIO
 
 } // namespace visualizer
 

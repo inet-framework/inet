@@ -22,12 +22,15 @@
 #include "inet/common/figures/PlotFigure.h"
 #include "inet/common/figures/TrailFigure.h"
 #include "inet/common/geometry/common/CanvasProjection.h"
-#include "inet/physicallayer/contract/packetlevel/IReceptionDecision.h"
-#include "inet/physicallayer/contract/packetlevel/ISignal.h"
-#include "inet/physicallayer/contract/packetlevel/ITransmission.h"
 #include "inet/visualizer/base/MediumVisualizerBase.h"
 #include "inet/visualizer/scene/NetworkNodeCanvasVisualizer.h"
 #include "inet/visualizer/util/AnimationSpeedInterpolator.h"
+
+#ifdef WITH_RADIO
+#include "inet/physicallayer/contract/packetlevel/IReceptionDecision.h"
+#include "inet/physicallayer/contract/packetlevel/ISignal.h"
+#include "inet/physicallayer/contract/packetlevel/ITransmission.h"
+#endif // WITH_RADIO
 
 namespace inet {
 
@@ -35,6 +38,7 @@ namespace visualizer {
 
 class INET_API MediumCanvasVisualizer : public MediumVisualizerBase
 {
+#ifdef WITH_RADIO
   protected:
     /** @name Parameters */
     //@{
@@ -131,6 +135,7 @@ class INET_API MediumCanvasVisualizer : public MediumVisualizerBase
     virtual void handleSignalDepartureEnded(const physicallayer::ITransmission *transmission) override;
     virtual void handleSignalArrivalStarted(const physicallayer::IReception *reception) override;
     virtual void handleSignalArrivalEnded(const physicallayer::IReception *reception) override;
+#endif // WITH_RADIO
 };
 
 } // namespace visualizer

@@ -32,6 +32,8 @@
 namespace inet {
 namespace visualizer {
 
+#ifdef WITH_RADIO
+
 using namespace inet::physicallayer;
 
 Define_Module(MediumCanvasVisualizer);
@@ -305,7 +307,6 @@ std::pair<WpHz, WpHz> MediumCanvasVisualizer::computePowerForDirectionalAntenna(
 
 void MediumCanvasVisualizer::updateSpectrumFigureFrequencyBounds(const ITransmission *transmission)
 {
-#ifdef WITH_RADIO
     if (auto dimensionalTransmission = dynamic_cast<const DimensionalTransmission *>(transmission)) {
         const auto& powerFunction = dimensionalTransmission->getPower();
         powerFunction->partition(powerFunction->getDomain(), [&] (const Interval<simsec, Hz>& i, const IFunction<WpHz, Domain<simsec, Hz>> *f) {
@@ -317,7 +318,6 @@ void MediumCanvasVisualizer::updateSpectrumFigureFrequencyBounds(const ITransmis
             spectrumMaxFrequency = std::max(spectrumMaxFrequency, std::get<1>(i.getUpper()));
         });
     }
-#endif // WITH_RADIO
 }
 
 void MediumCanvasVisualizer::updateSpectrumFigurePowerBounds(const Interval<m, m, m, simsec, Hz>& i, const IFunction<WpHz, Domain<m, m, m, simsec, Hz>> *f)
@@ -669,14 +669,12 @@ void MediumCanvasVisualizer::handleSignalDepartureStarted(const ITransmission *t
             auto networkNodeVisualization = networkNodeVisualizer->getNetworkNodeVisualization(networkNode);
             networkNodeVisualization->setAnnotationVisible(figure, true);
             auto labelFigure = check_and_cast<LabeledIconFigure *>(figure)->getLabelFigure();
-#ifdef WITH_RADIO
             if (auto scalarTransmission = dynamic_cast<const ScalarTransmission *>(transmission)) {
                 char tmp[32];
                 sprintf(tmp, "%.4g dBW", fraction2dB(W(scalarTransmission->getPower()).get()));
                 labelFigure->setText(tmp);
             }
             else
-#endif // WITH_RADIO
                 labelFigure->setText("");
         }
     }
@@ -713,14 +711,12 @@ void MediumCanvasVisualizer::handleSignalArrivalStarted(const IReception *recept
                 auto networkNodeVisualization = networkNodeVisualizer->getNetworkNodeVisualization(networkNode);
                 networkNodeVisualization->setAnnotationVisible(figure, true);
                 auto labelFigure = check_and_cast<LabeledIconFigure *>(figure)->getLabelFigure();
-#ifdef WITH_RADIO
                 if (auto scalarReception = dynamic_cast<const ScalarReception *>(reception)) {
                     char tmp[32];
                     sprintf(tmp, "%.4g dBW", fraction2dB(W(scalarReception->getPower()).get()));
                     labelFigure->setText(tmp);
                 }
                 else
-#endif // WITH_RADIO
                     labelFigure->setText("");
             }
         }
@@ -756,6 +752,8 @@ void MediumCanvasVisualizer::handleSignalArrivalEnded(const IReception *receptio
         }
     }
 }
+
+#endif // WITH_RADIO
 
 } // namespace visualizer
 } // namespace inet
