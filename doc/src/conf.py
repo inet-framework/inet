@@ -20,8 +20,8 @@ sys.path.insert(0, os.path.abspath('.'))
 # -- Project information -----------------------------------------------------
 
 project = 'INET Documentation'
-copyright = '2018, OpenSim Ltd.'
-author = 'OpenSim Ltd.'
+copyright = ''
+author = ''
 
 # The short X.Y version
 version = '4.0.0'
@@ -191,8 +191,8 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    ('users-guide/index', 'users-guide.tex', "INET Framework User's Guide", 'OpenSim Ltd.', 'manual', False),
-    ('developers-guide/index', 'developers-guide.tex', "INET Framework Developer's Guide", 'OpenSim Ltd.', 'manual', False),
+    ('users-guide/index', 'users-guide.tex', "INET Framework User's Guide", '', 'manual', False),
+    ('developers-guide/index', 'developers-guide.tex', "INET Framework Developer's Guide", '', 'manual', False),
 ]
 
 
