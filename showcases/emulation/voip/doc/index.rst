@@ -4,8 +4,32 @@ Testing a Simulated VoIP Application Over a Real Network
 Goals
 -----
 
-INET can be used to validate an application's simulation model over the real network.
-This showcase demonstrates such a case with a simulated VoIP application.
+INET contains several components to allow a variety of hardware-in-the-loop
+(HIL) simulation scenarios. Specifically, it contains one or two additional
+variants for several protocols and interfaces: an "ext lower" and/or an "ext
+upper" variant. The naming indicates that the given "half" of the protocol or
+interface connects to something external to the simulation, namely to an
+interface or socket on the host OS. This showcase demonstrates how such modules
+make it possible to build HIL scenarios like real apps/devices in a simulated network,
+or simulated apps/devices in a real network.
+
+In this showcase, we'll use :ned:`ExtLowerUdp`. This is a module that looks like
+a normal UDP module to its higher layers (i.e. applications), but in fact it
+sends and receives real UDP packets via the network stack of the host OS. In our
+simulation, we'll let a pair of VoIP applications that normaly use the
+:ned:`Udp` module communicate over :ned:`ExtLowerUdp`, and we'll make the actual
+UDP packets travel across a real network so that we can see how that affects
+voice quality. (Well, almost: to make it easier to run the simulation without
+any special setup, we'll use tricks like routing between virtual interfaces
+created in the Linux kernel instead of a real network. Luckily, Linux has
+facilities to make those virtual network links somewhat more interesting by adding
+delay, jitter, packet loss and packet corruption. The simulation setup can be
+trivially modified so that it runs on two distinct hosts connected by a real
+network.)
+
+Note that this showcase requires the ``VoIPStream`` and ``ExtInterface``
+features of the INET Framework to be turned on (they are off by default), and it
+only runs on Linux.
 
 | INET version: ``4.0``
 | Source files location: `inet/showcases/emulation/voip <https://github.com/inet-framework/inet-showcases/tree/master/emulation/voip>`__
