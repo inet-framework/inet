@@ -17,8 +17,8 @@
 // author: Zoltan Bojthe
 //
 
-#ifndef __INET_OSPFCRC_H
-#define __INET_OSPFCRC_H
+#ifndef __INET_OSPFV2CRC_H
+#define __INET_OSPFV2CRC_H
 
 #include <vector>
 
@@ -37,5 +37,5 @@ INET_API void setLsaHeaderCrc(Ospfv2LsaHeader& lsaHeader, CrcMode crcMode);
 
 } // namespace inet
 
-#endif // ifndef __INET_OSPFCRC_H
+#endif // ifndef __INET_OSPFV2CRC_H
 

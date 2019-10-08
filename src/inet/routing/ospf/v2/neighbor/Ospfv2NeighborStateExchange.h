@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_OSPFNEIGHBORSTATEEXCHANGE_H
-#define __INET_OSPFNEIGHBORSTATEEXCHANGE_H
+#ifndef __INET_OSPFV2NEIGHBORSTATEEXCHANGE_H
+#define __INET_OSPFV2NEIGHBORSTATEEXCHANGE_H
 
 #include "inet/common/INETDefs.h"
 #include "inet/routing/ospf/v2/neighbor/Ospfv2NeighborState.h"
@@ -36,5 +36,5 @@ class INET_API NeighborStateExchange : public NeighborState
 
 } // namespace inet
 
-#endif // ifndef __INET_OSPFNEIGHBORSTATEEXCHANGE_H
+#endif // ifndef __INET_OSPFV2NEIGHBORSTATEEXCHANGE_H
 

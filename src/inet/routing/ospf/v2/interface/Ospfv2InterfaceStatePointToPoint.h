@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_OSPFINTERFACESTATEPOINTTOPOINT_H
-#define __INET_OSPFINTERFACESTATEPOINTTOPOINT_H
+#ifndef __INET_OSPFV2INTERFACESTATEPOINTTOPOINT_H
+#define __INET_OSPFV2INTERFACESTATEPOINTTOPOINT_H
 
 #include "inet/common/INETDefs.h"
 #include "inet/routing/ospf/v2/interface/Ospfv2InterfaceState.h"
@@ -36,5 +36,5 @@ class INET_API InterfaceStatePointToPoint : public Ospfv2InterfaceState
 
 } // namespace inet
 
-#endif // ifndef __INET_OSPFINTERFACESTATEPOINTTOPOINT_H
+#endif // ifndef __INET_OSPFV2INTERFACESTATEPOINTTOPOINT_H
 

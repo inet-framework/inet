@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_OSPFROUTER_H
-#define __INET_OSPFROUTER_H
+#ifndef __INET_OSPFV2ROUTER_H
+#define __INET_OSPFV2ROUTER_H
 
 #include <map>
 #include <vector>
@@ -388,5 +388,5 @@ class INET_API Router
 
 } // namespace inet
 
-#endif // ifndef __INET_OSPFROUTER_H
+#endif // ifndef __INET_OSPFV2ROUTER_H
 

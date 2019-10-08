@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_OSPFCONFIGREADER_H
-#define __INET_OSPFCONFIGREADER_H
+#ifndef __INET_OSPFV2CONFIGREADER_H
+#define __INET_OSPFV2CONFIGREADER_H
 
 #include <vector>
 
@@ -120,5 +120,5 @@ class INET_API Ospfv2ConfigReader
 
 } // namespace inet
 
-#endif // ifndef __INET_OSPFCONFIGREADER_H
+#endif // ifndef __INET_OSPFV2CONFIGREADER_H
 

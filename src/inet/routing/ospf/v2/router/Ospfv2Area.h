@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_OSPFAREA_H
-#define __INET_OSPFAREA_H
+#ifndef __INET_OSPFV2AREA_H
+#define __INET_OSPFV2AREA_H
 
 #include <map>
 #include <vector>
@@ -167,5 +167,5 @@ inline std::ostream& operator<<(std::ostream& ostr, Ospfv2Area& area)
 
 } // namespace inet
 
-#endif // ifndef __INET_OSPFAREA_H
+#endif // ifndef __INET_OSPFV2AREA_H
 

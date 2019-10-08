@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_OSPFCOMMON_H
-#define __INET_OSPFCOMMON_H
+#ifndef __INET_OSPFV2COMMON_H
+#define __INET_OSPFV2COMMON_H
 
 #include <ctype.h>
 #include <functional>

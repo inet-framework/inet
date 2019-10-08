@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_OSPFROUTINGTABLEENTRY_H
-#define __INET_OSPFROUTINGTABLEENTRY_H
+#ifndef __INET_OSPFV2ROUTINGTABLEENTRY_H
+#define __INET_OSPFV2ROUTINGTABLEENTRY_H
 
 #include <memory.h>
 
@@ -98,5 +98,5 @@ std::ostream& operator<<(std::ostream& out, const Ospfv2RoutingTableEntry& entry
 
 } // namespace inet
 
-#endif // ifndef __INET_OSPFROUTINGTABLEENTRY_H
+#endif // ifndef __INET_OSPFV2ROUTINGTABLEENTRY_H
 

@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_OSPFINTERFACE_H
-#define __INET_OSPFINTERFACE_H
+#ifndef __INET_OSPFV2INTERFACE_H
+#define __INET_OSPFV2INTERFACE_H
 
 #include <list>
 #include <map>
@@ -27,14 +27,15 @@
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/routing/ospf/v2/Ospfv2Timer.h"
 #include "inet/routing/ospf/v2/neighbor/Ospfv2Neighbor.h"
+#include "inet/routing/ospf/v2/router/Ospfv2Area.h"
 #include "inet/routing/ospf/v2/router/Ospfv2Common.h"
 
 namespace inet {
 
 namespace ospf {
 
-class Ospfv2InterfaceState;
 class Ospfv2Area;
+class Ospfv2InterfaceState;
 
 class INET_API Ospfv2Interface
 {
@@ -198,5 +199,5 @@ class INET_API Ospfv2Interface
 
 } // namespace inet
 
-#endif // ifndef __INET_OSPFINTERFACE_H
+#endif // ifndef __INET_OSPFV2INTERFACE_H
 

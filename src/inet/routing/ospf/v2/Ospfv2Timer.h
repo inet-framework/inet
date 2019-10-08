@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_OSPFTIMER_H
-#define __INET_OSPFTIMER_H
+#ifndef __INET_OSPFV2TIMER_H
+#define __INET_OSPFV2TIMER_H
 
 #include "inet/common/INETDefs.h"
 
@@ -40,5 +40,5 @@ enum Ospfv2TimerType {
 
 } // namespace inet
 
-#endif // ifndef __INET_OSPFTIMER_H
+#endif // ifndef __INET_OSPFV2TIMER_H
 

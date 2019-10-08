@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_OSPFINTERFACESTATE_H
-#define __INET_OSPFINTERFACESTATE_H
+#ifndef __INET_OSPFV2INTERFACESTATE_H
+#define __INET_OSPFV2INTERFACESTATE_H
 
 #include "inet/common/INETDefs.h"
 #include "inet/routing/ospf/v2/interface/Ospfv2Interface.h"
@@ -43,5 +43,5 @@ class INET_API Ospfv2InterfaceState
 
 } // namespace inet
 
-#endif // ifndef __INET_OSPFINTERFACESTATE_H
+#endif // ifndef __INET_OSPFV2INTERFACESTATE_H
 

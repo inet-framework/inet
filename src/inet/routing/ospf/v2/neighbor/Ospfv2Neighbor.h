@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_OSPFNEIGHBOR_H
-#define __INET_OSPFNEIGHBOR_H
+#ifndef __INET_OSPFV2NEIGHBOR_H
+#define __INET_OSPFV2NEIGHBOR_H
 
 #include <list>
 
@@ -219,5 +219,5 @@ inline bool operator!=(Neighbor::DdPacketId leftID, Neighbor::DdPacketId rightID
 
 } // namespace inet
 
-#endif // ifndef __INET_OSPFNEIGHBOR_H
+#endif // ifndef __INET_OSPFV2NEIGHBOR_H
 
