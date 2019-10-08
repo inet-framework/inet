@@ -20,10 +20,8 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/routing/bgpv4/BgpRouter.h"
 #include "inet/routing/bgpv4/BgpSession.h"
-//#include "inet/routing/ospf/v2/router/Ospfv2RoutingTableEntry.h"
 
 namespace inet {
-
 namespace bgp {
 
 BgpRouter::BgpRouter(cSimpleModule *bgpModule, IInterfaceTable *ift, IIpv4RoutingTable *rt)
@@ -32,7 +30,7 @@ BgpRouter::BgpRouter(cSimpleModule *bgpModule, IInterfaceTable *ift, IIpv4Routin
     this->ift = ift;
     this->rt = rt;
 
-    ospfModule = getModuleFromPar<ospf::Ospfv2>(bgpModule->par("ospfRoutingModule"), bgpModule, false);
+    ospfModule = getModuleFromPar<ospf::v2::Ospfv2>(bgpModule->par("ospfRoutingModule"), bgpModule, false);
 }
 
 BgpRouter::~BgpRouter(void)
@@ -646,7 +644,7 @@ unsigned char BgpRouter::decisionProcess(const BgpUpdateMessage& msg, BgpRouting
             InterfaceEntry *ie = entry->getInterface();
             if (!ie)
                 throw cRuntimeError("Model error: interface entry is nullptr");
-            ospf::Ipv4AddressRange OSPFnetAddr;
+            ospf::v2::Ipv4AddressRange OSPFnetAddr;
             OSPFnetAddr.address = entry->getDestination();
             OSPFnetAddr.mask = entry->getNetmask();
             if(!ospfModule)
@@ -1020,17 +1018,17 @@ bool BgpRouter::isRouteExcluded(const Ipv4Route &rtEntry)
         if(!redistributeOspf)
             return true;
 
-        auto entry = static_cast<const ospf::Ospfv2RoutingTableEntry *>(&rtEntry);
+        auto entry = static_cast<const ospf::v2::Ospfv2RoutingTableEntry *>(&rtEntry);
         ASSERT(entry);
 
-        if(entry->getPathType() == ospf::Ospfv2RoutingTableEntry::INTRAAREA) {
+        if(entry->getPathType() == ospf::v2::Ospfv2RoutingTableEntry::INTRAAREA) {
             if(redistributeOspfType.intraArea)
                 return false;
             else
                 return true;
         }
 
-        if(entry->getPathType() == ospf::Ospfv2RoutingTableEntry::INTERAREA) {
+        if(entry->getPathType() == ospf::v2::Ospfv2RoutingTableEntry::INTERAREA) {
             if(redistributeOspfType.interArea)
                 return false;
             else

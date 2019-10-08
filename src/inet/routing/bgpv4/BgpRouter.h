@@ -41,7 +41,7 @@ private:
     IInterfaceTable *ift = nullptr;
     IIpv4RoutingTable *rt = nullptr;
     cSimpleModule *bgpModule = nullptr;
-    ospf::Ospfv2 *ospfModule = nullptr;
+    ospf::v2::Ospfv2 *ospfModule = nullptr;
     AsId myAsId = 0;
     bool redistributeInternal = false;
     bool redistributeRip = false;
