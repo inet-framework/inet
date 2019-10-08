@@ -8,7 +8,7 @@ Testing TCP communication speed
 %file: test.ned
 
 import inet.applications.ethernet.EtherAppClient;
-import inet.common.queue.Sink;
+import inet.queueing.Sink;
 import inet.linklayer.ieee80211.Ieee80211Interface;
 import inet.mobility.single.CircleMobility;
 import inet.mobility.static.StationaryMobility;
