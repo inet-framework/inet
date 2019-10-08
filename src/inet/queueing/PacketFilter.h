@@ -18,8 +18,8 @@
 #ifndef __INET_PACKETFILTER_H
 #define __INET_PACKETFILTER_H
 
-#include "inet/common/queueing/base/PacketFilterBase.h"
-#include "inet/common/queueing/contract/IPacketFilterFunction.h"
+#include "inet/queueing/base/PacketFilterBase.h"
+#include "inet/queueing/contract/IPacketFilterFunction.h"
 
 namespace inet {
 namespace queueing {

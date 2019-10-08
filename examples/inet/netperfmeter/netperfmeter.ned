@@ -27,9 +27,9 @@
 
 package inet.examples.inet.netperfmeter;
 
-import inet.common.queueing.CompoundPacketQueue;
-import inet.common.queueing.PacketQueue;
-import inet.common.queueing.RedDropper;
+import inet.queueing.CompoundPacketQueue;
+import inet.queueing.PacketQueue;
+import inet.queueing.RedDropper;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.Router;
 import inet.node.inet.StandardHost;

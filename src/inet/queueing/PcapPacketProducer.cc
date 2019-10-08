@@ -16,7 +16,7 @@
 //
 
 #include "inet/common/ModuleAccess.h"
-#include "inet/common/queueing/PcapPacketProducer.h"
+#include "inet/queueing/PcapPacketProducer.h"
 
 namespace inet {
 namespace queueing {

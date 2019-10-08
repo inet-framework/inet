@@ -15,10 +15,10 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-package inet.common.queueing;
+package inet.queueing;
 
-import inet.common.queueing.base.PacketClassifierBase;
-import inet.common.queueing.contract.IPacketClassifier;
+import inet.queueing.base.PacketClassifierBase;
+import inet.queueing.contract.IPacketClassifier;
 
 //
 // This module connects one packet producer to multiple packet consumers. It

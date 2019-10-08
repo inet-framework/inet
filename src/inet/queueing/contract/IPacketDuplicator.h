@@ -18,8 +18,8 @@
 #ifndef __INET_IPACKETDUPLICATOR_H
 #define __INET_IPACKETDUPLICATOR_H
 
-#include "inet/common/queueing/contract/IPacketConsumer.h"
-#include "inet/common/queueing/contract/IPacketProducer.h"
+#include "inet/queueing/contract/IPacketConsumer.h"
+#include "inet/queueing/contract/IPacketProducer.h"
 
 namespace inet {
 namespace queueing {

@@ -15,10 +15,10 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-package inet.common.queueing;
+package inet.queueing;
 
-import inet.common.queueing.base.PacketQueueBase;
-import inet.common.queueing.contract.IPacketQueue;
+import inet.queueing.base.PacketQueueBase;
+import inet.queueing.contract.IPacketQueue;
 
 //
 // This module implements a widely configurable packet queue, which is suitable

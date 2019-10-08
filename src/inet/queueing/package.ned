@@ -1,4 +1,4 @@
-package inet.common.queueing;
+package inet.queueing;
 
 @namespace(inet::queueing);
 

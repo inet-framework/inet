@@ -8,9 +8,9 @@ one or the other sink.
 
 %file: test.ned
 
-import inet.common.queueing.PacketConsumer;
-import inet.common.queueing.PacketClassifier;
-import inet.common.queueing.PacketProducer;
+import inet.queueing.PacketConsumer;
+import inet.queueing.PacketClassifier;
+import inet.queueing.PacketProducer;
 
 network TestClassifier
 {
@@ -34,7 +34,7 @@ network TestClassifier
 }
 
 %file: Test.cc
-#include "inet/common/queueing/PacketClassifierFunction.h"
+#include "inet/queueing/PacketClassifierFunction.h"
 #include "inet/common/packet/Packet.h"
 
 using namespace inet; 

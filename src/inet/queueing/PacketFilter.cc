@@ -15,7 +15,7 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-#include "inet/common/queueing/PacketFilter.h"
+#include "inet/queueing/PacketFilter.h"
 
 namespace inet {
 namespace queueing {

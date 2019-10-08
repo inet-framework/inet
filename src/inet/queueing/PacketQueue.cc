@@ -16,9 +16,9 @@
 //
 
 #include "inet/common/ModuleAccess.h"
-#include "inet/common/queueing/PacketComparatorFunction.h"
-#include "inet/common/queueing/PacketDropperFunction.h"
-#include "inet/common/queueing/PacketQueue.h"
+#include "inet/queueing/PacketComparatorFunction.h"
+#include "inet/queueing/PacketDropperFunction.h"
+#include "inet/queueing/PacketQueue.h"
 #include "inet/common/Simsignals.h"
 
 namespace inet {

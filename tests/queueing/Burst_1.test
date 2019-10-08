@@ -8,9 +8,9 @@ consumed by a single passive sink (PacketConsumer).
 
 %file: test.ned
 
-import inet.common.queueing.PacketConsumer;
-import inet.common.queueing.MarkovScheduler;
-import inet.common.queueing.PacketProducer;
+import inet.queueing.PacketConsumer;
+import inet.queueing.MarkovScheduler;
+import inet.queueing.PacketProducer;
 
 network TestBurst
 {

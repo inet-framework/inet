@@ -4,9 +4,9 @@ TODO
 
 %file: test.ned
 
-import inet.common.queueing.LeakyBucket;
-import inet.common.queueing.PacketConsumer;
-import inet.common.queueing.PacketProducer;
+import inet.queueing.LeakyBucket;
+import inet.queueing.PacketConsumer;
+import inet.queueing.PacketProducer;
 
 network TestLeakyBucket
 {

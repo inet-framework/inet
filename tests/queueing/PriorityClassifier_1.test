@@ -10,10 +10,10 @@ way.
 
 %file: test.ned
 
-import inet.common.queueing.PacketCollector;
-import inet.common.queueing.PacketQueue;
-import inet.common.queueing.PriorityClassifier;
-import inet.common.queueing.PacketProducer;
+import inet.queueing.PacketCollector;
+import inet.queueing.PacketQueue;
+import inet.queueing.PriorityClassifier;
+import inet.queueing.PacketProducer;
 
 network TestPriorityClassifier
 {

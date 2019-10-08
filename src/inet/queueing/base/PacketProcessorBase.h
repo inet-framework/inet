@@ -19,7 +19,7 @@
 #define __INET_PACKETPROCESSORBASE_H
 
 #include "inet/common/packet/Packet.h"
-#include "inet/common/queueing/base/PacketQueueingElementBase.h"
+#include "inet/queueing/base/PacketQueueingElementBase.h"
 #include "inet/common/StringFormat.h"
 
 namespace inet {

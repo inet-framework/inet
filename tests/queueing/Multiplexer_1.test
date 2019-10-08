@@ -8,9 +8,9 @@ forwards packets.
 
 %file: test.ned
 
-import inet.common.queueing.PacketConsumer;
-import inet.common.queueing.PacketMultiplexer;
-import inet.common.queueing.PacketProducer;
+import inet.queueing.PacketConsumer;
+import inet.queueing.PacketMultiplexer;
+import inet.queueing.PacketProducer;
 
 network TestServer
 {

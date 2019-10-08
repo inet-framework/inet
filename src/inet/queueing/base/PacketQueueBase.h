@@ -18,8 +18,8 @@
 #ifndef __INET_PACKETQUEUEBASE_H
 #define __INET_PACKETQUEUEBASE_H
 
-#include "inet/common/queueing/base/PacketQueueingElementBase.h"
-#include "inet/common/queueing/contract/IPacketQueue.h"
+#include "inet/queueing/base/PacketQueueingElementBase.h"
+#include "inet/queueing/contract/IPacketQueue.h"
 
 namespace inet {
 namespace queueing {

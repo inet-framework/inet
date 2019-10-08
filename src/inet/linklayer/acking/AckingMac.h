@@ -21,7 +21,7 @@
 #define __INET_ACKINGMAC_H
 
 #include "inet/common/INETDefs.h"
-#include "inet/common/queueing/contract/IPacketQueue.h"
+#include "inet/queueing/contract/IPacketQueue.h"
 #include "inet/linklayer/base/MacProtocolBase.h"
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/physicallayer/contract/packetlevel/IRadio.h"

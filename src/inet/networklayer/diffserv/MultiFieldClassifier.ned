@@ -18,7 +18,7 @@
 
 package inet.networklayer.diffserv;
 
-import inet.common.queueing.base.PacketClassifierBase;
+import inet.queueing.base.PacketClassifierBase;
 
 //
 // This classifier contains a list of filters that identifies

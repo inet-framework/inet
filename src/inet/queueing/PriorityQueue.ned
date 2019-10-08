@@ -15,12 +15,12 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-package inet.common.queueing;
+package inet.queueing;
 
-import inet.common.queueing.contract.IPacketBuffer;
-import inet.common.queueing.contract.IPacketClassifier;
-import inet.common.queueing.contract.IPacketQueue;
-import inet.common.queueing.contract.IPacketScheduler;
+import inet.queueing.contract.IPacketBuffer;
+import inet.queueing.contract.IPacketClassifier;
+import inet.queueing.contract.IPacketQueue;
+import inet.queueing.contract.IPacketScheduler;
 
 //
 // This module implements a priority queue with multiple inner queues and an

@@ -19,7 +19,7 @@
 #include <cstdio>
 #include <cstring>
 #include <sstream>
-#include "inet/common/queueing/compat/cpacketqueue.h"
+#include "inet/queueing/compat/cpacketqueue.h"
 
 namespace inet {
 namespace queueing {

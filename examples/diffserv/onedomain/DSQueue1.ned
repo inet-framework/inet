@@ -18,11 +18,11 @@
 
 package inet.examples.diffserv.onedomain;
 
-import inet.common.queueing.CompoundPacketQueue;
-import inet.common.queueing.DropTailQueue;
-import inet.common.queueing.PriorityScheduler;
-import inet.common.queueing.WrrScheduler;
-import inet.common.queueing.contract.IPacketQueue;
+import inet.queueing.CompoundPacketQueue;
+import inet.queueing.DropTailQueue;
+import inet.queueing.PriorityScheduler;
+import inet.queueing.WrrScheduler;
+import inet.queueing.contract.IPacketQueue;
 import inet.networklayer.diffserv.BehaviorAggregateClassifier;
 
 //

@@ -15,10 +15,10 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-package inet.common.queueing;
+package inet.queueing;
 
-import inet.common.queueing.base.PacketServerBase;
-import inet.common.queueing.contract.IPacketServer;
+import inet.queueing.base.PacketServerBase;
+import inet.queueing.contract.IPacketServer;
 
 //
 // This module repeatedly pops packets from the connected packet provider and

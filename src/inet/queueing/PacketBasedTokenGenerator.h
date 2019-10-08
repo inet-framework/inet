@@ -18,8 +18,8 @@
 #ifndef __INET_PACKETBASEDTOKENGENERATOR_H
 #define __INET_PACKETBASEDTOKENGENERATOR_H
 
-#include "inet/common/queueing/base/PacketConsumerBase.h"
-#include "inet/common/queueing/TokenBasedServer.h"
+#include "inet/queueing/base/PacketConsumerBase.h"
+#include "inet/queueing/TokenBasedServer.h"
 
 namespace inet {
 namespace queueing {

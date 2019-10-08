@@ -7,9 +7,9 @@ a filter (PacketFilter). Every second packet is dropped.
 
 %file: test.ned
 
-import inet.common.queueing.PacketCollector;
-import inet.common.queueing.PacketFilter;
-import inet.common.queueing.PacketProvider;
+import inet.queueing.PacketCollector;
+import inet.queueing.PacketFilter;
+import inet.queueing.PacketProvider;
 
 network TestFilter
 {
@@ -29,7 +29,7 @@ network TestFilter
 }
 
 %file: Test.cc
-#include "inet/common/queueing/PacketFilterFunction.h"
+#include "inet/queueing/PacketFilterFunction.h"
 #include "inet/common/packet/Packet.h"
 
 using namespace inet; 

@@ -17,7 +17,7 @@
 
 // Author
 
-package inet.common.queueing;
+package inet.queueing;
 
 module RedMarkerQueue extends CompoundPacketQueue
 {

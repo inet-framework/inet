@@ -17,7 +17,7 @@
 
 package inet.linklayer.ieee80211.mac.queue;
 
-import inet.common.queueing.DropTailQueue;
+import inet.queueing.DropTailQueue;
 
 simple PendingQueue extends DropTailQueue
 {

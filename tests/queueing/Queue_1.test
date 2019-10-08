@@ -7,9 +7,9 @@ by a FIFO queue (PacketQueue) where packets are stored temporarily.
 
 %file: test.ned
 
-import inet.common.queueing.PacketProducer;
-import inet.common.queueing.PacketCollector;
-import inet.common.queueing.PacketQueue;
+import inet.queueing.PacketProducer;
+import inet.queueing.PacketCollector;
+import inet.queueing.PacketQueue;
 
 network TestPacketQueue
 {

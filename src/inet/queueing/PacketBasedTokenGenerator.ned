@@ -15,10 +15,10 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-package inet.common.queueing;
+package inet.queueing;
 
-import inet.common.queueing.base.PacketSinkBase;
-import inet.common.queueing.contract.IPacketConsumer;
+import inet.queueing.base.PacketSinkBase;
+import inet.queueing.contract.IPacketConsumer;
 
 simple PacketBasedTokenGenerator extends PacketSinkBase like IPacketConsumer
 {

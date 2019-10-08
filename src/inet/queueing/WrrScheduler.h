@@ -18,8 +18,8 @@
 #ifndef __INET_WRRSCHEDULER_H
 #define __INET_WRRSCHEDULER_H
 
-#include "inet/common/queueing/base/PacketSchedulerBase.h"
-#include "inet/common/queueing/contract/IPacketCollection.h"
+#include "inet/queueing/base/PacketSchedulerBase.h"
+#include "inet/queueing/contract/IPacketCollection.h"
 
 namespace inet {
 namespace queueing {

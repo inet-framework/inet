@@ -18,9 +18,9 @@
 #ifndef __INET_IPACKETQUEUE_H
 #define __INET_IPACKETQUEUE_H
 
-#include "inet/common/queueing/contract/IPacketCollection.h"
-#include "inet/common/queueing/contract/IPacketConsumer.h"
-#include "inet/common/queueing/contract/IPacketProvider.h"
+#include "inet/queueing/contract/IPacketCollection.h"
+#include "inet/queueing/contract/IPacketConsumer.h"
+#include "inet/queueing/contract/IPacketProvider.h"
 
 namespace inet {
 namespace queueing {

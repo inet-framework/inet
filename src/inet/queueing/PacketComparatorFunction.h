@@ -18,7 +18,7 @@
 #ifndef __INET_PACKETCOMPARATORFUNCTION_H
 #define __INET_PACKETCOMPARATORFUNCTION_H
 
-#include "inet/common/queueing/contract/IPacketComparatorFunction.h"
+#include "inet/queueing/contract/IPacketComparatorFunction.h"
 
 namespace inet {
 namespace queueing {

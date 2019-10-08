@@ -18,7 +18,7 @@
 
 package inet.networklayer.diffserv;
 
-import inet.common.queueing.base.PacketClassifierBase;
+import inet.queueing.base.PacketClassifierBase;
 
 //
 // This module reads the DSCP (lower six bits of ToS/TrafficClass) from the

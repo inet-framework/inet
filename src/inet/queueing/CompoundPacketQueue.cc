@@ -15,7 +15,7 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-#include "inet/common/queueing/CompoundPacketQueue.h"
+#include "inet/queueing/CompoundPacketQueue.h"
 #include "inet/common/Simsignals.h"
 
 namespace inet {

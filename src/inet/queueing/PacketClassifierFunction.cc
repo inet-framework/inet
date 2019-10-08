@@ -15,7 +15,7 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-#include "inet/common/queueing/PacketClassifierFunction.h"
+#include "inet/queueing/PacketClassifierFunction.h"
 
 namespace inet {
 namespace queueing {

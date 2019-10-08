@@ -15,10 +15,10 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-package inet.common.queueing;
+package inet.queueing;
 
-import inet.common.queueing.base.PacketFilterBase;
-import inet.common.queueing.contract.IPacketFilter;
+import inet.queueing.base.PacketFilterBase;
+import inet.queueing.contract.IPacketFilter;
 
 //
 // This module filters for packets matching the configured filter criteria.

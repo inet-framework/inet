@@ -7,9 +7,9 @@ Every second packet is duplicated based on its ordinal number.
 
 %file: test.ned
 
-import inet.common.queueing.OrdinalBasedDuplicator;
-import inet.common.queueing.PacketConsumer;
-import inet.common.queueing.PacketProducer;
+import inet.queueing.OrdinalBasedDuplicator;
+import inet.queueing.PacketConsumer;
+import inet.queueing.PacketProducer;
 
 network TestOrdinalBasedDuplicator
 {

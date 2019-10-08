@@ -16,7 +16,7 @@
 //
 
 #include "inet/common/ModuleAccess.h"
-#include "inet/common/queueing/base/PacketSchedulerBase.h"
+#include "inet/queueing/base/PacketSchedulerBase.h"
 #include "inet/common/Simsignals.h"
 
 namespace inet {

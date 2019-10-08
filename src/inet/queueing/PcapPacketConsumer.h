@@ -19,8 +19,8 @@
 #define __INET_PCAPPACKETCONSUMER_H
 
 #include "inet/common/packet/recorder/PcapWriter.h"
-#include "inet/common/queueing/base/PacketConsumerBase.h"
-#include "inet/common/queueing/contract/IPacketProducer.h"
+#include "inet/queueing/base/PacketConsumerBase.h"
+#include "inet/queueing/contract/IPacketProducer.h"
 
 namespace inet {
 namespace queueing {

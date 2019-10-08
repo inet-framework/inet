@@ -26,7 +26,7 @@
 #include "inet/common/checksum/EthernetCRC.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/packet/chunk/BytesChunk.h"
-#include "inet/common/queueing/PacketComparatorFunction.h"
+#include "inet/queueing/PacketComparatorFunction.h"
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
 #include "inet/linklayer/ethernet/EtherMacBase.h"
 #include "inet/linklayer/ethernet/EtherPhyFrame_m.h"

@@ -18,8 +18,8 @@
 #ifndef __INET_PACKETDUPLICATORBASE_H
 #define __INET_PACKETDUPLICATORBASE_H
 
-#include "inet/common/queueing/base/PacketQueueingElementBase.h"
-#include "inet/common/queueing/contract/IPacketDuplicator.h"
+#include "inet/queueing/base/PacketQueueingElementBase.h"
+#include "inet/queueing/contract/IPacketDuplicator.h"
 
 namespace inet {
 namespace queueing {

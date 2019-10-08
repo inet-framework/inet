@@ -18,7 +18,7 @@
 #ifndef __INET_PACKETDROPPERFUNCTION_H
 #define __INET_PACKETDROPPERFUNCTION_H
 
-#include "inet/common/queueing/contract/IPacketDropperFunction.h"
+#include "inet/queueing/contract/IPacketDropperFunction.h"
 
 namespace inet {
 namespace queueing {

@@ -18,8 +18,8 @@
 #ifndef __INET_PACKETCLASSIFIER_H
 #define __INET_PACKETCLASSIFIER_H
 
-#include "inet/common/queueing/base/PacketClassifierBase.h"
-#include "inet/common/queueing/contract/IPacketClassifierFunction.h"
+#include "inet/queueing/base/PacketClassifierBase.h"
+#include "inet/queueing/contract/IPacketClassifierFunction.h"
 
 namespace inet {
 namespace queueing {

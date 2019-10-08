@@ -18,7 +18,7 @@
 #ifndef __INET_TOKENBASEDSERVER_H
 #define __INET_TOKENBASEDSERVER_H
 
-#include "inet/common/queueing/base/PacketServerBase.h"
+#include "inet/queueing/base/PacketServerBase.h"
 
 namespace inet {
 namespace queueing {

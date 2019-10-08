@@ -15,9 +15,9 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-package inet.common.queueing;
+package inet.queueing;
 
-import inet.common.queueing.contract.IPacketProducer;
+import inet.queueing.contract.IPacketProducer;
 
 module ResponseProducer like IPacketProducer
 {

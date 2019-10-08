@@ -15,7 +15,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package inet.common.queueing;
+package inet.queueing;
 
 //
 // TODO auto-generated module

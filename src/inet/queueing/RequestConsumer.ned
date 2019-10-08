@@ -15,12 +15,12 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-package inet.common.queueing;
+package inet.queueing;
 
-import inet.common.queueing.contract.IPacketClassifier;
-import inet.common.queueing.contract.IPacketConsumer;
-import inet.common.queueing.contract.IPacketQueue;
-import inet.common.queueing.contract.IPacketServer;
+import inet.queueing.contract.IPacketClassifier;
+import inet.queueing.contract.IPacketConsumer;
+import inet.queueing.contract.IPacketQueue;
+import inet.queueing.contract.IPacketServer;
 
 module RequestConsumer like IPacketConsumer
 {

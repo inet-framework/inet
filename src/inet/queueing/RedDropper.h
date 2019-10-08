@@ -18,8 +18,8 @@
 #ifndef __INET_REDDROPPER_H
 #define __INET_REDDROPPER_H
 
-#include "inet/common/queueing/base/PacketFilterBase.h"
-#include "inet/common/queueing/contract/IPacketCollection.h"
+#include "inet/queueing/base/PacketFilterBase.h"
+#include "inet/queueing/contract/IPacketCollection.h"
 
 namespace inet {
 namespace queueing {

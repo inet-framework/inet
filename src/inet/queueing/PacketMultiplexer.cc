@@ -16,7 +16,7 @@
 //
 
 #include "inet/common/ModuleAccess.h"
-#include "inet/common/queueing/PacketMultiplexer.h"
+#include "inet/queueing/PacketMultiplexer.h"
 
 namespace inet {
 namespace queueing {

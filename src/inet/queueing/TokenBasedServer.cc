@@ -15,7 +15,7 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-#include "inet/common/queueing/TokenBasedServer.h"
+#include "inet/queueing/TokenBasedServer.h"
 #include "inet/common/Simsignals.h"
 #include "inet/common/StringFormat.h"
 

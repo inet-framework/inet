@@ -18,9 +18,9 @@
 #ifndef __INET_PACKETSERVERBASE_H
 #define __INET_PACKETSERVERBASE_H
 
-#include "inet/common/queueing/base/PacketSinkBase.h"
-#include "inet/common/queueing/contract/IPacketCollector.h"
-#include "inet/common/queueing/contract/IPacketProducer.h"
+#include "inet/queueing/base/PacketSinkBase.h"
+#include "inet/queueing/contract/IPacketCollector.h"
+#include "inet/queueing/contract/IPacketProducer.h"
 
 namespace inet {
 namespace queueing {

@@ -18,7 +18,7 @@
 #ifndef __INET_PACKETCLASSIFIERFUNCTION_H
 #define __INET_PACKETCLASSIFIERFUNCTION_H
 
-#include "inet/common/queueing/contract/IPacketClassifierFunction.h"
+#include "inet/queueing/contract/IPacketClassifierFunction.h"
 
 namespace inet {
 namespace queueing {

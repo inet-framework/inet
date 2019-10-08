@@ -15,7 +15,7 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-#include "inet/common/queueing/base/PacketProcessorBase.h"
+#include "inet/queueing/base/PacketProcessorBase.h"
 
 namespace inet {
 namespace queueing {

@@ -19,9 +19,9 @@
 #define __INET_DSCPMARKER_H
 
 #include "inet/common/INETDefs.h"
-#include "inet/common/queueing/base/PacketQueueingElementBase.h"
-#include "inet/common/queueing/contract/IPacketConsumer.h"
-#include "inet/common/queueing/contract/IPacketProducer.h"
+#include "inet/queueing/base/PacketQueueingElementBase.h"
+#include "inet/queueing/contract/IPacketConsumer.h"
+#include "inet/queueing/contract/IPacketProducer.h"
 #include "inet/common/packet/Packet.h"
 
 namespace inet {

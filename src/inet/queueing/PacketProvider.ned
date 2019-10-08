@@ -15,10 +15,10 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-package inet.common.queueing;
+package inet.queueing;
 
-import inet.common.queueing.base.PacketSourceBase;
-import inet.common.queueing.contract.IPacketProvider;
+import inet.queueing.base.PacketSourceBase;
+import inet.queueing.contract.IPacketProvider;
 
 //
 // This module is a passive packet source which can be popped for packets from

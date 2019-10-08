@@ -18,8 +18,8 @@
 #ifndef __INET_PACKETCONSUMERBASE_H
 #define __INET_PACKETCONSUMERBASE_H
 
-#include "inet/common/queueing/base/PacketSinkBase.h"
-#include "inet/common/queueing/contract/IPacketConsumer.h"
+#include "inet/queueing/base/PacketSinkBase.h"
+#include "inet/queueing/contract/IPacketConsumer.h"
 
 namespace inet {
 namespace queueing {

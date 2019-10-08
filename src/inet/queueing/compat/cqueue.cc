@@ -22,7 +22,7 @@
 #include <cstdio>
 #include <cstring>
 #include <sstream>
-#include "inet/common/queueing/compat/cqueue.h"
+#include "inet/queueing/compat/cqueue.h"
 
 namespace inet {
 namespace queueing {

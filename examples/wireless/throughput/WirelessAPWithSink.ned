@@ -18,7 +18,7 @@
 
 package inet.examples.wireless.throughput;
 
-import inet.common.queueing.PacketConsumer;
+import inet.queueing.PacketConsumer;
 import inet.linklayer.ieee80211.Ieee80211Interface;
 import inet.mobility.static.StationaryMobility;
 import inet.networklayer.common.InterfaceTable;

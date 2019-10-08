@@ -18,11 +18,11 @@
 
 package inet.networklayer.diffserv;
 
-import inet.common.queueing.CompoundPacketQueue;
-import inet.common.queueing.DropTailQueue;
-import inet.common.queueing.PacketConsumer;
-import inet.common.queueing.PriorityScheduler;
-import inet.common.queueing.WrrScheduler;
+import inet.queueing.CompoundPacketQueue;
+import inet.queueing.DropTailQueue;
+import inet.queueing.PacketConsumer;
+import inet.queueing.PriorityScheduler;
+import inet.queueing.WrrScheduler;
 
 //
 // This is an example queue, that can be used in

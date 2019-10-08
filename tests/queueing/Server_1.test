@@ -7,9 +7,9 @@ by a passive packet source (PacketProvider) and consumed by a passive packet sin
 
 %file: test.ned
 
-import inet.common.queueing.PacketConsumer;
-import inet.common.queueing.PacketProvider;
-import inet.common.queueing.PacketServer;
+import inet.queueing.PacketConsumer;
+import inet.queueing.PacketProvider;
+import inet.queueing.PacketServer;
 
 network TestServer
 {

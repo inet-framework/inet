@@ -17,7 +17,7 @@
 
 #include "inet/common/INETUtils.h"
 #include "inet/common/ModuleAccess.h"
-#include "inet/common/queueing/RedDropper.h"
+#include "inet/queueing/RedDropper.h"
 
 namespace inet {
 namespace queueing {

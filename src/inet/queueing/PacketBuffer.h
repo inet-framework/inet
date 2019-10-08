@@ -18,9 +18,9 @@
 #ifndef __INET_PACKETBUFFER_H
 #define __INET_PACKETBUFFER_H
 
-#include "inet/common/queueing/contract/IPacketBuffer.h"
-#include "inet/common/queueing/contract/IPacketCollection.h"
-#include "inet/common/queueing/contract/IPacketDropperFunction.h"
+#include "inet/queueing/contract/IPacketBuffer.h"
+#include "inet/queueing/contract/IPacketCollection.h"
+#include "inet/queueing/contract/IPacketDropperFunction.h"
 
 namespace inet {
 namespace queueing {

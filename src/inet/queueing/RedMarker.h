@@ -20,7 +20,7 @@
 
 #include "inet/common/INETDefs.h"
 #include "inet/common/packet/Packet.h"
-#include "inet/common/queueing/RedDropper.h"
+#include "inet/queueing/RedDropper.h"
 
 namespace inet {
 namespace queueing {

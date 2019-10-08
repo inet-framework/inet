@@ -18,7 +18,7 @@
 #ifndef __INET_PACKETSERVER_H
 #define __INET_PACKETSERVER_H
 
-#include "inet/common/queueing/base/PacketServerBase.h"
+#include "inet/queueing/base/PacketServerBase.h"
 
 namespace inet {
 namespace queueing {

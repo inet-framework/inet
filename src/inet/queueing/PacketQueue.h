@@ -18,13 +18,13 @@
 #ifndef __INET_PACKETQUEUE_H
 #define __INET_PACKETQUEUE_H
 
-#include "inet/common/queueing/base/PacketQueueBase.h"
-#include "inet/common/queueing/compat/cpacketqueue.h"
-#include "inet/common/queueing/contract/IPacketBuffer.h"
-#include "inet/common/queueing/contract/IPacketCollector.h"
-#include "inet/common/queueing/contract/IPacketComparatorFunction.h"
-#include "inet/common/queueing/contract/IPacketDropperFunction.h"
-#include "inet/common/queueing/contract/IPacketProducer.h"
+#include "inet/queueing/base/PacketQueueBase.h"
+#include "inet/queueing/compat/cpacketqueue.h"
+#include "inet/queueing/contract/IPacketBuffer.h"
+#include "inet/queueing/contract/IPacketCollector.h"
+#include "inet/queueing/contract/IPacketComparatorFunction.h"
+#include "inet/queueing/contract/IPacketDropperFunction.h"
+#include "inet/queueing/contract/IPacketProducer.h"
 
 namespace inet {
 namespace queueing {

@@ -18,9 +18,9 @@
 #ifndef __INET_PACKETPROVIDER_H
 #define __INET_PACKETPROVIDER_H
 
-#include "inet/common/queueing/base/PacketSourceBase.h"
-#include "inet/common/queueing/contract/IPacketCollector.h"
-#include "inet/common/queueing/contract/IPacketProvider.h"
+#include "inet/queueing/base/PacketSourceBase.h"
+#include "inet/queueing/contract/IPacketCollector.h"
+#include "inet/queueing/contract/IPacketProvider.h"
 
 namespace inet {
 namespace queueing {

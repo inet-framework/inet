@@ -18,7 +18,7 @@
 #ifndef __INET_INPROGRESSFRAMES_H
 #define __INET_INPROGRESSFRAMES_H
 
-#include "inet/common/queueing/contract/IPacketQueue.h"
+#include "inet/queueing/contract/IPacketQueue.h"
 #include "inet/linklayer/ieee80211/mac/common/SequenceControlField.h"
 #include "inet/linklayer/ieee80211/mac/contract/IAckHandler.h"
 #include "inet/linklayer/ieee80211/mac/contract/IOriginatorMacDataService.h"

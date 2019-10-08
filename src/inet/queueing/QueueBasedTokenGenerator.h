@@ -18,9 +18,9 @@
 #ifndef __INET_QUEUEBASEDTOKENGENERATOR_H
 #define __INET_QUEUEBASEDTOKENGENERATOR_H
 
-#include "inet/common/queueing/base/PacketQueueingElementBase.h"
-#include "inet/common/queueing/contract/IPacketQueue.h"
-#include "inet/common/queueing/TokenBasedServer.h"
+#include "inet/queueing/base/PacketQueueingElementBase.h"
+#include "inet/queueing/contract/IPacketQueue.h"
+#include "inet/queueing/TokenBasedServer.h"
 #include "inet/common/StringFormat.h"
 
 namespace inet {

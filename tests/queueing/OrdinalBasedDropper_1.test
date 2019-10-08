@@ -7,9 +7,9 @@ Every second packet is dropped based on its ordinal number.
 
 %file: test.ned
 
-import inet.common.queueing.OrdinalBasedDropper;
-import inet.common.queueing.PacketConsumer;
-import inet.common.queueing.PacketProducer;
+import inet.queueing.OrdinalBasedDropper;
+import inet.queueing.PacketConsumer;
+import inet.queueing.PacketProducer;
 
 network TestOrdinalBasedDropper
 {

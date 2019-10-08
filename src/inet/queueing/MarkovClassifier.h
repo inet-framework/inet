@@ -18,9 +18,9 @@
 #ifndef __INET_MARKOVCLASSIFIER_H
 #define __INET_MARKOVCLASSIFIER_H
 
-#include "inet/common/queueing/base/PacketClassifierBase.h"
-#include "inet/common/queueing/contract/IPacketCollector.h"
-#include "inet/common/queueing/contract/IPacketProvider.h"
+#include "inet/queueing/base/PacketClassifierBase.h"
+#include "inet/queueing/contract/IPacketCollector.h"
+#include "inet/queueing/contract/IPacketProvider.h"
 
 namespace inet {
 namespace queueing {

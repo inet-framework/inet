@@ -18,8 +18,8 @@
 #ifndef __INET_IPACKETFILTER_H
 #define __INET_IPACKETFILTER_H
 
-#include "inet/common/queueing/contract/IPacketSink.h"
-#include "inet/common/queueing/contract/IPacketSource.h"
+#include "inet/queueing/contract/IPacketSink.h"
+#include "inet/queueing/contract/IPacketSource.h"
 
 namespace inet {
 namespace queueing {

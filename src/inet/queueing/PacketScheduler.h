@@ -18,8 +18,8 @@
 #ifndef __INET_PACKETSCHEDULER_H
 #define __INET_PACKETSCHEDULER_H
 
-#include "inet/common/queueing/base/PacketSchedulerBase.h"
-#include "inet/common/queueing/contract/IPacketSchedulerFunction.h"
+#include "inet/queueing/base/PacketSchedulerBase.h"
+#include "inet/queueing/contract/IPacketSchedulerFunction.h"
 
 namespace inet {
 namespace queueing {

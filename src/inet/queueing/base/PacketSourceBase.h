@@ -18,7 +18,7 @@
 #ifndef __INET_PACKETSOURCEBASE_H
 #define __INET_PACKETSOURCEBASE_H
 
-#include "inet/common/queueing/base/PacketProcessorBase.h"
+#include "inet/queueing/base/PacketProcessorBase.h"
 
 namespace inet {
 namespace queueing {

@@ -9,10 +9,10 @@ from the queues to the sink in a prioritized way.
 
 %file: test.ned
 
-import inet.common.queueing.PacketCollector;
-import inet.common.queueing.PacketQueue;
-import inet.common.queueing.PriorityScheduler;
-import inet.common.queueing.PacketProducer;
+import inet.queueing.PacketCollector;
+import inet.queueing.PacketQueue;
+import inet.queueing.PriorityScheduler;
+import inet.queueing.PacketProducer;
 
 network TestPriorityScheduler
 {

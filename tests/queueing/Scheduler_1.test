@@ -8,9 +8,9 @@ one or the other source.
 
 %file: test.ned
 
-import inet.common.queueing.PacketCollector;
-import inet.common.queueing.PacketScheduler;
-import inet.common.queueing.PacketProvider;
+import inet.queueing.PacketCollector;
+import inet.queueing.PacketScheduler;
+import inet.queueing.PacketProvider;
 
 network TestScheduler
 {
@@ -35,9 +35,9 @@ network TestScheduler
 
 %file: Test.cc
 #include <vector>
-#include "inet/common/queueing/PacketSchedulerFunction.h"
+#include "inet/queueing/PacketSchedulerFunction.h"
 #include "inet/common/packet/Packet.h"
-#include "inet/common/queueing/contract/IPacketProvider.h"
+#include "inet/queueing/contract/IPacketProvider.h"
 
 using namespace inet; 
 

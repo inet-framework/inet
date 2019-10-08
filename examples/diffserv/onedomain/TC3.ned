@@ -19,8 +19,8 @@
 
 package inet.examples.diffserv.onedomain;
 
-import inet.common.queueing.PacketConsumer;
-import inet.common.queueing.PacketMultiplexer;
+import inet.queueing.PacketConsumer;
+import inet.queueing.PacketMultiplexer;
 import inet.linklayer.contract.ITrafficConditioner;
 import inet.networklayer.diffserv.MultiFieldClassifier;
 import inet.networklayer.diffserv.TokenBucketMeter;

@@ -15,7 +15,7 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-#include "inet/common/queueing/PriorityScheduler.h"
+#include "inet/queueing/PriorityScheduler.h"
 
 namespace inet {
 namespace queueing {

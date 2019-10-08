@@ -18,8 +18,8 @@
 #ifndef __INET_PACKETCOLLECTOR_H
 #define __INET_PACKETCOLLECTOR_H
 
-#include "inet/common/queueing/base/PacketSinkBase.h"
-#include "inet/common/queueing/contract/IPacketCollector.h"
+#include "inet/queueing/base/PacketSinkBase.h"
+#include "inet/queueing/contract/IPacketCollector.h"
 
 namespace inet {
 namespace queueing {

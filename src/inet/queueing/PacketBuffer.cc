@@ -16,7 +16,7 @@
 //
 
 #include <algorithm>
-#include "inet/common/queueing/PacketBuffer.h"
+#include "inet/queueing/PacketBuffer.h"
 #include "inet/common/Simsignals.h"
 #include "inet/common/StringFormat.h"
 

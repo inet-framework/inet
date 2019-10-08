@@ -16,7 +16,7 @@
 //
 
 #include "inet/common/ModuleAccess.h"
-#include "inet/common/queueing/MarkovScheduler.h"
+#include "inet/queueing/MarkovScheduler.h"
 
 namespace inet {
 namespace queueing {

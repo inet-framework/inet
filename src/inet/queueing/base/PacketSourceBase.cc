@@ -16,7 +16,7 @@
 //
 
 #include "inet/applications/base/ApplicationPacket_m.h"
-#include "inet/common/queueing/base/PacketSourceBase.h"
+#include "inet/queueing/base/PacketSourceBase.h"
 #include "inet/common/packet/chunk/BitCountChunk.h"
 #include "inet/common/packet/chunk/BitsChunk.h"
 #include "inet/common/packet/chunk/ByteCountChunk.h"

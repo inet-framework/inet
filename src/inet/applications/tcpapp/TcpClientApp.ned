@@ -16,8 +16,8 @@
 package inet.applications.tcpapp;
 
 import inet.applications.contract.IApp;
-import inet.common.queueing.contract.IPacketConsumer;
-import inet.common.queueing.contract.IPacketProducer;
+import inet.queueing.contract.IPacketConsumer;
+import inet.queueing.contract.IPacketProducer;
 
 module TcpClientApp like IApp
 {

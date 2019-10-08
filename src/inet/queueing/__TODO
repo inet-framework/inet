@@ -1,3 +1,19 @@
+ - contract IPacketCollector documentation: e.g. collector is an active component which for example periodically collects packets from a passive provider
+ - contract document all corresponding interfaces in relation to each other
+ - ActivePacketSource
+ - PassivePacketSource
+ - ActivePacketSink
+ - PassivePacketSink
+ - PcapFilePacketSink
+ - PcapFilePacketSource
+
+
+
+
+
+
+
+
  - classifyPacketByData function corresponds to PacketByDataClassifier or ClassifyPacketByData class? which one? and rename all similar classes according to naming convention
  - remove txQueueLimit parameters from network interfaces which are only simply passed down to the MAC queue
  - using queue->getPacket(0) as the current transmission is generally wrong, because a new high priority packet might jump to the front of the queue

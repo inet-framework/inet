@@ -15,7 +15,7 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-package inet.common.queueing.base;
+package inet.queueing.base;
 
 //
 // This is a base module for various packet classifier modules. Derived modules

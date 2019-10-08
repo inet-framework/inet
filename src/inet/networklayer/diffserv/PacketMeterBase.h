@@ -18,9 +18,9 @@
 #ifndef __INET_PACKETMETERBASE_H
 #define __INET_PACKETMETERBASE_H
 
-#include "inet/common/queueing/base/PacketConsumerBase.h"
-#include "inet/common/queueing/contract/IPacketProducer.h"
-#include "inet/common/queueing/contract/IPacketQueueingElement.h"
+#include "inet/queueing/base/PacketConsumerBase.h"
+#include "inet/queueing/contract/IPacketProducer.h"
+#include "inet/queueing/contract/IPacketQueueingElement.h"
 
 namespace inet {
 

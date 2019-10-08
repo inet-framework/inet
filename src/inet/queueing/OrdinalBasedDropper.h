@@ -19,7 +19,7 @@
 #define __INET_ORDINALBASEDDROPPER_H
 
 #include <vector>
-#include "inet/common/queueing/base/PacketFilterBase.h"
+#include "inet/queueing/base/PacketFilterBase.h"
 
 namespace inet {
 namespace queueing {

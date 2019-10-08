@@ -4,11 +4,11 @@ TODO
 
 %file: test.ned
 
-import inet.common.queueing.PacketConsumer;
-import inet.common.queueing.PacketDelayer;
-import inet.common.queueing.PacketProducer;
-import inet.common.queueing.PacketQueue;
-import inet.common.queueing.PacketServer;
+import inet.queueing.PacketConsumer;
+import inet.queueing.PacketDelayer;
+import inet.queueing.PacketProducer;
+import inet.queueing.PacketQueue;
+import inet.queueing.PacketServer;
 
 module TestMac
 {

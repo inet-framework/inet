@@ -7,9 +7,9 @@ sink (PacketConsumer).
 
 %file: test.ned
 
-import inet.common.queueing.PacketConsumer;
-import inet.common.queueing.PacketDuplicator;
-import inet.common.queueing.PacketProducer;
+import inet.queueing.PacketConsumer;
+import inet.queueing.PacketDuplicator;
+import inet.queueing.PacketProducer;
 
 network TestDuplicator
 {

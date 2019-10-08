@@ -6,8 +6,8 @@ In this test, packets are collected periodically by an active packet sink
 
 %file: test.ned
 
-import inet.common.queueing.PacketCollector;
-import inet.common.queueing.PacketProvider;
+import inet.queueing.PacketCollector;
+import inet.queueing.PacketProvider;
 
 network TestProviderCollector
 {

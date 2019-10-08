@@ -15,10 +15,10 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-package inet.common.queueing;
+package inet.queueing;
 
-import inet.common.queueing.contract.IPacketConsumer;
-import inet.common.queueing.contract.IPacketProducer;
+import inet.queueing.contract.IPacketConsumer;
+import inet.queueing.contract.IPacketProducer;
 
 //
 // This module connects one packet producer to one packet consumer. It can be

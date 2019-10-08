@@ -19,8 +19,8 @@
 
 package inet.examples.diffserv.simple_;
 
-import inet.common.queueing.PacketConsumer;
-import inet.common.queueing.PacketMultiplexer;
+import inet.queueing.PacketConsumer;
+import inet.queueing.PacketMultiplexer;
 import inet.linklayer.contract.ITrafficConditioner;
 import inet.networklayer.diffserv.BehaviorAggregateClassifier;
 import inet.networklayer.diffserv.DscpMarker;

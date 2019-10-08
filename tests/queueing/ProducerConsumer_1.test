@@ -6,8 +6,8 @@ In this test, packets are produced periodically by an active packet source
 
 %file: test.ned
 
-import inet.common.queueing.PacketConsumer;
-import inet.common.queueing.PacketProducer;
+import inet.queueing.PacketConsumer;
+import inet.queueing.PacketProducer;
 
 network TestProducerConsumer
 {

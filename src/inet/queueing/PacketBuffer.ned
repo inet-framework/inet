@@ -15,9 +15,9 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-package inet.common.queueing;
+package inet.queueing;
 
-import inet.common.queueing.contract.IPacketBuffer;
+import inet.queueing.contract.IPacketBuffer;
 
 //
 // This module provides packet storage for sharing and optimizing storage space

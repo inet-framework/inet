@@ -18,7 +18,7 @@
 
 package inet.linklayer.ethernet;
 
-import inet.common.queueing.contract.IPacketQueue;
+import inet.queueing.contract.IPacketQueue;
 import inet.linklayer.contract.IEtherMac;
 
 //

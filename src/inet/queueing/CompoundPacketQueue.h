@@ -18,10 +18,10 @@
 #ifndef __INET_COMPOUNDPACKETQUEUE_H
 #define __INET_COMPOUNDPACKETQUEUE_H
 
-#include "inet/common/queueing/base/PacketQueueBase.h"
-#include "inet/common/queueing/contract/IPacketCollection.h"
-#include "inet/common/queueing/contract/IPacketConsumer.h"
-#include "inet/common/queueing/contract/IPacketProvider.h"
+#include "inet/queueing/base/PacketQueueBase.h"
+#include "inet/queueing/contract/IPacketCollection.h"
+#include "inet/queueing/contract/IPacketConsumer.h"
+#include "inet/queueing/contract/IPacketProvider.h"
 
 namespace inet {
 namespace queueing {

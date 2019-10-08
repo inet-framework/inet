@@ -18,7 +18,7 @@
 #ifndef __INET_ETHERFRAMECLASSIFIER_H
 #define __INET_ETHERFRAMECLASSIFIER_H
 
-#include "inet/common/queueing/base/PacketClassifierBase.h"
+#include "inet/queueing/base/PacketClassifierBase.h"
 
 namespace inet {
 

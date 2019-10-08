@@ -18,7 +18,7 @@
 #ifndef __INET_PACKETFILTERFUNCTION_H
 #define __INET_PACKETFILTERFUNCTION_H
 
-#include "inet/common/queueing/contract/IPacketFilterFunction.h"
+#include "inet/queueing/contract/IPacketFilterFunction.h"
 
 namespace inet {
 namespace queueing {

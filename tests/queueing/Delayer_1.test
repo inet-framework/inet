@@ -6,9 +6,9 @@ amount of time. Finally, the packets are sent into a passive packet sink (Packet
 
 %file: test.ned
 
-import inet.common.queueing.PacketConsumer;
-import inet.common.queueing.PacketDelayer;
-import inet.common.queueing.PacketProducer;
+import inet.queueing.PacketConsumer;
+import inet.queueing.PacketDelayer;
+import inet.queueing.PacketProducer;
 
 network TestDelayer
 {

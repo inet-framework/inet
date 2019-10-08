@@ -18,7 +18,7 @@
 #ifndef __INET_PACKETSCHEDULERFUNCTION_H
 #define __INET_PACKETSCHEDULERFUNCTION_H
 
-#include "inet/common/queueing/contract/IPacketSchedulerFunction.h"
+#include "inet/queueing/contract/IPacketSchedulerFunction.h"
 
 namespace inet {
 namespace queueing {

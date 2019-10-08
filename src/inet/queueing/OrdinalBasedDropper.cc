@@ -16,7 +16,7 @@
 //
 
 #include "inet/common/ModuleAccess.h"
-#include "inet/common/queueing/OrdinalBasedDropper.h"
+#include "inet/queueing/OrdinalBasedDropper.h"
 #include "inet/common/Simsignals.h"
 
 namespace inet {

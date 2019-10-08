@@ -17,7 +17,7 @@
 
 package inet.linklayer.ieee80211.mac.channelaccess;
 
-import inet.common.queueing.contract.IPacketQueue;
+import inet.queueing.contract.IPacketQueue;
 import inet.linklayer.ieee80211.mac.contract.IContention;
 import inet.linklayer.ieee80211.mac.queue.InProgressFrames;
 

@@ -15,10 +15,10 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-package inet.common.queueing;
+package inet.queueing;
 
-import inet.common.queueing.base.PacketSchedulerBase;
-import inet.common.queueing.contract.IPacketScheduler;
+import inet.queueing.base.PacketSchedulerBase;
+import inet.queueing.contract.IPacketScheduler;
 
 simple MarkovScheduler extends PacketSchedulerBase like IPacketScheduler
 {

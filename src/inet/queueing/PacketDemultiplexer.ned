@@ -15,10 +15,10 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-package inet.common.queueing;
+package inet.queueing;
 
-import inet.common.queueing.base.PacketProcessorBase;
-import inet.common.queueing.contract.IPacketCollector;
+import inet.queueing.base.PacketProcessorBase;
+import inet.queueing.contract.IPacketCollector;
 
 //
 // This module connects multiple packet collectors to one packet provider. When

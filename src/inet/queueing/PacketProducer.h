@@ -18,8 +18,8 @@
 #ifndef __INET_PACKETPRODUCER_H
 #define __INET_PACKETPRODUCER_H
 
-#include "inet/common/queueing/base/PacketSourceBase.h"
-#include "inet/common/queueing/contract/IPacketProducer.h"
+#include "inet/queueing/base/PacketSourceBase.h"
+#include "inet/queueing/contract/IPacketProducer.h"
 
 namespace inet {
 namespace queueing {
