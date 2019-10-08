@@ -19,7 +19,7 @@
 
 package inet.examples.diffserv.simple_;
 
-import inet.queueing.PacketConsumer;
+import inet.queueing.PassivePacketSink;
 import inet.queueing.PacketMultiplexer;
 import inet.linklayer.contract.ITrafficConditioner;
 import inet.networklayer.diffserv.BehaviorAggregateClassifier;
@@ -89,7 +89,7 @@ module TrafficConditioner like ITrafficConditioner
             dscps = "AF11";
             @display("p=550,100");
         }
-        dropper: PacketConsumer {
+        dropper: PassivePacketSink {
             @display("p=550,450");
         }
     connections:

@@ -18,7 +18,7 @@
 
 package inet.examples.wireless.throughput;
 
-import inet.queueing.PacketConsumer;
+import inet.queueing.PassivePacketSink;
 import inet.linklayer.ieee80211.Ieee80211Interface;
 import inet.mobility.static.StationaryMobility;
 import inet.networklayer.common.InterfaceTable;
@@ -41,7 +41,7 @@ module WirelessAPWithSink
             parameters:
                 @display("p=100,100;is=s");
         }
-        sink: PacketConsumer {
+        sink: PassivePacketSink {
             parameters:
                 @display("p=300,100");
         }

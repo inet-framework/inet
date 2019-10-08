@@ -1,21 +1,21 @@
 %description:
 
 In this test, packets are collected periodically by an active packet sink
-(PacketCollector). The packets are provided by a passive packet source
-(PacketProvider).
+(ActivePacketSink). The packets are provided by a passive packet source
+(PassivePacketSource).
 
 %file: test.ned
 
-import inet.queueing.PacketCollector;
-import inet.queueing.PacketProvider;
+import inet.queueing.ActivePacketSink;
+import inet.queueing.PassivePacketSource;
 
 network TestProviderCollector
 {
     submodules:
-        provider: PacketProvider {
+        provider: PassivePacketSource {
             @display("p=100,100");
         }
-        collector: PacketCollector {
+        collector: ActivePacketSink {
             @display("p=200,100");
         }
     connections:

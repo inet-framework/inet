@@ -19,7 +19,7 @@
 
 package inet.examples.diffserv.onedomain;
 
-import inet.queueing.PacketConsumer;
+import inet.queueing.PassivePacketSink;
 import inet.queueing.PacketMultiplexer;
 import inet.linklayer.contract.ITrafficConditioner;
 import inet.networklayer.diffserv.MultiFieldClassifier;
@@ -45,7 +45,7 @@ module TC3 like ITrafficConditioner
         meter: TokenBucketMeter {
             @display("p=250,200");
         }
-        sink: PacketConsumer {
+        sink: PassivePacketSink {
             @display("p=350,100");
         }
         join: PacketMultiplexer {

@@ -1,26 +1,26 @@
 %description:
 
 In this test, packets are produced periodically (randomly) by an active packet
-source (PacketProducer). The packets are collected periodically (randomly) by
-an active packet sink (PacketCollector). The source and the sink is connected
+source (ActivePacketSource). The packets are collected periodically (randomly) by
+an active packet sink (ActivePacketSink). The source and the sink is connected
 by a FIFO queue (PacketQueue) where packets are stored temporarily.
 
 %file: test.ned
 
-import inet.queueing.PacketProducer;
-import inet.queueing.PacketCollector;
+import inet.queueing.ActivePacketSource;
+import inet.queueing.ActivePacketSink;
 import inet.queueing.PacketQueue;
 
 network TestPacketQueue
 {
     submodules:
-        producer: PacketProducer {
+        producer: ActivePacketSource {
             @display("p=100,100");
         }
         queue: PacketQueue {
             @display("p=200,100");
         }
-        collector: PacketCollector {
+        collector: ActivePacketSink {
             @display("p=300,100");
         }
     connections allowunconnected:

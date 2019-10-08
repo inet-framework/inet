@@ -19,7 +19,7 @@
 package inet.examples.wireless.hosttohost;
 
 import inet.applications.ethernet.EtherAppClient;
-import inet.queueing.PacketConsumer;
+import inet.queueing.PassivePacketSink;
 import inet.linklayer.ieee80211.Ieee80211Interface;
 import inet.mobility.single.CircleMobility;
 import inet.mobility.static.StationaryMobility;
@@ -72,7 +72,7 @@ module ThroughputServer
         input radioIn @directIn;
 
     submodules:
-        sink: PacketConsumer {
+        sink: PassivePacketSink {
             parameters:
                 @display("p=300,100");
         }

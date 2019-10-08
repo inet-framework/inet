@@ -5,19 +5,19 @@ TODO
 %file: test.ned
 
 import inet.queueing.TokenBucket;
-import inet.queueing.PacketConsumer;
-import inet.queueing.PacketProducer;
+import inet.queueing.PassivePacketSink;
+import inet.queueing.ActivePacketSource;
 
 network TestTokenBucket
 {
     submodules:
-        producer: PacketProducer {
+        producer: ActivePacketSource {
             @display("p=100,100");
         }
         bucket: TokenBucket {
             @display("p=200,100");
         }
-        consumer: PacketConsumer {
+        consumer: PassivePacketSink {
             @display("p=300,100");
         }
     connections allowunconnected:

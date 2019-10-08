@@ -4,8 +4,8 @@ TODO
 
 %file: test.ned
 
-import inet.queueing.PacketProvider;
-import inet.queueing.PacketCollector;
+import inet.queueing.PassivePacketSource;
+import inet.queueing.ActivePacketSink;
 import inet.queueing.PacketQueue;
 import inet.queueing.QueueBasedTokenGenerator;
 import inet.queueing.TokenBasedServer;
@@ -13,7 +13,7 @@ import inet.queueing.TokenBasedServer;
 network TestPacketQueue
 {
     submodules:
-        provider: PacketProvider {
+        provider: PassivePacketSource {
             @display("p=100,100");
         }
         server: TokenBasedServer {
@@ -22,7 +22,7 @@ network TestPacketQueue
         queue: PacketQueue {
             @display("p=100,300");
         }
-        collector: PacketCollector {
+        collector: ActivePacketSink {
             @display("p=100,400");
         }
         tokenGenerator: QueueBasedTokenGenerator {

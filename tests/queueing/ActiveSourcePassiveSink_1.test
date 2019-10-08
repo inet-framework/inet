@@ -1,21 +1,21 @@
 %description:
 
 In this test, packets are produced periodically by an active packet source
-(PacketProducer). The packets are consumed by a passive packet sink
-(PacketConsumer).
+(ActivePacketSource). The packets are consumed by a passive packet sink
+(PassivePacketSink).
 
 %file: test.ned
 
-import inet.queueing.PacketConsumer;
-import inet.queueing.PacketProducer;
+import inet.queueing.PassivePacketSink;
+import inet.queueing.ActivePacketSource;
 
 network TestProducerConsumer
 {
     submodules:
-        producer: PacketProducer {
+        producer: ActivePacketSource {
             @display("p=100,100");
         }
-        consumer: PacketConsumer {
+        consumer: PassivePacketSink {
             @display("p=200,100");
         }
     connections:

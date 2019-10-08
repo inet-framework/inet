@@ -20,8 +20,8 @@
 
 #include "inet/common/INETDefs.h"
 #include "inet/queueing/base/PacketQueueingElementBase.h"
-#include "inet/queueing/contract/IPacketConsumer.h"
-#include "inet/queueing/contract/IPacketProducer.h"
+#include "inet/queueing/contract/IPassivePacketSink.h"
+#include "inet/queueing/contract/IActivePacketSource.h"
 #include "inet/common/packet/Packet.h"
 
 namespace inet {
@@ -29,7 +29,7 @@ namespace inet {
 /**
  * DSCP Marker.
  */
-class INET_API DscpMarker : public queueing::PacketQueueingElementBase, public queueing::IPacketConsumer, public queueing::IPacketProducer
+class INET_API DscpMarker : public queueing::PacketQueueingElementBase, public queueing::IPassivePacketSink, public queueing::IActivePacketSource
 {
   protected:
     std::vector<int> dscps;
@@ -45,7 +45,7 @@ class INET_API DscpMarker : public queueing::PacketQueueingElementBase, public q
     virtual bool supportsPushPacket(cGate *gate) override { return true; }
     virtual bool supportsPopPacket(cGate *gate) override { return false; }
 
-    virtual queueing::IPacketConsumer *getConsumer(cGate *gate) override { return this; }
+    virtual queueing::IPassivePacketSink *getConsumer(cGate *gate) override { return this; }
     virtual void handleCanPushPacket(cGate *gate) override { }
 
   protected:

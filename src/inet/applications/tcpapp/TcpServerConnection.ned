@@ -16,8 +16,8 @@
 package inet.applications.tcpapp;
 
 import inet.applications.contract.IApp;
-import inet.queueing.contract.IPacketConsumer;
-import inet.queueing.contract.IPacketProducer;
+import inet.queueing.contract.IPassivePacketSink;
+import inet.queueing.contract.IActivePacketSource;
 
 module TcpServerConnection like IApp
 {
@@ -27,11 +27,11 @@ module TcpServerConnection like IApp
         input socketIn;
         output socketOut;
     submodules:
-        source: <default("PacketProducer")> like IPacketProducer {
+        source: <default("ActivePacketSource")> like IActivePacketSource {
             parameters:
                 @display("p=100,100");
         }
-        sink: <default("PacketConsumer")> like IPacketConsumer {
+        sink: <default("PassivePacketSink")> like IPassivePacketSink {
             parameters:
                 @display("p=200,100");
         }

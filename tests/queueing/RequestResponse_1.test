@@ -4,39 +4,39 @@ This test contains a simplified version of a client/server and a request/respons
 based communication.
 
 Request packets are produced periodically and randomly by an active packet
-source (PacketProducer) in the client. The generated requests fall into one of
+source (ActivePacketSource) in the client. The generated requests fall into one of
 two categories based on the data they contain.
 
 The server processes requests in order, one by one, using a compound consumer
-(RequestConsumer). Each request is first classified based on the data it contains,
+(PassiveRequestSink). Each request is first classified based on the data it contains,
 and then a certain number of tokens are generated as the request is consumed.
 
-The tokens are added to a response server in a compound producer (ResponseProducer).
+The tokens are added to a response server in a compound producer (ActiveResponseSource).
 The response producer generates different traffic randomly over a period of time
 for each kind of request.
 
-The client consumes the response packets by a passive packet sink (PacketConsumer).
+The client consumes the response packets by a passive packet sink (PassivePacketSink).
 
 %file: test.ned
 
-import inet.queueing.PacketProducer;
-import inet.queueing.RequestConsumer;
-import inet.queueing.ResponseProducer;
-import inet.queueing.PacketConsumer;
+import inet.queueing.ActivePacketSource;
+import inet.queueing.PassiveRequestSink;
+import inet.queueing.ActiveResponseSource;
+import inet.queueing.PassivePacketSink;
 
 network TestRequestResponse
 {
     submodules:
-        requestProducer: PacketProducer {
+        requestProducer: ActivePacketSource {
             @display("p=200,100");
         }
-        responseConsumer: PacketConsumer {
+        responseConsumer: PassivePacketSink {
             @display("p=400,100");
         }
-        requestConsumer: RequestConsumer {
+        requestConsumer: PassiveRequestSink {
             @display("p=200,200");
         }
-        responseProducer: ResponseProducer {
+        responseProducer: ActiveResponseSource {
             @display("p=400,200");
         }
     connections allowunconnected:

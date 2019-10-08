@@ -4,9 +4,9 @@ TODO
 
 %file: test.ned
 
-import inet.queueing.PacketConsumer;
+import inet.queueing.PassivePacketSink;
 import inet.queueing.PacketDelayer;
-import inet.queueing.PacketProducer;
+import inet.queueing.ActivePacketSource;
 import inet.queueing.PacketQueue;
 import inet.queueing.PacketServer;
 
@@ -33,8 +33,8 @@ module TestHost
         input lowerIn;
         output lowerOut;
     submodules:
-        sourceApplication: PacketProducer;
-        destinationApplication: PacketConsumer;
+        sourceApplication: ActivePacketSource;
+        destinationApplication: PassivePacketSink;
         mac: TestMac;
     connections:
     	sourceApplication.out --> mac.upperIn;

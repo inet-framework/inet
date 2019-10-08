@@ -20,7 +20,7 @@ package inet.networklayer.diffserv;
 
 import inet.queueing.CompoundPacketQueue;
 import inet.queueing.DropTailQueue;
-import inet.queueing.PacketConsumer;
+import inet.queueing.PassivePacketSink;
 import inet.queueing.PriorityScheduler;
 import inet.queueing.WrrScheduler;
 
@@ -64,7 +64,7 @@ module DiffservQueue extends CompoundPacketQueue
             cbs = default(5000B); // 5 1000B packets
             @display("p=250,130");
         }
-        sink: PacketConsumer {
+        sink: PassivePacketSink {
             @display("p=400,80");
         }
         efQueue: DropTailQueue {

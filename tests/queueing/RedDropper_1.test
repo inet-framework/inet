@@ -7,15 +7,15 @@ TODO
 import inet.queueing.PriorityBuffer;
 import inet.queueing.PacketClassifier;
 import inet.queueing.PacketQueue;
-import inet.queueing.PacketCollector;
-import inet.queueing.PacketProducer;
+import inet.queueing.ActivePacketSink;
+import inet.queueing.ActivePacketSource;
 import inet.queueing.PriorityScheduler;
 import inet.queueing.RedDropper;
 
 network TestRedDropper
 {
     submodules:
-        producer: PacketProducer {
+        producer: ActivePacketSource {
             @display("p=100,100");
         }
         classifier: PacketClassifier {
@@ -36,7 +36,7 @@ network TestRedDropper
         scheduler: PriorityScheduler {
             @display("p=500,100");
         }
-        collector: PacketCollector {
+        collector: ActivePacketSink {
             @display("p=600,100");
         }
     connections:
