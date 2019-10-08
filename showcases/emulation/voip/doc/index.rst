@@ -104,19 +104,19 @@ simulation, the :ned:`VoipStreamReceiver` module receives and decodes them, and 
 an audio file at the end of the simulation.
 
 The simulations for the two cases are controlled by two shell scripts in the showcase's
-folder. The scripts set up the network namespaces and veth interfaces, and run the
+folder. The scripts set up the network namespaces and ``veth`` interfaces, and run the
 simulations. They also apply a small amount of delay, packet loss and bit corruption
 to the interfaces in both cases to simulate the effects of the packets going through
 a real network.
 
-The specific setup for the **loopback interface** case is illustrated by the following
+The specific setup for the loopback interface case is illustrated by the following
 figure:
 
 .. figure:: media/setup2.png
    :align: center
    :width: 60%
 
-The specific setup for the **virtual Ethernet interface** case is illustrated below:
+The specific setup for the virtual Ethernet interface (``veth``) case is illustrated below:
 
 .. figure:: media/setup3.png
    :align: center
@@ -197,7 +197,7 @@ Here is the ``run_veth`` script:
 .. literalinclude:: ../run_veth
    :language: bash
 
-The script creates two namespaces and a veth interface in each, and adds routes
+The script creates two namespaces and a ``veth`` interface in each, and adds routes
 (a route for each direction is required because there is an ARP exchange at the beginning).
 Note that the veth interfaces are created in pairs, and are automatically connected
 to each other. The scripts also adds the same delay, loss and corruption to the ``veth0``
