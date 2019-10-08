@@ -291,11 +291,12 @@ void TcpConnection::sendToIP(Packet *packet, const Ptr<TcpHeader>& tcpseg)
 
     insertTransportProtocolHeader(packet, Protocol::tcp, tcpseg);
 
-    auto ecnTag = packet->addTagIfAbsent<EcnReq>();
-    int64_t payload = packet->getByteLength() - tcpseg->getHeaderLength().get();
-    // do not set ECN on ACKs
-    ecnTag->setExplicitCongestionNotification((state->ecnActive && payload > 0) ? IP_ECN_ECT_0 : IP_ECN_NOT_ECT);
-
+    if (state->ecnEnabled) {
+        auto ecnTag = packet->addTagIfAbsent<EcnReq>();
+        int64_t payload = packet->getByteLength() - tcpseg->getHeaderLength().get();
+        // do not set ECN on ACKs
+        ecnTag->setExplicitCongestionNotification((state->ecnActive && payload > 0) ? IP_ECN_ECT_0 : IP_ECN_NOT_ECT);
+    }
     tcpMain->send(packet, "ipOut");
 }
 
