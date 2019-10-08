@@ -16,14 +16,14 @@
 //
 
 #include "inet/common/ModuleAccess.h"
-#include "inet/queueing/PcapPacketConsumer.h"
+#include "inet/queueing/PcapFilePassivePacketSink.h"
 
 namespace inet {
 namespace queueing {
 
-Define_Module(PcapPacketConsumer);
+Define_Module(PcapFilePassivePacketSink);
 
-void PcapPacketConsumer::initialize(int stage)
+void PcapFilePassivePacketSink::initialize(int stage)
 {
     PacketSinkBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
@@ -40,12 +40,12 @@ void PcapPacketConsumer::initialize(int stage)
     }
 }
 
-void PcapPacketConsumer::finish()
+void PcapFilePassivePacketSink::finish()
 {
     pcapWriter.closePcap();
 }
 
-void PcapPacketConsumer::pushPacket(Packet *packet, cGate *gate)
+void PcapFilePassivePacketSink::pushPacket(Packet *packet, cGate *gate)
 {
     EV_INFO << "Writing packet " << packet->getName() << " to PCAP file." << endl;
     pcapWriter.writePacket(simTime(), packet);

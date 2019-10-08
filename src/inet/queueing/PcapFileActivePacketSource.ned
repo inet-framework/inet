@@ -33,12 +33,12 @@ import inet.queueing.contract.IPacketProducer;
 //  %i - packet data information
 //  %n - number of packets read so far
 //
-simple PcapPacketProducer like IPacketProducer
+simple PcapFileActivePacketSource like IPacketProducer
 {
     parameters:
         string filename; // the PCAP file to be read
         string packetNameFormat = default("Pcap-%p-%t-%n"); // determines the name of the packets read from the PCAP file
-        @class(PcapPacketProducer);
+        @class(PcapFileActivePacketSource);
         @display("i=block/source");
     gates:
         output out @labels(push);

@@ -18,7 +18,7 @@
 
 	Added new special purpose queueing element classes: CompoundPacketQueue,
 	MarkovClassifier, MarkovScheduler, OrdinalBasedDropper, OrdinalBasedDuplicator,
-	PacketBasedTokenGenerator, PcapPacketConsumer, PcapPacketProducer,
+	PacketBasedTokenGenerator, PcapFilePassivePacketSink, PcapFileActivePacketSource,
 	PriorityClassifier, PriorityScheduler, QueueBasedTokenGenerator, RedDropper,
 	TokenBasedServer, and WrrScheduler.
 
@@ -27,7 +27,7 @@
 	PacketBuffer, PacketClassifier, PacketCloner, PacketCollector, PacketConsumer,
 	PacketDelayer, PacketDemultiplexer, PacketDuplicator, PacketFilter, PacketMultiplexer,
 	PacketProducer, PacketProvider, PacketQueue, PacketScheduler, PacketServer,
-	PcapPacketConsumer, PcapPacketProducer, PriorityBuffer, PriorityClassifier,
+	PcapFilePassivePacketSink, PcapFileActivePacketSource, PriorityBuffer, PriorityClassifier,
 	PriorityScheduler, QueueBasedTokenGenerator, RedDropper, TokenBasedServer,
 	and WrrScheduler.
 
