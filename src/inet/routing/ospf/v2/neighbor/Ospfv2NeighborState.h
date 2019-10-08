@@ -24,6 +24,7 @@
 namespace inet {
 
 namespace ospf {
+namespace v2 {
 
 class INET_API NeighborState
 {
@@ -38,6 +39,7 @@ class INET_API NeighborState
     virtual Neighbor::NeighborStateType getState() const = 0;
 };
 
+} // namespace v2
 } // namespace ospf
 
 } // namespace inet

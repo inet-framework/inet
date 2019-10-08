@@ -24,6 +24,7 @@
 namespace inet {
 
 namespace ospf {
+namespace v2 {
 
 class INET_API Ospfv2InterfaceState
 {
@@ -39,6 +40,7 @@ class INET_API Ospfv2InterfaceState
     virtual Ospfv2Interface::Ospfv2InterfaceStateType getState() const = 0;
 };
 
+} // namespace v2
 } // namespace ospf
 
 } // namespace inet

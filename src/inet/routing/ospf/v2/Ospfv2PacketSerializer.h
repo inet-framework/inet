@@ -20,10 +20,9 @@
 #include "inet/routing/ospf/v2/Ospfv2Packet_m.h"
 
 namespace inet {
-
 namespace ospf {
-
 class OspfPacketSerializer;
+namespace v2 {
 
 /**
  * Converts between Ospfv2Packet and binary (network byte order) OSPF data.
@@ -64,9 +63,10 @@ class INET_API Ospfv2PacketSerializer : public FieldsChunkSerializer
     static void deserializeLsaHeader(MemoryInputStream& stream, Ospfv2LsaHeader& lsaHeader);
 
     //TODO kludge, should register Ospfv2PacketSerializer to OspfPacketSerializer later.
-    friend class OspfPacketSerializer;
+    friend class inet::ospf::OspfPacketSerializer;
 };
 
+} // namespace v2
 } // namespace ospf
 } // namespace inet
 

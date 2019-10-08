@@ -7,6 +7,7 @@
 
 namespace inet {
 namespace ospf {
+namespace v3 {
 
 // intervals values
 #define OSPFV3_START            5
@@ -410,6 +411,7 @@ inline bool operator==(const Ospfv3LsaHeader& leftLSA, const Ospfv3LsaHeader& ri
 }
 //Packets
 
+} // namespace v3
 } //namespace ospf
 }//namespace inet
 

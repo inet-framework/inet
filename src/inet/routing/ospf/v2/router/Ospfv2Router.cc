@@ -24,6 +24,7 @@
 namespace inet {
 
 namespace ospf {
+namespace v2 {
 
 Router::Router(cSimpleModule *containingModule, IInterfaceTable *ift, IIpv4RoutingTable *rt) :
     ift(ift),
@@ -1534,6 +1535,7 @@ bool Router::isDirectRoute(Ospfv2RoutingTableEntry &entry)
     return false;
 }
 
+} // namespace v2
 } // namespace ospf
 
 } // namespace inet

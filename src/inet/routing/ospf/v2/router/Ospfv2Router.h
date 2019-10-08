@@ -32,6 +32,7 @@
 namespace inet {
 
 namespace ospf {
+namespace v2 {
 
 /**
  * All OSPF classes are in this namespace.
@@ -384,6 +385,7 @@ class INET_API Router
     bool isDirectRoute(Ospfv2RoutingTableEntry &entry);
 };
 
+} // namespace v2
 } // namespace ospf
 
 } // namespace inet

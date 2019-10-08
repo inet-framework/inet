@@ -18,6 +18,7 @@
 
 namespace inet {
 namespace ospf {
+namespace v3 {
 
 class Ospfv3Area;
 class Ospfv3InterfaceState;
@@ -255,6 +256,7 @@ inline std::ostream& operator<<(std::ostream& ostr, const Ospfv3Interface& inter
     return ostr;
 }
 
+} // namespace v3
 } // namespace ospf
 }//namespace inet
 

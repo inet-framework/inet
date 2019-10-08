@@ -6,6 +6,7 @@
 
 namespace inet {
 namespace ospf {
+namespace v3 {
 
 void Ospfv3InterfaceState::changeState(Ospfv3Interface *interface, Ospfv3InterfaceState *newState, Ospfv3InterfaceState *currentState)
 {
@@ -510,6 +511,7 @@ void Ospfv3InterfaceState::calculateDesignatedRouter(Ospfv3Interface *intf) {
         intf->setBackupIP(intf->getInterfaceLLIP());
 }
 
+} // namespace v3
 } // namespace ospf
 }//namespace inet
 

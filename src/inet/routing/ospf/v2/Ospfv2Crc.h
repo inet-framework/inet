@@ -28,11 +28,13 @@
 namespace inet {
 
 namespace ospf {
+namespace v2 {
 
 INET_API void setOspfCrc(const Ptr<Ospfv2Packet>& ospfPacket, CrcMode crcMode);
 INET_API void setLsaCrc(Ospfv2Lsa& lsa, CrcMode crcMode);
 INET_API void setLsaHeaderCrc(Ospfv2LsaHeader& lsaHeader, CrcMode crcMode);
 
+} // namespace v2
 } // namespace ospf
 
 } // namespace inet

@@ -20,6 +20,7 @@
 
 namespace inet {
 namespace ospf {
+namespace v2 {
 
 void InterfaceStateLoopback::processEvent(Ospfv2Interface *intf, Ospfv2Interface::Ospfv2InterfaceEventType event)
 {
@@ -32,6 +33,7 @@ void InterfaceStateLoopback::processEvent(Ospfv2Interface *intf, Ospfv2Interface
     }
 }
 
+} // namespace v2
 } // namespace ospf
 } // namespace inet
 

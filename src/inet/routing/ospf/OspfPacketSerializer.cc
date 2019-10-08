@@ -40,13 +40,13 @@ const Ptr<Chunk> OspfPacketSerializer::deserialize(MemoryInputStream& stream) co
 #ifdef WITH_OSPFv2
         case 2:
             stream.seek(startPos);
-            return Ospfv2PacketSerializer().deserialize(stream);
+            return v2::Ospfv2PacketSerializer().deserialize(stream);
             break;
 #endif // #ifdef WITH_OSPFv2
 #ifdef WITH_OSPFv3
         case 3:
             //TODO stream.seek(startPos);
-            //TODO return Ospfv3PacketSerializer().deserialize(stream);
+            //TODO return v3::Ospfv3PacketSerializer().deserialize(stream);
 #endif // #ifdef WITH_OSPFv3
         default: {
             auto ospfPacket = makeShared<OspfPacket>();

@@ -33,6 +33,7 @@
 namespace inet {
 
 namespace ospf {
+namespace v2 {
 
 Ospfv2Interface::Ospfv2Interface(Ospfv2Interface::Ospfv2InterfaceType ifType) :
     interfaceType(ifType),
@@ -675,6 +676,7 @@ std::ostream& operator<<(std::ostream& stream, const Ospfv2Interface& intf)
             << "backupDesignatedRouterInterface: " << intf.backupDesignatedRouter.ipInterfaceAddress;
 }
 
+} // namespace v2
 } // namespace ospf
 
 } // namespace inet

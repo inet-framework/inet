@@ -25,6 +25,7 @@
 namespace inet {
 
 namespace ospf {
+namespace v2 {
 
 Ospfv2Area::Ospfv2Area(CrcMode crcMode, IInterfaceTable *ift, AreaId id) :
     crcMode(crcMode),
@@ -2654,6 +2655,7 @@ bool Ospfv2Area::isAllZero(Ipv4AddressRange entry) const
     return false;
 }
 
+} // namespace v2
 } // namespace ospf
 
 } // namespace inet

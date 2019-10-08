@@ -26,6 +26,7 @@
 namespace inet {
 
 namespace ospf {
+namespace v2 {
 
 MessageHandler::MessageHandler(Router *containingRouter, cSimpleModule *containingModule) :
     IMessageHandler(containingRouter),
@@ -582,6 +583,7 @@ void MessageHandler::printLinkStateAcknowledgementPacket(const Ospfv2LinkStateAc
     }
 }
 
+} // namespace v2
 } // namespace ospf
 
 } // namespace inet

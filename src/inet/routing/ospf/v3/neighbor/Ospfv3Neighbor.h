@@ -12,6 +12,7 @@
 
 namespace inet {
 namespace ospf {
+namespace v3 {
 
 class Ospfv3NeighborState;
 class Ospfv3Interface;
@@ -184,6 +185,7 @@ class Ospfv3Neighbor
     int last_hello_received = 0;
 };
 
+} // namespace v3
 } // namespace ospf
 }//namespace inet
 

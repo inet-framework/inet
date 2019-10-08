@@ -20,6 +20,7 @@
 namespace inet {
 
 namespace ospf {
+namespace v2 {
 
 bool SummaryLsa::update(const Ospfv2SummaryLsa *lsa)
 {
@@ -68,6 +69,7 @@ bool SummaryLsa::differsFrom(const Ospfv2SummaryLsa *summaryLSA) const
     return differentHeader || differentBody;
 }
 
+} // namespace v2
 } // namespace ospf
 
 } // namespace inet

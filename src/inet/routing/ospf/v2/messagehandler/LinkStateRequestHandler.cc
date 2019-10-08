@@ -24,6 +24,7 @@
 namespace inet {
 
 namespace ospf {
+namespace v2 {
 
 LinkStateRequestHandler::LinkStateRequestHandler(Router *containingRouter) :
     IMessageHandler(containingRouter)
@@ -106,6 +107,7 @@ void LinkStateRequestHandler::processPacket(Packet *packet, Ospfv2Interface *int
     }
 }
 
+} // namespace v2
 } // namespace ospf
 
 } // namespace inet

@@ -20,6 +20,7 @@
 namespace inet {
 
 namespace ospf {
+namespace v2 {
 
 Ospfv2RoutingTableEntry::Ospfv2RoutingTableEntry(IInterfaceTable *_ift) :
     ift(_ift),
@@ -197,6 +198,7 @@ const std::string Ospfv2RoutingTableEntry::getPathTypeString(RoutingPathType pat
     return "Unknown";
 }
 
+} // namespace v2
 } // namespace ospf
 
 } // namespace inet

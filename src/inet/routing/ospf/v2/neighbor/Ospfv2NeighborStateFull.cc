@@ -27,6 +27,7 @@
 
 namespace inet {
 namespace ospf {
+namespace v2 {
 
 void NeighborStateFull::processEvent(Neighbor *neighbor, Neighbor::NeighborEventType event)
 {
@@ -80,6 +81,7 @@ void NeighborStateFull::processEvent(Neighbor *neighbor, Neighbor::NeighborEvent
     }
 }
 
+} // namespace v2
 } // namespace ospf
 } // namespace inet
 

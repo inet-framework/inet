@@ -3,6 +3,7 @@
 
 namespace inet {
 namespace ospf {
+namespace v3 {
 
 Ospfv3RoutingTableEntry::Ospfv3RoutingTableEntry(IInterfaceTable *ift, Ipv6Address destPrefix, int prefixLength, SourceType sourceType) :
         Ipv6Route(destPrefix, prefixLength, sourceType),
@@ -390,6 +391,7 @@ std::ostream& operator<<(std::ostream& out, const Ospfv3Ipv4RoutingTableEntry& e
     return out;
 }
 
+} // namespace v3
 } // namespace ospf
 } // namespace inet
 

@@ -5,6 +5,7 @@
 
 namespace inet {
 namespace ospf {
+namespace v3 {
 
 Define_Module(Ospfv3Splitter);
 
@@ -206,6 +207,7 @@ void Ospfv3Splitter::addNewProcess(cXMLElement* process, cXMLElement* interfaces
     this->processesModules.push_back(newProcessModule);
 }//addNewProcess
 
+} // namespace v3
 } //namespace ospf
 }//namespace inet
 

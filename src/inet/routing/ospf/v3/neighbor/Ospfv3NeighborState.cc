@@ -20,6 +20,7 @@
 
 namespace inet {
 namespace ospf {
+namespace v3 {
 
 void Ospfv3NeighborState::changeState(Ospfv3Neighbor *neighbor, Ospfv3NeighborState *newState, Ospfv3NeighborState *currentState)
 {
@@ -136,6 +137,7 @@ void Ospfv3NeighborState::changeState(Ospfv3Neighbor *neighbor, Ospfv3NeighborSt
     }
 }
 
+} // namespace v3
 } // namespace ospf
 } // namespace inet
 

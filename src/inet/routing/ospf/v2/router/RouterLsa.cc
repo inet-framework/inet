@@ -20,6 +20,7 @@
 namespace inet {
 
 namespace ospf {
+namespace v2 {
 
 bool RouterLsa::update(const Ospfv2RouterLsa *lsa)
 {
@@ -88,6 +89,7 @@ bool RouterLsa::differsFrom(const Ospfv2RouterLsa *routerLSA) const
     return differentHeader || differentBody;
 }
 
+} // namespace v2
 } // namespace ospf
 
 } // namespace inet

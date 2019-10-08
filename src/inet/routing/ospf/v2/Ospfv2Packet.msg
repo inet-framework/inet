@@ -21,7 +21,7 @@ import inet.networklayer.contract.ipv4.Ipv4Address;
 import inet.routing.ospf.OspfPacket;
 import inet.transportlayer.common.CrcMode;
 
-namespace inet::ospf;
+namespace inet::ospf::v2;
 
 // should be a byte long bitfield
 struct Ospfv2Options

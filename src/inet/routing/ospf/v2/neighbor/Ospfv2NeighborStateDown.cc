@@ -26,6 +26,7 @@
 namespace inet {
 
 namespace ospf {
+namespace v2 {
 
 void NeighborStateDown::processEvent(Neighbor *neighbor, Neighbor::NeighborEventType event)
 {
@@ -52,6 +53,7 @@ void NeighborStateDown::processEvent(Neighbor *neighbor, Neighbor::NeighborEvent
     }
 }
 
+} // namespace v2
 } // namespace ospf
 
 } // namespace inet

@@ -13,6 +13,7 @@
 
 namespace inet {
 namespace ospf {
+namespace v3 {
 
 class INET_API Ospfv3RoutingTableEntry : public Ipv6Route
 {
@@ -136,6 +137,7 @@ public:
 
 std::ostream& operator<<(std::ostream& out, const Ospfv3Ipv4RoutingTableEntry& entry);
 
+} // namespace v3
 } // namespace ospf
 }//namespace inet
 

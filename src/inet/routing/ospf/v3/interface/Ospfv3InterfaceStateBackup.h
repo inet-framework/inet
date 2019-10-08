@@ -8,6 +8,7 @@
 
 namespace inet {
 namespace ospf {
+namespace v3 {
 
 /*
  * The router is BDR, it will be promoted to DR in case of failure. It forms adjacencies with
@@ -28,6 +29,7 @@ class INET_API Ospfv3InterfaceStateBackup : public Ospfv3InterfaceState
     virtual std::string getInterfaceStateString() const override { return std::string("Ospfv3InterfaceStateBackup"); }
 };
 
+} // namespace v3
 } // namespace ospf
 }//namespace inet
 

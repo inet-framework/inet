@@ -20,6 +20,7 @@
 namespace inet {
 
 namespace ospf {
+namespace v2 {
 
 bool operator<(const Ospfv2LsaHeader& leftLSA, const Ospfv2LsaHeader& rightLSA)
 {
@@ -344,6 +345,7 @@ std::ostream& operator<<(std::ostream& ostr, const Ospfv2Lsa& lsa)
     return ostr;
 }
 
+} // namespace v2
 } // namespace ospf
 } // namespace inet
 

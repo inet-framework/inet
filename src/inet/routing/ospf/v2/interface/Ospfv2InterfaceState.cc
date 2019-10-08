@@ -28,6 +28,7 @@
 namespace inet {
 
 namespace ospf {
+namespace v2 {
 
 void Ospfv2InterfaceState::changeState(Ospfv2Interface *intf, Ospfv2InterfaceState *newState, Ospfv2InterfaceState *currentState)
 {
@@ -404,6 +405,7 @@ void Ospfv2InterfaceState::printElectionResult(const Ospfv2Interface *onInterfac
     EV_DETAIL << "\n";
 }
 
+} // namespace v2
 } // namespace ospf
 
 } // namespace inet

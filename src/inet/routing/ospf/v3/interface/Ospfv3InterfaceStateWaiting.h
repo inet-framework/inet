@@ -8,6 +8,7 @@
 
 namespace inet {
 namespace ospf {
+namespace v3 {
 
 /*
  * In this state the interface is waiting for the DR and BDR election. It does do by monitoring hello packets
@@ -24,6 +25,7 @@ class INET_API Ospfv3InterfaceStateWaiting : public Ospfv3InterfaceState
     std::string getInterfaceStateString() const override { return std::string("Ospfv3InterfaceStateWaiting"); };
 };
 
+} // namespace v3
 } // namespace ospf
 }//namespace inet
 

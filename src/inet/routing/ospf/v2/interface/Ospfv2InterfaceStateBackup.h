@@ -24,6 +24,7 @@
 namespace inet {
 
 namespace ospf {
+namespace v2 {
 
 class INET_API InterfaceStateBackup : public Ospfv2InterfaceState
 {
@@ -32,6 +33,7 @@ class INET_API InterfaceStateBackup : public Ospfv2InterfaceState
     virtual Ospfv2Interface::Ospfv2InterfaceStateType getState() const override { return Ospfv2Interface::BACKUP_STATE; }
 };
 
+} // namespace v2
 } // namespace ospf
 
 } // namespace inet

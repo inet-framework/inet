@@ -37,6 +37,7 @@
 
 namespace inet {
 namespace ospf {
+namespace v2 {
 
 using namespace xmlutils;
 
@@ -628,6 +629,7 @@ void Ospfv2ConfigReader::joinMulticastGroups(int interfaceId)
     ipv4Data->joinMulticastGroup(Ipv4Address::ALL_OSPF_DESIGNATED_ROUTERS_MCAST);
 }
 
+} // namespace v2
 } // namespace ospf
 } // namespace inet
 

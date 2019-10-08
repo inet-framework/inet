@@ -20,6 +20,7 @@
 
 namespace inet {
 namespace ospf {
+namespace v2 {
 
 LinkStateAcknowledgementHandler::LinkStateAcknowledgementHandler(Router *containingRouter) :
     IMessageHandler(containingRouter)
@@ -62,6 +63,7 @@ void LinkStateAcknowledgementHandler::processPacket(Packet *packet, Ospfv2Interf
     }
 }
 
+} // namespace v2
 } // namespace ospf
 } // namespace inet
 

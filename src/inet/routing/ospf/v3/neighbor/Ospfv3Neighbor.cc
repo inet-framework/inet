@@ -4,6 +4,7 @@
 
 namespace inet {
 namespace ospf {
+namespace v3 {
 
 // FIXME!!! Should come from a global unique number generator module.
 unsigned long Ospfv3Neighbor::ddSequenceNumberInitSeed = 0;
@@ -734,6 +735,7 @@ void Ospfv3Neighbor::deleteLastSentDDPacket()
     }
 }//deleteLastSentDDPacket
 
+} // namespace v3
 } // namespace ospf
 } // namespace inet
 

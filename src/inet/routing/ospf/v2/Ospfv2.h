@@ -30,6 +30,7 @@
 namespace inet {
 
 namespace ospf {
+namespace v2 {
 
 /**
  * Implements the OSPFv2 routing protocol. See the NED file for more information.
@@ -78,6 +79,7 @@ class Ospfv2 : public RoutingProtocolBase, protected cListener
     void handleInterfaceDown(const InterfaceEntry *ie);
 };
 
+} // namespace v2
 } // namespace ospf
 
 } // namespace inet

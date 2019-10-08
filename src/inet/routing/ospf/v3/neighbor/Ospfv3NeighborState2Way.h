@@ -7,6 +7,7 @@
 
 namespace inet {
 namespace ospf {
+namespace v3 {
 
 class INET_API Ospfv3NeighborState2Way : public Ospfv3NeighborState
 {
@@ -21,6 +22,7 @@ class INET_API Ospfv3NeighborState2Way : public Ospfv3NeighborState
     virtual std::string getNeighborStateString() override { return std::string("Ospfv3NeighborState2Way"); }
 };
 
+} // namespace v3
 } // namespace ospf
 }//namespace inet
 

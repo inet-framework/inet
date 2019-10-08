@@ -25,6 +25,7 @@
 namespace inet {
 
 namespace ospf {
+namespace v2 {
 
 class INET_API LinkStateUpdateHandler : public IMessageHandler
 {
@@ -50,6 +51,7 @@ class INET_API LinkStateUpdateHandler : public IMessageHandler
     void processPacket(Packet *packet, Ospfv2Interface *intf, Neighbor *neighbor) override;
 };
 
+} // namespace v2
 } // namespace ospf
 
 } // namespace inet

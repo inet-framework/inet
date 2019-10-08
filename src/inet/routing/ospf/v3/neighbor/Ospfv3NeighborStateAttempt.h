@@ -7,6 +7,7 @@
 
 namespace inet {
 namespace ospf {
+namespace v3 {
 
 class INET_API Ospfv3NeighborStateAttempt : public Ospfv3NeighborState
 {
@@ -21,6 +22,7 @@ class INET_API Ospfv3NeighborStateAttempt : public Ospfv3NeighborState
     ~Ospfv3NeighborStateAttempt() {};
 };
 
+} // namespace v3
 } // namespace ospf
 }//namespace inet
 

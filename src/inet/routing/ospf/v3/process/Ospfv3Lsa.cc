@@ -3,6 +3,7 @@
 
 namespace inet {
 namespace ospf {
+namespace v3 {
 
 Ospfv3SpfVertex::Ospfv3SpfVertex(Ospfv3Lsa* asocLSA, int distance)
 {
@@ -166,6 +167,7 @@ std::ostream& operator<<(std::ostream& ostr, const Ospfv3AsExternalLsa& lsa)
     return ostr;
 }
 
+} // namespace v3
 } // namespace ospf
 } //namespace inet
 

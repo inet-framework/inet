@@ -8,6 +8,7 @@
 
 namespace inet {
 namespace ospf {
+namespace v3 {
 
 /*
  * Adjacencies are established with every router on the network.
@@ -23,6 +24,7 @@ class INET_API Ospfv3InterfacePassive : public Ospfv3InterfaceState
     virtual std::string getInterfaceStateString() const override { return std::string("Ospfv3InterfacePassive"); }
 };
 
+} // namespace v3
 } // namespace ospf
 }//namespace inet
 

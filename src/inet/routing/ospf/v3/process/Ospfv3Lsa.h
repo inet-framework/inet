@@ -11,6 +11,7 @@
 
 namespace inet {
 namespace ospf {
+namespace v3 {
 
 class INET_API LSATrackingInfo
 {
@@ -195,6 +196,7 @@ std::ostream& operator<<(std::ostream& ostr, const Ospfv3RouterLsa& lsa);
 std::ostream& operator<<(std::ostream& ostr, const Ospfv3InterAreaPrefixLsa& lsa);
 std::ostream& operator<<(std::ostream& ostr, const Ospfv3AsExternalLsa& lsa);
 
+} // namespace v3
 } // namespace ospf
 }//namespace inet
 

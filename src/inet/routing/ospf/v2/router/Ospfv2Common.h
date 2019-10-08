@@ -30,6 +30,7 @@
 namespace inet {
 
 namespace ospf {
+namespace v2 {
 
 // global constants
 #define LS_REFRESH_TIME                        1800
@@ -296,6 +297,7 @@ inline char hexPairToByte(char upperHex, char lowerHex)
     return (hexCharToByte(upperHex) << 4) & (hexCharToByte(lowerHex));
 }
 
+} // namespace v2
 } // namespace ospf
 
 } // namespace inet

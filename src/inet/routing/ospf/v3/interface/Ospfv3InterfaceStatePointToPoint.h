@@ -9,6 +9,7 @@
 
 namespace inet {
 namespace ospf {
+namespace v3 {
 
 /*
  * Interface is operational and it is connected to either a physical point-to-point interface
@@ -25,6 +26,7 @@ class INET_API Ospfv3InterfaceStatePointToPoint : public Ospfv3InterfaceState
     virtual std::string getInterfaceStateString() const override { return std::string("Ospfv3InterfaceStatePointToPoint"); }
 };
 
+} // namespace v3
 } // namespace ospf
 }//namespace inet
 

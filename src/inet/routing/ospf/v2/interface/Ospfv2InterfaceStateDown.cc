@@ -27,6 +27,7 @@
 namespace inet {
 
 namespace ospf {
+namespace v2 {
 
 void InterfaceStateDown::processEvent(Ospfv2Interface *intf, Ospfv2Interface::Ospfv2InterfaceEventType event)
 {
@@ -79,6 +80,7 @@ void InterfaceStateDown::processEvent(Ospfv2Interface *intf, Ospfv2Interface::Os
     }
 }
 
+} // namespace v2
 } // namespace ospf
 
 } // namespace inet

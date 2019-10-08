@@ -8,6 +8,7 @@
 
 namespace inet {
 namespace ospf {
+namespace v3 {
 
 class INET_API Ospfv3InterfaceState
 {
@@ -22,6 +23,7 @@ class INET_API Ospfv3InterfaceState
     void calculateDesignatedRouter(Ospfv3Interface *intf);
 };
 
+} // namespace v3
 } // namespace ospf
 }//namespace inet
 

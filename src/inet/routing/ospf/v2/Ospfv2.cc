@@ -31,6 +31,7 @@
 
 namespace inet {
 namespace ospf {
+namespace v2 {
 
 Define_Module(Ospfv2);
 
@@ -243,5 +244,6 @@ void Ospfv2::handleInterfaceDown(const InterfaceEntry *ie)
     }
 }
 
+} // namespace v2
 } // namespace ospf
 } // namespace inet

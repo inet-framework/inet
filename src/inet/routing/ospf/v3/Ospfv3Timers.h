@@ -3,6 +3,7 @@
 
 namespace inet {
 namespace ospf {
+namespace v3 {
 
 enum Ospfv3Timers
 {
@@ -19,6 +20,7 @@ enum Ospfv3Timers
     HELLO_TIMER_INIT = 10 // timer set by process, for initialisation of hello msgs
 };
 
+} // namespace v3
 } //namespace ospf
 }//namespace inet
 

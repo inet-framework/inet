@@ -7,6 +7,7 @@
 
 namespace inet {
 namespace ospf {
+namespace v3 {
 
 void Ospfv3InterfaceStateDrOther::processEvent(Ospfv3Interface* interface, Ospfv3Interface::Ospfv3InterfaceEvent event)
 {
@@ -66,6 +67,7 @@ void Ospfv3InterfaceStateDrOther::processEvent(Ospfv3Interface* interface, Ospfv
 //    }
 }//processEvent
 
+} // namespace v3
 } // namespace ospf
 }//namespace inet
 

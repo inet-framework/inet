@@ -7,6 +7,7 @@
 
 namespace inet {
 namespace ospf {
+namespace v3 {
 
 using namespace std;
 
@@ -3749,6 +3750,7 @@ std::string Ospfv3Area::detailedInfo() const
     return out.str();
 }//detailedInfo
 
+} // namespace v3
 } // namespace ospf
 }//namespace inet
 

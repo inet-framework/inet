@@ -8,6 +8,7 @@
 
 namespace inet {
 namespace ospf {
+namespace v3 {
 
 /*
  * Interface os looped back, it is unsiutable for normal traffic. It is still desirable to gain information
@@ -24,6 +25,7 @@ class INET_API Ospfv3InterfaceStateLoopback : public Ospfv3InterfaceState
     std::string getInterfaceStateString() const override { return std::string("Ospfv3InterfaceStateLoopback"); }
 };
 
+} // namespace v3
 } // namespace ospf
 }//namespace inet
 

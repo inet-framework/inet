@@ -28,6 +28,7 @@
 
 namespace inet {
 namespace ospf {
+namespace v2 {
 
 void NeighborStateLoading::processEvent(Neighbor *neighbor, Neighbor::NeighborEventType event)
 {
@@ -85,6 +86,7 @@ void NeighborStateLoading::processEvent(Neighbor *neighbor, Neighbor::NeighborEv
     }
 }
 
+} // namespace v2
 } // namespace ospf
 } // namespace inet
 

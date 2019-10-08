@@ -33,6 +33,7 @@
 namespace inet {
 
 namespace ospf {
+namespace v2 {
 
 class Ospfv2Area;
 class Ospfv2InterfaceState;
@@ -195,6 +196,7 @@ class INET_API Ospfv2Interface
     friend std::ostream& operator<<(std::ostream& stream, const Ospfv2Interface& intf);
 };
 
+} // namespace v2
 } // namespace ospf
 
 } // namespace inet

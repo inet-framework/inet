@@ -24,6 +24,7 @@
 
 namespace inet {
 namespace ospf {
+namespace v2 {
 
 void setOspfCrc(const Ptr<Ospfv2Packet>& ospfPacket, CrcMode crcMode)
 {
@@ -110,6 +111,7 @@ void setLsaHeaderCrc(Ospfv2LsaHeader& lsaHeader, CrcMode crcMode)
     }
 }
 
+} // namespace v2
 } // namespace ospf
 } // namespace inet
 

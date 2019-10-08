@@ -7,6 +7,7 @@
 
 namespace inet {
 namespace ospf {
+namespace v3 {
 
 class INET_API Ospfv3NeighborState
 {
@@ -20,6 +21,7 @@ class INET_API Ospfv3NeighborState
     virtual ~Ospfv3NeighborState() {};
 };
 
+} // namespace v3
 } // namespace ospf
 }//namespace inet
 

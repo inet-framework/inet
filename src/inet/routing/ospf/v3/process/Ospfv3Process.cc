@@ -4,6 +4,7 @@
 
 namespace inet {
 namespace ospf {
+namespace v3 {
 
 Define_Module(Ospfv3Process);
 
@@ -1005,6 +1006,7 @@ void Ospfv3Process::rebuildRoutingTable()
     }
 } // end of rebuildRoutingTable
 
+} // namespace v3
 } // namespace ospf
 }//namespace inet
 

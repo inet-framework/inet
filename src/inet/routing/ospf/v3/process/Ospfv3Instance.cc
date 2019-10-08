@@ -4,6 +4,7 @@
 
 namespace inet {
 namespace ospf {
+namespace v3 {
 
 Ospfv3Instance::Ospfv3Instance(int instanceId, Ospfv3Process* parentProcess, int addressFamily)
 {
@@ -268,6 +269,7 @@ std::string Ospfv3Instance::detailedInfo() const
     return out.str();
 }
 
+} // namespace v3
 } // namespace ospf
 }//namespace inet
 

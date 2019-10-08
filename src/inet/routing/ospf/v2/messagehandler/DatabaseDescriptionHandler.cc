@@ -23,6 +23,7 @@
 
 namespace inet {
 namespace ospf {
+namespace v2 {
 
 DatabaseDescriptionHandler::DatabaseDescriptionHandler(Router *containingRouter) :
     IMessageHandler(containingRouter)
@@ -253,6 +254,7 @@ bool DatabaseDescriptionHandler::processDDPacket(const Ospfv2DatabaseDescription
     return true;
 }
 
+} // namespace v2
 } // namespace ospf
 } // namespace inet
 

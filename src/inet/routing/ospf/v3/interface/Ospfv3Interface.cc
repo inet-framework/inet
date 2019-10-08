@@ -9,6 +9,7 @@ using namespace std;
 
 namespace inet {
 namespace ospf {
+namespace v3 {
 
 Ospfv3Interface::Ospfv3Interface(const char* name, cModule* routerModule, Ospfv3Process* processModule, Ospfv3InterfaceType interfaceType, bool passive) :
         helloInterval(DEFAULT_HELLO_INTERVAL),
@@ -2019,6 +2020,7 @@ std::string Ospfv3Interface::detailedInfo() const
     return out.str();
 }//detailedInfo
 
+} // namespace v3
 } //namespace ospf
 }//namespace inet
 

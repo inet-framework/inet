@@ -30,6 +30,7 @@
 
 namespace inet {
 namespace ospf {
+namespace v3 {
 
 class Ospfv3Instance;
 
@@ -101,6 +102,7 @@ class INET_API Ospfv3Process : protected cListener, public cSimpleModule
     //list of as-external routes
 };
 
+} // namespace v3
 } // namespace ospf
 }//namespace inet
 

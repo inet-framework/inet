@@ -20,6 +20,7 @@
 namespace inet {
 
 namespace ospf {
+namespace v2 {
 
 Register_Serializer(Ospfv2Packet, Ospfv2PacketSerializer);
 Register_Serializer(Ospfv2HelloPacket, Ospfv2PacketSerializer);
@@ -514,6 +515,7 @@ void Ospfv2PacketSerializer::copyHeaderFields(const Ptr<Ospfv2Packet> from, Ptr<
     }
 }
 
+} // namespace v2
 } // namespace ospf
 
 } // namespace inet

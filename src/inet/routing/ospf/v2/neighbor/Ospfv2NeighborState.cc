@@ -22,6 +22,7 @@
 
 namespace inet {
 namespace ospf {
+namespace v2 {
 
 void NeighborState::changeState(Neighbor *neighbor, NeighborState *newState, NeighborState *currentState)
 {
@@ -87,6 +88,7 @@ bool NeighborState::updateLsa(Neighbor *neighbor)
     return shouldRebuildRoutingTable;
 }
 
+} // namespace v2
 } // namespace ospf
 } // namespace inet
 
