@@ -30,7 +30,7 @@ import ned.DatarateChannel;
 
 //import inet.linklayer.queue.REDDropper;
 
-//import inet.common.queue.IOutputQueue;
+//import inet.common.queue.IPacketQueue;
 //import inet.linklayer.queue.DropTailQueue;
 //import inet.common.queue.FifoQueue;
 //import inet.common.queue.RedDropper;

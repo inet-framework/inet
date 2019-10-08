@@ -88,7 +88,7 @@ import inet.linklayer.contract.IEtherMac;
 //
 // <b>Queueing</b>
 //
-// In routers, MAC relies on an external queue module (see ~IOutputQueue)
+// In routers, MAC relies on an external queue module (see ~IPacketQueue)
 // to model finite buffer, implement QoS and/or RED, and requests packets
 // from this external queue one-by-one.
 //
@@ -103,7 +103,7 @@ import inet.linklayer.contract.IEtherMac;
 //
 // Please see <a href="physical.html">Messaging on the physical layer</a>.
 //
-// @see ~EtherMacFullDuplex, ~EthernetInterface, ~IOutputQueue, ~EtherEncap, ~Ieee8022Llc
+// @see ~EtherMacFullDuplex, ~EthernetInterface, ~IPacketQueue, ~EtherEncap, ~Ieee8022Llc
 // @see ~EtherFrame, ~EthernetIIFrame, ~EtherFrameWithLlc, ~Ieee802Ctrl
 //
 module EtherMac like IEtherMac

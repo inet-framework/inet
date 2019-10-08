@@ -97,7 +97,7 @@ parametric type like this:
 
 .. code-block:: ned
 
-   queue: <queueType> like IOutputQueue if queueType != "";
+   queue: <queueType> like IPacketQueue if queueType != "";
 
 When :par:`queueType` is empty (this is the default), the external queue
 module is absent, and the MAC (or equivalent L2) protocol will use its
@@ -107,7 +107,7 @@ the queue length in a module parameter – if this is exceeded, the
 simulation stops with an error.
 
 When :par:`queueType` is not empty, it must name a NED type that
-implements the :ned:`IOutputQueue` interface. The external queue module
+implements the :ned:`IPacketQueue` interface. The external queue module
 model allows modeling a finite buffer, or implement various queueing
 policies for QoS and/or RED.
 

@@ -50,7 +50,7 @@ layer immediately through the :gate:`netwOut` gate.
 
 Incoming datagrams are waiting in a queue if the line is currently busy.
 In routers, PPP relies on an external queue module (implementing
-:ned:`IOutputQueue`) to model finite buffer, implement QoS and/or RED,
+:ned:`IPacketQueue`) to model finite buffer, implement QoS and/or RED,
 and requests packets from this external queue one-by-one. The name of
 this queue is given as the :par:`queueModule` parameter.
 
@@ -82,7 +82,7 @@ passive queue for the messages received from the network layer.
 
 The queue type is specified by the :par:`queueType` parameter. It can be
 set to ``NoQueue`` or to a module type implementing the
-:ned:`IOutputQueue` interface. There are implementations with QoS and
+:ned:`IPacketQueue` interface. There are implementations with QoS and
 RED support.
 
 In typical use of the :ned:`Ppp` module it is augmented with other nodes

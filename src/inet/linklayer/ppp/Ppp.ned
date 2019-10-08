@@ -28,7 +28,7 @@ import inet.queueing.contract.IPacketQueue;
 // and maintenance. This model ignores those details, and only performs
 // simple encapsulation/decapsulation and queuing.
 //
-// In routers, PPP relies on an external queue module (see ~IOutputQueue)
+// In routers, PPP relies on an external queue module (see ~IPacketQueue)
 // to model finite buffer, implement QoS and/or RED, and requests packets
 // from this external queue one-by-one.
 //

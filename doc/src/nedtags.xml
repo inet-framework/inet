@@ -1457,8 +1457,8 @@
     <filename>inet.routing.contract.IOspf.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.common.queue.IOutputQueue</name>
-    <filename>inet.common.queue.IOutputQueue.html</filename>
+    <name>inet.common.queue.IPacketQueue</name>
+    <filename>inet.common.queue.IPacketQueue.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.visualizer.contract.IPacketDropVisualizer</name>
