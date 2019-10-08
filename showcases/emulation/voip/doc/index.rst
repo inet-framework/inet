@@ -101,17 +101,16 @@ The specific setup for the **virtual Ethernet interface** case is illustrated be
 The Network
 ~~~~~~~~~~~
 
-In the simulation, only a sender
-node and a receiver node are needed in order to
+In the simulation, only a sender node and a receiver node are needed in order to
 send the packets into the real network on one side and receive them on
 the other side. The two simulated nodes are in separate parts of the whole
 network so they are defined in separate networks in the NED file, and run in
 separate simulations.
 
 There are only two submodules per node. There is a
-``VoipStreamSender`` in the sender node and a
-``VoipStreamReceiver`` in the receiver node, both called ``app``.
-Both nodes contain an ``ExtLowerUdp`` module, called ``udp``. The
+:ned:`VoipStreamSender` in the sender node and a
+:ned:`VoipStreamReceiver` in the receiver node, both called ``app``.
+Both nodes contain an :ned:`ExtLowerUdp` module, called ``udp``. The
 layout of the two nodes can be seen in the following image:
 
 +----------------------------------------------------+--+---------------------------------------------------+
@@ -125,16 +124,16 @@ layout of the two nodes can be seen in the following image:
 Configuration
 ~~~~~~~~~~~~~
 
-There is no difference in the configuration of the ``VoipStreamSender`` and
-``VoipStreamReceiver`` modules compared to a fully simulated scenario. Also,
-the ``ExtLowerUdp`` module behaves just like the :ned:`Udp` module from the point of view
+There is no difference in the configuration of the :ned:`VoipStreamSender` and
+:ned:`VoipStreamReceiver` modules compared to a fully simulated scenario. Also,
+the :ned:`ExtLowerUdp` module behaves just like the :ned:`Udp` module from the point of view
 of the modules above them. In this showcase (aside from assigning the :ned:`ExtLowerUdp`
 modules to network namespaces) only the VoIP modules need to be configured.
 The simulations are defined in separate ini files, :download:`sender.ini <../sender.ini>`
 and
 :download:`receiver.ini <../receiver.ini>`.
 
-Here is the ``VoipStreamSender``'s configuration in :download:`sender.ini <../sender.ini>`:
+Here is the :ned:`VoipStreamSender`'s configuration in :download:`sender.ini <../sender.ini>`:
 
 .. literalinclude:: ../sender.ini
    :language: ini
@@ -146,7 +145,7 @@ In the ``VethSender`` configuration, the ``destAddress`` parameter is set to ``1
 (the address of the ``veth1`` interface). Also, the :ned:`ExtLowerUdp` module is set to use
 the ``net1`` network namespace.
 
-Here is the VoipStreamReceiver's configuration in :download:`receiver.ini <../receiver.ini>`:
+Here is :ned:`VoipStreamReceiver`'s configuration in :download:`receiver.ini <../receiver.ini>`:
 
 .. literalinclude:: ../receiver.ini
    :language: ini
