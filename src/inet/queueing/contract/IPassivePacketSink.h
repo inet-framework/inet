@@ -24,7 +24,7 @@ namespace inet {
 namespace queueing {
 
 /**
- * This class defines the interface for packet consumers.
+ * This class defines the interface for passive packet sinks.
  */
 class INET_API IPassivePacketSink
 {
@@ -32,7 +32,7 @@ class INET_API IPassivePacketSink
     virtual ~IPassivePacketSink() {}
 
     /**
-     * Returns false if the consumer is full at the given gate and no more
+     * Returns false if the packet sink is full at the given gate and no more
      * packets can be pushed into it without raising an error. The gate must
      * support pushing packets.
      */
@@ -40,13 +40,13 @@ class INET_API IPassivePacketSink
 
     /**
      * Returns true if the given packet can be pushed at the given gate into
-     * the consumer. The packet must not be nullptr and the gate must support
+     * the packet sink. The packet must not be nullptr and the gate must support
      * pushing packets.
      */
     virtual bool canPushPacket(Packet *packet, cGate *gate = nullptr) = 0;
 
     /**
-     * Pushes a packet into the consumer at the given gate. The consumer must
+     * Pushes a packet into the packet sink at the given gate. The consumer must
      * not be full at the gate. The packet must not be nullptr and the gate
      * must support pushing packets.
      */

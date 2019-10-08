@@ -18,11 +18,12 @@
 package inet.queueing.contract;
 
 //
-// This module interface must be implemented by packet collector modules. A packet
-// collector is an active module with one input. It must be connected to a packet
-// provider module from which it's going to actively collect packets over time.
+// This module interface must be implemented by active packet sink modules. An
+// active packet sink has one input that must be connected to a passive packet
+// source module. The active packet sink is expected to pop packets from the
+// connected passive packet source over time.
 //
-// @see ~IPassivePacketSource, ~ActivePacketSink, ~PacketScheduler
+// @see ~ActivePacketSink, ~PacketServer, ~PacketScheduler, ~IPassivePacketSource
 //
 moduleinterface IActivePacketSink
 {

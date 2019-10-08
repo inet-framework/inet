@@ -18,11 +18,12 @@
 package inet.queueing.contract;
 
 //
-// This module interface must be implemented by packet producer modules. A packet
-// producer is an active module with one output. It must be connected to a packet
-// consumer module to which it's going to push packets over time.
+// This module interface must be implemented by active packet source modules. An
+// active packet source has one output that must be connected to a passive packet
+// sink module. The active packet source is expected to push packets into the
+// connected passive packet sink over time.
 //
-// @see ~IPassivePacketSink, ~PassivePacketSink, ~PacketClassifier
+// @see ~PassivePacketSink, ~PacketServer, ~PacketClassifier, ~IPassivePacketSink
 //
 moduleinterface IActivePacketSource
 {

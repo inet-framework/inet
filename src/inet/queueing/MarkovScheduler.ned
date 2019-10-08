@@ -20,11 +20,16 @@ package inet.queueing;
 import inet.queueing.base.PacketSchedulerBase;
 import inet.queueing.contract.IPacketScheduler;
 
+//
+// This module implements a packet scheduler using a Markov process that has
+// as many states as many input gates the scheduler has. The input gate for
+// the next packet is determined by the current state of the Markov process.
+//
 simple MarkovScheduler extends PacketSchedulerBase like IPacketScheduler
 {
     parameters:
-        int initialState = default(0);
-        string transitionProbabilities;
+        int initialState = default(0); // the start state of the Markov process
+        string transitionProbabilities; // the transmition matrix of the Markov process, specified as a list of probabilities
         string waitIntervals;
         @class(MarkovScheduler);
 }

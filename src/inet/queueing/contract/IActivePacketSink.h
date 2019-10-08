@@ -24,7 +24,7 @@ namespace inet {
 namespace queueing {
 
 /**
- * This class defines the interface for packet collectors.
+ * This class defines the interface for active packet sinks.
  */
 class INET_API IActivePacketSink
 {
@@ -32,13 +32,14 @@ class INET_API IActivePacketSink
     virtual ~IActivePacketSink() {}
 
     /**
-     * Returns the provider from where packets are collected. The gate must not be nullptr.
+     * Returns the passive packet source from where packets are collected. The
+     * gate must not be nullptr.
      */
     virtual IPassivePacketSource *getProvider(cGate *gate) = 0;
 
     /**
      * Notifies about a state change that allows to pop some packet from the
-     * provider at the given gate. The gate is never nulltr.
+     * passive packet source at the given gate. The gate is never nulltr.
      */
     virtual void handleCanPopPacket(cGate *gate) = 0;
 };

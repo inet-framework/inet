@@ -25,9 +25,10 @@ namespace inet {
 namespace queueing {
 
 /**
- * This class defines the interface for packet sources.
+ * This class defines the interface for packet sources which can be both active
+ * and passive.
  */
-class INET_API IPacketSource : public IActivePacketSource, public IPassivePacketSource
+class INET_API IPacketSource : public IPassivePacketSource, public IActivePacketSource
 {
 };
 

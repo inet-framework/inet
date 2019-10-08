@@ -24,7 +24,7 @@ namespace inet {
 namespace queueing {
 
 /**
- * This class defines the interface for packet providers.
+ * This class defines the interface for passive packet sources.
  */
 class INET_API IPassivePacketSource
 {
@@ -32,7 +32,7 @@ class INET_API IPassivePacketSource
     virtual ~IPassivePacketSource() {}
 
     /**
-     * Returns false if the provider is empty at the given gate and no more
+     * Returns false if the packet source is empty at the given gate and no more
      * packets can be popped without raising an error. The gate must support
      * popping packets.
      */
@@ -46,9 +46,9 @@ class INET_API IPassivePacketSource
     virtual Packet *canPopPacket(cGate *gate = nullptr) = 0;
 
     /**
-     * Pops a packet from the provider at the given gate. The provider must not
-     * be empty at the given gate. The returned packet is never nullptr, and the
-     * gate must support popping packets.
+     * Pops a packet from the packet source at the given gate. The provider must
+     * not be empty at the given gate. The returned packet is never nullptr, and
+     * the gate must support popping packets.
      */
     virtual Packet *popPacket(cGate *gate = nullptr) = 0;
 };

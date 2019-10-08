@@ -24,7 +24,7 @@ namespace inet {
 namespace queueing {
 
 /**
- * This class defines the interface for packet producers.
+ * This class defines the interface for active packet sources.
  */
 class INET_API IActivePacketSource
 {
@@ -32,13 +32,14 @@ class INET_API IActivePacketSource
     virtual ~IActivePacketSource() {}
 
     /**
-     * Returns the consumer where packets are pushed. The gate must not be nullptr.
+     * Returns the passive packet sink where packets are pushed. The gate must
+     * not be nullptr.
      */
     virtual IPassivePacketSink *getConsumer(cGate *gate) = 0;
 
     /**
      * Notifies about a state change that allows to push some packet into the
-     * consumer at the given gate. The gate is never nullptr.
+     * passive packet sink at the given gate. The gate is never nullptr.
      */
     virtual void handleCanPushPacket(cGate *gate) = 0;
 };
