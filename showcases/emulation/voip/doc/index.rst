@@ -1,5 +1,5 @@
-Validating a VoIP Simulation Model over a Real Network
-======================================================
+Testing a Simulated VoIP Application Over a Real Network
+========================================================
 
 Goals
 -----
