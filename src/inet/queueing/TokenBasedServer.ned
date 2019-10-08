@@ -23,11 +23,11 @@ import inet.queueing.contract.IPacketServer;
 simple TokenBasedServer extends PacketServerBase like IPacketServer
 {
     parameters:
-        int initialNumTokens = default(0);
-        int maxNumTokens = default(-1);
+        double initialNumTokens = default(0);
+        double maxNumTokens = default(nan);
         volatile double tokenProductionInterval @unit(s) = default(0s);
-        volatile int tokenConsumptionPerPacket = default(1);
-        volatile int tokenConsumptionPerBit = default(0);
+        volatile double tokenConsumptionPerPacket = default(1);
+        volatile double tokenConsumptionPerBit = default(0);
         displayStringTextFormat = default("contains %n tk\nserved %p pk (%l)"); // determines display string text above the submodule
         @signal[tokensDepleted];
         @class(TokenBasedServer);

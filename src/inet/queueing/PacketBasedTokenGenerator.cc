@@ -27,8 +27,8 @@ void PacketBasedTokenGenerator::initialize(int stage)
 {
     PassivePacketSinkBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        numTokensPerPacket = par("numTokensPerPacket");
-        numTokensPerBit = par("numTokensPerBit");
+        numTokensPerPacketParameter = &par("numTokensPerPacket");
+        numTokensPerBitParameter = &par("numTokensPerBit");
         inputGate = gate("in");
         producer = check_and_cast<IActivePacketSource *>(getConnectedModule(inputGate));
         server = getModuleFromPar<TokenBasedServer>(par("serverModule"), this);
@@ -41,7 +41,7 @@ void PacketBasedTokenGenerator::initialize(int stage)
 void PacketBasedTokenGenerator::pushPacket(Packet *packet, cGate *gate)
 {
     Enter_Method_Silent();
-    auto numTokens = numTokensPerPacket + numTokensPerBit * packet->getTotalLength().get();
+    auto numTokens = numTokensPerPacketParameter->doubleValue() + numTokensPerBitParameter->doubleValue() * packet->getTotalLength().get();
     numTokensGenerated += numTokens;
     server->addTokens(numTokens);
     numProcessedPackets++;

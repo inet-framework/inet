@@ -29,10 +29,14 @@ class INET_API TokenBasedServer : public PacketServerBase
     static simsignal_t tokensDepletedSignal;
 
   protected:
+    cPar *tokenConsumptionPerPacketParameter = nullptr;
+    cPar *tokenConsumptionPerBitParameter = nullptr;
     const char *displayStringTextFormat = nullptr;
+    double maxNumTokens = NaN;
+
     cMessage *tokenProductionTimer = nullptr;
-    int numTokens = 0;
-    int maxNumTokens = -1;
+
+    double numTokens = 0;
 
   protected:
     virtual void initialize(int stage) override;
@@ -44,7 +48,7 @@ class INET_API TokenBasedServer : public PacketServerBase
     virtual ~TokenBasedServer() { cancelAndDelete(tokenProductionTimer); }
 
     virtual int getNumTokens() const { return numTokens; }
-    virtual void addTokens(int tokens);
+    virtual void addTokens(double tokens);
 
     virtual void handleCanPushPacket(cGate *gate) override;
     virtual void handleCanPopPacket(cGate *gate) override;

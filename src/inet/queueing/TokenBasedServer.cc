@@ -30,6 +30,8 @@ void TokenBasedServer::initialize(int stage)
 {
     PacketServerBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
+        tokenConsumptionPerPacketParameter = &par("tokenConsumptionPerPacket");
+        tokenConsumptionPerBitParameter = &par("tokenConsumptionPerBit");
         displayStringTextFormat = par("displayStringTextFormat");
         numTokens = par("initialNumTokens");
         maxNumTokens = par("maxNumTokens");
@@ -46,7 +48,7 @@ void TokenBasedServer::handleMessage(cMessage *message)
 {
     if (message == tokenProductionTimer) {
         numTokens++;
-        if (maxNumTokens != -1 && numTokens >= maxNumTokens)
+        if (!std::isnan(maxNumTokens) && numTokens >= maxNumTokens)
             numTokens = maxNumTokens;
         processPackets();
         updateDisplayString();
@@ -70,8 +72,8 @@ void TokenBasedServer::processPackets()
         if (packet == nullptr)
             break;
         else {
-            int tokenConsumptionPerPacket = par("tokenConsumptionPerPacket");
-            int tokenConsumptionPerBit = par("tokenConsumptionPerBit");
+            auto tokenConsumptionPerPacket = tokenConsumptionPerPacketParameter->doubleValue();
+            auto tokenConsumptionPerBit = tokenConsumptionPerBitParameter->doubleValue();
             int numRequiredTokens = tokenConsumptionPerPacket + tokenConsumptionPerBit * packet->getTotalLength().get();
             if (numTokens >= numRequiredTokens) {
                 packet = provider->popPacket(inputGate->getPathStartGate());
@@ -101,11 +103,11 @@ void TokenBasedServer::handleCanPopPacket(cGate *gate)
     updateDisplayString();
 }
 
-void TokenBasedServer::addTokens(int tokens)
+void TokenBasedServer::addTokens(double tokens)
 {
     Enter_Method("addTokens");
     numTokens += tokens;
-    if (maxNumTokens != -1 && numTokens >= maxNumTokens)
+    if (!std::isnan(maxNumTokens) && numTokens >= maxNumTokens)
         numTokens = maxNumTokens;
     processPackets();
     updateDisplayString();

@@ -27,8 +27,8 @@ namespace queueing {
 class INET_API PacketBasedTokenGenerator : public PassivePacketSinkBase, public cListener
 {
   protected:
-    int numTokensPerPacket = -1;
-    int numTokensPerBit = -1;
+    cPar *numTokensPerPacketParameter = nullptr;
+    cPar *numTokensPerBitParameter = nullptr;
 
     cGate *inputGate = nullptr;
     IActivePacketSource *producer = nullptr;
