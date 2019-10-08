@@ -18,7 +18,7 @@
 package inet.queueing;
 
 import inet.queueing.base.PacketSourceBase;
-import inet.queueing.contract.IPacketProducer;
+import inet.queueing.contract.IActivePacketSource;
 
 //
 // This module is an active packet source which pushes packets into the connected
@@ -33,7 +33,7 @@ import inet.queueing.contract.IPacketProducer;
 //  %i - packet data information
 //  %n - number of packets read so far
 //
-simple PcapFileActivePacketSource like IPacketProducer
+simple PcapFileActivePacketSource like IActivePacketSource
 {
     parameters:
         string filename; // the PCAP file to be read

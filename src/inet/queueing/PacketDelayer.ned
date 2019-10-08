@@ -17,8 +17,8 @@
 
 package inet.queueing;
 
-import inet.queueing.contract.IPacketConsumer;
-import inet.queueing.contract.IPacketProducer;
+import inet.queueing.contract.IPassivePacketSink;
+import inet.queueing.contract.IActivePacketSource;
 
 //
 // This module connects one packet producer to one packet consumer. It can be
@@ -27,7 +27,7 @@ import inet.queueing.contract.IPacketProducer;
 // order of packets may change if the delay parameter is configured to be a
 // distribution.
 //
-simple PacketDelayer like IPacketConsumer, IPacketProducer
+simple PacketDelayer like IPassivePacketSink, IActivePacketSource
 {
     parameters:
         volatile double delay @unit(s);

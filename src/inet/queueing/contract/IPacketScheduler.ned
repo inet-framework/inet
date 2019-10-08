@@ -23,7 +23,7 @@ package inet.queueing.contract;
 // passive output. Packets popped from the passive output are provided by
 // one of the inputs without any delay and reordering.
 //
-moduleinterface IPacketScheduler extends IPacketProvider
+moduleinterface IPacketScheduler extends IPassivePacketSource
 {
     parameters:
         @display("i=block/join");

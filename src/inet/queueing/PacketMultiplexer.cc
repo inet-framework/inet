@@ -25,16 +25,16 @@ Define_Module(PacketMultiplexer);
 
 void PacketMultiplexer::initialize(int stage)
 {
-    PacketConsumerBase::initialize(stage);
+    PassivePacketSinkBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         for (int i = 0; i < gateSize("in"); i++) {
             auto inputGate = gate("in", i);
-            auto input = check_and_cast<IPacketProducer *>(getConnectedModule(inputGate));
+            auto input = check_and_cast<IActivePacketSource *>(getConnectedModule(inputGate));
             inputGates.push_back(inputGate);
             producers.push_back(input);
         }
         outputGate = gate("out");
-        consumer = dynamic_cast<IPacketConsumer *>(getConnectedModule(outputGate));
+        consumer = dynamic_cast<IPassivePacketSink *>(getConnectedModule(outputGate));
     }
     else if (stage == INITSTAGE_QUEUEING) {
         for (auto inputGate : inputGates)

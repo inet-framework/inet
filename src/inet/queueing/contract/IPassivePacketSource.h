@@ -15,8 +15,8 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_IPACKETPROVIDER_H
-#define __INET_IPACKETPROVIDER_H
+#ifndef __INET_IPASSIVEPACKETSOURCE_H
+#define __INET_IPASSIVEPACKETSOURCE_H
 
 #include "inet/common/packet/Packet.h"
 
@@ -26,10 +26,10 @@ namespace queueing {
 /**
  * This class defines the interface for packet providers.
  */
-class INET_API IPacketProvider
+class INET_API IPassivePacketSource
 {
   public:
-    virtual ~IPacketProvider() {}
+    virtual ~IPassivePacketSource() {}
 
     /**
      * Returns false if the provider is empty at the given gate and no more
@@ -56,5 +56,5 @@ class INET_API IPacketProvider
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_IPACKETPROVIDER_H
+#endif // ifndef __INET_IPASSIVEPACKETSOURCE_H
 

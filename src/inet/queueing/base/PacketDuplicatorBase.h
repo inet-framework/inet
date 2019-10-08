@@ -28,17 +28,17 @@ class INET_API PacketDuplicatorBase : public PacketQueueingElementBase, public I
 {
   protected:
     cGate *inputGate = nullptr;
-    IPacketProducer *producer = nullptr;
+    IActivePacketSource *producer = nullptr;
 
     cGate *outputGate = nullptr;
-    IPacketConsumer *consumer = nullptr;
+    IPassivePacketSink *consumer = nullptr;
 
   protected:
     virtual void initialize(int stage) override;
     virtual int getNumPacketDuplicates(Packet *packet) = 0;
 
   public:
-    virtual IPacketConsumer *getConsumer(cGate *gate) override { return this; }
+    virtual IPassivePacketSink *getConsumer(cGate *gate) override { return this; }
 
     virtual bool supportsPushPacket(cGate *gate) override { return true; }
     virtual bool supportsPopPacket(cGate *gate) override { return true; }

@@ -15,20 +15,20 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_PACKETCONSUMER_H
-#define __INET_PACKETCONSUMER_H
+#ifndef __INET_PASSIVEPACKETSINK_H
+#define __INET_PASSIVEPACKETSINK_H
 
-#include "inet/queueing/base/PacketConsumerBase.h"
-#include "inet/queueing/contract/IPacketProducer.h"
+#include "inet/queueing/base/PassivePacketSinkBase.h"
+#include "inet/queueing/contract/IActivePacketSource.h"
 
 namespace inet {
 namespace queueing {
 
-class INET_API PacketConsumer : public PacketConsumerBase
+class INET_API PassivePacketSink : public PassivePacketSinkBase
 {
   protected:
     cGate *inputGate = nullptr;
-    IPacketProducer *producer = nullptr;
+    IActivePacketSource *producer = nullptr;
 
     cPar *consumptionIntervalParameter = nullptr;
     cMessage *consumptionTimer = nullptr;
@@ -41,7 +41,7 @@ class INET_API PacketConsumer : public PacketConsumerBase
     virtual void consumePacket(Packet *packet);
 
   public:
-    virtual ~PacketConsumer() { cancelAndDelete(consumptionTimer); }
+    virtual ~PassivePacketSink() { cancelAndDelete(consumptionTimer); }
 
     virtual bool supportsPushPacket(cGate *gate) override { return gate == inputGate; }
     virtual bool supportsPopPacket(cGate *gate) override { return false; }
@@ -54,5 +54,5 @@ class INET_API PacketConsumer : public PacketConsumerBase
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_PACKETCONSUMER_H
+#endif // ifndef __INET_PASSIVEPACKETSINK_H
 

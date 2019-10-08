@@ -26,9 +26,9 @@ void PacketDuplicatorBase::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
         inputGate = gate("in");
-        producer = dynamic_cast<IPacketProducer *>(findConnectedModule(inputGate));
+        producer = dynamic_cast<IActivePacketSource *>(findConnectedModule(inputGate));
         outputGate = gate("out");
-        consumer = check_and_cast<IPacketConsumer *>(getConnectedModule(outputGate));
+        consumer = check_and_cast<IPassivePacketSink *>(getConnectedModule(outputGate));
     }
     else if (stage == INITSTAGE_QUEUEING) {
         checkPushPacketSupport(inputGate);

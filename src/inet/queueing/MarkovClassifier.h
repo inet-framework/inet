@@ -19,17 +19,17 @@
 #define __INET_MARKOVCLASSIFIER_H
 
 #include "inet/queueing/base/PacketClassifierBase.h"
-#include "inet/queueing/contract/IPacketCollector.h"
-#include "inet/queueing/contract/IPacketProvider.h"
+#include "inet/queueing/contract/IActivePacketSink.h"
+#include "inet/queueing/contract/IPassivePacketSource.h"
 
 namespace inet {
 namespace queueing {
 
-class INET_API MarkovClassifier : public PacketClassifierBase, public IPacketCollector, public IPacketProvider
+class INET_API MarkovClassifier : public PacketClassifierBase, public IActivePacketSink, public IPassivePacketSource
 {
   protected:
-    IPacketProvider *provider = nullptr;
-    std::vector<IPacketCollector *> collectors;
+    IPassivePacketSource *provider = nullptr;
+    std::vector<IActivePacketSink *> collectors;
 
     std::vector<std::vector<double>> transitionProbabilities;
     std::vector<simtime_t> waitIntervals;
@@ -49,7 +49,7 @@ class INET_API MarkovClassifier : public PacketClassifierBase, public IPacketCol
   public:
     virtual ~MarkovClassifier();
 
-    virtual IPacketProvider *getProvider(cGate *gate) override { return provider; }
+    virtual IPassivePacketSource *getProvider(cGate *gate) override { return provider; }
 
     virtual bool supportsPushPacket(cGate *gate) override { return true; }
     virtual bool supportsPopPacket(cGate *gate) override { return true; }

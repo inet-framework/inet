@@ -17,8 +17,8 @@
 
 package inet.queueing;
 
-import inet.queueing.contract.IPacketConsumer;
-import inet.queueing.contract.IPacketProducer;
+import inet.queueing.contract.IPassivePacketSink;
+import inet.queueing.contract.IActivePacketSource;
 import inet.queueing.contract.IPacketQueue;
 
 //
@@ -27,7 +27,7 @@ import inet.queueing.contract.IPacketQueue;
 // the last N packets pushed into its input. The packets are available in the
 // runtime user interface (Qtenv) for inspection.
 //
-module PacketHistory like IPacketConsumer, IPacketProducer
+module PacketHistory like IPassivePacketSink, IActivePacketSource
 {
     parameters:
         int size = default(100); // the number of packets to remember

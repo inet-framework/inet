@@ -23,7 +23,7 @@ package inet.queueing.contract;
 // active outputs. Packets pushed into the passive input are passed through to
 // one of the active outputs without any delay and reordering.
 //
-moduleinterface IPacketClassifier extends IPacketConsumer
+moduleinterface IPacketClassifier extends IPassivePacketSink
 {
     parameters:
         @display("i=block/classifier");

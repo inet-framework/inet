@@ -23,7 +23,7 @@
 namespace inet {
 namespace queueing {
 
-typedef int (*PacketSchedulerFunction)(const std::vector<IPacketProvider *>& providers);
+typedef int (*PacketSchedulerFunction)(const std::vector<IPassivePacketSource *>& providers);
 
 class INET_API CPacketSchedulerFunction : public cObject, public IPacketSchedulerFunction
 {
@@ -33,7 +33,7 @@ class INET_API CPacketSchedulerFunction : public cObject, public IPacketSchedule
   public:
     CPacketSchedulerFunction(PacketSchedulerFunction packetSchedulerFunction) : packetSchedulerFunction(packetSchedulerFunction) { }
 
-    virtual int schedulePacket(const std::vector<IPacketProvider *>& queues) const override { return packetSchedulerFunction(queues); }
+    virtual int schedulePacket(const std::vector<IPassivePacketSource *>& queues) const override { return packetSchedulerFunction(queues); }
 };
 
 #define Register_Packet_Scheduler_Function(name, function) \

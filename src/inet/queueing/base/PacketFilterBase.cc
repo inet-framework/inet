@@ -29,10 +29,10 @@ void PacketFilterBase::initialize(int stage)
         outputGate = gate("out");
         auto inputConnectedModule = findConnectedModule(inputGate);
         auto outputConnectedModule = findConnectedModule(outputGate);
-        producer = dynamic_cast<IPacketProducer *>(inputConnectedModule);
-        collector = dynamic_cast<IPacketCollector *>(outputConnectedModule);
-        provider = dynamic_cast<IPacketProvider *>(inputConnectedModule);
-        consumer = dynamic_cast<IPacketConsumer *>(outputConnectedModule);
+        producer = dynamic_cast<IActivePacketSource *>(inputConnectedModule);
+        collector = dynamic_cast<IActivePacketSink *>(outputConnectedModule);
+        provider = dynamic_cast<IPassivePacketSource *>(inputConnectedModule);
+        consumer = dynamic_cast<IPassivePacketSink *>(outputConnectedModule);
     }
     else if (stage == INITSTAGE_QUEUEING) {
         if (consumer != nullptr) {

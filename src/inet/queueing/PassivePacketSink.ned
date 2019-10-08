@@ -18,18 +18,19 @@
 package inet.queueing;
 
 import inet.queueing.base.PacketSinkBase;
-import inet.queueing.contract.IPacketCollector;
+import inet.queueing.contract.IPassivePacketSink;
 
 //
-// This module is an active packet sink which pops packets from the connected
-// packet provider. All popped packets are counted and deleted.
+// This module is a passive packet sink which is pushed with packets by the
+// connected packet producer. All pushed packets are counted and deleted.
 //
-simple PacketCollector extends PacketSinkBase like IPacketCollector
+simple PassivePacketSink extends PacketSinkBase like IPassivePacketSink
 {
     parameters:
-        volatile double collectionInterval @unit(s); // elapsed time between subsequent packets popped from the connected packet provider
-        @class(PacketCollector);
+        volatile double consumptionInterval @unit(s) = default(0s); // elapsed time between subsequent packets allowed to be pushed by the connected packet producer, 0 means any number of packets can be pushed at the same simulation time
+        @class(PassivePacketSink);
+        @signal[packetPushed](type=inet::Packet);
     gates:
-        input in @labels(pop);
+        input in @labels(push);
 }
 

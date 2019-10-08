@@ -18,7 +18,7 @@
 #ifndef __INET_IPACKETSCHEDULERFUNCTION_H
 #define __INET_IPACKETSCHEDULERFUNCTION_H
 
-#include "inet/queueing/contract/IPacketProvider.h"
+#include "inet/queueing/contract/IPassivePacketSource.h"
 
 namespace inet {
 namespace queueing {
@@ -34,7 +34,7 @@ class INET_API IPacketSchedulerFunction
     /**
      * Returns the index of the scheduled provider.
      */
-    virtual int schedulePacket(const std::vector<IPacketProvider *>& providers) const = 0;
+    virtual int schedulePacket(const std::vector<IPassivePacketSource *>& providers) const = 0;
 };
 
 } // namespace queueing

@@ -23,13 +23,13 @@ namespace queueing {
 
 void PacketClassifierBase::initialize(int stage)
 {
-    PacketConsumerBase::initialize(stage);
+    PassivePacketSinkBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         inputGate = gate("in");
-        producer = dynamic_cast<IPacketProducer *>(findConnectedModule(inputGate));
+        producer = dynamic_cast<IActivePacketSource *>(findConnectedModule(inputGate));
         for (int i = 0; i < gateSize("out"); i++) {
             auto outputGate = gate("out", i);
-            auto consumer = dynamic_cast<IPacketConsumer *>(getConnectedModule(outputGate));
+            auto consumer = dynamic_cast<IPassivePacketSink *>(getConnectedModule(outputGate));
             outputGates.push_back(outputGate);
             consumers.push_back(consumer);
         }

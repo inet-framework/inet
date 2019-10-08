@@ -15,36 +15,27 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_IPACKETPRODUCER_H
-#define __INET_IPACKETPRODUCER_H
+#ifndef __INET_PASSIVEPACKETSINKBASE_H
+#define __INET_PASSIVEPACKETSINKBASE_H
 
-#include "inet/queueing/contract/IPacketConsumer.h"
+#include "inet/queueing/base/PacketSinkBase.h"
+#include "inet/queueing/contract/IPassivePacketSink.h"
 
 namespace inet {
 namespace queueing {
 
-/**
- * This class defines the interface for packet producers.
- */
-class INET_API IPacketProducer
+class INET_API PassivePacketSinkBase : public PacketSinkBase, public IPassivePacketSink
 {
+  protected:
+    virtual void handleMessage(cMessage *message) override;
+
   public:
-    virtual ~IPacketProducer() {}
-
-    /**
-     * Returns the consumer where packets are pushed. The gate must not be nullptr.
-     */
-    virtual IPacketConsumer *getConsumer(cGate *gate) = 0;
-
-    /**
-     * Notifies about a state change that allows to push some packet into the
-     * consumer at the given gate. The gate is never nullptr.
-     */
-    virtual void handleCanPushPacket(cGate *gate) = 0;
+    virtual bool canPushSomePacket(cGate *gate) override { return true; }
+    virtual bool canPushPacket(Packet *packet, cGate *gate) override { return true; }
 };
 
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_IPACKETPRODUCER_H
+#endif // ifndef __INET_PASSIVEPACKETSINKBASE_H
 

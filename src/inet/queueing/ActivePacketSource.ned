@@ -18,17 +18,17 @@
 package inet.queueing;
 
 import inet.queueing.base.PacketSourceBase;
-import inet.queueing.contract.IPacketProducer;
+import inet.queueing.contract.IActivePacketSource;
 
 //
 // This module is an active packet source which pushes packets into the connected
 // packet consumer.
 //
-simple PacketProducer extends PacketSourceBase like IPacketProducer
+simple ActivePacketSource extends PacketSourceBase like IActivePacketSource
 {
     parameters:
         volatile double productionInterval @unit(s); // elapsed time between subsequent packets pushed to the connected packet consumer
-        @class(PacketProducer);
+        @class(ActivePacketSource);
         @display("i=block/source");
         @signal[packetCreated](type=inet::Packet);
         @statistic[packetCreated](title="created packets"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);

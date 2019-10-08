@@ -18,9 +18,9 @@
 package inet.queueing;
 
 import inet.queueing.base.PacketSinkBase;
-import inet.queueing.contract.IPacketConsumer;
+import inet.queueing.contract.IPassivePacketSink;
 
-simple PacketBasedTokenGenerator extends PacketSinkBase like IPacketConsumer
+simple PacketBasedTokenGenerator extends PacketSinkBase like IPassivePacketSink
 {
     parameters:
         string serverModule; // module path of the packet server where the tokens are generated via C++ method call

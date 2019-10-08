@@ -7,14 +7,14 @@
 	components were either ported or completely replaced with components of the new
 	queueing package.
 
-	Added new interfaces: IPacketBuffer, IPacketCollection, IPacketCollector,
-	IPacketConsumer, IPacketDuplicator, IPacketFilter, IPacketProducer, IPacketProvider,
+	Added new interfaces: IPacketBuffer, IPacketCollection, IActivePacketSink,
+	IPassivePacketSink, IPacketDuplicator, IPacketFilter, IActivePacketSource, IPassivePacketSource,
 	IPacketQueue, IPacketQueueingElement, IPacketSink, and IPacketSource.
 
 	Added new functional extension support interfaces: IPacketClassifierFunction,
 	IPacketComparatorFunction, IPacketDropperFunction, IPacketFilterFunction,
 	and IPacketSchedulerFunction.
 
-	Added new NED module interfaces: IPacketBuffer, IPacketClassifier, IPacketCollector,
-	IPacketConsumer, IPacketFilter, IPacketProducer, IPacketProvider, IPacketQueue,
+	Added new NED module interfaces: IPacketBuffer, IPacketClassifier, IActivePacketSink,
+	IPassivePacketSink, IPacketFilter, IActivePacketSource, IPassivePacketSource, IPacketQueue,
 	IPacketScheduler, IPacketServer, IPacketSink, and IPacketSource.

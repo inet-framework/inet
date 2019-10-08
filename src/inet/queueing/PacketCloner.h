@@ -18,26 +18,26 @@
 #ifndef __INET_PACKETCLONER_H
 #define __INET_PACKETCLONER_H
 
-#include "inet/queueing/base/PacketConsumerBase.h"
-#include "inet/queueing/contract/IPacketProducer.h"
+#include "inet/queueing/base/PassivePacketSinkBase.h"
+#include "inet/queueing/contract/IActivePacketSource.h"
 
 namespace inet {
 namespace queueing {
 
-class INET_API PacketCloner : public PacketConsumerBase, public IPacketProducer
+class INET_API PacketCloner : public PassivePacketSinkBase, public IActivePacketSource
 {
   protected:
     cGate *inputGate = nullptr;
-    IPacketProducer *producer = nullptr;
+    IActivePacketSource *producer = nullptr;
 
     std::vector<cGate *> outputGates;
-    std::vector<IPacketConsumer *> consumers;
+    std::vector<IPassivePacketSink *> consumers;
 
   protected:
     virtual void initialize(int stage) override;
 
   public:
-    virtual IPacketConsumer *getConsumer(cGate *gate) override { return consumers[gate->getIndex()]; }
+    virtual IPassivePacketSink *getConsumer(cGate *gate) override { return consumers[gate->getIndex()]; }
 
     virtual bool supportsPushPacket(cGate *gate) override { return true; }
     virtual bool supportsPopPacket(cGate *gate) override { return false; }

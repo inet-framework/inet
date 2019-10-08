@@ -18,8 +18,8 @@
 #ifndef __INET_IPACKETSOURCE_H
 #define __INET_IPACKETSOURCE_H
 
-#include "inet/queueing/contract/IPacketProducer.h"
-#include "inet/queueing/contract/IPacketProvider.h"
+#include "inet/queueing/contract/IActivePacketSource.h"
+#include "inet/queueing/contract/IPassivePacketSource.h"
 
 namespace inet {
 namespace queueing {
@@ -27,7 +27,7 @@ namespace queueing {
 /**
  * This class defines the interface for packet sources.
  */
-class INET_API IPacketSource : public IPacketProducer, public IPacketProvider
+class INET_API IPacketSource : public IActivePacketSource, public IPassivePacketSource
 {
 };
 

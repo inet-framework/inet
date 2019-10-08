@@ -7,7 +7,7 @@
 	components were either ported or completely replaced with components of the new
 	queueing package.
 
-	Add new base classes: PacketClassifierBase, PacketConsumerBase, PacketDuplicatorBase,
+	Add new base classes: PacketClassifierBase, PassivePacketSinkBase, PacketDuplicatorBase,
 	PacketFilterBase, PacketProcessorBase, PacketQueueBase, PacketQueueingElementBase,
 	PacketSchedulerBase, PacketServerBase, PacketSinkBase, and PacketSourceBase.
 

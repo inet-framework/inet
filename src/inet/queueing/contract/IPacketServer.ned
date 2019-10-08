@@ -23,7 +23,7 @@ package inet.queueing.contract;
 // Packets are popped from the connected input module and pushed into the
 // connected output module with an optional delay but without reordering.
 //
-moduleinterface IPacketServer extends IPacketCollector, IPacketProducer
+moduleinterface IPacketServer extends IActivePacketSink, IActivePacketSource
 {
     parameters:
         @display("i=block/server");

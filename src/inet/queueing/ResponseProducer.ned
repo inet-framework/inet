@@ -17,9 +17,9 @@
 
 package inet.queueing;
 
-import inet.queueing.contract.IPacketProducer;
+import inet.queueing.contract.IActivePacketSource;
 
-module ResponseProducer like IPacketProducer
+module ActiveResponseSource like IActivePacketSource
 {
     parameters:
         int numKind;
@@ -27,7 +27,7 @@ module ResponseProducer like IPacketProducer
     gates:
         output out;
     submodules:
-        provider[numKind]: PacketProvider {
+        provider[numKind]: PassivePacketSource {
             @display("p=200,100,row,200");
         }
         server[numKind]: TokenBasedServer {

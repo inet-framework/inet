@@ -15,47 +15,44 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_PACKETPROVIDER_H
-#define __INET_PACKETPROVIDER_H
+#ifndef __INET_ACTIVEPACKETSOURCE_H
+#define __INET_ACTIVEPACKETSOURCE_H
 
 #include "inet/queueing/base/PacketSourceBase.h"
-#include "inet/queueing/contract/IPacketCollector.h"
-#include "inet/queueing/contract/IPacketProvider.h"
+#include "inet/queueing/contract/IActivePacketSource.h"
 
 namespace inet {
 namespace queueing {
 
-class INET_API PacketProvider : public PacketSourceBase, public IPacketProvider
+class INET_API ActivePacketSource : public PacketSourceBase, public IActivePacketSource
 {
   protected:
     cGate *outputGate = nullptr;
-    IPacketCollector *collector = nullptr;
+    IPassivePacketSink *consumer = nullptr;
 
-    cPar *providingIntervalParameter = nullptr;
-    cMessage *providingTimer = nullptr;
-
-    Packet *nextPacket = nullptr;
+    cPar *productionIntervalParameter = nullptr;
+    cMessage *productionTimer = nullptr;
 
   protected:
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *message) override;
 
-    virtual void scheduleProvidingTimer();
-    virtual Packet *providePacket(cGate *gate);
+    virtual void scheduleProductionTimer();
+    virtual void producePacket();
 
   public:
-    virtual ~PacketProvider() { delete nextPacket; cancelAndDelete(providingTimer); }
+    virtual ~ActivePacketSource() { cancelAndDelete(productionTimer); }
 
-    virtual bool supportsPushPacket(cGate* gate) override { return false; }
-    virtual bool supportsPopPacket(cGate* gate) override { return outputGate == gate; }
+    virtual IPassivePacketSink *getConsumer(cGate *gate) override { return consumer; }
 
-    virtual bool canPopSomePacket(cGate *gate) override { return !providingTimer->isScheduled(); }
-    virtual Packet *canPopPacket(cGate *gate) override;
-    virtual Packet *popPacket(cGate *gate) override;
+    virtual bool supportsPushPacket(cGate *gate) override { return outputGate == gate; }
+    virtual bool supportsPopPacket(cGate *gate) override { return false; }
+
+    virtual void handleCanPushPacket(cGate *gate) override;
 };
 
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_PACKETPROVIDER_H
+#endif // ifndef __INET_ACTIVEPACKETSOURCE_H
 

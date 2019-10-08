@@ -16,20 +16,20 @@
 //
 
 #include "inet/common/ModuleAccess.h"
-#include "inet/queueing/PacketProvider.h"
+#include "inet/queueing/PassivePacketSource.h"
 #include "inet/common/Simsignals.h"
 
 namespace inet {
 namespace queueing {
 
-Define_Module(PacketProvider);
+Define_Module(PassivePacketSource);
 
-void PacketProvider::initialize(int stage)
+void PassivePacketSource::initialize(int stage)
 {
     PacketSourceBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         outputGate = gate("out");
-        collector = dynamic_cast<IPacketCollector *>(getConnectedModule(outputGate));
+        collector = dynamic_cast<IActivePacketSink *>(getConnectedModule(outputGate));
         providingIntervalParameter = &par("providingInterval");
         providingTimer = new cMessage("ProvidingTimer");
     }
@@ -41,7 +41,7 @@ void PacketProvider::initialize(int stage)
     }
 }
 
-void PacketProvider::handleMessage(cMessage *message)
+void PassivePacketSource::handleMessage(cMessage *message)
 {
     if (message == providingTimer) {
         if (collector != nullptr)
@@ -51,14 +51,14 @@ void PacketProvider::handleMessage(cMessage *message)
         throw cRuntimeError("Unknown message");
 }
 
-void PacketProvider::scheduleProvidingTimer()
+void PassivePacketSource::scheduleProvidingTimer()
 {
     simtime_t interval = providingIntervalParameter->doubleValue();
     if (interval != 0 || providingTimer->getArrivalModule() == nullptr)
         scheduleAt(simTime() + interval, providingTimer);
 }
 
-Packet *PacketProvider::canPopPacket(cGate *gate)
+Packet *PassivePacketSource::canPopPacket(cGate *gate)
 {
     if (providingTimer->isScheduled())
         return nullptr;
@@ -69,7 +69,7 @@ Packet *PacketProvider::canPopPacket(cGate *gate)
     }
 }
 
-Packet *PacketProvider::popPacket(cGate *gate)
+Packet *PassivePacketSource::popPacket(cGate *gate)
 {
     Enter_Method_Silent();
     if (providingTimer->isScheduled()  && providingTimer->getArrivalTime() > simTime())
@@ -83,7 +83,7 @@ Packet *PacketProvider::popPacket(cGate *gate)
     }
 }
 
-Packet *PacketProvider::providePacket(cGate *gate)
+Packet *PassivePacketSource::providePacket(cGate *gate)
 {
     Packet *packet;
     if (nextPacket == nullptr)

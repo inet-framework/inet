@@ -18,8 +18,8 @@
 #ifndef __INET_IPACKETSINK_H
 #define __INET_IPACKETSINK_H
 
-#include "inet/queueing/contract/IPacketCollector.h"
-#include "inet/queueing/contract/IPacketConsumer.h"
+#include "inet/queueing/contract/IActivePacketSink.h"
+#include "inet/queueing/contract/IPassivePacketSink.h"
 
 namespace inet {
 namespace queueing {
@@ -27,7 +27,7 @@ namespace queueing {
 /**
  * This class defines the interface for packet sinks.
  */
-class INET_API IPacketSink : public IPacketConsumer, public IPacketCollector
+class INET_API IPacketSink : public IPassivePacketSink, public IActivePacketSink
 {
 };
 

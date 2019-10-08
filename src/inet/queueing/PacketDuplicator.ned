@@ -17,15 +17,15 @@
 
 package inet.queueing;
 
-import inet.queueing.contract.IPacketConsumer;
-import inet.queueing.contract.IPacketProducer;
+import inet.queueing.contract.IPassivePacketSink;
+import inet.queueing.contract.IActivePacketSource;
 
 //
 // This module connects one packet producer to one packet consumer. It can be
 // pushed with packets from the connected packet producer. When this happens,
 // one or more copy of the packet is pushed to the output gate.
 //
-simple PacketDuplicator like IPacketConsumer, IPacketProducer
+simple PacketDuplicator like IPassivePacketSink, IActivePacketSource
 {
     parameters:
         volatile int numDuplicates = default(1); // number of duplicates, 0 means only the original packet is forwarded

@@ -18,27 +18,27 @@
 #ifndef __INET_PACKETDELAYER_H
 #define __INET_PACKETDELAYER_H
 
-#include "inet/queueing/base/PacketConsumerBase.h"
-#include "inet/queueing/contract/IPacketProducer.h"
+#include "inet/queueing/base/PassivePacketSinkBase.h"
+#include "inet/queueing/contract/IActivePacketSource.h"
 
 namespace inet {
 namespace queueing {
 
-class INET_API PacketDelayer : public PacketConsumerBase, public IPacketProducer
+class INET_API PacketDelayer : public PassivePacketSinkBase, public IActivePacketSource
 {
   protected:
     cGate *inputGate = nullptr;
-    IPacketProducer *producer = nullptr;
+    IActivePacketSource *producer = nullptr;
 
     cGate *outputGate = nullptr;
-    IPacketConsumer *consumer = nullptr;
+    IPassivePacketSink *consumer = nullptr;
 
   protected:
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *message) override;
 
   public:
-    virtual IPacketConsumer *getConsumer(cGate *gate) override { return consumer; }
+    virtual IPassivePacketSink *getConsumer(cGate *gate) override { return consumer; }
 
     virtual bool supportsPushPacket(cGate *gate) override { return true; }
     virtual bool supportsPopPacket(cGate *gate) override { return true; }

@@ -15,36 +15,36 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_IPACKETCOLLECTOR_H
-#define __INET_IPACKETCOLLECTOR_H
+#ifndef __INET_IACTIVEPACKETSOURCE_H
+#define __INET_IACTIVEPACKETSOURCE_H
 
-#include "inet/queueing/contract/IPacketProvider.h"
+#include "inet/queueing/contract/IPassivePacketSink.h"
 
 namespace inet {
 namespace queueing {
 
 /**
- * This class defines the interface for packet collectors.
+ * This class defines the interface for packet producers.
  */
-class INET_API IPacketCollector
+class INET_API IActivePacketSource
 {
   public:
-    virtual ~IPacketCollector() {}
+    virtual ~IActivePacketSource() {}
 
     /**
-     * Returns the provider from where packets are collected. The gate must not be nullptr.
+     * Returns the consumer where packets are pushed. The gate must not be nullptr.
      */
-    virtual IPacketProvider *getProvider(cGate *gate) = 0;
+    virtual IPassivePacketSink *getConsumer(cGate *gate) = 0;
 
     /**
-     * Notifies about a state change that allows to pop some packet from the
-     * provider at the given gate. The gate is never nulltr.
+     * Notifies about a state change that allows to push some packet into the
+     * consumer at the given gate. The gate is never nullptr.
      */
-    virtual void handleCanPopPacket(cGate *gate) = 0;
+    virtual void handleCanPushPacket(cGate *gate) = 0;
 };
 
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_IPACKETCOLLECTOR_H
+#endif // ifndef __INET_IACTIVEPACKETSOURCE_H
 

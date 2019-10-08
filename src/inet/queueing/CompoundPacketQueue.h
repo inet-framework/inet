@@ -20,8 +20,8 @@
 
 #include "inet/queueing/base/PacketQueueBase.h"
 #include "inet/queueing/contract/IPacketCollection.h"
-#include "inet/queueing/contract/IPacketConsumer.h"
-#include "inet/queueing/contract/IPacketProvider.h"
+#include "inet/queueing/contract/IPassivePacketSink.h"
+#include "inet/queueing/contract/IPassivePacketSource.h"
 
 namespace inet {
 namespace queueing {
@@ -33,10 +33,10 @@ class INET_API CompoundPacketQueue : public PacketQueueBase
     b dataCapacity = b(-1);
 
     cGate *inputGate = nullptr;
-    IPacketConsumer *consumer = nullptr;
+    IPassivePacketSink *consumer = nullptr;
 
     cGate *outputGate = nullptr;
-    IPacketProvider *provider = nullptr;
+    IPassivePacketSource *provider = nullptr;
     IPacketCollection *collection = nullptr;
 
   protected:

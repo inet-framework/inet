@@ -28,7 +28,7 @@ void PcapFileActivePacketSource::initialize(int stage)
     PacketQueueingElementBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         outputGate = gate("out");
-        consumer = dynamic_cast<IPacketConsumer *>(getConnectedModule(outputGate));
+        consumer = dynamic_cast<IPassivePacketSink *>(getConnectedModule(outputGate));
         pcapReader.openPcap(par("filename"), par("packetNameFormat"));
     }
     else if (stage == INITSTAGE_QUEUEING) {

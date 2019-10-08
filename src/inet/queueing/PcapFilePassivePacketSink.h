@@ -19,17 +19,17 @@
 #define __INET_PCAPFILEPACKETSINK_H
 
 #include "inet/common/packet/recorder/PcapWriter.h"
-#include "inet/queueing/base/PacketConsumerBase.h"
-#include "inet/queueing/contract/IPacketProducer.h"
+#include "inet/queueing/base/PassivePacketSinkBase.h"
+#include "inet/queueing/contract/IActivePacketSource.h"
 
 namespace inet {
 namespace queueing {
 
-class INET_API PcapFilePassivePacketSink : public PacketConsumerBase
+class INET_API PcapFilePassivePacketSink : public PassivePacketSinkBase
 {
   protected:
     cGate *inputGate = nullptr;
-    IPacketProducer *producer = nullptr;
+    IActivePacketSource *producer = nullptr;
 
     PcapWriter pcapWriter;
 

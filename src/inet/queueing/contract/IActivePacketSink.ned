@@ -18,16 +18,16 @@
 package inet.queueing.contract;
 
 //
-// This module interface must be implemented by packet provider modules. A packet
-// provider is a passive module with one output. It must be connected to a packet
-// collector module which is going to pop packets from it over time.
+// This module interface must be implemented by packet collector modules. A packet
+// collector is an active module with one input. It must be connected to a packet
+// provider module from which it's going to actively collect packets over time.
 //
-// @see ~IPacketCollector, ~PacketCollector, ~PacketScheduler
+// @see ~IPassivePacketSource, ~ActivePacketSink, ~PacketScheduler
 //
-moduleinterface IPacketProvider
+moduleinterface IActivePacketSink
 {
     parameters:
-        @display("i=block/source");
+        @display("i=block/sink");
     gates:
-        output out @labels(pop);
+        input in @labels(pop);
 }

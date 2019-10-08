@@ -15,8 +15,8 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_IPACKETCONSUMER_H
-#define __INET_IPACKETCONSUMER_H
+#ifndef __INET_IPASSIVEPACKETSINK_H
+#define __INET_IPASSIVEPACKETSINK_H
 
 #include "inet/common/packet/Packet.h"
 
@@ -26,10 +26,10 @@ namespace queueing {
 /**
  * This class defines the interface for packet consumers.
  */
-class INET_API IPacketConsumer
+class INET_API IPassivePacketSink
 {
   public:
-    virtual ~IPacketConsumer() {}
+    virtual ~IPassivePacketSink() {}
 
     /**
      * Returns false if the consumer is full at the given gate and no more
@@ -56,5 +56,5 @@ class INET_API IPacketConsumer
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_IPACKETCONSUMER_H
+#endif // ifndef __INET_IPASSIVEPACKETSINK_H
 

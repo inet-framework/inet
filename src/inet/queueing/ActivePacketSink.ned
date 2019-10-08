@@ -15,19 +15,21 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-package inet.queueing.contract;
+package inet.queueing;
+
+import inet.queueing.base.PacketSinkBase;
+import inet.queueing.contract.IActivePacketSink;
 
 //
-// This module interface must be implemented by packet producer modules. A packet
-// producer is an active module with one output. It must be connected to a packet
-// consumer module to which it's going to push packets over time.
+// This module is an active packet sink which pops packets from the connected
+// packet provider. All popped packets are counted and deleted.
 //
-// @see ~IPacketConsumer, ~PacketConsumer, ~PacketClassifier
-//
-moduleinterface IPacketProducer
+simple ActivePacketSink extends PacketSinkBase like IActivePacketSink
 {
     parameters:
-        @display("i=block/source");
+        volatile double collectionInterval @unit(s); // elapsed time between subsequent packets popped from the connected packet provider
+        @class(ActivePacketSink);
     gates:
-        output out @labels(push);
+        input in @labels(pop);
 }
+

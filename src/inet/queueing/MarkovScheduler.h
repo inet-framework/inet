@@ -19,16 +19,16 @@
 #define __INET_MARKOVSCHEDULER_H
 
 #include "inet/queueing/base/PacketSchedulerBase.h"
-#include "inet/queueing/contract/IPacketProducer.h"
+#include "inet/queueing/contract/IActivePacketSource.h"
 
 namespace inet {
 namespace queueing {
 
-class INET_API MarkovScheduler : public PacketSchedulerBase, public IPacketConsumer, public IPacketProducer
+class INET_API MarkovScheduler : public PacketSchedulerBase, public IPassivePacketSink, public IActivePacketSource
 {
   protected:
-    std::vector<IPacketProducer *> producers;
-    IPacketConsumer *consumer = nullptr;
+    std::vector<IActivePacketSource *> producers;
+    IPassivePacketSink *consumer = nullptr;
 
     std::vector<std::vector<double>> transitionProbabilities;
     std::vector<simtime_t> waitIntervals;
@@ -48,7 +48,7 @@ class INET_API MarkovScheduler : public PacketSchedulerBase, public IPacketConsu
   public:
     virtual ~MarkovScheduler();
 
-    virtual IPacketConsumer *getConsumer(cGate *gate) override { return consumer; }
+    virtual IPassivePacketSink *getConsumer(cGate *gate) override { return consumer; }
 
     virtual bool supportsPushPacket(cGate* gate) override { return true; }
     virtual bool supportsPopPacket(cGate *gate) override { return true; }

@@ -15,45 +15,47 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_PACKETSCHEDULERBASE_H
-#define __INET_PACKETSCHEDULERBASE_H
+#ifndef __INET_PASSIVEPACKETSOURCE_H
+#define __INET_PASSIVEPACKETSOURCE_H
 
-#include "inet/queueing/base/PacketProcessorBase.h"
+#include "inet/queueing/base/PacketSourceBase.h"
 #include "inet/queueing/contract/IActivePacketSink.h"
 #include "inet/queueing/contract/IPassivePacketSource.h"
 
 namespace inet {
 namespace queueing {
 
-class INET_API PacketSchedulerBase : public PacketProcessorBase, public IActivePacketSink, public IPassivePacketSource
+class INET_API PassivePacketSource : public PacketSourceBase, public IPassivePacketSource
 {
   protected:
-    std::vector<cGate *> inputGates;
-    std::vector<IPassivePacketSource *> providers;
-
     cGate *outputGate = nullptr;
     IActivePacketSink *collector = nullptr;
 
+    cPar *providingIntervalParameter = nullptr;
+    cMessage *providingTimer = nullptr;
+
+    Packet *nextPacket = nullptr;
+
   protected:
     virtual void initialize(int stage) override;
+    virtual void handleMessage(cMessage *message) override;
 
-    virtual int schedulePacket() = 0;
+    virtual void scheduleProvidingTimer();
+    virtual Packet *providePacket(cGate *gate);
 
   public:
-    virtual IPassivePacketSource *getProvider(cGate *gate) override { return providers[gate->getIndex()]; }
+    virtual ~PassivePacketSource() { delete nextPacket; cancelAndDelete(providingTimer); }
 
-    virtual bool supportsPushPacket(cGate *gate) override { return false; }
-    virtual bool supportsPopPacket(cGate *gate) override { return true; }
+    virtual bool supportsPushPacket(cGate* gate) override { return false; }
+    virtual bool supportsPopPacket(cGate* gate) override { return outputGate == gate; }
 
-    virtual bool canPopSomePacket(cGate *gate) override;
-    virtual Packet *canPopPacket(cGate *gate) override { throw cRuntimeError("Invalid operation"); }
+    virtual bool canPopSomePacket(cGate *gate) override { return !providingTimer->isScheduled(); }
+    virtual Packet *canPopPacket(cGate *gate) override;
     virtual Packet *popPacket(cGate *gate) override;
-
-    virtual void handleCanPopPacket(cGate *gate) override;
 };
 
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_PACKETSCHEDULERBASE_H
+#endif // ifndef __INET_PASSIVEPACKETSOURCE_H
 

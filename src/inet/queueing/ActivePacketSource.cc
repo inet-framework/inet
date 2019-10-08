@@ -16,20 +16,20 @@
 //
 
 #include "inet/common/ModuleAccess.h"
-#include "inet/queueing/PacketProducer.h"
+#include "inet/queueing/ActivePacketSource.h"
 #include "inet/common/Simsignals.h"
 
 namespace inet {
 namespace queueing {
 
-Define_Module(PacketProducer);
+Define_Module(ActivePacketSource);
 
-void PacketProducer::initialize(int stage)
+void ActivePacketSource::initialize(int stage)
 {
     PacketSourceBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         outputGate = gate("out");
-        consumer = dynamic_cast<IPacketConsumer *>(getConnectedModule(outputGate));
+        consumer = dynamic_cast<IPassivePacketSink *>(getConnectedModule(outputGate));
         productionIntervalParameter = &par("productionInterval");
         productionTimer = new cMessage("ProductionTimer");
     }
@@ -41,7 +41,7 @@ void PacketProducer::initialize(int stage)
     }
 }
 
-void PacketProducer::handleMessage(cMessage *message)
+void ActivePacketSource::handleMessage(cMessage *message)
 {
     if (message == productionTimer) {
         if (consumer == nullptr || consumer->canPushSomePacket(outputGate->getPathEndGate())) {
@@ -53,12 +53,12 @@ void PacketProducer::handleMessage(cMessage *message)
         throw cRuntimeError("Unknown message");
 }
 
-void PacketProducer::scheduleProductionTimer()
+void ActivePacketSource::scheduleProductionTimer()
 {
     scheduleAt(simTime() + productionIntervalParameter->doubleValue(), productionTimer);
 }
 
-void PacketProducer::producePacket()
+void ActivePacketSource::producePacket()
 {
     auto packet = createPacket();
     EV_INFO << "Producing packet " << packet->getName() << "." << endl;
@@ -66,7 +66,7 @@ void PacketProducer::producePacket()
     updateDisplayString();
 }
 
-void PacketProducer::handleCanPushPacket(cGate *gate)
+void ActivePacketSource::handleCanPushPacket(cGate *gate)
 {
     if (gate->getPathStartGate() == outputGate && !productionTimer->isScheduled()) {
         producePacket();

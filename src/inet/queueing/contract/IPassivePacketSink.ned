@@ -15,22 +15,19 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-package inet.queueing;
-
-import inet.queueing.base.PacketSinkBase;
-import inet.queueing.contract.IPacketConsumer;
+package inet.queueing.contract;
 
 //
-// This module is a passive packet sink which is pushed with packets by the
-// connected packet producer. All pushed packets are counted and deleted.
+// This module interface must be implemented by packet consumer modules. A packet
+// consumer is a passive module with one input. It must be connected to a packet
+// producer module which is going to actively push packets into it over time.
 //
-simple PacketConsumer extends PacketSinkBase like IPacketConsumer
+// @see ~IActivePacketSource, ~PassivePacketSink, ~PacketClassifier
+//
+moduleinterface IPassivePacketSink
 {
     parameters:
-        volatile double consumptionInterval @unit(s) = default(0s); // elapsed time between subsequent packets allowed to be pushed by the connected packet producer, 0 means any number of packets can be pushed at the same simulation time
-        @class(PacketConsumer);
-        @signal[packetPushed](type=inet::Packet);
+        @display("i=block/sink");
     gates:
         input in @labels(push);
 }
-

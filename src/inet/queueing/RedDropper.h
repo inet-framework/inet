@@ -45,7 +45,7 @@ class INET_API RedDropper : public PacketFilterBase
   protected:
     virtual void initialize(int stage) override;
     virtual bool matchesPacket(Packet *packet) override;
-    virtual void pushOrSendPacket(Packet *packet, cGate *gate, IPacketConsumer *consumer) override;
+    virtual void pushOrSendPacket(Packet *packet, cGate *gate, IPassivePacketSink *consumer) override;
 };
 
 } // namespace queueing

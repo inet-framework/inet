@@ -15,20 +15,20 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_PACKETCOLLECTOR_H
-#define __INET_PACKETCOLLECTOR_H
+#ifndef __INET_ACTIVEPACKETSINK_H
+#define __INET_ACTIVEPACKETSINK_H
 
 #include "inet/queueing/base/PacketSinkBase.h"
-#include "inet/queueing/contract/IPacketCollector.h"
+#include "inet/queueing/contract/IActivePacketSink.h"
 
 namespace inet {
 namespace queueing {
 
-class INET_API PacketCollector : public PacketSinkBase, public IPacketCollector
+class INET_API ActivePacketSink : public PacketSinkBase, public IActivePacketSink
 {
   public:
     cGate *inputGate = nullptr;
-    IPacketProvider *provider = nullptr;
+    IPassivePacketSource *provider = nullptr;
 
     cPar *collectionIntervalParameter = nullptr;
     cMessage *collectionTimer = nullptr;
@@ -41,9 +41,9 @@ class INET_API PacketCollector : public PacketSinkBase, public IPacketCollector
     virtual void collectPacket();
 
   public:
-    virtual ~PacketCollector() { cancelAndDelete(collectionTimer); }
+    virtual ~ActivePacketSink() { cancelAndDelete(collectionTimer); }
 
-    virtual IPacketProvider *getProvider(cGate *gate) override { return provider; }
+    virtual IPassivePacketSource *getProvider(cGate *gate) override { return provider; }
 
     virtual bool supportsPushPacket(cGate *gate) override { return false; }
     virtual bool supportsPopPacket(cGate *gate) override { return inputGate == gate; }
@@ -54,5 +54,5 @@ class INET_API PacketCollector : public PacketSinkBase, public IPacketCollector
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_PACKETCOLLECTOR_H
+#endif // ifndef __INET_ACTIVEPACKETSINK_H
 

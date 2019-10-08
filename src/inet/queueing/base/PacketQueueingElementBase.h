@@ -18,7 +18,7 @@
 #ifndef __INET_PACKETQUEUEINGELEMENTBASE_H
 #define __INET_PACKETQUEUEINGELEMENTBASE_H
 
-#include "inet/queueing/contract/IPacketConsumer.h"
+#include "inet/queueing/contract/IPassivePacketSink.h"
 #include "inet/queueing/contract/IPacketQueueingElement.h"
 #include "inet/common/Simsignals.h"
 
@@ -33,7 +33,7 @@ class INET_API PacketQueueingElementBase : public cSimpleModule, public IPacketQ
     virtual void checkPushPacketSupport(cGate *gate);
     virtual void checkPopPacketSupport(cGate *gate);
     virtual void pushOrSendPacket(Packet *packet, cGate *gate);
-    virtual void pushOrSendPacket(Packet *packet, cGate *gate, IPacketConsumer *consumer);
+    virtual void pushOrSendPacket(Packet *packet, cGate *gate, IPassivePacketSink *consumer);
     virtual void dropPacket(Packet *packet, PacketDropReason reason, int limit = -1);
 };
 

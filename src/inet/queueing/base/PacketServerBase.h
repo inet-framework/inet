@@ -19,27 +19,27 @@
 #define __INET_PACKETSERVERBASE_H
 
 #include "inet/queueing/base/PacketSinkBase.h"
-#include "inet/queueing/contract/IPacketCollector.h"
-#include "inet/queueing/contract/IPacketProducer.h"
+#include "inet/queueing/contract/IActivePacketSink.h"
+#include "inet/queueing/contract/IActivePacketSource.h"
 
 namespace inet {
 namespace queueing {
 
-class INET_API PacketServerBase : public PacketSinkBase, public IPacketCollector, public IPacketProducer
+class INET_API PacketServerBase : public PacketSinkBase, public IActivePacketSink, public IActivePacketSource
 {
   protected:
     cGate *inputGate = nullptr;
-    IPacketProvider *provider = nullptr;
+    IPassivePacketSource *provider = nullptr;
 
     cGate *outputGate = nullptr;
-    IPacketConsumer *consumer = nullptr;
+    IPassivePacketSink *consumer = nullptr;
 
   protected:
     virtual void initialize(int stage) override;
 
   public:
-    virtual IPacketProvider *getProvider(cGate *gate) override { return provider; }
-    virtual IPacketConsumer *getConsumer(cGate *gate) override { return consumer; }
+    virtual IPassivePacketSource *getProvider(cGate *gate) override { return provider; }
+    virtual IPassivePacketSink *getConsumer(cGate *gate) override { return consumer; }
 
     virtual bool supportsPushPacket(cGate *gate) override { return outputGate == gate; }
     virtual bool supportsPopPacket(cGate *gate) override { return inputGate == gate; }

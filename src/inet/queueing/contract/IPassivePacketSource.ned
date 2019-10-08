@@ -15,17 +15,19 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-#include "inet/queueing/base/PacketConsumerBase.h"
+package inet.queueing.contract;
 
-namespace inet {
-namespace queueing {
-
-void PacketConsumerBase::handleMessage(cMessage *message)
+//
+// This module interface must be implemented by packet provider modules. A packet
+// provider is a passive module with one output. It must be connected to a packet
+// collector module which is going to pop packets from it over time.
+//
+// @see ~IActivePacketSink, ~ActivePacketSink, ~PacketScheduler
+//
+moduleinterface IPassivePacketSource
 {
-    auto packet = check_and_cast<Packet *>(message);
-    pushPacket(packet, packet->getArrivalGate());
+    parameters:
+        @display("i=block/source");
+    gates:
+        output out @labels(pop);
 }
-
-} // namespace queueing
-} // namespace inet
-

@@ -18,13 +18,13 @@
 package inet.queueing;
 
 import inet.queueing.base.PacketSinkBase;
-import inet.queueing.contract.IPacketConsumer;
+import inet.queueing.contract.IPassivePacketSink;
 
 //
 // This module is a passive packet sink which is pushed with packets by the
 // connected packet producer. All pushed packets are written to a PCAP file.
 //
-simple PcapFilePassivePacketSink extends PacketSinkBase like IPacketConsumer
+simple PcapFilePassivePacketSink extends PacketSinkBase like IPassivePacketSink
 {
     parameters:
         string filename; // the PCAP file to be written

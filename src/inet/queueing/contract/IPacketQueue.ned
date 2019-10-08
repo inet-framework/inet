@@ -23,7 +23,7 @@ package inet.queueing.contract;
 // Packets pushed into the passive input are either stored or dropped. Packets
 // popped from the passive output are provided from the stored packets.
 //
-moduleinterface IPacketQueue extends IPacketConsumer, IPacketProvider
+moduleinterface IPacketQueue extends IPassivePacketSink, IPassivePacketSource
 {
     parameters:
         @display("i=block/queue");

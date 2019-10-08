@@ -31,11 +31,11 @@ void PacketDemultiplexer::initialize(int stage)
         inputGate = gate("in");
         for (int i = 0; i < gateSize("out"); i++) {
             auto outputGate = gate("out", i);
-            auto output = check_and_cast<IPacketCollector *>(getConnectedModule(outputGate));
+            auto output = check_and_cast<IActivePacketSink *>(getConnectedModule(outputGate));
             outputGates.push_back(outputGate);
             collectors.push_back(output);
         }
-        provider = dynamic_cast<IPacketProvider *>(getConnectedModule(inputGate));
+        provider = dynamic_cast<IPassivePacketSource *>(getConnectedModule(inputGate));
     }
     else if (stage == INITSTAGE_QUEUEING) {
         if (provider != nullptr)

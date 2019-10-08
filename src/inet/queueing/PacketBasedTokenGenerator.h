@@ -18,20 +18,20 @@
 #ifndef __INET_PACKETBASEDTOKENGENERATOR_H
 #define __INET_PACKETBASEDTOKENGENERATOR_H
 
-#include "inet/queueing/base/PacketConsumerBase.h"
+#include "inet/queueing/base/PassivePacketSinkBase.h"
 #include "inet/queueing/TokenBasedServer.h"
 
 namespace inet {
 namespace queueing {
 
-class INET_API PacketBasedTokenGenerator : public PacketConsumerBase, public cListener
+class INET_API PacketBasedTokenGenerator : public PassivePacketSinkBase, public cListener
 {
   protected:
     int numTokensPerPacket = -1;
     int numTokensPerBit = -1;
 
     cGate *inputGate = nullptr;
-    IPacketProducer *producer = nullptr;
+    IActivePacketSource *producer = nullptr;
     TokenBasedServer *server = nullptr;
 
     int numTokensGenerated = -1;

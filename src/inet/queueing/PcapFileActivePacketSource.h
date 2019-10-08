@@ -20,16 +20,16 @@
 
 #include "inet/common/packet/recorder/PcapReader.h"
 #include "inet/queueing/base/PacketQueueingElementBase.h"
-#include "inet/queueing/contract/IPacketProducer.h"
+#include "inet/queueing/contract/IActivePacketSource.h"
 
 namespace inet {
 namespace queueing {
 
-class INET_API PcapFileActivePacketSource : public PacketQueueingElementBase, public IPacketProducer
+class INET_API PcapFileActivePacketSource : public PacketQueueingElementBase, public IActivePacketSource
 {
   protected:
     cGate *outputGate = nullptr;
-    IPacketConsumer *consumer = nullptr;
+    IPassivePacketSink *consumer = nullptr;
 
     PcapReader pcapReader;
 
@@ -41,7 +41,7 @@ class INET_API PcapFileActivePacketSource : public PacketQueueingElementBase, pu
     virtual void schedulePacket();
 
   public:
-    virtual IPacketConsumer *getConsumer(cGate *gate) override { return consumer; }
+    virtual IPassivePacketSink *getConsumer(cGate *gate) override { return consumer; }
 
     virtual bool supportsPushPacket(cGate *gate) override { return outputGate == gate; }
     virtual bool supportsPopPacket(cGate *gate) override { return false; }

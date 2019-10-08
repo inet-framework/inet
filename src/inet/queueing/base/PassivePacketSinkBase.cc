@@ -15,19 +15,17 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-package inet.queueing.contract;
+#include "inet/queueing/base/PassivePacketSinkBase.h"
 
-//
-// This module interface must be implemented by packet collector modules. A packet
-// collector is an active module with one input. It must be connected to a packet
-// provider module from which it's going to actively collect packets over time.
-//
-// @see ~IPacketProvider, ~PacketCollector, ~PacketScheduler
-//
-moduleinterface IPacketCollector
+namespace inet {
+namespace queueing {
+
+void PassivePacketSinkBase::handleMessage(cMessage *message)
 {
-    parameters:
-        @display("i=block/sink");
-    gates:
-        input in @labels(pop);
+    auto packet = check_and_cast<Packet *>(message);
+    pushPacket(packet, packet->getArrivalGate());
 }
+
+} // namespace queueing
+} // namespace inet
+

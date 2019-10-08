@@ -7,9 +7,9 @@
 	components were either ported or completely replaced with components of the new
 	queueing package.
 
-	Added new core classes: PacketBuffer, PacketClassifier, PacketCloner, PacketCollector,
-	PacketConsumer, PacketDelayer, PacketDemultiplexer, PacketDuplicator, PacketFilter,
-	PacketMultiplexer, PacketProducer, PacketProvider, PacketQueue, PacketScheduler,
+	Added new core classes: PacketBuffer, PacketClassifier, PacketCloner, ActivePacketSink,
+	PassivePacketSink, PacketDelayer, PacketDemultiplexer, PacketDuplicator, PacketFilter,
+	PacketMultiplexer, ActivePacketSource, PassivePacketSource, PacketQueue, PacketScheduler,
 	and PacketServer.
 
 	Added new functional extension support classes: CPacketClassifierFunction,
@@ -24,13 +24,13 @@
 
 	Added new NED simple modules: DropHeadQueue, DropTailQueue, MarkovClassifier,
 	MarkovScheduler, OrdinalBasedDropper, OrdinalBasedDuplicator, PacketBasedTokenGenerator,
-	PacketBuffer, PacketClassifier, PacketCloner, PacketCollector, PacketConsumer,
+	PacketBuffer, PacketClassifier, PacketCloner, ActivePacketSink, PassivePacketSink,
 	PacketDelayer, PacketDemultiplexer, PacketDuplicator, PacketFilter, PacketMultiplexer,
-	PacketProducer, PacketProvider, PacketQueue, PacketScheduler, PacketServer,
+	ActivePacketSource, PassivePacketSource, PacketQueue, PacketScheduler, PacketServer,
 	PcapFilePassivePacketSink, PcapFileActivePacketSource, PriorityBuffer, PriorityClassifier,
 	PriorityScheduler, QueueBasedTokenGenerator, RedDropper, TokenBasedServer,
 	and WrrScheduler.
 
-	Added new NED compound modules: BurstyPacketProducer, CompoundPacketQueue,
+	Added new NED compound modules: BurstyActivePacketSource, CompoundPacketQueue,
 	LeakyBucket, PacketHistory, PriorityQueue, RequestConsumer, ResponseProducer,
 	and TokenBucket.

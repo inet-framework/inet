@@ -19,8 +19,8 @@
 #define __INET_IPACKETQUEUE_H
 
 #include "inet/queueing/contract/IPacketCollection.h"
-#include "inet/queueing/contract/IPacketConsumer.h"
-#include "inet/queueing/contract/IPacketProvider.h"
+#include "inet/queueing/contract/IPassivePacketSink.h"
+#include "inet/queueing/contract/IPassivePacketSource.h"
 
 namespace inet {
 namespace queueing {
@@ -28,7 +28,7 @@ namespace queueing {
 /**
  * This class defines the interface for packet queues.
  */
-class INET_API IPacketQueue : public IPacketCollection, public IPacketConsumer, public IPacketProvider
+class INET_API IPacketQueue : public IPacketCollection, public IPassivePacketSink, public IPassivePacketSource
 {
 };
 

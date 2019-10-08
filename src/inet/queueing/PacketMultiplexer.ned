@@ -18,14 +18,14 @@
 package inet.queueing;
 
 import inet.queueing.base.PacketSinkBase;
-import inet.queueing.contract.IPacketProducer;
+import inet.queueing.contract.IActivePacketSource;
 
 //
 // This module connects multiple packet producers to one packet consumer. When
 // a packet is pushed by one of the connected packet producers, then the multiplexer
 // simply pushes the packet to the connected packet consumer.
 //
-simple PacketMultiplexer extends PacketSinkBase like IPacketProducer // TODO: IPacketConsumer // in gate is vector
+simple PacketMultiplexer extends PacketSinkBase like IActivePacketSource // TODO: IPassivePacketSink // in gate is vector
 {
     parameters:
         displayStringTextFormat = default("passed %p pk (%l)"); // %p number of packet, %l total length

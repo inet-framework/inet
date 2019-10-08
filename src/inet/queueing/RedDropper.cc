@@ -94,7 +94,7 @@ bool RedDropper::matchesPacket(Packet *packet)
     return true;
 }
 
-void RedDropper::pushOrSendPacket(Packet *packet, cGate *gate, IPacketConsumer *consumer)
+void RedDropper::pushOrSendPacket(Packet *packet, cGate *gate, IPassivePacketSink *consumer)
 {
     PacketFilterBase::pushOrSendPacket(packet, gate, consumer);
     // TD: Set the time stamp q_time when the queue gets empty.

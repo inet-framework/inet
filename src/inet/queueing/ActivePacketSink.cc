@@ -16,20 +16,20 @@
 //
 
 #include "inet/common/ModuleAccess.h"
-#include "inet/queueing/PacketCollector.h"
+#include "inet/queueing/ActivePacketSink.h"
 #include "inet/common/Simsignals.h"
 
 namespace inet {
 namespace queueing {
 
-Define_Module(PacketCollector);
+Define_Module(ActivePacketSink);
 
-void PacketCollector::initialize(int stage)
+void ActivePacketSink::initialize(int stage)
 {
     PacketSinkBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         inputGate = gate("in");
-        provider = check_and_cast<IPacketProvider *>(getConnectedModule(inputGate));
+        provider = check_and_cast<IPassivePacketSource *>(getConnectedModule(inputGate));
         collectionIntervalParameter = &par("collectionInterval");
         collectionTimer = new cMessage("CollectionTimer");
     }
@@ -37,7 +37,7 @@ void PacketCollector::initialize(int stage)
         checkPopPacketSupport(inputGate);
 }
 
-void PacketCollector::handleMessage(cMessage *message)
+void ActivePacketSink::handleMessage(cMessage *message)
 {
     if (message == collectionTimer) {
         if (provider->canPopSomePacket(inputGate->getPathStartGate())) {
@@ -49,12 +49,12 @@ void PacketCollector::handleMessage(cMessage *message)
         throw cRuntimeError("Unknown message");
 }
 
-void PacketCollector::scheduleCollectionTimer()
+void ActivePacketSink::scheduleCollectionTimer()
 {
     scheduleAt(simTime() + collectionIntervalParameter->doubleValue(), collectionTimer);
 }
 
-void PacketCollector::collectPacket()
+void ActivePacketSink::collectPacket()
 {
     auto packet = provider->popPacket(inputGate->getPathStartGate());
     EV_INFO << "Collecting packet " << packet->getName() << "." << endl;
@@ -64,7 +64,7 @@ void PacketCollector::collectPacket()
     dropPacket(packet, OTHER_PACKET_DROP);
 }
 
-void PacketCollector::handleCanPopPacket(cGate *gate)
+void ActivePacketSink::handleCanPopPacket(cGate *gate)
 {
     if (gate->getPathEndGate() == inputGate && !collectionTimer->isScheduled()) {
         scheduleCollectionTimer();

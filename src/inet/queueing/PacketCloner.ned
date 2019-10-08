@@ -17,16 +17,16 @@
 
 package inet.queueing;
 
-import inet.queueing.contract.IPacketConsumer;
-import inet.queueing.contract.IPacketProducer;
+import inet.queueing.contract.IPassivePacketSink;
+import inet.queueing.contract.IActivePacketSource;
 
 //
 // This module connects one packet producer to one packet consumer. It can be
 // pushed with packets from the connected packet producer. When this happens,
 // a separate copy of the packet is pushed to each output gate.
 //
-simple PacketCloner like IPacketConsumer
-						 // IPacketProducer // TODO: out gate is vector 
+simple PacketCloner like IPassivePacketSink
+						 // IActivePacketSource // TODO: out gate is vector 
 {
     parameters:
         @display("i=block/star");

@@ -17,19 +17,19 @@
 
 package inet.queueing;
 
-import inet.queueing.contract.IPacketProducer;
+import inet.queueing.contract.IActivePacketSource;
 
-module BurstyPacketProducer like IPacketProducer
+module BurstyActivePacketSource like IActivePacketSource
 {
     parameters:
         @display("i=block/source");
     gates:
         output out;
     submodules:
-        normalProducer: PacketProducer {
+        normalProducer: ActivePacketSource {
             @display("p=100,100");
         }
-        burstProducer: PacketProducer {
+        burstProducer: ActivePacketSource {
             @display("p=300,100");
         }
         scheduler: MarkovScheduler {

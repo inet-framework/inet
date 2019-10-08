@@ -18,8 +18,8 @@
 #ifndef __INET_IPACKETDUPLICATOR_H
 #define __INET_IPACKETDUPLICATOR_H
 
-#include "inet/queueing/contract/IPacketConsumer.h"
-#include "inet/queueing/contract/IPacketProducer.h"
+#include "inet/queueing/contract/IPassivePacketSink.h"
+#include "inet/queueing/contract/IActivePacketSource.h"
 
 namespace inet {
 namespace queueing {
@@ -27,7 +27,7 @@ namespace queueing {
 /**
  * This class defines the interface for packet duplicators.
  */
-class INET_API IPacketDuplicator : public IPacketConsumer, public IPacketProducer
+class INET_API IPacketDuplicator : public IPassivePacketSink, public IActivePacketSource
 {
 };
 

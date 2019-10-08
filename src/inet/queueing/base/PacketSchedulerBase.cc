@@ -27,10 +27,10 @@ void PacketSchedulerBase::initialize(int stage)
     PacketProcessorBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         outputGate = gate("out");
-        collector = dynamic_cast<IPacketCollector *>(findConnectedModule(outputGate));
+        collector = dynamic_cast<IActivePacketSink *>(findConnectedModule(outputGate));
         for (int i = 0; i < gateSize("in"); i++) {
             auto inputGate = gate("in", i);
-            auto provider = dynamic_cast<IPacketProvider *>(getConnectedModule(inputGate));
+            auto provider = dynamic_cast<IPassivePacketSource *>(getConnectedModule(inputGate));
             inputGates.push_back(inputGate);
             providers.push_back(provider);
         }

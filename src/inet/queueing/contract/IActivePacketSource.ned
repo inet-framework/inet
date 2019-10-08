@@ -18,16 +18,16 @@
 package inet.queueing.contract;
 
 //
-// This module interface must be implemented by packet consumer modules. A packet
-// consumer is a passive module with one input. It must be connected to a packet
-// producer module which is going to actively push packets into it over time.
+// This module interface must be implemented by packet producer modules. A packet
+// producer is an active module with one output. It must be connected to a packet
+// consumer module to which it's going to push packets over time.
 //
-// @see ~IPacketProducer, ~PacketConsumer, ~PacketClassifier
+// @see ~IPassivePacketSink, ~PassivePacketSink, ~PacketClassifier
 //
-moduleinterface IPacketConsumer
+moduleinterface IActivePacketSource
 {
     parameters:
-        @display("i=block/sink");
+        @display("i=block/source");
     gates:
-        input in @labels(push);
+        output out @labels(push);
 }

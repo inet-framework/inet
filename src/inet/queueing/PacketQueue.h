@@ -21,10 +21,10 @@
 #include "inet/queueing/base/PacketQueueBase.h"
 #include "inet/queueing/compat/cpacketqueue.h"
 #include "inet/queueing/contract/IPacketBuffer.h"
-#include "inet/queueing/contract/IPacketCollector.h"
+#include "inet/queueing/contract/IActivePacketSink.h"
 #include "inet/queueing/contract/IPacketComparatorFunction.h"
 #include "inet/queueing/contract/IPacketDropperFunction.h"
-#include "inet/queueing/contract/IPacketProducer.h"
+#include "inet/queueing/contract/IActivePacketSource.h"
 
 namespace inet {
 namespace queueing {
@@ -33,10 +33,10 @@ class INET_API PacketQueue : public PacketQueueBase, public IPacketBuffer::ICall
 {
   protected:
     cGate *inputGate = nullptr;
-    IPacketProducer *producer = nullptr;
+    IActivePacketSource *producer = nullptr;
 
     cGate *outputGate = nullptr;
-    IPacketCollector *collector = nullptr;
+    IActivePacketSink *collector = nullptr;
 
     int frameCapacity = -1;
     b dataCapacity = b(-1);

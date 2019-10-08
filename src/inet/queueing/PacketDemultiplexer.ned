@@ -18,14 +18,14 @@
 package inet.queueing;
 
 import inet.queueing.base.PacketProcessorBase;
-import inet.queueing.contract.IPacketCollector;
+import inet.queueing.contract.IActivePacketSink;
 
 //
 // This module connects multiple packet collectors to one packet provider. When
 // a packet is popped by one of the connected packet providers, then the demultiplexer
 // simply pops a packet from the connected packet provider.
 //
-simple PacketDemultiplexer extends PacketProcessorBase like IPacketCollector // TODO: , IPacketProvider // out gate is vector
+simple PacketDemultiplexer extends PacketProcessorBase like IActivePacketSink // TODO: , IPassivePacketSource // out gate is vector
 {
     parameters:
         displayStringTextFormat = default("passed %p pk (%l)");

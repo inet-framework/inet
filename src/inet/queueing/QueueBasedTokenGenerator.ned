@@ -18,7 +18,7 @@
 package inet.queueing;
 
 import inet.queueing.base.PacketSinkBase;
-import inet.queueing.contract.IPacketConsumer;
+import inet.queueing.contract.IPassivePacketSink;
 
 //
 // This module generates tokens for a packet server based on the observed state

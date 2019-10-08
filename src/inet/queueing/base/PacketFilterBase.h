@@ -28,20 +28,20 @@ class INET_API PacketFilterBase : public PacketQueueingElementBase, public IPack
 {
   protected:
     cGate *inputGate = nullptr;
-    IPacketProducer *producer = nullptr;
-    IPacketProvider *provider = nullptr;
+    IActivePacketSource *producer = nullptr;
+    IPassivePacketSource *provider = nullptr;
 
     cGate *outputGate = nullptr;
-    IPacketConsumer *consumer = nullptr;
-    IPacketCollector *collector = nullptr;
+    IPassivePacketSink *consumer = nullptr;
+    IActivePacketSink *collector = nullptr;
 
   protected:
     virtual void initialize(int stage) override;
     virtual bool matchesPacket(Packet *packet) = 0;
 
   public:
-    virtual IPacketConsumer *getConsumer(cGate *gate) override { return this; }
-    virtual IPacketProvider *getProvider(cGate *gate) override { return this; }
+    virtual IPassivePacketSink *getConsumer(cGate *gate) override { return this; }
+    virtual IPassivePacketSource *getProvider(cGate *gate) override { return this; }
 
     virtual bool supportsPushPacket(cGate *gate) override { return true; }
     virtual bool canPushSomePacket(cGate *gate) override { return true; }

@@ -25,12 +25,12 @@ Define_Module(PacketBasedTokenGenerator);
 
 void PacketBasedTokenGenerator::initialize(int stage)
 {
-    PacketConsumerBase::initialize(stage);
+    PassivePacketSinkBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         numTokensPerPacket = par("numTokensPerPacket");
         numTokensPerBit = par("numTokensPerBit");
         inputGate = gate("in");
-        producer = check_and_cast<IPacketProducer *>(getConnectedModule(inputGate));
+        producer = check_and_cast<IActivePacketSource *>(getConnectedModule(inputGate));
         server = getModuleFromPar<TokenBasedServer>(par("serverModule"), this);
         server->subscribe(TokenBasedServer::tokensDepletedSignal, this);
         numTokensGenerated = 0;
@@ -58,7 +58,7 @@ const char *PacketBasedTokenGenerator::resolveDirective(char directive)
             result = std::to_string(numTokensGenerated);
             break;
         default:
-            return PacketConsumerBase::resolveDirective(directive);
+            return PassivePacketSinkBase::resolveDirective(directive);
     }
     return result.c_str();
 }

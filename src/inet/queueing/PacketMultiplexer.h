@@ -18,26 +18,26 @@
 #ifndef __INET_PACKETMULTIPLEXER_H
 #define __INET_PACKETMULTIPLEXER_H
 
-#include "inet/queueing/base/PacketConsumerBase.h"
-#include "inet/queueing/contract/IPacketProducer.h"
+#include "inet/queueing/base/PassivePacketSinkBase.h"
+#include "inet/queueing/contract/IActivePacketSource.h"
 
 namespace inet {
 namespace queueing {
 
-class INET_API PacketMultiplexer : public PacketConsumerBase, public IPacketProducer
+class INET_API PacketMultiplexer : public PassivePacketSinkBase, public IActivePacketSource
 {
   protected:
     std::vector<cGate *> inputGates;
-    std::vector<IPacketProducer *> producers;
+    std::vector<IActivePacketSource *> producers;
 
     cGate *outputGate = nullptr;
-    IPacketConsumer *consumer = nullptr;
+    IPassivePacketSink *consumer = nullptr;
 
   protected:
     virtual void initialize(int stage) override;
 
   public:
-    virtual IPacketConsumer *getConsumer(cGate *gate) override { return consumer; }
+    virtual IPassivePacketSink *getConsumer(cGate *gate) override { return consumer; }
 
     virtual bool supportsPopPacket(cGate *gate) override { return false; }
     virtual bool supportsPushPacket(cGate *gate) override { return true; }

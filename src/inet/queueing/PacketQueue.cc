@@ -31,9 +31,9 @@ void PacketQueue::initialize(int stage)
     PacketQueueBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         inputGate = gate("in");
-        producer = dynamic_cast<IPacketProducer *>(findConnectedModule(inputGate));
+        producer = dynamic_cast<IActivePacketSource *>(findConnectedModule(inputGate));
         outputGate = gate("out");
-        collector = dynamic_cast<IPacketCollector *>(findConnectedModule(outputGate));
+        collector = dynamic_cast<IActivePacketSink *>(findConnectedModule(outputGate));
         frameCapacity = par("frameCapacity");
         dataCapacity = b(par("dataCapacity"));
         buffer = getModuleFromPar<IPacketBuffer>(par("bufferModule"), this, false);

@@ -16,20 +16,20 @@
 //
 
 #include "inet/common/ModuleAccess.h"
-#include "inet/queueing/PacketConsumer.h"
+#include "inet/queueing/PassivePacketSink.h"
 #include "inet/common/Simsignals.h"
 
 namespace inet {
 namespace queueing {
 
-Define_Module(PacketConsumer);
+Define_Module(PassivePacketSink);
 
-void PacketConsumer::initialize(int stage)
+void PassivePacketSink::initialize(int stage)
 {
     PacketSinkBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         inputGate = gate("in");
-        producer = dynamic_cast<IPacketProducer *>(getConnectedModule(inputGate));
+        producer = dynamic_cast<IActivePacketSource *>(getConnectedModule(inputGate));
         consumptionIntervalParameter = &par("consumptionInterval");
         consumptionTimer = new cMessage("ConsumptionTimer");
     }
@@ -41,24 +41,24 @@ void PacketConsumer::initialize(int stage)
     }
 }
 
-void PacketConsumer::handleMessage(cMessage *message)
+void PassivePacketSink::handleMessage(cMessage *message)
 {
     if (message == consumptionTimer) {
         if (producer != nullptr)
             producer->handleCanPushPacket(inputGate);
     }
     else
-        PacketConsumerBase::handleMessage(message);
+        PassivePacketSinkBase::handleMessage(message);
 }
 
-void PacketConsumer::scheduleConsumptionTimer()
+void PassivePacketSink::scheduleConsumptionTimer()
 {
     simtime_t interval = consumptionIntervalParameter->doubleValue();
     if (interval != 0 || consumptionTimer->getArrivalModule() == nullptr)
         scheduleAt(simTime() + interval, consumptionTimer);
 }
 
-void PacketConsumer::pushPacket(Packet *packet, cGate *gate)
+void PassivePacketSink::pushPacket(Packet *packet, cGate *gate)
 {
     if (consumptionTimer->isScheduled() && consumptionTimer->getArrivalTime() > simTime())
         throw cRuntimeError("Another packet is already being consumed");
@@ -69,7 +69,7 @@ void PacketConsumer::pushPacket(Packet *packet, cGate *gate)
     }
 }
 
-void PacketConsumer::consumePacket(Packet *packet)
+void PassivePacketSink::consumePacket(Packet *packet)
 {
     EV_INFO << "Consuming packet " << packet->getName() << "." << endl;
     numProcessedPackets++;

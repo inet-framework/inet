@@ -18,15 +18,15 @@
 package inet.queueing;
 
 import inet.queueing.contract.IPacketClassifier;
-import inet.queueing.contract.IPacketConsumer;
+import inet.queueing.contract.IPassivePacketSink;
 import inet.queueing.contract.IPacketQueue;
 import inet.queueing.contract.IPacketServer;
 
-module RequestConsumer like IPacketConsumer
+module PassiveRequestSink like IPassivePacketSink
 {
     parameters:
         int numKind;
-        string responseProducerModule = default("^.sink");
+        string responseProducerModule = default("^.source");
         @display("i=block/sink");
     gates:
         input in;
@@ -41,7 +41,7 @@ module RequestConsumer like IPacketConsumer
         classifier: <default("PacketClassifier")> like IPacketClassifier {
             @display("p=200,300");
         }
-        tokenGenerator[numKind]: <default("PacketBasedTokenGenerator")> like IPacketConsumer {
+        tokenGenerator[numKind]: <default("PacketBasedTokenGenerator")> like IPassivePacketSink {
             serverModule = default("^." + responseProducerModule + ".server[" + string(index) + "]");
             @display("p=200,400,row,200");
         }
