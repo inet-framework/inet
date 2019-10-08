@@ -1311,7 +1311,7 @@ bool Ospfv3Area::installInterAreaPrefixLSA(const Ospfv3InterAreaPrefixLsa* lsa)
     EV_DEBUG << "\nLS Seq Number: " << header.getLsaSequenceNumber() << endl;
 
     EV_DEBUG << "Prefix Address: " << lsa->getPrefix().addressPrefix;
-    EV_DEBUG << "\nPrefix Length: " << lsa->getPrefix().prefixLen;
+    EV_DEBUG << "\nPrefix Length: " << static_cast<unsigned int>(lsa->getPrefix().prefixLen);
     if (lsa->getPrefix().dnBit)
         EV_DEBUG << "DN ";
     if (lsa->getPrefix().laBit)
@@ -1643,7 +1643,7 @@ bool Ospfv3Area::installIntraAreaPrefixLSA(const Ospfv3IntraAreaPrefixLsa *lsa)
     for (int i = 0; i<lsa->getNumPrefixes(); i++) {
         const Ospfv3LsaPrefixMetric &prefix = lsa->getPrefixes(i);
         EV_DEBUG << "Prefix Address: " << prefix.addressPrefix;
-        EV_DEBUG << "\nPrefix Length: " << prefix.prefixLen;
+        EV_DEBUG << "\nPrefix Length: " << static_cast<unsigned int>(prefix.prefixLen);
         if (prefix.dnBit)
             EV_DEBUG << "DN ";
         if (prefix.laBit)
