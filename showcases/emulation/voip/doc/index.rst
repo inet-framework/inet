@@ -157,9 +157,9 @@ the ``VethReceiver`` configuration sets the :ned:`ExtLowerUdp` module to use the
 network namespace.
 
 The emulation scenario is controlled by two shell scripts in the showcase's folder.
-Here is the ``Run_loopback.sh`` script:
+Here is the ``run_loopback`` script:
 
-.. literalinclude:: ../Run_loopback.sh
+.. literalinclude:: ../run_loopback
    :language: bash
 
 The script applies some delay (10ms with 1ms random variation), packet loss and bit
@@ -169,9 +169,9 @@ simulation time limit, which is enough for the transfer of the whole audio file.
 When the simulations are finished, the delay, packets loss and corruption are removed
 from the loopback interface.
 
-Here is the ``Run_veth.sh`` script:
+Here is the ``run_veth`` script:
 
-.. literalinclude:: ../Run_veth.sh
+.. literalinclude:: ../run_veth
    :language: bash
 
 The script creates two namespaces and a veth interface in each, and adds routes
