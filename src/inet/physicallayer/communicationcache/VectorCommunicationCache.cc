@@ -163,30 +163,30 @@ void VectorCommunicationCache::removeNonInterferingTransmissions(std::function<v
 {
     const simtime_t now = simTime();
     size_t transmissionIndex = 0;
-    while (transmissionIndex < transmissionCache.size() && transmissionCache[transmissionIndex].interferenceEndTime <= now)
-        transmissionIndex++;
     for (auto it = transmissionCache.cbegin(); it != transmissionCache.cbegin() + transmissionIndex; it++) {
         const TransmissionCacheEntry &transmissionCacheEntry = *it;
-        if (transmissionCacheEntry.receptionCacheEntries != nullptr) {
-            std::vector<ReceptionCacheEntry> *receptionCacheEntries = static_cast<std::vector<ReceptionCacheEntry> *>(transmissionCacheEntry.receptionCacheEntries);
-            auto radioIt = radioCache.cbegin();
-            auto receptionIt = receptionCacheEntries->cbegin();
-            while (radioIt != radioCache.cend() && receptionIt != receptionCacheEntries->cend()) {
-                const RadioCacheEntry &radioCacheEntry = *radioIt;
-                const ReceptionCacheEntry &receptionCacheEntry = *receptionIt;
-                const IntervalTree::Interval *interval = receptionCacheEntry.interval;
-                if (interval != nullptr)
-                    radioCacheEntry.receptionIntervals->deleteNode(interval);
-                radioIt++;
-                receptionIt++;
+        if (transmissionCacheEntry.interferenceEndTime <= now) {
+            transmissionIndex++;
+            if (transmissionCacheEntry.receptionCacheEntries != nullptr) {
+                std::vector<ReceptionCacheEntry> *receptionCacheEntries = static_cast<std::vector<ReceptionCacheEntry> *>(transmissionCacheEntry.receptionCacheEntries);
+                auto radioIt = radioCache.cbegin();
+                auto receptionIt = receptionCacheEntries->cbegin();
+                while (radioIt != radioCache.cend() && receptionIt != receptionCacheEntries->cend()) {
+                    const RadioCacheEntry &radioCacheEntry = *radioIt;
+                    const ReceptionCacheEntry &receptionCacheEntry = *receptionIt;
+                    const IntervalTree::Interval *interval = receptionCacheEntry.interval;
+                    if (interval != nullptr)
+                        radioCacheEntry.receptionIntervals->deleteNode(interval);
+                    radioIt++;
+                    receptionIt++;
+                }
+                delete receptionCacheEntries;
             }
+            if (transmissionCacheEntry.transmission != nullptr)
+                f(transmissionCacheEntry.transmission);
         }
-    }
-    for (auto it = transmissionCache.cbegin(); it != transmissionCache.cbegin() + transmissionIndex; it++) {
-        const TransmissionCacheEntry &transmissionCacheEntry = *it;
-        if (transmissionCacheEntry.transmission != nullptr)
-            f(transmissionCacheEntry.transmission);
-        delete static_cast<std::vector<ReceptionCacheEntry> *>(transmissionCacheEntry.receptionCacheEntries);
+        else
+            break;
     }
     ASSERT(baseTransmissionId != -1);
     baseTransmissionId += transmissionIndex;
