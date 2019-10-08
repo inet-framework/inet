@@ -18,9 +18,11 @@
 package inet.common.queueing.contract;
 
 //
-// This module interface is implemented by packet collector modules. A packet
-// collector is an active module with one input. Packets are actively popped
-// from the connected module repeatedly over time.
+// This module interface must be implemented by packet collector modules. A packet
+// collector is an active module with one input. It must be connected to a packet
+// provider module from which it's going to actively collect packets over time.
+//
+// @see ~IPacketProvider, ~PacketCollector, ~PacketScheduler
 //
 moduleinterface IPacketCollector
 {
