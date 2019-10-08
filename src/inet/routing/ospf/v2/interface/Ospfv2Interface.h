@@ -34,7 +34,7 @@ namespace inet {
 namespace ospf {
 
 class Ospfv2InterfaceState;
-class Area;
+class Ospfv2Area;
 
 class INET_API Ospfv2Interface
 {
@@ -108,7 +108,7 @@ class INET_API Ospfv2Interface
     AuthenticationType authenticationType;
     AuthenticationKeyType authenticationKey;
 
-    Area *parentArea;
+    Ospfv2Area *parentArea;
 
   private:
     friend class Ospfv2InterfaceState;
@@ -187,9 +187,9 @@ class INET_API Ospfv2Interface
     Neighbor *getNeighbor(unsigned long i) { return neighboringRouters[i]; }
     const Neighbor *getNeighbor(unsigned long i) const { return neighboringRouters[i]; }
 
-    void setArea(Area *area) { parentArea = area; }
-    Area *getArea() { return parentArea; }
-    const Area *getArea() const { return parentArea; }
+    void setArea(Ospfv2Area *area) { parentArea = area; }
+    Ospfv2Area *getArea() { return parentArea; }
+    const Ospfv2Area *getArea() const { return parentArea; }
 
     friend std::ostream& operator<<(std::ostream& stream, const Ospfv2Interface& intf);
 };

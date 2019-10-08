@@ -34,7 +34,7 @@ namespace ospf {
 
 class Router;
 
-class INET_API Area : public cObject
+class INET_API Ospfv2Area : public cObject
 {
   private:
     CrcMode crcMode;
@@ -58,8 +58,8 @@ class INET_API Area : public cObject
     Router *parentRouter;
 
   public:
-    Area(CrcMode crcMode, IInterfaceTable *ift, AreaId id = BACKBONE_AREAID);
-    virtual ~Area();
+    Ospfv2Area(CrcMode crcMode, IInterfaceTable *ift, AreaId id = BACKBONE_AREAID);
+    virtual ~Ospfv2Area();
 
     void setAreaID(AreaId areaId) { areaID = areaId; }
     AreaId getAreaID() const { return areaID; }
@@ -157,7 +157,7 @@ class INET_API Area : public cObject
     bool isAllZero(Ipv4AddressRange entry) const;
 };
 
-inline std::ostream& operator<<(std::ostream& ostr, Area& area)
+inline std::ostream& operator<<(std::ostream& ostr, Ospfv2Area& area)
 {
     ostr << area.info();
     return ostr;

@@ -197,7 +197,7 @@ void MessageHandler::processPacket(Packet *pk, Ospfv2Interface *unused1, Neighbo
     if (packet->getVersion() == 2) {
         int interfaceId = pk->getTag<InterfaceInd>()->getInterfaceId();
         AreaId areaID = packet->getAreaID();
-        Area *area = router->getAreaByID(areaID);
+        Ospfv2Area *area = router->getAreaByID(areaID);
 
         if (area != nullptr) {
             // packet Area ID must either match the Area ID of the receiving interface or...
@@ -211,7 +211,7 @@ void MessageHandler::processPacket(Packet *pk, Ospfv2Interface *unused1, Neighbo
                         intf = area->findVirtualLink(packet->getRouterID());
 
                         if (intf != nullptr) {
-                            Area *virtualLinkTransitArea = router->getAreaByID(intf->getTransitAreaId());
+                            Ospfv2Area *virtualLinkTransitArea = router->getAreaByID(intf->getTransitAreaId());
 
                             if (virtualLinkTransitArea != nullptr) {
                                 // the receiving interface must attach to the virtual link's configured transit area

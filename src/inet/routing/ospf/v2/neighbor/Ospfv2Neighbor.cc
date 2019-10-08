@@ -290,7 +290,7 @@ bool Neighbor::retransmitDatabaseDescriptionPacket()
 
 void Neighbor::createDatabaseSummary()
 {
-    Area *area = parentInterface->getArea();
+    Ospfv2Area *area = parentInterface->getArea();
     unsigned long routerLSACount = area->getRouterLSACount();
 
     /* Note: OSPF specification says:

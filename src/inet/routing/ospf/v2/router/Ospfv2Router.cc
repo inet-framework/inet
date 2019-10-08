@@ -66,14 +66,14 @@ void Router::addWatches()
     WATCH_PTRVECTOR(ospfRoutingTable);
 }
 
-void Router::addArea(Area *area)
+void Router::addArea(Ospfv2Area *area)
 {
     area->setRouter(this);
     areasByID[area->getAreaID()] = area;
     areas.push_back(area);
 }
 
-Area *Router::getAreaByID(AreaId areaID)
+Ospfv2Area *Router::getAreaByID(AreaId areaID)
 {
     auto areaIt = areasByID.find(areaID);
     if (areaIt != areasByID.end()) {
@@ -84,7 +84,7 @@ Area *Router::getAreaByID(AreaId areaID)
     }
 }
 
-Area *Router::getAreaByAddr(Ipv4Address address)
+Ospfv2Area *Router::getAreaByAddr(Ipv4Address address)
 {
     long areaCount = areas.size();
 
@@ -704,7 +704,7 @@ void Router::rebuildRoutingTable()
     }
 
     if (areaCount > 1) {
-        Area *backbone = getAreaByID(BACKBONE_AREAID);
+        Ospfv2Area *backbone = getAreaByID(BACKBONE_AREAID);
         // if this is an ABR and at least one adjacency in FULL state is built over the backbone
         if (backbone && backbone->hasAnyNeighborInStates(Neighbor::FULL_STATE))
             backbone->calculateInterAreaRoutes(newTable);
@@ -1168,7 +1168,7 @@ void Router::notifyAboutRoutingTableChanges(std::vector<Ospfv2RoutingTableEntry 
     if (areas.size() <= 1)
         return;
     auto position = std::find_if(areas.begin(), areas.end(),
-            [&](const Area *m) -> bool {return (m->getAreaID() == BACKBONE_AREAID);});
+            [&](const Ospfv2Area *m) -> bool {return (m->getAreaID() == BACKBONE_AREAID);});
     if(position == areas.end())
         return;
 

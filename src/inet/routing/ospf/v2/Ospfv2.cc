@@ -226,7 +226,7 @@ void Ospfv2::handleInterfaceDown(const InterfaceEntry *ie)
     // Step 2: find the Ospfv2Interface associated with the ie and take it down
     Ospfv2Interface *foundIntf = nullptr;
     for(auto &areaId : ospfRouter->getAreaIds()) {
-        Area *area = ospfRouter->getAreaByID(areaId);
+        Ospfv2Area *area = ospfRouter->getAreaByID(areaId);
         if(area) {
             for(auto &ifIndex : area->getInterfaceIndices()) {
                 Ospfv2Interface *intf = area->getInterface(ifIndex);

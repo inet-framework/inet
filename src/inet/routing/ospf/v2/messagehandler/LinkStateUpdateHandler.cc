@@ -53,7 +53,7 @@ void LinkStateUpdateHandler::processPacket(Packet *packet, Ospfv2Interface *intf
 
     if (neighbor->getState() >= Neighbor::EXCHANGE_STATE) {
         AreaId areaID = lsUpdatePacket->getAreaID();
-        Area *area = router->getAreaByID(areaID);
+        Ospfv2Area *area = router->getAreaByID(areaID);
 
         EV_INFO << "  Processing packet contents:\n";
 

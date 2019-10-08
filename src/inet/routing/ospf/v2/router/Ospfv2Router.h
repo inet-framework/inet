@@ -45,8 +45,8 @@ class INET_API Router
     IInterfaceTable *ift = nullptr;
     IIpv4RoutingTable *rt = nullptr;
     RouterId routerID;    ///< The router ID assigned by the IP layer.
-    std::map<AreaId, Area *> areasByID;    ///< A map of the contained areas with the AreaId as key.
-    std::vector<Area *> areas;    ///< A list of the contained areas.
+    std::map<AreaId, Ospfv2Area *> areasByID;    ///< A map of the contained areas with the AreaId as key.
+    std::vector<Ospfv2Area *> areas;    ///< A list of the contained areas.
     std::map<LsaKeyType, AsExternalLsa *, LsaKeyType_Less> asExternalLSAsByID;    ///< A map of the ASExternalLSAs advertised by this router.
     std::vector<AsExternalLsa *> asExternalLSAs;    ///< A list of the ASExternalLSAs advertised by this router.
     std::map<Ipv4Address, Ospfv2AsExternalLsaContents> externalRoutes;    ///< A map of the external route advertised by this router.
@@ -96,21 +96,21 @@ class INET_API Router
      * Adds a new Area to the Area list.
      * @param area [in] The Area to add.
      */
-    void addArea(Area *area);
+    void addArea(Ospfv2Area *area);
 
     /**
      * Returns the pointer to the Area identified by the input areaID, if it's on the Area list,
      * nullptr otherwise.
      * @param areaID [in] The Area identifier.
      */
-    Area *getAreaByID(AreaId areaID);
+    Ospfv2Area *getAreaByID(AreaId areaID);
 
     /**
      * Returns the Area pointer from the Area list which contains the input Ipv4 address,
      * nullptr if there's no such area connected to the Router.
      * @param address [in] The Ipv4 address whose containing Area we're looking for.
      */
-    Area *getAreaByAddr(Ipv4Address address);
+    Ospfv2Area *getAreaByAddr(Ipv4Address address);
 
     /**
      * Returns the pointer of the physical Interface identified by the input interface index,

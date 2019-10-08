@@ -166,7 +166,7 @@ void Ospfv2ConfigReader::loadAreaFromXML(const cXMLElement& asConfig, AreaId are
     if (areaConfig == nullptr) {
         if(areaID != Ipv4Address("0.0.0.0"))
             throw cRuntimeError("No configuration for Area ID: %s at %s", areaID.str(false).c_str(), asConfig.getSourceLocation());
-        Area *area = new Area(crcMode, ift, areaID);
+        Ospfv2Area *area = new Ospfv2Area(crcMode, ift, areaID);
         area->addWatches();
         ospfRouter->addArea(area);
         return;
@@ -174,7 +174,7 @@ void Ospfv2ConfigReader::loadAreaFromXML(const cXMLElement& asConfig, AreaId are
 
     EV_DEBUG << "    loading info for Area id = " << areaID.str(false) << "\n";
 
-    Area *area = new Area(crcMode, ift, areaID);
+    Ospfv2Area *area = new Ospfv2Area(crcMode, ift, areaID);
     area->addWatches();
     cXMLElementList areaDetails = areaConfig->getChildren();
     for (auto & areaDetail : areaDetails) {
@@ -302,7 +302,7 @@ void Ospfv2ConfigReader::loadInterfaceParameters(const cXMLElement& ifConfig, In
     joinMulticastGroups(ifIndex);
 
     // add the interface to it's Area
-    Area *area = ospfRouter->getAreaByID(areaID);
+    Ospfv2Area *area = ospfRouter->getAreaByID(areaID);
     if (area != nullptr) {
         area->addInterface(intf);
         intf->processEvent(Ospfv2Interface::INTERFACE_UP);    // notification should come from the blackboard...
@@ -383,7 +383,7 @@ void Ospfv2ConfigReader::loadHostRoute(const cXMLElement& hostRouteConfig)
         hostParameters.linkCost = getIntAttrOrPar(hostRouteConfig, "linkCost");
 
         // add the host route to the OSPF data structure.
-        Area *area = ospfRouter->getAreaByID(hostArea);
+        Ospfv2Area *area = ospfRouter->getAreaByID(hostArea);
         if (area != nullptr) {
             area->addHostRoute(hostParameters);
         }
@@ -408,7 +408,7 @@ void Ospfv2ConfigReader::loadLoopbackParameters(const cXMLElement& loConfig, Int
     hostParameters.linkCost = getIntAttrOrPar(loConfig, "linkCost");
 
     // add the host route to the OSPF data structure.
-    Area *area = ospfRouter->getAreaByID(hostArea);
+    Ospfv2Area *area = ospfRouter->getAreaByID(hostArea);
     if (area != nullptr)
         area->addHostRoute(hostParameters);
     else
@@ -442,7 +442,7 @@ void Ospfv2ConfigReader::loadVirtualLink(const cXMLElement& virtualLinkConfig, c
     loadAuthenticationConfig(intf, virtualLinkConfig);
 
     AreaId transitAreaId = intf->getTransitAreaId();
-    Area *transitArea = ospfRouter->getAreaByID(transitAreaId);
+    Ospfv2Area *transitArea = ospfRouter->getAreaByID(transitAreaId);
     if (!transitArea) {
         delete intf;
         throw cRuntimeError("Virtual link to router %s cannot be configured through a non-existence transit area '%s' at %s", routerId.str(false).c_str(), transitAreaId.str(false).c_str(), virtualLinkConfig.getSourceLocation());
@@ -453,7 +453,7 @@ void Ospfv2ConfigReader::loadVirtualLink(const cXMLElement& virtualLinkConfig, c
     }
 
     // add the virtual link to the OSPF data structure
-    Area *backbone = ospfRouter->getAreaByID(BACKBONE_AREAID);
+    Ospfv2Area *backbone = ospfRouter->getAreaByID(BACKBONE_AREAID);
     if (!backbone) {
         loadAreaFromXML(asConfig, BACKBONE_AREAID);
         backbone = ospfRouter->getAreaByID(BACKBONE_AREAID);
