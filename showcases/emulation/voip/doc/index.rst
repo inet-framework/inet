@@ -128,7 +128,7 @@ The Network
 In the simulation, only a sender node and a receiver node are needed in order to
 send the packets into the real network on one side and receive them on
 the other side. The two simulated nodes are in separate parts of the whole
-network so they are defined in separate networks in the NED file, and run in
+network, so they are defined in separate networks in the NED file, and run in
 separate simulations.
 
 There are only two submodules per node. There is a
@@ -204,7 +204,7 @@ to each other. The scripts also adds the same delay, loss and corruption to the 
 interface as the loopback script. Then it runs the simulations. When they are finished,
 it destroys the namespaces.
 
-.. note:: The scripts only work on Linux. On Windows and MAC OS, the loopback interface
+.. note:: The scripts only work on Linux. On Windows and macOS, the loopback interface
    simulations can be run manually. To run the emulation scenario,
    start the receiver simulation first, and run it in express mode. Then, the sender
    simulation can be started. Also, in this case, the delay, the packet loss, and the
