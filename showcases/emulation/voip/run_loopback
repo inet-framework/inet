@@ -1,0 +1,26 @@
+#! /bin/sh
+
+# clean up on Ctrl+C and similar events
+trap cleanup 1 2 3 6
+
+cleanup()
+{
+    # remove delay+loss+corruption from loopback interface
+    echo "cleaning up"
+    sudo tc qdisc del dev lo root
+    exit 1
+}
+
+# remove delay+loss+corruption from loopback interface (just in case the script was interrupted previously)
+sudo tc qdisc del dev lo root || exit 1
+
+# add delay+loss+corruption to loopback interface
+sudo tc qdisc add dev lo root netem loss 1% corrupt 5% delay 10ms 1ms || exit 1
+
+# run the simulations
+inet -s -u Cmdenv -f receiver.ini -c LoopbackReceiver &
+sleep 1
+inet -s -u Cmdenv -f sender.ini -c LoopbackSender
+wait
+
+cleanup()

@@ -1,3 +1,17 @@
+#! /bin/sh
+
+# clean up on Ctrl+C and similar events
+trap cleanup 1 2 3 6
+
+cleanup()
+{
+    # delete namespaces
+    echo "cleaning up"
+    sudo ip netns del net0
+    sudo ip netns del net1
+    exit 1
+}
+
 # remove any namespaces (just in case the script was interrupted previously)
 sudo ip netns del net0
 sudo ip netns del net1
@@ -27,6 +41,4 @@ sleep 1
 inet -u Cmdenv -f sender.ini -c VethSender
 wait
 
-# delete namespaces
-sudo ip netns del net0
-sudo ip netns del net1
+cleanup()
