@@ -34,7 +34,7 @@ B calculateLSASize(const Ospfv3NetworkLsa *networkLSA)
 B calculateLSASize(const Ospfv3InterAreaPrefixLsa *prefixLSA)
 {
 //    return OSPFV3_LSA_HEADER_LENGTH + OSPFV3_INTER_AREA_PREFIX_LSA_HEADER_LENGTH + OSPFV3_INTER_AREA_PREFIX_LSA_BODY_LENGTH;
-    return OSPFV3_LSA_HEADER_LENGTH + OSPFV3_INTER_AREA_PREFIX_LSA_HEADER_LENGTH + OSPFV3_LSA_PREFIX_HEADER_LENGTH + B( ((prefixLSA->getPrefixLen() +31)/32) * 4 );
+    return OSPFV3_LSA_HEADER_LENGTH + OSPFV3_INTER_AREA_PREFIX_LSA_HEADER_LENGTH + OSPFV3_LSA_PREFIX_HEADER_LENGTH + B( ((prefixLSA->getPrefix().prefixLen+31)/32) * 4);
 }
 
 // for LINK_LSA
@@ -144,7 +144,7 @@ std::ostream& operator<<(std::ostream& ostr, const Ospfv3RouterLsa& lsa)
 
 std::ostream& operator<<(std::ostream& ostr, const Ospfv3InterAreaPrefixLsa& lsa)
 {
-    ostr << "Mask: " << lsa.getPrefixLen()
+    ostr << "Mask: " << lsa.getPrefix().prefixLen
          << ", Cost: " << lsa.getMetric() << ", ";
     ostr << lsa.getHeader();
     return ostr;

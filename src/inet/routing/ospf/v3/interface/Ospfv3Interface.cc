@@ -1792,7 +1792,7 @@ LinkLSA* Ospfv3Interface::originateLinkLSA()
             // set also ipv4 link local address
             linkLSA->setLinkLocalInterfaceAdd(ipAdd);
 
-            Ospfv3LinkLsaPrefix prefix;
+            Ospfv3LsaPrefix0 prefix;
             prefix.dnBit = false;
             prefix.laBit = false;
             prefix.nuBit = false;
@@ -1811,7 +1811,7 @@ LinkLSA* Ospfv3Interface::originateLinkLSA()
             Ipv6Address ipv6 = ipv6Data->getAddress(i);
             // this also includes linkLocal and Multicast adresses. So there need to  be chceck, if writing ipv6 is global
             if (ipv6.isGlobal()) {//Only all the global prefixes belong to the Intra-Area-Prefix LSA
-                Ospfv3LinkLsaPrefix prefix;
+                Ospfv3LsaPrefix0 prefix;
                 prefix.dnBit = false;
                 prefix.laBit = false;
                 prefix.nuBit = false;

@@ -112,8 +112,8 @@ void Ospfv3NeighborState::changeState(Ospfv3Neighbor *neighbor, Ospfv3NeighborSt
                             {
                                 InterAreaPrefixLSA *interLSA = area->getInterAreaPrefixLSA(j);
                                 if ((interLSA->getHeader().getAdvertisingRouter() == thisArea->getInstance()->getProcess()->getRouterID()) &&
-                                        (interLSA->getPrefix() == iapLSA->getPrefixes(k).addressPrefix) &&
-                                        (interLSA->getPrefixLen() == iapLSA->getPrefixes(k).prefixLen))
+                                        (interLSA->getPrefix().addressPrefix == iapLSA->getPrefixes(k).addressPrefix) &&
+                                        (interLSA->getPrefix().prefixLen == iapLSA->getPrefixes(k).prefixLen))
                                 {
                                     interLSA->getHeaderForUpdate().setLsaAge(MAX_AGE);
                                     area->floodLSA(interLSA);
