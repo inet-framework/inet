@@ -109,22 +109,6 @@ simulations. They also apply a small amount of delay, packet loss and bit corrup
 to the interfaces in both cases to simulate the effects of the packets going through
 a real network.
 
-The specific setup for the loopback interface case is illustrated by the following
-figure:
-
-.. figure:: media/setup2.png
-   :align: center
-   :width: 60%
-
-The specific setup for the virtual Ethernet interface (``veth``) case is illustrated below:
-
-.. figure:: media/setup3.png
-   :align: center
-   :width: 60%
-
-The Network
-~~~~~~~~~~~
-
 In the simulation, only a sender node and a receiver node are needed in order to
 send the packets into the real network on one side and receive them on
 the other side. The two simulated nodes are in separate parts of the whole
@@ -145,9 +129,6 @@ layout of the two nodes can be seen in the following image:
 |   :align: center                                   |  |   :align: center                                  |
 +----------------------------------------------------+--+---------------------------------------------------+
 
-Configuration
-~~~~~~~~~~~~~
-
 There is no difference in the configuration of the :ned:`VoipStreamSender` and
 :ned:`VoipStreamReceiver` modules compared to a fully simulated scenario. Also,
 the :ned:`ExtLowerUdp` module behaves just like the :ned:`Udp` module from the point of view
@@ -157,29 +138,33 @@ The simulations are defined in separate ini files, :download:`sender.ini <../sen
 and
 :download:`receiver.ini <../receiver.ini>`.
 
+Loopback Configuration
+~~~~~~~~~~~~~~~~~~~~~~
+
+The specific setup for the loopback interface case is illustrated by the following
+figure:
+
+.. figure:: media/setup2.png
+   :align: center
+   :width: 60%
+
 Here is the :ned:`VoipStreamSender`'s configuration in :download:`sender.ini <../sender.ini>`:
 
 .. literalinclude:: ../sender.ini
    :language: ini
-   :start-at: packetTimeLength
+   :end-at: destAddress
 
-There are two configurations for the two cases. In the ``LoopbackSender`` configuration,
+In the ``LoopbackSender`` configuration,
 the ``destAddress`` parameter is set to ``127.0.0.1`` address (the loopback address).
-In the ``VethSender`` configuration, the ``destAddress`` parameter is set to ``192.168.2.2``
-(the address of the ``veth1`` interface). Also, the :ned:`ExtLowerUdp` module is set to use
-the ``net1`` network namespace.
 
 Here is :ned:`VoipStreamReceiver`'s configuration in :download:`receiver.ini <../receiver.ini>`:
 
 .. literalinclude:: ../receiver.ini
    :language: ini
-   :start-at: localPort
+   :end-at: LoopbackReceiver
 
-There are two configurations for the receiver simulation. ``LoopbackReceiver`` is empty;
-the ``VethReceiver`` configuration sets the :ned:`ExtLowerUdp` module to use the ``net0``
-network namespace.
+``LoopbackReceiver`` is empty;
 
-The emulation scenario is controlled by two shell scripts in the showcase's folder.
 Here is the ``run_loopback`` script:
 
 .. literalinclude:: ../run_loopback
@@ -191,6 +176,36 @@ It runs both simulations in Cmdenv. The simulations are run until the configured
 simulation time limit, which is enough for the transfer of the whole audio file.
 When the simulations are finished, the delay, packets loss and corruption are removed
 from the loopback interface.
+
+Virtual Ethernet Interface Configuration
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The specific setup for the virtual Ethernet interface (``veth``) case is illustrated below:
+
+.. figure:: media/setup3.png
+   :align: center
+   :width: 60%
+
+Here is the :ned:`VoipStreamSender`'s configuration in :download:`sender.ini <../sender.ini>`:
+
+.. literalinclude:: ../sender.ini
+   :language: ini
+   :start-at: VethSender
+   :end-at: namespace
+
+In the ``VethSender`` configuration, the ``destAddress`` parameter is set to ``192.168.2.2``
+(the address of the ``veth1`` interface). Also, the :ned:`ExtLowerUdp` module is set to use
+the ``net1`` network namespace.
+
+Here is :ned:`VoipStreamReceiver`'s configuration in :download:`receiver.ini <../receiver.ini>`:
+
+.. literalinclude:: ../receiver.ini
+   :language: ini
+   :start-at: VethReceiver
+   :end-at: namespace
+
+The ``VethReceiver`` configuration sets the :ned:`ExtLowerUdp` module to use the ``net0``
+network namespace.
 
 Here is the ``run_veth`` script:
 
