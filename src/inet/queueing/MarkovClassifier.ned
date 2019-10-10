@@ -22,14 +22,14 @@ import inet.queueing.contract.IPacketClassifier;
 
 //
 // This module implements a packet classifier using a Markov process that has
-// as many states as many output gates the classifier has. The output gate for
+// as many states as output gates the classifier has. The output gate for
 // a given packet is determined by the current state of the Markov process.
 //
 simple MarkovClassifier extends PacketClassifierBase like IPacketClassifier
 {
     parameters:
         int initialState = default(0); // the index of the start state of the Markov process
-        string transitionProbabilities; // the transmition matrix of the Markov process, specified as a list of probabilities
-        string waitIntervals; // the amount of time the Markov process stays in a given state, a list of intervals indexed by the state 
+        string transitionProbabilities; // the transition matrix (N x N) of the Markov process, specified as a list of probabilities
+        string waitIntervals; // the amount of time the Markov process stays in a given state, a list of intervals (N) indexed by the state 
         @class(MarkovClassifier);
 }
