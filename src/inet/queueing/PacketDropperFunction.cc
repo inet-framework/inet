@@ -74,7 +74,7 @@ static void dropPacketWithLowestOwnerId(IPacketCollection *collection)
 
 Register_Packet_Dropper_Function(DropPacketWithLowestOwnerId, dropPacketWithLowestOwnerId);
 
-static void dropPacketWithHighestOwnerId(IPacketCollection *collection)
+static void dropPacketWithHighestOwnerModuleId(IPacketCollection *collection)
 {
     int highestIdIndex = 0;
     int highestId = check_and_cast<cModule *>(collection->getPacket(highestIdIndex)->getOwner()->getOwner())->getId();
@@ -86,7 +86,7 @@ static void dropPacketWithHighestOwnerId(IPacketCollection *collection)
     dropPacket(collection, highestIdIndex);
 }
 
-Register_Packet_Dropper_Function(DropPacketWithHighestOwnerId, dropPacketWithHighestOwnerId);
+Register_Packet_Dropper_Function(DropPacketWithHighestOwnerModuleId, dropPacketWithHighestOwnerModuleId);
 
 } // namespace queueing
 } // namespace inet
