@@ -42,59 +42,50 @@ The Simulation Setup
 --------------------
 
 This showcase features a simulated VoIP application over a real network.
-There'll be a sender and a receiver application, and we'll send realistic VoIP
-traffic (contents of an audio file) between them. The received audio will be
-saved to a file, which can be compared to the original to examine how the audio
-quality is affected by the packets passing through the network.
+There'll be a sender and a receiver application, running in two separate
+simulations, and we'll send realistic VoIP traffic (contents of an audio file)
+between them. The received audio will be saved to a file, which can be compared
+to the original to examine how the audio quality is affected by the packets
+passing through the network. The simulations will be run under an OMNeT++
+real-time scheduler, so that timing in the applications corresponds to real
+time.
 
-The VoIP sender and receiver applications will be run in separate simulations,
-so they could be running on different machines. The simulation time will be kept
-in sync with the real time; this is achived by using a real-time scheduler in
-OMNeT++.
+At the UDP layer TODO
+Note that the division of the simulated and real parts of the network is arbitrary;
+INET has support for dividing the network at other levels of the protocol stack;
+for example, at the link layer.
 
-The :ned:`ExtLowerUdp` module will be used to connect the application to the
-real network. TODO.
-
-The VoIP application and :ned:`ExtLowerUdp` are the only modules we need,
-so the simulations, both the sender side and the receiver side, will only
-contain an ``app`` and an ``udp`` submodule, as indicated in the following screenshot:
-
-.. image:: media/VoipStreamSenderApplication.png
-   :width: 25%
-   :align: center
-
-How it works
-~~~~~~~~~~~~
-
-In this showcase, the real world and the simulation connects at two points. Firstly,
-we generate VoIP traffic by re-encoding an mp3 file with the simulated VoIP protocol
-(as opposed to sending dummy data packets). Secondly, we send UDP traffic (creating
-application packets in the simulation and sending them over a real network via a UDP
-socket). The following figure illustrates this scenario:
+The following figure illustrates this scenario:
 
 .. figure:: media/setup.png
    :align: center
    :width: 40%
 
-Note that the division of the simulated and real parts of the network is arbitrary;
-INET has support for dividing the network at other levels of the protocol stack;
-for example, at the link layer.
+We'll use the :ned:`VoipStreamSender` and :ned:`VoipStreamReceiver` modules to
+generate the realistic VoIP traffic, and :ned:`ExtLowerUdp` modules will be used
+to connect the applications to the real network. These modules are the only ones
+we need, so both the sender and the receiver side simulations will look like the
+following screenshot:
 
+.. image:: media/VoipStreamSenderApplication.png
+   :width: 25%
+   :align: center
 
-The :ned:`VoipStreamSender` generates application packets. The simulated packets
-enter the real UDP socket in the :ned:`ExtLowerUdp` module, where they are
-encapsulated in real UDP packets and injected into the host OS protocol stack.
+When we run the simulations, :ned:`VoipStreamSender` will generate application
+packets. The simulated packets will be sent to the :ned:`ExtLowerUdp` module,
+where they will be encapsulated in real UDP packets and injected into the
+protocol stack of the host OS via a (real) UDP socket.
 
-The packets travel through the host OS network stack to the real UDP socket at the receiver
-side. The receiver :ned:`ExtLowerUdp` module injects the packets into the receiver
-simulation, the :ned:`VoipStreamReceiver` module receives and decodes them, and creates
-an audio file at the end of the simulation.
+The packets will travel through the network until they reach the UDP layer of
+the host OS, and delivered to the simulation program in which the :ned:`ExtLowerUdp`
+module keeps an UDP socket open. The :ned:`ExtLowerUdp` module will send the packets
+up to the :ned:`VoipStreamReceiver` module, which receives and decodes them, and
+creates an audio file at the end of the simulation.
 
-In this scenario, for simplicity, traffic
-will only go through the host machine's protocol stack via either the loopback interface or a
-pair of virtual Ethernet interfaces (but the traffic could be sent over any real network).
+In this scenario, for simplicity, traffic will only go through the host
+machine's protocol stack via either the loopback interface or a pair of virtual
+Ethernet interfaces (but the traffic could be sent over any real network).
 
-In this showcase, there are two cases depending on how the packets traverse the network:
 
 The Configuration
 ~~~~~~~~~~~~~~~~~
@@ -105,14 +96,11 @@ the other side. The two simulated nodes are in separate parts of the whole
 network, so they are defined in separate networks in the NED file, and run in
 separate simulations.
 
-the :ned:`ExtLowerUdp` module behaves just like the :ned:`Udp` module from the point of view
+The :ned:`ExtLowerUdp` module behaves just like the :ned:`Udp` module from the point of view
 of the modules above them. In this showcase (aside from assigning the :ned:`ExtLowerUdp`
 modules to network namespaces) only the VoIP modules need to be configured.
 The simulations are defined in separate ini files, :download:`sender.ini <../sender.ini>`
 and :download:`receiver.ini <../receiver.ini>`.
-
-To generate the realistic VoIP traffic, we'll use the :ned:`VoipStreamSender` and
-:ned:`VoipStreamReceiver` modules.
 
 - The :ned:`VoipStreamSender` module transmits the contents of an audio file
   as VoIP traffic. The module resamples the audio, encodes it with a codec,
@@ -155,7 +143,7 @@ figure:
 
 .. figure:: media/setup2.png
    :align: center
-   :width: 60%
+   :width: 40%
 
 Here is the :ned:`VoipStreamSender`'s configuration in :download:`sender.ini <../sender.ini>`.
 It sets the ``destAddress`` parameter set to ``127.0.0.1``, the loopback address.
@@ -201,7 +189,7 @@ interfaces will be connected to each other. This setup is illustrated below:
 
 .. figure:: media/setup3.png
    :align: center
-   :width: 60%
+   :width: 40%
 
 Here is the :ned:`VoipStreamSender`'s configuration in :download:`sender.ini <../sender.ini>`:
 
