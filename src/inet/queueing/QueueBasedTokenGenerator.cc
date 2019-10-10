@@ -26,6 +26,8 @@ Define_Module(QueueBasedTokenGenerator);
 void QueueBasedTokenGenerator::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
+        minNumPackets = par("minNumPackets");
+        minTotalLength = b(par("minTotalLength"));
         displayStringTextFormat = par("displayStringTextFormat");
         queue = getModuleFromPar<IPacketQueue>(par("queueModule"), this);
         check_and_cast<cSimpleModule *>(queue)->subscribe(packetPoppedSignal, this);
@@ -60,10 +62,12 @@ void QueueBasedTokenGenerator::receiveSignal(cComponent *source, simsignal_t sig
 {
     Enter_Method_Silent();
     if (signal == packetPoppedSignal) {
-        auto numTokens = numTokensParameter->doubleValue();
-        server->addTokens(numTokens);
-        numTokensGenerated += numTokens;
-        updateDisplayString();
+        if (queue->getNumPackets() < minNumPackets || queue->getTotalLength() < minTotalLength) {
+            auto numTokens = numTokensParameter->doubleValue();
+            server->addTokens(numTokens);
+            numTokensGenerated += numTokens;
+            updateDisplayString();
+        }
     }
     else
         throw cRuntimeError("Unknown signal");

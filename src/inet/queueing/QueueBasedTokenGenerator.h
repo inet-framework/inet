@@ -29,6 +29,8 @@ namespace queueing {
 class INET_API QueueBasedTokenGenerator : public cSimpleModule, public cListener, public StringFormat::IDirectiveResolver
 {
   protected:
+    int minNumPackets = -1;
+    b minTotalLength = b(-1);
     const char *displayStringTextFormat = nullptr;
     IPacketQueue *queue = nullptr;
     TokenBasedServer *server = nullptr;
