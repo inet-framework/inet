@@ -15,28 +15,13 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-#include "inet/linklayer/common/UserPriorityTag_m.h"
-#include "inet/queueing/PacketClassifierFunction.h"
+package inet.queueing;
 
-namespace inet {
-namespace queueing {
+import inet.queueing.base.PacketClassifierBase;
+import inet.queueing.contract.IPacketClassifier;
 
-static int classifyPacketByData(Packet *packet)
+simple UserPriorityClassifier extends PacketClassifier
 {
-    const auto& data = packet->peekDataAt<BytesChunk>(B(0), B(1));
-    return data->getBytes().at(0);
+    parameters:
+        classifierClass = default("inet::queueing::ClassifyPacketByUserPriority");
 }
-
-Register_Packet_Classifier_Function(ClassifyPacketByData, classifyPacketByData);
-
-static int classifyPacketByUserPriority(Packet *packet)
-{
-    auto userPriorityReq = packet->getTag<UserPriorityReq>();
-    return userPriorityReq->getUserPriority();
-}
-
-Register_Packet_Classifier_Function(ClassifyPacketByUserPriority, classifyPacketByUserPriority);
-
-} // namespace queueing
-} // namespace inet
-
