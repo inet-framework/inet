@@ -4,6 +4,10 @@ Testing a Simulated VoIP Application Over a Real Network
 Goals
 -----
 
+In this showcase, we show how a simulated application can be used
+over a real network.
+
+Let's see a bit of background first.
 INET contains several components to allow a variety of hardware-in-the-loop
 (HIL) simulation scenarios. Specifically, it contains one or two additional
 variants for several protocols and interfaces: an "ext lower" and/or an "ext
@@ -56,20 +60,13 @@ passing through the network.
 There are only two submodules per node. There is a
 :ned:`VoipStreamSender` in the sender node and a
 :ned:`VoipStreamReceiver` in the receiver node, both called ``app``.
-Both nodes contain an :ned:`ExtLowerUdp` module, called ``udp``. The
-layout of the two nodes can be seen in the following image:
+Both nodes contain an :ned:`ExtLowerUdp` module, called ``udp``.
 
-+----------------------------------------------------+--+---------------------------------------------------+
-|        VoIP sender node                            |  |      VoIP receiver node                           |
-+====================================================+==+===================================================+
-|.. image:: media/VoipStreamSenderApplication.png    |  |.. image:: media/VoipStreamReceiverApplication.png |
-|   :width: 60%                                      |  |   :width: 60%                                     |
-|   :align: center                                   |  |   :align: center                                  |
-+----------------------------------------------------+--+---------------------------------------------------+
+Thus, both the sender and the receiver nodes look like this:
 
-
-
-
+.. image:: media/VoipStreamSenderApplication.png
+   :width: 60%
+   :align: center
 
 In this showcase, the real world and the simulation connects at two points. Firstly,
 we generate VoIP traffic by re-encoding an mp3 file with the simulated VoIP protocol
@@ -85,20 +82,6 @@ Note that the division of the simulated and real parts of the network is arbitra
 INET has support for dividing the network at other levels of the protocol stack;
 for example, at the link layer.
 
-To generate the realistic VoIP traffic, we'll use the :ned:`VoipStreamSender` and
-:ned:`VoipStreamReceiver` modules.
-
-- The :ned:`VoipStreamSender` module transmits the contents of an audio file
-  as VoIP traffic. The module resamples the audio, encodes it with a codec,
-  chops it into packets and sends the packets via UDP. By default, it creates
-  packets containing 20 ms of audio, and sends a packet every 20 ms.
-  The codec, the sample rate, the time length of the audio packets, and other
-  settings can be specified by parameters.
-
-- The :ned:`VoipStreamReceiver` module can receive this data stream, decode it
-  and save it as an audio file. The module numbers the incoming packets, and discards
-  out-of-order ones. There is a playout delay (specified by parameter; by default 20 ms)
-  simulating a de-jitter buffer.
 
 The :ned:`VoipStreamSender` generates application packets. The simulated packets
 enter the real UDP socket in the :ned:`ExtLowerUdp` module, where they are
@@ -137,6 +120,21 @@ pair of virtual Ethernet interfaces (but the traffic could be sent over any real
 
 The VoIP Configuration
 ~~~~~~~~~~~~~~~~~~~~~~
+
+To generate the realistic VoIP traffic, we'll use the :ned:`VoipStreamSender` and
+:ned:`VoipStreamReceiver` modules.
+
+- The :ned:`VoipStreamSender` module transmits the contents of an audio file
+  as VoIP traffic. The module resamples the audio, encodes it with a codec,
+  chops it into packets and sends the packets via UDP. By default, it creates
+  packets containing 20 ms of audio, and sends a packet every 20 ms.
+  The codec, the sample rate, the time length of the audio packets, and other
+  settings can be specified by parameters.
+
+- The :ned:`VoipStreamReceiver` module can receive this data stream, decode it
+  and save it as an audio file. The module numbers the incoming packets, and discards
+  out-of-order ones. There is a playout delay (specified by parameter; by default 20 ms)
+  simulating a de-jitter buffer.
 
 The :ned:`VoipStreamSender` and :ned:`VoipStreamReceiver` modules are configured
 just like they would be in a fully simulated scenario, no special configuration
