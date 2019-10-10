@@ -34,14 +34,13 @@ only runs on Linux.
 | INET version: ``4.0``
 | Source files location: `inet/showcases/emulation/voip <https://github.com/inet-framework/inet-showcases/tree/master/emulation/voip>`__
 
-The Model
----------
+The Simulation Setup
+--------------------
 
-In this showcase, we use real audio to generate realistic VoIP traffic using a simulated
+In this showcase, we generate generate realistic VoIP traffic using a simulated
 VoIP application. We'll simulate the VoIP sender and receiver applications; however, the
-traffic will be sent in a real network over UDP. In this scenario, for simplicity, traffic
-will only go through the host machine's protocol stack via either the loopback interface or a
-pair of virtual Ethernet interfaces (but the traffic could be sent over any real network).
+traffic will be sent in a real network over UDP.
+
 Also, the sender and receiver applications are run in separate simulations, so they
 could be running on different machines.
 
@@ -53,6 +52,25 @@ We'll send an audio file as VoIP traffic; the received re-encoded audio file and
 original can be compared to examine how the audio quality is affected by the packets
 passing through the network.
 
+
+There are only two submodules per node. There is a
+:ned:`VoipStreamSender` in the sender node and a
+:ned:`VoipStreamReceiver` in the receiver node, both called ``app``.
+Both nodes contain an :ned:`ExtLowerUdp` module, called ``udp``. The
+layout of the two nodes can be seen in the following image:
+
++----------------------------------------------------+--+---------------------------------------------------+
+|        VoIP sender node                            |  |      VoIP receiver node                           |
++====================================================+==+===================================================+
+|.. image:: media/VoipStreamSenderApplication.png    |  |.. image:: media/VoipStreamReceiverApplication.png |
+|   :width: 60%                                      |  |   :width: 60%                                     |
+|   :align: center                                   |  |   :align: center                                  |
++----------------------------------------------------+--+---------------------------------------------------+
+
+
+
+
+
 In this showcase, the real world and the simulation connects at two points. Firstly,
 we generate VoIP traffic by re-encoding an mp3 file with the simulated VoIP protocol
 (as opposed to sending dummy data packets). Secondly, we send UDP traffic (creating
@@ -61,7 +79,7 @@ socket). The following figure illustrates this scenario:
 
 .. figure:: media/setup.png
    :align: center
-   :width: 60%
+   :width: 40%
 
 Note that the division of the simulated and real parts of the network is arbitrary;
 INET has support for dividing the network at other levels of the protocol stack;
@@ -86,17 +104,7 @@ The :ned:`VoipStreamSender` generates application packets. The simulated packets
 enter the real UDP socket in the :ned:`ExtLowerUdp` module, where they are
 encapsulated in real UDP packets and injected into the host OS protocol stack.
 
-In this showcase, there are two cases depending on how the packets traverse the network:
-
-- **Loopback interface:** Packets go down protocol stack, through the loopback interface,
-  and back up the protocol stack
-- **Virtual Ethernet interfaces:** The sender and receiver :ned:`ExtLowerUdp` modules
-  belong to different network namespaces. Each namespace has a virtual Ethernet interface
-  (``veth``), which are connected to each other; the packets go through the ``veth``
-  interfaces.
-
-Basically, a network namespace provides a complete virtualized network stack independent
-from the main network stack of the host OS.
+The
 
 The packets travel through the host OS network stack to the real UDP socket at the receiver
 side. The receiver :ned:`ExtLowerUdp` module injects the packets into the receiver
@@ -115,31 +123,40 @@ the other side. The two simulated nodes are in separate parts of the whole
 network, so they are defined in separate networks in the NED file, and run in
 separate simulations.
 
-There are only two submodules per node. There is a
-:ned:`VoipStreamSender` in the sender node and a
-:ned:`VoipStreamReceiver` in the receiver node, both called ``app``.
-Both nodes contain an :ned:`ExtLowerUdp` module, called ``udp``. The
-layout of the two nodes can be seen in the following image:
-
-+----------------------------------------------------+--+---------------------------------------------------+
-|        Voip Stream Sender Node                     |  |      Voip Stream Receiver Node                    |
-+====================================================+==+===================================================+
-|.. image:: media/VoipStreamSenderApplication.png    |  |.. image:: media/VoipStreamReceiverApplication.png |
-|   :width: 100%                                     |  |   :width: 100%                                    |
-|   :align: center                                   |  |   :align: center                                  |
-+----------------------------------------------------+--+---------------------------------------------------+
-
-There is no difference in the configuration of the :ned:`VoipStreamSender` and
-:ned:`VoipStreamReceiver` modules compared to a fully simulated scenario. Also,
 the :ned:`ExtLowerUdp` module behaves just like the :ned:`Udp` module from the point of view
 of the modules above them. In this showcase (aside from assigning the :ned:`ExtLowerUdp`
 modules to network namespaces) only the VoIP modules need to be configured.
 The simulations are defined in separate ini files, :download:`sender.ini <../sender.ini>`
-and
-:download:`receiver.ini <../receiver.ini>`.
+and :download:`receiver.ini <../receiver.ini>`.
 
-Loopback Configuration
+
+In this scenario, for simplicity, traffic
+will only go through the host machine's protocol stack via either the loopback interface or a
+pair of virtual Ethernet interfaces (but the traffic could be sent over any real network).
+
+
+The VoIP Configuration
 ~~~~~~~~~~~~~~~~~~~~~~
+
+The :ned:`VoipStreamSender` and :ned:`VoipStreamReceiver` modules are configured
+just like they would be in a fully simulated scenario, no special configuration
+is needed.
+
+.. literalinclude:: ../sender.ini
+   :language: ini
+   :end-before: [Config
+
+.. literalinclude:: ../receiver.ini
+   :language: ini
+   :end-before: [Config
+
+Using the Loopback Interface as Network
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+In this showcase, there are two cases depending on how the packets traverse the network:
+
+- **Loopback interface:** Packets go down protocol stack, through the loopback interface,
+  and back up the protocol stack
 
 The specific setup for the loopback interface case is illustrated by the following
 figure:
@@ -152,7 +169,8 @@ Here is the :ned:`VoipStreamSender`'s configuration in :download:`sender.ini <..
 
 .. literalinclude:: ../sender.ini
    :language: ini
-   :end-at: destAddress
+   :start-at: [Config LoopbackSender]
+   :end-before: [Config VethSender]
 
 In the ``LoopbackSender`` configuration,
 the ``destAddress`` parameter is set to ``127.0.0.1`` address (the loopback address).
@@ -161,7 +179,8 @@ Here is :ned:`VoipStreamReceiver`'s configuration in :download:`receiver.ini <..
 
 .. literalinclude:: ../receiver.ini
    :language: ini
-   :end-at: LoopbackReceiver
+   :start-at: [Config LoopbackReceiver]
+   :end-before: [Config VethReceiver]
 
 ``LoopbackReceiver`` is empty;
 
@@ -177,8 +196,16 @@ simulation time limit, which is enough for the transfer of the whole audio file.
 When the simulations are finished, the delay, packets loss and corruption are removed
 from the loopback interface.
 
-Virtual Ethernet Interface Configuration
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Using Virtual Ethernet Interfaces
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+**Virtual Ethernet interfaces:** The sender and receiver :ned:`ExtLowerUdp` modules
+belong to different network namespaces. Each namespace has a virtual Ethernet interface
+(``veth``), which are connected to each other; the packets go through the ``veth``
+interfaces.
+
+Basically, a network namespace provides a complete virtualized network stack independent
+from the main network stack of the host OS.
 
 The specific setup for the virtual Ethernet interface (``veth``) case is illustrated below:
 
@@ -191,7 +218,6 @@ Here is the :ned:`VoipStreamSender`'s configuration in :download:`sender.ini <..
 .. literalinclude:: ../sender.ini
    :language: ini
    :start-at: VethSender
-   :end-at: namespace
 
 In the ``VethSender`` configuration, the ``destAddress`` parameter is set to ``192.168.2.2``
 (the address of the ``veth1`` interface). Also, the :ned:`ExtLowerUdp` module is set to use
@@ -201,8 +227,7 @@ Here is :ned:`VoipStreamReceiver`'s configuration in :download:`receiver.ini <..
 
 .. literalinclude:: ../receiver.ini
    :language: ini
-   :start-at: VethReceiver
-   :end-at: namespace
+   :start-at: [Config VethReceiver]
 
 The ``VethReceiver`` configuration sets the :ned:`ExtLowerUdp` module to use the ``net0``
 network namespace.
@@ -218,12 +243,6 @@ Note that the veth interfaces are created in pairs, and are automatically connec
 to each other. The scripts also adds the same delay, loss and corruption to the ``veth0``
 interface as the loopback script. Then it runs the simulations. When they are finished,
 it destroys the namespaces.
-
-.. note:: The scripts only work on Linux. On Windows and macOS, the loopback interface
-   simulations can be run manually. To run the emulation scenario,
-   start the receiver simulation first, and run it in express mode. Then, the sender
-   simulation can be started. Also, in this case, the delay, the packet loss, and the
-   corruption is not applied.
 
 The received audio file is saved to the ``results`` folder.
 
