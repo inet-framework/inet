@@ -65,7 +65,7 @@ Both nodes contain an :ned:`ExtLowerUdp` module, called ``udp``.
 Thus, both the sender and the receiver nodes look like this:
 
 .. image:: media/VoipStreamSenderApplication.png
-   :width: 60%
+   :width: 25%
    :align: center
 
 In this showcase, the real world and the simulation connects at two points. Firstly,
@@ -86,8 +86,6 @@ for example, at the link layer.
 The :ned:`VoipStreamSender` generates application packets. The simulated packets
 enter the real UDP socket in the :ned:`ExtLowerUdp` module, where they are
 encapsulated in real UDP packets and injected into the host OS protocol stack.
-
-The
 
 The packets travel through the host OS network stack to the real UDP socket at the receiver
 side. The receiver :ned:`ExtLowerUdp` module injects the packets into the receiver
@@ -117,6 +115,7 @@ In this scenario, for simplicity, traffic
 will only go through the host machine's protocol stack via either the loopback interface or a
 pair of virtual Ethernet interfaces (but the traffic could be sent over any real network).
 
+In this showcase, there are two cases depending on how the packets traverse the network:
 
 The VoIP Configuration
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -138,23 +137,24 @@ To generate the realistic VoIP traffic, we'll use the :ned:`VoipStreamSender` an
 
 The :ned:`VoipStreamSender` and :ned:`VoipStreamReceiver` modules are configured
 just like they would be in a fully simulated scenario, no special configuration
-is needed.
+is needed. Here is the sender-side configuration:
 
 .. literalinclude:: ../sender.ini
    :language: ini
    :end-before: [Config
 
+And the receiver side:
+
 .. literalinclude:: ../receiver.ini
    :language: ini
    :end-before: [Config
 
-Using the Loopback Interface as Network
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Using the Loopback Interface
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-In this showcase, there are two cases depending on how the packets traverse the network:
-
-- **Loopback interface:** Packets go down protocol stack, through the loopback interface,
-  and back up the protocol stack
+In our first configuration, packets will go via the loopback interface. Each
+sent packet goes down the protocol stack, through the loopback interface,
+and back up the protocol stack to the other simulation process.
 
 The specific setup for the loopback interface case is illustrated by the following
 figure:
@@ -163,15 +163,13 @@ figure:
    :align: center
    :width: 60%
 
-Here is the :ned:`VoipStreamSender`'s configuration in :download:`sender.ini <../sender.ini>`:
+Here is the :ned:`VoipStreamSender`'s configuration in :download:`sender.ini <../sender.ini>`.
+It sets the ``destAddress`` parameter set to ``127.0.0.1``, the loopback address.
 
 .. literalinclude:: ../sender.ini
    :language: ini
    :start-at: [Config LoopbackSender]
    :end-before: [Config VethSender]
-
-In the ``LoopbackSender`` configuration,
-the ``destAddress`` parameter is set to ``127.0.0.1`` address (the loopback address).
 
 Here is :ned:`VoipStreamReceiver`'s configuration in :download:`receiver.ini <../receiver.ini>`:
 
@@ -179,8 +177,6 @@ Here is :ned:`VoipStreamReceiver`'s configuration in :download:`receiver.ini <..
    :language: ini
    :start-at: [Config LoopbackReceiver]
    :end-before: [Config VethReceiver]
-
-``LoopbackReceiver`` is empty;
 
 Here is the ``run_loopback`` script:
 
@@ -286,7 +282,7 @@ The quality would be nearly as good as the original file.
 
           This eliminates reordering in this scenario.
 
-Sources: :download:`sender.ini <../sender.ini>`, :download:`receiver.ini <../receiver.ini>`, :download:`VoipStreamNodes.ned <../VoipStreamNodes.ned>`
+Sources: :download:`sender.ini <../sender.ini>`, :download:`receiver.ini <../receiver.ini>`, :download:`VoipStreamNode.ned <../VoipStreamNode.ned>`
 
 Discussion
 ----------
