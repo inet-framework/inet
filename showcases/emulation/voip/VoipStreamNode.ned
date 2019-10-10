@@ -15,28 +15,13 @@
 
 package inet.showcases.emulation.voip;
 
-import inet.applications.voipstream.VoipStreamReceiver;
-import inet.applications.voipstream.VoipStreamSender;
+import inet.applications.contract.IApp;
 import inet.emulation.transportlayer.udp.ExtLowerUdp;
 
-network VoipStreamSenderNode
+network VoipStreamNode
 {
-    parameters:
-        @networkNode;
     submodules:
-        app: VoipStreamSender;
-        udp: ExtLowerUdp;
-    connections:
-        app.socketOut --> udp.appIn;
-        app.socketIn <-- udp.appOut;
-}
-
-network VoipStreamReceiverNode
-{
-    parameters:
-        @networkNode;
-    submodules:
-        app: VoipStreamReceiver;
+        app: <> like IApp;
         udp: ExtLowerUdp;
     connections:
         app.socketOut --> udp.appIn;
