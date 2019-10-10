@@ -90,13 +90,6 @@ side. The receiver :ned:`ExtLowerUdp` module injects the packets into the receiv
 simulation, the :ned:`VoipStreamReceiver` module receives and decodes them, and creates
 an audio file at the end of the simulation.
 
-The simulations for the two cases are controlled by two shell scripts in the showcase's
-folder. The scripts set up the network namespaces and ``veth`` interfaces, and run the
-simulations. They also apply a small amount of delay, packet loss and bit corruption
-to the interfaces in both cases to simulate the effects of the packets going through
-a real network.
-
-
 In this scenario, for simplicity, traffic
 will only go through the host machine's protocol stack via either the loopback interface or a
 pair of virtual Ethernet interfaces (but the traffic could be sent over any real network).
@@ -151,10 +144,13 @@ Using the Loopback Interface
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 In our first configuration, packets will go via the loopback interface. Each
-sent packet goes down the protocol stack, through the loopback interface,
-and back up the protocol stack to the other simulation process.
+sent packet goes down the protocol stack, through the loopback interface, and
+back up the protocol stack to the other simulation process. The Linux kernel
+even even allows us to apply a small amount of delay, packet loss and bit
+corruption to the interfaces, to simulate the effects of the packets going
+through a real network.
 
-The specific setup for the loopback interface case is illustrated by the following
+The setup for the loopback interface case is illustrated by the following
 figure:
 
 .. figure:: media/setup2.png
@@ -176,11 +172,8 @@ Here is :ned:`VoipStreamReceiver`'s configuration in :download:`receiver.ini <..
    :start-at: [Config LoopbackReceiver]
    :end-before: [Config VethReceiver]
 
-Here is the ``run_loopback`` script:
-
-.. literalinclude:: ../run_loopback
-   :language: bash
-
+The simulation can be run with a shell script, listed below, that performs the appropriate
+configuration and starts the simulations.
 The script applies some delay (10ms with 1ms random variation), packet loss and bit
 corruption to the traffic passing through the loopback interface.
 It runs both simulations in Cmdenv. The simulations are run until the configured
@@ -188,24 +181,23 @@ simulation time limit, which is enough for the transfer of the whole audio file.
 When the simulations are finished, the delay, packets loss and corruption are removed
 from the loopback interface.
 
+The ``run_loopback`` script:
+
+.. literalinclude:: ../run_loopback
+   :language: bash
+
+
 Using Virtual Ethernet Interfaces
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-This configuration uses two virtual Ethernet interfaces, a facility provided by the Linux kernel.
-The inet in two different network namespaces.
+This configuration uses network namespaces and virtual Ethernet interfaces,
+which are features provided by the Linux kernel. A network namespace provides a
+complete virtualized network stack independent from the main network stack of
+the host OS.
 
-The sender and receiver :ned:`ExtLowerUdp` modules
-belong to different network namespaces.
-
-Basically, a network namespace provides a complete virtualized network stack independent
-from the main network stack of the host OS.
-
- Each namespace has a virtual Ethernet interface
-(``veth``), which are connected to each other; the packets go through the ``veth``
-interfaces.
-
-
-The specific setup for the virtual Ethernet interface (``veth``) case is illustrated below:
+We'll create two namespaces, ``net0`` and ``net1``. Then we'll create a virtual
+Ethernet interface in both, and name them ``veth0`` and ``veth1``. The two
+interfaces will be connected to each other. This setup is illustrated below:
 
 .. figure:: media/setup3.png
    :align: center
@@ -230,17 +222,18 @@ Here is :ned:`VoipStreamReceiver`'s configuration in :download:`receiver.ini <..
 The ``VethReceiver`` configuration sets the :ned:`ExtLowerUdp` module to use the ``net0``
 network namespace.
 
-Here is the ``run_veth`` script:
+The run script in this case (see below) creates the two namespaces and a *veth*
+interface in each, and adds routes (a route for each direction is required
+because there is an ARP exchange at the beginning). Note that the *veth*
+interfaces are created in pairs, and are automatically connected to each other.
+The scripts also adds the same delay, loss and corruption to the ``veth0``
+interface as the loopback script. Then it runs the simulations. When they are
+finished, it destroys the namespaces.
+
+ The ``run_veth`` script:
 
 .. literalinclude:: ../run_veth
    :language: bash
-
-The script creates two namespaces and a ``veth`` interface in each, and adds routes
-(a route for each direction is required because there is an ARP exchange at the beginning).
-Note that the veth interfaces are created in pairs, and are automatically connected
-to each other. The scripts also adds the same delay, loss and corruption to the ``veth0``
-interface as the loopback script. Then it runs the simulations. When they are finished,
-it destroys the namespaces.
 
 The received audio file is saved to the ``results`` folder.
 
