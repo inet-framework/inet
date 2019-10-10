@@ -41,32 +41,30 @@ only runs on Linux.
 The Simulation Setup
 --------------------
 
-In this showcase, we generate generate realistic VoIP traffic using a simulated
-VoIP application. We'll simulate the VoIP sender and receiver applications; however, the
-traffic will be sent in a real network over UDP.
+This showcase features a simulated VoIP application over a real network.
+There'll be a sender and a receiver application, and we'll send realistic VoIP
+traffic (contents of an audio file) between them. The received audio will be
+saved to a file, which can be compared to the original to examine how the audio
+quality is affected by the packets passing through the network.
 
-Also, the sender and receiver applications are run in separate simulations, so they
-could be running on different machines.
+The VoIP sender and receiver applications will be run in separate simulations,
+so they could be running on different machines. The simulation time will be kept
+in sync with the real time; this is achived by using a real-time scheduler in
+OMNeT++.
 
-We'll use the :ned:`ExtLowerUdp` module to connect the simulation with the real network.
-The upper part of the module connects to the rest of the simulation; the lower part
-connects to the host computer protocol stack via UDP sockets.
+The :ned:`ExtLowerUdp` module will be used to connect the application to the
+real network. TODO.
 
-We'll send an audio file as VoIP traffic; the received re-encoded audio file and the
-original can be compared to examine how the audio quality is affected by the packets
-passing through the network.
-
-
-There are only two submodules per node. There is a
-:ned:`VoipStreamSender` in the sender node and a
-:ned:`VoipStreamReceiver` in the receiver node, both called ``app``.
-Both nodes contain an :ned:`ExtLowerUdp` module, called ``udp``.
-
-Thus, both the sender and the receiver nodes look like this:
+The VoIP application and :ned:`ExtLowerUdp` are the only modules we need,
+so the simulations, both the sender side and the receiver side, will only
+contain an ``app`` and an ``udp`` submodule, as indicated in the following screenshot:
 
 .. image:: media/VoipStreamSenderApplication.png
    :width: 25%
    :align: center
+
+How it works
+~~~~~~~~~~~~
 
 In this showcase, the real world and the simulation connects at two points. Firstly,
 we generate VoIP traffic by re-encoding an mp3 file with the simulated VoIP protocol
@@ -98,6 +96,16 @@ simulations. They also apply a small amount of delay, packet loss and bit corrup
 to the interfaces in both cases to simulate the effects of the packets going through
 a real network.
 
+
+In this scenario, for simplicity, traffic
+will only go through the host machine's protocol stack via either the loopback interface or a
+pair of virtual Ethernet interfaces (but the traffic could be sent over any real network).
+
+In this showcase, there are two cases depending on how the packets traverse the network:
+
+The Configuration
+~~~~~~~~~~~~~~~~~
+
 In the simulation, only a sender node and a receiver node are needed in order to
 send the packets into the real network on one side and receive them on
 the other side. The two simulated nodes are in separate parts of the whole
@@ -109,16 +117,6 @@ of the modules above them. In this showcase (aside from assigning the :ned:`ExtL
 modules to network namespaces) only the VoIP modules need to be configured.
 The simulations are defined in separate ini files, :download:`sender.ini <../sender.ini>`
 and :download:`receiver.ini <../receiver.ini>`.
-
-
-In this scenario, for simplicity, traffic
-will only go through the host machine's protocol stack via either the loopback interface or a
-pair of virtual Ethernet interfaces (but the traffic could be sent over any real network).
-
-In this showcase, there are two cases depending on how the packets traverse the network:
-
-The VoIP Configuration
-~~~~~~~~~~~~~~~~~~~~~~
 
 To generate the realistic VoIP traffic, we'll use the :ned:`VoipStreamSender` and
 :ned:`VoipStreamReceiver` modules.
@@ -193,13 +191,19 @@ from the loopback interface.
 Using Virtual Ethernet Interfaces
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-**Virtual Ethernet interfaces:** The sender and receiver :ned:`ExtLowerUdp` modules
-belong to different network namespaces. Each namespace has a virtual Ethernet interface
-(``veth``), which are connected to each other; the packets go through the ``veth``
-interfaces.
+This configuration uses two virtual Ethernet interfaces, a facility provided by the Linux kernel.
+The inet in two different network namespaces.
+
+The sender and receiver :ned:`ExtLowerUdp` modules
+belong to different network namespaces.
 
 Basically, a network namespace provides a complete virtualized network stack independent
 from the main network stack of the host OS.
+
+ Each namespace has a virtual Ethernet interface
+(``veth``), which are connected to each other; the packets go through the ``veth``
+interfaces.
+
 
 The specific setup for the virtual Ethernet interface (``veth``) case is illustrated below:
 
