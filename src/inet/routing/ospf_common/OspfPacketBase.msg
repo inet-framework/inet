@@ -34,7 +34,7 @@ enum OspfPacketType
 //
 // Represents an OSPF packet header
 //
-class OspfPacket extends FieldsChunk
+class OspfPacketBase extends FieldsChunk
 {
     chunkLength = B(14);
     short version = -1;     // 1 byte

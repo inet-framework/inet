@@ -14,7 +14,7 @@
 //
 
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
-#include "inet/routing/ospf_common/OspfPacket_m.h"
+#include "inet/routing/ospf_common/OspfPacketBase_m.h"
 #include "inet/routing/ospf_common/OspfPacketSerializer.h"
 #ifdef WITH_OSPFv2
 #include "inet/routing/ospfv2/Ospfv2PacketSerializer.h"
@@ -23,11 +23,11 @@
 namespace inet {
 namespace ospf {
 
-Register_Serializer(OspfPacket, OspfPacketSerializer);
+Register_Serializer(OspfPacketBase, OspfPacketSerializer);
 
 void OspfPacketSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
-    throw cRuntimeError("OspfPacket is not serializable, should use specific OSPF chunks");
+    throw cRuntimeError("OspfPacketBase is not serializable, should use specific OSPF chunks");
 }
 
 const Ptr<Chunk> OspfPacketSerializer::deserialize(MemoryInputStream& stream) const
@@ -49,7 +49,7 @@ const Ptr<Chunk> OspfPacketSerializer::deserialize(MemoryInputStream& stream) co
             //TODO return ospfv3::Ospfv3PacketSerializer().deserialize(stream);
 #endif // #ifdef WITH_OSPFv3
         default: {
-            auto ospfPacket = makeShared<OspfPacket>();
+            auto ospfPacket = makeShared<OspfPacketBase>();
             ospfPacket->markIncorrect();
             ospfPacket->setVersion(ospfVer);
             int ospfType = stream.readUint8();

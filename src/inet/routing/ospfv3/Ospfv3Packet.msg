@@ -4,7 +4,7 @@ import inet.common.packet.chunk.Chunk;
 import inet.networklayer.common.L3Address;
 import inet.networklayer.contract.ipv4.Ipv4Address;
 import inet.networklayer.contract.ipv6.Ipv6Address;
-import inet.routing.ospf_common.OspfPacket;
+import inet.routing.ospf_common.OspfPacketBase;
 
 namespace inet::ospfv3;
 
@@ -13,7 +13,7 @@ using namespace ospf;
 }}
 
 //Common OSPFv3 packet header - this header is present in every OSPFv3 packet
-class Ospfv3Packet extends ospf::OspfPacket
+class Ospfv3Packet extends ospf::OspfPacketBase
 {
     chunkLength = B(16);
     version = 3;

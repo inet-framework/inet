@@ -18,7 +18,7 @@
 //
 
 #include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
-#include "inet/routing/ospf_common/OspfPacket_m.h"
+#include "inet/routing/ospf_common/OspfPacketBase_m.h"
 #include "inet/routing/ospf_common/OspfProtocolDissector.h"
 
 namespace inet {
@@ -28,7 +28,7 @@ Register_Protocol_Dissector(&Protocol::ospf, OspfProtocolDissector);
 
 void OspfProtocolDissector::dissect(Packet *packet, const Protocol *protocol, ICallback& callback) const
 {
-    auto header = packet->popAtFront<OspfPacket>();
+    auto header = packet->popAtFront<OspfPacketBase>();
     callback.startProtocolDataUnit(&Protocol::ospf);
     callback.visitChunk(header, &Protocol::ospf);
     callback.endProtocolDataUnit(&Protocol::ospf);

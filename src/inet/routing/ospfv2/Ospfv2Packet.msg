@@ -18,7 +18,7 @@
 import inet.common.INETDefs;
 import inet.common.packet.chunk.Chunk;
 import inet.networklayer.contract.ipv4.Ipv4Address;
-import inet.routing.ospf_common.OspfPacket;
+import inet.routing.ospf_common.OspfPacketBase;
 import inet.transportlayer.common.CrcMode;
 
 namespace inet::ospfv2;
@@ -43,7 +43,7 @@ struct Ospfv2Options
 //
 // Represents an OSPF packet header
 //
-class Ospfv2Packet extends ospf::OspfPacket
+class Ospfv2Packet extends ospf::OspfPacketBase
 {
     chunkLength = B(24);
     version = 2;
