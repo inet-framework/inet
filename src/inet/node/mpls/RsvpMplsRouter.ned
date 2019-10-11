@@ -23,6 +23,7 @@ import inet.networklayer.mpls.Mpls;
 import inet.networklayer.rsvpte.RsvpTe;
 import inet.networklayer.ted.LinkStateRouting;
 import inet.networklayer.ted.Ted;
+import inet.common.packet.recorder.PcapRecorder;
 
 //
 // An RSVP-TE capable router.
@@ -39,6 +40,7 @@ module RsvpMplsRouter
         @display("i=abstract/router");
         bool hasStatus = default(false);
         int numLoInterfaces = default(1);
+        int numPcapRecorders = default(0);
         string peers;
         string routerId = default("auto");
         *.forwarding = true;
@@ -108,6 +110,10 @@ module RsvpMplsRouter
         ml: MessageDispatcher {
             parameters:
                 @display("p=450,480;b=500,5,,,,1");
+        }
+        pcapRecorder[numPcapRecorders]: PcapRecorder {
+            parameters:
+                @display("p=100,600;is=s");
         }
     connections allowunconnected:
         linkStateRouting.ipOut --> tn.in++;
