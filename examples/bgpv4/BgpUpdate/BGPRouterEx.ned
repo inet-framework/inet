@@ -24,7 +24,7 @@ import inet.linklayer.contract.IPppInterface;
 import inet.networklayer.common.InterfaceTable;
 import inet.networklayer.ipv4.Ipv4NetworkLayer;
 import inet.routing.bgpv4.Bgp;
-import inet.routing.ospf.v2.Ospfv2;
+import inet.routing.ospfv2.Ospfv2;
 import inet.transportlayer.contract.ITcp;
 
 
