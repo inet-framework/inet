@@ -15,12 +15,11 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/routing/ospf/v3/neighbor/Ospfv3Neighbor.h"
-#include "inet/routing/ospf/v3/neighbor/Ospfv3NeighborState.h"
+#include "inet/routing/ospfv3/neighbor/Ospfv3Neighbor.h"
+#include "inet/routing/ospfv3/neighbor/Ospfv3NeighborState.h"
 
 namespace inet {
-namespace ospf {
-namespace v3 {
+namespace ospfv3 {
 
 void Ospfv3NeighborState::changeState(Ospfv3Neighbor *neighbor, Ospfv3NeighborState *newState, Ospfv3NeighborState *currentState)
 {
@@ -137,7 +136,6 @@ void Ospfv3NeighborState::changeState(Ospfv3Neighbor *neighbor, Ospfv3NeighborSt
     }
 }
 
-} // namespace v3
-} // namespace ospf
+} // namespace ospfv3
 } // namespace inet
 

@@ -8,12 +8,11 @@
 #include "inet/networklayer/ipv4/Ipv4RoutingTable.h"
 #include "inet/networklayer/ipv6/Ipv6RoutingTable.h"
 #include "inet/networklayer/ipv6/Ipv6Route.h"
-#include "inet/routing/ospf/v3/Ospfv3Common.h"
-#include "inet/routing/ospf/v3/Ospfv3Packet_m.h"
+#include "inet/routing/ospfv3/Ospfv3Common.h"
+#include "inet/routing/ospfv3/Ospfv3Packet_m.h"
 
 namespace inet {
-namespace ospf {
-namespace v3 {
+namespace ospfv3 {
 
 class INET_API Ospfv3RoutingTableEntry : public Ipv6Route
 {
@@ -137,8 +136,7 @@ public:
 
 std::ostream& operator<<(std::ostream& out, const Ospfv3Ipv4RoutingTableEntry& entry);
 
-} // namespace v3
-} // namespace ospf
+} // namespace ospfv3
 }//namespace inet
 
 #endif // __INET_OSPFV3ROUTINGTABLEENTRY_H_

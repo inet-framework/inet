@@ -18,13 +18,12 @@
 #include <algorithm>
 
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
-#include "inet/routing/ospf/v2/router/Lsa.h"
-#include "inet/routing/ospf/v2/router/Ospfv2Router.h"
+#include "inet/routing/ospfv2/router/Lsa.h"
+#include "inet/routing/ospfv2/router/Ospfv2Router.h"
 
 namespace inet {
 
-namespace ospf {
-namespace v2 {
+namespace ospfv2 {
 
 Router::Router(cSimpleModule *containingModule, IInterfaceTable *ift, IIpv4RoutingTable *rt) :
     ift(ift),
@@ -1535,8 +1534,7 @@ bool Router::isDirectRoute(Ospfv2RoutingTableEntry &entry)
     return false;
 }
 
-} // namespace v2
-} // namespace ospf
+} // namespace ospfv2
 
 } // namespace inet
 

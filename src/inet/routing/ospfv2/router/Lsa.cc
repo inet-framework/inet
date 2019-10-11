@@ -15,12 +15,11 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/routing/ospf/v2/router/Lsa.h"
+#include "inet/routing/ospfv2/router/Lsa.h"
 
 namespace inet {
 
-namespace ospf {
-namespace v2 {
+namespace ospfv2 {
 
 bool operator<(const Ospfv2LsaHeader& leftLSA, const Ospfv2LsaHeader& rightLSA)
 {
@@ -345,7 +344,6 @@ std::ostream& operator<<(std::ostream& ostr, const Ospfv2Lsa& lsa)
     return ostr;
 }
 
-} // namespace v2
-} // namespace ospf
+} // namespace ospfv2
 } // namespace inet
 

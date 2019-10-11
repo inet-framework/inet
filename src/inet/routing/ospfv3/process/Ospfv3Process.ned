@@ -1,4 +1,4 @@
-package inet.routing.ospf.v3.process;
+package inet.routing.ospfv3.process;
 
 simple Ospfv3Process
 {

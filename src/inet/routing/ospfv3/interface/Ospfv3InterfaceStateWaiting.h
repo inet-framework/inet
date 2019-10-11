@@ -4,11 +4,10 @@
 #include <string>
 
 #include "inet/common/INETDefs.h"
-#include "inet/routing/ospf/v3/interface/Ospfv3InterfaceState.h"
+#include "inet/routing/ospfv3/interface/Ospfv3InterfaceState.h"
 
 namespace inet {
-namespace ospf {
-namespace v3 {
+namespace ospfv3 {
 
 /*
  * In this state the interface is waiting for the DR and BDR election. It does do by monitoring hello packets
@@ -25,8 +24,7 @@ class INET_API Ospfv3InterfaceStateWaiting : public Ospfv3InterfaceState
     std::string getInterfaceStateString() const override { return std::string("Ospfv3InterfaceStateWaiting"); };
 };
 
-} // namespace v3
-} // namespace ospf
+} // namespace ospfv3
 }//namespace inet
 
 #endif // __INET_OSPFV3INTERFACESTATEWAITING_H_

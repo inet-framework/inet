@@ -22,8 +22,7 @@
 
 namespace inet {
 
-namespace ospf {
-namespace v2 {
+namespace ospfv2 {
 
 enum Ospfv2TimerType {
     INTERFACE_HELLO_TIMER = 0,
@@ -37,8 +36,7 @@ enum Ospfv2TimerType {
     DATABASE_AGE_TIMER = 9,
 };
 
-} // namespace v2
-} // namespace ospf
+} // namespace ospfv2
 
 } // namespace inet
 

@@ -4,12 +4,11 @@
 #include <omnetpp.h>
 #include <string>
 
-#include "inet/routing/ospf/v3/interface/Ospfv3InterfaceState.h"
+#include "inet/routing/ospfv3/interface/Ospfv3InterfaceState.h"
 #include "inet/common/INETDefs.h"
 
 namespace inet {
-namespace ospf {
-namespace v3 {
+namespace ospfv3 {
 
 /*
  * Interface is operational and it is connected to either a physical point-to-point interface
@@ -26,8 +25,7 @@ class INET_API Ospfv3InterfaceStatePointToPoint : public Ospfv3InterfaceState
     virtual std::string getInterfaceStateString() const override { return std::string("Ospfv3InterfaceStatePointToPoint"); }
 };
 
-} // namespace v3
-} // namespace ospf
+} // namespace ospfv3
 }//namespace inet
 
 #endif // __INET_OSPFV3INTERFACESTATEPOINTTOPOINT_H_

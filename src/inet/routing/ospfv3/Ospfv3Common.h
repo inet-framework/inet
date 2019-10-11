@@ -3,11 +3,10 @@
 
 #include "inet/common/INETDefs.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
-#include "inet/routing/ospf/v3/Ospfv3Packet_m.h"
+#include "inet/routing/ospfv3/Ospfv3Packet_m.h"
 
 namespace inet {
-namespace ospf {
-namespace v3 {
+namespace ospfv3 {
 
 // intervals values
 #define OSPFV3_START            5
@@ -411,8 +410,7 @@ inline bool operator==(const Ospfv3LsaHeader& leftLSA, const Ospfv3LsaHeader& ri
 }
 //Packets
 
-} // namespace v3
-} //namespace ospf
+} //namespace ospfv3
 }//namespace inet
 
 #endif // __INET_OSPFV3COMMON_H_

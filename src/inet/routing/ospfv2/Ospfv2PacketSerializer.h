@@ -17,12 +17,15 @@
 #define __INET_OSPFV2PACKETSERIALIZER_H
 
 #include "inet/common/packet/serializer/FieldsChunkSerializer.h"
-#include "inet/routing/ospf/v2/Ospfv2Packet_m.h"
+#include "inet/routing/ospfv2/Ospfv2Packet_m.h"
 
 namespace inet {
+
 namespace ospf {
 class OspfPacketSerializer;
-namespace v2 {
+} // namespace ospf
+
+namespace ospfv2 {
 
 /**
  * Converts between Ospfv2Packet and binary (network byte order) OSPF data.
@@ -66,8 +69,7 @@ class INET_API Ospfv2PacketSerializer : public FieldsChunkSerializer
     friend class inet::ospf::OspfPacketSerializer;
 };
 
-} // namespace v2
-} // namespace ospf
+} // namespace ospfv2
 } // namespace inet
 
 #endif // ifndef __INET_OSPFV2PACKETSERIALIZER_H

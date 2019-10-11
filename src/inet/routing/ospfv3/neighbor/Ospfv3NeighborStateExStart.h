@@ -1,13 +1,12 @@
 #ifndef __INET_OSPFV3NEIGHBORSTATEEXSTART_H_
 #define __INET_OSPFV3NEIGHBORSTATEEXSTART_H_
 
-#include "inet/routing/ospf/v3/neighbor/Ospfv3Neighbor.h"
-#include "inet/routing/ospf/v3/neighbor/Ospfv3NeighborState.h"
+#include "inet/routing/ospfv3/neighbor/Ospfv3Neighbor.h"
+#include "inet/routing/ospfv3/neighbor/Ospfv3NeighborState.h"
 #include "inet/common/INETDefs.h"
 
 namespace inet {
-namespace ospf {
-namespace v3 {
+namespace ospfv3 {
 
 class INET_API Ospfv3NeighborStateExStart : public Ospfv3NeighborState
 {
@@ -23,8 +22,7 @@ class INET_API Ospfv3NeighborStateExStart : public Ospfv3NeighborState
     virtual std::string getNeighborStateString() override { return std::string("Ospfv3NeighborStateExStart"); }
 };
 
-} // namespace v3
-} // namespace ospf
+} // namespace ospfv3
 }//namespace inet
 
 #endif // __INET_OSPFV3NEIGHBORSTATEEXSTART_H_

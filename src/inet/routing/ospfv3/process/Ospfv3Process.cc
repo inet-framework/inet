@@ -1,10 +1,9 @@
 
 #include "inet/common/IProtocolRegistrationListener.h"
-#include "inet/routing/ospf/v3/process/Ospfv3Process.h"
+#include "inet/routing/ospfv3/process/Ospfv3Process.h"
 
 namespace inet {
-namespace ospf {
-namespace v3 {
+namespace ospfv3 {
 
 Define_Module(Ospfv3Process);
 
@@ -1006,7 +1005,6 @@ void Ospfv3Process::rebuildRoutingTable()
     }
 } // end of rebuildRoutingTable
 
-} // namespace v3
-} // namespace ospf
+} // namespace ospfv3
 }//namespace inet
 

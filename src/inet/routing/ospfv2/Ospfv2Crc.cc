@@ -18,13 +18,12 @@
 //
 
 #include "inet/common/checksum/TcpIpChecksum.h"
-#include "inet/routing/ospf/v2/Ospfv2Crc.h"
-#include "inet/routing/ospf/v2/Ospfv2PacketSerializer.h"
-#include "inet/routing/ospf/v2/router/Ospfv2Common.h"
+#include "inet/routing/ospfv2/Ospfv2Crc.h"
+#include "inet/routing/ospfv2/Ospfv2PacketSerializer.h"
+#include "inet/routing/ospfv2/router/Ospfv2Common.h"
 
 namespace inet {
-namespace ospf {
-namespace v2 {
+namespace ospfv2 {
 
 void setOspfCrc(const Ptr<Ospfv2Packet>& ospfPacket, CrcMode crcMode)
 {
@@ -111,7 +110,6 @@ void setLsaHeaderCrc(Ospfv2LsaHeader& lsaHeader, CrcMode crcMode)
     }
 }
 
-} // namespace v2
-} // namespace ospf
+} // namespace ospfv2
 } // namespace inet
 

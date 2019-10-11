@@ -2,16 +2,15 @@
 #define __INET_OSPFV3LSA_H_
 
 #include "inet/common/INETDefs.h"
-#include "inet/routing/ospf/v3/Ospfv3Common.h"
-#include "inet/routing/ospf/v3/Ospfv3Packet_m.h"
+#include "inet/routing/ospfv3/Ospfv3Common.h"
+#include "inet/routing/ospfv3/Ospfv3Packet_m.h"
 
 // NexHop is defined in Ospfv3Common.h
 // Every Ospfv3 class representing pakcet is extedned by Routing and Tracking info,
 // which are needed for calculating SPF and wtchting time since LSA is written down into LSDB
 
 namespace inet {
-namespace ospf {
-namespace v3 {
+namespace ospfv3 {
 
 class INET_API LSATrackingInfo
 {
@@ -196,8 +195,7 @@ std::ostream& operator<<(std::ostream& ostr, const Ospfv3RouterLsa& lsa);
 std::ostream& operator<<(std::ostream& ostr, const Ospfv3InterAreaPrefixLsa& lsa);
 std::ostream& operator<<(std::ostream& ostr, const Ospfv3AsExternalLsa& lsa);
 
-} // namespace v3
-} // namespace ospf
+} // namespace ospfv3
 }//namespace inet
 
 #endif // __INET_OSPFV3LSA_H_

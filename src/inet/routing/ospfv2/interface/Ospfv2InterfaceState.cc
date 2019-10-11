@@ -17,18 +17,17 @@
 
 #include <map>
 
-#include "inet/routing/ospf/v2/interface/Ospfv2Interface.h"
-#include "inet/routing/ospf/v2/interface/Ospfv2InterfaceState.h"
-#include "inet/routing/ospf/v2/interface/Ospfv2InterfaceStateBackup.h"
-#include "inet/routing/ospf/v2/interface/Ospfv2InterfaceStateDesignatedRouter.h"
-#include "inet/routing/ospf/v2/interface/Ospfv2InterfaceStateNotDesignatedRouter.h"
-#include "inet/routing/ospf/v2/router/Ospfv2Area.h"
-#include "inet/routing/ospf/v2/router/Ospfv2Router.h"
+#include "inet/routing/ospfv2/interface/Ospfv2Interface.h"
+#include "inet/routing/ospfv2/interface/Ospfv2InterfaceState.h"
+#include "inet/routing/ospfv2/interface/Ospfv2InterfaceStateBackup.h"
+#include "inet/routing/ospfv2/interface/Ospfv2InterfaceStateDesignatedRouter.h"
+#include "inet/routing/ospfv2/interface/Ospfv2InterfaceStateNotDesignatedRouter.h"
+#include "inet/routing/ospfv2/router/Ospfv2Area.h"
+#include "inet/routing/ospfv2/router/Ospfv2Router.h"
 
 namespace inet {
 
-namespace ospf {
-namespace v2 {
+namespace ospfv2 {
 
 void Ospfv2InterfaceState::changeState(Ospfv2Interface *intf, Ospfv2InterfaceState *newState, Ospfv2InterfaceState *currentState)
 {
@@ -405,8 +404,7 @@ void Ospfv2InterfaceState::printElectionResult(const Ospfv2Interface *onInterfac
     EV_DETAIL << "\n";
 }
 
-} // namespace v2
-} // namespace ospf
+} // namespace ospfv2
 
 } // namespace inet
 

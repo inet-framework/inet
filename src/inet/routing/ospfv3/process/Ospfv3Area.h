@@ -3,16 +3,15 @@
 
 #include "inet/common/INETDefs.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
-#include "inet/routing/ospf/v3/Ospfv3Packet_m.h"
-#include "inet/routing/ospf/v3/interface/Ospfv3Interface.h"
-#include "inet/routing/ospf/v3/neighbor/Ospfv3Neighbor.h"
-#include "inet/routing/ospf/v3/process/Ospfv3Lsa.h"
-#include "inet/routing/ospf/v3/process/Ospfv3Process.h"
-#include "inet/routing/ospf/v3/process/Ospfv3RoutingTableEntry.h"
+#include "inet/routing/ospfv3/Ospfv3Packet_m.h"
+#include "inet/routing/ospfv3/interface/Ospfv3Interface.h"
+#include "inet/routing/ospfv3/neighbor/Ospfv3Neighbor.h"
+#include "inet/routing/ospfv3/process/Ospfv3Lsa.h"
+#include "inet/routing/ospfv3/process/Ospfv3Process.h"
+#include "inet/routing/ospfv3/process/Ospfv3RoutingTableEntry.h"
 
 namespace inet {
-namespace ospf {
-namespace v3 {
+namespace ospfv3 {
 
 class Ospfv3Instance;
 class Ospfv3Interface;
@@ -220,8 +219,7 @@ inline std::ostream& operator<<(std::ostream& ostr, const Ospfv3Area& area)
     return ostr;
 }
 
-} // namespace v3
-} // namespace ospf
+} // namespace ospfv3
 }//namespace inet
 
 #endif // __INET_OSPFV3AREA_H_

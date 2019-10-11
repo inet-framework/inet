@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package inet.routing.ospf.v3;
+package inet.routing.ospfv3;
 
 import inet.routing.contract.IOspf;
 

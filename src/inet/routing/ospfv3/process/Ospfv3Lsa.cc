@@ -1,9 +1,8 @@
 
-#include "inet/routing/ospf/v3/process/Ospfv3Lsa.h"
+#include "inet/routing/ospfv3/process/Ospfv3Lsa.h"
 
 namespace inet {
-namespace ospf {
-namespace v3 {
+namespace ospfv3 {
 
 Ospfv3SpfVertex::Ospfv3SpfVertex(Ospfv3Lsa* asocLSA, int distance)
 {
@@ -167,7 +166,6 @@ std::ostream& operator<<(std::ostream& ostr, const Ospfv3AsExternalLsa& lsa)
     return ostr;
 }
 
-} // namespace v3
-} // namespace ospf
+} // namespace ospfv3
 } //namespace inet
 

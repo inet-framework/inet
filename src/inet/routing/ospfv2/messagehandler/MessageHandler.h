@@ -19,18 +19,17 @@
 #define __INET_MESSAGEHANDLER_H
 
 #include "inet/common/INETDefs.h"
-#include "inet/routing/ospf/v2/Ospfv2Timer.h"
-#include "inet/routing/ospf/v2/interface/Ospfv2Interface.h"
-#include "inet/routing/ospf/v2/messagehandler/DatabaseDescriptionHandler.h"
-#include "inet/routing/ospf/v2/messagehandler/HelloHandler.h"
-#include "inet/routing/ospf/v2/messagehandler/IMessageHandler.h"
-#include "inet/routing/ospf/v2/messagehandler/LinkStateAcknowledgementHandler.h"
-#include "inet/routing/ospf/v2/messagehandler/LinkStateRequestHandler.h"
-#include "inet/routing/ospf/v2/messagehandler/LinkStateUpdateHandler.h"
+#include "inet/routing/ospfv2/Ospfv2Timer.h"
+#include "inet/routing/ospfv2/interface/Ospfv2Interface.h"
+#include "inet/routing/ospfv2/messagehandler/DatabaseDescriptionHandler.h"
+#include "inet/routing/ospfv2/messagehandler/HelloHandler.h"
+#include "inet/routing/ospfv2/messagehandler/IMessageHandler.h"
+#include "inet/routing/ospfv2/messagehandler/LinkStateAcknowledgementHandler.h"
+#include "inet/routing/ospfv2/messagehandler/LinkStateRequestHandler.h"
+#include "inet/routing/ospfv2/messagehandler/LinkStateUpdateHandler.h"
 
 namespace inet {
-namespace ospf {
-namespace v2 {
+namespace ospfv2 {
 
 class INET_API MessageHandler : public IMessageHandler
 {
@@ -66,8 +65,7 @@ class INET_API MessageHandler : public IMessageHandler
     bool authenticatePacket(const Ospfv2Packet *packet) { return true; }
 };
 
-} // namespace v2
-} // namespace ospf
+} // namespace ospfv2
 } // namespace inet
 
 #endif // ifndef __INET_MESSAGEHANDLER_H

@@ -16,15 +16,14 @@
 //
 
 #include "inet/networklayer/common/L3AddressTag_m.h"
-#include "inet/routing/ospf/v2/interface/Ospfv2Interface.h"
-#include "inet/routing/ospf/v2/messagehandler/HelloHandler.h"
-#include "inet/routing/ospf/v2/neighbor/Ospfv2Neighbor.h"
-#include "inet/routing/ospf/v2/router/Ospfv2Area.h"
-#include "inet/routing/ospf/v2/router/Ospfv2Router.h"
+#include "inet/routing/ospfv2/interface/Ospfv2Interface.h"
+#include "inet/routing/ospfv2/messagehandler/HelloHandler.h"
+#include "inet/routing/ospfv2/neighbor/Ospfv2Neighbor.h"
+#include "inet/routing/ospfv2/router/Ospfv2Area.h"
+#include "inet/routing/ospfv2/router/Ospfv2Router.h"
 
 namespace inet {
-namespace ospf {
-namespace v2 {
+namespace ospfv2 {
 
 HelloHandler::HelloHandler(Router *containingRouter) :
     IMessageHandler(containingRouter)
@@ -340,7 +339,6 @@ void HelloHandler::processPacket(Packet *packet, Ospfv2Interface *intf, Neighbor
     }
 }
 
-} // namespace v2
-} // namespace ospf
+} // namespace ospfv2
 } // namespace inet
 

@@ -19,12 +19,11 @@
 #define __INET_OSPFV2INTERFACESTATE_H
 
 #include "inet/common/INETDefs.h"
-#include "inet/routing/ospf/v2/interface/Ospfv2Interface.h"
+#include "inet/routing/ospfv2/interface/Ospfv2Interface.h"
 
 namespace inet {
 
-namespace ospf {
-namespace v2 {
+namespace ospfv2 {
 
 class INET_API Ospfv2InterfaceState
 {
@@ -40,8 +39,7 @@ class INET_API Ospfv2InterfaceState
     virtual Ospfv2Interface::Ospfv2InterfaceStateType getState() const = 0;
 };
 
-} // namespace v2
-} // namespace ospf
+} // namespace ospfv2
 
 } // namespace inet
 

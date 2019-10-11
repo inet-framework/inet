@@ -15,19 +15,18 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/routing/ospf/v2/interface/Ospfv2InterfaceStateDown.h"
-#include "inet/routing/ospf/v2/interface/Ospfv2InterfaceStateLoopback.h"
-#include "inet/routing/ospf/v2/interface/Ospfv2InterfaceStateNotDesignatedRouter.h"
-#include "inet/routing/ospf/v2/interface/Ospfv2InterfaceStatePointToPoint.h"
-#include "inet/routing/ospf/v2/interface/Ospfv2InterfaceStateWaiting.h"
-#include "inet/routing/ospf/v2/messagehandler/MessageHandler.h"
-#include "inet/routing/ospf/v2/router/Ospfv2Area.h"
-#include "inet/routing/ospf/v2/router/Ospfv2Router.h"
+#include "inet/routing/ospfv2/interface/Ospfv2InterfaceStateDown.h"
+#include "inet/routing/ospfv2/interface/Ospfv2InterfaceStateLoopback.h"
+#include "inet/routing/ospfv2/interface/Ospfv2InterfaceStateNotDesignatedRouter.h"
+#include "inet/routing/ospfv2/interface/Ospfv2InterfaceStatePointToPoint.h"
+#include "inet/routing/ospfv2/interface/Ospfv2InterfaceStateWaiting.h"
+#include "inet/routing/ospfv2/messagehandler/MessageHandler.h"
+#include "inet/routing/ospfv2/router/Ospfv2Area.h"
+#include "inet/routing/ospfv2/router/Ospfv2Router.h"
 
 namespace inet {
 
-namespace ospf {
-namespace v2 {
+namespace ospfv2 {
 
 void InterfaceStateDown::processEvent(Ospfv2Interface *intf, Ospfv2Interface::Ospfv2InterfaceEventType event)
 {
@@ -80,8 +79,7 @@ void InterfaceStateDown::processEvent(Ospfv2Interface *intf, Ospfv2Interface::Os
     }
 }
 
-} // namespace v2
-} // namespace ospf
+} // namespace ospfv2
 
 } // namespace inet
 

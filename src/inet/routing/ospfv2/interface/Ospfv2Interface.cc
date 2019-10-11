@@ -22,18 +22,19 @@
 #include "inet/common/checksum/TcpIpChecksum.h"
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
-#include "inet/routing/ospf/v2/Ospfv2Crc.h"
-#include "inet/routing/ospf/v2/Ospfv2PacketSerializer.h"
-#include "inet/routing/ospf/v2/interface/Ospfv2Interface.h"
-#include "inet/routing/ospf/v2/interface/Ospfv2InterfaceStateDown.h"
-#include "inet/routing/ospf/v2/messagehandler/MessageHandler.h"
-#include "inet/routing/ospf/v2/router/Ospfv2Area.h"
-#include "inet/routing/ospf/v2/router/Ospfv2Router.h"
+#include "inet/routing/ospfv2/Ospfv2Crc.h"
+#include "inet/routing/ospfv2/Ospfv2PacketSerializer.h"
+#include "inet/routing/ospfv2/interface/Ospfv2Interface.h"
+#include "inet/routing/ospfv2/interface/Ospfv2InterfaceStateDown.h"
+#include "inet/routing/ospfv2/messagehandler/MessageHandler.h"
+#include "inet/routing/ospfv2/router/Ospfv2Area.h"
+#include "inet/routing/ospfv2/router/Ospfv2Router.h"
 
 namespace inet {
 
-namespace ospf {
-namespace v2 {
+namespace ospfv2 {
+
+using namespace ospf;
 
 Ospfv2Interface::Ospfv2Interface(Ospfv2Interface::Ospfv2InterfaceType ifType) :
     interfaceType(ifType),
@@ -676,8 +677,7 @@ std::ostream& operator<<(std::ostream& stream, const Ospfv2Interface& intf)
             << "backupDesignatedRouterInterface: " << intf.backupDesignatedRouter.ipInterfaceAddress;
 }
 
-} // namespace v2
-} // namespace ospf
+} // namespace ospfv2
 
 } // namespace inet
 

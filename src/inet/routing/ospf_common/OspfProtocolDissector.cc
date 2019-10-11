@@ -18,8 +18,8 @@
 //
 
 #include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
-#include "inet/routing/ospf/OspfPacket_m.h"
-#include "inet/routing/ospf/OspfProtocolDissector.h"
+#include "inet/routing/ospf_common/OspfPacket_m.h"
+#include "inet/routing/ospf_common/OspfProtocolDissector.h"
 
 namespace inet {
 namespace ospf {

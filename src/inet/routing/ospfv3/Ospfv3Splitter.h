@@ -11,15 +11,14 @@
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 #include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
 #include "inet/networklayer/ipv6/Ipv6RoutingTable.h"
-#include "inet/routing/ospf/v3/Ospfv3Common.h"
-#include "inet/routing/ospf/v3/Ospfv3Packet_m.h"
-#include "inet/routing/ospf/v3/Ospfv3Timers.h"
-#include "inet/routing/ospf/v3/process/Ospfv3Process.h"
+#include "inet/routing/ospfv3/Ospfv3Common.h"
+#include "inet/routing/ospfv3/Ospfv3Packet_m.h"
+#include "inet/routing/ospfv3/Ospfv3Timers.h"
+#include "inet/routing/ospfv3/process/Ospfv3Process.h"
 
 
 namespace inet {
-namespace ospf {
-namespace v3 {
+namespace ospfv3 {
 
 int ospfv3InterfaceIndex=1;
 
@@ -50,8 +49,7 @@ class INET_API Ospfv3Splitter : protected cListener, public cSimpleModule
      virtual int numInitStages() const override { return NUM_INIT_STAGES; }
 };
 
-} // namespace v3
-} //namespace ospf
+} //namespace ospfv3
 } //namespace inet
 
 #endif // __INET_OSPFV3SPLITTER_H_

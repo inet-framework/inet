@@ -1,5 +1,5 @@
 
-package inet.routing.ospf.v3;
+package inet.routing.ospfv3;
 
 simple Ospfv3Splitter
 {

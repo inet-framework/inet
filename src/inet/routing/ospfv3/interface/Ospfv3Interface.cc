@@ -1,15 +1,14 @@
 
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/ipv6/Ipv6Header_m.h"
-#include "inet/routing/ospf/v3/interface/Ospfv3Interface.h"
-#include "inet/routing/ospf/v3/interface/Ospfv3InterfaceState.h"
-#include "inet/routing/ospf/v3/interface/Ospfv3InterfaceStateDown.h"
+#include "inet/routing/ospfv3/interface/Ospfv3Interface.h"
+#include "inet/routing/ospfv3/interface/Ospfv3InterfaceState.h"
+#include "inet/routing/ospfv3/interface/Ospfv3InterfaceStateDown.h"
 
 using namespace std;
 
 namespace inet {
-namespace ospf {
-namespace v3 {
+namespace ospfv3 {
 
 Ospfv3Interface::Ospfv3Interface(const char* name, cModule* routerModule, Ospfv3Process* processModule, Ospfv3InterfaceType interfaceType, bool passive) :
         helloInterval(DEFAULT_HELLO_INTERVAL),
@@ -2020,7 +2019,6 @@ std::string Ospfv3Interface::detailedInfo() const
     return out.str();
 }//detailedInfo
 
-} // namespace v3
-} //namespace ospf
+} // namespace ospfv3
 }//namespace inet
 

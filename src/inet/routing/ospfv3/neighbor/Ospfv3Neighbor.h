@@ -6,13 +6,12 @@
 #include "inet/common/INETDefs.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
-#include "inet/routing/ospf/v3/Ospfv3Common.h"
-#include "inet/routing/ospf/v3/Ospfv3Packet_m.h"
-#include "inet/routing/ospf/v3/Ospfv3Timers.h"
+#include "inet/routing/ospfv3/Ospfv3Common.h"
+#include "inet/routing/ospfv3/Ospfv3Packet_m.h"
+#include "inet/routing/ospfv3/Ospfv3Timers.h"
 
 namespace inet {
-namespace ospf {
-namespace v3 {
+namespace ospfv3 {
 
 class Ospfv3NeighborState;
 class Ospfv3Interface;
@@ -185,8 +184,7 @@ class Ospfv3Neighbor
     int last_hello_received = 0;
 };
 
-} // namespace v3
-} // namespace ospf
+} // namespace ospfv3
 }//namespace inet
 
 #endif // __INET_OSPFV3NEIGHBOR_H_

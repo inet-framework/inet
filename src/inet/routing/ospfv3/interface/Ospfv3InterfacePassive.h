@@ -4,11 +4,10 @@
 #include <string>
 
 #include "inet/common/INETDefs.h"
-#include "inet/routing/ospf/v3/interface/Ospfv3InterfaceState.h"
+#include "inet/routing/ospfv3/interface/Ospfv3InterfaceState.h"
 
 namespace inet {
-namespace ospf {
-namespace v3 {
+namespace ospfv3 {
 
 /*
  * Adjacencies are established with every router on the network.
@@ -24,8 +23,7 @@ class INET_API Ospfv3InterfacePassive : public Ospfv3InterfaceState
     virtual std::string getInterfaceStateString() const override { return std::string("Ospfv3InterfacePassive"); }
 };
 
-} // namespace v3
-} // namespace ospf
+} // namespace ospfv3
 }//namespace inet
 
 #endif // __INET_OSPFV3INTERFACEPASSIVE_H_

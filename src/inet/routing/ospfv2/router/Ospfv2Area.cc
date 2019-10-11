@@ -18,14 +18,13 @@
 
 #include <memory.h>
 
-#include "inet/routing/ospf/v2/Ospfv2Crc.h"
-#include "inet/routing/ospf/v2/router/Ospfv2Area.h"
-#include "inet/routing/ospf/v2/router/Ospfv2Router.h"
+#include "inet/routing/ospfv2/Ospfv2Crc.h"
+#include "inet/routing/ospfv2/router/Ospfv2Area.h"
+#include "inet/routing/ospfv2/router/Ospfv2Router.h"
 
 namespace inet {
 
-namespace ospf {
-namespace v2 {
+namespace ospfv2 {
 
 Ospfv2Area::Ospfv2Area(CrcMode crcMode, IInterfaceTable *ift, AreaId id) :
     crcMode(crcMode),
@@ -2655,7 +2654,6 @@ bool Ospfv2Area::isAllZero(Ipv4AddressRange entry) const
     return false;
 }
 
-} // namespace v2
-} // namespace ospf
+} // namespace ospfv2
 
 } // namespace inet

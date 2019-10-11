@@ -4,11 +4,10 @@
 #include <string>
 
 #include "inet/common/INETDefs.h"
-#include "inet/routing/ospf/v3/interface/Ospfv3InterfaceState.h"
+#include "inet/routing/ospfv3/interface/Ospfv3InterfaceState.h"
 
 namespace inet {
-namespace ospf {
-namespace v3 {
+namespace ospfv3 {
 
 /*
  * The router is BDR, it will be promoted to DR in case of failure. It forms adjacencies with
@@ -29,8 +28,7 @@ class INET_API Ospfv3InterfaceStateBackup : public Ospfv3InterfaceState
     virtual std::string getInterfaceStateString() const override { return std::string("Ospfv3InterfaceStateBackup"); }
 };
 
-} // namespace v3
-} // namespace ospf
+} // namespace ospfv3
 }//namespace inet
 
 #endif // __INET_OSPFV3INTERFACESTATEBACKUP_H_

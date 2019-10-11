@@ -1,11 +1,10 @@
 
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/Protocol.h"
-#include "inet/routing/ospf/v3/Ospfv3Splitter.h"
+#include "inet/routing/ospfv3/Ospfv3Splitter.h"
 
 namespace inet {
-namespace ospf {
-namespace v3 {
+namespace ospfv3 {
 
 Define_Module(Ospfv3Splitter);
 
@@ -165,7 +164,7 @@ void Ospfv3Splitter::parseConfig(cXMLElement* routingConfig, cXMLElement* intCon
 
 void Ospfv3Splitter::addNewProcess(cXMLElement* process, cXMLElement* interfaces, int gateIndex)
 {
-    cModuleType* newProcessType = cModuleType::find("inet.routing.ospf.v3.process.Ospfv3Process");
+    cModuleType* newProcessType = cModuleType::find("inet.routing.ospfv3.process.Ospfv3Process");
     if (newProcessType==nullptr)
         throw cRuntimeError("Ospfv3Routing: Ospfv3Process module was not found");
 
@@ -207,7 +206,6 @@ void Ospfv3Splitter::addNewProcess(cXMLElement* process, cXMLElement* interfaces
     this->processesModules.push_back(newProcessModule);
 }//addNewProcess
 
-} // namespace v3
-} //namespace ospf
+} // namespace ospfv3
 }//namespace inet
 

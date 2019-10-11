@@ -14,10 +14,10 @@
 //
 
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
-#include "inet/routing/ospf/OspfPacket_m.h"
-#include "inet/routing/ospf/OspfPacketSerializer.h"
+#include "inet/routing/ospf_common/OspfPacket_m.h"
+#include "inet/routing/ospf_common/OspfPacketSerializer.h"
 #ifdef WITH_OSPFv2
-#include "inet/routing/ospf/v2/Ospfv2PacketSerializer.h"
+#include "inet/routing/ospfv2/Ospfv2PacketSerializer.h"
 #endif // #ifdef WITH_OSPFv2
 
 namespace inet {
@@ -40,13 +40,13 @@ const Ptr<Chunk> OspfPacketSerializer::deserialize(MemoryInputStream& stream) co
 #ifdef WITH_OSPFv2
         case 2:
             stream.seek(startPos);
-            return v2::Ospfv2PacketSerializer().deserialize(stream);
+            return ospfv2::Ospfv2PacketSerializer().deserialize(stream);
             break;
 #endif // #ifdef WITH_OSPFv2
 #ifdef WITH_OSPFv3
         case 3:
             //TODO stream.seek(startPos);
-            //TODO return v3::Ospfv3PacketSerializer().deserialize(stream);
+            //TODO return ospfv3::Ospfv3PacketSerializer().deserialize(stream);
 #endif // #ifdef WITH_OSPFv3
         default: {
             auto ospfPacket = makeShared<OspfPacket>();

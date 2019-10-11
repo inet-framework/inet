@@ -4,12 +4,11 @@
 #include <string>
 
 #include "inet/common/INETDefs.h"
-#include "inet/routing/ospf/v3/interface/Ospfv3InterfaceState.h"
-#include "inet/routing/ospf/v3/interface/Ospfv3InterfaceStateWaiting.h"
+#include "inet/routing/ospfv3/interface/Ospfv3InterfaceState.h"
+#include "inet/routing/ospfv3/interface/Ospfv3InterfaceStateWaiting.h"
 
 namespace inet {
-namespace ospf {
-namespace v3 {
+namespace ospfv3 {
 
 class INET_API Ospfv3InterfaceStateDown : public Ospfv3InterfaceState
 {
@@ -20,8 +19,7 @@ class INET_API Ospfv3InterfaceStateDown : public Ospfv3InterfaceState
     std::string getInterfaceStateString() const override { return std::string("Ospfv3InterfaceStateDown"); };
 };
 
-} // namespace v3
-} // namespace ospf
+} // namespace ospfv3
 }//namespace inet
 
 #endif // __INET_OSPFV3INTERFACESTATEDOWN_H_

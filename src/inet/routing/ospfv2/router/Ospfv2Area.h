@@ -23,15 +23,14 @@
 
 #include "inet/common/INETDefs.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/routing/ospf/v2/interface/Ospfv2Interface.h"
-#include "inet/routing/ospf/v2/router/Lsa.h"
-#include "inet/routing/ospf/v2/router/Ospfv2Common.h"
-#include "inet/routing/ospf/v2/router/Ospfv2RoutingTableEntry.h"
+#include "inet/routing/ospfv2/interface/Ospfv2Interface.h"
+#include "inet/routing/ospfv2/router/Lsa.h"
+#include "inet/routing/ospfv2/router/Ospfv2Common.h"
+#include "inet/routing/ospfv2/router/Ospfv2RoutingTableEntry.h"
 
 namespace inet {
 
-namespace ospf {
-namespace v2 {
+namespace ospfv2 {
 
 class Router;
 
@@ -164,8 +163,7 @@ inline std::ostream& operator<<(std::ostream& ostr, Ospfv2Area& area)
     return ostr;
 }
 
-} // namespace v2
-} // namespace ospf
+} // namespace ospfv2
 
 } // namespace inet
 

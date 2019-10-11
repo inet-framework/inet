@@ -8,17 +8,16 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/routing/ospf/v3/Ospfv3Common.h"
-#include "inet/routing/ospf/v3/Ospfv3Packet_m.h"
-#include "inet/routing/ospf/v3/neighbor/Ospfv3Neighbor.h"
-#include "inet/routing/ospf/v3/process/Ospfv3Area.h"
-#include "inet/routing/ospf/v3/process/Ospfv3Lsa.h"
-#include "inet/routing/ospf/v3/process/Ospfv3Process.h"
+#include "inet/routing/ospfv3/Ospfv3Common.h"
+#include "inet/routing/ospfv3/Ospfv3Packet_m.h"
+#include "inet/routing/ospfv3/neighbor/Ospfv3Neighbor.h"
+#include "inet/routing/ospfv3/process/Ospfv3Area.h"
+#include "inet/routing/ospfv3/process/Ospfv3Lsa.h"
+#include "inet/routing/ospfv3/process/Ospfv3Process.h"
 
 
 namespace inet {
-namespace ospf {
-namespace v3 {
+namespace ospfv3 {
 
 class Ospfv3Area;
 class Ospfv3InterfaceState;
@@ -256,8 +255,7 @@ inline std::ostream& operator<<(std::ostream& ostr, const Ospfv3Interface& inter
     return ostr;
 }
 
-} // namespace v3
-} // namespace ospf
+} // namespace ospfv3
 }//namespace inet
 
 #endif // __INET_OSPFV3INTERFACE_H_

@@ -10,7 +10,7 @@
 // See the GNU Lesser General Public License for more details.
 //
 
-package inet.routing.ospf.v2;
+package inet.routing.ospfv2;
 
 import inet.routing.contract.IOspf;
 

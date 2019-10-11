@@ -19,12 +19,11 @@
 #define __INET_HELLOHANDLER_H
 
 #include "inet/common/INETDefs.h"
-#include "inet/routing/ospf/v2/messagehandler/IMessageHandler.h"
+#include "inet/routing/ospfv2/messagehandler/IMessageHandler.h"
 
 namespace inet {
 
-namespace ospf {
-namespace v2 {
+namespace ospfv2 {
 
 class INET_API HelloHandler : public IMessageHandler
 {
@@ -34,8 +33,7 @@ class INET_API HelloHandler : public IMessageHandler
     void processPacket(Packet *packet, Ospfv2Interface *intf, Neighbor *unused = nullptr) override;
 };
 
-} // namespace v2
-} // namespace ospf
+} // namespace ospfv2
 
 } // namespace inet
 

@@ -29,15 +29,14 @@
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
-#include "inet/routing/ospf/v2/Ospfv2ConfigReader.h"
-#include "inet/routing/ospf/v2/interface/Ospfv2Interface.h"
-#include "inet/routing/ospf/v2/messagehandler/MessageHandler.h"
-#include "inet/routing/ospf/v2/router/Ospfv2Area.h"
-#include "inet/routing/ospf/v2/router/Ospfv2Common.h"
+#include "inet/routing/ospfv2/Ospfv2ConfigReader.h"
+#include "inet/routing/ospfv2/interface/Ospfv2Interface.h"
+#include "inet/routing/ospfv2/messagehandler/MessageHandler.h"
+#include "inet/routing/ospfv2/router/Ospfv2Area.h"
+#include "inet/routing/ospfv2/router/Ospfv2Common.h"
 
 namespace inet {
-namespace ospf {
-namespace v2 {
+namespace ospfv2 {
 
 using namespace xmlutils;
 
@@ -629,7 +628,6 @@ void Ospfv2ConfigReader::joinMulticastGroups(int interfaceId)
     ipv4Data->joinMulticastGroup(Ipv4Address::ALL_OSPF_DESIGNATED_ROUTERS_MCAST);
 }
 
-} // namespace v2
-} // namespace ospf
+} // namespace ospfv2
 } // namespace inet
 

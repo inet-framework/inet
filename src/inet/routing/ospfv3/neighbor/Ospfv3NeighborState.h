@@ -2,12 +2,11 @@
 #define __INET_OSPFV3NEIGHBORSTATE_H_
 
 #include "inet/common/INETDefs.h"
-#include "inet/routing/ospf/v3/interface/Ospfv3Interface.h"
-#include "inet/routing/ospf/v3/neighbor/Ospfv3Neighbor.h"
+#include "inet/routing/ospfv3/interface/Ospfv3Interface.h"
+#include "inet/routing/ospfv3/neighbor/Ospfv3Neighbor.h"
 
 namespace inet {
-namespace ospf {
-namespace v3 {
+namespace ospfv3 {
 
 class INET_API Ospfv3NeighborState
 {
@@ -21,8 +20,7 @@ class INET_API Ospfv3NeighborState
     virtual ~Ospfv3NeighborState() {};
 };
 
-} // namespace v3
-} // namespace ospf
+} // namespace ospfv3
 }//namespace inet
 
 #endif // __INET_OSPFV3NEIGHBORSTATE_H_

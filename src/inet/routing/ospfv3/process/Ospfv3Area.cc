@@ -3,11 +3,10 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "inet/routing/ospf/v3/process/Ospfv3Area.h"
+#include "inet/routing/ospfv3/process/Ospfv3Area.h"
 
 namespace inet {
-namespace ospf {
-namespace v3 {
+namespace ospfv3 {
 
 using namespace std;
 
@@ -3750,7 +3749,6 @@ std::string Ospfv3Area::detailedInfo() const
     return out.str();
 }//detailedInfo
 
-} // namespace v3
-} // namespace ospf
+} // namespace ospfv3
 }//namespace inet
 

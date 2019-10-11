@@ -1,10 +1,9 @@
 
-#include "inet/routing/ospf/v3/interface/Ospfv3Interface.h"
-#include "inet/routing/ospf/v3/process/Ospfv3Instance.h"
+#include "inet/routing/ospfv3/interface/Ospfv3Interface.h"
+#include "inet/routing/ospfv3/process/Ospfv3Instance.h"
 
 namespace inet {
-namespace ospf {
-namespace v3 {
+namespace ospfv3 {
 
 Ospfv3Instance::Ospfv3Instance(int instanceId, Ospfv3Process* parentProcess, int addressFamily)
 {
@@ -269,7 +268,6 @@ std::string Ospfv3Instance::detailedInfo() const
     return out.str();
 }
 
-} // namespace v3
-} // namespace ospf
+} // namespace ospfv3
 }//namespace inet
 

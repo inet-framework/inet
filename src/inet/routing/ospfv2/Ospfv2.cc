@@ -25,13 +25,12 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
-#include "inet/routing/ospf/v2/Ospfv2.h"
-#include "inet/routing/ospf/v2/Ospfv2ConfigReader.h"
-#include "inet/routing/ospf/v2/messagehandler/MessageHandler.h"
+#include "inet/routing/ospfv2/Ospfv2.h"
+#include "inet/routing/ospfv2/Ospfv2ConfigReader.h"
+#include "inet/routing/ospfv2/messagehandler/MessageHandler.h"
 
 namespace inet {
-namespace ospf {
-namespace v2 {
+namespace ospfv2 {
 
 Define_Module(Ospfv2);
 
@@ -244,6 +243,5 @@ void Ospfv2::handleInterfaceDown(const InterfaceEntry *ie)
     }
 }
 
-} // namespace v2
-} // namespace ospf
+} // namespace ospfv2
 } // namespace inet

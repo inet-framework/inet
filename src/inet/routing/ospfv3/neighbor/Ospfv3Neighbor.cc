@@ -1,10 +1,9 @@
 
-#include "inet/routing/ospf/v3/neighbor/Ospfv3Neighbor.h"
-#include "inet/routing/ospf/v3/neighbor/Ospfv3NeighborStateDown.h"
+#include "inet/routing/ospfv3/neighbor/Ospfv3Neighbor.h"
+#include "inet/routing/ospfv3/neighbor/Ospfv3NeighborStateDown.h"
 
 namespace inet {
-namespace ospf {
-namespace v3 {
+namespace ospfv3 {
 
 // FIXME!!! Should come from a global unique number generator module.
 unsigned long Ospfv3Neighbor::ddSequenceNumberInitSeed = 0;
@@ -735,7 +734,6 @@ void Ospfv3Neighbor::deleteLastSentDDPacket()
     }
 }//deleteLastSentDDPacket
 
-} // namespace v3
-} // namespace ospf
+} // namespace ospfv3
 } // namespace inet
 

@@ -17,14 +17,13 @@
 
 #include <vector>
 
-#include "inet/routing/ospf/v2/messagehandler/LinkStateRequestHandler.h"
-#include "inet/routing/ospf/v2/neighbor/Ospfv2Neighbor.h"
-#include "inet/routing/ospf/v2/router/Ospfv2Router.h"
+#include "inet/routing/ospfv2/messagehandler/LinkStateRequestHandler.h"
+#include "inet/routing/ospfv2/neighbor/Ospfv2Neighbor.h"
+#include "inet/routing/ospfv2/router/Ospfv2Router.h"
 
 namespace inet {
 
-namespace ospf {
-namespace v2 {
+namespace ospfv2 {
 
 LinkStateRequestHandler::LinkStateRequestHandler(Router *containingRouter) :
     IMessageHandler(containingRouter)
@@ -107,8 +106,7 @@ void LinkStateRequestHandler::processPacket(Packet *packet, Ospfv2Interface *int
     }
 }
 
-} // namespace v2
-} // namespace ospf
+} // namespace ospfv2
 
 } // namespace inet
 

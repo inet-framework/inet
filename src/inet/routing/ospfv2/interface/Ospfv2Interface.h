@@ -25,15 +25,14 @@
 #include "inet/common/INETDefs.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/routing/ospf/v2/Ospfv2Timer.h"
-#include "inet/routing/ospf/v2/neighbor/Ospfv2Neighbor.h"
-#include "inet/routing/ospf/v2/router/Ospfv2Area.h"
-#include "inet/routing/ospf/v2/router/Ospfv2Common.h"
+#include "inet/routing/ospfv2/Ospfv2Timer.h"
+#include "inet/routing/ospfv2/neighbor/Ospfv2Neighbor.h"
+#include "inet/routing/ospfv2/router/Ospfv2Area.h"
+#include "inet/routing/ospfv2/router/Ospfv2Common.h"
 
 namespace inet {
 
-namespace ospf {
-namespace v2 {
+namespace ospfv2 {
 
 class Ospfv2Area;
 class Ospfv2InterfaceState;
@@ -196,8 +195,7 @@ class INET_API Ospfv2Interface
     friend std::ostream& operator<<(std::ostream& stream, const Ospfv2Interface& intf);
 };
 
-} // namespace v2
-} // namespace ospf
+} // namespace ospfv2
 
 } // namespace inet
 

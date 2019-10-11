@@ -14,13 +14,14 @@
 //
 
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
-#include "inet/routing/ospf/v2/Ospfv2PacketSerializer.h"
-#include "inet/routing/ospf/v2/router/Ospfv2Common.h"
+#include "inet/routing/ospfv2/Ospfv2PacketSerializer.h"
+#include "inet/routing/ospfv2/router/Ospfv2Common.h"
 
 namespace inet {
 
-namespace ospf {
-namespace v2 {
+namespace ospfv2 {
+
+using namespace ospf;
 
 Register_Serializer(Ospfv2Packet, Ospfv2PacketSerializer);
 Register_Serializer(Ospfv2HelloPacket, Ospfv2PacketSerializer);
@@ -515,8 +516,7 @@ void Ospfv2PacketSerializer::copyHeaderFields(const Ptr<Ospfv2Packet> from, Ptr<
     }
 }
 
-} // namespace v2
-} // namespace ospf
+} // namespace ospfv2
 
 } // namespace inet
 

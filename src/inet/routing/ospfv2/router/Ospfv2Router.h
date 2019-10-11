@@ -22,17 +22,16 @@
 #include <vector>
 
 #include "inet/common/INETDefs.h"
-#include "inet/routing/ospf/v2/interface/Ospfv2Interface.h"
-#include "inet/routing/ospf/v2/messagehandler/MessageHandler.h"
-#include "inet/routing/ospf/v2/router/Lsa.h"
-#include "inet/routing/ospf/v2/router/Ospfv2Area.h"
-#include "inet/routing/ospf/v2/router/Ospfv2Common.h"
-#include "inet/routing/ospf/v2/router/Ospfv2RoutingTableEntry.h"
+#include "inet/routing/ospfv2/interface/Ospfv2Interface.h"
+#include "inet/routing/ospfv2/messagehandler/MessageHandler.h"
+#include "inet/routing/ospfv2/router/Lsa.h"
+#include "inet/routing/ospfv2/router/Ospfv2Area.h"
+#include "inet/routing/ospfv2/router/Ospfv2Common.h"
+#include "inet/routing/ospfv2/router/Ospfv2RoutingTableEntry.h"
 
 namespace inet {
 
-namespace ospf {
-namespace v2 {
+namespace ospfv2 {
 
 /**
  * All OSPF classes are in this namespace.
@@ -385,8 +384,7 @@ class INET_API Router
     bool isDirectRoute(Ospfv2RoutingTableEntry &entry);
 };
 
-} // namespace v2
-} // namespace ospf
+} // namespace ospfv2
 
 } // namespace inet
 

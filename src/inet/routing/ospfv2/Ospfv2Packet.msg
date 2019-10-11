@@ -18,10 +18,14 @@
 import inet.common.INETDefs;
 import inet.common.packet.chunk.Chunk;
 import inet.networklayer.contract.ipv4.Ipv4Address;
-import inet.routing.ospf.OspfPacket;
+import inet.routing.ospf_common.OspfPacket;
 import inet.transportlayer.common.CrcMode;
 
-namespace inet::ospf::v2;
+namespace inet::ospfv2;
+
+cplusplus {{
+using namespace ospf;
+}}
 
 // should be a byte long bitfield
 struct Ospfv2Options
@@ -39,7 +43,7 @@ struct Ospfv2Options
 //
 // Represents an OSPF packet header
 //
-class Ospfv2Packet extends OspfPacket
+class Ospfv2Packet extends ospf::OspfPacket
 {
     chunkLength = B(24);
     version = 2;

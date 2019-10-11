@@ -23,14 +23,13 @@
 #include "inet/common/INETDefs.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
-#include "inet/routing/ospf/v2/Ospfv2Packet_m.h"
-#include "inet/routing/ospf/v2/router/Lsa.h"
-#include "inet/routing/ospf/v2/router/Ospfv2Common.h"
+#include "inet/routing/ospfv2/Ospfv2Packet_m.h"
+#include "inet/routing/ospfv2/router/Lsa.h"
+#include "inet/routing/ospfv2/router/Ospfv2Common.h"
 
 namespace inet {
 
-namespace ospf {
-namespace v2 {
+namespace ospfv2 {
 
 class INET_API Ospfv2RoutingTableEntry : public Ipv4Route
 {
@@ -95,8 +94,7 @@ class INET_API Ospfv2RoutingTableEntry : public Ipv4Route
 
 std::ostream& operator<<(std::ostream& out, const Ospfv2RoutingTableEntry& entry);
 
-} // namespace v2
-} // namespace ospf
+} // namespace ospfv2
 
 } // namespace inet
 

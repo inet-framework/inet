@@ -15,22 +15,21 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/routing/ospf/v2/interface/Ospfv2Interface.h"
-#include "inet/routing/ospf/v2/messagehandler/MessageHandler.h"
-#include "inet/routing/ospf/v2/neighbor/Ospfv2NeighborStateDown.h"
-#include "inet/routing/ospf/v2/neighbor/Ospfv2NeighborStateExchange.h"
-#include "inet/routing/ospf/v2/neighbor/Ospfv2NeighborStateExchangeStart.h"
-#include "inet/routing/ospf/v2/neighbor/Ospfv2NeighborStateFull.h"
-#include "inet/routing/ospf/v2/neighbor/Ospfv2NeighborStateInit.h"
-#include "inet/routing/ospf/v2/neighbor/Ospfv2NeighborStateLoading.h"
-#include "inet/routing/ospf/v2/neighbor/Ospfv2NeighborStateTwoWay.h"
-#include "inet/routing/ospf/v2/router/Ospfv2Area.h"
-#include "inet/routing/ospf/v2/router/Ospfv2Router.h"
+#include "inet/routing/ospfv2/interface/Ospfv2Interface.h"
+#include "inet/routing/ospfv2/messagehandler/MessageHandler.h"
+#include "inet/routing/ospfv2/neighbor/Ospfv2NeighborStateDown.h"
+#include "inet/routing/ospfv2/neighbor/Ospfv2NeighborStateExchange.h"
+#include "inet/routing/ospfv2/neighbor/Ospfv2NeighborStateExchangeStart.h"
+#include "inet/routing/ospfv2/neighbor/Ospfv2NeighborStateFull.h"
+#include "inet/routing/ospfv2/neighbor/Ospfv2NeighborStateInit.h"
+#include "inet/routing/ospfv2/neighbor/Ospfv2NeighborStateLoading.h"
+#include "inet/routing/ospfv2/neighbor/Ospfv2NeighborStateTwoWay.h"
+#include "inet/routing/ospfv2/router/Ospfv2Area.h"
+#include "inet/routing/ospfv2/router/Ospfv2Router.h"
 
 namespace inet {
 
-namespace ospf {
-namespace v2 {
+namespace ospfv2 {
 
 void NeighborStateExchange::processEvent(Neighbor *neighbor, Neighbor::NeighborEventType event)
 {
@@ -94,8 +93,7 @@ void NeighborStateExchange::processEvent(Neighbor *neighbor, Neighbor::NeighborE
     }
 }
 
-} // namespace v2
-} // namespace ospf
+} // namespace ospfv2
 
 } // namespace inet
 

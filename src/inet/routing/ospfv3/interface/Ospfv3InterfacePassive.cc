@@ -1,11 +1,10 @@
 
-#include "inet/routing/ospf/v3/interface/Ospfv3Interface.h"
-#include "inet/routing/ospf/v3/interface/Ospfv3InterfacePassive.h"
-#include "inet/routing/ospf/v3/interface/Ospfv3InterfaceStateDown.h"
+#include "inet/routing/ospfv3/interface/Ospfv3Interface.h"
+#include "inet/routing/ospfv3/interface/Ospfv3InterfacePassive.h"
+#include "inet/routing/ospfv3/interface/Ospfv3InterfaceStateDown.h"
 
 namespace inet {
-namespace ospf {
-namespace v3 {
+namespace ospfv3 {
 
 void Ospfv3InterfacePassive::processEvent(Ospfv3Interface* interface, Ospfv3Interface::Ospfv3InterfaceEvent event)
 {
@@ -15,7 +14,6 @@ void Ospfv3InterfacePassive::processEvent(Ospfv3Interface* interface, Ospfv3Inte
     }
 }//processEvent
 
-} // namespace v3
-} // namespace ospf
+} // namespace ospfv3
 }//namespace inet
 

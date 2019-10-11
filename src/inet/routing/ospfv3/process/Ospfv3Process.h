@@ -21,16 +21,15 @@
 #include "inet/networklayer/ipv6/Ipv6RoutingTable.h"
 #include "inet/networklayer/ipv6/Ipv6Route.h"
 #include "inet/networklayer/ipv6/Ipv6RoutingTable.h"
-#include "inet/routing/ospf/v3/Ospfv3Common.h"
-#include "inet/routing/ospf/v3/Ospfv3Packet_m.h"
-#include "inet/routing/ospf/v3/Ospfv3Timers.h"
-#include "inet/routing/ospf/v3/process/Ospfv3Area.h"
-#include "inet/routing/ospf/v3/process/Ospfv3Instance.h"
-#include "inet/routing/ospf/v3/process/Ospfv3RoutingTableEntry.h"
+#include "inet/routing/ospfv3/Ospfv3Common.h"
+#include "inet/routing/ospfv3/Ospfv3Packet_m.h"
+#include "inet/routing/ospfv3/Ospfv3Timers.h"
+#include "inet/routing/ospfv3/process/Ospfv3Area.h"
+#include "inet/routing/ospfv3/process/Ospfv3Instance.h"
+#include "inet/routing/ospfv3/process/Ospfv3RoutingTableEntry.h"
 
 namespace inet {
-namespace ospf {
-namespace v3 {
+namespace ospfv3 {
 
 class Ospfv3Instance;
 
@@ -102,8 +101,7 @@ class INET_API Ospfv3Process : protected cListener, public cSimpleModule
     //list of as-external routes
 };
 
-} // namespace v3
-} // namespace ospf
+} // namespace ospfv3
 }//namespace inet
 
 #endif // __INET_OSPFV3PROCESS_H_

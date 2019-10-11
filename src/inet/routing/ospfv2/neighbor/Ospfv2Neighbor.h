@@ -22,15 +22,14 @@
 
 #include "inet/common/INETDefs.h"
 #include "inet/common/packet/Packet.h"
-#include "inet/routing/ospf/v2/Ospfv2Packet_m.h"
-#include "inet/routing/ospf/v2/Ospfv2Timer.h"
-#include "inet/routing/ospf/v2/router/Lsa.h"
-#include "inet/routing/ospf/v2/router/Ospfv2Common.h"
+#include "inet/routing/ospfv2/Ospfv2Packet_m.h"
+#include "inet/routing/ospfv2/Ospfv2Timer.h"
+#include "inet/routing/ospfv2/router/Lsa.h"
+#include "inet/routing/ospfv2/router/Ospfv2Common.h"
 
 namespace inet {
 
-namespace ospf {
-namespace v2 {
+namespace ospfv2 {
 
 class NeighborState;
 class Ospfv2Interface;
@@ -216,8 +215,7 @@ inline bool operator!=(Neighbor::DdPacketId leftID, Neighbor::DdPacketId rightID
     return !(leftID == rightID);
 }
 
-} // namespace v2
-} // namespace ospf
+} // namespace ospfv2
 
 } // namespace inet
 

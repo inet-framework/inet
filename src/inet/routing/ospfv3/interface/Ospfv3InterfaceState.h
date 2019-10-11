@@ -4,11 +4,10 @@
 #include <string>
 
 #include "inet/common/INETDefs.h"
-#include "inet/routing/ospf/v3/interface/Ospfv3Interface.h"
+#include "inet/routing/ospfv3/interface/Ospfv3Interface.h"
 
 namespace inet {
-namespace ospf {
-namespace v3 {
+namespace ospfv3 {
 
 class INET_API Ospfv3InterfaceState
 {
@@ -23,8 +22,7 @@ class INET_API Ospfv3InterfaceState
     void calculateDesignatedRouter(Ospfv3Interface *intf);
 };
 
-} // namespace v3
-} // namespace ospf
+} // namespace ospfv3
 }//namespace inet
 
 #endif // __INET_OSPFV3INTERFACESTATE_H_

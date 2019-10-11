@@ -18,17 +18,18 @@
 #include <memory.h>
 
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
-#include "inet/routing/ospf/v2/Ospfv2Crc.h"
-#include "inet/routing/ospf/v2/messagehandler/MessageHandler.h"
-#include "inet/routing/ospf/v2/neighbor/Ospfv2Neighbor.h"
-#include "inet/routing/ospf/v2/neighbor/Ospfv2NeighborState.h"
-#include "inet/routing/ospf/v2/neighbor/Ospfv2NeighborStateDown.h"
-#include "inet/routing/ospf/v2/router/Ospfv2Area.h"
-#include "inet/routing/ospf/v2/router/Ospfv2Router.h"
+#include "inet/routing/ospfv2/Ospfv2Crc.h"
+#include "inet/routing/ospfv2/messagehandler/MessageHandler.h"
+#include "inet/routing/ospfv2/neighbor/Ospfv2Neighbor.h"
+#include "inet/routing/ospfv2/neighbor/Ospfv2NeighborState.h"
+#include "inet/routing/ospfv2/neighbor/Ospfv2NeighborStateDown.h"
+#include "inet/routing/ospfv2/router/Ospfv2Area.h"
+#include "inet/routing/ospfv2/router/Ospfv2Router.h"
 
 namespace inet {
-namespace ospf {
-namespace v2 {
+namespace ospfv2 {
+
+using namespace ospf;
 
 // FIXME!!! Should come from a global unique number generator module.
 unsigned long Neighbor::ddSequenceNumberInitSeed = 0;
@@ -710,7 +711,6 @@ void Neighbor::deleteLastSentDDPacket()
     }
 }
 
-} // namespace v2
-} // namespace ospf
+} // namespace ospfv2
 } // namespace inet
 

@@ -1,4 +1,4 @@
-package inet.routing.ospf.v3;
+package inet.routing.ospfv3;
 
-@namespace(inet::ospf::v3);
+@namespace(inet::ospfv3);
 

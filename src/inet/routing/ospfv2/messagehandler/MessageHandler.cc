@@ -20,13 +20,14 @@
 #include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/ipv4/IcmpHeader.h"
-#include "inet/routing/ospf/v2/messagehandler/MessageHandler.h"
-#include "inet/routing/ospf/v2/router/Ospfv2Router.h"
+#include "inet/routing/ospfv2/messagehandler/MessageHandler.h"
+#include "inet/routing/ospfv2/router/Ospfv2Router.h"
 
 namespace inet {
 
-namespace ospf {
-namespace v2 {
+namespace ospfv2 {
+
+using namespace ospf;
 
 MessageHandler::MessageHandler(Router *containingRouter, cSimpleModule *containingModule) :
     IMessageHandler(containingRouter),
@@ -583,8 +584,7 @@ void MessageHandler::printLinkStateAcknowledgementPacket(const Ospfv2LinkStateAc
     }
 }
 
-} // namespace v2
-} // namespace ospf
+} // namespace ospfv2
 
 } // namespace inet
 

@@ -15,12 +15,11 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/routing/ospf/v2/messagehandler/LinkStateAcknowledgementHandler.h"
-#include "inet/routing/ospf/v2/router/Ospfv2Router.h"
+#include "inet/routing/ospfv2/messagehandler/LinkStateAcknowledgementHandler.h"
+#include "inet/routing/ospfv2/router/Ospfv2Router.h"
 
 namespace inet {
-namespace ospf {
-namespace v2 {
+namespace ospfv2 {
 
 LinkStateAcknowledgementHandler::LinkStateAcknowledgementHandler(Router *containingRouter) :
     IMessageHandler(containingRouter)
@@ -63,7 +62,6 @@ void LinkStateAcknowledgementHandler::processPacket(Packet *packet, Ospfv2Interf
     }
 }
 
-} // namespace v2
-} // namespace ospf
+} // namespace ospfv2
 } // namespace inet
 

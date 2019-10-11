@@ -19,12 +19,11 @@
 #define __INET_OSPFV2INTERFACESTATEWAITING_H
 
 #include "inet/common/INETDefs.h"
-#include "inet/routing/ospf/v2/interface/Ospfv2InterfaceState.h"
+#include "inet/routing/ospfv2/interface/Ospfv2InterfaceState.h"
 
 namespace inet {
 
-namespace ospf {
-namespace v2 {
+namespace ospfv2 {
 
 class INET_API InterfaceStateWaiting : public Ospfv2InterfaceState
 {
@@ -33,8 +32,7 @@ class INET_API InterfaceStateWaiting : public Ospfv2InterfaceState
     virtual Ospfv2Interface::Ospfv2InterfaceStateType getState() const override { return Ospfv2Interface::WAITING_STATE; }
 };
 
-} // namespace v2
-} // namespace ospf
+} // namespace ospfv2
 
 } // namespace inet
 

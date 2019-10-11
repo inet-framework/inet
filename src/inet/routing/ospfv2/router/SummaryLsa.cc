@@ -15,12 +15,11 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/routing/ospf/v2/router/Lsa.h"
+#include "inet/routing/ospfv2/router/Lsa.h"
 
 namespace inet {
 
-namespace ospf {
-namespace v2 {
+namespace ospfv2 {
 
 bool SummaryLsa::update(const Ospfv2SummaryLsa *lsa)
 {
@@ -69,8 +68,7 @@ bool SummaryLsa::differsFrom(const Ospfv2SummaryLsa *summaryLSA) const
     return differentHeader || differentBody;
 }
 
-} // namespace v2
-} // namespace ospf
+} // namespace ospfv2
 
 } // namespace inet
 

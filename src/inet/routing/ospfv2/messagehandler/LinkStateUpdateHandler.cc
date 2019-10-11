@@ -15,17 +15,18 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/routing/ospf/v2/Ospfv2Crc.h"
-#include "inet/routing/ospf/v2/messagehandler/LinkStateUpdateHandler.h"
-#include "inet/routing/ospf/v2/neighbor/Ospfv2Neighbor.h"
-#include "inet/routing/ospf/v2/router/Ospfv2Area.h"
-#include "inet/routing/ospf/v2/router/Ospfv2Common.h"
-#include "inet/routing/ospf/v2/router/Ospfv2Router.h"
+#include "inet/routing/ospfv2/Ospfv2Crc.h"
+#include "inet/routing/ospfv2/messagehandler/LinkStateUpdateHandler.h"
+#include "inet/routing/ospfv2/neighbor/Ospfv2Neighbor.h"
+#include "inet/routing/ospfv2/router/Ospfv2Area.h"
+#include "inet/routing/ospfv2/router/Ospfv2Common.h"
+#include "inet/routing/ospfv2/router/Ospfv2Router.h"
 
 namespace inet {
 
-namespace ospf {
-namespace v2 {
+namespace ospfv2 {
+
+using namespace ospf;
 
 class LsaProcessingMarker
 {
@@ -315,8 +316,7 @@ void LinkStateUpdateHandler::acknowledgeLSA(const Ospfv2LsaHeader& lsaHeader,
     }
 }
 
-} // namespace v2
-} // namespace ospf
+} // namespace ospfv2
 
 } // namespace inet
 

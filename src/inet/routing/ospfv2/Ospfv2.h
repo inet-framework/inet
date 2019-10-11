@@ -24,13 +24,12 @@
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
 #include "inet/routing/base/RoutingProtocolBase.h"
-#include "inet/routing/ospf/v2/Ospfv2Packet_m.h"
-#include "inet/routing/ospf/v2/router/Ospfv2Router.h"
+#include "inet/routing/ospfv2/Ospfv2Packet_m.h"
+#include "inet/routing/ospfv2/router/Ospfv2Router.h"
 
 namespace inet {
 
-namespace ospf {
-namespace v2 {
+namespace ospfv2 {
 
 /**
  * Implements the OSPFv2 routing protocol. See the NED file for more information.
@@ -79,8 +78,7 @@ class Ospfv2 : public RoutingProtocolBase, protected cListener
     void handleInterfaceDown(const InterfaceEntry *ie);
 };
 
-} // namespace v2
-} // namespace ospf
+} // namespace ospfv2
 
 } // namespace inet
 

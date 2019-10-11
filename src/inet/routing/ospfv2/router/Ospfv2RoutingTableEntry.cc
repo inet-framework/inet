@@ -15,12 +15,11 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/routing/ospf/v2/router/Ospfv2RoutingTableEntry.h"
+#include "inet/routing/ospfv2/router/Ospfv2RoutingTableEntry.h"
 
 namespace inet {
 
-namespace ospf {
-namespace v2 {
+namespace ospfv2 {
 
 Ospfv2RoutingTableEntry::Ospfv2RoutingTableEntry(IInterfaceTable *_ift) :
     ift(_ift),
@@ -198,8 +197,7 @@ const std::string Ospfv2RoutingTableEntry::getPathTypeString(RoutingPathType pat
     return "Unknown";
 }
 
-} // namespace v2
-} // namespace ospf
+} // namespace ospfv2
 
 } // namespace inet
 

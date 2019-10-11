@@ -22,13 +22,12 @@
 #include <vector>
 
 #include "inet/common/INETDefs.h"
-#include "inet/routing/ospf/v2/Ospfv2Packet_m.h"
-#include "inet/routing/ospf/v2/router/Ospfv2Common.h"
+#include "inet/routing/ospfv2/Ospfv2Packet_m.h"
+#include "inet/routing/ospfv2/router/Ospfv2Common.h"
 
 namespace inet {
 
-namespace ospf {
-namespace v2 {
+namespace ospfv2 {
 
 struct NextHop
 {
@@ -205,8 +204,7 @@ std::ostream& operator<<(std::ostream& ostr, const Ospfv2ExternalTosInfo& tos);
 std::ostream& operator<<(std::ostream& ostr, const Ospfv2AsExternalLsaContents& contents);
 std::ostream& operator<<(std::ostream& ostr, const Ospfv2AsExternalLsa& lsa);
 
-} // namespace v2
-} // namespace ospf
+} // namespace ospfv2
 
 } // namespace inet
 

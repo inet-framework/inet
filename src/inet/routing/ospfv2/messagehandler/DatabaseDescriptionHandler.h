@@ -19,12 +19,11 @@
 #define __INET_DATABASEDESCRIPTIONHANDLER_H
 
 #include "inet/common/INETDefs.h"
-#include "inet/routing/ospf/v2/messagehandler/IMessageHandler.h"
+#include "inet/routing/ospfv2/messagehandler/IMessageHandler.h"
 
 namespace inet {
 
-namespace ospf {
-namespace v2 {
+namespace ospfv2 {
 
 class INET_API DatabaseDescriptionHandler : public IMessageHandler
 {
@@ -37,8 +36,7 @@ class INET_API DatabaseDescriptionHandler : public IMessageHandler
     void processPacket(Packet *packet, Ospfv2Interface *intf, Neighbor *neighbor) override;
 };
 
-} // namespace v2
-} // namespace ospf
+} // namespace ospfv2
 
 } // namespace inet
 
