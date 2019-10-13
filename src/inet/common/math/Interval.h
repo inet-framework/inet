@@ -26,66 +26,86 @@ namespace inet {
 
 namespace math {
 
+/**
+ * N-dimensional interval (cuboid), given by its two opposite corners.
+ */
 template<typename ... T>
 class INET_API Interval
 {
   protected:
     Point<T ...> lower;
     Point<T ...> upper;
-    unsigned int closed; // 1 bit per dimension, upper end (lower end is always closed in all dimensions)
+    unsigned char lowerClosed; // 1 bit per dimension
+    unsigned char upperClosed; // 1 bit per dimension
+    unsigned char fixed; // 1 bit per dimension, if a dimension is fixed, then lower == upper and both ends are closed
 
   protected:
     template<size_t ... IS>
     void checkImpl(integer_sequence<size_t, IS...>) const {
-        std::initializer_list<bool> bs{ std::get<IS>(upper) < std::get<IS>(lower) ... };
-        if (std::any_of(bs.begin(), bs.end(), [] (bool b) { return b; }))
-            throw cRuntimeError("Invalid arguments");
-        if (closed != (closed & ((1 << std::tuple_size<std::tuple<T ...>>::value) - 1)))
-            throw cRuntimeError("Invalid arguments");
+        unsigned char b = 1 << std::tuple_size<std::tuple<T ...>>::value >> 1;
+        bool check = true;
+        std::initializer_list<bool> { check &= std::get<IS>(lower) <= std::get<IS>(upper) ... };
+        if (!check)
+            throw cRuntimeError("Invalid lower or upper arguments");
+        check = true;
+        std::initializer_list<bool> { check &= (fixed & (b >> IS) ? lowerClosed & upperClosed & (b >> IS) && std::get<IS>(lower) == std::get<IS>(upper) : true) ... };
+        if (!check)
+            throw cRuntimeError("Invalid fixed argument");
+        auto mask = (1 << std::tuple_size<std::tuple<T ...>>::value) - 1;
+        if (lowerClosed != (lowerClosed & mask))
+            throw cRuntimeError("Invalid lowerClosed argument");
+        if (upperClosed != (upperClosed & mask))
+            throw cRuntimeError("Invalid upperClosed argument");
+        if (fixed != (fixed & mask))
+            throw cRuntimeError("Invalid fixed argument");
     }
 
     template<size_t ... IS>
     bool containsImpl(const Point<T ...>& p, integer_sequence<size_t, IS...>) const {
-        bool result = lower <= p;
-        if (result) {
-            unsigned int b = 1 << std::tuple_size<std::tuple<T ...>>::value >> 1;
-            (void)std::initializer_list<bool>{ result &= ((closed & (b >> IS)) ? std::get<IS>(p) <= std::get<IS>(upper) : std::get<IS>(p) < std::get<IS>(upper)) ... };
-        }
+        bool result = true;
+        unsigned char b = 1 << std::tuple_size<std::tuple<T ...>>::value >> 1;
+        (void)std::initializer_list<bool>{ result &= ((lowerClosed & (b >> IS)) ? std::get<IS>(lower) <= std::get<IS>(p) : std::get<IS>(lower) < std::get<IS>(p)) ... };
+        (void)std::initializer_list<bool>{ result &= ((upperClosed & (b >> IS)) ? std::get<IS>(p) <= std::get<IS>(upper) : std::get<IS>(p) < std::get<IS>(upper)) ... };
         return result;
     }
 
     template<size_t ... IS>
     Interval<T ...> intersectImpl(const Interval<T ...>& o, integer_sequence<size_t, IS...>) const {
-        unsigned int b = 1 << std::tuple_size<std::tuple<T ...>>::value >> 1;
-        Point<T ...> l( std::max(std::get<IS>(lower), std::get<IS>(o.lower)) ... );
-        Point<T ...> u( std::min(std::get<IS>(upper), std::get<IS>(o.upper)) ... );
-        unsigned int c = 0;
-        (void)std::initializer_list<unsigned int>{ c += ((b >> IS) & (std::get<IS>(lower) > std::get<IS>(u) || std::get<IS>(upper) < std::get<IS>(l) ? 0 :
-                                                                     (std::get<IS>(upper) == std::get<IS>(o.upper) ? (closed & o.closed) :
-                                                                     (std::get<IS>(upper) < std::get<IS>(o.upper) ? closed : o.closed)))) ... };
+        unsigned char b = 1 << std::tuple_size<std::tuple<T ...>>::value >> 1;
+        Point<T ...> l( std::max(std::get<IS>(lower), std::get<IS>(o.lower)) ... ); (void)l;
+        Point<T ...> u( std::min(std::get<IS>(upper), std::get<IS>(o.upper)) ... ); (void)u;
+        unsigned char lc = 0;
+        unsigned char uc = 0;
+        (void)std::initializer_list<unsigned char>{ lc += ((b >> IS) & (std::get<IS>(upper) < std::get<IS>(l) || std::get<IS>(lower) > std::get<IS>(u) ? 0 :
+                                                                       (std::get<IS>(lower) == std::get<IS>(o.lower) ? (lowerClosed & o.lowerClosed) :
+                                                                       (std::get<IS>(lower) > std::get<IS>(o.lower) ? lowerClosed : o.lowerClosed)))) ... };
+        (void)std::initializer_list<unsigned char>{ uc += ((b >> IS) & (std::get<IS>(lower) > std::get<IS>(u) || std::get<IS>(upper) < std::get<IS>(l) ? 0 :
+                                                                       (std::get<IS>(upper) == std::get<IS>(o.upper) ? (upperClosed & o.upperClosed) :
+                                                                       (std::get<IS>(upper) < std::get<IS>(o.upper) ? upperClosed : o.upperClosed)))) ... };
         Point<T ...> l1( std::min(std::get<IS>(upper), std::get<IS>(l)) ... );
         Point<T ...> u1( std::max(std::get<IS>(lower), std::get<IS>(u)) ... );
-        return Interval<T ...>(l1, u1, c);
+        return Interval<T ...>(l1, u1, lc, uc, (fixed | o.getFixed()) & lc & uc);
     }
 
     template<size_t ... IS>
     double getVolumeImpl(integer_sequence<size_t, IS...>) const {
         double result = 1;
-        unsigned int b = 1 << std::tuple_size<std::tuple<T ...>>::value >> 1;
-        (void)std::initializer_list<double>{ result *= ((closed & (b >> IS)) && std::get<IS>(upper) == std::get<IS>(lower) ? 1 : toDouble(std::get<IS>(upper) - std::get<IS>(lower))) ... };
+        unsigned char b = 1 << std::tuple_size<std::tuple<T ...>>::value >> 1;
+        (void)std::initializer_list<double>{ result *= ((fixed & (b >> IS)) ? 1 : toDouble(std::get<IS>(upper) - std::get<IS>(lower))) ... };
         return result;
     }
 
     template<size_t ... IS>
     bool isEmptyImpl(integer_sequence<size_t, IS...>) const {
-        unsigned int b = 1 << std::tuple_size<std::tuple<T ...>>::value >> 1;
+        unsigned char b = 1 << std::tuple_size<std::tuple<T ...>>::value >> 1;
         bool result = false;
-        (void)std::initializer_list<bool>{ result |= ((closed & (b >> IS)) ? false : std::get<IS>(lower) == std::get<IS>(upper)) ... };
+        (void)std::initializer_list<bool>{ result |= ((fixed & (b >> IS)) ? false : std::get<IS>(lower) == std::get<IS>(upper)) ... };
         return result;
     }
 
   public:
-    Interval(const Point<T ...>& lower, const Point<T ...>& upper, unsigned int closed) : lower(lower), upper(upper), closed(closed) {
+    Interval(const Point<T ...>& lower, const Point<T ...>& upper, unsigned char lowerClosed, unsigned char upperClosed, unsigned char fixed) :
+        lower(lower), upper(upper), lowerClosed(lowerClosed), upperClosed(upperClosed), fixed(fixed) {
 #ifndef NDEBUG
         checkImpl(index_sequence_for<T ...>{});
 #endif
@@ -93,7 +113,9 @@ class INET_API Interval
 
     const Point<T ...>& getLower() const { return lower; }
     const Point<T ...>& getUpper() const { return upper; }
-    unsigned int getClosed() const { return closed; }
+    unsigned char getLowerClosed() const { return lowerClosed; }
+    unsigned char getUpperClosed() const { return upperClosed; }
+    unsigned char getFixed() const { return fixed; }
 
     bool contains(const Point<T ...>& p) const {
         return containsImpl(p, index_sequence_for<T ...>{});
@@ -103,23 +125,25 @@ class INET_API Interval
         return intersectImpl(o, index_sequence_for<T ...>{});
     }
 
+    /// Returns the volume in the dimensions denoted by the 1 bits of dims
     double getVolume() const {
         return getVolumeImpl(index_sequence_for<T ...>{});
     }
 
+    /// Returns true iff getVolume() == 0
     bool isEmpty() const {
         return isEmptyImpl(index_sequence_for<T ...>{});
     }
 };
 
-inline void iterateBoundaries(const Interval<>& i, const std::function<void (const Point<>&)> f) {
+inline void iterateCorners(const Interval<>& i, const std::function<void (const Point<>&)> f) {
     f(Point<>());
 }
 
 template<typename T0, typename ... TS>
-inline void iterateBoundaries(const Interval<T0, TS ...>& i, const std::function<void (const Point<T0, TS ...>&)> f) {
-    Interval<TS ...> i1(tail(i.getLower()), tail(i.getUpper()), i.getClosed() >> 1);
-    iterateBoundaries(i1, std::function<void (const Point<TS ...>&)>([&] (const Point<TS ...>& q) {
+inline void iterateCorners(const Interval<T0, TS ...>& i, const std::function<void (const Point<T0, TS ...>&)> f) {
+    Interval<TS ...> i1(tail(i.getLower()), tail(i.getUpper()), i.getLowerClosed() >> 1, i.getUpperClosed() >> 1, i.getFixed() >> 1);
+    iterateCorners(i1, std::function<void (const Point<TS ...>&)>([&] (const Point<TS ...>& q) {
         f(concat(Point<T0>(head(i.getLower())), q));
         f(concat(Point<T0>(head(i.getUpper())), q));
     }));
@@ -131,9 +155,13 @@ template<typename ... T, size_t ... IS>
 inline std::ostream& print(std::ostream& os, const Interval<T ...>& i, integer_sequence<size_t, IS...>) {
     const auto& lower = i.getLower();
     const auto& upper = i.getUpper();
-    auto closed = i.getClosed();
-    unsigned int b = 1 << std::tuple_size<std::tuple<T ...>>::value >> 1;
-    (void)std::initializer_list<bool>{(os << (IS == 0 ? "" : " x "), (std::get<IS>(lower) == std::get<IS>(upper) ? os << "[" << std::get<IS>(lower) << "]" : os << "[" << std::get<IS>(lower) << " … " << std::get<IS>(upper) << ((closed & (b >> IS)) ? "]" : ")"), true)) ... };
+    auto lowerClosed = i.getLowerClosed(); (void)lowerClosed;
+    auto upperClosed = i.getUpperClosed(); (void)upperClosed;
+    auto fixed = i.getFixed(); (void)fixed;
+    unsigned char b = 1 << std::tuple_size<std::tuple<T ...>>::value >> 1;
+    (void)std::initializer_list<bool>{(os << (IS == 0 ? "" : " x "), (std::get<IS>(lower) == std::get<IS>(upper) ?
+            (fixed & (b >> IS) ? os << std::get<IS>(lower) : os << "[" << std::get<IS>(lower) << "]") :
+            os << ((lowerClosed & (b >> IS)) ? "[" : "(") << std::get<IS>(lower) << " … " << std::get<IS>(upper) << ((upperClosed & (b >> IS)) ? "]" : ")"), true)) ... };
     return os;
 }
 

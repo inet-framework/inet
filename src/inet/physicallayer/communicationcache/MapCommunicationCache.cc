@@ -129,22 +129,22 @@ void MapCommunicationCache::removeNonInterferingTransmissions(std::function<void
 {
     int transmissionCount = 0;
     const simtime_t now = simTime();
-    for (auto it = transmissionCache.cbegin(); it != transmissionCache.cend();) {
+    for (auto it = transmissionCache.begin(); it != transmissionCache.end();) {
         const TransmissionCacheEntry& transmissionCacheEntry = it->second;
         if (transmissionCacheEntry.interferenceEndTime <= now) {
             if (transmissionCacheEntry.receptionCacheEntries != nullptr) {
-                std::vector<ReceptionCacheEntry> *receptionCacheEntries = static_cast<std::vector<ReceptionCacheEntry> *>(transmissionCacheEntry.receptionCacheEntries);
-                auto radioIt = radioCache.cbegin();
-                auto receptionIt = receptionCacheEntries->cbegin();
-                while (radioIt != radioCache.cend() && receptionIt != receptionCacheEntries->cend()) {
+                std::map<int, ReceptionCacheEntry> *receptionCacheEntries = static_cast<std::map<int, ReceptionCacheEntry> *>(transmissionCacheEntry.receptionCacheEntries);
+                for (auto radioIt = radioCache.cbegin(); radioIt != radioCache.cend(); radioIt++) {
                     const RadioCacheEntry& radioCacheEntry = radioIt->second;
-                    const ReceptionCacheEntry& receptionCacheEntry = *receptionIt;
-                    const IntervalTree::Interval *interval = receptionCacheEntry.interval;
-                    if (interval != nullptr)
-                        radioCacheEntry.receptionIntervals->deleteNode(interval);
-                    radioIt++;
-                    receptionIt++;
+                    auto receptionIt = receptionCacheEntries->find(radioIt->first);
+                    if (receptionIt != receptionCacheEntries->cend()) {
+                        const ReceptionCacheEntry& receptionCacheEntry = receptionIt->second;
+                        const IntervalTree::Interval *interval = receptionCacheEntry.interval;
+                        if (interval != nullptr)
+                            radioCacheEntry.receptionIntervals->deleteNode(interval);
+                    }
                 }
+                delete receptionCacheEntries;
             }
             f(transmissionCacheEntry.transmission);
             transmissionCache.erase(it++);

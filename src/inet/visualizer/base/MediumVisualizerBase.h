@@ -19,13 +19,16 @@
 #define __INET_MEDIUMVISUALIZERBASE_H
 
 #include "inet/common/packet/PacketFilter.h"
-#include "inet/physicallayer/common/packetlevel/PowerFunction.h"
-#include "inet/physicallayer/contract/packetlevel/IRadioMedium.h"
 #include "inet/visualizer/base/VisualizerBase.h"
 #include "inet/visualizer/util/ColorSet.h"
 #include "inet/visualizer/util/InterfaceFilter.h"
 #include "inet/visualizer/util/NetworkNodeFilter.h"
 #include "inet/visualizer/util/Placement.h"
+
+#ifdef WITH_RADIO
+#include "inet/physicallayer/common/packetlevel/PowerFunctions.h"
+#include "inet/physicallayer/contract/packetlevel/IRadioMedium.h"
+#endif // WITH_RADIO
 
 namespace inet {
 
@@ -33,6 +36,7 @@ namespace visualizer {
 
 class INET_API MediumVisualizerBase : public VisualizerBase, public cListener
 {
+#ifdef WITH_RADIO
   protected:
     enum SignalShape
     {
@@ -116,6 +120,7 @@ class INET_API MediumVisualizerBase : public VisualizerBase, public cListener
     virtual ~MediumVisualizerBase();
 
     virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override;
+#endif // WITH_RADIO
 };
 
 } // namespace visualizer

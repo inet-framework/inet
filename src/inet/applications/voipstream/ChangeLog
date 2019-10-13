@@ -1,5 +1,18 @@
 ====== inet-4.x ======
 
+2019-08-07  Zoltan Bojthe
+
+	Changed fingerprint calculation: for silence packets, add sample count
+	instead of data buffer content.
+
+2019-07-31  Marcell Juhász
+
+	Removed payload from SILENCE packets.
+
+2019-03-26  Zoltan Bojthe
+
+	Fixed serializer header length.
+
 2019-01-28  ------ inet-4.1.0 released ------
 
 2018-11-13  Zoltan Bojthe

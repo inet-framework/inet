@@ -40,7 +40,7 @@
       <items xsi:type="scave:ComputeScalar" scalarName="avgthroughput" valueExpr="mean('throughput:vector')/1048576" moduleExpr="FragmentationShowcase.wifiHost2.app[0]" groupByExpr=""/>
       <items xsi:type="scave:ScatterChart" name="Throughput vs fragmentation threshold" xDataPattern="module(_runattrs_) AND name(threshold)">
         <filters xsi:type="scave:Select"/>
-        <properties name="Graph.Title" value="Throughput vs. fragmentation threshold,1000-byte packets"/>
+        <properties name="Graph.Title" value="Throughput vs. fragmentation threshold, 1000-byte packets"/>
         <properties name="X.Axis.Title" value="Fragmentation threshold [byte]"/>
         <properties name="Y.Axis.Title" value="Throughput [Mbps]"/>
         <properties name="Legend.Display" value="true"/>

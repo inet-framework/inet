@@ -94,7 +94,7 @@ void TcpSessionApp::handleTimer(cMessage *msg)
             if (activeOpen)
                 connect(); // sending will be scheduled from socketEstablished()
             else
-                ; //TODO
+                throw cRuntimeError("TODO");
             break;
 
         case MSGKIND_SEND:

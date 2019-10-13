@@ -24,7 +24,7 @@ import inet.linklayer.contract.IPppInterface;
 import inet.networklayer.common.InterfaceTable;
 import inet.networklayer.ipv4.Ipv4NetworkLayer;
 import inet.routing.bgpv4.Bgp;
-import inet.routing.ospfv2.Ospf;
+import inet.routing.ospfv2.Ospfv2;
 import inet.transportlayer.contract.ITcp;
 
 
@@ -51,7 +51,7 @@ module BGPRouterEx
             parameters:
                 @display("p=100,100;i=block/table_s");
         }
-        ospf: Ospf {
+        ospf: Ospfv2 {
             parameters:
                 @display("p=400,400,row;i=block/network2");
         }

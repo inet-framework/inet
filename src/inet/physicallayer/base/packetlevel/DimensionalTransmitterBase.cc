@@ -157,8 +157,8 @@ Ptr<const IFunction<WpHz, Domain<simsec, Hz>>> DimensionalTransmitterBase::creat
             auto centerTime = (startTime + endTime) / 2;
             auto duration = endTime - startTime;
             std::map<simsec, std::pair<double, const IInterpolator<simsec, double> *>> ts;
-            ts[getLowerBoundary<simsec>()] = {0, firstTimeInterpolator};
-            ts[getUpperBoundary<simsec>()] = {0, nullptr};
+            ts[getLowerBound<simsec>()] = {0, firstTimeInterpolator};
+            ts[getUpperBound<simsec>()] = {0, nullptr};
             for (const auto & entry : timeGains) {
                 simsec time;
                 switch (entry.where) {
@@ -180,8 +180,8 @@ Ptr<const IFunction<WpHz, Domain<simsec, Hz>>> DimensionalTransmitterBase::creat
             auto startFrequency = centerFrequency - bandwidth / 2;
             auto endFrequency = centerFrequency + bandwidth / 2;
             std::map<Hz, std::pair<double, const IInterpolator<Hz, double>*>> fs;
-            fs[getLowerBoundary<Hz>()] = {0, firstFrequencyInterpolator};
-            fs[getUpperBoundary<Hz>()] = {0, nullptr};
+            fs[getLowerBound<Hz>()] = {0, firstFrequencyInterpolator};
+            fs[getUpperBound<Hz>()] = {0, nullptr};
             for (const auto & entry : frequencyGains) {
                 Hz frequency;
                 switch (entry.where) {

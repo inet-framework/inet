@@ -18,9 +18,11 @@
 package inet.common.queueing.contract;
 
 //
-// This module interface is implemented by packet producer modules. A packet
-// producer is an active module with one output. Packets are actively pushed
-// into the connected module repeatedly over time.
+// This module interface must be implemented by packet producer modules. A packet
+// producer is an active module with one output. It must be connected to a packet
+// consumer module to which it's going to push packets over time.
+//
+// @see ~IPacketConsumer, ~PacketConsumer, ~PacketClassifier
 //
 moduleinterface IPacketProducer
 {

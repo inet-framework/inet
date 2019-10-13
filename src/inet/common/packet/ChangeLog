@@ -1,5 +1,14 @@
 ====== inet-4.x ======
 
+2019-09-18  Levente Mészáros
+
+	Followed chunk API length parameter changes with Packet and ChunkQueue.
+	As a side effect, peekAtFront and peekAtBack became simpler and more efficient.
+
+2019-07-25  Zoltan Bojthe
+
+	Non-templated versions of peekAtBack, popAtBack, and removeAtBack require the length parameter.
+
 2019-01-28  ------ inet-4.1.0 released ------
 
 2018-06-27  ------ inet-4.0.0 released ------

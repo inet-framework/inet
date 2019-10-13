@@ -1440,6 +1440,7 @@ void Ipv4NetworkConfigurator::addStaticRoutes(Topology& topology, cXMLElement *a
                             if (addSubnetRoutesParameter && destinationNode->interfaceInfos.size() == 1 && destinationNode->interfaceInfos[0]->linkInfo->gatewayInterfaceInfo
                                 && destinationNode->interfaceInfos[0]->addSubnetRoute)
                             {
+                                ASSERT(!destinationAddress.doAnd(destinationNetmask).isUnspecified());
                                 route->setDestination(destinationAddress.doAnd(destinationNetmask));
                                 route->setNetmask(destinationNetmask);
                             }

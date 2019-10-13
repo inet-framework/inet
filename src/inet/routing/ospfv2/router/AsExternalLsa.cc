@@ -18,9 +18,9 @@
 #include "inet/routing/ospfv2/router/Lsa.h"
 
 namespace inet {
-namespace ospf {
+namespace ospfv2 {
 
-bool AsExternalLsa::update(const OspfAsExternalLsa *lsa)
+bool AsExternalLsa::update(const Ospfv2AsExternalLsa *lsa)
 {
     bool different = differsFrom(lsa);
     (*this) = (*lsa);
@@ -31,10 +31,10 @@ bool AsExternalLsa::update(const OspfAsExternalLsa *lsa)
     return different;
 }
 
-bool AsExternalLsa::differsFrom(const OspfAsExternalLsa *asExternalLSA) const
+bool AsExternalLsa::differsFrom(const Ospfv2AsExternalLsa *asExternalLSA) const
 {
-    const OspfLsaHeader& thisHeader = getHeader();
-    const OspfLsaHeader& lsaHeader = asExternalLSA->getHeader();
+    const Ospfv2LsaHeader& thisHeader = getHeader();
+    const Ospfv2LsaHeader& lsaHeader = asExternalLSA->getHeader();
     bool differentHeader = ((thisHeader.getLsOptions() != lsaHeader.getLsOptions()) ||
                             ((thisHeader.getLsAge() == MAX_AGE) && (lsaHeader.getLsAge() != MAX_AGE)) ||
                             ((thisHeader.getLsAge() != MAX_AGE) && (lsaHeader.getLsAge() == MAX_AGE)) ||
@@ -42,8 +42,8 @@ bool AsExternalLsa::differsFrom(const OspfAsExternalLsa *asExternalLSA) const
     bool differentBody = false;
 
     if (!differentHeader) {
-        const OspfAsExternalLsaContents& thisContents = getContents();
-        const OspfAsExternalLsaContents& lsaContents = asExternalLSA->getContents();
+        const Ospfv2AsExternalLsaContents& thisContents = getContents();
+        const Ospfv2AsExternalLsaContents& lsaContents = asExternalLSA->getContents();
 
         unsigned int thisTosInfoCount = thisContents.getExternalTOSInfoArraySize();
 
@@ -52,8 +52,8 @@ bool AsExternalLsa::differsFrom(const OspfAsExternalLsa *asExternalLSA) const
 
         if (!differentBody) {
             for (unsigned int i = 0; i < thisTosInfoCount; i++) {
-                const ExternalTosInfo& thisTOSInfo = thisContents.getExternalTOSInfo(i);
-                const ExternalTosInfo& lsaTOSInfo = lsaContents.getExternalTOSInfo(i);
+                const auto& thisTOSInfo = thisContents.getExternalTOSInfo(i);
+                const auto& lsaTOSInfo = lsaContents.getExternalTOSInfo(i);
 
                 if (
                         (thisTOSInfo.E_ExternalMetricType != lsaTOSInfo.E_ExternalMetricType) ||
@@ -72,6 +72,6 @@ bool AsExternalLsa::differsFrom(const OspfAsExternalLsa *asExternalLSA) const
     return differentHeader || differentBody;
 }
 
-} // namespace ospf
+} // namespace ospfv2
 } // namespace inet
 

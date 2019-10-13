@@ -18,9 +18,11 @@
 package inet.common.queueing.contract;
 
 //
-// This module interface is implemented by packet consumer modules. A packet
-// consumer is a passive module with one input. Packets are pushed into the
-// packet consumer by the connected module repeatedly over time.
+// This module interface must be implemented by packet consumer modules. A packet
+// consumer is a passive module with one input. It must be connected to a packet
+// producer module which is going to actively push packets into it over time.
+//
+// @see ~IPacketProducer, ~PacketConsumer, ~PacketClassifier
 //
 moduleinterface IPacketConsumer
 {

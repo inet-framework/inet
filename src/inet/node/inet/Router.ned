@@ -62,7 +62,7 @@ module Router extends ApplicationLayerNodeBase
         *.routingTableModule = default("^.ipv4.routingTable");
 
     submodules:
-        ospf: <"Ospf"> like IOspf if hasOspf {
+        ospf: <default("Ospfv2")> like IOspf if hasOspf {
             parameters:
                 @display("p=975,226");
         }

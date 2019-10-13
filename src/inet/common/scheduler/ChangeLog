@@ -1,0 +1,37 @@
+====== inet-4.x ======
+
+2019-09-17  TÖRÖK Attila
+
+	Avoid intentional signed integer overflow in RealTimeScheduler.
+
+2019-03-25  Levente Mészáros
+
+	Fixed bug #420.
+
+2019-01-28  ------ inet-4.1.0 released ------
+
+2018-07-20  Levente Mészáros
+
+	Added check for fd in callback.
+
+2018-07-17  Levente Mészáros
+
+	Fixed advancing simulation time when there are no simulation events.
+
+2018-07-12  Zoltan Bojthe
+
+	Delete BeginSimulationEvent in execute().
+
+2018-06-29  Levente Mészáros
+
+	Added BeginSimulation event to RealTimeScheduler.
+
+2018-06-29  Gyorgy Szaszko
+
+	Dropped FES macro from RealTimeScheduler.
+
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-05-09  Levente Mészáros
+
+	Moved RealTimeScheduler under common/scheduler.

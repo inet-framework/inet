@@ -39,7 +39,7 @@ namespace internal {
 
 template<typename ... T, size_t ... IS>
 inline std::ostream& print(std::ostream& os, const Domain<T ...>& d, integer_sequence<size_t, IS...>) {
-    (void)std::initializer_list<bool>{(os << (IS == 0 ? "" : ", "), outputUnit(os, T()), true) ... };
+    (void)std::initializer_list<bool>{(os << (IS == 0 ? "" : ", "), printUnit(os, T()), true) ... };
     return os;
 }
 

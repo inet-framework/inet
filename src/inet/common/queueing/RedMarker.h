@@ -44,7 +44,7 @@ class INET_API RedMarker : public RedDropper
     virtual void initialize(int stage) override;
     Action chooseAction(Packet *packet);
     virtual bool matchesPacket(Packet *packet) override;
-    bool markPacket(Packet *packet);
+    void markPacket(Packet *packet);
 };
 
 } // namespace queueing

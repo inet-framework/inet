@@ -1,5 +1,24 @@
 ====== inet-4.x ======
 
+2019-07-26  Zoltan Bojthe
+
+	Fixed string length calculation.
+
+2019-06-24  Zoltan Bojthe
+
+	Changed field type in DhcpMessage.
+	Changed field name in DhcpClient.
+
+2019-06-24  Marcell Juhász
+
+	Fixed packet length.
+	Fixed parameterRequestList, item size is 1 byte (instead of 8 bytes).
+	Added missing field for DhcpMessage.
+
+2019-06-04  Marcell Juhász
+
+	Added DhcpMessageSerializer.
+
 2019-01-28  ------ inet-4.1.0 released ------
 
 2018-11-15  Zoltan Bojthe

@@ -86,8 +86,7 @@ void Ipv4RoutingTable::initialize(int stage)
         WATCH(multicastForward);
         WATCH(routerId);
     }
-    // TODO: INITSTAGE
-    else if (stage == INITSTAGE_STATIC_ROUTING) {
+    else if (stage == INITSTAGE_ROUTER_ID_ASSIGNMENT) {
         cModule *node = findContainingNode(this);
         NodeStatus *nodeStatus = node ? check_and_cast_nullable<NodeStatus *>(node->getSubmodule("status")) : nullptr;
         isNodeUp = !nodeStatus || nodeStatus->getState() == NodeStatus::UP;
@@ -97,21 +96,16 @@ void Ipv4RoutingTable::initialize(int stage)
             const char *routerIdStr = par("routerId");
             if (strcmp(routerIdStr, "") && strcmp(routerIdStr, "auto"))
                 routerId = Ipv4Address(routerIdStr);
-        }
-    }
-    else if (stage == INITSTAGE_NETWORK_LAYER) {
-        if (isNodeUp) {
             // read routing table file (and interface configuration)
             const char *filename = par("routingFile");
             RoutingTableParser parser(ift, this);
             if (*filename && parser.readRoutingTableFromFile(filename) == -1)
                 throw cRuntimeError("Error reading routing table file %s", filename);
-        }
-
-        // routerID selection must be after network autoconfiguration assigned interface addresses
-        if (isNodeUp)
+            // routerID selection must be after network autoconfiguration assigned interface addresses
             configureRouterId();
-
+        }
+    }
+    else if (stage == INITSTAGE_NETWORK_LAYER) {
         // we don't use notifications during initialize(), so we do it manually.
         updateNetmaskRoutes();
     }

@@ -1,5 +1,13 @@
 ====== inet-4.x ======
 
+2019-09-21  Mani Amoozadeh
+
+	Reorganized code to better reflect the execution flow.
+
+2019-04-17  Levente Mészáros
+
+	Added guard for the case when there's no SocketInd on the packet.
+
 2019-01-28  ------ inet-4.1.0 released ------
 
 2018-12-03  Zoltan Bojthe

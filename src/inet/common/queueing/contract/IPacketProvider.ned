@@ -18,9 +18,11 @@
 package inet.common.queueing.contract;
 
 //
-// This module interface is implemented by packet provider modules. A packet
-// provider is a passive module with one output. Packets are popped from the
-// packet provider by the connected module repeatedly over time.
+// This module interface must be implemented by packet provider modules. A packet
+// provider is a passive module with one output. It must be connected to a packet
+// collector module which is going to pop packets from it over time.
+//
+// @see ~IPacketCollector, ~PacketCollector, ~PacketScheduler
 //
 moduleinterface IPacketProvider
 {

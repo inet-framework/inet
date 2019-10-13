@@ -477,10 +477,10 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *packet, const Ptr<c
         //"
 
         if (payloadLength > 0) {
-            auto ecnTag = packet->findTag<EcnInd>();
-
-            if (ecnTag->getExplicitCongestionNotification() == IP_ECN_CE)
-                state->ecnCe = true;
+            if (auto ecnTag = packet->findTag<EcnInd>()) {
+                if (ecnTag->getExplicitCongestionNotification() == IP_ECN_CE)
+                    state->ecnCe = true;
+            }
 
             // check for full sized segment
             if ((uint32_t)payloadLength == state->snd_mss || (uint32_t)payloadLength + B(tcpseg->getHeaderLength() - TCP_MIN_HEADER_LENGTH).get() == state->snd_mss)

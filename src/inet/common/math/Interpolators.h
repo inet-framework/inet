@@ -49,6 +49,9 @@ class INET_API ConstantInterpolatorBase : public InterpolatorBase<X, Y>
     }
 };
 
+/**
+ * Interpolation that can only be used if y1 == y2.
+ */
 template<typename X, typename Y>
 class INET_API EitherInterpolator : public ConstantInterpolatorBase<X, Y>
 {

@@ -1,6 +1,56 @@
 ====== inet-4.x ======
 
+2019-09-17  Zoltan Bojthe
+
+	Simplified serializing empty data part.
+
+2019-09-02  Zoltan Bojthe
+
+	Optimized Tag usage.
+
+2019-08-26  Marcell Juhász
+
+	Added auxData[], removed additionalData[].
+
+2019-08-26  Zoltan Bojthe
+
+	Fixed CRC calculation for empty payload.
+
+2019-07-24  Zoltan Bojthe
+
+	igmp: crcMode, crc calculation, crc verification added
+
+2019-07-16  Zoltan Bojthe
+
+	Set Router Alert option and TOS value in Igmp.
+	Added option Ipv4OptionRouterAlert.
+	Allow Ipv4OptionsReq tag: transport layer can set Ipv4 header options on outgoing packets.
+	Emit PacketDroppedSignal when received packet has incorrect CRC.
+
+2019-07-15  Zoltan Bojthe
+
+	Replaced Igmpv3::AddressVector with inet::AddressVector.
+	Changed maxRespTime to be stored in RFC-specified format.
+	Use parseCrcMode().
+
+2019-07-01  Marcell Juhász
+
+	Allow nonlocal src address if enabled in L3AddressReq in Ipv4.
+
+2019-05-06  Zoltan Bojthe
+
+	Fixed length field check in Ipv4ProtocolDissector.
+
+2019-03-20  Zoltan Bojthe
+
+	Added insertCrc().
+
 2019-01-28  ------ inet-4.1.0 released ------
+
+2019-01-23  Levente Mészáros
+
+	Extracted a separate updateDisplayString() method.
+	Added display string text to Ipv4NatTable and Ipv4NetworkLayer.
 
 2019-01-07  Zoltan Bojthe
 

@@ -21,7 +21,7 @@
 #include "inet/physicallayer/analogmodel/packetlevel/DimensionalTransmission.h"
 #include "inet/physicallayer/base/packetlevel/DimensionalAnalogModelBase.h"
 #include "inet/physicallayer/common/packetlevel/BandListening.h"
-#include "inet/physicallayer/common/packetlevel/PowerFunction.h"
+#include "inet/physicallayer/common/packetlevel/PowerFunctions.h"
 #include "inet/physicallayer/contract/packetlevel/IRadioMedium.h"
 
 namespace inet {

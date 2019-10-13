@@ -1,5 +1,10 @@
 ====== inet-4.x ======
 
+2019-03-20  Zoltan Bojthe
+
+	Added shouldDissectProtocolDataUnit() to PacketDissector::ICallback for
+	possibility to stop dissection.
+
 2019-01-28  ------ inet-4.1.0 released ------
 
 2018-10-19  Levente Mészáros
