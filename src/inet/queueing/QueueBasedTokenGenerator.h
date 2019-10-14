@@ -26,7 +26,7 @@
 namespace inet {
 namespace queueing {
 
-class INET_API QueueBasedTokenGenerator : public cSimpleModule, public cListener, public StringFormat::IDirectiveResolver
+class INET_API QueueBasedTokenGenerator : public PacketQueueingElementBase, public cListener, public StringFormat::IDirectiveResolver
 {
   protected:
     int minNumPackets = -1;
@@ -42,8 +42,14 @@ class INET_API QueueBasedTokenGenerator : public cSimpleModule, public cListener
     virtual void initialize(int stage) override;
     virtual void updateDisplayString();
 
+    virtual void generateTokens();
+
   public:
+    virtual bool supportsPushPacket(cGate *gate) override { return false; }
+    virtual bool supportsPopPacket(cGate *gate) override { return false; }
+
     virtual const char *resolveDirective(char directive) override;
+
     virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override;
 };
 

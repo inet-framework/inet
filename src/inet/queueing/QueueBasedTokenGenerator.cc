@@ -36,6 +36,9 @@ void QueueBasedTokenGenerator::initialize(int stage)
         numTokensGenerated = 0;
         WATCH(numTokensGenerated);
     }
+    else if (stage == INITSTAGE_QUEUEING)
+        if (queue->getNumPackets() < minNumPackets || queue->getTotalLength() < minTotalLength)
+            generateTokens();
 }
 
 void QueueBasedTokenGenerator::updateDisplayString()
@@ -57,20 +60,23 @@ const char *QueueBasedTokenGenerator::resolveDirective(char directive)
     return result.c_str();
 }
 
-
 void QueueBasedTokenGenerator::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
 {
     Enter_Method_Silent();
     if (signal == packetPoppedSignal) {
-        if (queue->getNumPackets() < minNumPackets || queue->getTotalLength() < minTotalLength) {
-            auto numTokens = numTokensParameter->doubleValue();
-            server->addTokens(numTokens);
-            numTokensGenerated += numTokens;
-            updateDisplayString();
-        }
+        if (queue->getNumPackets() < minNumPackets || queue->getTotalLength() < minTotalLength)
+            generateTokens();
     }
     else
         throw cRuntimeError("Unknown signal");
+}
+
+void QueueBasedTokenGenerator::generateTokens()
+{
+    auto numTokens = numTokensParameter->doubleValue();
+    server->addTokens(numTokens);
+    numTokensGenerated += numTokens;
+    updateDisplayString();
 }
 
 } // namespace queueing
