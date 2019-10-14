@@ -77,7 +77,7 @@ sim-time-limit = 20s
 **.app[1].localPort = 1234
 
 **.host*snap.eth[*].useSNAP = true
-**.host*.eth[*].ppp.queue.frameCapacity = 1
+**.host*.eth[*].ppp.queue.packetCapacity = 1
 
 # Arp
 **.arp.typename = "GlobalArp"

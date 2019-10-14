@@ -50,7 +50,7 @@ network TestPriorityClassifier
 network = TestPriorityClassifier
 sim-time-limit = 10s
 cmdenv-event-banners = false
-*.queue*.frameCapacity = 1
+*.queue*.packetCapacity = 1
 *.producer.packetLength = 1B
 *.producer.productionInterval = uniform(0s, 1s)
 *.collector*.collectionInterval = uniform(0s, 2s)

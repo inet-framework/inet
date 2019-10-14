@@ -88,7 +88,7 @@ cmdenv-event-banners = false
 *.producer.packetLength = 1B
 *.producer.productionInterval = uniform(0s, 1s)
 *.collector.collectionInterval = uniform(0s, 2s)
-*.queue.buffer.frameCapacity = 2
+*.queue.buffer.packetCapacity = 2
 *.queue.classifier.classifierClass = "TestClassifier"
 
 %contains: stdout

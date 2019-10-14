@@ -57,7 +57,7 @@ this queue is given as the :par:`queueModule` parameter.
 In hosts, no such queue is used, so :ned:`Ppp` contains an internal
 queue to store packets wainting for transmission.
 Conceptually the queue is of inifinite size, but for better diagnostics
-one can specify a hard limit in the :par:`frameCapacity` parameter – if
+one can specify a hard limit in the :par:`packetCapacity` parameter – if
 this is exceeded, the simulation stops with an error.
 
 The module can be used in simulations where the nodes are connected and

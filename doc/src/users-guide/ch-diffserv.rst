@@ -198,7 +198,7 @@ DropTailQueue
 ^^^^^^^^^^^^^
 
 The other primitive queue module is :ned:`DropTailQueue`. Its capacity
-can be specified by the :par:`frameCapacity` parameter. When the number
+can be specified by the :par:`packetCapacity` parameter. When the number
 of stored packet reached the capacity of the queue, further packets are
 dropped. Because this module contains a built-in dropping strategy, it
 cannot be combined with algorithmic droppers as :ned:`FifoQueue` can be.

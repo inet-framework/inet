@@ -118,8 +118,8 @@ sim-time-limit = 2s+10s+20s+1.2s
 
 # NIC configuration
 **.ppp[*].ppp.queue.typename = "DropTailQueue" # in routers
-#**.ppp[*].ppp.queue.frameCapacity = 10
-**.ppp[*].ppp.queue.frameCapacity = 47  # good:(13,15,16,18,19,21-25, 7) bad:(17,20)
+#**.ppp[*].ppp.queue.packetCapacity = 10
+**.ppp[*].ppp.queue.packetCapacity = 47  # good:(13,15,16,18,19,21-25, 7) bad:(17,20)
 
 %#--------------------------------------------------------------------------------------------------------------
 %postrun-command: Rscript check.r
