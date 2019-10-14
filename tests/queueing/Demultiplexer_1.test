@@ -8,9 +8,9 @@ simply forwards packets.
 
 %file: test.ned
 
-import inet.queueing.ActivePacketSink;
-import inet.queueing.PacketDemultiplexer;
-import inet.queueing.PassivePacketSource;
+import inet.queueing.sink.ActivePacketSink;
+import inet.queueing.common.PacketDemultiplexer;
+import inet.queueing.source.PassivePacketSource;
 
 network TestServer
 {

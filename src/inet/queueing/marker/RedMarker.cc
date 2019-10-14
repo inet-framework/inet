@@ -18,7 +18,8 @@
 #include "inet/common/INETUtils.h"
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/queueing/RedMarker.h"
+#include "inet/queueing/marker/RedMarker.h"
+
 #ifdef WITH_ETHERNET
 #include "inet/linklayer/ethernet/EtherEncap.h"
 #include "inet/linklayer/ethernet/EtherFrame_m.h"

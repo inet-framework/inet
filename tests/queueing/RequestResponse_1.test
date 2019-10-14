@@ -19,10 +19,10 @@ The client consumes the response packets by a passive packet sink (PassivePacket
 
 %file: test.ned
 
-import inet.queueing.ActivePacketSource;
-import inet.queueing.RequestConsumer;
-import inet.queueing.ResponseProducer;
-import inet.queueing.PassivePacketSink;
+import inet.queueing.sink.RequestConsumer;
+import inet.queueing.sink.PassivePacketSink;
+import inet.queueing.source.ActivePacketSource;
+import inet.queueing.source.ResponseProducer;
 
 network TestRequestResponse
 {
@@ -45,7 +45,7 @@ network TestRequestResponse
 }
 
 %file: Test.cc
-#include "inet/queueing/PacketClassifierFunction.h"
+#include "inet/queueing/function/PacketClassifierFunction.h"
 #include "inet/common/packet/Packet.h"
 
 using namespace inet; 

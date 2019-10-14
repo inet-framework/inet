@@ -4,9 +4,9 @@ TODO
 
 %file: test.ned
 
-import inet.queueing.ActivePacketSink;
-import inet.queueing.PacketQueue;
-import inet.queueing.QueueFiller;
+import inet.queueing.sink.ActivePacketSink;
+import inet.queueing.queue.PacketQueue;
+import inet.queueing.source.QueueFiller;
 
 network TestQueueFiller
 {

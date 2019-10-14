@@ -15,10 +15,10 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-package inet.queueing;
+package inet.queueing.pcap;
 
-import inet.queueing.base.PacketSourceBase;
 import inet.queueing.contract.IActivePacketSource;
+
 
 //
 // This module is an active packet source which pushes packets into the connected

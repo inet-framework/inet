@@ -7,10 +7,10 @@ is higher than a predefined threshold, then packets are dropped.
 
 %file: test.ned
 
-import inet.queueing.ActivePacketSource;
-import inet.queueing.PassivePacketSink;
-import inet.queueing.RateLimiter;
-import inet.queueing.RateMeter;
+import inet.queueing.source.ActivePacketSource;
+import inet.queueing.sink.PassivePacketSink;
+import inet.queueing.filter.RateLimiter;
+import inet.queueing.meter.RateMeter;
 
 network TestMeter
 {

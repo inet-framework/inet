@@ -15,7 +15,10 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package inet.queueing;
+package inet.queueing.marker;
+
+import inet.queueing.filter.RedDropper;
+
 
 //
 // TODO auto-generated module

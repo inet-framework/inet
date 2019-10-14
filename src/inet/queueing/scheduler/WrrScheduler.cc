@@ -16,7 +16,7 @@
 //
 
 #include "inet/common/INETUtils.h"
-#include "inet/queueing/WrrScheduler.h"
+#include "inet/queueing/scheduler/WrrScheduler.h"
 
 namespace inet {
 namespace queueing {

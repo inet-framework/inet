@@ -15,8 +15,8 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-#include "inet/queueing/RateLimiter.h"
-#include "inet/queueing/RateTag_m.h"
+#include "inet/queueing/common/RateTag_m.h"
+#include "inet/queueing/filter/RateLimiter.h"
 
 namespace inet {
 namespace queueing {

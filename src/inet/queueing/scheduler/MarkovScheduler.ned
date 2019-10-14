@@ -15,7 +15,7 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-package inet.queueing;
+package inet.queueing.scheduler;
 
 import inet.queueing.base.PacketSchedulerBase;
 import inet.queueing.contract.IPacketScheduler;

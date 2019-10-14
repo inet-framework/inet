@@ -7,9 +7,9 @@ sink (PassivePacketSink).
 
 %file: test.ned
 
-import inet.queueing.PassivePacketSink;
-import inet.queueing.PacketDuplicator;
-import inet.queueing.ActivePacketSource;
+import inet.queueing.sink.PassivePacketSink;
+import inet.queueing.common.PacketDuplicator;
+import inet.queueing.source.ActivePacketSource;
 
 network TestDuplicator
 {

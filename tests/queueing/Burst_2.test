@@ -8,9 +8,9 @@ provided by a single passive source (PassivePacketSource).
 
 %file: test.ned
 
-import inet.queueing.ActivePacketSink;
-import inet.queueing.MarkovClassifier;
-import inet.queueing.PassivePacketSource;
+import inet.queueing.sink.ActivePacketSink;
+import inet.queueing.classifier.MarkovClassifier;
+import inet.queueing.source.PassivePacketSource;
 
 network TestBurst
 {

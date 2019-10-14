@@ -16,8 +16,8 @@
 //
 
 #include "inet/common/ModuleAccess.h"
-#include "inet/queueing/LabelsTag_m.h"
-#include "inet/queueing/PacketMarker.h"
+#include "inet/queueing/common/LabelsTag_m.h"
+#include "inet/queueing/marker/PacketMarker.h"
 
 namespace inet {
 namespace queueing {

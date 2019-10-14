@@ -15,9 +15,12 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-package inet.queueing;
+package inet.queueing.source;
 
+import inet.queueing.common.PacketMultiplexer;
 import inet.queueing.contract.IActivePacketSource;
+import inet.queueing.server.TokenBasedServer;
+
 
 module ResponseProducer like IActivePacketSource
 {

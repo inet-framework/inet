@@ -4,9 +4,9 @@ TODO
 
 %file: test.ned
 
-import inet.queueing.TokenBucket;
-import inet.queueing.PassivePacketSink;
-import inet.queueing.ActivePacketSource;
+import inet.queueing.shaper.TokenBucket;
+import inet.queueing.sink.PassivePacketSink;
+import inet.queueing.source.ActivePacketSource;
 
 network TestTokenBucket
 {

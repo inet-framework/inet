@@ -16,8 +16,8 @@
 //
 
 #include "inet/common/ModuleAccess.h"
-#include "inet/queueing/RateMeter.h"
-#include "inet/queueing/RateTag_m.h"
+#include "inet/queueing/common/RateTag_m.h"
+#include "inet/queueing/meter/RateMeter.h"
 
 namespace inet {
 namespace queueing {

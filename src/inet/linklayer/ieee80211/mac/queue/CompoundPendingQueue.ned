@@ -17,10 +17,10 @@
 
 package inet.linklayer.ieee80211.mac.queue;
 
-import inet.queueing.PacketClassifier;
-import inet.queueing.CompoundPacketQueue;
-import inet.queueing.PacketQueue;
-import inet.queueing.PriorityScheduler;
+import inet.queueing.classifier.PacketClassifier;
+import inet.queueing.queue.CompoundPacketQueue;
+import inet.queueing.queue.PacketQueue;
+import inet.queueing.scheduler.PriorityScheduler;
 
 module CompoundPendingQueue extends CompoundPacketQueue
 {

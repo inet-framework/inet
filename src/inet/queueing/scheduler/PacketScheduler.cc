@@ -15,7 +15,7 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-#include "inet/queueing/PacketScheduler.h"
+#include "inet/queueing/scheduler/PacketScheduler.h"
 
 namespace inet {
 namespace queueing {

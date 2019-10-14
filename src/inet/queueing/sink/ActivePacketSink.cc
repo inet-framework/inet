@@ -16,8 +16,8 @@
 //
 
 #include "inet/common/ModuleAccess.h"
-#include "inet/queueing/ActivePacketSink.h"
 #include "inet/common/Simsignals.h"
+#include "inet/queueing/sink/ActivePacketSink.h"
 
 namespace inet {
 namespace queueing {

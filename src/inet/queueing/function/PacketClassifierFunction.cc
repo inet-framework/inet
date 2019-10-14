@@ -16,7 +16,7 @@
 //
 
 #include "inet/linklayer/common/UserPriorityTag_m.h"
-#include "inet/queueing/PacketClassifierFunction.h"
+#include "inet/queueing/function/PacketClassifierFunction.h"
 
 namespace inet {
 namespace queueing {

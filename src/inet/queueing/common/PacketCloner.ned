@@ -15,10 +15,10 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-package inet.queueing;
+package inet.queueing.common;
 
 import inet.queueing.contract.IPassivePacketSink;
-import inet.queueing.contract.IActivePacketSource;
+
 
 //
 // This module connects one packet producer to one packet consumer. It can be

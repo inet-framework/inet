@@ -15,8 +15,8 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-#include "inet/queueing/LabelsTag_m.h"
-#include "inet/queueing/MarkerClassifier.h"
+#include "inet/queueing/classifier/MarkerClassifier.h"
+#include "inet/queueing/common/LabelsTag_m.h"
 
 namespace inet {
 namespace queueing {

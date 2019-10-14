@@ -16,9 +16,9 @@
 //
 
 #include <algorithm>
-#include "inet/queueing/PacketBuffer.h"
 #include "inet/common/Simsignals.h"
 #include "inet/common/StringFormat.h"
+#include "inet/queueing/buffer/PacketBuffer.h"
 
 namespace inet {
 namespace queueing {

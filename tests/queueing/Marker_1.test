@@ -9,10 +9,10 @@ a PacketMarker based on the packet length.
 
 %file: test.ned
 
-import inet.queueing.PassivePacketSink;
-import inet.queueing.PacketMarker;
-import inet.queueing.MarkerClassifier;
-import inet.queueing.ActivePacketSource;
+import inet.queueing.sink.PassivePacketSink;
+import inet.queueing.marker.PacketMarker;
+import inet.queueing.classifier.MarkerClassifier;
+import inet.queueing.source.ActivePacketSource;
 
 network TestMarker
 {
@@ -40,7 +40,7 @@ network TestMarker
 }
 
 %file: Test.cc
-#include "inet/queueing/PacketFilterFunction.h"
+#include "inet/queueing/function/PacketFilterFunction.h"
 #include "inet/common/packet/Packet.h"
 
 using namespace inet; 

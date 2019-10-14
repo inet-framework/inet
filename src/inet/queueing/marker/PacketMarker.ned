@@ -15,7 +15,7 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-package inet.queueing;
+package inet.queueing.marker;
 
 import inet.queueing.base.PacketMarkerBase;
 import inet.queueing.contract.IPacketMarker;

@@ -10,13 +10,13 @@ scheduler (PriortyScheduler).
 
 %file: test.ned
 
-import inet.queueing.PriorityBuffer;
-import inet.queueing.PacketClassifier;
-import inet.queueing.CompoundPacketQueue;
-import inet.queueing.PacketQueue;
-import inet.queueing.ActivePacketSink;
-import inet.queueing.ActivePacketSource;
-import inet.queueing.PriorityScheduler;
+import inet.queueing.buffer.PriorityBuffer;
+import inet.queueing.classifier.PacketClassifier;
+import inet.queueing.queue.CompoundPacketQueue;
+import inet.queueing.queue.PacketQueue;
+import inet.queueing.sink.ActivePacketSink;
+import inet.queueing.source.ActivePacketSource;
+import inet.queueing.scheduler.PriorityScheduler;
 
 module TestQueue extends CompoundPacketQueue
 {
@@ -67,7 +67,7 @@ network TestBufferNetwork
 
 %file: Test.cc
 #include <vector>
-#include "inet/queueing/PacketClassifierFunction.h"
+#include "inet/queueing/function/PacketClassifierFunction.h"
 #include "inet/common/packet/Packet.h"
 
 using namespace inet;

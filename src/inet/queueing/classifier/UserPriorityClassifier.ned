@@ -15,10 +15,7 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-package inet.queueing;
-
-import inet.queueing.base.PacketClassifierBase;
-import inet.queueing.contract.IPacketClassifier;
+package inet.queueing.classifier;
 
 simple UserPriorityClassifier extends PacketClassifier
 {

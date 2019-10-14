@@ -15,7 +15,7 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-#include "inet/queueing/PriorityClassifier.h"
+#include "inet/queueing/classifier/PriorityClassifier.h"
 
 namespace inet {
 namespace queueing {

@@ -16,8 +16,8 @@
 //
 
 #include "inet/common/ModuleAccess.h"
-#include "inet/queueing/PacketDemultiplexer.h"
 #include "inet/common/Simsignals.h"
+#include "inet/queueing/common/PacketDemultiplexer.h"
 
 namespace inet {
 namespace queueing {

@@ -67,9 +67,9 @@ they are requested to do so.
 
 -  :ned:`PassivePacketSource`: provides packets with configurable length and content upon request
 -  :ned:`ActivePacketSource`: produces packets periodically
-TODO: rename BurstyPacketProducer -  :ned:`BurstyPacketProducer`: compound module with two different sources to generate bursty traffic
-TODO: rename ResponseProducer -  :ned:`ResponseProducer`: produces complex response traffic based on the incoming request type
-TODO: rename PcapFilePacketProducer -  :ned:`PcapFilePacketProducer`: reads packets from a PCAP file and sends them based on timestamps
+-  :ned:`BurstyPacketProducer`: compound module with two different sources to generate bursty traffic
+-  :ned:`ResponseProducer`: produces complex response traffic based on the incoming request type
+-  :ned:`PcapFilePacketProducer`: reads packets from a PCAP file and sends them based on timestamps
 
 Sinks
 -----
@@ -79,8 +79,8 @@ they see fit.
 
 -  :ned:`PassivePacketSink`: drops packets
 -  :ned:`ActivePacketSink`: pops packets from source periodically
-TODO: rename RequestConsumer -  :ned:`RequestConsumer`: enqueues incoming requests, processes them in order, and initiates response traffic
-TODO: rename PcapFilePacketConsumer -  :ned:`PcapFilePacketConsumer`: writes packets to a PCAP file
+-  :ned:`RequestConsumer`: enqueues incoming requests, processes them in order, and initiates response traffic
+-  :ned:`PcapFilePacketConsumer`: writes packets to a PCAP file
 
 Queues
 ------

@@ -16,7 +16,7 @@
 //
 
 #include "inet/common/ModuleAccess.h"
-#include "inet/queueing/PacketBasedTokenGenerator.h"
+#include "inet/queueing/tokengenerator/PacketBasedTokenGenerator.h"
 
 namespace inet {
 namespace queueing {

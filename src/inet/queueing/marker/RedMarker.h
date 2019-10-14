@@ -18,9 +18,8 @@
 #ifndef __INET_REDMARKER_H_
 #define __INET_REDMARKER_H_
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/packet/Packet.h"
-#include "inet/queueing/RedDropper.h"
+#include "inet/queueing/filter/RedDropper.h"
 
 namespace inet {
 namespace queueing {

@@ -15,7 +15,7 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-package inet.queueing;
+package inet.queueing.meter;
 
 import inet.queueing.base.PacketMeterBase;
 import inet.queueing.contract.IPacketMeter;

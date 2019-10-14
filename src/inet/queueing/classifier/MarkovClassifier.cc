@@ -16,7 +16,7 @@
 //
 
 #include "inet/common/ModuleAccess.h"
-#include "inet/queueing/MarkovClassifier.h"
+#include "inet/queueing/classifier/MarkovClassifier.h"
 
 namespace inet {
 namespace queueing {

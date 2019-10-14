@@ -6,8 +6,8 @@ In this test, packets are produced periodically by an active packet source
 
 %file: test.ned
 
-import inet.queueing.PassivePacketSink;
-import inet.queueing.ActivePacketSource;
+import inet.queueing.sink.PassivePacketSink;
+import inet.queueing.source.ActivePacketSource;
 
 network TestProducerConsumer
 {

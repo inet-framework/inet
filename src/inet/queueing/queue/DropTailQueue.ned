@@ -15,7 +15,7 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-package inet.queueing;
+package inet.queueing.queue;
 
 //
 // This module is a limited packet queue which drops packets at the tail of the queue.

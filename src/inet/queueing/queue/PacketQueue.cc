@@ -16,10 +16,10 @@
 //
 
 #include "inet/common/ModuleAccess.h"
-#include "inet/queueing/PacketComparatorFunction.h"
-#include "inet/queueing/PacketDropperFunction.h"
-#include "inet/queueing/PacketQueue.h"
 #include "inet/common/Simsignals.h"
+#include "inet/queueing/function/PacketComparatorFunction.h"
+#include "inet/queueing/function/PacketDropperFunction.h"
+#include "inet/queueing/queue/PacketQueue.h"
 
 namespace inet {
 namespace queueing {

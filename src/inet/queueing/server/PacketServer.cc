@@ -15,8 +15,8 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-#include "inet/queueing/PacketServer.h"
 #include "inet/common/Simsignals.h"
+#include "inet/queueing/server/PacketServer.h"
 
 namespace inet {
 namespace queueing {

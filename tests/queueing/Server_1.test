@@ -7,9 +7,9 @@ by a passive packet source (PassivePacketSource) and consumed by a passive packe
 
 %file: test.ned
 
-import inet.queueing.PassivePacketSink;
-import inet.queueing.PassivePacketSource;
-import inet.queueing.PacketServer;
+import inet.queueing.sink.PassivePacketSink;
+import inet.queueing.source.PassivePacketSource;
+import inet.queueing.server.PacketServer;
 
 network TestServer
 {

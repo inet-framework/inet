@@ -15,7 +15,7 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-package inet.queueing;
+package inet.queueing.buffer;
 
 //
 // This buffer drops packets among the connected packet queues based on their

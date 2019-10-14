@@ -19,14 +19,14 @@
 
 package inet.examples.diffserv.simple_;
 
-import inet.queueing.PassivePacketSink;
-import inet.queueing.PacketMultiplexer;
 import inet.linklayer.contract.ITrafficConditioner;
 import inet.networklayer.diffserv.BehaviorAggregateClassifier;
 import inet.networklayer.diffserv.DscpMarker;
 import inet.networklayer.diffserv.MultiFieldClassifier;
 import inet.networklayer.diffserv.SingleRateThreeColorMeter;
 import inet.networklayer.diffserv.TokenBucketMeter;
+import inet.queueing.common.PacketMultiplexer;
+import inet.queueing.sink.PassivePacketSink;
 
 //
 // TODO documentation

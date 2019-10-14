@@ -18,9 +18,9 @@
 #ifndef __INET_TIMEBASEDTOKENGENERATOR_H
 #define __INET_TIMEBASEDTOKENGENERATOR_H
 
-#include "inet/queueing/contract/IPacketQueueingElement.h"
-#include "inet/queueing/TokenBasedServer.h"
 #include "inet/common/StringFormat.h"
+#include "inet/queueing/contract/IPacketQueueingElement.h"
+#include "inet/queueing/server/TokenBasedServer.h"
 
 namespace inet {
 namespace queueing {

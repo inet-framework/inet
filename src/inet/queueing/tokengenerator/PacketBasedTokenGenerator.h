@@ -19,7 +19,7 @@
 #define __INET_PACKETBASEDTOKENGENERATOR_H
 
 #include "inet/queueing/base/PassivePacketSinkBase.h"
-#include "inet/queueing/TokenBasedServer.h"
+#include "inet/queueing/server/TokenBasedServer.h"
 
 namespace inet {
 namespace queueing {

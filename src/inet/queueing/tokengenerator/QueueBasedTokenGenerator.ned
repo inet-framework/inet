@@ -15,10 +15,7 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-package inet.queueing;
-
-import inet.queueing.base.PacketSinkBase;
-import inet.queueing.contract.IPassivePacketSink;
+package inet.queueing.tokengenerator;
 
 //
 // This module generates tokens for a packet server based on the observed state

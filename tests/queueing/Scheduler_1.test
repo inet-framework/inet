@@ -8,9 +8,9 @@ one or the other source.
 
 %file: test.ned
 
-import inet.queueing.ActivePacketSink;
-import inet.queueing.PacketScheduler;
-import inet.queueing.PassivePacketSource;
+import inet.queueing.sink.ActivePacketSink;
+import inet.queueing.scheduler.PacketScheduler;
+import inet.queueing.source.PassivePacketSource;
 
 network TestScheduler
 {
@@ -35,7 +35,7 @@ network TestScheduler
 
 %file: Test.cc
 #include <vector>
-#include "inet/queueing/PacketSchedulerFunction.h"
+#include "inet/queueing/function/PacketSchedulerFunction.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/queueing/contract/IPassivePacketSource.h"
 

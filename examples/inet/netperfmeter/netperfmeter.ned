@@ -27,14 +27,13 @@
 
 package inet.examples.inet.netperfmeter;
 
-import inet.queueing.CompoundPacketQueue;
-import inet.queueing.PacketQueue;
-import inet.queueing.RedDropper;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
+import inet.queueing.filter.RedDropper;
+import inet.queueing.queue.CompoundPacketQueue;
+import inet.queueing.queue.PacketQueue;
 import ned.DatarateChannel;
-
 
 module REDQueue extends CompoundPacketQueue
 {
