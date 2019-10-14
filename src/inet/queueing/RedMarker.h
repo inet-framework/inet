@@ -35,7 +35,7 @@ class INET_API RedMarker : public RedDropper
     bool markNext;
 
   private:
-    int frameQueueCapacity;
+    int packetCapacity;
 
   protected:
 

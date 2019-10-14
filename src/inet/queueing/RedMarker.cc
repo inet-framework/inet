@@ -50,7 +50,7 @@ void RedMarker::initialize(int stage)
     RedDropper::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
-        frameQueueCapacity = par("frameQueueCapacity");
+        packetCapacity = par("packetCapacity");
 
         mark = par("mark");
         if (mark < 0.0)
@@ -133,7 +133,7 @@ bool RedMarker::matchesPacket(Packet *packet)
  //       return false;
  //   }
  //   else
-    if (queueLength >= frameQueueCapacity) {    // UPDATE: frameQueueCapacity is the new "hard" limit // maxth is also the "hard" limit
+    if (queueLength >= packetCapacity) {    // UPDATE: packetCapacity is the new "hard" limit // maxth is also the "hard" limit
         EV << "Queue len " << queueLength << " >= maxth, dropping packet.\n";
         count = 0;
         return false;
@@ -154,9 +154,9 @@ RedMarker::Action RedMarker::chooseAction(Packet *packet)
 {
     const int queueLength = collection->getNumPackets();
 
-    if (maxth > frameQueueCapacity) {
-        EV << "Warning: FrameQueueCapacity < max_th. Setting capacity to max_th\n";
-        frameQueueCapacity = maxth;
+    if (maxth > packetCapacity) {
+        EV << "Warning: packetCapacity < max_th. Setting capacity to max_th\n";
+        packetCapacity = maxth;
     }
 
     if (queueLength > 0) {
@@ -171,8 +171,8 @@ RedMarker::Action RedMarker::chooseAction(Packet *packet)
 
 //    Random dropping is disabled; returns true only for hard limit
 
-    if (queueLength >= frameQueueCapacity) {   // maxth is also the "hard" limit
-        EV << "Queue len " << queueLength << " >= frameQueueCapacity, dropping packet.\n";
+    if (queueLength >= packetCapacity) {   // maxth is also the "hard" limit
+        EV << "Queue len " << queueLength << " >= packetCapacity, dropping packet.\n";
         count = 0;
         return DROP;
     }
