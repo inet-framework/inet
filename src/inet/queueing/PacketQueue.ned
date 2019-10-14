@@ -55,7 +55,7 @@ import inet.queueing.contract.IPacketQueue;
 simple PacketQueue extends PacketQueueBase like IPacketQueue
 {
     parameters:
-        int frameCapacity = default(-1); // maximum number of packets in the queue, no limit by default
+        int packetCapacity = default(-1); // maximum number of packets in the queue, no limit by default
         int dataCapacity @unit(b) = default(-1b); // maximum total length of packets in the queue, no limit by default
         string dropperClass = default(""); // determines which packets are dropped when the queue is overloaded, packets are not dropped by default; the parameter must be the name of a C++ class which implements the IPacketDropperFunction C++ interface and is registered via Register_Class
         string comparatorClass = default(""); // determines the order of packets in the queue, insertion order by default; the parameter must be the name of a C++ class which implements the IPacketComparatorFunction C++ interface and is registered via Register_Class

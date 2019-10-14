@@ -34,7 +34,7 @@ void PacketQueue::initialize(int stage)
         producer = dynamic_cast<IActivePacketSource *>(findConnectedModule(inputGate));
         outputGate = gate("out");
         collector = dynamic_cast<IActivePacketSink *>(findConnectedModule(outputGate));
-        frameCapacity = par("frameCapacity");
+        packetCapacity = par("packetCapacity");
         dataCapacity = b(par("dataCapacity"));
         buffer = getModuleFromPar<IPacketBuffer>(par("bufferModule"), this, false);
         const char *comparatorClass = par("comparatorClass");
@@ -66,7 +66,7 @@ void PacketQueue::handleMessage(cMessage *message)
 
 bool PacketQueue::isOverloaded()
 {
-    return (frameCapacity != -1 && getNumPackets() > frameCapacity) ||
+    return (packetCapacity != -1 && getNumPackets() > packetCapacity) ||
            (dataCapacity != b(-1) && getTotalLength() > dataCapacity);
 }
 

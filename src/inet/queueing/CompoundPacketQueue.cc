@@ -27,7 +27,7 @@ void CompoundPacketQueue::initialize(int stage)
 {
     PacketQueueBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        frameCapacity = par("frameCapacity");
+        packetCapacity = par("packetCapacity");
         dataCapacity = b(par("dataCapacity"));
         inputGate = gate("in");
         outputGate = gate("out");
@@ -61,11 +61,11 @@ Packet *CompoundPacketQueue::getPacket(int index)
 void CompoundPacketQueue::pushPacket(Packet *packet, cGate *gate)
 {
     emit(packetPushedSignal, packet);
-    if ((frameCapacity != -1 && getNumPackets() >= frameCapacity) ||
+    if ((packetCapacity != -1 && getNumPackets() >= packetCapacity) ||
         (dataCapacity != b(-1) && getTotalLength() + packet->getTotalLength() > dataCapacity))
     {
         EV_INFO << "Dropping packet " << packet->getName() << " because the queue is full." << endl;
-        dropPacket(packet, QUEUE_OVERFLOW, frameCapacity);
+        dropPacket(packet, QUEUE_OVERFLOW, packetCapacity);
     }
     else {
         pushOrSendPacket(packet, inputGate, consumer);

@@ -38,7 +38,7 @@ class INET_API PacketQueue : public PacketQueueBase, public IPacketBuffer::ICall
     cGate *outputGate = nullptr;
     IActivePacketSink *collector = nullptr;
 
-    int frameCapacity = -1;
+    int packetCapacity = -1;
     b dataCapacity = b(-1);
 
     cPacketQueue queue;
@@ -55,7 +55,7 @@ class INET_API PacketQueue : public PacketQueueBase, public IPacketBuffer::ICall
   public:
     virtual ~PacketQueue() { delete packetDropperFunction; }
 
-    virtual int getMaxNumPackets() override { return frameCapacity; }
+    virtual int getMaxNumPackets() override { return packetCapacity; }
     virtual int getNumPackets() override;
 
     virtual b getMaxTotalLength() override { return dataCapacity; }

@@ -42,7 +42,7 @@ module PacketHistory like IPassivePacketSink, IActivePacketSource
         }
         queue: <default("DropHeadQueue")> like IPacketQueue {
             parameters:
-                frameCapacity = default(size);
+                packetCapacity = default(size);
                 @display("p=100,200");
         }
     connections:

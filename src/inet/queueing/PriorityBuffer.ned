@@ -24,7 +24,7 @@ package inet.queueing;
 simple PriorityBuffer extends PacketBuffer
 {
     parameters:
-        frameCapacity = default(100);
+        packetCapacity = default(100);
         dropperClass = default("inet::queueing::PacketWithHighestOwnerModuleIdDropper");
 }
 

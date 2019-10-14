@@ -29,7 +29,7 @@ void PacketBuffer::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
         displayStringTextFormat = par("displayStringTextFormat");
-        frameCapacity = par("frameCapacity");
+        packetCapacity = par("packetCapacity");
         dataCapacity = b(par("dataCapacity"));
         const char *dropperClass = par("dropperClass");
         if (*dropperClass != '\0')
@@ -41,7 +41,7 @@ void PacketBuffer::initialize(int stage)
 
 bool PacketBuffer::isOverloaded()
 {
-    return (frameCapacity != -1 && getNumPackets() > frameCapacity) ||
+    return (packetCapacity != -1 && getNumPackets() > packetCapacity) ||
            (dataCapacity != b(-1) && getTotalLength() > dataCapacity);
 }
 

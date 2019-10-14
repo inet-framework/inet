@@ -30,7 +30,7 @@ class INET_API PacketBuffer : public PacketQueueingElementBase, public IPacketBu
 {
   protected:
     const char *displayStringTextFormat = nullptr;
-    int frameCapacity = -1;
+    int packetCapacity = -1;
     b dataCapacity = b(-1);
 
     b totalLength = b(0);
@@ -44,7 +44,7 @@ class INET_API PacketBuffer : public PacketQueueingElementBase, public IPacketBu
     virtual bool isOverloaded();
 
   public:
-    virtual int getMaxNumPackets() override { return frameCapacity; }
+    virtual int getMaxNumPackets() override { return packetCapacity; }
     virtual int getNumPackets() override { return packets.size(); }
 
     virtual b getMaxTotalLength() override { return dataCapacity; }

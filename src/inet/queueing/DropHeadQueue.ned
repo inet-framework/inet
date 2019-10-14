@@ -23,6 +23,6 @@ package inet.queueing;
 simple DropHeadQueue extends PacketQueue
 {
     parameters:
-        frameCapacity = default(100);
+        packetCapacity = default(100);
         dropperClass = default("inet::queueing::PacketAtCollectionBeginDropper");
 }

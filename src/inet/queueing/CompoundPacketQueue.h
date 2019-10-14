@@ -29,7 +29,7 @@ namespace queueing {
 class INET_API CompoundPacketQueue : public PacketQueueBase
 {
   protected:
-    int frameCapacity = -1;
+    int packetCapacity = -1;
     b dataCapacity = b(-1);
 
     cGate *inputGate = nullptr;
@@ -43,7 +43,7 @@ class INET_API CompoundPacketQueue : public PacketQueueBase
     virtual void initialize(int stage) override;
 
   public:
-    virtual int getMaxNumPackets() override { return frameCapacity; }
+    virtual int getMaxNumPackets() override { return packetCapacity; }
     virtual int getNumPackets() override;
 
     virtual b getMaxTotalLength() override { return dataCapacity; }
