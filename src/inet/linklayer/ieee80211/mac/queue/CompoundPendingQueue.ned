@@ -25,7 +25,7 @@ import inet.queueing.PriorityScheduler;
 module CompoundPendingQueue extends CompoundPacketQueue
 {
     parameters:
-        frameCapacity = default(100); // -1 means unlimited
+        packetCapacity = default(100); // -1 means unlimited
     submodules:
         classifier: PacketClassifier {
             parameters:

@@ -88,7 +88,7 @@ module CsmaCaMac extends MacProtocolBase like IMacProtocol
     submodules:
         queue: <default("DropTailQueue")> like IPacketQueue {
             parameters:
-                frameCapacity = default(maxQueueSize);
+                packetCapacity = default(maxQueueSize);
                 @display("p=100,100;q=l2queue");
         }
 }

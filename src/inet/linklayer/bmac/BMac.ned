@@ -86,7 +86,7 @@ module BMac extends MacProtocolBase like IMacProtocol
     submodules:
         queue: <default("DropTailQueue")> like IPacketQueue {
             parameters:
-                frameCapacity = default(queueLength);
+                packetCapacity = default(queueLength);
                 @display("p=100,100;q=l2queue");
         }
 }

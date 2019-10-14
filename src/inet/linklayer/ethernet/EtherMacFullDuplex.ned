@@ -162,7 +162,7 @@ module EtherMacFullDuplex like IEtherMac
     submodules:
         queue: <default("EtherQueue")> like IPacketQueue {
             parameters:
-                frameCapacity = default(1000);
+                packetCapacity = default(1000);
                 @display("p=100,100");
         }
 }

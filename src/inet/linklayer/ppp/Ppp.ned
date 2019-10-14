@@ -35,7 +35,7 @@ import inet.queueing.contract.IPacketQueue;
 // In hosts, no such queue is used, so PPP contains an internal
 // queue to store packets waiting for transmission.
 // Conceptually, the queue is of infinite size, but for better diagnostics
-// one can specify a hard limit in the frameCapacity parameter -- if this is
+// one can specify a hard limit in the packetCapacity parameter -- if this is
 // exceeded, the simulation stops with an error.
 //
 // There is no buffering done on received packets -- they are just decapsulated
@@ -77,7 +77,7 @@ module Ppp
     submodules:
         queue: <default("DropTailQueue")> like IPacketQueue {
             parameters:
-                frameCapacity = default(1000);
+                packetCapacity = default(1000);
                 @display("p=100,100;q=l2queue");
         }
 }

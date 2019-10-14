@@ -68,7 +68,7 @@ module DiffservQueue extends CompoundPacketQueue
             @display("p=400,80");
         }
         efQueue: DropTailQueue {
-            frameCapacity = default(5); // keep low, for low delay and jitter
+            packetCapacity = default(5); // keep low, for low delay and jitter
             @display("p=400,180");
         }
         af1xQueue: AFxyQueue {

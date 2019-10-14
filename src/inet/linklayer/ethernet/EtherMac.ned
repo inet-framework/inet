@@ -95,7 +95,7 @@ import inet.linklayer.contract.IEtherMac;
 // In hosts, no such queue is used, so MAC contains an internal
 // queue to store packets waiting for transmission.
 // Conceptually, the queue is of infinite size, but for better diagnostics
-// one can specify a hard limit in the frameCapacity parameter -- if this is
+// one can specify a hard limit in the packetCapacity parameter -- if this is
 // exceeded, the simulation stops with an error.
 //
 //
@@ -155,7 +155,7 @@ module EtherMac like IEtherMac
     submodules:
         queue: <default("EtherQueue")> like IPacketQueue {
             parameters:
-                frameCapacity = default(1000);
+                packetCapacity = default(1000);
                 @display("p=100,100");
         }
 }

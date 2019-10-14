@@ -56,7 +56,7 @@ module EthernetInterface extends InterfaceEntry like IEthernetInterface
         }
         mac: <default(csmacdSupport ? "EtherMac" : "EtherMacFullDuplex")> like IEtherMac {
             parameters:
-                queue.frameCapacity = 10000;
+                queue.packetCapacity = 10000;
                 @display("p=250,400");
         }
         encap: <default("EtherEncap")> like IEtherEncap {
