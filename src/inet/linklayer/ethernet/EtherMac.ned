@@ -93,9 +93,9 @@ import inet.linklayer.contract.IEtherMac;
 // from this external queue one-by-one.
 //
 // In hosts, no such queue is used, so MAC contains an internal
-// queue named txQueue to queue up packets waiting for transmission.
-// Conceptually, txQueue is of infinite size, but for better diagnostics
-// one can specify a hard limit in the txQueueLimit parameter -- if this is
+// queue to store packets waiting for transmission.
+// Conceptually, the queue is of infinite size, but for better diagnostics
+// one can specify a hard limit in the frameCapacity parameter -- if this is
 // exceeded, the simulation stops with an error.
 //
 //
@@ -115,7 +115,6 @@ module EtherMac like IEtherMac
         bool promiscuous = default(false);  // if true, all packets are received, otherwise only the
                                             // ones with matching destination MAC address
         bool duplexMode = default(true);    // selects full-duplex (true) or half-duplex (false) operation
-        int txQueueLimit = default(1000);   // maximum number of frames queued up for transmission in the internal queue, additional frames cause a runtime error
         bool frameBursting = default(true); // enable/disable frame bursting mode in Gigabit Ethernet
         int mtu @unit(B) = default(1500B);
         @lifecycleSupport;
@@ -156,7 +155,7 @@ module EtherMac like IEtherMac
     submodules:
         queue: <default("EtherQueue")> like IPacketQueue {
             parameters:
-                frameCapacity = default(txQueueLimit);
+                frameCapacity = default(1000);
                 @display("p=100,100");
         }
     connections allowunconnected:

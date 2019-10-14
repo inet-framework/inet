@@ -55,9 +55,9 @@ and requests packets from this external queue one-by-one. The name of
 this queue is given as the :par:`queueModule` parameter.
 
 In hosts, no such queue is used, so :ned:`Ppp` contains an internal
-queue named txQueue to queue up packets wainting for transmission.
-Conceptually txQueue is of inifinite size, but for better diagnostics
-one can specify a hard limit in the :par:`txQueueLimit` parameter – if
+queue to store packets wainting for transmission.
+Conceptually the queue is of inifinite size, but for better diagnostics
+one can specify a hard limit in the :par:`frameCapacity` parameter – if
 this is exceeded, the simulation stops with an error.
 
 The module can be used in simulations where the nodes are connected and
