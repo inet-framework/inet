@@ -1940,7 +1940,7 @@ LinkLSA* Ospfv3Interface::findLinkLSAbyAdvRouter (Ipv4Address advRouter)
     return nullptr;
 }
 
-std::string Ospfv3Interface::info() const
+std::string Ospfv3Interface::str() const
 {
     std::stringstream out;
 

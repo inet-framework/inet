@@ -164,7 +164,7 @@ class INET_API Ospfv3Area : public cObject
     void recheckInterAreaPrefixLSAs(std::vector<Ospfv3Ipv4RoutingTableEntry* >& newTableIPv4);
     bool hasLink(Ospfv3Lsa *fromLSA, Ospfv3Lsa *toLSA) const;
 
-    std::string detailedInfo() const override;
+    std::string detailedInfo() const OMNETPP5_CODE(override);
 
     void setSpfTreeRoot(RouterLSA* routerLSA) { spfTreeRoot = routerLSA; }
 
