@@ -24,5 +24,5 @@ simple DropHeadQueue extends PacketQueue
 {
     parameters:
         frameCapacity = default(100);
-        dropperClass = default("inet::queueing::DropPacketAtBegin");
+        dropperClass = default("inet::queueing::PacketAtCollectionBeginDropper");
 }

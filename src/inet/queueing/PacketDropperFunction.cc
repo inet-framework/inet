@@ -51,16 +51,16 @@ static void dropPacketAtEnd(IPacketCollection *collection)
     dropPacket(collection, collection->getNumPackets() - 1);
 }
 
-Register_Packet_Dropper_Function(DropPacketAtEnd, dropPacketAtEnd);
+Register_Packet_Dropper_Function(PacketAtCollectionEndDropper, dropPacketAtEnd);
 
 static void dropPacketAtBegin(IPacketCollection *collection)
 {
     dropPacket(collection, 0);
 }
 
-Register_Packet_Dropper_Function(DropPacketAtBegin, dropPacketAtBegin);
+Register_Packet_Dropper_Function(PacketAtCollectionBeginDropper, dropPacketAtBegin);
 
-static void dropPacketWithLowestOwnerId(IPacketCollection *collection)
+static void dropPacketWithLowestOwnerModuleId(IPacketCollection *collection)
 {
     int lowestIdIndex = 0;
     int lowestId = check_and_cast<cModule *>(collection->getPacket(lowestIdIndex)->getOwner()->getOwner())->getId();
@@ -72,7 +72,7 @@ static void dropPacketWithLowestOwnerId(IPacketCollection *collection)
     dropPacket(collection, lowestIdIndex);
 }
 
-Register_Packet_Dropper_Function(DropPacketWithLowestOwnerId, dropPacketWithLowestOwnerId);
+Register_Packet_Dropper_Function(PacketWithLowestOwnerModuleIdDropper, dropPacketWithLowestOwnerModuleId);
 
 static void dropPacketWithHighestOwnerModuleId(IPacketCollection *collection)
 {
@@ -86,7 +86,7 @@ static void dropPacketWithHighestOwnerModuleId(IPacketCollection *collection)
     dropPacket(collection, highestIdIndex);
 }
 
-Register_Packet_Dropper_Function(DropPacketWithHighestOwnerModuleId, dropPacketWithHighestOwnerModuleId);
+Register_Packet_Dropper_Function(PacketWithHighestOwnerModuleIdDropper, dropPacketWithHighestOwnerModuleId);
 
 } // namespace queueing
 } // namespace inet

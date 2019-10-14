@@ -24,5 +24,5 @@ simple DropTailQueue extends PacketQueue
 {
     parameters:
         frameCapacity = default(100);
-        dropperClass = default("inet::queueing::DropPacketAtEnd");
+        dropperClass = default("inet::queueing::PacketAtCollectionEndDropper");
 }

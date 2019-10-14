@@ -23,5 +23,5 @@ import inet.queueing.contract.IPacketClassifier;
 simple UserPriorityClassifier extends PacketClassifier
 {
     parameters:
-        classifierClass = default("inet::queueing::ClassifyPacketByUserPriority");
+        classifierClass = default("inet::queueing::PacketUserPriorityClassifier");
 }

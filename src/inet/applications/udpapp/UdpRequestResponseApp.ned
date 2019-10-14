@@ -22,7 +22,7 @@ module UdpRequestResponseApp extends UdpApp
         sink.typename = default("PassiveRequestSink");
         sink.numKind = numKind;
         sink.responseProducerModule = default("^.source");
-        sink.classifier.classifierClass = default("inet::queueing::ClassifyPacketByData");
+        sink.classifier.classifierClass = default("inet::queueing::PacketDataClassifer");
         source.typename = default("ActiveResponseSource");
         source.numKind = numKind;
 }

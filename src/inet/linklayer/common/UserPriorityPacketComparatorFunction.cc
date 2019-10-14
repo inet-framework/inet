@@ -33,7 +33,7 @@ static int comparePacketsByUserPriority(Packet *a, Packet *b)
     return getPacketPriority(b) - getPacketPriority(a);
 }
 
-Register_Packet_Comparator_Function(UserPriorityPacketComparator, comparePacketsByUserPriority);
+Register_Packet_Comparator_Function(PacketUserPriorityComparator, comparePacketsByUserPriority);
 
 } // namespace inet
 

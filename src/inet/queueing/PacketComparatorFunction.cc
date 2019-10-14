@@ -31,7 +31,7 @@ static int comparePacketCreationTime(Packet *packet1, Packet *packet2)
         return -1;
 }
 
-Register_Packet_Comparator_Function(ComparePacketCreationTime, comparePacketCreationTime);
+Register_Packet_Comparator_Function(PacketCreationTimeComparator, comparePacketCreationTime);
 
 } // namespace queueing
 } // namespace inet

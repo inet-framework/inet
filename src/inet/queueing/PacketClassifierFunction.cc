@@ -27,7 +27,7 @@ static int classifyPacketByData(Packet *packet)
     return data->getBytes().at(0);
 }
 
-Register_Packet_Classifier_Function(ClassifyPacketByData, classifyPacketByData);
+Register_Packet_Classifier_Function(PacketDataClassifer, classifyPacketByData);
 
 static int classifyPacketByUserPriority(Packet *packet)
 {
@@ -35,7 +35,7 @@ static int classifyPacketByUserPriority(Packet *packet)
     return userPriorityReq->getUserPriority();
 }
 
-Register_Packet_Classifier_Function(ClassifyPacketByUserPriority, classifyPacketByUserPriority);
+Register_Packet_Classifier_Function(PacketUserPriorityClassifier, classifyPacketByUserPriority);
 
 } // namespace queueing
 } // namespace inet

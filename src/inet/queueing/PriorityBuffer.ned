@@ -25,6 +25,6 @@ simple PriorityBuffer extends PacketBuffer
 {
     parameters:
         frameCapacity = default(100);
-        dropperClass = default("inet::queueing::DropPacketWithHighestOwnerModuleId");
+        dropperClass = default("inet::queueing::PacketWithHighestOwnerModuleIdDropper");
 }
 
