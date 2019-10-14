@@ -58,10 +58,10 @@ Running simulation...
 Providing packet provider-1.
 Processing packet provider-1.
 Pushing packet provider-1 into the queue.
-Popping packet provider-1 from the queue.
 Providing packet provider-2.
 Processing packet provider-2.
 Pushing packet provider-2 into the queue.
+Popping packet provider-1 from the queue.
 Collecting packet provider-1.
 Popping packet provider-2 from the queue.
 Providing packet provider-3.

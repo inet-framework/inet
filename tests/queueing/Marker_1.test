@@ -14,7 +14,7 @@ import inet.queueing.PacketMarker;
 import inet.queueing.MarkerClassifier;
 import inet.queueing.ActivePacketSource;
 
-network TestClassifier
+network TestMarker
 {
     submodules:
         producer: ActivePacketSource {
@@ -62,7 +62,7 @@ Register_Packet_Filter_Function(TestLarge, testLarge);
 %inifile: omnetpp.ini
 
 [General]
-network = TestClassifier
+network = TestMarker
 sim-time-limit = 10s
 cmdenv-event-banners = false
 *.producer.packetLength = intuniform(1B, 2B)
