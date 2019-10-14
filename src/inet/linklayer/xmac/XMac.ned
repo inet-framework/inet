@@ -45,9 +45,6 @@ module XMac extends MacProtocolBase like IMacProtocol
         // how long is the check interval (CCA)?
         double checkInterval @unit(s) = default(0.01s);
 
-        // size of the MAC queue (maximum number of packets in Tx buffer)
-        int queueLength = default(20);
-
         // should we animate the nodes with colors depending on their state or 
         // not?
         bool animation = default(true);
@@ -79,7 +76,7 @@ module XMac extends MacProtocolBase like IMacProtocol
     submodules:
         queue: <default("DropTailQueue")> like IPacketQueue {
             parameters:
-                packetCapacity = default(queueLength);
+                packetCapacity = default(20);
                 @display("p=100,100;q=l2queue");
         }
 }

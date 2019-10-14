@@ -32,8 +32,6 @@ module LMac extends MacProtocolBase like IMacProtocol
         double slotDuration @unit(s) = default(100ms);
         int headerLength @unit(b) = default(10b);
         int mtu @unit(B) = default(0B);
-        // length of MAC header
-        int queueLength = default(10);
         // default channel
         double defaultChannel = default(0);
         // bit rate
@@ -51,7 +49,7 @@ module LMac extends MacProtocolBase like IMacProtocol
     submodules:
         queue: <default("DropTailQueue")> like IPacketQueue {
             parameters:
-                packetCapacity = default(queueLength);
+                packetCapacity = default(10);
                 @display("p=100,100;q=l2queue");
         }
 }

@@ -43,7 +43,6 @@ class INET_API CsmaCaMac : public MacProtocolBase
     simtime_t slotTime = -1;
     simtime_t sifsTime = -1;
     simtime_t difsTime = -1;
-    int maxQueueSize = -1;
     int retryLimit = -1;
     int cwMin = -1;
     int cwMax = -1;

@@ -49,7 +49,6 @@ void Ieee802154Mac::initialize(int stage)
     MacProtocolBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         useMACAcks = par("useMACAcks");
-        queueLength = par("queueLength");
         sifs = par("sifs");
         headerLength = par("headerLength");
         transmissionAttemptInterruptedByRx = false;
@@ -125,8 +124,7 @@ void Ieee802154Mac::initialize(int stage)
         }
         radio->setRadioMode(IRadio::RADIO_MODE_RECEIVER);
 
-        EV_DETAIL << "queueLength = " << queueLength
-                  << " bitrate = " << bitrate
+        EV_DETAIL << " bitrate = " << bitrate
                   << " backoff method = " << par("backoffMethod").stringValue() << endl;
 
         EV_DETAIL << "finished csma init stage 1." << endl;

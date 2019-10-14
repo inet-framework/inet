@@ -43,8 +43,6 @@ module Ieee802154Mac extends MacProtocolBase like IMacProtocol
         // length of MAC header
         int headerLength @unit(b) = default(72 b);
         int mtu @unit(B) = default(0B);
-        // size of the MAC queue (maximum number of packets in Tx buffer)
-        int queueLength = default(100);
         // bit rate
         double bitrate @unit(bps) = default(250000 bps);
 
@@ -105,7 +103,7 @@ module Ieee802154Mac extends MacProtocolBase like IMacProtocol
     submodules:
         queue: <default("DropTailQueue")> like IPacketQueue {
             parameters:
-                packetCapacity = default(queueLength);
+                packetCapacity = default(100);
                 @display("p=100,100;q=l2queue");
         }
     connections allowunconnected:
