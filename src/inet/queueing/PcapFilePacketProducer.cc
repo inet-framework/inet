@@ -16,14 +16,14 @@
 //
 
 #include "inet/common/ModuleAccess.h"
-#include "inet/queueing/PcapFileActivePacketSource.h"
+#include "inet/queueing/PcapFilePacketProducer.h"
 
 namespace inet {
 namespace queueing {
 
-Define_Module(PcapFileActivePacketSource);
+Define_Module(PcapFilePacketProducer);
 
-void PcapFileActivePacketSource::initialize(int stage)
+void PcapFilePacketProducer::initialize(int stage)
 {
     PacketQueueingElementBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
@@ -38,13 +38,13 @@ void PcapFileActivePacketSource::initialize(int stage)
     }
 }
 
-void PcapFileActivePacketSource::finish()
+void PcapFilePacketProducer::finish()
 {
     if (pcapReader.isOpen())
         pcapReader.closePcap();
 }
 
-void PcapFileActivePacketSource::handleMessage(cMessage *message)
+void PcapFilePacketProducer::handleMessage(cMessage *message)
 {
     if (message->isPacket()) {
         auto packet = check_and_cast<Packet *>(message);
@@ -57,7 +57,7 @@ void PcapFileActivePacketSource::handleMessage(cMessage *message)
         throw cRuntimeError("Unknown message: %s", message->getFullName());
 }
 
-void PcapFileActivePacketSource::schedulePacket()
+void PcapFilePacketProducer::schedulePacket()
 {
     auto pair = pcapReader.readPacket();
     auto packet = pair.second;
@@ -69,7 +69,7 @@ void PcapFileActivePacketSource::schedulePacket()
         EV << "End of PCAP file reached.\n";
 }
 
-void PcapFileActivePacketSource::handleCanPushPacket(cGate *gate)
+void PcapFilePacketProducer::handleCanPushPacket(cGate *gate)
 {
     if (gate->getPathStartGate() == outputGate)
         schedulePacket();

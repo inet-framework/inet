@@ -19,7 +19,7 @@ package inet.queueing;
 
 import inet.queueing.contract.IActivePacketSource;
 
-module BurstyActivePacketSource like IActivePacketSource
+module BurstyPacketProducer like IActivePacketSource
 {
     parameters:
         @display("i=block/source");

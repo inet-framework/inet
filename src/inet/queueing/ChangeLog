@@ -18,7 +18,7 @@
 
 	Added new special purpose queueing element classes: CompoundPacketQueue,
 	MarkovClassifier, MarkovScheduler, OrdinalBasedDropper, OrdinalBasedDuplicator,
-	PacketBasedTokenGenerator, PcapFilePassivePacketSink, PcapFileActivePacketSource,
+	PacketBasedTokenGenerator, PcapFilePacketConsumer, PcapFilePacketProducer,
 	PriorityClassifier, PriorityScheduler, QueueBasedTokenGenerator, RedDropper,
 	TokenBasedServer, and WrrScheduler.
 
@@ -27,10 +27,10 @@
 	PacketBuffer, PacketClassifier, PacketCloner, ActivePacketSink, PassivePacketSink,
 	PacketDelayer, PacketDemultiplexer, PacketDuplicator, PacketFilter, PacketMultiplexer,
 	ActivePacketSource, PassivePacketSource, PacketQueue, PacketScheduler, PacketServer,
-	PcapFilePassivePacketSink, PcapFileActivePacketSource, PriorityBuffer, PriorityClassifier,
+	PcapFilePacketConsumer, PcapFilePacketProducer, PriorityBuffer, PriorityClassifier,
 	PriorityScheduler, QueueBasedTokenGenerator, RedDropper, TokenBasedServer,
 	and WrrScheduler.
 
-	Added new NED compound modules: BurstyActivePacketSource, CompoundPacketQueue,
+	Added new NED compound modules: BurstyPacketProducer, CompoundPacketQueue,
 	LeakyBucket, PacketHistory, PriorityQueue, RequestConsumer, ResponseProducer,
 	and TokenBucket.

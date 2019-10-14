@@ -15,37 +15,42 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_PCAPFILEPACKETSINK_H
-#define __INET_PCAPFILEPACKETSINK_H
+#ifndef __INET_PCAPFILEPACKETPRODUCER_H
+#define __INET_PCAPFILEPACKETPRODUCER_H
 
-#include "inet/common/packet/recorder/PcapWriter.h"
-#include "inet/queueing/base/PassivePacketSinkBase.h"
+#include "inet/common/packet/recorder/PcapReader.h"
+#include "inet/queueing/base/PacketQueueingElementBase.h"
 #include "inet/queueing/contract/IActivePacketSource.h"
 
 namespace inet {
 namespace queueing {
 
-class INET_API PcapFilePassivePacketSink : public PassivePacketSinkBase
+class INET_API PcapFilePacketProducer : public PacketQueueingElementBase, public IActivePacketSource
 {
   protected:
-    cGate *inputGate = nullptr;
-    IActivePacketSource *producer = nullptr;
+    cGate *outputGate = nullptr;
+    IPassivePacketSink *consumer = nullptr;
 
-    PcapWriter pcapWriter;
+    PcapReader pcapReader;
 
   protected:
     virtual void initialize(int stage) override;
     virtual void finish() override;
+    virtual void handleMessage(cMessage *message) override;
+
+    virtual void schedulePacket();
 
   public:
-    virtual bool supportsPushPacket(cGate *gate) override { return gate == inputGate; }
+    virtual IPassivePacketSink *getConsumer(cGate *gate) override { return consumer; }
+
+    virtual bool supportsPushPacket(cGate *gate) override { return outputGate == gate; }
     virtual bool supportsPopPacket(cGate *gate) override { return false; }
 
-    virtual void pushPacket(Packet *packet, cGate *gate) override;
+    virtual void handleCanPushPacket(cGate *gate) override;
 };
 
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_PCAPFILEPACKETSINK_H
+#endif // ifndef __INET_PCAPFILEPACKETPRODUCER_H
 

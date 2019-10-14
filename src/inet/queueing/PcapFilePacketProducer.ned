@@ -17,30 +17,29 @@
 
 package inet.queueing;
 
+import inet.queueing.base.PacketSourceBase;
 import inet.queueing.contract.IActivePacketSource;
 
-module ActiveResponseSource like IActivePacketSource
+//
+// This module is an active packet source which pushes packets into the connected
+// packet consumer. All pushed packets are read from a PCAP file.
+//
+// Available packet name format directives:
+//  %s - source address and/or port
+//  %d - destination address and/or port
+//  %p - innermost packet protocol
+//  %t - innermost packet protocol subtype
+//  %l - packet length
+//  %i - packet data information
+//  %n - number of packets read so far
+//
+simple PcapFilePacketProducer like IActivePacketSource
 {
     parameters:
-        int numKind;
+        string filename; // the PCAP file to be read
+        string packetNameFormat = default("Pcap-%p-%t-%n"); // determines the name of the packets read from the PCAP file
+        @class(PcapFilePacketProducer);
         @display("i=block/source");
     gates:
-        output out;
-    submodules:
-        provider[numKind]: PassivePacketSource {
-            @display("p=200,100,row,200");
-        }
-        server[numKind]: TokenBasedServer {
-            tokenProductionInterval = default(0s);
-            @display("p=200,200,row,200");
-        }
-        multiplexer: PacketMultiplexer {
-            @display("p=200,300");
-        }
-    connections:
-        for i=0..sizeof(provider) - 1 {
-            provider[i].out --> server[i].in;
-            server[i].out --> multiplexer.in++;
-        }
-        multiplexer.out --> { @display("m=s"); } --> out;
+        output out @labels(push);
 }

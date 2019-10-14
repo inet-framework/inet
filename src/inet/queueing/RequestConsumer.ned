@@ -22,7 +22,7 @@ import inet.queueing.contract.IPassivePacketSink;
 import inet.queueing.contract.IPacketQueue;
 import inet.queueing.contract.IPacketServer;
 
-module PassiveRequestSink like IPassivePacketSink
+module RequestConsumer like IPassivePacketSink
 {
     parameters:
         int numKind;
