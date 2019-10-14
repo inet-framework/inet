@@ -38,6 +38,6 @@ simple PacketQueueBase
         string displayStringTextFormat = default("contains %p pk (%l)\npushed %u popped %o dropped %d"); // determines display string text above the submodule
         @display("i=block/queue");
     gates:
-        input in;
-        output out;
+        input in @loose;
+        output out @loose;
 }

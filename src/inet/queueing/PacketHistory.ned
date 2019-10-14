@@ -45,7 +45,7 @@ module PacketHistory like IPassivePacketSink, IActivePacketSource
                 frameCapacity = default(size);
                 @display("p=100,200");
         }
-    connections allowunconnected:
+    connections:
         in --> { @display("m=w"); } --> cloner.in;
         cloner.out++ --> { @display("m=e"); } --> out;
         cloner.out++ --> queue.in;

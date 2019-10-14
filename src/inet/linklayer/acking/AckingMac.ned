@@ -64,6 +64,5 @@ module AckingMac extends MacProtocolBase like ILinkLayer, IMacProtocol
             parameters:
                 @display("p=100,100;q=l2queue");
         }
-    connections allowunconnected:
 }
 

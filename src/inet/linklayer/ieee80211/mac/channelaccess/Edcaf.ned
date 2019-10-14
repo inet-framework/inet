@@ -81,6 +81,5 @@ module Edcaf
                 rtsPolicyModule = "^.^.^.rtsPolicy";
                 @display("p=100,600");
         }
-    connections allowunconnected:
 }
 

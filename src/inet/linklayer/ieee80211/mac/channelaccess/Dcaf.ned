@@ -48,6 +48,5 @@ module Dcaf
             parameters:
                 @display("p=100,300");
         }
-    connections allowunconnected:
 }
 

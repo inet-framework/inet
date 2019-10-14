@@ -80,6 +80,5 @@ module Ppp
                 frameCapacity = default(1000);
                 @display("p=100,100;q=l2queue");
         }
-    connections allowunconnected:
 }
 

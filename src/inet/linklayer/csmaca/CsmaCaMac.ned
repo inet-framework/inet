@@ -91,6 +91,5 @@ module CsmaCaMac extends MacProtocolBase like IMacProtocol
                 frameCapacity = default(maxQueueSize);
                 @display("p=100,100;q=l2queue");
         }
-    connections allowunconnected:
 }
 

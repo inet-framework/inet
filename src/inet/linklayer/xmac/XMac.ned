@@ -82,6 +82,5 @@ module XMac extends MacProtocolBase like IMacProtocol
                 frameCapacity = default(queueLength);
                 @display("p=100,100;q=l2queue");
         }
-    connections allowunconnected:
 }
 
