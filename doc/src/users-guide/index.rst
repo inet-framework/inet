@@ -19,6 +19,7 @@ recommend the *INET Developer's Guide*.)
    ch-networks
    ch-network-nodes
    ch-network-interfaces
+   ch-queueing
    ch-apps
    ch-transport
    ch-ipv4
