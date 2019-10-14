@@ -24,6 +24,7 @@ simple TimeBasedTokenGenerator
 {
     parameters:
         string serverModule; // module path of the packet server where the tokens are generated via C++ method call
+        string displayStringTextFormat = default("generated %t tk"); // determines display string text above the submodule
         volatile double generationInterval @unit(s);
         volatile double numTokens = default(1);
         @class(TimeBasedTokenGenerator);

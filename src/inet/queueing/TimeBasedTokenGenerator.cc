@@ -26,6 +26,7 @@ Define_Module(TimeBasedTokenGenerator);
 void TimeBasedTokenGenerator::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
+        displayStringTextFormat = par("displayStringTextFormat");
         generationIntervalParameter = &par("generationInterval");
         numTokensParameter = &par("numTokens");
         server = getModuleFromPar<TokenBasedServer>(par("serverModule"), this);
@@ -49,9 +50,29 @@ void TimeBasedTokenGenerator::handleMessage(cMessage *message)
         numTokensGenerated += numTokens;
         server->addTokens(numTokens);
         scheduleGenerationTimer();
+        updateDisplayString();
     }
     else
         throw cRuntimeError("Unknown message");
+}
+
+void TimeBasedTokenGenerator::updateDisplayString()
+{
+    auto text = StringFormat::formatString(displayStringTextFormat, this);
+    getDisplayString().setTagArg("t", 0, text);
+}
+
+const char *TimeBasedTokenGenerator::resolveDirective(char directive)
+{
+    static std::string result;
+    switch (directive) {
+        case 't':
+            result = std::to_string(numTokensGenerated);
+            break;
+        default:
+            throw cRuntimeError("Unknown directive: %c", directive);
+    }
+    return result.c_str();
 }
 
 } // namespace queueing

@@ -20,13 +20,15 @@
 
 #include "inet/queueing/contract/IPacketQueueingElement.h"
 #include "inet/queueing/TokenBasedServer.h"
+#include "inet/common/StringFormat.h"
 
 namespace inet {
 namespace queueing {
 
-class INET_API TimeBasedTokenGenerator : public cSimpleModule, public IPacketQueueingElement
+class INET_API TimeBasedTokenGenerator : public PacketQueueingElementBase, public StringFormat::IDirectiveResolver
 {
   protected:
+    const char *displayStringTextFormat = nullptr;
     cPar *generationIntervalParameter = nullptr;
     cPar *numTokensParameter = nullptr;
 
@@ -39,6 +41,7 @@ class INET_API TimeBasedTokenGenerator : public cSimpleModule, public IPacketQue
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *message) override;
 
+    virtual void updateDisplayString();
     virtual void scheduleGenerationTimer();
 
   public:
@@ -46,6 +49,8 @@ class INET_API TimeBasedTokenGenerator : public cSimpleModule, public IPacketQue
 
     virtual bool supportsPushPacket(cGate *gate) override { return false; }
     virtual bool supportsPopPacket(cGate *gate) override { return false; }
+
+    virtual const char *resolveDirective(char directive) override;
 };
 
 } // namespace queueing
