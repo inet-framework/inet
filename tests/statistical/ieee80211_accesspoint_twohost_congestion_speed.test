@@ -156,7 +156,6 @@ sim-time-limit = 50s
 # access point
 **.ap.wlan*.mac.address = "10:00:00:00:00:00"
 **.mgmt.accessPointAddress = "10:00:00:00:00:00"
-**.mgmt.frameCapacity = 100
 
 # nic settings
 **.wlan*.*.dataBitrate = 11Mbps
