@@ -24,6 +24,7 @@ namespace queueing {
 
 void PacketFilterBase::initialize(int stage)
 {
+    PacketProcessorBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         inputGate = gate("in");
         outputGate = gate("out");
@@ -33,16 +34,18 @@ void PacketFilterBase::initialize(int stage)
         collector = dynamic_cast<IActivePacketSink *>(outputConnectedModule);
         provider = dynamic_cast<IPassivePacketSource *>(inputConnectedModule);
         consumer = dynamic_cast<IPassivePacketSink *>(outputConnectedModule);
+        numDroppedPackets = 0;
+        droppedTotalLength = b(0);
     }
     else if (stage == INITSTAGE_QUEUEING) {
-        if (consumer != nullptr) {
-            checkPushPacketSupport(inputGate);
+        if (producer != nullptr)
             checkPushPacketSupport(outputGate);
-        }
-        if (provider != nullptr) {
-            checkPopPacketSupport(inputGate);
+        if (collector != nullptr)
             checkPopPacketSupport(outputGate);
-        }
+        if (provider != nullptr)
+            checkPopPacketSupport(inputGate);
+        if (consumer != nullptr)
+            checkPushPacketSupport(inputGate);
     }
 }
 
@@ -56,6 +59,9 @@ void PacketFilterBase::pushPacket(Packet *packet, cGate *gate)
         EV_INFO << "Filtering out packet " << packet->getName() << "." << endl;
         dropPacket(packet, OTHER_PACKET_DROP);
     }
+    numProcessedPackets++;
+    processedTotalLength += packet->getTotalLength();
+    updateDisplayString();
 }
 
 bool PacketFilterBase::canPopSomePacket(cGate *gate)
@@ -80,6 +86,8 @@ Packet *PacketFilterBase::popPacket(cGate *gate)
     auto providerGate = inputGate->getPathStartGate();
     while (true) {
         auto packet = provider->popPacket(providerGate);
+        numProcessedPackets++;
+        processedTotalLength += packet->getTotalLength();
         if (matchesPacket(packet)) {
             EV_INFO << "Passing through packet " << packet->getName() << "." << endl;
             animateSend(packet, outputGate);
@@ -88,6 +96,7 @@ Packet *PacketFilterBase::popPacket(cGate *gate)
         else {
             EV_INFO << "Filtering out packet " << packet->getName() << "." << endl;
             dropPacket(packet, OTHER_PACKET_DROP);
+            updateDisplayString();
         }
     }
 }
@@ -102,6 +111,29 @@ void PacketFilterBase::handleCanPopPacket(cGate *gate)
 {
     if (collector != nullptr)
         collector->handleCanPopPacket(outputGate);
+}
+
+void PacketFilterBase::dropPacket(Packet *packet, PacketDropReason reason, int limit)
+{
+    PacketQueueingElementBase::dropPacket(packet, reason, limit);
+    numDroppedPackets++;
+    droppedTotalLength += packet->getTotalLength();
+}
+
+const char *PacketFilterBase::resolveDirective(char directive)
+{
+    static std::string result;
+    switch (directive) {
+        case 'd':
+            result = std::to_string(numDroppedPackets);
+            break;
+        case 'k':
+            result = droppedTotalLength.str();
+            break;
+        default:
+            return PacketProcessorBase::resolveDirective(directive);
+    }
+    return result.c_str();
 }
 
 } // namespace queueing

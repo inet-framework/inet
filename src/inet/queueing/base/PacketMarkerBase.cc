@@ -53,6 +53,7 @@ void PacketMarkerBase::pushPacket(Packet *packet, cGate *gate)
     markPacket(packet);
     pushOrSendPacket(packet, outputGate, consumer);
     numProcessedPackets++;
+    processedTotalLength += packet->getTotalLength();
     updateDisplayString();
 }
 
@@ -67,6 +68,7 @@ Packet *PacketMarkerBase::popPacket(cGate *gate)
     EV_INFO << "Marking packet " << packet->getName() << "." << endl;
     markPacket(packet);
     numProcessedPackets++;
+    processedTotalLength += packet->getTotalLength();
     updateDisplayString();
     animateSend(packet, outputGate);
     return packet;

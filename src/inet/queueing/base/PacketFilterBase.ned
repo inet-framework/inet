@@ -24,9 +24,10 @@ package inet.queueing.base;
 //
 // @see ~IPacketFilter
 //
-simple PacketFilterBase
+simple PacketFilterBase extends PacketProcessorBase
 {
     parameters:
+        displayStringTextFormat = default("dropped %d/%p pk (%k/%l)"); // determines the text that is written on top of the submodule
         @display("i=block/downarrow");
         @signal[packetDropped](type=inet::Packet);
         @statistic[packetDropped](title="packet drops"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);

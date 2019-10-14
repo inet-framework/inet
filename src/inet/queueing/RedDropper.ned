@@ -17,6 +17,8 @@
 
 package inet.queueing;
 
+import inet.queueing.base.PacketFilterBase;
+
 //
 // This module implements Random Early Detection (RED).
 //
@@ -42,7 +44,7 @@ package inet.queueing;
 // separately for each input gate, so this module can be
 // used to implement different packet drop priorities.
 //
-simple RedDropper
+simple RedDropper extends PacketFilterBase
 {
     parameters:
         string collectionModule = default("");
@@ -51,12 +53,9 @@ simple RedDropper
         double maxth = default(50);  // maximum threshold for avg queue length (=buffer capacity)
         double maxp = default(0.02);  // maximum value for pbs
         double pkrate = default(150);  // average packet rate for calculations when queue is empty
+        @class(RedDropper);
         @display("i=block/downarrow");
         @signal[packetDropped](type=inet::Packet);
         @statistic[packetDropCongestion](title="packet drop: congestion"; source=packetDropReasonIsCongestion(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
-
-    gates:
-        input in;
-        output out;
 }
 

@@ -18,6 +18,7 @@
 #ifndef __INET_PACKETBUFFER_H
 #define __INET_PACKETBUFFER_H
 
+#include "inet/queueing/base/PacketQueueingElementBase.h"
 #include "inet/queueing/contract/IPacketBuffer.h"
 #include "inet/queueing/contract/IPacketCollection.h"
 #include "inet/queueing/contract/IPacketDropperFunction.h"
@@ -25,7 +26,7 @@
 namespace inet {
 namespace queueing {
 
-class INET_API PacketBuffer : public cSimpleModule, public IPacketBuffer, public IPacketCollection
+class INET_API PacketBuffer : public PacketQueueingElementBase, public IPacketBuffer, public IPacketCollection
 {
   protected:
     const char *displayStringTextFormat = nullptr;
@@ -54,6 +55,9 @@ class INET_API PacketBuffer : public cSimpleModule, public IPacketBuffer, public
 
     virtual void addPacket(Packet *packet) override;
     virtual void removePacket(Packet *packet) override;
+
+    virtual bool supportsPushPacket(cGate *gate) override { return false; }
+    virtual bool supportsPopPacket(cGate *gate) override { return false; }
 };
 
 } // namespace queueing

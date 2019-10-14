@@ -18,13 +18,13 @@
 #ifndef __INET_PACKETFILTERBASE_H
 #define __INET_PACKETFILTERBASE_H
 
-#include "inet/queueing/base/PacketQueueingElementBase.h"
+#include "inet/queueing/base/PacketProcessorBase.h"
 #include "inet/queueing/contract/IPacketFilter.h"
 
 namespace inet {
 namespace queueing {
 
-class INET_API PacketFilterBase : public PacketQueueingElementBase, public IPacketFilter
+class INET_API PacketFilterBase : public PacketProcessorBase, public IPacketFilter
 {
   protected:
     cGate *inputGate = nullptr;
@@ -35,9 +35,14 @@ class INET_API PacketFilterBase : public PacketQueueingElementBase, public IPack
     IPassivePacketSink *consumer = nullptr;
     IActivePacketSink *collector = nullptr;
 
+    int numDroppedPackets = 0;
+    b droppedTotalLength = b(-1);
+
   protected:
     virtual void initialize(int stage) override;
     virtual bool matchesPacket(Packet *packet) = 0;
+    virtual void dropPacket(Packet *packet, PacketDropReason reason, int limit = -1) override;
+    virtual const char *resolveDirective(char directive) override;
 
   public:
     virtual IPassivePacketSink *getConsumer(cGate *gate) override { return this; }
