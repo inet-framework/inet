@@ -648,6 +648,7 @@ class INET_API Packet : public cPacket
 };
 
 INET_API TagSet& getTags(cMessage *msg);
+INET_API TagSet *findTags(cMessage *msg);
 
 inline std::ostream& operator<<(std::ostream& os, const Packet *packet) { return os << packet->str(); }
 

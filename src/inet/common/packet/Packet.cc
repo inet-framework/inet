@@ -298,5 +298,14 @@ TagSet& getTags(cMessage *msg)
         return check_and_cast<Message *>(msg)->getTags();
 }
 
+TagSet *findTags(cMessage *msg)
+{
+    if (auto packet = dynamic_cast<Packet *>(msg))
+        return &packet->getTags();
+    if (auto message = dynamic_cast<Message *>(msg))
+        return &message->getTags();
+    return nullptr;
+}
+
 } // namespace
 
