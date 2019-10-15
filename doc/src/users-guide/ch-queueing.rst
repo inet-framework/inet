@@ -13,192 +13,237 @@ Overview
 --------
 
 The INET queueing model provides several reusable modules for various application
-areas. These modules can be used to build application traffic generators, queueing
-models for MAC protocols, traffic shaping, and traffic policing models for quality
-of service implementations. Most queueing model elements are simple modules but
-they are designed to be composable to form more complex behaviors.
+areas. They can be used to build application traffic generators, queueing models
+for MAC protocols, traffic shaping, and traffic policing models for quality of
+service implementations, and so on.
+
+Usage
+~~~~~
+
+The queueing modules can be used in two very different ways. For one, they can
+be connected to other INET modules using their gates. In this case, the modules
+send and receive packets asynchronously as many other INET modules do. For example,
+application packet source and packet sink modules are used this way. The other
+way to use them, is to directly call their C++ methods through one of the C++
+interfaces of the contract package. In this case, the queueing modules are
+not connected to other INET modules at all. For example, MAC protocol modules
+use packet queues as submodules through C++ method calls.
+
+Model
+~~~~~
+
+Most queueing model elements provide simple behaviors, so they are implemented
+as simple modules. But queueing elements can also be composed to form more
+complex behaviors. For example, priority queues, request-response based traffic
+generators, traffic shapers are usually implement as compound modules. In fact,
+some of the queueing model elements provided by INET are actually realized as
+compound modules using composition.
 
 The queueing model can be found in the :ned:`inet.queueing` NED package. All
-elements implement the :cpp:`IPacketQueueingElement` interface.
+queueing model elements implement one or more NED module interfaces and also
+the corresponding C++ interfaces from the contract folder. As a minimum they
+all implement the :cpp:`IPacketQueueingElement` interface.
 
-different external structure:
- - queues as submodules without being connected to the outside world via gates
-   the queue is not in the packet path, it's rather part of the processing module
- - queues which are connected to generators and consumers
-   the queue is in the packet path
+Operation
+~~~~~~~~~
 
-different modes of operation:
- - queues must be able to operate synchronously without utilizing handleMessage
-   a packet getting into a queue may immediately cause another packet to get out from the queue
- - queues must be able to operate asynchronously with utilizing handleMessage
-   this is the old INET 4.0 behaviour
+Internally, connected queueing model elements most often communicate with each
+other using synchronous C++ method calls without utilizing :cpp:`handleMessage()`.
+The most notable exception is when an operation takes a non-zero simulation
+time. For example, when the processing of a packet is delayed.
 
-abstraction via composition:
- - queues can be simple modules
- - queues can be composed from simple modules into compound queue modules
+There are two new important operations on queueing model elements. Packets can
+be *pushed* into gates and packets can be *popped* from gates. The main difference
+between them is the subject of the activity. In the former case, when a packet
+is pushed, the activity is initiated by the *source* of the packet. In contrast,
+when a packet is popped, the activity is initiated by the *sink* of the packet.
 
-easy access through C++ interfaces:
- - protocols should be able to use queues without knowing what is the queue's
-   module structure, mode of operation, simple or compound, etc.
+Queueing model elements can be divided into two categories with respect to the
+operation on a given gate: *passive* and *active*. Active elements push packets
+into output gates and pop packets from input gates as they see fit. Passive
+elements are pushed into and popped from by other connected modules.
 
-TODO
+The queueing model elements validate the assembled structure during module
+initialization with respect to the active and passive behavior of the connected
+gates.
 
-The available modules can be used on their own or they can also be combined in
-many ways to create the desired complex behavior for the above purposes. In order
-to avoid unexpected runtime errors, the queueing modules validate the assembled
-structure during module initialization.
+The following equation about the number of packets holds true for all queueing
+elements:
 
- - component categorization
- - composition rules
-   - validation of the assembled structure during module initialization with respect to push/pop gates
-   - the following is true for all queueing elements (statistics)
-     - #pushed - #dropped - #removed - #popped + #generated = #available + #delayed
- - some selected components
-
-send packets along connections with synchronous method calls but towards non queueing elements asynchronous message sends
-queueing elements directly call each other using C++ functions
-terminology related push and pop and passive vs. active
+#pushed - #dropped - #removed - #popped + #generated = #available + #delayed
 
 Sources
 -------
 
-These modules produce packets either actively when they see fit or passively when
-they are requested to do so.
+These modules act as a source of packets. An active packet source pushes packets
+to its output. A passive packet source returns a packet when it is popped by
+other queueing model elements.
 
--  :ned:`PassivePacketSource`: provides packets with configurable length and content upon request
--  :ned:`ActivePacketSource`: produces packets periodically
--  :ned:`BurstyPacketProducer`: compound module with two different sources to generate bursty traffic
+-  :ned:`ActivePacketSource`: generic source that produces packets periodically
+-  :ned:`PassivePacketSource`: generic source that provides packets as requested
+-  :ned:`BurstyPacketProducer`: mixes two different sources to generate bursty traffic
+-  :ned:`QueueFiller`: produces packets to continuously fill a queue
 -  :ned:`ResponseProducer`: produces complex response traffic based on the incoming request type
--  :ned:`PcapFilePacketProducer`: reads packets from a PCAP file and sends them based on timestamps
+-  :ned:`PcapFilePacketProducer`: replays packets from a PCAP file
 
 Sinks
 -----
 
-These modules consume packets either passively when they arrive or actively when
-they see fit.
+These modules act as a sink of packets. An active packet sink pops packets from
+its input. A passive packet sink is pushed with packets by other queueing model
+elements.
 
--  :ned:`PassivePacketSink`: drops packets
--  :ned:`ActivePacketSink`: pops packets from source periodically
--  :ned:`RequestConsumer`: enqueues incoming requests, processes them in order, and initiates response traffic
+-  :ned:`ActivePacketSink`: generic sink that collects packets periodically
+-  :ned:`PassivePacketSink`: generic sink that consumes packets as they arrive
+-  :ned:`RequestConsumer`: processes incoming requests in order and initiates response traffic
 -  :ned:`PcapFilePacketConsumer`: writes packets to a PCAP file
 
 Queues
 ------
 
-These modules enqueue packets.
-PacketQueue cannot delay packets, if a packetqueue is not empty then it can be popped!
-for any queue the following holds true:
- - pushed - dropped - removed - popped + generated = queue length = available + delayed
- - generated = 0
- - delayed = 0
- - #pushed - #dropped - #removed - #popped = #queueLength = #available
+These modules store packets and maintain the order among them. Queues cannot
+delay packets, so if a queue is not empty, then a packet is always available.
+When a packet is pushed into the input of a queue, then the packet either gets
+stored or dropped if the queue is overloaded. When a packet is popped from the
+output of a queue, then one of the stored packets is returned.
 
--  :ned:`PacketQueue`: a generic packet queue parameterizable with an :cpp:`IPacketComparatorFunction` and an :cpp:`IPacketDropperFunction` 
--  :ned:`DropHeadQueue`: a packet queue which drops packets at the head
--  :ned:`DropTailQueue`: the most commonly used packet queue
--  :ned:`PriorityQueue`: several inner queues and a shared buffer
+The following equation about the number of packets always holds true for queues:
+
+#pushed - #dropped - #removed - #popped = #queueLength = #available
+
+-  :ned:`PacketQueue`: generic queue that provides ordering and selective dropping
+
+   parameterizable with an :cpp:`IPacketComparatorFunction` and an :cpp:`IPacketDropperFunction`
+
+-  :ned:`DropHeadQueue`: drops packets at the head of the queue
+-  :ned:`DropTailQueue`: drops packets at the tail of the queue, the most commonly used queue
+-  :ned:`PriorityQueue`: contains several inner queues using a shared buffer prioritizing over them
+-  :ned:`RedMarkerQueue`: combines random early detection with a queue
 -  :ned:`CompoundPacketQueue`: allows building complex queues by pure NED composition
 
 Buffers
 -------
 
-These modules maintain memory allocation for packets.
+These modules deal with memory allocation of packets without considering the
+order among them. A packet buffer generally doesn't have gates and packets are
+not pushed into or popped from it.
 
--  :ned:`PacketBuffer`: provides sharing storage space between several packet queues with an :cpp:`IPacketDropperFunction`
+-  :ned:`PacketBuffer`: generic buffer that provides shared storage between several queues
+
+   parameterizable with an :cpp:`IPacketDropperFunction`
+
 -  :ned:`PriorityBuffer`: drops packets based on the queue priority
 
 Filters
 -------
 
-These modules filter for packets.
-push -> push or drop
-pop -> pop but may drop several packets and may fail
+These modules filter for specific packets while dropping the rest. When a packet
+is pushed into the input of a packet filter, then the filter either pushes the
+packet to its output or it simply drops the packet. In contrast, when a packet
+is popped from the output of a packet filter, then it continuously pops and drops
+packets from its input until it finds one that matches the filter criteria.
 
--  :ned:`PacketFilter`: generic packet filter parameterizable with an :cpp:`IPacketFilterFunction`
--  :ned:`RateLimiter`:
--  :ned:`OrdinalBasedDropper`:
+-  :ned:`PacketFilter`: generic packet filter
+
+   parameterizable with an :cpp:`IPacketFilterFunction`
+
+-  :ned:`OrdinalBasedDropper`: drops received packets based on their ordinal number
+-  :ned:`RateLimiter`: drops packets above the specified packetrate or datarate
+-  :ned:`RedDropper`: drops packets based on random early detection
 
 Classifiers
 -----------
 
-These modules classify packets.
+These modules classify packets to one of their outputs. When a packet is pushed
+into the input of a packet classifier, then it immediately pushes the packet
+to one of its outputs.
 
--  :ned:`PacketClassifier`: generic packet classifier parameterizable with an :cpp:`IPacketClassifierFunction`
--  :ned:`MarkerClassifier`: classifier based on label
--  :ned:`PriorityClassifier`: first non-full sink
+-  :ned:`PacketClassifier`: generic packet classifier
+
+   parameterizable with an :cpp:`IPacketClassifierFunction`
+
+-  :ned:`PriorityClassifier`: classifies packets to the first non-full output
+-  :ned:`MarkerClassifier`: classifies packets based on the attached labels
 -  :ned:`MarkovClassifier`: classifies packets based on the state of a Markov process
-TODO: UserPriorityClassifier
+-  :ned:`UserPriorityClassifier`: classifies packets based on the attached UserPriorityReq.
 
 Schedulers
 ----------
 
-These modules schedule packets.
+These modules schedule packets from one of their inputs. When a packet is popped
+from the output of a packet scheduler, then it immediately pops a packet from
+one of its inputs and returns that packet.
 
--  :ned:`PacketScheduler`: generic packet scheduler parameterizable with an :cpp:`IPacketSchedulerFunction`
--  :ned:`PriorityScheduler`: 
+-  :ned:`PacketScheduler`: generic packet scheduler
+
+   parameterizable with an :cpp:`IPacketSchedulerFunction`
+
+-  :ned:`PriorityScheduler`: schedules packets from the first non-empty source
 -  :ned:`WrrScheduler`: schedules packets in a weighted Round-robin manner
+-  :ned:`MarkerScheduler`: schedules packets based on the attached labels
 -  :ned:`MarkovScheduler`: schedules packets based on the state of a Markov process
 
 Servers
 -------
 
-These modules serve packets.
+These modules process packets in order one by one. A packet server actively pops
+packets from its input when it sees fit, and it also actively pushes packets into
+its output.
 
--  :ned:`PacketServer`:
--  :ned:`TokenBasedServer`:
+-  :ned:`PacketServer`: serves packets according to the processing time based on packet length
+-  :ned:`TokenBasedServer`: serves packets when the required number of tokens are available
 
 Markers
 -------
 
--  :ned:`PacketMarker`: 
+These modules attach some information to packets on an individual basis. Packets
+can be both pushed into the input and popped from the output of packet markers.
+
+-  :ned:`PacketMarker`: generic marker which attaches labels to packets
+
+   parameterizable with an :cpp:`IPacketFilterFunction`
+
+-  :ned:`RedMarker`: random early detection marker
 
 Meters
 ------
 
--  :ned:`RateMeter`: 
+These modules measure some property of a stream of packets. Packets can be both
+pushed into the input and popped from the output of packet meters.
+
+-  :ned:`RateMeter`: measuring the packetrate and datarate of the received stream of packets 
 
 Token generators
 ----------------
 
-These modules generate tokens for other modules.
+These modules generate tokens for other modules. A token generator generally
+doesn't have gates and packets are not pushed into or popped from it.
 
--  :ned:`QueueBasedTokenGenerator`:
--  :ned:`PacketBasedTokenGenerator`:
--  :ned:`TimeBasedTokenGenerator`:
+-  :ned:`TimeBasedTokenGenerator`: generates tokens based on the elapsed simulation time
+-  :ned:`PacketBasedTokenGenerator`: generates tokens based on the received packets
+-  :ned:`QueueBasedTokenGenerator`: generates tokens based on the state of a queue
 
-RED modules
------------
+Shapers
+-------
 
-Random early detection modules.
+These modules actively shape traffic by changing the order of packets, dropping
+packets, delaying packets, etc. If a shaper is not empty, then a packet is not
+necessarily available, because it can delay packets. They are generally built
+by composition using other queueing model elements.
 
--  :ned:`RedDropper`:
--  :ned:`RedMarker`:
--  :ned:`RedMarkerQueue`:
+-  :ned:`LeakyBucket`: generic shaper with overflow and configurable output rate
+-  :ned:`TokenBucket`: generic shaper with overflow and configurable burstiness and output rate
 
 Other generic modules
 ---------------------
 
-There are some other generic modules.
+There are also some other generic queueing model elements. Each one has its own
+specific purpose and behavior.
 
--  :ned:`PacketMultiplexer`: passively connects multiple inputs to a single output, packets are pushed into the input
--  :ned:`PacketDemultiplexer`: passively connects a single input to multiple outputs, packets are popped from the output 
--  :ned:`PacketDelayer`: sends received packets to the output with delay independently of each other
--  :ned:`PacketDuplicator`: sends copies of received packets to the same output
--  :ned:`PacketCloner`: sends copies of received packets to all outputs
+-  :ned:`PacketMultiplexer`: passively connects multiple inputs to a single output, packets are pushed into the inputs
+-  :ned:`PacketDemultiplexer`: passively connects a single input to multiple outputs, packets are popped from the outputs 
+-  :ned:`PacketDelayer`: sends received packets to the output with some delay independently
+-  :ned:`PacketDuplicator`: sends copies of each received packet to the only output
+-  :ned:`PacketCloner`: sends one copy of each received packet to all outputs
 -  :ned:`PacketHistory`: keeps track of the last N packets which can be inspected in Qtenv
-
-Traffic generators
-------------------
-
-All sources and sinks but more specifically.
-
--  :ned:`RequestConsumer`
--  :ned:`ResponseProducer`
-
-Traffic shapers
----------------
-
-These modules bucket...
-
--  :ned:`LeakyBucket`:
--  :ned:`TokenBucket`:
+-  :ned:`OrdinalBasedDuplicator`: copies received packets based on their ordinal number
