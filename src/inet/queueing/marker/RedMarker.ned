@@ -19,9 +19,8 @@ package inet.queueing.marker;
 
 import inet.queueing.filter.RedDropper;
 
-
 //
-// TODO auto-generated module
+// TODO
 //
 simple RedMarker extends RedDropper
 {

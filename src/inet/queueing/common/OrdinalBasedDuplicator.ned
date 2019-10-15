@@ -18,7 +18,8 @@
 package inet.queueing.common;
 
 //
-// Ordinal Based Duplicator module.
+// This module duplicates packets based on the ordinal number of the packet in
+// the received stream of packets.
 //
 simple OrdinalBasedDuplicator
 {

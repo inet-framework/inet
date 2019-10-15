@@ -20,10 +20,13 @@ package inet.queueing.classifier;
 import inet.queueing.base.PacketClassifierBase;
 import inet.queueing.contract.IPacketClassifier;
 
+//
+// This module classifies packets based on the attached labels in a ~LabelsTag.
+//
 simple MarkerClassifier extends PacketClassifierBase like IPacketClassifier
 {
     parameters:
-        int defaultGateIndex = default(-1);
+        int defaultGateIndex = default(-1); // if no matching labels are found
         string labelsToGateIndices; // space separated list of label and gate index pairs
         @class(MarkerClassifier);
 }

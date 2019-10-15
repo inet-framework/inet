@@ -18,7 +18,10 @@
 package inet.queueing.contract;
 
 //
-// This module interface is implemented by packet source modules.
+// This module interface is implemented by packet source modules which are both
+// active and passive simultaneously.
+//
+// @see ~IPassivePacketSource, ~IActivePacketSource
 //
 moduleinterface IPacketSource
 {

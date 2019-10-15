@@ -18,10 +18,10 @@
 package inet.queueing.contract;
 
 //
-// This module interface must be implemented by passive packet sink modules. A
-// passive packet sink has one input that must be connected to an active packet
-// source module. The connected active packet source is expected to push packets
-// into the passive packet sink over time.
+// This module interface must be implemented by passive packet sink modules.
+// A passive packet sink, also called a consumer, has one input that must be
+// connected to an active packet source module. The connected active packet
+// source is expected to push packets into the passive packet sink over time.
 //
 // @see ~PassivePacketSink, ~PacketQueue, ~PacketClassifier, ~IActivePacketSource
 //

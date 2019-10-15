@@ -21,7 +21,9 @@ package inet.queueing.queue;
 
 import inet.queueing.marker.RedMarker;
 
-
+//
+// TODO
+//
 module RedMarkerQueue extends CompoundPacketQueue
 {
     submodules:

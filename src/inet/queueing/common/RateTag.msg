@@ -21,6 +21,11 @@ import inet.common.Units;
 
 namespace inet;
 
+//
+// This tag can be attached to individual packets the specify the data rate and
+// packet rate. The values are meaningful for a stream of packets which this
+// packet is part of.
+//
 class RateTag extends TagBase
 {
     bps datarate;

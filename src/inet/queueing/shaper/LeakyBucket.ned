@@ -20,6 +20,9 @@ package inet.queueing.shaper;
 import inet.queueing.contract.IPacketQueue;
 import inet.queueing.contract.IPacketServer;
 
+//
+// This module implements a parameterizable leaky bucket algorithm.
+//
 module LeakyBucket like IPacketQueue
 {
     parameters:

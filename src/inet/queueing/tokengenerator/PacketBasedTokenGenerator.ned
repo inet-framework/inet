@@ -20,12 +20,16 @@ package inet.queueing.tokengenerator;
 import inet.queueing.base.PacketSinkBase;
 import inet.queueing.contract.IPassivePacketSink;
 
+//
+// This module generates tokens into the configured ~TokenBasedServer for each
+// consumed packet.
+//
 simple PacketBasedTokenGenerator extends PacketSinkBase like IPassivePacketSink
 {
     parameters:
         string serverModule; // module path of the packet server where the tokens are generated via C++ method call
-        volatile double numTokensPerPacket = default(1);
-        volatile double numTokensPerBit = default(0);
+        volatile double numTokensPerPacket = default(1); // number of tokens per consumed packet
+        volatile double numTokensPerBit = default(0); // number of tokens per consumed bit
         displayStringTextFormat = default("processed %p pk (%l)\ngenerated %t tk"); // %p number of packet, %l total length
         @class(PacketBasedTokenGenerator);
         @display("i=block/control");

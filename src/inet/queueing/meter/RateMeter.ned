@@ -20,10 +20,15 @@ package inet.queueing.meter;
 import inet.queueing.base.PacketMeterBase;
 import inet.queueing.contract.IPacketMeter;
 
+//
+// This module attaches a ~RateTag to each packet specifying the datarate and
+// packetrate of the received stream of packets. The algorithm takes older
+// packets into account with an exponentially decreasing weight.
+//
 simple RateMeter extends PacketMeterBase like IPacketMeter
 {
     parameters:
-        double alpha;
+        double alpha; // parameter in the range of (0, 1) for the exponential weight decrease
         @display("i=block/star");
         @class(RateMeter);
     gates:

@@ -20,7 +20,8 @@ package inet.queueing.filter;
 import inet.queueing.base.PacketFilterBase;
 
 //
-// Ordinal Based Dropper module.
+// This module drops packets based on the ordinal number of the packet in the
+// received stream of packets.
 //
 simple OrdinalBasedDropper extends PacketFilterBase
 {

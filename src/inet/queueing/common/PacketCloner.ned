@@ -19,14 +19,12 @@ package inet.queueing.common;
 
 import inet.queueing.contract.IPassivePacketSink;
 
-
 //
 // This module connects one packet producer to one packet consumer. It can be
 // pushed with packets from the connected packet producer. When this happens,
 // a separate copy of the packet is pushed to each output gate.
 //
-simple PacketCloner like IPassivePacketSink
-						 // IActivePacketSource // TODO: out gate is vector 
+simple PacketCloner like IPassivePacketSink // IActivePacketSource // TODO: out gate is vector 
 {
     parameters:
         @display("i=block/star");

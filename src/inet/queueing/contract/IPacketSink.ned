@@ -18,7 +18,10 @@
 package inet.queueing.contract;
 
 //
-// This module interface is implemented by packet sink modules.
+// This module interface is implemented by packet sink modules which are both
+// passive and active simultaneously.
+//
+// @see ~IPassivePacketSink, ~IActivePacketSink
 //
 moduleinterface IPacketSink
 {

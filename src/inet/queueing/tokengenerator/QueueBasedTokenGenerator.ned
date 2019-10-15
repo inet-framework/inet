@@ -18,7 +18,7 @@
 package inet.queueing.tokengenerator;
 
 //
-// This module generates tokens for a packet server based on the observed state
+// This module generates tokens for a ~TokenBasedServer based on the observed state
 // changes of a packet queue. It's primary purpose is to allow applications to
 // produce traffic which completely utilizes a network interface. This is achieved
 // by generating tokens whenever the observed packet queue becomes empty.

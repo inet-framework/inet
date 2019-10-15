@@ -20,14 +20,20 @@ package inet.queueing.server;
 import inet.queueing.base.PacketServerBase;
 import inet.queueing.contract.IPacketServer;
 
+//
+// This module repeatedly pops packets from the connected packet provider and
+// it pushes them into the connected packet consumer. The packets are processed
+// in zero simulation time, and the process continues until the available number
+// of tokens is not sufficient anymore.
+//
 simple TokenBasedServer extends PacketServerBase like IPacketServer
 {
     parameters:
-        double initialNumTokens = default(0);
-        double maxNumTokens = default(nan);
-        volatile double tokenProductionInterval @unit(s) = default(0s);
-        volatile double tokenConsumptionPerPacket = default(1);
-        volatile double tokenConsumptionPerBit = default(0);
+        double initialNumTokens = default(0); // initial number of tokens
+        double maxNumTokens = default(nan); // maximum number of tokens
+        volatile double tokenProductionInterval @unit(s) = default(0s); // internal token production interval, 0 means tokens are not produced
+        volatile double tokenConsumptionPerPacket = default(1); // how many tokens are consumed per processed packet
+        volatile double tokenConsumptionPerBit = default(0); // how may tokens are consumed per processed bit
         displayStringTextFormat = default("contains %n tk\nserved %p pk (%l)"); // determines display string text above the submodule
         @signal[tokensDepleted];
         @class(TokenBasedServer);
