@@ -1,5 +1,4 @@
  - update NED documentation and User's Guide
+ - review RequestConsumer, ResponseProducer with respect to parallel request processing
  - add signals and statistics to all packet queue modules!
- - document all corresponding interfaces in relation to each other in NED files
- - change all queue users (MACs) to: queue->pushPacket(), !queue->canPopSomePacket() && !isTransmitting(), startTransmitting(queue->popPacket)
  - add pop strategy queue parameter
