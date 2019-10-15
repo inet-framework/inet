@@ -26,7 +26,7 @@ import inet.queueing.contract.IPacketClassifier;
 simple MarkerClassifier extends PacketClassifierBase like IPacketClassifier
 {
     parameters:
-        int defaultGateIndex = default(-1); // if no matching labels are found
+        int defaultGateIndex = default(0); // default gate index if no matching labels are found
         string labelsToGateIndices; // space separated list of label and gate index pairs
         @class(MarkerClassifier);
 }
