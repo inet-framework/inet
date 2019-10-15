@@ -23,7 +23,7 @@ import inet.queueing.contract.IPacketServer;
 //
 // This module implements a parameterizable leaky bucket algorithm.
 //
-module LeakyBucket like IPacketQueue
+module LeakyBucket
 {
     parameters:
         @display("i=block/buffer");
