@@ -22,7 +22,6 @@ import inet.queueing.contract.IActivePacketSource;
 import inet.queueing.server.TokenBasedServer;
 import inet.queueing.tokengenerator.SignalBasedTokenGenerator;
 
-
 //
 // This module is capable of generating several different streams of packets,
 // one after the other. For each traffic category, the packets are produced by
