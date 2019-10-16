@@ -1,4 +1,6 @@
- - merge OPSFv3 into INET when it becomes available and rename OSPF to OSPFv2
+ - extend packet API with updateAtFront<> and updateAtBack taking a modifier lambda function as argument (to replace the remove/insert idiom)
+ - unify C++ namespaces, NED namespaces, folders and file names (e.g. ospfv vs. Ospf3*)
+ - extend applications chapter with generic UdpApp, TcpApp with traffic generators
  - merge BGPv4 into INET when it becomes available
  - implement additional INET specific fingerprint ingredients: network interface configuration, routing table, mobility state, etc.
  - review all names in packet queueing and mathematical function API
