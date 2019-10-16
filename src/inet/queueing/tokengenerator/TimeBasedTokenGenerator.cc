@@ -15,7 +15,6 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-#include "inet/common/ModuleAccess.h"
 #include "inet/queueing/tokengenerator/TimeBasedTokenGenerator.h"
 
 namespace inet {
@@ -25,14 +24,11 @@ Define_Module(TimeBasedTokenGenerator);
 
 void TimeBasedTokenGenerator::initialize(int stage)
 {
+    TokenGeneratorBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        displayStringTextFormat = par("displayStringTextFormat");
         generationIntervalParameter = &par("generationInterval");
         numTokensParameter = &par("numTokens");
-        server = getModuleFromPar<TokenBasedServer>(par("serverModule"), this);
         generationTimer = new cMessage("GenerationTimer");
-        numTokensGenerated = 0;
-        WATCH(numTokensGenerated);
     }
     else if (stage == INITSTAGE_QUEUEING)
         scheduleGenerationTimer();
@@ -54,25 +50,6 @@ void TimeBasedTokenGenerator::handleMessage(cMessage *message)
     }
     else
         throw cRuntimeError("Unknown message");
-}
-
-void TimeBasedTokenGenerator::updateDisplayString()
-{
-    auto text = StringFormat::formatString(displayStringTextFormat, this);
-    getDisplayString().setTagArg("t", 0, text);
-}
-
-const char *TimeBasedTokenGenerator::resolveDirective(char directive)
-{
-    static std::string result;
-    switch (directive) {
-        case 't':
-            result = std::to_string(numTokensGenerated);
-            break;
-        default:
-            throw cRuntimeError("Unknown directive: %c", directive);
-    }
-    return result.c_str();
 }
 
 } // namespace queueing

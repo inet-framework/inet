@@ -17,6 +17,8 @@
 
 package inet.queueing.tokengenerator;
 
+import inet.queueing.base.TokenGeneratorBase;
+
 //
 // This module generates tokens for a ~TokenBasedServer based on the observed state
 // changes of a packet queue. It's primary purpose is to allow applications to
@@ -28,12 +30,10 @@ package inet.queueing.tokengenerator;
 //  %l - processed total packet length
 //  %t - number of generated tokens
 //
-simple QueueBasedTokenGenerator
+simple QueueBasedTokenGenerator extends TokenGeneratorBase
 {
     parameters:
         string queueModule; // module path of the observed packet queue
-        string serverModule; // module path of the packet server where the tokens are generated via C++ method call
-        string displayStringTextFormat = default("generated %t tk"); // determines display string text above the submodule
         int minNumPackets = default(1);
         int minTotalLength @unit(b) = default(0 b);
         volatile double numTokens = default(1); // number of tokens generated when the queue becomes empty

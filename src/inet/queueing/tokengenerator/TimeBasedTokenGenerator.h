@@ -18,30 +18,23 @@
 #ifndef __INET_TIMEBASEDTOKENGENERATOR_H
 #define __INET_TIMEBASEDTOKENGENERATOR_H
 
-#include "inet/common/StringFormat.h"
-#include "inet/queueing/contract/IPacketQueueingElement.h"
-#include "inet/queueing/server/TokenBasedServer.h"
+#include "inet/queueing/base/TokenGeneratorBase.h"
 
 namespace inet {
 namespace queueing {
 
-class INET_API TimeBasedTokenGenerator : public PacketQueueingElementBase, public StringFormat::IDirectiveResolver
+class INET_API TimeBasedTokenGenerator : public TokenGeneratorBase
 {
   protected:
-    const char *displayStringTextFormat = nullptr;
     cPar *generationIntervalParameter = nullptr;
     cPar *numTokensParameter = nullptr;
 
     cMessage *generationTimer = nullptr;
-    TokenBasedServer *server = nullptr;
-
-    int numTokensGenerated = -1;
 
   protected:
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *message) override;
 
-    virtual void updateDisplayString();
     virtual void scheduleGenerationTimer();
 
   public:
@@ -49,8 +42,6 @@ class INET_API TimeBasedTokenGenerator : public PacketQueueingElementBase, publi
 
     virtual bool supportsPushPacket(cGate *gate) override { return false; }
     virtual bool supportsPopPacket(cGate *gate) override { return false; }
-
-    virtual const char *resolveDirective(char directive) override;
 };
 
 } // namespace queueing

@@ -15,37 +15,37 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_QUEUEBASEDTOKENGENERATOR_H
-#define __INET_QUEUEBASEDTOKENGENERATOR_H
+#ifndef __INET_TOKENGENERATORBASE_H
+#define __INET_TOKENGENERATORBASE_H
 
-#include "inet/queueing/base/TokenGeneratorBase.h"
-#include "inet/queueing/contract/IPacketQueue.h"
+#include "inet/common/StringFormat.h"
+#include "inet/queueing/contract/IPacketQueueingElement.h"
+#include "inet/queueing/server/TokenBasedServer.h"
 
 namespace inet {
 namespace queueing {
 
-class INET_API QueueBasedTokenGenerator : public TokenGeneratorBase, public cListener
+class INET_API TokenGeneratorBase : public PacketQueueingElementBase, public StringFormat::IDirectiveResolver
 {
   protected:
-    int minNumPackets = -1;
-    b minTotalLength = b(-1);
-    IPacketQueue *queue = nullptr;
-    cPar *numTokensParameter = nullptr;
+    const char *displayStringTextFormat = nullptr;
+    TokenBasedServer *server = nullptr;
+    int numTokensGenerated = -1;
 
   protected:
     virtual void initialize(int stage) override;
 
-    virtual void generateTokens();
+    virtual void updateDisplayString();
 
   public:
     virtual bool supportsPushPacket(cGate *gate) override { return false; }
     virtual bool supportsPopPacket(cGate *gate) override { return false; }
 
-    virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override;
+    virtual const char *resolveDirective(char directive) override;
 };
 
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_QUEUEBASEDTOKENGENERATOR_H
+#endif // ifndef __INET_TOKENGENERATORBASE_H
 
