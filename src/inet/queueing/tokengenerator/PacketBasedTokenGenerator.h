@@ -48,7 +48,7 @@ class INET_API PacketBasedTokenGenerator : public PassivePacketSinkBase, public 
     virtual void pushPacket(Packet *packet, cGate *gate = nullptr) override;
 
     virtual const char *resolveDirective(char directive) override;
-    virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override;
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, double value, cObject *details) override;
 };
 
 } // namespace queueing

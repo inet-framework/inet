@@ -66,7 +66,7 @@ const char *PacketBasedTokenGenerator::resolveDirective(char directive)
     return result.c_str();
 }
 
-void PacketBasedTokenGenerator::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
+void PacketBasedTokenGenerator::receiveSignal(cComponent *source, simsignal_t signal, double value, cObject *details)
 {
     if (signal == TokenBasedServer::tokensDepletedSignal)
         producer->handleCanPushPacket(inputGate->getPathStartGate());
