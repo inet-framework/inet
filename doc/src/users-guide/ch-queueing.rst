@@ -219,8 +219,9 @@ Token generators
 These modules generate tokens for other modules. A token generator generally
 doesn't have gates and packets are not pushed into or popped from it.
 
--  :ned:`TimeBasedTokenGenerator`: generates tokens based on the elapsed simulation time
--  :ned:`PacketBasedTokenGenerator`: generates tokens based on the received packets
+-  :ned:`TimeBasedTokenGenerator`: generates tokens based on elapsed simulation time
+-  :ned:`PacketBasedTokenGenerator`: generates tokens based on received packets
+-  :ned:`SignalBasedTokenGenerator`: generates tokens based on received signals
 -  :ned:`QueueBasedTokenGenerator`: generates tokens based on the state of a queue
 
 Shapers
