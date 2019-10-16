@@ -34,19 +34,13 @@ class INET_API TokenBasedServer : public PacketServerBase
     const char *displayStringTextFormat = nullptr;
     double maxNumTokens = NaN;
 
-    cMessage *tokenProductionTimer = nullptr;
-
     double numTokens = 0;
 
   protected:
     virtual void initialize(int stage) override;
-    virtual void handleMessage(cMessage *message) override;
-    virtual void scheduleTokenProductionTimer();
     virtual void processPackets();
 
   public:
-    virtual ~TokenBasedServer() { cancelAndDelete(tokenProductionTimer); }
-
     virtual int getNumTokens() const { return numTokens; }
     virtual void addTokens(double tokens);
 

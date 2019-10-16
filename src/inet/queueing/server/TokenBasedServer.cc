@@ -35,34 +35,10 @@ void TokenBasedServer::initialize(int stage)
         displayStringTextFormat = par("displayStringTextFormat");
         numTokens = par("initialNumTokens");
         maxNumTokens = par("maxNumTokens");
-        tokenProductionTimer = new cMessage("TokenProductionTimer");
         WATCH(numTokens);
     }
-    else if (stage == INITSTAGE_QUEUEING)
-        scheduleTokenProductionTimer();
     else if (stage == INITSTAGE_LAST)
         updateDisplayString();
-}
-
-void TokenBasedServer::handleMessage(cMessage *message)
-{
-    if (message == tokenProductionTimer) {
-        numTokens++;
-        if (!std::isnan(maxNumTokens) && numTokens >= maxNumTokens)
-            numTokens = maxNumTokens;
-        processPackets();
-        updateDisplayString();
-        scheduleTokenProductionTimer();
-    }
-    else
-        PacketServerBase::handleMessage(message);
-}
-
-void TokenBasedServer::scheduleTokenProductionTimer()
-{
-    simtime_t interval = par("tokenProductionInterval");
-    if (interval != 0)
-        scheduleAt(simTime() + interval, tokenProductionTimer);
 }
 
 void TokenBasedServer::processPackets()
