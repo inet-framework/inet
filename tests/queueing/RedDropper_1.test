@@ -4,18 +4,18 @@ TODO
 
 %file: test.ned
 
-import inet.common.queueing.PriorityBuffer;
-import inet.common.queueing.PacketClassifier;
-import inet.common.queueing.PacketQueue;
-import inet.common.queueing.PacketCollector;
-import inet.common.queueing.PacketProducer;
-import inet.common.queueing.PriorityScheduler;
-import inet.common.queueing.RedDropper;
+import inet.queueing.buffer.PriorityBuffer;
+import inet.queueing.classifier.PacketClassifier;
+import inet.queueing.queue.PacketQueue;
+import inet.queueing.sink.ActivePacketSink;
+import inet.queueing.source.ActivePacketSource;
+import inet.queueing.scheduler.PriorityScheduler;
+import inet.queueing.filter.RedDropper;
 
 network TestRedDropper
 {
     submodules:
-        producer: PacketProducer {
+        producer: ActivePacketSource {
             @display("p=100,100");
         }
         classifier: PacketClassifier {
@@ -36,7 +36,7 @@ network TestRedDropper
         scheduler: PriorityScheduler {
             @display("p=500,100");
         }
-        collector: PacketCollector {
+        collector: ActivePacketSink {
             @display("p=600,100");
         }
     connections:
@@ -52,7 +52,7 @@ network TestRedDropper
 
 %file: Test.cc
 #include <vector>
-#include "inet/common/queueing/PacketClassifierFunction.h"
+#include "inet/queueing/function/PacketClassifierFunction.h"
 #include "inet/common/packet/Packet.h"
 
 using namespace inet; 

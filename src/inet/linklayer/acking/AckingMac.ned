@@ -19,7 +19,7 @@
 
 package inet.linklayer.acking;
 
-import inet.common.queueing.contract.IPacketQueue;
+import inet.queueing.contract.IPacketQueue;
 import inet.linklayer.base.MacProtocolBase;
 import inet.linklayer.contract.ILinkLayer;
 import inet.linklayer.contract.IMacProtocol;
@@ -64,6 +64,5 @@ module AckingMac extends MacProtocolBase like ILinkLayer, IMacProtocol
             parameters:
                 @display("p=100,100;q=l2queue");
         }
-    connections allowunconnected:
 }
 

@@ -1,26 +1,26 @@
 %description:
 
 In this test, packets are produced periodically by an active packet source
-(PacketProducer). The produced packets are randomly either duplicated or not
+(ActivePacketSource). The produced packets are randomly either duplicated or not
 (PacketDuplicator). Finally, the packets are all sent into a passive packet
-sink (PacketConsumer).
+sink (PassivePacketSink).
 
 %file: test.ned
 
-import inet.common.queueing.PacketConsumer;
-import inet.common.queueing.PacketDuplicator;
-import inet.common.queueing.PacketProducer;
+import inet.queueing.sink.PassivePacketSink;
+import inet.queueing.common.PacketDuplicator;
+import inet.queueing.source.ActivePacketSource;
 
 network TestDuplicator
 {
     submodules:
-        producer: PacketProducer {
+        producer: ActivePacketSource {
             @display("p=100,100");
         }
         duplicator: PacketDuplicator {
             @display("p=200,100");
         }
-        consumer: PacketConsumer {
+        consumer: PassivePacketSink {
             @display("p=300,100");
         }
     connections allowunconnected:

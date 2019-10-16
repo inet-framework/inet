@@ -32,7 +32,7 @@ package inet.linklayer.bmac;
 //*
 //**************************************************************************/
 
-import inet.common.queueing.contract.IPacketQueue;
+import inet.queueing.contract.IPacketQueue;
 import inet.linklayer.base.MacProtocolBase;
 import inet.linklayer.contract.IMacProtocol;
 
@@ -57,9 +57,6 @@ module BMac extends MacProtocolBase like IMacProtocol
         // how long is the check interval (CCA)?
         double checkInterval @unit(s) = default(0.01s);
 
-        // size of the MAC queue (maximum number of packets in Tx buffer)
-        int queueLength = default(20);
-
         // should we animate the nodes with colors depending on their state or 
         // not?
         bool animation = default(true);
@@ -82,13 +79,12 @@ module BMac extends MacProtocolBase like IMacProtocol
         @statistic[linkBroken](title="link break"; source=linkBroken; record=count; interpolationmode=none);
         @statistic[packetDropIncorrectlyReceived](title="packet drop: incorrectly received"; source=packetDropReasonIsIncorrectlyReceived(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetDropNotAddressedToUs](title="packet drop: not addressed to us"; source=packetDropReasonIsNotAddressedToUs(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
-        @statistic[packetDropQueueOverlow](title="packet drop: queue overflow"; source=packetDropReasonIsQueueOverflow(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
+        @statistic[packetDropQueueOverflow](title="packet drop: queue overflow"; source=packetDropReasonIsQueueOverflow(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
     submodules:
         queue: <default("DropTailQueue")> like IPacketQueue {
             parameters:
-                frameCapacity = default(queueLength);
+                packetCapacity = default(20);
                 @display("p=100,100;q=l2queue");
         }
-    connections allowunconnected:
 }
 

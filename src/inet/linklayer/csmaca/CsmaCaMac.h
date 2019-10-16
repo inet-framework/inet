@@ -20,7 +20,7 @@
 
 #include "inet/common/FSMA.h"
 #include "inet/common/packet/Packet.h"
-#include "inet/common/queueing/contract/IPacketQueue.h"
+#include "inet/queueing/contract/IPacketQueue.h"
 #include "inet/linklayer/base/MacProtocolBase.h"
 #include "inet/linklayer/csmaca/CsmaCaMacHeader_m.h"
 #include "inet/physicallayer/contract/packetlevel/IRadio.h"
@@ -43,7 +43,6 @@ class INET_API CsmaCaMac : public MacProtocolBase
     simtime_t slotTime = -1;
     simtime_t sifsTime = -1;
     simtime_t difsTime = -1;
-    int maxQueueSize = -1;
     int retryLimit = -1;
     int cwMin = -1;
     int cwMax = -1;

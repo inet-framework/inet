@@ -18,10 +18,9 @@
 
 package inet.networklayer.diffserv;
 
-import inet.common.queueing.PacketMultiplexer;
-import inet.common.queueing.PacketQueue;
-import inet.common.queueing.RedDropper;
-
+import inet.queueing.common.PacketMultiplexer;
+import inet.queueing.filter.RedDropper;
+import inet.queueing.queue.PacketQueue;
 
 //
 // This is an example queue, that implements

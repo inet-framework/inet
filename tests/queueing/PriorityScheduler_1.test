@@ -1,26 +1,26 @@
 %description:
 
 In this test, packets are collected periodically by an active packet sink
-(PacketCollector). The packets are produced by two active packet sources
-(PacketProducers). The sources are connected to FIFO queues (PacketQueue)
+(ActivePacketSink). The packets are produced by two active packet sources
+(ActivePacketSources). The sources are connected to FIFO queues (PacketQueue)
 where packets are stored temporarily. The single sink is connected to the
 queues using a scheduler (PriorityScheduler). The scheduler forwards packets
 from the queues to the sink in a prioritized way.
 
 %file: test.ned
 
-import inet.common.queueing.PacketCollector;
-import inet.common.queueing.PacketQueue;
-import inet.common.queueing.PriorityScheduler;
-import inet.common.queueing.PacketProducer;
+import inet.queueing.sink.ActivePacketSink;
+import inet.queueing.queue.PacketQueue;
+import inet.queueing.scheduler.PriorityScheduler;
+import inet.queueing.source.ActivePacketSource;
 
 network TestPriorityScheduler
 {
     submodules:
-        producer1: PacketProducer {
+        producer1: ActivePacketSource {
             @display("p=100,100");
         }
-        producer2: PacketProducer {
+        producer2: ActivePacketSource {
             @display("p=100,200");
         }
         queue1: PacketQueue {
@@ -32,7 +32,7 @@ network TestPriorityScheduler
         scheduler: PriorityScheduler {
             @display("p=300,100");
         }
-        collector: PacketCollector {
+        collector: ActivePacketSink {
             @display("p=400,100");
         }
     connections allowunconnected:

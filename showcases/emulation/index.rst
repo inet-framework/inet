@@ -106,3 +106,4 @@ The following showcases demonstrate several such emulation examples:
    :maxdepth: 1
 
    babel/doc/index
+   voip/doc/index

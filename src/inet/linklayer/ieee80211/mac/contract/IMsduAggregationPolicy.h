@@ -18,7 +18,7 @@
 #ifndef __INET_IMSDUAGGREGATIONPOLICY_H
 #define __INET_IMSDUAGGREGATIONPOLICY_H
 
-#include "inet/common/queueing/contract/IPacketQueue.h"
+#include "inet/queueing/contract/IPacketQueue.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 
 namespace inet {

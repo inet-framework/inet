@@ -2,25 +2,25 @@
 
 In this test, packets are passed through from the source to the sink periodically
 (randomly) by an active packet processor (PacketServer). The packets are generated
-by a passive packet source (PacketProvider) and consumed by a passive packet sink
-(PacketConsumer).
+by a passive packet source (PassivePacketSource) and consumed by a passive packet sink
+(PassivePacketSink).
 
 %file: test.ned
 
-import inet.common.queueing.PacketConsumer;
-import inet.common.queueing.PacketProvider;
-import inet.common.queueing.PacketServer;
+import inet.queueing.sink.PassivePacketSink;
+import inet.queueing.source.PassivePacketSource;
+import inet.queueing.server.PacketServer;
 
 network TestServer
 {
     submodules:
-        provider: PacketProvider {
+        provider: PassivePacketSource {
             @display("p=100,100");
         }
         server: PacketServer {
             @display("p=200,100");
         }
-        consumer: PacketConsumer {
+        consumer: PassivePacketSink {
             @display("p=300,100");
         }
     connections allowunconnected:

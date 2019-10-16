@@ -24,7 +24,7 @@
 
 package inet.linklayer.ieee802154Loss;
 
-import inet.common.queueing.contract.IPacketQueue;
+import inet.queueing.contract.IPacketQueue;
 import inet.linklayer.base.MacProtocolBase;
 import inet.linklayer.contract.IMacProtocol;
 import inet.linklayer.ieee802154.Ieee802154Mac;

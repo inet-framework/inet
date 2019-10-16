@@ -18,20 +18,19 @@
 
 #include <stdlib.h>
 
+#include "inet/common/checksum/EthernetCRC.h"
 #include "inet/common/INETUtils.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/ModuleAccess.h"
-//#include "inet/common/ProtocolGroup.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/StringFormat.h"
-#include "inet/common/checksum/EthernetCRC.h"
-#include "inet/common/lifecycle/ModuleOperations.h"
-#include "inet/common/packet/chunk/BytesChunk.h"
-#include "inet/common/queueing/PacketComparatorFunction.h"
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
 #include "inet/linklayer/ethernet/EtherMacBase.h"
-#include "inet/linklayer/ethernet/EtherPhyFrame_m.h"
 #include "inet/linklayer/ethernet/Ethernet.h"
+#include "inet/linklayer/ethernet/EtherPhyFrame_m.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/queueing/function/PacketComparatorFunction.h"
 
 namespace inet {
 

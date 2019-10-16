@@ -1,0 +1,36 @@
+====== inet-4.x ======
+
+2018-10-03  Levente Mészáros
+
+	Added a new queueing package which replaces the old queue package. This new
+	package comes with a different API and a lot of new components. All old queue
+	components were either ported or completely replaced with components of the new
+	queueing package.
+
+	Added new core classes: PacketBuffer, PacketClassifier, PacketCloner, ActivePacketSink,
+	PassivePacketSink, PacketDelayer, PacketDemultiplexer, PacketDuplicator, PacketFilter,
+	PacketMultiplexer, ActivePacketSource, PassivePacketSource, PacketQueue, PacketScheduler,
+	and PacketServer.
+
+	Added new functional extension support classes: CPacketClassifierFunction,
+	CPacketComparatorFunction, CPacketDropperFunction, CPacketFilterFunction,
+	and CPacketSchedulerFunction.
+
+	Added new special purpose queueing element classes: CompoundPacketQueue,
+	MarkovClassifier, MarkovScheduler, OrdinalBasedDropper, OrdinalBasedDuplicator,
+	PacketBasedTokenGenerator, PcapFilePacketConsumer, PcapFilePacketProducer,
+	PriorityClassifier, PriorityScheduler, QueueBasedTokenGenerator, RedDropper,
+	TokenBasedServer, and WrrScheduler.
+
+	Added new NED simple modules: DropHeadQueue, DropTailQueue, MarkovClassifier,
+	MarkovScheduler, OrdinalBasedDropper, OrdinalBasedDuplicator, PacketBasedTokenGenerator,
+	PacketBuffer, PacketClassifier, PacketCloner, ActivePacketSink, PassivePacketSink,
+	PacketDelayer, PacketDemultiplexer, PacketDuplicator, PacketFilter, PacketMultiplexer,
+	ActivePacketSource, PassivePacketSource, PacketQueue, PacketScheduler, PacketServer,
+	PcapFilePacketConsumer, PcapFilePacketProducer, PriorityBuffer, PriorityClassifier,
+	PriorityScheduler, QueueBasedTokenGenerator, RedDropper, TokenBasedServer,
+	and WrrScheduler.
+
+	Added new NED compound modules: BurstyPacketProducer, CompoundPacketQueue,
+	LeakyBucket, PacketHistory, PriorityQueue, RequestConsumer, ResponseProducer,
+	and TokenBucket.

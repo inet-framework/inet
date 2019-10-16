@@ -1,0 +1,407 @@
+%description:
+
+In this test, packets are produced periodically by an active packet source
+(ActivePacketSource). The packets are consumed by a passive packet sink
+(PassivePacketSink). The packet rate is measured and if the rate of packets
+is higher than a predefined threshold, then packets are dropped.
+
+%file: test.ned
+
+import inet.queueing.source.ActivePacketSource;
+import inet.queueing.sink.PassivePacketSink;
+import inet.queueing.filter.RateLimiter;
+import inet.queueing.meter.RateMeter;
+
+network TestMeter
+{
+    submodules:
+        producer: ActivePacketSource {
+            @display("p=100,100");
+        }
+        meter: RateMeter {
+            @display("p=200,100");
+        }
+        limiter: RateLimiter {
+            @display("p=300,100");
+        }
+        consumer: PassivePacketSink {
+            @display("p=400,100");
+        }
+    connections allowunconnected:
+        producer.out --> meter.in;
+        meter.out --> limiter.in;
+        limiter.out --> consumer.in;
+}
+%inifile: omnetpp.ini
+
+[General]
+network = TestMeter
+sim-time-limit = 100s
+cmdenv-event-banners = false
+*.producer.packetLength = 1B
+*.producer.productionInterval = 1s
+*.meter.alpha = 0.9
+*.limiter.maxPacketrate = 0.5
+
+%contains: stdout
+Producing packet producer-0.
+Metering packet producer-0.
+Passing through packet producer-0.
+Consuming packet producer-0.
+
+Running simulation...
+Producing packet producer-1.
+Metering packet producer-1.
+Passing through packet producer-1.
+Consuming packet producer-1.
+Producing packet producer-2.
+Metering packet producer-2.
+Passing through packet producer-2.
+Consuming packet producer-2.
+Producing packet producer-3.
+Metering packet producer-3.
+Passing through packet producer-3.
+Consuming packet producer-3.
+Producing packet producer-4.
+Metering packet producer-4.
+Passing through packet producer-4.
+Consuming packet producer-4.
+Producing packet producer-5.
+Metering packet producer-5.
+Passing through packet producer-5.
+Consuming packet producer-5.
+Producing packet producer-6.
+Metering packet producer-6.
+Passing through packet producer-6.
+Consuming packet producer-6.
+Producing packet producer-7.
+Metering packet producer-7.
+Passing through packet producer-7.
+Consuming packet producer-7.
+Producing packet producer-8.
+Metering packet producer-8.
+Passing through packet producer-8.
+Consuming packet producer-8.
+Producing packet producer-9.
+Metering packet producer-9.
+Filtering out packet producer-9.
+Producing packet producer-10.
+Metering packet producer-10.
+Passing through packet producer-10.
+Consuming packet producer-10.
+Producing packet producer-11.
+Metering packet producer-11.
+Passing through packet producer-11.
+Consuming packet producer-11.
+Producing packet producer-12.
+Metering packet producer-12.
+Filtering out packet producer-12.
+Producing packet producer-13.
+Metering packet producer-13.
+Filtering out packet producer-13.
+Producing packet producer-14.
+Metering packet producer-14.
+Filtering out packet producer-14.
+Producing packet producer-15.
+Metering packet producer-15.
+Passing through packet producer-15.
+Consuming packet producer-15.
+Producing packet producer-16.
+Metering packet producer-16.
+Filtering out packet producer-16.
+Producing packet producer-17.
+Metering packet producer-17.
+Passing through packet producer-17.
+Consuming packet producer-17.
+Producing packet producer-18.
+Metering packet producer-18.
+Filtering out packet producer-18.
+Producing packet producer-19.
+Metering packet producer-19.
+Filtering out packet producer-19.
+Producing packet producer-20.
+Metering packet producer-20.
+Filtering out packet producer-20.
+Producing packet producer-21.
+Metering packet producer-21.
+Passing through packet producer-21.
+Consuming packet producer-21.
+Producing packet producer-22.
+Metering packet producer-22.
+Passing through packet producer-22.
+Consuming packet producer-22.
+Producing packet producer-23.
+Metering packet producer-23.
+Passing through packet producer-23.
+Consuming packet producer-23.
+Producing packet producer-24.
+Metering packet producer-24.
+Filtering out packet producer-24.
+Producing packet producer-25.
+Metering packet producer-25.
+Passing through packet producer-25.
+Consuming packet producer-25.
+Producing packet producer-26.
+Metering packet producer-26.
+Filtering out packet producer-26.
+Producing packet producer-27.
+Metering packet producer-27.
+Passing through packet producer-27.
+Consuming packet producer-27.
+Producing packet producer-28.
+Metering packet producer-28.
+Passing through packet producer-28.
+Consuming packet producer-28.
+Producing packet producer-29.
+Metering packet producer-29.
+Filtering out packet producer-29.
+Producing packet producer-30.
+Metering packet producer-30.
+Filtering out packet producer-30.
+Producing packet producer-31.
+Metering packet producer-31.
+Filtering out packet producer-31.
+Producing packet producer-32.
+Metering packet producer-32.
+Passing through packet producer-32.
+Consuming packet producer-32.
+Producing packet producer-33.
+Metering packet producer-33.
+Filtering out packet producer-33.
+Producing packet producer-34.
+Metering packet producer-34.
+Filtering out packet producer-34.
+Producing packet producer-35.
+Metering packet producer-35.
+Passing through packet producer-35.
+Consuming packet producer-35.
+Producing packet producer-36.
+Metering packet producer-36.
+Passing through packet producer-36.
+Consuming packet producer-36.
+Producing packet producer-37.
+Metering packet producer-37.
+Passing through packet producer-37.
+Consuming packet producer-37.
+Producing packet producer-38.
+Metering packet producer-38.
+Filtering out packet producer-38.
+Producing packet producer-39.
+Metering packet producer-39.
+Passing through packet producer-39.
+Consuming packet producer-39.
+Producing packet producer-40.
+Metering packet producer-40.
+Passing through packet producer-40.
+Consuming packet producer-40.
+Producing packet producer-41.
+Metering packet producer-41.
+Passing through packet producer-41.
+Consuming packet producer-41.
+Producing packet producer-42.
+Metering packet producer-42.
+Filtering out packet producer-42.
+Producing packet producer-43.
+Metering packet producer-43.
+Passing through packet producer-43.
+Consuming packet producer-43.
+Producing packet producer-44.
+Metering packet producer-44.
+Passing through packet producer-44.
+Consuming packet producer-44.
+Producing packet producer-45.
+Metering packet producer-45.
+Filtering out packet producer-45.
+Producing packet producer-46.
+Metering packet producer-46.
+Passing through packet producer-46.
+Consuming packet producer-46.
+Producing packet producer-47.
+Metering packet producer-47.
+Passing through packet producer-47.
+Consuming packet producer-47.
+Producing packet producer-48.
+Metering packet producer-48.
+Passing through packet producer-48.
+Consuming packet producer-48.
+Producing packet producer-49.
+Metering packet producer-49.
+Filtering out packet producer-49.
+Producing packet producer-50.
+Metering packet producer-50.
+Passing through packet producer-50.
+Consuming packet producer-50.
+Producing packet producer-51.
+Metering packet producer-51.
+Passing through packet producer-51.
+Consuming packet producer-51.
+Producing packet producer-52.
+Metering packet producer-52.
+Passing through packet producer-52.
+Consuming packet producer-52.
+Producing packet producer-53.
+Metering packet producer-53.
+Filtering out packet producer-53.
+Producing packet producer-54.
+Metering packet producer-54.
+Passing through packet producer-54.
+Consuming packet producer-54.
+Producing packet producer-55.
+Metering packet producer-55.
+Passing through packet producer-55.
+Consuming packet producer-55.
+Producing packet producer-56.
+Metering packet producer-56.
+Passing through packet producer-56.
+Consuming packet producer-56.
+Producing packet producer-57.
+Metering packet producer-57.
+Passing through packet producer-57.
+Consuming packet producer-57.
+Producing packet producer-58.
+Metering packet producer-58.
+Filtering out packet producer-58.
+Producing packet producer-59.
+Metering packet producer-59.
+Filtering out packet producer-59.
+Producing packet producer-60.
+Metering packet producer-60.
+Filtering out packet producer-60.
+Producing packet producer-61.
+Metering packet producer-61.
+Filtering out packet producer-61.
+Producing packet producer-62.
+Metering packet producer-62.
+Filtering out packet producer-62.
+Producing packet producer-63.
+Metering packet producer-63.
+Passing through packet producer-63.
+Consuming packet producer-63.
+Producing packet producer-64.
+Metering packet producer-64.
+Passing through packet producer-64.
+Consuming packet producer-64.
+Producing packet producer-65.
+Metering packet producer-65.
+Filtering out packet producer-65.
+Producing packet producer-66.
+Metering packet producer-66.
+Filtering out packet producer-66.
+Producing packet producer-67.
+Metering packet producer-67.
+Passing through packet producer-67.
+Consuming packet producer-67.
+Producing packet producer-68.
+Metering packet producer-68.
+Filtering out packet producer-68.
+Producing packet producer-69.
+Metering packet producer-69.
+Filtering out packet producer-69.
+Producing packet producer-70.
+Metering packet producer-70.
+Filtering out packet producer-70.
+Producing packet producer-71.
+Metering packet producer-71.
+Passing through packet producer-71.
+Consuming packet producer-71.
+Producing packet producer-72.
+Metering packet producer-72.
+Filtering out packet producer-72.
+Producing packet producer-73.
+Metering packet producer-73.
+Passing through packet producer-73.
+Consuming packet producer-73.
+Producing packet producer-74.
+Metering packet producer-74.
+Filtering out packet producer-74.
+Producing packet producer-75.
+Metering packet producer-75.
+Passing through packet producer-75.
+Consuming packet producer-75.
+Producing packet producer-76.
+Metering packet producer-76.
+Filtering out packet producer-76.
+Producing packet producer-77.
+Metering packet producer-77.
+Passing through packet producer-77.
+Consuming packet producer-77.
+Producing packet producer-78.
+Metering packet producer-78.
+Passing through packet producer-78.
+Consuming packet producer-78.
+Producing packet producer-79.
+Metering packet producer-79.
+Passing through packet producer-79.
+Consuming packet producer-79.
+Producing packet producer-80.
+Metering packet producer-80.
+Filtering out packet producer-80.
+Producing packet producer-81.
+Metering packet producer-81.
+Filtering out packet producer-81.
+Producing packet producer-82.
+Metering packet producer-82.
+Passing through packet producer-82.
+Consuming packet producer-82.
+Producing packet producer-83.
+Metering packet producer-83.
+Filtering out packet producer-83.
+Producing packet producer-84.
+Metering packet producer-84.
+Passing through packet producer-84.
+Consuming packet producer-84.
+Producing packet producer-85.
+Metering packet producer-85.
+Passing through packet producer-85.
+Consuming packet producer-85.
+Producing packet producer-86.
+Metering packet producer-86.
+Filtering out packet producer-86.
+Producing packet producer-87.
+Metering packet producer-87.
+Filtering out packet producer-87.
+Producing packet producer-88.
+Metering packet producer-88.
+Passing through packet producer-88.
+Consuming packet producer-88.
+Producing packet producer-89.
+Metering packet producer-89.
+Passing through packet producer-89.
+Consuming packet producer-89.
+Producing packet producer-90.
+Metering packet producer-90.
+Passing through packet producer-90.
+Consuming packet producer-90.
+Producing packet producer-91.
+Metering packet producer-91.
+Passing through packet producer-91.
+Consuming packet producer-91.
+Producing packet producer-92.
+Metering packet producer-92.
+Filtering out packet producer-92.
+Producing packet producer-93.
+Metering packet producer-93.
+Filtering out packet producer-93.
+Producing packet producer-94.
+Metering packet producer-94.
+Filtering out packet producer-94.
+Producing packet producer-95.
+Metering packet producer-95.
+Filtering out packet producer-95.
+Producing packet producer-96.
+Metering packet producer-96.
+Passing through packet producer-96.
+Consuming packet producer-96.
+Producing packet producer-97.
+Metering packet producer-97.
+Filtering out packet producer-97.
+Producing packet producer-98.
+Metering packet producer-98.
+Passing through packet producer-98.
+Consuming packet producer-98.
+Producing packet producer-99.
+Metering packet producer-99.
+Filtering out packet producer-99.
+Producing packet producer-100.
+Metering packet producer-100.
+Filtering out packet producer-100.

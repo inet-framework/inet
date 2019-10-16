@@ -57,7 +57,7 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
 # NIC configuration
 #**.ppp[*].ppp.queue.typename = "DropTailQueue" # in routers
-#**.ppp[*].ppp.queue.frameCapacity = 100  # in routers
+#**.ppp[*].ppp.queue.packetCapacity = 100  # in routers
 #**.ppp[*].ppp.mtu = 1500 B
 
 

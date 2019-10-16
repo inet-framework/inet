@@ -1,0 +1,4 @@
+ - update NED documentation and User's Guide
+ - review RequestConsumer, ResponseProducer with respect to parallel request processing
+ - add signals and statistics to all packet queue modules!
+ - add pop strategy queue parameter

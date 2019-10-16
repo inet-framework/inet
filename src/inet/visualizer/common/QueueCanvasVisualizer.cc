@@ -16,7 +16,7 @@
 //
 
 #include "inet/common/ModuleAccess.h"
-#include "inet/common/queueing/PacketQueue.h"
+#include "inet/queueing/queue/PacketQueue.h"
 #include "inet/visualizer/common/QueueCanvasVisualizer.h"
 
 namespace inet {

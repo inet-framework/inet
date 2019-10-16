@@ -1,9 +1,0 @@
-This folder contains many reusable queueing modules for the purpose of traffic
-generation in applications, packet queueing in MAC protocols, traffic shaping,
-and traffic policing in quality of service implementations, and for many other
-tasks when simulating network devices and communication protocols.
-
-The available modules can be used on their own or they can also be combined in
-many ways to create the desired complex behavior for the above purposes. In order
-to avoid unexpected runtime errors, the queueing modules validate the assembled
-structure during module initialization.

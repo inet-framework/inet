@@ -108,7 +108,7 @@ network = SpeedTest
 *.host_10_H_*.cli.sendInterval   = 1.0ms            # 10.000 / speed [ / 2 when halfduplex]
 
 **.mac.address = "auto"
-**.queue.dataQueue.frameCapacity = 1000
+**.queue.dataQueue.packetCapacity = 1000
 
 %#--------------------------------------------------------------------------------------------------------------
 %postrun-command: Rscript check.r

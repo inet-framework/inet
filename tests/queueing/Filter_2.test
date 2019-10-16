@@ -1,26 +1,26 @@
 %description:
 
 In this test, packets are collected periodically by an active packet sink
-(PacketCollector). The packets are provided by a passive packet source
-(PacketProvider). Packets are passed through from the source to the sink by
+(ActivePacketSink). The packets are provided by a passive packet source
+(PassivePacketSource). Packets are passed through from the source to the sink by
 a filter (PacketFilter). Every second packet is dropped.
 
 %file: test.ned
 
-import inet.common.queueing.PacketCollector;
-import inet.common.queueing.PacketFilter;
-import inet.common.queueing.PacketProvider;
+import inet.queueing.sink.ActivePacketSink;
+import inet.queueing.filter.PacketFilter;
+import inet.queueing.source.PassivePacketSource;
 
 network TestFilter
 {
     submodules:
-        provider: PacketProvider {
+        provider: PassivePacketSource {
             @display("p=100,100");
         }
         filter: PacketFilter {
             @display("p=200,100");
         }
-        collector: PacketCollector {
+        collector: ActivePacketSink {
             @display("p=300,100");
         }
     connections allowunconnected:
@@ -29,7 +29,7 @@ network TestFilter
 }
 
 %file: Test.cc
-#include "inet/common/queueing/PacketFilterFunction.h"
+#include "inet/queueing/function/PacketFilterFunction.h"
 #include "inet/common/packet/Packet.h"
 
 using namespace inet; 

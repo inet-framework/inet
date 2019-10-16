@@ -1,29 +1,29 @@
 %description:
 
 In this test, packets are collected periodically (randomly) by several active
-packet sinks (PacketCollectors). The packets are provided by a single passive
-packet source upon request (PacketProvider). The single source is connected to
+packet sinks (ActivePacketSinks). The packets are provided by a single passive
+packet source upon request (PassivePacketSource). The single source is connected to
 the multiple sinks using an intermediary component (PacketDemultiplexer) which
 simply forwards packets.
 
 %file: test.ned
 
-import inet.common.queueing.PacketCollector;
-import inet.common.queueing.PacketDemultiplexer;
-import inet.common.queueing.PacketProvider;
+import inet.queueing.sink.ActivePacketSink;
+import inet.queueing.common.PacketDemultiplexer;
+import inet.queueing.source.PassivePacketSource;
 
 network TestServer
 {
     parameters:
         int numCollectors;
     submodules:
-        provider: PacketProvider {
+        provider: PassivePacketSource {
             @display("p=100,100");
         }
         demultiplexer: PacketDemultiplexer {
             @display("p=200,100");
         }
-        collector[numCollectors]: PacketCollector {
+        collector[numCollectors]: ActivePacketSink {
             @display("p=300,100");
         }
     connections allowunconnected:

@@ -317,8 +317,8 @@
     <filename>ned.DelayChannel.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.common.queue.Delayer</name>
-    <filename>inet.common.queue.Delayer.html</filename>
+    <name>inet.queueing.Delayer</name>
+    <filename>inet.queueing.Delayer.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.applications.dhcp.DhcpClient</name>
@@ -349,8 +349,8 @@
     <filename>inet.physicallayer.antenna.DipoleAntenna.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.common.queue.DropTailQueue</name>
-    <filename>inet.common.queue.DropTailQueue.html</filename>
+    <name>inet.queueing.DropTailQueue</name>
+    <filename>inet.queueing.DropTailQueue.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.linklayer.ieee80211.mac.Ds</name>
@@ -593,8 +593,8 @@
     <filename>inet.mobility.single.FacingMobility.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.common.queue.FifoQueue</name>
-    <filename>inet.common.queue.FifoQueue.html</filename>
+    <name>inet.queueing.FifoQueue</name>
+    <filename>inet.queueing.FifoQueue.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.environment.ground.FlatGround</name>
@@ -1457,8 +1457,8 @@
     <filename>inet.routing.contract.IOspf.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.common.queue.IOutputQueue</name>
-    <filename>inet.common.queue.IOutputQueue.html</filename>
+    <name>inet.queueing.IPacketQueue</name>
+    <filename>inet.queueing.IPacketQueue.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.visualizer.contract.IPacketDropVisualizer</name>
@@ -1709,8 +1709,8 @@
     <filename>inet.networklayer.contract.IxMIPv6Support.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.common.queue.Join</name>
-    <filename>inet.common.queue.Join.html</filename>
+    <name>inet.queueing.Join</name>
+    <filename>inet.queueing.Join.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.linklayer.configurator.L2NetworkConfigurator</name>
@@ -2033,8 +2033,8 @@
     <filename>inet.linklayer.ieee80211.mac.originator.NonQosRecoveryProcedure.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.common.queue.Nop</name>
-    <filename>inet.common.queue.Nop.html</filename>
+    <name>inet.queueing.Nop</name>
+    <filename>inet.queueing.Nop.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.mobility.single.Ns2MotionMobility</name>
@@ -2045,12 +2045,12 @@
     <filename>inet.linklayer.ieee80211.mac.ratecontrol.OnoeRateControl.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.common.queue.OrdinalBasedDropper</name>
-    <filename>inet.common.queue.OrdinalBasedDropper.html</filename>
+    <name>inet.queueing.OrdinalBasedDropper</name>
+    <filename>inet.queueing.OrdinalBasedDropper.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.common.queue.OrdinalBasedDuplicator</name>
-    <filename>inet.common.queue.OrdinalBasedDuplicator.html</filename>
+    <name>inet.queueing.OrdinalBasedDuplicator</name>
+    <filename>inet.queueing.OrdinalBasedDuplicator.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.linklayer.ieee80211.mac.originator.OriginatorAckPolicy</name>
@@ -2213,8 +2213,8 @@
     <filename>inet.linklayer.ppp.PppInterface.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.common.queue.PriorityScheduler</name>
-    <filename>inet.common.queue.PriorityScheduler.html</filename>
+    <name>inet.queueing.PriorityScheduler</name>
+    <filename>inet.queueing.PriorityScheduler.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.networklayer.probabilistic.ProbabilisticBroadcast</name>
@@ -2249,16 +2249,16 @@
     <filename>inet.physicallayer.neighborcache.QuadTreeNeighborCache.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.visualizer.common.QueueCanvasVisualizer</name>
-    <filename>inet.visualizer.common.QueueCanvasVisualizer.html</filename>
+    <name>inet.visualizer.queueingCanvasVisualizer</name>
+    <filename>inet.visualizer.queueingCanvasVisualizer.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.visualizer.common.QueueOsgVisualizer</name>
-    <filename>inet.visualizer.common.QueueOsgVisualizer.html</filename>
+    <name>inet.visualizer.queueingOsgVisualizer</name>
+    <filename>inet.visualizer.queueingOsgVisualizer.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.visualizer.common.QueueVisualizer</name>
-    <filename>inet.visualizer.common.QueueVisualizer.html</filename>
+    <name>inet.visualizer.queueingVisualizer</name>
+    <filename>inet.visualizer.queueingVisualizer.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.visualizer.base.QueueVisualizerBase</name>
@@ -2333,8 +2333,8 @@
     <filename>inet.mobility.single.RectangleMobility.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.common.queue.RedDropper</name>
-    <filename>inet.common.queue.RedDropper.html</filename>
+    <name>inet.queueing.RedDropper</name>
+    <filename>inet.queueing.RedDropper.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.physicallayer.communicationcache.ReferenceCommunicationCache</name>
@@ -2593,8 +2593,8 @@
     <filename>inet.networklayer.diffserv.SingleRateThreeColorMeter.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.common.queue.Sink</name>
-    <filename>inet.common.queue.Sink.html</filename>
+    <name>inet.queueing.Sink</name>
+    <filename>inet.queueing.Sink.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.node.inet.StandardHost</name>
@@ -2725,8 +2725,8 @@
     <filename>inet.applications.tcpapp.TelnetApp.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.common.queue.ThresholdDropper</name>
-    <filename>inet.common.queue.ThresholdDropper.html</filename>
+    <name>inet.queueing.ThresholdDropper</name>
+    <filename>inet.queueing.ThresholdDropper.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.common.misc.ThruputMeter</name>
@@ -2941,8 +2941,8 @@
     <filename>inet.networklayer.wiseroute.WiseRouteNetworkLayer.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.common.queue.WrrScheduler</name>
-    <filename>inet.common.queue.WrrScheduler.html</filename>
+    <name>inet.queueing.WrrScheduler</name>
+    <filename>inet.queueing.WrrScheduler.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.linklayer.xmac.XMac</name>

@@ -1,0 +1,42 @@
+#! /bin/sh
+
+cleanup() {
+    # delete namespaces
+    sudo ip netns del net0
+    sudo ip netns del net1
+}
+
+sigcleanup() {
+    cleanup; trap '' EXIT ; exit 1
+}
+
+# auto-cleanup on exit and when interrupted
+trap cleanup EXIT
+trap sigcleanup INT QUIT TERM
+
+# create namespaces
+cleanup 2>/dev/null
+sudo ip netns add net0
+sudo ip netns add net1
+
+# create a virtual ethernet interface in each namespace, assign IP addresses to them
+# and bring them up
+sudo ip link add veth0 netns net0 type veth peer name veth1 netns net1 || exit 1
+sudo ip netns exec net0 ip addr add 192.168.2.1 dev veth0 || exit 1
+sudo ip netns exec net1 ip addr add 192.168.2.2 dev veth1 || exit 1
+sudo ip netns exec net0 ip link set veth0 up || exit 1
+sudo ip netns exec net1 ip link set veth1 up || exit 1
+
+# add routes
+sudo ip netns exec net0 route add -net 192.168.2.0 netmask 255.255.255.0 dev veth0 || exit 1
+sudo ip netns exec net1 route add -net 192.168.2.0 netmask 255.255.255.0 dev veth1 || exit 1
+
+# add delay+loss+corruption to veth0 interface
+sudo ip netns exec net0 tc qdisc add dev veth0 root netem loss 1% corrupt 5% delay 10ms 1ms || exit 1
+
+# run both simulations
+inet -s -u Cmdenv -c VoipReceiverVirtualEth &
+sleep 1
+inet -s -u Cmdenv -c VoipSenderVirtualEth || exit 1
+wait
+

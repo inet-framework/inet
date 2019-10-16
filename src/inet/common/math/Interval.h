@@ -44,11 +44,11 @@ class INET_API Interval
     void checkImpl(integer_sequence<size_t, IS...>) const {
         unsigned char b = 1 << std::tuple_size<std::tuple<T ...>>::value >> 1;
         bool check = true;
-        std::initializer_list<bool> { check &= std::get<IS>(lower) <= std::get<IS>(upper) ... };
+        std::initializer_list<bool> l1{ check &= std::get<IS>(lower) <= std::get<IS>(upper) ... }; (void)l1;
         if (!check)
             throw cRuntimeError("Invalid lower or upper arguments");
         check = true;
-        std::initializer_list<bool> { check &= (fixed & (b >> IS) ? lowerClosed & upperClosed & (b >> IS) && std::get<IS>(lower) == std::get<IS>(upper) : true) ... };
+        std::initializer_list<bool> l2{ check &= (fixed & (b >> IS) ? lowerClosed & upperClosed & (b >> IS) && std::get<IS>(lower) == std::get<IS>(upper) : true) ... }; (void)l2;
         if (!check)
             throw cRuntimeError("Invalid fixed argument");
         auto mask = (1 << std::tuple_size<std::tuple<T ...>>::value) - 1;

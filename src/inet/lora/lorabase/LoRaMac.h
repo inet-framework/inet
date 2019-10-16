@@ -6,7 +6,7 @@
 #include "inet/linklayer/contract/IMacProtocol.h"
 #include "inet/linklayer/base/MacProtocolBase.h"
 #include "inet/common/FSMA.h"
-#include "inet/common/queueing/contract/IPacketQueue.h"
+#include "inet/queueing/contract/IPacketQueue.h"
 #include "inet/lora/lorabase/LoRaMacFrame_m.h"
 
 

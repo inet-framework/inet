@@ -18,11 +18,11 @@
 
 package inet.linklayer.ethernet;
 
-import inet.common.queueing.CompoundPacketQueue;
-import inet.common.queueing.DropTailQueue;
-import inet.common.queueing.contract.IPacketClassifier;
-import inet.common.queueing.contract.IPacketQueue;
-import inet.common.queueing.contract.IPacketScheduler;
+import inet.queueing.contract.IPacketClassifier;
+import inet.queueing.contract.IPacketQueue;
+import inet.queueing.contract.IPacketScheduler;
+import inet.queueing.queue.CompoundPacketQueue;
+import inet.queueing.queue.DropTailQueue;
 
 //
 // Queue module that gives the PAUSE frames a higher priority.

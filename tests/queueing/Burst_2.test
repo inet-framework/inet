@@ -1,30 +1,30 @@
 %description:
 
 In this test, packets are periodically (randomly) collected by two active sinks
-(PacketCollectors). One sink collects packets with a slower rate while the other
+(ActivePacketSinks). One sink collects packets with a slower rate while the other
 sink uses a faster rate. The two packet sinks are combined using a markov
 chain with random transition matrix and random wait intervals. The packets are
-provided by a single passive source (PacketProvider).
+provided by a single passive source (PassivePacketSource).
 
 %file: test.ned
 
-import inet.common.queueing.PacketCollector;
-import inet.common.queueing.MarkovClassifier;
-import inet.common.queueing.PacketProvider;
+import inet.queueing.sink.ActivePacketSink;
+import inet.queueing.classifier.MarkovClassifier;
+import inet.queueing.source.PassivePacketSource;
 
 network TestBurst
 {
     submodules:
-        provider: PacketProvider {
+        provider: PassivePacketSource {
             @display("p=100,100");
         }
         classifier: MarkovClassifier {
             @display("p=200,100");
         }
-        collector1: PacketCollector {
+        collector1: ActivePacketSink {
             @display("p=300,100");
         }
-        collector2: PacketCollector {
+        collector2: ActivePacketSink {
             @display("p=300,200");
         }
     connections allowunconnected:

@@ -17,7 +17,7 @@
 
 package inet.linklayer.ppp;
 
-import inet.common.queueing.contract.IPacketQueue;
+import inet.queueing.contract.IPacketQueue;
 
 //
 // PPP implementation.
@@ -28,14 +28,14 @@ import inet.common.queueing.contract.IPacketQueue;
 // and maintenance. This model ignores those details, and only performs
 // simple encapsulation/decapsulation and queuing.
 //
-// In routers, PPP relies on an external queue module (see ~IOutputQueue)
+// In routers, PPP relies on an external queue module (see ~IPacketQueue)
 // to model finite buffer, implement QoS and/or RED, and requests packets
 // from this external queue one-by-one.
 //
 // In hosts, no such queue is used, so PPP contains an internal
-// queue named txQueue to queue up packets waiting for transmission.
-// Conceptually, txQueue is of infinite size, but for better diagnostics
-// one can specify a hard limit in the txQueueLimit parameter -- if this is
+// queue to store packets waiting for transmission.
+// Conceptually, the queue is of infinite size, but for better diagnostics
+// one can specify a hard limit in the packetCapacity parameter -- if this is
 // exceeded, the simulation stops with an error.
 //
 // There is no buffering done on received packets -- they are just decapsulated
@@ -49,7 +49,6 @@ module Ppp
         string interfaceTableModule;   // The path to the InterfaceTable module
         string displayStringTextFormat = default("rate: %b\nsent: %s, rcvd: %r\nqueue: %q, drop: %d");
         bool sendRawBytes = default(false); // when true packets are serialized into a sequence of bytes before sending out
-        int txQueueLimit = default(1000);  // zero means infinite
         int mtu @unit(B) = default(4470B);
         @lifecycleSupport;
         double stopOperationExtraTime @unit(s) = default(-1s);    // extra time after lifecycle stop operation finished
@@ -78,9 +77,8 @@ module Ppp
     submodules:
         queue: <default("DropTailQueue")> like IPacketQueue {
             parameters:
-                frameCapacity = default(txQueueLimit);
+                packetCapacity = default(1000);
                 @display("p=100,100;q=l2queue");
         }
-    connections allowunconnected:
 }
 

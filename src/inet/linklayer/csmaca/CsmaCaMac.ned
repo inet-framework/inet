@@ -17,7 +17,7 @@
 
 package inet.linklayer.csmaca;
 
-import inet.common.queueing.contract.IPacketQueue;
+import inet.queueing.contract.IPacketQueue;
 import inet.linklayer.base.MacProtocolBase;
 import inet.linklayer.contract.IMacProtocol;
 
@@ -64,7 +64,6 @@ module CsmaCaMac extends MacProtocolBase like IMacProtocol
                                           // "auto". "auto" values will be replaced by
                                           // a generated MAC address in init stage 0.
         string fcsMode @enum("declared","computed") = default("declared");
-        int maxQueueSize = default(-1); // maximum queue length in frames
         bool useAck = default(true);
         double bitrate @unit(bps);
         int headerLength @unit(B) = default(17B); // maximum 255 byte, minimum 17B for serializing, see CsmaCaMacDataHeader
@@ -88,9 +87,8 @@ module CsmaCaMac extends MacProtocolBase like IMacProtocol
     submodules:
         queue: <default("DropTailQueue")> like IPacketQueue {
             parameters:
-                frameCapacity = default(maxQueueSize);
+                packetCapacity = default(-1);
                 @display("p=100,100;q=l2queue");
         }
-    connections allowunconnected:
 }
 

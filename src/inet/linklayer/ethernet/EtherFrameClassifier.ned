@@ -18,8 +18,8 @@
 
 package inet.linklayer.ethernet;
 
-import inet.common.queueing.base.PacketClassifierBase;
-import inet.common.queueing.contract.IPacketClassifier;
+import inet.queueing.base.PacketClassifierBase;
+import inet.queueing.contract.IPacketClassifier;
 
 //
 // Classifier that forwards Ethernet PAUSE frames

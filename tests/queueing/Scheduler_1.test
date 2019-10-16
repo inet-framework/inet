@@ -1,30 +1,30 @@
 %description:
 
 In this test, packets are collected periodically by an active packet sink
-(PacketCollector). The packets are produced by two passive packet sources
-(PacketProviders). The single sink is connected to the two sources using a
+(ActivePacketSink). The packets are produced by two passive packet sources
+(PassivePacketSources). The single sink is connected to the two sources using a
 scheduler (PacketScheduler). The scheduler forwards packets alternately from
 one or the other source.
 
 %file: test.ned
 
-import inet.common.queueing.PacketCollector;
-import inet.common.queueing.PacketScheduler;
-import inet.common.queueing.PacketProvider;
+import inet.queueing.sink.ActivePacketSink;
+import inet.queueing.scheduler.PacketScheduler;
+import inet.queueing.source.PassivePacketSource;
 
 network TestScheduler
 {
     submodules:
-        provider1: PacketProvider {
+        provider1: PassivePacketSource {
             @display("p=100,100");
         }
-        provider2: PacketProvider {
+        provider2: PassivePacketSource {
             @display("p=100,200");
         }
         scheduler: PacketScheduler {
             @display("p=200,100");
         }
-        collector: PacketCollector {
+        collector: ActivePacketSink {
             @display("p=300,100");
         }
     connections allowunconnected:
@@ -35,13 +35,13 @@ network TestScheduler
 
 %file: Test.cc
 #include <vector>
-#include "inet/common/queueing/PacketSchedulerFunction.h"
+#include "inet/queueing/function/PacketSchedulerFunction.h"
 #include "inet/common/packet/Packet.h"
-#include "inet/common/queueing/contract/IPacketProvider.h"
+#include "inet/queueing/contract/IPassivePacketSource.h"
 
 using namespace inet; 
 
-static int testSchedule(const std::vector<queueing::IPacketProvider *>& providers)
+static int testSchedule(const std::vector<queueing::IPassivePacketSource *>& providers)
 {
     static int i = 0;
     return i++ % 2;

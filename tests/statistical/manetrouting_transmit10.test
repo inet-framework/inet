@@ -127,8 +127,7 @@ description = "Aodv Simple test"
 **.wlan*.*.controlBitrate = 1Mbps
 #for validation
 **.wlan*.mac.EDCA = false
-**.wlan*.mgmt.frameCapacity = 10
-**.wlan*.mac.queue.frameCapacity = 14
+**.wlan*.mac.queue.packetCapacity = 14
 **.wlan*.mac.rtsThresholdBytes = 3000B
 **.wlan*.mac.basicBitrate = 6Mbps  # 24Mbps
 **.wlan*.mac.retryLimit = 7

@@ -1,0 +1,58 @@
+%description:
+
+In this test, packets are collected periodically by an active packet sink
+(ActivePacketSink). The packets are provided by a passive packet source
+(PassivePacketSource).
+
+%file: test.ned
+
+import inet.queueing.sink.ActivePacketSink;
+import inet.queueing.source.PassivePacketSource;
+
+network TestProviderCollector
+{
+    submodules:
+        provider: PassivePacketSource {
+            @display("p=100,100");
+        }
+        collector: ActivePacketSink {
+            @display("p=200,100");
+        }
+    connections:
+        provider.out --> collector.in;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = TestProviderCollector
+sim-time-limit = 10s
+cmdenv-event-banners = false
+*.provider.packetLength = 1B
+*.collector.collectionInterval = 1s
+
+%contains: stdout
+Providing packet provider-0.
+Collecting packet provider-0.
+
+Running simulation...
+Providing packet provider-1.
+Collecting packet provider-1.
+Providing packet provider-2.
+Collecting packet provider-2.
+Providing packet provider-3.
+Collecting packet provider-3.
+Providing packet provider-4.
+Collecting packet provider-4.
+Providing packet provider-5.
+Collecting packet provider-5.
+Providing packet provider-6.
+Collecting packet provider-6.
+Providing packet provider-7.
+Collecting packet provider-7.
+Providing packet provider-8.
+Collecting packet provider-8.
+Providing packet provider-9.
+Collecting packet provider-9.
+Providing packet provider-10.
+Collecting packet provider-10.

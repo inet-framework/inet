@@ -40,7 +40,7 @@ module ExtUpperEthernetInterface extends ExtInterface like IEthernetInterface
         }
         mac: <default(csmacdSupport ? "EtherMac" : "EtherMacFullDuplex")> like IEtherMac {
             parameters:
-                txQueueLimit = 10000;
+                queue.packetCapacity = 10000;
                 @display("p=200,400");
         }
     connections allowunconnected:

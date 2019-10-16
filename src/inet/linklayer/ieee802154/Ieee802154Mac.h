@@ -27,7 +27,7 @@
 #ifndef __INET_IEEE802154MAC_H
 #define __INET_IEEE802154MAC_H
 
-#include "inet/common/queueing/contract/IPacketQueue.h"
+#include "inet/queueing/contract/IPacketQueue.h"
 #include "inet/linklayer/base/MacProtocolBase.h"
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/linklayer/contract/IMacProtocol.h"
@@ -82,7 +82,6 @@ class INET_API Ieee802154Mac : public MacProtocolBase, public IMacProtocol
         , initialCW(0)
         , txPower(0)
         , NB(0)
-        , queueLength(0)
         , txAttempts(0)
         , bitrate(0)
         , ackLength(0)
@@ -262,9 +261,6 @@ class INET_API Ieee802154Mac : public MacProtocolBase, public IMacProtocol
 
     /** @brief number of backoff performed until now for current frame */
     int NB;
-
-    /** @brief length of the queue*/
-    unsigned int queueLength;
 
     /** @brief count the number of tx attempts
      *
