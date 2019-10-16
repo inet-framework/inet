@@ -26,6 +26,8 @@ namespace queueing {
 class INET_API TokenBasedServer : public PacketServerBase
 {
   public:
+    static simsignal_t tokensAddedSignal;
+    static simsignal_t tokensRemovedSignal;
     static simsignal_t tokensDepletedSignal;
 
   protected:
@@ -34,6 +36,7 @@ class INET_API TokenBasedServer : public PacketServerBase
     const char *displayStringTextFormat = nullptr;
     double maxNumTokens = NaN;
 
+    bool tokensDepletedSignaled = true;
     double numTokens = 0;
 
   protected:

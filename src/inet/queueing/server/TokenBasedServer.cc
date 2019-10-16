@@ -24,6 +24,8 @@ namespace queueing {
 
 Define_Module(TokenBasedServer);
 
+simsignal_t TokenBasedServer::tokensAddedSignal = cComponent::registerSignal("tokensAdded");
+simsignal_t TokenBasedServer::tokensRemovedSignal = cComponent::registerSignal("tokensRemoved");
 simsignal_t TokenBasedServer::tokensDepletedSignal = cComponent::registerSignal("tokensDepleted");
 
 void TokenBasedServer::initialize(int stage)
@@ -58,14 +60,18 @@ void TokenBasedServer::processPackets()
                 pushOrSendPacket(packet, outputGate, consumer);
                 numProcessedPackets++;
                 numTokens -= numRequiredTokens;
+                emit(tokensRemovedSignal, numTokens);
+                updateDisplayString();
             }
             else {
-                emit(tokensDepletedSignal, this);
+                if (!tokensDepletedSignaled) {
+                    tokensDepletedSignaled = true;
+                    emit(tokensDepletedSignal, numTokens);
+                }
                 break;
             }
         }
     }
-    updateDisplayString();
 }
 
 void TokenBasedServer::handleCanPushPacket(cGate *gate)
@@ -85,6 +91,8 @@ void TokenBasedServer::addTokens(double tokens)
     numTokens += tokens;
     if (!std::isnan(maxNumTokens) && numTokens >= maxNumTokens)
         numTokens = maxNumTokens;
+    emit(tokensAddedSignal, numTokens);
+    tokensDepletedSignaled = false;
     processPackets();
     updateDisplayString();
 }
