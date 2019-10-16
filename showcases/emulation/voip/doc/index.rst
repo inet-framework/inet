@@ -154,7 +154,7 @@ First, run the following command on the receiver side:
 
 .. code-block:: bash
 
-   inet -u Cmdenv -c VoipReceiver
+   $ inet -u Cmdenv -c VoipReceiver
 
 Once the receiver is running, enter the following command on the sender side
 (replace ``10.0.0.8`` with the IP address of the host the receiver side is
@@ -162,7 +162,7 @@ running on):
 
 .. code-block:: bash
 
-   inet -u Cmdenv -c VoipSender '--*.app.destAddress="10.0.0.8"'
+   $ inet -u Cmdenv -c VoipSender '--*.app.destAddress="10.0.0.8"'
 
 That's all. When the receiver-side simulation exits, you'll find the received
 audio file in ``results/received.wav``. You may need to raise the CPU time limit
@@ -174,10 +174,7 @@ Using the Loopback Interface
 In this configuration, both simulations run on the same host, and packets will
 go via the loopback interface. Each sent packet goes down the protocol stack,
 through the loopback interface, and back up the protocol stack into the other
-simulation process. The Linux kernel even allows us to apply a small amount of
-delay, jitter, packet loss and data corruption to the packets traveling through
-the interface, to simulate the effects of the packets going through a real
-network.
+simulation process.
 
 The setup for the loopback interface case is illustrated by the following
 figure:
@@ -186,27 +183,39 @@ figure:
    :align: center
    :width: 40%
 
-The simulation can be run with a shell script, listed below, that performs the
-appropriate configuration and starts the simulations. The script applies some
-delay (10ms with 1ms random variation), packet loss and data corruption to the
-traffic passing through the loopback interface. It runs both simulations in
-Cmdenv. The simulations are run until the configured simulation time limit,
-which is enough for the transfer of the whole audio file. When the simulations
-are finished, the delay, packets loss and corruption are removed from the
-loopback interface.
+You can run this scenario in the same way as the previous one, just specify
+``127.0.0.1`` for destination address.
 
-The ``run_loopback`` script:
+.. code-block:: bash
 
-.. literalinclude:: ../run_loopback
-   :language: bash
+   $ inet -u Cmdenv -c VoipReceiver &
+   $ inet -u Cmdenv -c VoipSender '--*.app.destAddress="127.0.0.1"'
 
-The only extra configuration needed in the simulations is to set the
-``destAddress`` parameter of the sender to ``127.0.0.1``, the loopback address.
+Loopback Interface with Realistic Network Conditions
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. literalinclude:: ../omnetpp.ini
-   :language: ini
-   :start-at: VoipSenderLoopback
-   :end-before: VoipSenderVirtualEth
+The Linux kernel allows us to apply delay, jitter, packet loss and data
+corruption to the packets traveling through the loopback interface. We can use
+this feature to simulate the effects of the packets going through a real
+network.
+
+To try it, issue the following command before running the simulations. The
+command adds some delay (10ms with 1ms random variation), packet loss and data
+corruption to the traffic passing through the loopback interface:
+
+.. code-block:: bash
+
+   $ sudo tc qdisc add dev lo root netem loss 1% corrupt 5% delay 10ms 1ms
+
+When you are done with the experiments, run the following command to restore the
+loopback interface to its original state:
+
+.. code-block:: bash
+
+   $ sudo tc qdisc del dev lo root
+
+Alternatively, you can use the provided :download:`run_loopback<../run_loopback>`
+script that automates the above procedure.
 
 Using Virtual Ethernet Interfaces
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -224,35 +233,53 @@ interfaces will be connected to each other. This setup is illustrated below:
    :align: center
    :width: 40%
 
-The run script in this case (see below) creates the two namespaces and a *veth*
-interface in each, and adds routes (a route for each direction is required
-because there is an ARP exchange at the beginning). Note that the *veth*
-interfaces are created in pairs, and are automatically connected to each other.
-The scripts also adds the same delay, loss and corruption to the ``veth0``
-interface as the loopback script. Then it runs the simulations. When they are
-finished, it destroys the namespaces.
+It can be produced with the following lengthy sequence of commands that
+needs to be run as *root*:
 
-The ``run_veth`` script:
-
-.. literalinclude:: ../run_veth
+.. literalinclude:: ../veth_setup
    :language: bash
+   :start-at: create namespaces
 
-In the simulation configurations, we need to set the network namespace of the
-:ned:`ExtLowerUdp` modules to ``net0`` and ``net1``, and the sender's
-``destAddress`` parameter to ``192.168.2.2``.
+The commands create the two namespaces, and a *veth* interface in each. Then
+they add routes; a route for both direction is required because even though VoIP
+traffic uses only one direction, there is an ARP exchange at the beginning. Note
+that the *veth* interfaces are created in pairs, and are automatically connected
+to each other. The last command adds some some delay, packet loss and corruption
+to the ``veth0`` interface like we did in the loopback-based setup.
+
+In the simulation configurations, we need to tell the :ned:`ExtLowerUdp` modules
+to use the ``net0`` / ``net1`` namespaces, and set the sender's ``destAddress``
+parameter to ``192.168.2.2``.
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
    :start-at: VoipSenderVirtualEth
 
-The received audio file is saved to the ``results`` folder.
+You can run the simulations with the following commands:
+
+.. code-block:: bash
+
+   $ inet -s -u Cmdenv -c VoipReceiverVirtualEth &
+   $ inet -s -u Cmdenv -c VoipSenderVirtualEth
+
+When you are finished, you can remove the virtual Ethernet interfaces by
+deleting the namespaces with the following commands (also to be run as *root*):
+
+.. literalinclude:: ../veth_teardown
+   :language: bash
+   :start-after: remove the namespaces
+
+If you don't want to enter the setup and teardown commands manually, you can use
+the provided :download:`veth_setup<../veth_setup>` and
+:download:`veth_teardown<../veth_teardown>` scripts (with ``sudo``), or use
+:download:`run_veth<../run_veth>` that automates the complete procedure.
 
 Results
 -------
 
-Let's look at results obtained from running the loopback-based configuration! As
-a reference, you can listen to the original audio file by clicking the play
-button below:
+Let's look at results obtained from running the loopback-based configuration
+with a lossy link. As a reference, you can listen to the original audio file by
+clicking the play button below:
 
 .. raw:: html
 
@@ -285,7 +312,8 @@ and keep the packet order, a data rate can be specified in the ``netem`` command
 e.g. ``rate 1000kbps``. This eliminates reordering in this scenario.)
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`AppContainer.ned <../AppContainer.ned>`,
-:download:`run_loopback <../run_loopback>`, :download:`run_veth <../run_veth>`
+:download:`run_loopback <../run_loopback>`, :download:`run_veth <../run_veth>`,
+:download:`veth_setup <../veth_setup>`, :download:`veth_teardown <../veth_teardown>`
 
 Discussion
 ----------
