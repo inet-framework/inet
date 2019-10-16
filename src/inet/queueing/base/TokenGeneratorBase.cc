@@ -41,9 +41,12 @@ const char *TokenGeneratorBase::resolveDirective(char directive)
 {
     static std::string result;
     switch (directive) {
-        case 't':
-            result = std::to_string(numTokensGenerated);
+        case 't': {
+            std::stringstream stream;
+            stream << numTokensGenerated;
+            result = stream.str();
             break;
+        }
         default:
             throw cRuntimeError("Unknown directive: %c", directive);
     }

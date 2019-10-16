@@ -54,9 +54,12 @@ const char *PacketBasedTokenGenerator::resolveDirective(char directive)
 {
     static std::string result;
     switch (directive) {
-        case 't':
-            result = std::to_string(numTokensGenerated);
+        case 't': {
+            std::stringstream stream;
+            stream << numTokensGenerated;
+            result = stream.str();
             break;
+        }
         default:
             return PassivePacketSinkBase::resolveDirective(directive);
     }

@@ -117,9 +117,12 @@ const char *TokenBasedServer::resolveDirective(char directive)
 {
     static std::string result;
     switch (directive) {
-        case 'n':
-            result = std::to_string(numTokens);
+        case 'n': {
+            std::stringstream stream;
+            stream << numTokens;
+            result = stream.str();
             break;
+        }
         default:
             return PacketServerBase::resolveDirective(directive);
     }
