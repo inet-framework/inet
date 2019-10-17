@@ -13,6 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
+#include "inet/applications/common/SocketTag_m.h"
 #include "inet/applications/tcpapp/TcpServerSocketIo.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 
@@ -43,6 +44,7 @@ void TcpServerSocketIo::handleMessage(cMessage *message)
 
 void TcpServerSocketIo::socketDataArrived(TcpSocket* socket, Packet *packet, bool urgent)
 {
+    packet->removeTag<SocketInd>();
     send(packet, "trafficOut");
 }
 
