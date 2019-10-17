@@ -47,8 +47,11 @@ void MarkovClassifier::initialize(int stage)
                 transitionProbabilities[i].push_back(atof(transitionProbabilitiesTokenizer.nextToken()));
         }
         cStringTokenizer waitIntervalsTokenizer(par("waitIntervals"));
-        for (int i = 0; i < numStates; i++)
-            waitIntervals.push_back(SimTime::parse(waitIntervalsTokenizer.nextToken()));
+        for (int i = 0; i < numStates; i++) {
+            cDynamicExpression expression;
+            expression.parse(waitIntervalsTokenizer.nextToken());
+            waitIntervals.push_back(expression);
+        }
         waitTimer = new cMessage("WaitTimer");
         WATCH(state);
     }
@@ -88,7 +91,7 @@ int MarkovClassifier::classifyPacket(Packet *packet)
 
 void MarkovClassifier::scheduleWaitTimer()
 {
-    scheduleAt(simTime() + waitIntervals[state], waitTimer);
+    scheduleAt(simTime() + waitIntervals[state].doubleValue(this), waitTimer);
 }
 
 bool MarkovClassifier::canPopSomePacket(cGate *gate)
