@@ -31,7 +31,11 @@ void AckingMacProtocolPrinter::print(const Ptr<const Chunk>& chunk, const Protoc
     if (auto header = dynamicPtrCast<const AckingMacHeader>(chunk)) {
         context.sourceColumn << header->getSrc();
         context.destinationColumn << header->getDest();
-        context.infoColumn << "(Acking MAC) " << chunk;        //TODO
+        context.infoColumn << "(Acking MAC) (chunkLength = " << header->getChunkLength() << "), "
+                << "srcAddr: " << header->getSrc() << ", "
+                << "destAddr: " << header->getDest() << ", "
+                << "srcModuleId: " << header->getSrcModuleId() << ", "
+                << "networkProtocol: " << header->getNetworkProtocol();
     }
     else
         context.infoColumn << "(Acking MAC) " << chunk;
