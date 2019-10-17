@@ -20,6 +20,7 @@ package inet.queueing.source;
 import inet.queueing.common.PacketMultiplexer;
 import inet.queueing.contract.IActivePacketSource;
 import inet.queueing.server.TokenBasedServer;
+import inet.queueing.tokengenerator.SignalBasedTokenGenerator;
 
 //
 // This module is capable of generating several different streams of packets,
@@ -34,19 +35,24 @@ module ResponseProducer like IActivePacketSource
 {
     parameters:
         int numKind;
+        string requestConsumerModule = default("^.sink");
         @display("i=block/source");
     gates:
         output out;
     submodules:
         provider[numKind]: PassivePacketSource {
-            @display("p=200,100,row,200");
+            @display("p=300,100,row,200");
         }
         server[numKind]: TokenBasedServer {
-            tokenProductionInterval = default(0s);
-            @display("p=200,200,row,200");
+            @display("p=300,200,row,200");
         }
         multiplexer: PacketMultiplexer {
-            @display("p=200,300");
+            @display("p=300,300");
+        }
+        tokenGenerator: SignalBasedTokenGenerator {
+            serverModule = default("^." + requestConsumerModule + ".server");
+            signals = default("tokensDepleted");
+            @display("p=100,100");
         }
     connections:
         for i=0..sizeof(provider) - 1 {

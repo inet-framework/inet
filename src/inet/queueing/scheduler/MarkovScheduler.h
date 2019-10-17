@@ -31,7 +31,7 @@ class INET_API MarkovScheduler : public PacketSchedulerBase, public IPassivePack
     IPassivePacketSink *consumer = nullptr;
 
     std::vector<std::vector<double>> transitionProbabilities;
-    std::vector<simtime_t> waitIntervals;
+    std::vector<cDynamicExpression> waitIntervals;
 
     int state;
 

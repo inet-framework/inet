@@ -25,39 +25,17 @@ Define_Module(QueueBasedTokenGenerator);
 
 void QueueBasedTokenGenerator::initialize(int stage)
 {
+    TokenGeneratorBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         minNumPackets = par("minNumPackets");
         minTotalLength = b(par("minTotalLength"));
-        displayStringTextFormat = par("displayStringTextFormat");
         queue = getModuleFromPar<IPacketQueue>(par("queueModule"), this);
         check_and_cast<cSimpleModule *>(queue)->subscribe(packetPoppedSignal, this);
-        server = getModuleFromPar<TokenBasedServer>(par("serverModule"), this);
         numTokensParameter = &par("numTokens");
-        numTokensGenerated = 0;
-        WATCH(numTokensGenerated);
     }
     else if (stage == INITSTAGE_QUEUEING)
         if (queue->getNumPackets() < minNumPackets || queue->getTotalLength() < minTotalLength)
             generateTokens();
-}
-
-void QueueBasedTokenGenerator::updateDisplayString()
-{
-    auto text = StringFormat::formatString(displayStringTextFormat, this);
-    getDisplayString().setTagArg("t", 0, text);
-}
-
-const char *QueueBasedTokenGenerator::resolveDirective(char directive)
-{
-    static std::string result;
-    switch (directive) {
-        case 't':
-            result = std::to_string(numTokensGenerated);
-            break;
-        default:
-            throw cRuntimeError("Unknown directive: %c", directive);
-    }
-    return result.c_str();
 }
 
 void QueueBasedTokenGenerator::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)

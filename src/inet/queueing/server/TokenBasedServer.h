@@ -26,6 +26,8 @@ namespace queueing {
 class INET_API TokenBasedServer : public PacketServerBase
 {
   public:
+    static simsignal_t tokensAddedSignal;
+    static simsignal_t tokensRemovedSignal;
     static simsignal_t tokensDepletedSignal;
 
   protected:
@@ -34,19 +36,14 @@ class INET_API TokenBasedServer : public PacketServerBase
     const char *displayStringTextFormat = nullptr;
     double maxNumTokens = NaN;
 
-    cMessage *tokenProductionTimer = nullptr;
-
+    bool tokensDepletedSignaled = true;
     double numTokens = 0;
 
   protected:
     virtual void initialize(int stage) override;
-    virtual void handleMessage(cMessage *message) override;
-    virtual void scheduleTokenProductionTimer();
     virtual void processPackets();
 
   public:
-    virtual ~TokenBasedServer() { cancelAndDelete(tokenProductionTimer); }
-
     virtual int getNumTokens() const { return numTokens; }
     virtual void addTokens(double tokens);
 

@@ -54,16 +54,19 @@ const char *PacketBasedTokenGenerator::resolveDirective(char directive)
 {
     static std::string result;
     switch (directive) {
-        case 't':
-            result = std::to_string(numTokensGenerated);
+        case 't': {
+            std::stringstream stream;
+            stream << numTokensGenerated;
+            result = stream.str();
             break;
+        }
         default:
             return PassivePacketSinkBase::resolveDirective(directive);
     }
     return result.c_str();
 }
 
-void PacketBasedTokenGenerator::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
+void PacketBasedTokenGenerator::receiveSignal(cComponent *source, simsignal_t signal, double value, cObject *details)
 {
     if (signal == TokenBasedServer::tokensDepletedSignal)
         producer->handleCanPushPacket(inputGate->getPathStartGate());

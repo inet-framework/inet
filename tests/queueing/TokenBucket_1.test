@@ -7,6 +7,7 @@ TODO
 import inet.queueing.shaper.TokenBucket;
 import inet.queueing.sink.PassivePacketSink;
 import inet.queueing.source.ActivePacketSource;
+import inet.queueing.tokengenerator.TimeBasedTokenGenerator;
 
 network TestTokenBucket
 {
@@ -19,6 +20,9 @@ network TestTokenBucket
         }
         consumer: PassivePacketSink {
             @display("p=300,100");
+        }
+        tokenGenerator: TimeBasedTokenGenerator {
+            @display("p=100,200");
         }
     connections allowunconnected:
         producer.out --> bucket.in;
@@ -34,7 +38,8 @@ cmdenv-event-banners = false
 *.producer.packetLength = 1B
 *.producer.productionInterval = uniform(0s, 2s)
 *.bucket.server.maxNumTokens = 10
-*.bucket.server.tokenProductionInterval = uniform(0s, 2s)
+*.tokenGenerator.serverModule = "^.bucket.server"
+*.tokenGenerator.generationInterval = uniform(0s, 2s)
 
 %contains: stdout
 Producing packet producer-0.

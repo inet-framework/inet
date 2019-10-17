@@ -22,7 +22,9 @@ import inet.queueing.contract.IPacketServer;
 import inet.queueing.contract.IPassivePacketSource;
 import inet.queueing.tokengenerator.QueueBasedTokenGenerator;
 
-
+//
+// This module produces packets in order to prevent a queue from becoming empty.
+//
 module QueueFiller like IActivePacketSource
 {
     parameters:

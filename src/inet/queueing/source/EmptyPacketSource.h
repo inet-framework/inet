@@ -15,37 +15,35 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_QUEUEBASEDTOKENGENERATOR_H
-#define __INET_QUEUEBASEDTOKENGENERATOR_H
+#ifndef __INET_EMPTYPACKETSOURCE_H
+#define __INET_EMPTYPACKETSOURCE_H
 
-#include "inet/queueing/base/TokenGeneratorBase.h"
-#include "inet/queueing/contract/IPacketQueue.h"
+#include "inet/queueing/base/PacketQueueingElementBase.h"
+#include "inet/queueing/contract/IActivePacketSource.h"
 
 namespace inet {
 namespace queueing {
 
-class INET_API QueueBasedTokenGenerator : public TokenGeneratorBase, public cListener
+class INET_API EmptyPacketSource : public PacketQueueingElementBase, public IActivePacketSource
 {
   protected:
-    int minNumPackets = -1;
-    b minTotalLength = b(-1);
-    IPacketQueue *queue = nullptr;
-    cPar *numTokensParameter = nullptr;
+    cGate *outputGate = nullptr;
+    IPassivePacketSink *consumer = nullptr;
 
   protected:
     virtual void initialize(int stage) override;
 
-    virtual void generateTokens();
-
   public:
-    virtual bool supportsPushPacket(cGate *gate) override { return false; }
+    virtual IPassivePacketSink *getConsumer(cGate *gate) override { return consumer; }
+
+    virtual bool supportsPushPacket(cGate *gate) override { return outputGate == gate; }
     virtual bool supportsPopPacket(cGate *gate) override { return false; }
 
-    virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override;
+    virtual void handleCanPushPacket(cGate *gate) override { }
 };
 
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_QUEUEBASEDTOKENGENERATOR_H
+#endif // ifndef __INET_EMPTYPACKETSOURCE_H
 

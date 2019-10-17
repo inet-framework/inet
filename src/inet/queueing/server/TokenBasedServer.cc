@@ -24,6 +24,8 @@ namespace queueing {
 
 Define_Module(TokenBasedServer);
 
+simsignal_t TokenBasedServer::tokensAddedSignal = cComponent::registerSignal("tokensAdded");
+simsignal_t TokenBasedServer::tokensRemovedSignal = cComponent::registerSignal("tokensRemoved");
 simsignal_t TokenBasedServer::tokensDepletedSignal = cComponent::registerSignal("tokensDepleted");
 
 void TokenBasedServer::initialize(int stage)
@@ -35,34 +37,10 @@ void TokenBasedServer::initialize(int stage)
         displayStringTextFormat = par("displayStringTextFormat");
         numTokens = par("initialNumTokens");
         maxNumTokens = par("maxNumTokens");
-        tokenProductionTimer = new cMessage("TokenProductionTimer");
         WATCH(numTokens);
     }
-    else if (stage == INITSTAGE_QUEUEING)
-        scheduleTokenProductionTimer();
     else if (stage == INITSTAGE_LAST)
         updateDisplayString();
-}
-
-void TokenBasedServer::handleMessage(cMessage *message)
-{
-    if (message == tokenProductionTimer) {
-        numTokens++;
-        if (!std::isnan(maxNumTokens) && numTokens >= maxNumTokens)
-            numTokens = maxNumTokens;
-        processPackets();
-        updateDisplayString();
-        scheduleTokenProductionTimer();
-    }
-    else
-        PacketServerBase::handleMessage(message);
-}
-
-void TokenBasedServer::scheduleTokenProductionTimer()
-{
-    simtime_t interval = par("tokenProductionInterval");
-    if (interval != 0)
-        scheduleAt(simTime() + interval, tokenProductionTimer);
 }
 
 void TokenBasedServer::processPackets()
@@ -82,14 +60,18 @@ void TokenBasedServer::processPackets()
                 pushOrSendPacket(packet, outputGate, consumer);
                 numProcessedPackets++;
                 numTokens -= numRequiredTokens;
+                emit(tokensRemovedSignal, numTokens);
+                updateDisplayString();
             }
             else {
-                emit(tokensDepletedSignal, this);
+                if (!tokensDepletedSignaled) {
+                    tokensDepletedSignaled = true;
+                    emit(tokensDepletedSignal, numTokens);
+                }
                 break;
             }
         }
     }
-    updateDisplayString();
 }
 
 void TokenBasedServer::handleCanPushPacket(cGate *gate)
@@ -109,6 +91,8 @@ void TokenBasedServer::addTokens(double tokens)
     numTokens += tokens;
     if (!std::isnan(maxNumTokens) && numTokens >= maxNumTokens)
         numTokens = maxNumTokens;
+    emit(tokensAddedSignal, numTokens);
+    tokensDepletedSignaled = false;
     processPackets();
     updateDisplayString();
 }
@@ -117,9 +101,12 @@ const char *TokenBasedServer::resolveDirective(char directive)
 {
     static std::string result;
     switch (directive) {
-        case 'n':
-            result = std::to_string(numTokens);
+        case 'n': {
+            std::stringstream stream;
+            stream << numTokens;
+            result = stream.str();
             break;
+        }
         default:
             return PacketServerBase::resolveDirective(directive);
     }

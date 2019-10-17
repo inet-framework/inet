@@ -15,44 +15,34 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_PACKETBASEDTOKENGENERATOR_H
-#define __INET_PACKETBASEDTOKENGENERATOR_H
+#ifndef __INET_SIGNALBASEDTOKENGENERATOR_H
+#define __INET_SIGNALBASEDTOKENGENERATOR_H
 
-#include "inet/queueing/base/PassivePacketSinkBase.h"
-#include "inet/queueing/server/TokenBasedServer.h"
+#include "inet/queueing/base/TokenGeneratorBase.h"
 
 namespace inet {
 namespace queueing {
 
-class INET_API PacketBasedTokenGenerator : public PassivePacketSinkBase, public cListener
+class INET_API SignalBasedTokenGenerator : public TokenGeneratorBase, public cListener
 {
   protected:
-    cPar *numTokensPerPacketParameter = nullptr;
-    cPar *numTokensPerBitParameter = nullptr;
-
-    cGate *inputGate = nullptr;
-    IActivePacketSource *producer = nullptr;
-    TokenBasedServer *server = nullptr;
-
-    int numTokensGenerated = -1;
+    cPar *numTokensParameter = nullptr;
 
   protected:
     virtual void initialize(int stage) override;
+    virtual void generateTokens();
 
   public:
-    virtual bool supportsPushPacket(cGate *gate) override { return true; }
+    virtual bool supportsPushPacket(cGate *gate) override { return false; }
     virtual bool supportsPopPacket(cGate *gate) override { return false; }
 
-    virtual bool canPushSomePacket(cGate *gate) override { return server->getNumTokens() == 0; }
-    virtual bool canPushPacket(Packet *packet, cGate *gate) override { return server->getNumTokens() == 0; }
-    virtual void pushPacket(Packet *packet, cGate *gate = nullptr) override;
-
-    virtual const char *resolveDirective(char directive) override;
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, long value, cObject *details) override;
     virtual void receiveSignal(cComponent *source, simsignal_t signal, double value, cObject *details) override;
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override;
 };
 
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_PACKETBASEDTOKENGENERATOR_H
+#endif // ifndef __INET_SIGNALBASEDTOKENGENERATOR_H
 

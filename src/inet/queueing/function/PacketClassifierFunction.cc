@@ -27,7 +27,19 @@ static int classifyPacketByData(Packet *packet)
     return data->getBytes().at(0);
 }
 
-Register_Packet_Classifier_Function(PacketDataClassifer, classifyPacketByData);
+Register_Packet_Classifier_Function(PacketDataClassifier, classifyPacketByData);
+
+static int classifyPacketAsCharacterOrEnter(Packet *packet)
+{
+    const auto& data = packet->peekDataAt<BytesChunk>(B(0), B(1));
+    auto byte = data->getBytes().at(0);
+    if (byte != 13)
+        return 0;
+    else
+        return 1;
+}
+
+Register_Packet_Classifier_Function(PacketCharacterOrEnterClassifier, classifyPacketAsCharacterOrEnter);
 
 static int classifyPacketByUserPriority(Packet *packet)
 {

@@ -42,8 +42,8 @@ module RequestConsumer like IPassivePacketSink
         queue: <default("PacketQueue")> like IPacketQueue {
             @display("p=200,100");
         }
-        server: <default("PacketServer")> like IPacketServer {
-            processingTime = default(0s);
+        server: <default("TokenBasedServer")> like IPacketServer {
+            initialNumTokens = default(1);
             @display("p=200,200");
         }
         classifier: <default("PacketClassifier")> like IPacketClassifier {

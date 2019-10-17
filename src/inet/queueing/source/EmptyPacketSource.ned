@@ -18,29 +18,16 @@
 package inet.queueing.source;
 
 import inet.queueing.contract.IActivePacketSource;
-import inet.queueing.scheduler.MarkovScheduler;
 
 //
-// This module mixes two different packet sources to generate bursty traffic.
+// This module is an empty packet source which never pushes packets into the
+// connected packet consumer.
 //
-module BurstyPacketProducer like IActivePacketSource
+simple EmptyPacketSource like IActivePacketSource
 {
     parameters:
+        @class(EmptyPacketSource);
         @display("i=block/source");
     gates:
-        output out;
-    submodules:
-        normalProducer: ActivePacketSource {
-            @display("p=100,100");
-        }
-        burstProducer: ActivePacketSource {
-            @display("p=300,100");
-        }
-        scheduler: MarkovScheduler {
-            @display("p=200,200");
-        }
-    connections allowunconnected:
-        normalProducer.out --> scheduler.in++;
-        burstProducer.out --> scheduler.in++;
-        scheduler.out --> out;
+        output out @labels(push);
 }

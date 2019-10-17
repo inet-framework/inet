@@ -32,7 +32,7 @@ class INET_API MarkovClassifier : public PacketClassifierBase, public IActivePac
     std::vector<IActivePacketSink *> collectors;
 
     std::vector<std::vector<double>> transitionProbabilities;
-    std::vector<simtime_t> waitIntervals;
+    std::vector<cDynamicExpression> waitIntervals;
 
     int state;
 
