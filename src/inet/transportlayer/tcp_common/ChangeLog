@@ -1,5 +1,17 @@
 ====== inet-4.x ======
 
+2019-09-30  Marcel Marek
+
+	Added simplified version of TCP/IP ECN mechanism.
+
+	The mechanism is activated by setting ecnEnabled = true in .ini file. It
+	uses normal ECN-setup SYN and SYN-ACK  to establish a TCP flow. Sets
+	ECT(0) only on non-ACK packets.
+
+	Adds ECE and CWR flags to TCP header. Each packet marked with IP ECN CE
+	is echoed back with TCP ECE set
+	(allowing multiple packets be echoed back within the same window).
+
 2019-09-17  Zoltan Bojthe
 
 	Simplified serializing empty data part.

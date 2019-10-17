@@ -1,0 +1,11 @@
+====== inet-4.x ======
+
+2019-09-26  Zoltan Bojthe
+
+	Refactored and adapted to the INET 4.x branch.
+
+2019-07-09  Galino & Marcel Marek
+
+	Added a new protocol implementation for OSPF version 3.
+
+	Added Ospfv3Process simple module.

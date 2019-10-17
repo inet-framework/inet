@@ -12,6 +12,10 @@
 
 	Replaced simtime_t type with simsec in multidimensional analog domain signal representations.
 
+2019-07-29  Gyorgy Szaszko
+
+	Added some example frequencyGains values.
+
 2019-06-07  Levente Mészáros
 
 	Replaced old multidimensional mappings (MiXiM) with new multidimensional functions.

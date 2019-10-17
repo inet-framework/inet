@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2019-09-25  Zoltan Bojthe
+
+	Added INITSTAGE_ROUTER_ID_ASSIGNMENT.
+
 2019-08-07  Andras Varga
 
 	Updated for OMNeT++ 6 builds (STR became deprecated, STRING has existed for ages).

@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2019-09-25  Zoltan Bojthe
+
+	Changed Ipv4RoutingTable to initialize routerId in INITSTAGE_ROUTER_ID_ASSIGNMENT.
+
 2019-09-17  Zoltan Bojthe
 
 	Simplified serializing empty data part.

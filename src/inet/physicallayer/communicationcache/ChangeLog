@@ -1,5 +1,10 @@
 ====== inet-4.x ======
 
+2019-10-08  Levente Mészáros
+
+	Simplified VectorCommunicationCache::removeNonInterferingTransmissions().
+	Fixed crash caused by copy-pasted code in MapCommunicationCache::removeNonInterferingTransmissions().
+
 2019-09-24  Levente Mészáros
 
 	Moved the storage of radios and transmissions from the medium into the communication cache.

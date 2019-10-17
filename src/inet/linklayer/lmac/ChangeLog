@@ -1,5 +1,17 @@
 ====== inet-4.x ======
 
+2019-10-14  Levente Mészáros
+
+	Dropped queue length related parameters from MAC modules.
+
+	The queue packet capacity and data capacity can already be set on the
+	queue. If the queue module is more complicated then these parameters are
+	meaningless anyway, because there may be way more parameters than one.
+
+2019-10-14  Levente Mészáros
+
+	Removed allowunconnected because queue in/out gates are loose.
+
 2019-06-03  Zoltan Bojthe
 
 	Removed unneeded clearQueue() and flushQueue() functions already implemented in MacProtocolBase.

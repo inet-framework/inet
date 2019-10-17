@@ -1,5 +1,10 @@
 ====== inet-4.x ======
 
+2019-09-07  Marcel Marek
+
+	Added ECN to .msg file.
+	Added defines of IP ECN two bit value for easier interpretation.
+
 2019-09-02  Zoltan Bojthe
 
 	Optimized Tag usage

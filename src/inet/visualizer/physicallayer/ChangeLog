@@ -1,5 +1,17 @@
 ====== inet-4.x ======
 
+2019-10-07  Levente Mészáros
+
+	Fixed disabled radio feature.
+
+2019-10-03  Levente Mészáros
+
+	Renamed a few functions in MediumCanvasVisualizer.
+
+	computePowerForPartitionBoundaries -> computePowerForPartitionBounds
+	updateSpectrumFigureFrequencyLimits -> updateSpectrumFigureFrequencyBounds
+	updateSpectrumFigurePowerLimits -> updateSpectrumFigurePowerBounds
+
 2019-09-25  Zoltan Bojthe
 
 	Feature dependent code marked with #ifdef/endif.
