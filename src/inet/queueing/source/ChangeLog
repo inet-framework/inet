@@ -7,5 +7,6 @@
 	components were either ported or completely replaced with components of the new
 	queueing package.
 
-	Added new NED simple modules: ActivePacketSource, PassivePacketSource, and PcapFilePacketProducer.
+	Added new NED simple modules: ActivePacketSource, PassivePacketSource, EmptyPacketSource,
+	and PcapFilePacketProducer.
 	Added new NED compound modules: BurstyPacketProducer, QueueFiller, and ResponseProducer.
