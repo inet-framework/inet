@@ -41,6 +41,10 @@ const char *TokenGeneratorBase::resolveDirective(char directive)
 {
     static std::string result;
     switch (directive) {
+        case 's': {
+            result = par("serverModule").stringValue();
+            break;
+        }
         case 't': {
             std::stringstream stream;
             stream << numTokensGenerated;
