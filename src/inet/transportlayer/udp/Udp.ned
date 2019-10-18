@@ -85,11 +85,13 @@ simple Udp like IUdp
         @statistic[passedUpPk](title="packets passed up"; source=packetSentToUpper; record=count,"vector(count)"; interpolationmode=none);
         @statistic[droppedPkWrongPort](title="packets dropped (wrong port)"; source=packetDropReasonIsNoPortFound(packetDropped); record=count,"vector(count)"; interpolationmode=none);
         @statistic[droppedPkBadChecksum](title="packets dropped (checksum error)"; source=packetDropReasonIsIncorrectlyReceived(packetDropped); record=count,"vector(count)"; interpolationmode=none);
+        @selfMessageKinds();	// kind not used in self messages or model doesn't use any self message
+        @directSendKinds();     // kind not used in sendDirect() messages or model doesn't use any sendDirect()
 
     gates:
-        input appIn @labels(UdpControlInfo/down);
+        input appIn @labels(UdpControlInfo/down) @messageKinds(inet::UdpCommandCode);
         input ipIn @labels(UdpHeader,Ipv4ControlInfo/up,Ipv6ControlInfo/up);
-        output appOut @labels(UdpControlInfo/up);
+        output appOut @labels(UdpControlInfo/up) @messageKinds(inet::UdpStatusInd);
         output ipOut @labels(UdpHeader,Ipv4ControlInfo/down,Ipv6ControlInfo/down);
 }
 
