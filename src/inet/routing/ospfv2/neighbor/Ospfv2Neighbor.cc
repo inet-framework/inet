@@ -45,26 +45,16 @@ Neighbor::Neighbor(RouterId neighbor) :
     // setting only I and M bits is invalid -> good initializer
     lastReceivedDDPacket.ddOptions.I_Init = true;
     lastReceivedDDPacket.ddOptions.M_More = true;
-    inactivityTimer = new cMessage();
-    inactivityTimer->setKind(NEIGHBOR_INACTIVITY_TIMER);
+    inactivityTimer = new cMessage("Neighbor::NeighborInactivityTimer", NEIGHBOR_INACTIVITY_TIMER);
     inactivityTimer->setContextPointer(this);
-    inactivityTimer->setName("Neighbor::NeighborInactivityTimer");
-    pollTimer = new cMessage();
-    pollTimer->setKind(NEIGHBOR_POLL_TIMER);
+    pollTimer = new cMessage("Neighbor::NeighborPollTimer", NEIGHBOR_POLL_TIMER);
     pollTimer->setContextPointer(this);
-    pollTimer->setName("Neighbor::NeighborPollTimer");
-    ddRetransmissionTimer = new cMessage();
-    ddRetransmissionTimer->setKind(NEIGHBOR_DD_RETRANSMISSION_TIMER);
+    ddRetransmissionTimer = new cMessage("Neighbor::NeighborDDRetransmissionTimer", NEIGHBOR_DD_RETRANSMISSION_TIMER);
     ddRetransmissionTimer->setContextPointer(this);
-    ddRetransmissionTimer->setName("Neighbor::NeighborDDRetransmissionTimer");
-    updateRetransmissionTimer = new cMessage();
-    updateRetransmissionTimer->setKind(NEIGHBOR_UPDATE_RETRANSMISSION_TIMER);
+    updateRetransmissionTimer = new cMessage("Neighbor::Neighbor::NeighborUpdateRetransmissionTimer", NEIGHBOR_UPDATE_RETRANSMISSION_TIMER);
     updateRetransmissionTimer->setContextPointer(this);
-    updateRetransmissionTimer->setName("Neighbor::Neighbor::NeighborUpdateRetransmissionTimer");
-    requestRetransmissionTimer = new cMessage();
-    requestRetransmissionTimer->setKind(NEIGHBOR_REQUEST_RETRANSMISSION_TIMER);
+    requestRetransmissionTimer = new cMessage("Neighbor::NeighborRequestRetransmissionTimer", NEIGHBOR_REQUEST_RETRANSMISSION_TIMER);
     requestRetransmissionTimer->setContextPointer(this);
-    requestRetransmissionTimer->setName("Neighbor::NeighborRequestRetransmissionTimer");
     state = new NeighborStateDown;
     previousState = nullptr;
 }

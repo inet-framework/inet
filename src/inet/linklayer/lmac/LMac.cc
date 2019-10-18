@@ -68,26 +68,13 @@ void LMac::initialize(int stage)
                   << " numSlots = " << numSlots
                   << " bitrate = " << bitrate << endl;
 
-        timeout = new cMessage("timeout");
-        timeout->setKind(LMAC_TIMEOUT);
-
-        sendData = new cMessage("sendData");
-        sendData->setKind(LMAC_SEND_DATA);
-
-        wakeup = new cMessage("wakeup");
-        wakeup->setKind(LMAC_WAKEUP);
-
-        initChecker = new cMessage("setup phase");
-        initChecker->setKind(LMAC_SETUP_PHASE_END);
-
-        checkChannel = new cMessage("checkchannel");
-        checkChannel->setKind(LMAC_CHECK_CHANNEL);
-
-        start_lmac = new cMessage("start_lmac");
-        start_lmac->setKind(LMAC_START_LMAC);
-
-        send_control = new cMessage("send_control");
-        send_control->setKind(LMAC_SEND_CONTROL);
+        timeout = new cMessage("timeout", LMAC_TIMEOUT);
+        sendData = new cMessage("sendData", LMAC_SEND_DATA);
+        wakeup = new cMessage("wakeup", LMAC_WAKEUP);
+        initChecker = new cMessage("setup phase", LMAC_SETUP_PHASE_END);
+        checkChannel = new cMessage("checkchannel", LMAC_CHECK_CHANNEL);
+        start_lmac = new cMessage("start_lmac", LMAC_START_LMAC);
+        send_control = new cMessage("send_control", LMAC_SEND_CONTROL);
 
         scheduleAt(simTime(), start_lmac);
         EV_DETAIL << "My Mac address is" << interfaceEntry->getMacAddress() << " and my Id is " << myId << endl;

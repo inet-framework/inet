@@ -123,9 +123,8 @@ void TcpGenericServerApp::handleMessage(cMessage *msg)
                 maxMsgDelay = msgDelay;
 
             if (requestedBytes > B(0)) {
-                Packet *outPacket = new Packet(msg->getName());
+                Packet *outPacket = new Packet(msg->getName(), TCP_C_SEND);
                 outPacket->addTag<SocketReq>()->setSocketId(connId);
-                outPacket->setKind(TCP_C_SEND);
                 const auto& payload = makeShared<GenericAppMsg>();
                 payload->setChunkLength(requestedBytes);
                 payload->setExpectedReplyLength(B(0));

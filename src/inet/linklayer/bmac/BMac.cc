@@ -68,40 +68,29 @@ void BMac::initialize(int stage)
         // init the dropped packet info
         WATCH(macState);
 
-        wakeup = new cMessage("wakeup");
-        wakeup->setKind(BMAC_WAKE_UP);
+        wakeup = new cMessage("wakeup", BMAC_WAKE_UP);
 
-        data_timeout = new cMessage("data_timeout");
-        data_timeout->setKind(BMAC_DATA_TIMEOUT);
+        data_timeout = new cMessage("data_timeout", BMAC_DATA_TIMEOUT);
         data_timeout->setSchedulingPriority(100);
 
-        data_tx_over = new cMessage("data_tx_over");
-        data_tx_over->setKind(BMAC_DATA_TX_OVER);
+        data_tx_over = new cMessage("data_tx_over", BMAC_DATA_TX_OVER);
 
-        stop_preambles = new cMessage("stop_preambles");
-        stop_preambles->setKind(BMAC_STOP_PREAMBLES);
+        stop_preambles = new cMessage("stop_preambles", BMAC_STOP_PREAMBLES);
 
-        send_preamble = new cMessage("send_preamble");
-        send_preamble->setKind(BMAC_SEND_PREAMBLE);
+        send_preamble = new cMessage("send_preamble", BMAC_SEND_PREAMBLE);
 
-        ack_tx_over = new cMessage("ack_tx_over");
-        ack_tx_over->setKind(BMAC_ACK_TX_OVER);
+        ack_tx_over = new cMessage("ack_tx_over", BMAC_ACK_TX_OVER);
 
-        cca_timeout = new cMessage("cca_timeout");
-        cca_timeout->setKind(BMAC_CCA_TIMEOUT);
+        cca_timeout = new cMessage("cca_timeout", BMAC_CCA_TIMEOUT);
         cca_timeout->setSchedulingPriority(100);
 
-        send_ack = new cMessage("send_ack");
-        send_ack->setKind(BMAC_SEND_ACK);
+        send_ack = new cMessage("send_ack", BMAC_SEND_ACK);
 
-        start_bmac = new cMessage("start_bmac");
-        start_bmac->setKind(BMAC_START_BMAC);
+        start_bmac = new cMessage("start_bmac", BMAC_START_BMAC);
 
-        ack_timeout = new cMessage("ack_timeout");
-        ack_timeout->setKind(BMAC_ACK_TIMEOUT);
+        ack_timeout = new cMessage("ack_timeout", BMAC_ACK_TIMEOUT);
 
-        resend_data = new cMessage("resend_data");
-        resend_data->setKind(BMAC_RESEND_DATA);
+        resend_data = new cMessage("resend_data", BMAC_RESEND_DATA);
         resend_data->setSchedulingPriority(100);
 
         scheduleAt(simTime(), start_bmac);

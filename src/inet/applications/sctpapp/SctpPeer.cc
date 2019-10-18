@@ -130,8 +130,7 @@ void SctpPeer::initialize(int stage)
         clientSocket.setOutputGate(gate("socketOut"));
 
         if (simtime_t(par("startTime")) > SIMTIME_ZERO) {    //FIXME is invalid the startTime == 0 ????
-            connectTimer = new cMessage("ConnectTimer");
-            connectTimer->setKind(MSGKIND_CONNECT);
+            connectTimer = new cMessage("ConnectTimer", MSGKIND_CONNECT);
             scheduleAt(par("startTime"), connectTimer);
         }
 
@@ -200,8 +199,7 @@ void SctpPeer::connect()
     }
 
     if (streamReset) {
-        cMessage *cmsg = new cMessage("StreamReset");
-        cmsg->setKind(MSGKIND_RESET);
+        cMessage *cmsg = new cMessage("StreamReset", MSGKIND_RESET);
         EV_INFO << "StreamReset Timer scheduled at " << simTime() << "\n";
         scheduleAt(simTime() + par("streamRequestTime"), cmsg);
     }
@@ -229,14 +227,13 @@ void SctpPeer::handleMessage(cMessage *msg)
             Message *message = check_and_cast<Message *>(msg);
             auto& intags = getTags(message);
             SctpCommandReq *ind = intags.findTag<SctpCommandReq>();
-            Request *cmsg = new Request("SCTP_C_ABORT");
+            Request *cmsg = new Request("SCTP_C_ABORT", SCTP_C_ABORT);
             SctpSendReq *cmd = cmsg->addTag<SctpSendReq>();
             id = ind->getSocketId();
             cmd->setSocketId(id);
             cmd->setSid(ind->getSid());
             cmd->setNumMsgs(ind->getNumMsgs());
             delete msg;
-            cmsg->setKind(SCTP_C_ABORT);
             sendOrSchedule(cmsg);
             break;
         }
@@ -292,10 +289,9 @@ void SctpPeer::handleMessage(cMessage *msg)
                                 i->second = numRequestsToSend;
                             }
 
-                            Request *cmsg = new Request("SCTP_C_QUEUE_MSGS_LIMIT");
+                            Request *cmsg = new Request("SCTP_C_QUEUE_MSGS_LIMIT", SCTP_C_QUEUE_MSGS_LIMIT);
                             SctpInfoReq *qinfo = cmsg->addTag<SctpInfoReq>();
                             qinfo->setText(queueSize);
-                            cmsg->setKind(SCTP_C_QUEUE_MSGS_LIMIT);
                             qinfo->setSocketId(id);
                             sendOrSchedule(cmsg);
                         }
@@ -306,15 +302,13 @@ void SctpPeer::handleMessage(cMessage *msg)
                         if (j->second == 0 && par("waitToClose").doubleValue() > 0) {
                             char as[5];
                             sprintf(as, "%d", serverAssocId);
-                            cMessage *abortMsg = new cMessage(as);
-                            abortMsg->setKind(SCTP_I_ABORT);
+                            cMessage *abortMsg = new cMessage(as, SCTP_I_ABORT);
                             scheduleAt(simTime() + par("waitToClose"), abortMsg);
                         }
                         else {
                             EV_INFO << "no more packets to send, call shutdown for assoc " << serverAssocId << "\n";
-                            Request *cmsg = new Request("ShutdownRequest");
+                            Request *cmsg = new Request("ShutdownRequest", SCTP_C_SHUTDOWN);
                             SctpCommandReq *cmd = cmsg->addTag<SctpCommandReq>();
-                            cmsg->setKind(SCTP_C_SHUTDOWN);
                             cmd->setSocketId(serverAssocId);
                             sendOrSchedule(cmsg);
                         }
@@ -330,14 +324,13 @@ void SctpPeer::handleMessage(cMessage *msg)
             auto& intags = getTags(message);
             SctpCommandReq *ind = intags.findTag<SctpCommandReq>();
             id = ind->getSocketId();
-            Request *cmsg = new Request("ReceiveRequest");
+            Request *cmsg = new Request("ReceiveRequest", SCTP_C_RECEIVE);
             auto cmd = cmsg->addTag<SctpSendReq>();
             cmsg->addTag<SocketReq>()->setSocketId(id);
             cmsg->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::sctp);
             cmd->setSocketId(id);
             cmd->setSid(ind->getSid());
             cmd->setNumMsgs(ind->getNumMsgs());
-            cmsg->setKind(SCTP_C_RECEIVE);
             delete msg;
             if (!cmsg->isScheduled() && schedule == false) {
                 scheduleAt(simTime() + par("delayFirstRead"), cmsg);
@@ -372,9 +365,8 @@ void SctpPeer::handleMessage(cMessage *msg)
                         k->second->collect(simTime() - smsg->getCreationTime());
 
                         if (i->second == 0) {
-                            Request *cmsg = new Request("SCTP_C_NO_OUTSTANDING");
+                            Request *cmsg = new Request("SCTP_C_NO_OUTSTANDING", SCTP_C_NO_OUTSTANDING);
                             SctpCommandReq *qinfo = cmsg->addTag<SctpCommandReq>();
-                            cmsg->setKind(SCTP_C_NO_OUTSTANDING);
                             qinfo->setSocketId(id);
                             sendOrSchedule(cmsg);
                         }
@@ -420,9 +412,8 @@ void SctpPeer::handleMessage(cMessage *msg)
                 clientSocket.processMessage(PK(msg));
             else if (i != rcvdPacketsPerAssoc.end()) {
                 if (i->second == 0) {
-                    Request *cmsg = new Request("SCTP_C_NO_OUTSTANDING");
+                    Request *cmsg = new Request("SCTP_C_NO_OUTSTANDING", SCTP_C_NO_OUTSTANDING);
                     SctpCommandReq *qinfo = cmsg->addTag<SctpCommandReq>();
-                    cmsg->setKind(SCTP_C_NO_OUTSTANDING);
                     qinfo->setSocketId(id);
                     sendOrSchedule(cmsg);
                 }
@@ -495,12 +486,11 @@ void SctpPeer::socketDataNotificationArrived(SctpSocket *socket, Message *msg)
     Message *message = check_and_cast<Message *>(msg);
     auto& intags = getTags(message);
     SctpCommandReq *ind = intags.findTag<SctpCommandReq>();
-    Request *cmesg = new Request("SCTP_C_RECEIVE");
+    Request *cmesg = new Request("SCTP_C_RECEIVE", SCTP_C_RECEIVE);
     SctpSendReq *cmd = cmesg->addTag<SctpSendReq>();
     cmd->setSocketId(ind->getSocketId());
     cmd->setSid(ind->getSid());
     cmd->setNumMsgs(ind->getNumMsgs());
-    cmesg->setKind(SCTP_C_RECEIVE);
     clientSocket.sendNotification(cmesg);
 }
 
@@ -637,10 +627,9 @@ void SctpPeer::socketEstablished(SctpSocket *socket, unsigned long int buffer)
 
 void SctpPeer::sendQueueRequest()
 {
-    Request *cmsg = new Request("SCTP_C_QUEUE_MSGS_LIMIT");
+    Request *cmsg = new Request("SCTP_C_QUEUE_MSGS_LIMIT", SCTP_C_QUEUE_MSGS_LIMIT);
     SctpInfoReq *qinfo = cmsg->addTag<SctpInfoReq>();
     qinfo->setText(queueSize);
-    cmsg->setKind(SCTP_C_QUEUE_MSGS_LIMIT);
     qinfo->setSocketId(clientSocket.getSocketId());
     clientSocket.sendRequest(cmsg);
 }
@@ -678,13 +667,13 @@ void SctpPeer::socketDataArrived(SctpSocket *socket, Packet *msg, bool)
     if (echo) {
         const auto& smsg = msg->peekData();
         auto cmsg = new Packet("ApplicationPacket");
+        cmsg->setKind(ind->getSendUnordered() ? SCTP_C_SEND_UNORDERED : SCTP_C_SEND_ORDERED);
         cmsg->insertAtBack(smsg);
         auto cmd = cmsg->addTag<SctpSendReq>();
         cmd->setLast(true);
         cmd->setSocketId(ind->getSocketId());
         cmd->setPrValue(0);
         cmd->setSid(ind->getSid());
-        cmsg->setKind(ind->getSendUnordered() ? SCTP_C_SEND_UNORDERED : SCTP_C_SEND_ORDERED);
         packetsSent++;
         clientSocket.send(cmsg);
     }
@@ -701,9 +690,8 @@ void SctpPeer::socketDataArrived(SctpSocket *socket, Packet *msg, bool)
 void SctpPeer::shutdownReceivedArrived(SctpSocket *socket)
 {
     if (numRequestsToSend == 0) {
-        Message *cmsg = new Message("SCTP_C_NO_OUTSTANDING");
+        Message *cmsg = new Message("SCTP_C_NO_OUTSTANDING", SCTP_C_NO_OUTSTANDING);
         SctpCommandReq *qinfo = cmsg->addTag<SctpCommandReq>();
-        cmsg->setKind(SCTP_C_NO_OUTSTANDING);
         qinfo->setSocketId(socket->getSocketId());
         clientSocket.sendNotification(cmsg);
     }

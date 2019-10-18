@@ -28,26 +28,16 @@ Ospfv3Neighbor::Ospfv3Neighbor(Ipv4Address newId, Ospfv3Interface* parent)
         this->neighborsBackupIP = Ipv4Address::UNSPECIFIED_ADDRESS;
     }
 
-    inactivityTimer = new cMessage();
-    inactivityTimer->setKind(NEIGHBOR_INACTIVITY_TIMER);
+    inactivityTimer = new cMessage("Ospfv3Neighbor::NeighborInactivityTimer", NEIGHBOR_INACTIVITY_TIMER);
     inactivityTimer->setContextPointer(this);
-    inactivityTimer->setName("Ospfv3Neighbor::NeighborInactivityTimer");
-    pollTimer = new cMessage();
-    pollTimer->setKind(NEIGHBOR_POLL_TIMER);
+    pollTimer = new cMessage("Ospfv3Neighbor::NeighborPollTimer", NEIGHBOR_POLL_TIMER);
     pollTimer->setContextPointer(this);
-    pollTimer->setName("Ospfv3Neighbor::NeighborPollTimer");
-    ddRetransmissionTimer = new cMessage();
-    ddRetransmissionTimer->setKind(NEIGHBOR_DD_RETRANSMISSION_TIMER);
+    ddRetransmissionTimer = new cMessage("Ospfv3Neighbor::NeighborDDRetransmissionTimer", NEIGHBOR_DD_RETRANSMISSION_TIMER);
     ddRetransmissionTimer->setContextPointer(this);
-    ddRetransmissionTimer->setName("Ospfv3Neighbor::NeighborDDRetransmissionTimer");
-    updateRetransmissionTimer = new cMessage();
-    updateRetransmissionTimer->setKind(NEIGHBOR_UPDATE_RETRANSMISSION_TIMER);
+    updateRetransmissionTimer = new cMessage("Ospfv3Neighbor::Neighbor::NeighborUpdateRetransmissionTimer", NEIGHBOR_UPDATE_RETRANSMISSION_TIMER);
     updateRetransmissionTimer->setContextPointer(this);
-    updateRetransmissionTimer->setName("Ospfv3Neighbor::Neighbor::NeighborUpdateRetransmissionTimer");
-    requestRetransmissionTimer = new cMessage();
-    requestRetransmissionTimer->setKind(NEIGHBOR_REQUEST_RETRANSMISSION_TIMER);
+    requestRetransmissionTimer = new cMessage("Ospfv3sNeighbor::NeighborRequestRetransmissionTimer", NEIGHBOR_REQUEST_RETRANSMISSION_TIMER);
     requestRetransmissionTimer->setContextPointer(this);
-    requestRetransmissionTimer->setName("Ospfv3sNeighbor::NeighborRequestRetransmissionTimer");
 }//constructor
 
 Ospfv3Neighbor::~Ospfv3Neighbor()

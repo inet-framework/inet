@@ -61,18 +61,12 @@ Ospfv2Interface::Ospfv2Interface(Ospfv2Interface::Ospfv2InterfaceType ifType) :
 {
     state = new InterfaceStateDown;
     previousState = nullptr;
-    helloTimer = new cMessage();
-    helloTimer->setKind(INTERFACE_HELLO_TIMER);
+    helloTimer = new cMessage("Interface::InterfaceHelloTimer", INTERFACE_HELLO_TIMER);
     helloTimer->setContextPointer(this);
-    helloTimer->setName("Interface::InterfaceHelloTimer");
-    waitTimer = new cMessage();
-    waitTimer->setKind(INTERFACE_WAIT_TIMER);
+    waitTimer = new cMessage("Interface::InterfaceWaitTimer", INTERFACE_WAIT_TIMER);
     waitTimer->setContextPointer(this);
-    waitTimer->setName("Interface::InterfaceWaitTimer");
-    acknowledgementTimer = new cMessage();
-    acknowledgementTimer->setKind(INTERFACE_ACKNOWLEDGEMENT_TIMER);
+    acknowledgementTimer = new cMessage("Interface::InterfaceAcknowledgementTimer", INTERFACE_ACKNOWLEDGEMENT_TIMER);
     acknowledgementTimer->setContextPointer(this);
-    acknowledgementTimer->setName("Interface::InterfaceAcknowledgementTimer");
     memset(authenticationKey.bytes, 0, 8 * sizeof(char));
 }
 

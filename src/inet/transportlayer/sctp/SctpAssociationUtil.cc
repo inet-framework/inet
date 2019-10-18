@@ -447,8 +447,7 @@ void SctpAssociation::sendIndicationToApp(int32 code, int32 value)
     EV_INFO << "sendIndicationToApp: " << indicationName(code) << endl;
     assert(code != SCTP_I_SENDQUEUE_ABATED);
 
-    Indication *msg = new Indication(indicationName(code));
-    msg->setKind(code);
+    Indication *msg = new Indication(indicationName(code), code);
 
     SctpCommandReq *indication = msg->addTag<SctpCommandReq>();
     indication->setSocketId(assocId);
@@ -465,8 +464,7 @@ void SctpAssociation::sendAvailableIndicationToApp()
     EV_INFO << "sendAvailableIndicationToApp: localPort="
             << localPort << " remotePort=" << remotePort << endl;
 
-    Indication *msg = new Indication(indicationName(SCTP_I_AVAILABLE));
-    msg->setKind(SCTP_I_AVAILABLE);
+    Indication *msg = new Indication(indicationName(SCTP_I_AVAILABLE), SCTP_I_AVAILABLE);
 
     auto availableIndication = msg->addTag<SctpAvailableReq>();
    // SctpAvailableInfo *availableIndication = new SctpAvailableInfo("SctpAvailableInfo");
@@ -486,8 +484,7 @@ void SctpAssociation::sendEstabIndicationToApp()
     EV_INFO << "sendEstabIndicationToApp: localPort="
             << localPort << " remotePort=" << remotePort << " assocId=" << assocId << endl;
 
-    Indication *msg = new Indication(indicationName(SCTP_I_ESTABLISHED));
-    msg->setKind(SCTP_I_ESTABLISHED);
+    Indication *msg = new Indication(indicationName(SCTP_I_ESTABLISHED), SCTP_I_ESTABLISHED);
 
     auto establishIndication = msg->addTag<SctpConnectReq>();
    // SctpConnectInfo *establishIndication = new SctpConnectInfo("ConnectInfo");
@@ -1868,8 +1865,7 @@ void SctpAssociation::sendDataArrivedNotification(uint16 sid)
 {
     EV_INFO << "SendDataArrivedNotification\n";
 
-    Indication *cmsg = new Indication("SCTP_I_DATA_NOTIFICATION");
-    cmsg->setKind(SCTP_I_DATA_NOTIFICATION);
+    Indication *cmsg = new Indication("SCTP_I_DATA_NOTIFICATION", SCTP_I_DATA_NOTIFICATION);
     auto cmd = cmsg->addTag<SctpCommandReq>();
     cmd->setSocketId(assocId);
     cmd->setSid(sid);
@@ -2040,7 +2036,7 @@ void SctpAssociation::pushUlp()
                       << ": sid=" << chunk->sid << " ssn=" << chunk->ssn << endl;
 
             SctpSimpleMessage *smsg = check_and_cast<SctpSimpleMessage *>(chunk->userData);
-            auto applicationPacket = new Packet("ApplicationPacket");
+            auto applicationPacket = new Packet("ApplicationPacket", SCTP_I_DATA);
             std::vector<uint8_t> vec;
             int sendBytes = smsg->getDataLen();
             vec.resize(sendBytes);
@@ -2050,7 +2046,6 @@ void SctpAssociation::pushUlp()
             applicationData->setBytes(vec);
             applicationData->addTag<CreationTimeTag>()->setCreationTime(smsg->getCreationTime());
             SctpRcvReq *cmd = applicationPacket->addTag<SctpRcvReq>();
-            applicationPacket->setKind(SCTP_I_DATA);
             cmd->setSocketId(assocId);
             cmd->setGate(appGateIndex);
             cmd->setSid(chunk->sid);
@@ -2835,8 +2830,7 @@ void SctpAssociation::pmClearPathCounter(SctpPathVariables *path)
 void SctpAssociation::pathStatusIndication(const SctpPathVariables *path,
         const bool status)
 {
-    Indication *msg = new Indication("StatusInfo");
-    msg->setKind(SCTP_I_STATUS);
+    Indication *msg = new Indication("StatusInfo", SCTP_I_STATUS);
     SctpStatusReq *cmd = msg->addTag<SctpStatusReq>();
     cmd->setPathId(path->remoteAddress);
     cmd->setSocketId(assocId);

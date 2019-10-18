@@ -53,10 +53,8 @@ void Ospfv3Process::initialize(int stage)
         WATCH_PTRVECTOR(this->routingTableIPv6);
         WATCH_PTRVECTOR(this->routingTableIPv4);
 
-        ageTimer = new cMessage();
-        ageTimer->setKind(DATABASE_AGE_TIMER);
+        ageTimer = new cMessage("Ospfv3Process::DatabaseAgeTimer", DATABASE_AGE_TIMER);
         ageTimer->setContextPointer(this);
-        ageTimer->setName("Ospfv3Process::DatabaseAgeTimer");
 
         this->setTimer(ageTimer, 1.0);
     }

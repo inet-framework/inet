@@ -32,10 +32,8 @@ Router::Router(cSimpleModule *containingModule, IInterfaceTable *ift, IIpv4Routi
     rfc1583Compatibility(false)
 {
     messageHandler = new MessageHandler(this, containingModule);
-    ageTimer = new cMessage();
-    ageTimer->setKind(DATABASE_AGE_TIMER);
+    ageTimer = new cMessage("Router::DatabaseAgeTimer", DATABASE_AGE_TIMER);
     ageTimer->setContextPointer(this);
-    ageTimer->setName("Router::DatabaseAgeTimer");
     messageHandler->startTimer(ageTimer, 1.0);
 }
 

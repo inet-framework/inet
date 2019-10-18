@@ -93,9 +93,8 @@ void TcpEchoAppThread::dataArrived(Packet *rcvdPkt, bool urgent)
     echoAppModule->bytesRcvd += rcvdBytes;
 
     if (echoAppModule->echoFactor > 0 && sock->getState() == TcpSocket::CONNECTED) {
-        Packet *outPkt = new Packet(rcvdPkt->getName());
+        Packet *outPkt = new Packet(rcvdPkt->getName(), TCP_C_SEND);
         // reverse direction, modify length, and send it back
-        outPkt->setKind(TCP_C_SEND);
         int socketId = rcvdPkt->getTag<SocketInd>()->getSocketId();
         outPkt->addTag<SocketReq>()->setSocketId(socketId);
 

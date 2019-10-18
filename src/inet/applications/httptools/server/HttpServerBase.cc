@@ -298,7 +298,7 @@ Packet *HttpServerBase::generateDocument(Packet *pk, const char *resource, int s
 
     char szReply[512];
     sprintf(szReply, "HTTP/1.1 200 OK (%s)", resource);
-    Packet *replyPk = new Packet(szReply);
+    Packet *replyPk = new Packet(szReply, HTTPT_RESPONSE_MESSAGE);
     const auto& replymsg = makeShared<HttpReplyMessage>();
     replymsg->setHeading("HTTP/1.1 200 OK");
     replymsg->setOriginatorUrl(hostName.c_str());
@@ -307,7 +307,6 @@ Packet *HttpServerBase::generateDocument(Packet *pk, const char *resource, int s
     replymsg->setSerial(request->getSerial());
     replymsg->setResult(200);
     replymsg->setContentType(CT_HTML);    // Emulates the content-type header field
-    replyPk->setKind(HTTPT_RESPONSE_MESSAGE);
 
     if (scriptedMode) {
         replymsg->setPayload(htmlPages[resource].body.c_str());
@@ -374,7 +373,7 @@ Packet *HttpServerBase::generateErrorReply(const Ptr<const HttpRequestMessage>& 
 {
     char szErrStr[32];
     sprintf(szErrStr, "HTTP/1.1 %.3d %s", code, htmlErrFromCode(code).c_str());
-    Packet *replyPk = new Packet(szErrStr);
+    Packet *replyPk = new Packet(szErrStr, HTTPT_RESPONSE_MESSAGE);
     const auto& replymsg = makeShared<HttpReplyMessage>();
     replymsg->setHeading(szErrStr);
     replymsg->setOriginatorUrl(hostName.c_str());
@@ -384,7 +383,6 @@ Packet *HttpServerBase::generateErrorReply(const Ptr<const HttpRequestMessage>& 
     replymsg->setResult(code);
     replymsg->setChunkLength(B((int)rdErrorMsgSize->draw()));
     replyPk->insertAtBack(replymsg);
-    replyPk->setKind(HTTPT_RESPONSE_MESSAGE);
 
     badRequests++;
     return replyPk;
