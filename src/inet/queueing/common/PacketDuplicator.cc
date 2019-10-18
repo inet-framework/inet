@@ -25,6 +25,7 @@ Define_Module(PacketDuplicator);
 
 void PacketDuplicator::initialize(int stage)
 {
+    PassivePacketSinkBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         inputGate = gate("in");
         producer = dynamic_cast<IActivePacketSource *>(findConnectedModule(inputGate));
@@ -43,6 +44,9 @@ void PacketDuplicator::pushPacket(Packet *packet, cGate *gate)
     }
     EV_INFO << "Forwarding original packet " << packet->getName() << "." << endl;
     pushOrSendPacket(packet, outputGate, consumer);
+    numProcessedPackets++;
+    processedTotalLength += packet->getTotalLength();
+    updateDisplayString();
 }
 
 void PacketDuplicator::handleCanPushPacket(cGate *gate)
