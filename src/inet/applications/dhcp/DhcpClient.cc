@@ -682,7 +682,7 @@ void DhcpClient::handleDhcpAck(const Ptr<const DhcpMessage>& msg)
     bindLease();
 }
 
-void DhcpClient::scheduleTimerTO(TimerType type)
+void DhcpClient::scheduleTimerTO(DhcpTimerType type)
 {
     // cancel the previous timeout
     cancelEvent(timerTo);
