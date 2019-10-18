@@ -25,7 +25,6 @@
 #include "inet/common/INETDefs.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/routing/ospfv2/Ospfv2Timer.h"
 #include "inet/routing/ospfv2/neighbor/Ospfv2Neighbor.h"
 #include "inet/routing/ospfv2/router/Ospfv2Area.h"
 #include "inet/routing/ospfv2/router/Ospfv2Common.h"

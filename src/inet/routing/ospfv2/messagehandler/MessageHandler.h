@@ -19,7 +19,6 @@
 #define __INET_MESSAGEHANDLER_H
 
 #include "inet/common/INETDefs.h"
-#include "inet/routing/ospfv2/Ospfv2Timer.h"
 #include "inet/routing/ospfv2/interface/Ospfv2Interface.h"
 #include "inet/routing/ospfv2/messagehandler/DatabaseDescriptionHandler.h"
 #include "inet/routing/ospfv2/messagehandler/HelloHandler.h"
