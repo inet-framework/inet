@@ -2,7 +2,7 @@
 
 2019-09-30  Levente Mészáros
 
-	Mobility: Fixed reading MoBAN parameters in release mode.
+	Fixed reading MoBAN parameters in release mode.
 
 2019-01-28  ------ inet-4.1.0 released ------
 

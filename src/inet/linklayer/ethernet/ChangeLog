@@ -1,5 +1,10 @@
 ====== inet-4.x ======
 
+2019-10-14  Levente Mészáros
+
+	Removed allowunconnected because queue in/out gates are loose.
+	Replaced txQueueLimit with queue.frameCapacity.
+
 2019-09-02  Zoltan Bojthe
 
 	Optimized tag usage.

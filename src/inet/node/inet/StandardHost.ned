@@ -44,7 +44,5 @@ module StandardHost extends ApplicationLayerNodeBase
         forwarding = default(false);  // disable routing by default
         ipv4.arp.proxyArpInterfaces = default(""); // proxy arp is disabled on hosts by default
         *.routingTableModule = default("^.ipv4.routingTable");
-        
-//        hasIpv6 = default(true);
 }
 

@@ -24,7 +24,7 @@ simple TokenGeneratorBase
 {
     parameters:
         string serverModule; // module path of the packet server where the tokens are generated via C++ method call
-        string displayStringTextFormat = default("generated %t tk"); // determines display string text above the submodule
+        string displayStringTextFormat = default("generated %t tk\nto %s"); // determines display string text above the submodule
         @class(TokenGeneratorBase);
         @display("i=block/control");
 }

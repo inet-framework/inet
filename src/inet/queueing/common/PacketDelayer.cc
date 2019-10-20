@@ -25,6 +25,7 @@ Define_Module(PacketDelayer);
 
 void PacketDelayer::initialize(int stage)
 {
+    PassivePacketSinkBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         inputGate = gate("in");
         producer = dynamic_cast<IActivePacketSource *>(findConnectedModule(inputGate));
@@ -50,6 +51,9 @@ void PacketDelayer::pushPacket(Packet *packet, cGate *gate)
     take(packet);
     packet->setArrival(getId(), inputGate->getId(), simTime());
     scheduleAt(simTime() + par("delay"), packet);
+    numProcessedPackets++;
+    processedTotalLength += packet->getTotalLength();
+    updateDisplayString();
 }
 
 void PacketDelayer::handleCanPushPacket(cGate *gate)

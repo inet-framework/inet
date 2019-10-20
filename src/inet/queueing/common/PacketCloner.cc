@@ -25,6 +25,7 @@ Define_Module(PacketCloner);
 
 void PacketCloner::initialize(int stage)
 {
+    PassivePacketSinkBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         inputGate = gate("in");
         producer = dynamic_cast<IActivePacketSource *>(findConnectedModule(inputGate));
@@ -42,6 +43,9 @@ void PacketCloner::pushPacket(Packet *packet, cGate *gate)
     int numGates = outputGates.size();
     for (int i = 0; i < numGates; i++)
         pushOrSendPacket(i == numGates - 1 ? packet : packet->dup(), outputGates[i], consumers[i]);
+    numProcessedPackets++;
+    processedTotalLength += packet->getTotalLength();
+    updateDisplayString();
 }
 
 void PacketCloner::handleCanPushPacket(cGate *gate)

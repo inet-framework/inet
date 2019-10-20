@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2019-10-07  Zoltan Bojthe
+
+	Fixed port check in MultiFieldClassifier.
+
 2019-04-12  Levente Mészáros
 
 	Adapted to the new queueing API.

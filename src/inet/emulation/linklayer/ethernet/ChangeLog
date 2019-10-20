@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2019-10-14  Levente Mészáros
+
+	Replaced txQueueLimit with queue.frameCapacity.
+
 2019-04-29  Zoltan Bojthe
 
 	Add only uncalculated FCS, padding will be added and FCS will be calculated

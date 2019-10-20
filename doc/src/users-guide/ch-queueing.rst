@@ -63,9 +63,11 @@ operation on a given gate: *passive* and *active*. Active elements push packets
 into output gates and pop packets from input gates as they see fit. Passive
 elements are pushed into and popped from by other connected modules.
 
-The queueing model elements validate the assembled structure during module
-initialization with respect to the active and passive behavior of the connected
-gates.
+The active queueing elements take into consideration the state of the connected
+passive elements. That is they push or pop packets only when the passive end is
+able to consume or provide accordingly. The queueing model elements also validate
+the assembled structure during module initialization with respect to the active
+and passive behavior of the connected gates.
 
 The following equation about the number of packets holds true for all queueing
 elements:
@@ -241,6 +243,7 @@ Other generic modules
 There are also some other generic queueing model elements. Each one has its own
 specific purpose and behavior.
 
+-  :ned:`PacketGate`: allows or prevents packets to pass through, either pushed or popped
 -  :ned:`PacketMultiplexer`: passively connects multiple inputs to a single output, packets are pushed into the inputs
 -  :ned:`PacketDemultiplexer`: passively connects a single input to multiple outputs, packets are popped from the outputs 
 -  :ned:`PacketDelayer`: sends received packets to the output with some delay independently

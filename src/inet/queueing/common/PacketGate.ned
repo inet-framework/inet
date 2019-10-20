@@ -18,21 +18,24 @@
 package inet.queueing.common;
 
 import inet.queueing.base.PacketProcessorBase;
-import inet.queueing.contract.IActivePacketSource;
-import inet.queueing.contract.IPassivePacketSink;
+import inet.queueing.contract.IPacketSink;
+import inet.queueing.contract.IPacketSource;
 
 //
-// This module connects one packet producer to one packet consumer. It can be
-// pushed with packets from the connected packet producer. When this happens,
-// one or more copy of the packet is pushed to the output gate.
+// This module allows or forbids packets to pass through depending on whether
+// the gate is open or closed.
 //
-simple PacketDuplicator extends PacketProcessorBase like IPassivePacketSink, IActivePacketSource
+simple PacketGate extends PacketProcessorBase like IPacketSource, IPacketSink
 {
     parameters:
-        volatile int numDuplicates = default(1); // number of duplicates, 0 means only the original packet is forwarded
-        @class(PacketDuplicator);
-        @display("i=block/star");
+        bool initiallyOpen = default(false);
+        double openTime @unit(s) = default(nan s); // if there's only one
+        double closeTime @unit(s) = default(nan s); // if there's only one
+        string changeTimes = default(""); // space separated list of times where state change happens
+        displayStringTextFormat = default("passed %p pk (%l)");
+        @class(PacketGate);
+        @display("i=block/cogwheel");
     gates:
-        input in @labels(push);
-        output out @labels(push);
+        input in;
+        output out;
 }

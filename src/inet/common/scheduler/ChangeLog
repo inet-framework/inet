@@ -1,5 +1,13 @@
 ====== inet-4.x ======
 
+2019-10-01  Levente Mészáros
+
+	Begin simulation event is not needed after OMNeT 5.5.1.
+	Qtenv does not fast-forward to the first event anymore.
+	Fixed advanceSimTime() when the FES was not empty. The simulation time should
+	change continuously until the simulation gets to the next event.
+	Added missing advanceSimTime() to RealTimeScheduler under non-linux platforms.
+
 2019-09-17  TÖRÖK Attila
 
 	Avoid intentional signed integer overflow in RealTimeScheduler.

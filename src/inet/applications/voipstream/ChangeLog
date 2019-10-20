@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2019-10-14  Andras Varga
+
+	Fix crash in VoipStreamSender if module is deleted without initialize() being called.
+
 2019-08-07  Zoltan Bojthe
 
 	Changed fingerprint calculation: for silence packets, add sample count

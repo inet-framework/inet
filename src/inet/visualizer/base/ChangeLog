@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2019-10-07  Levente Mészáros
+
+	Fixed disabled radio feature.
+
 2019-09-24  Levente Mészáros
 
 	Added basic documentation to spectrum figures.
@@ -37,6 +41,10 @@
 2019-06-05  Levente Mészáros
 
 	Implemented the creation and deletion of network node visualizations for dynamic modules.
+
+2019-03-18  Gyorgy Szaszko
+
+	Changed InfoVisualizer to visualize display string by default.
 
 2019-01-04  Levente Mészáros
 

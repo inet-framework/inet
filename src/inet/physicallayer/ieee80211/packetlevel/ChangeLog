@@ -32,6 +32,10 @@
 
 	Fixed 802.11 PHY padding detection.
 
+2019-07-29  Gyorgy Szaszko
+
+	Added some example frequencyGains values.
+
 2019-07-26  Levente Mészáros
 
 	Removed 'Min' from log line, because it's not always the case.

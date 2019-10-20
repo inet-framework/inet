@@ -17,8 +17,9 @@
 
 package inet.queueing.common;
 
-import inet.queueing.contract.IPassivePacketSink;
+import inet.queueing.base.PacketProcessorBase;
 import inet.queueing.contract.IActivePacketSource;
+import inet.queueing.contract.IPassivePacketSink;
 
 //
 // This module connects one packet producer to one packet consumer. It can be
@@ -27,10 +28,11 @@ import inet.queueing.contract.IActivePacketSource;
 // order of packets may change if the delay parameter is configured to be a
 // distribution.
 //
-simple PacketDelayer like IPassivePacketSink, IActivePacketSource
+simple PacketDelayer extends PacketProcessorBase like IPassivePacketSink, IActivePacketSource
 {
     parameters:
         volatile double delay @unit(s);
+        @class(PacketDelayer);
         @display("i=block/delay");
     gates:
         input in @labels(push);
