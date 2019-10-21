@@ -1,4 +1,4 @@
-/* fixes for sphinx_materialdesign_theme */
+/* local fixes for the theme */
 
 body { font-family: "Helvetica","Arial",sans-serif }
 
@@ -28,6 +28,12 @@ body { font-family: "Helvetica","Arial",sans-serif }
     font-size: 1.1rem!important;
 }
 
+div.admonition {
+    padding: 12px 20px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
 /* missing styles */
 .align-left { text-align: left; }
 .align-center { text-align: center; display: block; margin-left: auto; margin-right: auto; }
@@ -52,6 +58,13 @@ body { font-family: "Helvetica","Arial",sans-serif }
 .literal-msg, .reference-msg { color: purple; }
 .protocol { font-style: italic; }
 
+.page-content .code, .page-content code:not(.download) {
+    margin: 0 4px;
+    padding: 0 4px;
+    background: rgba(0,0,0,.05);
+    border-radius: 2px;
+}
+
 .page-content code.literal {
     font-size: 0.95rem;
     margin-left: 0px;
@@ -59,6 +72,7 @@ body { font-family: "Helvetica","Arial",sans-serif }
     padding-left: 2px;
     padding-right: 2px;
 }
+
 
 /* higlighter backgrounds */
 .highlight-cpp .highlight { background-color: #e6f3ff }

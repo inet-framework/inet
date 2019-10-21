@@ -14,7 +14,7 @@ Use './docker-make deploy' to build the html version and deploy it on the web.
 Alternatively, you can install sphinx locally,
 
   sudo apt-get install dvipng texlive-binaries
-  python3 -m pip install --user -U Sphinx sphinx_materialdesign_theme sphinxcontrib-doxylink sphinx-autobuild
+  python3 -m pip install --user -U Sphinx sphinxcontrib-doxylink sphinx-autobuild
 
 and then use 'make' directly (instead of the docker) with the above targets. Don't forget to add ~/.local/bin 
 to your path to be able to access the sphinx tools.

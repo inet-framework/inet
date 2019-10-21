@@ -10,12 +10,12 @@
     {{ super() }}
 {% endblock %}
 
+
 {% set css_files = css_files + [
     '_static/material-design-lite-1.3.0/material.' + theme_primary_color|e + '-' + theme_accent_color|e + '.min.css',
     '_static/sphinx_materialdesign_theme.css',
     '_static/fontawesome/all.css',
     '_static/fonts.css',
-    '_static/inet_theme.css'
 ] %}
 
     {%- block header %}
