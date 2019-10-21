@@ -95,8 +95,10 @@ std::vector<Packet *> *OriginatorQosMacDataService::extractFramesToTransmit(queu
         Packet *packet = nullptr;
         if (aMsduAggregationPolicy)
             packet = aMsduAggregateIfNeeded(pendingQueue);
-        if (!packet)
+        if (!packet) {
             packet = pendingQueue->popPacket();
+            take(packet);
+        }
         // PS Defer Queueing
         if (sequenceNumberAssigment) {
             auto header = packet->removeAtFront<Ieee80211DataOrMgmtHeader>();
