@@ -77,6 +77,9 @@ bool PacketFilterBase::canPopSomePacket(cGate *gate)
             packet = provider->popPacket(providerGate);
             EV_INFO << "Filtering out packet " << packet->getName() << "." << endl;
             dropPacket(packet, OTHER_PACKET_DROP);
+            numProcessedPackets++;
+            processedTotalLength += packet->getTotalLength();
+            updateDisplayString();
         }
     }
 }
@@ -91,14 +94,15 @@ Packet *PacketFilterBase::popPacket(cGate *gate)
         if (matchesPacket(packet)) {
             EV_INFO << "Passing through packet " << packet->getName() << "." << endl;
             animateSend(packet, outputGate);
+            updateDisplayString();
             return packet;
         }
         else {
             EV_INFO << "Filtering out packet " << packet->getName() << "." << endl;
             dropPacket(packet, OTHER_PACKET_DROP);
-            updateDisplayString();
         }
     }
+    updateDisplayString();
 }
 
 void PacketFilterBase::handleCanPushPacket(cGate *gate)
