@@ -51,6 +51,7 @@ void PacketFilterBase::initialize(int stage)
 
 void PacketFilterBase::pushPacket(Packet *packet, cGate *gate)
 {
+    Enter_Method_Silent();
     if (matchesPacket(packet)) {
         EV_INFO << "Passing through packet " << packet->getName() << "." << endl;
         pushOrSendPacket(packet, outputGate, consumer);
@@ -86,6 +87,7 @@ bool PacketFilterBase::canPopSomePacket(cGate *gate)
 
 Packet *PacketFilterBase::popPacket(cGate *gate)
 {
+    Enter_Method_Silent();
     auto providerGate = inputGate->getPathStartGate();
     while (true) {
         auto packet = provider->popPacket(providerGate);
@@ -107,12 +109,14 @@ Packet *PacketFilterBase::popPacket(cGate *gate)
 
 void PacketFilterBase::handleCanPushPacket(cGate *gate)
 {
+    Enter_Method_Silent();
     if (producer != nullptr)
         producer->handleCanPushPacket(inputGate);
 }
 
 void PacketFilterBase::handleCanPopPacket(cGate *gate)
 {
+    Enter_Method_Silent();
     if (collector != nullptr)
         collector->handleCanPopPacket(outputGate);
 }

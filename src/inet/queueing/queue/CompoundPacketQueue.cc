@@ -60,6 +60,7 @@ Packet *CompoundPacketQueue::getPacket(int index)
 
 void CompoundPacketQueue::pushPacket(Packet *packet, cGate *gate)
 {
+    Enter_Method_Silent();
     emit(packetPushedSignal, packet);
     if ((packetCapacity != -1 && getNumPackets() >= packetCapacity) ||
         (dataCapacity != b(-1) && getTotalLength() + packet->getTotalLength() > dataCapacity))
@@ -75,6 +76,7 @@ void CompoundPacketQueue::pushPacket(Packet *packet, cGate *gate)
 
 Packet *CompoundPacketQueue::popPacket(cGate *gate)
 {
+    Enter_Method_Silent();
     auto packet = provider->popPacket(outputGate->getPathStartGate());
     animateSend(packet, outputGate->getPathStartGate());
     updateDisplayString();

@@ -49,6 +49,7 @@ void PacketMeterBase::initialize(int stage)
 
 void PacketMeterBase::pushPacket(Packet *packet, cGate *gate)
 {
+    Enter_Method_Silent();
     EV_INFO << "Metering packet " << packet->getName() << "." << endl;
     meterPacket(packet);
     pushOrSendPacket(packet, outputGate, consumer);
@@ -64,6 +65,7 @@ bool PacketMeterBase::canPopSomePacket(cGate *gate)
 
 Packet *PacketMeterBase::popPacket(cGate *gate)
 {
+    Enter_Method_Silent();
     auto packet = provider->popPacket(inputGate->getPathStartGate());
     EV_INFO << "Metering packet " << packet->getName() << "." << endl;
     meterPacket(packet);
@@ -76,12 +78,14 @@ Packet *PacketMeterBase::popPacket(cGate *gate)
 
 void PacketMeterBase::handleCanPushPacket(cGate *gate)
 {
+    Enter_Method_Silent();
     if (producer != nullptr)
         producer->handleCanPushPacket(inputGate);
 }
 
 void PacketMeterBase::handleCanPopPacket(cGate *gate)
 {
+    Enter_Method_Silent();
     if (collector != nullptr)
         collector->handleCanPopPacket(outputGate);
 }

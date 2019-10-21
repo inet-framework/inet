@@ -58,6 +58,7 @@ void PacketDelayer::pushPacket(Packet *packet, cGate *gate)
 
 void PacketDelayer::handleCanPushPacket(cGate *gate)
 {
+    Enter_Method_Silent();
     if (producer != nullptr)
         producer->handleCanPushPacket(inputGate);
 }

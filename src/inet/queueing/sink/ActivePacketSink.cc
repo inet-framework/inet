@@ -66,6 +66,7 @@ void ActivePacketSink::collectPacket()
 
 void ActivePacketSink::handleCanPopPacket(cGate *gate)
 {
+    Enter_Method_Silent();
     if (gate->getPathEndGate() == inputGate && !collectionTimer->isScheduled()) {
         scheduleCollectionTimer();
         collectPacket();

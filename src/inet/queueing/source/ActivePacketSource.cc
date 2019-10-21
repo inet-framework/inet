@@ -68,6 +68,7 @@ void ActivePacketSource::producePacket()
 
 void ActivePacketSource::handleCanPushPacket(cGate *gate)
 {
+    Enter_Method_Silent();
     if (gate->getPathStartGate() == outputGate && !productionTimer->isScheduled()) {
         producePacket();
         scheduleProductionTimer();
