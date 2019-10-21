@@ -92,7 +92,7 @@ class INET_API Ipv4 : public OperationalBase, public NetfilterBase, public INetw
     cPatternMatcher directBroadcastInterfaceMatcher;
 
     // working vars
-    long curFragmentId = -1;    // counter, used to assign unique fragmentIds to datagrams
+    uint16_t curFragmentId = -1;    // counter, used to assign unique fragmentIds to datagrams
     Ipv4FragBuf fragbuf;    // fragmentation reassembly buffer
     simtime_t lastCheckTime;    // when fragbuf was last checked for state fragments
     std::set<const Protocol *> upperProtocols;    // where to send packets after decapsulation
