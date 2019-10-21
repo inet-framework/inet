@@ -41,8 +41,8 @@ void copyActionFrameFields(const Ptr<ieee80211::Ieee80211ActionFrame> to, const 
     to->setReceiverAddress(from->getReceiverAddress());
     to->setTransmitterAddress(from->getTransmitterAddress());
     to->setAddress3(from->getAddress3());
-    to->setSequenceNumber(from->getSequenceNumber());
     to->setFragmentNumber(from->getFragmentNumber());
+    to->setSequenceNumber(from->getSequenceNumber());
     to->setCategory(from->getCategory());
 }
 
@@ -169,8 +169,8 @@ void Ieee80211MacHeaderSerializer::serialize(MemoryOutputStream& stream, const P
             stream.writeMacAddress(mgmtHeader->getReceiverAddress());
             stream.writeMacAddress(mgmtHeader->getTransmitterAddress());
             stream.writeMacAddress(mgmtHeader->getAddress3());
-            stream.writeUint4(mgmtHeader->getSequenceNumber().getRaw());
-            stream.writeNBitsOfUint64Be(mgmtHeader->getFragmentNumber(), 12);
+            stream.writeUint4(mgmtHeader->getFragmentNumber());
+            stream.writeNBitsOfUint64Be(mgmtHeader->getSequenceNumber().getRaw(), 12);
             if (mgmtHeader->getOrder())
                 stream.writeUint32Be(0);
             if (type == ST_ACTION) {
@@ -332,8 +332,8 @@ void Ieee80211MacHeaderSerializer::serialize(MemoryOutputStream& stream, const P
             stream.writeMacAddress(dataHeader->getReceiverAddress());
             stream.writeMacAddress(dataHeader->getTransmitterAddress());
             stream.writeMacAddress(dataHeader->getAddress3());
-            stream.writeUint4(dataHeader->getSequenceNumber().getRaw());
-            stream.writeNBitsOfUint64Be(dataHeader->getFragmentNumber(), 12);
+            stream.writeUint4(dataHeader->getFragmentNumber());
+            stream.writeNBitsOfUint64Be(dataHeader->getSequenceNumber().getRaw(), 12);
             if (dataHeader->getFromDS() && dataHeader->getToDS())
                 stream.writeMacAddress(dataHeader->getAddress4());
             if (type == ST_DATA_WITH_QOS) {
@@ -392,8 +392,8 @@ const Ptr<Chunk> Ieee80211MacHeaderSerializer::deserialize(MemoryInputStream& st
             mgmtHeader->setReceiverAddress(stream.readMacAddress());
             mgmtHeader->setTransmitterAddress(stream.readMacAddress());
             mgmtHeader->setAddress3(stream.readMacAddress());
-            mgmtHeader->setSequenceNumber(SequenceNumber(stream.readUint4()));
-            mgmtHeader->setFragmentNumber(stream.readNBitsToUint64Be(12));
+            mgmtHeader->setFragmentNumber(stream.readUint4());
+            mgmtHeader->setSequenceNumber(SequenceNumber(stream.readNBitsToUint64Be(12)));
             if (order)
                 stream.readUint32Be();
             return mgmtHeader;
@@ -405,8 +405,8 @@ const Ptr<Chunk> Ieee80211MacHeaderSerializer::deserialize(MemoryInputStream& st
             actionFrame->setReceiverAddress(stream.readMacAddress());
             actionFrame->setTransmitterAddress(stream.readMacAddress());
             actionFrame->setAddress3(stream.readMacAddress());
-            actionFrame->setSequenceNumber(SequenceNumber(stream.readUint4()));
-            actionFrame->setFragmentNumber(stream.readNBitsToUint64Be(12));
+            actionFrame->setFragmentNumber(stream.readUint4());
+            actionFrame->setSequenceNumber(SequenceNumber(stream.readNBitsToUint64Be(12)));
             if (order)
                 stream.readUint32Be();
             actionFrame->setCategory(stream.readByte());
@@ -579,8 +579,8 @@ const Ptr<Chunk> Ieee80211MacHeaderSerializer::deserialize(MemoryInputStream& st
             dataHeader->setReceiverAddress(stream.readMacAddress());
             dataHeader->setTransmitterAddress(stream.readMacAddress());
             dataHeader->setAddress3(stream.readMacAddress());
-            dataHeader->setSequenceNumber(SequenceNumber(stream.readUint4()));
-            dataHeader->setFragmentNumber(stream.readNBitsToUint64Be(12));
+            dataHeader->setFragmentNumber(stream.readUint4());
+            dataHeader->setSequenceNumber(SequenceNumber(stream.readNBitsToUint64Be(12)));
             if (dataHeader->getFromDS() && dataHeader->getToDS())
                 dataHeader->setAddress4(stream.readMacAddress());
             if (type == ST_DATA_WITH_QOS) {
