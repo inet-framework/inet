@@ -48,14 +48,14 @@ void Ieee80211MacHeaderSerializer::serialize(MemoryOutputStream& stream, const P
     {
         stream.writeByte(0xD4);
         stream.writeByte(0);
-        stream.writeUint16Be(ackFrame->getDuration().inUnit(SIMTIME_US));
+        stream.writeUint16Be(ackFrame->getDurationField().inUnit(SIMTIME_US));
         stream.writeMacAddress(ackFrame->getReceiverAddress());
     }
     else if (auto rtsFrame = dynamicPtrCast<const Ieee80211RtsFrame>(chunk))
     {
         stream.writeByte(0xB4);
         stream.writeByte(0);
-        stream.writeUint16Be(rtsFrame->getDuration().inUnit(SIMTIME_US));
+        stream.writeUint16Be(rtsFrame->getDurationField().inUnit(SIMTIME_US));
         stream.writeMacAddress(rtsFrame->getReceiverAddress());
         stream.writeMacAddress(rtsFrame->getTransmitterAddress());
     }
@@ -63,7 +63,7 @@ void Ieee80211MacHeaderSerializer::serialize(MemoryOutputStream& stream, const P
     {
         stream.writeByte(0xC4);
         stream.writeByte(0);
-        stream.writeUint16Be(ctsFrame->getDuration().inUnit(SIMTIME_US));
+        stream.writeUint16Be(ctsFrame->getDurationField().inUnit(SIMTIME_US));
         stream.writeMacAddress(ctsFrame->getReceiverAddress());
     }
     else if (auto dataOrMgmtFrame = dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(chunk))
@@ -77,7 +77,7 @@ void Ieee80211MacHeaderSerializer::serialize(MemoryOutputStream& stream, const P
                 | (dataOrMgmtFrame->getFromDS() ? 2 : 0)
                 | (dataOrMgmtFrame->getToDS() ? 1 : 0);
         stream.writeByte(fc1);
-        stream.writeUint16Be(dataOrMgmtFrame->getDuration().inUnit(SIMTIME_US));
+        stream.writeUint16Be(dataOrMgmtFrame->getDurationField().inUnit(SIMTIME_US));
         stream.writeMacAddress(dataOrMgmtFrame->getReceiverAddress());
         stream.writeMacAddress(dataOrMgmtFrame->getTransmitterAddress());
         stream.writeMacAddress(dataOrMgmtFrame->getAddress3());
@@ -129,7 +129,7 @@ void Ieee80211MacHeaderSerializer::parseDataOrMgmtFrame(MemoryInputStream &strea
     frame->setFromDS(fc1 & 0x2);
     frame->setMoreFragments(fc1 & 0x4);
     frame->setRetry(fc1 & 0x8);
-    frame->setDuration(SimTime(stream.readUint16Be(), SIMTIME_US)); // i_dur
+    frame->setDurationField(SimTime(stream.readUint16Be(), SIMTIME_US)); // i_dur
     frame->setReceiverAddress(stream.readMacAddress());
     frame->setTransmitterAddress(stream.readMacAddress());
     frame->setAddress3(stream.readMacAddress());
@@ -167,7 +167,7 @@ const Ptr<Chunk> Ieee80211MacHeaderSerializer::deserialize(MemoryInputStream& st
             ackFrame->setFromDS(false);
             ackFrame->setRetry(false);
             ackFrame->setMoreFragments(false);
-            ackFrame->setDuration(SimTime(stream.readUint16Be(), SIMTIME_US));    //i_dur
+            ackFrame->setDurationField(SimTime(stream.readUint16Be(), SIMTIME_US));    //i_dur
             ackFrame->setReceiverAddress(stream.readMacAddress());
             return ackFrame;
         }
@@ -179,7 +179,7 @@ const Ptr<Chunk> Ieee80211MacHeaderSerializer::deserialize(MemoryInputStream& st
             rtsFrame->setFromDS(false);
             rtsFrame->setRetry(false);
             rtsFrame->setMoreFragments(false);
-            rtsFrame->setDuration(SimTime(stream.readUint16Be(), SIMTIME_US));    //i_dur
+            rtsFrame->setDurationField(SimTime(stream.readUint16Be(), SIMTIME_US));    //i_dur
             rtsFrame->setReceiverAddress(stream.readMacAddress());
             rtsFrame->setTransmitterAddress(stream.readMacAddress());
             return rtsFrame;
@@ -192,7 +192,7 @@ const Ptr<Chunk> Ieee80211MacHeaderSerializer::deserialize(MemoryInputStream& st
             ctsFrame->setFromDS(false);
             ctsFrame->setRetry(false);
             ctsFrame->setMoreFragments(false);
-            ctsFrame->setDuration(SimTime(stream.readUint16Be(),SIMTIME_US));    //i_dur
+            ctsFrame->setDurationField(SimTime(stream.readUint16Be(),SIMTIME_US));    //i_dur
             ctsFrame->setReceiverAddress(stream.readMacAddress());
             return ctsFrame;
         }
