@@ -20,6 +20,13 @@
 namespace inet {
 namespace queueing {
 
+static bool filterAnyPacket(Packet *packet)
+{
+    return true;
+}
+
+Register_Packet_Filter_Function(AnyPacketFilter, filterAnyPacket);
+
 } // namespace queueing
 } // namespace inet
 
