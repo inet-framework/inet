@@ -297,7 +297,7 @@ class Ieee80211AddbaRequest extends Ieee80211ActionFrame
 //
 class Ieee80211AddbaResponse extends Ieee80211ActionFrame
 {
-    // chunkLength = LENGTH_ADDBARESP - B(4);
+    chunkLength = LENGTH_ADDBARESP - B(4);
     category = 3; // Category field is set to 3 (representing Block Ack). (1 byte)
     blockAckAction = 1; // Block Ack Action field is set to 1 (representing ADDBA response). (1 byte)
     uint8_t dialogToken = 1; // The Dialog Token field value is copied from the corresponding received ADDBA Request frame. (1 byte)
@@ -321,7 +321,7 @@ class Ieee80211AddbaResponse extends Ieee80211ActionFrame
 //
 class Ieee80211Delba extends Ieee80211ActionFrame
 {
-    // chunkLength = LENGTH_DELBA;
+    chunkLength = LENGTH_DELBA;
     category = 3; // Category field is set to 3 (representing DELBA). (1 byte)
     blockAckAction = 2; // Block Ack Action field is set to 2 (representing DELBA). (1 byte)
 
@@ -354,7 +354,7 @@ class Ieee80211BlockAckReq extends Ieee80211TwoAddressHeader
 
 class Ieee80211BasicBlockAckReq extends Ieee80211BlockAckReq
 {
-    // chunkLength = B(38);
+    chunkLength = B(38);
 
     int tidInfo; //  The TID_INFO subfield of the BAR Control field of the Basic BlockAckReq frame contains the TID for which a Basic BlockAck frame is requested.
 
@@ -371,7 +371,7 @@ class Ieee80211BasicBlockAckReq extends Ieee80211BlockAckReq
 
 class Ieee80211CompressedBlockAckReq extends Ieee80211BlockAckReq
 {
-    // chunkLength = B(38);
+    chunkLength = B(38);
 
     int tidInfo; // The TID_INFO subfield of the BAR Control field of the Compressed BlockAckReq frame contains the TID for which a BlockAck frame is requested.
     // The BAR Information field of the Compressed BlockAckReq frame contains the Block Ack Starting
