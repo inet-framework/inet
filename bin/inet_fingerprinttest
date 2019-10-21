@@ -33,12 +33,29 @@ from io import StringIO
 
 # FIXME this is a hard coded path!!! must be specified from command line or dicovered automatically
 rootDir = os.path.abspath(".")  # the working directory in the CSV file is relative to this dir
-cpuTimeLimit = "300s"
+cpuTimeLimit = "3000s"
 logFile = "test.out"
 extraOppRunArgs = ""
 debug=False
 release=False
 exitCode = 0
+useColors = sys.stdout.isatty()
+
+txtPASS = "PASS"
+txtPASS_unexpected = "PASS (unexpected)"
+txtFAILED = "FAILED"
+txtFAILED_expected = "FAILED (expected)"
+txtERROR = "ERROR"
+txtERROR_expected = "ERROR (expected)"
+
+if useColors:
+    txtPASS = '\033[0;32m' + "PASS" + "\033[0;0m"     # GREEN
+    txtPASS_unexpected = '\033[0;32m' + "PASS" + "\033[0;0m" + " " + "\033[1;31m" + "(unexpected)" + "\033[0;0m"     # GREEN + RED
+    txtFAILED = "\033[0;0m" + "FAILED" + "\033[0;0m"    # YELLOW
+    txtFAILED_expected = "\033[2;32m" + "FAILED (expected)" + "\033[0;0m"    # DARK GREEN
+    txtERROR = "\033[0;0m" + "ERROR" + "\033[0;0m"      # RED
+    txtERROR_expected = "\033[2;32m" + "ERROR (expected)" + "\033[0;0m"    # DARK GREEN
+
 
 class FingerprintTestCaseGenerator():
     fileToSimulationsMap = {}
@@ -501,7 +518,7 @@ class SimulationTextTestResult(ThreadedTestResult):
         super(SimulationTextTestResult, self).addSuccess(test)
         if test.expectedResult == 'PASS':
             if self.showAll:
-                self.stream.write(": PASS\n")
+                self.stream.write(": " + txtPASS + "\n")
             elif self.dots:
                 self.stream.write('.')
                 self.stream.flush()
@@ -516,7 +533,7 @@ class SimulationTextTestResult(ThreadedTestResult):
             errmsg = err[1]
             self.errors[-1] = (test, errmsg)  # super class method inserts stack trace; we don't need that, so overwrite it
             if self.showAll:
-                self.stream.write(": ERROR (should be %s): %s\n" % (test.expectedResult, errmsg))
+                self.stream.write(": " + txtERROR + " (should be %s): %s\n" % (test.expectedResult, errmsg))
             elif self.dots:
                 self.stream.write('E')
                 self.stream.flush()
@@ -528,7 +545,7 @@ class SimulationTextTestResult(ThreadedTestResult):
         self._mirrorOutput = True
         self.expectedErrors[-1] = (test, err[1])  # super class method inserts stack trace; we don't need that, so overwrite it
         if self.showAll:
-            self.stream.write(": ERROR (expected)\n")
+            self.stream.write(": " + txtERROR_expected + "\n")
         elif self.dots:
             self.stream.write('e')
             self.stream.flush()
@@ -542,7 +559,7 @@ class SimulationTextTestResult(ThreadedTestResult):
             errmsg = err[1]
             self.failures[-1] = (test, errmsg)  # super class method inserts stack trace; we don't need that, so overwrite it
             if self.showAll:
-                self.stream.write(": FAIL (should be %s): %s\n" % (test.expectedResult, errmsg))
+                self.stream.write(": " + txtFAIL + " (should be %s): %s\n" % (test.expectedResult, errmsg))
             elif self.dots:
                 self.stream.write('F')
                 self.stream.flush()
@@ -562,7 +579,7 @@ class SimulationTextTestResult(ThreadedTestResult):
         super(SimulationTextTestResult, self).addExpectedFailure(test, err)
         self.expectedFailures[-1] = (test, err[1])  # super class method inserts stack trace; we don't need that, so overwrite it
         if self.showAll:
-            self.stream.write(":FAIL (expected)\n")
+            self.stream.write(": " + txtFAIL_expected + "\n")
         elif self.dots:
             self.stream.write("x")
             self.stream.flush()
@@ -571,7 +588,7 @@ class SimulationTextTestResult(ThreadedTestResult):
         super(SimulationTextTestResult, self).addUnexpectedSuccess(test)
         self.unexpectedSuccesses[-1] = (test)  # super class method inserts stack trace; we don't need that, so overwrite it
         if self.showAll:
-            self.stream.write(": PASS (unexpected)\n")
+            self.stream.write(": " + txtPASS_unexpected + "\n")
         elif self.dots:
             self.stream.write("u")
             self.stream.flush()
@@ -672,3 +689,4 @@ if __name__ == "__main__":
     else:
         print("Test results differ from expected results")
     exit(exitCode)
+
