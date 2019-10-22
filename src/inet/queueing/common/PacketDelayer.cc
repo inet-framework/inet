@@ -46,7 +46,7 @@ void PacketDelayer::handleMessage(cMessage *message)
 
 void PacketDelayer::pushPacket(Packet *packet, cGate *gate)
 {
-    Enter_Method_Silent();
+    Enter_Method("pushPacket");
     EV_INFO << "Delaying packet " << packet->getName() << "." << endl;
     take(packet);
     packet->setArrival(getId(), inputGate->getId(), simTime());
@@ -58,7 +58,7 @@ void PacketDelayer::pushPacket(Packet *packet, cGate *gate)
 
 void PacketDelayer::handleCanPushPacket(cGate *gate)
 {
-    Enter_Method_Silent();
+    Enter_Method("handleCanPushPacket");
     if (producer != nullptr)
         producer->handleCanPushPacket(inputGate);
 }

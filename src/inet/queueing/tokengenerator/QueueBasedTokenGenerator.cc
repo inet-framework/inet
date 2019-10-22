@@ -40,7 +40,7 @@ void QueueBasedTokenGenerator::initialize(int stage)
 
 void QueueBasedTokenGenerator::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
 {
-    Enter_Method_Silent();
+    Enter_Method("receiveSignal");
     if (signal == packetPoppedSignal) {
         if (queue->getNumPackets() < minNumPackets || queue->getTotalLength() < minTotalLength)
             generateTokens();

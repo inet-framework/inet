@@ -47,6 +47,7 @@ bool PacketBuffer::isOverloaded()
 
 void PacketBuffer::addPacket(Packet *packet)
 {
+    Enter_Method("addPacket");
     EV_INFO << "Adding packet " << packet->getName() << " to the buffer.\n";
     totalLength += packet->getTotalLength();
     packets.push_back(packet);
@@ -58,6 +59,7 @@ void PacketBuffer::addPacket(Packet *packet)
 
 void PacketBuffer::removePacket(Packet *packet)
 {
+    Enter_Method("removePacket");
     EV_INFO << "Removing packet " << packet->getName() << " from the buffer.\n";
     totalLength -= packet->getTotalLength();
     packets.erase(find(packets.begin(), packets.end(), packet));

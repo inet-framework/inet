@@ -76,12 +76,12 @@ void TokenBasedServer::processPackets()
 
 void TokenBasedServer::handleCanPushPacket(cGate *gate)
 {
-    Enter_Method_Silent();
+    Enter_Method("handleCanPushPacket");
 }
 
 void TokenBasedServer::handleCanPopPacket(cGate *gate)
 {
-    Enter_Method_Silent();
+    Enter_Method("handleCanPopPacket");
     processPackets();
     updateDisplayString();
 }

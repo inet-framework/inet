@@ -74,7 +74,6 @@ void PacketQueueingElementBase::pushOrSendPacket(Packet *packet, cGate *gate, IP
         consumer->pushPacket(packet, gate->getPathEndGate());
     }
     else {
-        Enter_Method_Silent();
         take(packet);
         send(packet, gate);
     }

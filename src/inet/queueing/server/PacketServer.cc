@@ -77,7 +77,7 @@ void PacketServer::endProcessingPacket()
 
 void PacketServer::handleCanPushPacket(cGate *gate)
 {
-    Enter_Method_Silent();
+    Enter_Method("handleCanPushPacket");
     if (!processingTimer->isScheduled() && canStartProcessingPacket()) {
         startProcessingPacket();
         scheduleProcessingTimer();
@@ -86,7 +86,7 @@ void PacketServer::handleCanPushPacket(cGate *gate)
 
 void PacketServer::handleCanPopPacket(cGate *gate)
 {
-    Enter_Method_Silent();
+    Enter_Method("handleCanPopPacket");
     if (!processingTimer->isScheduled() && canStartProcessingPacket()) {
         startProcessingPacket();
         scheduleProcessingTimer();

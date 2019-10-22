@@ -40,7 +40,7 @@ void PacketBasedTokenGenerator::initialize(int stage)
 
 void PacketBasedTokenGenerator::pushPacket(Packet *packet, cGate *gate)
 {
-    Enter_Method_Silent();
+    Enter_Method("pushPacket");
     auto numTokens = numTokensPerPacketParameter->doubleValue() + numTokensPerBitParameter->doubleValue() * packet->getTotalLength().get();
     numTokensGenerated += numTokens;
     server->addTokens(numTokens);
@@ -72,6 +72,7 @@ const char *PacketBasedTokenGenerator::resolveDirective(char directive)
 
 void PacketBasedTokenGenerator::receiveSignal(cComponent *source, simsignal_t signal, double value, cObject *details)
 {
+    Enter_Method("receiveSignal");
     if (signal == TokenBasedServer::tokensDepletedSignal)
         producer->handleCanPushPacket(inputGate->getPathStartGate());
     else

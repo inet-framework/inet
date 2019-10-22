@@ -119,6 +119,7 @@ bool PacketGate::canPushPacket(Packet *packet, cGate *gate)
 
 void PacketGate::pushPacket(Packet *packet, cGate *gate)
 {
+    Enter_Method("pushPacket");
     if (!isOpen_)
         throw cRuntimeError("Cannot push packet when the gate is closed");
     EV_INFO << "Passing packet " << packet->getName() << "." << endl;
@@ -140,6 +141,7 @@ Packet *PacketGate::canPopPacket(cGate *gate)
 
 Packet *PacketGate::popPacket(cGate *gate)
 {
+    Enter_Method("popPacket");
     if (!isOpen_)
         throw cRuntimeError("Cannot pop packet when the gate is closed");
     auto packet = provider->popPacket(inputGate->getPathStartGate());
@@ -153,12 +155,14 @@ Packet *PacketGate::popPacket(cGate *gate)
 
 void PacketGate::handleCanPushPacket(cGate *gate)
 {
+    Enter_Method("handleCanPushPacket");
     if (isOpen_ && producer != nullptr)
         producer->handleCanPushPacket(inputGate);
 }
 
 void PacketGate::handleCanPopPacket(cGate *gate)
 {
+    Enter_Method("handleCanPopPacket");
     if (isOpen_ && collector != nullptr)
         collector->handleCanPopPacket(outputGate);
 }
