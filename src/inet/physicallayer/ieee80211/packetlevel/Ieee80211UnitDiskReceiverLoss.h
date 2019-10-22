@@ -30,7 +30,14 @@ class INET_API Ieee80211UnitDiskReceiverLoss : public Ieee80211UnitDiskReceiver
     typedef std::vector<int> Links;
     static std::map<int, Links> uniLinks;
     static std::map<int, Links> lossLinks;
+    int hostId;
+    m communicationRange;
+    IMobility *mobility;
+    static std::map<int, IMobility *> nodes;
+    std::vector<int> neigbors;
+
   protected:
+    virtual void checkNeigChange() const;
     virtual void initialize(int stage) override;
 
   public:

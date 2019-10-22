@@ -27,6 +27,7 @@ namespace physicallayer {
 
 std::map<int, Ieee80211UnitDiskReceiverLoss::Links> Ieee80211UnitDiskReceiverLoss::uniLinks;
 std::map<int, Ieee80211UnitDiskReceiverLoss::Links> Ieee80211UnitDiskReceiverLoss::lossLinks;
+std::map<int, IMobility *> Ieee80211UnitDiskReceiverLoss::nodes;
 
 
 Define_Module(Ieee80211UnitDiskReceiverLoss);
@@ -38,9 +39,16 @@ Ieee80211UnitDiskReceiverLoss::Ieee80211UnitDiskReceiverLoss() :
 
 void Ieee80211UnitDiskReceiverLoss::initialize(int stage)
 {
+    Ieee80211UnitDiskReceiver::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
     }
-    if (stage == INITSTAGE_PHYSICAL_LAYER_NEIGHBOR_CACHE) {
+    else if (stage == INITSTAGE_PHYSICAL_LAYER) {
+
+        auto parent = this->getParentModule();
+        auto node = getContainingNode(this);
+        mobility = check_and_cast<IMobility *>(node->getSubmodule("mobility"));
+        hostId = node->getId();
+        nodes.insert(std::make_pair(hostId, mobility));
 
         double numUniLink = par("perUniLinks").doubleValue();
         double numLossLinks = par("perLosLinks").doubleValue();
@@ -57,9 +65,9 @@ void Ieee80211UnitDiskReceiverLoss::initialize(int stage)
         cTopology topo("topo");
         topo.extractByProperty("networkNode");
 
-        auto parent = this->getParentModule();
         auto transmitter = check_and_cast<UnitDiskTransmitter *> (parent->getSubmodule("transmitter"));
         auto distance = transmitter->getMaxCommunicationRange();
+        communicationRange = distance;
 
         std::deque<std::pair<int,int>> links;
         std::deque<std::pair<int,int>> erased;
@@ -123,11 +131,124 @@ void Ieee80211UnitDiskReceiverLoss::initialize(int stage)
             numLossLinks--;
         }
     }
+    else if (stage == INITSTAGE_PHYSICAL_LAYER_NEIGHBOR_CACHE) {
+        // register the neighbors nodes
+        auto cord1 = mobility->getCurrentPosition();
+        for (const auto &elem : nodes) {
+            if (elem.first == hostId)
+                continue;
+            auto cord2 = elem.second->getCurrentPosition();
+            if (cord1.distance(cord2) < communicationRange.get()) {
+                neigbors.push_back(elem.first);
+            }
+        }
+    }
 }
 
+void Ieee80211UnitDiskReceiverLoss::checkNeigChange() const{
+    std::vector<int> neig;
+    auto cord1 = mobility->getCurrentPosition();
+    for (const auto &elem : nodes) {
+        if (elem.first == hostId)
+            continue;
+        auto cord2 = elem.second->getCurrentPosition();
+        if (cord1.distance(cord2) < communicationRange.get()) {
+            neig.push_back(elem.first);
+        }
+    }
+
+    if (neig != neigbors) {
+        auto temp1 = neigbors;
+        auto temp2 = neig;
+        // recompute list
+        // first find the difference.
+        for (auto it = temp1.begin(); it != temp1.end(); ) {
+            auto it2 = std::find(temp2.begin(), temp2.end(), *it);
+            if (it2 != temp2.end()) {// no change, erase both form the list
+                it = temp1.erase(it);
+                temp2.erase(it2);
+                continue;
+            }
+            ++it;
+        }
+        // erase links from tem1, and include links from tem2
+        auto uniLinkHostIt = uniLinks.find(hostId);
+        auto lossLinkHostIt = lossLinks.find(hostId);
+        for (const auto &elem : temp1) {
+            auto uniLinkIt = uniLinks.find(elem);
+            auto lossLinkIt = lossLinks.find(elem);
+            if (uniLinkIt != uniLinks.end()) {
+                auto it = std::find(uniLinkIt->second.begin(), uniLinkIt->second.end(), hostId);
+                if (it != uniLinkIt->second.end()) {
+                    uniLinkIt->second.erase(it);
+                }
+            }
+            if (lossLinkIt != lossLinks.end()) {
+                auto it = std::find(lossLinkIt->second.begin(), lossLinkIt->second.end(), hostId);
+                if (it != lossLinkIt->second.end()) {
+                    lossLinkIt->second.erase(it);
+                }
+            }
+            if (uniLinkHostIt != uniLinks.end()) {
+                auto it = std::find(uniLinkHostIt->second.begin(), uniLinkHostIt->second.end(), hostId);
+                if (it != uniLinkHostIt->second.end()) {
+                    uniLinkHostIt->second.erase(it);
+                }
+                if (uniLinkHostIt->second.empty()) {
+                    uniLinks.erase(uniLinkHostIt);
+                    uniLinkHostIt = uniLinks.end();
+                }
+            }
+            if (lossLinkHostIt != lossLinks.end()) {
+                auto it = std::find(lossLinkHostIt->second.begin(), lossLinkHostIt->second.end(), hostId);
+                if (it != lossLinkHostIt->second.end()) {
+                    lossLinkHostIt->second.erase(it);
+                }
+                if (lossLinkHostIt->second.empty()) {
+                    lossLinks.erase(uniLinkHostIt);
+                    lossLinkHostIt = lossLinks.end();
+                }
+            }
+            if (uniLinkIt->second.empty())
+                uniLinks.erase(uniLinkIt);
+            if (lossLinkIt->second.empty())
+                lossLinks.erase(lossLinkIt);
+        }
+
+        double numUniLink = par("perUniLinks").doubleValue();
+        double numLossLinks = par("perLosLinks").doubleValue();
+
+        for (const auto &elem : temp2) {
+            int val1 = intuniform(0,1);
+            int val2 = uniform(0, 100);
+            if (val2 < numUniLink) {
+                if (val1) {
+                    uniLinks[hostId].push_back(elem);
+                }
+                else {
+                    uniLinks[elem].push_back(hostId);
+                }
+                continue;
+            }
+            if (val2 < numLossLinks) {
+                if (val1) {
+                    lossLinks[hostId].push_back(elem);
+                }
+                else {
+                    lossLinks[elem].push_back(hostId);
+                }
+                continue;
+            }
+        }
+        auto ptr = const_cast<std::vector<int> *> (&neigbors);
+        *ptr = neig;
+    }
+}
 
 const IReceptionResult *Ieee80211UnitDiskReceiverLoss::computeReceptionResult(const IListening *listening, const IReception *reception, const IInterference *interference, const ISnir *snir, const std::vector<const IReceptionDecision *> *decisions) const
 {
+    checkNeigChange();
+
     auto receptionResult = Ieee80211UnitDiskReceiver::computeReceptionResult(listening, reception, interference, snir, decisions);
 
     auto txNode = findContainingNode(check_and_cast<Radio *>(const_cast<IRadio *>(reception->getTransmission()->getTransmitter())));
