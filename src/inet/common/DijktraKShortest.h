@@ -155,6 +155,7 @@ public:
     virtual const Edge* getEdge(const NodeId & originNode, const NodeId & last_node);
 
     virtual void addEdge (const NodeId & dest_node, const NodeId & last_node,double cost) {
+        routeMap.clear();
         addEdge (dest_node, last_node,cost,1,1000,1000);
     }
 
@@ -196,6 +197,15 @@ public:
 
     typedef std::vector<NodeId> Route;
     typedef std::map<NodeId, Route> MapRoutes;
+    struct RoutesInfo {
+        NodeId destination;
+        NodeId nextHop;
+        double cost = 0;
+        int hops = -1;
+    };
+
+    typedef std::vector<RoutesInfo> RoutesInfoList;
+
 
     class SetElem
     {
@@ -324,6 +334,12 @@ public:
     virtual Edge* removeEdge(const NodeId & originNode, const NodeId & last_node, LinkArray & linkArray);
     virtual const Edge* getEdge(const NodeId & originNode, const NodeId & last_node, LinkArray & linkArray);
 
+    bool rootNodeIncluded() {
+        auto it = linkArray.find(rootNode);
+          if (it == linkArray.end())
+              return false;
+          return true;
+    }
     virtual void cleanLinkArray();
     virtual void clearAll();
     virtual void cleanRoutes() {routeMap.clear();}
@@ -351,6 +367,8 @@ public:
     virtual double getCost(const NodeId &);
 
     virtual void setMethod(Method p) {method = p;}
+
+    virtual void getRoutesInfoList(RoutesInfoList & list);
 };
 
 }

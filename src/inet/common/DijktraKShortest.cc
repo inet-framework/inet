@@ -303,6 +303,7 @@ void DijkstraKshortest::addEdge (const NodeId & originNode, const NodeId & last_
     link->Bandwith()=bw;
     link->Quality()=quality;
     linkArray[originNode].push_back(link);
+    routeMap.clear();
 }
 
 void DijkstraKshortest::deleteEdge(const NodeId & originNode, const NodeId & last_node)
@@ -1172,6 +1173,31 @@ void Dijkstra::runUntil(const NodeId &target, const NodeId &rootNode, const Link
         }
     }
 }
+void Dijkstra::getRoutesInfoList(RoutesInfoList & list) {
+
+    list.clear();
+    for (const auto & elem : routeMap) {
+        if (elem.first == rootNode)
+            continue;
+        std::vector<NodeId> path;
+        NodeId currentNode = elem.first;
+        auto it = routeMap.find(elem.first);
+        while (currentNode != rootNode) {
+            path.push_back(currentNode);
+            currentNode = it->second.idPrev;
+            it = routeMap.find(currentNode);
+            if (it == routeMap.end())
+                throw cRuntimeError("error in data");
+        }
+        RoutesInfo info;
+        info.destination = elem.first;
+        info.cost = elem.second.cost;
+        info.hops = path.size();
+        info.nextHop = path.back();
+        list.push_back(info);
+    }
+}
+
 
 bool Dijkstra::getRoute(const NodeId &nodeId, std::vector<NodeId> &pathNode, const RouteMap &routeMap)
 {
@@ -1203,6 +1229,8 @@ bool Dijkstra::getRoute(const NodeId &nodeId, std::vector<NodeId> &pathNode, con
     return (true);
 
 }
+
+
 
 bool Dijkstra::getRoute(const NodeId &nodeId, std::vector<NodeId> &pathNode)
 {
