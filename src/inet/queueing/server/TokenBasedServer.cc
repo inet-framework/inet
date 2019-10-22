@@ -57,6 +57,7 @@ void TokenBasedServer::processPackets()
                 packet = provider->popPacket(inputGate->getPathStartGate());
                 EV_INFO << "Processing packet " << packet->getName() << ".\n";
                 processedTotalLength += packet->getDataLength();
+                emit(packetServedSignal, packet);
                 pushOrSendPacket(packet, outputGate, consumer);
                 numProcessedPackets++;
                 numTokens -= numRequiredTokens;

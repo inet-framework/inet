@@ -33,6 +33,8 @@ simple PacketBasedTokenGenerator extends PacketSinkBase like IPassivePacketSink
         displayStringTextFormat = default("processed %p pk (%l)\ngenerated %t tk\nto %s"); // %p number of packet, %l total length
         @class(PacketBasedTokenGenerator);
         @display("i=block/control");
+        @signal[tokensCreated](type=double);
+        @statistic[tokensCreated](title="tokens created"; record=count,sum,vector; interpolationmode=none);
     gates:
         input in;
 }

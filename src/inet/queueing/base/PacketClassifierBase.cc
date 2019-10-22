@@ -54,6 +54,7 @@ bool PacketClassifierBase::canPushSomePacket(cGate *gate)
 void PacketClassifierBase::pushPacket(Packet *packet, cGate *gate)
 {
     Enter_Method("pushPacket");
+    emit(packetPushedSignal, packet);
     EV_INFO << "Classifying packet " << packet->getName() << ".\n";
     int index = classifyPacket(packet);
     if (index == -1)

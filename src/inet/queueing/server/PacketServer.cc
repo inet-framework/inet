@@ -70,6 +70,7 @@ void PacketServer::endProcessingPacket()
 {
     EV_INFO << "Processing packet " << packet->getName() << " ended.\n";
     processedTotalLength += packet->getDataLength();
+    emit(packetServedSignal, packet);
     pushOrSendPacket(packet, outputGate, consumer);
     numProcessedPackets++;
     packet = nullptr;

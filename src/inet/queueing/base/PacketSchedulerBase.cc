@@ -67,6 +67,7 @@ Packet *PacketSchedulerBase::popPacket(cGate *gate)
         processedTotalLength += packet->getDataLength();
         updateDisplayString();
         animateSend(packet, outputGate);
+        emit(packetPoppedSignal, packet);
         return packet;
     }
 }

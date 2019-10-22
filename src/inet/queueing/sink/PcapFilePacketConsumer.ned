@@ -32,6 +32,8 @@ simple PcapFilePacketConsumer extends PacketSinkBase like IPassivePacketSink
         int snaplen = default(65535);  // maximum number of bytes to record per packet
         bool alwaysFlush = default(false); // flush the PCAP file after each write to ensure that all packets are captured in case of a crash
         @class(PcapFilePacketConsumer);
+        @signal[packetPushed](type=inet::Packet);
+        @statistic[packetPushed](title="packets pushed"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
     gates:
         input in @labels(push);
 }

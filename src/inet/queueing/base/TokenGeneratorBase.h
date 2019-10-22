@@ -27,6 +27,9 @@ namespace queueing {
 
 class INET_API TokenGeneratorBase : public PacketQueueingElementBase, public StringFormat::IDirectiveResolver
 {
+  public:
+    static simsignal_t tokensCreatedSignal;
+
   protected:
     const char *displayStringTextFormat = nullptr;
     TokenBasedServer *server = nullptr;

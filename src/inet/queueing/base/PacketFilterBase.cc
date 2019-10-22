@@ -16,8 +16,8 @@
 //
 
 #include "inet/common/ModuleAccess.h"
-#include "inet/queueing/base/PacketFilterBase.h"
 #include "inet/common/Simsignals.h"
+#include "inet/queueing/base/PacketFilterBase.h"
 
 namespace inet {
 namespace queueing {
@@ -52,6 +52,7 @@ void PacketFilterBase::initialize(int stage)
 void PacketFilterBase::pushPacket(Packet *packet, cGate *gate)
 {
     Enter_Method("pushPacket");
+    emit(packetPushedSignal, packet);
     if (matchesPacket(packet)) {
         EV_INFO << "Passing through packet " << packet->getName() << "." << endl;
         pushOrSendPacket(packet, outputGate, consumer);
@@ -97,6 +98,7 @@ Packet *PacketFilterBase::popPacket(cGate *gate)
             EV_INFO << "Passing through packet " << packet->getName() << "." << endl;
             animateSend(packet, outputGate);
             updateDisplayString();
+            emit(packetPoppedSignal, packet);
             return packet;
         }
         else {

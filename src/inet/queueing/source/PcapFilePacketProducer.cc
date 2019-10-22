@@ -16,6 +16,7 @@
 //
 
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/Simsignals.h"
 #include "inet/queueing/source/PcapFilePacketProducer.h"
 
 namespace inet {
@@ -61,6 +62,7 @@ void PcapFilePacketProducer::schedulePacket()
 {
     auto pair = pcapReader.readPacket();
     auto packet = pair.second;
+    emit(packetCreatedSignal, packet);
     if (packet != nullptr) {
         EV << "Scheduling packet " << packet->getFullName() << " from PCAP file.\n";
         scheduleAt(pair.first, packet);

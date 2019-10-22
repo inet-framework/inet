@@ -31,7 +31,8 @@ simple PassivePacketSource extends PacketSourceBase like IPassivePacketSource
         @class(PassivePacketSource);
         @signal[packetPopped](type=inet::Packet);
         @signal[packetCreated](type=inet::Packet);
-        @statistic[packetCreated](title="created packets"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
+        @statistic[packetPopped](title="packets popped"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
+        @statistic[packetCreated](title="packets created"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
     gates:
         output out @labels(pop);
 }

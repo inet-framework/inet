@@ -16,6 +16,7 @@
 //
 
 #include "inet/common/ModuleAccess.h"
+#include "inet/queueing/base/TokenGeneratorBase.h"
 #include "inet/queueing/tokengenerator/PacketBasedTokenGenerator.h"
 
 namespace inet {
@@ -43,6 +44,7 @@ void PacketBasedTokenGenerator::pushPacket(Packet *packet, cGate *gate)
     Enter_Method("pushPacket");
     auto numTokens = numTokensPerPacketParameter->doubleValue() + numTokensPerBitParameter->doubleValue() * packet->getTotalLength().get();
     numTokensGenerated += numTokens;
+    emit(TokenGeneratorBase::tokensCreatedSignal, numTokens);
     server->addTokens(numTokens);
     numProcessedPackets++;
     processedTotalLength += packet->getDataLength();

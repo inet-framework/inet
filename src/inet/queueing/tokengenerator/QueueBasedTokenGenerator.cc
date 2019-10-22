@@ -52,8 +52,9 @@ void QueueBasedTokenGenerator::receiveSignal(cComponent *source, simsignal_t sig
 void QueueBasedTokenGenerator::generateTokens()
 {
     auto numTokens = numTokensParameter->doubleValue();
-    server->addTokens(numTokens);
     numTokensGenerated += numTokens;
+    emit(tokensCreatedSignal, numTokens);
+    server->addTokens(numTokens);
     updateDisplayString();
 }
 
