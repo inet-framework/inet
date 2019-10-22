@@ -205,6 +205,7 @@ can be both pushed into the input and popped from the output of packet markers.
 
    parameterizable with an :cpp:`IPacketFilterFunction`
 
+-  :ned:`PacketTagger`: attaches tags to packet such as outgoing interface, hopLimit, VLAN, user priority 
 -  :ned:`RedMarker`: random early detection marker
 
 Meters
