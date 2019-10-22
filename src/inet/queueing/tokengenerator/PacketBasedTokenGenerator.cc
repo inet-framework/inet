@@ -72,9 +72,10 @@ const char *PacketBasedTokenGenerator::resolveDirective(char directive)
 
 void PacketBasedTokenGenerator::receiveSignal(cComponent *source, simsignal_t signal, double value, cObject *details)
 {
-    Enter_Method("receiveSignal");
-    if (signal == TokenBasedServer::tokensDepletedSignal)
+    if (signal == TokenBasedServer::tokensDepletedSignal) {
+        Enter_Method("tokensDepleted");
         producer->handleCanPushPacket(inputGate->getPathStartGate());
+    }
     else
         throw cRuntimeError("Unknown signal");
 }

@@ -47,19 +47,19 @@ void SignalBasedTokenGenerator::generateTokens()
 
 void SignalBasedTokenGenerator::receiveSignal(cComponent *source, simsignal_t signal, long value, cObject *details)
 {
-    Enter_Method("receiveSignal");
+    Enter_Method(cComponent::getSignalName(signal));
     generateTokens();
 }
 
 void SignalBasedTokenGenerator::receiveSignal(cComponent *source, simsignal_t signal, double value, cObject *details)
 {
-    Enter_Method("receiveSignal");
+    Enter_Method(cComponent::getSignalName(signal));
     generateTokens();
 }
 
 void SignalBasedTokenGenerator::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
 {
-    Enter_Method("receiveSignal");
+    Enter_Method(cComponent::getSignalName(signal));
     generateTokens();
 }
 
