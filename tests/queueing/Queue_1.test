@@ -59,17 +59,19 @@ Popping packet producer-3 from the queue.
 Collecting packet producer-3.
 Producing packet producer-4.
 Pushing packet producer-4 into the queue.
-Popping packet producer-4 from the queue.
-Collecting packet producer-4.
 Producing packet producer-5.
 Pushing packet producer-5 into the queue.
-Popping packet producer-5 from the queue.
-Collecting packet producer-5.
+Popping packet producer-4 from the queue.
+Collecting packet producer-4.
 Producing packet producer-6.
 Pushing packet producer-6 into the queue.
-Popping packet producer-6 from the queue.
-Collecting packet producer-6.
+Popping packet producer-5 from the queue.
+Collecting packet producer-5.
 Producing packet producer-7.
 Pushing packet producer-7 into the queue.
+Producing packet producer-8.
+Pushing packet producer-8 into the queue.
+Popping packet producer-6 from the queue.
+Collecting packet producer-6.
 Popping packet producer-7 from the queue.
 Collecting packet producer-7.
