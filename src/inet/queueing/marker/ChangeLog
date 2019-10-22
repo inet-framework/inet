@@ -7,4 +7,4 @@
 	components were either ported or completely replaced with components of the new
 	queueing package.
 
-	Added new NED simple modules: PacketMarker and RedMarker.
+	Added new NED simple modules: PacketMarker, PacketTagger and RedMarker.
