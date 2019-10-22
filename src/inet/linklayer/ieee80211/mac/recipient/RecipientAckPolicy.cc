@@ -62,7 +62,7 @@ bool RecipientAckPolicy::isAckNeeded(const Ptr<const Ieee80211DataOrMgmtHeader>&
 simtime_t RecipientAckPolicy::computeAckDurationField(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header) const
 {
     if (header->getMoreFragments()) {
-        auto duration = header->getDuration() - modeSet->getSifsTime() - computeAckDuration(packet, header);
+        auto duration = header->getDurationField() - modeSet->getSifsTime() - computeAckDuration(packet, header);
         duration = ceil(duration, SimTime(1, SIMTIME_US));
         if (duration < 0)
             EV_WARN << "ACK duration field would be negative, returning 0 instead.\n";

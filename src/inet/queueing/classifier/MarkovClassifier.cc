@@ -106,6 +106,7 @@ Packet *MarkovClassifier::canPopPacket(cGate *gate)
 
 Packet *MarkovClassifier::popPacket(cGate *gate)
 {
+    Enter_Method_Silent();
     if (gate->getIndex() != state)
         throw cRuntimeError("Cannot pop from gate");
     auto packet = provider->popPacket(inputGate->getPathEndGate());
@@ -118,6 +119,7 @@ Packet *MarkovClassifier::popPacket(cGate *gate)
 
 void MarkovClassifier::handleCanPopPacket(cGate *gate)
 {
+    Enter_Method_Silent();
     collectors[state]->handleCanPopPacket(outputGates[state]);
 }
 

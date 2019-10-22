@@ -15,10 +15,41 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-#include "inet/queueing/function/PacketFilterFunction.h"
+#include "inet/linklayer/common/UserPriorityTag_m.h"
+#include "inet/queueing/function/PacketSchedulerFunction.h"
 
 namespace inet {
 namespace queueing {
+
+static int schedulePacketByData(const std::vector<IPassivePacketSource *>& queues)
+{
+    int selectedIndex = -1;
+    int selectedData = -1;
+    for (int i = 0; i < (int)queues.size(); i++) {
+        auto packet = queues[i]->canPopPacket();
+        const auto& data = packet->peekDataAt<BytesChunk>(B(0), B(1));
+        if (data->getBytes().at(0) > selectedData)
+            selectedIndex = i;
+    }
+    return selectedIndex;
+}
+
+Register_Packet_Scheduler_Function(PacketDataScheduler, schedulePacketByData);
+
+static int schedulePacketByUserPriority(const std::vector<IPassivePacketSource *>& queues)
+{
+    int selectedIndex = -1;
+    int selectedUserPriority = -1;
+    for (int i = 0; i < (int)queues.size(); i++) {
+        auto packet = queues[i]->canPopPacket();
+        auto userPriorityReq = packet->getTag<UserPriorityReq>();
+        if (userPriorityReq->getUserPriority() > selectedUserPriority)
+            selectedIndex = i;
+    }
+    return selectedIndex;
+}
+
+Register_Packet_Scheduler_Function(PacketUserPriorityScheduler, schedulePacketByUserPriority);
 
 } // namespace queueing
 } // namespace inet

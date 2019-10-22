@@ -31,6 +31,6 @@ import inet.queueing.contract.IPacketClassifier;
 simple PacketClassifier extends PacketClassifierBase like IPacketClassifier
 {
     parameters:
-        string classifierClass = default(""); // determines the output queue of packets, the parameter must be the name of a C++ class which implements the IPacketClassifierFunction interface and is registered via Register_Class
+        string classifierClass; // determines the output queue of packets, the parameter must be the name of a C++ class which implements the IPacketClassifierFunction interface and is registered via Register_Class
         @class(PacketClassifier);
 }

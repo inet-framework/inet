@@ -15,18 +15,35 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-#include "inet/queueing/function/PacketFilterFunction.h"
+#ifndef __INET_PACKETTAGGER_H
+#define __INET_PACKETTAGGER_H
+
+#include "inet/queueing/base/PacketMarkerBase.h"
+#include "inet/queueing/contract/IPacketFilterFunction.h"
 
 namespace inet {
 namespace queueing {
 
-static bool filterAnyPacket(Packet *packet)
+class INET_API PacketTagger : public PacketMarkerBase
 {
-    return true;
-}
+  protected:
+    int userPriority = -1;
+    int interfaceId = -1;
+    int hopLimit = -1;
+    int vlanId = -1;
+    W transmissionPower = W(NaN);
+    IPacketFilterFunction *packetFilterFunction = nullptr;
 
-Register_Packet_Filter_Function(AnyPacketFilter, filterAnyPacket);
+  protected:
+    virtual void initialize(int stage) override;
+    virtual void markPacket(Packet *packet) override;
+
+  public:
+    virtual ~PacketTagger();
+};
 
 } // namespace queueing
 } // namespace inet
+
+#endif // ifndef __INET_PACKETTAGGER_H
 

@@ -47,6 +47,7 @@ void PcapFilePacketConsumer::finish()
 
 void PcapFilePacketConsumer::pushPacket(Packet *packet, cGate *gate)
 {
+    Enter_Method_Silent();
     EV_INFO << "Writing packet " << packet->getName() << " to PCAP file." << endl;
     pcapWriter.writePacket(simTime(), packet);
     numProcessedPackets++;

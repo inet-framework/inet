@@ -76,6 +76,7 @@ void TokenBasedServer::processPackets()
 
 void TokenBasedServer::handleCanPushPacket(cGate *gate)
 {
+    Enter_Method_Silent();
 }
 
 void TokenBasedServer::handleCanPopPacket(cGate *gate)

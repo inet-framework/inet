@@ -84,6 +84,7 @@ Packet *PacketQueue::getPacket(int index)
 
 void PacketQueue::pushPacket(Packet *packet, cGate *gate)
 {
+    Enter_Method_Silent();
     emit(packetPushedSignal, packet);
     EV_INFO << "Pushing packet " << packet->getName() << " into the queue." << endl;
     queue.insert(packet);
@@ -102,6 +103,7 @@ void PacketQueue::pushPacket(Packet *packet, cGate *gate)
 
 Packet *PacketQueue::popPacket(cGate *gate)
 {
+    Enter_Method_Silent();
     auto packet = check_and_cast<Packet *>(queue.front());
     EV_INFO << "Popping packet " << packet->getName() << " from the queue." << endl;
     if (buffer != nullptr)

@@ -184,24 +184,26 @@ class Ipv4Header extends NetworkHeaderBase
 {
     chunkLength = IPv4_MIN_HEADER_LENGTH;
 
-    short version = 4;
-    B headerLength = IPv4_MIN_HEADER_LENGTH;         // bytes, must be multiple of 4
+    short version = 4;      // @bit(4)
+    B headerLength = IPv4_MIN_HEADER_LENGTH;         // @bit(4), bytes, must be multiple of 4
+    short diffServCodePoint;  // @bit(6), maps to bits 0-5 of ToS
+    short explicitCongestionNotification;  // @bit(2),  maps to bits 6-7 of ToS
+    B totalLengthField;    // @byte(2)
 
-    Ipv4Address srcAddress;
-    Ipv4Address destAddress;
+    uint16_t identification;    // @byte(2)
+    bool reservedBit = false;    // @bit(1)
+    bool moreFragments;    // @bit(1)
+    bool dontFragment;    // @bit(1)
+    uint16_t fragmentOffset;         // @bit(13), must be multiple of 8
 
-    uint16_t crc = 0;
+    short timeToLive;    // @byte(1)
+    IpProtocolId protocolId = IP_PROT_NONE;    // @byte(1)
+    uint16_t crc = 0;    // @byte(2)
     CrcMode crcMode = CRC_MODE_UNDEFINED;
 
-    IpProtocolId protocolId = IP_PROT_NONE;
-    short timeToLive;
-    int identification;
-    bool moreFragments;
-    bool dontFragment;
-    int fragmentOffset;         // bytes, must be multiple of 8
-    B totalLengthField;
-    short diffServCodePoint;  // maps to bits 0-5 of ToS
-    short explicitCongestionNotification;  // maps to bits 6-7 of ToS
+    Ipv4Address srcAddress;
+
+    Ipv4Address destAddress;
 
     TlvOptions options; // array of option pointers, option pointers owned by datagram
 }

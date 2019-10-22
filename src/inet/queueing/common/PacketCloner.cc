@@ -40,9 +40,12 @@ void PacketCloner::initialize(int stage)
 
 void PacketCloner::pushPacket(Packet *packet, cGate *gate)
 {
+    Enter_Method_Silent();
     int numGates = outputGates.size();
-    for (int i = 0; i < numGates; i++)
+    for (int i = 0; i < numGates; i++) {
+        EV_INFO << "Cloning packet " << packet->getName() << "." << endl;
         pushOrSendPacket(i == numGates - 1 ? packet : packet->dup(), outputGates[i], consumers[i]);
+    }
     numProcessedPackets++;
     processedTotalLength += packet->getTotalLength();
     updateDisplayString();
@@ -50,6 +53,7 @@ void PacketCloner::pushPacket(Packet *packet, cGate *gate)
 
 void PacketCloner::handleCanPushPacket(cGate *gate)
 {
+    Enter_Method_Silent();
     if (producer != nullptr)
         producer->handleCanPushPacket(inputGate);
 }

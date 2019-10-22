@@ -53,6 +53,7 @@ bool PacketClassifierBase::canPushSomePacket(cGate *gate)
 
 void PacketClassifierBase::pushPacket(Packet *packet, cGate *gate)
 {
+    Enter_Method_Silent();
     EV_INFO << "Classifying packet " << packet->getName() << ".\n";
     int index = classifyPacket(packet);
     if (index == -1)
@@ -67,6 +68,7 @@ void PacketClassifierBase::pushPacket(Packet *packet, cGate *gate)
 
 void PacketClassifierBase::handleCanPushPacket(cGate *gate)
 {
+    Enter_Method_Silent();
     if (producer != nullptr)
         producer->handleCanPushPacket(inputGate);
 }
