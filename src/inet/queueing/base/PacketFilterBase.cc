@@ -104,7 +104,6 @@ Packet *PacketFilterBase::popPacket(cGate *gate)
             dropPacket(packet, OTHER_PACKET_DROP);
         }
     }
-    updateDisplayString();
 }
 
 void PacketFilterBase::handleCanPushPacket(cGate *gate)
