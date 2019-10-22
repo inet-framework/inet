@@ -22,7 +22,7 @@ package inet.queueing.base;
 // implement a single markPacket() function which marks the individual packets
 // by attaching tags.
 //
-// @see ~IPacketMarker, ~PacketMarker
+// @see ~IPacketMarker, ~PacketLabeler
 //
 simple PacketMarkerBase extends PacketProcessorBase
 {

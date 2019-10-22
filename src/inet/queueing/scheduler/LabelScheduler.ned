@@ -15,18 +15,18 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-package inet.queueing.classifier;
+package inet.queueing.scheduler;
 
-import inet.queueing.base.PacketClassifierBase;
-import inet.queueing.contract.IPacketClassifier;
+import inet.queueing.base.PacketSchedulerBase;
+import inet.queueing.contract.IPacketScheduler;
 
 //
-// This module classifies packets based on the attached labels in a ~LabelsTag.
+// This module schedules packets based on the attached labels in a ~LabelsTag.
 //
-simple MarkerClassifier extends PacketClassifierBase like IPacketClassifier
+simple LabelScheduler extends PacketSchedulerBase like IPacketScheduler
 {
     parameters:
         int defaultGateIndex = default(0); // default gate index if no matching labels are found
-        string labelsToGateIndices; // space separated list of label and gate index pairs
-        @class(MarkerClassifier);
+        string labels; // space separated list of labels in the order of priority (highest first)
+        @class(LabelScheduler);
 }

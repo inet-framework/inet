@@ -15,31 +15,27 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_PACKETMARKER_H
-#define __INET_PACKETMARKER_H
+#ifndef __INET_LABELCLASSIFIER_H
+#define __INET_LABELCLASSIFIER_H
 
-#include "inet/queueing/base/PacketMarkerBase.h"
-#include "inet/queueing/contract/IPacketFilterFunction.h"
+#include "inet/queueing/base/PacketClassifierBase.h"
 
 namespace inet {
 namespace queueing {
 
-class INET_API PacketMarker : public PacketMarkerBase
+class INET_API LabelClassifier : public PacketClassifierBase
 {
   protected:
-    std::vector<IPacketFilterFunction *> filters;
-    std::vector<std::string> labels;
+    int defaultGateIndex = -1;
+    std::map<std::string, int> labelsToGateIndexMap;
 
   protected:
     virtual void initialize(int stage) override;
-    virtual void markPacket(Packet *packet) override;
-
-  public:
-    virtual ~PacketMarker();
+    virtual int classifyPacket(Packet *packet) override;
 };
 
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_PACKETMARKER_H
+#endif // ifndef __INET_LABELCLASSIFIER_H
 

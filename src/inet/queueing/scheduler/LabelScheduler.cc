@@ -16,14 +16,14 @@
 //
 
 #include "inet/queueing/common/LabelsTag_m.h"
-#include "inet/queueing/scheduler/MarkerScheduler.h"
+#include "inet/queueing/scheduler/LabelScheduler.h"
 
 namespace inet {
 namespace queueing {
 
-Define_Module(MarkerScheduler);
+Define_Module(LabelScheduler);
 
-void MarkerScheduler::initialize(int stage)
+void LabelScheduler::initialize(int stage)
 {
     PacketSchedulerBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
@@ -34,7 +34,7 @@ void MarkerScheduler::initialize(int stage)
     }
 }
 
-int MarkerScheduler::getNumPackets()
+int LabelScheduler::getNumPackets()
 {
     int size = 0;
     for (auto collection : collections)
@@ -42,17 +42,17 @@ int MarkerScheduler::getNumPackets()
     return size;
 }
 
-Packet *MarkerScheduler::getPacket(int index)
+Packet *LabelScheduler::getPacket(int index)
 {
     throw cRuntimeError("TODO");
 }
 
-void MarkerScheduler::removePacket(Packet *packet)
+void LabelScheduler::removePacket(Packet *packet)
 {
     throw cRuntimeError("TODO");
 }
 
-int MarkerScheduler::schedulePacket()
+int LabelScheduler::schedulePacket()
 {
     for (auto label : labels) {
         for (int i = 0; i < (int)providers.size(); i++) {

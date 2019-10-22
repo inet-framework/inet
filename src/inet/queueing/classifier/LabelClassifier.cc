@@ -15,15 +15,15 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-#include "inet/queueing/classifier/MarkerClassifier.h"
+#include "inet/queueing/classifier/LabelClassifier.h"
 #include "inet/queueing/common/LabelsTag_m.h"
 
 namespace inet {
 namespace queueing {
 
-Define_Module(MarkerClassifier);
+Define_Module(LabelClassifier);
 
-void MarkerClassifier::initialize(int stage)
+void LabelClassifier::initialize(int stage)
 {
     PacketClassifierBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
@@ -37,7 +37,7 @@ void MarkerClassifier::initialize(int stage)
     }
 }
 
-int MarkerClassifier::classifyPacket(Packet *packet)
+int LabelClassifier::classifyPacket(Packet *packet)
 {
     auto labelsTag = packet->getTag<LabelsTag>();
     for (int i = 0; i < (int)labelsTag->getLabelsArraySize(); i++) {
