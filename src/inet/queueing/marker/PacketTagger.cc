@@ -57,16 +57,26 @@ void PacketTagger::initialize(int stage)
 void PacketTagger::markPacket(Packet *packet)
 {
     if (packetFilterFunction->matchesPacket(packet)) {
-        if (interfaceId != -1)
+        if (interfaceId != -1) {
+            EV_DEBUG << "Attaching InterfaceReq to " << packet->getName() << " with interfaceId = " << interfaceId << std::endl;
             packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(interfaceId);
-        if (hopLimit != -1)
+        }
+        if (hopLimit != -1) {
+            EV_DEBUG << "Attaching HopLimitReq to " << packet->getName() << " with hopLimit = " << hopLimit << std::endl;
             packet->addTagIfAbsent<HopLimitReq>()->setHopLimit(hopLimit);
-        if (vlanId != -1)
+        }
+        if (vlanId != -1) {
+            EV_DEBUG << "Attaching VlanReq to " << packet->getName() << " with vlanId = " << vlanId << std::endl;
             packet->addTagIfAbsent<VlanReq>()->setVlanId(vlanId);
-        if (userPriority != -1)
+        }
+        if (userPriority != -1) {
+            EV_DEBUG << "Attaching UserPriorityReq to " << packet->getName() << " with userPriority = " << userPriority << std::endl;
             packet->addTagIfAbsent<UserPriorityReq>()->setUserPriority(userPriority);
-        if (!std::isnan(transmissionPower.get()))
+        }
+        if (!std::isnan(transmissionPower.get())) {
+            EV_DEBUG << "Attaching SignalPowerReq to " << packet->getName() << " with power = " << transmissionPower << std::endl;
             packet->addTagIfAbsent<SignalPowerReq>()->setPower(transmissionPower);
+        }
     }
 }
 
