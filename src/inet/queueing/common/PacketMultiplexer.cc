@@ -46,7 +46,7 @@ void PacketMultiplexer::initialize(int stage)
 
 void PacketMultiplexer::pushPacket(Packet *packet, cGate *gate)
 {
-    Enter_Method_Silent();
+    Enter_Method("pushPacket");
     EV_INFO << "Forwarding pushed packet " << packet->getName() << "." << endl;
     processedTotalLength += packet->getDataLength();
     pushOrSendPacket(packet, outputGate, consumer);
@@ -56,7 +56,7 @@ void PacketMultiplexer::pushPacket(Packet *packet, cGate *gate)
 
 void PacketMultiplexer::handleCanPushPacket(cGate *gate)
 {
-    Enter_Method_Silent();
+    Enter_Method("handleCanPushPacket");
     for (int i = 0; i < (int)inputGates.size(); i++)
         // NOTE: notifying a listener may prevent others from pushing
         if (consumer->canPushSomePacket(outputGate))

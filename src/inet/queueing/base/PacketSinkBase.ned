@@ -28,5 +28,5 @@ simple PacketSinkBase extends PacketProcessorBase
         displayStringTextFormat = default("dropped %p pk (%l)");
         @display("i=block/sink");
         @signal[packetDropped](type=inet::Packet);
-        @statistic[packetDropped](title="packet drops"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
+        @statistic[packetDropped](title="packets dropped"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
 }

@@ -40,7 +40,7 @@ void PacketCloner::initialize(int stage)
 
 void PacketCloner::pushPacket(Packet *packet, cGate *gate)
 {
-    Enter_Method_Silent();
+    Enter_Method("pushPacket");
     int numGates = outputGates.size();
     for (int i = 0; i < numGates; i++) {
         EV_INFO << "Cloning packet " << packet->getName() << "." << endl;
@@ -53,7 +53,7 @@ void PacketCloner::pushPacket(Packet *packet, cGate *gate)
 
 void PacketCloner::handleCanPushPacket(cGate *gate)
 {
-    Enter_Method_Silent();
+    Enter_Method("handleCanPushPacket");
     if (producer != nullptr)
         producer->handleCanPushPacket(inputGate);
 }

@@ -15,18 +15,25 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-package inet.queueing.scheduler;
+#include "inet/queueing/filter/ContentBasedFilter.h"
 
-import inet.queueing.base.PacketSchedulerBase;
-import inet.queueing.contract.IPacketScheduler;
+namespace inet {
+namespace queueing {
 
-//
-// This module schedules packets based on the attached labels in a ~LabelsTag.
-//
-simple MarkerScheduler extends PacketSchedulerBase like IPacketScheduler
+Define_Module(ContentBasedFilter);
+
+void ContentBasedFilter::initialize(int stage)
 {
-    parameters:
-        int defaultGateIndex = default(0); // default gate index if no matching labels are found
-        string labels; // space separated list of labels in the order of priority (highest first)
-        @class(MarkerScheduler);
+    PacketFilterBase::initialize(stage);
+    if (stage == INITSTAGE_LOCAL)
+        filter.setPattern(par("packetFilter"), par("packetDataFilter"));
 }
+
+bool ContentBasedFilter::matchesPacket(Packet *packet)
+{
+    return filter.matches(packet);
+}
+
+} // namespace queueing
+} // namespace inet
+

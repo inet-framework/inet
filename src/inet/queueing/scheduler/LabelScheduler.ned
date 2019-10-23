@@ -15,23 +15,18 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-package inet.queueing.base;
+package inet.queueing.scheduler;
+
+import inet.queueing.base.PacketSchedulerBase;
+import inet.queueing.contract.IPacketScheduler;
 
 //
-// This is a base module for various packet classifier modules. Derived modules
-// must implement a single packet classifier function which determines the index
-// of the output gate for the next pushed packet.
+// This module schedules packets based on the attached labels in a ~LabelsTag.
 //
-// @see ~IPacketClassifier
-//
-simple PacketClassifierBase extends PacketSinkBase
+simple LabelScheduler extends PacketSchedulerBase like IPacketScheduler
 {
     parameters:
-        displayStringTextFormat = default("classified %p pk (%l)");
-        @display("i=block/classifier");
-        @signal[packetPushed](type=inet::Packet);
-        @statistic[packetPushed](title="packets pushed"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
-    gates:
-        input in;
-        output out[];
+        int defaultGateIndex = default(0); // default gate index if no matching labels are found
+        string labels; // space separated list of labels in the order of priority (highest first)
+        @class(LabelScheduler);
 }

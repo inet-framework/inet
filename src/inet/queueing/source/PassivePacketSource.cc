@@ -71,7 +71,7 @@ Packet *PassivePacketSource::canPopPacket(cGate *gate)
 
 Packet *PassivePacketSource::popPacket(cGate *gate)
 {
-    Enter_Method_Silent();
+    Enter_Method("popPacket");
     if (providingTimer->isScheduled()  && providingTimer->getArrivalTime() > simTime())
         throw cRuntimeError("Another packet is already being provided");
     else {

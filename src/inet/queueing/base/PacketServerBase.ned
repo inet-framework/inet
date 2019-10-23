@@ -27,6 +27,8 @@ simple PacketServerBase extends PacketSinkBase
     parameters:
         displayStringTextFormat = default("served %p pk (%l)\n%s");
         @display("i=block/server");
+        @signal[packetServed](type=inet::Packet);
+        @statistic[packetServed](title="packets served"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
     gates:
         input in;
         output out;

@@ -47,22 +47,24 @@ bool PacketBuffer::isOverloaded()
 
 void PacketBuffer::addPacket(Packet *packet)
 {
+    Enter_Method("addPacket");
     EV_INFO << "Adding packet " << packet->getName() << " to the buffer.\n";
+    emit(packetAddedSignal, packet);
     totalLength += packet->getTotalLength();
     packets.push_back(packet);
     if (isOverloaded())
         packetDropperFunction->dropPackets(this);
     updateDisplayString();
-    emit(packetAddedSignal, packet);
 }
 
 void PacketBuffer::removePacket(Packet *packet)
 {
+    Enter_Method("removePacket");
     EV_INFO << "Removing packet " << packet->getName() << " from the buffer.\n";
+    emit(packetRemovedSignal, packet);
     totalLength -= packet->getTotalLength();
     packets.erase(find(packets.begin(), packets.end(), packet));
     updateDisplayString();
-    emit(packetRemovedSignal, packet);
     ICallback *callback = check_and_cast<ICallback *>(packet->getOwner()->getOwner());
     callback->handlePacketRemoved(packet);
 }

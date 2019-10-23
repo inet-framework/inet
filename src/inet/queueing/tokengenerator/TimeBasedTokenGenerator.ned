@@ -29,4 +29,6 @@ simple TimeBasedTokenGenerator
         volatile double numTokens = default(1); // number of tokens generated repeatedly
         @class(TimeBasedTokenGenerator);
         @display("i=block/control");
+        @signal[tokensCreated](type=double);
+        @statistic[tokensCreated](title="tokens created"; record=count,sum,vector; interpolationmode=none);
 }

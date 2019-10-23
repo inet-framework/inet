@@ -31,7 +31,7 @@ simple ActivePacketSource extends PacketSourceBase like IActivePacketSource
         @class(ActivePacketSource);
         @display("i=block/source");
         @signal[packetCreated](type=inet::Packet);
-        @statistic[packetCreated](title="created packets"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
+        @statistic[packetCreated](title="packets created"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
     gates:
         output out @labels(push);
 }

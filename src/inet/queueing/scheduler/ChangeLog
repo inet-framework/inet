@@ -7,5 +7,5 @@
 	components were either ported or completely replaced with components of the new
 	queueing package.
 
-	Added new NED simple modules: MarkovScheduler, MarkerScheduler, PacketScheduler,
+	Added new NED simple modules: MarkovScheduler, LabelScheduler, PacketScheduler,
 	PriorityScheduler, and WrrScheduler.

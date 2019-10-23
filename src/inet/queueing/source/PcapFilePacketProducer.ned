@@ -39,6 +39,8 @@ simple PcapFilePacketProducer like IActivePacketSource
         string packetNameFormat = default("Pcap-%p-%t-%n"); // determines the name of the packets read from the PCAP file
         @class(PcapFilePacketProducer);
         @display("i=block/source");
+        @signal[packetCreated](type=inet::Packet);
+        @statistic[packetCreated](title="packets created"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
     gates:
         output out @labels(push);
 }

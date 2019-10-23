@@ -15,36 +15,34 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-#include "inet/queueing/classifier/MarkerClassifier.h"
-#include "inet/queueing/common/LabelsTag_m.h"
+#include "inet/queueing/classifier/ContentBasedClassifier.h"
 
 namespace inet {
 namespace queueing {
 
-Define_Module(MarkerClassifier);
+Define_Module(ContentBasedClassifier);
 
-void MarkerClassifier::initialize(int stage)
+void ContentBasedClassifier::initialize(int stage)
 {
     PacketClassifierBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         defaultGateIndex = par("defaultGateIndex");
-        cStringTokenizer tokenizer(par("labelsToGateIndices"));
-        while (tokenizer.hasMoreTokens()) {
-            auto label = tokenizer.nextToken();
-            auto index = tokenizer.nextToken();
-            labelsToGateIndexMap[label] = atoi(index);
+        cStringTokenizer packetFilterTokenizer(par("packetFilter"), ";");
+        cStringTokenizer packetDataFilterTokenizer(par("packetDataFilter"), ";");
+        while (packetFilterTokenizer.hasMoreTokens() && packetDataFilterTokenizer.hasMoreTokens()) {
+            PacketFilter filter;
+            filter.setPattern(packetFilterTokenizer.nextToken(), packetDataFilterTokenizer.nextToken());
+            filters.push_back(filter);
         }
     }
 }
 
-int MarkerClassifier::classifyPacket(Packet *packet)
+int ContentBasedClassifier::classifyPacket(Packet *packet)
 {
-    auto labelsTag = packet->getTag<LabelsTag>();
-    for (int i = 0; i < (int)labelsTag->getLabelsArraySize(); i++) {
-        auto label = labelsTag->getLabels(i);
-        auto it = labelsToGateIndexMap.find(label);
-        if (it != labelsToGateIndexMap.end())
-            return it->second;
+    for (int i = 0; i < (int)filters.size(); i++) {
+        auto filter = filters[i];
+        if (filter.matches(packet))
+            return i;
     }
     return defaultGateIndex;
 }

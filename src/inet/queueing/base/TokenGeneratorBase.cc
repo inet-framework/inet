@@ -21,6 +21,8 @@
 namespace inet {
 namespace queueing {
 
+simsignal_t TokenGeneratorBase::tokensCreatedSignal = cComponent::registerSignal("tokensCreated");
+
 void TokenGeneratorBase::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {

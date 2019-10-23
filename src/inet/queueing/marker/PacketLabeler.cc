@@ -17,20 +17,20 @@
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/queueing/common/LabelsTag_m.h"
-#include "inet/queueing/marker/PacketMarker.h"
+#include "inet/queueing/marker/PacketLabeler.h"
 
 namespace inet {
 namespace queueing {
 
-Define_Module(PacketMarker);
+Define_Module(PacketLabeler);
 
-PacketMarker::~PacketMarker()
+PacketLabeler::~PacketLabeler()
 {
     for (auto filter : filters)
         delete filter;
 }
 
-void PacketMarker::initialize(int stage)
+void PacketLabeler::initialize(int stage)
 {
     PacketMarkerBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
@@ -44,7 +44,7 @@ void PacketMarker::initialize(int stage)
     }
 }
 
-void PacketMarker::markPacket(Packet *packet)
+void PacketLabeler::markPacket(Packet *packet)
 {
     auto labelsTag = packet->addTagIfAbsent<LabelsTag>();
     for (int i = 0; i < (int)filters.size(); i++) {

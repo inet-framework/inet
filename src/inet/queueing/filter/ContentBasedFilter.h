@@ -15,40 +15,27 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_MARKERSCHEDULER_H
-#define __INET_MARKERSCHEDULER_H
+#ifndef __INET_CONTENTBASEDFILTER_H
+#define __INET_CONTENTBASEDFILTER_H
 
-#include "inet/queueing/base/PacketSchedulerBase.h"
-#include "inet/queueing/contract/IPacketCollection.h"
+#include "inet/common/packet/PacketFilter.h"
+#include "inet/queueing/base/PacketFilterBase.h"
 
 namespace inet {
 namespace queueing {
 
-class INET_API MarkerScheduler : public PacketSchedulerBase, public IPacketCollection
+class INET_API ContentBasedFilter : public PacketFilterBase
 {
   protected:
-    int defaultGateIndex = -1;
-    std::vector<std::string> labels;
-    std::vector<IPacketCollection *> collections;
+    PacketFilter filter;
 
   protected:
     virtual void initialize(int stage) override;
-    virtual int schedulePacket() override;
-
-  public:
-    virtual int getMaxNumPackets() override { return -1; }
-    virtual int getNumPackets() override;
-
-    virtual b getMaxTotalLength() override { return b(-1); }
-    virtual b getTotalLength() override { return b(-1); }
-
-    virtual bool isEmpty() override { return getNumPackets() == 0; }
-    virtual Packet *getPacket(int index) override;
-    virtual void removePacket(Packet *packet) override;
+    virtual bool matchesPacket(Packet *packet) override;
 };
 
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_MARKERSCHEDULER_H
+#endif // ifndef __INET_CONTENTBASEDFILTER_H
 

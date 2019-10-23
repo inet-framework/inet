@@ -37,5 +37,8 @@ simple TokenBasedServer extends PacketServerBase like IPacketServer
         @signal[tokensAdded](type=double);
         @signal[tokensRemoved](type=double);
         @signal[tokensDepleted](type=double);
+        @statistic[tokensAdded](title="tokens added"; record=sum; interpolationmode=none);
+        @statistic[tokensRemoved](title="tokens removed"; record=sum; interpolationmode=none);
+        @statistic[tokensDepleted](title="tokens depleted"; record=count; interpolationmode=none);
         @class(TokenBasedServer);
 }

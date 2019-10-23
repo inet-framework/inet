@@ -21,6 +21,8 @@
 namespace inet {
 namespace queueing {
 
+simsignal_t PacketServerBase::packetServedSignal = cComponent::registerSignal("packetServed");
+
 void PacketServerBase::initialize(int stage)
 {
     PacketSinkBase::initialize(stage);

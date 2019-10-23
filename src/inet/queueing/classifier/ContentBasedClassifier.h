@@ -15,23 +15,28 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-package inet.queueing.base;
+#ifndef __INET_CONTENTBASEDCLASSIFIER_H
+#define __INET_CONTENTBASEDCLASSIFIER_H
 
-//
-// This is a base module for various packet classifier modules. Derived modules
-// must implement a single packet classifier function which determines the index
-// of the output gate for the next pushed packet.
-//
-// @see ~IPacketClassifier
-//
-simple PacketClassifierBase extends PacketSinkBase
+#include "inet/common/packet/PacketFilter.h"
+#include "inet/queueing/base/PacketClassifierBase.h"
+
+namespace inet {
+namespace queueing {
+
+class INET_API ContentBasedClassifier : public PacketClassifierBase
 {
-    parameters:
-        displayStringTextFormat = default("classified %p pk (%l)");
-        @display("i=block/classifier");
-        @signal[packetPushed](type=inet::Packet);
-        @statistic[packetPushed](title="packets pushed"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
-    gates:
-        input in;
-        output out[];
-}
+  protected:
+    int defaultGateIndex = -1;
+    std::vector<PacketFilter> filters;
+
+  protected:
+    virtual void initialize(int stage) override;
+    virtual int classifyPacket(Packet *packet) override;
+};
+
+} // namespace queueing
+} // namespace inet
+
+#endif // ifndef __INET_CONTENTBASEDCLASSIFIER_H
+

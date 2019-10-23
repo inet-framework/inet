@@ -57,6 +57,7 @@ void TokenBasedServer::processPackets()
                 packet = provider->popPacket(inputGate->getPathStartGate());
                 EV_INFO << "Processing packet " << packet->getName() << ".\n";
                 processedTotalLength += packet->getDataLength();
+                emit(packetServedSignal, packet);
                 pushOrSendPacket(packet, outputGate, consumer);
                 numProcessedPackets++;
                 numTokens -= numRequiredTokens;
@@ -76,12 +77,12 @@ void TokenBasedServer::processPackets()
 
 void TokenBasedServer::handleCanPushPacket(cGate *gate)
 {
-    Enter_Method_Silent();
+    Enter_Method("handleCanPushPacket");
 }
 
 void TokenBasedServer::handleCanPopPacket(cGate *gate)
 {
-    Enter_Method_Silent();
+    Enter_Method("handleCanPopPacket");
     processPackets();
     updateDisplayString();
 }

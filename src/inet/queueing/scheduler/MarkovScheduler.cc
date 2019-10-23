@@ -107,7 +107,7 @@ bool MarkovScheduler::canPushPacket(Packet *packet, cGate *gate)
 
 void MarkovScheduler::pushPacket(Packet *packet, cGate *gate)
 {
-    Enter_Method_Silent();
+    Enter_Method("pushPacket");
     if (gate->getIndex() != state)
         throw cRuntimeError("Cannot push to gate");
     processedTotalLength += packet->getDataLength();
@@ -118,7 +118,7 @@ void MarkovScheduler::pushPacket(Packet *packet, cGate *gate)
 
 void MarkovScheduler::handleCanPushPacket(cGate *gate)
 {
-    Enter_Method_Silent();
+    Enter_Method("handleCanPushPacket");
     producers[state]->handleCanPushPacket(inputGates[state]);
 }
 
