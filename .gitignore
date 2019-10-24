@@ -16,6 +16,7 @@ precompiled_*.h.*
 
 # output and result files
 .settings/
+.ccls-cache/
 /doc/doxy/
 /doc/neddoc/
 /doc/src/manual/figures/*.pdf
@@ -48,6 +49,7 @@ precompiled_*.h.*
 *.ind
 *.synctex.gz
 .buildlog*
+compile_commands.json
 
 # ignore binary files
 out/
