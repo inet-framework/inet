@@ -39,6 +39,7 @@ extraOppRunArgs = ""
 debug=False
 release=False
 exitCode = 0
+writeOutfile = True
 useColors = sys.stdout.isatty()
 
 txtPASS = "PASS"
@@ -257,15 +258,16 @@ class SimulationTestCase(unittest.TestCase):
                  + "Elapsed time:  " + str(round(elapsedTime,2)) + "s\n\n")
         FILE.close()
 
-        FILE = open(resultdir + "/test.out", "w")
-        FILE.write("------------------------------------------------------\n"
-                 + "Running: " + title + "\n\n"
-                 + "$ cd " + workingdir + "\n"
-                 + "$ " + command + "\n\n"
-                 + out.strip() + "\n\n"
-                 + "Exit code: " + str(exitcode) + "\n"
-                 + "Elapsed time:  " + str(round(elapsedTime,2)) + "s\n\n")
-        FILE.close()
+        if (writeOutfile):
+            FILE = open(resultdir + "/test.out", "w")
+            FILE.write("------------------------------------------------------\n"
+                     + "Running: " + title + "\n\n"
+                     + "$ cd " + workingdir + "\n"
+                     + "$ " + command + "\n\n"
+                     + out.strip() + "\n\n"
+                     + "Exit code: " + str(exitcode) + "\n"
+                     + "Elapsed time:  " + str(round(elapsedTime,2)) + "s\n\n")
+            FILE.close()
 
         result = SimulationResult(command, workingdir, exitcode, elapsedTime=elapsedTime)
 
@@ -641,6 +643,7 @@ if __name__ == "__main__":
     parser.add_argument('-C', '--directory', help='Change to DIRECTORY before executing the tests. Working dirs in the CSV files are relative to this.')
     parser.add_argument('-d', '--debug', action='store_true', help='Run debug executables: use the debug version of the executable (appends _dbg to the executable name)')
     parser.add_argument('-s', '--release', action='store_true', help='Run release executables: use the release version of the executable (appends _release to the executable name)')
+    parser.add_argument('-q', '--disable_outfile', dest='writeOutfile', action='store_false', help='disable the writing standard output of simulations to result directory')
     parser.add_argument('-a', '--oppargs', action='append', metavar='oppargs', nargs=argparse.REMAINDER, help='extra opp_run arguments until the end of the line')
     args = parser.parse_args()
 
@@ -663,6 +666,7 @@ if __name__ == "__main__":
         rootDir = os.path.abspath(args.directory)
 
     debug = args.debug
+    writeOutfile = args.writeOutfile
 
     generator = FingerprintTestCaseGenerator()
     testcases = generator.generateFromCSV(args.testspecfiles, args.match, args.exclude, args.repeat)
@@ -689,4 +693,5 @@ if __name__ == "__main__":
     else:
         print("Test results differ from expected results")
     exit(exitCode)
+
 
