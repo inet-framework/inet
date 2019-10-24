@@ -8,11 +8,10 @@ import inet.queueing.source.ActivePacketSource;
 network MultiplexerNetwork
 {
     parameters:
-    	@display("bgb=600,200");
         int numProducers;
     submodules:
         producer[numProducers]: ActivePacketSource {
-            @display("p=100,100");
+            @display("p=100,100,c,100");
         }
         multiplexer: PacketMultiplexer {
             @display("p=300,100");

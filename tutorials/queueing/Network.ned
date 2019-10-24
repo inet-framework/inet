@@ -9,19 +9,24 @@ import inet.queueing.server.PacketServer;
 
 module TestMac
 {
+    @display("bgb=400,300");
     gates:
         input lowerIn;
         input upperIn;
         output lowerOut;
         output upperOut;
     submodules:
-        queue: PacketQueue;
-        server: PacketServer;
+        queue: PacketQueue {
+            @display("p=200,100");
+        }
+        server: PacketServer {
+            @display("p=200,225");
+        }
     connections:
         upperIn --> queue.in;
         queue.out --> server.in;
-        server.out --> lowerOut;
-        lowerIn --> upperOut;
+        server.out --> { @display("m=s"); } --> lowerOut;
+        lowerIn --> { @display("m=m,66,100,66,0"); } --> upperOut;
 }
 
 module TestHost
@@ -30,9 +35,15 @@ module TestHost
         input lowerIn;
         output lowerOut;
     submodules:
-        sourceApplication: ActivePacketSource;
-        destinationApplication: PassivePacketSink;
-        mac: TestMac;
+        sourceApplication: ActivePacketSource {
+            @display("p=100,100");
+        }
+        destinationApplication: PassivePacketSink {
+            @display("p=300,100");
+        }
+        mac: TestMac {
+            @display("p=200,200");
+        }
     connections:
         sourceApplication.out --> mac.upperIn;
         mac.lowerOut --> lowerOut;
@@ -48,21 +59,31 @@ module TestCable
         input bIn;
         output bOut;
     submodules:
-        aDelayer: PacketDelayer;
-        bDelayer: PacketDelayer;
+        aDelayer: PacketDelayer {
+            @display("p=100,100");
+        }
+        bDelayer: PacketDelayer {
+            @display("p=100,200");
+        }
     connections:
-        aIn --> aDelayer.in;
-        aDelayer.out --> aOut;
-        bIn --> bDelayer.in;
-        bDelayer.out --> bOut;
+        aIn --> { @display("m=w"); } --> aDelayer.in;
+        aDelayer.out --> { @display("m=e"); } --> aOut;
+        bIn --> { @display("m=w"); } --> bDelayer.in;
+        bDelayer.out --> { @display("m=e"); } --> bOut;
 }
 
 network TestNetwork
 {
     submodules:
-        source: TestHost;
-        destination: TestHost;
-        cable: TestCable;
+        source: TestHost {
+            @display("p=100,100");
+        }
+        cable: TestCable {
+            @display("p=200,100");
+        }
+        destination: TestHost {
+            @display("p=300,100");
+        }
     connections:
         source.lowerOut --> cable.aIn;
         cable.aOut --> destination.lowerIn;

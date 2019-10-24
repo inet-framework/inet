@@ -11,7 +11,7 @@ a PacketLabelere based on the packet length.
 The network contains ... TODO
 
 .. figure:: media/Labeler.png
-   :width: 80%
+   :width: 90%
    :align: center
 
 **TODO** Config

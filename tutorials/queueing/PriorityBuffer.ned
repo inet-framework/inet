@@ -1,16 +1,16 @@
 
 package inet.tutorials.queueing;
 
-import inet.queueing.buffer.PacketBuffer;
+import inet.queueing.buffer.PriorityBuffer;
 import inet.queueing.queue.PacketQueue;
 import inet.queueing.sink.ActivePacketSink;
 import inet.queueing.source.ActivePacketSource;
 
 
-network BufferNetwork
+network PriorityBufferNetwork
 {
     submodules:
-        buffer: PacketBuffer {
+        buffer: PriorityBuffer {
             @display("p=125,350");
         }
         producer1: ActivePacketSource {

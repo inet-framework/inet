@@ -5,8 +5,20 @@ TODO
 
 The network contains ... TODO
 
+.. figure:: media/Network_TestCable.png
+   :width: 25%
+   :align: center
+
 .. figure:: media/Network.png
-   :width: 80%
+   :width: 50%
+   :align: center
+
+.. figure:: media/Network_TestHost.png
+   :width: 60%
+   :align: center
+
+.. figure:: media/Network_TestMac.png
+   :width: 50%
    :align: center
 
 **TODO** Config

@@ -2,7 +2,7 @@
 package inet.tutorials.queueing;
 
 import inet.queueing.classifier.LabelClassifier;
-import inet.queueing.marker.PacketLabeler;
+import inet.queueing.marker.ContentBasedLabeler;
 import inet.queueing.sink.PassivePacketSink;
 import inet.queueing.source.ActivePacketSource;
 
@@ -14,7 +14,7 @@ network LabelerNetwork
         producer: ActivePacketSource {
             @display("p=100,100");
         }
-        labeler: PacketLabeler {
+        labeler: ContentBasedLabeler {
             @display("p=300,100");
         }
         classifier: LabelClassifier {

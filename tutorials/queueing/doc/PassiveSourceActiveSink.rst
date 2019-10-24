@@ -8,7 +8,7 @@ In this test, packets are collected periodically by an active packet sink
 The network contains ... TODO
 
 .. figure:: media/PassiveSourceActiveSink.png
-   :width: 80%
+   :width: 60%
    :align: center
 
 **TODO** Config

@@ -9,7 +9,7 @@ is higher than a predefined threshold, then packets are dropped.
 The network contains ... TODO
 
 .. figure:: media/Meter.png
-   :width: 80%
+   :width: 90%
    :align: center
 
 **TODO** Config

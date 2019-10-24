@@ -8,7 +8,7 @@ TODO
 The network contains ... TODO
 
 .. figure:: media/RedDropper.png
-   :width: 80%
+   :width: 100%
    :align: center
 
 **TODO** Config

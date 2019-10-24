@@ -6,7 +6,11 @@ TODO
 The network contains ... TODO
 
 .. figure:: media/LeakyBucket.png
-   :width: 80%
+   :width: 60%
+   :align: center
+
+.. figure:: media/LeakyBucket_Bucket.png
+   :width: 65%
    :align: center
 
 **TODO** Config

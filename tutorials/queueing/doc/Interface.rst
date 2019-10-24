@@ -6,7 +6,7 @@ TODO
 The network contains ... TODO
 
 .. figure:: media/Interface.png
-   :width: 80%
+   :width: 50%
    :align: center
 
 **TODO** Config

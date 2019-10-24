@@ -5,7 +5,7 @@ import inet.queueing.sink.PassivePacketSink;
 import inet.queueing.filter.ContentBasedFilter;
 import inet.queueing.source.ActivePacketSource;
 
-network Filter1Network
+network Filter3Network
 {
     @display("bgb=600,200");
     submodules:

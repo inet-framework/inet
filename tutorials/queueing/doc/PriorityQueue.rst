@@ -10,6 +10,10 @@ stored temporarily.
 The network contains ... TODO
 
 .. figure:: media/PriorityQueue.png
+   :width: 70%
+   :align: center
+
+.. figure:: media/PriorityQueue_Queue.png
    :width: 80%
    :align: center
 
