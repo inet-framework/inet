@@ -165,11 +165,11 @@ to one of its outputs.
 
    parameterizable with an :cpp:`IPacketClassifierFunction`
 
--  :ned:`ContentBasedClassifier`: classifies packets based on the data they contain
 -  :ned:`PriorityClassifier`: classifies packets to the first non-full output
 -  :ned:`LabelClassifier`: classifies packets based on the attached labels
 -  :ned:`MarkovClassifier`: classifies packets based on the state of a Markov process
 -  :ned:`UserPriorityClassifier`: classifies packets based on the attached UserPriorityReq.
+-  :ned:`ContentBasedClassifier`: classifies packets based on the data they contain
 
 Schedulers
 ----------
@@ -186,6 +186,7 @@ one of its inputs and returns that packet.
 -  :ned:`WrrScheduler`: schedules packets in a weighted Round-robin manner
 -  :ned:`LabelScheduler`: schedules packets based on the attached labels
 -  :ned:`MarkovScheduler`: schedules packets based on the state of a Markov process
+-  :ned:`ContentBasedScheduler`: schedules packets based on the data they contain
 
 Servers
 -------
