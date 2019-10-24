@@ -54,7 +54,7 @@
 /showcases/visualizer/submoduleinfo/,         -f omnetpp.ini -c PacketCounts -r 0,                    5s,            074a-17ee/tplx, PASS,   # VisualizingSubmoduleInformation extended
 /showcases/visualizer/submoduleinfo/,         -f omnetpp.ini -c MACStates -r 0,                                    5s,            074a-17ee/tplx, PASS,
 
-/showcases/visualizer/instrumentfigures/,    -f omnetpp.ini -c General -r 0,                                            3s,              9b60-2e32/tplx, PASS,
+/showcases/visualizer/instrumentfigures/,    -f omnetpp.ini -c General -r 0,                                            3s,              b99d-a750/tplx, PASS,
 
 /showcases/visualizer/interfacetable/, -f omnetpp.ini -c EnablingVisualization -r 0,                  5s,            0000-0000/tplx, PASS,
 /showcases/visualizer/interfacetable/, -f omnetpp.ini -c AdvancedFeatures -r 0,                       5s,            b2a7-9364/tplx, PASS,
@@ -105,7 +105,7 @@
 /showcases/visualizer/styling/,      -f omnetpp.ini -c Line -r 0,                   25s,         c8a3-f9e1/tplx, PASS,
 /showcases/visualizer/styling/,      -f omnetpp.ini -c Font -r 0,                   25s,         c8a3-f9e1/tplx, PASS,
 /showcases/visualizer/styling/,      -f omnetpp.ini -c Icon -r 0,                   25s,         abc7-d477/tplx, PASS,
-/showcases/visualizer/styling/,      -f omnetpp.ini -c Annotation -r 0,             25s,         79dd-3def/tplx, PASS,
+/showcases/visualizer/styling/,      -f omnetpp.ini -c Annotation -r 0,             25s,         6807-2cd5/tplx, PASS,
 
 /showcases/visualizer/transportconnection/, -f omnetpp.ini -c EnablingVisualization -r 0,                       2s,            3411-6527/tplx, PASS,
 /showcases/visualizer/transportconnection/, -f omnetpp.ini -c MultipleConnections -r 0,                         2s,            b4a6-5a35/tplx, PASS,
