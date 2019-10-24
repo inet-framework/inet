@@ -645,6 +645,8 @@ if __name__ == "__main__":
     parser.add_argument('-s', '--release', action='store_true', help='Run release executables: use the release version of the executable (appends _release to the executable name)')
     parser.add_argument('-q', '--disable_outfile', dest='writeOutfile', action='store_false', help='disable the writing standard output of simulations to result directory')
     parser.add_argument('-a', '--oppargs', action='append', metavar='oppargs', nargs=argparse.REMAINDER, help='extra opp_run arguments until the end of the line')
+    parser.add_argument('-n', type=int, default=1, help='Split the selected test cases into n sets, and only run one of these sets')
+    parser.add_argument('-i', type=int, default=0, help='Which set of test cases to run [0..n-1]')
     args = parser.parse_args()
 
     if os.path.isfile(logFile):
@@ -671,6 +673,8 @@ if __name__ == "__main__":
     generator = FingerprintTestCaseGenerator()
     testcases = generator.generateFromCSV(args.testspecfiles, args.match, args.exclude, args.repeat)
 
+    testcases = testcases[args.i::args.n]
+
     testSuite = ThreadedTestSuite()
     testSuite.addTests(testcases)
     testSuite.thread_count = args.threads
@@ -693,5 +697,3 @@ if __name__ == "__main__":
     else:
         print("Test results differ from expected results")
     exit(exitCode)
-
-
