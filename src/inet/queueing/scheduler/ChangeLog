@@ -8,4 +8,4 @@
 	queueing package.
 
 	Added new NED simple modules: MarkovScheduler, LabelScheduler, PacketScheduler,
-	PriorityScheduler, and WrrScheduler.
+	ContentBasedScheduler, PriorityScheduler, and WrrScheduler.
