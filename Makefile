@@ -5,14 +5,18 @@ FEATURES_H = src/inet/features.h
 
 all: checkmakefiles $(FEATURES_H)
 	cd src && $(MAKE)
+	cd tutorials/queueing && $(MAKE)
 
 clean: checkmakefiles
 	cd src && $(MAKE) clean
+	cd tutorials/queueing && $(MAKE) clean
 
 cleanall: checkmakefiles
 	@cd src && $(MAKE) MODE=release clean
 	@cd src && $(MAKE) MODE=debug clean
 	@rm -f src/Makefile $(FEATURES_H)
+	@cd tutorials/queueing && $(MAKE) MODE=release clean
+	@cd tutorials/queueing && $(MAKE) MODE=debug clean
 
 MAKEMAKE_OPTIONS := -f --deep -o INET -O out -pINET -I.
 
@@ -20,12 +24,15 @@ makefiles: makefiles-so
 
 makefiles-so: $(FEATURES_H)
 	@FEATURE_OPTIONS=$$($(FEATURETOOL) options -f -l) && cd src && opp_makemake --make-so $(MAKEMAKE_OPTIONS) $$FEATURE_OPTIONS
+	cd tutorials/queueing && opp_makemake -s -I $(INET_ROOT)/src -o inetqueueing -f
 
 makefiles-lib: $(FEATURES_H)
 	@FEATURE_OPTIONS=$$($(FEATURETOOL) options -f -l) && cd src && opp_makemake --make-lib $(MAKEMAKE_OPTIONS) $$FEATURE_OPTIONS
+	cd tutorials/queueing && opp_makemake -s -I $(INET_ROOT)/src -o inetqueueing -f
 
 makefiles-exe: $(FEATURES_H)
 	@FEATURE_OPTIONS=$$($(FEATURETOOL) options -f -l) && cd src && opp_makemake $(MAKEMAKE_OPTIONS) $$FEATURE_OPTIONS
+	cd tutorials/queueing && opp_makemake -s -I $(INET_ROOT)/src -o inetqueueing -f
 
 checkmakefiles: submodule-init
 	@if [ ! -f src/Makefile ]; then \
