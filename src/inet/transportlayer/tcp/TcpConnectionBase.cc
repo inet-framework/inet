@@ -203,6 +203,8 @@ std::string TcpStateVariables::detailedInfo() const
 
 void TcpConnection::initConnection(Tcp *_mod, int _socketId)
 {
+    Enter_Method_Silent();
+
     tcpMain = _mod;
     socketId = _socketId;
 
@@ -240,6 +242,16 @@ TcpConnection::~TcpConnection()
         delete cancelEvent(synRexmitTimer);
 }
 
+void TcpConnection::handleMessage(cMessage *msg)
+{
+    if (msg->isSelfMessage()) {
+        if (!processTimer(msg))
+            tcpMain->removeConnection(this);
+    }
+    else
+        throw cRuntimeError("model error: TcpConnection allows only self messages");
+}
+
 bool TcpConnection::processTimer(cMessage *msg)
 {
     printConnBrief();
@@ -275,6 +287,8 @@ bool TcpConnection::processTimer(cMessage *msg)
 
 bool TcpConnection::processTCPSegment(Packet *packet, const Ptr<const TcpHeader>& tcpseg, L3Address segSrcAddr, L3Address segDestAddr)
 {
+    Enter_Method_Silent();
+
     printConnBrief();
     if (!localAddr.isUnspecified()) {
         ASSERT(localAddr == segDestAddr);
@@ -298,6 +312,8 @@ bool TcpConnection::processTCPSegment(Packet *packet, const Ptr<const TcpHeader>
 
 bool TcpConnection::processAppCommand(cMessage *msg)
 {
+    Enter_Method_Silent();
+
     printConnBrief();
 
     // first do actions

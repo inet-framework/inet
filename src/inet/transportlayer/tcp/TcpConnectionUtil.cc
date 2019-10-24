@@ -206,6 +206,40 @@ void TcpConnection::printSegmentBrief(Packet *packet, const Ptr<const TcpHeader>
     EV_INFO << "\n";
 }
 
+void TcpConnection::initClonedConnection(TcpConnection *listenerConn)
+{
+    Enter_Method_Silent();
+    listeningSocketId = listenerConn->getSocketId();
+
+    // following code to be kept consistent with initConnection()
+    const char *sendQueueClass = listenerConn->sendQueue->getClassName();
+    sendQueue = check_and_cast<TcpSendQueue *>(inet::utils::createOne(sendQueueClass));
+    sendQueue->setConnection(this);
+
+    const char *receiveQueueClass = listenerConn->receiveQueue->getClassName();
+    receiveQueue = check_and_cast<TcpReceiveQueue *>(inet::utils::createOne(receiveQueueClass));
+    receiveQueue->setConnection(this);
+
+    // create SACK retransmit queue
+    rexmitQueue = new TcpSackRexmitQueue();
+    rexmitQueue->setConnection(this);
+
+    const char *tcpAlgorithmClass = listenerConn->tcpAlgorithm->getClassName();
+    tcpAlgorithm = check_and_cast<TcpAlgorithm *>(inet::utils::createOne(tcpAlgorithmClass));
+    tcpAlgorithm->setConnection(this);
+
+    state = tcpAlgorithm->getStateVariables();
+    configureStateVariables();
+    tcpAlgorithm->initialize();
+
+    // put it into LISTEN, with our localAddr/localPort
+    state->active = false;
+    state->fork = true;
+    localAddr = listenerConn->localAddr;
+    localPort = listenerConn->localPort;
+    FSM_Goto(fsm, TCP_S_LISTEN);
+}
+
 TcpConnection *TcpConnection::cloneListeningConnection()
 {
 //    TcpConnection *conn = new TcpConnection();
@@ -214,40 +248,11 @@ TcpConnection *TcpConnection::cloneListeningConnection()
     int newSocketId = getEnvir()->getUniqueNumber();
     char submoduleName[24];
     sprintf(submoduleName, "conn-%d", newSocketId);
-    auto conn = check_and_cast<TcpConnection *>(moduleType->create(submoduleName, tcpMain));
-    conn->finalizeParameters();
-    conn->buildInside();
+    auto conn = check_and_cast<TcpConnection *>(moduleType->createScheduleInit(submoduleName, tcpMain));
     conn->initConnection(tcpMain, newSocketId);
-    conn->callInitialize();
-    conn->listeningSocketId = socketId;
-
-    // following code to be kept consistent with initConnection()
-    const char *sendQueueClass = sendQueue->getClassName();
-    conn->sendQueue = check_and_cast<TcpSendQueue *>(inet::utils::createOne(sendQueueClass));
-    conn->sendQueue->setConnection(conn);
-
-    const char *receiveQueueClass = receiveQueue->getClassName();
-    conn->receiveQueue = check_and_cast<TcpReceiveQueue *>(inet::utils::createOne(receiveQueueClass));
-    conn->receiveQueue->setConnection(conn);
-
-    // create SACK retransmit queue
-    conn->rexmitQueue = new TcpSackRexmitQueue();
-    conn->rexmitQueue->setConnection(conn);
-
-    const char *tcpAlgorithmClass = tcpAlgorithm->getClassName();
-    conn->tcpAlgorithm = check_and_cast<TcpAlgorithm *>(inet::utils::createOne(tcpAlgorithmClass));
-    conn->tcpAlgorithm->setConnection(conn);
-
-    conn->state = conn->tcpAlgorithm->getStateVariables();
-    conn->configureStateVariables();
-    conn->tcpAlgorithm->initialize();
-
-    // put it into LISTEN, with our localAddr/localPort
-    conn->state->active = false;
-    conn->state->fork = true;
-    conn->localAddr = localAddr;
-    conn->localPort = localPort;
-    FSM_Goto(conn->fsm, TCP_S_LISTEN);
+    conn->initClonedConnection(this);
+    // FSM_Goto(conn->fsm, TCP_S_LISTEN);
+    //FSM_Goto(fsm, TCP_S_LISTEN);
 
     return conn;
 }
@@ -297,7 +302,7 @@ void TcpConnection::sendToIP(Packet *packet, const Ptr<TcpHeader>& tcpseg)
         // do not set ECN on ACKs
         ecnTag->setExplicitCongestionNotification((state->ecnActive && payload > 0) ? IP_ECN_ECT_0 : IP_ECN_NOT_ECT);
     }
-    tcpMain->send(packet, "ipOut");
+    tcpMain->sendFromConn(packet, "ipOut");
 }
 
 void TcpConnection::sendToIP(Packet *packet, const Ptr<TcpHeader>& tcpseg, L3Address src, L3Address dest)
@@ -322,7 +327,7 @@ void TcpConnection::sendToIP(Packet *packet, const Ptr<TcpHeader>& tcpseg, L3Add
 
     insertTransportProtocolHeader(packet, Protocol::tcp, tcpseg);
 
-    tcpMain->send(packet, "ipOut");
+    tcpMain->sendFromConn(packet, "ipOut");
 }
 
 void TcpConnection::signalConnectionTimeout()
@@ -373,7 +378,7 @@ void TcpConnection::sendEstabIndicationToApp()
 
 void TcpConnection::sendToApp(cMessage *msg)
 {
-    tcpMain->send(msg, "appOut");
+    tcpMain->sendFromConn(msg, "appOut");
 }
 
 void TcpConnection::sendAvailableDataToApp()

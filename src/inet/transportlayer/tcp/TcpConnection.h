@@ -463,6 +463,8 @@ class INET_API TcpConnection : public cSimpleModule
     /** Utility: clone a listening connection. Used for forking. */
     virtual TcpConnection *cloneListeningConnection();
 
+    virtual void initClonedConnection(TcpConnection *listenerConn);
+
     /** Utility: creates send/receive queues and tcpAlgorithm */
     virtual void initConnection(TcpOpenCommand *openCmd);
 
@@ -545,12 +547,11 @@ class INET_API TcpConnection : public cSimpleModule
     virtual void signalConnectionTimeout();
 
     /** Utility: start a timer */
-    void scheduleTimeout(cMessage *msg, simtime_t timeout)
-    { tcpMain->scheduleAt(simTime() + timeout, msg); }
+    void scheduleTimeout(cMessage *msg, simtime_t timeout) { scheduleAt(simTime() + timeout, msg); }
 
   protected:
     /** Utility: cancel a timer */
-    cMessage *cancelEvent(cMessage *msg) { return tcpMain->cancelEvent(msg); }
+    // cMessage *cancelEvent(cMessage *msg) { return tcpMain->cancelEvent(msg); }
 
     /** Utility: send IP packet */
     virtual void sendToIP(Packet *pkt, const Ptr<TcpHeader>& tcpseg, L3Address src, L3Address dest);
@@ -658,6 +659,8 @@ class INET_API TcpConnection : public cSimpleModule
      * connection structure must be deleted by the caller (TCP).
      */
     virtual bool processAppCommand(cMessage *msg);
+
+    virtual void handleMessage(cMessage *msg);
 
     /**
      * For SACK TCP. RFC 3517, page 3: "This routine returns whether the given

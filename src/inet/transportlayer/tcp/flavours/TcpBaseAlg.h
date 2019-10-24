@@ -151,7 +151,7 @@ class INET_API TcpBaseAlg : public TcpAlgorithm
     virtual bool sendData(bool sendCommandInvoked);
 
     /** Utility function */
-    cMessage *cancelEvent(cMessage *msg) { return conn->getTcpMain()->cancelEvent(msg); }
+    cMessage *cancelEvent(cMessage *msg) { return conn->cancelEvent(msg); }
 
   public:
     /**
