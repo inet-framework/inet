@@ -15,6 +15,7 @@
 import os
 import sys
 sys.path.insert(0, os.path.abspath('.'))
+sys.path.insert(0, os.path.abspath('_themes'))
 
 
 # -- Project information -----------------------------------------------------
@@ -419,4 +420,4 @@ def setup(app):
     app.add_directive('vimeo', tools.video.Vimeo)
     app.add_directive('video', tools.video.Video)
     app.add_directive('audio', tools.audio.Audio)
-    app.add_directive('card', mxtheme.CardDirective)
+    app.add_directive('card', opptheme.CardDirective)
