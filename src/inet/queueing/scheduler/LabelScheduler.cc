@@ -42,6 +42,14 @@ int LabelScheduler::getNumPackets()
     return size;
 }
 
+b LabelScheduler::getTotalLength()
+{
+    b totalLength(0);
+    for (auto collection : collections)
+        totalLength += collection->getTotalLength();
+    return totalLength;
+}
+
 Packet *LabelScheduler::getPacket(int index)
 {
     throw cRuntimeError("TODO");

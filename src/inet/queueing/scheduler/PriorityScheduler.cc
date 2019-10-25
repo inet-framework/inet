@@ -38,6 +38,14 @@ int PriorityScheduler::getNumPackets()
     return size;
 }
 
+b PriorityScheduler::getTotalLength()
+{
+    b totalLength(0);
+    for (auto collection : collections)
+        totalLength += collection->getTotalLength();
+    return totalLength;
+}
+
 Packet *PriorityScheduler::getPacket(int index)
 {
     int origIndex = index;
