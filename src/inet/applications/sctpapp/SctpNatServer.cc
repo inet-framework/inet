@@ -101,14 +101,13 @@ void SctpNatServer::sendInfo(NatInfo *info)
 
     auto applicationData = makeShared<BytesChunk>(buffer, buflen);
     applicationData->addTag<CreationTimeTag>()->setCreationTime(simTime());
-    auto applicationPacket = new Packet("ApplicationPacket");
+    auto applicationPacket = new Packet("ApplicationPacket", SCTP_C_SEND_ORDERED);
     applicationPacket->insertAtBack(applicationData);
     auto sctpSendReq = applicationPacket->addTag<SctpSendReq>();
     sctpSendReq->setLast(true);
     sctpSendReq->setPrMethod(0);
     sctpSendReq->setPrValue(0);
     sctpSendReq->setSid(0);
-    applicationPacket->setKind(SCTP_C_SEND_ORDERED);
     applicationPacket->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::sctp);
     applicationPacket->addTag<SocketReq>()->setSocketId(info->peer1Assoc);
     send(applicationPacket, "socketOut");
@@ -144,14 +143,13 @@ void SctpNatServer::sendInfo(NatInfo *info)
 
     auto applicationData2 = makeShared<BytesChunk>(buffer2, buflen);
     applicationData2->addTag<CreationTimeTag>()->setCreationTime(simTime());
-    auto applicationPacket2 = new Packet("ApplicationPacket");
+    auto applicationPacket2 = new Packet("ApplicationPacket", SCTP_C_SEND_ORDERED);
     applicationPacket2->insertAtBack(applicationData2);
     auto sctpSendReq2 = applicationPacket2->addTag<SctpSendReq>();
     sctpSendReq2->setLast(true);
     sctpSendReq2->setPrMethod(0);
     sctpSendReq2->setPrValue(0);
     sctpSendReq2->setSid(0);
-    applicationPacket2->setKind(SCTP_C_SEND_ORDERED);
     applicationPacket2->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::sctp);
     applicationPacket2->addTag<SocketReq>()->setSocketId(info->peer2Assoc);
     send(applicationPacket2, "socketOut");
@@ -170,7 +168,7 @@ void SctpNatServer::sendInfo(NatInfo *info)
 
 void SctpNatServer::generateAndSend()
 {
-    auto cmsg = new Packet("ApplicationPacket");
+    auto cmsg = new Packet("ApplicationPacket", SCTP_C_SEND);
     auto msg = makeShared<BytesChunk>();
     int numBytes = par("requestLength");
     std::vector<uint8_t> vec;
@@ -186,7 +184,6 @@ void SctpNatServer::generateAndSend()
     lastStream = (lastStream + 1) % outboundStreams;
     cmd->setSid(lastStream);
     cmd->setLast(true);
-    cmsg->setKind(SCTP_C_SEND);
     packetsSent++;
     bytesSent += numBytes;
     send(cmsg, "socketOut");
@@ -209,7 +206,7 @@ void SctpNatServer::handleMessage(cMessage *msg)
                 auto& indtags = getTags(message);
                 SctpCommandReq *ind = indtags.findTag<SctpCommandReq>();
 
-                Request *cmsg = new Request("SCTP_C_ABORT");
+                Request *cmsg = new Request("SCTP_C_ABORT", SCTP_C_ABORT);
                 SctpSendReq *cmd = cmsg->addTag<SctpSendReq>();
 
                 id = ind->getSocketId();
@@ -217,7 +214,6 @@ void SctpNatServer::handleMessage(cMessage *msg)
                 cmd->setSid(ind->getSid());
                 cmd->setNumMsgs(ind->getNumMsgs());
                 delete msg;
-                cmsg->setKind(SCTP_C_ABORT);
                 send(cmsg, "socketOut");
                 break;
             }
@@ -242,9 +238,8 @@ void SctpNatServer::handleMessage(cMessage *msg)
                 Message *message = check_and_cast<Message *>(msg);
                 int newSockId = message->getTag<SctpAvailableReq>()->getNewSocketId();
                 EV_DETAIL << "new socket id = " << newSockId << endl;
-                Request *cmsg = new Request("SCTP_C_ACCEPT_SOCKET_ID");
+                Request *cmsg = new Request("SCTP_C_ACCEPT_SOCKET_ID", SCTP_C_ACCEPT_SOCKET_ID);
                 cmsg->addTag<SctpAvailableReq>()->setSocketId(newSockId);
-                cmsg->setKind(SCTP_C_ACCEPT_SOCKET_ID);
                 cmsg->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::sctp);
                 cmsg->addTag<SocketReq>()->setSocketId(newSockId);
                 EV_INFO << "Sending accept socket id request ..." << endl;
@@ -260,13 +255,12 @@ void SctpNatServer::handleMessage(cMessage *msg)
                 Message *message = check_and_cast<Message *>(msg);
                 auto& intags = getTags(message);
                 SctpCommandReq *ind = intags.findTag<SctpCommandReq>();
-                Request *cmsg = new Request("ReceiveRequest");
+                Request *cmsg = new Request("ReceiveRequest", SCTP_C_RECEIVE);
                 auto cmd = cmsg->addTag<SctpSendReq>();
                 id = ind->getSocketId();
                 cmd->setSocketId(id);
                 cmd->setSid(ind->getSid());
                 cmd->setNumMsgs(ind->getNumMsgs());
-                cmsg->setKind(SCTP_C_RECEIVE);
                 delete msg;
                 cmsg->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::sctp);
                 cmsg->addTag<SocketReq>()->setSocketId(id);
@@ -383,9 +377,8 @@ void SctpNatServer::handleMessage(cMessage *msg)
                 Message *message = check_and_cast<Message *>(msg);
                 id = message->getTag<SocketInd>()->getSocketId();
                 EV << "server: SCTP_I_SHUTDOWN_RECEIVED for assoc " << id << "\n";
-                Request *cmsg = new Request("SCTP_C_NO_OUTSTANDING");
+                Request *cmsg = new Request("SCTP_C_NO_OUTSTANDING", SCTP_C_NO_OUTSTANDING);
                 SctpCommandReq *qinfo = cmsg->addTag<SctpCommandReq>();
-                cmsg->setKind(SCTP_C_NO_OUTSTANDING);
                 qinfo->setSocketId(id);
                 send(cmsg, "socketOut");
 

@@ -53,11 +53,6 @@ simsignal_t Tcp::tcpConnectionRemovedSignal = registerSignal("tcpConnectionRemov
 
 Tcp::~Tcp()
 {
-    while (!tcpAppConnMap.empty()) {
-        auto i = tcpAppConnMap.begin();
-        delete i->second;
-        tcpAppConnMap.erase(i);
-    }
 }
 
 void Tcp::initialize(int stage)
@@ -102,9 +97,7 @@ void Tcp::finish()
 
 void Tcp::handleSelfMessage(cMessage *msg)
 {
-    TcpConnection *conn = (TcpConnection *)msg->getContextPointer();
-    if (!conn->processTimer(msg))
-        removeConnection(conn);
+    throw cRuntimeError("model error: should schedule timers on connection");
 }
 
 void Tcp::handleUpperCommand(cMessage *msg)
@@ -124,6 +117,13 @@ void Tcp::handleUpperCommand(cMessage *msg)
 
     if (!conn->processAppCommand(msg))
         removeConnection(conn);
+}
+
+void Tcp::sendFromConn(cMessage *msg, const char *gatename, int gateindex)
+{
+    Enter_Method_Silent();
+    take(msg);
+    send(msg, gatename, gateindex);
 }
 
 void Tcp::handleUpperPacket(Packet *packet)
@@ -182,11 +182,8 @@ TcpConnection *Tcp::createConnection(int socketId)
     auto moduleType = cModuleType::get("inet.transportlayer.tcp.TcpConnection");
     char submoduleName[24];
     sprintf(submoduleName, "conn-%d", socketId);
-    auto module = check_and_cast<TcpConnection *>(moduleType->create(submoduleName, this));
-    module->finalizeParameters();
-    module->buildInside();
+    auto module = check_and_cast<TcpConnection *>(moduleType->createScheduleInit(submoduleName, this));
     module->initConnection(this, socketId);
-    module->callInitialize();
     return module;
 }
 
@@ -259,9 +256,7 @@ void Tcp::segmentArrivalWhileClosed(Packet *packet, const Ptr<const TcpHeader>& 
 {
     auto moduleType = cModuleType::get("inet.transportlayer.tcp.TcpConnection");
     const char *submoduleName = "conn-temp";
-    auto module = check_and_cast<TcpConnection *>(moduleType->create(submoduleName, this));
-    module->finalizeParameters();
-    module->buildInside();
+    auto module = check_and_cast<TcpConnection *>(moduleType->createScheduleInit(submoduleName, this));
     module->initConnection(this, -1);
     module->segmentArrivalWhileClosed(packet, tcpseg, srcAddr, destAddr);
     module->deleteModule();

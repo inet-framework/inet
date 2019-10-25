@@ -72,7 +72,7 @@ and passive behavior of the connected gates.
 The following equation about the number of packets holds true for all queueing
 elements:
 
-#pushed - #dropped - #removed - #popped + #generated = #available + #delayed
+#pushed - #dropped - #removed - #popped + #created = #available + #delayed
 
 Sources
 -------
@@ -149,7 +149,8 @@ packets from its input until it finds one that matches the filter criteria.
 
    parameterizable with an :cpp:`IPacketFilterFunction`
 
--  :ned:`OrdinalBasedDropper`: drops received packets based on their ordinal number
+-  :ned:`ContentBasedDropper`: drops packets based on the data they contain
+-  :ned:`OrdinalBasedDropper`: drops packets based on their ordinal number
 -  :ned:`RateLimiter`: drops packets above the specified packetrate or datarate
 -  :ned:`RedDropper`: drops packets based on random early detection
 
@@ -165,9 +166,10 @@ to one of its outputs.
    parameterizable with an :cpp:`IPacketClassifierFunction`
 
 -  :ned:`PriorityClassifier`: classifies packets to the first non-full output
--  :ned:`MarkerClassifier`: classifies packets based on the attached labels
+-  :ned:`LabelClassifier`: classifies packets based on the attached labels
 -  :ned:`MarkovClassifier`: classifies packets based on the state of a Markov process
 -  :ned:`UserPriorityClassifier`: classifies packets based on the attached UserPriorityReq.
+-  :ned:`ContentBasedClassifier`: classifies packets based on the data they contain
 
 Schedulers
 ----------
@@ -182,8 +184,9 @@ one of its inputs and returns that packet.
 
 -  :ned:`PriorityScheduler`: schedules packets from the first non-empty source
 -  :ned:`WrrScheduler`: schedules packets in a weighted Round-robin manner
--  :ned:`MarkerScheduler`: schedules packets based on the attached labels
+-  :ned:`LabelScheduler`: schedules packets based on the attached labels
 -  :ned:`MarkovScheduler`: schedules packets based on the state of a Markov process
+-  :ned:`ContentBasedScheduler`: schedules packets based on the data they contain
 
 Servers
 -------
@@ -201,10 +204,11 @@ Markers
 These modules attach some information to packets on an individual basis. Packets
 can be both pushed into the input and popped from the output of packet markers.
 
--  :ned:`PacketMarker`: generic marker which attaches labels to packets
+-  :ned:`PacketLabeler`: generic marker which attaches labels to packets
 
    parameterizable with an :cpp:`IPacketFilterFunction`
 
+-  :ned:`PacketTagger`: attaches tags to packet such as outgoing interface, hopLimit, VLAN, user priority 
 -  :ned:`RedMarker`: random early detection marker
 
 Meters

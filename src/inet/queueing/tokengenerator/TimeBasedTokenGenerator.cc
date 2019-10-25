@@ -44,6 +44,7 @@ void TimeBasedTokenGenerator::handleMessage(cMessage *message)
     if (message == generationTimer) {
         auto numTokens = numTokensParameter->doubleValue();
         numTokensGenerated += numTokens;
+        emit(tokensCreatedSignal, numTokens);
         server->addTokens(numTokens);
         scheduleGenerationTimer();
         updateDisplayString();

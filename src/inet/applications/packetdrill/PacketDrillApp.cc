@@ -68,8 +68,7 @@ void PacketDrillApp::initialize(int stage)
         eventCounter = 0;
         numEvents = 0;
         localVTag = 0;
-        eventTimer = new cMessage("event timer");
-        eventTimer->setKind(MSGKIND_EVENT);
+        eventTimer = new cMessage("event timer", MSGKIND_EVENT);
         simStartTime = simTime();
         simRelTime = simTime();
     } else if (stage == INITSTAGE_APPLICATION_LAYER) {
@@ -97,8 +96,7 @@ void PacketDrillApp::initialize(int stage)
         tunInterfaceId = interfaceEntry->getInterfaceId();
         tunSocketId = tunSocket.getSocketId();
 
-        cMessage* timeMsg = new cMessage("PacketDrillAppTimer");
-        timeMsg->setKind(MSGKIND_START);
+        cMessage* timeMsg = new cMessage("PacketDrillAppTimer", MSGKIND_START);
         scheduleAt(par("startTime"), timeMsg);
     }
 }
@@ -884,7 +882,7 @@ int PacketDrillApp::syscallWrite(struct syscall_spec *syscall, cQueue *args, cha
             break;
         }
         case IP_PROT_SCTP: {
-            Packet* cmsg = new Packet("AppData");
+            Packet* cmsg = new Packet("AppData", SCTP_C_SEND_ORDERED);
             auto applicationData = makeShared<BytesChunk>();
             uint32 sendBytes = syscall->result->getNum();
             std::vector<uint8_t> vec;
@@ -894,7 +892,6 @@ int PacketDrillApp::syscallWrite(struct syscall_spec *syscall, cQueue *args, cha
             applicationData->setBytes(vec);
             applicationData->addTag<CreationTimeTag>()->setCreationTime(simTime());
 
-            cmsg->setKind(SCTP_C_SEND_ORDERED);
             cmsg->insertAtBack(applicationData);
             auto sendCommand = cmsg->addTag<SctpSendReq>();
             sendCommand->setLast(true);
@@ -1023,7 +1020,7 @@ int PacketDrillApp::syscallSetsockopt(struct syscall_spec *syscall, cQueue *args
         }
         case EXPR_SCTP_RESET_STREAMS: {
             struct sctp_reset_streams_expr *rs = exp->getResetStreams();
-            Message *cmsg = new Message("SCTP_C_STREAM_RESET");
+            Message *cmsg = new Message("SCTP_C_STREAM_RESET", SCTP_C_STREAM_RESET);
             SctpResetReq *rinfo = cmsg->addTag<SctpResetReq>();
             rinfo->setSocketId(-1);
             rinfo->setFd(rs->srs_assoc_id->getNum());
@@ -1038,7 +1035,6 @@ int PacketDrillApp::syscallSetsockopt(struct syscall_spec *syscall, cQueue *args
                 }
                 qu->clear();
             }
-            cmsg->setKind(SCTP_C_STREAM_RESET);
             if (rs->srs_flags->getNum() == SCTP_STREAM_RESET_OUTGOING) {
                 rinfo->setRequestType(RESET_OUTGOING);
             } else if (rs->srs_flags->getNum() == SCTP_STREAM_RESET_INCOMING) {
@@ -1056,7 +1052,7 @@ int PacketDrillApp::syscallSetsockopt(struct syscall_spec *syscall, cQueue *args
         }
         case EXPR_SCTP_ADD_STREAMS: {
             struct sctp_add_streams_expr *as = exp->getAddStreams();
-            Message *cmsg = new Message("SCTP_C_STREAM_RESET");
+            Message *cmsg = new Message("SCTP_C_ADD_STREAMS", SCTP_C_ADD_STREAMS);
             SctpResetReq *rinfo = cmsg->addTag<SctpResetReq>();
             rinfo->setSocketId(-1);
             rinfo->setFd(as->sas_assoc_id->getNum());
@@ -1072,7 +1068,6 @@ int PacketDrillApp::syscallSetsockopt(struct syscall_spec *syscall, cQueue *args
                 rinfo->setRequestType(ADD_OUTGOING);
                 rinfo->setOutstreams(as->sas_outstrms->getNum());
             }
-            cmsg->setKind(SCTP_C_ADD_STREAMS);
             sctpSocket.sendNotification(cmsg);
             delete (as->sas_assoc_id);
             delete (as->sas_instrms);
@@ -1127,13 +1122,12 @@ int PacketDrillApp::syscallSetsockopt(struct syscall_spec *syscall, cQueue *args
                     sctpSocket.setNagle(value? 0 : 1);
                     break;
                 case SCTP_RESET_ASSOC: {
-                    Message *cmsg = new Message("SCTP_C_STREAM_RESET");
+                    Message *cmsg = new Message("SCTP_C_STREAM_RESET", SCTP_C_RESET_ASSOC);
                     SctpResetReq *rinfo = cmsg->addTag<SctpResetReq>();
                     rinfo->setSocketId(-1);
                     rinfo->setFd(value);
                     rinfo->setRemoteAddr(sctpSocket.getRemoteAddr());
                     rinfo->setRequestType(SSN_TSN);
-                    cmsg->setKind(SCTP_C_RESET_ASSOC);
                     sctpSocket.sendNotification(cmsg);
                     break;
                 }

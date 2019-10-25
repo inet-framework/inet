@@ -38,6 +38,7 @@ logFile = "test.out"
 extraOppRunArgs = ""
 debug=False
 exitCode = 0
+writeOutfile = True
 useColors = sys.stdout.isatty()
 
 txtPASS = "PASS"
@@ -50,9 +51,9 @@ txtERROR_expected = "ERROR (expected)"
 if useColors:
     txtPASS = '\033[0;32m' + "PASS" + "\033[0;0m"     # GREEN
     txtPASS_unexpected = '\033[0;32m' + "PASS" + "\033[0;0m" + " " + "\033[1;31m" + "(unexpected)" + "\033[0;0m"     # GREEN + RED
-    txtFAILED = "\033[0;0m" + "FAILED" + "\033[0;0m"    # YELLOW
+    txtFAILED = "\033[1;33m" + "FAILED" + "\033[0;0m"    # YELLOW
     txtFAILED_expected = "\033[2;32m" + "FAILED (expected)" + "\033[0;0m"    # DARK GREEN
-    txtERROR = "\033[0;0m" + "ERROR" + "\033[0;0m"      # RED
+    txtERROR = "\033[1;31m" + "ERROR" + "\033[0;0m"      # RED
     txtERROR_expected = "\033[2;32m" + "ERROR (expected)" + "\033[0;0m"    # DARK GREEN
 
 
@@ -256,15 +257,16 @@ class SimulationTestCase(unittest.TestCase):
                  + "Elapsed time:  " + str(round(elapsedTime,2)) + "s\n\n")
         FILE.close()
 
-        FILE = open(resultdir + "/test.out", "w")
-        FILE.write("------------------------------------------------------\n"
-                 + "Running: " + title + "\n\n"
-                 + "$ cd " + workingdir + "\n"
-                 + "$ " + command + "\n\n"
-                 + out.strip() + "\n\n"
-                 + "Exit code: " + str(exitcode) + "\n"
-                 + "Elapsed time:  " + str(round(elapsedTime,2)) + "s\n\n")
-        FILE.close()
+        if (writeOutfile):
+            FILE = open(resultdir + "/test.out", "w")
+            FILE.write("------------------------------------------------------\n"
+                     + "Running: " + title + "\n\n"
+                     + "$ cd " + workingdir + "\n"
+                     + "$ " + command + "\n\n"
+                     + out.strip() + "\n\n"
+                     + "Exit code: " + str(exitcode) + "\n"
+                     + "Elapsed time:  " + str(round(elapsedTime,2)) + "s\n\n")
+            FILE.close()
 
         result = SimulationResult(command, workingdir, exitcode, elapsedTime=elapsedTime)
 
@@ -558,7 +560,7 @@ class SimulationTextTestResult(ThreadedTestResult):
             errmsg = err[1]
             self.failures[-1] = (test, errmsg)  # super class method inserts stack trace; we don't need that, so overwrite it
             if self.showAll:
-                self.stream.write(": " + txtFAIL + " (should be %s): %s\n" % (test.expectedResult, errmsg))
+                self.stream.write(": " + txtFAILED + " (should be %s): %s\n" % (test.expectedResult, errmsg))
             elif self.dots:
                 self.stream.write('F')
                 self.stream.flush()
@@ -578,7 +580,7 @@ class SimulationTextTestResult(ThreadedTestResult):
         super(SimulationTextTestResult, self).addExpectedFailure(test, err)
         self.expectedFailures[-1] = (test, err[1])  # super class method inserts stack trace; we don't need that, so overwrite it
         if self.showAll:
-            self.stream.write(": " + txtFAIL_expected + "\n")
+            self.stream.write(": " + txtFAILED_expected + "\n")
         elif self.dots:
             self.stream.write("x")
             self.stream.flush()
@@ -639,6 +641,8 @@ if __name__ == "__main__":
     parser.add_argument('-e', '--executable', help='Determines which binary to execute (e.g. opp_run_dbg, opp_run_release) if the command column in the CSV file does not specify one.')
     parser.add_argument('-C', '--directory', help='Change to DIRECTORY before executing the tests. Working dirs in the CSV files are relative to this.')
     parser.add_argument('-d', '--debug', action='store_true', help='Run debug executables: use the debug version of the executable (appends _dbg to the executable name)')
+    parser.add_argument('-s', '--release', action='store_true', help='Run release executables: use the release version of the executable (appends _release to the executable name)')
+    parser.add_argument('-q', '--disable_outfile', dest='writeOutfile', action='store_false', help='disable the writing standard output of simulations to result directory')
     parser.add_argument('-a', '--oppargs', action='append', metavar='oppargs', nargs=argparse.REMAINDER, help='extra opp_run arguments until the end of the line')
     args = parser.parse_args()
 
@@ -661,6 +665,7 @@ if __name__ == "__main__":
         rootDir = os.path.abspath(args.directory)
 
     debug = args.debug
+    writeOutfile = args.writeOutfile
 
     generator = FingerprintTestCaseGenerator()
     testcases = generator.generateFromCSV(args.testspecfiles, args.match, args.exclude, args.repeat)
@@ -687,4 +692,5 @@ if __name__ == "__main__":
     else:
         print("Test results differ from expected results")
     exit(exitCode)
+
 

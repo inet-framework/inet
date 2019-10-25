@@ -16,6 +16,7 @@
 //
 
 #include "inet/common/ModuleAccess.h"
+#include "inet/queueing/base/TokenGeneratorBase.h"
 #include "inet/queueing/tokengenerator/PacketBasedTokenGenerator.h"
 
 namespace inet {
@@ -40,9 +41,10 @@ void PacketBasedTokenGenerator::initialize(int stage)
 
 void PacketBasedTokenGenerator::pushPacket(Packet *packet, cGate *gate)
 {
-    Enter_Method_Silent();
+    Enter_Method("pushPacket");
     auto numTokens = numTokensPerPacketParameter->doubleValue() + numTokensPerBitParameter->doubleValue() * packet->getTotalLength().get();
     numTokensGenerated += numTokens;
+    emit(TokenGeneratorBase::tokensCreatedSignal, numTokens);
     server->addTokens(numTokens);
     numProcessedPackets++;
     processedTotalLength += packet->getDataLength();
@@ -72,8 +74,10 @@ const char *PacketBasedTokenGenerator::resolveDirective(char directive)
 
 void PacketBasedTokenGenerator::receiveSignal(cComponent *source, simsignal_t signal, double value, cObject *details)
 {
-    if (signal == TokenBasedServer::tokensDepletedSignal)
+    if (signal == TokenBasedServer::tokensDepletedSignal) {
+        Enter_Method("tokensDepleted");
         producer->handleCanPushPacket(inputGate->getPathStartGate());
+    }
     else
         throw cRuntimeError("Unknown signal");
 }

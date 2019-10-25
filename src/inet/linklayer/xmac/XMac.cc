@@ -74,50 +74,25 @@ void XMac::initialize(int stage)
         radioModule->subscribe(IRadio::transmissionStateChangedSignal, this);
         radio = check_and_cast<IRadio *>(radioModule);
 
-        wakeup = new cMessage("wakeup");
-        wakeup->setKind(XMAC_WAKE_UP);
+        wakeup = new cMessage("wakeup", XMAC_WAKE_UP);
 
-        data_timeout = new cMessage("data_timeout");
-        data_timeout->setKind(XMAC_DATA_TIMEOUT);
+        data_timeout = new cMessage("data_timeout", XMAC_DATA_TIMEOUT);
         data_timeout->setSchedulingPriority(100);
 
-        data_tx_over = new cMessage("data_tx_over");
-        data_tx_over->setKind(XMAC_DATA_TX_OVER);
-
-        stop_preambles = new cMessage("stop_preambles");
-        stop_preambles->setKind(XMAC_STOP_PREAMBLES);
-
-        send_preamble = new cMessage("send_preamble");
-        send_preamble->setKind(XMAC_SEND_PREAMBLE);
-
-        ack_tx_over = new cMessage("ack_tx_over");
-        ack_tx_over->setKind(XMAC_ACK_TX_OVER);
-
-        cca_timeout = new cMessage("cca_timeout");
-        cca_timeout->setKind(XMAC_CCA_TIMEOUT);
+        data_tx_over = new cMessage("data_tx_over", XMAC_DATA_TX_OVER);
+        stop_preambles = new cMessage("stop_preambles", XMAC_STOP_PREAMBLES);
+        send_preamble = new cMessage("send_preamble", XMAC_SEND_PREAMBLE);
+        ack_tx_over = new cMessage("ack_tx_over", XMAC_ACK_TX_OVER);
+        cca_timeout = new cMessage("cca_timeout", XMAC_CCA_TIMEOUT);
         cca_timeout->setSchedulingPriority(100);
-
-        send_ack = new cMessage("send_ack");
-        send_ack->setKind(XMAC_SEND_ACK);
-
-        start_xmac = new cMessage("start_xmac");
-        start_xmac->setKind(XMAC_START_XMAC);
-
-        ack_timeout = new cMessage("ack_timeout");
-        ack_timeout->setKind(XMAC_ACK_TIMEOUT);
-
-        resend_data = new cMessage("resend_data");
-        resend_data->setKind(XMAC_RESEND_DATA);
+        send_ack = new cMessage("send_ack", XMAC_SEND_ACK);
+        start_xmac = new cMessage("start_xmac", XMAC_START_XMAC);
+        ack_timeout = new cMessage("ack_timeout", XMAC_ACK_TIMEOUT);
+        resend_data = new cMessage("resend_data", XMAC_RESEND_DATA);
         resend_data->setSchedulingPriority(100);
-
-        switch_preamble_phase = new cMessage("switch_preamble_phase");
-        switch_preamble_phase->setKind(SWITCH_PREAMBLE_PHASE);
-
-        delay_for_ack_within_remote_rx = new cMessage("delay_for_ack_within_remote_rx");
-        delay_for_ack_within_remote_rx->setKind(DELAY_FOR_ACK_WITHIN_REMOTE_RX);
-
-        switching_done = new cMessage("switching_done");
-        switching_done->setKind(XMAC_SWITCHING_FINISHED);
+        switch_preamble_phase = new cMessage("switch_preamble_phase", SWITCH_PREAMBLE_PHASE);
+        delay_for_ack_within_remote_rx = new cMessage("delay_for_ack_within_remote_rx", DELAY_FOR_ACK_WITHIN_REMOTE_RX);
+        switching_done = new cMessage("switching_done", XMAC_SWITCHING_FINISHED);
 
         scheduleAt(simTime(), start_xmac);
     }

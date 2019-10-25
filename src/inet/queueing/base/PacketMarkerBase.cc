@@ -49,7 +49,7 @@ void PacketMarkerBase::initialize(int stage)
 
 void PacketMarkerBase::pushPacket(Packet *packet, cGate *gate)
 {
-    Enter_Method_Silent();
+    Enter_Method("pushPacket");
     EV_INFO << "Marking packet " << packet->getName() << "." << endl;
     markPacket(packet);
     pushOrSendPacket(packet, outputGate, consumer);
@@ -65,7 +65,7 @@ bool PacketMarkerBase::canPopSomePacket(cGate *gate)
 
 Packet *PacketMarkerBase::popPacket(cGate *gate)
 {
-    Enter_Method_Silent();
+    Enter_Method("popPacket");
     auto packet = provider->popPacket(inputGate->getPathStartGate());
     EV_INFO << "Marking packet " << packet->getName() << "." << endl;
     markPacket(packet);
@@ -78,14 +78,14 @@ Packet *PacketMarkerBase::popPacket(cGate *gate)
 
 void PacketMarkerBase::handleCanPushPacket(cGate *gate)
 {
-    Enter_Method_Silent();
+    Enter_Method("handleCanPushPacket");
     if (producer != nullptr)
         producer->handleCanPushPacket(inputGate);
 }
 
 void PacketMarkerBase::handleCanPopPacket(cGate *gate)
 {
-    Enter_Method_Silent();
+    Enter_Method("handleCanPopPacket");
     if (collector != nullptr)
         collector->handleCanPopPacket(outputGate);
 }

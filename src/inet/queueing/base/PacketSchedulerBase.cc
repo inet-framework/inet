@@ -56,7 +56,7 @@ bool PacketSchedulerBase::canPopSomePacket(cGate *gate)
 
 Packet *PacketSchedulerBase::popPacket(cGate *gate)
 {
-    Enter_Method_Silent();
+    Enter_Method("popPacket");
     int i = schedulePacket();
     if (i == -1)
         throw cRuntimeError("Cannot pop packet");
@@ -67,13 +67,14 @@ Packet *PacketSchedulerBase::popPacket(cGate *gate)
         processedTotalLength += packet->getDataLength();
         updateDisplayString();
         animateSend(packet, outputGate);
+        emit(packetPoppedSignal, packet);
         return packet;
     }
 }
 
 void PacketSchedulerBase::handleCanPopPacket(cGate *gate)
 {
-    Enter_Method_Silent();
+    Enter_Method("handleCanPopPacket");
     if (collector != nullptr)
         collector->handleCanPopPacket(outputGate);
 }

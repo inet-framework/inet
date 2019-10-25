@@ -405,7 +405,7 @@ Packet *HttpBrowserBase::generatePageRequest(std::string www, std::string pageNa
 
     char szReq[MAX_URL_LENGTH + 24];
     sprintf(szReq, "GET %s HTTP/1.1", pageName.c_str());
-    Packet *outPk = new Packet(szReq);
+    Packet *outPk = new Packet(szReq, HTTPT_REQUEST_MESSAGE);
     const auto& msg = makeShared<HttpRequestMessage>();
     msg->setTargetUrl(www.c_str());
     msg->setProtocol(httpProtocol);
@@ -415,7 +415,6 @@ Packet *HttpBrowserBase::generatePageRequest(std::string www, std::string pageNa
     msg->setKeepAlive(httpProtocol == 11);
     msg->setBadRequest(bad);    // Simulates willingly requesting a non-existing resource.
     outPk->insertAtBack(msg);
-    outPk->setKind(HTTPT_REQUEST_MESSAGE);
 
     logRequest(outPk);
     htmlRequested++;
@@ -457,7 +456,7 @@ Packet *HttpBrowserBase::generateResourceRequest(std::string www, std::string re
     char szReq[MAX_URL_LENGTH + 24];
     sprintf(szReq, "GET %s HTTP/1.1", resource.c_str());
 
-    Packet *outPk = new Packet(szReq);
+    Packet *outPk = new Packet(szReq, HTTPT_REQUEST_MESSAGE);
     const auto& msg = makeShared<HttpRequestMessage>();
     msg->setTargetUrl(www.c_str());
     msg->setProtocol(httpProtocol);
@@ -467,7 +466,6 @@ Packet *HttpBrowserBase::generateResourceRequest(std::string www, std::string re
     msg->setKeepAlive(httpProtocol == 11);
     msg->setBadRequest(bad);    // Simulates willingly requesting a non-existing resource.
     outPk->insertAtBack(msg);
-    outPk->setKind(HTTPT_REQUEST_MESSAGE);
 
     logRequest(outPk);
 

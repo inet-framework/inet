@@ -39,20 +39,14 @@ Ospfv3Interface::Ospfv3Interface(const char* name, cModule* routerModule, Ospfv3
     this->passiveInterface = passive;
     this->transitNetworkInterface = false; //false at first
 
-    this->helloTimer = new cMessage();
-    helloTimer->setKind(HELLO_TIMER);
+    this->helloTimer = new cMessage("Ospfv3Interface::HelloTimer", HELLO_TIMER);
     helloTimer->setContextPointer(this);
-    helloTimer->setName("Ospfv3Interface::HelloTimer");
 
-    this->waitTimer = new cMessage();
-    waitTimer->setKind(WAIT_TIMER);
+    this->waitTimer = new cMessage("Ospfv3Interface::WaitTimer", WAIT_TIMER);
     waitTimer->setContextPointer(this);
-    waitTimer->setName("Ospfv3Interface::WaitTimer");
 
-    this->acknowledgementTimer = new cMessage();
-    acknowledgementTimer->setKind(ACKNOWLEDGEMENT_TIMER);
+    this->acknowledgementTimer = new cMessage("Ospfv3Interface::AcknowledgementTimer", ACKNOWLEDGEMENT_TIMER);
     acknowledgementTimer->setContextPointer(this);
-    acknowledgementTimer->setName("Ospfv3Interface::AcknowledgementTimer");
 }//constructor
 
 Ospfv3Interface::~Ospfv3Interface()

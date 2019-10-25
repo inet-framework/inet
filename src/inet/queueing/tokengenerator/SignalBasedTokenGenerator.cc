@@ -41,25 +41,26 @@ void SignalBasedTokenGenerator::generateTokens()
 {
     auto numTokens = numTokensParameter->doubleValue();
     numTokensGenerated += numTokens;
+    emit(tokensCreatedSignal, numTokens);
     server->addTokens(numTokens);
     updateDisplayString();
 }
 
 void SignalBasedTokenGenerator::receiveSignal(cComponent *source, simsignal_t signal, long value, cObject *details)
 {
-    Enter_Method_Silent();
+    Enter_Method(cComponent::getSignalName(signal));
     generateTokens();
 }
 
 void SignalBasedTokenGenerator::receiveSignal(cComponent *source, simsignal_t signal, double value, cObject *details)
 {
-    Enter_Method_Silent();
+    Enter_Method(cComponent::getSignalName(signal));
     generateTokens();
 }
 
 void SignalBasedTokenGenerator::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
 {
-    Enter_Method_Silent();
+    Enter_Method(cComponent::getSignalName(signal));
     generateTokens();
 }
 

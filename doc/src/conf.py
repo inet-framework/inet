@@ -32,7 +32,7 @@ release = ''
 
 # If your documentation needs a minimal Sphinx version, state it here.
 #
-needs_sphinx = '1.7'
+needs_sphinx = '2.2'
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
@@ -90,9 +90,9 @@ graphviz_output_format = 'svg'
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-#
-html_theme = 'sphinx_materialdesign_theme'
-html_theme_path = ['_templates']
+# https://github.com/omnetpp/sphinx_opp_theme
+html_theme = 'opptheme'
+html_theme_path = ['_themes']
 
 # material theme config
 html_theme_options = {
@@ -411,6 +411,7 @@ lexers['ini'] = IniLexer(startinline=True)
 # -- setup the customizations
 import tools.video
 import tools.audio
+import opptheme
 
 def setup(app):
     app.connect("source-read", opp_preprocess)
@@ -418,4 +419,4 @@ def setup(app):
     app.add_directive('vimeo', tools.video.Vimeo)
     app.add_directive('video', tools.video.Video)
     app.add_directive('audio', tools.audio.Audio)
-
+    app.add_directive('card', mxtheme.CardDirective)

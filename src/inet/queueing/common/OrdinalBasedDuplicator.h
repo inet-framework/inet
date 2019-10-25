@@ -34,8 +34,6 @@ class INET_API OrdinalBasedDuplicator : public PacketDuplicatorBase
     unsigned int numDuplicated;
     bool generateFurtherDuplicates;
 
-    static simsignal_t duplPkSignal;
-
     std::vector<unsigned int> duplicatesVector;
 
   protected:

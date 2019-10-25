@@ -84,7 +84,7 @@ Packet *PacketQueue::getPacket(int index)
 
 void PacketQueue::pushPacket(Packet *packet, cGate *gate)
 {
-    Enter_Method_Silent();
+    Enter_Method("pushPacket");
     emit(packetPushedSignal, packet);
     EV_INFO << "Pushing packet " << packet->getName() << " into the queue." << endl;
     queue.insert(packet);
@@ -103,7 +103,7 @@ void PacketQueue::pushPacket(Packet *packet, cGate *gate)
 
 Packet *PacketQueue::popPacket(cGate *gate)
 {
-    Enter_Method_Silent();
+    Enter_Method("popPacket");
     auto packet = check_and_cast<Packet *>(queue.front());
     EV_INFO << "Popping packet " << packet->getName() << " from the queue." << endl;
     if (buffer != nullptr)
@@ -118,6 +118,7 @@ Packet *PacketQueue::popPacket(cGate *gate)
 
 void PacketQueue::removePacket(Packet *packet)
 {
+    Enter_Method("removePacket");
     EV_INFO << "Removing packet " << packet->getName() << " from the queue." << endl;
     if (buffer != nullptr)
         buffer->removePacket(packet);
@@ -152,6 +153,7 @@ bool PacketQueue::canPushPacket(Packet *packet, cGate *gate)
 
 void PacketQueue::handlePacketRemoved(Packet *packet)
 {
+    Enter_Method("handlePacketRemoved");
     queue.remove(packet);
     emit(packetRemovedSignal, packet);
     updateDisplayString();

@@ -87,8 +87,7 @@ void SctpClient::initialize(int stage)
         WATCH(numRequestsToSend);
         recordScalar("ums", par("requestLength").intValue());
 
-        timeMsg = new cMessage("CliAppTimer");
-        timeMsg->setKind(MSGKIND_CONNECT);
+        timeMsg = new cMessage("CliAppTimer", MSGKIND_CONNECT);
         scheduleAt(par("startTime"), timeMsg);
 
         stopTimer = nullptr;
@@ -125,16 +124,14 @@ void SctpClient::initialize(int stage)
 
         simtime_t stopTime = par("stopTime");
         if (stopTime >= SIMTIME_ZERO) {
-            stopTimer = new cMessage("StopTimer");
-            stopTimer->setKind(MSGKIND_STOP);
+            stopTimer = new cMessage("StopTimer", MSGKIND_STOP);
             scheduleAt(par("stopTime"), stopTimer);
             timer = true;
         }
 
         simtime_t primaryTime = par("primaryTime");
         if (primaryTime != SIMTIME_ZERO) {
-            primaryChangeTimer = new cMessage("PrimaryTime");
-            primaryChangeTimer->setKind(MSGKIND_PRIMARY);
+            primaryChangeTimer = new cMessage("PrimaryTime", MSGKIND_PRIMARY);
             scheduleAt(primaryTime, primaryChangeTimer);
         }
     }
@@ -169,8 +166,7 @@ void SctpClient::connect()
     }
 
     if (streamReset) {
-        cMessage *cmsg = new cMessage("StreamReset");
-        cmsg->setKind(MSGKIND_RESET);
+        cMessage *cmsg = new cMessage("StreamReset", MSGKIND_RESET);
         EV_INFO << "StreamReset Timer scheduled at " << simTime() + par("streamRequestTime") << "\n";
         scheduleAt(simTime() + par("streamRequestTime"), cmsg);
     }
@@ -288,10 +284,9 @@ void SctpClient::socketEstablished(SctpSocket *socket, unsigned long int buffer)
 
 void SctpClient::sendQueueRequest()
 {
-    Request *cmsg = new Request("SCTP_C_QUEUE_MSGS_LIMIT");
+    Request *cmsg = new Request("SCTP_C_QUEUE_MSGS_LIMIT", SCTP_C_QUEUE_MSGS_LIMIT);
     SctpInfoReq *qinfo = cmsg->addTag<SctpInfoReq>();
     qinfo->setText(queueSize);
-    cmsg->setKind(SCTP_C_QUEUE_MSGS_LIMIT);
     qinfo->setSocketId(socket.getSocketId());
     socket.sendRequest(cmsg);
 }
@@ -478,12 +473,11 @@ void SctpClient::socketDataNotificationArrived(SctpSocket *socket, Message *msg)
 {
     Message *message = check_and_cast<Message *>(msg);
     SctpCommandReq *ind = message->findTag<SctpCommandReq>();
-    Request *cmesg = new Request("SCTP_C_RECEIVE");
+    Request *cmesg = new Request("SCTP_C_RECEIVE", SCTP_C_RECEIVE);
     SctpSendReq *cmd = cmesg->addTag<SctpSendReq>();
     cmd->setSocketId(ind->getSocketId());
     cmd->setSid(ind->getSid());
     cmd->setNumMsgs(ind->getNumMsgs());
-    cmesg->setKind(SCTP_C_RECEIVE);
     delete msg;
     socket->sendNotification(cmesg);
 }
@@ -491,9 +485,8 @@ void SctpClient::socketDataNotificationArrived(SctpSocket *socket, Message *msg)
 void SctpClient::shutdownReceivedArrived(SctpSocket *socket)
 {
     if (numRequestsToSend == 0) {
-        Message *cmsg = new Message("SCTP_C_NO_OUTSTANDING");
+        Message *cmsg = new Message("SCTP_C_NO_OUTSTANDING", SCTP_C_NO_OUTSTANDING);
         SctpCommandReq *qinfo = cmsg->addTag<SctpCommandReq>();
-        cmsg->setKind(SCTP_C_NO_OUTSTANDING);
         qinfo->setSocketId(socket->getSocketId());
         socket->sendNotification(cmsg);
     }
@@ -549,7 +542,7 @@ void SctpClient::socketStatusArrived(SctpSocket *socket, SctpStatusReq *status)
 
 void SctpClient::setPrimaryPath(const char *str)
 {
-    Request *cmsg = new Request("SCTP_C_PRIMARY");
+    Request *cmsg = new Request("SCTP_C_PRIMARY", SCTP_C_PRIMARY);
     SctpPathInfoReq *pinfo = cmsg->addTag<SctpPathInfoReq>();
 
     if (strcmp(str, "") != 0) {
@@ -566,7 +559,6 @@ void SctpClient::setPrimaryPath(const char *str)
     }
 
     pinfo->setSocketId(socket.getSocketId());
-    cmsg->setKind(SCTP_C_PRIMARY);
     socket.sendNotification(cmsg);
 }
 
@@ -574,14 +566,13 @@ void SctpClient::sendStreamResetNotification()
 {
     unsigned short int type = par("streamResetType");
     if (type >= 6 && type <= 9) {
-        Message *cmsg = new Message("SCTP_C_STREAM_RESET");
+        Message *cmsg = new Message("SCTP_C_STREAM_RESET", SCTP_C_STREAM_RESET);
         SctpResetReq *rinfo = cmsg->addTag<SctpResetReq>();
         rinfo->setSocketId(socket.getSocketId());
         rinfo->setRemoteAddr(socket.getRemoteAddr());
         rinfo->setRequestType(type);
         rinfo->setStreamsArraySize(1);
         rinfo->setStreams(0, par("streamToReset"));
-        cmsg->setKind(SCTP_C_STREAM_RESET);
         socket.sendNotification(cmsg);
     }
 }

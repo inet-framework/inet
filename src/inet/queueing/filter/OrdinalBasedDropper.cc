@@ -16,7 +16,6 @@
 //
 
 #include "inet/common/ModuleAccess.h"
-#include "inet/common/Simsignals.h"
 #include "inet/queueing/filter/OrdinalBasedDropper.h"
 
 namespace inet {
@@ -41,13 +40,11 @@ void OrdinalBasedDropper::initialize(int stage)
         const char *vector = par("dropsVector");
         parseVector(vector);
 
-        if (dropsVector.size() == 0) {
-            EV << "DropsGenerator: Empty dropsVector" << endl;
-        }
-        else {
-            EV << "DropsGenerator: dropsVector=" << vector << endl;
+        if (dropsVector.size() == 0)
+            EV_WARN << "Empty dropsVector" << endl;
+        else
+            EV_DEBUG << "dropsVector=" << vector << endl;
             generateFurtherDrops = true;
-        }
     }
 }
 
@@ -55,11 +52,11 @@ bool OrdinalBasedDropper::matchesPacket(Packet *packet)
 {
     if (generateFurtherDrops) {
         if (numPackets == dropsVector[0]) {
-            EV << "DropsGenerator: Dropping packet number " << numPackets << " " << packet << endl;
+            EV_DEBUG << "Dropping packet number " << numPackets << " " << packet << endl;
             numDropped++;
             dropsVector.erase(dropsVector.begin());
             if (dropsVector.size() == 0) {
-                EV << "DropsGenerator: End of dropsVector reached." << endl;
+                EV_DEBUG << "End of dropsVector reached." << endl;
                 generateFurtherDrops = false;
             }
             numPackets++;

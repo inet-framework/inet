@@ -143,7 +143,6 @@ class INET_API Tcp : public TransportProtocolBase
     virtual TcpConnection *findConnForSegment(const Ptr<const TcpHeader>& tcpseg, L3Address srcAddr, L3Address destAddr);
     virtual TcpConnection *findConnForApp(int socketId);
     virtual void segmentArrivalWhileClosed(Packet *packet, const Ptr<const TcpHeader>& tcpseg, L3Address src, L3Address dest);
-    virtual void removeConnection(TcpConnection *conn);
     virtual void refreshDisplay() const override;
 
   public:
@@ -171,6 +170,9 @@ class INET_API Tcp : public TransportProtocolBase
      * during processing of OPEN_ACTIVE or OPEN_PASSIVE.
      */
     virtual void addSockPair(TcpConnection *conn, L3Address localAddr, L3Address remoteAddr, int localPort, int remotePort);
+
+    virtual void removeConnection(TcpConnection *conn);
+    virtual void sendFromConn(cMessage *msg, const char *gatename, int gateindex = -1);
 
     /**
      * To be called from TcpConnection when socket pair (key for TcpConnMap) changes

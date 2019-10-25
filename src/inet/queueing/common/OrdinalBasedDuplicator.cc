@@ -24,8 +24,6 @@ namespace queueing {
 
 Define_Module(OrdinalBasedDuplicator);
 
-simsignal_t OrdinalBasedDuplicator::duplPkSignal = registerSignal("duplPk");
-
 void OrdinalBasedDuplicator::initialize(int stage)
 {
     PacketDuplicatorBase::initialize(stage);
@@ -41,11 +39,10 @@ void OrdinalBasedDuplicator::initialize(int stage)
         const char *vector = par("duplicatesVector");
         parseVector(vector);
 
-        if (duplicatesVector.size() == 0) {
-            EV << "DuplicatesGenerator: Empty duplicatesVector" << endl;
-        }
+        if (duplicatesVector.size() == 0)
+            EV_WARN << "Empty duplicatesVector" << endl;
         else {
-            EV << "DuplicatesGenerator: duplicatesVector=" << vector << endl;
+            EV_DEBUG << "duplicatesVector=" << vector << endl;
             generateFurtherDuplicates = true;
         }
     }
@@ -55,11 +52,11 @@ int OrdinalBasedDuplicator::getNumPacketDuplicates(Packet *packet)
 {
     if (generateFurtherDuplicates) {
         if (numPackets == duplicatesVector[0]) {
-            EV << "DuplicatesGenerator: Duplicating packet number " << numPackets << " " << packet << endl;
+            EV_DEBUG << "Duplicating packet number " << numPackets << " " << packet << endl;
             numDuplicated++;
             duplicatesVector.erase(duplicatesVector.begin());
             if (duplicatesVector.size() == 0) {
-                EV << "DuplicatesGenerator: End of duplicatesVector reached." << endl;
+                EV_DEBUG << "End of duplicatesVector reached." << endl;
                 generateFurtherDuplicates = false;
             }
             numPackets++;

@@ -29,6 +29,8 @@ simple PacketSchedulerBase extends PacketProcessorBase
     parameters:
         displayStringTextFormat = default("scheduled %p pk (%l)");
         @display("i=block/join");
+        @signal[packetPopped](type=inet::Packet);
+        @statistic[packetPopped](title="packets popped"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
     gates:
         input in[];
         output out;

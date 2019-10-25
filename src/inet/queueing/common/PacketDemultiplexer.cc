@@ -47,7 +47,7 @@ void PacketDemultiplexer::initialize(int stage)
 
 Packet *PacketDemultiplexer::popPacket(cGate *gate)
 {
-    Enter_Method_Silent();
+    Enter_Method("popPacket");
     auto packet = provider->popPacket(inputGate->getPathStartGate());
     EV_INFO << "Forwarding popped packet " << packet->getName() << "." << endl;
     animateSend(packet, gate);
@@ -59,7 +59,7 @@ Packet *PacketDemultiplexer::popPacket(cGate *gate)
 
 void PacketDemultiplexer::handleCanPopPacket(cGate *gate)
 {
-    Enter_Method_Silent();
+    Enter_Method("handleCanPopPacket");
     for (int i = 0; i < (int)outputGates.size(); i++)
         // NOTE: notifying a listener may prevent others from popping
         if (provider->canPopSomePacket(inputGate->getPathStartGate()))

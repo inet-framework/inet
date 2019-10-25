@@ -48,4 +48,4 @@
 /examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c pcm_s16le -r 9,   60s,     59a5-ceca/tplx, PASS, udp
 
 /examples/voipstream/VoIPStreamLargeNet/,    -f omnetpp.ini -c General -r 0,      5s,     e8d5-eed0/tplx, PASS, udp
-/examples/voipstream/VoIPStreamTrafficTest/, -f omnetpp.ini -c General -r 0,      2s,     ba1c-de22/tplx, PASS, udp
+/examples/voipstream/VoIPStreamTrafficTest/, -f omnetpp.ini -c General -r 0,      2s,     a3a7-b666/tplx, PASS, udp

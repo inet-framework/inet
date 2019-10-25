@@ -27,6 +27,18 @@ cplusplus {{
 using namespace ospf;
 }}
 
+enum Ospfv2TimerType {
+    INTERFACE_HELLO_TIMER = 0;
+    INTERFACE_WAIT_TIMER = 1;
+    INTERFACE_ACKNOWLEDGEMENT_TIMER = 3;
+    NEIGHBOR_INACTIVITY_TIMER = 4;
+    NEIGHBOR_POLL_TIMER = 5;
+    NEIGHBOR_DD_RETRANSMISSION_TIMER = 6;
+    NEIGHBOR_UPDATE_RETRANSMISSION_TIMER = 7;
+    NEIGHBOR_REQUEST_RETRANSMISSION_TIMER = 8;
+    DATABASE_AGE_TIMER = 9;
+};
+
 // should be a byte long bitfield
 struct Ospfv2Options
 {

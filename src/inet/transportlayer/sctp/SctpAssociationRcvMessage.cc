@@ -2004,8 +2004,7 @@ void SctpAssociation::generateSendQueueAbatedIndication(const uint64 bytes)
                   << bytes << ") to refill buffer "
                   << state->sendBuffer << "/" << state->sendQueueLimit << endl;
 
-        Indication *msg = new Indication(indicationName(SCTP_I_SENDQUEUE_ABATED));
-        msg->setKind(SCTP_I_SENDQUEUE_ABATED);
+        Indication *msg = new Indication(indicationName(SCTP_I_SENDQUEUE_ABATED), SCTP_I_SENDQUEUE_ABATED);
 
         msg->addTag<SocketInd>()->setSocketId(assocId);
         SctpSendQueueAbatedReq *sendQueueAbatedIndication = msg->addTag<SctpSendQueueAbatedReq>();

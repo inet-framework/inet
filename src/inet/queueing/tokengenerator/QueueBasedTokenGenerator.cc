@@ -40,8 +40,8 @@ void QueueBasedTokenGenerator::initialize(int stage)
 
 void QueueBasedTokenGenerator::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
 {
-    Enter_Method_Silent();
     if (signal == packetPoppedSignal) {
+        Enter_Method("packetPopped");
         if (queue->getNumPackets() < minNumPackets || queue->getTotalLength() < minTotalLength)
             generateTokens();
     }
@@ -52,8 +52,9 @@ void QueueBasedTokenGenerator::receiveSignal(cComponent *source, simsignal_t sig
 void QueueBasedTokenGenerator::generateTokens()
 {
     auto numTokens = numTokensParameter->doubleValue();
-    server->addTokens(numTokens);
     numTokensGenerated += numTokens;
+    emit(tokensCreatedSignal, numTokens);
+    server->addTokens(numTokens);
     updateDisplayString();
 }
 

@@ -27,12 +27,6 @@ simple OrdinalBasedDuplicator
         string duplicatesVector = default(""); // the duplicatesVector format is "<packetNumber>;<packetNumber>;...;"
                                                // packet numbers in ascending order e.g. "5;6;12;13;"
         @display("i=block/control");
-        @signal[packetReceived](type=cMessage);
-        @signal[packetSent](type=cMessage);
-        @signal[duplPk](type=cMessage);
-        @statistic[packetReceived](title="packets received"; source=packetReceived; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
-        @statistic[packetSent](title="packets sent"; source=packetSent; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
-        @statistic[duplPk](title="packets duplicated"; source=duplPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
     gates:
         input in;
         output out;

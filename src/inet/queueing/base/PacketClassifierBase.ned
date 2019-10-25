@@ -29,6 +29,8 @@ simple PacketClassifierBase extends PacketSinkBase
     parameters:
         displayStringTextFormat = default("classified %p pk (%l)");
         @display("i=block/classifier");
+        @signal[packetPushed](type=inet::Packet);
+        @statistic[packetPushed](title="packets pushed"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
     gates:
         input in;
         output out[];
