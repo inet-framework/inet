@@ -79,8 +79,8 @@ Packet *CompoundPacketQueue::popPacket(cGate *gate)
     Enter_Method("popPacket");
     auto packet = provider->popPacket(outputGate->getPathStartGate());
     animateSend(packet, outputGate->getPathStartGate());
-    updateDisplayString();
     emit(packetPoppedSignal, packet);
+    updateDisplayString();
     return packet;
 }
 
@@ -88,8 +88,8 @@ void CompoundPacketQueue::removePacket(Packet *packet)
 {
     Enter_Method("removePacket");
     collection->removePacket(packet);
-    updateDisplayString();
     emit(packetRemovedSignal, packet);
+    updateDisplayString();
 }
 
 } // namespace queueing
