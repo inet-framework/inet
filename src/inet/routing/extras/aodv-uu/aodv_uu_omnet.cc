@@ -451,6 +451,7 @@ void NS_CLASS packetFailed(const Packet *dgram)
 
     // create a copy of this packet
     auto pkt = new Packet(dgram->getName());
+    pkt->copyTags(*dgram);
 
     for (const auto& chunk : protocolDataUnit->getChunks()) {
         if (auto childLevel = dynamicPtrCast<const PacketDissector::ProtocolDataUnit>(chunk)) {
