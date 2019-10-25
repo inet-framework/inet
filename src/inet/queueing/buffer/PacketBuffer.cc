@@ -27,6 +27,7 @@ Define_Module(PacketBuffer);
 
 void PacketBuffer::initialize(int stage)
 {
+    PacketBufferBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         displayStringTextFormat = par("displayStringTextFormat");
         packetCapacity = par("packetCapacity");
@@ -52,8 +53,12 @@ void PacketBuffer::addPacket(Packet *packet)
     emit(packetAddedSignal, packet);
     totalLength += packet->getTotalLength();
     packets.push_back(packet);
-    if (isOverloaded())
-        packetDropperFunction->dropPackets(this);
+    if (isOverloaded()) {
+        if (packetDropperFunction != nullptr)
+            packetDropperFunction->dropPackets(this);
+        else
+            throw cRuntimeError("Buffer is overloaded but packet dropper function is not specified");
+    }
     updateDisplayString();
 }
 
@@ -67,25 +72,6 @@ void PacketBuffer::removePacket(Packet *packet)
     updateDisplayString();
     ICallback *callback = check_and_cast<ICallback *>(packet->getOwner()->getOwner());
     callback->handlePacketRemoved(packet);
-}
-
-void PacketBuffer::updateDisplayString()
-{
-    auto text = StringFormat::formatString(displayStringTextFormat, [&] (char directive) {
-        static std::string result;
-        switch (directive) {
-            case 'p':
-                result = std::to_string(packets.size());
-                break;
-            case 'l':
-                result = totalLength.str();
-                break;
-            default:
-                throw cRuntimeError("Unknown directive: %c", directive);
-        }
-        return result.c_str();
-    });
-    getDisplayString().setTagArg("t", 0, text);
 }
 
 Packet *PacketBuffer::getPacket(int index)

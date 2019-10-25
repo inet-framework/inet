@@ -18,7 +18,7 @@
 #ifndef __INET_PACKETBUFFER_H
 #define __INET_PACKETBUFFER_H
 
-#include "inet/queueing/base/PacketQueueingElementBase.h"
+#include "inet/queueing/base/PacketBufferBase.h"
 #include "inet/queueing/contract/IPacketBuffer.h"
 #include "inet/queueing/contract/IPacketCollection.h"
 #include "inet/queueing/contract/IPacketDropperFunction.h"
@@ -26,10 +26,9 @@
 namespace inet {
 namespace queueing {
 
-class INET_API PacketBuffer : public PacketQueueingElementBase, public IPacketBuffer, public IPacketCollection
+class INET_API PacketBuffer : public PacketBufferBase, public IPacketBuffer
 {
   protected:
-    const char *displayStringTextFormat = nullptr;
     int packetCapacity = -1;
     b dataCapacity = b(-1);
 
@@ -40,7 +39,7 @@ class INET_API PacketBuffer : public PacketQueueingElementBase, public IPacketBu
 
   protected:
     virtual void initialize(int stage) override;
-    virtual void updateDisplayString();
+
     virtual bool isOverloaded();
 
   public:
