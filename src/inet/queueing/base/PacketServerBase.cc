@@ -28,9 +28,9 @@ void PacketServerBase::initialize(int stage)
     PacketSinkBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         inputGate = gate("in");
-        provider = check_and_cast<IPassivePacketSource *>(getConnectedModule(inputGate));
+        provider = getConnectedModule<IPassivePacketSource>(inputGate);
         outputGate = gate("out");
-        consumer = check_and_cast<IPassivePacketSink *>(getConnectedModule(outputGate));
+        consumer = getConnectedModule<IPassivePacketSink>(outputGate);
     }
     else if (stage == INITSTAGE_QUEUEING) {
         checkPopPacketSupport(inputGate);

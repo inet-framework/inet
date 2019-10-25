@@ -63,7 +63,7 @@ void PacketQueueingElementBase::checkPopPacketSupport(cGate *gate)
 
 void PacketQueueingElementBase::pushOrSendPacket(Packet *packet, cGate *gate)
 {
-    IPassivePacketSink *consumer = dynamic_cast<IPassivePacketSink *>(getConnectedModule(gate));
+    auto consumer = findConnectedModule<IPassivePacketSink>(gate);
     pushOrSendPacket(packet, gate, consumer);
 }
 

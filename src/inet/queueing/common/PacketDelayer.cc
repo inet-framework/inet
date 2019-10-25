@@ -28,9 +28,9 @@ void PacketDelayer::initialize(int stage)
     PassivePacketSinkBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         inputGate = gate("in");
-        producer = dynamic_cast<IActivePacketSource *>(findConnectedModule(inputGate));
+        producer = findConnectedModule<IActivePacketSource>(inputGate);
         outputGate = gate("out");
-        consumer = check_and_cast<IPassivePacketSink *>(getConnectedModule(outputGate));
+        consumer = findConnectedModule<IPassivePacketSink>(outputGate);
     }
 }
 

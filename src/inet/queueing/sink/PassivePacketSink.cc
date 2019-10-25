@@ -29,7 +29,7 @@ void PassivePacketSink::initialize(int stage)
     PacketSinkBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         inputGate = gate("in");
-        producer = dynamic_cast<IActivePacketSource *>(getConnectedModule(inputGate));
+        producer = findConnectedModule<IActivePacketSource>(inputGate);
         consumptionIntervalParameter = &par("consumptionInterval");
         consumptionTimer = new cMessage("ConsumptionTimer");
     }

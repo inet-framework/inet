@@ -29,7 +29,7 @@ void EmptyPacketSource::initialize(int stage)
     PacketQueueingElementBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         outputGate = gate("out");
-        consumer = dynamic_cast<IPassivePacketSink *>(getConnectedModule(outputGate));
+        consumer = findConnectedModule<IPassivePacketSink>(outputGate);
     }
     else if (stage == INITSTAGE_QUEUEING) {
         if (consumer != nullptr)

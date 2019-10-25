@@ -28,7 +28,7 @@ void PcapFilePacketConsumer::initialize(int stage)
     PacketSinkBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         inputGate = gate("in");
-        producer = dynamic_cast<IActivePacketSource *>(getConnectedModule(inputGate));
+        producer = findConnectedModule<IActivePacketSource>(inputGate);
         pcapWriter.setFlushParameter(par("alwaysFlush").boolValue());
         pcapWriter.openPcap(par("filename"), par("snaplen"), par("networkType"));
     }

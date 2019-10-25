@@ -34,10 +34,10 @@ void MarkovScheduler::initialize(int stage)
     PacketSchedulerBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         for (int i = 0; i < gateSize("in"); i++) {
-            auto input = check_and_cast<IActivePacketSource *>(getConnectedModule(inputGates[i]));
+            auto input = getConnectedModule<IActivePacketSource>(inputGates[i]);
             producers.push_back(input);
         }
-        consumer = dynamic_cast<IPassivePacketSink *>(getConnectedModule(outputGate));
+        consumer = findConnectedModule<IPassivePacketSink>(outputGate);
         state = par("initialState");
         int numStates = gateSize("in");
         cStringTokenizer transitionProbabilitiesTokenizer(par("transitionProbabilities"));

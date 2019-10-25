@@ -47,7 +47,7 @@ void RedDropper::initialize(int stage)
         if (pkrate < 0.0)
             throw cRuntimeError("Invalid value for pkrate parameter: %g", pkrate);
         auto outputGate = gate("out");
-        collection = dynamic_cast<IPacketCollection *>(getConnectedModule(outputGate));
+        collection = findConnectedModule<IPacketCollection>(outputGate);
         if (collection == nullptr)
             collection = getModuleFromPar<IPacketCollection>(par("collectionModule"), this);
     }
