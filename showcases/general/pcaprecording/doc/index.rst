@@ -250,7 +250,7 @@ Results
 The following video shows the traffic in the network:
 
 .. video:: media/pcap1.mp4
-   :width: 698
+   :width: 100%
 
    <!--internal video recording, playback speed 1, no animation speed, run until first sendTimer (t=0.002), step, stop at about 10.5 seconds simulation time-->
 

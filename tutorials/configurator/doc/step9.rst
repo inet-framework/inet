@@ -125,7 +125,7 @@ In the following video, ``area1lan3host2`` sends a ping packet to
 ``area3lan3host2``:
 
 .. video:: media/Step9_2.mp4
-   :width: 698
+   :width: 100%
 
 No routes are visualized initially because ``area3lan3host2`` (the
 destination of route visualization) has an unspecified IP address. When

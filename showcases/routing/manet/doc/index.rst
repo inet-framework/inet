@@ -434,7 +434,7 @@ The hosts' routing protocol type is set to :ned:`Gpsr`:
 The following video shows running the simulation from the beginning:
 
 .. video:: media/Gpsr1.mp4
-   :width: 698
+   :width: 100%
    :align: center
 
 

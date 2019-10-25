@@ -129,7 +129,7 @@ completely before the next ping packet arrives.
 The following video shows what happens when the simulation is run.
 
 .. video:: media/StaticNetworkPaths_v0703.m4v
-   :width: 698
+   :width: 100%
 
 Each arrow has a different color indicating different paths. You can see
 that although there are both video stream and ping traffic in the
@@ -172,7 +172,7 @@ We use the following configuration for the visualization.
 The following video shows what happens when the simulation is run.
 
 .. video:: media/Mobile_v0614.m4v
-   :width: 698
+   :width: 100%
 
 Blue circles are displays the communication range of ``source`` and
 ``destination``.
@@ -237,7 +237,7 @@ In the following video we can examine that how network path activity
 visualization follows the routing changes in a complex network.
 
 .. video:: media/ChangingPaths_v0614.m4v
-   :width: 698
+   :width: 100%
 
 At the beginning of the video, ping traffic is routed through
 ``router1``. After five seconds, small cogwheels appear above

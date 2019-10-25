@@ -66,7 +66,7 @@ Physical link activity visualization is enabled by setting the
 The following animation shows what happens when we start the simulation.
 
 .. video:: media/EnablingVisualization_v0614.m4v
-   :width: 698
+   :width: 100%
 
 At the beginning of the animation, a red strip appears and moves from
 ``source`` to ``destination``. This strip is the standard OMNeT++
@@ -121,7 +121,7 @@ video was captured from the point when the hosts had already associated
 with ``accessPoint``.
 
 .. video:: media/Filtering_v0614.m4v
-   :width: 698
+   :width: 100%
 
 You can see that although there are also ACK frames, Beacon frames and
 ping traffic in the network, :ned:`PhysicalLinkVisualizer` displays only
@@ -166,7 +166,7 @@ The following video shows what happens when we run the simulation. (If
 the video does not show up, try refreshing the page with Ctrl+Shift+R.)
 
 .. video:: media/Mobile_v0614.m4v
-   :width: 698
+   :width: 100%
 
 Here, physical link activity looks like a connection graph, where
 vertices are hosts, and each edge is physical link activity between two

@@ -117,7 +117,7 @@ of destination host's ``radio`` module:
 This animation illustrates what happens when the simulation is run:
 
 .. video:: media/statisticvisualizer5.mp4
-   :width: 698
+   :width: 100%
 
 After the first packet exchange, the packet error rate statistic is
 displayed above ``destination``. As the simulation progresses,

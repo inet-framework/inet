@@ -218,7 +218,7 @@ configures the routing tables. To reduce clutter, we set the
 The following animation depicts what happens when the simulation is run.
 
 .. video:: media/routingtablevisualizer2.mp4
-   :width: 698
+   :width: 100%
 
 When ``destinationHost`` starts to move downwards, packets get routed
 along the chain to the host that is currently adjacent to

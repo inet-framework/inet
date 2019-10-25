@@ -97,10 +97,10 @@ more transmission successfully when transmissions go through the
 forest.
 
 .. video:: media/noratecontrol3.mp4
-   :width: 698
+   :width: 100%
 
 .. video:: media/aarf3.mp4
-   :width: 698
+   :width: 100%
 
 Bitrate and throughput are recorded during the simulations. The
 following plots show the nominal data bitrate and the actual application
