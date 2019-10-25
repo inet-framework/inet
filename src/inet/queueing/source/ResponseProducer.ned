@@ -44,10 +44,10 @@ module ResponseProducer like IActivePacketSource
             @display("p=300,100,row,200");
         }
         server[numKind]: TokenBasedServer {
-            @display("p=300,200,row,200");
+            @display("p=300,225,row,200");
         }
         multiplexer: PacketMultiplexer {
-            @display("p=300,300");
+            @display("p=300,350");
         }
         tokenGenerator: SignalBasedTokenGenerator {
             serverModule = default("^." + requestConsumerModule + ".server");
