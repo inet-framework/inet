@@ -94,7 +94,7 @@ void PacketQueue::pushPacket(Packet *packet, cGate *gate)
         if (packetDropperFunction != nullptr)
             packetDropperFunction->dropPackets(this);
         else
-            throw cRuntimeError("Queue is overloaded and packet dropper function is not specified");
+            throw cRuntimeError("Queue is overloaded but packet dropper function is not specified");
     }
     updateDisplayString();
     if (collector != nullptr && getNumPackets() != 0)

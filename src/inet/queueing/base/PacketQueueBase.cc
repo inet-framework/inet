@@ -68,7 +68,7 @@ void PacketQueueBase::updateDisplayString()
                 result = std::to_string(numPoppedPackets);
                 break;
             case 'r':
-                result = std::to_string(numPoppedPackets);
+                result = std::to_string(numRemovedPackets);
                 break;
             case 'd':
                 result = std::to_string(numDroppedPackets);
