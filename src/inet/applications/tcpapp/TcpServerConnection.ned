@@ -19,6 +19,12 @@ import inet.applications.contract.IApp;
 import inet.queueing.contract.IPassivePacketSink;
 import inet.queueing.contract.IActivePacketSource;
 
+//
+// This module is a generic TCP server connection. The traffic source and traffic
+// sink modules can be built from queueing model elements.
+//
+// @see ~TcpServerApp
+//
 module TcpServerConnection like IApp
 {
     parameters:

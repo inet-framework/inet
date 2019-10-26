@@ -15,6 +15,11 @@
 
 package inet.applications.tcpapp;
 
+//
+// This server application accepts and creates telnet server connections.
+//
+// @see ~TelnetClientApp, ~TelnetServerConnection
+//
 module TelnetServerApp extends TcpServerApp
 {
     parameters:

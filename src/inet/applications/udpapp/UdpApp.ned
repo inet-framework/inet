@@ -19,6 +19,10 @@ import inet.applications.contract.IApp;
 import inet.queueing.contract.IPassivePacketSink;
 import inet.queueing.contract.IActivePacketSource;
 
+//
+// This module generates traffic for a UDP application. The traffic source and
+// traffic sink modules can be built from queueing model elements.
+//
 module UdpApp like IApp
 {
     parameters:

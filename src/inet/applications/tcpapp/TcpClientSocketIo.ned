@@ -15,6 +15,11 @@
 
 package inet.applications.tcpapp;
 
+//
+// This module provides TCP client socket handling for generic TCP applications.
+//
+// @see ~TcpServerSocketIo
+//
 simple TcpClientSocketIo
 {
     parameters:
