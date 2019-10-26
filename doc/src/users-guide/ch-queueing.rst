@@ -49,21 +49,24 @@ Operation
 
 Internally, connected queueing model elements most often communicate with each
 other using synchronous C++ method calls without utilizing :cpp:`handleMessage()`.
-The most notable exception is when an operation takes a non-zero simulation
-time, such as when the processing of a packet is delayed.
+The only exception is when an operation takes a non-zero simulation time, such
+as when the processing of a packet is delayed. The connections between the model
+elements are simply used to designate the caller and the callee. Other modules
+can still send and receive messages through the gates of queueing model elements,
+but only :cpp:`Packet` instances are allowed.
 
-TODO: only Packets are passed along the connections, no Commands, Messages
-
-There are two new important operations on queueing model elements. Packets can
-be *pushed* into gates and packets can be *popped* from gates. The main difference
-between them is the subject of the activity. In the former case, when a packet
-is pushed, the activity is initiated by the source of the packet. In contrast,
-when a packet is popped, the activity is initiated by the sink of the packet.
+There are two new important operations on queueing model elements defined in
+:cpp:`IPassivePacketSource` and :cpp:`IPassivePacketSink`. Packets can be *pushed*
+into gates and packets can be *popped* from gates. The main difference between
+them is the subject of the activity. In the former case, when a packet is pushed,
+the activity is initiated by the source of the packet. In contrast, when a packet
+is popped, the activity is initiated by the sink of the packet.
 
 Queueing model elements can be divided into two categories with respect to the
-operation on a given gate: *passive* and *active*. Active elements push packets
-into output gates and pop packets from input gates as they see fit. Passive
-elements are pushed into and popped from by other connected modules.
+operation on a given gate: *passive* and *active*. The passive model elements
+are pushed into and popped from by other connected modules. In contrast, the
+active model elements push into and pop from other connected modules as they see
+fit. They implement the interfaces :cpp:`IActivePacketSource` and :cpp:`IActivePacketSink`.
 
 The active queueing elements take into consideration the state of the connected
 passive elements. That is, they push or pop packets only when the passive end is
