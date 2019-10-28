@@ -45,6 +45,9 @@ class INET_API SimpleNetworkProtocolControlInfo : public SimpleNetworkProtocolCo
     virtual void setInterfaceId(int interfaceId) override { SimpleNetworkProtocolControlInfo_Base::setInterfaceId(interfaceId); }
     virtual short getHopLimit() const override { return SimpleNetworkProtocolControlInfo_Base::getHopLimit(); }
     virtual void setHopLimit(short hopLimit) override { SimpleNetworkProtocolControlInfo_Base::setHopLimit(hopLimit); }
+
+    virtual int getExplicitCongestionNotification() const override { return -1; }
+    virtual void setExplicitCongestionNotification(int ecn) override {}
 };
 
 } // namespace inet

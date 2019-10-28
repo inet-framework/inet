@@ -37,6 +37,8 @@ class INET_API INetworkProtocolControlInfo
     virtual void setInterfaceId(int interfaceId) = 0;
     virtual short getHopLimit() const = 0;
     virtual void setHopLimit(short hopLimit) = 0;
+    virtual int getExplicitCongestionNotification() const = 0;
+    virtual void setExplicitCongestionNotification(int ecn) = 0;
 };
 
 } // namespace inet

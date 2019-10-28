@@ -45,6 +45,9 @@ class INET_API GenericNetworkProtocolControlInfo : public GenericNetworkProtocol
     virtual void setInterfaceId(int interfaceId) override { GenericNetworkProtocolControlInfo_Base::setInterfaceId(interfaceId); }
     virtual short getHopLimit() const override { return GenericNetworkProtocolControlInfo_Base::getHopLimit(); }
     virtual void setHopLimit(short hopLimit) override { GenericNetworkProtocolControlInfo_Base::setHopLimit(hopLimit); }
+
+    virtual int getExplicitCongestionNotification() const override { return -1; }
+    virtual void setExplicitCongestionNotification(int ecn) override {}
 };
 
 } // namespace inet
