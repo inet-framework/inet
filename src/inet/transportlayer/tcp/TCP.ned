@@ -215,6 +215,7 @@ simple TCP like ITCP
         string sendQueueClass = default("");    // Obsolete!!!
         string receiveQueueClass = default(""); // Obsolete!!!
         bool useDataNotification = default(false); // turn the notifications for arrived data on or off
+        bool ecnWillingness = default(false);	// true if willing to use ECN
         @display("i=block/wheelbarrow");
         @signal[tcpConnectionAdded];
         @signal[tcpConnectionRemoved];

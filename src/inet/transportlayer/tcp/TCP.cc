@@ -158,16 +158,27 @@ void TCP::handleMessage(cMessage *msg)
             srcAddr = controlInfo->getSourceAddress();
             destAddr = controlInfo->getDestinationAddress();
             //interfaceId = controlInfo->getInterfaceId();
+            int CE = controlInfo->getExplicitCongestionNotification();
+            ASSERT(CE != -1);
+
             delete ctrl;
 
             // process segment
             TCPConnection *conn = findConnForSegment(tcpseg, srcAddr, destAddr);
             if (conn) {
+                TCPStateVariables* state = conn->getState();
+                if (state && state->ect) {
+                    // This may be true only in receiver side. According to RFC 3168, page 20:
+                    // pure acknowledgement packets (e.g., packets that do not contain
+                    // any accompanying data) MUST be sent with the not-ECT codepoint.
+                    if (CE == 3)
+                        state->gotCeIndication = true;
+                }
+
                 bool ret = conn->processTCPSegment(tcpseg, srcAddr, destAddr);
                 if (!ret)
                     removeConnection(conn);
-            }
-            else {
+            } else {
                 segmentArrivalWhileClosed(tcpseg, srcAddr, destAddr);
             }
         }

@@ -103,53 +103,108 @@ void TCPReno::receivedDataAck(uint32 firstSeqAcked)
             cwndVector->record(state->snd_cwnd);
     }
     else {
-        //
-        // Perform slow start and congestion avoidance.
-        //
-        if (state->snd_cwnd < state->ssthresh) {
-            EV_INFO << "cwnd <= ssthresh: Slow Start: increasing cwnd by one SMSS bytes to ";
+        bool performSsCa = true; //Stands for: "perform slow start and congestion avoidance"
+        if (state && state->ect && state->gotEce) {
+            // halve cwnd and reduce ssthresh and do not increase cwnd (rfc-3168, page 18):
+            //   If the sender receives an ECN-Echo (ECE) ACK
+            // packet (that is, an ACK packet with the ECN-Echo flag set in the TCP
+            // header), then the sender knows that congestion was encountered in the
+            // network on the path from the sender to the receiver.  The indication
+            // of congestion should be treated just as a congestion loss in non-
+            // ECN-Capable TCP. That is, the TCP source halves the congestion window
+            // "cwnd" and reduces the slow start threshold "ssthresh".  The sending
+            // TCP SHOULD NOT increase the congestion window in response to the
+            // receipt of an ECN-Echo ACK packet.
+            // ...
+            //   The value of the congestion window is bounded below by a value of one MSS.
+            // ...
+            //   TCP should not react to congestion indications more than once every
+            // window of data (or more loosely, more than once every round-trip
+            // time). That is, the TCP sender's congestion window should be reduced
+            // only once in response to a series of dropped and/or CE packets from a
+            // single window of data.  In addition, the TCP source should not decrease
+            // the slow-start threshold, ssthresh, if it has been decreased
+            // within the last round trip time.
+            if (simTime() - state->eceReactionTime > state->srtt) {
+                state->ssthresh = state->snd_cwnd / 2;
+                state->snd_cwnd = std::max(state->snd_cwnd / 2, uint32(1));
+                state->sndCwr = true;
+                performSsCa = false;
+                EV_INFO
+                               << "ssthresh = cwnd/2: received ECN-Echo ACK... new ssthresh = "
+                               << state->ssthresh << "\n";
+                EV_INFO << "cwnd /= 2: received ECN-Echo ACK... new cwnd = "
+                               << state->snd_cwnd << "\n";
 
-            // perform Slow Start. RFC 2581: "During slow start, a TCP increments cwnd
-            // by at most SMSS bytes for each ACK received that acknowledges new data."
-            state->snd_cwnd += state->snd_mss;
-
-            // Note: we could increase cwnd based on the number of bytes being
-            // acknowledged by each arriving ACK, rather than by the number of ACKs
-            // that arrive. This is called "Appropriate Byte Counting" (ABC) and is
-            // described in RFC 3465. This RFC is experimental and probably not
-            // implemented in real-life TCPs, hence it's commented out. Also, the ABC
-            // RFC would require other modifications as well in addition to the
-            // two lines below.
-            //
-            // int bytesAcked = state->snd_una - firstSeqAcked;
-            // state->snd_cwnd += bytesAcked * state->snd_mss;
-
-            if (cwndVector)
-                cwndVector->record(state->snd_cwnd);
-
-            EV_INFO << "cwnd=" << state->snd_cwnd << "\n";
+                // rfc-3168 page 18:
+                // The sending TCP MUST reset the retransmit timer on receiving
+                // the ECN-Echo packet when the congestion window is one.
+                if (state->snd_cwnd == 1) {
+                    restartRexmitTimer();
+                    EV_INFO << "cwnd = 1... reset retransmit timer.\n";
+                }
+                state->eceReactionTime = simTime();
+                if (cwndVector)
+                    cwndVector->record(state->snd_cwnd);
+                if (ssthreshVector)
+                    ssthreshVector->record(state->ssthresh);
+            } else
+                EV_INFO
+                               << "multiple ECN-Echo ACKs in less than rtt... no ECN reaction\n";
+            state->gotEce = false;
         }
-        else {
-            // perform Congestion Avoidance (RFC 2581)
-            uint32 incr = state->snd_mss * state->snd_mss / state->snd_cwnd;
+        if (performSsCa) {
+            // If ECN is not enabled or if ECN is enabled and received multiple ECE-Acks in
+            // less than RTT, then perform slow start and congestion avoidance.
+            if (state->snd_cwnd < state->ssthresh) {
+                EV_INFO
+                               << "cwnd <= ssthresh: Slow Start: increasing cwnd by one SMSS bytes to ";
 
-            if (incr == 0)
-                incr = 1;
+                // perform Slow Start. RFC 2581: "During slow start, a TCP increments cwnd
+                // by at most SMSS bytes for each ACK received that acknowledges new data."
+                state->snd_cwnd += state->snd_mss;
 
-            state->snd_cwnd += incr;
+                // Note: we could increase cwnd based on the number of bytes being
+                // acknowledged by each arriving ACK, rather than by the number of ACKs
+                // that arrive. This is called "Appropriate Byte Counting" (ABC) and is
+                // described in RFC 3465. This RFC is experimental and probably not
+                // implemented in real-life TCPs, hence it's commented out. Also, the ABC
+                // RFC would require other modifications as well in addition to the
+                // two lines below.
+                //
+                // int bytesAcked = state->snd_una - firstSeqAcked;
+                // state->snd_cwnd += bytesAcked * state->snd_mss;
 
-            if (cwndVector)
-                cwndVector->record(state->snd_cwnd);
+                if (cwndVector)
+                    cwndVector->record(state->snd_cwnd);
+                if (ssthreshVector)
+                    ssthreshVector->record(state->ssthresh);
+                EV_INFO << "cwnd=" << state->snd_cwnd << "\n";
+            } else {
+                // perform Congestion Avoidance (RFC 2581)
+                uint32 incr = state->snd_mss * state->snd_mss / state->snd_cwnd;
 
-            //
-            // Note: some implementations use extra additive constant mss / 8 here
-            // which is known to be incorrect (RFC 2581 p5)
-            //
-            // Note 2: RFC 3465 (experimental) "Appropriate Byte Counting" (ABC)
-            // would require maintaining a bytes_acked variable here which we don't do
-            //
+                if (incr == 0)
+                    incr = 1;
 
-            EV_INFO << "cwnd > ssthresh: Congestion Avoidance: increasing cwnd linearly, to " << state->snd_cwnd << "\n";
+                state->snd_cwnd += incr;
+
+                if (cwndVector)
+                    cwndVector->record(state->snd_cwnd);
+                if (ssthreshVector)
+                    ssthreshVector->record(state->ssthresh);
+                //
+                // Note: some implementations use extra additive constant mss / 8 here
+                // which is known to be incorrect (RFC 2581 p5)
+                //
+                // Note 2: RFC 3465 (experimental) "Appropriate Byte Counting" (ABC)
+                // would require maintaining a bytes_acked variable here which we don't do
+                //
+
+                EV_INFO
+                               << "cwnd > ssthresh: Congestion Avoidance: increasing cwnd linearly, to "
+                               << state->snd_cwnd << "\n";
+            }
         }
     }
 
