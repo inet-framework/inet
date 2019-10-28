@@ -38,6 +38,7 @@ class INET_API DropTailQueue : public PassiveQueueBase
     cGate *outGate;
 
     // statistics
+  public:
     static simsignal_t queueLengthSignal;
 
   protected:
