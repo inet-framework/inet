@@ -157,10 +157,21 @@ void Tcp::handleLowerPacket(Packet *packet)
         L3Address srcAddr, destAddr;
         srcAddr = packet->getTag<L3AddressInd>()->getSrcAddress();
         destAddr = packet->getTag<L3AddressInd>()->getDestAddress();
+        int CE = controlInfo->getExplicitCongestionNotification();
+        ASSERT(CE != -1);
 
         // process segment
         TcpConnection *conn = findConnForSegment(tcpHeader, srcAddr, destAddr);
         if (conn) {
+            TCPStateVariables* state = conn->getState();
+            if (state && state->ect) {
+                // This may be true only in receiver side. According to RFC 3168, page 20:
+                // pure acknowledgement packets (e.g., packets that do not contain
+                // any accompanying data) MUST be sent with the not-ECT codepoint.
+                if (CE == 3)
+                    state->gotCeIndication = true;
+            }
+
             bool ret = conn->processTCPSegment(packet, tcpHeader, srcAddr, destAddr);
             if (!ret)
                 removeConnection(conn);

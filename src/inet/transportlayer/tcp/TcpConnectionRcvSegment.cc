@@ -200,6 +200,12 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *packet, const Ptr<c
         return TCP_E_IGNORE;
     }
 
+    // ECN
+    if (tcpseg->getCwrBit() == true) {
+        EV_INFO << "Received CWR... Leaving ecnEcho State\n";
+        state->ecnEchoState = false;
+    }
+
     //
     // RFC 793: second check the RST bit,
     //
@@ -828,6 +834,13 @@ TcpEventCode TcpConnection::processSynInListen(Packet *packet, const Ptr<const T
         readHeaderOptions(tcpseg);
 
     state->ack_now = true;
+
+        // ECN
+        if (tcpseg->getEceBit() == true && tcpseg->getCwrBit() == true) {
+            state->endPointIsWillingECN = true;
+            EV << "ECN-setup SYN packet received\n";
+        }
+
     sendSynAck();
     startSynRexmitTimer();
 
@@ -1014,6 +1027,26 @@ TcpEventCode TcpConnection::processSegmentInSynSent(Packet *packet, const Ptr<co
             tcpMain->emit(Tcp::tcpConnectionAddedSignal, this);
             sendEstabIndicationToApp();
 
+            //ECN
+            if (state->ecnSynSent) {
+                if (tcpseg->getEceBit() == true
+                        && tcpseg->getCwrBit() == false) {
+                    state->ect = true;
+                    EV
+                              << "ECN-setup SYN-ACK packet was received... ECN is enabled.\n";
+                } else {
+                    state->ect = false;
+                    EV
+                              << "non-ECN-setup SYN-ACK packet was received... ECN is disabled.\n";
+                }
+                state->ecnSynSent = false;
+            } else {
+                state->ect = false;
+                if (tcpseg->getEceBit() == true && tcpseg->getCwrBit() == false)
+                    EV
+                              << "ECN-setup SYN-ACK packet was received... ECN is disabled.\n";
+            }
+
             // This will trigger transition to ESTABLISHED. Timers and notifying
             // app will be taken care of in stateEntered().
             return TCP_E_RCV_SYN_ACK;
@@ -1107,6 +1140,15 @@ bool TcpConnection::processAckInEstabEtc(Packet *packet, const Ptr<const TcpHead
     EV_DETAIL << "Processing ACK in a data transfer state\n";
 
     int payloadLength = packet->getByteLength() - B(tcpseg->getHeaderLength()).get();
+
+    //ECN
+    TCPStateVariables* state = getState();
+    if (state && state->ect) {
+        if (tcpseg->getEceBit() == true) {
+            EV_INFO << "Received packet with ECE\n";
+            state->gotEce = true;
+        }
+    }
 
     //
     //"

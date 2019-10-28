@@ -139,6 +139,18 @@ TcpStateVariables::TcpStateVariables()
     tcpRcvQueueDrops = 0;
     sendQueueLimit = 0;
     queueUpdate = true;
+
+    sndCwr = false;
+    ecnEchoState = false;
+    gotEce = false;
+    gotCeIndication = false;
+    ect = false;
+    endPointIsWillingECN = false;
+    ecnSynSent = false;
+    ecnWillingness = false;
+    sndAck = false;
+    rexmit = false;
+    eceReactionTime = 0;          
 }
 
 std::string TcpStateVariables::str() const
