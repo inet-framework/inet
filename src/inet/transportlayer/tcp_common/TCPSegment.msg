@@ -223,6 +223,8 @@ packet TCPSegment
     // if header options are used the headerLength is greater than 20 bytes (default)
     unsigned short headerLength = TCP_HEADER_OCTETS; // TCP_HEADER_OCTETS = 20
 
+    bool cwrBit; // CWR: congistion window reduced bit
+    bool eceBit; // ECE: ECN-Echo bit
     bool urgBit; // URG: urgent pointer field significant if set
     bool ackBit; // ACK: ackNo significant if set
     bool pshBit; // PSH: push function
