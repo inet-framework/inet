@@ -23,57 +23,46 @@ Register_Serializer(Bpdu, Ieee8021dBpduSerializer);
 
 void Ieee8021dBpduSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
-    B startPos = B(stream.getLength());
     const auto& bpdu = staticPtrCast<const Bpdu>(chunk);
     stream.writeUint16Be(bpdu->getProtocolIdentifier());
-    stream.writeByte(bpdu->getProtocolVersionIdentifier());
-    stream.writeByte(bpdu->getBpduType());
-    if (bpdu->getBpduType() == 0) {
-        stream.writeBit(bpdu->getTcaFlag());
-        stream.writeNBitsOfUint64Be(bpdu->getReserved(), 6);
-        stream.writeBit(bpdu->getTcFlag());
-        stream.writeUint16Be(bpdu->getRootPriority());
-        stream.writeMacAddress(bpdu->getRootAddress());
-        stream.writeUint32Be(bpdu->getRootPathCost());
-        stream.writeUint16Be(bpdu->getBridgePriority());
-        stream.writeMacAddress(bpdu->getBridgeAddress());
-        stream.writeByte(bpdu->getPortPriority());
-        stream.writeByte(bpdu->getPortNum());
-        stream.writeUint16Be(bpdu->getMessageAge().inUnit(SIMTIME_S) * 256);
-        stream.writeUint16Be(bpdu->getMaxAge().inUnit(SIMTIME_S) * 256);
-        stream.writeUint16Be(bpdu->getHelloTime().inUnit(SIMTIME_S) * 256);
-        stream.writeUint16Be(bpdu->getForwardDelay().inUnit(SIMTIME_S) * 256);
-    }
-    // because of the KLUDGE in Rstp.cc (line 593) padding is added
-    while (B(stream.getLength()) - startPos < B(bpdu->getChunkLength()))
-        stream.writeByte('?');
+    stream.writeUint8(bpdu->getProtocolVersionIdentifier());
+    stream.writeUint8(bpdu->getBpduType());
+    stream.writeBit(bpdu->getTcaFlag());
+    stream.writeNBitsOfUint64Be(bpdu->getReserved(), 6);
+    stream.writeBit(bpdu->getTcFlag());
+    stream.writeUint16Be(bpdu->getRootPriority());
+    stream.writeMacAddress(bpdu->getRootAddress());
+    stream.writeUint32Be(bpdu->getRootPathCost());
+    stream.writeUint16Be(bpdu->getBridgePriority());
+    stream.writeMacAddress(bpdu->getBridgeAddress());
+    stream.writeByte(bpdu->getPortPriority());
+    stream.writeByte(bpdu->getPortNum());
+    stream.writeUint16Be(bpdu->getMessageAge().dbl() * 256);
+    stream.writeUint16Be(bpdu->getMaxAge().dbl() * 256);
+    stream.writeUint16Be(bpdu->getHelloTime().dbl() * 256);
+    stream.writeUint16Be(bpdu->getForwardDelay().dbl() * 256);
 }
 
 const Ptr<Chunk> Ieee8021dBpduSerializer::deserialize(MemoryInputStream& stream) const
 {
     auto bpdu = makeShared<Bpdu>();
     bpdu->setProtocolIdentifier(stream.readUint16Be());
-    bpdu->setProtocolVersionIdentifier(stream.readByte());
-    bpdu->setBpduType(stream.readByte());
-    if (bpdu->getBpduType() == 0) {
-        bpdu->setTcaFlag(stream.readBit());
-        bpdu->setReserved(stream.readNBitsToUint64Be(6));
-        bpdu->setTcFlag(stream.readBit());
-        bpdu->setRootPriority(stream.readUint16Be());
-        bpdu->setRootAddress(stream.readMacAddress());
-        bpdu->setRootPathCost(stream.readUint32Be());
-        bpdu->setBridgePriority(stream.readUint16Be());
-        bpdu->setBridgeAddress(stream.readMacAddress());
-        bpdu->setPortPriority(stream.readByte());
-        bpdu->setPortNum(stream.readByte());
-        bpdu->setMessageAge(SimTime(stream.readUint16Be() / 256, SIMTIME_S));
-        bpdu->setMaxAge(SimTime(stream.readUint16Be() / 256, SIMTIME_S));
-        bpdu->setHelloTime(SimTime(stream.readUint16Be() / 256, SIMTIME_S));
-        bpdu->setForwardDelay(SimTime(stream.readUint16Be() / 256, SIMTIME_S));
-    }
-    // because of the KLUDGE in Rstp.cc (line 593) padding is added
-    while (B(stream.getRemainingLength()) > B(0))
-        stream.readByte();
+    bpdu->setProtocolVersionIdentifier(stream.readUint8());
+    bpdu->setBpduType(stream.readUint8());
+    bpdu->setTcaFlag(stream.readBit());
+    bpdu->setReserved(stream.readNBitsToUint64Be(6));
+    bpdu->setTcFlag(stream.readBit());
+    bpdu->setRootPriority(stream.readUint16Be());
+    bpdu->setRootAddress(stream.readMacAddress());
+    bpdu->setRootPathCost(stream.readUint32Be());
+    bpdu->setBridgePriority(stream.readUint16Be());
+    bpdu->setBridgeAddress(stream.readMacAddress());
+    bpdu->setPortPriority(stream.readByte());
+    bpdu->setPortNum(stream.readByte());
+    bpdu->setMessageAge(SimTime(stream.readUint16Be() / 256.0));
+    bpdu->setMaxAge(SimTime(stream.readUint16Be() / 256.0));
+    bpdu->setHelloTime(SimTime(stream.readUint16Be() / 256.0));
+    bpdu->setForwardDelay(SimTime(stream.readUint16Be() / 256.0));
     return bpdu;
 }
 
