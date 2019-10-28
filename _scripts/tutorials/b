@@ -1,4 +1,3 @@
 #!/bin/bash
 
-rm -rv _build
-make html
+./docker-make html
