@@ -20,7 +20,7 @@ sys.path.insert(0, os.path.abspath('_themes'))
 
 # -- Project information -----------------------------------------------------
 
-project = 'INET Documentation'
+project = 'INET'
 copyright = 'INET community'
 author = 'INET community'
 
