@@ -91,6 +91,8 @@ simple IPv4
         string arpModule;
         string icmpModule;
         double procDelay @unit("s") = default(0s);
+        bool ecnEnabled = default(false);	// Set if ecn is enabled in IP
+        double ecnQLengthThrsh = default(1);	// Queue length threshold to trigger CE indication
         int timeToLive = default(32);
         int multicastTimeToLive = default(32);
         double fragmentTimeout @unit("s") = default(60s);
