@@ -2,4 +2,5 @@
 <buildspec version="4.0">
     <dir path="." type="custom"/>
     <dir makemake-options="--make-so --deep -o INET -O out -pINET --meta:export-include-path --meta:export-library --meta:use-exported-libs --meta:feature-cflags --meta:feature-ldflags" path="src" type="makemake"/>
+    <dir makemake-options="--make-so --deep -o inetqueueing -O out -I../../src" path="tutorials/queueing" type="makemake"/>
 </buildspec>
