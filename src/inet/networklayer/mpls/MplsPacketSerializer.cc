@@ -23,36 +23,20 @@ Register_Serializer(MplsHeader, MplsPacketSerializer);
 
 void MplsPacketSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
-    B startPos = stream.getLength();
     const auto& mplsHeader = staticPtrCast<const MplsHeader>(chunk);
-    size_t size = mplsHeader->getLabelsArraySize();
-    ASSERT(size > 0);
-    for(size_t i = 0; i < size; ++i) {
-        auto& label = mplsHeader->getLabels(i);
-        stream.writeNBitsOfUint64Be(label.getLabel(), 20);
-        stream.writeNBitsOfUint64Be(label.getTc(), 3);
-        stream.writeBit(i == size - 1);
-        stream.writeByte(label.getTtl());
-    }
-    ASSERT(mplsHeader->getChunkLength() == stream.getLength() - startPos);
+    stream.writeNBitsOfUint64Be(mplsHeader->getLabel(), 20);
+    stream.writeNBitsOfUint64Be(mplsHeader->getTc(), 3);
+    stream.writeBit(mplsHeader->getS());
+    stream.writeUint8(mplsHeader->getTtl());
 }
 
 const Ptr<Chunk> MplsPacketSerializer::deserialize(MemoryInputStream& stream) const
 {
     auto mplsHeader = makeShared<MplsHeader>();
-    mplsHeader->setChunkLength(B(0));
-    if (B(stream.getRemainingLength()).get() > 0) {
-        bool mbool = false;
-        while(!mbool) {
-            MplsLabel* label = new MplsLabel();
-            label->setLabel(stream.readNBitsToUint64Be(20));
-            label->setTc(stream.readNBitsToUint64Be(3));
-            mbool = stream.readBit();
-            label->setTtl(stream.readByte());
-            mplsHeader->pushLabel(*label);
-            mplsHeader->addChunkLength(B(4));
-        }
-    }
+    mplsHeader->setLabel(stream.readNBitsToUint64Be(20));
+    mplsHeader->setTc(stream.readNBitsToUint64Be(3));
+    mplsHeader->setS(stream.readBit());
+    mplsHeader->setTtl(stream.readUint8());
     return mplsHeader;
 }
 
