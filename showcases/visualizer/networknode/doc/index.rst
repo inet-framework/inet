@@ -191,7 +191,7 @@ from the ini file. The following animation shows how the nodes look
 like after we have replaced their icons with 3D models.
 
 .. video:: media/ModelsLoaded.mp4
-   :width: 698
+   :width: 100%
 
 The ``pedestrian`` node is represented by an animated walking boxman, and
 the ``car`` node is represented by a car model.
@@ -206,7 +206,7 @@ to our previous configuration (select ``AddingMovement`` from the ini file),
 the boxman will walk sideways:
 
 .. video:: media/PedestrianMovesSideways.mp4
-   :width: 698
+   :width: 100%
 
 The orientation of the 3D model can be initialized by the ``rot`` pseudo
 loader. If the node is a mobile node then the mobility submodule of the
@@ -220,7 +220,7 @@ rotated 90 degrees counterclockwise around the Z axis.
    :language: ini
 
 .. video:: media/NodesOrientationIsRight.mp4
-   :width: 698
+   :width: 100%
 
 The above animation shows that both 3D models' orientation is correct.
 They are initialized by pseudo loaders and updated by the mobility model

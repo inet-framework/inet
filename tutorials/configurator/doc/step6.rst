@@ -134,7 +134,7 @@ pinging ``host6``. Routes towards ``host1`` are visualized. The packets
 don't use the link between ``router0`` and ``router2``.
 
 .. video:: media/Step6A_1_cropped.mp4
-   :width: 698
+   :width: 100%
 
    <!--internal video recording run until 1s playback speed 1.5 animation speed none zoom 0.77 crop 30 70 150 80-->
 
@@ -201,7 +201,7 @@ video shows ``host1`` pinging ``host7``. Routes towards ``host1`` are
 visualized. The ping packets take the diverted route in both directions:
 
 .. video:: media/Step6A_1_cropped.mp4
-   :width: 698
+   :width: 100%
 
    <!--internal video recording run until 1s playback speed 1.5 animation speed none zoom 0.77 crop 30 70 150 80-->
 

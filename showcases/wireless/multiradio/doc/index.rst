@@ -69,7 +69,7 @@ The transmissions for the two different networks (both disks and arrows) are col
 differently (red for wlan2.4 and blue for wlan5.)
 
 .. video:: media/ping3.mp4
-   :width: 698
+   :width: 100%
 
 .. run until sendPing, zoom 1.3, no animation speed, playback speed 0.4
 

@@ -34,10 +34,10 @@ void MarkovClassifier::initialize(int stage)
     PacketClassifierBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         for (int i = 0; i < gateSize("out"); i++) {
-            auto output = check_and_cast<IActivePacketSink *>(getConnectedModule(outputGates[i]));
+            auto output = getConnectedModule<IActivePacketSink>(outputGates[i]);
             collectors.push_back(output);
         }
-        provider = check_and_cast<IPassivePacketSource *>(getConnectedModule(inputGate));
+        provider = getConnectedModule<IPassivePacketSource>(inputGate);
         state = par("initialState");
         int numStates = gateSize("out");
         cStringTokenizer transitionProbabilitiesTokenizer(par("transitionProbabilities"));

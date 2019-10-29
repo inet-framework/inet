@@ -101,7 +101,7 @@ communication range can receive them correctly (i.e. nodes in the same
 LAN).
 
 .. video:: media/Step8A_1_cropped.mp4
-   :width: 698
+   :width: 100%
 
    <!--internal video recording playback speed 2 animation speed none crop 210 360 50 30-->
 

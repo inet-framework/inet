@@ -1,16 +1,11 @@
  - extend packet API with updateAtFront<> and updateAtBack taking a modifier lambda function as argument (to replace the remove/insert idiom)
+ - add generic IpApp, EthernetApp similarly to UdpApp and TcpApp
  - unify C++ namespaces, NED namespaces, folders and file names (e.g. ospfv vs. Ospf3*)
- - extend applications chapter with generic UdpApp, TcpApp with traffic generators
- - merge BGPv4 into INET when it becomes available
  - implement additional INET specific fingerprint ingredients: network interface configuration, routing table, mobility state, etc.
- - review all names in packet queueing and mathematical function API
- - bandpass filter for noise, reception and SNIR
  - better error reporting when the radio doesn't provide the Ieee80211Mode to the MAC, e.g. when using the default UnitDiskRadio instead of the Ieee80211UnitDiskRadio, check for base classes
  - fix Ieee80211UnitDiskReceiver base class and initialize, solve diamond inheritance
  - extend timeGains/frequencyGains parsing with OMNeT++ 6.0 expression parser support (#ifdef)
- - UWB-IR radio is not dimensional in frequency 7GHz spectrum, 2D linear/reciprocal problem!!!
- - PlotFigure margin
- - split PowerFunction.h
+ - extend PlotFigure with margin parameters
  - extend Units with double and simtime_t handling and use C++ units in division and multiplication functions
  - signal shared ptr cache
  - implement MemoizedFunction and multi dimensional domain subdivision tree
@@ -18,8 +13,6 @@
  - add parameter for bit error estimation: based on min(packet), mean(packet), min(mean(symbol))
  - test cmdenv-fake-gui & figure fingerprinting from OMNeT++ 6.0
  - clang compiler bug, see test.cc
-
-
 
 
 most important topics

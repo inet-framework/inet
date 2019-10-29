@@ -15,34 +15,30 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-#include "inet/queueing/base/PacketQueueBase.h"
+#include "inet/queueing/base/PacketBufferBase.h"
 #include "inet/common/Simsignals.h"
 #include "inet/common/StringFormat.h"
 
 namespace inet {
 namespace queueing {
 
-void PacketQueueBase::initialize(int stage)
+void PacketBufferBase::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
         displayStringTextFormat = par("displayStringTextFormat");
-        numPushedPackets = 0;
-        numPoppedPackets = 0;
+        numAddedPackets = 0;
         numRemovedPackets = 0;
         numDroppedPackets = 0;
-        WATCH(numPushedPackets);
-        WATCH(numPoppedPackets);
+        WATCH(numAddedPackets);
         WATCH(numRemovedPackets);
         WATCH(numDroppedPackets);
     }
 }
 
-void PacketQueueBase::emit(simsignal_t signal, cObject *object, cObject *details)
+void PacketBufferBase::emit(simsignal_t signal, cObject *object, cObject *details)
 {
-    if (signal == packetPushedSignal)
-        numPushedPackets++;
-    else if (signal == packetPoppedSignal)
-        numPoppedPackets++;
+    if (signal == packetAddedSignal)
+        numAddedPackets++;
     else if (signal == packetRemovedSignal)
         numRemovedPackets++;
     else if (signal == packetDroppedSignal)
@@ -50,7 +46,7 @@ void PacketQueueBase::emit(simsignal_t signal, cObject *object, cObject *details
     cSimpleModule::emit(signal, object, details);
 }
 
-void PacketQueueBase::updateDisplayString()
+void PacketBufferBase::updateDisplayString()
 {
     auto text = StringFormat::formatString(displayStringTextFormat, [&] (char directive) {
         static std::string result;
@@ -61,20 +57,14 @@ void PacketQueueBase::updateDisplayString()
             case 'l':
                 result = getTotalLength().str();
                 break;
-            case 'u':
-                result = std::to_string(numPushedPackets);
-                break;
-            case 'o':
-                result = std::to_string(numPoppedPackets);
+            case 'a':
+                result = std::to_string(numAddedPackets);
                 break;
             case 'r':
                 result = std::to_string(numRemovedPackets);
                 break;
             case 'd':
                 result = std::to_string(numDroppedPackets);
-                break;
-            case 'n':
-                result = !isEmpty() ? getPacket(0)->getFullName() : "";
                 break;
             default:
                 throw cRuntimeError("Unknown directive: %c", directive);

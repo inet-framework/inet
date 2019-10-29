@@ -29,12 +29,12 @@ void PacketMultiplexer::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         for (int i = 0; i < gateSize("in"); i++) {
             auto inputGate = gate("in", i);
-            auto input = check_and_cast<IActivePacketSource *>(getConnectedModule(inputGate));
+            auto input = getConnectedModule<IActivePacketSource>(inputGate);
             inputGates.push_back(inputGate);
             producers.push_back(input);
         }
         outputGate = gate("out");
-        consumer = dynamic_cast<IPassivePacketSink *>(getConnectedModule(outputGate));
+        consumer = findConnectedModule<IPassivePacketSink>(outputGate);
     }
     else if (stage == INITSTAGE_QUEUEING) {
         for (auto inputGate : inputGates)

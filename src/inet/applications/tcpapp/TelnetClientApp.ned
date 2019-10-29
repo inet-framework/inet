@@ -22,6 +22,12 @@ import inet.queueing.contract.IActivePacketSource;
 import inet.queueing.contract.IPacketScheduler;
 import inet.queueing.contract.IPassivePacketSink;
 
+//
+// This client application contains a configurable pre-composed telnet traffic
+// source and traffic sink.
+//
+// @see ~TelnetServerApp
+//
 module TelnetClientApp like IApp
 {
     parameters:

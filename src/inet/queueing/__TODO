@@ -1,3 +1,2 @@
- - update NED documentation and User's Guide
- - add signals and statistics to all packet queue modules!
+ - merge ContentBased* with generic Packet* modules?
  - add pop strategy queue parameter

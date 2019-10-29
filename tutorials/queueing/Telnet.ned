@@ -37,7 +37,7 @@ network TelnetNetwork_
 //{
 //    submodules:
 //        client: TelnetClientApp;
-//        server: TelnetServerApp;
+//        server: TelnetServerConnection;
 //    connections:
 //        client.socketOut --> server.socketIn;
 //        client.socketIn <-- server.socketOut;

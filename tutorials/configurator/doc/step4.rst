@@ -179,7 +179,7 @@ the hosts.
 Below is a video of ``host1`` pinging ``host7``.
 
 .. video:: media/Step4_2_cropped.mp4
-   :width: 698
+   :width: 100%
 
    <!--internal video recording playback speed 1.38 animation speed none
    zoom level 0.77 crop: 30 70 150 80-->

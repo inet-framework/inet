@@ -31,7 +31,7 @@ void PacketBasedTokenGenerator::initialize(int stage)
         numTokensPerPacketParameter = &par("numTokensPerPacket");
         numTokensPerBitParameter = &par("numTokensPerBit");
         inputGate = gate("in");
-        producer = check_and_cast<IActivePacketSource *>(getConnectedModule(inputGate));
+        producer = getConnectedModule<IActivePacketSource>(inputGate);
         server = getModuleFromPar<TokenBasedServer>(par("serverModule"), this);
         server->subscribe(TokenBasedServer::tokensDepletedSignal, this);
         numTokensGenerated = 0;

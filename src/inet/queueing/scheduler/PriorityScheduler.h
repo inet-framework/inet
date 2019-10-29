@@ -38,7 +38,7 @@ class INET_API PriorityScheduler : public PacketSchedulerBase, public IPacketCol
     virtual int getNumPackets() override;
 
     virtual b getMaxTotalLength() override { return b(-1); }
-    virtual b getTotalLength() override { return b(-1); }
+    virtual b getTotalLength() override;
 
     virtual bool isEmpty() override { return getNumPackets() == 0; }
     virtual Packet *getPacket(int index) override;

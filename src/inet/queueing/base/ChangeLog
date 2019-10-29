@@ -9,7 +9,7 @@
 
 	Add new base classes: PacketClassifierBase, PassivePacketSinkBase, PacketDuplicatorBase,
 	PacketFilterBase, PacketProcessorBase, PacketQueueBase, PacketQueueingElementBase,
-	PacketSchedulerBase, PacketServerBase, PacketSinkBase, and PacketSourceBase.
+	PacketBufferBase, PacketSchedulerBase, PacketServerBase, PacketSinkBase, and PacketSourceBase.
 
 	Added new NED modules: PacketClassifierBase, PacketFilterBase, PacketProcessorBase,
 	PacketQueueBase, PacketSchedulerBase, PacketServerBase, PacketSinkBase, and

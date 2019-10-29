@@ -103,37 +103,5 @@ InterfaceEntry *getContainingNicModule(const cModule *from)
     return interfaceEntry;
 }
 
-cModule *findConnectedModule(cGate *gate)
-{
-    if (!gate->isConnectedOutside())
-        return nullptr;
-    else {
-        if (gate->getType() == cGate::INPUT) {
-            auto pathStartGate = gate->getPathStartGate();
-            if (pathStartGate->getType() == cGate::OUTPUT)
-                return pathStartGate->getOwnerModule();
-            else
-                return nullptr;
-        }
-        else if (gate->getType() == cGate::OUTPUT) {
-            auto parthEndGate = gate->getPathEndGate();
-            if (parthEndGate->getType() == cGate::INPUT)
-                return parthEndGate->getOwnerModule();
-            else
-                return nullptr;
-        }
-        else
-            throw cRuntimeError("Unknown gate type");
-    }
-}
-
-cModule *getConnectedModule(cGate *gate)
-{
-    auto module = findConnectedModule(gate);
-    if (module == nullptr)
-        throw cRuntimeError("Gate %s is not connected", gate->getFullPath().c_str());
-    return module;
-}
-
 } // namespace inet
 

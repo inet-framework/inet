@@ -36,6 +36,7 @@ class INET_API PacketQueueBase : public PacketQueueingElementBase, public IPacke
   protected:
     virtual void initialize(int stage) override;
     virtual void emit(simsignal_t signal, cObject *object, cObject *details = nullptr) override;
+
     virtual void updateDisplayString();
 
   public:

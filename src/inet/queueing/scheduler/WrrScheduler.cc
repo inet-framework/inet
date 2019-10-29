@@ -59,6 +59,14 @@ int WrrScheduler::getNumPackets()
     return size;
 }
 
+b WrrScheduler::getTotalLength()
+{
+    b totalLength(0);
+    for (auto collection : collections)
+        totalLength += collection->getTotalLength();
+    return totalLength;
+}
+
 int WrrScheduler::schedulePacket()
 {
     bool isEmpty = true;

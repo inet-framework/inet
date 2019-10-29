@@ -15,28 +15,31 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-#include "inet/common/ModuleAccess.h"
-#include "inet/common/Simsignals.h"
-#include "inet/queueing/source/EmptyPacketSource.h"
+#ifndef __INET_PACKETBUFFERBASE_H
+#define __INET_PACKETBUFFERBASE_H
+
+#include "inet/queueing/base/PacketQueueingElementBase.h"
+#include "inet/queueing/contract/IPacketQueue.h"
 
 namespace inet {
 namespace queueing {
 
-Define_Module(EmptyPacketSource);
-
-void EmptyPacketSource::initialize(int stage)
+class INET_API PacketBufferBase : public PacketQueueingElementBase, public IPacketCollection
 {
-    PacketQueueingElementBase::initialize(stage);
-    if (stage == INITSTAGE_LOCAL) {
-        outputGate = gate("out");
-        consumer = findConnectedModule<IPassivePacketSink>(outputGate);
-    }
-    else if (stage == INITSTAGE_QUEUEING) {
-        if (consumer != nullptr)
-            checkPushPacketSupport(outputGate);
-    }
-}
+  protected:
+    const char *displayStringTextFormat = nullptr;
+    int numAddedPackets = -1;
+    int numRemovedPackets = -1;
+    int numDroppedPackets = -1;
+
+  protected:
+    virtual void initialize(int stage) override;
+    virtual void emit(simsignal_t signal, cObject *object, cObject *details = nullptr) override;
+    virtual void updateDisplayString();
+};
 
 } // namespace queueing
 } // namespace inet
+
+#endif // ifndef __INET_PACKETBUFFERBASE_H
 

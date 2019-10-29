@@ -31,9 +31,9 @@ void PacketQueue::initialize(int stage)
     PacketQueueBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         inputGate = gate("in");
-        producer = dynamic_cast<IActivePacketSource *>(findConnectedModule(inputGate));
+        producer = findConnectedModule<IActivePacketSource>(inputGate);
         outputGate = gate("out");
-        collector = dynamic_cast<IActivePacketSink *>(findConnectedModule(outputGate));
+        collector = findConnectedModule<IActivePacketSink>(outputGate);
         packetCapacity = par("packetCapacity");
         dataCapacity = b(par("dataCapacity"));
         buffer = getModuleFromPar<IPacketBuffer>(par("bufferModule"), this, false);
@@ -94,7 +94,7 @@ void PacketQueue::pushPacket(Packet *packet, cGate *gate)
         if (packetDropperFunction != nullptr)
             packetDropperFunction->dropPackets(this);
         else
-            throw cRuntimeError("Queue is overloaded and packet dropper function is not specified");
+            throw cRuntimeError("Queue is overloaded but packet dropper function is not specified");
     }
     updateDisplayString();
     if (collector != nullptr && getNumPackets() != 0)

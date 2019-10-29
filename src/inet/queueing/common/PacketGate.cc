@@ -30,12 +30,10 @@ void PacketGate::initialize(int stage)
         isOpen_ = par("initiallyOpen");
         inputGate = gate("in");
         outputGate = gate("out");
-        auto inputConnectedModule = findConnectedModule(inputGate);
-        auto outputConnectedModule = findConnectedModule(outputGate);
-        producer = dynamic_cast<IActivePacketSource *>(inputConnectedModule);
-        collector = dynamic_cast<IActivePacketSink *>(outputConnectedModule);
-        provider = dynamic_cast<IPassivePacketSource *>(inputConnectedModule);
-        consumer = dynamic_cast<IPassivePacketSink *>(outputConnectedModule);
+        producer = findConnectedModule<IActivePacketSource>(inputGate);
+        collector = findConnectedModule<IActivePacketSink>(outputGate);
+        provider = findConnectedModule<IPassivePacketSource>(inputGate);
+        consumer = findConnectedModule<IPassivePacketSink>(outputGate);
         changeTimer = new cMessage("ChangeTimer");
         double openTime = par("openTime");
         if (!std::isnan(openTime))

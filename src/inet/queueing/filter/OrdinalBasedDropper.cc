@@ -31,8 +31,6 @@ void OrdinalBasedDropper::initialize(int stage)
         numDropped = 0;
         generateFurtherDrops = false;
 
-        consumer = dynamic_cast<IPassivePacketSink *>(getConnectedModule(outputGate));
-
         WATCH(numPackets);
         WATCH(numDropped);
         WATCH(generateFurtherDrops);

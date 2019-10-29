@@ -18,6 +18,12 @@ package inet.applications.tcpapp;
 import inet.applications.contract.IApp;
 import inet.common.MessageDispatcher;
 
+//
+// This module is a generic TCP server application with a TCP server listener
+// that creates TCP server connections.
+//
+// @see ~TcpClientApp, ~TcpServerListener, ~TcpServerConnection
+//
 module TcpServerApp like IApp
 {
     parameters:

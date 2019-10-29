@@ -15,28 +15,27 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-#include "inet/common/ModuleAccess.h"
-#include "inet/common/Simsignals.h"
-#include "inet/queueing/source/EmptyPacketSource.h"
+package inet.queueing.base;
 
-namespace inet {
-namespace queueing {
-
-Define_Module(EmptyPacketSource);
-
-void EmptyPacketSource::initialize(int stage)
+//
+// This is a base module for various packet buffer modules which maintains a few
+// statistics.
+//
+// Available display string format directives:
+// - %p - number of packet
+// - %l - total length
+// - %a - number of added packets
+// - %r - number of removed packets
+// - %d - number of dropped packets
+//
+// @see ~IPacketBuffer
+//
+simple PacketBufferBase
 {
-    PacketQueueingElementBase::initialize(stage);
-    if (stage == INITSTAGE_LOCAL) {
-        outputGate = gate("out");
-        consumer = findConnectedModule<IPassivePacketSink>(outputGate);
-    }
-    else if (stage == INITSTAGE_QUEUEING) {
-        if (consumer != nullptr)
-            checkPushPacketSupport(outputGate);
-    }
+    parameters:
+        string displayStringTextFormat = default("contains %p pk (%l)\nadded %a removed %r dropped %d"); // determines display string text above the submodule
+        @display("i=block/buffer");
+    gates:
+        input in @loose;
+        output out @loose;
 }
-
-} // namespace queueing
-} // namespace inet
-

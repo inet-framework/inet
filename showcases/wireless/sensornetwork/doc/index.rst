@@ -271,7 +271,7 @@ B-MAC
 The following video shows sensor nodes sending data to the server:
 
 .. video:: media/BMac2.mp4
-   :width: 698
+   :width: 100%
 
    <!--internal video recording, zoom 20.28, animation speed none, playback speed 1.698, normal run, crop 50 50 130 130-->
 
@@ -290,7 +290,7 @@ X-MAC
 In the following video, the sensors send data to the server:
 
 .. video:: media/XMac2.mp4
-   :width: 698
+   :width: 100%
 
    <!--internal video recording, zoom 20.28, animation speed none, playback speed 1.698, normal run, crop 50 50 130 130-->
 
@@ -308,7 +308,7 @@ LMAC
 In the following video, sensor nodes send data to the server:
 
 .. video:: media/LMac5.mp4
-   :width: 698
+   :width: 100%
 
    <!--internal video recording, zoom 20.28, animation speed none, playback speed 1.698, normal run, crop 50 50 130 130-->
 

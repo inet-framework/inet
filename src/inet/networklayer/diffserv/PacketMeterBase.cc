@@ -24,7 +24,7 @@ void PacketMeterBase::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
         inputGate = gate("in");
-        producer = dynamic_cast<IActivePacketSource *>(findConnectedModule(inputGate));
+        producer = findConnectedModule<IActivePacketSource>(inputGate);
     }
     else if (stage == INITSTAGE_LAST) {
         if (producer != nullptr)

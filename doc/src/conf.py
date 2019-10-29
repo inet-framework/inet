@@ -15,18 +15,19 @@
 import os
 import sys
 sys.path.insert(0, os.path.abspath('.'))
+sys.path.insert(0, os.path.abspath('_themes'))
 
 
 # -- Project information -----------------------------------------------------
 
-project = 'INET Documentation'
-copyright = ''
-author = ''
+project = 'INET'
+copyright = 'INET community'
+author = 'INET community'
 
 # The short X.Y version
-version = '4.0.0'
+version = '4.2'
 # The full version, including alpha/beta/rc tags
-release = ''
+release = '4.2'
 
 # -- General configuration ---------------------------------------------------
 
@@ -44,6 +45,7 @@ extensions = [
     'sphinx.ext.todo',
     'sphinx.ext.githubpages',
     'sphinx.ext.graphviz',
+#    'sphinxcontrib.images',  ## needed, but not yet compatible with sphinx 2.x
     'tools.doxylink',
 ]
 
@@ -220,6 +222,17 @@ texinfo_documents = [
 # external link configuration
 extlinks = {
   'wiki': ('https://en.wikipedia.org/wiki/%s', '')
+}
+
+# image extension config
+images_config = {
+    'override_image_directive': False,
+#    'backend': 'LightBox2',
+#    'default_image_width': '100%',
+#    'default_image_height': 'auto',
+#    'default_group': 'None',
+#    'download': True,
+    'default_show_title': False
 }
 
 # -- Doxylink config ---------------------------------------------------------
@@ -419,4 +432,4 @@ def setup(app):
     app.add_directive('vimeo', tools.video.Vimeo)
     app.add_directive('video', tools.video.Video)
     app.add_directive('audio', tools.audio.Audio)
-    app.add_directive('card', mxtheme.CardDirective)
+    app.add_directive('card', opptheme.CardDirective)

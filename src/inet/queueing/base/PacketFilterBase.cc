@@ -28,12 +28,10 @@ void PacketFilterBase::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         inputGate = gate("in");
         outputGate = gate("out");
-        auto inputConnectedModule = findConnectedModule(inputGate);
-        auto outputConnectedModule = findConnectedModule(outputGate);
-        producer = dynamic_cast<IActivePacketSource *>(inputConnectedModule);
-        collector = dynamic_cast<IActivePacketSink *>(outputConnectedModule);
-        provider = dynamic_cast<IPassivePacketSource *>(inputConnectedModule);
-        consumer = dynamic_cast<IPassivePacketSink *>(outputConnectedModule);
+        producer = findConnectedModule<IActivePacketSource>(inputGate);
+        collector = findConnectedModule<IActivePacketSink>(outputGate);
+        provider = findConnectedModule<IPassivePacketSource>(inputGate);
+        consumer = findConnectedModule<IPassivePacketSink>(outputGate);
         numDroppedPackets = 0;
         droppedTotalLength = b(0);
     }

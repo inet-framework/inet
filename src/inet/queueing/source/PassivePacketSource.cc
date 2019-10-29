@@ -29,7 +29,7 @@ void PassivePacketSource::initialize(int stage)
     PacketSourceBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         outputGate = gate("out");
-        collector = dynamic_cast<IActivePacketSink *>(getConnectedModule(outputGate));
+        collector = findConnectedModule<IActivePacketSink>(outputGate);
         providingIntervalParameter = &par("providingInterval");
         providingTimer = new cMessage("ProvidingTimer");
     }

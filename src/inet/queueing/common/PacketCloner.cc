@@ -28,10 +28,10 @@ void PacketCloner::initialize(int stage)
     PassivePacketSinkBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         inputGate = gate("in");
-        producer = dynamic_cast<IActivePacketSource *>(findConnectedModule(inputGate));
+        producer = findConnectedModule<IActivePacketSource>(inputGate);
         for (int i = 0; i < gateSize("out"); i++) {
             auto outputGate = gate("out", i);
-            auto consumer = dynamic_cast<IPassivePacketSink *>(getConnectedModule(outputGate));
+            auto consumer = getConnectedModule<IPassivePacketSink>(outputGate);
             outputGates.push_back(outputGate);
             consumers.push_back(consumer);
         }
