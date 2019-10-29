@@ -23,7 +23,6 @@ namespace inet {
 
 Ieee8021dInterfaceData::PortInfo::PortInfo()
 {
-    priority = 0;
     linkCost = 1;
     edge = false;
 
@@ -47,17 +46,17 @@ Ieee8021dInterfaceData::Ieee8021dInterfaceData()
 
 std::string Ieee8021dInterfaceData::str() const
 {
-    std::stringstream out;
-    out << "role:" << getRoleName() << " state:" << getStateName();
-    return out.str();
+    return detailedInfo();
 }
 
 std::string Ieee8021dInterfaceData::detailedInfo() const
 {
     std::stringstream out;
-    out << "role:" << getRoleName() << "\tstate:" << getStateName() << "\n";
-    out << "priority:" << getPriority() << "\n";
-    out << "linkCost:" << getLinkCost() << "\n";
+    out << "role:" << getRoleName();
+    out << " state:" << getStateName();
+    out << " priority:" << getPortPriority();
+    out << " linkCost:" << getLinkCost();
+    out << " isEdge:" << isEdge();
 
     return out.str();
 }
@@ -65,43 +64,46 @@ std::string Ieee8021dInterfaceData::detailedInfo() const
 const char *Ieee8021dInterfaceData::getRoleName(PortRole role)
 {
     switch (role) {
-        case ALTERNATE:
-            return "ALTERNATE";
+    case NOTASSIGNED:
+        return "NOTASSIGNED";
 
-        case NOTASSIGNED:
-            return "NOTASSIGNED";
+    case ROOT:
+        return "ROOT";
 
-        case DISABLED:
-            return "DISABLED";
+    case DESIGNATED:
+        return "DESIGNATED";
 
-        case DESIGNATED:
-            return "DESIGNATED";
+    case ALTERNATE:
+        return "ALTERNATE";
 
-        case BACKUP:
-            return "BACKUP";
+    case DISABLED:
+        return "DISABLED";
 
-        case ROOT:
-            return "ROOT";
+    case BACKUP:
+        return "BACKUP";
 
-        default:
-            throw cRuntimeError("Unknown port role %d", role);
+    default:
+        throw cRuntimeError("Unknown port role %d", role);
     }
 }
 
 const char *Ieee8021dInterfaceData::getStateName(PortState state)
 {
     switch (state) {
-        case DISCARDING:
-            return "DISCARDING";
+    case BLOCKING:
+        return "BLOCKING";
 
-        case LEARNING:
-            return "LEARNING";
+    case LEARNING:
+        return "LEARNING";
 
-        case FORWARDING:
-            return "FORWARDING";
+    case FORWARDING:
+        return "FORWARDING";
 
-        default:
-            throw cRuntimeError("Unknown port state %d", state);
+    case DISCARDING:
+        return "DISCARDING";
+
+    default:
+        throw cRuntimeError("Unknown port state %d", state);
     }
 }
 

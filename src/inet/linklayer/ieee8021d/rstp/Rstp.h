@@ -170,6 +170,11 @@ class INET_API Rstp : public StpBase
     virtual void handleBackup(const Ptr<const Bpdu>& frame, unsigned int arrivalInterfaceId);
 
     /**
+     * @brief checks if the src MAC address belongs to this switch
+     */
+    virtual bool sameSwitch(MacAddress src);
+
+    /**
      * @brief schedule next upgrade self-message
      */
     virtual void scheduleNextUpgrade();

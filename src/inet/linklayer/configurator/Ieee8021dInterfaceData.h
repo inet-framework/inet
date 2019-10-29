@@ -34,9 +34,9 @@ namespace inet {
 class INET_API Ieee8021dInterfaceData : public InterfaceProtocolData
 {
   public:
-    enum PortRole { ALTERNATE, NOTASSIGNED, DISABLED, DESIGNATED, BACKUP, ROOT };
+    enum PortRole { NOTASSIGNED, ROOT, DESIGNATED, ALTERNATE, DISABLED, BACKUP /*rstp only*/ };
 
-    enum PortState { DISCARDING, LEARNING, FORWARDING };
+    enum PortState { BLOCKING /*stp only*/, LEARNING, FORWARDING, DISCARDING /*rstp only*/ };
 
     class PortInfo
     {
@@ -44,7 +44,6 @@ class INET_API Ieee8021dInterfaceData : public InterfaceProtocolData
         /* The following values have same meaning in both STP and RSTP.
          * See Ieee8021dBDPU for more info.
          */
-        unsigned int priority;
         unsigned int linkCost;
         bool edge;
 
@@ -131,13 +130,14 @@ class INET_API Ieee8021dInterfaceData : public InterfaceProtocolData
 
     void setPortPriority(unsigned int portPriority) { portData.portPriority = portPriority; }
 
-    unsigned int getPriority() const { return portData.priority; }
-
-    void setPriority(unsigned int priority) { portData.priority = priority; }
-
     PortRole getRole() const { return portData.role; }
 
-    void setRole(PortRole role) { portData.role = role; }
+    void setRole(PortRole role) {
+        EV_DETAIL << getInterfaceEntry()->getFullName()
+                << ": role changed " << getRoleName(portData.role)
+                << " --> " << getRoleName(role) << std::endl;
+        portData.role = role;
+    }
 
     const MacAddress& getRootAddress() const { return portData.rootAddress; }
 
@@ -153,7 +153,12 @@ class INET_API Ieee8021dInterfaceData : public InterfaceProtocolData
 
     PortState getState() const { return portData.state; }
 
-    void setState(PortState state) { portData.state = state; }
+    void setState(PortState state) {
+        EV_DETAIL << getInterfaceEntry()->getFullName()
+                << ": state changed " << getStateName(portData.state)
+                << " --> " << getStateName(state) << std::endl;
+        portData.state = state;
+    }
 
     bool isEdge() const { return portData.edge; }
 

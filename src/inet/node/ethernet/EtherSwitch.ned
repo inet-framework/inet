@@ -53,6 +53,7 @@ module EtherSwitch
         string spanningTreeProtocol = default("Stp");
         int numEthInterfaces = default(0);  // minimum number of ethernet interfaces
         int numExtInterfaces = default(0);
+        string baseMacAddress = default("");
         eth[*].encap.typename = "EtherEncapDummy";
         eth[*].csmacdSupport = csmacdSupport;
         eth[*].mac.typename = default(csmacdSupport ? "EtherMac" : "EtherMacFullDuplex");

@@ -40,13 +40,14 @@ class INET_API Stp : public StpBase
 {
   public:
     typedef Ieee8021dInterfaceData::PortInfo PortInfo;
-    enum BdpuType { CONFIG_BDPU = 0, TCN_BPDU = 1 };
 
   protected:
     static const double tickInterval;    // interval between two ticks
     bool isRoot = false;
     unsigned int rootInterfaceId = 0;
     std::vector<unsigned int> desPorts;    // set of designated ports
+    std::string disabledInterfaces = "";
+    cPatternMatcher disabledInterfaceMatcher;
 
     // Discovered values
     unsigned int rootPathCost = 0;
@@ -136,13 +137,6 @@ class INET_API Stp : public StpBase
     void setAllDesignated();
 
     /*
-     * Helper functions to handle state changes
-     */
-    void lostRoot();
-    void lostAlternate();
-    void reset();
-
-    /*
      * Determine who is eligible to become the root switch
      */
     bool checkRootEligibility();
@@ -226,7 +220,7 @@ inline std::ostream& operator<<(std::ostream& os, Ieee8021dInterfaceData *p)
 
     os << " " << p->getRole() << " " << p->getState() << " ";
     os << p->getLinkCost() << " ";
-    os << p->getPriority() << " ";
+    os << p->getPortPriority() << " ";
 
     return os;
 }

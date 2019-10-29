@@ -32,8 +32,22 @@ namespace inet {
  */
 class INET_API StpBase : public OperationalBase, public cListener
 {
+public:
+    enum BdpuType { BPDU_TYPE_CONFIG = 0x00,
+        BPDU_TYPE_TCN = 0x80,
+        BPDU_TYPE_RSTP = 0x02 };
+
+    enum ProtocolVersion { PROTO_VERSION_STP = 0,
+        PROTO_VERSION_RSTP = 2,
+        PROTO_VERSION_MSTP = 3,
+        PROTO_VERSION_SPB = 4 };
+
   protected:
     bool visualize = false;    // if true it visualize the spanning tree
+    std::string colorLinkEnabled = "";
+    std::string colorLinkDisabled = "";
+    std::string colorRootBridge = "";
+
     unsigned int numPorts = 0;    // number of ports
 
     unsigned int bridgePriority = 0;    // bridge's priority
@@ -46,7 +60,6 @@ class INET_API StpBase : public OperationalBase, public cListener
     cModule *switchModule = nullptr;
     IMacAddressTable *macTable = nullptr;
     IInterfaceTable *ifTable = nullptr;
-    InterfaceEntry *ie = nullptr;
 
   public:
     StpBase();
@@ -96,11 +109,6 @@ class INET_API StpBase : public OperationalBase, public cListener
      * @return The port's InterfaceEntry, throws error if it doesn't exist.
      */
     InterfaceEntry *getPortInterfaceEntry(unsigned int interfaceId);
-
-    /*
-     * Returns the first non-loopback interface.
-     */
-    virtual InterfaceEntry *chooseInterface();
 };
 
 } // namespace inet

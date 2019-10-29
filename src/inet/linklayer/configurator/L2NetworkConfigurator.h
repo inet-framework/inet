@@ -108,6 +108,7 @@ class INET_API L2NetworkConfigurator : public cSimpleModule
     cXMLElement *configuration = nullptr;
     L2Topology topology;
     Node *rootNode = nullptr;
+    std::vector<InterfaceEntry *> interfaces;
 
   protected:
     virtual void initialize(int stage) override;
@@ -131,7 +132,9 @@ class INET_API L2NetworkConfigurator : public cSimpleModule
     virtual bool linkContainsMatchingHostExcept(InterfaceInfo *currentInfo, Matcher& hostMatcher, cModule *exceptModule);
     void ensureConfigurationComputed(L2Topology& topology);
     virtual Topology::LinkOut *findLinkOut(Node *node, int gateId);
+    virtual void configureInterface(InterfaceEntry *interfaceEntry);
     void configureInterface(InterfaceInfo *interfaceInfo);
+    unsigned int getRecommendedPortCost(Node *node, InterfaceEntry *ie);
 
   public:
     /**
@@ -142,7 +145,7 @@ class INET_API L2NetworkConfigurator : public cSimpleModule
     /**
      * Configures the provided interface based on the current network configuration.
      */
-    virtual void configureInterface(InterfaceEntry *interfaceEntry);
+    void addToConfigureInterface(InterfaceEntry *interfaceEntry);
 };
 
 } // namespace inet
