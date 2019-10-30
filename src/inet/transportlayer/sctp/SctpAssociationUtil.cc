@@ -149,7 +149,7 @@ void SctpAssociation::printSctpPathMap() const
 const char *SctpAssociation::stateName(int32 state)
 {
 #define CASE(x)    case x: \
-        s = #x + 7; break
+        s = (char *)#x + 7; break
     const char *s = "unknown";
     switch (state) {
         CASE(SCTP_S_CLOSED);
@@ -168,7 +168,7 @@ const char *SctpAssociation::stateName(int32 state)
 const char *SctpAssociation::eventName(int32 event)
 {
 #define CASE(x)    case x: \
-        s = #x + 7; break
+        s = (char *)#x + 7; break
     const char *s = "unknown";
     switch (event) {
         CASE(SCTP_E_OPEN_PASSIVE);
@@ -215,7 +215,7 @@ const char *SctpAssociation::eventName(int32 event)
 const char *SctpAssociation::indicationName(int32 code)
 {
 #define CASE(x)    case x: \
-        s = #x + 7; break
+        s = (char *)#x + 7; break
     const char *s = "unknown";
     switch (code) {
         CASE(SCTP_I_DATA);
