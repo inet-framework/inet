@@ -1,4 +1,3 @@
-//
 // Copyright (C) 2016 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
@@ -81,7 +80,9 @@ void Ieee80211Mac::initialize(int stage)
         rx = check_and_cast<IRx *>(getSubmodule("rx"));
         tx = check_and_cast<ITx *>(getSubmodule("tx"));
         dcf = check_and_cast<Dcf *>(getSubmodule("dcf"));
-        hcf = check_and_cast<Hcf *>(getSubmodule("hcf"));
+        hcf = check_and_cast_nullable<Hcf *>(getSubmodule("hcf"));
+        if (mib->qos && !hcf)
+            throw cRuntimeError("Missing hcf module, required for QoS");
     }
 }
 
