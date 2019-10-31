@@ -90,6 +90,12 @@ void UdpBasicBurst::initialize(int stage)
         destPort = par("destPort");
 
         timerNext = new cMessage("UDPBasicBurstTimer");
+
+        if (hasPar("registerInInit") && par("registerInInit").boolValue()) {
+            socket.setOutputGate(gate("socketOut"));
+            socket.bind(localPort);
+            socket.setCallback(this);
+        }
     }
 }
 
@@ -121,9 +127,12 @@ Packet *UdpBasicBurst::createPacket()
 
 void UdpBasicBurst::processStart()
 {
-    socket.setOutputGate(gate("socketOut"));
-    socket.bind(localPort);
-    socket.setCallback(this);
+
+    if (!hasPar("registerInInit") || (hasPar("registerInInit") && !par("registerInInit").boolValue())) {
+        socket.setOutputGate(gate("socketOut"));
+        socket.bind(localPort);
+        socket.setCallback(this);
+    }
 
     const char *destAddrs = par("destAddresses");
     cStringTokenizer tokenizer(destAddrs);
