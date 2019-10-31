@@ -18,20 +18,15 @@
 #ifndef __INET_PACKETTAGGER_H
 #define __INET_PACKETTAGGER_H
 
-#include "inet/queueing/base/PacketMarkerBase.h"
+#include "inet/queueing/base/PacketTaggerBase.h"
 #include "inet/queueing/contract/IPacketFilterFunction.h"
 
 namespace inet {
 namespace queueing {
 
-class INET_API PacketTagger : public PacketMarkerBase
+class INET_API PacketTagger : public PacketTaggerBase
 {
   protected:
-    int userPriority = -1;
-    int interfaceId = -1;
-    int hopLimit = -1;
-    int vlanId = -1;
-    W transmissionPower = W(NaN);
     IPacketFilterFunction *packetFilterFunction = nullptr;
 
   protected:

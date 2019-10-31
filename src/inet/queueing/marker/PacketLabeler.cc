@@ -15,7 +15,6 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-#include "inet/common/ModuleAccess.h"
 #include "inet/queueing/common/LabelsTag_m.h"
 #include "inet/queueing/marker/PacketLabeler.h"
 
@@ -32,7 +31,7 @@ PacketLabeler::~PacketLabeler()
 
 void PacketLabeler::initialize(int stage)
 {
-    PacketMarkerBase::initialize(stage);
+    PacketLabelerBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         cStringTokenizer tokenizer(par("filterClasses"));
         while (tokenizer.hasMoreTokens()) {
@@ -40,7 +39,6 @@ void PacketLabeler::initialize(int stage)
             auto filter = check_and_cast<IPacketFilterFunction *>(createOne(filterClass));
             filters.push_back(filter);
         }
-        labels = cStringTokenizer(par("labels")).asVector();
     }
 }
 
