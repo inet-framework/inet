@@ -67,12 +67,18 @@ void Stp::handleMessageWhenUp(cMessage *msg)
 {
     if (!msg->isSelfMessage()) {
         Packet *packet = check_and_cast<Packet*>(msg);
-        const auto& bpdu = packet->peekAtFront<Bpdu>();
+        const auto& bpdu = packet->peekAtFront<BpduBase>();
 
-        if (bpdu->getBpduType() == CONFIG_BDPU)
-            handleBPDU(packet, bpdu);
-        else if (bpdu->getBpduType() == TCN_BPDU)
-            handleTCN(packet, bpdu);
+        switch (bpdu->getBpduType()) {
+            case BPDU_CFG:
+                handleBPDU(packet, CHK(dynamicPtrCast<const BpduCfg>(bpdu)));
+                break;
+            case BPDU_TCN:
+                handleTCN(packet, CHK(dynamicPtrCast<const BpduTcn>(bpdu)));
+                break;
+            default:
+                throw cRuntimeError("unknown BPDU TYPE: %d", bpdu->getBpduType());
+        }
     }
     else {
         if (msg == tick) {
@@ -84,7 +90,7 @@ void Stp::handleMessageWhenUp(cMessage *msg)
     }
 }
 
-void Stp::handleBPDU(Packet *packet, const Ptr<const Bpdu>& bpdu)
+void Stp::handleBPDU(Packet *packet, const Ptr<const BpduCfg>& bpdu)
 {
     int arrivalGate = packet->getTag<InterfaceInd>()->getInterfaceId();
     Ieee8021dInterfaceData *port = getPortInterfaceData(arrivalGate);
@@ -128,7 +134,7 @@ void Stp::handleBPDU(Packet *packet, const Ptr<const Bpdu>& bpdu)
     delete packet;
 }
 
-void Stp::handleTCN(Packet *packet, const Ptr<const Bpdu>& tcn)
+void Stp::handleTCN(Packet *packet, const Ptr<const BpduTcn>& tcn)
 {
     EV_INFO << "Topology Change Notification BDPU " << tcn << " arrived." << endl;
     topologyChangeNotification = true;
@@ -159,7 +165,7 @@ void Stp::handleTCN(Packet *packet, const Ptr<const Bpdu>& tcn)
 void Stp::generateBPDU(int interfaceId, const MacAddress& address, bool tcFlag, bool tcaFlag)
 {
     Packet *packet = new Packet("BPDU");
-    const auto& bpdu = makeShared<Bpdu>();
+    const auto& bpdu = makeShared<BpduCfg>();
     auto macAddressReq = packet->addTag<MacAddressReq>();
     macAddressReq->setSrcAddress(bridgeAddress);
     macAddressReq->setDestAddress(address);
@@ -167,9 +173,8 @@ void Stp::generateBPDU(int interfaceId, const MacAddress& address, bool tcFlag, 
     packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::stp);
     packet->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ethernetMac);
 
-    bpdu->setProtocolIdentifier(0);
-    bpdu->setProtocolVersionIdentifier(0);
-    bpdu->setBpduType(0);    // 0 if configuration BPDU
+    bpdu->setProtocolIdentifier(SPANNING_TREE_PROTOCOL);
+    bpdu->setProtocolVersionIdentifier(SPANNING_TREE);
 
     bpdu->setBridgeAddress(bridgeAddress);
     bpdu->setBridgePriority(bridgePriority);
@@ -205,14 +210,10 @@ void Stp::generateTCN()
         if (getPortInterfaceData(rootInterfaceId)->getRole() == Ieee8021dInterfaceData::ROOT) {
             // exist root port to notifying
             topologyChangeNotification = false;
-            Packet *packet = new Packet("BPDU");
-            const auto& tcn = makeShared<Bpdu>();
-            tcn->setProtocolIdentifier(0);
-            tcn->setProtocolVersionIdentifier(0);
-
-            // 1 if Topology Change Notification BPDU
-            tcn->setBpduType(1);
-            tcn->setChunkLength(B(4));
+            Packet *packet = new Packet("BPDU-TCN");
+            const auto& tcn = makeShared<BpduTcn>();
+            tcn->setProtocolIdentifier(SPANNING_TREE_PROTOCOL);
+            tcn->setProtocolVersionIdentifier(SPANNING_TREE);
 
             auto macAddressReq = packet->addTag<MacAddressReq>();
             macAddressReq->setSrcAddress(bridgeAddress);
@@ -228,7 +229,7 @@ void Stp::generateTCN()
     }
 }
 
-bool Stp::isSuperiorBPDU(int interfaceId, const Ptr<const Bpdu>& bpdu)
+bool Stp::isSuperiorBPDU(int interfaceId, const Ptr<const BpduCfg>& bpdu)
 {
     Ieee8021dInterfaceData *port = getPortInterfaceData(interfaceId);
     Ieee8021dInterfaceData *xBpdu = new Ieee8021dInterfaceData();
@@ -265,7 +266,7 @@ bool Stp::isSuperiorBPDU(int interfaceId, const Ptr<const Bpdu>& bpdu)
     return true;
 }
 
-void Stp::setSuperiorBPDU(int interfaceId, const Ptr<const Bpdu>& bpdu)
+void Stp::setSuperiorBPDU(int interfaceId, const Ptr<const BpduCfg>& bpdu)
 {
     // BDPU is out-of-date
     if (bpdu->getMessageAge() >= bpdu->getMaxAge())
