@@ -453,47 +453,58 @@ void IPv4::routeUnicastPacket(IPv4Datagram *datagram, const InterfaceEntry *from
         const IPv4Route *re = rt->findBestMatchingRoute(destAddr);
         if (re) {
             destIE = re->getInterface();
+            nextHopAddr = re->getGateway();
+        }
+    }
 
-            // rfc-3168, pages 6+7:
-            // The ECN-Capable Transport (ECT) codepoints '10' and '01' are set by the
-            // data sender to indicate that the end-points of the transport protocol
-            // are ECN-capable; we call them ECT(0) and ECT(1) respectively...
-            // ...The not-ECT codepoint '00' indicates a packet that is not using ECN.
-            // The CE codepoint '11' is set by a router to indicate congestion to
-            // the end nodes.  Routers that have a packet arriving at a full queue
-            // drop the packet, just as they do in the absence of ECN.
-            //
-            //  +-----+-----+
-            //  | ECN FIELD |
-            //  +-----+-----+
-            //    ECT   CE         [Obsolete] RFC 2481 names for the ECN bits.
-            //     0     0         Not-ECT
-            //     0     1         ECT(1)
-            //     1     0         ECT(0)
-            //     1     1         CE
-            //
-            // Figure 1: The ECN Field in IP.
+    if (!destIE) {    // no route found
+        EV_WARN << "unroutable, sending ICMP_DESTINATION_UNREACHABLE, dropping packet\n";
+        numUnroutable++;
+        emit(LayeredProtocolBase::packetFromUpperDroppedSignal, datagram);
+        icmp->sendErrorMessage(datagram, fromIE ? fromIE->getInterfaceId() : -1, ICMP_DESTINATION_UNREACHABLE, 0);
+    }
+    else {    // fragment and send
 
-            // IeFullPath is of this structure: <NetworkName>.rte[*].ppp*
-            // while the actual path should be of the following
-            // structure: <NetworkName>.rte[*].ppp[*], so we have to convert
-            // distIeFullPath to the appropriate structure, I.e: add [ ] around
-            // ppp's index.
-            if (ecnEnabled) {
-                std::string distIeFullPath = destIE->getFullPath();
-                std::string pppIndex = distIeFullPath.substr(
-                        distIeFullPath.length() - 1);
-                std::string distIeFixedFullPath = distIeFullPath.substr(0,
-                        distIeFullPath.length() - 1) + "[" + pppIndex + "]";
-                // We intend to access the ppp queue, so we add ".queue" to the path
-                std::string pppQueueFullPath = distIeFixedFullPath + ".queue";
-                // First, we have to subscribe to the relevant queues (if didn't
-                // subscribe yet) in order to receive queue length updates and
-                // set CE in IPv4 header if queue length exceeds threshold.
-                DropTailQueue* q = (DropTailQueue*) getModuleByPath(
-                        pppQueueFullPath.c_str());
-                // check queue path does not exist in qLengthMap (didn't subscribe yet).
-                if (q && qLengthMap.count(pppQueueFullPath) == 0) {
+        // rfc-3168, pages 6-7:
+        // The ECN-Capable Transport (ECT) codepoints '10' and '01' are set by the
+        // data sender to indicate that the end-points of the transport protocol
+        // are ECN-capable; we call them ECT(0) and ECT(1) respectively...
+        // ...The not-ECT codepoint '00' indicates a packet that is not using ECN.
+        // The CE codepoint '11' is set by a router to indicate congestion to
+        // the end nodes.  Routers that have a packet arriving at a full queue
+        // drop the packet, just as they do in the absence of ECN.
+        //
+        // The ECN Field in IP:
+        //  +-----+-----+
+        //  | ECN FIELD |
+        //  +-----+-----+
+        //    ECT   CE         [Obsolete] RFC 2481 names for the ECN bits.
+        //     0     0         Not-ECT
+        //     0     1         ECT(1)
+        //     1     0         ECT(0)
+        //     1     1         CE
+
+        // IeFullPath is of this structure: <NetworkName>.rte[*].ppp*
+        // while the actual path should be of the following
+        // structure: <NetworkName>.rte[*].ppp[*], so we have to convert
+        // distIeFullPath to the appropriate structure, I.e: add [ ] around
+        // ppp's index.
+        if (ecnEnabled) {
+            std::string distIeFullPath = destIE->getFullPath();
+            std::string pppIndex = distIeFullPath.substr(
+                    distIeFullPath.length() - 1);
+            std::string distIeFixedFullPath = distIeFullPath.substr(0,
+                    distIeFullPath.length() - 1) + "[" + pppIndex + "]";
+            // We intend to access the ppp queue, so we add ".queue" to the path
+            std::string pppQueueFullPath = distIeFixedFullPath + ".queue";
+            // First, we have to subscribe to the relevant queues (if didn't
+            // subscribe yet) in order to receive queue length updates and
+            // set CE in IPv4 header if queue length exceeds threshold.
+            DropTailQueue* q = (DropTailQueue*) getModuleByPath(
+                    pppQueueFullPath.c_str());
+            if (q) {
+                // check if queue path does not exist in qLengthMap (didn't subscribe yet).
+                if (qLengthMap.count(pppQueueFullPath) == 0) {
                     cModule *pppQueueModule = check_and_cast<cModule *>(q);
                     pppQueueModule->subscribe(DropTailQueue::queueLengthSignal,
                             this);
@@ -515,18 +526,8 @@ void IPv4::routeUnicastPacket(IPv4Datagram *datagram, const InterfaceEntry *from
                     }
                 }
             }
-
-            nextHopAddr = re->getGateway();
         }
-    }
 
-    if (!destIE) {    // no route found
-        EV_WARN << "unroutable, sending ICMP_DESTINATION_UNREACHABLE, dropping packet\n";
-        numUnroutable++;
-        emit(LayeredProtocolBase::packetFromUpperDroppedSignal, datagram);
-        icmp->sendErrorMessage(datagram, fromIE ? fromIE->getInterfaceId() : -1, ICMP_DESTINATION_UNREACHABLE, 0);
-    }
-    else {    // fragment and send
         L3Address nextHop(nextHopAddr);
         if (fromIE != nullptr) {
             if (datagramForwardHook(datagram, fromIE, destIE, nextHop) != INetfilter::IHook::ACCEPT)

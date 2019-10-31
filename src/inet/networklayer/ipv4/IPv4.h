@@ -311,7 +311,7 @@ class INET_API IPv4 : public QueueBase, public INetfilter, public ILifecycle, pu
 
     /// cListener methods
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, long l, cObject *details) override;    //mona
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, long l, cObject *details) override;
 
   protected:
     virtual bool isNodeUp();
