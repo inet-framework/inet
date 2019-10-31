@@ -496,12 +496,15 @@ void TCPConnection::sendSyn()
 
     // ECN
     if (state->ecnWillingness) {
+        // rfc-3168, page 15:
+        // For a SYN packet, the setting of both ECE and CWR in the ECN-setup SYN
+        // packet is defined as an indication that the sending TCP is ECN-Capable
         tcpseg->setEceBit(true);
         tcpseg->setCwrBit(true);
         state->ecnSynSent = true;
         EV << "ECN-setup SYN packet sent\n";
     } else {
-        // rfc 3168 page 16:
+        // rfc-3168, page 16:
         // A host that is not willing to use ECN on a TCP connection SHOULD
         // clear both the ECE and CWR flags in all non-ECN-setup SYN and/or
         // SYN-ACK packets that it sends to indicate this unwillingness.
@@ -531,7 +534,10 @@ void TCPConnection::sendSynAck()
 
     state->snd_max = state->snd_nxt = state->iss + 1;
 
-    //ECN
+    // ECN
+    // rfc-3168, page 15:
+    // When a host sends an ECN-setup SYN-ACK packet, it
+    // sets the ECE flag but not the CWR flag.
     if (state->ecnWillingness) {
         tcpseg->setEceBit(true);
         tcpseg->setCwrBit(false);
@@ -545,11 +551,11 @@ void TCPConnection::sendSynAck()
     if (state->ecnWillingness && state->endPointIsWillingECN) {
         state->ect = true;
         EV << "both end-points are willing to use ECN... ECN is enabled\n";
-    } else { //TODO: not sure if we have to.
-             // rfc-3168, page 16:
-             // A host that is not willing to use ECN on a TCP connection SHOULD
-             // clear both the ECE and CWR flags in all non-ECN-setup SYN and/or
-             // SYN-ACK packets that it sends to indicate this unwillingness.
+    } else {
+        // rfc-3168, page 16:
+        // A host that is not willing to use ECN on a TCP connection SHOULD
+        // clear both the ECE and CWR flags in all non-ECN-setup SYN and/or
+        // SYN-ACK packets that it sends to indicate this unwillingness.
         state->ect = false;
         if (state->endPointIsWillingECN)
             EV << "ECN is disabled\n";
