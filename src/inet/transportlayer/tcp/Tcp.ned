@@ -217,9 +217,9 @@ simple Tcp like ITcp
         @signal[packetReceivedFromUpper](type=cPacket);
         @signal[packetReceivedFromLower](type=cPacket);
     gates:
-        input appIn @labels(TcpCommand/down) @messageKind(inet::TcpCommandCode);
+        input appIn @labels(TcpCommand/down) @messageKinds(inet::TcpCommandCode);
         input ipIn @labels(TcpHeader,Ipv4ControlInfo/up,Ipv6ControlInfo/up);
-        output appOut @labels(TcpCommand/up) @messageKind(inet::TcpStatusInd);
+        output appOut @labels(TcpCommand/up) @messageKinds(inet::TcpStatusInd);
         output ipOut @labels(TcpHeader,Ipv4ControlInfo/down,Ipv6ControlInfo/down);
 }
 
