@@ -90,10 +90,10 @@ class INET_API Stp : public StpBase
     void generateBPDU(int interfaceId, const MacAddress& address = MacAddress::STP_MULTICAST_ADDRESS, bool tcFlag = false, bool tcaFlag = false);
 
     /*
-     * Send hello BDPUs on all ports (only for root switches)
+     * Send hello BPDUs on all ports (only for root switches)
      * Invokes generateBPDU(i) where i goes through all ports
      */
-    void generateHelloBDPUs();
+    void generateHelloBPDUs();
 
     /*
      * Generate and send Topology Change Notification

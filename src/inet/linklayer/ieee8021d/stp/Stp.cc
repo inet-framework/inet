@@ -136,7 +136,7 @@ void Stp::handleBPDU(Packet *packet, const Ptr<const BpduCfg>& bpdu)
 
 void Stp::handleTCN(Packet *packet, const Ptr<const BpduTcn>& tcn)
 {
-    EV_INFO << "Topology Change Notification BDPU " << tcn << " arrived." << endl;
+    EV_INFO << "Topology Change Notification BPDU " << tcn << " arrived." << endl;
     topologyChangeNotification = true;
 
     int arrivalGate = packet->getTag<InterfaceInd>()->getInterfaceId();
@@ -268,7 +268,7 @@ bool Stp::isSuperiorBPDU(int interfaceId, const Ptr<const BpduCfg>& bpdu)
 
 void Stp::setSuperiorBPDU(int interfaceId, const Ptr<const BpduCfg>& bpdu)
 {
-    // BDPU is out-of-date
+    // BPDU is out-of-date
     if (bpdu->getMessageAge() >= bpdu->getMaxAge())
         return;
 
@@ -289,11 +289,11 @@ void Stp::setSuperiorBPDU(int interfaceId, const Ptr<const BpduCfg>& bpdu)
     portData->setAge(0);
 }
 
-void Stp::generateHelloBDPUs()
+void Stp::generateHelloBPDUs()
 {
-    EV_INFO << "It is hello time. Root switch sending hello BDPUs on all its ports." << endl;
+    EV_INFO << "It is hello time. Root switch sending hello BPDUs on all its ports." << endl;
 
-    // send hello BDPUs on all ports
+    // send hello BPDUs on all ports
     for (unsigned int i = 0; i < numPorts; i++) {
         int interfaceId = ifTable->getInterface(i)->getInterfaceId();
         generateBPDU(interfaceId);
@@ -302,7 +302,7 @@ void Stp::generateHelloBDPUs()
 
 void Stp::handleTick()
 {
-    // hello BDPU timer
+    // hello BPDU timer
     if (isRoot)
         helloTime = helloTime + 1;
     else
@@ -339,7 +339,7 @@ void Stp::checkTimers()
     if (helloTime >= currentHelloTime) {
         // only the root switch can generate Hello BPDUs
         if (isRoot)
-            generateHelloBDPUs();
+            generateHelloBPDUs();
 
         helloTime = 0;
     }

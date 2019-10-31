@@ -109,7 +109,7 @@ class INET_API Rstp : public StpBase
     virtual void printState();
 
     /**
-     * @brief Update Interfacedata with the content of the BDPU frame
+     * @brief Update Interfacedata with the content of the BPDU frame
      */
     virtual void updateInterfacedata(const Ptr<const BpduCfg>& frame, unsigned int interfaceId);
 

@@ -311,7 +311,7 @@ void Rstp::processBPDU(const Ptr<const BpduCfg>& frame, unsigned int arrivalInte
 
 bool Rstp::processBetterSource(const Ptr<const BpduCfg>& frame, unsigned int arrivalInterfaceId)
 {
-    EV_DETAIL << "Better BDPU received than the current best for this port." << endl;
+    EV_DETAIL << "Better BPDU received than the current best for this port." << endl;
     // update that port rstp info
     updateInterfacedata(frame, arrivalInterfaceId);
     Ieee8021dInterfaceData *arrivalPort = getPortInterfaceData(arrivalInterfaceId);
@@ -415,7 +415,7 @@ bool Rstp::processBetterSource(const Ptr<const BpduCfg>& frame, unsigned int arr
                 return true;
 
             case WORSE_ROOT:
-                EV_DETAIL << "Worse BDPU received than the current root. Sending BPDU to show him a better root as soon as possible." << endl;
+                EV_DETAIL << "Worse BPDU received than the current root. Sending BPDU to show him a better root as soon as possible." << endl;
                 sendBPDU(arrivalInterfaceId);    // BPDU to show him a better root as soon as possible
                 break;
 
@@ -447,7 +447,7 @@ bool Rstp::processBetterSource(const Ptr<const BpduCfg>& frame, unsigned int arr
 
 bool Rstp::processSameSource(const Ptr<const BpduCfg>& frame, unsigned int arrivalInterfaceId)
 {
-    EV_DETAIL << "BDPU received from the same source than the current best for this port" << endl;
+    EV_DETAIL << "BPDU received from the same source than the current best for this port" << endl;
     Ieee8021dInterfaceData *arrivalPort = getPortInterfaceData(arrivalInterfaceId);
     int case0 = compareInterfacedata(arrivalInterfaceId, frame, arrivalPort->getLinkCost());
     // source has updated BPDU information
