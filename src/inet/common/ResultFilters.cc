@@ -92,7 +92,7 @@ void ApplicationPacketSequenceNumberFilter::receiveSignal(cResultFilter *prev, s
 {
     if (auto packet = dynamic_cast<Packet*>(object)) {
         if (auto applicationPacket = dynamicPtrCast<const ApplicationPacket>(packet->peekAtFront()))
-            fire(this, t, (long)applicationPacket->getSequenceNumber(), details);
+            fire(this, t, (OMNETPP5_CODE(long) OMNETPP6_CODE(intval_t))applicationPacket->getSequenceNumber(), details);
     }
 }
 
@@ -374,12 +374,12 @@ void LocalSignalFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, boo
     fire(this, t, b, details);
 }
 
-void LocalSignalFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, long l, cObject *details)
+void LocalSignalFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, OMNETPP5_CODE(long) OMNETPP6_CODE(intval_t) l, cObject *details)
 {
     fire(this, t, l, details);
 }
 
-void LocalSignalFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, unsigned long l, cObject *details)
+void LocalSignalFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, OMNETPP5_CODE(unsigned long) OMNETPP6_CODE(uintval_t) l, cObject *details)
 {
     fire(this, t, l, details);
 }
@@ -410,13 +410,13 @@ void LocalSignalFilter::receiveSignal(cComponent *source, simsignal_t signal, bo
         cResultListener::receiveSignal(source, signal, b, details);
 }
 
-void LocalSignalFilter::receiveSignal(cComponent *source, simsignal_t signal, long l, cObject *details)
+void LocalSignalFilter::receiveSignal(cComponent *source, simsignal_t signal, OMNETPP5_CODE(long) OMNETPP6_CODE(intval_t) l, cObject *details)
 {
     if (source == component)
         cResultListener::receiveSignal(source, signal, l, details);
 }
 
-void LocalSignalFilter::receiveSignal(cComponent *source, simsignal_t signal, unsigned long l, cObject *details)
+void LocalSignalFilter::receiveSignal(cComponent *source, simsignal_t signal, OMNETPP5_CODE(unsigned long) OMNETPP6_CODE(uintval_t) l, cObject *details)
 {
     if (source == component)
         cResultListener::receiveSignal(source, signal, l, details);

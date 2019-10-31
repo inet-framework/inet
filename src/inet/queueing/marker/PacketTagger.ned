@@ -17,25 +17,15 @@
 
 package inet.queueing.marker;
 
-import inet.queueing.base.PacketProcessorBase;
-import inet.queueing.contract.IPacketSink;
-import inet.queueing.contract.IPacketSource;
+import inet.queueing.base.PacketTaggerBase;
+import inet.queueing.contract.IPacketMarker;
 
 //
 // This module attaches various request tags to packets.
 //
-simple PacketTagger extends PacketProcessorBase like IPacketSource, IPacketSink
+simple PacketTagger extends PacketTaggerBase like IPacketMarker
 {
     parameters:
         string filterClass = default("inet::queueing::AnyPacketFilter"); // determines which packets are tagged
-        string interfaceName = default(""); // specifies outgoing interface, unused by default
-        int hopLimit = default(-1); // specifies network layer TTL, unused by default
-        int vlanId = default(-1); // specifies VLAN, unused by default
-        int userPriority = default(-1); // specifies user priority, unused by default
-        double transmissionPower @unit(W) = default(nan W); // specifies signal transmission power, unused by default
         @class(PacketTagger);
-        @display("i=block/star");
-    gates:
-        input in;
-        output out;
 }

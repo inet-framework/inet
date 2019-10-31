@@ -44,9 +44,6 @@ void Tx::initialize(int stage)
         rx = dynamic_cast<IRx *>(getModuleByPath(par("rxModule")));
         WATCH(transmitting);
     }
-    else if (stage == INITSTAGE_LINK_LAYER) {
-        refreshDisplay();
-    }
 }
 
 void Tx::transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, ITx::ICallback *txCallback)
@@ -85,8 +82,6 @@ void Tx::transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& head
     this->frame = packet->dup();
     ASSERT(!endIfsTimer->isScheduled() && !transmitting);    // we are idle
     scheduleAt(simTime() + ifs, endIfsTimer);
-    if (hasGUI())
-        refreshDisplay();
 }
 
 void Tx::radioTransmissionFinished()
@@ -104,8 +99,6 @@ void Tx::radioTransmissionFinished()
         txCallback = nullptr;
         tmpTxCallback->transmissionComplete(tmpFrame, tmpFrame->peekAtFront<Ieee80211MacHeader>());
         rx->frameTransmitted(duration);
-        if (hasGUI())
-            refreshDisplay();
     }
 }
 
@@ -115,8 +108,6 @@ void Tx::handleMessage(cMessage *msg)
         EV_DETAIL << "Tx: endIfsTimer expired\n";
         transmitting = true;
         mac->sendDownFrame(frame->dup());
-        if (hasGUI())
-            refreshDisplay();
     }
     else
         ASSERT(false);

@@ -54,6 +54,12 @@ using namespace omnetpp;
 #define OMNETPP5_CODE(x)
 #endif // if OMNETPP_VERSION < 0x0600
 
+#if OMNETPP_VERSION >= 0x0600
+#define OMNETPP6_CODE(x) x
+#else
+#define OMNETPP6_CODE(x)
+#endif // if OMNETPP_VERSION >= 0x0600
+
 
 #if defined(INET_EXPORT)
 #  define INET_API    OPP_DLLEXPORT

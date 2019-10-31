@@ -21,8 +21,7 @@ namespace inet {
 std::string MplsHeader::str() const
 {
     std::stringstream out;
-    for (int i = (int)labels_arraysize - 1; i >= 0; i--)
-        out << labels[i].getLabel() << (i == 0 ? "" : " ");
+    out << "MPLS " << getLabel() << ":" << +getTc() << ":" << +getTtl() << ":" << (getS() ? "Bottom" : "");
     return out.str();
 }
 

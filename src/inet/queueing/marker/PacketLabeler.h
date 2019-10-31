@@ -18,17 +18,16 @@
 #ifndef __INET_PACKETLABELER_H
 #define __INET_PACKETLABELER_H
 
-#include "inet/queueing/base/PacketMarkerBase.h"
+#include "inet/queueing/base/PacketLabelerBase.h"
 #include "inet/queueing/contract/IPacketFilterFunction.h"
 
 namespace inet {
 namespace queueing {
 
-class INET_API PacketLabeler : public PacketMarkerBase
+class INET_API PacketLabeler : public PacketLabelerBase
 {
   protected:
     std::vector<IPacketFilterFunction *> filters;
-    std::vector<std::string> labels;
 
   protected:
     virtual void initialize(int stage) override;

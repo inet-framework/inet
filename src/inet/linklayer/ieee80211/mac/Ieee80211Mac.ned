@@ -93,7 +93,7 @@ module Ieee80211Mac extends MacProtocolBase like IIeee80211Mac
             parameters:
                 @display("p=100,100");
         }
-        hcf: <default("Hcf")> like IHcf {
+        hcf: <default("Hcf")> like IHcf if qosStation {
             parameters:
                 @display("p=250,100");
         }

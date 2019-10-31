@@ -8,4 +8,4 @@
 	queueing package.
 
 	Added new NED simple modules: MarkovClassifier, LabelClassifier, PacketClassifier,
-	PriorityClassifier, UserPriorityClassifier, and ContentBasedClassifier.
+	PriorityClassifier, WrrClassifier, UserPriorityClassifier, and ContentBasedClassifier.

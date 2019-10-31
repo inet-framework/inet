@@ -50,12 +50,12 @@ network TestRequestResponse
 
 using namespace inet; 
 
-static int classifyRequest(Packet *packet)
+static int testClassify(Packet *packet)
 {
     return packet->getId() % 2;
 }
 
-Register_Packet_Classifier_Function(RequestClassifier, classifyRequest);
+Register_Packet_Classifier_Function(TestClassifier, testClassify);
 
 %inifile: omnetpp.ini
 
@@ -66,7 +66,7 @@ cmdenv-event-banners = false
 *.requestProducer.packetLength = 1B
 *.requestProducer.productionInterval = uniform(0s, 4s)
 *.requestConsumer.numKind = 2
-*.requestConsumer.classifier.classifierClass = "RequestClassifier"
+*.requestConsumer.classifier.classifierClass = "TestClassifier"
 *.requestConsumer.responseProducerModule = "^.responseProducer"
 *.requestConsumer.tokenGenerator[0].numTokensPerPacket = intuniform(1, 10)
 *.requestConsumer.tokenGenerator[1].numTokensPerPacket = intuniform(1, 5)
