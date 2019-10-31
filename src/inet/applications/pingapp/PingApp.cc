@@ -19,7 +19,7 @@
 #include <iostream>
 
 #include "inet/applications/pingapp/PingApp.h"
-
+#include "inet/applications/pingapp/PingApp_m.h"
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/Protocol.h"
@@ -73,12 +73,6 @@ const std::map<const Protocol *, const Protocol *> PingApp::l3Echo( {
     { &Protocol::probabilistic, &Protocol::echo },
     { &Protocol::wiseRoute, &Protocol::echo },
 });
-
-enum PingSelfKinds {
-    PING_FIRST_ADDR = 1001,
-    PING_CHANGE_ADDR,
-    PING_SEND
-};
 
 PingApp::PingApp()
 {
