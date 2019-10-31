@@ -27,11 +27,14 @@ namespace queueing {
 class INET_API ContentBasedLabeler : public PacketLabelerBase
 {
   protected:
-    std::vector<PacketFilter> filters;
+    std::vector<PacketFilter *> filters;
 
   protected:
     virtual void initialize(int stage) override;
     virtual void markPacket(Packet *packet) override;
+
+  public:
+    virtual ~ContentBasedLabeler();
 };
 
 } // namespace queueing

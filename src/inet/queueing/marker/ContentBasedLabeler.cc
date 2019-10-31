@@ -23,17 +23,23 @@ namespace queueing {
 
 Define_Module(ContentBasedLabeler);
 
+ContentBasedLabeler::~ContentBasedLabeler()
+{
+    for (auto filter : filters)
+        delete filter;
+}
+
 void ContentBasedLabeler::initialize(int stage)
 {
     PacketLabelerBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        cStringTokenizer packetFiltersTokenizer(par("packetFilters"));
-        cStringTokenizer packetDataFiltersTokenizer(par("packetDataFilters"));
+        cStringTokenizer packetFiltersTokenizer(par("packetFilters"), ";");
+        cStringTokenizer packetDataFiltersTokenizer(par("packetDataFilters"), ";");
         while (packetFiltersTokenizer.hasMoreTokens()) {
             auto packetFilter = packetFiltersTokenizer.nextToken();
             auto packetDataFilter = packetDataFiltersTokenizer.nextToken();
-            PacketFilter filter;
-            filter.setPattern(packetFilter, packetDataFilter);
+            auto filter = new PacketFilter();
+            filter->setPattern(packetFilter, packetDataFilter);
             filters.push_back(filter);
         }
     }
@@ -43,8 +49,8 @@ void ContentBasedLabeler::markPacket(Packet *packet)
 {
     auto labelsTag = packet->addTagIfAbsent<LabelsTag>();
     for (int i = 0; i < (int)filters.size(); i++) {
-        auto& filter = filters[i];
-        if (filter.matches(packet)) {
+        auto filter = filters[i];
+        if (filter->matches(packet)) {
             EV_INFO << "Marking packet " << packet->getName() << " with " << labels[i] << ".\n";
             labelsTag->insertLabels(labels[i].c_str());
         }
