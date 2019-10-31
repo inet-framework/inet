@@ -171,6 +171,7 @@ one of its outputs.
    parameterizable with an :cpp:`IPacketClassifierFunction`
 
 -  :ned:`PriorityClassifier`: classifies packets to the first non-full output
+-  :ned:`WrrClassifier`: classifies packets in a weighted round-robin manner
 -  :ned:`LabelClassifier`: classifies packets based on the attached labels
 -  :ned:`MarkovClassifier`: classifies packets based on the state of a Markov process
 -  :ned:`UserPriorityClassifier`: classifies packets based on the attached :cpp:`UserPriorityReq`
@@ -213,7 +214,12 @@ can be both pushed into the input and popped from the output of packet markers.
 
    parameterizable with an :cpp:`IPacketFilterFunction`
 
+-  :ned:`ContentBasedLabeler`: attaches labels to packets based on the data they contain 
 -  :ned:`PacketTagger`: attaches tags such as outgoing interface, hopLimit, VLAN, user priority to matching packets 
+
+   parameterizable with an :cpp:`IPacketFilterFunction`
+
+-  :ned:`ContentBasedTagger`: attaches tags to packets based on the data they contain 
 -  :ned:`RedMarker`: random early detection marker
 
 Meters
