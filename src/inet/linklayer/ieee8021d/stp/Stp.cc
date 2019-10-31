@@ -212,6 +212,7 @@ void Stp::generateTCN()
 
             // 1 if Topology Change Notification BPDU
             tcn->setBpduType(1);
+            tcn->setChunkLength(B(4));
 
             auto macAddressReq = packet->addTag<MacAddressReq>();
             macAddressReq->setSrcAddress(bridgeAddress);
