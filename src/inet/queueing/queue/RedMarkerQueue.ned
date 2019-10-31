@@ -15,23 +15,25 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-// Author
-
 package inet.queueing.queue;
 
+import inet.queueing.contract.IPacketQueue;
 import inet.queueing.marker.RedMarker;
 
 //
-// TODO
+// Combines a packet queue with random early detection (RED) marker.
 //
 module RedMarkerQueue extends CompoundPacketQueue
 {
     submodules:
-        red: RedMarker;
-        fifo: PacketQueue;
+        red: RedMarker {
+            @display("p=100,100");
+        }
+        fifo: <default("PacketQueue")> like IPacketQueue {
+            @display("p=100,200");
+        }
     connections:
-        in --> red.in;
+        in --> { @display("m=n"); } --> red.in;
         red.out --> fifo.in;
-        fifo.out --> out;
+        fifo.out --> { @display("m=s"); } --> out;
 }
-

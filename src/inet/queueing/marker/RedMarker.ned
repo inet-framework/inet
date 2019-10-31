@@ -20,7 +20,7 @@ package inet.queueing.marker;
 import inet.queueing.filter.RedDropper;
 
 //
-// TODO
+// Random early detection (RED) marker which sets the ECN bits in the IP header.
 //
 simple RedMarker extends RedDropper
 {
