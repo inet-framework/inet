@@ -1,5 +1,15 @@
 ====== inet-4.x ======
 
+2019-10-30  Andras Varga
+
+	Turn off Hcf submodule in non-QoS mode.
+	Removed unnecessary refreshDisplay() calls.
+
+2019-10-21  Zoltan Bojthe
+
+	Fixed chunklengths, fingerprints changed.
+	Fixed fragmentNumber and sequenceNumber fields Ieee80211MacHeaderSerializer.
+
 2019-02-11  Levente Mészáros
 
 	Added a heuristic approach for determining the LLC protcol inside a MAC frame.

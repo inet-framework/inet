@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2019-09-23  Marcell Juhász
+
+	Added popIeee80211PhyHeaderAtFront() and peekIeee80211PhyHeaderAtFront() to Ieee80211Radio.
+
 2019-09-23  Levente Mészáros
 
 	Renamed carrierFrequency to centerFrequency.
@@ -19,6 +23,12 @@
 2019-08-26  Levente Mészáros
 
 	Refactored PHY protocol dissector.
+
+2019-08-23  Marcell Juhász
+
+	Set crcMode in Ieee80211Radio.
+	Reworked PHY header serializers.
+	Added fields to PHY headers in MSG.
 
 2019-08-23  Levente Mészáros
 

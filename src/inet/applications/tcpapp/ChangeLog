@@ -1,5 +1,17 @@
 ====== inet-4.x ======
 
+2019-10-26  Levente Mészáros
+
+	Added NED documentations to new applications with composable traffic source and sink modules.
+
+2019-10-25  Levente Mészáros
+
+	Renamed to TelnetServerConnection, and added a separate TelnetServerApp.
+
+2019-10-18  Zoltan Bojthe
+
+	Changed to use msg constructor to set message name and message kind.
+
 2019-10-17  Levente Mészáros
 
 	Added queueing based TelnetClientApp and TelnetServerApp.
@@ -8,6 +20,10 @@
 2019-10-09  Levente Mészáros
 
 	Fixed TcpSessionApp to throw runtime error on unimplemented listening.
+
+2019-10-07  TÖRÖK Attila
+
+	Fixed crash in ~TcpServerHostApp.
 
 2019-09-22  Mani Amoozadeh
 

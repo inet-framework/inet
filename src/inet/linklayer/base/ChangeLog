@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2019-10-21  Levente Mészáros
+
+	Fixed taking packet ownership from TX queue after popping a packet.
+
 2019-06-03  Zoltan Bojthe
 
 	Renamed	transmissionQueue --> txQueue and popFromTransmissionQueue() --> popTxQueue().

@@ -9,6 +9,11 @@
 
 	Optimized Tag usage
 
+2019-07-24  Marcell Juhász
+
+	Added EchoPacketSerializer.
+	Fixed chunkLength.
+
 2019-07-01  Marcell Juhász
 
 	Added nonLocalSrcAddress flag to L3AddressReq.

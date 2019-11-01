@@ -1,5 +1,10 @@
 ====== inet-4.x ======
 
+2019-10-18  Zoltan Bojthe
+
+	Moved the enum Ospfv2TimerType to MSG file to generate cEnum.
+	Changed to use msg constructor to set message name and message kind.
+
 2019-07-22  Marcell Juhász
 
 	Added calculating CRC for lsa headers.

@@ -1,8 +1,20 @@
 ====== inet-4.x ======
 
+2019-10-25  Levente Mészáros
+
+	Added module type template parameters to findConnectedModule/getConnectedModule.
+
+2019-10-18  Levente Mészáros
+
+	Added writeString/readString to memory streams.
+
 2019-09-25  Zoltan Bojthe
 
 	Added INITSTAGE_ROUTER_ID_ASSIGNMENT.
+
+2019-09-23  Marcell Juhász
+
+	Added IEEE 802.11 physical protocols
 
 2019-08-07  Andras Varga
 

@@ -1,5 +1,10 @@
 ====== inet-4.x ======
 
+2019-10-18  Zoltan Bojthe
+
+	Added message kind infos (name of used cEnum).
+	Changed to use msg constructor to set message name and message kind.
+
 2019-10-14  Levente Mészáros
 
 	Dropped queue length related parameters from MAC modules.
