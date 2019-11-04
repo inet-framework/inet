@@ -1,6 +1,13 @@
 Recent changes in the INET Framework
 ====================================
 
+INET 3.6.7 (November 2019) - stable
+---------------------------------
+
+This release contains a compatibility fix to be able to build INET with
+OMNeT++ 6.0 Preview 5. It requires OMNeT++ 5.3 or later.
+
+
 INET 3.6.6 (August 2019) - stable
 ---------------------------------
 
