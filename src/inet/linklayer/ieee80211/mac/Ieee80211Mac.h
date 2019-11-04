@@ -71,7 +71,7 @@ class INET_API Ieee80211Mac : public MACProtocolBase
     virtual int numInitStages() const override {return NUM_INIT_STAGES;}
     virtual void initialize(int) override;
 
-    void receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details) override;
+    void receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details) override;
     void configureRadioMode(IRadio::RadioMode radioMode);
     virtual InterfaceEntry *createInterfaceEntry() override;
     virtual const MACAddress& isInterfaceRegistered();

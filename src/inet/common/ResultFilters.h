@@ -139,8 +139,8 @@ class INET_API ElapsedTimeFilter : public cResultFilter
   protected:
     double getElapsedTime();
     virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, bool b, cObject *details) override {fire(this, t, getElapsedTime(), details);}
-    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, long l, cObject *details) override {fire(this, t, getElapsedTime(), details);}
-    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, unsigned long l, cObject *details) override {fire(this, t, getElapsedTime(), details);}
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, intval_t l, cObject *details) override {fire(this, t, getElapsedTime(), details);}
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, uintval_t l, cObject *details) override {fire(this, t, getElapsedTime(), details);}
     virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, double d, cObject *details) override {fire(this, t, getElapsedTime(), details);}
     virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, const SimTime& v, cObject *details) override {fire(this, t, getElapsedTime(), details);}
     virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, const char *s, cObject *details) override {fire(this, t, getElapsedTime(), details);}

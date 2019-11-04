@@ -33,8 +33,8 @@ class INET_API GroupCountRecorder : public cResultRecorder
     protected:
         virtual void collect(std::string val);
         virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, bool b, cObject *details) override;
-        virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, long l, cObject *details) override;
-        virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, unsigned long l, cObject *details) override;
+        virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, intval_t l, cObject *details) override;
+        virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, uintval_t l, cObject *details) override;
         virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, double d, cObject *details) override;
         virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, const SimTime& v, cObject *details) override;
         virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, const char *s, cObject *details) override;
@@ -51,8 +51,8 @@ class INET_API ElapsedTimeRecorder : public cResultRecorder
         clock_t startTime;
     protected:
         virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, bool b, cObject *details) override {}
-        virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, long l, cObject *details) override {}
-        virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, unsigned long l, cObject *details) override {}
+        virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, intval_t l, cObject *details) override {}
+        virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, uintval_t l, cObject *details) override {}
         virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, double d, cObject *details) override {}
         virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, const SimTime& v, cObject *details) override {}
         virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, const char *s, cObject *details) override {}

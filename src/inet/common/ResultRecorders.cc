@@ -30,13 +30,13 @@ void GroupCountRecorder::receiveSignal(cResultFilter *prev, simtime_t_cref t, bo
     collect(b ? "true" : "false");
 }
 
-void GroupCountRecorder::receiveSignal(cResultFilter *prev, simtime_t_cref t, long l, cObject *details) {
+void GroupCountRecorder::receiveSignal(cResultFilter *prev, simtime_t_cref t, intval_t l, cObject *details) {
     std::stringstream s;
     s << l;
     collect(s.str());
 }
 
-void GroupCountRecorder::receiveSignal(cResultFilter *prev, simtime_t_cref t, unsigned long l, cObject *details) {
+void GroupCountRecorder::receiveSignal(cResultFilter *prev, simtime_t_cref t, uintval_t l, cObject *details) {
     std::stringstream s;
     s << l;
     collect(s.str());

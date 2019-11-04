@@ -134,7 +134,7 @@ InterfaceEntry *IdealMac::createInterfaceEntry()
     return e;
 }
 
-void IdealMac::receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details)
+void IdealMac::receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details)
 {
     Enter_Method_Silent();
     if (signalID == IRadio::transmissionStateChangedSignal) {

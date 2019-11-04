@@ -113,7 +113,7 @@ void RadioVisualizerBase::removeRadioVisualization(const RadioVisualization *rad
     radioVisualizations.erase(radioVisualizations.find(radioVisualization->radioModuleId));
 }
 
-void RadioVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, long value, cObject *details)
+void RadioVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, intval_t value, cObject *details)
 {
     Enter_Method_Silent();
     if (signal == IRadio::radioModeChangedSignal || signal == IRadio::receptionStateChangedSignal || signal == IRadio::transmissionStateChangedSignal) {

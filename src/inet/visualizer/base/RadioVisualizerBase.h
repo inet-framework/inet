@@ -78,7 +78,7 @@ class INET_API RadioVisualizerBase : public VisualizerBase, public cListener
   public:
     virtual ~RadioVisualizerBase();
 
-    virtual void receiveSignal(cComponent *source, simsignal_t signal, long value, cObject *details) override;
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, intval_t value, cObject *details) override;
 };
 
 } // namespace visualizer

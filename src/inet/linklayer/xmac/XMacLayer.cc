@@ -611,7 +611,7 @@ void XMacLayer::sendDataPacket()
  * Handle transmission over messages: either send another preambles or the data
  * packet itself.
  */
-void XMacLayer::receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details)
+void XMacLayer::receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details)
 {
     Enter_Method_Silent();
     if (signalID == IRadio::transmissionStateChangedSignal) {

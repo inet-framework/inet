@@ -42,8 +42,8 @@ class INET_API DelegateSignalConfigurator : public cSimpleModule
       public:
         DelegatingListener(cComponent *component, simsignal_t signal) : component(component), signal(signal) {}
         virtual void receiveSignal(cComponent *, simsignal_t, bool b, cObject *details) { component->emit(signal, b, details); }
-        virtual void receiveSignal(cComponent *, simsignal_t, long l, cObject *details) { component->emit(signal, l, details); }
-        virtual void receiveSignal(cComponent *, simsignal_t, unsigned long l, cObject *details) { component->emit(signal, l, details); }
+        virtual void receiveSignal(cComponent *, simsignal_t, intval_t l, cObject *details) { component->emit(signal, l, details); }
+        virtual void receiveSignal(cComponent *, simsignal_t, uintval_t l, cObject *details) { component->emit(signal, l, details); }
         virtual void receiveSignal(cComponent *, simsignal_t, double d, cObject *details) { component->emit(signal, d, details); }
         virtual void receiveSignal(cComponent *, simsignal_t, const SimTime& t, cObject *details) { component->emit(signal, t, details); }
         virtual void receiveSignal(cComponent *, simsignal_t, const char *s, cObject *details) { component->emit(signal, s, details); }

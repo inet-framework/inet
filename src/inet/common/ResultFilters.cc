@@ -61,7 +61,7 @@ Register_ResultFilter("appPkSeqNo", ApplicationPacketSequenceNumberFilter);
 void ApplicationPacketSequenceNumberFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
 {
     if (auto msg = dynamic_cast<ApplicationPacket*>(object))
-        fire(this, t, msg->getSequenceNumber(), details);
+        fire(this, t, (OMNETPP5_CODE(long) OMNETPP6_CODE(intval_t))msg->getSequenceNumber(), details);
 }
 
 
