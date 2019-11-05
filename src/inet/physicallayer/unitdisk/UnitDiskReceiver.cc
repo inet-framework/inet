@@ -17,7 +17,7 @@
 
 #include "inet/physicallayer/common/packetlevel/ListeningDecision.h"
 #include "inet/physicallayer/common/packetlevel/ReceptionDecision.h"
-#include "inet/physicallayer/common/packetlevel/SignalTag_m.h"
+#include "inet/physicallayer/contract/packetlevel/SignalTag_m.h"
 #include "inet/physicallayer/unitdisk/UnitDiskListening.h"
 #include "inet/physicallayer/unitdisk/UnitDiskNoise.h"
 #include "inet/physicallayer/unitdisk/UnitDiskReceiver.h"
