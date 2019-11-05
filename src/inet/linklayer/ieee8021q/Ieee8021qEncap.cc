@@ -17,10 +17,10 @@
 
 #include "inet/common/Simsignals.h"
 #include "inet/common/packet/Packet.h"
+#include "inet/linklayer/common/VlanTag_m.h"
 #include "inet/linklayer/ethernet/EtherEncap.h"
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
 #include "inet/linklayer/ieee8021q/Ieee8021qEncap.h"
-#include "inet/linklayer/vlan/VlanTag_m.h"
 
 namespace inet {
 
