@@ -42,6 +42,12 @@ Ieee80211CanvasVisualizer::Ieee80211CanvasVisualization::Ieee80211CanvasVisualiz
 {
 }
 
+Ieee80211CanvasVisualizer::~Ieee80211CanvasVisualizer()
+{
+    if (displayAssociations)
+        removeAllIeee80211Visualizations();
+}
+
 void Ieee80211CanvasVisualizer::initialize(int stage)
 {
     Ieee80211VisualizerBase::initialize(stage);

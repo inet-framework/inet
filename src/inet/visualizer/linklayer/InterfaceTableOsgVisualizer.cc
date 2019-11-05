@@ -34,6 +34,12 @@ InterfaceTableOsgVisualizer::InterfaceOsgVisualization::InterfaceOsgVisualizatio
 {
 }
 
+InterfaceTableOsgVisualizer::~InterfaceTableOsgVisualizer()
+{
+    if (displayInterfaceTables)
+        removeAllInterfaceVisualizations();
+}
+
 void InterfaceTableOsgVisualizer::initialize(int stage)
 {
     InterfaceTableVisualizerBase::initialize(stage);

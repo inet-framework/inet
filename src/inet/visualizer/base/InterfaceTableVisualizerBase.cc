@@ -251,6 +251,7 @@ void InterfaceTableVisualizerBase::receiveSignal(cComponent *source, simsignal_t
             if (interfaceFilter.matches(interfaceEntry)) {
                 auto interfaceVisualization = getInterfaceVisualization(networkNode, interfaceEntry);
                 removeInterfaceVisualization(interfaceVisualization);
+                delete interfaceVisualization;
             }
         }
     }

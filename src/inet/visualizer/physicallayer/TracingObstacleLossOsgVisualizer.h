@@ -49,6 +49,9 @@ class INET_API TracingObstacleLossOsgVisualizer : public TracingObstacleLossVisu
     virtual void removeObstacleLossVisualization(const ObstacleLossVisualization *obstacleLossVisualization) override;
     virtual void setAlpha(const ObstacleLossVisualization *obstacleLossVisualization, double alpha) const override;
 
+  public:
+    virtual ~TracingObstacleLossOsgVisualizer();
+
 #else // ifdef WITH_OSG
 
   protected:

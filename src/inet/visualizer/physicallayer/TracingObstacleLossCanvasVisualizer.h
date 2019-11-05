@@ -66,6 +66,9 @@ class INET_API TracingObstacleLossCanvasVisualizer : public TracingObstacleLossV
     virtual void addObstacleLossVisualization(const ObstacleLossVisualization* obstacleLossVisualization) override;
     virtual void removeObstacleLossVisualization(const ObstacleLossVisualization* obstacleLossVisualization) override;
     virtual void setAlpha(const ObstacleLossVisualization *obstacleLossVisualization, double alpha) const override;
+
+  public:
+    virtual ~TracingObstacleLossCanvasVisualizer();
 };
 
 } // namespace visualizer

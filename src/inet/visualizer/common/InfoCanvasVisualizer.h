@@ -51,6 +51,9 @@ class INET_API InfoCanvasVisualizer : public InfoVisualizerBase
     virtual void addInfoVisualization(const InfoVisualization *infoVisualization) override;
     virtual void removeInfoVisualization(const InfoVisualization *infoVisualization) override;
     virtual void refreshInfoVisualization(const InfoVisualization *infoVisualization, const char *info) const override;
+
+  public:
+    virtual ~InfoCanvasVisualizer();
 };
 
 } // namespace visualizer

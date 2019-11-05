@@ -55,6 +55,9 @@ class INET_API StatisticOsgVisualizer : public StatisticVisualizerBase
     virtual void removeStatisticVisualization(const StatisticVisualization *statisticVisualization) override;
     virtual void refreshStatisticVisualization(const StatisticVisualization *statisticVisualization) override;
 
+  public:
+    virtual ~StatisticOsgVisualizer();
+
 #else // ifdef WITH_OSG
 
   protected:
