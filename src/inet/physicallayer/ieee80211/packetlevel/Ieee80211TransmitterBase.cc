@@ -20,7 +20,6 @@
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211TransmitterBase.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 Ieee80211TransmitterBase::Ieee80211TransmitterBase() :
@@ -135,6 +134,5 @@ void Ieee80211TransmitterBase::setChannelNumber(int channelNumber)
 }
 
 } // namespace physicallayer
-
 } // namespace inet
 

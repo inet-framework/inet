@@ -29,7 +29,6 @@
 #include "inet/physicallayer/modulation/BpskModulation.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 Define_Module(Ieee80211OfdmErrorModel);
@@ -157,6 +156,6 @@ const IReceptionSampleModel *Ieee80211OfdmErrorModel::computeSampleModel(const L
     return new ReceptionSampleModel(sampleLength, sampleRate, samples, rssi);
 }
 
-} /* namespace physicallayer */
-} /* namespace inet */
+} // namespace physicallayer
+} // namespace inet
 

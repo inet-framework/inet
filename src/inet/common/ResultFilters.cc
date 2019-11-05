@@ -30,9 +30,7 @@
 #include "inet/physicallayer/contract/packetlevel/SignalTag_m.h"
 
 namespace inet {
-
 namespace utils {
-
 namespace filters {
 
 Register_ResultFilter("dataAge", DataAgeFilter);
@@ -444,8 +442,6 @@ void LocalSignalFilter::receiveSignal(cComponent *source, simsignal_t signal, cO
 }
 
 } // namespace filters
-
 } // namespace utils
-
 } // namespace inet
 

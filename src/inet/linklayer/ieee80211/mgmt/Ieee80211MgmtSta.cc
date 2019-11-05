@@ -32,7 +32,6 @@
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211ControlInfo_m.h"
 
 namespace inet {
-
 namespace ieee80211 {
 
 using namespace physicallayer;
@@ -769,6 +768,5 @@ void Ieee80211MgmtSta::storeAPInfo(Packet *packet, const Ptr<const Ieee80211Mgmt
 }
 
 } // namespace ieee80211
-
 } // namespace inet
 

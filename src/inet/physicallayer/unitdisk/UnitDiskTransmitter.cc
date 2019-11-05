@@ -22,7 +22,6 @@
 #include "inet/physicallayer/unitdisk/UnitDiskTransmitter.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 Define_Module(UnitDiskTransmitter);
@@ -85,6 +84,5 @@ const ITransmission *UnitDiskTransmitter::createTransmission(const IRadio *trans
 }
 
 } // namespace physicallayer
-
 } // namespace inet
 

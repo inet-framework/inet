@@ -24,7 +24,6 @@
 #include "inet/physicallayer/unitdisk/UnitDiskReception.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 Define_Module(UnitDiskReceiver);
@@ -107,6 +106,5 @@ const IReceptionResult *UnitDiskReceiver::computeReceptionResult(const IListenin
 }
 
 } // namespace physicallayer
-
 } // namespace inet
 

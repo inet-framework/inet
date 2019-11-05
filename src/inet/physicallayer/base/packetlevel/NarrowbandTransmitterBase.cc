@@ -20,7 +20,6 @@
 #include "inet/physicallayer/contract/packetlevel/SignalTag_m.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 NarrowbandTransmitterBase::NarrowbandTransmitterBase() :
@@ -63,6 +62,5 @@ Hz NarrowbandTransmitterBase::computeBandwidth(const Packet *packet) const
 }
 
 } // namespace physicallayer
-
 } // namespace inet
 

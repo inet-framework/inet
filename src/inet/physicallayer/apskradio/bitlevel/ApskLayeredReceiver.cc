@@ -33,7 +33,6 @@
 #include "inet/physicallayer/contract/packetlevel/SignalTag_m.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 Define_Module(ApskLayeredReceiver);
@@ -211,6 +210,5 @@ bool ApskLayeredReceiver::computeIsReceptionPossible(const IListening *listening
 }
 
 } // namespace physicallayer
-
 } // namespace inet
 

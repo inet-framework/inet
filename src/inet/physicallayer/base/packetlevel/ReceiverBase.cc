@@ -26,7 +26,6 @@
 #include "inet/physicallayer/contract/packetlevel/SignalTag_m.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 bool ReceiverBase::computeIsReceptionPossible(const IListening *listening, const ITransmission *transmission) const
@@ -125,6 +124,5 @@ Packet *ReceiverBase::computeReceivedPacket(const ISnir *snir, bool isReceptionS
 }
 
 } // namespace physicallayer
-
 } // namespace inet
 

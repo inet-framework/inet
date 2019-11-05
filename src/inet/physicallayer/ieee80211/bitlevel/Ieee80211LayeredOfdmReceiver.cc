@@ -41,7 +41,6 @@
 #include "inet/physicallayer/modulation/BpskModulation.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 Define_Module(Ieee80211LayeredOfdmReceiver);
@@ -454,6 +453,7 @@ Ieee80211LayeredOfdmReceiver::~Ieee80211LayeredOfdmReceiver()
         delete mode;
     }
 }
-} /* namespace physicallayer */
-} /* namespace inet */
+
+} // namespace physicallayer
+} // namespace inet
 

@@ -25,7 +25,6 @@
 #include "inet/physicallayer/contract/packetlevel/SignalTag_m.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 const IReceptionPacketModel *LayeredErrorModelBase::computePacketModel(const LayeredTransmission *transmission, double packetErrorRate) const
@@ -82,6 +81,5 @@ const IReceptionSymbolModel *LayeredErrorModelBase::computeSymbolModel(const Lay
 }
 
 } // namespace physicallayer
-
 } // namespace inet
 

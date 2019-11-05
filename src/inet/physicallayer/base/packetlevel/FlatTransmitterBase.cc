@@ -19,7 +19,6 @@
 #include "inet/physicallayer/contract/packetlevel/SignalTag_m.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 FlatTransmitterBase::FlatTransmitterBase() :
@@ -77,6 +76,5 @@ W FlatTransmitterBase::computeTransmissionPower(const Packet *packet) const
 }
 
 } // namespace physicallayer
-
 } // namespace inet
 

@@ -26,7 +26,6 @@
 #include "inet/physicallayer/contract/packetlevel/SignalTag_m.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 FlatReceiverBase::FlatReceiverBase() :
@@ -121,6 +120,5 @@ Packet *FlatReceiverBase::computeReceivedPacket(const ISnir *snir, bool isRecept
 }
 
 } // namespace physicallayer
-
 } // namespace inet
 
