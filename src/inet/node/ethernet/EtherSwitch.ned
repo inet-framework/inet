@@ -52,13 +52,10 @@ module EtherSwitch
         string fcsMode @enum("declared","computed") = default("declared");
         string spanningTreeProtocol = default("Stp");
         int numEthInterfaces = default(0);  // minimum number of ethernet interfaces
-        int numExtInterfaces = default(0);
         eth[*].encap.typename = "EtherEncapDummy";
         eth[*].csmacdSupport = csmacdSupport;
         eth[*].mac.typename = default(csmacdSupport ? "EtherMac" : "EtherMacFullDuplex");
         *.fcsMode = fcsMode;
-        ext[*].encapDecap.typename = default("");
-        ext[*].rawSocket.protocol = default("ethernetMac");
         *.interfaceTableModule = default(absPath(".interfaceTable"));
         *.macTableModule = default(absPath(".macTable"));
 
@@ -105,10 +102,6 @@ module EtherSwitch
         encap: <default("EtherEncap")> like IEtherEncap {
             @display("p=800,220");
         }
-        ext[numExtInterfaces]: <default("ExtInterface")> like IExternalInterface {
-            parameters:
-                @display("p=1125,616,row,150;q=txQueue");
-        }
     connections:
         relayUnit.ifOut --> down.in++;
         relayUnit.ifIn <-- down.out++;
@@ -128,10 +121,6 @@ module EtherSwitch
         if hasStp {
             stp.relayIn <-- up.out++; // relayUnit.stpOut;
             stp.relayOut --> up.in++; // relayUnit.stpIn;
-        }
-        for i=0..numExtInterfaces-1 {
-            ext[i].upperLayerOut --> down.in++;
-            ext[i].upperLayerIn <-- down.out++;
         }
 }
 

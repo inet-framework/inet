@@ -34,7 +34,6 @@ module LinkLayerNodeBase extends NodeBase
         int numLoInterfaces = default(1);
         int numWlanInterfaces = default(0);
         int numEthInterfaces = default(0);  // minimum number of ethernet interfaces
-        int numExtInterfaces = default(0);
         int numPppInterfaces = default(0);  // minimum number of PPP interfaces
         int numTunInterfaces = default(0);
         int numVlanInterfaces = default(0);
@@ -74,10 +73,6 @@ module LinkLayerNodeBase extends NodeBase
         eth[sizeof(ethg)]: <default("EthernetInterface")> like IEthernetInterface {
             parameters:
                 @display("p=900,526,row,150;q=txQueue");
-        }
-        ext[numExtInterfaces]: <default("ExtInterface")> like IExternalInterface {
-            parameters:
-                @display("p=1125,616,row,150;q=txQueue");
         }
         tun[numTunInterfaces]: <default("TunInterface")> like ITunnelInterface {
             parameters:
