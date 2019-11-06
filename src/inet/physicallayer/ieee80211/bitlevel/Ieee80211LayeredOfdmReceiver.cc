@@ -26,8 +26,8 @@
 #include "inet/physicallayer/common/bitlevel/SignalSymbolModel.h"
 #include "inet/physicallayer/common/packetlevel/BandListening.h"
 #include "inet/physicallayer/common/packetlevel/ListeningDecision.h"
-#include "inet/physicallayer/common/packetlevel/SignalTag_m.h"
 #include "inet/physicallayer/contract/bitlevel/ISymbol.h"
+#include "inet/physicallayer/contract/packetlevel/SignalTag_m.h"
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211LayeredOfdmReceiver.h"
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211LayeredTransmission.h"
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OfdmDecoderModule.h"
@@ -41,7 +41,6 @@
 #include "inet/physicallayer/modulation/BpskModulation.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 Define_Module(Ieee80211LayeredOfdmReceiver);
@@ -454,6 +453,7 @@ Ieee80211LayeredOfdmReceiver::~Ieee80211LayeredOfdmReceiver()
         delete mode;
     }
 }
-} /* namespace physicallayer */
-} /* namespace inet */
+
+} // namespace physicallayer
+} // namespace inet
 

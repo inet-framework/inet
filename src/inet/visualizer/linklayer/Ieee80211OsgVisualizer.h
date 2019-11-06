@@ -49,6 +49,9 @@ class INET_API Ieee80211OsgVisualizer : public Ieee80211VisualizerBase
     virtual void addIeee80211Visualization(const Ieee80211Visualization *ieee80211Visualization) override;
     virtual void removeIeee80211Visualization(const Ieee80211Visualization *ieee80211Visualization) override;
 
+  public:
+    virtual ~Ieee80211OsgVisualizer();
+
 #else // ifdef WITH_OSG
 
   protected:

@@ -50,6 +50,9 @@ class INET_API TransportConnectionOsgVisualizer : public TransportConnectionVisu
     virtual void addConnectionVisualization(const TransportConnectionVisualization *connectionVisualization) override;
     virtual void removeConnectionVisualization(const TransportConnectionVisualization *connectionVisualization) override;
 
+  public:
+    virtual ~TransportConnectionOsgVisualizer();
+
 #else // ifdef WITH_OSG
 
   protected:

@@ -223,7 +223,7 @@ void PacketDropVisualizerBase::removePacketDropVisualization(const PacketDropVis
 
 void PacketDropVisualizerBase::removeAllPacketDropVisualizations()
 {
-    for (auto packetDropVisualization : packetDropVisualizations) {
+    for (auto packetDropVisualization : std::vector<const PacketDropVisualization *>(packetDropVisualizations)) {
         removePacketDropVisualization(packetDropVisualization);
         delete packetDropVisualization;
     }

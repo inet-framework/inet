@@ -22,11 +22,10 @@
 #include "inet/physicallayer/base/packetlevel/NarrowbandNoiseBase.h"
 #include "inet/physicallayer/common/packetlevel/ListeningDecision.h"
 #include "inet/physicallayer/common/packetlevel/ReceptionDecision.h"
-#include "inet/physicallayer/common/packetlevel/SignalTag_m.h"
 #include "inet/physicallayer/contract/packetlevel/IRadioMedium.h"
+#include "inet/physicallayer/contract/packetlevel/SignalTag_m.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 FlatReceiverBase::FlatReceiverBase() :
@@ -121,6 +120,5 @@ Packet *FlatReceiverBase::computeReceivedPacket(const ISnir *snir, bool isRecept
 }
 
 } // namespace physicallayer
-
 } // namespace inet
 

@@ -17,14 +17,13 @@
 
 #include "inet/physicallayer/common/packetlevel/ListeningDecision.h"
 #include "inet/physicallayer/common/packetlevel/ReceptionDecision.h"
-#include "inet/physicallayer/common/packetlevel/SignalTag_m.h"
+#include "inet/physicallayer/contract/packetlevel/SignalTag_m.h"
 #include "inet/physicallayer/unitdisk/UnitDiskListening.h"
 #include "inet/physicallayer/unitdisk/UnitDiskNoise.h"
 #include "inet/physicallayer/unitdisk/UnitDiskReceiver.h"
 #include "inet/physicallayer/unitdisk/UnitDiskReception.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 Define_Module(UnitDiskReceiver);
@@ -107,6 +106,5 @@ const IReceptionResult *UnitDiskReceiver::computeReceptionResult(const IListenin
 }
 
 } // namespace physicallayer
-
 } // namespace inet
 

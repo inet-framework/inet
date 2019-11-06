@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2019-10-21  Zoltan Bojthe
+
+	Fixed types, reordered fields in IPv4 header, added missing reserved bit.
+
 2019-09-25  Zoltan Bojthe
 
 	Changed Ipv4RoutingTable to initialize routerId in INITSTAGE_ROUTER_ID_ASSIGNMENT.

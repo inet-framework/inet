@@ -52,6 +52,9 @@ class INET_API PathCanvasVisualizerBase : public PathVisualizerBase
     virtual void removePathVisualization(const PathVisualization *pathVisualization) override;
     virtual void setAlpha(const PathVisualization *pathVisualization, double alpha) const override;
     virtual void refreshPathVisualization(const PathVisualization *pathVisualization, cPacket *packet) override;
+
+  public:
+    virtual ~PathCanvasVisualizerBase();
 };
 
 } // namespace visualizer

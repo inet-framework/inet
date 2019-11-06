@@ -1,5 +1,13 @@
 ====== inet-4.x ======
 
+2019-10-24  Zoltan Bojthe
+
+	Fixed "TcpConnection is a submodule" bug.
+
+2019-10-18  Zoltan Bojthe
+
+	Added message kind infos (name of used cEnum).
+
 2019-09-30  Marcel Marek
 
 	Added simplified version of TCP/IP ECN mechanism.

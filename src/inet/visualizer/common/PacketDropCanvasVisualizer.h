@@ -53,6 +53,9 @@ class INET_API PacketDropCanvasVisualizer : public PacketDropVisualizerBase
     virtual void addPacketDropVisualization(const PacketDropVisualization *packetDropVisualization) override;
     virtual void removePacketDropVisualization(const PacketDropVisualization *packetDropVisualization) override;
     virtual void setAlpha(const PacketDropVisualization *packetDrop, double alpha) const override;
+
+  public:
+    virtual ~PacketDropCanvasVisualizer();
 };
 
 } // namespace visualizer

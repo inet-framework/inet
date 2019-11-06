@@ -51,6 +51,9 @@ class INET_API EnergyStorageCanvasVisualizer : public EnergyStorageVisualizerBas
     virtual void addEnergyStorageVisualization(const EnergyStorageVisualization *energyStorageVisualization) override;
     virtual void removeEnergyStorageVisualization(const EnergyStorageVisualization *energyStorageVisualization) override;
     virtual void refreshEnergyStorageVisualization(const EnergyStorageVisualization *energyStorageVisualization) const override;
+
+  public:
+    virtual ~EnergyStorageCanvasVisualizer();
 };
 
 } // namespace visualizer

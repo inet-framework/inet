@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2019-10-18  Zoltan Bojthe
+
+	Message kind enum moved to MSG file to generate cEnum.
+
 2019-07-26  Zoltan Bojthe
 
 	Fixed string length calculation.

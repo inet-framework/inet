@@ -55,6 +55,9 @@ class INET_API InterfaceTableOsgVisualizer : public InterfaceTableVisualizerBase
     virtual void removeInterfaceVisualization(const InterfaceVisualization *interfaceVisualization) override;
     virtual void refreshInterfaceVisualization(const InterfaceVisualization *interfaceVisualization, const InterfaceEntry *interfaceEntry) override;
 
+  public:
+    virtual ~InterfaceTableOsgVisualizer();
+
 #else // ifdef WITH_OSG
 
   protected:
