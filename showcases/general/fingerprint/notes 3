@@ -1,0 +1,27 @@
+wired
+wireless
+mixed
+not just wifi
+
+udp
+
+wired
+adhoc wireless
+mixed wireless
+sensor network
+
+udp
+tcp
+
+power
+
+moving nodes
+
+-adhoc wireless with moving nodes
+-wired
+-mixed wireless
+-sensor network (no moving nodes) + wifi (+wired)
+
+-association process/no association
+-scalar/dimensional/realistic dimensional
+-modify movement -> different fingerprint -> leave out the mobility modules
