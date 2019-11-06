@@ -2,7 +2,7 @@ Wireless
 ========
 
 These showcases demonstrate various aspects of performing wireless network
-simulations with INET.
+simulations.
 
 General Wireless:
 

@@ -1,7 +1,7 @@
 Mobility
 ========
 
-These showcases demonstrate node mobility support of INET:
+These showcases demonstrate mobility support of INET:
 
 .. toctree::
    :maxdepth: 1
