@@ -67,7 +67,7 @@ void ExtIpv4TunDevice::handleMessage(cMessage *msg)
     emit(packetReceivedFromLowerSignal, packet);
     auto protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
     if (protocol != &Protocol::ipv4)
-        throw cRuntimeError("ExtInterface accepts IPv4 packets only");
+        throw cRuntimeError("Accepts IPv4 packets only");
     const auto& ipv4Header = packet->peekAtFront<Ipv4Header>();
     auto bytesChunk = packet->peekDataAsBytes();
     uint8_t buffer[packet->getByteLength()];
