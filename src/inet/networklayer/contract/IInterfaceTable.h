@@ -159,6 +159,12 @@ class INET_API IInterfaceTable
     virtual InterfaceEntry *getFirstLoopbackInterface() const = 0;
 
     /**
+     * Returns the first interface with the isLoopback flag unset.
+     * If there's no non-loopback, it returns nullptr.
+     */
+
+    virtual InterfaceEntry *getFirstNonLoopbackInterface() const = 0;
+    /**
      * Returns the first multicast capable interface.
      * If there is no such interface, then returns nullptr.
      */
