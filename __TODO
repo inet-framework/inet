@@ -1,3 +1,4 @@
+ - when deleting a network interface or deleting a network node, the interface deleted signal is missing
  - extend packet API with updateAtFront<> and updateAtBack taking a modifier lambda function as argument (to replace the remove/insert idiom)
  - add generic IpApp, EthernetApp similarly to UdpApp and TcpApp
  - unify C++ namespaces, NED namespaces, folders and file names (e.g. ospfv vs. Ospf3*)
