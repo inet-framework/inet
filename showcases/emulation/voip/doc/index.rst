@@ -23,7 +23,7 @@ traffic (contents of an audio file) between them. The received audio will be
 saved to a file, which can be compared to the original to examine how the audio
 quality is affected by the packets passing through the network.
 
-Note that this showcase requires the ``VoIPStream`` and ``ExtInterface``
+Note that this showcase requires the ``VoIPStream`` and ``Emulation``
 features of the INET Framework to be turned on (they are off by default), and it
 only runs on Linux.
 

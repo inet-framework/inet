@@ -16,24 +16,19 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-package inet.examples.emulation.pinger;
+package inet.examples.emulation.extclient;
 
 import inet.node.inet.StandardHost;
 
-
-network ExtPinger
+network ExtClientExample
 {
-    parameters:
-        double testTimeout @unit(s) = default(0s);
-        bool testing = default(false);
     submodules:
         peer: StandardHost {
             parameters:
-                forwarding = false;
-                ipv4.routingTable.routingFile = "cli1d.mrt";
-                numExtInterfaces = 1;
-                @display("p=29,90;i=old/laptop3");
+                @display("p=100,100;i=device/laptop");
         }
     connections allowunconnected:
 }
+
+
 

@@ -8,15 +8,13 @@ import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
 import ned.DatarateChannel;
 
-
-network extserver
+network ExtServerExample
 {
     parameters:
         @display("bgb=400,200");
     submodules:
         router: Router {
             parameters:
-                numExtInterfaces = 1;
                 @display("p=200,100;i=abstract/router");
             gates:
                 pppg[2];

@@ -19,8 +19,8 @@ name: ppp1
     POINTTOPOINT MULTICAST
 
 # interface 2 to external server (real network interface)
-name: ext0
-    inet_addr: 192.168.1.100
+name: eth0
+    inet_addr: 192.168.2.1
     Mask: 255.255.255.0
     MTU: 1500
     POINTTOPOINT MULTICAST
@@ -33,6 +33,6 @@ route:
 #Destination     Gateway          Genmask          Flags  Metric  Iface
 172.0.0.0        *                255.255.255.0    H      0       ppp0
 172.0.1.0        *                255.255.255.0    H      0       ppp1
-0.0.0.0          *                0.0.0.0          G      0       ext0
+0.0.0.0          *                0.0.0.0          G      0       eth0
 
 routeend.
