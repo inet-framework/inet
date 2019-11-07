@@ -500,11 +500,10 @@ std::string NetworkConfiguratorBase::getWirelessId(InterfaceEntry *interfaceEntr
     cModule *interfaceModule = interfaceEntry;
 #ifdef WITH_IEEE80211
     if (auto mibModule = dynamic_cast<ieee80211::Ieee80211Mib *>(interfaceModule->getSubmodule("mib"))) {
-        auto bssid = mibModule->bssData.bssid;
-        if (!bssid.isUnspecified())
-            return bssid.str();
+        auto ssid = mibModule->bssData.ssid;
+        if (ssid.length() != 0)
+            return ssid;
     }
-#endif
     cModule *mgmtModule = interfaceModule->getSubmodule("mgmt");
     if (mgmtModule != nullptr && mgmtModule->hasPar("ssid")) {
         const char *value = mgmtModule->par("ssid");
@@ -517,6 +516,7 @@ std::string NetworkConfiguratorBase::getWirelessId(InterfaceEntry *interfaceEntr
         if (*value)
             return value;
     }
+#endif
 #ifdef WITH_RADIO
     cModule *radioModule = interfaceModule->getSubmodule("radio");
     const IRadio *radio = dynamic_cast<const IRadio *>(radioModule);
