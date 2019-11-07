@@ -81,14 +81,13 @@ void Tx::transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& head
     packet->insertAtBack(updatedTrailer);
     this->frame = packet->dup();
     ASSERT(!endIfsTimer->isScheduled() && !transmitting);    // we are idle
-    if (ifs.isZero()) {
+    if (ifs == 0) {
         // do directly what handleMessage() would do
         transmitting = true;
         mac->sendDownFrame(frame->dup());
     }
-    else {
+    else
         scheduleAt(simTime() + ifs, endIfsTimer);
-    }
 }
 
 void Tx::radioTransmissionFinished()
