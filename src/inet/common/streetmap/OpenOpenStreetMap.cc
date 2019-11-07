@@ -23,7 +23,7 @@ namespace osm {
 
 const char *Tags::get(const char *k) const
 {
-    for (int i=0; i<kvpairs.size(); i+=2)
+    for (size_t i = 0; i < kvpairs.size(); i += 2)
         if (strcmp(kvpairs[i], k) == 0)
             return kvpairs[i+1];
     return nullptr;
