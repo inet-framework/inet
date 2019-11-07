@@ -36,10 +36,11 @@ class INET_API InterfaceTableVisualizerBase : public VisualizerBase, public cLis
     class INET_API InterfaceVisualization {
       public:
         const int networkNodeId = -1;
+        const int networkNodeGateId = -1;
         const int interfaceId = -1;
 
       public:
-        InterfaceVisualization(int networkNodeId, int interfaceId);
+        InterfaceVisualization(int networkNodeId, int networkNodeGateId, int interfaceId);
         virtual ~InterfaceVisualization() {}
     };
 
@@ -79,6 +80,10 @@ class INET_API InterfaceTableVisualizerBase : public VisualizerBase, public cLis
 
     virtual void subscribe();
     virtual void unsubscribe();
+
+    virtual cModule *getNetworkNode(const InterfaceVisualization *interfaceVisualization);
+    virtual cGate *getOutputGate(cModule *networkNode, InterfaceEntry *interfaceEntry);
+    virtual cGate *getOutputGate(const InterfaceVisualization *interfaceVisualization);
 
     virtual InterfaceVisualization *createInterfaceVisualization(cModule *networkNode, InterfaceEntry *interfaceEntry) = 0;
     virtual const InterfaceVisualization *getInterfaceVisualization(cModule *networkNode, InterfaceEntry *interfaceEntry);
