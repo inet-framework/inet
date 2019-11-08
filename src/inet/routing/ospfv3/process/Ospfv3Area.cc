@@ -1366,7 +1366,7 @@ bool Ospfv3Area::interAreaPrefixLSADiffersFrom(Ospfv3InterAreaPrefixLsa* current
     bool differentBody = false;
 
     if (!differentHeader) {
-        differentBody = ((currentLsa->getMetric() != newLsa->getMetric()) ||
+        differentBody = (
                 (currentLsa->getPrefix() != newLsa->getPrefix()) ||
                 (currentLsa->getMetric() != newLsa->getMetric())
                 );
