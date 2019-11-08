@@ -20,7 +20,7 @@
 
 #include "inet/common/geometry/common/CanvasProjection.h"
 #include "inet/common/geometry/common/GeographicCoordinateSystem.h"
-#include "inet/common/streetmap/OpenOpenStreetMap.h"
+#include "inet/common/streetmap/OpenStreetMap.h"
 #include "inet/visualizer/base/SceneVisualizerBase.h"
 
 namespace inet {
