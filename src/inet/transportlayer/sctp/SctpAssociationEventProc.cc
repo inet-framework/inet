@@ -239,6 +239,7 @@ void SctpAssociation::process_SEND(SctpEventCode& event, SctpCommandReq *sctpCom
                 EV_DEBUG << "msg will be abandoned, buffer is full and priority too low ("
                          << datMsg->getPriority() << ")\n";
                 state->queuedDroppableBytes -= PK(msg)->getByteLength();
+                delete datMsg;
                 delete smsg;
                 delete msg;
                 sendIndicationToApp(SCTP_I_ABANDONED);

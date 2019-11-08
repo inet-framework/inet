@@ -49,13 +49,13 @@ const INoise *IsotropicScalarBackgroundNoise::computeNoise(const IListening *lis
     const BandListening *bandListening = check_and_cast<const BandListening *>(listening);
     simtime_t startTime = listening->getStartTime();
     simtime_t endTime = listening->getEndTime();
-    std::map<simtime_t, W> *powerChanges = new std::map<simtime_t, W>();
     Hz centerFrequency = bandListening->getCenterFrequency();
     Hz listeningBandwidth = bandListening->getBandwidth();
     if (std::isnan(bandwidth.get()))
         bandwidth = listeningBandwidth;
     else if (bandwidth != listeningBandwidth)
         throw cRuntimeError("Background noise bandwidth doesn't match listening bandwidth");
+    std::map<simtime_t, W> *powerChanges = new std::map<simtime_t, W>();
     powerChanges->insert(std::pair<simtime_t, W>(startTime, power));
     powerChanges->insert(std::pair<simtime_t, W>(endTime, -power));
     return new ScalarNoise(startTime, endTime, centerFrequency, bandwidth, powerChanges);

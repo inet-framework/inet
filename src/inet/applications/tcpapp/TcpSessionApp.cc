@@ -128,7 +128,6 @@ void TcpSessionApp::sendData()
 
 Packet *TcpSessionApp::createDataPacket(long sendBytes)
 {
-    Packet *packet = new Packet("data1");
     const char *dataTransferMode = par("dataTransferMode");
     Ptr<Chunk> payload;
     if (!strcmp(dataTransferMode, "bytecount")) {
@@ -151,6 +150,7 @@ Packet *TcpSessionApp::createDataPacket(long sendBytes)
     else
         throw cRuntimeError("Invalid data transfer mode: %d", dataTransferMode);
     payload->addTag<CreationTimeTag>()->setCreationTime(simTime());
+    Packet *packet = new Packet("data1");
     packet->insertAtBack(payload);
     return packet;
 }

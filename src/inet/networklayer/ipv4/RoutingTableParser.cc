@@ -65,16 +65,15 @@ void RoutingTableParser::skipBlanks(char *str, int& charptr)
 
 int RoutingTableParser::readRoutingTableFromFile(const char *filename)
 {
-    FILE *fp;
+    FILE *fp = fopen(filename, "r");
+    if (fp == nullptr)
+        throw cRuntimeError("Error opening routing table file `%s'", filename);
+
     int charpointer;
     char *file = new char[MAX_FILESIZE];
     char *ifconfigFile = nullptr;
     char *routeFile = nullptr;
     int c;
-
-    fp = fopen(filename, "r");
-    if (fp == nullptr)
-        throw cRuntimeError("Error opening routing table file `%s'", filename);
 
     // read the whole into the file[] char-array
     for (charpointer = 0; (c = getc(fp)) != EOF; charpointer++)

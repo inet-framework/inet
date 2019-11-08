@@ -65,11 +65,7 @@ void Ipv4NatTable::parseConfig()
 {
     cXMLElementList xmlEntries = config->getChildrenByTagName("entry");
     for (auto & xmlEntry : xmlEntries) {
-        Ipv4NatEntry natEntry;
-        PacketFilter *packetFilter = new PacketFilter();
-        const char *packetFilterAttr = xmlEntry->getAttribute("packetFilter");
-        const char *packetDataFilterAttr = xmlEntry->getAttribute("packetDataFilter");
-        packetFilter->setPattern(packetFilterAttr != nullptr ? packetFilterAttr : "*", packetDataFilterAttr != nullptr ? packetDataFilterAttr : "*");
+        // type
         const char *typeAttr = xmlEntry->getAttribute("type");
         INetfilter::IHook::Type type;
         if (!strcmp("prerouting", typeAttr))
@@ -84,6 +80,13 @@ void Ipv4NatTable::parseConfig()
             type = LOCALOUT;
         else
             throw cRuntimeError("Unknown type");
+        // filter
+        PacketFilter *packetFilter = new PacketFilter();
+        const char *packetFilterAttr = xmlEntry->getAttribute("packetFilter");
+        const char *packetDataFilterAttr = xmlEntry->getAttribute("packetDataFilter");
+        packetFilter->setPattern(packetFilterAttr != nullptr ? packetFilterAttr : "*", packetDataFilterAttr != nullptr ? packetDataFilterAttr : "*");
+        // NAT entry
+        Ipv4NatEntry natEntry;
         const char *destAddressAttr = xmlEntry->getAttribute("destAddress");
         if (destAddressAttr != nullptr && *destAddressAttr != '\0')
             natEntry.setDestAddress(Ipv4Address(destAddressAttr));
@@ -96,6 +99,7 @@ void Ipv4NatTable::parseConfig()
         const char *srcPortAttr = xmlEntry->getAttribute("srcPort");
         if (srcPortAttr != nullptr && *srcPortAttr != '\0')
             natEntry.setSrcPort(atoi(srcPortAttr));
+        // insert
         natEntries.insert({type, {packetFilter, natEntry}});
     }
 }

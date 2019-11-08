@@ -285,6 +285,10 @@ const Ptr<Chunk> BgpHeaderSerializer::deserialize(MemoryInputStream& stream) con
                 }
                 switch (typeCode) {
                     case ORIGIN: {
+                        if (optionalBit || !transitiveBit || pathAttributeLength != 1) {
+                            bgpUpdateMessage->markIncorrect();
+                            return bgpUpdateMessage;
+                        }
                         BgpUpdatePathAttributesOrigin* origin = new BgpUpdatePathAttributesOrigin();
                         origin->setOptionalBit(optionalBit);
                         origin->setTransitiveBit(transitiveBit);
@@ -293,15 +297,15 @@ const Ptr<Chunk> BgpHeaderSerializer::deserialize(MemoryInputStream& stream) con
                         origin->setReserved(0);
                         origin->setLength(pathAttributeLength);
                         origin->setTypeCode(typeCode);
-                        if (optionalBit || !transitiveBit || pathAttributeLength != 1) {
-                            bgpUpdateMessage->markIncorrect();
-                            return bgpUpdateMessage;
-                        }
                         origin->setValue(static_cast<BgpSessionType>(stream.readByte()));
                         bgpUpdateMessage->setPathAttributes(i, origin);
                         break;
                     }
                     case AS_PATH: {
+                        if (optionalBit || !transitiveBit) {
+                            bgpUpdateMessage->markIncorrect();
+                            return bgpUpdateMessage;
+                        }
                         BgpUpdatePathAttributesAsPath* asPath = new BgpUpdatePathAttributesAsPath();
                         asPath->setOptionalBit(optionalBit);
                         asPath->setTransitiveBit(transitiveBit);
@@ -310,10 +314,6 @@ const Ptr<Chunk> BgpHeaderSerializer::deserialize(MemoryInputStream& stream) con
                         asPath->setReserved(0);
                         asPath->setLength(pathAttributeLength);
                         asPath->setTypeCode(typeCode);
-                        if (optionalBit || !transitiveBit) {
-                            bgpUpdateMessage->markIncorrect();
-                            return bgpUpdateMessage;
-                        }
                         for (size_t e = 0; pathAttributeLength > 0; ++e) {
                             asPath->setValueArraySize(e + 1);
                             BgpAsPathSegment* value = new BgpAsPathSegment();
@@ -332,6 +332,10 @@ const Ptr<Chunk> BgpHeaderSerializer::deserialize(MemoryInputStream& stream) con
                         break;
                     }
                     case NEXT_HOP: {
+                        if (optionalBit || !transitiveBit || pathAttributeLength != 4) {
+                            bgpUpdateMessage->markIncorrect();
+                            return bgpUpdateMessage;
+                        }
                         BgpUpdatePathAttributesNextHop* nextHop = new BgpUpdatePathAttributesNextHop();
                         nextHop->setOptionalBit(optionalBit);
                         nextHop->setTransitiveBit(transitiveBit);
@@ -340,15 +344,15 @@ const Ptr<Chunk> BgpHeaderSerializer::deserialize(MemoryInputStream& stream) con
                         nextHop->setReserved(0);
                         nextHop->setLength(pathAttributeLength);
                         nextHop->setTypeCode(typeCode);
-                        if (optionalBit || !transitiveBit || pathAttributeLength != 4) {
-                            bgpUpdateMessage->markIncorrect();
-                            return bgpUpdateMessage;
-                        }
                         nextHop->setValue(stream.readIpv4Address());
                         bgpUpdateMessage->setPathAttributes(i, nextHop);
                         break;
                     }
                     case MULTI_EXIT_DISC: {
+                        if (!optionalBit || transitiveBit || pathAttributeLength != 4) {
+                            bgpUpdateMessage->markIncorrect();
+                            return bgpUpdateMessage;
+                        }
                         BgpUpdatePathAttributesMultiExitDisc* multiExitDisc = new BgpUpdatePathAttributesMultiExitDisc();
                         multiExitDisc->setOptionalBit(optionalBit);
                         multiExitDisc->setTransitiveBit(transitiveBit);
@@ -357,15 +361,15 @@ const Ptr<Chunk> BgpHeaderSerializer::deserialize(MemoryInputStream& stream) con
                         multiExitDisc->setReserved(0);
                         multiExitDisc->setLength(pathAttributeLength);
                         multiExitDisc->setTypeCode(typeCode);
-                        if (!optionalBit || transitiveBit || pathAttributeLength != 4) {
-                            bgpUpdateMessage->markIncorrect();
-                            return bgpUpdateMessage;
-                        }
                         multiExitDisc->setValue(stream.readUint32Be());
                         bgpUpdateMessage->setPathAttributes(i, multiExitDisc);
                         break;
                     }
                     case LOCAL_PREF: {
+                        if (optionalBit || !transitiveBit || pathAttributeLength != 4) {
+                            bgpUpdateMessage->markIncorrect();
+                            return bgpUpdateMessage;
+                        }
                         BgpUpdatePathAttributesLocalPref* localPref = new BgpUpdatePathAttributesLocalPref();
                         localPref->setOptionalBit(optionalBit);
                         localPref->setTransitiveBit(transitiveBit);
@@ -374,15 +378,15 @@ const Ptr<Chunk> BgpHeaderSerializer::deserialize(MemoryInputStream& stream) con
                         localPref->setReserved(0);
                         localPref->setLength(pathAttributeLength);
                         localPref->setTypeCode(typeCode);
-                        if (optionalBit || !transitiveBit || pathAttributeLength != 4) {
-                            bgpUpdateMessage->markIncorrect();
-                            return bgpUpdateMessage;
-                        }
                         localPref->setValue(stream.readUint32Be());
                         bgpUpdateMessage->setPathAttributes(i, localPref);
                         break;
                     }
                     case ATOMIC_AGGREGATE: {
+                        if (optionalBit || !transitiveBit || pathAttributeLength != 0) {
+                            bgpUpdateMessage->markIncorrect();
+                            return bgpUpdateMessage;
+                        }
                         BgpUpdatePathAttributesAtomicAggregate* atomicAggregate = new BgpUpdatePathAttributesAtomicAggregate();
                         atomicAggregate->setOptionalBit(optionalBit);
                         atomicAggregate->setTransitiveBit(transitiveBit);
@@ -391,14 +395,14 @@ const Ptr<Chunk> BgpHeaderSerializer::deserialize(MemoryInputStream& stream) con
                         atomicAggregate->setReserved(0);
                         atomicAggregate->setLength(pathAttributeLength);
                         atomicAggregate->setTypeCode(typeCode);
-                        if (optionalBit || !transitiveBit || pathAttributeLength != 0) {
-                            bgpUpdateMessage->markIncorrect();
-                            return bgpUpdateMessage;
-                        }
                         bgpUpdateMessage->setPathAttributes(i, atomicAggregate);
                         break;
                     }
                     case AGGREGATOR: {
+                        if (!optionalBit || !transitiveBit || pathAttributeLength != 6) {
+                            bgpUpdateMessage->markIncorrect();
+                            return bgpUpdateMessage;
+                        }
                         BgpUpdatePathAttributesAggregator* aggregator = new BgpUpdatePathAttributesAggregator();
                         aggregator->setOptionalBit(optionalBit);
                         aggregator->setTransitiveBit(transitiveBit);
@@ -407,10 +411,6 @@ const Ptr<Chunk> BgpHeaderSerializer::deserialize(MemoryInputStream& stream) con
                         aggregator->setReserved(0);
                         aggregator->setLength(pathAttributeLength);
                         aggregator->setTypeCode(typeCode);
-                        if (!optionalBit || !transitiveBit || pathAttributeLength != 6) {
-                            bgpUpdateMessage->markIncorrect();
-                            return bgpUpdateMessage;
-                        }
                         aggregator->setAsNumber(stream.readUint16Be());
                         aggregator->setBgpSpeaker(stream.readIpv4Address());
                         bgpUpdateMessage->setPathAttributes(i, aggregator);
