@@ -128,7 +128,7 @@ void EtherEncap::processPacketFromHigherLayer(Packet *packet)
 {
     delete packet->removeTagIfPresent<DispatchProtocolReq>();
     if (packet->getDataLength() > MAX_ETHERNET_DATA_BYTES)
-        throw cRuntimeError("packet from higher layer (%d bytes) exceeds maximum Ethernet payload length (%d)", (int)packet->getByteLength(), MAX_ETHERNET_DATA_BYTES);
+        throw cRuntimeError("packet length from higher layer (%s) exceeds maximum Ethernet payload length (%s)", packet->getDataLength().str().c_str(), MAX_ETHERNET_DATA_BYTES.str().c_str());
 
     totalFromHigherLayer++;
     emit(encapPkSignal, packet);
