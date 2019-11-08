@@ -1062,8 +1062,8 @@ void Ipv6NeighbourDiscovery::processRdTimeout(cMessage *msg)
            appear on the link.*/
         bubble("Max number of RS messages sent");
         EV_INFO << "No RA messages were received. Assume no routers are on-link";
-        delete rdEntry;
         rdList.erase(rdEntry);
+        delete rdEntry;
         delete msg;
     }
 }
