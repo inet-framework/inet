@@ -103,7 +103,9 @@ void AudioOutFile::open(const char *resultFile, int sampleRate, short int sample
     }
 
     // write the stream header
-    avformat_write_header(oc, nullptr);
+    auto err = avformat_write_header(oc, nullptr);
+    if (err < 0)
+        throw cRuntimeError("Could not write header to '%s'", resultFile);
 }
 
 void AudioOutFile::write(void *decBuf, int pktBytes)
