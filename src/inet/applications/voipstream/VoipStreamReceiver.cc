@@ -25,6 +25,12 @@
 
 namespace inet {
 
+#if defined(__clang__)
+#  pragma clang diagnostic ignored "-Wdeprecated-declarations"
+#elif defined(__GNUC__)
+#  pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#endif
+
 Define_Module(VoipStreamReceiver);
 
 simsignal_t VoipStreamReceiver::lostSamplesSignal = registerSignal("lostSamples");
