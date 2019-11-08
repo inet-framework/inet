@@ -21,7 +21,7 @@
 #include "inet/physicallayer/common/packetlevel/Interference.h"
 #include "inet/physicallayer/common/packetlevel/Radio.h"
 #include "inet/physicallayer/common/packetlevel/RadioMedium.h"
-#include "inet/physicallayer/common/packetlevel/SignalTag_m.h"
+#include "inet/physicallayer/contract/packetlevel/SignalTag_m.h"
 #include "inet/physicallayer/contract/packetlevel/IErrorModel.h"
 
 

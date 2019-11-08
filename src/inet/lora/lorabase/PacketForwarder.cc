@@ -21,7 +21,7 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/applications/base/ApplicationPacket_m.h"
 #include "inet/lora/lorabase/PacketForwarder.h"
-#include "inet/physicallayer/common/packetlevel/SignalTag_m.h"
+#include "inet/physicallayer/contract/packetlevel/SignalTag_m.h"
 
 namespace inet {
 namespace lora {
