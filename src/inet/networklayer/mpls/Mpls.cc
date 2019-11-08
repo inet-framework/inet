@@ -118,19 +118,10 @@ bool Mpls::tryLabelAndForwardIpv4Datagram(Packet *packet)
 
     packet->addPar("color") = color;
 
-    if (packet->getTag<PacketProtocolTag>()->getProtocol()->getId() != Protocol::mpls.getId()) {
-        // yes, this may happen - if we'are both ingress and egress
-        packet->trim();
-        delete packet->removeTagIfPresent<DispatchProtocolReq>();
-        packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(outInterfaceId);
-        sendToL2(packet);
-    }
-    else {
-        packet->trim();
-        delete packet->removeTagIfPresent<DispatchProtocolReq>();
-        packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(outInterfaceId);
-        sendToL2(packet);
-    }
+    packet->trim();
+    delete packet->removeTagIfPresent<DispatchProtocolReq>();
+    packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(outInterfaceId);
+    sendToL2(packet);
 
     return true;
 }

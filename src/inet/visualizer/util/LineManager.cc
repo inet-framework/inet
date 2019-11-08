@@ -38,7 +38,7 @@ LineManager *LineManager::getOsgLineManager(const cCanvas *canvas)
 
 bool LineManager::compareModuleLines(const ModuleLine *moduleLine1, const ModuleLine *moduleLine2)
 {
-    auto v1 = moduleLine1->sourceModuleId < moduleLine1->destinationModuleId ? moduleLine1->shiftPriority : moduleLine1->shiftPriority;
+    auto v1 = moduleLine1->sourceModuleId < moduleLine1->destinationModuleId ? moduleLine1->shiftPriority : -moduleLine1->shiftPriority;
     auto v2 = moduleLine2->sourceModuleId < moduleLine2->destinationModuleId ? moduleLine2->shiftPriority : -moduleLine2->shiftPriority;
     return v1 < v2;
 }

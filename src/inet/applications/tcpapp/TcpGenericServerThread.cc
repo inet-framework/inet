@@ -47,7 +47,6 @@ void TcpGenericServerThread::dataArrived(Packet *msg, bool)
     // connection if that was requested too
     B requestedBytes = appmsg->getExpectedReplyLength();
     bool doClose = appmsg->getServerClose();
-    delete msg;
 
     if (requestedBytes > B(0)) {
         Packet *outPacket = new Packet(msg->getName());
@@ -59,6 +58,7 @@ void TcpGenericServerThread::dataArrived(Packet *msg, bool)
 
     if (doClose)
         getSocket()->close();
+    delete msg;
 }
 
 void TcpGenericServerThread::timerExpired(cMessage *timer)

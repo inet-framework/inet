@@ -655,7 +655,7 @@ void PacketDrillApp::runSystemCallEvent(PacketDrillEvent* event, struct syscall_
     char *error = NULL;
     const char *name = syscall->name;
     cQueue *args = new cQueue("systemCallEventQueue");
-    int result = 0;
+    int result = STATUS_OK;
 
     // Evaluate script symbolic expressions to get live numeric args for system calls.
 
@@ -669,35 +669,35 @@ void PacketDrillApp::runSystemCallEvent(PacketDrillEvent* event, struct syscall_
     }
 
     if (!strcmp(name, "socket")) {
-        syscallSocket(syscall, args, &error);
+        result = syscallSocket(syscall, args, &error);
     } else if (!strcmp(name, "bind")) {
-        syscallBind(syscall, args, &error);
+        result = syscallBind(syscall, args, &error);
     } else if (!strcmp(name, "listen")) {
-        syscallListen(syscall, args, &error);
+        result = syscallListen(syscall, args, &error);
     } else if (!strcmp(name, "write") || !strcmp(name, "send")) {
-        syscallWrite(syscall, args, &error);
+        result = syscallWrite(syscall, args, &error);
     } else if (!strcmp(name, "read")) {
-        syscallRead(event, syscall, args, &error);
+        result = syscallRead(event, syscall, args, &error);
     } else if (!strcmp(name, "sendto")) {
-        syscallSendTo(syscall, args, &error);
+        result = syscallSendTo(syscall, args, &error);
     } else if (!strcmp(name, "recvfrom")) {
-        syscallRecvFrom(event, syscall, args, &error);
+        result = syscallRecvFrom(event, syscall, args, &error);
     } else if (!strcmp(name, "close")) {
-        syscallClose(syscall, args, &error);
+        result = syscallClose(syscall, args, &error);
     } else if (!strcmp(name, "shutdown")) {
-        syscallShutdown(syscall, args, &error);
+        result = syscallShutdown(syscall, args, &error);
     } else if (!strcmp(name, "connect")) {
-        syscallConnect(syscall, args, &error);
+        result = syscallConnect(syscall, args, &error);
     } else if (!strcmp(name, "accept")) {
-        syscallAccept(syscall, args, &error);
+        result = syscallAccept(syscall, args, &error);
     } else if (!strcmp(name, "setsockopt")) {
-        syscallSetsockopt(syscall, args, &error);
+        result = syscallSetsockopt(syscall, args, &error);
     } else if (!strcmp(name, "getsockopt")) {
-        syscallGetsockopt(syscall, args, &error);
+        result = syscallGetsockopt(syscall, args, &error);
     } else if (!strcmp(name, "sctp_sendmsg")) {
-        syscallSctpSendmsg(syscall, args, &error);
+        result = syscallSctpSendmsg(syscall, args, &error);
     } else if (!strcmp(name, "sctp_send")) {
-        syscallSctpSend(syscall, args, &error);
+        result = syscallSctpSend(syscall, args, &error);
     } else {
         EV_INFO << "System call %s not known (yet)." << name;
     }

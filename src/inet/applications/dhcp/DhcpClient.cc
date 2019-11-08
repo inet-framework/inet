@@ -525,7 +525,6 @@ void DhcpClient::sendRequest()
     // setting the xid
     xid = intuniform(0, RAND_MAX);    // generating a new xid for each transmission
 
-    Packet *packet = new Packet("DHCPREQUEST");
     const auto& request = makeShared<DhcpMessage>();
     request->setOp(BOOTREQUEST);
     uint16_t length = 236;  // packet size without the options field
@@ -591,6 +590,7 @@ void DhcpClient::sendRequest()
 
     request->setChunkLength(B(length));
 
+    Packet *packet = new Packet("DHCPREQUEST");
     packet->insertAtBack(request);
     sendToUdp(packet, clientPort, destAddr, serverPort);
 }

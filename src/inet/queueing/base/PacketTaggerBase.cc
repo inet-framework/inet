@@ -37,7 +37,7 @@ void PacketTaggerBase::initialize(int stage)
         userPriority = par("userPriority");
         transmissionPower = W(par("transmissionPower"));
     }
-    else if (stage == INITSTAGE_LOCAL) {
+    else if (stage == INITSTAGE_LINK_LAYER) {
         const char *interfaceName = par("interfaceName");
         if (strlen(interfaceName) != 0) {
             auto interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);

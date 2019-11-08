@@ -2408,7 +2408,6 @@ void xMIPv6::createBRRTimer(const Ipv6Address& brDest, InterfaceEntry *ie, const
        the home address of the mobile node.*/
 
     Enter_Method("createBRRTimer()");
-    cMessage *brTriggerMsg = new cMessage("sendPeriodicBRR", MK_SEND_PERIODIC_BR);
 
     // check if there already exists a BRTimer entry for this key
     Key key(brDest, ie->getInterfaceId(), KEY_BR);
@@ -2432,10 +2431,10 @@ void xMIPv6::createBRRTimer(const Ipv6Address& brDest, InterfaceEntry *ie, const
 
     brIfEntry->dest = brDest;
     brIfEntry->ifEntry = ie;
-    brIfEntry->timer = brTriggerMsg;
-
     brIfEntry->retries = 0;
 
+    cMessage *brTriggerMsg = new cMessage("sendPeriodicBRR", MK_SEND_PERIODIC_BR);
+    brIfEntry->timer = brTriggerMsg;
     brTriggerMsg->setContextPointer(brIfEntry);    // attaching the brIfEntry info corresponding to a particular address ith message
 
     // Scheduling a message which will trigger a BRR towards brIfEntry->dest

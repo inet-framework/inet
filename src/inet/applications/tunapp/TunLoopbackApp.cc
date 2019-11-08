@@ -28,16 +28,6 @@ namespace inet {
 
 Define_Module(TunLoopbackApp);
 
-TunLoopbackApp::TunLoopbackApp() :
-    packetsSent(0),
-    packetsReceived(0)
-{
-}
-
-TunLoopbackApp::~TunLoopbackApp()
-{
-}
-
 void TunLoopbackApp::initialize(int stage)
 {
     cSimpleModule::initialize(stage);

@@ -1,7 +1,7 @@
 Routing
 =======
 
-These showcases demonstrate various aspects of simulations in INET, concerning routing:
+These showcases demonstrate various aspects of simulations concerning routing:
 
 .. toctree::
    :maxdepth: 1

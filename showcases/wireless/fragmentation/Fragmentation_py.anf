@@ -16,7 +16,8 @@
     </inputs>
     <charts>
         <chart icon="icons/full/obj/barchart.png" id="90" name="Number of packets received" template="barchart_mpl" type="MATPLOTLIB">
-            <script><![CDATA[# IDE version   OMNeT++ IDE    6.0.0.190710-009aaf6ab8
+            <script>
+                <![CDATA[# IDE version   OMNeT++ IDE    6.0.0.190710-009aaf6ab8
 
 from omnetpp.scave import results, chart
 import matplotlib.pyplot as plt
@@ -76,8 +77,10 @@ for p in ax.patches:
     i += 1
     
 plt.savefig('numberofpackets.png', transparent=True, dpi=150, bbox_inches='tight')
-]]></script>
-            <dialogPage id="Main" label="Main"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]>
+            </script>
+            <dialogPage id="Main" label="Main">
+                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -143,8 +146,10 @@ Colors {
 
   </x:children>
 </xswt>
-]]></dialogPage>
-            <dialogPage id="Input" label="Input"><![CDATA[<?xml version='1.0' encoding='UTF-8'?>
+]]>
+            </dialogPage>
+            <dialogPage id="Input" label="Input">
+                <![CDATA[<?xml version='1.0' encoding='UTF-8'?>
 <xswt xmlns:x='http://sweet_swt.sf.net/xswt'>
   <import xmlns='http://sweet_swt.sf.net/xswt'>
     <package name='java.lang'/>
@@ -160,15 +165,19 @@ Colors {
       <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="true"/>
     </text>
   </x:children>
-</xswt>]]></dialogPage>
+</xswt>]]>
+            </dialogPage>
             <property name="filter" value="name(packetReceived:count) AND (runattr:experiment(DCFfrag) AND runattr:replication(&quot;#0&quot;) AND module(&quot;FragmentationShowcase.wifiHost2.app[0]&quot;) AND name(packetReceived:count) &#10;runattr:experiment(DCFnofrag) AND runattr:replication(&quot;#0&quot;) AND module(&quot;FragmentationShowcase.wifiHost2.app[0]&quot;) AND name(packetReceived:count) &#10;runattr:experiment(HCFfrag) AND runattr:replication(&quot;#0&quot;) AND module(&quot;FragmentationShowcase.wifiHost2.app[0]&quot;) AND name(packetReceived:count) &#10;runattr:experiment(HCFfragblockack) AND runattr:replication(&quot;#0&quot;) AND module(&quot;FragmentationShowcase.wifiHost2.app[0]&quot;) AND name(packetReceived:count) &#10;)"/>
             <property name="background_color" value=""/>
         </chart>
         <chart icon="icons/full/obj/linechart.png" id="68" name="Throughput" template="linechart_mpl" type="MATPLOTLIB">
-            <script><![CDATA[# IDE version   OMNeT++ IDE    6.0.0.190710-009aaf6ab8
+            <script>
+                <![CDATA[# IDE version   OMNeT++ IDE    6.0.0.190710-009aaf6ab8
 
 from omnetpp.scave import results, chart, vectorops as ops
 import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
 
 params = chart.get_properties()
 
@@ -183,6 +192,26 @@ df = ops.perform_vector_ops(df, params["vector_operations"])
 
 # You can perform any transformations on the data here
 df.vecvalue /= 1000000
+
+print(df)
+
+newcolors = ['#2ca02c', '#ff7f0e', '#1f77b4', '#d62728']
+# green orange blue red
+
+array_of_colors = np.array([['DCFfrag','#d62728',1], ['DCFnofrag','#2ca02c',0], ['HCFfrag','#1f77b4',2], ['HCFfragblockack','#ff7f0e',3]])
+print(array_of_colors)
+
+colordf = pd.DataFrame(array_of_colors, index=None, columns=['experiment','color','order'])
+print('colordf:',colordf)
+
+colordf = colordf[['experiment','color','order']].set_index('experiment')
+print("the new colordf:", colordf)
+
+df = df.join(colordf, on='experiment')
+
+print(df)
+
+df = df.sort_values(by='order')
 
 print(df)
 
@@ -209,11 +238,11 @@ for t in df.itertuples(index=False):
     print(style)
     style["marker"] = "s"
     style["markersize"] = "3"
-    plt.plot(t.vectime, t.vecvalue, label=t.experiment, **style)
+    plt.plot(t.vectime, t.vecvalue, label=t.experiment, **style, color=t.color)
 
 plt.title("Throughput over time in various operating modes, 2000-byte packets and 250-byte fragmentation threshold")
 
-plt.legend(ncol=4)
+plt.legend(ncol=4, markerscale=2)
 plt.grid(linestyle='--')
 
 plt.xticks([0,1,2,3,4,5,6,7,8,9,10])
@@ -221,8 +250,10 @@ plt.xticks([0,1,2,3,4,5,6,7,8,9,10])
 plt.xlim(0,10.2)
 plt.ylim(0,7.5)
 
-plt.savefig('throughput.png', transparent=True, dpi=150, bbox_inches='tight')]]></script>
-            <dialogPage id="Main" label="Main"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+plt.savefig('throughput.png', transparent=True, dpi=150, bbox_inches='tight')]]>
+            </script>
+            <dialogPage id="Main" label="Main">
+                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -288,8 +319,10 @@ Colors {
 
   </x:children>
 </xswt>
-]]></dialogPage>
-            <dialogPage id="Input" label="Input"><![CDATA[<?xml version='1.0' encoding='UTF-8'?>
+]]>
+            </dialogPage>
+            <dialogPage id="Input" label="Input">
+                <![CDATA[<?xml version='1.0' encoding='UTF-8'?>
 <xswt xmlns:x='http://sweet_swt.sf.net/xswt'>
   <import xmlns='http://sweet_swt.sf.net/xswt'>
     <package name='java.lang'/>
@@ -321,17 +354,21 @@ Colors {
 
     </group>
   </x:children>
-</xswt>]]></dialogPage>
+</xswt>]]>
+            </dialogPage>
             <property name="filter" value="name(throughput:vector) AND (runattr:experiment(HCFfragblockack) AND runattr:replication(&quot;#0&quot;) AND module(&quot;FragmentationShowcase.wifiHost2.app[0]&quot;) AND name(throughput:vector) &#10;runattr:experiment(DCFfrag) AND runattr:replication(&quot;#0&quot;) AND module(&quot;FragmentationShowcase.wifiHost2.app[0]&quot;) AND name(throughput:vector) &#10;runattr:experiment(DCFnofrag) AND runattr:replication(&quot;#0&quot;) AND module(&quot;FragmentationShowcase.wifiHost2.app[0]&quot;) AND name(throughput:vector) &#10;runattr:experiment(HCFfrag) AND runattr:replication(&quot;#0&quot;) AND module(&quot;FragmentationShowcase.wifiHost2.app[0]&quot;) AND name(throughput:vector) &#10;)"/>
             <property name="background_color" value=""/>
             <property name="title" value=""/>
         </chart>
         <chart icon="icons/full/obj/linechart.png" id="91" name="Throughput vs. packet size with a 250-byte fragmentation threshold" template="linechart_mpl" type="MATPLOTLIB">
-            <script><![CDATA[# IDE version   OMNeT++ IDE    6.0.0.190710-009aaf6ab8
+            <script>
+                <![CDATA[# IDE version   OMNeT++ IDE    6.0.0.190710-009aaf6ab8
 
 from omnetpp.scave import results, chart, vectorops as ops
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
+from tkinter.tix import COLUMN
 
 params = chart.get_properties()
 
@@ -345,6 +382,8 @@ df = results.get_vectors(filter_expression, include_attrs=True, include_runattrs
 df["vecvalue"] = df["vecvalue"].apply(np.mean)
 df["packetSize"] = df["packetSize"].apply(int)  # iteration variables are strings, but we want to order them as numbers, so convert
 
+print(df)
+
 df = df.pivot(index='packetSize', columns='experiment', values='vecvalue')
 
 # You can perform any transformations on the data here
@@ -352,7 +391,22 @@ df /= 1000000
 
 print(df)
 
-df.plot(ax=plt.gca(), marker='s', markersize=3, figsize=(10,6))   # we can have only one plot, so don't try to create a new one
+plt.figure(figsize=(10,6))
+
+# define the order in which the columns will be plotted
+# also assign a color for each column
+column_order_color = [
+    ('OnlyPacketSizeDCFnofrag',       '#2ca02c'),
+    ('OnlyPacketSizeDCFfrag',         '#d62728'),
+    ('OnlyPacketSizeHCFfrag',         '#1f77b4'),
+    ('OnlyPacketSizeHCFfragblockack', '#ff7f0e')
+]
+
+print(df)
+# iterate on the above list instead of the dataframe, so we dont
+# have to reorder the columns (and still get the desired order and colors)
+for c in column_order_color:
+    plt.plot(df[c[0]], color=c[1], marker='s', markersize=3)
 
 xmin, xmax = plt.xlim()
 plt.xlim(0,xmax)
@@ -374,10 +428,12 @@ handles, labels = ax.get_legend_handles_labels()
 newlabels = []
 for i in labels:
     newlabels.append(i.replace('OnlyPacketSize',''))
-ax.legend(handles, newlabels, loc=1)
+ax.legend(handles, newlabels, loc=1, markerscale=2)
 
-plt.savefig('onlypacketsize.png', transparent=True, dpi=150, bbox_inches='tight')]]></script>
-            <dialogPage id="Main" label="Main"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+plt.savefig('onlypacketsize.png', transparent=True, dpi=150, bbox_inches='tight')]]>
+            </script>
+            <dialogPage id="Main" label="Main">
+                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -443,8 +499,10 @@ Colors {
 
   </x:children>
 </xswt>
-]]></dialogPage>
-            <dialogPage id="Input" label="Input"><![CDATA[<?xml version='1.0' encoding='UTF-8'?>
+]]>
+            </dialogPage>
+            <dialogPage id="Input" label="Input">
+                <![CDATA[<?xml version='1.0' encoding='UTF-8'?>
 <xswt xmlns:x='http://sweet_swt.sf.net/xswt'>
   <import xmlns='http://sweet_swt.sf.net/xswt'>
     <package name='java.lang'/>
@@ -476,13 +534,15 @@ Colors {
 
     </group>
   </x:children>
-</xswt>]]></dialogPage>
+</xswt>]]>
+            </dialogPage>
             <property name="filter" value="module(&quot;FragmentationShowcase.wifiHost2.app[0]&quot;) AND name(throughput:vector) AND ((runattr:experiment(OnlyPacketSizeHCFfragblockack) OR runattr:experiment(OnlyPacketSizeDCFnofrag) OR runattr:experiment(OnlyPacketSizeHCFfrag) OR runattr:experiment(OnlyPacketSizeDCFfrag)))"/>
             <property name="background_color" value=""/>
             <property name="title" value=""/>
         </chart>
         <chart icon="icons/full/obj/linechart.png" id="105" name="Throughput vs. packet size, with all frames fragmented to 16 fragments" template="linechart_mpl" type="MATPLOTLIB">
-            <script><![CDATA[# IDE version   OMNeT++ IDE    6.0.0.190710-009aaf6ab8
+            <script>
+                <![CDATA[# IDE version   OMNeT++ IDE    6.0.0.190710-009aaf6ab8
 
 from omnetpp.scave import results, chart, vectorops as ops
 import matplotlib.pyplot as plt
@@ -507,7 +567,22 @@ df /= 1000000
 
 print(df)
 
-df.plot(ax=plt.gca(), marker='s', markersize=3, figsize=(10,6))   # we can have only one plot, so don't try to create a new one
+plt.figure(figsize=(10,6))
+
+# define the order in which the columns will be plotted
+# also assign a color for each column
+column_order_color = [
+    ('PacketSizeDCFnofrag',       '#2ca02c'),
+    ('PacketSizeDCFfrag',         '#d62728'),
+    ('PacketSizeHCFfrag',         '#1f77b4'),
+    ('PacketSizeHCFfragblockack', '#ff7f0e')
+]
+
+print(df)
+# iterate on the above list instead of the dataframe, so we dont
+# have to reorder the columns (and still get the desired order and colors)
+for c in column_order_color:
+    plt.plot(df[c[0]], color=c[1], marker='s', markersize=3)
 
 xmin, xmax = plt.xlim()
 plt.xlim(0,xmax)
@@ -529,10 +604,12 @@ handles, labels = ax.get_legend_handles_labels()
 newlabels = []
 for i in labels:
     newlabels.append(i.replace('PacketSize',''))
-ax.legend(handles, newlabels, loc=1)
+ax.legend(handles, newlabels, loc=1, markerscale=2)
 
-plt.savefig('packetsize.png', transparent=True, dpi=150, bbox_inches='tight')]]></script>
-            <dialogPage id="Main" label="Main"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+plt.savefig('packetsize.png', transparent=True, dpi=150, bbox_inches='tight')]]>
+            </script>
+            <dialogPage id="Main" label="Main">
+                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -598,8 +675,10 @@ Colors {
 
   </x:children>
 </xswt>
-]]></dialogPage>
-            <dialogPage id="Input" label="Input"><![CDATA[<?xml version='1.0' encoding='UTF-8'?>
+]]>
+            </dialogPage>
+            <dialogPage id="Input" label="Input">
+                <![CDATA[<?xml version='1.0' encoding='UTF-8'?>
 <xswt xmlns:x='http://sweet_swt.sf.net/xswt'>
   <import xmlns='http://sweet_swt.sf.net/xswt'>
     <package name='java.lang'/>
@@ -631,13 +710,15 @@ Colors {
 
     </group>
   </x:children>
-</xswt>]]></dialogPage>
+</xswt>]]>
+            </dialogPage>
             <property name="filter" value="module(&quot;FragmentationShowcase.wifiHost2.app[0]&quot;) AND name(throughput:vector) AND ((runattr:experiment(PacketSizeHCFfragblockack) OR runattr:experiment(PacketSizeDCFnofrag) OR runattr:experiment(PacketSizeHCFfrag) OR runattr:experiment(PacketSizeDCFfrag)))"/>
             <property name="background_color" value=""/>
             <property name="title" value=""/>
         </chart>
         <chart icon="icons/full/obj/linechart.png" id="119" name="Throughput vs. fragmentation threshold, 1000-byte packets" template="linechart_mpl" type="MATPLOTLIB">
-            <script><![CDATA[# IDE version   OMNeT++ IDE    6.0.0.190710-009aaf6ab8
+            <script>
+                <![CDATA[# IDE version   OMNeT++ IDE    6.0.0.190710-009aaf6ab8
 
 from omnetpp.scave import results, chart, vectorops as ops
 import matplotlib.pyplot as plt
@@ -663,7 +744,21 @@ df /= 1000000
 
 print(df)
 
-df.plot(marker='s', markersize=3, figsize=(10,5))
+plt.figure(figsize=(10,5))
+
+# define the order in which the columns will be plotted
+# also assign a color for each column
+column_order_color = [
+    ('ThresholdDCFfrag',         '#d62728'),
+    ('ThresholdHCFfrag',         '#1f77b4'),
+    ('ThresholdHCFfragblockack', '#ff7f0e')
+]
+
+print(df)
+# iterate on the above list instead of the dataframe, so we dont
+# have to reorder the columns (and still get the desired order and colors)
+for c in column_order_color:
+    plt.plot(df[c[0]], color=c[1], marker='s', markersize=3)
 
 plt.xlim(0,1050)
 plt.ylim(0,7)
@@ -683,10 +778,12 @@ handles, labels = ax.get_legend_handles_labels()
 newlabels = []
 for i in labels:
     newlabels.append(i.replace('Threshold',''))
-ax.legend(handles, newlabels, loc=1)
+ax.legend(handles, newlabels, loc=1, markerscale=2)
 
-plt.savefig('threshold.png', transparent=True, dpi=150, bbox_inches='tight')]]></script>
-            <dialogPage id="Main" label="Main"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+plt.savefig('threshold.png', transparent=True, dpi=150, bbox_inches='tight')]]>
+            </script>
+            <dialogPage id="Main" label="Main">
+                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -752,8 +849,10 @@ Colors {
 
   </x:children>
 </xswt>
-]]></dialogPage>
-            <dialogPage id="Input" label="Input"><![CDATA[<?xml version='1.0' encoding='UTF-8'?>
+]]>
+            </dialogPage>
+            <dialogPage id="Input" label="Input">
+                <![CDATA[<?xml version='1.0' encoding='UTF-8'?>
 <xswt xmlns:x='http://sweet_swt.sf.net/xswt'>
   <import xmlns='http://sweet_swt.sf.net/xswt'>
     <package name='java.lang'/>
@@ -785,13 +884,15 @@ Colors {
 
     </group>
   </x:children>
-</xswt>]]></dialogPage>
+</xswt>]]>
+            </dialogPage>
             <property name="filter" value="name(throughput:vector) AND (runattr:experiment(ThresholdDCFfrag) AND runattr:measurement(&quot;$threshold=200&quot;) AND runattr:replication(&quot;#0&quot;) AND module(&quot;FragmentationShowcase.wifiHost2.app[0]&quot;) AND name(throughput:vector) &#10;runattr:experiment(ThresholdHCFfragblockack) AND runattr:measurement(&quot;$threshold=600&quot;) AND runattr:replication(&quot;#0&quot;) AND module(&quot;FragmentationShowcase.wifiHost2.app[0]&quot;) AND name(throughput:vector) &#10;runattr:experiment(ThresholdHCFfrag) AND runattr:measurement(&quot;$threshold=800&quot;) AND runattr:replication(&quot;#0&quot;) AND module(&quot;FragmentationShowcase.wifiHost2.app[0]&quot;) AND name(throughput:vector) &#10;runattr:experiment(ThresholdHCFfragblockack) AND runattr:measurement(&quot;$threshold=700&quot;) AND runattr:replication(&quot;#0&quot;) AND module(&quot;FragmentationShowcase.wifiHost2.app[0]&quot;) AND name(throughput:vector) &#10;runattr:experiment(ThresholdDCFfrag) AND runattr:measurement(&quot;$threshold=600&quot;) AND runattr:replication(&quot;#0&quot;) AND module(&quot;FragmentationShowcase.wifiHost2.app[0]&quot;) AND name(throughput:vector) &#10;runattr:experiment(ThresholdHCFfrag) AND runattr:measurement(&quot;$threshold=400&quot;) AND runattr:replication(&quot;#0&quot;) AND module(&quot;FragmentationShowcase.wifiHost2.app[0]&quot;) AND name(throughput:vector) &#10;runattr:experiment(ThresholdHCFfragblockack) AND runattr:measurement(&quot;$threshold=300&quot;) AND runattr:replication(&quot;#0&quot;) AND module(&quot;FragmentationShowcase.wifiHost2.app[0]&quot;) AND name(throughput:vector) &#10;runattr:experiment(ThresholdHCFfrag) AND runattr:measurement(&quot;$threshold=500&quot;) AND runattr:replication(&quot;#0&quot;) AND module(&quot;FragmentationShowcase.wifiHost2.app[0]&quot;) AND name(throughput:vector) &#10;runattr:experiment(ThresholdDCFfrag) AND runattr:measurement(&quot;$threshold=300&quot;) AND runattr:replication(&quot;#0&quot;) AND module(&quot;FragmentationShowcase.wifiHost2.app[0]&quot;) AND name(throughput:vector) &#10;runattr:experiment(ThresholdDCFfrag) AND runattr:measurement(&quot;$threshold=500&quot;) AND runattr:replication(&quot;#0&quot;) AND module(&quot;FragmentationShowcase.wifiHost2.app[0]&quot;) AND name(throughput:vector) &#10;runattr:experiment(ThresholdHCFfrag) AND runattr:measurement(&quot;$threshold=200&quot;) AND runattr:replication(&quot;#0&quot;) AND module(&quot;FragmentationShowcase.wifiHost2.app[0]&quot;) AND name(throughput:vector) &#10;runattr:experiment(ThresholdHCFfragblockack) AND runattr:measurement(&quot;$threshold=100&quot;) AND runattr:replication(&quot;#0&quot;) AND module(&quot;FragmentationShowcase.wifiHost2.app[0]&quot;) AND name(throughput:vector) &#10;runattr:experiment(ThresholdDCFfrag) AND runattr:measurement(&quot;$threshold=800&quot;) AND runattr:replication(&quot;#0&quot;) AND module(&quot;FragmentationShowcase.wifiHost2.app[0]&quot;) AND name(throughput:vector) &#10;runattr:experiment(ThresholdHCFfragblockack) AND runattr:measurement(&quot;$threshold=900&quot;) AND runattr:replication(&quot;#0&quot;) AND module(&quot;FragmentationShowcase.wifiHost2.app[0]&quot;) AND name(throughput:vector) &#10;runattr:experiment(ThresholdHCFfrag) AND runattr:measurement(&quot;$threshold=600&quot;) AND runattr:replication(&quot;#0&quot;) AND module(&quot;FragmentationShowcase.wifiHost2.app[0]&quot;) AND name(throughput:vector) &#10;runattr:experiment(ThresholdHCFfrag) AND runattr:measurement(&quot;$threshold=1000&quot;) AND runattr:replication(&quot;#0&quot;) AND module(&quot;FragmentationShowcase.wifiHost2.app[0]&quot;) AND name(throughput:vector) &#10;runattr:experiment(ThresholdDCFfrag) AND runattr:measurement(&quot;$threshold=900&quot;) AND runattr:replication(&quot;#0&quot;) AND module(&quot;FragmentationShowcase.wifiHost2.app[0]&quot;) AND name(throughput:vector) &#10;runattr:experiment(ThresholdDCFfrag) AND runattr:measurement(&quot;$threshold=400&quot;) AND runattr:replication(&quot;#0&quot;) AND module(&quot;FragmentationShowcase.wifiHost2.app[0]&quot;) AND name(throughput:vector) &#10;runattr:experiment(ThresholdHCFfragblockack) AND runattr:measurement(&quot;$threshold=400&quot;) AND runattr:replication(&quot;#0&quot;) AND module(&quot;FragmentationShowcase.wifiHost2.app[0]&quot;) AND name(throughput:vector) &#10;runattr:experiment(ThresholdHCFfrag) AND runattr:measurement(&quot;$threshold=100&quot;) AND runattr:replication(&quot;#0&quot;) AND module(&quot;FragmentationShowcase.wifiHost2.app[0]&quot;) AND name(throughput:vector) &#10;runattr:experiment(ThresholdHCFfrag) AND runattr:measurement(&quot;$threshold=700&quot;) AND runattr:replication(&quot;#0&quot;) AND module(&quot;FragmentationShowcase.wifiHost2.app[0]&quot;) AND name(throughput:vector) &#10;runattr:experiment(ThresholdDCFfrag) AND runattr:measurement(&quot;$threshold=1000&quot;) AND runattr:replication(&quot;#0&quot;) AND module(&quot;FragmentationShowcase.wifiHost2.app[0]&quot;) AND name(throughput:vector) &#10;runattr:experiment(ThresholdHCFfragblockack) AND runattr:measurement(&quot;$threshold=800&quot;) AND runattr:replication(&quot;#0&quot;) AND module(&quot;FragmentationShowcase.wifiHost2.app[0]&quot;) AND name(throughput:vector) &#10;runattr:experiment(ThresholdHCFfrag) AND runattr:measurement(&quot;$threshold=300&quot;) AND runattr:replication(&quot;#0&quot;) AND module(&quot;FragmentationShowcase.wifiHost2.app[0]&quot;) AND name(throughput:vector) &#10;runattr:experiment(ThresholdDCFfrag) AND runattr:measurement(&quot;$threshold=100&quot;) AND runattr:replication(&quot;#0&quot;) AND module(&quot;FragmentationShowcase.wifiHost2.app[0]&quot;) AND name(throughput:vector) &#10;runattr:experiment(ThresholdDCFfrag) AND runattr:measurement(&quot;$threshold=700&quot;) AND runattr:replication(&quot;#0&quot;) AND module(&quot;FragmentationShowcase.wifiHost2.app[0]&quot;) AND name(throughput:vector) &#10;runattr:experiment(ThresholdHCFfragblockack) AND runattr:measurement(&quot;$threshold=200&quot;) AND runattr:replication(&quot;#0&quot;) AND module(&quot;FragmentationShowcase.wifiHost2.app[0]&quot;) AND name(throughput:vector) &#10;runattr:experiment(ThresholdHCFfrag) AND runattr:measurement(&quot;$threshold=900&quot;) AND runattr:replication(&quot;#0&quot;) AND module(&quot;FragmentationShowcase.wifiHost2.app[0]&quot;) AND name(throughput:vector) &#10;runattr:experiment(ThresholdHCFfragblockack) AND runattr:measurement(&quot;$threshold=1000&quot;) AND runattr:replication(&quot;#0&quot;) AND module(&quot;FragmentationShowcase.wifiHost2.app[0]&quot;) AND name(throughput:vector) &#10;runattr:experiment(ThresholdHCFfragblockack) AND runattr:measurement(&quot;$threshold=500&quot;) AND runattr:replication(&quot;#0&quot;) AND module(&quot;FragmentationShowcase.wifiHost2.app[0]&quot;) AND name(throughput:vector) &#10;)"/>
             <property name="background_color" value=""/>
             <property name="title" value=""/>
         </chart>
         <chart icon="icons/full/obj/linechart.png" id="133" name="Throughput vs. SNIR in the case of 2000-byte packet size and 250-byte fragmentation threshold" template="linechart_mpl" type="MATPLOTLIB">
-            <script><![CDATA[# IDE version   OMNeT++ IDE    6.0.0.190710-009aaf6ab8
+            <script>
+                <![CDATA[# IDE version   OMNeT++ IDE    6.0.0.190710-009aaf6ab8
 
 from omnetpp.scave import results, chart
 import matplotlib.pyplot as plt
@@ -826,10 +927,22 @@ print(df_tp)
 
 plt.figure(figsize=(11,6))
 
+# define the order in which the columns will be plotted
+# also assign a color for each column
+column_order_color = [
+    ('TxPowerDCFnofrag',       '#2ca02c'),
+    ('TxPowerDCFfrag',         '#d62728'),
+    ('TxPowerHCFfrag',         '#1f77b4'),
+    ('TxPowerHCFfragblockack', '#ff7f0e')
+]
+
+print(df_tp)
+# iterate on the above list instead of the dataframe, so we dont
+# have to reorder the columns (and still get the desired order and colors)
 # For each column (experiment) we plot a line, taking the x coordinates
 # from df_snir, the y coordinates from df_tp
-for col in df_snir.columns:                     # Iterate on the column names (experiments) which is the same in both df's
-    plt.plot(df_snir[col], df_tp[col] / 1e6, marker='s',markersize=3)    # Also convert to Mbps
+for c in column_order_color:    # Iterate on the column names (experiments) which is the same in both df'
+    plt.plot(df_snir[c[0]], df_tp[c[0]] / 1e6, color=c[1], marker='s', markersize=3)    # Also convert to Mbps
 
 plt.xlim(14,28)
 plt.ylim(0,18)
@@ -851,10 +964,12 @@ handles, labels = ax.get_legend_handles_labels()
 newlabels = []
 for i in labels:
     newlabels.append(i.replace('TxPower',''))
-ax.legend(handles, newlabels, loc=1, ncol=4)
+ax.legend(handles, newlabels, loc=1, ncol=4, markerscale=2)
 
-plt.savefig('snir.png', transparent=True, dpi=150, bbox_inches='tight')]]></script>
-            <dialogPage id="Main" label="Main"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+plt.savefig('snir.png', transparent=True, dpi=150, bbox_inches='tight')]]>
+            </script>
+            <dialogPage id="Main" label="Main">
+                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -920,8 +1035,10 @@ Colors {
 
   </x:children>
 </xswt>
-]]></dialogPage>
-            <dialogPage id="Input" label="Input"><![CDATA[<?xml version='1.0' encoding='UTF-8'?>
+]]>
+            </dialogPage>
+            <dialogPage id="Input" label="Input">
+                <![CDATA[<?xml version='1.0' encoding='UTF-8'?>
 <xswt xmlns:x='http://sweet_swt.sf.net/xswt'>
   <import xmlns='http://sweet_swt.sf.net/xswt'>
     <package name='java.lang'/>
@@ -953,7 +1070,8 @@ Colors {
 
     </group>
   </x:children>
-</xswt>]]></dialogPage>
+</xswt>]]>
+            </dialogPage>
             <property name="filter" value="(&#10; (module(&quot;FragmentationShowcase.wifiHost2.app[0]&quot;) AND name(throughput:vector))&#10;   OR&#10; (module(&quot;FragmentationShowcase.wifiHost2.wlan[0].radio&quot;) AND name(minSnir:histogram))&#10;) &#10;&#10;AND&#10;((runattr:experiment(TxPowerDCFnofrag)&#10;  OR runattr:experiment(TxPowerDCFfrag)&#10;  OR runattr:experiment(TxPowerHCFfrag)&#10;  OR runattr:experiment(TxPowerHCFfragblockack)))"/>
             <property name="background_color" value=""/>
             <property name="title" value=""/>

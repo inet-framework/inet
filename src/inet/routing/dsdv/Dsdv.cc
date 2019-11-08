@@ -253,6 +253,7 @@ void Dsdv::handleMessageWhenUp(cMessage *msg)
                 if (src == source) {
                     EV_INFO << "Hello msg dropped. This message returned to the original creator.\n";
                     delete packet;
+                    delete fhp;
                     delete msg;
                     return;
                 }

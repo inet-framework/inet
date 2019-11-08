@@ -218,8 +218,8 @@ void EtherMac::handleUpperPacket(Packet *packet)
     }
 
     if (packet->getDataLength() > MAX_ETHERNET_FRAME_BYTES) {
-        throw cRuntimeError("Packet from higher layer (%d bytes) exceeds maximum Ethernet frame size (%d)",
-                (int)(packet->getByteLength()), MAX_ETHERNET_FRAME_BYTES);
+        throw cRuntimeError("Packet length from higher layer (%s) exceeds maximum Ethernet frame size (%s)",
+                packet->getDataLength().str().c_str(), MAX_ETHERNET_FRAME_BYTES.str().c_str());
     }
 
     if (!connected || disabled) {

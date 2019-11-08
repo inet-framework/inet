@@ -75,7 +75,7 @@ void SctpHeader::clean()
 
 void SctpHeader::setSctpChunksArraySize(size_t size)
 {
-    throw new cException(this, "setSctpChunkArraySize() not supported, use insertSctpChunks()");
+    throw cException(this, "setSctpChunkArraySize() not supported, use insertSctpChunks()");
 }
 
 void SctpHeader::setSctpChunks(size_t k, SctpChunk *chunk)
@@ -190,7 +190,7 @@ void SctpErrorChunk::copy(const SctpErrorChunk& other)
 
 void SctpErrorChunk::setParametersArraySize(size_t size)
 {
-    throw new cException(this, "setParametersArraySize() not supported, use addParameter()");
+    throw cException(this, "setParametersArraySize() not supported, use addParameter()");
 }
 
 size_t SctpErrorChunk::getParametersArraySize() const
@@ -205,7 +205,7 @@ SctpParameter * SctpErrorChunk::getParameters(size_t k) const
 
 void SctpErrorChunk::setParameters(size_t k, SctpParameter * parameters)
 {
-    throw new cException(this, "setParameter() not supported, use addParameter()");
+    throw cException(this, "setParameter() not supported, use addParameter()");
 }
 
 void SctpErrorChunk::addParameters(SctpParameter *msg)
@@ -266,7 +266,7 @@ void SctpStreamResetChunk::copy(const SctpStreamResetChunk& other)
 
 void SctpStreamResetChunk::setParametersArraySize(size_t size)
 {
-    throw new cException(this, "setParametersArraySize() not supported, use addParameter()");
+    throw cException(this, "setParametersArraySize() not supported, use addParameter()");
 }
 
 size_t SctpStreamResetChunk::getParametersArraySize() const
@@ -281,7 +281,7 @@ const SctpParameter * SctpStreamResetChunk::getParameters(size_t k) const
 
 void SctpStreamResetChunk::setParameters(size_t k, SctpParameter * parameters)
 {
-    throw new cException(this, "setParameters() not supported, use addParameter()");
+    throw cException(this, "setParameters() not supported, use addParameter()");
 }
 
 void SctpStreamResetChunk::addParameter(SctpParameter *msg)
@@ -348,7 +348,7 @@ SctpAsconfChunk& SctpAsconfChunk::operator=(const SctpAsconfChunk& other)
 
 void SctpAsconfChunk::setAsconfParamsArraySize(size_t size)
 {
-    throw new cException(this, "setAsconfParamsArraySize() not supported, use addAsconfParam()");
+    throw cException(this, "setAsconfParamsArraySize() not supported, use addAsconfParam()");
 }
 
 size_t SctpAsconfChunk::getAsconfParamsArraySize() const
@@ -363,7 +363,7 @@ const SctpParameter * SctpAsconfChunk::getAsconfParams(size_t k) const
 
 void SctpAsconfChunk::setAsconfParams(size_t k, SctpParameter * asconfParams)
 {
-    throw new cException(this, "setAsconfParams() not supported, use addAsconfParam()");
+    throw cException(this, "setAsconfParams() not supported, use addAsconfParam()");
 }
 
 void SctpAsconfChunk::addAsconfParam(SctpParameter *msg)
@@ -400,7 +400,7 @@ SctpAsconfAckChunk& SctpAsconfAckChunk::operator=(const SctpAsconfAckChunk& othe
 
 void SctpAsconfAckChunk::setAsconfResponseArraySize(size_t size)
 {
-    throw new cException(this, "setAsconfResponseArraySize() not supported, use addAsconfResponse()");
+    throw cException(this, "setAsconfResponseArraySize() not supported, use addAsconfResponse()");
 }
 
 size_t SctpAsconfAckChunk::getAsconfResponseArraySize() const
@@ -415,7 +415,7 @@ SctpParameter * SctpAsconfAckChunk::getAsconfResponse(size_t k) const
 
 void SctpAsconfAckChunk::setAsconfResponse(size_t k, SctpParameter * asconfResponse)
 {
-    throw new cException(this, "setAsconfresponse() not supported, use addAsconfResponse()");
+    throw cException(this, "setAsconfresponse() not supported, use addAsconfResponse()");
 }
 
 void SctpAsconfAckChunk::addAsconfResponse(SctpParameter *msg)

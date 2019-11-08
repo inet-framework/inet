@@ -3352,7 +3352,7 @@ SctpEventCode SctpAssociation::processAsconfAckArrived(SctpAsconfAckChunk *ascon
                         }
                     }
                     if (errorFound == true) {
-                        delete delParam;
+                        delete priParam;
                         break;
                     }
                     delete priParam;

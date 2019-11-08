@@ -23,6 +23,12 @@
 
 namespace inet {
 
+#if defined(__clang__)
+#  pragma clang diagnostic ignored "-Wdeprecated-declarations"
+#elif defined(__GNUC__)
+#  pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#endif
+
 extern "C" {
 #include <libavutil/opt.h>
 }
@@ -309,7 +315,6 @@ Packet *VoipStreamSender::generatePacket()
     int samples = std::min(sampleBuffer.length() / (bytesPerInSample), samplesPerPacket);
     int inBytes = samples * bytesPerInSample;
     bool isSilent = checkSilence(pEncoderCtx->sample_fmt, sampleBuffer.readPtr(), samples);
-    Packet *pk = new Packet();
     const auto& vp = makeShared<VoipStreamPacket>();
 
     AVPacket opacket;
@@ -340,6 +345,7 @@ Packet *VoipStreamSender::generatePacket()
         outFile.write(sampleBuffer.readPtr(), inBytes);
     sampleBuffer.notifyRead(inBytes);
 
+    Packet *pk = new Packet();
     if (isSilent) {
         pk->setName("SILENCE");
         vp->setType(SILENCE);

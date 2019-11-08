@@ -287,6 +287,7 @@ void PimSm::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj
         const auto& ipv4Header = pk->peekAtFront<Ipv4Header>();
         PimInterface *incomingInterface = getIncomingInterface(check_and_cast<InterfaceEntry *>(details));
         Route *route = findRouteSG(ipv4Header->getSrcAddress(), ipv4Header->getDestAddress());
+        (void)route;    //TODO unused variable
         if (incomingInterface && incomingInterface->getMode() == PimInterface::SparseMode)
             multicastPacketForwarded(pk);
     }

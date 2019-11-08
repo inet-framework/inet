@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/streetmap/OpenOpenStreetMap.h"
+#include "inet/common/streetmap/OpenStreetMap.h"
 
 namespace inet {
 

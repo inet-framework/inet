@@ -56,7 +56,7 @@ unsigned int ByteArrayBuffer::getBytesToBuffer(void *bufferP, unsigned int buffe
     unsigned int copiedBytes = 0;
     DataList::const_iterator i;
 
-    for (i = this->dataListM.begin(); (copiedBytes < bufferLengthP) && (i != dataListM.end()); ++i) {
+    for (i = dataListM.begin(); (copiedBytes < bufferLengthP) && (i != dataListM.end()); ++i) {
         unsigned int cbytes = i->copyDataToBuffer((char *)bufferP + copiedBytes,
                     bufferLengthP - copiedBytes, srcOffsP);
         if (cbytes) {

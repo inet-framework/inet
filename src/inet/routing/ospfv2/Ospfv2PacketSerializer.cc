@@ -310,6 +310,7 @@ void Ospfv2PacketSerializer::deserializeRouterLsa(MemoryInputStream& stream, con
             link->setTosData(j, *tos);
         }
         routerLsa.setLinks(i, *link);
+        delete link;
     }
 }
 
@@ -401,6 +402,7 @@ void Ospfv2PacketSerializer::deserializeAsExternalLsa(MemoryInputStream& stream,
         extTos->forwardingAddress = stream.readIpv4Address();
         extTos->externalRouteTag = stream.readUint32Be();
         contents.setExternalTOSInfo(i, *extTos);
+        delete extTos;
     }
 }
 
