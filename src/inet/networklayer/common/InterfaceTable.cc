@@ -498,6 +498,17 @@ InterfaceEntry *InterfaceTable::getFirstLoopbackInterface() const
     return nullptr;
 }
 
+InterfaceEntry *InterfaceTable::getFirstNonLoopbackInterface() const
+{
+    Enter_Method_Silent();
+    int n = idToInterface.size();
+    for (int i = 0; i < n; i++)
+        if (idToInterface[i] && !idToInterface[i]->isLoopback())
+            return idToInterface[i];
+
+    return nullptr;
+}
+
 InterfaceEntry *InterfaceTable::getFirstMulticastInterface() const
 {
     Enter_Method_Silent();

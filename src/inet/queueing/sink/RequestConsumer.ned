@@ -44,14 +44,14 @@ module RequestConsumer like IPassivePacketSink
         }
         server: <default("TokenBasedServer")> like IPacketServer {
             initialNumTokens = default(1);
-            @display("p=200,200");
+            @display("p=200,225");
         }
         classifier: <default("PacketClassifier")> like IPacketClassifier {
-            @display("p=200,300");
+            @display("p=200,350");
         }
         tokenGenerator[numKind]: <default("PacketBasedTokenGenerator")> like IPassivePacketSink {
             serverModule = default("^." + responseProducerModule + ".server[" + string(index) + "]");
-            @display("p=200,400,row,200");
+            @display("p=200,475,row,300");
         }
     connections:
         in --> queue.in;

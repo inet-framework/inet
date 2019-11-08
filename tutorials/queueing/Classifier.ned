@@ -2,7 +2,7 @@
 package inet.tutorials.queueing;
 
 import inet.queueing.sink.PassivePacketSink;
-import inet.queueing.classifier.PacketClassifier;
+import inet.queueing.classifier.WrrClassifier;
 import inet.queueing.source.ActivePacketSource;
 
 network ClassifierNetwork
@@ -12,7 +12,7 @@ network ClassifierNetwork
         producer: ActivePacketSource {
             @display("p=100,100");
         }
-        classifier: PacketClassifier {
+        classifier: WrrClassifier {
             @display("p=300,100");
         }
         consumer1: PassivePacketSink {

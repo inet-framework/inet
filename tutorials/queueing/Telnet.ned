@@ -1,11 +1,5 @@
 package inet.tutorials.queueing;
 
-import inet.applications.contract.IApp;
-import inet.applications.tcpapp.TcpServerSocketIo;
-import inet.applications.tcpapp.TelnetClientApp;
-import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
-import inet.node.ethernet.Eth100M;
-import inet.node.inet.StandardHost;
 import inet.queueing.common.PacketCloner;
 import inet.queueing.common.PacketMultiplexer;
 import inet.queueing.contract.IActivePacketSource;
@@ -17,32 +11,6 @@ import inet.queueing.contract.IPassivePacketSource;
 import inet.queueing.tokengenerator.PacketBasedTokenGenerator;
 
 
-network TelnetNetwork_
-{
-    submodules:
-        client: StandardHost {
-            @display("p=100,100");
-        }
-        server: StandardHost {
-            @display("p=200,100");
-        }
-        configurator: Ipv4NetworkConfigurator {
-            @display("p=50,50");
-        }
-    connections:
-        client.ethg++ <--> Eth100M <--> server.ethg++;
-}
-
-//network Tel2
-//{
-//    submodules:
-//        client: TelnetClientApp;
-//        server: TelnetServerConnection;
-//    connections:
-//        client.socketOut --> server.socketIn;
-//        client.socketIn <-- server.socketOut;
-//}
-
 network TelnetNetwork
 {
     @display("bgb=400,200");
@@ -50,8 +18,7 @@ network TelnetNetwork
         client: TelnetClientTraffic {
             @display("p=100,100");
         }
-        server: TelnetServerTraffic
-        {
+        server: TelnetServerTraffic {
             @display("p=300,100");
         }
     connections:
@@ -113,7 +80,7 @@ module TelnetServerTraffic
     submodules:
         cloner: PacketCloner {
             parameters:
-                @display("p=300,200");
+                @display("p=300,225");
         }
         responseProvider: <default("PassivePacketSource")> like IPassivePacketSource {
             parameters:
@@ -121,25 +88,25 @@ module TelnetServerTraffic
         }
         responseServer: <default("TokenBasedServer")> like IPacketServer {
             parameters:
-                @display("p=100,200");
+                @display("p=100,225");
         }
         multiplexer: PacketMultiplexer {
             parameters:
-                @display("p=200,300");
+                @display("p=200,350");
         }
         classifier: <default("PacketClassifier")> like IPacketClassifier {
             parameters:
                 classifierClass = default("inet::queueing::PacketCharacterOrEnterClassifier");
-                @display("p=500,200");
+                @display("p=500,225");
         }
         characterConsumer: <default("PassivePacketSink")> like IPassivePacketSink {
             parameters:
-                @display("p=400,300");
+                @display("p=400,350");
         }
         enterTokenGenerator: PacketBasedTokenGenerator {
             parameters:
                 serverModule = default("^.responseServer");
-                @display("p=600,300");
+                @display("p=600,350");
         }
     connections:
         in --> { @display("m=s"); } --> cloner.in;

@@ -26,6 +26,7 @@ import inet.queueing.contract.IPacketSource;
 simple PacketTaggerBase extends PacketProcessorBase
 {
     parameters:
+        int dscp = default(-1); // specifies differentiated services code point
         string interfaceName = default(""); // specifies outgoing interface, unused by default
         int hopLimit = default(-1); // specifies network layer TTL, unused by default
         int vlanId = default(-1); // specifies VLAN, unused by default

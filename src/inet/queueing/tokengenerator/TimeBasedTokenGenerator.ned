@@ -17,14 +17,14 @@
 
 package inet.queueing.tokengenerator;
 
+import inet.queueing.base.TokenGeneratorBase;
+
 //
 // This module generates tokens for a ~TokenBasedServer repeatedly.
 //
-simple TimeBasedTokenGenerator
+simple TimeBasedTokenGenerator extends TokenGeneratorBase
 {
     parameters:
-        string serverModule; // module path of the packet server where the tokens are generated via C++ method call
-        string displayStringTextFormat = default("generated %t tk"); // determines display string text above the submodule
         volatile double generationInterval @unit(s); // time interval between two subsequent token generation events
         volatile double numTokens = default(1); // number of tokens generated repeatedly
         @class(TimeBasedTokenGenerator);

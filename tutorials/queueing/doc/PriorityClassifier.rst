@@ -14,7 +14,7 @@ TODO
 The network contains ... TODO
 
 .. figure:: media/PriorityClassifier.png
-   :width: 80%
+   :width: 90%
    :align: center
 
 **TODO** Config

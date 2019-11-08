@@ -8,7 +8,7 @@ import inet.queueing.source.PassivePacketSource;
 network DemultiplexerNetwork
 {
     parameters:
-    	@display("bgb=600,200");
+//    	@display("bgb=600");
         int numCollectors;
     submodules:
         provider: PassivePacketSource {
@@ -18,7 +18,7 @@ network DemultiplexerNetwork
             @display("p=300,100");
         }
         collector[numCollectors]: ActivePacketSink {
-            @display("p=500,100");
+            @display("p=500,100,c,100");
         }
     connections allowunconnected:
         provider.out --> demultiplexer.in;

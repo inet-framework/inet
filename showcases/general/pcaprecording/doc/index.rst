@@ -52,7 +52,7 @@ should be recorded. It takes a space separated list of module names. For
 selecting a module vector, ``[*]`` can be used. The recorded modules are
 on the same level in the hierarchy as the PCAP recorder module. The
 default value for the :par:`moduleNamePatterns` parameter is
-``wlan[*] eth[*] ppp[*] ext[*]``, so it records the most commonly
+``wlan[*] eth[*] ppp[*]``, so it records the most commonly
 present L2 interfaces. The :par:`dumpProtocols` parameter is a filter and
 selects which protocols to include in the capture. It matches packets
 which are of the specified protocol type at the level of capture, but

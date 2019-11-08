@@ -156,7 +156,7 @@ void HttpBrowserBase::initialize(int stage)
         else {
             double activationTime = par("activationTime");    // This is the activation delay. Optional
             if (rdActivityLength != nullptr)
-                activationTime += (86400.0 - rdActivityLength->draw()) / 2; // First activate after half the sleep period
+                activationTime += std::max(0.0, 86400.0 - rdActivityLength->draw()) / 2.0; // First activate after half the sleep period
             EV_INFO << "Initial activation time is " << activationTime << endl;
             eventTimer->setKind(MSGKIND_ACTIVITY_START);
             scheduleAt(simTime() + activationTime, eventTimer);
@@ -216,9 +216,9 @@ void HttpBrowserBase::handleSelfActivityStart()
     eventTimer->setKind(MSGKIND_START_SESSION);
     messagesInCurrentSession = 0;
     reqNoInCurSession = 0;
-    double activityPeriodLength = rdActivityLength->draw();    // Get the length of the activity period
+    double activityPeriodLength = (rdActivityLength != nullptr) ? rdActivityLength->draw() : 0.0;    // Get the length of the activity period
     acitivityPeriodEnd = simTime() + activityPeriodLength;    // The end of the activity period
-    EV_INFO << "Activity period starts @ T=" << simTime() << ". Activity period is " << activityPeriodLength / 3600 << " hours." << endl;
+    EV_INFO << "Activity period starts @ T=" << simTime() << ". Activity period is " << (activityPeriodLength / 3600.0) << " hours." << endl;
     scheduleAt(simTime() + simtime_t(rdInterSessionInterval->draw()) / 2, eventTimer);
 }
 
@@ -491,7 +491,7 @@ void HttpBrowserBase::scheduleNextBrowseEvent()
             // Schedule the next activity period start. This corresponds to to a working day or home time, ie. time
             // when the user is near his workstation and periodically browsing the web. Inactivity periods then
             // correspond to sleep time or time away from the office
-            simtime_t activationTime = simTime() + (86400.0 - rdActivityLength->draw());    // Sleep for a while
+            simtime_t activationTime = simTime() + std::max(0.0, 86400.0 - rdActivityLength->draw());    // Sleep for a while
             EV_INFO << "Terminating current activity @ T=" << simTime() << ". Next activation time is " << activationTime << endl;
             eventTimer->setKind(MSGKIND_ACTIVITY_START);
             scheduleAt(activationTime, eventTimer);

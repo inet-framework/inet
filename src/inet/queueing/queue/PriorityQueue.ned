@@ -33,7 +33,7 @@ module PriorityQueue extends CompoundPacketQueue
     submodules:
         buffer: <default("PriorityBuffer")> like IPacketBuffer if typename != "" {
             parameters:
-                @display("p=100,200");
+                @display("p=100,225");
         }
         classifier: <default("PacketClassifier")> like IPacketClassifier {
             parameters:
@@ -42,11 +42,11 @@ module PriorityQueue extends CompoundPacketQueue
         queue[numQueues]: <default("PacketQueue")> like IPacketQueue {
             parameters:
                 bufferModule = default(exists(buffer) ? "^.buffer" : "");
-                @display("p=300,100,column,100");
+                @display("p=325,100,column,125");
         }
         scheduler: <default("PriorityScheduler")> like IPacketScheduler {
             parameters:
-                @display("p=500,100");
+                @display("p=550,100");
         }
     connections:
         in --> { @display("m=w"); } --> classifier.in;

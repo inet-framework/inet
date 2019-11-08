@@ -661,6 +661,7 @@ void Ieee80211MgmtSta::handleAssociationResponseFrame(Packet *packet, const Ptr<
         EV << "Association successful, AP address=" << ap->address << "\n";
 
         // change our state to "associated"
+        mib->bssData.ssid = ap->ssid;
         mib->bssData.bssid = ap->address;
         mib->bssStationData.isAssociated = true;
         (ApInfo&)assocAP = (*ap);

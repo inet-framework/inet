@@ -184,7 +184,7 @@ class INET_API NetworkConfiguratorBase : public cSimpleModule, public L3AddressR
     virtual double computeWirelessLinkWeight(Link *link, const char *metric, cXMLElement *parameters);
     virtual bool isBridgeNode(Node *node);
     virtual bool isWirelessInterface(InterfaceEntry *interfaceEntry);
-    virtual const char *getWirelessId(InterfaceEntry *interfaceEntry);
+    virtual std::string getWirelessId(InterfaceEntry *interfaceEntry);
     virtual InterfaceInfo *createInterfaceInfo(Topology& topology, Node *node, LinkInfo *linkInfo, InterfaceEntry *interfaceEntry);
     virtual Topology::LinkOut *findLinkOut(Node *node, int gateId);
     virtual InterfaceInfo *findInterfaceInfo(Node *node, InterfaceEntry *interfaceEntry);

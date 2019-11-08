@@ -1358,7 +1358,7 @@ const Ptr<Chunk> SctpHeaderSerializer::deserialize(MemoryInputStream& stream) co
                             }
 
                             default: {
-                                EV_INFO << "ExtInterface: Unknown Sctp INIT parameter type " << paramType << "\n";
+                                EV_INFO << "Unknown Sctp INIT parameter type " << paramType << "\n";
                                 uint16 skip = (paramType & 0x8000) >> 15;
                                 if (skip == 0)
                                     stopProcessing = true;
@@ -1569,7 +1569,7 @@ const Ptr<Chunk> SctpHeaderSerializer::deserialize(MemoryInputStream& stream) co
                             }
 
                             default: {
-                                EV_INFO << "ExtInterface: Unknown SCTP INIT-ACK parameter type " << paramType << "\n";
+                                EV_INFO << "Unknown SCTP INIT-ACK parameter type " << paramType << "\n";
                                 uint16 skip = (paramType & 0x8000) >> 15;
                                 if (skip == 0)
                                     stopProcessing = true;
@@ -1969,7 +1969,7 @@ const Ptr<Chunk> SctpHeaderSerializer::deserialize(MemoryInputStream& stream) co
                             }
 
                             default:
-                                EV << "ExtInterface: Unknown Sctp parameter type " << paramType;
+                                EV << "Unknown Sctp parameter type " << paramType;
                                 /*throw new cRuntimeError("TODO: unknown parametertype in incoming packet from external interface! Implement it!");*/
                                 break;
                         }
@@ -2020,7 +2020,7 @@ const Ptr<Chunk> SctpHeaderSerializer::deserialize(MemoryInputStream& stream) co
                             }
 
                             default:
-                                EV << "ExtInterface: Unknown Sctp parameter type " << paramType;
+                                EV << "Unknown Sctp parameter type " << paramType;
                                 break;
                         }
                         parptr += ADD_PADDING(paramLength);

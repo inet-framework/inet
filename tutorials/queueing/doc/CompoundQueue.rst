@@ -11,6 +11,10 @@ and a priorty scheduler (PriortyScheduler).
 The network contains ... TODO
 
 .. figure:: media/CompoundQueue.png
+   :width: 70%
+   :align: center
+
+.. figure:: media/CompoundQueue_Queue.png
    :width: 80%
    :align: center
 

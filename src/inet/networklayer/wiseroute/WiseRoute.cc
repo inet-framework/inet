@@ -84,7 +84,11 @@ void WiseRoute::initialize(int stage)
         sinkAddress = addressResolver.resolve(par("sinkAddress"));
 
         IInterfaceTable *interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
-        myNetwAddr = interfaceTable->getInterface(1)->getNetworkAddress();
+        auto ie = interfaceTable->getFirstNonLoopbackInterface();
+        if (ie != nullptr)
+            myNetwAddr = ie->getNetworkAddress();
+        else
+            throw cRuntimeError("No non-loopback interface found!");
 
         // only schedule a flood of the node is a sink!!
         if (routeFloodsInterval > 0 && myNetwAddr == sinkAddress)

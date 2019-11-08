@@ -42,6 +42,7 @@ void ExtLowerUdp::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
+        packetNameFormat = par("packetName");
         if (auto scheduler = dynamic_cast<RealTimeScheduler *>(getSimulation()->getScheduler())) {
             rtScheduler = scheduler;
         }
@@ -304,10 +305,11 @@ void ExtLowerUdp::processPacketFromLower(int fd)
         if (n < 0)
             throw cRuntimeError("Calling recv failed: %d", n);
         auto data = makeShared<BytesChunk>(static_cast<const uint8_t *>(buffer), n);
-        auto packet = new Packet("ExtLowerUdp", data);
+        auto packet = new Packet(nullptr, data);
         packet->addTag<SocketInd>()->setSocketId(socket->socketId);
         packet->addTag<L3AddressInd>()->setSrcAddress(Ipv4Address(ntohl(sockaddr.sin_addr.s_addr)));
         packet->addTag<L4PortInd>()->setSrcPort(ntohs(sockaddr.sin_port));
+        packet->setName(packetPrinter.printPacketToString(packet, packetNameFormat).c_str());
         emit(packetReceivedSignal, packet);
         send(packet, "appOut");
         emit(packetSentToUpperSignal, packet);

@@ -215,11 +215,15 @@ class INET_API InterfaceTable : public OperationalBase, public IInterfaceTable, 
 
     /**
      * Returns the first interface with the isLoopback flag set.
-     * (If there's no loopback, it returns nullptr -- but this
-     * should never happen because InterfaceTable itself registers a
-     * loopback interface on startup.)
+     * If there's no loopback, it returns nullptr.
      */
     virtual InterfaceEntry *getFirstLoopbackInterface() const override;
+
+    /**
+     * Returns the first interface with the isLoopback flag unset.
+     * If there's no non-loopback, it returns nullptr.
+     */
+    virtual InterfaceEntry *getFirstNonLoopbackInterface() const override;
 
     /**
      * Returns the first multicast capable interface.

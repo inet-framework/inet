@@ -34,8 +34,9 @@ namespace inet {
 
 namespace visualizer {
 
-InterfaceTableVisualizerBase::InterfaceVisualization::InterfaceVisualization(int networkNodeId, int interfaceId) :
+InterfaceTableVisualizerBase::InterfaceVisualization::InterfaceVisualization(int networkNodeId, int networkNodeGateId, int interfaceId) :
     networkNodeId(networkNodeId),
+    networkNodeGateId(networkNodeGateId),
     interfaceId(interfaceId)
 {
 }
@@ -166,6 +167,32 @@ void InterfaceTableVisualizerBase::unsubscribe()
         visualizationSubjectModule->unsubscribe(interfaceDeletedSignal, this);
         visualizationSubjectModule->unsubscribe(interfaceConfigChangedSignal, this);
         visualizationSubjectModule->unsubscribe(interfaceIpv4ConfigChangedSignal, this);
+    }
+}
+
+cModule *InterfaceTableVisualizerBase::getNetworkNode(const InterfaceVisualization *interfaceVisualization)
+{
+    return getSimulation()->getModule(interfaceVisualization->networkNodeId);
+}
+
+cGate *InterfaceTableVisualizerBase::getOutputGate(cModule *networkNode, InterfaceEntry *interfaceEntry)
+{
+    if (interfaceEntry->getNodeOutputGateId() == -1)
+        return nullptr;
+    cGate *outputGate = networkNode->gate(interfaceEntry->getNodeOutputGateId());
+    if (outputGate == nullptr || outputGate->getChannel() == nullptr)
+        return nullptr;
+    else
+        return outputGate;
+}
+
+cGate *InterfaceTableVisualizerBase::getOutputGate(const InterfaceVisualization *interfaceVisualization)
+{
+    if (interfaceVisualization->networkNodeGateId == -1)
+        return nullptr;
+    else {
+        auto networkNode = getNetworkNode(interfaceVisualization);
+        return networkNode != nullptr ? networkNode->gate(interfaceVisualization->networkNodeGateId) : nullptr;
     }
 }
 

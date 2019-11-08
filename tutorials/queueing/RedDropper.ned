@@ -1,7 +1,7 @@
 
 package inet.tutorials.queueing;
 
-import inet.queueing.classifier.PacketClassifier;
+import inet.queueing.classifier.WrrClassifier;
 import inet.queueing.filter.RedDropper;
 import inet.queueing.queue.PacketQueue;
 import inet.queueing.scheduler.PriorityScheduler;
@@ -16,7 +16,7 @@ network RedDropperNetwork
         producer: ActivePacketSource {
             @display("p=100,100");
         }
-        classifier: PacketClassifier {
+        classifier: WrrClassifier {
             @display("p=300,100");
         }
         dropper1: RedDropper {

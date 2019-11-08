@@ -2,7 +2,7 @@
 package inet.tutorials.queueing;
 
 import inet.queueing.sink.PassivePacketSink;
-import inet.queueing.filter.PacketFilter;
+import inet.queueing.filter.ContentBasedFilter;
 import inet.queueing.source.ActivePacketSource;
 
 network Filter1Network
@@ -12,7 +12,7 @@ network Filter1Network
         producer: ActivePacketSource {
             @display("p=100,100");
         }
-        filter: PacketFilter {
+        filter: ContentBasedFilter {
             @display("p=300,100");
         }
         consumer: PassivePacketSink {

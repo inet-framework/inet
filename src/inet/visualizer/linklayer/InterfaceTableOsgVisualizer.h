@@ -41,7 +41,7 @@ class INET_API InterfaceTableOsgVisualizer : public InterfaceTableVisualizerBase
         osg::Node *node = nullptr;
 
       public:
-        InterfaceOsgVisualization(NetworkNodeOsgVisualization *networkNodeVisualization, osg::Node *node, int networkNodeId, int interfaceId);
+        InterfaceOsgVisualization(NetworkNodeOsgVisualization *networkNodeVisualization, osg::Node *node, int networkNodeId, int networkNodeGateId, int interfaceId);
     };
 
   protected:

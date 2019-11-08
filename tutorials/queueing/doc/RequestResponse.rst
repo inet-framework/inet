@@ -22,7 +22,15 @@ TODO
 
 The network contains ... TODO
 
+.. figure:: media/ResponseProducer.png
+   :width: 70%
+   :align: center
+
 .. figure:: media/RequestResponse.png
+   :width: 50%
+   :align: center
+
+.. figure:: media/RequestConsumer.png
    :width: 80%
    :align: center
 

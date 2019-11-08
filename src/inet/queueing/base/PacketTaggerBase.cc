@@ -19,6 +19,7 @@
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/UserPriorityTag_m.h"
 #include "inet/linklayer/common/VlanTag_m.h"
+#include "inet/networklayer/common/DscpTag_m.h"
 #include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/physicallayer/contract/packetlevel/SignalTag_m.h"
 #include "inet/queueing/base/PacketTaggerBase.h"
@@ -30,6 +31,7 @@ void PacketTaggerBase::initialize(int stage)
 {
     PacketMarkerBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
+        dscp = par("dscp");
         hopLimit = par("hopLimit");
         vlanId = par("vlanId");
         userPriority = par("userPriority");
@@ -47,6 +49,10 @@ void PacketTaggerBase::initialize(int stage)
 
 void PacketTaggerBase::markPacket(Packet *packet)
 {
+    if (dscp != -1) {
+        EV_DEBUG << "Attaching DscpReq to " << packet->getName() << " with dscp = " << dscp << std::endl;
+        packet->addTagIfAbsent<DscpReq>()->setDifferentiatedServicesCodePoint(dscp);
+    }
     if (interfaceId != -1) {
         EV_DEBUG << "Attaching InterfaceReq to " << packet->getName() << " with interfaceId = " << interfaceId << std::endl;
         packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(interfaceId);

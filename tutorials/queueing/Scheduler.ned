@@ -2,7 +2,7 @@
 package inet.tutorials.queueing;
 
 import inet.queueing.sink.ActivePacketSink;
-import inet.queueing.scheduler.PacketScheduler;
+import inet.queueing.scheduler.WrrScheduler;
 import inet.queueing.source.PassivePacketSource;
 
 network SchedulerNetwork
@@ -15,7 +15,7 @@ network SchedulerNetwork
         provider2: PassivePacketSource {
             @display("p=100,200");
         }
-        scheduler: PacketScheduler {
+        scheduler: WrrScheduler {
             @display("p=300,100");
         }
         collector: ActivePacketSink {

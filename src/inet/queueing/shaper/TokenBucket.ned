@@ -33,15 +33,15 @@ module TokenBucket
     submodules:
         queue: <default("DropTailQueue")> like IPacketQueue {
             parameters:
-                @display("p=100,120");
+                @display("p=150,120");
         }
         server: <default("TokenBasedServer")> like IPacketServer {
             parameters:
-                @display("p=220,120");
+                @display("p=350,120");
         }
     connections:
-        in --> queue.in;
+        in --> { @display("m=w"); } --> queue.in;
         queue.out --> server.in;
-        server.out --> out;
+        server.out --> { @display("m=e"); } --> out;
 }
 
