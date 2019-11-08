@@ -1091,7 +1091,7 @@ void SctpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
             }
 
             default:
-                throw new cRuntimeError("TODO: unknown chunktype in outgoing packet on external interface! Implement it!");
+                throw cRuntimeError("TODO: unknown chunktype in outgoing packet on external interface! Implement it!");
         }
     }
     // calculate the HMAC if required
@@ -1171,7 +1171,7 @@ const Ptr<Chunk> SctpHeaderSerializer::deserialize(MemoryInputStream& stream) co
                 const struct data_chunk *dc = (struct data_chunk *)(chunks + chunkPtr);
                 EV_DETAIL << "cLen=" << cLen << "\n";
                 if (cLen == 0)
-                    throw new cRuntimeError("Incoming SCTP packet contains data chunk with length==0");
+                    throw cRuntimeError("Incoming SCTP packet contains data chunk with length==0");
                 SctpDataChunk *chunk = new SctpDataChunk("DATA");
                 chunk->setSctpChunkType(chunkType);
                 chunk->setUBit(dc->flags & UNORDERED_BIT);
@@ -1914,7 +1914,7 @@ const Ptr<Chunk> SctpHeaderSerializer::deserialize(MemoryInputStream& stream) co
                     parcounter++;
                     if (ntohs(ipv4addr->type) != INIT_PARAM_IPV4) {
                         if (parlen == 0)
-                            throw new cRuntimeError("ParamLen == 0.");
+                            throw cRuntimeError("ParamLen == 0.");
                         continue;
                     }
                     else {
@@ -1970,7 +1970,7 @@ const Ptr<Chunk> SctpHeaderSerializer::deserialize(MemoryInputStream& stream) co
 
                             default:
                                 EV << "Unknown Sctp parameter type " << paramType;
-                                /*throw new cRuntimeError("TODO: unknown parametertype in incoming packet from external interface! Implement it!");*/
+                                /*throw cRuntimeError("TODO: unknown parametertype in incoming packet from external interface! Implement it!");*/
                                 break;
                         }
                         parptr += ADD_PADDING(paramLength);
