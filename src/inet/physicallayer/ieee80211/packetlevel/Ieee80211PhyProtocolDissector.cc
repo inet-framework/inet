@@ -46,8 +46,8 @@ void Ieee80211PhyProtocolDissector::dissect(Packet *packet, const Protocol *prot
     auto payloadEndOffset = packet->getFrontOffset();
     const auto& header = physicallayer::Ieee80211Radio::popIeee80211PhyHeaderAtFront(packet, b(-1), Chunk::PF_ALLOW_INCORRECT);
     callback.visitChunk(header, protocolTag);
-    payloadEndOffset += header->getChunkLength() + B(header->getLengthField());
-    bool incorrect = (payloadEndOffset > originalBackOffset || header->getLengthField() < header->getChunkLength());
+    payloadEndOffset += header->getChunkLength() + header->getLengthField();
+    bool incorrect = (payloadEndOffset > originalBackOffset || b(header->getLengthField()) < header->getChunkLength());
     if (incorrect) {
         callback.markIncorrect();
         payloadEndOffset = originalBackOffset;
