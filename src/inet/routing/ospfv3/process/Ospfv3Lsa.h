@@ -175,7 +175,7 @@ class INET_API Ospfv3SpfVertex
     Ospfv3Lsa* asocLSA;
     int distance; //link state cost of the current set of shortest paths from the root
     uint16_t type; //router or network lsa
-    Ospfv3SpfVertex* parent = nullptr;
+    // Ospfv3SpfVertex* parent = nullptr;   //TODO unused field
 
   public:
     Ospfv3SpfVertex(Ospfv3Lsa* asocLSA, int distance);
