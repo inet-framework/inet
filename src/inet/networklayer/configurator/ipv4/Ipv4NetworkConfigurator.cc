@@ -68,6 +68,7 @@ void Ipv4NetworkConfigurator::initialize(int stage)
     NetworkConfiguratorBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         assignAddressesParameter = par("assignAddresses");
+        assignUniqueAddresses = par("assignUniqueAddresses");
         assignDisjunctSubnetAddressesParameter = par("assignDisjunctSubnetAddresses");
         addStaticRoutesParameter = par("addStaticRoutes");
         addSubnetRoutesParameter = par("addSubnetRoutes");
@@ -585,7 +586,7 @@ void Ipv4NetworkConfigurator::assignAddresses(std::vector<LinkInfo *> links)
                 uint32 completeNetmask = networkNetmask;
 
                 // check if we could really find a unique IP address
-                if (assignedAddressToInterfaceEntryMap.find(completeAddress) != assignedAddressToInterfaceEntryMap.end())
+                if (assignUniqueAddresses && assignedAddressToInterfaceEntryMap.find(completeAddress) != assignedAddressToInterfaceEntryMap.end())
                     throw cRuntimeError("Failed to configure unique address for %s. Please refine your parameters and try again!", interfaceEntry->getInterfaceFullPath().c_str());
                 assignedAddressToInterfaceEntryMap[completeAddress] = compatibleInterface->interfaceEntry;
                 assignedInterfaceAddresses.push_back(completeAddress);
