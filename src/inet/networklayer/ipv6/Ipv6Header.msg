@@ -42,6 +42,7 @@ std::ostream& operator<<(std::ostream& os, Ipv6ExtensionHeader eh);
 //
 class Ipv6ExtensionHeader extends cObject
 {
+    @packetData;
     short extensionType;
     B byteLength = B(0);   // byteLength = n * 8;
 }

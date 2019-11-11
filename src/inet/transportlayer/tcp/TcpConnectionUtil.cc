@@ -807,8 +807,9 @@ bool TcpConnection::sendData(bool fullSegmentsOnly, uint32 congestionWindow)
     if (bytesToSend > buffered)
         bytesToSend = buffered;
 
+    // TODO: FIXME: effectiveMaxBytesSend is just an estimation (it's not even accurate, because of NOPs)
+    //              it should rely on the actual header that will be used
     uint32 effectiveMaxBytesSend = state->snd_mss;
-
     if (state->ts_enabled)
         effectiveMaxBytesSend -= B(TCP_OPTION_TS_SIZE).get();
 
@@ -832,6 +833,7 @@ bool TcpConnection::sendData(bool fullSegmentsOnly, uint32 congestionWindow)
     while (bytesToSend > 0) {
         ulong bytes = std::min(bytesToSend, state->snd_mss);
         sendSegment(bytes);
+        ASSERT(bytesToSend >= state->sentBytes);
         bytesToSend -= state->sentBytes;
     }
 #else // ifdef TCP_SENDFRAGMENTS
@@ -841,11 +843,13 @@ bool TcpConnection::sendData(bool fullSegmentsOnly, uint32 congestionWindow)
       // FIXME this should probably obey Nagle's alg -- to be checked
     if (bytesToSend <= state->snd_mss) {
         sendSegment(bytesToSend);
+        ASSERT(bytesToSend >= state->sentBytes);
         bytesToSend -= state->sentBytes;
     }
     else {    // send whole segments only (nagle_enabled)
         while (bytesToSend >= effectiveMaxBytesSend) {
             sendSegment(state->snd_mss);
+            ASSERT(bytesToSend >= state->sentBytes);
             bytesToSend -= state->sentBytes;
         }
     }
@@ -989,6 +993,7 @@ void TcpConnection::retransmitData()
         if (state->send_fin && state->snd_nxt == state->snd_fin_seq + 1)
             break;
 
+        ASSERT(bytesToSend >= state->sentBytes);
         bytesToSend -= state->sentBytes;
     }
     tcpAlgorithm->segmentRetransmitted(state->snd_una, state->snd_nxt);
@@ -1268,7 +1273,7 @@ TcpHeader TcpConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpseg)
     }
     else if (fsm.getState() == TCP_S_SYN_SENT || fsm.getState() == TCP_S_SYN_RCVD
              || fsm.getState() == TCP_S_ESTABLISHED || fsm.getState() == TCP_S_FIN_WAIT_1
-             || fsm.getState() == TCP_S_FIN_WAIT_2)    // connetion is not in INIT or LISTEN state
+             || fsm.getState() == TCP_S_FIN_WAIT_2 || fsm.getState() == TCP_S_CLOSE_WAIT)    // connetion is not in INIT or LISTEN state
     {
         // TS header option
         if (state->ts_enabled) {    // Is TS enabled?

@@ -36,9 +36,9 @@ simple TcpLwip like ITcp
         @display("i=block/wheelbarrow");
 
     gates:
-        input appIn;
+        input appIn @messageKinds(inet::TcpCommandCode);
         input ipIn;
-        output appOut;
+        output appOut @messageKinds(inet::TcpStatusInd);
         output ipOut;
 }
 
