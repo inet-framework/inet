@@ -61,6 +61,12 @@ void Ospfv2RoutingTableEntry::addNextHop(NextHop hop)
         // TODO: this used to be commented out, but it seems we need it
         // otherwise gateways will never be filled in and gateway is needed for broadcast networks
         setGateway(hop.hopAddress);
+    }else{
+      for(int i= 0; i < nextHops.size(); i++){
+        if(hop.ifIndex == nextHops.at(i).ifIndex && hop.hopAddress == nextHops.at(i).hopAddress){
+          return;
+        }
+      }
     }
     nextHops.push_back(hop);
 }
