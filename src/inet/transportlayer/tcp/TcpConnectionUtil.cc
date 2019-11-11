@@ -832,6 +832,7 @@ bool TcpConnection::sendData(bool fullSegmentsOnly, uint32 congestionWindow)
     while (bytesToSend > 0) {
         ulong bytes = std::min(bytesToSend, state->snd_mss);
         sendSegment(bytes);
+        ASSERT(bytesToSend >= state->sentBytes);
         bytesToSend -= state->sentBytes;
     }
 #else // ifdef TCP_SENDFRAGMENTS
@@ -841,11 +842,13 @@ bool TcpConnection::sendData(bool fullSegmentsOnly, uint32 congestionWindow)
       // FIXME this should probably obey Nagle's alg -- to be checked
     if (bytesToSend <= state->snd_mss) {
         sendSegment(bytesToSend);
+        ASSERT(bytesToSend >= state->sentBytes);
         bytesToSend -= state->sentBytes;
     }
     else {    // send whole segments only (nagle_enabled)
         while (bytesToSend >= effectiveMaxBytesSend) {
             sendSegment(state->snd_mss);
+            ASSERT(bytesToSend >= state->sentBytes);
             bytesToSend -= state->sentBytes;
         }
     }
@@ -989,6 +992,7 @@ void TcpConnection::retransmitData()
         if (state->send_fin && state->snd_nxt == state->snd_fin_seq + 1)
             break;
 
+        ASSERT(bytesToSend >= state->sentBytes);
         bytesToSend -= state->sentBytes;
     }
     tcpAlgorithm->segmentRetransmitted(state->snd_una, state->snd_nxt);
