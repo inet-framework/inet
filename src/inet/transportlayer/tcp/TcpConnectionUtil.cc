@@ -807,8 +807,9 @@ bool TcpConnection::sendData(bool fullSegmentsOnly, uint32 congestionWindow)
     if (bytesToSend > buffered)
         bytesToSend = buffered;
 
+    // TODO: FIXME: effectiveMaxBytesSend is just an estimation (it's not even accurate, because of NOPs)
+    //              it should rely on the actual header that will be used
     uint32 effectiveMaxBytesSend = state->snd_mss;
-
     if (state->ts_enabled)
         effectiveMaxBytesSend -= B(TCP_OPTION_TS_SIZE).get();
 
