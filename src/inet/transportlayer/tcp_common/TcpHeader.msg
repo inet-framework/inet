@@ -111,6 +111,7 @@ cplusplus(Sack) {{
 // Header Options (optional):
 class TcpOption extends cObject
 {
+    @packetData;
     TcpOptionNumbers kind;            // option kind
     unsigned short length = 1;                    // option length
 }
