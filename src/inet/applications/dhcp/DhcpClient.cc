@@ -250,7 +250,7 @@ void DhcpClient::handleTimer(cMessage *msg)
         cancelEvent(timerT1);
         cancelEvent(timerT2);
         cancelEvent(timerTo);
-        cancelEvent(leaseTimer);
+        //cancelEvent(leaseTimer);
 
         sendRequest();
         scheduleTimerTO(WAIT_ACK);
