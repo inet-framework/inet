@@ -81,6 +81,7 @@ class BgpKeepAliveMessage extends BgpHeader
 
 class BgpOptionalParameterBase
 {
+    @packetData;
     short parameterType;
     unsigned short parameterValueLength;
 }
