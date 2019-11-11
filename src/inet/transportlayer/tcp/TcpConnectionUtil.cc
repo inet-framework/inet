@@ -828,15 +828,6 @@ bool TcpConnection::sendData(bool fullSegmentsOnly, uint32 congestionWindow)
 
     ASSERT(bytesToSend > 0);
 
-#ifdef TCP_SENDFRAGMENTS    /* normally undefined */
-    // make agressive use of the window until the last byte
-    while (bytesToSend > 0) {
-        ulong bytes = std::min(bytesToSend, state->snd_mss);
-        sendSegment(bytes);
-        ASSERT(bytesToSend >= state->sentBytes);
-        bytesToSend -= state->sentBytes;
-    }
-#else // ifdef TCP_SENDFRAGMENTS
       // send < MSS segments only if it's the only segment we can send now
       // Note: if (bytesToSend == 1010 && MSS == 1012 && ts_enabled == true) => we may send
       // 2 segments (1000 payload + 12 optionsHeader and 10 payload + 12 optionsHeader)
@@ -861,7 +852,6 @@ bool TcpConnection::sendData(bool fullSegmentsOnly, uint32 congestionWindow)
         sendSegment(bytesToSend);
     else if (bytesToSend > 0)
         EV_DETAIL << bytesToSend << " bytes of space left in effectiveWindow\n";
-#endif // ifdef TCP_SENDFRAGMENTS
 
     // remember highest seq sent (snd_nxt may be set back on retransmission,
     // but we'll need snd_max to check validity of ACKs -- they must ack
