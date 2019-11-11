@@ -333,6 +333,15 @@ Ipv4Address InterfaceEntry::getIpv4Address() const {
 #endif // ifdef WITH_IPv4
 }
 
+Ipv4Address InterfaceEntry::getIpv4Netmask() const {
+#ifdef WITH_IPv4
+    auto ipv4data = findProtocolData<Ipv4InterfaceData>();
+    return ipv4data == nullptr ? Ipv4Address::UNSPECIFIED_ADDRESS : ipv4data->getNetmask();
+#else
+    return Ipv4Address::UNSPECIFIED_ADDRESS;
+#endif // ifdef WITH_IPv4
+}
+
 void InterfaceEntry::setState(State s)
 {
     if (state != s)
