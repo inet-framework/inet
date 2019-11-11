@@ -35,5 +35,5 @@ class InterfaceEntry extends cModule
     int mtu;
     MacAddress macAddress;
     Ipv4Address ipv4Address @byValue;
-    Ipv4Address netmask @byValue;
 }
+
