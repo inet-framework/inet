@@ -45,8 +45,8 @@ Ospfv2RoutingTableEntry::Ospfv2RoutingTableEntry(const Ospfv2RoutingTableEntry& 
 {
     setDestination(entry.getDestination());
     setNetmask(entry.getNetmask());
-    setGateway(entry.getGateway());
     setInterface(entry.getInterface());
+    setGateway(entry.getGateway());
     setSourceType(entry.getSourceType());
     setMetric(entry.getMetric());
     setAdminDist(entry.getAdminDist());
