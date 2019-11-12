@@ -248,7 +248,7 @@ void Mpls::processMplsPacketFromL2(Packet *packet)
         return;
     }
 
-    InterfaceEntry *outgoingInterface = ift->findInterfaceByName(outInterface.c_str());
+    InterfaceEntry *outgoingInterface = CHK(ift->findInterfaceByName(outInterface.c_str()));
 
     doStackOps(packet, outLabel);
 

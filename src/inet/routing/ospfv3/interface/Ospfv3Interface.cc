@@ -31,7 +31,7 @@ Ospfv3Interface::Ospfv3Interface(const char* name, cModule* routerModule, Ospfv3
     this->containingProcess = processModule;
     this->ift = check_and_cast<IInterfaceTable *>(containingModule->getSubmodule("interfaceTable"));
 
-    InterfaceEntry *ie = this->ift->findInterfaceByName(this->interfaceName.c_str());
+    InterfaceEntry *ie = CHK(this->ift->findInterfaceByName(this->interfaceName.c_str()));
     Ipv6InterfaceData *ipv6int = ie->findProtocolData<Ipv6InterfaceData>();
     this->interfaceId = ift->getInterfaceById(ie->getInterfaceId())->getInterfaceId();
     this->interfaceLLIP = ipv6int->getLinkLocalAddress();
@@ -81,7 +81,7 @@ void Ospfv3Interface::processEvent(Ospfv3Interface::Ospfv3InterfaceEvent event)
 
 int Ospfv3Interface::getInterfaceMTU() const
 {
-    InterfaceEntry* ie = this->ift->findInterfaceByName(this->interfaceName.c_str());
+    InterfaceEntry* ie = CHK(this->ift->findInterfaceByName(this->interfaceName.c_str()));
     return ie->getMtu();
 }
 
@@ -1768,7 +1768,7 @@ LinkLSA* Ospfv3Interface::originateLinkLSA()
     memset(&lsOptions, 0, sizeof(Ospfv3Options));
     linkLSA->setOspfOptions(lsOptions);
 
-    InterfaceEntry* ie = this->ift->findInterfaceByName(this->interfaceName.c_str());
+    InterfaceEntry* ie = CHK(this->ift->findInterfaceByName(this->interfaceName.c_str()));
     Ipv6InterfaceData* ipv6Data = ie->findProtocolData<Ipv6InterfaceData>();
 
     int numPrefixes;
@@ -1962,7 +1962,7 @@ std::string Ospfv3Interface::detailedInfo() const
 
     out << "Interface " << this->getIntName() << "\n";
     out << "Link Local Address ";
-    InterfaceEntry* ie = this->ift->findInterfaceByName(this->getIntName().c_str());
+    InterfaceEntry* ie = CHK(this->ift->findInterfaceByName(this->getIntName().c_str()));
     Ipv6InterfaceData *ipv6int = ie->findProtocolData<Ipv6InterfaceData>();
     out << ipv6int->getLinkLocalAddress() << ", Interface ID " << this->interfaceId << "\n";
 

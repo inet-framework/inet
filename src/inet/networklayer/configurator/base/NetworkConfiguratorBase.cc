@@ -298,6 +298,8 @@ Topology::LinkOut *NetworkConfiguratorBase::findLinkOut(Node *node, int gateId)
 
 NetworkConfiguratorBase::InterfaceInfo *NetworkConfiguratorBase::findInterfaceInfo(Node *node, InterfaceEntry *interfaceEntry)
 {
+    if (interfaceEntry == nullptr)
+        return nullptr;
     for (auto & interfaceInfo : node->interfaceInfos)
         if (interfaceInfo->interfaceEntry == interfaceEntry)
             return interfaceInfo;

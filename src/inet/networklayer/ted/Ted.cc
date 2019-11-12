@@ -101,8 +101,7 @@ void Ted::initializeTED()
         Ipv4Address destRouterId = destRt->getRouterId();
         IInterfaceTable *destIft = L3AddressResolver().findInterfaceTableOf(destNode);
         ASSERT(destIft);
-        InterfaceEntry *destIe = destIft->findInterfaceByNodeInputGateId(g->getId());
-        ASSERT(destIe);
+        InterfaceEntry *destIe = CHK(destIft->findInterfaceByNodeInputGateId(g->getId()));
 
         //
         // fill in and insert TED entry
