@@ -796,7 +796,7 @@ Ipv4Address Ldp::findPeerAddrFromInterface(std::string interfaceName)
 {
     int i = 0;
     int k = 0;
-    InterfaceEntry *ie = ift->getInterfaceByName(interfaceName.c_str());
+    InterfaceEntry *ie = ift->findInterfaceByName(interfaceName.c_str());
 
     const Ipv4Route *anEntry;
 

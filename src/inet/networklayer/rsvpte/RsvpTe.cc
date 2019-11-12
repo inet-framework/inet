@@ -315,9 +315,9 @@ void RsvpTe::setupHello()
     cStringTokenizer tokenizer(par("peers"));
     const char *token;
     while ((token = tokenizer.nextToken()) != nullptr) {
-        ASSERT(ift->getInterfaceByName(token));
+        ASSERT(ift->findInterfaceByName(token));
 
-        Ipv4Address peer = tedmod->getPeerByLocalAddress(ift->getInterfaceByName(token)->getProtocolData<Ipv4InterfaceData>()->getIPAddress());
+        Ipv4Address peer = tedmod->getPeerByLocalAddress(ift->findInterfaceByName(token)->getProtocolData<Ipv4InterfaceData>()->getIPAddress());
 
         HelloState h;
 

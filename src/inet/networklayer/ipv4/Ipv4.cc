@@ -443,7 +443,7 @@ void Ipv4::datagramLocalOut(Packet *packet)
 
         // loop back a copy
         if (multicastLoop && (!destIE || !destIE->isLoopback())) {
-            const InterfaceEntry *loopbackIF = ift->getFirstLoopbackInterface();
+            const InterfaceEntry *loopbackIF = ift->findFirstLoopbackInterface();
             if (loopbackIF) {
                 auto packetCopy = packet->dup();
                 packetCopy->addTagIfAbsent<InterfaceReq>()->setInterfaceId(loopbackIF->getInterfaceId());
@@ -477,7 +477,7 @@ void Ipv4::datagramLocalOut(Packet *packet)
                 packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(-1);
             }
             if (!destIE) {
-                destIE = ift->getFirstLoopbackInterface();
+                destIE = ift->findFirstLoopbackInterface();
                 packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(destIE ? destIE->getInterfaceId() : -1);
             }
             ASSERT(destIE);
@@ -519,7 +519,7 @@ const InterfaceEntry *Ipv4::determineOutgoingInterfaceForMulticastDatagram(const
             EV_DETAIL << "multicast packet routed by source address via output interface " << ie->getInterfaceName() << "\n";
     }
     if (!ie) {
-        ie = ift->getFirstMulticastInterface();
+        ie = ift->findFirstMulticastInterface();
         if (ie)
             EV_DETAIL << "multicast packet routed via the first multicast interface " << ie->getInterfaceName() << "\n";
     }

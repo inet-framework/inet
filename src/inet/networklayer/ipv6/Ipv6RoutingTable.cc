@@ -147,7 +147,7 @@ void Ipv6RoutingTable::parseXmlConfigFile()
                 if (!ifname)
                     throw cRuntimeError("<interface> without name attribute at %s", child->getSourceLocation());
 
-                InterfaceEntry *ie = ift->getInterfaceByName(ifname);
+                InterfaceEntry *ie = ift->findInterfaceByName(ifname);
                 if (!ie)
                     throw cRuntimeError("no interface named %s was registered, %s", ifname, child->getSourceLocation());
 

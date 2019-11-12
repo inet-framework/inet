@@ -144,7 +144,7 @@ void Ospfv3Splitter::parseConfig(cXMLElement* routingConfig, cXMLElement* intCon
         }
         //register all interfaces to MCAST
         for (auto it=processToInterface.begin(); it!=processToInterface.end(); it++) {
-            InterfaceEntry* ie = ift->getInterfaceByName(intName);
+            InterfaceEntry* ie = ift->findInterfaceByName(intName);
             Ipv6InterfaceData *ipv6int = ie->findProtocolData<Ipv6InterfaceData>();
 
             //ALL_OSPF_ROUTERS_MCAST renamed into ALL_ROUTERS_5

@@ -41,7 +41,7 @@ void PacketTaggerBase::initialize(int stage)
         const char *interfaceName = par("interfaceName");
         if (strlen(interfaceName) != 0) {
             auto interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
-            auto interface = interfaceTable->getInterfaceByName(interfaceName);
+            auto interface = interfaceTable->findInterfaceByName(interfaceName);
             interfaceId = interface->getId();
         }
     }

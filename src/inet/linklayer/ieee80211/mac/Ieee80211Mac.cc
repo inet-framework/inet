@@ -113,7 +113,7 @@ const MacAddress& Ieee80211Mac::isInterfaceRegistered()
     if (!interfaceModule)
         throw cRuntimeError("NIC module not found in the host");
     std::string interfaceName = utils::stripnonalnum(interfaceModule->getFullName());
-    InterfaceEntry *e = ift->getInterfaceByName(interfaceName.c_str());
+    InterfaceEntry *e = ift->findInterfaceByName(interfaceName.c_str());
     if (e)
         return e->getMacAddress();
     return MacAddress::UNSPECIFIED_ADDRESS;

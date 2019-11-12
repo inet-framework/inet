@@ -54,7 +54,7 @@ INetfilter::IHook::Result SctpNatHook::datagramForwardHook(Packet *datagram)
     } else {
         strcpy(name, "lo0");
     }
-    const InterfaceEntry *inIE = ift->getInterfaceByName(name);
+    const InterfaceEntry *inIE = ift->findInterfaceByName(name);
 
     if (!dgram) {
         insertNetworkProtocolHeader(datagram, Protocol::ipv4, dgram);

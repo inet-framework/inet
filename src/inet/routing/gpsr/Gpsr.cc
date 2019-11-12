@@ -608,7 +608,7 @@ INetfilter::IHook::Result Gpsr::routeDatagram(Packet *datagram, GpsrOption *gpsr
     else {
         EV_INFO << "Next hop found: source = " << source << ", destination = " << destination << ", nextHop: " << nextHop << endl;
         gpsrOption->setSenderAddress(getSelfAddress());
-        auto interfaceEntry = interfaceTable->getInterfaceByName(outputInterface);
+        auto interfaceEntry = interfaceTable->findInterfaceByName(outputInterface);
         ASSERT(interfaceEntry);
         datagram->addTagIfAbsent<InterfaceReq>()->setInterfaceId(interfaceEntry->getInterfaceId());
         return ACCEPT;

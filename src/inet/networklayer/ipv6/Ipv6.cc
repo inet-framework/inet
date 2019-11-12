@@ -353,7 +353,7 @@ void Ipv6::handleMessageFromHL(Packet *msg)
             destIE = nullptr;
         }
         if (!destIE)
-            destIE = ift->getFirstLoopbackInterface();
+            destIE = ift->findFirstLoopbackInterface();
         ASSERT(destIE);
     }
     L3Address nextHopAddr(Ipv6Address::UNSPECIFIED_ADDRESS);

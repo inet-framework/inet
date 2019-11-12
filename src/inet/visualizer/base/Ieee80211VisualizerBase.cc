@@ -156,7 +156,7 @@ void Ieee80211VisualizerBase::receiveSignal(cComponent *source, simsignal_t sign
             // TODO: KLUDGE: this is the wrong way to lookup the interface and the ssid
             L3AddressResolver addressResolver;
             auto mgmt = check_and_cast<inet::ieee80211::Ieee80211MgmtAp *>(source);
-            auto interfaceEntry = addressResolver.findInterfaceTableOf(networkNode)->getInterfaceByInterfaceModule(mgmt->getParentModule());
+            auto interfaceEntry = addressResolver.findInterfaceTableOf(networkNode)->findInterfaceByInterfaceModule(mgmt->getParentModule());
             auto ieee80211Visualization = getIeee80211Visualization(networkNode, interfaceEntry);
             if (ieee80211Visualization == nullptr) {
                 auto ieee80211Visualization = createIeee80211Visualization(networkNode, interfaceEntry, mgmt->par("ssid"), W(NaN));
@@ -170,7 +170,7 @@ void Ieee80211VisualizerBase::receiveSignal(cComponent *source, simsignal_t sign
             // TODO: KLUDGE: this is the wrong way to lookup the interface
             L3AddressResolver addressResolver;
             auto mgmt = check_and_cast<inet::ieee80211::Ieee80211MgmtAp *>(source);
-            auto interfaceEntry = addressResolver.findInterfaceTableOf(networkNode)->getInterfaceByInterfaceModule(mgmt->getParentModule());
+            auto interfaceEntry = addressResolver.findInterfaceTableOf(networkNode)->findInterfaceByInterfaceModule(mgmt->getParentModule());
             auto ieee80211Visualization = getIeee80211Visualization(networkNode, interfaceEntry);
             if (ieee80211Visualization != nullptr) {
                 removeIeee80211Visualization(ieee80211Visualization);

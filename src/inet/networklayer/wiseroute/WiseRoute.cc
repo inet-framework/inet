@@ -84,7 +84,7 @@ void WiseRoute::initialize(int stage)
         sinkAddress = addressResolver.resolve(par("sinkAddress"));
 
         IInterfaceTable *interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
-        auto ie = interfaceTable->getFirstNonLoopbackInterface();
+        auto ie = interfaceTable->findFirstNonLoopbackInterface();
         if (ie != nullptr)
             myNetwAddr = ie->getNetworkAddress();
         else

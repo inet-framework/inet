@@ -190,7 +190,7 @@ bool MediumVisualizerBase::matchesTransmission(const ITransmission *transmission
         return false;
     L3AddressResolver addressResolver;
     if (auto interfaceTable = addressResolver.findInterfaceTableOf(networkNode)) {
-        auto interfaceEntry = interfaceTable->getInterfaceByInterfaceModule(radio->getParentModule());
+        auto interfaceEntry = interfaceTable->findInterfaceByInterfaceModule(radio->getParentModule());
         if (!interfaceFilter.matches(interfaceEntry))
             return false;
     }
