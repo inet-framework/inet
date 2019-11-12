@@ -80,9 +80,9 @@ PppInterface
 :ned:`IWiredInterface` interface. It contains a :ned:`Ppp` module and a
 passive queue for the messages received from the network layer.
 
-The queue type is specified by the :par:`queueType` parameter. It can be
-set to ``NoQueue`` or to a module type implementing the
-:ned:`IPacketQueue` interface. There are implementations with QoS and
+The queue type is specified by the :par:`typename` parameter of the queue
+submodule. It can be set to ``PacketQueue`` or to a module type implementing
+the :ned:`IPacketQueue` interface. There are implementations with QoS and
 RED support.
 
 In typical use of the :ned:`Ppp` module it is augmented with other nodes

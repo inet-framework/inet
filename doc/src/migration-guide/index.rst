@@ -122,7 +122,7 @@ Configuring Protocols
 Transport layer and network layer protocols can be enabled/disabled with separate
 boolean flags (:par:`hasTcp`, :par:`hasUdp`, :par:`hasSctp`, :par:`hasIpv4`, :par:`hasIpv6`). The number of network
 interfaces can be set with separate parameters (:par:`numLoInterfaces`, :par:`numPppInterfaces`,
-:par:`numEthInterfaces`, :par:`numWlanInterfaces`, :par:`numExtInterfaces`, :par:`numTunInterfaces`) or they
+:par:`numEthInterfaces`, :par:`numWlanInterfaces`, :par:`numTunInterfaces`) or they
 are set indirectly with the number of connected (pppg, ethg) gates.
 
 .. _mg:sec:migrationguide:tagsapi:
