@@ -814,7 +814,7 @@ bool Ospfv3Process::installLSA(const Ospfv3Lsa *lsa, int instanceID, Ipv4Address
         case LINK_LSA: {
             Ospfv3Instance* instance = this->getInstanceById(instanceID);
             if (Ospfv3Area* area = instance->getAreaById(areaID)) {
-                //FIXME set but unused 'area' variable
+                (void)area; //FIXME set but unused 'area' variable
                 Ospfv3LinkLsa *ospfLinkLSA = check_and_cast<Ospfv3LinkLsa *>(const_cast<Ospfv3Lsa*>(lsa));
                 return intf->installLinkLSA(ospfLinkLSA);
             }
@@ -850,7 +850,8 @@ void Ospfv3Process::rebuildRoutingTable()
     for (unsigned int k=0; k<instanceCount; k++) {
         Ospfv3Instance* currInst = this->instances.at(k);
         unsigned long areaCount = currInst->getAreaCount();
-        bool hasTransitAreas = false;    //FIXME set but not used variable
+        bool hasTransitAreas = false;
+        (void)hasTransitAreas; //FIXME set but not used variable
         unsigned long i;
 
         EV_INFO << "Rebuilding routing table for instance " << this->instances.at(k)->getInstanceID() << ":\n";
