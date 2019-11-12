@@ -55,6 +55,7 @@ class INET_API SctpHeaderSerializer : public FieldsChunkSerializer
     static void hmacSha1(const uint8 *buf, uint32 buflen, const uint8 *key, uint32 keylen, uint8 *digest);
     void calculateSharedKey();
     bool compareRandom();
+    static uint8* serializeSctpHeaderIntoBuffer(const Ptr<const SctpHeader>& msg, uint32& writtenBytes);
 
   private:
     static unsigned char keyVector[512];
