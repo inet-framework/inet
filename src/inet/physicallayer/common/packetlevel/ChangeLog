@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2019-11-05  Zoltan Bojthe
+
+	Moved SignalTag.msg to contract folder.
+
 2019-09-24  Levente Mészáros
 
 	Moved the storage of radios and transmissions from the medium into the communication cache.

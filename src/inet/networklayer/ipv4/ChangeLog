@@ -1,5 +1,17 @@
 ====== inet-4.x ======
 
+2019-11-11  Zoltan Bojthe
+
+	Added  notifications about changing the InterfaceProtocolData set in InterfaceEntry.
+
+2019-11-11  Levente Mészáros
+
+	Added @packetData annotation to non-Chunk based packet parts.
+
+2019-11-08  Levente Mészáros
+
+	Fixed memory leaks detected by static analysis.
+
 2019-10-21  Zoltan Bojthe
 
 	Fixed types, reordered fields in IPv4 header, added missing reserved bit.

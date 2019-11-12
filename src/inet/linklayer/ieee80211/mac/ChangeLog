@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2019-10-30  Levente Mészáros
+
+	Removed self message if scheduled at current time and refreshDisplay() calls.
+
 2019-10-30  Andras Varga
 
 	Turn off Hcf submodule in non-QoS mode.

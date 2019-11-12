@@ -1,5 +1,18 @@
 ====== inet-4.x ======
 
+2019-11-12  Zoltan Bojthe
+
+	Fixed looking up InterfaceEntry.
+
+2019-11-07  Levente Mészáros
+
+	Fixed crash during destruction of InterfaceTableCanvasVisualizer.
+
+2019-11-05  Levente Mészáros
+
+	Fixed concurrent update while iterating a vector during removing all visualizations.
+	Fixed memory leaks caused by not cleaning up after destruction.
+
 2019-10-07  Levente Mészáros
 
 	Fixed disabled radio feature.

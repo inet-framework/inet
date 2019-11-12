@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2019-11-08  Levente Mészáros
+
+	Fixed memory leaks detected by static analysis.
+
 2019-09-26  Zoltan Bojthe
 
 	Renamed Ospf module to Ospfv2 and also renamed the folder to distinguish from Ospfv3.

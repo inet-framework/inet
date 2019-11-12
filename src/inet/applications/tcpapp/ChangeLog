@@ -1,5 +1,10 @@
 ====== inet-4.x ======
 
+2019-11-08  Levente Mészáros
+
+	Fixed memory leaks detected by static analysis.
+	Fixed use after delete.
+
 2019-10-26  Levente Mészáros
 
 	Added NED documentations to new applications with composable traffic source and sink modules.
