@@ -694,7 +694,7 @@ void Ospfv3Process::addInstance(Ospfv3Instance* newInstance)
 void Ospfv3Process::sendPacket(Packet *packet, Ipv6Address destination, const char* ifName, short hopLimit)
 {
     InterfaceEntry *ie = CHK(this->ift->findInterfaceByName(ifName));
-    Ipv6InterfaceData *ipv6int = ie->findProtocolData<Ipv6InterfaceData>();
+    Ipv6InterfaceData *ipv6int = ie->getProtocolData<Ipv6InterfaceData>();
 
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ospf);
     packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
