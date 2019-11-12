@@ -297,7 +297,8 @@ void Ospfv3Interface::processHelloPacket(Packet* packet)
     EV_DEBUG <<"Hello packet was received on interface " << this->getIntName() << "\n";
     const auto& hello = packet->peekAtFront<Ospfv3HelloPacket>();
     bool neighborChanged = false;
-    bool backupSeen = false;    //FIXME set but not used variable
+    bool backupSeen = false;
+    (void)backupSeen; //FIXME set but not used variable
     bool neighborsDRStateChanged = false;
     bool drChanged = false;
     bool shouldRebuildRoutingTable=false;
