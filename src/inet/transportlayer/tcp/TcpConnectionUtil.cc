@@ -807,11 +807,13 @@ bool TcpConnection::sendData(bool fullSegmentsOnly, uint32 congestionWindow)
     if (bytesToSend > buffered)
         bytesToSend = buffered;
 
-    // TODO: FIXME: effectiveMaxBytesSend is just an estimation (it's not even accurate, because of NOPs)
-    //              it should rely on the actual header that will be used
-    uint32 effectiveMaxBytesSend = state->snd_mss;
-    if (state->ts_enabled)
-        effectiveMaxBytesSend -= B(TCP_OPTION_TS_SIZE).get();
+    // make a temporary tcp header for detecting tcp options length (copied from 'TcpConnection::sendSegment(uint32 bytes)' )
+    const auto& tmpTcpHeader = makeShared<TcpHeader>();
+    tmpTcpHeader->setAckBit(true);    // needed for TS option, otherwise TSecr will be set to 0
+    writeHeaderOptions(tmpTcpHeader);
+    uint options_len = B(tmpTcpHeader->getHeaderLength() - TCP_MIN_HEADER_LENGTH).get();
+    ASSERT(options_len < state->snd_mss);
+    uint32 effectiveMaxBytesSend = state->snd_mss - options_len;
 
     // last segment could be less than state->snd_mss (or less than snd_mss - TCP_OPTION_TS_SIZE if using TS option)
     if (fullSegmentsOnly && (bytesToSend < (effectiveMaxBytesSend))) {
