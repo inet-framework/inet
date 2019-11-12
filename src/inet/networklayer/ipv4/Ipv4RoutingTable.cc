@@ -133,8 +133,9 @@ void Ipv4RoutingTable::configureRouterId()
               // TODO find out if this is a good practice, in which situations it is useful etc.
         if (getInterfaceByAddress(routerId) == nullptr) {
             InterfaceEntry *lo0 = CHK(ift->findFirstLoopbackInterface());
-            lo0->getProtocolData<Ipv4InterfaceData>()->setIPAddress(routerId);
-            lo0->getProtocolData<Ipv4InterfaceData>()->setNetmask(Ipv4Address::ALLONES_ADDRESS);
+            auto ipv4Data = lo0->getProtocolData<Ipv4InterfaceData>();
+            ipv4Data->setIPAddress(routerId);
+            ipv4Data->setNetmask(Ipv4Address::ALLONES_ADDRESS);
         }
     }
 }
