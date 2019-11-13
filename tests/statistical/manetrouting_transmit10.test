@@ -130,7 +130,6 @@ description = "Aodv Simple test"
 **.wlan*.mac.queue.packetCapacity = 14
 **.wlan*.mac.rtsThresholdBytes = 3000B
 **.wlan*.mac.basicBitrate = 6Mbps  # 24Mbps
-**.wlan*.mac.cwMinData = 31
 
 # channel physical parameters
 *.radioMedium.pMax = 2.0mW
