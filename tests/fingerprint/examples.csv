@@ -264,6 +264,14 @@
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-dumb -r 5,              500s,            8e0e-e2ef/tplx, PASS,
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-dumb -r 6,              500s,            3fd0-0ec4/tplx, PASS,
 
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-nocongestioncontrol -r 0,  500s,            e803-dc6d/tplx, PASS,
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-nocongestioncontrol -r 1,              500s,            5d43-0e3b/tplx, PASS,
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-nocongestioncontrol -r 2,              500s,            8930-e58b/tplx, PASS,
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-nocongestioncontrol -r 3,              500s,            42e4-c31f/tplx, PASS,
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-nocongestioncontrol -r 4,              500s,            063e-d015/tplx, PASS,
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-nocongestioncontrol -r 5,              500s,            5369-019a/tplx, PASS,
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-nocongestioncontrol -r 6,              500s,            5563-5804/tplx, PASS,
+
 /examples/inet/tcpwindowscale/,      -f omnetpp.ini -c WS_disabled -r 0,            1.5s,            2d23-e783/tplx, PASS,
 /examples/inet/tcpwindowscale/,      -f omnetpp.ini -c WS_enabled -r 0,             1.5s,            a2a5-5e6d/tplx, PASS,
 
