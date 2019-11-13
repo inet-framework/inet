@@ -396,7 +396,7 @@ int UdpVideoStreamSvr2::broadcastInterface()
     {
         IInterfaceTable *ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
         const char *ports = par("broadcastInterface");
-        InterfaceEntry *ie = ift->getInterfaceByName(ports);
+        InterfaceEntry *ie = ift->findInterfaceByName(ports);
         if (ie == nullptr)
             throw cRuntimeError(this, "Invalid output interface name : %s", ports);
         outputInterfaceBroadcast = ie->getInterfaceId();
