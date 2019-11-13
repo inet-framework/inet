@@ -132,7 +132,6 @@ description = "Aodv Simple test"
 **.wlan*.mac.basicBitrate = 6Mbps  # 24Mbps
 **.wlan*.mac.retryLimit = 7
 **.wlan*.mac.cwMinData = 31
-**.wlan*.mac.cwMinBroadcast = 31
 
 # channel physical parameters
 *.radioMedium.pMax = 2.0mW

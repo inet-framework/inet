@@ -158,7 +158,6 @@ sim-time-limit = 50s
 **.mac.rtsThresholdBytes = 3000B
 **.wlan*.mac.retryLimit = 7
 **.wlan*.mac.cwMinData = 31
-**.wlan*.mac.cwMinBroadcast = 31
 
 **.radio.bitrate = 11Mbps
 **.radio.transmitterPower = 20.0mW
