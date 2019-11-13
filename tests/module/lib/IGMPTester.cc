@@ -146,7 +146,7 @@ void IGMPTester::processCommand(const cXMLElement &node)
 
     string tag = node.getTagName();
     const char *ifname = node.getAttribute("ifname");
-    InterfaceEntry *ie = ifname ? ift->getInterfaceByName(ifname) : NULL;
+    InterfaceEntry *ie = CHK(ift->findInterfaceByName(CHK(ifname)));
 
     if (tag == "join")
     {
@@ -201,7 +201,7 @@ void IGMPTester::processCommand(const cXMLElement &node)
 void IGMPTester::processSendCommand(const cXMLElement &node)
 {
     const char *ifname = node.getAttribute("ifname");
-    InterfaceEntry *ie = ifname ? ift->getInterfaceByName(ifname) : ift->getInterface(0);
+    InterfaceEntry *ie = CHK(ift->findInterfaceByName(CHK(ifname)));
     string type = node.getAttribute("type");
 
     if (type == "Igmpv1Query")
