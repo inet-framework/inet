@@ -18,6 +18,8 @@
 
 package inet.networklayer.configurator.ipv4;
 
+import inet.networklayer.configurator.contract.IIpv4NodeConfigurator;
+
 //
 // ~HostAutoConfigurator automatically assigns IP addresses and sets up routing table.
 // It has to be added into each host.
@@ -26,7 +28,7 @@ package inet.networklayer.configurator.ipv4;
 // This module is kept only because the ~Ipv4NetworkConfigurator cannot assign IP addresses
 // to modules that are dynamically created/destroyed.
 //
-simple HostAutoConfigurator
+simple HostAutoConfigurator like IIpv4NodeConfigurator
 {
     parameters:
         string interfaces = default("wlan");         // list of interfaces to autoassign addresses to, separated by a single space characters
