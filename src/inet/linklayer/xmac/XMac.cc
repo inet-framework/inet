@@ -182,6 +182,7 @@ void XMac::sendPreamble(MacAddress preamble_address)
     auto preamble = makeShared<XMacHeader>();
     preamble->setSrcAddr(interfaceEntry->getMacAddress());
     preamble->setDestAddr(preamble_address);
+    //FIXME preamble->setNetworkProtocol( ??? );
     preamble->setChunkLength(b(headerLength));
     preamble->setType(XMAC_PREAMBLE);
     auto packet = new Packet("Preamble", preamble);
@@ -200,6 +201,7 @@ void XMac::sendMacAck()
     ack->setSrcAddr(interfaceEntry->getMacAddress());
     //~ diff with XMAC, ack_preamble_based
     ack->setDestAddr(lastPreamblePktSrcAddr);
+    //FIXME preamble->setNetworkProtocol( ??? );
     ack->setChunkLength(b(headerLength));
     ack->setType(XMAC_ACK);
     auto packet = new Packet("XMacAck", ack);
