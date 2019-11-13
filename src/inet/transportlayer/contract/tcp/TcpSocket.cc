@@ -221,11 +221,11 @@ void TcpSocket::setTimeToLive(int ttl)
     sendToTcp(request);
 }
 
-void TcpSocket::setTypeOfService(unsigned char tos)
+void TcpSocket::setDscp(short dscp)
 {
     auto request = new Request("setTOS", TCP_C_SETOPTION);
-    TcpTypeOfServiceCommand *cmd = new TcpTypeOfServiceCommand();
-    cmd->setTos(tos);
+    auto *cmd = new TcpSetDscpCommand();
+    cmd->setDscp(dscp);
     request->setControlInfo(cmd);
     sendToTcp(request);
 }
