@@ -55,14 +55,11 @@ static ostream &operator<<(ostream &out, const IgmpMessage* msg)
 {
     out << msg->getClassName() << "<";
 
-    switch (msg->getType())
-    {
-        case IGMP_MEMBERSHIP_QUERY:
-        {
+    switch (msg->getType()) {
+        case IGMP_MEMBERSHIP_QUERY: {
             auto *query = check_and_cast<const IgmpQuery*>(msg);
             out << "group=" << query->getGroupAddress();
-            if (auto v3Query = dynamic_cast<const Igmpv3Query*>(msg))
-            {
+            if (auto v3Query = dynamic_cast<const Igmpv3Query*>(msg)) {
                 out << ", sourceList=" << v3Query->getSourceList()
                     << ", maxRespTime=" << SimTime(Igmpv3::decodeTime(v3Query->getMaxRespTimeCode()), (SimTimeUnit)-1)
                     << ", suppressRouterProc=" << (int)v3Query->getSuppressRouterProc()
@@ -82,15 +79,12 @@ static ostream &operator<<(ostream &out, const IgmpMessage* msg)
         case IGMPV2_LEAVE_GROUP:
             // TODO
             break;
-        case IGMPV3_MEMBERSHIP_REPORT:
-        {
+        case IGMPV3_MEMBERSHIP_REPORT: {
             auto report = check_and_cast<const Igmpv3Report*>(msg);
-            for (unsigned int i = 0; i < report->getGroupRecordArraySize(); i++)
-            {
+            for (unsigned int i = 0; i < report->getGroupRecordArraySize(); i++) {
                 const GroupRecord &record = report->getGroupRecord(i);
                 out << (i>0?", ":"") << record.getGroupAddress() << "=";
-                switch (record.getRecordType())
-                {
+                switch (record.getRecordType()) {
                     case MODE_IS_INCLUDE:        out << "IS_IN" ; break;
                     case MODE_IS_EXCLUDE:        out << "IS_EX" ; break;
                     case CHANGE_TO_INCLUDE_MODE: out << "TO_IN" ; break;
@@ -146,38 +140,33 @@ void IGMPTester::processCommand(const cXMLElement &node)
 
     string tag = node.getTagName();
     const char *ifname = node.getAttribute("ifname");
-    InterfaceEntry *ie = ifname ? ift->getInterfaceByName(ifname) : NULL;
+    InterfaceEntry *ie = CHK(ift->findInterfaceByName(CHK(ifname)));
 
-    if (tag == "join")
-    {
+    if (tag == "join") {
         const char *group = node.getAttribute("group");
         Ipv4AddressVector sources;
         parseIPv4AddressVector(node.getAttribute("sources"), sources);
         processJoinCommand(Ipv4Address(group), sources, ie);
     }
-    else if (tag == "leave")
-    {
+    else if (tag == "leave") {
         const char *group = node.getAttribute("group");
         Ipv4AddressVector sources;
         parseIPv4AddressVector(node.getAttribute("sources"), sources);
         processLeaveCommand(Ipv4Address(group), sources, ie);
     }
-    else if (tag == "block")
-    {
+    else if (tag == "block") {
         const char *group = node.getAttribute("group");
         Ipv4AddressVector sources;
         parseIPv4AddressVector(node.getAttribute("sources"), sources);
         processBlockCommand(Ipv4Address(group), sources, ie);
     }
-    else if (tag == "allow")
-    {
+    else if (tag == "allow") {
         const char *group = node.getAttribute("group");
         Ipv4AddressVector sources;
         parseIPv4AddressVector(node.getAttribute("sources"), sources);
         processAllowCommand(Ipv4Address(group), sources, ie);
     }
-    else if (tag == "set-filter")
-    {
+    else if (tag == "set-filter") {
         const char *groupAttr = node.getAttribute("group");
         const char *sourcesAttr = node.getAttribute("sources");
         ASSERT((sourcesAttr[0] == 'I' || sourcesAttr[0] == 'E') && (sourcesAttr[1] == ' ' || sourcesAttr[1] == '\0'));
@@ -187,13 +176,11 @@ void IGMPTester::processCommand(const cXMLElement &node)
             parseIPv4AddressVector(sourcesAttr+2, sources);
         processSetFilterCommand(Ipv4Address(groupAttr), filterMode, sources, ie);
     }
-    else if (tag == "dump")
-    {
+    else if (tag == "dump") {
         const char *what = node.getAttribute("what");
         processDumpCommand(what, ie);
     }
-    else if (tag == "send")
-    {
+    else if (tag == "send") {
         processSendCommand(node);
     }
 }
@@ -201,19 +188,16 @@ void IGMPTester::processCommand(const cXMLElement &node)
 void IGMPTester::processSendCommand(const cXMLElement &node)
 {
     const char *ifname = node.getAttribute("ifname");
-    InterfaceEntry *ie = ifname ? ift->getInterfaceByName(ifname) : ift->getInterface(0);
+    InterfaceEntry *ie = CHK(ift->findInterfaceByName(CHK(ifname)));
     string type = node.getAttribute("type");
 
-    if (type == "Igmpv1Query")
-    {
+    if (type == "Igmpv1Query") {
         // TODO
     }
-    else if (type == "Igmpv2Query")
-    {
+    else if (type == "Igmpv2Query") {
         // TODO
     }
-    else if (type == "Igmpv3Query")
-    {
+    else if (type == "Igmpv3Query") {
         const char *groupStr = node.getAttribute("group");
         const char *maxRespCodeStr = node.getAttribute("maxRespCode");
         const char *sourcesStr = node.getAttribute("source");
@@ -234,24 +218,20 @@ void IGMPTester::processSendCommand(const cXMLElement &node)
         packet->insertAtFront(msg);
         sendIGMP(packet, ie, group.isUnspecified() ? Ipv4Address::ALL_HOSTS_MCAST : group);
     }
-    else if (type == "Igmpv2Report")
-    {
+    else if (type == "Igmpv2Report") {
         // TODO
     }
-    else if (type == "Igmpv2Leave")
-    {
+    else if (type == "Igmpv2Leave") {
         // TODO
     }
-    else if (type == "Igmpv3Report")
-    {
+    else if (type == "Igmpv3Report") {
         cXMLElementList records = node.getElementsByTagName("record");
         Packet *packet = new Packet("Igmpv3 report");
         const auto& msg = makeShared<Igmpv3Report>();
         unsigned int byteLength = 8;   // Igmpv3Report header size
 
         msg->setGroupRecordArraySize(records.size());
-        for (int i = 0; i < (int)records.size(); ++i)
-        {
+        for (int i = 0; i < (int)records.size(); ++i) {
             cXMLElement *recordNode = records[i];
             const char *groupStr = recordNode->getAttribute("group");
             string recordTypeStr = recordNode->getAttribute("type");
@@ -281,13 +261,11 @@ void IGMPTester::processSendCommand(const cXMLElement &node)
 
 void IGMPTester::processJoinCommand(Ipv4Address group, const Ipv4AddressVector &sources, InterfaceEntry *ie)
 {
-    if (sources.empty())
-    {
+    if (sources.empty()) {
         ie->getProtocolData<Ipv4InterfaceData>()->joinMulticastGroup(group);
         socketState[group] = Ipv4MulticastSourceList::ALL_SOURCES;
     }
-    else
-    {
+    else {
         Ipv4MulticastSourceList &sourceList = socketState[group];
         ASSERT(sourceList.filterMode == MCAST_INCLUDE_SOURCES);
         Ipv4AddressVector oldSources(sourceList.sources);
@@ -300,13 +278,11 @@ void IGMPTester::processJoinCommand(Ipv4Address group, const Ipv4AddressVector &
 
 void IGMPTester::processLeaveCommand(Ipv4Address group, const Ipv4AddressVector &sources, InterfaceEntry *ie)
 {
-    if (sources.empty())
-    {
+    if (sources.empty()) {
         ie->getProtocolData<Ipv4InterfaceData>()->leaveMulticastGroup(group);
         socketState.erase(group);
     }
-    else
-    {
+    else {
         Ipv4MulticastSourceList &sourceList = socketState[group];
         ASSERT(sourceList.filterMode == MCAST_INCLUDE_SOURCES);
         Ipv4AddressVector oldSources(sourceList.sources);
@@ -362,10 +338,8 @@ void IGMPTester::processDumpCommand(string what, InterfaceEntry *ie)
 {
     EV << "IGMPTester: " << ie->getInterfaceName() << ": " << what << " = ";
 
-    if (what == "groups")
-    {
-        for (int i = 0; i < ie->getProtocolData<Ipv4InterfaceData>()->getNumOfJoinedMulticastGroups(); i++)
-        {
+    if (what == "groups") {
+        for (int i = 0; i < ie->getProtocolData<Ipv4InterfaceData>()->getNumOfJoinedMulticastGroups(); i++) {
             Ipv4Address group = ie->getProtocolData<Ipv4InterfaceData>()->getJoinedMulticastGroup(i);
             const Ipv4MulticastSourceList &sourceList = ie->getProtocolData<Ipv4InterfaceData>()->getJoinedMulticastSources(i);
             EV << (i==0 ? "" : ", ") << group << " " << sourceList.str();
@@ -373,8 +347,7 @@ void IGMPTester::processDumpCommand(string what, InterfaceEntry *ie)
     }
     else if (what == "listeners")
     {
-        for (int i = 0; i < ie->getProtocolData<Ipv4InterfaceData>()->getNumOfReportedMulticastGroups(); i++)
-        {
+        for (int i = 0; i < ie->getProtocolData<Ipv4InterfaceData>()->getNumOfReportedMulticastGroups(); i++) {
             Ipv4Address group = ie->getProtocolData<Ipv4InterfaceData>()->getReportedMulticastGroup(i);
             const Ipv4MulticastSourceList &sourceList = ie->getProtocolData<Ipv4InterfaceData>()->getReportedMulticastSources(i);
             EV << (i==0 ? "" : ", ") << group << " " << sourceList.str();
@@ -401,8 +374,7 @@ void IGMPTester::sendIGMP(Packet *msg, InterfaceEntry *ie, Ipv4Address dest)
 
 void IGMPTester::parseIPv4AddressVector(const char *str, Ipv4AddressVector &result)
 {
-    if (str)
-    {
+    if (str) {
         cStringTokenizer tokens(str);
         while (tokens.hasMoreTokens())
             result.push_back(Ipv4Address(tokens.nextToken()));

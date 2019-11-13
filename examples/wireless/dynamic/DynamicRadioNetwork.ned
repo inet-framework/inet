@@ -19,21 +19,10 @@
 package inet.examples.wireless.dynamic;
 
 import inet.common.scenario.ScenarioManager;
-import inet.networklayer.configurator.ipv4.HostAutoConfigurator;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.AdhocHost;
 import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 import inet.visualizer.contract.IIntegratedVisualizer;
-
-module DynamicHost extends AdhocHost
-{
-    parameters:
-        ipv4.configurator.networkConfiguratorModule = "";
-    submodules:
-        autoConfigurator: HostAutoConfigurator {
-            @display("p=125,640;is=s");
-        }
-}
 
 network DynamicRadioNetwork
 {
@@ -51,11 +40,11 @@ network DynamicRadioNetwork
             parameters:
                 @display("p=100,200;is=s");
         }
-        destinationNode: DynamicHost {
+        destinationNode: AdhocHost {
             parameters:
                 @display("p=400,250");
         }
-        sourceNode[0]: DynamicHost {
+        sourceNode[0]: AdhocHost {
             parameters:
                 @dynamic(true);
                 @display("p=250,250");

@@ -670,8 +670,14 @@ void Ipv4NetworkConfigurator::readInterfaceConfiguration(Topology& topology)
             uint32_t address, addressSpecifiedBits, netmask, netmaskSpecifiedBits;
             if (haveAddressConstraint)
                 parseAddressAndSpecifiedBits(addressAttr, address, addressSpecifiedBits);
-            if (haveNetmaskConstraint)
-                parseAddressAndSpecifiedBits(netmaskAttr, netmask, netmaskSpecifiedBits);
+            if (haveNetmaskConstraint) {
+                if (netmaskAttr[0] == '/') {
+                    netmask = Ipv4Address::makeNetmask(atoi(netmaskAttr + 1)).getInt();
+                    netmaskSpecifiedBits = 0xffffffffLU;
+                }
+                else
+                    parseAddressAndSpecifiedBits(netmaskAttr, netmask, netmaskSpecifiedBits);
+            }
 
             // configure address/netmask constraints on matching interfaces
             for (auto & linkInfo : topology.linkInfos) {

@@ -93,6 +93,15 @@ const char *InterfaceTableVisualizerBase::DirectiveResolver::resolveDirective(ch
         case 'n':
             result = interfaceEntry->getNetworkAddress().str();
             break;
+        case 't':
+            switch (interfaceEntry->getState()) {
+                case InterfaceEntry::UP: result = "up"; break;
+                case InterfaceEntry::DOWN: result = "down"; break;
+                case InterfaceEntry::GOING_UP: result = "going up"; break;
+                case InterfaceEntry::GOING_DOWN: result = "going down"; break;
+                default: throw cRuntimeError("Unknown interface state");
+            }
+            break;
         case 'i':
             result = interfaceEntry->str();
             break;

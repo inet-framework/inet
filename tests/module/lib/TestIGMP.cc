@@ -23,11 +23,6 @@ class INET_API TestIGMP : public Igmpv2, public IScriptable
   private:
      std::ofstream out;
      cModule *node;
-//     std::string currentEvent;
-//     std::vector<std::string> currentActions;
-//     IGMPHostGroupState st;
-//     IGMPRouterGroupState st2;
-//     IGMPRouterState currentRouterGroupState;
   protected:
     typedef Ipv4InterfaceData::Ipv4AddressVector Ipv4AddressVector;
     virtual void initialize(int stage) override;
@@ -51,12 +46,10 @@ Define_Module(TestIGMP);
 
 void TestIGMP::initialize(int stage)
 {
-    if (stage == 0)
-    {
+    if (stage == 0) {
         node = (cModule*)getOwner()->getOwner();
         const char *filename = par("outputFile");
-        if (filename && (*filename))
-        {
+        if (filename && (*filename)) {
             out.open(filename);
             if (out.fail())
                 throw cRuntimeError("Failed to open output file: %s", filename);
@@ -69,22 +62,19 @@ void TestIGMP::initialize(int stage)
 void TestIGMP::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
     const Ipv4MulticastGroupInfo *info;
-    if (signalID == ipv4MulticastGroupJoinedSignal)
-    {
+    if (signalID == ipv4MulticastGroupJoinedSignal) {
         info = check_and_cast<const Ipv4MulticastGroupInfo*>(obj);
         startEvent("join group", HOST_GROUP_STATE, info->ie, &info->groupAddress);
         Igmpv2::receiveSignal(source, signalID, obj, details);
         endEvent(HOST_GROUP_STATE, info->ie, &info->groupAddress);
     }
-    else if (signalID == ipv4MulticastGroupLeftSignal)
-    {
+    else if (signalID == ipv4MulticastGroupLeftSignal) {
         info = check_and_cast<const Ipv4MulticastGroupInfo*>(obj);
         startEvent("leave group", HOST_GROUP_STATE, info->ie, &info->groupAddress);
         Igmpv2::receiveSignal(source, signalID, obj, details);
         endEvent(HOST_GROUP_STATE, info->ie, &info->groupAddress);
     }
-    else
-    {
+    else {
         Igmpv2::receiveSignal(source, signalID, obj, details);
     }
 }
@@ -102,8 +92,7 @@ void TestIGMP::processIgmpMessage(Packet *packet)
     InterfaceEntry *ie = ift->getInterfaceById(packet->getTag<InterfaceInd>()->getInterfaceId());
     const auto& igmp = packet->peekAtFront<IgmpMessage>();
     Ipv4Address group = Ipv4Address::UNSPECIFIED_ADDRESS;
-    switch (igmp->getType())
-    {
+    switch (igmp->getType()) {
         case IGMP_MEMBERSHIP_QUERY:
             group = packet->peekAtFront<IgmpQuery>()->getGroupAddress();
             break;
@@ -126,8 +115,7 @@ void TestIGMP::processIgmpMessage(Packet *packet)
         stateMask |= HOST_GROUP_STATE;
     if (!group.isUnspecified() && rt->isMulticastForwardingEnabled())
         stateMask |= ROUTER_GROUP_STATE;
-    switch (igmp->getType())
-    {
+    switch (igmp->getType()) {
         case IGMP_MEMBERSHIP_QUERY:
             startEvent("query received", stateMask, ie, &group);
             Igmpv2::processIgmpMessage(packet);
@@ -188,11 +176,9 @@ void TestIGMP::processRexmtTimer(cMessage *msg)
 
 void TestIGMP::sendToIP(Packet *msg, InterfaceEntry *ie, const Ipv4Address& dest)
 {
-    if (out.is_open())
-    {
+    if (out.is_open()) {
         const auto& igmp = CHK(msg->peekAtFront<IgmpMessage>());
-        switch (igmp->getType())
-        {
+        switch (igmp->getType()) {
             case IGMP_MEMBERSHIP_QUERY:
                 out << "send query"; break;
             case IGMPV1_MEMBERSHIP_REPORT:
@@ -208,72 +194,66 @@ void TestIGMP::sendToIP(Packet *msg, InterfaceEntry *ie, const Ipv4Address& dest
 
 void TestIGMP::processCommand(const cXMLElement &node)
 {
-  Enter_Method_Silent();
+    Enter_Method_Silent();
 
-  const char *tag = node.getTagName();
-  const char *ifname = node.getAttribute("ifname");
-  InterfaceEntry *ie = ifname ? ift->getInterfaceByName(ifname) : NULL;
+    const char *tag = node.getTagName();
+    const char *ifname = node.getAttribute("ifname");
+    InterfaceEntry *ie = ifname ? CHK(ift->findInterfaceByName(ifname)) : nullptr;
 
-  if (!strcmp(tag, "join"))
-  {
-    const char *group = node.getAttribute("group");
-    ie->getProtocolData<Ipv4InterfaceData>()->joinMulticastGroup(Ipv4Address(group));
-  }
-  else if (!strcmp(tag, "leave"))
-  {
-    const char *group = node.getAttribute("group");
-    ie->getProtocolData<Ipv4InterfaceData>()->leaveMulticastGroup(Ipv4Address(group));
-  }
-  else if (!strcmp(tag, "dump"))
-  {
-    const char *what = node.getAttribute("what");
-    if (!strcmp(what, "groups"))
-    {
+    if (!strcmp(tag, "join")) {
         if (!ie)
             throw cRuntimeError("'ifname' attribute is missing at XML node ", node.str().c_str());
-        Ipv4AddressVector joinedGroups;
-        const int count = ie->getProtocolData<Ipv4InterfaceData>()->getNumOfJoinedMulticastGroups();
-        for (int i = 0; i < count; ++i)
-            joinedGroups.push_back(ie->getProtocolData<Ipv4InterfaceData>()->getJoinedMulticastGroup(i));
-        dumpMulticastGroups(what, ifname, joinedGroups);
+        const char *group = node.getAttribute("group");
+        ie->getProtocolData<Ipv4InterfaceData>()->joinMulticastGroup(Ipv4Address(group));
     }
-    else if (!strcmp(what, "listeners"))
-    {
+    else if (!strcmp(tag, "leave")) {
         if (!ie)
             throw cRuntimeError("'ifname' attribute is missing at XML node ", node.str().c_str());
-        Ipv4AddressVector reportedGroups;
-        const int count = ie->getProtocolData<Ipv4InterfaceData>()->getNumOfReportedMulticastGroups();
-        for (int i = 0; i < count; ++i)
-            reportedGroups.push_back(ie->getProtocolData<Ipv4InterfaceData>()->getReportedMulticastGroup(i));
-        dumpMulticastGroups("listeners", ifname, reportedGroups);
+        const char *group = node.getAttribute("group");
+        ie->getProtocolData<Ipv4InterfaceData>()->leaveMulticastGroup(Ipv4Address(group));
     }
-  }
-  else if (!strcmp(tag, "disable"))
-  {
-      enabled = false;
-  }
-  else if (!strcmp(tag, "enable"))
-  {
-      enabled = true;
-  }
-  else if (!strcmp(tag, "send"))
-  {
-      const char *what = node.getAttribute("what");
-      if (!strcmp(what,"query"))
-      {
-          const char *groupAttr = node.getAttribute("group");
-          Ipv4Address group = groupAttr ? Ipv4Address(groupAttr) : Ipv4Address::UNSPECIFIED_ADDRESS;
-          const char *maxRespTimeAttr = node.getAttribute("maxRespTime");
-          double maxRespTime = maxRespTimeAttr ? atof(maxRespTimeAttr) : queryResponseInterval;
-          sendQuery(ie, group, maxRespTime);
-      }
-  }
+    else if (!strcmp(tag, "dump")) {
+        const char *what = node.getAttribute("what");
+        if (!strcmp(what, "groups")) {
+            if (!ie)
+                throw cRuntimeError("'ifname' attribute is missing at XML node ", node.str().c_str());
+            Ipv4AddressVector joinedGroups;
+            const int count = ie->getProtocolData<Ipv4InterfaceData>()->getNumOfJoinedMulticastGroups();
+            for (int i = 0; i < count; ++i)
+                joinedGroups.push_back(ie->getProtocolData<Ipv4InterfaceData>()->getJoinedMulticastGroup(i));
+            dumpMulticastGroups(what, ifname, joinedGroups);
+        }
+        else if (!strcmp(what, "listeners")) {
+            if (!ie)
+                throw cRuntimeError("'ifname' attribute is missing at XML node ", node.str().c_str());
+            Ipv4AddressVector reportedGroups;
+            const int count = ie->getProtocolData<Ipv4InterfaceData>()->getNumOfReportedMulticastGroups();
+            for (int i = 0; i < count; ++i)
+                reportedGroups.push_back(ie->getProtocolData<Ipv4InterfaceData>()->getReportedMulticastGroup(i));
+            dumpMulticastGroups("listeners", ifname, reportedGroups);
+        }
+    }
+    else if (!strcmp(tag, "disable")) {
+        enabled = false;
+    }
+    else if (!strcmp(tag, "enable")) {
+        enabled = true;
+    }
+    else if (!strcmp(tag, "send")) {
+        const char *what = node.getAttribute("what");
+        if (!strcmp(what,"query")) {
+            const char *groupAttr = node.getAttribute("group");
+            Ipv4Address group = groupAttr ? Ipv4Address(groupAttr) : Ipv4Address::UNSPECIFIED_ADDRESS;
+            const char *maxRespTimeAttr = node.getAttribute("maxRespTime");
+            double maxRespTime = maxRespTimeAttr ? atof(maxRespTimeAttr) : queryResponseInterval;
+            sendQuery(ie, group, maxRespTime);
+        }
+    }
 }
 
 void TestIGMP::startEvent(const char * event, int stateMask, InterfaceEntry *ie, const Ipv4Address *group)
 {
-    if (out.is_open())
-    {
+    if (out.is_open()) {
         out << "t=" << simTime() << " " << node->getFullName() << "/" << ie->getInterfaceName();
         if (group)
             out << "/" << *group;
@@ -285,8 +265,7 @@ void TestIGMP::startEvent(const char * event, int stateMask, InterfaceEntry *ie,
 
 void TestIGMP::endEvent(int stateMask, InterfaceEntry *ie, const Ipv4Address *group)
 {
-    if (out.is_open())
-    {
+    if (out.is_open()) {
         out << "> -->";
         printStates(stateMask, ie, group);
         out << "\n";
@@ -296,13 +275,10 @@ void TestIGMP::endEvent(int stateMask, InterfaceEntry *ie, const Ipv4Address *gr
 
 void TestIGMP::printStates(int stateMask, InterfaceEntry *ie, const Ipv4Address *group)
 {
-    if (stateMask & ROUTER_IF_STATE)
-    {
+    if (stateMask & ROUTER_IF_STATE) {
         RouterInterfaceData *routerIfData = getRouterInterfaceData(ie);
-        if (routerIfData)
-        {
-            switch (routerIfData->igmpRouterState)
-            {
+        if (routerIfData) {
+            switch (routerIfData->igmpRouterState) {
                 case IGMP_RS_INITIAL: out << " INITIAL"; break;
                 case IGMP_RS_QUERIER: out << " QUERIER"; break;
                 case IGMP_RS_NON_QUERIER: out << " NON_QUERIER"; break;
@@ -312,13 +288,10 @@ void TestIGMP::printStates(int stateMask, InterfaceEntry *ie, const Ipv4Address 
         else
             out << " <NONE>";
     }
-    if ((stateMask & ROUTER_GROUP_STATE) && group)
-    {
+    if ((stateMask & ROUTER_GROUP_STATE) && group) {
         RouterGroupData *routerGroupData = getRouterGroupData(ie, *group);
-        if (routerGroupData)
-        {
-            switch (routerGroupData->state)
-            {
+        if (routerGroupData) {
+            switch (routerGroupData->state) {
                 case IGMP_RGS_NO_MEMBERS_PRESENT: out << " NO_MEMBERS_PRESENT"; break;
                 case IGMP_RGS_MEMBERS_PRESENT:    out << " MEMBERS_PRESENT"; break;
                 case IGMP_RGS_V1_MEMBERS_PRESENT: out << " V1_MEMBERS_PRESENT"; break;
@@ -329,13 +302,10 @@ void TestIGMP::printStates(int stateMask, InterfaceEntry *ie, const Ipv4Address 
         else
             out << " NO_MEMBERS_PRESENT";
     }
-    if ((stateMask & HOST_GROUP_STATE) && group)
-    {
+    if ((stateMask & HOST_GROUP_STATE) && group) {
         HostGroupData *hostGroupData = getHostGroupData(ie, *group);
-        if (hostGroupData)
-        {
-            switch (hostGroupData->state)
-            {
+        if (hostGroupData) {
+            switch (hostGroupData->state) {
                 case IGMP_HGS_NON_MEMBER:      out << " NON_MEMBER"; break;
                 case IGMP_HGS_DELAYING_MEMBER: out << " DELAYING_MEMBER"; break;
                 case IGMP_HGS_IDLE_MEMBER:     out << " IDLE_MEMBER"; break;
@@ -349,15 +319,16 @@ void TestIGMP::printStates(int stateMask, InterfaceEntry *ie, const Ipv4Address 
 
 void TestIGMP::dumpMulticastGroups(const char* name, const char *ifname, Ipv4AddressVector groups)
 {
-  if (!out.is_open())
-      return;
+    if (!out.is_open())
+        return;
 
-  out << "t=" << simTime() << " " << node->getFullName() << "/" << ifname << ": " << name << " = <";
+    out << "t=" << simTime() << " " << node->getFullName() << "/" << ifname << ": " << name << " = <";
 
-  sort(groups.begin(), groups.end());
-  for (Ipv4AddressVector::iterator it = groups.begin(); it != groups.end(); ++it)
-      out << (it == groups.begin()?"":",") << *it;
-  out << ">\n";
+    sort(groups.begin(), groups.end());
+    for (Ipv4AddressVector::iterator it = groups.begin(); it != groups.end(); ++it)
+        out << (it == groups.begin()?"":",") << *it;
+    out << ">\n";
 }
 
 } // namespace inet
+
