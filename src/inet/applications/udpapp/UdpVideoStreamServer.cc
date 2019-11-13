@@ -160,8 +160,16 @@ void UdpVideoStreamServer::clearStreams()
 void UdpVideoStreamServer::handleStartOperation(LifecycleOperation *operation)
 {
     socket.setOutputGate(gate("socketOut"));
-    socket.bind(localPort);
     socket.setCallback(this);
+    socket.bind(localPort);
+
+    int timeToLive = par("timeToLive");
+    if (timeToLive != -1)
+        socket.setTimeToLive(timeToLive);
+
+    int dscp = par("dscp");
+    if (dscp != -1)
+        socket.setDscp(dscp);
 }
 
 void UdpVideoStreamServer::handleStopOperation(LifecycleOperation *operation)
