@@ -94,7 +94,7 @@ simple TcpSessionApp like IApp
         string sendScript = default("");
         double tClose @unit(s) = default(2s);
         int timeToLive = default(-1); // if not -1, set the TTL (IPv4) or Hop Limit (IPv6) field of sent packets to this value
-        int typeOfService = default(-1); // if not -1, set the ToS (IPv4) or Traffic Class (IPv6) field of sent packets to this value
+        int dscp = default(-1); // if not -1, set the DSCP (IPv4/IPv6) field of sent packets to this value
         @display("i=block/app");
         @lifecycleSupport;
         double stopOperationExtraTime @unit(s) = default(-1s);    // extra time after lifecycle stop operation finished

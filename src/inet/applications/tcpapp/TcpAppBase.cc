@@ -70,9 +70,9 @@ void TcpAppBase::connect()
     if (timeToLive != -1)
         socket.setTimeToLive(timeToLive);
 
-    int typeOfService = par("typeOfService");
-    if (typeOfService != -1)
-        socket.setTypeOfService(typeOfService);
+    int dscp = par("dscp");
+    if (dscp != -1)
+        socket.setDscp(dscp);
 
     // connect
     const char *connectAddress = par("connectAddress");
