@@ -350,6 +350,14 @@ class INET_API MemoryOutputStream {
             mul >>= 1;
         }
     }
+
+    /**
+     * Writes a SimTime value to the end of the stream on 9 bytes.
+     */
+    void writeSimTime(SimTime value) {
+        writeUint64Be(value.raw());
+        writeByte(-1 * value.getScaleExp());
+    }
     //@}
 };
 

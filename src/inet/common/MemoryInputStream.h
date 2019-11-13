@@ -457,6 +457,15 @@ class INET_API MemoryInputStream {
         }
         return num;
     }
+
+    /**
+     * Reads a SimTime value at the current position from the next 9 bytes.
+     */
+    SimTime readSimTime() {
+        uint64_t raw = readUint64Be();
+        SimTimeUnit unit = static_cast<SimTimeUnit>(-1 * readByte());
+        return SimTime(raw, unit);
+    }
     //@}
 };
 
