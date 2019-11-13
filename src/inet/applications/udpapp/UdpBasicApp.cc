@@ -71,9 +71,9 @@ void UdpBasicApp::setSocketOptions()
     if (timeToLive != -1)
         socket.setTimeToLive(timeToLive);
 
-    int typeOfService = par("typeOfService");
-    if (typeOfService != -1)
-        socket.setDscp(typeOfService);
+    int dscp = par("dscp");
+    if (dscp != -1)
+        socket.setDscp(dscp);
 
     const char *multicastInterface = par("multicastInterface");
     if (multicastInterface[0]) {
