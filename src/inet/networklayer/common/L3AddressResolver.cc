@@ -218,7 +218,7 @@ L3Address L3AddressResolver::addressOf(cModule *host, int addrType)
 L3Address L3AddressResolver::addressOf(cModule *host, const char *ifname, int addrType)
 {
     IInterfaceTable *ift = interfaceTableOf(host);
-    InterfaceEntry *ie = ift->getInterfaceByName(ifname);
+    InterfaceEntry *ie = ift->findInterfaceByName(ifname);
     if (ie)
         return getAddressFrom(ie, addrType);
 

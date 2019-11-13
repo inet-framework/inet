@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2019-10-31  Zoltan Bojthe
+
+	Moved kind enums to MSG files.
+
 2019-10-18  Zoltan Bojthe
 
 	Added message kind properties.

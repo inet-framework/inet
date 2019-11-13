@@ -35,8 +35,8 @@ void VlanTunnel::initialize(int stage)
         interfaceEntry = getContainingNicModule(this);
     }
     else if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION) {
-        auto interfaceTable = findModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
-        realInterfaceEntry = interfaceTable->getInterfaceByName(par("realInterfaceName"));
+        auto interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
+        realInterfaceEntry = CHK(interfaceTable->findInterfaceByName(par("realInterfaceName")));
         const char *addressString = par("address");
         MacAddress address;
         if (!strcmp(addressString, "auto"))

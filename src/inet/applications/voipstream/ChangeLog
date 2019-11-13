@@ -1,5 +1,14 @@
 ====== inet-4.x ======
 
+2019-11-08  Zoltan Bojthe
+
+	Added missing return value checks.
+
+2019-11-08  Levente Mészáros
+
+	Fixed memory leaks detected by static analysis.
+	Suppressed annoying deprecated warnings until they get fixed.
+
 2019-10-14  Andras Varga
 
 	Fix crash in VoipStreamSender if module is deleted without initialize() being called.

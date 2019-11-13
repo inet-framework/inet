@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2019-11-11  Levente Mészáros
+
+	Added missing error handling to PcapReader.
+
 2019-08-26  Levente Mészáros
 
 	Renamed pcapFrameRecorded signal to packetRecorded.

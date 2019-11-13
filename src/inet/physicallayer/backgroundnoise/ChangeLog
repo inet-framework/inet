@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2019-11-08  Levente Mészáros
+
+	Fixed memory leaks detected by static analysis.
+
 2019-09-23  Levente Mészáros
 
 	Added power spectral density parameter to IsotropicDimensionalBackgroundNoise.

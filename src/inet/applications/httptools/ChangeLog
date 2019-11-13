@@ -1,5 +1,13 @@
 ====== inet-4.x ======
 
+2019-11-08  Levente Mészáros
+
+	Fixed memory leaks detected by static analysis.
+
+2019-11-06  Zoltan Bojthe
+
+	Fixed bug #219.
+
 2019-10-18  Zoltan Bojthe
 
 	Changed to use msg constructor to set message name and message kind.

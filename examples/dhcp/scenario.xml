@@ -9,7 +9,7 @@
     <at t="80.0">
         <shutdown module="server"/>
     </at>
-    <at t="90.0">
+    <at t="160.0">
         <startup module="server"/>
     </at>
 </scenario>

@@ -78,7 +78,7 @@ void HostAutoConfigurator::setupNetworkLayer()
     cStringTokenizer interfaceTokenizer(interfaces.c_str());
     const char *ifname;
     while ((ifname = interfaceTokenizer.nextToken()) != nullptr) {
-        InterfaceEntry *ie = ift->getInterfaceByName(ifname);
+        InterfaceEntry *ie = ift->findInterfaceByName(ifname);
         if (!ie)
             throw cRuntimeError("No such interface '%s'", ifname);
 

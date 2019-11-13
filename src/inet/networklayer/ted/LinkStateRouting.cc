@@ -58,8 +58,7 @@ void LinkStateRouting::initialize(int stage)
         IInterfaceTable *ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
         const char *token;
         while ((token = tokenizer.nextToken()) != nullptr) {
-            ASSERT(ift->getInterfaceByName(token));
-            peerIfAddrs.push_back(ift->getInterfaceByName(token)->getProtocolData<Ipv4InterfaceData>()->getIPAddress());
+            peerIfAddrs.push_back(CHK(ift->findInterfaceByName(token))->getProtocolData<Ipv4InterfaceData>()->getIPAddress());
         }
 
         // schedule start of flooding link state info

@@ -42,7 +42,7 @@ void ExtLowerUdp::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        packetNameFormat = par("packetName");
+        packetNameFormat = par("packetNameFormat");
         if (auto scheduler = dynamic_cast<RealTimeScheduler *>(getSimulation()->getScheduler())) {
             rtScheduler = scheduler;
         }

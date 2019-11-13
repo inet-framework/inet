@@ -31,8 +31,8 @@ Ospfv3Interface::Ospfv3Interface(const char* name, cModule* routerModule, Ospfv3
     this->containingProcess = processModule;
     this->ift = check_and_cast<IInterfaceTable *>(containingModule->getSubmodule("interfaceTable"));
 
-    InterfaceEntry *ie = this->ift->getInterfaceByName(this->interfaceName.c_str());
-    Ipv6InterfaceData *ipv6int = ie->findProtocolData<Ipv6InterfaceData>();
+    InterfaceEntry *ie = CHK(this->ift->findInterfaceByName(this->interfaceName.c_str()));
+    Ipv6InterfaceData *ipv6int = ie->getProtocolData<Ipv6InterfaceData>();
     this->interfaceId = ift->getInterfaceById(ie->getInterfaceId())->getInterfaceId();
     this->interfaceLLIP = ipv6int->getLinkLocalAddress();
     this->interfaceType = interfaceType;
@@ -81,7 +81,7 @@ void Ospfv3Interface::processEvent(Ospfv3Interface::Ospfv3InterfaceEvent event)
 
 int Ospfv3Interface::getInterfaceMTU() const
 {
-    InterfaceEntry* ie = this->ift->getInterfaceByName(this->interfaceName.c_str());
+    InterfaceEntry* ie = CHK(this->ift->findInterfaceByName(this->interfaceName.c_str()));
     return ie->getMtu();
 }
 
@@ -297,7 +297,8 @@ void Ospfv3Interface::processHelloPacket(Packet* packet)
     EV_DEBUG <<"Hello packet was received on interface " << this->getIntName() << "\n";
     const auto& hello = packet->peekAtFront<Ospfv3HelloPacket>();
     bool neighborChanged = false;
-    bool backupSeen = false;    //FIXME set but not used variable
+    bool backupSeen = false;
+    (void)backupSeen; //FIXME set but not used variable
     bool neighborsDRStateChanged = false;
     bool drChanged = false;
     bool shouldRebuildRoutingTable=false;
@@ -1768,40 +1769,33 @@ LinkLSA* Ospfv3Interface::originateLinkLSA()
     memset(&lsOptions, 0, sizeof(Ospfv3Options));
     linkLSA->setOspfOptions(lsOptions);
 
-    InterfaceEntry* ie = this->ift->getInterfaceByName(this->interfaceName.c_str());
-    Ipv6InterfaceData* ipv6Data = ie->findProtocolData<Ipv6InterfaceData>();
-
-    int numPrefixes;
+    InterfaceEntry* ie = CHK(this->ift->findInterfaceByName(this->interfaceName.c_str()));
     if (this->getArea()->getInstance()->getAddressFamily() == IPV4INSTANCE) {
-        numPrefixes = 1;
+        Ipv4InterfaceData* ipv4Data = ie->getProtocolData<Ipv4InterfaceData>();
+        Ipv4Address ipAdd = ipv4Data->getIPAddress();
+
+        // set also ipv4 link local address
+        linkLSA->setLinkLocalInterfaceAdd(ipAdd);
+
+        Ospfv3LsaPrefix0 prefix;
+        prefix.dnBit = false;
+        prefix.laBit = false;
+        prefix.nuBit = false;
+        prefix.pBit = false;
+        prefix.xBit = false;
+        prefix.prefixLen = ipv4Data->getNetmask().getNetmaskLength();
+        prefix.addressPrefix = L3Address(ipAdd.getPrefix(prefix.prefixLen));
+
+        linkLSA->setPrefixesArraySize(1);
+        linkLSA->setPrefixes(0, prefix);
+        packetLength += 4;
+        linkLSA->setNumPrefixes(1);
     }
     else {
+        Ipv6InterfaceData* ipv6Data = ie->getProtocolData<Ipv6InterfaceData>();
         linkLSA->setLinkLocalInterfaceAdd(ipv6Data->getLinkLocalAddress());
-        numPrefixes = ipv6Data->getNumAddresses();
-    }
-    for (int i=0; i<numPrefixes; i++) {
-        if (this->getArea()->getInstance()->getAddressFamily() == IPV4INSTANCE) {
-            Ipv4InterfaceData* ipv4Data = ie->findProtocolData<Ipv4InterfaceData>();
-            Ipv4Address ipAdd = ipv4Data->getIPAddress();
-
-            // set also ipv4 link local address
-            linkLSA->setLinkLocalInterfaceAdd(ipAdd);
-
-            Ospfv3LsaPrefix0 prefix;
-            prefix.dnBit = false;
-            prefix.laBit = false;
-            prefix.nuBit = false;
-            prefix.pBit = false;
-            prefix.xBit = false;
-            prefix.prefixLen = ipv4Data->getNetmask().getNetmaskLength();
-            prefix.addressPrefix = L3Address(ipAdd.getPrefix(prefix.prefixLen));
-
-            linkLSA->setPrefixesArraySize(linkLSA->getPrefixesArraySize()+1);
-            linkLSA->setPrefixes(i, prefix);
-            packetLength += 4;
-            linkLSA->setNumPrefixes(linkLSA->getNumPrefixes() + 1);
-        }
-        else {
+        int numPrefixes = ipv6Data->getNumAddresses();
+        for (int i=0; i<numPrefixes; i++) {
             EV_DEBUG << "Creating Link LSA for address: " << ipv6Data->getLinkLocalAddress() << "\n";
             Ipv6Address ipv6 = ipv6Data->getAddress(i);
             // this also includes linkLocal and Multicast adresses. So there need to  be chceck, if writing ipv6 is global
@@ -1962,7 +1956,7 @@ std::string Ospfv3Interface::detailedInfo() const
 
     out << "Interface " << this->getIntName() << "\n";
     out << "Link Local Address ";
-    InterfaceEntry* ie = this->ift->getInterfaceByName(this->getIntName().c_str());
+    InterfaceEntry* ie = CHK(this->ift->findInterfaceByName(this->getIntName().c_str()));
     Ipv6InterfaceData *ipv6int = ie->findProtocolData<Ipv6InterfaceData>();
     out << ipv6int->getLinkLocalAddress() << ", Interface ID " << this->interfaceId << "\n";
 

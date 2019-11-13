@@ -142,7 +142,7 @@ void Ospfv3Process::parseConfig(cXMLElement* interfaceConfig)
     cXMLElementList intList = interfaceConfig->getElementsByTagName("Interface");
     for (auto interfaceIt=intList.begin(); interfaceIt!=intList.end(); interfaceIt++) {
         const char* interfaceName = (*interfaceIt)->getAttribute("name");
-        InterfaceEntry *myInterface = (ift->getInterfaceByName(interfaceName));
+        InterfaceEntry *myInterface = CHK(ift->findInterfaceByName(interfaceName));
 
         if (myInterface->isLoopback()) {
             const char * ipv41 = "127.0.0.0";
@@ -693,8 +693,8 @@ void Ospfv3Process::addInstance(Ospfv3Instance* newInstance)
 
 void Ospfv3Process::sendPacket(Packet *packet, Ipv6Address destination, const char* ifName, short hopLimit)
 {
-    InterfaceEntry *ie = this->ift->getInterfaceByName(ifName);
-    Ipv6InterfaceData *ipv6int = ie->findProtocolData<Ipv6InterfaceData>();
+    InterfaceEntry *ie = CHK(this->ift->findInterfaceByName(ifName));
+    Ipv6InterfaceData *ipv6int = ie->getProtocolData<Ipv6InterfaceData>();
 
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ospf);
     packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
@@ -814,7 +814,7 @@ bool Ospfv3Process::installLSA(const Ospfv3Lsa *lsa, int instanceID, Ipv4Address
         case LINK_LSA: {
             Ospfv3Instance* instance = this->getInstanceById(instanceID);
             if (Ospfv3Area* area = instance->getAreaById(areaID)) {
-                //FIXME set but unused 'area' variable
+                (void)area; //FIXME set but unused 'area' variable
                 Ospfv3LinkLsa *ospfLinkLSA = check_and_cast<Ospfv3LinkLsa *>(const_cast<Ospfv3Lsa*>(lsa));
                 return intf->installLinkLSA(ospfLinkLSA);
             }
@@ -850,7 +850,8 @@ void Ospfv3Process::rebuildRoutingTable()
     for (unsigned int k=0; k<instanceCount; k++) {
         Ospfv3Instance* currInst = this->instances.at(k);
         unsigned long areaCount = currInst->getAreaCount();
-        bool hasTransitAreas = false;    //FIXME set but not used variable
+        bool hasTransitAreas = false;
+        (void)hasTransitAreas; //FIXME set but not used variable
         unsigned long i;
 
         EV_INFO << "Rebuilding routing table for instance " << this->instances.at(k)->getInstanceID() << ":\n";

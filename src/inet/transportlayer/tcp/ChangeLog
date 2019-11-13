@@ -1,5 +1,18 @@
 ====== inet-4.x ======
 
+2019-11-11  Zoltan Bojthe
+
+	Removed unused code guarded with "ifdef TCP_SENDFRAGMENTS"
+	Added missing TCP connection state when building TCP header options.
+
+2019-11-06  Zoltan Bojthe
+
+	Using scaled window limit when scaled window enabled (fix for #274).
+
+2019-10-31  Zoltan Bojthe
+
+	Fixed messageKinds in NED
+
 2019-10-24  Zoltan Bojthe
 
 	Fixed "TcpConnection is a submodule" bug.

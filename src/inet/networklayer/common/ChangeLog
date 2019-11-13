@@ -1,5 +1,18 @@
 ====== inet-4.x ======
 
+2019-11-12  Zoltan Bojthe
+
+	Renamed functions for getFoo()/findFoo() convention in InterfaceTable.
+
+2019-11-11  Zoltan Bojthe
+
+	Added notifications about changing the InterfaceProtocolData set in InterfaceEntry.
+	Added ipv4Netmask field to InterfaceEntry.
+
+2019-11-07  Zoltan Bojthe
+
+	Added getFirstNonLoopbackInterface() to InterfaceTable.
+
 2019-09-07  Marcel Marek
 
 	Added ECN to .msg file.

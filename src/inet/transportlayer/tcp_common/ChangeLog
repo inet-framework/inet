@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2019-11-11  Levente Mészáros
+
+	Added missing @packetData annotation to TcpOption.
+
 2019-09-30  Marcel Marek
 
 	Added simplified version of TCP/IP ECN mechanism.

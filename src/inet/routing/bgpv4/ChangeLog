@@ -1,5 +1,13 @@
 ====== inet-4.x ======
 
+2019-11-11  Levente Mészáros
+
+	Added @packetData annotation to non-Chunk based packet parts.
+
+2019-11-08  Levente Mészáros
+
+	Fixed memory leaks detected by static analysis.
+
 2019-09-22  Mani Amoozadeh
 
 	Now that TCP socket has setTtl option value, all E-bgp connections

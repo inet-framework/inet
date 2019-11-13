@@ -132,10 +132,10 @@ void Ipv4RoutingTable::configureRouterId()
               // if there is no interface with routerId yet, assign it to the loopback address;
               // TODO find out if this is a good practice, in which situations it is useful etc.
         if (getInterfaceByAddress(routerId) == nullptr) {
-            InterfaceEntry *lo0 = ift->getFirstLoopbackInterface();
-            ASSERT(lo0);
-            lo0->getProtocolData<Ipv4InterfaceData>()->setIPAddress(routerId);
-            lo0->getProtocolData<Ipv4InterfaceData>()->setNetmask(Ipv4Address::ALLONES_ADDRESS);
+            InterfaceEntry *lo0 = CHK(ift->findFirstLoopbackInterface());
+            auto ipv4Data = lo0->getProtocolData<Ipv4InterfaceData>();
+            ipv4Data->setIPAddress(routerId);
+            ipv4Data->setNetmask(Ipv4Address::ALLONES_ADDRESS);
         }
     }
 }
