@@ -20,9 +20,9 @@ individually turned on or off:
 
 .. code-block:: ned
 
-   ipv4: <ipv4NetworkLayerType> like INetworkLayer if hasIpv4;
-   ipv6: <ipv6NetworkLayerType> like INetworkLayer if hasIpv6;
-   generic: <networkLayerType> like INetworkLayer if hasGn;
+   ipv4: <default("Ipv4NetworkLayer")> like INetworkLayer if hasIpv4;
+   ipv6: <default("Ipv6NetworkLayer")> like INetworkLayer if hasIpv6;
+   generic: <default("")> like INetworkLayer if hasGn;
 
 In the default configuration, only IPv4 is turned on. If you want to use
 an alternative network layer protocol instead of IPv4/IPv6, your
@@ -35,7 +35,7 @@ configuration will look something like this:
    **.hasIpv4 = false
    **.hasIpv6 = false
    **.hasGn = true
-   **.networkLayerType = "WiseRouteNetworkLayer"
+   **.generic.typename = "WiseRouteNetworkLayer"
 
 The list of alternative network layers includes:
 

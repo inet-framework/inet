@@ -78,8 +78,7 @@ void Ted::initializeTED()
         // preconfigured static host routes in routing table.
         //
         // find bandwidth of the link
-        cGate *g = getParentModule()->gate(ie->getNodeOutputGateId());
-        ASSERT(g);
+        cGate *g = CHK(getParentModule()->gate(ie->getNodeOutputGateId()));
         double linkBandwidth = g->getChannel()->getNominalDatarate();
 
         // find destination node for current interface
@@ -99,10 +98,8 @@ void Ted::initializeTED()
         if (!destRt) // switch, hub, bus, accesspoint, etc
             continue;
         Ipv4Address destRouterId = destRt->getRouterId();
-        IInterfaceTable *destIft = L3AddressResolver().findInterfaceTableOf(destNode);
-        ASSERT(destIft);
-        InterfaceEntry *destIe = destIft->getInterfaceByNodeInputGateId(g->getId());
-        ASSERT(destIe);
+        IInterfaceTable *destIft = L3AddressResolver().interfaceTableOf(destNode);
+        InterfaceEntry *destIe = CHK(destIft->findInterfaceByNodeInputGateId(g->getId()));
 
         //
         // fill in and insert TED entry

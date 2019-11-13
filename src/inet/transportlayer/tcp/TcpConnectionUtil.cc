@@ -687,6 +687,7 @@ void TcpConnection::sendFin()
 
 void TcpConnection::sendSegment(uint32 bytes)
 {
+    //FIXME check it: where is the right place for the next code (sacked/rexmitted)
     if (state->sack_enabled && state->afterRto) {
         // check rexmitQ and try to forward snd_nxt before sending new data
         uint32 forward = rexmitQueue->checkRexmitQueueForSackedOrRexmittedSegments(state->snd_nxt);
@@ -807,11 +808,13 @@ bool TcpConnection::sendData(bool fullSegmentsOnly, uint32 congestionWindow)
     if (bytesToSend > buffered)
         bytesToSend = buffered;
 
-    // TODO: FIXME: effectiveMaxBytesSend is just an estimation (it's not even accurate, because of NOPs)
-    //              it should rely on the actual header that will be used
-    uint32 effectiveMaxBytesSend = state->snd_mss;
-    if (state->ts_enabled)
-        effectiveMaxBytesSend -= B(TCP_OPTION_TS_SIZE).get();
+    // make a temporary tcp header for detecting tcp options length (copied from 'TcpConnection::sendSegment(uint32 bytes)' )
+    const auto& tmpTcpHeader = makeShared<TcpHeader>();
+    tmpTcpHeader->setAckBit(true);    // needed for TS option, otherwise TSecr will be set to 0
+    writeHeaderOptions(tmpTcpHeader);
+    uint options_len = B(tmpTcpHeader->getHeaderLength() - TCP_MIN_HEADER_LENGTH).get();
+    ASSERT(options_len < state->snd_mss);
+    uint32 effectiveMaxBytesSend = state->snd_mss - options_len;
 
     // last segment could be less than state->snd_mss (or less than snd_mss - TCP_OPTION_TS_SIZE if using TS option)
     if (fullSegmentsOnly && (bytesToSend < (effectiveMaxBytesSend))) {
@@ -828,15 +831,6 @@ bool TcpConnection::sendData(bool fullSegmentsOnly, uint32 congestionWindow)
 
     ASSERT(bytesToSend > 0);
 
-#ifdef TCP_SENDFRAGMENTS    /* normally undefined */
-    // make agressive use of the window until the last byte
-    while (bytesToSend > 0) {
-        ulong bytes = std::min(bytesToSend, state->snd_mss);
-        sendSegment(bytes);
-        ASSERT(bytesToSend >= state->sentBytes);
-        bytesToSend -= state->sentBytes;
-    }
-#else // ifdef TCP_SENDFRAGMENTS
       // send < MSS segments only if it's the only segment we can send now
       // Note: if (bytesToSend == 1010 && MSS == 1012 && ts_enabled == true) => we may send
       // 2 segments (1000 payload + 12 optionsHeader and 10 payload + 12 optionsHeader)
@@ -861,7 +855,6 @@ bool TcpConnection::sendData(bool fullSegmentsOnly, uint32 congestionWindow)
         sendSegment(bytesToSend);
     else if (bytesToSend > 0)
         EV_DETAIL << bytesToSend << " bytes of space left in effectiveWindow\n";
-#endif // ifdef TCP_SENDFRAGMENTS
 
     // remember highest seq sent (snd_nxt may be set back on retransmission,
     // but we'll need snd_max to check validity of ACKs -- they must ack

@@ -328,7 +328,7 @@ void MacAddressTable::readAddressTable(const char *fileName)
 
         //   parse interface:
         int interfaceId = -1;
-        auto ie = ifTable->getInterfaceByName(interfaceName);
+        auto ie = ifTable->findInterfaceByName(interfaceName);
         if (ie == nullptr) {
             long int num = strtol(interfaceName, &endptr, 10);
             if (endptr && *endptr == '\0')

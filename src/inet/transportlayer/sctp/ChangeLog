@@ -1,5 +1,18 @@
 ====== inet-4.x ======
 
+2019-11-12  Zoltan Bojthe
+
+	Fixed input interface detection in SctpNatHook.
+
+2019-11-08  Zoltan Bojthe
+
+	Fixed using size... field instead of sizeof(...)
+
+2019-11-08  Levente Mészáros
+
+	Fixed memory leaks detected by static analysis.
+	Fixed throwing exceptions with a pointer.
+
 2019-10-18  Zoltan Bojthe
 
 	Added message kind infos (name of used cEnum).

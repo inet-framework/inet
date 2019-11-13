@@ -162,7 +162,7 @@ void RoutingTableParser::parseInterfaces(char *ifconfigFile)
         if (streq(ifconfigFile + charpointer, "name:")) {
             // find existing interface with this name
             char *name = parseEntry(ifconfigFile, "name:", charpointer, buf);
-            ie = ift->getInterfaceByName(name);
+            ie = ift->findInterfaceByName(name);
             if (!ie)
                 throw cRuntimeError("Error in routing file: interface name `%s' not registered by any L2 module", name);
             if (!ie->findProtocolData<Ipv4InterfaceData>())
@@ -368,7 +368,7 @@ void RoutingTableParser::parseRouting(char *routeFile)
         interfaceName.reserve(MAX_ENTRY_STRING_SIZE);
         pos += strcpyword(interfaceName.buffer(), routeFile + pos);
         skipBlanks(routeFile, pos);
-        InterfaceEntry *ie = ift->getInterfaceByName(interfaceName.c_str());
+        InterfaceEntry *ie = ift->findInterfaceByName(interfaceName.c_str());
         if (!ie)
             throw cRuntimeError("Syntax error in routing file: 6th column: `%s' is not an existing interface", interfaceName.c_str());
 

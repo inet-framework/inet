@@ -1,5 +1,13 @@
 ====== inet-4.x ======
 
+2019-11-11  Zoltan Bojthe
+
+	Fixed #249: Ipv4 address does not expire when DHCP lease time pass by.
+
+2019-11-08  Levente Mészáros
+
+	Fixed memory leaks detected by static analysis.
+
 2019-10-18  Zoltan Bojthe
 
 	Message kind enum moved to MSG file to generate cEnum.

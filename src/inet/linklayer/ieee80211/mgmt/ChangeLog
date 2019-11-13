@@ -1,5 +1,14 @@
 ====== inet-4.x ======
 
+2019-11-12  Zoltan Bojthe
+
+	Fixed code for nullptr exception-safe.
+
+2019-11-07  Levente Mészáros
+
+	Added SSID to BssData in MiB.
+	Extended display string to display SSID too.
+
 2019-09-02  Zoltan Bojthe
 
 	Optimized tag usage.

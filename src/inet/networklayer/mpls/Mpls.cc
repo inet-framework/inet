@@ -108,7 +108,7 @@ bool Mpls::tryLabelAndForwardIpv4Datagram(Packet *packet)
         EV_WARN << "no mapping exists for this packet" << endl;
         return false;
     }
-    int outInterfaceId = CHK(ift->getInterfaceByName(outInterface.c_str()))->getInterfaceId();
+    int outInterfaceId = CHK(ift->findInterfaceByName(outInterface.c_str()))->getInterfaceId();
 
     ASSERT(outLabel.size() > 0);
 
@@ -248,7 +248,7 @@ void Mpls::processMplsPacketFromL2(Packet *packet)
         return;
     }
 
-    InterfaceEntry *outgoingInterface = ift->getInterfaceByName(outInterface.c_str());
+    InterfaceEntry *outgoingInterface = CHK(ift->findInterfaceByName(outInterface.c_str()));
 
     doStackOps(packet, outLabel);
 

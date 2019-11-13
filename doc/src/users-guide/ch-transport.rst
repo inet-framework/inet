@@ -20,9 +20,9 @@ instances of these protocols, like this:
 
 .. code-block:: ned
 
-   tcp: <tcpType> like ITcp if hasTcp;
-   udp: <udpType> like IUdp if hasUdp;
-   sctp: <sctpType> like ISctp if hasSctp;
+   tcp: <default("Tcp")> like ITcp if hasTcp;
+   udp: <default("Udp")> like IUdp if hasUdp;
+   sctp: <default("Sctp")> like ISctp if hasSctp;
 
 As RTP is more specialized that the other ones (multimedia streaming),
 INET provides a separate node type, :ned:`RtpHost`, for modeling RTP

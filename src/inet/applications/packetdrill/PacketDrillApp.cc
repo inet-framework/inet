@@ -86,7 +86,7 @@ void PacketDrillApp::initialize(int stage)
         const char *interface = par("interface");
         //const char *interfaceTableModule = par("interfaceTableModule");
         IInterfaceTable *interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
-        InterfaceEntry *interfaceEntry = interfaceTable->getInterfaceByName(interface);
+        InterfaceEntry *interfaceEntry = interfaceTable->findInterfaceByName(interface);
         if (interfaceEntry == nullptr)
             throw cRuntimeError("TUN interface not found: %s", interface);
         auto *idat = interfaceEntry->getProtocolData<Ipv4InterfaceData>();

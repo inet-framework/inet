@@ -1121,7 +1121,7 @@ void Ipv4NetworkConfigurator::readManualMulticastRouteConfiguration(Topology& to
                     if (atMatcher.matches(hostShortenedFullPath.c_str()) || atMatcher.matches(hostFullPath.c_str())) {
                         InterfaceEntry *parent = nullptr;
                         if (!isEmpty(parentAttr)) {
-                            parent = node->interfaceTable->getInterfaceByName(parentAttr);
+                            parent = node->interfaceTable->findInterfaceByName(parentAttr);
                             if (!parent)
                                 throw cRuntimeError("Parent interface '%s' not found.", parentAttr);
                             if (!parent->isMulticast())
@@ -1168,7 +1168,7 @@ void Ipv4NetworkConfigurator::resolveInterfaceAndGateway(Node *node, const char 
         outIE = nullptr;
     }
     else {
-        outIE = node->interfaceTable->getInterfaceByName(interfaceAttr);
+        outIE = node->interfaceTable->findInterfaceByName(interfaceAttr);
         if (!outIE)
             throw cRuntimeError("Host/router %s has no interface named \"%s\"",
                     node->module->getFullPath().c_str(), interfaceAttr);

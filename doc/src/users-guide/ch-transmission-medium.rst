@@ -52,17 +52,17 @@ types:
 
 .. code-block:: ned
 
-   propagation: <propagationType> like IPropagation;
-   analogModel: <analogModelType> like IAnalogModel;
-   backgroundNoise: <backgroundNoiseType> like IRadioBackgroundNoise
-       if backgroundNoiseType != "";
-   pathLoss: <pathLossType> like IPathLoss;
-   obstacleLoss: <obstacleLossType> like IObstacleLoss
-       if obstacleLossType != "";
-   mediumLimitCache: <mediumLimitCacheType> like IMediumLimitCache;
-   communicationCache: <communicationCacheType> like ICommunicationCache;
-   neighborCache: <neighborCacheType> like INeighborCache
-       if neighborCacheType != "";
+   propagation: <default("ConstantSpeedPropagation")> like IPropagation;
+   analogModel: <default("ScalarAnalogModel")> like IAnalogModel;
+   backgroundNoise: <default("IsotropicScalarBackgroundNoise")> like IRadioBackgroundNoise
+       if typename != "";
+   pathLoss: <default("FreeSpacePathLoss")> like IPathLoss;
+   obstacleLoss: <default("")> like IObstacleLoss
+       if typename != "";
+   mediumLimitCache: <default("MediumLimitCache")> like IMediumLimitCache;
+   communicationCache: <default("VectorCommunicationCache")> like ICommunicationCache;
+   neighborCache: <default("")> like INeighborCache
+       if typename != "";
 
 There are many preconfigured versions of :ned:`RadioMedium`:
 

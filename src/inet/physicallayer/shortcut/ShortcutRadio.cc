@@ -44,7 +44,7 @@ void ShortcutRadio::initialize(int stage)
     // TODO: INITSTAGE
     else if (stage == INITSTAGE_LINK_LAYER) {
         auto interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
-        auto interfaceEntry = interfaceTable->getInterfaceByInterfaceModule(this);
+        auto interfaceEntry = CHK(interfaceTable->findInterfaceByInterfaceModule(this));
         auto address = interfaceEntry->getMacAddress();
         shortcutRadios[address] = this;
     }

@@ -86,7 +86,7 @@ InterfaceEntry *DhcpClient::chooseInterface()
     InterfaceEntry *ie = nullptr;
 
     if (strlen(interfaceName) > 0) {
-        ie = ift->getInterfaceByName(interfaceName);
+        ie = ift->findInterfaceByName(interfaceName);
         if (ie == nullptr)
             throw cRuntimeError("Interface \"%s\" does not exist", interfaceName);
     }

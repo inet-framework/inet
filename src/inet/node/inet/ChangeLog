@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2019-11-06  Levente Mészáros
+
+	Removed numExtInterfaces parameter, ext[*] submodule vector.
+
 2019-06-19  Zoltan Bojthe
 
 	Added routingApp submodule to ManetRouter for Aodv or other manet routing over UDP/TCP protocol.
