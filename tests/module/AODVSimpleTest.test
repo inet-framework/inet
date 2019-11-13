@@ -95,7 +95,6 @@ sim-time-limit = 100s
 **.wlan[*].mac.address = "auto"
 **.wlan[*].mac.queue.packetCapacity = 14
 **.wlan[*].mac.rtsThresholdBytes = 3000B
-**.wlan[*].mac.retryLimit = 7
 **.wlan[*].mac.cwMinData = 7
 **.wlan[*].mac.cwMinMulticast = 31
 
