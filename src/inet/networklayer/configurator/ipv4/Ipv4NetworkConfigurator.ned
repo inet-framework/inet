@@ -207,7 +207,7 @@ import inet.networklayer.configurator.base.NetworkConfiguratorBase;
 //      in place of a byte. Unspecified parts will be filled automatically be
 //      the configurator. The default value "" means that any netmask can be
 //      configured.
-//      e.g. "255.255.255.0" or "255.255.x.x" or "255.255.x.0"
+//      e.g. "255.255.255.0" or "/24" or "255.255.x.x" or "255.255.x.0"
 //
 //    - @mtu                number
 //      Optional parameter attribute to set the MTU parameter in the interface.
