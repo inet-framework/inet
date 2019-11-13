@@ -72,7 +72,7 @@ void UdpSocketIo::setSocketOptions()
 
     int typeOfService = par("typeOfService");
     if (typeOfService != -1)
-        socket.setTypeOfService(typeOfService);
+        socket.setDscp(typeOfService);
 
     const char *multicastInterface = par("multicastInterface");
     if (multicastInterface[0]) {

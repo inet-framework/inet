@@ -155,7 +155,7 @@ class INET_API UdpSocket : public ISocket
      * Sets the Ipv4 Type of Service / Ipv6 Traffic Class fields of packets
      * sent from the UDP socket.
      */
-    void setTypeOfService(unsigned char tos);
+    void setDscp(short tos);
 
     /**
      * Set the Broadcast option on the UDP socket. This will cause the
