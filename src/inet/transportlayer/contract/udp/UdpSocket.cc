@@ -123,11 +123,11 @@ void UdpSocket::setTimeToLive(int ttl)
     sendToUDP(request);
 }
 
-void UdpSocket::setTypeOfService(unsigned char tos)
+void UdpSocket::setDscp(short dscp)
 {
-    auto request = new Request("setTOS", UDP_C_SETOPTION);
-    UdpSetTypeOfServiceCommand *ctrl = new UdpSetTypeOfServiceCommand();
-    ctrl->setTos(tos);
+    auto request = new Request("setDscp", UDP_C_SETOPTION);
+    auto *ctrl = new UdpSetDscpCommand();
+    ctrl->setDscp(dscp);
     request->setControlInfo(ctrl);
     sendToUDP(request);
 }

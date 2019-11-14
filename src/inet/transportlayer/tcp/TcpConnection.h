@@ -365,7 +365,7 @@ class INET_API TcpConnection : public cSimpleModule
 
     // TCP options for this connection
     int ttl = -1;
-    unsigned char typeOfService = 0;
+    short dscp = 0;
 
   protected:
     Tcp *tcpMain = nullptr;    // Tcp module

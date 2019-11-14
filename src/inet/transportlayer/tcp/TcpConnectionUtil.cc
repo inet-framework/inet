@@ -285,7 +285,7 @@ void TcpConnection::sendToIP(Packet *packet, const Ptr<TcpHeader>& tcpseg)
         packet->addTag<HopLimitReq>()->setHopLimit(ttl);
 
     if (packet->findTag<DscpReq>() == nullptr)
-        packet->addTag<DscpReq>()->setDifferentiatedServicesCodePoint(typeOfService);
+        packet->addTag<DscpReq>()->setDifferentiatedServicesCodePoint(dscp);
 
     auto addresses = packet->addTagIfAbsent<L3AddressReq>();
     addresses->setSrcAddress(localAddr);
@@ -319,7 +319,7 @@ void TcpConnection::sendToIP(Packet *packet, const Ptr<TcpHeader>& tcpseg, L3Add
         packet->addTag<HopLimitReq>()->setHopLimit(ttl);
 
     if (packet->findTag<DscpReq>() == nullptr)
-        packet->addTag<DscpReq>()->setDifferentiatedServicesCodePoint(typeOfService);
+        packet->addTag<DscpReq>()->setDifferentiatedServicesCodePoint(dscp);
 
     auto addresses = packet->addTagIfAbsent<L3AddressReq>();
     addresses->setSrcAddress(src);

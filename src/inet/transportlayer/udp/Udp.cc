@@ -166,8 +166,8 @@ void Udp::handleUpperCommand(cMessage *msg)
 
             if (auto cmd = dynamic_cast<UdpSetTimeToLiveCommand *>(ctrl))
                 setTimeToLive(sd, cmd->getTtl());
-            else if (auto cmd = dynamic_cast<UdpSetTypeOfServiceCommand *>(ctrl))
-                setTypeOfService(sd, cmd->getTos());
+            else if (auto cmd = dynamic_cast<UdpSetDscpCommand *>(ctrl))
+                setDscp(sd, cmd->getDscp());
             else if (auto cmd = dynamic_cast<UdpSetBroadcastCommand *>(ctrl))
                 setBroadcast(sd, cmd->getBroadcast());
             else if (auto cmd = dynamic_cast<UdpSetMulticastInterfaceCommand *>(ctrl))
@@ -389,9 +389,9 @@ void Udp::setTimeToLive(SockDesc *sd, int ttl)
     sd->ttl = ttl;
 }
 
-void Udp::setTypeOfService(SockDesc *sd, int typeOfService)
+void Udp::setDscp(SockDesc *sd, short dscp)
 {
-    sd->typeOfService = typeOfService;
+    sd->dscp = dscp;
 }
 
 void Udp::setBroadcast(SockDesc *sd, bool broadcast)
@@ -729,8 +729,8 @@ void Udp::handleUpperPacket(Packet *packet)
     if (sd->ttl != -1 && packet->findTag<HopLimitReq>() == nullptr)
         packet->addTag<HopLimitReq>()->setHopLimit(sd->ttl);
 
-    if (packet->findTag<DscpReq>() == nullptr)
-        packet->addTag<DscpReq>()->setDifferentiatedServicesCodePoint(sd->typeOfService);
+    if (sd->dscp != -1 && packet->findTag<DscpReq>() == nullptr)
+        packet->addTag<DscpReq>()->setDifferentiatedServicesCodePoint(sd->dscp);
 
     const Protocol *l3Protocol = nullptr;
     // TODO: apps use ModuleIdAddress if the network interface doesn't have an IP address configured, and UDP uses NextHopForwarding which results in a weird error in MessageDispatcher

@@ -160,9 +160,9 @@ class TcpSetTimeToLiveCommand extends TcpSetOptionCommand
     int ttl;    
 }
 
-class TcpTypeOfServiceCommand extends TcpSetOptionCommand
+class TcpSetDscpCommand extends TcpSetOptionCommand
 {
-    char tos;   // ToS byte for Ipv4/Ipv6
+    short dscp;   // dscp for Ipv4/Ipv6
 }
 
 //

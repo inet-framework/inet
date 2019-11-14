@@ -337,7 +337,7 @@ class INET_API TcpSocket : public ISocket
      * Sets the Ipv4 Type of Service / Ipv6 Traffic Class fields of packets
      * sent from the TCP socket.
      */
-    void setTypeOfService(unsigned char tos);
+    void setDscp(short dscp);
 
     /**
      * Required to re-connect with a "used" TcpSocket object.

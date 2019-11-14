@@ -178,18 +178,17 @@ class UdpSetTimeToLiveCommand extends UdpSetOptionCommand
 }
 
 //
-// Control info for setting the Type of Service (Ipv4) or Traffic Class (Ipv6)
+// Control info for setting the DSCP (DiffServ Code Point)
 // header field on outgoing Ipv4/Ipv6 packets sent from an Udp socket.
-// This is an 8-bit field, the lowest 6 bits are the Dscp (DiffServ Code Point)
-// and the highest 2 bits are the ECN (Explicit Congestion Notification).
+// This is a 6-bit field.
 // To set the option, send a message to  the ~Udp module with kind=UDP_C_SETOPTION
 // and an and instance of this control info class attached.
 //
 // @see ~UdpCommandCode
 //
-class UdpSetTypeOfServiceCommand extends UdpSetOptionCommand
+class UdpSetDscpCommand extends UdpSetOptionCommand
 {
-    char tos;  // ToS byte for Ipv4/Ipv6
+    short dscp;  // diffserv code point for Ipv4/Ipv6
 }
 
 //
