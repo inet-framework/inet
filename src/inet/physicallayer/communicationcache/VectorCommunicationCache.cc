@@ -163,7 +163,7 @@ void VectorCommunicationCache::removeNonInterferingTransmissions(std::function<v
 {
     const simtime_t now = simTime();
     size_t transmissionIndex = 0;
-    for (auto it = transmissionCache.cbegin(); it != transmissionCache.cbegin() + transmissionIndex; it++) {
+    for (auto it = transmissionCache.cbegin(); it != transmissionCache.cend(); ++it) {
         const TransmissionCacheEntry &transmissionCacheEntry = *it;
         if (transmissionCacheEntry.interferenceEndTime <= now) {
             transmissionIndex++;
