@@ -38,6 +38,7 @@ void BMac::initialize(int stage)
         slotDuration = par("slotDuration");
         bitrate = par("bitrate");
         headerLength = b(par("headerLength"));
+        ctrlFrameLength = b(par("ctrlFrameLength"));
         checkInterval = par("checkInterval");
         useMacAcks = par("useMACAcks");
         maxTxAttempts = par("maxTxAttempts");
@@ -167,10 +168,10 @@ void BMac::handleUpperPacket(Packet *packet)
  */
 void BMac::sendPreamble()
 {
-    auto preamble = makeShared<BMacHeader>();
+    auto preamble = makeShared<BMacControlFrame>();
     preamble->setSrcAddr(interfaceEntry->getMacAddress());
     preamble->setDestAddr(MacAddress::BROADCAST_ADDRESS);
-    preamble->setChunkLength(headerLength);
+    preamble->setChunkLength(ctrlFrameLength);
 
     //attach signal and send down
     auto packet = new Packet("Preamble");
@@ -187,10 +188,10 @@ void BMac::sendPreamble()
  */
 void BMac::sendMacAck()
 {
-    auto ack = makeShared<BMacHeader>();
+    auto ack = makeShared<BMacControlFrame>();
     ack->setSrcAddr(interfaceEntry->getMacAddress());
     ack->setDestAddr(lastDataPktSrcAddr);
-    ack->setChunkLength(headerLength);
+    ack->setChunkLength(ctrlFrameLength);
 
     //attach signal and send down
     auto packet = new Packet("BMacAck");
@@ -396,7 +397,7 @@ void BMac::handleSelfMessage(cMessage *msg)
             if (msg->getKind() == BMAC_ACK) {
                 EV_DETAIL << "State WAIT_ACK, message BMAC_ACK" << endl;
                 auto packet = check_and_cast<Packet *>(msg);
-                const MacAddress src = packet->peekAtFront<BMacHeader>()->getSrcAddr();
+                const MacAddress src = packet->peekAtFront<BMacControlFrame>()->getSrcAddr();
                 // the right ACK is received..
                 EV_DETAIL << "We are waiting for ACK from : " << lastDataPktDestAddr
                           << ", and ACK came from : " << src << endl;
@@ -440,7 +441,7 @@ void BMac::handleSelfMessage(cMessage *msg)
                 MacAddress address = interfaceEntry->getMacAddress();
                 nbRxDataPackets++;
                 auto packet = check_and_cast<Packet *>(msg);
-                const auto bmacHeader = packet->peekAtFront<BMacHeader>();
+                const auto bmacHeader = packet->peekAtFront<BMacDataFrameHeader>();
                 const MacAddress& dest = bmacHeader->getDestAddr();
                 const MacAddress& src = bmacHeader->getSrcAddr();
                 if ((dest == address) || dest.isBroadcast()) {
@@ -539,9 +540,9 @@ void BMac::handleLowerPacket(Packet *packet)
         return;
     }
     else {
-        const auto& hdr = packet->peekAtFront<BMacHeader>();
+        const auto& hdr = packet->peekAtFront<BMacHeaderBase>();
         packet->setKind(hdr->getType());
-        // simply pass the massage as self message, to be processed by the FSM.
+        // simply pass the message as self message, to be processed by the FSM.
         handleSelfMessage(packet);
     }
 }
@@ -552,7 +553,7 @@ void BMac::sendDataPacket()
 
     Packet *pkt = currentTxFrame->dup();
     attachSignal(pkt);
-    const auto& hdr = pkt->peekAtFront<BMacHeader>();
+    const auto& hdr = pkt->peekAtFront<BMacDataFrameHeader>();
     lastDataPktDestAddr = hdr->getDestAddr();
     ASSERT(hdr->getType() == BMAC_DATA);
     sendDown(pkt);
@@ -677,7 +678,7 @@ void BMac::refreshDisplay() const
 
 void BMac::decapsulate(Packet *packet)
 {
-    const auto& bmacHeader = packet->popAtFront<BMacHeader>();
+    const auto& bmacHeader = packet->popAtFront<BMacDataFrameHeader>();
     packet->addTagIfAbsent<MacAddressInd>()->setSrcAddress(bmacHeader->getSrcAddr());
     packet->addTagIfAbsent<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
     auto payloadProtocol = ProtocolGroup::ethertype.getProtocol(bmacHeader->getNetworkProtocol());
@@ -688,7 +689,7 @@ void BMac::decapsulate(Packet *packet)
 
 void BMac::encapsulate(Packet *packet)
 {
-    auto pkt = makeShared<BMacHeader>();
+    auto pkt = makeShared<BMacDataFrameHeader>();
     pkt->setChunkLength(headerLength);
 
     pkt->setType(BMAC_DATA);

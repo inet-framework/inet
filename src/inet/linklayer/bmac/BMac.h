@@ -171,6 +171,7 @@ class INET_API BMac : public MacProtocolBase, public IMacProtocol
     double slotDuration = 0;
     /** @brief Length of the header*/
     b headerLength = b(0);
+    b ctrlFrameLength = b(0);
     /** @brief The bitrate of transmission */
     double bitrate = 0;
     /** @brief The duration of CCA */
