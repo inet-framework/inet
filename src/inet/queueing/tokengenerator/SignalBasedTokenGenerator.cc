@@ -46,7 +46,7 @@ void SignalBasedTokenGenerator::generateTokens()
     updateDisplayString();
 }
 
-void SignalBasedTokenGenerator::receiveSignal(cComponent *source, simsignal_t signal, long value, cObject *details)
+void SignalBasedTokenGenerator::receiveSignal(cComponent *source, simsignal_t signal, intval_t value, cObject *details)
 {
     Enter_Method(cComponent::getSignalName(signal));
     generateTokens();

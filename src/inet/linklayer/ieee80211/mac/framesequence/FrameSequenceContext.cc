@@ -84,7 +84,7 @@ Register_ResultFilter("frameSequenceNumPackets", FrameSequenceNumPacketsFilter);
 
 void FrameSequenceNumPacketsFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
 {
-    fire(this, t, (long)check_and_cast<FrameSequenceContext *>(object)->getNumSteps(), details);
+    fire(this, t, (intval_t)check_and_cast<FrameSequenceContext *>(object)->getNumSteps(), details);
 }
 
 } // namespace ieee80211

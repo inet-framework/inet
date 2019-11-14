@@ -65,7 +65,7 @@ class INET_API AckingMac : public MacProtocolBase
     virtual void acked(Packet *packet);    // called by other AckingMac module, when receiving a packet with my moduleID
 
     //cListener:
-    virtual void receiveSignal(cComponent *src, simsignal_t id, long value, cObject *details) override;
+    virtual void receiveSignal(cComponent *src, simsignal_t id, intval_t value, cObject *details) override;
 
     /** implements MacProtocolBase functions */
     //@{

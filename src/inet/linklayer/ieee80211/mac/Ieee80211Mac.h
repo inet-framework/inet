@@ -72,7 +72,7 @@ class INET_API Ieee80211Mac : public MacProtocolBase
     virtual void initialize(int) override;
     virtual void initializeRadioMode();
 
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details) override;
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details) override;
     using MacProtocolBase::receiveSignal;
     virtual void configureRadioMode(physicallayer::IRadio::RadioMode radioMode);
     virtual void configureInterfaceEntry() override;

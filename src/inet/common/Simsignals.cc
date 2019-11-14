@@ -116,7 +116,7 @@ void printSignalBanner(simsignal_t signalID, const cObject *obj, const cObject *
        << "\n";
 }
 
-void printSignalBanner(simsignal_t signalID, long value, const cObject *details)
+void printSignalBanner(simsignal_t signalID, intval_t value, const cObject *details)
 {
     EV << "** Signal at T=" << simTime()
        << " to " << getSimulation()->getContextModule()->getFullPath() << ": "

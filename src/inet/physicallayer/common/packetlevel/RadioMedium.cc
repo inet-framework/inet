@@ -707,7 +707,7 @@ void RadioMedium::pickUpSignals(IRadio *receiverRadio)
     });
 }
 
-void RadioMedium::receiveSignal(cComponent *source, simsignal_t signal, long value, cObject *details)
+void RadioMedium::receiveSignal(cComponent *source, simsignal_t signal, intval_t value, cObject *details)
 {
     if (signal == IRadio::radioModeChangedSignal) {
         auto radio = check_and_cast<Radio *>(source);

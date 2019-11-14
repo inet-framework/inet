@@ -139,7 +139,7 @@ class INET_API CsmaCaMac : public MacProtocolBase
     virtual void handleLowerPacket(Packet *packet) override;
     virtual void handleWithFsm(cMessage *msg);
 
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details) override;
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details) override;
 
     virtual void encapsulate(Packet *frame);
     virtual void decapsulate(Packet *frame);

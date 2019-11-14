@@ -886,7 +886,7 @@ void Ieee802154Mac::handleLowerPacket(Packet *packet)
     }
 }
 
-void Ieee802154Mac::receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details)
+void Ieee802154Mac::receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details)
 {
     Enter_Method_Silent();
     if (signalID == IRadio::transmissionStateChangedSignal) {

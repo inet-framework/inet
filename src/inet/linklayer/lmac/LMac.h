@@ -110,7 +110,7 @@ class INET_API LMac : public MacProtocolBase, public IMacProtocol
     virtual void handleSelfMessage(cMessage *) override;
 
     /** @brief Handle control messages from lower layer */
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details) override;
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details) override;
 
     /** @brief Encapsulate the NetwPkt into an MacPkt */
     virtual void encapsulate(Packet *);

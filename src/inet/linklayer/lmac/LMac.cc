@@ -551,7 +551,7 @@ void LMac::handleLowerPacket(Packet *packet)
 /**
  * Handle transmission over messages: send the data packet or don;t do anyhting.
  */
-void LMac::receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details)
+void LMac::receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details)
 {
     if (signalID == IRadio::transmissionStateChangedSignal) {
         IRadio::TransmissionState newRadioTransmissionState = static_cast<IRadio::TransmissionState>(value);
