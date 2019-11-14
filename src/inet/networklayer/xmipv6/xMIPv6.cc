@@ -113,21 +113,17 @@ void xMIPv6::initialize(int stage)
            statVectorCoTfromCN.setName("CoT from CN");*/
 
         tunneling = getModuleFromPar<Ipv6Tunneling>(par("ipv6TunnelingModule"), this);    // access to tunneling module
-    }
-    else if (stage == INITSTAGE_NETWORK_LAYER) {
+
         // moved rt6 initialization to here, as we should
         // set the MIPv6 flag as soon as possible for use
         // with other modules.
         cModule *host = getContainingNode(this);
         rt6 = L3AddressResolver().getIpv6RoutingTableOf(host);
-        rt6->setMipv6Support(true);    // 4.9.07 - CB
-
-        // moved init stuff from rt6 to here as this is actually
-        // the right place for these parameters
-        // 26.10.07 - CB
-        rt6->setIsHomeAgent(par("isHomeAgent"));
         rt6->setIsMobileNode(par("isMobileNode"));
-
+        rt6->setMipv6Support(true);
+        rt6->setIsHomeAgent(par("isHomeAgent"));
+    }
+    else if (stage == INITSTAGE_NETWORK_LAYER) {
         ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
         ipv6nd = getModuleFromPar<Ipv6NeighbourDiscovery>(par("ipv6NeighbourDiscoveryModule"), this);
 
