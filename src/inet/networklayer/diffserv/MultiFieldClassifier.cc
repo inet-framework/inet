@@ -83,7 +83,7 @@ void MultiFieldClassifier::PacketDissectorCallback::visitChunk(const Ptr<const C
             return;
         if (protocolId >= 0 && protocolId != ipv4Header->getProtocolId())
             return;
-        if (tosMask != 0 && (tos & tosMask) != (ipv4Header->getTypeOfService() & tosMask))
+        if (dscp != -1 && dscp != ipv4Header->getDiffServCodePoint())
             return;
 
         matchesL3 = true;
@@ -107,7 +107,7 @@ void MultiFieldClassifier::PacketDissectorCallback::visitChunk(const Ptr<const C
             return;
         if (protocolId >= 0 && protocolId != ipv6Header->getProtocolId())
             return;
-        if (tosMask != 0 && (tos & tosMask) != (ipv6Header->getTrafficClass() & tosMask))
+        if (dscp != -1 && dscp != ipv6Header->getDiffServCodePoint())
             return;
 
         matchesL3 = true;
@@ -200,10 +200,8 @@ void MultiFieldClassifier::addFilter(const PacketDissectorCallback& filter)
         throw cRuntimeError("srcPrefixLength is invalid");
     if (filter.protocolId != -1 && (filter.protocolId < 0 || filter.protocolId > 0xff))
         throw cRuntimeError("protocol is not a valid protocol number");
-    if (filter.tos != -1 && (filter.tos < 0 || filter.tos > 0xff))
-        throw cRuntimeError("tos is not valid");
-    if (filter.tosMask < 0 || filter.tosMask > 0xff)
-        throw cRuntimeError("tosMask is not valid");
+    if (filter.dscp != -1 && (filter.dscp < 0 || filter.dscp > 0x3f))
+        throw cRuntimeError("dscp is not valid");
     if (filter.srcPortMin != -1 && (filter.srcPortMin < 0 || filter.srcPortMin > 0xffff))
         throw cRuntimeError("srcPortMin is not a valid port number");
     if (filter.srcPortMax != -1 && (filter.srcPortMax < 0 || filter.srcPortMax > 0xffff))
@@ -233,8 +231,7 @@ void MultiFieldClassifier::configureFilters(cXMLElement *config)
             const char *destAddrAttr = filterElement->getAttribute("destAddress");
             const char *destPrefixLengthAttr = filterElement->getAttribute("destPrefixLength");
             const char *protocolAttr = filterElement->getAttribute("protocol");
-            const char *tosAttr = filterElement->getAttribute("tos");
-            const char *tosMaskAttr = filterElement->getAttribute("tosMask");
+            const char *dscpAttr = filterElement->getAttribute("dscp");
             const char *srcPortAttr = filterElement->getAttribute("srcPort");
             const char *srcPortMinAttr = filterElement->getAttribute("srcPortMin");
             const char *srcPortMaxAttr = filterElement->getAttribute("srcPortMax");
@@ -258,10 +255,8 @@ void MultiFieldClassifier::configureFilters(cXMLElement *config)
                 filter.destPrefixLength = filter.destAddr.getType() == L3Address::IPv6 ? 128 : 32;
             if (protocolAttr)
                 filter.protocolId = parseProtocol(protocolAttr, "protocol");
-            if (tosAttr)
-                filter.tos = parseIntAttribute(tosAttr, "tos");
-            if (tosMaskAttr)
-                filter.tosMask = parseIntAttribute(tosMaskAttr, "tosMask");
+            if (dscpAttr)
+                filter.dscp = parseIntAttribute(dscpAttr, "dscp");
             if (srcPortAttr)
                 filter.srcPortMin = filter.srcPortMax = parseIntAttribute(srcPortAttr, "srcPort");
             if (srcPortMinAttr)
