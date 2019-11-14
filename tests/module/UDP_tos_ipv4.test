@@ -28,7 +28,7 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 **.cli[*].app[0].destAddresses = "srv"
 **.cli[*].app[0].destPort = 1000
 **.cli[*].app[0].messageLength = 64B
-**.cli[*].app[0].typeOfService = 53  # some abritrary value
+**.cli[*].app[0].dscp = 53  # some abritrary value
 
 **.cli[*].app[0].startTime = 10s
 **.cli[*].app[0].stopTime = 11s
