@@ -38,6 +38,7 @@ void LMac::initialize(int stage)
         bitrate = par("bitrate");
         headerLength = b(par("headerLength"));
         EV << "headerLength is: " << headerLength << endl;
+        ctrlFrameLength = b(par("ctrlFrameLength"));
         numSlots = par("numSlots");
         // the first N slots are reserved for mobile nodes to be able to function normally
         reservedMobileSlots = par("reservedMobileSlots");
@@ -50,7 +51,7 @@ void LMac::initialize(int stage)
         slotChange = new cOutVector("slotChange");
 
         // how long does it take to send/receive a control packet
-        controlDuration = (double)(headerLength.get() + numSlots + 16) / (double)bitrate;     //FIXME replace 16 to a constant
+        controlDuration = (double)(b(headerLength).get() + numSlots + 16) / (double)bitrate;     //FIXME replace 16 to a constant
         EV << "Control packets take : " << controlDuration << " seconds to transmit\n";
 
         txQueue = check_and_cast<queueing::IPacketQueue *>(getSubmodule("queue"));
@@ -226,7 +227,7 @@ void LMac::handleSelfMessage(cMessage *msg)
             }
             else if (msg->getKind() == LMAC_CONTROL) {
                 auto packet = check_and_cast<Packet *>(msg);
-                const auto& lmacHeader = packet->peekAtFront<LMacHeader>();
+                const auto& lmacHeader = packet->peekAtFront<LMacControlFrame>();
                 const MacAddress& dest = lmacHeader->getDestAddr();
                 EV_DETAIL << " I have received a control packet from src " << lmacHeader->getSrcAddr() << " and dest " << dest << ".\n";
                 bool collision = false;
@@ -284,7 +285,7 @@ void LMac::handleSelfMessage(cMessage *msg)
             //probably it never happens
             else if (msg->getKind() == LMAC_DATA) {
                 auto packet = check_and_cast<Packet *>(msg);
-                const MacAddress& dest = packet->peekAtFront<LMacHeader>()->getDestAddr();
+                const MacAddress& dest = packet->peekAtFront<LMacDataFrameHeader>()->getDestAddr();
                 //bool collision = false;
                 // if we are listening to the channel and receive anything, there is a collision in the slot.
                 if (checkChannel->isScheduled()) {
@@ -332,7 +333,7 @@ void LMac::handleSelfMessage(cMessage *msg)
             }
             else if (msg->getKind() == LMAC_CONTROL) {
                 auto packet = check_and_cast<Packet *>(msg);
-                const auto& lmacHeader = packet->peekAtFront<LMacHeader>();
+                const auto& lmacHeader = packet->peekAtFront<LMacControlFrame>();
                 const MacAddress& dest = lmacHeader->getDestAddr();
                 EV_DETAIL << " I have received a control packet from src " << lmacHeader->getSrcAddr() << " and dest " << dest << ".\n";
 
@@ -418,15 +419,15 @@ void LMac::handleSelfMessage(cMessage *msg)
                     currentTxFrame = txQueue->popPacket();
                 // send first a control message, so that non-receiving nodes can switch off.
                 EV << "Sending a control packet.\n";
-                auto control = makeShared<LMacHeader>();
+                auto control = makeShared<LMacControlFrame>();
                 if (currentTxFrame != nullptr && !SETUP_PHASE)
-                    control->setDestAddr(currentTxFrame->peekAtFront<LMacHeader>()->getDestAddr());
+                    control->setDestAddr(currentTxFrame->peekAtFront<LMacHeaderBase>()->getDestAddr());
                 else
                     control->setDestAddr(LMAC_NO_RECEIVER);
 
                 control->setSrcAddr(address);
                 control->setMySlot(mySlot);
-                control->setChunkLength(headerLength + b(numSlots));    //FIXME check it: add only 1 bit / slot?
+                control->setChunkLength(ctrlFrameLength + b(numSlots));    //FIXME check it: add only 1 bit / slot?
                 control->setOccupiedSlotsArraySize(numSlots);
                 for (int i = 0; i < numSlots; i++)
                     control->setOccupiedSlots(i, occSlotsDirect[i]);
@@ -449,8 +450,8 @@ void LMac::handleSelfMessage(cMessage *msg)
                     return;
                 }
                 Packet *data = new Packet("Data");
-                data->insertAtBack(currentTxFrame->peekAt(headerLength, currentTxFrame->getTotalLength() - headerLength));
-                const auto& lmacHeader = staticPtrCast<LMacHeader>(currentTxFrame->peekAtFront<LMacHeader>()->dupShared());
+                const auto& lmacHeader = currentTxFrame->removeAtFront<LMacDataFrameHeader>();
+                data->insertAtBack(currentTxFrame->peekData());
                 lmacHeader->setType(LMAC_DATA);
                 lmacHeader->setMySlot(mySlot);
                 lmacHeader->setOccupiedSlotsArraySize(numSlots);
@@ -491,7 +492,7 @@ void LMac::handleSelfMessage(cMessage *msg)
         case WAIT_DATA:
             if (msg->getKind() == LMAC_DATA) {
                 auto packet = check_and_cast<Packet *>(msg);
-                const MacAddress& dest = packet->peekAtFront<LMacHeader>()->getDestAddr();
+                const MacAddress& dest = packet->peekAtFront<LMacDataFrameHeader>()->getDestAddr();
 
                 EV_DETAIL << " I have received a data packet.\n";
                 if (dest == address || dest.isBroadcast()) {
@@ -543,7 +544,7 @@ void LMac::handleLowerPacket(Packet *packet)
         return;
     }
     // simply pass the massage as self message, to be processed by the FSM.
-    const auto& hdr = packet->peekAtFront<LMacHeader>();
+    const auto& hdr = packet->peekAtFront<LMacHeaderBase>();
     packet->setKind(hdr->getType());
     handleSelfMessage(packet);
 }
@@ -551,7 +552,7 @@ void LMac::handleLowerPacket(Packet *packet)
 /**
  * Handle transmission over messages: send the data packet or don;t do anyhting.
  */
-void LMac::receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details)
+void LMac::receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details)
 {
     if (signalID == IRadio::transmissionStateChangedSignal) {
         IRadio::TransmissionState newRadioTransmissionState = static_cast<IRadio::TransmissionState>(value);
@@ -609,7 +610,7 @@ void LMac::findNewSlot()
 
 void LMac::decapsulate(Packet *packet)
 {
-    const auto& lmacHeader = packet->popAtFront<LMacHeader>();
+    const auto& lmacHeader = packet->popAtFront<LMacDataFrameHeader>();
     packet->addTagIfAbsent<MacAddressInd>()->setSrcAddress(lmacHeader->getSrcAddr());
     packet->addTagIfAbsent<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
     auto payloadProtocol = ProtocolGroup::ethertype.getProtocol(lmacHeader->getNetworkProtocol());
@@ -625,7 +626,7 @@ void LMac::decapsulate(Packet *packet)
 
 void LMac::encapsulate(Packet *netwPkt)
 {
-    auto pkt = makeShared<LMacHeader>();
+    auto pkt = makeShared<LMacDataFrameHeader>();
     pkt->setChunkLength(headerLength);
 
     // copy dest address from the Control Info attached to the network

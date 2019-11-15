@@ -52,6 +52,7 @@ module BMac extends MacProtocolBase like IMacProtocol
         double slotDuration @unit(s) = default(0.1s);
 
         int headerLength @unit(b) = default(10b);
+        int ctrlFrameLength @unit(b) = default(headerLength);
         int mtu @unit(B) = default(0B);
 
         // how long is the check interval (CCA)?

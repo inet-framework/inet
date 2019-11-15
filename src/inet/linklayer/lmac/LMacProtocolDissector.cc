@@ -22,18 +22,18 @@
 #include "inet/linklayer/lmac/LMacHeader_m.h"
 #include "inet/linklayer/lmac/LMacProtocolDissector.h"
 
-
 namespace inet {
 
 Register_Protocol_Dissector(&Protocol::lmac, LMacProtocolDissector);
 
 void LMacProtocolDissector::dissect(Packet *packet, const Protocol *protocol, ICallback& callback) const
 {
-    auto header = packet->popAtFront<LMacHeader>();
+    auto header = packet->popAtFront<LMacHeaderBase>();
     callback.startProtocolDataUnit(&Protocol::lmac);
     callback.visitChunk(header, &Protocol::lmac);
     if (header->getType() == LMAC_DATA) {
-        auto payloadProtocol = ProtocolGroup::ethertype.findProtocol(header->getNetworkProtocol());
+        const auto& dataHeader = dynamicPtrCast<const LMacDataFrameHeader>(header);
+        auto payloadProtocol = ProtocolGroup::ethertype.findProtocol(dataHeader->getNetworkProtocol());
         callback.dissectPacket(packet, payloadProtocol);
     }
     ASSERT(packet->getDataLength() == B(0));

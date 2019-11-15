@@ -16,7 +16,8 @@
 //
 
 import inet.common.INETDefs;
-import inet.linklayer.base.MacHeaderBase;
+import inet.common.packet.chunk.Chunk;
+import inet.linklayer.common.MacAddress;
 
 namespace inet;
 
@@ -41,9 +42,31 @@ enum BMacType {
     BMAC_DATA_TIMEOUT = 204;
 };
 
-
-class BMacHeader extends MacHeaderBase
+//
+// Base class for ~BMac headers.
+//
+class BMacHeaderBase extends FieldsChunk
 {
+    MacAddress srcAddr;
+    MacAddress destAddr;
     BMacType   type;
+}
+
+//
+// Control Frame for ~BMac. Frame size is configurable
+// in the MAC layer. 
+//
+class BMacControlFrame extends BMacHeaderBase
+{
+}
+
+//
+// Dataframe header for ~BMac. Frame size is configurable
+// in the MAC layer. 
+//
+class BMacDataFrameHeader extends BMacHeaderBase
+{
+    long sequenceId; // Sequence Number to detect duplicate messages
+    int networkProtocol = -1;
 }
 

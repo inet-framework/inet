@@ -68,7 +68,7 @@ class INET_API StateBasedEpEnergyConsumer : public cSimpleModule, public power::
     virtual power::IEnergySource *getEnergySource() const override { return energySource; }
     virtual W getPowerConsumption() const override { return powerConsumption; }
 
-    virtual void receiveSignal(cComponent *source, simsignal_t signal, long value, cObject *details) override;
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, intval_t value, cObject *details) override;
 };
 
 } // namespace physicallayer

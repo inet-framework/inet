@@ -508,7 +508,10 @@ ISignal *RadioMedium::createTransmitterSignal(const IRadio *radio, Packet *packe
         take(packet);
     auto transmission = radio->getTransmitter()->createTransmission(radio, packet, simTime());
     auto signal = new Signal(transmission);
-    signal->setDuration(transmission->getDuration());
+    auto duration = transmission->getDuration();
+    if (duration > mediumLimitCache->getMaxTransmissionDuration())
+        throw cRuntimeError("Maximum transmission duration is exceeded");
+    signal->setDuration(duration);
     if (packet != nullptr) {
         signal->setName(packet->getName());
         signal->encapsulate(packet);
@@ -707,7 +710,7 @@ void RadioMedium::pickUpSignals(IRadio *receiverRadio)
     });
 }
 
-void RadioMedium::receiveSignal(cComponent *source, simsignal_t signal, long value, cObject *details)
+void RadioMedium::receiveSignal(cComponent *source, simsignal_t signal, intval_t value, cObject *details)
 {
     if (signal == IRadio::radioModeChangedSignal) {
         auto radio = check_and_cast<Radio *>(source);

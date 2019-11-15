@@ -31,6 +31,7 @@ module LMac extends MacProtocolBase like IMacProtocol
         // how long is a slot?
         double slotDuration @unit(s) = default(100ms);
         int headerLength @unit(b) = default(10b);
+        int ctrlFrameLength @unit(b) = default(headerLength);
         int mtu @unit(B) = default(0B);
         // default channel
         double defaultChannel = default(0);

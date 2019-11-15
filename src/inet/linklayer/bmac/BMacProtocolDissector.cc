@@ -29,11 +29,12 @@ Register_Protocol_Dissector(&Protocol::bmac, BMacProtocolDissector);
 
 void BMacProtocolDissector::dissect(Packet *packet, const Protocol *protocol, ICallback& callback) const
 {
-    auto header = packet->popAtFront<BMacHeader>();
+    auto header = packet->popAtFront<BMacHeaderBase>();
     callback.startProtocolDataUnit(&Protocol::bmac);
     callback.visitChunk(header, &Protocol::bmac);
     if (header->getType() == BMAC_DATA) {
-        auto payloadProtocol = ProtocolGroup::ethertype.findProtocol(header->getNetworkProtocol());
+        const auto& dataHeader = dynamicPtrCast<const BMacDataFrameHeader>(header);
+        auto payloadProtocol = ProtocolGroup::ethertype.findProtocol(dataHeader->getNetworkProtocol());
         callback.dissectPacket(packet, payloadProtocol);
     }
     ASSERT(packet->getDataLength() == B(0));

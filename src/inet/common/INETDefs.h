@@ -50,6 +50,8 @@ using namespace omnetpp;
 
 #if OMNETPP_VERSION < 0x0600
 #define OMNETPP5_CODE(x) x
+typedef long intval_t;
+typedef unsigned long uintval_t;
 #else
 #define OMNETPP5_CODE(x)
 #endif // if OMNETPP_VERSION < 0x0600

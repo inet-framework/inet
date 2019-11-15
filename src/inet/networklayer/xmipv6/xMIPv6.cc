@@ -637,7 +637,8 @@ void xMIPv6::sendMobilityMessageToIPv6Module(Packet *msg, const Ipv6Address& des
     EV_INFO << "Appending ControlInfo to mobility message\n";
     delete msg->removeTagIfPresent<DispatchProtocolReq>();
     msg->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::mobileipv6);
-    msg->addTagIfAbsent<InterfaceReq>()->setInterfaceId(interfaceId);
+    if (interfaceId != -1)
+        msg->addTagIfAbsent<InterfaceReq>()->setInterfaceId(interfaceId);
     msg->addTagIfAbsent<L3AddressReq>()->setSrcAddress(srcAddr);
     msg->addTagIfAbsent<L3AddressReq>()->setDestAddress(destAddr);
     msg->addTagIfAbsent<HopLimitReq>()->setHopLimit(255);
