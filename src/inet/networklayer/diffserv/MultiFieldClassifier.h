@@ -56,6 +56,8 @@ class INET_API MultiFieldClassifier : public queueing::PacketClassifierBase
         int destPrefixLength = 0;
         int protocolId = -1;
         int dscp = 0;
+        int tos = 0;
+        int tosMask = 0;
         int srcPortMin = -1;
         int srcPortMax = -1;
         int destPortMin = -1;
