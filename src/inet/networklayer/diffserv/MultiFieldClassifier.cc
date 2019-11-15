@@ -214,13 +214,13 @@ void MultiFieldClassifier::addFilter(const PacketDissectorCallback& filter)
         throw cRuntimeError("srcPortMin is not a valid port number");
     if (filter.srcPortMax != -1 && (filter.srcPortMax < 0 || filter.srcPortMax > 0xffff))
         throw cRuntimeError("srcPortMax is not a valid port number");
-    if (filter.srcPortMin != -1 && filter.srcPortMin > filter.srcPortMax)
+    if (filter.srcPortMax != -1 && filter.srcPortMin > filter.srcPortMax)
         throw cRuntimeError("srcPortMin > srcPortMax");
     if (filter.destPortMin != -1 && (filter.destPortMin < 0 || filter.destPortMin > 0xffff))
         throw cRuntimeError("destPortMin is not a valid port number");
     if (filter.destPortMax != -1 && (filter.destPortMax < 0 || filter.destPortMax > 0xffff))
         throw cRuntimeError("destPortMax is not a valid port number");
-    if (filter.destPortMin != -1 && filter.destPortMin > filter.destPortMax)
+    if (filter.destPortMax != -1 && filter.destPortMin > filter.destPortMax)
         throw cRuntimeError("destPortMin > destPortMax");
 
     filters.push_back(filter);
