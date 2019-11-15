@@ -77,6 +77,7 @@ class INET_API LMac : public MacProtocolBase, public IMacProtocol
         , macState()
         , slotDuration(0)
         , headerLength(b(0))
+        , ctrlFrameLength(b(0))
         , controlDuration(0)
         , myId(0)
         , mySlot(0)
@@ -152,8 +153,10 @@ class INET_API LMac : public MacProtocolBase, public IMacProtocol
 
     /** @brief Duration of a slot */
     double slotDuration;
-    /** @brief Length of the header*/
+    /** @brief Length of the header */
     b headerLength;
+    /** @brief Length of the control frames */
+    b ctrlFrameLength;
     /** @brief Duration of teh control time in each slot */
     double controlDuration;
     /** @brief my ID */
