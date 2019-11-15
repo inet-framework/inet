@@ -36,6 +36,12 @@ LinkCanvasVisualizerBase::LinkCanvasVisualization::~LinkCanvasVisualization()
     delete figure;
 }
 
+LinkCanvasVisualizerBase::~LinkCanvasVisualizerBase()
+{
+    if (displayLinks)
+        removeAllLinkVisualizations();
+}
+
 void LinkCanvasVisualizerBase::initialize(int stage)
 {
     LinkVisualizerBase::initialize(stage);

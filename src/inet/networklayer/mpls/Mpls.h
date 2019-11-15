@@ -62,7 +62,10 @@ class INET_API Mpls : public cSimpleModule, public IProtocolRegistrationListener
     virtual void sendToL2(Packet *msg);
     virtual void sendToL3(Packet *msg);
 
-    virtual void doStackOps(MplsHeader *mplsPacket, const LabelOpVector& outLabel);
+    void pushLabel(Packet *packet, Ptr<MplsHeader>& newMplsHeader);
+    void swapLabel(Packet *packet, Ptr<MplsHeader>& newMplsHeader);
+    void popLabel(Packet *packet);
+    virtual void doStackOps(Packet *packet, const LabelOpVector& outLabel);
 
     //IInterfaceRegistrationListener:
     virtual void handleRegisterInterface(const InterfaceEntry &interface, cGate *in, cGate *out) override;

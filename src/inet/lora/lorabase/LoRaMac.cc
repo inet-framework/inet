@@ -52,7 +52,7 @@ void LoRaMac::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         EV << "Initializing stage 0\n";
 
-        maxQueueSize = par("maxQueueSize");
+        //maxQueueSize = par("maxQueueSize");
         headerLength = par("headerLength");
         ackLength = par("ackLength");
         ackTimeout = par("ackTimeout");
@@ -361,7 +361,7 @@ Packet *LoRaMac::encapsulate(Packet *msg)
 
     frame->setTransmitterAddress(address);
     frame->setLoRaTP(tag->getPower().get());
-    frame->setLoRaCF(tag->getCarrierFrequency());
+    frame->setLoRaCF(tag->getCenterFrequency());
     frame->setLoRaSF(tag->getSpreadFactor());
     frame->setLoRaBW(tag->getBandwidth());
     frame->setLoRaCR(tag->getCodeRendundance());

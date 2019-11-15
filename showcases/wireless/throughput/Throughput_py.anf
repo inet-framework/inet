@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<analysis version="2">
+    <inputs>
+        <input pattern="results/General-*.sca"/>
+        <input pattern="results/General-*.vec"/>
+    </inputs>
+    <charts>
+        <chart icon="icons/full/obj/linechart.png" id="1352" name="Analytical vs simulated throughput" template="linechart_mpl" type="MATPLOTLIB">
+            <script>
+                <![CDATA[from omnetpp.scave import results, chart
+import matplotlib.pyplot as plt
+import pandas as pd
+import math
+
+params = chart.get_properties()
+
+# This expression selects the results (you might be able to logically simplify it)
+filter_expression = params["filter"]
+
+# The data is returned as a Pandas DataFrame
+df = results.get_scalars(filter_expression, include_attrs=True, include_itervars=True)
+
+print(df)
+
+fig, ax1 = plt.subplots(figsize=(12,6))
+
+title, legend = chart.extract_label_columns(df)
+
+for i, c in legend:
+    df[c] = pd.to_numeric(df[c], errors="ignore")
+
+df.sort_values(by=[l for i, l in legend], axis='index', inplace=True)
+
+plt.title("Analytical vs simulated throughput")
+plt.xlabel("Bitrate [Mbps]")
+plt.ylabel("Application-level throughput [Mbps]")
+
+df = pd.pivot_table(df, index=legend[1][1], columns=legend[0][1], values='value')
+
+sim_time_limit = 1
+# TODO: add when works properly
+# results.get_config_entries('name("sim-time-limit")')
+
+df /= 1000000 # Mega
+df *= 8       # bits
+df /= sim_time_limit       # per second
+
+print(df)
+
+df_an = df.copy()
+
+df_an = pd.DataFrame(
+        {100: [326,258,210,174,154,134,126,122],
+         1000: [1526,1058,810,574,454,334,278,258],
+         2268: [3218,2186,1654,1138,874,618,486,446]
+        },
+    index=pd.Index([6,9,12,18,24,36,48,54], name="bitrate"),
+    columns=pd.Index([100, 1000, 2268], name="packetLength")
+)
+# actually, the values listed above are frame exchange times in us, converting to Mbps now:
+for pl, r in df_an.iteritems(): # adding backoff period and converting to [Mega]bits per second
+    df_an[pl] = 1/(r + 67.5) * 8 * pl
+
+print(df_an)
+
+df.columns = [str(n) + "B simulated" for n in df.columns]
+df_an.columns = [str(n) + "B analytical" for n in df_an.columns]
+
+
+df.plot(ax=plt.gca(), marker='s', markersize=5)
+df_an.plot(ax=plt.gca(), marker='x', markersize=5)
+
+plt.legend()
+plt.grid(linestyle='--')
+
+plt.ylim(0,40)
+
+ymin, ymax = plt.ylim()
+
+plt.xlim(0,55)
+
+#extraticks = [6,9,12,18,24,36,48,54]
+
+#plt.xticks([0,10,20,30,40,50] + extraticks)
+
+#ticks, ticklabels = plt.xticks()
+
+ax2 = ax1.twinx()
+ax2.tick_params('y', colors='darkblue')
+ax2.zorder=-1
+
+ax2.set_ylim(ymin, ymax)
+
+rightyticks = []
+
+# add values to right y axis
+rightyticks.append(df['100B simulated'].values[0])
+rightyticks.append(df['100B simulated'].values[7])
+rightyticks.append(df['1000B simulated'].values[1])
+rightyticks.append(df['1000B simulated'].values[2])
+rightyticks.append(df['1000B simulated'].values[3])
+rightyticks.append(df['2268B simulated'].values[4])
+rightyticks.append(df['1000B simulated'].values[6])
+rightyticks.append(df['2268B simulated'].values[5])
+rightyticks.append(df['2268B simulated'].values[6])
+rightyticks.append(df['2268B simulated'].values[7])
+
+print('rightyticks:',rightyticks)
+
+ax2.set_yticks(rightyticks)
+
+ax2.grid(axis='y', linestyle='--', color='lightblue')
+
+plt.xticks([6,9,12,18,24,36,48,54])
+    
+plt.savefig('throughput3.png', dpi=150, transparent=True, bbox_inches = "tight")
+            
+ax2.set_zorder(0)
+]]>
+            </script>
+            <dialogPage id="Main" label="Main">
+                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<xswt xmlns:x="http://sweet_swt.sf.net/xswt">
+
+  <import xmlns="http://sweet_swt.sf.net/xswt">
+    <package name="java.lang"/>
+    <package name="org.eclipse.swt.widgets" />
+    <package name="org.eclipse.swt.graphics" />
+    <package name="org.eclipse.swt.layout" />
+    <package name="org.eclipse.swt.custom" />
+    <package name="org.omnetpp.common.wizard.support" />
+    <package name="org.omnetpp.ned.editor.wizards.support" />
+    <package name="org.omnetpp.cdt.wizard.support" />
+  </import>
+  <layout x:class="GridLayout" numColumns="2"/>
+
+  <x:children>
+
+    <!-- page generated from the following spec:
+Names {
+	chartName,
+},
+Options {
+	Use antialias?,
+	Use caching?,
+},
+Colors {
+	backgroundColor
+}    
+    -->
+    
+    <!-- Names { -->
+    <group text="Names">
+      <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+      <layout x:class="GridLayout" numColumns="2"/>
+      <x:children>
+
+    <!-- chartName -->
+    <label text="Chart name:"/>
+    <text x:id="chart_name" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </text>
+
+    <!--  -->
+
+    <!-- } -->
+      </x:children>
+    </group>
+
+    <!-- Colors { -->
+    <group text="Colors">
+      <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+      <layout x:class="GridLayout" numColumns="2"/>
+      <x:children>
+
+    <!-- backgroundColor -->
+    <label text="Background color:"/>
+    <ColorChooser x:id="background_color" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </ColorChooser>
+
+    <!-- } -->
+      </x:children>
+    </group>
+
+  </x:children>
+</xswt>
+
+            ]]>
+            </dialogPage>
+            <dialogPage id="Input" label="Input">
+                <![CDATA[<?xml version='1.0' encoding='UTF-8'?>
+<xswt xmlns:x='http://sweet_swt.sf.net/xswt'>
+  <import xmlns='http://sweet_swt.sf.net/xswt'>
+    <package name='java.lang'/>
+    <package name='org.eclipse.swt.widgets' />
+    <package name='org.eclipse.swt.graphics' />
+    <package name='org.eclipse.swt.layout' />
+    <package name='org.eclipse.swt.custom' />
+  </import>
+  <layout x:class='GridLayout' numColumns='1'/>
+  <x:children>
+    <label text="Chart Title:"/>
+    <text x:id="title" x:style="BORDER">
+        <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+	</text>
+
+    <label text="Filter expression:">
+        <layoutData x:class="GridData" horizontalAlignment="BEGINNING" verticalAlignment="BEGINNING"/>
+    </label>
+    <text x:id="filter" x:style="BORDER|WRAP|MULTI" x:id.isFilter="true">
+        <layoutData x:class="GridData" horizontalAlignment="FILL" verticalAlignment="FILL" grabExcessHorizontalSpace="true" grabExcessVerticalSpace="true"/>
+    </text>
+
+    <label text="Vector operations:"/>
+    <text x:id="vector_operations" x:style="BORDER|MULTI">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="true"/>
+    </text>
+
+    <label text="Vector start time (seconds):"/>
+    <text x:id="vector_start_time" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/>
+    </text>
+
+    <label text="Vector end time (seconds):"/>
+    <text x:id="vector_end_time" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/>
+    </text>
+
+  </x:children>
+</xswt>
+            ]]>
+            </dialogPage>
+            <property name="filter" value="&quot;packetReceived:sum(packetBytes)&quot; AND module(&quot;Throughput.destinationHost.app[0]&quot;)"/>
+            <property name="vector_start_time" value=""/>
+            <property name="vector_operations" value=""/>
+            <property name="background_color" value=""/>
+            <property name="vector_end_time" value=""/>
+            <property name="title" value=""/>
+        </chart>
+    </charts>
+</analysis>

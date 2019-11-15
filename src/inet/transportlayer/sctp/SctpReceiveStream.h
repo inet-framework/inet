@@ -43,18 +43,18 @@ class INET_API SctpReceiveStream : public cObject
      */
     SctpReceiveStream(SctpAssociation *assoc);
     int32 getExpectedStreamSeqNum();
-    void setExpectedStreamSeqNum(const int32 num);
+    void setExpectedStreamSeqNum(int32 num);
 
     /**
      * Virtual dtor.
      */
     ~SctpReceiveStream();
-    inline SctpQueue *getDeliveryQ() const { return deliveryQ; };
-    inline SctpQueue *getOrderedQ() const { return orderedQ; };
-    inline SctpQueue *getUnorderedQ() const { return unorderedQ; };
+    SctpQueue *getDeliveryQ() const { return deliveryQ; };
+    SctpQueue *getOrderedQ() const { return orderedQ; };
+    SctpQueue *getUnorderedQ() const { return unorderedQ; };
 
-    inline int32 getStreamId() const { return streamId; };
-    inline void setStreamId(const uint16 id) { streamId = id; };
+    int32 getStreamId() const { return streamId; };
+    void setStreamId(const uint16 id) { streamId = id; };
 };
 
 } // namespace sctp

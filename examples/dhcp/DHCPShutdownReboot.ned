@@ -21,6 +21,7 @@ import inet.common.scenario.ScenarioManager;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.ethernet.Eth10M;
 import inet.node.inet.StandardHost;
+import inet.visualizer.integrated.IntegratedVisualizer;
 
 
 network DHCPShutdownReboot
@@ -32,13 +33,17 @@ network DHCPShutdownReboot
         configurator: Ipv4NetworkConfigurator {
             parameters:
                 config = xml("<config><interface hosts='server' address='192.168.1.1' netmask='255.255.255.0'/></config>");
-                @display("p=100,100;is=s");
+                @display("p=100,125;is=s");
         }
+        visualizer: IntegratedVisualizer {
+            @display("p=100,50;is=s");
+        }
+
         client: StandardHost {
             @display("p=250,150");
         }
         server: StandardHost {
-            @display("p=450,150");
+            @display("p=600,150");
         }
     connections:
         client.ethg++ <--> Eth10M <--> server.ethg++;

@@ -51,21 +51,20 @@ class INET_API SctpSendStream : public cObject
     SctpSendStream(SctpAssociation *assoc, const uint16 id);
     ~SctpSendStream();
 
-    inline cPacketQueue *getStreamQ() const { return streamQ; };
-    inline cPacketQueue *getUnorderedStreamQ() const { return uStreamQ; };
+    cPacketQueue *getStreamQ() const { return streamQ; };
+    cPacketQueue *getUnorderedStreamQ() const { return uStreamQ; };
     uint32 getNextStreamSeqNum();
-    inline uint32 getBytesInFlight() const { return bytesInFlight; };
+    uint32 getBytesInFlight() const { return bytesInFlight; };
     void setNextStreamSeqNum(const uint16 num);
-    inline void setBytesInFlight(const uint32 bytes) { bytesInFlight = bytes; };
-    inline bool getFragInProgress() const { return fragInProgress; };
-    inline void setFragInProgress(const bool frag) { fragInProgress = frag; };
-    inline uint16 getStreamId() const { return streamId; };
-    inline void setStreamId(const uint16 id) { streamId = id; };
+    void setBytesInFlight(const uint32 bytes) { bytesInFlight = bytes; };
+    bool getFragInProgress() const { return fragInProgress; };
+    void setFragInProgress(const bool frag) { fragInProgress = frag; };
+    uint16 getStreamId() const { return streamId; };
+    void setStreamId(const uint16 id) { streamId = id; };
     void deleteQueue();
 };
 
 } // namespace sctp
-
 } // namespace inet
 
 #endif // ifndef __INET_SCTPSENDSTREAM_H

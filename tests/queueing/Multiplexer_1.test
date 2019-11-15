@@ -1,29 +1,29 @@
 %description:
 
 In this test, packets are produced periodically (randomly) by several active
-packet sources (PacketProducers). The packets are consumed by a single passive
-packet sink upon arrival (PacketConsumer). The single sink is connected to the
+packet sources (ActivePacketSources). The packets are consumed by a single passive
+packet sink upon arrival (PassivePacketSink). The single sink is connected to the
 multiple sources using an intermediary component (PacketMultiplexer) which simply
 forwards packets.
 
 %file: test.ned
 
-import inet.common.queueing.PacketConsumer;
-import inet.common.queueing.PacketMultiplexer;
-import inet.common.queueing.PacketProducer;
+import inet.queueing.sink.PassivePacketSink;
+import inet.queueing.common.PacketMultiplexer;
+import inet.queueing.source.ActivePacketSource;
 
 network TestServer
 {
     parameters:
         int numProducers;
     submodules:
-        producer[numProducers]: PacketProducer {
+        producer[numProducers]: ActivePacketSource {
             @display("p=100,100");
         }
         multiplexer: PacketMultiplexer {
             @display("p=200,100");
         }
-        consumer: PacketConsumer {
+        consumer: PassivePacketSink {
             @display("p=300,100");
         }
     connections allowunconnected:

@@ -59,6 +59,17 @@ enum DhcpOptionCode
     SERVER_ID = 54;
 }
 
+// DHCP timer types (RFC 2131 4.4.5)
+enum DhcpTimerType
+{
+    WAIT_OFFER = 1;
+    WAIT_ACK = 2;
+    T1 = 3;
+    T2 = 4;
+    LEASE_TIMEOUT = 5;
+    START_DHCP = 6;
+}
+
 //
 // Represents options in a DHCP message. In the DHCP protocol, options are
 // added to the message as tagged data items. In the simulation, this DhcpOptions

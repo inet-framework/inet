@@ -51,13 +51,16 @@ void CsmaCaMac::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         EV << "Initializing stage 0\n";
         fcsMode = parseFcsMode(par("fcsMode"));
-        maxQueueSize = par("maxQueueSize");
         useAck = par("useAck");
         bitrate = par("bitrate");
         headerLength = B(par("headerLength"));
+        if (headerLength > B(255))
+            throw cRuntimeError("The specified headerLength is too large");
         if (headerLength < makeShared<CsmaCaMacDataHeader>()->getChunkLength())
             throw cRuntimeError("The specified headerLength is too short");
         ackLength = B(par("ackLength"));
+        if (ackLength > B(255))
+            throw cRuntimeError("The specified ackLength is too large");
         if (ackLength < makeShared<CsmaCaMacAckHeader>()->getChunkLength())
             throw cRuntimeError("The specified ackLength is too short");
         ackTimeout = par("ackTimeout");
@@ -365,7 +368,7 @@ void CsmaCaMac::handleWithFsm(cMessage *msg)
     getDisplayString().setTagArg("t", 0, fsm.getStateName());
 }
 
-void CsmaCaMac::receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details)
+void CsmaCaMac::receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details)
 {
     Enter_Method_Silent();
     if (signalID == IRadio::receptionStateChangedSignal)
@@ -383,6 +386,8 @@ void CsmaCaMac::receiveSignal(cComponent *source, simsignal_t signalID, long val
 void CsmaCaMac::encapsulate(Packet *frame)
 {
     auto macHeader = makeShared<CsmaCaMacDataHeader>();
+    macHeader->setChunkLength(headerLength);
+    macHeader->setHeaderLengthField(B(headerLength).get());
     auto transportProtocol = frame->getTag<PacketProtocolTag>()->getProtocol();
     auto networkProtocol = ProtocolGroup::ethertype.getProtocolNumber(transportProtocol);
     macHeader->setNetworkProtocol(networkProtocol);
@@ -391,8 +396,6 @@ void CsmaCaMac::encapsulate(Packet *frame)
     auto userPriorityReq = frame->findTag<UserPriorityReq>();
     int userPriority = userPriorityReq == nullptr ? UP_BE : userPriorityReq->getUserPriority();
     macHeader->setPriority(userPriority == -1 ? UP_BE : userPriority);
-    if (headerLength > macHeader->getChunkLength())
-        frame->insertAtFront(makeShared<ByteCountChunk>(headerLength - macHeader->getChunkLength()));
     frame->insertAtFront(macHeader);
     auto macTrailer = makeShared<CsmaCaMacTrailer>();
     macTrailer->setFcsMode(fcsMode);
@@ -518,17 +521,17 @@ void CsmaCaMac::sendAckFrame()
     auto frameToAck = static_cast<Packet *>(endSifs->getContextPointer());
     endSifs->setContextPointer(nullptr);
     auto macHeader = makeShared<CsmaCaMacAckHeader>();
+    macHeader->setChunkLength(ackLength);
+    macHeader->setHeaderLengthField(B(ackLength).get());
     macHeader->setReceiverAddress(frameToAck->peekAtFront<CsmaCaMacHeader>()->getTransmitterAddress());
     auto frame = new Packet("CsmaAck");
-    if (ackLength > macHeader->getChunkLength())
-        frame->insertAtFront(makeShared<ByteCountChunk>(ackLength - macHeader->getChunkLength()));
     frame->insertAtFront(macHeader);
     auto macTrailer = makeShared<CsmaCaMacTrailer>();
     macTrailer->setFcsMode(fcsMode);
     if (fcsMode == FCS_COMPUTED)
         macTrailer->setFcs(computeFcs(frame->peekAllAsBytes()));
     frame->insertAtBack(macTrailer);
-    auto macAddressInd = frame->addTagIfAbsent<MacAddressInd>();
+    auto macAddressInd = frame->addTag<MacAddressInd>();
     macAddressInd->setSrcAddress(macHeader->getTransmitterAddress());
     macAddressInd->setDestAddress(macHeader->getReceiverAddress());
     frame->addTag<PacketProtocolTag>()->setProtocol(&Protocol::csmaCaMac);
@@ -597,7 +600,7 @@ bool CsmaCaMac::isReceiving()
 bool CsmaCaMac::isAck(Packet *frame)
 {
     const auto& macHeader = frame->peekAtFront<CsmaCaMacHeader>();
-    return dynamicPtrCast<const CsmaCaMacAckHeader>(macHeader) != nullptr;
+    return macHeader->getType() == CSMA_ACK;
 }
 
 bool CsmaCaMac::isBroadcast(Packet *frame)
@@ -646,6 +649,18 @@ uint32_t CsmaCaMac::computeFcs(const Ptr<const BytesChunk>& bytes)
     auto computedFcs = ethernetCRC(buffer, bufferLength);
     delete [] buffer;
     return computedFcs;
+}
+
+void CsmaCaMac::handleStopOperation(LifecycleOperation *operation)
+{
+    MacProtocolBase::handleStopOperation(operation);
+    resetTransmissionVariables();
+}
+
+void CsmaCaMac::handleCrashOperation(LifecycleOperation *operation)
+{
+    MacProtocolBase::handleCrashOperation(operation);
+    resetTransmissionVariables();
 }
 
 } // namespace inet

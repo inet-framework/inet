@@ -16,8 +16,11 @@
 
 #include <map>
 
+#include "inet/common/ModuleAccess.h"
 #include "inet/common/StringFormat.h"
 #include "inet/linklayer/ethernet/switch/MacAddressTable.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
+#include "inet/networklayer/contract/IInterfaceTable.h"
 
 namespace inet {
 
@@ -27,29 +30,22 @@ Define_Module(MacAddressTable);
 
 std::ostream& operator<<(std::ostream& os, const MacAddressTable::AddressEntry& entry)
 {
-    os << "{VID=" << entry.vid << ", port=" << entry.portno << ", insertionTime=" << entry.insertionTime << "}";
+    os << "{VID=" << entry.vid << ", interfaceId=" << entry.interfaceId << ", insertionTime=" << entry.insertionTime << "}";
     return os;
 }
 
 MacAddressTable::MacAddressTable()
 {
-    addressTable = new AddressTable();
-    // Set addressTable for VLAN ID 0
-    vlanAddressTable[0] = addressTable;
 }
 
-void MacAddressTable::initialize()
+void MacAddressTable::initialize(int stage)
 {
-    agingTime = par("agingTime");
-    lastPurge = SIMTIME_ZERO;
-
-    // Option to pre-read in Address Table. To turn it off, set addressTableFile to empty string
-    const char *addressTableFile = par("addressTableFile");
-    if (addressTableFile && *addressTableFile)
-        readAddressTable(addressTableFile);
-
-    AddressTable& addressTable = *this->addressTable;    // magic to hide the '*' from the name of the watch below
-    WATCH_MAP(addressTable);
+    OperationalBase::initialize(stage);
+    if (stage == INITSTAGE_LOCAL) {
+        agingTime = par("agingTime");
+        lastPurge = SIMTIME_ZERO;
+        ifTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
+    }
 }
 
 /**
@@ -78,6 +74,11 @@ static char *fgetline(FILE *fp)
 }
 
 void MacAddressTable::handleMessage(cMessage *)
+{
+    throw cRuntimeError("This module doesn't process messages");
+}
+
+void MacAddressTable::handleMessageWhenUp(cMessage *)
 {
     throw cRuntimeError("This module doesn't process messages");
 }
@@ -123,13 +124,7 @@ MacAddressTable::AddressTable *MacAddressTable::getTableForVid(unsigned int vid)
     return nullptr;
 }
 
-/*
- * For a known arriving port, V-TAG and destination MAC. It generates a vector with the ports where relay component
- * should deliver the message.
- * returns false if not found
- */
-
-int MacAddressTable::getPortForAddress(const MacAddress& address, unsigned int vid)
+int MacAddressTable::getInterfaceIdForAddress(const MacAddress& address, unsigned int vid)
 {
     Enter_Method("MacAddressTable::getPortForAddress()");
 
@@ -146,11 +141,11 @@ int MacAddressTable::getPortForAddress(const MacAddress& address, unsigned int v
     }
     if (iter->second.insertionTime + agingTime <= simTime()) {
         // don't use (and throw out) aged entries
-        EV << "Ignoring and deleting aged entry: " << iter->first << " --> port" << iter->second.portno << "\n";
+        EV << "Ignoring and deleting aged entry: " << iter->first << " --> interfaceId " << iter->second.interfaceId << "\n";
         table->erase(iter);
         return -1;
     }
-    return iter->second.portno;
+    return iter->second.interfaceId;
 }
 
 /*
@@ -158,7 +153,7 @@ int MacAddressTable::getPortForAddress(const MacAddress& address, unsigned int v
  * True if refreshed. False if it is new.
  */
 
-bool MacAddressTable::updateTableWithAddress(int portno, const MacAddress& address, unsigned int vid)
+bool MacAddressTable::updateTableWithAddress(int interfaceId, const MacAddress& address, unsigned int vid)
 {
     Enter_Method("MacAddressTable::updateTableWithAddress()");
     if (address.isMulticast())      // broadcast or multicast
@@ -185,32 +180,32 @@ bool MacAddressTable::updateTableWithAddress(int portno, const MacAddress& addre
         removeAgedEntriesIfNeeded();
 
         // Add entry to table
-        EV << "Adding entry to Address Table: " << address << " --> port" << portno << "\n";
-        (*table)[address] = AddressEntry(vid, portno, simTime());
+        EV << "Adding entry to Address Table: " << address << " --> interfaceId " << interfaceId << "\n";
+        (*table)[address] = AddressEntry(vid, interfaceId, simTime());
         return false;
     }
     else {
         // Update existing entry
-        EV << "Updating entry in Address Table: " << address << " --> port" << portno << "\n";
+        EV << "Updating entry in Address Table: " << address << " --> interfaceId " << interfaceId << "\n";
         AddressEntry& entry = iter->second;
         entry.insertionTime = simTime();
-        entry.portno = portno;
+        entry.interfaceId = interfaceId;
     }
     return true;
 }
 
 /*
- * Clears portno MAC cache.
+ * Clears interfaceId MAC cache.
  */
 
-void MacAddressTable::flush(int portno)
+void MacAddressTable::flush(int interfaceId)
 {
-    Enter_Method("MacAddressTable::flush():  Clearing gate %d cache", portno);
+    Enter_Method("MacAddressTable::flush():  Clearing interfaceId %d cache", interfaceId);
     for (auto & elem : vlanAddressTable) {
         AddressTable *table = elem.second;
         for (auto j = table->begin(); j != table->end(); ) {
             auto cur = j++;
-            if (cur->second.portno == portno)
+            if (cur->second.interfaceId == interfaceId)
                 table->erase(cur);
         }
     }
@@ -223,21 +218,21 @@ void MacAddressTable::flush(int portno)
 void MacAddressTable::printState()
 {
     EV << endl << "MAC Address Table" << endl;
-    EV << "VLAN ID    MAC    Port    Inserted" << endl;
+    EV << "VLAN ID    MAC    IfId    Inserted" << endl;
     for (auto & elem : vlanAddressTable) {
         AddressTable *table = elem.second;
         for (auto & table_j : *table)
-            EV << table_j.second.vid << "   " << table_j.first << "   " << table_j.second.portno << "   " << table_j.second.insertionTime << endl;
+            EV << table_j.second.vid << "   " << table_j.first << "   " << table_j.second.interfaceId << "   " << table_j.second.insertionTime << endl;
     }
 }
 
-void MacAddressTable::copyTable(int portA, int portB)
+void MacAddressTable::copyTable(int interfaceIdA, int interfaceIdB)
 {
     for (auto & elem : vlanAddressTable) {
         AddressTable *table = elem.second;
         for (auto & table_j : *table)
-            if (table_j.second.portno == portA)
-                table_j.second.portno = portB;
+            if (table_j.second.interfaceId == interfaceIdA)
+                table_j.second.interfaceId = interfaceIdB;
 
     }
 }
@@ -253,7 +248,7 @@ void MacAddressTable::removeAgedEntriesFromVlan(unsigned int vid)
         AddressEntry& entry = cur->second;
         if (entry.insertionTime + agingTime <= simTime()) {
             EV << "Removing aged entry from Address Table: "
-               << cur->first << " --> port" << cur->second.portno << "\n";
+               << cur->first << " --> interfaceId " << cur->second.interfaceId << "\n";
             table->erase(cur);
         }
     }
@@ -269,7 +264,7 @@ void MacAddressTable::removeAgedEntriesFromAllVlans()
             AddressEntry& entry = cur->second;
             if (entry.insertionTime + agingTime <= simTime()) {
                 EV << "Removing aged entry from Address Table: "
-                   << cur->first << " --> port" << cur->second.portno << "\n";
+                   << cur->first << " --> interfaceId " << cur->second.interfaceId << "\n";
                 table->erase(cur);
             }
         }
@@ -292,16 +287,7 @@ void MacAddressTable::readAddressTable(const char *fileName)
     if (fp == nullptr)
         throw cRuntimeError("cannot open address table file `%s'", fileName);
 
-    //  Syntax of the file goes as:
-    //  VLAN ID, address in hexadecimal representation, portno
-    //  1    ffffffff    1
-    //  1    ffffeed1    2
-    //  2    aabcdeff    3
-    //
-    //  etc...
-    //
-    //  Each iteration of the loop reads in an entire line i.e. up to '\n' or EOF characters
-    //  and uses strtok to extract tokens from the resulting string
+    // parse address table file:
     char *line;
     for (int lineno = 0; (line = fgetline(fp)) != nullptr; delete [] line) {
         lineno++;
@@ -311,32 +297,79 @@ void MacAddressTable::readAddressTable(const char *fileName)
             continue;
 
         // scan in VLAN ID
-        char *vlanID = strtok(line, " \t");
-        // scan in hexaddress
-        char *hexaddress = strtok(nullptr, " \t");
-        // scan in port number
-        char *portno = strtok(nullptr, " \t");
+        char *vlanIdStr = strtok(line, " \t");
+        // scan in MAC address
+        char *macAddressStr = strtok(nullptr, " \t");
+        // scan in interface name
+        char *interfaceName = strtok(nullptr, " \t");
 
-        // empty line?
-        if (!vlanID)
+        char *endptr = nullptr;
+
+        // empty line or comment?
+        if (!vlanIdStr || *vlanIdStr == '#')
             continue;
 
         // broken line?
-        if (!portno || !hexaddress)
+        if (!vlanIdStr || !macAddressStr || !interfaceName)
             throw cRuntimeError("line %d invalid in address table file `%s'", lineno, fileName);
 
-        // Create an entry with address and portno and insert into table
-        AddressEntry entry(atoi(vlanID), atoi(portno), 0);
+        // parse columns:
+
+        //   parse VLAN ID:
+        unsigned int vlanId = strtol(vlanIdStr, &endptr, 10);
+        if (!endptr || *endptr)
+            throw cRuntimeError("error in line %d in address table file `%s': VLAN ID '%s' unresolved", lineno, fileName, vlanIdStr);
+
+        //   parse MAC address:
+        L3Address addr;
+        if (! L3AddressResolver().tryResolve(macAddressStr, addr, L3AddressResolver::ADDR_MAC))
+            throw cRuntimeError("error in line %d in address table file `%s': MAC address '%s' unresolved", lineno, fileName, macAddressStr);
+        MacAddress macAddress = addr.toMac();
+
+        //   parse interface:
+        int interfaceId = -1;
+        auto ie = ifTable->findInterfaceByName(interfaceName);
+        if (ie == nullptr) {
+            long int num = strtol(interfaceName, &endptr, 10);
+            if (endptr && *endptr == '\0')
+                ie = ifTable->findInterfaceById(num);
+        }
+        if (ie == nullptr)
+            throw cRuntimeError("error in line %d in address table file `%s': interface '%s' not found", lineno, fileName, interfaceName);
+        interfaceId = ie->getInterfaceId();
+
+        // Create an entry with address and interfaceId and insert into table
+        AddressEntry entry(vlanId, interfaceId, 0);
         AddressTable *table = getTableForVid(entry.vid);
 
         if (table == nullptr) {
+            // MAC Address Table does not exist for VLAN ID vid, so we create it
             table = new AddressTable();
+
+            // set 'the addressTable' to VLAN ID 0
+            if (entry.vid == 0)
+                addressTable = table;
+
             vlanAddressTable[entry.vid] = table;
         }
 
-        (*table)[MacAddress(hexaddress)] = entry;
+        (*table)[macAddress] = entry;
     }
     fclose(fp);
+}
+
+void MacAddressTable::initializeTable()
+{
+    clearTable();
+    // Option to pre-read in Address Table. To turn it off, set addressTableFile to empty string
+    const char *addressTableFile = par("addressTableFile");
+    if (addressTableFile && *addressTableFile)
+        readAddressTable(addressTableFile);
+
+    if (this->addressTable != nullptr) {  // setup a WATCH on VLANID 0 if present
+        AddressTable& addressTable = *this->addressTable;    // magic to hide the '*' from the name of the watch below
+        WATCH_MAP(addressTable);
+    }
 }
 
 void MacAddressTable::clearTable()

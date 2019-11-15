@@ -137,6 +137,8 @@ The following video shows the movement of the drones:
    :width: 50%
    :align: center
 
+Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`MobilityShowcase.ned <../MobilityShowcase.ned>`
+
 Discussion
 ----------
 

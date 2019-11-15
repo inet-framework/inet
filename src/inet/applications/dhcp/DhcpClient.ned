@@ -26,7 +26,7 @@ import inet.applications.contract.IApp;
 // described in RFC 2131, provides configuration parameters to Internet hosts.
 // Requires UDP.
 //
-// @see DhcpServer, DhcpMessage
+// @see ~DhcpServer, ~DhcpMessage
 //
 simple DhcpClient like IApp
 {
@@ -39,6 +39,7 @@ simple DhcpClient like IApp
         @lifecycleSupport;
         double stopOperationExtraTime @unit(s) = default(-1s);    // extra time after lifecycle stop operation finished
         double stopOperationTimeout @unit(s) = default(2s);    // timeout value for lifecycle stop operation
+        @selfMessageKinds(inet::DhcpTimerType);
     gates:
         input socketIn @labels(UdpControlInfo/up);
         output socketOut @labels(UdpControlInfo/down);

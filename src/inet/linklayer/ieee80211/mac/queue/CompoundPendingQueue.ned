@@ -17,15 +17,15 @@
 
 package inet.linklayer.ieee80211.mac.queue;
 
-import inet.common.queueing.PacketClassifier;
-import inet.common.queueing.CompoundPacketQueue;
-import inet.common.queueing.PacketQueue;
-import inet.common.queueing.PriorityScheduler;
+import inet.queueing.classifier.PacketClassifier;
+import inet.queueing.queue.CompoundPacketQueue;
+import inet.queueing.queue.PacketQueue;
+import inet.queueing.scheduler.PriorityScheduler;
 
 module CompoundPendingQueue extends CompoundPacketQueue
 {
     parameters:
-        frameCapacity = default(100); // -1 means unlimited
+        packetCapacity = default(100); // -1 means unlimited
     submodules:
         classifier: PacketClassifier {
             parameters:

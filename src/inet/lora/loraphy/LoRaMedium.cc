@@ -21,7 +21,7 @@
 #include "inet/physicallayer/common/packetlevel/Interference.h"
 #include "inet/physicallayer/common/packetlevel/Radio.h"
 #include "inet/physicallayer/common/packetlevel/RadioMedium.h"
-#include "inet/physicallayer/common/packetlevel/SignalTag_m.h"
+#include "inet/physicallayer/contract/packetlevel/SignalTag_m.h"
 #include "inet/physicallayer/contract/packetlevel/IErrorModel.h"
 
 
@@ -66,7 +66,7 @@ const IReceptionResult *LoRaMedium::getReceptionResult(const IRadio *radio, cons
     if (result)
         cacheResultHitCount++;
     else {
-        result = computeReceptionResult(radio, listening, transmission, const_cast<const std::vector<const ITransmission *> *>(&transmissions));
+        result = computeReceptionResult(radio, listening, transmission);
 
         auto pkt = const_cast<Packet *>(result->getPacket());
         if (!pkt->findTag<SnirInd>()) {

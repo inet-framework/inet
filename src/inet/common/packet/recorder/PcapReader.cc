@@ -42,13 +42,15 @@ void PcapReader::openPcap(const char *filename, const char *packetNameFormat)
     if (file == nullptr)
         throw cRuntimeError("Cannot open pcap file [%s] for reading: %s", filename, strerror(errno));
     struct pcap_hdr fh;
-    fread(&fh, sizeof(fh), 1, file);
+    auto err = fread(&fh, sizeof(fh), 1, file);
+    if (err != 1)
+        throw cRuntimeError("Cannot read fileheader from file '%s', errno is %ld.", filename, err);
     if (fh.magic == 0xa1b2c3d4)
         swapByteOrder = false;
     else if (fh.magic == 0xd4c3b2a1)
         swapByteOrder = true;
     else
-        throw cRuntimeError("Unknown PCAP fileheader from file '%s'", filename);
+        throw cRuntimeError("Unknown fileheader read from file '%s'", filename);
     if (swapByteOrder) {
         fh.version_major = swapByteOrder16(fh.version_major);
         fh.version_minor = swapByteOrder16(fh.version_minor);
@@ -66,10 +68,14 @@ std::pair<simtime_t, Packet *> PcapReader::readPacket()
     if (feof(file))
         return {-1, nullptr};
     struct pcaprec_hdr packetHeader;
-    fread(&packetHeader, sizeof(packetHeader), 1, file);
+    auto err = fread(&packetHeader, sizeof(packetHeader), 1, file);
+    if (err != 1)
+        throw cRuntimeError("Cannot read packetheader, errno is %ld.", err);
     uint8 buffer[1 << 16];
     memset(buffer, 0, sizeof(buffer));
-    fread(buffer, packetHeader.incl_len, 1, file);
+    err = fread(buffer, packetHeader.incl_len, 1, file);
+    if (err != 1)
+        throw cRuntimeError("Cannot read packet, errno is %ld.", err);
     if (swapByteOrder) {
         packetHeader.ts_sec = swapByteOrder32(packetHeader.ts_sec);
         packetHeader.ts_usec = swapByteOrder32(packetHeader.ts_usec);

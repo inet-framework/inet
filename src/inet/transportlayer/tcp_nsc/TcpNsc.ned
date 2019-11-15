@@ -43,15 +43,15 @@ simple TcpNsc like ITcp
         // full library name of the tcp stack implementation
         string stackName @choice("liblinux2.6.10.so","liblinux2.6.18.so","liblinux2.6.26.so","liblwip.so","libopenbsd3.5.so","libfreebsd5.3.so") = default("liblinux2.6.26.so");
         int stackBufferSize = default(80000); // the size of buffer used when communicating with the specified NSC stack
-        string sendQueueClass = default("");    // Obsolete!!!
-        string receiveQueueClass = default(""); // Obsolete!!!
+        string sendQueueClass = default("");    //# TODO: Obsolete!!!
+        string receiveQueueClass = default(""); //# TODO: Obsolete!!!
         string crcMode @enum("declared", "computed") = default("declared");
         @display("i=block/wheelbarrow");
 
     gates:
-        input appIn;
+        input appIn @messageKinds(inet::TcpCommandCode);
         input ipIn;
-        output appOut;
+        output appOut @messageKinds(inet::TcpStatusInd);
         output ipOut;
 }
 

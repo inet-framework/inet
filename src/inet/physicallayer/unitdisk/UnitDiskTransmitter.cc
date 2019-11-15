@@ -16,13 +16,12 @@
 //
 
 #include "inet/mobility/contract/IMobility.h"
-#include "inet/physicallayer/common/packetlevel/SignalTag_m.h"
+#include "inet/physicallayer/contract/packetlevel/SignalTag_m.h"
 #include "inet/physicallayer/unitdisk/UnitDiskPhyHeader_m.h"
 #include "inet/physicallayer/unitdisk/UnitDiskTransmission.h"
 #include "inet/physicallayer/unitdisk/UnitDiskTransmitter.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 Define_Module(UnitDiskTransmitter);
@@ -85,6 +84,5 @@ const ITransmission *UnitDiskTransmitter::createTransmission(const IRadio *trans
 }
 
 } // namespace physicallayer
-
 } // namespace inet
 

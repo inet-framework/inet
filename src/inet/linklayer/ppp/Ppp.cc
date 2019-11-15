@@ -320,11 +320,10 @@ void Ppp::refreshDisplay() const
     getDisplayString().setTagArg("i", 1, color);
 }
 
-void Ppp::encapsulate(Packet *msg)
+void Ppp::encapsulate(Packet *packet)
 {
-    auto packet = msg;
     auto pppHeader = makeShared<PppHeader>();
-    pppHeader->setProtocol(ProtocolGroup::pppprotocol.getProtocolNumber(msg->getTag<PacketProtocolTag>()->getProtocol()));
+    pppHeader->setProtocol(ProtocolGroup::pppprotocol.getProtocolNumber(packet->getTag<PacketProtocolTag>()->getProtocol()));
     packet->insertAtFront(pppHeader);
     auto pppTrailer = makeShared<PppTrailer>();
     packet->insertAtBack(pppTrailer);

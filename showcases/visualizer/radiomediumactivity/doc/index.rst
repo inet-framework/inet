@@ -103,7 +103,7 @@ The following video illustrates the visualization of propagating
 signals:
 
 .. video:: media/propagation9.mp4
-   :width: 698
+   :width: 100%
 
 ``host1`` sends an ARP request packet to ``host2``, which sends an
 ARP reply. ``host1`` ACKs it, then sends the first UDP packet. This transmission
@@ -277,7 +277,7 @@ range circles would be if they were enabled:
 When the simulation is run, this happens:
 
 .. video:: media/MultipleNodes14.mp4
-   :width: 698
+   :width: 100%
 
    <!--internal video recording, animation speed none, playback speed 1.00-->
 
@@ -315,7 +315,7 @@ effectively.
 Here is what happens when the simulation is run:
 
 .. video:: media/interference.mp4
-   :width: 698
+   :width: 100%
 
 The two sources can't detect each other's transmissions, but they receive
 the ACKs and ping replies of the destination. Receiving these transmissions
@@ -337,6 +337,8 @@ transmitting, the simulation slows down again, although
 Generally, several signals being present at a receiving node doesn't
 necessarily cause a collision. One of the signals might not be strong
 enough to garble the other transmission.
+
+Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`RadioMediumActivityVisualizationShowcase.ned <../RadioMediumActivityVisualizationShowcase.ned>`
 
 More information
 ----------------

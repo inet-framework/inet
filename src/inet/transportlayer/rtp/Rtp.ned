@@ -27,42 +27,42 @@ package inet.transportlayer.rtp;
 //
 // See ~RtpProfile, ~RtpAvProfile
 //
-// TODO Translate:
-// Az ~Rtp az appIn gate-en a következő üzeneteket fogadja az application-tól:
-// olyan msg-t, ami ~RtpControlInfo leszármazott controlinfo-t tartalmaz.
-//   - ~RtpCiEnterSession: Enter new session
-//         Create and initialize an ~RtpProfile module for the session.
-//         params: profileName, commonName, bandwidth, destinationAddress, port
-//   - ~RtpCiCreateSenderModule:
-//         Küld a profile-nak egy msg-t, hogy hozzon létre új modult a fileName fájl küldésére.
-//         params: ssrc, payloadType, fileName
-//   - ~RtpCiDeleteSenderModule:
-//         Küld a profile-nak egy msg-t, hogy törölje a küldő modult.
-//         params: ssrc
-//   - ~RtpCiSenderControl:
-//         Küld a profile-nak egy msg-t, hogy a modul hajtsa végre a <command> parancsot.
-//         params: ssrc, command (see ~RtpSenderControlMessageCommands), parameter1, parameter2
-//   - ~RtpCiLeaveSession: Leave session
-//         Delete ~RtpProfile module.
-//         params: ---
-//   -
-// Az ~Rtp az appOut gate-en a következő üzeneteket küldi az application-nek:
-// Olyan ~RtpControlMsg msg-t, ami ~RtpControlInfo leszármazottat tartalmaz:
-//   - ~RtpCiSenderModuleCreated:
-//         Elküldi az App részére a létrehozott modulhoz tartozó ssrc-t
-//         params: ssrc
-//   - ~RtpCiSenderModuleDeleted:
-//         Értesíti az App-ot, hogy a modul törölve lett.
-//         params: ssrc
-//   - ~RtpCiSenderStatus:
-//         Elküldi az App részére a modul állapotát. (PLAYING, FINISHED, STOPPED, PAUSED)
-//         params: ssrc, status (see ~RtpSenderStatus), timeStamp
-//   - ~RtpCiSessionEntered:
-//         Értesíti az App-ot, hogy létrehozott egy új session-t (~RtpProfile-t).
-//         params: ssrc
-//   - ~RtpCiSessionLeft:
-//         Értesíti az App-ot, hogy véget lett a session-nek és törölte az ~RtpProfile-t.
-//         params: ---
+//# TODO Translate:
+//# Az ~Rtp az appIn gate-en a következő üzeneteket fogadja az application-tól:
+//# olyan msg-t, ami ~RtpControlInfo leszármazott controlinfo-t tartalmaz.
+//#   - ~RtpCiEnterSession: Enter new session
+//#         Create and initialize an ~RtpProfile module for the session.
+//#         params: profileName, commonName, bandwidth, destinationAddress, port
+//#   - ~RtpCiCreateSenderModule:
+//#         Küld a profile-nak egy msg-t, hogy hozzon létre új modult a fileName fájl küldésére.
+//#         params: ssrc, payloadType, fileName
+//#   - ~RtpCiDeleteSenderModule:
+//#         Küld a profile-nak egy msg-t, hogy törölje a küldő modult.
+//#         params: ssrc
+//#   - ~RtpCiSenderControl:
+//#         Küld a profile-nak egy msg-t, hogy a modul hajtsa végre a <command> parancsot.
+//#         params: ssrc, command (see ~RtpSenderControlMessageCommands), parameter1, parameter2
+//#   - ~RtpCiLeaveSession: Leave session
+//#         Delete ~RtpProfile module.
+//#         params: ---
+//#   -
+//# Az ~Rtp az appOut gate-en a következő üzeneteket küldi az application-nek:
+//# Olyan ~RtpControlMsg msg-t, ami ~RtpControlInfo leszármazottat tartalmaz:
+//#   - ~RtpCiSenderModuleCreated:
+//#         Elküldi az App részére a létrehozott modulhoz tartozó ssrc-t
+//#         params: ssrc
+//#   - ~RtpCiSenderModuleDeleted:
+//#         Értesíti az App-ot, hogy a modul törölve lett.
+//#         params: ssrc
+//#   - ~RtpCiSenderStatus:
+//#         Elküldi az App részére a modul állapotát. (PLAYING, FINISHED, STOPPED, PAUSED)
+//#         params: ssrc, status (see ~RtpSenderStatus), timeStamp
+//#   - ~RtpCiSessionEntered:
+//#         Értesíti az App-ot, hogy létrehozott egy új session-t (~RtpProfile-t).
+//#         params: ssrc
+//#   - ~RtpCiSessionLeft:
+//#         Értesíti az App-ot, hogy véget lett a session-nek és törölte az ~RtpProfile-t.
+//#         params: ---
 simple Rtp
 {
     parameters:

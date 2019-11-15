@@ -24,263 +24,185 @@ namespace inet {
 
 namespace physicallayer {
 
-DimensionalTransmitterBase::DimensionalTransmitterBase() :
-    interpolationMode(static_cast<Mapping::InterpolationMethod>(-1))
-{
-}
+using namespace inet::math;
 
 void DimensionalTransmitterBase::initialize(int stage)
 {
-    if (stage == INITSTAGE_LOCAL)
-    {
+    if (stage == INITSTAGE_LOCAL) {
         cModule *module = check_and_cast<cModule *>(this);
-        // TODO: factor parsing?
-        // dimensions
-        const char *dimensionsString = module->par("dimensions");
-        cStringTokenizer tokenizer(dimensionsString);
-        while (tokenizer.hasMoreTokens()) {
-            const char *dimensionString = tokenizer.nextToken();
-            if (!strcmp("time", dimensionString))
-                dimensions.addDimension(Dimension::time);
-            else if (!strcmp("frequency", dimensionString))
-                dimensions.addDimension(Dimension::frequency);
-            else
-                throw cRuntimeError("Unknown dimension");
+        parseTimeGains(module->par("timeGains"));
+        parseFrequencyGains(module->par("frequencyGains"));
+        timeGainsNormalization = module->par("timeGainsNormalization");
+        frequencyGainsNormalization = module->par("frequencyGainsNormalization");
+    }
+}
+
+template<typename T>
+std::vector<DimensionalTransmitterBase::GainEntry<T>> DimensionalTransmitterBase::parseGains(const char *text) const
+{
+    std::vector<GainEntry<T>> gains;
+    cStringTokenizer tokenizer(text);
+    tokenizer.nextToken();
+    while (tokenizer.hasMoreTokens()) {
+        char *token = const_cast<char *>(tokenizer.nextToken());
+        char where;
+        char *end;
+        if (*token == 's' || *token == 'c' || *token == 'e') {
+            where = *token;
+            end = token + 1;
         }
-        // interpolation mode
-        const char *interpolationModeString = module->par("interpolationMode");
-        if (!strcmp("linear", interpolationModeString))
-            interpolationMode = Mapping::LINEAR;
-        else if (!strcmp("sample-hold", interpolationModeString))
-            interpolationMode = Mapping::STEPS;
-        else
-            throw cRuntimeError("Unknown interpolation mode: '%s'", interpolationModeString);
-        // time gains
-        cStringTokenizer timeGainsTokenizer(module->par("timeGains"));
-        while (timeGainsTokenizer.hasMoreTokens()) {
-            char *end;
-            const char *timeString = timeGainsTokenizer.nextToken();
-            double time = strtod(timeString, &end);
-            char timeUnit;
-            if (!end)
-                timeUnit = 's';
-            else if (*end == '%') {
-                timeUnit = '%';
-                time /= 100;
-                if (time < 0 || time > 1)
-                    throw cRuntimeError("Invalid percentage in timeGains parameter");
-            }
+        else {
+            where = ' ';
+            end = token;
+        }
+// TODO: replace this BS with the expression evaluator when it supports simtime_t and bindings
+//      Allowed syntax:
+//        +-quantity
+//        s|c|e
+//        s|c|e+-quantity
+//        s|c|e+-b|d
+//        s|c|e+-b|d+-quantity
+//        s|c|e+-b|d*number
+//        s|c|e+-b|d*number+-quantity
+        double lengthMultiplier = 0;
+        if ((*(token + 1) == '+' || *(token + 1) == '-') &&
+            (*(token + 2) == 'b' || *(token + 2) == 'd'))
+        {
+            if (*(token + 3) == '*')
+                lengthMultiplier = strtod(token + 4, &end);
             else {
-                timeUnit = 's';
-                time = cNEDValue::parseQuantity(timeString, "s");
+                lengthMultiplier = 1;
+                end += 2;
             }
-            const char *gainString = timeGainsTokenizer.nextToken();
-            double gain = strtod(gainString, &end);
-            if (end && !strcmp(end, "dB"))
-                gain = math::dB2fraction(gain);
-            if (gain < 0 || gain > 1)
-                throw cRuntimeError("Invalid gain in timeGains parameter");
-            timeGains.push_back(TimeGainEntry(timeUnit, time, gain));
+            if (*(token + 1) == '-')
+                lengthMultiplier *= -1;
         }
-        // frequency gains
-        cStringTokenizer frequencyGainsTokenizer(module->par("frequencyGains"));
-        while (frequencyGainsTokenizer.hasMoreTokens()) {
-            char *end;
-            const char *frequencyString = frequencyGainsTokenizer.nextToken();
-            double frequency = strtod(frequencyString, &end);
-            char frequencyUnit;
-            if (!end)
-                frequencyUnit = 'H';
-            else if (*end == '%') {
-                frequencyUnit = '%';
-                frequency /= 100;
-                if (frequency < 0 || frequency > 1)
-                    throw cRuntimeError("Invalid percentage in frequencyGains parameter");
-            }
-            else {
-                frequencyUnit = 'H';
-                frequency = cNEDValue::parseQuantity(frequencyString, "Hz");
-            }
-            const char *gainString = frequencyGainsTokenizer.nextToken();
-            double gain = strtod(gainString, &end);
-            if (end && !strcmp(end, "dB"))
-                gain = math::dB2fraction(gain);
-            if (gain < 0 || gain > 1)
-                throw cRuntimeError("Invalid gain in frequencyGains parameter");
-            frequencyGains.push_back(FrequencyGainEntry(frequencyUnit, frequency, gain));
-        }
+        T offset = T(0);
+        if (end && strlen(end) != 0)
+            offset = T(cNEDValue::parseQuantity(end, (std::is_same<T, simsec>::value == true ? "s" : (std::is_same<T, Hz>::value == true ? "Hz" : ""))));
+        double gain = strtod(tokenizer.nextToken(), &end);
+        if (end && !strcmp(end, "dB"))
+            gain = dB2fraction(gain);
+        if (gain < 0)
+            throw cRuntimeError("Gain must be in the range [0, inf)");
+        auto interpolator = createInterpolator<T, double>(tokenizer.nextToken());
+        gains.push_back(GainEntry<T>(interpolator, where, lengthMultiplier, offset, gain));
+    }
+    return gains;
+}
+
+void DimensionalTransmitterBase::parseTimeGains(const char *text)
+{
+    if (strcmp(text, "left s 0dB either e 0dB right")) {
+        firstTimeInterpolator = createInterpolator<simsec, double>(cStringTokenizer(text).nextToken());
+        timeGains = parseGains<simsec>(text);
+    }
+    else {
+        firstTimeInterpolator = nullptr;
+        timeGains.clear();
+    }
+}
+
+void DimensionalTransmitterBase::parseFrequencyGains(const char *text)
+{
+    if (strcmp(text, "left s 0dB either e 0dB right")) {
+        firstFrequencyInterpolator = createInterpolator<Hz, double>(cStringTokenizer(text).nextToken());
+        frequencyGains = parseGains<Hz>(text);
+    }
+    else {
+        firstFrequencyInterpolator = nullptr;
+        frequencyGains.clear();
     }
 }
 
 std::ostream& DimensionalTransmitterBase::printToStream(std::ostream& stream, int level) const
 {
-    if (level <= PRINT_LEVEL_TRACE)
-        stream << ", interpolationMode = " << interpolationMode
-               << ", dimensions = " << dimensions ;
-               // TODO: << "timeGains = " << timeGains
-               // TODO: << "frequencyGains = " << frequencyGains ;
+    // TODO: << ", timeGains = " << timeGains
+    // TODO: << ", frequencyGains = " << frequencyGains;
     return stream;
 }
 
-ConstMapping *DimensionalTransmitterBase::createPowerMapping(const simtime_t startTime, const simtime_t endTime, Hz carrierFrequency, Hz bandwidth, W power) const
+template<typename T>
+const Ptr<const IFunction<double, Domain<T>>> DimensionalTransmitterBase::normalize(const Ptr<const IFunction<double, Domain<T>>>& gainFunction, const char *normalization) const
 {
-    Mapping *powerMapping = MappingUtils::createMapping(Argument::MappedZero, dimensions, interpolationMode);
-    Argument position(dimensions);
-    bool hasTimeDimension = dimensions.hasDimension(Dimension::time);
-    bool hasFrequencyDimension = dimensions.hasDimension(Dimension::frequency);
-    if (hasTimeDimension && hasFrequencyDimension) {
-        double startFrequency = (carrierFrequency - bandwidth / 2).get();
-        double endFrequency = (carrierFrequency + bandwidth / 2).get();
-        // must be 0 before the start
-        if (interpolationMode == Mapping::STEPS)
-            ; // already 0 where unspecified
-        else if (interpolationMode == Mapping::LINEAR) {
-            auto previousTime = startTime;
-            previousTime.setRaw(previousTime.raw() - 1);
-            position.setTime(previousTime);
-            position.setArgValue(Dimension::frequency, startFrequency);
-            powerMapping->setValue(position, 0);
-            position.setArgValue(Dimension::frequency, endFrequency);
-            powerMapping->setValue(position, 0);
-            position.setTime(startTime);
-            position.setArgValue(Dimension::frequency, nexttoward(startFrequency, DBL_MIN));
-            powerMapping->setValue(position, 0);
-            position.setArgValue(Dimension::frequency, nexttoward(endFrequency, DBL_MAX));
-            powerMapping->setValue(position, 0);
-        }
+    if (!strcmp("", normalization))
+        return gainFunction;
+    else if (!strcmp("maximum", normalization)) {
+        auto max = gainFunction->getMax();
+        ASSERT(max != 0);
+        if (max == 1.0)
+            return gainFunction;
         else
-            throw cRuntimeError("Unknown interpolation mode");
-        // iterate over timeGains and frequencyGains
-        for (const auto & timeGainEntry : timeGains) {
-            switch (timeGainEntry.timeUnit) {
-                case 's':
-                    position.setTime(timeGainEntry.time >= 0 ? startTime + timeGainEntry.time : endTime - timeGainEntry.time);
-                    break;
-                case '%':
-                    position.setTime((1 - timeGainEntry.time) * startTime + timeGainEntry.time * endTime);
-                    break;
-                default:
-                    throw cRuntimeError("Unknown time unit");
-            }
-            for (const auto & frequencyGainEntry : frequencyGains) {
-                switch (frequencyGainEntry.frequencyUnit) {
-                    case 's':
-                        position.setArgValue(Dimension::frequency, frequencyGainEntry.frequency >= 0 ? startFrequency + frequencyGainEntry.frequency : endFrequency - frequencyGainEntry.frequency);
-                        break;
-                    case '%':
-                        position.setArgValue(Dimension::frequency, (1 - frequencyGainEntry.frequency) * startFrequency + frequencyGainEntry.frequency * endFrequency);
-                        break;
-                    default:
-                        throw cRuntimeError("Unknown frequency unit");
-                }
-                powerMapping->setValue(position, timeGainEntry.gain * frequencyGainEntry.gain * power.get());
-            }
-        }
-        // must be 0 after the end
-        if (interpolationMode == Mapping::STEPS) {
-            position.setTime(startTime);
-            position.setArgValue(Dimension::frequency, endFrequency);
-            powerMapping->setValue(position, 0);
-            position.setTime(endTime);
-            position.setArgValue(Dimension::frequency, startFrequency);
-            powerMapping->setValue(position, 0);
-            position.setTime(endTime);
-            position.setArgValue(Dimension::frequency, endFrequency);
-            powerMapping->setValue(position, 0);
-        }
-        else if (interpolationMode == Mapping::LINEAR) {
-            auto nextTime = endTime;
-            nextTime.setRaw(nextTime.raw() + 1);
-            position.setTime(nextTime);
-            position.setArgValue(Dimension::frequency, startFrequency);
-            powerMapping->setValue(position, 0);
-            position.setArgValue(Dimension::frequency, endFrequency);
-            powerMapping->setValue(position, 0);
-            position.setTime(endTime);
-            position.setArgValue(Dimension::frequency, nexttoward(startFrequency, DBL_MIN));
-            powerMapping->setValue(position, 0);
-            position.setArgValue(Dimension::frequency, nexttoward(endFrequency, DBL_MAX));
-            powerMapping->setValue(position, 0);
-        }
-        else
-            throw cRuntimeError("Unknown interpolation mode");
+            return gainFunction->divide(makeShared<ConstantFunction<double, Domain<T>>>(max));
     }
-    else if (hasTimeDimension) {
-        // must be 0 before the start
-        if (interpolationMode == Mapping::STEPS)
-            ; // already 0 where unspecified
-        else if (interpolationMode == Mapping::LINEAR) {
-            auto previousTime = startTime;
-            previousTime.setRaw(previousTime.raw() - 1);
-            position.setTime(previousTime);
-            powerMapping->setValue(position, 0);
-        }
+    else if (!strcmp("integral", normalization)) {
+        double integral = gainFunction->getIntegral();
+        ASSERT(integral != 0);
+        if (integral == 1.0)
+            return gainFunction;
         else
-            throw cRuntimeError("Unknown interpolation mode");
-        // iterate over timeGains
-        for (const auto & timeGainEntry : timeGains) {
-            switch (timeGainEntry.timeUnit) {
-                case 's':
-                    position.setTime(timeGainEntry.time >= 0 ? startTime + timeGainEntry.time : endTime - timeGainEntry.time);
-                    break;
-                case '%':
-                    position.setTime((1 - timeGainEntry.time) * startTime + timeGainEntry.time * endTime);
-                    break;
-                default:
-                    throw cRuntimeError("Unknown time unit");
-            }
-            powerMapping->setValue(position, timeGainEntry.gain * power.get());
-        }
-        // must be 0 after the end
-        if (interpolationMode == Mapping::STEPS)
-            position.setTime(endTime);
-        else if (interpolationMode == Mapping::LINEAR) {
-            auto nextTime = endTime;
-            nextTime.setRaw(nextTime.raw() + 1);
-            position.setTime(nextTime);
-        }
-        else
-            throw cRuntimeError("Unknown interpolation mode");
-        powerMapping->setValue(position, 0);
-    }
-    else if (hasFrequencyDimension) {
-        double startFrequency = (carrierFrequency - bandwidth / 2).get();
-        double endFrequency = (carrierFrequency + bandwidth / 2).get();
-        // must be 0 before the start
-        if (interpolationMode == Mapping::STEPS)
-            ; // already 0 where unspecified
-        else if (interpolationMode == Mapping::LINEAR) {
-            position.setArgValue(Dimension::frequency, nexttoward(startFrequency, DBL_MIN));
-            powerMapping->setValue(position, 0);
-        }
-        else
-            throw cRuntimeError("Unknown interpolation mode");
-        // iterate over frequencyGains
-        for (const auto & frequencyGainEntry : frequencyGains) {
-            switch (frequencyGainEntry.frequencyUnit) {
-                case 's':
-                    position.setArgValue(Dimension::frequency, frequencyGainEntry.frequency >= 0 ? startFrequency + frequencyGainEntry.frequency : endFrequency - frequencyGainEntry.frequency);
-                    break;
-                case '%':
-                    position.setArgValue(Dimension::frequency, (1 - frequencyGainEntry.frequency) * startFrequency + frequencyGainEntry.frequency * endFrequency);
-                    break;
-                default:
-                    throw cRuntimeError("Unknown frequency unit");
-            }
-            powerMapping->setValue(position, frequencyGainEntry.gain * power.get());
-        }
-        // must be 0 after the end
-        if (interpolationMode == Mapping::STEPS)
-            position.setArgValue(Dimension::frequency, endFrequency);
-        else if (interpolationMode == Mapping::LINEAR)
-            position.setArgValue(Dimension::frequency, nexttoward(endFrequency, DBL_MAX));
-        else
-            throw cRuntimeError("Unknown interpolation mode");
-        powerMapping->setValue(position, 0);
+            return gainFunction->divide(makeShared<ConstantFunction<double, Domain<T>>>(integral));
     }
     else
-        throw cRuntimeError("Unknown dimensions");
-    return powerMapping;
+        throw cRuntimeError("Unknown normalization: '%s'", normalization);
+}
+
+Ptr<const IFunction<WpHz, Domain<simsec, Hz>>> DimensionalTransmitterBase::createPowerFunction(const simtime_t startTime, const simtime_t endTime, Hz centerFrequency, Hz bandwidth, W power) const
+{
+    if (timeGains.size() == 0 && frequencyGains.size() == 0)
+        return makeFirstQuadrantLimitedFunction(staticPtrCast<const IFunction<WpHz, Domain<simsec, Hz>>>(makeShared<TwoDimensionalBoxcarFunction<WpHz, simsec, Hz>>(simsec(startTime), simsec(endTime), centerFrequency - bandwidth / 2, centerFrequency + bandwidth / 2, power / bandwidth)));
+    else {
+        Ptr<const IFunction<double, Domain<simsec>>> timeGainFunction;
+        if (timeGains.size() != 0) {
+            auto centerTime = (startTime + endTime) / 2;
+            auto duration = endTime - startTime;
+            std::map<simsec, std::pair<double, const IInterpolator<simsec, double> *>> ts;
+            ts[getLowerBound<simsec>()] = {0, firstTimeInterpolator};
+            ts[getUpperBound<simsec>()] = {0, nullptr};
+            for (const auto & entry : timeGains) {
+                simsec time;
+                switch (entry.where) {
+                    case 's': time = simsec(startTime); break;
+                    case 'e': time = simsec(endTime); break;
+                    case 'c': time = simsec(centerTime); break;
+                    case ' ': time = simsec(0); break;
+                    default: throw cRuntimeError("Unknown qualifier");
+                }
+                time += simsec(duration) * entry.length + entry.offset;
+                ts[time] = {entry.gain, entry.interpolator};
+            }
+            timeGainFunction = makeShared<OneDimensionalInterpolatedFunction<double, simsec>>(ts);
+        }
+        else
+            timeGainFunction = makeShared<OneDimensionalBoxcarFunction<double, simsec>>(simsec(startTime), simsec(endTime), 1);
+        Ptr<const IFunction<double, Domain<Hz>>> frequencyGainFunction;
+        if (frequencyGains.size() != 0) {
+            auto startFrequency = centerFrequency - bandwidth / 2;
+            auto endFrequency = centerFrequency + bandwidth / 2;
+            std::map<Hz, std::pair<double, const IInterpolator<Hz, double>*>> fs;
+            fs[getLowerBound<Hz>()] = {0, firstFrequencyInterpolator};
+            fs[getUpperBound<Hz>()] = {0, nullptr};
+            for (const auto & entry : frequencyGains) {
+                Hz frequency;
+                switch (entry.where) {
+                    case 's': frequency = startFrequency; break;
+                    case 'e': frequency = endFrequency; break;
+                    case 'c': frequency = centerFrequency; break;
+                    case ' ': frequency = Hz(0); break;
+                    default: throw cRuntimeError("Unknown qualifier");
+                }
+                frequency += bandwidth * entry.length + entry.offset;
+                ASSERT(!std::isnan(frequency.get()));
+                fs[frequency] = {entry.gain, entry.interpolator};
+            }
+            frequencyGainFunction = makeShared<OneDimensionalInterpolatedFunction<double, Hz>>(fs);
+        }
+        else
+            frequencyGainFunction = makeShared<OneDimensionalBoxcarFunction<double, Hz>>(centerFrequency - bandwidth / 2, centerFrequency + bandwidth / 2, 1);
+        auto gainFunction = makeShared<OrthogonalCombinatorFunction<double, simsec, Hz>>(normalize<simsec>(timeGainFunction, timeGainsNormalization), normalize<Hz>(frequencyGainFunction, frequencyGainsNormalization));
+        auto powerFunction = makeShared<ConstantFunction<WpHz, Domain<simsec, Hz>>>(power / Hz(1));
+        return makeFirstQuadrantLimitedFunction(powerFunction->multiply(gainFunction));
+    }
 }
 
 } // namespace physicallayer

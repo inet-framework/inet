@@ -50,6 +50,7 @@ simple Ieee80211MgmtApSimplified like IIeee80211Mgmt
         string interfaceTableModule;
         string mibModule;
         string macModule;               // The path to the MAC module
+        string ssid = default("SSID");
         @display("i=block/cogwheel");
     gates:
         input macIn @labels(Ieee80211MacHeader); // from ~Ieee80211Mac

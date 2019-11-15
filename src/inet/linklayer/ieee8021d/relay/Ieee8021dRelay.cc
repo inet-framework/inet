@@ -96,7 +96,7 @@ void Ieee8021dRelay::handleUpperPacket(Packet *packet)
     } else if (frame->getDest().isBroadcast()) {    // broadcast address
         broadcast(packet, -1);
     } else {
-        int outInterfaceId = macTable->getPortForAddress(frame->getDest());
+        int outInterfaceId = macTable->getInterfaceIdForAddress(frame->getDest());
         // Not known -> broadcast
         if (outInterfaceId == -1) {
             EV_DETAIL << "Destination address = " << frame->getDest()
@@ -189,7 +189,7 @@ void Ieee8021dRelay::handleAndDispatchFrame(Packet *packet)
         broadcast(packet, arrivalInterfaceId);
     }
     else {
-        int outputInterfaceId = macTable->getPortForAddress(frame->getDest());
+        int outputInterfaceId = macTable->getInterfaceIdForAddress(frame->getDest());
         // Not known -> broadcast
         if (outputInterfaceId == -1) {
             EV_DETAIL << "Destination address = " << frame->getDest() << " unknown, broadcasting frame " << frame << endl;
@@ -269,13 +269,10 @@ void Ieee8021dRelay::start()
     }
     else
         throw cRuntimeError("No non-loopback interface found!");
-
-    macTable->clearTable();
 }
 
 void Ieee8021dRelay::stop()
 {
-    macTable->clearTable();
     ie = nullptr;
 }
 

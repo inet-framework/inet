@@ -434,7 +434,7 @@ The hosts' routing protocol type is set to :ned:`Gpsr`:
 The following video shows running the simulation from the beginning:
 
 .. video:: media/Gpsr1.mp4
-   :width: 698
+   :width: 100%
    :align: center
 
 
@@ -488,6 +488,8 @@ in this showcase:
    Protocol <http://www.netlab.tkk.fi/opetus/s38030/k02/Papers/03-Guoyou.pdf>`__
 -  `GPSR: Greedy Perimeter Stateless Routing for Wireless
    Networks <http://www.icir.org/bkarp/jobs/gpsr-mobicom2000.pdf>`__
+
+Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`ManetProtocolsShowcase.ned <../ManetProtocolsShowcase.ned>`
 
 Discussion
 ----------

@@ -18,10 +18,10 @@
 
 package inet.examples.wireless.throughput;
 
-import inet.common.queueing.PacketConsumer;
 import inet.linklayer.ieee80211.Ieee80211Interface;
 import inet.mobility.static.StationaryMobility;
 import inet.networklayer.common.InterfaceTable;
+import inet.queueing.sink.PassivePacketSink;
 
 //
 // Well, this models a 802.11 Access Point with a Sink.
@@ -41,7 +41,7 @@ module WirelessAPWithSink
             parameters:
                 @display("p=100,100;is=s");
         }
-        sink: PacketConsumer {
+        sink: PassivePacketSink {
             parameters:
                 @display("p=300,100");
         }

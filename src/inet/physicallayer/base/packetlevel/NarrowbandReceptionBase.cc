@@ -21,9 +21,9 @@ namespace inet {
 
 namespace physicallayer {
 
-NarrowbandReceptionBase::NarrowbandReceptionBase(const IRadio *receiver, const ITransmission *transmission, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const Quaternion startOrientation, const Quaternion endOrientation, Hz carrierFrequency, Hz bandwidth) :
+NarrowbandReceptionBase::NarrowbandReceptionBase(const IRadio *receiver, const ITransmission *transmission, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const Quaternion startOrientation, const Quaternion endOrientation, Hz centerFrequency, Hz bandwidth) :
     ReceptionBase(receiver, transmission, startTime, endTime, startPosition, endPosition, startOrientation, endOrientation),
-    carrierFrequency(carrierFrequency),
+    centerFrequency(centerFrequency),
     bandwidth(bandwidth)
 {
 }
@@ -31,7 +31,7 @@ NarrowbandReceptionBase::NarrowbandReceptionBase(const IRadio *receiver, const I
 std::ostream& NarrowbandReceptionBase::printToStream(std::ostream& stream, int level) const
 {
     if (level <= PRINT_LEVEL_DETAIL)
-        stream << ", carrierFrequency = " << carrierFrequency;
+        stream << ", centerFrequency = " << centerFrequency;
     if (level <= PRINT_LEVEL_TRACE)
         stream << ", bandwidth = " << bandwidth;
     return ReceptionBase::printToStream(stream, level);

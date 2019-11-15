@@ -69,11 +69,9 @@ const Ptr<const Chunk> Packet::peekAtFront(b length, int flags) const
 {
     auto dataLength = getDataLength();
     CHUNK_CHECK_USAGE(b(-1) <= length && length <= dataLength, "length is invalid");
-    const auto& chunk = content->peek(frontIterator, length, flags);
-    if (chunk == nullptr || chunk->getChunkLength() <= dataLength)
-        return chunk;
-    else
-        return content->peek(frontIterator, dataLength, flags);
+    const auto& chunk = content->peek(frontIterator, length == b(-1) ? -dataLength : length, flags);
+    CHUNK_CHECK_IMPLEMENTATION(chunk == nullptr || chunk->getChunkLength() <= dataLength);
+    return chunk;
 }
 
 const Ptr<const Chunk> Packet::popAtFront(b length, int flags)
@@ -97,17 +95,15 @@ void Packet::setBackOffset(b offset)
 const Ptr<const Chunk> Packet::peekAtBack(b length, int flags) const
 {
     auto dataLength = getDataLength();
-    CHUNK_CHECK_USAGE(b(1) <= length && length <= dataLength, "length is invalid");
-    const auto& chunk = content->peek(backIterator, length, flags);
-    if (chunk == nullptr || chunk->getChunkLength() <= dataLength)
-        return chunk;
-    else
-        return content->peek(backIterator, dataLength, flags);
+    CHUNK_CHECK_USAGE(b(-1) <= length && length <= dataLength, "length is invalid");
+    const auto& chunk = content->peek(backIterator, length == b(-1) ? -dataLength : length, flags);
+    CHUNK_CHECK_IMPLEMENTATION(chunk == nullptr || chunk->getChunkLength() <= dataLength);
+    return chunk;
 }
 
 const Ptr<const Chunk> Packet::popAtBack(b length, int flags)
 {
-    CHUNK_CHECK_USAGE(b(1) <= length && length <= getDataLength(), "length is invalid");
+    CHUNK_CHECK_USAGE(b(-1) <= length && length <= getDataLength(), "length is invalid");
     const auto& chunk = peekAtBack(length, flags);
     if (chunk != nullptr) {
         content->moveIterator(backIterator, chunk->getChunkLength());
@@ -118,17 +114,19 @@ const Ptr<const Chunk> Packet::popAtBack(b length, int flags)
 
 const Ptr<const Chunk> Packet::peekDataAt(b offset, b length, int flags) const
 {
-    CHUNK_CHECK_USAGE(b(0) <= offset && offset <= getDataLength(), "offset is out of range");
-    CHUNK_CHECK_USAGE(b(-1) <= length && offset + length <= getDataLength(), "length is invalid");
+    auto dataLength = getDataLength();
+    CHUNK_CHECK_USAGE(b(0) <= offset && offset <= dataLength, "offset is out of range");
+    CHUNK_CHECK_USAGE(b(-1) <= length && offset + length <= dataLength, "length is invalid");
     b peekOffset = frontIterator.getPosition() + offset;
-    return content->peek(Chunk::Iterator(true, peekOffset, -1), length, flags);
+    return content->peek(Chunk::Iterator(true, peekOffset, -1), length == b(-1) ? -(dataLength - offset) : length, flags);
 }
 
 const Ptr<const Chunk> Packet::peekAt(b offset, b length, int flags) const
 {
-    CHUNK_CHECK_USAGE(b(0) <= offset && offset <= getTotalLength(), "offset is out of range");
-    CHUNK_CHECK_USAGE(b(-1) <= length && offset + length <= getTotalLength(), "length is invalid");
-    return content->peek(Chunk::Iterator(true, offset, -1), length, flags);
+    auto totalLength = getTotalLength();
+    CHUNK_CHECK_USAGE(b(0) <= offset && offset <= totalLength, "offset is out of range");
+    CHUNK_CHECK_USAGE(b(-1) <= length && offset + length <= totalLength, "length is invalid");
+    return content->peek(Chunk::Iterator(true, offset, -1), length == b(-1) ? -(totalLength - offset) : length, flags);
 }
 
 void Packet::insertAtBack(const Ptr<const Chunk>& chunk)
@@ -269,7 +267,7 @@ const Ptr<Chunk> Packet::removeAtFront(b length, int flags)
 
 const Ptr<Chunk> Packet::removeAtBack(b length, int flags)
 {
-    CHUNK_CHECK_USAGE(b(1) <= length && length <= getDataLength(), "length is invalid");
+    CHUNK_CHECK_USAGE(b(-1) <= length && length <= getDataLength(), "length is invalid");
     CHUNK_CHECK_USAGE(backIterator.getPosition() == b(0), "popped trailer length is non-zero");
     const auto& chunk = popAtBack(length, flags);
     trimBack();
@@ -283,7 +281,7 @@ const Ptr<Chunk> Packet::removeAll()
     return makeExclusivelyOwnedMutableChunk(oldContent);
 }
 
-//(inet::Packet)UdpBasicAppData-0 (5000 bytes) [content]
+//(inet::Packet)UdpBasicAppData-0 (5000 B) [content]
 std::string Packet::str() const
 {
     std::ostringstream out;

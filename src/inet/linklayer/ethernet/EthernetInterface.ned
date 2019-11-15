@@ -18,7 +18,7 @@
 
 package inet.linklayer.ethernet;
 
-import inet.common.queueing.contract.IPacketQueue;
+import inet.queueing.contract.IPacketQueue;
 import inet.linklayer.contract.IEtherMac;
 import inet.linklayer.contract.IEthernetInterface;
 import inet.linklayer.contract.ITrafficConditioner;
@@ -56,7 +56,7 @@ module EthernetInterface extends InterfaceEntry like IEthernetInterface
         }
         mac: <default(csmacdSupport ? "EtherMac" : "EtherMacFullDuplex")> like IEtherMac {
             parameters:
-                txQueueLimit = 10000;
+                queue.packetCapacity = default(10000);
                 @display("p=250,400");
         }
         encap: <default("EtherEncap")> like IEtherEncap {

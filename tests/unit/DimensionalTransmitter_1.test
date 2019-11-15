@@ -1,39 +1,51 @@
 %description:
-This test checks the correctness of dimensional signal power representation with sample-hold interpolation.
+This test checks the correctness of dimensional signal power representation with interpolation.
 
 %includes:
-#include "inet/common/mapping/MappingUtils.h"
+#include "inet/common/math/Functions.h"
 #include "inet/physicallayer/base/packetlevel/DimensionalTransmitterBase.h"
 
 %global:
 
-using namespace inet::units::values;
+using namespace inet;
+using namespace inet::math;
 using namespace inet::physicallayer;
+using namespace inet::units::values;
 
 class DimensionalTransmitterTest : public DimensionalTransmitterBase
 {
   public:
-    ConstMapping *add(ConstMapping *p1, ConstMapping *p2) {
-        return new ConcatConstMapping<std::plus<double> >(p1, p2, false, Argument::MappedZero);
+  	DimensionalTransmitterTest() {
+        timeGainsNormalization = "";
+        frequencyGainsNormalization = "";
     }
 
-    void printValue(ConstMapping *mapping, simtime_t time) {
-        Argument position(dimensions);
-        position.setTime(time);
-        std::cout << "Value at " << time << ": " << mapping->getValue(position) << std::endl;
+    void printValue(const Ptr<const IFunction<double, Domain<simsec, Hz>>>& function, simtime_t time) {
+        std::cout << "Value at " << time << ": " << function->getValue(Point<simsec, Hz>(simsec(time), GHz(1))) << std::endl;
     }
 
-    void printValue(ConstMapping *mapping, Hz frequency) {
-        Argument position(dimensions);
-        position.setArgValue(Dimension::frequency, frequency.get());
-        std::cout << "Value at " << frequency << ": " << mapping->getValue(position) << std::endl;
+    void printValue(const Ptr<const IFunction<WpHz, Domain<simsec, Hz>>>& function, simtime_t time) {
+        std::cout << "Value at " << time << ": " << function->getValue(Point<simsec, Hz>(simsec(time), GHz(1))) << std::endl;
     }
 
-    void printValue(ConstMapping *mapping, simtime_t time, Hz frequency) {
-        Argument position(dimensions);
-        position.setTime(time);
-        position.setArgValue(Dimension::frequency, frequency.get());
-        std::cout << "Value at " << time << " " << frequency << ": " << mapping->getValue(position) << std::endl;
+    void printValue(const Ptr<const IFunction<WpHz, Domain<simsec, Hz>>>& function, Hz frequency) {
+        std::cout << "Value at " << frequency << ": " << function->getValue(Point<simsec, Hz>(simsec(20), frequency)) << std::endl;
+    }
+
+    void printValue(const Ptr<const IFunction<WpHz, Domain<simsec, Hz>>>& function, simtime_t time, Hz frequency) {
+        std::cout << "Value at " << time << " " << frequency << ": " << function->getValue(Point<simsec, Hz>(simsec(time), frequency)) << std::endl;
+    }
+
+    void printMinMax(const Ptr<const IFunction<double, Domain<simsec, Hz>>>& function) {
+	    std::cout << "Min value: " << function->getMin() << std::endl;
+	    std::cout << "Max value: " << function->getMax() << std::endl;
+	    std::cout << "Mean value: " << function->getMean() << std::endl;
+    }
+
+    void printMinMax(const Ptr<const IFunction<WpHz, Domain<simsec, Hz>>>& function) {
+	    std::cout << "Min value: " << function->getMin() << std::endl;
+	    std::cout << "Max value: " << function->getMax() << std::endl;
+	    std::cout << "Mean value: " << function->getMean() << std::endl;
     }
 
     void testTime1();
@@ -42,115 +54,125 @@ class DimensionalTransmitterTest : public DimensionalTransmitterBase
     void testFrequency2();
     void testDual1();
     void testDual2();
+    void testDual3();
+    void testDivide();
 };
 
 void DimensionalTransmitterTest::testTime1()
 {
-    interpolationMode = Mapping::STEPS;
-    dimensions = DimensionSet();
-    dimensions.addDimension(Dimension::time);
-    timeGains.clear();
-    timeGains.push_back(TimeGainEntry('%', 0, 1));
-    timeGains.push_back(TimeGainEntry('%', 1, 1));
-    auto p = createPowerMapping(10, 30, GHz(1), MHz(200), W(1));
-    std::cout << *p << std::endl;
+	std::cout << "testTime1\n";
+    parseTimeGains("left s 0dB either e 0dB right");
+    auto p = createPowerFunction(10, 30, GHz(1), MHz(200), W(1));
+//    std::cout << *p << std::endl;
     for (int i = 0; i <= 45; i += 5)
-        printValue(p, i);
+        printValue(p, SimTime(i));
+    printMinMax(p);
 }
 
 void DimensionalTransmitterTest::testTime2()
 {
-    interpolationMode = Mapping::STEPS;
-    dimensions = DimensionSet();
-    dimensions.addDimension(Dimension::time);
-    timeGains.clear();
-    timeGains.push_back(TimeGainEntry('%', 0, 1));
-    timeGains.push_back(TimeGainEntry('%', 1, 1));
-    auto p1 = createPowerMapping(10, 30, GHz(1), MHz(200), W(1));
-    auto p2 = createPowerMapping(20, 40, GHz(1), MHz(200), W(10));
-    std::cout << *p1 << std::endl;
-    std::cout << *p2 << std::endl;
-    auto total = add(p1, p2);
-    std::cout << *total << std::endl;
+	std::cout << "testTime2\n";
+    parseTimeGains("left s 0dB either e 0dB right");
+    auto p1 = createPowerFunction(10, 30, GHz(1), MHz(200), W(1));
+    auto p2 = createPowerFunction(20, 40, GHz(1), MHz(200), W(10));
+//    std::cout << *p1 << std::endl;
+//    std::cout << *p2 << std::endl;
+    auto result = p1->add(p2);
+//    std::cout << *result << std::endl;
     for (int i = 0; i <= 45; i += 5)
-        printValue(total, i);
-    std::cout << "Max value: " << MappingUtils::findMax(*total) << std::endl;
+        printValue(result, SimTime(i));
+    printMinMax(result);
 }
 
 void DimensionalTransmitterTest::testFrequency1()
 {
-    interpolationMode = Mapping::STEPS;
-    dimensions = DimensionSet();
-    dimensions.addDimension(Dimension::frequency);
-    frequencyGains.clear();
-    frequencyGains.push_back(FrequencyGainEntry('%', 0, 1));
-    frequencyGains.push_back(FrequencyGainEntry('%', 1, 1));
-    auto p = createPowerMapping(10, 30, GHz(1), MHz(200), W(1));
-    std::cout << *p << std::endl;
+	std::cout << "testFrequency1\n";
+    parseFrequencyGains("left s 0dB either e 0dB right");
+    auto p = createPowerFunction(10, 30, GHz(1), MHz(200), W(1));
+//    std::cout << *p << std::endl;
     for (int i = 800; i <= 1250; i += 50)
         printValue(p, MHz(i));
+    printMinMax(p);
 }
 
 void DimensionalTransmitterTest::testFrequency2()
 {
-    interpolationMode = Mapping::STEPS;
-    dimensions = DimensionSet();
-    dimensions.addDimension(Dimension::frequency);
-    frequencyGains.clear();
-    frequencyGains.push_back(FrequencyGainEntry('%', 0, 1));
-    frequencyGains.push_back(FrequencyGainEntry('%', 1, 1));
-    auto p1 = createPowerMapping(10, 30, GHz(1), MHz(200), W(1));
-    auto p2 = createPowerMapping(10, 30, GHz(1.1), MHz(200), W(10));
-    std::cout << *p1 << std::endl;
-    std::cout << *p2 << std::endl;
-    auto total = add(p1, p2);
-    std::cout << *total << std::endl;
+	std::cout << "testFrequency2\n";
+    parseFrequencyGains("left s 0dB either e 0dB right");
+    auto p1 = createPowerFunction(10, 30, GHz(1), MHz(200), W(1));
+    auto p2 = createPowerFunction(10, 30, GHz(1.1), MHz(200), W(10));
+//    std::cout << *p1 << std::endl;
+//    std::cout << *p2 << std::endl;
+    auto result = p1->add(p2);
+//    std::cout << *result << std::endl;
     for (int i = 800; i <= 1250; i += 50)
-        printValue(total, MHz(i));
-    std::cout << "Max value: " << MappingUtils::findMax(*total) << std::endl;
+        printValue(result, MHz(i));
+    printMinMax(result);
 }
 
 void DimensionalTransmitterTest::testDual1()
 {
-    interpolationMode = Mapping::STEPS;
-    dimensions = DimensionSet();
-    dimensions.addDimension(Dimension::time);
-    dimensions.addDimension(Dimension::frequency);
-    timeGains.clear();
-    timeGains.push_back(TimeGainEntry('%', 0, 1));
-    timeGains.push_back(TimeGainEntry('%', 1, 1));
-    frequencyGains.clear();
-    frequencyGains.push_back(FrequencyGainEntry('%', 0, 1));
-    frequencyGains.push_back(FrequencyGainEntry('%', 1, 1));
-    auto p = createPowerMapping(10, 30, GHz(1), MHz(200), W(1));
-    std::cout << *p << std::endl;
+	std::cout << "testDual1\n";
+    parseTimeGains("left s 0dB either e 0dB right");
+    parseFrequencyGains("left s 0dB either e 0dB right");
+    auto p = createPowerFunction(10, 30, GHz(1), MHz(200), W(1));
+//    std::cout << *p << std::endl;
     for (int i = 0; i <= 45; i += 5)
         for (int j = 800; j <= 1250; j += 50)
-            printValue(p, i, MHz(j));
+            printValue(p, SimTime(i), MHz(j));
+    printMinMax(p);
 }
 
 void DimensionalTransmitterTest::testDual2()
 {
-    interpolationMode = Mapping::STEPS;
-    dimensions = DimensionSet();
-    dimensions.addDimension(Dimension::time);
-    dimensions.addDimension(Dimension::frequency);
-    timeGains.clear();
-    timeGains.push_back(TimeGainEntry('%', 0, 1));
-    timeGains.push_back(TimeGainEntry('%', 1, 1));
-    frequencyGains.clear();
-    frequencyGains.push_back(FrequencyGainEntry('%', 0, 1));
-    frequencyGains.push_back(FrequencyGainEntry('%', 1, 1));
-    auto p1 = createPowerMapping(10, 30, GHz(1), MHz(200), W(1));
-    auto p2 = createPowerMapping(20, 40, GHz(1.1), MHz(200), W(10));
-    std::cout << *p1 << std::endl;
-    std::cout << *p2 << std::endl;
-    auto total = add(p1, p2);
-    std::cout << *total << std::endl;
+	std::cout << "testDual2\n";
+    parseTimeGains("left s 0dB either e 0dB right");
+    parseFrequencyGains("left s 0dB either e 0dB right");
+    auto p1 = createPowerFunction(10, 30, GHz(1), MHz(200), W(1));
+    auto p2 = createPowerFunction(20, 40, GHz(1.1), MHz(200), W(10));
+//    std::cout << *p1 << std::endl;
+//    std::cout << *p2 << std::endl;
+    auto result = p1->add(p2);
+//    std::cout << *result << std::endl;
     for (int i = 0; i <= 45; i += 5)
         for (int j = 800; j <= 1250; j += 50)
-            printValue(total, i, MHz(j));
-    std::cout << "Max value: " << MappingUtils::findMax(*total) << std::endl;
+            printValue(result, SimTime(i), MHz(j));
+    printMinMax(result);
+}
+
+void DimensionalTransmitterTest::testDual3()
+{
+	std::cout << "testDual3\n";
+    parseTimeGains("left s 0dB either e 0dB right");
+    parseFrequencyGains("left s 0dB either e 0dB right");
+    auto p1 = createPowerFunction(20, 30, GHz(1.1), MHz(400), W(2));
+    auto p2 = createPowerFunction(10, 40, GHz(1.1), MHz(200), W(10));
+//    std::cout << *p1 << std::endl;
+//    std::cout << *p2 << std::endl;
+    auto result = p1->add(p2);
+//    std::cout << *result << std::endl;
+    for (int i = 0; i <= 45; i += 5)
+        for (int j = 800; j <= 1350; j += 50)
+            printValue(result, SimTime(i), MHz(j));
+    printMinMax(result);
+}
+
+void DimensionalTransmitterTest::testDivide()
+{
+	std::cout << "testDivide\n";
+    parseTimeGains("left s 0dB linear c 0.5 linear e 0dB right");
+    auto p1 = createPowerFunction(10, 30, GHz(1), MHz(200), W(1));
+    auto p2 = createPowerFunction(20, 40, GHz(1), MHz(200), W(10));
+//    std::cout << *p1 << std::endl;
+//    std::cout << *p2 << std::endl;
+    auto result = p1->divide(p2);
+//    std::cout << *result << std::endl;
+    for (int i = 0; i <= 50; i += 1)
+        printValue(result, SimTime(i));
+    Interval<simsec, Hz> i(Point<simsec, Hz>(simsec(20), GHz(0.9)), Point<simsec, Hz>(simsec(30), GHz(1.1)), 0b11, 0b00, 0b00);
+    std::cout << "Min value: " << result->getMin(i) << std::endl;
+    std::cout << "Max value: " << result->getMax(i) << std::endl;
+    std::cout << "Mean value: " << result->getMean(i) << std::endl;
 }
 
 %activity:
@@ -161,253 +183,449 @@ tester.testFrequency1();
 tester.testFrequency2();
 tester.testDual1();
 tester.testDual2();
+tester.testDual3();
+tester.testDivide();
 
 %contains-regex: stdout
-Value at 0: 0
-Value at 5: 0
-Value at 10: 1
-Value at 15: 1
-Value at 20: 1
-Value at 25: 1
+Value at 0: 0 WpHz
+Value at 5: 0 WpHz
+Value at 10: 5e-09 WpHz
+Value at 15: 5e-09 WpHz
+Value at 20: 5e-09 WpHz
+Value at 25: 5e-09 WpHz
+Value at 30: 0 WpHz
+Value at 35: 0 WpHz
+Value at 40: 0 WpHz
+Value at 45: 0 WpHz
+Min value: 0 WpHz
+Max value: 5e-09 WpHz
+Mean value: 0 WpHz
+.*
+Value at 0: 0 WpHz
+Value at 5: 0 WpHz
+Value at 10: 5e-09 WpHz
+Value at 15: 5e-09 WpHz
+Value at 20: 5.5e-08 WpHz
+Value at 25: 5.5e-08 WpHz
+Value at 30: 5e-08 WpHz
+Value at 35: 5e-08 WpHz
+Value at 40: 0 WpHz
+Value at 45: 0 WpHz
+Min value: 0 WpHz
+Max value: 5.5e-08 WpHz
+Mean value: 0 WpHz
+.*
+Value at 800 MHz: 0 WpHz
+Value at 850 MHz: 0 WpHz
+Value at 900 MHz: 5e-09 WpHz
+Value at 950 MHz: 5e-09 WpHz
+Value at 1 GHz: 5e-09 WpHz
+Value at 1.05 GHz: 5e-09 WpHz
+Value at 1.1 GHz: 0 WpHz
+Value at 1.15 GHz: 0 WpHz
+Value at 1.2 GHz: 0 WpHz
+Value at 1.25 GHz: 0 WpHz
+Min value: 0 WpHz
+Max value: 5e-09 WpHz
+Mean value: 0 WpHz
+.*
+Value at 800 MHz: 0 WpHz
+Value at 850 MHz: 0 WpHz
+Value at 900 MHz: 5e-09 WpHz
+Value at 950 MHz: 5e-09 WpHz
+Value at 1 GHz: 5.5e-08 WpHz
+Value at 1.05 GHz: 5.5e-08 WpHz
+Value at 1.1 GHz: 5e-08 WpHz
+Value at 1.15 GHz: 5e-08 WpHz
+Value at 1.2 GHz: 0 WpHz
+Value at 1.25 GHz: 0 WpHz
+Min value: 0 WpHz
+Max value: 5.5e-08 WpHz
+Mean value: 0 WpHz
+.*
+Value at 0 800 MHz: 0 WpHz
+Value at 0 850 MHz: 0 WpHz
+Value at 0 900 MHz: 0 WpHz
+Value at 0 950 MHz: 0 WpHz
+Value at 0 1 GHz: 0 WpHz
+Value at 0 1.05 GHz: 0 WpHz
+Value at 0 1.1 GHz: 0 WpHz
+Value at 0 1.15 GHz: 0 WpHz
+Value at 0 1.2 GHz: 0 WpHz
+Value at 0 1.25 GHz: 0 WpHz
+Value at 5 800 MHz: 0 WpHz
+Value at 5 850 MHz: 0 WpHz
+Value at 5 900 MHz: 0 WpHz
+Value at 5 950 MHz: 0 WpHz
+Value at 5 1 GHz: 0 WpHz
+Value at 5 1.05 GHz: 0 WpHz
+Value at 5 1.1 GHz: 0 WpHz
+Value at 5 1.15 GHz: 0 WpHz
+Value at 5 1.2 GHz: 0 WpHz
+Value at 5 1.25 GHz: 0 WpHz
+Value at 10 800 MHz: 0 WpHz
+Value at 10 850 MHz: 0 WpHz
+Value at 10 900 MHz: 5e-09 WpHz
+Value at 10 950 MHz: 5e-09 WpHz
+Value at 10 1 GHz: 5e-09 WpHz
+Value at 10 1.05 GHz: 5e-09 WpHz
+Value at 10 1.1 GHz: 0 WpHz
+Value at 10 1.15 GHz: 0 WpHz
+Value at 10 1.2 GHz: 0 WpHz
+Value at 10 1.25 GHz: 0 WpHz
+Value at 15 800 MHz: 0 WpHz
+Value at 15 850 MHz: 0 WpHz
+Value at 15 900 MHz: 5e-09 WpHz
+Value at 15 950 MHz: 5e-09 WpHz
+Value at 15 1 GHz: 5e-09 WpHz
+Value at 15 1.05 GHz: 5e-09 WpHz
+Value at 15 1.1 GHz: 0 WpHz
+Value at 15 1.15 GHz: 0 WpHz
+Value at 15 1.2 GHz: 0 WpHz
+Value at 15 1.25 GHz: 0 WpHz
+Value at 20 800 MHz: 0 WpHz
+Value at 20 850 MHz: 0 WpHz
+Value at 20 900 MHz: 5e-09 WpHz
+Value at 20 950 MHz: 5e-09 WpHz
+Value at 20 1 GHz: 5e-09 WpHz
+Value at 20 1.05 GHz: 5e-09 WpHz
+Value at 20 1.1 GHz: 0 WpHz
+Value at 20 1.15 GHz: 0 WpHz
+Value at 20 1.2 GHz: 0 WpHz
+Value at 20 1.25 GHz: 0 WpHz
+Value at 25 800 MHz: 0 WpHz
+Value at 25 850 MHz: 0 WpHz
+Value at 25 900 MHz: 5e-09 WpHz
+Value at 25 950 MHz: 5e-09 WpHz
+Value at 25 1 GHz: 5e-09 WpHz
+Value at 25 1.05 GHz: 5e-09 WpHz
+Value at 25 1.1 GHz: 0 WpHz
+Value at 25 1.15 GHz: 0 WpHz
+Value at 25 1.2 GHz: 0 WpHz
+Value at 25 1.25 GHz: 0 WpHz
+Value at 30 800 MHz: 0 WpHz
+Value at 30 850 MHz: 0 WpHz
+Value at 30 900 MHz: 0 WpHz
+Value at 30 950 MHz: 0 WpHz
+Value at 30 1 GHz: 0 WpHz
+Value at 30 1.05 GHz: 0 WpHz
+Value at 30 1.1 GHz: 0 WpHz
+Value at 30 1.15 GHz: 0 WpHz
+Value at 30 1.2 GHz: 0 WpHz
+Value at 30 1.25 GHz: 0 WpHz
+Value at 35 800 MHz: 0 WpHz
+Value at 35 850 MHz: 0 WpHz
+Value at 35 900 MHz: 0 WpHz
+Value at 35 950 MHz: 0 WpHz
+Value at 35 1 GHz: 0 WpHz
+Value at 35 1.05 GHz: 0 WpHz
+Value at 35 1.1 GHz: 0 WpHz
+Value at 35 1.15 GHz: 0 WpHz
+Value at 35 1.2 GHz: 0 WpHz
+Value at 35 1.25 GHz: 0 WpHz
+Value at 40 800 MHz: 0 WpHz
+Value at 40 850 MHz: 0 WpHz
+Value at 40 900 MHz: 0 WpHz
+Value at 40 950 MHz: 0 WpHz
+Value at 40 1 GHz: 0 WpHz
+Value at 40 1.05 GHz: 0 WpHz
+Value at 40 1.1 GHz: 0 WpHz
+Value at 40 1.15 GHz: 0 WpHz
+Value at 40 1.2 GHz: 0 WpHz
+Value at 40 1.25 GHz: 0 WpHz
+Value at 45 800 MHz: 0 WpHz
+Value at 45 850 MHz: 0 WpHz
+Value at 45 900 MHz: 0 WpHz
+Value at 45 950 MHz: 0 WpHz
+Value at 45 1 GHz: 0 WpHz
+Value at 45 1.05 GHz: 0 WpHz
+Value at 45 1.1 GHz: 0 WpHz
+Value at 45 1.15 GHz: 0 WpHz
+Value at 45 1.2 GHz: 0 WpHz
+Value at 45 1.25 GHz: 0 WpHz
+Min value: 0 WpHz
+Max value: 5e-09 WpHz
+Mean value: 0 WpHz
+.*
+Value at 0 800 MHz: 0 WpHz
+Value at 0 850 MHz: 0 WpHz
+Value at 0 900 MHz: 0 WpHz
+Value at 0 950 MHz: 0 WpHz
+Value at 0 1 GHz: 0 WpHz
+Value at 0 1.05 GHz: 0 WpHz
+Value at 0 1.1 GHz: 0 WpHz
+Value at 0 1.15 GHz: 0 WpHz
+Value at 0 1.2 GHz: 0 WpHz
+Value at 0 1.25 GHz: 0 WpHz
+Value at 5 800 MHz: 0 WpHz
+Value at 5 850 MHz: 0 WpHz
+Value at 5 900 MHz: 0 WpHz
+Value at 5 950 MHz: 0 WpHz
+Value at 5 1 GHz: 0 WpHz
+Value at 5 1.05 GHz: 0 WpHz
+Value at 5 1.1 GHz: 0 WpHz
+Value at 5 1.15 GHz: 0 WpHz
+Value at 5 1.2 GHz: 0 WpHz
+Value at 5 1.25 GHz: 0 WpHz
+Value at 10 800 MHz: 0 WpHz
+Value at 10 850 MHz: 0 WpHz
+Value at 10 900 MHz: 5e-09 WpHz
+Value at 10 950 MHz: 5e-09 WpHz
+Value at 10 1 GHz: 5e-09 WpHz
+Value at 10 1.05 GHz: 5e-09 WpHz
+Value at 10 1.1 GHz: 0 WpHz
+Value at 10 1.15 GHz: 0 WpHz
+Value at 10 1.2 GHz: 0 WpHz
+Value at 10 1.25 GHz: 0 WpHz
+Value at 15 800 MHz: 0 WpHz
+Value at 15 850 MHz: 0 WpHz
+Value at 15 900 MHz: 5e-09 WpHz
+Value at 15 950 MHz: 5e-09 WpHz
+Value at 15 1 GHz: 5e-09 WpHz
+Value at 15 1.05 GHz: 5e-09 WpHz
+Value at 15 1.1 GHz: 0 WpHz
+Value at 15 1.15 GHz: 0 WpHz
+Value at 15 1.2 GHz: 0 WpHz
+Value at 15 1.25 GHz: 0 WpHz
+Value at 20 800 MHz: 0 WpHz
+Value at 20 850 MHz: 0 WpHz
+Value at 20 900 MHz: 5e-09 WpHz
+Value at 20 950 MHz: 5e-09 WpHz
+Value at 20 1 GHz: 5.5e-08 WpHz
+Value at 20 1.05 GHz: 5.5e-08 WpHz
+Value at 20 1.1 GHz: 5e-08 WpHz
+Value at 20 1.15 GHz: 5e-08 WpHz
+Value at 20 1.2 GHz: 0 WpHz
+Value at 20 1.25 GHz: 0 WpHz
+Value at 25 800 MHz: 0 WpHz
+Value at 25 850 MHz: 0 WpHz
+Value at 25 900 MHz: 5e-09 WpHz
+Value at 25 950 MHz: 5e-09 WpHz
+Value at 25 1 GHz: 5.5e-08 WpHz
+Value at 25 1.05 GHz: 5.5e-08 WpHz
+Value at 25 1.1 GHz: 5e-08 WpHz
+Value at 25 1.15 GHz: 5e-08 WpHz
+Value at 25 1.2 GHz: 0 WpHz
+Value at 25 1.25 GHz: 0 WpHz
+Value at 30 800 MHz: 0 WpHz
+Value at 30 850 MHz: 0 WpHz
+Value at 30 900 MHz: 0 WpHz
+Value at 30 950 MHz: 0 WpHz
+Value at 30 1 GHz: 5e-08 WpHz
+Value at 30 1.05 GHz: 5e-08 WpHz
+Value at 30 1.1 GHz: 5e-08 WpHz
+Value at 30 1.15 GHz: 5e-08 WpHz
+Value at 30 1.2 GHz: 0 WpHz
+Value at 30 1.25 GHz: 0 WpHz
+Value at 35 800 MHz: 0 WpHz
+Value at 35 850 MHz: 0 WpHz
+Value at 35 900 MHz: 0 WpHz
+Value at 35 950 MHz: 0 WpHz
+Value at 35 1 GHz: 5e-08 WpHz
+Value at 35 1.05 GHz: 5e-08 WpHz
+Value at 35 1.1 GHz: 5e-08 WpHz
+Value at 35 1.15 GHz: 5e-08 WpHz
+Value at 35 1.2 GHz: 0 WpHz
+Value at 35 1.25 GHz: 0 WpHz
+Value at 40 800 MHz: 0 WpHz
+Value at 40 850 MHz: 0 WpHz
+Value at 40 900 MHz: 0 WpHz
+Value at 40 950 MHz: 0 WpHz
+Value at 40 1 GHz: 0 WpHz
+Value at 40 1.05 GHz: 0 WpHz
+Value at 40 1.1 GHz: 0 WpHz
+Value at 40 1.15 GHz: 0 WpHz
+Value at 40 1.2 GHz: 0 WpHz
+Value at 40 1.25 GHz: 0 WpHz
+Value at 45 800 MHz: 0 WpHz
+Value at 45 850 MHz: 0 WpHz
+Value at 45 900 MHz: 0 WpHz
+Value at 45 950 MHz: 0 WpHz
+Value at 45 1 GHz: 0 WpHz
+Value at 45 1.05 GHz: 0 WpHz
+Value at 45 1.1 GHz: 0 WpHz
+Value at 45 1.15 GHz: 0 WpHz
+Value at 45 1.2 GHz: 0 WpHz
+Value at 45 1.25 GHz: 0 WpHz
+Min value: 0 WpHz
+Max value: 5.5e-08 WpHz
+Mean value: 0 WpHz
+.*
+Value at 0 800 MHz: 0 WpHz
+Value at 0 850 MHz: 0 WpHz
+Value at 0 900 MHz: 0 WpHz
+Value at 0 950 MHz: 0 WpHz
+Value at 0 1 GHz: 0 WpHz
+Value at 0 1.05 GHz: 0 WpHz
+Value at 0 1.1 GHz: 0 WpHz
+Value at 0 1.15 GHz: 0 WpHz
+Value at 0 1.2 GHz: 0 WpHz
+Value at 0 1.25 GHz: 0 WpHz
+Value at 0 1.3 GHz: 0 WpHz
+Value at 0 1.35 GHz: 0 WpHz
+Value at 5 800 MHz: 0 WpHz
+Value at 5 850 MHz: 0 WpHz
+Value at 5 900 MHz: 0 WpHz
+Value at 5 950 MHz: 0 WpHz
+Value at 5 1 GHz: 0 WpHz
+Value at 5 1.05 GHz: 0 WpHz
+Value at 5 1.1 GHz: 0 WpHz
+Value at 5 1.15 GHz: 0 WpHz
+Value at 5 1.2 GHz: 0 WpHz
+Value at 5 1.25 GHz: 0 WpHz
+Value at 5 1.3 GHz: 0 WpHz
+Value at 5 1.35 GHz: 0 WpHz
+Value at 10 800 MHz: 0 WpHz
+Value at 10 850 MHz: 0 WpHz
+Value at 10 900 MHz: 0 WpHz
+Value at 10 950 MHz: 0 WpHz
+Value at 10 1 GHz: 5e-08 WpHz
+Value at 10 1.05 GHz: 5e-08 WpHz
+Value at 10 1.1 GHz: 5e-08 WpHz
+Value at 10 1.15 GHz: 5e-08 WpHz
+Value at 10 1.2 GHz: 0 WpHz
+Value at 10 1.25 GHz: 0 WpHz
+Value at 10 1.3 GHz: 0 WpHz
+Value at 10 1.35 GHz: 0 WpHz
+Value at 15 800 MHz: 0 WpHz
+Value at 15 850 MHz: 0 WpHz
+Value at 15 900 MHz: 0 WpHz
+Value at 15 950 MHz: 0 WpHz
+Value at 15 1 GHz: 5e-08 WpHz
+Value at 15 1.05 GHz: 5e-08 WpHz
+Value at 15 1.1 GHz: 5e-08 WpHz
+Value at 15 1.15 GHz: 5e-08 WpHz
+Value at 15 1.2 GHz: 0 WpHz
+Value at 15 1.25 GHz: 0 WpHz
+Value at 15 1.3 GHz: 0 WpHz
+Value at 15 1.35 GHz: 0 WpHz
+Value at 20 800 MHz: 0 WpHz
+Value at 20 850 MHz: 0 WpHz
+Value at 20 900 MHz: 5e-09 WpHz
+Value at 20 950 MHz: 5e-09 WpHz
+Value at 20 1 GHz: 5.5e-08 WpHz
+Value at 20 1.05 GHz: 5.5e-08 WpHz
+Value at 20 1.1 GHz: 5.5e-08 WpHz
+Value at 20 1.15 GHz: 5.5e-08 WpHz
+Value at 20 1.2 GHz: 5e-09 WpHz
+Value at 20 1.25 GHz: 5e-09 WpHz
+Value at 20 1.3 GHz: 0 WpHz
+Value at 20 1.35 GHz: 0 WpHz
+Value at 25 800 MHz: 0 WpHz
+Value at 25 850 MHz: 0 WpHz
+Value at 25 900 MHz: 5e-09 WpHz
+Value at 25 950 MHz: 5e-09 WpHz
+Value at 25 1 GHz: 5.5e-08 WpHz
+Value at 25 1.05 GHz: 5.5e-08 WpHz
+Value at 25 1.1 GHz: 5.5e-08 WpHz
+Value at 25 1.15 GHz: 5.5e-08 WpHz
+Value at 25 1.2 GHz: 5e-09 WpHz
+Value at 25 1.25 GHz: 5e-09 WpHz
+Value at 25 1.3 GHz: 0 WpHz
+Value at 25 1.35 GHz: 0 WpHz
+Value at 30 800 MHz: 0 WpHz
+Value at 30 850 MHz: 0 WpHz
+Value at 30 900 MHz: 0 WpHz
+Value at 30 950 MHz: 0 WpHz
+Value at 30 1 GHz: 5e-08 WpHz
+Value at 30 1.05 GHz: 5e-08 WpHz
+Value at 30 1.1 GHz: 5e-08 WpHz
+Value at 30 1.15 GHz: 5e-08 WpHz
+Value at 30 1.2 GHz: 0 WpHz
+Value at 30 1.25 GHz: 0 WpHz
+Value at 30 1.3 GHz: 0 WpHz
+Value at 30 1.35 GHz: 0 WpHz
+Value at 35 800 MHz: 0 WpHz
+Value at 35 850 MHz: 0 WpHz
+Value at 35 900 MHz: 0 WpHz
+Value at 35 950 MHz: 0 WpHz
+Value at 35 1 GHz: 5e-08 WpHz
+Value at 35 1.05 GHz: 5e-08 WpHz
+Value at 35 1.1 GHz: 5e-08 WpHz
+Value at 35 1.15 GHz: 5e-08 WpHz
+Value at 35 1.2 GHz: 0 WpHz
+Value at 35 1.25 GHz: 0 WpHz
+Value at 35 1.3 GHz: 0 WpHz
+Value at 35 1.35 GHz: 0 WpHz
+Value at 40 800 MHz: 0 WpHz
+Value at 40 850 MHz: 0 WpHz
+Value at 40 900 MHz: 0 WpHz
+Value at 40 950 MHz: 0 WpHz
+Value at 40 1 GHz: 0 WpHz
+Value at 40 1.05 GHz: 0 WpHz
+Value at 40 1.1 GHz: 0 WpHz
+Value at 40 1.15 GHz: 0 WpHz
+Value at 40 1.2 GHz: 0 WpHz
+Value at 40 1.25 GHz: 0 WpHz
+Value at 40 1.3 GHz: 0 WpHz
+Value at 40 1.35 GHz: 0 WpHz
+Value at 45 800 MHz: 0 WpHz
+Value at 45 850 MHz: 0 WpHz
+Value at 45 900 MHz: 0 WpHz
+Value at 45 950 MHz: 0 WpHz
+Value at 45 1 GHz: 0 WpHz
+Value at 45 1.05 GHz: 0 WpHz
+Value at 45 1.1 GHz: 0 WpHz
+Value at 45 1.15 GHz: 0 WpHz
+Value at 45 1.2 GHz: 0 WpHz
+Value at 45 1.25 GHz: 0 WpHz
+Value at 45 1.3 GHz: 0 WpHz
+Value at 45 1.35 GHz: 0 WpHz
+Min value: 0 WpHz
+Max value: 5.5e-08 WpHz
+Mean value: 0 WpHz
+.*
+Value at 0: -nan
+Value at 1: -nan
+Value at 2: -nan
+Value at 3: -nan
+Value at 4: -nan
+Value at 5: -nan
+Value at 6: -nan
+Value at 7: -nan
+Value at 8: -nan
+Value at 9: -nan
+Value at 10: inf
+Value at 11: inf
+Value at 12: inf
+Value at 13: inf
+Value at 14: inf
+Value at 15: inf
+Value at 16: inf
+Value at 17: inf
+Value at 18: inf
+Value at 19: inf
+Value at 20: 0.05
+Value at 21: 0.0578947
+Value at 22: 0.0666667
+Value at 23: 0.0764706
+Value at 24: 0.0875
+Value at 25: 0.1
+Value at 26: 0.114286
+Value at 27: 0.130769
+Value at 28: 0.15
+Value at 29: 0.172727
 Value at 30: 0
+Value at 31: 0
+Value at 32: 0
+Value at 33: 0
+Value at 34: 0
 Value at 35: 0
-Value at 40: 0
-Value at 45: 0
-.*
-Value at 0: 0
-Value at 5: 0
-Value at 10: 1
-Value at 15: 1
-Value at 20: 11
-Value at 25: 11
-Value at 30: 10
-Value at 35: 10
-Value at 40: 0
-Value at 45: 0
-Max value: 11
-.*
-Value at 800 MHz: 0
-Value at 850 MHz: 0
-Value at 900 MHz: 1
-Value at 950 MHz: 1
-Value at 1 GHz: 1
-Value at 1.05 GHz: 1
-Value at 1.1 GHz: 0
-Value at 1.15 GHz: 0
-Value at 1.2 GHz: 0
-Value at 1.25 GHz: 0
-.*
-Value at 800 MHz: 0
-Value at 850 MHz: 0
-Value at 900 MHz: 1
-Value at 950 MHz: 1
-Value at 1 GHz: 11
-Value at 1.05 GHz: 11
-Value at 1.1 GHz: 10
-Value at 1.15 GHz: 10
-Value at 1.2 GHz: 0
-Value at 1.25 GHz: 0
-Max value: 11
-.*
-Value at 0 800 MHz: 0
-Value at 0 850 MHz: 0
-Value at 0 900 MHz: 0
-Value at 0 950 MHz: 0
-Value at 0 1 GHz: 0
-Value at 0 1.05 GHz: 0
-Value at 0 1.1 GHz: 0
-Value at 0 1.15 GHz: 0
-Value at 0 1.2 GHz: 0
-Value at 0 1.25 GHz: 0
-Value at 5 800 MHz: 0
-Value at 5 850 MHz: 0
-Value at 5 900 MHz: 0
-Value at 5 950 MHz: 0
-Value at 5 1 GHz: 0
-Value at 5 1.05 GHz: 0
-Value at 5 1.1 GHz: 0
-Value at 5 1.15 GHz: 0
-Value at 5 1.2 GHz: 0
-Value at 5 1.25 GHz: 0
-Value at 10 800 MHz: 0
-Value at 10 850 MHz: 0
-Value at 10 900 MHz: 1
-Value at 10 950 MHz: 1
-Value at 10 1 GHz: 1
-Value at 10 1.05 GHz: 1
-Value at 10 1.1 GHz: 0
-Value at 10 1.15 GHz: 0
-Value at 10 1.2 GHz: 0
-Value at 10 1.25 GHz: 0
-Value at 15 800 MHz: 0
-Value at 15 850 MHz: 0
-Value at 15 900 MHz: 1
-Value at 15 950 MHz: 1
-Value at 15 1 GHz: 1
-Value at 15 1.05 GHz: 1
-Value at 15 1.1 GHz: 0
-Value at 15 1.15 GHz: 0
-Value at 15 1.2 GHz: 0
-Value at 15 1.25 GHz: 0
-Value at 20 800 MHz: 0
-Value at 20 850 MHz: 0
-Value at 20 900 MHz: 1
-Value at 20 950 MHz: 1
-Value at 20 1 GHz: 1
-Value at 20 1.05 GHz: 1
-Value at 20 1.1 GHz: 0
-Value at 20 1.15 GHz: 0
-Value at 20 1.2 GHz: 0
-Value at 20 1.25 GHz: 0
-Value at 25 800 MHz: 0
-Value at 25 850 MHz: 0
-Value at 25 900 MHz: 1
-Value at 25 950 MHz: 1
-Value at 25 1 GHz: 1
-Value at 25 1.05 GHz: 1
-Value at 25 1.1 GHz: 0
-Value at 25 1.15 GHz: 0
-Value at 25 1.2 GHz: 0
-Value at 25 1.25 GHz: 0
-Value at 30 800 MHz: 0
-Value at 30 850 MHz: 0
-Value at 30 900 MHz: 0
-Value at 30 950 MHz: 0
-Value at 30 1 GHz: 0
-Value at 30 1.05 GHz: 0
-Value at 30 1.1 GHz: 0
-Value at 30 1.15 GHz: 0
-Value at 30 1.2 GHz: 0
-Value at 30 1.25 GHz: 0
-Value at 35 800 MHz: 0
-Value at 35 850 MHz: 0
-Value at 35 900 MHz: 0
-Value at 35 950 MHz: 0
-Value at 35 1 GHz: 0
-Value at 35 1.05 GHz: 0
-Value at 35 1.1 GHz: 0
-Value at 35 1.15 GHz: 0
-Value at 35 1.2 GHz: 0
-Value at 35 1.25 GHz: 0
-Value at 40 800 MHz: 0
-Value at 40 850 MHz: 0
-Value at 40 900 MHz: 0
-Value at 40 950 MHz: 0
-Value at 40 1 GHz: 0
-Value at 40 1.05 GHz: 0
-Value at 40 1.1 GHz: 0
-Value at 40 1.15 GHz: 0
-Value at 40 1.2 GHz: 0
-Value at 40 1.25 GHz: 0
-Value at 45 800 MHz: 0
-Value at 45 850 MHz: 0
-Value at 45 900 MHz: 0
-Value at 45 950 MHz: 0
-Value at 45 1 GHz: 0
-Value at 45 1.05 GHz: 0
-Value at 45 1.1 GHz: 0
-Value at 45 1.15 GHz: 0
-Value at 45 1.2 GHz: 0
-Value at 45 1.25 GHz: 0
-.*
-Value at 0 800 MHz: 0
-Value at 0 850 MHz: 0
-Value at 0 900 MHz: 0
-Value at 0 950 MHz: 0
-Value at 0 1 GHz: 0
-Value at 0 1.05 GHz: 0
-Value at 0 1.1 GHz: 0
-Value at 0 1.15 GHz: 0
-Value at 0 1.2 GHz: 0
-Value at 0 1.25 GHz: 0
-Value at 5 800 MHz: 0
-Value at 5 850 MHz: 0
-Value at 5 900 MHz: 0
-Value at 5 950 MHz: 0
-Value at 5 1 GHz: 0
-Value at 5 1.05 GHz: 0
-Value at 5 1.1 GHz: 0
-Value at 5 1.15 GHz: 0
-Value at 5 1.2 GHz: 0
-Value at 5 1.25 GHz: 0
-Value at 10 800 MHz: 0
-Value at 10 850 MHz: 0
-Value at 10 900 MHz: 1
-Value at 10 950 MHz: 1
-Value at 10 1 GHz: 1
-Value at 10 1.05 GHz: 1
-Value at 10 1.1 GHz: 0
-Value at 10 1.15 GHz: 0
-Value at 10 1.2 GHz: 0
-Value at 10 1.25 GHz: 0
-Value at 15 800 MHz: 0
-Value at 15 850 MHz: 0
-Value at 15 900 MHz: 1
-Value at 15 950 MHz: 1
-Value at 15 1 GHz: 1
-Value at 15 1.05 GHz: 1
-Value at 15 1.1 GHz: 0
-Value at 15 1.15 GHz: 0
-Value at 15 1.2 GHz: 0
-Value at 15 1.25 GHz: 0
-Value at 20 800 MHz: 0
-Value at 20 850 MHz: 0
-Value at 20 900 MHz: 1
-Value at 20 950 MHz: 1
-Value at 20 1 GHz: 11
-Value at 20 1.05 GHz: 11
-Value at 20 1.1 GHz: 10
-Value at 20 1.15 GHz: 10
-Value at 20 1.2 GHz: 0
-Value at 20 1.25 GHz: 0
-Value at 25 800 MHz: 0
-Value at 25 850 MHz: 0
-Value at 25 900 MHz: 1
-Value at 25 950 MHz: 1
-Value at 25 1 GHz: 11
-Value at 25 1.05 GHz: 11
-Value at 25 1.1 GHz: 10
-Value at 25 1.15 GHz: 10
-Value at 25 1.2 GHz: 0
-Value at 25 1.25 GHz: 0
-Value at 30 800 MHz: 0
-Value at 30 850 MHz: 0
-Value at 30 900 MHz: 0
-Value at 30 950 MHz: 0
-Value at 30 1 GHz: 10
-Value at 30 1.05 GHz: 10
-Value at 30 1.1 GHz: 10
-Value at 30 1.15 GHz: 10
-Value at 30 1.2 GHz: 0
-Value at 30 1.25 GHz: 0
-Value at 35 800 MHz: 0
-Value at 35 850 MHz: 0
-Value at 35 900 MHz: 0
-Value at 35 950 MHz: 0
-Value at 35 1 GHz: 10
-Value at 35 1.05 GHz: 10
-Value at 35 1.1 GHz: 10
-Value at 35 1.15 GHz: 10
-Value at 35 1.2 GHz: 0
-Value at 35 1.25 GHz: 0
-Value at 40 800 MHz: 0
-Value at 40 850 MHz: 0
-Value at 40 900 MHz: 0
-Value at 40 950 MHz: 0
-Value at 40 1 GHz: 0
-Value at 40 1.05 GHz: 0
-Value at 40 1.1 GHz: 0
-Value at 40 1.15 GHz: 0
-Value at 40 1.2 GHz: 0
-Value at 40 1.25 GHz: 0
-Value at 45 800 MHz: 0
-Value at 45 850 MHz: 0
-Value at 45 900 MHz: 0
-Value at 45 950 MHz: 0
-Value at 45 1 GHz: 0
-Value at 45 1.05 GHz: 0
-Value at 45 1.1 GHz: 0
-Value at 45 1.15 GHz: 0
-Value at 45 1.2 GHz: 0
-Value at 45 1.25 GHz: 0
-Max value: 11
+Value at 36: 0
+Value at 37: 0
+Value at 38: 0
+Value at 39: 0
+Value at 40: -nan
+Value at 41: -nan
+Value at 42: -nan
+Value at 43: -nan
+Value at 44: -nan
+Value at 45: -nan
+Value at 46: -nan
+Value at 47: -nan
+Value at 48: -nan
+Value at 49: -nan
+Value at 50: -nan
+Min value: 0.05
+Max value: 0.2
+Mean value: 0.107944

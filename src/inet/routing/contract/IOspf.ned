@@ -25,7 +25,7 @@ moduleinterface IOspf
     parameters:
         @display("i=block/network");
     gates:
-        input ipIn @labels(Ipv4ControlInfo/up);
-        output ipOut @labels(Ipv4ControlInfo/down);
+        input ipIn @labels(Ipv4ControlInfo/up,Ipv6ControlInfo/up);
+        output ipOut @labels(Ipv4ControlInfo/down,Ipv6ControlInfo/down);
 }
 

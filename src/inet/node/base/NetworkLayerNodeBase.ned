@@ -81,11 +81,6 @@ module NetworkLayerNodeBase extends LinkLayerNodeBase
             ppp[i].upperLayerIn <-- nl.out++;
         }
 
-        for i=0..numExtInterfaces-1 {
-            ext[i].upperLayerOut --> nl.in++;
-            ext[i].upperLayerIn <-- nl.out++;
-        }
-
         for i=0..numTunInterfaces-1 {
             tun[i].upperLayerOut --> nl.in++;
             tun[i].upperLayerIn <-- nl.out++;

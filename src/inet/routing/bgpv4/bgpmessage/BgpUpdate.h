@@ -21,24 +21,11 @@
 #include "inet/routing/bgpv4/bgpmessage/BgpHeader_m.h"
 
 namespace inet {
-
 namespace bgp {
 
-class INET_API BgpUpdateMessage : public BgpUpdateMessage_Base
-{
-  protected:
-    unsigned short computePathAttributesBytes(const BgpUpdatePathAttributeList& pathAttrs);
-
-  public:
-    BgpUpdateMessage() : BgpUpdateMessage_Base() {}
-    virtual BgpUpdateMessage *dup() const override { return new BgpUpdateMessage(*this); }
-    void setWithdrawnRoutesArraySize(size_t size) override;
-    void setPathAttributeList(const BgpUpdatePathAttributeList& pathAttributeList_var);
-    void setNLRI(const BgpUpdateNlri& NLRI_var) override;
-};
+INET_API unsigned short computePathAttributeBytes(const BgpUpdatePathAttributes& pathAttr);
 
 } // namespace bgp
-
 } // namespace inet
 
 #endif // ifndef __INET_BGPUPDATE_H

@@ -30,7 +30,7 @@ class INET_API NarrowbandReceiverBase : public SnirReceiverBase
 {
   protected:
     const IModulation *modulation;
-    Hz carrierFrequency;
+    Hz centerFrequency;
     Hz bandwidth;
 
   protected:
@@ -51,8 +51,8 @@ class INET_API NarrowbandReceiverBase : public SnirReceiverBase
     virtual const IModulation *getModulation() const { return modulation; }
     virtual void setModulation(const IModulation *modulation) { this->modulation = modulation; }
 
-    virtual Hz getCarrierFrequency() const { return carrierFrequency; }
-    virtual void setCarrierFrequency(Hz carrierFrequency) { this->carrierFrequency = carrierFrequency; }
+    virtual Hz getCenterFrequency() const { return centerFrequency; }
+    virtual void setCenterFrequency(Hz centerFrequency) { this->centerFrequency = centerFrequency; }
 
     virtual Hz getBandwidth() const { return bandwidth; }
     virtual void setBandwidth(Hz bandwidth) { this->bandwidth = bandwidth; }

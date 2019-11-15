@@ -15,10 +15,10 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-#include "inet/common/queueing/PacketClassifierFunction.h"
-#include "inet/common/queueing/PacketComparatorFunction.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "inet/queueing/function/PacketClassifierFunction.h"
+#include "inet/queueing/function/PacketComparatorFunction.h"
 
 namespace inet {
 namespace ieee80211 {

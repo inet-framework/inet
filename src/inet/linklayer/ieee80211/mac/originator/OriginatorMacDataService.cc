@@ -55,6 +55,7 @@ std::vector<Packet *> *OriginatorMacDataService::extractFramesToTransmit(queuein
         // if (msduRateLimiting)
         //    txRateLimitingIfNeeded();
         Packet *packet = pendingQueue->popPacket();
+        take(packet);
         if (sequenceNumberAssigment) {
             auto frame = packet->removeAtFront<Ieee80211DataOrMgmtHeader>();
             assignSequenceNumber(frame);

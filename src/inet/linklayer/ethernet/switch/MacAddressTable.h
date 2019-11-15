@@ -17,25 +17,30 @@
 #ifndef __INET_MACADDRESSTABLE_H
 #define __INET_MACADDRESSTABLE_H
 
+#include "inet/common/lifecycle/ModuleOperations.h"
+#include "inet/common/lifecycle/OperationalBase.h"
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/linklayer/ethernet/switch/IMacAddressTable.h"
+#include "inet/networklayer/common/InterfaceTable.h"
 
 namespace inet {
 
 /**
- * This module handles the mapping between ports and MAC addresses. See the NED definition for details.
+ * This module handles the mapping between interface IDs and MAC addresses. See the NED definition for details.
+ * NOTE that interfaceIds (interfaceId parameters) are actually the corresponding ID of the port interface.
+ * i.e. this is an interfaceId and NOT an index of the some kind in a gate vector.
  */
-class INET_API MacAddressTable : public cSimpleModule, public IMacAddressTable
+class INET_API MacAddressTable : public OperationalBase, public IMacAddressTable
 {
   protected:
     struct AddressEntry
     {
         unsigned int vid = 0;    // VLAN ID
-        int portno = -1;    // Input port
+        int interfaceId = -1;    // Input interface ID
         simtime_t insertionTime;    // Arrival time of Lookup Address Table entry
         AddressEntry() {}
-        AddressEntry(unsigned int vid, int portno, simtime_t insertionTime) :
-            vid(vid), portno(portno), insertionTime(insertionTime) {}
+        AddressEntry(unsigned int vid, int interfaceId, simtime_t insertionTime) :
+            vid(vid), interfaceId(interfaceId), insertionTime(insertionTime) {}
     };
 
     friend std::ostream& operator<<(std::ostream& os, const AddressEntry& entry);
@@ -51,12 +56,15 @@ class INET_API MacAddressTable : public cSimpleModule, public IMacAddressTable
     simtime_t agingTime;    // Max idle time for address table entries
     simtime_t lastPurge;    // Time of the last call of removeAgedEntriesFromAllVlans()
     AddressTable *addressTable = nullptr;    // VLAN-unaware address lookup (vid = 0)
+    IInterfaceTable *ifTable = nullptr;
     VlanAddressTable vlanAddressTable;    // VLAN-aware address lookup
 
   protected:
 
-    virtual void initialize() override;
+    virtual void initialize(int stage) override;
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void handleMessage(cMessage *msg) override;
+    virtual void handleMessageWhenUp(cMessage *msg) override;
     virtual void refreshDisplay() const override;
     virtual void updateDisplayString() const;
 
@@ -74,24 +82,24 @@ class INET_API MacAddressTable : public cSimpleModule, public IMacAddressTable
     // Table management
 
     /**
-     * @brief For a known arriving port, V-TAG and destination MAC. It finds out the port where relay component should deliver the message
+     * @brief For a known arriving interfaceId, V-TAG and destination MAC. It finds out the interfaceId where relay component should deliver the message
      * @param address MAC destination
      * @param vid VLAN ID
-     * @return Output port for address, or -1 if unknown.
+     * @return Output interfaceId for address, or -1 if unknown.
      */
-    virtual int getPortForAddress(const MacAddress& address, unsigned int vid = 0) override;
+    virtual int getInterfaceIdForAddress(const MacAddress& address, unsigned int vid = 0) override;
 
     /**
      * @brief Register a new MAC address at AddressTable.
      * @return True if refreshed. False if it is new.
      */
-    virtual bool updateTableWithAddress(int portno, const MacAddress& address, unsigned int vid = 0) override;
+    virtual bool updateTableWithAddress(int interfaceId, const MacAddress& address, unsigned int vid = 0) override;
 
     /**
-     *  @brief Clears portno cache
+     *  @brief Clears interfaceId cache
      */
     // TODO: find a better name
-    virtual void flush(int portno) override;
+    virtual void flush(int interfaceId) override;
 
     /**
      *  @brief Prints cached data
@@ -99,9 +107,9 @@ class INET_API MacAddressTable : public cSimpleModule, public IMacAddressTable
     virtual void printState() override;
 
     /**
-     * @brief Copy cache from portA to portB port
+     * @brief Copy cache from interfaceIdA to interfaceIdB interface
      */
-    virtual void copyTable(int portA, int portB) override;
+    virtual void copyTable(int interfaceIdA, int interfaceIdB) override;
 
     /**
      * @brief Remove aged entries from a specified VLAN
@@ -124,6 +132,11 @@ class INET_API MacAddressTable : public cSimpleModule, public IMacAddressTable
     virtual void readAddressTable(const char *fileName) override;
 
     /**
+     * For lifecycle: initialize entries for the vlanAddressTable by reading them from a file (if specified by a parameter)
+     */
+    virtual void initializeTable() override;
+
+    /**
      * For lifecycle: clears all entries from the vlanAddressTable.
      */
     virtual void clearTable() override;
@@ -133,6 +146,15 @@ class INET_API MacAddressTable : public cSimpleModule, public IMacAddressTable
      */
     virtual void setAgingTime(simtime_t agingTime) override;
     virtual void resetDefaultAging() override;
+
+    //@{ For lifecycle
+    virtual void handleStartOperation(LifecycleOperation *operation) override { initializeTable(); }
+    virtual void handleStopOperation(LifecycleOperation *operation) override { clearTable(); }
+    virtual void handleCrashOperation(LifecycleOperation *operation) override { clearTable(); }
+    virtual bool isInitializeStage(int stage) override { return stage == INITSTAGE_LINK_LAYER; }
+    virtual bool isModuleStartStage(int stage) override { return stage == ModuleStartOperation::STAGE_LINK_LAYER; }
+    virtual bool isModuleStopStage(int stage) override { return stage == ModuleStopOperation::STAGE_LINK_LAYER; }
+    //@}
 };
 
 } // namespace inet

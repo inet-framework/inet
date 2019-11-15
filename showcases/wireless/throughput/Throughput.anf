@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scave:Analysis xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:scave="http://www.omnetpp.org/omnetpp/scave">
+  <inputs>
+    <inputs name="/inet/showcases/wireless/throughput/General-*.sca"/>
+    <inputs name="/inet/showcases/wireless/throughput/results/General-*.sca"/>
+  </inputs>
+  <datasets>
+    <datasets name="computed">
+      <items xsi:type="scave:Add" filterPattern="computedthroughput"/>
+      <items xsi:type="scave:Add" filterPattern="bitrate or packetLength"/>
+      <items xsi:type="scave:Add" filterPattern="module(Throughput.destinationHost.app[0]) AND name(&quot;packetReceived:sum(packetBytes)&quot;)"/>
+      <items xsi:type="scave:ComputeScalar" scalarName="analyticalThroughput_mbps" valueExpr="'computedthroughput'/1000000" moduleExpr="" groupByExpr=""/>
+      <items xsi:type="scave:ComputeScalar" scalarName="throughput_mbps" valueExpr="'packetReceived:sum(packetBytes)'/1*8/1000000" moduleExpr="" groupByExpr=""/>
+      <items xsi:type="scave:ScatterChart" name="Analytical vs Simulated" xDataPattern="module(_runattrs_) AND name(bitrate)" averageReplications="false">
+        <filters xsi:type="scave:Select" filterPattern="analyticalThroughput_mbps OR throughput_mbps OR bitrate OR packetLength"/>
+        <properties name="Graph.Title" value="Analytical vs simulated throughput"/>
+        <properties name="X.Axis.Title" value="Bitrate [Mbps]"/>
+        <properties name="Y.Axis.Title" value="Throughput [Mbps]"/>
+        <properties name="Y.Axis.Max" value="54.0"/>
+        <properties name="Legend.Display" value="true"/>
+        <properties name="Line.Name/Throughput.destinationHost.udpApp[0] computedthroughput_mbps - configname=Computed" value="Computed"/>
+        <properties name="Line.Name/Throughput.destinationHost.udpApp[0] throughput_mbps - configname=General" value="Simulated"/>
+        <properties name="Line.Name/Throughput computedthroughput_mbps - configname=General" value="Analytical"/>
+        <properties name="Line.Name/Throughput computedthroughput_mbps - configname=Computed" value="Analytical"/>
+        <properties name="Line.Name/Throughput computedthroughput_mbps - _runattrs_ packetLength=100.0" value="100B Analytical"/>
+        <properties name="Line.Name/Throughput computedthroughput_mbps - _runattrs_ packetLength=2268.0" value="2268B Analytical"/>
+        <properties name="Line.Name/Throughput.destinationHost.app[0] throughput_mbps - _runattrs_ packetLength=100.0" value="100B Simulated"/>
+        <properties name="Line.Name/Throughput.destinationHost.app[0] throughput_mbps - _runattrs_ packetLength=2268.0" value="2268B Simulated"/>
+        <properties name="Line.Name/Throughput computedthroughput_mbps - _runattrs_ packetLength=100.0 configname=Analytical" value="100B Analytical"/>
+        <properties name="Line.Name/Throughput.destinationHost.app[0] throughput_mbps - _runattrs_ packetLength=100.0 configname=General" value="100B Simulated"/>
+        <properties name="Line.Name/Throughput.destinationHost.app[0] throughput_mbps - _runattrs_ packetLength=2268.0 configname=General" value="2268B Simulated"/>
+        <properties name="Line.Name/Throughput computedthroughput_mbps - _runattrs_ packetLength=2268.0 configname=Analytical" value="2268B Analytical"/>
+        <properties name="Line.Name/Throughput analyticalThroughput_mbps - _runattrs_ packetLength=100.0 configname=Analytical" value="100B Analytical"/>
+        <properties name="Line.Name/Throughput analyticalThroughput_mbps - _runattrs_ packetLength=2268.0 configname=Analytical" value="2268B Analytical"/>
+        <properties name="Line.Name/Throughput analyticalThroughput_mbps - _runattrs_ packetLength=1000.0 configname=Computed" value="1000B Analytical"/>
+        <properties name="Line.Name/Throughput analyticalThroughput_mbps - _runattrs_ packetLength=1000.0 configname=Computed100B" value="100B Analytical"/>
+        <properties name="Line.Name/Throughput analyticalThroughput_mbps - _runattrs_ packetLength=1000.0 configname=Computed2268B" value="2268B Analytical"/>
+        <properties name="Line.Name/Throughput.destinationHost.app[0] throughput_mbps - _runattrs_ packetLength=100.0 configname=g" value="100B Simulated"/>
+        <properties name="Line.Name/Throughput.destinationHost.app[0] throughput_mbps - _runattrs_ packetLength=1000.0 configname=g" value="1000B Simulated"/>
+        <properties name="Line.Name/Throughput.destinationHost.app[0] throughput_mbps - _runattrs_ packetLength=2268.0 configname=g" value="2268B Simulated"/>
+        <properties name="Line.Name/Throughput.destinationHost.app[0] throughput_mbps - _runattrs_ packetLength=1000.0 configname=General" value="1000B Simulated"/>
+        <isoDataPattern>module(_runattrs_) AND name(packetLength)</isoDataPattern>
+        <isoDataPattern>attr:configname(*)</isoDataPattern>
+      </items>
+    </datasets>
+    <datasets name="packetReceived:sum(packetBytes) Throughput.destinationHost.app[0]">
+      <items xsi:type="scave:Add" filterPattern="module(Throughput.destinationHost.app[0]) AND name(&quot;packetReceived:sum(packetBytes)&quot;)"/>
+      <items xsi:type="scave:BarChart" name="packetReceived:sum(packetBytes) Throughput.destinationHost.app[0]"/>
+    </datasets>
+  </datasets>
+  <chartSheets>
+    <chartSheets name="default" charts="//@datasets/@datasets.0/@items.5"/>
+  </chartSheets>
+</scave:Analysis>

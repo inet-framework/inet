@@ -62,7 +62,7 @@ double ApskErrorModel::computeBitErrorRate(const ISnir *snir, IRadioSignal::Sign
     Enter_Method_Silent();
     const FlatTransmissionBase *flatTransmission = check_and_cast<const FlatTransmissionBase *>(snir->getReception()->getTransmission());
     const ApskModulationBase *modulation = check_and_cast<const ApskModulationBase *>(flatTransmission->getModulation());
-    return modulation->calculateBER(snir->getMin(), flatTransmission->getBandwidth(), flatTransmission->getBitrate());
+    return modulation->calculateBER(getScalarSnir(snir), flatTransmission->getBandwidth(), flatTransmission->getBitrate());
 }
 
 double ApskErrorModel::computeSymbolErrorRate(const ISnir *snir, IRadioSignal::SignalPart part) const
@@ -70,7 +70,7 @@ double ApskErrorModel::computeSymbolErrorRate(const ISnir *snir, IRadioSignal::S
     Enter_Method_Silent();
     const FlatTransmissionBase *flatTransmission = check_and_cast<const FlatTransmissionBase *>(snir->getReception()->getTransmission());
     const ApskModulationBase *modulation = check_and_cast<const ApskModulationBase *>(flatTransmission->getModulation());
-    return modulation->calculateSER(snir->getMin(), flatTransmission->getBandwidth(), flatTransmission->getBitrate());
+    return modulation->calculateSER(getScalarSnir(snir), flatTransmission->getBandwidth(), flatTransmission->getBitrate());
 }
 
 } // namespace physicallayer

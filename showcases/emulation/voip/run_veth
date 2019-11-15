@@ -1,0 +1,24 @@
+#! /bin/sh
+
+cleanup() {
+    sudo ./veth_teardown
+}
+
+sigcleanup() {
+    cleanup; trap '' EXIT ; exit 1
+}
+
+# auto-cleanup on exit and when interrupted
+trap cleanup EXIT
+trap sigcleanup INT QUIT TERM
+
+# create namespaces etc.
+cleanup 2>/dev/null
+sudo ./veth_setup || exit 1
+
+# run both simulations
+inet -s -u Cmdenv -c VoipReceiverVirtualEth &
+sleep 1
+inet -s -u Cmdenv -c VoipSenderVirtualEth || exit 1
+wait
+

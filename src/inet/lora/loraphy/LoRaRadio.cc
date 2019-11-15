@@ -25,7 +25,7 @@
 #include "inet/physicallayer/common/packetlevel/RadioMedium.h"
 #include "inet/lora/loraphy/LoRaPhyPreamble_m.h"
 #include "inet/lora/lorabase/LoRaTagInfo_m.h"
-#include "inet/physicallayer/common/packetlevel/SignalTag_m.h"
+#include "inet/physicallayer/contract/packetlevel/SignalTag_m.h"
 
 //#include "LoRaMacFrame_m.h"
 
@@ -186,7 +186,7 @@ void LoRaRadio::handleUpperPacket(Packet *packet)
         auto preamble = makeShared<LoRaPhyPreamble>();
 
         preamble->setBandwidth(tag->getBandwidth());
-        preamble->setCarrierFrequency(tag->getCarrierFrequency());
+        preamble->setCenterFrequency(tag->getCenterFrequency());
         preamble->setCodeRendundance(tag->getCodeRendundance());
         preamble->setPower(tag->getPower());
         preamble->setSpreadFactor(tag->getSpreadFactor());
@@ -400,7 +400,7 @@ void LoRaRadio::decapsulate(Packet *packet) const
     auto preamble = packet->popAtFront<LoRaPhyPreamble>();
 
     tag->setBandwidth(preamble->getBandwidth());
-    tag->setCarrierFrequency(preamble->getCarrierFrequency());
+    tag->setCenterFrequency(preamble->getCenterFrequency());
     tag->setCodeRendundance(preamble->getCodeRendundance());
     tag->setPower(preamble->getPower());
     tag->setSpreadFactor(preamble->getSpreadFactor());
@@ -454,7 +454,7 @@ void LoRaRadio::endReception(cMessage *timer)
         auto preamble = macFrame->popAtFront<LoRaPhyPreamble>();
 
         tag->setBandwidth(preamble->getBandwidth());
-        tag->setCarrierFrequency(preamble->getCarrierFrequency());
+        tag->setCenterFrequency(preamble->getCenterFrequency());
         tag->setCodeRendundance(preamble->getCodeRendundance());
         tag->setPower(preamble->getPower());
         tag->setSpreadFactor(preamble->getSpreadFactor());

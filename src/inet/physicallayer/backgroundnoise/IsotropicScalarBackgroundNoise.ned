@@ -28,6 +28,7 @@ module IsotropicScalarBackgroundNoise like IBackgroundNoise
 {
     parameters:
         double power @unit(dBm); // noise power
+        double bandwidth @unit(Hz) = default(nan Hz);
         @class(IsotropicScalarBackgroundNoise);
         @display("i=block/mac");
 }

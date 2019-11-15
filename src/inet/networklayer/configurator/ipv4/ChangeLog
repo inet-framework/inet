@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2019-11-08  Levente Mészáros
+
+	Added assignUniqueAddresses parameter to Ipv4NetworkConfigurator.
+
 2019-01-28  ------ inet-4.1.0 released ------
 
 2019-01-07  Zoltan Bojthe

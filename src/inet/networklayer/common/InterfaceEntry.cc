@@ -76,6 +76,18 @@ InterfaceEntry::~InterfaceEntry()
     resetInterface();
 }
 
+void InterfaceEntry::clearProtocolDataSet()
+{
+    std::vector<int> ids;
+    int n = protocolDataSet.getNumTags();
+    ids.reserve(n);
+    for (int i=0; i < n; i++)
+        ids[i] = static_cast<InterfaceProtocolData *>(protocolDataSet.getTag(i))->id;
+    protocolDataSet.clearTags();
+    for (int i=0; i < n; i++)
+        changed(interfaceConfigChangedSignal, ids[i]);
+}
+
 void InterfaceEntry::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL)
@@ -328,6 +340,15 @@ Ipv4Address InterfaceEntry::getIpv4Address() const {
 #ifdef WITH_IPv4
     auto ipv4data = findProtocolData<Ipv4InterfaceData>();
     return ipv4data == nullptr ? Ipv4Address::UNSPECIFIED_ADDRESS : ipv4data->getIPAddress();
+#else
+    return Ipv4Address::UNSPECIFIED_ADDRESS;
+#endif // ifdef WITH_IPv4
+}
+
+Ipv4Address InterfaceEntry::getIpv4Netmask() const {
+#ifdef WITH_IPv4
+    auto ipv4data = findProtocolData<Ipv4InterfaceData>();
+    return ipv4data == nullptr ? Ipv4Address::UNSPECIFIED_ADDRESS : ipv4data->getNetmask();
 #else
     return Ipv4Address::UNSPECIFIED_ADDRESS;
 #endif // ifdef WITH_IPv4

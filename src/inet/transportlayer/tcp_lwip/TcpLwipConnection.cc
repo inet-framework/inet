@@ -33,84 +33,62 @@
 namespace inet {
 namespace tcp {
 
-TcpLwipConnection::Stats::Stats()
-    :
-    sndWndVector("send window"),
-    sndSeqVector("sent seq"),
-    sndAckVector("sent ack"),
+Define_Module(TcpLwipConnection);
 
-    rcvWndVector("receive window"),
-    rcvSeqVector("rcvd seq"),
-    rcvAckVector("rcvd ack")
-{
-}
+simsignal_t TcpLwipConnection::sndWndSignal = registerSignal("sndWnd");    // snd_wnd
+simsignal_t TcpLwipConnection::sndNxtSignal = registerSignal("sndNxt");    // sent seqNo
+simsignal_t TcpLwipConnection::sndAckSignal = registerSignal("sndAck");    // sent ackNo
+simsignal_t TcpLwipConnection::rcvWndSignal = registerSignal("rcvWnd");    // rcv_wnd
+simsignal_t TcpLwipConnection::rcvSeqSignal = registerSignal("rcvSeq");    // received seqNo
+simsignal_t TcpLwipConnection::rcvAckSignal = registerSignal("rcvAck");    // received ackNo (=snd_una)
 
-TcpLwipConnection::Stats::~Stats()
+void TcpLwipConnection::recordSend(const TcpHeader& tcpsegP)
 {
-}
-
-void TcpLwipConnection::Stats::recordSend(const TcpHeader& tcpsegP)
-{
-    sndWndVector.record(tcpsegP.getWindow());
-    sndSeqVector.record(tcpsegP.getSequenceNo());
+    emit(sndWndSignal, tcpsegP.getWindow());
+    emit(sndNxtSignal, tcpsegP.getSequenceNo());
 
     if (tcpsegP.getAckBit())
-        sndAckVector.record(tcpsegP.getAckNo());
+        emit(sndAckSignal, tcpsegP.getAckNo());
 }
 
-void TcpLwipConnection::Stats::recordReceive(const TcpHeader& tcpsegP)
+void TcpLwipConnection::recordReceive(const TcpHeader& tcpsegP)
 {
-    rcvWndVector.record(tcpsegP.getWindow());
-    rcvSeqVector.record(tcpsegP.getSequenceNo());
+    emit(rcvWndSignal, tcpsegP.getWindow());
+    emit(rcvSeqSignal, tcpsegP.getSequenceNo());
 
     if (tcpsegP.getAckBit())
-        rcvAckVector.record(tcpsegP.getAckNo());
+        emit(rcvAckSignal, tcpsegP.getAckNo());
 }
 
-TcpLwipConnection::TcpLwipConnection(TcpLwip& tcpLwipP, int connIdP)
-    :
-    connIdM(connIdP),
-    pcbM(nullptr),
-    sendQueueM(tcpLwipP.createSendQueue()),
-    receiveQueueM(tcpLwipP.createReceiveQueue()),
-    tcpLwipM(tcpLwipP),
-    totalSentM(0),
-    isListenerM(false),
-    onCloseM(false),
-    statsM(nullptr)
+void TcpLwipConnection::initConnection(TcpLwip& tcpLwipP, int connIdP)
 {
-    pcbM = tcpLwipM.getLwipTcpLayer()->tcp_new();       //FIXME memory leak
+    connIdM = connIdP;
+    sendQueueM = tcpLwipP.createSendQueue();
+    receiveQueueM = tcpLwipP.createReceiveQueue();
+    tcpLwipM = &tcpLwipP;
+    totalSentM = 0;
+    isListenerM = false;
+    onCloseM = false;
+    pcbM = tcpLwipM->getLwipTcpLayer()->tcp_new();       //FIXME memory leak
     ASSERT(pcbM);
-
     pcbM->callback_arg = this;
-
     sendQueueM->setConnection(this);
     receiveQueueM->setConnection(this);
-
-    if (tcpLwipM.recordStatisticsM)
-        statsM = new Stats();
 }
 
-TcpLwipConnection::TcpLwipConnection(TcpLwipConnection& connP, int connIdP, LwipTcpLayer::tcp_pcb *pcbP)
-    :
-    connIdM(connIdP),
-    pcbM(pcbP),
-    sendQueueM(check_and_cast<TcpLwipSendQueue *>(inet::utils::createOne(connP.sendQueueM->getClassName()))),
-    receiveQueueM(check_and_cast<TcpLwipReceiveQueue *>(inet::utils::createOne(connP.receiveQueueM->getClassName()))),
-    tcpLwipM(connP.tcpLwipM),
-    totalSentM(0),
-    isListenerM(false),
-    onCloseM(false),
-    statsM(nullptr)
+void TcpLwipConnection::initConnection(TcpLwipConnection& connP, int connIdP, LwipTcpLayer::tcp_pcb *pcbP)
 {
+    connIdM = connIdP;
+    sendQueueM = check_and_cast<TcpLwipSendQueue *>(inet::utils::createOne(connP.sendQueueM->getClassName()));
+    receiveQueueM = check_and_cast<TcpLwipReceiveQueue *>(inet::utils::createOne(connP.receiveQueueM->getClassName()));
+    tcpLwipM = connP.tcpLwipM;
+    totalSentM = 0;
+    isListenerM = false;
+    onCloseM = false;
     pcbM = pcbP;
     pcbM->callback_arg = this;
-
     sendQueueM->setConnection(this);
     receiveQueueM->setConnection(this);
-
-    if (tcpLwipM.recordStatisticsM)
-        statsM = new Stats();
 }
 
 TcpLwipConnection::~TcpLwipConnection()
@@ -121,7 +99,6 @@ TcpLwipConnection::~TcpLwipConnection()
 
     delete receiveQueueM;
     delete sendQueueM;
-    delete statsM;
 }
 
 void TcpLwipConnection::sendAvailableIndicationToApp(int listenConnId)
@@ -138,9 +115,9 @@ void TcpLwipConnection::sendAvailableIndicationToApp(int listenConnId)
     ind->setRemotePort(pcbM->remote_port);
 
     indication->setControlInfo(ind);
-    indication->addTagIfAbsent<TransportProtocolInd>()->setProtocol(&Protocol::tcp);
-    indication->addTagIfAbsent<SocketInd>()->setSocketId(listenConnId);
-    tcpLwipM.send(indication, "appOut");
+    indication->addTag<TransportProtocolInd>()->setProtocol(&Protocol::tcp);
+    indication->addTag<SocketInd>()->setSocketId(listenConnId);
+    tcpLwipM->send(indication, "appOut");
     //TODO shouldn't read from lwip until accept arrived
 }
 
@@ -157,10 +134,10 @@ void TcpLwipConnection::sendEstablishedMsg()
     tcpConnectInfo->setRemotePort(pcbM->remote_port);
 
     indication->setControlInfo(tcpConnectInfo);
-    indication->addTagIfAbsent<TransportProtocolInd>()->setProtocol(&Protocol::udp);
-    indication->addTagIfAbsent<SocketInd>()->setSocketId(connIdM);
+    indication->addTag<TransportProtocolInd>()->setProtocol(&Protocol::udp);
+    indication->addTag<SocketInd>()->setSocketId(connIdM);
 
-    tcpLwipM.send(indication, "appOut");
+    tcpLwipM->send(indication, "appOut");
     sendUpEnabled = true;
     do_SEND();
     //TODO now can read from lwip
@@ -197,9 +174,9 @@ void TcpLwipConnection::sendIndicationToApp(int code)
     auto indication = new Indication(nameOfIndication, code);
     TcpCommand *ind = new TcpCommand();
     indication->setControlInfo(ind);
-    indication->addTagIfAbsent<TransportProtocolInd>()->setProtocol(&Protocol::tcp);
-    indication->addTagIfAbsent<SocketInd>()->setSocketId(connIdM);
-    tcpLwipM.send(indication, "appOut");
+    indication->addTag<TransportProtocolInd>()->setProtocol(&Protocol::tcp);
+    indication->addTag<SocketInd>()->setSocketId(connIdM);
+    tcpLwipM->send(indication, "appOut");
 }
 
 void TcpLwipConnection::fillStatusInfo(TcpStatusInfo& statusInfo)
@@ -231,13 +208,13 @@ void TcpLwipConnection::fillStatusInfo(TcpStatusInfo& statusInfo)
 void TcpLwipConnection::listen(const L3Address& localAddr, unsigned short localPort)
 {
     onCloseM = false;
-    tcpLwipM.getLwipTcpLayer()->tcp_bind(pcbM, nullptr, localPort);
+    tcpLwipM->getLwipTcpLayer()->tcp_bind(pcbM, nullptr, localPort);
     // The next returns a tcp_pcb: need to do some research on how
     // it works; does it actually accept a connection as well? It
     // shouldn't, as there is a tcp_accept
     LwipTcpLayer::tcp_pcb *pcb = pcbM;
     pcbM = nullptr;    // unlink old pcb from this, otherwise lwip_free_pcb_event destroy this conn.
-    pcbM = tcpLwipM.getLwipTcpLayer()->tcp_listen(pcb);
+    pcbM = tcpLwipM->getLwipTcpLayer()->tcp_listen(pcb);
     totalSentM = 0;
 }
 
@@ -249,8 +226,8 @@ void TcpLwipConnection::connect(const L3Address& localAddr, unsigned short local
     src_addr.addr = localAddr;
     struct ip_addr dest_addr;
     dest_addr.addr = remoteAddr;
-    tcpLwipM.getLwipTcpLayer()->tcp_bind(pcbM, &src_addr, localPort);
-    tcpLwipM.getLwipTcpLayer()->tcp_connect(pcbM, &dest_addr, (u16_t)remotePort, nullptr);
+    tcpLwipM->getLwipTcpLayer()->tcp_bind(pcbM, &src_addr, localPort);
+    tcpLwipM->getLwipTcpLayer()->tcp_connect(pcbM, &dest_addr, (u16_t)remotePort, nullptr);
     totalSentM = 0;
 }
 
@@ -259,14 +236,14 @@ void TcpLwipConnection::close()
     onCloseM = true;
 
     if (0 == sendQueueM->getBytesAvailable()) {
-        tcpLwipM.getLwipTcpLayer()->tcp_close(pcbM);
+        tcpLwipM->getLwipTcpLayer()->tcp_close(pcbM);
         onCloseM = false;
     }
 }
 
 void TcpLwipConnection::abort()
 {
-    tcpLwipM.getLwipTcpLayer()->tcp_close(pcbM);
+    tcpLwipM->getLwipTcpLayer()->tcp_close(pcbM);
     onCloseM = false;
 }
 
@@ -286,9 +263,7 @@ void TcpLwipConnection::send(Packet *msgP)
 void TcpLwipConnection::notifyAboutSending(const TcpHeader& tcpsegP)
 {
     receiveQueueM->notifyAboutSending(&tcpsegP);
-
-    if (statsM)
-        statsM->recordSend(tcpsegP);
+    recordSend(tcpsegP);
 }
 
 int TcpLwipConnection::send_data(void *data, int datalen)
@@ -300,7 +275,7 @@ int TcpLwipConnection::send_data(void *data, int datalen)
         datalen = 0xFFFF; // tcp_write() length argument is uint16_t
 
     u32_t ss = pcbM->snd_lbb;
-    error = tcpLwipM.getLwipTcpLayer()->tcp_write(pcbM, data, datalen, 1);
+    error = tcpLwipM->getLwipTcpLayer()->tcp_write(pcbM, data, datalen, 1);
 
     if (error == ERR_OK) {
         written = datalen;
@@ -317,7 +292,7 @@ int TcpLwipConnection::send_data(void *data, int datalen)
             if (datalen < snd_buf)
                 break;
 
-            error = tcpLwipM.getLwipTcpLayer()->tcp_write(
+            error = tcpLwipM->getLwipTcpLayer()->tcp_write(
                         pcbM, ((const char *)data) + written, snd_buf, 1);
 
             if (error != ERR_OK)
@@ -367,7 +342,7 @@ void TcpLwipConnection::do_SEND()
               << endl;
 
     if (onCloseM && (0 == sendQueueM->getBytesAvailable())) {
-        tcpLwipM.getLwipTcpLayer()->tcp_close(pcbM);
+        tcpLwipM->getLwipTcpLayer()->tcp_close(pcbM);
         onCloseM = false;
     }
 }
@@ -377,14 +352,14 @@ void TcpLwipConnection::sendUpData()
     if (sendUpEnabled) {
         while (Packet *dataMsg = receiveQueueM->extractBytesUpTo()) {
             dataMsg->setKind(TCP_I_DATA);
-            dataMsg->addTagIfAbsent<TransportProtocolInd>()->setProtocol(&Protocol::tcp);
-            dataMsg->addTagIfAbsent<SocketInd>()->setSocketId(connIdM);
+            dataMsg->addTag<TransportProtocolInd>()->setProtocol(&Protocol::tcp);
+            dataMsg->addTag<SocketInd>()->setSocketId(connIdM);
 //            int64_t len = dataMsg->getByteLength();
             // send Msg to Application layer:
-            tcpLwipM.send(dataMsg, "appOut");
+            tcpLwipM->send(dataMsg, "appOut");
 //            while (len > 0) {
 //                unsigned int slen = len > 0xffff ? 0xffff : len;
-//                tcpLwipM.getLwipTcpLayer()->tcp_recved(pcbM, slen);
+//                tcpLwipM->getLwipTcpLayer()->tcp_recved(pcbM, slen);
 //                len -= slen;
 //            }
         }

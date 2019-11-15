@@ -1,34 +1,33 @@
 %description:
 
-In this test, packets are produced periodically (randomly) by an active packet
-source (PacketProducer). The packets are collected periodically (randomly) by
-an active packet sink (PacketCollector). The source and the sink is connected
-by a compound priority queue (TestQueue) where packets are stored temporarily.
-This queue contains a classifier (PacketClassifier), two queues (PacketQueues)
-that use a limited shared buffer (PacketBuffer) to store packets, and a priorty
-scheduler (PriortyScheduler).
+In this test, packets are produced periodically (randomly) by two active packet
+sources (ActivePacketSource). The packets are collected periodically (randomly)
+by two active packet sinks (ActivePacketSink). The sources and the sinkes are
+connected by packet queues (TestQueue) and packets are stored in shared packet
+buffer (PacketBuffer). The packet buffer drops packets from the beginning of
+the buffer when it gets overloaded.
 
 %file: test.ned
 
-import inet.common.queueing.PriorityBuffer;
-import inet.common.queueing.PacketClassifier;
-import inet.common.queueing.CompoundPacketQueue;
-import inet.common.queueing.PacketQueue;
-import inet.common.queueing.PacketCollector;
-import inet.common.queueing.PacketProducer;
-import inet.common.queueing.PriorityScheduler;
+import inet.queueing.buffer.PacketBuffer;
+import inet.queueing.classifier.PacketClassifier;
+import inet.queueing.queue.CompoundPacketQueue;
+import inet.queueing.queue.PacketQueue;
+import inet.queueing.sink.ActivePacketSink;
+import inet.queueing.source.ActivePacketSource;
+import inet.queueing.scheduler.PriorityScheduler;
 
-module TestQueue extends CompoundPacketQueue
+network TestBufferNetwork
 {
-    parameters:
-        *.bufferModule = "^.buffer";
-        @class(::inet::queueing::CompoundPacketQueue);
     submodules:
-        buffer: PriorityBuffer {
+        buffer: PacketBuffer {
+            @display("p=100,300");
+        }
+        producer1: ActivePacketSource {
             @display("p=100,100");
         }
-        classifier: PacketClassifier {
-            @display("p=200,100");
+        producer2: ActivePacketSource {
+            @display("p=100,200");
         }
         queue1: PacketQueue {
             @display("p=300,100");
@@ -36,48 +35,18 @@ module TestQueue extends CompoundPacketQueue
         queue2: PacketQueue {
             @display("p=300,200");
         }
-        scheduler: PriorityScheduler {
-            @display("p=400,100");
+        collector1: ActivePacketSink {
+            @display("p=500,100");
+        }
+        collector2: ActivePacketSink {
+            @display("p=500,200");
         }
     connections:
-        in --> classifier.in;
-    	classifier.out++ --> queue1.in;
-    	classifier.out++ --> queue2.in;
-    	queue1.out --> scheduler.in++;
-    	queue2.out --> scheduler.in++;
-    	scheduler.out --> out;
+        producer1.out --> queue1.in;
+        queue1.out --> collector1.in;
+        producer2.out --> queue2.in;
+        queue2.out --> collector2.in;
 }
-
-network TestBufferNetwork
-{
-    submodules:
-        producer: PacketProducer {
-            @display("p=100,100");
-        }
-        queue: TestQueue {
-            @display("p=200,100");
-        }
-        collector: PacketCollector {
-            @display("p=300,100");
-        }
-    connections allowunconnected:
-        producer.out --> queue.in;
-        queue.out --> collector.in;
-}
-
-%file: Test.cc
-#include <vector>
-#include "inet/common/queueing/PacketClassifierFunction.h"
-#include "inet/common/packet/Packet.h"
-
-using namespace inet;
-
-static int testClassify(Packet *packet)
-{
-    return packet->getId() % 2;
-}
-
-Register_Packet_Classifier_Function(TestClassifier, testClassify);
 
 %inifile: omnetpp.ini
 
@@ -85,127 +54,189 @@ Register_Packet_Classifier_Function(TestClassifier, testClassify);
 network = TestBufferNetwork
 sim-time-limit = 10s
 cmdenv-event-banners = false
-*.producer.packetLength = 1B
-*.producer.productionInterval = uniform(0s, 1s)
-*.collector.collectionInterval = uniform(0s, 2s)
-*.queue.buffer.frameCapacity = 2
-*.queue.classifier.classifierClass = "TestClassifier"
+*.buffer.dropperClass = "inet::queueing::PacketAtCollectionBeginDropper"
+*.producer*.packetLength = 1B
+*.producer*.productionInterval = uniform(0s, 1s)
+*.collector*.collectionInterval = uniform(0s, 2s)
+*.queue*.bufferModule = "^.buffer"
+*.buffer.packetCapacity = 2
 
 %contains: stdout
-Producing packet producer-0.
-Classifying packet producer-0.
-Pushing packet producer-0 into the queue.
-Adding packet producer-0 to the buffer.
-Popping packet producer-0 from the queue.
-Removing packet producer-0 from the buffer.
-Scheduling packet producer-0.
-Collecting packet producer-0.
+Producing packet producer1-0.
+Pushing packet producer1-0 into the queue.
+Adding packet producer1-0 to the buffer.
+Popping packet producer1-0 from the queue.
+Removing packet producer1-0 from the buffer.
+Collecting packet producer1-0.
+Producing packet producer2-0.
+Pushing packet producer2-0 into the queue.
+Adding packet producer2-0 to the buffer.
+Popping packet producer2-0 from the queue.
+Removing packet producer2-0 from the buffer.
+Collecting packet producer2-0.
 
 Running simulation...
-Producing packet producer-1.
-Classifying packet producer-1.
-Pushing packet producer-1 into the queue.
-Adding packet producer-1 to the buffer.
-Popping packet producer-1 from the queue.
-Removing packet producer-1 from the buffer.
-Scheduling packet producer-1.
-Collecting packet producer-1.
-Producing packet producer-2.
-Classifying packet producer-2.
-Pushing packet producer-2 into the queue.
-Adding packet producer-2 to the buffer.
-Producing packet producer-3.
-Classifying packet producer-3.
-Pushing packet producer-3 into the queue.
-Adding packet producer-3 to the buffer.
-Producing packet producer-4.
-Classifying packet producer-4.
-Pushing packet producer-4 into the queue.
-Adding packet producer-4 to the buffer.
-Removing packet producer-3 from the buffer.
-Popping packet producer-2 from the queue.
-Removing packet producer-2 from the buffer.
-Scheduling packet producer-2.
-Collecting packet producer-2.
-Producing packet producer-5.
-Classifying packet producer-5.
-Pushing packet producer-5 into the queue.
-Adding packet producer-5 to the buffer.
-Producing packet producer-6.
-Classifying packet producer-6.
-Pushing packet producer-6 into the queue.
-Adding packet producer-6 to the buffer.
-Removing packet producer-5 from the buffer.
-Producing packet producer-7.
-Classifying packet producer-7.
-Pushing packet producer-7 into the queue.
-Adding packet producer-7 to the buffer.
-Removing packet producer-7 from the buffer.
-Popping packet producer-4 from the queue.
-Removing packet producer-4 from the buffer.
-Scheduling packet producer-4.
-Collecting packet producer-4.
-Producing packet producer-8.
-Classifying packet producer-8.
-Pushing packet producer-8 into the queue.
-Adding packet producer-8 to the buffer.
-Popping packet producer-6 from the queue.
-Removing packet producer-6 from the buffer.
-Scheduling packet producer-6.
-Collecting packet producer-6.
-Producing packet producer-9.
-Classifying packet producer-9.
-Pushing packet producer-9 into the queue.
-Adding packet producer-9 to the buffer.
-Popping packet producer-8 from the queue.
-Removing packet producer-8 from the buffer.
-Scheduling packet producer-8.
-Collecting packet producer-8.
-Popping packet producer-9 from the queue.
-Removing packet producer-9 from the buffer.
-Scheduling packet producer-9.
-Collecting packet producer-9.
-Producing packet producer-10.
-Classifying packet producer-10.
-Pushing packet producer-10 into the queue.
-Adding packet producer-10 to the buffer.
-Producing packet producer-11.
-Classifying packet producer-11.
-Pushing packet producer-11 into the queue.
-Adding packet producer-11 to the buffer.
-Producing packet producer-12.
-Classifying packet producer-12.
-Pushing packet producer-12 into the queue.
-Adding packet producer-12 to the buffer.
-Removing packet producer-11 from the buffer.
-Producing packet producer-13.
-Classifying packet producer-13.
-Pushing packet producer-13 into the queue.
-Adding packet producer-13 to the buffer.
-Removing packet producer-13 from the buffer.
-Popping packet producer-10 from the queue.
-Removing packet producer-10 from the buffer.
-Scheduling packet producer-10.
-Collecting packet producer-10.
-Producing packet producer-14.
-Classifying packet producer-14.
-Pushing packet producer-14 into the queue.
-Adding packet producer-14 to the buffer.
-Producing packet producer-15.
-Classifying packet producer-15.
-Pushing packet producer-15 into the queue.
-Adding packet producer-15 to the buffer.
-Removing packet producer-15 from the buffer.
-Producing packet producer-16.
-Classifying packet producer-16.
-Pushing packet producer-16 into the queue.
-Adding packet producer-16 to the buffer.
-Removing packet producer-12 from the buffer.
-Popping packet producer-14 from the queue.
-Removing packet producer-14 from the buffer.
-Scheduling packet producer-14.
-Collecting packet producer-14.
-Producing packet producer-17.
-Classifying packet producer-17.
-Pushing packet producer-17 into the queue.
-Adding packet producer-17 to the buffer.
+Producing packet producer1-1.
+Pushing packet producer1-1 into the queue.
+Adding packet producer1-1 to the buffer.
+Producing packet producer2-1.
+Pushing packet producer2-1 into the queue.
+Adding packet producer2-1 to the buffer.
+Producing packet producer1-2.
+Pushing packet producer1-2 into the queue.
+Adding packet producer1-2 to the buffer.
+Removing packet producer1-1 from the buffer.
+Popping packet producer1-2 from the queue.
+Removing packet producer1-2 from the buffer.
+Collecting packet producer1-2.
+Producing packet producer2-2.
+Pushing packet producer2-2 into the queue.
+Adding packet producer2-2 to the buffer.
+Popping packet producer2-1 from the queue.
+Removing packet producer2-1 from the buffer.
+Collecting packet producer2-1.
+Producing packet producer1-3.
+Pushing packet producer1-3 into the queue.
+Adding packet producer1-3 to the buffer.
+Producing packet producer2-3.
+Pushing packet producer2-3 into the queue.
+Adding packet producer2-3 to the buffer.
+Removing packet producer2-2 from the buffer.
+Producing packet producer1-4.
+Pushing packet producer1-4 into the queue.
+Adding packet producer1-4 to the buffer.
+Removing packet producer1-3 from the buffer.
+Producing packet producer2-4.
+Pushing packet producer2-4 into the queue.
+Adding packet producer2-4 to the buffer.
+Removing packet producer2-3 from the buffer.
+Producing packet producer2-5.
+Pushing packet producer2-5 into the queue.
+Adding packet producer2-5 to the buffer.
+Removing packet producer1-4 from the buffer.
+Producing packet producer1-5.
+Pushing packet producer1-5 into the queue.
+Adding packet producer1-5 to the buffer.
+Removing packet producer2-4 from the buffer.
+Producing packet producer1-6.
+Pushing packet producer1-6 into the queue.
+Adding packet producer1-6 to the buffer.
+Removing packet producer2-5 from the buffer.
+Popping packet producer1-5 from the queue.
+Removing packet producer1-5 from the buffer.
+Collecting packet producer1-5.
+Popping packet producer1-6 from the queue.
+Removing packet producer1-6 from the buffer.
+Collecting packet producer1-6.
+Producing packet producer2-6.
+Pushing packet producer2-6 into the queue.
+Adding packet producer2-6 to the buffer.
+Popping packet producer2-6 from the queue.
+Removing packet producer2-6 from the buffer.
+Collecting packet producer2-6.
+Producing packet producer1-7.
+Pushing packet producer1-7 into the queue.
+Adding packet producer1-7 to the buffer.
+Popping packet producer1-7 from the queue.
+Removing packet producer1-7 from the buffer.
+Collecting packet producer1-7.
+Producing packet producer2-7.
+Pushing packet producer2-7 into the queue.
+Adding packet producer2-7 to the buffer.
+Popping packet producer2-7 from the queue.
+Removing packet producer2-7 from the buffer.
+Collecting packet producer2-7.
+Producing packet producer1-8.
+Pushing packet producer1-8 into the queue.
+Adding packet producer1-8 to the buffer.
+Producing packet producer2-8.
+Pushing packet producer2-8 into the queue.
+Adding packet producer2-8 to the buffer.
+Producing packet producer1-9.
+Pushing packet producer1-9 into the queue.
+Adding packet producer1-9 to the buffer.
+Removing packet producer1-8 from the buffer.
+Popping packet producer1-9 from the queue.
+Removing packet producer1-9 from the buffer.
+Collecting packet producer1-9.
+Popping packet producer2-8 from the queue.
+Removing packet producer2-8 from the buffer.
+Collecting packet producer2-8.
+Producing packet producer2-9.
+Pushing packet producer2-9 into the queue.
+Adding packet producer2-9 to the buffer.
+Producing packet producer1-10.
+Pushing packet producer1-10 into the queue.
+Adding packet producer1-10 to the buffer.
+Popping packet producer1-10 from the queue.
+Removing packet producer1-10 from the buffer.
+Collecting packet producer1-10.
+Producing packet producer2-10.
+Pushing packet producer2-10 into the queue.
+Adding packet producer2-10 to the buffer.
+Producing packet producer1-11.
+Pushing packet producer1-11 into the queue.
+Adding packet producer1-11 to the buffer.
+Removing packet producer2-9 from the buffer.
+Producing packet producer2-11.
+Pushing packet producer2-11 into the queue.
+Adding packet producer2-11 to the buffer.
+Removing packet producer2-10 from the buffer.
+Popping packet producer2-11 from the queue.
+Removing packet producer2-11 from the buffer.
+Collecting packet producer2-11.
+Producing packet producer1-12.
+Pushing packet producer1-12 into the queue.
+Adding packet producer1-12 to the buffer.
+Producing packet producer1-13.
+Pushing packet producer1-13 into the queue.
+Adding packet producer1-13 to the buffer.
+Removing packet producer1-11 from the buffer.
+Popping packet producer1-12 from the queue.
+Removing packet producer1-12 from the buffer.
+Collecting packet producer1-12.
+Producing packet producer2-12.
+Pushing packet producer2-12 into the queue.
+Adding packet producer2-12 to the buffer.
+Producing packet producer1-14.
+Pushing packet producer1-14 into the queue.
+Adding packet producer1-14 to the buffer.
+Removing packet producer1-13 from the buffer.
+Popping packet producer2-12 from the queue.
+Removing packet producer2-12 from the buffer.
+Collecting packet producer2-12.
+Producing packet producer2-13.
+Pushing packet producer2-13 into the queue.
+Adding packet producer2-13 to the buffer.
+Producing packet producer1-15.
+Pushing packet producer1-15 into the queue.
+Adding packet producer1-15 to the buffer.
+Removing packet producer1-14 from the buffer.
+Producing packet producer1-16.
+Pushing packet producer1-16 into the queue.
+Adding packet producer1-16 to the buffer.
+Removing packet producer2-13 from the buffer.
+Popping packet producer1-15 from the queue.
+Removing packet producer1-15 from the buffer.
+Collecting packet producer1-15.
+Producing packet producer2-14.
+Pushing packet producer2-14 into the queue.
+Adding packet producer2-14 to the buffer.
+Producing packet producer1-17.
+Pushing packet producer1-17 into the queue.
+Adding packet producer1-17 to the buffer.
+Removing packet producer1-16 from the buffer.
+Producing packet producer1-18.
+Pushing packet producer1-18 into the queue.
+Adding packet producer1-18 to the buffer.
+Removing packet producer2-14 from the buffer.
+Producing packet producer2-15.
+Pushing packet producer2-15 into the queue.
+Adding packet producer2-15 to the buffer.
+Removing packet producer1-17 from the buffer.
+Popping packet producer2-15 from the queue.
+Removing packet producer2-15 from the buffer.
+Collecting packet producer2-15.
+Producing packet producer1-19.
+Pushing packet producer1-19 into the queue.
+Adding packet producer1-19 to the buffer.

@@ -194,7 +194,7 @@ void SimpleLoRaApp::sendJoinRequest()
 
     auto loraTag = pktRequest->addTagIfAbsent<LoRaTag>();
     loraTag->setBandwidth(loRaBW);
-    loraTag->setCarrierFrequency(loRaCF);
+    loraTag->setCenterFrequency(loRaCF);
     loraTag->setSpreadFactor(loRaSF);
     loraTag->setCodeRendundance(loRaCR);
     loraTag->setPower(W(loRaTP));

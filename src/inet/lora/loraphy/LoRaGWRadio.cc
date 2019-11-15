@@ -17,7 +17,7 @@
 #include "inet/lora/loraphy/LoRaMedium.h"
 #include "inet/lora/loraphy/LoRaPhyPreamble_m.h"
 #include "inet/lora/lorabase/LoRaTagInfo_m.h"
-#include "inet/physicallayer/common/packetlevel/SignalTag_m.h"
+#include "inet/physicallayer/contract/packetlevel/SignalTag_m.h"
 
 namespace inet {
 
@@ -86,7 +86,7 @@ void LoRaGWRadio::handleUpperPacket(Packet *packet)
     auto preamble = makeShared<LoRaPhyPreamble>();
     if (tag != nullptr) {
         preamble->setBandwidth(tag->getBandwidth());
-        preamble->setCarrierFrequency(tag->getCarrierFrequency());
+        preamble->setCenterFrequency(tag->getCenterFrequency());
         preamble->setCodeRendundance(tag->getCodeRendundance());
         preamble->setPower(tag->getPower());
         preamble->setSpreadFactor(tag->getSpreadFactor());

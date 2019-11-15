@@ -1,0 +1,6 @@
+<scenario>
+    <at t="90">
+        <disconnect src-module="Router3" src-gate="ethg$o[1]" />
+        <disconnect src-module="Router8" src-gate="ethg$o[0]" />		
+  	</at>
+</scenario>

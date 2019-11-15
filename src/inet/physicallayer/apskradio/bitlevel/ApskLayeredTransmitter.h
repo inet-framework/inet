@@ -49,7 +49,7 @@ class INET_API ApskLayeredTransmitter : public TransmitterBase
     W power;
     bps bitrate;
     Hz bandwidth;
-    Hz carrierFrequency;
+    Hz centerFrequency;
 
   protected:
     virtual void initialize(int stage) override;
@@ -71,7 +71,7 @@ class INET_API ApskLayeredTransmitter : public TransmitterBase
     virtual W getPower() const { return power; }
     virtual bps getBitrate() const { return bitrate; }
     virtual const Hz getBandwidth() const { return bandwidth; }
-    virtual const Hz getCarrierFrequency() const { return carrierFrequency; }
+    virtual const Hz getCenterFrequency() const { return centerFrequency; }
     virtual W getMaxPower() const override { return power; }
     virtual m getMaxCommunicationRange() const override { return m(NaN); }
     virtual m getMaxInterferenceRange() const override { return m(NaN); }

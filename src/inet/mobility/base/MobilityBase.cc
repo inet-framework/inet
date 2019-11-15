@@ -136,18 +136,22 @@ void MobilityBase::initializePosition()
 void MobilityBase::setInitialPosition()
 {
     // reading the coordinates from omnetpp.ini makes predefined scenarios a lot easier
-    bool filled = false;
     auto coordinateSystem = getModuleFromPar<IGeographicCoordinateSystem>(par("coordinateSystemModule"), this, false);
     if (subjectModule != nullptr && hasPar("initFromDisplayString") && par("initFromDisplayString")) {
         const char *s = subjectModule->getDisplayString().getTagArg("p", 2);
         if (s && *s)
             throw cRuntimeError("The coordinates of '%s' are invalid. Please remove automatic arrangement"
                                 " (3rd argument of 'p' tag) from '@display' attribute.", subjectModule->getFullPath().c_str());
-        filled = parseIntTo(subjectModule->getDisplayString().getTagArg("p", 0), lastPosition.x) &&
-                 parseIntTo(subjectModule->getDisplayString().getTagArg("p", 1), lastPosition.y);
+        bool filled = parseIntTo(subjectModule->getDisplayString().getTagArg("p", 0), lastPosition.x) &&
+                      parseIntTo(subjectModule->getDisplayString().getTagArg("p", 1), lastPosition.y);
         if (filled) {
             lastPosition.z = hasPar("initialZ") ? par("initialZ") : 0.0;
             lastPosition = canvasProjection->computeCanvasPointInverse(cFigure::Point(lastPosition.x, lastPosition.y), lastPosition.z);
+            EV_DEBUG << "position initialized from displayString and initialZ parameter: " << lastPosition << endl;
+        }
+        else {
+            lastPosition = getRandomPosition();
+            EV_DEBUG << "position initialized by random values: " << lastPosition << endl;
         }
     }
     // not all mobility models have "initialX", "initialY" and "initialZ" parameters
@@ -155,17 +159,21 @@ void MobilityBase::setInitialPosition()
         lastPosition.x = par("initialX");
         lastPosition.y = par("initialY");
         lastPosition.z = par("initialZ");
-        filled = true;
+        EV_DEBUG << "position initialized from initialX/Y/Z parameters: " << lastPosition << endl;
     }
     else if (coordinateSystem != nullptr && hasPar("initialLatitude") && hasPar("initialLongitude") && hasPar("initialAltitude")) {
         auto initialLatitude = deg(par("initialLatitude"));
         auto initialLongitude = deg(par("initialLongitude"));
         auto initialAltitude = m(par("initialAltitude"));
         lastPosition = coordinateSystem->computeSceneCoordinate(GeoCoord(initialLatitude, initialLongitude, initialAltitude));
-        filled = true;
+        EV_DEBUG << "position initialized from initialLatitude/Longitude/Altitude parameters: " << lastPosition << endl;
     }
-    if (!filled)
+    else {
         lastPosition = getRandomPosition();
+        EV_DEBUG << "position initialized by random values: " << lastPosition << endl;
+    }
+    if (par("updateDisplayString"))
+        updateDisplayStringFromMobilityState();
 }
 
 void MobilityBase::checkPosition()
@@ -195,19 +203,41 @@ void MobilityBase::refreshDisplay() const
 {
     DirectiveResolver directiveResolver(const_cast<MobilityBase *>(this));
     auto text = format.formatString(&directiveResolver);
-    cDisplayString& displayString = this->getDisplayString();
-    displayString.setTagArg("t", 0, text);
-    if (subjectModule != nullptr && par("updateDisplayString")) {
+    getDisplayString().setTagArg("t", 0, text);
+    if (par("updateDisplayString"))
+        updateDisplayStringFromMobilityState();
+}
+
+void MobilityBase::updateDisplayStringFromMobilityState() const
+{
+    if (subjectModule != nullptr) {
+        // position
         auto position = const_cast<MobilityBase *>(this)->getCurrentPosition();
         EV_TRACE << "current position = " << position << endl;
         auto subjectModulePosition = canvasProjection->computeCanvasPoint(position);
         char buf[32];
         snprintf(buf, sizeof(buf), "%lf", subjectModulePosition.x);
         buf[sizeof(buf) - 1] = 0;
-        subjectModule->getDisplayString().setTagArg("p", 0, buf);
+        auto& displayString = subjectModule->getDisplayString();
+        displayString.setTagArg("p", 0, buf);
         snprintf(buf, sizeof(buf), "%lf", subjectModulePosition.y);
         buf[sizeof(buf) - 1] = 0;
-        subjectModule->getDisplayString().setTagArg("p", 1, buf);
+        displayString.setTagArg("p", 1, buf);
+        // angle
+        double angle = 0;
+        auto angularPosition = const_cast<MobilityBase *>(this)->getCurrentAngularPosition();
+        if (angularPosition != Quaternion::IDENTITY) {
+            Quaternion swing;
+            Quaternion twist;
+            Coord vector = canvasProjection->computeCanvasPointInverse(cFigure::Point(0, 0), 1);
+            vector.normalize();
+            angularPosition.getSwingAndTwist(vector, swing, twist);
+            Coord axis;
+            twist.getRotationAxisAndAngle(axis, angle);
+            angle = math::rad2deg(axis.z >= 0 ? angle : -angle);
+        }
+        snprintf(buf, sizeof(buf), "%lf", angle);
+        displayString.setTagArg("a", 0, buf);
     }
 }
 

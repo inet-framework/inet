@@ -20,11 +20,11 @@
 
 #include "inet/common/INETDefs.h"
 #include "inet/routing/ospfv2/messagehandler/IMessageHandler.h"
-#include "inet/routing/ospfv2/router/OspfCommon.h"
+#include "inet/routing/ospfv2/router/Ospfv2Common.h"
 
 namespace inet {
 
-namespace ospf {
+namespace ospfv2 {
 
 class INET_API LinkStateUpdateHandler : public IMessageHandler
 {
@@ -41,16 +41,16 @@ class INET_API LinkStateUpdateHandler : public IMessageHandler
     };
 
   private:
-    bool validateLSChecksum(const OspfLsa *lsa) { return true; }    // not implemented
-    void acknowledgeLSA(const OspfLsaHeader& lsaHeader, OspfInterface *intf, AcknowledgementFlags acknowledgementFlags, RouterId lsaSource);
+    bool validateLSChecksum(const Ospfv2Lsa *lsa) { return true; }    // not implemented
+    void acknowledgeLSA(const Ospfv2LsaHeader& lsaHeader, Ospfv2Interface *intf, AcknowledgementFlags acknowledgementFlags, RouterId lsaSource);
 
   public:
     LinkStateUpdateHandler(Router *containingRouter);
 
-    void processPacket(Packet *packet, OspfInterface *intf, Neighbor *neighbor) override;
+    void processPacket(Packet *packet, Ospfv2Interface *intf, Neighbor *neighbor) override;
 };
 
-} // namespace ospf
+} // namespace ospfv2
 
 } // namespace inet
 

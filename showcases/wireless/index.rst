@@ -2,7 +2,7 @@ Wireless
 ========
 
 These showcases demonstrate various aspects of performing wireless network
-simulations with INET.
+simulations.
 
 General Wireless:
 
@@ -23,15 +23,15 @@ IEEE 802.11:
    :maxdepth: 1
 
    throughput/doc/index
-   errorrate/doc/index
-   hiddennode/doc/index
    handover/doc/index
    ratecontrol/doc/index
-   multiradio/doc/index
    fragmentation/doc/index
    qos/doc/index
    blockack/doc/index
    aggregation/doc/index
    txop/doc/index
+   errorrate/doc/index
+   hiddennode/doc/index
+   multiradio/doc/index
 .. crosstalk/doc/index
 .. infrastructure/doc/index

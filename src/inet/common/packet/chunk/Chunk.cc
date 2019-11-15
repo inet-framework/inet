@@ -21,6 +21,7 @@ namespace inet {
 
 bool Chunk::enableImplicitChunkSerialization = false;
 int Chunk::nextId = 0;
+const b Chunk::unspecifiedLength = b(-std::numeric_limits<int64_t>::max());
 
 Chunk::Chunk() :
     id(nextId++),
@@ -115,10 +116,10 @@ const Ptr<Chunk> Chunk::convertChunk(const std::type_info& typeInfo, const Ptr<C
     if (!enableImplicitChunkSerialization && !(flags & PF_ALLOW_SERIALIZATION) && chunkType != CT_BITS && chunkType != CT_BYTES)
         throw cRuntimeError("Implicit chunk serialization is disabled to prevent unpredictable performance degradation (you may consider changing the Chunk::enableImplicitChunkSerialization flag or passing the PF_ALLOW_SERIALIZATION flag to peek)");
     MemoryOutputStream outputStream;
-    serialize(outputStream, chunk, offset, length);
+    serialize(outputStream, chunk, offset, length < b(0) ? std::min(-length, chunk->getChunkLength() - offset) : length);
     MemoryInputStream inputStream(outputStream.getData());
     const auto& result = deserialize(inputStream, typeInfo);
-    result->tags.copyTags(chunk->tags, offset, b(0), length);
+    result->tags.copyTags(chunk->tags, offset, b(0), result->getChunkLength());
     return result;
 }
 
@@ -150,6 +151,8 @@ std::string Chunk::str() const
 
 void Chunk::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk, b offset, b length)
 {
+    CHUNK_CHECK_USAGE(length >= b(-1), "length is invalid");
+    CHUNK_CHECK_USAGE(b(0) <= offset && offset <= chunk->getChunkLength(), "offset is out of range");
     const Chunk *chunkPointer = chunk.get();
     auto serializer = ChunkSerializerRegistry::globalRegistry.getSerializer(typeid(*chunkPointer));
 #if CHUNK_CHECK_IMPLEMENTATION_ENABLED

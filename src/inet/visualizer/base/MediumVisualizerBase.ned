@@ -68,6 +68,19 @@ simple MediumVisualizerBase extends VisualizerBase
         string interferenceRangeLineStyle = default("solid"); // interference range circle line style, solid by default
         double interferenceRangeLineWidth = default(1); // interference range circle line width, 1 by default
 
+        bool displaySpectrums = default(false); // display power spectrum density at the nodes, can be enabled with dimensional analog models only
+        double spectrumFigureWidth = default(100); // plot figure width in pixels
+        double spectrumFigureHeight = default(60); // plot figure height in pixels
+        double spectrumFigureInterpolationSize = default(5); // power spectrum density interpolation distance along the frequency axis
+        bool spectrumAutoFrequencyAxis = default(true); // enables automatic frequency axis configuration
+        double spectrumMinFrequency @unit(Hz) = default(inf Hz);
+        double spectrumMaxFrequency @unit(Hz) = default(-inf Hz);
+        bool spectrumAutoPowerAxis = default(true); // enables automatic power axis configuration
+        double spectrumMinPower @unit(dBmWpMHz) = default(inf dBmWpMHz);
+        double spectrumMaxPower @unit(dBmWpMHz) = default(-inf dBmWpMHz);
+        string spectrumPlacementHint = default("bottomCenter"); // annotation placement hint, space separated list of any, top, bottom, left, right, topLeft, topCenter, topRight, etc. 
+        double spectrumPlacementPriority = default(-1); // determines the order of annotation positioning
+
         @class(MediumVisualizerBase);
 }
 

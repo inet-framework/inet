@@ -20,9 +20,9 @@
 namespace inet {
 namespace physicallayer {
 
-BandListening::BandListening(const IRadio *radio, simtime_t startTime, simtime_t endTime, Coord startPosition, Coord endPosition, Hz carrierFrequency, Hz bandwidth) :
+BandListening::BandListening(const IRadio *radio, simtime_t startTime, simtime_t endTime, Coord startPosition, Coord endPosition, Hz centerFrequency, Hz bandwidth) :
     ListeningBase(radio, startTime, endTime, startPosition, endPosition),
-    carrierFrequency(carrierFrequency),
+    centerFrequency(centerFrequency),
     bandwidth(bandwidth)
 {
 }
@@ -31,7 +31,7 @@ std::ostream& BandListening::printToStream(std::ostream& stream, int level) cons
 {
     stream << "BandListening";
     if (level <= PRINT_LEVEL_DETAIL)
-        stream << ", carrierFrequency = " << carrierFrequency
+        stream << ", centerFrequency = " << centerFrequency
                << ", bandwidth = " << bandwidth;
     return ListeningBase::printToStream(stream, level);
 }

@@ -432,6 +432,16 @@ class INET_API MemoryInputStream {
     /** @name other useful streaming functions */
     //@{
     /**
+     * Reads a string from the current position until a zero.
+     */
+    std::string readString() {
+        std::vector<uint8_t> data;
+        while (uint8_t b = readByte())
+            data.push_back(b);
+        return std::string(data.begin(), data.end());
+    }
+
+    /**
      * Reads n bits of a 64 bit unsigned integer at the current position of the
      * stream in big endian byte order and MSB to LSB bit order.
      */

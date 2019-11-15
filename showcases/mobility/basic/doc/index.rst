@@ -328,6 +328,8 @@ The configuration just sets the mobility type. Here is what it looks like when t
    :scale: 100%
    :align: center
 
+Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`MobilityShowcase.ned <../MobilityShowcase.ned>`
+
 Discussion
 ----------
 

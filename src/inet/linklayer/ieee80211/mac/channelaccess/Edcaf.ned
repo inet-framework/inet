@@ -18,7 +18,7 @@
 
 package inet.linklayer.ieee80211.mac.channelaccess;
 
-import inet.common.queueing.contract.IPacketQueue;
+import inet.queueing.contract.IPacketQueue;
 import inet.linklayer.ieee80211.mac.contract.IContention;
 import inet.linklayer.ieee80211.mac.originator.QosAckHandler;
 import inet.linklayer.ieee80211.mac.originator.QosRecoveryProcedure;
@@ -81,6 +81,5 @@ module Edcaf
                 rtsPolicyModule = "^.^.^.rtsPolicy";
                 @display("p=100,600");
         }
-    connections allowunconnected:
 }
 

@@ -165,6 +165,8 @@ in on the near-field:
 .. image:: media/ricianlognormal2.*
    :width: 100%
 
+Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`PathLossShowcase.ned <../PathLossShowcase.ned>`
+
 Further Information
 -------------------
 

@@ -170,8 +170,9 @@ class INET_API Packet : public cPacket
      */
     template <typename T>
     bool hasAtFront(b length = b(-1)) const {
-        CHUNK_CHECK_USAGE(b(-1) <= length && length <= getDataLength(), "length is invalid");
-        return content->has<T>(frontIterator, length);
+        auto dataLength = getDataLength();
+        CHUNK_CHECK_USAGE(b(-1) <= length && length <= dataLength, "length is invalid");
+        return content->has<T>(frontIterator, length == b(-1) ? -dataLength: length);
     }
 
     /**
@@ -184,15 +185,9 @@ class INET_API Packet : public cPacket
     const Ptr<const T> peekAtFront(b length = b(-1), int flags = 0) const {
         auto dataLength = getDataLength();
         CHUNK_CHECK_USAGE(b(-1) <= length && length <= dataLength, "length is invalid");
-        if (backIterator.getPosition() == b(0) || (length != b(-1) && length <= dataLength)) {
-            const auto& chunk = content->peek<T>(frontIterator, length, flags);
-            return chunk;
-        }
-        else {
-            auto available = content->peek(frontIterator, dataLength);
-            const auto& chunk = available->peek<T>(Chunk::ForwardIterator(b(0)), length, flags);
-            return chunk;
-        }
+        const auto& chunk = content->peek<T>(frontIterator, length == b(-1) ? -dataLength : length, flags);
+        CHUNK_CHECK_IMPLEMENTATION(chunk == nullptr || chunk->getChunkLength() <= dataLength);
+        return chunk;
     }
 
     /**
@@ -251,28 +246,24 @@ class INET_API Packet : public cPacket
      * result is chosen according to the current representation.
      */
     template <typename T>
-    bool hasAtBack(b length = b(-1)) const {
-        CHUNK_CHECK_USAGE(b(-1) <= length && length <= getDataLength(), "length is invalid");
+    bool hasAtBack(b length) const {
+        CHUNK_CHECK_USAGE(b(0) <= length && length <= getDataLength(), "length is invalid");
         return content->has<T>(backIterator, length);
     }
 
     /**
      * Returns the designated part as an immutable chunk in the requested
      * representation. Decreases the back offset with the length of the returned
-     * chunk. If the length is unspecified, then the length of the result is
-     * chosen according to the current representation. The flags parameter
-     * is a combination of Chunk::PeekFlag enumeration members.
+     * chunk. The flags parameter is a combination of Chunk::PeekFlag enumeration
+     * members.
      */
     template <typename T>
     const Ptr<const T> peekAtBack(b length, int flags = 0) const {
         auto dataLength = getDataLength();
         CHUNK_CHECK_USAGE(b(0) <= length && length <= dataLength, "length is invalid");
         const auto& chunk = content->peek<T>(backIterator, length, flags);
-        //TODO revise it: check length vs dataLength, doesn't read popped data!
-        if (chunk == nullptr || chunk->getChunkLength() <= dataLength)
-            return chunk;
-        else
-            return content->peek<T>(backIterator, dataLength, flags);
+        CHUNK_CHECK_IMPLEMENTATION(chunk == nullptr || chunk->getChunkLength() <= dataLength);
+        return chunk;
     }
 
     /**
@@ -317,9 +308,10 @@ class INET_API Packet : public cPacket
      */
     template <typename T>
     bool hasDataAt(b offset, b length = b(-1)) const {
-        CHUNK_CHECK_USAGE(b(0) <= offset && offset <= getDataLength(), "offset is out of range");
-        CHUNK_CHECK_USAGE(b(-1) <= length && offset + length <= getDataLength(), "length is invalid");
-        return content->has<T>(Chunk::Iterator(true, frontIterator.getPosition() + offset, -1), length);
+        auto dataLength = getDataLength();
+        CHUNK_CHECK_USAGE(b(0) <= offset && offset <= dataLength, "offset is out of range");
+        CHUNK_CHECK_USAGE(b(-1) <= length && offset + length <= dataLength, "length is invalid");
+        return content->has<T>(Chunk::Iterator(true, frontIterator.getPosition() + offset, -1), length == b(-1) ? -(dataLength - offset) : length);
     }
 
     /**
@@ -330,9 +322,10 @@ class INET_API Packet : public cPacket
      */
     template <typename T>
     const Ptr<const T> peekDataAt(b offset, b length = b(-1), int flags = 0) const {
-        CHUNK_CHECK_USAGE(b(0) <= offset && offset <= getDataLength(), "offset is out of range");
-        CHUNK_CHECK_USAGE(b(-1) <= length && offset + length <= getDataLength(), "length is invalid");
-        return content->peek<T>(Chunk::Iterator(true, frontIterator.getPosition() + offset, -1), length, flags);
+        auto dataLength = getDataLength();
+        CHUNK_CHECK_USAGE(b(0) <= offset && offset <= dataLength, "offset is out of range");
+        CHUNK_CHECK_USAGE(b(-1) <= length && offset + length <= dataLength, "length is invalid");
+        return content->peek<T>(Chunk::Iterator(true, frontIterator.getPosition() + offset, -1), length == b(-1) ? -(dataLength - offset) : length, flags);
     }
 
     /**
@@ -394,9 +387,10 @@ class INET_API Packet : public cPacket
      */
     template <typename T>
     bool hasAt(b offset, b length = b(-1)) const {
-        CHUNK_CHECK_USAGE(b(0) <= offset && offset <= getTotalLength(), "offset is out of range");
-        CHUNK_CHECK_USAGE(b(-1) <= length && offset + length <= getTotalLength(), "length is invalid");
-        return content->has<T>(Chunk::Iterator(true, b(offset), -1), length);
+        auto totalLength = getTotalLength();
+        CHUNK_CHECK_USAGE(b(0) <= offset && offset <= totalLength, "offset is out of range");
+        CHUNK_CHECK_USAGE(b(-1) <= length && offset + length <= totalLength, "length is invalid");
+        return content->has<T>(Chunk::Iterator(true, b(offset), -1), length == b(-1) ? -(totalLength - offset) : length);
     }
 
     /**
@@ -407,9 +401,10 @@ class INET_API Packet : public cPacket
      */
     template <typename T>
     const Ptr<const T> peekAt(b offset, b length = b(-1), int flags = 0) const {
-        CHUNK_CHECK_USAGE(b(0) <= offset && offset <= getTotalLength(), "offset is out of range");
-        CHUNK_CHECK_USAGE(b(-1) <= length && offset + length <= getTotalLength(), "length is invalid");
-        return content->peek<T>(Chunk::Iterator(true, b(offset), -1), length, flags);
+        auto totalLength = getTotalLength();
+        CHUNK_CHECK_USAGE(b(0) <= offset && offset <= totalLength, "offset is out of range");
+        CHUNK_CHECK_USAGE(b(-1) <= length && offset + length <= totalLength, "length is invalid");
+        return content->peek<T>(Chunk::Iterator(true, b(offset), -1), length == b(-1) ? -(totalLength - offset) : length, flags);
     }
 
     /**
@@ -527,7 +522,7 @@ class INET_API Packet : public cPacket
      * of back popped part must be zero before calling this function. The flags
      * parameter is a combination of Chunk::PeekFlag enumeration members.
      */
-    const Ptr<Chunk> removeAtBack(b length, int flags = 0);
+    const Ptr<Chunk> removeAtBack(b length = b(-1), int flags = 0);
 
     /**
      * Removes the designated part and returns it as a mutable chunk in the
@@ -554,7 +549,7 @@ class INET_API Packet : public cPacket
      */
     template <typename T>
     const Ptr<T> removeAtBack(b length, int flags = 0) {
-        CHUNK_CHECK_USAGE(b(1) <= length && length <= getDataLength(), "length is invalid");
+        CHUNK_CHECK_USAGE(b(0) <= length && length <= getDataLength(), "length is invalid");
         CHUNK_CHECK_USAGE(backIterator.getPosition() == b(0), "back popped length is non-zero");
         const auto& chunk = popAtBack<T>(length, flags);
         trimBack();

@@ -17,6 +17,12 @@ package inet.applications.tcpapp;
 
 import inet.applications.contract.IApp;
 
+//
+// This module accepts/rejects TCP connections and creates TCP server connections
+// as part of a generic TCP server application.
+//
+// @see ~TcpServerApp, ~TcpServerConnection
+//
 simple TcpServerListener like IApp
 {
     parameters:

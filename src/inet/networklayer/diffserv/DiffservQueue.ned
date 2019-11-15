@@ -18,11 +18,11 @@
 
 package inet.networklayer.diffserv;
 
-import inet.common.queueing.CompoundPacketQueue;
-import inet.common.queueing.DropTailQueue;
-import inet.common.queueing.PacketConsumer;
-import inet.common.queueing.PriorityScheduler;
-import inet.common.queueing.WrrScheduler;
+import inet.queueing.queue.CompoundPacketQueue;
+import inet.queueing.queue.DropTailQueue;
+import inet.queueing.scheduler.PriorityScheduler;
+import inet.queueing.scheduler.WrrScheduler;
+import inet.queueing.sink.PassivePacketSink;
 
 //
 // This is an example queue, that can be used in
@@ -64,11 +64,11 @@ module DiffservQueue extends CompoundPacketQueue
             cbs = default(5000B); // 5 1000B packets
             @display("p=250,130");
         }
-        sink: PacketConsumer {
+        sink: PassivePacketSink {
             @display("p=400,80");
         }
         efQueue: DropTailQueue {
-            frameCapacity = default(5); // keep low, for low delay and jitter
+            packetCapacity = default(5); // keep low, for low delay and jitter
             @display("p=400,180");
         }
         af1xQueue: AFxyQueue {

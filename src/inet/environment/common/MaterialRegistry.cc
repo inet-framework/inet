@@ -53,6 +53,7 @@ const Material *MaterialRegistry::getMaterial(const char *name) const
         addMaterial(new Material("brick", Ohmm(3E+3), 4.5, 1));
         addMaterial(new Material("concrete", Ohmm(1E+2), 4.5, 1));
         addMaterial(new Material("glass", Ohmm(1E+12), 7, 1));
+        addMaterial(new Material("DH36", Ohmm(100), NaN, 1000));
     }
     auto it = materials.find(name);
     return it != materials.end() ? it->second : nullptr;

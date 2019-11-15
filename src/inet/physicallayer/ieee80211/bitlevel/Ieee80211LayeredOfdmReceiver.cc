@@ -26,8 +26,8 @@
 #include "inet/physicallayer/common/bitlevel/SignalSymbolModel.h"
 #include "inet/physicallayer/common/packetlevel/BandListening.h"
 #include "inet/physicallayer/common/packetlevel/ListeningDecision.h"
-#include "inet/physicallayer/common/packetlevel/SignalTag_m.h"
 #include "inet/physicallayer/contract/bitlevel/ISymbol.h"
+#include "inet/physicallayer/contract/packetlevel/SignalTag_m.h"
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211LayeredOfdmReceiver.h"
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211LayeredTransmission.h"
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OfdmDecoderModule.h"
@@ -41,13 +41,13 @@
 #include "inet/physicallayer/modulation/BpskModulation.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 Define_Module(Ieee80211LayeredOfdmReceiver);
 
 void Ieee80211LayeredOfdmReceiver::initialize(int stage)
 {
+    SnirReceiverBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         errorModel = dynamic_cast<ILayeredErrorModel *>(getSubmodule("errorModel"));
         dataDecoder = dynamic_cast<IDecoder *>(getSubmodule("dataDecoder"));
@@ -57,11 +57,10 @@ void Ieee80211LayeredOfdmReceiver::initialize(int stage)
         pulseFilter = dynamic_cast<IPulseFilter *>(getSubmodule("pulseFilter"));
         analogDigitalConverter = dynamic_cast<IAnalogDigitalConverter *>(getSubmodule("analogDigitalConverter"));
 
-        energyDetection = mW(math::dBm2mW(par("energyDetection")));
-        sensitivity = mW(math::dBm2mW(par("sensitivity")));
-        carrierFrequency = Hz(par("carrierFrequency"));
+        energyDetection = mW(math::dBmW2mW(par("energyDetection")));
+        sensitivity = mW(math::dBmW2mW(par("sensitivity")));
+        centerFrequency = Hz(par("centerFrequency"));
         bandwidth = Hz(par("bandwidth"));
-        snirThreshold = math::dB2fraction(par("snirThreshold"));
         channelSpacing = Hz(par("channelSpacing"));
         isCompliant = par("isCompliant");
         if (isCompliant && (dataDecoder || signalDecoder || dataDemodulator || signalDemodulator || pulseFilter || analogDigitalConverter))
@@ -102,7 +101,7 @@ std::ostream& Ieee80211LayeredOfdmReceiver::printToStream(std::ostream& stream, 
                << ", analogDigitalConverter = " << printObjectToString(analogDigitalConverter, level + 1)
                << ", energyDetection = " << energyDetection
                << ", sensitivity = " << energyDetection
-               << ", carrierFrequency = " << carrierFrequency
+               << ", centerFrequency = " << centerFrequency
                << ", bandwidth = " << bandwidth
                << ", channelSpacing = " << channelSpacing
                << ", snirThreshold = " << snirThreshold
@@ -394,6 +393,7 @@ const IReceptionResult *Ieee80211LayeredOfdmReceiver::computeReceptionResult(con
     auto snirInd = packet->addTagIfAbsent<SnirInd>();
     snirInd->setMinimumSnir(snir->getMin());
     snirInd->setMaximumSnir(snir->getMax());
+    snirInd->setAverageSnir(snir->getMean());
     packet->addTagIfAbsent<ErrorRateInd>(); // TODO: should be done  setPacketErrorRate(packetModel->getPER());
     auto modeInd = packet->addTagIfAbsent<Ieee80211ModeInd>();
     modeInd->setMode(transmission->getMode());
@@ -405,7 +405,7 @@ const IReceptionResult *Ieee80211LayeredOfdmReceiver::computeReceptionResult(con
 const IListening *Ieee80211LayeredOfdmReceiver::createListening(const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition) const
 {
     // We assume that in compliant mode the bandwidth is always 20MHz.
-    return new BandListening(radio, startTime, endTime, startPosition, endPosition, carrierFrequency, isCompliant ? Hz(20000000) : bandwidth);
+    return new BandListening(radio, startTime, endTime, startPosition, endPosition, centerFrequency, isCompliant ? Hz(20000000) : bandwidth);
 }
 
 // TODO: copy
@@ -431,7 +431,7 @@ bool Ieee80211LayeredOfdmReceiver::computeIsReceptionPossible(const IListening *
     const LayeredReception *scalarReception = check_and_cast<const LayeredReception *>(reception);
     // TODO: scalar
     const ScalarReceptionSignalAnalogModel *analogModel = check_and_cast<const ScalarReceptionSignalAnalogModel *>(scalarReception->getAnalogModel());
-    if (bandListening->getCarrierFrequency() != analogModel->getCarrierFrequency() || bandListening->getBandwidth() != analogModel->getBandwidth()) {
+    if (bandListening->getCenterFrequency() != analogModel->getCenterFrequency() || bandListening->getBandwidth() != analogModel->getBandwidth()) {
         EV_DEBUG << "Computing reception possible: listening and reception bands are different -> reception is impossible" << endl;
         return false;
     }
@@ -453,6 +453,7 @@ Ieee80211LayeredOfdmReceiver::~Ieee80211LayeredOfdmReceiver()
         delete mode;
     }
 }
-} /* namespace physicallayer */
-} /* namespace inet */
+
+} // namespace physicallayer
+} // namespace inet
 

@@ -61,17 +61,17 @@ void SctpCrcInsertion::insertCrc(const Protocol *networkProtocol, const L3Addres
         case CRC_COMPUTED: {
             // if the CRC mode is computed, then compute the CRC and set it
             // this computation is delayed after the routing decision, see INetfilter hook
-            sctpHeader->setCrc(0x0000); // make sure that the CRC is 0 in the TCP header before computing the CRC
-            MemoryOutputStream sctpHeaderStream;
-            Chunk::serialize(sctpHeaderStream, sctpHeader);
-            auto sctpHeaderBytes = sctpHeaderStream.getData();
-            const std::vector<uint8_t> emptyData;
-            auto sctpDataBytes = (packet->getDataLength() > b(0)) ? packet->peekDataAsBytes()->getBytes() : emptyData;
-            auto headerLength = sctpHeaderBytes.size();
-            auto buffer = new uint8_t[headerLength];
-            std::copy(sctpHeaderBytes.begin(), sctpHeaderBytes.end(), (uint8_t *)buffer);
-            auto crc = SctpChecksum::checksum(buffer, headerLength);
+            sctpHeader->setCrc(0); // make sure that the CRC is 0 in the SCTP header before computing the CRC
+            MemoryOutputStream sctpPacketStream;
+            Chunk::serialize(sctpPacketStream, sctpHeader);
+            Chunk::serialize(sctpPacketStream, packet->peekData(Chunk::PF_ALLOW_EMPTY));
+            const auto& sctpPacketBytes = sctpPacketStream.getData();
+            auto length = sctpPacketBytes.size();
+            auto buffer = new uint8_t[length];
+            std::copy(sctpPacketBytes.begin(), sctpPacketBytes.end(), (uint8_t *)buffer);
+            auto crc = SctpChecksum::checksum(buffer, length);
             sctpHeader->setCrc(crc);
+            delete [] buffer;
             break;
         }
         default:

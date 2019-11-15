@@ -2,13 +2,14 @@ Visualization
 =============
 
 The INET Framework is able to visualize a wide range of events and conditions
-in the network: packet drops, data link connectivity, wireless signal path loss, 
+in the network: packet drops, data link connectivity, wireless signal path loss,
 transport connections, routing table routes, and many more.
 Visualization is implemented as a collection of configurable INET modules that
 can be added to simulations at will.
 
 These showcases demonstrate several such visualization possibilities
 via practical examples.
+
 Communication:
 
 .. toctree::
@@ -51,4 +52,3 @@ Generic:
    statistic/doc/index
 .. filtering/doc/index
 .. advanced/doc/index
-

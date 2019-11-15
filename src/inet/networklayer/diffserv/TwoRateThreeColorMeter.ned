@@ -26,9 +26,13 @@ package inet.networklayer.diffserv;
 // to be either green, yellow or red.
 //
 // The green traffic is guaranteed to be under (in bits)
-//   pir * (t1 - t0) + 8 * pbs and cir * (t1 - t0) + 8 * cbs,
+// <pre>
+//   pir * (t1 - t0) + 8 * pbs and cir * (t1 - t0) + 8 * cbs
+// </pre>
 // and yellow traffic to be under
+// <pre>
 //   pir * (t1 - t0) + 8 * pbs
+// </pre>
 // in every [t0,t1] interval.
 //
 // When operating in color-aware mode, the meter does not recolor

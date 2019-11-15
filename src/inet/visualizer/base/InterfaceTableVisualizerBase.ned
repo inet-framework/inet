@@ -36,6 +36,7 @@ package inet.visualizer.base;
 //  - %l IPv4 or IPv6 netmask length
 //  - %g generic address
 //  - %n network address
+//  - %t up or down state
 //  - %i InterfaceEntry::info()
 //  - %s InterfaceEntry::str()
 //  - %\ conditional newline for wired interfaces

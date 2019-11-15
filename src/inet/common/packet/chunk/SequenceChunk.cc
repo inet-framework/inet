@@ -13,6 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
+#include "inet/common/packet/chunk/EmptyChunk.h"
 #include "inet/common/packet/chunk/SequenceChunk.h"
 
 namespace inet {
@@ -45,9 +46,9 @@ const Ptr<Chunk> SequenceChunk::peekUnchecked(PeekPredicate predicate, PeekConve
     b chunkLength = getChunkLength();
     CHUNK_CHECK_USAGE(b(0) <= iterator.getPosition() && iterator.getPosition() <= chunkLength, "iterator is out of range");
     // 1. peeking an empty part returns nullptr
-    if (length == b(0) || (iterator.getPosition() == chunkLength && length == b(-1))) {
+    if (length == b(0) || (iterator.getPosition() == chunkLength && length < b(0))) {
         if (predicate == nullptr || predicate(nullptr))
-            return nullptr;
+            return EmptyChunk::getEmptyChunk(flags);
     }
     // 2. peeking the whole part returns this chunk only if length is also specified
     if (iterator.getPosition() == b(0) && length == chunkLength) {
@@ -59,7 +60,8 @@ const Ptr<Chunk> SequenceChunk::peekUnchecked(PeekPredicate predicate, PeekConve
     if (iterator.getIndex() != -1 && iterator.getIndex() != (int)chunks.size()) {
         // KLUDGE: TODO: constPtrCast<Chunk>
         const auto& chunk = constPtrCast<Chunk>(getElementChunk(iterator));
-        if (length == b(-1) || chunk->getChunkLength() == length) {
+        auto chunkLength = chunk->getChunkLength();
+        if (-length >= chunkLength || length == chunkLength) {
             if (predicate == nullptr || predicate(chunk))
                 return chunk;
         }
@@ -69,17 +71,17 @@ const Ptr<Chunk> SequenceChunk::peekUnchecked(PeekPredicate predicate, PeekConve
     for (size_t i = 0; i < chunks.size(); i++) {
         // KLUDGE: TODO: constPtrCast<Chunk>
         const auto& chunk = constPtrCast<Chunk>(chunks[getElementIndex(iterator.isForward(), i)]);
-        b chunkLength = chunk->getChunkLength();
+        b elementChunkLength = chunk->getChunkLength();
         // 4.1 peeking the whole part of an element chunk returns that element chunk
-        if (iterator.getPosition() == position && (length == b(-1) || length == chunk->getChunkLength())) {
+        if (iterator.getPosition() == position && (-length >= elementChunkLength || length == elementChunkLength)) {
             if (predicate == nullptr || predicate(chunk))
                 return chunk;
         }
         // 4.2 peeking a part of an element chunk returns the part of that element chunk
-        if (position <= iterator.getPosition() && iterator.getPosition() < position + chunkLength &&
-            (length == b(-1) || iterator.getPosition() + length <= position + chunkLength))
+        if (position <= iterator.getPosition() && iterator.getPosition() < position + elementChunkLength &&
+            (-length >= elementChunkLength || iterator.getPosition() + length <= position + elementChunkLength))
             return chunk->peekUnchecked(predicate, converter, Iterator(iterator.isForward(), iterator.getPosition() - position, -1), length, flags);
-        position += chunkLength;
+        position += elementChunkLength;
     }
     // 5. peeking without conversion returns a SequenceChunk
     if (converter == nullptr)
@@ -90,8 +92,11 @@ const Ptr<Chunk> SequenceChunk::peekUnchecked(PeekPredicate predicate, PeekConve
 
 const Ptr<Chunk> SequenceChunk::convertChunk(const std::type_info& typeInfo, const Ptr<Chunk>& chunk, b offset, b length, int flags)
 {
+    auto chunkLength = chunk->getChunkLength();
+    CHUNK_CHECK_IMPLEMENTATION(b(0) <= offset && offset <= chunkLength);
+    CHUNK_CHECK_IMPLEMENTATION(length <= chunkLength - offset);
     auto sequenceChunk = makeShared<SequenceChunk>();
-    auto sliceChunk = makeShared<SliceChunk>(chunk, offset, length);
+    auto sliceChunk = makeShared<SliceChunk>(chunk, offset, length < b(0) ? std::min(-length, chunkLength - offset) : length);
     sliceChunk->markImmutable();
     sequenceChunk->insertAtBack(sliceChunk);
     return sequenceChunk;

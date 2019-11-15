@@ -19,7 +19,7 @@
 #include <iostream>
 
 #include "inet/applications/pingapp/PingApp.h"
-
+#include "inet/applications/pingapp/PingApp_m.h"
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/Protocol.h"
@@ -73,12 +73,6 @@ const std::map<const Protocol *, const Protocol *> PingApp::l3Echo( {
     { &Protocol::probabilistic, &Protocol::echo },
     { &Protocol::wiseRoute, &Protocol::echo },
 });
-
-enum PingSelfKinds {
-    PING_FIRST_ADDR = 1001,
-    PING_CHANGE_ADDR,
-    PING_SEND
-};
 
 PingApp::PingApp()
 {
@@ -402,7 +396,7 @@ void PingApp::sendPingRequest()
             outPacket->insertAtBack(payload);
             Icmp::insertCrc(crcMode, request, outPacket);
             outPacket->insertAtFront(request);
-            outPacket->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::icmpv4);
+            outPacket->addTag<PacketProtocolTag>()->setProtocol(&Protocol::icmpv4);
             break;
 #else
             throw cRuntimeError("INET compiled without Ipv4");
@@ -416,7 +410,7 @@ void PingApp::sendPingRequest()
             outPacket->insertAtBack(payload);
             Icmpv6::insertCrc(crcMode, request, outPacket);
             outPacket->insertAtFront(request);
-            outPacket->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::icmpv6);
+            outPacket->addTag<PacketProtocolTag>()->setProtocol(&Protocol::icmpv6);
             break;
 #else
             throw cRuntimeError("INET compiled without Ipv6");
@@ -433,7 +427,7 @@ void PingApp::sendPingRequest()
             outPacket->insertAtBack(payload);
             // insertCrc(crcMode, request, outPacket);
             outPacket->insertAtFront(request);
-            outPacket->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::echo);
+            outPacket->addTag<PacketProtocolTag>()->setProtocol(&Protocol::echo);
             break;
 #else
             throw cRuntimeError("INET compiled without Next Hop Forwarding");
@@ -443,11 +437,11 @@ void PingApp::sendPingRequest()
             throw cRuntimeError("Unaccepted destination address type: %d (address: %s)", (int)destAddr.getType(), destAddr.str().c_str());
     }
 
-    auto addressReq = outPacket->addTagIfAbsent<L3AddressReq>();
+    auto addressReq = outPacket->addTag<L3AddressReq>();
     addressReq->setSrcAddress(srcAddr);
     addressReq->setDestAddress(destAddr);
     if (hopLimit != -1)
-        outPacket->addTagIfAbsent<HopLimitReq>()->setHopLimit(hopLimit);
+        outPacket->addTag<HopLimitReq>()->setHopLimit(hopLimit);
     EV_INFO << "Sending ping request #" << sendSeqNo << " to lower layer.\n";
     currentSocket->send(outPacket);
 

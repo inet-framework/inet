@@ -44,8 +44,8 @@ package inet.common.packet.recorder;
 // ~Ipv6Header classes), possibly encapsulated into other (L2, PHY, etc)
 // frames at any depth. Packets not containing IP packets are discarded.
 // The following higher layer protocol messages (inside IP packets) are
-// recognized and dumped/recorded: Ipv4Header, SctpMessage, TcpHeader,
-// IcmpMessage.
+// recognized and dumped/recorded: ~Ipv4Header, ~SctpHeader, ~TcpHeader,
+// ~IcmpHeader.
 //
 simple PcapRecorder
 {
@@ -56,7 +56,7 @@ simple PcapRecorder
                                         // (-1 means autodetect based on first recordable packet)
         int snaplen = default(65535);  // maximum number of bytes to record per packet
         bool dumpBadFrames = default(true); // enable dump of frames with hasBitError
-        string moduleNamePatterns = default("wlan[*] eth[*] ppp[*] ext[*]"); // space-separated list of sibling module names to listen on
+        string moduleNamePatterns = default("wlan[*] eth[*] ppp[*]"); // space-separated list of sibling module names to listen on
         string sendingSignalNames = default("packetSentToLower"); // space-separated list of outbound packet signals to subscribe to
         string receivingSignalNames = default("packetReceivedFromLower"); // space-separated list of inbound packet signals to subscribe to
         string dumpProtocols = default("ethernetmac ppp ieee80211mac"); // space-separated list of protocol names as defined in the Protocol class
@@ -67,5 +67,6 @@ simple PcapRecorder
         bool alwaysFlush = default(false); // flush the pcapFile after each write to ensure that all packets are captured in case of a crash
         string displayStringTextFormat = default("rec: %n pks");
         @display("i=block/blackboard");
+        @signal[packetRecorded](type=Packet);
 }
 

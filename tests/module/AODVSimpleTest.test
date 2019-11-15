@@ -70,7 +70,7 @@ num-rngs = 3
 sim-time-limit = 100s
 
 # channel physical parameters
-*.radioMedium.mediumLimitCache.carrierFrequency = 2.4GHz
+*.radioMedium.mediumLimitCache.centerFrequency = 2.4GHz
 *.radioMedium.mediumLimitCache.maxTransmissionPower = 2.0mW
 
 # mobility
@@ -92,13 +92,9 @@ sim-time-limit = 100s
 # nic settings
 **.wlan[*].bitrate = 2Mbps
 
-**.wlan[*].mgmt.frameCapacity = 10
 **.wlan[*].mac.address = "auto"
-**.wlan[*].mac.queue.frameCapacity = 14
+**.wlan[*].mac.queue.packetCapacity = 14
 **.wlan[*].mac.rtsThresholdBytes = 3000B
-**.wlan[*].mac.retryLimit = 7
-**.wlan[*].mac.cwMinData = 7
-**.wlan[*].mac.cwMinMulticast = 31
 
 **.wlan[*].radio.transmitter.power = 2mW
 **.wlan[*].radio.transmitter.headerLength = 4b

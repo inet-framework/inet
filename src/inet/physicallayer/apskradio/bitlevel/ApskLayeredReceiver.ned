@@ -17,12 +17,13 @@
 
 package inet.physicallayer.apskradio.bitlevel;
 
-import inet.physicallayer.contract.packetlevel.IReceiver;
+import inet.physicallayer.base.packetlevel.SnirReceiverBase;
 import inet.physicallayer.contract.bitlevel.IAnalogDigitalConverter;
 import inet.physicallayer.contract.bitlevel.IDecoder;
 import inet.physicallayer.contract.bitlevel.IDemodulator;
 import inet.physicallayer.contract.bitlevel.ILayeredErrorModel;
 import inet.physicallayer.contract.bitlevel.IPulseFilter;
+import inet.physicallayer.contract.packetlevel.IReceiver;
 
 //
 // This receiver model is part of a simple hypothetical layered radio. It
@@ -46,17 +47,16 @@ import inet.physicallayer.contract.bitlevel.IPulseFilter;
 // purpose of this model is to provide a basic infrastructure for further
 // development and experimentation.
 //
-// See also ~ApskDemodulator, ~ApskDecoder, and ~ApskLayeredTransmitter.
+// @see ~ApskDemodulator, ~ApskDecoder, ~ApskLayeredTransmitter.
 //
-module ApskLayeredReceiver like IReceiver
+module ApskLayeredReceiver extends SnirReceiverBase like IReceiver
 {
     parameters:
         string levelOfDetail @enum("packet", "bit", "symbol", "sample") = default("symbol");
         double energyDetection @unit(dBm); // TODO: @unit(W) + dBm/dBW <--> W
         double sensitivity @unit(dBm); // TODO: @unit(W) + dBm/dBW <--> W
-        double carrierFrequency @unit(Hz);
+        double centerFrequency @unit(Hz);
         double bandwidth @unit(Hz);
-        double snirThreshold @unit(dB);
         @display("i=block/wrx");
         @class(ApskLayeredReceiver);
 

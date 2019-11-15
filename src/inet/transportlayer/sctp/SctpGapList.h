@@ -39,18 +39,18 @@ class INET_API SctpSimpleGapList
     void check(const uint32 cTsnAck) const;
     void print(std::ostream& os) const;
 
-    inline uint32 getNumGaps() const
+    uint32 getNumGaps() const
     {
         return NumGaps;
     }
 
-    inline uint32 getGapStart(const uint32 index) const
+    uint32 getGapStart(const uint32 index) const
     {
         assert(index < NumGaps);
         return GapStartList[index];
     }
 
-    inline uint32 getGapStop(const uint32 index) const
+    uint32 getGapStop(const uint32 index) const
     {
         assert(index < NumGaps);
         return GapStopList[index];
@@ -81,18 +81,18 @@ class INET_API SctpGapList
     SctpGapList();
     ~SctpGapList();
 
-    inline void setInitialCumAckTsn(const uint32 cumAckTsn)
+    void setInitialCumAckTsn(const uint32 cumAckTsn)
     {
         assert(CombinedGapList.getNumGaps() == 0);
         CumAckTsn = cumAckTsn;
     }
 
-    inline uint32 getCumAckTsn() const
+    uint32 getCumAckTsn() const
     {
         return CumAckTsn;
     }
 
-    inline uint32 getHighestTsnReceived() const
+    uint32 getHighestTsnReceived() const
     {
         if (CombinedGapList.getNumGaps() > 0) {
             return CombinedGapList.getGapStop(CombinedGapList.getNumGaps() - 1);
@@ -108,7 +108,7 @@ class INET_API SctpGapList
         GT_NonRevokable = 2
     };
 
-    inline uint32 getNumGaps(const GapType type) const
+    uint32 getNumGaps(const GapType type) const
     {
         if (type == GT_Revokable) {
             return RevokableGapList.getNumGaps();
@@ -121,22 +121,22 @@ class INET_API SctpGapList
         }
     }
 
-    inline bool tsnInGapList(const uint32 tsn) const
+    bool tsnInGapList(const uint32 tsn) const
     {
         return CombinedGapList.tsnInGapList(tsn);
     }
 
-    inline bool tsnIsRevokable(const uint32 tsn) const
+    bool tsnIsRevokable(const uint32 tsn) const
     {
         return RevokableGapList.tsnInGapList(tsn);
     }
 
-    inline bool tsnIsNonRevokable(const uint32 tsn) const
+    bool tsnIsNonRevokable(const uint32 tsn) const
     {
         return NonRevokableGapList.tsnInGapList(tsn);
     }
 
-    inline uint32 getGapStart(const GapType type, const uint32 index) const
+    uint32 getGapStart(const GapType type, const uint32 index) const
     {
         if (type == GT_Revokable) {
             return RevokableGapList.getGapStart(index);
@@ -149,7 +149,7 @@ class INET_API SctpGapList
         }
     }
 
-    inline uint32 getGapStop(const GapType type, const uint32 index) const
+    uint32 getGapStop(const GapType type, const uint32 index) const
     {
         if (type == GT_Revokable) {
             return RevokableGapList.getGapStop(index);

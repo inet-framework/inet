@@ -110,6 +110,7 @@ void MacProtocolBase::popTxQueue()
         throw cRuntimeError("Model error: incomplete transmission exists");
     ASSERT(txQueue != nullptr);
     currentTxFrame = txQueue->popPacket();
+    take(currentTxFrame);
 }
 
 void MacProtocolBase::flushQueue(PacketDropDetails& details)

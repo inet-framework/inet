@@ -282,7 +282,7 @@ void InterfaceTable::addInterface(InterfaceEntry *entry)
     if (!host)
         throw cRuntimeError("InterfaceTable must precede all network interface modules in the node's NED definition");
     // check name is unique
-    if (getInterfaceByName(entry->getInterfaceName()) != nullptr)
+    if (findInterfaceByName(entry->getInterfaceName()) != nullptr)
         throw cRuntimeError("addInterface(): interface '%s' already registered", entry->getInterfaceName());
 
     // insert
@@ -417,7 +417,7 @@ void InterfaceTable::updateLinkDisplayString(InterfaceEntry *entry) const
     }
 }
 
-InterfaceEntry *InterfaceTable::getInterfaceByNodeOutputGateId(int id) const
+InterfaceEntry *InterfaceTable::findInterfaceByNodeOutputGateId(int id) const
 {
     // linear search is OK because normally we have don't have many interfaces and this func is rarely called
     Enter_Method_Silent();
@@ -429,7 +429,7 @@ InterfaceEntry *InterfaceTable::getInterfaceByNodeOutputGateId(int id) const
     return nullptr;
 }
 
-InterfaceEntry *InterfaceTable::getInterfaceByNodeInputGateId(int id) const
+InterfaceEntry *InterfaceTable::findInterfaceByNodeInputGateId(int id) const
 {
     // linear search is OK because normally we have don't have many interfaces and this func is rarely called
     Enter_Method_Silent();
@@ -441,7 +441,7 @@ InterfaceEntry *InterfaceTable::getInterfaceByNodeInputGateId(int id) const
     return nullptr;
 }
 
-InterfaceEntry *InterfaceTable::getInterfaceByInterfaceModule(cModule *ifmod) const
+InterfaceEntry *InterfaceTable::findInterfaceByInterfaceModule(cModule *ifmod) const
 {
     // ifmod is something like "host.eth[1].mac"; climb up to find "host.eth[1]" from it
     ASSERT(host != nullptr);
@@ -466,15 +466,15 @@ InterfaceEntry *InterfaceTable::getInterfaceByInterfaceModule(cModule *ifmod) co
 
     InterfaceEntry *ie = nullptr;
     if (nodeInputGateId >= 0)
-        ie = getInterfaceByNodeInputGateId(nodeInputGateId);
+        ie = findInterfaceByNodeInputGateId(nodeInputGateId);
     if (!ie && nodeOutputGateId >= 0)
-        ie = getInterfaceByNodeOutputGateId(nodeOutputGateId);
+        ie = findInterfaceByNodeOutputGateId(nodeOutputGateId);
 
     ASSERT(!ie || (ie->getNodeInputGateId() == nodeInputGateId && ie->getNodeOutputGateId() == nodeOutputGateId));
     return ie;
 }
 
-InterfaceEntry *InterfaceTable::getInterfaceByName(const char *name) const
+InterfaceEntry *InterfaceTable::findInterfaceByName(const char *name) const
 {
     Enter_Method_Silent();
     if (!name)
@@ -487,7 +487,7 @@ InterfaceEntry *InterfaceTable::getInterfaceByName(const char *name) const
     return nullptr;
 }
 
-InterfaceEntry *InterfaceTable::getFirstLoopbackInterface() const
+InterfaceEntry *InterfaceTable::findFirstLoopbackInterface() const
 {
     Enter_Method_Silent();
     int n = idToInterface.size();
@@ -498,7 +498,18 @@ InterfaceEntry *InterfaceTable::getFirstLoopbackInterface() const
     return nullptr;
 }
 
-InterfaceEntry *InterfaceTable::getFirstMulticastInterface() const
+InterfaceEntry *InterfaceTable::findFirstNonLoopbackInterface() const
+{
+    Enter_Method_Silent();
+    int n = idToInterface.size();
+    for (int i = 0; i < n; i++)
+        if (idToInterface[i] && !idToInterface[i]->isLoopback())
+            return idToInterface[i];
+
+    return nullptr;
+}
+
+InterfaceEntry *InterfaceTable::findFirstMulticastInterface() const
 {
     Enter_Method_Silent();
     int n = idToInterface.size();

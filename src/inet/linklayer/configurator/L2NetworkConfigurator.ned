@@ -27,12 +27,13 @@ package inet.linklayer.configurator;
 //
 // The following example configures port 5 (if it exists) on all switches to cost 19 and
 // priority 32768:
+// <pre>
 // <config>
 //   <interface hosts='**' ports='5' cost='19' priority='32768'/>
 // </config>
+// <pre>
 //
-// For more information about the usage of the selector attributes see
-// ~Ipv4NetworkConfigurator.
+// For more information about the usage of the selector attributes see ~Ipv4NetworkConfigurator.
 //
 simple L2NetworkConfigurator
 {

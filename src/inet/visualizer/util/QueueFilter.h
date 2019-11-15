@@ -19,7 +19,7 @@
 #define __INET_QUEUEFILTER_H
 
 #include "inet/common/MatchableObject.h"
-#include "inet/common/queueing/contract/IPacketQueue.h"
+#include "inet/queueing/contract/IPacketQueue.h"
 
 namespace inet {
 

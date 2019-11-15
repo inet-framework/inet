@@ -165,7 +165,7 @@ W LoRaMediumCache::computeMaxTransmissionPower() const
 
 W LoRaMediumCache::computeMinInterferencePower() const
 {
-    W minInterferencePower = mW(math::dBm2mW(par("minInterferencePower")));
+    W minInterferencePower = mW(math::dBmW2mW(par("minInterferencePower")));
     for (const auto radio : radios) {
         if (radio != nullptr)
             minInterferencePower = minIgnoreNaN(minInterferencePower, radio->getReceiver()->getMinInterferencePower());
@@ -175,7 +175,7 @@ W LoRaMediumCache::computeMinInterferencePower() const
 
 W LoRaMediumCache::computeMinReceptionPower() const
 {
-    W minReceptionPower = mW(math::dBm2mW(par("minReceptionPower")));
+    W minReceptionPower = mW(math::dBmW2mW(par("minReceptionPower")));
     for (const auto radio : radios) {
         if (radio != nullptr)
             minReceptionPower = minIgnoreNaN(minReceptionPower, radio->getReceiver()->getMinReceptionPower());
@@ -196,9 +196,9 @@ double LoRaMediumCache::computeMaxAntennaGain() const
 m LoRaMediumCache::computeMaxRange(W maxTransmissionPower, W minReceptionPower) const
 {
     // TODO: this is NaN by default
-    Hz carrierFrequency = Hz(par("carrierFrequency"));
+    Hz centerFrequency = Hz(par("centerFrequency"));
     double loss = unit(minReceptionPower / maxTransmissionPower).get() / maxAntennaGain / maxAntennaGain;
-    return radioMedium->getPathLoss()->computeRange(radioMedium->getPropagation()->getPropagationSpeed(), carrierFrequency, loss);
+    return radioMedium->getPathLoss()->computeRange(radioMedium->getPropagation()->getPropagationSpeed(), centerFrequency, loss);
 }
 
 m LoRaMediumCache::computeMaxInterferenceRange() const

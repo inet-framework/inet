@@ -62,7 +62,7 @@ class INET_API MacRelayUnit : public LayeredProtocolBase
      */
     virtual void finish() override;
 
-    // for lifecycle:
+    //@{ for lifecycle:
     virtual void handleStartOperation(LifecycleOperation *operation) override { start(); }
     virtual void handleStopOperation(LifecycleOperation *operation) override { stop(); }
     virtual void handleCrashOperation(LifecycleOperation *operation) override { stop(); }
@@ -75,6 +75,8 @@ class INET_API MacRelayUnit : public LayeredProtocolBase
 
     virtual void start();
     virtual void stop();
+    //@}
+
     virtual void learn(MacAddress srcAddr, int arrivalInterfaceId);
 };
 

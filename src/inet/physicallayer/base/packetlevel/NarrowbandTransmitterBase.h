@@ -29,13 +29,13 @@ class INET_API NarrowbandTransmitterBase : public TransmitterBase
 {
   protected:
     const IModulation *modulation;
-    Hz carrierFrequency;
+    Hz centerFrequency;
     Hz bandwidth;
 
   protected:
     virtual void initialize(int stage) override;
 
-    virtual Hz computeCarrierFrequency(const Packet *packet) const;
+    virtual Hz computeCenterFrequency(const Packet *packet) const;
     virtual Hz computeBandwidth(const Packet *packet) const;
 
   public:
@@ -46,8 +46,8 @@ class INET_API NarrowbandTransmitterBase : public TransmitterBase
     virtual const IModulation *getModulation() const { return modulation; }
     virtual void setModulation(const IModulation *modulation) { this->modulation = modulation; }
 
-    virtual Hz getCarrierFrequency() const { return carrierFrequency; }
-    virtual void setCarrierFrequency(Hz carrierFrequency) { this->carrierFrequency = carrierFrequency; }
+    virtual Hz getCenterFrequency() const { return centerFrequency; }
+    virtual void setCenterFrequency(Hz centerFrequency) { this->centerFrequency = centerFrequency; }
 
     virtual Hz getBandwidth() const { return bandwidth; }
     virtual void setBandwidth(Hz bandwidth) { this->bandwidth = bandwidth; }

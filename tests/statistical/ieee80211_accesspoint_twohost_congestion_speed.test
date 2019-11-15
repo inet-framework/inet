@@ -8,7 +8,7 @@ Testing TCP communication speed
 %file: test.ned
 
 import inet.applications.ethernet.EtherAppClient;
-import inet.common.queue.Sink;
+import inet.queueing.Sink;
 import inet.linklayer.ieee80211.Ieee80211Interface;
 import inet.mobility.single.CircleMobility;
 import inet.mobility.static.StationaryMobility;
@@ -156,7 +156,6 @@ sim-time-limit = 50s
 # access point
 **.ap.wlan*.mac.address = "10:00:00:00:00:00"
 **.mgmt.accessPointAddress = "10:00:00:00:00:00"
-**.mgmt.frameCapacity = 100
 
 # nic settings
 **.wlan*.*.dataBitrate = 11Mbps
@@ -164,12 +163,8 @@ sim-time-limit = 50s
 **.wlan*.*.multicastBitrate = 11Mbps
 **.wlan*.*.controlBitrate = 11Mbps
 **.mac.address = "auto"
-**.mac.queue.frameCapacity = 14
+**.mac.queue.packetCapacity = 14
 **.mac.rtsThresholdBytes = 3000B
-**.wlan*.mac.retryLimit = 7
-**.wlan*.mac.cwMinData = 31
-**.wlan*.mac.cwMinBroadcast = 31
-
 
 # cli
 **.cli.reqLength = 1250B

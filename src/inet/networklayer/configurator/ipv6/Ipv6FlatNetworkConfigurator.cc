@@ -241,7 +241,7 @@ void Ipv6FlatNetworkConfigurator::addStaticRoutes(cTopology& topo)
 
             // determine the local interface id
             cGate *localGate = atNode->getPath(0)->getLocalGate();
-            InterfaceEntry *localIf = ift->getInterfaceByNodeOutputGateId(localGate->getId());
+            InterfaceEntry *localIf = CHK(ift->findInterfaceByNodeOutputGateId(localGate->getId()));
 
             // determine next hop link address. That's a bit tricky because
             // the directly adjacent cTopo node might be a non-IP getNode(ethernet switch etc)
@@ -256,7 +256,7 @@ void Ipv6FlatNetworkConfigurator::addStaticRoutes(cTopology& topo)
             cGate *remoteGate = prevNode->getPath(0)->getRemoteGate();
             cModule *nextHop = remoteGate->getOwnerModule();
             IInterfaceTable *nextHopIft = L3AddressResolver().interfaceTableOf(nextHop);
-            InterfaceEntry *nextHopOnlinkIf = nextHopIft->getInterfaceByNodeInputGateId(remoteGate->getId());
+            InterfaceEntry *nextHopOnlinkIf = CHK(nextHopIft->findInterfaceByNodeInputGateId(remoteGate->getId()));
 
             // find link-local address for next hop
             Ipv6Address nextHopLinkLocalAddr = nextHopOnlinkIf->getProtocolData<Ipv6InterfaceData>()->getLinkLocalAddress();

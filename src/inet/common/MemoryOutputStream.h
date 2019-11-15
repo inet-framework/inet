@@ -170,7 +170,7 @@ class INET_API MemoryOutputStream {
      * Writes a sequence of bytes to the end of the stream keeping the original
      * byte order and in MSB to LSB bit order.
      */
-    void writeBytes(uint8_t *buffer, B length) {
+    void writeBytes(const uint8_t *buffer, B length) {
         assert(isByteAligned());
         data.insert(data.end(), buffer, buffer + B(length).get());
         this->length += length;
@@ -330,14 +330,22 @@ class INET_API MemoryOutputStream {
     /** @name other useful streaming functions */
     //@{
     /**
+     * Writes a zero terminated string in the order of the characters.
+     */
+    void writeString(std::string s) {
+        writeBytes(std::vector<uint8_t>(s.begin(), s.end()));
+        writeByte(0);
+    }
+
+    /**
      * Writes n bits of a 64 bit unsigned integer to the end of the stream in big
      * endian byte order and MSB to LSB bit order.
      */
-    void writeNBitsOfUint64Be(uint64_t value, uint8_t n){
+    void writeNBitsOfUint64Be(uint64_t value, uint8_t n) {
         if (n == 0 || n > 64)
             throw cRuntimeError("Can not write 0 bit or more than 64 bits.");
         uint64_t mul = 1 << (n-1);
-        for(int i = 0; i < n; ++i){
+        for (int i = 0; i < n; ++i) {
             writeBit((value & mul) != 0);
             mul >>= 1;
         }

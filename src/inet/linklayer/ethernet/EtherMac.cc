@@ -218,8 +218,8 @@ void EtherMac::handleUpperPacket(Packet *packet)
     }
 
     if (packet->getDataLength() > MAX_ETHERNET_FRAME_BYTES) {
-        throw cRuntimeError("Packet from higher layer (%d bytes) exceeds maximum Ethernet frame size (%d)",
-                (int)(packet->getByteLength()), MAX_ETHERNET_FRAME_BYTES);
+        throw cRuntimeError("Packet length from higher layer (%s) exceeds maximum Ethernet frame size (%s)",
+                packet->getDataLength().str().c_str(), MAX_ETHERNET_FRAME_BYTES.str().c_str());
     }
 
     if (!connected || disabled) {
@@ -242,6 +242,8 @@ void EtherMac::handleUpperPacket(Packet *packet)
         packet->insertAtFront(newFrame);
         frame = newFrame;
     }
+
+    addPaddingAndSetFcs(packet, MIN_ETHERNET_FRAME_BYTES);  // calculate valid FCS
 
     // store frame and possibly begin transmitting
     EV_DETAIL << "Frame " << packet << " arrived from higher layer, enqueueing\n";
@@ -495,7 +497,7 @@ void EtherMac::handleEndIFGPeriod()
 B EtherMac::calculateMinFrameLength()
 {
     bool inBurst = frameBursting && framesSentInBurst;
-    B minFrameLength = duplexMode ? curEtherDescr->frameMinBytes : (inBurst ? curEtherDescr->frameInBurstMinBytes : curEtherDescr->halfDuplexFrameMinBytes);
+    B minFrameLength = duplexMode ? MIN_ETHERNET_FRAME_BYTES : (inBurst ? curEtherDescr->frameInBurstMinBytes : curEtherDescr->halfDuplexFrameMinBytes);
 
     return minFrameLength;
 }
@@ -519,8 +521,6 @@ void EtherMac::startFrameTransmission()
     ASSERT(!hdr->getSrc().isUnspecified());
 
     B minFrameLengthWithExtension = calculateMinFrameLength();
-    addPaddingAndSetFcs(frame, curEtherDescr->frameMinBytes);  // calculate valid FCS
-
     B extensionLength = minFrameLengthWithExtension > frame->getDataLength() ? (minFrameLengthWithExtension - frame->getDataLength()) : B(0);
 
     // add preamble and SFD (Starting Frame Delimiter), then send out

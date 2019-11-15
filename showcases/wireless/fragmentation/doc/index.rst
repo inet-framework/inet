@@ -204,7 +204,7 @@ Results
 Here are the results from the simulations:
 
 .. figure:: media/numberofpackets.png
-   :width: 100%
+   :width: 90%
    :align: center
 
 .. figure:: media/throughput.png
@@ -270,7 +270,7 @@ and TXOP + block ack.
 Then, the transmission power was iterated to examine performance at different noise levels.
 
 .. figure:: media/snir.png
-   :width: 90%
+   :width: 100%
    :align: center
 
 It is apparent that in this scenario, the domain in which fragmentation is useful is

@@ -24,6 +24,7 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/TimeTag_m.h"
 #include "inet/common/packet/Packet.h"
+#include "inet/networklayer/common/FragmentationTag_m.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/transportlayer/contract/udp/UdpControlInfo_m.h"
 
@@ -73,6 +74,7 @@ void UdpBasicBurst::initialize(int stage)
         nextSleep = startTime;
         nextBurst = startTime;
         nextPkt = startTime;
+        dontFragment = par("dontFragment");
 
         destAddrRNG = par("destAddrRNG");
         const char *addrModeStr = par("chooseDestAddrMode");
@@ -90,6 +92,12 @@ void UdpBasicBurst::initialize(int stage)
         destPort = par("destPort");
 
         timerNext = new cMessage("UDPBasicBurstTimer");
+
+        if (hasPar("registerInInit") && par("registerInInit").boolValue()) {
+            socket.setOutputGate(gate("socketOut"));
+            socket.setCallback(this);
+            socket.bind(localPort);
+        }
     }
 }
 
@@ -109,9 +117,9 @@ Packet *UdpBasicBurst::createPacket()
     long msgByteLength = *messageLengthPar;
     Packet *pk = new Packet(msgName);
     const auto& payload = makeShared<ApplicationPacket>();
-    payload->addTag<CreationTimeTag>()->setCreationTime(simTime());
     payload->setChunkLength(B(msgByteLength));
     payload->setSequenceNumber(numSent);
+    payload->addTag<CreationTimeTag>()->setCreationTime(simTime());
     pk->insertAtBack(payload);
     pk->addPar("sourceId") = getId();
     pk->addPar("msgId") = numSent;
@@ -121,9 +129,19 @@ Packet *UdpBasicBurst::createPacket()
 
 void UdpBasicBurst::processStart()
 {
-    socket.setOutputGate(gate("socketOut"));
-    socket.bind(localPort);
-    socket.setCallback(this);
+    if (!hasPar("registerInInit") || (hasPar("registerInInit") && !par("registerInInit").boolValue())) {
+        socket.setOutputGate(gate("socketOut"));
+        socket.setCallback(this);
+        socket.bind(localPort);
+    }
+
+    int timeToLive = par("timeToLive");
+    if (timeToLive != -1)
+        socket.setTimeToLive(timeToLive);
+
+    int dscp = par("dscp");
+    if (dscp != -1)
+        socket.setDscp(dscp);
 
     const char *destAddrs = par("destAddresses");
     cStringTokenizer tokenizer(destAddrs);
@@ -307,6 +325,8 @@ void UdpBasicBurst::generateBurst()
         destAddr = chooseDestAddr();
 
     Packet *payload = createPacket();
+    if(dontFragment)
+        payload->addTag<FragmentationReq>()->setDontFragment(true);
     payload->setTimestamp();
     emit(packetSentSignal, payload);
     socket.sendTo(payload, destAddr, destPort);

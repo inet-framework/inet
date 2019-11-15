@@ -133,38 +133,42 @@ class INET_API IInterfaceTable
      * Returns an interface given by its getNodeOutputGateId().
      * Returns nullptr if not found.
      */
-    virtual InterfaceEntry *getInterfaceByNodeOutputGateId(int id) const = 0;
+    virtual InterfaceEntry *findInterfaceByNodeOutputGateId(int id) const = 0;
 
     /**
      * Returns an interface given by its getNodeInputGateId().
      * Returns nullptr if not found.
      */
-    virtual InterfaceEntry *getInterfaceByNodeInputGateId(int id) const = 0;
+    virtual InterfaceEntry *findInterfaceByNodeInputGateId(int id) const = 0;
 
     /**
      * Returns an interface by one of its component module (e.g. PPP).
      * Returns nullptr if not found.
      */
-    virtual InterfaceEntry *getInterfaceByInterfaceModule(cModule *ifmod) const = 0;
+    virtual InterfaceEntry *findInterfaceByInterfaceModule(cModule *ifmod) const = 0;
 
     /**
      * Returns an interface given by its name. Returns nullptr if not found.
      */
-    virtual InterfaceEntry *getInterfaceByName(const char *name) const = 0;
+    virtual InterfaceEntry *findInterfaceByName(const char *name) const = 0;
 
     /**
      * Returns the first interface with the isLoopback flag set.
-     * (If there's no loopback, it returns nullptr -- but this
-     * should never happen because InterfaceTable itself registers a
-     * loopback interface on startup.)
+     * If there's no loopback, it returns nullptr.
      */
-    virtual InterfaceEntry *getFirstLoopbackInterface() const = 0;
+    virtual InterfaceEntry *findFirstLoopbackInterface() const = 0;
 
+    /**
+     * Returns the first interface with the isLoopback flag unset.
+     * If there's no non-loopback, it returns nullptr.
+     */
+
+    virtual InterfaceEntry *findFirstNonLoopbackInterface() const = 0;
     /**
      * Returns the first multicast capable interface.
      * If there is no such interface, then returns nullptr.
      */
-    virtual InterfaceEntry *getFirstMulticastInterface() const = 0;
+    virtual InterfaceEntry *findFirstMulticastInterface() const = 0;
 
     /**
      * Returns all multicast group address, with it's interfaceId

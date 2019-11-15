@@ -24,7 +24,7 @@ import inet.physicallayer.contract.bitlevel.IDemodulator;
 // the bit domain representation from the symbol domain representation by applying
 // the configured modulation.
 //
-// See also ~ApskModulator, ~ApskLayeredReceiver.
+// @see ~ApskModulator, ~ApskLayeredReceiver.
 //
 simple ApskDemodulator like IDemodulator
 {

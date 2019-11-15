@@ -360,7 +360,7 @@ const Ieee80211OfdmDataMode Ieee80211OfdmCompliantModes::ofdmDataMode18MbpsCS10M
 const Ieee80211OfdmDataMode Ieee80211OfdmCompliantModes::ofdmDataMode18MbpsCS20MHz(&Ieee80211OfdmCompliantCodes::ofdmCC3_4QPSKInterleaving, &Ieee80211OfdmCompliantModulations::qpskModulation, MHz(20), MHz(20));
 const Ieee80211OfdmDataMode Ieee80211OfdmCompliantModes::ofdmDataMode24MbpsCS10MHz(&Ieee80211OfdmCompliantCodes::ofdmCC2_3QAM64Interleaving, &Ieee80211OfdmCompliantModulations::qam64Modulation, MHz(10), MHz(20));
 const Ieee80211OfdmDataMode Ieee80211OfdmCompliantModes::ofdmDataMode24MbpsCS20MHz(&Ieee80211OfdmCompliantCodes::ofdmCC1_2QAM16Interleaving, &Ieee80211OfdmCompliantModulations::qam16Modulation, MHz(20), MHz(20));
-const Ieee80211OfdmDataMode Ieee80211OfdmCompliantModes::ofdmDataMode27Mbps(&Ieee80211OfdmCompliantCodes::ofdmCC2_3QAM64Interleaving, &Ieee80211OfdmCompliantModulations::qam64Modulation, MHz(20), MHz(20));
+const Ieee80211OfdmDataMode Ieee80211OfdmCompliantModes::ofdmDataMode27Mbps(&Ieee80211OfdmCompliantCodes::ofdmCC3_4QAM64Interleaving, &Ieee80211OfdmCompliantModulations::qam64Modulation, MHz(10), MHz(20));
 const Ieee80211OfdmDataMode Ieee80211OfdmCompliantModes::ofdmDataMode36Mbps(&Ieee80211OfdmCompliantCodes::ofdmCC3_4QAM16Interleaving, &Ieee80211OfdmCompliantModulations::qam16Modulation, MHz(20), MHz(20));
 const Ieee80211OfdmDataMode Ieee80211OfdmCompliantModes::ofdmDataMode48Mbps(&Ieee80211OfdmCompliantCodes::ofdmCC2_3QAM64Interleaving, &Ieee80211OfdmCompliantModulations::qam64Modulation, MHz(20), MHz(20));
 const Ieee80211OfdmDataMode Ieee80211OfdmCompliantModes::ofdmDataMode54Mbps(&Ieee80211OfdmCompliantCodes::ofdmCC3_4QAM64Interleaving, &Ieee80211OfdmCompliantModulations::qam64Modulation, MHz(20), MHz(20));

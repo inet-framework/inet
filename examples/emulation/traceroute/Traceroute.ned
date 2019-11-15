@@ -23,12 +23,8 @@ import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
 import ned.DatarateChannel;
 
-
 network Traceroute
 {
-    parameters:
-        double testTimeout @unit(s) = default(0s);
-        bool testing = default(false);
     types:
         channel pppline extends DatarateChannel
         {
@@ -44,7 +40,6 @@ network Traceroute
     submodules:
         cli1: StandardHost {
             parameters:
-                forwarding = false;
                 ipv4.routingTable.routingFile = "cli1.mrt";
                 @display("p=37,62;i=old/laptop3");
             gates:
@@ -52,7 +47,6 @@ network Traceroute
         }
         cli2: StandardHost {
             parameters:
-                forwarding = false;
                 ipv4.routingTable.routingFile = "cli2.mrt";
                 @display("p=35,131;i=old/laptop3");
             gates:
@@ -60,7 +54,6 @@ network Traceroute
         }
         cli3: StandardHost {
             parameters:
-                forwarding = false;
                 ipv4.routingTable.routingFile = "cli3.mrt";
                 @display("p=40,223;i=old/laptop3");
             gates:
@@ -68,7 +61,6 @@ network Traceroute
         }
         cli4: StandardHost {
             parameters:
-                forwarding = false;
                 ipv4.routingTable.routingFile = "cli4.mrt";
                 @display("p=40,295;i=old/laptop3");
             gates:
@@ -76,7 +68,6 @@ network Traceroute
         }
         cli5: StandardHost {
             parameters:
-                forwarding = false;
                 ipv4.routingTable.routingFile = "cli5.mrt";
                 @display("p=40,383;i=old/laptop3");
             gates:
@@ -84,7 +75,6 @@ network Traceroute
         }
         cli6: StandardHost {
             parameters:
-                forwarding = false;
                 ipv4.routingTable.routingFile = "cli6.mrt";
                 @display("p=40,439;i=old/laptop3");
             gates:
@@ -92,7 +82,6 @@ network Traceroute
         }
         cli7: StandardHost {
             parameters:
-                forwarding = false;
                 ipv4.routingTable.routingFile = "cli7.mrt";
                 @display("p=40,511;i=old/laptop3");
             gates:
@@ -100,7 +89,6 @@ network Traceroute
         }
         cli8: StandardHost {
             parameters:
-                forwarding = false;
                 ipv4.routingTable.routingFile = "cli8.mrt";
                 @display("p=40,575;i=old/laptop3");
             gates:
@@ -179,7 +167,6 @@ network Traceroute
         extRouter: Router {
             parameters:
                 ipv4.routingTable.routingFile = "extRouter.mrt";
-                numExtInterfaces = 1;
                 @display("p=500,293;i=device/router_l");
             gates:
                 pppg[2];

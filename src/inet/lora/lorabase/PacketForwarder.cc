@@ -21,7 +21,7 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/applications/base/ApplicationPacket_m.h"
 #include "inet/lora/lorabase/PacketForwarder.h"
-#include "inet/physicallayer/common/packetlevel/SignalTag_m.h"
+#include "inet/physicallayer/contract/packetlevel/SignalTag_m.h"
 
 namespace inet {
 namespace lora {
@@ -116,7 +116,7 @@ void PacketForwarder::processLoraMACPacket(Packet *pk)
 
     W w_rssi = signalPowerInd->getPower();
     double rssi = w_rssi.get()*1000;
-    frame->setRSSI(math::mW2dBm(rssi));
+    frame->setRSSI(math::mW2dBmW(rssi));
     frame->setSNIR(snirInd->getMinimumSnir());
     pk->insertAtFront(frame);
 

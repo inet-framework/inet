@@ -19,11 +19,11 @@
 
 package inet.examples.diffserv.onedomain;
 
-import inet.common.queueing.PacketMultiplexer;
 import inet.linklayer.contract.ITrafficConditioner;
 import inet.networklayer.diffserv.DscpMarker;
 import inet.networklayer.diffserv.MultiFieldClassifier;
 import inet.networklayer.diffserv.TokenBucketMeter;
+import inet.queueing.common.PacketMultiplexer;
 
 //
 // Traffic conditioner used in Experiment 3.1.

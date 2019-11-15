@@ -26,9 +26,13 @@ package inet.networklayer.diffserv;
 // and Excess Burst Size (ebs), to be either green, yellow or red.
 //
 // The green traffic is guaranteed to be under (in bits)
-//    cir * (t1 - t0) + 8 * cbs,
+// <pre>
+//    cir * (t1 - t0) + 8 * cbs
+// </pre>
 // and green+yellow traffic to be under
+// <pre>
 //    cir * (t1 - t0) + 8 * (cbs + ebs)
+// </pre>
 // in every [t0,t1] interval.
 //
 // When operating in color-aware mode, the meter does not recolor

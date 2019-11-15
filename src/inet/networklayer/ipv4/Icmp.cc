@@ -124,16 +124,16 @@ void Icmp::sendErrorMessage(Packet *packet, int inputInterfaceId, IcmpType type,
     // ICMP message length: the internet header plus the first 8 bytes of
     // the original datagram's data is returned to the sender.
     errorPacket->insertAtBack(packet->peekDataAt(B(0), ipv4Header->getHeaderLength() + B(8)));
-    insertCrc(icmpHeader,errorPacket);
+    insertCrc(icmpHeader, errorPacket);
     errorPacket->insertAtFront(icmpHeader);
 
-    errorPacket->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::icmpv4);
+    errorPacket->addTag<PacketProtocolTag>()->setProtocol(&Protocol::icmpv4);
 
     // if srcAddr is not filled in, we're still in the src node, so we just
     // process the ICMP message locally, right away
     if (origSrcAddr.isUnspecified()) {
         // pretend it came from the Ipv4 layer
-        errorPacket->addTagIfAbsent<L3AddressInd>()->setDestAddress(Ipv4Address::LOOPBACK_ADDRESS);    // FIXME maybe use configured loopback address
+        errorPacket->addTag<L3AddressInd>()->setDestAddress(Ipv4Address::LOOPBACK_ADDRESS);    // FIXME maybe use configured loopback address
 
         // then process it locally
         processICMPMessage(errorPacket);
@@ -264,7 +264,7 @@ void Icmp::processEchoRequest(Packet *request)
     // swap src and dest
     // TBD check what to do if dest was multicast etc?
     // A. Ariza Modification 5/1/2011 clean the interface id, this forces the use of routing table in the Ipv4 layer
-    auto addressReq = reply->addTagIfAbsent<L3AddressReq>();
+    auto addressReq = reply->addTag<L3AddressReq>();
     addressReq->setSrcAddress(addressInd->getDestAddress().toIpv4());
     addressReq->setDestAddress(addressInd->getSrcAddress().toIpv4());
 
@@ -318,7 +318,8 @@ void Icmp::insertCrc(CrcMode crcMode, const Ptr<IcmpHeader>& icmpHeader, Packet 
             icmpHeader->setChksum(0x0000); // make sure that the CRC is 0 in the header before computing the CRC
             MemoryOutputStream icmpStream;
             Chunk::serialize(icmpStream, icmpHeader);
-            Chunk::serialize(icmpStream, packet->peekDataAsBytes());
+            if (packet->getByteLength() > 0)
+                Chunk::serialize(icmpStream, packet->peekDataAsBytes());
             uint16_t crc = TcpIpChecksum::checksum(icmpStream.getData());
             icmpHeader->setChksum(crc);
             break;

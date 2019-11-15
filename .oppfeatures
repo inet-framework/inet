@@ -436,6 +436,35 @@
         linkerFlags = ""
         />
     <feature
+        id="OSPFv3"
+        name="OSPFv3"
+        description = "OSPFv3 support"
+        initiallyEnabled = "true"
+        requires = "IPv4 IPv6"
+        labels = "routing"
+        nedPackages = "
+                       inet.routing.ospfv3
+                       inet.node.ospfv3
+                      "
+        extraSourceFolders = ""
+        compileFlags = "-DWITH_OSPFv3"
+        linkerFlags = ""
+        />
+    <feature
+        id="OSPFv3_examples"
+        name="OSPFv3 examples"
+        description = "Examples for OSPFv3"
+        initiallyEnabled = "true"
+        requires = "OSPFv3 UDP IPv4 IPv6 PPP Ethernet"
+        labels = "routing examples"
+        nedPackages = "
+                       inet.examples.ospfv3
+                      "
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
         id="BGPv4"
         name="BGPv4"
         description = "BGP support"
@@ -689,7 +718,7 @@
         id="radio"
         name="Radio"
         description = "Radio support for wireless simulations"
-        requires = "power"
+        requires = ""
         labels = ""
         nedPackages = "
                        inet.physicallayer.analogmodel
@@ -834,7 +863,7 @@
     <feature
         id="VoIPStream"
         name="VoIPStream"
-        description = "Voice over IP tool. Required external libraries: libavcodec libavformat libavresample libavutil"
+        description = "Voice-over-IP application. Required external libraries: libavcodec-dev libavformat-dev libavresample-dev libavutil-dev"
         initiallyEnabled = "false"
         requires = "UDP"
         labels = ""
@@ -1176,18 +1205,6 @@
         linkerFlags = ""
         />
     <feature
-        id="visualizationtutorial"
-        name="Visualization tutorial"
-        description = "A step-by-step tutorial starting from the basics, and introducing new features and concepts related to visualizing state and behavior of communication networks."
-        initiallyEnabled = "true"
-        requires = "visualization physicalenvironment Ieee80211 IPv4 AODV"
-        labels = "tutorial visualization"
-        nedPackages = "inet.tutorials.visualization"
-        extraSourceFolders = ""
-        compileFlags = ""
-        linkerFlags = ""
-        />
-    <feature
         id="configuratortutorial"
         name="Configurator tutorial"
         description = "A step-by-step tutorial starting from the basics, and introducing new features and concepts related to automatic IP address and routing table configuartion."
@@ -1200,21 +1217,9 @@
         linkerFlags = ""
         />
     <feature
-        id="riptutorial"
-        name="RIP routing tutorial"
-        description = "A step-by-step tutorial starting from the basics, and introducing new features and concepts related to RIP routing."
-        initiallyEnabled = "true"
-        requires = "visualization Ethernet RIP"
-        labels = "tutorial rip routing"
-        nedPackages = "inet.tutorials.rip"
-        extraSourceFolders = ""
-        compileFlags = ""
-        linkerFlags = ""
-        />
-    <feature
-        id="generalshowcases"
+        id="general_showcases"
         name="General showcases"
-        description = "Simple showcases demonstrating general features."
+        description = "Showcases that demonstrate features which are independent of any specific network technology."
         initiallyEnabled = "true"
         requires = "visualization
                     physicalenvironment
@@ -1232,9 +1237,33 @@
         linkerFlags = ""
         />
     <feature
-        id="visualizershowcases"
+        id="mobility_showcases"
+        name="Mobility showcases"
+        description = "Showcases that demonstrate node mobility."
+        initiallyEnabled = "true"
+        requires = "mobility visualization physicalenvironment Ieee80211 IPv4"
+        labels = "showcase mobility"
+        nedPackages = "inet.showcases.mobility"
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
+        id="routing_showcases"
+        name="Routing showcases"
+        description = "Showcases that demonstrate routing protocols."
+        initiallyEnabled = "true"
+        requires = "visualization physicalenvironment Ieee80211 IPv4 GPSR"
+        labels = "showcase routing"
+        nedPackages = "inet.showcases.routing"
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
+        id="visualizer_showcases"
         name="Visualization showcases"
-        description = "Simple showcases demonstrating features and concepts related to visualizing state and behavior of communication networks."
+        description = "Showcases that demonstrate the visualization of state and behavior of communication networks."
         initiallyEnabled = "true"
         requires = "visualization physicalenvironment Ethernet Ieee80211 IPv4 AODV"
         labels = "showcase visualization"
@@ -1244,9 +1273,9 @@
         linkerFlags = ""
         />
     <feature
-        id="wirelessshowcases"
+        id="wireless_showcases"
         name="Wireless showcases"
-        description = "Simple showcases demonstrating wireless features."
+        description = "Showcases that demonstrate the simulation of wireless networks."
         initiallyEnabled = "true"
         requires = "visualization physicalenvironment apskradio Ieee80211 IPv4 AODV"
         labels = "showcase visualization"

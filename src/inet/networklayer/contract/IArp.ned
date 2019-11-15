@@ -18,9 +18,6 @@
 
 package inet.networklayer.contract;
 
-//
-// TODO
-//
 moduleinterface IArp
 {
     parameters:

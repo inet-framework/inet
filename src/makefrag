@@ -1,7 +1,11 @@
+.DEFAULT_GOAL := all-pch
+
 #
 # Use the new message compiler introduced in OMNeT++ 5.3
 #
 MSGC:=$(MSGC) --msg6
+
+FEATURETOOL := opp_featuretool
 
 #
 # compiler warning for c-style cast
@@ -9,21 +13,34 @@ MSGC:=$(MSGC) --msg6
 #CFLAGS += -Wold-style-cast
 
 
-#
-# on windows we have to link with the ws2_32 (winsock2) library as it is no longer added
-# to the omnetpp system libraries by default (as of OMNeT++ 5.1)
-#
 ifeq ($(PLATFORM),win32.x86_64)
+  #
+  # on windows we have to link with the ws2_32 (winsock2) library as it is no longer added
+  # to the omnetpp system libraries by default (as of OMNeT++ 5.1)
+  #
   LIBS += -lws2_32
   DEFINES += -DINET_EXPORT
   ENABLE_AUTO_IMPORT=-Wl,--enable-auto-import
   LDFLAGS := $(filter-out $(ENABLE_AUTO_IMPORT), $(LDFLAGS))
+
+  # FIX for clang not exporting typinfo and other thunks on Windows
+  ifeq ($(CC),clang)
+    DEFFILE = $O/typeinfo.def
+    LDFLAGS += $(DEFFILE)
+
+$(DEFFILE): $(OBJS)  $(wildcard $(EXTRA_OBJS)) Makefile $(CONFIGFILE)
+	@echo Creating .DEF file for $(TARGET) - needed to fix an issue where clang is not exporting typinfo for classes on Windows
+	$(Q)echo >.tmp$$$$ $(OBJS) $(EXTRA_OBJS) && $(DLLTOOL) --export-all-symbols --kill-at -z all$$$$.def @.tmp$$$$ && grep -E '( *_ZTI)|( *_ZThn)|EXPORTS' all$$$$.def | sed 's/ @.*//' >$(DEFFILE) && rm .tmp$$$$ all$$$$.def
+
+$O/$(TARGET): $(DEFFILE)
+
+  endif
 endif
 
 #
 # TCP implementaion using the Network Simulation Cradle (TCP_NSC feature)
 #
-WITH_TCP_NSC := $(shell (cd .. && ./bin/inet_featuretool -q isenabled TCP_NSC && echo enabled) )
+WITH_TCP_NSC := $(shell (cd .. && $(FEATURETOOL) -q isenabled TCP_NSC && echo enabled) )
 ifeq ($(WITH_TCP_NSC), enabled)
   NSC_VERSION= $(shell ls -d ../3rdparty/nsc* 2>/dev/null | sed 's/^.*-//')
   ifneq ($(NSC_VERSION),)
@@ -37,7 +54,7 @@ endif
 #
 # TCP implementation using the lwIP stack
 #
-WITH_TCP_LWIP := $(shell (cd .. && ./bin/inet_featuretool -q isenabled TCP_lwIP && echo enabled) )
+WITH_TCP_LWIP := $(shell (cd .. && $(FEATURETOOL) -q isenabled TCP_lwIP && echo enabled) )
 ifeq ($(WITH_TCP_LWIP), enabled)
   INCLUDE_PATH += -Iinet/transportlayer/tcp_lwip/lwip/include -Iinet/transportlayer/tcp_lwip/lwip/include/ipv4 -Iinet/transportlayer/tcp_lwip/lwip/include/ipv6
 endif
@@ -56,7 +73,7 @@ endif
 #
 # VoipStream feature:
 #
-WITH_VOIPSTREAM := $(shell (cd .. && ./bin/inet_featuretool -q isenabled VoIPStream && echo enabled) )
+WITH_VOIPSTREAM := $(shell (cd .. && $(FEATURETOOL) -q isenabled VoIPStream && echo enabled) )
 ifeq ($(WITH_VOIPSTREAM), enabled)
   ifeq ($(HAVE_PKGCFG), yes)
     HAVE_FFMPEG := $(shell $(PKGCFG) --exists libavcodec libavformat libavutil && echo yes || echo no)
@@ -75,7 +92,7 @@ endif
 #
 # visualization feature requires (optionally) some extra osg and osgEarth libraries
 #
-WITH_VISUALIZERS := $(shell (cd .. && ./bin/inet_featuretool -q isenabled visualization && echo enabled) )
+WITH_VISUALIZERS := $(shell (cd .. && $(FEATURETOOL) -q isenabled visualization && echo enabled) )
 ifeq ($(WITH_VISUALIZERS), enabled)
   ifeq ($(WITH_OSG), yes)
     OMNETPP_LIBS += -losg -losgText -losgDB -losgGA -losgViewer -losgUtil -lOpenThreads # TODO: use $(OSG_LIBS) from Makefile.inc? Does that include -losgText? Why not?

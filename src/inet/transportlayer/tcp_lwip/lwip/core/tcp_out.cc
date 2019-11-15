@@ -499,6 +499,7 @@ tcp_send_empty_ack(struct tcp_pcb *pcb)
   pcb->flags &= ~(TF_ACK_DELAY | TF_ACK_NOW);
 
   tcphdr = tcp_output_set_header(pcb, p, optlen, htonl(pcb->snd_nxt));
+  (void)tcphdr; // supress warning, because usage is conditional
 
   /* NB. MSS option is only sent on SYNs, so ignore it here */
 #if LWIP_TCP_TIMESTAMPS
@@ -976,6 +977,7 @@ tcp_keepalive(struct tcp_pcb *pcb)
               (p->len >= sizeof(struct tcp_hdr)));
 
   tcphdr = tcp_output_set_header(pcb, p, 0, htonl(pcb->snd_nxt - 1));
+  (void)tcphdr; // supress warning, because usage is conditional
 
 #if CHECKSUM_GEN_TCP
   tcphdr->chksum = inet_chksum_pseudo(p, &pcb->local_ip, &pcb->remote_ip,

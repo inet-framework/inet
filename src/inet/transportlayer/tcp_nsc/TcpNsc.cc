@@ -284,8 +284,8 @@ void TcpNsc::sendEstablishedMsg(TcpNscConnection& connP)
     tcpConnectInfo->setLocalPort(connP.inetSockPairM.localM.portM);
     tcpConnectInfo->setRemotePort(connP.inetSockPairM.remoteM.portM);
     indication->setControlInfo(tcpConnectInfo);
-    indication->addTagIfAbsent<TransportProtocolInd>()->setProtocol(&Protocol::tcp);
-    indication->addTagIfAbsent<SocketInd>()->setSocketId(connP.connIdM);
+    indication->addTag<TransportProtocolInd>()->setProtocol(&Protocol::tcp);
+    indication->addTag<SocketInd>()->setSocketId(connP.connIdM);
     send(indication, "appOut");
     connP.sentEstablishedM = true;
 }
@@ -303,8 +303,8 @@ void TcpNsc::sendAvailableIndicationMsg(TcpNscConnection& c)
     tcpConnectInfo->setRemotePort(c.inetSockPairM.remoteM.portM);
 
     indication->setControlInfo(tcpConnectInfo);
-    indication->addTagIfAbsent<TransportProtocolInd>()->setProtocol(&Protocol::tcp);
-    indication->addTagIfAbsent<SocketInd>()->setSocketId(c.forkedConnId);
+    indication->addTag<TransportProtocolInd>()->setProtocol(&Protocol::tcp);
+    indication->addTag<SocketInd>()->setSocketId(c.forkedConnId);
     send(indication, "appOut");
     c.sentEstablishedM = true;
 }
@@ -558,7 +558,7 @@ void TcpNsc::sendDataToApp(TcpNscConnection& c)
 
     while (nullptr != (dataMsg = c.receiveQueueM->extractBytesUpTo())) {
         dataMsg->setKind(TCP_I_DATA);
-        dataMsg->addTagIfAbsent<SocketInd>()->setSocketId(c.connIdM);
+        dataMsg->addTag<SocketInd>()->setSocketId(c.connIdM);
         // send Msg to Application layer:
         send(dataMsg, "appOut");
     }
@@ -602,8 +602,8 @@ void TcpNsc::sendErrorNotificationToApp(TcpNscConnection& c, int err)
         auto indication = new Indication(name, code);
         TcpCommand *ind = new TcpCommand();
         indication->setControlInfo(ind);
-        indication->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::tcp);
-        indication->addTagIfAbsent<SocketInd>()->setSocketId(c.connIdM);
+        indication->addTag<PacketProtocolTag>()->setProtocol(&Protocol::tcp);
+        indication->addTag<SocketInd>()->setSocketId(c.connIdM);
         send(indication, "appOut");
     }
 }
@@ -895,8 +895,8 @@ void TcpNsc::sendToIP(const void *dataP, int lenP)
              << " to " << dest << "\n";
 
     IL3AddressType *addressType = dest.getAddressType();
-    fp->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
-    auto addresses = fp->addTagIfAbsent<L3AddressReq>();
+    fp->addTag<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
+    auto addresses = fp->addTag<L3AddressReq>();
     addresses->setSrcAddress(src);
     addresses->setDestAddress(dest);
 

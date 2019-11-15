@@ -75,7 +75,7 @@ std::vector<Packet *> *MsduDeaggregation::deaggregateFrame(Packet *aggregatedFra
         frame->insertAtBack(msdu);
         auto header = makeShared<Ieee80211DataHeader>();
         header->setType(ST_DATA_WITH_QOS);
-        header->setChunkLength(header->getChunkLength() + QOSCONTROL_PART_LENGTH);
+        header->addChunkLength(QOSCONTROL_PART_LENGTH);
         header->setToDS(amsduHeader->getToDS());
         header->setFromDS(amsduHeader->getFromDS());
         header->setTid(tid);

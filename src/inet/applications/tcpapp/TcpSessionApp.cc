@@ -94,7 +94,7 @@ void TcpSessionApp::handleTimer(cMessage *msg)
             if (activeOpen)
                 connect(); // sending will be scheduled from socketEstablished()
             else
-                ; //TODO
+                throw cRuntimeError("TODO");
             break;
 
         case MSGKIND_SEND:
@@ -128,7 +128,6 @@ void TcpSessionApp::sendData()
 
 Packet *TcpSessionApp::createDataPacket(long sendBytes)
 {
-    Packet *packet = new Packet("data1");
     const char *dataTransferMode = par("dataTransferMode");
     Ptr<Chunk> payload;
     if (!strcmp(dataTransferMode, "bytecount")) {
@@ -151,6 +150,7 @@ Packet *TcpSessionApp::createDataPacket(long sendBytes)
     else
         throw cRuntimeError("Invalid data transfer mode: %d", dataTransferMode);
     payload->addTag<CreationTimeTag>()->setCreationTime(simTime());
+    Packet *packet = new Packet("data1");
     packet->insertAtBack(payload);
     return packet;
 }

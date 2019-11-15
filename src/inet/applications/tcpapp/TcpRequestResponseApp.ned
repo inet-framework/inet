@@ -15,6 +15,14 @@
 
 package inet.applications.tcpapp;
 
+//
+// This module is a generic request/response based server application. For each
+// request it receives, it generates a different traffic based on the data the
+// request contains. The client application can be any source that is capable
+// of generating packets with different data. The first byte of the packet data
+// determines the response traffic, which can be configured to produce complex
+// streams of packets with various data and timing distributions.
+//
 module TcpRequestResponseApp extends TcpServerConnection
 {
     parameters:
@@ -22,7 +30,7 @@ module TcpRequestResponseApp extends TcpServerConnection
         sink.typename = default("RequestConsumer");
         sink.numKind = numKind;
         sink.responseProducerModule = default("^.source");
-        sink.classifier.classifierClass = default("inet::queueing::ClassifyPacketByData");
+        sink.classifier.classifierClass = default("inet::queueing::PacketDataClassifier");
         source.typename = default("ResponseProducer");
         source.numKind = numKind;
 }

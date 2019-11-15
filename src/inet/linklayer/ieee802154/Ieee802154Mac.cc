@@ -49,7 +49,6 @@ void Ieee802154Mac::initialize(int stage)
     MacProtocolBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         useMACAcks = par("useMACAcks");
-        queueLength = par("queueLength");
         sifs = par("sifs");
         headerLength = par("headerLength");
         transmissionAttemptInterruptedByRx = false;
@@ -125,8 +124,7 @@ void Ieee802154Mac::initialize(int stage)
         }
         radio->setRadioMode(IRadio::RADIO_MODE_RECEIVER);
 
-        EV_DETAIL << "queueLength = " << queueLength
-                  << " bitrate = " << bitrate
+        EV_DETAIL << " bitrate = " << bitrate
                   << " backoff method = " << par("backoffMethod").stringValue() << endl;
 
         EV_DETAIL << "finished csma init stage 1." << endl;
@@ -374,11 +372,16 @@ void Ieee802154Mac::updateStatusCCA(t_mac_event event, cMessage *msg)
                     EV_DETAIL << "Tried " << NB << " backoffs, all reported a busy "
                               << "channel. Dropping the packet." << endl;
                     txAttempts = 0;
-                    nbDroppedFrames++;
-                    PacketDropDetails details;
-                    details.setReason(CONGESTION);
-                    details.setLimit(macMaxCSMABackoffs);
-                    dropCurrentTxFrame(details);
+                    if (currentTxFrame) {
+                        nbDroppedFrames++;
+                        PacketDropDetails details;
+                        details.setReason(CONGESTION);
+                        details.setLimit(macMaxCSMABackoffs);
+                        dropCurrentTxFrame(details);
+                    }
+                    else {
+                        EV_ERROR << "too many Backoffs, but currentTxFrame is empty\n";    //TODO is it good, or model error?
+                    }
                     manageQueue();
                 }
                 else {
@@ -883,7 +886,7 @@ void Ieee802154Mac::handleLowerPacket(Packet *packet)
     }
 }
 
-void Ieee802154Mac::receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details)
+void Ieee802154Mac::receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details)
 {
     Enter_Method_Silent();
     if (signalID == IRadio::transmissionStateChangedSignal) {

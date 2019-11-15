@@ -7,14 +7,16 @@ Building the documentation website
 The INET documentation is built with the Sphinx tool (sphinx-doc.org).
 A docker image is provided at: https://github.com/omnetpp/dockerfiles/tree/master/docker-sphinx
 
-Use './docker-make server' to run a local web server to preview the documentation.
-Use './docker-make html' or 'docker-make pdf' to build the documentation.
-Use './docker-make deploy' to build the html version and deploy it on the web.
+- Use './docker-make server' to run a local web server to preview the documentation.
+- Use './docker-make html' or 'docker-make pdf' to build the documentation.
+- Use './docker-make clean all' to build both the html and pdf version from scratch.
+- Use 'make deploy' to create a new commit with the new version in the _deploy folder
+  and then you can 'git push' it manually.
 
 Alternatively, you can install sphinx locally,
 
   sudo apt-get install dvipng texlive-binaries
-  python3 -m pip install --user -U Sphinx sphinx_materialdesign_theme sphinxcontrib-doxylink sphinx-autobuild
+  python3 -m pip install --user -U Sphinx sphinxcontrib-images sphinxcontrib-doxylink sphinx-autobuild
 
 and then use 'make' directly (instead of the docker) with the above targets. Don't forget to add ~/.local/bin 
 to your path to be able to access the sphinx tools.

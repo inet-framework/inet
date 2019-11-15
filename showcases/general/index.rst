@@ -1,7 +1,7 @@
 Generic
 =======
 
-These showcases demonstrate various aspects of performing wireless network
+These showcases demonstrate various aspects of performing network
 simulations with INET.
 
 .. toctree::

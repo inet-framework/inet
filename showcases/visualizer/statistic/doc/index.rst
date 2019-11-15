@@ -117,7 +117,7 @@ of destination host's ``radio`` module:
 This animation illustrates what happens when the simulation is run:
 
 .. video:: media/statisticvisualizer5.mp4
-   :width: 698
+   :width: 100%
 
 After the first packet exchange, the packet error rate statistic is
 displayed above ``destination``. As the simulation progresses,
@@ -134,13 +134,13 @@ communication range. When ``destination`` turns back and gets into the
 range again, the packet error rate starts to decrease, reaching zero
 when it gets close to ``source``.
 
+Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`StatisticVisualizationShowcase.ned <../StatisticVisualizationShowcase.ned>`
+
 Further information
 -------------------
 
 For further information, refer to the :ned:`StatisticVisualizer` NED
 documentation.
-
-Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`StatisticVisualizationShowcase.ned <../StatisticVisualizationShowcase.ned>`
 
 Discussion
 ----------

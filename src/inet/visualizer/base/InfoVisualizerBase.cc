@@ -117,7 +117,7 @@ void InfoVisualizerBase::addInfoVisualizations()
 
 void InfoVisualizerBase::removeAllInfoVisualizations()
 {
-    for (auto infoVisualization : infoVisualizations) {
+    for (auto infoVisualization : std::vector<const InfoVisualization *>(infoVisualizations)) {
         removeInfoVisualization(infoVisualization);
         delete infoVisualization;
     }

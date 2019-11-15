@@ -19,8 +19,7 @@
 #define __INET_MESSAGEHANDLER_H
 
 #include "inet/common/INETDefs.h"
-#include "inet/routing/ospfv2/OspfTimer.h"
-#include "inet/routing/ospfv2/interface/OspfInterface.h"
+#include "inet/routing/ospfv2/interface/Ospfv2Interface.h"
 #include "inet/routing/ospfv2/messagehandler/DatabaseDescriptionHandler.h"
 #include "inet/routing/ospfv2/messagehandler/HelloHandler.h"
 #include "inet/routing/ospfv2/messagehandler/IMessageHandler.h"
@@ -29,7 +28,7 @@
 #include "inet/routing/ospfv2/messagehandler/LinkStateUpdateHandler.h"
 
 namespace inet {
-namespace ospf {
+namespace ospfv2 {
 
 class INET_API MessageHandler : public IMessageHandler
 {
@@ -48,24 +47,24 @@ class INET_API MessageHandler : public IMessageHandler
     void messageReceived(cMessage *message);
     void handleTimer(cMessage *timer);
 
-    void processPacket(Packet *packet, OspfInterface *unused1 = nullptr, Neighbor *unused2 = nullptr) override;
+    void processPacket(Packet *packet, Ospfv2Interface *unused1 = nullptr, Neighbor *unused2 = nullptr) override;
 
-    void sendPacket(Packet *packet, Ipv4Address destination, OspfInterface *outputIf, short ttl = 1);
+    void sendPacket(Packet *packet, Ipv4Address destination, Ospfv2Interface *outputIf, short ttl = 1);
     void clearTimer(cMessage *timer);
     void startTimer(cMessage *timer, simtime_t delay);
 
-    void printEvent(const char *eventString, const OspfInterface *onInterface = nullptr, const Neighbor *forNeighbor = nullptr) const;
-    void printHelloPacket(const OspfHelloPacket *helloPacket, Ipv4Address destination, int outputIfIndex) const;
-    void printDatabaseDescriptionPacket(const OspfDatabaseDescriptionPacket *ddPacket, Ipv4Address destination, int outputIfIndex) const;
-    void printLinkStateRequestPacket(const OspfLinkStateRequestPacket *requestPacket, Ipv4Address destination, int outputIfIndex) const;
-    void printLinkStateUpdatePacket(const OspfLinkStateUpdatePacket *updatePacket, Ipv4Address destination, int outputIfIndex) const;
-    void printLinkStateAcknowledgementPacket(const OspfLinkStateAcknowledgementPacket *ackPacket, Ipv4Address destination, int outputIfIndex) const;
+    void printEvent(const char *eventString, const Ospfv2Interface *onInterface = nullptr, const Neighbor *forNeighbor = nullptr) const;
+    void printHelloPacket(const Ospfv2HelloPacket *helloPacket, Ipv4Address destination, int outputIfIndex) const;
+    void printDatabaseDescriptionPacket(const Ospfv2DatabaseDescriptionPacket *ddPacket, Ipv4Address destination, int outputIfIndex) const;
+    void printLinkStateRequestPacket(const Ospfv2LinkStateRequestPacket *requestPacket, Ipv4Address destination, int outputIfIndex) const;
+    void printLinkStateUpdatePacket(const Ospfv2LinkStateUpdatePacket *updatePacket, Ipv4Address destination, int outputIfIndex) const;
+    void printLinkStateAcknowledgementPacket(const Ospfv2LinkStateAcknowledgementPacket *ackPacket, Ipv4Address destination, int outputIfIndex) const;
 
     // Authentication not implemented
-    bool authenticatePacket(const OspfPacket *packet) { return true; }
+    bool authenticatePacket(const Ospfv2Packet *packet) { return true; }
 };
 
-} // namespace ospf
+} // namespace ospfv2
 } // namespace inet
 
 #endif // ifndef __INET_MESSAGEHANDLER_H

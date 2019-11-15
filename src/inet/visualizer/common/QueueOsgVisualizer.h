@@ -50,6 +50,9 @@ class INET_API QueueOsgVisualizer : public QueueVisualizerBase
     virtual QueueVisualization *createQueueVisualization(queueing::IPacketQueue *queue) const override;
     virtual void refreshQueueVisualization(const QueueVisualization *queueVisualization) const override;
 
+  public:
+    virtual ~QueueOsgVisualizer();
+
 #else // ifdef WITH_OSG
 
   protected:

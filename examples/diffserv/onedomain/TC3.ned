@@ -19,11 +19,11 @@
 
 package inet.examples.diffserv.onedomain;
 
-import inet.common.queueing.PacketConsumer;
-import inet.common.queueing.PacketMultiplexer;
 import inet.linklayer.contract.ITrafficConditioner;
 import inet.networklayer.diffserv.MultiFieldClassifier;
 import inet.networklayer.diffserv.TokenBucketMeter;
+import inet.queueing.common.PacketMultiplexer;
+import inet.queueing.sink.PassivePacketSink;
 
 //
 // Traffic conditioner used in Experiment 3.2.
@@ -45,7 +45,7 @@ module TC3 like ITrafficConditioner
         meter: TokenBucketMeter {
             @display("p=250,200");
         }
-        sink: PacketConsumer {
+        sink: PassivePacketSink {
             @display("p=350,100");
         }
         join: PacketMultiplexer {

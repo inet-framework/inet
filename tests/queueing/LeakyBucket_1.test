@@ -4,20 +4,20 @@ TODO
 
 %file: test.ned
 
-import inet.common.queueing.LeakyBucket;
-import inet.common.queueing.PacketConsumer;
-import inet.common.queueing.PacketProducer;
+import inet.queueing.shaper.LeakyBucket;
+import inet.queueing.sink.PassivePacketSink;
+import inet.queueing.source.ActivePacketSource;
 
 network TestLeakyBucket
 {
     submodules:
-        producer: PacketProducer {
+        producer: ActivePacketSource {
             @display("p=100,100");
         }
         bucket: LeakyBucket {
             @display("p=200,100");
         }
-        consumer: PacketConsumer {
+        consumer: PassivePacketSink {
             @display("p=300,100");
         }
     connections allowunconnected:

@@ -20,7 +20,7 @@
 
 #include "inet/common/FSMA.h"
 #include "inet/common/packet/Packet.h"
-#include "inet/common/queueing/contract/IPacketQueue.h"
+#include "inet/queueing/contract/IPacketQueue.h"
 #include "inet/linklayer/base/MacProtocolBase.h"
 #include "inet/linklayer/csmaca/CsmaCaMacHeader_m.h"
 #include "inet/physicallayer/contract/packetlevel/IRadio.h"
@@ -37,13 +37,12 @@ class INET_API CsmaCaMac : public MacProtocolBase
     FcsMode fcsMode;
     bool useAck = true;
     double bitrate = NaN;
-    b headerLength = b(-1);
-    b ackLength = b(-1);
+    B headerLength = B(-1);
+    B ackLength = B(-1);
     simtime_t ackTimeout = -1;
     simtime_t slotTime = -1;
     simtime_t sifsTime = -1;
     simtime_t difsTime = -1;
-    int maxQueueSize = -1;
     int retryLimit = -1;
     int cwMin = -1;
     int cwMax = -1;
@@ -140,7 +139,7 @@ class INET_API CsmaCaMac : public MacProtocolBase
     virtual void handleLowerPacket(Packet *packet) override;
     virtual void handleWithFsm(cMessage *msg);
 
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details) override;
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details) override;
 
     virtual void encapsulate(Packet *frame);
     virtual void decapsulate(Packet *frame);
@@ -197,17 +196,8 @@ class INET_API CsmaCaMac : public MacProtocolBase
     //@}
 
     // OperationalBase:
-    virtual void handleStopOperation(LifecycleOperation *operation) override
-    {
-        MacProtocolBase::handleStopOperation(operation);
-        resetTransmissionVariables();
-    }
-
-    virtual void handleCrashOperation(LifecycleOperation *operation) override
-    {
-        MacProtocolBase::handleCrashOperation(operation);
-        resetTransmissionVariables();
-    }
+    virtual void handleStopOperation(LifecycleOperation *operation) override;
+    virtual void handleCrashOperation(LifecycleOperation *operation) override;
 };
 
 } // namespace inet

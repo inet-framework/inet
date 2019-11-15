@@ -26,12 +26,12 @@
 #include "inet/linklayer/common/Ieee802SapTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
+#include "inet/linklayer/common/VlanTag_m.h"
 #include "inet/linklayer/ethernet/EtherEncap.h"
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
 #include "inet/linklayer/ethernet/EthernetCommand_m.h"
 #include "inet/linklayer/ethernet/EtherPhyFrame_m.h"
 #include "inet/linklayer/ieee8022/Ieee8022LlcHeader_m.h"
-#include "inet/linklayer/vlan/VlanTag_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 
 namespace inet {
@@ -102,7 +102,7 @@ void EtherEncap::processCommandFromHigherLayer(Request *msg)
         auto indication = new Indication("closed", ETHERNET_I_SOCKET_CLOSED);
         auto ctrl = new EthernetSocketClosedIndication();
         indication->setControlInfo(ctrl);
-        indication->addTagIfAbsent<SocketInd>()->setSocketId(socketId);
+        indication->addTag<SocketInd>()->setSocketId(socketId);
         send(indication, "transportOut");
     }
     else if (dynamic_cast<EthernetDestroyCommand *>(ctrl) != nullptr) {
@@ -128,7 +128,7 @@ void EtherEncap::processPacketFromHigherLayer(Packet *packet)
 {
     delete packet->removeTagIfPresent<DispatchProtocolReq>();
     if (packet->getDataLength() > MAX_ETHERNET_DATA_BYTES)
-        throw cRuntimeError("packet from higher layer (%d bytes) exceeds maximum Ethernet payload length (%d)", (int)packet->getByteLength(), MAX_ETHERNET_DATA_BYTES);
+        throw cRuntimeError("packet length from higher layer (%s) exceeds maximum Ethernet payload length (%s)", packet->getDataLength().str().c_str(), MAX_ETHERNET_DATA_BYTES.str().c_str());
 
     totalFromHigherLayer++;
     emit(encapPkSignal, packet);

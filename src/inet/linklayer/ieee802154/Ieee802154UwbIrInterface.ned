@@ -17,7 +17,7 @@
 
 package inet.linklayer.ieee802154;
 
-import inet.common.queueing.contract.IPacketQueue;
+import inet.queueing.contract.IPacketQueue;
 import inet.linklayer.acking.AckingMac;
 import inet.linklayer.contract.IWirelessInterface;
 import inet.networklayer.common.InterfaceEntry;

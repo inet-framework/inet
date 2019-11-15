@@ -52,6 +52,9 @@ class INET_API Quaternion
     void setV(const Coord& v) { this->v = v; }
 
     //! basic operations
+    bool operator==(const Quaternion& q) { return s == q.s && v == q.v; }
+    bool operator!=(const Quaternion& q) { return !(*this == q); }
+
     Quaternion &operator =(const Quaternion &q) { s = q.s; v = q.v; return *this; }
 
     const Quaternion operator +(const Quaternion &q) const { return Quaternion(s+q.s, v+q.v); }
@@ -87,12 +90,13 @@ class INET_API Quaternion
     //! computes the conjugate of this Quaternion
     void conjugate() { v = -v; }
 
+    Quaternion conjugated() const { return Quaternion(s, -v.x, -v.y, -v.z); }
+
     //! inverts this Quaternion
     void invert() { conjugate(); *this /= lengthSquared(); }
 
     //! returns the inverse of this Quaternion
     Quaternion inverse() const { Quaternion q(*this); q.invert(); return q; }
-
 
     //! computes the dot product of 2 quaternions
     static inline double dot(const Quaternion &q1, const Quaternion &q2) { return q1.v*q2.v + q1.s*q2.s; }
@@ -116,6 +120,18 @@ class INET_API Quaternion
 
     // adapted from https://svn.code.sf.net/p/irrlicht/code/trunk/include/quaternion.h
     static Quaternion rotationFromTo(const Coord& from, const Coord& to);
+
+    /**
+       Decompose the rotation on to 2 parts.
+       1. Twist - rotation around the "direction" vector
+       2. Swing - rotation around axis that is perpendicular to "direction" vector
+       The rotation can be composed back by rotation = swing * twist
+
+       has singularity in case of swing_rotation close to 180 degrees rotation.
+       if the input quaternion is of non-unit length, the outputs are non-unit as well
+       otherwise, outputs are both unit
+    */
+    void getSwingAndTwist(const Coord& direction, Quaternion& swing, Quaternion& twist) const;
 
     std::string str() const;
 };

@@ -36,10 +36,9 @@ package inet.transportlayer.contract;
 // "fork" on an incoming connection, leaving the original connection LISTENing
 // on the port (see the fork field in ~TcpOpenCommand).
 //
-// The app can send data by assigning the TCP_C_SEND message kind
-// and attaching a ~TCPSendCommand control info object to the data packet,
+// The app can send data by assigning the TCP_C_SEND message kind to the data packet,
 // and sending it to TCP. The app will receive data as messages
-// with the TCP_I_DATA message kind and ~TCPSendCommand control info.
+// with the TCP_I_DATA message kind.
 //
 // To close, the client sends a cMessage to TCP with the TCP_C_CLOSE message kind
 // and ~TcpCommand control info.

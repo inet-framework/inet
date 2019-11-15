@@ -21,9 +21,9 @@ namespace inet {
 
 namespace physicallayer {
 
-NarrowbandNoiseBase::NarrowbandNoiseBase(simtime_t startTime, simtime_t endTime, Hz carrierFrequency, Hz bandwidth) :
+NarrowbandNoiseBase::NarrowbandNoiseBase(simtime_t startTime, simtime_t endTime, Hz centerFrequency, Hz bandwidth) :
     NoiseBase(startTime, endTime),
-    carrierFrequency(carrierFrequency),
+    centerFrequency(centerFrequency),
     bandwidth(bandwidth)
 {
 }
@@ -31,7 +31,7 @@ NarrowbandNoiseBase::NarrowbandNoiseBase(simtime_t startTime, simtime_t endTime,
 std::ostream& NarrowbandNoiseBase::printToStream(std::ostream& stream, int level) const
 {
     if (level <= PRINT_LEVEL_TRACE)
-        stream << ", carrierFrequency = " << carrierFrequency
+        stream << ", centerFrequency = " << centerFrequency
                << ", bandwidth = " << bandwidth;
     return NoiseBase::printToStream(stream, level);
 }

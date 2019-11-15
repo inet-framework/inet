@@ -20,8 +20,8 @@
 namespace inet {
 namespace physicallayer {
 
-DimensionalSignalAnalogModel::DimensionalSignalAnalogModel(const simtime_t duration, Hz carrierFrequency, Hz bandwidth, const ConstMapping *power) :
-    NarrowbandSignalAnalogModel(duration, carrierFrequency, bandwidth),
+DimensionalSignalAnalogModel::DimensionalSignalAnalogModel(const simtime_t duration, Hz centerFrequency, Hz bandwidth, const Ptr<const IFunction<WpHz, Domain<simsec, Hz>>>& power) :
+    NarrowbandSignalAnalogModel(duration, centerFrequency, bandwidth),
     power(power)
 {
 }
@@ -29,11 +29,9 @@ DimensionalSignalAnalogModel::DimensionalSignalAnalogModel(const simtime_t durat
 std::ostream& DimensionalSignalAnalogModel::printToStream(std::ostream& stream, int level) const
 {
     stream << "DimensionalSignalAnalogModel";
-    if (level <= PRINT_LEVEL_DETAIL)
-        stream << ", powerDimensionSet = " << power->getDimensionSet();
     if (level <= PRINT_LEVEL_DEBUG)
-        stream << ", powerMax = " << MappingUtils::findMax(*power)
-               << ", powerMin = " << MappingUtils::findMin(*power);
+        stream << ", powerMax = " << power->getMax()
+               << ", powerMin = " << power->getMin();
     if (level <= PRINT_LEVEL_TRACE)
         stream << ", power = " << power;
     return NarrowbandSignalAnalogModel::printToStream(stream, level);
@@ -41,30 +39,20 @@ std::ostream& DimensionalSignalAnalogModel::printToStream(std::ostream& stream, 
 
 W DimensionalSignalAnalogModel::computeMinPower(simtime_t startTime, simtime_t endTime) const
 {
-    const DimensionSet& dimensions = power->getDimensionSet();
-    Argument startArgument(dimensions);
-    Argument endArgument(dimensions);
-    if (dimensions.hasDimension(Dimension::time)) {
-        startArgument.setTime(startTime);
-        // NOTE: to exclude the moment where the reception power starts to be 0 again
-        endArgument.setTime(MappingUtils::pre(endTime));
-    }
-    if (dimensions.hasDimension(Dimension::frequency)) {
-        startArgument.setArgValue(Dimension::frequency, (carrierFrequency - bandwidth / 2).get());
-        endArgument.setArgValue(Dimension::frequency, nexttoward((carrierFrequency + bandwidth / 2).get(), 0));
-    }
-    W minPower = W(MappingUtils::findMin(*power, startArgument, endArgument));
-    EV_DEBUG << "Computing minimum reception power: start = " << startArgument << ", end = " << endArgument << " -> minimum reception power = " << minPower << endl;
+    Point<simsec> startPoint{simsec(startTime)};
+    Point<simsec> endPoint{simsec(endTime)};
+    W minPower = integrate<WpHz, Domain<simsec, Hz>, 0b10, W, Domain<simsec>>(power)->getMin(Interval<simsec>(startPoint, endPoint, 0b1, 0b1, 0b0));
+    EV_DEBUG << "Computing minimum reception power: start = " << startPoint << ", end = " << endPoint << " -> minimum reception power = " << minPower << endl;
     return minPower;
 }
 
-DimensionalTransmissionSignalAnalogModel::DimensionalTransmissionSignalAnalogModel(const simtime_t duration, Hz carrierFrequency, Hz bandwidth, const ConstMapping *power) :
-    DimensionalSignalAnalogModel(duration, carrierFrequency, bandwidth, power)
+DimensionalTransmissionSignalAnalogModel::DimensionalTransmissionSignalAnalogModel(const simtime_t duration, Hz centerFrequency, Hz bandwidth, const Ptr<const IFunction<WpHz, Domain<simsec, Hz>>>& power) :
+    DimensionalSignalAnalogModel(duration, centerFrequency, bandwidth, power)
 {
 }
 
-DimensionalReceptionSignalAnalogModel::DimensionalReceptionSignalAnalogModel(const simtime_t duration, Hz carrierFrequency, Hz bandwidth, const ConstMapping *power) :
-    DimensionalSignalAnalogModel(duration, carrierFrequency, bandwidth, power)
+DimensionalReceptionSignalAnalogModel::DimensionalReceptionSignalAnalogModel(const simtime_t duration, Hz centerFrequency, Hz bandwidth, const Ptr<const IFunction<WpHz, Domain<simsec, Hz>>>& power) :
+    DimensionalSignalAnalogModel(duration, centerFrequency, bandwidth, power)
 {
 }
 

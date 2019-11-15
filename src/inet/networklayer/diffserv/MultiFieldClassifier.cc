@@ -83,7 +83,9 @@ void MultiFieldClassifier::PacketDissectorCallback::visitChunk(const Ptr<const C
             return;
         if (protocolId >= 0 && protocolId != ipv4Header->getProtocolId())
             return;
-        if (tosMask != 0 && (tos & tosMask) != (ipv4Header->getTypeOfService() & tosMask))
+        if (dscp != -1 && dscp != ipv4Header->getDiffServCodePoint())
+            return;
+        if (tos != -1 && tosMask != 0 && (tos & tosMask) != (ipv4Header->getTypeOfService() & tosMask))
             return;
 
         matchesL3 = true;
@@ -107,7 +109,9 @@ void MultiFieldClassifier::PacketDissectorCallback::visitChunk(const Ptr<const C
             return;
         if (protocolId >= 0 && protocolId != ipv6Header->getProtocolId())
             return;
-        if (tosMask != 0 && (tos & tosMask) != (ipv6Header->getTrafficClass() & tosMask))
+        if (dscp != -1 && dscp != ipv6Header->getDiffServCodePoint())
+            return;
+        if (tos != -1 && tosMask != 0 && (tos & tosMask) != (ipv6Header->getTrafficClass() & tosMask))
             return;
 
         matchesL3 = true;
@@ -126,9 +130,13 @@ void MultiFieldClassifier::PacketDissectorCallback::visitChunk(const Ptr<const C
         auto srcPort = transportHeader->getSourcePort();
         auto destPort = transportHeader->getDestinationPort();
 
-        if (srcPortMin >= 0 && (srcPort < srcPortMin || srcPort > srcPortMax))
+        if (srcPortMin != -1 && (srcPort < (unsigned int)srcPortMin))
             return;
-        if (destPortMin >= 0 && (destPort < destPortMin || destPort > destPortMax))
+        if (srcPortMax != -1 && (srcPort > (unsigned int)srcPortMax))
+            return;
+        if (destPortMin != -1 && (destPort < (unsigned int)destPortMin))
+            return;
+        if (destPortMax != -1 && (destPort > (unsigned int)destPortMax))
             return;
         matchesL4 = true;
     }
@@ -194,23 +202,25 @@ void MultiFieldClassifier::addFilter(const PacketDissectorCallback& filter)
     if (!filter.destAddr.isUnspecified() && ((filter.destAddr.getType() == L3Address::IPv6 && filter.destPrefixLength > 128) ||
                                              (filter.destAddr.getType() == L3Address::IPv4 && filter.destPrefixLength > 32)))
         throw cRuntimeError("srcPrefixLength is invalid");
-    if (filter.protocolId != -1 && (filter.protocolId < 0 || filter.protocolId > 0xff))
+    if ((filter.protocolId < -1 || filter.protocolId > 0xff))
         throw cRuntimeError("protocol is not a valid protocol number");
-    if (filter.tos != -1 && (filter.tos < 0 || filter.tos > 0xff))
+    if (filter.dscp < -1 || filter.dscp > 0x3f)
+        throw cRuntimeError("dscp is not valid");
+    if (filter.tos < -1 || filter.tos > 0xff)
         throw cRuntimeError("tos is not valid");
     if (filter.tosMask < 0 || filter.tosMask > 0xff)
         throw cRuntimeError("tosMask is not valid");
-    if (filter.srcPortMin != -1 && (filter.srcPortMin < 0 || filter.srcPortMin > 0xffff))
+    if (filter.srcPortMin < -1 || filter.srcPortMin > 0xffff)
         throw cRuntimeError("srcPortMin is not a valid port number");
-    if (filter.srcPortMax != -1 && (filter.srcPortMax < 0 || filter.srcPortMax > 0xffff))
+    if (filter.srcPortMax < -1 || filter.srcPortMax > 0xffff)
         throw cRuntimeError("srcPortMax is not a valid port number");
-    if (filter.srcPortMin != -1 && filter.srcPortMin > filter.srcPortMax)
+    if (filter.srcPortMax != -1 && filter.srcPortMin > filter.srcPortMax)
         throw cRuntimeError("srcPortMin > srcPortMax");
-    if (filter.destPortMin != -1 && (filter.destPortMin < 0 || filter.destPortMin > 0xffff))
+    if (filter.destPortMin < -1 || filter.destPortMin > 0xffff)
         throw cRuntimeError("destPortMin is not a valid port number");
-    if (filter.destPortMax != -1 && (filter.destPortMax < 0 || filter.destPortMax > 0xffff))
+    if (filter.destPortMax < -1 || filter.destPortMax > 0xffff)
         throw cRuntimeError("destPortMax is not a valid port number");
-    if (filter.destPortMin != -1 && filter.destPortMin > filter.destPortMax)
+    if (filter.destPortMax != -1 && filter.destPortMin > filter.destPortMax)
         throw cRuntimeError("destPortMin > destPortMax");
 
     filters.push_back(filter);
@@ -229,6 +239,7 @@ void MultiFieldClassifier::configureFilters(cXMLElement *config)
             const char *destAddrAttr = filterElement->getAttribute("destAddress");
             const char *destPrefixLengthAttr = filterElement->getAttribute("destPrefixLength");
             const char *protocolAttr = filterElement->getAttribute("protocol");
+            const char *dscpAttr = filterElement->getAttribute("dscp");
             const char *tosAttr = filterElement->getAttribute("tos");
             const char *tosMaskAttr = filterElement->getAttribute("tosMask");
             const char *srcPortAttr = filterElement->getAttribute("srcPort");
@@ -254,6 +265,8 @@ void MultiFieldClassifier::configureFilters(cXMLElement *config)
                 filter.destPrefixLength = filter.destAddr.getType() == L3Address::IPv6 ? 128 : 32;
             if (protocolAttr)
                 filter.protocolId = parseProtocol(protocolAttr, "protocol");
+            if (dscpAttr)
+                filter.dscp = parseIntAttribute(dscpAttr, "dscp");
             if (tosAttr)
                 filter.tos = parseIntAttribute(tosAttr, "tos");
             if (tosMaskAttr)

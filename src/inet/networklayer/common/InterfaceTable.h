@@ -194,38 +194,42 @@ class INET_API InterfaceTable : public OperationalBase, public IInterfaceTable, 
      * Returns an interface given by its getNodeOutputGateId().
      * Returns nullptr if not found.
      */
-    virtual InterfaceEntry *getInterfaceByNodeOutputGateId(int id) const override;
+    virtual InterfaceEntry *findInterfaceByNodeOutputGateId(int id) const override;
 
     /**
      * Returns an interface given by its getNodeInputGateId().
      * Returns nullptr if not found.
      */
-    virtual InterfaceEntry *getInterfaceByNodeInputGateId(int id) const override;
+    virtual InterfaceEntry *findInterfaceByNodeInputGateId(int id) const override;
 
     /**
      * Returns an interface by one of its component module (e.g. PPP).
      * Returns nullptr if not found.
      */
-    virtual InterfaceEntry *getInterfaceByInterfaceModule(cModule *ifmod) const override;
+    virtual InterfaceEntry *findInterfaceByInterfaceModule(cModule *ifmod) const override;
 
     /**
      * Returns an interface given by its name. Returns nullptr if not found.
      */
-    virtual InterfaceEntry *getInterfaceByName(const char *name) const override;
+    virtual InterfaceEntry *findInterfaceByName(const char *name) const override;
 
     /**
      * Returns the first interface with the isLoopback flag set.
-     * (If there's no loopback, it returns nullptr -- but this
-     * should never happen because InterfaceTable itself registers a
-     * loopback interface on startup.)
+     * If there's no loopback, it returns nullptr.
      */
-    virtual InterfaceEntry *getFirstLoopbackInterface() const override;
+    virtual InterfaceEntry *findFirstLoopbackInterface() const override;
+
+    /**
+     * Returns the first interface with the isLoopback flag unset.
+     * If there's no non-loopback, it returns nullptr.
+     */
+    virtual InterfaceEntry *findFirstNonLoopbackInterface() const override;
 
     /**
      * Returns the first multicast capable interface.
      * If there is no such interface, then returns nullptr.
      */
-    virtual InterfaceEntry *getFirstMulticastInterface() const override;
+    virtual InterfaceEntry *findFirstMulticastInterface() const override;
 
     /**
      * Lifecycle method

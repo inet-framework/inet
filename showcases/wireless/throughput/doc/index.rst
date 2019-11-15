@@ -7,9 +7,8 @@ Goals
 This example analyzes how application-level throughput changes as a
 function of nominal bitrate in an 802.11g network.
 
-INET version: ``4.0``
-
-Source files location: `inet/showcases/wireless/throughput <https://github.com/inet-framework/inet-showcases/tree/master/wireless/throughput>`__
+| INET version: ``4.0``
+| Source files location: `inet/showcases/wireless/throughput <https://github.com/inet-framework/inet-showcases/tree/master/wireless/throughput>`__
 
 The model
 ---------
@@ -29,7 +28,7 @@ Configuration
 The network contains two :ned:`WirelessHost`'s, at a distance of 1 meter,
 one of them acting as traffic source, the other one as traffic sink. The
 source host sends a UDP stream to the destination host in ad-hoc mode.
-The simulation is run with a small packet size of 100 bytes, and the
+The simulation is run with a small packet size of 100 bytes, 1000 bytes, and the
 default maximum unfragmented packet size in 802.11, 2236 bytes. (The
 maximum transfer unit in 802.11 by default is 2304 bytes, which
 corresponds to 2236 bytes of application data.) The simulation will be
@@ -119,6 +118,8 @@ one-by-one.) Frame aggregation allows multiple data frames to be sent
 following a preamble and a physical header in a single transmission.
 Recent versions of the INET Framework support these 802.11 features, but
 they are out of scope for this simulation example.
+
+Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`Throughput.ned <../Throughput.ned>`
 
 Further information
 -------------------

@@ -154,7 +154,7 @@ void Ipv6::handleRequest(Request *request)
             auto indication = new Indication("closed", IPv6_I_SOCKET_CLOSED);
             auto ctrl = new Ipv6SocketClosedIndication();
             indication->setControlInfo(ctrl);
-            indication->addTagIfAbsent<SocketInd>()->setSocketId(socketId);
+            indication->addTag<SocketInd>()->setSocketId(socketId);
             send(indication, "transportOut");
         }
         delete request;
@@ -353,7 +353,7 @@ void Ipv6::handleMessageFromHL(Packet *msg)
             destIE = nullptr;
         }
         if (!destIE)
-            destIE = ift->getFirstLoopbackInterface();
+            destIE = ift->findFirstLoopbackInterface();
         ASSERT(destIE);
     }
     L3Address nextHopAddr(Ipv6Address::UNSPECIFIED_ADDRESS);

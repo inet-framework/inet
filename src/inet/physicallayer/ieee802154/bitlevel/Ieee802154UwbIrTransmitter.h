@@ -24,9 +24,7 @@
 #define __INET_IEEE802154UWBIRTRANSMITTER_H
 
 #include <vector>
-
-#include "inet/common/mapping/MappingBase.h"
-#include "inet/common/mapping/MappingUtils.h"
+#include "inet/common/math/Functions.h"
 #include "inet/physicallayer/base/packetlevel/TransmitterBase.h"
 #include "inet/physicallayer/ieee802154/bitlevel/Ieee802154UwbIrMode.h"
 
@@ -52,13 +50,13 @@ class INET_API Ieee802154UwbIrTransmitter : public TransmitterBase
     simtime_t getPhyMaxFrameDuration() const;
     simtime_t getThdr() const;
 
-    virtual void generateSyncPreamble(Mapping* mapping, Argument* arg, const simtime_t startTime) const;
-    virtual void generateSFD(Mapping* mapping, Argument* arg, const simtime_t startTime) const;
-    virtual void generatePhyHeader(Mapping* mapping, Argument* arg, const simtime_t startTime) const;
-    virtual void generateBurst(Mapping* mapping, Argument* arg, const simtime_t startTime, const simtime_t burstStart, short polarity) const;
-    virtual void generatePulse(Mapping* mapping, Argument* arg, const simtime_t startTime, short polarity, double peak, const simtime_t chip) const;
+    virtual void generateSyncPreamble(std::map<simsec, WpHz>& data, simtime_t& time, const simtime_t startTime) const;
+    virtual void generateSFD(std::map<simsec, WpHz>& data, simtime_t& time, const simtime_t startTime) const;
+    virtual void generatePhyHeader(std::map<simsec, WpHz>& data, simtime_t& time, const simtime_t startTime) const;
+    virtual void generateBurst(std::map<simsec, WpHz>& data, simtime_t& time, const simtime_t startTime, const simtime_t burstStart, short polarity) const;
+    virtual void generatePulse(std::map<simsec, WpHz>& data, simtime_t& time, const simtime_t startTime, short polarity, double peak, const simtime_t chip) const;
 
-    virtual ConstMapping *generateIEEE802154AUWBSignal(const simtime_t startTime, std::vector<bool> *bits) const;
+    virtual Ptr<const IFunction<WpHz, Domain<simsec, Hz>>> generateIEEE802154AUWBSignal(const simtime_t startTime, std::vector<bool> *bits) const;
 
   public:
     Ieee802154UwbIrTransmitter();

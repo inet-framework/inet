@@ -30,6 +30,12 @@ LinkBreakCanvasVisualizer::LinkBreakCanvasVisualization::LinkBreakCanvasVisualiz
 {
 }
 
+LinkBreakCanvasVisualizer::~LinkBreakCanvasVisualizer()
+{
+    if (displayLinkBreaks)
+        removeAllLinkBreakVisualizations();
+}
+
 void LinkBreakCanvasVisualizer::initialize(int stage)
 {
     LinkBreakVisualizerBase::initialize(stage);

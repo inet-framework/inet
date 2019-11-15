@@ -73,7 +73,9 @@ double DsssOqpsk16Modulation::calculateBER(double snir, Hz bandwidth, bps bitrat
     // for k = 16 (because of missing k=0 value)
     k = 16;
     dSumK += math::n_choose_k(16, k) * exp(dSNRFct * (1.0 / k - 1.0));
-    return (8.0 / 15) * (1.0 / 16) * dSumK;
+    double ber = (8.0 / 15) * (1.0 / 16) * dSumK;
+    ASSERT(0.0 <= ber && ber <= 1.0);
+    return ber;
 }
 
 double DsssOqpsk16Modulation::calculateSER(double snir, Hz bandwidth, bps bitrate) const

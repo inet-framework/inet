@@ -40,7 +40,7 @@ class LoRaConfigureRadioCommand
     W power;                    // new default transmission power in the range (0, +infinity) or NaN if not set.
     bps bitrate;              // new default bitrate in the range (0, +infinity) or NaN if not set.
     //IModulationPtr modulation = nullptr; // new default modulation or nullptr if not set.
-    Hz carrierFrequency;       // new default carrier frequency in the range (0, +infinity) or NaN if not set.
+    Hz centerFrequency;       // new default carrier frequency in the range (0, +infinity) or NaN if not set.
     Hz bandwidth;              // new default bandwidth in the rage (0, +infinity) or NaN if not set.
 }
 
@@ -51,7 +51,7 @@ class LoRaTransmissionRequest
 {
     W power;              // override default transmission power in the range (0, +infinity) or NaN if not set.
     bps bitrate;        // override default bitrate in the range (0, +infinity) or NaN if not set.
-    Hz carrierFrequency; // override default carrier frequency in the range (0, +infinity) or NaN if not set.
+    Hz centerFrequency; // override default carrier frequency in the range (0, +infinity) or NaN if not set.
     Hz bandwidth;        // override default bandwidth in the rage (0, +infinity) or NaN if not set.
 }
 

@@ -15,9 +15,9 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-#include "inet/common/queueing/PacketComparatorFunction.h"
 #include "inet/linklayer/common/UserPriority.h"
 #include "inet/linklayer/common/UserPriorityTag_m.h"
+#include "inet/queueing/function/PacketComparatorFunction.h"
 
 namespace inet {
 
@@ -33,7 +33,7 @@ static int comparePacketsByUserPriority(Packet *a, Packet *b)
     return getPacketPriority(b) - getPacketPriority(a);
 }
 
-Register_Packet_Comparator_Function(UserPriorityPacketComparator, comparePacketsByUserPriority);
+Register_Packet_Comparator_Function(PacketUserPriorityComparator, comparePacketsByUserPriority);
 
 } // namespace inet
 

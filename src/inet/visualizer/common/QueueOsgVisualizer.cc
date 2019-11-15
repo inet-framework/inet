@@ -33,6 +33,12 @@ QueueOsgVisualizer::QueueOsgVisualization::QueueOsgVisualization(NetworkNodeOsgV
 {
 }
 
+QueueOsgVisualizer::~QueueOsgVisualizer()
+{
+    if (displayQueues)
+        removeAllQueueVisualizations();
+}
+
 void QueueOsgVisualizer::initialize(int stage)
 {
     QueueVisualizerBase::initialize(stage);

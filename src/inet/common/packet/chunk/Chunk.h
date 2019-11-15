@@ -287,12 +287,15 @@ class INET_API Chunk : public cObject,
      */
     enum PeekFlag {
         PF_ALLOW_NULLPTR                = (1 << 0),
-        PF_ALLOW_INCOMPLETE             = (1 << 1),
-        PF_ALLOW_INCORRECT              = (1 << 2),
-        PF_ALLOW_IMPROPERLY_REPRESENTED = (1 << 3),
-        PF_ALLOW_SERIALIZATION          = (1 << 4),
+        PF_ALLOW_EMPTY                  = (1 << 1),
+        PF_ALLOW_INCOMPLETE             = (1 << 2),
+        PF_ALLOW_INCORRECT              = (1 << 3),
+        PF_ALLOW_IMPROPERLY_REPRESENTED = (1 << 4),
+        PF_ALLOW_SERIALIZATION          = (1 << 5),
         PF_ALLOW_ALL                    = -1
     };
+
+    static const b unspecifiedLength;
 
     class INET_API Iterator
     {
@@ -399,7 +402,7 @@ class INET_API Chunk : public cObject,
 
     template <typename T>
     const Ptr<T> peekConverted(const Iterator& iterator, b length, int flags) const {
-        CHUNK_CHECK_USAGE(iterator.isForward() || length != b(-1), "chunk conversion using backward iterator with undefined length is invalid");
+        CHUNK_CHECK_USAGE(iterator.isForward() || length >= b(0), "chunk conversion using backward iterator with undefined length is invalid");
         auto offset = iterator.isForward() ? iterator.getPosition() : getChunkLength() - iterator.getPosition() - length;
         const auto& chunk = T::convertChunk(typeid(T), const_cast<Chunk *>(this)->shared_from_this(), offset, length, flags);
         chunk->markImmutable();
@@ -410,7 +413,11 @@ class INET_API Chunk : public cObject,
     const Ptr<T> checkPeekResult(const Ptr<T>& chunk, int flags) const {
         if (chunk == nullptr) {
             if (!(flags & PF_ALLOW_NULLPTR))
-                throw cRuntimeError("Returning an empty chunk is not allowed according to the flags: %x", flags);
+                throw cRuntimeError("Returning an empty chunk (nullptr) is not allowed according to the flags: %x", flags);
+        }
+        else if (chunk->getChunkType() == CT_EMPTY) {
+            if (!(flags & PF_ALLOW_EMPTY))
+                throw cRuntimeError("Returning an empty chunk (EmptyChunk) is not allowed according to the flags: %x", flags);
         }
         else {
             if (chunk->isIncomplete() && !(flags & PF_ALLOW_INCOMPLETE))
@@ -581,19 +588,20 @@ class INET_API Chunk : public cObject,
     /**
      * Returns the designated part of the data represented by this chunk in its
      * default representation. If the length is unspecified, then the length of
-     * the result is chosen according to the internal representation. The result
-     * is mutable iff the designated part is directly represented in this chunk
-     * by a mutable chunk, otherwise the result is immutable.
+     * the result is chosen according to the internal representation. If the
+     * length is negative, then the result won't be longer than the absolute
+     * length. The result is mutable iff the designated part is directly represented
+     * in this chunk by a mutable chunk, otherwise the result is immutable.
      */
-    const Ptr<Chunk> peek(const Iterator& iterator, b length = b(-1), int flags = 0) const;
+    const Ptr<Chunk> peek(const Iterator& iterator, b length = unspecifiedLength, int flags = 0) const;
 
     /**
      * Returns whether if the designated part of the data is available in the
      * requested representation.
      */
     template <typename T>
-    bool has(const Iterator& iterator, b length = b(-1)) const {
-        if (length != b(-1) && getChunkLength() < iterator.getPosition() + length)
+    bool has(const Iterator& iterator, b length = unspecifiedLength) const {
+        if (length >= b(0) && getChunkLength() < iterator.getPosition() + length)
             return false;
         else {
             const auto& chunk = peek<T>(iterator, length, PF_ALLOW_NULLPTR | PF_ALLOW_INCOMPLETE);
@@ -604,12 +612,14 @@ class INET_API Chunk : public cObject,
     /**
      * Returns the designated part of the data represented by this chunk in the
      * requested representation. If the length is unspecified, then the length of
-     * the result is chosen according to the internal representation. The result
-     * is mutable iff the designated part is directly represented in this chunk
-     * by a mutable chunk, otherwise the result is immutable.
+     * the result is chosen according to the internal representation. If the
+     * length is negative, then the result won't be longer than the absolute
+     * length. The result is mutable iff the designated part is directly represented
+     * in this chunk by a mutable chunk, otherwise the result is immutable.
      */
     template <typename T>
-    const Ptr<T> peek(const Iterator& iterator, b length = b(-1), int flags = 0) const {
+    const Ptr<T> peek(const Iterator& iterator, b length = unspecifiedLength, int flags = 0) const {
+        CHUNK_CHECK_USAGE((flags & PF_ALLOW_EMPTY) == 0, "peeking with a specific chunk type with PF_ALLOW_EMPTY is an invalid operation");
         const auto& predicate = [] (const Ptr<Chunk>& chunk) -> bool { return chunk == nullptr || dynamicPtrCast<T>(chunk); };
         const auto& converter = [] (const Ptr<Chunk>& chunk, const Iterator& iterator, b length, int flags) -> const Ptr<Chunk> { return chunk->peekConverted<T>(iterator, length, flags); };
         const auto& chunk = peekUnchecked(predicate, converter, iterator, length, flags);
@@ -723,6 +733,9 @@ class INET_API Chunk : public cObject,
     /**
      * Serializes a chunk into the given stream. The bytes representing the
      * chunk is written at the current position of the stream up to its length.
+     * The offset parameter and the offset + length value must be in the range
+     * [0, chunkLength]. If the length parameter is -1, then the chunk will be
+     * serialized up to its end.
      */
     static void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk, b offset = b(0), b length = b(-1));
 

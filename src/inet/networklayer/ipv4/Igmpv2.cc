@@ -22,12 +22,14 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/Protocol.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/checksum/TcpIpChecksum.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/ipv4/Igmpv2.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
+#include "inet/networklayer/ipv4/Ipv4OptionsTag_m.h"
 #include "inet/networklayer/ipv4/Ipv4RoutingTable.h"
 
 namespace inet {
@@ -175,6 +177,8 @@ void Igmpv2::initialize(int stage)
         lastMemberQueryCount = par("lastMemberQueryCount");
         unsolicitedReportInterval = par("unsolicitedReportInterval");
         //version1RouterPresentInterval = par("version1RouterPresentInterval");
+        const char *crcModeString = par("crcMode");
+        crcMode = parseCrcMode(crcModeString, false);
 
         addWatches();
     }
@@ -352,9 +356,8 @@ void Igmpv2::handleMessage(cMessage *msg)
     else if (!strcmp(msg->getArrivalGate()->getName(), "routerIn"))
         send(msg, "ipOut");
     else {
-        Packet *packet = check_and_cast<Packet *>(msg);
-        const auto& igmp = packet->peekAtFront<IgmpMessage>();
-        processIgmpMessage(packet, igmp);
+        auto packet = check_and_cast<Packet *>(msg);
+        processIgmpMessage(packet);
     }
 }
 
@@ -442,8 +445,19 @@ void Igmpv2::startHostTimer(InterfaceEntry *ie, HostGroupData *group, double max
 
 // --- Methods for processing IGMP messages ---
 
-void Igmpv2::processIgmpMessage(Packet *packet, const Ptr<const IgmpMessage>& igmp)
+void Igmpv2::processIgmpMessage(Packet *packet)
 {
+    if (!verifyCrc(packet)) {
+        EV_WARN << "incoming IGMP packet has wrong CRC, dropped\n";
+        // drop packet
+        PacketDropDetails details;
+        details.setReason(INCORRECTLY_RECEIVED);
+        emit(packetDroppedSignal, packet, &details);
+        delete packet;
+        return;
+    }
+
+    const auto& igmp = packet->peekAtFront<IgmpMessage>();
     InterfaceEntry *ie = ift->getInterfaceById(packet->getTag<InterfaceInd>()->getInterfaceId());
     switch (igmp->getType()) {
         case IGMP_MEMBERSHIP_QUERY:
@@ -485,7 +499,7 @@ void Igmpv2::processQuery(InterfaceEntry *ie, Packet *packet)
 
     Ipv4Address groupAddr = igmpQry->getGroupAddress();
     const Ptr<const Igmpv2Query>& v2Query = dynamicPtrCast<const Igmpv2Query>(igmpQry);
-    simtime_t maxRespTime = v2Query ? v2Query->getMaxRespTime() : 10.0;
+    simtime_t maxRespTime = SimTime(v2Query ? v2Query->getMaxRespTimeCode() : 100, (SimTimeUnit)-1);
 
     if (groupAddr.isUnspecified()) {
         // general query
@@ -657,8 +671,9 @@ void Igmpv2::sendQuery(InterfaceEntry *ie, const Ipv4Address& groupAddr, double 
         const auto& msg = makeShared<Igmpv2Query>();
         msg->setType(IGMP_MEMBERSHIP_QUERY);
         msg->setGroupAddress(groupAddr);
-        msg->setMaxRespTime(maxRespTime);
+        msg->setMaxRespTimeCode(SimTime(maxRespTime).inUnit((SimTimeUnit)-1));
         msg->setChunkLength(B(8));
+        insertCrc(msg, packet);
         packet->insertAtFront(msg);
         sendToIP(packet, ie, groupAddr.isUnspecified() ? Ipv4Address::ALL_HOSTS_MCAST : groupAddr);
 
@@ -679,7 +694,11 @@ void Igmpv2::sendReport(InterfaceEntry *ie, HostGroupData *group)
     const auto& msg = makeShared<Igmpv2Report>();
     msg->setGroupAddress(group->groupAddr);
     msg->setChunkLength(B(8));
+    insertCrc(msg, packet);
     packet->insertAtFront(msg);
+    // TODO fill Router Alert option
+    auto raOption = new Ipv4OptionRouterAlert();
+    packet->addTag<Ipv4OptionsReq>()->insertOption(raOption);
     sendToIP(packet, ie, group->groupAddr);
     numReportsSent++;
 }
@@ -693,7 +712,11 @@ void Igmpv2::sendLeave(InterfaceEntry *ie, HostGroupData *group)
     const auto& msg = makeShared<Igmpv2Leave>();
     msg->setGroupAddress(group->groupAddr);
     msg->setChunkLength(B(8));
+    insertCrc(msg, packet);
     packet->insertAtFront(msg);
+    // TODO fill Router Alert option
+    auto raOption = new Ipv4OptionRouterAlert();
+    packet->addTag<Ipv4OptionsReq>()->insertOption(raOption);
     sendToIP(packet, ie, Ipv4Address::ALL_ROUTERS_MCAST);
     numLeavesSent++;
 }
@@ -930,6 +953,55 @@ const std::string Igmpv2::getHostGroupStateString(Igmpv2::HostGroupState hgs)
         return "IDLE_MEMBER";
 
     return "UNKNOWN";
+}
+
+void Igmpv2::insertCrc(CrcMode crcMode, const Ptr<IgmpMessage>& igmpMsg, Packet *packet)
+{
+    igmpMsg->setCrcMode(crcMode);
+    switch (crcMode) {
+        case CRC_DECLARED_CORRECT:
+            // if the CRC mode is declared to be correct, then set the CRC to an easily recognizable value
+            igmpMsg->setCrc(0xC00D);
+            break;
+        case CRC_DECLARED_INCORRECT:
+            // if the CRC mode is declared to be incorrect, then set the CRC to an easily recognizable value
+            igmpMsg->setCrc(0xBAAD);
+            break;
+        case CRC_COMPUTED: {
+            // if the CRC mode is computed, then compute the CRC and set it
+            igmpMsg->setCrc(0x0000); // make sure that the CRC is 0 in the header before computing the CRC
+            MemoryOutputStream igmpStream;
+            Chunk::serialize(igmpStream, igmpMsg);
+            Chunk::serialize(igmpStream, packet->peekData(Chunk::PF_ALLOW_EMPTY));
+            uint16_t crc = TcpIpChecksum::checksum(igmpStream.getData());
+            igmpMsg->setCrc(crc);
+            break;
+        }
+        default:
+            throw cRuntimeError("Unknown CRC mode");
+    }
+}
+
+bool Igmpv2::verifyCrc(const Packet *packet)
+{
+    const auto& igmpMsg = packet->peekAtFront<IgmpMessage>(b(-1), Chunk::PF_ALLOW_INCORRECT);
+    switch (igmpMsg->getCrcMode()) {
+        case CRC_DECLARED_CORRECT:
+            // if the CRC mode is declared to be correct, then the check passes if and only if the chunks are correct
+            return igmpMsg->isCorrect();
+        case CRC_DECLARED_INCORRECT:
+            // if the CRC mode is declared to be incorrect, then the check fails
+            return false;
+        case CRC_COMPUTED: {
+            // otherwise compute the CRC, the check passes if the result is 0xFFFF (includes the received CRC)
+            auto dataBytes = packet->peekDataAsBytes(Chunk::PF_ALLOW_INCORRECT);
+            uint16_t crc = TcpIpChecksum::checksum(dataBytes->getBytes());
+            // TODO: delete these isCorrect calls, rely on CRC only
+            return crc == 0 && igmpMsg->isCorrect();
+        }
+        default:
+            throw cRuntimeError("Unknown CRC mode");
+    }
 }
 
 }    // namespace inet

@@ -71,14 +71,14 @@ void UdpBasicApp::setSocketOptions()
     if (timeToLive != -1)
         socket.setTimeToLive(timeToLive);
 
-    int typeOfService = par("typeOfService");
-    if (typeOfService != -1)
-        socket.setTypeOfService(typeOfService);
+    int dscp = par("dscp");
+    if (dscp != -1)
+        socket.setDscp(dscp);
 
     const char *multicastInterface = par("multicastInterface");
     if (multicastInterface[0]) {
         IInterfaceTable *ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
-        InterfaceEntry *ie = ift->getInterfaceByName(multicastInterface);
+        InterfaceEntry *ie = ift->findInterfaceByName(multicastInterface);
         if (!ie)
             throw cRuntimeError("Wrong multicastInterface setting: no interface named \"%s\"", multicastInterface);
         socket.setMulticastOutputInterface(ie->getInterfaceId());
@@ -111,7 +111,7 @@ void UdpBasicApp::sendPacket()
     str << packetName << "-" << numSent;
     Packet *packet = new Packet(str.str().c_str());
     if(dontFragment)
-        packet->addTagIfAbsent<FragmentationReq>()->setDontFragment(true);
+        packet->addTag<FragmentationReq>()->setDontFragment(true);
     const auto& payload = makeShared<ApplicationPacket>();
     payload->setChunkLength(B(par("messageLength")));
     payload->setSequenceNumber(numSent);

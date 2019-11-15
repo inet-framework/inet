@@ -15,9 +15,8 @@ The visualization currently supports IPv4.
 This showcase contains three simulation models of increasing complexity,
 each demonstrating different features of routing table visualization.
 
-INET version: ``3.6``
-
-Source files location: `inet/showcases/visualizer/routingtable <https://github.com/inet-framework/inet-showcases/tree/master/visualizer/routingtable>`__
+| INET version: ``3.6``
+| Source files location: `inet/showcases/visualizer/routingtable <https://github.com/inet-framework/inet-showcases/tree/master/visualizer/routingtable>`__
 
 About the visualizer
 --------------------
@@ -219,7 +218,7 @@ configures the routing tables. To reduce clutter, we set the
 The following animation depicts what happens when the simulation is run.
 
 .. video:: media/routingtablevisualizer2.mp4
-   :width: 698
+   :width: 100%
 
 When ``destinationHost`` starts to move downwards, packets get routed
 along the chain to the host that is currently adjacent to
@@ -232,6 +231,8 @@ tables for a while, then they time out and are removed. When
 ``destinationHost`` gets to the top of the scene, the process
 starts over again. The visualizer continually reacts to changes in the
 routing tables and updates the visualization accordingly.
+
+Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`RoutingTableVisualizationShowcase.ned <../RoutingTableVisualizationShowcase.ned>`
 
 More information
 ----------------

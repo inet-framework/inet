@@ -175,9 +175,21 @@ void TcpConnection::process_READ_REQUEST(TcpEventCode& event, TcpCommand *tcpCom
     while ((dataMsg = receiveQueue->extractBytesUpTo(state->rcv_nxt)) != nullptr)
     {
         dataMsg->setKind(TCP_I_DATA);
-        dataMsg->addTagIfAbsent<SocketInd>()->setSocketId(socketId);
+        dataMsg->addTag<SocketInd>()->setSocketId(socketId);
         sendToApp(dataMsg);
     }
+}
+
+void TcpConnection::process_OPTIONS(TcpEventCode& event, TcpCommand *tcpCommand, cMessage *msg)
+{
+    ASSERT(event == TCP_E_SETOPTION);
+
+    if (auto cmd = dynamic_cast<TcpSetTimeToLiveCommand *>(tcpCommand))
+        ttl = cmd->getTtl();
+    else if (auto cmd = dynamic_cast<TcpSetDscpCommand *>(tcpCommand))
+        dscp = cmd->getDscp();
+    else
+        throw cRuntimeError("Unknown subclass of TcpSetOptionCommand received from app: %s", tcpCommand->getClassName());
 }
 
 void TcpConnection::process_CLOSE(TcpEventCode& event, TcpCommand *tcpCommand, cMessage *msg)
@@ -213,8 +225,7 @@ void TcpConnection::process_CLOSE(TcpEventCode& event, TcpCommand *tcpCommand, c
                 tcpAlgorithm->restartRexmitTimer();
                 state->snd_max = ++state->snd_nxt;
 
-                if (unackedVector)
-                    unackedVector->record(state->snd_max - state->snd_una);
+                emit(unackedSignal, state->snd_max - state->snd_una);
 
                 // state transition will automatically take us to FIN_WAIT_1 (or LAST_ACK)
             }

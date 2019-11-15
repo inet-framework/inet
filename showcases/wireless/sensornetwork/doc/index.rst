@@ -189,7 +189,7 @@ some other parameters of the radio to arbitrary values:
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
-   :start-at: carrierFrequency
+   :start-at: centerFrequency
    :end-at: snirThreshold
 
 Routes are set up according to a star topology, with the gateway at the
@@ -271,7 +271,7 @@ B-MAC
 The following video shows sensor nodes sending data to the server:
 
 .. video:: media/BMac2.mp4
-   :width: 698
+   :width: 100%
 
    <!--internal video recording, zoom 20.28, animation speed none, playback speed 1.698, normal run, crop 50 50 130 130-->
 
@@ -290,7 +290,7 @@ X-MAC
 In the following video, the sensors send data to the server:
 
 .. video:: media/XMac2.mp4
-   :width: 698
+   :width: 100%
 
    <!--internal video recording, zoom 20.28, animation speed none, playback speed 1.698, normal run, crop 50 50 130 130-->
 
@@ -308,7 +308,7 @@ LMAC
 In the following video, sensor nodes send data to the server:
 
 .. video:: media/LMac5.mp4
-   :width: 698
+   :width: 100%
 
    <!--internal video recording, zoom 20.28, animation speed none, playback speed 1.698, normal run, crop 50 50 130 130-->
 
@@ -592,6 +592,8 @@ others. All three carried around 90-100% of the traffic (:ned:`BMac` 90%,
 consumption per packet. The conclusion is that in this scenario, with
 the selected parameter values, :ned:`XMac` turned out to be the most energy
 efficient MAC protocol, although :ned:`LMac` carried a bit more traffic.
+
+Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`SensorNetworkShowcase.ned <../SensorNetworkShowcase.ned>`, :download:`config.xml <../config.xml>`
 
 Further information
 -------------------

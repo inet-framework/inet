@@ -25,106 +25,54 @@ namespace physicallayer {
 
 Define_Module(IsotropicDimensionalBackgroundNoise);
 
-IsotropicDimensionalBackgroundNoise::IsotropicDimensionalBackgroundNoise() :
-    interpolationMode(static_cast<Mapping::InterpolationMethod>(-1)),
-    power(W(NaN))
-{
-}
-
 void IsotropicDimensionalBackgroundNoise::initialize(int stage)
 {
     cModule::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        // TODO: factor parsing?
-        const char *dimensionsString = par("dimensions");
-        cStringTokenizer tokenizer(dimensionsString);
-        while (tokenizer.hasMoreTokens()) {
-            const char *dimensionString = tokenizer.nextToken();
-            if (!strcmp("time", dimensionString))
-                dimensions.addDimension(Dimension::time);
-            else if (!strcmp("frequency", dimensionString))
-                dimensions.addDimension(Dimension::frequency);
-            else
-                throw cRuntimeError("Unknown dimension");
-        }
-        const char *interpolationModeString = par("interpolationMode");
-        if (!strcmp("linear", interpolationModeString))
-            interpolationMode = Mapping::LINEAR;
-        else if (!strcmp("sample-hold", interpolationModeString))
-            interpolationMode = Mapping::STEPS;
-        else
-            throw cRuntimeError("Unknown interpolation mode: '%s'", interpolationModeString);
-        power = mW(math::dBm2mW(par("power")));
+        powerSpectralDensity = WpHz(dBmWpMHz2WpHz(par("powerSpectralDensity")));
+        power = mW(dBmW2mW(par("power")));
+        bandwidth = Hz(par("bandwidth"));
+        if (std::isnan(powerSpectralDensity.get()) && std::isnan(power.get()))
+            throw cRuntimeError("One of powerSpectralDensity or power parameters must be specified");
+        if (!std::isnan(powerSpectralDensity.get()) && !std::isnan(power.get()))
+            throw cRuntimeError("Both of powerSpectralDensity and power parameters cannot be specified");
     }
 }
 
 std::ostream& IsotropicDimensionalBackgroundNoise::printToStream(std::ostream& stream, int level) const
 {
     stream << "IsotropicDimensionalBackgroundNoise";
-    if (level <= PRINT_LEVEL_DETAIL)
-        stream << ", power = " << power;
-    if (level <= PRINT_LEVEL_TRACE)
-        stream << ", interpolationMode = " << interpolationMode
-               << ", dimensions = " << dimensions ;
+    if (level <= PRINT_LEVEL_DETAIL) {
+        if (!std::isnan(powerSpectralDensity.get()))
+            stream << ", powerSpectralDensity = " << powerSpectralDensity;
+        else {
+            stream << ", power = " << power;
+            stream << ", bandwidth = " << bandwidth;
+        }
+    }
     return stream;
 }
 
 const INoise *IsotropicDimensionalBackgroundNoise::computeNoise(const IListening *listening) const
 {
     const BandListening *bandListening = check_and_cast<const BandListening *>(listening);
+    Hz centerFrequency = bandListening->getCenterFrequency();
+    Hz listeningBandwidth = bandListening->getBandwidth();
+    WpHz noisePowerSpectralDensity;
+    if (!std::isnan(powerSpectralDensity.get()))
+        noisePowerSpectralDensity = powerSpectralDensity;
+    else {
+        if (std::isnan(bandwidth.get()))
+            bandwidth = listeningBandwidth;
+        else if (bandwidth != listeningBandwidth)
+            throw cRuntimeError("Background noise bandwidth doesn't match listening bandwidth");
+        // NOTE: dividing by the bandwidth here makes sure the total background noise power in the listening band is the given power
+        noisePowerSpectralDensity = power / bandwidth;
+    }
+    const Ptr<const IFunction<WpHz, Domain<simsec, Hz>>>& powerFunction = makeShared<ConstantFunction<WpHz, Domain<simsec, Hz>>>(noisePowerSpectralDensity);
     const simtime_t startTime = listening->getStartTime();
     const simtime_t endTime = listening->getEndTime();
-    Hz carrierFrequency = bandListening->getCarrierFrequency();
-    Hz bandwidth = bandListening->getBandwidth();
-    Mapping *powerMapping = MappingUtils::createMapping(Argument::MappedZero, dimensions, interpolationMode);
-    Argument position(dimensions);
-    bool hasTimeDimension = dimensions.hasDimension(Dimension::time);
-    bool hasFrequencyDimension = dimensions.hasDimension(Dimension::frequency);
-    if (hasTimeDimension && hasFrequencyDimension) {
-        // before the start
-        position.setTime(0);
-        position.setArgValue(Dimension::frequency, 0);
-        powerMapping->setValue(position, 0);
-        position.setTime(startTime);
-        powerMapping->setValue(position, 0);
-        position.setTime(endTime);
-        powerMapping->setValue(position, 0);
-        // start frequency
-        position.setTime(0);
-        position.setArgValue(Dimension::frequency, (carrierFrequency - bandwidth / 2).get());
-        powerMapping->setValue(position, 0);
-        position.setTime(startTime);
-        powerMapping->setValue(position, power.get());
-        position.setTime(endTime);
-        powerMapping->setValue(position, 0);
-        // end frequency
-        position.setTime(0);
-        position.setArgValue(Dimension::frequency, (carrierFrequency + bandwidth / 2).get());
-        powerMapping->setValue(position, 0);
-        position.setTime(startTime);
-        powerMapping->setValue(position, 0);
-        position.setTime(endTime);
-        powerMapping->setValue(position, 0);
-    }
-    else if (hasTimeDimension) {
-        position.setTime(0);
-        powerMapping->setValue(position, 0);
-        position.setTime(startTime);
-        powerMapping->setValue(position, power.get());
-        position.setTime(endTime);
-        powerMapping->setValue(position, 0);
-    }
-    else if (hasFrequencyDimension) {
-        position.setArgValue(Dimension::frequency, 0);
-        powerMapping->setValue(position, 0);
-        position.setArgValue(Dimension::frequency, (carrierFrequency - bandwidth / 2).get());
-        powerMapping->setValue(position, power.get());
-        position.setArgValue(Dimension::frequency, (carrierFrequency + bandwidth / 2).get());
-        powerMapping->setValue(position, 0);
-    }
-    else
-        throw cRuntimeError("Unknown dimensions");
-    return new DimensionalNoise(startTime, endTime, carrierFrequency, bandwidth, powerMapping);
+    return new DimensionalNoise(startTime, endTime, centerFrequency, bandwidth, makeFirstQuadrantLimitedFunction(powerFunction));
 }
 
 } // namespace physicallayer

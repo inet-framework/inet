@@ -16,7 +16,7 @@
 //
 
 #include "inet/common/ModuleAccess.h"
-#include "inet/common/queueing/PacketQueue.h"
+#include "inet/queueing/queue/PacketQueue.h"
 #include "inet/visualizer/common/QueueCanvasVisualizer.h"
 
 namespace inet {
@@ -35,6 +35,12 @@ QueueCanvasVisualizer::QueueCanvasVisualization::QueueCanvasVisualization(Networ
 QueueCanvasVisualizer::QueueCanvasVisualization::~QueueCanvasVisualization()
 {
     delete figure;
+}
+
+QueueCanvasVisualizer::~QueueCanvasVisualizer()
+{
+    if (displayQueues)
+        removeAllQueueVisualizations();
 }
 
 void QueueCanvasVisualizer::initialize(int stage)

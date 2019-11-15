@@ -67,8 +67,7 @@ void TcpWestwood::recalculateSlowStartThreshold()
 {
     state->ssthresh = (uint32)((state->w_bwe * SIMTIME_DBL(state->w_RTTmin)) / (state->w_a));
 
-    if (ssthreshVector)
-        ssthreshVector->record(state->ssthresh);
+    conn->emit(ssthreshSignal, state->ssthresh);
 
     EV_DEBUG << "recalculateSlowStartThreshold(), ssthresh=" << state->ssthresh << "\n";
 }
@@ -116,8 +115,7 @@ void TcpWestwood::processRexmitTimer(TcpEventCode& event)
 
     state->snd_cwnd = state->snd_mss;
 
-    if (cwndVector)
-        cwndVector->record(state->snd_cwnd);
+    conn->emit(cwndSignal, state->snd_cwnd);
 
     state->afterRto = true;
     conn->retransmitOneSegment(true);
@@ -162,8 +160,7 @@ void TcpWestwood::receivedDataAck(uint32 firstSeqAcked)
         EV_DETAIL << "Fast Recovery: setting cwnd to ssthresh=" << state->ssthresh << "\n";
         state->snd_cwnd = state->ssthresh;
 
-        if (cwndVector)
-            cwndVector->record(state->snd_cwnd);
+        conn->emit(cwndSignal, state->snd_cwnd);
     }
     else {
         //
@@ -187,8 +184,7 @@ void TcpWestwood::receivedDataAck(uint32 firstSeqAcked)
             // int bytesAcked = state->snd_una - firstSeqAcked;
             // state->snd_cwnd += bytesAcked * state->snd_mss;
 
-            if (cwndVector)
-                cwndVector->record(state->snd_cwnd);
+            conn->emit(cwndSignal, state->snd_cwnd);
 
             EV_DETAIL << "cwnd=" << state->snd_cwnd << "\n";
         }
@@ -201,8 +197,7 @@ void TcpWestwood::receivedDataAck(uint32 firstSeqAcked)
 
             state->snd_cwnd += incr;
 
-            if (cwndVector)
-                cwndVector->record(state->snd_cwnd);
+            conn->emit(cwndSignal, state->snd_cwnd);
 
             //
             // Note: some implementations use extra additive constant mss / 8 here
@@ -267,8 +262,7 @@ void TcpWestwood::receivedDuplicateAck()
         if (state->snd_cwnd > state->ssthresh)
             state->snd_cwnd = state->ssthresh;
 
-        if (cwndVector)
-            cwndVector->record(state->snd_cwnd);
+        conn->emit(cwndSignal, state->snd_cwnd);
 
         EV_DETAIL << " set cwnd=" << state->snd_cwnd << ", ssthresh=" << state->ssthresh << "\n";
 
@@ -285,8 +279,7 @@ void TcpWestwood::receivedDuplicateAck()
         state->snd_cwnd += state->snd_mss;
         EV_DETAIL << "Westwood on dupAcks > DUPTHRESH(=3): Fast Recovery: inflating cwnd by SMSS, new cwnd=" << state->snd_cwnd << "\n";
 
-        if (cwndVector)
-            cwndVector->record(state->snd_cwnd);
+        conn->emit(cwndSignal, state->snd_cwnd);
 
         sendData(false);
     }

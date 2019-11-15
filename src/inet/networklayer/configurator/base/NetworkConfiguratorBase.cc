@@ -29,15 +29,19 @@
 #include "inet/networklayer/common/InterfaceEntry.h"
 #include "inet/networklayer/configurator/base/NetworkConfiguratorBase.h"
 
+#ifdef WITH_IEEE80211
+#include "inet/linklayer/ieee80211/mib/Ieee80211Mib.h"
+#endif
+
 #ifdef WITH_RADIO
 #include "inet/physicallayer/base/packetlevel/FlatReceiverBase.h"
 #include "inet/physicallayer/base/packetlevel/FlatTransmitterBase.h"
 #include "inet/physicallayer/common/packetlevel/Interference.h"
 #include "inet/physicallayer/common/packetlevel/Radio.h"
 #include "inet/physicallayer/common/packetlevel/ReceptionDecision.h"
-#include "inet/physicallayer/common/packetlevel/SignalTag_m.h"
 #include "inet/physicallayer/contract/packetlevel/IRadio.h"
 #include "inet/physicallayer/contract/packetlevel/IRadioMedium.h"
+#include "inet/physicallayer/contract/packetlevel/SignalTag_m.h"
 #endif
 
 #ifdef WITH_ACKINGWIRELESS
@@ -128,8 +132,8 @@ void NetworkConfiguratorBase::extractTopology(Topology& topology)
                         // visit neighbors (and potentially the whole LAN, recursively)
                         if (isWirelessInterface(interfaceEntry)) {
                             std::vector<Node *> empty;
-                            const char *wirelessId = getWirelessId(interfaceEntry);
-                            extractWirelessNeighbors(topology, wirelessId, linkInfo, interfacesSeen, empty);
+                            auto wirelessId = getWirelessId(interfaceEntry);
+                            extractWirelessNeighbors(topology, wirelessId.c_str(), linkInfo, interfacesSeen, empty);
                         }
                         else {
                             Topology::LinkOut *linkOut = findLinkOut(node, interfaceEntry->getNodeOutputGateId());
@@ -152,10 +156,10 @@ void NetworkConfiguratorBase::extractTopology(Topology& topology)
             Link *link = (Link *)linkOut;
             Node *localNode = (Node *)linkOut->getLocalNode();
             if (localNode->interfaceTable)
-                link->sourceInterfaceInfo = findInterfaceInfo(localNode, localNode->interfaceTable->getInterfaceByNodeOutputGateId(linkOut->getLocalGateId()));
+                link->sourceInterfaceInfo = findInterfaceInfo(localNode, localNode->interfaceTable->findInterfaceByNodeOutputGateId(linkOut->getLocalGateId()));
             Node *remoteNode = (Node *)linkOut->getRemoteNode();
             if (remoteNode->interfaceTable)
-                link->destinationInterfaceInfo = findInterfaceInfo(remoteNode, remoteNode->interfaceTable->getInterfaceByNodeInputGateId(linkOut->getRemoteGateId()));
+                link->destinationInterfaceInfo = findInterfaceInfo(remoteNode, remoteNode->interfaceTable->findInterfaceByNodeInputGateId(linkOut->getRemoteGateId()));
         }
     }
 
@@ -165,7 +169,7 @@ void NetworkConfiguratorBase::extractTopology(Topology& topology)
         InterfaceInfo *interfaceInfo = entry.second;
         InterfaceEntry *interfaceEntry = interfaceInfo->interfaceEntry;
         if (!interfaceEntry->isLoopback() && isWirelessInterface(interfaceEntry)) {
-            const char *wirelessId = getWirelessId(interfaceEntry);
+            auto wirelessId = getWirelessId(interfaceEntry);
             wirelessIdToInterfaceInfosMap[wirelessId].push_back(interfaceInfo);
         }
     }
@@ -201,7 +205,7 @@ void NetworkConfiguratorBase::extractWiredNeighbors(Topology& topology, Topology
     int inputGateId = linkOut->getRemoteGateId();
     IInterfaceTable *interfaceTable = node->interfaceTable;
     if (!isBridgeNode(node)) {
-        InterfaceEntry *interfaceEntry = interfaceTable->getInterfaceByNodeInputGateId(inputGateId);
+        InterfaceEntry *interfaceEntry = interfaceTable->findInterfaceByNodeInputGateId(inputGateId);
         if (!interfaceEntry) {
             // no such interface (node is probably down); we should probably get the information from our (future) internal database
         }
@@ -226,7 +230,7 @@ void NetworkConfiguratorBase::extractWirelessNeighbors(Topology& topology, const
             for (int j = 0; j < interfaceTable->getNumInterfaces(); j++) {
                 InterfaceEntry *interfaceEntry = interfaceTable->getInterface(j);
                 if (!interfaceEntry->isLoopback() && interfacesSeen.count(interfaceEntry) == 0 && isWirelessInterface(interfaceEntry)) {
-                    if (!strcmp(getWirelessId(interfaceEntry), wirelessId)) {
+                    if (getWirelessId(interfaceEntry) == wirelessId) {
                         if (!isBridgeNode(node)) {
                             InterfaceInfo *interfaceInfo = createInterfaceInfo(topology, node, linkInfo, interfaceEntry);
                             linkInfo->interfaceInfos.push_back(interfaceInfo);
@@ -253,7 +257,7 @@ void NetworkConfiguratorBase::extractDeviceNeighbors(Topology& topology, Node *n
             InterfaceEntry *interfaceEntry = interfaceTable->getInterface(i);
             if (!interfaceEntry->isLoopback() && interfacesSeen.count(interfaceEntry) == 0) {
                 if (isWirelessInterface(interfaceEntry))
-                    extractWirelessNeighbors(topology, getWirelessId(interfaceEntry), linkInfo, interfacesSeen, deviceNodesVisited);
+                    extractWirelessNeighbors(topology, getWirelessId(interfaceEntry).c_str(), linkInfo, interfacesSeen, deviceNodesVisited);
                 else {
                     Topology::LinkOut *linkOut = findLinkOut(node, interfaceEntry->getNodeOutputGateId());
                     if (linkOut)
@@ -294,6 +298,8 @@ Topology::LinkOut *NetworkConfiguratorBase::findLinkOut(Node *node, int gateId)
 
 NetworkConfiguratorBase::InterfaceInfo *NetworkConfiguratorBase::findInterfaceInfo(Node *node, InterfaceEntry *interfaceEntry)
 {
+    if (interfaceEntry == nullptr)
+        return nullptr;
     for (auto & interfaceInfo : node->interfaceInfos)
         if (interfaceInfo->interfaceEntry == interfaceEntry)
             return interfaceInfo;
@@ -466,7 +472,7 @@ double NetworkConfiguratorBase::computeWirelessLinkWeight(Link *link, const char
  * will be regarded as being in the same wireless network. (The actual value
  * of the string doesn't count.)
  */
-const char *NetworkConfiguratorBase::getWirelessId(InterfaceEntry *interfaceEntry)
+std::string NetworkConfiguratorBase::getWirelessId(InterfaceEntry *interfaceEntry)
 {
     // use the configuration
     cModule *hostModule = interfaceEntry->getInterfaceTable()->getHostModule();
@@ -494,18 +500,25 @@ const char *NetworkConfiguratorBase::getWirelessId(InterfaceEntry *interfaceEntr
         }
     }
     cModule *interfaceModule = interfaceEntry;
+#ifdef WITH_IEEE80211
+    if (auto mibModule = dynamic_cast<ieee80211::Ieee80211Mib *>(interfaceModule->getSubmodule("mib"))) {
+        auto ssid = mibModule->bssData.ssid;
+        if (ssid.length() != 0)
+            return ssid;
+    }
     cModule *mgmtModule = interfaceModule->getSubmodule("mgmt");
-    if (mgmtModule != nullptr) {
-        if (mgmtModule->hasPar("ssid") && *mgmtModule->par("ssid").stringValue())
-            return mgmtModule->par("ssid");
-        else if (mgmtModule->hasPar("accessPointAddress") && *mgmtModule->par("accessPointAddress").stringValue())
-            return mgmtModule->par("accessPointAddress");
+    if (mgmtModule != nullptr && mgmtModule->hasPar("ssid")) {
+        const char *value = mgmtModule->par("ssid");
+        if (*value)
+            return value;
     }
     cModule *agentModule = interfaceModule->getSubmodule("agent");
-    if (agentModule != nullptr) {
-        if (agentModule->hasPar("defaultSsid") && *agentModule->par("defaultSsid").stringValue())
-            return agentModule->par("defaultSsid");
+    if (agentModule != nullptr && agentModule->hasPar("defaultSsid")) {
+        const char *value = agentModule->par("defaultSsid");
+        if (*value)
+            return value;
     }
+#endif
 #ifdef WITH_RADIO
     cModule *radioModule = interfaceModule->getSubmodule("radio");
     const IRadio *radio = dynamic_cast<const IRadio *>(radioModule);

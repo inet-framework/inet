@@ -52,7 +52,7 @@ should be recorded. It takes a space separated list of module names. For
 selecting a module vector, ``[*]`` can be used. The recorded modules are
 on the same level in the hierarchy as the PCAP recorder module. The
 default value for the :par:`moduleNamePatterns` parameter is
-``wlan[*] eth[*] ppp[*] ext[*]``, so it records the most commonly
+``wlan[*] eth[*] ppp[*]``, so it records the most commonly
 present L2 interfaces. The :par:`dumpProtocols` parameter is a filter and
 selects which protocols to include in the capture. It matches packets
 which are of the specified protocol type at the level of capture, but
@@ -250,7 +250,7 @@ Results
 The following video shows the traffic in the network:
 
 .. video:: media/pcap1.mp4
-   :width: 698
+   :width: 100%
 
    <!--internal video recording, playback speed 1, no animation speed, run until first sendTimer (t=0.002), step, stop at about 10.5 seconds simulation time-->
 
@@ -306,6 +306,8 @@ The TCP data packets from ``router2``:
 
 .. figure:: media/tcpdata.png
    :width: 100%
+
+Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`PcapRecordingShowcase.ned <../PcapRecordingShowcase.ned>`
 
 Discussion
 ----------

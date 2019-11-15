@@ -27,15 +27,10 @@
 #include "inet/mobility/contract/IMobility.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/physicallayer/base/packetlevel/FlatReceptionBase.h"
-
-#ifdef WITH_RADIO
-#include "inet/physicallayer/common/packetlevel/SignalTag_m.h"
-#endif
+#include "inet/physicallayer/contract/packetlevel/SignalTag_m.h"
 
 namespace inet {
-
 namespace utils {
-
 namespace filters {
 
 Register_ResultFilter("dataAge", DataAgeFilter);
@@ -92,7 +87,7 @@ void ApplicationPacketSequenceNumberFilter::receiveSignal(cResultFilter *prev, s
 {
     if (auto packet = dynamic_cast<Packet*>(object)) {
         if (auto applicationPacket = dynamicPtrCast<const ApplicationPacket>(packet->peekAtFront()))
-            fire(this, t, (long)applicationPacket->getSequenceNumber(), details);
+            fire(this, t, (intval_t)applicationPacket->getSequenceNumber(), details);
     }
 }
 
@@ -235,7 +230,6 @@ void LiveThroughputFilter::init(cComponent *component, cProperty *attrsProperty)
 LiveThroughputFilter::~LiveThroughputFilter()
 {
     if (event) {
-        ASSERT(event->isScheduled());
         getSimulation()->getFES()->remove(event);
         delete event;
     }
@@ -375,12 +369,12 @@ void LocalSignalFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, boo
     fire(this, t, b, details);
 }
 
-void LocalSignalFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, long l, cObject *details)
+void LocalSignalFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, intval_t l, cObject *details)
 {
     fire(this, t, l, details);
 }
 
-void LocalSignalFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, unsigned long l, cObject *details)
+void LocalSignalFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, uintval_t l, cObject *details)
 {
     fire(this, t, l, details);
 }
@@ -411,13 +405,13 @@ void LocalSignalFilter::receiveSignal(cComponent *source, simsignal_t signal, bo
         cResultListener::receiveSignal(source, signal, b, details);
 }
 
-void LocalSignalFilter::receiveSignal(cComponent *source, simsignal_t signal, long l, cObject *details)
+void LocalSignalFilter::receiveSignal(cComponent *source, simsignal_t signal, intval_t l, cObject *details)
 {
     if (source == component)
         cResultListener::receiveSignal(source, signal, l, details);
 }
 
-void LocalSignalFilter::receiveSignal(cComponent *source, simsignal_t signal, unsigned long l, cObject *details)
+void LocalSignalFilter::receiveSignal(cComponent *source, simsignal_t signal, uintval_t l, cObject *details)
 {
     if (source == component)
         cResultListener::receiveSignal(source, signal, l, details);
@@ -448,8 +442,6 @@ void LocalSignalFilter::receiveSignal(cComponent *source, simsignal_t signal, cO
 }
 
 } // namespace filters
-
 } // namespace utils
-
 } // namespace inet
 

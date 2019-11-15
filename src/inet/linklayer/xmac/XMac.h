@@ -24,7 +24,7 @@
 #include <string>
 #include <vector>
 
-#include "inet/common/queueing/contract/IPacketQueue.h"
+#include "inet/queueing/contract/IPacketQueue.h"
 #include "inet/linklayer/base/MacProtocolBase.h"
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/linklayer/contract/IMacProtocol.h"
@@ -37,13 +37,13 @@ class MacPkt;
 
 /**
  * @brief Implementation of X-MAC.
- * 
+ *
  * This implementation was created for the MiXiM framework by Joaquim Oller.
  * It was ported to the INET framework by Jan Peter Drees.
  *
  * A paper describing the X-MAC protocol can be found at:
  * http://www.cs.cmu.edu/~andersoe/papers/xmac-sensys.pdf
- * 
+ *
  * A paper analyzing this MiXiM implementation can be found at:
  * http://ieeexplore.ieee.org/document/7024195/
  *
@@ -97,7 +97,7 @@ class INET_API XMac : public MacProtocolBase, public IMacProtocol
     /** @brief Handle self messages such as timers */
     virtual void handleSelfMessage(cMessage *) override;
 
-    void receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details) override;
+    void receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details) override;
 
   protected:
     /** implements MacBase functions */
@@ -174,7 +174,8 @@ class INET_API XMac : public MacProtocolBase, public IMacProtocol
     MacAddress lastDataPktSrcAddr;
     MacAddress lastDataPktDestAddr;
     MacAddress lastPreamblePktSrcAddr;
-    int headerLength = 0;    // XMacFrame header length in bytes
+    b headerLength = b(0);    // XMacDataFrameHeader header length
+    b ctrlFrameLength = b(0);    // XMacControlFrame frame length
 
     /** @brief The radio. */
     physicallayer::IRadio *radio;

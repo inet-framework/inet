@@ -18,58 +18,55 @@
 #include "inet/routing/bgpv4/bgpmessage/BgpUpdate.h"
 
 namespace inet {
-
 namespace bgp {
 
-Register_Class(BgpUpdateMessage)
-
-void BgpUpdateMessage::setWithdrawnRoutesArraySize(size_t size)
+unsigned short computePathAttributeBytes(const BgpUpdatePathAttributes& pathAttr)
 {
-    unsigned short delta_size = size - getWithdrawnRoutesArraySize();
-    unsigned short delta_bytes = delta_size * 5;    // 5 = Withdrawn Route length
-    BgpUpdateMessage_Base::setWithdrawnRoutesArraySize(size);
-    setChunkLength(getChunkLength() + B(delta_bytes));
-}
-
-unsigned short BgpUpdateMessage::computePathAttributesBytes(const BgpUpdatePathAttributeList& pathAttrs)
-{
-    unsigned short nb_path_attr = 2 + pathAttrs.getAsPathArraySize()
-        + pathAttrs.getLocalPrefArraySize()
-        + pathAttrs.getAtomicAggregateArraySize();
-
-    // BgpUpdatePathAttributes (4)
-    unsigned short contentBytes = nb_path_attr * 4;
-    // BgpUpdatePathAttributesOrigin (1)
-    contentBytes += 1;
-    // BgpUpdatePathAttributesAsPath
-    for (size_t i = 0; i < pathAttrs.getAsPathArraySize(); i++)
-        contentBytes += 2 + pathAttrs.getAsPath(i).getLength(); // type (1) + length (1) + value
-    // BgpUpdatePathAttributesNextHop (4)
-    contentBytes += 4;
-    // BgpUpdatePathAttributesLocalPref (4)
-    contentBytes = 4 * pathAttrs.getLocalPrefArraySize();
-    return contentBytes;
-}
-
-void BgpUpdateMessage::setPathAttributeList(const BgpUpdatePathAttributeList& pathAttrs)
-{
-    unsigned int old_bytes = getPathAttributeListArraySize() == 0 ? 0 : computePathAttributesBytes(getPathAttributeList(0));
-    unsigned int delta_bytes = computePathAttributesBytes(pathAttrs) - old_bytes;
-
-    setPathAttributeListArraySize(1);
-    BgpUpdateMessage_Base::setPathAttributeList(0, pathAttrs);
-
-    setChunkLength(getChunkLength() + B(delta_bytes));
-}
-
-void BgpUpdateMessage::setNLRI(const BgpUpdateNlri& NLRI_var)
-{
-    //FIXME bug: the length always incremented
-    setChunkLength(getChunkLength() + B(5));    //5 = NLRI (length (1) + Ipv4Address (4))
-    BgpUpdateMessage_Base::NLRI = NLRI_var;
+    unsigned short contentBytes = pathAttr.getExtendedLengthBit() ? 4 : 3;
+    switch (pathAttr.getTypeCode()) {
+        case BgpUpdateAttributeTypeCode::ORIGIN: {
+            auto& attr = *check_and_cast<const BgpUpdatePathAttributesOrigin *>(&pathAttr);
+            ASSERT(attr.getLength() == 1);
+            contentBytes += 1;
+            return contentBytes;
+        }
+        case BgpUpdateAttributeTypeCode::AS_PATH: {
+            auto& attr = *check_and_cast<const BgpUpdatePathAttributesAsPath*>(&pathAttr);
+    #ifndef NDEBUG
+            {
+                unsigned short s = 0;
+                for (size_t j = 0; j < attr.getValueArraySize(); j++) {
+                    ASSERT(attr.getValue(j).getLength() == attr.getValue(j).getAsValueArraySize());
+                    s += 2 + 2 * attr.getValue(j).getAsValueArraySize();
+                }
+                ASSERT(s == attr.getLength());
+            }
+    #endif
+            contentBytes += attr.getLength(); // type (1) + length (1) + value
+            return contentBytes;
+        }
+        case BgpUpdateAttributeTypeCode::NEXT_HOP: {
+            auto& attr = *check_and_cast<const BgpUpdatePathAttributesNextHop*>(&pathAttr);
+            ASSERT(attr.getLength() == 4);
+            contentBytes += 4;
+            return contentBytes;
+        }
+        case BgpUpdateAttributeTypeCode::LOCAL_PREF: {
+            auto& attr = *check_and_cast<const BgpUpdatePathAttributesLocalPref*>(&pathAttr);
+            ASSERT(attr.getLength() == 4);
+            contentBytes += 4;
+            return contentBytes;
+        }
+        case BgpUpdateAttributeTypeCode::ATOMIC_AGGREGATE: {
+            auto& attr = *check_and_cast<const BgpUpdatePathAttributesAtomicAggregate*>(&pathAttr);
+            ASSERT(attr.getLength() == 0);
+            return contentBytes;
+        }
+        default:
+            throw cRuntimeError("Unknown BgpUpdateAttributeTypeCode: %d", (int)pathAttr.getTypeCode());
+    }
 }
 
 } // namespace bgp
-
 } // namespace inet
 

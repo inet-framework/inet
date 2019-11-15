@@ -19,8 +19,7 @@
 #ifndef __INET_STATICLINEARMOBILITY_H
 #define __INET_STATICLINEARMOBILITY_H
 
-#include "inet/common/INETDefs.h"
-#include "inet/mobility/static/StationaryMobility.h"
+#include "inet/mobility/base/StationaryMobilityBase.h"
 
 namespace inet {
 
@@ -31,7 +30,7 @@ namespace inet {
  * @ingroup mobility
  * @author Alfonso Ariza
  */
-class INET_API StaticLinearMobility : public StationaryMobility
+class INET_API StaticLinearMobility : public StationaryMobilityBase
 {
   protected:
 

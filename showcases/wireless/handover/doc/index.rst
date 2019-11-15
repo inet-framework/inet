@@ -129,6 +129,8 @@ associated with them.
 .. figure:: media/stalist2.png
    :width: 100%
 
+Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`HandoverShowcase.ned <../HandoverShowcase.ned>`
+
 Discussion
 ----------
 

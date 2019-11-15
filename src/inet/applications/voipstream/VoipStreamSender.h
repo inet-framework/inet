@@ -131,7 +131,7 @@ class INET_API VoipStreamSender : public cSimpleModule, public LifecycleUnsuppor
     int streamIndex = -1;
     uint32_t pktID = 0;    // increasing packet sequence number
     int samplesPerPacket = 0;
-    AVPacket packet;
+    AVPacket packet {};  // {}: zero-initialize so that av_free_packet() doesn't crash if initialization doesn't go through
     Buffer sampleBuffer;
 
     cMessage *timer = nullptr;

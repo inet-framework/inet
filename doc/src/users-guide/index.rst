@@ -3,9 +3,9 @@ User's Guide
 
 This manual is written for users who are interested in assembling
 simulations using the components provided by the INET Framework. (In
-contrast, if you are interested in modifing INET’s components or plan to
+contrast, if you are interested in modifying INET’s components or plan to
 extend INET with new protocols or other components using C++, we
-recommend the *INET Developer's Guide*.)
+recommend the :doc:`INET Developer's Guide </developers-guide/index>`.)
 
 .. only:: html
 
@@ -19,6 +19,7 @@ recommend the *INET Developer's Guide*.)
    ch-networks
    ch-network-nodes
    ch-network-interfaces
+   ch-queueing
    ch-apps
    ch-transport
    ch-ipv4

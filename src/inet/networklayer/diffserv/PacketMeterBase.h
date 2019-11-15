@@ -18,19 +18,19 @@
 #ifndef __INET_PACKETMETERBASE_H
 #define __INET_PACKETMETERBASE_H
 
-#include "inet/common/queueing/base/PacketConsumerBase.h"
-#include "inet/common/queueing/contract/IPacketProducer.h"
-#include "inet/common/queueing/contract/IPacketQueueingElement.h"
+#include "inet/queueing/base/PassivePacketSinkBase.h"
+#include "inet/queueing/contract/IActivePacketSource.h"
+#include "inet/queueing/contract/IPacketQueueingElement.h"
 
 namespace inet {
 
 using namespace inet::queueing;
 
-class INET_API PacketMeterBase : public PacketConsumerBase, public IPacketProducer
+class INET_API PacketMeterBase : public PassivePacketSinkBase, public IActivePacketSource
 {
   protected:
     cGate *inputGate = nullptr;
-    IPacketProducer *producer = nullptr;
+    IActivePacketSource *producer = nullptr;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
@@ -38,7 +38,7 @@ class INET_API PacketMeterBase : public PacketConsumerBase, public IPacketProduc
     virtual int meterPacket(Packet *packet) = 0;
 
   public:
-    virtual IPacketConsumer *getConsumer(cGate *gate) override { throw cRuntimeError("Invalid operation"); }
+    virtual IPassivePacketSink *getConsumer(cGate *gate) override { throw cRuntimeError("Invalid operation"); }
 
     virtual bool supportsPushPacket(cGate *gate) override { return true; }
     virtual bool supportsPopPacket(cGate *gate) override { return false; }

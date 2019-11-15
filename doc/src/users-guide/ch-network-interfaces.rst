@@ -48,8 +48,8 @@ list gives the most commonly used network interfaces.
 -  :ned:`LoopbackInterface` provides local loopback within the network
    node
 
--  :ned:`ExtInterface` represents a real-world interface, suitable for
-   hardware-in-the-loop simulations
+-  :ned:`ExtLowerEthernetInterface` represents a real-world interface,
+   suitable for hardware-in-the-loop simulations
 
 .. _ug:sec:interfaces:anatomy-of-network-interfaces:
 
@@ -72,10 +72,7 @@ Typical ingredients are:
    implement the physical layer. For example, :ned:`Ieee80211Interface`
    contains a radio module.
 
--  *Output queue*. This module is optional and absent by default,
-   because most MAC protocol implementations already contain an internal
-   queue which is more efficient to work with. The possibility to plug
-   in an external queue module allows one to experiment with different
+-  *Output queue*. This module allows one to experiment with different
    queueing policies and implement QoS, RED, etc.
 
 -  *Traffic conditioners* allow traffic shaping and policing elements to
@@ -90,43 +87,44 @@ Typical ingredients are:
 Internal vs External Output Queue
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Network interfaces usually have the external queue module defined with a
-parametric type like this:
+Network interfaces usually have a queue module defined with a parametric
+type like this:
 
 
 
 .. code-block:: ned
 
-   queue: <queueType> like IOutputQueue if queueType != "";
+   queue: <default("DropTailQueue")> like IPacketQueue;
 
-When :par:`queueType` is empty (this is the default), the external queue
-module is absent, and the MAC (or equivalent L2) protocol will use its
-internal queue object. Conceptually, the internal queue is of inifinite
-size, but for better diagnostics one can often specify a hard limit for
-the queue length in a module parameter – if this is exceeded, the
-simulation stops with an error.
+When the :par:`typename` parameter of the queue submodule is unspecified
+(this is the default), the queue module is a :ned:`DropTailQueue`. Conceptually,
+the queue is of inifinite size, but for better diagnostics one can often specify
+a hard limit for the queue length in a module parameter – if this is exceeded,
+the simulation stops with an error.
 
-When :par:`queueType` is not empty, it must name a NED type that
-implements the :ned:`IOutputQueue` interface. The external queue module
-model allows modeling a finite buffer, or implement various queueing
-policies for QoS and/or RED.
+When the :par:`typename` parameter of the queue module is not empty, it must
+name a NED type that implements the :ned:`IPacketQueue` interface. The
+queue module model allows modeling a finite buffer, or implement various
+queueing policies for QoS and/or RED.
 
-The most frequently used module type for external queue is
+The most frequently used module type for the queue module is
 :ned:`DropTailQueue`, a finite-size FIFO that drops overflowing
 packets). Other queue types that implement queueing policies can be
-created by assembling compound modules from DiffServ components (see
-chapter :doc:`ch-diffserv`). An example of such compound
+created by assembling compound modules from queueing model and DiffServ
+components (see chapter :doc:`ch-diffserv`). An example of such compound
 modules is :ned:`DiffservQueue`.
 
-An example ini file fragment that installs drop-tail queues of size 10
-on PPP interfaces:
+An example ini file fragment that installs a priority queue on PPP interfaces:
 
 
 
 .. code-block:: ini
 
-   **.ppp[*].ppp.queueType = "DropTailQueue"
-   **.ppp[*].ppp.queue.frameCapacity = 10
+   **.ppp[*].ppp.queue.typename = "PriorityQueue"
+   **.ppp[*].ppp.queue.packetCapacity = 10
+   **.ppp[*].ppp.queue.numQueues = 2
+   **.ppp[*].ppp.queue.classifier.typename = "WrrClassifier"
+   **.ppp[*].ppp.queue.classifier.weights = "1 1"
 
 .. _ug:sec:interfaces:traffic-conditioners:
 
@@ -140,8 +138,8 @@ defined with parametric types, like this:
 
 .. code-block:: ned
 
-   ingressTC: <ingressTCType> like ITrafficConditioner if ingressTCType != "";
-   egressTC: <egressTCType> like ITrafficConditioner if egressTCType != "";
+   ingressTC: <default("")> like ITrafficConditioner if typename != "";
+   egressTC: <default("")> like ITrafficConditioner if typename != "";
 
 Traffic conditioners allow one to implement the policing and shaping
 actions of a Diffserv router. They are added to the input or output
@@ -158,8 +156,8 @@ An example configuration with fictituous types:
 
 .. code-block:: ini
 
-   **.ppp[*].ingressTCType = "CustomIngressTC"
-   **.ppp[*].egressTCType = "CustomEgressTC"
+   **.ppp[*].ingressTC.typename = "CustomIngressTC"
+   **.ppp[*].egressTC.typename = "CustomEgressTC"
 
 .. _ug:sec:interfaces:hooks:
 
@@ -277,8 +275,8 @@ the MAC protocol and the PHY layer (the radio) are parameters:
 
 .. code-block:: ned
 
-   mac: <macType> like IMacProtocol;
-   radio: <radioType> like IRadio if radioType != "";
+   mac: <> like IMacProtocol;
+   radio: <> like IRadio if typename != "";
 
 There are specialized versions of :ned:`WirelessInterface` where the MAC
 and the radio modules are fixed to a particular value. One example is
@@ -407,10 +405,10 @@ node.
 
 .. _ug:sec:interfaces:external-interface:
 
-External Interface
-~~~~~~~~~~~~~~~~~~
+External Interfaces
+~~~~~~~~~~~~~~~~~~~
 
-:ned:`ExtInterface` represents a real-world interface, suitable for
+:ned:`ExtLowerEthernetInterface` represents a real-world interface, suitable for
 hardware-in-the-loop simulations. External interfaces are explained in
 chapter :doc:`ch-emulation`.
 

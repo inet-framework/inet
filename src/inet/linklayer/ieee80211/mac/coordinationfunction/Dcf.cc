@@ -190,7 +190,7 @@ void Dcf::transmitFrame(Packet *packet, simtime_t ifs)
     auto pendingPacket = channelAccess->getInProgressFrames()->getPendingFrameFor(packet);
     auto duration = originatorProtectionMechanism->computeDurationField(packet, header, pendingPacket, pendingPacket == nullptr ? nullptr : pendingPacket->peekAtFront<Ieee80211DataOrMgmtHeader>());
     const auto& updatedHeader = packet->removeAtFront<Ieee80211MacHeader>();
-    updatedHeader->setDuration(duration);
+    updatedHeader->setDurationField(duration);
     EV_DEBUG << "Duration for " << packet->getName() << " is set to " << duration << " s.\n";
     packet->insertAtFront(updatedHeader);
     tx->transmitFrame(packet, packet->peekAtFront<Ieee80211MacHeader>(), ifs, this);

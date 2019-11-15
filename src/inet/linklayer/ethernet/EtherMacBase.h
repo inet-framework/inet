@@ -25,7 +25,7 @@
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/packet/Packet.h"
-#include "inet/common/queueing/contract/IPacketQueue.h"
+#include "inet/queueing/contract/IPacketQueue.h"
 #include "inet/linklayer/base/MacProtocolBase.h"
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
@@ -73,14 +73,13 @@ class INET_API EtherMacBase : public MacProtocolBase
     };
 
     enum {
-        NUM_OF_ETHERDESCRS = 8
+        NUM_OF_ETHERDESCRS = 9
     };
 
     struct EtherDescr
     {
         double txrate;
         double halfBitTime;    // transmission time of a half bit
-        B frameMinBytes;    // minimal frame length
         // for half-duplex operation:
         short int maxFramesInBurst;
         B maxBytesInBurst;    // including IFG and preamble, etc.

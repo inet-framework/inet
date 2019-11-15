@@ -38,12 +38,11 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
 **.recip.trafGen.protocol = 150
 
-**.router.ppp[*].frameCapacity = 300
-**.router.ppp[*].bitCapacity = 0
+**.router.ppp[*].queue.packetCapacity = 300
 
 # NIC configuration
 **.ppp[*].ppp.queue.typename = "DropTailQueue" # in routers
-**.ppp[*].ppp.queue.frameCapacity = 10  # in routers
+**.ppp[*].ppp.queue.packetCapacity = 10  # in routers
 
 %#--------------------------------------------------------------------------------------------------------------
 %file: test.ned

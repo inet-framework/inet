@@ -28,7 +28,7 @@ Register_Protocol_Printer(&Protocol::bmac, BMacProtocolPrinter);
 
 void BMacProtocolPrinter::print(const Ptr<const Chunk>& chunk, const Protocol *protocol, const cMessagePrinter::Options *options, Context& context) const
 {
-    if (auto header = dynamicPtrCast<const BMacHeader>(chunk)) {
+    if (auto header = dynamicPtrCast<const BMacHeaderBase>(chunk)) {
         context.sourceColumn << header->getSrcAddr();
         context.destinationColumn << header->getDestAddr();
         context.infoColumn << "(Acking MAC) " << chunk;        //TODO

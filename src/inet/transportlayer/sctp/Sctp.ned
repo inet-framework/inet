@@ -157,9 +157,9 @@ simple Sctp like ISctp
         @display("i=block/wheelbarrow");
 
     gates:
-        input appIn;
+        input appIn @messageKinds(inet::SctpCommandCode);
         input ipIn;
-        output appOut @labels(SctpCommand/up);
+        output appOut @labels(SctpCommand/up) @messageKinds(inet::SctpStatusInd);
         output ipOut;
 }
 

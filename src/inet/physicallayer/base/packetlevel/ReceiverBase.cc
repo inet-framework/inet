@@ -21,12 +21,11 @@
 #include "inet/physicallayer/common/packetlevel/Interference.h"
 #include "inet/physicallayer/common/packetlevel/ReceptionDecision.h"
 #include "inet/physicallayer/common/packetlevel/ReceptionResult.h"
-#include "inet/physicallayer/common/packetlevel/SignalTag_m.h"
 #include "inet/physicallayer/contract/packetlevel/IRadio.h"
 #include "inet/physicallayer/contract/packetlevel/IRadioMedium.h"
+#include "inet/physicallayer/contract/packetlevel/SignalTag_m.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 bool ReceiverBase::computeIsReceptionPossible(const IListening *listening, const ITransmission *transmission) const
@@ -93,6 +92,7 @@ const IReceptionResult *ReceiverBase::computeReceptionResult(const IListening *l
     auto snirInd = packet->addTagIfAbsent<SnirInd>();
     snirInd->setMinimumSnir(snir->getMin());
     snirInd->setMaximumSnir(snir->getMax());
+    snirInd->setAverageSnir(snir->getMean());
     auto signalTimeInd = packet->addTagIfAbsent<SignalTimeInd>();
     signalTimeInd->setStartTime(reception->getStartTime());
     signalTimeInd->setEndTime(reception->getEndTime());
@@ -124,6 +124,5 @@ Packet *ReceiverBase::computeReceivedPacket(const ISnir *snir, bool isReceptionS
 }
 
 } // namespace physicallayer
-
 } // namespace inet
 

@@ -93,7 +93,7 @@ void QueueVisualizerBase::addQueueVisualizations()
 
 void QueueVisualizerBase::removeAllQueueVisualizations()
 {
-    for (auto queueVisualization : queueVisualizations) {
+    for (auto queueVisualization : std::vector<const QueueVisualization *>(queueVisualizations)) {
         removeQueueVisualization(queueVisualization);
         delete queueVisualization;
     }

@@ -1,0 +1,343 @@
+%description:
+
+This test contains basic checks for various interpolation methods.
+
+%includes:
+#include "inet/common/math/Interpolators.h"
+
+%global:
+
+using namespace inet::math;
+using namespace inet::units::values;
+
+class InterpolatorTest
+{
+  public:
+    template<typename X, typename Y>
+    void testXY(const IInterpolator<X, Y>& i, X x1, Y y1, X x2, Y y2, X x0, X x25, X x50, X x75, X x100);
+
+    void testDoubleDouble(const IInterpolator<double, double>& i);
+    void testDoubleW(const IInterpolator<double, W>& i);
+    void testTimeDouble(const IInterpolator<simtime_t, double>& i);
+    void testTimeW(const IInterpolator<simtime_t, W>& i);
+    void testHzDouble(const IInterpolator<Hz, double>& i);
+    void testHzW(const IInterpolator<Hz, W>& i);
+};
+
+template<typename X, typename Y>
+void InterpolatorTest::testXY(const IInterpolator<X, Y>& i, X x1, Y y1, X x2, Y y2, X x0, X x25, X x50, X x75, X x100)
+{
+    std::cout << i.getValue(x1, y1, x2, y2, x0) << std::endl;
+    std::cout << i.getValue(x1, y1, x2, y2, x25) << std::endl;
+    std::cout << i.getValue(x1, y1, x2, y2, x50) << std::endl;
+    std::cout << i.getValue(x1, y1, x2, y2, x75) << std::endl;
+    std::cout << i.getValue(x1, y1, x2, y2, x100) << std::endl;
+}
+
+void InterpolatorTest::testDoubleDouble(const IInterpolator<double, double>& i)
+{
+    testXY<double, double>(i, 0, 0, 100, 1, 0, 25, 50, 75, 100);
+}
+
+void InterpolatorTest::testDoubleW(const IInterpolator<double, W>& i)
+{
+    testXY<double, W>(i, 0, W(0), 100, W(1), 0, 25, 50, 75, 100);
+}
+
+void InterpolatorTest::testTimeDouble(const IInterpolator<simtime_t, double>& i)
+{
+    testXY<simtime_t, double>(i, 0, 0, 100, 1, 0, 25, 50, 75, 100);
+}
+
+void InterpolatorTest::testTimeW(const IInterpolator<simtime_t, W>& i)
+{
+    testXY<simtime_t, W>(i, 0, W(0), 100, W(1), 0, 25, 50, 75, 100);
+}
+
+void InterpolatorTest::testHzDouble(const IInterpolator<Hz, double>& i)
+{
+    testXY<Hz, double>(i, Hz(0), 0, Hz(100), 1, Hz(0), Hz(25), Hz(50), Hz(75), Hz(100));
+}
+
+void InterpolatorTest::testHzW(const IInterpolator<Hz, W>& i)
+{
+    testXY<Hz, W>(i, Hz(0), W(0), Hz(100), W(1), Hz(0), Hz(25), Hz(50), Hz(75), Hz(100));
+}
+
+%activity:
+InterpolatorTest tester;
+
+std::cout << "Left" << endl;
+tester.testDoubleDouble(LeftInterpolator<double, double>());
+tester.testDoubleW(LeftInterpolator<double, W>());
+tester.testTimeDouble(LeftInterpolator<simtime_t, double>());
+tester.testTimeW(LeftInterpolator<simtime_t, W>());
+tester.testHzDouble(LeftInterpolator<Hz, double>());
+tester.testHzW(LeftInterpolator<Hz, W>());
+
+std::cout << "Right" << endl;
+tester.testDoubleDouble(RightInterpolator<double, double>());
+tester.testDoubleW(RightInterpolator<double, W>());
+tester.testTimeDouble(RightInterpolator<simtime_t, double>());
+tester.testTimeW(RightInterpolator<simtime_t, W>());
+tester.testHzDouble(RightInterpolator<Hz, double>());
+tester.testHzW(RightInterpolator<Hz, W>());
+
+std::cout << "Average" << endl;
+tester.testDoubleDouble(AverageInterpolator<double, double>());
+tester.testDoubleW(AverageInterpolator<double, W>());
+tester.testTimeDouble(AverageInterpolator<simtime_t, double>());
+tester.testTimeW(AverageInterpolator<simtime_t, W>());
+tester.testHzDouble(AverageInterpolator<Hz, double>());
+tester.testHzW(AverageInterpolator<Hz, W>());
+
+std::cout << "Closer" << endl;
+tester.testDoubleDouble(CloserInterpolator<double, double>());
+tester.testDoubleW(CloserInterpolator<double, W>());
+tester.testTimeDouble(CloserInterpolator<simtime_t, double>());
+tester.testTimeW(CloserInterpolator<simtime_t, W>());
+tester.testHzDouble(CloserInterpolator<Hz, double>());
+tester.testHzW(CloserInterpolator<Hz, W>());
+
+std::cout << "Minimum" << endl;
+tester.testDoubleDouble(MinimumInterpolator<double, double>());
+tester.testDoubleW(MinimumInterpolator<double, W>());
+tester.testTimeDouble(MinimumInterpolator<simtime_t, double>());
+tester.testTimeW(MinimumInterpolator<simtime_t, W>());
+tester.testHzDouble(MinimumInterpolator<Hz, double>());
+tester.testHzW(MinimumInterpolator<Hz, W>());
+
+std::cout << "Maximum" << endl;
+tester.testDoubleDouble(MaximumInterpolator<double, double>());
+tester.testDoubleW(MaximumInterpolator<double, W>());
+tester.testTimeDouble(MaximumInterpolator<simtime_t, double>());
+tester.testTimeW(MaximumInterpolator<simtime_t, W>());
+tester.testHzDouble(MaximumInterpolator<Hz, double>());
+tester.testHzW(MaximumInterpolator<Hz, W>());
+
+std::cout << "Linear" << endl;
+tester.testDoubleDouble(LinearInterpolator<double, double>());
+tester.testDoubleW(LinearInterpolator<double, W>());
+tester.testTimeDouble(LinearInterpolator<simtime_t, double>());
+tester.testTimeW(LinearInterpolator<simtime_t, W>());
+tester.testHzDouble(LinearInterpolator<Hz, double>());
+tester.testHzW(LinearInterpolator<Hz, W>());
+
+%contains: stdout
+Left
+0
+0
+0
+0
+0
+0 W
+0 W
+0 W
+0 W
+0 W
+0
+0
+0
+0
+0
+0 W
+0 W
+0 W
+0 W
+0 W
+0
+0
+0
+0
+0
+0 W
+0 W
+0 W
+0 W
+0 W
+Right
+1
+1
+1
+1
+1
+1 W
+1 W
+1 W
+1 W
+1 W
+1
+1
+1
+1
+1
+1 W
+1 W
+1 W
+1 W
+1 W
+1
+1
+1
+1
+1
+1 W
+1 W
+1 W
+1 W
+1 W
+Average
+0.5
+0.5
+0.5
+0.5
+0.5
+500 mW
+500 mW
+500 mW
+500 mW
+500 mW
+0.5
+0.5
+0.5
+0.5
+0.5
+500 mW
+500 mW
+500 mW
+500 mW
+500 mW
+0.5
+0.5
+0.5
+0.5
+0.5
+500 mW
+500 mW
+500 mW
+500 mW
+500 mW
+Closer
+0
+0
+1
+1
+1
+0 W
+0 W
+1 W
+1 W
+1 W
+0
+0
+1
+1
+1
+0 W
+0 W
+1 W
+1 W
+1 W
+0
+0
+1
+1
+1
+0 W
+0 W
+1 W
+1 W
+1 W
+Minimum
+0
+0
+0
+0
+0
+0 W
+0 W
+0 W
+0 W
+0 W
+0
+0
+0
+0
+0
+0 W
+0 W
+0 W
+0 W
+0 W
+0
+0
+0
+0
+0
+0 W
+0 W
+0 W
+0 W
+0 W
+Maximum
+1
+1
+1
+1
+1
+1 W
+1 W
+1 W
+1 W
+1 W
+1
+1
+1
+1
+1
+1 W
+1 W
+1 W
+1 W
+1 W
+1
+1
+1
+1
+1
+1 W
+1 W
+1 W
+1 W
+1 W
+Linear
+0
+0.25
+0.5
+0.75
+1
+0 W
+250 mW
+500 mW
+750 mW
+1 W
+0
+0.25
+0.5
+0.75
+1
+0 W
+250 mW
+500 mW
+750 mW
+1 W
+0
+0.25
+0.5
+0.75
+1
+0 W
+250 mW
+500 mW
+750 mW
+1 W

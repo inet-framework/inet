@@ -19,9 +19,16 @@
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/visualizer/base/MediumVisualizerBase.h"
 
+#ifdef WITH_RADIO
+#include "inet/physicallayer/analogmodel/packetlevel/DimensionalAnalogModel.h"
+#include "inet/physicallayer/analogmodel/packetlevel/DimensionalTransmission.h"
+#endif // WITH_RADIO
+
 namespace inet {
 
 namespace visualizer {
+
+#ifdef WITH_RADIO
 
 using namespace inet::physicallayer;
 
@@ -73,6 +80,19 @@ void MediumVisualizerBase::initialize(int stage)
         communicationRangeLineWidth = par("communicationRangeLineWidth");
         signalPropagationAnimationSpeed = par("signalPropagationAnimationSpeed");
         signalTransmissionAnimationSpeed = par("signalTransmissionAnimationSpeed");
+        displaySpectrums = par("displaySpectrums");
+        spectrumFigureWidth = par("spectrumFigureWidth");
+        spectrumFigureHeight = par("spectrumFigureHeight");
+        spectrumFigureInterpolationSize = par("spectrumFigureInterpolationSize");
+        spectrumAutoFrequencyAxis = par("spectrumAutoFrequencyAxis");
+        spectrumMinFrequency = Hz(par("spectrumMinFrequency"));
+        spectrumMaxFrequency = Hz(par("spectrumMaxFrequency"));
+        spectrumAutoPowerAxis = par("spectrumAutoPowerAxis");
+        spectrumMinPower = WpHz(dBmWpMHz2WpHz(par("spectrumMinPower")));
+        spectrumMaxPower = WpHz(dBmWpMHz2WpHz(par("spectrumMaxPower")));
+        spectrumPlacementHint = parsePlacement(par("spectrumPlacementHint"));
+        spectrumPlacementPriority = par("spectrumPlacementPriority");
+        mediumPowerFunction = makeShared<SumFunction<WpHz, Domain<m, m, m, simsec, Hz>>>();
         radioMedium = getModuleFromPar<IRadioMedium>(par("mediumModule"), this, false);
         if (radioMedium != nullptr) {
             cModule *radioMediumModule = check_and_cast<cModule *>(radioMedium);
@@ -84,6 +104,12 @@ void MediumVisualizerBase::initialize(int stage)
             radioMediumModule->subscribe(IRadioMedium::signalDepartureEndedSignal, this);
             radioMediumModule->subscribe(IRadioMedium::signalArrivalStartedSignal, this);
             radioMediumModule->subscribe(IRadioMedium::signalArrivalEndedSignal, this);
+        }
+    }
+    else if (stage == INITSTAGE_PHYSICAL_LAYER) {
+        if (radioMedium != nullptr && displaySpectrums) {
+            if (auto backgroundNoise = radioMedium->getBackgroundNoise())
+                mediumPowerFunction->addElement(makeShared<BackgroundNoisePowerFunction>(backgroundNoise));
         }
     }
     else if (stage == INITSTAGE_LAST) {
@@ -162,14 +188,53 @@ bool MediumVisualizerBase::matchesTransmission(const ITransmission *transmission
     auto networkNode = getContainingNode(radio);
     if (!networkNodeFilter.matches(networkNode))
         return false;
-    L3AddressResolver addressResolver;
-    if (auto interfaceTable = addressResolver.findInterfaceTableOf(networkNode)) {
-        auto interfaceEntry = interfaceTable->getInterfaceByInterfaceModule(radio->getParentModule());
-        if (!interfaceFilter.matches(interfaceEntry))
-            return false;
-    }
-    return packetFilter.matches(transmission->getPacket());
+    auto interfaceEntry = getContainingNicModule(radio);
+    if (!interfaceFilter.matches(interfaceEntry))
+        return false;
+    auto packet = transmission->getPacket();
+    return packet == nullptr || packetFilter.matches(packet);
 }
+
+void MediumVisualizerBase::handleSignalAdded(const physicallayer::ITransmission *transmission)
+{
+    if (auto dimensionalTransmission = dynamic_cast<const DimensionalTransmission *>(transmission)) {
+        auto transmissionPowerFunction = dimensionalTransmission->getPower();
+        const auto& transmitterAntennaGainFunction = makeShared<AntennaGainFunction>(transmission->getTransmitter()->getAntenna()->getGain().get());
+        const auto& pathLossFunction = makeShared<PathLossFunction>(radioMedium->getPathLoss());
+        mps propagationSpeed = radioMedium->getPropagation()->getPropagationSpeed();
+        Point<m, m, m> startPosition(m(transmission->getStartPosition().x), m(transmission->getStartPosition().y), m(transmission->getStartPosition().z));
+        const auto& startOrientation = transmission->getStartOrientation();
+        const auto& propagatedTransmissionPowerFunction = makeShared<PropagatedTransmissionPowerFunction>(transmissionPowerFunction, startPosition, propagationSpeed);
+        Ptr<const IFunction<WpHz, Domain<m, m, m, simsec, Hz>>> receptionPowerFunction;
+        const Ptr<const IFunction<double, Domain<m, m, m, m, m, m, Hz>>>& obstacleLossFunction = radioMedium->getObstacleLoss() != nullptr ? makeShared<ObstacleLossFunction>(radioMedium->getObstacleLoss()) : nullptr;
+        bool attenuateWithCenterFrequency = check_and_cast<const DimensionalAnalogModel *>(radioMedium->getAnalogModel())->par("attenuateWithCenterFrequency");
+        if (attenuateWithCenterFrequency) {
+            const auto& attenuationFunction = makeShared<SpaceDependentAttenuationFunction>(transmitterAntennaGainFunction, pathLossFunction, obstacleLossFunction, startPosition, startOrientation, propagationSpeed, dimensionalTransmission->getCenterFrequency());
+            receptionPowerFunction = propagatedTransmissionPowerFunction->multiply(attenuationFunction);
+        }
+        else {
+            Hz lower = dimensionalTransmission->getCenterFrequency() - dimensionalTransmission->getBandwidth() / 2;
+            Hz upper = dimensionalTransmission->getCenterFrequency() + dimensionalTransmission->getBandwidth() / 2;
+            Hz step = dimensionalTransmission->getBandwidth() / 2;
+            const auto& attenuationFunction = makeShared<SpaceAndFrequencyDependentAttenuationFunction>(transmitterAntennaGainFunction, pathLossFunction, obstacleLossFunction, startPosition, startOrientation, propagationSpeed);
+            const auto& approximatedAtteunuationFunction = makeShared<ApproximatedFunction<double, Domain<m, m, m, simsec, Hz>, 4, Hz>>(lower, upper, step, &AverageInterpolator<Hz, double>::singleton, attenuationFunction);
+            receptionPowerFunction = propagatedTransmissionPowerFunction->multiply(approximatedAtteunuationFunction);
+        }
+        mediumPowerFunction->addElement(receptionPowerFunction);
+        receptionPowerFunctions[transmission] = receptionPowerFunction;
+    }
+}
+
+void MediumVisualizerBase::handleSignalRemoved(const physicallayer::ITransmission *transmission)
+{
+    auto it = receptionPowerFunctions.find(transmission);
+    if (it != receptionPowerFunctions.end()) {
+        mediumPowerFunction->removeElement(it->second);
+        receptionPowerFunctions.erase(it);
+    }
+}
+
+#endif // WITH_RADIO
 
 } // namespace visualizer
 

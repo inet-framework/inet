@@ -13,6 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
+#include "inet/applications/common/SocketTag_m.h"
 #include "inet/applications/udpapp/UdpSocketIo.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/networklayer/common/FragmentationTag_m.h"
@@ -69,14 +70,14 @@ void UdpSocketIo::setSocketOptions()
     if (timeToLive != -1)
         socket.setTimeToLive(timeToLive);
 
-    int typeOfService = par("typeOfService");
-    if (typeOfService != -1)
-        socket.setTypeOfService(typeOfService);
+    int dscp = par("dscp");
+    if (dscp != -1)
+        socket.setDscp(dscp);
 
     const char *multicastInterface = par("multicastInterface");
     if (multicastInterface[0]) {
         IInterfaceTable *ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
-        InterfaceEntry *ie = ift->getInterfaceByName(multicastInterface);
+        InterfaceEntry *ie = ift->findInterfaceByName(multicastInterface);
         if (!ie)
             throw cRuntimeError("Wrong multicastInterface setting: no interface named \"%s\"", multicastInterface);
         socket.setMulticastOutputInterface(ie->getInterfaceId());
@@ -99,6 +100,7 @@ void UdpSocketIo::socketDataArrived(UdpSocket *socket, Packet *packet)
     emit(packetReceivedSignal, packet);
     EV_INFO << "Received packet: " << UdpSocket::getReceivedPacketInfo(packet) << endl;
     numReceived++;
+    packet->removeTag<SocketInd>();
     send(packet, "trafficOut");
 }
 

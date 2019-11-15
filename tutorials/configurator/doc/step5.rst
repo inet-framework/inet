@@ -124,7 +124,7 @@ The following animation depicts ``host1`` pinging ``host7`` and
 ``host0`` pinging ``host6``. Routes to ``host7`` are visualized.
 
 .. video:: media/Step5A_1_cropped.mp4
-   :width: 698
+   :width: 100%
 
    <!--internal video recording run until 1s playback speed 1.5 animation speed none zoom 0.77 crop 30 70 150 80-->
 
@@ -196,7 +196,7 @@ The following is the animation of ``host1`` pinging ``host7`` and
 are visualized.
 
 .. video:: media/Step5B_1_cropped.mp4
-   :width: 698
+   :width: 100%
 
    <!--internal video recording run until 1s playback speed 1.5 animation speed none zoom 0.77 crop 30 70 150 80-->
 

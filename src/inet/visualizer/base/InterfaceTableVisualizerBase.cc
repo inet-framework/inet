@@ -34,8 +34,9 @@ namespace inet {
 
 namespace visualizer {
 
-InterfaceTableVisualizerBase::InterfaceVisualization::InterfaceVisualization(int networkNodeId, int interfaceId) :
+InterfaceTableVisualizerBase::InterfaceVisualization::InterfaceVisualization(int networkNodeId, int networkNodeGateId, int interfaceId) :
     networkNodeId(networkNodeId),
+    networkNodeGateId(networkNodeGateId),
     interfaceId(interfaceId)
 {
 }
@@ -91,6 +92,15 @@ const char *InterfaceTableVisualizerBase::DirectiveResolver::resolveDirective(ch
             break;
         case 'n':
             result = interfaceEntry->getNetworkAddress().str();
+            break;
+        case 't':
+            switch (interfaceEntry->getState()) {
+                case InterfaceEntry::UP: result = "up"; break;
+                case InterfaceEntry::DOWN: result = "down"; break;
+                case InterfaceEntry::GOING_UP: result = "going up"; break;
+                case InterfaceEntry::GOING_DOWN: result = "going down"; break;
+                default: throw cRuntimeError("Unknown interface state");
+            }
             break;
         case 'i':
             result = interfaceEntry->str();
@@ -166,6 +176,32 @@ void InterfaceTableVisualizerBase::unsubscribe()
         visualizationSubjectModule->unsubscribe(interfaceDeletedSignal, this);
         visualizationSubjectModule->unsubscribe(interfaceConfigChangedSignal, this);
         visualizationSubjectModule->unsubscribe(interfaceIpv4ConfigChangedSignal, this);
+    }
+}
+
+cModule *InterfaceTableVisualizerBase::getNetworkNode(const InterfaceVisualization *interfaceVisualization)
+{
+    return getSimulation()->getModule(interfaceVisualization->networkNodeId);
+}
+
+cGate *InterfaceTableVisualizerBase::getOutputGate(cModule *networkNode, InterfaceEntry *interfaceEntry)
+{
+    if (interfaceEntry->getNodeOutputGateId() == -1)
+        return nullptr;
+    cGate *outputGate = networkNode->gate(interfaceEntry->getNodeOutputGateId());
+    if (outputGate == nullptr || outputGate->getChannel() == nullptr)
+        return nullptr;
+    else
+        return outputGate;
+}
+
+cGate *InterfaceTableVisualizerBase::getOutputGate(const InterfaceVisualization *interfaceVisualization)
+{
+    if (interfaceVisualization->networkNodeGateId == -1)
+        return nullptr;
+    else {
+        auto networkNode = getNetworkNode(interfaceVisualization);
+        return networkNode != nullptr ? networkNode->gate(interfaceVisualization->networkNodeGateId) : nullptr;
     }
 }
 
@@ -251,6 +287,7 @@ void InterfaceTableVisualizerBase::receiveSignal(cComponent *source, simsignal_t
             if (interfaceFilter.matches(interfaceEntry)) {
                 auto interfaceVisualization = getInterfaceVisualization(networkNode, interfaceEntry);
                 removeInterfaceVisualization(interfaceVisualization);
+                delete interfaceVisualization;
             }
         }
     }

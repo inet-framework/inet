@@ -16,30 +16,30 @@
 //
 
 #include "inet/routing/ospfv2/messagehandler/LinkStateAcknowledgementHandler.h"
-#include "inet/routing/ospfv2/router/OspfRouter.h"
+#include "inet/routing/ospfv2/router/Ospfv2Router.h"
 
 namespace inet {
-namespace ospf {
+namespace ospfv2 {
 
 LinkStateAcknowledgementHandler::LinkStateAcknowledgementHandler(Router *containingRouter) :
     IMessageHandler(containingRouter)
 {
 }
 
-void LinkStateAcknowledgementHandler::processPacket(Packet *packet, OspfInterface *intf, Neighbor *neighbor)
+void LinkStateAcknowledgementHandler::processPacket(Packet *packet, Ospfv2Interface *intf, Neighbor *neighbor)
 {
     router->getMessageHandler()->printEvent("Link State Acknowledgement packet received", intf, neighbor);
 
     if (neighbor->getState() >= Neighbor::EXCHANGE_STATE) {
-        const auto& lsAckPacket = packet->peekAtFront<OspfLinkStateAcknowledgementPacket>();
+        const auto& lsAckPacket = packet->peekAtFront<Ospfv2LinkStateAcknowledgementPacket>();
 
         int lsaCount = lsAckPacket->getLsaHeadersArraySize();
 
         EV_DETAIL << "  Processing packet contents:\n";
 
         for (int i = 0; i < lsaCount; i++) {
-            const OspfLsaHeader& lsaHeader = lsAckPacket->getLsaHeaders(i);
-            OspfLsa *lsaOnRetransmissionList;
+            const Ospfv2LsaHeader& lsaHeader = lsAckPacket->getLsaHeaders(i);
+            Ospfv2Lsa *lsaOnRetransmissionList;
             LsaKeyType lsaKey;
 
             EV_DETAIL << "    " << lsaHeader << "\n";
@@ -62,6 +62,6 @@ void LinkStateAcknowledgementHandler::processPacket(Packet *packet, OspfInterfac
     }
 }
 
-} // namespace ospf
+} // namespace ospfv2
 } // namespace inet
 

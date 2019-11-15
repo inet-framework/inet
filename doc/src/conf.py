@@ -15,24 +15,25 @@
 import os
 import sys
 sys.path.insert(0, os.path.abspath('.'))
+sys.path.insert(0, os.path.abspath('_themes'))
 
 
 # -- Project information -----------------------------------------------------
 
-project = 'INET Documentation'
-copyright = '2018, OpenSim Ltd.'
-author = 'OpenSim Ltd.'
+project = 'INET'
+copyright = 'INET community'
+author = 'INET community'
 
 # The short X.Y version
-version = '4.0.0'
+version = '4.2'
 # The full version, including alpha/beta/rc tags
-release = ''
+release = '4.2'
 
 # -- General configuration ---------------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.
 #
-needs_sphinx = '1.7'
+needs_sphinx = '2.2'
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
@@ -44,6 +45,7 @@ extensions = [
     'sphinx.ext.todo',
     'sphinx.ext.githubpages',
     'sphinx.ext.graphviz',
+#    'sphinxcontrib.images',  ## needed, but not yet compatible with sphinx 2.x
     'tools.doxylink',
 ]
 
@@ -90,9 +92,9 @@ graphviz_output_format = 'svg'
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-#
-html_theme = 'sphinx_materialdesign_theme'
-html_theme_path = ['_templates']
+# https://github.com/omnetpp/sphinx_opp_theme
+html_theme = 'opptheme'
+html_theme_path = ['_themes']
 
 # material theme config
 html_theme_options = {
@@ -191,8 +193,8 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    ('users-guide/index', 'users-guide.tex', "INET Framework User's Guide", 'OpenSim Ltd.', 'manual', False),
-    ('developers-guide/index', 'developers-guide.tex', "INET Framework Developer's Guide", 'OpenSim Ltd.', 'manual', False),
+    ('users-guide/index', 'users-guide.tex', "INET Framework User's Guide", '', 'manual', False),
+    ('developers-guide/index', 'developers-guide.tex', "INET Framework Developer's Guide", '', 'manual', False),
 ]
 
 
@@ -220,6 +222,17 @@ texinfo_documents = [
 # external link configuration
 extlinks = {
   'wiki': ('https://en.wikipedia.org/wiki/%s', '')
+}
+
+# image extension config
+images_config = {
+    'override_image_directive': False,
+#    'backend': 'LightBox2',
+#    'default_image_width': '100%',
+#    'default_image_height': 'auto',
+#    'default_group': 'None',
+#    'download': True,
+    'default_show_title': False
 }
 
 # -- Doxylink config ---------------------------------------------------------
@@ -411,6 +424,7 @@ lexers['ini'] = IniLexer(startinline=True)
 # -- setup the customizations
 import tools.video
 import tools.audio
+import opptheme
 
 def setup(app):
     app.connect("source-read", opp_preprocess)
@@ -418,4 +432,4 @@ def setup(app):
     app.add_directive('vimeo', tools.video.Vimeo)
     app.add_directive('video', tools.video.Video)
     app.add_directive('audio', tools.audio.Audio)
-
+    app.add_directive('card', opptheme.CardDirective)

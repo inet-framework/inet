@@ -26,7 +26,7 @@
 #include "inet/routing/bgpv4/BgpRoutingTableEntry.h"
 #include "inet/routing/bgpv4/bgpmessage/BgpHeader_m.h"
 #include "inet/routing/bgpv4/bgpmessage/BgpUpdate.h"
-#include "inet/routing/ospfv2/Ospf.h"
+#include "inet/routing/ospfv2/Ospfv2.h"
 #include "inet/transportlayer/contract/tcp/TcpSocket.h"
 
 namespace inet {
@@ -41,7 +41,7 @@ private:
     IInterfaceTable *ift = nullptr;
     IIpv4RoutingTable *rt = nullptr;
     cSimpleModule *bgpModule = nullptr;
-    ospf::Ospf *ospfModule = nullptr;
+    ospfv2::Ospfv2 *ospfModule = nullptr;
     AsId myAsId = 0;
     bool redistributeInternal = false;
     bool redistributeRip = false;

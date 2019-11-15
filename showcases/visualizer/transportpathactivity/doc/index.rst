@@ -159,7 +159,7 @@ The following video has been captured from the simulation and shows
 what happens if :par:`packetFilter` is set.
 
 .. video:: media/Filtering_PacketFilter_v0615.m4v
-   :width: 698
+   :width: 100%
 
 You can see that although there are both video stream and
 ``UDPBasicAppData`` traffic in the network, :ned:`TransportRouteVisualizer`
@@ -186,13 +186,15 @@ The following video has been captured from the simulation and shows
 what happens if :par:`nodeFilter` is set.
 
 .. video:: media/Filtering_NodeFilter_v0615.m4v
-   :width: 698
+   :width: 100%
 
 If you observe the default OMNeT++ packet transmission animation (red
 stripes), you can see that although there is UDP data traffic between
 both source-destination pairs, the traffic is visualized only
 between ``source1`` and ``destination1`` because of the :par:`nodeFilter`
 parameter setting.
+
+Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`TransportPathVisualizerShowcase.ned <../TransportPathVisualizerShowcase.ned>`
 
 More Information
 ----------------

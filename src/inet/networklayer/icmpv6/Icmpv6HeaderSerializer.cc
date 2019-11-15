@@ -114,7 +114,7 @@ void deserializeIpv6NdOptions(Ipv6NdMessage& msg, Ipv6NdOptions& options, Memory
                 break;
             }
             case IPv6ND_TARGET_LINK_LAYER_ADDR_OPTION: {
-                auto option = new Ipv6NdSourceLinkLayerAddress();
+                auto option = new Ipv6NdTargetLinkLayerAddress();
                 option->setLinkLayerAddress(stream.readMacAddress());
                 if (length > 1) {
                     option->setOptionLength(length);

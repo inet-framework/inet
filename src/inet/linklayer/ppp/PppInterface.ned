@@ -22,7 +22,7 @@ import inet.linklayer.contract.ITrafficConditioner;
 import inet.networklayer.common.InterfaceEntry;
 
 //
-// PPP interface. Complements the ~PPP module with an output queue
+// PPP interface. Complements the ~Ppp module with an output queue
 // for QoS and RED support.
 //
 module PppInterface extends InterfaceEntry like IPppInterface
@@ -45,7 +45,7 @@ module PppInterface extends InterfaceEntry like IPppInterface
         }
         ppp: Ppp {
             parameters:
-                txQueueLimit = default(10000);
+                queue.packetCapacity = default(10000);
                 @display("p=200,200");
         }
     connections:

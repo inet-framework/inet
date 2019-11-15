@@ -18,24 +18,24 @@
 #ifndef __INET_DIMENSIONALRECEPTION_H
 #define __INET_DIMENSIONALRECEPTION_H
 
-#include "inet/common/mapping/MappingBase.h"
-#include "inet/common/mapping/MappingUtils.h"
+#include "inet/common/math/Functions.h"
 #include "inet/physicallayer/base/packetlevel/FlatReceptionBase.h"
 
 namespace inet {
 
 namespace physicallayer {
 
+using namespace inet::math;
+
 class INET_API DimensionalReception : public FlatReceptionBase
 {
   protected:
-    const ConstMapping *power;
+    const Ptr<const IFunction<WpHz, Domain<simsec, Hz>>> power;
 
   public:
-    DimensionalReception(const IRadio *radio, const ITransmission *transmission, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const Quaternion startOrientation, const Quaternion endOrientation, Hz carrierFrequency, Hz bandwidth, const ConstMapping *power);
-    virtual ~DimensionalReception() { delete power; }
+    DimensionalReception(const IRadio *radio, const ITransmission *transmission, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const Quaternion startOrientation, const Quaternion endOrientation, Hz centerFrequency, Hz bandwidth, const Ptr<const IFunction<WpHz, Domain<simsec, Hz>>>& power);
 
-    virtual const ConstMapping *getPower() const { return power; }
+    virtual const Ptr<const IFunction<WpHz, Domain<simsec, Hz>>>& getPower() const { return power; }
     virtual W computeMinPower(simtime_t startTime, simtime_t endTime) const override;
 };
 

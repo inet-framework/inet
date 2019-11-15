@@ -110,7 +110,7 @@ void EnergyStorageVisualizerBase::addEnergyStorageVisualizations()
 
 void EnergyStorageVisualizerBase::removeAllEnergyStorageVisualizations()
 {
-    for (auto energyStorageVisualization : energyStorageVisualizations) {
+    for (auto energyStorageVisualization : std::vector<const EnergyStorageVisualization *>(energyStorageVisualizations)) {
         removeEnergyStorageVisualization(energyStorageVisualization);
         delete energyStorageVisualization;
     }

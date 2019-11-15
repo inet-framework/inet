@@ -86,7 +86,7 @@ InterfaceEntry *DhcpClient::chooseInterface()
     InterfaceEntry *ie = nullptr;
 
     if (strlen(interfaceName) > 0) {
-        ie = ift->getInterfaceByName(interfaceName);
+        ie = ift->findInterfaceByName(interfaceName);
         if (ie == nullptr)
             throw cRuntimeError("Interface \"%s\" does not exist", interfaceName);
     }
@@ -250,7 +250,7 @@ void DhcpClient::handleTimer(cMessage *msg)
         cancelEvent(timerT1);
         cancelEvent(timerT2);
         cancelEvent(timerTo);
-        cancelEvent(leaseTimer);
+        //cancelEvent(leaseTimer);
 
         sendRequest();
         scheduleTimerTO(WAIT_ACK);
@@ -525,7 +525,6 @@ void DhcpClient::sendRequest()
     // setting the xid
     xid = intuniform(0, RAND_MAX);    // generating a new xid for each transmission
 
-    Packet *packet = new Packet("DHCPREQUEST");
     const auto& request = makeShared<DhcpMessage>();
     request->setOp(BOOTREQUEST);
     uint16_t length = 236;  // packet size without the options field
@@ -591,6 +590,7 @@ void DhcpClient::sendRequest()
 
     request->setChunkLength(B(length));
 
+    Packet *packet = new Packet("DHCPREQUEST");
     packet->insertAtBack(request);
     sendToUdp(packet, clientPort, destAddr, serverPort);
 }
@@ -682,7 +682,7 @@ void DhcpClient::handleDhcpAck(const Ptr<const DhcpMessage>& msg)
     bindLease();
 }
 
-void DhcpClient::scheduleTimerTO(TimerType type)
+void DhcpClient::scheduleTimerTO(DhcpTimerType type)
 {
     // cancel the previous timeout
     cancelEvent(timerTo);

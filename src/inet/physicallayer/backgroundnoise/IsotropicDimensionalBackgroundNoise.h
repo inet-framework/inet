@@ -18,7 +18,6 @@
 #ifndef __INET_ISOTROPICDIMENSIONALBACKGROUNDNOISE_H
 #define __INET_ISOTROPICDIMENSIONALBACKGROUNDNOISE_H
 
-#include "inet/common/mapping/MappingBase.h"
 #include "inet/physicallayer/contract/packetlevel/IBackgroundNoise.h"
 
 namespace inet {
@@ -28,15 +27,12 @@ namespace physicallayer {
 class INET_API IsotropicDimensionalBackgroundNoise : public cModule, public IBackgroundNoise
 {
   protected:
-    DimensionSet dimensions;
-    Mapping::InterpolationMethod interpolationMode;
-    W power;
+    WpHz powerSpectralDensity = WpHz(NaN);
+    W power = W(NaN);
+    mutable Hz bandwidth = Hz(NaN);
 
   protected:
     virtual void initialize(int stage) override;
-
-  public:
-    IsotropicDimensionalBackgroundNoise();
 
   public:
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;

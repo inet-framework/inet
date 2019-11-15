@@ -24,13 +24,24 @@ import inet.physicallayer.base.packetlevel.NarrowbandTransmitterBase;
 // transmission power (that changes over time and/or frequency) in their analog
 // representation and the configured modulation.
 //
+// Allowed expressions for time and frequency coordinates in the gains parameters:
+// <pre>
+//   s|c|e
+//   s|c|e+-quantity
+//   s|c|e+-b|d
+//   s|c|e+-b|d+-quantity
+//   s|c|e+-b|d*number
+//   s|c|e+-b|d*number+-quantity
+// </pre>
+// where s = start, e = end, c = center frequency, b = bandwidth, d = duration. For example: c-b*0.5-1MHz
+//
 module DimensionalTransmitterBase extends NarrowbandTransmitterBase
 {
     parameters:
-        string dimensions = default("time");                // dimensions of power: time and/or frequency
-        string timeGains = default("0% 0dB 100% 0dB");      // sequence of time and gain pairs; time is in [%] or [s], negative time measures from the end; gain is in [dB] or [0..1]; default value is a flat signal
-        string frequencyGains = default("0% 0dB 100% 0dB"); // sequence of frequency and gain pairs; frequency is in [%] or [Hz], negative frequency measures from the end; gain is in [dB] or [0..1]; default value is a flat signal
-        string interpolationMode @enum("linear", "sample-hold") = default("sample-hold");
+        string timeGains = default("left s 0dB either e 0dB right"); // sequence of interpolation method, time, gain tuples; time can be an expression, gain is in [dB] or [0..inf); default value is a flat signal
+        string timeGainsNormalization @enum("", "maximum", "integral") = default(""); // determines how the time gains function is normalized, no normalization by default
+        string frequencyGains = default("left s 0dB either e 0dB right"); // sequence of interpolation method, frequency, gain tuples; frequency can be an expression, gain is in [dB] or [0..1]; default value is a flat signal
+        string frequencyGainsNormalization @enum("", "maximum", "integral") = default("integral"); // determines how the frequency gains function is normalized, integral normalization by default
         modulation = default("BPSK");
         @class(DimensionalTransmitterBase);
 }

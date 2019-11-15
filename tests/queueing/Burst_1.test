@@ -1,30 +1,30 @@
 %description:
 
 In this test, packets are periodically (randomly) produced by two active sources
-(PacketProducers). One source produces packets with a slower rate while the other
+(ActivePacketSources). One source produces packets with a slower rate while the other
 source uses a faster rate. The two packet sources are combined using a markov
 chain with random transition matrix and random wait intervals. The packets are
-consumed by a single passive sink (PacketConsumer).
+consumed by a single passive sink (PassivePacketSink).
 
 %file: test.ned
 
-import inet.common.queueing.PacketConsumer;
-import inet.common.queueing.MarkovScheduler;
-import inet.common.queueing.PacketProducer;
+import inet.queueing.sink.PassivePacketSink;
+import inet.queueing.scheduler.MarkovScheduler;
+import inet.queueing.source.ActivePacketSource;
 
 network TestBurst
 {
     submodules:
-        producer1: PacketProducer {
+        producer1: ActivePacketSource {
             @display("p=100,100");
         }
-        producer2: PacketProducer {
+        producer2: ActivePacketSource {
             @display("p=100,200");
         }
         scheduler: MarkovScheduler {
             @display("p=200,100");
         }
-        consumer: PacketConsumer {
+        consumer: PassivePacketSink {
             @display("p=300,100");
         }
     connections allowunconnected:

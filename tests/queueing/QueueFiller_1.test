@@ -1,0 +1,98 @@
+%description:
+
+TODO
+
+%file: test.ned
+
+import inet.queueing.sink.ActivePacketSink;
+import inet.queueing.queue.PacketQueue;
+import inet.queueing.source.QueueFiller;
+
+network TestQueueFiller
+{
+    submodules:
+        filler: QueueFiller {
+            @display("p=100,100");
+        }
+        queue: PacketQueue {
+            @display("p=200,100");
+        }
+        consumer: ActivePacketSink {
+            @display("p=300,100");
+        }
+    connections allowunconnected:
+    	filler.out --> queue.in;
+    	queue.out --> consumer.in;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = TestQueueFiller
+sim-time-limit = 10s
+cmdenv-event-banners = false
+*.filler.provider.packetLength = 1B
+*.filler.tokenGenerator.queueModule = "queue"
+*.consumer.collectionInterval = 1s
+
+%contains: stdout
+Providing packet provider-0.
+Processing packet provider-0.
+Pushing packet provider-0 into the queue.
+Popping packet provider-0 from the queue.
+Collecting packet provider-0.
+
+Running simulation...
+Providing packet provider-1.
+Processing packet provider-1.
+Pushing packet provider-1 into the queue.
+Popping packet provider-1 from the queue.
+Providing packet provider-2.
+Processing packet provider-2.
+Pushing packet provider-2 into the queue.
+Collecting packet provider-1.
+Popping packet provider-2 from the queue.
+Providing packet provider-3.
+Processing packet provider-3.
+Pushing packet provider-3 into the queue.
+Collecting packet provider-2.
+Popping packet provider-3 from the queue.
+Providing packet provider-4.
+Processing packet provider-4.
+Pushing packet provider-4 into the queue.
+Collecting packet provider-3.
+Popping packet provider-4 from the queue.
+Providing packet provider-5.
+Processing packet provider-5.
+Pushing packet provider-5 into the queue.
+Collecting packet provider-4.
+Popping packet provider-5 from the queue.
+Providing packet provider-6.
+Processing packet provider-6.
+Pushing packet provider-6 into the queue.
+Collecting packet provider-5.
+Popping packet provider-6 from the queue.
+Providing packet provider-7.
+Processing packet provider-7.
+Pushing packet provider-7 into the queue.
+Collecting packet provider-6.
+Popping packet provider-7 from the queue.
+Providing packet provider-8.
+Processing packet provider-8.
+Pushing packet provider-8 into the queue.
+Collecting packet provider-7.
+Popping packet provider-8 from the queue.
+Providing packet provider-9.
+Processing packet provider-9.
+Pushing packet provider-9 into the queue.
+Collecting packet provider-8.
+Popping packet provider-9 from the queue.
+Providing packet provider-10.
+Processing packet provider-10.
+Pushing packet provider-10 into the queue.
+Collecting packet provider-9.
+Popping packet provider-10 from the queue.
+Providing packet provider-11.
+Processing packet provider-11.
+Pushing packet provider-11 into the queue.
+Collecting packet provider-10.

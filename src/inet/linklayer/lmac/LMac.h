@@ -12,7 +12,7 @@
 #ifndef __INET_LMAC_H
 #define __INET_LMAC_H
 
-#include "inet/common/queueing/contract/IPacketQueue.h"
+#include "inet/queueing/contract/IPacketQueue.h"
 #include "inet/linklayer/base/MacProtocolBase.h"
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/linklayer/contract/IMacProtocol.h"
@@ -77,6 +77,7 @@ class INET_API LMac : public MacProtocolBase, public IMacProtocol
         , macState()
         , slotDuration(0)
         , headerLength(b(0))
+        , ctrlFrameLength(b(0))
         , controlDuration(0)
         , myId(0)
         , mySlot(0)
@@ -110,7 +111,7 @@ class INET_API LMac : public MacProtocolBase, public IMacProtocol
     virtual void handleSelfMessage(cMessage *) override;
 
     /** @brief Handle control messages from lower layer */
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details) override;
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details) override;
 
     /** @brief Encapsulate the NetwPkt into an MacPkt */
     virtual void encapsulate(Packet *);
@@ -152,8 +153,10 @@ class INET_API LMac : public MacProtocolBase, public IMacProtocol
 
     /** @brief Duration of a slot */
     double slotDuration;
-    /** @brief Length of the header*/
+    /** @brief Length of the header */
     b headerLength;
+    /** @brief Length of the control frames */
+    b ctrlFrameLength;
     /** @brief Duration of teh control time in each slot */
     double controlDuration;
     /** @brief my ID */

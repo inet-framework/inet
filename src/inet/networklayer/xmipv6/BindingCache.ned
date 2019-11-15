@@ -23,9 +23,9 @@
 package inet.networklayer.xmipv6;
 
 //
-// xMIPv6 Data structure for the HA and CN(s) only.
+// ~xMIPv6 Data structure for the HA and CN(s) only.
 //
-// @see  xMIPv6.
+// @see  ~xMIPv6.
 //
 simple BindingCache
 {

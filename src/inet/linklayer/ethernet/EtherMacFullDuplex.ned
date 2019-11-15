@@ -18,7 +18,7 @@
 
 package inet.linklayer.ethernet;
 
-import inet.common.queueing.contract.IPacketQueue;
+import inet.queueing.contract.IPacketQueue;
 import inet.linklayer.contract.IEtherMac;
 
 //
@@ -97,14 +97,14 @@ import inet.linklayer.contract.IEtherMac;
 //
 // <b>Queueing</b>
 //
-// In routers, MAC relies on an external queue module (see ~IOutputQueue)
+// In routers, MAC relies on an external queue module (see ~IPacketQueue)
 // to model finite buffer, implement QoS and/or RED, and requests packets
 // from this external queue one-by-one.
 //
 // In hosts, no such queue is used, so MAC contains an internal
-// queue named txQueue to queue up packets waiting for transmission.
-// Conceptually, txQueue is of infinite size, but for better diagnostics
-// one can specify a hard limit in the txQueueLimit parameter -- if this is
+// queue to store packets waiting for transmission.
+// Conceptually, the queue is of infinite size, but for better diagnostics
+// one can specify a hard limit in the queue parameter -- if this is
 // exceeded, the simulation stops with an error.
 //
 //
@@ -112,7 +112,7 @@ import inet.linklayer.contract.IEtherMac;
 //
 // Please see <a href="physical.html">Messaging on the physical layer</a>.
 //
-// @see ~EtherMac, ~EthernetInterface, ~IOutputQueue, ~EtherEncap, ~Ieee8022Llc
+// @see ~EtherMac, ~EthernetInterface, ~IPacketQueue, ~EtherEncap, ~Ieee8022Llc
 // @see ~EtherFrame, ~EthernetIIFrame, ~EtherFrameWithLlc, ~Ieee802Ctrl
 //
 module EtherMacFullDuplex like IEtherMac
@@ -125,8 +125,6 @@ module EtherMacFullDuplex like IEtherMac
                                             // ones with matching destination MAC address
         bool duplexMode = default(true);    // must be set to "true", as EtherMacFullDuplex does not support half-duplex operation
                                             // (parameter is present to reduce the risk of accidental misconfiguration)
-        int txQueueLimit = default(1000);   // maximum number of frames queued up for transmission in the internal queue
-                                            // additional frames cause a runtime error
         int mtu @unit(B) = default(1500B);
         @lifecycleSupport;
         double stopOperationExtraTime @unit(s) = default(-1s);    // extra time after lifecycle stop operation finished
@@ -164,9 +162,8 @@ module EtherMacFullDuplex like IEtherMac
     submodules:
         queue: <default("EtherQueue")> like IPacketQueue {
             parameters:
-                frameCapacity = default(txQueueLimit);
+                packetCapacity = default(1000);
                 @display("p=100,100");
         }
-    connections allowunconnected:
 }
 

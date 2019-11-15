@@ -17,12 +17,12 @@
 
 package inet.linklayer.ieee80211.mac.queue;
 
-import inet.common.queueing.DropTailQueue;
+import inet.queueing.queue.DropTailQueue;
 
 simple PendingQueue extends DropTailQueue
 {
     parameters:
         comparatorClass = default("inet::ieee80211::MgmtOverDataComparator"); // MgmtOverDataComparator, MgmtOverMulticastOverUnicastComparator, ...
-        frameCapacity = default(100);
+        packetCapacity = default(100);
 }
 

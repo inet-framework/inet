@@ -16,7 +16,7 @@
 #ifndef __INET_BMAC_H
 #define __INET_BMAC_H
 
-#include "inet/common/queueing/contract/IPacketQueue.h"
+#include "inet/queueing/contract/IPacketQueue.h"
 #include "inet/linklayer/base/MacProtocolBase.h"
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/linklayer/contract/IMacProtocol.h"
@@ -85,7 +85,7 @@ class INET_API BMac : public MacProtocolBase, public IMacProtocol
     virtual void handleSelfMessage(cMessage *) override;
 
     /** @brief Handle control messages from lower layer */
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details) override;
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details) override;
 
   protected:
     /** @brief The radio. */
@@ -171,6 +171,7 @@ class INET_API BMac : public MacProtocolBase, public IMacProtocol
     double slotDuration = 0;
     /** @brief Length of the header*/
     b headerLength = b(0);
+    b ctrlFrameLength = b(0);
     /** @brief The bitrate of transmission */
     double bitrate = 0;
     /** @brief The duration of CCA */

@@ -20,7 +20,7 @@
 #define __INET_MULTIFIELDCLASSIFIER_H
 
 #include "inet/common/INETDefs.h"
-#include "inet/common/queueing/base/PacketClassifierBase.h"
+#include "inet/queueing/base/PacketClassifierBase.h"
 #include "inet/common/packet/dissector/PacketDissector.h"
 #include "inet/common/packet/Packet.h"
 
@@ -55,6 +55,7 @@ class INET_API MultiFieldClassifier : public queueing::PacketClassifierBase
         L3Address destAddr;
         int destPrefixLength = 0;
         int protocolId = -1;
+        int dscp = 0;
         int tos = 0;
         int tosMask = 0;
         int srcPortMin = -1;

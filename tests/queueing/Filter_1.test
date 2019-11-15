@@ -1,26 +1,26 @@
 %description:
 
 In this test, packets are produced periodically by an active packet source
-(PacketProducer). The packets are consumed by a passive packet sink (PacketConsumer).
+(ActivePacketSource). The packets are consumed by a passive packet sink (PassivePacketSink).
 Packets are passed through from the source to the sink by a filter (PacketFilter).
 Every second packet is dropped.
 
 %file: test.ned
 
-import inet.common.queueing.PacketConsumer;
-import inet.common.queueing.PacketFilter;
-import inet.common.queueing.PacketProducer;
+import inet.queueing.sink.PassivePacketSink;
+import inet.queueing.filter.PacketFilter;
+import inet.queueing.source.ActivePacketSource;
 
 network TestFilter
 {
     submodules:
-        producer: PacketProducer {
+        producer: ActivePacketSource {
             @display("p=100,100");
         }
         filter: PacketFilter {
             @display("p=200,100");
         }
-        consumer: PacketConsumer {
+        consumer: PassivePacketSink {
             @display("p=300,100");
         }
     connections allowunconnected:
@@ -29,7 +29,7 @@ network TestFilter
 }
 
 %file: Test.cc
-#include "inet/common/queueing/PacketFilterFunction.h"
+#include "inet/queueing/function/PacketFilterFunction.h"
 #include "inet/common/packet/Packet.h"
 
 using namespace inet; 

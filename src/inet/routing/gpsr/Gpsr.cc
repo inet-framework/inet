@@ -238,12 +238,12 @@ void Gpsr::sendBeacon(const Ptr<GpsrBeacon>& beacon)
     udpHeader->setDestinationPort(GPSR_UDP_PORT);
     udpHeader->setCrcMode(CRC_DISABLED);
     udpPacket->insertAtFront(udpHeader);
-    auto addresses = udpPacket->addTagIfAbsent<L3AddressReq>();
+    auto addresses = udpPacket->addTag<L3AddressReq>();
     addresses->setSrcAddress(getSelfAddress());
     addresses->setDestAddress(addressType->getLinkLocalManetRoutersMulticastAddress());
-    udpPacket->addTagIfAbsent<HopLimitReq>()->setHopLimit(255);
-    udpPacket->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::manet);
-    udpPacket->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
+    udpPacket->addTag<HopLimitReq>()->setHopLimit(255);
+    udpPacket->addTag<PacketProtocolTag>()->setProtocol(&Protocol::manet);
+    udpPacket->addTag<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
     sendUdpPacket(udpPacket);
 }
 
@@ -608,8 +608,7 @@ INetfilter::IHook::Result Gpsr::routeDatagram(Packet *datagram, GpsrOption *gpsr
     else {
         EV_INFO << "Next hop found: source = " << source << ", destination = " << destination << ", nextHop: " << nextHop << endl;
         gpsrOption->setSenderAddress(getSelfAddress());
-        auto interfaceEntry = interfaceTable->getInterfaceByName(outputInterface);
-        ASSERT(interfaceEntry);
+        auto interfaceEntry = CHK(interfaceTable->findInterfaceByName(outputInterface));
         datagram->addTagIfAbsent<InterfaceReq>()->setInterfaceId(interfaceEntry->getInterfaceId());
         return ACCEPT;
     }
@@ -627,7 +626,7 @@ void Gpsr::setGpsrOptionOnNetworkDatagram(Packet *packet, const Ptr<const Networ
         ipv4Header->addOption(gpsrOption);
         B newHlen = ipv4Header->calculateHeaderByteLength();
         ipv4Header->setHeaderLength(newHlen);
-        ipv4Header->setChunkLength(ipv4Header->getChunkLength() + B(newHlen - oldHlen));  // it was ipv4Header->addByteLength(newHlen - oldHlen);
+        ipv4Header->addChunkLength(newHlen - oldHlen);
         ipv4Header->setTotalLengthField(ipv4Header->getTotalLengthField() + newHlen - oldHlen);
         insertNetworkProtocolHeader(packet, Protocol::ipv4, ipv4Header);
     }
@@ -647,7 +646,7 @@ void Gpsr::setGpsrOptionOnNetworkDatagram(Packet *packet, const Ptr<const Networ
         hdr->getTlvOptionsForUpdate().insertTlvOption(gpsrOption);
         hdr->setByteLength(B(utils::roundUp(2 + B(hdr->getTlvOptions().getLength()).get(), 8)));
         B newHlen = ipv6Header->calculateHeaderByteLength();
-        ipv6Header->setChunkLength(ipv6Header->getChunkLength() + (newHlen - oldHlen));
+        ipv6Header->addChunkLength(newHlen - oldHlen);
         insertNetworkProtocolHeader(packet, Protocol::ipv6, ipv6Header);
     }
     else
@@ -659,7 +658,7 @@ void Gpsr::setGpsrOptionOnNetworkDatagram(Packet *packet, const Ptr<const Networ
         int oldHlen = nextHopHeader->getTlvOptions().getLength();
         nextHopHeader->getTlvOptionsForUpdate().insertTlvOption(gpsrOption);
         int newHlen = nextHopHeader->getTlvOptions().getLength();
-        nextHopHeader->setChunkLength(nextHopHeader->getChunkLength() + B(newHlen - oldHlen));
+        nextHopHeader->addChunkLength(B(newHlen - oldHlen));
         insertNetworkProtocolHeader(packet, Protocol::nextHopForwarding, nextHopHeader);
     }
     else
