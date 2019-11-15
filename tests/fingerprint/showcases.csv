@@ -244,13 +244,13 @@
 #/showcases/wireless/scaling/,        -f omnetpp.ini -c IdealRadioPing -r 0,                                     500s,            37e4-12cc/tplx, PASS,
 #/showcases/wireless/scaling/,        -f omnetpp.ini -c IdealRadioUdp -r 0,                                      500s,            b428-a77d/tplx, PASS,
 
-/showcases/wireless/sensornetwork/,  -f omnetpp.ini -c BMac -r 0,                   100s,         45ad-a901/tplx, PASS,
-/showcases/wireless/sensornetwork/,  -f omnetpp.ini -c XMac -r 0,                   100s,         fa4c-c500/tplx, PASS,
-/showcases/wireless/sensornetwork/,  -f omnetpp.ini -c LMac -r 0,                   100s,         94d2-cfcf/tplx, PASS,
+/showcases/wireless/sensornetwork/,  -f omnetpp.ini -c BMac -r 0,                   100s,         870a-69b2/tplx, PASS,
+/showcases/wireless/sensornetwork/,  -f omnetpp.ini -c XMac -r 0,                   100s,         9d0a-4b51/tplx, PASS,
+/showcases/wireless/sensornetwork/,  -f omnetpp.ini -c LMac -r 0,                   100s,         034d-eadc/tplx, PASS,
 # /showcases/wireless/sensornetwork/,  -f omnetpp.ini -c StatisticBase -r 0,          100s,         0000-0000/tplx, PASS,   # StatisticBase extended
-/showcases/wireless/sensornetwork/,  -f omnetpp.ini -c StatisticBMac -r 100,          100s,         49e4-0aed/tplx, PASS,
-/showcases/wireless/sensornetwork/,  -f omnetpp.ini -c StatisticXMac -r 100,          100s,         8487-24e6/tplx, PASS,
-/showcases/wireless/sensornetwork/,  -f omnetpp.ini -c StatisticLMac -r 100,          100s,         eba4-055f/tplx, PASS,
+/showcases/wireless/sensornetwork/,  -f omnetpp.ini -c StatisticBMac -r 100,          100s,         c679-b660/tplx, PASS,
+/showcases/wireless/sensornetwork/,  -f omnetpp.ini -c StatisticXMac -r 100,          100s,         3f3f-4791/tplx, PASS,
+/showcases/wireless/sensornetwork/,  -f omnetpp.ini -c StatisticLMac -r 100,          100s,         a5be-29ba/tplx, PASS,
 
 /showcases/wireless/throughput/,     -f omnetpp.ini -c General -r 0,                1s,         030e-c416/tplx, PASS,
 
