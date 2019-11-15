@@ -202,23 +202,23 @@ void MultiFieldClassifier::addFilter(const PacketDissectorCallback& filter)
     if (!filter.destAddr.isUnspecified() && ((filter.destAddr.getType() == L3Address::IPv6 && filter.destPrefixLength > 128) ||
                                              (filter.destAddr.getType() == L3Address::IPv4 && filter.destPrefixLength > 32)))
         throw cRuntimeError("srcPrefixLength is invalid");
-    if (filter.protocolId != -1 && (filter.protocolId < 0 || filter.protocolId > 0xff))
+    if ((filter.protocolId < -1 || filter.protocolId > 0xff))
         throw cRuntimeError("protocol is not a valid protocol number");
-    if (filter.dscp != -1 && (filter.dscp < 0 || filter.dscp > 0x3f))
+    if (filter.dscp < -1 || filter.dscp > 0x3f)
         throw cRuntimeError("dscp is not valid");
-    if (filter.tos != -1 && (filter.tos < 0 || filter.tos > 0xff))
+    if (filter.tos < -1 || filter.tos > 0xff)
         throw cRuntimeError("tos is not valid");
     if (filter.tosMask < 0 || filter.tosMask > 0xff)
         throw cRuntimeError("tosMask is not valid");
-    if (filter.srcPortMin != -1 && (filter.srcPortMin < 0 || filter.srcPortMin > 0xffff))
+    if (filter.srcPortMin < -1 || filter.srcPortMin > 0xffff)
         throw cRuntimeError("srcPortMin is not a valid port number");
-    if (filter.srcPortMax != -1 && (filter.srcPortMax < 0 || filter.srcPortMax > 0xffff))
+    if (filter.srcPortMax < -1 || filter.srcPortMax > 0xffff)
         throw cRuntimeError("srcPortMax is not a valid port number");
     if (filter.srcPortMax != -1 && filter.srcPortMin > filter.srcPortMax)
         throw cRuntimeError("srcPortMin > srcPortMax");
-    if (filter.destPortMin != -1 && (filter.destPortMin < 0 || filter.destPortMin > 0xffff))
+    if (filter.destPortMin < -1 || filter.destPortMin > 0xffff)
         throw cRuntimeError("destPortMin is not a valid port number");
-    if (filter.destPortMax != -1 && (filter.destPortMax < 0 || filter.destPortMax > 0xffff))
+    if (filter.destPortMax < -1 || filter.destPortMax > 0xffff)
         throw cRuntimeError("destPortMax is not a valid port number");
     if (filter.destPortMax != -1 && filter.destPortMin > filter.destPortMax)
         throw cRuntimeError("destPortMin > destPortMax");
