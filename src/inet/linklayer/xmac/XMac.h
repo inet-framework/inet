@@ -174,7 +174,8 @@ class INET_API XMac : public MacProtocolBase, public IMacProtocol
     MacAddress lastDataPktSrcAddr;
     MacAddress lastDataPktDestAddr;
     MacAddress lastPreamblePktSrcAddr;
-    int headerLength = 0;    // XMacFrame header length in bytes
+    b headerLength = b(0);    // XMacDataFrameHeader header length
+    b ctrlFrameLength = b(0);    // XMacControlFrame frame length
 
     /** @brief The radio. */
     physicallayer::IRadio *radio;

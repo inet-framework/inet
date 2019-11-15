@@ -62,8 +62,11 @@ module XMac extends MacProtocolBase like IMacProtocol
         // only used when usage of MAC acks is enabled
         int macMaxFrameRetries = default(3);
 
-        // length of MAC header
+        // length of MAC headers
         int headerLength @unit(b) = default(80b);
+        int ctrlFrameLength @unit(b) = default(headerLength);
+
+        // mtu
         int mtu @unit(B) = default(0B);
 
         // Maximum transmission attempts per data packet, when ACKs are used
