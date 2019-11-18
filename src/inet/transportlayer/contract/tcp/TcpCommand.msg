@@ -165,12 +165,10 @@ class TcpSetDscpCommand extends TcpSetOptionCommand
     short dscp;   // dscp for Ipv4/Ipv6
 }
 
-//
-// Control info to be used with the SEND command.
-//
-// @see ~TcpCommandCode, ~ITcp
-//
-
+class TcpSetTosCommand extends TcpSetOptionCommand
+{
+    short tos;   // type of service for Ipv4 / traffic class for Ipv6
+}
 
 //
 // Sent with message kind TCP_I_AVAILABLE, to let the app know

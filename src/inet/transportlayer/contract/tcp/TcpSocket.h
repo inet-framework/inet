@@ -334,10 +334,16 @@ class INET_API TcpSocket : public ISocket
     void setTimeToLive(int ttl);
 
     /**
-     * Sets the Ipv4 Type of Service / Ipv6 Traffic Class fields of packets
+     * Sets the Ipv4 / Ipv6 dscp fields of packets
      * sent from the TCP socket.
      */
     void setDscp(short dscp);
+
+    /**
+     * Sets the Ipv4 Type of Service / Ipv6 Traffic Class fields of packets
+     * sent from the TCP socket.
+     */
+    void setTos(short tos);
 
     /**
      * Required to re-connect with a "used" TcpSocket object.
