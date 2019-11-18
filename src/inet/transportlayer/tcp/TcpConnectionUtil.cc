@@ -40,6 +40,7 @@
 #include "inet/transportlayer/tcp_common/TcpHeader.h"
 #include "inet/networklayer/common/DscpTag_m.h"
 #include "inet/networklayer/common/HopLimitTag_m.h"
+#include "inet/networklayer/common/TosTag_m.h"
 
 namespace inet {
 namespace tcp {
@@ -284,8 +285,11 @@ void TcpConnection::sendToIP(Packet *packet, const Ptr<TcpHeader>& tcpseg)
     if (ttl != -1 && packet->findTag<HopLimitReq>() == nullptr)
         packet->addTag<HopLimitReq>()->setHopLimit(ttl);
 
-    if (packet->findTag<DscpReq>() == nullptr)
+    if (dscp != -1 && packet->findTag<DscpReq>() == nullptr)
         packet->addTag<DscpReq>()->setDifferentiatedServicesCodePoint(dscp);
+
+    if (tos != -1 && packet->findTag<TosReq>() == nullptr)
+        packet->addTag<TosReq>()->setTos(tos);
 
     auto addresses = packet->addTagIfAbsent<L3AddressReq>();
     addresses->setSrcAddress(localAddr);
@@ -318,8 +322,11 @@ void TcpConnection::sendToIP(Packet *packet, const Ptr<TcpHeader>& tcpseg, L3Add
     if (ttl != -1 && packet->findTag<HopLimitReq>() == nullptr)
         packet->addTag<HopLimitReq>()->setHopLimit(ttl);
 
-    if (packet->findTag<DscpReq>() == nullptr)
+    if (dscp != -1 && packet->findTag<DscpReq>() == nullptr)
         packet->addTag<DscpReq>()->setDifferentiatedServicesCodePoint(dscp);
+
+    if (tos != -1 && packet->findTag<TosReq>() == nullptr)
+        packet->addTag<TosReq>()->setTos(tos);
 
     auto addresses = packet->addTagIfAbsent<L3AddressReq>();
     addresses->setSrcAddress(src);
