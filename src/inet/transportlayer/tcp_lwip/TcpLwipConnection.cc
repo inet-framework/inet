@@ -151,7 +151,7 @@ void TcpLwipConnection::sendEstablishedMsg()
 const char *TcpLwipConnection::indicationName(int code)
 {
 #define CASE(x)    case x: \
-        s = #x + 6; break
+        s = (char *)#x + 6; break
     const char *s = "unknown";
 
     switch (code) {
