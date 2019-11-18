@@ -769,8 +769,8 @@ void Ipv6::decapsulate(Packet *packet)
 
     // create and fill in control info
     packet->addTagIfAbsent<TosInd>()->setTos(ipv6Header->getTrafficClass());
-    packet->addTagIfAbsent<DscpInd>()->setDifferentiatedServicesCodePoint(ipv6Header->getDiffServCodePoint());
-    packet->addTagIfAbsent<EcnInd>()->setExplicitCongestionNotification(ipv6Header->getExplicitCongestionNotification());
+    packet->addTagIfAbsent<DscpInd>()->setDifferentiatedServicesCodePoint(ipv6Header->getDscp());
+    packet->addTagIfAbsent<EcnInd>()->setExplicitCongestionNotification(ipv6Header->getEcn());
     packet->addTagIfAbsent<DispatchProtocolInd>()->setProtocol(&Protocol::ipv6);
     auto payloadProtocol = ipv6Header->getProtocol();
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(payloadProtocol);
@@ -813,11 +813,11 @@ void Ipv6::encapsulate(Packet *transportPacket)
             throw cRuntimeError("TosReq and EcnReq found together");
     }
     if (DscpReq *dscpReq = transportPacket->removeTagIfPresent<DscpReq>()) {
-        ipv6Header->setDiffServCodePoint(dscpReq->getDifferentiatedServicesCodePoint());
+        ipv6Header->setDscp(dscpReq->getDifferentiatedServicesCodePoint());
         delete dscpReq;
     }
     if (EcnReq *ecnReq = transportPacket->removeTagIfPresent<EcnReq>()) {
-        ipv6Header->setExplicitCongestionNotification(ecnReq->getExplicitCongestionNotification());
+        ipv6Header->setEcn(ecnReq->getExplicitCongestionNotification());
         delete ecnReq;
     }
 

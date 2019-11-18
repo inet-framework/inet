@@ -171,22 +171,22 @@ Ipv6ExtensionHeader *Ipv6Header::removeExtensionHeader(IpProtocolId extensionTyp
     return nullptr;
 }
 
-short Ipv6Header::getDiffServCodePoint() const
+short Ipv6Header::getDscp() const
 {
     return (trafficClass & 0xfc) >> 2;
 }
 
-void Ipv6Header::setDiffServCodePoint(short dscp)
+void Ipv6Header::setDscp(short dscp)
 {
     setTrafficClass(((dscp & 0x3f) << 2) | (trafficClass & 0x03));
 }
 
-short Ipv6Header::getExplicitCongestionNotification() const
+short Ipv6Header::getEcn() const
 {
     return trafficClass & 0x03;
 }
 
-void Ipv6Header::setExplicitCongestionNotification(short ecn)
+void Ipv6Header::setEcn(short ecn)
 {
     setTrafficClass((trafficClass & 0xfc) | (ecn & 0x03));
 }

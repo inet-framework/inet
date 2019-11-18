@@ -55,22 +55,22 @@ B Ipv4Header::calculateHeaderByteLength() const
     return B(length);
 }
 
-short Ipv4Header::getDiffServCodePoint() const
+short Ipv4Header::getDscp() const
 {
     return (typeOfService & 0xfc) >> 2;
 }
 
-void Ipv4Header::setDiffServCodePoint(short dscp)
+void Ipv4Header::setDscp(short dscp)
 {
     setTypeOfService(((dscp & 0x3f) << 2) | (typeOfService & 0x03));
 }
 
-short Ipv4Header::getExplicitCongestionNotification() const
+short Ipv4Header::getEcn() const
 {
     return typeOfService & 0x03;
 }
 
-void Ipv4Header::setExplicitCongestionNotification(short ecn)
+void Ipv4Header::setEcn(short ecn)
 {
     setTypeOfService((typeOfService & 0xfc) | (ecn & 0x03));
 }

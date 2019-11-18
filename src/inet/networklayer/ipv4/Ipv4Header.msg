@@ -187,8 +187,8 @@ class Ipv4Header extends NetworkHeaderBase
     short version = 4;      // @bit(4)
     B headerLength = IPv4_MIN_HEADER_LENGTH;         // @bit(4), bytes, must be multiple of 4
     short typeOfService;    // @bit(8)
-    // abstract short diffServCodePoint;  // @bit(6), maps to bits 0-5 of ToS, stored in typeOfService
-    // abstract short explicitCongestionNotification;  // @bit(2),  maps to bits 6-7 of ToS, stored in typeOfService
+    // abstract short dscp;  // @bit(6), maps to bits 0-5 of ToS, stored in typeOfService
+    // abstract short ecn;  // @bit(2),  maps to bits 6-7 of ToS, stored in typeOfService
     B totalLengthField;    // @byte(2)
 
     uint16_t identification;    // @byte(2)
@@ -211,10 +211,10 @@ class Ipv4Header extends NetworkHeaderBase
 
 cplusplus(Ipv4Header) {{
   public:
-    virtual short getDiffServCodePoint() const;
-    virtual void setDiffServCodePoint(short dscp);
-    virtual short getExplicitCongestionNotification() const;
-    virtual void setExplicitCongestionNotification(short ecn);
+    virtual short getDscp() const;
+    virtual void setDscp(short dscp);
+    virtual short getEcn() const;
+    virtual void setEcn(short ecn);
 
     /**
      * Returns the number of extension headers in this datagram
