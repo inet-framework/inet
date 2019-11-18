@@ -27,6 +27,7 @@
 #include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/common/L3Tools.h"
+#include "inet/networklayer/common/TosTag_m.h"
 #include "inet/networklayer/contract/ipv4/Ipv4SocketCommand_m.h"
 
 namespace inet {
@@ -157,6 +158,14 @@ void Ipv4Encap::encapsulate(Packet *transportPacket)
         ipv4Header->setSrcAddress(src);
 
     // set other fields
+    if (TosReq *tosReq = transportPacket->removeTagIfPresent<TosReq>()) {
+        ipv4Header->setTypeOfService(tosReq->getTos());
+        delete tosReq;
+        if (transportPacket->findTag<DscpReq>())
+            throw cRuntimeError("TosReq and DscpReq found together");
+        if (transportPacket->findTag<EcnReq>())
+            throw cRuntimeError("TosReq and EcnReq found together");
+    }
     if (DscpReq *dscpReq = transportPacket->removeTagIfPresent<DscpReq>()) {
         ipv4Header->setDiffServCodePoint(dscpReq->getDifferentiatedServicesCodePoint());
         delete dscpReq;
@@ -216,6 +225,7 @@ void Ipv4Encap::decapsulate(Packet *packet)
     // create and fill in control info
     packet->addTagIfAbsent<DscpInd>()->setDifferentiatedServicesCodePoint(ipv4Header->getDiffServCodePoint());
     packet->addTagIfAbsent<EcnInd>()->setExplicitCongestionNotification(ipv4Header->getExplicitCongestionNotification());
+    packet->addTagIfAbsent<TosInd>()->setTos(ipv4Header->getTypeOfService());
 
     // original Ipv4 datagram might be needed in upper layers to send back ICMP error message
 
