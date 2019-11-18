@@ -28,7 +28,7 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 **.cli[*].app[0].destAddresses = "srv"
 **.cli[*].app[0].destPort = 1000
 **.cli[*].app[0].messageLength = 64B
-**.cli[*].app[0].tos = 53  # some abritrary value
+**.cli[*].app[0].dscp = 53  # some abritrary value
 
 **.cli[*].app[0].startTime = 10s
 **.cli[*].app[0].stopTime = 11s
@@ -38,11 +38,16 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 **.srv.app[0].typename = "UdpSink"
 **.srv.app[0].localPort = 1000
 
+**.cli[0].numPcapRecorders = 1
+**.cli[0].pcapRecorder[0].pcapFile = "foo.pcap"
+**.crcMode="computed"
+**.fcsMode="computed"
+
 %#--------------------------------------------------------------------------------------------------------------
 %subst: /omnetpp:://
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
-Received packet: \(inet::Packet\)UdpBasicAppData-0 .* TOS=53
+Received packet: \(inet::Packet\)UdpBasicAppData-0 .* DSCP=53
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout
 undisposed object:
