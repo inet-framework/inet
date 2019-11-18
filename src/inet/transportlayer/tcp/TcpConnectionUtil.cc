@@ -48,7 +48,7 @@ namespace tcp {
 const char *TcpConnection::stateName(int state)
 {
 #define CASE(x)    case x: \
-        s = #x + 6; break
+        s = (char *)#x + 6; break
     const char *s = "unknown";
     switch (state) {
         CASE(TCP_S_INIT);
@@ -71,7 +71,7 @@ const char *TcpConnection::stateName(int state)
 const char *TcpConnection::eventName(int event)
 {
 #define CASE(x)    case x: \
-        s = #x + 6; break
+        s = (char *)#x + 6; break
     const char *s = "unknown";
     switch (event) {
         CASE(TCP_E_IGNORE);
@@ -101,7 +101,7 @@ const char *TcpConnection::eventName(int event)
 const char *TcpConnection::indicationName(int code)
 {
 #define CASE(x)    case x: \
-        s = #x + 6; break
+        s = (char *)#x + 6; break
     const char *s = "unknown";
     switch (code) {
         CASE(TCP_I_DATA);
