@@ -97,6 +97,7 @@ class INET_API Udp : public TransportProtocolBase
         bool multicastLoop = DEFAULT_MULTICAST_LOOP;
         int ttl = -1;
         short dscp = -1;
+        short tos = -1;
         MulticastMembershipTable multicastMembershipTable;
 
         MulticastMembershipTable::iterator findFirstMulticastMembership(const L3Address& multicastAddress);
@@ -147,6 +148,7 @@ class INET_API Udp : public TransportProtocolBase
     virtual void clearAllSockets();
     virtual void setTimeToLive(SockDesc *sd, int ttl);
     virtual void setDscp(SockDesc *sd, short dscp);
+    virtual void setTos(SockDesc *sd, short tos);
     virtual void setBroadcast(SockDesc *sd, bool broadcast);
     virtual void setMulticastOutputInterface(SockDesc *sd, int interfaceId);
     virtual void setMulticastLoop(SockDesc *sd, bool loop);
