@@ -70,7 +70,7 @@ void BehaviorAggregateClassifier::PacketDissectorCallback::visitChunk(const Ptr<
         const auto& ipv4Header = dynamicPtrCast<const Ipv4Header>(chunk);
         if (!ipv4Header)
             return;
-        dscp = ipv4Header->getDiffServCodePoint();
+        dscp = ipv4Header->getDscp();
         matches_ = true;
 #endif // ifdef WITH_IPv4
     }
@@ -80,7 +80,7 @@ void BehaviorAggregateClassifier::PacketDissectorCallback::visitChunk(const Ptr<
         const auto& ipv6Header = dynamicPtrCast<const Ipv6Header>(chunk);
         if (!ipv6Header)
             return;
-        dscp = ipv6Header->getDiffServCodePoint();
+        dscp = ipv6Header->getDscp();
         matches_ = true;
 #endif // ifdef WITH_IPv6
     }
