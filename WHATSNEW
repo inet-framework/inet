@@ -1,6 +1,12 @@
 Recent changes in the INET Framework
 ====================================
 
+INET-4.1.2 (November 2019) - Stable
+------------------------------
+
+- Fixes to build with OMNeT++ 6.0, too.
+
+
 INET-4.1.1 (May 2019) - Stable
 ------------------------------
 
