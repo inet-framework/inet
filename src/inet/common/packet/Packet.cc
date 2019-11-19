@@ -13,10 +13,12 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#include "inet/common/packet/Message.h"
-#include "inet/common/packet/Packet.h"
 #include "inet/common/packet/chunk/EmptyChunk.h"
 #include "inet/common/packet/chunk/SequenceChunk.h"
+#include "inet/common/packet/dissector/PacketDissector.h"
+#include "inet/common/packet/Message.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/common/ProtocolTag_m.h"
 
 namespace inet {
 
@@ -51,6 +53,34 @@ Packet::Packet(const Packet& other) :
     tags(other.tags)
 {
     CHUNK_CHECK_IMPLEMENTATION(content->isImmutable());
+}
+
+const ChunkTemporarySharedPtr *Packet::getDissection() const
+{
+    auto packetProtocolTag = findTag<PacketProtocolTag>();
+    auto protocol = packetProtocolTag != nullptr ? packetProtocolTag->getProtocol() : nullptr;
+    PacketDissector::ChunkBuilder builder;
+    PacketDissector packetDissector(ProtocolDissectorRegistry::globalRegistry, builder);
+    packetDissector.dissectPacket(const_cast<Packet *>(this), protocol);
+    return new ChunkTemporarySharedPtr(builder.getContent());
+}
+
+const ChunkTemporarySharedPtr *Packet::getFront() const
+{
+    const auto& chunk = peekAt(b(0), getFrontOffset(), Chunk::PF_ALLOW_ALL);
+    return chunk == nullptr? nullptr : new ChunkTemporarySharedPtr(chunk);
+}
+
+const ChunkTemporarySharedPtr *Packet::getData() const
+{
+    const auto& chunk = peekData(Chunk::PF_ALLOW_ALL);
+    return chunk == nullptr? nullptr : new ChunkTemporarySharedPtr(chunk);
+}
+
+const ChunkTemporarySharedPtr *Packet::getBack() const
+{
+    const auto& chunk = peekAt(getBackOffset(), backIterator.getPosition(), Chunk::PF_ALLOW_ALL);
+    return chunk == nullptr? nullptr : new ChunkTemporarySharedPtr(chunk);
 }
 
 void Packet::forEachChild(cVisitor *v)
