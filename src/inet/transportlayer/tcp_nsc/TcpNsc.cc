@@ -1093,6 +1093,7 @@ void TcpNsc::process_ACCEPT(TcpNscConnection& connP, TcpAcceptCommand *tcpComman
     sendDataToApp(connP);
     sendErrorNotificationToApp(connP, err);
     delete tcpCommandP;
+    delete msgP;
 }
 
 void TcpNsc::process_SEND(TcpNscConnection& connP, Packet *msgP)

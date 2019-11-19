@@ -38,6 +38,8 @@ class INET_API ReferenceCommunicationCache : public CommunicationCacheBase
     //@}
 
   public:
+    virtual ~ReferenceCommunicationCache();
+
     virtual std::ostream& printToStream(std::ostream &stream, int level) const override { return stream << "ReferenceCommunicationCache"; }
 
     /** @name Radio cache */

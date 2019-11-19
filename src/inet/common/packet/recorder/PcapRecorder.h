@@ -219,6 +219,8 @@ class INET_API PcapRecorder : public cSimpleModule, protected cListener
   public:
     class INET_API IHelper {
       public:
+        virtual ~IHelper() { }
+
         /// returns pcapLinkType for given protocol or returns LINKTYPE_INVALID. Protocol storable as or convertable to pcapLinkType.
         virtual PcapLinkType protocolToLinkType(const Protocol *protocol) const = 0;
 
@@ -246,7 +248,7 @@ class INET_API PcapRecorder : public cSimpleModule, protected cListener
 
   public:
     PcapRecorder();
-    ~PcapRecorder();
+    virtual ~PcapRecorder();
 
   protected:
     virtual void initialize() override;
