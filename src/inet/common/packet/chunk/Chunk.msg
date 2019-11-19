@@ -112,3 +112,9 @@ class FieldsChunk extends Chunk
     @existingClass;
     @descriptor(readonly);
 }
+
+class ChunkTemporarySharedPtr extends cObject
+{
+    @existingClass;
+    @descriptor(readonly);
+}

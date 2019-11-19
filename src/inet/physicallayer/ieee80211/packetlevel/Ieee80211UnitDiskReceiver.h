@@ -30,6 +30,9 @@ class INET_API Ieee80211UnitDiskReceiver : public UnitDiskReceiver
   protected:
     virtual void initialize(int stage) override;
 
+    virtual bool computeIsReceptionPossible(const IListening *listening, const ITransmission *transmission) const override;
+    virtual bool computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part) const override;
+
   public:
     Ieee80211UnitDiskReceiver();
 

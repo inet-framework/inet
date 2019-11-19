@@ -84,6 +84,10 @@ class INET_API Packet : public cPacket
 
   protected:
     const Chunk *getContent() const { return content.get(); } // only for class descriptor
+    const ChunkTemporarySharedPtr *getDissection() const; // only for class descriptor
+    const ChunkTemporarySharedPtr *getFront() const; // only for class descriptor
+    const ChunkTemporarySharedPtr *getData() const; // only for class descriptor
+    const ChunkTemporarySharedPtr *getBack() const; // only for class descriptor
 
     bool isIteratorConsistent(const Chunk::Iterator& iterator) {
         Chunk::Iterator copy(iterator);

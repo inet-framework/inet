@@ -23,6 +23,7 @@
 #include "inet/common/Ptr.h"
 #include "inet/common/Units.h"
 #include "inet/common/packet/tag/RegionTagSet.h"
+#include "inet/common/TemporarySharedPtr.h"
 
 // checking chunk implementation is disabled by default
 #ifndef CHUNK_CHECK_IMPLEMENTATION_ENABLED
@@ -763,6 +764,8 @@ const Ptr<T> makeExclusivelyOwnedMutableChunk(const Ptr<const T>& chunk)
 inline std::ostream& operator<<(std::ostream& os, const Chunk *chunk) { if (chunk != nullptr) return os << chunk->str(); else return os << "<nullptr>"; }
 
 inline std::ostream& operator<<(std::ostream& os, const Chunk& chunk) { return os << chunk.str(); }
+
+typedef TemporarySharedPtr<Chunk> ChunkTemporarySharedPtr;
 
 } // namespace
 

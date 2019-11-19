@@ -43,7 +43,7 @@ void TestApp::initialize()
 {
     out.open("result.txt");
     if (out.fail())
-      throw cRuntimeError("Can not open output file.");
+        throw cRuntimeError("Can not open output file.");
 
     {
         Packet *packet = new Packet("ipv4-1", makeShared<ByteCountChunk>(B(30)));
