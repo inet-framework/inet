@@ -96,7 +96,7 @@ void HttpServer::socketEstablished(TcpSocket *socket)
     socketsOpened++;
 }
 
-void HttpServer::socketDataArrived(TcpSocket *socket, Packet *msg, bool urgent)
+void HttpServer::socketDataArrived(TcpSocket *socket)
 {
     SockData *sockdata = (SockData *)socket->getUserData();
     if (sockdata == nullptr) {
@@ -105,20 +105,17 @@ void HttpServer::socketDataArrived(TcpSocket *socket, Packet *msg, bool urgent)
     }
 
     // Should be a HttpReplyMessage
-    EV_DEBUG << "Socket data arrived on connection " << socket->getSocketId() << ". Message=" << msg->getName() << ", kind=" << msg->getKind() << endl;
+    EV_DEBUG << "Socket data arrived on connection " << socket->getSocketId() << "." << endl;
 
     // call the message handler to process the message.
-    sockdata->queue.push(msg->peekDataAt(B(0), msg->getDataLength()));
-
-    while (sockdata->queue.has<HttpRequestMessage>()) {
-        auto packet = new Packet(msg->getName(), sockdata->queue.pop<HttpRequestMessage>());
-        packet->setSentFrom(msg->getSenderModule(), msg->getSenderGate()->getId(), msg->getSendingTime());
+    auto queue = socket->getReceiveQueue();
+    while (queue->has<HttpRequestMessage>()) {
+        auto packet = new Packet("", queue->pop<HttpRequestMessage>());
         auto reply = handleReceivedMessage(packet);
         if (reply != nullptr)
             socket->send(reply);    // Send to socket if the reply is non-zero.
         delete packet;
     }
-    delete msg;    // Delete the received message here. Must not be deleted in the handler!
 }
 
 void HttpServer::socketPeerClosed(TcpSocket *socket)

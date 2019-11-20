@@ -58,7 +58,7 @@ double HttpNodeBase::transmissionDelay(Packet *pckt)
     return pckt->getBitLength() / ((double)linkSpeed);    // The link speed is in bit/s
 }
 
-void HttpNodeBase::logRequest(const Packet *httpRequest)
+void HttpNodeBase::logRequest(const Ptr<const HttpRequestMessage>& httpRequest)
 {
     if (!enableLogging)
         return;
@@ -70,7 +70,7 @@ void HttpNodeBase::logRequest(const Packet *httpRequest)
         EV_INFO << "Request:\n" << formatHttpRequestLong(httpRequest);
 }
 
-void HttpNodeBase::logResponse(const Packet *httpResponse)
+void HttpNodeBase::logResponse(const Ptr<const HttpReplyMessage>& httpResponse)
 {
     if (!enableLogging)
         return;
@@ -103,15 +103,12 @@ void HttpNodeBase::logEntry(std::string line)
     outfile.close();
 }
 
-std::string HttpNodeBase::formatHttpRequestShort(const Packet *pk)
+std::string HttpNodeBase::formatHttpRequestShort(const Ptr<const HttpRequestMessage>& httpRequest)
 {
     std::ostringstream str;
 
     std::string originatorStr = "";
-    const auto& httpRequest = pk->peekAtFront<HttpRequestMessage>();
-    cModule *originator = findContainingNode(pk->getSenderModule());
-    if (originator != nullptr)
-        originatorStr = originator->getFullName();
+    //TODO get originator's name
 
     str << originatorStr << ";";
     str << "REQ;" << httpRequest->getOriginatorUrl() << ";" << httpRequest->getTargetUrl() << ";";
@@ -121,15 +118,12 @@ std::string HttpNodeBase::formatHttpRequestShort(const Packet *pk)
     return str.str();
 }
 
-std::string HttpNodeBase::formatHttpResponseShort(const Packet *pk)
+std::string HttpNodeBase::formatHttpResponseShort(const Ptr<const HttpReplyMessage>& httpResponse)
 {
     std::ostringstream str;
 
     std::string originatorStr = "";
-    const auto& httpResponse = pk->peekAtFront<HttpReplyMessage>();
-    cModule *originator = findContainingNode(pk->getSenderModule());
-    if (originator != nullptr)
-        originatorStr = originator->getFullName();
+    //TODO get originator's name
 
     str << originatorStr << ";";
     str << "RESP;" << httpResponse->getOriginatorUrl() << ";" << httpResponse->getTargetUrl() << ";";
@@ -140,87 +134,51 @@ std::string HttpNodeBase::formatHttpResponseShort(const Packet *pk)
     return str.str();
 }
 
-std::string HttpNodeBase::formatHttpRequestLong(const Packet *pk)
+std::string HttpNodeBase::formatHttpRequestLong(const Ptr<const HttpRequestMessage>& httpRequest)
 {
     std::ostringstream str;
-    const auto& httpRequest = pk->peekAtFront<HttpRequestMessage>();
 
-    str << "REQUEST: " << pk->getName() << " -- " << pk->getByteLength() << " bytes\n";
+    str << "REQUEST: length=" << httpRequest->getChunkLength() << endl;
     str << "Target URL:" << httpRequest->getTargetUrl() << "  Originator URL:" << httpRequest->getOriginatorUrl() << endl;
-
     str << "PROTOCOL:";
     switch (httpRequest->getProtocol()) {    // MIGRATE40: kvj
-        case 10:
-            str << "HTTP/1.0";
-            break;
-
-        case 11:
-            str << "HTTP/1.1";
-            break;
-
-        default:
-            str << "UNKNOWN";
-            break;
+        case 10: str << "HTTP/1.0"; break;
+        case 11: str << "HTTP/1.1"; break;
+        default: str << "UNKNOWN"; break;
     }
     str << "  ";
-
     str << "KEEP-ALIVE:" << httpRequest->getKeepAlive() << "  ";
     str << "BAD-REQ:" << httpRequest->getBadRequest() << "  ";
     str << "SERIAL:" << httpRequest->getSerial() << "  " << endl;
-
     str << "REQUEST:" << httpRequest->getHeading() << endl;
 
     return str.str();
 }
 
-std::string HttpNodeBase::formatHttpResponseLong(const Packet *pk)
+std::string HttpNodeBase::formatHttpResponseLong(const Ptr<const HttpReplyMessage>& httpResponse)
 {
     std::ostringstream str;
-    const auto& httpResponse = pk->peekAtFront<HttpReplyMessage>();
 
-    str << "RESPONSE: " << pk->getName() << " -- " << pk->getByteLength() << " bytes\n";
-
+    str << "RESPONSE: length is " << httpResponse->getChunkLength() << endl;
     str << "Target URL:" << httpResponse->getTargetUrl() << "  Originator URL:" << httpResponse->getOriginatorUrl() << endl;
-
     str << "PROTOCOL:";
     switch (httpResponse->getProtocol()) {
-        case 10:
-            str << "HTTP/1.0";
-            break;
-
-        case 11:
-            str << "HTTP/1.1";
-            break;
-
-        default:
-            str << "UNKNOWN";
-            break;
+        case 10: str << "HTTP/1.0"; break;
+        case 11: str << "HTTP/1.1"; break;
+        default: str << "UNKNOWN"; break;
     }
     str << "  ";
-
     str << "RESULT:" << httpResponse->getResult() << "  ";
     str << "KEEP-ALIVE:" << httpResponse->getKeepAlive() << "  ";
     str << "SERIAL:" << httpResponse->getSerial() << "  " << endl;
-
     str << "RESPONSE: " << httpResponse->getHeading() << endl;
 
     str << "CONTENT-TYPE:";
     switch (httpResponse->getContentType()) {
-        case CT_HTML:
-            str << "HTML DOC";
-            break;
-
-        case CT_TEXT:
-            str << "Text/HTML RES";
-            break;
-
-        case CT_IMAGE:
-            str << "IMG RES";
-            break;
-
-        default:
-            str << "UNKNOWN";
-            break;
+        case CT_HTML: str << "HTML DOC"; break;
+        case CT_TEXT: str << "Text/HTML RES"; break;
+        case CT_IMAGE: str << "IMG RES"; break;
+        default: str << "UNKNOWN"; break;
     }
     str << endl;
 

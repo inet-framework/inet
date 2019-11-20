@@ -201,12 +201,10 @@ void HttpServerBase::handleMessage(cMessage *msg)
 Packet *HttpServerBase::handleReceivedMessage(Packet *msg)
 {
     const auto& request = msg->peekAtFront<HttpRequestMessage>();
-    if (request == nullptr)
-        throw cRuntimeError("Message (%s)%s is not a valid request", msg->getClassName(), msg->getName());
 
     EV_DEBUG << "Handling received message " << msg->getName() << ". Target URL: " << request->getTargetUrl() << endl;
 
-    logRequest(msg);
+    logRequest(request);
 
     if (extractServerName(request->getTargetUrl()) != hostName) {
         // This should never happen but lets check
@@ -222,7 +220,7 @@ Packet *HttpServerBase::handleReceivedMessage(Packet *msg)
     if (res.size() != 3) {
         EV_ERROR << "Invalid request string: " << request->getHeading() << endl;
         replymsg = generateErrorReply(request, 400);
-        logResponse(replymsg);
+        logResponse(replymsg->peekAtFront<HttpReplyMessage>());
         return replymsg;
     }
 
@@ -240,7 +238,7 @@ Packet *HttpServerBase::handleReceivedMessage(Packet *msg)
     }
 
     if (replymsg != nullptr)
-        logResponse(replymsg);
+        logResponse(replymsg->peekAtFront<HttpReplyMessage>());
 
     return replymsg;
 }
