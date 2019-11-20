@@ -136,8 +136,7 @@ TcpLwip::~TcpLwip()
 
     while (!tcpAppConnMapM.empty()) {
         auto i = tcpAppConnMapM.begin();
-        delete i->second;
-        tcpAppConnMapM.erase(i);
+        i->second->abort();
     }
 
     if (pLwipFastTimerM)
@@ -255,12 +254,8 @@ void TcpLwip::notifyAboutIncomingSegmentProcessing(LwipTcpLayer::tcp_pcb *pcb, u
 void TcpLwip::lwip_free_pcb_event(LwipTcpLayer::tcp_pcb *pcb)
 {
     TcpLwipConnection *conn = static_cast<TcpLwipConnection *>(pcb->callback_arg);
-    if (conn != nullptr) {
-        if (conn->pcbM == pcb) {
-            // conn->sendIndicationToApp(TCP_I_????); // TODO send some indication when need
-            removeConnection(*conn);
-        }
-    }
+    if (conn != nullptr && conn->pcbM == pcb)
+        removeConnection(*conn);
 }
 
 err_t TcpLwip::lwip_tcp_event(void *arg, LwipTcpLayer::tcp_pcb *pcb,
