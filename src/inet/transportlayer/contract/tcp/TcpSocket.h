@@ -19,6 +19,7 @@
 #define __INET_TCPSOCKET_H
 
 #include "inet/common/INETDefs.h"
+#include "inet/common/packet/ChunkQueue.h"
 #include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/socket/ISocket.h"
@@ -140,7 +141,7 @@ class INET_API TcpSocket : public ISocket
         /**
          * Notifies about data arrival, packet ownership is transferred to the callee.
          */
-        virtual void socketDataArrived(TcpSocket* socket, Packet *packet, bool urgent) = 0;
+        virtual void socketDataArrived(TcpSocket *socket, Packet *packet, bool urgent) = 0;
         virtual void socketAvailable(TcpSocket *socket, TcpAvailableInfo *availableInfo) = 0;
         virtual void socketEstablished(TcpSocket *socket) = 0;
         virtual void socketPeerClosed(TcpSocket *socket) = 0;
@@ -148,6 +149,18 @@ class INET_API TcpSocket : public ISocket
         virtual void socketFailure(TcpSocket *socket, int code) = 0;
         virtual void socketStatusArrived(TcpSocket *socket, TcpStatusInfo *status) = 0;
         virtual void socketDeleted(TcpSocket *socket) = 0;
+    };
+
+    class INET_API ReceiveQueueBasedCallback : public ICallback
+    {
+      public:
+        virtual void socketDataArrived(TcpSocket *socket) = 0;
+
+        virtual void socketDataArrived(TcpSocket *socket, Packet *packet, bool urgent) override {
+            socket->getReceiveQueue()->push(packet->peekData());
+            delete packet;
+            socketDataArrived(socket);
+        }
     };
 
     enum State { NOT_BOUND, BOUND, LISTENING, CONNECTING, CONNECTED, PEER_CLOSED, LOCALLY_CLOSED, CLOSED, SOCKERROR };
@@ -165,6 +178,8 @@ class INET_API TcpSocket : public ISocket
     void *userData = nullptr;
     cGate *gateToTcp = nullptr;
     std::string tcpAlgorithmClass;
+
+    ChunkQueue *receiveQueue = nullptr;
 
   protected:
     void sendToTcp(cMessage *msg, int c = -1);
@@ -202,6 +217,8 @@ class INET_API TcpSocket : public ISocket
      * (or TcpSocket).
      */
     int getSocketId() const override { return connId; }
+
+    ChunkQueue *getReceiveQueue() { if (receiveQueue == nullptr) receiveQueue = new ChunkQueue(); return receiveQueue; }
 
     void *getUserData() const { return userData; }
     void setUserData(void *userData) { this->userData = userData; }

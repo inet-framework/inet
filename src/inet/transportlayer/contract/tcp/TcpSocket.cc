@@ -72,6 +72,7 @@ TcpSocket::~TcpSocket()
         cb->socketDeleted(this);
         cb = nullptr;
     }
+    delete receiveQueue;
 }
 
 void TcpSocket::bind(int lPort)
