@@ -49,7 +49,7 @@ void VoipStreamReceiver::initialize(int stage)
     cSimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
-        // Hack for create results folder
+        // KLUDGE: TODO: hack to create results folder (doesn't work when record-scalars = false)
         recordScalar("hackForCreateResultsFolder", 0);
 
         // Say Hello to the world
