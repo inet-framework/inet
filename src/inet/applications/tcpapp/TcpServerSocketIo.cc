@@ -44,7 +44,7 @@ void TcpServerSocketIo::handleMessage(cMessage *message)
 
 void TcpServerSocketIo::socketDataArrived(TcpSocket* socket, Packet *packet, bool urgent)
 {
-    packet->removeTag<SocketInd>();
+    delete packet->removeTag<SocketInd>();
     send(packet, "trafficOut");
 }
 

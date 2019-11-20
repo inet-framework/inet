@@ -23,6 +23,12 @@ namespace physicallayer {
 
 Define_Module(ReferenceCommunicationCache);
 
+ReferenceCommunicationCache::~ReferenceCommunicationCache()
+{
+    for (auto& transmissionCacheEntry : transmissionCache)
+        delete static_cast<std::vector<ReceptionCacheEntry> *>(transmissionCacheEntry.receptionCacheEntries);
+}
+
 ReferenceCommunicationCache::RadioCacheEntry *ReferenceCommunicationCache::getRadioCacheEntry(const IRadio *radio)
 {
     return &radioCache[radio->getId()];

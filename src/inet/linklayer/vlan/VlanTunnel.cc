@@ -75,7 +75,7 @@ void VlanTunnel::handleMessage(cMessage *message)
 
 void VlanTunnel::socketDataArrived(EthernetSocket *socket, Packet *packet)
 {
-    packet->removeTag<SocketInd>();
+    delete packet->removeTag<SocketInd>();
     packet->getTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
     send(packet, "upperLayerOut");
 }

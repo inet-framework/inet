@@ -21,6 +21,8 @@ namespace inet {
 
 namespace physicallayer {
 
+const DsssOqpsk16Modulation DsssOqpsk16Modulation::singleton;
+
 DsssOqpsk16Modulation::DsssOqpsk16Modulation() :
     ApskModulationBase(new std::vector<ApskSymbol>())
 {
