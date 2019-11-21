@@ -642,8 +642,10 @@ void TcpLwip::ip_output(LwipTcpLayer::tcp_pcb *pcb, L3Address const& srcP, L3Add
         conn->notifyAboutSending(*tcpHdr);
     }
 
-    EV_INFO << this << ": Send segment: conn ID=" << conn->connIdM << " from " << srcP
-            << " to " << destP << " SEQ=" << tcpHdr->getSequenceNo();
+    EV_INFO << this << ": Send segment:";
+    if (conn)
+        EV_INFO << "conn ID=" << conn->connIdM;
+    EV_INFO << " from " << srcP << " to " << destP << " SEQ=" << tcpHdr->getSequenceNo();
     if (tcpHdr->getSynBit())
         EV_INFO << " SYN";
     if (tcpHdr->getAckBit())
