@@ -143,6 +143,10 @@ void UdpBasicBurst::processStart()
     if (dscp != -1)
         socket.setDscp(dscp);
 
+    int tos = par("tos");
+    if (tos != -1)
+        socket.setTos(tos);
+
     const char *destAddrs = par("destAddresses");
     cStringTokenizer tokenizer(destAddrs);
     const char *token;

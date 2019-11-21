@@ -74,6 +74,10 @@ void UdpSocketIo::setSocketOptions()
     if (dscp != -1)
         socket.setDscp(dscp);
 
+    int tos = par("tos");
+    if (tos != -1)
+        socket.setTos(tos);
+
     const char *multicastInterface = par("multicastInterface");
     if (multicastInterface[0]) {
         IInterfaceTable *ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);

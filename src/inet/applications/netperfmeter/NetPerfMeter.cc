@@ -99,6 +99,26 @@ NetPerfMeter::~NetPerfMeter()
         cancelAndDelete(elem);
         elem = nullptr;
     }
+    if (SocketUDP != nullptr) {
+        delete SocketUDP;
+        SocketUDP = nullptr;
+    }
+    if (SocketTCP != nullptr) {
+        delete SocketTCP;
+        SocketTCP = nullptr;
+    }
+    if (IncomingSocketTCP != nullptr) {
+        delete IncomingSocketTCP;
+        IncomingSocketTCP = nullptr;
+    }
+    if (SocketSCTP != nullptr) {
+        delete SocketSCTP;
+        SocketSCTP = nullptr;
+    }
+    if (IncomingSocketSCTP != nullptr) {
+        delete IncomingSocketSCTP;
+        IncomingSocketSCTP = nullptr;
+    }
 }
 
 

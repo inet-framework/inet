@@ -35,6 +35,7 @@
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/common/L3Tools.h"
 #include "inet/networklayer/common/MulticastTag_m.h"
+#include "inet/networklayer/common/TosTag_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
 
@@ -168,6 +169,8 @@ void Udp::handleUpperCommand(cMessage *msg)
                 setTimeToLive(sd, cmd->getTtl());
             else if (auto cmd = dynamic_cast<UdpSetDscpCommand *>(ctrl))
                 setDscp(sd, cmd->getDscp());
+            else if (auto cmd = dynamic_cast<UdpSetTosCommand *>(ctrl))
+                setTos(sd, cmd->getTos());
             else if (auto cmd = dynamic_cast<UdpSetBroadcastCommand *>(ctrl))
                 setBroadcast(sd, cmd->getBroadcast());
             else if (auto cmd = dynamic_cast<UdpSetMulticastInterfaceCommand *>(ctrl))
@@ -392,6 +395,11 @@ void Udp::setTimeToLive(SockDesc *sd, int ttl)
 void Udp::setDscp(SockDesc *sd, short dscp)
 {
     sd->dscp = dscp;
+}
+
+void Udp::setTos(SockDesc *sd, short tos)
+{
+    sd->tos = tos;
 }
 
 void Udp::setBroadcast(SockDesc *sd, bool broadcast)
@@ -731,6 +739,12 @@ void Udp::handleUpperPacket(Packet *packet)
 
     if (sd->dscp != -1 && packet->findTag<DscpReq>() == nullptr)
         packet->addTag<DscpReq>()->setDifferentiatedServicesCodePoint(sd->dscp);
+
+    if (sd->tos != -1 && packet->findTag<TosReq>() == nullptr) {
+        packet->addTag<TosReq>()->setTos(sd->tos);
+        if (packet->findTag<DscpReq>())
+            throw cRuntimeError("setting error: TOS and DSCP found together");
+    }
 
     const Protocol *l3Protocol = nullptr;
     // TODO: apps use ModuleIdAddress if the network interface doesn't have an IP address configured, and UDP uses NextHopForwarding which results in a weird error in MessageDispatcher

@@ -1,7 +1,7 @@
 %description:
-Tests that the TypeOfService UDP socket option takes effect over IPv6.
+Tests that the TypeOfService UDP socket option takes effect over IPv4.
 
-NClientsEth example network is used, with one client.
+NClients example network is used, with one client.
 The client sends a packet with a given ToS.
 It is checked that the server receives the datagram with the correct ToS value.
 
@@ -9,7 +9,7 @@ It is checked that the server receives the datagram with the correct ToS value.
 %inifile: {}.ini
 [General]
 ned-path = ../../../../examples;../../../../src
-network = inet.examples.ipv6.nclients.NClientsEth
+network = inet.examples.inet.nclients.NClients
 sim-time-limit = 15s
 cmdenv-express-mode = false
 
@@ -28,7 +28,7 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 **.cli[*].app[0].destAddresses = "srv"
 **.cli[*].app[0].destPort = 1000
 **.cli[*].app[0].messageLength = 64B
-**.cli[*].app[0].tos = 53  # some abritrary value
+**.cli[*].app[0].dscp = 53  # some abritrary value
 
 **.cli[*].app[0].startTime = 10s
 **.cli[*].app[0].stopTime = 11s
@@ -38,11 +38,15 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 **.srv.app[0].typename = "UdpSink"
 **.srv.app[0].localPort = 1000
 
+**.cli[0].numPcapRecorders = 1
+**.cli[0].pcapRecorder[0].pcapFile = "foo.pcap"
+**.crcMode="computed"
+**.fcsMode="computed"
 %#--------------------------------------------------------------------------------------------------------------
 %subst: /omnetpp:://
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
-Received packet: \(inet::Packet\)UdpBasicAppData-0 .* TOS=53
+Received packet: \(inet::Packet\)UdpBasicAppData-0 .* DSCP=53
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout
 undisposed object:

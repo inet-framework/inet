@@ -43,7 +43,6 @@ enum TcpCommandCode
     TCP_C_SETOPTION = 11;    // setting TCP socket options
 }
 
-
 //
 // TCP indications, sent by TCP to the application. TCP will set these
 // constants as message kind on messages it sends to the application.
@@ -66,14 +65,12 @@ enum TcpStatusInd
     TCP_I_DATA_NOTIFICATION = 12; // notify the upper layer that data has arrived
 }
 
-
 //
 // Currently not in use.
 //
 enum TcpErrorCode
 {
 }
-
 
 //
 // Control info for TCP connections. This class is to be set as control info
@@ -93,7 +90,6 @@ class TcpCommand extends cObject
 {
     int userId = -1;   // id than can be freely used by the app
 }
-
 
 //
 // Currently not in use.
@@ -138,13 +134,11 @@ class TcpOpenCommand extends TcpCommand
     string tcpAlgorithmClass; // TCP congestion control algorithm; leave empty for default
 }
 
-
 //
 // Control info to be used to accept an available connection.
 //
 class TcpAcceptCommand extends TcpCommand
 {
-    
 }
 
 //
@@ -152,12 +146,11 @@ class TcpAcceptCommand extends TcpCommand
 //
 class TcpSetOptionCommand extends TcpCommand
 {
-    
 }
 
 class TcpSetTimeToLiveCommand extends TcpSetOptionCommand
 {
-    int ttl;    
+    int ttl;
 }
 
 class TcpSetDscpCommand extends TcpSetOptionCommand
@@ -165,12 +158,10 @@ class TcpSetDscpCommand extends TcpSetOptionCommand
     short dscp;   // dscp for Ipv4/Ipv6
 }
 
-//
-// Control info to be used with the SEND command.
-//
-// @see ~TcpCommandCode, ~ITcp
-//
-
+class TcpSetTosCommand extends TcpSetOptionCommand
+{
+    short tos;   // type of service for Ipv4 / traffic class for Ipv6
+}
 
 //
 // Sent with message kind TCP_I_AVAILABLE, to let the app know
@@ -187,7 +178,6 @@ class TcpAvailableInfo extends TcpCommand
     int newSocketId;
 }
 
-
 //
 // Sent with message kind TCP_I_ESTABLISHED, to let the app know
 // about the local and remote IP address and port.
@@ -201,7 +191,6 @@ class TcpConnectInfo extends TcpCommand
     int localPort;
     int remotePort;
 }
-
 
 //
 // Sent with message kind TCP_I_STATUS, in response to command TCP_C_STATUS.

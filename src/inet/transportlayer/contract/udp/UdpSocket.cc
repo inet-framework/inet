@@ -20,6 +20,7 @@
 #include "inet/common/packet/Message.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/DscpTag_m.h"
+#include "inet/networklayer/common/TosTag_m.h"
 #include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 
@@ -128,6 +129,15 @@ void UdpSocket::setDscp(short dscp)
     auto request = new Request("setDscp", UDP_C_SETOPTION);
     auto *ctrl = new UdpSetDscpCommand();
     ctrl->setDscp(dscp);
+    request->setControlInfo(ctrl);
+    sendToUDP(request);
+}
+
+void UdpSocket::setTos(short tos)
+{
+    auto request = new Request("setTos", UDP_C_SETOPTION);
+    auto *ctrl = new UdpSetTosCommand();
+    ctrl->setTos(tos);
     request->setControlInfo(ctrl);
     sendToUDP(request);
 }
@@ -329,6 +339,8 @@ std::string UdpSocket::getReceivedPacketInfo(Packet *pk)
     os << pk << " (" << pk->getByteLength() << " bytes) ";
     os << srcAddr << ":" << srcPort << " --> " << destAddr << ":" << destPort;
     os << " TTL=" << ttl;
+    if (auto tosTag = pk->findTag<TosInd>())
+        os << " TOS=" << tosTag->getTos();
     if (auto dscpTag = pk->findTag<DscpInd>())
         os << " DSCP=" << dscpTag->getDifferentiatedServicesCodePoint();
     os << " on ifID=" << interfaceID;

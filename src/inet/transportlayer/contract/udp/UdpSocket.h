@@ -152,10 +152,16 @@ class INET_API UdpSocket : public ISocket
     void setTimeToLive(int ttl);
 
     /**
+     * Sets the Ipv4 / Ipv6 dscp fields of packets
+     * sent from the UDP socket.
+     */
+    void setDscp(short dscp);
+
+    /**
      * Sets the Ipv4 Type of Service / Ipv6 Traffic Class fields of packets
      * sent from the UDP socket.
      */
-    void setDscp(short tos);
+    void setTos(short tos);
 
     /**
      * Set the Broadcast option on the UDP socket. This will cause the

@@ -170,6 +170,10 @@ void UdpVideoStreamServer::handleStartOperation(LifecycleOperation *operation)
     int dscp = par("dscp");
     if (dscp != -1)
         socket.setDscp(dscp);
+
+    int tos = par("tos");
+    if (tos != -1)
+        socket.setTos(tos);
 }
 
 void UdpVideoStreamServer::handleStopOperation(LifecycleOperation *operation)

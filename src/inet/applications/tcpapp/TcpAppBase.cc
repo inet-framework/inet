@@ -74,6 +74,10 @@ void TcpAppBase::connect()
     if (dscp != -1)
         socket.setDscp(dscp);
 
+    int tos = par("tos");
+    if (tos != -1)
+        socket.setTos(tos);
+
     // connect
     const char *connectAddress = par("connectAddress");
     int connectPort = par("connectPort");

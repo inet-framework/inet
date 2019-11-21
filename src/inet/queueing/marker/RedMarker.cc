@@ -70,7 +70,7 @@ bool RedMarker::matchesPacket(Packet *packet)
             auto ipv4Header = packet->peekDataAt<Ipv4Header>(ethHeader->getChunkLength());
 
             //congestion experienced CE
-            int ect = ipv4Header->getExplicitCongestionNotification();
+            int ect = ipv4Header->getEcn();
 
             // if packet supports marking (ECT(1) or ECT(0))
             if (ect != 0) {
@@ -210,7 +210,7 @@ void RedMarker::markPacket(Packet *packet)
     auto ethFcs = packet->removeAtBack<EthernetFcs>(ETHER_FCS_BYTES);
 
     auto ipv4Header = removeNetworkProtocolHeader<Ipv4Header>(packet);
-    ipv4Header->setExplicitCongestionNotification(IP_ECN_CE);
+    ipv4Header->setEcn(IP_ECN_CE);
     //TODO recalculate IP Header checksum
     insertNetworkProtocolHeader(packet, Protocol::ipv4, ipv4Header);
     packet->insertAtFront(macHeader);

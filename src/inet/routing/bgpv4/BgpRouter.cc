@@ -425,16 +425,22 @@ void BgpRouter::socketFailure(TcpSocket *socket, int code)
     }
 }
 
-void BgpRouter::socketDataArrived(TcpSocket *socket, Packet *msg, bool urgent)
+void BgpRouter::socketDataArrived(TcpSocket *socket)
+{
+    auto queue = socket->getReceiveQueue();
+    while (queue->has<BgpHeader>()) {
+        auto header = queue->pop<BgpHeader>();
+        processChunks(*header.get());
+    }
+}
+
+void BgpRouter::socketDataArrived(TcpSocket *socket, Packet *packet, bool urgent)
 {
     _currSessionId = findIdFromSocketConnId(_BGPSessions, socket->getSocketId());
-    if (_currSessionId != static_cast<SessionId>(-1)) {
-        while (msg->getByteLength() > 0) {
-            const auto& chunk = msg->popAtFront<BgpHeader>();
-            processChunks(*(chunk.get()));
-        }
-    }
-    delete msg;
+    if (_currSessionId != static_cast<SessionId>(-1))
+        ReceiveQueueBasedCallback::socketDataArrived(socket, packet, urgent);
+    else
+        delete packet;
 }
 
 void BgpRouter::processChunks(const BgpHeader& ptrHdr)

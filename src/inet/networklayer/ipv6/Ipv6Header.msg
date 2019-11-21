@@ -65,8 +65,9 @@ class Ipv6Header extends NetworkHeaderBase
     Ipv6Address srcAddress;
     Ipv6Address destAddress;
     B payloadLength = B(-1);    // The size of the payload in octets, including any extension headers. The length is set to zero when a Hop-by-Hop extension header carries a Jumbo Payload option.
-    short diffServCodePoint;  // bits 0-5 of trafficClass
-    short explicitCongestionNotification;  // bits 6-7 of trafficClass
+    short trafficClass;    // @bits(8) Traffic Class
+    //abstract short dscp;  // bits 0-5 of trafficClass
+    //abstract short ecn;  // bits 6-7 of trafficClass
     unsigned int flowLabel;
     short hopLimit = 0;
     IpProtocolId protocolId = IP_PROT_NONE;
@@ -76,8 +77,10 @@ class Ipv6Header extends NetworkHeaderBase
 
 cplusplus(Ipv6Header) {{
   public:
-    virtual short getTrafficClass() const;
-    virtual void setTrafficClass(short trafficClass);
+    virtual short getDscp() const;
+    virtual void setDscp(short dscp);
+    virtual short getEcn() const;
+    virtual void setEcn(short ecn);
 
     /**
      * Returns the extension header of the specified type,

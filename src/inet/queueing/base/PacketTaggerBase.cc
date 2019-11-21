@@ -21,6 +21,7 @@
 #include "inet/linklayer/common/VlanTag_m.h"
 #include "inet/networklayer/common/DscpTag_m.h"
 #include "inet/networklayer/common/HopLimitTag_m.h"
+#include "inet/networklayer/common/TosTag_m.h"
 #include "inet/physicallayer/contract/packetlevel/SignalTag_m.h"
 #include "inet/queueing/base/PacketTaggerBase.h"
 
@@ -32,6 +33,9 @@ void PacketTaggerBase::initialize(int stage)
     PacketMarkerBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         dscp = par("dscp");
+        tos = par("tos");
+        if (tos != -1 && dscp != -1)
+            throw cRuntimeError("parameter error: 'tos' and 'dscp' parameters specified together");
         hopLimit = par("hopLimit");
         vlanId = par("vlanId");
         userPriority = par("userPriority");
@@ -52,6 +56,10 @@ void PacketTaggerBase::markPacket(Packet *packet)
     if (dscp != -1) {
         EV_DEBUG << "Attaching DscpReq to " << packet->getName() << " with dscp = " << dscp << std::endl;
         packet->addTagIfAbsent<DscpReq>()->setDifferentiatedServicesCodePoint(dscp);
+    }
+    if (tos != -1) {
+        EV_DEBUG << "Attaching TosReq to " << packet->getName() << " with tos = " << tos << std::endl;
+        packet->addTagIfAbsent<TosReq>()->setTos(tos);
     }
     if (interfaceId != -1) {
         EV_DEBUG << "Attaching InterfaceReq to " << packet->getName() << " with interfaceId = " << interfaceId << std::endl;
