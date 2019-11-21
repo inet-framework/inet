@@ -136,7 +136,15 @@ TcpLwip::~TcpLwip()
 
     while (!tcpAppConnMapM.empty()) {
         auto i = tcpAppConnMapM.begin();
-        i->second->abort();
+        auto& pcb = i->second->pcbM;
+        if (pcb) {
+            pcb->callback_arg = nullptr;
+            getLwipTcpLayer()->tcp_pcb_purge(pcb);
+            memp_free(MEMP_TCP_PCB, pcb);
+            pcb = nullptr;
+        }
+        delete i->second;
+        tcpAppConnMapM.erase(i);
     }
 
     if (pLwipFastTimerM)
