@@ -69,7 +69,6 @@ void TcpLwipConnection::initConnection(TcpLwip& tcpLwipP, int connIdP)
     totalSentM = 0;
     isListenerM = false;
     onCloseM = false;
-    ASSERT(!pcbM);
     pcbM = tcpLwipM->getLwipTcpLayer()->tcp_new();       //FIXME memory leak
     ASSERT(pcbM);
     pcbM->callback_arg = this;
@@ -86,7 +85,6 @@ void TcpLwipConnection::initConnection(TcpLwipConnection& connP, int connIdP, Lw
     totalSentM = 0;
     isListenerM = false;
     onCloseM = false;
-    ASSERT(!pcbM);
     pcbM = pcbP;
     pcbM->callback_arg = this;
     sendQueueM->setConnection(this);
@@ -95,11 +93,8 @@ void TcpLwipConnection::initConnection(TcpLwipConnection& connP, int connIdP, Lw
 
 TcpLwipConnection::~TcpLwipConnection()
 {
-    if (pcbM) {
+    if (pcbM)
         pcbM->callback_arg = nullptr;
-        tcpLwipM->getLwipTcpLayer()->tcp_close(pcbM);
-        pcbM = nullptr;
-    }
     //FIXME memory leak, who will free pcbM?
 
     delete receiveQueueM;
@@ -242,7 +237,6 @@ void TcpLwipConnection::close()
 
     if (0 == sendQueueM->getBytesAvailable()) {
         tcpLwipM->getLwipTcpLayer()->tcp_close(pcbM);
-        pcbM = nullptr;
         onCloseM = false;
     }
 }
@@ -250,7 +244,6 @@ void TcpLwipConnection::close()
 void TcpLwipConnection::abort()
 {
     tcpLwipM->getLwipTcpLayer()->tcp_close(pcbM);
-    pcbM = nullptr;
     onCloseM = false;
 }
 
@@ -350,7 +343,6 @@ void TcpLwipConnection::do_SEND()
 
     if (onCloseM && (0 == sendQueueM->getBytesAvailable())) {
         tcpLwipM->getLwipTcpLayer()->tcp_close(pcbM);
-        pcbM = nullptr;
         onCloseM = false;
     }
 }

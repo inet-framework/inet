@@ -371,7 +371,6 @@ err_t TcpLwip::tcp_event_conn(TcpLwipConnection& conn, err_t err)
 void TcpLwip::removeConnection(TcpLwipConnection& conn)
 {
     conn.pcbM->callback_arg = nullptr;
-    pLwipTcpLayerM->tcp_close(conn.pcbM);
     conn.pcbM = nullptr;
     tcpAppConnMapM.erase(conn.connIdM);
     delete &conn;
