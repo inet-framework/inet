@@ -60,6 +60,9 @@ class INET_API FunctionChecker
 };
 
 template<typename R, typename D>
+class INET_API ConstantFunction;
+
+template<typename R, typename D>
 class INET_API DomainLimitedFunction;
 
 template<typename R, typename D>
@@ -1488,80 +1491,93 @@ class INET_API ApproximatedFunction : public FunctionBase<R, D>
 
     virtual R getValue(const typename D::P& p) const override {
         X x = std::get<DIMENSION>(p);
-        if (x < lower) {
-            typename D::P p1 = p;
-            std::get<DIMENSION>(p1) = lower;
-            return f->getValue(p1);
-        }
-        else if (x > upper) {
-            typename D::P p1 = p;
-            std::get<DIMENSION>(p1) = upper;
-            return f->getValue(p1);
-        }
+        if (x < lower)
+            return f->getValue(p.template getReplaced<X, DIMENSION>(lower));
+        else if (x > upper)
+            return f->getValue(p.template getReplaced<X, DIMENSION>(upper));
         else {
-            X x1 = lower + step * floor(toDouble((x - lower) / step));
+            X x1 = lower + step * floor(toDouble(x - lower) / toDouble(step));
             X x2 = std::min(upper, x1 + step);
-            typename D::P p1 = p;
-            std::get<DIMENSION>(p1) = x1;
-            typename D::P p2 = p;
-            std::get<DIMENSION>(p2) = x2;
-            R r1 = f->getValue(p1);
-            R r2 = f->getValue(p2);
+            R r1 = f->getValue(p.template getReplaced<X, DIMENSION>(x1));
+            R r2 = f->getValue(p.template getReplaced<X, DIMENSION>(x2));
             return interpolator->getValue(x1, r1, x2, r2, x);
         }
     }
 
     virtual void partition(const typename D::I& i, std::function<void (const typename D::I&, const IFunction<R, D> *)> g) const override {
         unsigned char b = 1 << std::tuple_size<typename D::P::type>::value >> 1;
-        auto lowerClosed = i.getLowerClosed() & ~(b >> DIMENSION);
-        auto upperClosed = i.getUpperClosed() & ~(b >> DIMENSION);
-        auto fixed = i.getFixed() & ~(b >> DIMENSION);
+        auto m = (b >> DIMENSION);
+        auto fixed = i.getFixed() & m;
         const auto& pl = i.getLower();
         const auto& pu = i.getUpper();
-        if (std::get<DIMENSION>(pl) < lower) {
-            typename D::P p = pu;
-            std::get<DIMENSION>(p) = std::min(lower, std::get<DIMENSION>(pu));
-            ConstantFunction<R, D> h(f->getValue(p));
-            typename D::I i1(pl, p, lowerClosed, upperClosed, fixed);
-            if (!i1.isEmpty())
-                g(i1, &h);
-        }
-        X xl = std::max(lower, std::get<DIMENSION>(pl));
-        X xu = std::min(upper, std::get<DIMENSION>(pu));
-        X min = lower + step * floor(toDouble((xl - lower) / step));
-        X max = lower + step * ceil(toDouble((xu - lower) / step));
-        for (X x = min; x < max; x += step) {
-            X x1 = x;
-            X x2 = x + step;
-            typename D::P p1 = pl;
-            typename D::P p2 = pu;
-            std::get<DIMENSION>(p1) = std::max(xl, x1);
-            std::get<DIMENSION>(p2) = std::min(xu, x2);
-            typename D::I i1(p1, p2, lowerClosed | (b >> DIMENSION), upperClosed, fixed);
-            if (!i1.isEmpty()) {
-                std::get<DIMENSION>(p1) = x1;
-                std::get<DIMENSION>(p2) = x2;
-                R r1 = f->getValue(p1);
-                R r2 = f->getValue(p2);
-                if (dynamic_cast<const ConstantInterpolatorBase<X, R> *>(interpolator)) {
-                    ConstantFunction<R, D> h(interpolator->getValue(x1, r1, x2, r2, (x1 + x2) / 2));
-                    g(i1, &h);
-                }
-                else if (dynamic_cast<const LinearInterpolator<X, R> *>(interpolator)) {
-                    UnilinearFunction<R, D> h(p1, p2, r1, r2, DIMENSION);
-                    simplifyAndCall(i1, &h, g);
+        X xl = std::get<DIMENSION>(pl);
+        X xu = std::get<DIMENSION>(pu);
+        if (xl < lower) {
+            f->partition(i.template getFixed<X, DIMENSION>(lower), [&] (const typename D::I& i1, const IFunction<R, D> *h) {
+                if (auto ch = dynamic_cast<const ConstantFunction<R, D> *>(h)) {
+                    auto p1 = i1.getLower().template getReplaced<X, DIMENSION>(xl);
+                    auto p2 = i1.getUpper().template getReplaced<X, DIMENSION>(std::min(lower, xu));
+                    ConstantFunction<R, D> j(ch->getConstantValue());
+                    // TODO: review closed & fixed flags
+                    typename D::I i2(p1, p2, i.getLowerClosed() | fixed, (i.getUpperClosed() & ~m) | fixed, i.getFixed());
+                    g(i2, &j);
                 }
                 else
                     throw cRuntimeError("TODO");
+            });
+        }
+        if (xu >= lower && upper >= xl) {
+            X min = lower + step * floor(toDouble(std::max(lower, xl) - lower) / toDouble(step));
+            X max = (i.getFixed() & m) ? min + step : lower + step * ceil(toDouble(std::min(upper, xu) - lower) / toDouble(step));
+            for (X x = min; x < max; x += step) {
+                X x1 = x;
+                X x2 = x + step;
+                Interval<X> j(std::max(x1, xl), std::min(x2, xu), true, fixed, fixed);
+                // determine the smallest intervals along the other dimensions for which the primitive functions are calculated
+                f->partition(i.template getFixed<X, DIMENSION>(x1), [&] (const typename D::I& i2, const IFunction<R, D> *h1) {
+                    f->partition(i2.template getFixed<X, DIMENSION>(x2), [&] (const typename D::I& i3, const IFunction<R, D> *h2) {
+                        if (auto ch1 = dynamic_cast<const ConstantFunction<R, D> *>(h1)) {
+                            auto r1 = ch1->getConstantValue();
+                            if (auto ch2 = dynamic_cast<const ConstantFunction<R, D> *>(h2)) {
+                                auto r2 = ch2->getConstantValue();
+                                auto i4 = i3.template getReplaced<X, DIMENSION>(j);
+                                if (dynamic_cast<const ConstantInterpolatorBase<X, R> *>(interpolator)) {
+                                    ConstantFunction<R, D> h(interpolator->getValue(x1, r1, x2, r2, (x1 + x2) / 2));
+                                    g(i4, &h);
+                                }
+                                else if (dynamic_cast<const LinearInterpolator<X, R> *>(interpolator)) {
+                                    auto p3 = i3.getLower();
+                                    auto p4 = i3.getUpper();
+                                    auto p5 = p3.template getReplaced<X, DIMENSION>(x1);
+                                    auto p6 = p4.template getReplaced<X, DIMENSION>(x2);
+                                    UnilinearFunction<R, D> h(p5, p6, r1, r2, DIMENSION);
+                                    simplifyAndCall(i4, &h, g);
+                                }
+                                else
+                                    throw cRuntimeError("TODO");
+                            }
+                            else
+                                throw cRuntimeError("TODO");
+                        }
+                        else
+                            throw cRuntimeError("TODO");
+                    });
+                });
             }
         }
-        if (std::get<DIMENSION>(pu) > upper) {
-            typename D::P p = pl;
-            std::get<DIMENSION>(p) = std::max(upper, std::get<DIMENSION>(pl));
-            ConstantFunction<R, D> h(f->getValue(p));
-            typename D::I i1(p, pu, i.getLowerClosed() | (b >> DIMENSION), i.getUpperClosed(), i.getFixed());
-            if (!i1.isEmpty())
-                g(i1, &h);
+        if (xu > upper) {
+            f->partition(i.template getFixed<X, DIMENSION>(upper), [&] (const typename D::I& i1, const IFunction<R, D> *h) {
+                if (auto ch = dynamic_cast<const ConstantFunction<R, D> *>(h)) {
+                    auto p1 = i1.getLower().template getReplaced<X, DIMENSION>(std::max(upper, xl));
+                    auto p2 = i1.getUpper().template getReplaced<X, DIMENSION>(xu);
+                    ConstantFunction<R, D> j(ch->getConstantValue());
+                    // TODO: review closed & fixed flags
+                    typename D::I i2(p1, p2, (i.getLowerClosed() & ~m) | fixed, i.getUpperClosed() | fixed, i.getFixed());
+                    g(i2, &j);
+                }
+                else
+                    throw cRuntimeError("TODO");
+            });
         }
     }
 
