@@ -46,7 +46,8 @@ InterfaceTableCanvasVisualizer::~InterfaceTableCanvasVisualizer()
 void InterfaceTableCanvasVisualizer::initialize(int stage)
 {
     InterfaceTableVisualizerBase::initialize(stage);
-    if (!hasGUI()) return;
+    if (!hasGUI())
+        return;
     if (stage == INITSTAGE_LOCAL) {
         zIndex = par("zIndex");
         networkNodeVisualizer = getModuleFromPar<NetworkNodeCanvasVisualizer>(par("networkNodeVisualizerModule"), this);
@@ -97,9 +98,11 @@ void InterfaceTableCanvasVisualizer::addInterfaceVisualization(const InterfaceVi
     auto interfaceCanvasVisualization = static_cast<const InterfaceCanvasVisualization *>(interfaceVisualization);
     if (interfaceCanvasVisualization->figure == nullptr) {
         auto gate = getOutputGate(interfaceVisualization);
-        cDisplayString& displayString = gate->getDisplayString();
-        displayString.setTagArg("t", 0, getVisualizationText(getInterfaceEntry(interfaceVisualization)).c_str());
-        displayString.setTagArg("t", 1, "l");
+        if (gate != nullptr && gate->getChannel()) {
+            cDisplayString& displayString = gate->getDisplayString();
+            displayString.setTagArg("t", 0, getVisualizationText(getInterfaceEntry(interfaceVisualization)).c_str());
+            displayString.setTagArg("t", 1, "l");
+        }
     }
     else
         interfaceCanvasVisualization->networkNodeVisualization->addAnnotation(interfaceCanvasVisualization->figure, interfaceCanvasVisualization->figure->getBounds().getSize(), placementHint, placementPriority);
@@ -111,7 +114,7 @@ void InterfaceTableCanvasVisualizer::removeInterfaceVisualization(const Interfac
     auto interfaceCanvasVisualization = static_cast<const InterfaceCanvasVisualization *>(interfaceVisualization);
     if (interfaceCanvasVisualization->figure == nullptr) {
         auto gate = getOutputGate(interfaceVisualization);
-        if (gate != nullptr)
+        if (gate != nullptr && gate->getChannel())
             gate->getDisplayString().setTagArg("t", 0, "");
     }
     else
@@ -124,7 +127,11 @@ void InterfaceTableCanvasVisualizer::refreshInterfaceVisualization(const Interfa
     auto figure = interfaceCanvasVisualization->figure;
     if (figure == nullptr) {
         auto gate = getOutputGate(interfaceVisualization);
-        gate->getDisplayString().setTagArg("t", 0, getVisualizationText(interfaceEntry).c_str());
+        if (gate != nullptr && gate->getChannel()) {
+            cDisplayString& displayString = gate->getDisplayString();
+            displayString.setTagArg("t", 0, getVisualizationText(interfaceEntry).c_str());
+            displayString.setTagArg("t", 1, "l");
+        }
     }
     else {
         figure->setText(getVisualizationText(interfaceEntry).c_str());
