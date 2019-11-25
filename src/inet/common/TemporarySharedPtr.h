@@ -47,12 +47,12 @@ class TemporarySharedPtrClassDescriptor : public cClassDescriptor
     virtual const char *getFieldName(int field) const override { return classDescriptor->getFieldName(field); }
     virtual int findField(const char *fieldName) const override { return classDescriptor->findField(fieldName); }
     virtual unsigned int getFieldTypeFlags(int field) const override { return classDescriptor->getFieldTypeFlags(field); }
-    virtual const char *getFieldDeclaredOn(int field) const { return classDescriptor->getFieldDeclaredOn(field); }
+    virtual const char *getFieldDeclaredOn(int field) const override { return classDescriptor->getFieldDeclaredOn(field); }
     virtual const char *getFieldTypeString(int field) const override { return classDescriptor->getFieldTypeString(field); }
     virtual const char **getFieldPropertyNames(int field) const override { return classDescriptor->getFieldPropertyNames(field); }
     virtual const char *getFieldProperty(int field, const char *propertyname) const override { return classDescriptor->getFieldProperty(field, propertyname); }
     virtual int getFieldArraySize(void *object, int field) const override { return classDescriptor->getFieldArraySize(getObjectPointer(object), field); }
-    virtual const char *getFieldDynamicTypeString(void *object, int field, int i) const { return classDescriptor->getFieldDynamicTypeString(getObjectPointer(object), field, i); }
+    virtual const char *getFieldDynamicTypeString(void *object, int field, int i) const override { return classDescriptor->getFieldDynamicTypeString(getObjectPointer(object), field, i); }
     virtual std::string getFieldValueAsString(void *object, int field, int i) const override { return classDescriptor->getFieldValueAsString(getObjectPointer(object), field, i); }
     virtual bool setFieldValueAsString(void *object, int field, int i, const char *value) const override { return classDescriptor->setFieldValueAsString(getObjectPointer(object), field, i, value); }
     virtual const char *getFieldStructName(int field) const override { return classDescriptor->getFieldStructName(field); }
