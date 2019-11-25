@@ -52,17 +52,21 @@ class TemporarySharedPtrClassDescriptor : public cClassDescriptor
     virtual const char **getFieldPropertyNames(int field) const override { return classDescriptor->getFieldPropertyNames(field); }
     virtual const char *getFieldProperty(int field, const char *propertyname) const override { return classDescriptor->getFieldProperty(field, propertyname); }
     virtual int getFieldArraySize(void *object, int field) const override { return classDescriptor->getFieldArraySize(getObjectPointer(object), field); }
+#if OMNETPP_VERSION >= 0x0600
+    virtual void setFieldArraySize(void *object, int field, int size) const override { classDescriptor->setFieldArraySize(getObjectPointer(object), field, size); }
+#endif
     virtual const char *getFieldDynamicTypeString(void *object, int field, int i) const override { return classDescriptor->getFieldDynamicTypeString(getObjectPointer(object), field, i); }
     virtual std::string getFieldValueAsString(void *object, int field, int i) const override { return classDescriptor->getFieldValueAsString(getObjectPointer(object), field, i); }
 #if OMNETPP_VERSION >= 0x0600
-    virtual void setFieldValueAsString(void *object, int field, int i, const char *value) const override {classDescriptor->setFieldValueAsString(getObjectPointer(object), field, i, value); }
-    virtual void setFieldArraySize(void *object, int field, int size) const override {classDescriptor->setFieldArraySize(getObjectPointer(object), field, size);}
-    virtual void setFieldStructValuePointer(void *object, int field, int i, void *ptr) const override {classDescriptor->setFieldStructValuePointer(getObjectPointer(object), field, i, ptr);}
+    virtual void setFieldValueAsString(void *object, int field, int i, const char *value) const override { classDescriptor->setFieldValueAsString(getObjectPointer(object), field, i, value); }
 #else
     virtual bool setFieldValueAsString(void *object, int field, int i, const char *value) const override { return classDescriptor->setFieldValueAsString(getObjectPointer(object), field, i, value); }
 #endif
     virtual const char *getFieldStructName(int field) const override { return classDescriptor->getFieldStructName(field); }
     virtual void *getFieldStructValuePointer(void *object, int field, int i) const override { return classDescriptor->getFieldStructValuePointer(getObjectPointer(object), field, i); }
+#if OMNETPP_VERSION >= 0x0600
+    virtual void setFieldStructValuePointer(void *object, int field, int i, void *ptr) const override { classDescriptor->setFieldStructValuePointer(getObjectPointer(object), field, i, ptr); }
+#endif
 };
 
 /**
