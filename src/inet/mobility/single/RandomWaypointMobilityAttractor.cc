@@ -242,83 +242,120 @@ void RandomWaypointMobilityAttractor::parseXml(cXMLElement *nodes)
 
 Coord RandomWaypointMobilityAttractor::getNewCoord()
 {
-    auto itAttractors = listsAttractors.find(typeAttractor);
-    if (itAttractors == listsAttractors.end() || itAttractors->second.empty()) {
-        return getRandomPosition();
-    }
-    auto itconf = attractorConf.find(typeAttractor);
-    if (itconf == attractorConf.end())
-        throw cRuntimeError("Doesn't exist a configured attractor with id '%s'", typeAttractor.c_str());
+    Coord posAttractor;
+    if (typeAttractor.empty()) {
+        if (freeAtractors.empty())
+            return getRandomPosition();
 
-    if (itconf->second.attractorData.empty())
-        return getRandomPosition();
-
-    // First, compute probabilities.
-    double prob = uniform(0, itconf->second.totalRep);
-    double repetitions = 0;
-    unsigned int pos = 0;
-    for (auto elem : itconf->second.attractorData) {
-        if (repetitions < prob)
-            break;
-        repetitions += elem.probability;
-        pos++;
-    }
-
-    if (pos == itconf->second.attractorData.size())
-        pos--;
-
-    std::vector<Coord> attractors;
-    double distance = itconf->second.attractorData[pos].distance;
-    do {
-        for (const auto &elem : itAttractors->second) {
-            if (elem.distance(this->getCurrentPosition()) < distance) {
-                attractors.push_back(elem);
-            }
+        double total = 0;
+        std::vector<int> position;
+        for (const auto &elem : freeAtractors) {
+            total += elem.repetition;
+            position.push_back(total);
         }
-        if (attractors.empty()) {
-            // check behavior
-            if (itconf->second.behavior == "landscape") {
-                return getRandomPosition();
-            }
-            if (itconf->second.behavior == "nearest") {
-                double distNearest = std::numeric_limits<double>::max();
-                Coord pos = Coord::NIL;
-                for (const auto &elem : itAttractors->second) {
-                    if (elem.distance(this->getCurrentPosition()) < distNearest) {
-                        pos = elem;
-                        distNearest = elem.distance(this->getCurrentPosition());
-                    }
+        position.push_back(total+1); // rest landscape
+        int val = intuniform(0,total+1);
+        int i;
+
+        for (i = 0; i < position.size();i++){
+            if (position[i] > val)
+                break;
+        }
+        if (i >= position.size() -1)
+            return getRandomPosition();
+
+        if (freeAtractors[i].distX)
+            posAttractor.x += freeAtractors[i].distX->evaluate(this).doubleValue();
+        if (freeAtractors[i].distY)
+            posAttractor.y += freeAtractors[i].distY->evaluate(this).doubleValue();
+        if (freeAtractors[i].distZ)
+            posAttractor.z += freeAtractors[i].distZ->evaluate(this).doubleValue();
+    }
+    else {
+
+        auto itAttractors = listsAttractors.find(typeAttractor);
+        if (itAttractors == listsAttractors.end() || itAttractors->second.empty()) {
+            return getRandomPosition();
+        }
+
+        auto itconf = attractorConf.find(typeAttractor);
+        if (itconf == attractorConf.end())
+            throw cRuntimeError(
+                    "Doesn't exist a configured attractor with id '%s'",
+                    typeAttractor.c_str());
+
+        if (itconf->second.attractorData.empty())
+            return getRandomPosition();
+
+        // First, compute probabilities.
+        double prob = uniform(0, itconf->second.totalRep);
+        double repetitions = 0;
+        unsigned int pos = 0;
+        for (auto elem : itconf->second.attractorData) {
+            if (repetitions < prob)
+                break;
+            repetitions += elem.probability;
+            pos++;
+        }
+
+        if (pos == itconf->second.attractorData.size())
+            pos--;
+
+        std::vector<Coord> attractors;
+        double distance = itconf->second.attractorData[pos].distance;
+        do {
+            for (const auto &elem : itAttractors->second) {
+                if (elem.distance(this->getCurrentPosition()) < distance) {
+                    attractors.push_back(elem);
                 }
-                if (pos == Coord::NIL)
-                    throw cRuntimeError("Impossible to find an attractor with id '%s'", typeAttractor.c_str());
-                attractors.push_back(pos);
             }
-            else {
-                // increment the area.
-                pos++;
-                if (pos >= itconf->second.attractorData.size()) {
+            if (attractors.empty()) {
+                // check behavior
+                if (itconf->second.behavior == "landscape") {
                     return getRandomPosition();
                 }
-                distance = itconf->second.attractorData[pos].distance;
-                for (const auto &elem : itAttractors->second) {
-                    if (elem.distance(this->getCurrentPosition()) < distance) {
-                        attractors.push_back(elem);
+                if (itconf->second.behavior == "nearest") {
+                    double distNearest = std::numeric_limits<double>::max();
+                    Coord pos = Coord::NIL;
+                    for (const auto &elem : itAttractors->second) {
+                        if (elem.distance(this->getCurrentPosition()) < distNearest) {
+                            pos = elem;
+                            distNearest = elem.distance(this->getCurrentPosition());
+                        }
+                    }
+                    if (pos == Coord::NIL)
+                        throw cRuntimeError(
+                                "Impossible to find an attractor with id '%s'",
+                                typeAttractor.c_str());
+                    attractors.push_back(pos);
+                }
+                else {
+                    // increment the area.
+                    pos++;
+                    if (pos >= itconf->second.attractorData.size()) {
+                        return getRandomPosition();
+                    }
+                    distance = itconf->second.attractorData[pos].distance;
+                    for (const auto &elem : itAttractors->second) {
+                        if (elem.distance(this->getCurrentPosition()) < distance) {
+                            attractors.push_back(elem);
+                        }
                     }
                 }
             }
-        }
-    } while(attractors.empty());
+        } while (attractors.empty());
 
-    // choose an attractor in the list
-    Coord posAttractor = attractors[intuniform(0, attractors.size()-1)];
-    // now select the position in function of the distributions.
-    if (itconf->second.distX)
-        posAttractor.x += itconf->second.distX->evaluate(this).doubleValue();
-    if (itconf->second.distY)
-        posAttractor.y += itconf->second.distY->evaluate(this).doubleValue();
-    if (itconf->second.distZ)
-        posAttractor.z += itconf->second.distZ->evaluate(this).doubleValue();
-    // Check that the value is in the landscape,
+        // choose an attractor in the list
+        posAttractor = attractors[intuniform(0, attractors.size() - 1)];
+        // now select the position in function of the distributions.
+        if (itconf->second.distX)
+            posAttractor.x += itconf->second.distX->evaluate(this).doubleValue();
+        if (itconf->second.distY)
+            posAttractor.y += itconf->second.distY->evaluate(this).doubleValue();
+        if (itconf->second.distZ)
+            posAttractor.z += itconf->second.distZ->evaluate(this).doubleValue();
+        // Check that the value is in the landscape,
+    }
 
     return posAttractor;
 }
