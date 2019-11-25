@@ -84,13 +84,13 @@ class INET_API HttpNodeBase : public cSimpleModule, public LifecycleUnsupported
     /*
      * Methods for logging and formatting messages
      */
-    void logRequest(const Packet *httpRequest);
-    void logResponse(const Packet *httpResponse);
+    void logRequest(const Ptr<const HttpRequestMessage>& httpRequest);
+    void logResponse(const Ptr<const HttpReplyMessage>& httpResponse);
     void logEntry(std::string line);
-    std::string formatHttpRequestShort(const Packet *httpRequest);
-    std::string formatHttpResponseShort(const Packet *httpResponse);
-    std::string formatHttpRequestLong(const Packet *httpRequest);
-    std::string formatHttpResponseLong(const Packet *httpResponse);
+    std::string formatHttpRequestShort(const Ptr<const HttpRequestMessage>& httpRequest);
+    std::string formatHttpRequestLong(const Ptr<const HttpRequestMessage>& httpRequest);
+    std::string formatHttpResponseShort(const Ptr<const HttpReplyMessage>& httpResponse);
+    std::string formatHttpResponseLong(const Ptr<const HttpReplyMessage>& httpResponse);
 
   public:
     HttpNodeBase();
