@@ -52,6 +52,7 @@ PlotFigure::PlotFigure(const char *name) : cGroupFigure(name)
 {
     addChildren();
     setNumSeries(1);
+    refreshDisplay();
 }
 
 void PlotFigure::setNumSeries(int numSeries)
@@ -75,11 +76,13 @@ void PlotFigure::setPlotSize(const Point& p)
 {
     const auto& backgroundBounds = backgroundFigure->getBounds();
     backgroundFigure->setBounds(Rectangle(backgroundBounds.x, backgroundBounds.y, p.x, p.y));
-    layout();
+    invalidLayout = true;
 }
 
 const cFigure::Rectangle& PlotFigure::getBounds() const
 {
+    if (invalidLayout)
+        const_cast<PlotFigure *>(this)->layout();
     return bounds;
 }
 
@@ -87,7 +90,7 @@ void PlotFigure::setBounds(const Rectangle& rect)
 {
     const auto& backgroundBounds = backgroundFigure->getBounds();
     backgroundFigure->setBounds(Rectangle(backgroundBounds.x + rect.x - bounds.x, backgroundBounds.y + rect.y - bounds.y, rect.width - (bounds.width - backgroundBounds.width), rect.height - (bounds.height - backgroundBounds.height)));
-    layout();
+    invalidLayout = true;
 }
 
 const cFigure::Color& PlotFigure::getBackgrouncColor() const
@@ -111,7 +114,15 @@ void PlotFigure::setYTickSize(double size)
         return;
 
     yTickSize = size;
-    layout();
+    invalidLayout = true;
+}
+
+void PlotFigure::setYTickCount(int count)
+{
+    if (count != 0 && std::isfinite(minY) && std::isfinite(maxY))
+        setYTickSize((maxY - minY) / (count - 1));
+    else
+        setYTickSize(INFINITY);
 }
 
 double PlotFigure::getTimeWindow() const
@@ -140,6 +151,14 @@ void PlotFigure::setXTickSize(double size)
     xTickSize = size;
 }
 
+void PlotFigure::setXTickCount(int count)
+{
+    if (count != 0 && std::isfinite(minX) && std::isfinite(maxX))
+        setXTickSize((maxX - minX) / (count - 1));
+    else
+        setXTickSize(INFINITY);
+}
+
 const cFigure::Color& PlotFigure::getLineColor(int series) const
 {
     return seriesPlotFigures[series]->getLineColor();
@@ -156,7 +175,7 @@ void PlotFigure::setMinX(double value)
         return;
 
     minX = value;
-    layout();
+    invalidLayout = true;
 }
 
 void PlotFigure::setMaxX(double value)
@@ -165,7 +184,7 @@ void PlotFigure::setMaxX(double value)
         return;
 
     maxX = value;
-    layout();
+    invalidLayout = true;
 }
 
 void PlotFigure::setMinY(double value)
@@ -174,7 +193,7 @@ void PlotFigure::setMinY(double value)
         return;
 
     minY = value;
-    layout();
+    invalidLayout = true;
 }
 
 void PlotFigure::setMaxY(double value)
@@ -183,7 +202,7 @@ void PlotFigure::setMaxY(double value)
         return;
 
     maxY = value;
-    layout();
+    invalidLayout = true;
 }
 
 int PlotFigure::getLabelOffset() const
@@ -193,10 +212,11 @@ int PlotFigure::getLabelOffset() const
 
 void PlotFigure::setLabelOffset(int offset)
 {
-    if (labelOffset != offset) {
-        labelOffset = offset;
-        layout();
-    }
+    if (labelOffset == offset)
+        return;
+
+    labelOffset = offset;
+    invalidLayout = true;
 }
 
 const cFigure::Font& PlotFigure::getLabelFont() const
@@ -257,7 +277,7 @@ void PlotFigure::parse(cProperty *property)
         setLabelColor(parseColor(s));
     if ((s = property->getValue(PKEY_LABEL_FONT)) != nullptr)
         setLabelFont(parseFont(s));
-    refresh();
+    refreshDisplay();
 }
 
 const char **PlotFigure::getAllowedPropertyKeys() const
@@ -299,6 +319,7 @@ void PlotFigure::addChildren()
 void PlotFigure::setValue(int series, double x, double y)
 {
     seriesValues[series].push_front({x, y});
+    invalidPlot = true;
 }
 
 static cFigure::Rectangle rectangleUnion(const cFigure::Rectangle& r1, const cFigure::Rectangle& r2)
@@ -312,6 +333,7 @@ static cFigure::Rectangle rectangleUnion(const cFigure::Rectangle& r1, const cFi
 
 void PlotFigure::layout()
 {
+    redrawXTicks();
     redrawYTicks();
 
     Rectangle b = backgroundFigure->getBounds();
@@ -328,12 +350,13 @@ void PlotFigure::layout()
         bounds = rectangleUnion(bounds, tick.number->getBounds());
     for (auto& tick : yTicks)
         bounds = rectangleUnion(bounds, tick.number->getBounds());
+    invalidLayout = false;
 }
 
 void PlotFigure::redrawYTicks()
 {
     Rectangle bounds = backgroundFigure->getBounds();
-    int numTicks = std::abs(maxY - minY) / yTickSize + 1;
+    int numTicks = std::isfinite(yTickSize) ? std::abs(maxY - minY) / yTickSize + 1 : 0;
 
     int fontSize = bounds.height * NUMBER_SIZE_PERCENT * numberSizeFactor;
 
@@ -398,11 +421,6 @@ void PlotFigure::redrawYTicks()
     }
 }
 
-void PlotFigure::refreshDisplay()
-{
-    refresh();
-}
-
 void PlotFigure::redrawXTicks()
 {
     Rectangle bounds = backgroundFigure->getBounds();
@@ -418,7 +436,7 @@ void PlotFigure::redrawXTicks()
             shifting = 0;
     }
 
-    int numTicks = ((maxX - minX) - shifting) / xTickSize + 1;
+    int numTicks = std::isfinite(xTickSize) ? ((maxX - minX) - shifting) / xTickSize + 1 : 0;
 
     Font font("", bounds.height * NUMBER_SIZE_PERCENT * numberSizeFactor);
     xAxisLabelFigure->setFont(font);
@@ -475,11 +493,8 @@ void PlotFigure::redrawXTicks()
     }
 }
 
-void PlotFigure::refresh()
+void PlotFigure::plot()
 {
-    redrawXTicks();
-
-    // plot
     double minX = std::isnan(timeWindow) ? this->minX : simTime().dbl() - timeWindow;
     double maxX = std::isnan(timeWindow) ? this->maxX : simTime().dbl();
 
@@ -529,6 +544,16 @@ void PlotFigure::refresh()
         if (!std::isnan(timeWindow) && it != values.end())
             values.erase(++it, values.end());
     }
+}
+
+void PlotFigure::refreshDisplay()
+{
+    if (invalidLayout)
+        layout();
+    else if (!std::isnan(timeWindow))
+        redrawXTicks();
+    if (invalidPlot)
+        plot();
 }
 
 } // namespace inet
