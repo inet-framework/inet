@@ -81,6 +81,13 @@ void FunctionTest::test1()
     auto f12 = makeShared<ApproximatedFunction<double, Domain<double>, 0, double>>(-10, 10, 1, &AverageInterpolator<double, double>::singleton, f11);
 	FunctionChecker<double, Domain<double>>(f12).check(Interval<double>(Point<double>(1.3), Point<double>(2.1), 0b1, 0b0, 0b0));
     printPartitioning<double, Domain<double>>(f12->getDomain(), f12);
+
+    std::cout << "\nGaussFunction x BoxcarFunction\n";
+    auto f13 = makeShared<OrthogonalCombinatorFunction<double, double, double>>(f11, f2);
+    auto f14 = makeShared<ApproximatedFunction<double, Domain<double, double>, 0, double>>(-10, 10, 1, &AverageInterpolator<double, double>::singleton, f13);
+    auto f15 = makeShared<ApproximatedFunction<double, Domain<double, double>, 1, double>>(-1, 1, 0.5, &LeftInterpolator<double, double>::singleton, f14);
+	FunctionChecker<double, Domain<double, double>>(f14).check(Interval<double, double>(Point<double, double>(1.3, -1), Point<double, double>(2.1, 1), 0b11, 0b00, 0b00));
+    printPartitioning<double, Domain<double, double>>(f15->getDomain(), f15);
 }
 
 %activity:
@@ -299,3 +306,271 @@ constant over [9 … 10)
   → 0.0254028
 constant over [10 … inf)
   → 0.0241971
+
+GaussFunction x BoxcarFunction
+
+Partitioning (-inf … inf) x (-inf … inf)
+constant over (-inf … -10) x (-inf … -1)
+  → 0.241971
+constant over (-10 … -9) x (-inf … -1)
+  → 0.254028
+constant over (-9 … -8) x (-inf … -1)
+  → 0.277888
+constant over (-8 … -7) x (-inf … -1)
+  → 0.300973
+constant over (-7 … -6) x (-inf … -1)
+  → 0.322739
+constant over (-6 … -5) x (-inf … -1)
+  → 0.342645
+constant over (-5 … -4) x (-inf … -1)
+  → 0.360168
+constant over (-4 … -3) x (-inf … -1)
+  → 0.374829
+constant over (-3 … -2) x (-inf … -1)
+  → 0.386215
+constant over (-2 … -1) x (-inf … -1)
+  → 0.393998
+constant over (-1 … 0) x (-inf … -1)
+  → 0.397947
+constant over (0 … 1) x (-inf … -1)
+  → 0.397947
+constant over (1 … 2) x (-inf … -1)
+  → 0.393998
+constant over (2 … 3) x (-inf … -1)
+  → 0.386215
+constant over (3 … 4) x (-inf … -1)
+  → 0.374829
+constant over (4 … 5) x (-inf … -1)
+  → 0.360168
+constant over (5 … 6) x (-inf … -1)
+  → 0.342645
+constant over (6 … 7) x (-inf … -1)
+  → 0.322739
+constant over (7 … 8) x (-inf … -1)
+  → 0.300973
+constant over (8 … 9) x (-inf … -1)
+  → 0.277888
+constant over (9 … 10) x (-inf … -1)
+  → 0.254028
+constant over (10 … inf) x (-inf … -1)
+  → 0.241971
+constant over (-inf … -10) x [-1 … -0.5)
+  → 0.241971
+constant over [-10 … -9) x [-1 … -0.5)
+  → 0.254028
+constant over [-9 … -8) x [-1 … -0.5)
+  → 0.277888
+constant over [-8 … -7) x [-1 … -0.5)
+  → 0.300973
+constant over [-7 … -6) x [-1 … -0.5)
+  → 0.322739
+constant over [-6 … -5) x [-1 … -0.5)
+  → 0.342645
+constant over [-5 … -4) x [-1 … -0.5)
+  → 0.360168
+constant over [-4 … -3) x [-1 … -0.5)
+  → 0.374829
+constant over [-3 … -2) x [-1 … -0.5)
+  → 0.386215
+constant over [-2 … -1) x [-1 … -0.5)
+  → 0.393998
+constant over [-1 … 0) x [-1 … -0.5)
+  → 0.397947
+constant over [0 … 1) x [-1 … -0.5)
+  → 0.397947
+constant over [1 … 2) x [-1 … -0.5)
+  → 0.393998
+constant over [2 … 3) x [-1 … -0.5)
+  → 0.386215
+constant over [3 … 4) x [-1 … -0.5)
+  → 0.374829
+constant over [4 … 5) x [-1 … -0.5)
+  → 0.360168
+constant over [5 … 6) x [-1 … -0.5)
+  → 0.342645
+constant over [6 … 7) x [-1 … -0.5)
+  → 0.322739
+constant over [7 … 8) x [-1 … -0.5)
+  → 0.300973
+constant over [8 … 9) x [-1 … -0.5)
+  → 0.277888
+constant over [9 … 10) x [-1 … -0.5)
+  → 0.254028
+constant over [10 … inf) x [-1 … -0.5)
+  → 0.241971
+constant over (-inf … -10) x [-0.5 … 0)
+  → 0.241971
+constant over [-10 … -9) x [-0.5 … 0)
+  → 0.254028
+constant over [-9 … -8) x [-0.5 … 0)
+  → 0.277888
+constant over [-8 … -7) x [-0.5 … 0)
+  → 0.300973
+constant over [-7 … -6) x [-0.5 … 0)
+  → 0.322739
+constant over [-6 … -5) x [-0.5 … 0)
+  → 0.342645
+constant over [-5 … -4) x [-0.5 … 0)
+  → 0.360168
+constant over [-4 … -3) x [-0.5 … 0)
+  → 0.374829
+constant over [-3 … -2) x [-0.5 … 0)
+  → 0.386215
+constant over [-2 … -1) x [-0.5 … 0)
+  → 0.393998
+constant over [-1 … 0) x [-0.5 … 0)
+  → 0.397947
+constant over [0 … 1) x [-0.5 … 0)
+  → 0.397947
+constant over [1 … 2) x [-0.5 … 0)
+  → 0.393998
+constant over [2 … 3) x [-0.5 … 0)
+  → 0.386215
+constant over [3 … 4) x [-0.5 … 0)
+  → 0.374829
+constant over [4 … 5) x [-0.5 … 0)
+  → 0.360168
+constant over [5 … 6) x [-0.5 … 0)
+  → 0.342645
+constant over [6 … 7) x [-0.5 … 0)
+  → 0.322739
+constant over [7 … 8) x [-0.5 … 0)
+  → 0.300973
+constant over [8 … 9) x [-0.5 … 0)
+  → 0.277888
+constant over [9 … 10) x [-0.5 … 0)
+  → 0.254028
+constant over [10 … inf) x [-0.5 … 0)
+  → 0.241971
+constant over (-inf … -10) x [0 … 0.5)
+  → 0.241971
+constant over [-10 … -9) x [0 … 0.5)
+  → 0.254028
+constant over [-9 … -8) x [0 … 0.5)
+  → 0.277888
+constant over [-8 … -7) x [0 … 0.5)
+  → 0.300973
+constant over [-7 … -6) x [0 … 0.5)
+  → 0.322739
+constant over [-6 … -5) x [0 … 0.5)
+  → 0.342645
+constant over [-5 … -4) x [0 … 0.5)
+  → 0.360168
+constant over [-4 … -3) x [0 … 0.5)
+  → 0.374829
+constant over [-3 … -2) x [0 … 0.5)
+  → 0.386215
+constant over [-2 … -1) x [0 … 0.5)
+  → 0.393998
+constant over [-1 … 0) x [0 … 0.5)
+  → 0.397947
+constant over [0 … 1) x [0 … 0.5)
+  → 0.397947
+constant over [1 … 2) x [0 … 0.5)
+  → 0.393998
+constant over [2 … 3) x [0 … 0.5)
+  → 0.386215
+constant over [3 … 4) x [0 … 0.5)
+  → 0.374829
+constant over [4 … 5) x [0 … 0.5)
+  → 0.360168
+constant over [5 … 6) x [0 … 0.5)
+  → 0.342645
+constant over [6 … 7) x [0 … 0.5)
+  → 0.322739
+constant over [7 … 8) x [0 … 0.5)
+  → 0.300973
+constant over [8 … 9) x [0 … 0.5)
+  → 0.277888
+constant over [9 … 10) x [0 … 0.5)
+  → 0.254028
+constant over [10 … inf) x [0 … 0.5)
+  → 0.241971
+constant over (-inf … -10) x [0.5 … 1)
+  → 0.241971
+constant over [-10 … -9) x [0.5 … 1)
+  → 0.254028
+constant over [-9 … -8) x [0.5 … 1)
+  → 0.277888
+constant over [-8 … -7) x [0.5 … 1)
+  → 0.300973
+constant over [-7 … -6) x [0.5 … 1)
+  → 0.322739
+constant over [-6 … -5) x [0.5 … 1)
+  → 0.342645
+constant over [-5 … -4) x [0.5 … 1)
+  → 0.360168
+constant over [-4 … -3) x [0.5 … 1)
+  → 0.374829
+constant over [-3 … -2) x [0.5 … 1)
+  → 0.386215
+constant over [-2 … -1) x [0.5 … 1)
+  → 0.393998
+constant over [-1 … 0) x [0.5 … 1)
+  → 0.397947
+constant over [0 … 1) x [0.5 … 1)
+  → 0.397947
+constant over [1 … 2) x [0.5 … 1)
+  → 0.393998
+constant over [2 … 3) x [0.5 … 1)
+  → 0.386215
+constant over [3 … 4) x [0.5 … 1)
+  → 0.374829
+constant over [4 … 5) x [0.5 … 1)
+  → 0.360168
+constant over [5 … 6) x [0.5 … 1)
+  → 0.342645
+constant over [6 … 7) x [0.5 … 1)
+  → 0.322739
+constant over [7 … 8) x [0.5 … 1)
+  → 0.300973
+constant over [8 … 9) x [0.5 … 1)
+  → 0.277888
+constant over [9 … 10) x [0.5 … 1)
+  → 0.254028
+constant over [10 … inf) x [0.5 … 1)
+  → 0.241971
+constant over (-inf … -10) x [1 … inf)
+  → 0
+constant over (-10 … -9) x [1 … inf)
+  → 0
+constant over (-9 … -8) x [1 … inf)
+  → 0
+constant over (-8 … -7) x [1 … inf)
+  → 0
+constant over (-7 … -6) x [1 … inf)
+  → 0
+constant over (-6 … -5) x [1 … inf)
+  → 0
+constant over (-5 … -4) x [1 … inf)
+  → 0
+constant over (-4 … -3) x [1 … inf)
+  → 0
+constant over (-3 … -2) x [1 … inf)
+  → 0
+constant over (-2 … -1) x [1 … inf)
+  → 0
+constant over (-1 … 0) x [1 … inf)
+  → 0
+constant over (0 … 1) x [1 … inf)
+  → 0
+constant over (1 … 2) x [1 … inf)
+  → 0
+constant over (2 … 3) x [1 … inf)
+  → 0
+constant over (3 … 4) x [1 … inf)
+  → 0
+constant over (4 … 5) x [1 … inf)
+  → 0
+constant over (5 … 6) x [1 … inf)
+  → 0
+constant over (6 … 7) x [1 … inf)
+  → 0
+constant over (7 … 8) x [1 … inf)
+  → 0
+constant over (8 … 9) x [1 … inf)
+  → 0
+constant over (9 … 10) x [1 … inf)
+  → 0
+constant over (10 … inf) x [1 … inf)
+  → 0
