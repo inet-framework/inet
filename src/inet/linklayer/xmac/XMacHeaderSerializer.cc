@@ -25,10 +25,10 @@ Register_Serializer(XMacDataFrameHeader, XMacHeaderSerializer);
 
 void XMacHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
-    B startPos = B(stream.getLength());
+    b startPos = stream.getLength();
     const auto& header = staticPtrCast<const XMacHeaderBase>(chunk);
     stream.writeByte(header->getType());
-    stream.writeByte(B(header->getChunkLength()).get());
+    stream.writeUint16Be(b(header->getChunkLength()).get());
     stream.writeMacAddress(header->getSrcAddr());
     stream.writeMacAddress(header->getDestAddr());
     switch (header->getType()) {
@@ -45,17 +45,20 @@ void XMacHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
         default:
             throw cRuntimeError("Unknown header type: %d", header->getType());
     }
-    if ((B(stream.getLength()) - startPos) > B(header->getChunkLength()))
-        throw cRuntimeError("XMacHeader length = %d smaller than required %d bytes, try to increase the 'headerLength' parameter", B(header->getChunkLength()).get(), B(stream.getLength() - startPos).get());
-    while ((B(stream.getLength()) - startPos) < B(header->getChunkLength()))
-        stream.writeByte('?');
+    auto remainderBits = b(header->getChunkLength() - (stream.getLength() - startPos)).get();
+    if (remainderBits < 0)
+        throw cRuntimeError("XMacHeader length = %s smaller than required %s, try to increase the 'headerLength' parameter", header->getChunkLength().str().c_str(), (stream.getLength() - startPos).str().c_str());
+    if (remainderBits >= 8)
+        stream.writeByteRepeatedly('?', remainderBits >> 3);
+    if (remainderBits & 7)
+        stream.writeBitRepeatedly(0, remainderBits & 7);
 }
 
 const Ptr<Chunk> XMacHeaderSerializer::deserialize(MemoryInputStream& stream) const
 {
-    B startPos = stream.getPosition();
+    b startPos = stream.getPosition();
     XMacTypes type = static_cast<XMacTypes>(stream.readByte());
-    uint8_t length = stream.readByte();
+    b length = b(stream.readUint16Be());
     MacAddress srcAddr = stream.readMacAddress();
     MacAddress destAddr = stream.readMacAddress();
     switch (type) {
@@ -63,31 +66,42 @@ const Ptr<Chunk> XMacHeaderSerializer::deserialize(MemoryInputStream& stream) co
         case XMAC_ACK: {
             auto ctrlFrame = makeShared<XMacControlFrame>();
             ctrlFrame->setType(type);
-            ctrlFrame->setChunkLength(B(length));
+            ctrlFrame->setChunkLength(length);
             ctrlFrame->setSrcAddr(srcAddr);
             ctrlFrame->setDestAddr(destAddr);
-            while (B(length) - (stream.getPosition() - startPos) > B(0))
-                stream.readByte();
+            auto remainderBits = b(length - (stream.getPosition() - startPos)).get();
+            if (remainderBits >= 8)
+                stream.readByteRepeatedly('?', remainderBits >> 3);
+            if (remainderBits & 7)
+                stream.readBitRepeatedly(0, remainderBits & 7);
             return ctrlFrame;
         }
         case XMAC_DATA: {
             auto dataFrame = makeShared<XMacDataFrameHeader>();
             dataFrame->setType(type);
-            dataFrame->setChunkLength(B(length));
+            dataFrame->setChunkLength(length);
             dataFrame->setSrcAddr(srcAddr);
             dataFrame->setDestAddr(destAddr);
             dataFrame->setSequenceId(stream.readUint64Be());
             dataFrame->setNetworkProtocol(stream.readUint16Be());
-            while (B(length) - (stream.getPosition() - startPos) > B(0))
-                stream.readByte();
+            auto remainderBits = b(length - (stream.getPosition() - startPos)).get();
+            if (remainderBits >= 8)
+                stream.readByteRepeatedly('?', remainderBits >> 3);
+            if (remainderBits & 7)
+                stream.readBitRepeatedly(0, remainderBits & 7);
             return dataFrame;
         }
         default: {
-            auto xMacHeader = makeShared<XMacHeaderBase>();
-            while (B(length) - (stream.getPosition() - startPos) > B(0))
-                stream.readByte();
-            xMacHeader->markIncorrect();
-            return xMacHeader;
+            auto unknownFrame = makeShared<XMacHeaderBase>();
+            unknownFrame->setType(type);
+            unknownFrame->setChunkLength(length);
+            auto remainderBits = b(length - (stream.getPosition() - startPos)).get();
+            if (remainderBits >= 8)
+                stream.readByteRepeatedly('?', remainderBits >> 3);
+            if (remainderBits & 7)
+                stream.readBitRepeatedly(0, remainderBits & 7);
+            unknownFrame->markIncorrect();
+            return unknownFrame;
         }
     }
 }
