@@ -57,14 +57,12 @@ void PacketClassifierBase::pushPacket(Packet *packet, cGate *gate)
     emit(packetPushedSignal, packet);
     EV_INFO << "Classifying packet " << packet->getName() << ".\n";
     int index = classifyPacket(packet);
-    if (index == -1)
-        throw cRuntimeError("Cannot classify packet");
-    else {
-        processedTotalLength += packet->getDataLength();
-        pushOrSendPacket(packet, outputGates[index], consumers[index]);
-        numProcessedPackets++;
-        updateDisplayString();
-    }
+    if (index < 0 || index >= outputGates.size())
+        throw cRuntimeError("Classified packet to invalid output gate: %d", index);
+    processedTotalLength += packet->getDataLength();
+    pushOrSendPacket(packet, outputGates[index], consumers[index]);
+    numProcessedPackets++;
+    updateDisplayString();
 }
 
 void PacketClassifierBase::handleCanPushPacket(cGate *gate)
