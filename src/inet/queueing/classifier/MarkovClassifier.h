@@ -59,6 +59,8 @@ class INET_API MarkovClassifier : public PacketClassifierBase, public IActivePac
     virtual Packet *popPacket(cGate *gate) override;
 
     virtual void handleCanPopPacket(cGate *gate) override;
+    virtual const char *resolveDirective(char directive) const override;
+
 };
 
 } // namespace queueing
