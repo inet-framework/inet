@@ -114,7 +114,7 @@ void BehaviorAggregateClassifier::pushPacket(Packet *packet, cGate *inputGate)
     if (index >= 0)
         pushOrSendPacket(packet, outputGates[index], consumers[index]);
     else
-        pushOrSendPacket(packet, gate("defaultOutputGate"));
+        pushOrSendPacket(packet, gate("defaultOut"));
 }
 
 void BehaviorAggregateClassifier::refreshDisplay() const
