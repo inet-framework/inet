@@ -72,11 +72,14 @@ template<>
 struct bits_to_indices_sequence<0b0, 1> { typedef integer_sequence<size_t> type; };
 
 template<>
-struct bits_to_indices_sequence<0b00, 2> { typedef integer_sequence<size_t, 0> type; };
+struct bits_to_indices_sequence<0b00, 2> { typedef integer_sequence<size_t, 0> type; }; // TODO: shouldn't be empty set?
 template<>
 struct bits_to_indices_sequence<0b01, 2> { typedef integer_sequence<size_t, 1> type; };
 template<>
 struct bits_to_indices_sequence<0b10, 2> { typedef integer_sequence<size_t, 0> type; };
+
+template<>
+struct bits_to_indices_sequence<0b11110, 5> { typedef integer_sequence<size_t, 0, 1, 2, 3> type; };
 
 template<int DIMS, int SIZE>
 using make_bits_to_indices_sequence = typename bits_to_indices_sequence<DIMS, SIZE>::type;
@@ -169,6 +172,10 @@ class INET_API Point : public std::tuple<T ...>
         return setImpl(index, value, index_sequence_for<T ...>{});
     }
 
+    Point<T ...> operator-() const {
+        return multiply(-1, index_sequence_for<T ...>{});
+    }
+
     Point<T ...> operator+(const Point<T ...>& o) const {
         return add(o, index_sequence_for<T ...>{});
     }
@@ -215,6 +222,19 @@ class INET_API Point : public std::tuple<T ...>
     template<typename P, int DIMS>
     void copyFrom(const P& p) {
         internal::copyTupleElements(p, internal::make_bits_to_indices_sequence<DIMS, std::tuple_size<typename P::type>::value>{}, *this, index_sequence_for<T ...>{});
+    }
+
+    template<typename X, int DIMENSION>
+    Point<T ...> getReplaced(X x) const {
+        Point<T ...> p = *this;
+        std::get<DIMENSION>(p) = x;
+        return p;
+    }
+
+    std::string str() const {
+        std::stringstream os;
+        os << *this;
+        return os.str();
     }
 
     static Point<T ...> getZero() {
