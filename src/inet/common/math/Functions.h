@@ -45,12 +45,12 @@ class INET_API FunctionChecker
     }
 
     void check(const typename D::I& i) const {
-        function->partition(i, [&] (const typename D::I& i1, const IFunction<R, D> *g) {
+        function->partition(i, [&] (const typename D::I& i1, const IFunction<R, D> *f1) {
             auto check = std::function<void (const typename D::P&)>([&] (const typename D::P& p) {
                 if (i1.contains(p)) {
-                    R rF = function->getValue(p);
-                    R rG = g->getValue(p);
-                    ASSERT(rF == rG || (std::isnan(toDouble(rF)) && std::isnan(toDouble(rG))));
+                    R r = function->getValue(p);
+                    R r1 = f1->getValue(p);
+                    ASSERT(r == r1 || (std::isnan(toDouble(r)) && std::isnan(toDouble(r1))));
                 }
             });
             iterateCorners(i1, check);
@@ -90,12 +90,12 @@ template<typename R, typename D>
 class INET_API FunctionBase : public IFunction<R, D>
 {
   public:
-    virtual void partition(const typename D::I& i, const std::function<void (const typename D::I&, const IFunction<R, D> *)> f) const override {
+    virtual void partition(const typename D::I& i, const std::function<void (const typename D::I&, const IFunction<R, D> *)> callback) const override {
         auto m = (1 << std::tuple_size<typename D::P::type>::value) - 1;
         if (i.getFixed() == m) {
             ASSERT(i.getLower() == i.getUpper());
             ConstantFunction<R, D> g(this->getValue(i.getLower()));
-            f(i, &g);
+            callback(i, &g);
         }
         else
             throw cRuntimeError("Cannot partition %s, interval = %s", this->getClassName(), i.str().c_str());
@@ -116,8 +116,8 @@ class INET_API FunctionBase : public IFunction<R, D>
     virtual bool isFinite() const override { return isFinite(getDomain()); }
     virtual bool isFinite(const typename D::I& i) const override {
         bool result = true;
-        this->partition(i, [&] (const typename D::I& i1, const IFunction<R, D> *f) {
-            result &= f->isFinite(i1);
+        this->partition(i, [&] (const typename D::I& i1, const IFunction<R, D> *f1) {
+            result &= f1->isFinite(i1);
         });
         return result;
     }
@@ -125,8 +125,8 @@ class INET_API FunctionBase : public IFunction<R, D>
     virtual R getMin() const override { return getMin(getDomain()); }
     virtual R getMin(const typename D::I& i) const override {
         R result(getUpperBound<R>());
-        this->partition(i, [&] (const typename D::I& i1, const IFunction<R, D> *f) {
-            result = std::min(f->getMin(i1), result);
+        this->partition(i, [&] (const typename D::I& i1, const IFunction<R, D> *f1) {
+            result = std::min(f1->getMin(i1), result);
         });
         return result;
     }
@@ -134,8 +134,8 @@ class INET_API FunctionBase : public IFunction<R, D>
     virtual R getMax() const override { return getMax(getDomain()); }
     virtual R getMax(const typename D::I& i) const override {
         R result(getLowerBound<R>());
-        this->partition(i, [&] (const typename D::I& i1, const IFunction<R, D> *f) {
-            result = std::max(f->getMax(i1), result);
+        this->partition(i, [&] (const typename D::I& i1, const IFunction<R, D> *f1) {
+            result = std::max(f1->getMax(i1), result);
         });
         return result;
     }
@@ -148,9 +148,9 @@ class INET_API FunctionBase : public IFunction<R, D>
     virtual R getIntegral() const override { return getIntegral(getDomain()); }
     virtual R getIntegral(const typename D::I& i) const override {
         R result(0);
-        this->partition(i, [&] (const typename D::I& i1, const IFunction<R, D> *f) {
+        this->partition(i, [&] (const typename D::I& i1, const IFunction<R, D> *f1) {
             double volume = i1.getVolume();
-            R value = f->getMean(i1);
+            R value = f1->getMean(i1);
             if (!(value == R(0) && std::isinf(volume)))
                 result += volume * value;
         });
@@ -190,9 +190,9 @@ class INET_API FunctionBase : public IFunction<R, D>
     }
 
     virtual void printPartitioning(std::ostream& os, const typename D::I& i, int level) const override {
-        this->partition(i, [&] (const typename D::I& i1, const IFunction<R, D> *g) {
+        this->partition(i, [&] (const typename D::I& i1, const IFunction<R, D> *f1) {
             os << std::string(level, ' ');
-            g->printPartition(os, i1, level);
+            f1->printPartition(os, i1, level);
         });
     }
 
@@ -240,10 +240,10 @@ class INET_API DomainLimitedFunction : public FunctionBase<R, D>
         return function->getValue(p);
     }
 
-    virtual void partition(const typename D::I& i, const std::function<void (const typename D::I&, const IFunction<R, D> *)> g) const override {
+    virtual void partition(const typename D::I& i, const std::function<void (const typename D::I&, const IFunction<R, D> *)> callback) const override {
         const auto& i1 = i.getIntersected(domain);
         if (!i1.isEmpty())
-            function->partition(i1, g);
+            function->partition(i1, callback);
     }
 
     virtual R getMin(const typename D::I& i) const override {
@@ -291,8 +291,8 @@ class INET_API ConstantFunction : public FunctionBase<R, D>
 
     virtual R getValue(const typename D::P& p) const override { return value; }
 
-    virtual void partition(const typename D::I& i, const std::function<void (const typename D::I&, const IFunction<R, D> *)> f) const override {
-        f(i, this);
+    virtual void partition(const typename D::I& i, const std::function<void (const typename D::I&, const IFunction<R, D> *)> callback) const override {
+        callback(i, this);
     }
 
     virtual bool isFinite(const typename D::I& i) const override { return std::isfinite(toDouble(value)); }
@@ -332,21 +332,21 @@ class INET_API OneDimensionalBoxcarFunction : public FunctionBase<R, Domain<X>>
         return std::get<0>(p) < lower || std::get<0>(p) >= upper ? R(0) : value;
     }
 
-    virtual void partition(const Interval<X>& i, const std::function<void (const Interval<X>&, const IFunction<R, Domain<X>> *)> f) const override {
+    virtual void partition(const Interval<X>& i, const std::function<void (const Interval<X>&, const IFunction<R, Domain<X>> *)> callback) const override {
         const auto& i1 = i.getIntersected(Interval<X>(getLowerBound<X>(), Point<X>(lower), 0b0, 0b0, 0b0));
         if (!i1.isEmpty()) {
             ConstantFunction<R, Domain<X>> g(R(0));
-            f(i1, &g);
+            callback(i1, &g);
         }
         const auto& i2 = i.getIntersected(Interval<X>(Point<X>(lower), Point<X>(upper), 0b1, 0b0, 0b0));
         if (!i2.isEmpty()) {
             ConstantFunction<R, Domain<X>> g(value);
-            f(i2, &g);
+            callback(i2, &g);
         }
         const auto& i3 = i.getIntersected(Interval<X>(Point<X>(upper), getUpperBound<X>(), 0b1, 0b0, 0b0));
         if (!i3.isEmpty()) {
             ConstantFunction<R, Domain<X>> g(R(0));
-            f(i3, &g);
+            callback(i3, &g);
         }
     }
 
@@ -371,10 +371,10 @@ class INET_API TwoDimensionalBoxcarFunction : public FunctionBase<R, Domain<X, Y
     const R value;
 
   protected:
-    void callf(const Interval<X, Y>& i, const std::function<void (const Interval<X, Y>&, const IFunction<R, Domain<X, Y>> *)> f, R r) const {
+    void call(const Interval<X, Y>& i, const std::function<void (const Interval<X, Y>&, const IFunction<R, Domain<X, Y>> *)> callback, R r) const {
         if (!i.isEmpty()) {
             ConstantFunction<R, Domain<X, Y>> g(r);
-            f(i, &g);
+            callback(i, &g);
         }
     }
 
@@ -391,18 +391,18 @@ class INET_API TwoDimensionalBoxcarFunction : public FunctionBase<R, Domain<X, Y
         return std::get<0>(p) < lowerX || std::get<0>(p) >= upperX || std::get<1>(p) < lowerY || std::get<1>(p) >= upperY ? R(0) : value;
     }
 
-    virtual void partition(const Interval<X, Y>& i, const std::function<void (const Interval<X, Y>&, const IFunction<R, Domain<X, Y>> *)> f) const override {
-        callf(i.getIntersected(Interval<X, Y>(Point<X, Y>(getLowerBound<X>(), getLowerBound<Y>()), Point<X, Y>(X(lowerX), Y(lowerY)), 0b00, 0b00, 0b00)), f, R(0));
-        callf(i.getIntersected(Interval<X, Y>(Point<X, Y>(X(lowerX), getLowerBound<Y>()), Point<X, Y>(X(upperX), Y(lowerY)), 0b10, 0b00, 0b00)), f, R(0));
-        callf(i.getIntersected(Interval<X, Y>(Point<X, Y>(X(upperX), getLowerBound<Y>()), Point<X, Y>(getUpperBound<X>(), Y(lowerY)), 0b10, 0b00, 0b00)), f, R(0));
+    virtual void partition(const Interval<X, Y>& i, const std::function<void (const Interval<X, Y>&, const IFunction<R, Domain<X, Y>> *)> callback) const override {
+        call(i.getIntersected(Interval<X, Y>(Point<X, Y>(getLowerBound<X>(), getLowerBound<Y>()), Point<X, Y>(X(lowerX), Y(lowerY)), 0b00, 0b00, 0b00)), callback, R(0));
+        call(i.getIntersected(Interval<X, Y>(Point<X, Y>(X(lowerX), getLowerBound<Y>()), Point<X, Y>(X(upperX), Y(lowerY)), 0b10, 0b00, 0b00)), callback, R(0));
+        call(i.getIntersected(Interval<X, Y>(Point<X, Y>(X(upperX), getLowerBound<Y>()), Point<X, Y>(getUpperBound<X>(), Y(lowerY)), 0b10, 0b00, 0b00)), callback, R(0));
 
-        callf(i.getIntersected(Interval<X, Y>(Point<X, Y>(getLowerBound<X>(), Y(lowerY)), Point<X, Y>(X(lowerX), Y(upperY)), 0b01, 0b00, 0b00)), f, R(0));
-        callf(i.getIntersected(Interval<X, Y>(Point<X, Y>(X(lowerX), Y(lowerY)), Point<X, Y>(X(upperX), Y(upperY)), 0b11, 0b00, 0b00)), f, value);
-        callf(i.getIntersected(Interval<X, Y>(Point<X, Y>(X(upperX), Y(lowerY)), Point<X, Y>(getUpperBound<X>(), Y(upperY)), 0b11, 0b00, 0b00)), f, R(0));
+        call(i.getIntersected(Interval<X, Y>(Point<X, Y>(getLowerBound<X>(), Y(lowerY)), Point<X, Y>(X(lowerX), Y(upperY)), 0b01, 0b00, 0b00)), callback, R(0));
+        call(i.getIntersected(Interval<X, Y>(Point<X, Y>(X(lowerX), Y(lowerY)), Point<X, Y>(X(upperX), Y(upperY)), 0b11, 0b00, 0b00)), callback, value);
+        call(i.getIntersected(Interval<X, Y>(Point<X, Y>(X(upperX), Y(lowerY)), Point<X, Y>(getUpperBound<X>(), Y(upperY)), 0b11, 0b00, 0b00)), callback, R(0));
 
-        callf(i.getIntersected(Interval<X, Y>(Point<X, Y>(getLowerBound<X>(), Y(upperY)), Point<X, Y>(X(lowerX), getUpperBound<Y>()), 0b01, 0b00, 0b00)), f, R(0));
-        callf(i.getIntersected(Interval<X, Y>(Point<X, Y>(X(lowerX), Y(upperY)), Point<X, Y>(X(upperX), getUpperBound<Y>()), 0b11, 0b00, 0b00)), f, R(0));
-        callf(i.getIntersected(Interval<X, Y>(Point<X, Y>(X(upperX), Y(upperY)), Point<X, Y>(getUpperBound<X>(), getUpperBound<Y>()), 0b11, 0b00, 0b00)), f, R(0));
+        call(i.getIntersected(Interval<X, Y>(Point<X, Y>(getLowerBound<X>(), Y(upperY)), Point<X, Y>(X(lowerX), getUpperBound<Y>()), 0b01, 0b00, 0b00)), callback, R(0));
+        call(i.getIntersected(Interval<X, Y>(Point<X, Y>(X(lowerX), Y(upperY)), Point<X, Y>(X(upperX), getUpperBound<Y>()), 0b11, 0b00, 0b00)), callback, R(0));
+        call(i.getIntersected(Interval<X, Y>(Point<X, Y>(X(upperX), Y(upperY)), Point<X, Y>(getUpperBound<X>(), getUpperBound<Y>()), 0b11, 0b00, 0b00)), callback, R(0));
     }
 
     virtual bool isFinite(const Interval<X, Y>& i) const override { return std::isfinite(toDouble(value)); }
@@ -445,8 +445,8 @@ class INET_API UnilinearFunction : public FunctionBase<R, D>
         return rLower * (1 - alpha) + rUpper * alpha;
     }
 
-    virtual void partition(const typename D::I& i, const std::function<void (const typename D::I&, const IFunction<R, D> *)> f) const override {
-        f(i, this);
+    virtual void partition(const typename D::I& i, const std::function<void (const typename D::I&, const IFunction<R, D> *)> callback) const override {
+        callback(i, this);
     }
 
     virtual bool isFinite(const typename D::I& i) const override {
@@ -541,8 +541,8 @@ class INET_API BilinearFunction : public FunctionBase<R, D>
         return rLower * (1 - alpha) + rUpper * alpha;
     }
 
-    virtual void partition(const typename D::I& i, const std::function<void (const typename D::I&, const IFunction<R, D> *)> f) const override {
-        f(i, this);
+    virtual void partition(const typename D::I& i, const std::function<void (const typename D::I&, const IFunction<R, D> *)> callback) const override {
+        callback(i, this);
     }
 
     virtual R getMin(const typename D::I& i) const override {
@@ -606,7 +606,7 @@ class INET_API OneDimensionalInterpolatedFunction : public FunctionBase<R, Domai
         }
     }
 
-    virtual void partition(const Interval<X>& i, const std::function<void (const Interval<X>&, const IFunction<R, Domain<X>> *)> f) const override {
+    virtual void partition(const Interval<X>& i, const std::function<void (const Interval<X>&, const IFunction<R, Domain<X>> *)> callback) const override {
         // loop from less or equal than lower to greater or equal than upper inclusive both ends
         auto lt = rs.lower_bound(std::get<0>(i.getLower()));
         auto ut = rs.upper_bound(std::get<0>(i.getUpper()));
@@ -627,13 +627,13 @@ class INET_API OneDimensionalInterpolatedFunction : public FunctionBase<R, Domai
                 if (dynamic_cast<const ConstantInterpolatorBase<X, R> *>(interpolator)) {
                     auto value = interpolator->getValue(it->first, it->second.first, jt->first, jt->second.first, (xLower + xUpper) / 2);
                     ConstantFunction<R, Domain<X>> g(value);
-                    f(i1, &g);
+                    callback(i1, &g);
                 }
                 else if (dynamic_cast<const LinearInterpolator<X, R> *>(interpolator)) {
                     auto yLower = interpolator->getValue(it->first, it->second.first, jt->first, jt->second.first, xLower);
                     auto yUpper = interpolator->getValue(it->first, it->second.first, jt->first, jt->second.first, xUpper);
                     UnilinearFunction<R, Domain<X>> g(xLower, xUpper, yLower, yUpper, 0);
-                    simplifyAndCall(i1, &g, f);
+                    simplifyAndCall(i1, &g, callback);
                 }
                 else
                     throw cRuntimeError("TODO");
@@ -686,7 +686,7 @@ class INET_API OneDimensionalInterpolatedFunction : public FunctionBase<R, Domai
 //        throw cRuntimeError("TODO");
 //    }
 //
-//    virtual void partition(const Interval<X, Y>& i, const std::function<void (const Interval<X, Y>&, const IFunction<R, Domain<X, Y>> *)> f) const override {
+//    virtual void partition(const Interval<X, Y>& i, const std::function<void (const Interval<X, Y>&, const IFunction<R, Domain<X, Y>> *)> callback) const override {
 //        throw cRuntimeError("TODO");
 //    }
 //};
@@ -710,7 +710,7 @@ class INET_API OneDimensionalInterpolatedFunction : public FunctionBase<R, Domai
 //        return i.get(lt->first, lt->second->getValue(q), ut->first, ut->second->getValue(q), x);
 //    }
 //
-//    virtual void partition(const Interval<D0, D>& i, const std::function<void (const Interval<D0, D>&, const IFunction<R, D> *)> f) const override {
+//    virtual void partition(const Interval<D0, D>& i, const std::function<void (const Interval<D0, D>&, const IFunction<R, D> *)> callback) const override {
 //        throw cRuntimeError("TODO");
 //    }
 //};
@@ -762,32 +762,32 @@ class INET_API OrthogonalCombinatorFunction : public FunctionBase<R, Domain<X, Y
         return functionX->getValue(std::get<0>(p)) * functionY->getValue(std::get<1>(p));
     }
 
-    virtual void partition(const Interval<X, Y>& i, const std::function<void (const Interval<X, Y>&, const IFunction<R, Domain<X, Y>> *)> h) const override {
+    virtual void partition(const Interval<X, Y>& i, const std::function<void (const Interval<X, Y>&, const IFunction<R, Domain<X, Y>> *)> callback) const override {
         Interval<X> ix(Point<X>(std::get<0>(i.getLower())), Point<X>(std::get<0>(i.getUpper())), (i.getLowerClosed() & 0b10) >> 1, (i.getUpperClosed() & 0b10) >> 1, (i.getFixed() & 0b10) >> 1);
         Interval<Y> iy(Point<Y>(std::get<1>(i.getLower())), Point<Y>(std::get<1>(i.getUpper())), (i.getLowerClosed() & 0b01) >> 0, (i.getUpperClosed() & 0b01) >> 0, (i.getFixed() & 0b01) >> 0);
-        functionX->partition(ix, [&] (const Interval<X>& ixf, const IFunction<R, Domain<X>> *if1) {
-            functionY->partition(iy, [&] (const Interval<Y>& iyg, const IFunction<double, Domain<Y>> *if2) {
-                Point<X, Y> lower(std::get<0>(ixf.getLower()), std::get<0>(iyg.getLower()));
-                Point<X, Y> upper(std::get<0>(ixf.getUpper()), std::get<0>(iyg.getUpper()));
-                auto lowerClosed = (ixf.getLowerClosed() << 1) | (iyg.getLowerClosed() << 0);
-                auto upperClosed = (ixf.getUpperClosed() << 1) | (iyg.getUpperClosed() << 0);
-                auto fixed = (ixf.getFixed() << 1) | (iyg.getFixed() << 0);
-                if (auto cif1 = dynamic_cast<const ConstantFunction<R, Domain<X>> *>(if1)) {
-                    if (auto cif2 = dynamic_cast<const ConstantFunction<double, Domain<Y>> *>(if2)) {
+        functionX->partition(ix, [&] (const Interval<X>& ix1, const IFunction<R, Domain<X>> *fx1) {
+            functionY->partition(iy, [&] (const Interval<Y>& iy1, const IFunction<double, Domain<Y>> *fy1) {
+                Point<X, Y> lower(std::get<0>(ix1.getLower()), std::get<0>(iy1.getLower()));
+                Point<X, Y> upper(std::get<0>(ix1.getUpper()), std::get<0>(iy1.getUpper()));
+                auto lowerClosed = (ix1.getLowerClosed() << 1) | (iy1.getLowerClosed() << 0);
+                auto upperClosed = (ix1.getUpperClosed() << 1) | (iy1.getUpperClosed() << 0);
+                auto fixed = (ix1.getFixed() << 1) | (iy1.getFixed() << 0);
+                if (auto cif1 = dynamic_cast<const ConstantFunction<R, Domain<X>> *>(fx1)) {
+                    if (auto cif2 = dynamic_cast<const ConstantFunction<double, Domain<Y>> *>(fy1)) {
                         ConstantFunction<R, Domain<X, Y>> g(cif1->getConstantValue() * cif2->getConstantValue());
-                        h(Interval<X, Y>(lower, upper, lowerClosed, upperClosed, fixed), &g);
+                        callback(Interval<X, Y>(lower, upper, lowerClosed, upperClosed, fixed), &g);
                     }
-                    else if (auto lif2 = dynamic_cast<const UnilinearFunction<double, Domain<Y>> *>(if2)) {
-                        UnilinearFunction<R, Domain<X, Y>> g(lower, upper, lif2->getValue(iyg.getLower()) * cif1->getConstantValue(), lif2->getValue(iyg.getUpper()) * cif1->getConstantValue(), 1);
-                        simplifyAndCall(Interval<X, Y>(lower, upper, lowerClosed, upperClosed, fixed), &g, h);
+                    else if (auto lif2 = dynamic_cast<const UnilinearFunction<double, Domain<Y>> *>(fy1)) {
+                        UnilinearFunction<R, Domain<X, Y>> g(lower, upper, lif2->getValue(iy1.getLower()) * cif1->getConstantValue(), lif2->getValue(iy1.getUpper()) * cif1->getConstantValue(), 1);
+                        simplifyAndCall(Interval<X, Y>(lower, upper, lowerClosed, upperClosed, fixed), &g, callback);
                     }
                     else
                         throw cRuntimeError("TODO");
                 }
-                else if (auto lif1 = dynamic_cast<const UnilinearFunction<R, Domain<X>> *>(if1)) {
-                    if (auto cif2 = dynamic_cast<const ConstantFunction<double, Domain<Y>> *>(if2)) {
-                        UnilinearFunction<R, Domain<X, Y>> g(lower, upper, lif1->getValue(ixf.getLower()) * cif2->getConstantValue(), lif1->getValue(ixf.getUpper()) * cif2->getConstantValue(), 0);
-                        simplifyAndCall(Interval<X, Y>(lower, upper, lowerClosed, upperClosed, fixed), &g, h);
+                else if (auto lif1 = dynamic_cast<const UnilinearFunction<R, Domain<X>> *>(fx1)) {
+                    if (auto cif2 = dynamic_cast<const ConstantFunction<double, Domain<Y>> *>(fy1)) {
+                        UnilinearFunction<R, Domain<X, Y>> g(lower, upper, lif1->getValue(ix1.getLower()) * cif2->getConstantValue(), lif1->getValue(ix1.getUpper()) * cif2->getConstantValue(), 0);
+                        simplifyAndCall(Interval<X, Y>(lower, upper, lowerClosed, upperClosed, fixed), &g, callback);
                     }
                     else {
                         // QuadraticFunction<double, Domain<X, Y>> g();
@@ -832,13 +832,13 @@ class INET_API ShiftFunction : public FunctionBase<R, D>
         return function->getValue(p - shift);
     }
 
-    virtual void partition(const typename D::I& i, const std::function<void (const typename D::I&, const IFunction<R, D> *)> g) const override {
-        function->partition(i.getShifted(-shift), [&] (const typename D::I& j, const IFunction<R, D> *jf) {
-            if (auto cjf = dynamic_cast<const ConstantFunction<R, D> *>(jf))
-                g(j.getShifted(shift), jf);
-            else if (auto ljf = dynamic_cast<const UnilinearFunction<R, D> *>(jf)) {
-                UnilinearFunction<R, D> h(j.getLower() + shift, j.getUpper() + shift, ljf->getValue(j.getLower()), ljf->getValue(j.getUpper()), ljf->getDimension());
-                simplifyAndCall(j.getShifted(shift), &h, g);
+    virtual void partition(const typename D::I& i, const std::function<void (const typename D::I&, const IFunction<R, D> *)> callback) const override {
+        function->partition(i.getShifted(-shift), [&] (const typename D::I& i1, const IFunction<R, D> *f1) {
+            if (auto cjf = dynamic_cast<const ConstantFunction<R, D> *>(f1))
+                callback(i1.getShifted(shift), f1);
+            else if (auto ljf = dynamic_cast<const UnilinearFunction<R, D> *>(f1)) {
+                UnilinearFunction<R, D> g(i1.getLower() + shift, i1.getUpper() + shift, ljf->getValue(i1.getLower()), ljf->getValue(i1.getUpper()), ljf->getDimension());
+                simplifyAndCall(i1.getShifted(shift), &g, callback);
             }
             else
                 throw cRuntimeError("TODO");
@@ -868,8 +868,8 @@ class INET_API ShiftFunction : public FunctionBase<R, D>
 //        return R(0);
 //    }
 //
-//    virtual void partition(const typename D::I& i, const std::function<void (const typename D::I&, const IFunction<R, D> *)> f) const override {
-//        f(i, this);
+//    virtual void partition(const typename D::I& i, const std::function<void (const typename D::I&, const IFunction<R, D> *)> callback) const override {
+//        callback(i, this);
 //    }
 //};
 
@@ -904,8 +904,8 @@ class INET_API UnireciprocalFunction : public FunctionBase<R, D>
         return R(a * x + b) / (c * x + d);
     }
 
-    virtual void partition(const typename D::I& i, const std::function<void (const typename D::I&, const IFunction<R, D> *)> f) const override {
-        f(i, this);
+    virtual void partition(const typename D::I& i, const std::function<void (const typename D::I&, const IFunction<R, D> *)> callback) const override {
+        callback(i, this);
     }
 
     virtual R getMin(const typename D::I& i) const override {
@@ -971,8 +971,8 @@ class INET_API UnireciprocalFunction : public FunctionBase<R, D>
 //        return R((a0 + a1 * x + a2 * y + a3 * x * y) / (b0 + b1 * x + b2 * y + b3 * x * y));
 //    }
 //
-//    virtual void partition(const typename D::I& i, const std::function<void (const typename D::I&, const IFunction<R, D> *)> f) const override {
-//        f(i, this);
+//    virtual void partition(const typename D::I& i, const std::function<void (const typename D::I&, const IFunction<R, D> *)> callback) const override {
+//        callback(i, this);
 //    }
 //
 //    virtual R getMin(const typename D::I& i) const override {
@@ -1033,31 +1033,31 @@ class INET_API AdditionFunction : public FunctionBase<R, D>
         return function1->getValue(p) + function2->getValue(p);
     }
 
-    virtual void partition(const typename D::I& i, const std::function<void (const typename D::I&, const IFunction<R, D> *)> f) const override {
-        function1->partition(i, [&] (const typename D::I& i1, const IFunction<R, D> *if1) {
-            function2->partition(i1, [&] (const typename D::I& i2, const IFunction<R, D> *if2) {
+    virtual void partition(const typename D::I& i, const std::function<void (const typename D::I&, const IFunction<R, D> *)> callback) const override {
+        function1->partition(i, [&] (const typename D::I& i1, const IFunction<R, D> *f1) {
+            function2->partition(i1, [&] (const typename D::I& i2, const IFunction<R, D> *f2) {
                 // TODO: use template specialization for compile time optimization
-                if (auto cif1 = dynamic_cast<const ConstantFunction<R, D> *>(if1)) {
-                    if (auto cif2 = dynamic_cast<const ConstantFunction<R, D> *>(if2)) {
+                if (auto cif1 = dynamic_cast<const ConstantFunction<R, D> *>(f1)) {
+                    if (auto cif2 = dynamic_cast<const ConstantFunction<R, D> *>(f2)) {
                         ConstantFunction<R, D> g(cif1->getConstantValue() + cif2->getConstantValue());
-                        f(i2, &g);
+                        callback(i2, &g);
                     }
-                    else if (auto lif2 = dynamic_cast<const UnilinearFunction<R, D> *>(if2)) {
+                    else if (auto lif2 = dynamic_cast<const UnilinearFunction<R, D> *>(f2)) {
                         UnilinearFunction<R, D> g(i2.getLower(), i2.getUpper(), lif2->getValue(i2.getLower()) + cif1->getConstantValue(), lif2->getValue(i2.getUpper()) + cif1->getConstantValue(), lif2->getDimension());
-                        simplifyAndCall(i2, &g, f);
+                        simplifyAndCall(i2, &g, callback);
                     }
                     else
                         throw cRuntimeError("TODO");
                 }
-                else if (auto lif1 = dynamic_cast<const UnilinearFunction<R, D> *>(if1)) {
-                    if (auto cif2 = dynamic_cast<const ConstantFunction<R, D> *>(if2)) {
+                else if (auto lif1 = dynamic_cast<const UnilinearFunction<R, D> *>(f1)) {
+                    if (auto cif2 = dynamic_cast<const ConstantFunction<R, D> *>(f2)) {
                         UnilinearFunction<R, D> g(i2.getLower(), i2.getUpper(), lif1->getValue(i2.getLower()) + cif2->getConstantValue(), lif1->getValue(i2.getUpper()) + cif2->getConstantValue(), lif1->getDimension());
-                        simplifyAndCall(i2, &g, f);
+                        simplifyAndCall(i2, &g, callback);
                     }
-                    else if (auto lif2 = dynamic_cast<const UnilinearFunction<R, D> *>(if2)) {
+                    else if (auto lif2 = dynamic_cast<const UnilinearFunction<R, D> *>(f2)) {
                         if (lif1->getDimension() == lif2->getDimension()) {
                             UnilinearFunction<R, D> g(i2.getLower(), i2.getUpper(), lif1->getValue(i2.getLower()) + lif2->getValue(i2.getLower()), lif1->getValue(i2.getUpper()) + lif2->getValue(i2.getUpper()), lif1->getDimension());
-                            simplifyAndCall(i2, &g, f);
+                            simplifyAndCall(i2, &g, callback);
                         }
                         else {
                             typename D::P lowerLower = D::P::getZero();
@@ -1077,7 +1077,7 @@ class INET_API AdditionFunction : public FunctionBase<R, D>
                             R rUpperLower = lif1->getValue(upperLower) + lif2->getValue(upperLower);
                             R rUpperUpper = lif1->getValue(upperUpper) + lif2->getValue(upperUpper);
                             BilinearFunction<R, D> g(lowerLower, lowerUpper, upperLower, upperUpper, rLowerLower, rLowerUpper, rUpperLower, rUpperUpper, lif1->getDimension(), lif2->getDimension());
-                            simplifyAndCall(i2, &g, f);
+                            simplifyAndCall(i2, &g, callback);
                         }
                     }
                     else
@@ -1122,30 +1122,30 @@ class INET_API SubtractionFunction : public FunctionBase<R, D>
         return function1->getValue(p) - function2->getValue(p);
     }
 
-    virtual void partition(const typename D::I& i, const std::function<void (const typename D::I&, const IFunction<R, D> *)> f) const override {
-        function1->partition(i, [&] (const typename D::I& i1, const IFunction<R, D> *if1) {
-            function2->partition(i1, [&] (const typename D::I& i2, const IFunction<R, D> *if2) {
-                if (auto cif1 = dynamic_cast<const ConstantFunction<R, D> *>(if1)) {
-                    if (auto cif2 = dynamic_cast<const ConstantFunction<R, D> *>(if2)) {
+    virtual void partition(const typename D::I& i, const std::function<void (const typename D::I&, const IFunction<R, D> *)> callback) const override {
+        function1->partition(i, [&] (const typename D::I& i1, const IFunction<R, D> *f1) {
+            function2->partition(i1, [&] (const typename D::I& i2, const IFunction<R, D> *f2) {
+                if (auto cif1 = dynamic_cast<const ConstantFunction<R, D> *>(f1)) {
+                    if (auto cif2 = dynamic_cast<const ConstantFunction<R, D> *>(f2)) {
                         ConstantFunction<R, D> g(cif1->getConstantValue() - cif2->getConstantValue());
-                        f(i2, &g);
+                        callback(i2, &g);
                     }
-                    else if (auto lif2 = dynamic_cast<const UnilinearFunction<R, D> *>(if2)) {
+                    else if (auto lif2 = dynamic_cast<const UnilinearFunction<R, D> *>(f2)) {
                         UnilinearFunction<R, D> g(i2.getLower(), i2.getUpper(), lif2->getValue(i2.getLower()) - cif1->getConstantValue(), lif2->getValue(i2.getUpper()) - cif1->getConstantValue(), lif2->getDimension());
-                        simplifyAndCall(i2, &g, f);
+                        simplifyAndCall(i2, &g, callback);
                     }
                     else
                         throw cRuntimeError("TODO");
                 }
-                else if (auto lif1 = dynamic_cast<const UnilinearFunction<R, D> *>(if1)) {
-                    if (auto cif2 = dynamic_cast<const ConstantFunction<R, D> *>(if2)) {
+                else if (auto lif1 = dynamic_cast<const UnilinearFunction<R, D> *>(f1)) {
+                    if (auto cif2 = dynamic_cast<const ConstantFunction<R, D> *>(f2)) {
                         UnilinearFunction<R, D> g(i2.getLower(), i2.getUpper(), lif1->getValue(i2.getLower()) - cif2->getConstantValue(), lif1->getValue(i2.getUpper()) - cif2->getConstantValue(), lif1->getDimension());
-                        simplifyAndCall(i2, &g, f);
+                        simplifyAndCall(i2, &g, callback);
                     }
-                    else if (auto lif2 = dynamic_cast<const UnilinearFunction<R, D> *>(if2)) {
+                    else if (auto lif2 = dynamic_cast<const UnilinearFunction<R, D> *>(f2)) {
                         if (lif1->getDimension() == lif2->getDimension()) {
                             UnilinearFunction<R, D> g(i2.getLower(), i2.getUpper(), lif1->getValue(i2.getLower()) - lif2->getValue(i2.getLower()), lif1->getValue(i2.getUpper()) - lif2->getValue(i2.getUpper()), lif1->getDimension());
-                            simplifyAndCall(i2, &g, f);
+                            simplifyAndCall(i2, &g, callback);
                         }
                         else
                             throw cRuntimeError("TODO");
@@ -1196,34 +1196,34 @@ class INET_API MultiplicationFunction : public FunctionBase<R, D>
         return function1->getValue(p) * function2->getValue(p);
     }
 
-    virtual void partition(const typename D::I& i, const std::function<void (const typename D::I&, const IFunction<R, D> *)> f) const override {
-        function1->partition(i, [&] (const typename D::I& i1, const IFunction<R, D> *if1) {
+    virtual void partition(const typename D::I& i, const std::function<void (const typename D::I&, const IFunction<R, D> *)> callback) const override {
+        function1->partition(i, [&] (const typename D::I& i1, const IFunction<R, D> *f1) {
             // NOTE: optimization for 0 * x
-            if (auto cif1 = dynamic_cast<const ConstantFunction<R, D> *>(if1)) {
+            if (auto cif1 = dynamic_cast<const ConstantFunction<R, D> *>(f1)) {
                 if (toDouble(cif1->getConstantValue()) == 0 && function2->isFinite(i1)) {
-                    f(i1, if1);
+                    callback(i1, f1);
                     return;
                 }
             }
-            function2->partition(i1, [&] (const typename D::I& i2, const IFunction<double, D> *if2) {
-                if (auto cif1 = dynamic_cast<const ConstantFunction<R, D> *>(if1)) {
-                    if (auto cif2 = dynamic_cast<const ConstantFunction<double, D> *>(if2)) {
+            function2->partition(i1, [&] (const typename D::I& i2, const IFunction<double, D> *f2) {
+                if (auto cif1 = dynamic_cast<const ConstantFunction<R, D> *>(f1)) {
+                    if (auto cif2 = dynamic_cast<const ConstantFunction<double, D> *>(f2)) {
                         ConstantFunction<R, D> g(cif1->getConstantValue() * cif2->getConstantValue());
-                        f(i2, &g);
+                        callback(i2, &g);
                     }
-                    else if (auto lif2 = dynamic_cast<const UnilinearFunction<double, D> *>(if2)) {
+                    else if (auto lif2 = dynamic_cast<const UnilinearFunction<double, D> *>(f2)) {
                         UnilinearFunction<R, D> g(i2.getLower(), i2.getUpper(), lif2->getValue(i2.getLower()) * cif1->getConstantValue(), lif2->getValue(i2.getUpper()) * cif1->getConstantValue(), lif2->getDimension());
-                        simplifyAndCall(i2, &g, f);
+                        simplifyAndCall(i2, &g, callback);
                     }
                     else
                         throw cRuntimeError("TODO");
                 }
-                else if (auto lif1 = dynamic_cast<const UnilinearFunction<R, D> *>(if1)) {
-                    if (auto cif2 = dynamic_cast<const ConstantFunction<double, D> *>(if2)) {
+                else if (auto lif1 = dynamic_cast<const UnilinearFunction<R, D> *>(f1)) {
+                    if (auto cif2 = dynamic_cast<const ConstantFunction<double, D> *>(f2)) {
                         UnilinearFunction<R, D> g(i2.getLower(), i2.getUpper(), lif1->getValue(i2.getLower()) * cif2->getConstantValue(), lif1->getValue(i2.getUpper()) * cif2->getConstantValue(), lif1->getDimension());
-                        simplifyAndCall(i2, &g, f);
+                        simplifyAndCall(i2, &g, callback);
                     }
-                    else if (auto lif2 = dynamic_cast<const UnilinearFunction<double, D> *>(if2)) {
+                    else if (auto lif2 = dynamic_cast<const UnilinearFunction<double, D> *>(f2)) {
                         // QuadraticFunction<double, D> g();
                         throw cRuntimeError("TODO");
                     }
@@ -1267,30 +1267,30 @@ class INET_API DivisionFunction : public FunctionBase<double, D>
         return unit(function1->getValue(p) / function2->getValue(p)).get();
     }
 
-    virtual void partition(const typename D::I& i, const std::function<void (const typename D::I&, const IFunction<double, D> *)> f) const override {
-        function1->partition(i, [&] (const typename D::I& i1, const IFunction<R, D> *if1) {
-            function2->partition(i1, [&] (const typename D::I& i2, const IFunction<R, D> *if2) {
-                if (auto cif1 = dynamic_cast<const ConstantFunction<R, D> *>(if1)) {
-                    if (auto cif2 = dynamic_cast<const ConstantFunction<R, D> *>(if2)) {
+    virtual void partition(const typename D::I& i, const std::function<void (const typename D::I&, const IFunction<double, D> *)> callback) const override {
+        function1->partition(i, [&] (const typename D::I& i1, const IFunction<R, D> *f1) {
+            function2->partition(i1, [&] (const typename D::I& i2, const IFunction<R, D> *f2) {
+                if (auto cif1 = dynamic_cast<const ConstantFunction<R, D> *>(f1)) {
+                    if (auto cif2 = dynamic_cast<const ConstantFunction<R, D> *>(f2)) {
                         ConstantFunction<double, D> g(unit(cif1->getConstantValue() / cif2->getConstantValue()).get());
-                        f(i2, &g);
+                        callback(i2, &g);
                     }
-                    else if (auto lif2 = dynamic_cast<const UnilinearFunction<R, D> *>(if2)) {
+                    else if (auto lif2 = dynamic_cast<const UnilinearFunction<R, D> *>(f2)) {
                         UnireciprocalFunction<double, D> g(0, toDouble(cif1->getConstantValue()), lif2->getA(), lif2->getB(), lif2->getDimension());
-                        simplifyAndCall(i2, &g, f);
+                        simplifyAndCall(i2, &g, callback);
                     }
                     else
                         throw cRuntimeError("TODO");
                 }
-                else if (auto lif1 = dynamic_cast<const UnilinearFunction<R, D> *>(if1)) {
-                    if (auto cif2 = dynamic_cast<const ConstantFunction<R, D> *>(if2)) {
+                else if (auto lif1 = dynamic_cast<const UnilinearFunction<R, D> *>(f1)) {
+                    if (auto cif2 = dynamic_cast<const ConstantFunction<R, D> *>(f2)) {
                         UnilinearFunction<double, D> g(i2.getLower(), i2.getUpper(), unit(lif1->getValue(i2.getLower()) / cif2->getConstantValue()).get(), unit(lif1->getValue(i2.getUpper()) / cif2->getConstantValue()).get(), lif1->getDimension());
-                        simplifyAndCall(i2, &g, f);
+                        simplifyAndCall(i2, &g, callback);
                     }
-                    else if (auto lif2 = dynamic_cast<const UnilinearFunction<R, D> *>(if2)) {
+                    else if (auto lif2 = dynamic_cast<const UnilinearFunction<R, D> *>(f2)) {
                         if (lif1->getDimension() == lif2->getDimension()) {
                             UnireciprocalFunction<double, D> g(lif1->getA(), lif1->getB(), lif2->getA(), lif2->getB(), lif2->getDimension());
-                            simplifyAndCall(i2, &g, f);
+                            simplifyAndCall(i2, &g, callback);
                         }
                         else {
                             throw cRuntimeError("TODO");
@@ -1352,37 +1352,37 @@ class INET_API SumFunction : public FunctionBase<R, D>
         return sum;
     }
 
-    virtual void partition(const typename D::I& i, const std::function<void (const typename D::I&, const IFunction<R, D> *)> f) const override {
+    virtual void partition(const typename D::I& i, const std::function<void (const typename D::I&, const IFunction<R, D> *)> callback) const override {
         ConstantFunction<R, D> g(R(0));
-        partition(0, i, f, &g);
+        partition(0, i, callback, &g);
     }
 
-    virtual void partition(int index, const typename D::I& i, const std::function<void (const typename D::I&, const IFunction<R, D> *)> f, const IFunction<R, D> *g) const {
+    virtual void partition(int index, const typename D::I& i, const std::function<void (const typename D::I&, const IFunction<R, D> *)> callback, const IFunction<R, D> *f) const {
         if (index == (int)functions.size())
-            simplifyAndCall(i, g, f);
+            simplifyAndCall(i, f, callback);
         else {
-            functions[index]->partition(i, [&] (const typename D::I& i1, const IFunction<R, D> *h) {
-                if (auto cg = dynamic_cast<const ConstantFunction<R, D> *>(g)) {
-                    if (auto ch = dynamic_cast<const ConstantFunction<R, D> *>(h)) {
-                        ConstantFunction<R, D> j(cg->getConstantValue() + ch->getConstantValue());
-                        partition(index + 1, i1, f, &j);
+            functions[index]->partition(i, [&] (const typename D::I& i1, const IFunction<R, D> *f1) {
+                if (auto cg = dynamic_cast<const ConstantFunction<R, D> *>(f)) {
+                    if (auto ch = dynamic_cast<const ConstantFunction<R, D> *>(f1)) {
+                        ConstantFunction<R, D> g(cg->getConstantValue() + ch->getConstantValue());
+                        partition(index + 1, i1, callback, &g);
                     }
-                    else if (auto lh = dynamic_cast<const UnilinearFunction<R, D> *>(h)) {
-                        UnilinearFunction<R, D> j(i1.getLower(), i1.getUpper(), lh->getValue(i1.getLower()) + cg->getConstantValue(), lh->getValue(i1.getUpper()) + cg->getConstantValue(), lh->getDimension());
-                        partition(index + 1, i1, f, &j);
+                    else if (auto lh = dynamic_cast<const UnilinearFunction<R, D> *>(f1)) {
+                        UnilinearFunction<R, D> g(i1.getLower(), i1.getUpper(), lh->getValue(i1.getLower()) + cg->getConstantValue(), lh->getValue(i1.getUpper()) + cg->getConstantValue(), lh->getDimension());
+                        partition(index + 1, i1, callback, &g);
                     }
                     else
                         throw cRuntimeError("TODO");
                 }
-                else if (auto lg = dynamic_cast<const UnilinearFunction<R, D> *>(g)) {
-                    if (auto ch = dynamic_cast<const ConstantFunction<R, D> *>(h)) {
-                        UnilinearFunction<R, D> j(i1.getLower(), i1.getUpper(), lg->getValue(i1.getLower()) + ch->getConstantValue(), lg->getValue(i1.getUpper()) + ch->getConstantValue(), lg->getDimension());
-                        partition(index + 1, i1, f, &j);
+                else if (auto lg = dynamic_cast<const UnilinearFunction<R, D> *>(f)) {
+                    if (auto ch = dynamic_cast<const ConstantFunction<R, D> *>(f1)) {
+                        UnilinearFunction<R, D> g(i1.getLower(), i1.getUpper(), lg->getValue(i1.getLower()) + ch->getConstantValue(), lg->getValue(i1.getUpper()) + ch->getConstantValue(), lg->getDimension());
+                        partition(index + 1, i1, callback, &g);
                     }
-                    else if (auto lh = dynamic_cast<const UnilinearFunction<R, D> *>(h)) {
+                    else if (auto lh = dynamic_cast<const UnilinearFunction<R, D> *>(f1)) {
                         if (lg->getDimension() == lh->getDimension()) {
-                            UnilinearFunction<R, D> j(i1.getLower(), i1.getUpper(), lg->getValue(i1.getLower()) + lh->getValue(i1.getLower()), lg->getValue(i1.getUpper()) + lh->getValue(i1.getUpper()), lg->getDimension());
-                            partition(index + 1, i1, f, &j);
+                            UnilinearFunction<R, D> g(i1.getLower(), i1.getUpper(), lg->getValue(i1.getLower()) + lh->getValue(i1.getLower()), lg->getValue(i1.getUpper()) + lh->getValue(i1.getUpper()), lg->getDimension());
+                            partition(index + 1, i1, callback, &g);
                         }
                         else
                             throw cRuntimeError("TODO");
@@ -1435,16 +1435,16 @@ class INET_API ModulatedFunction : public FunctionBase<R, Domain<X, Y>>
         return function->getValue({x, y - mv});
     }
 
-    virtual void partition(const Interval<X, Y>& i, const std::function<void (const Interval<X, Y>&, const IFunction<R, Domain<X, Y>> *)> fi) const override {
-        modulator->partition(i.template get<X, 0>(), [&] (const Interval<X>& j, const IFunction<Y, Domain<X>> *fj) {
-            if (auto fjc = dynamic_cast<const ConstantFunction<Y, Domain<X>> *>(fj)) {
+    virtual void partition(const Interval<X, Y>& i, const std::function<void (const Interval<X, Y>&, const IFunction<R, Domain<X, Y>> *)> callback) const override {
+        modulator->partition(i.template get<X, 0>(), [&] (const Interval<X>& i1, const IFunction<Y, Domain<X>> *f1) {
+            if (auto fjc = dynamic_cast<const ConstantFunction<Y, Domain<X>> *>(f1)) {
                 Point<X, Y> s(X(0), fjc->getConstantValue());
-                function->partition(i.template getReplaced<X, 0>(j).getShifted(-s), [&] (const Interval<X, Y>& k, const IFunction<R, Domain<X, Y>> *fk) {
-                    if (auto fkc = dynamic_cast<const ConstantFunction<R, Domain<X, Y>> *>(fk))
-                        fi(k.getShifted(s), fk);
-                    else if (auto fkl = dynamic_cast<const UnilinearFunction<R, Domain<X, Y>> *>(fk)) {
-                        UnilinearFunction<R, Domain<X, Y>> h(k.getLower() + s, k.getUpper() + s, fkl->getValue(k.getLower()), fkl->getValue(k.getUpper()), fkl->getDimension());
-                        simplifyAndCall(k.getShifted(s), &h, fi);
+                function->partition(i.template getReplaced<X, 0>(i1).getShifted(-s), [&] (const Interval<X, Y>& i2, const IFunction<R, Domain<X, Y>> *f2) {
+                    if (auto fkc = dynamic_cast<const ConstantFunction<R, Domain<X, Y>> *>(f2))
+                        callback(i2.getShifted(s), f2);
+                    else if (auto fkl = dynamic_cast<const UnilinearFunction<R, Domain<X, Y>> *>(f2)) {
+                        UnilinearFunction<R, Domain<X, Y>> g(i2.getLower() + s, i2.getUpper() + s, fkl->getValue(i2.getLower()), fkl->getValue(i2.getUpper()), fkl->getDimension());
+                        simplifyAndCall(i2.getShifted(s), &g, callback);
                     }
                     else
                         throw cRuntimeError("TODO");
@@ -1469,19 +1469,19 @@ class INET_API IntegratedFunction<R, Domain<X, Y>, DIMS, RI, Domain<X>> : public
         Point<X, Y> u1(std::get<0>(p), getUpperBound<Y>());
         RI ri(0);
         Interval<X, Y> i1(l1, u1, DIMS, DIMS, DIMS);
-        function->partition(i1, [&] (const Interval<X, Y>& i2, const IFunction<R, Domain<X, Y>> *g) {
-            R r = g->getIntegral(i2);
+        function->partition(i1, [&] (const Interval<X, Y>& i2, const IFunction<R, Domain<X, Y>> *f2) {
+            R r = f2->getIntegral(i2);
             ri += RI(toDouble(r));
         });
         return ri;
     }
 
-    virtual void partition(const Interval<X>& i, std::function<void (const Interval<X>&, const IFunction<RI, Domain<X>> *)> g) const override {
+    virtual void partition(const Interval<X>& i, std::function<void (const Interval<X>&, const IFunction<RI, Domain<X>> *)> callback) const override {
         Point<X, Y> l1(std::get<0>(i.getLower()), getLowerBound<Y>());
         Point<X, Y> u1(std::get<0>(i.getUpper()), getUpperBound<Y>());
         Interval<X, Y> i1(l1, u1, (i.getLowerClosed() & 0b1) << 1, (i.getUpperClosed() & 0b1) << 1, (i.getFixed() & 0b1) << 1);
         std::set<X> xs;
-        function->partition(i1, [&] (const Interval<X, Y>& i2, const IFunction<R, Domain<X, Y>> *h) {
+        function->partition(i1, [&] (const Interval<X, Y>& i2, const IFunction<R, Domain<X, Y>> *f2) {
             xs.insert(std::get<0>(i2.getLower()));
             xs.insert(std::get<0>(i2.getUpper()));
         });
@@ -1497,14 +1497,14 @@ class INET_API IntegratedFunction<R, Domain<X, Y>, DIMS, RI, Domain<X>> : public
                 Point<X, Y> l3(xLower, getLowerBound<Y>());
                 Point<X, Y> u3(xLower, getUpperBound<Y>());
                 Interval<X, Y> i3(l3, u3, DIMS, DIMS, DIMS);
-                function->partition(i3, [&] (const Interval<X, Y>& i4, const IFunction<R, Domain<X, Y>> *h) {
-                    if (dynamic_cast<const ConstantFunction<R, Domain<X, Y>> *>(h)) {
-                        R r = h->getIntegral(i4);
+                function->partition(i3, [&] (const Interval<X, Y>& i4, const IFunction<R, Domain<X, Y>> *f4) {
+                    if (dynamic_cast<const ConstantFunction<R, Domain<X, Y>> *>(f4)) {
+                        R r = f4->getIntegral(i4);
                         ri += RI(toDouble(r));
                     }
-                    else if (auto lh = dynamic_cast<const UnilinearFunction<R, Domain<X, Y>> *>(h)) {
+                    else if (auto lh = dynamic_cast<const UnilinearFunction<R, Domain<X, Y>> *>(f4)) {
                         if (lh->getDimension() == 1) {
-                            R r = h->getIntegral(i4);
+                            R r = f4->getIntegral(i4);
                             ri += RI(toDouble(r));
                         }
                         else
@@ -1513,11 +1513,11 @@ class INET_API IntegratedFunction<R, Domain<X, Y>, DIMS, RI, Domain<X>> : public
                     else
                         throw cRuntimeError("TODO");
                 });
-                ConstantFunction<RI, Domain<X>> h(ri);
+                ConstantFunction<RI, Domain<X>> g(ri);
                 Point<X> l5(xLower);
                 Point<X> u5(xUpper);
                 Interval<X> i5(l5, u5, first ? (i.getLowerClosed() & 0b10) >> 1 : 0b1, 0b0, 0b0);
-                g(i5, &h);
+                callback(i5, &g);
             }
             xLower = xUpper;
         }
@@ -1539,14 +1539,14 @@ class INET_API IntegratedFunction : public FunctionBase<RI, DI>
         p.template copyTo<typename D::P, DIMS>(u1);
         RI ri(0);
         typename D::I i1(l1, u1, DIMS, DIMS, DIMS);
-        function->partition(i1, [&] (const typename D::I& i2, const IFunction<R, D> *g) {
-            R r = g->getIntegral(i2);
+        function->partition(i1, [&] (const typename D::I& i2, const IFunction<R, D> *f2) {
+            R r = f2->getIntegral(i2);
             ri += RI(toDouble(r));
         });
         return ri;
     }
 
-    virtual void partition(const typename DI::I& i, std::function<void (const typename DI::I&, const IFunction<RI, DI> *)> g) const override {
+    virtual void partition(const typename DI::I& i, std::function<void (const typename DI::I&, const IFunction<RI, DI> *)> callback) const override {
         throw cRuntimeError("TODO");
     }
 
@@ -1587,7 +1587,7 @@ class INET_API ApproximatedFunction : public FunctionBase<R, D>
         }
     }
 
-    virtual void partition(const typename D::I& i, std::function<void (const typename D::I&, const IFunction<R, D> *)> g) const override {
+    virtual void partition(const typename D::I& i, std::function<void (const typename D::I&, const IFunction<R, D> *)> callback) const override {
         unsigned char b = 1 << std::tuple_size<typename D::P::type>::value >> 1;
         auto m = (b >> DIMENSION);
         auto fixed = i.getFixed() & m;
@@ -1596,14 +1596,14 @@ class INET_API ApproximatedFunction : public FunctionBase<R, D>
         X xl = std::get<DIMENSION>(pl);
         X xu = std::get<DIMENSION>(pu);
         if (xl < lower) {
-            function->partition(i.template getFixed<X, DIMENSION>(lower), [&] (const typename D::I& i1, const IFunction<R, D> *h) {
-                if (auto ch = dynamic_cast<const ConstantFunction<R, D> *>(h)) {
+            function->partition(i.template getFixed<X, DIMENSION>(lower), [&] (const typename D::I& i1, const IFunction<R, D> *f1) {
+                if (auto ch = dynamic_cast<const ConstantFunction<R, D> *>(f1)) {
                     auto p1 = i1.getLower().template getReplaced<X, DIMENSION>(xl);
                     auto p2 = i1.getUpper().template getReplaced<X, DIMENSION>(std::min(lower, xu));
-                    ConstantFunction<R, D> j(ch->getConstantValue());
+                    ConstantFunction<R, D> g(ch->getConstantValue());
                     // TODO: review closed & fixed flags
                     typename D::I i2(p1, p2, i.getLowerClosed() | fixed, (i.getUpperClosed() & ~m) | fixed, i.getFixed());
-                    g(i2, &j);
+                    callback(i2, &g);
                 }
                 else
                     throw cRuntimeError("TODO");
@@ -1617,24 +1617,24 @@ class INET_API ApproximatedFunction : public FunctionBase<R, D>
                 X x2 = x + step;
                 Interval<X> j(std::max(x1, xl), std::min(x2, xu), true, fixed, fixed);
                 // determine the smallest intervals along the other dimensions for which the primitive functions are calculated
-                function->partition(i.template getFixed<X, DIMENSION>(x1), [&] (const typename D::I& i2, const IFunction<R, D> *h1) {
-                    function->partition(i2.template getFixed<X, DIMENSION>(x2), [&] (const typename D::I& i3, const IFunction<R, D> *h2) {
-                        if (auto ch1 = dynamic_cast<const ConstantFunction<R, D> *>(h1)) {
+                function->partition(i.template getFixed<X, DIMENSION>(x1), [&] (const typename D::I& i2, const IFunction<R, D> *f2) {
+                    function->partition(i2.template getFixed<X, DIMENSION>(x2), [&] (const typename D::I& i3, const IFunction<R, D> *f3) {
+                        if (auto ch1 = dynamic_cast<const ConstantFunction<R, D> *>(f2)) {
                             auto r1 = ch1->getConstantValue();
-                            if (auto ch2 = dynamic_cast<const ConstantFunction<R, D> *>(h2)) {
+                            if (auto ch2 = dynamic_cast<const ConstantFunction<R, D> *>(f3)) {
                                 auto r2 = ch2->getConstantValue();
                                 auto i4 = i3.template getReplaced<X, DIMENSION>(j);
                                 if (dynamic_cast<const ConstantInterpolatorBase<X, R> *>(interpolator)) {
-                                    ConstantFunction<R, D> h(interpolator->getValue(x1, r1, x2, r2, (x1 + x2) / 2));
-                                    g(i4, &h);
+                                    ConstantFunction<R, D> g(interpolator->getValue(x1, r1, x2, r2, (x1 + x2) / 2));
+                                    callback(i4, &g);
                                 }
                                 else if (dynamic_cast<const LinearInterpolator<X, R> *>(interpolator)) {
                                     auto p3 = i3.getLower();
                                     auto p4 = i3.getUpper();
                                     auto p5 = p3.template getReplaced<X, DIMENSION>(x1);
                                     auto p6 = p4.template getReplaced<X, DIMENSION>(x2);
-                                    UnilinearFunction<R, D> h(p5, p6, r1, r2, DIMENSION);
-                                    simplifyAndCall(i4, &h, g);
+                                    UnilinearFunction<R, D> g(p5, p6, r1, r2, DIMENSION);
+                                    simplifyAndCall(i4, &g, callback);
                                 }
                                 else
                                     throw cRuntimeError("TODO");
@@ -1649,14 +1649,14 @@ class INET_API ApproximatedFunction : public FunctionBase<R, D>
             }
         }
         if (xu > upper) {
-            function->partition(i.template getFixed<X, DIMENSION>(upper), [&] (const typename D::I& i1, const IFunction<R, D> *h) {
-                if (auto ch = dynamic_cast<const ConstantFunction<R, D> *>(h)) {
+            function->partition(i.template getFixed<X, DIMENSION>(upper), [&] (const typename D::I& i1, const IFunction<R, D> *f1) {
+                if (auto ch = dynamic_cast<const ConstantFunction<R, D> *>(f1)) {
                     auto p1 = i1.getLower().template getReplaced<X, DIMENSION>(std::max(upper, xl));
                     auto p2 = i1.getUpper().template getReplaced<X, DIMENSION>(xu);
-                    ConstantFunction<R, D> j(ch->getConstantValue());
+                    ConstantFunction<R, D> g(ch->getConstantValue());
                     // TODO: review closed & fixed flags
                     typename D::I i2(p1, p2, (i.getLowerClosed() & ~m) | fixed, i.getUpperClosed() | fixed, i.getFixed());
-                    g(i2, &j);
+                    callback(i2, &g);
                 }
                 else
                     throw cRuntimeError("TODO");
@@ -1688,21 +1688,21 @@ class INET_API ExtrudedFunction : public FunctionBase<R, Domain<X, Y>>
         return function->getValue(Point<Y>(std::get<1>(p)));
     }
 
-    virtual void partition(const Interval<X, Y>& i, std::function<void (const Interval<X, Y>&, const IFunction<R, Domain<X, Y>> *)> g) const override {
+    virtual void partition(const Interval<X, Y>& i, std::function<void (const Interval<X, Y>&, const IFunction<R, Domain<X, Y>> *)> callback) const override {
         Interval<Y> i1(Point<Y>(std::get<1>(i.getLower())), Point<Y>(std::get<1>(i.getUpper())), i.getUpperClosed() & 0b01);
-        function->partition(i1, [&] (const Interval<Y>& i2, const IFunction<R, Domain<Y>> *h) {
+        function->partition(i1, [&] (const Interval<Y>& i2, const IFunction<R, Domain<Y>> *f2) {
             Point<X, Y> lower(std::get<0>(i.getLower()), std::get<0>(i2.getLower()));
             Point<X, Y> upper(std::get<0>(i.getUpper()), std::get<0>(i2.getUpper()));
             Interval<X, Y> i3(lower, upper, (i.getUpperClosed() & 0b10) | i2.getUpperClosed());
-            if (auto ch = dynamic_cast<const ConstantFunction<R, Domain<Y>> *>(h)) {
-                ConstantFunction<R, Domain<X, Y>> j(ch->getConstantValue());
-                g(i3, &j);
+            if (auto ch = dynamic_cast<const ConstantFunction<R, Domain<Y>> *>(f2)) {
+                ConstantFunction<R, Domain<X, Y>> g(ch->getConstantValue());
+                callback(i3, &g);
             }
-            else if (auto lh = dynamic_cast<const UnilinearFunction<R, Domain<Y>> *>(h)) {
+            else if (auto lh = dynamic_cast<const UnilinearFunction<R, Domain<Y>> *>(f2)) {
                 Point<X, Y> lower(std::get<0>(i.getLower()), std::get<0>(lh->getLower()));
                 Point<X, Y> upper(std::get<0>(i.getUpper()), std::get<0>(lh->getUpper()));
-                UnilinearFunction<R, Domain<X, Y>> j(lower, upper, lh->getRLower(), lh->getRUpper(), 1);
-                g(i3, &j);
+                UnilinearFunction<R, Domain<X, Y>> g(lower, upper, lh->getRLower(), lh->getRUpper(), 1);
+                callback(i3, &g);
             }
             else
                 throw cRuntimeError("TODO");
@@ -1739,36 +1739,36 @@ class INET_API ExtrudedFunction : public FunctionBase<R, Domain<X, Y>>
 //        function->getValue(p);
 //    }
 //
-//    virtual void partition(const typename D::I& i, std::function<void (const typename D::I&, const IFunction<R, D> *)> g) const override {
+//    virtual void partition(const typename D::I& i, std::function<void (const typename D::I&, const IFunction<R, D> *)> callback) const override {
 //        // TODO: search in domain subdivision tree structure
 //        throw cRuntimeError("TODO");
 //    }
 //};
 
 template<typename R, typename D>
-void simplifyAndCall(const typename D::I& i, const IFunction<R, D> *f, const std::function<void (const typename D::I&, const IFunction<R, D> *)> g) {
-    g(i, f);
+void simplifyAndCall(const typename D::I& i, const IFunction<R, D> *f, const std::function<void (const typename D::I&, const IFunction<R, D> *)> callback) {
+    callback(i, f);
 }
 
 template<typename R, typename D>
-void simplifyAndCall(const typename D::I& i, const UnilinearFunction<R, D> *f, const std::function<void (const typename D::I&, const IFunction<R, D> *)> g) {
+void simplifyAndCall(const typename D::I& i, const UnilinearFunction<R, D> *f, const std::function<void (const typename D::I&, const IFunction<R, D> *)> callback) {
     if (f->getRLower() == f->getRUpper()) {
-        ConstantFunction<R, D> h(f->getRLower());
-        g(i, &h);
+        ConstantFunction<R, D> g(f->getRLower());
+        callback(i, &g);
     }
     else
-        g(i, f);
+        callback(i, f);
 }
 
 template<typename R, typename D>
-void simplifyAndCall(const typename D::I& i, const BilinearFunction<R, D> *f, const std::function<void (const typename D::I&, const IFunction<R, D> *)> g) {
+void simplifyAndCall(const typename D::I& i, const BilinearFunction<R, D> *f, const std::function<void (const typename D::I&, const IFunction<R, D> *)> callback) {
     if (f->getRLowerLower() == f->getRLowerUpper() && f->getRLowerLower() == f->getRUpperLower() && f->getRLowerLower() == f->getRUpperUpper()) {
-        ConstantFunction<R, D> h(f->getRLowerLower());
-        g(i, &h);
+        ConstantFunction<R, D> g(f->getRLowerLower());
+        callback(i, &g);
     }
     // TODO: one dimensional linear functions?
     else
-        g(i, f);
+        callback(i, f);
 }
 
 } // namespace math
