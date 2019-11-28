@@ -52,7 +52,6 @@ PlotFigure::PlotFigure(const char *name) : cGroupFigure(name)
 {
     addChildren();
     setNumSeries(1);
-    refreshDisplay();
 }
 
 void PlotFigure::setNumSeries(int numSeries)
