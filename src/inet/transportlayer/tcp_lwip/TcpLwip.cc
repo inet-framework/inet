@@ -143,7 +143,7 @@ TcpLwip::~TcpLwip()
             memp_free(MEMP_TCP_PCB, pcb);
             pcb = nullptr;
         }
-        delete i->second;
+        i->second->deleteModule();
         tcpAppConnMapM.erase(i);
     }
 
@@ -378,7 +378,7 @@ void TcpLwip::removeConnection(TcpLwipConnection& conn)
     conn.pcbM->callback_arg = nullptr;
     conn.pcbM = nullptr;
     tcpAppConnMapM.erase(conn.connIdM);
-    delete &conn;
+    conn.deleteModule();
 }
 
 err_t TcpLwip::tcp_event_err(TcpLwipConnection& conn, err_t err)

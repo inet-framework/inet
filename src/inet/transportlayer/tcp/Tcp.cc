@@ -378,7 +378,7 @@ void Tcp::handleCrashOperation(LifecycleOperation *operation)
 void Tcp::reset()
 {
     for (auto & elem : tcpAppConnMap)
-        delete elem.second;
+        elem.second->deleteModule();
     tcpAppConnMap.clear();
     tcpConnMap.clear();
     usedEphemeralPorts.clear();
