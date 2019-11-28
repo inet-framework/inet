@@ -983,6 +983,31 @@ class INET_API UnireciprocalFunction : public FunctionBase<R, D>
 //    }
 //};
 
+template<typename R, typename X>
+class INET_API SawtoothFunction : public FunctionBase<R, Domain<X>>
+{
+  protected:
+    const X start;
+    const X end;
+    const X period;
+    const R value;
+
+  public:
+    SawtoothFunction(X start, X end, X period, R value) :
+        start(start), end(end), period(period), value(value)
+    { }
+
+    virtual R getValue(const Point<X>& p) const override {
+        auto x = std::get<0>(p);
+        if (x < start)
+            return R(0);
+        else if (x > end)
+            return R(0);
+        else
+            return value * fmod(toDouble(x - start) / toDouble(period), 1);
+    }
+};
+
 template<typename R, typename D>
 class INET_API AdditionFunction : public FunctionBase<R, D>
 {
@@ -1378,6 +1403,45 @@ class INET_API SumFunction : public FunctionBase<R, D>
             f->printStructure(os, level + 3);
         }
         os << ")";
+    }
+};
+
+template<typename R, typename X, typename Y>
+class INET_API ModulatedFunction : public FunctionBase<R, Domain<X, Y>>
+{
+  protected:
+    const Ptr<const IFunction<R, Domain<X, Y>>> f;
+    const Ptr<const IFunction<Y, Domain<X>>> m;
+
+  public:
+    ModulatedFunction(const Ptr<const IFunction<R, Domain<X, Y>>>& f, const Ptr<const IFunction<Y, Domain<X>>>& m) :
+        f(f), m(m) { }
+
+    virtual R getValue(const Point<X, Y>& p) const override {
+        auto x = std::get<0>(p);
+        auto y = std::get<1>(p);
+        auto mv = m->getValue({x});
+        return f->getValue({x, y - mv});
+    }
+
+    virtual void partition(const Interval<X, Y>& i, const std::function<void (const Interval<X, Y>&, const IFunction<R, Domain<X, Y>> *)> fi) const override {
+        m->partition(i.template get<X, 0>(), [&] (const Interval<X>& j, const IFunction<Y, Domain<X>> *fj) {
+            if (auto fjc = dynamic_cast<const ConstantFunction<Y, Domain<X>> *>(fj)) {
+                Point<X, Y> s(X(0), fjc->getConstantValue());
+                f->partition(i.template getReplaced<X, 0>(j).getShifted(-s), [&] (const Interval<X, Y>& k, const IFunction<R, Domain<X, Y>> *fk) {
+                    if (auto fkc = dynamic_cast<const ConstantFunction<R, Domain<X, Y>> *>(fk))
+                        fi(k.getShifted(s), fk);
+                    else if (auto fkl = dynamic_cast<const UnilinearFunction<R, Domain<X, Y>> *>(fk)) {
+                        UnilinearFunction<R, Domain<X, Y>> h(k.getLower() + s, k.getUpper() + s, fkl->getValue(k.getLower()), fkl->getValue(k.getUpper()), fkl->getDimension());
+                        simplifyAndCall(k.getShifted(s), &h, fi);
+                    }
+                    else
+                        throw cRuntimeError("TODO");
+                });
+            }
+            else
+                throw cRuntimeError("TODO");
+        });
     }
 };
 
