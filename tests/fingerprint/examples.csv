@@ -208,11 +208,11 @@
 /examples/inet/shutdownrestart/,     -f omnetpp.ini -c TCP -r 1,                    100s,            7946-3eb0/tplx, PASS,
 /examples/inet/shutdownrestart/,     -f omnetpp.ini -c TCP -r 2,                    100s,            f4d2-c98a/tplx, PASS,
 
-/examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMACFullDuplex -r 0, 5s,    565c-2581/tplx, PASS,
-/examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMACFullDuplex -r 1, 5s,    565c-2581/tplx, PASS,
-/examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMAC_fullduplex -r 0, 3s,   3dc0-0674/tplx, PASS,
-/examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMAC_fullduplex -r 1, 3s,   3dc0-0674/tplx, PASS,
-/examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMAC_halfduplex -r 0, 2s,   0c98-102e/tplx, PASS,
+/examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMACFullDuplex -r 0, 5s,    a2a8-b9be/tplx, PASS,
+/examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMACFullDuplex -r 1, 5s,    a2a8-b9be/tplx, PASS,
+/examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMAC_fullduplex -r 0, 3s,   0b98-fd24/tplx, PASS,
+/examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMAC_fullduplex -r 1, 3s,   0b98-fd24/tplx, PASS,
+/examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMAC_halfduplex -r 0, 2s,   9488-232c/tplx, PASS,
 /examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMAC_halfduplex -r 1, 2s,   1668-9622/tplx, PASS,
 
 /examples/inet/tcp_ppp_reconnect/,   -f omnetpp.ini -c General -r 0,     5s,              defb-8774/tplx, PASS,
@@ -440,11 +440,11 @@
 /examples/pim/sm/basic/,             -f omnetpp.ini -c Scenario4 -r 0,              100s,            3078-c1d1/tplx, PASS, igmp
 
 /examples/rip/dynamictest/,          -f omnetpp.ini -c stable -r 0,                 100s,            f41a-a6db/tplx, PASS,
-/examples/rip/dynamictest/,          -f omnetpp.ini -c dynamic1 -r 0,               500s,            f260-4386/tplx, PASS,
+/examples/rip/dynamictest/,          -f omnetpp.ini -c dynamic1 -r 0,               500s,            aed1-57dd/tplx, PASS,
 /examples/rip/dynamictest/,          -f omnetpp.ini -c dynamic2 -r 0,               500s,            ab6b-4a65/tplx, PASS,
-/examples/rip/infinitycount/,        -f omnetpp.ini -c General -r 0,                100s,            e96f-36da/tplx, PASS,
+/examples/rip/infinitycount/,        -f omnetpp.ini -c General -r 0,                100s,            7d48-08d3/tplx, PASS,
 /examples/rip/mixednetwork/,         -f omnetpp.ini -c stable -r 0,                 100s,            c82a-3ea6/tplx, PASS,
-/examples/rip/mixednetwork/,         -f omnetpp.ini -c disconnect -r 0,             100s,            b6e3-8d6b/tplx, PASS,
+/examples/rip/mixednetwork/,         -f omnetpp.ini -c disconnect -r 0,             100s,            1955-9c5e/tplx, PASS,
 /examples/rip/mixednetwork/,         -f omnetpp.ini -c shutdown-restart -r 0,       100s,            773b-bc6a/tplx, PASS,
 /examples/rip/simpletest/,           -f omnetpp.ini -c IPv4 -r 0,                   100s,            4418-5bbb/tplx, PASS,
 /examples/rip/simpletest/,           -f omnetpp.ini -c IPv6 -r 0,                   100s,            d8cd-5cb7/tplx, PASS,
