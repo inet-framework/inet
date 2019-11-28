@@ -36,7 +36,7 @@ void ActivePacketSource::initialize(int stage)
     else if (stage == INITSTAGE_QUEUEING) {
         if (consumer != nullptr)
             checkPushPacketSupport(outputGate);
-        else
+        else if (!productionTimer->isScheduled())
             scheduleProductionTimer();
     }
 }
@@ -45,8 +45,8 @@ void ActivePacketSource::handleMessage(cMessage *message)
 {
     if (message == productionTimer) {
         if (consumer == nullptr || consumer->canPushSomePacket(outputGate->getPathEndGate())) {
-            producePacket();
             scheduleProductionTimer();
+            producePacket();
         }
     }
     else

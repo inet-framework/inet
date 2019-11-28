@@ -57,19 +57,17 @@ bool PacketSchedulerBase::canPopSomePacket(cGate *gate)
 Packet *PacketSchedulerBase::popPacket(cGate *gate)
 {
     Enter_Method("popPacket");
-    int i = schedulePacket();
-    if (i == -1)
-        throw cRuntimeError("Cannot pop packet");
-    else {
-        auto packet = providers[i]->popPacket(inputGates[i]->getPathStartGate());
-        EV_INFO << "Scheduling packet " << packet->getName() << ".\n";
-        numProcessedPackets++;
-        processedTotalLength += packet->getDataLength();
-        updateDisplayString();
-        animateSend(packet, outputGate);
-        emit(packetPoppedSignal, packet);
-        return packet;
-    }
+    int index = schedulePacket();
+    if (index < 0 || index >= inputGates.size())
+        throw cRuntimeError("Scheduled packet from invalid input gate: %d", index);
+    auto packet = providers[index]->popPacket(inputGates[index]->getPathStartGate());
+    EV_INFO << "Scheduling packet " << packet->getName() << ".\n";
+    numProcessedPackets++;
+    processedTotalLength += packet->getDataLength();
+    updateDisplayString();
+    animateSend(packet, outputGate);
+    emit(packetPoppedSignal, packet);
+    return packet;
 }
 
 void PacketSchedulerBase::handleCanPopPacket(cGate *gate)
