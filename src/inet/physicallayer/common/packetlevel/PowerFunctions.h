@@ -258,20 +258,20 @@ class INET_API BackgroundNoisePowerFunction : public FunctionBase<WpHz, Domain<m
             Point<simsec, Hz> l1(std::get<3>(lower), std::get<4>(i.getLower()));
             Point<simsec, Hz> u1(std::get<3>(upper), std::get<4>(i.getUpper()));
             Interval<simsec, Hz> i1(l1, u1, i.getLowerClosed() & 0b11, i.getUpperClosed() & 0b11, i.getFixed() & 0b11);
-            powerFunction->partition(i1, [&] (const Interval<simsec, Hz>& i2, const IFunction<WpHz, Domain<simsec, Hz>> *g) {
+            powerFunction->partition(i1, [&] (const Interval<simsec, Hz>& i2, const IFunction<WpHz, Domain<simsec, Hz>> *f2) {
                 Interval<m, m, m, simsec, Hz> i3(
                     Point<m, m, m, simsec, Hz>(std::get<0>(lower), std::get<1>(lower), std::get<2>(lower), std::get<0>(i2.getLower()), std::get<1>(i2.getLower())),
                     Point<m, m, m, simsec, Hz>(std::get<0>(upper), std::get<1>(upper), std::get<2>(upper), std::get<0>(i2.getUpper()), std::get<1>(i2.getUpper())),
                     0b11100 | i2.getLowerClosed(),
                     0b11100 | i2.getUpperClosed(),
                     0b11100 | i2.getFixed());
-                if (auto cg = dynamic_cast<const ConstantFunction<WpHz, Domain<simsec, Hz>> *>(g)) {
-                    ConstantFunction<WpHz, Domain<m, m, m, simsec, Hz>> h(cg->getConstantValue());
-                    f(i3, &h);
+                if (auto f2c = dynamic_cast<const ConstantFunction<WpHz, Domain<simsec, Hz>> *>(f2)) {
+                    ConstantFunction<WpHz, Domain<m, m, m, simsec, Hz>> g(f2c->getConstantValue());
+                    f(i3, &g);
                 }
-                else if (auto lg = dynamic_cast<const UnilinearFunction<WpHz, Domain<simsec, Hz>> *>(g)) {
-                    UnilinearFunction<WpHz, Domain<m, m, m, simsec, Hz>> h(i3.getLower(), i3.getUpper(), lg->getValue(i2.getLower()), lg->getValue(i2.getUpper()), lg->getDimension() + 3);
-                    f(i3, &h);
+                else if (auto f2l = dynamic_cast<const UnilinearFunction<WpHz, Domain<simsec, Hz>> *>(f2)) {
+                    UnilinearFunction<WpHz, Domain<m, m, m, simsec, Hz>> g(i3.getLower(), i3.getUpper(), f2l->getValue(i2.getLower()), f2l->getValue(i2.getUpper()), f2l->getDimension() + 3);
+                    f(i3, &g);
                 }
                 else
                     throw cRuntimeError("TODO");
@@ -341,20 +341,20 @@ class INET_API PropagatedTransmissionPowerFunction : public FunctionBase<WpHz, D
             Point<simsec, Hz> l1(std::get<3>(lower) - propagationTime, std::get<4>(i.getLower()));
             Point<simsec, Hz> u1(std::get<3>(upper) - propagationTime, std::get<4>(i.getUpper()));
             Interval<simsec, Hz> i1(l1, u1, i.getLowerClosed() & 0b11, i.getUpperClosed() & 0b11, i.getFixed() & 0b11);
-            transmissionPowerFunction->partition(i1, [&] (const Interval<simsec, Hz>& i2, const IFunction<WpHz, Domain<simsec, Hz>> *g) {
+            transmissionPowerFunction->partition(i1, [&] (const Interval<simsec, Hz>& i2, const IFunction<WpHz, Domain<simsec, Hz>> *f2) {
                 Interval<m, m, m, simsec, Hz> i3(
                     Point<m, m, m, simsec, Hz>(std::get<0>(lower), std::get<1>(lower), std::get<2>(lower), std::get<0>(i2.getLower()) + propagationTime, std::get<1>(i2.getLower())),
                     Point<m, m, m, simsec, Hz>(std::get<0>(upper), std::get<1>(upper), std::get<2>(upper), std::get<0>(i2.getUpper()) + propagationTime, std::get<1>(i2.getUpper())),
                     0b11100 | i2.getLowerClosed(),
                     0b11100 | i2.getUpperClosed(),
                     0b11100 | i2.getFixed());
-                if (auto cg = dynamic_cast<const ConstantFunction<WpHz, Domain<simsec, Hz>> *>(g)) {
-                    ConstantFunction<WpHz, Domain<m, m, m, simsec, Hz>> h(cg->getConstantValue());
-                    f(i3, &h);
+                if (auto f2c = dynamic_cast<const ConstantFunction<WpHz, Domain<simsec, Hz>> *>(f2)) {
+                    ConstantFunction<WpHz, Domain<m, m, m, simsec, Hz>> g(f2c->getConstantValue());
+                    f(i3, &g);
                 }
-                else if (auto lg = dynamic_cast<const UnilinearFunction<WpHz, Domain<simsec, Hz>> *>(g)) {
-                    UnilinearFunction<WpHz, Domain<m, m, m, simsec, Hz>> h(i3.getLower(), i3.getUpper(), lg->getValue(i2.getLower()), lg->getValue(i2.getUpper()), lg->getDimension() + 3);
-                    f(i3, &h);
+                else if (auto f2l = dynamic_cast<const UnilinearFunction<WpHz, Domain<simsec, Hz>> *>(f2)) {
+                    UnilinearFunction<WpHz, Domain<m, m, m, simsec, Hz>> g(i3.getLower(), i3.getUpper(), f2l->getValue(i2.getLower()), f2l->getValue(i2.getUpper()), f2l->getDimension() + 3);
+                    f(i3, &g);
                 }
                 else
                     throw cRuntimeError("TODO");
