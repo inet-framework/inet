@@ -90,6 +90,17 @@ template<typename R, typename D>
 class INET_API FunctionBase : public IFunction<R, D>
 {
   public:
+    virtual void partition(const typename D::I& i, const std::function<void (const typename D::I&, const IFunction<R, D> *)> f) const override {
+        auto m = (1 << std::tuple_size<typename D::P::type>::value) - 1;
+        if (i.getFixed() == m) {
+            ASSERT(i.getLower() == i.getUpper());
+            ConstantFunction<R, D> g(this->getValue(i.getLower()));
+            f(i, &g);
+        }
+        else
+            throw cRuntimeError("Cannot partition %s, interval = %s", this->getClassName(), i.str().c_str());
+    }
+
     virtual Interval<R> getRange() const override {
         return getRange(getDomain());
     }
@@ -714,10 +725,6 @@ class INET_API GaussFunction : public FunctionBase<R, Domain<X>>
         X x = std::get<0>(p);
         double a = toDouble((x - mean) / stddev);
         return R(c / toDouble(stddev) * std::exp(-0.5 * a * a));
-    }
-
-    virtual void partition(const Interval<X>& i, const std::function<void (const Interval<X>&, const IFunction<R, Domain<X>> *)> f) const override {
-        throw cRuntimeError("Invalid operation");
     }
 };
 
