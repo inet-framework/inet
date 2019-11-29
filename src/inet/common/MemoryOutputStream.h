@@ -61,6 +61,13 @@ class INET_API MemoryOutputStream {
         data.reserve((b(initialCapacity).get() + 7) >> 3);
     }
 
+    MemoryOutputStream(const std::vector<uint8_t>& data, b length = b(-1)) :
+        data(data),
+        length(length == b(-1) ? b(data.size() * 8) : length)
+    {
+        assert(b(0) <= this->length);
+    }
+
     /** @name Stream querying functions */
     //@{
     /**
