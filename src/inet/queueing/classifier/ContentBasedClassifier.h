@@ -28,11 +28,14 @@ class INET_API ContentBasedClassifier : public PacketClassifierBase
 {
   protected:
     int defaultGateIndex = -1;
-    std::vector<PacketFilter> filters;
+    std::vector<PacketFilter *> filters;
 
   protected:
     virtual void initialize(int stage) override;
     virtual int classifyPacket(Packet *packet) override;
+
+  public:
+    virtual ~ContentBasedClassifier();
 };
 
 } // namespace queueing

@@ -176,9 +176,10 @@ void Ipv4NodeConfigurator::receiveSignal(cComponent *source, simsignal_t signalI
     }
     else if (signalID == interfaceStateChangedSignal) {
         const auto *ieChangeDetails = check_and_cast<const InterfaceEntryChangeDetails *>(obj);
-        if (ieChangeDetails->getFieldId() == InterfaceEntry::F_STATE) {
+        auto fieldId = ieChangeDetails->getFieldId();
+        if (fieldId == InterfaceEntry::F_STATE || fieldId == InterfaceEntry::F_CARRIER) {
             auto *entry = ieChangeDetails->getInterfaceEntry();
-            if (entry->getState() == InterfaceEntry::State::UP && networkConfigurator) {
+            if (entry->isUp() && networkConfigurator) {
                 networkConfigurator->configureInterface(entry);
                 if (par("configureRoutingTable"))
                     networkConfigurator->configureRoutingTable(routingTable, entry);

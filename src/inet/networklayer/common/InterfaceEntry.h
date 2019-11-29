@@ -166,6 +166,7 @@ class INET_API InterfaceEntry : public cModule
      * Returns the requested state of this interface.
      */
     State getState() const { return state; }
+
     /**
      * Returns the combined state of the carrier and the interface requested state.
      */

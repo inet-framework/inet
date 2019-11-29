@@ -58,7 +58,7 @@ Packet *PacketSchedulerBase::popPacket(cGate *gate)
 {
     Enter_Method("popPacket");
     int index = schedulePacket();
-    if (index < 0 || index >= inputGates.size())
+    if (index < 0 || static_cast<unsigned int>(index) >= inputGates.size())
         throw cRuntimeError("Scheduled packet from invalid input gate: %d", index);
     auto packet = providers[index]->popPacket(inputGates[index]->getPathStartGate());
     EV_INFO << "Scheduling packet " << packet->getName() << ".\n";

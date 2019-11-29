@@ -32,6 +32,7 @@ void PassivePacketSource::initialize(int stage)
         collector = findConnectedModule<IActivePacketSink>(outputGate);
         providingIntervalParameter = &par("providingInterval");
         providingTimer = new cMessage("ProvidingTimer");
+        WATCH_PTR(nextPacket);
     }
     else if (stage == INITSTAGE_QUEUEING) {
         if (collector != nullptr) {

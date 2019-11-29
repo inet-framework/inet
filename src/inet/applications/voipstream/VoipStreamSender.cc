@@ -118,7 +118,20 @@ void VoipStreamSender::initialize(int stage)
 
         destAddress = L3AddressResolver().resolve(par("destAddress"));
         socket.setOutputGate(gate("socketOut"));
+
         socket.bind(localPort);
+
+        int timeToLive = par("timeToLive");
+        if (timeToLive != -1)
+            socket.setTimeToLive(timeToLive);
+
+        int dscp = par("dscp");
+        if (dscp != -1)
+            socket.setDscp(dscp);
+
+        int tos = par("tos");
+        if (tos != -1)
+            socket.setTos(tos);
 
         simtime_t startTime = par("startTime");
 
