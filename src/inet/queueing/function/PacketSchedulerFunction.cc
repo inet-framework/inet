@@ -27,9 +27,14 @@ static int schedulePacketByData(const std::vector<IPassivePacketSource *>& queue
     int selectedData = -1;
     for (int i = 0; i < (int)queues.size(); i++) {
         auto packet = queues[i]->canPopPacket();
-        const auto& data = packet->peekDataAt<BytesChunk>(B(0), B(1));
-        if (data->getBytes().at(0) > selectedData)
-            selectedIndex = i;
+        if (packet != nullptr) {
+            const auto& dataChunk = packet->peekDataAt<BytesChunk>(B(0), B(1));
+            auto data = dataChunk->getBytes().at(0);
+            if (data > selectedData) {
+                selectedData = data;
+                selectedIndex = i;
+            }
+        }
     }
     return selectedIndex;
 }
