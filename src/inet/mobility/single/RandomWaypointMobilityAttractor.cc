@@ -1,6 +1,7 @@
 //
 // Copyright (C) 2005 Georg Lutz, Institut fuer Telematik, University of Karlsruhe
 // Copyright (C) 2005 Andras Varga
+// Copyright (C) 2019 Alfonso Ariza, Universidad de Malaga
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -16,43 +17,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-/*
- * <configuration>
- * //default configuration
- * <common>
- * <attractConf  id = "type_1">
- * <type = "attractor" />
- * <behaviorType = "nearest"/> --"nearest" "incremental", "landscape",  "incremental"  if not attractor is present in the area, what must select, the nearest, increase the area until there are attractors or select a random point in the landscape, default, nearest.
- * <Xdistribution = "uniform()" />
- * <Ydistribution = "uniform()" />
- * <Zdistribution = "uniform()" />
- * <proximity distance="100" repeat = "5" />   -- close attractor
- * <proximity distance="200" repeat = "3" />   -- second close
- * <proximity distance="300" repeat = "2" />   -- third close
- * </attractConf>
- * <attractConf  id = "type_2">
- * <type = "attractor" />
- * <behaviourType = "nearest"/> -- "incremental", "landscape",  "incremental"  if not attractor is present in the area, what must select, the nearest, increase the area until there are attractors or select a random point in the landscape, default if not
- * <Xdistribution = "uniform()" />
- * <Ydistribution = "uniform()" />
- * <Zdistribution = "uniform()" />
- * <proximity distance="200" repeat = "4" />   -- close attractor
- * <proximity distance="300" repeat = "3" />   -- second close
- * <proximity distance="400" repeat = "2" />   -- third close
- * <proximity distance= "MAX" repeat = "1" />  -- any point
- * </attractConf>
- * <attractConf  id = "type_3">
- * <type = "landscape" />
- * <Xdistribution = "uniform($MINX,$MAXX)" />
- * <Ydistribution = "uniform($MINY,$MAXY)" />
- * <Zdistribution = "uniform($MINZ,$MAXZ)" />
- * </attractConf>
- * </common>
- * <attractor x="xxx" y="xxx" z="xxx" AttractorId="type_1">  -- set the position of the attractor
- * <freeAttractor x="xxx" y="xxx" z="xxx" Xdistribution = "uniform()" Ydistribution = "uniform()" Zdistribution = "uniform()" repetition = "3">  -- set the position of the attractor, this is free list, the nodes that doesn't have a type assigned or the type doesn't exist, will use this
- * </configuration>
- *
- */
 
 #include "inet/mobility/single/RandomWaypointMobilityAttractor.h"
 #include <algorithm>
@@ -117,23 +81,32 @@ cDynamicExpression *RandomWaypointMobilityAttractor::getValue(cXMLElement *state
 
 void RandomWaypointMobilityAttractor::parseAttractor(cXMLElement *nodes)
 {
+    AttractorConf conf;
+
     cXMLElementList childs = nodes->getChildren();
 
     std::string id(nodes->getAttribute("id"));
-    AttractorConf conf;
+    std::string typeAttractor(nodes->getAttribute("type"));
+
+    if (typeAttractor == "attractor")
+        conf.type = ATTRACTOR;
+    else if (typeAttractor == "landscape")
+        conf.type = LANDSCAPE;
+    else
+        throw cRuntimeError("Wrong value '%s' ", typeAttractor.c_str());
+
+    if (conf.type == ATTRACTOR) {
+        std::string behaviorType(nodes->getAttribute("behaviorType"));
+        if (behaviorType != "nearest" && behaviorType != "incremental" && behaviorType != "landscape")
+            throw cRuntimeError("behaviourType '%s' not allowed", behaviorType.c_str());
+        conf.behavior = behaviorType;
+    }
+
+
     for (auto & child : childs)
     {
         const char *tag = child->getTagName();
-        if (!strcmp(tag, "type")) {
-            const char * s = child->getNodeValue();
-            if (!strcmp(s, "attractor"))
-                conf.type = ATTRACTOR;
-            else if (!strcmp(s, "landscape"))
-                conf.type = LANDSCAPE;
-            else
-                throw cRuntimeError("Wrong value '%s' ", s);
-        }
-        else if (!strcmp(tag, "Xdistribution")) {
+        if (!strcmp(tag, "Xdistribution")) {
             conf.distX = getValue(child);
         }
         else if (!strcmp(tag, "Ydistribution")) {
@@ -151,12 +124,6 @@ void RandomWaypointMobilityAttractor::parseAttractor(cXMLElement *nodes)
             conf.attractorData.push_back(data);
             conf.totalRep += prob;
         }
-        else if (!strcmp(tag, "behaviorType")) {
-            std::string str(child->getNodeValue());
-            if (str != "nearest" && str != "incremental" && str != "landscape")
-                throw cRuntimeError("behaviourType '%s' not allowed", str.c_str());
-            conf.behavior = str;
-        }
     }
     attractorConf[id] = conf;
 }
@@ -173,8 +140,8 @@ void RandomWaypointMobilityAttractor::parseXml(cXMLElement *nodes)
         if (!strcmp(tag, "common")) {
             cXMLElementList childsCommon = child->getChildren();
             for (auto & childCommon : childsCommon) {
-                const char *tag = childCommon->getTagName();
-                if (!strcmp(tag, "attractConf")) {
+                const char *tagChild = childCommon->getTagName();
+                if (!strcmp(tagChild, "attractConf")) {
                     parseAttractor(childCommon);
                 }
             }
@@ -204,13 +171,32 @@ void RandomWaypointMobilityAttractor::parseXml(cXMLElement *nodes)
             }
         }
         else if (!strcmp(tag, "freeAttractor")) {
-            std::string x(child->getAttribute("x"));
-            std::string y(child->getAttribute("y"));
-            std::string z(child->getAttribute("z"));
-            std::string repetition(child->getAttribute("repetition"));
-            std::string Xdistribution(child->getAttribute("Xdistribution"));
-            std::string Ydistribution(child->getAttribute("Ydistribution"));
-            std::string Zdistribution(child->getAttribute("Zdistribution"));
+
+            std::string x;
+            std::string y;
+            std::string z;
+            std::string Xdistribution;
+            std::string Ydistribution;
+            std::string Zdistribution;
+            std::string repetition;
+
+            if (child->getAttribute("x"))
+                x = std::string(child->getAttribute("x"));
+            if (child->getAttribute("y"))
+                y = std::string(child->getAttribute("y"));
+            if (child->getAttribute("z"))
+                z = std::string(child->getAttribute("z"));
+
+            if (child->getAttribute("Xdistribution"))
+                Xdistribution = std::string(child->getAttribute("Xdistribution"));
+            if (child->getAttribute("Ydistribution"))
+                Ydistribution = std::string(child->getAttribute("Ydistribution"));
+            if (child->getAttribute("Zdistribution"))
+                Zdistribution = std::string(child->getAttribute("Zdistribution"));
+
+            if (child->getAttribute("repetition"))
+                repetition = std::string(child->getAttribute("repetition"));
+
             PointData point;
             if (!x.empty())
                 point.pos.x = std::stod(x);
@@ -218,6 +204,7 @@ void RandomWaypointMobilityAttractor::parseXml(cXMLElement *nodes)
                 point.pos.y = std::stod(y);
             if (!z.empty())
                 point.pos.z = std::stod(z);
+
             if (!repetition.empty())
                 point.repetition = std::stod(repetition);
             if (!Xdistribution.empty()) {
@@ -243,7 +230,7 @@ void RandomWaypointMobilityAttractor::parseXml(cXMLElement *nodes)
 Coord RandomWaypointMobilityAttractor::getNewCoord()
 {
     Coord posAttractor;
-    if (typeAttractor.empty()) {
+    if (attractorId.empty()) {
         if (freeAtractors.empty())
             return getRandomPosition();
 
@@ -273,29 +260,28 @@ Coord RandomWaypointMobilityAttractor::getNewCoord()
     }
     else {
 
-        auto itAttractors = listsAttractors.find(typeAttractor);
+        auto itAttractors = listsAttractors.find(attractorId);
         if (itAttractors == listsAttractors.end() || itAttractors->second.empty()) {
             return getRandomPosition();
         }
 
-        auto itconf = attractorConf.find(typeAttractor);
+        auto itconf = attractorConf.find(attractorId);
         if (itconf == attractorConf.end())
             throw cRuntimeError(
                     "Doesn't exist a configured attractor with id '%s'",
-                    typeAttractor.c_str());
+                    attractorId.c_str());
 
         if (itconf->second.attractorData.empty())
             return getRandomPosition();
 
         // First, compute probabilities.
         double prob = uniform(0, itconf->second.totalRep);
-        double repetitions = 0;
-        unsigned int pos = 0;
-        for (auto elem : itconf->second.attractorData) {
-            if (repetitions < prob)
+        double repetitions = itconf->second.attractorData.front().probability;
+        unsigned int pos;
+        for (pos = 0; pos < itconf->second.attractorData.size(); pos++) {
+            if (repetitions > prob)
                 break;
-            repetitions += elem.probability;
-            pos++;
+            repetitions += itconf->second.attractorData[pos].probability;
         }
 
         if (pos == itconf->second.attractorData.size())
@@ -305,7 +291,7 @@ Coord RandomWaypointMobilityAttractor::getNewCoord()
         double distance = itconf->second.attractorData[pos].distance;
         do {
             for (const auto &elem : itAttractors->second) {
-                if (elem.distance(this->getCurrentPosition()) < distance) {
+                if (elem.distance(this->lastPosition) < distance) {
                     attractors.push_back(elem);
                 }
             }
@@ -318,15 +304,13 @@ Coord RandomWaypointMobilityAttractor::getNewCoord()
                     double distNearest = std::numeric_limits<double>::max();
                     Coord pos = Coord::NIL;
                     for (const auto &elem : itAttractors->second) {
-                        if (elem.distance(this->getCurrentPosition()) < distNearest) {
+                        if (elem.distance(this->lastPosition) < distNearest) {
                             pos = elem;
-                            distNearest = elem.distance(this->getCurrentPosition());
+                            distNearest = elem.distance(this->lastPosition);
                         }
                     }
                     if (pos == Coord::NIL)
-                        throw cRuntimeError(
-                                "Impossible to find an attractor with id '%s'",
-                                typeAttractor.c_str());
+                        throw cRuntimeError("Impossible to find an attractor with id '%s'", attractorId.c_str());
                     attractors.push_back(pos);
                 }
                 else {
@@ -337,7 +321,7 @@ Coord RandomWaypointMobilityAttractor::getNewCoord()
                     }
                     distance = itconf->second.attractorData[pos].distance;
                     for (const auto &elem : itAttractors->second) {
-                        if (elem.distance(this->getCurrentPosition()) < distance) {
+                        if (elem.distance(this->lastPosition) < distance) {
                             attractors.push_back(elem);
                         }
                     }
@@ -392,11 +376,14 @@ void RandomWaypointMobilityAttractor::initialize(int stage)
     LineSegmentsMobilityBase::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
+
         waitTimeParameter = &par("waitTime");
         hasWaitTime = waitTimeParameter->isExpression() || waitTimeParameter->doubleValue() != 0;
         speedParameter = &par("speed");
         stationary = !speedParameter->isExpression() && speedParameter->doubleValue() == 0;
+        attractorId = std::string(par("attractorId").stringValue());
         parseXml(par("xmlConfiguration"));
+
         // Order the distances ring
         for (auto elem : attractorConf) {
             std::sort(elem.second.attractorData.begin(), elem.second.attractorData.end());
@@ -412,7 +399,7 @@ void RandomWaypointMobilityAttractor::setTargetPosition()
         nextMoveIsWait = false;
     }
     else {
-        targetPosition = getRandomPosition();
+        targetPosition = getNewCoord();
         double speed = speedParameter->doubleValue();
         double distance = lastPosition.distance(targetPosition);
         simtime_t travelTime = distance / speed;

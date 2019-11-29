@@ -82,7 +82,7 @@ class INET_API RandomWaypointMobilityAttractor : public LineSegmentsMobilityBase
 
     struct PointData {
           Coord pos;
-          double repetition;
+          double repetition = 0;
           cDynamicExpression *distX = nullptr;
           cDynamicExpression *distY = nullptr;
           cDynamicExpression *distZ = nullptr;
@@ -103,7 +103,7 @@ class INET_API RandomWaypointMobilityAttractor : public LineSegmentsMobilityBase
     cDynamicExpression *getValue(cXMLElement *statement);
     Coord getNewCoord();
 
-    std::string typeAttractor;
+    std::string attractorId;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
