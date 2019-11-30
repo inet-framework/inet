@@ -98,6 +98,12 @@ bool RedDropper::shouldDrop(cPacket *packet)
         avg = pow(1 - wq, m) * avg;
     }
 
+    if (queueLength >= maxth) {    // maxth is also the "hard" limit
+        EV << "Queue len " << queueLength << " >= maxth, dropping packet.\n";
+        count[i] = 0;
+        return true;
+    }
+    
     if (minth <= avg && avg < maxth)
     {
         count[i]++;
@@ -112,11 +118,6 @@ bool RedDropper::shouldDrop(cPacket *packet)
     }
     else if (avg >= maxth) {
         EV << "Avg queue len " << avg << " >= maxth, dropping packet.\n";
-        count[i] = 0;
-        return true;
-    }
-    else if (queueLength >= maxth) {    // maxth is also the "hard" limit
-        EV << "Queue len " << queueLength << " >= maxth, dropping packet.\n";
         count[i] = 0;
         return true;
     }
