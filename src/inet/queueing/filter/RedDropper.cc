@@ -66,6 +66,12 @@ bool RedDropper::matchesPacket(Packet *packet)
         const double m = SIMTIME_DBL(simTime() - q_time) * pkrate;
         avg = pow(1 - wq, m) * avg;
     }
+     
+    if (queueLength >= maxth) {    // maxth is also the "hard" limit
+        EV << "Queue len " << queueLength << " >= maxth, dropping packet.\n";
+        count = 0;
+        return false;
+    }
 
     if (minth <= avg && avg < maxth) {
         count++;
@@ -79,11 +85,6 @@ bool RedDropper::matchesPacket(Packet *packet)
     }
     else if (avg >= maxth) {
         EV << "Avg queue len " << avg << " >= maxth, dropping packet.\n";
-        count = 0;
-        return false;
-    }
-    else if (queueLength >= maxth) {    // maxth is also the "hard" limit
-        EV << "Queue len " << queueLength << " >= maxth, dropping packet.\n";
         count = 0;
         return false;
     }
