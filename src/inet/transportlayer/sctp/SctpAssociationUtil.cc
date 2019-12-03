@@ -1077,7 +1077,7 @@ void SctpAssociation::sendHeartbeatAck(const SctpHeartbeatChunk *heartbeatChunk,
             heartbeatAckChunk->setInfo(i, heartbeatChunk->getInfo(i));
     }
 
-    heartbeatAckChunk->setByteLength(heartbeatChunk->getByteLength());
+    heartbeatAckChunk->setByteLength(heartbeatChunk->getByteLength() + 9 - 5);    // FIXME + 9 because of writing simtime to the stream, -5 don't know why, it was 5 bytes more than it should have been
     if (state->auth && state->peerAuth && typeInChunkList(HEARTBEAT_ACK)) {
         authChunk = createAuthChunk();
         sctpHeartbeatAck->insertSctpChunks(authChunk);
