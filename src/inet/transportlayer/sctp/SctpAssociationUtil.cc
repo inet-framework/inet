@@ -1044,7 +1044,7 @@ void SctpAssociation::sendHeartbeat(const SctpPathVariables *path)
     heartbeatChunk->setSctpChunkType(HEARTBEAT);
     heartbeatChunk->setRemoteAddr(path->remoteAddress);
     heartbeatChunk->setTimeField(simTime());
-    heartbeatChunk->setByteLength(SCTP_HEARTBEAT_CHUNK_LENGTH + 12);
+    heartbeatChunk->setByteLength(SCTP_HEARTBEAT_CHUNK_LENGTH + 12 + 9);    // FIXME + 9 because of writing simtime to the stream
     if (state->auth && state->peerAuth && typeInChunkList(HEARTBEAT)) {
         authChunk = createAuthChunk();
         sctpHeartbeatbeat->insertSctpChunks(authChunk);
