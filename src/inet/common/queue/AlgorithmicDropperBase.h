@@ -21,7 +21,7 @@
 
 #include "inet/common/INETDefs.h"
 #include "inet/common/queue/IQueueAccess.h"
-
+#include "inet/networklayer/ipv4/IPv4Datagram.h"
 namespace inet {
 
 /**
