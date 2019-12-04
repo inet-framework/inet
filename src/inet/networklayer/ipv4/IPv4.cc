@@ -35,8 +35,6 @@
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/LayeredProtocolBase.h"
-#include "inet/linklayer/ppp/PPP.h"
-#include "inet/common/queue/DropTailQueue.h"
 
 namespace inet {
 
@@ -47,8 +45,7 @@ Define_Module(IPv4);
 // a local interface-k hasznalata eseten szinten hianyozhatnak bizonyos NetFilter hook-ok
 
 IPv4::IPv4() :
-    isUp(true),
-    ecnEnabled(false)
+    isUp(true)
 {
 }
 
@@ -77,9 +74,6 @@ void IPv4::initialize(int stage)
         fragmentTimeoutTime = par("fragmentTimeout");
         forceBroadcast = par("forceBroadcast");
         useProxyARP = par("useProxyARP");
-
-        qLengthThreshold = par("ecnQLengthThrsh");
-        ecnEnabled = par("ecnEnabled");
 
         curFragmentId = 0;
         lastCheckTime = 0;
@@ -464,70 +458,6 @@ void IPv4::routeUnicastPacket(IPv4Datagram *datagram, const InterfaceEntry *from
         icmp->sendErrorMessage(datagram, fromIE ? fromIE->getInterfaceId() : -1, ICMP_DESTINATION_UNREACHABLE, 0);
     }
     else {    // fragment and send
-
-        // rfc-3168, pages 6-7:
-        // The ECN-Capable Transport (ECT) codepoints '10' and '01' are set by the
-        // data sender to indicate that the end-points of the transport protocol
-        // are ECN-capable; we call them ECT(0) and ECT(1) respectively...
-        // ...The not-ECT codepoint '00' indicates a packet that is not using ECN.
-        // The CE codepoint '11' is set by a router to indicate congestion to
-        // the end nodes.  Routers that have a packet arriving at a full queue
-        // drop the packet, just as they do in the absence of ECN.
-        //
-        // The ECN Field in IP:
-        //  +-----+-----+
-        //  | ECN FIELD |
-        //  +-----+-----+
-        //    ECT   CE         [Obsolete] RFC 2481 names for the ECN bits.
-        //     0     0         Not-ECT
-        //     0     1         ECT(1)
-        //     1     0         ECT(0)
-        //     1     1         CE
-
-        // IeFullPath is of this structure: <NetworkName>.rte[*].ppp*
-        // while the actual path should be of the following
-        // structure: <NetworkName>.rte[*].ppp[*], so we have to convert
-        // distIeFullPath to the appropriate structure, I.e: add [ ] around
-        // ppp's index.
-        if (ecnEnabled) {
-            std::string distIeFullPath = destIE->getFullPath();
-            std::string pppIndex = distIeFullPath.substr(
-                    distIeFullPath.length() - 1);
-            std::string distIeFixedFullPath = distIeFullPath.substr(0,
-                    distIeFullPath.length() - 1) + "[" + pppIndex + "]";
-            // We intend to access the ppp queue, so we add ".queue" to the path
-            std::string pppQueueFullPath = distIeFixedFullPath + ".queue";
-            // First, we have to subscribe to the relevant queues (if didn't
-            // subscribe yet) in order to receive queue length updates and
-            // set CE in IPv4 header if queue length exceeds threshold.
-            DropTailQueue* q = (DropTailQueue*) getModuleByPath(
-                    pppQueueFullPath.c_str());
-            if (q) {
-                // check if queue path does not exist in qLengthMap (didn't subscribe yet).
-                if (qLengthMap.count(pppQueueFullPath) == 0) {
-                    cModule *pppQueueModule = check_and_cast<cModule *>(q);
-                    pppQueueModule->subscribe(DropTailQueue::queueLengthSignal,
-                            this);
-                    //If we were already listening then the size would have been zero
-                    qLengthMap[pppQueueFullPath] = 0;
-                }
-
-                int queueLength = qLengthMap[pppQueueFullPath];
-                // If queue length exceeded threshold, then set CE.
-                if (queueLength > qLengthThreshold) {
-                    //if ECN-Capable Transport (ECT)
-                    if (datagram->getExplicitCongestionNotification() == 1
-                            || datagram->getExplicitCongestionNotification()
-                                    == 2) {
-                        EV_INFO << "\nECN-Capable Transport... set CE "
-                                       << "(queue length: " << queueLength
-                                       << ")\n";
-                        datagram->setExplicitCongestionNotification(3); //set CE
-                    }
-                }
-            }
-        }
-
         L3Address nextHop(nextHopAddr);
         if (fromIE != nullptr) {
             if (datagramForwardHook(datagram, fromIE, destIE, nextHop) != INetfilter::IHook::ACCEPT)
@@ -1258,15 +1188,4 @@ void IPv4::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj,
     }
 }
 
-void IPv4::receiveSignal(cComponent *source, simsignal_t signalID, long l, cObject *details)
-{
-    if (ecnEnabled) {
-        if (signalID == DropTailQueue::queueLengthSignal) {
-            std::string qFullPath = source->getFullPath();
-            qLengthMap[qFullPath] = l;
-        }
-    }
-}
-
 } // namespace inet
-

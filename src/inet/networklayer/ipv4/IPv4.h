@@ -30,7 +30,6 @@
 #include "inet/networklayer/ipv4/IPv4FragBuf.h"
 #include "inet/common/ProtocolMap.h"
 #include "inet/common/queue/QueueBase.h"
-#include "inet/common/queue/DropTailQueue.h"
 
 namespace inet {
 
@@ -62,15 +61,8 @@ class INET_API IPv4 : public QueueBase, public INetfilter, public ILifecycle, pu
         const IHook::Type hookType = (IHook::Type)-1;
     };
     typedef std::map<IPv4Address, cPacketQueue> PendingPackets;
-    typedef std::map<std::string, int> queuesLengthMap;
 
   protected:
-    // for each ppp[*].queue we save the last queue length. the key is the
-    // full path of the queue (full path is unique).
-    queuesLengthMap qLengthMap;
-    double qLengthThreshold;   // queue length threshold. Triggers setting CE in IPv4 header
-    bool ecnEnabled;    //true if ECN is enabled
-
     IIPv4RoutingTable *rt = nullptr;
     IInterfaceTable *ift = nullptr;
     IARP *arp = nullptr;
@@ -309,9 +301,8 @@ class INET_API IPv4 : public QueueBase, public INetfilter, public ILifecycle, pu
      */
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
 
-    /// cListener methods
+    /// cListener method
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, long l, cObject *details) override;
 
   protected:
     virtual bool isNodeUp();
