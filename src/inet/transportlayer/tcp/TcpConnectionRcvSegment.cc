@@ -1029,22 +1029,18 @@ TcpEventCode TcpConnection::processSegmentInSynSent(Packet *packet, const Ptr<co
 
             //ECN
             if (state->ecnSynSent) {
-                if (tcpseg->getEceBit() == true
-                        && tcpseg->getCwrBit() == false) {
+                if (tcpseg->getEceBit() && !tcpseg->getCwrBit()) {
                     state->ect = true;
-                    EV
-                              << "ECN-setup SYN-ACK packet was received... ECN is enabled.\n";
+                    EV << "ECN-setup SYN-ACK packet was received... ECN is enabled.\n";
                 } else {
                     state->ect = false;
-                    EV
-                              << "non-ECN-setup SYN-ACK packet was received... ECN is disabled.\n";
+                    EV << "non-ECN-setup SYN-ACK packet was received... ECN is disabled.\n";
                 }
                 state->ecnSynSent = false;
             } else {
                 state->ect = false;
-                if (tcpseg->getEceBit() == true && tcpseg->getCwrBit() == false)
-                    EV
-                              << "ECN-setup SYN-ACK packet was received... ECN is disabled.\n";
+                if (tcpseg->getEceBit() && !tcpseg->getCwrBit())
+                    EV << "ECN-setup SYN-ACK packet was received... ECN is disabled.\n";
             }
 
             // This will trigger transition to ESTABLISHED. Timers and notifying
@@ -1142,7 +1138,7 @@ bool TcpConnection::processAckInEstabEtc(Packet *packet, const Ptr<const TcpHead
     int payloadLength = packet->getByteLength() - B(tcpseg->getHeaderLength()).get();
 
     //ECN
-    TCPStateVariables* state = getState();
+    TcpStateVariables* state = getState();
     if (state && state->ect) {
         if (tcpseg->getEceBit() == true) {
             EV_INFO << "Received packet with ECE\n";

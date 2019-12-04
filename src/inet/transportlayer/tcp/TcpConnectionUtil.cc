@@ -26,6 +26,7 @@
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/packet/Message.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
+#include "inet/networklayer/common/EcnTag_m.h"
 #include "inet/networklayer/common/IpProtocolId_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/transportlayer/common/L4Tools.h"
@@ -310,10 +311,7 @@ void TcpConnection::sendToIP(Packet *packet, const Ptr<TcpHeader>& tcpseg)
     // rfc-3168, page 20:
     // ECN-capable TCP implementations MUST NOT set either ECT codepoint
     // (ECT(0) or ECT(1)) in the IP header for retransmitted data packets
-    if (state->ect && !state->sndAck && !state->rexmit)
-        controlInfo->setExplicitCongestionNotification(1);
-    else
-        controlInfo->setExplicitCongestionNotification(0);
+    packet->addTagIfAbsent<EcnReq>()->setExplicitCongestionNotification((state->ect && !state->sndAck && !state->rexmit) ? 1 : 0);
 
     tcpseg->setCrc(0);
     tcpseg->setCrcMode(tcpMain->crcMode);
@@ -709,7 +707,7 @@ void TcpConnection::sendAck()
     // data packets) until it receives a CWR packet (a packet with the CWR
     // flag set).  After the receipt of the CWR packet, acknowledgments for
     // subsequent non-CE data packets do not have the ECN-Echo flag set.
-    TCPStateVariables* state = getState();
+    TcpStateVariables* state = getState();
     if (state && state->ect) {
         if (state->gotCeIndication) {
             EV_INFO << "Received CE... ";

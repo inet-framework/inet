@@ -141,13 +141,11 @@ void TcpReno::receivedDataAck(uint32 firstSeqAcked)
                     EV_INFO << "cwnd = 1... reset retransmit timer.\n";
                 }
                 state->eceReactionTime = simTime();
-                if (cwndVector)
-                    cwndVector->record(state->snd_cwnd);
-                if (ssthreshVector)
-                    ssthreshVector->record(state->ssthresh);
-            } else
-                EV_INFO
-                               << "multiple ECN-Echo ACKs in less than rtt... no ECN reaction\n";
+                conn->emit(cwndSignal, state->snd_cwnd);
+                conn->emit(ssthreshSignal, state->ssthresh);
+            }
+            else
+                EV_INFO << "multiple ECN-Echo ACKs in less than rtt... no ECN reaction\n";
             state->gotEce = false;
         }
         if (performSsCa) {
@@ -162,9 +160,7 @@ void TcpReno::receivedDataAck(uint32 firstSeqAcked)
                 state->snd_cwnd += state->snd_mss;
 
                 conn->emit(cwndSignal, state->snd_cwnd);
-
-                if (ssthreshVector)
-                    ssthreshVector->record(state->ssthresh);
+                conn->emit(ssthreshSignal, state->ssthresh);
 
                 EV_INFO << "cwnd=" << state->snd_cwnd << "\n";
             }
@@ -178,8 +174,7 @@ void TcpReno::receivedDataAck(uint32 firstSeqAcked)
                 state->snd_cwnd += incr;
 
                 conn->emit(cwndSignal, state->snd_cwnd);
-                if (ssthreshVector)
-                    ssthreshVector->record(state->ssthresh);
+                conn->emit(ssthreshSignal, state->ssthresh);
 
                 //
                 // Note: some implementations use extra additive constant mss / 8 here
@@ -190,6 +185,7 @@ void TcpReno::receivedDataAck(uint32 firstSeqAcked)
                 //
 
                 EV_INFO << "cwnd > ssthresh: Congestion Avoidance: increasing cwnd linearly, to " << state->snd_cwnd << "\n";
+            }
         }
     }
 
