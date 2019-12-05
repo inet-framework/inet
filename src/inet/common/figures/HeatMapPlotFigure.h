@@ -43,8 +43,8 @@ class INET_API HeatMapPlotFigure : public cGroupFigure
     std::vector<Tick> yTicks;
 
     Rectangle bounds;
-    double yTickSize = 2.5;
-    double xTickSize = 3;
+    double yTickSize = INFINITY;
+    double xTickSize = INFINITY;
     int labelOffset = 0;
     double numberSizeFactor = 1;
     double minX = 0;
