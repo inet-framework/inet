@@ -30,16 +30,16 @@ class INET_API PlotFigure : public cGroupFigure, public inet::IIndicatorFigure
     {
         cLineFigure *tick;
         cLineFigure *dashLine;
-        cTextFigure *number;
+        cLabelFigure *number;
 
-        Tick(cLineFigure *tick, cLineFigure *dashLine, cTextFigure *number) :
+        Tick(cLineFigure *tick, cLineFigure *dashLine, cLabelFigure *number) :
             tick(tick), dashLine(dashLine), number(number) {}
     };
 
     std::vector<cPathFigure *> seriesPlotFigures;
-    cTextFigure *labelFigure;
-    cTextFigure *xAxisLabelFigure;
-    cTextFigure *yAxisLabelFigure;
+    cLabelFigure *labelFigure;
+    cLabelFigure *xAxisLabelFigure;
+    cLabelFigure *yAxisLabelFigure;
     cRectangleFigure *backgroundFigure;
     std::vector<Tick> xTicks;
     std::vector<Tick> yTicks;
