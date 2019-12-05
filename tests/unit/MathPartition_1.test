@@ -88,6 +88,16 @@ void FunctionTest::test1()
     auto f15 = makeShared<ApproximatedFunction<double, Domain<double, double>, 1, double>>(-1, 1, 0.5, &LeftInterpolator<double, double>::singleton, f14);
 	FunctionChecker<double, Domain<double, double>>(f14).check(Interval<double, double>(Point<double, double>(1.3, -1), Point<double, double>(2.1, 1), 0b11, 0b00, 0b00));
     printPartitioning<double, Domain<double, double>>(f15->getDomain(), f15);
+
+    std::cout << "\nSawtoothFunction\n";
+    auto f16 = makeShared<SawtoothFunction<double, double>>(0, 8, 4, 4);
+    auto f17 = makeShared<ApproximatedFunction<double, Domain<double>, 0, double>>(0, 8, 1, &LeftInterpolator<double, double>::singleton, f16);
+    printPartitioning<double, Domain<double>>(f17->getDomain(), f17);
+
+    std::cout << "\nModulatedFunction\n";
+    auto f18 = makeShared<TwoDimensionalBoxcarFunction<double, double, double>>(0, 8, 0, 1, 1);
+    auto f19 = makeShared<ModulatedFunction<double, double, double>>(f18, f17);
+    printPartitioning<double, Domain<double, double>>(f19->getDomain(), f19);
 }
 
 %activity:
@@ -573,4 +583,92 @@ constant over (8 … 9) x [1 … inf)
 constant over (9 … 10) x [1 … inf)
   → 0
 constant over (10 … inf) x [1 … inf)
+  → 0
+
+SawtoothFunction
+
+Partitioning (-inf … inf)
+constant over (-inf … 0)
+  → 0
+constant over [0 … 1)
+  → 0
+constant over [1 … 2)
+  → 1
+constant over [2 … 3)
+  → 2
+constant over [3 … 4)
+  → 3
+constant over [4 … 5)
+  → 0
+constant over [5 … 6)
+  → 1
+constant over [6 … 7)
+  → 2
+constant over [7 … 8)
+  → 3
+constant over [8 … inf)
+  → 0
+
+ModulatedFunction
+
+Partitioning (-inf … inf) x (-inf … inf)
+constant over (-inf … 0) x (-inf … 0)
+  → 0
+constant over (-inf … 0) x [0 … 1)
+  → 0
+constant over (-inf … 0) x [1 … inf)
+  → 0
+constant over [0 … 1) x (-inf … 0)
+  → 0
+constant over [0 … 1) x [0 … 1)
+  → 1
+constant over [0 … 1) x [1 … inf)
+  → 0
+constant over [1 … 2) x (-inf … 1)
+  → 0
+constant over [1 … 2) x [1 … 2)
+  → 1
+constant over [1 … 2) x [2 … inf)
+  → 0
+constant over [2 … 3) x (-inf … 2)
+  → 0
+constant over [2 … 3) x [2 … 3)
+  → 1
+constant over [2 … 3) x [3 … inf)
+  → 0
+constant over [3 … 4) x (-inf … 3)
+  → 0
+constant over [3 … 4) x [3 … 4)
+  → 1
+constant over [3 … 4) x [4 … inf)
+  → 0
+constant over [4 … 5) x (-inf … 0)
+  → 0
+constant over [4 … 5) x [0 … 1)
+  → 1
+constant over [4 … 5) x [1 … inf)
+  → 0
+constant over [5 … 6) x (-inf … 1)
+  → 0
+constant over [5 … 6) x [1 … 2)
+  → 1
+constant over [5 … 6) x [2 … inf)
+  → 0
+constant over [6 … 7) x (-inf … 2)
+  → 0
+constant over [6 … 7) x [2 … 3)
+  → 1
+constant over [6 … 7) x [3 … inf)
+  → 0
+constant over [7 … 8) x (-inf … 3)
+  → 0
+constant over [7 … 8) x [3 … 4)
+  → 1
+constant over [7 … 8) x [4 … inf)
+  → 0
+constant over [8 … inf) x (-inf … 0)
+  → 0
+constant over [8 … inf) x [0 … 1)
+  → 0
+constant over [8 … inf) x [1 … inf)
   → 0
