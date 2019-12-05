@@ -1035,6 +1035,13 @@ class INET_API AdditionFunction : public FunctionBase<R, D>
 
     virtual void partition(const typename D::I& i, const std::function<void (const typename D::I&, const IFunction<R, D> *)> callback) const override {
         function1->partition(i, [&] (const typename D::I& i1, const IFunction<R, D> *f1) {
+            // NOTE: optimization for 0 + x
+            if (auto f1c = dynamic_cast<const ConstantFunction<R, D> *>(f1)) {
+                if (toDouble(f1c->getConstantValue()) == 0) {
+                    function2->partition(i1, callback);
+                    return;
+                }
+            }
             function2->partition(i1, [&] (const typename D::I& i2, const IFunction<R, D> *f2) {
                 // TODO: use template specialization for compile time optimization
                 if (auto f1c = dynamic_cast<const ConstantFunction<R, D> *>(f1)) {
@@ -1269,6 +1276,14 @@ class INET_API DivisionFunction : public FunctionBase<double, D>
 
     virtual void partition(const typename D::I& i, const std::function<void (const typename D::I&, const IFunction<double, D> *)> callback) const override {
         function1->partition(i, [&] (const typename D::I& i1, const IFunction<R, D> *f1) {
+            // NOTE: optimization for 0 / x
+            if (auto f1c = dynamic_cast<const ConstantFunction<R, D> *>(f1)) {
+                if (toDouble(f1c->getConstantValue()) == 0 && function2->isNonZero(i1)) {
+                    ConstantFunction<double, D> g(0);
+                    callback(i1, &g);
+                    return;
+                }
+            }
             function2->partition(i1, [&] (const typename D::I& i2, const IFunction<R, D> *f2) {
                 if (auto f1c = dynamic_cast<const ConstantFunction<R, D> *>(f1)) {
                     if (auto f2c = dynamic_cast<const ConstantFunction<R, D> *>(f2)) {
