@@ -122,6 +122,15 @@ class INET_API FunctionBase : public IFunction<R, D>
         return result;
     }
 
+    virtual bool isNonZero() const override { return isNonZero(getDomain()); }
+    virtual bool isNonZero(const typename D::I& i) const override {
+        bool result = true;
+        this->partition(i, [&] (const typename D::I& i1, const IFunction<R, D> *f1) {
+            result &= f1->isNonZero(i1);
+        });
+        return result;
+    }
+
     virtual R getMin() const override { return getMin(getDomain()); }
     virtual R getMin(const typename D::I& i) const override {
         R result(getUpperBound<R>());
@@ -296,6 +305,7 @@ class INET_API ConstantFunction : public FunctionBase<R, D>
     }
 
     virtual bool isFinite(const typename D::I& i) const override { return std::isfinite(toDouble(value)); }
+    virtual bool isNonZero(const typename D::I& i) const override { return value != R(0); }
     virtual R getMin(const typename D::I& i) const override { return value; }
     virtual R getMax(const typename D::I& i) const override { return value; }
     virtual R getMean(const typename D::I& i) const override { return value; }
@@ -351,6 +361,7 @@ class INET_API OneDimensionalBoxcarFunction : public FunctionBase<R, Domain<X>>
     }
 
     virtual bool isFinite(const Interval<X>& i) const override { return std::isfinite(toDouble(value)); }
+    virtual bool isNonZero(const Interval<X>& i) const override { return value != R(0) && lower <= std::get<0>(i.getLower()) && std::get<0>(i.getUpper()) <= upper; }
 
     virtual void printStructure(std::ostream& os, int level = 0) const override {
         os << "(OneDimensionalBoxcar, [" << lower << " … " << upper << "] → " << value << ")";
@@ -406,6 +417,11 @@ class INET_API TwoDimensionalBoxcarFunction : public FunctionBase<R, Domain<X, Y
     }
 
     virtual bool isFinite(const Interval<X, Y>& i) const override { return std::isfinite(toDouble(value)); }
+    virtual bool isNonZero(const Interval<X, Y>& i) const override {
+        return value != R(0) &&
+               lowerX <= std::get<0>(i.getLower()) && std::get<0>(i.getUpper()) <= upperX &&
+               lowerY <= std::get<1>(i.getLower()) && std::get<1>(i.getUpper()) <= upperY;
+    }
 
     virtual void printStructure(std::ostream& os, int level = 0) const override {
         os << "(TwoDimensionalBoxcar, [" << lowerX << " … " << upperX << "] x [" << lowerY << " … " << upperY << "] → " << value << ")";

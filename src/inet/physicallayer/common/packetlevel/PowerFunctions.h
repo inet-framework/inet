@@ -437,6 +437,9 @@ class INET_API AntennaGainFunction : public IFunction<double, Domain<Quaternion>
     virtual bool isFinite() const override { throw cRuntimeError("TODO"); }
     virtual bool isFinite(const Interval<Quaternion>& i) const override { throw cRuntimeError("TODO"); }
 
+    virtual bool isNonZero() const override { throw cRuntimeError("TODO"); }
+    virtual bool isNonZero(const Interval<Quaternion>& i) const override { throw cRuntimeError("TODO"); }
+
     virtual double getMin() const override { throw cRuntimeError("TODO"); }
     virtual double getMin(const Interval<Quaternion>& i) const override { throw cRuntimeError("TODO"); }
 
