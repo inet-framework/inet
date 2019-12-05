@@ -26,7 +26,6 @@ static const char *INIT_PLOT_COLOR = "blue";
 static const char *INIT_BACKGROUND_COLOR = "white";
 static const double TICK_LENGTH = 5;
 static const double NUMBER_SIZE_PERCENT = 0.1;
-static const double NUMBER_DISTANCE_FROM_TICK = 0.04;
 static const double LABEL_Y_DISTANCE_FACTOR = 1.5;
 
 static const char *PKEY_BACKGROUND_COLOR = "backgroundColor";
@@ -34,7 +33,6 @@ static const char *PKEY_LABEL = "label";
 static const char *PKEY_LABEL_OFFSET = "labelOffset";
 static const char *PKEY_LABEL_FONT = "labelFont";
 static const char *PKEY_LABEL_COLOR = "labelColor";
-static const char *PKEY_NUMBER_SIZE_FACTOR = "numberSizeFactor";
 static const char *PKEY_TIME_WINDOW = "timeWindow";
 static const char *PKEY_X_TICK_SIZE = "xTickSize";
 static const char *PKEY_Y_TICK_SIZE = "yTickSize";
@@ -243,8 +241,6 @@ void PlotFigure::parse(cProperty *property)
     cGroupFigure::parse(property);
 
     const char *s;
-    if ((s = property->getValue(PKEY_NUMBER_SIZE_FACTOR)) != nullptr)
-            numberSizeFactor = atof(s);
 
     setBounds(parseBounds(property, getBounds()));
 
@@ -286,8 +282,7 @@ const char **PlotFigure::getAllowedPropertyKeys() const
         const char *localKeys[] = {
             PKEY_Y_TICK_SIZE, PKEY_TIME_WINDOW, PKEY_X_TICK_SIZE,
             PKEY_LINE_COLOR, PKEY_MIN_X, PKEY_MAX_X, PKEY_MIN_Y, PKEY_MAX_Y, PKEY_BACKGROUND_COLOR,
-            PKEY_LABEL, PKEY_LABEL_OFFSET, PKEY_LABEL_COLOR, PKEY_LABEL_FONT,
-            PKEY_NUMBER_SIZE_FACTOR, PKEY_POS,
+            PKEY_LABEL, PKEY_LABEL_OFFSET, PKEY_LABEL_COLOR, PKEY_LABEL_FONT, PKEY_POS,
             PKEY_SIZE, PKEY_ANCHOR, PKEY_BOUNDS, nullptr
         };
         concatArrays(keys, cGroupFigure::getAllowedPropertyKeys(), localKeys);
@@ -338,17 +333,15 @@ void PlotFigure::layout()
     Rectangle b = backgroundFigure->getBounds();
     double fontSize = xTicks.size() > 0 && xTicks[0].number ? xTicks[0].number->getFont().pointSize : 12;
     labelFigure->setPosition(Point(b.getCenter().x, b.y + b.height + fontSize * LABEL_Y_DISTANCE_FACTOR + labelOffset));
-    xAxisLabelFigure->setPosition(Point(b.x + b.width / 2, b.y - 3));
+    xAxisLabelFigure->setPosition(Point(b.x + b.width / 2, b.y - 5));
     yAxisLabelFigure->setPosition(Point(-5, b.height / 2));
 
     bounds = backgroundFigure->getBounds();
     bounds = rectangleUnion(bounds, labelFigure->getBounds());
-    bounds = rectangleUnion(bounds, xAxisLabelFigure->getBounds());
-    bounds = rectangleUnion(bounds, yAxisLabelFigure->getBounds());
-    for (auto& tick : xTicks)
-        bounds = rectangleUnion(bounds, tick.number->getBounds());
-    for (auto& tick : yTicks)
-        bounds = rectangleUnion(bounds, tick.number->getBounds());
+    bounds.x -= fontSize;
+    bounds.y -= fontSize;
+    bounds.width +=  2 * fontSize;
+    bounds.height += 2 * fontSize;
     invalidLayout = false;
 }
 
@@ -357,18 +350,12 @@ void PlotFigure::redrawYTicks()
     Rectangle bounds = backgroundFigure->getBounds();
     int numTicks = std::isfinite(yTickSize) ? std::abs(maxY - minY) / yTickSize + 1 : 0;
 
-    int fontSize = bounds.height * NUMBER_SIZE_PERCENT * numberSizeFactor;
-
     double valueTickYposAdjust[2] = { 0, 0 };
-
-    if(yTicks.size() == 1)
-    {
+    int fontSize = labelFigure->getFont().pointSize;
+    if (yTicks.size() == 1) {
         valueTickYposAdjust[0] = - (fontSize / 2);
         valueTickYposAdjust[1] = fontSize / 2;
     }
-
-    Font font("", bounds.height * NUMBER_SIZE_PERCENT * numberSizeFactor);
-    yAxisLabelFigure->setFont(font);
 
     // Allocate ticks and numbers if needed
     if ((size_t)numTicks > yTicks.size())
@@ -380,7 +367,6 @@ void PlotFigure::redrawYTicks()
             dashLine->setLineStyle(LINE_DASHED);
 
             number->setAnchor(ANCHOR_W);
-            number->setFont(font);
             auto plotFigure = seriesPlotFigures[seriesPlotFigures.size() - 1];
             tick->insertBelow(plotFigure);
             dashLine->insertBelow(plotFigure);
@@ -416,7 +402,7 @@ void PlotFigure::redrawYTicks()
         char buf[32];
         sprintf(buf, yValueFormat, minY + i * yTickSize);
         yTicks[i].number->setText(buf);
-        yTicks[i].number->setPosition(Point(x + 3 + bounds.height * NUMBER_DISTANCE_FROM_TICK, y + valueTickYposAdjust[i % 2]));
+        yTicks[i].number->setPosition(Point(x + 5, y + valueTickYposAdjust[i % 2]));
     }
 }
 
@@ -437,9 +423,6 @@ void PlotFigure::redrawXTicks()
 
     int numTicks = std::isfinite(xTickSize) ? ((maxX - minX) - shifting) / xTickSize + 1 : 0;
 
-    Font font("", bounds.height * NUMBER_SIZE_PERCENT * numberSizeFactor);
-    xAxisLabelFigure->setFont(font);
-
     // Allocate ticks and numbers if needed
     if ((size_t)numTicks > xTicks.size())
         while ((size_t)numTicks > xTicks.size()) {
@@ -450,7 +433,6 @@ void PlotFigure::redrawXTicks()
             dashLine->setLineStyle(LINE_DASHED);
 
             number->setAnchor(ANCHOR_N);
-            number->setFont(font);
             auto plotFigure = seriesPlotFigures[seriesPlotFigures.size() - 1];
             tick->insertBelow(plotFigure);
             dashLine->insertBelow(plotFigure);
@@ -488,7 +470,7 @@ void PlotFigure::redrawXTicks()
 
         sprintf(buf, xValueFormat, number);
         xTicks[i].number->setText(buf);
-        xTicks[i].number->setPosition(Point(x, y + bounds.height * NUMBER_DISTANCE_FROM_TICK));
+        xTicks[i].number->setPosition(Point(x, y + 5));
     }
 }
 

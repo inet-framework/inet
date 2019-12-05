@@ -50,7 +50,6 @@ class INET_API PlotFigure : public cGroupFigure, public inet::IIndicatorFigure
     double yTickSize = INFINITY;
     double xTickSize = INFINITY;
     int labelOffset = 0;
-    double numberSizeFactor = 1;
     double minX = 0;
     double maxX = 1;
     double minY = 0;
