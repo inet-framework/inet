@@ -28,17 +28,17 @@ class INET_API HeatMapPlotFigure : public cGroupFigure
     {
         cLineFigure *tick;
         cLineFigure *dashLine;
-        cTextFigure *number;
+        cLabelFigure *number;
 
-        Tick(cLineFigure *tick, cLineFigure *dashLine, cTextFigure *number) :
+        Tick(cLineFigure *tick, cLineFigure *dashLine, cLabelFigure *number) :
             tick(tick), dashLine(dashLine), number(number) {}
     };
 
     cPixmapFigure *pixmapFigure;
     cRectangleFigure *backgroundFigure;
-    cTextFigure *labelFigure;
-    cTextFigure *xAxisLabelFigure;
-    cTextFigure *yAxisLabelFigure;
+    cLabelFigure *labelFigure;
+    cLabelFigure *xAxisLabelFigure;
+    cLabelFigure *yAxisLabelFigure;
     std::vector<Tick> xTicks;
     std::vector<Tick> yTicks;
 

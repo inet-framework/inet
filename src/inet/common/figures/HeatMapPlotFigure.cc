@@ -381,13 +381,13 @@ void HeatMapPlotFigure::addChildren()
     pixmapFigure->fillPixmap(INIT_BACKGROUND_COLOR, 0);
     pixmapFigure->setAnchor(ANCHOR_NW);
     backgroundFigure = new cRectangleFigure("bounds");
-    labelFigure = new cTextFigure("label");
+    labelFigure = new cLabelFigure("label");
     labelFigure->setAnchor(ANCHOR_N);
-    xAxisLabelFigure = new cTextFigure("X axis label");
+    xAxisLabelFigure = new cLabelFigure("X axis label");
     xAxisLabelFigure->setAnchor(ANCHOR_S);
-    yAxisLabelFigure = new cTextFigure("Y axis label");
+    yAxisLabelFigure = new cLabelFigure("Y axis label");
     yAxisLabelFigure->setAnchor(ANCHOR_S);
-    yAxisLabelFigure->rotate(-M_PI / 2);
+    yAxisLabelFigure->setAngle(-90);
 
     addFigure(pixmapFigure);
     addFigure(backgroundFigure);
@@ -414,7 +414,7 @@ void HeatMapPlotFigure::layout()
     double fontSize = xTicks.size() > 0 && xTicks[0].number ? xTicks[0].number->getFont().pointSize : 12;
     labelFigure->setPosition(Point(b.getCenter().x, b.y + b.height + fontSize * LABEL_Y_DISTANCE_FACTOR + labelOffset));
     xAxisLabelFigure->setPosition(Point(b.x + b.width / 2, b.y - 3));
-    yAxisLabelFigure->setPosition(Point(-b.height / 2, -3));
+    yAxisLabelFigure->setPosition(Point(-5, b.height / 2));
 
     bounds = pixmapFigure->getBounds();
     bounds = rectangleUnion(bounds, labelFigure->getBounds());
@@ -450,7 +450,7 @@ void HeatMapPlotFigure::redrawYTicks()
         while ((size_t)numTicks > yTicks.size()) {
             cLineFigure *tick = new cLineFigure("yTick");
             cLineFigure *dashLine = new cLineFigure("yDashLine");
-            cTextFigure *number = new cTextFigure("yNumber");
+            cLabelFigure *number = new cLabelFigure("yNumber");
 
             dashLine->setLineStyle(LINE_DASHED);
 
@@ -509,7 +509,7 @@ void HeatMapPlotFigure::redrawXTicks()
         while ((size_t)numTicks > xTicks.size()) {
             cLineFigure *tick = new cLineFigure("xTick");
             cLineFigure *dashLine = new cLineFigure("xDashLine");
-            cTextFigure *number = new cTextFigure("xNumber");
+            cLabelFigure *number = new cLabelFigure("xNumber");
 
             dashLine->setLineStyle(LINE_DASHED);
 
