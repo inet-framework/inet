@@ -39,6 +39,7 @@ class INET_API Coord
     /** @brief Constant with all values set to 0. */
     static const Coord NIL;
     static const Coord ZERO;
+    static const Coord ONE;
     static const Coord X_AXIS;
     static const Coord Y_AXIS;
     static const Coord Z_AXIS;
@@ -63,6 +64,15 @@ class INET_API Coord
 
     /** @brief Initializes coordinate from other coordinate. */
     Coord(const Coord& other) { copy(other); }
+
+    Coord xyz() const { return *this; }
+    Coord getXyz() const { return Coord(*this).xyz(); }
+
+    Coord yzx() { auto tmp = x; x = y; y = z; z = tmp; return *this; }
+    Coord getYzx() const { return Coord(*this).yzx(); }
+
+    Coord zxy() { auto tmp = z; z = y; y = x; x = tmp; return *this; }
+    Coord getZxy() const { return Coord(*this).zxy(); }
 
     double getX() const { return x; }
     void setX(double x) { this->x = x; }
@@ -183,22 +193,84 @@ class INET_API Coord
      */
     friend bool operator!=(const Coord& a, const Coord& b) { return !(a == b); }
 
+    Coord clamp(double l, double u) {
+        x = math::clamp(x, l, u);
+        y = math::clamp(y, l, u);
+        z = math::clamp(z, l, u);
+        return *this;
+    }
+
+    Coord getClamped(double l, double u) const {
+        return Coord(*this).clamp(l, u);
+    }
+
+    Coord sign() {
+        x = math::sign(x);
+        y = math::sign(y);
+        z = math::sign(z);
+        return *this;
+    }
+
+    Coord getSign() const {
+        return Coord(*this).sign();
+    }
+
+    Coord abs() {
+        x = std::abs(x);
+        y = std::abs(y);
+        z = std::abs(z);
+        return *this;
+    }
+
+    Coord getAbs() const {
+        return Coord(*this).abs();
+    }
+
+    Coord step(const Coord& a) {
+        x = math::step(x, a.x);
+        y = math::step(y, a.y);
+        z = math::step(z, a.z);
+        return *this;
+    }
+
+    Coord getStep(const Coord& a) const {
+        return Coord(*this).step(a);
+    }
+
+    Coord divideElementwise(const Coord& a) {
+        x /= a.x;
+        y /= a.y;
+        z /= a.z;
+        return *this;
+    }
+
+    Coord getDividedElementwise(const Coord& a) const {
+        return Coord(*this).divideElementwise(a);
+    }
+
+    Coord multiplyElementwise(const Coord& a) {
+        x *= a.x;
+        y *= a.y;
+        z *= a.z;
+        return *this;
+    }
+
+    Coord getMultipliedElementwise(const Coord& a) const {
+        return Coord(*this).multiplyElementwise(a);
+    }
+
     /**
      * @brief Returns the distance to Coord 'a'.
      */
-    double distance(const Coord& a) const
-    {
-        Coord dist(*this - a);
-        return dist.length();
+    double distance(const Coord& a) const {
+        return Coord(*this - a).length();
     }
 
     /**
      * @brief Returns distance^2 to Coord 'a' (omits calling square root).
      */
-    double sqrdist(const Coord& a) const
-    {
-        Coord dist(*this - a);
-        return dist.squareLength();
+    double sqrdist(const Coord& a) const {
+        return Coord(*this - a).squareLength();
     }
 
     /**
@@ -220,6 +292,8 @@ class INET_API Coord
      * @brief Updates the length of this position vector to be 1.
      */
     Coord normalize() { *this /= length(); return *this; }
+
+    Coord getNormalized() const { return Coord(*this).normalize(); }
 
     /**
      * @brief Checks if this coordinate is inside a specified rectangle.
