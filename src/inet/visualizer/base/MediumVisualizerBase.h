@@ -74,26 +74,58 @@ class INET_API MediumVisualizerBase : public VisualizerBase, public cListener
     cFigure::Color communicationRangeLineColor;
     cFigure::LineStyle communicationRangeLineStyle;
     double communicationRangeLineWidth = NaN;
+    bool autoPowerAxis = false;
+    W signalMinPower = W(NaN);
+    W signalMaxPower = W(NaN);
+    WpHz signalMinPowerDensity = WpHz(NaN);
+    WpHz signalMaxPowerDensity = WpHz(NaN);
+    bool autoTimeAxis = false;
+    simtime_t signalMinTime;
+    simtime_t signalMaxTime;
+    bool autoFrequencyAxis = false;
+    Hz signalMinFrequency = Hz(NaN);
+    Hz signalMaxFrequency = Hz(NaN);
+    bool displayMainPowerDensityMap = false;
+    bool displayPowerDensityMaps = false;
+    const char *powerDensityMapMode = nullptr;
+    bool powerDensityMapSampling = false;
+    int powerDensityMapApproximationSize = -1;
+    Hz powerDensityMapCenterFrequency = Hz(NaN);
+    Hz powerDensityMapBandwidth = Hz(NaN);
+    double powerDensityMapFigureWidth = NaN;
+    double powerDensityMapFigureHeight = NaN;
+    double powerDensityMapPixmapWidth = NaN;
+    double powerDensityMapPixmapHeight = NaN;
+    int powerDensityMapFigureXTickCount = -1;
+    int powerDensityMapFigureYTickCount = -1;
     bool displaySpectrums = false;
+    const char *spectrumMode = nullptr;
     double spectrumFigureWidth = NaN;
     double spectrumFigureHeight = NaN;
+    int spectrumFigureXTickCount = -1;
+    int spectrumFigureYTickCount = -1;
     double spectrumFigureInterpolationSize = NaN;
-    bool spectrumAutoFrequencyAxis = false;
-    Hz spectrumMinFrequency = Hz(NaN);
-    Hz spectrumMaxFrequency = Hz(NaN);
-    bool spectrumAutoPowerAxis = false;
-    WpHz spectrumMinPower = WpHz(NaN);
-    WpHz spectrumMaxPower = WpHz(NaN);
     Placement spectrumPlacementHint;
     double spectrumPlacementPriority;
+    bool displaySpectograms = false;
+    const char *spectogramMode = nullptr;
+    double spectogramFigureWidth = NaN;
+    double spectogramFigureHeight = NaN;
+    double spectogramPixmapWidth = NaN;
+    double spectogramPixmapHeight = NaN;
+    int spectogramFigureXTickCount = -1;
+    int spectogramFigureYTickCount = -1;
+    Placement spectogramPlacementHint;
+    double spectogramPlacementPriority;
     //@}
 
     /** @name State */
     //@{
     double defaultSignalPropagationAnimationSpeed = NaN;
     double defaultSignalTransmissionAnimationSpeed = NaN;
-    std::map<const physicallayer::ITransmission *, Ptr<const math::IFunction<WpHz, math::Domain<m, m, m, simsec, Hz>>>> receptionPowerFunctions;
-    Ptr<math::SumFunction<WpHz, math::Domain<m, m, m, simsec, Hz>>> mediumPowerFunction;
+    std::map<const physicallayer::ITransmission *, Ptr<const math::IFunction<WpHz, math::Domain<m, m, m, simsec, Hz>>>> signalPowerDensityFunctions;
+    std::map<const physicallayer::ITransmission *, Ptr<math::SumFunction<WpHz, math::Domain<m, m, m, simsec, Hz>>>> noisePowerDensityFunctions;
+    Ptr<math::SumFunction<WpHz, math::Domain<m, m, m, simsec, Hz>>> mediumPowerDensityFunction;
     //@}
 
   protected:
@@ -113,7 +145,7 @@ class INET_API MediumVisualizerBase : public VisualizerBase, public cListener
 
     virtual void handleSignalDepartureStarted(const physicallayer::ITransmission *transmission) = 0;
     virtual void handleSignalDepartureEnded(const physicallayer::ITransmission *transmission) = 0;
-    virtual void handleSignalArrivalStarted(const physicallayer::IReception *reception) = 0;
+    virtual void handleSignalArrivalStarted(const physicallayer::IReception *reception);
     virtual void handleSignalArrivalEnded(const physicallayer::IReception *reception) = 0;
 
   public:

@@ -21,6 +21,7 @@
 #include "inet/common/figures/HeatMapFigure.h"
 #include "inet/common/figures/PlotFigure.h"
 #include "inet/common/figures/TrailFigure.h"
+#include "inet/common/figures/HeatMapPlotFigure.h"
 #include "inet/common/geometry/common/CanvasProjection.h"
 #include "inet/visualizer/base/MediumVisualizerBase.h"
 #include "inet/visualizer/scene/NetworkNodeCanvasVisualizer.h"
@@ -85,9 +86,21 @@ class INET_API MediumCanvasVisualizer : public MediumVisualizerBase
      */
     std::map<const physicallayer::ITransmission *, cFigure *> signalFigures;
     /**
+     * The main power density figure.
+     */
+    HeatMapPlotFigure *mainPowerDensityMapFigure = nullptr;
+    /**
+     * The list of power density figures.
+     */
+    std::map<const cModule *, HeatMapPlotFigure *> powerDensityMapFigures;
+    /**
      * The list of spectrum figures.
      */
     std::map<const cModule *, PlotFigure *> spectrumFigures;
+    /**
+     * The list of spectrum flow figures.
+     */
+    std::map<const cModule *, HeatMapPlotFigure *> spectrogramFigures;
     /**
      * The layer figure that contains the figures representing the ongoing communications.
      */
@@ -101,14 +114,20 @@ class INET_API MediumCanvasVisualizer : public MediumVisualizerBase
   protected:
     virtual void initialize(int stage) override;
     virtual void refreshDisplay() const override;
+    virtual void setAnimationSpeed();
+
+    virtual void refreshMainPowerDensityMapFigure() const;
+    virtual void refreshPowerDensityMapFigure(const cModule *networkNode, HeatMapPlotFigure *figure) const;
+    virtual void refreshPowerDensityMapFigurePowerFunction(const Ptr<const math::IFunction<WpHz, math::Domain<m, m, m, simsec, Hz>>>& powerDensityFunction, HeatMapPlotFigure *figure, int channel) const;
+
     virtual void refreshSpectrumFigure(const cModule *networkNode, PlotFigure *figure) const;
     virtual std::tuple<const physicallayer::ITransmission *, const physicallayer::ITransmission *, const physicallayer::IAntenna *, IMobility *> extractSpectrumFigureParameters(const cModule *networkNode) const;
     virtual void refreshSpectrumFigurePowerFunction(const Ptr<const math::IFunction<WpHz, math::Domain<m, m, m, simsec, Hz>>>& powerFunction, const physicallayer::IAntenna *antenna, const Coord& position, PlotFigure *figure, int series) const;
     virtual std::pair<WpHz, WpHz> computePowerForPartitionBounds(const Ptr<const math::IFunction<WpHz, math::Domain<m, m, m, simsec, Hz>>>& powerFunction, const math::Point<m, m, m, simsec, Hz>& lower, const math::Point<m, m, m, simsec, Hz>& upper, const math::IFunction<WpHz, math::Domain<m, m, m, simsec, Hz>> *partitonPowerFunction, const physicallayer::IAntenna *antenna, const Coord& position) const;
     virtual std::pair<WpHz, WpHz> computePowerForDirectionalAntenna(const Ptr<const math::IFunction<WpHz, math::Domain<m, m, m, simsec, Hz>>>& powerFunction, const math::Point<m, m, m, simsec, Hz>& lower, const math::Point<m, m, m, simsec, Hz>& upper, const physicallayer::IAntenna *antenna, const Coord& position) const;
-    virtual void updateSpectrumFigureFrequencyBounds(const physicallayer::ITransmission *transmission);
-    virtual void updateSpectrumFigurePowerBounds(const math::Interval<m, m, m, simsec, Hz>& i, const math::IFunction<WpHz, math::Domain<m, m, m, simsec, Hz>> *f);
-    virtual void setAnimationSpeed();
+
+    virtual void refreshSpectogramFigure(const cModule *networkNode, HeatMapPlotFigure *figure) const;
+    virtual void refreshSpectogramFigurePowerFunction(const Ptr<const math::IFunction<WpHz, math::Domain<m, m, m, simsec, Hz>>>& powerFunction, const Coord& position, SimTimeUnit signalTimeUnit, HeatMapPlotFigure *figure, int channel) const;
 
     virtual cFigure *getSignalDepartureFigure(const physicallayer::IRadio *radio) const;
     virtual void setSignalDepartureFigure(const physicallayer::IRadio *radio, cFigure *figure);
