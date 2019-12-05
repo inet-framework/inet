@@ -66,8 +66,10 @@ class Ipv6Header extends NetworkHeaderBase
     Ipv6Address destAddress;
     B payloadLength = B(-1);    // The size of the payload in octets, including any extension headers. The length is set to zero when a Hop-by-Hop extension header carries a Jumbo Payload option.
     short trafficClass;    // @bits(8) Traffic Class
-    //abstract short dscp;  // bits 0-5 of trafficClass
-    //abstract short ecn;  // bits 6-7 of trafficClass
+    // OMNeT++ 6.0:
+    // short __dscp @custom @getter(getDscp) @setter(setDscp);  // @bit(6), maps to bits 0-5 of trafficClass
+    // short __ecn @custom @getter(getEcn) @setter(setEcn);  // @bit(2),  maps to bits 6-7 of trafficClass
+
     unsigned int flowLabel;
     short hopLimit = 0;
     IpProtocolId protocolId = IP_PROT_NONE;
