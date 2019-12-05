@@ -21,15 +21,12 @@ namespace inet {
 
 static const char *INIT_BACKGROUND_COLOR = "white";
 static const double TICK_LENGTH = 5;
-static const double NUMBER_SIZE_PERCENT = 0.1;
-static const double NUMBER_DISTANCE_FROM_TICK = 0.04;
 static const double LABEL_Y_DISTANCE_FACTOR = 1.5;
 
 static const char *PKEY_LABEL = "label";
 static const char *PKEY_LABEL_OFFSET = "labelOffset";
 static const char *PKEY_LABEL_FONT = "labelFont";
 static const char *PKEY_LABEL_COLOR = "labelColor";
-static const char *PKEY_NUMBER_SIZE_FACTOR = "numberSizeFactor";
 static const char *PKEY_X_TICK_SIZE = "xTickSize";
 static const char *PKEY_Y_TICK_SIZE = "yTickSize";
 static const char *PKEY_MIN_X = "minX";
@@ -169,12 +166,12 @@ void HeatMapPlotFigure::bakeValues()
     }
 }
 
-void HeatMapPlotFigure::setPlotSize(const Point& p)
+void HeatMapPlotFigure::setPlotSize(const Point& figureSize, const Point& pixmapSize)
 {
     const auto& backgroundBounds = backgroundFigure->getBounds();
-    backgroundFigure->setBounds(Rectangle(backgroundBounds.x, backgroundBounds.y, p.x, p.y));
-    pixmapFigure->setSize(p.x, p.y);
-    pixmapFigure->setPixmapSize(p.x, p.y, INIT_BACKGROUND_COLOR, 1);
+    backgroundFigure->setBounds(Rectangle(backgroundBounds.x, backgroundBounds.y, figureSize.x, figureSize.y));
+    pixmapFigure->setSize(figureSize.x, figureSize.y);
+    pixmapFigure->setPixmapSize(pixmapSize.x, pixmapSize.y, INIT_BACKGROUND_COLOR, 1);
     invalidLayout = true;
 }
 
@@ -331,8 +328,6 @@ void HeatMapPlotFigure::parse(cProperty *property)
     cGroupFigure::parse(property);
 
     const char *s;
-    if ((s = property->getValue(PKEY_NUMBER_SIZE_FACTOR)) != nullptr)
-            numberSizeFactor = atof(s);
 
     setBounds(parseBounds(property, getBounds()));
 
@@ -366,8 +361,7 @@ const char **HeatMapPlotFigure::getAllowedPropertyKeys() const
         const char *localKeys[] = {
             PKEY_Y_TICK_SIZE, PKEY_X_TICK_SIZE,
             PKEY_MIN_X, PKEY_MAX_X, PKEY_MIN_Y, PKEY_MAX_Y,
-            PKEY_LABEL, PKEY_LABEL_OFFSET, PKEY_LABEL_COLOR, PKEY_LABEL_FONT,
-            PKEY_NUMBER_SIZE_FACTOR, PKEY_POS,
+            PKEY_LABEL, PKEY_LABEL_OFFSET, PKEY_LABEL_COLOR, PKEY_LABEL_FONT, PKEY_POS,
             PKEY_SIZE, PKEY_ANCHOR, PKEY_BOUNDS, nullptr
         };
         concatArrays(keys, cGroupFigure::getAllowedPropertyKeys(), localKeys);
@@ -410,20 +404,18 @@ void HeatMapPlotFigure::layout()
     redrawYTicks();
     redrawXTicks();
 
-    Rectangle b = pixmapFigure->getBounds();
+    Rectangle b = backgroundFigure->getBounds();
     double fontSize = xTicks.size() > 0 && xTicks[0].number ? xTicks[0].number->getFont().pointSize : 12;
     labelFigure->setPosition(Point(b.getCenter().x, b.y + b.height + fontSize * LABEL_Y_DISTANCE_FACTOR + labelOffset));
-    xAxisLabelFigure->setPosition(Point(b.x + b.width / 2, b.y - 3));
+    xAxisLabelFigure->setPosition(Point(b.x + b.width / 2, b.y - 5));
     yAxisLabelFigure->setPosition(Point(-5, b.height / 2));
 
-    bounds = pixmapFigure->getBounds();
+    bounds = backgroundFigure->getBounds();
     bounds = rectangleUnion(bounds, labelFigure->getBounds());
-    bounds = rectangleUnion(bounds, xAxisLabelFigure->getBounds());
-    bounds = rectangleUnion(bounds, yAxisLabelFigure->getBounds());
-    for (auto& tick : xTicks)
-        bounds = rectangleUnion(bounds, tick.number->getBounds());
-    for (auto& tick : yTicks)
-        bounds = rectangleUnion(bounds, tick.number->getBounds());
+    bounds.x -= fontSize;
+    bounds.y -= fontSize;
+    bounds.width += 2 * fontSize;
+    bounds.height += 2 * fontSize;
     invalidLayout = false;
 }
 
@@ -432,21 +424,15 @@ void HeatMapPlotFigure::redrawYTicks()
     Rectangle bounds = pixmapFigure->getBounds();
     int numTicks = std::isfinite(yTickSize) ? std::abs(maxY - minY) / yTickSize + 1 : 0;
 
-    int fontSize = bounds.height * NUMBER_SIZE_PERCENT * numberSizeFactor;
-
     double valueTickYposAdjust[2] = { 0, 0 };
-
-    if(yTicks.size() == 1)
-    {
+    int fontSize = labelFigure->getFont().pointSize;
+    if (yTicks.size() == 1) {
         valueTickYposAdjust[0] = - (fontSize / 2);
         valueTickYposAdjust[1] = fontSize / 2;
     }
 
-    Font font("", bounds.height * NUMBER_SIZE_PERCENT * numberSizeFactor);
-    yAxisLabelFigure->setFont(font);
-
     // Allocate ticks and numbers if needed
-    if ((size_t)numTicks > yTicks.size())
+    if ((size_t)numTicks > yTicks.size()) {
         while ((size_t)numTicks > yTicks.size()) {
             cLineFigure *tick = new cLineFigure("yTick");
             cLineFigure *dashLine = new cLineFigure("yDashLine");
@@ -455,13 +441,13 @@ void HeatMapPlotFigure::redrawYTicks()
             dashLine->setLineStyle(LINE_DASHED);
 
             number->setAnchor(ANCHOR_W);
-            number->setFont(font);
             tick->insertAbove(pixmapFigure);
             dashLine->insertAbove(pixmapFigure);
             number->insertAbove(pixmapFigure);
             yTicks.push_back(Tick(tick, dashLine, number));
         }
-    else
+    }
+    else {
         // Add or remove figures from canvas according to previous number of ticks
         for (int i = yTicks.size() - 1; i >= numTicks; --i) {
             delete removeFigure(yTicks[i].number);
@@ -469,6 +455,7 @@ void HeatMapPlotFigure::redrawYTicks()
             delete removeFigure(yTicks[i].tick);
             yTicks.pop_back();
         }
+    }
 
     for (size_t i = 0; i < yTicks.size(); ++i) {
         double x = bounds.x + bounds.width;
@@ -490,7 +477,7 @@ void HeatMapPlotFigure::redrawYTicks()
         char buf[32];
         sprintf(buf, yValueFormat, minY + i * yTickSize);
         yTicks[i].number->setText(buf);
-        yTicks[i].number->setPosition(Point(x + 3 + bounds.height * NUMBER_DISTANCE_FROM_TICK, y + valueTickYposAdjust[i % 2]));
+        yTicks[i].number->setPosition(Point(x + 5, y + valueTickYposAdjust[i % 2]));
     }
 }
 
@@ -498,14 +485,10 @@ void HeatMapPlotFigure::redrawXTicks()
 {
     Rectangle bounds = pixmapFigure->getBounds();
 
-    double shifting = 0;
-    int numTicks = std::isfinite(xTickSize) ? ((maxX - minX) - shifting) / xTickSize + 1 : 0;
-
-    Font font("", bounds.height * NUMBER_SIZE_PERCENT * numberSizeFactor);
-    xAxisLabelFigure->setFont(font);
+    int numTicks = std::isfinite(xTickSize) ? (maxX - minX) / xTickSize + 1 : 0;
 
     // Allocate ticks and numbers if needed
-    if ((size_t)numTicks > xTicks.size())
+    if ((size_t)numTicks > xTicks.size()) {
         while ((size_t)numTicks > xTicks.size()) {
             cLineFigure *tick = new cLineFigure("xTick");
             cLineFigure *dashLine = new cLineFigure("xDashLine");
@@ -514,13 +497,13 @@ void HeatMapPlotFigure::redrawXTicks()
             dashLine->setLineStyle(LINE_DASHED);
 
             number->setAnchor(ANCHOR_N);
-            number->setFont(font);
             tick->insertAbove(pixmapFigure);
             dashLine->insertAbove(pixmapFigure);
             number->insertAbove(pixmapFigure);
             xTicks.push_back(Tick(tick, dashLine, number));
         }
-    else
+    }
+    else {
         // Add or remove figures from canvas according to previous number of ticks
         for (int i = xTicks.size() - 1; i >= numTicks; --i) {
             delete removeFigure(xTicks[i].number);
@@ -528,9 +511,10 @@ void HeatMapPlotFigure::redrawXTicks()
             delete removeFigure(xTicks[i].tick);
             xTicks.pop_back();
         }
+    }
 
     for (uint32 i = 0; i < xTicks.size(); ++i) {
-        double x = bounds.x + bounds.width * (i * xTickSize + shifting) / (maxX - minX);
+        double x = bounds.x + bounds.width * (i * xTickSize) / (maxX - minX);
         double y = bounds.y + bounds.height;
         if (x > bounds.x && x < bounds.x + bounds.width) {
             xTicks[i].tick->setVisible(true);
@@ -547,11 +531,11 @@ void HeatMapPlotFigure::redrawXTicks()
         }
 
         char buf[32];
-        double number = minX + i * xTickSize + shifting;
+        double number = minX + i * xTickSize;
 
         sprintf(buf, xValueFormat, number);
         xTicks[i].number->setText(buf);
-        xTicks[i].number->setPosition(Point(x, y + bounds.height * NUMBER_DISTANCE_FROM_TICK));
+        xTicks[i].number->setPosition(Point(x, y + 5));
     }
 }
 

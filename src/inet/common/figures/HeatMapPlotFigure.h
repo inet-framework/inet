@@ -46,7 +46,6 @@ class INET_API HeatMapPlotFigure : public cGroupFigure
     double yTickSize = INFINITY;
     double xTickSize = INFINITY;
     int labelOffset = 0;
-    double numberSizeFactor = 1;
     double minX = 0;
     double maxX = 1;
     double minY = 0;
@@ -83,8 +82,11 @@ class INET_API HeatMapPlotFigure : public cGroupFigure
     void bakeValues();
 
     //getters and setters
-    void setPlotSize(const Point& p);
+    void setPlotSize(const Point& figureSize, const Point& pixmapSize);
+    const Point getPlotSize() const { return pixmapFigure->getBounds().getSize(); }
+    const Point getPixmapSize() const { return Point(pixmapFigure->getPixmapWidth(), pixmapFigure->getPixmapHeight()); }
 
+    const Point getSize() const { return getBounds().getSize(); }
     const Rectangle& getBounds() const;
     void setBounds(const Rectangle& rect);
 
