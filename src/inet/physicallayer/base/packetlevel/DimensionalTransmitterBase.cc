@@ -206,7 +206,16 @@ Ptr<const IFunction<double, Domain<simsec, Hz>>> DimensionalTransmitterBase::cre
         }
         else
             frequencyGainFunction = makeShared<OneDimensionalBoxcarFunction<double, Hz>>(centerFrequency - bandwidth / 2, centerFrequency + bandwidth / 2, 1);
-        return makeShared<CombinedFunction<double, simsec, Hz>>(normalize<simsec>(timeGainFunction, timeGainsNormalization), normalize<Hz>(frequencyGainFunction, frequencyGainsNormalization));
+
+        auto combinedFunction = makeShared<CombinedFunction<double, simsec, Hz>>(normalize<simsec>(timeGainFunction, timeGainsNormalization), normalize<Hz>(frequencyGainFunction, frequencyGainsNormalization));
+        static int i = 0;
+        auto numTeeth = 2 + i++ % 2;
+        auto frequencyShift = MHz(20);
+        auto numSamples = 16;
+        auto timeStep = simsec(endTime - startTime) / numTeeth / numSamples;
+        auto sawtoothFunction = makeShared<SawtoothFunction<Hz, simsec>>(simsec(startTime), simsec(endTime), simsec(endTime - startTime) / numTeeth, frequencyShift);
+        auto approximatedSawtoothFunction = makeShared<ApproximatedFunction<Hz, Domain<simsec>, 0, simsec>>(simsec(startTime), simsec(endTime), timeStep, &LeftInterpolator<simsec, Hz>::singleton, sawtoothFunction);
+        return makeShared<ModulatedFunction<double, simsec, Hz>>(combinedFunction, approximatedSawtoothFunction);
     }
 }
 
@@ -237,6 +246,7 @@ Ptr<const IFunction<WpHz, Domain<simsec, Hz>>> DimensionalTransmitterBase::creat
         auto shiftedGainFunction = makeShared<DomainShiftedFunction<double, Domain<simsec, Hz>>>(gainFunction, shift);
         powerFunction = makeShared<ConstantFunction<WpHz, Domain<simsec, Hz>>>(power / Hz(1))->multiply(shiftedGainFunction);
     }
+
     return makeFirstQuadrantLimitedFunction(powerFunction);
 }
 

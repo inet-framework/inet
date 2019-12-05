@@ -1,33 +1,36 @@
 package inet.showcases.wireless.crosstalk;
 
+import inet.environment.common.PhysicalEnvironment;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.AdhocHost;
 import inet.physicallayer.ieee80211.packetlevel.Ieee80211DimensionalRadioMedium;
 import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 import inet.visualizer.integrated.IntegratedVisualizer;
 
-
 network CrosstalkShowcaseBaseNetwork
 {
-    @display("bgb=661,400");
+    @display("bgb=640,360");
     submodules:
         host1: AdhocHost {
-            @display("p=231,201");
+            @display("p=230,180");
         }
         host2: AdhocHost {
-            @display("p=459,201");
+            @display("p=370,180");
         }
         host3: AdhocHost {
-            @display("p=346,94");
+            @display("p=290,130");
         }
         host4: AdhocHost {
-            @display("p=346,306");
+            @display("p=440,130");
         }
         configurator: Ipv4NetworkConfigurator {
-            @display("p=75,55");
+            @display("p=50,50;is=s");
         }
         visualizer: IntegratedVisualizer {
-            @display("p=75,125");
+            @display("p=50,100;is=s");
+        }
+        physicalEnvironment: PhysicalEnvironment {
+            @display("p=50,150;is=s");
         }
 }
 
@@ -54,6 +57,6 @@ network CrosstalkShowcasePartiallyOverlappingFrequencyBands extends CrosstalkSho
 {
     submodules:
         radioMedium: Ieee80211DimensionalRadioMedium {
-            @display("p=74,184");
+            @display("p=50,200;is=s");
         }
 }
