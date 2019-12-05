@@ -143,7 +143,6 @@ cplusplus(Ipv6NdOptions) {{
 //
 class Ipv6NdMessage extends Icmpv6Header
 {
-    //customize(true);
     int code = 0;
 }
 
