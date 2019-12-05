@@ -36,6 +36,12 @@ Chunk::Chunk(const Chunk& other) :
 {
 }
 
+void Chunk::forEachChild(cVisitor *v)
+{
+    for (int i = 0; i < tags.getNumTags(); i++)
+        v->visit(tags.getTag(i));
+}
+
 void Chunk::handleChange()
 {
     checkMutable();
