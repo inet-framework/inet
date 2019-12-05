@@ -1,0 +1,5 @@
+This is an example of an ECN Capable Network (ECT).
+Router2 gets congested, instead of its RED queue dropping the packets, it marks
+them ac CE (Congestion Experienced) in the IPv4 header, and forwards them.
+Then, the receiver Echoes the CE indication to the sender in the ACK packet.
+The sender reacts to the ECN-Echo by reducing its cwnd and ssthresh.   
