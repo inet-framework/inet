@@ -133,34 +133,6 @@ class INET_API Point : public std::tuple<T ...>
         return Point<T ...>{ (std::get<IS>(*this) / d) ... };
     }
 
-    template<size_t ... IS>
-    bool smaller(const Point<T ...>& o, integer_sequence<size_t, IS ...>) const {
-        bool result = true;
-        (void)std::initializer_list<bool>{ result &= std::get<IS>(*this) < std::get<IS>(o) ... };
-        return result;
-    }
-
-    template<size_t ... IS>
-    bool smallerOrEqual(const Point<T ...>& o, integer_sequence<size_t, IS ...>) const {
-        bool result = true;
-        (void)std::initializer_list<bool>{ result &= std::get<IS>(*this) <= std::get<IS>(o) ... };
-        return result;
-    }
-
-    template<size_t ... IS>
-    bool greater(const Point<T ...>& o, integer_sequence<size_t, IS ...>) const {
-        bool result = true;
-        (void)std::initializer_list<bool>{ result &= std::get<IS>(*this) > std::get<IS>(o) ... };
-        return result;
-    }
-
-    template<size_t ... IS>
-    bool greaterOrEqual(const Point<T ...>& o, integer_sequence<size_t, IS ...>) const {
-        bool result = true;
-        (void)std::initializer_list<bool>{ result &= std::get<IS>(*this) >= std::get<IS>(o) ... };
-        return result;
-    }
-
   public:
     Point(T ... t) : std::tuple<T ...>(t ...) { }
 
@@ -190,26 +162,6 @@ class INET_API Point : public std::tuple<T ...>
 
     Point<T ...> operator/(double d) const {
         return divide(d, index_sequence_for<T ...>{});
-    }
-
-    /// Coordinate-wise comparison (condition must hold for each dimension).
-    bool operator<(const Point<T ...>& o) const {
-        return smaller(o, index_sequence_for<T ...>{});
-    }
-
-    /// Coordinate-wise comparison (condition must hold for each dimension).
-    bool operator<=(const Point<T ...>& o) const {
-        return smallerOrEqual(o, index_sequence_for<T ...>{});
-    }
-
-    /// Coordinate-wise comparison (condition must hold for each dimension).
-    bool operator>(const Point<T ...>& o) const {
-        return greater(o, index_sequence_for<T ...>{});
-    }
-
-    /// Coordinate-wise comparison (condition must hold for each dimension).
-    bool operator>=(const Point<T ...>& o) const {
-        return greaterOrEqual(o, index_sequence_for<T ...>{});
     }
 
     /// Copy the dimensions selected by the 1 bits of DIMS into p.
