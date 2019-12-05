@@ -75,9 +75,10 @@ void AlgorithmicDropperBase::handleMessage(cMessage *msg)
         IPv4Datagram *datagram = check_and_cast<IPv4Datagram *>(msg);
         int CE = datagram->getExplicitCongestionNotification();
         // check if ECT and mark the packet instead of dropping it
-        if (CE == 1 || CE == 2) {
-            EV_INFO << "ECN-Capable Transport... set CE\n";
+        if (CE != 0) {
+            EV_INFO << "ECN-Capable Transport... set CE instead of dropping\n";
             datagram->setExplicitCongestionNotification(3); //set CE
+            sendOut(packet);
         } else {
             dropPacket(packet);
         }
