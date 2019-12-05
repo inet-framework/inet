@@ -1616,7 +1616,6 @@ class INET_API ApproximatedFunction : public FunctionBase<R, D>
                     auto p1 = i1.getLower().template getReplaced<X, DIMENSION>(xl);
                     auto p2 = i1.getUpper().template getReplaced<X, DIMENSION>(std::min(lower, xu));
                     ConstantFunction<R, D> g(f1c->getConstantValue());
-                    // TODO: review closed & fixed flags
                     typename D::I i2(p1, p2, i.getLowerClosed() | fixed, (i.getUpperClosed() & ~m) | fixed, i.getFixed());
                     callback(i2, &g);
                 }
@@ -1634,25 +1633,76 @@ class INET_API ApproximatedFunction : public FunctionBase<R, D>
                 // determine the smallest intervals along the other dimensions for which the primitive functions are calculated
                 function->partition(i.template getFixed<X, DIMENSION>(x1), [&] (const typename D::I& i2, const IFunction<R, D> *f2) {
                     function->partition(i2.template getFixed<X, DIMENSION>(x2), [&] (const typename D::I& i3, const IFunction<R, D> *f3) {
+                        auto i4 = i3.template getReplaced<X, DIMENSION>(j);
                         if (auto f2c = dynamic_cast<const ConstantFunction<R, D> *>(f2)) {
                             auto r1 = f2c->getConstantValue();
                             if (auto f3c = dynamic_cast<const ConstantFunction<R, D> *>(f3)) {
                                 auto r2 = f3c->getConstantValue();
-                                auto i4 = i3.template getReplaced<X, DIMENSION>(j);
                                 if (dynamic_cast<const ConstantInterpolatorBase<X, R> *>(interpolator)) {
                                     ConstantFunction<R, D> g(interpolator->getValue(x1, r1, x2, r2, (x1 + x2) / 2));
                                     callback(i4, &g);
                                 }
                                 else if (dynamic_cast<const LinearInterpolator<X, R> *>(interpolator)) {
-                                    auto p3 = i3.getLower();
-                                    auto p4 = i3.getUpper();
-                                    auto p5 = p3.template getReplaced<X, DIMENSION>(x1);
-                                    auto p6 = p4.template getReplaced<X, DIMENSION>(x2);
-                                    UnilinearFunction<R, D> g(p5, p6, r1, r2, DIMENSION);
+                                    auto p3 = i3.getLower().template getReplaced<X, DIMENSION>(x1);
+                                    auto p4 = i3.getUpper().template getReplaced<X, DIMENSION>(x2);
+                                    UnilinearFunction<R, D> g(p3, p4, r1, r2, DIMENSION);
                                     simplifyAndCall(i4, &g, callback);
                                 }
                                 else
                                     throw cRuntimeError("TODO");
+                            }
+                            else if (auto f3l = dynamic_cast<const UnilinearFunction<R, D> *>(f3)) {
+                                if (dynamic_cast<const ConstantInterpolatorBase<X, R> *>(interpolator))
+                                    throw cRuntimeError("TODO");
+                                else if (dynamic_cast<const LinearInterpolator<X, R> *>(interpolator)) {
+                                    typename D::P lowerLower = i4.getLower();
+                                    typename D::P lowerUpper = i4.getUpper();
+                                    typename D::P upperLower = i3.getLower().template getReplaced<X, DIMENSION>(x1);
+                                    typename D::P upperUpper = i3.getUpper().template getReplaced<X, DIMENSION>(x2);
+                                    R rLowerLower = f2c->getConstantValue();
+                                    R rLowerUpper = f2c->getConstantValue();
+                                    R rUpperLower = f3l->getRLower();
+                                    R rUpperUpper = f3l->getRUpper();
+                                    BilinearFunction<R, D> g(lowerLower, lowerUpper, upperLower, upperUpper, rLowerLower, rLowerUpper, rUpperLower, rUpperUpper, f3l->getDimension(), DIMENSION);
+                                    simplifyAndCall(i4, &g, callback);
+                                }
+                                else
+                                    throw cRuntimeError("TODO");
+                            }
+                            else
+                                throw cRuntimeError("TODO");
+                        }
+                        else if (auto f2l = dynamic_cast<const UnilinearFunction<R, D> *>(f2)) {
+                            if (auto f3c = dynamic_cast<const ConstantFunction<R, D> *>(f3)) {
+                                if (dynamic_cast<const ConstantInterpolatorBase<X, R> *>(interpolator))
+                                    throw cRuntimeError("TODO");
+                                else if (dynamic_cast<const LinearInterpolator<X, R> *>(interpolator)) {
+                                    typename D::P lowerLower = i2.getLower().template getReplaced<X, DIMENSION>(x1);
+                                    typename D::P lowerUpper = i2.getUpper().template getReplaced<X, DIMENSION>(x2);
+                                    typename D::P upperLower = i4.getLower();
+                                    typename D::P upperUpper = i4.getUpper();
+                                    R rLowerLower = f2l->getRLower();
+                                    R rLowerUpper = f2l->getRUpper();
+                                    R rUpperLower = f3c->getConstantValue();
+                                    R rUpperUpper = f3c->getConstantValue();
+                                    BilinearFunction<R, D> g(lowerLower, lowerUpper, upperLower, upperUpper, rLowerLower, rLowerUpper, rUpperLower, rUpperUpper, f2l->getDimension(), DIMENSION);
+                                    simplifyAndCall(i4, &g, callback);
+                                }
+                                else
+                                    throw cRuntimeError("TODO");
+                            }
+                            else if (auto f3l = dynamic_cast<const UnilinearFunction<R, D> *>(f3)) {
+                                ASSERT(f2l->getDimension() == f3l->getDimension());
+                                typename D::P lowerLower = i2.getLower().template getReplaced<X, DIMENSION>(x1);
+                                typename D::P lowerUpper = i2.getUpper().template getReplaced<X, DIMENSION>(x2);
+                                typename D::P upperLower = i3.getLower().template getReplaced<X, DIMENSION>(x1);
+                                typename D::P upperUpper = i3.getUpper().template getReplaced<X, DIMENSION>(x2);
+                                R rLowerLower = f2l->getRLower();
+                                R rLowerUpper = f2l->getRUpper();
+                                R rUpperLower = f3l->getRLower();
+                                R rUpperUpper = f3l->getRUpper();
+                                BilinearFunction<R, D> g(lowerLower, lowerUpper, upperLower, upperUpper, rLowerLower, rLowerUpper, rUpperLower, rUpperUpper, f2l->getDimension(), DIMENSION);
+                                simplifyAndCall(i4, &g, callback);
                             }
                             else
                                 throw cRuntimeError("TODO");
@@ -1669,8 +1719,7 @@ class INET_API ApproximatedFunction : public FunctionBase<R, D>
                     auto p1 = i1.getLower().template getReplaced<X, DIMENSION>(std::max(upper, xl));
                     auto p2 = i1.getUpper().template getReplaced<X, DIMENSION>(xu);
                     ConstantFunction<R, D> g(f1c->getConstantValue());
-                    // TODO: review closed & fixed flags
-                    typename D::I i2(p1, p2, (i.getLowerClosed() & ~m) | fixed, i.getUpperClosed() | fixed, i.getFixed());
+                    typename D::I i2(p1, p2, i.getLowerClosed() | m, (i.getUpperClosed() & ~m) | fixed, i.getFixed());
                     callback(i2, &g);
                 }
                 else
@@ -1755,7 +1804,7 @@ class INET_API MemoizedFunction : public FunctionBase<R, D>
         else {
             R v = function->getValue(p);
             cache[p] = v;
-            if (cache.size() > limit)
+            if ((int)cache.size() > limit)
                 cache.clear();
             return v;
         }
