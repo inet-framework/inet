@@ -141,6 +141,10 @@ inline bool close(double one, double two) { return fabs(one - two) < EPSILON; }
  */
 inline int stepfunction(double i) { return (i > EPSILON) ? 1 : close(i, 0) ? 0 : -1; };
 
+inline double step(double a, double b) { return b < a ? 0.0 : 1.0; };
+
+inline double clamp(double v, double l, double u) { return v < l ? l : v > u ? u : v; }
+
 /**
  * Returns 1 if the parameter is greater than zero, -1 if less than zero, 0 otherwise.
  */
