@@ -1721,29 +1721,35 @@ class INET_API ExtrudedFunction : public FunctionBase<R, Domain<X, Y>>
     }
 };
 
-//template<typename R, typename D>
-//class INET_API MemoizedFunction : public FunctionBase<R, D>
-//{
-//  protected:
-//    const Ptr<const IFunction<R, D>> function;
-//
-//  public:
-//    MemoizedFunction(const Ptr<const IFunction<R, D>>& function) : function(function) {
-//        f->partition(function->getDomain(), [] (const typename D::I& i, const IFunction<R, D> *g) {
-//            // TODO: store all interval function pairs in a domain subdivision tree structure
-//            throw cRuntimeError("TODO");
-//        });
-//    }
-//
-//    virtual R getValue(const typename D::P& p) const override {
-//        function->getValue(p);
-//    }
-//
-//    virtual void partition(const typename D::I& i, std::function<void (const typename D::I&, const IFunction<R, D> *)> callback) const override {
-//        // TODO: search in domain subdivision tree structure
-//        throw cRuntimeError("TODO");
-//    }
-//};
+template<typename R, typename D>
+class INET_API MemoizedFunction : public FunctionBase<R, D>
+{
+  protected:
+    const Ptr<const IFunction<R, D>> function;
+    const int limit;
+    mutable std::map<typename D::P, R> cache;
+
+  public:
+    MemoizedFunction(const Ptr<const IFunction<R, D>>& function, int limit = INT_MAX) :
+        function(function), limit(limit) { }
+
+    virtual R getValue(const typename D::P& p) const override {
+        auto it = cache.find(p);
+        if (it != cache.end())
+            return it->second;
+        else {
+            R v = function->getValue(p);
+            cache[p] = v;
+            if (cache.size() > limit)
+                cache.clear();
+            return v;
+        }
+    }
+
+    virtual void partition(const typename D::I& i, std::function<void (const typename D::I&, const IFunction<R, D> *)> callback) const override {
+        function->partition(i, callback);
+    }
+};
 
 template<typename R, typename D>
 void simplifyAndCall(const typename D::I& i, const IFunction<R, D> *f, const std::function<void (const typename D::I&, const IFunction<R, D> *)> callback) {
