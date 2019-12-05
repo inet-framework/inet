@@ -47,8 +47,8 @@ class INET_API PlotFigure : public cGroupFigure, public inet::IIndicatorFigure
     Rectangle bounds;
     int numSeries = -1;
     double timeWindow = NaN;
-    double yTickSize = 2.5;
-    double xTickSize = 3;
+    double yTickSize = INFINITY;
+    double xTickSize = INFINITY;
     int labelOffset = 0;
     double numberSizeFactor = 1;
     double minX = 0;
