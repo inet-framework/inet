@@ -56,12 +56,10 @@ class INET_API Coord
 
   public:
     /** @brief Default constructor. */
-    Coord()
-        : x(0.0), y(0.0), z(0.0) {}
+    Coord() : x(0.0), y(0.0), z(0.0) { }
 
     /** @brief Initializes a coordinate. */
-    Coord(double x, double y, double z = 0.0)
-        : x(x), y(y), z(z) {}
+    Coord(double x, double y, double z = 0.0) : x(x), y(y), z(z) { }
 
     /** @brief Initializes coordinate from other coordinate. */
     Coord(const Coord& other) { copy(other); }
@@ -78,47 +76,33 @@ class INET_API Coord
     /** @brief Returns a string with the value of the coordinate. */
     std::string str() const;
 
-
     /** @brief Returns the negated vector. */
     Coord operator-() const { return Coord(-x, -y, -z); }
 
     /** @brief Adds two coordinate vectors. */
-    friend Coord operator+(const Coord& a, const Coord& b)
-    {
-        Coord tmp(a);
-        tmp += b;
-        return tmp;
+    friend Coord operator+(const Coord& a, const Coord& b) {
+        return Coord(a).operator+=(b);
     }
 
     /** @brief Subtracts two coordinate vectors. */
-    friend Coord operator-(const Coord& a, const Coord& b)
-    {
-        Coord tmp(a);
-        tmp -= b;
-        return tmp;
+    friend Coord operator-(const Coord& a, const Coord& b) {
+        return Coord(a).operator-=(b);
     }
 
     /** @brief Multiplies a coordinate vector by a real number. */
-    friend Coord operator*(const Coord& a, double f)
-    {
-        Coord tmp(a);
-        tmp *= f;
-        return tmp;
+    friend Coord operator*(const Coord& a, double f) {
+        return Coord(a).operator*=(f);
     }
 
     /** @brief Divides a coordinate vector by a real number. */
-    friend Coord operator/(const Coord& a, double f)
-    {
-        Coord tmp(a);
-        tmp /= f;
-        return tmp;
+    friend Coord operator/(const Coord& a, double f) {
+        return Coord(a).operator/=(f);
     }
 
     /**
      * @brief Multiplies this coordinate vector by a real number.
      */
-    Coord& operator*=(double f)
-    {
+    Coord& operator*=(double f) {
         x *= f;
         y *= f;
         z *= f;
@@ -128,8 +112,7 @@ class INET_API Coord
     /**
      * @brief Divides this coordinate vector by a real number.
      */
-    Coord& operator/=(double f)
-    {
+    Coord& operator/=(double f) {
         x /= f;
         y /= f;
         z /= f;
@@ -139,8 +122,7 @@ class INET_API Coord
     /**
      * @brief Adds coordinate vector 'a' to this.
      */
-    Coord& operator+=(const Coord& a)
-    {
+    Coord& operator+=(const Coord& a) {
         x += a.x;
         y += a.y;
         z += a.z;
@@ -150,16 +132,14 @@ class INET_API Coord
     /**
      * @brief Dot product
      */
-    float operator*(const Coord& v) const
-    {
+    float operator*(const Coord& v) const {
         return x * v.x + y * v.y + z * v.z;
     }
 
     /**
      * @brief Cross product
      */
-    Coord operator%(const Coord& v) const
-    {
+    Coord operator%(const Coord& v) const {
         return Coord(y * v.z - z * v.y, z * v.x - x * v.z, x * v.y - y * v.x);
     }
 
@@ -168,8 +148,7 @@ class INET_API Coord
      *
      * This operator can change the dimension of the coordinate.
      */
-    Coord& operator=(const Coord& other)
-    {
+    Coord& operator=(const Coord& other) {
         if (this == &other)
             return *this;
         copy(other);
@@ -179,8 +158,7 @@ class INET_API Coord
     /**
      * @brief Subtracts coordinate vector 'a' from this.
      */
-    Coord& operator-=(const Coord& a)
-    {
+    Coord& operator-=(const Coord& a) {
         x -= a.x;
         y -= a.y;
         z -= a.z;
@@ -193,8 +171,7 @@ class INET_API Coord
      * Because coordinates are of type double, this is done through the
      * math::close function.
      */
-    friend bool operator==(const Coord& a, const Coord& b)
-    {
+    friend bool operator==(const Coord& a, const Coord& b) {
         // FIXME: this implementation is not transitive
         return math::close(a.x, b.x) && math::close(a.y, b.y) && math::close(a.z, b.z);
     }
@@ -242,7 +219,7 @@ class INET_API Coord
     /**
      * @brief Updates the length of this position vector to be 1.
      */
-    void normalize() { *this /= length(); }
+    Coord normalize() { *this /= length(); return *this; }
 
     /**
      * @brief Checks if this coordinate is inside a specified rectangle.
@@ -250,51 +227,41 @@ class INET_API Coord
      * @param lowerBound The upper bound of the rectangle.
      * @param upperBound The lower bound of the rectangle.
      */
-    bool isInBoundary(const Coord& lowerBound, const Coord& upperBound) const
-    {
+    bool isInBoundary(const Coord& lowerBound, const Coord& upperBound) const {
         return lowerBound.x <= x && x <= upperBound.x &&
                lowerBound.y <= y && y <= upperBound.y &&
                lowerBound.z <= z && z <= upperBound.z;
     }
 
-    bool isNil() const
-    {
+    bool isNil() const {
         return this == &NIL;
     }
 
     /**
      * Returns true if this coordinate is unspecified.
      */
-    bool isUnspecified() const
-    {
+    bool isUnspecified() const {
         return std::isnan(x) && std::isnan(y) && std::isnan(z);
     }
 
     /**
      * @brief Returns the minimal coordinates.
      */
-    Coord min(const Coord& a)
-    {
-        return Coord(this->x < a.x ? this->x : a.x,
-                this->y < a.y ? this->y : a.y,
-                this->z < a.z ? this->z : a.z);
+    Coord min(const Coord& a) {
+        return Coord(x < a.x ? x : a.x, y < a.y ? y : a.y, z < a.z ? z : a.z);
     }
 
     /**
      * @brief Returns the maximal coordinates.
      */
-    Coord max(const Coord& a)
-    {
-        return Coord(this->x > a.x ? this->x : a.x,
-                this->y > a.y ? this->y : a.y,
-                this->z > a.z ? this->z : a.z);
+    Coord max(const Coord& a) {
+        return Coord(x > a.x ? x : a.x, y > a.y ? y : a.y, z > a.z ? z : a.z);
     }
 
     /**
      * @brief Returns the angle between the two vectors.
      */
-    double angle(const Coord& a)
-    {
+    double angle(const Coord& a) {
         return acos(*this * a / length() / a.length());
     }
 
