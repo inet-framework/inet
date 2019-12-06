@@ -43,10 +43,10 @@ network InstrumentShowcase
     @figure[ctnIndexedImage](type=indexedImage; pos=800,340; size=32,32; images=showcases/idle,showcases/listen,showcases/clock; label="Contention state"; labelOffset=0,25; interpolation=best);
 
     @statistic[per2](source=packetErrorRate(client.wlan[0].radio.packetSentToUpper); record=figure; targetFigure=perPlot);
-    @figure[perPlot](type=plot; pos=700,20; size=150,60; timeWindow=3; maxY=1; yTickSize=1; label="Packet error rate"; numberSizeFactor=1.5);
+    @figure[perPlot](type=plot; pos=700,20; size=150,60; timeWindow=3; maxY=1; yTickSize=1; label="Packet error rate");
 
     @statistic[bitrate2](source=server.wlan[0].mac.dcf.rateControl.datarateChanged/1000000; record=figure; targetFigure=bitratePlot);
-    @figure[bitratePlot](type=plot; pos=700,140; size=150,60; timeWindow=3; maxY=55; yTickSize=54; label="WiFi bit rate [Mbps]"; numberSizeFactor=1.5);
+    @figure[bitratePlot](type=plot; pos=700,140; size=150,60; timeWindow=3; maxY=55; yTickSize=54; label="WiFi bit rate [Mbps]");
 
     submodules:
         configurator: Ipv4NetworkConfigurator {
