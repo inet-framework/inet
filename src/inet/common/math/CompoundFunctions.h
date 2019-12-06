@@ -79,6 +79,31 @@ Ptr<const DomainLimitedFunction<R, D>> makeFirstQuadrantLimitedFunction(const Pt
     return makeShared<DomainLimitedFunction<R, D>>(f, i);
 }
 
+//template<typename R, typename D>
+//class INET_API TruncatedFunction : public FunctionBase<R, D>
+//{
+//  protected:
+//    const Ptr<const IFunction<R, D>> function;
+//    const Interval<R> range;
+//    const typename D::I domain;
+//
+//  public:
+//    TruncatedFunction(const Ptr<const IFunction<R, D>>& function, const typename D::I& domain) :
+//        function(function), range(Interval<R>(std::min(R(0), function->getMin(domain)), std::max(R(0), function->getMax(domain)), 0b1, 0b1, 0b0)), domain(domain)
+//    { }
+//
+//    virtual Interval<R> getRange() const override { return range; }
+//    virtual typename D::I getDomain() const override { return domain; }
+//
+//    virtual R getValue(const typename D::P& p) const override {
+//        if (domain.contains(p))
+//            return function->getValue(p);
+//        else
+//            return R(0);
+//    }
+//
+//};
+
 //template<typename R, typename D0, typename D>
 //class INET_API FunctionInterpolatingFunction : public Function<R, D>
 //{
