@@ -121,6 +121,8 @@ class INET_API MediumVisualizerBase : public VisualizerBase, public cListener
 
     /** @name State */
     //@{
+    Ptr<const math::IFunction<double, math::Domain<mps, m, Hz>>> pathLossFunction;
+    Ptr<const math::IFunction<double, math::Domain<m, m, m, m, m, m, Hz>>> obstacleLossFunction;
     double defaultSignalPropagationAnimationSpeed = NaN;
     double defaultSignalTransmissionAnimationSpeed = NaN;
     std::map<const physicallayer::ITransmission *, Ptr<const math::IFunction<WpHz, math::Domain<m, m, m, simsec, Hz>>>> signalPowerDensityFunctions;

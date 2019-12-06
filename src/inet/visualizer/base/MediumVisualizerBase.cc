@@ -142,6 +142,13 @@ void MediumVisualizerBase::initialize(int stage)
         if (radioMedium != nullptr && (displayMainPowerDensityMap || displayPowerDensityMaps || displaySpectrums || displaySpectograms)) {
             if (auto backgroundNoise = radioMedium->getBackgroundNoise())
                 mediumPowerDensityFunction->addElement(makeShared<BackgroundNoisePowerFunction>(backgroundNoise));
+            pathLossFunction = makeShared<PathLossFunction>(radioMedium->getPathLoss());
+            if (radioMedium->getObstacleLoss() != nullptr) {
+                if (radioMedium->getMediumLimitCache()->getMaxSpeed() == mps(0))
+                    obstacleLossFunction = makeShared<MemoizedFunction<double, Domain<m, m, m, m, m, m, Hz>>>(makeShared<ObstacleLossFunction>(radioMedium->getObstacleLoss()));
+                else
+                    obstacleLossFunction = makeShared<ObstacleLossFunction>(radioMedium->getObstacleLoss());
+            }
         }
     }
     else if (stage == INITSTAGE_LAST) {
@@ -236,16 +243,15 @@ void MediumVisualizerBase::handleSignalAdded(const physicallayer::ITransmission 
     if (displayMainPowerDensityMap || displayPowerDensityMaps || displaySpectrums || displaySpectograms) {
         auto dimensionalTransmission = check_and_cast<const DimensionalTransmission *>(transmission);
         auto transmissionPowerFunction = dimensionalTransmission->getPower();
-        const auto& transmitterAntennaGainFunction = makeShared<AntennaGainFunction>(transmission->getTransmitter()->getAntenna()->getGain().get());
-        const auto& pathLossFunction = makeShared<PathLossFunction>(radioMedium->getPathLoss());
+        const auto& transmitterAntennaGain = transmission->getTransmitter()->getAntenna()->getGain();
+        bool isotropicAntenna = transmitterAntennaGain->getMaxGain() == 1 && transmitterAntennaGain->getMinGain() == 1;
+        const auto& transmitterAntennaGainFunction = !isotropicAntenna ? makeShared<AntennaGainFunction>(transmitterAntennaGain.get()) : nullptr;
         mps propagationSpeed = radioMedium->getPropagation()->getPropagationSpeed();
         Point<m, m, m> startPosition(m(transmission->getStartPosition().x), m(transmission->getStartPosition().y), m(transmission->getStartPosition().z));
         auto startTime = transmission->getStartTime();
         const auto& startOrientation = transmission->getStartOrientation();
         const auto& propagatedTransmissionPowerFunction = makeShared<PropagatedTransmissionPowerFunction>(transmissionPowerFunction, startPosition, propagationSpeed);
         Ptr<const IFunction<WpHz, Domain<m, m, m, simsec, Hz>>> signalPowerDensityFunction;
-        const Ptr<const IFunction<double, Domain<m, m, m, m, m, m, Hz>>>& obstacleLossFunction = radioMedium->getObstacleLoss() != nullptr ?
-                makeShared<MemoizedFunction<double, Domain<m, m, m, m, m, m, Hz>>>(makeShared<ObstacleLossFunction>(radioMedium->getObstacleLoss())) : nullptr;
         bool attenuateWithCenterFrequency = check_and_cast<const DimensionalAnalogModel *>(radioMedium->getAnalogModel())->par("attenuateWithCenterFrequency");
         if (attenuateWithCenterFrequency) {
             const auto& attenuationFunction = makeShared<SpaceDependentAttenuationFunction>(transmitterAntennaGainFunction, pathLossFunction, obstacleLossFunction, startPosition, startOrientation, propagationSpeed, dimensionalTransmission->getCenterFrequency());
