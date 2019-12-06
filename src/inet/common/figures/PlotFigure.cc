@@ -25,7 +25,6 @@ Register_Figure("plot", PlotFigure);
 static const char *INIT_PLOT_COLOR = "blue";
 static const char *INIT_BACKGROUND_COLOR = "white";
 static const double TICK_LENGTH = 5;
-static const double NUMBER_SIZE_PERCENT = 0.1;
 static const double LABEL_Y_DISTANCE_FACTOR = 1.5;
 
 static const char *PKEY_BACKGROUND_COLOR = "backgroundColor";
