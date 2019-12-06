@@ -111,7 +111,7 @@ class INET_API SpaceAndFrequencyDependentAttenuationFunction : public FunctionBa
         m distance = m(sqrt(dx * dx + dy * dy + dz * dz));
         auto direction = Quaternion::rotationFromTo(Coord::X_AXIS, Coord(dx.get(), dy.get(), dz.get()));
         auto antennaLocalDirection = startOrientation.inverse() * direction;
-        double transmitterAntennaGain = distance == m(0) ? 1 : transmitterAntennaGainFunction->getValue(Point<Quaternion>(antennaLocalDirection));
+        double transmitterAntennaGain = distance == m(0) || transmitterAntennaGainFunction == nullptr ? 1 : transmitterAntennaGainFunction->getValue(Point<Quaternion>(antennaLocalDirection));
         double pathLoss = pathLossFunction->getValue(Point<mps, m, Hz>(propagationSpeed, distance, frequency));
         double obstacleLoss = obstacleLossFunction != nullptr ? obstacleLossFunction->getValue(Point<m, m, m, m, m, m, Hz>(startX, startY, startZ, x, y, z, frequency)) : 1;
         double gain = transmitterAntennaGain * pathLoss * obstacleLoss;
@@ -141,8 +141,10 @@ class INET_API SpaceAndFrequencyDependentAttenuationFunction : public FunctionBa
 
     virtual void printStructure(std::ostream& os, int level = 0) const override {
         os << "(SpaceAndFrequencyDependentAttenuation\n" << std::string(level + 2, ' ');
-        transmitterAntennaGainFunction->printStructure(os, level + 2);
-        os << "\n" << std::string(level + 2, ' ');
+        if (transmitterAntennaGainFunction != nullptr) {
+            transmitterAntennaGainFunction->printStructure(os, level + 2);
+            os << "\n" << std::string(level + 2, ' ');
+        }
         pathLossFunction->printStructure(os, level + 2);
         os << "\n" << std::string(level + 2, ' ');
         obstacleLossFunction->printStructure(os, level + 2);
@@ -186,7 +188,7 @@ class INET_API SpaceDependentAttenuationFunction : public FunctionBase<double, D
         m distance = m(sqrt(dx * dx + dy * dy + dz * dz));
         auto direction = Quaternion::rotationFromTo(Coord::X_AXIS, Coord(dx.get(), dy.get(), dz.get()));
         auto antennaLocalDirection = startOrientation.inverse() * direction;
-        double transmitterAntennaGain = distance == m(0) ? 1 : transmitterAntennaGainFunction->getValue(Point<Quaternion>(antennaLocalDirection));
+        double transmitterAntennaGain = distance == m(0) || transmitterAntennaGainFunction == nullptr ? 1 : transmitterAntennaGainFunction->getValue(Point<Quaternion>(antennaLocalDirection));
         double pathLoss = pathLossFunction->getValue(Point<mps, m, Hz>(propagationSpeed, distance, frequency));
         double obstacleLoss = obstacleLossFunction != nullptr ? obstacleLossFunction->getValue(Point<m, m, m, m, m, m, Hz>(startX, startY, startZ, x, y, z, frequency)) : 1;
         double gain = transmitterAntennaGain * pathLoss * obstacleLoss;
@@ -216,8 +218,10 @@ class INET_API SpaceDependentAttenuationFunction : public FunctionBase<double, D
 
     virtual void printStructure(std::ostream& os, int level = 0) const override {
         os << "(SpaceDependentAttenuation\n" << std::string(level + 2, ' ');
-        transmitterAntennaGainFunction->printStructure(os, level + 2);
-        os << "\n" << std::string(level + 2, ' ');
+        if (transmitterAntennaGainFunction != nullptr) {
+            transmitterAntennaGainFunction->printStructure(os, level + 2);
+            os << "\n" << std::string(level + 2, ' ');
+        }
         pathLossFunction->printStructure(os, level + 2);
         os << "\n" << std::string(level + 2, ' ');
         obstacleLossFunction->printStructure(os, level + 2);
