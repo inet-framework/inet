@@ -297,17 +297,17 @@ void MediumCanvasVisualizer::refreshPowerDensityMapFigurePowerFunction(const Ptr
         figure->setMaxValue(mW2dBmW(mW(signalMaxPower).get()));
         throw cRuntimeError("TODO");
     }
-    auto plotSize = figure->getPlotSize();
+    auto size = maxPosition - minPosition;
     auto pixmapSize = figure->getPixmapSize();
     if (powerDensityMapSampling) {
         for (int x = 0; x < pixmapSize.x; x++) {
             for (int y = 0; y < pixmapSize.y; y++) {
                 if (powerFunction == nullptr) {
-                    auto value = powerDensityFunction->getValue(Point<m, m, m, simsec, Hz>(m(minPosition.x + x / pixmapSize.x * plotSize.x), m(minPosition.y + y / pixmapSize.y * plotSize.y), m(0), simsec(simTime()), powerDensityMapCenterFrequency));
+                    auto value = powerDensityFunction->getValue(Point<m, m, m, simsec, Hz>(m(minPosition.x + x * size.x / pixmapSize.x), m(minPosition.y + y * size.y / pixmapSize.y), m(0), simsec(simTime()), powerDensityMapCenterFrequency));
                     figure->setValue(x, y, wpHz2dBmWpMHz(WpHz(value).get()), channel);
                 }
                 else {
-                    auto value = powerFunction->getValue(Point<m, m, m, simsec>(m(minPosition.x + x / pixmapSize.x * plotSize.x), m(minPosition.y + y / pixmapSize.y * plotSize.y), m(0), simsec(simTime())));
+                    auto value = powerFunction->getValue(Point<m, m, m, simsec>(m(minPosition.x + x * size.x / pixmapSize.x), m(minPosition.y + y * size.y / pixmapSize.y), m(0), simsec(simTime())));
                     figure->setValue(x, y, mW2dBmW(mW(value).get()), channel);
                 }
             }
@@ -317,8 +317,8 @@ void MediumCanvasVisualizer::refreshPowerDensityMapFigurePowerFunction(const Ptr
         Point<m, m, m, simsec, Hz> l(m(minPosition.x), m(minPosition.y), m(minPosition.z), simsec(simTime()), powerDensityMapCenterFrequency);
         Point<m, m, m, simsec, Hz> u(m(maxPosition.x), m(maxPosition.y), m(maxPosition.z), simsec(simTime()), powerDensityMapCenterFrequency);
         Interval<m, m, m, simsec, Hz> i(l, u, 0b00111, 0b00111, 0b00111);
-        auto approximatedMediumPowerFunction1 = makeShared<ApproximatedFunction<WpHz, Domain<m, m, m, simsec, Hz>, 0, m>>(m(minPosition.x), m(maxPosition.x), m(maxPosition.x - minPosition.y) / powerDensityMapPixmapWidth * powerDensityMapApproximationSize, &LinearInterpolator<m, WpHz>::singleton, powerDensityFunction);
-        auto approximatedMediumPowerFunction2 = makeShared<ApproximatedFunction<WpHz, Domain<m, m, m, simsec, Hz>, 1, m>>(m(minPosition.y), m(maxPosition.y), m(maxPosition.y - minPosition.y) / powerDensityMapPixmapHeight * powerDensityMapApproximationSize, &LinearInterpolator<m, WpHz>::singleton, approximatedMediumPowerFunction1);
+        auto approximatedMediumPowerFunction1 = makeShared<ApproximatedFunction<WpHz, Domain<m, m, m, simsec, Hz>, 0, m>>(m(minPosition.x), m(maxPosition.x), m(size.x) / pixmapSize.x * powerDensityMapApproximationSize, &LinearInterpolator<m, WpHz>::singleton, powerDensityFunction);
+        auto approximatedMediumPowerFunction2 = makeShared<ApproximatedFunction<WpHz, Domain<m, m, m, simsec, Hz>, 1, m>>(m(minPosition.y), m(maxPosition.y), m(size.y) / pixmapSize.y * powerDensityMapApproximationSize, &LinearInterpolator<m, WpHz>::singleton, approximatedMediumPowerFunction1);
         approximatedMediumPowerFunction2->partition(i, [&] (const Interval<m, m, m, simsec, Hz>& j, const IFunction<WpHz, Domain<m, m, m, simsec, Hz>> *partitonPowerFunction) {
             auto lower = j.getLower();
             auto upper = j.getUpper();
