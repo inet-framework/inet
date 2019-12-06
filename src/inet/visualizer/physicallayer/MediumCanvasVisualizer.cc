@@ -531,8 +531,8 @@ void MediumCanvasVisualizer::refreshSpectogramFigure(const cModule *networkNode,
             signalTimeUnit = SIMTIME_S;
             figure->setYAxisLabel("[s]");
         }
-        figure->setMinY(-signalMaxTime.dbl() / exp10(signalTimeUnit));
-        figure->setMaxY(signalMaxTime.dbl() / exp10(signalTimeUnit));
+        figure->setMinY(-signalMaxTime.dbl() / std::pow(10, signalTimeUnit));
+        figure->setMaxY(signalMaxTime.dbl() / std::pow(10, signalTimeUnit));
         figure->setMinValue(minValue);
         figure->setMaxValue(maxValue);
         figure->clearValues();
@@ -589,8 +589,8 @@ void MediumCanvasVisualizer::refreshSpectogramFigurePowerFunction(const Ptr<cons
         auto upper = j.getUpper();
         auto x1 = GHz(std::get<4>(lower)).get();
         auto x2 = GHz(std::get<4>(upper)).get();
-        auto y1 = (simsec(std::get<3>(lower)).get() - simTime()).dbl() / exp10(signalTimeUnit);
-        auto y2 = (simsec(std::get<3>(upper)).get() - simTime()).dbl() / exp10(signalTimeUnit);
+        auto y1 = (simsec(std::get<3>(lower)).get() - simTime()).dbl() / std::pow(10, signalTimeUnit);
+        auto y2 = (simsec(std::get<3>(upper)).get() - simTime()).dbl() / std::pow(10, signalTimeUnit);
         if (auto cf = dynamic_cast<const ConstantFunction<WpHz, Domain<m, m, m, simsec, Hz>> *>(partitonPowerFunction)) {
             auto v = cf->getConstantValue() == WpHz(0) ? figure->getMinValue() : wpHz2dBmWpMHz(WpHz(cf->getConstantValue()).get());
             figure->setConstantValue(x1, x2, y1, y2, v, channel);
