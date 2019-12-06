@@ -26,16 +26,16 @@ template<typename R, typename D>
 class INET_API ConstantFunction;
 
 template<typename R, typename D>
-class INET_API AdditionFunction;
+class INET_API AddedFunction;
 
 template<typename R, typename D>
-class INET_API SubtractionFunction;
+class INET_API SubtractedFunction;
 
 template<typename R, typename D>
-class INET_API MultiplicationFunction;
+class INET_API MultipliedFunction;
 
 template<typename R, typename D>
-class INET_API DivisionFunction;
+class INET_API DividedFunction;
 
 /**
  * Useful base class for most IFunction implementations with some default behavior.
@@ -121,19 +121,19 @@ class INET_API FunctionBase : public IFunction<R, D>
     }
 
     virtual const Ptr<const IFunction<R, D>> add(const Ptr<const IFunction<R, D>>& o) const override {
-        return makeShared<AdditionFunction<R, D>>(const_cast<FunctionBase<R, D> *>(this)->shared_from_this(), o);
+        return makeShared<AddedFunction<R, D>>(const_cast<FunctionBase<R, D> *>(this)->shared_from_this(), o);
     }
 
     virtual const Ptr<const IFunction<R, D>> subtract(const Ptr<const IFunction<R, D>>& o) const override {
-        return makeShared<SubtractionFunction<R, D>>(const_cast<FunctionBase<R, D> *>(this)->shared_from_this(), o);
+        return makeShared<SubtractedFunction<R, D>>(const_cast<FunctionBase<R, D> *>(this)->shared_from_this(), o);
     }
 
     virtual const Ptr<const IFunction<R, D>> multiply(const Ptr<const IFunction<double, D>>& o) const override {
-        return makeShared<MultiplicationFunction<R, D>>(const_cast<FunctionBase<R, D> *>(this)->shared_from_this(), o);
+        return makeShared<MultipliedFunction<R, D>>(const_cast<FunctionBase<R, D> *>(this)->shared_from_this(), o);
     }
 
     virtual const Ptr<const IFunction<double, D>> divide(const Ptr<const IFunction<R, D>>& o) const override {
-        return makeShared<DivisionFunction<R, D>>(const_cast<FunctionBase<R, D> *>(this)->shared_from_this(), o);
+        return makeShared<DividedFunction<R, D>>(const_cast<FunctionBase<R, D> *>(this)->shared_from_this(), o);
     }
 
     virtual void print(std::ostream& os, int level = 0) const override {

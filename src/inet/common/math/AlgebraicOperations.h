@@ -23,14 +23,14 @@ namespace inet {
 namespace math {
 
 template<typename R, typename D>
-class INET_API AdditionFunction : public FunctionBase<R, D>
+class INET_API AddedFunction : public FunctionBase<R, D>
 {
   protected:
     const Ptr<const IFunction<R, D>> function1;
     const Ptr<const IFunction<R, D>> function2;
 
   public:
-    AdditionFunction(const Ptr<const IFunction<R, D>>& function1, const Ptr<const IFunction<R, D>>& function2) :
+    AddedFunction(const Ptr<const IFunction<R, D>>& function1, const Ptr<const IFunction<R, D>>& function2) :
         function1(function1), function2(function2)
     { }
 
@@ -119,14 +119,14 @@ class INET_API AdditionFunction : public FunctionBase<R, D>
 };
 
 template<typename R, typename D>
-class INET_API SubtractionFunction : public FunctionBase<R, D>
+class INET_API SubtractedFunction : public FunctionBase<R, D>
 {
   protected:
     const Ptr<const IFunction<R, D>> function1;
     const Ptr<const IFunction<R, D>> function2;
 
   public:
-    SubtractionFunction(const Ptr<const IFunction<R, D>>& function1, const Ptr<const IFunction<R, D>>& function2) :
+    SubtractedFunction(const Ptr<const IFunction<R, D>>& function1, const Ptr<const IFunction<R, D>>& function2) :
         function1(function1), function2(function2)
     { }
 
@@ -189,14 +189,14 @@ class INET_API SubtractionFunction : public FunctionBase<R, D>
 };
 
 template<typename R, typename D>
-class INET_API MultiplicationFunction : public FunctionBase<R, D>
+class INET_API MultipliedFunction : public FunctionBase<R, D>
 {
   protected:
     const Ptr<const IFunction<R, D>> function1;
     const Ptr<const IFunction<double, D>> function2;
 
   public:
-    MultiplicationFunction(const Ptr<const IFunction<R, D>>& function1, const Ptr<const IFunction<double, D>>& function2) :
+    MultipliedFunction(const Ptr<const IFunction<R, D>>& function1, const Ptr<const IFunction<double, D>>& function2) :
         function1(function1), function2(function2)
     { }
 
@@ -266,14 +266,14 @@ class INET_API MultiplicationFunction : public FunctionBase<R, D>
 };
 
 template<typename R, typename D>
-class INET_API DivisionFunction : public FunctionBase<double, D>
+class INET_API DividedFunction : public FunctionBase<double, D>
 {
   protected:
     const Ptr<const IFunction<R, D>> function1;
     const Ptr<const IFunction<R, D>> function2;
 
   public:
-    DivisionFunction(const Ptr<const IFunction<R, D>>& function1, const Ptr<const IFunction<R, D>>& function2) : function1(function1), function2(function2) { }
+    DividedFunction(const Ptr<const IFunction<R, D>>& function1, const Ptr<const IFunction<R, D>>& function2) : function1(function1), function2(function2) { }
 
     virtual typename D::I getDomain() const override {
         return function1->getDomain().getIntersected(function2->getDomain());
@@ -343,14 +343,14 @@ class INET_API DivisionFunction : public FunctionBase<double, D>
 };
 
 template<typename R, typename D>
-class INET_API SumFunction : public FunctionBase<R, D>
+class INET_API SummedFunction : public FunctionBase<R, D>
 {
   protected:
     std::vector<Ptr<const IFunction<R, D>>> functions;
 
   public:
-    SumFunction() { }
-    SumFunction(const std::vector<Ptr<const IFunction<R, D>>>& functions) : functions(functions) { }
+    SummedFunction() { }
+    SummedFunction(const std::vector<Ptr<const IFunction<R, D>>>& functions) : functions(functions) { }
 
     const std::vector<Ptr<const IFunction<R, D>>>& getElements() const { return functions; }
 
@@ -440,32 +440,6 @@ class INET_API SumFunction : public FunctionBase<R, D>
         os << ")";
     }
 };
-
-template<typename R, typename D>
-void simplifyAndCall(const typename D::I& i, const IFunction<R, D> *f, const std::function<void (const typename D::I&, const IFunction<R, D> *)> callback) {
-    callback(i, f);
-}
-
-template<typename R, typename D>
-void simplifyAndCall(const typename D::I& i, const UnilinearFunction<R, D> *f, const std::function<void (const typename D::I&, const IFunction<R, D> *)> callback) {
-    if (f->getRLower() == f->getRUpper()) {
-        ConstantFunction<R, D> g(f->getRLower());
-        callback(i, &g);
-    }
-    else
-        callback(i, f);
-}
-
-template<typename R, typename D>
-void simplifyAndCall(const typename D::I& i, const BilinearFunction<R, D> *f, const std::function<void (const typename D::I&, const IFunction<R, D> *)> callback) {
-    if (f->getRLowerLower() == f->getRLowerUpper() && f->getRLowerLower() == f->getRUpperLower() && f->getRLowerLower() == f->getRUpperUpper()) {
-        ConstantFunction<R, D> g(f->getRLowerLower());
-        callback(i, &g);
-    }
-    // TODO: one dimensional linear functions?
-    else
-        callback(i, f);
-}
 
 } // namespace math
 

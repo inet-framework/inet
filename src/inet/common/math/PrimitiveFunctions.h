@@ -454,6 +454,9 @@ class INET_API TwoDimensionalBoxcarFunction : public FunctionBase<R, Domain<X, Y
     }
 };
 
+/**
+ * The one-dimensional Gauss function.
+ */
 template<typename R, typename X>
 class INET_API GaussFunction : public FunctionBase<R, Domain<X>>
 {
@@ -472,6 +475,9 @@ class INET_API GaussFunction : public FunctionBase<R, Domain<X>>
     }
 };
 
+/**
+ * One-dimensional periodic function with a sawtooth shape.
+ */
 template<typename R, typename X>
 class INET_API SawtoothFunction : public FunctionBase<R, Domain<X>>
 {
@@ -498,7 +504,7 @@ class INET_API SawtoothFunction : public FunctionBase<R, Domain<X>>
 };
 
 /**
- * Interpolated (e.g. constant, linear) between intervals defined by points on the X axis.
+ * One-dimensional interpolated (e.g. constant, linear) function between intervals defined by points on the X axis.
  */
 template<typename R, typename X>
 class INET_API OneDimensionalInterpolatedFunction : public FunctionBase<R, Domain<X>>
@@ -602,6 +608,9 @@ class INET_API OneDimensionalInterpolatedFunction : public FunctionBase<R, Domai
     }
 };
 
+/**
+ * Two-dimensional interpolated (e.g. constant, linear) function between intervals defined by points on the X and Y axes.
+ */
 //template<typename R, typename X, typename Y>
 //class INET_API TwoDimensionalInterpolatedFunction : public Function<R, X, Y>
 //{
@@ -622,6 +631,32 @@ class INET_API OneDimensionalInterpolatedFunction : public FunctionBase<R, Domai
 //        throw cRuntimeError("TODO");
 //    }
 //};
+
+template<typename R, typename D>
+void simplifyAndCall(const typename D::I& i, const IFunction<R, D> *f, const std::function<void (const typename D::I&, const IFunction<R, D> *)> callback) {
+    callback(i, f);
+}
+
+template<typename R, typename D>
+void simplifyAndCall(const typename D::I& i, const UnilinearFunction<R, D> *f, const std::function<void (const typename D::I&, const IFunction<R, D> *)> callback) {
+    if (f->getRLower() == f->getRUpper()) {
+        ConstantFunction<R, D> g(f->getRLower());
+        callback(i, &g);
+    }
+    else
+        callback(i, f);
+}
+
+template<typename R, typename D>
+void simplifyAndCall(const typename D::I& i, const BilinearFunction<R, D> *f, const std::function<void (const typename D::I&, const IFunction<R, D> *)> callback) {
+    if (f->getRLowerLower() == f->getRLowerUpper() && f->getRLowerLower() == f->getRUpperLower() && f->getRLowerLower() == f->getRUpperUpper()) {
+        ConstantFunction<R, D> g(f->getRLowerLower());
+        callback(i, &g);
+    }
+    // TODO: simplify to one dimensional linear functions?
+    else
+        callback(i, f);
+}
 
 } // namespace math
 
