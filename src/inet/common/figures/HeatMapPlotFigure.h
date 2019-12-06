@@ -45,6 +45,8 @@ class INET_API HeatMapPlotFigure : public cGroupFigure
     Rectangle bounds;
     double yTickSize = INFINITY;
     double xTickSize = INFINITY;
+    bool invertedXAxis = false;
+    bool invertedYAxis = false;
     int labelOffset = 0;
     double minX = 0;
     double maxX = 1;
@@ -118,6 +120,9 @@ class INET_API HeatMapPlotFigure : public cGroupFigure
 
     void setXValueFormat(const char *format) { xValueFormat = format; }
     void setYValueFormat(const char *format) { yValueFormat = format; }
+
+    void invertXAxis() { invertedXAxis = !invertedXAxis; }
+    void invertYAxis() { invertedYAxis = !invertedYAxis; }
 
     const char* getXAxisLabel() const { return xAxisLabelFigure->getText(); }
     void setXAxisLabel(const char* text) { xAxisLabelFigure->setText(text); }
