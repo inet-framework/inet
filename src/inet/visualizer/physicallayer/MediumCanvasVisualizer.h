@@ -61,6 +61,8 @@ class INET_API MediumCanvasVisualizer : public MediumVisualizerBase
 
     /** @name Internal state */
     //@{
+    mutable bool invalidDisplay = true;
+    mutable simtime_t lastRefreshDisplay;
     enum SignalInProgress {
         SIP_NONE,
         SIP_PROPAGATION,

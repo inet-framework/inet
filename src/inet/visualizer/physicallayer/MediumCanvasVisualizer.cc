@@ -178,28 +178,32 @@ void MediumCanvasVisualizer::initialize(int stage)
 
 void MediumCanvasVisualizer::refreshDisplay() const
 {
-    if (displaySignals || displayMainPowerDensityMap || displayPowerDensityMaps)
-        const_cast<MediumCanvasVisualizer *>(this)->setAnimationSpeed();
-    if (displaySignals) {
-        for (auto transmission : transmissions)
-            if (matchesTransmission(transmission))
-                refreshSignalFigure(transmission);
-    }
-    if (!getEnvir()->isExpressMode()) {
-        if (displayMainPowerDensityMap)
-            refreshMainPowerDensityMapFigure();
-        if (displayPowerDensityMaps) {
-            for (auto it : powerDensityMapFigures)
-                refreshPowerDensityMapFigure(it.first, it.second);
+    if (invalidDisplay || lastRefreshDisplay != simTime()) {
+        if (displaySignals || displayMainPowerDensityMap || displayPowerDensityMaps)
+            const_cast<MediumCanvasVisualizer *>(this)->setAnimationSpeed();
+        if (displaySignals) {
+            for (auto transmission : transmissions)
+                if (matchesTransmission(transmission))
+                    refreshSignalFigure(transmission);
         }
-        if (displaySpectrums)
-            for (auto it : spectrumFigures)
-                refreshSpectrumFigure(it.first, it.second);
-        if (displaySpectograms)
-            for (auto it : spectrogramFigures)
-                refreshSpectogramFigure(it.first, it.second);
-        if (displayCommunicationHeat)
-            communicationHeat->coolDown();
+        if (!getEnvir()->isExpressMode()) {
+            if (displayMainPowerDensityMap)
+                refreshMainPowerDensityMapFigure();
+            if (displayPowerDensityMaps) {
+                for (auto it : powerDensityMapFigures)
+                    refreshPowerDensityMapFigure(it.first, it.second);
+            }
+            if (displaySpectrums)
+                for (auto it : spectrumFigures)
+                    refreshSpectrumFigure(it.first, it.second);
+            if (displaySpectograms)
+                for (auto it : spectrogramFigures)
+                    refreshSpectogramFigure(it.first, it.second);
+            if (displayCommunicationHeat)
+                communicationHeat->coolDown();
+            lastRefreshDisplay = simTime();
+            invalidDisplay = false;
+        }
     }
 }
 
@@ -861,6 +865,7 @@ void MediumCanvasVisualizer::handleRadioAdded(const IRadio *radio)
     auto module = check_and_cast<const cModule *>(radio);
     auto networkNode = getContainingNode(module);
     if (networkNodeFilter.matches(networkNode)) {
+        invalidDisplay = true;
         auto networkNodeVisualization = networkNodeVisualizer->getNetworkNodeVisualization(networkNode);
         if (networkNodeVisualization == nullptr)
             throw cRuntimeError("Cannot create medium visualization for '%s', because network node visualization is not found for '%s'", module->getFullPath().c_str(), networkNode->getFullPath().c_str());
@@ -922,17 +927,20 @@ void MediumCanvasVisualizer::handleRadioAdded(const IRadio *radio)
 void MediumCanvasVisualizer::handleRadioRemoved(const IRadio *radio)
 {
     Enter_Method_Silent();
-    auto transmissionFigure = removeSignalDepartureFigure(radio);
-    if (transmissionFigure != nullptr) {
-        auto module = const_cast<cModule *>(check_and_cast<const cModule *>(radio));
-        auto networkNodeVisualization = networkNodeVisualizer->getNetworkNodeVisualization(getContainingNode(module));
-        networkNodeVisualization->removeAnnotation(transmissionFigure);
-    }
-    auto figure = removeSignalArrivalFigure(radio);
-    if (figure != nullptr) {
-        auto module = const_cast<cModule *>(check_and_cast<const cModule *>(radio));
-        auto networkNodeVisualization = networkNodeVisualizer->getNetworkNodeVisualization(getContainingNode(module));
-        networkNodeVisualization->removeAnnotation(figure);
+    auto module = const_cast<cModule *>(check_and_cast<const cModule *>(radio));
+    auto networkNode = getContainingNode(module);
+    if (networkNodeFilter.matches(networkNode)) {
+        invalidDisplay = true;
+        auto departureFigure = removeSignalDepartureFigure(radio);
+        if (departureFigure != nullptr) {
+            auto networkNodeVisualization = networkNodeVisualizer->getNetworkNodeVisualization(networkNode);
+            networkNodeVisualization->removeAnnotation(departureFigure);
+        }
+        auto arrivalFigure = removeSignalArrivalFigure(radio);
+        if (arrivalFigure != nullptr) {
+            auto networkNodeVisualization = networkNodeVisualizer->getNetworkNodeVisualization(networkNode);
+            networkNodeVisualization->removeAnnotation(arrivalFigure);
+        }
     }
 }
 
@@ -941,6 +949,7 @@ void MediumCanvasVisualizer::handleSignalAdded(const ITransmission *transmission
     Enter_Method_Silent();
     MediumVisualizerBase::handleSignalAdded(transmission);
     if (matchesTransmission(transmission)) {
+        invalidDisplay = true;
         transmissions.push_back(transmission);
         if (displaySignals) {
             cGroupFigure *signalFigure = createSignalFigure(transmission);
@@ -957,6 +966,7 @@ void MediumCanvasVisualizer::handleSignalRemoved(const ITransmission *transmissi
     Enter_Method_Silent();
     MediumVisualizerBase::handleSignalRemoved(transmission);
     if (matchesTransmission(transmission)) {
+        invalidDisplay = true;
         transmissions.erase(std::remove(transmissions.begin(), transmissions.end(), transmission));
         if (displaySignals) {
             cFigure *signalFigure = getSignalFigure(transmission);
@@ -973,6 +983,7 @@ void MediumCanvasVisualizer::handleSignalDepartureStarted(const ITransmission *t
 {
     Enter_Method_Silent();
     if (matchesTransmission(transmission)) {
+        invalidDisplay = true;
         if (displaySignals || displayMainPowerDensityMap || displayPowerDensityMaps)
             setAnimationSpeed();
         if (displaySignalDepartures) {
@@ -998,6 +1009,7 @@ void MediumCanvasVisualizer::handleSignalDepartureEnded(const ITransmission *tra
 {
     Enter_Method_Silent();
     if (matchesTransmission(transmission)) {
+        invalidDisplay = true;
         if (displaySignals || displayMainPowerDensityMap || displayPowerDensityMaps)
             setAnimationSpeed();
         if (displaySignalDepartures) {
@@ -1016,6 +1028,7 @@ void MediumCanvasVisualizer::handleSignalArrivalStarted(const IReception *recept
     Enter_Method_Silent();
     MediumVisualizerBase::handleSignalArrivalStarted(reception);
     if (matchesTransmission(reception->getTransmission())) {
+        invalidDisplay = true;
         if (displaySignals || displayMainPowerDensityMap || displayPowerDensityMaps)
             setAnimationSpeed();
         if (displaySignalArrivals) {
@@ -1054,6 +1067,7 @@ void MediumCanvasVisualizer::handleSignalArrivalEnded(const IReception *receptio
 {
     Enter_Method_Silent();
     if (matchesTransmission(reception->getTransmission())) {
+        invalidDisplay = true;
         if (displaySignals || displayMainPowerDensityMap || displayPowerDensityMaps)
             setAnimationSpeed();
         if (displaySignalArrivals) {
