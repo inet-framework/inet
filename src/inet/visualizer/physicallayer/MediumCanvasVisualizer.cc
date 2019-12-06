@@ -106,6 +106,7 @@ void MediumCanvasVisualizer::initialize(int stage)
             mainPowerDensityMapFigure->setYAxisLabel("[m]");
             mainPowerDensityMapFigure->setXValueFormat("%.3g");
             mainPowerDensityMapFigure->setYValueFormat("%.3g");
+            mainPowerDensityMapFigure->invertYAxis();
             const auto& displayString = visualizationTargetModule->getDisplayString();
             auto width = atof(displayString.getTagArg("bgb", 0));
             auto height = atof(displayString.getTagArg("bgb", 1));
@@ -132,6 +133,7 @@ void MediumCanvasVisualizer::initialize(int stage)
                     powerDensityMapFigure->setYAxisLabel("[m]");
                     powerDensityMapFigure->setXValueFormat("%.3g");
                     powerDensityMapFigure->setYValueFormat("%.3g");
+                    powerDensityMapFigure->invertYAxis();
                     powerDensityMapFigure->setPlotSize(cFigure::Point(powerDensityMapFigureWidth, powerDensityMapFigureHeight), cFigure::Point(powerDensityMapPixmapWidth, powerDensityMapPixmapHeight));
                     // TODO: center on node to align in space coordinates
                     powerDensityMapFigure->refreshDisplay();
@@ -166,6 +168,7 @@ void MediumCanvasVisualizer::initialize(int stage)
                     spectogramFigure->setYAxisLabel("[s]");
                     spectogramFigure->setXValueFormat("%.3g");
                     spectogramFigure->setYValueFormat("%.3g");
+                    spectogramFigure->invertYAxis();
                     spectogramFigure->setPlotSize(cFigure::Point(spectogramFigureWidth, spectogramFigureHeight), cFigure::Point(spectogramPixmapWidth, spectogramPixmapHeight));
                     spectogramFigure->refreshDisplay();
                     networkNodeVisualization->addAnnotation(spectogramFigure, spectogramFigure->getSize(), spectogramPlacementHint, spectogramPlacementPriority);
