@@ -76,8 +76,8 @@ void HeatMapPlotFigure::setValue(double x, double y, double v, int channel)
 //    ASSERT(minX <= x && x <= maxX);
 //    ASSERT(minY <= y && y <= maxY);
 //    ASSERT(minValue <= v && v <= maxValue);
-    int xp = std::floor(pixmapFigure->getWidth() * (x - minX) / (maxX - minX));
-    int yp = std::floor(pixmapFigure->getHeight() * (y - minY) / (maxY - minY));
+    int xp = std::floor(pixmapFigure->getPixmapWidth() * (x - minX) / (maxX - minX));
+    int yp = std::floor(pixmapFigure->getPixmapHeight() * (y - minY) / (maxY - minY));
     double c = (v - minValue) / (maxValue - minValue);
     setPixelSafe(xp, yp, c, channel);
 }
@@ -89,10 +89,10 @@ void HeatMapPlotFigure::setConstantValue(double x1, double x2, double y1, double
 //    ASSERT(minY <= y1 && y1 <= maxY);
 //    ASSERT(minY <= y2 && y2 <= maxY);
 //    ASSERT(minValue <= v && v <= maxValue);
-    int x1p = std::floor(pixmapFigure->getWidth() * (x1 - minX) / (maxX - minX));
-    int x2p = std::floor(pixmapFigure->getWidth() * (x2 - minX) / (maxX - minX));
-    int y1p = std::floor(pixmapFigure->getHeight() * (y1 - minY) / (maxY - minY));
-    int y2p = std::floor(pixmapFigure->getHeight() * (y2 - minY) / (maxY - minY));
+    int x1p = std::floor(pixmapFigure->getPixmapWidth() * (x1 - minX) / (maxX - minX));
+    int x2p = std::floor(pixmapFigure->getPixmapWidth() * (x2 - minX) / (maxX - minX));
+    int y1p = std::floor(pixmapFigure->getPixmapHeight() * (y1 - minY) / (maxY - minY));
+    int y2p = std::floor(pixmapFigure->getPixmapHeight() * (y2 - minY) / (maxY - minY));
     double c = (v - minValue) / (maxValue - minValue);
     for (int xp = x1p; xp < x2p; xp++)
         for (int yp = y1p; yp < y2p; yp++)
@@ -107,10 +107,10 @@ void HeatMapPlotFigure::setLinearValue(double x1, double x2, double y1, double y
 //    ASSERT(minY <= y2 && y2 <= maxY);
 //    ASSERT(minValue <= vl && vl <= maxValue);
 //    ASSERT(minValue <= vu && vu <= maxValue);
-    int x1p = std::floor(pixmapFigure->getWidth() * (x1 - minX) / (maxX - minX));
-    int x2p = std::floor(pixmapFigure->getWidth() * (x2 - minX) / (maxX - minX));
-    int y1p = std::floor(pixmapFigure->getHeight() * (y1 - minY) / (maxY - minY));
-    int y2p = std::floor(pixmapFigure->getHeight() * (y2 - minY) / (maxY - minY));
+    int x1p = std::floor(pixmapFigure->getPixmapWidth() * (x1 - minX) / (maxX - minX));
+    int x2p = std::floor(pixmapFigure->getPixmapWidth() * (x2 - minX) / (maxX - minX));
+    int y1p = std::floor(pixmapFigure->getPixmapHeight() * (y1 - minY) / (maxY - minY));
+    int y2p = std::floor(pixmapFigure->getPixmapHeight() * (y2 - minY) / (maxY - minY));
     double v;
     for (int xp = x1p; xp < x2p; xp++) {
         if (axis == 0) {
@@ -138,10 +138,10 @@ void HeatMapPlotFigure::setBilinearValue(double x1, double x2, double y1, double
 //    ASSERT(minValue <= v21 && v21 <= maxValue);
 //    ASSERT(minValue <= v12 && v12 <= maxValue);
 //    ASSERT(minValue <= v22 && v22 <= maxValue);
-    int x1p = std::floor(pixmapFigure->getWidth() * (x1 - minX) / (maxX - minX));
-    int x2p = std::floor(pixmapFigure->getWidth() * (x2 - minX) / (maxX - minX));
-    int y1p = std::floor(pixmapFigure->getHeight() * (y1 - minY) / (maxY - minY));
-    int y2p = std::floor(pixmapFigure->getHeight() * (y2 - minY) / (maxY - minY));
+    int x1p = std::floor(pixmapFigure->getPixmapWidth() * (x1 - minX) / (maxX - minX));
+    int x2p = std::floor(pixmapFigure->getPixmapWidth() * (x2 - minX) / (maxX - minX));
+    int y1p = std::floor(pixmapFigure->getPixmapHeight() * (y1 - minY) / (maxY - minY));
+    int y2p = std::floor(pixmapFigure->getPixmapHeight() * (y2 - minY) / (maxY - minY));
     for (int xp = x1p; xp < x2p; xp++) {
         double ax = (double)(xp - x1p) / (x2p - x1p);
         for (int yp = y1p; yp < y2p; yp++) {
