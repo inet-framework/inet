@@ -5,7 +5,7 @@ EtherMac and EtherMacFullDuplex modules: tests IFG in full duplex mode
 %inifile: omnetpp.ini
 [General]
 ned-path = .;../../../../src;../../lib
-network = EthTestNetwork
+network = inet.test.moduletest.lib.EthTestNetwork
 
 record-eventlog = true
 

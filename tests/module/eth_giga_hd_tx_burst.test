@@ -5,7 +5,7 @@ EtherMac module: tests framebursting in half duplex mode on gigabit ethernet
 %inifile: omnetpp.ini
 [General]
 ned-path = .;../../../../src;../../lib
-network = EthTestNetwork
+network = inet.test.moduletest.lib.EthTestNetwork
 
 record-eventlog = true
 

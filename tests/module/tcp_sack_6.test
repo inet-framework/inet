@@ -38,7 +38,7 @@ output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
 output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
 snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
-network = TcpTestNet1
+network = inet.test.moduletest.lib.TcpTestNet1
 
 cmdenv-event-banners=false
 cmdenv-express-mode=false

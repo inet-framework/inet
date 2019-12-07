@@ -8,7 +8,7 @@ Transmission starts at the end of reception plus IFG.
 %inifile: omnetpp.ini
 [General]
 ned-path = .;../../../../src;../../lib
-network = EthTestNetwork
+network = inet.test.moduletest.lib.EthTestNetwork
 
 record-eventlog = true
 

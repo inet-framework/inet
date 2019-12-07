@@ -4,6 +4,7 @@ Tests Ipv4NetworkConfigurator for a wireless LAN.
 
 %file: test.ned
 
+import inet.test.moduletest.lib.*;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.ethernet.EtherSwitch;
 import inet.node.ethernet.Eth10M;

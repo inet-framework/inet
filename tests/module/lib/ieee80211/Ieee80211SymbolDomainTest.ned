@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-package ieee80211;
+package inet.test.moduletest.lib.ieee80211;
 
 simple Ieee80211SymbolDomainTest
 {

@@ -26,6 +26,7 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 *.host.ipv4.configurator.networkConfiguratorModule = ""
 %file: test.ned
 
+import inet.test.moduletest.lib.*;
 import inet.node.inet.StandardHost;
 import inet.status.NodeStatus;
 import inet.common.scenario.ScenarioManager;
