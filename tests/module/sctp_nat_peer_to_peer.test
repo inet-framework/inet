@@ -9,7 +9,7 @@ each other.
 %inifile: omnetpp.ini
 
 [General]
-network=multiRendezvous
+network = inet.test.moduletest.lib.multiRendezvous
 cmdenv-event-banners=false
 cmdenv-express-mode = false
 

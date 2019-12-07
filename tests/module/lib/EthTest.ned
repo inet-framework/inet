@@ -1,4 +1,4 @@
-
+package inet.test.moduletest.lib;
 
 package inet.test.moduletest.lib;
 

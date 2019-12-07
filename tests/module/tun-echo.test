@@ -6,7 +6,7 @@ Testing the functionality of the TUN interface:
 %#--------------------------------------------------------------------------------------------------------------
 %inifile: omnetpp.ini
 
-network = TunTest
+network = inet.test.moduletest.lib.TunTest
 debug-on-errors = true
 
 ned-path = .;../../../../src;../../lib

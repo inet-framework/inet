@@ -18,6 +18,7 @@ When NighborCache_Off test is OK, but some other NeighborCache test is FAILED, t
 %#--------------------------------------------------------------------------------------------------------------
 %file: test.ned
 
+import inet.test.moduletest.lib.*;
 import inet.common.lifecycle.LifecycleController;
 import inet.common.scenario.ScenarioManager;
 import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;

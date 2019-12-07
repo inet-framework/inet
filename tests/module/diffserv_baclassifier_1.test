@@ -76,6 +76,7 @@ void TestApp::handleMessage(cMessage *msg)
 
 %file: TestNetwork.ned
 
+import inet.test.moduletest.lib.*;
 import inet.networklayer.diffserv.BehaviorAggregateClassifier;
 
 network TestNetwork

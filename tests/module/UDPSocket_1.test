@@ -47,7 +47,7 @@ simple TestApp like IUDPApp
 %inifile: omnetpp.ini
 [General]
 ned-path = .;../../../../src;../../lib
-network = SimpleTestNetwork
+network = inet.test.moduletest.lib.SimpleTestNetwork
 cmdenv-express-mode = false
 cmdenv-log-prefix = "C:%C: "
 

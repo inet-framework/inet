@@ -37,6 +37,7 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
 %file: test.ned
 
+import inet.test.moduletest.lib.*;
 import inet.common.lifecycle.LifecycleController;
 import inet.node.inet.AdhocHost;
 import inet.status.NodeStatus;

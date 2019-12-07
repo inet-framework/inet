@@ -7,7 +7,7 @@ Testing SCTP_NAT: One peer sends data over two separate paths and two NATs to a 
 %inifile: omnetpp.ini
 
 [General]
-network=multinat
+network = inet.test.moduletest.lib.multinat
 cmdenv-event-banners=false
 cmdenv-express-mode = false
 
@@ -20,7 +20,7 @@ output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
 snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
 **.testing = false
-**.testTimeout = 0s
+**.testTimeout = 0
 
 # udp app (off)
 **.numUdpApps = 0

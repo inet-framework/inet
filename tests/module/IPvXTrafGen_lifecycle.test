@@ -49,6 +49,7 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 %#--------------------------------------------------------------------------------------------------------------
 %file: test.ned
 
+import inet.test.moduletest.lib.*;
 import inet.applications.generic.IIPvXTrafficGenerator;
 import inet.common.lifecycle.LifecycleController;
 import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;

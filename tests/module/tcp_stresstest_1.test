@@ -6,7 +6,7 @@ Here: packet loss only.
 [General]
 #preload-ned-files = *.ned ../../*.ned @../../../../nedfiles.lst
 ned-path = .;../../../../src;../../lib
-network=TcpTestNet2
+network = inet.test.moduletest.lib.TcpTestNet2
 
 #omnetpp 5.0 - 5.1 compatibility:
 eventlog-file = "${resultdir}/${configname}-${runnumber}.elog"

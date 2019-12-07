@@ -2,11 +2,11 @@
 EtherMAC module: tests IFG and framebursting in half duplex mode
 
 
-%inifile: {}.ini
+%inifile: omnetpp.ini
 [General]
 #preload-ned-files = *.ned ../../*.ned @../../../../nedfiles.lst
 ned-path = .;../../../../src;../../lib
-network = EthTestNetwork
+network = inet.test.moduletest.lib.EthTestNetwork
 
 record-eventlog = true
 

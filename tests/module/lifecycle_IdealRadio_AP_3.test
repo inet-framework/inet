@@ -50,6 +50,7 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
 %file: test.ned
 
+import inet.test.moduletest.lib.*;
 import inet.common.lifecycle.LifecycleController;
 import inet.node.wireless.AccessPoint;
 import inet.physicallayer.idealradio.IdealRadioMedium;

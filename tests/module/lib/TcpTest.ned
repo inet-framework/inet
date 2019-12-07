@@ -1,7 +1,5 @@
 package inet.test.moduletest.lib;
-
 import inet.transportlayer.contract.ITCP;
-
 network TcpTestNet1
 {
     parameters:

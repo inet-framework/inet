@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package ieee80211;
+package inet.test.moduletest.lib.ieee80211;
 
 module Ieee80211BitDomainTest
 {

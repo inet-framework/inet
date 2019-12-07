@@ -28,7 +28,7 @@ RFC 2236 6.:
    |  Max Resp Time    |         set flag)
    |  < current timer) |
     -------------------
-    
+
 This scenario checks the following trajectories:
 
 NON MEMBER --> join group --> DELAYING MEMBER --> timer expired --> IDLE MEMBER --> leave group --> NON MEMBER
@@ -50,7 +50,7 @@ output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
 output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
 snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
-network=IGMPTestNetwork
+network = inet.test.moduletest.lib.IGMPTestNetwork
 **.igmpType = "TestIGMP"
 
 **.scenarioManager.script = xmldoc("scenario.xml")

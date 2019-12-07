@@ -4,6 +4,7 @@ Tests IPv4NetworkConfigurator for a mixed wired and wireless LAN.
 
 %file: test.ned
 
+import inet.test.moduletest.lib.*;
 import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
 import inet.node.ethernet.EtherSwitch;
 import inet.node.ethernet.Eth10M;

@@ -9,7 +9,7 @@ reset requests performed.
 %inifile: omnetpp.ini
 
 [General]
-network=SCTPFeatureTest
+network = inet.test.moduletest.lib.SCTPFeatureTest
 cmdenv-event-banners=false
 cmdenv-express-mode = false
 

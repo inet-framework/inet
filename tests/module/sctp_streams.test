@@ -7,7 +7,7 @@ Testing SCTP: Use of several streams using the fair bandwidth scheduler
 %inifile: omnetpp.ini
 
 [General]
-network=SCTPFeatureTest
+network = inet.test.moduletest.lib.SCTPFeatureTest
 cmdenv-event-banners=false
 cmdenv-express-mode = false
 

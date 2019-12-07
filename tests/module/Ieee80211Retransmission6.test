@@ -3,6 +3,7 @@ https://warpproject.org/trac/wiki/802.11/MAC/Lower/Retransmissions (Example L.2)
 
 %file: test.ned
 
+import inet.test.moduletest.lib.*;
 import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
 import inet.node.inet.WirelessHost;
 import inet.node.wireless.AccessPoint;

@@ -18,7 +18,7 @@ output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
 output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
 snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
-network=TestIGMPNetwork
+network = inet.test.moduletest.lib.TestIGMPNetwork
 **.igmpType = "IGMPv3"
 **.IPForward = false
 **.multicastForwarding = false
@@ -56,7 +56,7 @@ network=TestIGMPNetwork
 %#
 %postrun-command: grep "IGMPTester: .* groups = " test.out > groups.out || true
 %contains: groups.out
-IGMPTester: eth0: groups = 224.0.0.1 E, 224.0.0.2 E. 
+IGMPTester: eth0: groups = 224.0.0.1 E, 224.0.0.2 E.
 IGMPTester: eth0: groups = 224.0.0.1 E, 224.0.0.2 E, 225.0.0.1 I 10.0.0.1 10.0.0.2.
 IGMPTester: eth0: groups = 224.0.0.1 E, 224.0.0.2 E, 225.0.0.1 I 10.0.0.1.
 IGMPTester: eth0: groups = 224.0.0.1 E, 224.0.0.2 E, 225.0.0.1 E 10.0.0.2.
