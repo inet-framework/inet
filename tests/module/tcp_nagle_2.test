@@ -5,9 +5,8 @@ Test Nagle's algorithm: full segment-sized packets should not be delayed.
 Output is not fully OK -- every socket write causes sending a new segment
 which contradicts with the slow start algorithm...
 
-%inifile: {}.ini
+%inifile: omnetpp.ini
 [General]
-#preload-ned-files = *.ned ../../*.ned @../../../../nedfiles.lst
 ned-path = .;../../../../src;../../lib
 
 #omnetpp 5.0 - 5.1 compatibility:
@@ -16,11 +15,9 @@ output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
 output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
 snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
-#[Cmdenv]
 cmdenv-event-banners=false
 cmdenv-express-mode=false
 
-#[Parameters]
 *.testing=true
 ####cmdenv-log-prefix="%c %C@"
 ####cmdenv-log-prefix=""

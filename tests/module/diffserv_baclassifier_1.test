@@ -105,7 +105,7 @@ network TestNetwork
 }
 
 
-%inifile: {}.ini
+%inifile: omnetpp.ini
 ned-path = .;../../../../src;../../lib
 sim-time-limit=100s
 cmdenv-express-mode = true
