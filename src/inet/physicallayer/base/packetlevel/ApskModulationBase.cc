@@ -57,11 +57,13 @@ const ApskModulationBase *ApskModulationBase::findModulation(const char *modulat
     else if (!strcmp("QAM-256", modulation))
         return &Qam256Modulation::singleton;
     else if (!strncmp("MQAM-", modulation, 5))
+        // TODO: avoid allocation
         return new MqamModulation(atoi(modulation + 5));
     else if (!strncmp("MPSK-", modulation, 5))
+        // TODO: avoid allocation
         return new MpskModulation(atoi(modulation + 5));
     else if (!strcmp(modulation, "DSSS-OQPSK-16"))
-        return new DsssOqpsk16Modulation();
+        return &DsssOqpsk16Modulation::singleton;
     else
         throw cRuntimeError("Unknown modulation = %s", modulation);
 }
