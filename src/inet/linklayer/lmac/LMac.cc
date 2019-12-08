@@ -407,6 +407,10 @@ void LMac::handleSelfMessage(cMessage *msg)
 
                 SETUP_PHASE = false;
             }
+            else if (msg->getKind() == LMAC_DATA) {
+                // TODO: review this delete, it's added to avoid a memory leak detected by Valgrind
+                delete msg;
+            }
             else {
                 EV << "Unknown packet" << msg->getKind() << "in state" << macState << endl;
             }
