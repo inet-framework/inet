@@ -30,6 +30,7 @@ void DimensionalTransmitterBase::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
         cModule *module = check_and_cast<cModule *>(this);
+        gainFunctionCacheLimit = module->par("gainFunctionCacheLimit");
         parseTimeGains(module->par("timeGains"));
         parseFrequencyGains(module->par("frequencyGains"));
         timeGainsNormalization = module->par("timeGainsNormalization");
@@ -147,10 +148,16 @@ const Ptr<const IFunction<double, Domain<T>>> DimensionalTransmitterBase::normal
         throw cRuntimeError("Unknown normalization: '%s'", normalization);
 }
 
-Ptr<const IFunction<WpHz, Domain<simsec, Hz>>> DimensionalTransmitterBase::createPowerFunction(const simtime_t startTime, const simtime_t endTime, Hz centerFrequency, Hz bandwidth, W power) const
+Ptr<const IFunction<double, Domain<simsec, Hz>>> DimensionalTransmitterBase::createGainFunction(const simtime_t startTime, const simtime_t endTime, Hz centerFrequency, Hz bandwidth) const
 {
-    if (timeGains.size() == 0 && frequencyGains.size() == 0)
-        return makeFirstQuadrantLimitedFunction(staticPtrCast<const IFunction<WpHz, Domain<simsec, Hz>>>(makeShared<TwoDimensionalBoxcarFunction<WpHz, simsec, Hz>>(simsec(startTime), simsec(endTime), centerFrequency - bandwidth / 2, centerFrequency + bandwidth / 2, power / bandwidth)));
+    if (timeGains.size() == 0 && frequencyGains.size() == 0) {
+        double value = 1;
+        if (!strcmp("integral", timeGainsNormalization))
+            value /= (endTime - startTime).dbl();
+        if (!strcmp("integral", frequencyGainsNormalization))
+            value /= bandwidth.get();
+        return makeShared<TwoDimensionalBoxcarFunction<double, simsec, Hz>>(simsec(startTime), simsec(endTime), centerFrequency - bandwidth / 2, centerFrequency + bandwidth / 2, value);
+    }
     else {
         Ptr<const IFunction<double, Domain<simsec>>> timeGainFunction;
         if (timeGains.size() != 0) {
@@ -199,10 +206,38 @@ Ptr<const IFunction<WpHz, Domain<simsec, Hz>>> DimensionalTransmitterBase::creat
         }
         else
             frequencyGainFunction = makeShared<OneDimensionalBoxcarFunction<double, Hz>>(centerFrequency - bandwidth / 2, centerFrequency + bandwidth / 2, 1);
-        auto gainFunction = makeShared<OrthogonalCombinatorFunction<double, simsec, Hz>>(normalize<simsec>(timeGainFunction, timeGainsNormalization), normalize<Hz>(frequencyGainFunction, frequencyGainsNormalization));
-        auto powerFunction = makeShared<ConstantFunction<WpHz, Domain<simsec, Hz>>>(power / Hz(1));
-        return makeFirstQuadrantLimitedFunction(powerFunction->multiply(gainFunction));
+        return makeShared<CombinedFunction<double, simsec, Hz>>(normalize<simsec>(timeGainFunction, timeGainsNormalization), normalize<Hz>(frequencyGainFunction, frequencyGainsNormalization));
     }
+}
+
+Ptr<const IFunction<WpHz, Domain<simsec, Hz>>> DimensionalTransmitterBase::createPowerFunction(const simtime_t startTime, const simtime_t endTime, Hz centerFrequency, Hz bandwidth, W power) const
+{
+    Ptr<const IFunction<WpHz, Domain<simsec, Hz>>> powerFunction;
+    if (gainFunctionCacheLimit == 0) {
+        if (timeGains.size() == 0 && frequencyGains.size() == 0)
+            powerFunction = makeShared<TwoDimensionalBoxcarFunction<WpHz, simsec, Hz>>(simsec(startTime), simsec(endTime), centerFrequency - bandwidth / 2, centerFrequency + bandwidth / 2, power / bandwidth);
+        else {
+            auto gainFunction = createGainFunction(startTime, endTime, centerFrequency, bandwidth);
+            powerFunction = makeShared<ConstantFunction<WpHz, Domain<simsec, Hz>>>(power / Hz(1))->multiply(gainFunction);
+        }
+    }
+    else {
+        Ptr<const IFunction<double, Domain<simsec, Hz>>> gainFunction;
+        std::tuple<simtime_t, Hz, Hz> key(endTime - startTime, centerFrequency, bandwidth);
+        auto it = gainFunctionCache.find(key);
+        if (it != gainFunctionCache.end())
+            gainFunction = it->second;
+        else {
+            gainFunction = createGainFunction(0, endTime - startTime, Hz(0), bandwidth);
+            gainFunctionCache[key] = gainFunction;
+            if ((int)gainFunctionCache.size() == gainFunctionCacheLimit)
+                gainFunctionCache.clear();
+        }
+        Point<simsec, Hz> shift(simsec(startTime), centerFrequency);
+        auto shiftedGainFunction = makeShared<DomainShiftedFunction<double, Domain<simsec, Hz>>>(gainFunction, shift);
+        powerFunction = makeShared<ConstantFunction<WpHz, Domain<simsec, Hz>>>(power / Hz(1))->multiply(shiftedGainFunction);
+    }
+    return makeFirstQuadrantLimitedFunction(powerFunction);
 }
 
 } // namespace physicallayer
