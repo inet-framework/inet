@@ -450,10 +450,10 @@ std::pair<WpHz, WpHz> MediumCanvasVisualizer::computePowerForPartitionBounds(con
     WpHz totalPower1;
     WpHz totalPower2;
     if (antenna != nullptr && antenna->isDirectional()) {
-        if (auto sumFunction = dynamicPtrCast<const SumFunction<WpHz, Domain<m, m, m, simsec, Hz>>>(powerFunction)) {
+        if (auto summedFunction = dynamicPtrCast<const SummedFunction<WpHz, Domain<m, m, m, simsec, Hz>>>(powerFunction)) {
             totalPower1 = WpHz(0);
             totalPower2 = WpHz(0);
-            for (auto elementFunction : sumFunction->getElements()) {
+            for (auto elementFunction : summedFunction->getElements()) {
                 WpHz p1;
                 WpHz p2;
                 std::tie(p1, p2) = computePowerForDirectionalAntenna(elementFunction, lower, upper, antenna, position);
@@ -475,7 +475,7 @@ std::pair<WpHz, WpHz> MediumCanvasVisualizer::computePowerForPartitionBounds(con
 
 std::pair<WpHz, WpHz> MediumCanvasVisualizer::computePowerForDirectionalAntenna(const Ptr<const IFunction<WpHz, Domain<m, m, m, simsec, Hz>>>& powerFunction, const math::Point<m, m, m, simsec, Hz>& lower, const math::Point<m, m, m, simsec, Hz>& upper, const IAntenna *antenna, const Coord& position) const
 {
-    if (auto rf = dynamicPtrCast<const MultiplicationFunction<WpHz, Domain<m, m, m, simsec, Hz>>>(powerFunction)) {
+    if (auto rf = dynamicPtrCast<const MultipliedFunction<WpHz, Domain<m, m, m, simsec, Hz>>>(powerFunction)) {
         if (auto tf = dynamicPtrCast<const PropagatedTransmissionPowerFunction>(rf->getF1())) {
             const Point<m, m, m>& startPosition = tf->getStartPosition();
             double dx = std::get<0>(startPosition).get() - position.x;

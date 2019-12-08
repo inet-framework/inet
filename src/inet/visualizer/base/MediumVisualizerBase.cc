@@ -124,7 +124,7 @@ void MediumVisualizerBase::initialize(int stage)
         spectogramFigureYTickCount = par("spectogramFigureYTickCount");
         spectogramPlacementHint = parsePlacement(par("spectogramPlacementHint"));
         spectogramPlacementPriority = par("spectogramPlacementPriority");
-        mediumPowerDensityFunction = makeShared<SumFunction<WpHz, Domain<m, m, m, simsec, Hz>>>();
+        mediumPowerDensityFunction = makeShared<SummedFunction<WpHz, Domain<m, m, m, simsec, Hz>>>();
         radioMedium = getModuleFromPar<IRadioMedium>(par("mediumModule"), this, false);
         if (radioMedium != nullptr) {
             cModule *radioMediumModule = check_and_cast<cModule *>(radioMedium);
@@ -269,7 +269,7 @@ void MediumVisualizerBase::handleSignalAdded(const physicallayer::ITransmission 
         signalPowerDensityFunctions[transmission] = signalPowerDensityFunction;
         for (auto it : noisePowerDensityFunctions)
             it.second->addElement(signalPowerDensityFunction);
-        auto noisePowerFunction = makeShared<SumFunction<WpHz, Domain<m, m, m, simsec, Hz>>>();
+        auto noisePowerFunction = makeShared<SummedFunction<WpHz, Domain<m, m, m, simsec, Hz>>>();
         for (auto elementFunction : mediumPowerDensityFunction->getElements())
             if (elementFunction != signalPowerDensityFunction)
                 noisePowerFunction->addElement(elementFunction);

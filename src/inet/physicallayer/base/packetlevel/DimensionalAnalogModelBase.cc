@@ -49,7 +49,7 @@ const Ptr<const IFunction<WpHz, Domain<simsec, Hz>>> DimensionalAnalogModelBase:
     EV_TRACE << *transmissionPowerFunction << endl;
     EV_TRACE << "Transmission power end" << endl;
     Point<simsec, Hz> propagationShift(simsec(arrival->getStartTime() - transmission->getStartTime()), Hz(0));
-    const auto& propagatedTransmissionPowerFunction = makeShared<ShiftFunction<WpHz, Domain<simsec, Hz>>>(transmissionPowerFunction, propagationShift);
+    const auto& propagatedTransmissionPowerFunction = makeShared<DomainShiftedFunction<WpHz, Domain<simsec, Hz>>>(transmissionPowerFunction, propagationShift);
     Ptr<const IFunction<double, Domain<simsec, Hz>>> attenuationFunction = makeShared<FrequencyDependentAttenuationFunction>(radioMedium, transmitterAntennaGain, receiverAntennaGain, transmissionStartPosition, receptionStartPosition);
     Ptr<const IFunction<WpHz, Domain<simsec, Hz>>> receptionPower;
     if (attenuateWithCenterFrequency) {
@@ -89,7 +89,7 @@ const INoise *DimensionalAnalogModelBase::computeNoise(const IListening *listeni
         EV_TRACE << *receptionPower << endl;
         EV_TRACE << "Interference power end" << endl;
     }
-    const Ptr<const IFunction<WpHz, Domain<simsec, Hz>>>& noisePower = makeShared<SumFunction<WpHz, Domain<simsec, Hz>>>(receptionPowers);
+    const Ptr<const IFunction<WpHz, Domain<simsec, Hz>>>& noisePower = makeShared<SummedFunction<WpHz, Domain<simsec, Hz>>>(receptionPowers);
     EV_TRACE << "Noise power begin " << endl;
     EV_TRACE << *noisePower << endl;
     EV_TRACE << "Noise power end" << endl;
@@ -101,7 +101,7 @@ const INoise *DimensionalAnalogModelBase::computeNoise(const IReception *recepti
 {
     auto dimensionalReception = check_and_cast<const DimensionalReception *>(reception);
     auto dimensionalNoise = check_and_cast<const DimensionalNoise *>(noise);
-    const Ptr<const IFunction<WpHz, Domain<simsec, Hz>>>& noisePower = makeShared<AdditionFunction<WpHz, Domain<simsec, Hz>>>(dimensionalReception->getPower(), dimensionalNoise->getPower());
+    const Ptr<const IFunction<WpHz, Domain<simsec, Hz>>>& noisePower = makeShared<AddedFunction<WpHz, Domain<simsec, Hz>>>(dimensionalReception->getPower(), dimensionalNoise->getPower());
     return new DimensionalNoise(reception->getStartTime(), reception->getEndTime(), dimensionalReception->getCenterFrequency(), dimensionalReception->getBandwidth(), noisePower);
 }
 
