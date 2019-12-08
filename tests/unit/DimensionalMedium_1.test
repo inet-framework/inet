@@ -23,6 +23,9 @@ class DimensionalMediumTest : public DimensionalTransmitterBase
 
 void DimensionalMediumTest::test1()
 {
+    gainFunctionCacheLimit = 0;
+    timeGainsNormalization = "";
+    frequencyGainsNormalization = "integral";
     mps propagationSpeed(299792458);
     auto pathLoss = new FreeSpacePathLoss();
     auto pathLossFunction = makeShared<PathLossFunction>(pathLoss);
@@ -52,7 +55,7 @@ void DimensionalMediumTest::test1()
     auto receptionFunction2 = propagatedTransmissionFunction2->multiply(approximatedAttenuationFunction2);
     //std::cout << "Reception 2: " << *receptionFunction2 << std::endl;
 
-    auto interferenceFunction = makeShared<SumFunction<WpHz, Domain<m, m, m, simsec, Hz>>>(std::vector<Ptr<const IFunction<WpHz, Domain<m, m, m, simsec, Hz>>>>({backgroundNoise, receptionFunction2}));
+    auto interferenceFunction = makeShared<SummedFunction<WpHz, Domain<m, m, m, simsec, Hz>>>(std::vector<Ptr<const IFunction<WpHz, Domain<m, m, m, simsec, Hz>>>>({backgroundNoise, receptionFunction2}));
 
     auto snirFunction = receptionFunction1->divide(interferenceFunction);
     //std::cout << "SNIR: " << *snirFunction << std::endl;

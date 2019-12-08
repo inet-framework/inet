@@ -3,6 +3,7 @@
 This test contains basic checks for various multi-dimensional partitioning of mathematical functions.
 
 %includes:
+#include "inet/common/math/FunctionChecker.h"
 #include "inet/common/math/Functions.h"
 
 %global:
@@ -37,14 +38,14 @@ void FunctionTest::test1()
     printPartitioning<double, Domain<double>>(Interval<double>(Point<double>(-10.0), Point<double>(0.0), 0b1, 0b0, 0b0), f2);
     printPartitioning<double, Domain<double>>(Interval<double>(Point<double>(0.0), Point<double>(10.0), 0b1, 0b0, 0b0), f2);
 
-    std::cout << "\nAdditionFunction\n";
+    std::cout << "\nAddedFunction\n";
     auto f3 = makeShared<OneDimensionalBoxcarFunction<double, double>>(0.0, 2.0, 1.0);
     auto f4 = f2->add(f3);
     printPartitioning<double, Domain<double>>(f3->getDomain(), f4);
     printPartitioning<double, Domain<double>>(Interval<double>(Point<double>(-10.0), Point<double>(0.0), 0b1, 0b0, 0b0), f4);
     printPartitioning<double, Domain<double>>(Interval<double>(Point<double>(0.0), Point<double>(10.0), 0b1, 0b0, 0b0), f4);
 
-    std::cout << "\nMultiplicationFunction\n";
+    std::cout << "\nMultipliedFunction\n";
     auto f5 = f2->multiply(f3);
     printPartitioning<double, Domain<double>>(f3->getDomain(), f5);
     printPartitioning<double, Domain<double>>(Interval<double>(Point<double>(-10.0), Point<double>(0.0), 0b1, 0b0, 0b0), f5);
@@ -60,19 +61,19 @@ void FunctionTest::test1()
     auto f6 = makeShared<OneDimensionalInterpolatedFunction<double, double>>(rs, &LinearInterpolator<double, double>::singleton);
     printPartitioning<double, Domain<double>>(f6->getDomain(), f6);
 
-    std::cout << "\nMultiplicationFunction optimization\n";
+    std::cout << "\nMultipliedFunction optimization\n";
     auto f7 = makeShared<ConstantFunction<double, Domain<double>>>(0.0)->multiply(f6);
     printPartitioning<double, Domain<double>>(f7->getDomain(), f7);
 
-    std::cout << "\nOrthogonalCombinatorFunction\n";
-    auto f8 = makeShared<OrthogonalCombinatorFunction<double, double, double>>(f2, f3);
+    std::cout << "\nCombinedFunction\n";
+    auto f8 = makeShared<CombinedFunction<double, double, double>>(f2, f3);
     printPartitioning<double, Domain<double, double>>(f8->getDomain(), f8);
 
     std::cout << "\nTwoDimensionalBoxcarFunction\n";
     auto f9 = makeShared<TwoDimensionalBoxcarFunction<double, double, double>>(-1.0, 1.0, 0.0, 2.0, 10.0);
     printPartitioning<double, Domain<double, double>>(f9->getDomain(), f9);
 
-    std::cout << "\nDivisionFunction\n";
+    std::cout << "\nDividedFunction\n";
     auto f10 = f8->divide(f9);
     printPartitioning<double, Domain<double, double>>(f10->getDomain(), f10);
 
@@ -82,7 +83,7 @@ void FunctionTest::test1()
     printPartitioning<double, Domain<double>>(f12->getDomain(), f12);
 
     std::cout << "\nGaussFunction x BoxcarFunction\n";
-    auto f13 = makeShared<OrthogonalCombinatorFunction<double, double, double>>(f11, f2);
+    auto f13 = makeShared<CombinedFunction<double, double, double>>(f11, f2);
     auto f14 = makeShared<ApproximatedFunction<double, Domain<double, double>, 0, double>>(-10, 10, 1, &AverageInterpolator<double, double>::singleton, f13);
     auto f15 = makeShared<ApproximatedFunction<double, Domain<double, double>, 1, double>>(-1, 1, 0.5, &LeftInterpolator<double, double>::singleton, f14);
     printPartitioning<double, Domain<double, double>>(f15->getDomain(), f15);
@@ -131,7 +132,7 @@ constant over [0 … 1)
 constant over [1 … 10)
   → 0
 
-AdditionFunction
+AddedFunction
 
 Partitioning (-inf … inf)
 constant over (-inf … -1)
@@ -159,7 +160,7 @@ constant over [1 … 2)
 constant over [2 … 10)
   → 0
 
-MultiplicationFunction
+MultipliedFunction
 
 Partitioning (-inf … inf)
 constant over (-inf … -1)
@@ -195,13 +196,13 @@ linear in dim. 0 over [0 … 1)
 constant over [1 … inf)
   → 0
 
-MultiplicationFunction optimization
+MultipliedFunction optimization
 
 Partitioning (-inf … inf)
 constant over (-inf … inf)
   → 0
 
-OrthogonalCombinatorFunction
+CombinedFunction
 
 Partitioning (-inf … inf) x (-inf … inf)
 constant over (-inf … -1) x (-inf … 0)
@@ -245,7 +246,7 @@ constant over [-1 … 1) x [2 … inf)
 constant over [1 … inf) x [2 … inf)
   → 0
 
-DivisionFunction
+DividedFunction
 
 Partitioning (-inf … inf) x (-inf … inf)
 constant over (-inf … -1) x (-inf … 0)

@@ -3,6 +3,7 @@
 This test contains basic checks for various multi-dimensional mathematical functions.
 
 %includes:
+#include "inet/common/math/FunctionChecker.h"
 #include "inet/common/math/Functions.h"
 
 %global:
@@ -34,7 +35,7 @@ void FunctionTest::test1()
     FunctionChecker<double, Domain<simsec, Hz>>(attenuation).check();
     std::cout << "Attenuation: " << *attenuation << std::endl;
 
-    auto propagatedTransmission = makeShared<ShiftFunction<WpHz, Domain<simsec, Hz>>>(transmission, propagation);
+    auto propagatedTransmission = makeShared<DomainShiftedFunction<WpHz, Domain<simsec, Hz>>>(transmission, propagation);
     FunctionChecker<WpHz, Domain<simsec, Hz>>(propagatedTransmission).check();
 
     auto reception = propagatedTransmission->multiply(attenuation);
@@ -115,7 +116,7 @@ Attenuation: function(s, Hz) → unit {
 Reception: function(s, Hz) → WpHz {
   domain = [10 s … inf s) x [0 Hz … inf GHz) → range = [-inf WpHz … inf WpHz]
   structure =
-    (* (Shift, s = (10 s, 0 Hz)
+    (* (DomainShifted, shift = (10 s, 0 Hz)
          (DomainLimited, domain = [0 s … inf s) x [0 Hz … inf GHz)
            (TwoDimensionalBoxcar, [10 s … 30 s] x [900 MHz … 1.1 GHz] → 5e-07 WpHz)))
        Constant 0.5)
@@ -144,7 +145,7 @@ Reception: function(s, Hz) → WpHz {
 SNIR over time and frequency: function(s, Hz) → unit {
   domain = [10 s … inf s) x [0 Hz … inf GHz) → range = [-inf … inf]
   structure =
-    (/ (* (Shift, s = (10 s, 0 Hz)
+    (/ (* (DomainShifted, shift = (10 s, 0 Hz)
             (DomainLimited, domain = [0 s … inf s) x [0 Hz … inf GHz)
               (TwoDimensionalBoxcar, [10 s … 30 s] x [900 MHz … 1.1 GHz] → 5e-07 WpHz)))
           Constant 0.5)
