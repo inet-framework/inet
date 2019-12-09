@@ -42,7 +42,7 @@ compound modules using composition.
 The queueing model can be found in the ``inet.queueing`` NED package. All
 queueing model elements implement one or more NED module interfaces and also
 the corresponding C++ interfaces from the contract folder. As a minimum, they
-all implement the :cpp:`IPacketQueueingElement` interface.
+all implement the :cpp:`IPacketQueueingElement` C++ interface.
 
 Operation
 ~~~~~~~~~
@@ -151,10 +151,8 @@ The following simpler equation about the number of packets always holds true for
 
 #pushed - #pulled - #dropped - #removed = #queueLength = #available
 
--  :ned:`PacketQueue`: a generic queue that provides ordering and selective dropping
-
-   parameterizable with an :cpp:`IPacketComparatorFunction` and an :cpp:`IPacketDropperFunction`
-
+-  :ned:`PacketQueue`: generic queue that provides ordering and selective dropping;
+   it can be parameterized with a *comparator* and a *dropper* function (such functions can be defined in C++)
 -  :ned:`DropHeadQueue`: drops packets at the head of the queue
 -  :ned:`DropTailQueue`: drops packets at the tail of the queue, the most commonly used queue
 -  :ned:`PriorityQueue`: contains several subqueues that share a buffer
@@ -168,10 +166,8 @@ These modules deal with memory allocation of packets without considering the
 ordering among them. A packet buffer generally doesn't have gates, and packets
 are not pushed into or pulled from it.
 
--  :ned:`PacketBuffer`: a generic buffer that provides shared storage between several queues
-
-   parameterizable with an :cpp:`IPacketDropperFunction`
-
+-  :ned:`PacketBuffer`: generic buffer that provides shared storage between several queues;
+   it can be parameterized with a *dropper* function (such functions can be defined in C++)
 -  :ned:`PriorityBuffer`: drops packets based on the queue priority
 
 Filters
@@ -183,10 +179,8 @@ packet to its output or it simply drops the packet. In contrast, when a packet
 is pulled from the output of a packet filter, then it continuously pulls and drops
 packets from its input until it finds one that matches the filter criteria.
 
--  :ned:`PacketFilter`: a generic packet filter
-
-   parameterizable with an :cpp:`IPacketFilterFunction`
-
+-  :ned:`PacketFilter`: generic packet filter;
+   it can be parameterized with a *filter* function (such functions can be defined in C++)
 -  :ned:`ContentBasedFilter`: drops packets based on the data they contain
 -  :ned:`OrdinalBasedDropper`: drops packets based on their ordinal number
 -  :ned:`StatisticalRateLimiter`: drops packets above the specified packetrate or datarate
@@ -199,10 +193,8 @@ These modules classify packets to one of their outputs. When a packet is pushed
 into the input of a packet classifier, then it immediately pushes the packet to
 one of its outputs.
 
--  :ned:`PacketClassifier`: a generic packet classifier
-
-   parameterizable with an :cpp:`IPacketClassifierFunction`
-
+-  :ned:`PacketClassifier`: generic packet classifier;
+   it can be parameterized with a *classifier* function (such functions can be defined in C++)
 -  :ned:`PriorityClassifier`: classifies packets to the first non-full output
 -  :ned:`WrrClassifier`: classifies packets in a weighted round-robin manner
 -  :ned:`LabelClassifier`: classifies packets based on the attached labels
@@ -217,10 +209,8 @@ These modules schedule packets from one of their inputs. When a packet is pulled
 from the output of a packet scheduler, then it immediately pulls a packet from one
 of its inputs and returns that packet.
 
--  :ned:`PacketScheduler`: a generic packet scheduler
-
-   parameterizable with an :cpp:`IPacketSchedulerFunction`
-
+-  :ned:`PacketScheduler`: generic packet scheduler;
+   it can be parameterized with a *packet scheduler* function (such functions can be defined in C++)
 -  :ned:`PriorityScheduler`: schedules packets from the first non-empty source
 -  :ned:`WrrScheduler`: schedules packets in a weighted round-robin manner
 -  :ned:`LabelScheduler`: schedules packets based on the attached labels
@@ -243,16 +233,13 @@ Markers
 These modules attach some information to packets on an individual basis. Packets
 can be both pushed into the input and pulled from the output of packet markers.
 
--  :ned:`PacketLabeler`: a generic marker that attaches labels to matching packets
-
-   parameterizable with an :cpp:`IPacketFilterFunction`
-
--  :ned:`ContentBasedLabeler`: attaches labels to packets based on the data they contain 
--  :ned:`PacketTagger`: attaches tags such as outgoing interface, hopLimit, VLAN, user priority to matching packets 
-
-   parameterizable with an :cpp:`IPacketFilterFunction`
-
--  :ned:`ContentBasedTagger`: attaches tags to packets based on the data they contain 
+-  :ned:`PacketLabeler`: generic marker which attaches labels to matching packets;
+   it can be parameterized with an :cpp:`IPacketFilterFunction`
+-  :ned:`ContentBasedLabeler`: attaches labels to packets based on the data they contain
+-  :ned:`PacketTagger`: attaches tags such as outgoing interface, hopLimit, VLAN, user priority to matching packets;
+   it can be parameterized with an :cpp:`IPacketFilterFunction`
+-  :ned:`ContentBasedTagger`: attaches tags to packets based on the data they contain
+-  :ned:`RedMarker`: random early detection marker
 
 Meters
 ------
