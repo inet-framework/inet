@@ -64,10 +64,10 @@ The subsequent sections describe the IPv4 modules in detail.
 
 .. _ug:sec:ipv4:ipv4:
 
-Ipv4
+IPv4
 ----
 
-The :ned:`Ipv4` module implements the IPv4 protocol.
+The IPv4 protocol is implemented by the :ned:`Ipv4` module.
 
 Its parameters include:
 
@@ -91,10 +91,10 @@ Its parameters include:
 
 .. _ug:sec:ipv4:ipv4routingtable:
 
-Ipv4RoutingTable
-----------------
+IPv4 Routing Table
+------------------
 
-The :ned:`Ipv4RoutingTable` module represents the IPv4 route table.
+IPv4 route tables are represented with the :ned:`Ipv4RoutingTable` module.
 Hosts and routers normally contain one instance of this module. The
 :ned:`Ipv4RoutingTable` module does not send or receive messages.
 Instead, C++ methods are for querying and updating the table, as well as
@@ -123,14 +123,14 @@ describes the format of the new configuration files.
 
 .. _ug:sec:ipv4:icmp:
 
-Icmp
+ICMP
 ----
 
-The :ned:`Icmp` module implements the Internet Control Message Protocol
-(ICMP). ICMP is the error reporting and diagnostic mechanism of the
-Internet. It uses the services of IP, so it is a transport layer
+The Internet Control Message Protocol (ICMP) can be modeled with the
+:ned:`Icmp` module. ICMP is the error reporting and diagnostic mechanism of the
+Internet. It uses the services of IPv4, so it is a transport layer
 protocol, but unlike TCP or UDP, it is not used to transfer user data. It
-cannot be separated from IP because the routing errors are reported by
+cannot be separated from IPv4, because the routing errors are reported by
 ICMP.
 
 The :ned:`Icmp` module can be used to send error messages and ping
@@ -141,10 +141,10 @@ is unreliable.
 
 .. _ug:sec:ipv4:arp:
 
-Arp
+ARP
 ---
 
-The :ned:`Arp` module implements the Address Resolution Protocol (ARP).
+The Address Resolution Protocol (ARP) is modeled with the :ned:`Arp` module.
 The ARP protocol is designed to translate a local protocol address to a
 hardware address. Although the ARP protocol can be used with several
 network protocols and hardware addressing schemes, in practice, they are
@@ -188,7 +188,7 @@ The module parameters of :ned:`Arp` are:
 
 .. _ug:sec:ipv4:igmp:
 
-Igmp
+IGMP
 ----
 
 The :ned:`Igmpv3` module implements the Internet Group Management Protocol

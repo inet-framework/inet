@@ -27,8 +27,8 @@ specified by the user) or automatic (addresses and routes are generated
 by a configurator module at startup).
 
 Before version 1.99.4, INET offered :ned:`Ipv4FlatNetworkConfigurator`
-for automatic and routing files for manual configuration. Both had
-serious limitations, so a new configurator has been added in version
+for automatic, and routing files for manual configuration. Both configuration
+methods had serious limitations, so a new configurator has been added in version
 1.99.4: :ned:`Ipv4NetworkConfigurator`. This configurator supports both
 fully manual and fully automatic configuration. It can also be used with
 partially specified manual configurations; the configurator fills in the
@@ -102,9 +102,9 @@ The configurator goes through the following steps:
 
 4. Adds static routes to all routing tables in the network. The
    configurator uses Dijkstra’s weighted shortest path algorithm to find
-   the desired routes between all possible node pairs. The resulting
-   routing tables will have one entry for all destination interfaces in
-   the network. The configurator can be safely instructed to add default
+   the desired routes between all possible node pairs. Then it will populate
+   the routing tables with entries to allow accessing all destination Interfaces
+   in the network. The configurator can be safely instructed to add default
    routes where applicable, significantly reducing the size of the host
    routing tables. It can also add subnet routes instead of interface
    routes, further reducing the size of routing tables. Turning on this
@@ -433,12 +433,12 @@ Automatic route configuration
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 If the :par:`addStaticRoutes` parameter is true, then the configurator
-add static routes to all routing tables.
+adds static routes to all routing tables.
 
 The configurator uses Dijkstra’s weighted shortest path algorithm to
-find the desired routes between all possible node pairs. The resulting
-routing tables will have one entry for all destination interfaces in the
-network.
+find the desired routes between all possible node pairs. As a result,
+each routing table will be populated with entries to allow accesssing
+all destination interfaces in the network directly or indirectly.
 
 The configurator can be safely instructed to add default routes where
 applicable, significantly reducing the size of the host routing tables.
@@ -446,8 +446,6 @@ It can also add subnet routes instead of destination interface routes,
 further reducing the size of routing tables. Turning on this option
 requires careful design to avoid having IP addresses from the same subnet
 on different links.
-
-
 
 .. caution::
 
