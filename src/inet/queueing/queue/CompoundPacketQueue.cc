@@ -69,7 +69,7 @@ void CompoundPacketQueue::pushPacket(Packet *packet, cGate *gate)
         dropPacket(packet, QUEUE_OVERFLOW, packetCapacity);
     }
     else {
-        pushOrSendPacket(packet, inputGate, consumer);
+        consumer->pushPacket(packet, inputGate->getPathEndGate());
         updateDisplayString();
     }
 }
@@ -78,7 +78,6 @@ Packet *CompoundPacketQueue::popPacket(cGate *gate)
 {
     Enter_Method("popPacket");
     auto packet = provider->popPacket(outputGate->getPathStartGate());
-    animateSend(packet, outputGate->getPathStartGate());
     emit(packetPoppedSignal, packet);
     updateDisplayString();
     return packet;
