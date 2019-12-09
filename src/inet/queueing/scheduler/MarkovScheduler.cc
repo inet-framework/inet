@@ -34,7 +34,7 @@ void MarkovScheduler::initialize(int stage)
     PacketSchedulerBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         for (int i = 0; i < gateSize("in"); i++) {
-            auto input = getConnectedModule<IActivePacketSource>(inputGates[i]);
+            auto input = findConnectedModule<IActivePacketSource>(inputGates[i]);
             producers.push_back(input);
         }
         consumer = findConnectedModule<IPassivePacketSink>(outputGate);
@@ -56,11 +56,13 @@ void MarkovScheduler::initialize(int stage)
         WATCH(state);
     }
     else if (stage == INITSTAGE_QUEUEING) {
-        for (auto inputGate : inputGates)
-            checkPushPacketSupport(inputGate);
+        for (int i = 0; i < (int)inputGates.size(); i++)
+            if (producers[i] != nullptr)
+                checkPushPacketSupport(inputGates[i]);
         if (consumer != nullptr)
             checkPushPacketSupport(outputGate);
-        producers[state]->handleCanPushPacket(inputGates[state]);
+        if (producers[state] != nullptr)
+            producers[state]->handleCanPushPacket(inputGates[state]);
         scheduleWaitTimer();
     }
 }
@@ -78,7 +80,8 @@ void MarkovScheduler::handleMessage(cMessage *message)
                 break;
             }
         }
-        producers[state]->handleCanPushPacket(inputGates[state]);
+        if (producers[state] != nullptr)
+            producers[state]->handleCanPushPacket(inputGates[state]);
         scheduleWaitTimer();
     }
     else
@@ -119,7 +122,8 @@ void MarkovScheduler::pushPacket(Packet *packet, cGate *gate)
 void MarkovScheduler::handleCanPushPacket(cGate *gate)
 {
     Enter_Method("handleCanPushPacket");
-    producers[state]->handleCanPushPacket(inputGates[state]);
+    if (producers[state] != nullptr)
+        producers[state]->handleCanPushPacket(inputGates[state]);
 }
 
 } // namespace queueing
