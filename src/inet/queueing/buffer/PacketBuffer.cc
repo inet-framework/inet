@@ -32,12 +32,18 @@ void PacketBuffer::initialize(int stage)
         displayStringTextFormat = par("displayStringTextFormat");
         packetCapacity = par("packetCapacity");
         dataCapacity = b(par("dataCapacity"));
-        const char *dropperClass = par("dropperClass");
-        if (*dropperClass != '\0')
-            packetDropperFunction = check_and_cast<IPacketDropperFunction *>(createOne(dropperClass));
+        packetDropperFunction = createDropperFunction(par("dropperClass"));
     }
     else if (stage == INITSTAGE_LAST)
         updateDisplayString();
+}
+
+IPacketDropperFunction *PacketBuffer::createDropperFunction(const char *dropperClass) const
+{
+    if (strlen(dropperClass) == 0)
+        return nullptr;
+    else
+        return check_and_cast<IPacketDropperFunction *>(createOne(dropperClass));
 }
 
 bool PacketBuffer::isOverloaded()

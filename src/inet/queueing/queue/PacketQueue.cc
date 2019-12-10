@@ -37,14 +37,10 @@ void PacketQueue::initialize(int stage)
         packetCapacity = par("packetCapacity");
         dataCapacity = b(par("dataCapacity"));
         buffer = getModuleFromPar<IPacketBuffer>(par("bufferModule"), this, false);
-        const char *comparatorClass = par("comparatorClass");
-        if (*comparatorClass != '\0')
-            packetComparatorFunction = check_and_cast<IPacketComparatorFunction *>(createOne(comparatorClass));
+        packetComparatorFunction = createComparatorFunction(par("comparatorClass"));
         if (packetComparatorFunction != nullptr)
             queue.setup(packetComparatorFunction);
-        const char *dropperClass = par("dropperClass");
-        if (*dropperClass != '\0')
-            packetDropperFunction = check_and_cast<IPacketDropperFunction *>(createOne(dropperClass));
+        packetDropperFunction = createDropperFunction(par("dropperClass"));
     }
     else if (stage == INITSTAGE_QUEUEING) {
         if (producer != nullptr) {
@@ -56,6 +52,22 @@ void PacketQueue::initialize(int stage)
     }
     else if (stage == INITSTAGE_LAST)
         updateDisplayString();
+}
+
+IPacketDropperFunction *PacketQueue::createDropperFunction(const char *dropperClass) const
+{
+    if (strlen(dropperClass) == 0)
+        return nullptr;
+    else
+        return check_and_cast<IPacketDropperFunction *>(createOne(dropperClass));
+}
+
+IPacketComparatorFunction *PacketQueue::createComparatorFunction(const char *comparatorClass) const
+{
+    if (strlen(comparatorClass) == 0)
+        return nullptr;
+    else
+        return check_and_cast<IPacketComparatorFunction *>(createOne(comparatorClass));
 }
 
 void PacketQueue::handleMessage(cMessage *message)

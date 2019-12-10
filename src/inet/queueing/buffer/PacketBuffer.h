@@ -39,7 +39,7 @@ class INET_API PacketBuffer : public PacketBufferBase, public IPacketBuffer
 
   protected:
     virtual void initialize(int stage) override;
-
+    virtual IPacketDropperFunction *createDropperFunction(const char *dropperClass) const;
     virtual bool isOverloaded();
 
   public:

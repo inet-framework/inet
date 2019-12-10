@@ -25,10 +25,13 @@ Define_Module(PacketClassifier);
 void PacketClassifier::initialize(int stage)
 {
     PacketClassifierBase::initialize(stage);
-    if (stage == INITSTAGE_LOCAL) {
-        const char *classifierClass = par("classifierClass");
-        packetClassifierFunction = check_and_cast<IPacketClassifierFunction *>(createOne(classifierClass));
-    }
+    if (stage == INITSTAGE_LOCAL)
+        packetClassifierFunction = createClassifierFunction(par("classifierClass"));
+}
+
+IPacketClassifierFunction *PacketClassifier::createClassifierFunction(const char *classifierClass) const
+{
+    return check_and_cast<IPacketClassifierFunction *>(createOne(classifierClass));
 }
 
 int PacketClassifier::classifyPacket(Packet *packet)

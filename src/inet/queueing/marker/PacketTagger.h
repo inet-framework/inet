@@ -31,6 +31,7 @@ class INET_API PacketTagger : public PacketTaggerBase
 
   protected:
     virtual void initialize(int stage) override;
+    virtual IPacketFilterFunction *createFilterFunction(const char *filterClass) const;
     virtual void markPacket(Packet *packet) override;
 
   public:
