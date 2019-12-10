@@ -70,8 +70,9 @@ PacketDropVisualizerBase::DirectiveResolver::DirectiveResolver(const PacketDrop*
 {
 }
 
-const char *PacketDropVisualizerBase::DirectiveResolver::resolveDirective(char directive)
+const char *PacketDropVisualizerBase::DirectiveResolver::resolveDirective(char directive) const
 {
+    static std::string result;
     switch (directive) {
         case 'n':
             result = packetDrop->getPacket_()->getName();

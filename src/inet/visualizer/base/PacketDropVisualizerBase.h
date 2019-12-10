@@ -65,12 +65,11 @@ class INET_API PacketDropVisualizerBase : public VisualizerBase, public cListene
     class DirectiveResolver : public StringFormat::IDirectiveResolver {
       protected:
         const PacketDrop *packetDrop = nullptr;
-        std::string result;
 
       public:
         DirectiveResolver(const PacketDrop* packetDrop);
 
-        virtual const char *resolveDirective(char directive) override;
+        virtual const char *resolveDirective(char directive) const override;
     };
 
     class INET_API DetailsFilter

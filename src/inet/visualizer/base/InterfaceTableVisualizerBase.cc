@@ -41,8 +41,9 @@ InterfaceTableVisualizerBase::InterfaceVisualization::InterfaceVisualization(int
 {
 }
 
-const char *InterfaceTableVisualizerBase::DirectiveResolver::resolveDirective(char directive)
+const char *InterfaceTableVisualizerBase::DirectiveResolver::resolveDirective(char directive) const
 {
+    static std::string result;
     result = "";
     switch (directive) {
         case 'N':
