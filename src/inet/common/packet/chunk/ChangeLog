@@ -1,5 +1,13 @@
 ====== inet-4.x ======
 
+2019-12-05  Gyorgy Szaszko
+
+	Added displaying attached tags of Chunks in Qtenv.
+
+2019-11-19  Levente Mészáros
+
+	Added inspector support for packet data part, front part, back part, and dissection result.
+
 2019-09-09  Levente Mészáros
 
 	Changed the interpretation of Chunk::peek() length parameter for negative values.

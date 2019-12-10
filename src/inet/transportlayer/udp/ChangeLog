@@ -1,5 +1,13 @@
 ====== inet-4.x ======
 
+2019-11-18  Zoltan Bojthe
+
+	Added TOS support.
+
+2019-11-13  Zoltan Bojthe
+
+	Renamed typeOfService to dscp, Udp already uses this value to send DscpReq to IP layer.
+
 2019-10-31  Zoltan Bojthe
 
 	Moved kind enums to MSG files.

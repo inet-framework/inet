@@ -1,5 +1,10 @@
 ====== inet-4.x ======
 
+2019-12-05  Levente Mészáros
+
+	Added visualization support for spectograms and power density maps.
+	Also added a ton of new parameters to control the new visualizations.
+
 2019-11-05  Levente Mészáros
 
 	Fixed memory leaks caused by not cleaning up after destruction.

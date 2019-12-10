@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2019-11-20  Zoltan Bojthe
+
+	Added TosTag.
+
 2019-11-12  Zoltan Bojthe
 
 	Renamed functions for getFoo()/findFoo() convention in InterfaceTable.

@@ -1,5 +1,30 @@
 ====== inet-4.x ======
 
+2019-10-28  Mohammad HabibAllah
+
+	Implemented Explicit Congestion Notification (ECN) in TCPReno.
+
+2019-11-27  Zoltan Bojthe
+
+	Fixed module deletion
+
+2019-11-19  Levente Mészáros
+
+	Fixed many memory leaks detected by Valgrind.
+
+2019-11-18  Zoltan Bojthe
+
+	Added TOS support
+
+2019-11-13  Zoltan Bojthe
+
+	Renamed typeOfService to dscp, Tcp already uses this value to send DscpReq to IP layer.
+	Fixed "TCPNoCongestionControl does not implement an infinite window", issue #179.
+
+2019-11-12  Zoltan Bojthe
+
+	Fixed calculation of sendable bytes in one segment.
+
 2019-11-11  Zoltan Bojthe
 
 	Removed unused code guarded with "ifdef TCP_SENDFRAGMENTS"

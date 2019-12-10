@@ -1,5 +1,10 @@
 ====== inet-4.x ======
 
+2019-11-25  Zoltan Bojthe
+
+	InterfaceTableVisualizer detects interface state and carrier changes.
+	Fixed the Gate::getDisplayString() channel creation side effect.
+
 2019-11-07  Levente Mészáros
 
 	Fixed crash during destruction of InterfaceTableCanvasVisualizer.

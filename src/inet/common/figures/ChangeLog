@@ -1,5 +1,20 @@
 ====== inet-4.x ======
 
+2019-12-07  Andras Varga
+
+	cLabelFigure::setAngle() not yet available, bumped buildnum threshold.
+
+2019-12-05  Levente Mészáros
+
+	Removed various relative font size tricks.
+	Changed default tick count to zero in PlotFigure.
+	Replaced cTextFigure with cLabelFigure in PlotFigure.
+
+2019-11-26  Levente Mészáros
+
+	Added HeatMapPlotFigure.
+	Refactored PlotFigure layouting to be lazy for performance reasons.
+
 2019-09-20  Levente Mészáros
 
 	Removed unnecessary resetting of the transformation matrix from PlotFigure.

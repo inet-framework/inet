@@ -1,5 +1,17 @@
 ====== inet-4.x ======
 
+2019-12-08  Levente Mészáros
+
+	Fixed memory leak detected by Valgrind.
+
+2019-11-15  Zoltan Bojthe
+
+	Redesigned LMacHeader, added ctrlFrameLength NED parameter.
+
+	Removed the base header MacHeaderBase, added LMacHeaderBase, LMacHeader.
+	Replaced to LMacControlFrame or LMacDataFrameHeader, added
+	ctrlFrameLength NED parameter for define length of LMacControlFrame.
+
 2019-10-18  Zoltan Bojthe
 
 	Added message kind infos (name of used cEnum).

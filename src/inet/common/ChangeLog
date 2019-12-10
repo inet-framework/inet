@@ -1,5 +1,19 @@
 ====== inet-4.x ======
 
+2019-12-10  Levente Mészáros
+
+	Added const qualifiers to StringFormat class where applicable.
+
+2019-12-05  Levente Mészáros
+
+	Added step() and clamp() functions to math namespace.
+	Fixed sign function.
+
+2019-11-19  Levente Mészáros
+
+	Fixed many memory leaks detected by Valgrind.
+	Added general inspector support for shared pointers.
+
 2019-10-25  Levente Mészáros
 
 	Added module type template parameters to findConnectedModule/getConnectedModule.
