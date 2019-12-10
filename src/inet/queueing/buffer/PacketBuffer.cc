@@ -52,12 +52,19 @@ bool PacketBuffer::isOverloaded() const
            (dataCapacity != b(-1) && getTotalLength() > dataCapacity);
 }
 
+b PacketBuffer::getTotalLength() const
+{
+    b totalLength = b(0);
+    for (auto packet : packets)
+        totalLength += packet->getTotalLength();
+    return totalLength;
+}
+
 void PacketBuffer::addPacket(Packet *packet)
 {
     Enter_Method("addPacket");
     EV_INFO << "Adding packet " << packet->getName() << " to the buffer.\n";
     emit(packetAddedSignal, packet);
-    totalLength += packet->getTotalLength();
     packets.push_back(packet);
     if (isOverloaded()) {
         if (packetDropperFunction != nullptr)
@@ -73,7 +80,6 @@ void PacketBuffer::removePacket(Packet *packet)
     Enter_Method("removePacket");
     EV_INFO << "Removing packet " << packet->getName() << " from the buffer.\n";
     emit(packetRemovedSignal, packet);
-    totalLength -= packet->getTotalLength();
     packets.erase(find(packets.begin(), packets.end(), packet));
     updateDisplayString();
     ICallback *callback = check_and_cast<ICallback *>(packet->getOwner()->getOwner());

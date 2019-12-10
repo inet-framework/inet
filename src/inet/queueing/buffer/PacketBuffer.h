@@ -32,7 +32,6 @@ class INET_API PacketBuffer : public PacketBufferBase, public IPacketBuffer
     int packetCapacity = -1;
     b dataCapacity = b(-1);
 
-    b totalLength = b(0);
     std::vector<Packet *> packets;
 
     IPacketDropperFunction *packetDropperFunction = nullptr;
@@ -47,7 +46,7 @@ class INET_API PacketBuffer : public PacketBufferBase, public IPacketBuffer
     virtual int getNumPackets() const override { return packets.size(); }
 
     virtual b getMaxTotalLength() const override { return dataCapacity; }
-    virtual b getTotalLength() const override { return totalLength; }
+    virtual b getTotalLength() const override;
 
     virtual Packet *getPacket(int index) const override;
     virtual bool isEmpty() const override { return packets.size() == 0; }
