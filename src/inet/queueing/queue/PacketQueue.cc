@@ -106,6 +106,7 @@ void PacketQueue::pushPacket(Packet *packet, cGate *gate)
         if (packetDropperFunction != nullptr) {
             while (!isEmpty() && isOverloaded()) {
                 auto packet = packetDropperFunction->selectPacket(this);
+                EV_INFO << "Dropping packet " << packet->getName() << " from the queue.\n";
                 queue.remove(packet);
                 dropPacket(packet, QUEUE_OVERFLOW);
             }

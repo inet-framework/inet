@@ -71,6 +71,7 @@ void PacketBuffer::addPacket(Packet *packet)
         if (packetDropperFunction != nullptr) {
             while (!isEmpty() && isOverloaded()) {
                 auto packet = packetDropperFunction->selectPacket(this);
+                EV_INFO << "Dropping packet " << packet->getName() << " from the buffer.\n";
                 packets.erase(find(packets.begin(), packets.end(), packet));
                 auto queue = dynamic_cast<cPacketQueue *>(packet->getOwner());
                 if (queue != nullptr) {
