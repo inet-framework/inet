@@ -123,8 +123,10 @@ Packet *PacketQueue::popPacket(cGate *gate)
     Enter_Method("popPacket");
     auto packet = check_and_cast<Packet *>(queue.front());
     EV_INFO << "Popping packet " << packet->getName() << " from the queue." << endl;
-    if (buffer != nullptr)
+    if (buffer != nullptr) {
+        queue.remove(packet);
         buffer->removePacket(packet);
+    }
     else
         queue.pop();
     emit(packetPoppedSignal, packet);
@@ -137,13 +139,14 @@ void PacketQueue::removePacket(Packet *packet)
 {
     Enter_Method("removePacket");
     EV_INFO << "Removing packet " << packet->getName() << " from the queue." << endl;
-    if (buffer != nullptr)
-        buffer->removePacket(packet);
-    else {
+    if (buffer != nullptr) {
         queue.remove(packet);
-        emit(packetRemovedSignal, packet);
-        updateDisplayString();
+        buffer->removePacket(packet);
     }
+    else
+        queue.remove(packet);
+    emit(packetRemovedSignal, packet);
+    updateDisplayString();
 }
 
 bool PacketQueue::canPushSomePacket(cGate *gate) const
@@ -171,9 +174,12 @@ bool PacketQueue::canPushPacket(Packet *packet, cGate *gate) const
 void PacketQueue::handlePacketRemoved(Packet *packet)
 {
     Enter_Method("handlePacketRemoved");
-    queue.remove(packet);
-    emit(packetRemovedSignal, packet);
-    updateDisplayString();
+    if (queue.contains(packet)) {
+        EV_INFO << "Removing packet " << packet->getName() << " from the queue." << endl;
+        queue.remove(packet);
+        emit(packetRemovedSignal, packet);
+        updateDisplayString();
+    }
 }
 
 } // namespace queueing

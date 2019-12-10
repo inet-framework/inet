@@ -19,6 +19,7 @@
 #include "inet/common/Simsignals.h"
 #include "inet/common/StringFormat.h"
 #include "inet/queueing/buffer/PacketBuffer.h"
+#include "inet/queueing/compat/cpacketqueue.h"
 
 namespace inet {
 namespace queueing {
@@ -93,8 +94,12 @@ void PacketBuffer::removePacket(Packet *packet)
     emit(packetRemovedSignal, packet);
     packets.erase(find(packets.begin(), packets.end(), packet));
     updateDisplayString();
-    ICallback *callback = check_and_cast<ICallback *>(packet->getOwner()->getOwner());
-    callback->handlePacketRemoved(packet);
+    auto queue = dynamic_cast<cPacketQueue *>(packet->getOwner());
+    if (queue != nullptr) {
+        ICallback *callback = dynamic_cast<ICallback *>(queue->getOwner());
+        if (callback != nullptr)
+            callback->handlePacketRemoved(packet);
+    }
 }
 
 Packet *PacketBuffer::getPacket(int index) const
