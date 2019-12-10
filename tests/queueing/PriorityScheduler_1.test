@@ -54,15 +54,6 @@ cmdenv-event-banners = false
 *.collector.collectionInterval = uniform(0s, 1s)
 
 %contains: stdout
-Producing packet producer1-0.
-Pushing packet producer1-0 into the queue.
-Popping packet producer1-0 from the queue.
-Scheduling packet producer1-0.
-Collecting packet producer1-0.
-Producing packet producer2-0.
-Pushing packet producer2-0 into the queue.
-
-Running simulation...
 Popping packet producer2-0 from the queue.
 Scheduling packet producer2-0.
 Collecting packet producer2-0.
@@ -101,49 +92,47 @@ Pushing packet producer2-3 into the queue.
 Popping packet producer2-3 from the queue.
 Scheduling packet producer2-3.
 Collecting packet producer2-3.
+Producing packet producer1-5.
+Pushing packet producer1-5 into the queue.
+Popping packet producer1-5 from the queue.
+Scheduling packet producer1-5.
+Collecting packet producer1-5.
 Producing packet producer2-4.
 Pushing packet producer2-4 into the queue.
 Popping packet producer2-4 from the queue.
 Scheduling packet producer2-4.
 Collecting packet producer2-4.
-Producing packet producer1-5.
-Pushing packet producer1-5 into the queue.
-Producing packet producer2-5.
-Pushing packet producer2-5 into the queue.
-Popping packet producer1-5 from the queue.
-Scheduling packet producer1-5.
-Collecting packet producer1-5.
-Popping packet producer2-5 from the queue.
-Scheduling packet producer2-5.
-Collecting packet producer2-5.
 Producing packet producer1-6.
 Pushing packet producer1-6 into the queue.
 Popping packet producer1-6 from the queue.
 Scheduling packet producer1-6.
 Collecting packet producer1-6.
-Producing packet producer2-6.
-Pushing packet producer2-6 into the queue.
-Popping packet producer2-6 from the queue.
-Scheduling packet producer2-6.
-Collecting packet producer2-6.
 Producing packet producer1-7.
 Pushing packet producer1-7 into the queue.
-Producing packet producer1-8.
-Pushing packet producer1-8 into the queue.
 Popping packet producer1-7 from the queue.
 Scheduling packet producer1-7.
 Collecting packet producer1-7.
+Producing packet producer2-5.
+Pushing packet producer2-5 into the queue.
+Popping packet producer2-5 from the queue.
+Scheduling packet producer2-5.
+Collecting packet producer2-5.
+Producing packet producer1-8.
+Pushing packet producer1-8 into the queue.
+Producing packet producer1-9.
+Pushing packet producer1-9 into the queue.
 Popping packet producer1-8 from the queue.
 Scheduling packet producer1-8.
 Collecting packet producer1-8.
-Producing packet producer1-9.
-Pushing packet producer1-9 into the queue.
-Producing packet producer1-10.
-Pushing packet producer1-10 into the queue.
-Producing packet producer2-7.
-Pushing packet producer2-7 into the queue.
 Popping packet producer1-9 from the queue.
 Scheduling packet producer1-9.
 Collecting packet producer1-9.
+Producing packet producer1-10.
+Pushing packet producer1-10 into the queue.
 Producing packet producer1-11.
 Pushing packet producer1-11 into the queue.
+Popping packet producer1-10 from the queue.
+Scheduling packet producer1-10.
+Collecting packet producer1-10.
+Producing packet producer2-6.
+Pushing packet producer2-6 into the queue.
