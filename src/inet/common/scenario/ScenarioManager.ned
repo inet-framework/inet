@@ -49,7 +49,6 @@ package inet.common.scenario;
 //     </at>
 //     <at t="60">
 //         <disconnect src-module="host[2]" src-gate="ppp[0]" />
-//         <disconnect src-module="host[1]" src-gate="ppp[0]" />
 //     </at>
 //     <at t="2s">
 //         <initiate module="Router2" operation="shutdown"/>

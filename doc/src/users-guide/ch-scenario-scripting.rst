@@ -37,8 +37,6 @@ The :ned:`ScenarioManager` module type is for setting up and controlling
 simulation experiments. In typical usage, it has only one instance in
 the network:
 
-
-
 .. code-block:: ned
 
    network Test {
@@ -72,7 +70,6 @@ An example script:
        </at>
        <at t="60">
            <disconnect src-module="host[2]" src-gate="ppp[0]" />
-           <disconnect src-module="host[1]" src-gate="ppp[0]" />
        </at>
    </scenario>
 
@@ -80,7 +77,7 @@ The above script probably does not need much explanation.
 
 The built-in commands of :ned:`ScenarioManager` are: ``<connect>``,
 ``<disconnect>``, ``<create-module>``, ``<delete-module>``,
-``<initiate>``, ``<shutdown>``,``<startup>``,``<crash>``,
+``<initiate>``, ``<shutdown>``, ``<startup>``, ``<crash>``,
 ``<set-param>``, ``<set-channel-attr>``, ``<at>``.
 
 All commands have a ``t`` attribute which carries the simulation time
