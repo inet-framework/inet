@@ -1748,10 +1748,10 @@ void SctpAssociation::handleChunkReportedAsMissing(const SctpSackChunk *sackChun
                             EV << "   => conservative increment of 1" << endl;
                             chunkReportedAsMissing = 1;
                         }
-                        else if (tsnGt(myChunkLastPath->lowestNewAckInSack, myChunk->tsn)) {    // All newly acked TSNs are larger than myChunk->tsn
-                            EV << "   => reported increment of dacPacketsRcvd=" << (unsigned int)sackChunk->getDacPacketsRcvd() << endl;
-                            chunkReportedAsMissing = sackChunk->getDacPacketsRcvd();
-                        }
+                        //else if (tsnGt(myChunkLastPath->lowestNewAckInSack, myChunk->tsn)) {    // All newly acked TSNs are larger than myChunk->tsn
+                        //    EV << "   => reported increment of dacPacketsRcvd=" << (unsigned int)sackChunk->getDacPacketsRcvd() << endl;
+                        //    chunkReportedAsMissing = sackChunk->getDacPacketsRcvd();
+                        //}
                     }
                     else {
                         // Mixed SACKS: newly acked TSNs were sent to multiple paths

@@ -191,7 +191,7 @@ class SctpSackChunk extends SctpChunk
     uint32 nrGapStart[];
     uint32 nrGapStop[];
     uint32 msg_rwnd;
-    uint8  dacPacketsRcvd = 0;
+    //uint8  dacPacketsRcvd = 0;
     bool   nrSubtractRGaps = false;
 }
 

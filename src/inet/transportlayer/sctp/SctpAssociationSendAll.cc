@@ -812,10 +812,10 @@ void SctpAssociation::sendOnPath(SctpPathVariables *pathId, bool firstPass)
             assert(headerCreated == true);
             sackChunk = createSack();
             // CMT DAC
-            if ((state->allowCMT == true) && (state->cmtUseDAC == true)) {
-                EV << "Adding dacPacketsRcvd=" << (unsigned int)dacPacketsRcvd << " to SACK" << endl;
-                sackChunk->setDacPacketsRcvd(dacPacketsRcvd);
-            }
+            //if ((state->allowCMT == true) && (state->cmtUseDAC == true)) {
+            //    EV << "Adding dacPacketsRcvd=" << (unsigned int)dacPacketsRcvd << " to SACK" << endl;
+            //    sackChunk->setDacPacketsRcvd(dacPacketsRcvd);
+            //}
             dacPacketsRcvd = 0;
 
             chunksAdded++;
