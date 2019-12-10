@@ -1068,7 +1068,7 @@ SctpEventCode SctpAssociation::processSackArrived(SctpSackChunk *sackChunk)
             << " with tsna=" << tsna << ":" << endl;
 
     // ====== SACK Sequence Number Check =====================================
-    EV_INFO << "SACK Seq Number = " << sackChunk->getSackSeqNum() << endl;
+    /*EV_INFO << "SACK Seq Number = " << sackChunk->getSackSeqNum() << endl;
     if ((state->checkSackSeqNumber == true) &&
         (sackChunk->getSackSeqNum() <= state->incomingSackSeqNum))
     {
@@ -1076,7 +1076,7 @@ SctpEventCode SctpAssociation::processSackArrived(SctpSackChunk *sackChunk)
                   << " < " << state->incomingSackSeqNum << endl;
         return SCTP_E_IGNORE;
     }
-    state->incomingSackSeqNum = sackChunk->getSackSeqNum();
+    state->incomingSackSeqNum = sackChunk->getSackSeqNum();*/
 
     // ====== Record statistics ==============================================
     numGapBlocks->record(numGaps);

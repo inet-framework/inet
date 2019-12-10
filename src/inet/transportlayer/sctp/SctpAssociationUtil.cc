@@ -1625,7 +1625,7 @@ SctpSackChunk *SctpAssociation::createSack()
     EV_DEBUG << "SACK: set cumTsnAck to " << sackChunk->getCumTsnAck() << endl;
     sackChunk->setA_rwnd(arwnd);
     sackChunk->setIsNrSack(state->nrSack);
-    sackChunk->setSackSeqNum(++state->outgoingSackSeqNum);
+    //sackChunk->setSackSeqNum(++state->outgoingSackSeqNum);
     if (state->messageAcceptLimit > 0) {
         sackChunk->setMsg_rwnd(state->messageAcceptLimit - state->bufferedMessages);
     }

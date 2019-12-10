@@ -187,7 +187,7 @@ class SctpSackChunk extends SctpChunk
     uint32 gapStart[];
     uint32 gapStop[];
     uint32 dupTsns[];
-    uint32 sackSeqNum = 0;
+    //uint32 sackSeqNum = 0;
     uint32 nrGapStart[];
     uint32 nrGapStop[];
     uint32 msg_rwnd;
