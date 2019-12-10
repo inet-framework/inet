@@ -29,7 +29,7 @@ class INET_API StringFormat
     class INET_API IDirectiveResolver
     {
       public:
-        virtual const char *resolveDirective(char directive) = 0;
+        virtual const char *resolveDirective(char directive) const = 0;
     };
 
   protected:
@@ -41,8 +41,8 @@ class INET_API StringFormat
     const char *formatString(IDirectiveResolver *resolver) const;
     const char *formatString(std::function<const char *(char)>& resolver) const;
 
-    static const char *formatString(const char *format, IDirectiveResolver *resolver);
-    static const char *formatString(const char *format, std::function<const char *(char)> resolver);
+    static const char *formatString(const char *format, const IDirectiveResolver *resolver);
+    static const char *formatString(const char *format, const std::function<const char *(char)> resolver);
 };
 
 } // namespace inet

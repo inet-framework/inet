@@ -34,12 +34,12 @@ const char *StringFormat::formatString(std::function<const char *(char)>& resolv
     return formatString(format.c_str(), resolver);
 }
 
-const char *StringFormat::formatString(const char *format, IDirectiveResolver *resolver)
+const char *StringFormat::formatString(const char *format, const IDirectiveResolver *resolver)
 {
     return formatString(format, [&] (char directive) { return resolver->resolveDirective(directive); });
 }
 
-const char *StringFormat::formatString(const char *format, std::function<const char *(char)> resolver)
+const char *StringFormat::formatString(const char *format, const std::function<const char *(char)> resolver)
 {
     static std::string result;
     result.clear();
