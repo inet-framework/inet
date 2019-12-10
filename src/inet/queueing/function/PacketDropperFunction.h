@@ -23,7 +23,7 @@
 namespace inet {
 namespace queueing {
 
-typedef void (*PacketDropperFunction)(IPacketCollection *packets);
+typedef Packet *(*PacketDropperFunction)(IPacketCollection *packets);
 
 class INET_API CPacketDropperFunction : public cObject, public IPacketDropperFunction
 {
@@ -33,7 +33,7 @@ class INET_API CPacketDropperFunction : public cObject, public IPacketDropperFun
   public:
     CPacketDropperFunction(PacketDropperFunction packetDropperFunction) : packetDropperFunction(packetDropperFunction) { }
 
-    virtual void dropPackets(IPacketCollection* collection) const override;
+    virtual Packet *selectPacket(IPacketCollection* collection) const override;
 };
 
 #define Register_Packet_Dropper_Function(name, function) \

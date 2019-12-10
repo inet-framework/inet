@@ -21,72 +21,60 @@
 namespace inet {
 namespace queueing {
 
-static bool isOverloaded(IPacketCollection *collection)
+Packet *CPacketDropperFunction::selectPacket(IPacketCollection* collection) const
 {
-    auto maxNumPackets = collection->getMaxNumPackets();
-    auto maxTotalLength = collection->getMaxTotalLength();
-    return (maxNumPackets != -1 && collection->getNumPackets() > maxNumPackets) ||
-           (maxTotalLength != b(-1) && collection->getTotalLength() > maxTotalLength);
+    return packetDropperFunction(collection);
 }
 
-static void dropPacket(IPacketCollection *collection, int i)
+static Packet *selectPacketAtEnd(IPacketCollection *collection)
 {
-    auto packet = collection->getPacket(i);
-    collection->removePacket(packet);
-    PacketDropDetails details;
-    details.setReason(QUEUE_OVERFLOW);
-    details.setLimit(collection->getMaxNumPackets());
-    check_and_cast<cModule *>(collection)->emit(packetDroppedSignal, packet, &details);
-    delete packet;
+    return collection->getPacket(collection->getNumPackets() - 1);
 }
 
-void CPacketDropperFunction::dropPackets(IPacketCollection* collection) const
+Register_Packet_Dropper_Function(PacketAtCollectionEndDropper, selectPacketAtEnd);
+
+static Packet *selectPacketAtBegin(IPacketCollection *collection)
 {
-    while (!collection->isEmpty() && isOverloaded(collection))
-        packetDropperFunction(collection);
+    return collection->getPacket(0);
 }
 
-static void dropPacketAtEnd(IPacketCollection *collection)
+Register_Packet_Dropper_Function(PacketAtCollectionBeginDropper, selectPacketAtBegin);
+
+static Packet *selectPacketWithLowestOwnerModuleId(IPacketCollection *collection)
 {
-    dropPacket(collection, collection->getNumPackets() - 1);
-}
-
-Register_Packet_Dropper_Function(PacketAtCollectionEndDropper, dropPacketAtEnd);
-
-static void dropPacketAtBegin(IPacketCollection *collection)
-{
-    dropPacket(collection, 0);
-}
-
-Register_Packet_Dropper_Function(PacketAtCollectionBeginDropper, dropPacketAtBegin);
-
-static void dropPacketWithLowestOwnerModuleId(IPacketCollection *collection)
-{
-    int lowestIdIndex = 0;
-    int lowestId = check_and_cast<cModule *>(collection->getPacket(lowestIdIndex)->getOwner()->getOwner())->getId();
+    Packet *result = nullptr;
+    int lowestId = INT_MAX;
     for (int index = 0; index < collection->getNumPackets(); index++) {
-        auto id = check_and_cast<cModule *>(collection->getPacket(index)->getOwner()->getOwner())->getId();
-        if (id < lowestId)
-            lowestIdIndex = index;
+        auto packet = collection->getPacket(index);
+        auto queue = packet->getOwner();
+        auto id = check_and_cast<cModule *>(queue->getOwner())->getId();
+        if (id < lowestId) {
+            lowestId = id;
+            result = packet;
+        }
     }
-    dropPacket(collection, lowestIdIndex);
+    return result;
 }
 
-Register_Packet_Dropper_Function(PacketWithLowestOwnerModuleIdDropper, dropPacketWithLowestOwnerModuleId);
+Register_Packet_Dropper_Function(PacketWithLowestOwnerModuleIdDropper, selectPacketWithLowestOwnerModuleId);
 
-static void dropPacketWithHighestOwnerModuleId(IPacketCollection *collection)
+static Packet *selectPacketWithHighestOwnerModuleId(IPacketCollection *collection)
 {
-    int highestIdIndex = 0;
-    int highestId = check_and_cast<cModule *>(collection->getPacket(highestIdIndex)->getOwner()->getOwner())->getId();
+    Packet *result = nullptr;
+    int highestId = INT_MIN;
     for (int index = 0; index < collection->getNumPackets(); index++) {
-        auto id = check_and_cast<cModule *>(collection->getPacket(index)->getOwner()->getOwner())->getId();
-        if (id > highestId)
-            highestIdIndex = index;
+        auto packet = collection->getPacket(index);
+        auto queue = packet->getOwner();
+        auto id = check_and_cast<cModule *>(queue->getOwner())->getId();
+        if (id > highestId) {
+            highestId = id;
+            result = packet;
+        }
     }
-    dropPacket(collection, highestIdIndex);
+    return result;
 }
 
-Register_Packet_Dropper_Function(PacketWithHighestOwnerModuleIdDropper, dropPacketWithHighestOwnerModuleId);
+Register_Packet_Dropper_Function(PacketWithHighestOwnerModuleIdDropper, selectPacketWithHighestOwnerModuleId);
 
 } // namespace queueing
 } // namespace inet
