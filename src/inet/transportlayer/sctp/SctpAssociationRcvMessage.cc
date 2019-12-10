@@ -829,13 +829,13 @@ bool SctpAssociation::processCookieEchoArrived(SctpCookieEchoChunk *cookieEcho, 
     if (fsm->getState() == SCTP_S_CLOSED) {
         if (cookie->getLocalTag() != localVTag || cookie->getPeerTag() != peerVTag) {
             bool same = true;
-            for (int32 i = 0; i < cookie->getLocalTieTagArraySize(); i++) {
+            for (size_t i = 0; i < cookie->getLocalTieTagArraySize(); i++) {
                 if (cookie->getLocalTieTag(i) != state->localTieTag[i]) {
                     same = false;
                     break;
                 }
             }
-            for (int32 i = 0; i < cookie->getPeerTieTagArraySize(); i++) {
+            for (size_t i = 0; i < cookie->getPeerTieTagArraySize(); i++) {
                 if (cookie->getPeerTieTag(i) != state->peerTieTag[i]) {
                     same = false;
                     break;
