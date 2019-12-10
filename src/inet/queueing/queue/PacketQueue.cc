@@ -103,8 +103,13 @@ void PacketQueue::pushPacket(Packet *packet, cGate *gate)
     if (buffer != nullptr)
         buffer->addPacket(packet);
     else if (isOverloaded()) {
-        if (packetDropperFunction != nullptr)
-            packetDropperFunction->dropPackets(this);
+        if (packetDropperFunction != nullptr) {
+            while (!isEmpty() && isOverloaded()) {
+                auto packet = packetDropperFunction->selectPacket(this);
+                queue.remove(packet);
+                dropPacket(packet, QUEUE_OVERFLOW);
+            }
+        }
         else
             throw cRuntimeError("Queue is overloaded but packet dropper function is not specified");
     }

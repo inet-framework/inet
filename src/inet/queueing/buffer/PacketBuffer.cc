@@ -67,8 +67,19 @@ void PacketBuffer::addPacket(Packet *packet)
     emit(packetAddedSignal, packet);
     packets.push_back(packet);
     if (isOverloaded()) {
-        if (packetDropperFunction != nullptr)
-            packetDropperFunction->dropPackets(this);
+        if (packetDropperFunction != nullptr) {
+            while (!isEmpty() && isOverloaded()) {
+                auto packet = packetDropperFunction->selectPacket(this);
+                packets.erase(find(packets.begin(), packets.end(), packet));
+                auto queue = dynamic_cast<cPacketQueue *>(packet->getOwner());
+                if (queue != nullptr) {
+                    ICallback *callback = dynamic_cast<ICallback *>(queue->getOwner());
+                    if (callback != nullptr)
+                        callback->handlePacketRemoved(packet);
+                }
+                dropPacket(packet, QUEUE_OVERFLOW);
+            }
+        }
         else
             throw cRuntimeError("Buffer is overloaded but packet dropper function is not specified");
     }
