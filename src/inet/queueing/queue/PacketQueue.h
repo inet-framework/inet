@@ -52,29 +52,29 @@ class INET_API PacketQueue : public PacketQueueBase, public IPacketBuffer::ICall
     virtual IPacketDropperFunction *createDropperFunction(const char *dropperClass) const;
     virtual IPacketComparatorFunction *createComparatorFunction(const char *comparatorClass) const;
     virtual void handleMessage(cMessage *message) override;
-    virtual bool isOverloaded();
+    virtual bool isOverloaded() const;
 
   public:
     virtual ~PacketQueue() { delete packetDropperFunction; }
 
-    virtual int getMaxNumPackets() override { return packetCapacity; }
-    virtual int getNumPackets() override;
+    virtual int getMaxNumPackets() const override { return packetCapacity; }
+    virtual int getNumPackets() const override;
 
-    virtual b getMaxTotalLength() override { return dataCapacity; }
-    virtual b getTotalLength() override { return b(queue.getBitLength()); }
+    virtual b getMaxTotalLength() const override { return dataCapacity; }
+    virtual b getTotalLength() const override { return b(queue.getBitLength()); }
 
-    virtual bool isEmpty() override { return getNumPackets() == 0; }
-    virtual Packet *getPacket(int index) override;
+    virtual bool isEmpty() const override { return getNumPackets() == 0; }
+    virtual Packet *getPacket(int index) const override;
     virtual void removePacket(Packet *packet) override;
 
-    virtual bool supportsPushPacket(cGate *gate) override { return inputGate == gate; }
-    virtual bool canPushSomePacket(cGate *gate) override;
-    virtual bool canPushPacket(Packet *packet, cGate *gate) override;
+    virtual bool supportsPushPacket(cGate *gate) const override { return inputGate == gate; }
+    virtual bool canPushSomePacket(cGate *gate) const override;
+    virtual bool canPushPacket(Packet *packet, cGate *gate) const override;
     virtual void pushPacket(Packet *packet, cGate *gate) override;
 
-    virtual bool supportsPopPacket(cGate *gate) override { return outputGate == gate; }
-    virtual bool canPopSomePacket(cGate *gate) override { return !isEmpty(); }
-    virtual Packet *canPopPacket(cGate *gate) override { return !isEmpty() ? getPacket(0) : nullptr; }
+    virtual bool supportsPopPacket(cGate *gate) const override { return outputGate == gate; }
+    virtual bool canPopSomePacket(cGate *gate) const override { return !isEmpty(); }
+    virtual Packet *canPopPacket(cGate *gate) const override { return !isEmpty() ? getPacket(0) : nullptr; }
     virtual Packet *popPacket(cGate *gate) override;
 
     virtual void handlePacketRemoved(Packet *packet) override;

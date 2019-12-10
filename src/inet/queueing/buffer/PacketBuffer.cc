@@ -46,7 +46,7 @@ IPacketDropperFunction *PacketBuffer::createDropperFunction(const char *dropperC
         return check_and_cast<IPacketDropperFunction *>(createOne(dropperClass));
 }
 
-bool PacketBuffer::isOverloaded()
+bool PacketBuffer::isOverloaded() const
 {
     return (packetCapacity != -1 && getNumPackets() > packetCapacity) ||
            (dataCapacity != b(-1) && getTotalLength() > dataCapacity);
@@ -80,7 +80,7 @@ void PacketBuffer::removePacket(Packet *packet)
     callback->handlePacketRemoved(packet);
 }
 
-Packet *PacketBuffer::getPacket(int index)
+Packet *PacketBuffer::getPacket(int index) const
 {
     if (index < 0 || (size_t)index >= packets.size())
         throw cRuntimeError("index %i out of range", index);

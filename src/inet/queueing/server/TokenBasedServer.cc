@@ -99,7 +99,7 @@ void TokenBasedServer::addTokens(double tokens)
     updateDisplayString();
 }
 
-const char *TokenBasedServer::resolveDirective(char directive)
+const char *TokenBasedServer::resolveDirective(char directive) const
 {
     static std::string result;
     switch (directive) {

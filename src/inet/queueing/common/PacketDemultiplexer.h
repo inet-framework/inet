@@ -40,11 +40,11 @@ class INET_API PacketDemultiplexer : public PacketProcessorBase, public IActiveP
   public:
     virtual IPassivePacketSource *getProvider(cGate *gate) override { return provider; }
 
-    virtual bool supportsPushPacket(cGate *gate) override { return false; }
-    virtual bool supportsPopPacket(cGate *gate) override { return true; }
+    virtual bool supportsPushPacket(cGate *gate) const override { return false; }
+    virtual bool supportsPopPacket(cGate *gate) const override { return true; }
 
-    virtual bool canPopSomePacket(cGate *gate) override { return provider->canPopSomePacket(inputGate->getPathStartGate()); }
-    virtual Packet *canPopPacket(cGate *gate) override { return  provider->canPopPacket(inputGate->getPathStartGate()); }
+    virtual bool canPopSomePacket(cGate *gate) const override { return provider->canPopSomePacket(inputGate->getPathStartGate()); }
+    virtual Packet *canPopPacket(cGate *gate) const override { return  provider->canPopPacket(inputGate->getPathStartGate()); }
     virtual Packet* popPacket(cGate *gate) override;
 
     virtual void handleCanPopPacket(cGate *gate) override;

@@ -38,7 +38,7 @@ void PacketSourceBase::initialize(int stage)
     }
 }
 
-const char *PacketSourceBase::createPacketName()
+const char *PacketSourceBase::createPacketName() const
 {
     return StringFormat::formatString(packetNameFormat, [&] (char directive) {
         static std::string result;
@@ -56,7 +56,7 @@ const char *PacketSourceBase::createPacketName()
     });
 }
 
-Ptr<Chunk> PacketSourceBase::createPacketContent()
+Ptr<Chunk> PacketSourceBase::createPacketContent() const
 {
     auto packetLength = b(packetLengthParameter->intValue());
     auto packetData = packetDataParameter->intValue();

@@ -30,7 +30,7 @@ void PriorityScheduler::initialize(int stage)
             collections.push_back(dynamic_cast<IPacketCollection *>(provider));
 }
 
-int PriorityScheduler::getNumPackets()
+int PriorityScheduler::getNumPackets() const
 {
     int size = 0;
     for (auto collection : collections)
@@ -38,7 +38,7 @@ int PriorityScheduler::getNumPackets()
     return size;
 }
 
-b PriorityScheduler::getTotalLength()
+b PriorityScheduler::getTotalLength() const
 {
     b totalLength(0);
     for (auto collection : collections)
@@ -46,7 +46,7 @@ b PriorityScheduler::getTotalLength()
     return totalLength;
 }
 
-Packet *PriorityScheduler::getPacket(int index)
+Packet *PriorityScheduler::getPacket(int index) const
 {
     int origIndex = index;
     for (auto collection : collections) {

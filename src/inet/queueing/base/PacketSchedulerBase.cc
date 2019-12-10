@@ -44,7 +44,7 @@ void PacketSchedulerBase::initialize(int stage)
     }
 }
 
-bool PacketSchedulerBase::canPopSomePacket(cGate *gate)
+bool PacketSchedulerBase::canPopSomePacket(cGate *gate) const
 {
     for (int i = 0; i < gateSize("in"); i++) {
         auto inputProvider = providers[i];

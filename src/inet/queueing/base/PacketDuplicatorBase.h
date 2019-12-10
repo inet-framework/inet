@@ -40,11 +40,11 @@ class INET_API PacketDuplicatorBase : public PacketQueueingElementBase, public I
   public:
     virtual IPassivePacketSink *getConsumer(cGate *gate) override { return this; }
 
-    virtual bool supportsPushPacket(cGate *gate) override { return true; }
-    virtual bool supportsPopPacket(cGate *gate) override { return true; }
+    virtual bool supportsPushPacket(cGate *gate) const override { return true; }
+    virtual bool supportsPopPacket(cGate *gate) const override { return true; }
 
-    virtual bool canPushSomePacket(cGate *gate) override { return true; }
-    virtual bool canPushPacket(Packet *packet, cGate *gate) override { return true; }
+    virtual bool canPushSomePacket(cGate *gate) const override { return true; }
+    virtual bool canPushPacket(Packet *packet, cGate *gate) const override { return true; }
     virtual void pushPacket(Packet *packet, cGate *gate) override;
 
     virtual void handleCanPushPacket(cGate *gate) override;

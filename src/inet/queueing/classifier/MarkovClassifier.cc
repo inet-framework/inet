@@ -98,12 +98,12 @@ void MarkovClassifier::scheduleWaitTimer()
     scheduleAt(simTime() + waitIntervals[state].doubleValue(this), waitTimer);
 }
 
-bool MarkovClassifier::canPopSomePacket(cGate *gate)
+bool MarkovClassifier::canPopSomePacket(cGate *gate) const
 {
     return gate->getIndex() == state;
 }
 
-Packet *MarkovClassifier::canPopPacket(cGate *gate)
+Packet *MarkovClassifier::canPopPacket(cGate *gate) const
 {
     return canPopSomePacket(gate) ? provider->canPopPacket(inputGate->getPathStartGate()) : nullptr;
 }

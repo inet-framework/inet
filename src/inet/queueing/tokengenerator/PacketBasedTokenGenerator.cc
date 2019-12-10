@@ -56,7 +56,7 @@ void PacketBasedTokenGenerator::pushPacket(Packet *packet, cGate *gate)
     delete packet;
 }
 
-const char *PacketBasedTokenGenerator::resolveDirective(char directive)
+const char *PacketBasedTokenGenerator::resolveDirective(char directive) const
 {
     static std::string result;
     switch (directive) {

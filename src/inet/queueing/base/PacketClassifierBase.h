@@ -40,11 +40,11 @@ class INET_API PacketClassifierBase : public PassivePacketSinkBase, public IActi
   public:
     virtual IPassivePacketSink *getConsumer(cGate *gate) override { return consumers[gate->getIndex()]; }
 
-    virtual bool supportsPushPacket(cGate *gate) override { return true; }
-    virtual bool supportsPopPacket(cGate *gate) override { return false; }
+    virtual bool supportsPushPacket(cGate *gate) const override { return true; }
+    virtual bool supportsPopPacket(cGate *gate) const override { return false; }
 
-    virtual bool canPushSomePacket(cGate *gate) override;
-    virtual bool canPushPacket(Packet *packet, cGate *gate) override { return canPushSomePacket(gate); }
+    virtual bool canPushSomePacket(cGate *gate) const override;
+    virtual bool canPushPacket(Packet *packet, cGate *gate) const override { return canPushSomePacket(gate); }
     virtual void pushPacket(Packet *packet, cGate *gate) override;
 
     virtual void handleCanPushPacket(cGate *gate) override;

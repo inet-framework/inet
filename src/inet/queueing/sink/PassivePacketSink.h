@@ -43,11 +43,11 @@ class INET_API PassivePacketSink : public PassivePacketSinkBase
   public:
     virtual ~PassivePacketSink() { cancelAndDelete(consumptionTimer); }
 
-    virtual bool supportsPushPacket(cGate *gate) override { return gate == inputGate; }
-    virtual bool supportsPopPacket(cGate *gate) override { return false; }
+    virtual bool supportsPushPacket(cGate *gate) const override { return gate == inputGate; }
+    virtual bool supportsPopPacket(cGate *gate) const override { return false; }
 
-    virtual bool canPushSomePacket(cGate *gate) override { return !consumptionTimer->isScheduled(); }
-    virtual bool canPushPacket(Packet *packet, cGate *gate) override { return canPushSomePacket(gate); }
+    virtual bool canPushSomePacket(cGate *gate) const override { return !consumptionTimer->isScheduled(); }
+    virtual bool canPushPacket(Packet *packet, cGate *gate) const override { return canPushSomePacket(gate); }
     virtual void pushPacket(Packet *packet, cGate *gate) override;
 };
 

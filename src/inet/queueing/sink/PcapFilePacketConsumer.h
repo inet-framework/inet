@@ -38,8 +38,8 @@ class INET_API PcapFilePacketConsumer : public PassivePacketSinkBase
     virtual void finish() override;
 
   public:
-    virtual bool supportsPushPacket(cGate *gate) override { return gate == inputGate; }
-    virtual bool supportsPopPacket(cGate *gate) override { return false; }
+    virtual bool supportsPushPacket(cGate *gate) const override { return gate == inputGate; }
+    virtual bool supportsPopPacket(cGate *gate) const override { return false; }
 
     virtual void pushPacket(Packet *packet, cGate *gate) override;
 };

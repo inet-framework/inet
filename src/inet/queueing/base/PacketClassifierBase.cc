@@ -43,7 +43,7 @@ void PacketClassifierBase::initialize(int stage)
     }
 }
 
-bool PacketClassifierBase::canPushSomePacket(cGate *gate)
+bool PacketClassifierBase::canPushSomePacket(cGate *gate) const
 {
     for (int i = 0; i < (int)outputGates.size(); i++)
         if (!consumers[i]->canPushSomePacket(outputGates[i]->getPathEndGate()))

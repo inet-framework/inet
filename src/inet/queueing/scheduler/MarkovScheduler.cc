@@ -98,12 +98,12 @@ void MarkovScheduler::scheduleWaitTimer()
     scheduleAt(simTime() + waitIntervals[state].doubleValue(this), waitTimer);
 }
 
-bool MarkovScheduler::canPushSomePacket(cGate *gate)
+bool MarkovScheduler::canPushSomePacket(cGate *gate) const
 {
     return gate->getIndex() == state;
 }
 
-bool MarkovScheduler::canPushPacket(Packet *packet, cGate *gate)
+bool MarkovScheduler::canPushPacket(Packet *packet, cGate *gate) const
 {
     return canPushSomePacket(gate);
 }

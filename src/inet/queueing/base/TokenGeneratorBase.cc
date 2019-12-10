@@ -39,7 +39,7 @@ void TokenGeneratorBase::updateDisplayString()
     getDisplayString().setTagArg("t", 0, text);
 }
 
-const char *TokenGeneratorBase::resolveDirective(char directive)
+const char *TokenGeneratorBase::resolveDirective(char directive) const
 {
     static std::string result;
     switch (directive) {

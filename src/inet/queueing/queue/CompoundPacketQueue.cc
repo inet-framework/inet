@@ -43,21 +43,6 @@ void CompoundPacketQueue::initialize(int stage)
         updateDisplayString();
 }
 
-int CompoundPacketQueue::getNumPackets()
-{
-    return collection->getNumPackets();
-}
-
-b CompoundPacketQueue::getTotalLength()
-{
-    return collection->getTotalLength();
-}
-
-Packet *CompoundPacketQueue::getPacket(int index)
-{
-    return collection->getPacket(index);
-}
-
 void CompoundPacketQueue::pushPacket(Packet *packet, cGate *gate)
 {
     Enter_Method("pushPacket");

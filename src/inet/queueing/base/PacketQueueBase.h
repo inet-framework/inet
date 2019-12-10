@@ -40,8 +40,8 @@ class INET_API PacketQueueBase : public PacketQueueingElementBase, public IPacke
     virtual void updateDisplayString();
 
   public:
-    virtual bool canPopSomePacket(cGate *gate) override { return getNumPackets() > 0; }
-    virtual bool canPushSomePacket(cGate *gate) override { return true; }
+    virtual bool canPopSomePacket(cGate *gate) const override { return getNumPackets() > 0; }
+    virtual bool canPushSomePacket(cGate *gate) const override { return true; }
 };
 
 } // namespace queueing

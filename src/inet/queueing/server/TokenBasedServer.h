@@ -50,7 +50,7 @@ class INET_API TokenBasedServer : public PacketServerBase
     virtual void handleCanPushPacket(cGate *gate) override;
     virtual void handleCanPopPacket(cGate *gate) override;
 
-    virtual const char *resolveDirective(char directive) override;
+    virtual const char *resolveDirective(char directive) const override;
 };
 
 } // namespace queueing

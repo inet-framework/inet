@@ -76,18 +76,18 @@ void PacketQueue::handleMessage(cMessage *message)
     pushPacket(packet, packet->getArrivalGate());
 }
 
-bool PacketQueue::isOverloaded()
+bool PacketQueue::isOverloaded() const
 {
     return (packetCapacity != -1 && getNumPackets() > packetCapacity) ||
            (dataCapacity != b(-1) && getTotalLength() > dataCapacity);
 }
 
-int PacketQueue::getNumPackets()
+int PacketQueue::getNumPackets() const
 {
     return queue.getLength();
 }
 
-Packet *PacketQueue::getPacket(int index)
+Packet *PacketQueue::getPacket(int index) const
 {
     if (index < 0 || index >= queue.getLength())
         throw cRuntimeError("index %i out of range", index);
@@ -141,7 +141,7 @@ void PacketQueue::removePacket(Packet *packet)
     }
 }
 
-bool PacketQueue::canPushSomePacket(cGate *gate)
+bool PacketQueue::canPushSomePacket(cGate *gate) const
 {
     if (packetDropperFunction)
         return true;
@@ -152,7 +152,7 @@ bool PacketQueue::canPushSomePacket(cGate *gate)
     return true;
 }
 
-bool PacketQueue::canPushPacket(Packet *packet, cGate *gate)
+bool PacketQueue::canPushPacket(Packet *packet, cGate *gate) const
 {
     if (packetDropperFunction)
         return true;

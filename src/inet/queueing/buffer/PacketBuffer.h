@@ -40,23 +40,23 @@ class INET_API PacketBuffer : public PacketBufferBase, public IPacketBuffer
   protected:
     virtual void initialize(int stage) override;
     virtual IPacketDropperFunction *createDropperFunction(const char *dropperClass) const;
-    virtual bool isOverloaded();
+    virtual bool isOverloaded() const;
 
   public:
-    virtual int getMaxNumPackets() override { return packetCapacity; }
-    virtual int getNumPackets() override { return packets.size(); }
+    virtual int getMaxNumPackets() const override { return packetCapacity; }
+    virtual int getNumPackets() const override { return packets.size(); }
 
-    virtual b getMaxTotalLength() override { return dataCapacity; }
-    virtual b getTotalLength() override { return totalLength; }
+    virtual b getMaxTotalLength() const override { return dataCapacity; }
+    virtual b getTotalLength() const override { return totalLength; }
 
-    virtual Packet *getPacket(int index) override;
-    virtual bool isEmpty() override { return packets.size() == 0; }
+    virtual Packet *getPacket(int index) const override;
+    virtual bool isEmpty() const override { return packets.size() == 0; }
 
     virtual void addPacket(Packet *packet) override;
     virtual void removePacket(Packet *packet) override;
 
-    virtual bool supportsPushPacket(cGate *gate) override { return false; }
-    virtual bool supportsPopPacket(cGate *gate) override { return false; }
+    virtual bool supportsPushPacket(cGate *gate) const override { return false; }
+    virtual bool supportsPopPacket(cGate *gate) const override { return false; }
 };
 
 } // namespace queueing

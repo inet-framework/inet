@@ -33,13 +33,13 @@ void PacketProcessorBase::initialize(int stage)
         updateDisplayString();
 }
 
-void PacketProcessorBase::updateDisplayString()
+void PacketProcessorBase::updateDisplayString() const
 {
     auto text = StringFormat::formatString(displayStringTextFormat, this);
     getDisplayString().setTagArg("t", 0, text);
 }
 
-const char *PacketProcessorBase::resolveDirective(char directive)
+const char *PacketProcessorBase::resolveDirective(char directive) const
 {
     static std::string result;
     switch (directive) {

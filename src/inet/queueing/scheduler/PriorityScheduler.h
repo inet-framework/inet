@@ -34,14 +34,14 @@ class INET_API PriorityScheduler : public PacketSchedulerBase, public IPacketCol
     virtual int schedulePacket() override;
 
   public:
-    virtual int getMaxNumPackets() override { return -1; }
-    virtual int getNumPackets() override;
+    virtual int getMaxNumPackets() const override { return -1; }
+    virtual int getNumPackets() const override;
 
-    virtual b getMaxTotalLength() override { return b(-1); }
-    virtual b getTotalLength() override;
+    virtual b getMaxTotalLength() const override { return b(-1); }
+    virtual b getTotalLength() const override;
 
-    virtual bool isEmpty() override { return getNumPackets() == 0; }
-    virtual Packet *getPacket(int index) override;
+    virtual bool isEmpty() const override { return getNumPackets() == 0; }
+    virtual Packet *getPacket(int index) const override;
     virtual void removePacket(Packet *packet) override;
 };
 

@@ -59,13 +59,14 @@ void PassivePacketSource::scheduleProvidingTimer()
         scheduleAt(simTime() + interval, providingTimer);
 }
 
-Packet *PassivePacketSource::canPopPacket(cGate *gate)
+Packet *PassivePacketSource::canPopPacket(cGate *gate) const
 {
     if (providingTimer->isScheduled())
         return nullptr;
     else {
         if (nextPacket == nullptr)
-            nextPacket = createPacket();
+            // TODO: KLUDGE:
+            nextPacket = const_cast<PassivePacketSource *>(this)->createPacket();
         return nextPacket;
     }
 }

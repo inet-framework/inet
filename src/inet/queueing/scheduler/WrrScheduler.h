@@ -42,14 +42,14 @@ class INET_API WrrScheduler : public PacketSchedulerBase, public IPacketCollecti
   public:
     virtual ~WrrScheduler();
 
-    virtual int getMaxNumPackets() override { return -1; }
-    virtual int getNumPackets() override;
+    virtual int getMaxNumPackets() const override { return -1; }
+    virtual int getNumPackets() const override;
 
-    virtual b getMaxTotalLength() override { return b(-1); }
-    virtual b getTotalLength() override;
+    virtual b getMaxTotalLength() const override { return b(-1); }
+    virtual b getTotalLength() const override;
 
-    virtual bool isEmpty() override { return getNumPackets() == 0; }
-    virtual Packet *getPacket(int index) override { throw cRuntimeError("Invalid operation"); }
+    virtual bool isEmpty() const override { return getNumPackets() == 0; }
+    virtual Packet *getPacket(int index) const override { throw cRuntimeError("Invalid operation"); }
     virtual void removePacket(Packet *packet) override { throw cRuntimeError("Invalid operation"); }
 };
 
