@@ -41,10 +41,10 @@ class INET_API TokenGeneratorBase : public PacketQueueingElementBase, public Str
     virtual void updateDisplayString();
 
   public:
-    virtual bool supportsPushPacket(cGate *gate) override { return false; }
-    virtual bool supportsPopPacket(cGate *gate) override { return false; }
+    virtual bool supportsPushPacket(cGate *gate) const override { return false; }
+    virtual bool supportsPopPacket(cGate *gate) const override { return false; }
 
-    virtual const char *resolveDirective(char directive) override;
+    virtual const char *resolveDirective(char directive) const override;
 };
 
 } // namespace queueing

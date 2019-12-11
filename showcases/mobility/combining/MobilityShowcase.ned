@@ -25,7 +25,7 @@ network MobilityShowcase
 
 network AntennaOrientation
 {
-    @display("bgb=800,800;bgi=showcases/desert3,s");
+    @display("bgb=800,800;bgi=showcases/desert,s");
     string minus = default("-");
 
     submodules:

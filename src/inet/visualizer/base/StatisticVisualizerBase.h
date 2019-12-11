@@ -62,12 +62,11 @@ class INET_API StatisticVisualizerBase : public VisualizerBase, public cListener
       protected:
         const StatisticVisualizerBase *visualizer = nullptr;
         const StatisticVisualization *visualization = nullptr;
-        std::string result;
 
       public:
         DirectiveResolver(const StatisticVisualizerBase *visualizer, const StatisticVisualization *visualization) : visualizer(visualizer), visualization(visualization) { }
 
-        virtual const char *resolveDirective(char directive) override;
+        virtual const char *resolveDirective(char directive) const override;
     };
 
   protected:

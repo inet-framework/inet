@@ -34,7 +34,7 @@ void LabelScheduler::initialize(int stage)
     }
 }
 
-int LabelScheduler::getNumPackets()
+int LabelScheduler::getNumPackets() const
 {
     int size = 0;
     for (auto collection : collections)
@@ -42,7 +42,7 @@ int LabelScheduler::getNumPackets()
     return size;
 }
 
-b LabelScheduler::getTotalLength()
+b LabelScheduler::getTotalLength() const
 {
     b totalLength(0);
     for (auto collection : collections)
@@ -50,7 +50,7 @@ b LabelScheduler::getTotalLength()
     return totalLength;
 }
 
-Packet *LabelScheduler::getPacket(int index)
+Packet *LabelScheduler::getPacket(int index) const
 {
     throw cRuntimeError("TODO");
 }

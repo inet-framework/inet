@@ -37,6 +37,7 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
 %file: test.ned
 
+import inet.test.moduletest.lib.*;
 import inet.node.wireless.AccessPoint;
 import inet.status.NodeStatus;
 import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;

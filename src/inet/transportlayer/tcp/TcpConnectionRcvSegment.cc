@@ -18,7 +18,6 @@
 
 #include <string.h>
 
-#include "inet/networklayer/common/EcnTag_m.h"
 #include "inet/transportlayer/contract/tcp/TcpCommand_m.h"
 #include "inet/transportlayer/tcp/Tcp.h"
 #include "inet/transportlayer/tcp/TcpAlgorithm.h"
@@ -199,6 +198,12 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *packet, const Ptr<c
         emit(rcvNASegSignal, state->rcv_naseg);
 
         return TCP_E_IGNORE;
+    }
+
+    // ECN
+    if (tcpseg->getCwrBit() == true) {
+        EV_INFO << "Received CWR... Leaving ecnEcho State\n";
+        state->ecnEchoState = false;
     }
 
     //
@@ -477,11 +482,6 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *packet, const Ptr<c
         //"
 
         if (payloadLength > 0) {
-            if (auto ecnTag = packet->findTag<EcnInd>()) {
-                if (ecnTag->getExplicitCongestionNotification() == IP_ECN_CE)
-                    state->ecnCe = true;
-            }
-
             // check for full sized segment
             if ((uint32_t)payloadLength == state->snd_mss || (uint32_t)payloadLength + B(tcpseg->getHeaderLength() - TCP_MIN_HEADER_LENGTH).get() == state->snd_mss)
                 state->full_sized_segment_counter++;
@@ -833,12 +833,14 @@ TcpEventCode TcpConnection::processSynInListen(Packet *packet, const Ptr<const T
     if (tcpseg->getHeaderLength() > TCP_MIN_HEADER_LENGTH) // Header options present?
         readHeaderOptions(tcpseg);
 
-    if (state->ecnEnabled && (tcpseg->getEceBit() && tcpseg->getCwrBit())) {
-        state->ecnSetupSynReceived = true;
-        state->ecnActive = true;
-    }
-
     state->ack_now = true;
+
+        // ECN
+        if (tcpseg->getEceBit() == true && tcpseg->getCwrBit() == true) {
+            state->endPointIsWillingECN = true;
+            EV << "ECN-setup SYN packet received\n";
+        }
+
     sendSynAck();
     startSynRexmitTimer();
 
@@ -1019,17 +1021,27 @@ TcpEventCode TcpConnection::processSegmentInSynSent(Packet *packet, const Ptr<co
             if (tcpseg->getHeaderLength() > TCP_MIN_HEADER_LENGTH) // Header options present?
                 readHeaderOptions(tcpseg);
 
-            //RFC 3168 - ECN enabled and received ECN-setup SYN-ACK packet
-            //ECN setup -> ECE = 1; CRW = 0
-            if (state->ecnEnabled && (tcpseg->getEceBit() && !tcpseg->getCwrBit())) {
-                state->ecnActive = true;
-            }
-
             // notify tcpAlgorithm (it has to send ACK of SYN) and app layer
             state->ack_now = true;
             tcpAlgorithm->established(true);
             tcpMain->emit(Tcp::tcpConnectionAddedSignal, this);
             sendEstabIndicationToApp();
+
+            //ECN
+            if (state->ecnSynSent) {
+                if (tcpseg->getEceBit() && !tcpseg->getCwrBit()) {
+                    state->ect = true;
+                    EV << "ECN-setup SYN-ACK packet was received... ECN is enabled.\n";
+                } else {
+                    state->ect = false;
+                    EV << "non-ECN-setup SYN-ACK packet was received... ECN is disabled.\n";
+                }
+                state->ecnSynSent = false;
+            } else {
+                state->ect = false;
+                if (tcpseg->getEceBit() && !tcpseg->getCwrBit())
+                    EV << "ECN-setup SYN-ACK packet was received... ECN is disabled.\n";
+            }
 
             // This will trigger transition to ESTABLISHED. Timers and notifying
             // app will be taken care of in stateEntered().
@@ -1124,6 +1136,15 @@ bool TcpConnection::processAckInEstabEtc(Packet *packet, const Ptr<const TcpHead
     EV_DETAIL << "Processing ACK in a data transfer state\n";
 
     int payloadLength = packet->getByteLength() - B(tcpseg->getHeaderLength()).get();
+
+    //ECN
+    TcpStateVariables* state = getState();
+    if (state && state->ect) {
+        if (tcpseg->getEceBit() == true) {
+            EV_INFO << "Received packet with ECE\n";
+            state->gotEce = true;
+        }
+    }
 
     //
     //"

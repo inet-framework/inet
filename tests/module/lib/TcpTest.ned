@@ -1,7 +1,6 @@
-// package module_.lib;
+package inet.test.moduletest.lib;
 
 import inet.transportlayer.contract.ITcp;
-
 
 network TcpTestNet1
 {

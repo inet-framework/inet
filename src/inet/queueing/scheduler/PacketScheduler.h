@@ -31,6 +31,7 @@ class INET_API PacketScheduler : public PacketSchedulerBase
 
   protected:
     virtual void initialize(int stage) override;
+    virtual IPacketSchedulerFunction *createSchedulerFunction(const char *schedulerClass) const;
     virtual int schedulePacket() override;
 
   public:

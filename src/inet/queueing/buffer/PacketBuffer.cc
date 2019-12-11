@@ -19,6 +19,7 @@
 #include "inet/common/Simsignals.h"
 #include "inet/common/StringFormat.h"
 #include "inet/queueing/buffer/PacketBuffer.h"
+#include "inet/queueing/compat/cpacketqueue.h"
 
 namespace inet {
 namespace queueing {
@@ -32,18 +33,32 @@ void PacketBuffer::initialize(int stage)
         displayStringTextFormat = par("displayStringTextFormat");
         packetCapacity = par("packetCapacity");
         dataCapacity = b(par("dataCapacity"));
-        const char *dropperClass = par("dropperClass");
-        if (*dropperClass != '\0')
-            packetDropperFunction = check_and_cast<IPacketDropperFunction *>(createOne(dropperClass));
+        packetDropperFunction = createDropperFunction(par("dropperClass"));
     }
     else if (stage == INITSTAGE_LAST)
         updateDisplayString();
 }
 
-bool PacketBuffer::isOverloaded()
+IPacketDropperFunction *PacketBuffer::createDropperFunction(const char *dropperClass) const
+{
+    if (strlen(dropperClass) == 0)
+        return nullptr;
+    else
+        return check_and_cast<IPacketDropperFunction *>(createOne(dropperClass));
+}
+
+bool PacketBuffer::isOverloaded() const
 {
     return (packetCapacity != -1 && getNumPackets() > packetCapacity) ||
            (dataCapacity != b(-1) && getTotalLength() > dataCapacity);
+}
+
+b PacketBuffer::getTotalLength() const
+{
+    b totalLength = b(0);
+    for (auto packet : packets)
+        totalLength += packet->getTotalLength();
+    return totalLength;
 }
 
 void PacketBuffer::addPacket(Packet *packet)
@@ -51,11 +66,22 @@ void PacketBuffer::addPacket(Packet *packet)
     Enter_Method("addPacket");
     EV_INFO << "Adding packet " << packet->getName() << " to the buffer.\n";
     emit(packetAddedSignal, packet);
-    totalLength += packet->getTotalLength();
     packets.push_back(packet);
     if (isOverloaded()) {
-        if (packetDropperFunction != nullptr)
-            packetDropperFunction->dropPackets(this);
+        if (packetDropperFunction != nullptr) {
+            while (!isEmpty() && isOverloaded()) {
+                auto packet = packetDropperFunction->selectPacket(this);
+                EV_INFO << "Dropping packet " << packet->getName() << " from the buffer.\n";
+                packets.erase(find(packets.begin(), packets.end(), packet));
+                auto queue = dynamic_cast<cPacketQueue *>(packet->getOwner());
+                if (queue != nullptr) {
+                    ICallback *callback = dynamic_cast<ICallback *>(queue->getOwner());
+                    if (callback != nullptr)
+                        callback->handlePacketRemoved(packet);
+                }
+                dropPacket(packet, QUEUE_OVERFLOW);
+            }
+        }
         else
             throw cRuntimeError("Buffer is overloaded but packet dropper function is not specified");
     }
@@ -67,14 +93,17 @@ void PacketBuffer::removePacket(Packet *packet)
     Enter_Method("removePacket");
     EV_INFO << "Removing packet " << packet->getName() << " from the buffer.\n";
     emit(packetRemovedSignal, packet);
-    totalLength -= packet->getTotalLength();
     packets.erase(find(packets.begin(), packets.end(), packet));
     updateDisplayString();
-    ICallback *callback = check_and_cast<ICallback *>(packet->getOwner()->getOwner());
-    callback->handlePacketRemoved(packet);
+    auto queue = dynamic_cast<cPacketQueue *>(packet->getOwner());
+    if (queue != nullptr) {
+        ICallback *callback = dynamic_cast<ICallback *>(queue->getOwner());
+        if (callback != nullptr)
+            callback->handlePacketRemoved(packet);
+    }
 }
 
-Packet *PacketBuffer::getPacket(int index)
+Packet *PacketBuffer::getPacket(int index) const
 {
     if (index < 0 || (size_t)index >= packets.size())
         throw cRuntimeError("index %i out of range", index);

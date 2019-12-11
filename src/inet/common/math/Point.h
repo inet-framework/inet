@@ -72,11 +72,14 @@ template<>
 struct bits_to_indices_sequence<0b0, 1> { typedef integer_sequence<size_t> type; };
 
 template<>
-struct bits_to_indices_sequence<0b00, 2> { typedef integer_sequence<size_t, 0> type; };
+struct bits_to_indices_sequence<0b00, 2> { typedef integer_sequence<size_t, 0> type; }; // TODO: shouldn't be empty set?
 template<>
 struct bits_to_indices_sequence<0b01, 2> { typedef integer_sequence<size_t, 1> type; };
 template<>
 struct bits_to_indices_sequence<0b10, 2> { typedef integer_sequence<size_t, 0> type; };
+
+template<>
+struct bits_to_indices_sequence<0b11110, 5> { typedef integer_sequence<size_t, 0, 1, 2, 3> type; };
 
 template<int DIMS, int SIZE>
 using make_bits_to_indices_sequence = typename bits_to_indices_sequence<DIMS, SIZE>::type;
@@ -130,34 +133,6 @@ class INET_API Point : public std::tuple<T ...>
         return Point<T ...>{ (std::get<IS>(*this) / d) ... };
     }
 
-    template<size_t ... IS>
-    bool smaller(const Point<T ...>& o, integer_sequence<size_t, IS ...>) const {
-        bool result = true;
-        (void)std::initializer_list<bool>{ result &= std::get<IS>(*this) < std::get<IS>(o) ... };
-        return result;
-    }
-
-    template<size_t ... IS>
-    bool smallerOrEqual(const Point<T ...>& o, integer_sequence<size_t, IS ...>) const {
-        bool result = true;
-        (void)std::initializer_list<bool>{ result &= std::get<IS>(*this) <= std::get<IS>(o) ... };
-        return result;
-    }
-
-    template<size_t ... IS>
-    bool greater(const Point<T ...>& o, integer_sequence<size_t, IS ...>) const {
-        bool result = true;
-        (void)std::initializer_list<bool>{ result &= std::get<IS>(*this) > std::get<IS>(o) ... };
-        return result;
-    }
-
-    template<size_t ... IS>
-    bool greaterOrEqual(const Point<T ...>& o, integer_sequence<size_t, IS ...>) const {
-        bool result = true;
-        (void)std::initializer_list<bool>{ result &= std::get<IS>(*this) >= std::get<IS>(o) ... };
-        return result;
-    }
-
   public:
     Point(T ... t) : std::tuple<T ...>(t ...) { }
 
@@ -167,6 +142,10 @@ class INET_API Point : public std::tuple<T ...>
 
     void set(int index, double value) {
         return setImpl(index, value, index_sequence_for<T ...>{});
+    }
+
+    Point<T ...> operator-() const {
+        return multiply(-1, index_sequence_for<T ...>{});
     }
 
     Point<T ...> operator+(const Point<T ...>& o) const {
@@ -185,26 +164,6 @@ class INET_API Point : public std::tuple<T ...>
         return divide(d, index_sequence_for<T ...>{});
     }
 
-    /// Coordinate-wise comparison (condition must hold for each dimension).
-    bool operator<(const Point<T ...>& o) const {
-        return smaller(o, index_sequence_for<T ...>{});
-    }
-
-    /// Coordinate-wise comparison (condition must hold for each dimension).
-    bool operator<=(const Point<T ...>& o) const {
-        return smallerOrEqual(o, index_sequence_for<T ...>{});
-    }
-
-    /// Coordinate-wise comparison (condition must hold for each dimension).
-    bool operator>(const Point<T ...>& o) const {
-        return greater(o, index_sequence_for<T ...>{});
-    }
-
-    /// Coordinate-wise comparison (condition must hold for each dimension).
-    bool operator>=(const Point<T ...>& o) const {
-        return greaterOrEqual(o, index_sequence_for<T ...>{});
-    }
-
     /// Copy the dimensions selected by the 1 bits of DIMS into p.
     template<typename P, int DIMS>
     void copyTo(P& p) const {
@@ -215,6 +174,19 @@ class INET_API Point : public std::tuple<T ...>
     template<typename P, int DIMS>
     void copyFrom(const P& p) {
         internal::copyTupleElements(p, internal::make_bits_to_indices_sequence<DIMS, std::tuple_size<typename P::type>::value>{}, *this, index_sequence_for<T ...>{});
+    }
+
+    template<typename X, int DIMENSION>
+    Point<T ...> getReplaced(X x) const {
+        Point<T ...> p = *this;
+        std::get<DIMENSION>(p) = x;
+        return p;
+    }
+
+    std::string str() const {
+        std::stringstream os;
+        os << *this;
+        return os.str();
     }
 
     static Point<T ...> getZero() {

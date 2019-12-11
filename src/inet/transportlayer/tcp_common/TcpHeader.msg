@@ -208,8 +208,8 @@ class TcpHeader extends TransportHeaderBase
     // if header options are used the headerLength is greater than 20 bytes (default)
     B headerLength = TCP_MIN_HEADER_LENGTH; // TCP_MIN_HEADER_LENGTH = 20 bytes
 
-    bool cwrBit; // CWR: congestion window reduced (RFC 3168)
-    bool eceBit; // ECE: ECN-echo (RFC 3168)
+    bool cwrBit; // CWR: congestion window reduced bit (RFC 3168)
+    bool eceBit; // ECE: ECN-echo bit (RFC 3168)
     bool urgBit; // URG: urgent pointer field significant if set
     bool ackBit; // ACK: ackNo significant if set
     bool pshBit; // PSH: push function

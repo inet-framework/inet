@@ -114,14 +114,14 @@ Collecting packet producer-13.
 Producing packet producer-14.
 Passing through packet producer-14.
 Pushing packet producer-14 into the queue.
+Popping packet producer-14 from the queue.
+Collecting packet producer-14.
 Producing packet producer-15.
 Passing through packet producer-15.
 Pushing packet producer-15 into the queue.
 Producing packet producer-16.
 Passing through packet producer-16.
 Pushing packet producer-16 into the queue.
-Popping packet producer-14 from the queue.
-Collecting packet producer-14.
 Popping packet producer-15 from the queue.
 Collecting packet producer-15.
 Popping packet producer-16 from the queue.
@@ -154,11 +154,11 @@ Collecting packet producer-21.
 Producing packet producer-22.
 Passing through packet producer-22.
 Pushing packet producer-22 into the queue.
+Popping packet producer-22 from the queue.
+Collecting packet producer-22.
 Producing packet producer-23.
 Passing through packet producer-23.
 Pushing packet producer-23 into the queue.
-Popping packet producer-22 from the queue.
-Collecting packet producer-22.
 Popping packet producer-23 from the queue.
 Collecting packet producer-23.
 Producing packet producer-24.
@@ -169,56 +169,56 @@ Collecting packet producer-24.
 Producing packet producer-25.
 Passing through packet producer-25.
 Pushing packet producer-25 into the queue.
-Popping packet producer-25 from the queue.
-Collecting packet producer-25.
 Producing packet producer-26.
 Passing through packet producer-26.
 Pushing packet producer-26 into the queue.
+Popping packet producer-25 from the queue.
+Collecting packet producer-25.
 Popping packet producer-26 from the queue.
 Collecting packet producer-26.
 Producing packet producer-27.
 Passing through packet producer-27.
 Pushing packet producer-27 into the queue.
+Popping packet producer-27 from the queue.
+Collecting packet producer-27.
 Producing packet producer-28.
 Passing through packet producer-28.
 Pushing packet producer-28 into the queue.
+Popping packet producer-28 from the queue.
+Collecting packet producer-28.
 Producing packet producer-29.
 Passing through packet producer-29.
 Pushing packet producer-29 into the queue.
+Popping packet producer-29 from the queue.
+Collecting packet producer-29.
 Producing packet producer-30.
 Passing through packet producer-30.
 Pushing packet producer-30 into the queue.
-Popping packet producer-27 from the queue.
-Collecting packet producer-27.
+Popping packet producer-30 from the queue.
+Collecting packet producer-30.
 Producing packet producer-31.
 Passing through packet producer-31.
 Pushing packet producer-31 into the queue.
-Popping packet producer-28 from the queue.
-Collecting packet producer-28.
-Popping packet producer-29 from the queue.
-Collecting packet producer-29.
-Popping packet producer-30 from the queue.
-Collecting packet producer-30.
+Popping packet producer-31 from the queue.
+Collecting packet producer-31.
 Producing packet producer-32.
 Passing through packet producer-32.
 Pushing packet producer-32 into the queue.
+Popping packet producer-32 from the queue.
+Collecting packet producer-32.
 Producing packet producer-33.
 Passing through packet producer-33.
 Pushing packet producer-33 into the queue.
-Popping packet producer-31 from the queue.
-Collecting packet producer-31.
-Popping packet producer-32 from the queue.
-Collecting packet producer-32.
+Popping packet producer-33 from the queue.
+Collecting packet producer-33.
 Producing packet producer-34.
 Passing through packet producer-34.
 Pushing packet producer-34 into the queue.
-Popping packet producer-33 from the queue.
-Collecting packet producer-33.
+Popping packet producer-34 from the queue.
+Collecting packet producer-34.
 Producing packet producer-35.
 Passing through packet producer-35.
 Pushing packet producer-35 into the queue.
-Popping packet producer-34 from the queue.
-Collecting packet producer-34.
 Popping packet producer-35 from the queue.
 Collecting packet producer-35.
 Producing packet producer-36.
@@ -239,11 +239,11 @@ Collecting packet producer-38.
 Producing packet producer-39.
 Passing through packet producer-39.
 Pushing packet producer-39 into the queue.
+Popping packet producer-39 from the queue.
+Collecting packet producer-39.
 Producing packet producer-40.
 Passing through packet producer-40.
 Pushing packet producer-40 into the queue.
-Popping packet producer-39 from the queue.
-Collecting packet producer-39.
 Popping packet producer-40 from the queue.
 Collecting packet producer-40.
 Producing packet producer-41.
@@ -260,118 +260,116 @@ Pushing packet producer-43 into the queue.
 Producing packet producer-44.
 Passing through packet producer-44.
 Pushing packet producer-44 into the queue.
+Producing packet producer-45.
+Queue len 3 >= maxth, dropping packet.
+Filtering out packet producer-45.
 Popping packet producer-42 from the queue.
 Collecting packet producer-42.
-Popping packet producer-43 from the queue.
-Collecting packet producer-43.
-Producing packet producer-45.
-Passing through packet producer-45.
-Pushing packet producer-45 into the queue.
-Popping packet producer-44 from the queue.
-Collecting packet producer-44.
 Producing packet producer-46.
 Passing through packet producer-46.
 Pushing packet producer-46 into the queue.
+Popping packet producer-43 from the queue.
+Collecting packet producer-43.
+Popping packet producer-44 from the queue.
+Collecting packet producer-44.
 Producing packet producer-47.
 Passing through packet producer-47.
 Pushing packet producer-47 into the queue.
-Popping packet producer-45 from the queue.
-Collecting packet producer-45.
-Popping packet producer-46 from the queue.
-Collecting packet producer-46.
-Popping packet producer-47 from the queue.
-Collecting packet producer-47.
 Producing packet producer-48.
 Passing through packet producer-48.
 Pushing packet producer-48 into the queue.
-Popping packet producer-48 from the queue.
-Collecting packet producer-48.
+Popping packet producer-46 from the queue.
+Collecting packet producer-46.
 Producing packet producer-49.
 Passing through packet producer-49.
 Pushing packet producer-49 into the queue.
-Popping packet producer-49 from the queue.
-Collecting packet producer-49.
+Popping packet producer-47 from the queue.
+Collecting packet producer-47.
 Producing packet producer-50.
 Passing through packet producer-50.
 Pushing packet producer-50 into the queue.
-Popping packet producer-50 from the queue.
-Collecting packet producer-50.
+Popping packet producer-48 from the queue.
+Collecting packet producer-48.
 Producing packet producer-51.
 Passing through packet producer-51.
 Pushing packet producer-51 into the queue.
-Popping packet producer-51 from the queue.
-Collecting packet producer-51.
 Producing packet producer-52.
-Passing through packet producer-52.
-Pushing packet producer-52 into the queue.
-Popping packet producer-52 from the queue.
-Collecting packet producer-52.
+Queue len 3 >= maxth, dropping packet.
+Filtering out packet producer-52.
+Popping packet producer-49 from the queue.
+Collecting packet producer-49.
+Popping packet producer-50 from the queue.
+Collecting packet producer-50.
 Producing packet producer-53.
 Passing through packet producer-53.
 Pushing packet producer-53 into the queue.
 Producing packet producer-54.
 Passing through packet producer-54.
 Pushing packet producer-54 into the queue.
+Popping packet producer-51 from the queue.
+Collecting packet producer-51.
 Popping packet producer-53 from the queue.
 Collecting packet producer-53.
-Popping packet producer-54 from the queue.
-Collecting packet producer-54.
 Producing packet producer-55.
 Passing through packet producer-55.
 Pushing packet producer-55 into the queue.
-Popping packet producer-55 from the queue.
-Collecting packet producer-55.
+Popping packet producer-54 from the queue.
+Collecting packet producer-54.
 Producing packet producer-56.
 Passing through packet producer-56.
 Pushing packet producer-56 into the queue.
+Popping packet producer-55 from the queue.
+Collecting packet producer-55.
 Popping packet producer-56 from the queue.
 Collecting packet producer-56.
 Producing packet producer-57.
 Passing through packet producer-57.
 Pushing packet producer-57 into the queue.
+Popping packet producer-57 from the queue.
+Collecting packet producer-57.
 Producing packet producer-58.
 Passing through packet producer-58.
 Pushing packet producer-58 into the queue.
-Popping packet producer-57 from the queue.
-Collecting packet producer-57.
 Popping packet producer-58 from the queue.
 Collecting packet producer-58.
 Producing packet producer-59.
 Passing through packet producer-59.
 Pushing packet producer-59 into the queue.
+Popping packet producer-59 from the queue.
+Collecting packet producer-59.
 Producing packet producer-60.
 Passing through packet producer-60.
 Pushing packet producer-60 into the queue.
+Popping packet producer-60 from the queue.
+Collecting packet producer-60.
 Producing packet producer-61.
 Passing through packet producer-61.
 Pushing packet producer-61 into the queue.
+Popping packet producer-61 from the queue.
+Collecting packet producer-61.
 Producing packet producer-62.
 Passing through packet producer-62.
 Pushing packet producer-62 into the queue.
-Popping packet producer-59 from the queue.
-Collecting packet producer-59.
 Producing packet producer-63.
 Passing through packet producer-63.
 Pushing packet producer-63 into the queue.
 Producing packet producer-64.
-Avg queue len 3.28125 >= maxth, dropping packet.
-Filtering out packet producer-64.
-Popping packet producer-60 from the queue.
-Collecting packet producer-60.
-Producing packet producer-65.
-Avg queue len 3.14062 >= maxth, dropping packet.
-Filtering out packet producer-65.
-Popping packet producer-61 from the queue.
-Collecting packet producer-61.
-Producing packet producer-66.
-Passing through packet producer-66.
-Pushing packet producer-66 into the queue.
+Passing through packet producer-64.
+Pushing packet producer-64 into the queue.
 Popping packet producer-62 from the queue.
 Collecting packet producer-62.
+Producing packet producer-65.
+Passing through packet producer-65.
+Pushing packet producer-65 into the queue.
+Producing packet producer-66.
+Queue len 3 >= maxth, dropping packet.
+Filtering out packet producer-66.
 Popping packet producer-63 from the queue.
 Collecting packet producer-63.
-Popping packet producer-66 from the queue.
-Collecting packet producer-66.
+Popping packet producer-64 from the queue.
+Collecting packet producer-64.
+Popping packet producer-65 from the queue.
+Collecting packet producer-65.
 Producing packet producer-67.
 Passing through packet producer-67.
 Pushing packet producer-67 into the queue.
@@ -380,26 +378,26 @@ Collecting packet producer-67.
 Producing packet producer-68.
 Passing through packet producer-68.
 Pushing packet producer-68 into the queue.
+Popping packet producer-68 from the queue.
+Collecting packet producer-68.
 Producing packet producer-69.
 Passing through packet producer-69.
 Pushing packet producer-69 into the queue.
+Popping packet producer-69 from the queue.
+Collecting packet producer-69.
 Producing packet producer-70.
 Passing through packet producer-70.
 Pushing packet producer-70 into the queue.
-Popping packet producer-68 from the queue.
-Collecting packet producer-68.
-Popping packet producer-69 from the queue.
-Collecting packet producer-69.
 Popping packet producer-70 from the queue.
 Collecting packet producer-70.
 Producing packet producer-71.
 Passing through packet producer-71.
 Pushing packet producer-71 into the queue.
-Popping packet producer-71 from the queue.
-Collecting packet producer-71.
 Producing packet producer-72.
 Passing through packet producer-72.
 Pushing packet producer-72 into the queue.
+Popping packet producer-71 from the queue.
+Collecting packet producer-71.
 Popping packet producer-72 from the queue.
 Collecting packet producer-72.
 Producing packet producer-73.
@@ -410,64 +408,68 @@ Collecting packet producer-73.
 Producing packet producer-74.
 Passing through packet producer-74.
 Pushing packet producer-74 into the queue.
-Popping packet producer-74 from the queue.
-Collecting packet producer-74.
 Producing packet producer-75.
 Passing through packet producer-75.
 Pushing packet producer-75 into the queue.
+Popping packet producer-74 from the queue.
+Collecting packet producer-74.
 Popping packet producer-75 from the queue.
 Collecting packet producer-75.
 Producing packet producer-76.
 Passing through packet producer-76.
 Pushing packet producer-76 into the queue.
-Popping packet producer-76 from the queue.
-Collecting packet producer-76.
 Producing packet producer-77.
 Passing through packet producer-77.
 Pushing packet producer-77 into the queue.
+Popping packet producer-76 from the queue.
+Collecting packet producer-76.
 Popping packet producer-77 from the queue.
 Collecting packet producer-77.
 Producing packet producer-78.
 Passing through packet producer-78.
 Pushing packet producer-78 into the queue.
+Popping packet producer-78 from the queue.
+Collecting packet producer-78.
 Producing packet producer-79.
 Passing through packet producer-79.
 Pushing packet producer-79 into the queue.
+Popping packet producer-79 from the queue.
+Collecting packet producer-79.
 Producing packet producer-80.
 Passing through packet producer-80.
 Pushing packet producer-80 into the queue.
 Producing packet producer-81.
 Passing through packet producer-81.
 Pushing packet producer-81 into the queue.
-Popping packet producer-78 from the queue.
-Collecting packet producer-78.
-Popping packet producer-79 from the queue.
-Collecting packet producer-79.
 Producing packet producer-82.
 Passing through packet producer-82.
 Pushing packet producer-82 into the queue.
+Popping packet producer-80 from the queue.
+Collecting packet producer-80.
+Popping packet producer-81 from the queue.
+Collecting packet producer-81.
 Producing packet producer-83.
-Random early packet drop (avg queue len=2.53125, pa=0.0993915)
-Filtering out packet producer-83.
+Passing through packet producer-83.
+Pushing packet producer-83 into the queue.
 Producing packet producer-84.
 Passing through packet producer-84.
 Pushing packet producer-84 into the queue.
-Producing packet producer-85.
-Avg queue len 3.38281 >= maxth, dropping packet.
-Filtering out packet producer-85.
-Popping packet producer-80 from the queue.
-Collecting packet producer-80.
-Producing packet producer-86.
-Avg queue len 3.19141 >= maxth, dropping packet.
-Filtering out packet producer-86.
-Popping packet producer-81 from the queue.
-Collecting packet producer-81.
 Popping packet producer-82 from the queue.
 Collecting packet producer-82.
+Popping packet producer-83 from the queue.
+Collecting packet producer-83.
 Popping packet producer-84 from the queue.
 Collecting packet producer-84.
+Producing packet producer-85.
+Passing through packet producer-85.
+Pushing packet producer-85 into the queue.
+Popping packet producer-85 from the queue.
+Collecting packet producer-85.
+Producing packet producer-86.
+Passing through packet producer-86.
+Pushing packet producer-86 into the queue.
+Popping packet producer-86 from the queue.
+Collecting packet producer-86.
 Producing packet producer-87.
 Passing through packet producer-87.
 Pushing packet producer-87 into the queue.
-Popping packet producer-87 from the queue.
-Collecting packet producer-87.

@@ -34,7 +34,7 @@ class INET_API PassivePacketSource : public PacketSourceBase, public IPassivePac
     cPar *providingIntervalParameter = nullptr;
     cMessage *providingTimer = nullptr;
 
-    Packet *nextPacket = nullptr;
+    mutable Packet *nextPacket = nullptr;
 
   protected:
     virtual void initialize(int stage) override;
@@ -46,11 +46,11 @@ class INET_API PassivePacketSource : public PacketSourceBase, public IPassivePac
   public:
     virtual ~PassivePacketSource() { delete nextPacket; cancelAndDelete(providingTimer); }
 
-    virtual bool supportsPushPacket(cGate* gate) override { return false; }
-    virtual bool supportsPopPacket(cGate* gate) override { return outputGate == gate; }
+    virtual bool supportsPushPacket(cGate *gate) const override { return false; }
+    virtual bool supportsPopPacket(cGate *gate) const override { return outputGate == gate; }
 
-    virtual bool canPopSomePacket(cGate *gate) override { return !providingTimer->isScheduled(); }
-    virtual Packet *canPopPacket(cGate *gate) override;
+    virtual bool canPopSomePacket(cGate *gate) const override { return !providingTimer->isScheduled(); }
+    virtual Packet *canPopPacket(cGate *gate) const override;
     virtual Packet *popPacket(cGate *gate) override;
 };
 

@@ -52,6 +52,10 @@ class INET_API DimensionalTransmitterBase : public virtual IPrintableObject
     std::vector<GainEntry<Hz>> frequencyGains;
     const char *timeGainsNormalization = nullptr;
     const char *frequencyGainsNormalization = nullptr;
+
+    int gainFunctionCacheLimit = -1;
+    mutable std::map<std::tuple<simtime_t, Hz, Hz>, Ptr<const IFunction<double, Domain<simsec, Hz>>>> gainFunctionCache;
+
   protected:
     virtual void initialize(int stage);
 
@@ -64,6 +68,7 @@ class INET_API DimensionalTransmitterBase : public virtual IPrintableObject
     template<typename T>
     const Ptr<const IFunction<double, Domain<T>>> normalize(const Ptr<const IFunction<double, Domain<T>>>& function, const char *normalization) const;
 
+    virtual Ptr<const IFunction<double, Domain<simsec, Hz>>> createGainFunction(const simtime_t startTime, const simtime_t endTime, Hz centerFrequency, Hz bandwidth) const;
     virtual Ptr<const IFunction<WpHz, Domain<simsec, Hz>>> createPowerFunction(const simtime_t startTime, const simtime_t endTime, Hz centerFrequency, Hz bandwidth, W power) const;
 
   public:

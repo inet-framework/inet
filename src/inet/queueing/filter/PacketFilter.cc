@@ -25,10 +25,13 @@ Define_Module(PacketFilter);
 void PacketFilter::initialize(int stage)
 {
     PacketFilterBase::initialize(stage);
-    if (stage == INITSTAGE_LOCAL) {
-        const char *filterClass = par("filterClass");
-        packetFilterFunction = check_and_cast<IPacketFilterFunction *>(createOne(filterClass));
-    }
+    if (stage == INITSTAGE_LOCAL)
+        packetFilterFunction = createFilterFunction(par("filterClass"));
+}
+
+IPacketFilterFunction *PacketFilter::createFilterFunction(const char *filterClass) const
+{
+    return check_and_cast<IPacketFilterFunction *>(createOne(filterClass));
 }
 
 bool PacketFilter::matchesPacket(Packet *packet)

@@ -10,14 +10,15 @@
 
 	Added interpolators are EitherInterpolator, LeftInterpolator, RightInterpolator,
 	MinimumInterpolator, MaximumInterpolator, AverageInterpolator, CloserInterpolator,
-	and LinearInterpolator.
+	LinearInterpolator and LineardbInterpolator.
 
 	Added primitive functions are ConstantFunction, LinearFunction, BilinearFunction,
 	ReciprocalFunction, OneDimensionalBoxcarFunction, OneDimensionalInterpolatedFunction,
-	TwoDimensionalBoxcarFunction, and GaussFunction.
+	TwoDimensionalBoxcarFunction, GaussFunction and SawtoothFunction.
 
-	Added function operators are AdditionFunction, SubtractionFunction, MultiplicationFunction,
-	DivisionFunction, and SumFunction.
+	Added algebraic function operations are AdditedFunction, SubtractedFunction,
+	MultipliedFunction, DividedFunction, and SummedFunction.
 
-	Added function compositors are DomainLimitedFunction, ShiftFunction, OrthogonalCombinatorFunction
-	ApproximatedFunction, ExtrudedFunction, IntegratedFunction, and MemoizedFunction.
+	Added function compositors are DomainLimitedFunction, DomainShiftedFunction,
+	ValueTruncatedFunction, MemoizedFunction, CombinedFunction, ModulatedFunction,
+	ApproximatedFunction, ExtrudedFunction, and IntegratedFunction.

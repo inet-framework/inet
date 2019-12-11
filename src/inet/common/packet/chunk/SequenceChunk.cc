@@ -37,6 +37,7 @@ SequenceChunk::SequenceChunk(const std::deque<Ptr<const Chunk>>& chunks) :
 
 void SequenceChunk::forEachChild(cVisitor *v)
 {
+    Chunk::forEachChild(v);
     for (const auto& chunk : chunks)
         v->visit(const_cast<Chunk *>(chunk.get()));
 }

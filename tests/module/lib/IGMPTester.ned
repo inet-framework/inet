@@ -1,3 +1,5 @@
+package inet.test.moduletest.lib;
+
 simple IGMPTester
 {
     parameters:

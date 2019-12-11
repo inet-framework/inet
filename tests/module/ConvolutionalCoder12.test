@@ -3,7 +3,7 @@
 %#--------------------------------------------------------------------------------------------------------------
 %file: test.ned
 
-import ieee80211.Ieee80211BitDomainTest;
+import inet.test.moduletest.lib.ieee80211.Ieee80211BitDomainTest;
 import inet.physicallayer.common.bitlevel.ConvolutionalCoder;
 
 network ConvCoder

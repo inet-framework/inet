@@ -32,9 +32,9 @@ class INET_API IPacketDropperFunction
     virtual ~IPacketDropperFunction() {}
 
     /**
-     * Drops packets from the collection until the limits are reached.
+     * Returns a packet to be dropped from the collection.
      */
-    virtual void dropPackets(IPacketCollection *packets) const = 0;
+    virtual Packet *selectPacket(IPacketCollection *collection) const = 0;
 };
 
 } // namespace queueing

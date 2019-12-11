@@ -43,21 +43,6 @@ void CompoundPacketQueue::initialize(int stage)
         updateDisplayString();
 }
 
-int CompoundPacketQueue::getNumPackets()
-{
-    return collection->getNumPackets();
-}
-
-b CompoundPacketQueue::getTotalLength()
-{
-    return collection->getTotalLength();
-}
-
-Packet *CompoundPacketQueue::getPacket(int index)
-{
-    return collection->getPacket(index);
-}
-
 void CompoundPacketQueue::pushPacket(Packet *packet, cGate *gate)
 {
     Enter_Method("pushPacket");
@@ -69,7 +54,7 @@ void CompoundPacketQueue::pushPacket(Packet *packet, cGate *gate)
         dropPacket(packet, QUEUE_OVERFLOW, packetCapacity);
     }
     else {
-        pushOrSendPacket(packet, inputGate, consumer);
+        consumer->pushPacket(packet, inputGate->getPathEndGate());
         updateDisplayString();
     }
 }
@@ -78,7 +63,6 @@ Packet *CompoundPacketQueue::popPacket(cGate *gate)
 {
     Enter_Method("popPacket");
     auto packet = provider->popPacket(outputGate->getPathStartGate());
-    animateSend(packet, outputGate->getPathStartGate());
     emit(packetPoppedSignal, packet);
     updateDisplayString();
     return packet;

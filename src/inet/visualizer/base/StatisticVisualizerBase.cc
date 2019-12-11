@@ -39,8 +39,9 @@ StatisticVisualizerBase::~StatisticVisualizerBase()
         unsubscribe();
 }
 
-const char *StatisticVisualizerBase::DirectiveResolver::resolveDirective(char directive)
+const char *StatisticVisualizerBase::DirectiveResolver::resolveDirective(char directive) const
 {
+    static std::string result;
     switch (directive) {
         case 's':
             result = visualizer->signalName;

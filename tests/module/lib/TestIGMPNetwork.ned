@@ -1,3 +1,5 @@
+package inet.test.moduletest.lib;
+
 import inet.networklayer.common.InterfaceTable;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.networklayer.configurator.ipv4.Ipv4NodeConfigurator;

@@ -65,10 +65,6 @@ class INET_API FrequencyDependentAttenuationFunction : public FunctionBase<doubl
         return gain;
     }
 
-    virtual void partition(const Interval<simsec, Hz>& i, const std::function<void (const Interval<simsec, Hz>&, const IFunction<double, Domain<simsec, Hz>> *)> f) const override {
-        throw cRuntimeError("Cannot partition");
-    }
-
     virtual bool isFinite(const Interval<simsec, Hz>& i) const override { return true; }
 
     virtual void printStructure(std::ostream& os, int level = 0) const override {
@@ -115,7 +111,7 @@ class INET_API SpaceAndFrequencyDependentAttenuationFunction : public FunctionBa
         m distance = m(sqrt(dx * dx + dy * dy + dz * dz));
         auto direction = Quaternion::rotationFromTo(Coord::X_AXIS, Coord(dx.get(), dy.get(), dz.get()));
         auto antennaLocalDirection = startOrientation.inverse() * direction;
-        double transmitterAntennaGain = distance == m(0) ? 1 : transmitterAntennaGainFunction->getValue(Point<Quaternion>(antennaLocalDirection));
+        double transmitterAntennaGain = distance == m(0) || transmitterAntennaGainFunction == nullptr ? 1 : transmitterAntennaGainFunction->getValue(Point<Quaternion>(antennaLocalDirection));
         double pathLoss = pathLossFunction->getValue(Point<mps, m, Hz>(propagationSpeed, distance, frequency));
         double obstacleLoss = obstacleLossFunction != nullptr ? obstacleLossFunction->getValue(Point<m, m, m, m, m, m, Hz>(startX, startY, startZ, x, y, z, frequency)) : 1;
         double gain = transmitterAntennaGain * pathLoss * obstacleLoss;
@@ -130,18 +126,25 @@ class INET_API SpaceAndFrequencyDependentAttenuationFunction : public FunctionBa
     virtual void partition(const Interval<m, m, m, simsec, Hz>& i, const std::function<void (const Interval<m, m, m, simsec, Hz>&, const IFunction<double, Domain<m, m, m, simsec, Hz>> *)> f) const override {
         const auto& lower = i.getLower();
         const auto& upper = i.getUpper();
-        if (std::get<0>(lower) == std::get<0>(upper) && std::get<1>(lower) == std::get<1>(upper) && std::get<2>(lower) == std::get<2>(upper) && (i.getLowerClosed() & 0b11100) == 0b11100 && (i.getUpperClosed() & 0b11100) == 0b11100)
-            throw cRuntimeError("Cannot partition");
+        if ((i.getFixed() & 0b11101) == 0b11101) {
+            auto lowerValue = getValue(lower);
+            auto upperValue = getValue(upper);
+            ASSERT(lowerValue == upperValue);
+            ConstantFunction<double, Domain<m, m, m, simsec, Hz>> g(lowerValue);
+            f(i, &g);
+        }
         else
-            throw cRuntimeError("TODO");
+            FunctionBase::partition(i, f);
     }
 
     virtual bool isFinite(const Interval<m, m, m, simsec, Hz>& i) const override { return true; }
 
     virtual void printStructure(std::ostream& os, int level = 0) const override {
         os << "(SpaceAndFrequencyDependentAttenuation\n" << std::string(level + 2, ' ');
-        transmitterAntennaGainFunction->printStructure(os, level + 2);
-        os << "\n" << std::string(level + 2, ' ');
+        if (transmitterAntennaGainFunction != nullptr) {
+            transmitterAntennaGainFunction->printStructure(os, level + 2);
+            os << "\n" << std::string(level + 2, ' ');
+        }
         pathLossFunction->printStructure(os, level + 2);
         os << "\n" << std::string(level + 2, ' ');
         obstacleLossFunction->printStructure(os, level + 2);
@@ -185,7 +188,7 @@ class INET_API SpaceDependentAttenuationFunction : public FunctionBase<double, D
         m distance = m(sqrt(dx * dx + dy * dy + dz * dz));
         auto direction = Quaternion::rotationFromTo(Coord::X_AXIS, Coord(dx.get(), dy.get(), dz.get()));
         auto antennaLocalDirection = startOrientation.inverse() * direction;
-        double transmitterAntennaGain = distance == m(0) ? 1 : transmitterAntennaGainFunction->getValue(Point<Quaternion>(antennaLocalDirection));
+        double transmitterAntennaGain = distance == m(0) || transmitterAntennaGainFunction == nullptr ? 1 : transmitterAntennaGainFunction->getValue(Point<Quaternion>(antennaLocalDirection));
         double pathLoss = pathLossFunction->getValue(Point<mps, m, Hz>(propagationSpeed, distance, frequency));
         double obstacleLoss = obstacleLossFunction != nullptr ? obstacleLossFunction->getValue(Point<m, m, m, m, m, m, Hz>(startX, startY, startZ, x, y, z, frequency)) : 1;
         double gain = transmitterAntennaGain * pathLoss * obstacleLoss;
@@ -200,7 +203,7 @@ class INET_API SpaceDependentAttenuationFunction : public FunctionBase<double, D
     virtual void partition(const Interval<m, m, m, simsec, Hz>& i, const std::function<void (const Interval<m, m, m, simsec, Hz>&, const IFunction<double, Domain<m, m, m, simsec, Hz>> *)> f) const override {
         const auto& lower = i.getLower();
         const auto& upper = i.getUpper();
-        if (std::get<0>(lower) == std::get<0>(upper) && std::get<1>(lower) == std::get<1>(upper) && std::get<2>(lower) == std::get<2>(upper) && (i.getLowerClosed() & 0b11100) == 0b11100 && (i.getUpperClosed() & 0b11100) == 0b11100) {
+        if ((i.getFixed() & 0b11100) == 0b11100) {
             auto lowerValue = getValue(lower);
             auto upperValue = getValue(upper);
             ASSERT(lowerValue == upperValue);
@@ -208,15 +211,17 @@ class INET_API SpaceDependentAttenuationFunction : public FunctionBase<double, D
             f(i, &g);
         }
         else
-            throw cRuntimeError("TODO");
+            FunctionBase::partition(i, f);
     }
 
     virtual bool isFinite(const Interval<m, m, m, simsec, Hz>& i) const override { return true; }
 
     virtual void printStructure(std::ostream& os, int level = 0) const override {
         os << "(SpaceDependentAttenuation\n" << std::string(level + 2, ' ');
-        transmitterAntennaGainFunction->printStructure(os, level + 2);
-        os << "\n" << std::string(level + 2, ' ');
+        if (transmitterAntennaGainFunction != nullptr) {
+            transmitterAntennaGainFunction->printStructure(os, level + 2);
+            os << "\n" << std::string(level + 2, ' ');
+        }
         pathLossFunction->printStructure(os, level + 2);
         os << "\n" << std::string(level + 2, ' ');
         obstacleLossFunction->printStructure(os, level + 2);
@@ -253,31 +258,31 @@ class INET_API BackgroundNoisePowerFunction : public FunctionBase<WpHz, Domain<m
     virtual void partition(const Interval<m, m, m, simsec, Hz>& i, const std::function<void (const Interval<m, m, m, simsec, Hz>&, const IFunction<WpHz, Domain<m, m, m, simsec, Hz>> *)> f) const override {
         const auto& lower = i.getLower();
         const auto& upper = i.getUpper();
-        if (std::get<0>(lower) == std::get<0>(upper) && std::get<1>(lower) == std::get<1>(upper) && std::get<2>(lower) == std::get<2>(upper) && (i.getLowerClosed() & 0b11100) == 0b11100 && (i.getUpperClosed() & 0b11100) == 0b11100) {
+        if ((i.getFixed() & 0b11100) == 0b11100) {
             Point<simsec, Hz> l1(std::get<3>(lower), std::get<4>(i.getLower()));
             Point<simsec, Hz> u1(std::get<3>(upper), std::get<4>(i.getUpper()));
             Interval<simsec, Hz> i1(l1, u1, i.getLowerClosed() & 0b11, i.getUpperClosed() & 0b11, i.getFixed() & 0b11);
-            powerFunction->partition(i1, [&] (const Interval<simsec, Hz>& i2, const IFunction<WpHz, Domain<simsec, Hz>> *g) {
+            powerFunction->partition(i1, [&] (const Interval<simsec, Hz>& i2, const IFunction<WpHz, Domain<simsec, Hz>> *f2) {
                 Interval<m, m, m, simsec, Hz> i3(
                     Point<m, m, m, simsec, Hz>(std::get<0>(lower), std::get<1>(lower), std::get<2>(lower), std::get<0>(i2.getLower()), std::get<1>(i2.getLower())),
                     Point<m, m, m, simsec, Hz>(std::get<0>(upper), std::get<1>(upper), std::get<2>(upper), std::get<0>(i2.getUpper()), std::get<1>(i2.getUpper())),
                     0b11100 | i2.getLowerClosed(),
                     0b11100 | i2.getUpperClosed(),
                     0b11100 | i2.getFixed());
-                if (auto cg = dynamic_cast<const ConstantFunction<WpHz, Domain<simsec, Hz>> *>(g)) {
-                    ConstantFunction<WpHz, Domain<m, m, m, simsec, Hz>> h(cg->getConstantValue());
-                    f(i3, &h);
+                if (auto f2c = dynamic_cast<const ConstantFunction<WpHz, Domain<simsec, Hz>> *>(f2)) {
+                    ConstantFunction<WpHz, Domain<m, m, m, simsec, Hz>> g(f2c->getConstantValue());
+                    f(i3, &g);
                 }
-                else if (auto lg = dynamic_cast<const UnilinearFunction<WpHz, Domain<simsec, Hz>> *>(g)) {
-                    UnilinearFunction<WpHz, Domain<m, m, m, simsec, Hz>> h(i3.getLower(), i3.getUpper(), lg->getValue(i2.getLower()), lg->getValue(i2.getUpper()), lg->getDimension() + 3);
-                    f(i3, &h);
+                else if (auto f2l = dynamic_cast<const UnilinearFunction<WpHz, Domain<simsec, Hz>> *>(f2)) {
+                    UnilinearFunction<WpHz, Domain<m, m, m, simsec, Hz>> g(i3.getLower(), i3.getUpper(), f2l->getValue(i2.getLower()), f2l->getValue(i2.getUpper()), f2l->getDimension() + 3);
+                    f(i3, &g);
                 }
                 else
                     throw cRuntimeError("TODO");
             });
         }
         else
-            throw cRuntimeError("TODO");
+            FunctionBase::partition(i, f);
     }
 
     virtual void printStructure(std::ostream& os, int level = 0) const override {
@@ -325,7 +330,7 @@ class INET_API PropagatedTransmissionPowerFunction : public FunctionBase<WpHz, D
     virtual void partition(const Interval<m, m, m, simsec, Hz>& i, const std::function<void (const Interval<m, m, m, simsec, Hz>&, const IFunction<WpHz, Domain<m, m, m, simsec, Hz>> *)> f) const override {
         const auto& lower = i.getLower();
         const auto& upper = i.getUpper();
-        if (std::get<0>(lower) == std::get<0>(upper) && std::get<1>(lower) == std::get<1>(upper) && std::get<2>(lower) == std::get<2>(upper) && (i.getLowerClosed() & 0b11100) == 0b11100 && (i.getUpperClosed() & 0b11100) == 0b11100) {
+        if ((i.getFixed() & 0b11100) == 0b11100) {
             m x = std::get<0>(lower);
             m y = std::get<1>(lower);
             m z = std::get<2>(lower);
@@ -340,27 +345,27 @@ class INET_API PropagatedTransmissionPowerFunction : public FunctionBase<WpHz, D
             Point<simsec, Hz> l1(std::get<3>(lower) - propagationTime, std::get<4>(i.getLower()));
             Point<simsec, Hz> u1(std::get<3>(upper) - propagationTime, std::get<4>(i.getUpper()));
             Interval<simsec, Hz> i1(l1, u1, i.getLowerClosed() & 0b11, i.getUpperClosed() & 0b11, i.getFixed() & 0b11);
-            transmissionPowerFunction->partition(i1, [&] (const Interval<simsec, Hz>& i2, const IFunction<WpHz, Domain<simsec, Hz>> *g) {
+            transmissionPowerFunction->partition(i1, [&] (const Interval<simsec, Hz>& i2, const IFunction<WpHz, Domain<simsec, Hz>> *f2) {
                 Interval<m, m, m, simsec, Hz> i3(
                     Point<m, m, m, simsec, Hz>(std::get<0>(lower), std::get<1>(lower), std::get<2>(lower), std::get<0>(i2.getLower()) + propagationTime, std::get<1>(i2.getLower())),
                     Point<m, m, m, simsec, Hz>(std::get<0>(upper), std::get<1>(upper), std::get<2>(upper), std::get<0>(i2.getUpper()) + propagationTime, std::get<1>(i2.getUpper())),
                     0b11100 | i2.getLowerClosed(),
                     0b11100 | i2.getUpperClosed(),
                     0b11100 | i2.getFixed());
-                if (auto cg = dynamic_cast<const ConstantFunction<WpHz, Domain<simsec, Hz>> *>(g)) {
-                    ConstantFunction<WpHz, Domain<m, m, m, simsec, Hz>> h(cg->getConstantValue());
-                    f(i3, &h);
+                if (auto f2c = dynamic_cast<const ConstantFunction<WpHz, Domain<simsec, Hz>> *>(f2)) {
+                    ConstantFunction<WpHz, Domain<m, m, m, simsec, Hz>> g(f2c->getConstantValue());
+                    f(i3, &g);
                 }
-                else if (auto lg = dynamic_cast<const UnilinearFunction<WpHz, Domain<simsec, Hz>> *>(g)) {
-                    UnilinearFunction<WpHz, Domain<m, m, m, simsec, Hz>> h(i3.getLower(), i3.getUpper(), lg->getValue(i2.getLower()), lg->getValue(i2.getUpper()), lg->getDimension() + 3);
-                    f(i3, &h);
+                else if (auto f2l = dynamic_cast<const UnilinearFunction<WpHz, Domain<simsec, Hz>> *>(f2)) {
+                    UnilinearFunction<WpHz, Domain<m, m, m, simsec, Hz>> g(i3.getLower(), i3.getUpper(), f2l->getValue(i2.getLower()), f2l->getValue(i2.getUpper()), f2l->getDimension() + 3);
+                    f(i3, &g);
                 }
                 else
                     throw cRuntimeError("TODO");
             });
         }
         else
-            throw cRuntimeError("TODO");
+            FunctionBase::partition(i, f);
     }
 
     virtual void printStructure(std::ostream& os, int level = 0) const override {
@@ -388,10 +393,6 @@ class INET_API PathLossFunction : public FunctionBase<double, Domain<mps, m, Hz>
         return pathLoss->computePathLoss(propagationSpeed, frequency, distance);
     }
 
-    virtual void partition(const Interval<mps, m, Hz>& i, const std::function<void (const Interval<mps, m, Hz>&, const IFunction<double, Domain<mps, m, Hz>> *)> f) const override {
-        throw cRuntimeError("TODO");
-    }
-
     virtual void printStructure(std::ostream& os, int level = 0) const override { os << "(" << *pathLoss << ")"; }
 };
 
@@ -411,10 +412,6 @@ class INET_API ObstacleLossFunction : public FunctionBase<double, Domain<m, m, m
         Coord receptionPosition(std::get<3>(p).get(), std::get<4>(p).get(), std::get<5>(p).get());
         Hz frequency = std::get<6>(p);
         return obstacleLoss->computeObstacleLoss(frequency, transmissionPosition, receptionPosition);
-    }
-
-    virtual void partition(const Interval<m, m, m, m, m, m, Hz>& i, const std::function<void (const Interval<m, m, m, m, m, m, Hz>&, const IFunction<double, Domain<m, m, m, m, m, m, Hz>> *)> f) const override {
-        throw cRuntimeError("TODO");
     }
 
     virtual void printStructure(std::ostream& os, int level = 0) const override { os << "(" << *obstacleLoss << ")"; }
@@ -443,6 +440,9 @@ class INET_API AntennaGainFunction : public IFunction<double, Domain<Quaternion>
 
     virtual bool isFinite() const override { throw cRuntimeError("TODO"); }
     virtual bool isFinite(const Interval<Quaternion>& i) const override { throw cRuntimeError("TODO"); }
+
+    virtual bool isNonZero() const override { throw cRuntimeError("TODO"); }
+    virtual bool isNonZero(const Interval<Quaternion>& i) const override { throw cRuntimeError("TODO"); }
 
     virtual double getMin() const override { throw cRuntimeError("TODO"); }
     virtual double getMin(const Interval<Quaternion>& i) const override { throw cRuntimeError("TODO"); }

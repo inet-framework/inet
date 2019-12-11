@@ -61,10 +61,14 @@ class INET_API ScenarioManager : public cSimpleModule
 
   protected:
     // utilities
-    virtual cModule *getRequiredModule(const cXMLElement *node, const char *attr);
-    virtual cGate *getRequiredGate(const cXMLElement *node, const char *modattr, const char *gateattr);
-    void createConnection(const cXMLElementList& paramList, cChannelType *channelType,
-            cGate *srcGate, cGate *destGate);
+    typedef std::pair<cGate*,cGate*> GatePair;
+    cModule *getRequiredModule(const char *path);
+    cModule *getRequiredModule(const cXMLElement *node, const char *attr);
+    cGate *findMandatorySingleGateTowards(cModule *srcModule, cModule *destModule);
+    GatePair getConnection(const cXMLElement *node);
+    void setChannelParam(cGate *srcGate, const char *name, const char *value);
+    void disconnect(cGate *srcGate);
+    void createConnection(const cXMLElementList& paramList, cChannelType *channelType, cGate *srcGate, cGate *destGate);
 
     // dispatch to command processors
     virtual void processCommand(const cXMLElement *node);

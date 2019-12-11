@@ -179,7 +179,7 @@ Ptr<const IFunction<WpHz, Domain<simsec, Hz>>> Ieee802154UwbIrTransmitter::gener
     }
     auto timeFunction = makeShared<OneDimensionalInterpolatedFunction<WpHz, simsec>>(data, &LinearInterpolator<simsec, WpHz>::singleton);
     auto frequencyFunction = makeShared<OneDimensionalBoxcarFunction<double, Hz>>(GHz(3.1), GHz(10.6), 1);
-    return makeShared<OrthogonalCombinatorFunction<WpHz, simsec, Hz>>(timeFunction, frequencyFunction);
+    return makeShared<CombinedFunction<WpHz, simsec, Hz>>(timeFunction, frequencyFunction);
 }
 
 const ITransmission *Ieee802154UwbIrTransmitter::createTransmission(const IRadio *transmitter, const Packet *packet, const simtime_t startTime) const

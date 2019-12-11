@@ -39,11 +39,11 @@ class INET_API PacketMultiplexer : public PassivePacketSinkBase, public IActiveP
   public:
     virtual IPassivePacketSink *getConsumer(cGate *gate) override { return consumer; }
 
-    virtual bool supportsPopPacket(cGate *gate) override { return false; }
-    virtual bool supportsPushPacket(cGate *gate) override { return true; }
+    virtual bool supportsPopPacket(cGate *gate) const override { return false; }
+    virtual bool supportsPushPacket(cGate *gate) const override { return true; }
 
-    virtual bool canPushSomePacket(cGate *gate) override { return consumer->canPushSomePacket(outputGate); }
-    virtual bool canPushPacket(Packet *packet, cGate *gate) override { return consumer->canPushPacket(packet, gate); }
+    virtual bool canPushSomePacket(cGate *gate) const override { return consumer->canPushSomePacket(outputGate); }
+    virtual bool canPushPacket(Packet *packet, cGate *gate) const override { return consumer->canPushPacket(packet, gate); }
     virtual void pushPacket(Packet *packet, cGate *gate) override;
 
     virtual void handleCanPushPacket(cGate *gate) override;

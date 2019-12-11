@@ -1,3 +1,5 @@
+package inet.test.moduletest.lib;
+
 import inet.node.ethernet.EtherSwitch;
 import ned.DatarateChannel;
 import inet.node.inet.StandardHost;

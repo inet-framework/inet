@@ -34,10 +34,10 @@ void MarkovClassifier::initialize(int stage)
     PacketClassifierBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         for (int i = 0; i < gateSize("out"); i++) {
-            auto output = getConnectedModule<IActivePacketSink>(outputGates[i]);
+            auto output = findConnectedModule<IActivePacketSink>(outputGates[i]);
             collectors.push_back(output);
         }
-        provider = getConnectedModule<IPassivePacketSource>(inputGate);
+        provider = findConnectedModule<IPassivePacketSource>(inputGate);
         state = par("initialState");
         int numStates = gateSize("out");
         cStringTokenizer transitionProbabilitiesTokenizer(par("transitionProbabilities"));
@@ -56,10 +56,13 @@ void MarkovClassifier::initialize(int stage)
         WATCH(state);
     }
     else if (stage == INITSTAGE_QUEUEING) {
-        for (auto outputGate : outputGates)
-            checkPopPacketSupport(outputGate);
-        checkPopPacketSupport(inputGate);
-        collectors[state]->handleCanPopPacket(outputGates[state]);
+        for (int i = 0; i < (int)outputGates.size(); i++)
+            if (collectors[i] != nullptr)
+                checkPopPacketSupport(outputGates[i]);
+        if (provider != nullptr)
+            checkPopPacketSupport(inputGate);
+        if (collectors[state] != nullptr)
+            collectors[state]->handleCanPopPacket(outputGates[state]);
         scheduleWaitTimer();
     }
 }
@@ -77,7 +80,8 @@ void MarkovClassifier::handleMessage(cMessage *message)
                 break;
             }
         }
-        collectors[state]->handleCanPopPacket(outputGates[state]);
+        if (collectors[state] != nullptr)
+            collectors[state]->handleCanPopPacket(outputGates[state]);
         scheduleWaitTimer();
     }
     else
@@ -94,12 +98,12 @@ void MarkovClassifier::scheduleWaitTimer()
     scheduleAt(simTime() + waitIntervals[state].doubleValue(this), waitTimer);
 }
 
-bool MarkovClassifier::canPopSomePacket(cGate *gate)
+bool MarkovClassifier::canPopSomePacket(cGate *gate) const
 {
     return gate->getIndex() == state;
 }
 
-Packet *MarkovClassifier::canPopPacket(cGate *gate)
+Packet *MarkovClassifier::canPopPacket(cGate *gate) const
 {
     return canPopSomePacket(gate) ? provider->canPopPacket(inputGate->getPathStartGate()) : nullptr;
 }
@@ -120,7 +124,8 @@ Packet *MarkovClassifier::popPacket(cGate *gate)
 void MarkovClassifier::handleCanPopPacket(cGate *gate)
 {
     Enter_Method("handleCanPopPacket");
-    collectors[state]->handleCanPopPacket(outputGates[state]);
+    if (collectors[state] != nullptr)
+        collectors[state]->handleCanPopPacket(outputGates[state]);
 }
 
 } // namespace queueing

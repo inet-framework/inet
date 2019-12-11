@@ -85,7 +85,10 @@ const ChunkTemporarySharedPtr *Packet::getBack() const
 
 void Packet::forEachChild(cVisitor *v)
 {
+    cPacket::forEachChild(v);
     v->visit(const_cast<Chunk *>(content.get()));
+    for (int i = 0; i < tags.getNumTags(); i++)
+        v->visit(tags.getTag(i));
 }
 
 void Packet::setFrontOffset(b offset)

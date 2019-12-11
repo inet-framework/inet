@@ -59,14 +59,14 @@ class INET_API PacketGate : public PacketProcessorBase, public IPacketSource, pu
     virtual IPassivePacketSink *getConsumer(cGate *gate) override { return this; }
     virtual IPassivePacketSource *getProvider(cGate *gate) override { return this; }
 
-    virtual bool supportsPushPacket(cGate *gate) override { return true; }
-    virtual bool canPushSomePacket(cGate *gate) override;
-    virtual bool canPushPacket(Packet *packet, cGate *gate) override;
+    virtual bool supportsPushPacket(cGate *gate) const override { return true; }
+    virtual bool canPushSomePacket(cGate *gate) const override;
+    virtual bool canPushPacket(Packet *packet, cGate *gate) const override;
     virtual void pushPacket(Packet *packet, cGate *gate) override;
 
-    virtual bool supportsPopPacket(cGate *gate) override { return true; }
-    virtual bool canPopSomePacket(cGate *gate) override;
-    virtual Packet *canPopPacket(cGate *gate) override;
+    virtual bool supportsPopPacket(cGate *gate) const override { return true; }
+    virtual bool canPopSomePacket(cGate *gate) const override;
+    virtual Packet *canPopPacket(cGate *gate) const override;
     virtual Packet *popPacket(cGate *gate) override;
 
     virtual void handleCanPushPacket(cGate *gate) override;

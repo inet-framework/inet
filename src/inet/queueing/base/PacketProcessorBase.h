@@ -34,10 +34,10 @@ class INET_API PacketProcessorBase : public PacketQueueingElementBase, public St
 
   protected:
     virtual void initialize(int stage) override;
-    virtual void updateDisplayString();
+    virtual void updateDisplayString() const;
 
   public:
-    virtual const char *resolveDirective(char directive) override;
+    virtual const char *resolveDirective(char directive) const override;
 };
 
 } // namespace queueing

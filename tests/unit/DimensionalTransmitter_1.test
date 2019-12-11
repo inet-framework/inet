@@ -16,8 +16,9 @@ class DimensionalTransmitterTest : public DimensionalTransmitterBase
 {
   public:
   	DimensionalTransmitterTest() {
+        gainFunctionCacheLimit = 0;
         timeGainsNormalization = "";
-        frequencyGainsNormalization = "";
+        frequencyGainsNormalization = "integral";
     }
 
     void printValue(const Ptr<const IFunction<double, Domain<simsec, Hz>>>& function, simtime_t time) {

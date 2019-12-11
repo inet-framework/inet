@@ -82,6 +82,16 @@ class INET_API IFunction : public cObject,
     virtual bool isFinite(const typename D::I& i) const = 0;
 
     /**
+     * Returns true if the function value is non-zero in the whole domain.
+     */
+    virtual bool isNonZero() const = 0;
+
+    /**
+     * Returns true if the function value is non-zero in the given domain.
+     */
+    virtual bool isNonZero(const typename D::I& i) const = 0;
+
+    /**
      * Returns the minimum value for the whole domain.
      */
     virtual R getMin() const = 0;

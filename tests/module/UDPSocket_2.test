@@ -44,7 +44,7 @@ simple TestApp like IApp
 %inifile: omnetpp.ini
 [General]
 ned-path = .;../../../../src;../../lib
-network = SimpleTestNetwork
+network = inet.test.moduletest.lib.SimpleTestNetwork
 cmdenv-express-mode = false
 cmdenv-event-banner-details = true
 

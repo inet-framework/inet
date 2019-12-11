@@ -89,6 +89,7 @@ void TestApp::handleMessage(cMessage *msg)
 
 %file: TestNetwork.ned
 
+import inet.test.moduletest.lib.*;
 import inet.networklayer.diffserv.BehaviorAggregateClassifier;
 
 network TestNetwork
@@ -105,7 +106,7 @@ network TestNetwork
 }
 
 
-%inifile: {}.ini
+%inifile: omnetpp.ini
 ned-path = .;../../../../src;../../lib
 sim-time-limit=100s
 cmdenv-express-mode = true

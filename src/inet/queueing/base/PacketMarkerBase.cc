@@ -56,7 +56,7 @@ void PacketMarkerBase::pushPacket(Packet *packet, cGate *gate)
     updateDisplayString();
 }
 
-bool PacketMarkerBase::canPopSomePacket(cGate *gate)
+bool PacketMarkerBase::canPopSomePacket(cGate *gate) const
 {
     return provider->canPopPacket(inputGate->getPathStartGate());
 }

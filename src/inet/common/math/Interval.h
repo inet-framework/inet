@@ -50,14 +50,18 @@ class INET_API Interval
         check = true;
         std::initializer_list<bool> l2{ check &= (fixed & (b >> IS) ? lowerClosed & upperClosed & (b >> IS) && std::get<IS>(lower) == std::get<IS>(upper) : true) ... }; (void)l2;
         if (!check)
-            throw cRuntimeError("Invalid fixed argument");
-        auto mask = (1 << std::tuple_size<std::tuple<T ...>>::value) - 1;
-        if (lowerClosed != (lowerClosed & mask))
+            throw cRuntimeError("Invalid fixed argument, interval = %s, fixed = %d", str().c_str(), fixed);
+        auto m = (1 << std::tuple_size<std::tuple<T ...>>::value) - 1;
+        if (lowerClosed != (lowerClosed & m))
             throw cRuntimeError("Invalid lowerClosed argument");
-        if (upperClosed != (upperClosed & mask))
+        if (upperClosed != (upperClosed & m))
             throw cRuntimeError("Invalid upperClosed argument");
-        if (fixed != (fixed & mask))
+        if (fixed != (fixed & m))
             throw cRuntimeError("Invalid fixed argument");
+        if (fixed != (lowerClosed & fixed))
+            throw cRuntimeError("Invalid combination of fixed and lowerClosed arguments");
+        if (fixed != (upperClosed & fixed))
+            throw cRuntimeError("Invalid combination of fixed and upperClosed arguments");
     }
 
     template<size_t ... IS>
@@ -117,12 +121,26 @@ class INET_API Interval
     unsigned char getUpperClosed() const { return upperClosed; }
     unsigned char getFixed() const { return fixed; }
 
-    bool contains(const Point<T ...>& p) const {
-        return containsImpl(p, index_sequence_for<T ...>{});
+    template<typename X, int DIMENSION>
+    Interval<X> get() const {
+        unsigned char s = std::tuple_size<std::tuple<T ...>>::value - DIMENSION - 1;
+        return Interval<X>(std::get<DIMENSION>(lower), std::get<DIMENSION>(upper), (lowerClosed >> s) & 0b1, (upperClosed >> s) & 0b1, (fixed >> s) & 0b1);
     }
 
-    Interval<T ...> intersect(const Interval<T ...>& o) const {
-        return intersectImpl(o, index_sequence_for<T ...>{});
+    template<typename X, int DIMENSION>
+    void set(const Interval<X>& ix) {
+        unsigned char s = std::tuple_size<std::tuple<T ...>>::value - DIMENSION - 1;
+        unsigned char b = 1 << std::tuple_size<std::tuple<T ...>>::value >> 1;
+        auto m = (b >> DIMENSION);
+        std::get<DIMENSION>(lower) = std::get<0>(ix.getLower());
+        std::get<DIMENSION>(upper) = std::get<0>(ix.getUpper());
+        lowerClosed = (lowerClosed & ~m) | (ix.getLowerClosed() << s);
+        upperClosed = (upperClosed & ~m) | (ix.getUpperClosed() << s);
+        fixed = (fixed & ~m) | (ix.getFixed() << s);
+    }
+
+    bool contains(const Point<T ...>& p) const {
+        return containsImpl(p, index_sequence_for<T ...>{});
     }
 
     /// Returns the volume in the dimensions denoted by the 1 bits of dims
@@ -133,6 +151,38 @@ class INET_API Interval
     /// Returns true iff getVolume() == 0
     bool isEmpty() const {
         return isEmptyImpl(index_sequence_for<T ...>{});
+    }
+
+    Interval<T ...> getIntersected(const Interval<T ...>& o) const {
+        return intersectImpl(o, index_sequence_for<T ...>{});
+    }
+
+    Interval<T ...> getShifted(const Point<T ...>& p) const {
+        return Interval<T ...>(lower + p, upper + p, lowerClosed, upperClosed, fixed);
+    }
+
+    template<typename X, int DIMENSION>
+    Interval<T ...> getReplaced(Interval<X> ix) const {
+        Interval<T ...> i = *this;
+        i.template set<X, DIMENSION>(ix);
+        return i;
+    }
+
+    template<typename X, int DIMENSION>
+    Interval<T ...> getFixed(X x) const {
+        unsigned char b = 1 << std::tuple_size<std::tuple<T ...>>::value >> 1;
+        auto m = (b >> DIMENSION);
+        Point<T ...> pl = lower;
+        Point<T ...> pu = upper;
+        std::get<DIMENSION>(pl) = x;
+        std::get<DIMENSION>(pu) = x;
+        return Interval<T ...>(pl, pu, lowerClosed | m, upperClosed | m, fixed | m);
+    }
+
+    std::string str() const {
+        std::stringstream os;
+        os << *this;
+        return os.str();
     }
 };
 

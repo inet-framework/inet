@@ -72,7 +72,11 @@ const INoise *IsotropicDimensionalBackgroundNoise::computeNoise(const IListening
     const Ptr<const IFunction<WpHz, Domain<simsec, Hz>>>& powerFunction = makeShared<ConstantFunction<WpHz, Domain<simsec, Hz>>>(noisePowerSpectralDensity);
     const simtime_t startTime = listening->getStartTime();
     const simtime_t endTime = listening->getEndTime();
+#ifndef NDEBUG
     return new DimensionalNoise(startTime, endTime, centerFrequency, bandwidth, makeFirstQuadrantLimitedFunction(powerFunction));
+#else
+    return new DimensionalNoise(startTime, endTime, centerFrequency, bandwidth, powerFunction);
+#endif
 }
 
 } // namespace physicallayer

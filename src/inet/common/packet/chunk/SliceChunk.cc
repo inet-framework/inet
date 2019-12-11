@@ -51,6 +51,7 @@ SliceChunk::SliceChunk(const Ptr<Chunk>& chunk, b offset, b length) :
 
 void SliceChunk::forEachChild(cVisitor *v)
 {
+    Chunk::forEachChild(v);
     v->visit(const_cast<Chunk *>(chunk.get()));
 }
 

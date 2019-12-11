@@ -47,12 +47,11 @@ class INET_API InterfaceTableVisualizerBase : public VisualizerBase, public cLis
     class DirectiveResolver : public StringFormat::IDirectiveResolver {
       protected:
         const InterfaceEntry *interfaceEntry = nullptr;
-        std::string result;
 
       public:
         DirectiveResolver(const InterfaceEntry *interfaceEntry) : interfaceEntry(interfaceEntry) { }
 
-        virtual const char *resolveDirective(char directive) override;
+        virtual const char *resolveDirective(char directive) const override;
     };
 
   protected:

@@ -60,7 +60,7 @@ simple PacketQueue extends PacketQueueBase like IPacketQueue
         string dropperClass = default(""); // determines which packets are dropped when the queue is overloaded, packets are not dropped by default; the parameter must be the name of a C++ class which implements the IPacketDropperFunction C++ interface and is registered via Register_Class
         string comparatorClass = default(""); // determines the order of packets in the queue, insertion order by default; the parameter must be the name of a C++ class which implements the IPacketComparatorFunction C++ interface and is registered via Register_Class
         string bufferModule = default(""); // relative module path to the IPacketBuffer module used by this queue, implicit buffer by default
-        displayStringTextFormat = default("contains %p pk (%l)\npushed %u popped %o dropped %d");
+        displayStringTextFormat = default("contains %p pk (%l) pushed %u\npopped %o removed %r dropped %d");
         @class(PacketQueue);
         @signal[packetPushed](type=inet::Packet);
         @signal[packetPopped](type=inet::Packet);
