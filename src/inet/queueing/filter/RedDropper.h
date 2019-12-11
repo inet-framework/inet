@@ -18,6 +18,7 @@
 #ifndef __INET_REDDROPPER_H
 #define __INET_REDDROPPER_H
 
+#include "inet/common/packet/Packet.h"
 #include "inet/queueing/base/PacketFilterBase.h"
 #include "inet/queueing/contract/IPacketCollection.h"
 
@@ -30,8 +31,6 @@ namespace queueing {
 class INET_API RedDropper : public PacketFilterBase
 {
   protected:
-    IPacketCollection *collection = nullptr;
-
     double wq = 0.0;
     double minth = NaN;
     double maxth = NaN;
@@ -42,8 +41,17 @@ class INET_API RedDropper : public PacketFilterBase
     double avg = 0.0;
     simtime_t q_time;
 
+    int packetCapacity = -1;
+    bool useEcn = false;
+    bool markNext = false;
+
+    IPacketCollection *collection = nullptr;
+
+    enum RedResult { QUEUE_FULL, RANDOMLY_ABOVE_LIMIT, RANDOMLY_BELOW_LIMIT, ABOVE_MAX_LIMIT, BELOW_MIN_LIMIT };
+
   protected:
     virtual void initialize(int stage) override;
+    virtual RedResult doRandomEarlyDetection(Packet *packet);
     virtual bool matchesPacket(Packet *packet) override;
     virtual void pushOrSendPacket(Packet *packet, cGate *gate, IPassivePacketSink *consumer) override;
 };

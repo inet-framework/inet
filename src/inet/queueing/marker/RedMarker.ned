@@ -26,9 +26,7 @@ simple RedMarker extends RedDropper
 {
     parameters:
         @class(RedMarker);
-        int packetCapacity = default(120);
-        double mark = default(0.0);
-        @signal[markingProb](type=double);
-        @statistic[marked](title="marking Prob"; source="markingProb"; record=mean,vector(count); interpolationmode=none);
+        useEcn = true;
+        packetCapacity = default(120);
 }
 
