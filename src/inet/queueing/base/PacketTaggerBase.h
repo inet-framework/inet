@@ -27,6 +27,7 @@ class INET_API PacketTaggerBase : public PacketMarkerBase
 {
   protected:
     int dscp = -1;
+    int ecn = -1;
     int tos = -1;
     int userPriority = -1;
     int interfaceId = -1;
