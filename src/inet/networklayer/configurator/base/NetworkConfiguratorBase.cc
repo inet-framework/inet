@@ -110,18 +110,18 @@ void NetworkConfiguratorBase::extractTopology(Topology& topology)
     }
 
     // extract links and interfaces
-    std::set<InterfaceEntry *> interfacesSeen;
+    std::map<int, InterfaceEntry *> interfacesSeen;
     for (int i = 0; i < topology.getNumNodes(); i++) {
         Node *node = (Node *)topology.getNode(i);
         IInterfaceTable *interfaceTable = node->interfaceTable;
         if (interfaceTable) {
             for (int j = 0; j < interfaceTable->getNumInterfaces(); j++) {
                 InterfaceEntry *interfaceEntry = interfaceTable->getInterface(j);
-                if (!interfaceEntry->isLoopback() && interfacesSeen.count(interfaceEntry) == 0) {
+                if (!interfaceEntry->isLoopback() && interfacesSeen.find(interfaceEntry->getId()) == interfacesSeen.end()) {
                     if (isBridgeNode(node))
                         createInterfaceInfo(topology, node, nullptr, interfaceEntry);
                     else {
-                        interfacesSeen.insert(interfaceEntry);
+                        interfacesSeen[interfaceEntry->getId()] = interfaceEntry;
                         // create a new network link
                         LinkInfo *linkInfo = new LinkInfo();
                         linkInfo->networkId = node->getNetworkId();
@@ -199,7 +199,7 @@ void NetworkConfiguratorBase::extractTopology(Topology& topology)
         linkInfo->gatewayInterfaceInfo = determineGatewayForLink(linkInfo);
 }
 
-void NetworkConfiguratorBase::extractWiredNeighbors(Topology& topology, Topology::LinkOut *linkOut, LinkInfo *linkInfo, std::set<InterfaceEntry *>& interfacesSeen, std::vector<Node *>& deviceNodesVisited)
+void NetworkConfiguratorBase::extractWiredNeighbors(Topology& topology, Topology::LinkOut *linkOut, LinkInfo *linkInfo, std::map<int, InterfaceEntry *>& interfacesSeen, std::vector<Node *>& deviceNodesVisited)
 {
     Node *node = (Node *)linkOut->getRemoteNode();
     int inputGateId = linkOut->getRemoteGateId();
@@ -209,10 +209,10 @@ void NetworkConfiguratorBase::extractWiredNeighbors(Topology& topology, Topology
         if (!interfaceEntry) {
             // no such interface (node is probably down); we should probably get the information from our (future) internal database
         }
-        else if (interfacesSeen.count(interfaceEntry) == 0) {
+        else if (interfacesSeen.find(interfaceEntry->getId()) == interfacesSeen.end()) {
             InterfaceInfo *neighborInterfaceInfo = createInterfaceInfo(topology, node, linkInfo, interfaceEntry);
             linkInfo->interfaceInfos.push_back(neighborInterfaceInfo);
-            interfacesSeen.insert(interfaceEntry);
+            interfacesSeen[interfaceEntry->getId()] = interfaceEntry;
         }
     }
     else {
@@ -221,7 +221,7 @@ void NetworkConfiguratorBase::extractWiredNeighbors(Topology& topology, Topology
     }
 }
 
-void NetworkConfiguratorBase::extractWirelessNeighbors(Topology& topology, const char *wirelessId, LinkInfo *linkInfo, std::set<InterfaceEntry *>& interfacesSeen, std::vector<Node *>& deviceNodesVisited)
+void NetworkConfiguratorBase::extractWirelessNeighbors(Topology& topology, const char *wirelessId, LinkInfo *linkInfo, std::map<int, InterfaceEntry *>& interfacesSeen, std::vector<Node *>& deviceNodesVisited)
 {
     for (int nodeIndex = 0; nodeIndex < topology.getNumNodes(); nodeIndex++) {
         Node *node = (Node *)topology.getNode(nodeIndex);
@@ -229,12 +229,12 @@ void NetworkConfiguratorBase::extractWirelessNeighbors(Topology& topology, const
         if (interfaceTable) {
             for (int j = 0; j < interfaceTable->getNumInterfaces(); j++) {
                 InterfaceEntry *interfaceEntry = interfaceTable->getInterface(j);
-                if (!interfaceEntry->isLoopback() && interfacesSeen.count(interfaceEntry) == 0 && isWirelessInterface(interfaceEntry)) {
+                if (!interfaceEntry->isLoopback() && interfacesSeen.find(interfaceEntry->getId()) == interfacesSeen.end() && isWirelessInterface(interfaceEntry)) {
                     if (getWirelessId(interfaceEntry) == wirelessId) {
                         if (!isBridgeNode(node)) {
                             InterfaceInfo *interfaceInfo = createInterfaceInfo(topology, node, linkInfo, interfaceEntry);
                             linkInfo->interfaceInfos.push_back(interfaceInfo);
-                            interfacesSeen.insert(interfaceEntry);
+                            interfacesSeen[interfaceEntry->getId()] = interfaceEntry;
                         }
                         else {
                             if (!contains(deviceNodesVisited, node))
@@ -247,7 +247,7 @@ void NetworkConfiguratorBase::extractWirelessNeighbors(Topology& topology, const
     }
 }
 
-void NetworkConfiguratorBase::extractDeviceNeighbors(Topology& topology, Node *node, LinkInfo *linkInfo, std::set<InterfaceEntry *>& interfacesSeen, std::vector<Node *>& deviceNodesVisited)
+void NetworkConfiguratorBase::extractDeviceNeighbors(Topology& topology, Node *node, LinkInfo *linkInfo, std::map<int, InterfaceEntry *>& interfacesSeen, std::vector<Node *>& deviceNodesVisited)
 {
     deviceNodesVisited.push_back(node);
     IInterfaceTable *interfaceTable = node->interfaceTable;
@@ -255,7 +255,7 @@ void NetworkConfiguratorBase::extractDeviceNeighbors(Topology& topology, Node *n
         // switch and access point
         for (int i = 0; i < interfaceTable->getNumInterfaces(); i++) {
             InterfaceEntry *interfaceEntry = interfaceTable->getInterface(i);
-            if (!interfaceEntry->isLoopback() && interfacesSeen.count(interfaceEntry) == 0) {
+            if (!interfaceEntry->isLoopback() && interfacesSeen.find(interfaceEntry->getId()) == interfacesSeen.end()) {
                 if (isWirelessInterface(interfaceEntry))
                     extractWirelessNeighbors(topology, getWirelessId(interfaceEntry).c_str(), linkInfo, interfacesSeen, deviceNodesVisited);
                 else {
@@ -576,7 +576,7 @@ NetworkConfiguratorBase::InterfaceInfo *NetworkConfiguratorBase::createInterface
 {
     InterfaceInfo *interfaceInfo = new InterfaceInfo(node, linkInfo, ie);
     node->interfaceInfos.push_back(interfaceInfo);
-    topology.interfaceInfos[ie] = interfaceInfo;
+    topology.interfaceInfos[ie->getId()] = interfaceInfo;
     return interfaceInfo;
 }
 

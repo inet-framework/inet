@@ -157,7 +157,7 @@ void Ipv4NetworkConfigurator::configureAllInterfaces()
 void Ipv4NetworkConfigurator::configureInterface(InterfaceEntry *interfaceEntry)
 {
     ensureConfigurationComputed(topology);
-    auto it = topology.interfaceInfos.find(interfaceEntry);
+    auto it = topology.interfaceInfos.find(interfaceEntry->getId());
     if (it != topology.interfaceInfos.end()) {
         InterfaceInfo *interfaceInfo = static_cast<InterfaceInfo *>(it->second);
         if (interfaceInfo->configure)
@@ -624,7 +624,7 @@ Ipv4NetworkConfigurator::InterfaceInfo *Ipv4NetworkConfigurator::createInterface
         }
     }
     node->interfaceInfos.push_back(interfaceInfo);
-    topology.interfaceInfos[ie] = interfaceInfo;
+    topology.interfaceInfos[ie->getId()] = interfaceInfo;
     return interfaceInfo;
 }
 
@@ -1796,7 +1796,7 @@ void Ipv4NetworkConfigurator::optimizeRoutes(std::vector<Ipv4Route *>& originalR
 
 bool Ipv4NetworkConfigurator::getInterfaceIpv4Address(L3Address& ret, InterfaceEntry *interfaceEntry, bool netmask)
 {
-    auto it = topology.interfaceInfos.find(interfaceEntry);
+    auto it = topology.interfaceInfos.find(interfaceEntry->getId());
     if (it == topology.interfaceInfos.end())
         return false;
     else {

@@ -116,7 +116,7 @@ class INET_API NetworkConfiguratorBase : public cSimpleModule, public L3AddressR
     {
       public:
         std::vector<LinkInfo *> linkInfos;    // all links in the network
-        std::map<InterfaceEntry *, InterfaceInfo *> interfaceInfos;    // all interfaces in the network
+        std::map<int, InterfaceInfo *> interfaceInfos;    // all interfaces in the network
 
       public:
         virtual ~Topology() { for (auto & linkInfo : linkInfos) delete linkInfo; }
@@ -174,9 +174,9 @@ class INET_API NetworkConfiguratorBase : public cSimpleModule, public L3AddressR
     virtual void extractTopology(Topology& topology);
 
     // helper functions
-    virtual void extractWiredNeighbors(Topology& topology, Topology::LinkOut *linkOut, LinkInfo *linkInfo, std::set<InterfaceEntry *>& interfacesSeen, std::vector<Node *>& nodesVisited);
-    virtual void extractWirelessNeighbors(Topology& topology, const char *wirelessId, LinkInfo *linkInfo, std::set<InterfaceEntry *>& interfacesSeen, std::vector<Node *>& nodesVisited);
-    virtual void extractDeviceNeighbors(Topology& topology, Node *node, LinkInfo *linkInfo, std::set<InterfaceEntry *>& interfacesSeen, std::vector<Node *>& deviceNodesVisited);
+    virtual void extractWiredNeighbors(Topology& topology, Topology::LinkOut *linkOut, LinkInfo *linkInfo, std::map<int, InterfaceEntry *>& interfacesSeen, std::vector<Node *>& nodesVisited);
+    virtual void extractWirelessNeighbors(Topology& topology, const char *wirelessId, LinkInfo *linkInfo, std::map<int, InterfaceEntry *>& interfacesSeen, std::vector<Node *>& nodesVisited);
+    virtual void extractDeviceNeighbors(Topology& topology, Node *node, LinkInfo *linkInfo, std::map<int, InterfaceEntry *>& interfacesSeen, std::vector<Node *>& deviceNodesVisited);
     virtual InterfaceInfo *determineGatewayForLink(LinkInfo *linkInfo);
     virtual double computeNodeWeight(Node *node, const char *metric, cXMLElement *parameters);
     virtual double computeLinkWeight(Link *link, const char *metric, cXMLElement *parameters);
