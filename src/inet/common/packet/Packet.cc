@@ -310,8 +310,9 @@ const Ptr<Chunk> Packet::removeAtBack(b length, int flags)
 const Ptr<Chunk> Packet::removeAll()
 {
     const auto& oldContent = content;
+    const auto result = makeExclusivelyOwnedMutableChunk(oldContent);
     eraseAll();
-    return makeExclusivelyOwnedMutableChunk(oldContent);
+    return result;
 }
 
 //(inet::Packet)UdpBasicAppData-0 (5000 B) [content]
