@@ -34,7 +34,7 @@ class INET_API PacketSourceBase : public PacketProcessorBase
   protected:
     virtual void initialize(int stage) override;
 
-    virtual const char *createPacketName() const;
+    virtual const char *createPacketName(const Ptr<const Chunk>& data) const;
     virtual Ptr<Chunk> createPacketContent() const;
     virtual Packet *createPacket();
 };
