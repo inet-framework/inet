@@ -26,7 +26,7 @@
 namespace inet {
 namespace queueing {
 
-class INET_API CompoundPacketQueue : public PacketQueueBase
+class INET_API CompoundPacketQueue : public PacketQueueBase, public cListener
 {
   protected:
     int packetCapacity = -1;
@@ -60,6 +60,8 @@ class INET_API CompoundPacketQueue : public PacketQueueBase
     virtual bool supportsPopPacket(cGate *gate) const override { return outputGate == gate; }
     virtual Packet *canPopPacket(cGate *gate) const override { throw cRuntimeError("Invalid operation"); }
     virtual Packet *popPacket(cGate *gate) override;
+
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override;
 };
 
 } // namespace queueing

@@ -30,6 +30,7 @@ void PacketQueueBase::initialize(int stage)
         numPoppedPackets = 0;
         numRemovedPackets = 0;
         numDroppedPackets = 0;
+        numCreatedPackets = 0;
         WATCH(numPushedPackets);
         WATCH(numPoppedPackets);
         WATCH(numRemovedPackets);
@@ -72,6 +73,9 @@ void PacketQueueBase::updateDisplayString()
                 break;
             case 'd':
                 result = std::to_string(numDroppedPackets);
+                break;
+            case 'c':
+                result = std::to_string(numCreatedPackets);
                 break;
             case 'n':
                 result = !isEmpty() ? getPacket(0)->getFullName() : "";

@@ -34,6 +34,12 @@ void CompoundPacketQueue::initialize(int stage)
         consumer = check_and_cast<IPassivePacketSink *>(inputGate->getPathEndGate()->getOwnerModule());
         provider = check_and_cast<IPassivePacketSource *>(outputGate->getPathStartGate()->getOwnerModule());
         collection = check_and_cast<IPacketCollection *>(provider);
+        subscribe(packetPushedSignal, this);
+        subscribe(packetPoppedSignal, this);
+        subscribe(packetRemovedSignal, this);
+        subscribe(packetDroppedSignal, this);
+        subscribe(packetCreatedSignal, this);
+        WATCH(numCreatedPackets);
     }
     else if (stage == INITSTAGE_QUEUEING) {
         checkPushPacketSupport(inputGate);
@@ -73,6 +79,20 @@ void CompoundPacketQueue::removePacket(Packet *packet)
     Enter_Method("removePacket");
     collection->removePacket(packet);
     emit(packetRemovedSignal, packet);
+    updateDisplayString();
+}
+
+void CompoundPacketQueue::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
+{
+    Enter_Method("receiveSignal");
+    if (signal == packetPushedSignal || signal == packetPoppedSignal || signal == packetRemovedSignal)
+        ;
+    else if (signal == packetDroppedSignal)
+        numDroppedPackets++;
+    else if (signal == packetCreatedSignal)
+        numCreatedPackets++;
+    else
+        throw cRuntimeError("Unknown signal");
     updateDisplayString();
 }
 

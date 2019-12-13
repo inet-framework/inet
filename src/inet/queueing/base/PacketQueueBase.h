@@ -32,6 +32,7 @@ class INET_API PacketQueueBase : public PacketQueueingElementBase, public IPacke
     int numPoppedPackets = -1;
     int numRemovedPackets = -1;
     int numDroppedPackets = -1;
+    int numCreatedPackets = -1;
 
   protected:
     virtual void initialize(int stage) override;
