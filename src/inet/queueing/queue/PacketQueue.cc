@@ -30,6 +30,7 @@ void PacketQueue::initialize(int stage)
 {
     PacketQueueBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
+        queue.setName("storage");
         inputGate = gate("in");
         producer = findConnectedModule<IActivePacketSource>(inputGate);
         outputGate = gate("out");
