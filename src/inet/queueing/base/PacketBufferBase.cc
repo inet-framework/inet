@@ -48,30 +48,32 @@ void PacketBufferBase::emit(simsignal_t signal, cObject *object, cObject *detail
 
 void PacketBufferBase::updateDisplayString()
 {
-    auto text = StringFormat::formatString(displayStringTextFormat, [&] (char directive) {
-        static std::string result;
-        switch (directive) {
-            case 'p':
-                result = std::to_string(getNumPackets());
-                break;
-            case 'l':
-                result = getTotalLength().str();
-                break;
-            case 'a':
-                result = std::to_string(numAddedPackets);
-                break;
-            case 'r':
-                result = std::to_string(numRemovedPackets);
-                break;
-            case 'd':
-                result = std::to_string(numDroppedPackets);
-                break;
-            default:
-                throw cRuntimeError("Unknown directive: %c", directive);
-        }
-        return result.c_str();
-    });
-    getDisplayString().setTagArg("t", 0, text);
+    if (getEnvir()->isGUI()) {
+        auto text = StringFormat::formatString(displayStringTextFormat, [&] (char directive) {
+            static std::string result;
+            switch (directive) {
+                case 'p':
+                    result = std::to_string(getNumPackets());
+                    break;
+                case 'l':
+                    result = getTotalLength().str();
+                    break;
+                case 'a':
+                    result = std::to_string(numAddedPackets);
+                    break;
+                case 'r':
+                    result = std::to_string(numRemovedPackets);
+                    break;
+                case 'd':
+                    result = std::to_string(numDroppedPackets);
+                    break;
+                default:
+                    throw cRuntimeError("Unknown directive: %c", directive);
+            }
+            return result.c_str();
+        });
+        getDisplayString().setTagArg("t", 0, text);
+    }
 }
 
 } // namespace queueing

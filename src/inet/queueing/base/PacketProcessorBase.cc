@@ -35,8 +35,10 @@ void PacketProcessorBase::initialize(int stage)
 
 void PacketProcessorBase::updateDisplayString() const
 {
-    auto text = StringFormat::formatString(displayStringTextFormat, this);
-    getDisplayString().setTagArg("t", 0, text);
+    if (getEnvir()->isGUI()) {
+        auto text = StringFormat::formatString(displayStringTextFormat, this);
+        getDisplayString().setTagArg("t", 0, text);
+    }
 }
 
 const char *PacketProcessorBase::resolveDirective(char directive) const
