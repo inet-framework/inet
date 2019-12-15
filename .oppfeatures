@@ -89,7 +89,7 @@
         extraSourceFolders = ""
         compileFlags = ""
         linkerFlags = ""
-        />
+        /> <!-- TODO split to wired and wireless examples!!! -->
     <feature
         id="IPv6"
         name="IPv6 protocol"
