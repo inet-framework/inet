@@ -38,13 +38,13 @@ class INET_API TcpBaseAlgStateVariables : public TcpStateVariables
     /// retransmit count
     //@{
     int rexmit_count;    ///< number of retransmissions (=1 after first rexmit)
-    simtime_t rexmit_timeout;    ///< current retransmission timeout (aka RTO)
+    simclocktime_t rexmit_timeout;    ///< current retransmission timeout (aka RTO)
     //@}
 
     /// persist factor
     //@{
     uint persist_factor;    ///< factor needed for simplified PERSIST timer calculation
-    simtime_t persist_timeout;    ///< current persist timeout
+    simclocktime_t persist_timeout;    ///< current persist timeout
     //@}
 
     /// congestion window
@@ -55,13 +55,13 @@ class INET_API TcpBaseAlgStateVariables : public TcpStateVariables
     /// round-trip time measurements
     //@{
     uint32 rtseq;    ///< starting sequence number of timed data
-    simtime_t rtseq_sendtime;    ///< time when rtseq was sent (0 if RTT measurement is not running)
+    simclocktime_t rtseq_sendtime;    ///< time when rtseq was sent (0 if RTT measurement is not running)
     //@}
 
     /// round-trip time estimation (Jacobson's algorithm)
     //@{
-    simtime_t srtt;    ///< smoothed round-trip time
-    simtime_t rttvar;    ///< variance of round-trip time
+    simclocktime_t srtt;    ///< smoothed round-trip time
+    simclocktime_t rttvar;    ///< variance of round-trip time
     //@}
 
     /// number of RTOs
@@ -133,14 +133,14 @@ class INET_API TcpBaseAlg : public TcpAlgorithm
     virtual void startRexmitTimer();
 
     /**
-     * Update state vars with new measured RTT value. Passing two simtime_t's
+     * Update state vars with new measured RTT value. Passing two simclocktime_t's
      * will allow rttMeasurementComplete() to do calculations in double or
      * in 200ms/500ms ticks, as needed)
      */
-    virtual void rttMeasurementComplete(simtime_t tSent, simtime_t tAcked);
+    virtual void rttMeasurementComplete(simclocktime_t tSent, simclocktime_t tAcked);
 
     /**
-     * Converting uint32 echoedTS to simtime_t and calling rttMeasurementComplete()
+     * Converting uint32 echoedTS to simclocktime_t and calling rttMeasurementComplete()
      * to update state vars with new measured RTT value.
      */
     virtual void rttMeasurementCompleteUsingTS(uint32 echoedTS) override;
@@ -151,7 +151,10 @@ class INET_API TcpBaseAlg : public TcpAlgorithm
     virtual bool sendData(bool sendCommandInvoked);
 
     /** Utility function */
-    cMessage *cancelEvent(cMessage *msg) { return conn->cancelEvent(msg); }
+    simclocktime_t getClockTime() const { return conn->getClockTime(); }
+
+    /** Utility function */
+    cMessage *cancelClockEvent(cMessage *msg) { return conn->cancelClockEvent(msg); }
 
   public:
     /**

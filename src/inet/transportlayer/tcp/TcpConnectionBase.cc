@@ -150,7 +150,7 @@ TcpStateVariables::TcpStateVariables()
     ecnWillingness = false;
     sndAck = false;
     rexmit = false;
-    eceReactionTime = 0;          
+    eceReactionTime = 0;
 }
 
 std::string TcpStateVariables::str() const
@@ -239,13 +239,13 @@ TcpConnection::~TcpConnection()
     delete state;
 
     if (the2MSLTimer)
-        delete cancelEvent(the2MSLTimer);
+        delete cancelClockEvent(the2MSLTimer);
     if (connEstabTimer)
-        delete cancelEvent(connEstabTimer);
+        delete cancelClockEvent(connEstabTimer);
     if (finWait2Timer)
-        delete cancelEvent(finWait2Timer);
+        delete cancelClockEvent(finWait2Timer);
     if (synRexmitTimer)
-        delete cancelEvent(synRexmitTimer);
+        delete cancelClockEvent(synRexmitTimer);
 }
 
 void TcpConnection::handleMessage(cMessage *msg)
@@ -710,8 +710,8 @@ void TcpConnection::stateEntered(int state, int oldState, TcpEventCode event)
         case TCP_S_LISTEN:
             // we may get back to LISTEN from SYN_RCVD
             ASSERT(connEstabTimer && synRexmitTimer);
-            cancelEvent(connEstabTimer);
-            cancelEvent(synRexmitTimer);
+            cancelClockEvent(connEstabTimer);
+            cancelClockEvent(synRexmitTimer);
             break;
 
         case TCP_S_SYN_RCVD:
@@ -720,8 +720,8 @@ void TcpConnection::stateEntered(int state, int oldState, TcpEventCode event)
 
         case TCP_S_ESTABLISHED:
             // we're in ESTABLISHED, these timers are no longer needed
-            delete cancelEvent(connEstabTimer);
-            delete cancelEvent(synRexmitTimer);
+            delete cancelClockEvent(connEstabTimer);
+            delete cancelClockEvent(synRexmitTimer);
             connEstabTimer = synRexmitTimer = nullptr;
             // TCP_I_ESTAB notification moved inside event processing
             break;
@@ -736,9 +736,9 @@ void TcpConnection::stateEntered(int state, int oldState, TcpEventCode event)
             // whether connection setup succeeded (ESTABLISHED) or not (others),
             // cancel these timers
             if (connEstabTimer)
-                cancelEvent(connEstabTimer);
+                cancelClockEvent(connEstabTimer);
             if (synRexmitTimer)
-                cancelEvent(synRexmitTimer);
+                cancelClockEvent(synRexmitTimer);
             break;
 
         case TCP_S_TIME_WAIT:
@@ -750,13 +750,13 @@ void TcpConnection::stateEntered(int state, int oldState, TcpEventCode event)
                 sendIndicationToApp(TCP_I_CLOSED);
             // all timers need to be cancelled
             if (the2MSLTimer)
-                cancelEvent(the2MSLTimer);
+                cancelClockEvent(the2MSLTimer);
             if (connEstabTimer)
-                cancelEvent(connEstabTimer);
+                cancelClockEvent(connEstabTimer);
             if (finWait2Timer)
-                cancelEvent(finWait2Timer);
+                cancelClockEvent(finWait2Timer);
             if (synRexmitTimer)
-                cancelEvent(synRexmitTimer);
+                cancelClockEvent(synRexmitTimer);
             tcpAlgorithm->connectionClosed();
             break;
     }

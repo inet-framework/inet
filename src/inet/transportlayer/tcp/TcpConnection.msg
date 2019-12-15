@@ -34,6 +34,18 @@ cplusplus {{
 #include "inet/transportlayer/tcp_common/TcpHeader.h"
 }}
 
+class simclocktime_t
+{
+    @existingClass;
+    @overwritePreviousDefinition;
+    @descriptor(false);
+    @opaque;
+    @byValue;
+    @cppType(inet::common::simclocktime_t);
+    @fromString(inet::common::SimClockTime::parse($)); @toString($.str());
+    @defaultValue(SIMTIME_ZERO);
+}
+
 namespace inet::tcp;
 
 class TcpSackRexmitQueue { @existingClass; }
@@ -71,7 +83,7 @@ struct TcpStateVariables
     // SYN, SYN+ACK retransmission variables (handled separately
     // because normal rexmit belongs to TcpAlgorithm)
     int syn_rexmit_count;    // number of SYN/SYN+ACK retransmissions (=1 after first rexmit)
-    simtime_t syn_rexmit_timeout;    // current SYN/SYN+ACK retransmission timeout
+    simclocktime_t syn_rexmit_timeout;    // current SYN/SYN+ACK retransmission timeout
 
     // whether ACK of our FIN has been received. Needed in FIN bit processing
     // to decide between transition to TIME-WAIT and CLOSING (set event code
@@ -119,7 +131,7 @@ struct TcpStateVariables
     bool rcv_initial_ts;    // set if initial TIMESTAMP has been received
     uint32_t ts_recent;    // RFC 1323, page 31: "Latest received Timestamp"
     uint32_t last_ack_sent;    // RFC 1323, page 31: "Last ACK field sent"
-    simtime_t time_last_data_sent;    // time at which the last data segment was sent (needed to compute the IDLE time for PAWS)
+    simclocktime_t time_last_data_sent;    // time at which the last data segment was sent (needed to compute the IDLE time for PAWS)
 
     // SACK related variables
     bool sack_support;    // set if the host supports selective acknowledgment (header option) (RFC 2018, 2883, 3517)

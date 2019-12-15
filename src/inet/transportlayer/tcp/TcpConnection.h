@@ -178,7 +178,7 @@ class INET_API TcpStateVariables : public cObject
     // SYN, SYN+ACK retransmission variables (handled separately
     // because normal rexmit belongs to TcpAlgorithm)
     int syn_rexmit_count;    // number of SYN/SYN+ACK retransmissions (=1 after first rexmit)
-    simtime_t syn_rexmit_timeout;    // current SYN/SYN+ACK retransmission timeout
+    simclocktime_t syn_rexmit_timeout;    // current SYN/SYN+ACK retransmission timeout
 
     // whether ACK of our FIN has been received. Needed in FIN bit processing
     // to decide between transition to TIME-WAIT and CLOSING (set event code
@@ -226,7 +226,7 @@ class INET_API TcpStateVariables : public cObject
     bool rcv_initial_ts;    // set if initial TIMESTAMP has been received
     uint32 ts_recent;    // RFC 1323, page 31: "Latest received Timestamp"
     uint32 last_ack_sent;    // RFC 1323, page 31: "Last ACK field sent"
-    simtime_t time_last_data_sent;    // time at which the last data segment was sent (needed to compute the IDLE time for PAWS)
+    simclocktime_t time_last_data_sent;    // time at which the last data segment was sent (needed to compute the IDLE time for PAWS)
 
     // SACK related variables
     bool sack_support;    // set if the host supports selective acknowledgment (header option) (RFC 2018, 2883, 3517)
@@ -273,7 +273,7 @@ class INET_API TcpStateVariables : public cObject
     bool ecnWillingness;       // set if current host is willing to use ECN
     bool sndAck;               // set if sending Ack packet, used to set relevant info in controlInfo.
     bool rexmit;               // set if retransmitting data, used to send not-ECT codepoint (rfc3168, p. 20)
-    simtime_t eceReactionTime; // records the time of the last ECE reaction
+    simclocktime_t eceReactionTime; // records the time of the last ECE reaction
 };
 
 /**
@@ -324,7 +324,7 @@ class INET_API TcpStateVariables : public cObject
  * When the CLOSED state is reached, TCP will delete the TcpConnection object.
  *
  */
-class INET_API TcpConnection : public cSimpleModule
+class INET_API TcpConnection : public SimpleModule
 {
   public:
     static simsignal_t tcpConnectionAddedSignal;
@@ -548,11 +548,11 @@ class INET_API TcpConnection : public cSimpleModule
     virtual void signalConnectionTimeout();
 
     /** Utility: start a timer */
-    void scheduleTimeout(cMessage *msg, simtime_t timeout) { scheduleAt(simTime() + timeout, msg); }
+    void scheduleTimeout(cMessage *msg, simclocktime_t timeout) { scheduleClockEvent(getClockTime() + timeout, msg); }
 
   protected:
     /** Utility: cancel a timer */
-    // cMessage *cancelEvent(cMessage *msg) { return tcpMain->cancelEvent(msg); }
+    // cMessage *cancelClockEvent(cMessage *msg) { return tcpMain->cancelClockEvent(msg); }
 
     /** Utility: send IP packet */
     virtual void sendToIP(Packet *pkt, const Ptr<TcpHeader>& tcpseg, L3Address src, L3Address dest);
@@ -711,12 +711,12 @@ class INET_API TcpConnection : public cSimpleModule
     /**
      * Utility: converts a given simtime to a timestamp (TS).
      */
-    static uint32 convertSimtimeToTS(simtime_t simtime);
+    static uint32 convertSimtimeToTS(simclocktime_t simtime);
 
     /**
      * Utility: converts a given timestamp (TS) to a simtime.
      */
-    static simtime_t convertTSToSimtime(uint32 timestamp);
+    static simclocktime_t convertTSToSimtime(uint32 timestamp);
 
     /**
      * Utility: checks if send queue is empty (no data to send).

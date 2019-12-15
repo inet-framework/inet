@@ -145,7 +145,7 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *packet, const Ptr<c
         if (state->ts_enabled) {
             uint32 tsval = getTSval(tcpseg);
             if (tsval != 0 && seqLess(tsval, state->ts_recent) &&
-                (simTime() - state->time_last_data_sent) > PAWS_IDLE_TIME_THRESH)    // PAWS_IDLE_TIME_THRESH = 24 days
+                (getClockTime() - state->time_last_data_sent) > PAWS_IDLE_TIME_THRESH)    // PAWS_IDLE_TIME_THRESH = 24 days
             {
                 EV_DETAIL << "PAWS: Segment is not acceptable, TSval=" << tsval << " in "
                           << stateName(fsm.getState()) << " state received: dropping segment\n";
@@ -425,7 +425,7 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *packet, const Ptr<c
         // And we are staying in the TIME_WAIT state.
         //
         sendAck();
-        cancelEvent(the2MSLTimer);
+        cancelClockEvent(the2MSLTimer);
         scheduleTimeout(the2MSLTimer, 2*tcpMain->getMsl());
     }
 
@@ -569,7 +569,7 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *packet, const Ptr<c
                                 if (state->fin_ack_rcvd) {
                                     event = TCP_E_RCV_FIN_ACK;
                                     // start the time-wait timer, turn off the other timers
-                                    cancelEvent(finWait2Timer);
+                                    cancelClockEvent(finWait2Timer);
                                     scheduleTimeout(the2MSLTimer, 2*tcpMain->getMsl());
 
                                     // we're entering TIME_WAIT, so we can signal CLOSED the user
@@ -579,7 +579,7 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *packet, const Ptr<c
 
                             case TCP_S_FIN_WAIT_2:
                                 // Start the time-wait timer, turn off the other timers.
-                                cancelEvent(finWait2Timer);
+                                cancelClockEvent(finWait2Timer);
                                 scheduleTimeout(the2MSLTimer, 2*tcpMain->getMsl());
 
                                 // we're entering TIME_WAIT, so we can signal CLOSED the user
@@ -588,7 +588,7 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *packet, const Ptr<c
 
                             case TCP_S_TIME_WAIT:
                                 // Restart the 2 MSL time-wait timeout.
-                                cancelEvent(the2MSLTimer);
+                                cancelClockEvent(the2MSLTimer);
                                 scheduleTimeout(the2MSLTimer, 2*tcpMain->getMsl());
                                 break;
 
@@ -643,7 +643,7 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *packet, const Ptr<c
                     if (state->fin_ack_rcvd) {
                         event = TCP_E_RCV_FIN_ACK;
                         // start the time-wait timer, turn off the other timers
-                        cancelEvent(finWait2Timer);
+                        cancelClockEvent(finWait2Timer);
                         scheduleTimeout(the2MSLTimer, 2*tcpMain->getMsl());
 
                         // we're entering TIME_WAIT, so we can signal CLOSED the user
@@ -653,7 +653,7 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *packet, const Ptr<c
 
                 case TCP_S_FIN_WAIT_2:
                     // Start the time-wait timer, turn off the other timers.
-                    cancelEvent(finWait2Timer);
+                    cancelClockEvent(finWait2Timer);
                     scheduleTimeout(the2MSLTimer, 2*tcpMain->getMsl());
 
                     // we're entering TIME_WAIT, so we can signal CLOSED the user
@@ -662,7 +662,7 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *packet, const Ptr<c
 
                 case TCP_S_TIME_WAIT:
                     // Restart the 2 MSL time-wait timeout.
-                    cancelEvent(the2MSLTimer);
+                    cancelClockEvent(the2MSLTimer);
                     scheduleTimeout(the2MSLTimer, 2*tcpMain->getMsl());
                     break;
 
@@ -1340,7 +1340,7 @@ void TcpConnection::startSynRexmitTimer()
     state->syn_rexmit_timeout = TCP_TIMEOUT_SYN_REXMIT;
 
     if (synRexmitTimer->isScheduled())
-        cancelEvent(synRexmitTimer);
+        cancelClockEvent(synRexmitTimer);
 
     scheduleTimeout(synRexmitTimer, state->syn_rexmit_timeout);
 }

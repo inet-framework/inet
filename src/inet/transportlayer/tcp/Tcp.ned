@@ -211,6 +211,7 @@ simple Tcp like ITcp
         double stopOperationExtraTime @unit(s) = default(0s);    // extra time after lifecycle stop operation finished
         double stopOperationTimeout @unit(s) = default(2s);    // timeout value for lifecycle stop operation
         bool ecnWillingness = default(false);	// true if willing to use ECN
+        string clockModule = default(""); // relative path to the clock module, used for timings; optional 
         @display("i=block/wheelbarrow");
         @signal[tcpConnectionAdded];
         @signal[tcpConnectionRemoved];

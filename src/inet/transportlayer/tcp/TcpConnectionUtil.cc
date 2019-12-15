@@ -489,7 +489,7 @@ void TcpConnection::configureStateVariables()
 void TcpConnection::selectInitialSeqNum()
 {
     // set the initial send sequence number
-    state->iss = (unsigned long)fmod(SIMTIME_DBL(simTime()) * 250000.0, 1.0 + (double)(unsigned)0xffffffffUL) & 0xffffffffUL;
+    state->iss = (unsigned long)fmod(SIMTIME_DBL(getClockTime()) * 250000.0, 1.0 + (double)(unsigned)0xffffffffUL) & 0xffffffffUL;
 
     state->snd_una = state->snd_nxt = state->snd_max = state->iss;
 
@@ -1239,7 +1239,7 @@ bool TcpConnection::processTSOption(const Ptr<const TcpHeader>& tcpseg, const Tc
     //   variable TS.Recent."
     if (state->ts_enabled) {
         if (seqLess(option.getSenderTimestamp(), state->ts_recent)) {
-            if ((simTime() - state->time_last_data_sent) > PAWS_IDLE_TIME_THRESH) {    // PAWS_IDLE_TIME_THRESH = 24 days
+            if ((getClockTime() - state->time_last_data_sent) > PAWS_IDLE_TIME_THRESH) {    // PAWS_IDLE_TIME_THRESH = 24 days
                 EV_DETAIL << "PAWS: Segment is not acceptable, TSval=" << option.getSenderTimestamp() << " in " << stateName(fsm.getState()) << " state received: dropping segment\n";
                 return false;
             }
@@ -1346,7 +1346,7 @@ TcpHeader TcpConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpseg)
 
             // Update TS variables
             // RFC 1323, page 13: "The Timestamp Value field (TSval) contains the current value of the timestamp clock of the Tcp sending the option."
-            option->setSenderTimestamp(convertSimtimeToTS(simTime()));
+            option->setSenderTimestamp(convertSimtimeToTS(getClockTime()));
 
             // RFC 1323, page 16: "(3) When a TSopt is sent, its TSecr field is set to the current TS.Recent value."
             // RFC 1323, page 13:
@@ -1381,7 +1381,7 @@ TcpHeader TcpConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpseg)
 
             // Update TS variables
             // RFC 1323, page 13: "The Timestamp Value field (TSval) contains the current value of the timestamp clock of the Tcp sending the option."
-            option->setSenderTimestamp(convertSimtimeToTS(simTime()));
+            option->setSenderTimestamp(convertSimtimeToTS(getClockTime()));
 
             // RFC 1323, page 16: "(3) When a TSopt is sent, its TSecr field is set to the current TS.Recent value."
             // RFC 1323, page 13:
@@ -1619,7 +1619,7 @@ void TcpConnection::sendOneNewSegment(bool fullSegmentsOnly, uint32 congestionWi
     }
 }
 
-uint32 TcpConnection::convertSimtimeToTS(simtime_t simtime)
+uint32 TcpConnection::convertSimtimeToTS(simclocktime_t simtime)
 {
     ASSERT(SimTime::getScaleExp() <= -3);
 
@@ -1627,11 +1627,11 @@ uint32 TcpConnection::convertSimtimeToTS(simtime_t simtime)
     return timestamp;
 }
 
-simtime_t TcpConnection::convertTSToSimtime(uint32 timestamp)
+simclocktime_t TcpConnection::convertTSToSimtime(uint32 timestamp)
 {
-    ASSERT(SimTime::getScaleExp() <= -3);
+    ASSERT(SimClockTime::getScaleExp() <= -3);
 
-    simtime_t simtime(timestamp, SIMTIME_MS);
+    simclocktime_t simtime(timestamp, SIMTIME_MS);
     return simtime;
 }
 

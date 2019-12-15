@@ -115,13 +115,13 @@ TcpBaseAlg::~TcpBaseAlg()
 
     // cancel and delete timers
     if (rexmitTimer)
-        delete cancelEvent(rexmitTimer);
+        delete cancelClockEvent(rexmitTimer);
     if (persistTimer)
-        delete cancelEvent(persistTimer);
+        delete cancelClockEvent(persistTimer);
     if (delayedAckTimer)
-        delete cancelEvent(delayedAckTimer);
+        delete cancelClockEvent(delayedAckTimer);
     if (keepAliveTimer)
-        delete cancelEvent(keepAliveTimer);
+        delete cancelClockEvent(keepAliveTimer);
 }
 
 void TcpBaseAlg::initialize()
@@ -196,10 +196,10 @@ void TcpBaseAlg::established(bool active)
 
 void TcpBaseAlg::connectionClosed()
 {
-    cancelEvent(rexmitTimer);
-    cancelEvent(persistTimer);
-    cancelEvent(delayedAckTimer);
-    cancelEvent(keepAliveTimer);
+    cancelClockEvent(rexmitTimer);
+    cancelClockEvent(persistTimer);
+    cancelClockEvent(delayedAckTimer);
+    cancelClockEvent(keepAliveTimer);
 }
 
 void TcpBaseAlg::processTimer(cMessage *timer, TcpEventCode& event)
@@ -282,7 +282,7 @@ void TcpBaseAlg::processRexmitTimer(TcpEventCode& event)
         }
     }
 
-    state->time_last_data_sent = simTime();
+    state->time_last_data_sent = getClockTime();
 
     //
     // Leave congestion window management and actual retransmission to
@@ -353,7 +353,7 @@ void TcpBaseAlg::startRexmitTimer()
     conn->scheduleTimeout(rexmitTimer, state->rexmit_timeout);
 }
 
-void TcpBaseAlg::rttMeasurementComplete(simtime_t tSent, simtime_t tAcked)
+void TcpBaseAlg::rttMeasurementComplete(simclocktime_t tSent, simclocktime_t tAcked)
 {
     //
     // Jacobson's algorithm for estimating RTT and adaptively setting RTO.
@@ -364,18 +364,18 @@ void TcpBaseAlg::rttMeasurementComplete(simtime_t tSent, simtime_t tAcked)
 
     // update smoothed RTT estimate (srtt) and variance (rttvar)
     const double g = 0.125;    // 1 / 8; (1 - alpha) where alpha == 7 / 8;
-    simtime_t newRTT = tAcked - tSent;
+    simclocktime_t newRTT = tAcked - tSent;
 
-    simtime_t& srtt = state->srtt;
-    simtime_t& rttvar = state->rttvar;
+    simclocktime_t& srtt = state->srtt;
+    simclocktime_t& rttvar = state->rttvar;
 
-    simtime_t err = newRTT - srtt;
+    simclocktime_t err = newRTT - srtt;
 
     srtt += g * err;
-    rttvar += g * (fabs(err) - rttvar);
+    rttvar += g * (fabs(err.dbl()) - rttvar); //TODO fabs(clock) instead
 
     // assign RTO (here: rexmit_timeout) a new value
-    simtime_t rto = srtt + 4 * rttvar;
+    simclocktime_t rto = srtt + 4 * rttvar;
 
     if (rto > MAX_REXMIT_TIMEOUT)
         rto = MAX_REXMIT_TIMEOUT;
@@ -388,10 +388,10 @@ void TcpBaseAlg::rttMeasurementComplete(simtime_t tSent, simtime_t tAcked)
     EV_DETAIL << "Measured RTT=" << (newRTT * 1000) << "ms, updated SRTT=" << (srtt * 1000)
               << "ms, new RTO=" << (rto * 1000) << "ms\n";
 
-    conn->emit(rttSignal, newRTT);
-    conn->emit(srttSignal, srtt);
-    conn->emit(rttvarSignal, rttvar);
-    conn->emit(rtoSignal, rto);
+    conn->emit(rttSignal, newRTT.toSimTime());
+    conn->emit(srttSignal, srtt.toSimTime());
+    conn->emit(rttvarSignal, rttvar.toSimTime());
+    conn->emit(rtoSignal, rto.toSimTime());
 }
 
 void TcpBaseAlg::rttMeasurementCompleteUsingTS(uint32 echoedTS)
@@ -399,10 +399,10 @@ void TcpBaseAlg::rttMeasurementCompleteUsingTS(uint32 echoedTS)
     ASSERT(state->ts_enabled);
 
     // Note: The TS option is using uint32 values (ms precision) therefore we convert the current simTime also to a uint32 value (ms precision)
-    // and then convert back to simtime_t to use rttMeasurementComplete() to update srtt and rttvar
-    uint32 now = conn->convertSimtimeToTS(simTime());
-    simtime_t tSent = conn->convertTSToSimtime(echoedTS);
-    simtime_t tAcked = conn->convertTSToSimtime(now);
+    // and then convert back to simclocktime_t to use rttMeasurementComplete() to update srtt and rttvar
+    uint32 now = conn->convertSimtimeToTS(getClockTime());
+    simclocktime_t tSent = conn->convertTSToSimtime(echoedTS);
+    simclocktime_t tAcked = conn->convertTSToSimtime(now);
     rttMeasurementComplete(tSent, tAcked);
 }
 
@@ -436,7 +436,7 @@ bool TcpBaseAlg::sendData(bool sendCommandInvoked)
     // transmission if the TCP has not sent data in an interval exceeding
     // the retransmission timeout."
     if (!conn->isSendQueueEmpty()) {    // do we have any data to send?
-        if ((simTime() - state->time_last_data_sent) > state->rexmit_timeout) {
+        if ((getClockTime() - state->time_last_data_sent) > state->rexmit_timeout) {
             // RFC 5681, page 11: "For the purposes of this standard, we define RW = min(IW,cwnd)."
             if (state->increased_IW_enabled)
                 state->snd_cwnd = std::min(std::min(4 * state->snd_mss, std::max(2 * state->snd_mss, (uint32)4380)), state->snd_cwnd);
@@ -513,9 +513,10 @@ void TcpBaseAlg::receivedDataAck(uint32 firstSeqAcked)
         if (state->rtseq_sendtime != 0 && seqLess(state->rtseq, state->snd_una)) {
             // print value
             EV_DETAIL << "Round-trip time measured on rtseq=" << state->rtseq << ": "
-                      << floor((simTime() - state->rtseq_sendtime) * 1000 + 0.5) << "ms\n";
+                      //<< floor((getClockTime() - state->rtseq_sendtime) * 1000 + 0.5) << "ms\n";
+                      << ((getClockTime() - state->rtseq_sendtime) * 1000 + 0.5).trunc(SIMTIME_S) << "ms\n"; //FIXME not good like this!!!
 
-            rttMeasurementComplete(state->rtseq_sendtime, simTime());    // update RTT variables with new value
+            rttMeasurementComplete(state->rtseq_sendtime, getClockTime());    // update RTT variables with new value
 
             // measurement finished
             state->rtseq_sendtime = 0;
@@ -530,7 +531,7 @@ void TcpBaseAlg::receivedDataAck(uint32 firstSeqAcked)
     if (state->snd_una == state->snd_max) {
         if (rexmitTimer->isScheduled()) {
             EV_INFO << "ACK acks all outstanding segments, cancel REXMIT timer\n";
-            cancelEvent(rexmitTimer);
+            cancelClockEvent(rexmitTimer);
         }
         else
             EV_INFO << "There were no outstanding segments, nothing new in this ACK.\n";
@@ -539,7 +540,7 @@ void TcpBaseAlg::receivedDataAck(uint32 firstSeqAcked)
         EV_INFO << "ACK acks some but not all outstanding segments ("
                 << (state->snd_max - state->snd_una) << " bytes outstanding), "
                 << "restarting REXMIT timer\n";
-        cancelEvent(rexmitTimer);
+        cancelClockEvent(rexmitTimer);
         startRexmitTimer();
     }
 
@@ -556,7 +557,7 @@ void TcpBaseAlg::receivedDataAck(uint32 firstSeqAcked)
         if (rexmitTimer->isScheduled()) {
             if (persistTimer->isScheduled()) {
                 EV_INFO << "Received zero-sized window and REXMIT timer is running therefore PERSIST timer is canceled.\n";
-                cancelEvent(persistTimer);
+                cancelClockEvent(persistTimer);
                 state->persist_factor = 0;
             }
             else
@@ -574,7 +575,7 @@ void TcpBaseAlg::receivedDataAck(uint32 firstSeqAcked)
     else {    // received non zero-sized window?
         if (persistTimer->isScheduled()) {
             EV_INFO << "Received non zero-sized window therefore PERSIST timer is canceled.\n";
-            cancelEvent(persistTimer);
+            cancelClockEvent(persistTimer);
             state->persist_factor = 0;
         }
     }
@@ -623,7 +624,7 @@ void TcpBaseAlg::ackSent()
     state->last_ack_sent = state->rcv_nxt;    // update last_ack_sent, needed for TS option
     // if delayed ACK timer is running, cancel it
     if (delayedAckTimer->isScheduled())
-        cancelEvent(delayedAckTimer);
+        cancelClockEvent(delayedAckTimer);
 }
 
 void TcpBaseAlg::dataSent(uint32 fromseq)
@@ -639,12 +640,12 @@ void TcpBaseAlg::dataSent(uint32 fromseq)
         if (state->rtseq_sendtime == 0) {
             // remember this sequence number and when it was sent
             state->rtseq = fromseq;
-            state->rtseq_sendtime = simTime();
+            state->rtseq_sendtime = getClockTime();
             EV_DETAIL << "Starting rtt measurement on seq=" << state->rtseq << "\n";
         }
     }
 
-    state->time_last_data_sent = simTime();
+    state->time_last_data_sent = getClockTime();
 }
 
 void TcpBaseAlg::segmentRetransmitted(uint32 fromseq, uint32 toseq)
@@ -654,7 +655,7 @@ void TcpBaseAlg::segmentRetransmitted(uint32 fromseq, uint32 toseq)
 void TcpBaseAlg::restartRexmitTimer()
 {
     if (rexmitTimer->isScheduled())
-        cancelEvent(rexmitTimer);
+        cancelClockEvent(rexmitTimer);
 
     startRexmitTimer();
 }

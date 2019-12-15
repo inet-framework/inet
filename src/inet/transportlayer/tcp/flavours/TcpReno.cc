@@ -122,7 +122,7 @@ void TcpReno::receivedDataAck(uint32 firstSeqAcked)
             // single window of data.  In addition, the TCP source should not decrease
             // the slow-start threshold, ssthresh, if it has been decreased
             // within the last round trip time.
-            if (simTime() - state->eceReactionTime > state->srtt) {
+            if (getClockTime() - state->eceReactionTime > state->srtt) {
                 state->ssthresh = state->snd_cwnd / 2;
                 state->snd_cwnd = std::max(state->snd_cwnd / 2, uint32(1));
                 state->sndCwr = true;
@@ -140,7 +140,7 @@ void TcpReno::receivedDataAck(uint32 firstSeqAcked)
                     restartRexmitTimer();
                     EV_INFO << "cwnd = 1... reset retransmit timer.\n";
                 }
-                state->eceReactionTime = simTime();
+                state->eceReactionTime = getClockTime();
                 conn->emit(cwndSignal, state->snd_cwnd);
                 conn->emit(ssthreshSignal, state->ssthresh);
             }

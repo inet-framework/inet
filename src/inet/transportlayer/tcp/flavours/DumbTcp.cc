@@ -36,7 +36,7 @@ DumbTcp::~DumbTcp()
 {
     // cancel and delete timers
     if (rexmitTimer)
-        delete conn->cancelEvent(rexmitTimer);
+        delete conn->cancelClockEvent(rexmitTimer);
 }
 
 void DumbTcp::initialize()
@@ -60,7 +60,7 @@ void DumbTcp::established(bool active)
 
 void DumbTcp::connectionClosed()
 {
-    conn->cancelEvent(rexmitTimer);
+    conn->cancelClockEvent(rexmitTimer);
 }
 
 void DumbTcp::processTimer(cMessage *timer, TcpEventCode& event)
@@ -117,7 +117,7 @@ void DumbTcp::ackSent()
 void DumbTcp::dataSent(uint32 fromseq)
 {
     if (rexmitTimer->isScheduled())
-        conn->cancelEvent(rexmitTimer);
+        conn->cancelClockEvent(rexmitTimer);
 
     conn->scheduleTimeout(rexmitTimer, REXMIT_TIMEOUT);
 }
