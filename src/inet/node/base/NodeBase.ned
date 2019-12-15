@@ -17,12 +17,14 @@
 
 package inet.node.base;
 
+import inet.common.clock.IClock;
 import inet.common.lifecycle.NodeStatus;
 import inet.mobility.contract.IMobility;
 import inet.node.inet.INetworkNode;
 import inet.power.contract.IEnergyGenerator;
 import inet.power.contract.IEnergyManagement;
 import inet.power.contract.IEnergyStorage;
+
 
 //
 // This module contains the most basic infrastructure for network nodes that is
@@ -36,6 +38,7 @@ module NodeBase like INetworkNode
         @networkNode;
         @labels(node,ethernet-node,wireless-node);
         bool hasStatus = default(false);
+        bool hasClock = default(false);
         string osgModel = default(""); // 3D model for OSG visualization, no 3D model by default
         string osgModelColor = default(""); // tint color, no colorization by default
         string canvasImage = default(""); // image for canvas visualization, no image by default
@@ -49,6 +52,9 @@ module NodeBase like INetworkNode
         status: NodeStatus if hasStatus {
             parameters:
                 @display("p=125,80;is=s");
+        }
+        clock: <default("LinearClock")> like IClock if hasClock { // note: 'if typename != ""' cannot be made to work 
+            @display("p=100,170;is=s");
         }
         energyStorage: <default("")> like IEnergyStorage if typename != "" {
             parameters:
