@@ -204,7 +204,7 @@ void Ipv6::handleMessage(cMessage *msg)
         if (sDgram->getIE()->getProtocolData<Ipv6InterfaceData>()->isTentativeAddress(sDgram->getSrcAddress())) {
             // address is still tentative - enqueue again
             //queue.insert(sDgram);
-            scheduleAt(simTime() + 1.0, sDgram);    //FIXME KLUDGE wait 1s for tentative->permanent. MISSING: timeout for drop or send back icmpv6 error, processing signals from IE, need another msg queue for waiting (similar to Ipv4 ARP)
+            scheduleClockEvent(getClockTime() + 1.0, sDgram);    //FIXME KLUDGE wait 1s for tentative->permanent. MISSING: timeout for drop or send back icmpv6 error, processing signals from IE, need another msg queue for waiting (similar to Ipv4 ARP)
         }
         else {
             // address is not tentative anymore - send out datagram
@@ -657,12 +657,12 @@ void Ipv6::localDeliver(Packet *packet, const InterfaceEntry *fromIE)
                   << ", MORE=" << (fh->getMoreFragments() ? "true" : "false") << ".\n";
 
         // erase timed out fragments in fragmentation buffer; check every 10 seconds max
-        if (simTime() >= lastCheckTime + 10) {
-            lastCheckTime = simTime();
-            fragbuf.purgeStaleFragments(simTime() - FRAGMENT_TIMEOUT);
+        if (getClockTime() >= lastCheckTime + 10) {
+            lastCheckTime = getClockTime();
+            fragbuf.purgeStaleFragments(getClockTime() - FRAGMENT_TIMEOUT);
         }
 
-        packet = fragbuf.addFragment(packet, ipv6Header.get(), fh, simTime());
+        packet = fragbuf.addFragment(packet, ipv6Header.get(), fh, getClockTime());
         if (!packet) {
             EV_DETAIL << "No complete datagram yet.\n";
             return;
@@ -900,7 +900,7 @@ void Ipv6::fragmentAndSend(Packet *packet, const InterfaceEntry *ie, const MacAd
             EV_INFO << "Source address is tentative - enqueueing datagram for later resubmission." << endl;
             ScheduledDatagram *sDgram = new ScheduledDatagram(packet, ipv6Header.get(), ie, nextHopAddr, fromHL);
             // queue.insert(sDgram);
-            scheduleAt(simTime() + 1.0, sDgram);    //FIXME KLUDGE wait 1s for tentative->permanent. MISSING: timeout for drop or send back icmpv6 error, processing signals from IE, need another msg queue for waiting (similar to Ipv4 ARP)
+            scheduleClockEvent(getClockTime() + 1.0, sDgram);    //FIXME KLUDGE wait 1s for tentative->permanent. MISSING: timeout for drop or send back icmpv6 error, processing signals from IE, need another msg queue for waiting (similar to Ipv4 ARP)
             return;
         }
     #endif /* WITH_xMIPv6 */

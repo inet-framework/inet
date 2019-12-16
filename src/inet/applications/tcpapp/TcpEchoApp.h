@@ -33,7 +33,7 @@ namespace inet {
 class INET_API TcpEchoApp : public TcpServerHostApp
 {
   protected:
-    simtime_t delay;
+    simclocktime_t delay;
     double echoFactor = NaN;
 
     long bytesRcvd = 0;
@@ -71,7 +71,7 @@ class INET_API TcpEchoAppThread : public TcpServerThreadBase
     virtual void dataArrived(Packet *msg, bool urgent) override;
 
     /*
-     * Called when a timer (scheduled via scheduleAt()) expires. To be redefined.
+     * Called when a timer (scheduled via scheduleClockEvent()) expires. To be redefined.
      */
     virtual void timerExpired(cMessage *timer) override;
 

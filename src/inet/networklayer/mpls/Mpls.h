@@ -37,7 +37,7 @@ namespace inet {
 class INET_API Mpls : public cSimpleModule, public IProtocolRegistrationListener, public IInterfaceRegistrationListener
 {
   protected:
-    simtime_t delay1;
+    simclocktime_t delay1;
 
     //no longer used, see comment in intialize
     //std::vector<bool> labelIf;

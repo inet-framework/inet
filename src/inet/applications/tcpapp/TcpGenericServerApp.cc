@@ -63,12 +63,12 @@ void TcpGenericServerApp::initialize(int stage)
     }
 }
 
-void TcpGenericServerApp::sendOrSchedule(cMessage *msg, simtime_t delay)
+void TcpGenericServerApp::sendOrSchedule(cMessage *msg, simclocktime_t delay)
 {
     if (delay == 0)
         sendBack(msg);
     else
-        scheduleAt(simTime() + delay, msg);
+        scheduleClockEvent(getClockTime() + delay, msg);
 }
 
 void TcpGenericServerApp::sendBack(cMessage *msg)
@@ -118,7 +118,7 @@ void TcpGenericServerApp::handleMessage(cMessage *msg)
             msgsRcvd++;
             bytesRcvd += B(appmsg->getChunkLength()).get();
             B requestedBytes = appmsg->getExpectedReplyLength();
-            simtime_t msgDelay = appmsg->getReplyDelay();
+            simclocktime_t msgDelay = appmsg->getReplyDelay();
             if (msgDelay > maxMsgDelay)
                 maxMsgDelay = msgDelay;
 
@@ -129,7 +129,7 @@ void TcpGenericServerApp::handleMessage(cMessage *msg)
                 payload->setChunkLength(requestedBytes);
                 payload->setExpectedReplyLength(B(0));
                 payload->setReplyDelay(0);
-                payload->addTag<CreationTimeTag>()->setCreationTime(simTime());
+                payload->addTag<CreationTimeTag>()->setCreationTime(getClockTime());
                 outPacket->insertAtBack(payload);
                 sendOrSchedule(outPacket, delay + msgDelay);
             }

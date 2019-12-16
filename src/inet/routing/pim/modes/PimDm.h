@@ -62,7 +62,7 @@ class INET_API PimDm : public PimBase, protected cListener
         GraftPruneState graftPruneState;
         cMessage *graftRetryTimer;    // scheduled in ACK_PENDING state for sending the next Graft message
         cMessage *overrideTimer;      // when expires we are overriding a prune
-        simtime_t lastPruneSentTime;  // for rate limiting prune messages, 0 if no prune was sent
+        simclocktime_t lastPruneSentTime;  // for rate limiting prune messages, 0 if no prune was sent
 
         // originator state
         OriginatorState originatorState;
@@ -83,7 +83,7 @@ class INET_API PimDm : public PimBase, protected cListener
         GraftPruneState getGraftPruneState() const { return graftPruneState; }
         cMessage * getGraftRetryTimer() const { return graftRetryTimer; }
         cMessage * getOverrideTimer() const { return overrideTimer; }
-        simtime_t getLastPruneSentTime() const { return lastPruneSentTime; }
+        simclocktime_t getLastPruneSentTime() const { return lastPruneSentTime; }
         bool isSourceDirectlyConnected() const { return isFlagSet(SOURCE_DIRECTLY_CONNECTED); }
         OriginatorState getOriginatorState() const { return originatorState; }
         cMessage * getSourceActiveTimer() const { return sourceActiveTimer; }
@@ -94,9 +94,9 @@ class INET_API PimDm : public PimBase, protected cListener
         void startOverrideTimer();
         void startSourceActiveTimer();
         void startStateRefreshTimer();
-        void startPruneLimitTimer() { lastPruneSentTime = simTime(); }
+        void startPruneLimitTimer() { lastPruneSentTime = getClockTime(); }
         void stopPruneLimitTimer() { lastPruneSentTime = 0; }
-        bool isPruneLimitTimerRunning() { return lastPruneSentTime > 0.0 && simTime() < lastPruneSentTime + pimdm()->pruneLimitInterval; }
+        bool isPruneLimitTimerRunning() { return lastPruneSentTime > 0.0 && getClockTime() < lastPruneSentTime + pimdm()->pruneLimitInterval; }
     };
 
     struct DownstreamInterface : public Interface

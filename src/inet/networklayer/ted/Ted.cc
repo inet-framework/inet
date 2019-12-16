@@ -121,7 +121,7 @@ void Ted::initializeTED()
 
         entry.sourceId = routerId.getInt();
         entry.messageId = ++maxMessageId;
-        entry.timestamp = simTime();
+        entry.timestamp = getClockTime();
 
         ted.push_back(entry);
     }
@@ -447,7 +447,7 @@ void Ted::updateTimestamp(TeLinkStateInfo *link)
 {
     ASSERT(link->advrouter == routerId);
 
-    link->timestamp = simTime();
+    link->timestamp = getClockTime();
     link->messageId = ++maxMessageId;
 }
 

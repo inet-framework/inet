@@ -53,9 +53,9 @@ void PassivePacketSource::handleMessage(cMessage *message)
 
 void PassivePacketSource::scheduleProvidingTimer()
 {
-    simtime_t interval = providingIntervalParameter->doubleValue();
+    simclocktime_t interval = providingIntervalParameter->doubleValue();
     if (interval != 0 || providingTimer->getArrivalModule() == nullptr)
-        scheduleAt(simTime() + interval, providingTimer);
+        scheduleClockEvent(getClockTime() + interval, providingTimer);
 }
 
 Packet *PassivePacketSource::canPopPacket(cGate *gate) const
@@ -73,7 +73,7 @@ Packet *PassivePacketSource::canPopPacket(cGate *gate) const
 Packet *PassivePacketSource::popPacket(cGate *gate)
 {
     Enter_Method("popPacket");
-    if (providingTimer->isScheduled()  && providingTimer->getArrivalTime() > simTime())
+    if (providingTimer->isScheduled()  && providingTimer->getArrivalTime() > getClockTime())
         throw cRuntimeError("Another packet is already being provided");
     else {
         auto packet = providePacket(gate);

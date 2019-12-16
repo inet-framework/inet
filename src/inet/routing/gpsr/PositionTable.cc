@@ -47,7 +47,7 @@ Coord PositionTable::getPosition(const L3Address& address) const
 void PositionTable::setPosition(const L3Address& address, const Coord& coord)
 {
     ASSERT(!address.isUnspecified());
-    addressToPositionMap[address] = AddressToPositionMapValue(simTime(), coord);
+    addressToPositionMap[address] = AddressToPositionMapValue(getClockTime(), coord);
 }
 
 void PositionTable::removePosition(const L3Address& address)
@@ -56,7 +56,7 @@ void PositionTable::removePosition(const L3Address& address)
     addressToPositionMap.erase(it);
 }
 
-void PositionTable::removeOldPositions(simtime_t timestamp)
+void PositionTable::removeOldPositions(simclocktime_t timestamp)
 {
     for (auto it = addressToPositionMap.begin(); it != addressToPositionMap.end(); )
         if (it->second.first <= timestamp)
@@ -71,11 +71,11 @@ void PositionTable::clear()
     addressToPositionMap.clear();
 }
 
-simtime_t PositionTable::getOldestPosition() const
+simclocktime_t PositionTable::getOldestPosition() const
 {
-    simtime_t oldestPosition = SimTime::getMaxTime();
+    simclocktime_t oldestPosition = SimTime::getMaxTime();
     for (const auto & elem : addressToPositionMap) {
-        const simtime_t& time = elem.second.first;
+        const simclocktime_t& time = elem.second.first;
         if (time < oldestPosition)
             oldestPosition = time;
     }

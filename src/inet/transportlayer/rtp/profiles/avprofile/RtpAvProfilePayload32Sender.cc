@@ -70,7 +70,7 @@ void RtpAvProfilePayload32Sender::initializeSenderModule(RtpInnerPacket *rinpIn)
 
     // wait initial delay
     // cPacket *reminderMessage = new cMessage("next frame");
-    // scheduleAt(simTime() + _initialDelay, reminderMessage);
+    // scheduleClockEvent(getClockTime() + _initialDelay, reminderMessage);
     EV_TRACE << "initializeSenderModule Exit" << endl;
 }
 
@@ -168,7 +168,7 @@ bool RtpAvProfilePayload32Sender::sendPacket()
         _frameNumber++;
 
         _reminderMessage = new cMessage("nextFrame");
-        scheduleAt(simTime() + 1.0 / _framesPerSecond, _reminderMessage);
+        scheduleClockEvent(getClockTime() + 1.0 / _framesPerSecond, _reminderMessage);
         ret = true;
     }
     else {

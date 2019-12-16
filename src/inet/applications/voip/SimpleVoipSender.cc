@@ -71,12 +71,12 @@ void SimpleVoipSender::initialize(int stage)
         EV_INFO << "VoIPSender::initialize - binding to port: local:" << localPort << " , dest:" << destPort << endl;
 
         // calculating traffic starting time
-        simtime_t startTime(par("startTime"));
+        simclocktime_t startTime(par("startTime"));
         stopTime = par("stopTime");
         if (stopTime >= SIMTIME_ZERO && stopTime < startTime)
             throw cRuntimeError("Invalid startTime/stopTime settings: startTime %g s greater than stopTime %g s", SIMTIME_DBL(startTime), SIMTIME_DBL(stopTime));
 
-        scheduleAt(startTime, selfSource);
+        scheduleClockEvent(startTime, selfSource);
         EV_INFO << "\t starting traffic in " << startTime << " s" << endl;
     }
 }
@@ -93,16 +93,16 @@ void SimpleVoipSender::handleMessage(cMessage *msg)
         throw cRuntimeError("Unknown incoming message: '%s' on gate '%s'", msg->getClassName(), msg->getArrivalGate()->getFullName());
 }
 
-void SimpleVoipSender::talkspurt(simtime_t dur)
+void SimpleVoipSender::talkspurt(simclocktime_t dur)
 {
-    simtime_t curTime = simTime();
-    simtime_t startTime = curTime;
+    simclocktime_t curTime = getClockTime();
+    simclocktime_t startTime = curTime;
     if (selfSender->isScheduled()) {
         // silence was too short, detected overlapping talkspurts
-        simtime_t delta = selfSender->getArrivalTime() - curTime;
+        simclocktime_t delta = selfSender->getArrivalTime() - curTime;
         startTime += delta;
         dur -= SIMTIME_DBL(delta);
-        cancelEvent(selfSender);
+        cancelClockEvent(selfSender);
     }
 
     talkspurtID++;
@@ -110,34 +110,34 @@ void SimpleVoipSender::talkspurt(simtime_t dur)
     talkspurtNumPackets = (ceil(dur / packetizationInterval));
     EV_DEBUG << "TALKSPURT " << talkspurtID - 1 << " will be sent " << talkspurtNumPackets << " packets\n\n";
 
-    scheduleAt(startTime + packetizationInterval, selfSender);
+    scheduleClockEvent(startTime + packetizationInterval, selfSender);
 }
 
 void SimpleVoipSender::selectTalkOrSilenceInterval()
 {
-    simtime_t now = simTime();
+    simclocktime_t now = getClockTime();
     if (stopTime >= SIMTIME_ZERO && now >= stopTime)
         return;
 
     if (isTalk) {
         silenceDuration = par("silenceDuration");
         EV_DEBUG << "SILENCE: " << "Duration: " << silenceDuration << " seconds\n\n";
-        simtime_t endSilence = now + silenceDuration;
+        simclocktime_t endSilence = now + silenceDuration;
         if (stopTime >= SIMTIME_ZERO && endSilence > stopTime)
             endSilence = stopTime;
-        scheduleAt(endSilence, selfSource);
+        scheduleClockEvent(endSilence, selfSource);
         isTalk = false;
     }
     else {
         talkspurtDuration = par("talkspurtDuration");
         EV_DEBUG << "TALKSPURT: " << talkspurtID << " Duration: " << talkspurtDuration << " seconds\n\n";
-        simtime_t endTalk = now + talkspurtDuration;
+        simclocktime_t endTalk = now + talkspurtDuration;
         if (stopTime >= SIMTIME_ZERO && endTalk > stopTime) {
             endTalk = stopTime;
             talkspurtDuration = stopTime - now;
         }
         talkspurt(talkspurtDuration);
-        scheduleAt(endTalk, selfSource);
+        scheduleClockEvent(endTalk, selfSource);
         isTalk = true;
     }
 }
@@ -152,7 +152,7 @@ void SimpleVoipSender::sendVoIPPacket()
     voice->setTalkspurtID(talkspurtID - 1);
     voice->setTalkspurtNumPackets(talkspurtNumPackets);
     voice->setPacketID(packetID);
-    voice->setVoipTimestamp(simTime() - packetizationInterval);    // start time of voice in this packet
+    voice->setVoipTimestamp(getClockTime() - packetizationInterval);    // start time of voice in this packet
     voice->setVoiceDuration(packetizationInterval);
     voice->setTotalLengthField(talkPacketSize);
     voice->setChunkLength(B(talkPacketSize));
@@ -164,7 +164,7 @@ void SimpleVoipSender::sendVoIPPacket()
     ++packetID;
 
     if (packetID < talkspurtNumPackets)
-        scheduleAt(simTime() + packetizationInterval, selfSender);
+        scheduleClockEvent(getClockTime() + packetizationInterval, selfSender);
 }
 
 } // namespace inet

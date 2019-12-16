@@ -35,11 +35,11 @@ class INET_API TcpBasicClientApp : public TcpAppBase
     cMessage *timeoutMsg = nullptr;
     bool earlySend = false;    // if true, don't wait with sendRequest() until established()
     int numRequestsToSend = 0;    // requests to send in this session
-    simtime_t startTime;
-    simtime_t stopTime;
+    simclocktime_t startTime;
+    simclocktime_t stopTime;
 
     virtual void sendRequest();
-    virtual void rescheduleOrDeleteTimer(simtime_t d, short int msgKind);
+    virtual void rescheduleOrDeleteTimer(simclocktime_t d, short int msgKind);
 
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;

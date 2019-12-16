@@ -133,7 +133,7 @@ class INET_API Ipv6NeighbourDiscovery : public cSimpleModule, public LifecycleUn
     {
         int interfaceId;
         unsigned int numRASent;    //number of Router Advertisements sent since start of sim
-        simtime_t nextScheduledRATime;    //stores time when next RA will be sent.
+        simclocktime_t nextScheduledRATime;    //stores time when next RA will be sent.
         cMessage *raTimeoutMsg;    //the message to cancel when resetting RA timer
     };
     typedef std::set<AdvIfEntry *> AdvIfList;    //FIXME why ptrs are stored?    //FIXME add comparator for stable fingerprints!
@@ -156,8 +156,8 @@ class INET_API Ipv6NeighbourDiscovery : public cSimpleModule, public LifecycleUn
     struct DadGlobalEntry
     {
         bool hFlag;    // home network flag from RA
-        simtime_t validLifetime;    // valid lifetime of the received prefix
-        simtime_t preferredLifetime;    // preferred lifetime of the received prefix
+        simclocktime_t validLifetime;    // valid lifetime of the received prefix
+        simclocktime_t preferredLifetime;    // preferred lifetime of the received prefix
         Ipv6Address addr;    // the address with scope > link local that the interface will get
 
         //bool returnedHome; // MIPv6-related: whether we returned home after a visit in a foreign network

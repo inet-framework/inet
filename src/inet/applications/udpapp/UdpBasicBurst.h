@@ -48,9 +48,9 @@ class INET_API UdpBasicBurst : public ApplicationBase, public UdpSocket::ICallba
     // parameters
     std::vector<L3Address> destAddresses;
     ChooseDestAddrMode chooseDestAddrMode = static_cast<ChooseDestAddrMode>(0);
-    simtime_t delayLimit;
-    simtime_t startTime;
-    simtime_t stopTime;
+    simclocktime_t delayLimit;
+    simclocktime_t startTime;
+    simclocktime_t stopTime;
     int localPort = -1, destPort = -1;
     int destAddrRNG = -1;
 
@@ -65,9 +65,9 @@ class INET_API UdpBasicBurst : public ApplicationBase, public UdpSocket::ICallba
     L3Address destAddr;
     SourceSequence sourceSequence;
     cMessage *timerNext = nullptr;
-    simtime_t nextPkt;
-    simtime_t nextBurst;
-    simtime_t nextSleep;
+    simclocktime_t nextPkt;
+    simclocktime_t nextBurst;
+    simclocktime_t nextSleep;
     bool isSource = false;
     bool activeBurst = false;
     bool haveSleepDuration = false;

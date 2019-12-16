@@ -388,10 +388,10 @@ void TcpBaseAlg::rttMeasurementComplete(simclocktime_t tSent, simclocktime_t tAc
     EV_DETAIL << "Measured RTT=" << (newRTT * 1000) << "ms, updated SRTT=" << (srtt * 1000)
               << "ms, new RTO=" << (rto * 1000) << "ms\n";
 
-    conn->emit(rttSignal, newRTT.toSimTime());
-    conn->emit(srttSignal, srtt.toSimTime());
-    conn->emit(rttvarSignal, rttvar.toSimTime());
-    conn->emit(rtoSignal, rto.toSimTime());
+    conn->emit(rttSignal, newRTT.togetClockTime());
+    conn->emit(srttSignal, srtt.togetClockTime());
+    conn->emit(rttvarSignal, rttvar.togetClockTime());
+    conn->emit(rtoSignal, rto.togetClockTime());
 }
 
 void TcpBaseAlg::rttMeasurementCompleteUsingTS(uint32 echoedTS)

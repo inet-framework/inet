@@ -252,7 +252,7 @@ void Igmpv3::configureInterface(InterfaceEntry *ie)
     if (enabled && rt->isMulticastForwardingEnabled()) {
         // start querier on this interface
         EV_INFO << "Sending General Query on interface '" << ie->getInterfaceName() << "', and scheduling next Query to '"
-                << (simTime() + startupQueryInterval) << "'.\n";
+                << (getClockTime() + startupQueryInterval) << "'.\n";
         RouterInterfaceData *routerData = getRouterInterfaceData(ie);
         routerData->state = IGMPV3_RS_QUERIER;
 
@@ -333,7 +333,7 @@ void Igmpv3::processRouterGeneralQueryTimer(cMessage *msg)
     RouterState state = interfaceData->state;
     if (state == IGMPV3_RS_QUERIER || state == IGMPV3_RS_NON_QUERIER) {
         EV_INFO << "Sending General Query on interface '" << ie->getInterfaceName() << "', and scheduling next Query to '"
-                << (simTime() + queryInterval) << "'.\n";
+                << (getClockTime() + queryInterval) << "'.\n";
         interfaceData->state = IGMPV3_RS_QUERIER;
         sendGeneralQuery(interfaceData, queryResponseInterval);
         startTimer(msg, queryInterval);
@@ -491,8 +491,8 @@ void Igmpv3::processHostGroupQueryTimer(cMessage *msg)
 void Igmpv3::startTimer(cMessage *timer, double interval)
 {
     ASSERT(timer);
-    cancelEvent(timer);
-    scheduleAt(simTime() + interval, timer);
+    cancelClockEvent(timer);
+    scheduleClockEvent(getClockTime() + interval, timer);
 }
 
 // --- Methods for processing IGMP messages ---
@@ -547,7 +547,7 @@ void Igmpv3::processQuery(Packet *packet)
     double delay = uniform(0.0, maxRespTime);
 
     // Rules from RFC page 22:
-    if (interfaceData->generalQueryTimer->isScheduled() && interfaceData->generalQueryTimer->getArrivalTime() < simTime() + delay) {
+    if (interfaceData->generalQueryTimer->isScheduled() && interfaceData->generalQueryTimer->getArrivalTime() < getClockTime() + delay) {
         // 1. If there is a pending response to a previous General Query
         //    scheduled sooner than the selected delay, no additional response
         //    needs to be scheduled.
@@ -587,11 +587,11 @@ void Igmpv3::processQuery(Packet *packet)
             //   scheduled to be sent at the earliest of the remaining time for the
             //   pending report and the selected delay.
             EV_DETAIL << "Received Group-Specific Query, scheduling report with delay="
-                      << min(delay, SIMTIME_DBL(groupData->timer->getArrivalTime() - simTime())) << ".\n";
+                      << min(delay, SIMTIME_DBL(groupData->timer->getArrivalTime() - getClockTime())) << ".\n";
 
             sort(queriedSources.begin(), queriedSources.end());
             groupData->queriedSources = queriedSources;
-            if (groupData->timer->getArrivalTime() > simTime() + delay)
+            if (groupData->timer->getArrivalTime() > getClockTime() + delay)
                 startTimer(groupData->timer, delay);
         }
         else {
@@ -604,9 +604,9 @@ void Igmpv3::processQuery(Packet *packet)
             //    report and the selected delay.
             EV_DETAIL << "Received Group-and-Source-Specific Query, combining sources with the sources of pending report, "
                       << "and scheduling a new report with delay="
-                      << min(delay, SIMTIME_DBL(groupData->timer->getArrivalTime() - simTime())) << ".\n";
+                      << min(delay, SIMTIME_DBL(groupData->timer->getArrivalTime() - getClockTime())) << ".\n";
 
-            if (groupData->timer->getArrivalTime() > simTime() + delay) {
+            if (groupData->timer->getArrivalTime() > getClockTime() + delay) {
                 sort(queriedSources.begin(), queriedSources.end());
                 groupData->queriedSources = set_union(groupData->queriedSources, queriedSources);
                 startTimer(groupData->timer, delay);
@@ -739,7 +739,7 @@ void Igmpv3::processReport(Packet *packet)
                     for (auto it = groupData->sources.begin(); it != groupData->sources.end(); ++it) {
                         if (!groupData->hasSourceRecord(it->first)) {
                             SourceRecord *record = groupData->createSourceRecord(it->first);
-                            double grouptimertime = groupData->timer->getArrivalTime().dbl() - simTime().dbl();
+                            double grouptimertime = groupData->timer->getArrivalTime().dbl() - getClockTime().dbl();
                             EV_DETAIL << "Setting source timer of '" << it->first << "' to '" << grouptimertime << "'.\n";
                             startTimer(record->sourceTimer, grouptimertime);
                         }
@@ -932,7 +932,7 @@ void Igmpv3::sendGeneralQuery(RouterInterfaceData *interfaceData, double maxResp
 void Igmpv3::sendGroupSpecificQuery(RouterGroupData *groupData)
 {
     RouterInterfaceData *interfaceData = groupData->parent;
-    bool suppressFlag = groupData->timer->isScheduled() && groupData->timer->getArrivalTime() > simTime() + lastMemberQueryTime;
+    bool suppressFlag = groupData->timer->isScheduled() && groupData->timer->getArrivalTime() > getClockTime() + lastMemberQueryTime;
 
     // Set group timer to LMQT
     startTimer(groupData->timer, lastMemberQueryTime);

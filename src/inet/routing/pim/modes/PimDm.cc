@@ -385,7 +385,7 @@ void PimDm::processGraftRetryTimer(cMessage *timer)
     // Graft_Retry_Period.  It is RECOMMENDED that the router retry a
     // configured number of times before ceasing retries.
     sendGraftPacket(upstream->rpfNeighbor(), route->source, route->group, upstream->getInterfaceId());
-    scheduleAt(simTime() + graftRetryInterval, timer);
+    scheduleClockEvent(getClockTime() + graftRetryInterval, timer);
 }
 
 void PimDm::processOverrideTimer(cMessage *timer)
@@ -475,7 +475,7 @@ void PimDm::processStateRefreshTimer(cMessage *timer)
         sendStateRefreshPacket(originator, route, downstream, upstream->maxTtlSeen);
     }
 
-    scheduleAt(simTime() + stateRefreshInterval, timer);
+    scheduleClockEvent(getClockTime() + stateRefreshInterval, timer);
 }
 
 // ---- process PIM Messages ----
@@ -635,7 +635,7 @@ void PimDm::processPrune(Route *route, int intId, int holdTime, int numRpfNeighb
         // holdtime contained in the Prune(S,G) message if it is greater
         // than the current value.
         EV << "Outgoing interface is already pruned, restart Prune Timer." << endl;
-        if (downstream->pruneTimer->getArrivalTime() < simTime() + holdTime)
+        if (downstream->pruneTimer->getArrivalTime() < getClockTime() + holdTime)
             restartTimer(downstream->pruneTimer, holdTime);
     }
 
@@ -1692,8 +1692,8 @@ void PimDm::processOlistNonEmptyEvent(Route *route)
 
 void PimDm::restartTimer(cMessage *timer, double interval)
 {
-    cancelEvent(timer);
-    scheduleAt(simTime() + interval, timer);
+    cancelClockEvent(timer);
+    scheduleClockEvent(getClockTime() + interval, timer);
 }
 
 void PimDm::cancelAndDeleteTimer(cMessage *& timer)
@@ -1820,14 +1820,14 @@ void PimDm::UpstreamInterface::startGraftRetryTimer()
 {
     graftRetryTimer = new cMessage("PIMGraftRetryTimer", GraftRetryTimer);
     graftRetryTimer->setContextPointer(this);
-    pimdm()->scheduleAt(simTime() + pimdm()->graftRetryInterval, graftRetryTimer);
+    pimdm()->scheduleClockEvent(getClockTime() + pimdm()->graftRetryInterval, graftRetryTimer);
 }
 
 void PimDm::UpstreamInterface::startOverrideTimer()
 {
     overrideTimer = new cMessage("PIMOverrideTimer", UpstreamOverrideTimer);
     overrideTimer->setContextPointer(this);
-    pimdm()->scheduleAt(simTime() + pimdm()->overrideInterval, overrideTimer);
+    pimdm()->scheduleClockEvent(getClockTime() + pimdm()->overrideInterval, overrideTimer);
 }
 
 /**
@@ -1839,7 +1839,7 @@ void PimDm::UpstreamInterface::startSourceActiveTimer()
 {
     sourceActiveTimer = new cMessage("PIMSourceActiveTimer", SourceActiveTimer);
     sourceActiveTimer->setContextPointer(this);
-    pimdm()->scheduleAt(simTime() + pimdm()->sourceActiveInterval, sourceActiveTimer);
+    pimdm()->scheduleClockEvent(getClockTime() + pimdm()->sourceActiveInterval, sourceActiveTimer);
 }
 
 /**
@@ -1851,7 +1851,7 @@ void PimDm::UpstreamInterface::startStateRefreshTimer()
 {
     stateRefreshTimer = new cMessage("PIMStateRefreshTimer", StateRefreshTimer);
     sourceActiveTimer->setContextPointer(this);
-    pimdm()->scheduleAt(simTime() + pimdm()->stateRefreshInterval, stateRefreshTimer);
+    pimdm()->scheduleClockEvent(getClockTime() + pimdm()->stateRefreshInterval, stateRefreshTimer);
 }
 
 PimDm::DownstreamInterface::~DownstreamInterface()
@@ -1869,7 +1869,7 @@ void PimDm::DownstreamInterface::startPruneTimer(double holdTime)
 {
     cMessage *timer = new cMessage("PimPruneTimer", PruneTimer);
     timer->setContextPointer(this);
-    owner->owner->scheduleAt(simTime() + holdTime, timer);
+    owner->owner->scheduleClockEvent(getClockTime() + holdTime, timer);
     pruneTimer = timer;
 }
 
@@ -1877,7 +1877,7 @@ void PimDm::DownstreamInterface::stopPruneTimer()
 {
     if (pruneTimer) {
         if (pruneTimer->isScheduled())
-            owner->owner->cancelEvent(pruneTimer);
+            owner->owner->cancelClockEvent(pruneTimer);
         delete pruneTimer;
         pruneTimer = nullptr;
     }
@@ -1888,7 +1888,7 @@ void PimDm::DownstreamInterface::startPrunePendingTimer(double overrideInterval)
     ASSERT(!prunePendingTimer);
     cMessage *timer = new cMessage("PimPrunePendingTimer", PrunePendingTimer);
     timer->setContextPointer(this);
-    owner->owner->scheduleAt(simTime() + overrideInterval, timer);
+    owner->owner->scheduleClockEvent(getClockTime() + overrideInterval, timer);
     prunePendingTimer = timer;
 }
 
@@ -1896,7 +1896,7 @@ void PimDm::DownstreamInterface::stopPrunePendingTimer()
 {
     if (prunePendingTimer) {
         if (prunePendingTimer->isScheduled())
-            owner->owner->cancelEvent(prunePendingTimer);
+            owner->owner->cancelClockEvent(prunePendingTimer);
         delete prunePendingTimer;
         prunePendingTimer = nullptr;
     }

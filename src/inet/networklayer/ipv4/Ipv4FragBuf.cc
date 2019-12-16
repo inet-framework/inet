@@ -40,7 +40,7 @@ void Ipv4FragBuf::flush()
     bufs.clear();
 }
 
-Packet *Ipv4FragBuf::addFragment(Packet *packet, simtime_t now)
+Packet *Ipv4FragBuf::addFragment(Packet *packet, simclocktime_t now)
 {
     const auto& ipv4Header = packet->peekAtFront<Ipv4Header>();
     // find datagram buffer
@@ -105,7 +105,7 @@ Packet *Ipv4FragBuf::addFragment(Packet *packet, simtime_t now)
     }
 }
 
-void Ipv4FragBuf::purgeStaleFragments(Icmp *icmpModule, simtime_t lastupdate)
+void Ipv4FragBuf::purgeStaleFragments(Icmp *icmpModule, simclocktime_t lastupdate)
 {
     // this method shouldn't be called too often because iteration on
     // an std::map is *very* slow...

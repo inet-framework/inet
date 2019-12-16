@@ -52,7 +52,7 @@ class SctpSimpleMessage extends cPacket
 {
     uint32 dataLen;     //TODO remove it, use set/getDataArraySize() functions only
     uint8_t data[];
-    simtime_t creationTime = 0;
+    simclocktime_t creationTime = 0;
     bool encaps = false;
 }
 

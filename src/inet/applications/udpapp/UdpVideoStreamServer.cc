@@ -129,7 +129,7 @@ void UdpVideoStreamServer::sendStreamData(cMessage *timer)
     if (pktLen > d->bytesLeft)
         pktLen = d->bytesLeft;
     const auto& payload = makeShared<ByteCountChunk>(B(pktLen));
-    payload->addTag<CreationTimeTag>()->setCreationTime(simTime());
+    payload->addTag<CreationTimeTag>()->setCreationTime(getClockTime());
     pkt->insertAtBack(payload);
 
     emit(packetSentSignal, pkt);
@@ -141,8 +141,8 @@ void UdpVideoStreamServer::sendStreamData(cMessage *timer)
 
     // reschedule timer if there's bytes left to send
     if (d->bytesLeft > 0) {
-        simtime_t interval = (*sendInterval);
-        scheduleAt(simTime() + interval, timer);
+        simclocktime_t interval = (*sendInterval);
+        scheduleClockEvent(getClockTime() + interval, timer);
     }
     else {
         streams.erase(it);

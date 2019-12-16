@@ -230,7 +230,7 @@ class INET_API Igmpv2 : public cSimpleModule, public IProtocolRegistrationListen
 
     virtual void processIgmpMessage(Packet *packet);
     virtual void processQuery(InterfaceEntry *ie, Packet *packet);
-    virtual void processGroupQuery(InterfaceEntry *ie, HostGroupData *group, simtime_t maxRespTime);
+    virtual void processGroupQuery(InterfaceEntry *ie, HostGroupData *group, simclocktime_t maxRespTime);
     //virtual void processV1Report(InterfaceEntry *ie, IgmpMessage *msg);
     virtual void processV2Report(InterfaceEntry *ie, Packet *packet);
     virtual void processLeave(InterfaceEntry *ie, Packet *packet);

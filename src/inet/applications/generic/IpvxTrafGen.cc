@@ -109,7 +109,7 @@ void IpvxTrafGen::handleMessageWhenUp(cMessage *msg)
         if (!destAddresses.empty()) {
             sendPacket();
             if (isEnabled())
-                scheduleNextPacket(simTime());
+                scheduleNextPacket(getClockTime());
         }
     }
     else
@@ -125,11 +125,11 @@ void IpvxTrafGen::refreshDisplay() const
     getDisplayString().setTagArg("t", 0, buf);
 }
 
-void IpvxTrafGen::scheduleNextPacket(simtime_t previous)
+void IpvxTrafGen::scheduleNextPacket(simclocktime_t previous)
 {
-    simtime_t next;
+    simclocktime_t next;
     if (previous == -1) {
-        next = simTime() <= startTime ? startTime : simTime();
+        next = getClockTime() <= startTime ? startTime : getClockTime();
         timer->setKind(START);
     }
     else {
@@ -137,12 +137,12 @@ void IpvxTrafGen::scheduleNextPacket(simtime_t previous)
         timer->setKind(NEXT);
     }
     if (stopTime < SIMTIME_ZERO || next < stopTime)
-        scheduleAt(next, timer);
+        scheduleClockEvent(next, timer);
 }
 
 void IpvxTrafGen::cancelNextPacket()
 {
-    cancelEvent(timer);
+    cancelClockEvent(timer);
 }
 
 bool IpvxTrafGen::isEnabled()
@@ -163,7 +163,7 @@ void IpvxTrafGen::sendPacket()
 
     Packet *packet = new Packet(msgName);
     const auto& payload = makeShared<ByteCountChunk>(B(*packetLengthPar));
-    payload->addTag<CreationTimeTag>()->setCreationTime(simTime());
+    payload->addTag<CreationTimeTag>()->setCreationTime(getClockTime());
     packet->insertAtBack(payload);
 
     L3Address destAddr = chooseDestAddr();

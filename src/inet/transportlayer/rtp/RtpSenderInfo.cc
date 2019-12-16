@@ -68,7 +68,7 @@ RtpSenderInfo *RtpSenderInfo::dup() const
     return new RtpSenderInfo(*this);
 }
 
-void RtpSenderInfo::processRTPPacket(Packet *packet, int id, simtime_t arrivalTime)
+void RtpSenderInfo::processRTPPacket(Packet *packet, int id, simclocktime_t arrivalTime)
 {
     const auto& rtpHeader = packet->peekAtFront<RtpHeader>();
     _packetsSent++;
@@ -80,11 +80,11 @@ void RtpSenderInfo::processRTPPacket(Packet *packet, int id, simtime_t arrivalTi
     RtpParticipantInfo::processRTPPacket(packet, id, arrivalTime);
 }
 
-void RtpSenderInfo::processReceptionReport(const ReceptionReport *report, simtime_t arrivalTime)
+void RtpSenderInfo::processReceptionReport(const ReceptionReport *report, simclocktime_t arrivalTime)
 {
 }
 
-SenderReport *RtpSenderInfo::senderReport(simtime_t now)
+SenderReport *RtpSenderInfo::senderReport(simclocktime_t now)
 {
     if (isSender()) {
         SenderReport *senderReport = new SenderReport();
@@ -104,7 +104,7 @@ SenderReport *RtpSenderInfo::senderReport(simtime_t now)
     }
 }
 
-void RtpSenderInfo::setStartTime(simtime_t startTime)
+void RtpSenderInfo::setStartTime(simclocktime_t startTime)
 {
     _startTime = startTime;
 }

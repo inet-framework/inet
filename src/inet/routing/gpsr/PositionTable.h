@@ -35,7 +35,7 @@ namespace inet {
 class INET_API PositionTable
 {
   private:
-    typedef std::pair<simtime_t, Coord> AddressToPositionMapValue;
+    typedef std::pair<simclocktime_t, Coord> AddressToPositionMapValue;
     typedef std::map<L3Address, AddressToPositionMapValue> AddressToPositionMap;
     AddressToPositionMap addressToPositionMap;
 
@@ -49,11 +49,11 @@ class INET_API PositionTable
     void setPosition(const L3Address& address, const Coord& coord);
 
     void removePosition(const L3Address& address);
-    void removeOldPositions(simtime_t timestamp);
+    void removeOldPositions(simclocktime_t timestamp);
 
     void clear();
 
-    simtime_t getOldestPosition() const;
+    simclocktime_t getOldestPosition() const;
 
     friend std::ostream& operator << (std::ostream& o, const PositionTable& t);
 };

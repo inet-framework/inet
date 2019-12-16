@@ -43,7 +43,7 @@ void TokenBucketMeter::initialize(int stage)
         const char *cirStr = par("cir");
         IInterfaceTable *ift = findModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
         CIR = parseInformationRate(cirStr, "cir", ift, *this, 0);
-        lastUpdateTime = simTime();
+        lastUpdateTime = getClockTime();
     }
 }
 
@@ -74,7 +74,7 @@ void TokenBucketMeter::refreshDisplay() const
 int TokenBucketMeter::meterPacket(Packet *packet)
 {
     // update token buckets
-    simtime_t currentTime = simTime();
+    simclocktime_t currentTime = getClockTime();
     long numTokens = (long)(SIMTIME_DBL(currentTime - lastUpdateTime) * CIR);
     lastUpdateTime = currentTime;
     if (Tc + numTokens <= CBS)

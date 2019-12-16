@@ -33,7 +33,7 @@ class ProbabilisticBroadcastHeader extends NetworkHeaderBase
     long      id;    // Unique message ID ~ f(node address, unique number in node scope).
     int       nbHops;
     IpProtocolId   protocolId;
-    simtime_t appTtl;   // Message time-to-live set by application.
+    simclocktime_t appTtl;   // Message time-to-live set by application.
     L3Address   initialSrcAddr;
     L3Address   finalDestAddr;
     B payloadLengthField;

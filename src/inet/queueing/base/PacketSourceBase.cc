@@ -62,7 +62,7 @@ const char *PacketSourceBase::createPacketName(const Ptr<const Chunk>& data) con
                     result = std::to_string(bitCountChunk->getData());
                 break;
             case 't':
-                result = simTime().str();
+                result = getClockTime().str();
                 break;
             case 'e':
                 result = std::to_string(getSimulation()->getEventNumber());
@@ -117,7 +117,7 @@ Ptr<Chunk> PacketSourceBase::createPacketContent() const
 Packet *PacketSourceBase::createPacket()
 {
     auto packetContent = createPacketContent();
-    packetContent->addTag<CreationTimeTag>()->setCreationTime(simTime());
+    packetContent->addTag<CreationTimeTag>()->setCreationTime(getClockTime());
     auto packetName = createPacketName(packetContent);
     auto packet = new Packet(packetName, packetContent);
     numProcessedPackets++;

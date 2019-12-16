@@ -66,15 +66,15 @@ void TcpSessionApp::initialize(int stage)
 
 void TcpSessionApp::handleStartOperation(LifecycleOperation *operation)
 {
-    if (simTime() <= tOpen) {
+    if (getClockTime() <= tOpen) {
         timeoutMsg->setKind(MSGKIND_CONNECT);
-        scheduleAt(tOpen, timeoutMsg);
+        scheduleClockEvent(tOpen, timeoutMsg);
     }
 }
 
 void TcpSessionApp::handleStopOperation(LifecycleOperation *operation)
 {
-    cancelEvent(timeoutMsg);
+    cancelClockEvent(timeoutMsg);
     if (socket.isOpen())
         close();
     delayActiveOperationFinish(par("stopOperationTimeout"));
@@ -82,7 +82,7 @@ void TcpSessionApp::handleStopOperation(LifecycleOperation *operation)
 
 void TcpSessionApp::handleCrashOperation(LifecycleOperation *operation)
 {
-    cancelEvent(timeoutMsg);
+    cancelClockEvent(timeoutMsg);
     if (operation->getRootModule() != getContainingNode(this))
         socket.destroy();
 }
@@ -117,12 +117,12 @@ void TcpSessionApp::sendData()
     sendPacket(createDataPacket(numBytes));
 
     if (++commandIndex < (int)commands.size()) {
-        simtime_t tSend = commands[commandIndex].tSend;
-        scheduleAt(std::max(tSend, simTime()), timeoutMsg);
+        simclocktime_t tSend = commands[commandIndex].tSend;
+        scheduleClockEvent(std::max(tSend, getClockTime()), timeoutMsg);
     }
     else {
         timeoutMsg->setKind(MSGKIND_CLOSE);
-        scheduleAt(std::max(tClose, simTime()), timeoutMsg);
+        scheduleClockEvent(std::max(tClose, getClockTime()), timeoutMsg);
     }
 }
 
@@ -149,7 +149,7 @@ Packet *TcpSessionApp::createDataPacket(long sendBytes)
     }
     else
         throw cRuntimeError("Invalid data transfer mode: %d", dataTransferMode);
-    payload->addTag<CreationTimeTag>()->setCreationTime(simTime());
+    payload->addTag<CreationTimeTag>()->setCreationTime(getClockTime());
     Packet *packet = new Packet("data1");
     packet->insertAtBack(payload);
     return packet;
@@ -161,8 +161,8 @@ void TcpSessionApp::socketEstablished(TcpSocket *socket)
 
     ASSERT(commandIndex == 0);
     timeoutMsg->setKind(MSGKIND_SEND);
-    simtime_t tSend = commands[commandIndex].tSend;
-    scheduleAt(std::max(tSend, simTime()), timeoutMsg);
+    simclocktime_t tSend = commands[commandIndex].tSend;
+    scheduleClockEvent(std::max(tSend, getClockTime()), timeoutMsg);
 }
 
 void TcpSessionApp::socketDataArrived(TcpSocket *socket, Packet *msg, bool urgent)
@@ -173,7 +173,7 @@ void TcpSessionApp::socketDataArrived(TcpSocket *socket, Packet *msg, bool urgen
 void TcpSessionApp::socketClosed(TcpSocket *socket)
 {
     TcpAppBase::socketClosed(socket);
-    cancelEvent(timeoutMsg);
+    cancelClockEvent(timeoutMsg);
     if (operationalState == State::STOPPING_OPERATION && !this->socket.isOpen())
         startActiveOperationExtraTimeOrFinish(par("stopOperationExtraTime"));
 }
@@ -181,7 +181,7 @@ void TcpSessionApp::socketClosed(TcpSocket *socket)
 void TcpSessionApp::socketFailure(TcpSocket *socket, int code)
 {
     TcpAppBase::socketFailure(socket, code);
-    cancelEvent(timeoutMsg);
+    cancelClockEvent(timeoutMsg);
 }
 
 void TcpSessionApp::parseScript(const char *script)
@@ -198,7 +198,7 @@ void TcpSessionApp::parseScript(const char *script)
             break;
 
         const char *s0 = s;
-        simtime_t tSend = strtod(s, &const_cast<char *&>(s));
+        simclocktime_t tSend = strtod(s, &const_cast<char *&>(s));
 
         if (s == s0)
             throw cRuntimeError("Syntax error in script: simulation time expected");

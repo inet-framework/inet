@@ -75,7 +75,7 @@ RtpReceiverInfo *RtpReceiverInfo::dup() const
     return new RtpReceiverInfo(*this);
 }
 
-void RtpReceiverInfo::processRTPPacket(Packet *packet, int id, simtime_t arrivalTime)
+void RtpReceiverInfo::processRTPPacket(Packet *packet, int id, simclocktime_t arrivalTime)
 {
     const auto& rtpHeader = packet->peekAtFront<RtpHeader>();
     // this endsystem sends, it isn't inactive
@@ -119,7 +119,7 @@ void RtpReceiverInfo::processRTPPacket(Packet *packet, int id, simtime_t arrival
         }
         // calculate interarrival jitter
         if (_clockRate != 0) {
-            simtime_t d = rtpHeader->getTimeStamp() - _lastPacketRTPTimeStamp
+            simclocktime_t d = rtpHeader->getTimeStamp() - _lastPacketRTPTimeStamp
                 - (arrivalTime - _lastPacketArrivalTime) * (double)_clockRate;
             if (d < 0)
                 d = -d;
@@ -133,7 +133,7 @@ void RtpReceiverInfo::processRTPPacket(Packet *packet, int id, simtime_t arrival
     RtpParticipantInfo::processRTPPacket(packet, id, arrivalTime);
 }
 
-void RtpReceiverInfo::processSenderReport(SenderReport *report, simtime_t arrivalTime)
+void RtpReceiverInfo::processSenderReport(SenderReport *report, simclocktime_t arrivalTime)
 {
     _lastSenderReportArrivalTime = arrivalTime;
     if (_lastSenderReportRTPTimeStamp == 0) {
@@ -153,14 +153,14 @@ void RtpReceiverInfo::processSenderReport(SenderReport *report, simtime_t arriva
     delete report;
 }
 
-void RtpReceiverInfo::processSDESChunk(const SdesChunk *sdesChunk, simtime_t arrivalTime)
+void RtpReceiverInfo::processSDESChunk(const SdesChunk *sdesChunk, simclocktime_t arrivalTime)
 {
     RtpParticipantInfo::processSDESChunk(sdesChunk, arrivalTime);
     _itemsReceived++;
     _inactiveIntervals = 0;
 }
 
-ReceptionReport *RtpReceiverInfo::receptionReport(simtime_t now)
+ReceptionReport *RtpReceiverInfo::receptionReport(simclocktime_t now)
 {
     if (isSender()) {
         ReceptionReport *receptionReport = new ReceptionReport();
@@ -200,7 +200,7 @@ ReceptionReport *RtpReceiverInfo::receptionReport(simtime_t now)
         return nullptr;
 }
 
-void RtpReceiverInfo::nextInterval(simtime_t now)
+void RtpReceiverInfo::nextInterval(simclocktime_t now)
 {
     _inactiveIntervals++;
     if (_inactiveIntervals == MAX_INACTIVE_INTERVALS) {
@@ -221,7 +221,7 @@ bool RtpReceiverInfo::isValid()
     return _itemsReceived >= MAX_INACTIVE_INTERVALS;
 }
 
-bool RtpReceiverInfo::toBeDeleted(simtime_t now)
+bool RtpReceiverInfo::toBeDeleted(simclocktime_t now)
 {
     // an RTP system should be removed from the list of known systems
     // when it hasn't been validated and hasn't been active for

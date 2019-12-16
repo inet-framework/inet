@@ -48,7 +48,7 @@ class INET_API RsvpTe : public RoutingProtocolBase, public IScriptable
         SenderTspecObj tspec;
 
         EroVector ERO;
-        simtime_t max_delay;
+        simclocktime_t max_delay;
 
         int owner;
         bool permanent;
@@ -166,9 +166,9 @@ class INET_API RsvpTe : public RoutingProtocolBase, public IScriptable
 
     typedef std::vector<HelloState> HelloVector;
 
-    simtime_t helloInterval;
-    simtime_t helloTimeout;
-    simtime_t retryInterval;
+    simclocktime_t helloInterval;
+    simclocktime_t helloTimeout;
+    simclocktime_t retryInterval;
 
   protected:
     Ted *tedmod = nullptr;
@@ -220,19 +220,19 @@ class INET_API RsvpTe : public RoutingProtocolBase, public IScriptable
     virtual void refreshResv(ResvStateBlock *rsbEle, Ipv4Address PHOP);
     virtual void commitResv(ResvStateBlock *rsb);
 
-    virtual void scheduleRefreshTimer(PathStateBlock *psbEle, simtime_t delay);
+    virtual void scheduleRefreshTimer(PathStateBlock *psbEle, simclocktime_t delay);
     virtual void scheduleTimeout(PathStateBlock *psbEle);
-    virtual void scheduleRefreshTimer(ResvStateBlock *rsbEle, simtime_t delay);
+    virtual void scheduleRefreshTimer(ResvStateBlock *rsbEle, simclocktime_t delay);
     virtual void scheduleCommitTimer(ResvStateBlock *rsbEle);
     virtual void scheduleTimeout(ResvStateBlock *rsbEle);
 
     virtual void sendPathErrorMessage(PathStateBlock *psb, int errCode);
     virtual void sendPathErrorMessage(SessionObj session, SenderTemplateObj sender, SenderTspecObj tspec, Ipv4Address nextHop, int errCode);
     virtual void sendPathTearMessage(Ipv4Address peerIP, const SessionObj& session, const SenderTemplateObj& sender, Ipv4Address LIH, Ipv4Address NHOP, bool force);
-    virtual void sendPathNotify(int handler, const SessionObj& session, const SenderTemplateObj& sender, int status, simtime_t delay);
+    virtual void sendPathNotify(int handler, const SessionObj& session, const SenderTemplateObj& sender, int status, simclocktime_t delay);
 
     virtual void setupHello();
-    virtual void startHello(Ipv4Address peer, simtime_t delay);
+    virtual void startHello(Ipv4Address peer, simclocktime_t delay);
     virtual void removeHello(HelloState *h);
 
     virtual void recoveryEvent(Ipv4Address peer);

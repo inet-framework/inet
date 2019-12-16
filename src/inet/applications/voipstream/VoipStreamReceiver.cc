@@ -148,7 +148,7 @@ void VoipStreamReceiver::Connection::writeAudioFrame(uint8_t *inbuf, int inbytes
         throw cRuntimeError("Error in avcodec_decode_audio4(): returns: %d, gotFrame: %d", consumedBytes, gotFrame);
     if (consumedBytes != inbytes)
         throw cRuntimeError("Model error: remained bytes after avcodec_decode_audio4(): %d = ( %d - %d )", inbytes - consumedBytes, inbytes, consumedBytes);
-    simtime_t decodedTime(1.0 * decodedFrame.nb_samples / sampleRate);
+    simclocktime_t decodedTime(1.0 * decodedFrame.nb_samples / sampleRate);
     lastPacketFinish += decodedTime;
     if (outFile.isOpen())
         outFile.write(decodedFrame.data[0], decodedFrame.linesize[0]);
@@ -179,7 +179,7 @@ void VoipStreamReceiver::createConnection(Packet *pk)
     curConn.sampleRate = vp->getSampleRate();
     curConn.transmitBitrate = vp->getTransmitBitrate();
     curConn.samplesPerPacket = vp->getSamplesPerPacket();
-    curConn.lastPacketFinish = simTime() + playoutDelay;
+    curConn.lastPacketFinish = getClockTime() + playoutDelay;
 
     curConn.pCodecDec = avcodec_find_decoder(curConn.codec);
     if (curConn.pCodecDec == nullptr)
@@ -244,8 +244,8 @@ void VoipStreamReceiver::decodePacket(Packet *pk)
     if (newSeqNo > curConn.seqNo + 1)
         emit(lostPacketsSignal, newSeqNo - (curConn.seqNo + 1));
 
-    if (simTime() > curConn.lastPacketFinish) {
-        int lostSamples = ceil(SIMTIME_DBL((simTime() - curConn.lastPacketFinish) * curConn.sampleRate));
+    if (getClockTime() > curConn.lastPacketFinish) {
+        int lostSamples = ceil(SIMTIME_DBL((getClockTime() - curConn.lastPacketFinish) * curConn.sampleRate));
         ASSERT(lostSamples > 0);
         EV_INFO << "Lost " << lostSamples << " samples\n";
         emit(lostSamplesSignal, lostSamples);

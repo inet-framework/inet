@@ -43,7 +43,7 @@ static std::ostream& operator<<(std::ostream& out, const Arp::ArpCacheEntry& e)
     if (e.pending)
         out << "pending (" << e.numRetries << " retries)";
     else
-        out << "MAC:" << e.macAddress << "  age:" << floor(simTime() - e.lastUpdate) << "s";
+        out << "MAC:" << e.macAddress << "  age:" << floor(getClockTime() - e.lastUpdate) << "s";
     return out;
 }
 
@@ -155,7 +155,7 @@ void Arp::initiateArpResolution(ArpCacheEntry *entry)
     // start timer
     cMessage *msg = entry->timer = new cMessage("ARP timeout");
     msg->setContextPointer(entry);
-    scheduleAt(simTime() + retryTimeout, msg);
+    scheduleClockEvent(getClockTime() + retryTimeout, msg);
 
     numResolutions++;
     Notification signal(nextHopAddr, MacAddress::UNSPECIFIED_ADDRESS, entry->ie);
@@ -200,7 +200,7 @@ void Arp::requestTimedOut(cMessage *selfmsg)
         Ipv4Address nextHopAddr = entry->myIter->first;
         EV_INFO << "ARP request for " << nextHopAddr << " timed out, resending\n";
         sendArpRequest(entry->ie, nextHopAddr);
-        scheduleAt(simTime() + retryTimeout, selfmsg);
+        scheduleClockEvent(getClockTime() + retryTimeout, selfmsg);
         return;
     }
 
@@ -386,12 +386,12 @@ void Arp::updateArpCache(ArpCacheEntry *entry, const MacAddress& macAddress)
     // update entry
     if (entry->pending) {
         entry->pending = false;
-        delete cancelEvent(entry->timer);
+        delete cancelClockEvent(entry->timer);
         entry->timer = nullptr;
         entry->numRetries = 0;
     }
     entry->macAddress = macAddress;
-    entry->lastUpdate = simTime();
+    entry->lastUpdate = getClockTime();
     Notification signal(entry->myIter->first, macAddress, entry->ie);
     emit(arpResolutionCompletedSignal, &signal);
 }
@@ -419,7 +419,7 @@ MacAddress Arp::resolveL3Address(const L3Address& address, const InterfaceEntry 
         EV << "ARP resolution for " << addr << " is already pending\n";
         return MacAddress::UNSPECIFIED_ADDRESS;
     }
-    else if (it->second->lastUpdate + cacheTimeout >= simTime()) {
+    else if (it->second->lastUpdate + cacheTimeout >= getClockTime()) {
         return it->second->macAddress;
     }
     else {
@@ -438,7 +438,7 @@ L3Address Arp::getL3AddressFor(const MacAddress& macAddr) const
     if (macAddr.isUnspecified())
         return Ipv4Address::UNSPECIFIED_ADDRESS;
 
-    simtime_t now = simTime();
+    simclocktime_t now = getClockTime();
     for (const auto & elem : arpCache)
         if (elem.second->macAddress == macAddr && elem.second->lastUpdate + cacheTimeout >= now)
             return elem.first;

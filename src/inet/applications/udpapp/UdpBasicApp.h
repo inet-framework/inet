@@ -40,8 +40,8 @@ class INET_API UdpBasicApp : public ApplicationBase, public UdpSocket::ICallback
     std::vector<L3Address> destAddresses;
     std::vector<std::string> destAddressStr;
     int localPort = -1, destPort = -1;
-    simtime_t startTime;
-    simtime_t stopTime;
+    simclocktime_t startTime;
+    simclocktime_t stopTime;
     bool dontFragment = false;
     const char *packetName = nullptr;
 

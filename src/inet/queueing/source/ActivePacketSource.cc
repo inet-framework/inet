@@ -54,7 +54,7 @@ void ActivePacketSource::handleMessage(cMessage *message)
 
 void ActivePacketSource::scheduleProductionTimer()
 {
-    scheduleAt(simTime() + productionIntervalParameter->doubleValue(), productionTimer);
+    scheduleClockEvent(getClockTime() + productionIntervalParameter->doubleValue(), productionTimer);
 }
 
 void ActivePacketSource::producePacket()

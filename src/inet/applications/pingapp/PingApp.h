@@ -55,8 +55,8 @@ class INET_API PingApp : public ApplicationBase, public INetworkSocket::ICallbac
     int hopLimit = 0;
     int count = 0;
     int destAddrIdx = -1;
-    simtime_t startTime;
-    simtime_t stopTime;
+    simclocktime_t startTime;
+    simclocktime_t stopTime;
     CrcMode crcMode = CRC_MODE_UNDEFINED;
     bool printPing = false;
     bool continuous = false;
@@ -67,10 +67,10 @@ class INET_API PingApp : public ApplicationBase, public INetworkSocket::ICallbac
     int pid = 0;    // to determine which hosts are associated with the responses
     cMessage *timer = nullptr;    // to schedule the next Ping request
     NodeStatus *nodeStatus = nullptr;    // lifecycle
-    simtime_t lastStart;    // the last time when the app was started (lifecycle)
+    simclocktime_t lastStart;    // the last time when the app was started (lifecycle)
     long sendSeqNo = 0;    // to match the response with the request that caused the response
     long expectedReplySeqNo = 0;
-    simtime_t sendTimeHistory[PING_HISTORY_SIZE];    // times of when the requests were sent
+    simclocktime_t sendTimeHistory[PING_HISTORY_SIZE];    // times of when the requests were sent
     bool pongReceived[PING_HISTORY_SIZE];
 
     static const std::map<const Protocol *, const Protocol *> l3Echo;
@@ -98,13 +98,13 @@ class INET_API PingApp : public ApplicationBase, public INetworkSocket::ICallbac
 
     virtual void parseDestAddressesPar();
     virtual void startSendingPingRequests();
-    virtual void scheduleNextPingRequest(simtime_t previous, bool withSleep);
+    virtual void scheduleNextPingRequest(simclocktime_t previous, bool withSleep);
     virtual void cancelNextPingRequest();
     virtual bool isEnabled();
     virtual std::vector<L3Address> getAllAddresses();
     virtual void sendPingRequest();
     virtual void processPingResponse(int identifier, int seqNumber, Packet *packet);
-    virtual void countPingResponse(int bytes, long seqNo, simtime_t rtt, bool isDup);
+    virtual void countPingResponse(int bytes, long seqNo, simclocktime_t rtt, bool isDup);
 
     // Lifecycle methods
     virtual void handleStartOperation(LifecycleOperation *operation) override;

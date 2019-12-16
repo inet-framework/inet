@@ -46,9 +46,9 @@ private:
   private:
     std::vector<const char *> findInternalPeers(cXMLElementList& ASConfig);
     void loadASConfig(cXMLElementList& ASConfig);
-    void loadEbgpSessionConfig(cXMLElementList& ASConfig, cXMLElementList& sessionList, simtime_t *delayTab);
+    void loadEbgpSessionConfig(cXMLElementList& ASConfig, cXMLElementList& sessionList, simclocktime_t *delayTab);
     AsId findMyAS(cXMLElementList& ASList, int& outRouterPosition);
-    void loadTimerConfig(cXMLElementList& timerConfig, simtime_t *delayTab);
+    void loadTimerConfig(cXMLElementList& timerConfig, simclocktime_t *delayTab);
     int isInInterfaceTable(IInterfaceTable *ifTable, Ipv4Address addr);
     int isInInterfaceTable(IInterfaceTable *ifTable, std::string ifName);
     unsigned int calculateStartDelay(int rtListSize, unsigned char rtPosition, unsigned char rtPeerPosition);

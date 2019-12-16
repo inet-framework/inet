@@ -84,7 +84,7 @@ class INET_API Ipv6 : public cSimpleModule, public NetfilterBase, public Lifecyc
     // working vars
     unsigned int curFragmentId = -1;    // counter, used to assign unique fragmentIds to datagrams
     Ipv6FragBuf fragbuf;    // fragmentation reassembly buffer
-    simtime_t lastCheckTime;    // when fragbuf was last checked for state fragments
+    simclocktime_t lastCheckTime;    // when fragbuf was last checked for state fragments
     std::set<const Protocol *> upperProtocols;    // where to send packets after decapsulation
     std::map<int, SocketDescriptor *> socketIdToSocketDescriptor;
 

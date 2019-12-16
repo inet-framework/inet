@@ -68,7 +68,7 @@ RedDropper::RedResult RedDropper::doRandomEarlyDetection(Packet *packet)
     }
     else {
         // TD: Added behaviour for empty queue.
-        const double m = SIMTIME_DBL(simTime() - q_time) * pkrate;
+        const double m = SIMTIME_DBL(getClockTime() - q_time) * pkrate;
         avg = pow(1 - wq, m) * avg;
     }
 
@@ -145,7 +145,7 @@ void RedDropper::pushOrSendPacket(Packet *packet, cGate *gate, IPassivePacketSin
     // TD: Set the time stamp q_time when the queue gets empty.
     const int queueLength = collection->getNumPackets();
     if (queueLength == 0)
-        q_time = simTime();
+        q_time = getClockTime();
 }
 
 } // namespace queueing

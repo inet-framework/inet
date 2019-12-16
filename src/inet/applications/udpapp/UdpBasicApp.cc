@@ -119,7 +119,7 @@ void UdpBasicApp::sendPacket()
     const auto& payload = makeShared<ApplicationPacket>();
     payload->setChunkLength(B(par("messageLength")));
     payload->setSequenceNumber(numSent);
-    payload->addTag<CreationTimeTag>()->setCreationTime(simTime());
+    payload->addTag<CreationTimeTag>()->setCreationTime(getClockTime());
     packet->insertAtBack(payload);
     L3Address destAddr = chooseDestAddr();
     emit(packetSentSignal, packet);
@@ -154,7 +154,7 @@ void UdpBasicApp::processStart()
     else {
         if (stopTime >= SIMTIME_ZERO) {
             selfMsg->setKind(STOP);
-            scheduleAt(stopTime, selfMsg);
+            scheduleClockEvent(stopTime, selfMsg);
         }
     }
 }
@@ -162,14 +162,14 @@ void UdpBasicApp::processStart()
 void UdpBasicApp::processSend()
 {
     sendPacket();
-    simtime_t d = simTime() + par("sendInterval");
+    simclocktime_t d = getClockTime() + par("sendInterval");
     if (stopTime < SIMTIME_ZERO || d < stopTime) {
         selfMsg->setKind(SEND);
-        scheduleAt(d, selfMsg);
+        scheduleClockEvent(d, selfMsg);
     }
     else {
         selfMsg->setKind(STOP);
-        scheduleAt(stopTime, selfMsg);
+        scheduleClockEvent(stopTime, selfMsg);
     }
 }
 
@@ -240,23 +240,23 @@ void UdpBasicApp::processPacket(Packet *pk)
 
 void UdpBasicApp::handleStartOperation(LifecycleOperation *operation)
 {
-    simtime_t start = std::max(startTime, simTime());
+    simclocktime_t start = std::max(startTime, getClockTime());
     if ((stopTime < SIMTIME_ZERO) || (start < stopTime) || (start == stopTime && startTime == stopTime)) {
         selfMsg->setKind(START);
-        scheduleAt(start, selfMsg);
+        scheduleClockEvent(start, selfMsg);
     }
 }
 
 void UdpBasicApp::handleStopOperation(LifecycleOperation *operation)
 {
-    cancelEvent(selfMsg);
+    cancelClockEvent(selfMsg);
     socket.close();
     delayActiveOperationFinish(par("stopOperationTimeout"));
 }
 
 void UdpBasicApp::handleCrashOperation(LifecycleOperation *operation)
 {
-    cancelEvent(selfMsg);
+    cancelClockEvent(selfMsg);
     socket.destroy();         //TODO  in real operating systems, program crash detected by OS and OS closes sockets of crashed programs.
 }
 

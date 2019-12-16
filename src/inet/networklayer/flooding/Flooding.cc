@@ -110,7 +110,7 @@ void Flooding::handleUpperPacket(Packet *packet)
         if (bcMsgs.size() >= bcMaxEntries) {
             //serach the broadcast list of outdated entries and delete them
             for (auto it = bcMsgs.begin(); it != bcMsgs.end(); ) {
-                if (it->delTime < simTime())
+                if (it->delTime < getClockTime())
                     it = bcMsgs.erase(it);
                 else
                     ++it;
@@ -121,7 +121,7 @@ void Flooding::handleUpperPacket(Packet *packet)
                 bcMsgs.pop_front();
             }
         }
-        bcMsgs.push_back(Bcast(floodHeader->getSeqNum(), floodHeader->getSourceAddress(), simTime() + bcDelTime));
+        bcMsgs.push_back(Bcast(floodHeader->getSeqNum(), floodHeader->getSourceAddress(), getClockTime() + bcDelTime));
     }
     //there is no routing so all messages are broadcast for the mac layer
     sendDown(packet);
@@ -229,13 +229,13 @@ bool Flooding::notBroadcasted(const FloodingHeader *msg)
 
     //serach the broadcast list of outdated entries and delete them
     for (auto it = bcMsgs.begin(); it != bcMsgs.end(); ) {
-        if (it->delTime < simTime()) {
+        if (it->delTime < getClockTime()) {
             it = bcMsgs.erase(it);
         }
         //message was already broadcasted
         else if ((it->srcAddr == msg->getSourceAddress()) && (it->seqNum == msg->getSeqNum())) {
             // update entry
-            it->delTime = simTime() + bcDelTime;
+            it->delTime = getClockTime() + bcDelTime;
             return false;
         }
         else
@@ -248,7 +248,7 @@ bool Flooding::notBroadcasted(const FloodingHeader *msg)
         bcMsgs.pop_front();
     }
 
-    bcMsgs.push_back(Bcast(msg->getSeqNum(), msg->getSourceAddress(), simTime() + bcDelTime));
+    bcMsgs.push_back(Bcast(msg->getSeqNum(), msg->getSourceAddress(), getClockTime() + bcDelTime));
     return true;
 }
 

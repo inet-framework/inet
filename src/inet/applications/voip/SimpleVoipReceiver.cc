@@ -55,7 +55,7 @@ void SimpleVoipReceiver::TalkspurtInfo::addPacket(const SimpleVoipPacket *pk)
     VoipPacketInfo packet;
     packet.packetID = pk->getPacketID();
     packet.creationTime = pk->getVoipTimestamp();
-    packet.arrivalTime = simTime();
+    packet.arrivalTime = getClockTime();
     packets.push_back(packet);
 }
 
@@ -107,8 +107,8 @@ void SimpleVoipReceiver::startTalkspurt(Packet *packet)
 {
     const auto& voice = packet->peekAtFront<SimpleVoipPacket>();
     currentTalkspurt.startTalkspurt(voice.get());
-    simtime_t endTime = simTime() + playoutDelay + (currentTalkspurt.talkspurtNumPackets - voice->getPacketID()) * currentTalkspurt.voiceDuration + mosSpareTime;
-    scheduleAt(endTime, selfTalkspurtFinished);
+    simclocktime_t endTime = getClockTime() + playoutDelay + (currentTalkspurt.talkspurtNumPackets - voice->getPacketID()) * currentTalkspurt.voiceDuration + mosSpareTime;
+    scheduleClockEvent(endTime, selfTalkspurtFinished);
 }
 
 void SimpleVoipReceiver::handleMessage(cMessage *msg)
@@ -136,7 +136,7 @@ void SimpleVoipReceiver::socketDataArrived(UdpSocket *socket, Packet *packet)
     else if (voice->getTalkspurtID() > currentTalkspurt.talkspurtID) {
         // old talkspurt finished, new talkspurt started
         if (currentTalkspurt.isActive()) {
-            cancelEvent(selfTalkspurtFinished);
+            cancelClockEvent(selfTalkspurtFinished);
             evaluateTalkspurt(false);
         }
         startTalkspurt(packet);
@@ -156,7 +156,7 @@ void SimpleVoipReceiver::socketDataArrived(UdpSocket *socket, Packet *packet)
 
     EV_DEBUG << "PACKET ARRIVED: TALKSPURT " << voice->getTalkspurtID() << " PACKET " << voice->getPacketID() << "\n\n";
 
-    simtime_t delay = packet->getArrivalTime() - voice->getVoipTimestamp();
+    simclocktime_t delay = packet->getArrivalTime() - voice->getVoipTimestamp();
     emit(voipPacketDelaySignal, delay);
 
     delete packet;
@@ -175,8 +175,8 @@ void SimpleVoipReceiver::evaluateTalkspurt(bool finish)
 
     VoipPacketInfo firstPacket = currentTalkspurt.packets.front();
 
-    simtime_t firstPlayoutTime = firstPacket.arrivalTime + playoutDelay;
-    simtime_t mouthToEarDelay = firstPlayoutTime - firstPacket.creationTime;
+    simclocktime_t firstPlayoutTime = firstPacket.arrivalTime + playoutDelay;
+    simclocktime_t mouthToEarDelay = firstPlayoutTime - firstPacket.creationTime;
     unsigned int firstPacketId = firstPacket.packetID;
     unsigned int talkspurtNumPackets = currentTalkspurt.talkspurtNumPackets;
     unsigned int playoutLoss = 0;
@@ -203,8 +203,8 @@ void SimpleVoipReceiver::evaluateTalkspurt(bool finish)
     for (unsigned int y = 0; y < talkspurtNumPackets; y++)
         isArrived[y] = false;
 
-    simtime_t lastLateness = -playoutDelay;    // arrival time - playout time
-    simtime_t maxLateness = -playoutDelay;
+    simclocktime_t lastLateness = -playoutDelay;    // arrival time - playout time
+    simclocktime_t maxLateness = -playoutDelay;
 
     // compute channelLoss, playoutLoss and tailDropLoss, needed for MOS and statistics
     PacketsList playoutQueue;
@@ -333,7 +333,7 @@ double SimpleVoipReceiver::eModel(double delay, double lossRate)
 void SimpleVoipReceiver::finish()
 {
     // evaluate last talkspurt
-    cancelEvent(selfTalkspurtFinished);
+    cancelClockEvent(selfTalkspurtFinished);
     if (currentTalkspurt.isActive())
         evaluateTalkspurt(true);
 }

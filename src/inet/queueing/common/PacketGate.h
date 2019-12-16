@@ -37,7 +37,7 @@ class INET_API PacketGate : public PacketProcessorBase, public IPacketSource, pu
     IActivePacketSink *collector = nullptr;
 
     int changeIndex = 0;
-    std::vector<simtime_t> changeTimes;
+    std::vector<simclocktime_t> changeTimes;
     bool isOpen_ = false;
 
     cMessage *changeTimer = nullptr;

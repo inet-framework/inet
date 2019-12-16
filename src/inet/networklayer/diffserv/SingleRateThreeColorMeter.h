@@ -43,7 +43,7 @@ class INET_API SingleRateThreeColorMeter : public PacketMeterBase
 
     long Tc = 0;    // token bucket for committed burst
     long Te = 0;    // token bucket for excess burst
-    simtime_t lastUpdateTime;
+    simclocktime_t lastUpdateTime;
 
     int numRcvd = 0;
     int numYellow = 0;

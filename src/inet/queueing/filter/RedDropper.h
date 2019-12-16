@@ -39,7 +39,7 @@ class INET_API RedDropper : public PacketFilterBase
     double count = NaN;
 
     double avg = 0.0;
-    simtime_t q_time;
+    simclocktime_t q_time;
 
     int packetCapacity = -1;
     bool useEcn = false;

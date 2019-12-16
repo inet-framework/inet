@@ -91,9 +91,9 @@ class DhcpOptions extends cObject
     Ipv4Address dns[]; // list of DNSs available to the client
     Ipv4Address ntp[]; // list of IP addresses indicating NTP servers available to the client
     Ipv4Address serverIdentifier; // client use this field as the destination address for any unicast DHCP messages to the server
-    simtime_t renewalTime; // time interval (T1) from address assignment until the client transitions to the RENEWING state
-    simtime_t rebindingTime; // time interval (T2) from address assignment until the client transitions to the REBINDING state
-    simtime_t leaseTime; // request for lease time (client), offered lease time (server)
+    simclocktime_t renewalTime; // time interval (T1) from address assignment until the client transitions to the RENEWING state
+    simclocktime_t rebindingTime; // time interval (T2) from address assignment until the client transitions to the REBINDING state
+    simclocktime_t leaseTime; // request for lease time (client), offered lease time (server)
 }
 
 //

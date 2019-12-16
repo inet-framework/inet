@@ -39,8 +39,8 @@ class INET_API IpvxTrafGen : public ApplicationBase
     enum Kinds { START = 100, NEXT };
 
     // parameters: see the NED files for more info
-    simtime_t startTime;
-    simtime_t stopTime;
+    simclocktime_t startTime;
+    simclocktime_t stopTime;
     cPar *sendIntervalPar = nullptr;
     cPar *packetLengthPar = nullptr;
     const Protocol *protocol = nullptr;
@@ -58,7 +58,7 @@ class INET_API IpvxTrafGen : public ApplicationBase
     friend void ipvxTrafGenClearProtocols();
 
   protected:
-    virtual void scheduleNextPacket(simtime_t previous);
+    virtual void scheduleNextPacket(simclocktime_t previous);
     virtual void cancelNextPacket();
     virtual bool isEnabled();
 

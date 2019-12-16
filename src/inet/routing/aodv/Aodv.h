@@ -90,9 +90,9 @@ class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase
     bool askGratuitousRREP = false;
     bool useHelloMessages = false;
     bool destinationOnlyFlag = false;
-    simtime_t maxJitter;
-    simtime_t activeRouteTimeout;
-    simtime_t helloInterval;
+    simclocktime_t maxJitter;
+    simclocktime_t activeRouteTimeout;
+    simclocktime_t helloInterval;
     unsigned int netDiameter = 0;
     unsigned int rreqRetries = 0;
     unsigned int rreqRatelimit = 0;
@@ -102,29 +102,29 @@ class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase
     unsigned int ttlThreshold = 0;
     unsigned int localAddTTL = 0;
     unsigned int allowedHelloLoss = 0;
-    simtime_t nodeTraversalTime;
+    simclocktime_t nodeTraversalTime;
     cPar *jitterPar = nullptr;
     cPar *periodicJitter = nullptr;
 
     // the following parameters are calculated from the parameters defined above
     // see the NED file for more info
-    simtime_t deletePeriod;
-    simtime_t myRouteTimeout;
-    simtime_t blacklistTimeout;
-    simtime_t netTraversalTime;
-    simtime_t nextHopWait;
-    simtime_t pathDiscoveryTime;
+    simclocktime_t deletePeriod;
+    simclocktime_t myRouteTimeout;
+    simclocktime_t blacklistTimeout;
+    simclocktime_t netTraversalTime;
+    simclocktime_t nextHopWait;
+    simclocktime_t pathDiscoveryTime;
 
     // state
     unsigned int rreqId = 0;    // when sending a new RREQ packet, rreqID incremented by one from the last id used by this node
     unsigned int sequenceNum = 0;    // it helps to prevent loops in the routes (RFC 3561 6.1 p11.)
     std::map<L3Address, WaitForRrep *> waitForRREPTimers;    // timeout for Route Replies
-    std::map<RreqIdentifier, simtime_t, RreqIdentifierCompare> rreqsArrivalTime;    // maps RREQ id to its arriving time
+    std::map<RreqIdentifier, simclocktime_t, RreqIdentifierCompare> rreqsArrivalTime;    // maps RREQ id to its arriving time
     L3Address failedNextHop;    // next hop to the destination who failed to send us RREP-ACK
-    std::map<L3Address, simtime_t> blacklist;    // we don't accept RREQs from blacklisted nodes
+    std::map<L3Address, simclocktime_t> blacklist;    // we don't accept RREQs from blacklisted nodes
     unsigned int rerrCount = 0;    // num of originated RERR in the last second
     unsigned int rreqCount = 0;    // num of originated RREQ in the last second
-    simtime_t lastBroadcastTime;    // the last time when any control packet was broadcasted
+    simclocktime_t lastBroadcastTime;    // the last time when any control packet was broadcasted
     std::map<L3Address, unsigned int> addressToRreqRetries;    // number of re-discovery attempts per address
 
     // self messages
@@ -135,7 +135,7 @@ class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase
     cMessage *blacklistTimer = nullptr;    // timer to clean the blacklist out
 
     // lifecycle
-    simtime_t rebootTime;    // the last time when the node rebooted
+    simclocktime_t rebootTime;    // the last time when the node rebooted
 
     // internal
     std::multimap<L3Address, Packet *> targetAddressToDelayedPackets;    // queue for the datagrams we have no route for
@@ -152,9 +152,9 @@ class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase
     void cancelRouteDiscovery(const L3Address& destAddr);
 
     /* Routing Table management */
-    void updateRoutingTable(IRoute *route, const L3Address& nextHop, unsigned int hopCount, bool hasValidDestNum, unsigned int destSeqNum, bool isActive, simtime_t lifeTime);
-    IRoute *createRoute(const L3Address& destAddr, const L3Address& nextHop, unsigned int hopCount, bool hasValidDestNum, unsigned int destSeqNum, bool isActive, simtime_t lifeTime);
-    bool updateValidRouteLifeTime(const L3Address& destAddr, simtime_t lifetime);
+    void updateRoutingTable(IRoute *route, const L3Address& nextHop, unsigned int hopCount, bool hasValidDestNum, unsigned int destSeqNum, bool isActive, simclocktime_t lifeTime);
+    IRoute *createRoute(const L3Address& destAddr, const L3Address& nextHop, unsigned int hopCount, bool hasValidDestNum, unsigned int destSeqNum, bool isActive, simclocktime_t lifeTime);
+    bool updateValidRouteLifeTime(const L3Address& destAddr, simclocktime_t lifetime);
     void scheduleExpungeRoutes();
     void expungeRoutes();
 

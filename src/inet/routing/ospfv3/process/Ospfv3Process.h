@@ -43,7 +43,7 @@ class INET_API Ospfv3Process : protected cListener, public cSimpleModule
     bool isActivated() { return this->isActive; };
     void activateProcess();
     void setTimer(cMessage* msg, double delay);
-    void clearTimer(cMessage* msg) { this->cancelEvent(msg); }
+    void clearTimer(cMessage* msg) { this->cancelClockEvent(msg); }
     Ospfv3Instance* getInstanceById(int instanceId);
     void addInstance(Ospfv3Instance* newInstance);
     void sendPacket(Packet *packet, Ipv6Address destination, const char* ifName, short hopLimit = 1);

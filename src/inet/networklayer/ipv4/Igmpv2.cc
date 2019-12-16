@@ -274,7 +274,7 @@ void Igmpv2::multicastGroupLeft(InterfaceEntry *ie, const Ipv4Address& groupAddr
         HostGroupData *groupData = getHostGroupData(ie, groupAddr);
         if (groupData) {
             if (groupData->state == IGMP_HGS_DELAYING_MEMBER)
-                cancelEvent(groupData->timer);
+                cancelClockEvent(groupData->timer);
 
             if (groupData->flag)
                 sendLeave(ie, groupData);
@@ -408,7 +408,7 @@ void Igmpv2::processLeaveTimer(cMessage *msg)
     numRouterGroups--;
 
     if (ctx->routerGroup->state == IGMP_RGS_CHECKING_MEMBERSHIP)
-        cancelEvent(ctx->routerGroup->rexmtTimer);
+        cancelClockEvent(ctx->routerGroup->rexmtTimer);
 
     ctx->routerGroup->state = IGMP_RGS_NO_MEMBERS_PRESENT;
     deleteRouterGroupData(ctx->ie, ctx->routerGroup->groupAddr);
@@ -427,8 +427,8 @@ void Igmpv2::processRexmtTimer(cMessage *msg)
 void Igmpv2::startTimer(cMessage *timer, double interval)
 {
     ASSERT(timer);
-    cancelEvent(timer);
-    scheduleAt(simTime() + interval, timer);
+    cancelClockEvent(timer);
+    scheduleClockEvent(getClockTime() + interval, timer);
 }
 
 void Igmpv2::startHostTimer(InterfaceEntry *ie, HostGroupData *group, double maxRespTime)
@@ -499,7 +499,7 @@ void Igmpv2::processQuery(InterfaceEntry *ie, Packet *packet)
 
     Ipv4Address groupAddr = igmpQry->getGroupAddress();
     const Ptr<const Igmpv2Query>& v2Query = dynamicPtrCast<const Igmpv2Query>(igmpQry);
-    simtime_t maxRespTime = SimTime(v2Query ? v2Query->getMaxRespTimeCode() : 100, (SimTimeUnit)-1);
+    simclocktime_t maxRespTime = SimTime(v2Query ? v2Query->getMaxRespTimeCode() : 100, (SimTimeUnit)-1);
 
     if (groupAddr.isUnspecified()) {
         // general query
@@ -543,13 +543,13 @@ void Igmpv2::processQuery(InterfaceEntry *ie, Packet *packet)
     delete packet;
 }
 
-void Igmpv2::processGroupQuery(InterfaceEntry *ie, HostGroupData *group, simtime_t maxRespTime)
+void Igmpv2::processGroupQuery(InterfaceEntry *ie, HostGroupData *group, simclocktime_t maxRespTime)
 {
-    double maxRespTimeSecs = maxRespTime.dbl();         //FIXME use simtime_t !!!
+    double maxRespTimeSecs = maxRespTime.dbl();         //FIXME use simclocktime_t !!!
 
     if (group->state == IGMP_HGS_DELAYING_MEMBER) {
         cMessage *timer = group->timer;
-        simtime_t maxAbsoluteRespTime = simTime() + maxRespTimeSecs;
+        simclocktime_t maxAbsoluteRespTime = getClockTime() + maxRespTimeSecs;
         if (timer->isScheduled() && maxAbsoluteRespTime < timer->getArrivalTime())
             startHostTimer(ie, group, maxRespTimeSecs);
     }
@@ -577,7 +577,7 @@ void Igmpv2::processV2Report(InterfaceEntry *ie, Packet *packet)
     HostGroupData *hostGroupData = getHostGroupData(ie, groupAddr);
     if (hostGroupData) {
         if (hostGroupData && hostGroupData->state == IGMP_HGS_DELAYING_MEMBER) {
-            cancelEvent(hostGroupData->timer);
+            cancelClockEvent(hostGroupData->timer);
             hostGroupData->flag = false;
             hostGroupData->state = IGMP_HGS_IDLE_MEMBER;
         }
@@ -610,7 +610,7 @@ void Igmpv2::processV2Report(InterfaceEntry *ie, Packet *packet)
             numRouterGroups++;
         }
         else if (routerGroupData->state == IGMP_RGS_CHECKING_MEMBERSHIP)
-            cancelEvent(routerGroupData->rexmtTimer);
+            cancelClockEvent(routerGroupData->rexmtTimer);
 
         startTimer(routerGroupData->timer, groupMembershipInterval);
         routerGroupData->state = IGMP_RGS_MEMBERS_PRESENT;

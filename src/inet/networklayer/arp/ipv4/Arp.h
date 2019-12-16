@@ -58,16 +58,16 @@ class INET_API Arp : public OperationalBase, public IArp
         const InterfaceEntry *ie = nullptr;    // NIC to send the packet to
         bool pending = false;    // true if resolution is pending
         MacAddress macAddress;    // MAC address
-        simtime_t lastUpdate;    // entries should time out after cacheTimeout
+        simclocktime_t lastUpdate;    // entries should time out after cacheTimeout
         int numRetries = 0;    // if pending==true: 0 after first ARP request, 1 after second, etc.
         cMessage *timer = nullptr;    // if pending==true: request timeout msg
         ArpCache::iterator myIter;    // iterator pointing to this entry
     };
 
   protected:
-    simtime_t retryTimeout;
+    simclocktime_t retryTimeout;
     int retryCount = 0;
-    simtime_t cacheTimeout;
+    simclocktime_t cacheTimeout;
     std::string proxyArpInterfaces = "";
     long numResolutions = 0;
     long numFailedResolutions = 0;

@@ -35,8 +35,8 @@ class INET_API DymoRouteData : public cObject
   private:
     bool isBroken;
     DymoSequenceNumber sequenceNumber;
-    simtime_t lastUsed;
-    simtime_t expirationTime;
+    simclocktime_t lastUsed;
+    simclocktime_t expirationTime;
     DymoMetricType metricType;
 
   public:
@@ -49,11 +49,11 @@ class INET_API DymoRouteData : public cObject
     DymoSequenceNumber getSequenceNumber() const { return sequenceNumber; }
     void setSequenceNumber(DymoSequenceNumber sequenceNumber) { this->sequenceNumber = sequenceNumber; }
 
-    simtime_t getLastUsed() const { return lastUsed; }
-    void setLastUsed(simtime_t lastUsed) { this->lastUsed = lastUsed; }
+    simclocktime_t getLastUsed() const { return lastUsed; }
+    void setLastUsed(simclocktime_t lastUsed) { this->lastUsed = lastUsed; }
 
-    simtime_t getExpirationTime() const { return expirationTime; }
-    void setExpirationTime(simtime_t expirationTime) { this->expirationTime = expirationTime; }
+    simclocktime_t getExpirationTime() const { return expirationTime; }
+    void setExpirationTime(simclocktime_t expirationTime) { this->expirationTime = expirationTime; }
 
     DymoMetricType getMetricType() const { return metricType; }
     void setMetricType(DymoMetricType metricType) { this->metricType = metricType; }

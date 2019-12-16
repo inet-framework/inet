@@ -385,7 +385,7 @@ void Rtp::createProfile(const char *profileName)
     profile->gate("rtpOut")->connectTo(this->gate("profileIn"));
 
     profile->callInitialize();
-    profile->scheduleStart(simTime());
+    profile->scheduleStart(getClockTime());
 }
 
 void Rtp::createSocket()

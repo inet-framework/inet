@@ -145,7 +145,7 @@ SessionId BgpRouter::createEbgpSession(const char *peerAddr, SessionInfo& extern
     return newSessionId;
 }
 
-void BgpRouter::setTimer(SessionId id, simtime_t *delayTab)
+void BgpRouter::setTimer(SessionId id, simclocktime_t *delayTab)
 {
     _BGPSessions[id]->setTimers(delayTab);
 }

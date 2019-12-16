@@ -133,7 +133,7 @@ void VoipStreamSender::initialize(int stage)
         if (tos != -1)
             socket.setTos(tos);
 
-        simtime_t startTime = par("startTime");
+        simclocktime_t startTime = par("startTime");
 
         sampleBuffer.clear(0);
 
@@ -146,7 +146,7 @@ void VoipStreamSender::initialize(int stage)
         openSoundFile(soundFile);
 
         timer = new cMessage("sendVoIP");
-        scheduleAt(startTime, timer);
+        scheduleClockEvent(startTime, timer);
 
         voipSilencePacketSize = voipHeaderSize;
 
@@ -173,8 +173,8 @@ void VoipStreamSender::handleMessage(cMessage *msg)
 
             if (packet) {
                 // reschedule trigger message
-                scheduleAt(simTime() + packetTimeLength, packet);
-                scheduleAt(simTime() + packetTimeLength, msg);
+                scheduleClockEvent(getClockTime() + packetTimeLength, packet);
+                scheduleClockEvent(getClockTime() + packetTimeLength, msg);
             }
         }
         else {

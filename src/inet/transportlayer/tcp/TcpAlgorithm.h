@@ -178,7 +178,7 @@ class INET_API TcpAlgorithm : public cObject
     virtual void restartRexmitTimer() = 0;
 
     /**
-     * Converting uint32 echoedTS to simtime_t and calling rttMeasurementComplete()
+     * Converting uint32 echoedTS to simclocktime_t and calling rttMeasurementComplete()
      * to update state vars with new measured RTT value.
      */
     virtual void rttMeasurementCompleteUsingTS(uint32 echoedTS) = 0;

@@ -75,7 +75,7 @@ simple PingApp like IApp
         @lifecycleSupport;
         double stopOperationExtraTime @unit(s) = default(-1s);    // extra time after lifecycle stop operation finished
         double stopOperationTimeout @unit(s) = default(2s);    // timeout value for lifecycle stop operation
-        @signal[rtt](type=simtime_t);
+        @signal[rtt](type=simclocktime_t);
         @signal[numLost](type=long);
         @signal[numOutOfOrderArrivals](type=long);
         @signal[pingTxSeq](type=long);

@@ -44,7 +44,7 @@ simple VoipStreamReceiver like IApp
         @signal[lostPackets](type=long);
         @signal[packetHasVoice](type=long);  // 1=yes, 0=no
         @signal[connState](type=long);  // 1=open, -1=close
-        @signal[delay](type=simtime_t);  // total time lag of voice transmission
+        @signal[delay](type=simclocktime_t);  // total time lag of voice transmission
         @statistic[packetReceived](title="packets received"; source=packetReceived; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[dropPk](title="packets dropped"; source=packetDropped; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[lostSamples](title="lost samples"; interpolationmode=none; record=vector,stats);

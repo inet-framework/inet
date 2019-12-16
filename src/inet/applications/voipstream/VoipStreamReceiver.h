@@ -86,7 +86,7 @@ class INET_API VoipStreamReceiver : public cSimpleModule, public LifecycleUnsupp
         int sampleRate = 0;
         int samplesPerPacket = 0;
         int transmitBitrate = 0;
-        simtime_t lastPacketFinish;
+        simclocktime_t lastPacketFinish;
         AVFormatContext *oc = nullptr;
         AVOutputFormat *fmt = nullptr;
         AVStream *audio_st = nullptr;
@@ -101,7 +101,7 @@ class INET_API VoipStreamReceiver : public cSimpleModule, public LifecycleUnsupp
 
   protected:
     int localPort = -1;
-    simtime_t playoutDelay;
+    simclocktime_t playoutDelay;
     const char *resultFile = nullptr;
 
     UdpSocket socket;

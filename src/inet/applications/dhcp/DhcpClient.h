@@ -46,7 +46,7 @@ class INET_API DhcpClient : public ApplicationBase, public cListener, public Udp
     int serverPort = -1;
     int clientPort = -1;
     UdpSocket socket;    // UDP socket for client-server communication
-    simtime_t startTime;    // application start time
+    simclocktime_t startTime;    // application start time
     MacAddress macAddress;    // client's MAC address
     cModule *host = nullptr;    // containing host module (@networkNode)
     InterfaceEntry *ie = nullptr;    // interface to configure

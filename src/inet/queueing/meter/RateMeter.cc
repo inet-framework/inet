@@ -33,7 +33,7 @@ void RateMeter::initialize(int stage)
 
 void RateMeter::meterPacket(Packet *packet)
 {
-    auto now = simTime();
+    auto now = getClockTime();
     if (now != lastUpdate) {
         auto elapsedTime = (now - lastUpdate).dbl();
         auto packetrateChange = (currentNumPackets / elapsedTime) - packetrate;

@@ -50,7 +50,7 @@ class INET_API AdaptiveProbabilisticBroadcast : public ProbabilisticBroadcast
     void updateBeta();
 
     //read from omnetpp.ini
-    simtime_t timeInNeighboursTable;    ///< @brief Default ttl for NeighborTable entries in seconds
+    simclocktime_t timeInNeighboursTable;    ///< @brief Default ttl for NeighborTable entries in seconds
     cOutVector bvec;
     NeighborMap neighMap;
 };

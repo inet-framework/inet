@@ -78,7 +78,7 @@ class INET_API Ipv6NeighbourCache
 
         // Neighbour Unreachability Detection variables
         ReachabilityState reachabilityState = static_cast<ReachabilityState>(-1);
-        simtime_t reachabilityExpires;    // reachabilityLastConfirmed+reachableTime
+        simclocktime_t reachabilityExpires;    // reachabilityLastConfirmed+reachableTime
         short numProbesSent = 0;
         cMessage *nudTimeoutEvent = nullptr;    // DELAY or PROBE timer
 
@@ -98,7 +98,7 @@ class INET_API Ipv6NeighbourCache
         // for router lifetime; instead, we'll check the expirytime every time
         // we bump into a router entry (as nexthop in dest cache, or during
         // default router selection
-        simtime_t routerExpiryTime;    // time when router lifetime expires
+        simclocktime_t routerExpiryTime;    // time when router lifetime expires
 
         // for double-linked list of default routers, see DefaultRouterList
         Neighbour *prevDefaultRouter = nullptr;
@@ -189,7 +189,7 @@ class INET_API Ipv6NeighbourCache
 
     /** Creates and initializes a router entry (isRouter=isDefaultRouter=true), MAC address and state=STALE. */
     virtual Neighbour *addRouter(const Ipv6Address& addr, int interfaceID,
-            MacAddress macAddress, simtime_t expiryTime, bool isHomeAgent = false);    // added HA flag, 3.9.07 - CB
+            MacAddress macAddress, simclocktime_t expiryTime, bool isHomeAgent = false);    // added HA flag, 3.9.07 - CB
 
     /** Deletes the given neighbour from the cache. */
     virtual void remove(const Ipv6Address& addr, int interfaceID);

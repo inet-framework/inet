@@ -101,21 +101,21 @@ void UdpVideoStreamClient::receiveStream(Packet *pk)
 
 void UdpVideoStreamClient::handleStartOperation(LifecycleOperation *operation)
 {
-    simtime_t startTimePar = par("startTime");
-    simtime_t startTime = std::max(startTimePar, simTime());
-    scheduleAt(startTime, selfMsg);
+    simclocktime_t startTimePar = par("startTime");
+    simclocktime_t startTime = std::max(startTimePar, getClockTime());
+    scheduleClockEvent(startTime, selfMsg);
 }
 
 void UdpVideoStreamClient::handleStopOperation(LifecycleOperation *operation)
 {
-    cancelEvent(selfMsg);
+    cancelClockEvent(selfMsg);
     socket.close();
     delayActiveOperationFinish(par("stopOperationTimeout"));
 }
 
 void UdpVideoStreamClient::handleCrashOperation(LifecycleOperation *operation)
 {
-    cancelEvent(selfMsg);
+    cancelClockEvent(selfMsg);
     if (operation->getRootModule() != getContainingNode(this))     // closes socket when the application crashed only
         socket.destroy();    //TODO  in real operating systems, program crash detected by OS and OS closes sockets of crashed programs.
 }

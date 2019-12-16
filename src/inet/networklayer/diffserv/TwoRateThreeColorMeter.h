@@ -44,7 +44,7 @@ class INET_API TwoRateThreeColorMeter : public PacketMeterBase
 
     long Tp = 0;    // token bucket for peak burst
     long Tc = 0;    // token bucket for committed burst
-    simtime_t lastUpdateTime;
+    simclocktime_t lastUpdateTime;
 
     int numRcvd = 0;
     int numYellow = 0;

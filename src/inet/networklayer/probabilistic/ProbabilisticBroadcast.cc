@@ -58,7 +58,7 @@ void ProbabilisticBroadcast::handleUpperPacket(Packet *packet)
     encapsulate(packet);
     auto macHeader = packet->peekAtFront<ProbabilisticBroadcastHeader>();
     nbDataPacketsSent++;
-    EV << "PBr: " << simTime() << " n" << myNetwAddr << " handleUpperMsg(): Pkt ID = " << macHeader->getId() << " TTL = " << macHeader->getAppTtl() << endl;
+    EV << "PBr: " << getClockTime() << " n" << myNetwAddr << " handleUpperMsg(): Pkt ID = " << macHeader->getId() << " TTL = " << macHeader->getAppTtl() << endl;
     // submit packet for first insertion in queue.
     insertNewMessage(packet, true);
 }
@@ -74,23 +74,23 @@ void ProbabilisticBroadcast::handleLowerPacket(Packet *packet)
     delete packet->removeControlInfo();
     ++nbDataPacketsReceived;
     nbHops = nbHops + macHeader->getNbHops();
-    oneHopLatencies.record(SIMTIME_DBL(simTime() - packet->getTimestamp()));
+    oneHopLatencies.record(SIMTIME_DBL(getClockTime() - packet->getTimestamp()));
     // oneHopLatency gives us an estimate of how long the message spent in the MAC queue of
     // its sender (compared to that, transmission delay is negligible). Use this value
     // to update the TTL of the message. Dump it if it is dead.
     //m->setAppTtl(m->getAppTtl().dbl() - oneHopLatency);
     if (    /*(m->getAppTtl() <= 0) || */ (messageKnown(macHeader->getId()))) {
         // we got this message already, ignore it.
-        EV << "PBr: " << simTime() << " n" << myNetwAddr << " handleLowerMsg(): Dead or Known message ID=" << macHeader->getId() << " from node "
+        EV << "PBr: " << getClockTime() << " n" << myNetwAddr << " handleLowerMsg(): Dead or Known message ID=" << macHeader->getId() << " from node "
            << macSrcAddr << " TTL = " << macHeader->getAppTtl() << endl;
         delete packet;
     }
     else {
         if (debugMessageKnown(macHeader->getId())) {
             ++debugNbMessageKnown;
-            EV << "PBr: " << simTime() << " n" << myNetwAddr << " ERROR Message should be known TTL= " << macHeader->getAppTtl() << endl;
+            EV << "PBr: " << getClockTime() << " n" << myNetwAddr << " ERROR Message should be known TTL= " << macHeader->getAppTtl() << endl;
         }
-        EV << "PBr: " << simTime() << " n" << myNetwAddr << " handleLowerMsg(): Unknown message ID=" << macHeader->getId() << " from node "
+        EV << "PBr: " << getClockTime() << " n" << myNetwAddr << " handleLowerMsg(): Unknown message ID=" << macHeader->getId() << " from node "
            << macSrcAddr << endl;
         // Unknown message. Insert message in queue with random backoff broadcast delay.
         // Because we got the message from lower layer, we need to create and add a new
@@ -124,7 +124,7 @@ void ProbabilisticBroadcast::handleSelfMessage(cMessage *msg)
         auto macHeader = packet->peekAtFront<ProbabilisticBroadcastHeader>();
         // if the packet is alive, duplicate it and insert the copy in the queue,
         // then perform a broadcast attempt.
-        EV << "PBr: " << simTime() << " n" << myNetwAddr << " handleSelfMsg(): Message ID= " << macHeader->getId() << " TTL= " << macHeader->getAppTtl() << endl;
+        EV << "PBr: " << getClockTime() << " n" << myNetwAddr << " handleSelfMsg(): Message ID= " << macHeader->getId() << " TTL= " << macHeader->getAppTtl() << endl;
         if (macHeader->getAppTtl() > 0) {
             // check if we are allowed to re-transmit the message on more time.
             if (msgDesc->nbBcast < maxNbBcast) {
@@ -161,20 +161,20 @@ void ProbabilisticBroadcast::handleSelfMessage(cMessage *msg)
                     insertMessage(macHeaderCopy->getAppTtl() + timeInQueueAfterDeath, msgDesc);
                 // broadcast the message with probability beta
                 if (sendForSure) {
-                    EV << "PBr: " << simTime() << " n" << myNetwAddr << "     Send packet down for sure." << endl;
+                    EV << "PBr: " << getClockTime() << " n" << myNetwAddr << "     Send packet down for sure." << endl;
                     packet->setTimestamp();
                     sendDown(packet);
                     ++nbDataPacketsForwarded;
                 }
                 else {
                     if (bernoulli(beta)) {
-                        EV << "PBr: " << simTime() << " n" << myNetwAddr << "     Bernoulli test result: TRUE. Send packet down." << endl;
+                        EV << "PBr: " << getClockTime() << " n" << myNetwAddr << "     Bernoulli test result: TRUE. Send packet down." << endl;
                         packet->setTimestamp();
                         sendDown(packet);
                         ++nbDataPacketsForwarded;
                     }
                     else {
-                        EV << "PBr: " << simTime() << " n" << myNetwAddr << "     Bernoulli test result: FALSE" << endl;
+                        EV << "PBr: " << getClockTime() << " n" << myNetwAddr << "     Bernoulli test result: FALSE" << endl;
                         delete packet;
                     }
                 }
@@ -183,24 +183,24 @@ void ProbabilisticBroadcast::handleSelfMessage(cMessage *msg)
                 // we can't re-transmit the message because maxNbBcast is reached.
                 // re-insert-it in the queue with delay = TTL so that its ID is still
                 // known by the system.
-                EV << "PBr: " << simTime() << " n" << myNetwAddr << "     maxNbBcast reached." << endl;
+                EV << "PBr: " << getClockTime() << " n" << myNetwAddr << "     maxNbBcast reached." << endl;
                 insertMessage(macHeader->getAppTtl() + timeInQueueAfterDeath, msgDesc);
             }
         }
         else {
-            EV << "PBr: " << simTime() << " n" << myNetwAddr << "     Message TTL zero, discard." << endl;
+            EV << "PBr: " << getClockTime() << " n" << myNetwAddr << "     Message TTL zero, discard." << endl;
             delete msgDesc;
             delete packet;
         }
     }
     else {
-        EV << "PBr: " << simTime() << " n" << myNetwAddr << " Received unexpected self message" << endl;
+        EV << "PBr: " << getClockTime() << " n" << myNetwAddr << " Received unexpected self message" << endl;
     }
 }
 
 void ProbabilisticBroadcast::finish()
 {
-    EV << "PBr: " << simTime() << " n" << myNetwAddr << " finish()" << endl;
+    EV << "PBr: " << getClockTime() << " n" << myNetwAddr << " finish()" << endl;
     cancelAndDelete(broadcastTimer);
     // if some messages are still in the queue, delete them.
     while (!msgQueue.empty()) {
@@ -233,11 +233,11 @@ bool ProbabilisticBroadcast::debugMessageKnown(unsigned int msgId)
     return pos != debugMsgIdSet.end();
 }
 
-void ProbabilisticBroadcast::insertMessage(simtime_t_cref bcastDelay, tMsgDesc *msgDesc)
+void ProbabilisticBroadcast::insertMessage(simclocktime_t_cref bcastDelay, tMsgDesc *msgDesc)
 {
-    simtime_t bcastTime = simTime() + bcastDelay;
+    simclocktime_t bcastTime = getClockTime() + bcastDelay;
 
-    EV << "PBr: " << simTime() << " n" << myNetwAddr << "         insertMessage() bcastDelay = " << bcastDelay << " Msg ID = " << msgDesc->pkt->getId() << endl;
+    EV << "PBr: " << getClockTime() << " n" << myNetwAddr << "         insertMessage() bcastDelay = " << bcastDelay << " Msg ID = " << msgDesc->pkt->getId() << endl;
     // update TTL field of the message to the value it will have when taken out of the list
     msgDesc->pkt->trim();
     auto macHeader = msgDesc->pkt->removeAtFront<ProbabilisticBroadcastHeader>();
@@ -251,9 +251,9 @@ void ProbabilisticBroadcast::insertMessage(simtime_t_cref bcastDelay, tMsgDesc *
     // will be the next message to be broadcasted, therefore we have to re-schedule
     // the broadcast timer to the message's broadcast instant.
     if (pos == msgQueue.begin()) {
-        EV << "PBr: " << simTime() << " n" << myNetwAddr << "         message inserted in the front, reschedule it." << endl;
-        cancelEvent(broadcastTimer);
-        scheduleAt(bcastTime, broadcastTimer);
+        EV << "PBr: " << getClockTime() << " n" << myNetwAddr << "         message inserted in the front, reschedule it." << endl;
+        cancelClockEvent(broadcastTimer);
+        scheduleClockEvent(bcastTime, broadcastTimer);
     }
 }
 
@@ -268,12 +268,12 @@ ProbabilisticBroadcast::tMsgDesc *ProbabilisticBroadcast::popFirstMessageUpdateQ
     // remove first message from message queue and from ID list
     msgQueue.erase(pos);
     knownMsgIds.erase(msgDesc->pkt->getId());
-    EV << "PBr: " << simTime() << " n" << myNetwAddr << "         pop(): just popped msg " << msgDesc->pkt->getId() << endl;
+    EV << "PBr: " << getClockTime() << " n" << myNetwAddr << "         pop(): just popped msg " << msgDesc->pkt->getId() << endl;
     if (!msgQueue.empty()) {
         // schedule broadcast of new first message
-        EV << "PBr: " << simTime() << " n" << myNetwAddr << "         pop(): schedule next message." << endl;
+        EV << "PBr: " << getClockTime() << " n" << myNetwAddr << "         pop(): schedule next message." << endl;
         pos = msgQueue.begin();
-        scheduleAt(pos->first, broadcastTimer);
+        scheduleClockEvent(pos->first, broadcastTimer);
     }
     return msgDesc;
 }
@@ -305,10 +305,10 @@ void ProbabilisticBroadcast::encapsulate(Packet *packet)
 void ProbabilisticBroadcast::insertNewMessage(Packet *packet, bool iAmInitialSender)
 {
     auto macHeader = packet->peekAtFront<ProbabilisticBroadcastHeader>();
-    simtime_t ttl = macHeader->getAppTtl();
+    simclocktime_t ttl = macHeader->getAppTtl();
 
     if (ttl > 0) {
-        simtime_t bcastDelay;
+        simclocktime_t bcastDelay;
         tMsgDesc *msgDesc;
 
         // insert packet in queue with delay in [0, min(TTL, broadcast period)].
@@ -322,7 +322,7 @@ void ProbabilisticBroadcast::insertNewMessage(Packet *packet, bool iAmInitialSen
             bcastDelay = maxFirstBcastBackoff;
         if (bcastDelay > ttl)
             bcastDelay = ttl;
-        EV << "PBr: " << simTime() << " n" << myNetwAddr << " insertNewMessage(): insert packet " << macHeader->getId() << " with delay "
+        EV << "PBr: " << getClockTime() << " n" << myNetwAddr << " insertNewMessage(): insert packet " << macHeader->getId() << " with delay "
            << bcastDelay << endl;
         // create container for message and initialize container's values.
         msgDesc = new tMsgDesc;
@@ -333,7 +333,7 @@ void ProbabilisticBroadcast::insertNewMessage(Packet *packet, bool iAmInitialSen
         insertMessage(uniform(0, bcastDelay), msgDesc);
     }
     else {
-        EV << "PBr: " << simTime() << " n" << myNetwAddr << " insertNewMessage(): got new packet with TTL = 0." << endl;
+        EV << "PBr: " << getClockTime() << " n" << myNetwAddr << " insertNewMessage(): got new packet with TTL = 0." << endl;
         delete packet;
     }
 }

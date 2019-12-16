@@ -109,7 +109,7 @@ void EtherAppServer::socketDataArrived(Ieee8022LlcSocket*, Packet *msg)
         const auto& outPayload = makeShared<EtherAppResp>();
         outPayload->setRequestId(requestId);
         outPayload->setChunkLength(B(l));
-        outPayload->addTag<CreationTimeTag>()->setCreationTime(simTime());
+        outPayload->addTag<CreationTimeTag>()->setCreationTime(getClockTime());
         outPacket->insertAtBack(outPayload);
 
         EV_INFO << "Send response `" << outPacket->getName() << "' to " << srcAddr << " ssap=" << localSap << " dsap=" << srcSap << " length=" << l << "B requestId=" << requestId << "\n";

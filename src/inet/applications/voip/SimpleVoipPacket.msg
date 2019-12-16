@@ -22,7 +22,7 @@ import inet.common.packet.chunk.Chunk;
 namespace inet;
 
 //
-// Represents a voice packet used by SimpleVoipSender / SimpleVoipReceiver 
+// Represents a voice packet used by SimpleVoipSender / SimpleVoipReceiver
 //
 class SimpleVoipPacket extends FieldsChunk
 {
@@ -30,7 +30,7 @@ class SimpleVoipPacket extends FieldsChunk
     unsigned int talkspurtID;          // identifies the talkspurt
     unsigned int talkspurtNumPackets;  // number of all packets of current talkspurt
     unsigned int packetID;             // 0..talkspurtNumPackets-1
-    simtime_t voipTimestamp;            // "mouth" timestamp of begin of voice in this packet
-    simtime_t voiceDuration;            // duration of voice in this packet
+    simclocktime_t voipTimestamp;            // "mouth" timestamp of begin of voice in this packet
+    simclocktime_t voiceDuration;            // duration of voice in this packet
 }
 

@@ -76,7 +76,7 @@ Packet *TcpSendQueue::createSegmentWithBytes(uint32 fromSeq, ulong numBytes)
 
     Packet *packet = new Packet(msgname);
     const auto& payload = dataBuffer.peekAt(B(fromSeq - begin), B(numBytes));   //get data from buffer
-    //std::cout << "#: " << getSimulation()->getEventNumber() << ", T: " << simTime() << ", SENDER: " << conn->getTcpMain()->getParentModule()->getFullName() << ", DATA: " << payload << std::endl;
+    //std::cout << "#: " << getSimulation()->getEventNumber() << ", T: " << getClockTime() << ", SENDER: " << conn->getTcpMain()->getParentModule()->getFullName() << ", DATA: " << payload << std::endl;
     packet->insertAtBack(payload);
     return packet;
 }

@@ -111,7 +111,7 @@ void SctpNatPeer::initialize(int stage)
         rendezvous = par("rendezvous");
         if (par("startTime").doubleValue() > 0.0) {
             cMessage *msg = new cMessage("ConnectTimer", MSGKIND_CONNECT);
-            scheduleAt(par("startTime"), msg);
+            scheduleClockEvent(par("startTime"), msg);
         }
     }
 }
@@ -122,7 +122,7 @@ void SctpNatPeer::sendOrSchedule(cMessage *msg)
         send(msg, "socketOut");
     }
     else {
-        scheduleAt(simTime() + delay, msg);
+        scheduleClockEvent(getClockTime() + delay, msg);
     }
 }
 
@@ -137,7 +137,7 @@ void SctpNatPeer::generateAndSend()
     for (int i = 0; i < numBytes; i++)
         vec[i] = (bytesSent + i) & 0xFF;
     applicationData->setBytes(vec);
-    applicationData->addTag<CreationTimeTag>()->setCreationTime(simTime());
+    applicationData->addTag<CreationTimeTag>()->setCreationTime(getClockTime());
     applicationPacket->insertAtBack(applicationData);
     auto sctpSendReq = applicationPacket->addTag<SctpSendReq>();
     sctpSendReq->setLast(true);
@@ -171,8 +171,8 @@ void SctpNatPeer::connectx(AddressVector connectAddressList, int32 connectPort)
         streamReset = false;
     else if (streamReset == true) {
         cMessage *cmsg = new cMessage("StreamReset", MSGKIND_RESET);
-        EV << "StreamReset Timer scheduled at " << simTime() << "\n";
-        scheduleAt(simTime() + par("streamRequestTime").doubleValue(), cmsg);
+        EV << "StreamReset Timer scheduled at " << getClockTime() << "\n";
+        scheduleClockEvent(getClockTime() + par("streamRequestTime").doubleValue(), cmsg);
     }
     uint32 streamNum = 0;
     cStringTokenizer tokenizer(par("streamPriorities"));
@@ -199,8 +199,8 @@ void SctpNatPeer::connect(L3Address connectAddress, int32 connectPort)
         streamReset = false;
     else if (streamReset == true) {
         cMessage *cmsg = new cMessage("StreamReset", MSGKIND_RESET);
-        EV << "StreamReset Timer scheduled at " << simTime() << "\n";
-        scheduleAt(simTime() + par("streamRequestTime").doubleValue(), cmsg);
+        EV << "StreamReset Timer scheduled at " << getClockTime() << "\n";
+        scheduleClockEvent(getClockTime() + par("streamRequestTime").doubleValue(), cmsg);
     }
     uint32 streamNum = 0;
     cStringTokenizer tokenizer(par("streamPriorities"));
@@ -283,7 +283,7 @@ void SctpNatPeer::handleMessage(cMessage *msg)
                         if (par("thinkTime").doubleValue() > 0.0) {
                             generateAndSend();
                             timeoutMsg->setKind(SCTP_C_SEND);
-                            scheduleAt(simTime() + par("thinkTime"), timeoutMsg);
+                            scheduleClockEvent(getClockTime() + par("thinkTime"), timeoutMsg);
                             numRequestsToSend--;
                             i->second = numRequestsToSend;
                         }
@@ -316,7 +316,7 @@ void SctpNatPeer::handleMessage(cMessage *msg)
                                 char as[5];
                                 sprintf(as, "%d", serverAssocId);
                                 cMessage *abortMsg = new cMessage(as, SCTP_I_ABORT);
-                                scheduleAt(simTime() + par("waitToClose"), abortMsg);
+                                scheduleClockEvent(getClockTime() + par("waitToClose"), abortMsg);
                             }
                             else {
                                 EV << "no more packets to send, call shutdown for assoc " << serverAssocId << "\n";
@@ -347,7 +347,7 @@ void SctpNatPeer::handleMessage(cMessage *msg)
                 cmd->setNumMsgs(ind->getNumMsgs());
                 delete msg;
                 if (!cmsg->isScheduled() && schedule == false) {
-                    scheduleAt(simTime() + par("delayFirstRead"), cmsg);
+                    scheduleClockEvent(getClockTime() + par("delayFirstRead"), cmsg);
                 }
                 else if (schedule == true)
                     sendOrSchedule(cmsg);
@@ -395,9 +395,9 @@ void SctpNatPeer::handleMessage(cMessage *msg)
                                 i->second--;
                                 SctpSimpleMessage *smsg = check_and_cast<SctpSimpleMessage *>(msg);
                                 auto j = endToEndDelay.find(id);
-                                j->second->record(simTime() - smsg->getCreationTime());
+                                j->second->record(getClockTime() - smsg->getCreationTime());
                                 auto k = histEndToEndDelay.find(id);
-                                k->second->collect(simTime() - smsg->getCreationTime());
+                                k->second->collect(getClockTime() - smsg->getCreationTime());
 
                                 if (i->second == 0) {
                                     Request *cmsg = new Request("SCTP_C_NO_OUTSTANDING", SCTP_C_NO_OUTSTANDING);
@@ -411,9 +411,9 @@ void SctpNatPeer::handleMessage(cMessage *msg)
                         else {
                             SctpSimpleMessage *smsg = check_and_cast<SctpSimpleMessage *>(msg->dup());
                             auto j = endToEndDelay.find(id);
-                            j->second->record(simTime() - smsg->getCreationTime());
+                            j->second->record(getClockTime() - smsg->getCreationTime());
                             auto k = histEndToEndDelay.find(id);
-                            k->second->collect(simTime() - smsg->getCreationTime());
+                            k->second->collect(getClockTime() - smsg->getCreationTime());
                             Packet *cmsg = new Packet("SCTP_C_SEND", SCTP_C_SEND);
                             bytesSent += smsg->getByteLength();
                             auto cmd = cmsg->addTag<SctpSendReq>();
@@ -500,7 +500,7 @@ void SctpNatPeer::handleTimer(cMessage *msg)
             if (numRequestsToSend > 0) {
                 generateAndSend();
                 if (par("thinkTime").doubleValue() > 0.0)
-                    scheduleAt(simTime() + par("thinkTime"), timeoutMsg);
+                    scheduleClockEvent(getClockTime() + par("thinkTime"), timeoutMsg);
                 numRequestsToSend--;
             }
             break;
@@ -618,7 +618,7 @@ void SctpNatPeer::socketFailure(SctpSocket *socket, int32 code)
 
     // reconnect after a delay
     timeMsg->setKind(MSGKIND_CONNECT);
-    scheduleAt(simTime() + par("reconnectInterval"), timeMsg);
+    scheduleClockEvent(getClockTime() + par("reconnectInterval"), timeMsg);
 }
 
 void SctpNatPeer::socketStatusArrived(SctpSocket *socket, SctpStatusReq *status)
@@ -660,7 +660,7 @@ void SctpNatPeer::sendRequest(bool last)
     for (int i = 0; i < numBytes; i++)
         vec[i] = (bytesSent + i) & 0xFF;
     msg->setBytes(vec);
-    msg->addTag<CreationTimeTag>()->setCreationTime(simTime());
+    msg->addTag<CreationTimeTag>()->setCreationTime(getClockTime());
     cmsg->insertAtBack(msg);
     auto sendCommand = cmsg->addTag<SctpSendReq>();
     sendCommand->setLast(true);
@@ -697,7 +697,7 @@ void SctpNatPeer::socketEstablished(SctpSocket *socket, unsigned long int buffer
         }
 
         auto applicationData = makeShared<BytesChunk>(buffer, buflen);
-        applicationData->addTag<CreationTimeTag>()->setCreationTime(simTime());
+        applicationData->addTag<CreationTimeTag>()->setCreationTime(getClockTime());
         auto applicationPacket = new Packet("ApplicationPacket", SCTP_C_SEND_ORDERED);
         applicationPacket->insertAtBack(applicationData);
         auto sctpSendReq = applicationPacket->addTag<SctpSendReq>();
@@ -728,7 +728,7 @@ void SctpNatPeer::socketEstablished(SctpSocket *socket, unsigned long int buffer
                     numRequestsToSend--;
                 }
                 timeMsg->setKind(MSGKIND_SEND);
-                scheduleAt(simTime() + par("thinkTime"), timeMsg);
+                scheduleClockEvent(getClockTime() + par("thinkTime"), timeMsg);
             }
             else {
                 if (queueSize > 0) {
@@ -751,7 +751,7 @@ void SctpNatPeer::socketEstablished(SctpSocket *socket, unsigned long int buffer
 
                 if (numPacketsToReceive == 0 && par("waitToClose").doubleValue() > 0.0) {
                     timeMsg->setKind(MSGKIND_ABORT);
-                    scheduleAt(simTime() + par("waitToClose"), timeMsg);
+                    scheduleClockEvent(getClockTime() + par("waitToClose"), timeMsg);
                 }
                 if (numRequestsToSend == 0 && par("waitToClose").doubleValue() == 0.0) {
                     EV << "socketEstablished:no more packets to send, call shutdown\n";
@@ -872,7 +872,7 @@ void SctpNatPeer::addressAddedArrived(SctpSocket *socket, L3Address localAddr, L
         buflen = ADD_PADDING(buflen + 4 * (nat->numAddrPeer1 + nat->numAddrPeer2));
 
         auto applicationData = makeShared<BytesChunk>(buffer, buflen);
-        applicationData->addTag<CreationTimeTag>()->setCreationTime(simTime());
+        applicationData->addTag<CreationTimeTag>()->setCreationTime(getClockTime());
         auto applicationPacket = new Packet("ApplicationPacket", SCTP_C_SEND_ORDERED);
         applicationPacket->insertAtBack(applicationData);
         auto sctpSendReq = applicationPacket->addTag<SctpSendReq>();

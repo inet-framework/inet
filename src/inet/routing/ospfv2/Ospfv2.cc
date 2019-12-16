@@ -139,20 +139,20 @@ void Ospfv2::receiveSignal(cComponent *source, simsignal_t signalID, cObject *ob
 void Ospfv2::handleStartOperation(LifecycleOperation *operation)
 {
     ASSERT(ospfRouter == nullptr);
-    simtime_t startupTime = par("startupTime");
-    if (startupTime <= simTime()) {
+    simclocktime_t startupTime = par("startupTime");
+    if (startupTime <= getClockTime()) {
         createOspfRouter();
         subscribe();
     }
     else
-        scheduleAt(simTime() + startupTime, startupTimer);
+        scheduleClockEvent(getClockTime() + startupTime, startupTimer);
 }
 
 void Ospfv2::handleStopOperation(LifecycleOperation *operation)
 {
     ASSERT(ospfRouter);
     delete ospfRouter;
-    cancelEvent(startupTimer);
+    cancelClockEvent(startupTimer);
     ospfRouter = nullptr;
     unsubscribe();
 }
@@ -161,7 +161,7 @@ void Ospfv2::handleCrashOperation(LifecycleOperation *operation)
 {
     ASSERT(ospfRouter);
     delete ospfRouter;
-    cancelEvent(startupTimer);
+    cancelClockEvent(startupTimer);
     ospfRouter = nullptr;
     unsubscribe();
 }

@@ -69,7 +69,7 @@ void PacketGate::handleMessage(cMessage *message)
 void PacketGate::scheduleChangeTimer()
 {
     ASSERT(0 <= changeIndex && changeIndex < (int)changeTimes.size());
-    scheduleAt(changeTimes[changeIndex], changeTimer);
+    scheduleClockEvent(changeTimes[changeIndex], changeTimer);
     changeIndex++;
 }
 

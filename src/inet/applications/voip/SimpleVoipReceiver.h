@@ -42,9 +42,9 @@ class INET_API SimpleVoipReceiver : public cSimpleModule, public LifecycleUnsupp
     {
       public:
         unsigned int packetID = 0;
-        simtime_t creationTime;
-        simtime_t arrivalTime;
-        simtime_t playoutTime;
+        simclocktime_t creationTime;
+        simclocktime_t arrivalTime;
+        simclocktime_t playoutTime;
     };
 
     typedef std::list<VoipPacketInfo *> PacketsList;
@@ -61,7 +61,7 @@ class INET_API SimpleVoipReceiver : public cSimpleModule, public LifecycleUnsupp
         Status status = EMPTY;
         unsigned int talkspurtID = -1;
         unsigned int talkspurtNumPackets = 0;
-        simtime_t voiceDuration;
+        simclocktime_t voiceDuration;
         PacketsVector packets;
 
       public:
@@ -79,8 +79,8 @@ class INET_API SimpleVoipReceiver : public cSimpleModule, public LifecycleUnsupp
     int emodelIe = -1;
     int emodelBpl = -1;
     int emodelA = -1;
-    simtime_t playoutDelay;
-    simtime_t mosSpareTime;    // spare time before calculating MOS (after calculated playout time of last packet)
+    simclocktime_t playoutDelay;
+    simclocktime_t mosSpareTime;    // spare time before calculating MOS (after calculated playout time of last packet)
 
     // state
     UdpSocket socket;

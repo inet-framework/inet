@@ -59,25 +59,25 @@ class INET_API RtpSenderInfo : public RtpParticipantInfo
     /**
      * Stores information about this outgoing RtpPacket.
      */
-    virtual void processRTPPacket(Packet *packet, int id, simtime_t arrivalTime) override;
+    virtual void processRTPPacket(Packet *packet, int id, simclocktime_t arrivalTime) override;
 
     /**
      * Processes an incoming ReceptionReport for this sender.
      */
-    virtual void processReceptionReport(const ReceptionReport *report, simtime_t arrivalTime);
+    virtual void processReceptionReport(const ReceptionReport *report, simclocktime_t arrivalTime);
 
     /**
      * Returns a SenderReport for this rtp endsystem.
      * If it hasn't sent rtp data packets during the
      * last 2 rtcp intervals, it returns nullptr.
      */
-    virtual SenderReport *senderReport(simtime_t now) override;
+    virtual SenderReport *senderReport(simclocktime_t now) override;
 
     /**
      * Sets the time (simTime) when this endsystem has
      * started sending rtp packets.
      */
-    virtual void setStartTime(simtime_t startTime);
+    virtual void setStartTime(simclocktime_t startTime);
 
     /**
      * Sets the clock rate (in ticks per second) this sender
@@ -102,7 +102,7 @@ class INET_API RtpSenderInfo : public RtpParticipantInfo
     /**
      * The time when the transmission was started.
      */
-    simtime_t _startTime;
+    simclocktime_t _startTime;
 
     /**
      * The clock rate this sender increases the rtp time stamp.

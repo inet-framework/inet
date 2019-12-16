@@ -54,24 +54,24 @@ void TcpBasicClientApp::initialize(int stage)
 
 void TcpBasicClientApp::handleStartOperation(LifecycleOperation *operation)
 {
-    simtime_t now = simTime();
-    simtime_t start = std::max(startTime, now);
+    simclocktime_t now = getClockTime();
+    simclocktime_t start = std::max(startTime, now);
     if (timeoutMsg && ((stopTime < SIMTIME_ZERO) || (start < stopTime) || (start == stopTime && startTime == stopTime))) {
         timeoutMsg->setKind(MSGKIND_CONNECT);
-        scheduleAt(start, timeoutMsg);
+        scheduleClockEvent(start, timeoutMsg);
     }
 }
 
 void TcpBasicClientApp::handleStopOperation(LifecycleOperation *operation)
 {
-    cancelEvent(timeoutMsg);
+    cancelClockEvent(timeoutMsg);
     if (socket.getState() == TcpSocket::CONNECTED || socket.getState() == TcpSocket::CONNECTING || socket.getState() == TcpSocket::PEER_CLOSED)
         close();
 }
 
 void TcpBasicClientApp::handleCrashOperation(LifecycleOperation *operation)
 {
-    cancelEvent(timeoutMsg);
+    cancelClockEvent(timeoutMsg);
     if (operation->getRootModule() != getContainingNode(this))
         socket.destroy();
 }
@@ -90,7 +90,7 @@ void TcpBasicClientApp::sendRequest()
     payload->setChunkLength(B(requestLength));
     payload->setExpectedReplyLength(B(replyLength));
     payload->setServerClose(false);
-    payload->addTag<CreationTimeTag>()->setCreationTime(simTime());
+    payload->addTag<CreationTimeTag>()->setCreationTime(getClockTime());
     packet->insertAtBack(payload);
 
     EV_INFO << "sending request with " << requestLength << " bytes, expected reply length " << replyLength << " bytes,"
@@ -115,7 +115,7 @@ void TcpBasicClientApp::handleTimer(cMessage *msg)
         case MSGKIND_SEND:
             sendRequest();
             numRequestsToSend--;
-            // no scheduleAt(): next request will be sent when reply to this one
+            // no scheduleClockEvent(): next request will be sent when reply to this one
             // arrives (see socketDataArrived())
             break;
 
@@ -140,13 +140,13 @@ void TcpBasicClientApp::socketEstablished(TcpSocket *socket)
     numRequestsToSend--;
 }
 
-void TcpBasicClientApp::rescheduleOrDeleteTimer(simtime_t d, short int msgKind)
+void TcpBasicClientApp::rescheduleOrDeleteTimer(simclocktime_t d, short int msgKind)
 {
-    cancelEvent(timeoutMsg);
+    cancelClockEvent(timeoutMsg);
 
     if (stopTime < SIMTIME_ZERO || d < stopTime) {
         timeoutMsg->setKind(msgKind);
-        scheduleAt(d, timeoutMsg);
+        scheduleClockEvent(d, timeoutMsg);
     }
     else {
         delete timeoutMsg;
@@ -162,7 +162,7 @@ void TcpBasicClientApp::socketDataArrived(TcpSocket *socket, Packet *msg, bool u
         EV_INFO << "reply arrived\n";
 
         if (timeoutMsg) {
-            simtime_t d = simTime() + par("thinkTime");
+            simclocktime_t d = getClockTime() + par("thinkTime");
             rescheduleOrDeleteTimer(d, MSGKIND_SEND);
         }
     }
@@ -175,7 +175,7 @@ void TcpBasicClientApp::socketDataArrived(TcpSocket *socket, Packet *msg, bool u
 void TcpBasicClientApp::close()
 {
     TcpAppBase::close();
-    cancelEvent(timeoutMsg);
+    cancelClockEvent(timeoutMsg);
 }
 
 void TcpBasicClientApp::socketClosed(TcpSocket *socket)
@@ -184,7 +184,7 @@ void TcpBasicClientApp::socketClosed(TcpSocket *socket)
 
     // start another session after a delay
     if (timeoutMsg) {
-        simtime_t d = simTime() + par("idleInterval");
+        simclocktime_t d = getClockTime() + par("idleInterval");
         rescheduleOrDeleteTimer(d, MSGKIND_CONNECT);
     }
 }
@@ -195,7 +195,7 @@ void TcpBasicClientApp::socketFailure(TcpSocket *socket, int code)
 
     // reconnect after a delay
     if (timeoutMsg) {
-        simtime_t d = simTime() + par("reconnectInterval");
+        simclocktime_t d = getClockTime() + par("reconnectInterval");
         rescheduleOrDeleteTimer(d, MSGKIND_CONNECT);
     }
 }

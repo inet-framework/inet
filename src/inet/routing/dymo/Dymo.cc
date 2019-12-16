@@ -269,7 +269,7 @@ bool Dymo::hasDelayedDatagrams(const L3Address& target)
 void Dymo::cancelRreqTimer(const L3Address& target)
 {
     auto tt = targetAddressToRREQTimer.find(target);
-    cancelEvent(tt->second);
+    cancelClockEvent(tt->second);
 }
 
 void Dymo::deleteRreqTimer(const L3Address& target)
@@ -300,7 +300,7 @@ void Dymo::scheduleRreqWaitRrepTimer(RreqWaitRrepTimer *message)
 {
     EV_DETAIL << "Scheduling RREQ wait RREP timer" << endl;
     targetAddressToRREQTimer[message->getTarget()] = message;
-    scheduleAt(simTime() + routeRREQWaitTime, message);
+    scheduleClockEvent(getClockTime() + routeRREQWaitTime, message);
 }
 
 void Dymo::processRreqWaitRrepTimer(RreqWaitRrepTimer *message)
@@ -334,7 +334,7 @@ void Dymo::scheduleRreqBackoffTimer(RreqBackoffTimer *message)
 {
     EV_DETAIL << "Scheduling RREQ backoff timer" << endl;
     targetAddressToRREQTimer[message->getTarget()] = message;
-    scheduleAt(simTime() + computeRreqBackoffTime(message->getRetryCount()), message);
+    scheduleClockEvent(getClockTime() + computeRreqBackoffTime(message->getRetryCount()), message);
 }
 
 void Dymo::processRreqBackoffTimer(RreqBackoffTimer *message)
@@ -344,7 +344,7 @@ void Dymo::processRreqBackoffTimer(RreqBackoffTimer *message)
     delete message;
 }
 
-simtime_t Dymo::computeRreqBackoffTime(int retryCount)
+simclocktime_t Dymo::computeRreqBackoffTime(int retryCount)
 {
     return pow(routeRREQWaitTime, retryCount);
 }
@@ -364,7 +364,7 @@ void Dymo::scheduleRreqHolddownTimer(RreqHolddownTimer *message)
 {
     EV_DETAIL << "Scheduling RREQ holddown timer" << endl;
     targetAddressToRREQTimer[message->getTarget()] = message;
-    scheduleAt(simTime() + rreqHolddownTime, message);
+    scheduleClockEvent(getClockTime() + rreqHolddownTime, message);
 }
 
 void Dymo::processRreqHolddownTimer(RreqHolddownTimer *message)
@@ -1149,10 +1149,10 @@ void Dymo::updateRoute(Packet *packet, const Ptr<const RteMsg>& rteMsg, const Ad
     // Route.Metric := RteMsg.Metric
     route->setMetric(addressBlock.getMetric());
     // Route.LastUsed := Current_Time
-    routeData->setLastUsed(simTime());
+    routeData->setLastUsed(getClockTime());
     // If RteMsg.VALIDITY_TIME is not included, then Route.ExpirationTime := MAXTIME, otherwise Route.ExpirationTime := Current_Time + RteMsg.VALIDITY_TIME
     if (addressBlock.getHasValidityTime())
-        routeData->setExpirationTime(simTime() + addressBlock.getValidityTime());
+        routeData->setExpirationTime(getClockTime() + addressBlock.getValidityTime());
     else
         routeData->setExpirationTime(SimTime::getMaxTime());
     scheduleExpungeTimer();
@@ -1190,18 +1190,18 @@ void Dymo::processExpungeTimer()
 void Dymo::scheduleExpungeTimer()
 {
     EV_DETAIL << "Scheduling expunge timer" << endl;
-    simtime_t nextExpungeTime = getNextExpungeTime();
+    simclocktime_t nextExpungeTime = getNextExpungeTime();
     if (nextExpungeTime == SimTime::getMaxTime()) {
         if (expungeTimer->isScheduled())
-            cancelEvent(expungeTimer);
+            cancelClockEvent(expungeTimer);
     }
     else {
         if (!expungeTimer->isScheduled())
-            scheduleAt(nextExpungeTime, expungeTimer);
+            scheduleClockEvent(nextExpungeTime, expungeTimer);
         else {
             if (expungeTimer->getArrivalTime() != nextExpungeTime) {
-                cancelEvent(expungeTimer);
-                scheduleAt(nextExpungeTime, expungeTimer);
+                cancelClockEvent(expungeTimer);
+                scheduleClockEvent(nextExpungeTime, expungeTimer);
             }
         }
     }
@@ -1221,8 +1221,8 @@ void Dymo::expungeRoutes()
             // A route MUST be expunged if (Current_Time - Route.LastUsed) >= MAX_SEQNUM_LIFETIME.
             // A route MUST be expunged if Current_Time >= Route.ExpirationTime
             if ((getRouteState(routeData) == EXPIRED) ||
-                (simTime() - routeData->getLastUsed() >= maxSequenceNumberLifetime) ||
-                (simTime() >= routeData->getExpirationTime()))
+                (getClockTime() - routeData->getLastUsed() >= maxSequenceNumberLifetime) ||
+                (getClockTime() >= routeData->getExpirationTime()))
             {
                 EV_DETAIL << "Expunging route: " << route << endl;
                 routingTable->deleteRoute(route);
@@ -1232,17 +1232,17 @@ void Dymo::expungeRoutes()
     }
 }
 
-simtime_t Dymo::getNextExpungeTime()
+simclocktime_t Dymo::getNextExpungeTime()
 {
-    simtime_t nextExpirationTime = SimTime::getMaxTime();
+    simclocktime_t nextExpirationTime = SimTime::getMaxTime();
     for (int i = 0; i < routingTable->getNumRoutes(); i++) {
         IRoute *route = routingTable->getRoute(i);
         if (route->getSource() == this) {
             DymoRouteData *routeData = check_and_cast<DymoRouteData *>(route->getProtocolData());
-            const simtime_t& expirationTime = routeData->getExpirationTime();
+            const simclocktime_t& expirationTime = routeData->getExpirationTime();
             if (expirationTime < nextExpirationTime)
                 nextExpirationTime = expirationTime;
-            const simtime_t& defaultExpirationTime = routeData->getLastUsed() + maxSequenceNumberLifetime;
+            const simclocktime_t& defaultExpirationTime = routeData->getLastUsed() + maxSequenceNumberLifetime;
             if (defaultExpirationTime < nextExpirationTime)
                 nextExpirationTime = defaultExpirationTime;
         }
@@ -1252,18 +1252,18 @@ simtime_t Dymo::getNextExpungeTime()
 
 DymoRouteState Dymo::getRouteState(DymoRouteData *routeData)
 {
-    simtime_t lastUsed = routeData->getLastUsed();
+    simclocktime_t lastUsed = routeData->getLastUsed();
     if (routeData->getBroken())
         return BROKEN;
-    else if (lastUsed - simTime() <= activeInterval)
+    else if (lastUsed - getClockTime() <= activeInterval)
         return ACTIVE;
     else if (routeData->getExpirationTime() != SimTime::getMaxTime()) {
-        if (simTime() >= routeData->getExpirationTime())
+        if (getClockTime() >= routeData->getExpirationTime())
             return EXPIRED;
         else
             return TIMED;
     }
-    else if (lastUsed - simTime() <= maxIdleTime)
+    else if (lastUsed - getClockTime() <= maxIdleTime)
         return IDLE;
     else
         return EXPIRED;
@@ -1375,7 +1375,7 @@ INetfilter::IHook::Result Dymo::ensureRouteForDatagram(Packet *datagram)
             if (routeData)
                 // 8.1. Handling Route Lifetimes During Packet Forwarding
                 // Route.LastUsed := Current_Time, and the packet is forwarded to the route's next hop.
-                routeData->setLastUsed(simTime());
+                routeData->setLastUsed(getClockTime());
             return ACCEPT;
         }
         else if (source.isUnspecified() || isClientAddress(source)) {

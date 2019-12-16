@@ -441,7 +441,7 @@ void Ospfv3Interface::processHelloPacket(Packet* packet)
                     }
                 }
 
-                neighbor->setLastHelloTime((int)simTime().dbl());
+                neighbor->setLastHelloTime((int)getClockTime().dbl());
             }
             else {
                 Ipv4Address dRouterID;
@@ -1988,7 +1988,7 @@ std::string Ospfv3Interface::detailedInfo() const
     out << ", Wait " << this->getDeadInterval();
     out << ", Retransmit " << this->getRetransmissionInterval() << endl;
 
-    out << "\tHello due in " << (int)simTime().dbl()%this->helloInterval << endl;
+    out << "\tHello due in " << (int)getClockTime().dbl()%this->helloInterval << endl;
 
     out << "Neighbor Count is " << this->getNeighborCount();
     out << ", Adjacent neighbor count is " << adjCount << endl;

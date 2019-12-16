@@ -74,8 +74,8 @@ void TcpWestwood::recalculateSlowStartThreshold()
 
 void TcpWestwood::recalculateBWE(uint32 cumul_ack)
 {
-    simtime_t currentTime = simTime();
-    simtime_t timeAck = currentTime - state->w_lastAckTime;
+    simclocktime_t currentTime = getClockTime();
+    simclocktime_t timeAck = currentTime - state->w_lastAckTime;
 
     // Update BWE
     if (timeAck > 0) {
@@ -129,8 +129,8 @@ void TcpWestwood::receivedDataAck(uint32 firstSeqAcked)
     const TcpSegmentTransmitInfoList::Item *found = state->regions.get(firstSeqAcked);
 
     if (found != nullptr) {
-        simtime_t currentTime = simTime();
-        simtime_t newRTT = currentTime - found->getFirstSentTime();
+        simclocktime_t currentTime = getClockTime();
+        simclocktime_t newRTT = currentTime - found->getFirstSentTime();
 
         // Update RTTmin
         if (newRTT < state->w_RTTmin && newRTT > 0 && found->getTransmitCount() == 1)
@@ -292,7 +292,7 @@ void TcpWestwood::dataSent(uint32 fromseq)
     // save time when packet is sent
     // fromseq is the seq number of the 1st sent byte
 
-    simtime_t sendtime = simTime();
+    simclocktime_t sendtime = getClockTime();
     state->regions.clearTo(state->snd_una);
     state->regions.set(fromseq, state->snd_max, sendtime);
 }
@@ -301,7 +301,7 @@ void TcpWestwood::segmentRetransmitted(uint32 fromseq, uint32 toseq)
 {
     TcpBaseAlg::segmentRetransmitted(fromseq, toseq);
 
-    state->regions.set(fromseq, toseq, simTime());
+    state->regions.set(fromseq, toseq, getClockTime());
 }
 
 } // namespace tcp

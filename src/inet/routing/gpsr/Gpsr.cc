@@ -153,7 +153,7 @@ void Gpsr::processMessage(cMessage *message)
 void Gpsr::scheduleBeaconTimer()
 {
     EV_DEBUG << "Scheduling beacon timer" << endl;
-    scheduleAt(simTime() + beaconInterval + uniform(-1, 1) * maxJitter, beaconTimer);
+    scheduleClockEvent(getClockTime() + beaconInterval + uniform(-1, 1) * maxJitter, beaconTimer);
 }
 
 void Gpsr::processBeaconTimer()
@@ -175,18 +175,18 @@ void Gpsr::processBeaconTimer()
 void Gpsr::schedulePurgeNeighborsTimer()
 {
     EV_DEBUG << "Scheduling purge neighbors timer" << endl;
-    simtime_t nextExpiration = getNextNeighborExpiration();
+    simclocktime_t nextExpiration = getNextNeighborExpiration();
     if (nextExpiration == SimTime::getMaxTime()) {
         if (purgeNeighborsTimer->isScheduled())
-            cancelEvent(purgeNeighborsTimer);
+            cancelClockEvent(purgeNeighborsTimer);
     }
     else {
         if (!purgeNeighborsTimer->isScheduled())
-            scheduleAt(nextExpiration, purgeNeighborsTimer);
+            scheduleClockEvent(nextExpiration, purgeNeighborsTimer);
         else {
             if (purgeNeighborsTimer->getArrivalTime() != nextExpiration) {
-                cancelEvent(purgeNeighborsTimer);
-                scheduleAt(nextExpiration, purgeNeighborsTimer);
+                cancelClockEvent(purgeNeighborsTimer);
+                scheduleClockEvent(nextExpiration, purgeNeighborsTimer);
             }
         }
     }
@@ -411,9 +411,9 @@ L3Address Gpsr::getSenderNeighborAddress(const Ptr<const NetworkHeaderBase>& net
 // neighbor
 //
 
-simtime_t Gpsr::getNextNeighborExpiration()
+simclocktime_t Gpsr::getNextNeighborExpiration()
 {
-    simtime_t oldestPosition = neighborPositionTable.getOldestPosition();
+    simclocktime_t oldestPosition = neighborPositionTable.getOldestPosition();
     if (oldestPosition == SimTime::getMaxTime())
         return oldestPosition;
     else
@@ -422,7 +422,7 @@ simtime_t Gpsr::getNextNeighborExpiration()
 
 void Gpsr::purgeNeighbors()
 {
-    neighborPositionTable.removeOldPositions(simTime() - neighborValidityInterval);
+    neighborPositionTable.removeOldPositions(getClockTime() - neighborValidityInterval);
 }
 
 std::vector<L3Address> Gpsr::getPlanarNeighbors() const
@@ -798,15 +798,15 @@ void Gpsr::handleStopOperation(LifecycleOperation *operation)
 {
     // TODO: send a beacon to remove ourself from peers neighbor position table
     neighborPositionTable.clear();
-    cancelEvent(beaconTimer);
-    cancelEvent(purgeNeighborsTimer);
+    cancelClockEvent(beaconTimer);
+    cancelClockEvent(purgeNeighborsTimer);
 }
 
 void Gpsr::handleCrashOperation(LifecycleOperation *operation)
 {
     neighborPositionTable.clear();
-    cancelEvent(beaconTimer);
-    cancelEvent(purgeNeighborsTimer);
+    cancelClockEvent(beaconTimer);
+    cancelClockEvent(purgeNeighborsTimer);
 }
 
 //

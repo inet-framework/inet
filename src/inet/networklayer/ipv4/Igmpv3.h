@@ -207,7 +207,7 @@ class INET_API Igmpv3 : public cSimpleModule, protected cListener
 
     bool enabled;
     int robustness;
-    double queryInterval; //TODO these should probably be simtime_t
+    double queryInterval; //TODO these should probably be simclocktime_t
     double queryResponseInterval;
     double groupMembershipInterval;
     double otherQuerierPresentInterval;

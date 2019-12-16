@@ -37,8 +37,8 @@ class INET_API SimpleVoipSender : public cSimpleModule, public LifecycleUnsuppor
     UdpSocket socket;
 
     // parameters
-    simtime_t stopTime;
-    simtime_t packetizationInterval;
+    simclocktime_t stopTime;
+    simclocktime_t packetizationInterval;
     int localPort = -1;
     int destPort = -1;
     int talkPacketSize = 0;
@@ -47,15 +47,15 @@ class INET_API SimpleVoipSender : public cSimpleModule, public LifecycleUnsuppor
     // state
     cMessage *selfSender = nullptr;    // timer for sending packets
     cMessage *selfSource = nullptr;    // timer for changing talkspurt/silence periods - FIXME: be more specific with the name of this self message
-    simtime_t silenceDuration;
-    simtime_t talkspurtDuration;
+    simclocktime_t silenceDuration;
+    simclocktime_t talkspurtDuration;
     int packetID = -1;
     int talkspurtID = -1;
     int talkspurtNumPackets = 0;
     bool isTalk = false;
 
   protected:
-    void talkspurt(simtime_t dur);
+    void talkspurt(simclocktime_t dur);
     void selectTalkOrSilenceInterval();
     void sendVoIPPacket();
 

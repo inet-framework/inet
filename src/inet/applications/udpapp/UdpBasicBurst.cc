@@ -113,7 +113,7 @@ Packet *UdpBasicBurst::createPacket()
     const auto& payload = makeShared<ApplicationPacket>();
     payload->setChunkLength(B(msgByteLength));
     payload->setSequenceNumber(numSent);
-    payload->addTag<CreationTimeTag>()->setCreationTime(simTime());
+    payload->addTag<CreationTimeTag>()->setCreationTime(getClockTime());
     pk->insertAtBack(payload);
     pk->addPar("sourceId") = getId();
     pk->addPar("msgId") = numSent;
@@ -157,9 +157,9 @@ void UdpBasicBurst::processStart()
         }
     }
 
-    nextSleep = simTime();
-    nextBurst = simTime();
-    nextPkt = simTime();
+    nextSleep = getClockTime();
+    nextBurst = getClockTime();
+    nextPkt = getClockTime();
     activeBurst = false;
 
     isSource = !destAddresses.empty();
@@ -176,7 +176,7 @@ void UdpBasicBurst::processStart()
 
 void UdpBasicBurst::processSend()
 {
-    if (stopTime < SIMTIME_ZERO || simTime() < stopTime) {
+    if (stopTime < SIMTIME_ZERO || getClockTime() < stopTime) {
         // send and reschedule next sending
         if (isSource) // if the node is a sink, don't generate messages
             generateBurst();
@@ -269,7 +269,7 @@ void UdpBasicBurst::processPacket(Packet *pk)
     }
 
     if (delayLimit > 0) {
-        if (simTime() - pk->getTimestamp() > delayLimit) {
+        if (getClockTime() - pk->getTimestamp() > delayLimit) {
             EV_DEBUG << "Old packet: " << UdpSocket::getReceivedPacketInfo(pk) << endl;
             PacketDropDetails details;
             details.setReason(CONGESTION);
@@ -288,7 +288,7 @@ void UdpBasicBurst::processPacket(Packet *pk)
 
 void UdpBasicBurst::generateBurst()
 {
-    simtime_t now = simTime();
+    simclocktime_t now = getClockTime();
 
     if (nextPkt < now)
         nextPkt = now;
@@ -336,7 +336,7 @@ void UdpBasicBurst::generateBurst()
         timerNext->setKind(STOP);
         nextPkt = stopTime;
     }
-    scheduleAt(nextPkt, timerNext);
+    scheduleClockEvent(nextPkt, timerNext);
 }
 
 void UdpBasicBurst::finish()
@@ -349,18 +349,18 @@ void UdpBasicBurst::finish()
 
 void UdpBasicBurst::handleStartOperation(LifecycleOperation *operation)
 {
-    simtime_t start = std::max(startTime, simTime());
+    simclocktime_t start = std::max(startTime, getClockTime());
 
     if ((stopTime < SIMTIME_ZERO) || (start < stopTime) || (start == stopTime && startTime == stopTime)) {
         timerNext->setKind(START);
-        scheduleAt(start, timerNext);
+        scheduleClockEvent(start, timerNext);
     }
 }
 
 void UdpBasicBurst::handleStopOperation(LifecycleOperation *operation)
 {
     if (timerNext)
-        cancelEvent(timerNext);
+        cancelClockEvent(timerNext);
     activeBurst = false;
     socket.close();
     delayActiveOperationFinish(par("stopOperationTimeout"));
@@ -369,7 +369,7 @@ void UdpBasicBurst::handleStopOperation(LifecycleOperation *operation)
 void UdpBasicBurst::handleCrashOperation(LifecycleOperation *operation)
 {
     if (timerNext)
-        cancelEvent(timerNext);
+        cancelClockEvent(timerNext);
     activeBurst = false;
     if (operation->getRootModule() != getContainingNode(this))     // closes socket when the application crashed only
         socket.destroy();         //TODO  in real operating systems, program crash detected by OS and OS closes sockets of crashed programs.

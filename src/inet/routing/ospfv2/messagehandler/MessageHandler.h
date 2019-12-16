@@ -51,7 +51,7 @@ class INET_API MessageHandler : public IMessageHandler
 
     void sendPacket(Packet *packet, Ipv4Address destination, Ospfv2Interface *outputIf, short ttl = 1);
     void clearTimer(cMessage *timer);
-    void startTimer(cMessage *timer, simtime_t delay);
+    void startTimer(cMessage *timer, simclocktime_t delay);
 
     void printEvent(const char *eventString, const Ospfv2Interface *onInterface = nullptr, const Neighbor *forNeighbor = nullptr) const;
     void printHelloPacket(const Ospfv2HelloPacket *helloPacket, Ipv4Address destination, int outputIfIndex) const;

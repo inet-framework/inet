@@ -122,7 +122,7 @@ class INET_API TcpServerThreadBase : public cSimpleModule, public TcpSocket::ICa
     virtual void dataArrived(Packet *msg, bool urgent) = 0;
 
     /*
-     * Called when a timer (scheduled via scheduleAt()) expires. To be redefined.
+     * Called when a timer (scheduled via scheduleClockEvent()) expires. To be redefined.
      */
     virtual void timerExpired(cMessage *timer) = 0;
 

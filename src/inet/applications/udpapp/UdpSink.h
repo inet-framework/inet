@@ -37,8 +37,8 @@ class INET_API UdpSink : public ApplicationBase, public UdpSocket::ICallback
     UdpSocket socket;
     int localPort = -1;
     L3Address multicastGroup;
-    simtime_t startTime;
-    simtime_t stopTime;
+    simclocktime_t startTime;
+    simclocktime_t stopTime;
     cMessage *selfMsg = nullptr;
     int numReceived = 0;
 

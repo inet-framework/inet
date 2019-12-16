@@ -129,9 +129,9 @@ void SctpPeer::initialize(int stage)
         clientSocket.setCallback(this);
         clientSocket.setOutputGate(gate("socketOut"));
 
-        if (simtime_t(par("startTime")) > SIMTIME_ZERO) {    //FIXME is invalid the startTime == 0 ????
+        if (simclocktime_t(par("startTime")) > SIMTIME_ZERO) {    //FIXME is invalid the startTime == 0 ????
             connectTimer = new cMessage("ConnectTimer", MSGKIND_CONNECT);
-            scheduleAt(par("startTime"), connectTimer);
+            scheduleClockEvent(par("startTime"), connectTimer);
         }
 
         cModule *node = findContainingNode(this);
@@ -148,7 +148,7 @@ void SctpPeer::sendOrSchedule(cMessage *msg)
         send(msg, "socketOut");
     }
     else {
-        scheduleAt(simTime() + delay, msg);
+        scheduleClockEvent(getClockTime() + delay, msg);
     }
 }
 
@@ -162,7 +162,7 @@ void SctpPeer::generateAndSend()
     for (int i = 0; i < numBytes; i++)
         vec[i] = (bytesSent + i) & 0xFF;
     applicationData->setBytes(vec);
-    applicationData->addTag<CreationTimeTag>()->setCreationTime(simTime());
+    applicationData->addTag<CreationTimeTag>()->setCreationTime(getClockTime());
     applicationPacket->insertAtBack(applicationData);
     auto sctpSendReq = applicationPacket->addTag<SctpSendReq>();
     sctpSendReq->setLast(true);
@@ -200,8 +200,8 @@ void SctpPeer::connect()
 
     if (streamReset) {
         cMessage *cmsg = new cMessage("StreamReset", MSGKIND_RESET);
-        EV_INFO << "StreamReset Timer scheduled at " << simTime() << "\n";
-        scheduleAt(simTime() + par("streamRequestTime"), cmsg);
+        EV_INFO << "StreamReset Timer scheduled at " << getClockTime() << "\n";
+        scheduleClockEvent(getClockTime() + par("streamRequestTime"), cmsg);
     }
 
     unsigned int streamNum = 0;
@@ -269,7 +269,7 @@ void SctpPeer::handleMessage(cMessage *msg)
                     if (par("thinkTime").doubleValue() > 0) {
                         generateAndSend();
                         timeoutMsg->setKind(SCTP_C_SEND);
-                        scheduleAt(simTime() + par("thinkTime"), timeoutMsg);
+                        scheduleClockEvent(getClockTime() + par("thinkTime"), timeoutMsg);
                         numRequestsToSend--;
                         i->second = numRequestsToSend;
                     }
@@ -303,7 +303,7 @@ void SctpPeer::handleMessage(cMessage *msg)
                             char as[5];
                             sprintf(as, "%d", serverAssocId);
                             cMessage *abortMsg = new cMessage(as, SCTP_I_ABORT);
-                            scheduleAt(simTime() + par("waitToClose"), abortMsg);
+                            scheduleClockEvent(getClockTime() + par("waitToClose"), abortMsg);
                         }
                         else {
                             EV_INFO << "no more packets to send, call shutdown for assoc " << serverAssocId << "\n";
@@ -333,7 +333,7 @@ void SctpPeer::handleMessage(cMessage *msg)
             cmd->setNumMsgs(ind->getNumMsgs());
             delete msg;
             if (!cmsg->isScheduled() && schedule == false) {
-                scheduleAt(simTime() + par("delayFirstRead"), cmsg);
+                scheduleClockEvent(getClockTime() + par("delayFirstRead"), cmsg);
             }
             else if (schedule == true)
                 sendOrSchedule(cmsg);
@@ -360,9 +360,9 @@ void SctpPeer::handleMessage(cMessage *msg)
                         i->second--;
                         SctpSimpleMessage *smsg = check_and_cast<SctpSimpleMessage *>(msg);
                         auto j = endToEndDelay.find(id);
-                        j->second->record(simTime() - smsg->getCreationTime());
+                        j->second->record(getClockTime() - smsg->getCreationTime());
                         auto k = histEndToEndDelay.find(id);
-                        k->second->collect(simTime() - smsg->getCreationTime());
+                        k->second->collect(getClockTime() - smsg->getCreationTime());
 
                         if (i->second == 0) {
                             Request *cmsg = new Request("SCTP_C_NO_OUTSTANDING", SCTP_C_NO_OUTSTANDING);
@@ -379,8 +379,8 @@ void SctpPeer::handleMessage(cMessage *msg)
                     const auto& smsg = message->peekData();
 
                     for (auto& region : smsg->getAllTags<CreationTimeTag>()) {
-                        m->second->record(simTime() - region.getTag()->getCreationTime());
-                        k->second->collect(simTime() - region.getTag()->getCreationTime());
+                        m->second->record(getClockTime() - region.getTag()->getCreationTime());
+                        k->second->collect(getClockTime() - region.getTag()->getCreationTime());
                     }
 
                     auto cmsg = new Packet("ApplicationPacket");
@@ -457,7 +457,7 @@ void SctpPeer::handleTimer(cMessage *msg)
             if (numRequestsToSend > 0) {
                 generateAndSend();
                 if (par("thinkTime").doubleValue() > 0)
-                    scheduleAt(simTime() + par("thinkTime"), timeoutMsg);
+                    scheduleClockEvent(getClockTime() + par("thinkTime"), timeoutMsg);
                 numRequestsToSend--;
             }
             break;
@@ -518,7 +518,7 @@ void SctpPeer::socketFailure(SctpSocket *socket, int code)
     setStatusString("broken");
     // reconnect after a delay
     timeMsg->setKind(MSGKIND_CONNECT);
-    scheduleAt(simTime() + par("reconnectInterval"), timeMsg);
+    scheduleClockEvent(getClockTime() + par("reconnectInterval"), timeMsg);
 }
 
 void SctpPeer::socketStatusArrived(SctpSocket *socket, SctpStatusReq *status)
@@ -560,7 +560,7 @@ void SctpPeer::sendRequest(bool last)
     for (int i = 0; i < numBytes; i++)
         vec[i] = (bytesSent + i) & 0xFF;
     msg->setBytes(vec);
-    msg->addTag<CreationTimeTag>()->setCreationTime(simTime());
+    msg->addTag<CreationTimeTag>()->setCreationTime(getClockTime());
     cmsg->insertAtBack(msg);
     cmsg->setKind(ordered ? SCTP_C_SEND_ORDERED : SCTP_C_SEND_UNORDERED);
     auto sendCommand = cmsg->addTag<SctpSendReq>();
@@ -593,7 +593,7 @@ void SctpPeer::socketEstablished(SctpSocket *socket, unsigned long int buffer)
             }
 
             timeMsg->setKind(MSGKIND_SEND);
-            scheduleAt(simTime() + par("thinkTime"), timeMsg);
+            scheduleClockEvent(getClockTime() + par("thinkTime"), timeMsg);
         }
         else {
             if (queueSize > 0) {
@@ -614,7 +614,7 @@ void SctpPeer::socketEstablished(SctpSocket *socket, unsigned long int buffer)
 
             if (numPacketsToReceive == 0 && par("waitToClose").doubleValue() > 0) {
                 timeMsg->setKind(MSGKIND_ABORT);
-                scheduleAt(simTime() + par("waitToClose"), timeMsg);
+                scheduleClockEvent(getClockTime() + par("waitToClose"), timeMsg);
             }
 
             if (numRequestsToSend == 0 && par("waitToClose").doubleValue() == 0) {

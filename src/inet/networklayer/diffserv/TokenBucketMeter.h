@@ -36,7 +36,7 @@ class INET_API TokenBucketMeter : public PacketMeterBase
     bool colorAwareMode = false;
 
     long Tc = 0;    // token bucket for committed burst
-    simtime_t lastUpdateTime;
+    simclocktime_t lastUpdateTime;
 
     int numRcvd = 0;
     int numRed = 0;

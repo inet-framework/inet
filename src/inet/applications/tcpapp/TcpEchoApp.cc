@@ -115,13 +115,13 @@ void TcpEchoAppThread::dataArrived(Packet *rcvdPkt, bool urgent)
         if (echoAppModule->delay == 0)
             echoAppModule->sendDown(outPkt);
         else
-            scheduleAt(simTime() + echoAppModule->delay, outPkt); // send after a delay
+            scheduleClockEvent(getClockTime() + echoAppModule->delay, outPkt); // send after a delay
     }
     delete rcvdPkt;
 }
 
   /*
-   * Called when a timer (scheduled via scheduleAt()) expires. To be redefined.
+   * Called when a timer (scheduled via scheduleClockEvent()) expires. To be redefined.
    */
 void TcpEchoAppThread::timerExpired(cMessage *timer)
 {

@@ -71,7 +71,7 @@ class INET_API Dymo : public RoutingProtocolBase, public cListener, public Netfi
     int bufferSizeBytes;
 
     // Dymo extension parameters
-    simtime_t maxJitter;
+    simclocktime_t maxJitter;
     bool sendIntermediateRREP;
     int minHopLimit;
     int maxHopLimit;
@@ -134,7 +134,7 @@ class INET_API Dymo : public RoutingProtocolBase, public cListener, public Netfi
     RreqBackoffTimer *createRreqBackoffTimer(const L3Address& target, int retryCount);
     void scheduleRreqBackoffTimer(RreqBackoffTimer *message);
     void processRreqBackoffTimer(RreqBackoffTimer *message);
-    simtime_t computeRreqBackoffTime(int retryCount);
+    simclocktime_t computeRreqBackoffTime(int retryCount);
 
     // handling RREQ holddown timer
     RreqHolddownTimer *createRreqHolddownTimer(const L3Address& target);
@@ -187,7 +187,7 @@ class INET_API Dymo : public RoutingProtocolBase, public cListener, public Netfi
     void processExpungeTimer();
     void scheduleExpungeTimer();
     void expungeRoutes();
-    simtime_t getNextExpungeTime();
+    simclocktime_t getNextExpungeTime();
     DymoRouteState getRouteState(DymoRouteData *routeData);
 
     // configuration

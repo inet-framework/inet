@@ -79,7 +79,7 @@ class Rrep extends AodvControlPacket
     L3Address destAddr;    // The IP address of the destination for which a route is supplied.
     uint32_t destSeqNum;    // The destination sequence number associated to the route.
     L3Address originatorAddr;    // The IP address of the node which originated the RREQ for which the route is supplied.
-    simtime_t lifeTime;     // The time in milliseconds for which nodes receiving the RREP consider the route to be valid.
+    simclocktime_t lifeTime;     // The time in milliseconds for which nodes receiving the RREP consider the route to be valid.
 }
 
 //

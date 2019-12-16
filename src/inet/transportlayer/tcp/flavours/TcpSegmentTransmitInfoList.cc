@@ -25,7 +25,7 @@ namespace inet {
 
 namespace tcp {
 
-void TcpSegmentTransmitInfoList::set(uint32_t beg, uint32_t end, simtime_t sentTime)
+void TcpSegmentTransmitInfoList::set(uint32_t beg, uint32_t end, simclocktime_t sentTime)
 {
     ASSERT(seqLess(beg, end));
     ASSERT(regions.empty() || (seqLE(regions.front().beg, beg) && seqLE(beg, regions.back().end)));
@@ -58,8 +58,8 @@ void TcpSegmentTransmitInfoList::set(uint32_t beg, uint32_t end, simtime_t sentT
         if (beg != end) {
             if (i != regions.end()) {
                 ASSERT(beg == i->beg);
-                simtime_t firstSent = std::min(i->firstSentTime, sentTime);
-                simtime_t lastSent = std::max(i->lastSentTime, sentTime);
+                simclocktime_t firstSent = std::min(i->firstSentTime, sentTime);
+                simclocktime_t lastSent = std::max(i->lastSentTime, sentTime);
 //                if (firstSent > sentTime)
 //                    firstSent = sentTime;
 //                if (lastSent < sentTime)

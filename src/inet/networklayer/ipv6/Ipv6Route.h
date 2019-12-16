@@ -65,7 +65,7 @@ class INET_API Ipv6Route : public cObject, public IRoute
     SourceType _sourceType;
     InterfaceEntry *_interfacePtr;
     Ipv6Address _nextHop;    // unspecified means "direct"
-    simtime_t _expiryTime;    // if route is an advertised prefix: prefix lifetime
+    simclocktime_t _expiryTime;    // if route is an advertised prefix: prefix lifetime
     int _metric;
     unsigned int _adminDist;
     cObject *_source;    /// Object identifying the source
@@ -103,7 +103,7 @@ class INET_API Ipv6Route : public cObject, public IRoute
     Ipv6RoutingTable *getRoutingTable() const { return _rt; }
 
     void setNextHop(const Ipv6Address& nextHop) { if (_nextHop != nextHop) { _nextHop = nextHop; changed(F_NEXTHOP); } }
-    void setExpiryTime(simtime_t expiryTime) { if (expiryTime != _expiryTime) { _expiryTime = expiryTime; changed(F_EXPIRYTIME); } }
+    void setExpiryTime(simclocktime_t expiryTime) { if (expiryTime != _expiryTime) { _expiryTime = expiryTime; changed(F_EXPIRYTIME); } }
     void setMetric(int metric) override { if (_metric != metric) { _metric = metric; changed(F_METRIC); } }
     void setAdminDist(unsigned int adminDist) override { if (_adminDist != adminDist) { _adminDist = adminDist; changed(F_ADMINDIST); } }
 
@@ -111,7 +111,7 @@ class INET_API Ipv6Route : public cObject, public IRoute
     virtual int getPrefixLength() const override { return _prefixLength; }
     virtual SourceType getSourceType() const override { return _sourceType; }
     const Ipv6Address& getNextHop() const { return _nextHop; }
-    simtime_t getExpiryTime() const { return _expiryTime; }
+    simclocktime_t getExpiryTime() const { return _expiryTime; }
     virtual int getMetric() const override { return _metric; }
     unsigned int getAdminDist() const { return _adminDist; }
     virtual IRoutingTable *getRoutingTableAsGeneric() const override;

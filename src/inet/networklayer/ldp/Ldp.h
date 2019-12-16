@@ -99,8 +99,8 @@ class INET_API Ldp : public RoutingProtocolBase, public TcpSocket::ReceiveQueueB
 
   protected:
     // configuration
-    simtime_t holdTime;
-    simtime_t helloInterval;
+    simclocktime_t holdTime;
+    simclocktime_t helloInterval;
 
     // currently recognized FECs
     FecVector fecList;

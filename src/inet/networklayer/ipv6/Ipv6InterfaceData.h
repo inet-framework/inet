@@ -155,8 +155,8 @@ class INET_API Ipv6InterfaceData : public InterfaceProtocolData
         bool advRtrAddr;    //R-flag (Zarrar Yousaf 09.07.07)
 #endif /* WITH_xMIPv6 */
 
-        simtime_t advValidLifetime;    // see comment above
-        simtime_t advPreferredLifetime;    // see comment above
+        simclocktime_t advValidLifetime;    // see comment above
+        simclocktime_t advPreferredLifetime;    // see comment above
         Ipv6Address prefix;
 #ifdef WITH_xMIPv6
         Ipv6Address rtrAddress;    //global scope, present when advRtrAddr is true (Zarrar Yousaf 09.07.07)
@@ -177,24 +177,24 @@ class INET_API Ipv6InterfaceData : public InterfaceProtocolData
     /*************RFC 2461: Section 10 Protocol Constants**********************/
     struct RouterConstants
     {
-        simtime_t maxInitialRtrAdvertInterval;
+        simclocktime_t maxInitialRtrAdvertInterval;
         uint maxInitialRtrAdvertisements;
         uint maxFinalRtrAdvertisements;
-        simtime_t minDelayBetweenRAs;
-        simtime_t maxRADelayTime;
+        simclocktime_t minDelayBetweenRAs;
+        simclocktime_t maxRADelayTime;
     };
     RouterConstants routerConstants;
 
     struct HostConstants
     {
-        simtime_t maxRtrSolicitationDelay;
-        simtime_t rtrSolicitationInterval;
+        simclocktime_t maxRtrSolicitationDelay;
+        simclocktime_t rtrSolicitationInterval;
         int maxRtrSolicitations;
 
 #ifdef WITH_xMIPv6
         uint initialBindAckTimeout;    //MIPv6: added by Zarrar Yousaf @ CNI UniDo 17.06.07
         uint maxBindAckTimeout;    //MIPv6: added by Zarrar Yousaf @ CNI UniDo 17.06.07
-        simtime_t initialBindAckTimeoutFirst;    //MIPv6: 12.9.07 - CB
+        simclocktime_t initialBindAckTimeoutFirst;    //MIPv6: 12.9.07 - CB
         uint maxRRBindingLifeTime;    // 14.9.07 - CB
         uint maxHABindingLifeTime;    // 14.9.07 - CB
         uint maxTokenLifeTime;    // 10.07.08 - CB
@@ -206,11 +206,11 @@ class INET_API Ipv6InterfaceData : public InterfaceProtocolData
     {
         uint maxMulticastSolicit;
         uint maxUnicastSolicit;
-        simtime_t maxAnycastDelayTime;
+        simclocktime_t maxAnycastDelayTime;
         uint maxNeighbourAdvertisement;
-        simtime_t reachableTime;
-        simtime_t retransTimer;
-        simtime_t delayFirstProbeTime;
+        simclocktime_t reachableTime;
+        simclocktime_t retransTimer;
+        simclocktime_t delayFirstProbeTime;
         double minRandomFactor;
         double maxRandomFactor;
     };
@@ -258,8 +258,8 @@ class INET_API Ipv6InterfaceData : public InterfaceProtocolData
     {
         Ipv6Address address;    // address itself
         bool tentative;    // true if currently undergoing Duplicate Address Detection
-        simtime_t expiryTime;    // end of valid lifetime; 0 means infinity
-        simtime_t prefExpiryTime;    // end of preferred lifetime; 0 means infinity
+        simclocktime_t expiryTime;    // end of valid lifetime; 0 means infinity
+        simclocktime_t prefExpiryTime;    // end of preferred lifetime; 0 means infinity
 
 #ifdef WITH_xMIPv6
         AddressType addrType;    //HoA or CoA: Zarrar 20.07.07
@@ -270,7 +270,7 @@ class INET_API Ipv6InterfaceData : public InterfaceProtocolData
 
     AddressDataVector addresses;    // interface addresses
     Ipv6Address preferredAddr;    // cached result of preferred address selection
-    simtime_t preferredAddrExpiryTime;
+    simclocktime_t preferredAddrExpiryTime;
 
     /***************RFC 2462: Section 5.1 Node Configuration Variables*********/
     struct NodeVariables
@@ -327,7 +327,7 @@ class INET_API Ipv6InterfaceData : public InterfaceProtocolData
          *  New value should be calculated when baseReachableTime changes or at
          *  least every few hours even if no Router Advertisements are received.
          */
-        simtime_t reachableTime;
+        simclocktime_t reachableTime;
         /**
          *  The time between retransmissions of Neighbor Solicitation messages
          *  to a neighbor when resolving the address or when probing the
@@ -357,7 +357,7 @@ class INET_API Ipv6InterfaceData : public InterfaceProtocolData
          *
          *  Default: 600 seconds
          */
-        simtime_t maxRtrAdvInterval;
+        simclocktime_t maxRtrAdvInterval;
         /**
          *  The minimum time allowed between sending unsolicited multicast Router
          *  Advertisements from the interface, in seconds.  MUST be no less than
@@ -365,7 +365,7 @@ class INET_API Ipv6InterfaceData : public InterfaceProtocolData
          *
          *  Default: 0.33 * MaxRtrAdvInterval
          */
-        simtime_t minRtrAdvInterval;
+        simclocktime_t minRtrAdvInterval;
         /**
          *  The TRUE/FALSE value to be placed in the "Managed address configuration"
          *  flag field in the Router Advertisement.  See [ADDRCONF].
@@ -433,7 +433,7 @@ class INET_API Ipv6InterfaceData : public InterfaceProtocolData
          *
          *  Default: 3 * MaxRtrAdvInterval
          */
-        simtime_t advDefaultLifetime;    // integer seconds in ND rfc but for MIPv6 really need better granularity
+        simclocktime_t advDefaultLifetime;    // integer seconds in ND rfc but for MIPv6 really need better granularity
         //bool fastRA;
         //uint maxFastRAS;
         //mutable uint fastRACounter;
@@ -468,7 +468,7 @@ class INET_API Ipv6InterfaceData : public InterfaceProtocolData
      * Assigns the given address to the interface.
      */
     virtual void assignAddress(const Ipv6Address& addr, bool tentative,
-            simtime_t expiryTime, simtime_t prefExpiryTime);
+            simclocktime_t expiryTime, simclocktime_t prefExpiryTime);
 #else /* WITH_xMIPv6 */
     /**
      * Assigns the given address to the interface.
@@ -480,7 +480,7 @@ class INET_API Ipv6InterfaceData : public InterfaceProtocolData
      * Relevant only when MIPv6 is supported. (Zarrar Yousaf 20.07.07)
      */
     virtual void assignAddress(const Ipv6Address& addr, bool tentative,
-            simtime_t expiryTime, simtime_t prefExpiryTime, bool hFlag = false);
+            simclocktime_t expiryTime, simclocktime_t prefExpiryTime, bool hFlag = false);
 #endif /* WITH_xMIPv6 */
 
     /**
@@ -489,7 +489,7 @@ class INET_API Ipv6InterfaceData : public InterfaceProtocolData
      * in Router Advertisements. Zero expiry time means infinity.
      */
     virtual void updateMatchingAddressExpiryTimes(const Ipv6Address& prefix, int length,
-            simtime_t expiryTime = SIMTIME_ZERO, simtime_t prefExpiryTime = SIMTIME_ZERO);
+            simclocktime_t expiryTime = SIMTIME_ZERO, simclocktime_t prefExpiryTime = SIMTIME_ZERO);
 
     /**
      * Returns the number of addresses the interface has.
@@ -604,42 +604,42 @@ class INET_API Ipv6InterfaceData : public InterfaceProtocolData
      *  allows both wired and wireless networks to co-exist within a simulation run.
      */
     /************Getters for Router Protocol Constants*************************/
-    simtime_t _getMaxInitialRtrAdvertInterval() const { return routerConstants.maxInitialRtrAdvertInterval; }
+    simclocktime_t _getMaxInitialRtrAdvertInterval() const { return routerConstants.maxInitialRtrAdvertInterval; }
     uint _getMaxInitialRtrAdvertisements() const { return routerConstants.maxInitialRtrAdvertisements; }
     uint _getMaxFinalRtrAdvertisements() const { return routerConstants.maxFinalRtrAdvertisements; }
-    simtime_t _getMinDelayBetweenRAs() const { return routerConstants.minDelayBetweenRAs; }
-    simtime_t _getMaxRaDelayTime() const { return routerConstants.maxRADelayTime; }
+    simclocktime_t _getMinDelayBetweenRAs() const { return routerConstants.minDelayBetweenRAs; }
+    simclocktime_t _getMaxRaDelayTime() const { return routerConstants.maxRADelayTime; }
     /************Setters for Router Protocol Constants*************************/
-    virtual void _setMaxInitialRtrAdvertInterval(simtime_t d) { routerConstants.maxInitialRtrAdvertInterval = d; }
+    virtual void _setMaxInitialRtrAdvertInterval(simclocktime_t d) { routerConstants.maxInitialRtrAdvertInterval = d; }
     virtual void _setMaxInitialRtrAdvertisements(uint d) { routerConstants.maxInitialRtrAdvertisements = d; }
     virtual void _setMaxFinalRtrAdvertisements(uint d) { routerConstants.maxFinalRtrAdvertisements = d; }
-    virtual void _setMinDelayBetweenRAs(simtime_t d) { routerConstants.minDelayBetweenRAs = d; }
-    virtual void _setMaxRaDelayTime(simtime_t d) { routerConstants.maxRADelayTime = d; }
+    virtual void _setMinDelayBetweenRAs(simclocktime_t d) { routerConstants.minDelayBetweenRAs = d; }
+    virtual void _setMaxRaDelayTime(simclocktime_t d) { routerConstants.maxRADelayTime = d; }
     /************End of Router Protocol Constant getters and setters***********/
 
     /************Getters for Host Protocol Constants***************************/
-    simtime_t _getMaxRtrSolicitationDelay() const { return hostConstants.maxRtrSolicitationDelay; }
-    simtime_t _getRtrSolicitationInterval() const { return hostConstants.rtrSolicitationInterval; }
+    simclocktime_t _getMaxRtrSolicitationDelay() const { return hostConstants.maxRtrSolicitationDelay; }
+    simclocktime_t _getRtrSolicitationInterval() const { return hostConstants.rtrSolicitationInterval; }
     uint _getMaxRtrSolicitations() const { return hostConstants.maxRtrSolicitations; }
 
 #ifdef WITH_xMIPv6
-    simtime_t _getInitialBindAckTimeout() const { return hostConstants.initialBindAckTimeout; }    //MIPv6: added by Zarrar Yousaf @ CNI UniDo 17.06.07
-    simtime_t _getMaxBindAckTimeout() const { return hostConstants.maxBindAckTimeout; }    //MIPv6: added by Zarrar Yousaf @ CNI UniDo 17.06.07
-    simtime_t _getInitialBindAckTimeoutFirst() const { return hostConstants.initialBindAckTimeoutFirst; }    //MIPv6, 12.9.07 - CB
+    simclocktime_t _getInitialBindAckTimeout() const { return hostConstants.initialBindAckTimeout; }    //MIPv6: added by Zarrar Yousaf @ CNI UniDo 17.06.07
+    simclocktime_t _getMaxBindAckTimeout() const { return hostConstants.maxBindAckTimeout; }    //MIPv6: added by Zarrar Yousaf @ CNI UniDo 17.06.07
+    simclocktime_t _getInitialBindAckTimeoutFirst() const { return hostConstants.initialBindAckTimeoutFirst; }    //MIPv6, 12.9.07 - CB
     uint _getMaxRrBindingLifeTime() const { return hostConstants.maxRRBindingLifeTime; }    //MIPv6, 14.9.07 - CB
     uint _getMaxHaBindingLifeTime() const { return hostConstants.maxHABindingLifeTime; }    //MIPv6, 14.9.07 - CB
     uint _getMaxTokenLifeTime() const { return hostConstants.maxTokenLifeTime; }    //MIPv6, 10.07.08 - CB
 #endif /* WITH_xMIPv6 */
 
     /************Setters for Host Protocol Constants***************************/
-    virtual void _setMaxRtrSolicitationDelay(simtime_t d) { hostConstants.maxRtrSolicitationDelay = d; }
-    virtual void _setRtrSolicitationInterval(simtime_t d) { hostConstants.rtrSolicitationInterval = d; }
+    virtual void _setMaxRtrSolicitationDelay(simclocktime_t d) { hostConstants.maxRtrSolicitationDelay = d; }
+    virtual void _setRtrSolicitationInterval(simclocktime_t d) { hostConstants.rtrSolicitationInterval = d; }
     virtual void _setMaxRtrSolicitations(uint d) { hostConstants.maxRtrSolicitations = d; }
 
 #ifdef WITH_xMIPv6
-    virtual void _setInitialBindAckTimeout(simtime_t d) { hostConstants.initialBindAckTimeout = SIMTIME_DBL(d); }
-    virtual void _setMaxBindAckTimeout(simtime_t d) { hostConstants.maxBindAckTimeout = SIMTIME_DBL(d); }
-    virtual void _setInitialBindAckTimeoutFirst(simtime_t d) { hostConstants.initialBindAckTimeoutFirst = d; }
+    virtual void _setInitialBindAckTimeout(simclocktime_t d) { hostConstants.initialBindAckTimeout = SIMTIME_DBL(d); }
+    virtual void _setMaxBindAckTimeout(simclocktime_t d) { hostConstants.maxBindAckTimeout = SIMTIME_DBL(d); }
+    virtual void _setInitialBindAckTimeoutFirst(simclocktime_t d) { hostConstants.initialBindAckTimeoutFirst = d; }
     virtual void _setMaxRrBindingLifeTime(uint d) { hostConstants.maxRRBindingLifeTime = d; }
     virtual void _setMaxHaBindingLifeTime(uint d) { hostConstants.maxHABindingLifeTime = d; }
     virtual void _setMaxTokenLifeTime(uint d) { hostConstants.maxTokenLifeTime = d; }
@@ -649,21 +649,21 @@ class INET_API Ipv6InterfaceData : public InterfaceProtocolData
     /************Getters for Node Protocol Constants***************************/
     uint _getMaxMulticastSolicit() const { return nodeConstants.maxMulticastSolicit; }
     uint _getMaxUnicastSolicit() const { return nodeConstants.maxUnicastSolicit; }
-    simtime_t _getMaxAnycastDelayTime() const { return nodeConstants.maxAnycastDelayTime; }
+    simclocktime_t _getMaxAnycastDelayTime() const { return nodeConstants.maxAnycastDelayTime; }
     uint _getMaxNeighbourAdvertisement() const { return nodeConstants.maxNeighbourAdvertisement; }
-    simtime_t _getReachableTime() const { return nodeConstants.reachableTime; }
-    simtime_t _getRetransTimer() const { return nodeConstants.retransTimer; }
-    simtime_t _getDelayFirstProbeTime() const { return nodeConstants.delayFirstProbeTime; }
+    simclocktime_t _getReachableTime() const { return nodeConstants.reachableTime; }
+    simclocktime_t _getRetransTimer() const { return nodeConstants.retransTimer; }
+    simclocktime_t _getDelayFirstProbeTime() const { return nodeConstants.delayFirstProbeTime; }
     double _getMinRandomFactor() const { return nodeConstants.minRandomFactor; }
     double _getMaxRandomFactor() const { return nodeConstants.maxRandomFactor; }
     /************Setters for Node Protocol Constants***************************/
     virtual void _setMaxMulticastSolicit(uint d) { nodeConstants.maxMulticastSolicit = d; }
     virtual void _setMaxUnicastSolicit(uint d) { nodeConstants.maxUnicastSolicit = d; }
-    virtual void _setMaxAnycastDelayTime(simtime_t d) { nodeConstants.maxAnycastDelayTime = d; }
+    virtual void _setMaxAnycastDelayTime(simclocktime_t d) { nodeConstants.maxAnycastDelayTime = d; }
     virtual void _setMaxNeighbourAdvertisement(uint d) { nodeConstants.maxNeighbourAdvertisement = d; }
-    virtual void _setReachableTime(simtime_t d) { nodeConstants.reachableTime = d; }
-    virtual void _setRetransTimer(simtime_t d) { nodeConstants.retransTimer = d; }
-    virtual void _setDelayFirstProbeTime(simtime_t d) { nodeConstants.delayFirstProbeTime = d; }
+    virtual void _setReachableTime(simclocktime_t d) { nodeConstants.reachableTime = d; }
+    virtual void _setRetransTimer(simclocktime_t d) { nodeConstants.retransTimer = d; }
+    virtual void _setDelayFirstProbeTime(simclocktime_t d) { nodeConstants.delayFirstProbeTime = d; }
     virtual void _setMinRandomFactor(double d) { nodeConstants.minRandomFactor = d; }
     virtual void _setMaxRandomFactor(double d) { nodeConstants.maxRandomFactor = d; }
     /************End of Node Protocol Constant getters and setters*************/
@@ -678,20 +678,20 @@ class INET_API Ipv6InterfaceData : public InterfaceProtocolData
     uint getLinkMtu() const { return hostVars.linkMTU; }
     short getCurHopLimit() const { return hostVars.curHopLimit; }
     uint getBaseReachableTime() const { return hostVars.baseReachableTime; }
-    simtime_t getReachableTime() const { return hostVars.reachableTime; }
+    simclocktime_t getReachableTime() const { return hostVars.reachableTime; }
     uint getRetransTimer() const { return hostVars.retransTimer; }
     /************Setters for Host Variables************************************/
     virtual void setLinkMtu(uint d) { hostVars.linkMTU = d; }
     virtual void setCurHopLimit(short d) { hostVars.curHopLimit = d; }
     virtual void setBaseReachableTime(uint d) { hostVars.baseReachableTime = d; }
-    virtual void setReachableTime(simtime_t d) { hostVars.reachableTime = d; }
+    virtual void setReachableTime(simclocktime_t d) { hostVars.reachableTime = d; }
     virtual void setRetransTimer(uint d) { hostVars.retransTimer = d; }
     /************End of Host Variables getters and setters*********************/
 
     /************Getters for Router Configuration Variables********************/
     bool getAdvSendAdvertisements() const { return rtrVars.advSendAdvertisements; }
-    simtime_t getMaxRtrAdvInterval() const { return rtrVars.maxRtrAdvInterval; }
-    simtime_t getMinRtrAdvInterval() const { return rtrVars.minRtrAdvInterval; }
+    simclocktime_t getMaxRtrAdvInterval() const { return rtrVars.maxRtrAdvInterval; }
+    simclocktime_t getMinRtrAdvInterval() const { return rtrVars.minRtrAdvInterval; }
     bool getAdvManagedFlag() const { return rtrVars.advManagedFlag; }
     bool getAdvOtherConfigFlag() const { return rtrVars.advOtherConfigFlag; }
 
@@ -703,11 +703,11 @@ class INET_API Ipv6InterfaceData : public InterfaceProtocolData
     int getAdvReachableTime() const { return rtrVars.advReachableTime; }
     int getAdvRetransTimer() const { return rtrVars.advRetransTimer; }
     short getAdvCurHopLimit() const { return rtrVars.advCurHopLimit; }
-    simtime_t getAdvDefaultLifetime() const { return rtrVars.advDefaultLifetime; }
+    simclocktime_t getAdvDefaultLifetime() const { return rtrVars.advDefaultLifetime; }
     /************Setters for Router Configuration Variables********************/
     virtual void setAdvSendAdvertisements(bool d) { rtrVars.advSendAdvertisements = d; }
-    virtual void setMaxRtrAdvInterval(simtime_t d) { rtrVars.maxRtrAdvInterval = d; }
-    virtual void setMinRtrAdvInterval(simtime_t d) { rtrVars.minRtrAdvInterval = d; }
+    virtual void setMaxRtrAdvInterval(simclocktime_t d) { rtrVars.maxRtrAdvInterval = d; }
+    virtual void setMinRtrAdvInterval(simclocktime_t d) { rtrVars.minRtrAdvInterval = d; }
     virtual void setAdvManagedFlag(bool d) { rtrVars.advManagedFlag = d; }
     virtual void setAdvOtherConfigFlag(bool d) { rtrVars.advOtherConfigFlag = d; }
 
@@ -719,7 +719,7 @@ class INET_API Ipv6InterfaceData : public InterfaceProtocolData
     virtual void setAdvReachableTime(int d) { rtrVars.advReachableTime = d; }
     virtual void setAdvRetransTimer(int d) { rtrVars.advRetransTimer = d; }
     virtual void setAdvCurHopLimit(short d) { rtrVars.advCurHopLimit = d; }
-    virtual void setAdvDefaultLifetime(simtime_t d) { rtrVars.advDefaultLifetime = d; }
+    virtual void setAdvDefaultLifetime(simclocktime_t d) { rtrVars.advDefaultLifetime = d; }
     /************End of Router Configuration Variables getters and setters*****/
 
     /** @name Router advertised prefixes */
@@ -755,13 +755,13 @@ class INET_API Ipv6InterfaceData : public InterfaceProtocolData
      *  This method randomly generates a reachableTime given the MIN_RANDOM_FACTOR
      *  MAX_RANDOM_FACTOR and baseReachableTime. Refer to RFC 2461: Section 6.3.2
      */
-    virtual simtime_t generateReachableTime(double MIN_RANDOM_FACTOR, double MAX_RANDOM_FACTOR,
+    virtual simclocktime_t generateReachableTime(double MIN_RANDOM_FACTOR, double MAX_RANDOM_FACTOR,
             uint baseReachableTime);
 
     /**
      * Arg-less version.
      */
-    virtual simtime_t generateReachableTime();
+    virtual simclocktime_t generateReachableTime();
 
 #ifdef WITH_xMIPv6
 //############## Additional Function defined by Zarrar YOusaf @ CNI, Uni Dortmund  #########

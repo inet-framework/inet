@@ -88,7 +88,7 @@ void SctpClient::initialize(int stage)
         recordScalar("ums", par("requestLength").intValue());
 
         timeMsg = new cMessage("CliAppTimer", MSGKIND_CONNECT);
-        scheduleAt(par("startTime"), timeMsg);
+        scheduleClockEvent(par("startTime"), timeMsg);
 
         stopTimer = nullptr;
         primaryChangeTimer = nullptr;
@@ -122,17 +122,17 @@ void SctpClient::initialize(int stage)
             socket.bindx(addresses, port);
         }
 
-        simtime_t stopTime = par("stopTime");
+        simclocktime_t stopTime = par("stopTime");
         if (stopTime >= SIMTIME_ZERO) {
             stopTimer = new cMessage("StopTimer", MSGKIND_STOP);
-            scheduleAt(par("stopTime"), stopTimer);
+            scheduleClockEvent(par("stopTime"), stopTimer);
             timer = true;
         }
 
-        simtime_t primaryTime = par("primaryTime");
+        simclocktime_t primaryTime = par("primaryTime");
         if (primaryTime != SIMTIME_ZERO) {
             primaryChangeTimer = new cMessage("PrimaryTime", MSGKIND_PRIMARY);
-            scheduleAt(primaryTime, primaryChangeTimer);
+            scheduleClockEvent(primaryTime, primaryChangeTimer);
         }
     }
 }
@@ -167,8 +167,8 @@ void SctpClient::connect()
 
     if (streamReset) {
         cMessage *cmsg = new cMessage("StreamReset", MSGKIND_RESET);
-        EV_INFO << "StreamReset Timer scheduled at " << simTime() + par("streamRequestTime") << "\n";
-        scheduleAt(simTime() + par("streamRequestTime"), cmsg);
+        EV_INFO << "StreamReset Timer scheduled at " << getClockTime() + par("streamRequestTime") << "\n";
+        scheduleClockEvent(getClockTime() + par("streamRequestTime"), cmsg);
     }
 
     for (unsigned int i = 0; i < outStreams; i++) {
@@ -232,7 +232,7 @@ void SctpClient::socketEstablished(SctpSocket *socket, unsigned long int buffer)
             }
 
             timeMsg->setKind(MSGKIND_SEND);
-            scheduleAt(simTime() + par("thinkTime"), timeMsg);
+            scheduleClockEvent(getClockTime() + par("thinkTime"), timeMsg);
         }
         else {
             if (queueSize > 0) {
@@ -265,7 +265,7 @@ void SctpClient::socketEstablished(SctpSocket *socket, unsigned long int buffer)
 
         if ((!timer && numPacketsToReceive == 0) && par("waitToClose").doubleValue() > 0) {
             timeMsg->setKind(MSGKIND_ABORT);
-            scheduleAt(simTime() + par("waitToClose"), timeMsg);
+            scheduleClockEvent(getClockTime() + par("waitToClose"), timeMsg);
         }
 
         if ((!timer && numRequestsToSend == 0) && par("waitToClose").doubleValue() == 0) {
@@ -273,7 +273,7 @@ void SctpClient::socketEstablished(SctpSocket *socket, unsigned long int buffer)
             socket->shutdown();
 
             if (timeMsg->isScheduled())
-                cancelEvent(timeMsg);
+                cancelClockEvent(timeMsg);
 
             if (finishEndsSimulation) {
                 endSimulation();
@@ -308,7 +308,7 @@ void SctpClient::sendRequestArrived(SctpSocket *socket)
             socket->shutdown();
 
             if (timeMsg->isScheduled())
-                cancelEvent(timeMsg);
+                cancelClockEvent(timeMsg);
 
             if (finishEndsSimulation)
                 endSimulation();
@@ -383,7 +383,7 @@ void SctpClient::sendRequest(bool last)
     for (uint32 i = 0; i < sendBytes; i++)
         vec[i] = (bytesSent + i) & 0xFF;
     applicationData->setBytes(vec);
-    applicationData->addTag<CreationTimeTag>()->setCreationTime(simTime());
+    applicationData->addTag<CreationTimeTag>()->setCreationTime(getClockTime());
     applicationPacket->insertAtBack(applicationData);
     auto sctpSendReq = applicationPacket->addTag<SctpSendReq>();
     sctpSendReq->setLast(last);
@@ -413,12 +413,12 @@ void SctpClient::handleTimer(cMessage *msg)
                         numRequestsToSend--;
                 }
                 if (par("thinkTime").doubleValue() > 0)
-                    scheduleAt(simTime() + par("thinkTime"), timeMsg);
+                    scheduleClockEvent(getClockTime() + par("thinkTime"), timeMsg);
 
                 if ((!timer && numRequestsToSend == 0) && par("waitToClose").doubleValue() == 0) {
                     socket.shutdown();
                     if (timeMsg->isScheduled())
-                        cancelEvent(timeMsg);
+                        cancelClockEvent(timeMsg);
 
                     if (finishEndsSimulation) {
                         endSimulation();
@@ -428,7 +428,7 @@ void SctpClient::handleTimer(cMessage *msg)
             else if ((!timer && numRequestsToSend == 0) && par("waitToClose").doubleValue() == 0) {
                 socket.shutdown();
                 if (timeMsg->isScheduled())
-                    cancelEvent(timeMsg);
+                    cancelClockEvent(timeMsg);
 
                 if (finishEndsSimulation) {
                     endSimulation();
@@ -456,7 +456,7 @@ void SctpClient::handleTimer(cMessage *msg)
             socket.close();
 
             if (timeMsg->isScheduled())
-                cancelEvent(timeMsg);
+                cancelClockEvent(timeMsg);
 
             if (finishEndsSimulation) {
                 endSimulation();
@@ -507,7 +507,7 @@ void SctpClient::socketClosed(SctpSocket *socket)
     EV_INFO << "connection closed\n";
 
     if (primaryChangeTimer) {
-        cancelEvent(primaryChangeTimer);
+        cancelClockEvent(primaryChangeTimer);
         delete primaryChangeTimer;
         primaryChangeTimer = nullptr;
     }
@@ -520,7 +520,7 @@ void SctpClient::socketFailure(SctpSocket *socket, int code)
     numBroken++;
     // reconnect after a delay
     timeMsg->setKind(MSGKIND_CONNECT);
-    scheduleAt(simTime() + par("reconnectInterval"), timeMsg);
+    scheduleClockEvent(getClockTime() + par("reconnectInterval"), timeMsg);
 }
 
 void SctpClient::socketStatusArrived(SctpSocket *socket, SctpStatusReq *status)
@@ -604,7 +604,7 @@ void SctpClient::sendqueueAbatedArrived(SctpSocket *socket, unsigned long int bu
         socket->shutdown();
 
         if (timeMsg->isScheduled())
-            cancelEvent(timeMsg);
+            cancelClockEvent(timeMsg);
 
         if (finishEndsSimulation) {
             endSimulation();

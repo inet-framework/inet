@@ -367,7 +367,7 @@ void xMIPv6::createBUTimer(const Ipv6Address& buDest, InterfaceEntry *ie, const 
         bool homeRegistration)
 {
     Enter_Method("createBUTimer()");
-    EV_INFO << "Creating BU timer at sim time: " << simTime() << " seconds." << endl;
+    EV_INFO << "Creating BU timer at sim time: " << getClockTime() << " seconds." << endl;
     cMessage *buTriggerMsg = new cMessage("sendPeriodicBU", MK_SEND_PERIODIC_BU);
 
     // check if there already exists a BUTimer entry for this key
@@ -404,18 +404,18 @@ void xMIPv6::createBUTimer(const Ipv6Address& buDest, InterfaceEntry *ie, const 
     buTriggerMsg->setContextPointer(buIfEntry);    // attaching the buIfEntry info corresponding to a particular address ith message
 
     // send BU now
-    //scheduleAt(buIfEntry->initScheduledBUTime, buTriggerMsg); //Scheduling a message which will trigger a BU towards buIfEntry->dest
-    scheduleAt(simTime(), buTriggerMsg);    //Scheduling a message which will trigger a BU towards buIfEntry->dest
+    //scheduleClockEvent(buIfEntry->initScheduledBUTime, buTriggerMsg); //Scheduling a message which will trigger a BU towards buIfEntry->dest
+    scheduleClockEvent(getClockTime(), buTriggerMsg);    //Scheduling a message which will trigger a BU towards buIfEntry->dest
 }
 
 void xMIPv6::sendPeriodicBU(cMessage *msg)
 {
-    EV_INFO << "Sending periodic BU message at time: " << simTime() << " seconds." << endl;
+    EV_INFO << "Sending periodic BU message at time: " << getClockTime() << " seconds." << endl;
     BuTransmitIfEntry *buIfEntry = (BuTransmitIfEntry *)msg->getContextPointer();    //detaching the corresponding buIfEntry pointer
     //EV << "### lifetime of buIfEntry=" << buIfEntry->lifeTime << " and seq#= " << buIfEntry->buSequenceNumber << endl;
     InterfaceEntry *ie = buIfEntry->ifEntry;    //copy the ie info
     Ipv6Address& buDest = buIfEntry->dest;
-    buIfEntry->presentSentTimeBU = simTime();    //records the present time at which BU is sent
+    buIfEntry->presentSentTimeBU = getClockTime();    //records the present time at which BU is sent
 
     buIfEntry->nextScheduledTime = buIfEntry->presentSentTimeBU + buIfEntry->ackTimeout;
     /*11.8
@@ -454,7 +454,7 @@ void xMIPv6::sendPeriodicBU(cMessage *msg)
     /*if (buIfEntry->ackTimeout < ie->ipv6()->_maxBindAckTimeout())
        {
         //buIfEntry->presentBindAckTimeout = buIfEntry->nextBindAckTimeout; //reassign the timeout value
-        //scheduleAt(buIfEntry->nextScheduledTime, msg);
+        //scheduleClockEvent(buIfEntry->nextScheduledTime, msg);
        }
        else*/
     if (!(buIfEntry->ackTimeout < ie->getProtocolData<Ipv6InterfaceData>()->_getMaxBindAckTimeout())) {
@@ -464,12 +464,12 @@ void xMIPv6::sendPeriodicBU(cMessage *msg)
         buIfEntry->ackTimeout = ie->getProtocolData<Ipv6InterfaceData>()->_getMaxBindAckTimeout();
         //buIfEntry->nextScheduledTime = ie->ipv6()->_maxBindAckTimeout();
         //ev << "\n++++Next Sent Time: " << buIfEntry->nextScheduledTime << endl;//" Next TimeOut: " << buIfEntry->nextBindAckTimeout << endl;
-        //scheduleAt(buIfEntry->nextScheduledTime, msg);
+        //scheduleClockEvent(buIfEntry->nextScheduledTime, msg);
     }
 
     EV_DETAIL << "Present Sent Time: " << buIfEntry->presentSentTimeBU << ", Present TimeOut: " << buIfEntry->ackTimeout << endl;
     EV_DETAIL << "Next Sent Time: " << buIfEntry->nextScheduledTime << endl;    // << " Next TimeOut: " << buIfEntry->nextBindAckTimeout << endl;
-    scheduleAt(buIfEntry->nextScheduledTime, msg);
+    scheduleClockEvent(buIfEntry->nextScheduledTime, msg);
 }
 
 void xMIPv6::createAndSendBUMessage(const Ipv6Address& dest, InterfaceEntry *ie, const uint buSeq, const uint lifeTime, const int bindAuthData)
@@ -572,7 +572,7 @@ void xMIPv6::createAndSendBUMessage(const Ipv6Address& dest, InterfaceEntry *ie,
        When sending a Binding Update to its home agent, the mobile node MUST
        also create or update the corresponding Binding Update List entry, as
        specified in Section 11.7.2.*/
-    updateBUL(bu.get(), dest, CoA, ie, simTime());
+    updateBUL(bu.get(), dest, CoA, ie, getClockTime());
 
     packet->insertAtFront(bu);
 
@@ -596,7 +596,7 @@ void xMIPv6::createAndSendBUMessage(const Ipv6Address& dest, InterfaceEntry *ie,
 }
 
 void xMIPv6::updateBUL(BindingUpdate *bu, const Ipv6Address& dest, const Ipv6Address& CoA,
-        InterfaceEntry *ie, const simtime_t sendTime)
+        InterfaceEntry *ie, const simclocktime_t sendTime)
 {
     uint buLife = 4 * bu->getLifetime();    /* 6.1.7 One time unit is 4 seconds. */
     uint buSeq = bu->getSequence();
@@ -611,8 +611,8 @@ void xMIPv6::updateBUL(BindingUpdate *bu, const Ipv6Address& dest, const Ipv6Add
         return;
     }
 
-    //simtime_t sentTime = buIfEntry->presentSentTimeBU;
-    //simtime_t nextSentTime = buIfEntry->nextScheduledTime;
+    //simclocktime_t sentTime = buIfEntry->presentSentTimeBU;
+    //simclocktime_t nextSentTime = buIfEntry->nextScheduledTime;
 
     //ASSERT(bul);
     bul->addOrUpdateBUL(dest, HoA, CoA, buLife, buSeq, sendTime);    //, nextSentTime); //updates the binding Update List
@@ -632,7 +632,7 @@ xMIPv6::BuTransmitIfEntry *xMIPv6::fetchBUTransmitIfEntry(InterfaceEntry *ie, co
 }
 
 void xMIPv6::sendMobilityMessageToIPv6Module(Packet *msg, const Ipv6Address& destAddr,
-        const Ipv6Address& srcAddr, int interfaceId, simtime_t sendTime)    // overloaded for use at CN - CB
+        const Ipv6Address& srcAddr, int interfaceId, simclocktime_t sendTime)    // overloaded for use at CN - CB
 {
     EV_INFO << "Appending ControlInfo to mobility message\n";
     delete msg->removeTagIfPresent<DispatchProtocolReq>();
@@ -851,7 +851,7 @@ void xMIPv6::processBUMessage(Packet *inPacket, const Ptr<const BindingUpdate>& 
             bool existingBinding = bc->isInBindingCache(HoA);
             bc->addOrUpdateBC(HoA, CoA, buLifetime, buSequence, homeRegistration);
             // for both HA and CN we create a BCE expiry timer
-            createBCEntryExpiryTimer(HoA, ift->getInterfaceById(ifTag->getInterfaceId()), simTime() + buLifetime);
+            createBCEntryExpiryTimer(HoA, ift->getInterfaceById(ifTag->getInterfaceId()), getClockTime() + buLifetime);
 
             /*10.3.1
                Regardless of the setting of the Acknowledge (A) bit in the Binding
@@ -885,7 +885,7 @@ void xMIPv6::processBUMessage(Packet *inPacket, const Ptr<const BindingUpdate>& 
                    address, the home agent MUST perform Duplicate Address Detection [13]
                    on the mobile node's home link before returning the Binding
                    Acknowledgement.*/
-                simtime_t sendTime;
+                simclocktime_t sendTime;
                 if (rt6->isHomeAgent())
                     // HA has to do DAD in case this is a new binding for this HoA
                     sendTime = existingBinding ? 0 : 1;
@@ -1067,7 +1067,7 @@ bool xMIPv6::validateBUderegisterMessage(Packet *inPacket, const Ptr<const Bindi
 
 void xMIPv6::createAndSendBAMessage(const Ipv6Address& src, const Ipv6Address& dest,
         int interfaceId, const BaStatus& baStatus, const uint baSeq,
-        const int bindingAuthorizationData, const uint lifeTime, const simtime_t sendTime)
+        const int bindingAuthorizationData, const uint lifeTime, const simclocktime_t sendTime)
 {
     EV_TRACE << "Entered createAndSendBAMessage() method" << endl;
 
@@ -1260,14 +1260,14 @@ void xMIPv6::processBAMessage(Packet *inPacket, const Ptr<const BindingAcknowled
                     where max(X, Y) is the maximum of X and Y.*/
                 int l_ack = ba->getLifetime() * 4;    /* 6.1.7 One time unit is 4 seconds. */
                 int l_update = entry->bindingLifetime;
-                int l_remain = entry->bindingLifetime - (SIMTIME_DBL(simTime() - entry->sentTime));
+                int l_remain = entry->bindingLifetime - (SIMTIME_DBL(getClockTime() - entry->sentTime));
                 int x = l_remain - (l_update - l_ack);
                 entry->bindingLifetime = x > 0 ? x : 0;
-                entry->bindingExpiry = simTime() + entry->bindingLifetime;
+                entry->bindingExpiry = getClockTime() + entry->bindingLifetime;
                 // we schedule the timer that manages the BUL entry expiration
                 // TODO currently we schedule the expiry message some seconds (PRE_BINDING_EXPIRY)
                 //         before the actual expiration. Can be improved.
-                simtime_t scheduledTime = entry->bindingExpiry - PRE_BINDING_EXPIRY;
+                simclocktime_t scheduledTime = entry->bindingExpiry - PRE_BINDING_EXPIRY;
                 scheduledTime = scheduledTime > 0 ? scheduledTime : 0;
 
                 /*EV << "l_ack=" << l_ack << ", l_update=" << l_update << ", l_remain=" << l_remain << ", x=" << x << endl;
@@ -1426,7 +1426,7 @@ void xMIPv6::initReturnRoutability(const Ipv6Address& cnDest, InterfaceEntry *ie
     // have valid home and care-of tokens
 
     // check whether the last received home token is still valid
-    //if ((cnEntry->tokenH != UNDEFINED_TOKEN) && (cnEntry->sentHoTI + ie->ipv6()->_maxTokenLifeTime() > simTime()))
+    //if ((cnEntry->tokenH != UNDEFINED_TOKEN) && (cnEntry->sentHoTI + ie->ipv6()->_maxTokenLifeTime() > getClockTime()))
     if (bul->isHomeTokenAvailable(cnDest, ie)) {
         EV_INFO << "Valid home token available - sending HoTI later.\n";
         sendHoTI = false;
@@ -1434,7 +1434,7 @@ void xMIPv6::initReturnRoutability(const Ipv6Address& cnDest, InterfaceEntry *ie
     //else
     //    delete HoTI;
 
-    /*if ((cnEntry->tokenC != UNDEFINED_TOKEN) && (cnEntry->sentCoTI + ie->ipv6()->_maxTokenLifeTime() > simTime()))*/
+    /*if ((cnEntry->tokenC != UNDEFINED_TOKEN) && (cnEntry->sentCoTI + ie->ipv6()->_maxTokenLifeTime() > getClockTime()))*/
     if (bul->isCareOfTokenAvailable(cnDest, ie)) {
         EV_INFO << "Valid care-of token available - sending CoTI later.\n" << endl;
 
@@ -1467,9 +1467,9 @@ void xMIPv6::initReturnRoutability(const Ipv6Address& cnDest, InterfaceEntry *ie
     }
 }
 
-void xMIPv6::createTestInitTimer(const Ptr<MobilityHeader> testInit, const Ipv6Address& dest, InterfaceEntry *ie, simtime_t sendTime)
+void xMIPv6::createTestInitTimer(const Ptr<MobilityHeader> testInit, const Ipv6Address& dest, InterfaceEntry *ie, simclocktime_t sendTime)
 {
-    EV_DETAIL << "\n++++++++++TEST INIT TIMER CREATED AT SIM TIME: " << simTime()
+    EV_DETAIL << "\n++++++++++TEST INIT TIMER CREATED AT SIM TIME: " << getClockTime()
               << " seconds+++++++++++++++++ \n";
 
     cMessage *testInitTriggerMsg = new cMessage("sendTestInit", MK_SEND_TEST_INIT);
@@ -1502,13 +1502,13 @@ void xMIPv6::createTestInitTimer(const Ptr<MobilityHeader> testInit, const Ipv6A
     /*o  Otherwise, the mobile node should use the specified value of
            INITIAL_BINDACK_TIMEOUT for the initial retransmission timer.*/
     tiIfEntry->ackTimeout = ie->getProtocolData<Ipv6InterfaceData>()->_getInitialBindAckTimeout();
-    tiIfEntry->nextScheduledTime = simTime();    // we send the HoTI/CoTI now
+    tiIfEntry->nextScheduledTime = getClockTime();    // we send the HoTI/CoTI now
 
     testInitTriggerMsg->setContextPointer(tiIfEntry);    // attach the Test Init If Entry to this message
 
     // scheduling a message which will trigger the Test Init for sendTime seconds
     // if not called with a parameter for sendTime, the message will be scheduled for NOW
-    scheduleAt(simTime() + sendTime, testInitTriggerMsg);
+    scheduleClockEvent(getClockTime() + sendTime, testInitTriggerMsg);
 }
 
 void xMIPv6::sendTestInit(cMessage *msg)
@@ -1543,7 +1543,7 @@ void xMIPv6::sendTestInit(cMessage *msg)
         auto outPacket = new Packet("HoTI");
 
         // update cache
-        bul->addOrUpdateBUL(tiIfEntry->dest, HoA, simTime(), homeTestInit->getHomeInitCookie(), true);
+        bul->addOrUpdateBUL(tiIfEntry->dest, HoA, getClockTime(), homeTestInit->getHomeInitCookie(), true);
         // mark the current home token as invalid
         bul->resetHomeToken(tiIfEntry->dest, HoA);
         // and send message
@@ -1563,7 +1563,7 @@ void xMIPv6::sendTestInit(cMessage *msg)
         auto outPacket = new Packet("CoTI");
 
         // update cache
-        bul->addOrUpdateBUL(tiIfEntry->dest, CoA, simTime(), careOfTestInit->getCareOfInitCookie(), false);
+        bul->addOrUpdateBUL(tiIfEntry->dest, CoA, getClockTime(), careOfTestInit->getCareOfInitCookie(), false);
         // mark the current care-of token as invalid
         bul->resetCareOfToken(tiIfEntry->dest, CoA);
         // and send message
@@ -1578,7 +1578,7 @@ void xMIPv6::sendTestInit(cMessage *msg)
        If the mobile node fails to receive a valid matching response within
          the selected initial retransmission interval, the mobile node SHOULD
         retransmit the message until a response is received.*/
-    tiIfEntry->nextScheduledTime = tiIfEntry->ackTimeout + simTime();
+    tiIfEntry->nextScheduledTime = tiIfEntry->ackTimeout + getClockTime();
 
     /*The retransmissions by the mobile node MUST use an exponential back-
          off process in which the timeout period is doubled upon each
@@ -1591,7 +1591,7 @@ void xMIPv6::sendTestInit(cMessage *msg)
         tiIfEntry->ackTimeout = ie->getProtocolData<Ipv6InterfaceData>()->_getMaxBindAckTimeout();
 
     msg->setContextPointer(tiIfEntry);
-    scheduleAt(tiIfEntry->nextScheduledTime, msg);
+    scheduleClockEvent(tiIfEntry->nextScheduledTime, msg);
 
     EV_INFO << "Scheduled next HoTI/CoTI for time=" << tiIfEntry->nextScheduledTime
             << " with timeout=" << tiIfEntry->ackTimeout << " for dest="
@@ -1618,12 +1618,12 @@ void xMIPv6::sendTestInit(cMessage *msg)
     ASSERT(entry);
 
     // first we cancel the current retransmission timer
-    cancelEvent(entry->timer);
+    cancelClockEvent(entry->timer);
     // then we reset the timeout value to the initial value
     entry->ackTimeout = entry->ifEntry->ipv6()->_initialBindAckTimeout();
     // and then we reschedule again for the time when the token expires
-    entry->nextScheduledTime = simTime() + MAX_TOKEN_LIFETIME * TEST_INIT_RETRANS_FACTOR;
-    scheduleAt(entry->nextScheduledTime, entry->timer);
+    entry->nextScheduledTime = getClockTime() + MAX_TOKEN_LIFETIME * TEST_INIT_RETRANS_FACTOR;
+    scheduleClockEvent(entry->nextScheduledTime, entry->timer);
 
     EV << "Updated TestTransmitIfEntry and corresponding timer.\n";
 
@@ -1649,19 +1649,19 @@ void xMIPv6::sendTestInit(cMessage *msg)
     ASSERT(entry);
 
     // first we cancel the current retransmission timer
-    cancelEvent(entry->timer);
+    cancelClockEvent(entry->timer);
     // then we reset the timeout value to the initial value
     entry->ackTimeout = entry->ifEntry->ipv6()->_initialBindAckTimeout();
     // and then we reschedule again for the time when the token expires
-    entry->nextScheduledTime = simTime() + MAX_TOKEN_LIFETIME * TEST_INIT_RETRANS_FACTOR;
-    scheduleAt(entry->nextScheduledTime, entry->timer);
+    entry->nextScheduledTime = getClockTime() + MAX_TOKEN_LIFETIME * TEST_INIT_RETRANS_FACTOR;
+    scheduleClockEvent(entry->nextScheduledTime, entry->timer);
 
     EV << "Updated TestTransmitIfEntry and corresponding timer.\n";
 
     // TODO check for token expiry in BUL
    }*/
 
-void xMIPv6::resetBUIfEntry(const Ipv6Address& dest, int interfaceID, simtime_t retransmissionTime)
+void xMIPv6::resetBUIfEntry(const Ipv6Address& dest, int interfaceID, simclocktime_t retransmissionTime)
 {
     /*ASSERT(msgType == KEY_BU);
        Key key(dest, interfaceID, msgType);*/
@@ -1679,14 +1679,14 @@ void xMIPv6::resetBUIfEntry(const Ipv6Address& dest, int interfaceID, simtime_t 
     ASSERT(entry);
 
     // first we cancel the current retransmission timer
-    cancelEvent(entry->timer);
+    cancelClockEvent(entry->timer);
     // then we reset the timeout value to the initial value
     entry->ackTimeout = entry->ifEntry->getProtocolData<Ipv6InterfaceData>()->_getInitialBindAckTimeout();
     // and then we reschedule again for BU expiry time
     // (with correct offset for scheduling)
     entry->nextScheduledTime = retransmissionTime;
 
-    scheduleAt(entry->nextScheduledTime, entry->timer);
+    scheduleClockEvent(entry->nextScheduledTime, entry->timer);
 
     EV_INFO << "Updated BuTransmitIfEntry and corresponding timer.\n";
 }
@@ -1787,7 +1787,7 @@ void xMIPv6::processHoTMessage(Packet *inPacket, const Ptr<const HomeTest>& home
 
         // set token expiry appropriately
         createHomeTokenEntryExpiryTimer(srcAddr, ift->getInterfaceById(interfaceID),
-                simTime() + ie->getProtocolData<Ipv6InterfaceData>()->_getMaxTokenLifeTime());
+                getClockTime() + ie->getProtocolData<Ipv6InterfaceData>()->_getMaxTokenLifeTime());
 
         // if we have the care-of token as well, we can send the BU to the CN now
         // but only if we have not already sent or are about to send a BU
@@ -1877,7 +1877,7 @@ void xMIPv6::processCoTMessage(Packet * inPacket, const Ptr<const CareOfTest>& C
 
         // set token expiry appropriately
         createCareOfTokenEntryExpiryTimer(srcAddr, ift->getInterfaceById(interfaceID),
-                simTime() + ie->getProtocolData<Ipv6InterfaceData>()->_getMaxTokenLifeTime());
+                getClockTime() + ie->getProtocolData<Ipv6InterfaceData>()->_getMaxTokenLifeTime());
 
         // if we have the home token as well, we can send the BU to the CN now
         // but only if we have already sent or are about to send a BU
@@ -2435,14 +2435,14 @@ void xMIPv6::createBRRTimer(const Ipv6Address& brDest, InterfaceEntry *ie, const
     brTriggerMsg->setContextPointer(brIfEntry);    // attaching the brIfEntry info corresponding to a particular address ith message
 
     // Scheduling a message which will trigger a BRR towards brIfEntry->dest
-    scheduleAt(simTime() + scheduledTime, brTriggerMsg);
-    EV_DETAIL << "\n++++++++++BRR TIMER CREATED FOR SIM TIME: " << simTime() + scheduledTime
+    scheduleClockEvent(getClockTime() + scheduledTime, brTriggerMsg);
+    EV_DETAIL << "\n++++++++++BRR TIMER CREATED FOR SIM TIME: " << getClockTime() + scheduledTime
               << " seconds+++++++++++++++++ \n";
 }
 
 void xMIPv6::sendPeriodicBRR(cMessage *msg)
 {
-    EV_INFO << "\n<<====== Periodic BRR MESSAGE at time: " << simTime() << " seconds =====>>\n";
+    EV_INFO << "\n<<====== Periodic BRR MESSAGE at time: " << getClockTime() << " seconds =====>>\n";
     BrTransmitIfEntry *brIfEntry = (BrTransmitIfEntry *)msg->getContextPointer();    //detaching the corresponding brIfEntry pointer
     InterfaceEntry *ie = brIfEntry->ifEntry;
     Ipv6Address& brDest = brIfEntry->dest;
@@ -2458,7 +2458,7 @@ void xMIPv6::sendPeriodicBRR(cMessage *msg)
         createAndSendBRRMessage(brDest, ie);
 
         // retransmit the Binding Refresh Message
-        scheduleAt(simTime() + BRR_TIMEOUT_THRESHOLD, msg);
+        scheduleClockEvent(getClockTime() + BRR_TIMEOUT_THRESHOLD, msg);
     }
     else {
         // we've tried often enough - remove the timer
@@ -2513,7 +2513,7 @@ void xMIPv6::processBRRMessage(Packet *inPacket, const Ptr<const BindingRefreshR
     delete inPacket;
 }
 
-void xMIPv6::createBULEntryExpiryTimer(BindingUpdateList::BindingUpdateListEntry *entry, InterfaceEntry *ie, simtime_t scheduledTime)
+void xMIPv6::createBULEntryExpiryTimer(BindingUpdateList::BindingUpdateListEntry *entry, InterfaceEntry *ie, simclocktime_t scheduledTime)
 {
     //Enter_Method("createBULEntryExpiryTimer()");
     //EV << "Creating BUL entry expiry timer for sim time: " << entry->bindingExpiry << " seconds." << endl;
@@ -2538,7 +2538,7 @@ void xMIPv6::createBULEntryExpiryTimer(BindingUpdateList::BindingUpdateListEntry
 
     /*BulExpiryIfEntry* bulExpIfEntry = createBULEntryExpiryTimer(key, HA, HoA, CoA, ie);*/
 
-    scheduleAt(scheduledTime, bulExpiryMsg);
+    scheduleClockEvent(scheduledTime, bulExpiryMsg);
     EV_INFO << "Scheduled BUL expiry (" << entry->bindingExpiry << "s) for time " << scheduledTime << "s" << endl;
     // WAS SCHEDULED FOR EXPIRY, NOT 2 SECONDS BEFORE!?!?!?
 }
@@ -2575,7 +2575,7 @@ void xMIPv6::handleBULExpiry(cMessage *msg)
     // A timer usually can appear for two times:
     // 1. Entry is shortly before expiration -> send new BU
     // 2. Entry expired -> remove
-    if (simTime() < entry->bindingExpiry) {
+    if (getClockTime() < entry->bindingExpiry) {
         EV_INFO << "BUL entry about to expire - creating new BU timer..." << endl;
         // we have to store the pointer to the InterfaceIdentifier as the BUL expiry timer
         // will be canceled/deleted by createBUTimer(...)
@@ -2623,7 +2623,7 @@ void xMIPv6::handleBULExpiry(cMessage *msg)
     }
 }
 
-void xMIPv6::createBCEntryExpiryTimer(const Ipv6Address& HoA, InterfaceEntry *ie, simtime_t scheduledTime)
+void xMIPv6::createBCEntryExpiryTimer(const Ipv6Address& HoA, InterfaceEntry *ie, simclocktime_t scheduledTime)
 {
     cMessage *bcExpiryMsg = new cMessage("BCEntryExpiry", MK_BC_EXPIRY);
 
@@ -2638,7 +2638,7 @@ void xMIPv6::createBCEntryExpiryTimer(const Ipv6Address& HoA, InterfaceEntry *ie
 
     bcExpiryMsg->setContextPointer(bcExpIfEntry);    // information in the bulExpIfEntry is required for handler when message fires
 
-    scheduleAt(scheduledTime, bcExpiryMsg);
+    scheduleClockEvent(scheduledTime, bcExpiryMsg);
     EV_INFO << "Scheduled BC expiry for time " << scheduledTime << "s" << endl;
 }
 
@@ -2672,7 +2672,7 @@ void xMIPv6::handleBCExpiry(cMessage *msg)
 }
 
 void xMIPv6::createTokenEntryExpiryTimer(Ipv6Address& cnAddr, InterfaceEntry *ie,
-        simtime_t scheduledTime, int tokenType)
+        simclocktime_t scheduledTime, int tokenType)
 {
     cMessage *tokenExpiryMsg = new cMessage("TokenEntryExpiry", MK_TOKEN_EXPIRY);
 
@@ -2688,7 +2688,7 @@ void xMIPv6::createTokenEntryExpiryTimer(Ipv6Address& cnAddr, InterfaceEntry *ie
 
     tokenExpiryMsg->setContextPointer(tokenExpIfEntry);
 
-    scheduleAt(scheduledTime, tokenExpiryMsg);
+    scheduleClockEvent(scheduledTime, tokenExpiryMsg);
     EV_INFO << "Scheduled token expiry for time " << scheduledTime << "s" << endl;
 }
 

@@ -105,7 +105,7 @@ void BindingUpdateList::handleMessage(cMessage *msg)
     throw cRuntimeError("This module doesn't process messages");
 }
 
-void BindingUpdateList::addOrUpdateBUL(const Ipv6Address& dest, const Ipv6Address& hoa, const Ipv6Address& coa, const uint lifetime, const uint seq, const simtime_t buSentTime)    //,const simtime_t& nextBUSentTime)
+void BindingUpdateList::addOrUpdateBUL(const Ipv6Address& dest, const Ipv6Address& hoa, const Ipv6Address& coa, const uint lifetime, const uint seq, const simclocktime_t buSentTime)    //,const simclocktime_t& nextBUSentTime)
 {
     // modified structure - CB
 
@@ -126,7 +126,7 @@ void BindingUpdateList::addOrUpdateBUL(const Ipv6Address& dest, const Ipv6Addres
     entry->careOfAddress = coa;
     // update lifetime 11.06.08 - CB
     entry->bindingLifetime = lifetime;    // for the moment a constant but then it is supposed to decrement with time.
-    entry->bindingExpiry = simTime() + lifetime;    // binding expires at this point in time
+    entry->bindingExpiry = getClockTime() + lifetime;    // binding expires at this point in time
     //TODO bindingUpdateList[dest].remainingLifetime = ;
     entry->sentTime = buSentTime;    //the time at which the BU, whose ack is awaited is sent
     //entry->nextBUTx = nextBUSentTime; //the nextScgheduledTime at which the BU will be sent in case of timeout.
@@ -169,7 +169,7 @@ void BindingUpdateList::initializeBUValues(BindingUpdateListEntry& entry)
 }
 
 void BindingUpdateList::addOrUpdateBUL(const Ipv6Address& dest, const Ipv6Address& addr,
-        const simtime_t sentTime, const int cookie, bool HoTI = false)
+        const simclocktime_t sentTime, const int cookie, bool HoTI = false)
 {
     EV_INFO << "\n++++++++++++++++++++Binding Update List for HoTI/CoTI Being Updated in Routing Table6 ++++++++++++++\n";
     // search for entry
@@ -282,7 +282,7 @@ bool BindingUpdateList::isHomeTokenAvailable(const Ipv6Address& dest, InterfaceE
     ASSERT(entry != nullptr);
 
     return entry->tokenH != UNDEFINED_TOKEN &&
-           (entry->sentHoTI + ie->getProtocolData<Ipv6InterfaceData>()->_getMaxTokenLifeTime()) > simTime();
+           (entry->sentHoTI + ie->getProtocolData<Ipv6InterfaceData>()->_getMaxTokenLifeTime()) > getClockTime();
 }
 
 bool BindingUpdateList::isCareOfTokenAvailable(const Ipv6Address& dest, InterfaceEntry *ie)
@@ -291,7 +291,7 @@ bool BindingUpdateList::isCareOfTokenAvailable(const Ipv6Address& dest, Interfac
     ASSERT(entry != nullptr);
 
     return entry->tokenC != UNDEFINED_TOKEN &&
-           (entry->sentCoTI + ie->getProtocolData<Ipv6InterfaceData>()->_getMaxTokenLifeTime()) > simTime();
+           (entry->sentCoTI + ie->getProtocolData<Ipv6InterfaceData>()->_getMaxTokenLifeTime()) > getClockTime();
 }
 
 bool BindingUpdateList::isInBindingUpdateList(const Ipv6Address& dest) const
@@ -337,7 +337,7 @@ bool BindingUpdateList::isValidBinding(const Ipv6Address& dest)
     if (entry == nullptr)
         return false;
 
-    return entry->BAck && (entry->bindingLifetime < SIMTIME_DBL(simTime()));
+    return entry->BAck && (entry->bindingLifetime < SIMTIME_DBL(getClockTime()));
 }
 
 bool BindingUpdateList::isBindingAboutToExpire(const Ipv6Address& dest)
@@ -347,7 +347,7 @@ bool BindingUpdateList::isBindingAboutToExpire(const Ipv6Address& dest)
     if (entry == nullptr)
         return true;
 
-    return entry->bindingLifetime < SIMTIME_DBL(simTime()) - PRE_BINDING_EXPIRY;
+    return entry->bindingLifetime < SIMTIME_DBL(getClockTime()) - PRE_BINDING_EXPIRY;
 }
 
 bool BindingUpdateList::sentBindingUpdate(const Ipv6Address& dest)
@@ -390,7 +390,7 @@ bool BindingUpdateList::recentlySentCOTI(const Ipv6Address& dest, InterfaceEntry
 
     ASSERT(entry != nullptr);
 
-    return entry->sentCoTI + ie->getProtocolData<Ipv6InterfaceData>()->_getMaxTokenLifeTime() / 3 > simTime();
+    return entry->sentCoTI + ie->getProtocolData<Ipv6InterfaceData>()->_getMaxTokenLifeTime() / 3 > getClockTime();
 }
 
 bool BindingUpdateList::recentlySentHOTI(const Ipv6Address& dest, InterfaceEntry *ie)
@@ -399,7 +399,7 @@ bool BindingUpdateList::recentlySentHOTI(const Ipv6Address& dest, InterfaceEntry
 
     ASSERT(entry != nullptr);
 
-    return entry->sentHoTI + ie->getProtocolData<Ipv6InterfaceData>()->_getMaxTokenLifeTime() / 3 > simTime();
+    return entry->sentHoTI + ie->getProtocolData<Ipv6InterfaceData>()->_getMaxTokenLifeTime() / 3 > getClockTime();
 }
 
 void BindingUpdateList::resetBindingCacheEntry(BindingUpdateListEntry& entry)

@@ -44,7 +44,7 @@ void Ipv6FragBuf::init(Icmpv6 *icmp)
     icmpModule = icmp;
 }
 
-Packet *Ipv6FragBuf::addFragment(Packet *pk, const Ipv6Header *ipv6Header, const Ipv6FragmentHeader *fh, simtime_t now)
+Packet *Ipv6FragBuf::addFragment(Packet *pk, const Ipv6Header *ipv6Header, const Ipv6FragmentHeader *fh, simclocktime_t now)
 {
     // find datagram buffer
     Key key;
@@ -148,7 +148,7 @@ Packet *Ipv6FragBuf::addFragment(Packet *pk, const Ipv6Header *ipv6Header, const
       sent to the source of that fragment.
  *
  */
-void Ipv6FragBuf::purgeStaleFragments(simtime_t lastupdate)
+void Ipv6FragBuf::purgeStaleFragments(simclocktime_t lastupdate)
 {
     // this method shouldn't be called too often because iteration on
     // an std::map is *very* slow...

@@ -108,7 +108,7 @@ void Aodv::handleMessageWhenUp(cMessage *msg)
             expungeRoutes();
         else if (msg == counterTimer) {
             rreqCount = rerrCount = 0;
-            scheduleAt(simTime() + 1, counterTimer);
+            scheduleClockEvent(getClockTime() + 1, counterTimer);
         }
         else if (msg == rrepAckTimer)
             handleRREPACKTimer();
@@ -214,8 +214,8 @@ INetfilter::IHook::Result Aodv::ensureRouteForDatagram(Packet *datagram)
             // path to the destination is updated to be no less than the current
             // time plus ACTIVE_ROUTE_TIMEOUT.
 
-            updateValidRouteLifeTime(destAddr, simTime() + activeRouteTimeout);
-            updateValidRouteLifeTime(route->getNextHopAsGeneric(), simTime() + activeRouteTimeout);
+            updateValidRouteLifeTime(destAddr, getClockTime() + activeRouteTimeout);
+            updateValidRouteLifeTime(route->getNextHopAsGeneric(), getClockTime() + activeRouteTimeout);
 
             return ACCEPT;
         }
@@ -316,7 +316,7 @@ void Aodv::sendRREQ(const Ptr<Rreq>& rreq, const L3Address& destAddr, unsigned i
         if (timeToLive != 0) {
             rrepTimerMsg->setLastTTL(timeToLive);
             rrepTimerMsg->setFromInvalidEntry(true);
-            cancelEvent(rrepTimerMsg);
+            cancelClockEvent(rrepTimerMsg);
         }
         else if (lastTTL + ttlIncrement < ttlThreshold) {
             ASSERT(!rrepTimerMsg->isScheduled());
@@ -341,8 +341,8 @@ void Aodv::sendRREQ(const Ptr<Rreq>& rreq, const L3Address& destAddr, unsigned i
     }
 
     // Each time, the timeout for receiving a RREP is RING_TRAVERSAL_TIME.
-    simtime_t ringTraversalTime = 2.0 * nodeTraversalTime * (timeToLive + timeoutBuffer);
-    scheduleAt(simTime() + ringTraversalTime, rrepTimerMsg);
+    simclocktime_t ringTraversalTime = 2.0 * nodeTraversalTime * (timeToLive + timeoutBuffer);
+    scheduleClockEvent(getClockTime() + ringTraversalTime, rrepTimerMsg);
 
     EV_INFO << "Sending a Route Request with target " << rreq->getDestAddr() << " and TTL= " << timeToLive << endl;
     sendAODVPacket(rreq, destAddr, timeToLive, *jitterPar);
@@ -377,9 +377,9 @@ void Aodv::sendRREP(const Ptr<Rrep>& rrep, const L3Address& destAddr, unsigned i
         failedNextHop = nextHop;
 
         if (rrepAckTimer->isScheduled())
-            cancelEvent(rrepAckTimer);
+            cancelClockEvent(rrepAckTimer);
 
-        scheduleAt(simTime() + nextHopWait, rrepAckTimer);
+        scheduleClockEvent(getClockTime() + nextHopWait, rrepAckTimer);
     }
     sendAODVPacket(rrep, nextHop, timeToLive, 0);
 }
@@ -438,7 +438,7 @@ const Ptr<Rreq> Aodv::createRREQ(const L3Address& destAddr)
     // it will not reprocess and re-forward the packet.
 
     RreqIdentifier rreqIdentifier(getSelfIPAddress(), rreqId);
-    rreqsArrivalTime[rreqIdentifier] = simTime();
+    rreqsArrivalTime[rreqIdentifier] = getClockTime();
     return rreqPacket;
 }
 
@@ -519,7 +519,7 @@ const Ptr<Rrep> Aodv::createRREP(const Ptr<Rreq>& rreq, IRoute *destRoute, IRout
         // The Lifetime field of the RREP is calculated by subtracting the
         // current time from the expiration time in its route table entry.
 
-        rrep->setLifeTime((destRouteData->getLifeTime() - simTime()).trunc(SIMTIME_MS));
+        rrep->setLifeTime((destRouteData->getLifeTime() - getClockTime()).trunc(SIMTIME_MS));
     }
 
     return rrep;
@@ -581,10 +581,10 @@ void Aodv::handleRREP(const Ptr<Rrep>& rrep, const L3Address& sourceAddr)
 
     if (!previousHopRoute || previousHopRoute->getSource() != this) {
         // create without valid sequence number
-        previousHopRoute = createRoute(sourceAddr, sourceAddr, 1, false, rrep->getDestSeqNum(), true, simTime() + activeRouteTimeout);
+        previousHopRoute = createRoute(sourceAddr, sourceAddr, 1, false, rrep->getDestSeqNum(), true, getClockTime() + activeRouteTimeout);
     }
     else
-        updateRoutingTable(previousHopRoute, sourceAddr, 1, false, rrep->getDestSeqNum(), true, simTime() + activeRouteTimeout);
+        updateRoutingTable(previousHopRoute, sourceAddr, 1, false, rrep->getDestSeqNum(), true, getClockTime() + activeRouteTimeout);
 
     // Next, the node then increments the hop count value in the RREP by one,
     // to account for the new hop through the intermediate node
@@ -596,7 +596,7 @@ void Aodv::handleRREP(const Ptr<Rrep>& rrep, const L3Address& sourceAddr)
 
     IRoute *destRoute = routingTable->findBestMatchingRoute(rrep->getDestAddr());
     AodvRouteData *destRouteData = nullptr;
-    simtime_t lifeTime = rrep->getLifeTime();
+    simclocktime_t lifeTime = rrep->getLifeTime();
     unsigned int destSeqNum = rrep->getDestSeqNum();
 
     if (destRoute && destRoute->getSource() == this) {    // already exists
@@ -607,7 +607,7 @@ void Aodv::handleRREP(const Ptr<Rrep>& rrep, const L3Address& sourceAddr)
         //     invalid in route table entry.
 
         if (!destRouteData->hasValidDestNum()) {
-            updateRoutingTable(destRoute, sourceAddr, newHopCount, true, destSeqNum, true, simTime() + lifeTime);
+            updateRoutingTable(destRoute, sourceAddr, newHopCount, true, destSeqNum, true, getClockTime() + lifeTime);
 
             // If the route table entry to the destination is created or updated,
             // then the following actions occur:
@@ -632,23 +632,23 @@ void Aodv::handleRREP(const Ptr<Rrep>& rrep, const L3Address& sourceAddr)
         //      the node's copy of the destination sequence number and the
         //      known value is valid, or
         else if (destSeqNum > destRouteData->getDestSeqNum()) {
-            updateRoutingTable(destRoute, sourceAddr, newHopCount, true, destSeqNum, true, simTime() + lifeTime);
+            updateRoutingTable(destRoute, sourceAddr, newHopCount, true, destSeqNum, true, getClockTime() + lifeTime);
         }
         else {
             // (iii) the sequence numbers are the same, but the route is
             //       marked as inactive, or
             if (destSeqNum == destRouteData->getDestSeqNum() && !destRouteData->isActive()) {
-                updateRoutingTable(destRoute, sourceAddr, newHopCount, true, destSeqNum, true, simTime() + lifeTime);
+                updateRoutingTable(destRoute, sourceAddr, newHopCount, true, destSeqNum, true, getClockTime() + lifeTime);
             }
             // (iv) the sequence numbers are the same, and the New Hop Count is
             //      smaller than the hop count in route table entry.
             else if (destSeqNum == destRouteData->getDestSeqNum() && newHopCount < (unsigned int)destRoute->getMetric()) {
-                updateRoutingTable(destRoute, sourceAddr, newHopCount, true, destSeqNum, true, simTime() + lifeTime);
+                updateRoutingTable(destRoute, sourceAddr, newHopCount, true, destSeqNum, true, getClockTime() + lifeTime);
             }
         }
     }
     else {    // create forward route for the destination: this path will be used by the originator to send data packets
-        destRoute = createRoute(rrep->getDestAddr(), sourceAddr, newHopCount, true, destSeqNum, true, simTime() + lifeTime);
+        destRoute = createRoute(rrep->getDestAddr(), sourceAddr, newHopCount, true, destSeqNum, true, getClockTime() + lifeTime);
         destRouteData = check_and_cast<AodvRouteData *>(destRoute->getProtocolData());
     }
 
@@ -673,10 +673,10 @@ void Aodv::handleRREP(const Ptr<Rrep>& rrep, const L3Address& sourceAddr)
             // RREP has its lifetime changed to be the maximum of (existing-
             // lifetime, (current time + ACTIVE_ROUTE_TIMEOUT).
 
-            simtime_t existingLifeTime = originatorRouteData->getLifeTime();
-            originatorRouteData->setLifeTime(std::max(simTime() + activeRouteTimeout, existingLifeTime));
+            simclocktime_t existingLifeTime = originatorRouteData->getLifeTime();
+            originatorRouteData->setLifeTime(std::max(getClockTime() + activeRouteTimeout, existingLifeTime));
 
-            if (simTime() > rebootTime + deletePeriod || rebootTime == 0) {
+            if (getClockTime() > rebootTime + deletePeriod || rebootTime == 0) {
                 // If a node forwards a RREP over a link that is likely to have errors
                 // or be unidirectional, the node SHOULD set the 'A' flag to require that
                 // the recipient of the RREP acknowledge receipt of the RREP by sending a
@@ -713,13 +713,13 @@ void Aodv::handleRREP(const Ptr<Rrep>& rrep, const L3Address& sourceAddr)
     else {
         if (hasOngoingRouteDiscovery(rrep->getDestAddr())) {
             EV_INFO << "The Route Reply has arrived for our Route Request to node " << rrep->getDestAddr() << endl;
-            updateRoutingTable(destRoute, sourceAddr, newHopCount, true, destSeqNum, true, simTime() + lifeTime);
+            updateRoutingTable(destRoute, sourceAddr, newHopCount, true, destSeqNum, true, getClockTime() + lifeTime);
             completeRouteDiscovery(rrep->getDestAddr());
         }
     }
 }
 
-void Aodv::updateRoutingTable(IRoute *route, const L3Address& nextHop, unsigned int hopCount, bool hasValidDestNum, unsigned int destSeqNum, bool isActive, simtime_t lifeTime)
+void Aodv::updateRoutingTable(IRoute *route, const L3Address& nextHop, unsigned int hopCount, bool hasValidDestNum, unsigned int destSeqNum, bool isActive, simclocktime_t lifeTime)
 {
     EV_DETAIL << "Updating existing route: " << route << endl;
 
@@ -754,14 +754,14 @@ void Aodv::sendAODVPacket(const Ptr<AodvControlPacket>& aodvPacket, const L3Addr
     packet->addTag<L4PortReq>()->setDestPort(aodvUDPPort);
 
     if (destAddr.isBroadcast())
-        lastBroadcastTime = simTime();
+        lastBroadcastTime = getClockTime();
 
     if (delay == 0)
         socket.send(packet);
     else {
         auto *timer = new PacketHolderMessage("aodv-send-jitter", KIND_DELAYEDSEND);
         timer->setOwnedPacket(packet);
-        scheduleAt(simTime()+delay, timer);
+        scheduleClockEvent(getClockTime()+delay, timer);
     }
 }
 
@@ -804,10 +804,10 @@ void Aodv::handleRREQ(const Ptr<Rreq>& rreq, const L3Address& sourceAddr, unsign
 
     if (!previousHopRoute || previousHopRoute->getSource() != this) {
         // create without valid sequence number
-        previousHopRoute = createRoute(sourceAddr, sourceAddr, 1, false, rreq->getOriginatorSeqNum(), true, simTime() + activeRouteTimeout);
+        previousHopRoute = createRoute(sourceAddr, sourceAddr, 1, false, rreq->getOriginatorSeqNum(), true, getClockTime() + activeRouteTimeout);
     }
     else
-        updateRoutingTable(previousHopRoute, sourceAddr, 1, false, rreq->getOriginatorSeqNum(), true, simTime() + activeRouteTimeout);
+        updateRoutingTable(previousHopRoute, sourceAddr, 1, false, rreq->getOriginatorSeqNum(), true, getClockTime() + activeRouteTimeout);
 
     // then checks to determine whether it has received a RREQ with the same
     // Originator IP Address and RREQ ID within at least the last PATH_DISCOVERY_TIME.
@@ -815,13 +815,13 @@ void Aodv::handleRREQ(const Ptr<Rreq>& rreq, const L3Address& sourceAddr, unsign
 
     RreqIdentifier rreqIdentifier(rreq->getOriginatorAddr(), rreq->getRreqId());
     auto checkRREQArrivalTime = rreqsArrivalTime.find(rreqIdentifier);
-    if (checkRREQArrivalTime != rreqsArrivalTime.end() && simTime() - checkRREQArrivalTime->second <= pathDiscoveryTime) {
+    if (checkRREQArrivalTime != rreqsArrivalTime.end() && getClockTime() - checkRREQArrivalTime->second <= pathDiscoveryTime) {
         EV_WARN << "The same packet has arrived within PATH_DISCOVERY_TIME= " << pathDiscoveryTime << ". Discarding it" << endl;
         return;
     }
 
     // update or create
-    rreqsArrivalTime[rreqIdentifier] = simTime();
+    rreqsArrivalTime[rreqIdentifier] = getClockTime();
 
     // First, it first increments the hop count value in the RREQ by one, to
     // account for the new hop through the intermediate node.
@@ -859,8 +859,8 @@ void Aodv::handleRREQ(const Ptr<Rreq>& rreq, const L3Address& sourceAddr, unsign
     //   MinimalLifetime = (current time + 2*NET_TRAVERSAL_TIME - 2*HopCount*NODE_TRAVERSAL_TIME).
 
     unsigned int hopCount = rreq->getHopCount();
-    simtime_t minimalLifeTime = simTime() + 2 * netTraversalTime - 2 * hopCount * nodeTraversalTime;
-    simtime_t newLifeTime = std::max(simTime(), minimalLifeTime);
+    simclocktime_t minimalLifeTime = getClockTime() + 2 * netTraversalTime - 2 * hopCount * nodeTraversalTime;
+    simclocktime_t newLifeTime = std::max(getClockTime(), minimalLifeTime);
     int rreqSeqNum = rreq->getOriginatorSeqNum();
     if (!reverseRoute || reverseRoute->getSource() != this) {    // create
         // This reverse route will be needed if the node receives a RREP back to the
@@ -977,7 +977,7 @@ void Aodv::handleRREQ(const Ptr<Rreq>& rreq, const L3Address& sourceAddr, unsign
     // incoming RREQ is larger than the value currently maintained by the
     // forwarding node.
 
-    if (timeToLive > 0 && (simTime() > rebootTime + deletePeriod || rebootTime == 0)) {
+    if (timeToLive > 0 && (getClockTime() > rebootTime + deletePeriod || rebootTime == 0)) {
         if (destRouteData)
             rreq->setDestSeqNum(std::max(destRouteData->getDestSeqNum(), rreq->getDestSeqNum()));
         rreq->setUnknownSeqNumFlag(false);
@@ -991,7 +991,7 @@ void Aodv::handleRREQ(const Ptr<Rreq>& rreq, const L3Address& sourceAddr, unsign
 
 IRoute *Aodv::createRoute(const L3Address& destAddr, const L3Address& nextHop,
         unsigned int hopCount, bool hasValidDestNum, unsigned int destSeqNum,
-        bool isActive, simtime_t lifeTime)
+        bool isActive, simclocktime_t lifeTime)
 {
     // create a new route
     IRoute *newRoute = routingTable->createRoute();
@@ -1105,7 +1105,7 @@ void Aodv::handleLinkBreakSendRERR(const L3Address& unreachableAddr)
             EV_DETAIL << "Marking route to " << route->getDestinationAsGeneric() << " as inactive" << endl;
 
             routeData->setIsActive(false);
-            routeData->setLifeTime(simTime() + deletePeriod);
+            routeData->setLifeTime(getClockTime() + deletePeriod);
             scheduleExpungeRoutes();
 
             UnreachableNode node;
@@ -1190,7 +1190,7 @@ void Aodv::handleRERR(const Ptr<const Rerr>& rerr, const L3Address& sourceAddr)
 
                     routeData->setDestSeqNum(rerr->getUnreachableNodes(j).seqNum);
                     routeData->setIsActive(false);    // it means invalid, see 3. AODV Terminology p.3. in RFC 3561
-                    routeData->setLifeTime(simTime() + deletePeriod);
+                    routeData->setLifeTime(getClockTime() + deletePeriod);
 
                     // The RERR should contain those destinations that are part of
                     // the created list of unreachable destinations and have a non-empty
@@ -1213,7 +1213,7 @@ void Aodv::handleRERR(const Ptr<const Rerr>& rerr, const L3Address& sourceAddr)
         return;
     }
 
-    if (unreachableNeighbors.size() > 0 && (simTime() > rebootTime + deletePeriod || rebootTime == 0)) {
+    if (unreachableNeighbors.size() > 0 && (getClockTime() > rebootTime + deletePeriod || rebootTime == 0)) {
         EV_INFO << "Sending RERR to inform our neighbors about link breaks." << endl;
         auto newRERR = createRERR(unreachableNeighbors);
         sendAODVPacket(newRERR, addressType->getBroadcastAddress(), 1, 0);
@@ -1223,7 +1223,7 @@ void Aodv::handleRERR(const Ptr<const Rerr>& rerr, const L3Address& sourceAddr)
 
 void Aodv::handleStartOperation(LifecycleOperation *operation)
 {
-    rebootTime = simTime();
+    rebootTime = getClockTime();
 
     socket.setOutputGate(gate("socketOut"));
     socket.setCallback(this);
@@ -1235,9 +1235,9 @@ void Aodv::handleStartOperation(LifecycleOperation *operation)
     // the delay between consecutive transmissions of messages of the same type is
     // equal to (MESSAGE_INTERVAL - jitter), where jitter is the random value.
     if (useHelloMessages)
-        scheduleAt(simTime() + helloInterval - *periodicJitter, helloMsgTimer);
+        scheduleClockEvent(getClockTime() + helloInterval - *periodicJitter, helloMsgTimer);
 
-    scheduleAt(simTime() + 1, counterTimer);
+    scheduleClockEvent(getClockTime() + 1, counterTimer);
 }
 
 void Aodv::handleStopOperation(LifecycleOperation *operation)
@@ -1269,15 +1269,15 @@ void Aodv::clearState()
     rreqsArrivalTime.clear();
 
     if (useHelloMessages)
-        cancelEvent(helloMsgTimer);
+        cancelClockEvent(helloMsgTimer);
     if (expungeTimer)
-        cancelEvent(expungeTimer);
+        cancelClockEvent(expungeTimer);
     if (counterTimer)
-        cancelEvent(counterTimer);
+        cancelClockEvent(counterTimer);
     if (blacklistTimer)
-        cancelEvent(blacklistTimer);
+        cancelClockEvent(blacklistTimer);
     if (rrepAckTimer)
-        cancelEvent(rrepAckTimer);
+        cancelClockEvent(rrepAckTimer);
 }
 
 void Aodv::handleWaitForRREP(WaitForRrep *rrepTimer)
@@ -1403,13 +1403,13 @@ void Aodv::sendHelloMessagesIfNeeded()
         }
     }
 
-    if (hasActiveRoute && (lastBroadcastTime == 0 || simTime() - lastBroadcastTime > helloInterval)) {
+    if (hasActiveRoute && (lastBroadcastTime == 0 || getClockTime() - lastBroadcastTime > helloInterval)) {
         EV_INFO << "It is hello time, broadcasting Hello Messages with TTL=1" << endl;
         auto helloMessage = createHelloMessage();
         sendAODVPacket(helloMessage, addressType->getBroadcastAddress(), 1, 0);
     }
 
-    scheduleAt(simTime() + helloInterval - *periodicJitter, helloMsgTimer);
+    scheduleClockEvent(getClockTime() + helloInterval - *periodicJitter, helloMsgTimer);
 }
 
 void Aodv::handleHelloMessage(const Ptr<Rrep>& helloMessage)
@@ -1430,13 +1430,13 @@ void Aodv::handleHelloMessage(const Ptr<Rrep>& helloMessage)
     // if the neighbor moves away and a neighbor timeout occurs.
 
     unsigned int latestDestSeqNum = helloMessage->getDestSeqNum();
-    simtime_t newLifeTime = simTime() + allowedHelloLoss * helloInterval;
+    simclocktime_t newLifeTime = getClockTime() + allowedHelloLoss * helloInterval;
 
     if (!routeHelloOriginator || routeHelloOriginator->getSource() != this)
         createRoute(helloOriginatorAddr, helloOriginatorAddr, 1, true, latestDestSeqNum, true, newLifeTime);
     else {
         AodvRouteData *routeData = check_and_cast<AodvRouteData *>(routeHelloOriginator->getProtocolData());
-        simtime_t lifeTime = routeData->getLifeTime();
+        simclocktime_t lifeTime = routeData->getLifeTime();
         updateRoutingTable(routeHelloOriginator, helloOriginatorAddr, 1, true, latestDestSeqNum, true, std::max(lifeTime, newLifeTime));
     }
 
@@ -1457,7 +1457,7 @@ void Aodv::expungeRoutes()
         if (route->getSource() == this) {
             AodvRouteData *routeData = check_and_cast<AodvRouteData *>(route->getProtocolData());
             ASSERT(routeData != nullptr);
-            if (routeData->getLifeTime() <= simTime()) {
+            if (routeData->getLifeTime() <= getClockTime()) {
                 if (routeData->isActive()) {
                     EV_DETAIL << "Route to " << route->getDestinationAsGeneric() << " expired and set to inactive. It will be deleted after DELETE_PERIOD time" << endl;
                     // An expired routing table entry SHOULD NOT be expunged before
@@ -1465,14 +1465,14 @@ void Aodv::expungeRoutes()
                     // soft state corresponding to the route (e.g., last known hop count)
                     // will be lost.
                     routeData->setIsActive(false);
-                    routeData->setLifeTime(simTime() + deletePeriod);
+                    routeData->setLifeTime(getClockTime() + deletePeriod);
                 }
                 else {
                     // Any routing table entry waiting for a RREP SHOULD NOT be expunged
                     // before (current_time + 2 * NET_TRAVERSAL_TIME).
                     if (hasOngoingRouteDiscovery(route->getDestinationAsGeneric())) {
                         EV_DETAIL << "Route to " << route->getDestinationAsGeneric() << " expired and is inactive, but we are waiting for a RREP to this destination, so we extend its lifetime with 2 * NET_TRAVERSAL_TIME" << endl;
-                        routeData->setLifeTime(simTime() + 2 * netTraversalTime);
+                        routeData->setLifeTime(getClockTime() + 2 * netTraversalTime);
                     }
                     else {
                         EV_DETAIL << "Route to " << route->getDestinationAsGeneric() << " expired and is inactive and we are not expecting any RREP to this destination, so we delete this route" << endl;
@@ -1487,7 +1487,7 @@ void Aodv::expungeRoutes()
 
 void Aodv::scheduleExpungeRoutes()
 {
-    simtime_t nextExpungeTime = SimTime::getMaxTime();
+    simclocktime_t nextExpungeTime = SimTime::getMaxTime();
     for (int i = 0; i < routingTable->getNumRoutes(); i++) {
         IRoute *route = routingTable->getRoute(i);
 
@@ -1501,15 +1501,15 @@ void Aodv::scheduleExpungeRoutes()
     }
     if (nextExpungeTime == SimTime::getMaxTime()) {
         if (expungeTimer->isScheduled())
-            cancelEvent(expungeTimer);
+            cancelClockEvent(expungeTimer);
     }
     else {
         if (!expungeTimer->isScheduled())
-            scheduleAt(nextExpungeTime, expungeTimer);
+            scheduleClockEvent(nextExpungeTime, expungeTimer);
         else {
             if (expungeTimer->getArrivalTime() != nextExpungeTime) {
-                cancelEvent(expungeTimer);
-                scheduleAt(nextExpungeTime, expungeTimer);
+                cancelClockEvent(expungeTimer);
+                scheduleClockEvent(nextExpungeTime, expungeTimer);
             }
         }
     }
@@ -1530,7 +1530,7 @@ INetfilter::IHook::Result Aodv::datagramForwardHook(Packet *datagram)
 
     if (destAddr.isBroadcast() || routingTable->isLocalAddress(destAddr) || destAddr.isMulticast()) {
         if (routingTable->isLocalAddress(destAddr) && ipSource && ipSource->getSource() == this)
-            updateValidRouteLifeTime(ipSource->getNextHopAsGeneric(), simTime() + activeRouteTimeout);
+            updateValidRouteLifeTime(ipSource->getNextHopAsGeneric(), getClockTime() + activeRouteTimeout);
 
         return ACCEPT;
     }
@@ -1545,11 +1545,11 @@ INetfilter::IHook::Result Aodv::datagramForwardHook(Packet *datagram)
     // path to the destination is updated to be no less than the current
     // time plus ACTIVE_ROUTE_TIMEOUT
 
-    updateValidRouteLifeTime(sourceAddr, simTime() + activeRouteTimeout);
-    updateValidRouteLifeTime(destAddr, simTime() + activeRouteTimeout);
+    updateValidRouteLifeTime(sourceAddr, getClockTime() + activeRouteTimeout);
+    updateValidRouteLifeTime(destAddr, getClockTime() + activeRouteTimeout);
 
     if (routeDest && routeDest->getSource() == this)
-        updateValidRouteLifeTime(routeDest->getNextHopAsGeneric(), simTime() + activeRouteTimeout);
+        updateValidRouteLifeTime(routeDest->getNextHopAsGeneric(), getClockTime() + activeRouteTimeout);
 
     // Since the route between each originator and destination pair is expected
     // to be symmetric, the Active Route Lifetime for the previous hop, along the
@@ -1557,7 +1557,7 @@ INetfilter::IHook::Result Aodv::datagramForwardHook(Packet *datagram)
     // current time plus ACTIVE_ROUTE_TIMEOUT.
 
     if (ipSource && ipSource->getSource() == this)
-        updateValidRouteLifeTime(ipSource->getNextHopAsGeneric(), simTime() + activeRouteTimeout);
+        updateValidRouteLifeTime(ipSource->getNextHopAsGeneric(), getClockTime() + activeRouteTimeout);
 
     EV_INFO << "We can't forward datagram because we have no active route for " << destAddr << endl;
     if (routeDest && routeDestData && !routeDestData->isActive()) {    // exists but is not active
@@ -1579,7 +1579,7 @@ INetfilter::IHook::Result Aodv::datagramForwardHook(Packet *datagram)
 
         // 3. The Lifetime field is updated to current time plus DELETE_PERIOD.
         //    Before this time, the entry SHOULD NOT be deleted.
-        routeDestData->setLifeTime(simTime() + deletePeriod);
+        routeDestData->setLifeTime(getClockTime() + deletePeriod);
 
         sendRERRWhenNoRouteToForward(destAddr);
     }
@@ -1631,13 +1631,13 @@ void Aodv::cancelRouteDiscovery(const L3Address& destAddr)
     waitForRREPTimers.erase(waitRREPIter);
 }
 
-bool Aodv::updateValidRouteLifeTime(const L3Address& destAddr, simtime_t lifetime)
+bool Aodv::updateValidRouteLifeTime(const L3Address& destAddr, simclocktime_t lifetime)
 {
     IRoute *route = routingTable->findBestMatchingRoute(destAddr);
     if (route && route->getSource() == this) {
         AodvRouteData *routeData = check_and_cast<AodvRouteData *>(route->getProtocolData());
         if (routeData->isActive()) {
-            simtime_t newLifeTime = std::max(routeData->getLifeTime(), lifetime);
+            simclocktime_t newLifeTime = std::max(routeData->getLifeTime(), lifetime);
             EV_DETAIL << "Updating " << route << " lifetime to " << newLifeTime << endl;
             routeData->setLifeTime(newLifeTime);
             return true;
@@ -1673,7 +1673,7 @@ void Aodv::handleRREPACK(const Ptr<const RrepAck>& rrepACK, const L3Address& nei
             EV_DETAIL << "Marking route " << route << " as active" << endl;
             AodvRouteData *routeData = check_and_cast<AodvRouteData *>(route->getProtocolData());
             routeData->setIsActive(true);
-            cancelEvent(rrepAckTimer);
+            cancelClockEvent(rrepAckTimer);
         }
     }
 }
@@ -1685,21 +1685,21 @@ void Aodv::handleRREPACKTimer()
 
     EV_INFO << "RREP-ACK didn't arrived within timeout. Adding " << failedNextHop << " to the blacklist" << endl;
 
-    blacklist[failedNextHop] = simTime() + blacklistTimeout;    // lifetime
+    blacklist[failedNextHop] = getClockTime() + blacklistTimeout;    // lifetime
 
     if (!blacklistTimer->isScheduled())
-        scheduleAt(simTime() + blacklistTimeout, blacklistTimer);
+        scheduleClockEvent(getClockTime() + blacklistTimeout, blacklistTimer);
 }
 
 void Aodv::handleBlackListTimer()
 {
-    simtime_t nextTime = SimTime::getMaxTime();
+    simclocktime_t nextTime = SimTime::getMaxTime();
 
     for (auto it = blacklist.begin(); it != blacklist.end(); ) {
         auto current = it++;
 
         // Nodes are removed from the blacklist set after a BLACKLIST_TIMEOUT period
-        if (current->second <= simTime()) {
+        if (current->second <= getClockTime()) {
             EV_DETAIL << "Blacklist lifetime has expired for " << current->first << " removing it from the blacklisted addresses" << endl;
             blacklist.erase(current);
         }
@@ -1708,7 +1708,7 @@ void Aodv::handleBlackListTimer()
     }
 
     if (nextTime != SimTime::getMaxTime())
-        scheduleAt(nextTime, blacklistTimer);
+        scheduleClockEvent(nextTime, blacklistTimer);
 }
 
 Aodv::~Aodv()

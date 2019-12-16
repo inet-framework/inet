@@ -441,10 +441,10 @@ void TcpLwip::handleAppMessage(cMessage *msgP)
     processAppCommand(*conn, msgP);
 }
 
-simtime_t roundTime(const simtime_t& timeP, int secSlicesP)
+simclocktime_t roundTime(const simclocktime_t& timeP, int secSlicesP)
 {
     int64_t scale = timeP.getScale() / secSlicesP;
-    simtime_t ret = timeP;
+    simclocktime_t ret = timeP;
     ret /= scale;
     ret *= scale;
     return ret;
@@ -457,7 +457,7 @@ void TcpLwip::handleMessage(cMessage *msgP)
         if (msgP == pLwipFastTimerM) {    // lwip fast timer
             EV_TRACE << "Call tcp_fasttmr()\n";
             pLwipTcpLayerM->tcp_fasttmr();
-            if (simTime() == roundTime(simTime(), 2)) {
+            if (getClockTime() == roundTime(getClockTime(), 2)) {
                 EV_TRACE << "Call tcp_slowtmr()\n";
                 pLwipTcpLayerM->tcp_slowtmr();
             }
@@ -488,7 +488,7 @@ void TcpLwip::handleMessage(cMessage *msgP)
 
     if (!pLwipFastTimerM->isScheduled()) {    // lwip fast timer
         if (nullptr != pLwipTcpLayerM->tcp_active_pcbs || nullptr != pLwipTcpLayerM->tcp_tw_pcbs)
-            scheduleAt(roundTime(simTime() + 0.250, 4), pLwipFastTimerM);
+            scheduleClockEvent(roundTime(getClockTime() + 0.250, 4), pLwipFastTimerM);
     }
 }
 

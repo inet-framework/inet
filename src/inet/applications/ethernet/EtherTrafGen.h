@@ -49,8 +49,8 @@ class INET_API EtherTrafGen : public ApplicationBase
     Ieee8022LlcSocket llcSocket;
     // self messages
     cMessage *timerMsg = nullptr;
-    simtime_t startTime;
-    simtime_t stopTime;
+    simclocktime_t startTime;
+    simclocktime_t stopTime;
 
     // receive statistics
     long packetsSent = 0;
@@ -63,7 +63,7 @@ class INET_API EtherTrafGen : public ApplicationBase
     virtual void finish() override;
 
     virtual bool isGenerator();
-    virtual void scheduleNextPacket(simtime_t previous);
+    virtual void scheduleNextPacket(simclocktime_t previous);
     virtual void cancelNextPacket();
 
     virtual MacAddress resolveDestMacAddress();

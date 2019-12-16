@@ -52,15 +52,15 @@ void PassivePacketSink::handleMessage(cMessage *message)
 
 void PassivePacketSink::scheduleConsumptionTimer()
 {
-    simtime_t interval = consumptionIntervalParameter->doubleValue();
+    simclocktime_t interval = consumptionIntervalParameter->doubleValue();
     if (interval != 0 || consumptionTimer->getArrivalModule() == nullptr)
-        scheduleAt(simTime() + interval, consumptionTimer);
+        scheduleClockEvent(getClockTime() + interval, consumptionTimer);
 }
 
 void PassivePacketSink::pushPacket(Packet *packet, cGate *gate)
 {
     Enter_Method("pushPacket");
-    if (consumptionTimer->isScheduled() && consumptionTimer->getArrivalTime() > simTime())
+    if (consumptionTimer->isScheduled() && consumptionTimer->getArrivalTime() > getClockTime())
         throw cRuntimeError("Another packet is already being consumed");
     else {
         emit(packetPushedSignal, packet);

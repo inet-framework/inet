@@ -136,7 +136,7 @@ class Ipv4OptionTimestamp extends Ipv4Option
     // use either up to 4 addresses with timestamps or
     // only up to 9 timestamps, according to the flag
     Ipv4Address recordAddress[];
-    simtime_t recordTimestamp[];
+    simclocktime_t recordTimestamp[];
 }
 
 //

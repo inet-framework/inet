@@ -105,7 +105,7 @@ class INET_API VoipStreamSender : public cSimpleModule, public LifecycleUnsuppor
     int sampleRate = 0;    // samples/sec [Hz]
     const char *codec = nullptr;
     int compressedBitRate = 0;
-    simtime_t packetTimeLength;
+    simclocktime_t packetTimeLength;
     const char *soundFile = nullptr;    // input audio file name
     int repeatCount = 0;
 

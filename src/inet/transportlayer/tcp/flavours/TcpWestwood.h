@@ -41,10 +41,10 @@ class INET_API TcpWestwoodStateVariables : public TcpBaseAlgStateVariables
 
     uint32 ssthresh;    ///< slow start threshold
 
-    simtime_t w_RTTmin;    // min RTT
+    simclocktime_t w_RTTmin;    // min RTT
     double w_a;    // threshold reduction factor for ssthresh calculation
 
-    simtime_t w_lastAckTime;    // last received ack time
+    simclocktime_t w_lastAckTime;    // last received ack time
 
     double w_bwe;
     double w_sample_bwe;

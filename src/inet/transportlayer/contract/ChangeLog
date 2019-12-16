@@ -522,7 +522,7 @@
 	  under src/; better names, e.g. networkinterfaces -> linklayer)
 	* build system to use a deep makefile
 	* updated the C++ code for the 4.0 API (follow name changes; use
-	  int64-based simtime_t; use cPacket; etc.)
+	  int64-based simclocktime_t; use cPacket; etc.)
 	* NED files converted to 4.0 syntax
 	* make use of new features in NED files (module interfaces, inout
 	  gates, @unit, etc.)

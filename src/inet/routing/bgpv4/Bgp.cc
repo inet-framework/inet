@@ -51,11 +51,11 @@ void Bgp::initialize(int stage)
         NodeStatus *nodeStatus = node ? check_and_cast_nullable<NodeStatus *>(node->getSubmodule("status")) : nullptr;
         isUp = !nodeStatus || nodeStatus->getState() == NodeStatus::UP;
         if (isUp) {
-            simtime_t startupTime = par("startupTime");
+            simclocktime_t startupTime = par("startupTime");
             if (startupTime == 0)
                 createBgpRouter();
             else
-                scheduleAt(simTime() + startupTime, startupTimer);
+                scheduleClockEvent(getClockTime() + startupTime, startupTimer);
         }
     }
 }

@@ -51,9 +51,9 @@ class INET_API Gpsr : public RoutingProtocolBase, public cListener, public Netfi
     // GPSR parameters
     GpsrPlanarizationMode planarizationMode = static_cast<GpsrPlanarizationMode>(-1);
     const char *interfaces = nullptr;
-    simtime_t beaconInterval;
-    simtime_t maxJitter;
-    simtime_t neighborValidityInterval;
+    simclocktime_t beaconInterval;
+    simclocktime_t maxJitter;
+    simclocktime_t neighborValidityInterval;
     bool displayBubbles;
 
     // context
@@ -139,7 +139,7 @@ class INET_API Gpsr : public RoutingProtocolBase, public cListener, public Netfi
     L3Address getSenderNeighborAddress(const Ptr<const NetworkHeaderBase>& networkHeader) const;
 
     // neighbor
-    simtime_t getNextNeighborExpiration();
+    simclocktime_t getNextNeighborExpiration();
     void purgeNeighbors();
     std::vector<L3Address> getPlanarNeighbors() const;
     std::vector<L3Address> getPlanarNeighborsCounterClockwise(double startAngle) const;

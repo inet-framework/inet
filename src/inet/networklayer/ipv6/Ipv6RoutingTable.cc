@@ -464,7 +464,7 @@ const Ipv6Address& Ipv6RoutingTable::lookupDestCache(const Ipv6Address& dest, in
         return Ipv6Address::UNSPECIFIED_ADDRESS;
     }
     DestCacheEntry& entry = it->second;
-    if (entry.expiryTime > 0 && simTime() > entry.expiryTime) {
+    if (entry.expiryTime > 0 && getClockTime() > entry.expiryTime) {
         destCache.erase(it);
         outInterfaceId = -1;
         return Ipv6Address::UNSPECIFIED_ADDRESS;
@@ -484,7 +484,7 @@ const Ipv6Route *Ipv6RoutingTable::doLongestPrefixMatch(const Ipv6Address& dest)
     auto it = routeList.begin();
     while (it != routeList.end()) {
         if (dest.matches((*it)->getDestPrefix(), (*it)->getPrefixLength())) {
-            if (simTime() > (*it)->getExpiryTime() && (*it)->getExpiryTime() != 0) {    //since 0 represents infinity.
+            if (getClockTime() > (*it)->getExpiryTime() && (*it)->getExpiryTime() != 0) {    //since 0 represents infinity.
                 if ((*it)->getSourceType() == IRoute::ROUTER_ADVERTISEMENT) {
                     EV_INFO << "Expired prefix detected!!" << endl;
                     it = internalDeleteRoute(it);    // TODO update display string
@@ -509,7 +509,7 @@ bool Ipv6RoutingTable::isPrefixPresent(const Ipv6Address& prefix) const
     return false;
 }
 
-void Ipv6RoutingTable::updateDestCache(const Ipv6Address& dest, const Ipv6Address& nextHopAddr, int interfaceId, simtime_t expiryTime)
+void Ipv6RoutingTable::updateDestCache(const Ipv6Address& dest, const Ipv6Address& nextHopAddr, int interfaceId, simclocktime_t expiryTime)
 {
     DestCacheEntry& entry = destCache[dest];
     entry.nextHopAddr = nextHopAddr;
@@ -549,7 +549,7 @@ void Ipv6RoutingTable::purgeDestCacheForInterfaceId(int interfaceId)
 }
 
 void Ipv6RoutingTable::addOrUpdateOnLinkPrefix(const Ipv6Address& destPrefix, int prefixLength,
-        int interfaceId, simtime_t expiryTime)
+        int interfaceId, simclocktime_t expiryTime)
 {
     // see if prefix exists in table
     Ipv6Route *route = nullptr;
@@ -581,7 +581,7 @@ void Ipv6RoutingTable::addOrUpdateOnLinkPrefix(const Ipv6Address& destPrefix, in
 }
 
 void Ipv6RoutingTable::addOrUpdateOwnAdvPrefix(const Ipv6Address& destPrefix, int prefixLength,
-        int interfaceId, simtime_t expiryTime)
+        int interfaceId, simclocktime_t expiryTime)
 {
     // FIXME this is very similar to the one above -- refactor!!
 
@@ -643,7 +643,7 @@ void Ipv6RoutingTable::addStaticRoute(const Ipv6Address& destPrefix, int prefixL
 }
 
 void Ipv6RoutingTable::addDefaultRoute(const Ipv6Address& nextHop, unsigned int ifID,
-        simtime_t routerLifetime)
+        simclocktime_t routerLifetime)
 {
     // create route object
     Ipv6Route *route = createNewRoute(Ipv6Address(), 0, IRoute::ROUTER_ADVERTISEMENT);

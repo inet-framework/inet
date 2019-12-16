@@ -377,7 +377,7 @@ void DhcpServer::sendAck(DhcpLease *lease, const Ptr<const DhcpMessage>& packet)
     pk->insertAtBack(ack);
 
     // register the lease time
-    lease->leaseTime = simTime();
+    lease->leaseTime = getClockTime();
 
     /* RFC 2131, 4.1
      * If the 'giaddr' field in a DHCP message from a client is non-zero,
@@ -457,7 +457,7 @@ void DhcpServer::sendOffer(DhcpLease *lease, const Ptr<const DhcpMessage>& packe
     offer->setChunkLength(B(length));
 
     // register the offering time // todo: ?
-    lease->leaseTime = simTime();
+    lease->leaseTime = getClockTime();
     pk->insertAtBack(offer);
 
     /* RFC 2131, 4.1
@@ -555,7 +555,7 @@ void DhcpServer::handleStartOperation(LifecycleOperation *operation)
     maxNumOfClients = par("maxNumClients");
     leaseTime = par("leaseTime");
 
-    simtime_t start = std::max(startTime, simTime());
+    simclocktime_t start = std::max(startTime, getClockTime());
     ie = chooseInterface();
     Ipv4InterfaceData *ipv4data = ie->findProtocolData<Ipv4InterfaceData>();
     if (ipv4data == nullptr)
@@ -570,14 +570,14 @@ void DhcpServer::handleStartOperation(LifecycleOperation *operation)
         throw cRuntimeError("The numReservedAddresses parameter larger than address range");
     if (!Ipv4Address::maskedAddrAreEqual(ipv4data->getIPAddress(), Ipv4Address(ipAddressStart.getInt() + maxNumOfClients - 1), subnetMask))
         throw cRuntimeError("Not enough IP addresses in subnet for %d clients", maxNumOfClients);
-    scheduleAt(start, startTimer);
+    scheduleClockEvent(start, startTimer);
 }
 
 void DhcpServer::handleStopOperation(LifecycleOperation *operation)
 {
     leased.clear();
     ie = nullptr;
-    cancelEvent(startTimer);
+    cancelClockEvent(startTimer);
     socket.close();
     delayActiveOperationFinish(par("stopOperationTimeout"));
 }
@@ -586,7 +586,7 @@ void DhcpServer::handleCrashOperation(LifecycleOperation *operation)
 {
     leased.clear();
     ie = nullptr;
-    cancelEvent(startTimer);
+    cancelClockEvent(startTimer);
     if (operation->getRootModule() != getContainingNode(this))     // closes socket when the application crashed only
         socket.destroy();         //TODO  in real operating systems, program crash detected by OS and OS closes sockets of crashed programs.
 }

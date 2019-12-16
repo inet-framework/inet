@@ -135,9 +135,9 @@ void Ipv6NeighbourDiscovery::initialize(int stage)
 
         //We want routers to boot up faster!
         if (rt6->isRouter())
-            scheduleAt(simTime() + uniform(0, 0.3), msg); //Random Router bootup time
+            scheduleClockEvent(getClockTime() + uniform(0, 0.3), msg); //Random Router bootup time
         else
-            scheduleAt(simTime() + uniform(0.4, 1), msg); //Random Host bootup time
+            scheduleClockEvent(getClockTime() + uniform(0.4, 1), msg); //Random Host bootup time
     }
 }
 
@@ -344,7 +344,7 @@ const MacAddress& Ipv6NeighbourDiscovery::resolveNeighbour(const Ipv6Address& ne
         initiateNeighbourUnreachabilityDetection(nce);
     }
     else if (nce->reachabilityState == Ipv6NeighbourCache::REACHABLE &&
-             simTime() > nce->reachabilityExpires)
+             getClockTime() > nce->reachabilityExpires)
     {
         nce->reachabilityState = Ipv6NeighbourCache::STALE;
         initiateNeighbourUnreachabilityDetection(nce);
@@ -431,7 +431,7 @@ void Ipv6NeighbourDiscovery::reachabilityConfirmed(const Ipv6Address& neighbour,
 Ipv6Address Ipv6NeighbourDiscovery::determineNextHop(const Ipv6Address& destAddr, int& outIfID)
 {
     Ipv6Address nextHopAddr;
-    simtime_t expiryTime;
+    simclocktime_t expiryTime;
 
     //RFC 2461 Section 5.2
     //Next-hop determination for a given unicast destination operates as follows.
@@ -493,7 +493,7 @@ void Ipv6NeighbourDiscovery::initiateNeighbourUnreachabilityDetection(Neighbour 
     cMessage *msg = new cMessage("NUDTimeout", MK_NUD_TIMEOUT);
     msg->setContextPointer(nce);
     nce->nudTimeoutEvent = msg;
-    scheduleAt(simTime() + ie->getProtocolData<Ipv6InterfaceData>()->_getDelayFirstProbeTime(), msg);
+    scheduleClockEvent(getClockTime() + ie->getProtocolData<Ipv6InterfaceData>()->_getDelayFirstProbeTime(), msg);
 }
 
 void Ipv6NeighbourDiscovery::processNudTimeout(cMessage *timeoutMsg)
@@ -538,7 +538,7 @@ void Ipv6NeighbourDiscovery::processNudTimeout(cMessage *timeoutMsg)
        every RetransTimer milliseconds until reachability confirmation is obtained.
        Probes are retransmitted even if no additional packets are sent to the
        neighbor.*/
-    scheduleAt(simTime() + ie->getProtocolData<Ipv6InterfaceData>()->_getRetransTimer(), timeoutMsg);
+    scheduleClockEvent(getClockTime() + ie->getProtocolData<Ipv6InterfaceData>()->_getRetransTimer(), timeoutMsg);
 }
 
 Ipv6Address Ipv6NeighbourDiscovery::selectDefaultRouter(int& outIfID)
@@ -569,7 +569,7 @@ Ipv6Address Ipv6NeighbourDiscovery::selectDefaultRouter(int& outIfID)
     DefaultRouterList& defaultRouters = neighbourCache.getDefaultRouterList();
     for (auto it = defaultRouters.begin(); it != defaultRouters.end(); ) {
         Neighbour& nce = *it;
-        if (simTime() > nce.routerExpiryTime) {
+        if (getClockTime() > nce.routerExpiryTime) {
             EV_INFO << "Found an expired default router. Deleting entry...\n";
             ++it;
             neighbourCache.remove(nce.nceKey->address, nce.nceKey->interfaceID);
@@ -686,7 +686,7 @@ void Ipv6NeighbourDiscovery::initiateAddressResolution(const Ipv6Address& dgSrcA
     cMessage *msg = new cMessage("arTimeout", MK_AR_TIMEOUT);    //AR msg timer
     nce->arTimer = msg;
     msg->setContextPointer(nce);
-    scheduleAt(simTime() + ie->getProtocolData<Ipv6InterfaceData>()->_getRetransTimer(), msg);
+    scheduleClockEvent(getClockTime() + ie->getProtocolData<Ipv6InterfaceData>()->_getRetransTimer(), msg);
 }
 
 void Ipv6NeighbourDiscovery::processArTimeout(cMessage *arTimeoutMsg)
@@ -704,7 +704,7 @@ void Ipv6NeighbourDiscovery::processArTimeout(cMessage *arTimeoutMsg)
         Ipv6Address nsDestAddr = nsTargetAddr.formSolicitedNodeMulticastAddress();
         createAndSendNsPacket(nsTargetAddr, nsDestAddr, nce->nsSrcAddr, ie);
         nce->numOfARNSSent++;
-        scheduleAt(simTime() + ie->getProtocolData<Ipv6InterfaceData>()->_getRetransTimer(), arTimeoutMsg);
+        scheduleClockEvent(getClockTime() + ie->getProtocolData<Ipv6InterfaceData>()->_getRetransTimer(), arTimeoutMsg);
         return;
     }
 
@@ -834,11 +834,11 @@ void Ipv6NeighbourDiscovery::initiateDad(const Ipv6Address& tentativeAddr, Inter
     msg->setContextPointer(dadEntry);
 
 #ifndef WITH_xMIPv6
-    scheduleAt(simTime() + ie->getProtocolData<Ipv6InterfaceData>()->getRetransTimer(), msg);
+    scheduleClockEvent(getClockTime() + ie->getProtocolData<Ipv6InterfaceData>()->getRetransTimer(), msg);
 #else /* WITH_xMIPv6 */
     // update: added uniform(0, IPv6_MAX_RTR_SOLICITATION_DELAY) to account for joining the solicited-node multicast
     // group which is delay up to one 1 second (RFC 4862, 5.4.2) - 16.01.08, CB
-    scheduleAt(simTime() + ie->getProtocolData<Ipv6InterfaceData>()->getRetransTimer() + uniform(0, IPv6_MAX_RTR_SOLICITATION_DELAY), msg);
+    scheduleClockEvent(getClockTime() + ie->getProtocolData<Ipv6InterfaceData>()->getRetransTimer() + uniform(0, IPv6_MAX_RTR_SOLICITATION_DELAY), msg);
 #endif /* WITH_xMIPv6 */
 
     emit(startDadSignal, 1);
@@ -860,7 +860,7 @@ void Ipv6NeighbourDiscovery::processDadTimeout(cMessage *msg)
         createAndSendNsPacket(dadEntry->address, destAddr, Ipv6Address::UNSPECIFIED_ADDRESS, ie);
         dadEntry->numNSSent++;
         //Reuse the received msg
-        scheduleAt(simTime() + ie->getProtocolData<Ipv6InterfaceData>()->getRetransTimer(), msg);
+        scheduleClockEvent(getClockTime() + ie->getProtocolData<Ipv6InterfaceData>()->getRetransTimer(), msg);
     }
     else {
         bubble("Max number of DAD messages for interface sent. Address is unique.");
@@ -888,8 +888,8 @@ void Ipv6NeighbourDiscovery::makeTentativeAddressPermanent(const Ipv6Address& te
     if (it != dadGlobalList.end()) {
         DadGlobalEntry& entry = it->second;
 
-        ie->getProtocolData<Ipv6InterfaceData>()->assignAddress(entry.addr, false, simTime() + entry.validLifetime,
-                simTime() + entry.preferredLifetime, entry.hFlag);
+        ie->getProtocolData<Ipv6InterfaceData>()->assignAddress(entry.addr, false, getClockTime() + entry.validLifetime,
+                getClockTime() + entry.preferredLifetime, entry.hFlag);
 
         // moved from processRAPrefixInfoForAddrAutoConf()
         // we can remove the old CoA now
@@ -948,8 +948,8 @@ void Ipv6NeighbourDiscovery::makeTentativeAddressPermanent(const Ipv6Address& te
         EV_INFO << "creating router discovery message timer\n";
         cMessage *rtrDisMsg = new cMessage("initiateRTRDIS", MK_INITIATE_RTRDIS);
         rtrDisMsg->setContextPointer(ie);
-        simtime_t interval = uniform(0, ie->getProtocolData<Ipv6InterfaceData>()->_getMaxRtrSolicitationDelay());    // random delay
-        scheduleAt(simTime() + interval, rtrDisMsg);
+        simclocktime_t interval = uniform(0, ie->getProtocolData<Ipv6InterfaceData>()->_getMaxRtrSolicitationDelay());    // random delay
+        scheduleClockEvent(getClockTime() + interval, rtrDisMsg);
     }
 }
 
@@ -1018,8 +1018,8 @@ void Ipv6NeighbourDiscovery::initiateRouterDiscovery(cMessage *msg)
        a random delay since the interface became (re)enabled (e.g., as part
        of Duplicate Address Detection [ADDRCONF]) there is no need to delay
        again before sending the first Router Solicitation message.*/
-    //simtime_t rndInterval = uniform(0, ie->getProtocolData<Ipv6InterfaceData>()->_getMaxRtrSolicitationDelay());
-    scheduleAt(simTime() + ie->getProtocolData<Ipv6InterfaceData>()->_getRtrSolicitationInterval(), rdTimeoutMsg);
+    //simclocktime_t rndInterval = uniform(0, ie->getProtocolData<Ipv6InterfaceData>()->_getMaxRtrSolicitationDelay());
+    scheduleClockEvent(getClockTime() + ie->getProtocolData<Ipv6InterfaceData>()->_getRtrSolicitationInterval(), rdTimeoutMsg);
 }
 
 void Ipv6NeighbourDiscovery::cancelRouterDiscovery(InterfaceEntry *ie)
@@ -1048,9 +1048,9 @@ void Ipv6NeighbourDiscovery::processRdTimeout(cMessage *msg)
 
         //Need to find out if this is the last RS we are sending out.
         if (rdEntry->numRSSent == ie->getProtocolData<Ipv6InterfaceData>()->_getMaxRtrSolicitations())
-            scheduleAt(simTime() + ie->getProtocolData<Ipv6InterfaceData>()->_getMaxRtrSolicitationDelay(), msg);
+            scheduleClockEvent(getClockTime() + ie->getProtocolData<Ipv6InterfaceData>()->_getMaxRtrSolicitationDelay(), msg);
         else
-            scheduleAt(simTime() + ie->getProtocolData<Ipv6InterfaceData>()->_getRtrSolicitationInterval(), msg);
+            scheduleClockEvent(getClockTime() + ie->getProtocolData<Ipv6InterfaceData>()->_getRtrSolicitationInterval(), msg);
     }
     else {
         //RFC 2461, Section 6.3.7
@@ -1120,12 +1120,12 @@ void Ipv6NeighbourDiscovery::processRsPacket(Packet *packet, const Ipv6RouterSol
            delay and send the advertisement at the already-scheduled time.*/
         cMessage *msg = new cMessage("sendSolicitedRA", MK_SEND_SOL_RTRADV);
         msg->setContextPointer(ie);
-        simtime_t interval = uniform(0, ie->getProtocolData<Ipv6InterfaceData>()->_getMaxRaDelayTime());
+        simclocktime_t interval = uniform(0, ie->getProtocolData<Ipv6InterfaceData>()->_getMaxRaDelayTime());
 
         if (interval < advIfEntry->nextScheduledRATime) {
-            simtime_t nextScheduledTime;
-            nextScheduledTime = simTime() + interval;
-            scheduleAt(nextScheduledTime, msg);
+            simclocktime_t nextScheduledTime;
+            nextScheduledTime = getClockTime() + interval;
+            scheduleClockEvent(nextScheduledTime, msg);
             advIfEntry->nextScheduledRATime = nextScheduledTime;
         }
         //else we ignore the generate interval and send it at the next scheduled time.
@@ -1399,13 +1399,13 @@ void Ipv6NeighbourDiscovery::processRaForRouterUpdates(Packet *packet, const Ipv
             //If a Neighbor Cache entry is created for the router its reachability
             //state MUST be set to STALE as specified in Section 7.3.3.
             neighbour = neighbourCache.addRouter(raSrcAddr, ifID,
-                        sourceLinkLayerAddress, simTime() + ra->getRouterLifetime()
+                        sourceLinkLayerAddress, getClockTime() + ra->getRouterLifetime()
 #ifdef WITH_xMIPv6
                         , ra->getHomeAgentFlag()
 #endif /* WITH_xMIPv6 */
                         );
             //According to Greg, we should add a default route for hosts as well!
-            rt6->addDefaultRoute(raSrcAddr, ifID, simTime() + ra->getRouterLifetime());
+            rt6->addDefaultRoute(raSrcAddr, ifID, getClockTime() + ra->getRouterLifetime());
         }
         else {
             EV_INFO << "Router Lifetime is 0, adding NON-default router.\n";
@@ -1432,7 +1432,7 @@ void Ipv6NeighbourDiscovery::processRaForRouterUpdates(Packet *packet, const Ipv
         /*- If the address is already present in the host's Default Router List
            as a result of a previously-received advertisement, reset its invalidation
            timer to the Router Lifetime value in the newly-received advertisement.*/
-        neighbour->routerExpiryTime = simTime() + ra->getRouterLifetime();
+        neighbour->routerExpiryTime = getClockTime() + ra->getRouterLifetime();
 
         /*- If the address is already present in the host's Default Router List
            and the received Router Lifetime value is zero, immediately time-out the
@@ -1517,7 +1517,7 @@ void Ipv6NeighbourDiscovery::processRaPrefixInfo(const Ipv6RouterAdvertisement *
         EV_INFO << "Fetching Prefix Information: option " << i + 1 << " of "
                 << ra->getOptions().getOptionArraySize() << endl;
         uint prefixLength = prefixInfo.getPrefixLength();
-        simtime_t validLifetime = prefixInfo.getValidLifetime();
+        simclocktime_t validLifetime = prefixInfo.getValidLifetime();
         //uint preferredLifetime = prefixInfo.getPreferredLifetime();
         Ipv6Address prefix = prefixInfo.getPrefix();
 
@@ -1535,7 +1535,7 @@ void Ipv6NeighbourDiscovery::processRaPrefixInfo(const Ipv6RouterAdvertisement *
                 /*create a new entry for the prefix and initialize its invalidation
                    timer to the Valid Lifetime value in the Prefix Information option.*/
                 rt6->addOrUpdateOnLinkPrefix(prefix, prefixLength, ie->getInterfaceId(),
-                        simTime() + validLifetime);
+                        getClockTime() + validLifetime);
             }
             /*- If the Prefix Information option's Valid Lifetime field is zero,
                and the prefix is not present in the host's Prefix List,
@@ -1555,7 +1555,7 @@ void Ipv6NeighbourDiscovery::processRaPrefixInfo(const Ipv6RouterAdvertisement *
                invalidation timer to the Valid Lifetime value in the Prefix
                Information option.*/
             rt6->addOrUpdateOnLinkPrefix(prefix, prefixLength, ie->getInterfaceId(),
-                    simTime() + validLifetime);
+                    getClockTime() + validLifetime);
         }
 
         /*Stateless address autoconfiguration [ADDRCONF] may in some
@@ -1575,8 +1575,8 @@ void Ipv6NeighbourDiscovery::processRaPrefixInfoForAddrAutoConf(const Ipv6NdPref
     EV_INFO << "Processing Prefix Info for address auto-configuration.\n";
     Ipv6Address prefix = prefixInfo.getPrefix();
     uint prefixLength = prefixInfo.getPrefixLength();
-    simtime_t preferredLifetime = prefixInfo.getPreferredLifetime();
-    simtime_t validLifetime = prefixInfo.getValidLifetime();
+    simclocktime_t preferredLifetime = prefixInfo.getPreferredLifetime();
+    simclocktime_t validLifetime = prefixInfo.getValidLifetime();
 
     //RFC 2461: Section 5.5.3
     //First condition tested, the autonomous flag is already set
@@ -1613,8 +1613,8 @@ void Ipv6NeighbourDiscovery::processRaPrefixInfoForAddrAutoConf(const Ipv6NdPref
         //TODO: for now we leave the newly formed address as not tentative,
         //according to Greg, we have to always perform DAD for a newly formed address.
         EV_INFO << "Assigning new address to: " << ie->getInterfaceName() << endl;
-        ie->getProtocolData<Ipv6InterfaceData>()->assignAddress(newAddr, false, simTime() + validLifetime,
-                simTime() + preferredLifetime);
+        ie->getProtocolData<Ipv6InterfaceData>()->assignAddress(newAddr, false, getClockTime() + validLifetime,
+                getClockTime() + preferredLifetime);
     }
 
     //TODO: this is the simplified version.
@@ -1664,8 +1664,8 @@ void Ipv6NeighbourDiscovery::createRaTimer(InterfaceEntry *ie)
 
     if (canServeWirelessNodes(ie)) {
         EV_INFO << "This Interface is connected to a WLAN AP, hence using MIPv6 Default Values" << endl;
-        simtime_t minRAInterval = par("minIntervalBetweenRAs");    //reading from the omnetpp.ini (ZY 23.07.09)
-        simtime_t maxRAInterval = par("maxIntervalBetweenRAs");    //reading from the omnetpp.ini (ZY 23.07.09
+        simclocktime_t minRAInterval = par("minIntervalBetweenRAs");    //reading from the omnetpp.ini (ZY 23.07.09)
+        simclocktime_t maxRAInterval = par("maxIntervalBetweenRAs");    //reading from the omnetpp.ini (ZY 23.07.09
         ie->getProtocolData<Ipv6InterfaceData>()->setMinRtrAdvInterval(minRAInterval);
         ie->getProtocolData<Ipv6InterfaceData>()->setMaxRtrAdvInterval(maxRAInterval);
     }
@@ -1677,16 +1677,16 @@ void Ipv6NeighbourDiscovery::createRaTimer(InterfaceEntry *ie)
     // end CB
 #endif /* WITH_xMIPv6 */
 
-    simtime_t interval = uniform(ie->getProtocolData<Ipv6InterfaceData>()->getMinRtrAdvInterval(), ie->getProtocolData<Ipv6InterfaceData>()->getMaxRtrAdvInterval());
+    simclocktime_t interval = uniform(ie->getProtocolData<Ipv6InterfaceData>()->getMinRtrAdvInterval(), ie->getProtocolData<Ipv6InterfaceData>()->getMaxRtrAdvInterval());
     advIfEntry->raTimeoutMsg = msg;
 
-    simtime_t nextScheduledTime = simTime() + interval;
+    simclocktime_t nextScheduledTime = getClockTime() + interval;
     advIfEntry->nextScheduledRATime = nextScheduledTime;
     advIfList.insert(advIfEntry);
     EV_DETAIL << "Interval: " << interval << endl;
     EV_DETAIL << "Next scheduled time: " << nextScheduledTime << endl;
     //now we schedule the msg for whatever time that was derived
-    scheduleAt(nextScheduledTime, msg);
+    scheduleClockEvent(nextScheduledTime, msg);
 }
 
 void Ipv6NeighbourDiscovery::resetRaTimer(InterfaceEntry *ie)
@@ -1701,10 +1701,10 @@ void Ipv6NeighbourDiscovery::resetRaTimer(InterfaceEntry *ie)
         if (msgIE->outputPort() == ie->outputPort())
         {
             EV << "Resetting RA timer for port: " << ie->outputPort();
-            cancelEvent(msg);//Cancel the next scheduled msg.
-            simtime_t interval
+            cancelClockEvent(msg);//Cancel the next scheduled msg.
+            simclocktime_t interval
                 = uniform(ie->getProtocolData<Ipv6InterfaceData>()->getMinRtrAdvInterval(),ie->getProtocolData<Ipv6InterfaceData>()->getMaxRtrAdvInterval());
-            scheduleAt(simTime()+interval, msg);
+            scheduleClockEvent(getClockTime()+interval, msg);
         }
     }
  */
@@ -1717,7 +1717,7 @@ void Ipv6NeighbourDiscovery::sendPeriodicRa(cMessage *msg)
     Ipv6Address destAddr = Ipv6Address("FF02::1");
     createAndSendRaPacket(destAddr, ie);
     advIfEntry->numRASent++;
-    simtime_t nextScheduledTime;
+    simclocktime_t nextScheduledTime;
 
     //RFC 2461, Section 6.2.4
     /*Whenever a multicast advertisement is sent from an interface, the timer is
@@ -1725,7 +1725,7 @@ void Ipv6NeighbourDiscovery::sendPeriodicRa(cMessage *msg)
        configured MinRtrAdvInterval and MaxRtrAdvInterval; expiration of the timer
        causes the next advertisement to be sent and a new random value to be chosen.*/
 
-    simtime_t interval;
+    simclocktime_t interval;
 
 #ifdef WITH_xMIPv6
     EV_DEBUG << "\n+=+=+= MIPv6 Feature: " << rt6->hasMipv6Support() << " +=+=+=\n";
@@ -1737,7 +1737,7 @@ void Ipv6NeighbourDiscovery::sendPeriodicRa(cMessage *msg)
     EV_DETAIL << "\n +=+=+= The random calculated interval is: " << interval << " +=+=+=\n";
 #endif /* WITH_xMIPv6 */
 
-    nextScheduledTime = simTime() + interval;
+    nextScheduledTime = getClockTime() + interval;
 
     /*For the first few advertisements (up to MAX_INITIAL_RTR_ADVERTISEMENTS)
        sent from an interface when it becomes an advertising interface,*/
@@ -1748,7 +1748,7 @@ void Ipv6NeighbourDiscovery::sendPeriodicRa(cMessage *msg)
         if (interval > ie->getProtocolData<Ipv6InterfaceData>()->_getMaxInitialRtrAdvertInterval()) {
             //if the randomly chosen interval is greater than MAX_INITIAL_RTR_ADVERT_INTERVAL,
             //the timer SHOULD be set to MAX_INITIAL_RTR_ADVERT_INTERVAL instead.
-            nextScheduledTime = simTime() + ie->getProtocolData<Ipv6InterfaceData>()->_getMaxInitialRtrAdvertInterval();
+            nextScheduledTime = getClockTime() + ie->getProtocolData<Ipv6InterfaceData>()->_getMaxInitialRtrAdvertInterval();
             EV_INFO << "Sending initial RA but interval is too long. Using default value." << endl;
         }
         else
@@ -1757,8 +1757,8 @@ void Ipv6NeighbourDiscovery::sendPeriodicRa(cMessage *msg)
 
     EV_DETAIL << "Next scheduled time: " << nextScheduledTime << endl;
     advIfEntry->nextScheduledRATime = nextScheduledTime;
-    ASSERT(nextScheduledTime > simTime());
-    scheduleAt(nextScheduledTime, msg);
+    ASSERT(nextScheduledTime > getClockTime());
+    scheduleClockEvent(nextScheduledTime, msg);
 }
 
 void Ipv6NeighbourDiscovery::sendSolicitedRa(cMessage *msg)
@@ -2295,7 +2295,7 @@ void Ipv6NeighbourDiscovery::processNaForIncompleteNceState(const Ipv6NeighbourA
         if (naSolicitedFlag == true) {
             nce->reachabilityState = Ipv6NeighbourCache::REACHABLE;
             EV_INFO << "Reachability confirmed through successful Addr Resolution.\n";
-            nce->reachabilityExpires = simTime() + ie->getProtocolData<Ipv6InterfaceData>()->_getReachableTime();
+            nce->reachabilityExpires = getClockTime() + ie->getProtocolData<Ipv6InterfaceData>()->_getReachableTime();
         }
         else
             nce->reachabilityState = Ipv6NeighbourCache::STALE;
@@ -2378,7 +2378,7 @@ void Ipv6NeighbourDiscovery::processNaForOtherNceStates(const Ipv6NeighbourAdver
             if (msg != nullptr) {
                 EV_INFO << "NUD in progress. Cancelling NUD Timer\n";
                 bubble("Reachability Confirmed via NUD.");
-                nce->reachabilityExpires = simTime() + ie->getProtocolData<Ipv6InterfaceData>()->_getReachableTime();
+                nce->reachabilityExpires = getClockTime() + ie->getProtocolData<Ipv6InterfaceData>()->_getReachableTime();
                 cancelAndDelete(msg);
                 nce->nudTimeoutEvent = nullptr;
             }
@@ -2454,8 +2454,8 @@ void Ipv6NeighbourDiscovery::processRaPrefixInfoForAddrAutoConf(const Ipv6NdPref
     EV_INFO << "Processing Prefix Info for address auto-configuration.\n";
     Ipv6Address prefix = prefixInfo.getPrefix();
     uint prefixLength = prefixInfo.getPrefixLength();
-    simtime_t preferredLifetime = prefixInfo.getPreferredLifetime();
-    simtime_t validLifetime = prefixInfo.getValidLifetime();
+    simclocktime_t preferredLifetime = prefixInfo.getPreferredLifetime();
+    simclocktime_t validLifetime = prefixInfo.getValidLifetime();
 
     //EV << "/// prefix: " << prefix << std::endl; // CB
 
@@ -2556,7 +2556,7 @@ void Ipv6NeighbourDiscovery::processRaPrefixInfoForAddrAutoConf(const Ipv6NdPref
                 bool isLinkLocalTentative = ie->getProtocolData<Ipv6InterfaceData>()->isTentativeAddress(linkLocalAddress);
                 // if the link local address is tentative, then we make the global unicast address tentative as well
                 ie->getProtocolData<Ipv6InterfaceData>()->assignAddress(newAddr, isLinkLocalTentative,
-                        simTime() + validLifetime, simTime() + preferredLifetime, hFlag);
+                        getClockTime() + validLifetime, getClockTime() + preferredLifetime, hFlag);
             }
             else {
                 // set tentative flag for all addresses on this interface

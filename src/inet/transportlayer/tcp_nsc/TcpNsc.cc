@@ -655,8 +655,8 @@ void TcpNsc::handleMessage(cMessage *msgP)
            NSC timer processing
            ...
            Timers are ordinary cMessage objects that are started by
-           scheduleAt(simTime()+timeout, msg), and can be cancelled
-           via cancelEvent(msg); when they expire (fire) they are delivered
+           scheduleClockEvent(getClockTime()+timeout, msg), and can be cancelled
+           via cancelClockEvent(msg); when they expire (fire) they are delivered
            to the module via handleMessage(), i.e. they end up here.
          */
         if (msgP == pNsiTimerM) {    // nsc_nsi_timer
@@ -666,7 +666,7 @@ void TcpNsc::handleMessage(cMessage *msgP)
 
             pStackM->timer_interrupt();
 
-            scheduleAt(msgP->getArrivalTime() + 1.0 / (double)pStackM->get_hz(), msgP);
+            scheduleClockEvent(msgP->getArrivalTime() + 1.0 / (double)pStackM->get_hz(), msgP);
         }
     }
     else if (msgP->arrivedOn("ipIn")) {
@@ -762,7 +762,7 @@ void TcpNsc::loadStack(const char *stacknameP, int bufferSizeP)
 
     // set timer for 1.0 / pStackM->get_hz()
     pNsiTimerM = new cMessage("nsc_nsi_timer");
-    scheduleAt(1.0 / (double)pStackM->get_hz(), pNsiTimerM);
+    scheduleClockEvent(1.0 / (double)pStackM->get_hz(), pNsiTimerM);
 }
 
 /** Called from the stack when a packet needs to be output to the wire. */
@@ -812,11 +812,11 @@ void TcpNsc::wakeup()
 void TcpNsc::gettime(unsigned int *secP, unsigned int *usecP)
 {
 #ifdef USE_DOUBLE_SIMTIME
-    double t = simTime().dbl();
+    double t = getClockTime().dbl();
     *sec = (unsigned int)(t);
     *usec = (unsigned int)((t - *sec) * 1000000 + 0.5);
 #else // ifdef USE_DOUBLE_SIMTIME
-    simtime_t t = simTime();
+    simclocktime_t t = getClockTime();
     int64 raw = t.raw();
     int64 scale = t.getScale();
     int64 secs = raw / scale;

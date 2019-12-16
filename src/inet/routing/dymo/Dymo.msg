@@ -51,7 +51,7 @@ class AddressBlock extends cObject
     L3Address address;
     int prefixLength;
     bool hasValidityTime;
-    simtime_t validityTime;
+    simclocktime_t validityTime;
     bool hasMetric;
     double metric;
     bool hasMetricType;

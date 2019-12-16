@@ -75,10 +75,10 @@ class INET_API Flooding : public NetworkProtocolBase, public INetworkProtocol
       public:
         unsigned long seqNum;
         L3Address srcAddr;
-        simtime_t delTime;
+        simclocktime_t delTime;
 
       public:
-        Bcast(unsigned long n = 0, const L3Address& s = L3Address(), simtime_t_cref d = SIMTIME_ZERO) :
+        Bcast(unsigned long n = 0, const L3Address& s = L3Address(), simclocktime_t_cref d = SIMTIME_ZERO) :
             seqNum(n), srcAddr(s), delTime(d)
         {
         }
@@ -99,7 +99,7 @@ class INET_API Flooding : public NetworkProtocolBase, public INetworkProtocol
      * @brief Time after which an entry for an already broadcasted msg
      * can be deleted
      **/
-    simtime_t bcDelTime;
+    simclocktime_t bcDelTime;
 
     long nbDataPacketsReceived = 0;
     long nbDataPacketsSent = 0;

@@ -40,9 +40,9 @@ class INET_API DhcpLease
     Ipv4Address ntp;
     Ipv4Address serverId;
     std::string hostName;
-    simtime_t leaseTime;
-    simtime_t renewalTime;
-    simtime_t rebindTime;
+    simclocktime_t leaseTime;
+    simclocktime_t renewalTime;
+    simclocktime_t rebindTime;
     bool leased = false;
 };
 

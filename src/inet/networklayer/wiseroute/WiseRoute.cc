@@ -92,7 +92,7 @@ void WiseRoute::initialize(int stage)
 
         // only schedule a flood of the node is a sink!!
         if (routeFloodsInterval > 0 && myNetwAddr == sinkAddress)
-            scheduleAt(simTime() + uniform(0.5, 1.5), routeFloodTimer);
+            scheduleClockEvent(getClockTime() + uniform(0.5, 1.5), routeFloodTimer);
     }
 }
 
@@ -123,7 +123,7 @@ void WiseRoute::handleSelfMessage(cMessage *msg)
         sendDown(packet);
         nbFloodsSent++;
         nbRouteFloodsSent++;
-        scheduleAt(simTime() + routeFloodsInterval + uniform(0, 1), routeFloodTimer);
+        scheduleClockEvent(getClockTime() + routeFloodsInterval + uniform(0, 1), routeFloodTimer);
     }
     else {
         EV << "WiseRoute - handleSelfMessage: got unexpected message of kind " << msg->getKind() << endl;

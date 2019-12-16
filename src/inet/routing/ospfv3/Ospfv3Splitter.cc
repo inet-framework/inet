@@ -202,7 +202,7 @@ void Ospfv3Splitter::addNewProcess(cXMLElement* process, cXMLElement* interfaces
     this->gate("processOut", gateIndex)->connectTo(newProcessModule->gate("splitterIn"));
     newProcessModule->gate("splitterOut")->connectTo(this->gate("processIn", gateIndex));
 
-    newProcessModule->scheduleStart(simTime());
+    newProcessModule->scheduleStart(getClockTime());
     this->processesModules.push_back(newProcessModule);
 }//addNewProcess
 

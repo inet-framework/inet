@@ -140,7 +140,7 @@ void Rip::handleMessageWhenUp(cMessage *msg)
     if (msg->isSelfMessage()) {
         if (msg == updateTimer) {
             processUpdate(false);
-            scheduleAt(simTime() + updateInterval, msg);
+            scheduleClockEvent(getClockTime() + updateInterval, msg);
         }
         else if (msg == triggeredUpdateTimer) {
             processUpdate(true);
@@ -232,13 +232,13 @@ void Rip::startRIPRouting()
             sendRIPRequest(elem);
 
     // set update timer
-    scheduleAt(simTime() + updateInterval, updateTimer);
+    scheduleClockEvent(getClockTime() + updateInterval, updateTimer);
 }
 
 void Rip::stopRIPRouting()
 {
     if (startupTimer->isScheduled())
-        cancelEvent(startupTimer);
+        cancelClockEvent(startupTimer);
     else {
         socket.close();
 
@@ -252,8 +252,8 @@ void Rip::stopRIPRouting()
     }
 
     // cancel timers
-    cancelEvent(updateTimer);
-    cancelEvent(triggeredUpdateTimer);
+    cancelClockEvent(updateTimer);
+    cancelClockEvent(triggeredUpdateTimer);
 
     // clear data
     for (auto& elem : ripRoutingTable)
@@ -414,8 +414,8 @@ void Rip::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, 
 
 void Rip::handleStartOperation(LifecycleOperation *operation)
 {
-    cancelEvent(startupTimer);
-    scheduleAt(simTime() + par("startupTime"), startupTimer);
+    cancelClockEvent(startupTimer);
+    scheduleClockEvent(getClockTime() + par("startupTime"), startupTimer);
 }
 
 void Rip::handleStopOperation(LifecycleOperation *operation)
@@ -430,7 +430,7 @@ void Rip::handleStopOperation(LifecycleOperation *operation)
     stopRIPRouting();
 
     // wait a few seconds before calling doneCallback, so that UDP can send the messages
-    scheduleAt(simTime() + shutdownTime, shutdownTimer);
+    scheduleClockEvent(getClockTime() + shutdownTime, shutdownTimer);
     delayActiveOperationFinish(par("stopOperationTimeout"));
 }
 
@@ -693,13 +693,13 @@ void Rip::processResponse(Packet *packet)
                 continue;
 
             if (fromAddr == srcAddr)
-                ripRoute->setLastUpdateTime(simTime());
+                ripRoute->setLastUpdateTime(getClockTime());
 
             if (metric < routeMetric || (fromAddr == srcAddr && routeMetric != metric)) {
                 bool preventRouteUpdate = false;
                 // we receive a route update that shows the unreachable route is now reachable
                 if(routeMetric == RIP_INFINITE_METRIC && metric < RIP_INFINITE_METRIC) {
-                    if(holdDownTime > 0 && simTime() < ripRoute->getLastInvalidationTime() + holdDownTime) {
+                    if(holdDownTime > 0 && getClockTime() < ripRoute->getLastInvalidationTime() + holdDownTime) {
                         EV_DEBUG << "hold-down timer prevents update to route " << ripRoute->getDestination() << std::endl;
                         preventRouteUpdate = true;
                     }
@@ -820,7 +820,7 @@ void Rip::addRoute(const L3Address& dest, int prefixLength, const InterfaceEntry
 
     RipRoute *ripRoute = new RipRoute(route, RipRoute::RIP_ROUTE_RTE, metric, routeTag);
     ripRoute->setFrom(from);
-    ripRoute->setLastUpdateTime(simTime());
+    ripRoute->setLastUpdateTime(getClockTime());
     ripRoute->setChanged(true);
     ripRoutingTable.push_back(ripRoute);
 
@@ -886,7 +886,7 @@ void Rip::updateRoute(RipRoute *ripRoute, const InterfaceEntry *ie, const L3Addr
     if (oldMetric != RIP_INFINITE_METRIC && metric == RIP_INFINITE_METRIC)
         invalidateRoute(ripRoute);
     else
-        ripRoute->setLastUpdateTime(simTime());
+        ripRoute->setLastUpdateTime(getClockTime());
 }
 
 /**
@@ -897,13 +897,13 @@ void Rip::triggerUpdate()
 {
     if (triggeredUpdate && !triggeredUpdateTimer->isScheduled()) {
         double delay = par("triggeredUpdateDelay");
-        simtime_t updateTime = simTime() + delay;
+        simclocktime_t updateTime = getClockTime() + delay;
         // Triggered updates may be suppressed if a regular
         // update is due by the time the triggered update would be sent.
         if (!updateTimer->isScheduled() || updateTimer->getArrivalTime() > updateTime)
         {
             EV_DETAIL << "scheduling triggered update \n";
-            scheduleAt(updateTime, triggeredUpdateTimer);
+            scheduleClockEvent(updateTime, triggeredUpdateTimer);
         }
     }
 }
@@ -918,7 +918,7 @@ void Rip::checkExpiredRoutes()
     for (RouteVector::iterator iter = ripRoutingTable.begin(); iter != ripRoutingTable.end();) {
         RipRoute *ripRoute = (*iter);
         if (ripRoute->getType() == RipRoute::RIP_ROUTE_RTE) {
-            simtime_t now = simTime();
+            simclocktime_t now = getClockTime();
             if (now >= ripRoute->getLastUpdateTime() + routeExpiryTime + routePurgeTime)
             {
                 iter = purgeRoute(ripRoute);
@@ -954,7 +954,7 @@ void Rip::invalidateRoute(RipRoute *ripRoute)
     }
     ripRoute->setMetric(RIP_INFINITE_METRIC);
     ripRoute->setChanged(true);
-    ripRoute->setLastInvalidationTime(simTime());
+    ripRoute->setLastInvalidationTime(getClockTime());
     triggerUpdate();
 }
 

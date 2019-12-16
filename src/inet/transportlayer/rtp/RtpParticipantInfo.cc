@@ -66,24 +66,24 @@ RtpParticipantInfo *RtpParticipantInfo::dup() const
     return new RtpParticipantInfo(*this);
 }
 
-void RtpParticipantInfo::processRTPPacket(Packet *packet, int id, simtime_t arrivalTime)
+void RtpParticipantInfo::processRTPPacket(Packet *packet, int id, simclocktime_t arrivalTime)
 {
     packet->peekAtFront<RtpHeader>();
     _silentIntervals = 0;
     delete packet;
 }
 
-void RtpParticipantInfo::processSenderReport(const SenderReport& report, simtime_t arrivalTime)
+void RtpParticipantInfo::processSenderReport(const SenderReport& report, simclocktime_t arrivalTime)
 {
     // useful code can be found in subclasses
 }
 
-void RtpParticipantInfo::processReceptionReport(const ReceptionReport& report, simtime_t arrivalTime)
+void RtpParticipantInfo::processReceptionReport(const ReceptionReport& report, simclocktime_t arrivalTime)
 {
     // useful code can be found in subclasses
 }
 
-void RtpParticipantInfo::processSDESChunk(const SdesChunk *sdesChunk, simtime_t arrivalTime)
+void RtpParticipantInfo::processSDESChunk(const SdesChunk *sdesChunk, simclocktime_t arrivalTime)
 {
     for (int i = 0; i < sdesChunk->size(); i++) {
         if (sdesChunk->exist(i)) {
@@ -108,22 +108,22 @@ bool RtpParticipantInfo::isSender() const
     return _silentIntervals <= 1;
 }
 
-ReceptionReport *RtpParticipantInfo::receptionReport(simtime_t now)
+ReceptionReport *RtpParticipantInfo::receptionReport(simclocktime_t now)
 {
     return nullptr;
 }
 
-SenderReport *RtpParticipantInfo::senderReport(simtime_t now)
+SenderReport *RtpParticipantInfo::senderReport(simclocktime_t now)
 {
     return nullptr;
 }
 
-void RtpParticipantInfo::nextInterval(simtime_t now)
+void RtpParticipantInfo::nextInterval(simclocktime_t now)
 {
     _silentIntervals++;
 }
 
-bool RtpParticipantInfo::toBeDeleted(simtime_t now)
+bool RtpParticipantInfo::toBeDeleted(simclocktime_t now)
 {
     return false;
 }

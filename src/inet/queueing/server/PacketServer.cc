@@ -46,10 +46,10 @@ void PacketServer::handleMessage(cMessage *message)
 
 void PacketServer::scheduleProcessingTimer()
 {
-    simtime_t processingTime = par("processingTime");
+    simclocktime_t processingTime = par("processingTime");
     auto processingBitrate = bps(par("processingBitrate"));
     processingTime += s(packet->getTotalLength() / processingBitrate).get();
-    scheduleAt(simTime() + processingTime, processingTimer);
+    scheduleClockEvent(getClockTime() + processingTime, processingTimer);
 }
 
 bool PacketServer::canStartProcessingPacket()
@@ -62,7 +62,7 @@ void PacketServer::startProcessingPacket()
 {
     packet = provider->popPacket(inputGate->getPathStartGate());
     take(packet);
-    packet->setArrival(getId(), inputGate->getId(), simTime());
+    packet->setArrival(getId(), inputGate->getId(), getClockTime());
     EV_INFO << "Processing packet " << packet->getName() << " started." << endl;
 }
 

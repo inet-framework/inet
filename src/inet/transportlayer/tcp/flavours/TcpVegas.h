@@ -38,17 +38,17 @@ class INET_API TcpVegasStateVariables : public TcpBaseAlgStateVariables
     virtual std::string detailedInfo() const override;
 
     uint32 v_recoverypoint;
-    simtime_t v_cwnd_changed;    // last time cwnd changes because of a rtx.
+    simclocktime_t v_cwnd_changed;    // last time cwnd changes because of a rtx.
 
-    simtime_t v_baseRTT;
-    simtime_t v_sumRTT;    // sum of rtt's measured within one RTT
+    simclocktime_t v_baseRTT;
+    simclocktime_t v_sumRTT;    // sum of rtt's measured within one RTT
     int v_cntRTT;    // # of rtt's measured within one RTT
     uint32 v_begseq;    // register next pkt to be sent,for rtt calculation in receivedDataAck
-    simtime_t v_begtime;    // register time for rtt calculation
+    simclocktime_t v_begtime;    // register time for rtt calculation
 
-    simtime_t v_rtt_timeout;    // vegas fine-grained timeout
-    simtime_t v_sa;    // average for vegas fine-grained timeout
-    simtime_t v_sd;    // deviation for vegas fine-grained timeout
+    simclocktime_t v_rtt_timeout;    // vegas fine-grained timeout
+    simclocktime_t v_sa;    // average for vegas fine-grained timeout
+    simclocktime_t v_sd;    // deviation for vegas fine-grained timeout
 
     TcpSegmentTransmitInfoList regions;
 

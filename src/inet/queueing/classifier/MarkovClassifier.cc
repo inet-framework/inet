@@ -94,7 +94,7 @@ int MarkovClassifier::classifyPacket(Packet *packet)
 
 void MarkovClassifier::scheduleWaitTimer()
 {
-    scheduleAt(simTime() + waitIntervals[state].doubleValue(this), waitTimer);
+    scheduleClockEvent(getClockTime() + waitIntervals[state].doubleValue(this), waitTimer);
 }
 
 bool MarkovClassifier::canPopSomePacket(cGate *gate) const

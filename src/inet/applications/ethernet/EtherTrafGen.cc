@@ -90,7 +90,7 @@ void EtherTrafGen::handleMessageWhenUp(cMessage *msg)
                 return;
         }
         sendBurstPackets();
-        scheduleNextPacket(simTime());
+        scheduleNextPacket(getClockTime());
     }
     else
         receivePacket(check_and_cast<Packet *>(msg));
@@ -121,11 +121,11 @@ bool EtherTrafGen::isGenerator()
     return par("destAddress").stringValue()[0];
 }
 
-void EtherTrafGen::scheduleNextPacket(simtime_t previous)
+void EtherTrafGen::scheduleNextPacket(simclocktime_t previous)
 {
-    simtime_t next;
+    simclocktime_t next;
     if (previous == -1) {
-        next = simTime() <= startTime ? startTime : simTime();
+        next = getClockTime() <= startTime ? startTime : getClockTime();
         timerMsg->setKind(START);
     }
     else {
@@ -133,12 +133,12 @@ void EtherTrafGen::scheduleNextPacket(simtime_t previous)
         timerMsg->setKind(NEXT);
     }
     if (stopTime < SIMTIME_ZERO || next < stopTime)
-        scheduleAt(next, timerMsg);
+        scheduleClockEvent(next, timerMsg);
 }
 
 void EtherTrafGen::cancelNextPacket()
 {
-    cancelEvent(timerMsg);
+    cancelClockEvent(timerMsg);
 }
 
 MacAddress EtherTrafGen::resolveDestMacAddress()
@@ -164,7 +164,7 @@ void EtherTrafGen::sendBurstPackets()
         Packet *datapacket = new Packet(msgname, IEEE802CTRL_DATA);
         long len = *packetLength;
         const auto& payload = makeShared<ByteCountChunk>(B(len));
-        payload->addTag<CreationTimeTag>()->setCreationTime(simTime());
+        payload->addTag<CreationTimeTag>()->setCreationTime(getClockTime());
         datapacket->insertAtBack(payload);
         datapacket->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ieee8022);
         datapacket->addTag<MacAddressReq>()->setDestAddress(destMacAddress);

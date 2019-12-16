@@ -36,7 +36,7 @@ class INET_API AodvRouteData : public cObject
     bool beingRepaired;
     bool validDestNum;
     unsigned int destSeqNum;
-    simtime_t lifeTime;    // expiration or deletion time of the route
+    simclocktime_t lifeTime;    // expiration or deletion time of the route
 
   public:
 
@@ -60,8 +60,8 @@ class INET_API AodvRouteData : public cObject
     void setIsBeingRepaired(bool isBeingRepaired) { this->beingRepaired = isBeingRepaired; }
     bool isRepariable() const { return repariable; }
     void setIsRepariable(bool isRepariable) { this->repariable = isRepariable; }
-    const simtime_t& getLifeTime() const { return lifeTime; }
-    void setLifeTime(const simtime_t& lifeTime) { this->lifeTime = lifeTime; }
+    const simclocktime_t& getLifeTime() const { return lifeTime; }
+    void setLifeTime(const simclocktime_t& lifeTime) { this->lifeTime = lifeTime; }
     bool isActive() const { return active; }
     void setIsActive(bool active) { this->active = active; }
     void addPrecursor(const L3Address& precursorAddr) { precursorList.insert(precursorAddr); }

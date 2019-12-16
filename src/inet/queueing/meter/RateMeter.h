@@ -28,7 +28,7 @@ class INET_API RateMeter : public PacketMeterBase
 {
   protected:
     double alpha = NaN;
-    simtime_t lastUpdate = 0;
+    simclocktime_t lastUpdate = 0;
     int currentNumPackets = 0;
     b currentTotalPacketLength = b(0);
     bps datarate = bps(0);

@@ -104,7 +104,7 @@ class BgpOpenMessage extends BgpHeader
 
     uint8_t version = 4;    // BGP Version, 1 octet
     uint16_t myAS;    // My Autonomous system, 2 octets
-    simtime_t holdTime;    // Hold Time in seconds, 2 octets
+    simclocktime_t holdTime;    // Hold Time in seconds, 2 octets
     Ipv4Address BGPIdentifier;    // 4 octets
     unsigned short optionalParametersLength;    // 1 octet, total length (in bytes) of optionalParameters[] (if = 0, no optional parameters)
     BgpOptionalParameterBase *optionalParameter[] @owned;

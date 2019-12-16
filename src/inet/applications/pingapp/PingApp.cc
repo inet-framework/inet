@@ -216,7 +216,7 @@ void PingApp::handleSelfMessage(cMessage *msg)
     }
 
     // then schedule next one if needed
-    scheduleNextPingRequest(simTime(), msg->getKind() == PING_CHANGE_ADDR);
+    scheduleNextPingRequest(getClockTime(), msg->getKind() == PING_CHANGE_ADDR);
 }
 
 void PingApp::handleMessageWhenUp(cMessage *msg)
@@ -308,7 +308,7 @@ void PingApp::startSendingPingRequests()
 {
     ASSERT(!timer->isScheduled());
     pid = getSimulation()->getUniqueNumber();
-    lastStart = simTime();
+    lastStart = getClockTime();
     timer->setKind(PING_FIRST_ADDR);
     sentCount = 0;
     sendSeqNo = 0;
@@ -353,23 +353,23 @@ void PingApp::handleCrashOperation(LifecycleOperation *operation)
     }
 }
 
-void PingApp::scheduleNextPingRequest(simtime_t previous, bool withSleep)
+void PingApp::scheduleNextPingRequest(simclocktime_t previous, bool withSleep)
 {
-    simtime_t next;
+    simclocktime_t next;
     if (previous < SIMTIME_ZERO)
-        next = simTime() <= startTime ? startTime : simTime();
+        next = getClockTime() <= startTime ? startTime : getClockTime();
     else {
         next = previous + *sendIntervalPar;
         if (withSleep)
             next += *sleepDurationPar;
     }
     if (stopTime < SIMTIME_ZERO || next < stopTime)
-        scheduleAt(next, timer);
+        scheduleClockEvent(next, timer);
 }
 
 void PingApp::cancelNextPingRequest()
 {
-    cancelEvent(timer);
+    cancelClockEvent(timer);
 }
 
 bool PingApp::isEnabled()
@@ -446,7 +446,7 @@ void PingApp::sendPingRequest()
     currentSocket->send(outPacket);
 
     // store the sending time in a circular buffer so we can compute RTT when the packet returns
-    sendTimeHistory[sendSeqNo % PING_HISTORY_SIZE] = simTime();
+    sendTimeHistory[sendSeqNo % PING_HISTORY_SIZE] = getClockTime();
     pongReceived[sendSeqNo % PING_HISTORY_SIZE] = false;
     emit(pingTxSeqSignal, sendSeqNo);
 
@@ -472,11 +472,11 @@ void PingApp::processPingResponse(int originatorId, int seqNo, Packet *packet)
     // if the send time is no longer available (i.e. the packet is very old and the
     // sendTime was overwritten in the circular buffer) then we just return a 0
     // to signal that this value should not be used during the RTT statistics)
-    simtime_t rtt = SIMTIME_ZERO;
+    simclocktime_t rtt = SIMTIME_ZERO;
     bool isDup = false;
     if (sendSeqNo - seqNo < PING_HISTORY_SIZE) {
         int idx = seqNo % PING_HISTORY_SIZE;
-        rtt = simTime() - sendTimeHistory[idx];
+        rtt = getClockTime() - sendTimeHistory[idx];
         isDup = pongReceived[idx];
         pongReceived[idx] = true;
     }
@@ -493,7 +493,7 @@ void PingApp::processPingResponse(int originatorId, int seqNo, Packet *packet)
     countPingResponse(B(pingPayload->getChunkLength()).get(), seqNo, rtt, isDup);
 }
 
-void PingApp::countPingResponse(int bytes, long seqNo, simtime_t rtt, bool isDup)
+void PingApp::countPingResponse(int bytes, long seqNo, simclocktime_t rtt, bool isDup)
 {
     EV_INFO << "Ping reply #" << seqNo << " arrived, rtt=" << (rtt == SIMTIME_ZERO ? "unknown" : rtt.str().c_str()) << (isDup ? ", duplicated" : "") << "\n";
     emit(pingRxSeqSignal, seqNo);

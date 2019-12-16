@@ -239,10 +239,10 @@ std::string Ipv6InterfaceData::detailedInfo() const
 
 #ifndef WITH_xMIPv6
 void Ipv6InterfaceData::assignAddress(const Ipv6Address& addr, bool tentative,
-        simtime_t expiryTime, simtime_t prefExpiryTime)
+        simclocktime_t expiryTime, simclocktime_t prefExpiryTime)
 #else /* WITH_xMIPv6 */
 void Ipv6InterfaceData::assignAddress(const Ipv6Address& addr, bool tentative,
-        simtime_t expiryTime, simtime_t prefExpiryTime, bool hFlag)
+        simclocktime_t expiryTime, simclocktime_t prefExpiryTime, bool hFlag)
 #endif /* WITH_xMIPv6 */
 {
     addresses.push_back(AddressData());
@@ -267,7 +267,7 @@ void Ipv6InterfaceData::assignAddress(const Ipv6Address& addr, bool tentative,
 }
 
 void Ipv6InterfaceData::updateMatchingAddressExpiryTimes(const Ipv6Address& prefix, int length,
-        simtime_t expiryTime, simtime_t prefExpiryTime)
+        simclocktime_t expiryTime, simclocktime_t prefExpiryTime)
 {
     for (auto & elem : addresses) {
         if (elem.address.matches(prefix, length)) {
@@ -448,13 +448,13 @@ void Ipv6InterfaceData::removeAdvPrefix(int i)
     rtrVars.advPrefixList.erase(rtrVars.advPrefixList.begin() + i);
 }
 
-simtime_t Ipv6InterfaceData::generateReachableTime(double MIN_RANDOM_FACTOR,
+simclocktime_t Ipv6InterfaceData::generateReachableTime(double MIN_RANDOM_FACTOR,
         double MAX_RANDOM_FACTOR, uint baseReachableTime)
 {
     return RNGCONTEXT uniform(MIN_RANDOM_FACTOR, MAX_RANDOM_FACTOR) * baseReachableTime;
 }
 
-simtime_t Ipv6InterfaceData::generateReachableTime()
+simclocktime_t Ipv6InterfaceData::generateReachableTime()
 {
     return RNGCONTEXT uniform(_getMinRandomFactor(), _getMaxRandomFactor()) * getBaseReachableTime();
 }

@@ -150,7 +150,7 @@ class INET_API Rtcp : public cSimpleModule, public LifecycleUnsupported
     virtual void processIncomingRTCPPacket(Packet *packet, Ipv4Address address, int port);
     void processIncomingRTCPSenderReportPacket(const Ptr<const RtcpSenderReportPacket>& rtcpSenderReportPacket, Ipv4Address address, int port);
     void processIncomingRTCPReceiverReportPacket(const Ptr<const RtcpReceiverReportPacket>& rtcpReceiverReportPacket, Ipv4Address address, int port);
-    void processIncomingRTCPSDESPacket(const Ptr<const RtcpSdesPacket>& rtcpSDESPacket, Ipv4Address address, int port, simtime_t arrivalTime);
+    void processIncomingRTCPSDESPacket(const Ptr<const RtcpSdesPacket>& rtcpSDESPacket, Ipv4Address address, int port, simclocktime_t arrivalTime);
     void processIncomingRTCPByePacket(const Ptr<const RtcpByePacket>& rtcpByePacket, Ipv4Address address, int port);
 
     /**

@@ -98,7 +98,7 @@ class INET_API RtpPayloadSender : public cSimpleModule
      * time (relative to start of file) is reached.
      * Implementation in sender modules is optional.
      */
-    virtual void playUntilTime(simtime_t moment);
+    virtual void playUntilTime(simclocktime_t moment);
 
     /**
      * Starts transmission from the current file position and plays until given
@@ -119,7 +119,7 @@ class INET_API RtpPayloadSender : public cSimpleModule
      * changed to this time (relative to start of file).
      * Implementation in sender modules is optional.
      */
-    virtual void seekTime(simtime_t moment);
+    virtual void seekTime(simclocktime_t moment);
 
     /**
      * When the data transmission is paused the current position is

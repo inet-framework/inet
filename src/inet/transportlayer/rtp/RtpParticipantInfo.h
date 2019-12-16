@@ -78,23 +78,23 @@ class INET_API RtpParticipantInfo : public RtpParticipantInfo_Base
      * the sender of this RTP packet is regarded as
      * an active sender.
      */
-    virtual void processRTPPacket(Packet *packet, int id, simtime_t arrivalTime);
+    virtual void processRTPPacket(Packet *packet, int id, simclocktime_t arrivalTime);
 
     /**
      * This method extracts information about an RTP endsystem
      * as provided by the given SenderReport.
      */
-    virtual void processSenderReport(const SenderReport& report, simtime_t arrivalTime);
+    virtual void processSenderReport(const SenderReport& report, simclocktime_t arrivalTime);
 
     /**
      * This method extracts information of the given ReceptionReport.
      */
-    virtual void processReceptionReport(const ReceptionReport& report, simtime_t arrivalTime);
+    virtual void processReceptionReport(const ReceptionReport& report, simclocktime_t arrivalTime);
 
     /**
      * This method extracts sdes information of the given sdes chunk.and stores it.
      */
-    virtual void processSDESChunk(const SdesChunk *sdesChunk, simtime_t arrivalTime);
+    virtual void processSDESChunk(const SdesChunk *sdesChunk, simclocktime_t arrivalTime);
 
     /**
      * Returns a copy of the sdes chunk used for storing source
@@ -112,7 +112,7 @@ class INET_API RtpParticipantInfo : public RtpParticipantInfo_Base
      * should return a receiver report if there have been received
      * RTP packets from that endsystem and nullptr otherwise.
      */
-    virtual ReceptionReport *receptionReport(simtime_t now);
+    virtual ReceptionReport *receptionReport(simclocktime_t now);
 
     /**
      * This method is intended to be overwritten by subclasses which
@@ -121,7 +121,7 @@ class INET_API RtpParticipantInfo : public RtpParticipantInfo_Base
      * packets recently or nullptr otherwise.
      * The implementation for this class always returns nullptr.
      */
-    virtual SenderReport *senderReport(simtime_t now);
+    virtual SenderReport *senderReport(simclocktime_t now);
 
     /**
      * This method should be called by the rtcp module which uses this class
@@ -134,14 +134,14 @@ class INET_API RtpParticipantInfo : public RtpParticipantInfo_Base
      * \sa getSenderReport()
      * \sa createReceptionReport()
      */
-    virtual void nextInterval(simtime_t now);
+    virtual void nextInterval(simclocktime_t now);
 
     /**
      * Returns true if the end system does no longer participate
      * in the RTP session.
      * The implementation in this class always returns false.
      */
-    virtual bool toBeDeleted(simtime_t now);
+    virtual bool toBeDeleted(simclocktime_t now);
 
     /**
      * Returns true if this endsystem has sent at least one RTP

@@ -83,7 +83,7 @@ void PimBase::handleStartOperation(LifecycleOperation *operation)
     if (isEnabled) {
         EV_INFO << "PIM is enabled on device " << hostname << endl;
         helloTimer = new cMessage("PIM HelloTimer", HelloTimer);
-        scheduleAt(simTime() + par("triggeredHelloDelay"), helloTimer);
+        scheduleClockEvent(getClockTime() + par("triggeredHelloDelay"), helloTimer);
     }
 }
 
@@ -106,7 +106,7 @@ void PimBase::processHelloTimer(cMessage *timer)
     ASSERT(timer == helloTimer);
     EV_DETAIL << "Hello Timer expired.\n";
     sendHelloPackets();
-    scheduleAt(simTime() + helloPeriod, helloTimer);
+    scheduleClockEvent(getClockTime() + helloPeriod, helloTimer);
 }
 
 void PimBase::sendHelloPackets()

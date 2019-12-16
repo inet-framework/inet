@@ -49,10 +49,10 @@ protected:
     InterfaceEntry *ie = nullptr;   // outgoing interface of the route
 
     L3Address from;                 // from which router did we get the route (only for RTE routes)
-    simtime_t lastUpdateTime = 0;   // time of the last change (only for RTE routes)
+    simclocktime_t lastUpdateTime = 0;   // time of the last change (only for RTE routes)
     bool changed = false;           // true if the route has changed since the update
     uint16 tag = 0;                 // route tag (only for REDISTRIBUTE routes)
-    simtime_t lastInvalid = 0;      // time of the last invalidation
+    simclocktime_t lastInvalid = 0;      // time of the last invalidation
 
 public:
     RipRoute(IRoute *route, RouteType type, int metric, uint16 routeTag)
@@ -82,10 +82,10 @@ public:
     int getMetric() const { return metric; }
     InterfaceEntry *getInterface() const { return ie; }
     L3Address getFrom() const { return from; }
-    simtime_t getLastUpdateTime() const { return lastUpdateTime; }
+    simclocktime_t getLastUpdateTime() const { return lastUpdateTime; }
     bool isChanged() const { return changed; }
     uint16 getRouteTag() const { return tag; }
-    simtime_t getLastInvalidationTime() const { return lastInvalid; }
+    simclocktime_t getLastInvalidationTime() const { return lastInvalid; }
 
     void setRoute(IRoute *route) { this->route = route; }
     void setType(RouteType type) { this->type = type; }
@@ -95,10 +95,10 @@ public:
     void setMetric(int metric) { this->metric = metric; if (route && type == RIP_ROUTE_RTE) route->setMetric(metric); }
     void setInterface(InterfaceEntry *ie) { this->ie = ie; if (route && type == RIP_ROUTE_RTE) route->setInterface(ie); }
     void setFrom(const L3Address& from) { this->from = from; }
-    void setLastUpdateTime(simtime_t time) { lastUpdateTime = time; }
+    void setLastUpdateTime(simclocktime_t time) { lastUpdateTime = time; }
     void setChanged(bool changed) { this->changed = changed; }
     void setRouteTag(uint16 routeTag) { this->tag = routeTag; }
-    void setLastInvalidationTime(simtime_t time) { this->lastInvalid = time; }
+    void setLastInvalidationTime(simclocktime_t time) { this->lastInvalid = time; }
 };
 
 } // namespace inet

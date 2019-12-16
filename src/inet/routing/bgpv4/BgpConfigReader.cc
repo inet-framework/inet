@@ -40,7 +40,7 @@ void BgpConfigReader::loadConfigFromXML(cXMLElement *bgpConfig, BgpRouter *bgpRo
     if (paramNode == nullptr)
         throw cRuntimeError("BGP Error: No configuration for BGP timer parameters");
     cXMLElementList timerConfig = paramNode->getChildren();
-    simtime_t delayTab[NB_TIMERS];
+    simclocktime_t delayTab[NB_TIMERS];
     loadTimerConfig(timerConfig, delayTab);
 
     // find my AS
@@ -62,7 +62,7 @@ void BgpConfigReader::loadConfigFromXML(cXMLElement *bgpConfig, BgpRouter *bgpRo
 
     // load EGP Session informations
     cXMLElementList sessionList = bgpConfig->getElementsByTagName("Session");
-    simtime_t saveStartDelay = delayTab[3];
+    simclocktime_t saveStartDelay = delayTab[3];
     loadEbgpSessionConfig(ASConfig, sessionList, delayTab);
     delayTab[3] = saveStartDelay;
 
@@ -85,7 +85,7 @@ void BgpConfigReader::loadConfigFromXML(cXMLElement *bgpConfig, BgpRouter *bgpRo
     loadASConfig(ASConfig);
 }
 
-void BgpConfigReader::loadTimerConfig(cXMLElementList& timerConfig, simtime_t *delayTab)
+void BgpConfigReader::loadTimerConfig(cXMLElementList& timerConfig, simclocktime_t *delayTab)
 {
     for (auto & elem : timerConfig) {
         std::string nodeName = (elem)->getTagName();
@@ -124,9 +124,9 @@ AsId BgpConfigReader::findMyAS(cXMLElementList& asList, int& outRouterPosition)
     return 0;
 }
 
-void BgpConfigReader::loadEbgpSessionConfig(cXMLElementList& ASConfig, cXMLElementList& sessionList, simtime_t *delayTab)
+void BgpConfigReader::loadEbgpSessionConfig(cXMLElementList& ASConfig, cXMLElementList& sessionList, simclocktime_t *delayTab)
 {
-    simtime_t saveStartDelay = delayTab[3];
+    simclocktime_t saveStartDelay = delayTab[3];
     for (auto sessionListIt = sessionList.begin(); sessionListIt != sessionList.end(); sessionListIt++, delayTab[3] = saveStartDelay) {
         auto numRouters = (*sessionListIt)->getChildren();
         if(numRouters.size() != 2)

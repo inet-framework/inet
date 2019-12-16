@@ -64,24 +64,24 @@ class INET_API BindingUpdateList : public cSimpleModule
         Ipv6Address homeAddress;    // Home address of the MN for which that BU was sent.
         Ipv6Address careOfAddress;    // MN's CoA. With this entry teh MN can determine whether it has sent a BU to the destination node with its CoA or not.
         uint bindingLifetime;    // the initial value of the lifetime field sent in the BU to which this entry corresponds
-        simtime_t bindingExpiry;    // the time at which the lifetime of the binding expires
+        simclocktime_t bindingExpiry;    // the time at which the lifetime of the binding expires
         //uint remainingLifetime;    //initialised from bindingLifetime and is decremented until it reaches zero
         uint sequenceNumber;    // the max value of the seq # sent in the previous BU.
-        simtime_t sentTime;    // the time at which that particular BU was sent. recorded from simTime(). Used to implement rate limiting restrcition for sending BU.
-        //simtime_t nextBUTx; // the time to send the next BU. NOT EXACTLY CLEAR
+        simclocktime_t sentTime;    // the time at which that particular BU was sent. recorded from getClockTime(). Used to implement rate limiting restrcition for sending BU.
+        //simclocktime_t nextBUTx; // the time to send the next BU. NOT EXACTLY CLEAR
         bool BAck;    //not part of RFC. Indicates whether the correpsonding BU has received a valid BAck or not. True if Ack'ed. By Default it is FALSE.
 
         // this part is for return routability procedure // 27.08.07 - CB
         /* The time at which a Home Test Init or Care-of Test Init message
            was last sent to this destination, as needed to implement the rate
            limiting restriction for the return routability procedure. */
-        simtime_t sentHoTI, sentCoTI;
+        simclocktime_t sentHoTI, sentCoTI;
 
         /* The state of any retransmissions needed for this return
            routability procedure.  This state includes the time remaining
            until the next retransmission attempt and the current state of the
            exponential back-off mechanism for retransmissions. */
-        //simtime_t sendNext; // FIXME huh?
+        //simclocktime_t sendNext; // FIXME huh?
 
         /* Cookie values used in the Home Test Init and Care-of Test Init
            messages. */
@@ -125,7 +125,7 @@ class INET_API BindingUpdateList : public cSimpleModule
      * Sets entry in the Binding Update List with provided values. If entry does not yet exist, a new one is created.
      */
     virtual void addOrUpdateBUL(const Ipv6Address& dest, const Ipv6Address& hoa,
-            const Ipv6Address& coa, const uint lifetime, const uint seq, const simtime_t buSentTime);    //,const simtime_t& nextBUSentTime );
+            const Ipv6Address& coa, const uint lifetime, const uint seq, const simclocktime_t buSentTime);    //,const simclocktime_t& nextBUSentTime );
 
     /**
      * Creates a new entry in the BUL for the provided address.
@@ -142,7 +142,7 @@ class INET_API BindingUpdateList : public cSimpleModule
      * Sets HoTI and/or CoTI values (transmission time, etc.) for the BUL entry.
      */
     virtual void addOrUpdateBUL(const Ipv6Address& dest, const Ipv6Address& hoa,
-            simtime_t sentTime, int cookie, bool isHoTI);    // BU for HoTI/CoTI
+            simclocktime_t sentTime, int cookie, bool isHoTI);    // BU for HoTI/CoTI
 
     /**
      * Returns the BUL entry for a certain destination address.

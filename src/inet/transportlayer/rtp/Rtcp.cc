@@ -168,7 +168,7 @@ void Rtcp::handleInitializeRTCP(RtpInnerPacket *rinp)
 
 void Rtcp::handleSenderModuleInitialized(RtpInnerPacket *rinp)
 {
-    _senderInfo->setStartTime(simTime());
+    _senderInfo->setStartTime(getClockTime());
     _senderInfo->setClockRate(rinp->getClockRate());
     _senderInfo->setTimeStampBase(rinp->getTimeStampBase());
     _senderInfo->setSequenceNumberBase(rinp->getSequenceNumberBase());
@@ -197,7 +197,7 @@ void Rtcp::connectRet()
     // schedule first rtcp packet
     double intervalLength = 2.5 * (dblrand() + 0.5);
     cMessage *reminderMessage = new cMessage("Interval");
-    scheduleAt(simTime() + intervalLength, reminderMessage);
+    scheduleClockEvent(getClockTime() + intervalLength, reminderMessage);
 }
 
 void Rtcp::readRet(Packet *sifpIn)
@@ -216,8 +216,8 @@ void Rtcp::createSocket()
 
 void Rtcp::scheduleInterval()
 {
-    simtime_t intervalLength = _averagePacketSize * (simtime_t)(_participantInfos.size())
-        / (simtime_t)(_bandwidth * _rtcpPercentage * (_senderInfo->isSender() ? 1.0 : 0.75) / 100.0);
+    simclocktime_t intervalLength = _averagePacketSize * (simclocktime_t)(_participantInfos.size())
+        / (simclocktime_t)(_bandwidth * _rtcpPercentage * (_senderInfo->isSender() ? 1.0 : 0.75) / 100.0);
 
     // interval length must be at least 5 seconds
     if (intervalLength < 5.0)
@@ -230,7 +230,7 @@ void Rtcp::scheduleInterval()
     intervalLength /= (double)(2.71828 - 1.5);    // [RFC 3550] , by Ahmed ayadi
 
     cMessage *reminderMessage = new cMessage("Interval");
-    scheduleAt(simTime() + intervalLength, reminderMessage);
+    scheduleClockEvent(getClockTime() + intervalLength, reminderMessage);
 }
 
 void Rtcp::chooseSSRC()
@@ -258,7 +258,7 @@ void Rtcp::createPacket()
     // details) insert a sender report
     if (_senderInfo->isSender()) {
         const auto& senderReportPacket = makeShared<RtcpSenderReportPacket>();
-        SenderReport *senderReport = _senderInfo->senderReport(simTime());
+        SenderReport *senderReport = _senderInfo->senderReport(getClockTime());
         senderReportPacket->setSenderReport(*senderReport);
         delete senderReport;
         reportPacket = senderReportPacket;
@@ -273,14 +273,14 @@ void Rtcp::createPacket()
         if (_participantInfos.exist(i)) {
             RtpParticipantInfo *participantInfo = check_and_cast<RtpParticipantInfo *>(_participantInfos.get(i));
             if (participantInfo->getSsrc() != _senderInfo->getSsrc()) {
-                ReceptionReport *report = check_and_cast<RtpReceiverInfo *>(participantInfo)->receptionReport(simTime());
+                ReceptionReport *report = check_and_cast<RtpReceiverInfo *>(participantInfo)->receptionReport(getClockTime());
                 if (report != nullptr) {
                     reportPacket->addReceptionReport(report);
                 }
             }
-            participantInfo->nextInterval(simTime());
+            participantInfo->nextInterval(getClockTime());
 
-            if (participantInfo->toBeDeleted(simTime())) {
+            if (participantInfo->toBeDeleted(getClockTime())) {
                 _participantInfos.remove(participantInfo);
                 delete participantInfo;
                 // perhaps inform the profile
@@ -322,7 +322,7 @@ void Rtcp::createPacket()
 
 void Rtcp::processOutgoingRTPPacket(Packet *packet)
 {
-    _senderInfo->processRTPPacket(packet, getId(), simTime());
+    _senderInfo->processRTPPacket(packet, getId(), getClockTime());
 }
 
 void Rtcp::processIncomingRTPPacket(Packet *packet, Ipv4Address address, int port)
@@ -362,7 +362,7 @@ void Rtcp::processIncomingRTPPacket(Packet *packet, Ipv4Address address, int por
 void Rtcp::processIncomingRTCPPacket(Packet *packet, Ipv4Address address, int port)
 {
     calculateAveragePacketSize(packet->getByteLength());
-    simtime_t arrivalTime = packet->getArrivalTime();
+    simclocktime_t arrivalTime = packet->getArrivalTime();
 
     for (int i = 0; packet->getByteLength() > 0; i++) {
         // remove the rtcp packet from the rtcp compound packet
@@ -415,14 +415,14 @@ void Rtcp::processIncomingRTCPSenderReportPacket(const Ptr<const RtcpSenderRepor
             // check for ssrc conflict
         }
     }
-    participantInfo->processSenderReport(rtcpSenderReportPacket->getSenderReport(), simTime());
+    participantInfo->processSenderReport(rtcpSenderReportPacket->getSenderReport(), getClockTime());
 
     const cArray& receptionReports = rtcpSenderReportPacket->getReceptionReports();
     for (int j = 0; j < receptionReports.size(); j++) {
         if (receptionReports.exist(j)) {
             const ReceptionReport *receptionReport = check_and_cast<const ReceptionReport *>(receptionReports.get(j));
             if (_senderInfo && (receptionReport->getSsrc() == _senderInfo->getSsrc())) {
-                _senderInfo->processReceptionReport(receptionReport, simTime());
+                _senderInfo->processReceptionReport(receptionReport, getClockTime());
             }
         }
     }
@@ -454,13 +454,13 @@ void Rtcp::processIncomingRTCPReceiverReportPacket(const Ptr<const RtcpReceiverR
         if (receptionReports.exist(j)) {
             const ReceptionReport *receptionReport = check_and_cast<const ReceptionReport *>(receptionReports.get(j));
             if (_senderInfo && (receptionReport->getSsrc() == _senderInfo->getSsrc())) {
-                _senderInfo->processReceptionReport(receptionReport, simTime());
+                _senderInfo->processReceptionReport(receptionReport, getClockTime());
             }
         }
     }
 }
 
-void Rtcp::processIncomingRTCPSDESPacket(const Ptr<const RtcpSdesPacket>& rtcpSDESPacket, Ipv4Address address, int port, simtime_t arrivalTime)
+void Rtcp::processIncomingRTCPSDESPacket(const Ptr<const RtcpSdesPacket>& rtcpSDESPacket, Ipv4Address address, int port, simclocktime_t arrivalTime)
 {
     const cArray& sdesChunks = rtcpSDESPacket->getSdesChunks();
 

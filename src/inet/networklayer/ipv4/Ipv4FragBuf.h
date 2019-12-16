@@ -58,7 +58,7 @@ class INET_API Ipv4FragBuf
     {
         ReassemblyBuffer buf;    // reassembly buffer
         Packet *packet = nullptr;          // the packet
-        simtime_t lastupdate;    // last time a new fragment arrived
+        simclocktime_t lastupdate;    // last time a new fragment arrived
     };
 
     // we use std::map for fast lookup by datagram Id
@@ -83,7 +83,7 @@ class INET_API Ipv4FragBuf
      * If this fragment completes a datagram, the full reassembled
      * datagram is returned, otherwise nullptr.
      */
-    Packet *addFragment(Packet *packet, simtime_t now);
+    Packet *addFragment(Packet *packet, simclocktime_t now);
 
     /**
      * Throws out all fragments which are incomplete and their
@@ -94,7 +94,7 @@ class INET_API Ipv4FragBuf
      * This method should be called more frequently, maybe every
      * 10..30 seconds or so.
      */
-    void purgeStaleFragments(Icmp *icmpModule, simtime_t lastupdate);
+    void purgeStaleFragments(Icmp *icmpModule, simclocktime_t lastupdate);
 
     /**
      * Clear all state.

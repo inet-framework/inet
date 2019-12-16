@@ -379,12 +379,12 @@ void MessageHandler::sendPacket(Packet *packet, Ipv4Address destination, Ospfv2I
 
 void MessageHandler::clearTimer(cMessage *timer)
 {
-    ospfModule->cancelEvent(timer);
+    ospfModule->cancelClockEvent(timer);
 }
 
-void MessageHandler::startTimer(cMessage *timer, simtime_t delay)
+void MessageHandler::startTimer(cMessage *timer, simclocktime_t delay)
 {
-    ospfModule->scheduleAt(simTime() + delay, timer);
+    ospfModule->scheduleClockEvent(getClockTime() + delay, timer);
 }
 
 void MessageHandler::printEvent(const char *eventString, const Ospfv2Interface *onInterface, const Neighbor *forNeighbor    /*= nullptr*/) const

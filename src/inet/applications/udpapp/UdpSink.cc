@@ -131,7 +131,7 @@ void UdpSink::processStart()
 
     if (stopTime >= SIMTIME_ZERO) {
         selfMsg->setKind(STOP);
-        scheduleAt(stopTime, selfMsg);
+        scheduleClockEvent(stopTime, selfMsg);
     }
 }
 
@@ -153,16 +153,16 @@ void UdpSink::processPacket(Packet *pk)
 
 void UdpSink::handleStartOperation(LifecycleOperation *operation)
 {
-    simtime_t start = std::max(startTime, simTime());
+    simclocktime_t start = std::max(startTime, getClockTime());
     if ((stopTime < SIMTIME_ZERO) || (start < stopTime) || (start == stopTime && startTime == stopTime)) {
         selfMsg->setKind(START);
-        scheduleAt(start, selfMsg);
+        scheduleClockEvent(start, selfMsg);
     }
 }
 
 void UdpSink::handleStopOperation(LifecycleOperation *operation)
 {
-    cancelEvent(selfMsg);
+    cancelClockEvent(selfMsg);
     if (!multicastGroup.isUnspecified())
         socket.leaveMulticastGroup(multicastGroup); // FIXME should be done by socket.close()
     socket.close();
@@ -171,7 +171,7 @@ void UdpSink::handleStopOperation(LifecycleOperation *operation)
 
 void UdpSink::handleCrashOperation(LifecycleOperation *operation)
 {
-    cancelEvent(selfMsg);
+    cancelClockEvent(selfMsg);
     if (operation->getRootModule() != getContainingNode(this)) {     // closes socket when the application crashed only
         if (!multicastGroup.isUnspecified())
             socket.leaveMulticastGroup(multicastGroup); // FIXME should be done by socket.close()

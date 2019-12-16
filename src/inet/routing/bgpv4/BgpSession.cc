@@ -53,7 +53,7 @@ void BgpSession::setInfo(SessionInfo info)
     _info.socket = new TcpSocket();
 }
 
-void BgpSession::setTimers(simtime_t *delayTab)
+void BgpSession::setTimers(simclocktime_t *delayTab)
 {
     _connectRetryTime = delayTab[0];
     _holdTime = delayTab[1];
@@ -63,14 +63,14 @@ void BgpSession::setTimers(simtime_t *delayTab)
         // if this BGP router does not establish any EGP connection, then start this IGP session
         if(bgpRouter.getNumEgpSessions() == 0) {
             _ptrStartEvent = new cMessage("BGP Start", START_EVENT_KIND);
-            bgpRouter.getScheduleAt(simTime() + _StartEventTime, _ptrStartEvent);
+            bgpRouter.getScheduleAt(getClockTime() + _StartEventTime, _ptrStartEvent);
             _ptrStartEvent->setContextPointer(this);
         }
     }
     else if (delayTab[3] != SIMTIME_ZERO) {
         _StartEventTime = delayTab[3];
         _ptrStartEvent = new cMessage("BGP Start", START_EVENT_KIND);
-        bgpRouter.getScheduleAt(simTime() + _StartEventTime, _ptrStartEvent);
+        bgpRouter.getScheduleAt(getClockTime() + _StartEventTime, _ptrStartEvent);
         _ptrStartEvent->setContextPointer(this);
     }
     _ptrConnectRetryTimer = new cMessage("BGP Connect Retry", CONNECT_RETRY_KIND);
@@ -88,8 +88,8 @@ void BgpSession::startConnection()
         _ptrStartEvent = new cMessage("BGP Start", START_EVENT_KIND);
 
     if (_info.sessionType == IGP) {
-        if (simTime() > _StartEventTime)
-            _StartEventTime = simTime();
+        if (getClockTime() > _StartEventTime)
+            _StartEventTime = getClockTime();
         if(!_ptrStartEvent->isScheduled())
             bgpRouter.getScheduleAt(_StartEventTime, _ptrStartEvent);
         _ptrStartEvent->setContextPointer(this);
@@ -100,21 +100,21 @@ void BgpSession::restartsHoldTimer()
 {
     if (_holdTime != 0) {
         bgpRouter.getCancelEvent(_ptrHoldTimer);
-        bgpRouter.getScheduleAt(simTime() + _holdTime, _ptrHoldTimer);
+        bgpRouter.getScheduleAt(getClockTime() + _holdTime, _ptrHoldTimer);
     }
 }
 
 void BgpSession::restartsKeepAliveTimer()
 {
     bgpRouter.getCancelEvent(_ptrKeepAliveTimer);
-    bgpRouter.getScheduleAt(simTime() + _keepAliveTime, _ptrKeepAliveTimer);
+    bgpRouter.getScheduleAt(getClockTime() + _keepAliveTime, _ptrKeepAliveTimer);
 }
 
 void BgpSession::restartsConnectRetryTimer(bool start)
 {
     bgpRouter.getCancelEvent(_ptrConnectRetryTimer);
     if (!start) {
-        bgpRouter.getScheduleAt(simTime() + _connectRetryTime, _ptrConnectRetryTimer);
+        bgpRouter.getScheduleAt(getClockTime() + _connectRetryTime, _ptrConnectRetryTimer);
     }
 }
 

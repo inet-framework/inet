@@ -66,28 +66,28 @@ class INET_API RtpReceiverInfo : public RtpParticipantInfo
      * Extracts information of the given RtpPacket.
      * Also sets _inactiveIntervals to 0.
      */
-    virtual void processRTPPacket(Packet *packet, int id, simtime_t arrivalTime) override;
+    virtual void processRTPPacket(Packet *packet, int id, simclocktime_t arrivalTime) override;
 
     /**
      * Extracts information of the given SenderReport.
      */
-    virtual void processSenderReport(SenderReport *report, simtime_t arrivalTime);
+    virtual void processSenderReport(SenderReport *report, simclocktime_t arrivalTime);
 
     /**
      * Extracts information of the given SdesChunk.
      */
-    virtual void processSDESChunk(const SdesChunk *sdesChunk, simtime_t arrivalTime) override;
+    virtual void processSDESChunk(const SdesChunk *sdesChunk, simclocktime_t arrivalTime) override;
 
     /**
      * Returns a ReceptionReport if this RTP end system is a sender,
      * nullptr otherwise.
      */
-    virtual ReceptionReport *receptionReport(simtime_t now) override;
+    virtual ReceptionReport *receptionReport(simclocktime_t now) override;
 
     /**
      * Informs this RtpReceiverInfo that one rtcp interval has past.
      */
-    virtual void nextInterval(simtime_t now) override;
+    virtual void nextInterval(simclocktime_t now) override;
 
     /**
      * Returns true if this RTP end system is regarded active.
@@ -104,7 +104,7 @@ class INET_API RtpReceiverInfo : public RtpParticipantInfo
      * the list of known RTP session participant.
      * This method should be called directly after nextInterval().
      */
-    virtual bool toBeDeleted(simtime_t now) override;
+    virtual bool toBeDeleted(simclocktime_t now) override;
 
   private:
     void copy(const RtpReceiverInfo& other);
@@ -145,7 +145,7 @@ class INET_API RtpReceiverInfo : public RtpParticipantInfo
     /**
      * The interarrival jitter. See RTP rfc for details.
      */
-    simtime_t _jitter;
+    simclocktime_t _jitter;
 
     /**
      * The output vector for jitter value
@@ -182,12 +182,12 @@ class INET_API RtpReceiverInfo : public RtpParticipantInfo
      * The arrival time of the last RtpPacket received from this sender.
      * Needed for calculating the jitter.
      */
-    simtime_t _lastPacketArrivalTime;
+    simclocktime_t _lastPacketArrivalTime;
 
     /**
      * The arrival time of the last SenderReport received from this sender.
      */
-    simtime_t _lastSenderReportArrivalTime;
+    simclocktime_t _lastSenderReportArrivalTime;
 
     /**
      * The consecutive number of rtcp intervals this rtcp end system
@@ -199,7 +199,7 @@ class INET_API RtpReceiverInfo : public RtpParticipantInfo
      * The time when this RTP end system has been inactive for five
      * consecutive rtcp intervals.
      */
-    simtime_t _startOfInactivity = 0.0;
+    simclocktime_t _startOfInactivity = 0.0;
 
     /**
      * The number of RTP and rtcp packets received from this RTP end system.

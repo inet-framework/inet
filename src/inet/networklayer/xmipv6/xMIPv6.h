@@ -99,8 +99,8 @@ class INET_API xMIPv6 : public cSimpleModule
         virtual ~TimerIfEntry() {};    // to make it a polymorphic base class
 
         Ipv6Address dest;    // the address (HA or CN(s) for which the message is sent
-        simtime_t ackTimeout;    // timeout for the Ack
-        simtime_t nextScheduledTime;    // time when the corrsponding message is supposed to be sent
+        simclocktime_t ackTimeout;    // timeout for the Ack
+        simclocktime_t nextScheduledTime;    // time when the corrsponding message is supposed to be sent
         InterfaceEntry *ifEntry;    // interface from which the message will be transmitted
     };
 
@@ -145,7 +145,7 @@ class INET_API xMIPv6 : public cSimpleModule
         uint buSequenceNumber;    // sequence number of the BU sent
         uint lifeTime;    // lifetime of the BU sent
         //Time variable related to the time at which BU was sent
-        simtime_t presentSentTimeBU;    //stores the present time at which BU is/was sent
+        simclocktime_t presentSentTimeBU;    //stores the present time at which BU is/was sent
         bool homeRegistration;    // indicates whether this goes to HA or CN;
     };
 
@@ -227,7 +227,7 @@ class INET_API xMIPv6 : public cSimpleModule
      * Update the an entry of the BUL with the provided parameters.
      */
     void updateBUL(BindingUpdate *bu, const Ipv6Address& dest, const Ipv6Address& CoA,
-            InterfaceEntry *ie, const simtime_t sendTime);
+            InterfaceEntry *ie, const simclocktime_t sendTime);
 
     /**
      * This method takes an interface and a destination address and returns the appropriate IfEntry for an BU.
@@ -240,8 +240,8 @@ class INET_API xMIPv6 : public cSimpleModule
      */
     void sendMobilityMessageToIPv6Module(Packet *msg, const Ipv6Address& destAddr,
             const Ipv6Address& srcAddr = Ipv6Address::UNSPECIFIED_ADDRESS, int interfaceId = -1,
-            simtime_t sendTime = 0);    // overloaded for use at CN - CB
-    //void sendMobilityMessageToIPv6Module(cMessage *msg, const Ipv6Address& destAddr, simtime_t sendTime = 0); // overloaded for use at CN - CB
+            simclocktime_t sendTime = 0);    // overloaded for use at CN - CB
+    //void sendMobilityMessageToIPv6Module(cMessage *msg, const Ipv6Address& destAddr, simclocktime_t sendTime = 0); // overloaded for use at CN - CB
 
     /**
      * Process a BU - only applicable to HAs and CNs.
@@ -263,7 +263,7 @@ class INET_API xMIPv6 : public cSimpleModule
      */
     void createAndSendBAMessage(const Ipv6Address& src,
             const Ipv6Address& dest, int interfaceId, const BaStatus& baStatus, const uint baSeq,
-            const int bindingAuthorizationData, const uint lifeTime, simtime_t sendTime = 0);
+            const int bindingAuthorizationData, const uint lifeTime, simclocktime_t sendTime = 0);
 
     /**
      * Processes the received BA and creates tunnels or mobility header paths if appropriate.
@@ -312,7 +312,7 @@ class INET_API xMIPv6 : public cSimpleModule
     /**
      * Creates and schedules a timer for either a HoTI or a CoTI transmission.
      */
-    void createTestInitTimer(const Ptr<MobilityHeader> testInit, const Ipv6Address& dest, InterfaceEntry *ie, simtime_t sendTime = 0);
+    void createTestInitTimer(const Ptr<MobilityHeader> testInit, const Ipv6Address& dest, InterfaceEntry *ie, simclocktime_t sendTime = 0);
 
     /**
      * If a TestInit timer was fired, this method gets called. The message is sent and the Binding Update List accordingly updated.
@@ -334,7 +334,7 @@ class INET_API xMIPv6 : public cSimpleModule
     /**
      * Reset the transmission structure for a BU and reschedule it for the provided time.
      */
-    void resetBUIfEntry(const Ipv6Address& dest, int interfaceID, simtime_t retransmissionTime);
+    void resetBUIfEntry(const Ipv6Address& dest, int interfaceID, simclocktime_t retransmissionTime);
 
     /**
      * Creates and sends a HoTI message to the specified destination.
@@ -497,7 +497,7 @@ class INET_API xMIPv6 : public cSimpleModule
      * Creates or overwrites a timer for BUL expiry that fires at provided scheduledTime.
      */
     void createBULEntryExpiryTimer(BindingUpdateList::BindingUpdateListEntry *entry,
-            InterfaceEntry *ie, simtime_t scheduledTime);
+            InterfaceEntry *ie, simclocktime_t scheduledTime);
 
     /**
      * Handles the situation of a BUL expiry. Either a BU is sent in advance for renewal or the BUL entry is removed.
@@ -507,7 +507,7 @@ class INET_API xMIPv6 : public cSimpleModule
     /**
      * Creates or overwrites a timer for BC expiry that fires at provided scheduledTime.
      */
-    void createBCEntryExpiryTimer(const Ipv6Address& HoA, InterfaceEntry *ie, simtime_t scheduledTime);
+    void createBCEntryExpiryTimer(const Ipv6Address& HoA, InterfaceEntry *ie, simclocktime_t scheduledTime);
 
     /**
      * Handles the expiry of a BC entry.
@@ -521,7 +521,7 @@ class INET_API xMIPv6 : public cSimpleModule
     /**
      * Creates or overwrites a timer for home keygen token expiry that fires at provided scheduledTime.
      */
-    void createHomeTokenEntryExpiryTimer(Ipv6Address& cnAddr, InterfaceEntry *ie, simtime_t scheduledTime)
+    void createHomeTokenEntryExpiryTimer(Ipv6Address& cnAddr, InterfaceEntry *ie, simclocktime_t scheduledTime)
     {
         createTokenEntryExpiryTimer(cnAddr, ie, scheduledTime, KEY_HTOKEN_EXP);
     }
@@ -529,7 +529,7 @@ class INET_API xMIPv6 : public cSimpleModule
     /**
      * Creates or overwrites a timer for care-of keygen token expiry that fires at provided scheduledTime.
      */
-    void createCareOfTokenEntryExpiryTimer(Ipv6Address& cnAddr, InterfaceEntry *ie, simtime_t scheduledTime)
+    void createCareOfTokenEntryExpiryTimer(Ipv6Address& cnAddr, InterfaceEntry *ie, simclocktime_t scheduledTime)
     {
         createTokenEntryExpiryTimer(cnAddr, ie, scheduledTime, KEY_CTOKEN_EXP);
     }
@@ -539,7 +539,7 @@ class INET_API xMIPv6 : public cSimpleModule
      * Creates or overwrites a timer for {home, care-of} keygen token expiry that fires at provided scheduledTime.
      * Parameter tokenType is provided as KEY_XTOKEN_EXP
      */
-    void createTokenEntryExpiryTimer(Ipv6Address& cnAddr, InterfaceEntry *ie, simtime_t scheduledTime, int tokenType);
+    void createTokenEntryExpiryTimer(Ipv6Address& cnAddr, InterfaceEntry *ie, simclocktime_t scheduledTime, int tokenType);
 
     /**
      * Handles the event that indicates that a {care-of,home} keygen token has expired.

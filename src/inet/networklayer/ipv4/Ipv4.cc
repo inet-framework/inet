@@ -729,12 +729,12 @@ void Ipv4::reassembleAndDeliver(Packet *packet)
                   << ", MORE=" << (ipv4Header->getMoreFragments() ? "true" : "false") << ".\n";
 
         // erase timed out fragments in fragmentation buffer; check every 10 seconds max
-        if (simTime() >= lastCheckTime + 10) {
-            lastCheckTime = simTime();
-            fragbuf.purgeStaleFragments(icmp, simTime() - fragmentTimeoutTime);
+        if (getClockTime() >= lastCheckTime + 10) {
+            lastCheckTime = getClockTime();
+            fragbuf.purgeStaleFragments(icmp, getClockTime() - fragmentTimeoutTime);
         }
 
-        packet = fragbuf.addFragment(packet, simTime());
+        packet = fragbuf.addFragment(packet, getClockTime());
         if (!packet) {
             EV_DETAIL << "No complete datagram yet.\n";
             return;

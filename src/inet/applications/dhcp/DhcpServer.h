@@ -59,7 +59,7 @@ class INET_API DhcpServer : public ApplicationBase, public cListener, public Udp
 
     InterfaceEntry *ie = nullptr;    // interface to serve DHCP requests on
     UdpSocket socket;
-    simtime_t startTime;    // application start time
+    simclocktime_t startTime;    // application start time
     cMessage *startTimer = nullptr;    // self message to start DHCP server
 
   protected:

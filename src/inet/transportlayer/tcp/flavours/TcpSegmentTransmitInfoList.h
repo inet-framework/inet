@@ -36,16 +36,16 @@ class INET_API TcpSegmentTransmitInfoList
       protected:
         uint32_t beg;    // segment [begin, end)
         uint32_t end;
-        simtime_t firstSentTime;    // time of first sending
-        simtime_t lastSentTime;    // time of last sending
+        simclocktime_t firstSentTime;    // time of first sending
+        simclocktime_t lastSentTime;    // time of last sending
         int transmitCount;    // num of transmissions
 
       public:
-        Item(uint32_t beg, uint32_t end, simtime_t firstTime, simtime_t lastTime, int transmits) : beg(beg), end(end), firstSentTime(firstTime), lastSentTime(lastTime), transmitCount(transmits) {}
+        Item(uint32_t beg, uint32_t end, simclocktime_t firstTime, simclocktime_t lastTime, int transmits) : beg(beg), end(end), firstSentTime(firstTime), lastSentTime(lastTime), transmitCount(transmits) {}
         uint32_t getBeg() const { return beg; }
         uint32_t getEnd() const { return end; }
-        simtime_t getFirstSentTime() const { return firstSentTime; }
-        simtime_t getLastSentTime() const { return lastSentTime; }
+        simclocktime_t getFirstSentTime() const { return firstSentTime; }
+        simclocktime_t getLastSentTime() const { return lastSentTime; }
         int getTransmitCount() const { return transmitCount; }
 
         friend class TcpSegmentTransmitInfoList;
@@ -54,7 +54,7 @@ class INET_API TcpSegmentTransmitInfoList
     TcpSegmentTransmitInfoItems regions;    // region[i].end == region[i+1].beg
 
   public:
-    void set(uint32_t beg, uint32_t end, simtime_t sentTime);    // [beg,end)
+    void set(uint32_t beg, uint32_t end, simclocktime_t sentTime);    // [beg,end)
 
     /// returns pointer to Item, or nullptr if not found
     const Item *get(uint32_t seq) const;

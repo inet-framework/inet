@@ -111,12 +111,12 @@ void Dsdv::start()
     //reads from omnetpp.ini
     //HelloForward = new DsdvHello("HelloForward");
     // schedules a random periodic event: the hello message broadcast from DSDV module
-    scheduleAt(simTime() + uniform(0.0, par("maxVariance").doubleValue()), event);
+    scheduleClockEvent(getClockTime() + uniform(0.0, par("maxVariance").doubleValue()), event);
 }
 
 void Dsdv::stop()
 {
-    cancelEvent(event);
+    cancelClockEvent(event);
     while (!forwardList->empty())
     {
         ForwardEntry *fh = forwardList->front();
@@ -187,7 +187,7 @@ void Dsdv::handleSelfMessage(cMessage *msg)
         hello = nullptr;
 
         //schedule new brodcast hello message event
-        scheduleAt(simTime()+helloInterval+broadcastDelay->doubleValue(), event);
+        scheduleClockEvent(getClockTime()+helloInterval+broadcastDelay->doubleValue(), event);
         bubble("Sending new hello message");
     }
     else
@@ -298,7 +298,7 @@ void Dsdv::handleMessageWhenUp(cMessage *msg)
                     e->setSourceType(IRoute::MANET);
                     e->setMetric(numHops);
                     e->setSequencenumber(msgsequencenumber);
-                    e->setExpiryTime(simTime()+routeLifetime);
+                    e->setExpiryTime(getClockTime()+routeLifetime);
                     rt->addRoute(e);
                 }
                 if (!isForwardHello) {
@@ -308,7 +308,7 @@ void Dsdv::handleMessageWhenUp(cMessage *msg)
                     double waitTime = intuniform(1, 50);
                     waitTime = waitTime/100;
                     EV_DETAIL << "waitime for forward before was " << waitTime <<" And host is " << source << "\n";
-                    //waitTime= SIMTIME_DBL (simTime())+waitTime;
+                    //waitTime= SIMTIME_DBL (getClockTime())+waitTime;
                     EV_DETAIL << "waitime for forward is " << waitTime <<" And host is " << source << "\n";     //FIXME unchanged waitTime showed twice!!!
                     packet->insertAtBack(recHello);
                     sendDelayed(packet, waitTime, "ipOut");
@@ -325,10 +325,10 @@ void Dsdv::handleMessageWhenUp(cMessage *msg)
                     double waitTime = intuniform(1, 50);
                     waitTime = waitTime/100;
                     EV_DETAIL << "waitime for forward before was " << waitTime <<" And host is " << source << "\n";
-                    waitTime = SIMTIME_DBL(simTime())+waitTime;
+                    waitTime = SIMTIME_DBL(getClockTime())+waitTime;
                     EV_DETAIL << "waitime for forward is " << waitTime <<" And host is " << source << "\n";
                     fhp->event = new cMessage("event2");
-                    scheduleAt(waitTime, fhp->event);
+                    scheduleClockEvent(waitTime, fhp->event);
                     forwardList->push_back(fhp);
                     fhp = nullptr;
                 }

@@ -111,11 +111,11 @@ InterfaceEntry *DhcpClient::chooseInterface()
 
 void DhcpClient::finish()
 {
-    cancelEvent(timerT1);
-    cancelEvent(timerTo);
-    cancelEvent(timerT2);
-    cancelEvent(leaseTimer);
-    cancelEvent(startTimer);
+    cancelClockEvent(timerT1);
+    cancelClockEvent(timerTo);
+    cancelClockEvent(timerT2);
+    cancelClockEvent(leaseTimer);
+    cancelClockEvent(startTimer);
 }
 
 namespace {
@@ -247,10 +247,10 @@ void DhcpClient::handleTimer(cMessage *msg)
     else if (category == T2 && clientState == RENEWING) {
         EV_DETAIL << "T2 expired. Starting REBINDING state." << endl;
         clientState = REBINDING;
-        cancelEvent(timerT1);
-        cancelEvent(timerT2);
-        cancelEvent(timerTo);
-        //cancelEvent(leaseTimer);
+        cancelClockEvent(timerT1);
+        cancelClockEvent(timerT2);
+        cancelClockEvent(timerTo);
+        //cancelClockEvent(leaseTimer);
 
         sendRequest();
         scheduleTimerTO(WAIT_ACK);
@@ -353,18 +353,18 @@ void DhcpClient::bindLease()
     }
 
     // update the routing table
-    cancelEvent(leaseTimer);
-    scheduleAt(simTime() + lease->leaseTime, leaseTimer);
+    cancelClockEvent(leaseTimer);
+    scheduleClockEvent(getClockTime() + lease->leaseTime, leaseTimer);
 }
 
 void DhcpClient::unbindLease()
 {
     EV_INFO << "Unbinding lease on " << ie->getInterfaceName() << "." << endl;
 
-    cancelEvent(timerT1);
-    cancelEvent(timerT2);
-    cancelEvent(timerTo);
-    cancelEvent(leaseTimer);
+    cancelClockEvent(timerT1);
+    cancelClockEvent(timerT2);
+    cancelClockEvent(timerTo);
+    cancelClockEvent(leaseTimer);
 
     irt->deleteRoute(route);
     ie->getProtocolData<Ipv4InterfaceData>()->setIPAddress(Ipv4Address());
@@ -375,10 +375,10 @@ void DhcpClient::initClient()
 {
     EV_INFO << "Starting DHCP configuration process." << endl;
 
-    cancelEvent(timerT1);
-    cancelEvent(timerT2);
-    cancelEvent(timerTo);
-    cancelEvent(leaseTimer);
+    cancelClockEvent(timerT1);
+    cancelClockEvent(timerT2);
+    cancelClockEvent(timerTo);
+    cancelClockEvent(leaseTimer);
 
     sendDiscover();
     scheduleTimerTO(WAIT_OFFER);
@@ -676,7 +676,7 @@ void DhcpClient::sendDecline(Ipv4Address declinedIp)
 void DhcpClient::handleDhcpAck(const Ptr<const DhcpMessage>& msg)
 {
     recordLease(msg);
-    cancelEvent(timerTo);
+    cancelClockEvent(timerTo);
     scheduleTimerT1();
     scheduleTimerT2();
     bindLease();
@@ -685,23 +685,23 @@ void DhcpClient::handleDhcpAck(const Ptr<const DhcpMessage>& msg)
 void DhcpClient::scheduleTimerTO(DhcpTimerType type)
 {
     // cancel the previous timeout
-    cancelEvent(timerTo);
+    cancelClockEvent(timerTo);
     timerTo->setKind(type);
-    scheduleAt(simTime() + responseTimeout, timerTo);
+    scheduleClockEvent(getClockTime() + responseTimeout, timerTo);
 }
 
 void DhcpClient::scheduleTimerT1()
 {
     // cancel the previous T1
-    cancelEvent(timerT1);
-    scheduleAt(simTime() + (lease->renewalTime), timerT1);    // RFC 2131 4.4.5
+    cancelClockEvent(timerT1);
+    scheduleClockEvent(getClockTime() + (lease->renewalTime), timerT1);    // RFC 2131 4.4.5
 }
 
 void DhcpClient::scheduleTimerT2()
 {
     // cancel the previous T2
-    cancelEvent(timerT2);
-    scheduleAt(simTime() + (lease->rebindTime), timerT2);    // RFC 2131 4.4.5
+    cancelClockEvent(timerT2);
+    scheduleClockEvent(getClockTime() + (lease->rebindTime), timerT2);    // RFC 2131 4.4.5
 }
 
 void DhcpClient::sendToUdp(Packet *msg, int srcPort, const L3Address& destAddr, int destPort)
@@ -720,19 +720,19 @@ void DhcpClient::openSocket()
 
 void DhcpClient::handleStartOperation(LifecycleOperation *operation)
 {
-    simtime_t start = std::max(startTime, simTime());
+    simclocktime_t start = std::max(startTime, getClockTime());
     ie = chooseInterface();
     macAddress = ie->getMacAddress();
-    scheduleAt(start, startTimer);
+    scheduleClockEvent(start, startTimer);
 }
 
 void DhcpClient::handleStopOperation(LifecycleOperation *operation)
 {
-    cancelEvent(timerT1);
-    cancelEvent(timerT2);
-    cancelEvent(timerTo);
-    cancelEvent(leaseTimer);
-    cancelEvent(startTimer);
+    cancelClockEvent(timerT1);
+    cancelClockEvent(timerT2);
+    cancelClockEvent(timerTo);
+    cancelClockEvent(leaseTimer);
+    cancelClockEvent(startTimer);
     ie = nullptr;
 
     // TODO: Client should send DHCPRELEASE to the server. However, the correct operation
@@ -744,11 +744,11 @@ void DhcpClient::handleStopOperation(LifecycleOperation *operation)
 
 void DhcpClient::handleCrashOperation(LifecycleOperation *operation)
 {
-    cancelEvent(timerT1);
-    cancelEvent(timerT2);
-    cancelEvent(timerTo);
-    cancelEvent(leaseTimer);
-    cancelEvent(startTimer);
+    cancelClockEvent(timerT1);
+    cancelClockEvent(timerT2);
+    cancelClockEvent(timerTo);
+    cancelClockEvent(leaseTimer);
+    cancelClockEvent(startTimer);
     ie = nullptr;
 
     if (operation->getRootModule() != getContainingNode(this))     // closes socket when the application crashed only

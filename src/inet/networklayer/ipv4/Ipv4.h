@@ -85,7 +85,7 @@ class INET_API Ipv4 : public OperationalBase, public NetfilterBase, public INetw
     CrcMode crcMode = CRC_MODE_UNDEFINED;
     int defaultTimeToLive = -1;
     int defaultMCTimeToLive = -1;
-    simtime_t fragmentTimeoutTime;
+    simclocktime_t fragmentTimeoutTime;
     bool limitedBroadcast = false;
     std::string directBroadcastInterfaces = "";
 
@@ -94,7 +94,7 @@ class INET_API Ipv4 : public OperationalBase, public NetfilterBase, public INetw
     // working vars
     uint16_t curFragmentId = -1;    // counter, used to assign unique fragmentIds to datagrams
     Ipv4FragBuf fragbuf;    // fragmentation reassembly buffer
-    simtime_t lastCheckTime;    // when fragbuf was last checked for state fragments
+    simclocktime_t lastCheckTime;    // when fragbuf was last checked for state fragments
     std::set<const Protocol *> upperProtocols;    // where to send packets after decapsulation
     std::map<int, SocketDescriptor *> socketIdToSocketDescriptor;
 

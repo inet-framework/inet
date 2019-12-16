@@ -128,7 +128,7 @@ Ipv6NeighbourCache::Neighbour *Ipv6NeighbourCache::addNeighbour(const Ipv6Addres
  * Update by CB: Added an optional parameter which is false by default. Specifies whether a router is also a home agent.
  */
 Ipv6NeighbourCache::Neighbour *Ipv6NeighbourCache::addRouter(const Ipv6Address& addr,
-        int interfaceID, MacAddress macAddress, simtime_t expiryTime, bool isHomeAgent)
+        int interfaceID, MacAddress macAddress, simclocktime_t expiryTime, bool isHomeAgent)
 {
     Key key(addr, interfaceID);
     ASSERT(neighbourMap.find(key) == neighbourMap.end());    // entry must not exist yet

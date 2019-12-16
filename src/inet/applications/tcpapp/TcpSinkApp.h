@@ -70,7 +70,7 @@ class INET_API TcpSinkAppThread : public TcpServerThreadBase
     virtual void dataArrived(Packet *msg, bool urgent) override;
 
     /*
-     * Called when a timer (scheduled via scheduleAt()) expires.
+     * Called when a timer (scheduled via scheduleClockEvent()) expires.
      */
     virtual void timerExpired(cMessage *timer) override { throw cRuntimeError("Model error: unknown timer message arrived"); }
 

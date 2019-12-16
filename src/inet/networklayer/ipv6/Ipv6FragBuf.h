@@ -60,7 +60,7 @@ class INET_API Ipv6FragBuf
     {
         ReassemblyBuffer buf;    // reassembly buffer
         Packet *packet = nullptr;    // the actual datagram
-        simtime_t createdAt;    // time of the buffer creation (i.e. reception time of first-arriving fragment)
+        simclocktime_t createdAt;    // time of the buffer creation (i.e. reception time of first-arriving fragment)
     };
 
     // we use std::map for fast lookup by datagram Id
@@ -94,7 +94,7 @@ class INET_API Ipv6FragBuf
      * If this fragment completes a datagram, the full reassembled
      * datagram is returned, otherwise nullptr.
      */
-    Packet *addFragment(Packet *packet, const Ipv6Header *dg, const Ipv6FragmentHeader *fh, simtime_t now);
+    Packet *addFragment(Packet *packet, const Ipv6Header *dg, const Ipv6FragmentHeader *fh, simclocktime_t now);
 
     /**
      * Throws out all fragments which are incomplete and their
@@ -105,7 +105,7 @@ class INET_API Ipv6FragBuf
      * This method should be called more frequently, maybe every
      * 10..30 seconds or so.
      */
-    void purgeStaleFragments(simtime_t lastupdate);
+    void purgeStaleFragments(simclocktime_t lastupdate);
 };
 
 } // namespace inet

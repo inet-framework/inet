@@ -128,7 +128,7 @@ void RoutingTableRecorder::recordInterfaceChange(cModule *host, const InterfaceE
     fprintf(routingLogFile, "%s  %" PRId64 "  %s  %d  %s %s\n",
             tag,
             getSimulation()->getEventNumber(),
-            SIMTIME_STR(simTime()),
+            SIMTIME_STR(getClockTime()),
             host->getId(),
             ie->getInterfaceName(),
             (ipv4Data != nullptr ? ipv4Data->getIPAddress().str().c_str() : Ipv4Address().str().c_str())
@@ -155,7 +155,7 @@ void RoutingTableRecorder::recordRouteChange(cModule *host, const IRoute *route,
     fprintf(routingLogFile, "%s %" PRId64 "  %s  %d  %s  %s  %d  %s\n",
             tag,
             getSimulation()->getEventNumber(),
-            SIMTIME_STR(simTime()),
+            SIMTIME_STR(getClockTime()),
             host->getId(),
             (rt ? rt->getRouterIdAsGeneric().str().c_str() : "*"),
             route->getDestinationAsGeneric().str().c_str(),
@@ -169,7 +169,7 @@ void RoutingTableRecorder::recordRouteChange(cModule *host, const IRoute *route,
 //    // time, moduleId, routerID
 //    ensureRoutingLogFileOpen();
 //    fprintf(routingLogFile, "ID  %s  %d  %s\n",
-//            SIMTIME_STR(simTime()),
+//            SIMTIME_STR(getClockTime()),
 //            getParentModule()->getId(), //XXX we assume routing table is direct child of the node compound module
 //            a.str().c_str()
 //            );

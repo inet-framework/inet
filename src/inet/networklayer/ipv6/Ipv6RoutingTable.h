@@ -68,7 +68,7 @@ class INET_API Ipv6RoutingTable : public cSimpleModule, public IRoutingTable, pr
     {
         int interfaceId = -1;
         Ipv6Address nextHopAddr;
-        simtime_t expiryTime;
+        simclocktime_t expiryTime;
         // more destination specific data may be added here, e.g. path MTU
     };
     friend std::ostream& operator<<(std::ostream& os, const DestCacheEntry& e);
@@ -228,7 +228,7 @@ class INET_API Ipv6RoutingTable : public cSimpleModule, public IRoutingTable, pr
     /**
      * Add or update a destination cache entry.
      */
-    virtual void updateDestCache(const Ipv6Address& dest, const Ipv6Address& nextHopAddr, int interfaceId, simtime_t expiryTime);
+    virtual void updateDestCache(const Ipv6Address& dest, const Ipv6Address& nextHopAddr, int interfaceId, simclocktime_t expiryTime);
 
     /**
      * Discard all entries in destination cache
@@ -263,7 +263,7 @@ class INET_API Ipv6RoutingTable : public cSimpleModule, public IRoutingTable, pr
      * separately.
      */
     virtual void addOrUpdateOnLinkPrefix(const Ipv6Address& destPrefix, int prefixLength,
-            int interfaceId, simtime_t expiryTime);
+            int interfaceId, simclocktime_t expiryTime);
 
     /**
      * Remove an on-link prefix. To be called when the prefix gets advertised
@@ -279,7 +279,7 @@ class INET_API Ipv6RoutingTable : public cSimpleModule, public IRoutingTable, pr
      * advertises on this interface.
      */
     virtual void addOrUpdateOwnAdvPrefix(const Ipv6Address& destPrefix, int prefixLength,
-            int interfaceId, simtime_t expiryTime);
+            int interfaceId, simclocktime_t expiryTime);
 
     /**
      * Creates a static route. If metric is omitted, it gets initialized
@@ -291,10 +291,10 @@ class INET_API Ipv6RoutingTable : public cSimpleModule, public IRoutingTable, pr
 
     /**
      *  Adds a default route for a host. This method requires the RA's source
-     *  address and the router expiry time plus the simTime().
+     *  address and the router expiry time plus the getClockTime().
      */
     virtual void addDefaultRoute(const Ipv6Address& raSrcAddr, unsigned int ifID,
-            simtime_t routerLifetime);
+            simclocktime_t routerLifetime);
 
     /**
      * Adds the given getRoute(which can be OSPF, BGP, RIP or any other route)

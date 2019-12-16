@@ -57,11 +57,11 @@ class INET_API Dsdv : public RoutingProtocolBase
     InterfaceEntry *interface80211ptr = nullptr;
     int interfaceId = -1;
     unsigned int sequencenumber = 0;
-    simtime_t routeLifetime;
+    simclocktime_t routeLifetime;
     cModule *host = nullptr;
 
   protected:
-    simtime_t helloInterval;
+    simclocktime_t helloInterval;
     IInterfaceTable *ift = nullptr;
     IIpv4RoutingTable *rt = nullptr;
 
@@ -91,13 +91,13 @@ class INET_API DsdvIpv4Route : public Ipv4Route
 {
     protected:
         unsigned int sequencenumber; // originated from destination. Ensures loop freeness.
-        simtime_t expiryTime;  // time the routing entry is valid until
+        simclocktime_t expiryTime;  // time the routing entry is valid until
 
     public:
-        virtual bool isValid() const override { return expiryTime == 0 || expiryTime > simTime(); }
+        virtual bool isValid() const override { return expiryTime == 0 || expiryTime > getClockTime(); }
 
-        simtime_t getExpiryTime() const {return expiryTime;}
-        void setExpiryTime(simtime_t time) {expiryTime = time;}
+        simclocktime_t getExpiryTime() const {return expiryTime;}
+        void setExpiryTime(simclocktime_t time) {expiryTime = time;}
         void setSequencenumber(int i) {sequencenumber = i;}
         unsigned int getSequencenumber() const {return sequencenumber;}
 };

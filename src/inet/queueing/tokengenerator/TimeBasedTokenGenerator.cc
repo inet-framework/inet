@@ -36,7 +36,7 @@ void TimeBasedTokenGenerator::initialize(int stage)
 
 void TimeBasedTokenGenerator::scheduleGenerationTimer()
 {
-    scheduleAt(simTime() + generationIntervalParameter->doubleValue(), generationTimer);
+    scheduleClockEvent(getClockTime() + generationIntervalParameter->doubleValue(), generationTimer);
 }
 
 void TimeBasedTokenGenerator::handleMessage(cMessage *message)

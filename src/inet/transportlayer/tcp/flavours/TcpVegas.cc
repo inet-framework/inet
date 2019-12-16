@@ -111,7 +111,7 @@ void TcpVegas::processRexmitTimer(TcpEventCode& event)
     EV_DETAIL << "RXT Timeout in Vegas: resetting cwnd to " << state->snd_cwnd << "\n"
               << ", ssthresh=" << state->ssthresh << "\n";
 
-    state->v_cwnd_changed = simTime();    // Save time when cwnd changes due to rtx
+    state->v_cwnd_changed = getClockTime();    // Save time when cwnd changes due to rtx
 
     state->afterRto = true;
 
@@ -124,8 +124,8 @@ void TcpVegas::receivedDataAck(uint32 firstSeqAcked)
 
     const TcpSegmentTransmitInfoList::Item *found = state->regions.get(firstSeqAcked);
     if (found) {
-        simtime_t currentTime = simTime();
-        simtime_t tSent = found->getFirstSentTime();
+        simclocktime_t currentTime = getClockTime();
+        simclocktime_t tSent = found->getFirstSentTime();
         int num_transmits = found->getTransmitCount();
 
         //TODO: When should do it: when received first ACK, or when received ACK of 1st sent packet???
@@ -139,7 +139,7 @@ void TcpVegas::receivedDataAck(uint32 firstSeqAcked)
 
         // Once per RTT
         if (seqGreater(state->snd_una, state->v_begseq)) {
-            simtime_t newRTT;
+            simclocktime_t newRTT;
             if (state->v_cntRTT > 0) {
                 newRTT = state->v_sumRTT / state->v_cntRTT;
                 EV_DETAIL << "Vegas: newRTT (state->v_sumRTT / state->v_cntRTT) calculated: " << state->v_sumRTT / state->v_cntRTT << "\n";
@@ -249,7 +249,7 @@ void TcpVegas::receivedDataAck(uint32 firstSeqAcked)
 
         // update vegas fine-grained timeout value (retransmitted packets do not count)
         if (tSent != 0 && num_transmits == 1) {
-            simtime_t newRTT = currentTime - tSent;
+            simclocktime_t newRTT = currentTime - tSent;
             state->v_sumRTT += newRTT;
             ++state->v_cntRTT;
 
@@ -257,7 +257,7 @@ void TcpVegas::receivedDataAck(uint32 firstSeqAcked)
                 if (newRTT < state->v_baseRTT)
                     state->v_baseRTT = newRTT;
 
-                simtime_t n = newRTT - state->v_sa / 8;
+                simclocktime_t n = newRTT - state->v_sa / 8;
                 state->v_sa += n;
                 n = n < 0 ? -n : n;
                 n -= state->v_sd / 4;
@@ -297,8 +297,8 @@ void TcpVegas::receivedDuplicateAck()
 {
     TcpBaseAlg::receivedDuplicateAck();
 
-    simtime_t currentTime = simTime();
-    simtime_t tSent = 0;
+    simclocktime_t currentTime = getClockTime();
+    simclocktime_t tSent = 0;
     int num_transmits = 0;
     const TcpSegmentTransmitInfoList::Item *found = state->regions.get(state->snd_una);
     if (found) {
@@ -368,14 +368,14 @@ void TcpVegas::dataSent(uint32 fromseq)
     // (this is why it is used: fromseq-state->iss)
 
     state->regions.clearTo(state->snd_una);
-    state->regions.set(fromseq, state->snd_max, simTime());
+    state->regions.set(fromseq, state->snd_max, getClockTime());
 }
 
 void TcpVegas::segmentRetransmitted(uint32 fromseq, uint32 toseq)
 {
     TcpBaseAlg::segmentRetransmitted(fromseq, toseq);
 
-    state->regions.set(fromseq, toseq, simTime());
+    state->regions.set(fromseq, toseq, getClockTime());
 }
 
 } // namespace tcp

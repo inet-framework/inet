@@ -148,7 +148,7 @@ void RtpPayloadSender::play()
     }
 }
 
-void RtpPayloadSender::playUntilTime(simtime_t moment)
+void RtpPayloadSender::playUntilTime(simclocktime_t moment)
 {
     throw cRuntimeError("playUntilTime() not implemented");
 }
@@ -170,7 +170,7 @@ void RtpPayloadSender::pause()
     send(rinpOut, "profileOut");
 }
 
-void RtpPayloadSender::seekTime(simtime_t moment)
+void RtpPayloadSender::seekTime(simclocktime_t moment)
 {
     throw cRuntimeError("seekTime() not implemented");
 }

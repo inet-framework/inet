@@ -109,11 +109,11 @@ class INET_API Rip : public RoutingProtocolBase, protected cListener
     // parameters
     Mode mode = static_cast<Mode>(-1);
     int ripUdpPort = -1;    // UDP port RIP routers (usually 520)
-    simtime_t updateInterval;    // time between regular updates
-    simtime_t routeExpiryTime;    // learned routes becomes invalid if no update received in this period of time
-    simtime_t routePurgeTime;    // invalid routes are deleted after this period of time is elapsed
-    simtime_t holdDownTime;
-    simtime_t shutdownTime;    // time of shutdown processing
+    simclocktime_t updateInterval;    // time between regular updates
+    simclocktime_t routeExpiryTime;    // learned routes becomes invalid if no update received in this period of time
+    simclocktime_t routePurgeTime;    // invalid routes are deleted after this period of time is elapsed
+    simclocktime_t holdDownTime;
+    simclocktime_t shutdownTime;    // time of shutdown processing
     bool triggeredUpdate = false;
 
     // signals

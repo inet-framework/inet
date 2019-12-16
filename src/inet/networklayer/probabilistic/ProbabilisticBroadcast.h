@@ -90,7 +90,7 @@ class INET_API ProbabilisticBroadcast : public NetworkProtocolBase, public INetw
     } tMsgDesc;
 
     typedef std::set<unsigned int> MsgIdSet;
-    typedef std::multimap<simtime_t, tMsgDesc *> TimeMsgMap;
+    typedef std::multimap<simclocktime_t, tMsgDesc *> TimeMsgMap;
 
     /** @brief Handle messages from upper layer */
     virtual void handleUpperPacket(Packet *packet) override;
@@ -113,7 +113,7 @@ class INET_API ProbabilisticBroadcast : public NetworkProtocolBase, public INetw
      *  @param bcastDelay relative (to now) simulator time of next broadcast attempt.
      *  @param msg descriptor of the message to insert in the queue.
      **/
-    virtual void insertMessage(simtime_t_cref bcastDelay, tMsgDesc *msgDesc);
+    virtual void insertMessage(simclocktime_t_cref bcastDelay, tMsgDesc *msgDesc);
 
     /** @brief Returns the descriptor of the first message in the queue,
      *         then remove its pointer from the queue and its id from the
@@ -168,7 +168,7 @@ class INET_API ProbabilisticBroadcast : public NetworkProtocolBase, public INetw
      * @brief Period (in sim time) between two broadcast attempts.
      * Read from omnetpp.ini
      **/
-    simtime_t broadcastPeriod;
+    simclocktime_t broadcastPeriod;
 
     /**
      * @brief Probability of each broadcast attempt.
@@ -179,7 +179,7 @@ class INET_API ProbabilisticBroadcast : public NetworkProtocolBase, public INetw
     /*
      * @brief Default time to live for packets to send.
      */
-    simtime_t timeToLive;
+    simclocktime_t timeToLive;
 
     static long id_counter;
 
@@ -200,7 +200,7 @@ class INET_API ProbabilisticBroadcast : public NetworkProtocolBase, public INetw
      * @brief Maximal back-off before first broadcast attempt [seconds].
      * Read from omnetpp.ini
      **/
-    simtime_t maxFirstBcastBackoff;
+    simclocktime_t maxFirstBcastBackoff;
 
     /**
      * @brief How long the message should be kept in queue after its died.
@@ -209,7 +209,7 @@ class INET_API ProbabilisticBroadcast : public NetworkProtocolBase, public INetw
      *        MAC backoff, propagation delay and clock drift.
      * Read from omnetpp.ini
      **/
-    simtime_t timeInQueueAfterDeath;
+    simclocktime_t timeInQueueAfterDeath;
 
     /**
      * @brief Length of the NetwPkt header

@@ -33,10 +33,10 @@ class INET_API RtpApplication : public cSimpleModule, public LifecycleUnsupporte
     double bandwidth = 0;    // the reserved bandwidth for rtp/rtcp in bytes/second
     int port = -1;    // one of the udp port used
     int payloadType = -1;    // the payload type of the data in the file
-    simtime_t sessionEnterDelay;    // the delay after the application enters the session
-    simtime_t transmissionStartDelay;    // the delay after the application starts the transmission
-    simtime_t transmissionStopDelay;    // the delay after the application stops the transmission
-    simtime_t sessionLeaveDelay;    // the delay after the application leaves the session
+    simclocktime_t sessionEnterDelay;    // the delay after the application enters the session
+    simclocktime_t transmissionStartDelay;    // the delay after the application starts the transmission
+    simclocktime_t transmissionStopDelay;    // the delay after the application stops the transmission
+    simclocktime_t sessionLeaveDelay;    // the delay after the application leaves the session
 
     // state
     Ipv4Address destinationAddress;    // the address of the unicast peer or of the multicast group

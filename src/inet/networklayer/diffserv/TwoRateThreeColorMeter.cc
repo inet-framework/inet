@@ -47,7 +47,7 @@ void TwoRateThreeColorMeter::initialize(int stage)
         IInterfaceTable *ift = findModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
         PIR = parseInformationRate(par("pir"), "pir", ift, *this, 0);
         CIR = parseInformationRate(par("cir"), "cir", ift, *this, 0);
-        lastUpdateTime = simTime();
+        lastUpdateTime = getClockTime();
     }
 }
 
@@ -89,7 +89,7 @@ void TwoRateThreeColorMeter::refreshDisplay() const
 int TwoRateThreeColorMeter::meterPacket(Packet *packet)
 {
     // update token buckets
-    simtime_t currentTime = simTime();
+    simclocktime_t currentTime = getClockTime();
     double elapsedTime = SIMTIME_DBL(currentTime - lastUpdateTime);
     lastUpdateTime = currentTime;
     long numTokens = (long)(elapsedTime * PIR);

@@ -36,14 +36,14 @@ private:
   BgpRouter& bgpRouter;
 
   // Timers
-  simtime_t _StartEventTime;
+  simclocktime_t _StartEventTime;
   cMessage *_ptrStartEvent = nullptr;
   unsigned int _connectRetryCounter = 0;
-  simtime_t _connectRetryTime = BGP_RETRY_TIME;
+  simclocktime_t _connectRetryTime = BGP_RETRY_TIME;
   cMessage *_ptrConnectRetryTimer = nullptr;
-  simtime_t _holdTime = BGP_HOLD_TIME;
+  simclocktime_t _holdTime = BGP_HOLD_TIME;
   cMessage *_ptrHoldTimer = nullptr;
-  simtime_t _keepAliveTime = BGP_KEEP_ALIVE;
+  simclocktime_t _keepAliveTime = BGP_KEEP_ALIVE;
   cMessage *_ptrKeepAliveTimer = nullptr;
 
   // Statistics
@@ -87,7 +87,7 @@ private:
 
     // setters for creating and editing the information in the Bgp session:
     void setInfo(SessionInfo info);
-    void setTimers(simtime_t *delayTab);
+    void setTimers(simclocktime_t *delayTab);
     void setlinkIntf(InterfaceEntry *intf) { _info.linkIntf = intf; }
     void setNextHopSelf(bool nextHopSelf) { _info.nextHopSelf = nextHopSelf; }
     void setLocalPreference(int localPreference) { _info.localPreference = localPreference; }
@@ -95,10 +95,10 @@ private:
     void setSocketListen(TcpSocket *socket) { delete _info.socketListen; _info.socketListen = socket; }
 
     // getters for accessing session information:
-    simtime_t getStartEventTime() const { return _StartEventTime; }
-    simtime_t getConnectionRetryTime() const { return _connectRetryTime; }
-    simtime_t getHoldTime() const { return _holdTime; }
-    simtime_t getKeepAliveTime() const { return _keepAliveTime; }
+    simclocktime_t getStartEventTime() const { return _StartEventTime; }
+    simclocktime_t getConnectionRetryTime() const { return _connectRetryTime; }
+    simclocktime_t getHoldTime() const { return _holdTime; }
+    simclocktime_t getKeepAliveTime() const { return _keepAliveTime; }
     void getStatistics(unsigned int *statTab);
     bool isEstablished() const { return _info.sessionEstablished; }
     SessionId getSessionID() const { return _info.sessionID; }

@@ -70,7 +70,7 @@ PimNeighborTable::~PimNeighborTable()
 {
     for (auto & elem : neighbors) {
         for (auto & _it2 : elem.second) {
-            cancelEvent((_it2)->getLivenessTimer());
+            cancelClockEvent((_it2)->getLivenessTimer());
             delete (_it2);
         }
     }
@@ -144,7 +144,7 @@ bool PimNeighborTable::deleteNeighbor(PimNeighbor *neighbor)
             emit(pimNeighborDeletedSignal, neighbor);
 
             neighbor->nt = nullptr;
-            cancelEvent(neighbor->getLivenessTimer());
+            cancelClockEvent(neighbor->getLivenessTimer());
             delete neighbor;
 
             return true;
@@ -156,8 +156,8 @@ bool PimNeighborTable::deleteNeighbor(PimNeighbor *neighbor)
 void PimNeighborTable::restartLivenessTimer(PimNeighbor *neighbor, double holdTime)
 {
     Enter_Method_Silent();
-    cancelEvent(neighbor->getLivenessTimer());
-    scheduleAt(simTime() + holdTime, neighbor->getLivenessTimer());
+    cancelClockEvent(neighbor->getLivenessTimer());
+    scheduleClockEvent(getClockTime() + holdTime, neighbor->getLivenessTimer());
 }
 
 PimNeighbor *PimNeighborTable::findNeighbor(int interfaceId, Ipv4Address addr)

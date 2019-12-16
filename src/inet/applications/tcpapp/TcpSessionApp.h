@@ -35,17 +35,17 @@ class INET_API TcpSessionApp : public TcpAppBase
     // parameters
     struct Command
     {
-        simtime_t tSend;
+        simclocktime_t tSend;
         long numBytes = 0;
-        Command(simtime_t t, long n) { tSend = t; numBytes = n; }
+        Command(simclocktime_t t, long n) { tSend = t; numBytes = n; }
     };
     typedef std::vector<Command> CommandVector;
     CommandVector commands;
 
     bool activeOpen = false;
-    simtime_t tOpen;
-    simtime_t tSend;
-    simtime_t tClose;
+    simclocktime_t tOpen;
+    simclocktime_t tSend;
+    simclocktime_t tClose;
     int sendBytes = 0;
 
     // state

@@ -183,7 +183,7 @@ void Ipv6FlatNetworkConfigurator::addStaticRoutes(cTopology& topo)
             continue;
 /*
     void addOrUpdateOwnAdvPrefix(const Ipv6Address& destPrefix, int prefixLength,
-                                 int interfaceId, simtime_t expiryTime);
+                                 int interfaceId, simclocktime_t expiryTime);
  */
 
         numIPNodes++;    // FIXME split into num hosts, num routers

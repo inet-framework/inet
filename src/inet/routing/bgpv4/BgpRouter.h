@@ -94,7 +94,7 @@ private:
 
     SessionId createEbgpSession(const char *peerAddr, SessionInfo& externalInfo);
     SessionId createIbgpSession(const char *peerAddr);
-    void setTimer(SessionId id, simtime_t *delayTab);
+    void setTimer(SessionId id, simclocktime_t *delayTab);
     void setSocketListen(SessionId id);
     void addToAdvertiseList(Ipv4Address address);
     void addToPrefixList(std::string nodeName, BgpRoutingTableEntry *entry);
@@ -125,9 +125,9 @@ private:
 
     friend class BgpSession;
     // functions used by the BgpSession class
-    void getScheduleAt(simtime_t t, cMessage *msg) { bgpModule->scheduleAt(t, msg); }
+    void getScheduleAt(simclocktime_t t, cMessage *msg) { bgpModule->scheduleClockEvent(t, msg); }
     void getCancelAndDelete(cMessage *msg) { return bgpModule->cancelAndDelete(msg); }
-    cMessage *getCancelEvent(cMessage *msg) { return bgpModule->cancelEvent(msg); }
+    cMessage *getCancelEvent(cMessage *msg) { return bgpModule->cancelClockEvent(msg); }
     IIpv4RoutingTable *getIPRoutingTable() { return rt; }
     std::vector<BgpRoutingTableEntry *> getBGPRoutingTable() { return bgpRoutingTable; }
 

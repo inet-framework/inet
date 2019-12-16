@@ -35,9 +35,9 @@ class INET_API SctpServer : public cSimpleModule, public LifecycleUnsupported
   protected:
     struct ServerAssocStat
     {
-        simtime_t start;
-        simtime_t stop;
-        simtime_t lifeTime;
+        simclocktime_t start;
+        simclocktime_t stop;
+        simclocktime_t lifeTime;
         unsigned long int rcvdBytes;
         unsigned long int sentPackets;
         unsigned long int rcvdPackets;
