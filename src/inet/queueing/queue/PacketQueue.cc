@@ -100,6 +100,7 @@ void PacketQueue::pushPacket(Packet *packet, cGate *gate)
     Enter_Method("pushPacket");
     EV_INFO << "Pushing packet " << packet->getName() << " into the queue." << endl;
     queue.insert(packet);
+    emit(packetPushedSignal, packet);
     if (buffer != nullptr)
         buffer->addPacket(packet);
     else if (isOverloaded()) {
@@ -114,7 +115,6 @@ void PacketQueue::pushPacket(Packet *packet, cGate *gate)
         else
             throw cRuntimeError("Queue is overloaded but packet dropper function is not specified");
     }
-    emit(packetPushedSignal, packet);
     updateDisplayString();
     if (collector != nullptr && getNumPackets() != 0)
         collector->handleCanPopPacket(outputGate);
