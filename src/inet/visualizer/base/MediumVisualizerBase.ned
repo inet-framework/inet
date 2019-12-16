@@ -107,17 +107,17 @@ simple MediumVisualizerBase extends VisualizerBase
         string spectrumPlacementHint = default("bottomCenter"); // annotation placement hint, space separated list of any, top, bottom, left, right, topLeft, topCenter, topRight, etc. 
         double spectrumPlacementPriority = default(-1); // determines the order of annotation positioning
 
-        // parameters for spectogram figures
-        bool displaySpectograms = default(false); // display power density spectograms at the nodes, can be enabled with dimensional analog models only
-        string spectogramMode @emu("total", "signal", "auto") = default("auto"); // total means total transmission medium, signal means transmitted or received signal, auto means total or signal and noise if transmission or reception is in progress
-        double spectogramFigureWidth = default(200); // plot figure width in pixels
-        double spectogramFigureHeight = default(120); // plot figure height in pixels
-        double spectogramPixmapWidth = default(spectogramFigureWidth); // pixmap resolution width
-        double spectogramPixmapHeight = default(spectogramFigureHeight); // pixmap resolution height
-        int spectogramFigureXTickCount = default(3); // number of ticks along the X axis
-        int spectogramFigureYTickCount = default(5); // number of ticks along the Y axis
-        string spectogramPlacementHint = default("bottomCenter"); // annotation placement hint, space separated list of any, top, bottom, left, right, topLeft, topCenter, topRight, etc. 
-        double spectogramPlacementPriority = default(-1); // determines the order of annotation positioning
+        // parameters for spectrogram figures
+        bool displaySpectrograms = default(false); // display power density spectrograms at the nodes, can be enabled with dimensional analog models only
+        string spectrogramMode @emu("total", "signal", "auto") = default("auto"); // total means total transmission medium, signal means transmitted or received signal, auto means total or signal and noise if transmission or reception is in progress
+        double spectrogramFigureWidth = default(200); // plot figure width in pixels
+        double spectrogramFigureHeight = default(120); // plot figure height in pixels
+        double spectrogramPixmapWidth = default(spectrogramFigureWidth); // pixmap resolution width
+        double spectrogramPixmapHeight = default(spectrogramFigureHeight); // pixmap resolution height
+        int spectrogramFigureXTickCount = default(3); // number of ticks along the X axis
+        int spectrogramFigureYTickCount = default(5); // number of ticks along the Y axis
+        string spectrogramPlacementHint = default("bottomCenter"); // annotation placement hint, space separated list of any, top, bottom, left, right, topLeft, topCenter, topRight, etc. 
+        double spectrogramPlacementPriority = default(-1); // determines the order of annotation positioning
 
         @class(MediumVisualizerBase);
 }

@@ -137,7 +137,7 @@ void MediumCanvasVisualizer::initialize(int stage)
                     powerDensityMapFigure->setPlotSize(cFigure::Point(powerDensityMapFigureWidth, powerDensityMapFigureHeight), cFigure::Point(powerDensityMapPixmapWidth, powerDensityMapPixmapHeight));
                     // TODO: center on node to align in space coordinates
                     powerDensityMapFigure->refreshDisplay();
-                    networkNodeVisualization->addAnnotation(powerDensityMapFigure, powerDensityMapFigure->getSize(), spectogramPlacementHint, spectogramPlacementPriority);
+                    networkNodeVisualization->addAnnotation(powerDensityMapFigure, powerDensityMapFigure->getSize(), spectrogramPlacementHint, spectrogramPlacementPriority);
                     powerDensityMapFigures[networkNode] = powerDensityMapFigure;
                 }
                 if (displaySpectrums) {
@@ -159,20 +159,20 @@ void MediumCanvasVisualizer::initialize(int stage)
                     networkNodeVisualization->addAnnotation(spectrumFigure, spectrumFigure->getSize(), spectrumPlacementHint, spectrumPlacementPriority);
                     spectrumFigures[networkNode] = spectrumFigure;
                 }
-                if (displaySpectograms) {
-                    auto spectogramFigure = new HeatMapPlotFigure();
-                    spectogramFigure->setTags("signal_spectogram");
-                    spectogramFigure->setTooltip("This plot represents the signal power density over time and frequency");
-                    spectogramFigure->setZIndex(zIndex);
-                    spectogramFigure->setXAxisLabel("[GHz]");
-                    spectogramFigure->setYAxisLabel("[s]");
-                    spectogramFigure->setXValueFormat("%.3g");
-                    spectogramFigure->setYValueFormat("%.3g");
-                    spectogramFigure->invertYAxis();
-                    spectogramFigure->setPlotSize(cFigure::Point(spectogramFigureWidth, spectogramFigureHeight), cFigure::Point(spectogramPixmapWidth, spectogramPixmapHeight));
-                    spectogramFigure->refreshDisplay();
-                    networkNodeVisualization->addAnnotation(spectogramFigure, spectogramFigure->getSize(), spectogramPlacementHint, spectogramPlacementPriority);
-                    spectrogramFigures[networkNode] = spectogramFigure;
+                if (displaySpectrograms) {
+                    auto spectrogramFigure = new HeatMapPlotFigure();
+                    spectrogramFigure->setTags("signal_spectrogram");
+                    spectrogramFigure->setTooltip("This plot represents the signal power density over time and frequency");
+                    spectrogramFigure->setZIndex(zIndex);
+                    spectrogramFigure->setXAxisLabel("[GHz]");
+                    spectrogramFigure->setYAxisLabel("[s]");
+                    spectrogramFigure->setXValueFormat("%.3g");
+                    spectrogramFigure->setYValueFormat("%.3g");
+                    spectrogramFigure->invertYAxis();
+                    spectrogramFigure->setPlotSize(cFigure::Point(spectrogramFigureWidth, spectrogramFigureHeight), cFigure::Point(spectrogramPixmapWidth, spectrogramPixmapHeight));
+                    spectrogramFigure->refreshDisplay();
+                    networkNodeVisualization->addAnnotation(spectrogramFigure, spectrogramFigure->getSize(), spectrogramPlacementHint, spectrogramPlacementPriority);
+                    spectrogramFigures[networkNode] = spectrogramFigure;
                 }
             }
         }
@@ -199,9 +199,9 @@ void MediumCanvasVisualizer::refreshDisplay() const
             if (displaySpectrums)
                 for (auto it : spectrumFigures)
                     refreshSpectrumFigure(it.first, it.second);
-            if (displaySpectograms)
+            if (displaySpectrograms)
                 for (auto it : spectrogramFigures)
-                    refreshSpectogramFigure(it.first, it.second);
+                    refreshSpectrogramFigure(it.first, it.second);
             if (displayCommunicationHeat)
                 communicationHeat->coolDown();
             lastRefreshDisplay = simTime();
@@ -502,7 +502,7 @@ std::pair<WpHz, WpHz> MediumCanvasVisualizer::computePowerForDirectionalAntenna(
     return {power1, power2};
 }
 
-void MediumCanvasVisualizer::refreshSpectogramFigure(const cModule *networkNode, HeatMapPlotFigure *figure) const
+void MediumCanvasVisualizer::refreshSpectrogramFigure(const cModule *networkNode, HeatMapPlotFigure *figure) const
 {
     if (signalMinFrequency < signalMaxFrequency) {
         const ITransmission *transmissionInProgress;
@@ -544,44 +544,44 @@ void MediumCanvasVisualizer::refreshSpectogramFigure(const cModule *networkNode,
         figure->setMaxValue(maxValue);
         figure->clearValues();
         auto position = mobility->getCurrentPosition();
-        if (!strcmp(spectogramMode, "total"))
-            refreshSpectogramFigurePowerFunction(mediumPowerDensityFunction, position, signalTimeUnit, figure, 2);
-        else if (!strcmp(spectogramMode, "signal")) {
+        if (!strcmp(spectrogramMode, "total"))
+            refreshSpectrogramFigurePowerFunction(mediumPowerDensityFunction, position, signalTimeUnit, figure, 2);
+        else if (!strcmp(spectrogramMode, "signal")) {
             if (transmissionInProgress != nullptr) {
                 const auto& signalPowerDensityFunction = signalPowerDensityFunctions.find(transmissionInProgress)->second;
-                refreshSpectogramFigurePowerFunction(signalPowerDensityFunction, position, signalTimeUnit, figure, 1);
+                refreshSpectrogramFigurePowerFunction(signalPowerDensityFunction, position, signalTimeUnit, figure, 1);
             }
             else if (receptionInProgress != nullptr) {
                 const auto& signalPowerDensityFunction = signalPowerDensityFunctions.find(receptionInProgress)->second;
-                refreshSpectogramFigurePowerFunction(signalPowerDensityFunction, position, signalTimeUnit, figure, 1);
+                refreshSpectrogramFigurePowerFunction(signalPowerDensityFunction, position, signalTimeUnit, figure, 1);
             }
         }
-        else if (!strcmp(spectogramMode, "auto")) {
+        else if (!strcmp(spectrogramMode, "auto")) {
             if (transmissionInProgress == nullptr && receptionInProgress == nullptr)
-                refreshSpectogramFigurePowerFunction(mediumPowerDensityFunction, position, signalTimeUnit, figure, 2);
+                refreshSpectrogramFigurePowerFunction(mediumPowerDensityFunction, position, signalTimeUnit, figure, 2);
             else if (transmissionInProgress != nullptr) {
                 const auto& signalPowerDensityFunction = signalPowerDensityFunctions.find(transmissionInProgress)->second;
                 const auto& noisePowerDensityFunction = noisePowerDensityFunctions.find(transmissionInProgress)->second;
-                refreshSpectogramFigurePowerFunction(noisePowerDensityFunction, position, signalTimeUnit, figure, 0);
-                refreshSpectogramFigurePowerFunction(signalPowerDensityFunction, position, signalTimeUnit, figure, 1);
+                refreshSpectrogramFigurePowerFunction(noisePowerDensityFunction, position, signalTimeUnit, figure, 0);
+                refreshSpectrogramFigurePowerFunction(signalPowerDensityFunction, position, signalTimeUnit, figure, 1);
             }
             else if (receptionInProgress != nullptr) {
                 const auto& signalPowerDensityFunction = signalPowerDensityFunctions.find(receptionInProgress)->second;
                 const auto& noisePowerDensityFunction = noisePowerDensityFunctions.find(receptionInProgress)->second;
-                refreshSpectogramFigurePowerFunction(noisePowerDensityFunction, position, signalTimeUnit, figure, 0);
-                refreshSpectogramFigurePowerFunction(signalPowerDensityFunction, position, signalTimeUnit, figure, 1);
+                refreshSpectrogramFigurePowerFunction(noisePowerDensityFunction, position, signalTimeUnit, figure, 0);
+                refreshSpectrogramFigurePowerFunction(signalPowerDensityFunction, position, signalTimeUnit, figure, 1);
             }
         }
         else
             throw cRuntimeError("Unknown signalFigureMode");
-        figure->setXTickCount(spectogramFigureXTickCount);
-        figure->setYTickCount(spectogramFigureYTickCount);
+        figure->setXTickCount(spectrogramFigureXTickCount);
+        figure->setYTickCount(spectrogramFigureYTickCount);
         figure->bakeValues();
         figure->refreshDisplay();
     }
 }
 
-void MediumCanvasVisualizer::refreshSpectogramFigurePowerFunction(const Ptr<const IFunction<WpHz, Domain<m, m, m, simsec, Hz>>>& powerFunction, const Coord& position, SimTimeUnit signalTimeUnit, HeatMapPlotFigure *figure, int channel) const
+void MediumCanvasVisualizer::refreshSpectrogramFigurePowerFunction(const Ptr<const IFunction<WpHz, Domain<m, m, m, simsec, Hz>>>& powerFunction, const Coord& position, SimTimeUnit signalTimeUnit, HeatMapPlotFigure *figure, int channel) const
 {
     auto minTime = simTime() - signalMaxTime;
     auto maxTime = simTime() + signalMaxTime;
