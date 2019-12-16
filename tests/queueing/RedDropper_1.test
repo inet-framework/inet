@@ -261,7 +261,7 @@ Producing packet producer-44.
 Passing through packet producer-44.
 Pushing packet producer-44 into the queue.
 Producing packet producer-45.
-Queue len 3 >= maxth, dropping packet.
+Queue len 3 >= packetCapacity.
 Filtering out packet producer-45.
 Popping packet producer-42 from the queue.
 Collecting packet producer-42.
@@ -294,7 +294,7 @@ Producing packet producer-51.
 Passing through packet producer-51.
 Pushing packet producer-51 into the queue.
 Producing packet producer-52.
-Queue len 3 >= maxth, dropping packet.
+Queue len 3 >= packetCapacity.
 Filtering out packet producer-52.
 Popping packet producer-49 from the queue.
 Collecting packet producer-49.
@@ -362,7 +362,7 @@ Producing packet producer-65.
 Passing through packet producer-65.
 Pushing packet producer-65 into the queue.
 Producing packet producer-66.
-Queue len 3 >= maxth, dropping packet.
+Queue len 3 >= packetCapacity.
 Filtering out packet producer-66.
 Popping packet producer-63 from the queue.
 Collecting packet producer-63.
