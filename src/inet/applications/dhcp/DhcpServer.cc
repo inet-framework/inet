@@ -352,11 +352,11 @@ void DhcpServer::sendAck(DhcpLease *lease, const Ptr<const DhcpMessage>& packet)
     // add the lease options
     ack->getOptionsForUpdate().setSubnetMask(lease->subnetMask);
     length += 6;
-    ack->getOptionsForUpdate().setRenewalTime(SimTime(leaseTime * 0.5).trunc(SIMTIME_S));    // RFC 4.4.5
+    ack->getOptionsForUpdate().setRenewalTime(SimClockTime(leaseTime * 0.5).trunc(SIMTIME_S));    // RFC 4.4.5
     length += 6;
-    ack->getOptionsForUpdate().setRebindingTime(SimTime(leaseTime * 0.875).trunc(SIMTIME_S));
+    ack->getOptionsForUpdate().setRebindingTime(SimClockTime(leaseTime * 0.875).trunc(SIMTIME_S));
     length += 6;
-    ack->getOptionsForUpdate().setLeaseTime(SimTime(leaseTime).trunc(SIMTIME_S));
+    ack->getOptionsForUpdate().setLeaseTime(SimClockTime(leaseTime).trunc(SIMTIME_S));
     length += 6;
     ack->getOptionsForUpdate().setRouterArraySize(1);
     ack->getOptionsForUpdate().setRouter(0, lease->gateway);
@@ -434,11 +434,11 @@ void DhcpServer::sendOffer(DhcpLease *lease, const Ptr<const DhcpMessage>& packe
     // add the offer options
     offer->getOptionsForUpdate().setSubnetMask(lease->subnetMask);
     length += 6;
-    offer->getOptionsForUpdate().setRenewalTime(SimTime(leaseTime * 0.5).trunc(SIMTIME_S));    // RFC 4.4.5
+    offer->getOptionsForUpdate().setRenewalTime(SimClockTime(leaseTime * 0.5).trunc(SIMTIME_S));    // RFC 4.4.5
     length += 6;
-    offer->getOptionsForUpdate().setRebindingTime(SimTime(leaseTime * 0.875).trunc(SIMTIME_S));
+    offer->getOptionsForUpdate().setRebindingTime(SimClockTime(leaseTime * 0.875).trunc(SIMTIME_S));
     length += 6;
-    offer->getOptionsForUpdate().setLeaseTime(SimTime(leaseTime).trunc(SIMTIME_S));
+    offer->getOptionsForUpdate().setLeaseTime(SimClockTime(leaseTime).trunc(SIMTIME_S));
     length += 6;
     offer->getOptionsForUpdate().setRouterArraySize(1);
     offer->getOptionsForUpdate().setRouter(0, lease->gateway);

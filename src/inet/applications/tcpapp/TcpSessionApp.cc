@@ -149,7 +149,7 @@ Packet *TcpSessionApp::createDataPacket(long sendBytes)
     }
     else
         throw cRuntimeError("Invalid data transfer mode: %d", dataTransferMode);
-    payload->addTag<CreationTimeTag>()->setCreationTime(getClockTime());
+    payload->addTag<CreationTimeTag>()->setCreationTime(simTime());
     Packet *packet = new Packet("data1");
     packet->insertAtBack(payload);
     return packet;

@@ -115,7 +115,7 @@ void Ipv6RoutingTable::initialize(int stage)
                     if (ie->getProtocolData<Ipv6InterfaceData>()->getAdvPrefix(y).prefix.isGlobal())
                         addOrUpdateOwnAdvPrefix(ie->getProtocolData<Ipv6InterfaceData>()->getAdvPrefix(y).prefix,
                                 ie->getProtocolData<Ipv6InterfaceData>()->getAdvPrefix(y).prefixLength,
-                                ie->getInterfaceId(), SIMTIME_ZERO);
+                                ie->getInterfaceId(), SIMCLOCKTIME_ZERO);
 
             }
         }
@@ -256,7 +256,7 @@ void Ipv6RoutingTable::assignRequiredNodeAddresses(InterfaceEntry *ie)
 
     //o  The loopback address.
     if (ie->isLoopback()) {
-        ie->getProtocolData<Ipv6InterfaceData>()->assignAddress(Ipv6Address("::1"), false, SIMTIME_ZERO, SIMTIME_ZERO);
+        ie->getProtocolData<Ipv6InterfaceData>()->assignAddress(Ipv6Address("::1"), false, SIMCLOCKTIME_ZERO, SIMCLOCKTIME_ZERO);
         return;
     }
     //o  Its required Link-Local Address for each interface.
@@ -266,7 +266,7 @@ void Ipv6RoutingTable::assignRequiredNodeAddresses(InterfaceEntry *ie)
     //ie->getProtocolData<Ipv6InterfaceData>()->assignAddress(linkLocalAddr, true, 0, 0);
 #else /* WITH_xMIPv6 */
     Ipv6Address linkLocalAddr = Ipv6Address().formLinkLocalAddress(ie->getInterfaceToken());
-    ie->getProtocolData<Ipv6InterfaceData>()->assignAddress(linkLocalAddr, true, SIMTIME_ZERO, SIMTIME_ZERO);
+    ie->getProtocolData<Ipv6InterfaceData>()->assignAddress(linkLocalAddr, true, SIMCLOCKTIME_ZERO, SIMCLOCKTIME_ZERO);
 #endif /* WITH_xMIPv6 */
 
     /*o  Any additional Unicast and Anycast Addresses that have been configured
@@ -370,7 +370,7 @@ void Ipv6RoutingTable::configureInterfaceFromXml(InterfaceEntry *ie, cXMLElement
         cXMLElement *node = elem;
         Ipv6Address address = Ipv6Address(node->getNodeValue());
         //We can now decide if the address is tentative or not.
-        d->assignAddress(address, toBool(getRequiredAttr(node, "tentative")), SIMTIME_ZERO, SIMTIME_ZERO);    // set up with infinite lifetimes
+        d->assignAddress(address, toBool(getRequiredAttr(node, "tentative")), SIMCLOCKTIME_ZERO, SIMCLOCKTIME_ZERO);    // set up with infinite lifetimes
     }
 }
 

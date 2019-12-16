@@ -21,6 +21,7 @@
 #include <vector>
 
 #include "inet/common/INETDefs.h"
+#include "inet/common/SimpleModule.h"
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/networklayer/contract/IRoutingTable.h"
 #include "inet/networklayer/contract/ipv6/Ipv6Address.h"
@@ -47,7 +48,7 @@ class Ipv6RoutingTable;
  * be read and modified during simulation, typically by routing protocol
  * implementations.
  */
-class INET_API Ipv6RoutingTable : public cSimpleModule, public IRoutingTable, protected cListener, public ILifecycle
+class INET_API Ipv6RoutingTable : public SimpleModule, public IRoutingTable, protected cListener, public ILifecycle
 {
   protected:
     IInterfaceTable *ift = nullptr;    // cached pointer

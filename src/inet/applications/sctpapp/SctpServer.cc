@@ -141,7 +141,7 @@ void SctpServer::generateAndSend()
     for (int i = 0; i < numBytes; i++)
         vec[i] = (bytesSent + i) & 0xFF;
     applicationData->setBytes(vec);
-    applicationData->addTag<CreationTimeTag>()->setCreationTime(getClockTime());
+    applicationData->addTag<CreationTimeTag>()->setCreationTime(simTime());
     applicationPacket->insertAtBack(applicationData);
     auto sctpSendReq = applicationPacket->addTag<SctpSendReq>();
     if (queueSize > 0 && numRequestsToSend > 0 && count < queueSize * 2)
@@ -369,7 +369,7 @@ void SctpServer::handleMessage(cMessage *msg)
 
                         auto m = endToEndDelay.find(id);
                         for (auto& region : message->peekData()->getAllTags<CreationTimeTag>())
-                            m->second->record(getClockTime() - region.getTag()->getCreationTime());
+                            m->second->record(simTime() - region.getTag()->getCreationTime());
 
                         EV_INFO << "server: Data received. Left packets to receive=" << j->second.rcvdPackets << "\n";
 
@@ -397,7 +397,7 @@ void SctpServer::handleMessage(cMessage *msg)
                     const auto& smsg = message->peekData();
 
                     for (auto& region : smsg->getAllTags<CreationTimeTag>())
-                        m->second->record(getClockTime() - region.getTag()->getCreationTime());
+                        m->second->record(simTime() - region.getTag()->getCreationTime());
 
                     auto cmsg = new Packet("ApplicationPacket");
                     cmsg->insertAtBack(smsg);

@@ -172,7 +172,7 @@ void EtherAppClient::sendPacket()
     long respLen = *respLength;
     data->setResponseBytes(respLen);
 
-    data->addTag<CreationTimeTag>()->setCreationTime(getClockTime());
+    data->addTag<CreationTimeTag>()->setCreationTime(simTime());
 
     datapacket->insertAtBack(data);
 

@@ -18,6 +18,7 @@
 
 import inet.common.INETDefs;
 import inet.common.packet.chunk.Chunk;
+import inet.common.clock.SimClockTime;
 
 namespace inet;
 

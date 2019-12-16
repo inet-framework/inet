@@ -21,11 +21,12 @@
 #include "inet/queueing/contract/IPassivePacketSink.h"
 #include "inet/queueing/contract/IPacketQueueingElement.h"
 #include "inet/common/Simsignals.h"
+#include "inet/common/SimpleModule.h"
 
 namespace inet {
 namespace queueing {
 
-class INET_API PacketQueueingElementBase : public cSimpleModule, public IPacketQueueingElement
+class INET_API PacketQueueingElementBase : public SimpleModule, public IPacketQueueingElement
 {
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }

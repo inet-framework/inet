@@ -1154,7 +1154,7 @@ void Dymo::updateRoute(Packet *packet, const Ptr<const RteMsg>& rteMsg, const Ad
     if (addressBlock.getHasValidityTime())
         routeData->setExpirationTime(getClockTime() + addressBlock.getValidityTime());
     else
-        routeData->setExpirationTime(SimTime::getMaxTime());
+        routeData->setExpirationTime(SimClockTime::getMaxTime());
     scheduleExpungeTimer();
 }
 
@@ -1191,7 +1191,7 @@ void Dymo::scheduleExpungeTimer()
 {
     EV_DETAIL << "Scheduling expunge timer" << endl;
     simclocktime_t nextExpungeTime = getNextExpungeTime();
-    if (nextExpungeTime == SimTime::getMaxTime()) {
+    if (nextExpungeTime == SimClockTime::getMaxTime()) {
         if (expungeTimer->isScheduled())
             cancelClockEvent(expungeTimer);
     }
@@ -1199,7 +1199,7 @@ void Dymo::scheduleExpungeTimer()
         if (!expungeTimer->isScheduled())
             scheduleClockEvent(nextExpungeTime, expungeTimer);
         else {
-            if (expungeTimer->getArrivalTime() != nextExpungeTime) {
+            if (getArrivalClockTime(expungeTimer) != nextExpungeTime) { //TODO won't work -- getArrivalClockTime() can be imprecise
                 cancelClockEvent(expungeTimer);
                 scheduleClockEvent(nextExpungeTime, expungeTimer);
             }
@@ -1234,7 +1234,7 @@ void Dymo::expungeRoutes()
 
 simclocktime_t Dymo::getNextExpungeTime()
 {
-    simclocktime_t nextExpirationTime = SimTime::getMaxTime();
+    simclocktime_t nextExpirationTime = SimClockTime::getMaxTime();
     for (int i = 0; i < routingTable->getNumRoutes(); i++) {
         IRoute *route = routingTable->getRoute(i);
         if (route->getSource() == this) {
@@ -1257,7 +1257,7 @@ DymoRouteState Dymo::getRouteState(DymoRouteData *routeData)
         return BROKEN;
     else if (lastUsed - getClockTime() <= activeInterval)
         return ACTIVE;
-    else if (routeData->getExpirationTime() != SimTime::getMaxTime()) {
+    else if (routeData->getExpirationTime() != SimClockTime::getMaxTime()) {
         if (getClockTime() >= routeData->getExpirationTime())
             return EXPIRED;
         else

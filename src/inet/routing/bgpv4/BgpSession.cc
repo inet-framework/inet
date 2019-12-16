@@ -67,7 +67,7 @@ void BgpSession::setTimers(simclocktime_t *delayTab)
             _ptrStartEvent->setContextPointer(this);
         }
     }
-    else if (delayTab[3] != SIMTIME_ZERO) {
+    else if (delayTab[3] != SIMCLOCKTIME_ZERO) {
         _StartEventTime = delayTab[3];
         _ptrStartEvent = new cMessage("BGP Start", START_EVENT_KIND);
         bgpRouter.getScheduleAt(getClockTime() + _StartEventTime, _ptrStartEvent);

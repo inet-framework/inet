@@ -26,6 +26,7 @@
 #include <set>
 
 #include "inet/common/INETDefs.h"
+#include "inet/common/SimpleModule.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
@@ -37,7 +38,7 @@ namespace inet {
 class IInterfaceTable;
 class IRoutingTable;
 
-class INET_API Igmpv3 : public cSimpleModule, protected cListener
+class INET_API Igmpv3 : public SimpleModule, protected cListener
 {
   protected:
     enum RouterState {

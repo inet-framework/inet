@@ -176,7 +176,7 @@ void Gpsr::schedulePurgeNeighborsTimer()
 {
     EV_DEBUG << "Scheduling purge neighbors timer" << endl;
     simclocktime_t nextExpiration = getNextNeighborExpiration();
-    if (nextExpiration == SimTime::getMaxTime()) {
+    if (nextExpiration == SimClockTime::getMaxTime()) {
         if (purgeNeighborsTimer->isScheduled())
             cancelClockEvent(purgeNeighborsTimer);
     }
@@ -184,7 +184,7 @@ void Gpsr::schedulePurgeNeighborsTimer()
         if (!purgeNeighborsTimer->isScheduled())
             scheduleClockEvent(nextExpiration, purgeNeighborsTimer);
         else {
-            if (purgeNeighborsTimer->getArrivalTime() != nextExpiration) {
+            if (getArrivalClockTime(purgeNeighborsTimer) != nextExpiration) {
                 cancelClockEvent(purgeNeighborsTimer);
                 scheduleClockEvent(nextExpiration, purgeNeighborsTimer);
             }
@@ -414,7 +414,7 @@ L3Address Gpsr::getSenderNeighborAddress(const Ptr<const NetworkHeaderBase>& net
 simclocktime_t Gpsr::getNextNeighborExpiration()
 {
     simclocktime_t oldestPosition = neighborPositionTable.getOldestPosition();
-    if (oldestPosition == SimTime::getMaxTime())
+    if (oldestPosition == SimClockTime::getMaxTime())
         return oldestPosition;
     else
         return oldestPosition + neighborValidityInterval;

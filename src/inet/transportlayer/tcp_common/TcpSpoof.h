@@ -15,6 +15,7 @@
 #define __INET_TCPSPOOF_H
 
 #include "inet/common/INETDefs.h"
+#include "inet/common/SimpleModule.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/transportlayer/tcp_common/TcpHeader.h"
@@ -25,7 +26,7 @@ namespace tcp {
 /**
  * Sends fabricated TCP packets.
  */
-class INET_API TcpSpoof : public cSimpleModule
+class INET_API TcpSpoof : public SimpleModule
 {
   protected:
     virtual void sendToIP(Packet *pk, L3Address src, L3Address dest);

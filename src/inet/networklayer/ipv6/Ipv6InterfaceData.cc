@@ -167,8 +167,8 @@ std::string Ipv6InterfaceData::str() const
 //               ? (addresses[i].addrType==HoA ? "HoA" : "CoA") : "")
             #endif /* WITH_xMIPv6 */
 
-           << " expiryTime: " << (addresses[i].expiryTime == SIMTIME_ZERO ? "inf" : SIMTIME_STR(addresses[i].expiryTime))
-           << " prefExpiryTime: " << (addresses[i].prefExpiryTime == SIMTIME_ZERO ? "inf" : SIMTIME_STR(addresses[i].prefExpiryTime))
+           << " expiryTime: " << (addresses[i].expiryTime == SIMCLOCKTIME_ZERO ? "inf" : SIMTIME_STR(addresses[i].expiryTime))
+           << " prefExpiryTime: " << (addresses[i].prefExpiryTime == SIMCLOCKTIME_ZERO ? "inf" : SIMTIME_STR(addresses[i].prefExpiryTime))
            << endl;
     }
 
@@ -185,9 +185,9 @@ std::string Ipv6InterfaceData::str() const
         os << "R-Flag = " << (a.advRtrAddr ? "1 " : "0 ");
 #endif /* WITH_xMIPv6 */
 
-        if (a.advValidLifetime == SIMTIME_ZERO)
+        if (a.advValidLifetime == SIMCLOCKTIME_ZERO)
             os << "lifetime:inf";
-        else if (a.advValidLifetime > SIMTIME_ZERO)
+        else if (a.advValidLifetime > SIMCLOCKTIME_ZERO)
             os << "expires:" << a.advValidLifetime;
         else
             os << "lifetime:+" << (-1 * a.advValidLifetime);
@@ -394,7 +394,7 @@ bool Ipv6InterfaceData::addrLess(const AddressData& a, const AddressData& b)
         return a.addrType == CoA; // HoA is better than CoA, 24.9.07 - CB
 #endif /* WITH_xMIPv6 */
 
-    return (a.expiryTime == SIMTIME_ZERO && b.expiryTime != SIMTIME_ZERO) || a.expiryTime > b.expiryTime;    // longer expiry time is better
+    return (a.expiryTime == SIMCLOCKTIME_ZERO && b.expiryTime != SIMCLOCKTIME_ZERO) || a.expiryTime > b.expiryTime;    // longer expiry time is better
 }
 
 void Ipv6InterfaceData::choosePreferredAddress()
@@ -590,7 +590,7 @@ void Ipv6InterfaceData::deduceAdvPrefix()
         Ipv6InterfaceData::AdvPrefix& p = rtrVars.advPrefixList[i];
         /*Ipv6Address globalAddr = */
         autoConfRouterGlobalScopeAddress(p);
-        assignAddress(p.rtrAddress, false, SIMTIME_ZERO, SIMTIME_ZERO);
+        assignAddress(p.rtrAddress, false, SIMCLOCKTIME_ZERO, SIMCLOCKTIME_ZERO);
     }
 }
 
@@ -636,7 +636,7 @@ void Ipv6InterfaceData::updateHomeNetworkInfo(const Ipv6Address& hoa, const Ipv6
     Ipv6Address addr = getGlobalAddress(HoA);
 
     if (addr == Ipv6Address::UNSPECIFIED_ADDRESS)
-        this->assignAddress(hoa, false, SIMTIME_ZERO, SIMTIME_ZERO, true);
+        this->assignAddress(hoa, false, SIMCLOCKTIME_ZERO, SIMCLOCKTIME_ZERO, true);
 }
 
 #endif /* WITH_xMIPv6 */

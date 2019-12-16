@@ -254,7 +254,7 @@ TlvOptionBase *Ipv4HeaderSerializer::deserializeOption(MemoryInputStream& stream
                 for (unsigned int count = 0; count < option->getRecordAddressArraySize(); count++) {
                     if (bytes == 8)
                         option->setRecordAddress(count, stream.readIpv4Address());
-                    option->setRecordTimestamp(count, SimTime(stream.readUint32Be(), SIMTIME_MS));
+                    option->setRecordTimestamp(count, SimClockTime(stream.readUint32Be(), SIMTIME_MS));
                 }
                 return option;
             }

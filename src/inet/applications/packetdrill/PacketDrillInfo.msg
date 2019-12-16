@@ -17,6 +17,9 @@
 
 
 import inet.common.INETDefs;
+import inet.common.clock.SimClockTime;
+
+namespace inet;
 
 message PacketDrillInfo
 {

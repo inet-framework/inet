@@ -25,6 +25,7 @@
 
 #include "inet/common/lifecycle/LifecycleUnsupported.h"
 #include "inet/common/packet/Packet.h"
+#include "inet/common/SimpleModule.h"
 #include "inet/networklayer/contract/ipv6/Ipv6Address.h"
 #include "inet/networklayer/icmpv6/Ipv6NdMessage_m.h"
 #include "inet/networklayer/icmpv6/Ipv6NeighbourCache.h"
@@ -46,7 +47,7 @@ class xMIPv6;
 /**
  * Implements RFC 2461 Neighbor Discovery for Ipv6.
  */
-class INET_API Ipv6NeighbourDiscovery : public cSimpleModule, public LifecycleUnsupported
+class INET_API Ipv6NeighbourDiscovery : public SimpleModule, public LifecycleUnsupported
 {
   public:
     typedef std::vector<Packet *> MsgPtrVector;

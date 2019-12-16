@@ -499,7 +499,7 @@ void Igmpv2::processQuery(InterfaceEntry *ie, Packet *packet)
 
     Ipv4Address groupAddr = igmpQry->getGroupAddress();
     const Ptr<const Igmpv2Query>& v2Query = dynamicPtrCast<const Igmpv2Query>(igmpQry);
-    simclocktime_t maxRespTime = SimTime(v2Query ? v2Query->getMaxRespTimeCode() : 100, (SimTimeUnit)-1);
+    simclocktime_t maxRespTime = SimClockTime(v2Query ? v2Query->getMaxRespTimeCode() : 100, (SimTimeUnit)-1);
 
     if (groupAddr.isUnspecified()) {
         // general query
@@ -550,7 +550,7 @@ void Igmpv2::processGroupQuery(InterfaceEntry *ie, HostGroupData *group, simcloc
     if (group->state == IGMP_HGS_DELAYING_MEMBER) {
         cMessage *timer = group->timer;
         simclocktime_t maxAbsoluteRespTime = getClockTime() + maxRespTimeSecs;
-        if (timer->isScheduled() && maxAbsoluteRespTime < timer->getArrivalTime())
+        if (timer->isScheduled() && maxAbsoluteRespTime < getArrivalClockTime(timer))
             startHostTimer(ie, group, maxRespTimeSecs);
     }
     else if (group->state == IGMP_HGS_IDLE_MEMBER) {

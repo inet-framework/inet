@@ -129,7 +129,7 @@ void UdpVideoStreamServer::sendStreamData(cMessage *timer)
     if (pktLen > d->bytesLeft)
         pktLen = d->bytesLeft;
     const auto& payload = makeShared<ByteCountChunk>(B(pktLen));
-    payload->addTag<CreationTimeTag>()->setCreationTime(getClockTime());
+    payload->addTag<CreationTimeTag>()->setCreationTime(simTime());
     pkt->insertAtBack(payload);
 
     emit(packetSentSignal, pkt);

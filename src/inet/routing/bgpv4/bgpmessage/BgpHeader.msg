@@ -21,6 +21,7 @@ import inet.common.Units;
 import inet.common.packet.chunk.Chunk;
 import inet.networklayer.contract.ipv4.Ipv4Address;
 import inet.routing.bgpv4.BgpCommon;
+import inet.common.clock.SimClockTime;
 
 namespace inet::bgp;
 

@@ -78,7 +78,7 @@ class INET_API Flooding : public NetworkProtocolBase, public INetworkProtocol
         simclocktime_t delTime;
 
       public:
-        Bcast(unsigned long n = 0, const L3Address& s = L3Address(), simclocktime_t_cref d = SIMTIME_ZERO) :
+        Bcast(unsigned long n = 0, const L3Address& s = L3Address(), simclocktime_t d = SIMCLOCKTIME_ZERO) :
             seqNum(n), srcAddr(s), delTime(d)
         {
         }

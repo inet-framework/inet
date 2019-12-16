@@ -22,6 +22,7 @@
 #include <vector>
 
 #include "inet/common/INETDefs.h"
+#include "inet/common/clock/SimClockTime.h"
 
 #ifndef WITH_IPv6
 #error "IPv6 feature disabled"
@@ -489,7 +490,7 @@ class INET_API Ipv6InterfaceData : public InterfaceProtocolData
      * in Router Advertisements. Zero expiry time means infinity.
      */
     virtual void updateMatchingAddressExpiryTimes(const Ipv6Address& prefix, int length,
-            simclocktime_t expiryTime = SIMTIME_ZERO, simclocktime_t prefExpiryTime = SIMTIME_ZERO);
+            simclocktime_t expiryTime = SIMCLOCKTIME_ZERO, simclocktime_t prefExpiryTime = SIMCLOCKTIME_ZERO);
 
     /**
      * Returns the number of addresses the interface has.

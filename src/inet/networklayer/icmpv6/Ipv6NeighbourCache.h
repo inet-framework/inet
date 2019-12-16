@@ -23,6 +23,7 @@
 #include <vector>
 
 #include "inet/common/packet/Packet.h"
+#include "inet/common/clock/SimClockTime.h"
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/networklayer/contract/ipv6/Ipv6Address.h"
 

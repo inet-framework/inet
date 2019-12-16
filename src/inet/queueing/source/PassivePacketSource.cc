@@ -73,7 +73,7 @@ Packet *PassivePacketSource::canPopPacket(cGate *gate) const
 Packet *PassivePacketSource::popPacket(cGate *gate)
 {
     Enter_Method("popPacket");
-    if (providingTimer->isScheduled()  && providingTimer->getArrivalTime() > getClockTime())
+    if (providingTimer->isScheduled()  && getArrivalClockTime(providingTimer) > getClockTime())
         throw cRuntimeError("Another packet is already being provided");
     else {
         auto packet = providePacket(gate);

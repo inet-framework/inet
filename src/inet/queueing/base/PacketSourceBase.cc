@@ -117,7 +117,7 @@ Ptr<Chunk> PacketSourceBase::createPacketContent() const
 Packet *PacketSourceBase::createPacket()
 {
     auto packetContent = createPacketContent();
-    packetContent->addTag<CreationTimeTag>()->setCreationTime(getClockTime());
+    packetContent->addTag<CreationTimeTag>()->setCreationTime(simTime());
     auto packetName = createPacketName(packetContent);
     auto packet = new Packet(packetName, packetContent);
     numProcessedPackets++;

@@ -52,7 +52,7 @@ void UdpBasicApp::initialize(int stage)
         stopTime = par("stopTime");
         packetName = par("packetName");
         dontFragment = par("dontFragment");
-        if (stopTime >= SIMTIME_ZERO && stopTime < startTime)
+        if (stopTime >= SIMCLOCKTIME_ZERO && stopTime < startTime)
             throw cRuntimeError("Invalid startTime/stopTime parameters");
         selfMsg = new cMessage("sendTimer");
     }
@@ -119,7 +119,7 @@ void UdpBasicApp::sendPacket()
     const auto& payload = makeShared<ApplicationPacket>();
     payload->setChunkLength(B(par("messageLength")));
     payload->setSequenceNumber(numSent);
-    payload->addTag<CreationTimeTag>()->setCreationTime(getClockTime());
+    payload->addTag<CreationTimeTag>()->setCreationTime(simTime());
     packet->insertAtBack(payload);
     L3Address destAddr = chooseDestAddr();
     emit(packetSentSignal, packet);
@@ -152,7 +152,7 @@ void UdpBasicApp::processStart()
         processSend();
     }
     else {
-        if (stopTime >= SIMTIME_ZERO) {
+        if (stopTime >= SIMCLOCKTIME_ZERO) {
             selfMsg->setKind(STOP);
             scheduleClockEvent(stopTime, selfMsg);
         }
@@ -163,7 +163,7 @@ void UdpBasicApp::processSend()
 {
     sendPacket();
     simclocktime_t d = getClockTime() + par("sendInterval");
-    if (stopTime < SIMTIME_ZERO || d < stopTime) {
+    if (stopTime < SIMCLOCKTIME_ZERO || d < stopTime) {
         selfMsg->setKind(SEND);
         scheduleClockEvent(d, selfMsg);
     }
@@ -241,7 +241,7 @@ void UdpBasicApp::processPacket(Packet *pk)
 void UdpBasicApp::handleStartOperation(LifecycleOperation *operation)
 {
     simclocktime_t start = std::max(startTime, getClockTime());
-    if ((stopTime < SIMTIME_ZERO) || (start < stopTime) || (start == stopTime && startTime == stopTime)) {
+    if ((stopTime < SIMCLOCKTIME_ZERO) || (start < stopTime) || (start == stopTime && startTime == stopTime)) {
         selfMsg->setKind(START);
         scheduleClockEvent(start, selfMsg);
     }

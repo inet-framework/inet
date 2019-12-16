@@ -23,6 +23,7 @@
 #include <map>
 
 #include "inet/common/INETDefs.h"
+#include "inet/common/SimpleModule.h"
 #include "inet/common/lifecycle/LifecycleUnsupported.h"
 #include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
@@ -51,7 +52,7 @@ class TcpLwipSendQueue;
  * Encapsulates a Network Simulation Cradle (NSC) instance.
  */
 
-class INET_API TcpLwip : public cSimpleModule, public LwipTcpStackIf, public LifecycleUnsupported
+class INET_API TcpLwip : public SimpleModule, public LwipTcpStackIf, public LifecycleUnsupported
 {
   public:
     TcpLwip();

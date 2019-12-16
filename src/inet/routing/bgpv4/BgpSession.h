@@ -67,6 +67,8 @@ private:
   friend struct fsm::OpenConfirm;
   friend struct fsm::Established;
 
+  protected:
+    simclocktime_t getClockTime() const { return SIMCLOCKTIME_ZERO; } //FIXME TODO: bgpRouter.getClockTime(); }
   public:
     BgpSession(BgpRouter& bgpRouter);
     virtual ~BgpSession();

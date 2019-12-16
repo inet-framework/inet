@@ -166,7 +166,7 @@ void RtpProfile::createSenderModule(RtpInnerPacket *rinp)
     rtpPayloadSender->gate("profileOut")->connectTo(gate("payloadSenderIn"));
 
     rtpPayloadSender->callInitialize();
-    rtpPayloadSender->scheduleStart(getClockTime());
+    rtpPayloadSender->scheduleStart(simTime());
 
     RtpInnerPacket *rinpOut1 = new RtpInnerPacket("senderModuleCreated()");
     rinpOut1->setSenderModuleCreatedPkt(ssrc);
@@ -236,7 +236,7 @@ void RtpProfile::dataIn(RtpInnerPacket *rinp)
             for (int i = 0; receiverModule->callInitialize(i); i++)
                 ;
 
-            receiverModule->scheduleStart(getClockTime());
+            receiverModule->scheduleStart(simTime());
         }
     }
 

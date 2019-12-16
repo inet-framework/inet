@@ -197,7 +197,7 @@ const Ptr<Chunk> AodvControlPacketsSerializer::deserialize(MemoryInputStream& st
             aodvRrep->setDestAddr(L3Address(stream.readIpv4Address()));
             aodvRrep->setDestSeqNum(stream.readUint32Be());
             aodvRrep->setOriginatorAddr(L3Address(stream.readIpv4Address()));
-            aodvRrep->setLifeTime(SimTime(stream.readUint32Be(), SIMTIME_MS));
+            aodvRrep->setLifeTime(SimClockTime(stream.readUint32Be(), SIMTIME_MS));
             aodvRrep->setChunkLength(B(20));
             return aodvRrep;
         }
@@ -212,7 +212,7 @@ const Ptr<Chunk> AodvControlPacketsSerializer::deserialize(MemoryInputStream& st
             aodvRrep->setDestSeqNum(stream.readUint32Be());
             aodvRrep->setDestAddr(L3Address(stream.readIpv6Address()));
             aodvRrep->setOriginatorAddr(L3Address(stream.readIpv6Address()));
-            aodvRrep->setLifeTime(SimTime(stream.readUint32Be(), SIMTIME_MS));
+            aodvRrep->setLifeTime(SimClockTime(stream.readUint32Be(), SIMTIME_MS));
             aodvRrep->setChunkLength(B(44));
             return aodvRrep;
         }

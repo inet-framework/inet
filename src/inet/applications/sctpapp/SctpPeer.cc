@@ -129,7 +129,7 @@ void SctpPeer::initialize(int stage)
         clientSocket.setCallback(this);
         clientSocket.setOutputGate(gate("socketOut"));
 
-        if (simclocktime_t(par("startTime")) > SIMTIME_ZERO) {    //FIXME is invalid the startTime == 0 ????
+        if (simclocktime_t(par("startTime")) > SIMCLOCKTIME_ZERO) {    //FIXME is invalid the startTime == 0 ????
             connectTimer = new cMessage("ConnectTimer", MSGKIND_CONNECT);
             scheduleClockEvent(par("startTime"), connectTimer);
         }
@@ -162,7 +162,7 @@ void SctpPeer::generateAndSend()
     for (int i = 0; i < numBytes; i++)
         vec[i] = (bytesSent + i) & 0xFF;
     applicationData->setBytes(vec);
-    applicationData->addTag<CreationTimeTag>()->setCreationTime(getClockTime());
+    applicationData->addTag<CreationTimeTag>()->setCreationTime(simTime());
     applicationPacket->insertAtBack(applicationData);
     auto sctpSendReq = applicationPacket->addTag<SctpSendReq>();
     sctpSendReq->setLast(true);
@@ -360,9 +360,9 @@ void SctpPeer::handleMessage(cMessage *msg)
                         i->second--;
                         SctpSimpleMessage *smsg = check_and_cast<SctpSimpleMessage *>(msg);
                         auto j = endToEndDelay.find(id);
-                        j->second->record(getClockTime() - smsg->getCreationTime());
+                        j->second->record(simTime() - smsg->getCreationTime());
                         auto k = histEndToEndDelay.find(id);
-                        k->second->collect(getClockTime() - smsg->getCreationTime());
+                        k->second->collect(simTime() - smsg->getCreationTime());
 
                         if (i->second == 0) {
                             Request *cmsg = new Request("SCTP_C_NO_OUTSTANDING", SCTP_C_NO_OUTSTANDING);
@@ -379,8 +379,8 @@ void SctpPeer::handleMessage(cMessage *msg)
                     const auto& smsg = message->peekData();
 
                     for (auto& region : smsg->getAllTags<CreationTimeTag>()) {
-                        m->second->record(getClockTime() - region.getTag()->getCreationTime());
-                        k->second->collect(getClockTime() - region.getTag()->getCreationTime());
+                        m->second->record(simTime() - region.getTag()->getCreationTime());
+                        k->second->collect(simTime() - region.getTag()->getCreationTime());
                     }
 
                     auto cmsg = new Packet("ApplicationPacket");
@@ -560,7 +560,7 @@ void SctpPeer::sendRequest(bool last)
     for (int i = 0; i < numBytes; i++)
         vec[i] = (bytesSent + i) & 0xFF;
     msg->setBytes(vec);
-    msg->addTag<CreationTimeTag>()->setCreationTime(getClockTime());
+    msg->addTag<CreationTimeTag>()->setCreationTime(simTime());
     cmsg->insertAtBack(msg);
     cmsg->setKind(ordered ? SCTP_C_SEND_ORDERED : SCTP_C_SEND_UNORDERED);
     auto sendCommand = cmsg->addTag<SctpSendReq>();

@@ -213,7 +213,7 @@ const Ptr<Chunk> BgpHeaderSerializer::deserialize(MemoryInputStream& stream) con
             uint16_t holdTime = stream.readUint16Be();
             if (holdTime > 0 && holdTime < 3)
                 bgpOpenMessage->markIncorrect();
-            bgpOpenMessage->setHoldTime(SimTime(holdTime, SIMTIME_S));
+            bgpOpenMessage->setHoldTime(SimClockTime(holdTime, SIMTIME_S));
             bgpOpenMessage->setBGPIdentifier(stream.readIpv4Address());
             unsigned short optionalParametersLength = stream.readByte();
             bgpOpenMessage->setOptionalParametersLength(optionalParametersLength);

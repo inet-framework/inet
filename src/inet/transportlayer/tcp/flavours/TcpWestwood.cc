@@ -30,7 +30,7 @@ Register_Class(TcpWestwood);
 TcpWestwoodStateVariables::TcpWestwoodStateVariables()
 {
     ssthresh = 65535;
-    w_RTTmin = SIMTIME_MAX;
+    w_RTTmin = SIMCLOCKTIME_MAX;
     w_a = 1;
     w_lastAckTime = 0;
     w_bwe = 0;

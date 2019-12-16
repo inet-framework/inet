@@ -67,7 +67,7 @@ void MeterTestApp::initialize()
     out << left << setw(12) << "Packet" << setw(12) << "Conformance" << "\n";
 
     double startTime = par("startTime");
-    if (stopTime < SIMTIME_ZERO || stopTime >= startTime)
+    if (stopTime < SIMCLOCKTIME_ZERO || stopTime >= startTime)
         scheduleAt(startTime, timer);
 }
 
@@ -88,7 +88,7 @@ void MeterTestApp::handleMessage(cMessage *msg)
       send(packet, "out");
 
       if ((numPackets == 0 || counter < numPackets) &&
-          (stopTime < SIMTIME_ZERO || simTime() < stopTime))
+          (stopTime < SIMCLOCKTIME_ZERO || simTime() < stopTime))
           scheduleAt(simTime() + par("iaTime"), msg);
       else
           delete msg;

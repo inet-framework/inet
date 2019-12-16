@@ -22,6 +22,7 @@
 #include "inet/common/INETDefs.h"
 #include "inet/common/lifecycle/LifecycleUnsupported.h"
 #include "inet/common/packet/Message.h"
+#include "inet/common/SimpleModule.h"
 #include "inet/transportlayer/contract/sctp/SctpSocket.h"
 #include "inet/transportlayer/sctp/SctpAssociation.h"
 
@@ -30,7 +31,7 @@ namespace inet {
 /**
  * Implements the SctpServer simple module. See the NED file for more info.
  */
-class INET_API SctpServer : public cSimpleModule, public LifecycleUnsupported
+class INET_API SctpServer : public SimpleModule, public LifecycleUnsupported
 {
   protected:
     struct ServerAssocStat

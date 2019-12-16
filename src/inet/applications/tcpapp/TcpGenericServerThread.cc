@@ -51,7 +51,7 @@ void TcpGenericServerThread::dataArrived(Packet *msg, bool)
     if (requestedBytes > B(0)) {
         Packet *outPacket = new Packet(msg->getName());
         const auto& payload = makeShared<ByteCountChunk>(requestedBytes);
-        payload->addTag<CreationTimeTag>()->setCreationTime(getClockTime());
+        payload->addTag<CreationTimeTag>()->setCreationTime(simTime());
         outPacket->insertAtBack(payload);
         getSocket()->send(outPacket);
     }

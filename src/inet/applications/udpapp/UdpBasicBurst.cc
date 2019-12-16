@@ -64,7 +64,7 @@ void UdpBasicBurst::initialize(int stage)
         delayLimit = par("delayLimit");
         startTime = par("startTime");
         stopTime = par("stopTime");
-        if (stopTime >= SIMTIME_ZERO && stopTime <= startTime)
+        if (stopTime >= SIMCLOCKTIME_ZERO && stopTime <= startTime)
             throw cRuntimeError("Invalid startTime/stopTime parameters");
 
         messageLengthPar = &par("messageLength");
@@ -113,7 +113,7 @@ Packet *UdpBasicBurst::createPacket()
     const auto& payload = makeShared<ApplicationPacket>();
     payload->setChunkLength(B(msgByteLength));
     payload->setSequenceNumber(numSent);
-    payload->addTag<CreationTimeTag>()->setCreationTime(getClockTime());
+    payload->addTag<CreationTimeTag>()->setCreationTime(simTime());
     pk->insertAtBack(payload);
     pk->addPar("sourceId") = getId();
     pk->addPar("msgId") = numSent;
@@ -176,7 +176,7 @@ void UdpBasicBurst::processStart()
 
 void UdpBasicBurst::processSend()
 {
-    if (stopTime < SIMTIME_ZERO || getClockTime() < stopTime) {
+    if (stopTime < SIMCLOCKTIME_ZERO || getClockTime() < stopTime) {
         // send and reschedule next sending
         if (isSource) // if the node is a sink, don't generate messages
             generateBurst();
@@ -269,7 +269,7 @@ void UdpBasicBurst::processPacket(Packet *pk)
     }
 
     if (delayLimit > 0) {
-        if (getClockTime() - pk->getTimestamp() > delayLimit) {
+        if (getClockTime() - SIMTIME_AS_CLOCKTIME(pk->getTimestamp()) > delayLimit) {  // "what the app thinks the packet's age is"
             EV_DEBUG << "Old packet: " << UdpSocket::getReceivedPacketInfo(pk) << endl;
             PacketDropDetails details;
             details.setReason(CONGESTION);
@@ -332,7 +332,7 @@ void UdpBasicBurst::generateBurst()
     if (activeBurst && nextPkt >= nextSleep)
         nextPkt = nextBurst;
 
-    if (stopTime >= SIMTIME_ZERO && nextPkt >= stopTime) {
+    if (stopTime >= SIMCLOCKTIME_ZERO && nextPkt >= stopTime) {
         timerNext->setKind(STOP);
         nextPkt = stopTime;
     }
@@ -351,7 +351,7 @@ void UdpBasicBurst::handleStartOperation(LifecycleOperation *operation)
 {
     simclocktime_t start = std::max(startTime, getClockTime());
 
-    if ((stopTime < SIMTIME_ZERO) || (start < stopTime) || (start == stopTime && startTime == stopTime)) {
+    if ((stopTime < SIMCLOCKTIME_ZERO) || (start < stopTime) || (start == stopTime && startTime == stopTime)) {
         timerNext->setKind(START);
         scheduleClockEvent(start, timerNext);
     }

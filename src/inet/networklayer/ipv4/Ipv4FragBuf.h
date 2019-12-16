@@ -21,6 +21,7 @@
 #include <map>
 
 #include "inet/common/INETDefs.h"
+#include "inet/common/clock/SimClockTime.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/packet/ReassemblyBuffer.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"

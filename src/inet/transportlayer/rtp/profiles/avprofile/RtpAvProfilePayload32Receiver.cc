@@ -153,7 +153,7 @@ void RtpAvProfilePayload32Receiver::processRtpPacket(Packet *rtpPacket)
                 }
 
                 // create sim line
-                sprintf(line, "%f %i %c-Frame", getClockTime().dbl(), frameSize * 8, picture);
+                sprintf(line, "%f %i %c-Frame", simTime().dbl(), frameSize * 8, picture);
                 // and write it to the file
                 _outputFileStream << line << endl;
             }

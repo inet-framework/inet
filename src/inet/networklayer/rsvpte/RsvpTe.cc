@@ -382,7 +382,7 @@ void RsvpTe::removeHello(HelloState *h)
     ASSERT(false);
 }
 
-void RsvpTe::sendPathNotify(int handler, const SessionObj& session, const SenderTemplateObj& sender, int status, simclocktime_t delay)
+void RsvpTe::sendPathNotify(int handler, const SessionObj& session, const SenderTemplateObj& sender, int status, simtime_t delay)
 {
     if (handler < 0)
         return; // handler not specified
@@ -399,7 +399,7 @@ void RsvpTe::sendPathNotify(int handler, const SessionObj& session, const Sender
     msg->setStatus(status);
 
     if (handler == getId())
-        scheduleClockEvent(getClockTime() + delay, msg);
+        scheduleAt(simTime() + delay, msg);
     else
         sendDirect(msg, delay, 0, mod, "from_rsvp");
 }

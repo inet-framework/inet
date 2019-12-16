@@ -64,7 +64,7 @@ void IpvxTrafGen::initialize(int stage)
         numPackets = par("numPackets");
         startTime = par("startTime");
         stopTime = par("stopTime");
-        if (stopTime >= SIMTIME_ZERO && stopTime < startTime)
+        if (stopTime >= SIMCLOCKTIME_ZERO && stopTime < startTime)
             throw cRuntimeError("Invalid startTime/stopTime parameters");
 
         packetLengthPar = &par("packetLength");
@@ -136,7 +136,7 @@ void IpvxTrafGen::scheduleNextPacket(simclocktime_t previous)
         next = previous + *sendIntervalPar;
         timer->setKind(NEXT);
     }
-    if (stopTime < SIMTIME_ZERO || next < stopTime)
+    if (stopTime < SIMCLOCKTIME_ZERO || next < stopTime)
         scheduleClockEvent(next, timer);
 }
 
@@ -163,7 +163,7 @@ void IpvxTrafGen::sendPacket()
 
     Packet *packet = new Packet(msgName);
     const auto& payload = makeShared<ByteCountChunk>(B(*packetLengthPar));
-    payload->addTag<CreationTimeTag>()->setCreationTime(getClockTime());
+    payload->addTag<CreationTimeTag>()->setCreationTime(simTime());
     packet->insertAtBack(payload);
 
     L3Address destAddr = chooseDestAddr();

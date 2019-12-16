@@ -41,7 +41,7 @@ void UdpSink::initialize(int stage)
         localPort = par("localPort");
         startTime = par("startTime");
         stopTime = par("stopTime");
-        if (stopTime >= SIMTIME_ZERO && stopTime < startTime)
+        if (stopTime >= SIMCLOCKTIME_ZERO && stopTime < startTime)
             throw cRuntimeError("Invalid startTime/stopTime parameters");
         selfMsg = new cMessage("UDPSinkTimer");
     }
@@ -129,7 +129,7 @@ void UdpSink::processStart()
     socket.bind(localPort);
     setSocketOptions();
 
-    if (stopTime >= SIMTIME_ZERO) {
+    if (stopTime >= SIMCLOCKTIME_ZERO) {
         selfMsg->setKind(STOP);
         scheduleClockEvent(stopTime, selfMsg);
     }
@@ -154,7 +154,7 @@ void UdpSink::processPacket(Packet *pk)
 void UdpSink::handleStartOperation(LifecycleOperation *operation)
 {
     simclocktime_t start = std::max(startTime, getClockTime());
-    if ((stopTime < SIMTIME_ZERO) || (start < stopTime) || (start == stopTime && startTime == stopTime)) {
+    if ((stopTime < SIMCLOCKTIME_ZERO) || (start < stopTime) || (start == stopTime && startTime == stopTime)) {
         selfMsg->setKind(START);
         scheduleClockEvent(start, selfMsg);
     }

@@ -632,7 +632,7 @@ xMIPv6::BuTransmitIfEntry *xMIPv6::fetchBUTransmitIfEntry(InterfaceEntry *ie, co
 }
 
 void xMIPv6::sendMobilityMessageToIPv6Module(Packet *msg, const Ipv6Address& destAddr,
-        const Ipv6Address& srcAddr, int interfaceId, simclocktime_t sendTime)    // overloaded for use at CN - CB
+        const Ipv6Address& srcAddr, int interfaceId, simtime_t sendTime)    // overloaded for use at CN - CB
 {
     EV_INFO << "Appending ControlInfo to mobility message\n";
     delete msg->removeTagIfPresent<DispatchProtocolReq>();

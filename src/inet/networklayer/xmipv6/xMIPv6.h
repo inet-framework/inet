@@ -27,6 +27,7 @@
 #include <vector>
 
 #include "inet/common/INETDefs.h"
+#include "inet/common/SimpleModule.h"
 #include "inet/networklayer/contract/ipv6/Ipv6Address.h"
 #include "inet/networklayer/ipv6tunneling/Ipv6Tunneling.h"
 #include "inet/networklayer/xmipv6/BindingUpdateList.h"
@@ -64,7 +65,7 @@ class Ipv6RoutingTable;
 /**
  * Implements RFC 3775 Mobility Support in Ipv6.
  */
-class INET_API xMIPv6 : public cSimpleModule
+class INET_API xMIPv6 : public SimpleModule
 {
   public:
     virtual ~xMIPv6();
@@ -240,7 +241,7 @@ class INET_API xMIPv6 : public cSimpleModule
      */
     void sendMobilityMessageToIPv6Module(Packet *msg, const Ipv6Address& destAddr,
             const Ipv6Address& srcAddr = Ipv6Address::UNSPECIFIED_ADDRESS, int interfaceId = -1,
-            simclocktime_t sendTime = 0);    // overloaded for use at CN - CB
+            simtime_t sendTime = 0);    // overloaded for use at CN - CB
     //void sendMobilityMessageToIPv6Module(cMessage *msg, const Ipv6Address& destAddr, simclocktime_t sendTime = 0); // overloaded for use at CN - CB
 
     /**

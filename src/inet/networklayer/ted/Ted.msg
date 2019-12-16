@@ -15,6 +15,7 @@
 
 import inet.common.INETDefs;
 import inet.networklayer.contract.ipv4.Ipv4Address;
+import inet.common.clock.SimClockTime;
 
 namespace inet;
 

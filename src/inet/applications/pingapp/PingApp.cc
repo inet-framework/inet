@@ -101,7 +101,7 @@ void PingApp::initialize(int stage)
 //            throw cRuntimeError("Invalid count=%d parameter (should use -1 or a larger than zero value)", count);
         startTime = par("startTime");
         stopTime = par("stopTime");
-        if (stopTime >= SIMTIME_ZERO && stopTime < startTime)
+        if (stopTime >= SIMCLOCKTIME_ZERO && stopTime < startTime)
             throw cRuntimeError("Invalid startTime/stopTime parameters");
         printPing = par("printPing");
         continuous = par("continuous");
@@ -114,7 +114,7 @@ void PingApp::initialize(int stage)
         lastStart = -1;
         sendSeqNo = expectedReplySeqNo = 0;
         for (int i = 0; i < PING_HISTORY_SIZE; i++) {
-            sendTimeHistory[i] = SIMTIME_MAX;
+            sendTimeHistory[i] = SIMCLOCKTIME_MAX;
             pongReceived[i] = false;
         }
         WATCH(sendSeqNo);
@@ -356,14 +356,14 @@ void PingApp::handleCrashOperation(LifecycleOperation *operation)
 void PingApp::scheduleNextPingRequest(simclocktime_t previous, bool withSleep)
 {
     simclocktime_t next;
-    if (previous < SIMTIME_ZERO)
+    if (previous < SIMCLOCKTIME_ZERO)
         next = getClockTime() <= startTime ? startTime : getClockTime();
     else {
         next = previous + *sendIntervalPar;
         if (withSleep)
             next += *sleepDurationPar;
     }
-    if (stopTime < SIMTIME_ZERO || next < stopTime)
+    if (stopTime < SIMCLOCKTIME_ZERO || next < stopTime)
         scheduleClockEvent(next, timer);
 }
 
@@ -472,7 +472,7 @@ void PingApp::processPingResponse(int originatorId, int seqNo, Packet *packet)
     // if the send time is no longer available (i.e. the packet is very old and the
     // sendTime was overwritten in the circular buffer) then we just return a 0
     // to signal that this value should not be used during the RTT statistics)
-    simclocktime_t rtt = SIMTIME_ZERO;
+    simclocktime_t rtt = SIMCLOCKTIME_ZERO;
     bool isDup = false;
     if (sendSeqNo - seqNo < PING_HISTORY_SIZE) {
         int idx = seqNo % PING_HISTORY_SIZE;
@@ -495,7 +495,7 @@ void PingApp::processPingResponse(int originatorId, int seqNo, Packet *packet)
 
 void PingApp::countPingResponse(int bytes, long seqNo, simclocktime_t rtt, bool isDup)
 {
-    EV_INFO << "Ping reply #" << seqNo << " arrived, rtt=" << (rtt == SIMTIME_ZERO ? "unknown" : rtt.str().c_str()) << (isDup ? ", duplicated" : "") << "\n";
+    EV_INFO << "Ping reply #" << seqNo << " arrived, rtt=" << (rtt == SIMCLOCKTIME_ZERO ? "unknown" : rtt.str().c_str()) << (isDup ? ", duplicated" : "") << "\n";
     emit(pingRxSeqSignal, seqNo);
 
     if (isDup)
@@ -504,9 +504,9 @@ void PingApp::countPingResponse(int bytes, long seqNo, simclocktime_t rtt, bool 
         numPongs++;
 
     // count only non 0 RTT values as 0s are invalid
-    if (rtt > SIMTIME_ZERO && !isDup) {
-        rttStat.collect(rtt);
-        emit(rttSignal, rtt);
+    if (rtt > SIMCLOCKTIME_ZERO && !isDup) {
+        rttStat.collect(rtt.asSimTime());
+        emit(rttSignal, rtt.asSimTime());
     }
 
     if (seqNo == expectedReplySeqNo) {
@@ -529,7 +529,7 @@ void PingApp::countPingResponse(int bytes, long seqNo, simclocktime_t rtt, bool 
               // ping reply arrived too late: count as out-of-order arrival (not loss after all)
         EV_DETAIL << "Arrived out of order (too late)\n";
         outOfOrderArrivalCount++;
-        if (!isDup && rtt > SIMTIME_ZERO)
+        if (!isDup && rtt > SIMCLOCKTIME_ZERO)
             lossCount--;
         emit(numOutOfOrderArrivalsSignal, outOfOrderArrivalCount);
         emit(numLostSignal, lossCount);

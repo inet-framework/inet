@@ -73,7 +73,7 @@ void SimpleVoipSender::initialize(int stage)
         // calculating traffic starting time
         simclocktime_t startTime(par("startTime"));
         stopTime = par("stopTime");
-        if (stopTime >= SIMTIME_ZERO && stopTime < startTime)
+        if (stopTime >= SIMCLOCKTIME_ZERO && stopTime < startTime)
             throw cRuntimeError("Invalid startTime/stopTime settings: startTime %g s greater than stopTime %g s", SIMTIME_DBL(startTime), SIMTIME_DBL(stopTime));
 
         scheduleClockEvent(startTime, selfSource);
@@ -99,7 +99,7 @@ void SimpleVoipSender::talkspurt(simclocktime_t dur)
     simclocktime_t startTime = curTime;
     if (selfSender->isScheduled()) {
         // silence was too short, detected overlapping talkspurts
-        simclocktime_t delta = selfSender->getArrivalTime() - curTime;
+        simclocktime_t delta = getArrivalClockTime(selfSender) - curTime;
         startTime += delta;
         dur -= SIMTIME_DBL(delta);
         cancelClockEvent(selfSender);
@@ -116,14 +116,14 @@ void SimpleVoipSender::talkspurt(simclocktime_t dur)
 void SimpleVoipSender::selectTalkOrSilenceInterval()
 {
     simclocktime_t now = getClockTime();
-    if (stopTime >= SIMTIME_ZERO && now >= stopTime)
+    if (stopTime >= SIMCLOCKTIME_ZERO && now >= stopTime)
         return;
 
     if (isTalk) {
         silenceDuration = par("silenceDuration");
         EV_DEBUG << "SILENCE: " << "Duration: " << silenceDuration << " seconds\n\n";
         simclocktime_t endSilence = now + silenceDuration;
-        if (stopTime >= SIMTIME_ZERO && endSilence > stopTime)
+        if (stopTime >= SIMCLOCKTIME_ZERO && endSilence > stopTime)
             endSilence = stopTime;
         scheduleClockEvent(endSilence, selfSource);
         isTalk = false;
@@ -132,7 +132,7 @@ void SimpleVoipSender::selectTalkOrSilenceInterval()
         talkspurtDuration = par("talkspurtDuration");
         EV_DEBUG << "TALKSPURT: " << talkspurtID << " Duration: " << talkspurtDuration << " seconds\n\n";
         simclocktime_t endTalk = now + talkspurtDuration;
-        if (stopTime >= SIMTIME_ZERO && endTalk > stopTime) {
+        if (stopTime >= SIMCLOCKTIME_ZERO && endTalk > stopTime) {
             endTalk = stopTime;
             talkspurtDuration = stopTime - now;
         }

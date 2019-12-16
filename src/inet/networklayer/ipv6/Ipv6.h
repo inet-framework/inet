@@ -22,6 +22,7 @@
 #include <set>
 
 #include "inet/common/INETDefs.h"
+#include "inet/common/SimpleModule.h"
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/lifecycle/LifecycleUnsupported.h"
 #include "inet/common/packet/Message.h"
@@ -41,7 +42,7 @@ class Icmpv6Header;
 /**
  * Ipv6 implementation.
  */
-class INET_API Ipv6 : public cSimpleModule, public NetfilterBase, public LifecycleUnsupported, public INetworkProtocol, public IProtocolRegistrationListener
+class INET_API Ipv6 : public SimpleModule, public NetfilterBase, public LifecycleUnsupported, public INetworkProtocol, public IProtocolRegistrationListener
 {
   public:
     /**

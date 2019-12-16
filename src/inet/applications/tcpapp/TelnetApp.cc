@@ -40,7 +40,7 @@ TelnetApp::~TelnetApp()
 
 void TelnetApp::checkedScheduleAt(simclocktime_t t, cMessage *msg)
 {
-    if (stopTime < SIMTIME_ZERO || t < stopTime)
+    if (stopTime < SIMCLOCKTIME_ZERO || t < stopTime)
         scheduleClockEvent(t, msg);
 }
 
@@ -54,7 +54,7 @@ void TelnetApp::initialize(int stage)
         WATCH(numLinesToType);
         simclocktime_t startTime = par("startTime");
         stopTime = par("stopTime");
-        if (stopTime >= SIMTIME_ZERO && stopTime < startTime)
+        if (stopTime >= SIMCLOCKTIME_ZERO && stopTime < startTime)
             throw cRuntimeError("Invalid startTime/stopTime parameters");
         timeoutMsg = new cMessage("timer");
     }
@@ -65,7 +65,7 @@ void TelnetApp::handleStartOperation(LifecycleOperation *operation)
     simclocktime_t now = getClockTime();
     simclocktime_t startTime = par("startTime");
     simclocktime_t start = std::max(startTime, now);
-    if (timeoutMsg && ((stopTime < SIMTIME_ZERO) || (start < stopTime) || (start == stopTime && startTime == stopTime))) {
+    if (timeoutMsg && ((stopTime < SIMCLOCKTIME_ZERO) || (start < stopTime) || (start == stopTime && startTime == stopTime))) {
         timeoutMsg->setKind(MSGKIND_CONNECT);
         scheduleClockEvent(start, timeoutMsg);
     }
@@ -131,7 +131,7 @@ void TelnetApp::sendGenericAppMsg(int numBytes, int expectedReplyBytes)
     payload->setChunkLength(B(numBytes));
     payload->setExpectedReplyLength(B(expectedReplyBytes));
     payload->setServerClose(false);
-    payload->addTag<CreationTimeTag>()->setCreationTime(getClockTime());
+    payload->addTag<CreationTimeTag>()->setCreationTime(simTime());
     packet->insertAtBack(payload);
 
     sendPacket(packet);

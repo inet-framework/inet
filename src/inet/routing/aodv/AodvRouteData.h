@@ -22,6 +22,7 @@
 #include <set>
 
 #include "inet/common/INETDefs.h"
+#include "inet/common/clock/SimClockTime.h"
 #include "inet/networklayer/common/L3Address.h"
 
 namespace inet {
@@ -46,7 +47,7 @@ class INET_API AodvRouteData : public cObject
         repariable = false;
         beingRepaired = false;
         validDestNum = true;
-        lifeTime = SIMTIME_ZERO;
+        lifeTime = SIMCLOCKTIME_ZERO;
         destSeqNum = 0;
     }
 

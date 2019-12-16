@@ -89,7 +89,7 @@ void Ipv6::initialize(int stage)
         tunneling = getModuleFromPar<Ipv6Tunneling>(par("ipv6TunnelingModule"), this);
 
         curFragmentId = 0;
-        lastCheckTime = SIMTIME_ZERO;
+        lastCheckTime = SIMCLOCKTIME_ZERO;
         fragbuf.init(icmp);
 
         // NetFilter:

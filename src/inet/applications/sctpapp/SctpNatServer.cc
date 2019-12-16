@@ -100,7 +100,7 @@ void SctpNatServer::sendInfo(NatInfo *info)
         EV << " peer1-2=" << Ipv4Address(nat->peer1Addresses[1]).str() << " peer2-2=" << Ipv4Address(nat->peer2Addresses[1]).str() << endl;
 
     auto applicationData = makeShared<BytesChunk>(buffer, buflen);
-    applicationData->addTag<CreationTimeTag>()->setCreationTime(getClockTime());
+    applicationData->addTag<CreationTimeTag>()->setCreationTime(simTime());
     auto applicationPacket = new Packet("ApplicationPacket", SCTP_C_SEND_ORDERED);
     applicationPacket->insertAtBack(applicationData);
     auto sctpSendReq = applicationPacket->addTag<SctpSendReq>();
@@ -142,7 +142,7 @@ void SctpNatServer::sendInfo(NatInfo *info)
     EV << "Info for peer2: peer1-1=" << Ipv4Address(nat2->peer1Addresses[0]).str() << " peer2-1=" << Ipv4Address(nat2->peer2Addresses[0]).str() << "\n";
 
     auto applicationData2 = makeShared<BytesChunk>(buffer2, buflen);
-    applicationData2->addTag<CreationTimeTag>()->setCreationTime(getClockTime());
+    applicationData2->addTag<CreationTimeTag>()->setCreationTime(simTime());
     auto applicationPacket2 = new Packet("ApplicationPacket", SCTP_C_SEND_ORDERED);
     applicationPacket2->insertAtBack(applicationData2);
     auto sctpSendReq2 = applicationPacket2->addTag<SctpSendReq>();

@@ -900,7 +900,7 @@ void Rip::triggerUpdate()
         simclocktime_t updateTime = getClockTime() + delay;
         // Triggered updates may be suppressed if a regular
         // update is due by the time the triggered update would be sent.
-        if (!updateTimer->isScheduled() || updateTimer->getArrivalTime() > updateTime)
+        if (!updateTimer->isScheduled() || getArrivalClockTime(updateTimer) > updateTime)
         {
             EV_DETAIL << "scheduling triggered update \n";
             scheduleClockEvent(updateTime, triggeredUpdateTimer);

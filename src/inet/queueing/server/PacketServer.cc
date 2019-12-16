@@ -62,7 +62,7 @@ void PacketServer::startProcessingPacket()
 {
     packet = provider->popPacket(inputGate->getPathStartGate());
     take(packet);
-    packet->setArrival(getId(), inputGate->getId(), getClockTime());
+    packet->setArrival(getId(), inputGate->getId(), simTime());
     EV_INFO << "Processing packet " << packet->getName() << " started." << endl;
 }
 

@@ -44,7 +44,7 @@ void PacketGate::initialize(int stage)
         const char *changeTimesAsString = par("changeTimes");
         cStringTokenizer tokenizer(changeTimesAsString);
         while (tokenizer.hasMoreTokens())
-            changeTimes.push_back(SimTime::parse(tokenizer.nextToken()));
+            changeTimes.push_back(SimClockTime::parse(tokenizer.nextToken()));
 
     }
     else if (stage == INITSTAGE_QUEUEING) {

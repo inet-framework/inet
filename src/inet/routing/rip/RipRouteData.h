@@ -21,6 +21,7 @@
 #include <set>
 
 #include "inet/common/INETDefs.h"
+#include "inet/common/clock/SimClockTime.h"
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/contract/IRoute.h"

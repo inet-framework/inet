@@ -19,6 +19,7 @@ import inet.common.INETDefs;
 import inet.common.Units;
 import inet.networklayer.common.IpProtocolId;
 import inet.networklayer.contract.NetworkHeaderBase;
+import inet.common.clock.SimClockTime;
 
 cplusplus {{
 #include "inet/common/ProtocolGroup.h"

@@ -73,7 +73,7 @@ void EtherTrafGen::initialize(int stage)
 
         startTime = par("startTime");
         stopTime = par("stopTime");
-        if (stopTime >= SIMTIME_ZERO && stopTime < startTime)
+        if (stopTime >= SIMCLOCKTIME_ZERO && stopTime < startTime)
             throw cRuntimeError("Invalid startTime/stopTime parameters");
         llcSocket.setOutputGate(gate("out"));
     }
@@ -132,7 +132,7 @@ void EtherTrafGen::scheduleNextPacket(simclocktime_t previous)
         next = previous + *sendInterval;
         timerMsg->setKind(NEXT);
     }
-    if (stopTime < SIMTIME_ZERO || next < stopTime)
+    if (stopTime < SIMCLOCKTIME_ZERO || next < stopTime)
         scheduleClockEvent(next, timerMsg);
 }
 
@@ -164,7 +164,7 @@ void EtherTrafGen::sendBurstPackets()
         Packet *datapacket = new Packet(msgname, IEEE802CTRL_DATA);
         long len = *packetLength;
         const auto& payload = makeShared<ByteCountChunk>(B(len));
-        payload->addTag<CreationTimeTag>()->setCreationTime(getClockTime());
+        payload->addTag<CreationTimeTag>()->setCreationTime(simTime());
         datapacket->insertAtBack(payload);
         datapacket->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ieee8022);
         datapacket->addTag<MacAddressReq>()->setDestAddress(destMacAddress);

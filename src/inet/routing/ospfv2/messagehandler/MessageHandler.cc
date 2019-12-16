@@ -29,7 +29,7 @@ namespace ospfv2 {
 
 using namespace ospf;
 
-MessageHandler::MessageHandler(Router *containingRouter, cSimpleModule *containingModule) :
+MessageHandler::MessageHandler(Router *containingRouter, SimpleModule *containingModule) :
     IMessageHandler(containingRouter),
     ospfModule(containingModule),
     helloHandler(containingRouter),
@@ -384,7 +384,7 @@ void MessageHandler::clearTimer(cMessage *timer)
 
 void MessageHandler::startTimer(cMessage *timer, simclocktime_t delay)
 {
-    ospfModule->scheduleClockEvent(getClockTime() + delay, timer);
+    ospfModule->scheduleClockEvent(ospfModule->getClockTime() + delay, timer);
 }
 
 void MessageHandler::printEvent(const char *eventString, const Ospfv2Interface *onInterface, const Neighbor *forNeighbor    /*= nullptr*/) const

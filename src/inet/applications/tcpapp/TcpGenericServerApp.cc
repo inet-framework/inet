@@ -129,7 +129,7 @@ void TcpGenericServerApp::handleMessage(cMessage *msg)
                 payload->setChunkLength(requestedBytes);
                 payload->setExpectedReplyLength(B(0));
                 payload->setReplyDelay(0);
-                payload->addTag<CreationTimeTag>()->setCreationTime(getClockTime());
+                payload->addTag<CreationTimeTag>()->setCreationTime(simTime());
                 outPacket->insertAtBack(payload);
                 sendOrSchedule(outPacket, delay + msgDelay);
             }

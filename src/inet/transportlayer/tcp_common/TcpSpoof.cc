@@ -83,7 +83,7 @@ void TcpSpoof::sendToIP(Packet *pk, L3Address src, L3Address dest)
 unsigned long TcpSpoof::chooseInitialSeqNum()
 {
     // choose an initial send sequence number in the same way as TCP does
-    return (unsigned long)SIMTIME_DBL(fmod(getClockTime() * 250000.0, 1.0 + (double)(unsigned)0xffffffffUL)) & 0xffffffffUL;
+    return 0; //FIXME TODO: (unsigned long)SIMTIME_DBL(fmod(getClockTime() * 250000.0, 1.0 + (double)(unsigned)0xffffffffUL)) & 0xffffffffUL;
 }
 
 } // namespace tcp

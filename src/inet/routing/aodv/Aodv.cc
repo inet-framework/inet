@@ -48,8 +48,8 @@ void Aodv::initialize(int stage)
     RoutingProtocolBase::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
-        lastBroadcastTime = SIMTIME_ZERO;
-        rebootTime = SIMTIME_ZERO;
+        lastBroadcastTime = SIMCLOCKTIME_ZERO;
+        rebootTime = SIMCLOCKTIME_ZERO;
         rreqId = sequenceNum = 0;
         rreqCount = rerrCount = 0;
         host = getContainingNode(this);
@@ -1487,7 +1487,7 @@ void Aodv::expungeRoutes()
 
 void Aodv::scheduleExpungeRoutes()
 {
-    simclocktime_t nextExpungeTime = SimTime::getMaxTime();
+    simclocktime_t nextExpungeTime = SimClockTime::getMaxTime();
     for (int i = 0; i < routingTable->getNumRoutes(); i++) {
         IRoute *route = routingTable->getRoute(i);
 
@@ -1499,7 +1499,7 @@ void Aodv::scheduleExpungeRoutes()
                 nextExpungeTime = routeData->getLifeTime();
         }
     }
-    if (nextExpungeTime == SimTime::getMaxTime()) {
+    if (nextExpungeTime == SimClockTime::getMaxTime()) {
         if (expungeTimer->isScheduled())
             cancelClockEvent(expungeTimer);
     }
@@ -1507,7 +1507,7 @@ void Aodv::scheduleExpungeRoutes()
         if (!expungeTimer->isScheduled())
             scheduleClockEvent(nextExpungeTime, expungeTimer);
         else {
-            if (expungeTimer->getArrivalTime() != nextExpungeTime) {
+            if (getArrivalClockTime(expungeTimer) != nextExpungeTime) {
                 cancelClockEvent(expungeTimer);
                 scheduleClockEvent(nextExpungeTime, expungeTimer);
             }
@@ -1693,7 +1693,7 @@ void Aodv::handleRREPACKTimer()
 
 void Aodv::handleBlackListTimer()
 {
-    simclocktime_t nextTime = SimTime::getMaxTime();
+    simclocktime_t nextTime = SimClockTime::getMaxTime();
 
     for (auto it = blacklist.begin(); it != blacklist.end(); ) {
         auto current = it++;
@@ -1707,7 +1707,7 @@ void Aodv::handleBlackListTimer()
             nextTime = current->second;
     }
 
-    if (nextTime != SimTime::getMaxTime())
+    if (nextTime != SimClockTime::getMaxTime())
         scheduleClockEvent(nextTime, blacklistTimer);
 }
 

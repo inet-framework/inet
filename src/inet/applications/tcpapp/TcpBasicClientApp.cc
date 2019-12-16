@@ -46,7 +46,7 @@ void TcpBasicClientApp::initialize(int stage)
 
         startTime = par("startTime");
         stopTime = par("stopTime");
-        if (stopTime >= SIMTIME_ZERO && stopTime < startTime)
+        if (stopTime >= SIMCLOCKTIME_ZERO && stopTime < startTime)
             throw cRuntimeError("Invalid startTime/stopTime parameters");
         timeoutMsg = new cMessage("timer");
     }
@@ -56,7 +56,7 @@ void TcpBasicClientApp::handleStartOperation(LifecycleOperation *operation)
 {
     simclocktime_t now = getClockTime();
     simclocktime_t start = std::max(startTime, now);
-    if (timeoutMsg && ((stopTime < SIMTIME_ZERO) || (start < stopTime) || (start == stopTime && startTime == stopTime))) {
+    if (timeoutMsg && ((stopTime < SIMCLOCKTIME_ZERO) || (start < stopTime) || (start == stopTime && startTime == stopTime))) {
         timeoutMsg->setKind(MSGKIND_CONNECT);
         scheduleClockEvent(start, timeoutMsg);
     }
@@ -90,7 +90,7 @@ void TcpBasicClientApp::sendRequest()
     payload->setChunkLength(B(requestLength));
     payload->setExpectedReplyLength(B(replyLength));
     payload->setServerClose(false);
-    payload->addTag<CreationTimeTag>()->setCreationTime(getClockTime());
+    payload->addTag<CreationTimeTag>()->setCreationTime(simTime());
     packet->insertAtBack(payload);
 
     EV_INFO << "sending request with " << requestLength << " bytes, expected reply length " << replyLength << " bytes,"
@@ -144,7 +144,7 @@ void TcpBasicClientApp::rescheduleOrDeleteTimer(simclocktime_t d, short int msgK
 {
     cancelClockEvent(timeoutMsg);
 
-    if (stopTime < SIMTIME_ZERO || d < stopTime) {
+    if (stopTime < SIMCLOCKTIME_ZERO || d < stopTime) {
         timeoutMsg->setKind(msgKind);
         scheduleClockEvent(d, timeoutMsg);
     }

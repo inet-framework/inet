@@ -43,7 +43,7 @@ static std::ostream& operator<<(std::ostream& out, const Arp::ArpCacheEntry& e)
     if (e.pending)
         out << "pending (" << e.numRetries << " retries)";
     else
-        out << "MAC:" << e.macAddress << "  age:" << floor(getClockTime() - e.lastUpdate) << "s";
+        out << "MAC:" << e.macAddress << "  age:" << floor(simTime() - CLOCKTIME_AS_SIMTIME(e.lastUpdate)) << "s"; //FIXME this is cheating
     return out;
 }
 
@@ -148,7 +148,7 @@ void Arp::initiateArpResolution(ArpCacheEntry *entry)
     Ipv4Address nextHopAddr = entry->myIter->first;
     entry->pending = true;
     entry->numRetries = 0;
-    entry->lastUpdate = SIMTIME_ZERO;
+    entry->lastUpdate = SIMCLOCKTIME_ZERO;
     entry->macAddress = MacAddress::UNSPECIFIED_ADDRESS;
     sendArpRequest(entry->ie, nextHopAddr);
 

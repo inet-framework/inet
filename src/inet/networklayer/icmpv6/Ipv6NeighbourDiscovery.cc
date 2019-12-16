@@ -789,7 +789,7 @@ void Ipv6NeighbourDiscovery::assignLinkLocalAddress(cMessage *timerMsg)
             //if no link local address exists for this interface, we assign one to it.
             EV_INFO << "No link local address exists. Forming one" << endl;
             linkLocalAddr = Ipv6Address().formLinkLocalAddress(ie->getInterfaceToken());
-            ie->getProtocolData<Ipv6InterfaceData>()->assignAddress(linkLocalAddr, true, SIMTIME_ZERO, SIMTIME_ZERO);
+            ie->getProtocolData<Ipv6InterfaceData>()->assignAddress(linkLocalAddr, true, SIMCLOCKTIME_ZERO, SIMCLOCKTIME_ZERO);
         }
 
         //Before we can use this address, we MUST initiate DAD first.

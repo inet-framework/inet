@@ -137,7 +137,7 @@ void SctpNatPeer::generateAndSend()
     for (int i = 0; i < numBytes; i++)
         vec[i] = (bytesSent + i) & 0xFF;
     applicationData->setBytes(vec);
-    applicationData->addTag<CreationTimeTag>()->setCreationTime(getClockTime());
+    applicationData->addTag<CreationTimeTag>()->setCreationTime(simTime());
     applicationPacket->insertAtBack(applicationData);
     auto sctpSendReq = applicationPacket->addTag<SctpSendReq>();
     sctpSendReq->setLast(true);
@@ -395,9 +395,9 @@ void SctpNatPeer::handleMessage(cMessage *msg)
                                 i->second--;
                                 SctpSimpleMessage *smsg = check_and_cast<SctpSimpleMessage *>(msg);
                                 auto j = endToEndDelay.find(id);
-                                j->second->record(getClockTime() - smsg->getCreationTime());
+                                j->second->record(simTime() - smsg->getCreationTime());
                                 auto k = histEndToEndDelay.find(id);
-                                k->second->collect(getClockTime() - smsg->getCreationTime());
+                                k->second->collect(simTime() - smsg->getCreationTime());
 
                                 if (i->second == 0) {
                                     Request *cmsg = new Request("SCTP_C_NO_OUTSTANDING", SCTP_C_NO_OUTSTANDING);
@@ -411,9 +411,9 @@ void SctpNatPeer::handleMessage(cMessage *msg)
                         else {
                             SctpSimpleMessage *smsg = check_and_cast<SctpSimpleMessage *>(msg->dup());
                             auto j = endToEndDelay.find(id);
-                            j->second->record(getClockTime() - smsg->getCreationTime());
+                            j->second->record(simTime() - smsg->getCreationTime());
                             auto k = histEndToEndDelay.find(id);
-                            k->second->collect(getClockTime() - smsg->getCreationTime());
+                            k->second->collect(simTime() - smsg->getCreationTime());
                             Packet *cmsg = new Packet("SCTP_C_SEND", SCTP_C_SEND);
                             bytesSent += smsg->getByteLength();
                             auto cmd = cmsg->addTag<SctpSendReq>();
@@ -660,7 +660,7 @@ void SctpNatPeer::sendRequest(bool last)
     for (int i = 0; i < numBytes; i++)
         vec[i] = (bytesSent + i) & 0xFF;
     msg->setBytes(vec);
-    msg->addTag<CreationTimeTag>()->setCreationTime(getClockTime());
+    msg->addTag<CreationTimeTag>()->setCreationTime(simTime());
     cmsg->insertAtBack(msg);
     auto sendCommand = cmsg->addTag<SctpSendReq>();
     sendCommand->setLast(true);
@@ -697,7 +697,7 @@ void SctpNatPeer::socketEstablished(SctpSocket *socket, unsigned long int buffer
         }
 
         auto applicationData = makeShared<BytesChunk>(buffer, buflen);
-        applicationData->addTag<CreationTimeTag>()->setCreationTime(getClockTime());
+        applicationData->addTag<CreationTimeTag>()->setCreationTime(simTime());
         auto applicationPacket = new Packet("ApplicationPacket", SCTP_C_SEND_ORDERED);
         applicationPacket->insertAtBack(applicationData);
         auto sctpSendReq = applicationPacket->addTag<SctpSendReq>();
@@ -872,7 +872,7 @@ void SctpNatPeer::addressAddedArrived(SctpSocket *socket, L3Address localAddr, L
         buflen = ADD_PADDING(buflen + 4 * (nat->numAddrPeer1 + nat->numAddrPeer2));
 
         auto applicationData = makeShared<BytesChunk>(buffer, buflen);
-        applicationData->addTag<CreationTimeTag>()->setCreationTime(getClockTime());
+        applicationData->addTag<CreationTimeTag>()->setCreationTime(simTime());
         auto applicationPacket = new Packet("ApplicationPacket", SCTP_C_SEND_ORDERED);
         applicationPacket->insertAtBack(applicationData);
         auto sctpSendReq = applicationPacket->addTag<SctpSendReq>();

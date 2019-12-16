@@ -366,21 +366,21 @@ const Ptr<Chunk> DhcpMessageSerializer::deserialize(MemoryInputStream& stream) c
             case RENEWAL_TIME: {
                 uint8_t size = stream.readByte();
                 ASSERT(size == 4);   // Time size
-                options.setRenewalTime(SimTime(stream.readUint32Be(), SIMTIME_S));
+                options.setRenewalTime(SimClockTime(stream.readUint32Be(), SIMTIME_S));
                 length += 2 + size;
                 break;
             }
             case REBIND_TIME: {
                 uint8_t size = stream.readByte();
                 ASSERT(size == 4);   // Time size
-                options.setRebindingTime(SimTime(stream.readUint32Be(), SIMTIME_S));
+                options.setRebindingTime(SimClockTime(stream.readUint32Be(), SIMTIME_S));
                 length += 2 + size;
                 break;
             }
             case LEASE_TIME: {
                 uint8_t size = stream.readByte();
                 ASSERT(size == 4);   // Time size
-                options.setLeaseTime(SimTime(stream.readUint32Be(), SIMTIME_S));
+                options.setLeaseTime(SimClockTime(stream.readUint32Be(), SIMTIME_S));
                 length += 2 + size;
                 break;
             }

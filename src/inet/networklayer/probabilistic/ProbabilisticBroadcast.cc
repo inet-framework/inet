@@ -74,7 +74,7 @@ void ProbabilisticBroadcast::handleLowerPacket(Packet *packet)
     delete packet->removeControlInfo();
     ++nbDataPacketsReceived;
     nbHops = nbHops + macHeader->getNbHops();
-    oneHopLatencies.record(SIMTIME_DBL(getClockTime() - packet->getTimestamp()));
+    oneHopLatencies.record(simTime() - packet->getTimestamp());
     // oneHopLatency gives us an estimate of how long the message spent in the MAC queue of
     // its sender (compared to that, transmission delay is negligible). Use this value
     // to update the TTL of the message. Dump it if it is dead.
@@ -233,7 +233,7 @@ bool ProbabilisticBroadcast::debugMessageKnown(unsigned int msgId)
     return pos != debugMsgIdSet.end();
 }
 
-void ProbabilisticBroadcast::insertMessage(simclocktime_t_cref bcastDelay, tMsgDesc *msgDesc)
+void ProbabilisticBroadcast::insertMessage(simclocktime_t bcastDelay, tMsgDesc *msgDesc)
 {
     simclocktime_t bcastTime = getClockTime() + bcastDelay;
 

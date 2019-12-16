@@ -21,6 +21,7 @@
 #include "inet/common/INETDefs.h"
 
 #include "inet/applications/base/ApplicationBase.h"
+#include "inet/common/SimpleModule.h"
 #include "inet/common/socket/SocketMap.h"
 #include "inet/transportlayer/contract/tcp/TcpSocket.h"
 
@@ -75,7 +76,7 @@ class INET_API TcpServerHostApp : public ApplicationBase, public TcpSocket::ICal
  *
  * @see TcpServerHostApp
  */
-class INET_API TcpServerThreadBase : public cSimpleModule, public TcpSocket::ICallback
+class INET_API TcpServerThreadBase : public SimpleModule, public TcpSocket::ICallback
 {
   protected:
     TcpServerHostApp *hostmod;

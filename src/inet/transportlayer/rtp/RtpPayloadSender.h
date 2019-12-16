@@ -21,6 +21,7 @@
 #include <fstream>
 
 #include "inet/common/INETDefs.h"
+#include "inet/common/SimpleModule.h"
 
 namespace inet {
 
@@ -35,7 +36,7 @@ class RtpInnerPacket;
  * packet sender like opening and closing the data file and choosing sequence
  * number and time stamp start values.
  */
-class INET_API RtpPayloadSender : public cSimpleModule
+class INET_API RtpPayloadSender : public SimpleModule
 {
   public:
     /**

@@ -22,6 +22,7 @@
 #include <string.h>
 
 #include "inet/common/INETDefs.h"
+#include "inet/common/SimpleModule.h"
 #include "inet/common/lifecycle/LifecycleUnsupported.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/transportlayer/contract/udp/UdpSocket.h"
@@ -31,7 +32,7 @@ namespace inet {
 /**
  * Implements a simple VoIP source. See the NED file for more information.
  */
-class INET_API SimpleVoipSender : public cSimpleModule, public LifecycleUnsupported
+class INET_API SimpleVoipSender : public SimpleModule, public LifecycleUnsupported
 {
   private:
     UdpSocket socket;

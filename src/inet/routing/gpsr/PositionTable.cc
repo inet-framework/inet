@@ -73,7 +73,7 @@ void PositionTable::clear()
 
 simclocktime_t PositionTable::getOldestPosition() const
 {
-    simclocktime_t oldestPosition = SimTime::getMaxTime();
+    simclocktime_t oldestPosition = SimClockTime::getMaxTime();
     for (const auto & elem : addressToPositionMap) {
         const simclocktime_t& time = elem.second.first;
         if (time < oldestPosition)

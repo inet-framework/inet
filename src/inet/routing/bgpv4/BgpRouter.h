@@ -40,7 +40,7 @@ class INET_API BgpRouter : public TcpSocket::ReceiveQueueBasedCallback
 private:
     IInterfaceTable *ift = nullptr;
     IIpv4RoutingTable *rt = nullptr;
-    cSimpleModule *bgpModule = nullptr;
+    SimpleModule *bgpModule = nullptr;
     ospfv2::Ospfv2 *ospfModule = nullptr;
     AsId myAsId = 0;
     bool redistributeInternal = false;
@@ -70,7 +70,7 @@ private:
     std::vector<AsId> _ASListOUT;
 
   public:
-    BgpRouter(cSimpleModule *bgpModule, IInterfaceTable *ift, IIpv4RoutingTable *rt);
+    BgpRouter(SimpleModule *bgpModule, IInterfaceTable *ift, IIpv4RoutingTable *rt);
     virtual ~BgpRouter();
 
     RouterId getRouterId() { return rt->getRouterId(); }
@@ -125,9 +125,9 @@ private:
 
     friend class BgpSession;
     // functions used by the BgpSession class
-    void getScheduleAt(simclocktime_t t, cMessage *msg) { bgpModule->scheduleClockEvent(t, msg); }
-    void getCancelAndDelete(cMessage *msg) { return bgpModule->cancelAndDelete(msg); }
-    cMessage *getCancelEvent(cMessage *msg) { return bgpModule->cancelClockEvent(msg); }
+    void getScheduleAt(simclocktime_t t, cMessage *msg) { bgpModule->scheduleClockEvent(t, msg); } //TODO why "get"?
+    void getCancelAndDelete(cMessage *msg) { return bgpModule->cancelAndDelete(msg); } //TODO why "get"?
+    cMessage *getCancelEvent(cMessage *msg) { return bgpModule->cancelClockEvent(msg); } //TODO why "get"?
     IIpv4RoutingTable *getIPRoutingTable() { return rt; }
     std::vector<BgpRoutingTableEntry *> getBGPRoutingTable() { return bgpRoutingTable; }
 

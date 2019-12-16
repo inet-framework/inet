@@ -123,14 +123,14 @@ void SctpClient::initialize(int stage)
         }
 
         simclocktime_t stopTime = par("stopTime");
-        if (stopTime >= SIMTIME_ZERO) {
+        if (stopTime >= SIMCLOCKTIME_ZERO) {
             stopTimer = new cMessage("StopTimer", MSGKIND_STOP);
             scheduleClockEvent(par("stopTime"), stopTimer);
             timer = true;
         }
 
         simclocktime_t primaryTime = par("primaryTime");
-        if (primaryTime != SIMTIME_ZERO) {
+        if (primaryTime != SIMCLOCKTIME_ZERO) {
             primaryChangeTimer = new cMessage("PrimaryTime", MSGKIND_PRIMARY);
             scheduleClockEvent(primaryTime, primaryChangeTimer);
         }
@@ -383,7 +383,7 @@ void SctpClient::sendRequest(bool last)
     for (uint32 i = 0; i < sendBytes; i++)
         vec[i] = (bytesSent + i) & 0xFF;
     applicationData->setBytes(vec);
-    applicationData->addTag<CreationTimeTag>()->setCreationTime(getClockTime());
+    applicationData->addTag<CreationTimeTag>()->setCreationTime(simTime());
     applicationPacket->insertAtBack(applicationData);
     auto sctpSendReq = applicationPacket->addTag<SctpSendReq>();
     sctpSendReq->setLast(last);

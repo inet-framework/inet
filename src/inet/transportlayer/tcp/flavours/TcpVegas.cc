@@ -33,7 +33,7 @@ TcpVegasStateVariables::TcpVegasStateVariables()
     v_recoverypoint = 0;
     v_cwnd_changed = 0;
 
-    v_baseRTT = SIMTIME_MAX;
+    v_baseRTT = SIMCLOCKTIME_MAX;
 
     v_inc_flag = true;
     v_incr_ss = false;

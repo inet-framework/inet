@@ -156,7 +156,7 @@ void SimpleVoipReceiver::socketDataArrived(UdpSocket *socket, Packet *packet)
 
     EV_DEBUG << "PACKET ARRIVED: TALKSPURT " << voice->getTalkspurtID() << " PACKET " << voice->getPacketID() << "\n\n";
 
-    simclocktime_t delay = packet->getArrivalTime() - voice->getVoipTimestamp();
+    simtime_t delay = packet->getArrivalTime() - voice->getVoipTimestamp();
     emit(voipPacketDelaySignal, delay);
 
     delete packet;
@@ -265,7 +265,7 @@ void SimpleVoipReceiver::evaluateTalkspurt(bool finish)
 
     double mos = eModel(SIMTIME_DBL(mouthToEarDelay), proportionalLossRate);
 
-    emit(voipPlayoutDelaySignal, playoutDelay);
+    emit(voipPlayoutDelaySignal, CLOCKTIME_AS_SIMTIME(playoutDelay));
     double lossRate = ((double)playoutLoss / (double)talkspurtNumPackets);
     emit(voipPlayoutLossRateSignal, lossRate);
     emit(voipMosRateSignal, mos);

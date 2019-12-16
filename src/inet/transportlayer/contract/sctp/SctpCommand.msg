@@ -23,6 +23,7 @@ import inet.common.packet.Packet;
 import inet.networklayer.common.IpProtocolId;
 import inet.networklayer.common.L3Address;
 import inet.common.TagBase;
+import inet.common.clock.SimClockTime;
 
 cplusplus {{
 #include <vector>
@@ -52,7 +53,7 @@ class SctpSimpleMessage extends cPacket
 {
     uint32 dataLen;     //TODO remove it, use set/getDataArraySize() functions only
     uint8_t data[];
-    simclocktime_t creationTime = 0;
+    simtime_t creationTime = 0;
     bool encaps = false;
 }
 

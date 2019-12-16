@@ -124,7 +124,7 @@ void Ipv6FlatNetworkConfigurator::configureAdvPrefixes(cTopology& topo)
 
             // add a link-local address (tentative) if it doesn't have one
             if (ipv6Data->getLinkLocalAddress().isUnspecified())
-                ipv6Data->assignAddress(Ipv6Address::formLinkLocalAddress(ie->getInterfaceToken()), true, SIMTIME_ZERO, SIMTIME_ZERO);
+                ipv6Data->assignAddress(Ipv6Address::formLinkLocalAddress(ie->getInterfaceToken()), true, SIMCLOCKTIME_ZERO, SIMCLOCKTIME_ZERO);
         }
     }
 }
@@ -161,7 +161,7 @@ void Ipv6FlatNetworkConfigurator::addOwnAdvPrefixRoutes(cTopology& topo)
                 if (ipv6Data->getAdvPrefix(y).prefix.isGlobal())
                     rt->addOrUpdateOwnAdvPrefix(ipv6Data->getAdvPrefix(y).prefix,
                             ipv6Data->getAdvPrefix(y).prefixLength,
-                            ie->getInterfaceId(), SIMTIME_ZERO);
+                            ie->getInterfaceId(), SIMCLOCKTIME_ZERO);
 
         }
     }
