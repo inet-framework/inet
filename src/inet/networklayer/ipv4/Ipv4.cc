@@ -601,9 +601,16 @@ void Ipv4::routeLocalBroadcastPacket(Packet *packet)
         fragmentPostRouting(packet);
     }
     else if (limitedBroadcast) {
-        // forward to each interface including loopback
+        auto destAddr = packet->peekAtFront<Ipv4Header>()->getDestAddress();
+        // forward to each matching interfaces including loopback
         for (int i = 0; i < ift->getNumInterfaces(); i++) {
             const InterfaceEntry *ie = ift->getInterface(i);
+            if (!destAddr.isLimitedBroadcastAddress()) {
+                Ipv4Address interfaceAddr = ie->getProtocolData<Ipv4InterfaceData>()->getIPAddress();
+                Ipv4Address broadcastAddr = interfaceAddr.makeBroadcastAddress(ie->getProtocolData<Ipv4InterfaceData>()->getNetmask());
+                if (destAddr != broadcastAddr)
+                    continue;
+            }
             auto packetCopy = packet->dup();
             packetCopy->addTagIfAbsent<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
             packetCopy->addTagIfAbsent<NextHopAddressReq>()->setNextHopAddress(Ipv4Address::ALLONES_ADDRESS);
