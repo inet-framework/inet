@@ -107,16 +107,16 @@ class INET_API MediumVisualizerBase : public VisualizerBase, public cListener
     double spectrumFigureInterpolationSize = NaN;
     Placement spectrumPlacementHint;
     double spectrumPlacementPriority;
-    bool displaySpectograms = false;
-    const char *spectogramMode = nullptr;
-    double spectogramFigureWidth = NaN;
-    double spectogramFigureHeight = NaN;
-    double spectogramPixmapWidth = NaN;
-    double spectogramPixmapHeight = NaN;
-    int spectogramFigureXTickCount = -1;
-    int spectogramFigureYTickCount = -1;
-    Placement spectogramPlacementHint;
-    double spectogramPlacementPriority;
+    bool displaySpectrograms = false;
+    const char *spectrogramMode = nullptr;
+    double spectrogramFigureWidth = NaN;
+    double spectrogramFigureHeight = NaN;
+    double spectrogramPixmapWidth = NaN;
+    double spectrogramPixmapHeight = NaN;
+    int spectrogramFigureXTickCount = -1;
+    int spectrogramFigureYTickCount = -1;
+    Placement spectrogramPlacementHint;
+    double spectrogramPlacementPriority;
     //@}
 
     /** @name State */

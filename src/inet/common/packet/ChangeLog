@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2019-12-05  Gyorgy Szaszko
+
+	Added displaying attached tags of Packets in Qtenv.
+
 2019-09-18  Levente Mészáros
 
 	Followed chunk API length parameter changes with Packet and ChunkQueue.

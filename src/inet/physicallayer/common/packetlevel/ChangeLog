@@ -1,5 +1,17 @@
 ====== inet-4.x ======
 
+2019-12-06  Levente Mészáros
+
+	Optimized attenuation functions for isotropic transmitter antennas.
+
+2019-11-28  Levente Mészáros
+
+	Renamed local variables for easier understanding.
+
+2019-11-15  Levente Mészáros
+
+	Added check for duration being greater than maxTransmissionDuration.
+
 2019-11-05  Zoltan Bojthe
 
 	Moved SignalTag.msg to contract folder.

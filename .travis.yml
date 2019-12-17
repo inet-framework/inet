@@ -107,4 +107,18 @@ jobs:
       env: TARGET_PLATFORM=linux MODE=debug
     # TODO add release mode when the runner script supports it
 
+    - stage: packettests
+      script:
+        - export STAGE=packettests INNER_ARGS="" # not env, so it doesn't affect the cache key
+        - *DOCKER_COMMAND
+      env: TARGET_PLATFORM=linux MODE=debug
+    # TODO add release mode when the runner script supports it
+
+    - stage: queueingtests
+      script:
+        - export STAGE=queueingtests INNER_ARGS="" # not env, so it doesn't affect the cache key
+        - *DOCKER_COMMAND
+      env: TARGET_PLATFORM=linux MODE=debug
+    # TODO add release mode when the runner script supports it
+
 # "Look what you made me do", Travis.

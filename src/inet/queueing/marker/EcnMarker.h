@@ -15,33 +15,27 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_PACKETTAGGERBASE_H
-#define __INET_PACKETTAGGERBASE_H
+#ifndef __INET_ECNMARKER_H_
+#define __INET_ECNMARKER_H_
 
+#include "inet/networklayer/common/EcnTag_m.h"
 #include "inet/queueing/base/PacketMarkerBase.h"
 
 namespace inet {
 namespace queueing {
 
-class INET_API PacketTaggerBase : public PacketMarkerBase
+class INET_API EcnMarker : public PacketMarkerBase
 {
   protected:
-    int dscp = -1;
-    int ecn = -1;
-    int tos = -1;
-    int userPriority = -1;
-    int interfaceId = -1;
-    int hopLimit = -1;
-    int vlanId = -1;
-    W transmissionPower = W(NaN);
-
-  protected:
-    virtual void initialize(int stage) override;
     virtual void markPacket(Packet *packet) override;
+
+  public:
+    static void setEcn(Packet *packet, IpEcnCode ecn);
+    static IpEcnCode getEcn(Packet *packet);
 };
 
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_PACKETTAGGERBASE_H
+#endif // #ifndef __INET_ECNMARKER_H_
 

@@ -237,11 +237,7 @@ Ptr<const IFunction<WpHz, Domain<simsec, Hz>>> DimensionalTransmitterBase::creat
         auto shiftedGainFunction = makeShared<DomainShiftedFunction<double, Domain<simsec, Hz>>>(gainFunction, shift);
         powerFunction = makeShared<ConstantFunction<WpHz, Domain<simsec, Hz>>>(power / Hz(1))->multiply(shiftedGainFunction);
     }
-#ifndef NDEBUG
     return makeFirstQuadrantLimitedFunction(powerFunction);
-#else
-    return powerFunction;
-#endif
 }
 
 } // namespace physicallayer

@@ -128,8 +128,8 @@ class INET_API MediumCanvasVisualizer : public MediumVisualizerBase
     virtual std::pair<WpHz, WpHz> computePowerForPartitionBounds(const Ptr<const math::IFunction<WpHz, math::Domain<m, m, m, simsec, Hz>>>& powerFunction, const math::Point<m, m, m, simsec, Hz>& lower, const math::Point<m, m, m, simsec, Hz>& upper, const math::IFunction<WpHz, math::Domain<m, m, m, simsec, Hz>> *partitonPowerFunction, const physicallayer::IAntenna *antenna, const Coord& position) const;
     virtual std::pair<WpHz, WpHz> computePowerForDirectionalAntenna(const Ptr<const math::IFunction<WpHz, math::Domain<m, m, m, simsec, Hz>>>& powerFunction, const math::Point<m, m, m, simsec, Hz>& lower, const math::Point<m, m, m, simsec, Hz>& upper, const physicallayer::IAntenna *antenna, const Coord& position) const;
 
-    virtual void refreshSpectogramFigure(const cModule *networkNode, HeatMapPlotFigure *figure) const;
-    virtual void refreshSpectogramFigurePowerFunction(const Ptr<const math::IFunction<WpHz, math::Domain<m, m, m, simsec, Hz>>>& powerFunction, const Coord& position, SimTimeUnit signalTimeUnit, HeatMapPlotFigure *figure, int channel) const;
+    virtual void refreshSpectrogramFigure(const cModule *networkNode, HeatMapPlotFigure *figure) const;
+    virtual void refreshSpectrogramFigurePowerFunction(const Ptr<const math::IFunction<WpHz, math::Domain<m, m, m, simsec, Hz>>>& powerFunction, const Coord& position, SimTimeUnit signalTimeUnit, HeatMapPlotFigure *figure, int channel) const;
 
     virtual cFigure *getSignalDepartureFigure(const physicallayer::IRadio *radio) const;
     virtual void setSignalDepartureFigure(const physicallayer::IRadio *radio, cFigure *figure);

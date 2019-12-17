@@ -30,6 +30,7 @@ void PacketQueue::initialize(int stage)
 {
     PacketQueueBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
+        queue.setName("storage");
         inputGate = gate("in");
         producer = findConnectedModule<IActivePacketSource>(inputGate);
         outputGate = gate("out");
@@ -97,9 +98,9 @@ Packet *PacketQueue::getPacket(int index) const
 void PacketQueue::pushPacket(Packet *packet, cGate *gate)
 {
     Enter_Method("pushPacket");
-    emit(packetPushedSignal, packet);
     EV_INFO << "Pushing packet " << packet->getName() << " into the queue." << endl;
     queue.insert(packet);
+    emit(packetPushedSignal, packet);
     if (buffer != nullptr)
         buffer->addPacket(packet);
     else if (isOverloaded()) {

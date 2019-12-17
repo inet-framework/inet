@@ -1,5 +1,19 @@
 ====== inet-4.x ======
 
+2019-12-05  Levente Mészáros
+
+	Added visualization support for spectograms and power density maps.
+	Also added a ton of new parameters to control the new visualizations.
+
+2019-11-25  Zoltan Bojthe
+
+	InterfaceTableVisualizer: detects interface state and carrier changes.
+	Fixed the Gate::getDisplayString() channel creation side effect.
+
+2019-11-13  Levente Mészáros
+
+	Added %t to display string format to display interface state.
+
 2019-11-12  Zoltan Bojthe
 
 	Fixed looking up InterfaceEntry.

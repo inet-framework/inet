@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2019-11-28  Zoltan Bojthe
+
+	Added timeToLive, dscp, tos NED parameters.
+
 2019-11-08  Zoltan Bojthe
 
 	Added missing return value checks.

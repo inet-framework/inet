@@ -27,7 +27,7 @@ package inet.queueing.base;
 simple PacketSourceBase extends PacketProcessorBase
 {
     parameters:
-        string packetNameFormat = default("%n-%c"); // %n module name, %c packet number
+        string packetNameFormat = default("%n-%c"); // %n module name, %c packet number, %l packet length, %d packet data, %t simulation time, %e event number
         string packetRepresentation @units("bitCount","bits","byteCount","bytes","applicationPacket") = default("byteCount"); // determines the chunk of the packet data
         volatile int packetLength @unit(b);
         volatile int packetData = default(-1);

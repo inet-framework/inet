@@ -87,7 +87,6 @@ simple PingApp like IApp
         @statistic[pingRxSeq](title="ping rx seq"; record=count,vector; interpolationmode=none);
         @selfMessageKinds(inet::PingSelfKinds);    // kind used in self messages
     gates:
-        input pingIn;
         input socketIn @labels(ITransportPacket/up);
         output socketOut @labels(ITransportPacket/down);
 }

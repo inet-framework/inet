@@ -114,16 +114,16 @@ void MediumVisualizerBase::initialize(int stage)
         spectrumFigureInterpolationSize = par("spectrumFigureInterpolationSize");
         spectrumPlacementHint = parsePlacement(par("spectrumPlacementHint"));
         spectrumPlacementPriority = par("spectrumPlacementPriority");
-        displaySpectograms = par("displaySpectograms");
-        spectogramMode = par("spectogramMode");
-        spectogramFigureWidth = par("spectogramFigureWidth");
-        spectogramFigureHeight = par("spectogramFigureHeight");
-        spectogramPixmapWidth = par("spectogramPixmapWidth");
-        spectogramPixmapHeight = par("spectogramPixmapHeight");
-        spectogramFigureXTickCount = par("spectogramFigureXTickCount");
-        spectogramFigureYTickCount = par("spectogramFigureYTickCount");
-        spectogramPlacementHint = parsePlacement(par("spectogramPlacementHint"));
-        spectogramPlacementPriority = par("spectogramPlacementPriority");
+        displaySpectrograms = par("displaySpectrograms");
+        spectrogramMode = par("spectrogramMode");
+        spectrogramFigureWidth = par("spectrogramFigureWidth");
+        spectrogramFigureHeight = par("spectrogramFigureHeight");
+        spectrogramPixmapWidth = par("spectrogramPixmapWidth");
+        spectrogramPixmapHeight = par("spectrogramPixmapHeight");
+        spectrogramFigureXTickCount = par("spectrogramFigureXTickCount");
+        spectrogramFigureYTickCount = par("spectrogramFigureYTickCount");
+        spectrogramPlacementHint = parsePlacement(par("spectrogramPlacementHint"));
+        spectrogramPlacementPriority = par("spectrogramPlacementPriority");
         mediumPowerDensityFunction = makeShared<SummedFunction<WpHz, Domain<m, m, m, simsec, Hz>>>();
         radioMedium = getModuleFromPar<IRadioMedium>(par("mediumModule"), this, false);
         if (radioMedium != nullptr) {
@@ -139,7 +139,7 @@ void MediumVisualizerBase::initialize(int stage)
         }
     }
     else if (stage == INITSTAGE_PHYSICAL_LAYER) {
-        if (radioMedium != nullptr && (displayMainPowerDensityMap || displayPowerDensityMaps || displaySpectrums || displaySpectograms)) {
+        if (radioMedium != nullptr && (displayMainPowerDensityMap || displayPowerDensityMaps || displaySpectrums || displaySpectrograms)) {
             if (auto backgroundNoise = radioMedium->getBackgroundNoise())
                 mediumPowerDensityFunction->addElement(makeShared<BackgroundNoisePowerFunction>(backgroundNoise));
             pathLossFunction = makeShared<PathLossFunction>(radioMedium->getPathLoss());
@@ -240,7 +240,7 @@ bool MediumVisualizerBase::matchesTransmission(const ITransmission *transmission
 
 void MediumVisualizerBase::handleSignalAdded(const physicallayer::ITransmission *transmission)
 {
-    if (displayMainPowerDensityMap || displayPowerDensityMaps || displaySpectrums || displaySpectograms) {
+    if (displayMainPowerDensityMap || displayPowerDensityMaps || displaySpectrums || displaySpectrograms) {
         auto dimensionalTransmission = check_and_cast<const DimensionalTransmission *>(transmission);
         auto transmissionPowerFunction = dimensionalTransmission->getPower();
         const auto& transmitterAntennaGain = transmission->getTransmitter()->getAntenna()->getGain();
@@ -316,7 +316,7 @@ void MediumVisualizerBase::handleSignalAdded(const physicallayer::ITransmission 
 
 void MediumVisualizerBase::handleSignalRemoved(const physicallayer::ITransmission *transmission)
 {
-    if (displayMainPowerDensityMap || displayPowerDensityMaps || displaySpectrums || displaySpectograms) {
+    if (displayMainPowerDensityMap || displayPowerDensityMaps || displaySpectrums || displaySpectrograms) {
         auto it = signalPowerDensityFunctions.find(transmission);
         if (it != signalPowerDensityFunctions.end()) {
             mediumPowerDensityFunction->removeElement(it->second);
@@ -328,7 +328,7 @@ void MediumVisualizerBase::handleSignalRemoved(const physicallayer::ITransmissio
 
 void MediumVisualizerBase::handleSignalArrivalStarted(const physicallayer::IReception *reception)
 {
-    if (displayMainPowerDensityMap || displayPowerDensityMaps || displaySpectrums || displaySpectograms) {
+    if (displayMainPowerDensityMap || displayPowerDensityMaps || displaySpectrums || displaySpectrograms) {
         auto dimensionalReception = check_and_cast<const DimensionalReception *>(reception);
         auto startTime = reception->getStartTime();
         auto receptionPowerFunction = dimensionalReception->getPower();

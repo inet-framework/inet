@@ -15,9 +15,9 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-#include "inet/common/INETUtils.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/queueing/filter/RedDropper.h"
+#include "inet/queueing/marker/EcnMarker.h"
 
 namespace inet {
 namespace queueing {
@@ -27,6 +27,7 @@ Define_Module(RedDropper);
 void RedDropper::initialize(int stage)
 {
     PacketFilterBase::initialize(stage);
+
     if (stage == INITSTAGE_LOCAL) {
         wq = par("wq");
         if (wq < 0.0 || wq > 1.0)
@@ -46,6 +47,10 @@ void RedDropper::initialize(int stage)
             throw cRuntimeError("Invalid value for maxp parameter: %g", maxp);
         if (pkrate < 0.0)
             throw cRuntimeError("Invalid value for pkrate parameter: %g", pkrate);
+        useEcn = par("useEcn");
+        packetCapacity = par("packetCapacity");
+        if (maxth > packetCapacity)
+            throw cRuntimeError("Warning: packetCapacity < maxth. Setting capacity to maxth");
         auto outputGate = gate("out");
         collection = findConnectedModule<IPacketCollection>(outputGate);
         if (collection == nullptr)
@@ -53,9 +58,9 @@ void RedDropper::initialize(int stage)
     }
 }
 
-bool RedDropper::matchesPacket(Packet *packet)
+RedDropper::RedResult RedDropper::doRandomEarlyDetection(Packet *packet)
 {
-    const int queueLength = collection->getNumPackets();
+    int queueLength = collection->getNumPackets();
 
     if (queueLength > 0) {
         // TD: This following calculation is only useful when the queue is not empty!
@@ -66,33 +71,72 @@ bool RedDropper::matchesPacket(Packet *packet)
         const double m = SIMTIME_DBL(simTime() - q_time) * pkrate;
         avg = pow(1 - wq, m) * avg;
     }
-     
-    if (queueLength >= maxth) {    // maxth is also the "hard" limit
-        EV << "Queue len " << queueLength << " >= maxth, dropping packet.\n";
-        count = 0;
-        return false;
-    }
 
-    if (minth <= avg && avg < maxth) {
+    if (queueLength >= packetCapacity) {   // maxth is also the "hard" limit
+        EV << "Queue len " << queueLength << " >= packetCapacity.\n";
+        count = 0;
+        return QUEUE_FULL;
+    }
+    else if (minth <= avg && avg < maxth) {
         count++;
         const double pb = maxp * (avg - minth) / (maxth - minth);
         const double pa = pb / (1 - count * pb); // TD: Adapted to work as in [Floyd93].
         if (dblrand() < pa) {
-            EV << "Random early packet drop (avg queue len=" << avg << ", pa=" << pa << ")\n";
+            EV << "Random early packet (avg queue len=" << avg << ", pa=" << pb << ")\n";
             count = 0;
-            return false;
+            return RANDOMLY_ABOVE_LIMIT;
         }
+        else
+            return RANDOMLY_BELOW_LIMIT;
     }
     else if (avg >= maxth) {
-        EV << "Avg queue len " << avg << " >= maxth, dropping packet.\n";
+        EV << "Avg queue len " << avg << " >= maxth.\n";
         count = 0;
-        return false;
+        return ABOVE_MAX_LIMIT;
     }
     else {
         count = -1;
     }
 
-    return true;
+    return BELOW_MIN_LIMIT;
+}
+
+bool RedDropper::matchesPacket(Packet *packet)
+{
+    auto redResult = doRandomEarlyDetection(packet);
+    switch (redResult) {
+        case RANDOMLY_ABOVE_LIMIT:
+        case ABOVE_MAX_LIMIT: {
+            if (!useEcn)
+                return false;
+            else {
+                IpEcnCode ecn = EcnMarker::getEcn(packet);
+                if (ecn == IP_ECN_NOT_ECT)
+                    return false;
+                else {
+                    // if next packet should be marked and it is not
+                    if (markNext && ecn != IP_ECN_CE) {
+                        EcnMarker::setEcn(packet, IP_ECN_CE);
+                        markNext = false;
+                    }
+                    else {
+                        if (ecn == IP_ECN_CE)
+                            markNext = true;
+                        else
+                            EcnMarker::setEcn(packet, IP_ECN_CE);
+                    }
+                    return true;
+                }
+            }
+        }
+        case RANDOMLY_BELOW_LIMIT:
+        case BELOW_MIN_LIMIT:
+            return true;
+        case QUEUE_FULL:
+            return false;
+        default:
+            throw cRuntimeError("Unknown XXX");
+    }
 }
 
 void RedDropper::pushOrSendPacket(Packet *packet, cGate *gate, IPassivePacketSink *consumer)

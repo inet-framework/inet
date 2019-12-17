@@ -1,5 +1,23 @@
 ====== inet-4.x ======
 
+2019-12-05  Zoltan Bojthe
+
+	Added OMNeT++ 6.0 custom fields as comment.
+
+2019-11-28  Zoltan Bojthe
+
+	Routing table and configurator detects when an interface connecting/disconnecting.
+
+2019-11-18  Zoltan Bojthe
+
+	Renamed fields: diffServCodePoint to dscp, explicitCongestionNotification to ecn.
+	Redesigned how TOS is stored, DSCP and ECN calculated.
+	Added TOS (type of service) support (TosReq, TosInd tags).
+
+2019-11-13  Levente Mészáros
+
+	Added IIpv4NodeConfigurator module interface.
+
 2019-11-11  Zoltan Bojthe
 
 	Added  notifications about changing the InterfaceProtocolData set in InterfaceEntry.

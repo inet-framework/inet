@@ -15,33 +15,17 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_PACKETTAGGERBASE_H
-#define __INET_PACKETTAGGERBASE_H
+package inet.queueing.marker;
 
-#include "inet/queueing/base/PacketMarkerBase.h"
+import inet.queueing.base.PacketMarkerBase;
 
-namespace inet {
-namespace queueing {
-
-class INET_API PacketTaggerBase : public PacketMarkerBase
+//
+// Sets Explicit Congestion Notification (ECN) bits in IPv4 header based on the
+// attached EcnReq tag on the packets.
+//
+simple EcnMarker extends PacketMarkerBase
 {
-  protected:
-    int dscp = -1;
-    int ecn = -1;
-    int tos = -1;
-    int userPriority = -1;
-    int interfaceId = -1;
-    int hopLimit = -1;
-    int vlanId = -1;
-    W transmissionPower = W(NaN);
-
-  protected:
-    virtual void initialize(int stage) override;
-    virtual void markPacket(Packet *packet) override;
-};
-
-} // namespace queueing
-} // namespace inet
-
-#endif // ifndef __INET_PACKETTAGGERBASE_H
+    parameters:
+        @class(EcnMarker);
+}
 

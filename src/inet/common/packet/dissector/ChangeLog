@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2019-11-19  Levente Mészáros
+
+	Added a packet dissector callback which can build the content as a chunk.
+
 2019-03-20  Zoltan Bojthe
 
 	Added shouldDissectProtocolDataUnit() to PacketDissector::ICallback for

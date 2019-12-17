@@ -58,6 +58,7 @@ class INET_API MarkovScheduler : public PacketSchedulerBase, public IPassivePack
     virtual void pushPacket(Packet *packet, cGate *gate) override;
 
     virtual void handleCanPushPacket(cGate *gate) override;
+    virtual const char *resolveDirective(char directive) const override;
 };
 
 } // namespace queueing

@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2019-11-28  Levente Mészáros
+
+	Replaced naive and non-robust implementation of Cuboid::computeIntersection() with an efficient one.
+
 2019-01-28  ------ inet-4.1.0 released ------
 
 2018-06-27  ------ inet-4.0.0 released ------

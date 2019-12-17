@@ -137,12 +137,11 @@
 /examples/inet/bulktransfer/,        -f omnetpp.ini -c inet_inet_2a -r 0,           50s,             92ce-4cd3/tplx, PASS,
 /examples/inet/bulktransfer/,        -f omnetpp.ini -c inet_inet_2b -r 0,           50s,             9e70-06f9/tplx, PASS,
 
-/examples/inet/configurator/,        -f complex.ini -c General -r 0,                100s,            ab15-3f65/tplx, PASS, wireless
-/examples/inet/configurator/,        -f simple.ini -c Default -r 0,                 10s,             c533-e2a5/tplx, PASS,
-/examples/inet/configurator/,        -f simple.ini -c DisableNode -r 0,             10s,             d817-7608/tplx, PASS,
-/examples/inet/configurator/,        -f simple.ini -c DisableLink -r 0,             10s,             a767-c931/tplx, PASS,
-/examples/inet/configurator/,        -f simple.ini -c DisableSourceHost -r 0,       10s,             8d38-e18e/tplx, PASS,
-/examples/inet/configurator/,        -f simple.ini -c DisableDestinationInterfaces -r 0, 10s,        767c-2ea2/tplx, PASS,
+/examples/inet/configurator/,        -f omnetpp.ini -c Default -r 0,                        10s,     c533-e2a5/tplx, PASS,
+/examples/inet/configurator/,        -f omnetpp.ini -c DisableNode -r 0,                    10s,     d817-7608/tplx, PASS,
+/examples/inet/configurator/,        -f omnetpp.ini -c DisableLink -r 0,                    10s,     a767-c931/tplx, PASS,
+/examples/inet/configurator/,        -f omnetpp.ini -c DisableSourceHost -r 0,              10s,     8d38-e18e/tplx, PASS,
+/examples/inet/configurator/,        -f omnetpp.ini -c DisableDestinationInterfaces -r 0,   10s,     767c-2ea2/tplx, PASS,
 
 /examples/inet/flatnet/,             -f omnetpp.ini -c General -r 0,                200s,            56b0-c7b2/tplx, PASS,
 
@@ -406,7 +405,7 @@
 
 /examples/ospfv2/areas/,             -f omnetpp.ini -c General -r 0,                500s,            c5ac-41e2/tplx, PASS,
 /examples/ospfv2/areatests/,         -f omnetpp.ini -c backbone -r 0,               100s,            cdd9-68a1/tplx, PASS,
-/examples/ospfv2/areatests/,         -f omnetpp.ini -c backboneandonestub -r 0,     100s,            9472-af05/tplx, PASS,
+/examples/ospfv2/areatests/,         -f omnetpp.ini -c backboneandonestub -r 0,     100s,            f8b1-7886/tplx, PASS,
 /examples/ospfv2/areatests/,         -f omnetpp.ini -c backboneandtwostubs -r 0,    100s,            9b6b-3366/tplx, PASS,
 /examples/ospfv2/areatests/,         -f omnetpp.ini -c mininet-A -r 0,              100s,            d37c-3fdb/tplx, PASS,
 /examples/ospfv2/areatests/,         -f omnetpp.ini -c mininet-B -r 0,              100s,            d37c-3fdb/tplx, PASS,
@@ -468,6 +467,8 @@
 /examples/wireless/antenna/,         -f omnetpp.ini -c OrbitX -r 0,                 3610s,           74b3-5fc1/tplx, PASS, wireless
 /examples/wireless/antenna/,         -f omnetpp.ini -c OrbitY -r 0,                 3610s,           c95e-2d0b/tplx, PASS, wireless
 /examples/wireless/antenna/,         -f omnetpp.ini -c OrbitZ -r 0,                 3610s,           843f-badf/tplx, PASS, wireless
+
+/examples/wireless/configurator/,    -f omnetpp.ini -c General -r 0,                100s,            ab15-3f65/tplx, PASS, wireless
 
 /examples/wireless/corruptionmode/,  -f omnetpp.ini -c PacketCorruptionMode -r 0,   10s,         8919-144b/tplx, PASS,
 /examples/wireless/corruptionmode/,  -f omnetpp.ini -c ChunkCorruptionMode -r 0,    10s,         9fe0-014a/tplx, PASS,
