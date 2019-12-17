@@ -36,25 +36,13 @@ void VoipStreamPacketSerializer::serialize(MemoryOutputStream& stream, const Ptr
     stream.writeUint16Be(voipStreamPacket->getSeqNo());
     stream.writeUint32Be(voipStreamPacket->getTimeStamp());
     stream.writeUint32Be(voipStreamPacket->getSsrc());
-    switch (type) {
-        case SILENCE: {
-            int64_t remainders = B(voipStreamPacket->getHeaderLength()).get() - B((stream.getLength() - startPosition)).get();
-            if (remainders < 0)
-                throw cRuntimeError("voipStreamPacket length = %d smaller than required %d bytes, try to increment the 'voipHeaderSize' parameter", (int)B(voipStreamPacket->getChunkLength()).get(), (int)B(stream.getLength() - startPosition).get());
-            stream.writeByteRepeatedly('?', remainders);
-            break;
-        }
-        case VOICE: {
-            const auto& bytes = voipStreamPacket->getBytes();
-            stream.writeUint16Be(bytes.getDataArraySize());
-            int64_t remainders = B(voipStreamPacket->getHeaderLength()).get() - B((stream.getLength() - startPosition)).get();
-            if (remainders < 0)
-                throw cRuntimeError("voipStreamPacket length = %d smaller than required %d bytes, try to increment the 'voipHeaderSize' parameter", (int)B(voipStreamPacket->getChunkLength()).get(), (int)B(stream.getLength() - startPosition).get());
-            stream.writeByteRepeatedly('?', remainders);
-            stream.writeBytes((uint8_t *)bytes.getDataPtr(), B(bytes.getDataArraySize()));
-        }
-    }
+    if (type == VOICE)
+        stream.writeUint16Be(voipStreamPacket->getDataLength());
 
+    int64_t remainders = B(voipStreamPacket->getHeaderLength()).get() - B((stream.getLength() - startPosition)).get();
+    if (remainders < 0)
+        throw cRuntimeError("voipStreamPacket length = %d smaller than required %d bytes, try to increment the 'voipHeaderSize' parameter", (int)B(voipStreamPacket->getChunkLength()).get(), (int)B(stream.getLength() - startPosition).get());
+    stream.writeByteRepeatedly('?', remainders);
 }
 
 const Ptr<Chunk> VoipStreamPacketSerializer::deserialize(MemoryInputStream& stream) const
@@ -73,30 +61,15 @@ const Ptr<Chunk> VoipStreamPacketSerializer::deserialize(MemoryInputStream& stre
     voipStreamPacket->setSeqNo(stream.readUint16Be());
     voipStreamPacket->setTimeStamp(stream.readUint32Be());
     voipStreamPacket->setSsrc(stream.readUint32Be());
-    switch (type) {
-        case SILENCE: {
-            B remainders = B(headerLength) - (stream.getPosition() - startPosition);
-            if (remainders.get() < 0) {
-                voipStreamPacket->markIncorrect();
-                return voipStreamPacket;
-            }
-            stream.readByteRepeatedly('?', B(remainders).get());
-            break;
-        }
-        case VOICE: {
-            auto size = stream.readUint16Be();
-            auto& bytes = voipStreamPacket->getBytesForUpdate();
-            bytes.setDataArraySize(size);
-            B remainders = B(headerLength) - (stream.getPosition() - startPosition);
-            if (remainders.get() < 0) {
-                voipStreamPacket->markIncorrect();
-                return voipStreamPacket;
-            }
-            stream.readByteRepeatedly('?', B(remainders).get());
-            stream.readBytes((uint8_t *)bytes.getDataPtr(), B(size));
-            break;
-        }
+    if (type == VOICE)
+        voipStreamPacket->setDataLength(stream.readUint16Be());
+
+    B remainders = B(headerLength) - (stream.getPosition() - startPosition);
+    if (remainders.get() < 0) {
+        voipStreamPacket->markIncorrect();
+        return voipStreamPacket;
     }
+    stream.readByteRepeatedly('?', B(remainders).get());
     return voipStreamPacket;
 }
 
