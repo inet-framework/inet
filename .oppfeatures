@@ -81,7 +81,7 @@
         name="INET examples"
         description = "Examples for basic internet protocols (IPv4, TCP, UDP)"
         initiallyEnabled = "true"
-        requires = "IPv4 TCP_INET UDP Ethernet PPP Ieee80211"
+        requires = "IPv4 TCP_INET UDP Ethernet PPP"
         labels = "protocols examples"
         nedPackages = "
                        inet.examples.inet
