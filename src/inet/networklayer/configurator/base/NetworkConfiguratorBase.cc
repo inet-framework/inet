@@ -499,6 +499,7 @@ std::string NetworkConfiguratorBase::getWirelessId(InterfaceEntry *interfaceEntr
             throw cRuntimeError("Error in XML <wireless> element at %s: %s", wirelessElement->getSourceLocation(), e.what());
         }
     }
+#if defined(WITH_IEEE80211) || defined(WITH_RADIO)
     cModule *interfaceModule = interfaceEntry;
 #ifdef WITH_IEEE80211
     if (auto mibModule = dynamic_cast<ieee80211::Ieee80211Mib *>(interfaceModule->getSubmodule("mib"))) {
@@ -518,7 +519,7 @@ std::string NetworkConfiguratorBase::getWirelessId(InterfaceEntry *interfaceEntr
         if (*value)
             return value;
     }
-#endif
+#endif // WITH_IEEE80211
 #ifdef WITH_RADIO
     cModule *radioModule = interfaceModule->getSubmodule("radio");
     const IRadio *radio = dynamic_cast<const IRadio *>(radioModule);
@@ -527,7 +528,8 @@ std::string NetworkConfiguratorBase::getWirelessId(InterfaceEntry *interfaceEntr
         if (mediumModule != nullptr)
             return mediumModule->getFullName();
     }
-#endif
+#endif // WITH_RADIO
+#endif // defined(WITH_IEEE80211) || defined(WITH_RADIO)
 
     // default: put all such wireless interfaces on the same LAN
     return "SSID";
