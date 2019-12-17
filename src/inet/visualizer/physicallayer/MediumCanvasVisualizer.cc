@@ -32,11 +32,11 @@
 namespace inet {
 namespace visualizer {
 
+Define_Module(MediumCanvasVisualizer);
+
 #ifdef WITH_RADIO
 
 using namespace inet::physicallayer;
-
-Define_Module(MediumCanvasVisualizer);
 
 void MediumCanvasVisualizer::initialize(int stage)
 {
