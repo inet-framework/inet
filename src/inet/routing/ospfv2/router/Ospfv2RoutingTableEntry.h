@@ -71,14 +71,12 @@ class INET_API Ospfv2RoutingTableEntry : public Ipv4Route
 
     void setDestinationType(RoutingDestinationType type) { destinationType = type; }
     RoutingDestinationType getDestinationType() const { return destinationType; }
-    static const std::string getDestinationTypeString(RoutingDestinationType destType);
     void setOptionalCapabilities(Ospfv2Options options) { optionalCapabilities = options; }
     Ospfv2Options getOptionalCapabilities() const { return optionalCapabilities; }
     void setArea(AreaId source) { area = source; }
     AreaId getArea() const { return area; }
     void setPathType(RoutingPathType type) { pathType = type; }
     RoutingPathType getPathType() const { return pathType; }
-    static const std::string getPathTypeString(RoutingPathType pathType);
     Metric getCost() const { return cost; }
     void setCost(Metric cost) { this->cost = cost; setMetric(cost); }
     void setType2Cost(Metric type2Cost) { this->type2Cost = type2Cost; setMetric(type2Cost); }
@@ -90,6 +88,9 @@ class INET_API Ospfv2RoutingTableEntry : public Ipv4Route
     unsigned int getNextHopCount() const { return nextHops.size(); }
     NextHop getNextHop(unsigned int index) const { return nextHops[index]; }
     virtual std::string str() const;
+
+    static const char *getDestinationTypeString(RoutingDestinationType destType);
+    static const char *getPathTypeString(RoutingPathType pathType);
 };
 
 std::ostream& operator<<(std::ostream& out, const Ospfv2RoutingTableEntry& entry);

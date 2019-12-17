@@ -18,14 +18,13 @@
 #include "inet/routing/ospfv2/router/Ospfv2RoutingTableEntry.h"
 
 namespace inet {
-
 namespace ospfv2 {
 
 Ospfv2RoutingTableEntry::Ospfv2RoutingTableEntry(IInterfaceTable *_ift) :
-    ift(_ift),
-    destinationType(Ospfv2RoutingTableEntry::NETWORK_DESTINATION),
-    area(BACKBONE_AREAID),
-    pathType(Ospfv2RoutingTableEntry::INTRAAREA)
+        ift(_ift),
+        destinationType(Ospfv2RoutingTableEntry::NETWORK_DESTINATION),
+        area(BACKBONE_AREAID),
+        pathType(Ospfv2RoutingTableEntry::INTRAAREA)
 {
     setNetmask(Ipv4Address::ALLONES_ADDRESS);
     setSourceType(IRoute::OSPF);
@@ -33,15 +32,15 @@ Ospfv2RoutingTableEntry::Ospfv2RoutingTableEntry(IInterfaceTable *_ift) :
 }
 
 Ospfv2RoutingTableEntry::Ospfv2RoutingTableEntry(const Ospfv2RoutingTableEntry& entry) :
-    ift(entry.ift),
-    destinationType(entry.destinationType),
-    optionalCapabilities(entry.optionalCapabilities),
-    area(entry.area),
-    pathType(entry.pathType),
-    cost(entry.cost),
-    type2Cost(entry.type2Cost),
-    linkStateOrigin(entry.linkStateOrigin),
-    nextHops(entry.nextHops)
+        ift(entry.ift),
+        destinationType(entry.destinationType),
+        optionalCapabilities(entry.optionalCapabilities),
+        area(entry.area),
+        pathType(entry.pathType),
+        cost(entry.cost),
+        type2Cost(entry.type2Cost),
+        linkStateOrigin(entry.linkStateOrigin),
+        nextHops(entry.nextHops)
 {
     setDestination(entry.getDestination());
     setNetmask(entry.getNetmask());
@@ -61,12 +60,12 @@ void Ospfv2RoutingTableEntry::addNextHop(NextHop hop)
         // TODO: this used to be commented out, but it seems we need it
         // otherwise gateways will never be filled in and gateway is needed for broadcast networks
         setGateway(hop.hopAddress);
-    }else{
-      for(int i= 0; i < nextHops.size(); i++){
-        if(hop.ifIndex == nextHops.at(i).ifIndex && hop.hopAddress == nextHops.at(i).hopAddress){
-          return;
+    }
+    else {
+        for (size_t i = 0; i < nextHops.size(); i++) {
+            if (hop.ifIndex == nextHops.at(i).ifIndex && hop.hopAddress == nextHops.at(i).hopAddress)
+                return;
         }
-      }
     }
     nextHops.push_back(hop);
 }
@@ -129,7 +128,7 @@ std::ostream& operator<<(std::ostream& out, const Ospfv2RoutingTableEntry& entry
 
 std::string Ospfv2RoutingTableEntry::str() const
 {
-    std::stringstream out;
+    std::ostringstream out;
     out << getSourceTypeAbbreviation();
     out << " ";
     if (getDestination().isUnspecified())
@@ -156,54 +155,44 @@ std::string Ospfv2RoutingTableEntry::str() const
         out << getInterfaceName();
 
     out << " destType:" << Ospfv2RoutingTableEntry::getDestinationTypeString(destinationType)
-    << " pathType:" << Ospfv2RoutingTableEntry::getPathTypeString(pathType)
-    << " area:" << area.str(false);
+            << " pathType:" << Ospfv2RoutingTableEntry::getPathTypeString(pathType)
+            << " area:" << area.str(false);
 
     return out.str();
 }
 
-const std::string Ospfv2RoutingTableEntry::getDestinationTypeString(RoutingDestinationType destType)
+const char *Ospfv2RoutingTableEntry::getDestinationTypeString(RoutingDestinationType destType)
 {
-    std::stringstream out;
-
-    if (destType == Ospfv2RoutingTableEntry::NETWORK_DESTINATION) {
-        out << "Network";
+    switch (destType) {
+        case Ospfv2RoutingTableEntry::NETWORK_DESTINATION:
+            return "Network";
+        case Ospfv2RoutingTableEntry::AREA_BORDER_ROUTER_DESTINATION:
+            return "AreaBorderRouter";
+        case Ospfv2RoutingTableEntry::AS_BOUNDARY_ROUTER_DESTINATION:
+            return "ASBoundaryRouter";
+        case Ospfv2RoutingTableEntry::AREA_BORDER_ROUTER_DESTINATION | Ospfv2RoutingTableEntry::AS_BOUNDARY_ROUTER_DESTINATION:
+            return "AreaBorderRouter+ASBoundaryRouter";
+        default:
+            return "Unknown";
     }
-    else {
-        if ((destType & Ospfv2RoutingTableEntry::AREA_BORDER_ROUTER_DESTINATION) != 0) {
-            out << "AreaBorderRouter";
-        }
-        if ((destType & Ospfv2RoutingTableEntry::AS_BOUNDARY_ROUTER_DESTINATION) != 0) {
-            if ((destType & Ospfv2RoutingTableEntry::AREA_BORDER_ROUTER_DESTINATION) != 0) {
-                out << "+";
-            }
-            out << "ASBoundaryRouter";
-        }
-    }
-
-    return out.str();
 }
 
-const std::string Ospfv2RoutingTableEntry::getPathTypeString(RoutingPathType pathType)
+const char *Ospfv2RoutingTableEntry::getPathTypeString(RoutingPathType pathType)
 {
     switch (pathType) {
         case Ospfv2RoutingTableEntry::INTRAAREA:
             return "IntraArea";
-
         case Ospfv2RoutingTableEntry::INTERAREA:
             return "InterArea";
-
         case Ospfv2RoutingTableEntry::TYPE1_EXTERNAL:
             return "Type1External";
-
         case Ospfv2RoutingTableEntry::TYPE2_EXTERNAL:
             return "Type2External";
+        default:
+            return "Unknown";
     }
-
-    return "Unknown";
 }
 
 } // namespace ospfv2
-
 } // namespace inet
 
