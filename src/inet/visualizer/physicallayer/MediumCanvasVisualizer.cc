@@ -212,7 +212,7 @@ void MediumCanvasVisualizer::refreshDisplay() const
 
 void MediumCanvasVisualizer::refreshMainPowerDensityMapFigure() const
 {
-    if (signalMinFrequency < signalMaxFrequency) {
+    if ((!std::isnan(powerDensityMapCenterFrequency.get()))) {
         mainPowerDensityMapFigure->setXTickCount(mainPowerDensityMapFigureXTickCount);
         mainPowerDensityMapFigure->setYTickCount(mainPowerDensityMapFigureYTickCount);
         mainPowerDensityMapFigure->clearValues();
@@ -224,7 +224,7 @@ void MediumCanvasVisualizer::refreshMainPowerDensityMapFigure() const
 
 void MediumCanvasVisualizer::refreshPowerDensityMapFigure(const cModule *networkNode, HeatMapPlotFigure *figure) const
 {
-    if (signalMinFrequency < signalMaxFrequency) {
+    if (!std::isnan(powerDensityMapCenterFrequency.get())) {
         const ITransmission *transmissionInProgress;
         const ITransmission *receptionInProgress;
         const IAntenna *antenna;
