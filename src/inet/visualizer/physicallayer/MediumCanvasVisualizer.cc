@@ -101,7 +101,7 @@ void MediumCanvasVisualizer::initialize(int stage)
             mainPowerDensityMapFigure = new HeatMapPlotFigure();
             mainPowerDensityMapFigure->setTags("signal_main_power_density_map");
             mainPowerDensityMapFigure->setTooltip("This plot represents the signal power density over space");
-            mainPowerDensityMapFigure->setZIndex(zIndex);
+            mainPowerDensityMapFigure->setZIndex(zIndex - 2);
             mainPowerDensityMapFigure->setXAxisLabel("[m]");
             mainPowerDensityMapFigure->setYAxisLabel("[m]");
             mainPowerDensityMapFigure->setXValueFormat("%.3g");
@@ -128,7 +128,7 @@ void MediumCanvasVisualizer::initialize(int stage)
                     auto powerDensityMapFigure = new HeatMapPlotFigure();
                     powerDensityMapFigure->setTags("signal_power_density_map");
                     powerDensityMapFigure->setTooltip("This plot represents the signal power density over space");
-                    powerDensityMapFigure->setZIndex(zIndex);
+                    powerDensityMapFigure->setZIndex(zIndex - 1);
                     powerDensityMapFigure->setXAxisLabel("[m]");
                     powerDensityMapFigure->setYAxisLabel("[m]");
                     powerDensityMapFigure->setXValueFormat("%.3g");
