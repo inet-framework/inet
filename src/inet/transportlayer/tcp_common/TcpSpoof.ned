@@ -36,6 +36,7 @@ simple TcpSpoof like ITcp
         int seqNo; // sequence number (-1 for TCP ISS)
         bool isSYN = default(true); // whether to set SYN bit on packet
         double t @unit(s); // simulation time to send at
+        string clockModule = default(""); // relative path to the clock module, used for timings; optional
         @display("i=block/square");
         @signal[packetSent](type=cPacket);
         @statistic[packetSent](title="packets sent"; source=packetSent; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);

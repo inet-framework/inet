@@ -35,6 +35,7 @@ simple xMIPv6
         string bindingCacheModule;
         bool isHomeAgent;
         bool isMobileNode;
+        string clockModule = default(""); // relative path to the clock module, used for timings; optional
         @display("i=block/classifier2");
         @signal[mipv6RoCompleted](type=cMessage?);
         @signal[packetDropped](type=cPacket);

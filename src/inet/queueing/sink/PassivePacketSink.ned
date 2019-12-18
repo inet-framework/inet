@@ -28,6 +28,7 @@ simple PassivePacketSink extends PacketSinkBase like IPassivePacketSink
 {
     parameters:
         volatile double consumptionInterval @unit(s) = default(0s); // elapsed time between subsequent packets allowed to be pushed by the connected packet producer, 0 means any number of packets can be pushed at the same simulation time
+        string clockModule = default(""); // relative path to the clock module, used for timings; optional
         @class(PassivePacketSink);
         @signal[packetPushed](type=inet::Packet);
         @statistic[packetPushed](title="packets pushed"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);

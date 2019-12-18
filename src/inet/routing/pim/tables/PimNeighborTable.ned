@@ -24,9 +24,10 @@ package inet.routing.pim.tables;
 //
 simple PimNeighborTable
 {
-      @display("i=block/table");
-      @signal[pimNeighborAdded](type=inet::PimNeighbor);
+    @display("i=block/table");
+    @signal[pimNeighborAdded](type=inet::PimNeighbor);
     @signal[pimNeighborDeleted](type=inet::PimNeighbor);
     @signal[pimNeighborChanged](type=inet::PimNeighbor);
+    string clockModule = default(""); // relative path to the clock module, used for timings; optional
 }
 

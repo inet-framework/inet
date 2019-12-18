@@ -33,11 +33,11 @@ simple UdpSink like IApp
         bool receiveBroadcast = default(false); // if true, makes the socket receive broadcast packets
         string multicastGroup = default(""); // if non-empty, makes the socket receive multicast packets sent to that group
         string multicastSources = default(""); // if non-empty, than the socket receives multicast packets from those sources only
-
         @display("i=block/sink");
         @lifecycleSupport;
         double stopOperationExtraTime @unit(s) = default(-1s);    // extra time after lifecycle stop operation finished
         double stopOperationTimeout @unit(s) = default(2s);    // timeout value for lifecycle stop operation
+        string clockModule = default(""); // relative path to the clock module, used for timings; optional
         @signal[packetReceived](type=inet::Packet);
         @statistic[packetReceived](title="packets received"; source=packetReceived; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[throughput](title="throughput"; unit=bps; source="throughput(packetReceived)"; record=vector);

@@ -173,12 +173,14 @@ simple Ospfv2 like IOspf
         int referenceBandwidth @unit(bps) = default(1e8bps);   // reference bandwidth for cost calculation
         int interfaceOutputCost = default(0);  // cost of link on the interface (1-1000), 0 means use reference bandwidth
         int externalInterfaceOutputCost = default(1);  // cost of link (1-1000)
-        string externalInterfaceOutputType = default("Type2");  // Type1|Type2 
+        string externalInterfaceOutputType = default("Type2");  // Type1|Type2
         string forwardingAddress = default("0.0.0.0");
-        int linkCost = default(1);  // cost of link (1-1000) for HostInterface and LoopbackInterface only      
+        int linkCost = default(1);  // cost of link (1-1000) for HostInterface and LoopbackInterface only
 
         string authenticationType @enum("SimplePasswordType","CrytographicType","NullType") = default("NullType");
         string authenticationKey = default("0x00");  // 0xnn..nn
+
+        string clockModule = default(""); // relative path to the clock module, used for timings; optional
 
         @display("i=block/network2");
     gates:

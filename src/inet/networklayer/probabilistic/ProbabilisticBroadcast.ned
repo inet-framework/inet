@@ -2,7 +2,7 @@
 // file:        ProbabilisticBroadcast.ned
 //
 // author:      Damien Piguet
-// 
+//
 // copyright:   (C) 2008-2010 CSEM SA, Neuchâtel, Switzerland.
 //
 // description: Multi-hop ad-hoc data dissemination protocol based on
@@ -11,7 +11,7 @@
 //              go through a number of transmission attempts, each
 //              with a certain probability. How number of transmissions
 //              attempts and probability of forwarding are computed will
-//              be derived from the simulations of this protocol. 
+//              be derived from the simulations of this protocol.
 //**************************************************************************
 package inet.networklayer.probabilistic;
 
@@ -54,5 +54,6 @@ simple ProbabilisticBroadcast extends NetworkProtocolBase like INetworkProtocol
         // copy that isn't dead because of TTL de-synchronization due to
         // MAC backoff, propagation delay and clock drift.
         double timeInQueueAfterDeath @unit(s) = default(60 s);
+        string clockModule = default(""); // relative path to the clock module, used for timings; optional
 }
 

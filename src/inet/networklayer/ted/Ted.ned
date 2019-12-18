@@ -30,6 +30,7 @@ simple Ted
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module
         string routingTableModule;
+        string clockModule = default(""); // relative path to the clock module, used for timings; optional
         @display("i=block/table");
 }
 

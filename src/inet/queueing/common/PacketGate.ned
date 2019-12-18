@@ -32,6 +32,7 @@ simple PacketGate extends PacketProcessorBase like IPacketSource, IPacketSink
         double openTime @unit(s) = default(nan s); // if there's only one
         double closeTime @unit(s) = default(nan s); // if there's only one
         string changeTimes = default(""); // space separated list of times where state change happens
+        string clockModule = default(""); // relative path to the clock module, used for timings; optional
         displayStringTextFormat = default("passed %p pk (%l)");
         @class(PacketGate);
         @display("i=block/cogwheel");

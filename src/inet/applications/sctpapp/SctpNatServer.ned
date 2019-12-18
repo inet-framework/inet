@@ -32,6 +32,7 @@ simple SctpNatServer like IApp
         int outboundStreams = default(1);
         int inboundStreams = default(1);
         bool ordered = default(true);
+        string clockModule = default(""); // relative path to the clock module, used for timings; optional
     gates:
         input socketIn;
         output socketOut;

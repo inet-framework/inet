@@ -49,6 +49,7 @@ simple TwoRateThreeColorMeter
         string cir;       // committed information rate, either absolute or relative bitrate; must be smaller than pir
         int cbs @unit(B); // committed burst size
         bool colorAwareMode = default(false); // enables color-aware mode
+        string clockModule = default(""); // relative path to the clock module, used for timings; optional
     gates:
         input in;
         output greenOut;

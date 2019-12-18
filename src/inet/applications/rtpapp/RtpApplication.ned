@@ -35,6 +35,7 @@ simple RtpApplication
         double transmissionStartDelay @unit(s); // delay before start transmission (related to "sender module created")
         double transmissionStopDelay @unit(s);  // delay before stops transmission (related to "start transmission")
         double sessionLeaveDelay @unit(s); // delay before leave session (related to "file transmission finished/stopped" or "session entered" when fileName is "")
+        string clockModule = default(""); // relative path to the clock module, used for timings; optional
         @selfMessageKinds(inet::RtpAppSelfMsgKinds);    // kind used in self messages
 
     gates:

@@ -28,6 +28,7 @@ simple ActivePacketSink extends PacketSinkBase like IActivePacketSink
 {
     parameters:
         volatile double collectionInterval @unit(s); // elapsed time between subsequent packets popped from the connected packet provider
+        string clockModule = default(""); // relative path to the clock module, used for timings; optional
         @class(ActivePacketSink);
     gates:
         input in @labels(pop);

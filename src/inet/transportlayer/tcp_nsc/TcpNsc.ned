@@ -46,6 +46,7 @@ simple TcpNsc like ITcp
         string sendQueueClass = default("");    //# TODO: Obsolete!!!
         string receiveQueueClass = default(""); //# TODO: Obsolete!!!
         string crcMode @enum("declared", "computed") = default("declared");
+        string clockModule = default(""); // relative path to the clock module, used for timings; optional
         @display("i=block/wheelbarrow");
 
     gates:

@@ -2,17 +2,17 @@
 // * file:        Flooding.ned
 // *
 // * author:      Daniel Willkomm
-// *		  
+// *
 // *
 // * copyright:   (C) 2004 Telecommunication Networks Group (TKN) at
 // *              Technische Universitaet Berlin, Germany.
 // *
-// *              This program is free software; you can redistribute it 
-// *              and/or modify it under the terms of the GNU General Public 
+// *              This program is free software; you can redistribute it
+// *              and/or modify it under the terms of the GNU General Public
 // *              License as published by the Free Software Foundation; either
-// *              version 2 of the License, or (at your option) any later 
+// *              version 2 of the License, or (at your option) any later
 // *              version.
-// *              For further information see file COPYING 
+// *              For further information see file COPYING
 // *              in the top level directory
 // *
 // ***************************************************************************
@@ -37,7 +37,7 @@ import inet.networklayer.contract.INetworkProtocol;
 // .ini file (bcMaxEntries parameter) as well as the time after which an entry
 // is deleted (bcDelTime parameter).
 //
-// If you prefere a memory-less version you should set to false the 
+// If you prefere a memory-less version you should set to false the
 // plainFlooding bool parameter.
 //
 // @author Daniel Willkomm
@@ -55,6 +55,7 @@ simple Flooding extends NetworkProtocolBase like INetworkProtocol
         // Time after which an entry for an already broadcasted msg can be deleted
         double bcDelTime @unit(s) = default(100 s);
         int defaultTtl = default(10); // Default time-to-live (ttl) used for this module expressed in  number of hops.
+        string clockModule = default(""); // relative path to the clock module, used for timings; optional
         @class(Flooding);
 }
 

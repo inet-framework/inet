@@ -73,6 +73,7 @@ simple PimSm
         double registerProbeTime @unit(s) = 5s;
         double assertTime @unit(s) = 180s;
         double assertOverrideInterval @unit(s) = 3s;
+        string clockModule = default(""); // relative path to the clock module, used for timings; optional
 
         @signal[sentHelloPk](type=cPacket);
         @signal[rcvdHelloPk](type=cPacket);

@@ -25,6 +25,7 @@ simple RtpProfile
 {
     parameters:
         bool autoOutputFileNames;
+        string clockModule = default(""); // relative path to the clock module, used for timings; optional
 
     gates:
         input rtpIn;
@@ -43,6 +44,7 @@ simple RtpAvProfile
 {
     parameters:
         bool autoOutputFileNames;
+        string clockModule = default(""); // relative path to the clock module, used for timings; optional
 
     gates:
         input rtpIn;

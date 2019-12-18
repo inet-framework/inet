@@ -50,6 +50,9 @@ simple Gpsr like IManetRouting
 
         // visualization parameters
         bool displayBubbles = default(false);	// display bubble messages about changes in routing state for packets
+
+        string clockModule = default(""); // relative path to the clock module, used for timings; optional
+
     gates:
         input ipIn;
         output ipOut;

@@ -45,6 +45,7 @@ simple SctpPeer like IApp
         int numRequestsPerSession = default(1);  // number of requests sent per session
         int numPacketsToReceive = default(0);
         string streamPriorities = default("");
+        string clockModule = default(""); // relative path to the clock module, used for timings; optional
 
         @display("i=block/app");
         @signal[packetSent](type=inet::Packet);

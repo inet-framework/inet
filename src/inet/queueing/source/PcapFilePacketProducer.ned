@@ -37,6 +37,7 @@ simple PcapFilePacketProducer like IActivePacketSource
     parameters:
         string filename; // the PCAP file to be read
         string packetNameFormat = default("Pcap-%p-%t-%n"); // determines the name of the packets read from the PCAP file
+        string clockModule = default(""); // relative path to the clock module, used for timings; optional
         @class(PcapFilePacketProducer);
         @display("i=block/source");
         @signal[packetCreated](type=inet::Packet);

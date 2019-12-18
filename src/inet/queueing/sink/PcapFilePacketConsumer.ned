@@ -31,6 +31,7 @@ simple PcapFilePacketConsumer extends PacketSinkBase like IPassivePacketSink
         int networkType; // the network type header field in the PCAP file, see http://www.tcpdump.org/linktypes.html (1=ethernet, 204=ppp, 105=IEEE 802.11, ...)
         int snaplen = default(65535);  // maximum number of bytes to record per packet
         bool alwaysFlush = default(false); // flush the PCAP file after each write to ensure that all packets are captured in case of a crash
+        string clockModule = default(""); // relative path to the clock module, used for timings; optional
         @class(PcapFilePacketConsumer);
         @signal[packetPushed](type=inet::Packet);
         @statistic[packetPushed](title="packets pushed"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);

@@ -36,6 +36,7 @@ simple Igmpv3 like IIgmp
         int    lastMemberQueryCount = default(robustnessVariable);
         double unsolicitedReportInterval @unit(s) = default(10s);
 //      double version1RouterPresentInterval @unit(s) = default(400s);
+        string clockModule = default(""); // relative path to the clock module, used for timings; optional
         @display("i=block/cogwheel");
 
     gates:

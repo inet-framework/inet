@@ -27,6 +27,7 @@ simple TimeBasedTokenGenerator extends TokenGeneratorBase
     parameters:
         volatile double generationInterval @unit(s); // time interval between two subsequent token generation events
         volatile double numTokens = default(1); // number of tokens generated repeatedly
+        string clockModule = default(""); // relative path to the clock module, used for timings; optional
         @class(TimeBasedTokenGenerator);
         @display("i=block/control");
         @signal[tokensCreated](type=double);

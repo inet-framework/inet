@@ -51,6 +51,7 @@ simple VoipStreamSender like IApp
         int timeToLive = default(-1); // if not -1, set the TTL (IPv4) or Hop Limit (IPv6) field of sent packets to this value
         int dscp = default(-1); // if not -1, set the DSCP field (on IPv4/IPv6) of sent packets to this value
         int tos = default(-1); // if not -1, set the Type Of Service (IPv4) / Traffic Class (IPv6) field of sent packets to this value
+        string clockModule = default(""); // relative path to the clock module, used for timings; optional
         @signal[packetSent](type=inet::Packet);       // TODO first chunk is VoipStreamPacket
         @statistic[packetSent](title="packets sent"; source=packetSent; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @display("i=block/departure");

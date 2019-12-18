@@ -38,6 +38,7 @@ simple Ipv6RoutingTable like IRoutingTable
         bool isRouter = default(this.forwarding);
         bool multicastForwarding = default(false);
         bool useAdminDist = default(false);     // Use Cisco like administrative distances
+        string clockModule = default(""); // relative path to the clock module, used for timings; optional
         @signal[routeAdded](type=inet::Ipv6Route);
         @signal[routeChanged](type=inet::Ipv6Route);
         @signal[routeDeleted](type=inet::Ipv6Route);

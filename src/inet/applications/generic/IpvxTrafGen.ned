@@ -40,6 +40,7 @@ simple IpvxTrafGen like IIpvxTrafficGenerator
         int protocol; // value for IPv4, IPv6 protocol field, accepts only between 143 and 254
         volatile int packetLength @unit(B); // packet length in bytes
         string destAddresses = default(""); // list of destination addresses, separated by spaces
+        string clockModule = default(""); // relative path to the clock module, used for timings; optional
         @lifecycleSupport;
         @display("i=block/source");
         @signal[packetSent](type=inet::Packet);

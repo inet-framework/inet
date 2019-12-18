@@ -56,6 +56,7 @@ simple SctpClient like IApp
         string streamRequestRatio = default("");
         string streamPriorities = default("");
         bool finishEndsSimulation = default(false);
+        string clockModule = default(""); // relative path to the clock module, used for timings; optional
         @signal[packetSent](type=inet::Packet);
         @signal[packetReceived](type=inet::Packet);
         @signal[echoedPk](type=inet::Packet);

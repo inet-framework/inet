@@ -15,7 +15,7 @@
 // *              For further information see file COPYING
 // *              in the top level directory
 // *
-// * Funding: This work was partially financed by the European Commission under the  
+// * Funding: This work was partially financed by the European Commission under the
 // * Framework 6 IST Project "Wirelessly Accessible Sensor Populations"
 // * (WASP) under contract IST-034963.
 // ***************************************************************************
@@ -68,6 +68,8 @@ simple WiseRoute extends NetworkProtocolBase like INetworkProtocol
         double routeFloodsInterval @unit(s) = default(0 s);
 
         string arpModule; // The path to the ARP module
+
+        string clockModule = default(""); // relative path to the clock module, used for timings; optional
 
         @display("i=block/fork");
         @class(WiseRoute);

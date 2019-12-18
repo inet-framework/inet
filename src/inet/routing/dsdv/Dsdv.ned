@@ -46,6 +46,7 @@ simple Dsdv like IManetRouting
         double routeLifetime @unit(s) = default(5s);  // the expiry time of the routing entries
         bool manetPurgeRoutingTables = default(true);
         volatile double broadcastDelay @unit(s) = default(uniform(0s,0.01s));
+        string clockModule = default(""); // relative path to the clock module, used for timings; optional
     gates:
         input ipIn;
         output ipOut;

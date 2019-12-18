@@ -29,5 +29,6 @@ package inet.networklayer.xmipv6;
 //
 simple BindingUpdateList
 {
+    string clockModule = default(""); // relative path to the clock module, used for timings; optional
 }
 

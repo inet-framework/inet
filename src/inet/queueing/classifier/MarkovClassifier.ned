@@ -31,6 +31,7 @@ simple MarkovClassifier extends PacketClassifierBase like IPacketClassifier
         displayStringTextFormat = default("classified %p pk (%l)\ncurrent state: %s");
         int initialState = default(0); // the index of the start state of the Markov process
         string transitionProbabilities; // the transition matrix (N x N) of the Markov process, specified as a list of probabilities
-        string waitIntervals; // the amount of time the Markov process stays in a given state, a list of intervals (N) indexed by the state 
+        string waitIntervals; // the amount of time the Markov process stays in a given state, a list of intervals (N) indexed by the state
+        string clockModule = default(""); // relative path to the clock module, used for timings; optional
         @class(MarkovClassifier);
 }

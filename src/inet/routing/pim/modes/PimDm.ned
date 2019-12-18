@@ -59,6 +59,7 @@ simple PimDm
         double sourceActiveInterval @unit(s) = 210s;
         double stateRefreshInterval @unit(s) = 60s;
         double assertTime @unit(s) = 180s;
+        string clockModule = default(""); // relative path to the clock module, used for timings; optional
 
         @signal[sentHelloPk](type=cPacket);
         @signal[rcvdHelloPk](type=cPacket);

@@ -73,6 +73,8 @@ simple Dymo like IManetRouting
         int minHopLimit = default(5);
         int maxHopLimit = default(10);
 
+        string clockModule = default(""); // relative path to the clock module, used for timings; optional
+
     gates:
         input ipIn;
         output ipOut;

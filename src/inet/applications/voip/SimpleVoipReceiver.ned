@@ -48,6 +48,7 @@ simple SimpleVoipReceiver like IApp
         bool adaptivePlayoutDelay = default(false);      // if true, adjust playoutDelay after each talkspurt
         int bufferSpace = default(20);      // buffer size in packets
         double mosSpareTime @unit(s) = default(1s); // spare time before calculating MOS (after calculated playout time of last packet)
+        string clockModule = default(""); // relative path to the clock module, used for timings; optional
 
         @signal[voipPacketDelay](type="simclocktime_t");      // when receive a frame
         @signal[voipPacketLossRate](type="double");      // at end of talkspurt

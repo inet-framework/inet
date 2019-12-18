@@ -52,8 +52,9 @@ simple SctpNatPeer like IApp
         int ownName = default(0);
         int peerName = default(0);
         bool rendezvous = default(false);
-        bool multi= default(false);
+        bool multi = default(false);
         string streamPriorities = default("");
+        string clockModule = default(""); // relative path to the clock module, used for timings; optional
     gates:
         input socketIn;
         output socketOut;

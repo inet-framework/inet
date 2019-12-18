@@ -30,5 +30,6 @@ simple PacketServer extends PacketServerBase like IPacketServer
     parameters:
         volatile double processingTime @unit(s); // determines additional processing time per packet
         volatile double processingBitrate @unit(bps) = default(inf bps); // determines additional processing time per bit
+        string clockModule = default(""); // relative path to the clock module, used for timings; optional
         @class(PacketServer);
 }

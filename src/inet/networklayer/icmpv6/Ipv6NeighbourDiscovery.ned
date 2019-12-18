@@ -35,6 +35,7 @@ simple Ipv6NeighbourDiscovery
         string routingTableModule;
         double minIntervalBetweenRAs @unit(s) = default(30ms); //minRtrAdvInterval:  0.03 sec for MIPv6 , declared as parameter to facilitate testing without recompiling (Zarrar 15.07.07)
         double maxIntervalBetweenRAs @unit(s) = default(70ms);  //MaxrtrAdvInterval: 0.07 sec for MIPv6, declared as parameter to facilitate testing without recompiling (Zarrar 15.07.07)
+        string clockModule = default(""); // relative path to the clock module, used for timings; optional
         @display("i=block/network");
         @signal[startDad](type=long); // emits value=1
         @statistic[startDad](title="DAD started";record=count,vector);

@@ -31,6 +31,7 @@ simple PacketSourceBase extends PacketProcessorBase
         string packetRepresentation @units("bitCount","bits","byteCount","bytes","applicationPacket") = default("byteCount"); // determines the chunk of the packet data
         volatile int packetLength @unit(b);
         volatile int packetData = default(-1);
+        string clockModule = default(""); // relative path to the clock module, used for timings; optional
         displayStringTextFormat = default("created %p pk (%l)");
         @class(PacketSourceBase);
         @display("i=block/source");

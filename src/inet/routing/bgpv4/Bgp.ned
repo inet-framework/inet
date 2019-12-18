@@ -21,7 +21,7 @@ import inet.routing.contract.IBgp;
 
 //
 // Implements BGP Version 4 routing protocol.
-// 
+//
 // The bgpConfig parameter can specify an XML file describing the
 // configuration of all BGP routers and their interfaces in the network.
 //
@@ -43,6 +43,7 @@ simple Bgp like IBgp
         int localPreference = default(100);
         bool connectedCheck = default(true);
         int ebgpMultihop = default(1);
+        string clockModule = default(""); // relative path to the clock module, used for timings; optional
         @display("i=block/network2");
     gates:
         input socketIn;

@@ -32,6 +32,7 @@ simple PacketDelayer extends PacketProcessorBase like IPassivePacketSink, IActiv
 {
     parameters:
         volatile double delay @unit(s);
+        string clockModule = default(""); // relative path to the clock module, used for timings; optional
         @class(PacketDelayer);
         @display("i=block/delay");
     gates:

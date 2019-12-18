@@ -48,6 +48,7 @@ simple SingleRateThreeColorMeter
         int cbs @unit(B); // committed burst size
         int ebs @unit(B); // excess burst size
         bool colorAwareMode = default(false); // enables color-aware mode
+        string clockModule = default(""); // relative path to the clock module, used for timings; optional
     gates:
         input in;
         output greenOut;

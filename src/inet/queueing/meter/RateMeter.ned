@@ -29,6 +29,7 @@ simple RateMeter extends PacketMeterBase like IPacketMeter
 {
     parameters:
         double alpha; // parameter in the range of (0, 1) for the exponential weight decrease
+        string clockModule = default(""); // relative path to the clock module, used for timings; optional
         @display("i=block/star");
         @class(RateMeter);
     gates:

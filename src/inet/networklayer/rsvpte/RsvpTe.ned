@@ -107,6 +107,7 @@ simple RsvpTe
         string peers; // names of the interfaces towards RSVP peers
         double helloInterval @unit(s);
         double helloTimeout @unit(s);
+        string clockModule = default(""); // relative path to the clock module, used for timings; optional
         @display("i=block/control");
         @signal[tedChanged](type=inet::TedChangeInfo);
     gates:

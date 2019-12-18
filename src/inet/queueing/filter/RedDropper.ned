@@ -55,6 +55,7 @@ simple RedDropper extends PacketFilterBase
         double pkrate = default(150);  // average packet rate for calculations when queue is empty
         bool useEcn = default(false); // if enabled, packets are marked with ECN if applicable
         int packetCapacity = default(int(maxth)); // packets are dropped if queue length is greater
+        string clockModule = default(""); // relative path to the clock module, used for timings; optional
         @class(RedDropper);
         @display("i=block/downarrow");
         @signal[packetDropped](type=inet::Packet);

@@ -68,6 +68,7 @@ simple Rtp
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module
         string routingTableModule;
+        string clockModule = default(""); // relative path to the clock module, used for timings; optional
         @display("i=block/buffer");
         @signal[packetReceived](type=cPacket);
         @statistic[packetReceived](title="packets received"; source=packetReceived; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);

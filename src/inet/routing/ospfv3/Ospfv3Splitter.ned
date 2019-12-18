@@ -10,6 +10,7 @@ simple Ospfv3Splitter
         string interfaceTableModule;
         string routingTableModule;
         string routingTableModule6;
+        string clockModule = default(""); // relative path to the clock module, used for timings; optional
     gates:
         input ipIn @labels(Ipv6ControlInfo/up);
         output ipOut @labels(Ipv6ControlInfo/down);

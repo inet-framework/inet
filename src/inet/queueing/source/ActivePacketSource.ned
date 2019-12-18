@@ -28,6 +28,7 @@ simple ActivePacketSource extends PacketSourceBase like IActivePacketSource
 {
     parameters:
         volatile double productionInterval @unit(s); // elapsed time between subsequent packets pushed to the connected packet consumer
+        string clockModule = default(""); // relative path to the clock module, used for timings; optional
         @class(ActivePacketSource);
         @display("i=block/source");
         @signal[packetCreated](type=inet::Packet);

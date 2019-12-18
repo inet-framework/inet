@@ -28,6 +28,7 @@ simple PassivePacketSource extends PacketSourceBase like IPassivePacketSource
 {
     parameters:
         volatile double providingInterval @unit(s) = default(0s); // elapsed time between subsequent packets allowed to be popped by the connected packet collector, 0 means any number of packets can be popped at the same simulation time
+        string clockModule = default(""); // relative path to the clock module, used for timings; optional
         @class(PassivePacketSource);
         @signal[packetPopped](type=inet::Packet);
         @signal[packetCreated](type=inet::Packet);

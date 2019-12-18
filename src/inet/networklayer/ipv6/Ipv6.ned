@@ -68,6 +68,7 @@ simple Ipv6
         string icmpv6Module;
         string ipv6TunnelingModule;
         double procDelay @unit(s) = default(0s);
+        string clockModule = default(""); // relative path to the clock module, used for timings; optional
         @display("i=block/network2");
         @signal[packetDropped](type=cPacket);
         @signal[packetSentToUpper](type=inet::Packet);

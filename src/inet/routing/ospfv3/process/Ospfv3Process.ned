@@ -9,6 +9,7 @@ simple Ospfv3Process
         string interfaceTableModule;
         string routingTableModule;
         string routingTableModule6;
+        string clockModule = default(""); // relative path to the clock module, used for timings; optional
     gates:
         input splitterIn @label(Ospfv3Packet/up);
         output splitterOut @label(Ospfv3Packet/down);

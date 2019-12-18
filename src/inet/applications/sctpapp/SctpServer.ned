@@ -50,6 +50,7 @@ simple SctpServer like IApp
         double streamRequestTime @unit(s) = default(0s);
         int streamToReset = default(0);
         string streamPriorities = default("");
+        string clockModule = default(""); // relative path to the clock module, used for timings; optional
     gates:
         input socketIn;
         output socketOut;

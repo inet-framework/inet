@@ -85,6 +85,8 @@ simple Aodv like IApp
         double netTraversalTime @unit(s) = default(2 * nodeTraversalTime * netDiameter); // an estimation of the traversal time for the complete network
         double nextHopWait @unit(s) = default(nodeTraversalTime + 0.01s); // timeout for a RREP-ACK
         double pathDiscoveryTime @unit(s) = default(2 * netTraversalTime); // buffer timeout for each broadcasted RREQ message
+
+        string clockModule = default(""); // relative path to the clock module, used for timings; optional
     gates:
         input socketIn;
         output socketOut;

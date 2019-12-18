@@ -38,6 +38,7 @@ simple VoipStreamReceiver like IApp
         int localPort;
         double playoutDelay @unit(s) = default(20ms);
         string resultFile;
+        string clockModule = default(""); // relative path to the clock module, used for timings; optional
         @signal[packetReceived](type=inet::Packet); // expected type=VoipStreamPacket
         @signal[packetDropped](type=inet::Packet);
         @signal[lostSamples](type=long);

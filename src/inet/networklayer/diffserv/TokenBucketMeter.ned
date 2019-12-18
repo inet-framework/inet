@@ -43,6 +43,7 @@ simple TokenBucketMeter
         string cir;       // committed information rate, either absolute bitrate (e.g. "100kbps"), or relative to the link's datarate (e.g. "20%")
         int cbs @unit(B); // committed burst size
         bool colorAwareMode = default(false); // enables color-aware mode
+        string clockModule = default(""); // relative path to the clock module, used for timings; optional
     gates:
         input in;
         output greenOut;

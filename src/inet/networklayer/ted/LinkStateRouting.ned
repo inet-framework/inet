@@ -30,6 +30,7 @@ simple LinkStateRouting
         string routingTableModule;
         string tedModule;
         string peers;
+        string clockModule = default(""); // relative path to the clock module, used for timings; optional
         @display("i=block/network2");
     gates:
         input ipIn @labels(Ipv4ControlInfo/up);

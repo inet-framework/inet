@@ -49,6 +49,7 @@ simple UdpVideoStreamServer like IApp
         @lifecycleSupport;
         double stopOperationExtraTime @unit(s) = default(-1s);    // extra time after lifecycle stop operation finished
         double stopOperationTimeout @unit(s) = default(2s);    // timeout value for lifecycle stop operation
+        string clockModule = default(""); // relative path to the clock module, used for timings; optional
         @signal[packetSent](type=inet::Packet);
         @signal[reqStreamBytes](type=long);
         @statistic[reqStreamBytes](title="requested stream bytes"; record=count,sum,vector; interpolationmode=none);

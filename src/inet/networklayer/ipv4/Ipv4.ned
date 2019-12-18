@@ -101,6 +101,7 @@ simple Ipv4 like IIpv4
         double fragmentTimeout @unit(s) = default(60s);
         bool limitedBroadcast = default(false); // send out limited broadcast packets comming from higher layer
         string directBroadcastInterfaces = default("");   // list of interfaces that direct broadcast is enabled (by default direct broadcast is disabled on all interfaces)
+        string clockModule = default(""); // relative path to the clock module, used for timings; optional
         @display("i=block/routing");
         @signal[packetSentToUpper](type=cPacket);
         @signal[packetReceivedFromUpper](type=cPacket);
