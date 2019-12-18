@@ -999,7 +999,7 @@ void SctpAssociation::sendOnPath(SctpPathVariables *pathId, bool firstPass)
                                 sctpMsg = nullptr;
 
                                 // TD 17.02.2015: There is data to send (on current path) -> create new message structure!
-                                sctpMsg = new SctpHeader();
+                                sctpMsg = makeShared<SctpHeader>();
                              //   sctpMsg = makeShared<SctpHeader>();
                                 sctpMsg->setChunkLength(B(SCTP_COMMON_HEADER));
                                 headerCreated = true;
@@ -1133,7 +1133,7 @@ void SctpAssociation::sendOnPath(SctpPathVariables *pathId, bool firstPass)
                                     sendSACKviaSelectedPath(sctpMsg);
                                     sctpMsg = nullptr;
                                     if (datMsg != nullptr) {
-                                        sctpMsg = new SctpHeader();
+                                        sctpMsg = makeShared<SctpHeader>();
                                       //  sctpMsg = makeShared<SctpHeader>();
                                         sctpMsg->setChunkLength(B(SCTP_COMMON_HEADER));
                                         headerCreated = true;
