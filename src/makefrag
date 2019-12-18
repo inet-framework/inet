@@ -1,5 +1,7 @@
 .DEFAULT_GOAL := all-pch
 
+LDFLAGS += -lz3 -fopenmp
+
 #
 # Use the new message compiler introduced in OMNeT++ 5.3
 #
@@ -10,7 +12,7 @@ FEATURETOOL := opp_featuretool
 #
 # compiler warning for c-style cast
 #
-#CFLAGS += -Wold-style-cast
+#CFLAGS += -Wold-style-cast -fopenmp
 
 ifeq ($(PLATFORM),win32)
   #
