@@ -304,7 +304,9 @@ void MediumCanvasVisualizer::refreshPowerDensityMapFigurePowerFunction(const Ptr
     auto size = maxPosition - minPosition;
     auto pixmapSize = figure->getPixmapSize();
     if (powerDensityMapSampling) {
-        for (int x = 0; x < pixmapSize.x; x++) {
+        const int xsize = pixmapSize.x;
+#pragma omp parallel for
+        for (int x = 0; x < xsize; x++) {
             for (int y = 0; y < pixmapSize.y; y++) {
                 if (powerFunction == nullptr) {
                     auto value = powerDensityFunction->getValue(Point<m, m, m, simsec, Hz>(m(minPosition.x + x * size.x / pixmapSize.x), m(minPosition.y + y * size.y / pixmapSize.y), m(0), simsec(simTime()), powerDensityMapCenterFrequency));

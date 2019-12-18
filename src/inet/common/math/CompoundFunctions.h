@@ -174,9 +174,12 @@ class INET_API MemoizedFunction : public FunctionBase<R, D>
             return it->second;
         else {
             R v = function->getValue(p);
-            cache[p] = v;
-            if ((int)cache.size() > limit)
-                cache.clear();
+#pragma omp critical
+            {
+                cache[p] = v;
+                if ((int)cache.size() > limit)
+                    cache.clear();
+            }
             return v;
         }
     }
