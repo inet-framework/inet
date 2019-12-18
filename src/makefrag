@@ -12,6 +12,8 @@ FEATURETOOL := opp_featuretool
 #
 #CFLAGS += -Wold-style-cast
 
+CFLAGS += -fopenmp
+LDFLAGS += -fopenmp
 
 ifeq ($(PLATFORM),win32.x86_64)
   #
