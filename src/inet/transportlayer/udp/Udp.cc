@@ -208,13 +208,6 @@ void Udp::handleUpperCommand(cMessage *msg)
                     sourceList.push_back(cmd->getSourceList(i));
                 unblockMulticastSources(sd, ie, cmd->getMulticastAddr(), sourceList);
             }
-            else if (auto cmd = dynamic_cast<UdpUnblockMulticastSourcesCommand *>(ctrl)) {
-                InterfaceEntry *ie = ift->getInterfaceById(cmd->getInterfaceId());
-                std::vector<L3Address> sourceList;
-                for (size_t i = 0; i < cmd->getSourceListArraySize(); i++)
-                    sourceList.push_back(cmd->getSourceList(i));
-                leaveMulticastSources(sd, ie, cmd->getMulticastAddr(), sourceList);
-            }
             else if (auto cmd = dynamic_cast<UdpLeaveMulticastSourcesCommand *>(ctrl)) {
                InterfaceEntry *ie = ift->getInterfaceById(cmd->getInterfaceId());
                 std::vector<L3Address> sourceList;
