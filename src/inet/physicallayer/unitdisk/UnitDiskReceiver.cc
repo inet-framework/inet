@@ -102,6 +102,18 @@ const IReceptionResult *UnitDiskReceiver::computeReceptionResult(const IListenin
     errorRateInd->setSymbolErrorRate(errorRate);
     errorRateInd->setBitErrorRate(errorRate);
     errorRateInd->setPacketErrorRate(errorRate);
+    if (check_and_cast<const UnitDiskReception *>(reception)->getPower() == UnitDiskReception::POWER_RECEIVABLE) {
+        auto txCoord = reception->getTransmission()->getStartPosition();
+        auto rxCoord = reception->getEndPosition();
+        double dist = txCoord.distance(rxCoord);
+        double power = 1/(dist*dist);
+
+        auto packet = const_cast<Packet *>(receptionResult->getPacket());
+        packet->getTag<SignalPowerInd>()->setPower(W(power));
+        packet->addTagIfAbsent<SnirInd>()->setMinimumSnir(power);
+        packet->addTagIfAbsent<SnirInd>()->setMaximumSnir(power);
+        packet->addTagIfAbsent<SnirInd>()->setAverageSnir(power);
+    }
     return receptionResult;
 }
 

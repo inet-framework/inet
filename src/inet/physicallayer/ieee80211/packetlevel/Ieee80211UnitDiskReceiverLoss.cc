@@ -19,6 +19,7 @@
 #include "inet/physicallayer/common/packetlevel/Radio.h"
 
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211UnitDiskReceiverLoss.h"
+#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211UnitDiskTransmitter.h"
 #include "inet/physicallayer/unitdisk/UnitDiskTransmitter.h"
 
 
@@ -65,7 +66,7 @@ void Ieee80211UnitDiskReceiverLoss::initialize(int stage)
         cTopology topo("topo");
         topo.extractByProperty("networkNode");
 
-        auto transmitter = check_and_cast<UnitDiskTransmitter *> (parent->getSubmodule("transmitter"));
+        auto transmitter = check_and_cast<Ieee80211UnitDiskTransmitter *> (parent->getSubmodule("transmitter"));
         auto distance = transmitter->getMaxCommunicationRange();
         communicationRange = distance;
 
