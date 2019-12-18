@@ -56,6 +56,8 @@ class INET_API DielectricObstacleLoss : public TracingObstacleLossBase
   protected:
     /** @name Parameters */
     //@{
+    bool enableDielectricLoss = false;
+    bool enableReflectionLoss = false;
     /**
      * The radio medium where the radio signal propagation takes place.
      */
