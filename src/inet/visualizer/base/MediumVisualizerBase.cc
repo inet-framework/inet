@@ -93,6 +93,19 @@ void MediumVisualizerBase::initialize(int stage)
         signalMinFrequency = Hz(par("signalMinFrequency"));
         signalMaxFrequency = Hz(par("signalMaxFrequency"));
         displayMainPowerDensityMap = par("displayMainPowerDensityMap");
+        mainPowerDensityMapPixmapDensity = par("mainPowerDensityMapPixmapDensity");
+        mainPowerDensityMapMinX = par("mainPowerDensityMapMinX");
+        mainPowerDensityMapMaxX = par("mainPowerDensityMapMaxX");
+        mainPowerDensityMapMinY = par("mainPowerDensityMapMinY");
+        mainPowerDensityMapMaxY = par("mainPowerDensityMapMaxY");
+        const auto& displayString = visualizationTargetModule->getDisplayString();
+        if (std::isnan(mainPowerDensityMapMaxX))
+            mainPowerDensityMapMaxX = atof(displayString.getTagArg("bgb", 0));
+        if (std::isnan(mainPowerDensityMapMaxY))
+            mainPowerDensityMapMaxY = atof(displayString.getTagArg("bgb", 1));
+        mainPowerDensityMapZ = par("mainPowerDensityMapZ");
+        mainPowerDensityMapFigureXTickCount = par("mainPowerDensityMapFigureXTickCount");
+        mainPowerDensityMapFigureYTickCount = par("mainPowerDensityMapFigureYTickCount");
         displayPowerDensityMaps = par("displayPowerDensityMaps");
         powerDensityMapMode = par("powerDensityMapMode");
         powerDensityMapSampling = par("powerDensityMapSampling");
@@ -103,6 +116,7 @@ void MediumVisualizerBase::initialize(int stage)
         powerDensityMapFigureHeight = par("powerDensityMapFigureHeight");
         powerDensityMapPixmapWidth = par("powerDensityMapPixmapWidth");
         powerDensityMapPixmapHeight = par("powerDensityMapPixmapHeight");
+        powerDensityMapZ = par("powerDensityMapZ");
         powerDensityMapFigureXTickCount = par("powerDensityMapFigureXTickCount");
         powerDensityMapFigureYTickCount = par("powerDensityMapFigureYTickCount");
         displaySpectrums = par("displaySpectrums");
