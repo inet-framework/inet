@@ -81,8 +81,18 @@ simple MediumVisualizerBase extends VisualizerBase
         double signalMinFrequency @unit(Hz) = default(inf Hz); // minimum signal frequency if axis is not automatic
         double signalMaxFrequency @unit(Hz) = default(-inf Hz); // maximum signal frequency if axis is not automatic
 
-        // parameters for power density maps
+        // parameters for main power density map
         bool displayMainPowerDensityMap = default(false); // display a power density map for the transmission medium, can be enabled with dimensional analog models only
+        double mainPowerDensityMapPixmapDensity = default(1); // pixmap relative resolution
+        double mainPowerDensityMapMinX = default(0); // minimum X coordinate
+        double mainPowerDensityMapMaxX = default(nan); // maximum X coordinate, compound module size by default
+        double mainPowerDensityMapMinY = default(0); // minimum Y coordinate
+        double mainPowerDensityMapMaxY = default(nan); // maximum Y coordinate, compound module size by default
+        double mainPowerDensityMapZ = default(0); // Z coordinate
+        int mainPowerDensityMapFigureXTickCount = default(3); // number of ticks along the X axis
+        int mainPowerDensityMapFigureYTickCount = default(3); // number of ticks along the Y axis
+
+        // parameters for power density maps
         bool displayPowerDensityMaps = default(false); // display power density maps at the nodes, can be enabled with dimensional analog models only
         string powerDensityMapMode @emu("total", "signal", "auto") = default("auto"); // total means total transmission medium, signal means transmitted or received signal, auto means total or signal and noise if transmission or reception is in progress
         bool powerDensityMapSampling = default(true); // use signal sampling for pixels or use signal partitioning for filling pixels
@@ -93,6 +103,7 @@ simple MediumVisualizerBase extends VisualizerBase
         double powerDensityMapFigureHeight = default(120); // plot figure height in pixels
         double powerDensityMapPixmapWidth = default(powerDensityMapFigureWidth); // pixmap resolution width
         double powerDensityMapPixmapHeight = default(powerDensityMapFigureHeight); // pixmap resolution height
+        double powerDensityMapZ = default(0); // Z coordinate
         int powerDensityMapFigureXTickCount = default(3); // number of ticks along the X axis
         int powerDensityMapFigureYTickCount = default(3); // number of ticks along the Y axis
 

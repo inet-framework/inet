@@ -86,6 +86,14 @@ class INET_API MediumVisualizerBase : public VisualizerBase, public cListener
     Hz signalMinFrequency = Hz(NaN);
     Hz signalMaxFrequency = Hz(NaN);
     bool displayMainPowerDensityMap = false;
+    double mainPowerDensityMapPixmapDensity = NaN;
+    double mainPowerDensityMapMinX = NaN;
+    double mainPowerDensityMapMaxX = NaN;
+    double mainPowerDensityMapMinY = NaN;
+    double mainPowerDensityMapMaxY = NaN;
+    double mainPowerDensityMapZ = NaN;
+    int mainPowerDensityMapFigureXTickCount = -1;
+    int mainPowerDensityMapFigureYTickCount = -1;
     bool displayPowerDensityMaps = false;
     const char *powerDensityMapMode = nullptr;
     bool powerDensityMapSampling = false;
@@ -96,6 +104,7 @@ class INET_API MediumVisualizerBase : public VisualizerBase, public cListener
     double powerDensityMapFigureHeight = NaN;
     double powerDensityMapPixmapWidth = NaN;
     double powerDensityMapPixmapHeight = NaN;
+    double powerDensityMapZ = NaN;
     int powerDensityMapFigureXTickCount = -1;
     int powerDensityMapFigureYTickCount = -1;
     bool displaySpectrums = false;

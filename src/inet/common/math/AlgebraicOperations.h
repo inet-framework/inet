@@ -364,14 +364,14 @@ class INET_API SummedFunction : public FunctionBase<R, D>
 
     virtual typename D::I getDomain() const override {
         typename D::I domain(D::P::getLowerBounds(), D::P::getUpperBounds(), 0, 0, 0);
-        for (auto f : functions)
+        for (const auto& f : functions)
             domain = domain.getIntersected(f->getDomain());
         return domain;
     }
 
     virtual R getValue(const typename D::P& p) const override {
         R sum = R(0);
-        for (auto f : functions)
+        for (const auto& f : functions)
             sum += f->getValue(p);
         return sum;
     }
@@ -421,7 +421,7 @@ class INET_API SummedFunction : public FunctionBase<R, D>
     }
 
     virtual bool isFinite(const typename D::I& i) const override {
-        for (auto f : functions)
+        for (const auto& f : functions)
             if (!f->isFinite(i))
                 return false;
         return true;
@@ -430,7 +430,7 @@ class INET_API SummedFunction : public FunctionBase<R, D>
     virtual void printStructure(std::ostream& os, int level = 0) const override {
         os << "(Σ ";
         bool first = true;
-        for (auto f : functions) {
+        for (const auto& f : functions) {
             if (first)
                 first = false;
             else

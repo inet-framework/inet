@@ -239,7 +239,7 @@ void VoipStreamReceiver::closeConnection()
 
 void VoipStreamReceiver::decodePacket(Packet *pk)
 {
-    const auto& vp = pk->peekAtFront<VoipStreamPacket>();
+    const auto& vp = pk->popAtFront<VoipStreamPacket>();
     uint16_t newSeqNo = vp->getSeqNo();
     if (newSeqNo > curConn.seqNo + 1)
         emit(lostPacketsSignal, newSeqNo - (curConn.seqNo + 1));
@@ -258,11 +258,11 @@ void VoipStreamReceiver::decodePacket(Packet *pk)
 
     if (vp->getType() == VOICE) {
         emit(packetHasVoiceSignal, 1);
-        int len = vp->getBytes().getDataArraySize();
-        uint8_t buff[len];
-        vp->getBytes().copyDataToBuffer(buff, len);
-        curConn.writeAudioFrame(buff, len);
-        FINGERPRINT_ADD_EXTRA_DATA2((const char *)buff, len);
+        uint16_t len = vp->getDataLength();
+        auto bb = pk->peekDataAt<BytesChunk>(b(0), B(len));
+        auto buff = bb->getBytes();
+        curConn.writeAudioFrame(&buff.front(), buff.size());
+        FINGERPRINT_ADD_EXTRA_DATA2((const char *)(&buff.front()), buff.size());
     }
     else if (vp->getType() == SILENCE) {
         emit(packetHasVoiceSignal, 0);
