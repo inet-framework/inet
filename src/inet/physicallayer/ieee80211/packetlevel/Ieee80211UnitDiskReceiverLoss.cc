@@ -43,7 +43,7 @@ void Ieee80211UnitDiskReceiverLoss::initialize(int stage)
     Ieee80211UnitDiskReceiver::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
     }
-    else if (stage == INITSTAGE_PHYSICAL_LAYER) {
+    else if (stage == INITSTAGE_PHYSICAL_LAYER_NEIGHBOR_CACHE) {
 
         auto parent = this->getParentModule();
         auto node = getContainingNode(this);
