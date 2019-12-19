@@ -17,7 +17,6 @@
 //
 
 import inet.common.INETDefs;
-import inet.common.ByteArray;
 import inet.common.packet.chunk.Chunk;
 
 cplusplus {{
@@ -49,9 +48,11 @@ class VoipStreamPacket extends FieldsChunk
     int sampleRate;
     int transmitBitrate;
     int samplesPerPacket;
-    ByteArray bytes;
 
     uint16_t seqNo; // packet sequence number
     uint32_t timeStamp; // increased with every packet
     uint32_t ssrc;  // currently unused
+
+    uint16_t dataLength;
 }
+

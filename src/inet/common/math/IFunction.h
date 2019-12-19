@@ -33,7 +33,7 @@ namespace math {
 template<typename R, typename D>
 class INET_API IFunction : public cObject,
 #if INET_PTR_IMPLEMENTATION == INET_STD_SHARED_PTR
-    public std::enable_shared_from_this<Chunk>
+    public std::enable_shared_from_this<IFunction<R, D>>
 #elif INET_PTR_IMPLEMENTATION == INET_INTRUSIVE_PTR
     public IntrusivePtrCounter<IFunction<R, D>>
 #else

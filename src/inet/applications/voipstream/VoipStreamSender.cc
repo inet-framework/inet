@@ -363,15 +363,19 @@ Packet *VoipStreamSender::generatePacket()
         pk->setName("SILENCE");
         vp->setType(SILENCE);
         vp->setChunkLength(B(voipSilencePacketSize));
+        vp->setHeaderLength(voipSilencePacketSize);
+        vp->setDataLength(0);
     }
     else {
         pk->setName("VOICE");
         vp->setType(VOICE);
-        vp->getBytesForUpdate().setDataFromBuffer(opacket.data, opacket.size);
-        vp->setChunkLength(B(voipHeaderSize + opacket.size));
+        vp->setDataLength(opacket.size);
+        vp->setChunkLength(B(voipHeaderSize));
+        vp->setHeaderLength(voipHeaderSize);
+        const auto& voice = makeShared<BytesChunk>(opacket.data, opacket.size);
+        pk->insertAtFront(voice);
     }
 
-    vp->setHeaderLength(voipHeaderSize);
     vp->setTimeStamp(pktID);
     vp->setSeqNo(pktID);
     vp->setCodec(pEncoderCtx->codec_id);
@@ -379,7 +383,7 @@ Packet *VoipStreamSender::generatePacket()
     vp->setSampleBits(pEncoderCtx->bits_per_coded_sample);
     vp->setSamplesPerPacket(samplesPerPacket);
     vp->setTransmitBitrate(compressedBitRate);
-    pk->insertAtBack(vp);
+    pk->insertAtFront(vp);
 
     pktID++;
 

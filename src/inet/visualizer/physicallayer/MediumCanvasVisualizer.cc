@@ -101,22 +101,22 @@ void MediumCanvasVisualizer::initialize(int stage)
             mainPowerDensityMapFigure = new HeatMapPlotFigure();
             mainPowerDensityMapFigure->setTags("signal_main_power_density_map");
             mainPowerDensityMapFigure->setTooltip("This plot represents the signal power density over space");
-            mainPowerDensityMapFigure->setZIndex(zIndex);
+            mainPowerDensityMapFigure->setZIndex(zIndex - 2);
             mainPowerDensityMapFigure->setXAxisLabel("[m]");
             mainPowerDensityMapFigure->setYAxisLabel("[m]");
             mainPowerDensityMapFigure->setXValueFormat("%.3g");
             mainPowerDensityMapFigure->setYValueFormat("%.3g");
             mainPowerDensityMapFigure->invertYAxis();
-            const auto& displayString = visualizationTargetModule->getDisplayString();
-            auto width = atof(displayString.getTagArg("bgb", 0));
-            auto height = atof(displayString.getTagArg("bgb", 1));
-            auto minPosition = canvasProjection->computeCanvasPointInverse(cFigure::Point(0, 0), 0);
-            auto maxPosition = canvasProjection->computeCanvasPointInverse(cFigure::Point(width, height), 0);
+            auto width = mainPowerDensityMapMaxX - mainPowerDensityMapMinX;
+            auto height = mainPowerDensityMapMaxY - mainPowerDensityMapMinY;
+            auto minPosition = canvasProjection->computeCanvasPointInverse(cFigure::Point(mainPowerDensityMapMinX, mainPowerDensityMapMinY), mainPowerDensityMapZ);
+            auto maxPosition = canvasProjection->computeCanvasPointInverse(cFigure::Point(mainPowerDensityMapMaxX, mainPowerDensityMapMaxY), mainPowerDensityMapZ);
             mainPowerDensityMapFigure->setMinX(minPosition.x);
-            mainPowerDensityMapFigure->setMaxX(maxPosition.x);
             mainPowerDensityMapFigure->setMinY(minPosition.y);
+            mainPowerDensityMapFigure->setMaxX(maxPosition.x);
             mainPowerDensityMapFigure->setMaxY(maxPosition.y);
-            mainPowerDensityMapFigure->setPlotSize(cFigure::Point(width, height), cFigure::Point(width / powerDensityMapFigureWidth * powerDensityMapPixmapWidth, height / powerDensityMapFigureHeight * powerDensityMapPixmapHeight));
+            mainPowerDensityMapFigure->setBounds(cFigure::Rectangle(mainPowerDensityMapMinX, mainPowerDensityMapMinY, width, height));
+            mainPowerDensityMapFigure->setPlotSize(cFigure::Point(width, height), cFigure::Point(width * mainPowerDensityMapPixmapDensity, height * mainPowerDensityMapPixmapDensity));
             cCanvas *canvas = visualizationTargetModule->getCanvas();
             canvas->addFigure(mainPowerDensityMapFigure, 0);
         }
@@ -128,7 +128,7 @@ void MediumCanvasVisualizer::initialize(int stage)
                     auto powerDensityMapFigure = new HeatMapPlotFigure();
                     powerDensityMapFigure->setTags("signal_power_density_map");
                     powerDensityMapFigure->setTooltip("This plot represents the signal power density over space");
-                    powerDensityMapFigure->setZIndex(zIndex);
+                    powerDensityMapFigure->setZIndex(zIndex - 1);
                     powerDensityMapFigure->setXAxisLabel("[m]");
                     powerDensityMapFigure->setYAxisLabel("[m]");
                     powerDensityMapFigure->setXValueFormat("%.3g");
@@ -137,7 +137,7 @@ void MediumCanvasVisualizer::initialize(int stage)
                     powerDensityMapFigure->setPlotSize(cFigure::Point(powerDensityMapFigureWidth, powerDensityMapFigureHeight), cFigure::Point(powerDensityMapPixmapWidth, powerDensityMapPixmapHeight));
                     // TODO: center on node to align in space coordinates
                     powerDensityMapFigure->refreshDisplay();
-                    networkNodeVisualization->addAnnotation(powerDensityMapFigure, powerDensityMapFigure->getSize(), spectrogramPlacementHint, spectrogramPlacementPriority);
+                    networkNodeVisualization->addAnnotation(powerDensityMapFigure, powerDensityMapFigure->getPlotSize(), PLACEMENT_CENTER_CENTER, -1);
                     powerDensityMapFigures[networkNode] = powerDensityMapFigure;
                 }
                 if (displaySpectrums) {
@@ -156,7 +156,7 @@ void MediumCanvasVisualizer::initialize(int stage)
                     spectrumFigure->setYValueFormat("%.3g");
                     spectrumFigure->setPlotSize(cFigure::Point(spectrumFigureWidth, spectrumFigureHeight));
                     spectrumFigure->refreshDisplay();
-                    networkNodeVisualization->addAnnotation(spectrumFigure, spectrumFigure->getSize(), spectrumPlacementHint, spectrumPlacementPriority);
+                    networkNodeVisualization->addAnnotation(spectrumFigure, spectrumFigure->getPlotSize(), spectrumPlacementHint, spectrumPlacementPriority);
                     spectrumFigures[networkNode] = spectrumFigure;
                 }
                 if (displaySpectrograms) {
@@ -171,7 +171,7 @@ void MediumCanvasVisualizer::initialize(int stage)
                     spectrogramFigure->invertYAxis();
                     spectrogramFigure->setPlotSize(cFigure::Point(spectrogramFigureWidth, spectrogramFigureHeight), cFigure::Point(spectrogramPixmapWidth, spectrogramPixmapHeight));
                     spectrogramFigure->refreshDisplay();
-                    networkNodeVisualization->addAnnotation(spectrogramFigure, spectrogramFigure->getSize(), spectrogramPlacementHint, spectrogramPlacementPriority);
+                    networkNodeVisualization->addAnnotation(spectrogramFigure, spectrogramFigure->getPlotSize(), spectrogramPlacementHint, spectrogramPlacementPriority);
                     spectrogramFigures[networkNode] = spectrogramFigure;
                 }
             }
@@ -212,9 +212,9 @@ void MediumCanvasVisualizer::refreshDisplay() const
 
 void MediumCanvasVisualizer::refreshMainPowerDensityMapFigure() const
 {
-    if (signalMinFrequency < signalMaxFrequency) {
-        mainPowerDensityMapFigure->setXTickCount(powerDensityMapFigureXTickCount);
-        mainPowerDensityMapFigure->setYTickCount(powerDensityMapFigureYTickCount);
+    if ((!std::isnan(powerDensityMapCenterFrequency.get()))) {
+        mainPowerDensityMapFigure->setXTickCount(mainPowerDensityMapFigureXTickCount);
+        mainPowerDensityMapFigure->setYTickCount(mainPowerDensityMapFigureYTickCount);
         mainPowerDensityMapFigure->clearValues();
         refreshPowerDensityMapFigurePowerFunction(mediumPowerDensityFunction, mainPowerDensityMapFigure, 2);
         mainPowerDensityMapFigure->bakeValues();
@@ -224,7 +224,7 @@ void MediumCanvasVisualizer::refreshMainPowerDensityMapFigure() const
 
 void MediumCanvasVisualizer::refreshPowerDensityMapFigure(const cModule *networkNode, HeatMapPlotFigure *figure) const
 {
-    if (signalMinFrequency < signalMaxFrequency) {
+    if (!std::isnan(powerDensityMapCenterFrequency.get())) {
         const ITransmission *transmissionInProgress;
         const ITransmission *receptionInProgress;
         const IAntenna *antenna;
@@ -232,8 +232,9 @@ void MediumCanvasVisualizer::refreshPowerDensityMapFigure(const cModule *network
         std::tie(transmissionInProgress, receptionInProgress, antenna, mobility) = extractSpectrumFigureParameters(networkNode);
         auto position = antenna->getMobility()->getCurrentPosition();
         auto point = canvasProjection->computeCanvasPoint(position);
-        auto minPosition = canvasProjection->computeCanvasPointInverse(cFigure::Point(point.x - powerDensityMapFigureWidth / 2, point.y - powerDensityMapFigureHeight / 2), 0);
-        auto maxPosition = canvasProjection->computeCanvasPointInverse(cFigure::Point(point.x + powerDensityMapFigureWidth / 2, point.y + powerDensityMapFigureHeight / 2), 0);
+        auto zoom = getEnvir()->getZoomLevel(visualizationTargetModule);
+        auto minPosition = canvasProjection->computeCanvasPointInverse(cFigure::Point(point.x - powerDensityMapFigureWidth / 2 / zoom, point.y - powerDensityMapFigureHeight / 2 / zoom), powerDensityMapZ);
+        auto maxPosition = canvasProjection->computeCanvasPointInverse(cFigure::Point(point.x + powerDensityMapFigureWidth / 2 / zoom, point.y + powerDensityMapFigureHeight / 2 / zoom), powerDensityMapZ);
         figure->setMinX(minPosition.x);
         figure->setMaxX(maxPosition.x);
         figure->setMinY(minPosition.y);
@@ -303,7 +304,9 @@ void MediumCanvasVisualizer::refreshPowerDensityMapFigurePowerFunction(const Ptr
     auto size = maxPosition - minPosition;
     auto pixmapSize = figure->getPixmapSize();
     if (powerDensityMapSampling) {
-        for (int x = 0; x < pixmapSize.x; x++) {
+        const int xsize = pixmapSize.x;
+#pragma omp parallel for
+        for (int x = 0; x < xsize; x++) {
             for (int y = 0; y < pixmapSize.y; y++) {
                 if (powerFunction == nullptr) {
                     auto value = powerDensityFunction->getValue(Point<m, m, m, simsec, Hz>(m(minPosition.x + x * size.x / pixmapSize.x), m(minPosition.y + y * size.y / pixmapSize.y), m(0), simsec(simTime()), powerDensityMapCenterFrequency));

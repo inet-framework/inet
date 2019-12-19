@@ -80,14 +80,15 @@ class INET_API PlotFigure : public cGroupFigure, public inet::IIndicatorFigure
     virtual void setNumSeries(int numSeries);
     virtual int getNumSeries() const override { return numSeries; }
 
-    virtual const Point getSize() const override { return getBounds().getSize(); }
     virtual void setValue(int series, simtime_t timestamp, double value) override { setValue(series, timestamp.dbl(), value); }
     virtual void setValue(int series, double x, double y);
     virtual void clearValues(int series) { seriesValues[series].clear(); invalidPlot = true; }
 
     //getters and setters
+    const Point getPlotSize() const { return backgroundFigure->getBounds().getSize(); }
     void setPlotSize(const Point& p);
 
+    virtual const Point getSize() const override { return getBounds().getSize(); }
     const Rectangle& getBounds() const;
     void setBounds(const Rectangle& rect);
 
