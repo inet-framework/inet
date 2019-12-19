@@ -93,6 +93,8 @@ void UdpBasicBurst::initialize(int stage)
 
         timerNext = new cMessage("UDPBasicBurstTimer");
 
+    }
+    else if (stage == INITSTAGE_APPLICATION_LAYER) {
         if (hasPar("registerInInit") && par("registerInInit").boolValue()) {
             socket.setOutputGate(gate("socketOut"));
             socket.setCallback(this);
