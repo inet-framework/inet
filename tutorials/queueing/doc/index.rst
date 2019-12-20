@@ -1,5 +1,3 @@
-:orphan:
-
 Queueing Tutorial
 =================
 
@@ -12,7 +10,7 @@ to define custom application behavior without C++ programming.
 
 Each step in this tutorial demonstrates one of the available queueing elements,
 with a few more complex examples at the end.
-Note that most of the available elements are demonstrated here, but not all 
+Note that most of the available elements are demonstrated here, but not all
 (for example, elements specific to DiffServ are omitted from here).
 See the INET Reference for the complete list of elements.
 
