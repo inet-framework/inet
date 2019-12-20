@@ -1,22 +1,23 @@
 Priority Buffer
 ===============
 
-In this test, packets are produced periodically (randomly) by two active packet
-sources (ActivePacketSource). The packets are collected periodically (randomly)
-by two active packet sinks (ActivePacketSink). The sources and the sinkes are
-connected by packet queues (TestQueue) and packets are stored in shared packet
-buffer (PacketBuffer). The packet buffer drops packets when it gets overloaded
-prioritizing over the packet queues.
+The :ned:`PriorityBuffer` module extends :ned:`PacketBuffer` by configuring
+a packet drop strategy. By default, when the buffer is full, packets belonging to the last
+queue are dropped first. This is the behavior that can be changed by the packet drop strategy.
 
-The network contains ... TODO
+In this example network, packets are produced at random intervals by two active packet
+sources (:ned:`ActivePacketSource`). The packet packet sources push packets into two
+queues (:ned:`PacketQueue`). The queues share a :ned:`PriorityBuffer` with a packet capacity of
+2. Packets are popped from the queues at random intervals by two active packet sinks (:ned:`ActivePacketSink`).
+When the buffer becomes full, it drops packets from the second queue first.
 
 .. figure:: media/PriorityBuffer.png
-   :width: 80%
+   :width: 90%
    :align: center
 
-**TODO** Config
-
-.. literalinclude:: ../PriorityBuffer.ned
+.. literalinclude:: ../QueueingTutorial.ned
+   :start-at: network PriorityBufferTutorialStep
+   :end-before: //----
    :language: ned
 
 .. literalinclude:: ../omnetpp.ini

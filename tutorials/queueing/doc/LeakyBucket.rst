@@ -1,9 +1,15 @@
 Leaky Bucket
 ============
 
-TODO
+The :ned:`LeakyBucket` compound module implements the leaky bucket algorithm.
+By default, the module contains a :ned:`DropTailQueue`, and a :ned:`PacketServer`.
+The queue capacity and the processing time of the server can be used to
+parameterize the leaky bucket algorithm.
 
-The network contains ... TODO
+In this example network, packets are produced by an active packet source (:ned:`ActivePacketSource`).
+The packet source pushes packets into a :ned:`LeakyBucket` module, which pushes them into
+a passive packet sink (:ned:`PassivePacketSink`). The leaky bucket is configured with a
+processing time of 1s, and a packet capacity of 1.
 
 .. figure:: media/LeakyBucket.png
    :width: 60%
@@ -13,9 +19,9 @@ The network contains ... TODO
    :width: 65%
    :align: center
 
-**TODO** Config
-
-.. literalinclude:: ../LeakyBucket.ned
+.. literalinclude:: ../QueueingTutorial.ned
+   :start-at: network LeakyBucketTutorialStep
+   :end-before: //----
    :language: ned
 
 .. literalinclude:: ../omnetpp.ini

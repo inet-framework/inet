@@ -1,19 +1,24 @@
-Queue Filler
-============
+Preventing a Queue from Becoming Empty
+======================================
 
-TODO
+The :ned:`QueueFiller` module creates packets whenever a connected queue becomes
+empty. One use of this module is to generate continuous traffic on a network
+interface.
 
-TODO
+In this example network, an active packet sink (:ned:`ActivePacketSink`) periodically pops packets from a queue (:ned:`PacketQueue`).
+Whenever the queue becomes empty, a queue filler module (:ned:`QueueFiller`) pushes a packet into it.
 
-The network contains ... TODO
-
-.. figure:: media/QueueFiller.png
+.. figure:: media/QueueFillerNetwork.png
    :width: 80%
    :align: center
 
-**TODO** Config
+.. figure:: media/QueueFiller.png
+   :width: 50%
+   :align: center
 
-.. literalinclude:: ../QueueFiller.ned
+.. literalinclude:: ../QueueingTutorial.ned
+   :start-at: network QueueFillerTutorialStep
+   :end-before: //----
    :language: ned
 
 .. literalinclude:: ../omnetpp.ini

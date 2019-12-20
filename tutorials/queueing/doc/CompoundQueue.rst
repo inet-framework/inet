@@ -1,29 +1,45 @@
-Compound Queue
-==============
+Building Complex Queues via Composition
+=======================================
 
-In this test, packets are produced periodically (randomly) by an active packet
-source (ActivePacketSource). The packets are collected periodically (randomly) by
-an active packet sink (ActivePacketSink). The source and the sink is connected
-by a compound priority queue (TestQueue) where packets are stored temporarily.
-This queue contains a classifier (PacketClassifier), two queues (PacketQueues),
-and a priorty scheduler (PriortyScheduler).
+This step demonstrates a compound priority queue (ExampleCompoundPriorityQueue) built from queueing components.
+The compound queue contains three packet queues. A classifier pushes packets to the first two queues and
+a passive packet sink in a round-robin fashion.
+An active packet source produces packets into the third queue. The three queues are
+connected to a priority scheduler, which pops packets
+from the first non-empty queue; the earlier queues have priority.
 
-The network contains ... TODO
+.. In this step, packets are produced at random intervals by an active packet
+   source (:ned:`ActivePacketSource`). The packets are collected at random intervals by
+   an active packet sink (ActivePacketSink). The source and the sink is connected
+   by a compound priority queue (ExampleCompoundPriorityQueue) where packets are stored temporarily.
+   This queue contains a classifier (:ned:`PacketClassifier`), two queues (:ned:`PacketQueue`),
+   and a priorty scheduler (:ned:`PriorityScheduler`).
+
+In this step, packets are produced at random intervals by an active packet
+source (:ned:`ActivePacketSource`). The source is connected
+to a compound priority queue (ExampleCompoundPriorityQueue) where packets are stored temporarily.
+Packets are collected at random intervals by
+an active packet sink (:ned:`ActivePacketSink`).
 
 .. figure:: media/CompoundQueue.png
    :width: 70%
    :align: center
 
 .. figure:: media/CompoundQueue_Queue.png
-   :width: 80%
+   :width: 90%
    :align: center
 
-**TODO** Config
+.. literalinclude:: ../QueueingTutorial.ned
+   :start-at: network CompoundPacketQueueTutorialStep
+   :end-before: //----
+   :language: ned
 
-.. literalinclude:: ../CompoundQueue.ned
+.. literalinclude:: ../QueueingTutorial.ned
+   :start-at: module ExampleCompoundPriorityQueue
+   :end-before: //----
    :language: ned
 
 .. literalinclude:: ../omnetpp.ini
    :start-at: Config CompoundQueue
-   :end-at: classifierClass
+   :end-at: weights
    :language: ini

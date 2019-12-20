@@ -1,22 +1,28 @@
-Buffer
-======
+Storing Packets on Behalf of Multiple Queues
+============================================
 
-In this test, packets are produced periodically (randomly) by two active packet
-sources (ActivePacketSource). The packets are collected periodically (randomly)
-by two active packet sinks (ActivePacketSink). The sources and the sinkes are
-connected by packet queues (TestQueue) and packets are stored in shared packet
-buffer (PacketBuffer). The packet buffer drops packets from the beginning of
+The :ned:`PacketBuffer` module stores packets on
+behalf of multiple queues, acting as a shared buffer for them.
+Instead of each individual queue having a separate capacity,
+the whole group of queues has a global, shared capacity, represented by the buffer.
+The buffer keeps a record of which packets belong to which queue, and also maintains
+the order of packets.
+
+In this example network, packets are produced at random intervals by two active packet sources
+(:ned:`ActivePacketSource`). Each packet source pushes packets into its associated queue (:ned:`PacketQueue`).
+The two queues share a packet buffer module (:ned:`PacketBuffer`). The buffer is configured to have
+a capacity of 2 packets. Packets are popped from the queues by two active packet sinks (:ned:`ActivePacketSink`).
+Since the buffer has a limited packet capacity, and the ``PacketAtCollectionBeginDropper`` function is used
+as the dropper function, the buffer drops packets from the beginning of
 the buffer when it gets overloaded.
-
-The network contains ... TODO
 
 .. figure:: media/Buffer.png
    :width: 80%
    :align: center
 
-**TODO** Config
-
-.. literalinclude:: ../Buffer.ned
+.. literalinclude:: ../QueueingTutorial.ned
+   :start-at: network BufferTutorialStep
+   :end-before: //----
    :language: ned
 
 .. literalinclude:: ../omnetpp.ini
