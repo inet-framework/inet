@@ -1,20 +1,25 @@
-Ordinal Based Duplicator
-========================
+Duplicating Packets Based On Their Ordinal Number
+=================================================
 
-In this test, packets are produced periodically by an active packet source
-(ActivePacketSource). The packets are consumed by a passive packet sink (PassivePacketSink).
-Packets are passed through from the source to the sink by a duplicator (OrdinalBasedDuplicator).
-Every second packet is duplicated based on its ordinal number.
+The :ned:`OrdinalBasedDuplicator` module duplicates packets based on the ordinal
+number of incoming packets. The packets to be duplicated can be configured by
+listing their ordinal numbers in a parameter. When the packets to be duplicated
+need to be selected using more complex criteria, a duplicator module can be combined
+with a classifier and a multiplexer to achieve that.
 
-The network contains ... TODO
+In this example network, packets are produced periodically by an active packet source
+(:ned:`ActivePacketSource`).
+The packet source pushed packets into a duplicator (:ned:`OrdinalBasedDuplicator`).
+The duplicator is configured to duplicate every second packet on its ordinal number.
+The packets are then consumed by a passive packet sink (:ned:`PassivePacketSink`).
 
 .. figure:: media/OrdinalBasedDuplicator.png
    :width: 60%
    :align: center
 
-**TODO** Config
-
-.. literalinclude:: ../OrdinalBasedDuplicator.ned
+.. literalinclude:: ../QueueingTutorial.ned
+   :start-at: network OrdinalBasedDuplicatorTutorialStep
+   :end-before: //----
    :language: ned
 
 .. literalinclude:: ../omnetpp.ini

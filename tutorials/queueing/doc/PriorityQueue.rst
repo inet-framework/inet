@@ -1,13 +1,18 @@
 Priority Queue
 ==============
 
-In this test, packets are produced periodically (randomly) by an active packet
-source (ActivePacketSource). The packets are collected periodically (randomly) by
-an active packet sink (ActivePacketSink). The source and the sink is connected
-by a priority queue with two inner queues (PriorityQueue) where packets are
-stored temporarily.
+The :ned:`PriorityQueue` module is a compound module that implements priority queueing
+with the help of a classifier submodule, multiple queues and a scheduler.
 
-The network contains ... TODO
+It contains a configurable number of :ned:`PacketQueue`'s. A :ned:`PacketClassifier` module
+classifies packets into the queues according to the configured packet classifier function.
+A :ned:`PriorityScheduler` pops packets from the first non-empty queue, thus earlier queues
+have a priority over the later ones.
+
+In this example network, packets are produced at random intervals by an active packet
+source (:ned:`ActivePacketSource`). The source is connected
+to a priority queue (:ned:`PriorityQueue`) with two inner queues (:ned:`PacketQueue`).
+The packets are collected at random intervals by an active packet sink (:ned:`ActivePacketSink`).
 
 .. figure:: media/PriorityQueue.png
    :width: 70%
@@ -17,9 +22,9 @@ The network contains ... TODO
    :width: 80%
    :align: center
 
-**TODO** Config
-
-.. literalinclude:: ../PriorityQueue.ned
+.. literalinclude:: ../QueueingTutorial.ned
+   :start-at: network PriorityQueueTutorialStep
+   :end-before: //----
    :language: ned
 
 .. literalinclude:: ../omnetpp.ini
