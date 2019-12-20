@@ -34,7 +34,7 @@ import ned.DatarateChannel;
 //import inet.linklayer.queue.DropTailQueue;
 //import inet.queueing.FifoQueue;
 //import inet.queueing.RedDropper;
-//import inet.queueing.RedMarkerQueue;
+//import inet.queueing.RedDropperQueue;
 
 
 
@@ -79,38 +79,8 @@ network RedMarkerNetwork
             parameters:
                 @display("p=2945.02,995.93005;i=abstract/router");
         }
-        
-        configurator: Ipv4NetworkConfigurator {
-//            parameters:
-//                @display("p=150,115;is=m");
-//                addStaticRoutes = false;
-//                config = default(xml("<config>"
-//                        + "<interface among='routerCore1 routerCore2' address='10.1.2.x' netmask='255.255.255.x' />"
-//                        + "<interface among='routerCore1 routerCore5' address='10.1.5.x' netmask='255.255.255.x' />"
-//                        + "<interface among='routerCore3 routerCore4' address='10.3.4.x' netmask='255.255.255.x' />"
-//                        + "<interface among='routerCore3 routerCore5' address='10.3.5.x' netmask='255.255.255.x' />"
-//                        + "<interface among='routerCore5 routerCore6' address='10.5.6.x' netmask='255.255.255.x' />"
-//                        + "<interface among='routerCore2 routerCore6' address='10.2.6.x' netmask='255.255.255.x' />"
-//                        + "<interface among='routerCore4 routerCore6' address='10.4.6.x' netmask='255.255.255.x' />"
-//                        
-//                        + "<interface among='routerCore1 sender1*' address='192.168.1.x' netmask='255.255.255.x' />"
-//                        + "<interface among='routerCore2 receiver1*' address='192.168.2.x' netmask='255.255.255.x' />"
-//                        + "<interface among='routerCore3 sender2*' address='192.168.3.x' netmask='255.255.255.x' />"
-//                        + "<interface among='routerCore4 receiver2*' address='192.168.4.x' netmask='255.255.255.x' />"
-//                        
-//                        + "<interface host='sender1*' address='192.168.1.x' netmask='255.255.255.x' />"
-//                        + "<interface host='receiver1*' address='192.168.2.x' netmask='255.255.255.x' />"
-//                        + "<interface host='sender2*' address='192.168.3.x' netmask='255.255.255.x' />"
-//                        + "<interface host='receiver2*' address='192.168.4.x' netmask='255.255.255.x' />"
-//                        
-//                        + "<multicast-group hosts='r*' address='224.0.0.5 224.0.0.6' />"
-//                        + "<route hosts='sender1*' destination='*' gateway='routerCore1'/>"
-//                        + "<route hosts='receiver1*' destination='*' gateway='routerCore2'/>"
-//                        + "<route hosts='sender2*' destination='*' gateway='routerCore3'/>"
-//                        + "<route hosts='receiver2*' destination='*' gateway='routerCore4'/>"
-//                        + "</config>"));
-//
-        }
+
+        configurator: Ipv4NetworkConfigurator;
 
 
         sender1: StandardHost {

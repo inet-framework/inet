@@ -125,7 +125,7 @@ The following simpler equation about the number of packets always holds true for
 -  :ned:`DropHeadQueue`: drops packets at the head of the queue
 -  :ned:`DropTailQueue`: drops packets at the tail of the queue, the most commonly used queue
 -  :ned:`PriorityQueue`: contains several subqueues that share a buffer
--  :ned:`RedMarkerQueue`: combines random early detection with a queue
+-  :ned:`RedDropperQueue`: combines random early detection with a queue
 -  :ned:`CompoundPacketQueue`: allows building complex queues by pure NED composition
 
 Buffers
@@ -220,7 +220,6 @@ can be both pushed into the input and popped from the output of packet markers.
    parameterizable with an :cpp:`IPacketFilterFunction`
 
 -  :ned:`ContentBasedTagger`: attaches tags to packets based on the data they contain 
--  :ned:`RedMarker`: random early detection marker
 
 Meters
 ------

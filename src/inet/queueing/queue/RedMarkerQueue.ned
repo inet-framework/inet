@@ -18,15 +18,15 @@
 package inet.queueing.queue;
 
 import inet.queueing.contract.IPacketQueue;
-import inet.queueing.marker.RedMarker;
+import inet.queueing.filter.RedDropper;
 
 //
-// Combines a packet queue with random early detection (RED) marker.
+// Combines a packet queue with random early detection (RED) dropper.
 //
-module RedMarkerQueue extends CompoundPacketQueue
+module RedDropperQueue extends CompoundPacketQueue
 {
     submodules:
-        red: RedMarker {
+        red: RedDropper {
             @display("p=100,100");
         }
         fifo: <default("PacketQueue")> like IPacketQueue {
