@@ -42,6 +42,7 @@ class INET_API Ieee80211UnitDiskReceiverLoss : public Ieee80211UnitDiskReceiver
 
   public:
     Ieee80211UnitDiskReceiverLoss();
+    ~Ieee80211UnitDiskReceiverLoss();
 
     virtual const IReceptionResult *computeReceptionResult(const IListening *listening, const IReception *reception, const IInterference *interference, const ISnir *snir, const std::vector<const IReceptionDecision *> *decisions) const override;
 };

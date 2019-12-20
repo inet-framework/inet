@@ -38,10 +38,26 @@ Ieee80211UnitDiskReceiverLoss::Ieee80211UnitDiskReceiverLoss() :
 {
 }
 
+Ieee80211UnitDiskReceiverLoss::~Ieee80211UnitDiskReceiverLoss()
+{
+    if (!nodes.empty())
+        nodes.clear();
+    if (!uniLinks.empty())
+        uniLinks.clear();
+    if (!lossLinks.empty())
+        lossLinks.clear();
+}
+
 void Ieee80211UnitDiskReceiverLoss::initialize(int stage)
 {
     Ieee80211UnitDiskReceiver::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
+        if (!nodes.empty())
+            nodes.clear();
+        if (!uniLinks.empty())
+            uniLinks.clear();
+        if (!lossLinks.empty())
+            lossLinks.clear();
     }
     else if (stage == INITSTAGE_PHYSICAL_LAYER_NEIGHBOR_CACHE) {
 
