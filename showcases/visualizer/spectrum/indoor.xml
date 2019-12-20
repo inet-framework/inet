@@ -1,0 +1,59 @@
+<environment>
+    <material id="0" name="magic" relativePermittivity="4.5" relativePermeability="1" resistivity="250"/>
+
+    <!-- Horizontal walls -->
+    <object position="min 205 100 0" orientation="0 0 0" shape="cuboid 40 5 2" material="0" fill-color="203 65 84" opacity="0.8"/>
+    <object position="min 265 100 0" orientation="0 0 0" shape="cuboid 40 5 2" material="0" fill-color="203 65 84" opacity="0.8"/>
+    <object position="min 310 100 0" orientation="0 0 0" shape="cuboid 40 5 2" material="0" fill-color="203 65 84" opacity="0.8"/>
+    <object position="min 370 100 0" orientation="0 0 0" shape="cuboid 40 5 2" material="0" fill-color="203 65 84" opacity="0.8"/>
+
+    <object position="min 310 155 0" orientation="0 0 0" shape="cuboid 100 5 2" material="0" fill-color="203 65 84" opacity="0.8"/>
+
+    <object position="min 205 210 0" orientation="0 0 0" shape="cuboid 40 5 2" material="0" fill-color="203 65 84" opacity="0.8"/>
+    <object position="min 265 210 0" orientation="0 0 0" shape="cuboid 40 5 2" material="0" fill-color="203 65 84" opacity="0.8"/>
+    <object position="min 310 210 0" orientation="0 0 0" shape="cuboid 40 5 2" material="0" fill-color="203 65 84" opacity="0.8"/>
+    <object position="min 370 210 0" orientation="0 0 0" shape="cuboid 40 5 2" material="0" fill-color="203 65 84" opacity="0.8"/>
+
+    <!-- Vertical walls -->
+    <object position="min 200 105 0" orientation="0 0 0" shape="cuboid 5 15 2" material="0" fill-color="203 65 84" opacity="0.8"/>
+    <object position="min 200 140 0" orientation="0 0 0" shape="cuboid 5 15 2" material="0" fill-color="203 65 84" opacity="0.8"/>
+    <object position="min 200 160 0" orientation="0 0 0" shape="cuboid 5 15 2" material="0" fill-color="203 65 84" opacity="0.8"/>
+    <object position="min 200 195 0" orientation="0 0 0" shape="cuboid 5 15 2" material="0" fill-color="203 65 84" opacity="0.8"/>
+
+    <object position="min 305 105 0" orientation="0 0 0" shape="cuboid 5 15 2" material="0" fill-color="203 65 84" opacity="0.8"/>
+    <object position="min 305 140 0" orientation="0 0 0" shape="cuboid 5 15 2" material="0" fill-color="203 65 84" opacity="0.8"/>
+    <object position="min 305 160 0" orientation="0 0 0" shape="cuboid 5 15 2" material="0" fill-color="203 65 84" opacity="0.8"/>
+    <object position="min 305 195 0" orientation="0 0 0" shape="cuboid 5 15 2" material="0" fill-color="203 65 84" opacity="0.8"/>
+
+    <object position="min 410 105 0" orientation="0 0 0" shape="cuboid 5 15 2" material="0" fill-color="203 65 84" opacity="0.8"/>
+    <object position="min 410 140 0" orientation="0 0 0" shape="cuboid 5 15 2" material="0" fill-color="203 65 84" opacity="0.8"/>
+    <object position="min 410 160 0" orientation="0 0 0" shape="cuboid 5 15 2" material="0" fill-color="203 65 84" opacity="0.8"/>
+    <object position="min 410 195 0" orientation="0 0 0" shape="cuboid 5 15 2" material="0" fill-color="203 65 84" opacity="0.8"/>
+
+    <!-- Walls at junctions --> 
+    <object position="min 200 100 0" orientation="0 0 0" shape="cuboid 5 5 2" material="0" fill-color="203 65 84" opacity="0.8"/>
+    <object position="min 305 100 0" orientation="0 0 0" shape="cuboid 5 5 2" material="0" fill-color="203 65 84" opacity="0.8"/>
+    <object position="min 410 100 0" orientation="0 0 0" shape="cuboid 5 5 2" material="0" fill-color="203 65 84" opacity="0.8"/>
+
+    <object position="min 200 155 0" orientation="0 0 0" shape="cuboid 5 5 2" material="0" fill-color="203 65 84" opacity="0.8"/>
+    <object position="min 305 155 0" orientation="0 0 0" shape="cuboid 5 5 2" material="0" fill-color="203 65 84" opacity="0.8"/>
+    <object position="min 410 155 0" orientation="0 0 0" shape="cuboid 5 5 2" material="0" fill-color="203 65 84" opacity="0.8"/>
+
+    <object position="min 200 210 0" orientation="0 0 0" shape="cuboid 5 5 2" material="0" fill-color="203 65 84" opacity="0.8"/>
+    <object position="min 305 210 0" orientation="0 0 0" shape="cuboid 5 5 2" material="0" fill-color="203 65 84" opacity="0.8"/>
+    <object position="min 410 210 0" orientation="0 0 0" shape="cuboid 5 5 2" material="0" fill-color="203 65 84" opacity="0.8"/>
+
+    <!-- Horizontal windows --> 
+    <object position="min 245 102 0" orientation="0 0 0" shape="cuboid 20 1 2" material="glass" fill-color="201, 219, 220" opacity="0.5"/>
+    <object position="min 350 102 0" orientation="0 0 0" shape="cuboid 20 1 2" material="glass" fill-color="201, 219, 220" opacity="0.5"/>
+
+    <object position="min 245 212 0" orientation="0 0 0" shape="cuboid 20 1 2" material="glass" fill-color="201, 219, 220" opacity="0.5"/>
+    <object position="min 350 212 0" orientation="0 0 0" shape="cuboid 20 1 2" material="glass" fill-color="201, 219, 220" opacity="0.5"/>
+
+    <!-- Vertical windows -->
+    <object position="min 202 120 0" orientation="0 0 0" shape="cuboid 1 20 2" material="glass" fill-color="201, 219, 220" opacity="0.5"/>
+    <object position="min 202 175 0" orientation="0 0 0" shape="cuboid 1 20 2" material="glass" fill-color="201, 219, 220" opacity="0.5"/>
+
+    <object position="min 412 120 0" orientation="0 0 0" shape="cuboid 1 20 2" material="glass" fill-color="201, 219, 220" opacity="0.5"/>
+    <object position="min 412 175 0" orientation="0 0 0" shape="cuboid 1 20 2" material="glass" fill-color="201, 219, 220" opacity="0.5"/>
+</environment>
