@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2019-12-12  Levente Mészáros
+
+	Fixed simulation trajectory instability caused by InterfaceEntry pointers in std::map.
+
 2019-11-28  Zoltan Bojthe
 
 	Routing table and configurator detects when an interface connecting/disconnecting.

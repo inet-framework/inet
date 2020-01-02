@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2019-12-18  Zoltan Bojthe
+
+	Added subcode enum for UdpSetOptionCommand.
+
 2019-11-18  Zoltan Bojthe
 
 	Added setTos() function and UdpSetTosCommand to UdpSocket.
