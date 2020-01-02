@@ -212,6 +212,11 @@ Notable backward compatible changes are the following:
    feature effectively allows the user to explore power spectral density in space
    by simply dragging a probe node.
 
+   See the following example videos:
+   https://www.youtube.com/watch?v=oyjX03MSi7s
+   https://www.youtube.com/watch?v=Oi1sq23IPYs
+   https://www.youtube.com/watch?v=TyYQ53hUrns
+
 7. Visualization of street maps
 
    The new OpenStreetMapSceneCanvasVisualizer allows displaying an arbitrary
