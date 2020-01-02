@@ -57,10 +57,14 @@ but only :cpp:`Packet` instances are allowed.
 
 There are two new important operations on queueing model elements defined in
 :cpp:`IPassivePacketSource` and :cpp:`IPassivePacketSink`. Packets can be *pushed*
-into gates and packets can be *popped* from gates. The main difference between
-them is the subject of the activity. In the former case, when a packet is pushed,
-the activity is initiated by the source of the packet. In contrast, when a packet
-is popped, the activity is initiated by the sink of the packet.
+into gates and packets can be *popped* from gates. Both of these operations are
+synchronous, they either finish successfully or throw an exception. The main
+difference between pushing and popping is the subject of the activity. In the
+former case, when a packet is pushed, the activity is initiated by the source
+of the packet. In contrast, when a packet is popped, the activity is initiated
+by the sink of the packet. In both cases, the passive elements can be asked
+via separate methods to tell if they can be pushed or popped in their current
+state either with respect to a specific packet or any packet thereof.
 
 Queueing model elements can be divided into two categories with respect to the
 operation on a given gate: *passive* and *active*. The passive model elements
@@ -72,10 +76,21 @@ The active queueing elements take into consideration the state of the connected
 passive elements. That is, they push or pop packets only when the passive end is
 able to consume or provide, respectively. The queueing model elements also validate
 the assembled structure during module initialization with respect to the active
-and passive behavior of the connected gates.
+and passive behavior of the connected gates. That is, active output gates must
+be connected to passive input gates, and active input gates must be connected
+to passive output gates.
 
-The following equation about the number of packets holds true for all queueing
-elements:
+Pushing a packet into a gate (and similarly popping a packet from a gate) can
+have far reaching consequences by triggering a chain of operations potentially
+by passing through multiple connected elements. For example, pushing a packet
+into a classifier will immediately push the packet into one of the connected
+queueing elements, and will also potentially lead to additional operations on
+further connected elements. Similarly, popping a packet from a scheduler will
+immediately pop a packet from one of the connected queueing elements, and will
+also potentially lead to additional operations on further connected elements.
+
+In general, the following equation about the number of packets holds true for
+all queueing model elements:
 
 #created + #pushed - #popped - #removed - #dropped = #available + #delayed
 
