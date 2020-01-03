@@ -106,7 +106,6 @@ void Ieee802154Mac::initialize(int stage)
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
         cModule *radioModule = getModuleFromPar<cModule>(par("radioModule"), this);
-        radioModule->subscribe(IRadio::radioModeChangedSignal, this);
         radioModule->subscribe(IRadio::transmissionStateChangedSignal, this);
         radio = check_and_cast<IRadio *>(radioModule);
 
