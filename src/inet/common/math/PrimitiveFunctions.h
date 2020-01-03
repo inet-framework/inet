@@ -673,30 +673,6 @@ class INET_API OneDimensionalInterpolatedFunction : public FunctionBase<R, Domai
     }
 };
 
-/**
- * Two-dimensional interpolated (e.g. constant, linear) function between intervals defined by points on the X and Y axes.
- */
-//template<typename R, typename X, typename Y>
-//class INET_API TwoDimensionalInterpolatedFunction : public Function<R, X, Y>
-//{
-//  protected:
-//    const IInterpolator<T, R>& interpolatorX;
-//    const IInterpolator<T, R>& interpolatorY;
-//    const std::vector<std::tuple<X, Y, R>> rs;
-//
-//  public:
-//    TwoDimensionalInterpolatedFunction(const IInterpolator<T, R>& interpolatorX, const IInterpolator<T, R>& interpolatorY, const std::vector<std::tuple<X, Y, R>>& rs) :
-//        interpolatorX(interpolatorX), interpolatorY(interpolatorY), rs(rs) { }
-//
-//    virtual R getValue(const Point<T>& p) const override {
-//        throw cRuntimeError("TODO");
-//    }
-//
-//    virtual void partition(const Interval<X, Y>& i, const std::function<void (const Interval<X, Y>&, const IFunction<R, Domain<X, Y>> *)> callback) const override {
-//        throw cRuntimeError("TODO");
-//    }
-//};
-
 template<typename R, typename D>
 void simplifyAndCall(const typename D::I& i, const IFunction<R, D> *f, const std::function<void (const typename D::I&, const IFunction<R, D> *)> callback) {
     callback(i, f);
