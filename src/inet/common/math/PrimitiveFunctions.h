@@ -504,6 +504,71 @@ class INET_API SawtoothFunction : public FunctionBase<R, Domain<X>>
 };
 
 /**
+ * One-dimensional interpolated (e.g. constant, linear) function between intervals defined by points positioned periodically on the X axis.
+ */
+template<typename R, typename X>
+class INET_API PeriodicallyInterpolated1DFunction : public FunctionBase<R, Domain<X>>
+{
+  protected:
+    const X start;
+    const X end;
+    const X step;
+    const IInterpolator<X, R>& interpolator;
+    const std::vector<R> rs;
+
+  public:
+    PeriodicallyInterpolated1DFunction(X start, X end, const IInterpolator<X, R>& interpolator, const std::vector<R>& rs) :
+        start(start), end(end), step((end - start) / rs.size()), interpolator(interpolator), rs(rs) { }
+
+    virtual R getValue(const Point<X>& p) const override {
+        X x = std::get<0>(p);
+        int index = std::floor(toDouble((x - start) / step));
+        if (index < 0)
+            return R(0);
+        else if (index > rs.size() - 1)
+            return R(0);
+        else {
+            R r1 = rs[index];
+            R r2 = rs[index + 1];
+            X x1 = start + index * step;
+            X x2 = x1 + step;
+            return interpolator.getValue(x1, r1, x2, r2, x);
+        }
+    }
+
+    virtual void partition(const Interval<X>& i, const std::function<void (const Interval<X>&, const IFunction<R, Domain<X>> *)> callback) const override {
+        throw cRuntimeError("TODO");
+    }
+};
+
+//template<typename R, typename X, typename Y>
+//class INET_API PeriodicallyInterpolated2DFunction : public FunctionBase<R, Domain<X, Y>>
+//{
+//  protected:
+//    const X startX;
+//    const X endX;
+//    const X stepX;
+//    const Y startY;
+//    const Y endY;
+//    const Y stepY;
+//    const IInterpolator<X, R>& interpolatorX;
+//    const IInterpolator<Y, R>& interpolatorY;
+//    const std::vector<R> rs;
+//
+//  public:
+//    PeriodicallyInterpolated2DFunction(X startX, X endX, Y startY, Y endY, const IInterpolator<X, R>& interpolatorX, const IInterpolator<Y, R>& interpolatorY, const std::vector<R>& rs) :
+//        startX(startX), endX(endX), startY(startY), endY(endY), interpolatorX(interpolatorX), interpolatorY(interpolatorY), rs(rs) { }
+//
+//    virtual R getValue(const Point<X, Y>& p) const override {
+//        throw cRuntimeError("TODO");
+//    }
+//
+//    virtual void partition(const Interval<X, Y>& i, const std::function<void (const Interval<X, Y>&, const IFunction<R, Domain<X, Y>> *)> callback) const override {
+//        throw cRuntimeError("TODO");
+//    }
+//};
+
+/**
  * One-dimensional interpolated (e.g. constant, linear) function between intervals defined by points on the X axis.
  */
 template<typename R, typename X>
