@@ -350,7 +350,7 @@ class INET_API UnireciprocalFunction : public FunctionBase<R, D>
  * Some constant value r between lower and upper and zero otherwise.
  */
 template<typename R, typename X>
-class INET_API OneDimensionalBoxcarFunction : public FunctionBase<R, Domain<X>>
+class INET_API Boxcar1DFunction : public FunctionBase<R, Domain<X>>
 {
   protected:
     const X lower;
@@ -358,7 +358,7 @@ class INET_API OneDimensionalBoxcarFunction : public FunctionBase<R, Domain<X>>
     const R value;
 
   public:
-    OneDimensionalBoxcarFunction(X lower, X upper, R value) : lower(lower), upper(upper), value(value) {
+    Boxcar1DFunction(X lower, X upper, R value) : lower(lower), upper(upper), value(value) {
         ASSERT(value > R(0));
     }
 
@@ -390,7 +390,7 @@ class INET_API OneDimensionalBoxcarFunction : public FunctionBase<R, Domain<X>>
     virtual bool isNonZero(const Interval<X>& i) const override { return value != R(0) && lower <= std::get<0>(i.getLower()) && std::get<0>(i.getUpper()) <= upper; }
 
     virtual void printStructure(std::ostream& os, int level = 0) const override {
-        os << "(OneDimensionalBoxcar, [" << lower << " … " << upper << "] → " << value << ")";
+        os << "(Boxcar1D, [" << lower << " … " << upper << "] → " << value << ")";
     }
 };
 
@@ -398,7 +398,7 @@ class INET_API OneDimensionalBoxcarFunction : public FunctionBase<R, Domain<X>>
  * Some constant value r between (lowerX, lowerY) and (upperX, upperY) and zero otherwise.
  */
 template<typename R, typename X, typename Y>
-class INET_API TwoDimensionalBoxcarFunction : public FunctionBase<R, Domain<X, Y>>
+class INET_API Boxcar2DFunction : public FunctionBase<R, Domain<X, Y>>
 {
   protected:
     const X lowerX;
@@ -416,7 +416,7 @@ class INET_API TwoDimensionalBoxcarFunction : public FunctionBase<R, Domain<X, Y
     }
 
   public:
-    TwoDimensionalBoxcarFunction(X lowerX, X upperX, Y lowerY, Y upperY, R value) :
+    Boxcar2DFunction(X lowerX, X upperX, Y lowerY, Y upperY, R value) :
         lowerX(lowerX), upperX(upperX), lowerY(lowerY), upperY(upperY), value(value)
     {
         ASSERT(value > R(0));
@@ -450,7 +450,7 @@ class INET_API TwoDimensionalBoxcarFunction : public FunctionBase<R, Domain<X, Y
     }
 
     virtual void printStructure(std::ostream& os, int level = 0) const override {
-        os << "(TwoDimensionalBoxcar, [" << lowerX << " … " << upperX << "] x [" << lowerY << " … " << upperY << "] → " << value << ")";
+        os << "(Boxcar2D, [" << lowerX << " … " << upperX << "] x [" << lowerY << " … " << upperY << "] → " << value << ")";
     }
 };
 
@@ -572,20 +572,20 @@ class INET_API PeriodicallyInterpolated1DFunction : public FunctionBase<R, Domai
  * One-dimensional interpolated (e.g. constant, linear) function between intervals defined by points on the X axis.
  */
 template<typename R, typename X>
-class INET_API OneDimensionalInterpolatedFunction : public FunctionBase<R, Domain<X>>
+class INET_API Interpolated1DFunction : public FunctionBase<R, Domain<X>>
 {
   protected:
     const std::map<X, std::pair<R, const IInterpolator<X, R> *>> rs;
 
   public:
-    OneDimensionalInterpolatedFunction(const std::map<X, R>& rs, const IInterpolator<X, R> *interpolator) : rs([&] () {
+    Interpolated1DFunction(const std::map<X, R>& rs, const IInterpolator<X, R> *interpolator) : rs([&] () {
         std::map<X, std::pair<R, const IInterpolator<X, R> *>> result;
         for (auto it : rs)
             result[it.first] = {it.second, interpolator};
         return result;
     } ()) { }
 
-    OneDimensionalInterpolatedFunction(const std::map<X, std::pair<R, const IInterpolator<X, R> *>>& rs) : rs(rs) { }
+    Interpolated1DFunction(const std::map<X, std::pair<R, const IInterpolator<X, R> *>>& rs) : rs(rs) { }
 
     virtual R getValue(const Point<X>& p) const override {
         X x = std::get<0>(p);
@@ -647,7 +647,7 @@ class INET_API OneDimensionalInterpolatedFunction : public FunctionBase<R, Domai
     virtual bool isFinite(const Interval<X>& i) const override { return true; }
 
     virtual void printStructure(std::ostream& os, int level = 0) const override {
-        os << "(OneDimensionalInterpolated";
+        os << "(Interpolated1D";
         auto size = rs.size();
         for (auto entry : rs) {
             const char *interpolatorClassName = nullptr;
