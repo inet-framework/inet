@@ -305,7 +305,9 @@ void MediumCanvasVisualizer::refreshPowerDensityMapFigurePowerFunction(const Ptr
     auto pixmapSize = figure->getPixmapSize();
     if (powerDensityMapSampling) {
         const int xsize = pixmapSize.x;
+#ifdef _OPENMP
 #pragma omp parallel for
+#endif
         for (int x = 0; x < xsize; x++) {
             for (int y = 0; y < pixmapSize.y; y++) {
                 if (powerFunction == nullptr) {
