@@ -37,28 +37,52 @@ void PacketQueueingElementBase::animateSend(Packet *packet, cGate *gate)
     }
 }
 
-void PacketQueueingElementBase::checkPushPacketSupport(cGate *gate)
+void PacketQueueingElementBase::checkPushPacketSupport(cGate *gate) const
 {
-    auto startGate = gate->getPathStartGate();
-    auto endGate = gate->getPathEndGate();
-    auto startElement = check_and_cast<IPacketQueueingElement *>(startGate->getOwnerModule());
-    auto endElement = check_and_cast<IPacketQueueingElement *>(endGate->getOwnerModule());
-    if (!endElement->supportsPushPacket(endGate))
-        throw cRuntimeError(endGate->getOwnerModule(), "doesn't support push on gate %s", endGate->getFullPath().c_str());
-    if (!startElement->supportsPushPacket(startGate))
-        throw cRuntimeError(startGate->getOwnerModule(), "doesn't support push on gate %s", startGate->getFullPath().c_str());
+    auto startGate = findConnectedGate<IPacketQueueingElement>(gate, -1);
+    if (startGate != nullptr) {
+        auto startElement = check_and_cast<IPacketQueueingElement *>(startGate->getOwnerModule());
+        if (!startElement->supportsPushPacket(startGate))
+            throw cRuntimeError(startGate->getOwnerModule(), "doesn't support push on gate %s", startGate->getFullPath().c_str());
+    }
+    auto endGate = findConnectedGate<IPacketQueueingElement>(gate, 1);
+    if (endGate != nullptr) {
+        auto endElement = check_and_cast<IPacketQueueingElement *>(endGate->getOwnerModule());
+        if (!endElement->supportsPushPacket(endGate))
+            throw cRuntimeError(endGate->getOwnerModule(), "doesn't support push on gate %s", endGate->getFullPath().c_str());
+    }
 }
 
-void PacketQueueingElementBase::checkPopPacketSupport(cGate *gate)
+void PacketQueueingElementBase::checkPopPacketSupport(cGate *gate) const
 {
-    auto startGate = gate->getPathStartGate();
-    auto endGate = gate->getPathEndGate();
-    auto startElement = check_and_cast<IPacketQueueingElement *>(startGate->getOwnerModule());
-    auto endElement = check_and_cast<IPacketQueueingElement *>(endGate->getOwnerModule());
-    if (!endElement->supportsPopPacket(endGate))
-        throw cRuntimeError(endGate->getOwnerModule(), "doesn't support pop on gate %s", endGate->getFullPath().c_str());
-    if (!startElement->supportsPopPacket(startGate))
-        throw cRuntimeError(startGate->getOwnerModule(), "doesn't support pop on gate %s", startGate->getFullPath().c_str());
+    auto startGate = findConnectedGate<IPacketQueueingElement>(gate, -1);
+    if (startGate != nullptr) {
+        auto startElement = check_and_cast<IPacketQueueingElement *>(startGate->getOwnerModule());
+        if (!startElement->supportsPopPacket(startGate))
+            throw cRuntimeError(startGate->getOwnerModule(), "doesn't support pop on gate %s", startGate->getFullPath().c_str());
+    }
+    auto endGate = findConnectedGate<IPacketQueueingElement>(gate, 1);
+    if (endGate != nullptr) {
+        auto endElement = check_and_cast<IPacketQueueingElement *>(endGate->getOwnerModule());
+        if (!endElement->supportsPopPacket(endGate))
+            throw cRuntimeError(endGate->getOwnerModule(), "doesn't support pop on gate %s", endGate->getFullPath().c_str());
+    }
+}
+
+void PacketQueueingElementBase::checkPushOrPopPacketSupport(cGate *gate) const
+{
+    auto startGate = findConnectedGate<IPacketQueueingElement>(gate, -1);
+    if (startGate != nullptr) {
+        auto startElement = check_and_cast<IPacketQueueingElement *>(startGate->getOwnerModule());
+        if (!startElement->supportsPushPacket(startGate) && !startElement->supportsPopPacket(startGate))
+            throw cRuntimeError(startGate->getOwnerModule(), "neither supports push or pop on gate %s", startGate->getFullPath().c_str());
+    }
+    auto endGate = findConnectedGate<IPacketQueueingElement>(gate, 1);
+    if (endGate != nullptr) {
+        auto endElement = check_and_cast<IPacketQueueingElement *>(endGate->getOwnerModule());
+        if (!endElement->supportsPushPacket(endGate) && !endElement->supportsPopPacket(endGate))
+            throw cRuntimeError(endGate->getOwnerModule(), "neither supports push or pop on gate %s", endGate->getFullPath().c_str());
+    }
 }
 
 void PacketQueueingElementBase::pushOrSendPacket(Packet *packet, cGate *gate)

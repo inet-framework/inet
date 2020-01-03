@@ -31,7 +31,8 @@ MarkovScheduler::~MarkovScheduler()
 
 void MarkovScheduler::initialize(int stage)
 {
-    PacketSchedulerBase::initialize(stage);
+    if (stage != INITSTAGE_QUEUEING)
+        PacketSchedulerBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         for (int i = 0; i < gateSize("in"); i++) {
             auto input = findConnectedModule<IActivePacketSource>(inputGates[i]);
@@ -57,10 +58,8 @@ void MarkovScheduler::initialize(int stage)
     }
     else if (stage == INITSTAGE_QUEUEING) {
         for (int i = 0; i < (int)inputGates.size(); i++)
-            if (producers[i] != nullptr)
-                checkPushPacketSupport(inputGates[i]);
-        if (consumer != nullptr)
-            checkPushPacketSupport(outputGate);
+            checkPushPacketSupport(inputGates[i]);
+        checkPushPacketSupport(outputGate);
         if (producers[state] != nullptr)
             producers[state]->handleCanPushPacket(inputGates[state]);
         scheduleWaitTimer();

@@ -34,10 +34,9 @@ void PassivePacketSink::initialize(int stage)
         consumptionTimer = new cMessage("ConsumptionTimer");
     }
     else if (stage == INITSTAGE_QUEUEING) {
-        if (producer != nullptr) {
-            checkPushPacketSupport(inputGate);
+        checkPushPacketSupport(inputGate);
+        if (producer != nullptr)
             producer->handleCanPushPacket(inputGate);
-        }
     }
 }
 

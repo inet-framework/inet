@@ -34,9 +34,8 @@ void ActivePacketSource::initialize(int stage)
         productionTimer = new cMessage("ProductionTimer");
     }
     else if (stage == INITSTAGE_QUEUEING) {
-        if (consumer != nullptr)
-            checkPushPacketSupport(outputGate);
-        else if (!productionTimer->isScheduled())
+        checkPushPacketSupport(outputGate);
+        if (consumer == nullptr && !productionTimer->isScheduled())
             scheduleProductionTimer();
     }
 }

@@ -38,8 +38,7 @@ void PacketDemultiplexer::initialize(int stage)
         provider = findConnectedModule<IPassivePacketSource>(inputGate);
     }
     else if (stage == INITSTAGE_QUEUEING) {
-        if (provider != nullptr)
-            checkPopPacketSupport(inputGate);
+        checkPopPacketSupport(inputGate);
         for (auto outputGate : outputGates)
             checkPopPacketSupport(outputGate);
     }

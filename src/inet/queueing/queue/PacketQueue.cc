@@ -44,12 +44,10 @@ void PacketQueue::initialize(int stage)
         packetDropperFunction = createDropperFunction(par("dropperClass"));
     }
     else if (stage == INITSTAGE_QUEUEING) {
-        if (producer != nullptr) {
-            checkPushPacketSupport(inputGate);
+        checkPushPacketSupport(inputGate);
+        checkPopPacketSupport(outputGate);
+        if (producer != nullptr)
             producer->handleCanPushPacket(inputGate);
-        }
-        if (collector != nullptr)
-            checkPopPacketSupport(outputGate);
     }
     else if (stage == INITSTAGE_LAST)
         updateDisplayString();

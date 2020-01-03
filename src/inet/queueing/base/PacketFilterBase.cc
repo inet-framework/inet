@@ -36,14 +36,8 @@ void PacketFilterBase::initialize(int stage)
         droppedTotalLength = b(0);
     }
     else if (stage == INITSTAGE_QUEUEING) {
-        if (producer != nullptr)
-            checkPushPacketSupport(outputGate);
-        if (collector != nullptr)
-            checkPopPacketSupport(outputGate);
-        if (provider != nullptr)
-            checkPopPacketSupport(inputGate);
-        if (consumer != nullptr)
-            checkPushPacketSupport(inputGate);
+        checkPushOrPopPacketSupport(inputGate);
+        checkPushOrPopPacketSupport(outputGate);
     }
 }
 

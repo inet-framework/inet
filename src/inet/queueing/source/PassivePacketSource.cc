@@ -35,10 +35,9 @@ void PassivePacketSource::initialize(int stage)
         WATCH_PTR(nextPacket);
     }
     else if (stage == INITSTAGE_QUEUEING) {
-        if (collector != nullptr) {
-            checkPopPacketSupport(outputGate);
+        checkPopPacketSupport(outputGate);
+        if (collector != nullptr)
             collector->handleCanPopPacket(outputGate);
-        }
     }
 }
 
