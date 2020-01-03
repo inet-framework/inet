@@ -27,9 +27,9 @@ double PathLossBase::computePathLoss(const ITransmission *transmission, const IA
     auto radioMedium = transmission->getMedium();
     auto narrowbandSignalAnalogModel = check_and_cast<const INarrowbandSignal *>(transmission->getAnalogModel());
     mps propagationSpeed = radioMedium->getPropagation()->getPropagationSpeed();
-    Hz carrierFrequency = Hz(narrowbandSignalAnalogModel->getCarrierFrequency());
+    Hz centerFrequency = Hz(narrowbandSignalAnalogModel->getCenterFrequency());
     m distance = m(arrival->getStartPosition().distance(transmission->getStartPosition()));
-    return computePathLoss(propagationSpeed, carrierFrequency, distance);
+    return computePathLoss(propagationSpeed, centerFrequency, distance);
 }
 
 } // namespace physicallayer

@@ -80,7 +80,14 @@ class INET_API Protocol
     static const Protocol ieee80211EtherType;
     static const Protocol ieee80211Mac;
     static const Protocol ieee80211Mgmt;
-    static const Protocol ieee80211Phy;
+    static const Protocol ieee80211FhssPhy;
+    static const Protocol ieee80211IrPhy;
+    static const Protocol ieee80211DsssPhy;
+    static const Protocol ieee80211HrDsssPhy;
+    static const Protocol ieee80211OfdmPhy;
+    static const Protocol ieee80211ErpOfdmPhy;
+    static const Protocol ieee80211HtPhy;
+    static const Protocol ieee80211VhtPhy;
     static const Protocol ieee802154;
     static const Protocol ieee8022;
     static const Protocol igmp;
@@ -101,11 +108,14 @@ class INET_API Protocol
     static const Protocol rsvpTe;
     static const Protocol rtsp;
     static const Protocol sctp;
+    static const Protocol srp;
     static const Protocol ssh;
     static const Protocol stp;
     static const Protocol tcp;
     static const Protocol telnet;
     static const Protocol trill;
+    static const Protocol tsn;  // ieee1722, AVB, TSN
+    static const Protocol tteth;  // SAE AS6802, TTEthernet
     static const Protocol udp;
     static const Protocol xmac;
     static const Protocol xtp;

@@ -182,24 +182,8 @@ std::string colorToString(int color)
 
 double getInterfaceDatarate(IInterfaceTable *ift, cSimpleModule *interfaceModule)
 {
-    InterfaceEntry *ie = ift ? ift->getInterfaceByInterfaceModule(interfaceModule) : nullptr;
+    InterfaceEntry *ie = ift ? ift->findInterfaceByInterfaceModule(interfaceModule) : nullptr;
     return ie ? ie->getDatarate() : -1;
-}
-
-cPacket *findIPDatagramInPacket(cPacket *packet)
-{
-    for ( ; packet; packet = packet->getEncapsulatedPacket()) {
-#ifdef WITH_IPv4
-        if (dynamic_cast<Ipv4Header *>(packet))
-            return packet;
-#endif // ifdef WITH_IPv4
-#ifdef WITH_IPv6
-        if (dynamic_cast<Ipv6Header *>(packet))
-            return packet;
-#endif // ifdef WITH_IPv6
-    }
-
-    return nullptr;
 }
 
 class ColorAttribute : public cObject

@@ -41,17 +41,13 @@ import inet.physicallayer.contract.bitlevel.IPulseShaper;
 // The level of detail parameter determines which submodules of
 // the transmitter will be used:
 //
-// Level (domain)|                        Submodules
-// ======================================================================
-//    PACKET     |-
-//               --------------------------------------------------------
-//    BIT        | signal encoder, data encoder
-//               --------------------------------------------------------
-//    SYMBOL     | signal modulator, data modulator + bit level modules
-//               --------------------------------------------------------
-//    SAMPLE     | pulse shaper + bit, symbol level modules + (digital/
-//               | analog converter)
-//               --------------------------------------------------------
+// <table border="1">
+//   <tr>  <th>Level (domain)</th>  <th>Submodules</th>                                                             </tr>
+//   <tr>  <td>PACKET</td>          <td>-</td>                                                                      </tr>
+//   <tr>  <td>BIT</td>             <td>signal encoder, data encoder</td>                                           </tr>
+//   <tr>  <td>SYMBOL</td>          <td>signal modulator, data modulator + bit level modules</td>                   </tr>
+//   <tr>  <td>SAMPLE</td>          <td>pulse shaper + bit, symbol level modules + (digital/analog converter)</td>  </tr>
+// </table>
 //
 // Important: We have no default module implementation for sample level
 // features.
@@ -80,7 +76,7 @@ module Ieee80211LayeredOfdmTransmitter like ITransmitter
         string levelOfDetail @enum("packet","bit","symbol","sample") = default("symbol");
         double channelSpacing @unit(Hz) = default(nan Hz);
         double power @unit(W);
-        double carrierFrequency @unit(Hz);
+        double centerFrequency @unit(Hz);
         double bandwidth @unit(Hz);
         @class(Ieee80211LayeredOfdmTransmitter);
 

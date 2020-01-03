@@ -100,7 +100,7 @@ void Ieee8022Llc::processCommandFromHigherLayer(Request *request)
         auto indication = new Indication("closed", IEEE8022_LLC_I_SOCKET_CLOSED);
         auto ctrl = new Ieee8022LlcSocketClosedIndication();
         indication->setControlInfo(ctrl);
-        indication->addTagIfAbsent<SocketInd>()->setSocketId(socketId);
+        indication->addTag<SocketInd>()->setSocketId(socketId);
         send(indication, "upperLayerOut");
 
     }

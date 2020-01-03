@@ -102,7 +102,7 @@ void TcpGenericServerApp::handleMessage(cMessage *msg)
         int connId = check_and_cast<Indication *>(msg)->getTag<SocketInd>()->getSocketId();
         delete msg;
         auto request = new Request("close", TCP_C_CLOSE);
-        request->addTagIfAbsent<SocketReq>()->setSocketId(connId);
+        request->addTag<SocketReq>()->setSocketId(connId);
         sendOrSchedule(request, delay + maxMsgDelay);
     }
     else if (msg->getKind() == TCP_I_DATA || msg->getKind() == TCP_I_URGENT_DATA) {
@@ -123,14 +123,13 @@ void TcpGenericServerApp::handleMessage(cMessage *msg)
                 maxMsgDelay = msgDelay;
 
             if (requestedBytes > B(0)) {
-                Packet *outPacket = new Packet(msg->getName());
-                outPacket->addTagIfAbsent<SocketReq>()->setSocketId(connId);
-                outPacket->setKind(TCP_C_SEND);
+                Packet *outPacket = new Packet(msg->getName(), TCP_C_SEND);
+                outPacket->addTag<SocketReq>()->setSocketId(connId);
                 const auto& payload = makeShared<GenericAppMsg>();
-                payload->addTag<CreationTimeTag>()->setCreationTime(simTime());
                 payload->setChunkLength(requestedBytes);
                 payload->setExpectedReplyLength(B(0));
                 payload->setReplyDelay(0);
+                payload->addTag<CreationTimeTag>()->setCreationTime(simTime());
                 outPacket->insertAtBack(payload);
                 sendOrSchedule(outPacket, delay + msgDelay);
             }
@@ -144,7 +143,7 @@ void TcpGenericServerApp::handleMessage(cMessage *msg)
         if (doClose) {
             auto request = new Request("close", TCP_C_CLOSE);
             TcpCommand *cmd = new TcpCommand();
-            request->addTagIfAbsent<SocketReq>()->setSocketId(connId);
+            request->addTag<SocketReq>()->setSocketId(connId);
             request->setControlInfo(cmd);
             sendOrSchedule(request, delay + maxMsgDelay);
         }

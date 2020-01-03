@@ -19,12 +19,16 @@
 #define __INET_MEDIUMVISUALIZERBASE_H
 
 #include "inet/common/packet/PacketFilter.h"
-#include "inet/physicallayer/contract/packetlevel/IRadioMedium.h"
 #include "inet/visualizer/base/VisualizerBase.h"
 #include "inet/visualizer/util/ColorSet.h"
 #include "inet/visualizer/util/InterfaceFilter.h"
 #include "inet/visualizer/util/NetworkNodeFilter.h"
 #include "inet/visualizer/util/Placement.h"
+
+#ifdef WITH_RADIO
+#include "inet/physicallayer/common/packetlevel/PowerFunctions.h"
+#include "inet/physicallayer/contract/packetlevel/IRadioMedium.h"
+#endif // WITH_RADIO
 
 namespace inet {
 
@@ -32,6 +36,7 @@ namespace visualizer {
 
 class INET_API MediumVisualizerBase : public VisualizerBase, public cListener
 {
+#ifdef WITH_RADIO
   protected:
     enum SignalShape
     {
@@ -69,12 +74,69 @@ class INET_API MediumVisualizerBase : public VisualizerBase, public cListener
     cFigure::Color communicationRangeLineColor;
     cFigure::LineStyle communicationRangeLineStyle;
     double communicationRangeLineWidth = NaN;
+    bool autoPowerAxis = false;
+    W signalMinPower = W(NaN);
+    W signalMaxPower = W(NaN);
+    WpHz signalMinPowerDensity = WpHz(NaN);
+    WpHz signalMaxPowerDensity = WpHz(NaN);
+    bool autoTimeAxis = false;
+    simtime_t signalMinTime;
+    simtime_t signalMaxTime;
+    bool autoFrequencyAxis = false;
+    Hz signalMinFrequency = Hz(NaN);
+    Hz signalMaxFrequency = Hz(NaN);
+    bool displayMainPowerDensityMap = false;
+    double mainPowerDensityMapPixmapDensity = NaN;
+    double mainPowerDensityMapMinX = NaN;
+    double mainPowerDensityMapMaxX = NaN;
+    double mainPowerDensityMapMinY = NaN;
+    double mainPowerDensityMapMaxY = NaN;
+    double mainPowerDensityMapZ = NaN;
+    int mainPowerDensityMapFigureXTickCount = -1;
+    int mainPowerDensityMapFigureYTickCount = -1;
+    bool displayPowerDensityMaps = false;
+    const char *powerDensityMapMode = nullptr;
+    bool powerDensityMapSampling = false;
+    int powerDensityMapApproximationSize = -1;
+    Hz powerDensityMapCenterFrequency = Hz(NaN);
+    Hz powerDensityMapBandwidth = Hz(NaN);
+    double powerDensityMapFigureWidth = NaN;
+    double powerDensityMapFigureHeight = NaN;
+    double powerDensityMapPixmapWidth = NaN;
+    double powerDensityMapPixmapHeight = NaN;
+    double powerDensityMapZ = NaN;
+    int powerDensityMapFigureXTickCount = -1;
+    int powerDensityMapFigureYTickCount = -1;
+    bool displaySpectrums = false;
+    const char *spectrumMode = nullptr;
+    double spectrumFigureWidth = NaN;
+    double spectrumFigureHeight = NaN;
+    int spectrumFigureXTickCount = -1;
+    int spectrumFigureYTickCount = -1;
+    double spectrumFigureInterpolationSize = NaN;
+    Placement spectrumPlacementHint;
+    double spectrumPlacementPriority;
+    bool displaySpectrograms = false;
+    const char *spectrogramMode = nullptr;
+    double spectrogramFigureWidth = NaN;
+    double spectrogramFigureHeight = NaN;
+    double spectrogramPixmapWidth = NaN;
+    double spectrogramPixmapHeight = NaN;
+    int spectrogramFigureXTickCount = -1;
+    int spectrogramFigureYTickCount = -1;
+    Placement spectrogramPlacementHint;
+    double spectrogramPlacementPriority;
     //@}
 
     /** @name State */
     //@{
+    Ptr<const math::IFunction<double, math::Domain<mps, m, Hz>>> pathLossFunction;
+    Ptr<const math::IFunction<double, math::Domain<m, m, m, m, m, m, Hz>>> obstacleLossFunction;
     double defaultSignalPropagationAnimationSpeed = NaN;
     double defaultSignalTransmissionAnimationSpeed = NaN;
+    std::map<const physicallayer::ITransmission *, Ptr<const math::IFunction<WpHz, math::Domain<m, m, m, simsec, Hz>>>> signalPowerDensityFunctions;
+    std::map<const physicallayer::ITransmission *, Ptr<math::SummedFunction<WpHz, math::Domain<m, m, m, simsec, Hz>>>> noisePowerDensityFunctions;
+    Ptr<math::SummedFunction<WpHz, math::Domain<m, m, m, simsec, Hz>>> mediumPowerDensityFunction;
     //@}
 
   protected:
@@ -89,18 +151,19 @@ class INET_API MediumVisualizerBase : public VisualizerBase, public cListener
     virtual void handleRadioAdded(const physicallayer::IRadio *radio) = 0;
     virtual void handleRadioRemoved(const physicallayer::IRadio *radio) = 0;
 
-    virtual void handleSignalAdded(const physicallayer::ITransmission *transmission) = 0;
-    virtual void handleSignalRemoved(const physicallayer::ITransmission *transmission) = 0;
+    virtual void handleSignalAdded(const physicallayer::ITransmission *transmission);
+    virtual void handleSignalRemoved(const physicallayer::ITransmission *transmission);
 
     virtual void handleSignalDepartureStarted(const physicallayer::ITransmission *transmission) = 0;
     virtual void handleSignalDepartureEnded(const physicallayer::ITransmission *transmission) = 0;
-    virtual void handleSignalArrivalStarted(const physicallayer::IReception *reception) = 0;
+    virtual void handleSignalArrivalStarted(const physicallayer::IReception *reception);
     virtual void handleSignalArrivalEnded(const physicallayer::IReception *reception) = 0;
 
   public:
     virtual ~MediumVisualizerBase();
 
     virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override;
+#endif // WITH_RADIO
 };
 
 } // namespace visualizer

@@ -40,7 +40,7 @@ ApskLayeredTransmitter::ApskLayeredTransmitter() :
     power(W(NaN)),
     bitrate(bps(NaN)),
     bandwidth(Hz(NaN)),
-    carrierFrequency(Hz(NaN))
+    centerFrequency(Hz(NaN))
 {
 }
 
@@ -54,7 +54,7 @@ void ApskLayeredTransmitter::initialize(int stage)
         power = W(par("power"));
         bitrate = bps(par("bitrate"));
         bandwidth = Hz(par("bandwidth"));
-        carrierFrequency = Hz(par("carrierFrequency"));
+        centerFrequency = Hz(par("centerFrequency"));
         const char *levelOfDetailStr = par("levelOfDetail");
         if (strcmp("packet", levelOfDetailStr) == 0)
             levelOfDetail = PACKET_DOMAIN;
@@ -80,7 +80,7 @@ std::ostream& ApskLayeredTransmitter::printToStream(std::ostream& stream, int le
     stream << "ApskLayeredTransmitter";
     if (level <= PRINT_LEVEL_DETAIL)
         stream << ", levelOfDetail = " << levelOfDetail
-               << ", carrierFrequency = " << carrierFrequency;
+               << ", centerFrequency = " << centerFrequency;
     if (level <= PRINT_LEVEL_TRACE)
         stream << ", encoder = " << printObjectToString(encoder, level + 1) 
                << ", modulator = " << printObjectToString(modulator, level + 1) 
@@ -148,7 +148,7 @@ const ITransmissionAnalogModel *ApskLayeredTransmitter::createAnalogModel(const 
     }
     else {
         simtime_t duration = packetModel->getPacket()->getBitLength() / bitrate.get();
-        return new ScalarTransmissionSignalAnalogModel(duration, carrierFrequency, bandwidth, power);
+        return new ScalarTransmissionSignalAnalogModel(duration, centerFrequency, bandwidth, power);
     }
 }
 

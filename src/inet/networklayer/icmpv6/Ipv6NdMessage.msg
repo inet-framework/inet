@@ -34,42 +34,101 @@ const B IPv6ND_MTU_OPTION_LENGTH = B(8);                   // RFC 2461, Section 
 }}
 
 // TLB options (type, length, bytes), length must be divisible by eight, max value is 8*255
-// Type codes:
+// Type codes:          // RFC 2461
 enum Ipv6NdOptionTypes {
-    IPv6ND_SOURCE_LINK_LAYER_ADDR_OPTION = 1;          // RFC 2461
-    IPv6ND_TARGET_LINK_LAYER_ADDR_OPTION = 2;          // RFC 2461
+    IPv6ND_SOURCE_LINK_LAYER_ADDR_OPTION = 1;
+    IPv6ND_TARGET_LINK_LAYER_ADDR_OPTION = 2;
+    IPv6ND_PREFIX_INFORMATION = 3;
+    IPv6ND_REDIRECTED_HEADER = 4;
+    IPv6ND_MTU = 5;
+    IPv6ND_ADVERTISEMENT_INTERVAL = 7;    // RFC 3775 Section 7.3
+    IPv6ND_HOME_AGENT_INFORMATION_OPTION = 8;    // RFC 3775 Section 7.4
 }
+
+class Ipv6NdOption extends cObject
+{
+    Ipv6NdOptionTypes type = static_cast<Ipv6NdOptionTypes>(0);    // 1 byte, 0 is invalid
+    short optionLength = 0;    // The length of the option in units of 8 octets, 0 is invalid.    // 1 byte
+    char paddingBytes[];    // padding bytes on end of option
+}
+
+class Ipv6NdSourceTargetLinkLayerAddress extends Ipv6NdOption
+{
+    optionLength = 1;    // 8 byte ( when using MacAddress)
+    MacAddress linkLayerAddress;
+}
+
+class Ipv6NdSourceLinkLayerAddress extends Ipv6NdSourceTargetLinkLayerAddress
+{
+    type = IPv6ND_SOURCE_LINK_LAYER_ADDR_OPTION;
+}
+
+class Ipv6NdTargetLinkLayerAddress extends Ipv6NdSourceTargetLinkLayerAddress
+{
+    type = IPv6ND_TARGET_LINK_LAYER_ADDR_OPTION;
+}
+
 //
 // IPv6ND Prefix Information
 // RFC 2461 / RFC 4861 Section 4.6.2
 // RFC 3775 Section 7.2 (routerAddressFlag)
 //
-class Ipv6NdPrefixInformation extends cObject
+class Ipv6NdPrefixInformation extends Ipv6NdOption
 {
-    unsigned short prefixLength;
+    type = IPv6ND_PREFIX_INFORMATION;
+    optionLength = 4;
+    unsigned short prefixLength;    // 0..128
     bool onlinkFlag;        //L-bit
     bool autoAddressConfFlag;    //A-bit
     bool routerAddressFlag;        //R-bit: used in case of MIPv6 when the H-bit is set
-    unsigned int validLifetime;    // seconds
-    unsigned int preferredLifetime;    // seconds
+    unsigned int reserved1 = 0;
+    uint32_t validLifetime;    // seconds
+    uint32_t preferredLifetime;    // seconds
+    uint32_t reserved2 = 0;
     Ipv6Address prefix;
+}
+
+class Ipv6NdMtu extends Ipv6NdOption
+{
+    type = IPv6ND_MTU;
+    optionLength = 1;
+    uint16_t reserved;
+    uint32_t mtu;
 }
 
 // MIPv6 New Advertisement Interval Option
 // RFC 3775 Section 7.3
 //
-class Mipv6NdAdvertisementInterval extends cObject
+class Mipv6NdAdvertisementInterval extends Ipv6NdOption
 {
-    unsigned int advertisementInterval;    // milliseconds
+    type = IPv6ND_ADVERTISEMENT_INTERVAL;
+    optionLength = 1;
+    uint16_t reserved;
+    uint32_t advertisementInterval;    // milliseconds
 }
 
 //MIPv6 Home Agent Information Option
 //RFC 3775 Section 7.4
-class Mipv6HaInformation extends cObject
+class Mipv6HaInformation extends Ipv6NdOption
 {
-    unsigned int homeAgentPreference;
-    unsigned int homeAgentLifetime;    // seconds
+    type = IPv6ND_HOME_AGENT_INFORMATION_OPTION;
+    optionLength = 1;
+    uint16_t reserved;
+    uint16_t homeAgentPreference;
+    uint16_t homeAgentLifetime;    // seconds
 }
+
+class Ipv6NdOptions extends cObject {
+    // TLV Options:
+    Ipv6NdOption *option[] @owned;  // on end of message
+}
+
+cplusplus(Ipv6NdOptions) {{
+    virtual const Ipv6NdOption *findOption(Ipv6NdOptionTypes t) const;
+    virtual Ipv6NdOption *findOptionForUpdate(Ipv6NdOptionTypes t);
+    virtual void insertUniqueOption(size_t k, Ipv6NdOption * option);
+    virtual void insertUniqueOption(Ipv6NdOption * option) { insertUniqueOption(option_arraysize, option); }
+}}
 
 //
 // Neighbour Discovery for Ipv6.
@@ -84,7 +143,6 @@ class Mipv6HaInformation extends cObject
 //
 class Ipv6NdMessage extends Icmpv6Header
 {
-    //customize(true);
     int code = 0;
 }
 
@@ -94,13 +152,11 @@ class Ipv6NdMessage extends Icmpv6Header
 //
 class Ipv6RouterSolicitation extends Ipv6NdMessage
 {
+    chunkLength = B(8);    // without options
     type = ICMPv6_ROUTER_SOL;
-    //Possible Options   //FIXME these fields are TLV options!
-
-    // The link-layer address of the sender, if known.
-    // MUST NOT be included if the Source Address is the unspecified address.
-    // Otherwise, it SHOULD be included on link layers that have addresses.
-    MacAddress sourceLinkLayerAddress;
+    //Additional ICMP fields
+    uint32_t reserved = 0;
+    Ipv6NdOptions options;
 }
 
 //
@@ -110,23 +166,20 @@ class Ipv6RouterSolicitation extends Ipv6NdMessage
 //
 class Ipv6RouterAdvertisement extends Ipv6NdMessage
 {
+    chunkLength = B(16);    // without options
     type = ICMPv6_ROUTER_AD;
     //Additional ICMP fields
     unsigned short curHopLimit;
+
     bool managedAddrConfFlag;    //M-bit
     bool otherStatefulConfFlag;    //O-bit
     bool homeAgentFlag = false;        //H-bit
-    unsigned short routerLifetime;  // 0 indicates router is not a default router
-    unsigned int reachableTime;
-    unsigned int retransTimer;
+    uint8_t reserved = 0;
 
-    //Possible Options   //FIXME these fields are TLV options!
-
-    MacAddress sourceLinkLayerAddress;        //source link layer option
-    unsigned int MTU;                //MTU option
-    Ipv6NdPrefixInformation prefixInformation[];    //Prefix Information Option
-    Mipv6NdAdvertisementInterval advInterval;    //New Advertisement Interval Option (MIPv6)
-    Mipv6HaInformation haInformation;    //New Home Agent Information Option (MIPv6)
+    unsigned short routerLifetime;  // [s] 0 indicates router is not a default router
+    unsigned int reachableTime;     // [ms]
+    unsigned int retransTimer;      // [ms]
+    Ipv6NdOptions options;
 }
 
 //
@@ -135,17 +188,12 @@ class Ipv6RouterAdvertisement extends Ipv6NdMessage
 //
 class Ipv6NeighbourSolicitation extends Ipv6NdMessage
 {
+    chunkLength = B(24);    // without options
     type = ICMPv6_NEIGHBOUR_SOL;
     //Additional ICMP fields
+    uint32_t reserved = 0;
     Ipv6Address targetAddress;// MUST NOT be a multicast address.
-
-    //Possible Options   //FIXME these fields are TLV options!
-
-    // The link-layer address for the sender.
-    // MUST NOT be included when the source IP address is the unspecified address.
-    // Otherwise, on link layers that have addresses this option MUST be included in multicast
-    // solicitations and SHOULD be included in unicast solicitations.
-    MacAddress sourceLinkLayerAddress;
+    Ipv6NdOptions options;
 }
 
 //
@@ -154,16 +202,15 @@ class Ipv6NeighbourSolicitation extends Ipv6NdMessage
 //
 class Ipv6NeighbourAdvertisement extends Ipv6NdMessage
 {
+    chunkLength = B(24);    // without options
     type = ICMPv6_NEIGHBOUR_AD;
     //Additional ICMP fields
     bool routerFlag;    //R-flag
     bool solicitedFlag;    //S-flag
     bool overrideFlag;    //O-flag
+    uint32_t reserved = 0;
     Ipv6Address targetAddress;// MUST NOT be a multicast address.
-
-    //Possible Options   //FIXME these fields are TLV options!
-
-    MacAddress targetLinkLayerAddress;    //Target Link Layer Address option
+    Ipv6NdOptions options;
 }
 
 //
@@ -172,15 +219,12 @@ class Ipv6NeighbourAdvertisement extends Ipv6NdMessage
 //
 class Ipv6Redirect extends Ipv6NdMessage
 {
+    chunkLength = B(40);    // without options
     type = ICMPv6_REDIRECT;
     //Additional ICMP fields
     Ipv6Address targetAddress;
     Ipv6Address destinationAddress;
-
-    //Possible Options   //FIXME these fields are TLV options!
-
-    MacAddress targetLinkLayerAddress;
-        //Redirected Header Encapsulated Msg
+    Ipv6NdOptions options;
 }
 
 class Ipv6NdControlInfo extends cObject

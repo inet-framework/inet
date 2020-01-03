@@ -18,6 +18,7 @@ simple TestApp
 #include "inet/common/Protocol.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/packet/Packet.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #include "inet/networklayer/ipv6/Ipv6Header.h"
 
@@ -48,9 +49,11 @@ void TestApp::initialize()
     for (int i = 0; i < 64; i++)
     {
       sprintf(buf, "ipv4-%d", i);
-      auto packet = new Packet(buf);
+      auto packet = new Packet(buf, makeShared<ByteCountChunk>(B(30)));
       const auto& header = makeShared<Ipv4Header>();
-      header->setDiffServCodePoint(i);
+      header->setDscp(i);
+      header->setTotalLengthField(header->getHeaderLength() + packet->getDataLength());
+      header->setCrcMode(CRC_DECLARED_CORRECT);
       packet->insertAtFront(header);
       packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
       send(packet, "out");
@@ -60,9 +63,10 @@ void TestApp::initialize()
     for (int i = 0; i < 64; i++)
     {
       sprintf(buf, "ipv6-%d", i);
-      auto packet = new Packet(buf);
+      auto packet = new Packet(buf, makeShared<ByteCountChunk>(B(30)));
       const auto& header = makeShared<Ipv6Header>();
-      header->setDiffServCodePoint(i);
+      header->setDscp(i);
+      header->setPayloadLength(packet->getDataLength());
       packet->insertAtFront(header);
       packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ipv6);
       send(packet, "out");
@@ -85,6 +89,7 @@ void TestApp::handleMessage(cMessage *msg)
 
 %file: TestNetwork.ned
 
+import inet.test.moduletest.lib.*;
 import inet.networklayer.diffserv.BehaviorAggregateClassifier;
 
 network TestNetwork
@@ -95,7 +100,7 @@ network TestNetwork
   connections:
     app.out --> classifier.in;
     for i=0..63 {
-      classifier.outs++ --> app.in++;
+      classifier.out++ --> app.in++;
     }
     classifier.defaultOut --> app.in++;
 }

@@ -161,6 +161,17 @@ class INET_API Ipv6InterfaceData : public InterfaceProtocolData
 #ifdef WITH_xMIPv6
         Ipv6Address rtrAddress;    //global scope, present when advRtrAddr is true (Zarrar Yousaf 09.07.07)
 #endif /* WITH_xMIPv6 */
+
+        AdvPrefix() {}
+        AdvPrefix(const Ipv6Address& addr, short preflength)
+            : prefixLength(preflength),
+              advOnLinkFlag(false), advAutonomousFlag(false),
+#ifdef WITH_xMIPv6
+              advRtrAddr(false),
+#endif /* WITH_xMIPv6 */
+              prefix(addr)
+        {
+        }
     };
 
     /*************RFC 2461: Section 10 Protocol Constants**********************/
@@ -489,6 +500,10 @@ class INET_API Ipv6InterfaceData : public InterfaceProtocolData
      * Returns ith address of the interface.
      */
     const Ipv6Address& getAddress(int i) const;
+    /*
+     * Returns Global address of the interface.
+     * */
+    const Ipv6Address& getGlblAddress() const;
 
     /**
      * Returns true if the ith address of the interface is tentative.

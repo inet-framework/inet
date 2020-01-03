@@ -224,7 +224,7 @@ void NonQosRecoveryProcedure::incrementContentionWindow()
     cwCalculator->incrementCw();
     auto newCw = cwCalculator->getCw();
     if (oldCw != newCw)
-        emit(contentionWindowChangedSignal, cwCalculator->getCw());
+        emit(contentionWindowChangedSignal, newCw);
 }
 
 void NonQosRecoveryProcedure::resetContentionWindow()

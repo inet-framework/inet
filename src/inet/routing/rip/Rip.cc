@@ -329,7 +329,8 @@ void Rip::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, 
     }
     else if (signalID == interfaceStateChangedSignal) {
         change = check_and_cast<const InterfaceEntryChangeDetails *>(obj);
-        if (change->getFieldId() == InterfaceEntry::F_CARRIER || change->getFieldId() == InterfaceEntry::F_STATE) {
+        auto fieldId = change->getFieldId();
+        if (fieldId == InterfaceEntry::F_STATE || fieldId == InterfaceEntry::F_CARRIER) {
             ie = change->getInterfaceEntry();
             if (!ie->isUp()) {
                 for (auto & elem : ripRoutingTable)

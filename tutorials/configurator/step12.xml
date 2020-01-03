@@ -1,0 +1,6 @@
+<config>
+    <interface hosts="area1*" address="10.x.x.x" netmask="255.x.x.x" add-default-route="false"/>
+    <interface hosts="**" address="10.x.x.x" netmask="255.x.x.x"/>
+    <autoroute metric="hopCount" sourceHosts="*.area2host* *router area3host*"/>
+    <autoroute metric="errorRate" sourceHosts="*.area1host*"/>
+</config>

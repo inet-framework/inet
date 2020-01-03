@@ -77,7 +77,7 @@ private:
     void restartsConnectRetryTimer(bool start = true);
 
     void sendOpenMessage();
-    void sendUpdateMessage(BgpUpdatePathAttributeList &content, BgpUpdateNlri &NLRI);
+    void sendUpdateMessage(std::vector<BgpUpdatePathAttributes *>& content, BgpUpdateNlri &NLRI);
     void sendNotificationMessage();
     void sendKeepAliveMessage();
 
@@ -111,6 +111,7 @@ private:
     int getLocalPreference() const { return _info.localPreference; }
     TcpSocket *getSocket() const { return _info.socket; }
     TcpSocket *getSocketListen() const { return _info.socketListen; }
+    int getEbgpMultihop() const { return _info.ebgpMultihop; }
     IIpv4RoutingTable *getIPRoutingTable() const { return bgpRouter.getIPRoutingTable(); }
     std::vector<BgpRoutingTableEntry *> getBGPRoutingTable() const { return bgpRouter.getBGPRoutingTable(); }
     Macho::Machine<fsm::TopState>& getFSM() const { return *_fsm; }

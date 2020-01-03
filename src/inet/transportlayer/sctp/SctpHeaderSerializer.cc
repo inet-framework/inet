@@ -53,6 +53,7 @@ unsigned char SctpHeaderSerializer::sharedKey[512];
 void SctpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     uint8_t buffer[MAXBUFLEN];
+    memset(&buffer, 0, MAXBUFLEN);
     // int32 size_chunk = sizeof(struct chunk);
 
     int authstart = 0;
@@ -422,6 +423,7 @@ void SctpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
 
                 // fill buffer with data from Sctp init ack chunk structure
                 sac->type = sackChunk->getSctpChunkType();
+                sac->flags = 0;
                 sac->length = htons(sackChunk->getByteLength());
                 uint32 cumtsnack = sackChunk->getCumTsnAck();
                 sac->cum_tsn_ack = htonl(cumtsnack);
@@ -453,6 +455,7 @@ void SctpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
 
                 // fill buffer with data from Sctp init ack chunk structure
                 sac->type = sackChunk->getSctpChunkType();
+                sac->flags = 0;
                 sac->length = htons(sackChunk->getByteLength());
                 uint32 cumtsnack = sackChunk->getCumTsnAck();
                 sac->cum_tsn_ack = htonl(cumtsnack);
@@ -1089,7 +1092,7 @@ void SctpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
             }
 
             default:
-                throw new cRuntimeError("TODO: unknown chunktype in outgoing packet on external interface! Implement it!");
+                throw cRuntimeError("TODO: unknown chunktype in outgoing packet on external interface! Implement it!");
         }
     }
     // calculate the HMAC if required
@@ -1169,7 +1172,7 @@ const Ptr<Chunk> SctpHeaderSerializer::deserialize(MemoryInputStream& stream) co
                 const struct data_chunk *dc = (struct data_chunk *)(chunks + chunkPtr);
                 EV_DETAIL << "cLen=" << cLen << "\n";
                 if (cLen == 0)
-                    throw new cRuntimeError("Incoming SCTP packet contains data chunk with length==0");
+                    throw cRuntimeError("Incoming SCTP packet contains data chunk with length==0");
                 SctpDataChunk *chunk = new SctpDataChunk("DATA");
                 chunk->setSctpChunkType(chunkType);
                 chunk->setUBit(dc->flags & UNORDERED_BIT);
@@ -1356,7 +1359,7 @@ const Ptr<Chunk> SctpHeaderSerializer::deserialize(MemoryInputStream& stream) co
                             }
 
                             default: {
-                                EV_INFO << "ExtInterface: Unknown Sctp INIT parameter type " << paramType << "\n";
+                                EV_INFO << "Unknown Sctp INIT parameter type " << paramType << "\n";
                                 uint16 skip = (paramType & 0x8000) >> 15;
                                 if (skip == 0)
                                     stopProcessing = true;
@@ -1567,7 +1570,7 @@ const Ptr<Chunk> SctpHeaderSerializer::deserialize(MemoryInputStream& stream) co
                             }
 
                             default: {
-                                EV_INFO << "ExtInterface: Unknown SCTP INIT-ACK parameter type " << paramType << "\n";
+                                EV_INFO << "Unknown SCTP INIT-ACK parameter type " << paramType << "\n";
                                 uint16 skip = (paramType & 0x8000) >> 15;
                                 if (skip == 0)
                                     stopProcessing = true;
@@ -1912,7 +1915,7 @@ const Ptr<Chunk> SctpHeaderSerializer::deserialize(MemoryInputStream& stream) co
                     parcounter++;
                     if (ntohs(ipv4addr->type) != INIT_PARAM_IPV4) {
                         if (parlen == 0)
-                            throw new cRuntimeError("ParamLen == 0.");
+                            throw cRuntimeError("ParamLen == 0.");
                         continue;
                     }
                     else {
@@ -1967,8 +1970,8 @@ const Ptr<Chunk> SctpHeaderSerializer::deserialize(MemoryInputStream& stream) co
                             }
 
                             default:
-                                EV << "ExtInterface: Unknown Sctp parameter type " << paramType;
-                                /*throw new cRuntimeError("TODO: unknown parametertype in incoming packet from external interface! Implement it!");*/
+                                EV << "Unknown Sctp parameter type " << paramType;
+                                /*throw cRuntimeError("TODO: unknown parametertype in incoming packet from external interface! Implement it!");*/
                                 break;
                         }
                         parptr += ADD_PADDING(paramLength);
@@ -2018,7 +2021,7 @@ const Ptr<Chunk> SctpHeaderSerializer::deserialize(MemoryInputStream& stream) co
                             }
 
                             default:
-                                EV << "ExtInterface: Unknown Sctp parameter type " << paramType;
+                                EV << "Unknown Sctp parameter type " << paramType;
                                 break;
                         }
                         parptr += ADD_PADDING(paramLength);

@@ -1,0 +1,8 @@
+<movement>
+    <!-- draw a triangle -->
+    <set speed="10" x="230" y="225" angle="180"/>
+    <repeat>
+        <forward d="60"/>
+        <turn angle="120"/>
+    </repeat>
+</movement>

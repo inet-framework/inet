@@ -19,9 +19,9 @@
 
 namespace inet {
 
-namespace ospf {
+namespace ospfv2 {
 
-bool operator<(const OspfLsaHeader& leftLSA, const OspfLsaHeader& rightLSA)
+bool operator<(const Ospfv2LsaHeader& leftLSA, const Ospfv2LsaHeader& rightLSA)
 {
     long leftSequenceNumber = leftLSA.getLsSequenceNumber();
     long rightSequenceNumber = rightLSA.getLsSequenceNumber();
@@ -46,7 +46,7 @@ bool operator<(const OspfLsaHeader& leftLSA, const OspfLsaHeader& rightLSA)
     return false;
 }
 
-bool operator==(const OspfLsaHeader& leftLSA, const OspfLsaHeader& rightLSA)
+bool operator==(const Ospfv2LsaHeader& leftLSA, const Ospfv2LsaHeader& rightLSA)
 {
     long leftSequenceNumber = leftLSA.getLsSequenceNumber();
     long rightSequenceNumber = rightLSA.getLsSequenceNumber();
@@ -65,7 +65,7 @@ bool operator==(const OspfLsaHeader& leftLSA, const OspfLsaHeader& rightLSA)
     }
 }
 
-bool operator==(const OspfOptions& leftOptions, const OspfOptions& rightOptions)
+bool operator==(const Ospfv2Options& leftOptions, const Ospfv2Options& rightOptions)
 {
     return (leftOptions.E_ExternalRoutingCapability == rightOptions.E_ExternalRoutingCapability) &&
            (leftOptions.MC_MulticastForwarding == rightOptions.MC_MulticastForwarding) &&
@@ -74,36 +74,69 @@ bool operator==(const OspfOptions& leftOptions, const OspfOptions& rightOptions)
            (leftOptions.DC_DemandCircuits == rightOptions.DC_DemandCircuits);
 }
 
-B calculateLSASize(const OspfRouterLsa *routerLSA)
+B calculateLSASize(const Ospfv2Lsa *lsa)
 {
-    B lsaLength = OSPF_LSA_HEADER_LENGTH + OSPF_ROUTERLSA_HEADER_LENGTH;
-    for (uint32_t i = 0; i < routerLSA->getLinksArraySize(); i++) {
-        const Link& link = routerLSA->getLinks(i);
-        lsaLength += OSPF_LINK_HEADER_LENGTH + (OSPF_TOS_LENGTH * link.getTosDataArraySize());
+    switch(lsa->getHeader().getLsType()) {
+        case Ospfv2LsaType::ROUTERLSA_TYPE: {
+            auto routerLsa = check_and_cast<const Ospfv2RouterLsa*>(lsa);
+            return calculateLsaSize(*routerLsa);
+        }
+        case Ospfv2LsaType::NETWORKLSA_TYPE: {
+            auto networkLsa = check_and_cast<const Ospfv2NetworkLsa*>(lsa);
+            return calculateLsaSize(*networkLsa);
+        }
+        case Ospfv2LsaType::SUMMARYLSA_NETWORKS_TYPE:
+        case Ospfv2LsaType::SUMMARYLSA_ASBOUNDARYROUTERS_TYPE: {
+            auto summaryLsa = check_and_cast<const Ospfv2SummaryLsa*>(lsa);
+            return calculateLsaSize(*summaryLsa);
+        }
+        case Ospfv2LsaType::AS_EXTERNAL_LSA_TYPE: {
+            auto asExternalLsa = check_and_cast<const Ospfv2AsExternalLsa*>(lsa);
+            return calculateLsaSize(*asExternalLsa);
+        }
+        default:
+            throw cRuntimeError("Unknown LsaType value: %d", (int)lsa->getHeader().getLsType());
+            break;
     }
+}
 
+B calculateLsaSize(const Ospfv2RouterLsa& lsa)
+{
+    B lsaLength = OSPFv2_LSA_HEADER_LENGTH + OSPFv2_ROUTERLSA_HEADER_LENGTH;
+    for (uint32_t i = 0; i < lsa.getLinksArraySize(); i++) {
+        const auto& link = lsa.getLinks(i);
+        lsaLength += OSPFv2_LINK_HEADER_LENGTH + (OSPFv2_TOS_LENGTH * link.getTosDataArraySize());
+    }
     return lsaLength;
 }
 
-B calculateLSASize(const OspfNetworkLsa *networkLSA)
+B calculateLsaSize(const Ospfv2NetworkLsa& lsa)
 {
-    return OSPF_LSA_HEADER_LENGTH + OSPF_NETWORKLSA_MASK_LENGTH
-           + (OSPF_NETWORKLSA_ADDRESS_LENGTH * networkLSA->getAttachedRoutersArraySize());
+    return OSPFv2_LSA_HEADER_LENGTH + OSPFv2_NETWORKLSA_MASK_LENGTH
+            + (OSPFv2_NETWORKLSA_ADDRESS_LENGTH * lsa.getAttachedRoutersArraySize());
 }
 
-B calculateLSASize(const OspfSummaryLsa *summaryLSA)
+B calculateLsaSize(const Ospfv2SummaryLsa& lsa)
 {
-    return OSPF_LSA_HEADER_LENGTH + OSPF_SUMMARYLSA_HEADER_LENGTH
-           + (OSPF_TOS_LENGTH * summaryLSA->getTosDataArraySize());
+    return OSPFv2_LSA_HEADER_LENGTH + OSPFv2_SUMMARYLSA_HEADER_LENGTH
+           + (OSPFv2_TOS_LENGTH * lsa.getTosDataArraySize());
 }
 
-B calculateLSASize(const OspfAsExternalLsa *asExternalLSA)
+B calculateLsaSize(const Ospfv2AsExternalLsa& lsa)
 {
-    return OSPF_LSA_HEADER_LENGTH + OSPF_ASEXTERNALLSA_HEADER_LENGTH
-           + (OSPF_ASEXTERNALLSA_TOS_INFO_LENGTH * asExternalLSA->getContents().getExternalTOSInfoArraySize());
+    return OSPFv2_LSA_HEADER_LENGTH + OSPFv2_ASEXTERNALLSA_HEADER_LENGTH
+           + (OSPFv2_ASEXTERNALLSA_TOS_INFO_LENGTH * lsa.getContents().getExternalTOSInfoArraySize());
 }
 
-std::ostream& operator<<(std::ostream& ostr, const OspfLsaHeader& lsaHeader)
+std::ostream& operator<<(std::ostream& ostr, const Ospfv2LsaRequest& request)
+{
+    ostr << "type=" << request.lsType
+         << ", LSID=" << request.linkStateID
+         << ", advertisingRouter=" << request.advertisingRouter;
+    return ostr;
+}
+
+std::ostream& operator<<(std::ostream& ostr, const Ospfv2LsaHeader& lsaHeader)
 {
     ostr << "LSAHeader (age: " << lsaHeader.getLsAge()
          << ", type: ";
@@ -139,120 +172,178 @@ std::ostream& operator<<(std::ostream& ostr, const OspfLsaHeader& lsaHeader)
     return ostr;
 }
 
-std::ostream& operator<<(std::ostream& ostr, const OspfNetworkLsa& lsa)
+std::ostream& operator<<(std::ostream& ostr, const Ospfv2NetworkLsa& lsa)
 {
     unsigned int cnt = lsa.getAttachedRoutersArraySize();
-    ostr << "numAttachedRouters: " << cnt << ", ";
-    ostr << "Attached routers: ";
+    ostr << lsa.getHeader();
+    ostr << ", numAttachedRouters: " << cnt;
     if (cnt) {
+        ostr << ", Attached routers: {";
         for (unsigned int i = 0; i < cnt; i++) {
-            ostr << lsa.getAttachedRouters(i) << " ";
+            if (i)
+                ostr << ", ";
+            ostr << lsa.getAttachedRouters(i);
         }
+        ostr << "}";
     }
     ostr << ", Mask: " << lsa.getNetworkMask();
-    ostr << ", " << lsa.getHeader();
     return ostr;
 }
 
-std::ostream& operator<<(std::ostream& ostr, const TosData& tos)
+std::ostream& operator<<(std::ostream& ostr, const Ospfv2TosData& tos)
 {
     ostr << "tos: " << (int)tos.tos
-         << "metric:";
-    for (int i = 0; i < 3; i++)
-        ostr << " " << (int)tos.tosMetric[i];
+         << "metric: " << tos.tosMetric;
     return ostr;
 }
 
-std::ostream& operator<<(std::ostream& ostr, const Link& link)
+std::ostream& operator<<(std::ostream& ostr, const Ospfv2Link& link)
 {
     ostr << "ID: " << link.getLinkID().str(false)
          << ", data: ";
     unsigned long data = link.getLinkData();
     if ((data & 0xFF000000) != 0)
-        ostr << Ipv4Address(data).str(false);
+        ostr << Ipv4Address(data);
     else
         ostr << data;
+    ostr << ", type=";
+    switch (link.getType()) {
+        case POINTTOPOINT_LINK:
+            ostr << "PointToPoint";
+            break;
+
+        case TRANSIT_LINK:
+            ostr << "Transit";
+            break;
+
+        case STUB_LINK:
+            ostr << "Stub";
+            break;
+
+        case VIRTUAL_LINK:
+            ostr << "Virtual";
+            break;
+
+        default:
+            ostr << "Unknown";
+            break;
+    }
     ostr << ", cost: " << link.getLinkCost();
     unsigned int cnt = link.getTosDataArraySize();
     if (cnt) {
         ostr << ", tos: {";
         for (unsigned int i = 0; i < cnt; i++) {
-            ostr << " " << link.getTosData(i);
+            if (i)
+                ostr << ", ";
+            ostr << link.getTosData(i);
         }
         ostr << "}";
     }
     return ostr;
 }
 
-std::ostream& operator<<(std::ostream& ostr, const OspfRouterLsa& lsa)
+std::ostream& operator<<(std::ostream& ostr, const Ospfv2RouterLsa& lsa)
 {
-    ostr << "flags: ";
-    if (lsa.getV_VirtualLinkEndpoint())
-        ostr << "V ";
-    if (lsa.getE_ASBoundaryRouter())
-        ostr << "E ";
-    if (lsa.getB_AreaBorderRouter())
-        ostr << "B ";
-    ostr << ", numberOfLinks: " << lsa.getNumberOfLinks() << ", ";
+    ostr << lsa.getHeader()
+         << ", flags: "
+         << (lsa.getV_VirtualLinkEndpoint() ? "V" : "_")
+         << (lsa.getE_ASBoundaryRouter() ? "E" : "_")
+         << (lsa.getB_AreaBorderRouter() ? "B" : "_")
+         << ", numberOfLinks: " << lsa.getNumberOfLinks() << ", ";
     unsigned int cnt = lsa.getLinksArraySize();
     if (cnt) {
         ostr << "Links: {";
         for (unsigned int i = 0; i < cnt; i++) {
+            if (i)
+                ostr << ",";
             ostr << " {" << lsa.getLinks(i) << "}";
         }
-        ostr << "}, ";
+        ostr << "}";
     }
-    ostr << lsa.getHeader();
     return ostr;
 }
 
-std::ostream& operator<<(std::ostream& ostr, const OspfSummaryLsa& lsa)
+std::ostream& operator<<(std::ostream& ostr, const Ospfv2SummaryLsa& lsa)
 {
-    ostr << "Mask: " << lsa.getNetworkMask().str(false)
+    ostr << lsa.getHeader();
+    ostr << ", Mask: " << lsa.getNetworkMask().str(false)
          << ", Cost: " << lsa.getRouteCost() << ", ";
     unsigned int cnt = lsa.getTosDataArraySize();
     if (cnt) {
         ostr << ", tosData: {";
         for (unsigned int i = 0; i < cnt; i++) {
-            ostr << " " << lsa.getTosData(i);
+            if (i)
+                ostr << ", ";
+            ostr << lsa.getTosData(i);
         }
-        ostr << "}, ";
+        ostr << "}";
     }
-    ostr << lsa.getHeader();
     return ostr;
 }
 
-std::ostream& operator<<(std::ostream& ostr, const ExternalTosInfo& tos)
+std::ostream& operator<<(std::ostream& ostr, const Ospfv2ExternalTosInfo& tos)
 {
-    ostr << "TosData: {" << tos.tosData
+    ostr << "Tos: {" << tos.tos
          << "}, MetricType: " << tos.E_ExternalMetricType
          << ", fwAddr: " << tos.forwardingAddress
          << ", extRouteTag: " << tos.externalRouteTag;
     return ostr;
 }
 
-std::ostream& operator<<(std::ostream& ostr, const OspfAsExternalLsa& lsa)
+std::ostream& operator<<(std::ostream& ostr, const Ospfv2AsExternalLsaContents& contents)
 {
-    const OspfAsExternalLsaContents& contents = lsa.getContents();
     ostr << "Mask: " << contents.getNetworkMask()
-         << ", Cost: " << contents.getRouteCost()
-         << ", MetricType: " << (contents.getE_ExternalMetricType() == false ? "Type1" : "Type2")
-         << ", ForwardingAddress: " << contents.getForwardingAddress().str(false)
-         << ", ExtRouteTag: " << contents.getExternalRouteTag()
          << ", ";
     unsigned int cnt = contents.getExternalTOSInfoArraySize();
     if (cnt) {
         ostr << ", tosData: {";
         for (unsigned int i = 0; i < cnt; i++) {
-            ostr << " " << contents.getExternalTOSInfo(i);
+            if (i)
+                ostr << ", ";
+            ostr << contents.getExternalTOSInfo(i);
         }
-        ostr << "}, ";
+        ostr << "}";
     }
-    ostr << lsa.getHeader();
     return ostr;
 }
 
-} // namespace ospf
+std::ostream& operator<<(std::ostream& ostr, const Ospfv2AsExternalLsa& lsa)
+{
+    ostr << lsa.getHeader() << lsa.getContents();
+    return ostr;
+}
 
+std::ostream& operator<<(std::ostream& ostr, const Ospfv2Lsa& lsa)
+{
+    ASSERT(lsa.getHeader().getLsCrcMode() != CrcMode::CRC_MODE_UNDEFINED);
+    ASSERT(lsa.getHeader().getLsaLength() != 0);
+
+    switch (lsa.getHeader().getLsType()) {
+        case ROUTERLSA_TYPE:
+            ostr << *check_and_cast<const RouterLsa *>(&lsa);
+            break;
+
+        case NETWORKLSA_TYPE:
+            ostr << *check_and_cast<const NetworkLsa *>(&lsa);
+            break;
+
+        case SUMMARYLSA_NETWORKS_TYPE:
+        case SUMMARYLSA_ASBOUNDARYROUTERS_TYPE:
+            ostr << *check_and_cast<const SummaryLsa *>(&lsa);
+            break;
+
+        case AS_EXTERNAL_LSA_TYPE:
+            ostr << *check_and_cast<const AsExternalLsa *>(&lsa);
+            break;
+
+        default:
+            ostr << lsa.getHeader();
+            ostr << ", Unknown";
+            break;
+    }
+    return ostr;
+}
+
+} // namespace ospfv2
 } // namespace inet
 

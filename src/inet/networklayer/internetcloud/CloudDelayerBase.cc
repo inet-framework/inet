@@ -50,7 +50,7 @@ void CloudDelayerBase::initialize(int stage)
 
 void CloudDelayerBase::finish()
 {
-    if (isRegisteredHook())
+    if (isRegisteredHook(networkProtocol))
         networkProtocol->unregisterHook(this);
 }
 
@@ -61,6 +61,8 @@ void CloudDelayerBase::handleMessage(cMessage *msg)
         delete msg;
         networkProtocol->reinjectQueuedDatagram(context);
     }
+    else
+        throw cRuntimeError("This module does not handle incoming messages");
 }
 
 void CloudDelayerBase::calculateDropAndDelay(const cMessage *msg, int srcID, int destID, bool& outDrop, simtime_t& outDelay)
@@ -95,7 +97,7 @@ INetfilter::IHook::Result CloudDelayerBase::datagramForwardHook(Packet *datagram
         //TODO emit?
         EV_INFO << "Message " << datagram->str() << " delayed with " << propDelay * 1000.0 << "ms in cloud.\n";
         cMessage *selfmsg = new cMessage("Delay");
-        selfmsg->setContextPointer(datagram);
+        selfmsg->setContextPointer(datagram);     // datagram owned by INetfilter module (Ipv4, Ipv6, ...)
         scheduleAt(simTime() + propDelay, selfmsg);
         return INetfilter::IHook::QUEUE;
     }

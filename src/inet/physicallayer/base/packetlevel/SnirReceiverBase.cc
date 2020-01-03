@@ -23,17 +23,19 @@ namespace inet {
 
 namespace physicallayer {
 
-SnirReceiverBase::SnirReceiverBase() :
-    ReceiverBase(),
-    snirThreshold(NaN)
-{
-}
-
 void SnirReceiverBase::initialize(int stage)
 {
     ReceiverBase::initialize(stage);
-    if (stage == INITSTAGE_LOCAL)
+    if (stage == INITSTAGE_LOCAL) {
         snirThreshold = math::dB2fraction(par("snirThreshold"));
+        const char *snirThresholdModeString = par("snirThresholdMode");
+        if (!strcmp("min", snirThresholdModeString))
+            snirThresholdMode = SnirThresholdMode::STM_MIN;
+        else if (!strcmp("mean", snirThresholdModeString))
+            snirThresholdMode = SnirThresholdMode::STM_MEAN;
+        else
+            throw cRuntimeError("Unknown SNIR threshold mode: '%s'", snirThresholdModeString);
+    }
 }
 
 std::ostream& SnirReceiverBase::printToStream(std::ostream& stream, int level) const
@@ -45,7 +47,12 @@ std::ostream& SnirReceiverBase::printToStream(std::ostream& stream, int level) c
 
 bool SnirReceiverBase::computeIsReceptionSuccessful(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference, const ISnir *snir) const
 {
-    return snir->getMin() > snirThreshold;
+    if (snirThresholdMode == SnirThresholdMode::STM_MIN)
+        return snir->getMin() > snirThreshold;
+    else if (snirThresholdMode == SnirThresholdMode::STM_MEAN)
+        return snir->getMean() > snirThreshold;
+    else
+        throw cRuntimeError("Unknown SNIR threshold mode: '%s'", snirThresholdMode);
 }
 
 } // namespace physicallayer

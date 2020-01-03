@@ -1,0 +1,24 @@
+====== inet-4.x ======
+
+2019-09-01  Levente Mészáros
+
+	Added a new generic and efficient multidimensional mathematical function API.
+	This API is mostly useful for the physical layer signal processing.
+
+	Added core classes are Point, Interval, and Domain.
+	Added core interfaces are IInterpolator and IFunction.
+
+	Added interpolators are EitherInterpolator, LeftInterpolator, RightInterpolator,
+	MinimumInterpolator, MaximumInterpolator, AverageInterpolator, CloserInterpolator,
+	LinearInterpolator and LineardbInterpolator.
+
+	Added primitive functions are ConstantFunction, LinearFunction, BilinearFunction,
+	ReciprocalFunction, OneDimensionalBoxcarFunction, OneDimensionalInterpolatedFunction,
+	TwoDimensionalBoxcarFunction, GaussFunction and SawtoothFunction.
+
+	Added algebraic function operations are AdditedFunction, SubtractedFunction,
+	MultipliedFunction, DividedFunction, and SummedFunction.
+
+	Added function compositors are DomainLimitedFunction, DomainShiftedFunction,
+	ValueTruncatedFunction, MemoizedFunction, CombinedFunction, ModulatedFunction,
+	ApproximatedFunction, ExtrudedFunction, and IntegratedFunction.

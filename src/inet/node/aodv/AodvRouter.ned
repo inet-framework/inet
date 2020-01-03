@@ -31,11 +31,10 @@ import inet.routing.aodv.Aodv;
 // Scenerios where AODV routing is desired use this module as a
 // host module.
 //
-// For more info about Aodv, see the corresponding module:
-// ~Aodv and its C++ implementation with the same name.
-//
 // The AODV v.2 (known as Dymo) is also implemented: ~Dymo,
 // ~DymoRouter.
+//
+// @see ~Aodv, ~Dymo, ~DymoRouter.
 //
 module AodvRouter extends AdhocHost
 {
@@ -44,7 +43,7 @@ module AodvRouter extends AdhocHost
             @display("p=825,226");
         }
     connections:
-        aodv.ipOut --> tn.in++;
-        aodv.ipIn <-- tn.out++;
+        aodv.socketOut --> at.in++;
+        aodv.socketIn <-- at.out++;
 }
 

@@ -1,0 +1,84 @@
+IPv4 Network Configurator Tutorial
+
+1. Fully automatic IP address assignment
+
+In many scenarios the network configurator automatically configures IP addresses in the network adequately without user input.
+
+2. Manually overriding individual IP addresses
+
+Sometimes the user may want to specify the IP addresses of some nodes with special purpose in the network and leave the rest for the automatic configuration. This helps remembering IP addresses of said nodes.
+
+3. Automatically assigning IP addresses to a subnet from a given range
+
+Complex networks often contain several subnetworks, the user may want to assign specific IP address ranges for them.
+
+4. Fully automatic static routing table configuration
+
+In many scenarios the network configurator automatically configures IP routes in the network adequately without user input.
+
+5. Manually overriding indivudual routes
+
+See above.
+
+6. Configuring metric for automatic routing table configuration
+
+By default, the network configurator uses the shorthest path algorithm with constant 1 cost function. It produces paths optimized for hop count.
+Other cost functions are also available: bitrate, error rate, etc.???
+
+7. Configuring IP addresses in a hierarchical network
+
+In complex hierarchical networks routing tables can grow very big with the default configuration, because nodes have one route for each destination. One can configure IP addresses for hierarchical networks in a way that drastically reduces the size of routing tables.
+
+9. Configuring wireless networks
+
+The topology of wireless networks is unclear in a static analysis. By default, the configurator assumes nodes can directly talk to each other.
+
+8. Mixed wired/wireless configuration
+
+Yes.
+
+9. Manually creating a slightly different configuration (Manually modifying an automatically created complete configuration)
+
+Sometimes the configuration is just almost right. In such a case one can dump the configuration into a file, update it and use the file in place of the original configuration.
+
+10. Leaving some part of the network unconfigured
+
+Configuring the whole network is not always desirable, because some part of the network should rather be configured dynamically.
+
+11. Optimizing the size of routing tables
+
+
+Yes.
+
+12.	Wireless + errorrate (nem kell mixed?)
+
+We need:
+ fully automatic
+ half automatic/half manual
+ fully manual (e.g. dump result of automatic and edit)
+
+ wired
+ wireless
+ mixed wired and wireless
+
+ fully specified
+ half specified/half unspecified
+
+Step 7 (hierarchical topology)
+a, non optimized, fully automatic IP address assignment and static routes
+b, optimized, same as above
+c, optimized, hierarchically assigned IP addresses
+
+Compare the number or routes
+
+Olyan példa kell ami b->c többet javít mint a->b
+
+1. mixed wired/wireless
+2. leaving some part unconfigured (so an adhoc protocol could configure it)
+3. completely wireless
+4. leaving all of it unconfigured
+
+Lehetne olyan, hogy egy linket kikapcsolunk
+<autoroute metric="hopCount">
+	<link interfaces="somehost.eth0" cost="infinite"/>
+</autoroute>

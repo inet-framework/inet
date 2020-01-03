@@ -26,6 +26,7 @@ simple ExtLowerUdp like IUdp
 {
     parameters:
         string namespace = default("");
+        string packetNameFormat = default("Ext-%p-%t-%n");
         @display("i=block/transport");
         @signal[packetSentToUpper](type=inet::Packet);
         @signal[packetReceivedFromUpper](type=inet::Packet);

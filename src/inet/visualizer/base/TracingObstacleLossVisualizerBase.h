@@ -67,6 +67,7 @@ class INET_API TracingObstacleLossVisualizerBase : public VisualizerBase, public
     virtual const ObstacleLossVisualization *createObstacleLossVisualization(const physicallayer::ITracingObstacleLoss::ObstaclePenetratedEvent *obstaclePenetratedEvent) const = 0;
     virtual void addObstacleLossVisualization(const ObstacleLossVisualization *obstacleLossVisualization);
     virtual void removeObstacleLossVisualization(const ObstacleLossVisualization *obstacleLossVisualization);
+    virtual void removeAllObstacleLossVisualizations();
     virtual void setAlpha(const ObstacleLossVisualization *obstacleLossVisualization, double alpha) const = 0;
 
   public:

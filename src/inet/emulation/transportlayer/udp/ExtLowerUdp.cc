@@ -21,6 +21,7 @@
 #include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
+#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/emulation/transportlayer/udp/ExtLowerUdp.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/transportlayer/common/L4PortTag_m.h"
@@ -41,9 +42,14 @@ void ExtLowerUdp::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
+        packetNameFormat = par("packetNameFormat");
         if (auto scheduler = dynamic_cast<RealTimeScheduler *>(getSimulation()->getScheduler())) {
             rtScheduler = scheduler;
         }
+    }
+    else if (stage == INITSTAGE_TRANSPORT_LAYER) {
+        registerService(Protocol::udp, gate("appIn"), nullptr);
+        registerProtocol(Protocol::udp, nullptr, gate("appOut"));
     }
 }
 
@@ -179,6 +185,13 @@ ExtLowerUdp::Socket *ExtLowerUdp::open(int socketId)
     int fd = ::socket(AF_INET, SOCK_DGRAM, 0);
     if (fd < 0)
         throw cRuntimeError("Cannot create socket: %d", fd);
+
+    // Setting this option makes it possible to kill the simulations
+    // and restart them right away using the same port numbers.
+    int enable = 1;
+    if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, (const char*)&enable, sizeof(int)) < 0)
+        throw cRuntimeError("ExtLowerUdp: cannot set socket option");
+
     socket->fd = fd;
     socketIdToSocketMap[socketId] = socket;
     fdToSocketMap[fd] = socket;
@@ -292,10 +305,11 @@ void ExtLowerUdp::processPacketFromLower(int fd)
         if (n < 0)
             throw cRuntimeError("Calling recv failed: %d", n);
         auto data = makeShared<BytesChunk>(static_cast<const uint8_t *>(buffer), n);
-        auto packet = new Packet("ExtLowerUdp", data);
+        auto packet = new Packet(nullptr, data);
         packet->addTag<SocketInd>()->setSocketId(socket->socketId);
         packet->addTag<L3AddressInd>()->setSrcAddress(Ipv4Address(ntohl(sockaddr.sin_addr.s_addr)));
         packet->addTag<L4PortInd>()->setSrcPort(ntohs(sockaddr.sin_port));
+        packet->setName(packetPrinter.printPacketToString(packet, packetNameFormat).c_str());
         emit(packetReceivedSignal, packet);
         send(packet, "appOut");
         emit(packetSentToUpperSignal, packet);

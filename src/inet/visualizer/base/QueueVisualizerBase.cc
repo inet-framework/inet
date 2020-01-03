@@ -25,12 +25,13 @@ namespace visualizer {
 
 void QueueVisualizerBase::QueueVisitor::visit(cObject *object)
 {
-    if (auto queue = dynamic_cast<PacketQueue *>(object))
+    if (auto queue = dynamic_cast<queueing::IPacketQueue *>(object))
         queues.push_back(queue);
-    object->forEachChild(this);
+    else
+        object->forEachChild(this);
 }
 
-QueueVisualizerBase::QueueVisualization::QueueVisualization(PacketQueue *queue) :
+QueueVisualizerBase::QueueVisualization::QueueVisualization(queueing::IPacketQueue *queue) :
     queue(queue)
 {
 }
@@ -92,7 +93,7 @@ void QueueVisualizerBase::addQueueVisualizations()
 
 void QueueVisualizerBase::removeAllQueueVisualizations()
 {
-    for (auto queueVisualization : queueVisualizations) {
+    for (auto queueVisualization : std::vector<const QueueVisualization *>(queueVisualizations)) {
         removeQueueVisualization(queueVisualization);
         delete queueVisualization;
     }

@@ -59,6 +59,17 @@ enum DhcpOptionCode
     SERVER_ID = 54;
 }
 
+// DHCP timer types (RFC 2131 4.4.5)
+enum DhcpTimerType
+{
+    WAIT_OFFER = 1;
+    WAIT_ACK = 2;
+    T1 = 3;
+    T2 = 4;
+    LEASE_TIMEOUT = 5;
+    START_DHCP = 6;
+}
+
 //
 // Represents options in a DHCP message. In the DHCP protocol, options are
 // added to the message as tagged data items. In the simulation, this DhcpOptions
@@ -72,7 +83,7 @@ class DhcpOptions extends cObject
 {
     DhcpMessageType messageType; // to convey the type of the DHCP message
     string hostName; // name of the client
-    int parameterRequestList[]; // used by a DHCP client to request values for specified configuration parameters
+    DhcpOptionCode parameterRequestList[]; // used by a DHCP client to request values for specified configuration parameters
     MacAddress clientIdentifier; // used by DHCP clients to specify their unique identifier
     Ipv4Address requestedIp; // used in a client request (DHCPDISCOVER) to allow the client to request that a particular IP address be assigned
     Ipv4Address subnetMask; // client's subnet mask
@@ -100,6 +111,7 @@ class DhcpMessage extends FieldsChunk
     unsigned int xid; // transaction ID, a random number chosen by the client, used by the client and server to associate messages and responses between a client and a server
     int secs; // filled in by client, seconds elapsed since client began address acquisition or renewal process
     bool broadcast; // the broadcast bit in the flags field
+    uint16_t reserved = 0; // MUST BE ZERO (reserved for future use)
     Ipv4Address ciaddr; // client IP address; only filled in if client is in BOUND, RENEW or REBINDING state and can respond to Arp requests
     Ipv4Address yiaddr; // 'your' (client) IP address
     Ipv4Address giaddr; // relay agent IP address, used in booting via a relay agent

@@ -21,6 +21,7 @@
 #define __INET_ACKINGMAC_H
 
 #include "inet/common/INETDefs.h"
+#include "inet/queueing/contract/IPacketQueue.h"
 #include "inet/linklayer/base/MacProtocolBase.h"
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/physicallayer/contract/packetlevel/IRadio.h"
@@ -29,7 +30,6 @@ namespace inet {
 
 class AckingMacHeader;
 class InterfaceEntry;
-class IPassiveQueue;
 
 /**
  * Implements a simplified ideal MAC.
@@ -48,32 +48,24 @@ class INET_API AckingMac : public MacProtocolBase
 
     physicallayer::IRadio *radio = nullptr;
     physicallayer::IRadio::TransmissionState transmissionState = physicallayer::IRadio::TRANSMISSION_STATE_UNDEFINED;
-    IPassiveQueue *queueModule = nullptr;
 
-    int outStandingRequests = 0;
-    Packet *lastSentPk = nullptr;
     simtime_t ackTimeout;
     cMessage *ackTimeoutMsg = nullptr;
 
   protected:
     /** implements MacBase functions */
     //@{
-    virtual void flushQueue();
-    virtual void clearQueue();
     virtual void configureInterfaceEntry() override;
     //@}
 
-    virtual void startTransmitting(Packet *msg);
+    virtual void startTransmitting();
     virtual bool dropFrameNotForUs(Packet *frame);
     virtual void encapsulate(Packet *msg);
     virtual void decapsulate(Packet *frame);
     virtual void acked(Packet *packet);    // called by other AckingMac module, when receiving a packet with my moduleID
 
-    // get MSG from queue
-    virtual void getNextMsgFromHL();
-
     //cListener:
-    virtual void receiveSignal(cComponent *src, simsignal_t id, long value, cObject *details) override;
+    virtual void receiveSignal(cComponent *src, simsignal_t id, intval_t value, cObject *details) override;
 
     /** implements MacProtocolBase functions */
     //@{
@@ -81,11 +73,6 @@ class INET_API AckingMac : public MacProtocolBase
     virtual void handleLowerPacket(Packet *packet) override;
     virtual void handleSelfMessage(cMessage *message) override;
     //@}
-
-    // OperationalBase:
-    virtual void handleStartOperation(LifecycleOperation *operation) override {}    //TODO implementation
-    virtual void handleStopOperation(LifecycleOperation *operation) override {}    //TODO implementation
-    virtual void handleCrashOperation(LifecycleOperation *operation) override {}    //TODO implementation
 
   public:
     AckingMac();

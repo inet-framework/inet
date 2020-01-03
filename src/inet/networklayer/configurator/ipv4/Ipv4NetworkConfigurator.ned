@@ -207,7 +207,7 @@ import inet.networklayer.configurator.base.NetworkConfiguratorBase;
 //      in place of a byte. Unspecified parts will be filled automatically be
 //      the configurator. The default value "" means that any netmask can be
 //      configured.
-//      e.g. "255.255.255.0" or "255.255.x.x" or "255.255.x.0"
+//      e.g. "255.255.255.0" or "/24" or "255.255.x.x" or "255.255.x.0"
 //
 //    - @mtu                number
 //      Optional parameter attribute to set the MTU parameter in the interface.
@@ -415,6 +415,7 @@ simple Ipv4NetworkConfigurator extends NetworkConfiguratorBase
         @display("i=block/cogwheel");
         xml config = default(xml("<config><interface hosts='**' address='10.x.x.x' netmask='255.x.x.x'/></config>")); // XML configuration parameters for IP address assignment and adding manual routes
         bool assignAddresses = default(true); // assign IP addresses to all interfaces in the network
+        bool assignUniqueAddresses = default(true); // avoid using the same address and raise an error if not possible
         bool assignDisjunctSubnetAddresses = default(true); // avoid using the same address prefix and netmask on different links when assigning IP addresses to interfaces
         bool addStaticRoutes = default(true);  // add static routes to the routing tables of all nodes to route to all destination interfaces (only where applicable; turn off when config file contains manual routes)
         bool addDefaultRoutes = default(true); // add default routes if all routes from a source node go through the same gateway (used only if addStaticRoutes is true)

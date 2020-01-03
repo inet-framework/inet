@@ -62,10 +62,7 @@ void PimBase::initialize(int stage)
         helloPeriod = par("helloPeriod");
         holdTime = par("holdTime");
         designatedRouterPriority = mode == PimInterface::SparseMode ? par("designatedRouterPriority") : -1;
-    }
-    else if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
-        registerService(Protocol::pim, nullptr, gate("ipIn"));
-        registerProtocol(Protocol::pim, gate("ipOut"), nullptr);
+        pimModule = check_and_cast<Pim *>(getParentModule());
     }
 }
 
@@ -147,13 +144,15 @@ void PimBase::sendHelloPacket(PimInterface *pimInterface)
     }
 
     msg->setChunkLength(byteLength);
+    msg->setCrcMode(pimModule->getCrcMode());
+    Pim::insertCrc(msg);
     pk->insertAtFront(msg);
-    pk->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::pim);
-    pk->addTagIfAbsent<InterfaceReq>()->setInterfaceId(pimInterface->getInterfaceId());
-    pk->addTagIfAbsent<DispatchProtocolInd>()->setProtocol(&Protocol::pim);
-    pk->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
-    pk->addTagIfAbsent<L3AddressReq>()->setDestAddress(ALL_PIM_ROUTERS_MCAST);
-    pk->addTagIfAbsent<HopLimitReq>()->setHopLimit(1);
+    pk->addTag<PacketProtocolTag>()->setProtocol(&Protocol::pim);
+    pk->addTag<InterfaceReq>()->setInterfaceId(pimInterface->getInterfaceId());
+    pk->addTag<DispatchProtocolInd>()->setProtocol(&Protocol::pim);
+    pk->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
+    pk->addTag<L3AddressReq>()->setDestAddress(ALL_PIM_ROUTERS_MCAST);
+    pk->addTag<HopLimitReq>()->setHopLimit(1);
 
     emit(sentHelloPkSignal, pk);
 

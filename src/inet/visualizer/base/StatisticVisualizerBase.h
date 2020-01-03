@@ -62,12 +62,11 @@ class INET_API StatisticVisualizerBase : public VisualizerBase, public cListener
       protected:
         const StatisticVisualizerBase *visualizer = nullptr;
         const StatisticVisualization *visualization = nullptr;
-        std::string result;
 
       public:
         DirectiveResolver(const StatisticVisualizerBase *visualizer, const StatisticVisualization *visualization) : visualizer(visualizer), visualization(visualization) { }
 
-        virtual const char *resolveDirective(char directive) override;
+        virtual const char *resolveDirective(char directive) const override;
     };
 
   protected:
@@ -118,8 +117,8 @@ class INET_API StatisticVisualizerBase : public VisualizerBase, public cListener
 
 #define PROCESS_SIGNAL(value) { processSignal(source, signal, [=] (cIListener *listener) { listener->receiveSignal(source, signal, value, details); }); }
     virtual void receiveSignal(cComponent* source, simsignal_t signal, bool b, cObject* details) override { PROCESS_SIGNAL(b); }
-    virtual void receiveSignal(cComponent *source, simsignal_t signal, long l, cObject *details) override { PROCESS_SIGNAL(l); }
-    virtual void receiveSignal(cComponent *source, simsignal_t signal, unsigned long l, cObject *details) override { PROCESS_SIGNAL(l); }
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, intval_t l, cObject *details) override { PROCESS_SIGNAL(l); }
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, uintval_t l, cObject *details) override { PROCESS_SIGNAL(l); }
     virtual void receiveSignal(cComponent *source, simsignal_t signal, double d, cObject *details) override { PROCESS_SIGNAL(d); }
     virtual void receiveSignal(cComponent *source, simsignal_t signal, const SimTime& t, cObject *details) override { PROCESS_SIGNAL(t); }
     virtual void receiveSignal(cComponent *source, simsignal_t signal, const char *s, cObject *details) override { PROCESS_SIGNAL(s); }

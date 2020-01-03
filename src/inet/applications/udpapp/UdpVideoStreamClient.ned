@@ -25,11 +25,6 @@ import inet.applications.contract.IApp;
 // This module sends one "video streaming request" to serverAddress:serverPort at time startTime
 // and receives stream from ~UdpVideoStreamServer server.
 //
-// Statistics:
-//
-// packetReceived: statistic of received packets and received bytes.
-// endToEndDelay: statistic of delays of incoming packets.
-//
 // @see ~UdpVideoStreamServer
 //
 simple UdpVideoStreamClient like IApp

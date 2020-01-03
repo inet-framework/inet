@@ -8,5 +8,5 @@
 # mode using 'make MODE=release' before.
 #
 
-inet --release "$@"
+MODE=release inet "$@"
 

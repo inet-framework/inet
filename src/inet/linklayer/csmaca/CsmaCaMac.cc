@@ -32,19 +32,6 @@ using namespace inet::physicallayer;
 
 Define_Module(CsmaCaMac);
 
-static int getUPBasedFramePriority(cObject *obj)
-{
-    auto frame = static_cast<Packet *>(obj);
-    const auto& macHeader = frame->peekAtFront<CsmaCaMacDataHeader>();
-    int up = macHeader->getPriority();
-    return (up == UP_BK) ? -2 : (up == UP_BK2) ? -1 : up;  // because UP_BE==0, but background traffic should have lower priority than best effort
-}
-
-static int compareFramesByPriority(cObject *a, cObject *b)
-{
-    return getUPBasedFramePriority(b) - getUPBasedFramePriority(a);
-}
-
 CsmaCaMac::~CsmaCaMac()
 {
     cancelAndDelete(endSifs);
@@ -64,13 +51,16 @@ void CsmaCaMac::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         EV << "Initializing stage 0\n";
         fcsMode = parseFcsMode(par("fcsMode"));
-        maxQueueSize = par("maxQueueSize");
         useAck = par("useAck");
         bitrate = par("bitrate");
         headerLength = B(par("headerLength"));
+        if (headerLength > B(255))
+            throw cRuntimeError("The specified headerLength is too large");
         if (headerLength < makeShared<CsmaCaMacDataHeader>()->getChunkLength())
             throw cRuntimeError("The specified headerLength is too short");
         ackLength = B(par("ackLength"));
+        if (ackLength > B(255))
+            throw cRuntimeError("The specified ackLength is too large");
         if (ackLength < makeShared<CsmaCaMacAckHeader>()->getChunkLength())
             throw cRuntimeError("The specified ackLength is too short");
         ackTimeout = par("ackTimeout");
@@ -91,18 +81,12 @@ void CsmaCaMac::initialize(int stage)
         mediumStateChange = new cMessage("MediumStateChange");
 
         // set up internal queue
-        transmissionQueue.setMaxPacketLength(maxQueueSize);
-        transmissionQueue.setName("transmissionQueue");
-        if (par("prioritizeByUP"))
-            transmissionQueue.setup(&compareFramesByPriority);
+        txQueue = check_and_cast<queueing::IPacketQueue *>(getSubmodule("queue"));
 
         // state variables
         fsm.setName("CsmaCaMac State Machine");
         backoffPeriod = -1;
         retryCounter = 0;
-
-        // obtain pointer to external queue
-        initializeQueueModule();        //FIXME move to INITSTAGE_LINK_LAYER
 
         // statistics
         numRetry = 0;
@@ -135,20 +119,6 @@ void CsmaCaMac::initialize(int stage)
 
         radio = check_and_cast<IRadio *>(radioModule);
         radio->setRadioMode(IRadio::RADIO_MODE_RECEIVER);
-    }
-}
-
-void CsmaCaMac::initializeQueueModule()
-{
-    // use of external queue module is optional -- find it if there's one specified
-    if (par("queueModule").stringValue()[0]) {
-        cModule *module = getParentModule()->getSubmodule(par("queueModule"));
-        queueModule = check_and_cast<IPassiveQueue *>(module);
-
-        EV << "Requesting first two frames from queue module\n";
-        queueModule->requestPacket();
-        // needed for backoff: mandatory if next message is already present
-        queueModule->requestPacket();
     }
 }
 
@@ -193,22 +163,18 @@ void CsmaCaMac::handleSelfMessage(cMessage *msg)
 
 void CsmaCaMac::handleUpperPacket(Packet *packet)
 {
-    if (maxQueueSize != -1 && (int)transmissionQueue.getLength() == maxQueueSize) {
-        EV << "message " << packet << " received from higher layer but MAC queue is full, dropping message\n";
-        emitPacketDropSignal(packet, QUEUE_OVERFLOW, maxQueueSize);
-        delete packet;
-        return;
-    }
     auto frame = check_and_cast<Packet *>(packet);
     encapsulate(frame);
     const auto& macHeader = frame->peekAtFront<CsmaCaMacHeader>();
     EV << "frame " << frame << " received from higher layer, receiver = " << macHeader->getReceiverAddress() << endl;
     ASSERT(!macHeader->getReceiverAddress().isUnspecified());
-    transmissionQueue.insert(frame);
+    txQueue->pushPacket(frame);
     if (fsm.getState() != IDLE)
         EV << "deferring upper message transmission in " << fsm.getStateName() << " state\n";
-    else
-        handleWithFsm(packet);
+    else if (!txQueue->isEmpty()){
+        popTxQueue();
+        handleWithFsm(currentTxFrame);
+    }
 }
 
 void CsmaCaMac::handleLowerPacket(Packet *packet)
@@ -390,15 +356,19 @@ void CsmaCaMac::handleWithFsm(cMessage *msg)
     if (fsm.getState() == IDLE) {
         if (isReceiving())
             handleWithFsm(mediumStateChange);
-        else if (!transmissionQueue.isEmpty())
-            handleWithFsm(transmissionQueue.front());
+        else if (currentTxFrame != nullptr)
+            handleWithFsm(currentTxFrame);
+        else if (!txQueue->isEmpty()) {
+            popTxQueue();
+            handleWithFsm(currentTxFrame);
+        }
     }
     if (isLowerMessage(msg) && frame->getOwner() == this && endSifs->getContextPointer() != frame)
         delete frame;
     getDisplayString().setTagArg("t", 0, fsm.getStateName());
 }
 
-void CsmaCaMac::receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details)
+void CsmaCaMac::receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details)
 {
     Enter_Method_Silent();
     if (signalID == IRadio::receptionStateChangedSignal)
@@ -416,6 +386,8 @@ void CsmaCaMac::receiveSignal(cComponent *source, simsignal_t signalID, long val
 void CsmaCaMac::encapsulate(Packet *frame)
 {
     auto macHeader = makeShared<CsmaCaMacDataHeader>();
+    macHeader->setChunkLength(headerLength);
+    macHeader->setHeaderLengthField(B(headerLength).get());
     auto transportProtocol = frame->getTag<PacketProtocolTag>()->getProtocol();
     auto networkProtocol = ProtocolGroup::ethertype.getProtocolNumber(transportProtocol);
     macHeader->setNetworkProtocol(networkProtocol);
@@ -424,8 +396,6 @@ void CsmaCaMac::encapsulate(Packet *frame)
     auto userPriorityReq = frame->findTag<UserPriorityReq>();
     int userPriority = userPriorityReq == nullptr ? UP_BE : userPriorityReq->getUserPriority();
     macHeader->setPriority(userPriority == -1 ? UP_BE : userPriority);
-    if (headerLength > macHeader->getChunkLength())
-        frame->insertAtFront(makeShared<ByteCountChunk>(headerLength - macHeader->getChunkLength()));
     frame->insertAtFront(macHeader);
     auto macTrailer = makeShared<CsmaCaMacTrailer>();
     macTrailer->setFcsMode(fcsMode);
@@ -551,17 +521,17 @@ void CsmaCaMac::sendAckFrame()
     auto frameToAck = static_cast<Packet *>(endSifs->getContextPointer());
     endSifs->setContextPointer(nullptr);
     auto macHeader = makeShared<CsmaCaMacAckHeader>();
+    macHeader->setChunkLength(ackLength);
+    macHeader->setHeaderLengthField(B(ackLength).get());
     macHeader->setReceiverAddress(frameToAck->peekAtFront<CsmaCaMacHeader>()->getTransmitterAddress());
     auto frame = new Packet("CsmaAck");
-    if (ackLength > macHeader->getChunkLength())
-        frame->insertAtFront(makeShared<ByteCountChunk>(ackLength - macHeader->getChunkLength()));
     frame->insertAtFront(macHeader);
     auto macTrailer = makeShared<CsmaCaMacTrailer>();
     macTrailer->setFcsMode(fcsMode);
     if (fcsMode == FCS_COMPUTED)
         macTrailer->setFcs(computeFcs(frame->peekAllAsBytes()));
     frame->insertAtBack(macTrailer);
-    auto macAddressInd = frame->addTagIfAbsent<MacAddressInd>();
+    auto macAddressInd = frame->addTag<MacAddressInd>();
     macAddressInd->setSrcAddress(macHeader->getTransmitterAddress());
     macAddressInd->setDestAddress(macHeader->getReceiverAddress());
     frame->addTag<PacketProtocolTag>()->setProtocol(&Protocol::csmaCaMac);
@@ -575,7 +545,7 @@ void CsmaCaMac::sendAckFrame()
  */
 void CsmaCaMac::finishCurrentTransmission()
 {
-    popTransmissionQueue();
+    deleteCurrentTxFrame();
     resetTransmissionVariables();
 }
 
@@ -584,7 +554,7 @@ void CsmaCaMac::giveUpCurrentTransmission()
     auto packet = getCurrentTransmission();
     emitPacketDropSignal(packet, RETRY_LIMIT_REACHED, retryLimit);
     emit(linkBrokenSignal, packet);
-    popTransmissionQueue();
+    deleteCurrentTxFrame();
     resetTransmissionVariables();
     numGivenUp++;
 }
@@ -599,18 +569,8 @@ void CsmaCaMac::retryCurrentTransmission()
 
 Packet *CsmaCaMac::getCurrentTransmission()
 {
-    return static_cast<Packet *>(transmissionQueue.front());
-}
-
-void CsmaCaMac::popTransmissionQueue()
-{
-    EV << "dropping frame from transmission queue\n";
-    delete transmissionQueue.pop();
-    if (queueModule) {
-        // tell queue module that we've become idle
-        EV << "requesting another frame from queue module\n";
-        queueModule->requestPacket();
-    }
+    ASSERT(currentTxFrame != nullptr);
+    return currentTxFrame;
 }
 
 void CsmaCaMac::resetTransmissionVariables()
@@ -640,7 +600,7 @@ bool CsmaCaMac::isReceiving()
 bool CsmaCaMac::isAck(Packet *frame)
 {
     const auto& macHeader = frame->peekAtFront<CsmaCaMacHeader>();
-    return dynamicPtrCast<const CsmaCaMacAckHeader>(macHeader) != nullptr;
+    return macHeader->getType() == CSMA_ACK;
 }
 
 bool CsmaCaMac::isBroadcast(Packet *frame)
@@ -689,6 +649,18 @@ uint32_t CsmaCaMac::computeFcs(const Ptr<const BytesChunk>& bytes)
     auto computedFcs = ethernetCRC(buffer, bufferLength);
     delete [] buffer;
     return computedFcs;
+}
+
+void CsmaCaMac::handleStopOperation(LifecycleOperation *operation)
+{
+    MacProtocolBase::handleStopOperation(operation);
+    resetTransmissionVariables();
+}
+
+void CsmaCaMac::handleCrashOperation(LifecycleOperation *operation)
+{
+    MacProtocolBase::handleCrashOperation(operation);
+    resetTransmissionVariables();
 }
 
 } // namespace inet

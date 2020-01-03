@@ -18,26 +18,26 @@
 #ifndef __INET_DIMENSIONALTRANSMISSION_H
 #define __INET_DIMENSIONALTRANSMISSION_H
 
-#include "inet/common/mapping/MappingBase.h"
-#include "inet/common/mapping/MappingUtils.h"
+#include "inet/common/math/Functions.h"
 #include "inet/physicallayer/base/packetlevel/FlatTransmissionBase.h"
 
 namespace inet {
 
 namespace physicallayer {
 
+using namespace inet::math;
+
 class INET_API DimensionalTransmission : public FlatTransmissionBase, public IDimensionalSignal
 {
   protected:
-    const ConstMapping *power;
+    const Ptr<const IFunction<WpHz, Domain<simsec, Hz>>> power;
 
   public:
-    DimensionalTransmission(const IRadio *transmitter, const Packet *packet, const simtime_t startTime, const simtime_t endTime, const simtime_t preambleDuration, const simtime_t headerDuration, const simtime_t dataDuration, const Coord startPosition, const Coord endPosition, const Quaternion startOrientation, const Quaternion endOrientation, const IModulation *modulation, b headerLength, b dataLength, Hz carrierFrequency, Hz bandwidth, bps bitrate, const ConstMapping *power);
-    virtual ~DimensionalTransmission() { delete power; }
+    DimensionalTransmission(const IRadio *transmitter, const Packet *packet, const simtime_t startTime, const simtime_t endTime, const simtime_t preambleDuration, const simtime_t headerDuration, const simtime_t dataDuration, const Coord startPosition, const Coord endPosition, const Quaternion startOrientation, const Quaternion endOrientation, const IModulation *modulation, b headerLength, b dataLength, Hz centerFrequency, Hz bandwidth, bps bitrate, const Ptr<const IFunction<WpHz, Domain<simsec, Hz>>>& power);
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 
-    virtual const ConstMapping *getPower() const override { return power; }
+    virtual const Ptr<const IFunction<WpHz, Domain<simsec, Hz>>>& getPower() const override { return power; }
     virtual W computeMinPower(const simtime_t startTime, const simtime_t endTime) const override { ASSERT(false); return W(NaN); }
 };
 

@@ -28,7 +28,7 @@ package inet.common.scenario;
 // ~ScenarioManager executes a script specified in XML. It has a few
 // built-in commands, while other commands are dispatched to be carried out
 // by given simple modules. (The C++ class of these simple modules' needs
-// to implement the IScriptable interface, and the processCommand() method
+// to implement the ~IScriptable interface, and the processCommand() method
 // must be redefined accordingly).
 //
 // An example script:
@@ -49,7 +49,6 @@ package inet.common.scenario;
 //     </at>
 //     <at t="60">
 //         <disconnect src-module="host[2]" src-gate="ppp[0]" />
-//         <disconnect src-module="host[1]" src-gate="ppp[0]" />
 //     </at>
 //     <at t="2s">
 //         <initiate module="Router2" operation="shutdown"/>
@@ -70,20 +69,28 @@ package inet.common.scenario;
 // then only the <at> command is needed to have a t attribute.
 //
 // Supported attributes:
-//    - <set-param>: module, par, value.
-//    - <set-channel-param>: src-module, src-gate, par, value.
-//    - <connect>: src-module, src-gate, dest-module, dest-gate, channel-type
-//        - <param>: name, value
-//    - <disconnect>: src-module, src-gate
-//          note: if src-gate names an inout gate, both directions will be disconnected.
-//    - <create-module>: parent, submodule, type, vector
-//          parent: parent path
-//          submodule: name of created module
-//          type: type of created module
-//          vector: boolean, if true, the module created as vector element with next index,
-//                  if false, the module created as a single module,
-//                  if missing, detects existing vector by submodule name
-//    - <delete-module>: module
+// - <set-param>: module, par, value.
+// - <set-channel-param>: src-module, src-gate, dest-module, par, value.
+//       Note: src-gate and dest-module are exclusive;
+//       if dest-module is present, there must be exactly one connection
+//       between src-module and dest-module (which may be bidirectional);
+//       if src-gate references an inout gate, the parameter will be set
+//       on the channel of both directions.
+// - <connect>: src-module, src-gate, dest-module, dest-gate, channel-type
+//     - <param>: name, value
+// - <disconnect>: src-module, src-gate, dest-module
+//       Note: src-gate and dest-module are exclusive;
+//       if dest-module is present, there must be exactly one connection
+//       between src-module and dest-module (which may be bidirectional);
+//       if src-gate references an inout gate, both directions will be disconnected.
+// - <create-module>: parent, submodule, type, vector
+//       parent: parent path
+//       submodule: name of created module
+//       type: type of created module
+//       vector: boolean, if true, the module created as vector element with next index,
+//               if false, the module created as a single module,
+//               if missing, detects existing vector by submodule name
+// - <delete-module>: module
 //
 simple ScenarioManager
 {

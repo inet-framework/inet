@@ -45,67 +45,80 @@ jobs:
     - env: TARGET_PLATFORM=macosx MODE=release
     - env: TARGET_PLATFORM=macosx MODE=debug
 
-    # The following atrocity was necessitated by the timeout limits on Travis,
-    # the fact that our debug builds are slow as heck, and the fingerprint test
-    # runner script is suspected of not being entirely free of deadlocks.
-    # The first 6 jobs are the release mode jobs, each runs a subset of the
-    # fingerprint tests. The 6 after them are the same, except in debug mode.
-    # The splitting is done with -x and -m expressions, quite arbitrarily,
-    # to get subsets of roughly equivalent size. This might have to be adjusted
-    # as the test suite evolves. Yes, the last two groups are split so that the tests
-    # in one of them contain the letter 'v', and the ones in the other don't. So what.
+    # The following atrocity was necessitated by the timeout limits on Travis.
 
     # release mode fingerprints, split into three arbitrary parts using filters, to avoid freaking timeouts
     - stage: fingerprints
       script:
-        - export STAGE=fingerprints INNER_ARGS="-m tutorials -m showcases" # not env, so it doesn't affect the cache key
+        - export STAGE=fingerprints INNER_ARGS="-n 2 -i 0" # not env, so it doesn't affect the cache key
         - *DOCKER_COMMAND
       env: TARGET_PLATFORM=linux MODE=release
     - script:
-        - export STAGE=fingerprints INNER_ARGS="-m examples/inet" # not env, so it doesn't affect the cache key
-        - *DOCKER_COMMAND
-      env: TARGET_PLATFORM=linux MODE=release
-    - script:
-        - export STAGE=fingerprints INNER_ARGS="-m examples/wireless -m examples/voipstream" # not env, so it doesn't affect the cache key
-        - *DOCKER_COMMAND
-      env: TARGET_PLATFORM=linux MODE=release
-    - script:
-        - export STAGE=fingerprints INNER_ARGS="-m ethernet" # not env, so it doesn't affect the cache key
-        - *DOCKER_COMMAND
-      env: TARGET_PLATFORM=linux MODE=release
-    - script:
-        - export STAGE=fingerprints INNER_ARGS="-x tutorials -x showcases -x examples/inet -x examples/wireless -x examples/voipstream -x ethernet -x v" # not env, so it doesn't affect the cache key
-        - *DOCKER_COMMAND
-      env: TARGET_PLATFORM=linux MODE=release
-    - script:
-        - export STAGE=fingerprints INNER_ARGS="-x tutorials -x showcases -x examples/inet -x examples/wireless -x examples/voipstream -x ethernet -m v" # not env, so it doesn't affect the cache key
+        - export STAGE=fingerprints INNER_ARGS="-n 2 -i 1" # not env, so it doesn't affect the cache key
         - *DOCKER_COMMAND
       env: TARGET_PLATFORM=linux MODE=release
 
 
     - script:
-        - export STAGE=fingerprints INNER_ARGS="-m tutorials -m showcases" # not env, so it doesn't affect the cache key
+        - export STAGE=fingerprints INNER_ARGS="-n 8 -i 0" # not env, so it doesn't affect the cache key
         - *DOCKER_COMMAND
       env: TARGET_PLATFORM=linux MODE=debug
     - script:
-        - export STAGE=fingerprints INNER_ARGS="-m examples/inet" # not env, so it doesn't affect the cache key
+        - export STAGE=fingerprints INNER_ARGS="-n 8 -i 1" # not env, so it doesn't affect the cache key
         - *DOCKER_COMMAND
       env: TARGET_PLATFORM=linux MODE=debug
     - script:
-        - export STAGE=fingerprints INNER_ARGS="-m examples/wireless -m examples/voipstream" # not env, so it doesn't affect the cache key
+        - export STAGE=fingerprints INNER_ARGS="-n 8 -i 2" # not env, so it doesn't affect the cache key
         - *DOCKER_COMMAND
       env: TARGET_PLATFORM=linux MODE=debug
     - script:
-        - export STAGE=fingerprints INNER_ARGS="-m ethernet" # not env, so it doesn't affect the cache key
+        - export STAGE=fingerprints INNER_ARGS="-n 8 -i 3" # not env, so it doesn't affect the cache key
         - *DOCKER_COMMAND
       env: TARGET_PLATFORM=linux MODE=debug
     - script:
-        - export STAGE=fingerprints INNER_ARGS="-x tutorials -x showcases -x examples/inet -x examples/wireless -x examples/voipstream -x ethernet -x v" # not env, so it doesn't affect the cache key
+        - export STAGE=fingerprints INNER_ARGS="-n 8 -i 4" # not env, so it doesn't affect the cache key
         - *DOCKER_COMMAND
       env: TARGET_PLATFORM=linux MODE=debug
     - script:
-        - export STAGE=fingerprints INNER_ARGS="-x tutorials -x showcases -x examples/inet -x examples/wireless -x examples/voipstream -x ethernet -m v" # not env, so it doesn't affect the cache key
+        - export STAGE=fingerprints INNER_ARGS="-n 8 -i 5" # not env, so it doesn't affect the cache key
         - *DOCKER_COMMAND
       env: TARGET_PLATFORM=linux MODE=debug
+    - script:
+        - export STAGE=fingerprints INNER_ARGS="-n 8 -i 6" # not env, so it doesn't affect the cache key
+        - *DOCKER_COMMAND
+      env: TARGET_PLATFORM=linux MODE=debug
+    - script:
+        - export STAGE=fingerprints INNER_ARGS="-n 8 -i 7" # not env, so it doesn't affect the cache key
+        - *DOCKER_COMMAND
+      env: TARGET_PLATFORM=linux MODE=debug
+
+
+    - stage: moduletests
+      script:
+        - export STAGE=moduletests INNER_ARGS="" # not env, so it doesn't affect the cache key
+        - *DOCKER_COMMAND
+      env: TARGET_PLATFORM=linux MODE=debug
+    # TODO add release mode when the runner script supports it
+
+    - stage: unittests
+      script:
+        - export STAGE=unittests INNER_ARGS="" # not env, so it doesn't affect the cache key
+        - *DOCKER_COMMAND
+      env: TARGET_PLATFORM=linux MODE=debug
+    # TODO add release mode when the runner script supports it
+
+    - stage: packettests
+      script:
+        - export STAGE=packettests INNER_ARGS="" # not env, so it doesn't affect the cache key
+        - *DOCKER_COMMAND
+      env: TARGET_PLATFORM=linux MODE=debug
+    # TODO add release mode when the runner script supports it
+
+    - stage: queueingtests
+      script:
+        - export STAGE=queueingtests INNER_ARGS="" # not env, so it doesn't affect the cache key
+        - *DOCKER_COMMAND
+      env: TARGET_PLATFORM=linux MODE=debug
+    # TODO add release mode when the runner script supports it
 
 # "Look what you made me do", Travis.

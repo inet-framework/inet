@@ -29,7 +29,7 @@ import inet.applications.contract.IApp;
 // number of milliseconds of voice. Those values come from module parameters.
 // Packets that are all silence (all samples are below a given threshold in
 // absolute value) are transmitted as special "silence" packets. The module
-// does not simulate any particular VoIP protocol (e.g. Rtp), but instead
+// does not simulate any particular VoIP protocol (e.g. RTP), but instead
 // accepts a "header size" parameter that can be set accordingly.
 //
 simple VoipStreamSender like IApp
@@ -48,6 +48,9 @@ simple VoipStreamSender like IApp
         string soundFile;                       // file name of input audio file
         int repeatCount = default(1);
         string traceFileName = default("");     // file name to save output stream (wav), OFF when empty
+        int timeToLive = default(-1); // if not -1, set the TTL (IPv4) or Hop Limit (IPv6) field of sent packets to this value
+        int dscp = default(-1); // if not -1, set the DSCP field (on IPv4/IPv6) of sent packets to this value
+        int tos = default(-1); // if not -1, set the Type Of Service (IPv4) / Traffic Class (IPv6) field of sent packets to this value
         @signal[packetSent](type=inet::Packet);       // TODO first chunk is VoipStreamPacket
         @statistic[packetSent](title="packets sent"; source=packetSent; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @display("i=block/departure");

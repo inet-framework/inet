@@ -72,7 +72,7 @@ Packet *MsduAggregation::aggregateFrames(std::vector<Packet *> *frames)
         auto msduSubframeHeader = makeShared<Ieee80211MsduSubframeHeader>();
         auto frame = frames->at(i);
         const auto& header = frame->popAtFront<Ieee80211DataHeader>();
-        frame->popAtBack<Ieee80211MacTrailer>();
+        frame->popAtBack<Ieee80211MacTrailer>(B(4));
         auto msdu = frame->peekData();
         msduSubframeHeader->setLength(B(msdu->getChunkLength()).get());
         setSubframeAddress(msduSubframeHeader, header);
@@ -98,7 +98,7 @@ Packet *MsduAggregation::aggregateFrames(std::vector<Packet *> *frames)
     amsduHeader->setAMsduPresent(true);
     amsduHeader->setReceiverAddress(ra);
     amsduHeader->setTid(tid);
-    amsduHeader->setChunkLength(amsduHeader->getChunkLength() + QOSCONTROL_PART_LENGTH);
+    amsduHeader->addChunkLength(QOSCONTROL_PART_LENGTH);
     // TODO: set addr3 and addr4 according to fromDS and toDS.
     aggregatedFrame->insertAtFront(amsduHeader);
     aggregatedFrame->insertAtBack(makeShared<Ieee80211MacTrailer>());

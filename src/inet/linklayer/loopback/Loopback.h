@@ -21,17 +21,16 @@
 #define __INET_LOOPBACK_H
 
 #include "inet/common/INETDefs.h"
-#include "inet/linklayer/base/MacBase.h"
+#include "inet/linklayer/base/MacProtocolBase.h"
 
 namespace inet {
 
 class InterfaceEntry;
-class IPassiveQueue;
 
 /**
  * Loopback interface implementation.
  */
-class INET_API Loopback : public MacBase
+class INET_API Loopback : public MacProtocolBase
 {
   protected:
     // statistics
@@ -40,8 +39,6 @@ class INET_API Loopback : public MacBase
 
   protected:
     virtual void configureInterfaceEntry() override;
-    virtual void flushQueue() override;
-    virtual void clearQueue() override;
 
   public:
     Loopback() {}

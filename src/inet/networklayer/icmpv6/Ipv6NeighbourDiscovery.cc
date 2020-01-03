@@ -90,12 +90,7 @@ void Ipv6NeighbourDiscovery::initialize(int stage)
 
     if (stage == INITSTAGE_LOCAL) {
         const char *crcModeString = par("crcMode");
-        if (!strcmp(crcModeString, "declared"))
-            crcMode = CRC_DECLARED_CORRECT;
-        else if (!strcmp(crcModeString, "computed"))
-            crcMode = CRC_COMPUTED;
-        else
-            throw cRuntimeError("unknown CRC mode: '%s'", crcModeString);
+        crcMode = parseCrcMode(crcModeString, false);
     }
     else if (stage == INITSTAGE_NETWORK_LAYER) {
         cModule *node = findContainingNode(this);
@@ -975,12 +970,13 @@ void Ipv6NeighbourDiscovery::createAndSendRsPacket(InterfaceEntry *ie)
 
     Ipv6Address destAddr = Ipv6Address::ALL_ROUTERS_2;    //all_routers multicast
     auto rs = makeShared<Ipv6RouterSolicitation>();
-    rs->setChunkLength(ICMPv6_HEADER_BYTES);
 
     //The Source Link-Layer Address option SHOULD be set to the host's link-layer
     //address, if the IP source address is not the unspecified address.
     if (!myIPv6Address.isUnspecified()) {
-        rs->setSourceLinkLayerAddress(ie->getMacAddress());
+        auto sla = new Ipv6NdSourceLinkLayerAddress();
+        sla->setLinkLayerAddress(ie->getMacAddress());
+        rs->getOptionsForUpdate().insertUniqueOption(sla);
         rs->setChunkLength(ICMPv6_HEADER_BYTES + IPv6ND_LINK_LAYER_ADDRESS_OPTION_LENGTH);
     }
 
@@ -1066,8 +1062,8 @@ void Ipv6NeighbourDiscovery::processRdTimeout(cMessage *msg)
            appear on the link.*/
         bubble("Max number of RS messages sent");
         EV_INFO << "No RA messages were received. Assume no routers are on-link";
-        delete rdEntry;
         rdList.erase(rdEntry);
+        delete rdEntry;
         delete msg;
     }
 }
@@ -1096,7 +1092,9 @@ void Ipv6NeighbourDiscovery::processRsPacket(Packet *packet, const Ipv6RouterSol
         EV_INFO << "RS message validated\n";
 
         //First we extract RS specific information from the received message
-        MacAddress macAddr = rs->getSourceLinkLayerAddress();
+        MacAddress macAddr;
+        if (auto sla = check_and_cast_nullable<const Ipv6NdSourceLinkLayerAddress*>(rs->getOptions().findOption(IPv6ND_SOURCE_LINK_LAYER_ADDR_OPTION)))
+            macAddr = sla->getLinkLayerAddress();
         EV_INFO << "MAC Address '" << macAddr << "' extracted\n";
 
         /*A router MAY choose to unicast the response directly to the soliciting
@@ -1175,7 +1173,10 @@ bool Ipv6NeighbourDiscovery::validateRsPacket(Packet *packet, const Ipv6RouterSo
     if (packet->getTag<L3AddressInd>()->getSrcAddress().toIpv6().isUnspecified()) {
         EV_WARN << "IP source address is unspecified\n";
 
-        if (rs->getSourceLinkLayerAddress().isUnspecified() == false) {
+        MacAddress macAddr;
+        if (auto sla = check_and_cast_nullable<const Ipv6NdSourceLinkLayerAddress*>(rs->getOptions().findOption(IPv6ND_SOURCE_LINK_LAYER_ADDR_OPTION)))
+            macAddr = sla->getLinkLayerAddress();
+        if (macAddr.isUnspecified() == false) {
             EV_WARN << " but source link layer address is provided. RS validation failed!\n";
         }
     }
@@ -1228,19 +1229,26 @@ void Ipv6NeighbourDiscovery::createAndSendRaPacket(const Ipv6Address& destAddr, 
         //- In the options:
         /*o Source Link-Layer Address option: link-layer address of the sending
             interface.  (Assumption: We always send this)*/
-        ra->setSourceLinkLayerAddress(ie->getMacAddress());
-        ra->setMTU(ie->getProtocolData<Ipv6InterfaceData>()->getAdvLinkMtu());
+        auto sla = new Ipv6NdSourceLinkLayerAddress();
+        sla->setLinkLayerAddress(ie->getMacAddress());
+        ra->getOptionsForUpdate().insertOption(sla);
+        ra->addChunkLength(IPv6ND_LINK_LAYER_ADDRESS_OPTION_LENGTH);
+
+        // set MTU option
+        auto mtu = new Ipv6NdMtu();
+        mtu->setMtu(ie->getProtocolData<Ipv6InterfaceData>()->getAdvLinkMtu());
+        ra->getOptionsForUpdate().insertOption(mtu);
+        ra->addChunkLength(IPv6ND_MTU_OPTION_LENGTH);
 
         //Add all Advertising Prefixes to the RA
         int numAdvPrefixes = ie->getProtocolData<Ipv6InterfaceData>()->getNumAdvPrefixes();
         EV_DETAIL << "Number of Adv Prefixes: " << numAdvPrefixes << endl;
-        ra->setPrefixInformationArraySize(numAdvPrefixes);
         for (int i = 0; i < numAdvPrefixes; i++) {
             Ipv6InterfaceData::AdvPrefix advPrefix = ie->getProtocolData<Ipv6InterfaceData>()->getAdvPrefix(i);
-            Ipv6NdPrefixInformation prefixInfo;
+            auto prefixInfo = new Ipv6NdPrefixInformation();
 
 #ifndef WITH_xMIPv6
-            prefixInfo.setPrefix(advPrefix.prefix);
+            prefixInfo->setPrefix(advPrefix.prefix);
 #else /* WITH_xMIPv6 */
             EV_DETAIL << "\n+=+=+=+= Appendign Prefix Info Option to RA +=+=+=+=\n";
             EV_DETAIL << "Prefix Value: " << advPrefix.prefix << endl;
@@ -1251,36 +1259,35 @@ void Ipv6NeighbourDiscovery::createAndSendRaPacket(const Ipv6Address& destAddr, 
             EV_DETAIL << "Global Address from Prefix: " << advPrefix.rtrAddress << endl;
 
             if (rt6->isHomeAgent() && advPrefix.advRtrAddr == true)
-                prefixInfo.setPrefix(advPrefix.rtrAddress); //add the global-scope address of the HA's interface in the prefix option list of the RA message.
+                prefixInfo->setPrefix(advPrefix.rtrAddress); //add the global-scope address of the HA's interface in the prefix option list of the RA message.
             else
-                prefixInfo.setPrefix(advPrefix.prefix); //adds the prefix only of the router's interface in the prefix option list of the RA message.
+                prefixInfo->setPrefix(advPrefix.prefix); //adds the prefix only of the router's interface in the prefix option list of the RA message.
 #endif /* WITH_xMIPv6 */
 
-            prefixInfo.setPrefixLength(advPrefix.prefixLength);
+            prefixInfo->setPrefixLength(advPrefix.prefixLength);
 
             //- In the "on-link" flag: the entry's AdvOnLinkFlag.
-            prefixInfo.setOnlinkFlag(advPrefix.advOnLinkFlag);
+            prefixInfo->setOnlinkFlag(advPrefix.advOnLinkFlag);
             //- In the Valid Lifetime field: the entry's AdvValidLifetime.
-            prefixInfo.setValidLifetime(SIMTIME_DBL(advPrefix.advValidLifetime));
+            prefixInfo->setValidLifetime(SIMTIME_DBL(advPrefix.advValidLifetime));
             //- In the "Autonomous address configuration" flag: the entry's
             //AdvAutonomousFlag.
-            prefixInfo.setAutoAddressConfFlag(advPrefix.advAutonomousFlag);
+            prefixInfo->setAutoAddressConfFlag(advPrefix.advAutonomousFlag);
 
 #ifdef WITH_xMIPv6
             if (rt6->isHomeAgent())
-                prefixInfo.setRouterAddressFlag(true); // set the R-bit if the node is a HA
+                prefixInfo->setRouterAddressFlag(true); // set the R-bit if the node is a HA
 
             //- In the Valid Lifetime field: the entry's AdvValidLifetime.
-            prefixInfo.setValidLifetime(SIMTIME_DBL(advPrefix.advValidLifetime));
+            prefixInfo->setValidLifetime(SIMTIME_DBL(advPrefix.advValidLifetime));
 #endif /* WITH_xMIPv6 */
 
             //- In the Preferred Lifetime field: the entry's AdvPreferredLifetime.
-            prefixInfo.setPreferredLifetime(SIMTIME_DBL(advPrefix.advPreferredLifetime));
+            prefixInfo->setPreferredLifetime(SIMTIME_DBL(advPrefix.advPreferredLifetime));
             //Now we pop the prefix info into the RA.
-            ra->setPrefixInformation(i, prefixInfo);
+            ra->getOptionsForUpdate().insertOption(prefixInfo);
+            ra->addChunkLength(IPv6ND_PREFIX_INFORMATION_OPTION_LENGTH);
         }
-
-        ra->setChunkLength(ICMPv6_HEADER_BYTES + IPv6ND_PREFIX_INFORMATION_OPTION_LENGTH * numAdvPrefixes);
 
         auto packet = new Packet("RApacket");
         Icmpv6::insertCrc(crcMode, ra, packet);
@@ -1321,8 +1328,11 @@ void Ipv6NeighbourDiscovery::processRaPacket(Packet *packet, const Ipv6RouterAdv
         //Possible options
         //MacAddress macAddress = ra->getSourceLinkLayerAddress();
         //uint mtu = ra->getMTU();
-        for (int i = 0; i < (int)ra->getPrefixInformationArraySize(); i++) {
-            const Ipv6NdPrefixInformation& prefixInfo = ra->getPrefixInformation(i);
+        for (int i = 0; i < (int)ra->getOptions().getOptionArraySize(); i++) {
+            auto option = ra->getOptions().getOption(i);
+            if (option->getType() != IPv6ND_PREFIX_INFORMATION)
+                continue;
+            const Ipv6NdPrefixInformation& prefixInfo = *check_and_cast<const Ipv6NdPrefixInformation*>(option);
             if (prefixInfo.getAutoAddressConfFlag() == true) {    //If auto addr conf is set
 #ifndef WITH_xMIPv6
                 processRaPrefixInfoForAddrAutoConf(prefixInfo, ie);    //We process prefix Info and form an addr
@@ -1360,6 +1370,10 @@ void Ipv6NeighbourDiscovery::processRaForRouterUpdates(Packet *packet, const Ipv
     InterfaceEntry *ie = ift->getInterfaceById(packet->getTag<InterfaceInd>()->getInterfaceId());
     int ifID = ie->getInterfaceId();
 
+    MacAddress sourceLinkLayerAddress;
+    if (auto sla = check_and_cast_nullable<const Ipv6NdSourceLinkLayerAddress*>(ra->getOptions().findOption(IPv6ND_SOURCE_LINK_LAYER_ADDR_OPTION)))
+        sourceLinkLayerAddress = sla->getLinkLayerAddress();
+
     /*- If the address is not already present in the host's Default Router List,
        and the advertisement's Router Lifetime is non-zero, create a new entry in
        the list, and initialize its invalidation timer value from the advertisement's
@@ -1385,22 +1399,22 @@ void Ipv6NeighbourDiscovery::processRaForRouterUpdates(Packet *packet, const Ipv
             //If a Neighbor Cache entry is created for the router its reachability
             //state MUST be set to STALE as specified in Section 7.3.3.
             neighbour = neighbourCache.addRouter(raSrcAddr, ifID,
-#ifndef WITH_xMIPv6
-                        ra->getSourceLinkLayerAddress(), simTime() + ra->getRouterLifetime());
-#else /* WITH_xMIPv6 */
-                        ra->getSourceLinkLayerAddress(), simTime() + ra->getRouterLifetime(), ra->getHomeAgentFlag());
+                        sourceLinkLayerAddress, simTime() + ra->getRouterLifetime()
+#ifdef WITH_xMIPv6
+                        , ra->getHomeAgentFlag()
 #endif /* WITH_xMIPv6 */
+                        );
             //According to Greg, we should add a default route for hosts as well!
             rt6->addDefaultRoute(raSrcAddr, ifID, simTime() + ra->getRouterLifetime());
         }
         else {
             EV_INFO << "Router Lifetime is 0, adding NON-default router.\n";
             //WEI-The router is advertising itself, BUT not as a default router.
-            if (ra->getSourceLinkLayerAddress().isUnspecified())
+            if (sourceLinkLayerAddress.isUnspecified())
                 neighbour = neighbourCache.addNeighbour(raSrcAddr, ifID);
             else
                 neighbour = neighbourCache.addNeighbour(raSrcAddr, ifID,
-                            ra->getSourceLinkLayerAddress());
+                            sourceLinkLayerAddress);
             neighbour->isRouter = true;
         }
     }
@@ -1411,9 +1425,9 @@ void Ipv6NeighbourDiscovery::processRaForRouterUpdates(Packet *packet, const Ipv
 
         //If a cache entry already exists and is updated with a different link-
         //layer address the reachability state MUST also be set to STALE.
-        if (ra->getSourceLinkLayerAddress().isUnspecified() == false &&
-            neighbour->macAddress.equals(ra->getSourceLinkLayerAddress()) == false)
-            neighbour->macAddress = ra->getSourceLinkLayerAddress();
+        if (sourceLinkLayerAddress.isUnspecified() == false &&
+            neighbour->macAddress.equals(sourceLinkLayerAddress) == false)
+            neighbour->macAddress = sourceLinkLayerAddress;
 
         /*- If the address is already present in the host's Default Router List
            as a result of a previously-received advertisement, reset its invalidation
@@ -1491,14 +1505,17 @@ void Ipv6NeighbourDiscovery::processRaPrefixInfo(const Ipv6RouterAdvertisement *
        the autonomous flag set and be used by [ADDRCONF].*/
     Ipv6NdPrefixInformation prefixInfo;
     //For each Prefix Information option
-    for (int i = 0; i < (int)ra->getPrefixInformationArraySize(); i++) {
-        prefixInfo = ra->getPrefixInformation(i);
+    for (int i = 0; i < (int)ra->getOptions().getOptionArraySize(); i++) {
+        auto option = ra->getOptions().getOption(i);
+        if (option->getType() != IPv6ND_PREFIX_INFORMATION)
+            continue;
+        const Ipv6NdPrefixInformation& prefixInfo = *check_and_cast<const Ipv6NdPrefixInformation*>(option);
         if (!prefixInfo.getOnlinkFlag())
             break; //skip to next prefix option
 
         //with the on-link flag set, a host does the following:
-        EV_INFO << "Fetching Prefix Information:" << i + 1 << " of "
-                << ra->getPrefixInformationArraySize() << endl;
+        EV_INFO << "Fetching Prefix Information: option " << i + 1 << " of "
+                << ra->getOptions().getOptionArraySize() << endl;
         uint prefixLength = prefixInfo.getPrefixLength();
         simtime_t validLifetime = prefixInfo.getValidLifetime();
         //uint preferredLifetime = prefixInfo.getPreferredLifetime();
@@ -1788,7 +1805,15 @@ bool Ipv6NeighbourDiscovery::validateRaPacket(Packet *packet, const Ipv6RouterAd
 #ifdef WITH_xMIPv6
     // - All included options have a length that is greater than zero.
     // CB
-    if (ra->getPrefixInformationArraySize() == 0) {
+    bool prefixInfoFound = false;
+    for (int i = 0; i < (int)ra->getOptions().getOptionArraySize(); i++) {
+        auto option = ra->getOptions().getOption(i);
+        if (option->getType() == IPv6ND_PREFIX_INFORMATION) {
+            prefixInfoFound = true;
+            break;
+        }
+    }
+    if (!prefixInfoFound) {
         EV_WARN << "No prefix information available! RA validation failed\n";
         result = false;
     }
@@ -1811,15 +1836,16 @@ void Ipv6NeighbourDiscovery::createAndSendNsPacket(const Ipv6Address& nsTargetAd
 
     //Neighbour Solicitation Specific Information
     ns->setTargetAddress(nsTargetAddr);
-    ns->setChunkLength(ICMPv6_HEADER_BYTES + B(IPv6_ADDRESS_SIZE));      // RFC 2461, Section 4.3.
 
     /*If the solicitation is being sent to a solicited-node multicast
        address, the sender MUST include its link-layer address (if it has
        one) as a Source Link-Layer Address option.*/
     if (dgDestAddr.matches(Ipv6Address("FF02::1:FF00:0"), 104) &&    // FIXME what's this? make constant...
             !dgSrcAddr.isUnspecified()) {
-        ns->setSourceLinkLayerAddress(myMacAddr);
-        ns->setChunkLength(ns->getChunkLength() + IPv6ND_LINK_LAYER_ADDRESS_OPTION_LENGTH);
+        auto sla = new Ipv6NdSourceLinkLayerAddress();
+        sla->setLinkLayerAddress(myMacAddr);
+        ns->getOptionsForUpdate().insertOption(sla);
+        ns->addChunkLength(IPv6ND_LINK_LAYER_ADDRESS_OPTION_LENGTH);
     }
     auto packet = new Packet("NSpacket");
     Icmpv6::insertCrc(crcMode, ns, packet);
@@ -1892,12 +1918,15 @@ bool Ipv6NeighbourDiscovery::validateNsPacket(Packet *packet, const Ipv6Neighbou
             result = false;
         }
         //there is no source link-layer address option in the message.
-        else if (ns->getSourceLinkLayerAddress().isUnspecified() == false) {
-            EV_WARN << " but Source link-layer address is not empty! NS validation failed!\n";
-            result = false;
+        else {
+            MacAddress sourceLinkLayerAddress;
+            if (auto sla = check_and_cast_nullable<const Ipv6NdSourceLinkLayerAddress*>(ns->getOptions().findOption(IPv6ND_SOURCE_LINK_LAYER_ADDR_OPTION)))
+                sourceLinkLayerAddress = sla->getLinkLayerAddress();
+            if (sourceLinkLayerAddress.isUnspecified() == false) {
+                EV_WARN << " but Source link-layer address is not empty! NS validation failed!\n";
+                result = false;
+            }
         }
-        else
-            EV_WARN << "NS Validation Passed\n";
     }
 
     return result;
@@ -1955,7 +1984,9 @@ void Ipv6NeighbourDiscovery::processNsWithSpecifiedSrcAddr(Packet *packet, const
        for the IP Source Address of the solicitation.*/
 
     //Neighbour Solicitation Information
-    MacAddress nsMacAddr = ns->getSourceLinkLayerAddress();
+    MacAddress nsMacAddr;
+    if (auto sla = check_and_cast_nullable<const Ipv6NdSourceLinkLayerAddress*>(ns->getOptions().findOption(IPv6ND_SOURCE_LINK_LAYER_ADDR_OPTION)))
+        nsMacAddr = sla->getLinkLayerAddress();
     Ipv6Address nsL3SrcAddr = packet->getTag<L3AddressInd>()->getSrcAddress().toIpv6();
 
     int ifID = ie->getInterfaceId();
@@ -1988,7 +2019,6 @@ void Ipv6NeighbourDiscovery::processNsWithSpecifiedSrcAddr(Packet *packet, const
 void Ipv6NeighbourDiscovery::sendSolicitedNa(Packet *packet, const Ipv6NeighbourSolicitation *ns, InterfaceEntry *ie)
 {
     auto na = makeShared<Ipv6NeighbourAdvertisement>();
-    na->setChunkLength(ICMPv6_HEADER_BYTES + B(IPv6_ADDRESS_SIZE));      // FIXME set correct length
 
     //RFC 2461: Section 7.2.4
     /*A node sends a Neighbor Advertisement in response to a valid Neighbor
@@ -2002,8 +2032,10 @@ void Ipv6NeighbourDiscovery::sendSolicitedNa(Packet *packet, const Ipv6Neighbour
        cached value must already be current in order for the solicitation to have
        been received. If the solicitation's IP Destination Address is a multicast
        address, the Target Link-Layer option MUST be included in the advertisement.*/
-    na->setTargetLinkLayerAddress(ie->getMacAddress());    //here, we always include the MAC addr.
-    na->setChunkLength(na->getChunkLength() + IPv6ND_LINK_LAYER_ADDRESS_OPTION_LENGTH);
+    auto tla = new Ipv6NdTargetLinkLayerAddress();
+    tla->setLinkLayerAddress(ie->getMacAddress());
+    na->getOptionsForUpdate().insertOption(tla);
+    na->addChunkLength(IPv6ND_LINK_LAYER_ADDRESS_OPTION_LENGTH);
 
     /*Furthermore, if the node is a router, it MUST set the Router flag to one;
        otherwise it MUST set the flag to zero.*/
@@ -2014,7 +2046,11 @@ void Ipv6NeighbourDiscovery::sendSolicitedNa(Packet *packet, const Ipv6Neighbour
        Link-Layer Address option is not included,*/
     //TODO:ANYCAST will not be implemented here!
 
-    if (ns->getSourceLinkLayerAddress().isUnspecified())
+    MacAddress sourceLinkLayerAddress;
+    if (auto sla = check_and_cast_nullable<const Ipv6NdSourceLinkLayerAddress*>(ns->getOptions().findOption(IPv6ND_SOURCE_LINK_LAYER_ADDR_OPTION)))
+        sourceLinkLayerAddress = sla->getLinkLayerAddress();
+
+    if (sourceLinkLayerAddress.isUnspecified())
         //the Override flag SHOULD be set to zero.
         na->setOverrideFlag(false);
     else
@@ -2086,7 +2122,6 @@ void Ipv6NeighbourDiscovery::sendUnsolicitedNa(InterfaceEntry *ie)
 #else /* WITH_xMIPv6 */
     auto na = makeShared<Ipv6NeighbourAdvertisement>();
     Ipv6Address myIPv6Addr = ie->getProtocolData<Ipv6InterfaceData>()->getPreferredAddress();
-    na->setChunkLength(ICMPv6_HEADER_BYTES + B(IPv6_ADDRESS_SIZE));
 #endif /* WITH_xMIPv6 */
 
     // The Target Address field in the unsolicited advertisement is set to
@@ -2094,8 +2129,10 @@ void Ipv6NeighbourDiscovery::sendUnsolicitedNa(InterfaceEntry *ie)
     // option is filled with the new link-layer address.
 #ifdef WITH_xMIPv6
     na->setTargetAddress(myIPv6Addr);
-    na->setTargetLinkLayerAddress(ie->getMacAddress());
-    na->setChunkLength(na->getChunkLength() + IPv6ND_LINK_LAYER_ADDRESS_OPTION_LENGTH);
+    auto sla = new Ipv6NdTargetLinkLayerAddress();
+    sla->setLinkLayerAddress(ie->getMacAddress());
+    na->getOptionsForUpdate().insertOption(sla);
+    na->addChunkLength(IPv6ND_LINK_LAYER_ADDRESS_OPTION_LENGTH);
 #endif /* WITH_xMIPv6 */
 
     // The Solicited flag MUST be set to zero, in order to avoid confusing
@@ -2230,7 +2267,9 @@ bool Ipv6NeighbourDiscovery::validateNaPacket(Packet *packet, const Ipv6Neighbou
 
 void Ipv6NeighbourDiscovery::processNaForIncompleteNceState(const Ipv6NeighbourAdvertisement *na, Neighbour *nce)
 {
-    MacAddress naMacAddr = na->getTargetLinkLayerAddress();
+    MacAddress naMacAddr;
+    if (auto tla = check_and_cast_nullable<const Ipv6NdTargetLinkLayerAddress*>(na->getOptions().findOption(IPv6ND_TARGET_LINK_LAYER_ADDR_OPTION)))
+        naMacAddr = tla->getLinkLayerAddress();
     bool naRouterFlag = na->getRouterFlag();
     bool naSolicitedFlag = na->getSolicitedFlag();
     const Key *nceKey = nce->nceKey;
@@ -2280,7 +2319,9 @@ void Ipv6NeighbourDiscovery::processNaForOtherNceStates(const Ipv6NeighbourAdver
     bool naRouterFlag = na->getRouterFlag();
     bool naSolicitedFlag = na->getSolicitedFlag();
     bool naOverrideFlag = na->getOverrideFlag();
-    MacAddress naMacAddr = na->getTargetLinkLayerAddress();
+    MacAddress naMacAddr;
+    if (auto tla = check_and_cast_nullable<const Ipv6NdTargetLinkLayerAddress*>(na->getOptions().findOption(IPv6ND_TARGET_LINK_LAYER_ADDR_OPTION)))
+        naMacAddr = tla->getLinkLayerAddress();
     const Key *nceKey = nce->nceKey;
     InterfaceEntry *ie = ift->getInterfaceById(nceKey->interfaceID);
 
@@ -2380,7 +2421,6 @@ void Ipv6NeighbourDiscovery::createAndSendRedirectPacket(InterfaceEntry *ie)
 {
     //Construct a Redirect message
     auto redirect = makeShared<Ipv6Redirect>(); // TODO: "redirectMsg");
-    redirect->setChunkLength(ICMPv6_HEADER_BYTES + B(IPv6_ADDRESS_SIZE) * 2);   // RFC 2461, Section 4.5
 
 //FIXME incomplete code
 #if 0

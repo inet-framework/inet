@@ -152,6 +152,11 @@ class INET_API MacAddress
     bool isMulticast() const  { return getAddressByte(0) & 0x01; };
 
     /**
+     * Returns true if this is a local address (first byte's second less significant bit is 1).
+     */
+    bool isLocal() const  { return getAddressByte(0) & 0x02; };
+
+    /**
      * Returns true if all address bytes are zero.
      */
     bool isUnspecified() const { return address == 0; }

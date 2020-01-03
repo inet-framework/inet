@@ -40,12 +40,7 @@ void Icmpv6::initialize(int stage)
 
     if (stage == INITSTAGE_LOCAL) {
         const char *crcModeString = par("crcMode");
-        if (!strcmp(crcModeString, "declared"))
-            crcMode = CRC_DECLARED_CORRECT;
-        else if (!strcmp(crcModeString, "computed"))
-            crcMode = CRC_COMPUTED;
-        else
-            throw cRuntimeError("unknown CRC mode: '%s'", crcModeString);
+        crcMode = parseCrcMode(crcModeString, false);
     }
     else if (stage == INITSTAGE_NETWORK_LAYER) {
         bool isOperational;
@@ -77,6 +72,9 @@ void Icmpv6::processICMPv6Message(Packet *packet)
     if (!verifyCrc(packet)) {
         // drop packet
         EV_WARN << "incoming ICMP packet has wrong CRC, dropped\n";
+        PacketDropDetails details;
+        details.setReason(INCORRECTLY_RECEIVED);
+        emit(packetDroppedSignal, packet, &details);
         delete packet;
         return;
     }
@@ -169,8 +167,8 @@ void Icmpv6::processEchoRequest(Packet *requestPacket, const Ptr<const Icmpv6Ech
     replyPacket->insertAtFront(replyHeader);
 
     auto addressInd = requestPacket->getTag<L3AddressInd>();
-    replyPacket->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::icmpv6);
-    auto addressReq = replyPacket->addTagIfAbsent<L3AddressReq>();
+    replyPacket->addTag<PacketProtocolTag>()->setProtocol(&Protocol::icmpv6);
+    auto addressReq = replyPacket->addTag<L3AddressReq>();
     addressReq->setDestAddress(addressInd->getSrcAddress());
 
     if (addressInd->getDestAddress().isMulticast()    /*TODO check for anycast too*/) {
@@ -240,8 +238,8 @@ void Icmpv6::sendErrorMessage(Packet *origDatagram, Icmpv6Type type, int code)
     const auto& ipv6Header = origDatagram->peekAtFront<Ipv6Header>();
     if (ipv6Header->getSrcAddress().isUnspecified()) {
         // pretend it came from the IP layer
-        errorMsg->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::icmpv6);
-        errorMsg->addTagIfAbsent<L3AddressInd>()->setSrcAddress(Ipv6Address::LOOPBACK_ADDRESS);    // FIXME maybe use configured loopback address
+        errorMsg->addTag<PacketProtocolTag>()->setProtocol(&Protocol::icmpv6);
+        errorMsg->addTag<L3AddressInd>()->setSrcAddress(Ipv6Address::LOOPBACK_ADDRESS);    // FIXME maybe use configured loopback address
 
         // then process it locally
         processICMPv6Message(errorMsg);
@@ -365,10 +363,8 @@ void Icmpv6::insertCrc(CrcMode crcMode, const Ptr<Icmpv6Header>& icmpHeader, Pac
             icmpHeader->setChksum(0x0000); // make sure that the CRC is 0 in the header before computing the CRC
             MemoryOutputStream icmpStream;
             Chunk::serialize(icmpStream, icmpHeader);
-            if (packet->getByteLength() > 0) {
-                auto icmpDataBytes = packet->peekDataAsBytes();
-                Chunk::serialize(icmpStream, icmpDataBytes);
-            }
+            if (packet->getByteLength() > 0)
+                Chunk::serialize(icmpStream, packet->peekDataAsBytes());
             uint16_t crc = TcpIpChecksum::checksum(icmpStream.getData());
             icmpHeader->setChksum(crc);
             break;

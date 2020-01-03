@@ -22,6 +22,7 @@ import inet.common.misc.NetAnimTrace;
 import inet.common.scenario.ScenarioManager;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.StandardHost;
+import inet.visualizer.integrated.IntegratedVisualizer;
 import ned.DatarateChannel;
 
 
@@ -34,6 +35,9 @@ network ClientServerWithSM
             delay = 0.1us;
         }
     submodules:
+        visualizer: IntegratedVisualizer {
+            @display("p=50,50");
+        }
         client1: StandardHost {
             parameters:
                 @display("p=250,200;i=device/pc3");

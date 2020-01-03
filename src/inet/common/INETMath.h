@@ -141,10 +141,14 @@ inline bool close(double one, double two) { return fabs(one - two) < EPSILON; }
  */
 inline int stepfunction(double i) { return (i > EPSILON) ? 1 : close(i, 0) ? 0 : -1; };
 
+inline double step(double a, double b) { return b < a ? 0.0 : 1.0; };
+
+inline double clamp(double v, double l, double u) { return v < l ? l : v > u ? u : v; }
+
 /**
- * Returns 1 if the parameter is greater or equal to zero, -1 otherwise
+ * Returns 1 if the parameter is greater than zero, -1 if less than zero, 0 otherwise.
  */
-inline int sign(double i) { return (i >= 0) ? 1 : -1; };
+inline int sign(double v) { return (0 < v) - (v < 0); };
 
 /**
  * Returns an integer that corresponds to rounded double parameter
@@ -157,11 +161,6 @@ inline int round(double d) { return static_cast<int>(ceil(d - 0.5)); }
 inline double floorToZero(double d) { return (d >= 0.0) ? floor(d) : ceil(d); }
 
 /**
- * Returns the greater of the given parameters
- */
-inline double max(double a, double b) { return (a < b) ? b : a; }
-
-/**
  * Converts a dB value to fraction.
  */
 inline double dB2fraction(double dB) { return pow(10.0, dB / 10.0); }
@@ -172,14 +171,24 @@ inline double dB2fraction(double dB) { return pow(10.0, dB / 10.0); }
 inline double fraction2dB(double fraction) { return 10 * log10(fraction); }
 
 /**
- * Converts a dBm value into milliwatts
+ * Converts a dBmW value to mW.
  */
-inline double dBm2mW(double dBm) { return pow(10.0, dBm / 10.0); }
+inline double dBmW2mW(double dBm) { return pow(10.0, dBm / 10.0); }
 
 /**
- * Convert a mW value to dBm.
+ * Convert a mW value to dBmW.
  */
-inline double mW2dBm(double mW) { return 10 * log10(mW); }
+inline double mW2dBmW(double mW) { return 10.0 * log10(mW); }
+
+/**
+ * Converts a dBmW/MHz value into W/Hz.
+ */
+inline double dBmWpMHz2WpHz(double dBmWpMHz) { return pow(10.0, dBmWpMHz / 10.0) / 1000000.0 / 1000.0; }
+
+/**
+ * Convert a W/Hz value to dBmW/MHz.
+ */
+inline double wpHz2dBmWpMHz(double wpHz) { return 10.0 * log10(wpHz * 1000000.0 * 1000.0); }
 
 /**
  * Convert a degree value to radian.

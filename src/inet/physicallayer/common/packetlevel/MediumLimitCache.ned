@@ -22,7 +22,7 @@ import inet.physicallayer.contract.packetlevel.IMediumLimitCache;
 module MediumLimitCache like IMediumLimitCache
 {
     parameters:
-        double carrierFrequency @unit(Hz) = default(nan Hz);       // TODO: rename to maxRangeCarrierFrequency?
+        double centerFrequency @unit(Hz) = default(nan Hz);       // TODO: rename to maxRangeCenterFrequency?
         double maxSpeed @unit(mps) = default(nan mps);             // maxium speed on the medium, NaN means medium computes using mobility models
         double maxTransmissionPower @unit(W) = default(nan W);     // TODO: @unit(W) + dBm/dBW <--> W
         double minInterferencePower @unit(dBm) = default(nan dBm); // TODO: @unit(W) + dBm/dBW <--> W

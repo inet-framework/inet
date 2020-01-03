@@ -6,7 +6,7 @@ The client sends an 5000 bytes in an UDP datagram to the server.
 It is checked that the server receives the datagram.
 
 %#--------------------------------------------------------------------------------------------------------------
-%inifile: {}.ini
+%inifile: omnetpp.ini
 [General]
 ned-path = ../../../../examples;../../../../src
 network = inet.examples.inet.nclients.NClients
@@ -48,7 +48,7 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 This fragment completes the datagram.
 %#--------------------------------------------------------------------------------------------------------------
 %contains: stdout
-Received packet: (inet::Packet)UdpBasicAppData-0 (5000 bytes)
+Received packet: (inet::Packet)UdpBasicAppData-0 (5000 B)
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout
 undisposed object:

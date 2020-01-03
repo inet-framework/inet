@@ -44,6 +44,12 @@ class INET_API PacketDissector
     {
       public:
         /**
+         * True means the packet dissector should recursively process the PDU.
+         * When false, start and end notifications and one visit chunk are still generated.
+         */
+        virtual bool shouldDissectProtocolDataUnit(const Protocol *protocol) = 0;
+
+        /**
          * Notifies about the start of a new protocol data unit (PDU).
          */
         virtual void startProtocolDataUnit(const Protocol *protocol) = 0;
@@ -103,6 +109,21 @@ class INET_API PacketDissector
         void insert(const Ptr<const Chunk>& chunk) { chunks.push_back(chunk); }
     };
 
+    class INET_API ChunkBuilder : public PacketDissector::ICallback
+    {
+      protected:
+        Ptr<const Chunk> content;
+
+      public:
+        const Ptr<const Chunk> getContent() { return content; }
+
+        virtual bool shouldDissectProtocolDataUnit(const Protocol *protocol) override { return true; }
+        virtual void startProtocolDataUnit(const Protocol *protocol) override { }
+        virtual void endProtocolDataUnit(const Protocol *protocol) override { }
+        virtual void markIncorrect() override { }
+        virtual void visitChunk(const Ptr<const Chunk>& chunk, const Protocol *protocol) override;
+    };
+
     class INET_API PduTreeBuilder : public PacketDissector::ICallback
     {
       protected:
@@ -118,6 +139,7 @@ class INET_API PacketDissector
         const Ptr<ProtocolDataUnit>& getTopLevelPdu() const { return topLevelPdu; }
         const Ptr<Chunk>& getRemainingJunk() const { return remainingJunk; }
 
+        virtual bool shouldDissectProtocolDataUnit(const Protocol *protocol) override { return true; }
         virtual void startProtocolDataUnit(const Protocol *protocol) override;
         virtual void endProtocolDataUnit(const Protocol *protocol) override;
         virtual void markIncorrect() override;

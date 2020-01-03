@@ -31,7 +31,8 @@ void MplsProtocolDissector::dissect(Packet *packet, const Protocol *protocol, IC
     auto header = packet->popAtFront<MplsHeader>();
     callback.startProtocolDataUnit(&Protocol::mpls);
     callback.visitChunk(header, &Protocol::mpls);
-    callback.dissectPacket(packet, &Protocol::ipv4);
+    const Protocol *encapsulatedProtocol = header->getS() ? &Protocol::ipv4 : &Protocol::mpls;
+    callback.dissectPacket(packet, encapsulatedProtocol);
     callback.endProtocolDataUnit(&Protocol::mpls);
 }
 

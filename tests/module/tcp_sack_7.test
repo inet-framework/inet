@@ -1,0 +1,94 @@
+%description:
+TCP SACK test
+ Testing correct closure of TCP connection when SACK is enabled.
+
+ In this example, we assume that the data receiver has first received seven segments of
+ 500 bytes each, and has sent an acknowledgement with the cumulative
+ acknowledgement field set to 3501 (assuming the first sequence number
+ is one). The congestion window size at sender's side is 8 segments (i.e. 4000B)
+
+        Transmitted      Received    ACK Sent
+        Segment          Segment     (Including SACK Blocks)
+
+        [3501-4001)      (data packet dropped)
+        [4001-4501)      (data packet dropped)
+        [4501-5001)      [4501-5001)   3501, SACK=4501-5001
+        [5001-5501)      [5001-5501)   3501, SACK=4501-5501
+        [5501-6001)      [5501-6001)   3501, SACK=4501-6001
+        [6001-6501)      [5001-5501)   3501, SACK=4501-6501
+        [6501-7001)      [6001-6501)   3501, SACK=4501-7001
+ 		     [7001-7501)		    [7001-7501)   3501, SACK=4501-7501
+
+   Because of two consecutive lost data packets, the sender receives three duplicate acks,
+   triggering Fast Retransmirt + Fast Recovery. The congestion window is now reduced to 7
+   segments (3500B).
+
+ 		(Re-)Transmitted      	Received       ACK Sent
+        Segment           Segment        (Including SACK Blocks)
+ 		(R) [3501-4001)     	[3501-4001)   4001, SACK=3501-4001 SACK=4501-5001
+   (R) [4001-4501)  	   [4001-4501)   7501
+   [7501-8001)			  	    [7501-8001)   8001
+ 		[8001-8201)+FIN		  	 [8001-8202)   8202
+
+ The last segment [8001-8201), which is sent for the first time during Fast Recovery,
+ contains 200 bytes of data and 1 byte for the FIN.
+
+
+%inifile: omnetpp.ini
+[General]
+ned-path = .;../../../../src;../../lib
+
+#omnetpp 5.0 - 5.1 compatibility:
+eventlog-file = "${resultdir}/${configname}-${runnumber}.elog"
+output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
+output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
+snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
+
+network = inet.test.moduletest.lib.TcpTestNet1
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+cmdenv-log-prefix="[%c]: "
+
+*.testing=false
+
+# for scriptabletester
+*.tcptester.script="A9 delete; A10 delete"
+
+# client test apps
+*.cli_app.active = true
+*.cli_app.localAddress="10.0.0.1"
+*.cli_app.localPort=1000
+*.cli_app.connectAddress="10.0.0.2"
+*.cli_app.connectPort=2000
+*.cli_app.active=true
+*.cli_app.tOpen=0s
+*.cli_app.tSend=0s
+*.cli_app.sendBytes = 8200B
+*.cli_app.sendScript=""
+*.cli_app.tClose=0.005s
+
+# server test apps
+*.srv_app.active=false
+*.srv_app.localAddress="10.0.0.2"
+*.srv_app.localPort=2000
+*.srv_app.connectAddress="10.0.0.1"
+*.srv_app.connectPort=1000
+*.srv_app.tOpen=0s
+*.srv_app.tSend=-1s
+*.srv_app.sendBytes=0B
+*.srv_app.sendScript=""
+*.srv_app.tClose=-1s
+
+# tcp settings
+*.*_tcp.advertisedWindow = 10000                       # in bytes, corresponds with the maximal receiver buffer capacity (Note: normally, NIC queues should be at least this size)
+*.*_tcp.delayedAcksEnabled = false                   # delayed ACK algorithm (RFC 1122) enabled/disabled
+*.*_tcp.nagleEnabled = false                          # Nagle's algorithm (RFC 896) enabled/disabled
+*.*_tcp.limitedTransmitEnabled = false                # Limited Transmit algorithm (RFC 3042) enabled/disabled (can be used for TcpReno/TcpTahoe/TcpNewReno/TcpNoCongestionControl)
+*.*_tcp.increasedIWEnabled = false                    # Increased Initial Window (RFC 3390) enabled/disabled
+*.*_tcp.sackSupport = true                            # Selective Acknowledgment (RFC 2018, 2883, 3517) support (header option) (SACK will be enabled for a connection if both endpoints support it)
+*.*_tcp.windowScalingSupport = false                  # Window Scale (RFC 1323) support (header option) (WS will be enabled for a connection if both endpoints support it)
+*.*_tcp.timestampSupport = false                     # Timestamps (RFC 1323) support (header option) (TS will be enabled for a connection if both endpoints support it)
+*.*_tcp.mss = 500                                     # Maximum Segment Size (RFC 793) (header option)
+*.*_tcp.tcpAlgorithmClass = "TcpReno"                 # TcpReno/TcpTahoe/TcpNewReno/TcpNoCongestionControl/DumbTcp
+*.*_tcp.recordStats = true                            # recording of seqNum etc. into output vectors enabled/disabled

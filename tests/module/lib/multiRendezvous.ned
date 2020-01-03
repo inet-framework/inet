@@ -1,3 +1,5 @@
+package inet.test.moduletest.lib;
+
 import inet.node.inet.StandardHost;
 import inet.transportlayer.sctp.SctpNatRouter;
 import inet.node.inet.Router;

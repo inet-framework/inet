@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scave:Analysis xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:scave="http://www.omnetpp.org/omnetpp/scave">
+  <inputs>
+    <inputs name="/inet/showcases/wireless/fragmentation/results/DCFnofrag*.*"/>
+    <inputs name="/inet/showcases/wireless/fragmentation/results/DCFfrag-#*.*"/>
+    <inputs name="/inet/showcases/wireless/fragmentation/results/HCFfrag-#*.*"/>
+    <inputs name="/inet/showcases/wireless/fragmentation/results/HCFfragblockack-#*.*"/>
+  </inputs>
+  <datasets>
+    <datasets name="Throughput">
+      <items xsi:type="scave:Add" filterPattern="module(*.wifiHost2.app[0]) AND name(throughput:vector)" type="VECTOR"/>
+      <items xsi:type="scave:ComputeScalar" scalarName="avgthroughput" valueExpr="mean('throughput:vector')" moduleExpr="FragmentationShowcase.wifiHost2.app[0]" groupByExpr=""/>
+      <items xsi:type="scave:BarChart"/>
+      <items xsi:type="scave:Apply" operation="divide-by">
+        <params name="a" value="1000000"/>
+      </items>
+      <items xsi:type="scave:LineChart" name="Throughput" lineNameFormat="">
+        <properties name="Graph.Title" value="Throughput over time in various operating modes, 2000-byte packets and 250-byte fragmentation threshold"/>
+        <properties name="X.Axis.Title" value="Time [s]"/>
+        <properties name="Y.Axis.Title" value="Throughput [Mbps]"/>
+        <properties name="Legend.Display" value="true"/>
+        <properties name="Legend.Position" value="Inside"/>
+        <properties name="Legend.Anchoring" value="NorthEast"/>
+        <properties name="Line.Name/DCF-0-20181123-11:15:03-12015 DCF" value="DCF"/>
+        <properties name="Line.Name/DCFfrag-0-20181123-11:15:03-12016 DCFfrag" value="DCFfrag"/>
+        <properties name="Line.Name/HCFfrag-0-20181123-11:15:03-12017 HCFfrag" value="HCFfrag"/>
+        <properties name="Line.Name/DCF-0-20181123-11:31:24-12394 DCF" value="DCF"/>
+        <properties name="Line.Name/DCFfrag-0-20181123-11:31:24-12396 DCFfrag" value="DCFfrag"/>
+        <properties name="Line.Name/HCFfrag-0-20181123-11:31:24-12397 HCFfrag" value="HCFfrag"/>
+        <properties name="Line.Name/DCFfrag-0-20181206-15:14:53-8809 DCFfrag" value="DCFfrag"/>
+        <properties name="Line.Name/DCFnofrag-0-20181206-15:14:53-8816 DCFnofrag" value="DCFnofrag"/>
+        <properties name="Line.Name/HCFfrag-0-20181206-15:14:53-8815 HCFfrag" value="HCFfrag"/>
+        <properties name="Line.Name/HCFfragblockack-0-20181206-15:14:53-8807 HCFfragblockack" value="HCFfragblockack"/>
+        <properties name="Line.Name/DCFfrag-0-20190107-15:33:35-27593 DCFfrag" value="DCFfrag"/>
+        <properties name="Line.Name/DCFnofrag-0-20190107-15:33:35-27590 DCFnofrag" value="DCFnofrag"/>
+        <properties name="Line.Name/HCFfrag-0-20190107-15:33:35-27591 HCFfrag" value="HCFfrag"/>
+        <properties name="Line.Name/HCFfragblockack-0-20190107-15:33:35-27592 HCFfragblockack" value="HCFfragblockack"/>
+        <properties name="Line.Name/DCFfrag-0-20190702-11:33:44-15395 DCFfrag" value="DCFfrag"/>
+        <properties name="Line.Name/DCFnofrag-0-20190702-11:33:44-15392 DCFnofrag" value="DCFnofrag"/>
+        <properties name="Line.Name/HCFfrag-0-20190702-11:33:44-15393 HCFfrag" value="HCFfrag"/>
+        <properties name="Line.Name/HCFfragblockack-0-20190702-11:33:44-15394 HCFfragblockack" value="HCFfragblockack"/>
+      </items>
+    </datasets>
+    <datasets name="Number of packets received">
+      <items xsi:type="scave:Add" filterPattern="module(FragmentationShowcase.wifiHost2.app[0]) AND name(packetReceived:count)"/>
+      <items xsi:type="scave:BarChart" name="Number of packets received">
+        <properties name="Graph.Title" value="Number of packets received, 2000-byte packets and 250-byte fragmentation threshold"/>
+      </items>
+    </datasets>
+  </datasets>
+  <chartSheets>
+    <chartSheets name="default" charts="//@datasets/@datasets.1/@items.1 //@datasets/@datasets.0/@items.4"/>
+  </chartSheets>
+</scave:Analysis>

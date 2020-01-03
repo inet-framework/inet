@@ -26,7 +26,8 @@ namespace physicallayer {
 ScalarSnir::ScalarSnir(const IReception *reception, const INoise *noise) :
     SnirBase(reception, noise),
     minSNIR(NaN),
-    maxSNIR(NaN)
+    maxSNIR(NaN),
+    meanSNIR(NaN)
 {
 }
 
@@ -52,6 +53,12 @@ double ScalarSnir::computeMax() const
     return unit(scalarSignalAnalogModel->getPower() / scalarNoise->computeMinPower(reception->getStartTime(), reception->getEndTime())).get();
 }
 
+double ScalarSnir::computeMean() const
+{
+    // TODO:
+    return NaN;
+}
+
 double ScalarSnir::getMin() const
 {
     if (std::isnan(minSNIR))
@@ -64,6 +71,13 @@ double ScalarSnir::getMax() const
     if (std::isnan(maxSNIR))
         maxSNIR = computeMax();
     return maxSNIR;
+}
+
+double ScalarSnir::getMean() const
+{
+    if (std::isnan(meanSNIR))
+        meanSNIR = computeMean();
+    return meanSNIR;
 }
 
 } // namespace physicallayer

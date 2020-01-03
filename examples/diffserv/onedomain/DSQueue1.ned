@@ -18,52 +18,38 @@
 
 package inet.examples.diffserv.onedomain;
 
-import inet.common.queue.DropTailQueue;
-import inet.common.queue.IOutputQueue;
-import inet.common.queue.PriorityScheduler;
-import inet.common.queue.WrrScheduler;
 import inet.networklayer.diffserv.BehaviorAggregateClassifier;
-
+import inet.queueing.queue.CompoundPacketQueue;
+import inet.queueing.queue.DropTailQueue;
+import inet.queueing.scheduler.PriorityScheduler;
+import inet.queueing.scheduler.WrrScheduler;
 
 //
 // Diffserv Queue used in Experiment 1.1 - 1.6 and 5.1.
 //
-module DSQueue1 like IOutputQueue
+module DSQueue1 extends CompoundPacketQueue
 {
-    parameters:
-        int frameCapacity = default(100);
-
-    gates:
-        input in;
-        output out;
-
     submodules:
         classifier: BehaviorAggregateClassifier {
             dscps = "EF AF11 AF21 AF31 AF41";
             @display("p=100,350");
         }
         efQueue: DropTailQueue {
-            frameCapacity = frameCapacity;
             @display("p=250,100");
         }
         af1xQueue: DropTailQueue {
-            frameCapacity = frameCapacity;
             @display("p=250,200");
         }
         af2xQueue: DropTailQueue {
-            frameCapacity = frameCapacity;
             @display("p=250,300");
         }
         af3xQueue: DropTailQueue {
-            frameCapacity = frameCapacity;
             @display("p=250,400");
         }
         af4xQueue: DropTailQueue {
-            frameCapacity = frameCapacity;
             @display("p=250,500");
         }
         beQueue: DropTailQueue {
-            frameCapacity = frameCapacity;
             @display("p=250,600");
         }
         wrr: WrrScheduler {
@@ -75,11 +61,11 @@ module DSQueue1 like IOutputQueue
 
     connections:
         in --> classifier.in;
-        classifier.outs++ --> efQueue.in;
-        classifier.outs++ --> af1xQueue.in;
-        classifier.outs++ --> af2xQueue.in;
-        classifier.outs++ --> af3xQueue.in;
-        classifier.outs++ --> af4xQueue.in;
+        classifier.out++ --> efQueue.in;
+        classifier.out++ --> af1xQueue.in;
+        classifier.out++ --> af2xQueue.in;
+        classifier.out++ --> af3xQueue.in;
+        classifier.out++ --> af4xQueue.in;
         classifier.defaultOut --> beQueue.in;
 
         af1xQueue.out --> wrr.in++;

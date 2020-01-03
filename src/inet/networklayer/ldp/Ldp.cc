@@ -171,7 +171,9 @@ void Ldp::handleMessageWhenUp(cMessage *msg)
             processHelloTimeout(msg);
         }
         else {
-            processNOTIFICATION(check_and_cast<Packet *>(msg));
+            auto ldpPacket = check_and_cast<Packet *>(msg)->popAtFront<LdpPacket>();
+            processNOTIFICATION(ldpPacket, /*rescheduled*/ true);
+            delete msg;
         }
     }
     else {
@@ -668,13 +670,16 @@ void Ldp::socketAvailable(TcpSocket *socketocket, TcpAvailableInfo *availableInf
     socketocket->accept(availableInfo->getNewSocketId());
 }
 
-void Ldp::socketDataArrived(TcpSocket *socket, Packet *msg, bool)
+void Ldp::socketDataArrived(TcpSocket *socket)
 {
     peer_info& peer = myPeers[(uintptr_t)socket->getUserData()];
     EV_INFO << "Message arrived over TCP from peer " << peer.peerIP << "\n";
 
-    delete msg->removeControlInfo();
-    processLDPPacketFromTCP(msg);
+    auto queue = socket->getReceiveQueue();
+    while (queue->has<LdpPacket>()) {
+        auto header = queue->pop<LdpPacket>();
+        processLdpPacketFromTcp(header);
+    }
 }
 
 void Ldp::socketPeerClosed(TcpSocket *socket)
@@ -714,9 +719,8 @@ void Ldp::socketFailure(TcpSocket *socket, int code)
     // FIXME what now? reconnect after a delay?
 }
 
-void Ldp::processLDPPacketFromTCP(Packet *packet)
+void Ldp::processLdpPacketFromTcp(Ptr<const LdpPacket>& ldpPacket)
 {
-    const auto& ldpPacket = packet->peekAtFront<LdpPacket>();
     switch (ldpPacket->getType()) {
         case HELLO:
             throw cRuntimeError("Received LDP HELLO over TCP (should arrive over UDP)");
@@ -733,23 +737,23 @@ void Ldp::processLDPPacketFromTCP(Packet *packet)
             break;
 
         case LABEL_MAPPING:
-            processLABEL_MAPPING(packet);
+            processLABEL_MAPPING(ldpPacket);
             break;
 
         case LABEL_REQUEST:
-            processLABEL_REQUEST(packet);
+            processLABEL_REQUEST(ldpPacket);
             break;
 
         case LABEL_WITHDRAW:
-            processLABEL_WITHDRAW(packet);
+            processLABEL_WITHDRAW(ldpPacket);
             break;
 
         case LABEL_RELEASE:
-            processLABEL_RELEASE(packet);
+            processLABEL_RELEASE(ldpPacket);
             break;
 
         case NOTIFICATION:
-            processNOTIFICATION(packet);
+            processNOTIFICATION(ldpPacket, /*rescheduled*/ false);
             break;
 
         default:
@@ -796,7 +800,9 @@ Ipv4Address Ldp::findPeerAddrFromInterface(std::string interfaceName)
 {
     int i = 0;
     int k = 0;
-    InterfaceEntry *ie = ift->getInterfaceByName(interfaceName.c_str());
+    InterfaceEntry *ie = ift->findInterfaceByName(interfaceName.c_str());
+    if (ie == nullptr)
+        return Ipv4Address();
 
     const Ipv4Route *anEntry;
 
@@ -916,9 +922,9 @@ void Ldp::sendMapping(int type, Ipv4Address dest, int label, Ipv4Address addr, i
     sendToPeer(dest, packet);
 }
 
-void Ldp::processNOTIFICATION(Packet *pk)
+void Ldp::processNOTIFICATION(Ptr<const LdpPacket>& ldpPacket, bool rescheduled)
 {
-    const auto& packet = pk->peekAtFront<LdpNotify>();
+    const auto& packet = CHK(dynamicPtrCast<const LdpNotify>(ldpPacket));
     FecTlv fec = packet->getFec();
     Ipv4Address srcAddr = packet->getSenderAddress();
     int status = packet->getStatus();
@@ -926,7 +932,7 @@ void Ldp::processNOTIFICATION(Packet *pk)
     // XXX FIXME NO_ROUTE processing should probably be split into two functions,
     // this is not the cleanest thing I ever wrote :)   --Vojta
 
-    if (pk->isSelfMessage()) {
+    if (rescheduled) {
         // re-scheduled by ourselves
         EV_INFO << "notification retry for peer=" << srcAddr << " fec=" << fec << " status=" << status << endl;
     }
@@ -942,9 +948,9 @@ void Ldp::processNOTIFICATION(Packet *pk)
             auto it = findFecEntry(fecList, fec.addr, fec.length);
             if (it != fecList.end()) {
                 if (it->nextHop == srcAddr) {
-                    if (!pk->isSelfMessage()) {
+                    if (!rescheduled) {
                         EV_DETAIL << "we are still interesed in this mapping, we will retry later" << endl;
-
+                        auto pk = new Packet(0, ldpPacket);
                         scheduleAt(simTime() + 1.0    /* XXX FIXME */, pk);
                         return;
                     }
@@ -967,13 +973,11 @@ void Ldp::processNOTIFICATION(Packet *pk)
             ASSERT(false);
             break;
     }
-
-    delete pk;
 }
 
-void Ldp::processLABEL_REQUEST(Packet *pk)
+void Ldp::processLABEL_REQUEST(Ptr<const LdpPacket>& ldpPacket)
 {
-    const auto& packet = pk->peekAtFront<LdpLabelRequest>();
+    const auto& packet = CHK(dynamicPtrCast<const LdpLabelRequest>(ldpPacket));
     FecTlv fec = packet->getFec();
     Ipv4Address srcAddr = packet->getSenderAddress();
 
@@ -984,8 +988,6 @@ void Ldp::processLABEL_REQUEST(Packet *pk)
         EV_DETAIL << "FEC not recognized, sending back No route message" << endl;
 
         sendNotify(NO_ROUTE, srcAddr, fec.addr, fec.length);
-
-        delete pk;
         return;
     }
 
@@ -1058,13 +1060,11 @@ void Ldp::processLABEL_REQUEST(Packet *pk)
         newItem.peer = srcAddr;
         pending.push_back(newItem);
     }
-
-    delete pk;
 }
 
-void Ldp::processLABEL_RELEASE(Packet *pk)
+void Ldp::processLABEL_RELEASE(Ptr<const LdpPacket>& ldpPacket)
 {
-    const auto& packet = pk->peekAtFront<LdpLabelMapping>();
+    const auto& packet = CHK(dynamicPtrCast<const LdpLabelMapping>(ldpPacket));
     FecTlv fec = packet->getFec();
     int label = packet->getLabel();
     Ipv4Address fromIP = packet->getSenderAddress();
@@ -1078,7 +1078,6 @@ void Ldp::processLABEL_RELEASE(Packet *pk)
     auto it = findFecEntry(fecList, fec.addr, fec.length);
     if (it == fecList.end()) {
         EV_INFO << "FEC no longer recognized here, ignoring" << endl;
-        delete pk;
         return;
     }
 
@@ -1088,7 +1087,6 @@ void Ldp::processLABEL_RELEASE(Packet *pk)
         // neighbour withdrew its mapping. we sent withdraw upstream as well and
         // this is upstream's response
         EV_INFO << "mapping not found among sent mappings, ignoring" << endl;
-        delete pk;
         return;
     }
 
@@ -1097,13 +1095,11 @@ void Ldp::processLABEL_RELEASE(Packet *pk)
 
     EV_DETAIL << "removing label from list of sent mappings" << endl;
     fecUp.erase(uit);
-
-    delete pk;
 }
 
-void Ldp::processLABEL_WITHDRAW(Packet *pk)
+void Ldp::processLABEL_WITHDRAW(Ptr<const LdpPacket>& ldpPacket)
 {
-    const auto& ldpLabelMapping = pk->peekAtFront<LdpLabelMapping>();
+    const auto& ldpLabelMapping = CHK(dynamicPtrCast<const LdpLabelMapping>(ldpPacket));
     FecTlv fec = ldpLabelMapping->getFec();
     int label = ldpLabelMapping->getLabel();
     Ipv4Address fromIP = ldpLabelMapping->getSenderAddress();
@@ -1117,7 +1113,6 @@ void Ldp::processLABEL_WITHDRAW(Packet *pk)
     auto it = findFecEntry(fecList, fec.addr, fec.length);
     if (it == fecList.end()) {
         EV_INFO << "matching FEC not found, ignoring withdraw message" << endl;
-        delete pk;
         return;
     }
 
@@ -1125,7 +1120,6 @@ void Ldp::processLABEL_WITHDRAW(Packet *pk)
 
     if (dit == fecDown.end() || label != dit->label) {
         EV_INFO << "matching mapping not found, ignoring withdraw message" << endl;
-        delete pk;
         return;
     }
 
@@ -1136,23 +1130,19 @@ void Ldp::processLABEL_WITHDRAW(Packet *pk)
     fecDown.erase(dit);
 
     EV_INFO << "sending back relase message" << endl;
-    pk->trimFront();
-    auto reply = pk->removeAtFront<LdpLabelMapping>();
-    pk->removeAll();
-    pk->clearTags();
+    auto reply = makeShared<LdpLabelMapping>(*ldpLabelMapping.get());
     reply->setType(LABEL_RELEASE);
-    pk->insertAtFront(reply);
+    auto pk = new Packet("LDP_RELEASE", reply);
     // pk->addTag<PacketProtocolTag>()->setProtocol(&Protocol::ldp) //FIXME
-
     // send msg to peer over TCP
     sendToPeer(fromIP, pk);
 
     updateFecListEntry(*it);
 }
 
-void Ldp::processLABEL_MAPPING(Packet *pk)
+void Ldp::processLABEL_MAPPING(Ptr<const LdpPacket>& ldpPacket)
 {
-    const auto& packet = pk->peekAtFront<LdpLabelMapping>();
+    const auto& packet = CHK(dynamicPtrCast<const LdpLabelMapping>(ldpPacket));
     FecTlv fec = packet->getFec();
     int label = packet->getLabel();
     Ipv4Address fromIP = packet->getSenderAddress();
@@ -1205,8 +1195,6 @@ void Ldp::processLABEL_MAPPING(Packet *pk)
         // remove request from the list
         pit = pending.erase(pit);
     }
-
-    delete pk;
 }
 
 int Ldp::findPeer(Ipv4Address peerAddr)

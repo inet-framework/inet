@@ -15,6 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+package inet.test.moduletest.lib;
+
 //
 // An ISriptable module for dumping routing tables into a file.
 //

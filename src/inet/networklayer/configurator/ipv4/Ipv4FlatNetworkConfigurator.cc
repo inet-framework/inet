@@ -182,7 +182,7 @@ void Ipv4FlatNetworkConfigurator::fillRoutingTables(cTopology& topo, NodeInfoVec
             IInterfaceTable *ift = nodeInfo[j].ift;
 
             int outputGateId = atNode->getPath(0)->getLocalGate()->getId();
-            InterfaceEntry *ie = ift->getInterfaceByNodeOutputGateId(outputGateId);
+            InterfaceEntry *ie = ift->findInterfaceByNodeOutputGateId(outputGateId);
             if (!ie)
                 throw cRuntimeError("%s has no interface for output gate id %d", ift->getFullPath().c_str(), outputGateId);
 

@@ -19,6 +19,7 @@ class L3AddressTagBase extends TagBase
 //
 class L3AddressReq extends L3AddressTagBase
 {
+    bool nonLocalSrcAddress = false;
 }
 
 //

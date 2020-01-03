@@ -35,14 +35,14 @@ package inet.visualizer.base;
 // visualizer receives a packetReceivedFromLower from a corresponding protocol
 // module, then it adds the node to the intermediate nodes of the route. After
 // a certain amount of time the route becomes inactive unless it is reinforced
-// by another packet. 
+// by another packet.
 //
 // The format string can contain the following directives:
 //  - %n packet name
 //  - %c packet class
 //
-// @see ~NetworkRouteCanvasVisualizer, ~NetworkRouteOsgVisualizer, ~INetworkRouteVisualizer
-// @see ~TransportRouteCanvasVisualizer, ~TransportRouteOsgVisualizer, ~ITransportRouteVisualizer
+// @see ~NetworkRouteCanvasVisualizer, ~NetworkRouteOsgVisualizer, ~INetworkRouteVisualizer, 
+// ~TransportRouteCanvasVisualizer, ~TransportRouteOsgVisualizer, ~ITransportRouteVisualizer
 //
 simple PathVisualizerBase extends VisualizerBase
 {

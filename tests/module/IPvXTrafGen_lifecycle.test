@@ -38,16 +38,16 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
 **.recip.trafGen.protocol = 150
 
-**.router.ppp[*].frameCapacity = 300
-**.router.ppp[*].bitCapacity = 0
+**.router.ppp[*].queue.packetCapacity = 300
 
 # NIC configuration
-**.ppp[*].queue.typename = "DropTailQueue" # in routers
-**.ppp[*].queue.frameCapacity = 10  # in routers
+**.ppp[*].ppp.queue.typename = "DropTailQueue" # in routers
+**.ppp[*].ppp.queue.packetCapacity = 10  # in routers
 
 %#--------------------------------------------------------------------------------------------------------------
 %file: test.ned
 
+import inet.test.moduletest.lib.*;
 import inet.applications.generic.IIpvxTrafficGenerator;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.networklayer.configurator.ipv4.Ipv4NodeConfigurator;

@@ -1,0 +1,26 @@
+#! /bin/sh
+
+cleanup() {
+    # remove delay, packet loss, etc. from the loopback interface
+    sudo tc qdisc del dev lo root
+}
+
+sigcleanup() {
+    cleanup; trap '' EXIT ; exit 1
+}
+
+# auto-cleanup on exit and when interrupted
+trap cleanup EXIT
+trap sigcleanup INT QUIT TERM
+
+# add delay, jitter, and packet loss/corruption to packets going through the loopback interface
+cleanup 2>/dev/null
+sudo tc qdisc add dev lo root netem loss 1% corrupt 5% delay 10ms 1ms || exit 1
+
+# run the simulations
+inet -s -u Cmdenv -c VoipReceiverLoopback &
+sleep 1
+inet -s -u Cmdenv -c VoipSenderLoopback || exit 1
+wait
+
+

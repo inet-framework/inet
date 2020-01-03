@@ -41,29 +41,29 @@
 
 namespace inet {
 
-IntervalTreeNode::IntervalTreeNode()
+IntervalTree::Node::Node()
 {
 }
 
-IntervalTreeNode::IntervalTreeNode(const Interval* new_interval) :
+IntervalTree::Node::Node(const IntervalTree::Interval* new_interval) :
     stored_interval(new_interval), key(new_interval->low), high(new_interval->high), max_high(high)
 {
 }
 
-IntervalTreeNode::~IntervalTreeNode()
+IntervalTree::Node::~Node()
 {
     delete stored_interval;
 }
 
 IntervalTree::IntervalTree()
 {
-    nil = new IntervalTreeNode;
+    nil = new Node;
     nil->left = nil->right = nil->parent = nil;
     nil->red = false;
     nil->key = nil->high = nil->max_high = -SimTime::getMaxTime(); //-std::numeric_limits<double>::max();
     nil->stored_interval = nullptr;
 
-    root = new IntervalTreeNode;
+    root = new Node;
     root->parent = root->left = root->right = nil;
     root->key = root->high = root->max_high = SimTime::getMaxTime(); // std::numeric_limits<double>::max();
     root->red = false;
@@ -78,8 +78,8 @@ IntervalTree::IntervalTree()
 
 IntervalTree::~IntervalTree()
 {
-    IntervalTreeNode* x = root->left;
-    std::deque<IntervalTreeNode*> nodes_to_free;
+    Node* x = root->left;
+    std::deque<Node*> nodes_to_free;
 
     if (x != nil)
     {
@@ -113,9 +113,9 @@ IntervalTree::~IntervalTree()
     free(recursion_node_stack);
 }
 
-void IntervalTree::leftRotate(IntervalTreeNode* x)
+void IntervalTree::leftRotate(Node* x)
 {
-    IntervalTreeNode* y;
+    Node* y;
 
     y = x->right;
     x->right = y->left;
@@ -137,9 +137,9 @@ void IntervalTree::leftRotate(IntervalTreeNode* x)
     y->max_high = std::max(x->max_high, std::max(y->right->max_high, y->high));
 }
 
-void IntervalTree::rightRotate(IntervalTreeNode* y)
+void IntervalTree::rightRotate(Node* y)
 {
-    IntervalTreeNode* x;
+    Node* x;
 
     x = y->left;
     y->left = x->right;
@@ -161,10 +161,10 @@ void IntervalTree::rightRotate(IntervalTreeNode* y)
 }
 
 /// @brief Inserts z into the tree as if it were a regular binary tree
-void IntervalTree::recursiveInsert(IntervalTreeNode* z)
+void IntervalTree::recursiveInsert(Node* z)
 {
-    IntervalTreeNode* x;
-    IntervalTreeNode* y;
+    Node* x;
+    Node* y;
 
     z->left = z->right = nil;
     y = root;
@@ -184,7 +184,7 @@ void IntervalTree::recursiveInsert(IntervalTreeNode* z)
         y->right = z;
 }
 
-void IntervalTree::fixupMaxHigh(IntervalTreeNode* x)
+void IntervalTree::fixupMaxHigh(Node* x)
 {
     while (x != root)
     {
@@ -193,13 +193,13 @@ void IntervalTree::fixupMaxHigh(IntervalTreeNode* x)
     }
 }
 
-IntervalTreeNode* IntervalTree::insert(const Interval* new_interval)
+IntervalTree::Node* IntervalTree::insert(const Interval* new_interval)
 {
-    IntervalTreeNode* y;
-    IntervalTreeNode* x;
-    IntervalTreeNode* new_node;
+    Node* y;
+    Node* x;
+    Node* new_node;
 
-    x = new IntervalTreeNode(new_interval);
+    x = new Node(new_interval);
     recursiveInsert(x);
     fixupMaxHigh(x->parent);
     new_node = x;
@@ -256,23 +256,23 @@ IntervalTreeNode* IntervalTree::insert(const Interval* new_interval)
     return new_node;
 }
 
-IntervalTreeNode* IntervalTree::getMinimum(IntervalTreeNode *x) const
+IntervalTree::Node* IntervalTree::getMinimum(Node *x) const
 {
     while (x->left != nil)
         x = x->left;
     return x;
 }
 
-IntervalTreeNode* IntervalTree::getMaximum(IntervalTreeNode *x) const
+IntervalTree::Node* IntervalTree::getMaximum(Node *x) const
 {
     while (x->right != nil)
         x = x->right;
     return x;
 }
 
-IntervalTreeNode* IntervalTree::getSuccessor(IntervalTreeNode* x) const
+IntervalTree::Node* IntervalTree::getSuccessor(Node* x) const
 {
-    IntervalTreeNode* y;
+    Node* y;
 
     if (nil != x->right)
         return getMinimum(x->right);
@@ -288,9 +288,9 @@ IntervalTreeNode* IntervalTree::getSuccessor(IntervalTreeNode* x) const
     }
 }
 
-IntervalTreeNode* IntervalTree::getPredecessor(IntervalTreeNode* x) const
+IntervalTree::Node* IntervalTree::getPredecessor(Node* x) const
 {
-    IntervalTreeNode* y;
+    Node* y;
 
     if (nil != x->left)
         return getMaximum(x->left);
@@ -306,7 +306,7 @@ IntervalTreeNode* IntervalTree::getPredecessor(IntervalTreeNode* x) const
     }
 }
 
-void IntervalTreeNode::print(IntervalTreeNode* nil, IntervalTreeNode* root) const
+void IntervalTree::Node::print(Node* nil, Node* root) const
 {
     stored_interval->print();
     std::cout << ", k = " << key << ", h = " << high << ", mH = " << max_high;
@@ -328,7 +328,7 @@ void IntervalTreeNode::print(IntervalTreeNode* nil, IntervalTreeNode* root) cons
     std::cout << "  red = " << (int) red << std::endl;
 }
 
-void IntervalTree::recursivePrint(IntervalTreeNode* x) const
+void IntervalTree::recursivePrint(Node* x) const
 {
     if (x != nil)
     {
@@ -343,10 +343,10 @@ void IntervalTree::print() const
     recursivePrint(root->left);
 }
 
-void IntervalTree::deleteFixup(IntervalTreeNode* x)
+void IntervalTree::deleteFixup(Node* x)
 {
-    IntervalTreeNode* w;
-    IntervalTreeNode* root_left_node = root->left;
+    Node* w;
+    Node* root_left_node = root->left;
 
     while ((!x->red) && (root_left_node != x))
     {
@@ -418,22 +418,22 @@ void IntervalTree::deleteFixup(IntervalTreeNode* x)
 
 void IntervalTree::deleteNode(const Interval* ivl)
 {
-    IntervalTreeNode* node = recursiveSearch(root, ivl);
+    Node* node = recursiveSearch(root, ivl);
     if (node != nil)
         deleteNode(node);
 }
 
-IntervalTreeNode* IntervalTree::recursiveSearch(IntervalTreeNode* node, const Interval* ivl) const
+IntervalTree::Node* IntervalTree::recursiveSearch(Node* node, const Interval* ivl) const
 {
     if (node != nil)
     {
         if (node->stored_interval == ivl)
             return node;
 
-        IntervalTreeNode* left = recursiveSearch(node->left, ivl);
+        Node* left = recursiveSearch(node->left, ivl);
         if (left != nil)
             return left;
-        IntervalTreeNode* right = recursiveSearch(node->right, ivl);
+        Node* right = recursiveSearch(node->right, ivl);
         if (right != nil)
             return right;
     }
@@ -441,10 +441,10 @@ IntervalTreeNode* IntervalTree::recursiveSearch(IntervalTreeNode* node, const In
     return nil;
 }
 
-const Interval* IntervalTree::deleteNode(IntervalTreeNode* z)
+const IntervalTree::Interval* IntervalTree::deleteNode(Node* z)
 {
-    IntervalTreeNode* y;
-    IntervalTreeNode* x;
+    Node* y;
+    Node* x;
     const Interval* node_to_delete = z->stored_interval;
 
     y = ((z->left == nil) || (z->right == nil)) ? z : getSuccessor(z);
@@ -513,10 +513,10 @@ bool overlap(simtime_t a1, simtime_t a2, simtime_t b1, simtime_t b2)
     }
 }
 
-std::deque<const Interval*> IntervalTree::query(simtime_t low, simtime_t high)
+std::deque<const IntervalTree::Interval*> IntervalTree::query(simtime_t low, simtime_t high)
 {
     std::deque<const Interval*> result_stack;
-    IntervalTreeNode* x = root->left;
+    Node* x = root->left;
     bool run = (x != nil);
 
     current_parent = 0;

@@ -18,7 +18,7 @@
 #ifndef __INET_QUEUEVISUALIZERBASE_H
 #define __INET_QUEUEVISUALIZERBASE_H
 
-#include "inet/common/queue/PacketQueue.h"
+#include "inet/queueing/contract/IPacketQueue.h"
 #include "inet/visualizer/base/VisualizerBase.h"
 #include "inet/visualizer/util/Placement.h"
 #include "inet/visualizer/util/QueueFilter.h"
@@ -33,7 +33,7 @@ class INET_API QueueVisualizerBase : public VisualizerBase
     class INET_API QueueVisitor : public cVisitor
     {
         public:
-            std::vector<PacketQueue *> queues;
+            std::vector<queueing::IPacketQueue *> queues;
 
         public:
             virtual void visit(cObject *object) override;
@@ -43,10 +43,10 @@ class INET_API QueueVisualizerBase : public VisualizerBase
     class INET_API QueueVisualization
     {
       public:
-        PacketQueue *queue = nullptr;
+        queueing::IPacketQueue *queue = nullptr;
 
       public:
-        QueueVisualization(PacketQueue *queue);
+        QueueVisualization(queueing::IPacketQueue *queue);
         virtual ~QueueVisualization() {}
     };
 
@@ -70,7 +70,7 @@ class INET_API QueueVisualizerBase : public VisualizerBase
     virtual void handleParameterChange(const char *name) override;
     virtual void refreshDisplay() const override;
 
-    virtual QueueVisualization *createQueueVisualization(PacketQueue *queue) const = 0;
+    virtual QueueVisualization *createQueueVisualization(queueing::IPacketQueue *queue) const = 0;
     virtual void addQueueVisualization(const QueueVisualization *queueVisualization);
     virtual void addQueueVisualizations();
     virtual void removeQueueVisualization(const QueueVisualization *queueVisualization);

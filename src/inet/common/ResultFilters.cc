@@ -27,15 +27,10 @@
 #include "inet/mobility/contract/IMobility.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/physicallayer/base/packetlevel/FlatReceptionBase.h"
-
-#ifdef WITH_RADIO
-#include "inet/physicallayer/common/packetlevel/SignalTag_m.h"
-#endif
+#include "inet/physicallayer/contract/packetlevel/SignalTag_m.h"
 
 namespace inet {
-
 namespace utils {
-
 namespace filters {
 
 Register_ResultFilter("dataAge", DataAgeFilter);
@@ -90,8 +85,10 @@ Register_ResultFilter("appPkSeqNo", ApplicationPacketSequenceNumberFilter);
 
 void ApplicationPacketSequenceNumberFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
 {
-    if (auto msg = dynamic_cast<ApplicationPacket*>(object))
-        fire(this, t, (long)msg->getSequenceNumber(), details);
+    if (auto packet = dynamic_cast<Packet*>(object)) {
+        if (auto applicationPacket = dynamicPtrCast<const ApplicationPacket>(packet->peekAtFront()))
+            fire(this, t, (intval_t)applicationPacket->getSequenceNumber(), details);
+    }
 }
 
 
@@ -233,7 +230,6 @@ void LiveThroughputFilter::init(cComponent *component, cProperty *attrsProperty)
 LiveThroughputFilter::~LiveThroughputFilter()
 {
     if (event) {
-        ASSERT(event->isScheduled());
         getSimulation()->getFES()->remove(event);
         delete event;
     }
@@ -366,10 +362,86 @@ void SymbolErrorRateFromErrorRateIndFilter::receiveSignal(cResultFilter *prev, s
 #endif  // WITH_RADIO
 }
 
+Register_ResultFilter("localSignal", LocalSignalFilter);
+
+void LocalSignalFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, bool b, cObject *details)
+{
+    fire(this, t, b, details);
+}
+
+void LocalSignalFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, intval_t l, cObject *details)
+{
+    fire(this, t, l, details);
+}
+
+void LocalSignalFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, uintval_t l, cObject *details)
+{
+    fire(this, t, l, details);
+}
+
+void LocalSignalFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, double d, cObject *details)
+{
+    fire(this, t, d, details);
+}
+
+void LocalSignalFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, const SimTime& v, cObject *details)
+{
+    fire(this, t, v, details);
+}
+
+void LocalSignalFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, const char *s, cObject *details)
+{
+    fire(this, t, s, details);
+}
+
+void LocalSignalFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
+{
+    fire(this, t, object, details);
+}
+
+void LocalSignalFilter::receiveSignal(cComponent *source, simsignal_t signal, bool b, cObject *details)
+{
+    if (source == component)
+        cResultListener::receiveSignal(source, signal, b, details);
+}
+
+void LocalSignalFilter::receiveSignal(cComponent *source, simsignal_t signal, intval_t l, cObject *details)
+{
+    if (source == component)
+        cResultListener::receiveSignal(source, signal, l, details);
+}
+
+void LocalSignalFilter::receiveSignal(cComponent *source, simsignal_t signal, uintval_t l, cObject *details)
+{
+    if (source == component)
+        cResultListener::receiveSignal(source, signal, l, details);
+}
+
+void LocalSignalFilter::receiveSignal(cComponent *source, simsignal_t signal, double d, cObject *details)
+{
+    if (source == component)
+        cResultListener::receiveSignal(source, signal, d, details);
+}
+
+void LocalSignalFilter::receiveSignal(cComponent *source, simsignal_t signal, const SimTime& v, cObject *details)
+{
+    if (source == component)
+        cResultListener::receiveSignal(source, signal, v, details);
+}
+
+void LocalSignalFilter::receiveSignal(cComponent *source, simsignal_t signal, const char *s, cObject *details)
+{
+    if (source == component)
+        cResultListener::receiveSignal(source, signal, s, details);
+}
+
+void LocalSignalFilter::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
+{
+    if (source == component)
+        cResultListener::receiveSignal(source, signal, object, details);
+}
 
 } // namespace filters
-
 } // namespace utils
-
 } // namespace inet
 

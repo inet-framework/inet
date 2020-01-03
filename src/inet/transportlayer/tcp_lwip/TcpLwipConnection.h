@@ -44,37 +44,18 @@ class INetStreamSocket;
 /**
  *
  */
-class INET_API TcpLwipConnection
+class INET_API TcpLwipConnection : public cSimpleModule
 {
   protected:
-    class Stats
-    {
-      public:
-        Stats();
-        ~Stats();
-        void recordSend(const TcpHeader& tcpsegP);
-        void recordReceive(const TcpHeader& tcpsegP);
-
-      protected:
-        // statistics
-        cOutVector sndWndVector;    // snd_wnd
-        cOutVector sndSeqVector;    // sent seqNo
-        cOutVector sndAckVector;    // sent ackNo
-
-        cOutVector rcvWndVector;    // rcv_wnd
-        cOutVector rcvSeqVector;    // received seqNo
-        cOutVector rcvAckVector;    // received ackNo (= snd_una)
-    };
-
     // prevent copy constructor:
     TcpLwipConnection(const TcpLwipConnection&);
 
   public:
-    TcpLwipConnection(TcpLwip& tcpLwipP, int connIdP);
-
-    TcpLwipConnection(TcpLwipConnection& tcpLwipConnectionP, int connIdP, LwipTcpLayer::tcp_pcb *pcbP);
-
+    TcpLwipConnection() {}
     ~TcpLwipConnection();
+
+    void initConnection(TcpLwip& tcpLwipP, int connIdP);
+    void initConnection(TcpLwipConnection& tcpLwipConnectionP, int connIdP, LwipTcpLayer::tcp_pcb *pcbP);
 
     /** Utility: sends TCP_I_AVAILABLE indication with TcpAvailableInfo to application */
     void sendAvailableIndicationToApp(int listenConnId);
@@ -112,21 +93,30 @@ class INET_API TcpLwipConnection
     bool isSendUpEnabled() { return sendUpEnabled; }
 
     void sendUpData();
+    void recordSend(const TcpHeader& tcpsegP);
+    void recordReceive(const TcpHeader& tcpsegP);
 
   public:
     int connIdM;
-    LwipTcpLayer::tcp_pcb *pcbM;
-    TcpLwipSendQueue *sendQueueM;
-    TcpLwipReceiveQueue *receiveQueueM;
-    TcpLwip& tcpLwipM;
+    LwipTcpLayer::tcp_pcb *pcbM = nullptr;
+    TcpLwipSendQueue *sendQueueM = nullptr;
+    TcpLwipReceiveQueue *receiveQueueM = nullptr;
+    TcpLwip *tcpLwipM = nullptr;
 
   protected:
-    long int totalSentM;
-    bool isListenerM;
-    bool onCloseM;
+    long int totalSentM = 0;
+    bool isListenerM = false;
+    bool onCloseM = false;
     bool sendUpEnabled = false;
 
-    Stats *statsM;
+    // statistics
+    static simsignal_t sndWndSignal;    // snd_wnd
+    static simsignal_t sndNxtSignal;    // sent seqNo
+    static simsignal_t sndAckSignal;    // sent ackNo
+
+    static simsignal_t rcvWndSignal;    // rcv_wnd
+    static simsignal_t rcvSeqSignal;    // received seqNo
+    static simsignal_t rcvAckSignal;    // received ackNo (= snd_una)
 };
 
 } // namespace tcp

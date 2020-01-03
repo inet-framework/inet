@@ -80,7 +80,7 @@ void Ieee80211ReceiverBase::setChannel(const Ieee80211Channel *channel)
     if (this->channel != channel) {
         delete this->channel;
         this->channel = channel;
-        setCarrierFrequency(channel->getCenterFrequency());
+        setCenterFrequency(channel->getCenterFrequency());
     }
 }
 
@@ -95,7 +95,7 @@ const IReceptionResult *Ieee80211ReceiverBase::computeReceptionResult(const ILis
     auto transmission = check_and_cast<const Ieee80211TransmissionBase *>(reception->getTransmission());
     auto receptionResult = FlatReceiverBase::computeReceptionResult(listening, reception, interference, snir, decisions);
     auto packet = const_cast<Packet *>(receptionResult->getPacket());
-    packet->getTag<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211Phy);
+    packet->getTag<PacketProtocolTag>()->setProtocol(packet->getTag<PacketProtocolTag>()->getProtocol());
     packet->addTagIfAbsent<Ieee80211ModeInd>()->setMode(transmission->getMode());
     packet->addTagIfAbsent<Ieee80211ChannelInd>()->setChannel(transmission->getChannel());
     return receptionResult;

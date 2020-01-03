@@ -34,6 +34,12 @@ TransportConnectionOsgVisualizer::TransportConnectionOsgVisualization::Transport
 {
 }
 
+TransportConnectionOsgVisualizer::~TransportConnectionOsgVisualizer()
+{
+    if (displayTransportConnections)
+        removeAllConnectionVisualizations();
+}
+
 void TransportConnectionOsgVisualizer::initialize(int stage)
 {
     TransportConnectionVisualizerBase::initialize(stage);

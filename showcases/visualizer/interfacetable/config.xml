@@ -1,0 +1,3 @@
+<config>
+	<interface hosts='host* router' address='10.x.x.x' netmask='255.x.x.x'/>
+</config>

@@ -29,7 +29,7 @@ module NarrowbandTransmitterBase like ITransmitter
         int headerLength @unit(b);   // number of header bits added to the length of the MAC frame
         double bitrate @unit(bps);         // the bitrate of the transmitter is used to compute the duration of the transmission
         double power @unit(W);             // transmission power
-        double carrierFrequency @unit(Hz); // center frequency of the band where the transmitter transmits on the medium
+        double centerFrequency @unit(Hz); // center frequency of the band where the transmitter transmits on the medium
         double bandwidth @unit(Hz);        // bandwidth of the band where the transmitter transmits on the medium
         string modulation;                 // "BPSK", "16-QAM", "256-QAM"
         @display("i=block/wtx");

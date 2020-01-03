@@ -296,7 +296,7 @@ class SmokeTestCase(SimulationTestCase):
         ensure_dir(resultdir)
         memcheckPrefix = ""
         if memcheck:
-            memcheckPrefix = "valgrind --leak-check=full --track-origins=yes --error-exitcode=" + str(memcheckFailedErrorCode) + " --suppressions=" + rootDir + "/tests/smoke/valgrind.supp "
+            memcheckPrefix = "valgrind --leak-check=full --track-origins=yes --error-exitcode=" + str(memcheckFailedErrorCode) + " --suppressions=" + rootDir + "/tests/fingerprint/valgrind.supp "
 
         # Check if the command line does not contain executable name (starts with an option i.e. - char)
         # and use the executable name from the command line.

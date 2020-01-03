@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2013 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -31,11 +31,11 @@ class INET_API VectorCommunicationCache : public CommunicationCacheBase
     /**
      * The smallest radio id of all radios on the medium.
      */
-    int baseRadioId;
+    int baseRadioId = -1;
     /**
      * The smallest transmission id of all ongoing transmissions on the medium.
      */
-    int baseTransmissionId;
+    int baseTransmissionId = -1;
     /**
      * Caches intermediate computation results for transmissions. The outer
      * vector is indexed by transmission id (offset with base transmission id)
@@ -60,23 +60,29 @@ class INET_API VectorCommunicationCache : public CommunicationCacheBase
     //@}
 
   public:
-    VectorCommunicationCache();
     virtual ~VectorCommunicationCache();
 
     virtual std::ostream& printToStream(std::ostream &stream, int level) const override { return stream << "VectorCommunicationCache"; }
 
-    /** @name Medium state change notifications */
+    /** @name Radio cache */
     //@{
     virtual void addRadio(const IRadio *radio) override;
     virtual void removeRadio(const IRadio *radio) override;
+    virtual const IRadio *getRadio(int id) const override;
+    virtual void mapRadios(std::function<void (const IRadio *)> f) const override;
+    //@}
 
+    /** @name Transmission cache */
+    //@{
     virtual void addTransmission(const ITransmission *transmission) override;
     virtual void removeTransmission(const ITransmission *transmission) override;
+    virtual const ITransmission *getTransmission(int id) const override;
+    virtual void mapTransmissions(std::function<void (const ITransmission *)> f) const override;
     //@}
 
     /** @name Interference cache */
     //@{
-    virtual void removeNonInterferingTransmissions() override;
+    virtual void removeNonInterferingTransmissions(std::function<void (const ITransmission *transmission)> f) override;
     //@}
 };
 

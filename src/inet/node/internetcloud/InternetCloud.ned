@@ -43,7 +43,7 @@ import inet.node.base.NetworkLayerNodeBase;
 // The ~InternetCloud module can be used only to model the delay between two hops, but
 // it is possible to build more complex networks using several ~InternetCloud modules.
 //
-// @see MatrixCloudDelayer
+// @see ~MatrixCloudDelayer
 //
 module InternetCloud extends NetworkLayerNodeBase
 {

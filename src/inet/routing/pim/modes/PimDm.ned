@@ -32,7 +32,7 @@ package inet.routing.pim.modes;
 // otherwise the forwarding restarts automatically. The router
 // can also cancel the prune by sending a Graft message.
 //
-// The module must access the ~PimInterfaceTable and ~PIMNeighbortable
+// The module must access the ~PimInterfaceTable and ~PimNeighborTable
 // modules, their path is given as the 'pimInterfaceTableModule' and
 // 'pimNeighborTableModule' parameters.
 //

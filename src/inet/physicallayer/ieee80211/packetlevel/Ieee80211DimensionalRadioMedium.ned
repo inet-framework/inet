@@ -22,8 +22,8 @@ package inet.physicallayer.ieee80211.packetlevel;
 // over time and/or frequency) in the analog representation. It must be used in
 // conjunction with the ~Ieee80211DimensionalRadio model.
 //
-// See also ~Ieee80211DimensionalRadio, ~Ieee80211DimensionalTransmitter,
-// ~Ieee80211DimensionalReceiver, and ~DimensionalAnalogModel.
+// @see ~Ieee80211DimensionalRadio, ~Ieee80211DimensionalTransmitter,
+// ~Ieee80211DimensionalReceiver, ~DimensionalAnalogModel.
 //
 module Ieee80211DimensionalRadioMedium extends Ieee80211RadioMedium
 {

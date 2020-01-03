@@ -47,33 +47,74 @@ Define_Module(BehaviorAggregateClassifier);
 
 simsignal_t BehaviorAggregateClassifier::pkClassSignal = registerSignal("pkClass");
 
-void BehaviorAggregateClassifier::initialize()
+bool BehaviorAggregateClassifier::PacketDissectorCallback::matches(const Packet *packet)
 {
-    numOutGates = gateSize("outs");
-    std::vector<int> dscps;
-    parseDSCPs(par("dscps"), "dscps", dscps);
-    int numDscps = (int)dscps.size();
-    if (numDscps > numOutGates)
-        throw cRuntimeError("%s dscp values are given, but the module has only %d out gates",
-                numDscps, numOutGates);
-    for (int i = 0; i < numDscps; ++i)
-        dscpToGateIndexMap[dscps[i]] = i;
-
-    numRcvd = 0;
-    WATCH(numRcvd);
+    dissect = true;
+    matches_ = false;
+    auto packetProtocolTag = packet->findTag<PacketProtocolTag>();
+    auto protocol = packetProtocolTag != nullptr ? packetProtocolTag->getProtocol() : nullptr;
+    PacketDissector packetDissector(ProtocolDissectorRegistry::globalRegistry, *this);
+    auto copy = packet->dup();
+    packetDissector.dissectPacket(copy, protocol);
+    delete copy;
+    return matches_;
 }
 
-void BehaviorAggregateClassifier::handleMessage(cMessage *msg)
+void BehaviorAggregateClassifier::PacketDissectorCallback::visitChunk(const Ptr<const Chunk>& chunk, const Protocol *protocol)
 {
-    Packet *packet = check_and_cast<Packet *>(msg);
-    numRcvd++;
-    int clazz = classifyPacket(packet);
-    emit(pkClassSignal, clazz);
+    if (protocol == nullptr)
+        return;
+    if (*protocol == Protocol::ipv4) {
+        dissect = false;
+#ifdef WITH_IPv4
+        const auto& ipv4Header = dynamicPtrCast<const Ipv4Header>(chunk);
+        if (!ipv4Header)
+            return;
+        dscp = ipv4Header->getDscp();
+        matches_ = true;
+#endif // ifdef WITH_IPv4
+    }
+    else if (*protocol == Protocol::ipv6) {
+        dissect = false;
+#ifdef WITH_IPv6
+        const auto& ipv6Header = dynamicPtrCast<const Ipv6Header>(chunk);
+        if (!ipv6Header)
+            return;
+        dscp = ipv6Header->getDscp();
+        matches_ = true;
+#endif // ifdef WITH_IPv6
+    }
+}
 
-    if (clazz >= 0)
-        send(packet, "outs", clazz);
+void BehaviorAggregateClassifier::initialize(int stage)
+{
+    PacketClassifierBase::initialize(stage);
+    if (stage == INITSTAGE_LOCAL) {
+        numOutGates = gateSize("out");
+        std::vector<int> dscps;
+        parseDSCPs(par("dscps"), "dscps", dscps);
+        int numDscps = (int)dscps.size();
+        if (numDscps > numOutGates)
+            throw cRuntimeError("%s dscp values are given, but the module has only %d out gates",
+                    numDscps, numOutGates);
+        for (int i = 0; i < numDscps; ++i)
+            dscpToGateIndexMap[dscps[i]] = i;
+
+        numRcvd = 0;
+        WATCH(numRcvd);
+    }
+}
+
+void BehaviorAggregateClassifier::pushPacket(Packet *packet, cGate *inputGate)
+{
+    EV_INFO << "Classifying packet " << packet->getName() << ".\n";
+    numRcvd++;
+    int index = classifyPacket(packet);
+    emit(pkClassSignal, index);
+    if (index >= 0)
+        pushOrSendPacket(packet, outputGates[index], consumers[index]);
     else
-        send(packet, "defaultOut");
+        pushOrSendPacket(packet, gate("defaultOut"));
 }
 
 void BehaviorAggregateClassifier::refreshDisplay() const
@@ -86,33 +127,14 @@ void BehaviorAggregateClassifier::refreshDisplay() const
 
 int BehaviorAggregateClassifier::classifyPacket(Packet *packet)
 {
-    int dscp = getDscpFromPacket(packet);
-    if (dscp >= 0) {
+    PacketDissectorCallback callback;
+
+    if (callback.matches(packet)) {
+        int dscp = callback.dscp;
         auto it = dscpToGateIndexMap.find(dscp);
         if (it != dscpToGateIndexMap.end())
             return it->second;
     }
-    return -1;
-}
-
-int BehaviorAggregateClassifier::getDscpFromPacket(Packet *packet)
-{
-    auto protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
-
-    //TODO processing link-layer headers when exists
-
-#ifdef WITH_IPv4
-    if (protocol == &Protocol::ipv4) {
-        const auto& ipv4Header = packet->peekAtFront<Ipv4Header>();
-        return ipv4Header->getDiffServCodePoint();
-    }
-#endif // ifdef WITH_IPv4
-#ifdef WITH_IPv6
-    if (protocol == &Protocol::ipv6) {
-        const auto& ipv6Header = packet->peekAtFront<Ipv6Header>();
-        return ipv6Header->getDiffServCodePoint();
-    }
-#endif // ifdef WITH_IPv6
     return -1;
 }
 

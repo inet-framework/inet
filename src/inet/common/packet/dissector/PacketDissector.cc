@@ -13,6 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
+#include "inet/common/packet/chunk/SequenceChunk.h"
 #include "inet/common/packet/dissector/PacketDissector.h"
 
 namespace inet {
@@ -65,6 +66,29 @@ b PacketDissector::ProtocolDataUnit::getChunkLength() const
     return length;
 }
 
+// ChunkBuilder
+
+void PacketDissector::ChunkBuilder::visitChunk(const Ptr<const Chunk>& chunk, const Protocol *protocol)
+{
+    if (content == nullptr)
+        content = chunk;
+    else {
+        if (content->canInsertAtBack(chunk)) {
+            const auto& newContent = makeExclusivelyOwnedMutableChunk(content);
+            newContent->insertAtBack(chunk);
+            newContent->markImmutable();
+            content = newContent->simplify();
+        }
+        else {
+            auto sequenceChunk = makeShared<SequenceChunk>();
+            sequenceChunk->insertAtBack(content);
+            sequenceChunk->insertAtBack(chunk);
+            sequenceChunk->markImmutable();
+            content = sequenceChunk;
+        }
+    }
+}
+
 // PduTreeBuilder
 
 void PacketDissector::PduTreeBuilder::startProtocolDataUnit(const Protocol *protocol)
@@ -111,7 +135,7 @@ PacketDissector::PacketDissector(const ProtocolDissectorRegistry& protocolDissec
 
 void PacketDissector::doDissectPacket(Packet *packet, const Protocol *protocol) const
 {
-    auto protocolDissector = protocolDissectorRegistry.findProtocolDissector(protocol);
+    auto protocolDissector = callback.shouldDissectProtocolDataUnit(protocol) ? protocolDissectorRegistry.findProtocolDissector(protocol) : nullptr;
     if (protocolDissector == nullptr)
         protocolDissector = protocolDissectorRegistry.getProtocolDissector(nullptr);
     ProtocolDissectorCallback callback(*this);

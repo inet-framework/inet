@@ -20,14 +20,16 @@ package inet.mobility.single;
 import inet.mobility.base.MovingMobilityBase;
 
 //
-// Uses the native file format of BonnMotion (http://www.cs.uni-bonn.de/IV/BonnMotion/).
+// Uses the native file format of BonnMotion.
 //
 // The file is a plain text file, where every line describes the motion
 // of one host. A line consists of one or more (t, x, y, [z]) tuples of real
 // numbers, like:
 //
 // t1 x1 y1 t2 x2 y2 t3 x3 y3 t4 x4 y4 ...
+//
 // or
+//
 // t1 x1 y1 z1 t2 x2 y2 z2 t3 x3 y3 z3 t4 x4 y4 z4...
 //
 // The meaning is that the given node gets to (xk,yk) at tk. There's no

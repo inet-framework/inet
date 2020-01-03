@@ -1,0 +1,138 @@
+%description:
+
+In this test, packets are collected periodically by an active packet sink
+(ActivePacketSink). The packets are produced by two active packet sources
+(ActivePacketSources). The sources are connected to FIFO queues (PacketQueue)
+where packets are stored temporarily. The single sink is connected to the
+queues using a scheduler (PriorityScheduler). The scheduler forwards packets
+from the queues to the sink in a prioritized way.
+
+%file: test.ned
+
+import inet.queueing.sink.ActivePacketSink;
+import inet.queueing.queue.PacketQueue;
+import inet.queueing.scheduler.PriorityScheduler;
+import inet.queueing.source.ActivePacketSource;
+
+network TestPriorityScheduler
+{
+    submodules:
+        producer1: ActivePacketSource {
+            @display("p=100,100");
+        }
+        producer2: ActivePacketSource {
+            @display("p=100,200");
+        }
+        queue1: PacketQueue {
+            @display("p=200,100");
+        }
+        queue2: PacketQueue {
+            @display("p=200,200");
+        }
+        scheduler: PriorityScheduler {
+            @display("p=300,100");
+        }
+        collector: ActivePacketSink {
+            @display("p=400,100");
+        }
+    connections allowunconnected:
+        producer1.out --> queue1.in;
+        producer2.out --> queue2.in;
+        queue1.out --> scheduler.in++;
+        queue2.out --> scheduler.in++;
+        scheduler.out --> collector.in;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = TestPriorityScheduler
+sim-time-limit = 10s
+cmdenv-event-banners = false
+*.producer*.packetLength = 1B
+*.producer*.productionInterval = uniform(0s, 2s)
+*.collector.collectionInterval = uniform(0s, 1s)
+
+%contains: stdout
+Popping packet producer2-0 from the queue.
+Scheduling packet producer2-0.
+Collecting packet producer2-0.
+Producing packet producer1-1.
+Pushing packet producer1-1 into the queue.
+Producing packet producer2-1.
+Pushing packet producer2-1 into the queue.
+Popping packet producer1-1 from the queue.
+Scheduling packet producer1-1.
+Collecting packet producer1-1.
+Popping packet producer2-1 from the queue.
+Scheduling packet producer2-1.
+Collecting packet producer2-1.
+Producing packet producer1-2.
+Pushing packet producer1-2 into the queue.
+Popping packet producer1-2 from the queue.
+Scheduling packet producer1-2.
+Collecting packet producer1-2.
+Producing packet producer2-2.
+Pushing packet producer2-2 into the queue.
+Producing packet producer1-3.
+Pushing packet producer1-3 into the queue.
+Popping packet producer1-3 from the queue.
+Scheduling packet producer1-3.
+Collecting packet producer1-3.
+Popping packet producer2-2 from the queue.
+Scheduling packet producer2-2.
+Collecting packet producer2-2.
+Producing packet producer1-4.
+Pushing packet producer1-4 into the queue.
+Popping packet producer1-4 from the queue.
+Scheduling packet producer1-4.
+Collecting packet producer1-4.
+Producing packet producer2-3.
+Pushing packet producer2-3 into the queue.
+Popping packet producer2-3 from the queue.
+Scheduling packet producer2-3.
+Collecting packet producer2-3.
+Producing packet producer1-5.
+Pushing packet producer1-5 into the queue.
+Popping packet producer1-5 from the queue.
+Scheduling packet producer1-5.
+Collecting packet producer1-5.
+Producing packet producer2-4.
+Pushing packet producer2-4 into the queue.
+Popping packet producer2-4 from the queue.
+Scheduling packet producer2-4.
+Collecting packet producer2-4.
+Producing packet producer1-6.
+Pushing packet producer1-6 into the queue.
+Popping packet producer1-6 from the queue.
+Scheduling packet producer1-6.
+Collecting packet producer1-6.
+Producing packet producer1-7.
+Pushing packet producer1-7 into the queue.
+Popping packet producer1-7 from the queue.
+Scheduling packet producer1-7.
+Collecting packet producer1-7.
+Producing packet producer2-5.
+Pushing packet producer2-5 into the queue.
+Popping packet producer2-5 from the queue.
+Scheduling packet producer2-5.
+Collecting packet producer2-5.
+Producing packet producer1-8.
+Pushing packet producer1-8 into the queue.
+Producing packet producer1-9.
+Pushing packet producer1-9 into the queue.
+Popping packet producer1-8 from the queue.
+Scheduling packet producer1-8.
+Collecting packet producer1-8.
+Popping packet producer1-9 from the queue.
+Scheduling packet producer1-9.
+Collecting packet producer1-9.
+Producing packet producer1-10.
+Pushing packet producer1-10 into the queue.
+Producing packet producer1-11.
+Pushing packet producer1-11 into the queue.
+Popping packet producer1-10 from the queue.
+Scheduling packet producer1-10.
+Collecting packet producer1-10.
+Producing packet producer2-6.
+Pushing packet producer2-6 into the queue.

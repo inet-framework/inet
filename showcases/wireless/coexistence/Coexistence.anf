@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scave:Analysis xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:scave="http://www.omnetpp.org/omnetpp/scave">
+  <inputs>
+    <inputs name="/inet/showcases/wireless/coexistence/results/*Coexistence-*.*"/>
+    <inputs name="/inet/showcases/wireless/coexistence/results/*Only*.*"/>
+  </inputs>
+  <datasets>
+    <datasets name="packetReceived:count CoexistenceShowcase.wifiHost2.app[0]">
+      <items xsi:type="scave:Group">
+        <items xsi:type="scave:Add" filterPattern="module(*.*Host2.app[0]) AND name(packetReceived:count) AND (attr:experiment(Coexistence) OR attr:experiment(*Only)) "/>
+        <items xsi:type="scave:BarChart" name="Wifi performance">
+          <filters xsi:type="scave:Select" filterPattern="module(*.wifiHost2.*) AND (attr:experiment(Coexistence) OR attr:experiment(WifiOnly))"/>
+          <properties name="Graph.Title" value="Wifi performance"/>
+          <properties name="Y.Axis.Title" value="number of received packets"/>
+        </items>
+        <items xsi:type="scave:BarChart" name="Wpan performance">
+          <filters xsi:type="scave:Select" filterPattern="module(*.wpanHost2.*) AND (attr:experiment(Coexistence) OR attr:experiment(WpanOnly))"/>
+          <properties name="Graph.Title" value="Wpan performance"/>
+          <properties name="Y.Axis.Title" value="number of received packets"/>
+        </items>
+      </items>
+    </datasets>
+  </datasets>
+  <chartSheets>
+    <chartSheets name="default" charts="//@datasets/@datasets.0/@items.0/@items.2 //@datasets/@datasets.0/@items.0/@items.1"/>
+  </chartSheets>
+</scave:Analysis>

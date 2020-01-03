@@ -39,9 +39,9 @@ void Ieee80211Mib::initialize(int stage)
 void Ieee80211Mib::refreshDisplay() const
 {
     std::string modeString;
-    std::string bssidString;
+    std::string ssidString;
     switch (mode) {
-        case INFRASTRUCTURE: modeString = "Infrastructure"; bssidString = "\nBSSID: " + bssData.bssid.str(); break;
+        case INFRASTRUCTURE: modeString = "Infrastructure"; ssidString = "\nSSID: " + bssData.ssid + ", " + bssData.bssid.str(); break;
         case INDEPENDENT: modeString = "Ad-hoc"; break;
         case MESH: modeString = "Mesh"; break;
     }
@@ -51,7 +51,7 @@ void Ieee80211Mib::refreshDisplay() const
         case ACCESS_POINT: bssStationTypeString = ", AP"; break;
         case STATION: bssStationTypeString = ", STA"; associatedString = bssStationData.isAssociated ? "\nAssociated" : "\nNot associated"; break;
     }
-    auto text = std::string("Address: ") + address.str() + bssidString + "\n" + modeString + bssStationTypeString + (qos ? ", QoS" : ", Non-QoS") + associatedString;
+    auto text = std::string("Address: ") + address.str() + ssidString + "\n" + modeString + bssStationTypeString + (qos ? ", QoS" : ", Non-QoS") + associatedString;
     getDisplayString().setTagArg("t", 0, text.c_str());
 }
 

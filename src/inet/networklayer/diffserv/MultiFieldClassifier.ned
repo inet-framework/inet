@@ -18,6 +18,8 @@
 
 package inet.networklayer.diffserv;
 
+import inet.queueing.base.PacketClassifierBase;
+
 //
 // This classifier contains a list of filters that identifies
 // the flows and determines their classes.
@@ -29,17 +31,14 @@ package inet.networklayer.diffserv;
 //
 // See RFC 2475 2.3.1, RFC 3290 4.2.2
 //
-simple MultiFieldClassifier
+simple MultiFieldClassifier extends PacketClassifierBase
 {
     parameters:
         xml filters = default(xml("<filters/>"));
-        @display("i=block/classifier");
-
+        @class(MultiFieldClassifier);
         @signal[pkClass](type=long);
         @statistic[pkClass](title="packet class"; source=pkClass; record=vector; interpolationmode=none);
     gates:
-        input in;
-        output outs[];
         output defaultOut;
 }
 

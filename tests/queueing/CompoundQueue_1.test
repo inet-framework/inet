@@ -1,0 +1,140 @@
+%description:
+
+In this test, packets are produced periodically (randomly) by an active packet
+source (ActivePacketSource). The packets are collected periodically (randomly) by
+an active packet sink (ActivePacketSink). The source and the sink is connected
+by a compound priority queue (TestQueue) where packets are stored temporarily.
+This queue contains a classifier (PacketClassifier), two queues (PacketQueues),
+and a priorty scheduler (PriortyScheduler).
+
+%file: test.ned
+
+import inet.queueing.classifier.PacketClassifier;
+import inet.queueing.queue.CompoundPacketQueue;
+import inet.queueing.queue.PacketQueue;
+import inet.queueing.sink.ActivePacketSink;
+import inet.queueing.source.ActivePacketSource;
+import inet.queueing.scheduler.PriorityScheduler;
+
+module TestCompoundPacketQueue extends CompoundPacketQueue
+{
+    parameters:
+        @class(::inet::queueing::CompoundPacketQueue);
+    submodules:
+        classifier: PacketClassifier {
+            @display("p=100,100");
+        }
+        queue1: PacketQueue {
+            @display("p=200,100");
+        }
+        queue2: PacketQueue {
+            @display("p=200,200");
+        }
+        scheduler: PriorityScheduler {
+            @display("p=300,100");
+        }
+    connections:
+        in --> classifier.in;
+    	classifier.out++ --> queue1.in;
+    	classifier.out++ --> queue2.in;
+    	queue1.out --> scheduler.in++;
+    	queue2.out --> scheduler.in++;
+    	scheduler.out --> out;
+}
+
+network TestCompoundPacketQueueNetwork
+{
+    submodules:
+        producer: ActivePacketSource {
+            @display("p=100,100");
+        }
+        queue: TestCompoundPacketQueue {
+            @display("p=200,100");
+        }
+        collector: ActivePacketSink {
+            @display("p=300,100");
+        }
+    connections allowunconnected:
+        producer.out --> queue.in;
+        queue.out --> collector.in;
+}
+
+%file: Test.cc
+#include <vector>
+#include "inet/queueing/function/PacketClassifierFunction.h"
+#include "inet/common/packet/Packet.h"
+
+using namespace inet; 
+
+static int testClassify(Packet *packet)
+{
+    return packet->getId() % 2;
+}
+
+Register_Packet_Classifier_Function(TestClassifier, testClassify);
+
+%inifile: omnetpp.ini
+
+[General]
+network = TestCompoundPacketQueueNetwork
+sim-time-limit = 10s
+cmdenv-event-banners = false
+*.producer.packetLength = 1B
+*.producer.productionInterval = uniform(0s, 2s)
+*.collector.collectionInterval = uniform(0s, 2s)
+*.queue.classifier.classifierClass = "TestClassifier"
+
+%contains: stdout
+Producing packet producer-0.
+Classifying packet producer-0.
+Pushing packet producer-0 into the queue.
+Popping packet producer-0 from the queue.
+Scheduling packet producer-0.
+Collecting packet producer-0.
+
+Running simulation...
+Producing packet producer-1.
+Classifying packet producer-1.
+Pushing packet producer-1 into the queue.
+Popping packet producer-1 from the queue.
+Scheduling packet producer-1.
+Collecting packet producer-1.
+Producing packet producer-2.
+Classifying packet producer-2.
+Pushing packet producer-2 into the queue.
+Popping packet producer-2 from the queue.
+Scheduling packet producer-2.
+Collecting packet producer-2.
+Producing packet producer-3.
+Classifying packet producer-3.
+Pushing packet producer-3 into the queue.
+Popping packet producer-3 from the queue.
+Scheduling packet producer-3.
+Collecting packet producer-3.
+Producing packet producer-4.
+Classifying packet producer-4.
+Pushing packet producer-4 into the queue.
+Producing packet producer-5.
+Classifying packet producer-5.
+Pushing packet producer-5 into the queue.
+Popping packet producer-4 from the queue.
+Scheduling packet producer-4.
+Collecting packet producer-4.
+Producing packet producer-6.
+Classifying packet producer-6.
+Pushing packet producer-6 into the queue.
+Popping packet producer-6 from the queue.
+Scheduling packet producer-6.
+Collecting packet producer-6.
+Producing packet producer-7.
+Classifying packet producer-7.
+Pushing packet producer-7 into the queue.
+Producing packet producer-8.
+Classifying packet producer-8.
+Pushing packet producer-8 into the queue.
+Popping packet producer-8 from the queue.
+Scheduling packet producer-8.
+Collecting packet producer-8.
+Popping packet producer-5 from the queue.
+Scheduling packet producer-5.
+Collecting packet producer-5.

@@ -39,13 +39,13 @@ std::ostream& Ieee80211DimensionalReceiver::printToStream(std::ostream& stream, 
 bool Ieee80211DimensionalReceiver::computeIsReceptionPossible(const IListening *listening, const ITransmission *transmission) const
 {
     const Ieee80211DimensionalTransmission *ieee80211Transmission = dynamic_cast<const Ieee80211DimensionalTransmission *>(transmission);
-    return ieee80211Transmission && modeSet->containsMode(ieee80211Transmission->getMode()) && NarrowbandReceiverBase::computeIsReceptionPossible(listening, transmission);
+    return ieee80211Transmission && modeSet->containsMode(ieee80211Transmission->getMode()) && Ieee80211ReceiverBase::computeIsReceptionPossible(listening, transmission);
 }
 
 bool Ieee80211DimensionalReceiver::computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part) const
 {
     auto ieee80211Transmission = dynamic_cast<const Ieee80211DimensionalTransmission *>(reception->getTransmission());
-    return ieee80211Transmission && modeSet->containsMode(ieee80211Transmission->getMode()) && NarrowbandReceiverBase::computeIsReceptionPossible(listening, reception, part);
+    return ieee80211Transmission && modeSet->containsMode(ieee80211Transmission->getMode()) && Ieee80211ReceiverBase::computeIsReceptionPossible(listening, reception, part);
 }
 
 } // namespace physicallayer

@@ -31,10 +31,12 @@ class INET_API DimensionalSnir : public SnirBase
   protected:
     mutable double minSNIR;
     mutable double maxSNIR;
+    mutable double meanSNIR;
 
   protected:
     virtual double computeMin() const;
     virtual double computeMax() const;
+    virtual double computeMean() const;
 
   public:
     DimensionalSnir(const DimensionalReception *reception, const DimensionalNoise *noise);
@@ -43,6 +45,7 @@ class INET_API DimensionalSnir : public SnirBase
 
     virtual double getMin() const override;
     virtual double getMax() const override;
+    virtual double getMean() const override;
 };
 
 } // namespace physicallayer

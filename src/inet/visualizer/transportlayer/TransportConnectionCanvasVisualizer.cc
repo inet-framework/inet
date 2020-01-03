@@ -31,6 +31,12 @@ TransportConnectionCanvasVisualizer::TransportConnectionCanvasVisualization::Tra
 {
 }
 
+TransportConnectionCanvasVisualizer::~TransportConnectionCanvasVisualizer()
+{
+    if (displayTransportConnections)
+        removeAllConnectionVisualizations();
+}
+
 void TransportConnectionCanvasVisualizer::initialize(int stage)
 {
     TransportConnectionVisualizerBase::initialize(stage);

@@ -259,14 +259,14 @@ static void runFrameSequence(IFrameSequence *originatorFrameSequence, IFrameSequ
     bool isOriginatorRunning = true;
     IFrameSequenceStep *originatorStep = nullptr;
     Packet *originatorFrame = nullptr;
-    originatorContext = new FrameSequenceContext(MacAddress(ORIGINATOR), nullptr, new InProgressFrames(nullptr, nullptr, nullptr), nullptr, nullptr, nullptr, nullptr);
+    originatorContext = new FrameSequenceContext(MacAddress(ORIGINATOR), nullptr, new InProgressFrames(), nullptr, nullptr, nullptr, nullptr);
     originatorFrameSequence->startSequence(originatorContext, 0);
 
     // prepare recipient
     bool isRecipientRunning = true;
     IFrameSequenceStep *recipientStep = nullptr;
     Packet *recipientFrame = nullptr;
-    recipientContext = new FrameSequenceContext(MacAddress(RECIPIENT), nullptr, new InProgressFrames(nullptr, nullptr, nullptr), nullptr, nullptr, nullptr, nullptr);
+    recipientContext = new FrameSequenceContext(MacAddress(RECIPIENT), nullptr, new InProgressFrames(), nullptr, nullptr, nullptr, nullptr);
     recipientFrameSequence->startSequence(recipientContext, 0);
 
     // run frame sequence

@@ -21,8 +21,8 @@ namespace inet {
 
 namespace physicallayer {
 
-ScalarSignalAnalogModel::ScalarSignalAnalogModel(const simtime_t duration, Hz carrierFrequency, Hz bandwidth, W power) :
-    NarrowbandSignalAnalogModel(duration, carrierFrequency, bandwidth),
+ScalarSignalAnalogModel::ScalarSignalAnalogModel(const simtime_t duration, Hz centerFrequency, Hz bandwidth, W power) :
+    NarrowbandSignalAnalogModel(duration, centerFrequency, bandwidth),
     power(power)
 {
 }
@@ -35,13 +35,13 @@ std::ostream& ScalarSignalAnalogModel::printToStream(std::ostream& stream, int l
     return NarrowbandSignalAnalogModel::printToStream(stream, level);
 }
 
-ScalarTransmissionSignalAnalogModel::ScalarTransmissionSignalAnalogModel(const simtime_t duration, Hz carrierFrequency, Hz bandwidth, W power) :
-    ScalarSignalAnalogModel(duration, carrierFrequency, bandwidth, power)
+ScalarTransmissionSignalAnalogModel::ScalarTransmissionSignalAnalogModel(const simtime_t duration, Hz centerFrequency, Hz bandwidth, W power) :
+    ScalarSignalAnalogModel(duration, centerFrequency, bandwidth, power)
 {
 }
 
-ScalarReceptionSignalAnalogModel::ScalarReceptionSignalAnalogModel(const simtime_t duration, Hz carrierFrequency, Hz bandwidth, W power) :
-    ScalarSignalAnalogModel(duration, carrierFrequency, bandwidth, power)
+ScalarReceptionSignalAnalogModel::ScalarReceptionSignalAnalogModel(const simtime_t duration, Hz centerFrequency, Hz bandwidth, W power) :
+    ScalarSignalAnalogModel(duration, centerFrequency, bandwidth, power)
 {
 }
 

@@ -3,9 +3,8 @@ Test connection setup: simultaneous active open by A and B
   A,B: INIT --> SYN_SENT --> SYN_RCVD --> ESTABLISHED
 Have them send 100-100 bytes to check seq numbers are correct.
 
-%inifile: {}.ini
+%inifile: omnetpp.ini
 [General]
-#preload-ned-files = *.ned ../../*.ned @../../../../nedfiles.lst
 ned-path = .;../../../../src;../../lib
 
 #omnetpp 5.0 - 5.1 compatibility:
@@ -14,16 +13,15 @@ output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
 output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
 snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
-#[Cmdenv]
-cmdenv-event-banners=false
+#cmdenv-event-banners=false
 cmdenv-express-mode=false
 
-#[Parameters]
 *.testing=true
 
 ####cmdenv-log-format=""
-*.tcptester.cmdenv-ev-output=true
-**.cmdenv-ev-output=false
+cmdenv-log-prefix="[%c]: "
+#*.tcptester.cmdenv-ev-output=true
+#**.cmdenv-ev-output=false
 
 *.cli_app.active=true
 *.srv_app.active=true

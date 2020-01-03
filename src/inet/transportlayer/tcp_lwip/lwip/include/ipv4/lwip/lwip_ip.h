@@ -110,28 +110,25 @@ struct ip_pcb {
 #define SOF_OOBINLINE   (u16_t)0x0100U    /* leave received OOB data in line */
 #define SOF_REUSEPORT   (u16_t)0x0200U    /* allow local address & port reuse */
 
-
-#ifdef PACK_STRUCT_USE_INCLUDES
-#  include "arch/bpstruct.h"
-#endif
-PACK_STRUCT_BEGIN
+// NOTE: this structure is not a proper network byte order IP header
+// it's only present to communicate IP data between INET and LwIp
 struct ip_hdr {
   /* version / header length / type of service */
 /*
-  PACK_STRUCT_FIELD(u16_t _v_hl_tos);
+  u16_t _v_hl_tos;
 */
-  PACK_STRUCT_FIELD(u16_t _hl);
+  u16_t _hl;
   /* total length */
 /*
-  PACK_STRUCT_FIELD(u16_t _len);
+  u16_t _len;
 */
   /* identification */
 /*
-  PACK_STRUCT_FIELD(u16_t _id);
+  u16_t _id;
 */
   /* fragment offset field */
 /*
-  PACK_STRUCT_FIELD(u16_t _offset);
+  u16_t _offset;
 */
 #define IP_RF 0x8000        /* reserved fragment flag */
 #define IP_DF 0x4000        /* dont fragment flag */
@@ -139,18 +136,14 @@ struct ip_hdr {
 #define IP_OFFMASK 0x1fff   /* mask for fragmenting bits */
   /* time to live / protocol*/
 /*
-  PACK_STRUCT_FIELD(u16_t _ttl_proto);
+  u16_t _ttl_proto;
 */
   /* checksum */
-  PACK_STRUCT_FIELD(u16_t _chksum);
+  u16_t _chksum;
   /* source and destination IP addresses */
-  PACK_STRUCT_FIELD(struct ip_addr src);
-  PACK_STRUCT_FIELD(struct ip_addr dest);
-} PACK_STRUCT_STRUCT;
-PACK_STRUCT_END
-#ifdef PACK_STRUCT_USE_INCLUDES
-#  include "arch/epstruct.h"
-#endif
+  struct ip_addr src;
+  struct ip_addr dest;
+};
 
 /*
 #define IPH_V(hdr)  (ntohs((hdr)->_v_hl_tos) >> 12)

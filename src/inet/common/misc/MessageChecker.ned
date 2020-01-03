@@ -18,7 +18,7 @@
 package inet.common.misc;
 
 //
-// Module that allows checking fields of messages
+// Module that allows checking fields of messages.
 //
 // Example of XML configuration:
 //

@@ -117,7 +117,7 @@ uint32 SctpReceiveStream::enqueueNewDataChunk(SctpDataVariables *dchunk)
             /* try to reassemble here */
             uint32 reassembled = reassemble(unorderedQ, dchunk->tsn);
 
-            if ((unorderedQ->getChunk(reassembled))->bbit && (unorderedQ->getChunk(reassembled))->bbit) {
+            if ((unorderedQ->getChunk(reassembled))->bbit && (unorderedQ->getChunk(reassembled))->bbit) {  //FIXME There are identical sub-expressions '(unorderedQ->getChunk(reassembled))->bbit' to the left and to the right of the '&&' operator.
                 /* put message into deliveryQ */
                 if (deliveryQ->checkAndInsertChunk(reassembled, unorderedQ->getAndExtractChunk(reassembled))) {
                     delivery = 2;

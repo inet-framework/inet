@@ -2,11 +2,10 @@
 EtherMac and EtherMacFullDuplex module: tests IFG in full duplex mode on gigabit ethernet
 
 
-%inifile: {}.ini
+%inifile: omnetpp.ini
 [General]
-#preload-ned-files = *.ned ../../*.ned @../../../../nedfiles.lst
 ned-path = .;../../../../src;../../lib
-network = EthTestNetwork
+network = inet.test.moduletest.lib.EthTestNetwork
 
 record-eventlog = true
 
@@ -16,11 +15,9 @@ output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
 output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
 snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
-#[Cmdenv]
 cmdenv-event-banners=false
 cmdenv-express-mode=false
 
-#[Parameters]
 
 **.ethch*.datarate = 1Gbps
 

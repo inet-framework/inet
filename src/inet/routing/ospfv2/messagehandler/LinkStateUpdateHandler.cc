@@ -15,16 +15,18 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/checksum/TcpIpChecksum.h"
+#include "inet/routing/ospfv2/Ospfv2Crc.h"
 #include "inet/routing/ospfv2/messagehandler/LinkStateUpdateHandler.h"
-#include "inet/routing/ospfv2/neighbor/OspfNeighbor.h"
-#include "inet/routing/ospfv2/router/OspfArea.h"
-#include "inet/routing/ospfv2/router/OspfCommon.h"
-#include "inet/routing/ospfv2/router/OspfRouter.h"
+#include "inet/routing/ospfv2/neighbor/Ospfv2Neighbor.h"
+#include "inet/routing/ospfv2/router/Ospfv2Area.h"
+#include "inet/routing/ospfv2/router/Ospfv2Common.h"
+#include "inet/routing/ospfv2/router/Ospfv2Router.h"
 
 namespace inet {
 
-namespace ospf {
+namespace ospfv2 {
+
+using namespace ospf;
 
 class LsaProcessingMarker
 {
@@ -44,232 +46,178 @@ LinkStateUpdateHandler::LinkStateUpdateHandler(Router *containingRouter) :
 /**
  * @see RFC2328 Section 13.
  */
-void LinkStateUpdateHandler::processPacket(Packet *packet, OspfInterface *intf, Neighbor *neighbor)
+void LinkStateUpdateHandler::processPacket(Packet *packet, Ospfv2Interface *intf, Neighbor *neighbor)
 {
     router->getMessageHandler()->printEvent("Link State update packet received", intf, neighbor);
 
-    const auto& lsUpdatePacket = packet->peekAtFront<OspfLinkStateUpdatePacket>();
+    const auto& lsUpdatePacket = packet->peekAtFront<Ospfv2LinkStateUpdatePacket>();
     bool shouldRebuildRoutingTable = false;
 
     if (neighbor->getState() >= Neighbor::EXCHANGE_STATE) {
         AreaId areaID = lsUpdatePacket->getAreaID();
-        Area *area = router->getAreaByID(areaID);
-        LsaType currentType = ROUTERLSA_TYPE;
-        unsigned int currentLSAIndex = 0;
+        Ospfv2Area *area = router->getAreaByID(areaID);
 
         EV_INFO << "  Processing packet contents:\n";
 
-        while (currentType <= AS_EXTERNAL_LSA_TYPE) {
-            unsigned int lsaCount = 0;
+        for (unsigned int i = 0; i < lsUpdatePacket->getOspfLSAsArraySize(); i++) {
+            const Ospfv2Lsa *currentLSA = lsUpdatePacket->getOspfLSAs(i);
 
-            switch (currentType) {
-                case ROUTERLSA_TYPE:
-                    lsaCount = lsUpdatePacket->getRouterLSAsArraySize();
-                    break;
-
-                case NETWORKLSA_TYPE:
-                    lsaCount = lsUpdatePacket->getNetworkLSAsArraySize();
-                    break;
-
-                case SUMMARYLSA_NETWORKS_TYPE:
-                case SUMMARYLSA_ASBOUNDARYROUTERS_TYPE:
-                    lsaCount = lsUpdatePacket->getSummaryLSAsArraySize();
-                    break;
-
-                case AS_EXTERNAL_LSA_TYPE:
-                    lsaCount = lsUpdatePacket->getAsExternalLSAsArraySize();
-                    break;
-
-                default:
-                    throw cRuntimeError("Invalid currentType:%d", currentType);
+            if (!validateLSChecksum(currentLSA)) {
+                continue;
             }
 
-            for (unsigned int i = 0; i < lsaCount; i++) {
-                const OspfLsa *currentLSA;
+            Ospfv2LsaType lsaType = static_cast<Ospfv2LsaType>(currentLSA->getHeader().getLsType());
+            if ((lsaType != ROUTERLSA_TYPE) &&
+                (lsaType != NETWORKLSA_TYPE) &&
+                (lsaType != SUMMARYLSA_NETWORKS_TYPE) &&
+                (lsaType != SUMMARYLSA_ASBOUNDARYROUTERS_TYPE) &&
+                (lsaType != AS_EXTERNAL_LSA_TYPE))
+            {
+                continue;
+            }
 
-                switch (currentType) {
-                    case ROUTERLSA_TYPE:
-                        currentLSA = (&(lsUpdatePacket->getRouterLSAs(i)));
-                        break;
+            LsaProcessingMarker marker(i);
+            EV_DETAIL << "    " << currentLSA->getHeader() << "\n";
 
-                    case NETWORKLSA_TYPE:
-                        currentLSA = (&(lsUpdatePacket->getNetworkLSAs(i)));
-                        break;
+            //FIXME area maybe nullptr
+            if ((lsaType == AS_EXTERNAL_LSA_TYPE) && !(area != nullptr && area->getExternalRoutingCapability())) {
+                continue;
+            }
+            LsaKeyType lsaKey;
 
-                    case SUMMARYLSA_NETWORKS_TYPE:
-                    case SUMMARYLSA_ASBOUNDARYROUTERS_TYPE:
-                        currentLSA = (&(lsUpdatePacket->getSummaryLSAs(i)));
-                        break;
+            lsaKey.linkStateID = currentLSA->getHeader().getLinkStateID();
+            lsaKey.advertisingRouter = currentLSA->getHeader().getAdvertisingRouter();
 
-                    case AS_EXTERNAL_LSA_TYPE:
-                        currentLSA = (&(lsUpdatePacket->getAsExternalLSAs(i)));
-                        break;
+            Ospfv2Lsa *lsaInDatabase = router->findLSA(lsaType, lsaKey, areaID);
+            unsigned short lsAge = currentLSA->getHeader().getLsAge();
+            AcknowledgementFlags ackFlags;
 
-                    default:
-                        throw cRuntimeError("Invalid currentType:%d", currentType);
+            ackFlags.floodedBackOut = false;
+            ackFlags.lsaIsNewer = false;
+            ackFlags.lsaIsDuplicate = false;
+            ackFlags.impliedAcknowledgement = false;
+            ackFlags.lsaReachedMaxAge = (lsAge == MAX_AGE);
+            ackFlags.noLSAInstanceInDatabase = (lsaInDatabase == nullptr);
+            ackFlags.anyNeighborInExchangeOrLoadingState = router->hasAnyNeighborInStates(Neighbor::EXCHANGE_STATE | Neighbor::LOADING_STATE);
+
+            if ((ackFlags.lsaReachedMaxAge) && (ackFlags.noLSAInstanceInDatabase) && (!ackFlags.anyNeighborInExchangeOrLoadingState)) {
+                if (intf->getType() == Ospfv2Interface::BROADCAST) {
+                    if ((intf->getState() == Ospfv2Interface::DESIGNATED_ROUTER_STATE) ||
+                        (intf->getState() == Ospfv2Interface::BACKUP_STATE) ||
+                        (intf->getDesignatedRouter() == NULL_DESIGNATEDROUTERID))
+                    {
+                        intf->sendLsAcknowledgement(&(currentLSA->getHeader()), Ipv4Address::ALL_OSPF_ROUTERS_MCAST);
+                    }
+                    else {
+                        intf->sendLsAcknowledgement(&(currentLSA->getHeader()), Ipv4Address::ALL_OSPF_DESIGNATED_ROUTERS_MCAST);
+                    }
                 }
-
-                if (!validateLSChecksum(currentLSA)) {
-                    continue;
+                else {
+                    if (intf->getType() == Ospfv2Interface::POINTTOPOINT) {
+                        intf->sendLsAcknowledgement(&(currentLSA->getHeader()), Ipv4Address::ALL_OSPF_ROUTERS_MCAST);
+                    }
+                    else {
+                        intf->sendLsAcknowledgement(&(currentLSA->getHeader()), neighbor->getAddress());
+                    }
                 }
+                continue;
+            }
 
-                LsaType lsaType = static_cast<LsaType>(currentLSA->getHeader().getLsType());
-                if ((lsaType != ROUTERLSA_TYPE) &&
-                    (lsaType != NETWORKLSA_TYPE) &&
-                    (lsaType != SUMMARYLSA_NETWORKS_TYPE) &&
-                    (lsaType != SUMMARYLSA_ASBOUNDARYROUTERS_TYPE) &&
-                    (lsaType != AS_EXTERNAL_LSA_TYPE))
+            if (!ackFlags.noLSAInstanceInDatabase) {
+                // operator< and operator== on OSPFLSAHeaders determines which one is newer(less means older)
+                ackFlags.lsaIsNewer = (lsaInDatabase->getHeader() < currentLSA->getHeader());
+                ackFlags.lsaIsDuplicate = (operator==(lsaInDatabase->getHeader(), currentLSA->getHeader()));
+            }
+            if ((ackFlags.noLSAInstanceInDatabase) || (ackFlags.lsaIsNewer)) {
+                LsaTrackingInfo *info = (!ackFlags.noLSAInstanceInDatabase) ? dynamic_cast<LsaTrackingInfo *>(lsaInDatabase) : nullptr;
+                if ((!ackFlags.noLSAInstanceInDatabase) &&
+                    (info != nullptr) &&
+                    (info->getSource() == LsaTrackingInfo::FLOODED) &&
+                    (info->getInstallTime() < MIN_LS_ARRIVAL))
                 {
                     continue;
                 }
+                ackFlags.floodedBackOut = router->floodLSA(currentLSA, areaID, intf, neighbor);
+                if (!ackFlags.noLSAInstanceInDatabase) {
+                    LsaKeyType lsaKey;
 
-                LsaProcessingMarker marker(currentLSAIndex++);
-                EV_DETAIL << "    " << currentLSA->getHeader() << "\n";
+                    lsaKey.linkStateID = lsaInDatabase->getHeader().getLinkStateID();
+                    lsaKey.advertisingRouter = lsaInDatabase->getHeader().getAdvertisingRouter();
 
-                //FIXME area maybe nullptr
-                if ((lsaType == AS_EXTERNAL_LSA_TYPE) && !(area != nullptr && area->getExternalRoutingCapability())) {
-                    continue;
+                    router->removeFromAllRetransmissionLists(lsaKey);
                 }
-                LsaKeyType lsaKey;
+                shouldRebuildRoutingTable |= router->installLSA(currentLSA, areaID);
 
-                lsaKey.linkStateID = currentLSA->getHeader().getLinkStateID();
-                lsaKey.advertisingRouter = currentLSA->getHeader().getAdvertisingRouter();
+                EV_INFO << "    (update installed)\n";
 
-                OspfLsa *lsaInDatabase = router->findLSA(lsaType, lsaKey, areaID);
-                unsigned short lsAge = currentLSA->getHeader().getLsAge();
-                AcknowledgementFlags ackFlags;
+                acknowledgeLSA(currentLSA->getHeader(), intf, ackFlags, lsUpdatePacket->getRouterID());
+                if ((currentLSA->getHeader().getAdvertisingRouter() == router->getRouterID()) ||
+                    ((lsaType == NETWORKLSA_TYPE) &&
+                     (router->isLocalAddress(currentLSA->getHeader().getLinkStateID()))))
+                {
+                    if (ackFlags.noLSAInstanceInDatabase) {
+                        auto lsaCopy = currentLSA->dup();
+                        lsaCopy->getHeaderForUpdate().setLsAge(MAX_AGE);
+                        router->floodLSA(lsaCopy, areaID);
+                    }
+                    else {
+                        if (ackFlags.lsaIsNewer) {
+                            long sequenceNumber = currentLSA->getHeader().getLsSequenceNumber();
+                            if (sequenceNumber == MAX_SEQUENCE_NUMBER) {
+                                lsaInDatabase->getHeaderForUpdate().setLsAge(MAX_AGE);
+                                router->floodLSA(lsaInDatabase, areaID);
+                            }
+                            else {
+                                lsaInDatabase->getHeaderForUpdate().setLsSequenceNumber(sequenceNumber + 1);
+                                router->floodLSA(lsaInDatabase, areaID);
+                            }
+                        }
+                    }
+                }
+                continue;
+            }
+            if (neighbor->isLSAOnRequestList(lsaKey)) {
+                neighbor->processEvent(Neighbor::BAD_LINK_STATE_REQUEST);
+                break;
+            }
+            if (ackFlags.lsaIsDuplicate) {
+                if (neighbor->isLinkStateRequestListEmpty(lsaKey)) {
+                    neighbor->removeFromRetransmissionList(lsaKey);
+                    ackFlags.impliedAcknowledgement = true;
+                }
+                acknowledgeLSA(currentLSA->getHeader(), intf, ackFlags, lsUpdatePacket->getRouterID());
+                continue;
+            }
+            if ((lsaInDatabase->getHeader().getLsAge() == MAX_AGE) &&
+                (lsaInDatabase->getHeader().getLsSequenceNumber() == MAX_SEQUENCE_NUMBER))
+            {
+                continue;
+            }
+            if (!neighbor->isOnTransmittedLSAList(lsaKey)) {
+                Packet *updatePacket = intf->createUpdatePacket(lsaInDatabase);
+                if (updatePacket != nullptr) {
+                    int ttl = (intf->getType() == Ospfv2Interface::VIRTUAL) ? VIRTUAL_LINK_TTL : 1;
 
-                ackFlags.floodedBackOut = false;
-                ackFlags.lsaIsNewer = false;
-                ackFlags.lsaIsDuplicate = false;
-                ackFlags.impliedAcknowledgement = false;
-                ackFlags.lsaReachedMaxAge = (lsAge == MAX_AGE);
-                ackFlags.noLSAInstanceInDatabase = (lsaInDatabase == nullptr);
-                ackFlags.anyNeighborInExchangeOrLoadingState = router->hasAnyNeighborInStates(Neighbor::EXCHANGE_STATE | Neighbor::LOADING_STATE);
-
-                if ((ackFlags.lsaReachedMaxAge) && (ackFlags.noLSAInstanceInDatabase) && (!ackFlags.anyNeighborInExchangeOrLoadingState)) {
-                    if (intf->getType() == OspfInterface::BROADCAST) {
-                        if ((intf->getState() == OspfInterface::DESIGNATED_ROUTER_STATE) ||
-                            (intf->getState() == OspfInterface::BACKUP_STATE) ||
+                    if (intf->getType() == Ospfv2Interface::BROADCAST) {
+                        if ((intf->getState() == Ospfv2Interface::DESIGNATED_ROUTER_STATE) ||
+                            (intf->getState() == Ospfv2Interface::BACKUP_STATE) ||
                             (intf->getDesignatedRouter() == NULL_DESIGNATEDROUTERID))
                         {
-                            intf->sendLsAcknowledgement(&(currentLSA->getHeader()), Ipv4Address::ALL_OSPF_ROUTERS_MCAST);
+                            router->getMessageHandler()->sendPacket(updatePacket, Ipv4Address::ALL_OSPF_ROUTERS_MCAST, intf, ttl);
                         }
                         else {
-                            intf->sendLsAcknowledgement(&(currentLSA->getHeader()), Ipv4Address::ALL_OSPF_DESIGNATED_ROUTERS_MCAST);
+                            router->getMessageHandler()->sendPacket(updatePacket, Ipv4Address::ALL_OSPF_DESIGNATED_ROUTERS_MCAST, intf, ttl);
                         }
                     }
                     else {
-                        if (intf->getType() == OspfInterface::POINTTOPOINT) {
-                            intf->sendLsAcknowledgement(&(currentLSA->getHeader()), Ipv4Address::ALL_OSPF_ROUTERS_MCAST);
+                        if (intf->getType() == Ospfv2Interface::POINTTOPOINT) {
+                            router->getMessageHandler()->sendPacket(updatePacket, Ipv4Address::ALL_OSPF_ROUTERS_MCAST, intf, ttl);
                         }
                         else {
-                            intf->sendLsAcknowledgement(&(currentLSA->getHeader()), neighbor->getAddress());
-                        }
-                    }
-                    continue;
-                }
-
-                if (!ackFlags.noLSAInstanceInDatabase) {
-                    // operator< and operator== on OSPFLSAHeaders determines which one is newer(less means older)
-                    ackFlags.lsaIsNewer = (lsaInDatabase->getHeader() < currentLSA->getHeader());
-                    ackFlags.lsaIsDuplicate = (operator==(lsaInDatabase->getHeader(), currentLSA->getHeader()));
-                }
-                if ((ackFlags.noLSAInstanceInDatabase) || (ackFlags.lsaIsNewer)) {
-                    LsaTrackingInfo *info = (!ackFlags.noLSAInstanceInDatabase) ? dynamic_cast<LsaTrackingInfo *>(lsaInDatabase) : nullptr;
-                    if ((!ackFlags.noLSAInstanceInDatabase) &&
-                        (info != nullptr) &&
-                        (info->getSource() == LsaTrackingInfo::FLOODED) &&
-                        (info->getInstallTime() < MIN_LS_ARRIVAL))
-                    {
-                        continue;
-                    }
-                    ackFlags.floodedBackOut = router->floodLSA(currentLSA, areaID, intf, neighbor);
-                    if (!ackFlags.noLSAInstanceInDatabase) {
-                        LsaKeyType lsaKey;
-
-                        lsaKey.linkStateID = lsaInDatabase->getHeader().getLinkStateID();
-                        lsaKey.advertisingRouter = lsaInDatabase->getHeader().getAdvertisingRouter();
-
-                        router->removeFromAllRetransmissionLists(lsaKey);
-                    }
-                    shouldRebuildRoutingTable |= router->installLSA(currentLSA, areaID);
-
-                    EV_INFO << "    (update installed)\n";
-
-                    acknowledgeLSA(currentLSA->getHeader(), intf, ackFlags, lsUpdatePacket->getRouterID());
-                    if ((currentLSA->getHeader().getAdvertisingRouter() == router->getRouterID()) ||
-                        ((lsaType == NETWORKLSA_TYPE) &&
-                         (router->isLocalAddress(currentLSA->getHeader().getLinkStateID()))))
-                    {
-                        if (ackFlags.noLSAInstanceInDatabase) {
-                            auto lsaCopy = currentLSA->dup();
-                            lsaCopy->getHeaderForUpdate().setLsAge(MAX_AGE);
-                            router->floodLSA(lsaCopy, areaID);
-                        }
-                        else {
-                            if (ackFlags.lsaIsNewer) {
-                                long sequenceNumber = currentLSA->getHeader().getLsSequenceNumber();
-                                if (sequenceNumber == MAX_SEQUENCE_NUMBER) {
-                                    lsaInDatabase->getHeaderForUpdate().setLsAge(MAX_AGE);
-                                    router->floodLSA(lsaInDatabase, areaID);
-                                }
-                                else {
-                                    lsaInDatabase->getHeaderForUpdate().setLsSequenceNumber(sequenceNumber + 1);
-                                    router->floodLSA(lsaInDatabase, areaID);
-                                }
-                            }
-                        }
-                    }
-                    continue;
-                }
-                if (neighbor->isLSAOnRequestList(lsaKey)) {
-                    neighbor->processEvent(Neighbor::BAD_LINK_STATE_REQUEST);
-                    break;
-                }
-                if (ackFlags.lsaIsDuplicate) {
-                    if (neighbor->isLinkStateRequestListEmpty(lsaKey)) {
-                        neighbor->removeFromRetransmissionList(lsaKey);
-                        ackFlags.impliedAcknowledgement = true;
-                    }
-                    acknowledgeLSA(currentLSA->getHeader(), intf, ackFlags, lsUpdatePacket->getRouterID());
-                    continue;
-                }
-                if ((lsaInDatabase->getHeader().getLsAge() == MAX_AGE) &&
-                    (lsaInDatabase->getHeader().getLsSequenceNumber() == MAX_SEQUENCE_NUMBER))
-                {
-                    continue;
-                }
-                if (!neighbor->isOnTransmittedLSAList(lsaKey)) {
-                    Packet *updatePacket = intf->createUpdatePacket(lsaInDatabase);
-                    if (updatePacket != nullptr) {
-                        int ttl = (intf->getType() == OspfInterface::VIRTUAL) ? VIRTUAL_LINK_TTL : 1;
-
-                        if (intf->getType() == OspfInterface::BROADCAST) {
-                            if ((intf->getState() == OspfInterface::DESIGNATED_ROUTER_STATE) ||
-                                (intf->getState() == OspfInterface::BACKUP_STATE) ||
-                                (intf->getDesignatedRouter() == NULL_DESIGNATEDROUTERID))
-                            {
-                                router->getMessageHandler()->sendPacket(updatePacket, Ipv4Address::ALL_OSPF_ROUTERS_MCAST, intf, ttl);
-                            }
-                            else {
-                                router->getMessageHandler()->sendPacket(updatePacket, Ipv4Address::ALL_OSPF_DESIGNATED_ROUTERS_MCAST, intf, ttl);
-                            }
-                        }
-                        else {
-                            if (intf->getType() == OspfInterface::POINTTOPOINT) {
-                                router->getMessageHandler()->sendPacket(updatePacket, Ipv4Address::ALL_OSPF_ROUTERS_MCAST, intf, ttl);
-                            }
-                            else {
-                                router->getMessageHandler()->sendPacket(updatePacket, neighbor->getAddress(), intf, ttl);
-                            }
+                            router->getMessageHandler()->sendPacket(updatePacket, neighbor->getAddress(), intf, ttl);
                         }
                     }
                 }
-            }
-            currentType = static_cast<LsaType>(currentType + 1);
-            if (currentType == SUMMARYLSA_NETWORKS_TYPE) {
-                currentType = static_cast<LsaType>(currentType + 1);
             }
         }
     }
@@ -278,15 +226,15 @@ void LinkStateUpdateHandler::processPacket(Packet *packet, OspfInterface *intf, 
         router->rebuildRoutingTable();
 }
 
-void LinkStateUpdateHandler::acknowledgeLSA(const OspfLsaHeader& lsaHeader,
-        OspfInterface *intf,
+void LinkStateUpdateHandler::acknowledgeLSA(const Ospfv2LsaHeader& lsaHeader,
+        Ospfv2Interface *intf,
         LinkStateUpdateHandler::AcknowledgementFlags acknowledgementFlags,
         RouterId lsaSource)
 {
     bool sendDirectAcknowledgment = false;
 
     if (!acknowledgementFlags.floodedBackOut) {
-        if (intf->getState() == OspfInterface::BACKUP_STATE) {
+        if (intf->getState() == Ospfv2Interface::BACKUP_STATE) {
             if ((acknowledgementFlags.lsaIsNewer && (lsaSource == intf->getDesignatedRouter().routerID)) ||
                 (acknowledgementFlags.lsaIsDuplicate && acknowledgementFlags.impliedAcknowledgement))
             {
@@ -319,7 +267,7 @@ void LinkStateUpdateHandler::acknowledgeLSA(const OspfLsaHeader& lsaHeader,
     }
 
     if (sendDirectAcknowledgment) {
-        const auto& ackPacket = makeShared<OspfLinkStateAcknowledgementPacket>();
+        const auto& ackPacket = makeShared<Ospfv2LinkStateAcknowledgementPacket>();
 
         ackPacket->setType(LINKSTATE_ACKNOWLEDGEMENT_PACKET);
         ackPacket->setRouterID(Ipv4Address(router->getRouterID()));
@@ -329,32 +277,24 @@ void LinkStateUpdateHandler::acknowledgeLSA(const OspfLsaHeader& lsaHeader,
         ackPacket->setLsaHeadersArraySize(1);
         ackPacket->setLsaHeaders(0, lsaHeader);
 
-        ackPacket->setChunkLength(OSPF_HEADER_LENGTH + OSPF_LSA_HEADER_LENGTH);
-
-        ackPacket->setCrcMode(intf->getCrcMode());
-        // making sure the crc field is zero
-        ackPacket->setCrc(0x0000);
-        // RFC 2328: OSPF checksum is calculated over the entire OSPF packet, excluding the 64-bit authentication field.
-        if(intf->getCrcMode() == CRC_COMPUTED) {
-            MemoryOutputStream stream;
-            Chunk::serialize(stream, ackPacket);
-            uint16_t crc = TcpIpChecksum::checksum(stream.getData());
-            ackPacket->setCrc(crc);
-        }
+        ackPacket->setPacketLengthField(B(OSPFv2_HEADER_LENGTH + OSPFv2_LSA_HEADER_LENGTH).get());
+        ackPacket->setChunkLength(B(ackPacket->getPacketLengthField()));
 
         AuthenticationKeyType authKey = intf->getAuthenticationKey();
         for (int i = 0; i < 8; i++) {
             ackPacket->setAuthentication(i, authKey.bytes[i]);
         }
 
+        setOspfCrc(ackPacket, intf->getCrcMode());
+
         Packet *pk = new Packet();
         pk->insertAtBack(ackPacket);
 
-        int ttl = (intf->getType() == OspfInterface::VIRTUAL) ? VIRTUAL_LINK_TTL : 1;
+        int ttl = (intf->getType() == Ospfv2Interface::VIRTUAL) ? VIRTUAL_LINK_TTL : 1;
 
-        if (intf->getType() == OspfInterface::BROADCAST) {
-            if ((intf->getState() == OspfInterface::DESIGNATED_ROUTER_STATE) ||
-                (intf->getState() == OspfInterface::BACKUP_STATE) ||
+        if (intf->getType() == Ospfv2Interface::BROADCAST) {
+            if ((intf->getState() == Ospfv2Interface::DESIGNATED_ROUTER_STATE) ||
+                (intf->getState() == Ospfv2Interface::BACKUP_STATE) ||
                 (intf->getDesignatedRouter() == NULL_DESIGNATEDROUTERID))
             {
                 router->getMessageHandler()->sendPacket(pk, Ipv4Address::ALL_OSPF_ROUTERS_MCAST, intf, ttl);
@@ -364,7 +304,7 @@ void LinkStateUpdateHandler::acknowledgeLSA(const OspfLsaHeader& lsaHeader,
             }
         }
         else {
-            if (intf->getType() == OspfInterface::POINTTOPOINT) {
+            if (intf->getType() == Ospfv2Interface::POINTTOPOINT) {
                 router->getMessageHandler()->sendPacket(pk, Ipv4Address::ALL_OSPF_ROUTERS_MCAST, intf, ttl);
             }
             else {
@@ -376,7 +316,7 @@ void LinkStateUpdateHandler::acknowledgeLSA(const OspfLsaHeader& lsaHeader,
     }
 }
 
-} // namespace ospf
+} // namespace ospfv2
 
 } // namespace inet
 

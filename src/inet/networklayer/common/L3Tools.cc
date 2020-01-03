@@ -59,7 +59,7 @@ const Ptr<const NetworkHeaderBase> getNetworkProtocolHeader(Packet *packet)
         return header;
 }
 
-const Ptr<const NetworkHeaderBase> peekNetworkProtocolHeader(Packet *packet, const Protocol& protocol)
+const Ptr<const NetworkHeaderBase> peekNetworkProtocolHeader(const Packet *packet, const Protocol& protocol)
 {
 #ifdef WITH_IPv4
     if (protocol == Protocol::ipv4)

@@ -66,6 +66,18 @@ void TcpAppBase::connect()
     int localPort = par("localPort");
     socket.bind(*localAddress ? L3AddressResolver().resolve(localAddress) : L3Address(), localPort);
 
+    int timeToLive = par("timeToLive");
+    if (timeToLive != -1)
+        socket.setTimeToLive(timeToLive);
+
+    int dscp = par("dscp");
+    if (dscp != -1)
+        socket.setDscp(dscp);
+
+    int tos = par("tos");
+    if (tos != -1)
+        socket.setTos(tos);
+
     // connect
     const char *connectAddress = par("connectAddress");
     int connectPort = par("connectPort");

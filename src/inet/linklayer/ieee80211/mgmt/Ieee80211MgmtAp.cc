@@ -93,7 +93,7 @@ void Ieee80211MgmtAp::handleCommand(int msgkind, cObject *ctrl)
     throw cRuntimeError("handleCommand(): no commands supported");
 }
 
-void Ieee80211MgmtAp::receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details)
+void Ieee80211MgmtAp::receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details)
 {
     Enter_Method_Silent();
     if (signalID == Ieee80211Radio::radioChannelChangedSignal) {
@@ -111,8 +111,8 @@ Ieee80211MgmtAp::StaInfo *Ieee80211MgmtAp::lookupSenderSTA(const Ptr<const Ieee8
 void Ieee80211MgmtAp::sendManagementFrame(const char *name, const Ptr<Ieee80211MgmtFrame>& body, int subtype, const MacAddress& destAddr)
 {
     auto packet = new Packet(name);
-    packet->addTagIfAbsent<MacAddressReq>()->setDestAddress(destAddr);
-    packet->addTagIfAbsent<Ieee80211SubtypeReq>()->setSubtype(subtype);
+    packet->addTag<MacAddressReq>()->setDestAddress(destAddr);
+    packet->addTag<Ieee80211SubtypeReq>()->setSubtype(subtype);
     packet->insertAtBack(body);
     sendDown(packet);
 }

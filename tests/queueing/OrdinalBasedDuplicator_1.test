@@ -1,0 +1,95 @@
+%description:
+
+In this test, packets are produced periodically by an active packet source
+(ActivePacketSource). The packets are consumed by a passive packet sink (PassivePacketSink).
+Packets are passed through from the source to the sink by a duplicator (OrdinalBasedDuplicator).
+Every second packet is duplicated based on its ordinal number.
+
+%file: test.ned
+
+import inet.queueing.common.OrdinalBasedDuplicator;
+import inet.queueing.sink.PassivePacketSink;
+import inet.queueing.source.ActivePacketSource;
+
+network TestOrdinalBasedDuplicator
+{
+    submodules:
+        producer: ActivePacketSource {
+            @display("p=100,100");
+        }
+        duplicator: OrdinalBasedDuplicator {
+            @display("p=200,100");
+        }
+        consumer: PassivePacketSink {
+            @display("p=300,100");
+        }
+    connections:
+        producer.out --> duplicator.in;
+        duplicator.out --> consumer.in;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = TestOrdinalBasedDuplicator
+sim-time-limit = 10s
+cmdenv-event-banners = false
+*.producer.packetLength = 1B
+*.producer.productionInterval = 1s
+*.duplicator.duplicatesVector = "0; 2; 4; 6; 8; 10"
+
+%contains: stdout
+Producing packet producer-0.
+Duplicating packet number 0 (inet::Packet)producer-0 (1 B) [ByteCountChunk, length = 1 B, data = 63]
+Forwarding duplicate packet producer-0.
+Consuming packet producer-0.
+Forwarding original packet producer-0.
+Consuming packet producer-0.
+
+Running simulation...
+Producing packet producer-1.
+Forwarding original packet producer-1.
+Consuming packet producer-1.
+Producing packet producer-2.
+Duplicating packet number 2 (inet::Packet)producer-2 (1 B) [ByteCountChunk, length = 1 B, data = 63]
+Forwarding duplicate packet producer-2.
+Consuming packet producer-2.
+Forwarding original packet producer-2.
+Consuming packet producer-2.
+Producing packet producer-3.
+Forwarding original packet producer-3.
+Consuming packet producer-3.
+Producing packet producer-4.
+Duplicating packet number 4 (inet::Packet)producer-4 (1 B) [ByteCountChunk, length = 1 B, data = 63]
+Forwarding duplicate packet producer-4.
+Consuming packet producer-4.
+Forwarding original packet producer-4.
+Consuming packet producer-4.
+Producing packet producer-5.
+Forwarding original packet producer-5.
+Consuming packet producer-5.
+Producing packet producer-6.
+Duplicating packet number 6 (inet::Packet)producer-6 (1 B) [ByteCountChunk, length = 1 B, data = 63]
+Forwarding duplicate packet producer-6.
+Consuming packet producer-6.
+Forwarding original packet producer-6.
+Consuming packet producer-6.
+Producing packet producer-7.
+Forwarding original packet producer-7.
+Consuming packet producer-7.
+Producing packet producer-8.
+Duplicating packet number 8 (inet::Packet)producer-8 (1 B) [ByteCountChunk, length = 1 B, data = 63]
+Forwarding duplicate packet producer-8.
+Consuming packet producer-8.
+Forwarding original packet producer-8.
+Consuming packet producer-8.
+Producing packet producer-9.
+Forwarding original packet producer-9.
+Consuming packet producer-9.
+Producing packet producer-10.
+Duplicating packet number 10 (inet::Packet)producer-10 (1 B) [ByteCountChunk, length = 1 B, data = 63]
+End of duplicatesVector reached.
+Forwarding duplicate packet producer-10.
+Consuming packet producer-10.
+Forwarding original packet producer-10.
+Consuming packet producer-10.

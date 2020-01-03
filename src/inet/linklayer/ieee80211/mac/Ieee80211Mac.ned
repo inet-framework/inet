@@ -30,8 +30,7 @@ import inet.linklayer.ieee80211.mac.coordinationfunction.Hcf;
 //
 // Implementation of the 802.11b MAC protocol. This module is intended
 // to be used in combination with the ~Ieee80211Radio module as the physical
-// layer. (The ~SnrEval80211 and ~Decider80211 modules should also work if
-// per-packet bitrate setting gets implemented.)
+// layer.
 //
 // Encapsulation/decapsulation must be done in the upper layers. (It is
 // typically in the 802.11 management module, see in ~Ieee80211Interface).
@@ -42,15 +41,10 @@ import inet.linklayer.ieee80211.mac.coordinationfunction.Hcf;
 // frames; all other fields must already be filled when this module gets
 // the frame for transmission.
 //
-// The module has an internal queue, but usually it is to be used with an
-// external passive queue module (its name should be given in the queueModule
-// parameter; specifying "" causes the internal queue to be used). The passive
-// queue module is a simple module whose C++ class implements the IPassiveQueue
-// interface.
-//
 // <b>Limitations</b>
 //
-// The following features not supported: 1) power management, 2) polling (PCF).
+// Power management and polling (PCF) are not supported.
+//
 // Physical layer algorithms such as frequency hopping and
 // direct sequence spread spectrum are not modelled directly.
 //
@@ -84,6 +78,7 @@ module Ieee80211Mac extends MacProtocolBase like IIeee80211Mac
         @statistic[packetReceivedFromUpper](title="packets received from upper layer"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetReceivedFromLower](title="packets received from lower layer"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[linkBroken](title="link breaks"; record=count, vector?; interpolationmode=none);
+        @statistic[packetDrop](title="packet drops"; source=packetDropped; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetDropIncorrectlyReceived](title="packet drops: incorrectly received"; source=packetDropReasonIsIncorrectlyReceived(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetDropNotAddressedToUs](title="packet drops: not addressed to us"; source=packetDropReasonIsNotAddressedToUs(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetDropQueueOverflow](title="packet drops: queue overflow"; source=packetDropReasonIsQueueOverflow(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
@@ -98,7 +93,7 @@ module Ieee80211Mac extends MacProtocolBase like IIeee80211Mac
             parameters:
                 @display("p=100,100");
         }
-        hcf: <default("Hcf")> like IHcf {
+        hcf: <default("Hcf")> like IHcf if qosStation {
             parameters:
                 @display("p=250,100");
         }

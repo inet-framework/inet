@@ -1,0 +1,1102 @@
+%description:
+
+This test contains a simplified version of a client/server and a request/response
+based communication.
+
+Request packets are produced periodically and randomly by an active packet
+source (ActivePacketSource) in the client. The generated requests fall into one of
+two categories based on the data they contain.
+
+The server processes requests in order, one by one, using a compound consumer
+(RequestConsumer). Each request is first classified based on the data it contains,
+and then a certain number of tokens are generated as the request is consumed.
+
+The tokens are added to a response server in a compound producer (ResponseProducer).
+The response producer generates different traffic randomly over a period of time
+for each kind of request.
+
+The client consumes the response packets by a passive packet sink (PassivePacketSink).
+
+%file: test.ned
+
+import inet.queueing.sink.RequestConsumer;
+import inet.queueing.sink.PassivePacketSink;
+import inet.queueing.source.ActivePacketSource;
+import inet.queueing.source.ResponseProducer;
+
+network TestRequestResponse
+{
+    submodules:
+        requestProducer: ActivePacketSource {
+            @display("p=200,100");
+        }
+        responseConsumer: PassivePacketSink {
+            @display("p=400,100");
+        }
+        requestConsumer: RequestConsumer {
+            @display("p=200,200");
+        }
+        responseProducer: ResponseProducer {
+            @display("p=400,200");
+        }
+    connections allowunconnected:
+    	requestProducer.out --> requestConsumer.in;
+        responseProducer.out --> responseConsumer.in;
+}
+
+%file: Test.cc
+#include "inet/queueing/function/PacketClassifierFunction.h"
+#include "inet/common/packet/Packet.h"
+
+using namespace inet; 
+
+static int testClassify(Packet *packet)
+{
+    return packet->getId() % 2;
+}
+
+Register_Packet_Classifier_Function(TestClassifier, testClassify);
+
+%inifile: omnetpp.ini
+
+[General]
+network = TestRequestResponse
+sim-time-limit = 100s
+cmdenv-event-banners = false
+*.requestProducer.packetLength = 1B
+*.requestProducer.productionInterval = uniform(0s, 4s)
+*.requestConsumer.numKind = 2
+*.requestConsumer.classifier.classifierClass = "TestClassifier"
+*.requestConsumer.responseProducerModule = "^.responseProducer"
+*.requestConsumer.tokenGenerator[0].numTokensPerPacket = intuniform(1, 10)
+*.requestConsumer.tokenGenerator[1].numTokensPerPacket = intuniform(1, 5)
+*.responseProducer.numKind = 2
+*.responseProducer.requestConsumerModule = "^.requestConsumer"
+*.responseProducer.provider[0].packetLength = intuniform(1B, 10B)
+*.responseProducer.provider[0].providingInterval = uniform(0s, 0.2s)
+*.responseProducer.provider[1].packetLength = intuniform(1B, 100B)
+*.responseProducer.provider[1].providingInterval = uniform(0s, 2s)
+
+%contains: stdout
+Producing packet requestProducer-0.
+Pushing packet requestProducer-0 into the queue.
+Popping packet requestProducer-0 from the queue.
+Processing packet requestProducer-0.
+Classifying packet requestProducer-0.
+Providing packet provider[0]-0.
+Processing packet provider[0]-0.
+Forwarding pushed packet provider[0]-0.
+Consuming packet provider[0]-0.
+
+Running simulation...
+Providing packet provider[0]-1.
+Processing packet provider[0]-1.
+Forwarding pushed packet provider[0]-1.
+Consuming packet provider[0]-1.
+Providing packet provider[0]-2.
+Processing packet provider[0]-2.
+Forwarding pushed packet provider[0]-2.
+Consuming packet provider[0]-2.
+Providing packet provider[0]-3.
+Processing packet provider[0]-3.
+Forwarding pushed packet provider[0]-3.
+Consuming packet provider[0]-3.
+Providing packet provider[0]-4.
+Processing packet provider[0]-4.
+Forwarding pushed packet provider[0]-4.
+Consuming packet provider[0]-4.
+Providing packet provider[0]-5.
+Processing packet provider[0]-5.
+Forwarding pushed packet provider[0]-5.
+Consuming packet provider[0]-5.
+Producing packet requestProducer-1.
+Pushing packet requestProducer-1 into the queue.
+Popping packet requestProducer-1 from the queue.
+Processing packet requestProducer-1.
+Classifying packet requestProducer-1.
+Providing packet provider[1]-0.
+Processing packet provider[1]-0.
+Forwarding pushed packet provider[1]-0.
+Consuming packet provider[1]-0.
+Producing packet requestProducer-2.
+Pushing packet requestProducer-2 into the queue.
+Popping packet requestProducer-2 from the queue.
+Processing packet requestProducer-2.
+Classifying packet requestProducer-2.
+Providing packet provider[1]-1.
+Processing packet provider[1]-1.
+Forwarding pushed packet provider[1]-1.
+Consuming packet provider[1]-1.
+Producing packet requestProducer-3.
+Pushing packet requestProducer-3 into the queue.
+Popping packet requestProducer-3 from the queue.
+Processing packet requestProducer-3.
+Classifying packet requestProducer-3.
+Providing packet provider[1]-2.
+Processing packet provider[1]-2.
+Forwarding pushed packet provider[1]-2.
+Consuming packet provider[1]-2.
+Producing packet requestProducer-4.
+Pushing packet requestProducer-4 into the queue.
+Popping packet requestProducer-4 from the queue.
+Processing packet requestProducer-4.
+Classifying packet requestProducer-4.
+Providing packet provider[0]-6.
+Processing packet provider[0]-6.
+Forwarding pushed packet provider[0]-6.
+Consuming packet provider[0]-6.
+Producing packet requestProducer-5.
+Pushing packet requestProducer-5 into the queue.
+Popping packet requestProducer-5 from the queue.
+Processing packet requestProducer-5.
+Classifying packet requestProducer-5.
+Providing packet provider[1]-3.
+Processing packet provider[1]-3.
+Forwarding pushed packet provider[1]-3.
+Consuming packet provider[1]-3.
+Providing packet provider[1]-4.
+Processing packet provider[1]-4.
+Forwarding pushed packet provider[1]-4.
+Consuming packet provider[1]-4.
+Producing packet requestProducer-6.
+Pushing packet requestProducer-6 into the queue.
+Popping packet requestProducer-6 from the queue.
+Processing packet requestProducer-6.
+Classifying packet requestProducer-6.
+Providing packet provider[0]-7.
+Processing packet provider[0]-7.
+Forwarding pushed packet provider[0]-7.
+Consuming packet provider[0]-7.
+Providing packet provider[0]-8.
+Processing packet provider[0]-8.
+Forwarding pushed packet provider[0]-8.
+Consuming packet provider[0]-8.
+Providing packet provider[0]-9.
+Processing packet provider[0]-9.
+Forwarding pushed packet provider[0]-9.
+Consuming packet provider[0]-9.
+Providing packet provider[0]-10.
+Processing packet provider[0]-10.
+Forwarding pushed packet provider[0]-10.
+Consuming packet provider[0]-10.
+Providing packet provider[0]-11.
+Processing packet provider[0]-11.
+Forwarding pushed packet provider[0]-11.
+Consuming packet provider[0]-11.
+Producing packet requestProducer-7.
+Pushing packet requestProducer-7 into the queue.
+Providing packet provider[0]-12.
+Processing packet provider[0]-12.
+Forwarding pushed packet provider[0]-12.
+Consuming packet provider[0]-12.
+Providing packet provider[0]-13.
+Processing packet provider[0]-13.
+Forwarding pushed packet provider[0]-13.
+Consuming packet provider[0]-13.
+Providing packet provider[0]-14.
+Processing packet provider[0]-14.
+Forwarding pushed packet provider[0]-14.
+Consuming packet provider[0]-14.
+Popping packet requestProducer-7 from the queue.
+Processing packet requestProducer-7.
+Classifying packet requestProducer-7.
+Providing packet provider[1]-5.
+Processing packet provider[1]-5.
+Forwarding pushed packet provider[1]-5.
+Consuming packet provider[1]-5.
+Producing packet requestProducer-8.
+Pushing packet requestProducer-8 into the queue.
+Popping packet requestProducer-8 from the queue.
+Processing packet requestProducer-8.
+Classifying packet requestProducer-8.
+Providing packet provider[0]-15.
+Processing packet provider[0]-15.
+Forwarding pushed packet provider[0]-15.
+Consuming packet provider[0]-15.
+Providing packet provider[0]-16.
+Processing packet provider[0]-16.
+Forwarding pushed packet provider[0]-16.
+Consuming packet provider[0]-16.
+Providing packet provider[0]-17.
+Processing packet provider[0]-17.
+Forwarding pushed packet provider[0]-17.
+Consuming packet provider[0]-17.
+Providing packet provider[0]-18.
+Processing packet provider[0]-18.
+Forwarding pushed packet provider[0]-18.
+Consuming packet provider[0]-18.
+Providing packet provider[0]-19.
+Processing packet provider[0]-19.
+Forwarding pushed packet provider[0]-19.
+Consuming packet provider[0]-19.
+Producing packet requestProducer-9.
+Pushing packet requestProducer-9 into the queue.
+Popping packet requestProducer-9 from the queue.
+Processing packet requestProducer-9.
+Classifying packet requestProducer-9.
+Providing packet provider[1]-6.
+Processing packet provider[1]-6.
+Forwarding pushed packet provider[1]-6.
+Consuming packet provider[1]-6.
+Providing packet provider[1]-7.
+Processing packet provider[1]-7.
+Forwarding pushed packet provider[1]-7.
+Consuming packet provider[1]-7.
+Producing packet requestProducer-10.
+Pushing packet requestProducer-10 into the queue.
+Providing packet provider[1]-8.
+Processing packet provider[1]-8.
+Forwarding pushed packet provider[1]-8.
+Consuming packet provider[1]-8.
+Popping packet requestProducer-10 from the queue.
+Processing packet requestProducer-10.
+Classifying packet requestProducer-10.
+Providing packet provider[1]-9.
+Processing packet provider[1]-9.
+Forwarding pushed packet provider[1]-9.
+Consuming packet provider[1]-9.
+Providing packet provider[1]-10.
+Processing packet provider[1]-10.
+Forwarding pushed packet provider[1]-10.
+Consuming packet provider[1]-10.
+Producing packet requestProducer-11.
+Pushing packet requestProducer-11 into the queue.
+Producing packet requestProducer-12.
+Pushing packet requestProducer-12 into the queue.
+Providing packet provider[1]-11.
+Processing packet provider[1]-11.
+Forwarding pushed packet provider[1]-11.
+Consuming packet provider[1]-11.
+Producing packet requestProducer-13.
+Pushing packet requestProducer-13 into the queue.
+Providing packet provider[1]-12.
+Processing packet provider[1]-12.
+Forwarding pushed packet provider[1]-12.
+Consuming packet provider[1]-12.
+Providing packet provider[1]-13.
+Processing packet provider[1]-13.
+Forwarding pushed packet provider[1]-13.
+Consuming packet provider[1]-13.
+Popping packet requestProducer-11 from the queue.
+Processing packet requestProducer-11.
+Classifying packet requestProducer-11.
+Providing packet provider[1]-14.
+Processing packet provider[1]-14.
+Forwarding pushed packet provider[1]-14.
+Consuming packet provider[1]-14.
+Producing packet requestProducer-14.
+Pushing packet requestProducer-14 into the queue.
+Producing packet requestProducer-15.
+Pushing packet requestProducer-15 into the queue.
+Providing packet provider[1]-15.
+Processing packet provider[1]-15.
+Forwarding pushed packet provider[1]-15.
+Consuming packet provider[1]-15.
+Producing packet requestProducer-16.
+Pushing packet requestProducer-16 into the queue.
+Providing packet provider[1]-16.
+Processing packet provider[1]-16.
+Forwarding pushed packet provider[1]-16.
+Consuming packet provider[1]-16.
+Providing packet provider[1]-17.
+Processing packet provider[1]-17.
+Forwarding pushed packet provider[1]-17.
+Consuming packet provider[1]-17.
+Popping packet requestProducer-12 from the queue.
+Processing packet requestProducer-12.
+Classifying packet requestProducer-12.
+Providing packet provider[0]-20.
+Processing packet provider[0]-20.
+Forwarding pushed packet provider[0]-20.
+Consuming packet provider[0]-20.
+Popping packet requestProducer-13 from the queue.
+Processing packet requestProducer-13.
+Classifying packet requestProducer-13.
+Providing packet provider[0]-21.
+Processing packet provider[0]-21.
+Forwarding pushed packet provider[0]-21.
+Consuming packet provider[0]-21.
+Popping packet requestProducer-14 from the queue.
+Processing packet requestProducer-14.
+Classifying packet requestProducer-14.
+Providing packet provider[0]-22.
+Processing packet provider[0]-22.
+Forwarding pushed packet provider[0]-22.
+Consuming packet provider[0]-22.
+Providing packet provider[0]-23.
+Processing packet provider[0]-23.
+Forwarding pushed packet provider[0]-23.
+Consuming packet provider[0]-23.
+Providing packet provider[0]-24.
+Processing packet provider[0]-24.
+Forwarding pushed packet provider[0]-24.
+Consuming packet provider[0]-24.
+Providing packet provider[0]-25.
+Processing packet provider[0]-25.
+Forwarding pushed packet provider[0]-25.
+Consuming packet provider[0]-25.
+Providing packet provider[0]-26.
+Processing packet provider[0]-26.
+Forwarding pushed packet provider[0]-26.
+Consuming packet provider[0]-26.
+Popping packet requestProducer-15 from the queue.
+Processing packet requestProducer-15.
+Classifying packet requestProducer-15.
+Providing packet provider[1]-18.
+Processing packet provider[1]-18.
+Forwarding pushed packet provider[1]-18.
+Consuming packet provider[1]-18.
+Providing packet provider[1]-19.
+Processing packet provider[1]-19.
+Forwarding pushed packet provider[1]-19.
+Consuming packet provider[1]-19.
+Providing packet provider[1]-20.
+Processing packet provider[1]-20.
+Forwarding pushed packet provider[1]-20.
+Consuming packet provider[1]-20.
+Producing packet requestProducer-17.
+Pushing packet requestProducer-17 into the queue.
+Producing packet requestProducer-18.
+Pushing packet requestProducer-18 into the queue.
+Popping packet requestProducer-16 from the queue.
+Processing packet requestProducer-16.
+Classifying packet requestProducer-16.
+Providing packet provider[1]-21.
+Processing packet provider[1]-21.
+Forwarding pushed packet provider[1]-21.
+Consuming packet provider[1]-21.
+Providing packet provider[1]-22.
+Processing packet provider[1]-22.
+Forwarding pushed packet provider[1]-22.
+Consuming packet provider[1]-22.
+Producing packet requestProducer-19.
+Pushing packet requestProducer-19 into the queue.
+Providing packet provider[1]-23.
+Processing packet provider[1]-23.
+Forwarding pushed packet provider[1]-23.
+Consuming packet provider[1]-23.
+Producing packet requestProducer-20.
+Pushing packet requestProducer-20 into the queue.
+Providing packet provider[1]-24.
+Processing packet provider[1]-24.
+Forwarding pushed packet provider[1]-24.
+Consuming packet provider[1]-24.
+Producing packet requestProducer-21.
+Pushing packet requestProducer-21 into the queue.
+Popping packet requestProducer-17 from the queue.
+Processing packet requestProducer-17.
+Classifying packet requestProducer-17.
+Providing packet provider[0]-27.
+Processing packet provider[0]-27.
+Forwarding pushed packet provider[0]-27.
+Consuming packet provider[0]-27.
+Providing packet provider[0]-28.
+Processing packet provider[0]-28.
+Forwarding pushed packet provider[0]-28.
+Consuming packet provider[0]-28.
+Popping packet requestProducer-18 from the queue.
+Processing packet requestProducer-18.
+Classifying packet requestProducer-18.
+Providing packet provider[1]-25.
+Processing packet provider[1]-25.
+Forwarding pushed packet provider[1]-25.
+Consuming packet provider[1]-25.
+Providing packet provider[1]-26.
+Processing packet provider[1]-26.
+Forwarding pushed packet provider[1]-26.
+Consuming packet provider[1]-26.
+Providing packet provider[1]-27.
+Processing packet provider[1]-27.
+Forwarding pushed packet provider[1]-27.
+Consuming packet provider[1]-27.
+Producing packet requestProducer-22.
+Pushing packet requestProducer-22 into the queue.
+Producing packet requestProducer-23.
+Pushing packet requestProducer-23 into the queue.
+Providing packet provider[1]-28.
+Processing packet provider[1]-28.
+Forwarding pushed packet provider[1]-28.
+Consuming packet provider[1]-28.
+Popping packet requestProducer-19 from the queue.
+Processing packet requestProducer-19.
+Classifying packet requestProducer-19.
+Providing packet provider[0]-29.
+Processing packet provider[0]-29.
+Forwarding pushed packet provider[0]-29.
+Consuming packet provider[0]-29.
+Providing packet provider[0]-30.
+Processing packet provider[0]-30.
+Forwarding pushed packet provider[0]-30.
+Consuming packet provider[0]-30.
+Providing packet provider[0]-31.
+Processing packet provider[0]-31.
+Forwarding pushed packet provider[0]-31.
+Consuming packet provider[0]-31.
+Providing packet provider[0]-32.
+Processing packet provider[0]-32.
+Forwarding pushed packet provider[0]-32.
+Consuming packet provider[0]-32.
+Producing packet requestProducer-24.
+Pushing packet requestProducer-24 into the queue.
+Popping packet requestProducer-20 from the queue.
+Processing packet requestProducer-20.
+Classifying packet requestProducer-20.
+Providing packet provider[0]-33.
+Processing packet provider[0]-33.
+Forwarding pushed packet provider[0]-33.
+Consuming packet provider[0]-33.
+Popping packet requestProducer-21 from the queue.
+Processing packet requestProducer-21.
+Classifying packet requestProducer-21.
+Providing packet provider[0]-34.
+Processing packet provider[0]-34.
+Forwarding pushed packet provider[0]-34.
+Consuming packet provider[0]-34.
+Providing packet provider[0]-35.
+Processing packet provider[0]-35.
+Forwarding pushed packet provider[0]-35.
+Consuming packet provider[0]-35.
+Providing packet provider[0]-36.
+Processing packet provider[0]-36.
+Forwarding pushed packet provider[0]-36.
+Consuming packet provider[0]-36.
+Providing packet provider[0]-37.
+Processing packet provider[0]-37.
+Forwarding pushed packet provider[0]-37.
+Consuming packet provider[0]-37.
+Popping packet requestProducer-22 from the queue.
+Processing packet requestProducer-22.
+Classifying packet requestProducer-22.
+Providing packet provider[0]-38.
+Processing packet provider[0]-38.
+Forwarding pushed packet provider[0]-38.
+Consuming packet provider[0]-38.
+Providing packet provider[0]-39.
+Processing packet provider[0]-39.
+Forwarding pushed packet provider[0]-39.
+Consuming packet provider[0]-39.
+Providing packet provider[0]-40.
+Processing packet provider[0]-40.
+Forwarding pushed packet provider[0]-40.
+Consuming packet provider[0]-40.
+Providing packet provider[0]-41.
+Processing packet provider[0]-41.
+Forwarding pushed packet provider[0]-41.
+Consuming packet provider[0]-41.
+Providing packet provider[0]-42.
+Processing packet provider[0]-42.
+Forwarding pushed packet provider[0]-42.
+Consuming packet provider[0]-42.
+Popping packet requestProducer-23 from the queue.
+Processing packet requestProducer-23.
+Classifying packet requestProducer-23.
+Providing packet provider[1]-29.
+Processing packet provider[1]-29.
+Forwarding pushed packet provider[1]-29.
+Consuming packet provider[1]-29.
+Providing packet provider[1]-30.
+Processing packet provider[1]-30.
+Forwarding pushed packet provider[1]-30.
+Consuming packet provider[1]-30.
+Producing packet requestProducer-25.
+Pushing packet requestProducer-25 into the queue.
+Popping packet requestProducer-24 from the queue.
+Processing packet requestProducer-24.
+Classifying packet requestProducer-24.
+Providing packet provider[1]-31.
+Processing packet provider[1]-31.
+Forwarding pushed packet provider[1]-31.
+Consuming packet provider[1]-31.
+Producing packet requestProducer-26.
+Pushing packet requestProducer-26 into the queue.
+Providing packet provider[1]-32.
+Processing packet provider[1]-32.
+Forwarding pushed packet provider[1]-32.
+Consuming packet provider[1]-32.
+Providing packet provider[1]-33.
+Processing packet provider[1]-33.
+Forwarding pushed packet provider[1]-33.
+Consuming packet provider[1]-33.
+Producing packet requestProducer-27.
+Pushing packet requestProducer-27 into the queue.
+Providing packet provider[1]-34.
+Processing packet provider[1]-34.
+Forwarding pushed packet provider[1]-34.
+Consuming packet provider[1]-34.
+Popping packet requestProducer-25 from the queue.
+Processing packet requestProducer-25.
+Classifying packet requestProducer-25.
+Providing packet provider[0]-43.
+Processing packet provider[0]-43.
+Forwarding pushed packet provider[0]-43.
+Consuming packet provider[0]-43.
+Providing packet provider[0]-44.
+Processing packet provider[0]-44.
+Forwarding pushed packet provider[0]-44.
+Consuming packet provider[0]-44.
+Providing packet provider[0]-45.
+Processing packet provider[0]-45.
+Forwarding pushed packet provider[0]-45.
+Consuming packet provider[0]-45.
+Providing packet provider[0]-46.
+Processing packet provider[0]-46.
+Forwarding pushed packet provider[0]-46.
+Consuming packet provider[0]-46.
+Providing packet provider[0]-47.
+Processing packet provider[0]-47.
+Forwarding pushed packet provider[0]-47.
+Consuming packet provider[0]-47.
+Providing packet provider[0]-48.
+Processing packet provider[0]-48.
+Forwarding pushed packet provider[0]-48.
+Consuming packet provider[0]-48.
+Providing packet provider[0]-49.
+Processing packet provider[0]-49.
+Forwarding pushed packet provider[0]-49.
+Consuming packet provider[0]-49.
+Providing packet provider[0]-50.
+Processing packet provider[0]-50.
+Forwarding pushed packet provider[0]-50.
+Consuming packet provider[0]-50.
+Providing packet provider[0]-51.
+Processing packet provider[0]-51.
+Forwarding pushed packet provider[0]-51.
+Consuming packet provider[0]-51.
+Popping packet requestProducer-26 from the queue.
+Processing packet requestProducer-26.
+Classifying packet requestProducer-26.
+Providing packet provider[0]-52.
+Processing packet provider[0]-52.
+Forwarding pushed packet provider[0]-52.
+Consuming packet provider[0]-52.
+Providing packet provider[0]-53.
+Processing packet provider[0]-53.
+Forwarding pushed packet provider[0]-53.
+Consuming packet provider[0]-53.
+Providing packet provider[0]-54.
+Processing packet provider[0]-54.
+Forwarding pushed packet provider[0]-54.
+Consuming packet provider[0]-54.
+Providing packet provider[0]-55.
+Processing packet provider[0]-55.
+Forwarding pushed packet provider[0]-55.
+Consuming packet provider[0]-55.
+Providing packet provider[0]-56.
+Processing packet provider[0]-56.
+Forwarding pushed packet provider[0]-56.
+Consuming packet provider[0]-56.
+Providing packet provider[0]-57.
+Processing packet provider[0]-57.
+Forwarding pushed packet provider[0]-57.
+Consuming packet provider[0]-57.
+Providing packet provider[0]-58.
+Processing packet provider[0]-58.
+Forwarding pushed packet provider[0]-58.
+Consuming packet provider[0]-58.
+Popping packet requestProducer-27 from the queue.
+Processing packet requestProducer-27.
+Classifying packet requestProducer-27.
+Providing packet provider[1]-35.
+Processing packet provider[1]-35.
+Forwarding pushed packet provider[1]-35.
+Consuming packet provider[1]-35.
+Producing packet requestProducer-28.
+Pushing packet requestProducer-28 into the queue.
+Providing packet provider[1]-36.
+Processing packet provider[1]-36.
+Forwarding pushed packet provider[1]-36.
+Consuming packet provider[1]-36.
+Providing packet provider[1]-37.
+Processing packet provider[1]-37.
+Forwarding pushed packet provider[1]-37.
+Consuming packet provider[1]-37.
+Producing packet requestProducer-29.
+Pushing packet requestProducer-29 into the queue.
+Popping packet requestProducer-28 from the queue.
+Processing packet requestProducer-28.
+Classifying packet requestProducer-28.
+Providing packet provider[0]-59.
+Processing packet provider[0]-59.
+Forwarding pushed packet provider[0]-59.
+Consuming packet provider[0]-59.
+Providing packet provider[0]-60.
+Processing packet provider[0]-60.
+Forwarding pushed packet provider[0]-60.
+Consuming packet provider[0]-60.
+Providing packet provider[0]-61.
+Processing packet provider[0]-61.
+Forwarding pushed packet provider[0]-61.
+Consuming packet provider[0]-61.
+Providing packet provider[0]-62.
+Processing packet provider[0]-62.
+Forwarding pushed packet provider[0]-62.
+Consuming packet provider[0]-62.
+Providing packet provider[0]-63.
+Processing packet provider[0]-63.
+Forwarding pushed packet provider[0]-63.
+Consuming packet provider[0]-63.
+Providing packet provider[0]-64.
+Processing packet provider[0]-64.
+Forwarding pushed packet provider[0]-64.
+Consuming packet provider[0]-64.
+Popping packet requestProducer-29 from the queue.
+Processing packet requestProducer-29.
+Classifying packet requestProducer-29.
+Providing packet provider[1]-38.
+Processing packet provider[1]-38.
+Forwarding pushed packet provider[1]-38.
+Consuming packet provider[1]-38.
+Providing packet provider[1]-39.
+Processing packet provider[1]-39.
+Forwarding pushed packet provider[1]-39.
+Consuming packet provider[1]-39.
+Producing packet requestProducer-30.
+Pushing packet requestProducer-30 into the queue.
+Popping packet requestProducer-30 from the queue.
+Processing packet requestProducer-30.
+Classifying packet requestProducer-30.
+Providing packet provider[1]-40.
+Processing packet provider[1]-40.
+Forwarding pushed packet provider[1]-40.
+Consuming packet provider[1]-40.
+Providing packet provider[1]-41.
+Processing packet provider[1]-41.
+Forwarding pushed packet provider[1]-41.
+Consuming packet provider[1]-41.
+Producing packet requestProducer-31.
+Pushing packet requestProducer-31 into the queue.
+Popping packet requestProducer-31 from the queue.
+Processing packet requestProducer-31.
+Classifying packet requestProducer-31.
+Providing packet provider[0]-65.
+Processing packet provider[0]-65.
+Forwarding pushed packet provider[0]-65.
+Consuming packet provider[0]-65.
+Providing packet provider[0]-66.
+Processing packet provider[0]-66.
+Forwarding pushed packet provider[0]-66.
+Consuming packet provider[0]-66.
+Providing packet provider[0]-67.
+Processing packet provider[0]-67.
+Forwarding pushed packet provider[0]-67.
+Consuming packet provider[0]-67.
+Providing packet provider[0]-68.
+Processing packet provider[0]-68.
+Forwarding pushed packet provider[0]-68.
+Consuming packet provider[0]-68.
+Producing packet requestProducer-32.
+Pushing packet requestProducer-32 into the queue.
+Providing packet provider[0]-69.
+Processing packet provider[0]-69.
+Forwarding pushed packet provider[0]-69.
+Consuming packet provider[0]-69.
+Providing packet provider[0]-70.
+Processing packet provider[0]-70.
+Forwarding pushed packet provider[0]-70.
+Consuming packet provider[0]-70.
+Popping packet requestProducer-32 from the queue.
+Processing packet requestProducer-32.
+Classifying packet requestProducer-32.
+Providing packet provider[0]-71.
+Processing packet provider[0]-71.
+Forwarding pushed packet provider[0]-71.
+Consuming packet provider[0]-71.
+Providing packet provider[0]-72.
+Processing packet provider[0]-72.
+Forwarding pushed packet provider[0]-72.
+Consuming packet provider[0]-72.
+Providing packet provider[0]-73.
+Processing packet provider[0]-73.
+Forwarding pushed packet provider[0]-73.
+Consuming packet provider[0]-73.
+Providing packet provider[0]-74.
+Processing packet provider[0]-74.
+Forwarding pushed packet provider[0]-74.
+Consuming packet provider[0]-74.
+Producing packet requestProducer-33.
+Pushing packet requestProducer-33 into the queue.
+Popping packet requestProducer-33 from the queue.
+Processing packet requestProducer-33.
+Classifying packet requestProducer-33.
+Providing packet provider[0]-75.
+Processing packet provider[0]-75.
+Forwarding pushed packet provider[0]-75.
+Consuming packet provider[0]-75.
+Providing packet provider[0]-76.
+Processing packet provider[0]-76.
+Forwarding pushed packet provider[0]-76.
+Consuming packet provider[0]-76.
+Providing packet provider[0]-77.
+Processing packet provider[0]-77.
+Forwarding pushed packet provider[0]-77.
+Consuming packet provider[0]-77.
+Providing packet provider[0]-78.
+Processing packet provider[0]-78.
+Forwarding pushed packet provider[0]-78.
+Consuming packet provider[0]-78.
+Producing packet requestProducer-34.
+Pushing packet requestProducer-34 into the queue.
+Popping packet requestProducer-34 from the queue.
+Processing packet requestProducer-34.
+Classifying packet requestProducer-34.
+Providing packet provider[1]-42.
+Processing packet provider[1]-42.
+Forwarding pushed packet provider[1]-42.
+Consuming packet provider[1]-42.
+Producing packet requestProducer-35.
+Pushing packet requestProducer-35 into the queue.
+Providing packet provider[1]-43.
+Processing packet provider[1]-43.
+Forwarding pushed packet provider[1]-43.
+Consuming packet provider[1]-43.
+Providing packet provider[1]-44.
+Processing packet provider[1]-44.
+Forwarding pushed packet provider[1]-44.
+Consuming packet provider[1]-44.
+Producing packet requestProducer-36.
+Pushing packet requestProducer-36 into the queue.
+Providing packet provider[1]-45.
+Processing packet provider[1]-45.
+Forwarding pushed packet provider[1]-45.
+Consuming packet provider[1]-45.
+Providing packet provider[1]-46.
+Processing packet provider[1]-46.
+Forwarding pushed packet provider[1]-46.
+Consuming packet provider[1]-46.
+Producing packet requestProducer-37.
+Pushing packet requestProducer-37 into the queue.
+Popping packet requestProducer-35 from the queue.
+Processing packet requestProducer-35.
+Classifying packet requestProducer-35.
+Providing packet provider[0]-79.
+Processing packet provider[0]-79.
+Forwarding pushed packet provider[0]-79.
+Consuming packet provider[0]-79.
+Providing packet provider[0]-80.
+Processing packet provider[0]-80.
+Forwarding pushed packet provider[0]-80.
+Consuming packet provider[0]-80.
+Providing packet provider[0]-81.
+Processing packet provider[0]-81.
+Forwarding pushed packet provider[0]-81.
+Consuming packet provider[0]-81.
+Providing packet provider[0]-82.
+Processing packet provider[0]-82.
+Forwarding pushed packet provider[0]-82.
+Consuming packet provider[0]-82.
+Providing packet provider[0]-83.
+Processing packet provider[0]-83.
+Forwarding pushed packet provider[0]-83.
+Consuming packet provider[0]-83.
+Providing packet provider[0]-84.
+Processing packet provider[0]-84.
+Forwarding pushed packet provider[0]-84.
+Consuming packet provider[0]-84.
+Providing packet provider[0]-85.
+Processing packet provider[0]-85.
+Forwarding pushed packet provider[0]-85.
+Consuming packet provider[0]-85.
+Providing packet provider[0]-86.
+Processing packet provider[0]-86.
+Forwarding pushed packet provider[0]-86.
+Consuming packet provider[0]-86.
+Popping packet requestProducer-36 from the queue.
+Processing packet requestProducer-36.
+Classifying packet requestProducer-36.
+Providing packet provider[1]-47.
+Processing packet provider[1]-47.
+Forwarding pushed packet provider[1]-47.
+Consuming packet provider[1]-47.
+Producing packet requestProducer-38.
+Pushing packet requestProducer-38 into the queue.
+Popping packet requestProducer-37 from the queue.
+Processing packet requestProducer-37.
+Classifying packet requestProducer-37.
+Providing packet provider[0]-87.
+Processing packet provider[0]-87.
+Forwarding pushed packet provider[0]-87.
+Consuming packet provider[0]-87.
+Providing packet provider[0]-88.
+Processing packet provider[0]-88.
+Forwarding pushed packet provider[0]-88.
+Consuming packet provider[0]-88.
+Providing packet provider[0]-89.
+Processing packet provider[0]-89.
+Forwarding pushed packet provider[0]-89.
+Consuming packet provider[0]-89.
+Producing packet requestProducer-39.
+Pushing packet requestProducer-39 into the queue.
+Providing packet provider[0]-90.
+Processing packet provider[0]-90.
+Forwarding pushed packet provider[0]-90.
+Consuming packet provider[0]-90.
+Providing packet provider[0]-91.
+Processing packet provider[0]-91.
+Forwarding pushed packet provider[0]-91.
+Consuming packet provider[0]-91.
+Providing packet provider[0]-92.
+Processing packet provider[0]-92.
+Forwarding pushed packet provider[0]-92.
+Consuming packet provider[0]-92.
+Providing packet provider[0]-93.
+Processing packet provider[0]-93.
+Forwarding pushed packet provider[0]-93.
+Consuming packet provider[0]-93.
+Providing packet provider[0]-94.
+Processing packet provider[0]-94.
+Forwarding pushed packet provider[0]-94.
+Consuming packet provider[0]-94.
+Providing packet provider[0]-95.
+Processing packet provider[0]-95.
+Forwarding pushed packet provider[0]-95.
+Consuming packet provider[0]-95.
+Popping packet requestProducer-38 from the queue.
+Processing packet requestProducer-38.
+Classifying packet requestProducer-38.
+Providing packet provider[0]-96.
+Processing packet provider[0]-96.
+Forwarding pushed packet provider[0]-96.
+Consuming packet provider[0]-96.
+Providing packet provider[0]-97.
+Processing packet provider[0]-97.
+Forwarding pushed packet provider[0]-97.
+Consuming packet provider[0]-97.
+Providing packet provider[0]-98.
+Processing packet provider[0]-98.
+Forwarding pushed packet provider[0]-98.
+Consuming packet provider[0]-98.
+Providing packet provider[0]-99.
+Processing packet provider[0]-99.
+Forwarding pushed packet provider[0]-99.
+Consuming packet provider[0]-99.
+Providing packet provider[0]-100.
+Processing packet provider[0]-100.
+Forwarding pushed packet provider[0]-100.
+Consuming packet provider[0]-100.
+Providing packet provider[0]-101.
+Processing packet provider[0]-101.
+Forwarding pushed packet provider[0]-101.
+Consuming packet provider[0]-101.
+Providing packet provider[0]-102.
+Processing packet provider[0]-102.
+Forwarding pushed packet provider[0]-102.
+Consuming packet provider[0]-102.
+Providing packet provider[0]-103.
+Processing packet provider[0]-103.
+Forwarding pushed packet provider[0]-103.
+Consuming packet provider[0]-103.
+Providing packet provider[0]-104.
+Processing packet provider[0]-104.
+Forwarding pushed packet provider[0]-104.
+Consuming packet provider[0]-104.
+Providing packet provider[0]-105.
+Processing packet provider[0]-105.
+Forwarding pushed packet provider[0]-105.
+Consuming packet provider[0]-105.
+Popping packet requestProducer-39 from the queue.
+Processing packet requestProducer-39.
+Classifying packet requestProducer-39.
+Providing packet provider[0]-106.
+Processing packet provider[0]-106.
+Forwarding pushed packet provider[0]-106.
+Consuming packet provider[0]-106.
+Providing packet provider[0]-107.
+Processing packet provider[0]-107.
+Forwarding pushed packet provider[0]-107.
+Consuming packet provider[0]-107.
+Providing packet provider[0]-108.
+Processing packet provider[0]-108.
+Forwarding pushed packet provider[0]-108.
+Consuming packet provider[0]-108.
+Providing packet provider[0]-109.
+Processing packet provider[0]-109.
+Forwarding pushed packet provider[0]-109.
+Consuming packet provider[0]-109.
+Providing packet provider[0]-110.
+Processing packet provider[0]-110.
+Forwarding pushed packet provider[0]-110.
+Consuming packet provider[0]-110.
+Providing packet provider[0]-111.
+Processing packet provider[0]-111.
+Forwarding pushed packet provider[0]-111.
+Consuming packet provider[0]-111.
+Providing packet provider[0]-112.
+Processing packet provider[0]-112.
+Forwarding pushed packet provider[0]-112.
+Consuming packet provider[0]-112.
+Providing packet provider[0]-113.
+Processing packet provider[0]-113.
+Forwarding pushed packet provider[0]-113.
+Consuming packet provider[0]-113.
+Producing packet requestProducer-40.
+Pushing packet requestProducer-40 into the queue.
+Popping packet requestProducer-40 from the queue.
+Processing packet requestProducer-40.
+Classifying packet requestProducer-40.
+Providing packet provider[0]-114.
+Processing packet provider[0]-114.
+Forwarding pushed packet provider[0]-114.
+Consuming packet provider[0]-114.
+Providing packet provider[0]-115.
+Processing packet provider[0]-115.
+Forwarding pushed packet provider[0]-115.
+Consuming packet provider[0]-115.
+Providing packet provider[0]-116.
+Processing packet provider[0]-116.
+Forwarding pushed packet provider[0]-116.
+Consuming packet provider[0]-116.
+Producing packet requestProducer-41.
+Pushing packet requestProducer-41 into the queue.
+Popping packet requestProducer-41 from the queue.
+Processing packet requestProducer-41.
+Classifying packet requestProducer-41.
+Providing packet provider[0]-117.
+Processing packet provider[0]-117.
+Forwarding pushed packet provider[0]-117.
+Consuming packet provider[0]-117.
+Producing packet requestProducer-42.
+Pushing packet requestProducer-42 into the queue.
+Popping packet requestProducer-42 from the queue.
+Processing packet requestProducer-42.
+Classifying packet requestProducer-42.
+Providing packet provider[0]-118.
+Processing packet provider[0]-118.
+Forwarding pushed packet provider[0]-118.
+Consuming packet provider[0]-118.
+Providing packet provider[0]-119.
+Processing packet provider[0]-119.
+Forwarding pushed packet provider[0]-119.
+Consuming packet provider[0]-119.
+Producing packet requestProducer-43.
+Pushing packet requestProducer-43 into the queue.
+Popping packet requestProducer-43 from the queue.
+Processing packet requestProducer-43.
+Classifying packet requestProducer-43.
+Providing packet provider[1]-48.
+Processing packet provider[1]-48.
+Forwarding pushed packet provider[1]-48.
+Consuming packet provider[1]-48.
+Producing packet requestProducer-44.
+Pushing packet requestProducer-44 into the queue.
+Popping packet requestProducer-44 from the queue.
+Processing packet requestProducer-44.
+Classifying packet requestProducer-44.
+Providing packet provider[1]-49.
+Processing packet provider[1]-49.
+Forwarding pushed packet provider[1]-49.
+Consuming packet provider[1]-49.
+Producing packet requestProducer-45.
+Pushing packet requestProducer-45 into the queue.
+Popping packet requestProducer-45 from the queue.
+Processing packet requestProducer-45.
+Classifying packet requestProducer-45.
+Providing packet provider[0]-120.
+Processing packet provider[0]-120.
+Forwarding pushed packet provider[0]-120.
+Consuming packet provider[0]-120.
+Providing packet provider[0]-121.
+Processing packet provider[0]-121.
+Forwarding pushed packet provider[0]-121.
+Consuming packet provider[0]-121.
+Providing packet provider[0]-122.
+Processing packet provider[0]-122.
+Forwarding pushed packet provider[0]-122.
+Consuming packet provider[0]-122.
+Providing packet provider[0]-123.
+Processing packet provider[0]-123.
+Forwarding pushed packet provider[0]-123.
+Consuming packet provider[0]-123.
+Providing packet provider[0]-124.
+Processing packet provider[0]-124.
+Forwarding pushed packet provider[0]-124.
+Consuming packet provider[0]-124.
+Producing packet requestProducer-46.
+Pushing packet requestProducer-46 into the queue.
+Providing packet provider[0]-125.
+Processing packet provider[0]-125.
+Forwarding pushed packet provider[0]-125.
+Consuming packet provider[0]-125.
+Providing packet provider[0]-126.
+Processing packet provider[0]-126.
+Forwarding pushed packet provider[0]-126.
+Consuming packet provider[0]-126.
+Providing packet provider[0]-127.
+Processing packet provider[0]-127.
+Forwarding pushed packet provider[0]-127.
+Consuming packet provider[0]-127.
+Providing packet provider[0]-128.
+Processing packet provider[0]-128.
+Forwarding pushed packet provider[0]-128.
+Consuming packet provider[0]-128.
+Providing packet provider[0]-129.
+Processing packet provider[0]-129.
+Forwarding pushed packet provider[0]-129.
+Consuming packet provider[0]-129.
+Popping packet requestProducer-46 from the queue.
+Processing packet requestProducer-46.
+Classifying packet requestProducer-46.
+Providing packet provider[0]-130.
+Processing packet provider[0]-130.
+Forwarding pushed packet provider[0]-130.
+Consuming packet provider[0]-130.
+Providing packet provider[0]-131.
+Processing packet provider[0]-131.
+Forwarding pushed packet provider[0]-131.
+Consuming packet provider[0]-131.
+Producing packet requestProducer-47.
+Pushing packet requestProducer-47 into the queue.
+Popping packet requestProducer-47 from the queue.
+Processing packet requestProducer-47.
+Classifying packet requestProducer-47.
+Providing packet provider[1]-50.
+Processing packet provider[1]-50.
+Forwarding pushed packet provider[1]-50.
+Consuming packet provider[1]-50.
+Providing packet provider[1]-51.
+Processing packet provider[1]-51.
+Forwarding pushed packet provider[1]-51.
+Consuming packet provider[1]-51.
+Providing packet provider[1]-52.
+Processing packet provider[1]-52.
+Forwarding pushed packet provider[1]-52.
+Consuming packet provider[1]-52.
+Producing packet requestProducer-48.
+Pushing packet requestProducer-48 into the queue.
+Providing packet provider[1]-53.
+Processing packet provider[1]-53.
+Forwarding pushed packet provider[1]-53.
+Consuming packet provider[1]-53.
+Popping packet requestProducer-48 from the queue.
+Processing packet requestProducer-48.
+Classifying packet requestProducer-48.
+Providing packet provider[0]-132.
+Processing packet provider[0]-132.
+Forwarding pushed packet provider[0]-132.
+Consuming packet provider[0]-132.
+Providing packet provider[0]-133.
+Processing packet provider[0]-133.
+Forwarding pushed packet provider[0]-133.
+Consuming packet provider[0]-133.
+Producing packet requestProducer-49.
+Pushing packet requestProducer-49 into the queue.
+Popping packet requestProducer-49 from the queue.
+Processing packet requestProducer-49.
+Classifying packet requestProducer-49.
+Providing packet provider[1]-54.
+Processing packet provider[1]-54.
+Forwarding pushed packet provider[1]-54.
+Consuming packet provider[1]-54.
+Producing packet requestProducer-50.
+Pushing packet requestProducer-50 into the queue.
+Producing packet requestProducer-51.
+Pushing packet requestProducer-51 into the queue.
+Providing packet provider[1]-55.
+Processing packet provider[1]-55.
+Forwarding pushed packet provider[1]-55.
+Consuming packet provider[1]-55.
+Producing packet requestProducer-52.
+Pushing packet requestProducer-52 into the queue.
+Providing packet provider[1]-56.
+Processing packet provider[1]-56.
+Forwarding pushed packet provider[1]-56.
+Consuming packet provider[1]-56.

@@ -31,8 +31,6 @@ namespace ieee80211 {
 class INET_API Ieee80211MacHeaderSerializer : public FieldsChunkSerializer
 {
   protected:
-    virtual void parseDataOrMgmtFrame(MemoryInputStream &stream, const Ptr<ieee80211::Ieee80211DataOrMgmtHeader> frame, inet::ieee80211::Ieee80211FrameType type, uint8_t fc1) const;
-
     virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
     virtual const Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
 
@@ -48,6 +46,32 @@ class INET_API Ieee80211MacTrailerSerializer : public FieldsChunkSerializer
 
   public:
     Ieee80211MacTrailerSerializer() : FieldsChunkSerializer() {}
+};
+
+/**
+ * Converts between Ieee80211MsduSubframeHeader and binary network byte order IEEE 802.11 Msdu header.
+ */
+class INET_API Ieee80211MsduSubframeHeaderSerializer : public FieldsChunkSerializer
+{
+  protected:
+    virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
+    virtual const Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
+
+  public:
+    Ieee80211MsduSubframeHeaderSerializer() : FieldsChunkSerializer() {}
+};
+
+/**
+ * Converts between Ieee80211MpduSubframeHeader and binary network byte order IEEE 802.11 Mpdu header.
+ */
+class INET_API Ieee80211MpduSubframeHeaderSerializer : public FieldsChunkSerializer
+{
+  protected:
+    virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
+    virtual const Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
+
+  public:
+    Ieee80211MpduSubframeHeaderSerializer() : FieldsChunkSerializer() {}
 };
 
 } // namespace ieee80211

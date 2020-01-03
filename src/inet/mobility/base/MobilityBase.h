@@ -57,12 +57,11 @@ class INET_API MobilityBase : public cSimpleModule, public IMobility
     class DirectiveResolver : public StringFormat::IDirectiveResolver {
       protected:
         IMobility *mobility = nullptr;
-        std::string result;
 
       public:
         DirectiveResolver(IMobility *mobility) : mobility(mobility) { }
 
-        virtual const char *resolveDirective(char directive) override;
+        virtual const char *resolveDirective(char directive) const override;
     };
 
   public:
@@ -118,6 +117,7 @@ class INET_API MobilityBase : public cSimpleModule, public IMobility
 
     /** @brief Moves the visual representation module's icon to the new position on the screen. */
     virtual void refreshDisplay() const override;
+    virtual void updateDisplayStringFromMobilityState() const;
 
     /** @brief Allows changing parameters from the GUI. */
     virtual void handleParameterChange(const char *name) override;

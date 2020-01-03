@@ -1,3 +1,5 @@
+package inet.test.moduletest.lib;
+
 import inet.networklayer.ipv4.IIgmp;
 
 simple TestIGMP like IIgmp
@@ -5,6 +7,7 @@ simple TestIGMP like IIgmp
     parameters:
         string interfaceTableModule;
         string routingTableModule;
+        string crcMode @enum("declared","computed") = default("declared");
         bool enabled = default(true);
         int    robustnessVariable = default(2); // IGMP is roboust to (roboustnessVariable-1) packet loss
         double queryInterval @unit(s) = default(125s);

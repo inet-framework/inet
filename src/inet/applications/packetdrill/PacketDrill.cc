@@ -115,6 +115,7 @@ Packet* PacketDrill::buildUDPPacket(int address_family, enum direction_t directi
         packet->setName("UDPOutbound");
     } else
         throw cRuntimeError("Unknown direction");
+    udpHeader->setCrcMode(CRC_DISABLED);
     udpHeader->setTotalLengthField(UDP_HEADER_LENGTH + B(udpPayloadBytes));
     packet->insertAtFront(udpHeader);
     auto ipHeader = PacketDrill::makeIpv4Header(IP_PROT_UDP, direction, app->getLocalAddress(), app->getRemoteAddress());
@@ -276,7 +277,7 @@ Packet* PacketDrill::buildSCTPPacket(int address_family, enum direction_t direct
     if (direction == DIRECTION_INBOUND) {
         sctpmsg->setSrcPort(app->getRemotePort());
         sctpmsg->setDestPort(app->getLocalPort());
-        auto addressReq = packet->addTagIfAbsent<L3AddressReq>();
+        auto addressReq = packet->addTag<L3AddressReq>();
         addressReq->setSrcAddress(app->getRemoteAddress());
         addressReq->setDestAddress(app->getLocalAddress());
         sctpmsg->setVTag(app->getPeerVTag());
@@ -404,7 +405,7 @@ Packet* PacketDrill::buildSCTPPacket(int address_family, enum direction_t direct
     } else if (direction == DIRECTION_OUTBOUND) {
         sctpmsg->setSrcPort(app->getLocalPort());
         sctpmsg->setDestPort(app->getRemotePort());
-        auto addressReq = packet->addTagIfAbsent<L3AddressReq>();
+        auto addressReq = packet->addTag<L3AddressReq>();
         addressReq->setSrcAddress(app->getLocalAddress());
         addressReq->setDestAddress(app->getRemoteAddress());
         sctpmsg->setVTag(app->getLocalVTag());
@@ -604,11 +605,11 @@ PacketDrillSctpChunk* PacketDrill::buildInitChunk(int64 flgs, int64 tag, int64 a
             parameter = check_and_cast<PacketDrillSctpParameter*>(*iter);
             switch (parameter->getType()) {
                 case SUPPORTED_EXTENSIONS: {
-                    ByteArray *ba = parameter->getByteList();
-                    parLen = ba->getDataArraySize();
+                    auto ba = parameter->getByteList();
+                    parLen = ba->size();
                     initchunk->setSepChunksArraySize(parLen);
                     for (int i = 0; i < parLen; i++) {
-                        initchunk->setSepChunks(i, ba->getData(i));
+                        initchunk->setSepChunks(i, ba->at(i));
                     }
                     if (parLen > 0) {
                         length += ADD_PADDING(SCTP_SUPPORTED_EXTENSIONS_PARAMETER_LENGTH + parLen);
@@ -689,11 +690,11 @@ PacketDrillSctpChunk* PacketDrill::buildInitAckChunk(int64 flgs, int64 tag, int6
             parameter = check_and_cast<PacketDrillSctpParameter*>(*iter);
             switch (parameter->getType()) {
                 case SUPPORTED_EXTENSIONS: {
-                    ByteArray *ba = parameter->getByteList();
-                    parLen = ba->getDataArraySize();
+                    auto ba = parameter->getByteList();
+                    parLen = ba->size();
                     initackchunk->setSepChunksArraySize(parLen);
                     for (int i = 0; i < parLen; i++) {
-                        initackchunk->setSepChunks(i, (0x00ff & ba->getData(i)));
+                        initackchunk->setSepChunks(i, (0x00ff & ba->at(i)));
                     }
                     if (parLen > 0) {
                         length += ADD_PADDING(SCTP_SUPPORTED_EXTENSIONS_PARAMETER_LENGTH + parLen);

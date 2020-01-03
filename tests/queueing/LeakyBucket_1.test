@@ -1,0 +1,80 @@
+%description:
+
+TODO
+
+%file: test.ned
+
+import inet.queueing.shaper.LeakyBucket;
+import inet.queueing.sink.PassivePacketSink;
+import inet.queueing.source.ActivePacketSource;
+
+network TestLeakyBucket
+{
+    submodules:
+        producer: ActivePacketSource {
+            @display("p=100,100");
+        }
+        bucket: LeakyBucket {
+            @display("p=200,100");
+        }
+        consumer: PassivePacketSink {
+            @display("p=300,100");
+        }
+    connections allowunconnected:
+        producer.out --> bucket.in;
+        bucket.out --> consumer.in;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = TestLeakyBucket
+sim-time-limit = 10s
+cmdenv-event-banners = false
+*.producer.packetLength = 1B
+*.producer.productionInterval = uniform(0s, 2s)
+*.bucket.server.processingTime = 1s
+
+%contains: stdout
+Producing packet producer-0.
+Pushing packet producer-0 into the queue.
+Popping packet producer-0 from the queue.
+Processing packet producer-0 started.
+
+Running simulation...
+Processing packet producer-0 ended.
+Consuming packet producer-0.
+Producing packet producer-1.
+Pushing packet producer-1 into the queue.
+Popping packet producer-1 from the queue.
+Processing packet producer-1 started.
+Processing packet producer-1 ended.
+Consuming packet producer-1.
+Producing packet producer-2.
+Pushing packet producer-2 into the queue.
+Popping packet producer-2 from the queue.
+Processing packet producer-2 started.
+Processing packet producer-2 ended.
+Consuming packet producer-2.
+Producing packet producer-3.
+Pushing packet producer-3 into the queue.
+Popping packet producer-3 from the queue.
+Processing packet producer-3 started.
+Processing packet producer-3 ended.
+Consuming packet producer-3.
+Producing packet producer-4.
+Pushing packet producer-4 into the queue.
+Popping packet producer-4 from the queue.
+Processing packet producer-4 started.
+Processing packet producer-4 ended.
+Consuming packet producer-4.
+Producing packet producer-5.
+Pushing packet producer-5 into the queue.
+Popping packet producer-5 from the queue.
+Processing packet producer-5 started.
+Processing packet producer-5 ended.
+Consuming packet producer-5.
+Producing packet producer-6.
+Pushing packet producer-6 into the queue.
+Popping packet producer-6 from the queue.
+Processing packet producer-6 started.

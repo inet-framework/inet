@@ -22,6 +22,7 @@
 #include "inet/networklayer/diffserv/DscpMarker.h"
 
 #ifdef WITH_IPv4
+#include "inet/networklayer/ipv4/Ipv4.h"
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #endif // ifdef WITH_IPv4
 
@@ -37,32 +38,40 @@ Define_Module(DscpMarker);
 
 simsignal_t DscpMarker::packetMarkedSignal = registerSignal("packetMarked");
 
-void DscpMarker::initialize()
+void DscpMarker::initialize(int stage)
 {
-    parseDSCPs(par("dscps"), "dscps", dscps);
-    if (dscps.empty())
-        dscps.push_back(DSCP_BE);
-    while ((int)dscps.size() < gateSize("in"))
-        dscps.push_back(dscps.back());
+    PacketQueueingElementBase::initialize(stage);
+    if (stage == INITSTAGE_LOCAL) {
+        parseDSCPs(par("dscps"), "dscps", dscps);
+        if (dscps.empty())
+            dscps.push_back(DSCP_BE);
+        while ((int)dscps.size() < gateSize("in"))
+            dscps.push_back(dscps.back());
 
-    numRcvd = 0;
-    numMarked = 0;
-    WATCH(numRcvd);
-    WATCH(numMarked);
+        numRcvd = 0;
+        numMarked = 0;
+        WATCH(numRcvd);
+        WATCH(numMarked);
+    }
 }
 
-void DscpMarker::handleMessage(cMessage *msg)
+void DscpMarker::handleMessage(cMessage *message)
 {
-    Packet *packet = check_and_cast<Packet *>(msg);
+    auto packet = check_and_cast<Packet *>(message);
+    pushPacket(packet, packet->getArrivalGate());
+}
+
+void DscpMarker::pushPacket(Packet *packet, cGate *inputGate)
+{
     numRcvd++;
-    int dscp = dscps.at(msg->getArrivalGate()->getIndex());
+    int dscp = dscps.at(inputGate->getIndex());
     if (markPacket(packet, dscp)) {
         emit(packetMarkedSignal, packet);
         numMarked++;
     }
-
-    send(packet, "out");
+    pushOrSendPacket(packet, gate("out"));
 }
+
 void DscpMarker::refreshDisplay() const
 {
     char buf[50] = "";
@@ -85,7 +94,8 @@ bool DscpMarker::markPacket(Packet *packet, int dscp)
     if (protocol == &Protocol::ipv4) {
         packet->trimFront();
         const auto& ipv4Header = packet->removeAtFront<Ipv4Header>();
-        ipv4Header->setDiffServCodePoint(dscp);
+        ipv4Header->setDscp(dscp);
+        Ipv4::insertCrc(ipv4Header);
         packet->insertAtFront(ipv4Header);
         return true;
     }
@@ -94,7 +104,7 @@ bool DscpMarker::markPacket(Packet *packet, int dscp)
     if (protocol == &Protocol::ipv6) {
         packet->trimFront();
         const auto& ipv6Header = packet->removeAtFront<Ipv6Header>();
-        ipv6Header->setDiffServCodePoint(dscp);
+        ipv6Header->setDscp(dscp);
         packet->insertAtFront(ipv6Header);
         return true;
     }

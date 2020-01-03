@@ -30,7 +30,7 @@ Packet *Defragmentation::defragmentFrames(std::vector<Packet *> *fragmentFrames)
     const auto& defragmentedHeader = staticPtrCast<Ieee80211DataOrMgmtHeader>(fragmentFrames->at(0)->peekAtFront<Ieee80211DataOrMgmtHeader>()->dupShared());
     for (auto fragmentFrame : *fragmentFrames) {
         fragmentFrame->popAtFront<Ieee80211DataOrMgmtHeader>();
-        fragmentFrame->popAtBack<Ieee80211MacTrailer>();
+        fragmentFrame->popAtBack<Ieee80211MacTrailer>(B(4));
         defragmentedFrame->insertAtBack(fragmentFrame->peekData());
         std::string defragmentedName(fragmentFrame->getName());
         auto index = defragmentedName.find("-frag");

@@ -20,7 +20,7 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
-#include "inet/linklayer/vlan/VlanTag_m.h"
+#include "inet/linklayer/common/VlanTag_m.h"
 #include "inet/linklayer/vlan/VlanTunnel.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 
@@ -35,8 +35,8 @@ void VlanTunnel::initialize(int stage)
         interfaceEntry = getContainingNicModule(this);
     }
     else if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION) {
-        auto interfaceTable = findModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
-        realInterfaceEntry = interfaceTable->getInterfaceByName(par("realInterfaceName"));
+        auto interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
+        realInterfaceEntry = CHK(interfaceTable->findInterfaceByName(par("realInterfaceName")));
         const char *addressString = par("address");
         MacAddress address;
         if (!strcmp(addressString, "auto"))
@@ -75,7 +75,7 @@ void VlanTunnel::handleMessage(cMessage *message)
 
 void VlanTunnel::socketDataArrived(EthernetSocket *socket, Packet *packet)
 {
-    packet->removeTag<SocketInd>();
+    delete packet->removeTag<SocketInd>();
     packet->getTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
     send(packet, "upperLayerOut");
 }

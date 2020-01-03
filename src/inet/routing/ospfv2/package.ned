@@ -1,4 +1,4 @@
 package inet.routing.ospfv2;
 
-@namespace(inet::ospf);
+@namespace(inet::ospfv2);
 

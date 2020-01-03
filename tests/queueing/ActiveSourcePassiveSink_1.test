@@ -1,0 +1,56 @@
+%description:
+
+In this test, packets are produced periodically by an active packet source
+(ActivePacketSource). The packets are consumed by a passive packet sink
+(PassivePacketSink).
+
+%file: test.ned
+
+import inet.queueing.sink.PassivePacketSink;
+import inet.queueing.source.ActivePacketSource;
+
+network TestProducerConsumer
+{
+    submodules:
+        producer: ActivePacketSource {
+            @display("p=100,100");
+        }
+        consumer: PassivePacketSink {
+            @display("p=200,100");
+        }
+    connections:
+        producer.out --> consumer.in;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = TestProducerConsumer
+sim-time-limit = 10s
+cmdenv-event-banners = false
+*.producer.packetLength = 1B
+*.producer.productionInterval = 1s
+
+%contains: stdout
+Producing packet producer-0.
+Consuming packet producer-0.
+
+Running simulation...
+Producing packet producer-1.
+Consuming packet producer-1.
+Producing packet producer-2.
+Consuming packet producer-2.
+Producing packet producer-3.
+Consuming packet producer-3.
+Producing packet producer-4.
+Consuming packet producer-4.
+Producing packet producer-5.
+Consuming packet producer-5.
+Producing packet producer-6.
+Consuming packet producer-6.
+Producing packet producer-7.
+Consuming packet producer-7.
+Producing packet producer-8.
+Consuming packet producer-8.
+Producing packet producer-9.
+Consuming packet producer-9.

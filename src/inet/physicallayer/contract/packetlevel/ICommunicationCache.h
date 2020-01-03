@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2013 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -31,29 +31,36 @@ namespace inet {
 namespace physicallayer {
 
 /**
- * This interface is used to cache various intermediate computation results
- * related to the communication on the medium.
+ * This interface is used to store the radios and transmissions of the medium.
+ * It also provides caching for various intermediate computation results related
+ * to the communication on the medium.
  */
 class INET_API ICommunicationCache : public IPrintableObject
 {
   public:
-    /** @name Medium state change notifications */
+    virtual ~ICommunicationCache() { }
+
+    /** @name Radio cache */
     //@{
     virtual void addRadio(const IRadio *radio) = 0;
     virtual void removeRadio(const IRadio *radio) = 0;
+    virtual const IRadio *getRadio(int id) const = 0;
+    virtual void mapRadios(std::function<void (const IRadio *)> f) const = 0;
+    //@}
 
+    /** @name Transmission cache */
+    //@{
     virtual void addTransmission(const ITransmission *transmission) = 0;
     virtual void removeTransmission(const ITransmission *transmission) = 0;
+    virtual const ITransmission *getTransmission(int id) const = 0;
+    virtual void mapTransmissions(std::function<void (const ITransmission *)> f) const = 0;
     //@}
 
     /** @name Interference cache */
     //@{
     virtual std::vector<const ITransmission *> *computeInterferingTransmissions(const IRadio *radio, const simtime_t startTime, const simtime_t endTime) = 0;
-    virtual void removeNonInterferingTransmissions() = 0;
-    //@}
+    virtual void removeNonInterferingTransmissions(std::function<void (const ITransmission *transmission)> f) = 0;
 
-    /** @name Transmission cache */
-    //@{
     virtual const simtime_t getCachedInterferenceEndTime(const ITransmission *transmission) = 0;
     virtual void setCachedInterferenceEndTime(const ITransmission *transmission, const simtime_t interferenceEndTime) = 0;
     virtual void removeCachedInterferenceEndTime(const ITransmission *transmission) = 0;
@@ -69,8 +76,8 @@ class INET_API ICommunicationCache : public IPrintableObject
     virtual void setCachedArrival(const IRadio *receiver, const ITransmission *transmission, const IArrival *arrival) = 0;
     virtual void removeCachedArrival(const IRadio *receiver, const ITransmission *transmission) = 0;
 
-    virtual const Interval *getCachedInterval(const IRadio *receiver, const ITransmission *transmission) = 0;
-    virtual void setCachedInterval(const IRadio *receiver, const ITransmission *transmission, const Interval *interval) = 0;
+    virtual const IntervalTree::Interval *getCachedInterval(const IRadio *receiver, const ITransmission *transmission) = 0;
+    virtual void setCachedInterval(const IRadio *receiver, const ITransmission *transmission, const IntervalTree::Interval *interval) = 0;
     virtual void removeCachedInterval(const IRadio *receiver, const ITransmission *transmission) = 0;
 
     virtual const IListening *getCachedListening(const IRadio *receiver, const ITransmission *transmission) = 0;

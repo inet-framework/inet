@@ -20,6 +20,7 @@
 
 #include "inet/common/INETDefs.h"
 #include "inet/common/packet/Packet.h"
+#include "inet/common/stlutils.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
 #include "inet/networklayer/contract/NetworkHeaderBase_m.h"
 
@@ -125,14 +126,14 @@ class INET_API NetfilterBase : public INetfilter {
       friend class NetfilterBase;
 
       protected:
-        INetfilter *netfilter = nullptr;
+        std::vector<INetfilter *> netfilters;
 
       public:
-        virtual ~HookBase() { if (netfilter) netfilter->unregisterHook(this); };
+        virtual ~HookBase() { for (auto netfilter : netfilters) netfilter->unregisterHook(this); }
 
-        void registeredTo(INetfilter *nf) { ASSERT(netfilter == nullptr); netfilter = nf; }
-        void unregisteredFrom(INetfilter *nf) { ASSERT(netfilter == nf); netfilter = nullptr; }
-        bool isRegisteredHook() { return netfilter != nullptr; }
+        void registeredTo(INetfilter *nf) { ASSERT(!isRegisteredHook(nf)); netfilters.push_back(nf); }
+        void unregisteredFrom(INetfilter *nf) { ASSERT(isRegisteredHook(nf)); remove(netfilters, nf); }
+        bool isRegisteredHook(INetfilter *nf) { return contains(netfilters, nf); }
     };
 
   protected:

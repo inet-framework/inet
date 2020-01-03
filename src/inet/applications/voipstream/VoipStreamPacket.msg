@@ -17,7 +17,6 @@
 //
 
 import inet.common.INETDefs;
-import inet.common.ByteArray;
 import inet.common.packet.chunk.Chunk;
 
 cplusplus {{
@@ -42,16 +41,18 @@ enum VoipStreamPacketType
 //
 class VoipStreamPacket extends FieldsChunk
 {
+    short headerLength = 0;     // from voipHeaderSize parameter
     VoipStreamPacketType type;
-
     int codec;  // FFmpeg identifier of the codec
     short sampleBits;
     int sampleRate;
     int transmitBitrate;
     int samplesPerPacket;
-    ByteArray bytes;
 
     uint16_t seqNo; // packet sequence number
     uint32_t timeStamp; // increased with every packet
     uint32_t ssrc;  // currently unused
+
+    uint16_t dataLength;
 }
+

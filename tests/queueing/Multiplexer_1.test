@@ -1,0 +1,129 @@
+%description:
+
+In this test, packets are produced periodically (randomly) by several active
+packet sources (ActivePacketSources). The packets are consumed by a single passive
+packet sink upon arrival (PassivePacketSink). The single sink is connected to the
+multiple sources using an intermediary component (PacketMultiplexer) which simply
+forwards packets.
+
+%file: test.ned
+
+import inet.queueing.sink.PassivePacketSink;
+import inet.queueing.common.PacketMultiplexer;
+import inet.queueing.source.ActivePacketSource;
+
+network TestServer
+{
+    parameters:
+        int numProducers;
+    submodules:
+        producer[numProducers]: ActivePacketSource {
+            @display("p=100,100");
+        }
+        multiplexer: PacketMultiplexer {
+            @display("p=200,100");
+        }
+        consumer: PassivePacketSink {
+            @display("p=300,100");
+        }
+    connections allowunconnected:
+        for i=0..numProducers-1 {
+        	producer[i].out --> multiplexer.in++;
+      	}
+        multiplexer.out --> consumer.in;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = TestServer
+sim-time-limit = 10s
+cmdenv-event-banners = false
+*.numProducers = 3
+*.producer[*].packetLength = 1B
+*.producer[*].productionInterval = uniform(0s, 2s)
+
+%contains: stdout
+Producing packet producer[0]-0.
+Forwarding pushed packet producer[0]-0.
+Consuming packet producer[0]-0.
+
+Running simulation...
+Producing packet producer[1]-0.
+Forwarding pushed packet producer[1]-0.
+Consuming packet producer[1]-0.
+Producing packet producer[2]-0.
+Forwarding pushed packet producer[2]-0.
+Consuming packet producer[2]-0.
+Producing packet producer[0]-1.
+Forwarding pushed packet producer[0]-1.
+Consuming packet producer[0]-1.
+Producing packet producer[1]-1.
+Forwarding pushed packet producer[1]-1.
+Consuming packet producer[1]-1.
+Producing packet producer[2]-1.
+Forwarding pushed packet producer[2]-1.
+Consuming packet producer[2]-1.
+Producing packet producer[1]-2.
+Forwarding pushed packet producer[1]-2.
+Consuming packet producer[1]-2.
+Producing packet producer[0]-2.
+Forwarding pushed packet producer[0]-2.
+Consuming packet producer[0]-2.
+Producing packet producer[2]-2.
+Forwarding pushed packet producer[2]-2.
+Consuming packet producer[2]-2.
+Producing packet producer[1]-3.
+Forwarding pushed packet producer[1]-3.
+Consuming packet producer[1]-3.
+Producing packet producer[2]-3.
+Forwarding pushed packet producer[2]-3.
+Consuming packet producer[2]-3.
+Producing packet producer[0]-3.
+Forwarding pushed packet producer[0]-3.
+Consuming packet producer[0]-3.
+Producing packet producer[1]-4.
+Forwarding pushed packet producer[1]-4.
+Consuming packet producer[1]-4.
+Producing packet producer[0]-4.
+Forwarding pushed packet producer[0]-4.
+Consuming packet producer[0]-4.
+Producing packet producer[2]-4.
+Forwarding pushed packet producer[2]-4.
+Consuming packet producer[2]-4.
+Producing packet producer[1]-5.
+Forwarding pushed packet producer[1]-5.
+Consuming packet producer[1]-5.
+Producing packet producer[1]-6.
+Forwarding pushed packet producer[1]-6.
+Consuming packet producer[1]-6.
+Producing packet producer[0]-5.
+Forwarding pushed packet producer[0]-5.
+Consuming packet producer[0]-5.
+Producing packet producer[0]-6.
+Forwarding pushed packet producer[0]-6.
+Consuming packet producer[0]-6.
+Producing packet producer[2]-5.
+Forwarding pushed packet producer[2]-5.
+Consuming packet producer[2]-5.
+Producing packet producer[0]-7.
+Forwarding pushed packet producer[0]-7.
+Consuming packet producer[0]-7.
+Producing packet producer[1]-7.
+Forwarding pushed packet producer[1]-7.
+Consuming packet producer[1]-7.
+Producing packet producer[2]-6.
+Forwarding pushed packet producer[2]-6.
+Consuming packet producer[2]-6.
+Producing packet producer[0]-8.
+Forwarding pushed packet producer[0]-8.
+Consuming packet producer[0]-8.
+Producing packet producer[2]-7.
+Forwarding pushed packet producer[2]-7.
+Consuming packet producer[2]-7.
+Producing packet producer[1]-8.
+Forwarding pushed packet producer[1]-8.
+Consuming packet producer[1]-8.
+Producing packet producer[0]-9.
+Forwarding pushed packet producer[0]-9.
+Consuming packet producer[0]-9.

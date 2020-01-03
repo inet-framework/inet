@@ -23,7 +23,7 @@ package inet.node.xmipv6;
 import inet.node.ipv6.StandardHost6;
 
 //
-// MIPv6 host with Tcp, Udp layers and applications.
+// MIPv6 host with TCP, UDP layers and applications.
 //
 module MobileHost6 extends StandardHost6
 {

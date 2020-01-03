@@ -183,9 +183,9 @@ void HttpBrowser::socketEstablished(TcpSocket *socket)
     }
 }
 
-void HttpBrowser::socketDataArrived(TcpSocket *socket, Packet *msg, bool urgent)
+void HttpBrowser::socketDataArrived(TcpSocket *socket)
 {
-    EV_DEBUG << "Socket data arrived on connection " << socket->getSocketId() << ": " << msg->getName() << endl;
+    EV_DEBUG << "Socket data arrived on connection " << socket->getSocketId() << endl;
     SockData *sockdata = (SockData *)socket->getUserData();
     if (sockdata == nullptr) {
         EV_ERROR << "socketDataArrivedfailure. Null pointer" << endl;
@@ -193,13 +193,9 @@ void HttpBrowser::socketDataArrived(TcpSocket *socket, Packet *msg, bool urgent)
     }
 
     ASSERT(socket == sockdata->socket);
-
-    sockdata->queue.push(msg->peekDataAt(B(0), msg->getDataLength()));
-
-    while (sockdata->queue.has<HttpReplyMessage>())
-        handleDataMessage(new Packet(msg->getName(), sockdata->queue.pop<HttpReplyMessage>()));
-
-    delete msg;
+    auto queue = socket->getReceiveQueue();
+    while (queue->has<HttpReplyMessage>())
+        handleDataMessage(queue->pop<HttpReplyMessage>());
 
     if (--sockdata->pending == 0) {
         EV_DEBUG << "Received last expected reply on this socket. Issuing a close" << endl;

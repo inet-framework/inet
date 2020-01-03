@@ -1,6 +1,0 @@
-This folder contains smoke tests for the INET Framework. The "runallexamples"
-script runs all example simulations for a while, and they must not crash
-or stop with an error.
-
-This test can provide a very modest level of confidence regarding the
-quality of the models.

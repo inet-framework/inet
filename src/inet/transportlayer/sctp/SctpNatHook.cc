@@ -45,16 +45,10 @@ INetfilter::IHook::Result SctpNatHook::datagramForwardHook(Packet *datagram)
     auto tag = datagram->findTag<InterfaceReq>();
     const InterfaceEntry *outIE = (tag != nullptr ? ift->getInterfaceById(tag->getInterfaceId()) : nullptr);
 
+    auto inIeTag = datagram->findTag<InterfaceInd>();
+    const InterfaceEntry *inIE = (inIeTag != nullptr ? ift->getInterfaceById(inIeTag->getInterfaceId()) : nullptr);
+
     const auto& dgram = removeNetworkProtocolHeader<Ipv4Header>(datagram);
-    char name[10];
-    if (!strcmp(outIE->getInterfaceName(), "ppp0")) {
-        strcpy(name, "ppp1");
-    } else if (!strcmp(outIE->getInterfaceName(), "ppp1")) {
-        strcpy(name, "ppp0");
-    } else {
-        strcpy(name, "lo0");
-    }
-    const InterfaceEntry *inIE = ift->getInterfaceByName(name);
 
     if (!dgram) {
         insertNetworkProtocolHeader(datagram, Protocol::ipv4, dgram);
@@ -124,8 +118,7 @@ INetfilter::IHook::Result SctpNatHook::datagramForwardHook(Packet *datagram)
                 insertTransportProtocolHeader(datagram, Protocol::sctp, sctp);
                 insertNetworkProtocolHeader(datagram, Protocol::ipv4, networkHeader);
                 datagram->addTagIfAbsent<NextHopAddressReq>()->setNextHopAddress(networkHeader->getDestAddress());
-
-                            datagram->addTagIfAbsent<InterfaceReq>()->setInterfaceId(inIE->getInterfaceId());
+                datagram->addTagIfAbsent<InterfaceReq>()->setInterfaceId(CHK(inIE)->getInterfaceId());
                 return INetfilter::IHook::ACCEPT;
             }
             else {
@@ -324,7 +317,7 @@ void SctpNatHook::sendBackError(SctpHeader* sctp)
 void SctpNatHook::finish()
 {
     auto ipv4 = dynamic_cast<INetfilter *>(getModuleByPath("^.ipv4.ip"));
-    if (isRegisteredHook())
+    if (isRegisteredHook(ipv4))
         ipv4->unregisterHook(this);
     ipLayer = nullptr;
     EV_INFO<< getFullPath() << ": Natted packets: " << nattedPackets << "\n";

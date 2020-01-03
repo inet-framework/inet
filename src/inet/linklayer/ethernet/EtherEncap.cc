@@ -26,12 +26,12 @@
 #include "inet/linklayer/common/Ieee802SapTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
+#include "inet/linklayer/common/VlanTag_m.h"
 #include "inet/linklayer/ethernet/EtherEncap.h"
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
 #include "inet/linklayer/ethernet/EthernetCommand_m.h"
 #include "inet/linklayer/ethernet/EtherPhyFrame_m.h"
 #include "inet/linklayer/ieee8022/Ieee8022LlcHeader_m.h"
-#include "inet/linklayer/vlan/VlanTag_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 
 namespace inet {
@@ -41,6 +41,12 @@ Define_Module(EtherEncap);
 simsignal_t EtherEncap::encapPkSignal = registerSignal("encapPk");
 simsignal_t EtherEncap::decapPkSignal = registerSignal("decapPk");
 simsignal_t EtherEncap::pauseSentSignal = registerSignal("pauseSent");
+
+EtherEncap::~EtherEncap()
+{
+    for (auto it : socketIdToSocketMap)
+        delete it.second;
+}
 
 bool EtherEncap::Socket::matches(Packet *packet, const Ptr<const EthernetMacHeader>& ethernetMacHeader)
 {
@@ -102,7 +108,7 @@ void EtherEncap::processCommandFromHigherLayer(Request *msg)
         auto indication = new Indication("closed", ETHERNET_I_SOCKET_CLOSED);
         auto ctrl = new EthernetSocketClosedIndication();
         indication->setControlInfo(ctrl);
-        indication->addTagIfAbsent<SocketInd>()->setSocketId(socketId);
+        indication->addTag<SocketInd>()->setSocketId(socketId);
         send(indication, "transportOut");
     }
     else if (dynamic_cast<EthernetDestroyCommand *>(ctrl) != nullptr) {
@@ -128,7 +134,7 @@ void EtherEncap::processPacketFromHigherLayer(Packet *packet)
 {
     delete packet->removeTagIfPresent<DispatchProtocolReq>();
     if (packet->getDataLength() > MAX_ETHERNET_DATA_BYTES)
-        throw cRuntimeError("packet from higher layer (%d bytes) exceeds maximum Ethernet payload length (%d)", (int)packet->getByteLength(), MAX_ETHERNET_DATA_BYTES);
+        throw cRuntimeError("packet length from higher layer (%s) exceeds maximum Ethernet payload length (%s)", packet->getDataLength().str().c_str(), MAX_ETHERNET_DATA_BYTES.str().c_str());
 
     totalFromHigherLayer++;
     emit(encapPkSignal, packet);
@@ -162,43 +168,11 @@ void EtherEncap::processPacketFromHigherLayer(Packet *packet)
     ethHeader->setTypeOrLength(typeOrLength);
     packet->insertAtFront(ethHeader);
 
-    EtherEncap::addPaddingAndFcs(packet, fcsMode);
+    packet->insertAtBack(makeShared<EthernetFcs>(fcsMode));
 
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);
     EV_INFO << "Sending " << packet << " to lower layer.\n";
     send(packet, "lowerLayerOut");
-}
-
-void EtherEncap::addPaddingAndFcs(Packet *packet, FcsMode fcsMode, B requiredMinBytes)
-{
-    B paddingLength = requiredMinBytes - ETHER_FCS_BYTES - B(packet->getByteLength());
-    if (paddingLength > B(0)) {
-        const auto& ethPadding = makeShared<EthernetPadding>();
-        ethPadding->setChunkLength(paddingLength);
-        packet->insertAtBack(ethPadding);
-    }
-    addFcs(packet, fcsMode);
-}
-
-void EtherEncap::addFcs(Packet *packet, FcsMode fcsMode)
-{
-    const auto& ethFcs = makeShared<EthernetFcs>();
-    ethFcs->setFcsMode(fcsMode);
-
-    // calculate Fcs if needed
-    if (fcsMode == FCS_COMPUTED) {
-        auto ethBytes = packet->peekDataAsBytes();
-        auto bufferLength = B(ethBytes->getChunkLength()).get();
-        auto buffer = new uint8_t[bufferLength];
-        // 1. fill in the data
-        ethBytes->copyToBuffer(buffer, bufferLength);
-        // 2. compute the FCS
-        auto computedFcs = ethernetCRC(buffer, bufferLength);
-        delete [] buffer;
-        ethFcs->setFcs(computedFcs);
-    }
-
-    packet->insertAtBack(ethFcs);
 }
 
 const Ptr<const EthernetMacHeader> EtherEncap::decapsulateMacHeader(Packet *packet)
@@ -220,7 +194,10 @@ const Ptr<const EthernetMacHeader> EtherEncap::decapsulateMacHeader(Packet *pack
         packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ieee8022);
     }
     else if (isEth2Header(*ethHeader)) {
-        packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(ProtocolGroup::ethertype.getProtocol(ethHeader->getTypeOrLength()));
+        if (auto protocol = ProtocolGroup::ethertype.findProtocol(ethHeader->getTypeOrLength()))
+            packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(protocol);
+        else
+            packet->removeTagIfPresent<PacketProtocolTag>();
     }
     return ethHeader;
 }
@@ -236,10 +213,15 @@ void EtherEncap::processPacketFromMac(Packet *packet)
         return;
     }
     else if (isEth2Header(*ethHeader)) {
-        payloadProtocol = ProtocolGroup::ethertype.getProtocol(ethHeader->getTypeOrLength());
-        packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(payloadProtocol);
-        packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(payloadProtocol);
-
+        payloadProtocol = ProtocolGroup::ethertype.findProtocol(ethHeader->getTypeOrLength());
+        if (payloadProtocol != nullptr) {
+            packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(payloadProtocol);
+            packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(payloadProtocol);
+        }
+        else {
+            packet->removeTagIfPresent<PacketProtocolTag>();
+            packet->removeTagIfPresent<DispatchProtocolReq>();
+        }
         bool stealPacket = false;
         for (auto it : socketIdToSocketMap) {
             auto socket = it.second;
@@ -254,7 +236,7 @@ void EtherEncap::processPacketFromMac(Packet *packet)
         // TODO: should the socket configure if it steals packets or not?
         if (stealPacket)
             delete packet;
-        else if (upperProtocols.find(payloadProtocol) != upperProtocols.end()) {
+        else if (payloadProtocol != nullptr && upperProtocols.find(payloadProtocol) != upperProtocols.end()) {
             EV_DETAIL << "Decapsulating frame `" << packet->getName() << "', passing up contained packet `"
                       << packet->getName() << "' to higher layer\n";
 
@@ -275,7 +257,6 @@ void EtherEncap::processPacketFromMac(Packet *packet)
     }
     else
         throw cRuntimeError("Unknown ethernet header");
-
 }
 
 void EtherEncap::handleSendPause(cMessage *msg)
@@ -302,7 +283,7 @@ void EtherEncap::handleSendPause(cMessage *msg)
     packet->insertAtFront(frame);
     hdr->setTypeOrLength(ETHERTYPE_FLOW_CONTROL);
     packet->insertAtFront(hdr);
-    EtherEncap::addPaddingAndFcs(packet, fcsMode);
+    packet->insertAtBack(makeShared<EthernetFcs>(fcsMode));
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);
 
     EV_INFO << "Sending " << frame << " to lower layer.\n";

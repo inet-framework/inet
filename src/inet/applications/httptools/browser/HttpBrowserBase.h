@@ -120,7 +120,7 @@ class INET_API HttpBrowserBase : public HttpNodeBase
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void finish() override;
     virtual void handleMessage(cMessage *msg) override = 0;
-    void handleDataMessage(Packet *msg);
+    void handleDataMessage(Ptr<const HttpReplyMessage> msg);
     void handleSelfMessages(cMessage *msg);
     void handleSelfActivityStart();
     void handleSelfStartSession();

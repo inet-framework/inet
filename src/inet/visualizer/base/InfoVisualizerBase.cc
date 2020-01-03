@@ -28,8 +28,9 @@ InfoVisualizerBase::InfoVisualization::InfoVisualization(int moduleId) :
 {
 }
 
-const char *InfoVisualizerBase::DirectiveResolver::resolveDirective(char directive)
+const char *InfoVisualizerBase::DirectiveResolver::resolveDirective(char directive) const
 {
+    static std::string result;
     switch (directive) {
         case 'n':
             result = module->getFullName();
@@ -117,7 +118,7 @@ void InfoVisualizerBase::addInfoVisualizations()
 
 void InfoVisualizerBase::removeAllInfoVisualizations()
 {
-    for (auto infoVisualization : infoVisualizations) {
+    for (auto infoVisualization : std::vector<const InfoVisualization *>(infoVisualizations)) {
         removeInfoVisualization(infoVisualization);
         delete infoVisualization;
     }

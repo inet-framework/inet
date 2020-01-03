@@ -7,7 +7,7 @@ It is checked that the server receives the datagram with the
 given TTL minus the number of hops.
 
 %#--------------------------------------------------------------------------------------------------------------
-%inifile: {}.ini
+%inifile: omnetpp.ini
 [General]
 ned-path = ../../../../examples;../../../../src
 network = inet.examples.ipv6.nclients.NClientsEth

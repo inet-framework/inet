@@ -40,6 +40,11 @@ class INET_API IAntenna : public IPrintableObject
     virtual IMobility *getMobility() const = 0;
 
     /**
+     * Returns true if the antenna has directional selectivity (i.e. the gain is not always 1).
+     */
+    virtual bool isDirectional() const = 0;
+
+    /**
      * Returns the antenna's gain calculator for directional selectivity.
      * This object may be copied as needed, i.e. IAntennaGain objects are
      * expected to have no reference to other objects.

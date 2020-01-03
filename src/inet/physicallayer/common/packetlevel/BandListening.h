@@ -26,15 +26,15 @@ namespace physicallayer {
 class INET_API BandListening : public ListeningBase
 {
   protected:
-    const Hz carrierFrequency;
+    const Hz centerFrequency;
     const Hz bandwidth;
 
   public:
-    BandListening(const IRadio *radio, simtime_t startTime, simtime_t endTime, Coord startPosition, Coord endPosition, Hz carrierFrequency, Hz bandwidth);
+    BandListening(const IRadio *radio, simtime_t startTime, simtime_t endTime, Coord startPosition, Coord endPosition, Hz centerFrequency, Hz bandwidth);
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 
-    virtual Hz getCarrierFrequency() const { return carrierFrequency; }
+    virtual Hz getCenterFrequency() const { return centerFrequency; }
     virtual Hz getBandwidth() const { return bandwidth; }
 };
 

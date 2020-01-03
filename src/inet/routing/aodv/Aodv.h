@@ -40,7 +40,7 @@ namespace aodv {
  * in the IP-layer required by this protocol.
  */
 
-class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase, public cListener
+class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase, public UdpSocket::ICallback, public cListener
 {
   protected:
     /*
@@ -81,6 +81,8 @@ class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase
     IRoutingTable *routingTable = nullptr;
     IInterfaceTable *interfaceTable = nullptr;
     INetfilter *networkProtocol = nullptr;
+    UdpSocket socket;
+    bool usingIpv6 = false;
 
     // AODV parameters: the following parameters are configurable, see the NED file for more info.
     unsigned int rerrRatelimit = 0;
@@ -204,7 +206,14 @@ class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase
     /* Helper functions */
     L3Address getSelfIPAddress() const;
     void sendAODVPacket(const Ptr<AodvControlPacket>& packet, const L3Address& destAddr, unsigned int timeToLive, double delay);
+    void processPacket(Packet *pk);
     void clearState();
+    void checkIpVersionAndPacketTypeCompatibility(AodvControlPacketType packetType);
+
+    /* UDP callback interface */
+    virtual void socketDataArrived(UdpSocket *socket, Packet *packet) override;
+    virtual void socketErrorArrived(UdpSocket *socket, Indication *indication) override;
+    virtual void socketClosed(UdpSocket *socket) override;
 
     /* Lifecycle */
     virtual void handleStartOperation(LifecycleOperation *operation) override;

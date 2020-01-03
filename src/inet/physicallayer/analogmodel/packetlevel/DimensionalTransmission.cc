@@ -21,8 +21,8 @@ namespace inet {
 
 namespace physicallayer {
 
-DimensionalTransmission::DimensionalTransmission(const IRadio *transmitter, const Packet *packet, const simtime_t startTime, const simtime_t endTime, const simtime_t preambleDuration, const simtime_t headerDuration, const simtime_t dataDuration, const Coord startPosition, const Coord endPosition, const Quaternion startOrientation, const Quaternion endOrientation, const IModulation *modulation, b headerLength, b dataLength, Hz carrierFrequency, Hz bandwidth, bps bitrate, const ConstMapping *power) :
-    FlatTransmissionBase(transmitter, packet, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, headerLength, dataLength, bitrate, modulation, carrierFrequency, bandwidth),
+DimensionalTransmission::DimensionalTransmission(const IRadio *transmitter, const Packet *packet, const simtime_t startTime, const simtime_t endTime, const simtime_t preambleDuration, const simtime_t headerDuration, const simtime_t dataDuration, const Coord startPosition, const Coord endPosition, const Quaternion startOrientation, const Quaternion endOrientation, const IModulation *modulation, b headerLength, b dataLength, Hz centerFrequency, Hz bandwidth, bps bitrate, const Ptr<const IFunction<WpHz, Domain<simsec, Hz>>>& power) :
+    FlatTransmissionBase(transmitter, packet, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, headerLength, dataLength, bitrate, modulation, centerFrequency, bandwidth),
     power(power)
 {
 }
@@ -30,11 +30,9 @@ DimensionalTransmission::DimensionalTransmission(const IRadio *transmitter, cons
 std::ostream& DimensionalTransmission::printToStream(std::ostream& stream, int level) const
 {
     stream << "DimensionalTransmission";
-    if (level <= PRINT_LEVEL_DETAIL)
-        stream << ", powerDimensionSet = " << power->getDimensionSet();
     if (level <= PRINT_LEVEL_DEBUG)
-        stream << ", powerMax = " << MappingUtils::findMax(*power)
-               << ", powerMin = " << MappingUtils::findMin(*power);
+//        stream << ", powerMax = " << power->getMax()
+//               << ", powerMin = " << power->getMin();
     if (level <= PRINT_LEVEL_TRACE)
         stream << ", power = " << power;
     return FlatTransmissionBase::printToStream(stream, level);

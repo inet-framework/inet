@@ -30,8 +30,8 @@ class INET_API ScalarDigitalAnalogConverter : public IDigitalAnalogConverter
 {
   protected:
     W power;
-    // TODO: why carrierFrequency and bandwidth here? why not in the shaper
-    Hz carrierFrequency;
+    // TODO: why centerFrequency and bandwidth here? why not in the shaper
+    Hz centerFrequency;
     Hz bandwidth;
     double sampleRate;
 

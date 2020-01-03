@@ -13,6 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
+#include "inet/common/packet/chunk/EmptyChunk.h"
 #include "inet/common/packet/chunk/SequenceChunk.h"
 
 namespace inet {
@@ -37,7 +38,7 @@ SliceChunk::SliceChunk(const Ptr<Chunk>& chunk, b offset, b length) :
     Chunk(),
     chunk(chunk),
     offset(offset),
-    length(length == b(-1) ? chunk->getChunkLength() - offset : length)
+    length(length < b(0) ? std::min(-length, chunk->getChunkLength() - offset) : length)
 {
     CHUNK_CHECK_USAGE(chunk->isImmutable(), "chunk is mutable");
 #if CHUNK_CHECK_IMPLEMENTATION_ENABLED
@@ -50,6 +51,7 @@ SliceChunk::SliceChunk(const Ptr<Chunk>& chunk, b offset, b length) :
 
 void SliceChunk::forEachChild(cVisitor *v)
 {
+    Chunk::forEachChild(v);
     v->visit(const_cast<Chunk *>(chunk.get()));
 }
 
@@ -58,12 +60,12 @@ const Ptr<Chunk> SliceChunk::peekUnchecked(PeekPredicate predicate, PeekConverte
     b chunkLength = getChunkLength();
     CHUNK_CHECK_USAGE(b(0) <= iterator.getPosition() && iterator.getPosition() <= chunkLength, "iterator is out of range");
     // 1. peeking an empty part returns nullptr
-    if (length == b(0) || (iterator.getPosition() == chunkLength && length == b(-1))) {
+    if (length == b(0) || (iterator.getPosition() == chunkLength && length < b(0))) {
         if (predicate == nullptr || predicate(nullptr))
-            return nullptr;
+            return EmptyChunk::getEmptyChunk(flags);
     }
     // 2. peeking the whole part
-    if (iterator.getPosition() == b(0) && (length == b(-1) || length == chunkLength)) {
+    if (iterator.getPosition() == b(0) && (-length >= chunkLength || length == chunkLength)) {
         // 2.1 peeking the whole part returns the sliced chunk
         if (offset == b(0) && chunkLength == chunk->getChunkLength()) {
             if (predicate == nullptr || predicate(chunk))
@@ -75,14 +77,15 @@ const Ptr<Chunk> SliceChunk::peekUnchecked(PeekPredicate predicate, PeekConverte
             return result;
     }
     // 3. peeking anything else returns what peeking the sliced chunk returns
-    return chunk->peekUnchecked(predicate, converter, ForwardIterator(iterator.getPosition() + offset, -1), length == b(-1) ? chunkLength : length, flags);
+    return chunk->peekUnchecked(predicate, converter, ForwardIterator(iterator.getPosition() + offset, -1), length < b(0) ? -std::min(-length, chunkLength - offset) : length, flags);
 }
 
 const Ptr<Chunk> SliceChunk::convertChunk(const std::type_info& typeInfo, const Ptr<Chunk>& chunk, b offset, b length, int flags)
 {
     b chunkLength = chunk->getChunkLength();
-    b sliceLength = length == b(-1) ? chunkLength - offset : length;
     CHUNK_CHECK_IMPLEMENTATION(b(0) <= offset && offset <= chunkLength);
+    CHUNK_CHECK_IMPLEMENTATION(length <= chunkLength - offset);
+    b sliceLength = length < b(0) ? std::min(-length, chunkLength) - offset : length;
     CHUNK_CHECK_IMPLEMENTATION(b(0) <= sliceLength && sliceLength <= chunkLength);
     return makeShared<SliceChunk>(chunk, offset, sliceLength);
 }

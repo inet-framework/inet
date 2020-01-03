@@ -24,14 +24,16 @@
 
 package inet.linklayer.ieee802154;
 
+import inet.queueing.contract.IPacketQueue;
 import inet.linklayer.base.MacProtocolBase;
 import inet.linklayer.contract.IMacProtocol;
+
 
 //
 // Generic CSMA protocol supporting Mac-ACKs as well as
 // constant, linear or exponential backoff times.
 //
-simple Ieee802154Mac extends MacProtocolBase like IMacProtocol
+module Ieee802154Mac extends MacProtocolBase like IMacProtocol
 {
     parameters:
         string address = default("auto"); // MAC address as hex string (12 hex digits), or
@@ -41,8 +43,6 @@ simple Ieee802154Mac extends MacProtocolBase like IMacProtocol
         // length of MAC header
         int headerLength @unit(b) = default(72 b);
         int mtu @unit(B) = default(0B);
-        // size of the MAC queue (maximum number of packets in Tx buffer)
-        int queueLength = default(100);
         // bit rate
         double bitrate @unit(bps) = default(250000 bps);
 
@@ -97,8 +97,15 @@ simple Ieee802154Mac extends MacProtocolBase like IMacProtocol
         @statistic[linkBroken](title="link break"; source=linkBroken; record=count; interpolationmode=none);
         @statistic[packetDropNotAddressToUs](title="packet drop: not addressed to us"; source=packetDropReasonIsNotAddressedToUs(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetDropIncorrectlyReceived](title="packet drop: incorrectly received"; source=packetDropReasonIsIncorrectlyReceived(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
-        @statistic[packetDropQueueOverlow](title="packet drop: queue overflow"; source=packetDropReasonIsQueueOverflow(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
+        @statistic[packetDropQueueOverflow](title="packet drop: queue overflow"; source=packetDropReasonIsQueueOverflow(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetDropRetryLimitReached](title="packet drop: retry limit reached"; source=packetDropReasonIsRetryLimitReached(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetDropBackoffLimitReached](title="packet drop: backoff limit reached"; source=packetDropReasonIsCongestion(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
+    submodules:
+        queue: <default("DropTailQueue")> like IPacketQueue {
+            parameters:
+                packetCapacity = default(100);
+                @display("p=100,100;q=l2queue");
+        }
+    connections allowunconnected:
 }
 

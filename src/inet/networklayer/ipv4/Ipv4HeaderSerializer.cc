@@ -35,7 +35,9 @@ void Ipv4HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
     iphdr.ip_tos = ipv4Header->getTypeOfService();
     iphdr.ip_id = htons(ipv4Header->getIdentification());
     ASSERT((ipv4Header->getFragmentOffset() & 7) == 0);
-    uint16_t ip_off = ipv4Header->getFragmentOffset() / 8;
+    uint16_t ip_off = (ipv4Header->getFragmentOffset() / 8) & IP_OFFMASK;
+    if (ipv4Header->getReservedBit())
+        ip_off |= IP_RF;
     if (ipv4Header->getMoreFragments())
         ip_off |= IP_MF;
     if (ipv4Header->getDontFragment())
@@ -133,7 +135,13 @@ void Ipv4HeaderSerializer::serializeOption(MemoryOutputStream& stream, const Tlv
             }
             break;
         }
-        case IPOPTION_ROUTER_ALERT:
+        case IPOPTION_ROUTER_ALERT: {
+            auto *opt = check_and_cast<const Ipv4OptionRouterAlert *>(option);
+            ASSERT(length == 4);
+            stream.writeUint16Be(opt->getRouterAlert());
+            break;
+        }
+
         case IPOPTION_SECURITY:
         default: {
             throw cRuntimeError("Unknown Ipv4Option type=%d (not in an TlvOptionRaw option)", type);
@@ -160,6 +168,7 @@ const Ptr<Chunk> Ipv4HeaderSerializer::deserialize(MemoryInputStream& stream) co
     ipv4Header->setTimeToLive(iphdr.ip_ttl);
     ipv4Header->setIdentification(ntohs(iphdr.ip_id));
     uint16_t ip_off = ntohs(iphdr.ip_off);
+    ipv4Header->setReservedBit((ip_off & IP_RF) != 0);
     ipv4Header->setMoreFragments((ip_off & IP_MF) != 0);
     ipv4Header->setDontFragment((ip_off & IP_DF) != 0);
     ipv4Header->setFragmentOffset((ntohs(iphdr.ip_off) & IP_OFFMASK) * 8);
@@ -189,7 +198,7 @@ const Ptr<Chunk> Ipv4HeaderSerializer::deserialize(MemoryInputStream& stream) co
         ipv4Header->markIncomplete();
     }
 
-    ipv4Header->setCrc(iphdr.ip_sum);
+    ipv4Header->setCrc(ntohs(iphdr.ip_sum));
     ipv4Header->setCrcMode(CRC_COMPUTED);
 
     return ipv4Header;
@@ -272,6 +281,16 @@ TlvOptionBase *Ipv4HeaderSerializer::deserializeOption(MemoryInputStream& stream
         }
 
         case IPOPTION_ROUTER_ALERT:
+            length = stream.readByte();
+            if (length == 4) {
+                auto *option = new Ipv4OptionRouterAlert();
+                option->setType(type);
+                option->setLength(length);
+                option->setRouterAlert(stream.readUint16Be());
+                return option;
+            }
+            break;
+
         case IPOPTION_SECURITY:
         default:
             length = stream.readByte();

@@ -24,7 +24,7 @@ import inet.physicallayer.base.packetlevel.FlatRadioBase;
 // well-known modulations without utilizing other techiques such as forward
 // error correction, interleaving, spreading, etc.
 //
-// See also ~ApskScalarRadio, and ~ApskScalarRadioMedium.
+// @see ~ApskScalarRadio, ~ApskScalarRadioMedium.
 //
 module ApskRadio extends FlatRadioBase
 {

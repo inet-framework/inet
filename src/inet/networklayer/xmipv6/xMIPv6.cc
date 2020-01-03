@@ -113,21 +113,17 @@ void xMIPv6::initialize(int stage)
            statVectorCoTfromCN.setName("CoT from CN");*/
 
         tunneling = getModuleFromPar<Ipv6Tunneling>(par("ipv6TunnelingModule"), this);    // access to tunneling module
-    }
-    else if (stage == INITSTAGE_NETWORK_LAYER) {
+
         // moved rt6 initialization to here, as we should
         // set the MIPv6 flag as soon as possible for use
         // with other modules.
         cModule *host = getContainingNode(this);
         rt6 = L3AddressResolver().getIpv6RoutingTableOf(host);
-        rt6->setMipv6Support(true);    // 4.9.07 - CB
-
-        // moved init stuff from rt6 to here as this is actually
-        // the right place for these parameters
-        // 26.10.07 - CB
-        rt6->setIsHomeAgent(par("isHomeAgent"));
         rt6->setIsMobileNode(par("isMobileNode"));
-
+        rt6->setMipv6Support(true);
+        rt6->setIsHomeAgent(par("isHomeAgent"));
+    }
+    else if (stage == INITSTAGE_NETWORK_LAYER) {
         ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
         ipv6nd = getModuleFromPar<Ipv6NeighbourDiscovery>(par("ipv6NeighbourDiscoveryModule"), this);
 
@@ -641,7 +637,8 @@ void xMIPv6::sendMobilityMessageToIPv6Module(Packet *msg, const Ipv6Address& des
     EV_INFO << "Appending ControlInfo to mobility message\n";
     delete msg->removeTagIfPresent<DispatchProtocolReq>();
     msg->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::mobileipv6);
-    msg->addTagIfAbsent<InterfaceReq>()->setInterfaceId(interfaceId);
+    if (interfaceId != -1)
+        msg->addTagIfAbsent<InterfaceReq>()->setInterfaceId(interfaceId);
     msg->addTagIfAbsent<L3AddressReq>()->setSrcAddress(srcAddr);
     msg->addTagIfAbsent<L3AddressReq>()->setDestAddress(destAddr);
     msg->addTagIfAbsent<HopLimitReq>()->setHopLimit(255);
@@ -2408,7 +2405,6 @@ void xMIPv6::createBRRTimer(const Ipv6Address& brDest, InterfaceEntry *ie, const
        the home address of the mobile node.*/
 
     Enter_Method("createBRRTimer()");
-    cMessage *brTriggerMsg = new cMessage("sendPeriodicBRR", MK_SEND_PERIODIC_BR);
 
     // check if there already exists a BRTimer entry for this key
     Key key(brDest, ie->getInterfaceId(), KEY_BR);
@@ -2432,10 +2428,10 @@ void xMIPv6::createBRRTimer(const Ipv6Address& brDest, InterfaceEntry *ie, const
 
     brIfEntry->dest = brDest;
     brIfEntry->ifEntry = ie;
-    brIfEntry->timer = brTriggerMsg;
-
     brIfEntry->retries = 0;
 
+    cMessage *brTriggerMsg = new cMessage("sendPeriodicBRR", MK_SEND_PERIODIC_BR);
+    brIfEntry->timer = brTriggerMsg;
     brTriggerMsg->setContextPointer(brIfEntry);    // attaching the brIfEntry info corresponding to a particular address ith message
 
     // Scheduling a message which will trigger a BRR towards brIfEntry->dest

@@ -1,0 +1,1324 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<analysis version="2">
+    <inputs>
+        <input pattern="results/IsotropicAntenna-#0.vec"/>
+        <input pattern="results/CosineAntenna-#0.vec"/>
+        <input pattern="results/DipoleAntenna-#0.vec"/>
+        <input pattern="results/IsotropicAntenna-#0.vec"/>
+        <input pattern="results/ParabolicAntenna-#0.vec"/>
+        <input pattern="results/AxiallySymmetricAntenna-#0.vec"/>
+    </inputs>
+    <charts>
+        <chart icon="icons/full/obj/linechart.png" id="1020" name="Isotropic" template="linechart_mpl" type="MATPLOTLIB">
+            <script><![CDATA[# IDE version   OMNeT++ IDE    6.0.0.190710-009aaf6ab8
+
+from omnetpp.scave import results, chart, vectorops as ops
+import matplotlib.pyplot as plt
+
+params = chart.get_properties()
+
+# This expression selects the results (you might be able to logically simplify it)
+
+filter_expression = params["filter"]
+
+# The data is returned as a Pandas DataFrame
+df = results.get_vectors(filter_expression, include_attrs=True, include_itervars=True)
+
+df = ops.perform_vector_ops(df, params["vector_operations"])
+
+# You can perform any transformations on the data here
+df['vecvalue'] *= 1000000000
+
+print(df)
+
+plt.figure(figsize=(7.5,4))
+
+plt.xlabel('Angle [deg]')
+plt.ylabel('Reception power [nW]')
+
+title, legend = chart.extract_label_columns(df)
+
+for t in df.itertuples(index=False):
+    style = dict()
+    interp = t.interpolationmode if 'interpolationmode' in df else 'sample-hold' if 'enum' in df else None
+    if interp:
+        if interp == "none":
+            style['linestyle'] = ' '
+            style['marker'] = '.'
+        elif interp == "linear":
+            pass # nothing to do
+        elif interp == "sample-hold":
+            style['drawstyle'] = 'steps-post'
+        elif interp == "backward-sample-hold":
+            style['drawstyle'] = 'steps-pre'
+
+    plt.plot(t.vectime, t.vecvalue, label=chart.make_legend_label(legend, t), **style)
+
+plt.title("""Isotropic antenna""")
+plt.tight_layout()
+
+plt.xlim(0,360)
+
+plt.xticks([0,60,120,180,240,300,360])
+
+plt.grid(b=True, which='major', axis='both', linestyle='--')
+
+plt.savefig('isotropicchart.png', dpi=150, transparent=True)
+]]></script>
+            <dialogPage id="Main" label="Main"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<xswt xmlns:x="http://sweet_swt.sf.net/xswt">
+
+  <import xmlns="http://sweet_swt.sf.net/xswt">
+    <package name="java.lang"/>
+    <package name="org.eclipse.swt.widgets" />
+    <package name="org.eclipse.swt.graphics" />
+    <package name="org.eclipse.swt.layout" />
+    <package name="org.eclipse.swt.custom" />
+    <package name="org.omnetpp.common.wizard.support" />
+    <package name="org.omnetpp.ned.editor.wizards.support" />
+    <package name="org.omnetpp.cdt.wizard.support" />
+  </import>
+  <layout x:class="GridLayout" numColumns="2"/>
+
+  <x:children>
+
+    <!-- page generated from the following spec:
+Names {
+	chartName,
+},
+Options {
+	Use antialias?,
+	Use caching?,
+},
+Colors {
+	backgroundColor
+}    
+    -->
+    
+    <!-- Names { -->
+    <group text="Names">
+      <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+      <layout x:class="GridLayout" numColumns="2"/>
+      <x:children>
+
+    <!-- chartName -->
+    <label text="Chart name:"/>
+    <text x:id="chart_name" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </text>
+
+    <!--  -->
+
+    <!-- } -->
+      </x:children>
+    </group>
+
+    <!-- Colors { -->
+    <group text="Colors">
+      <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+      <layout x:class="GridLayout" numColumns="2"/>
+      <x:children>
+
+    <!-- backgroundColor -->
+    <label text="Background color:"/>
+    <ColorChooser x:id="background_color" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </ColorChooser>
+
+    <!-- } -->
+      </x:children>
+    </group>
+
+  </x:children>
+</xswt>
+]]></dialogPage>
+            <dialogPage id="Input" label="Input"><![CDATA[<?xml version='1.0' encoding='UTF-8'?>
+<xswt xmlns:x='http://sweet_swt.sf.net/xswt'>
+  <import xmlns='http://sweet_swt.sf.net/xswt'>
+    <package name='java.lang'/>
+    <package name='org.eclipse.swt.widgets' />
+    <package name='org.eclipse.swt.graphics' />
+    <package name='org.eclipse.swt.layout' />
+    <package name='org.eclipse.swt.custom' />
+  </import>
+  <layout x:class='GridLayout' numColumns='1'/>
+  <x:children>
+    <group text=''>
+
+      <layoutData x:class='GridData' horizontalAlignment='FILL' verticalAlignment='FILL' grabExcessHorizontalSpace='true' grabExcessVerticalSpace='true'/>
+      <layout x:class='GridLayout' numColumns='2'/>
+
+      <x:children>
+            <label text="Filter expression:">
+            	<layoutData x:class="GridData" horizontalAlignment="BEGINNING" verticalAlignment="BEGINNING"/>
+            </label>
+            <text x:id="filter" x:style="BORDER|WRAP|MULTI" x:id.isFilter="true"> 
+                <layoutData x:class="GridData" horizontalAlignment="FILL" verticalAlignment="FILL" grabExcessHorizontalSpace="true" grabExcessVerticalSpace="true"/>
+            </text>
+
+            <label text="Chart Title:"/>
+            <text x:id="title" x:style="BORDER">
+          <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+        </text>
+      </x:children>
+
+    </group>
+  </x:children>
+</xswt>]]></dialogPage>
+            <property name="filter" value="name(receptionPower:vector) AND (runattr:experiment(IsotropicAntenna))"/>
+            <property name="background_color" value=""/>
+            <property name="title" value=""/>
+        </chart>
+        <chart icon="icons/full/obj/linechart.png" id="1021" name="Parabolic" template="linechart_mpl" type="MATPLOTLIB">
+            <script><![CDATA[# IDE version   OMNeT++ IDE    6.0.0.190710-009aaf6ab8
+
+from omnetpp.scave import results, chart, vectorops as ops
+import matplotlib.pyplot as plt
+
+params = chart.get_properties()
+
+# This expression selects the results (you might be able to logically simplify it)
+
+filter_expression = params["filter"]
+
+# The data is returned as a Pandas DataFrame
+df = results.get_vectors(filter_expression, include_attrs=True, include_itervars=True)
+
+df = ops.perform_vector_ops(df, params["vector_operations"])
+
+# You can perform any transformations on the data here
+df['vecvalue'] *= 1000000000
+
+print(df)
+
+plt.figure(figsize=(7.5,4))
+
+plt.xlabel('Angle [deg]')
+plt.ylabel('Reception power [nW]')
+
+title, legend = chart.extract_label_columns(df)
+
+for t in df.itertuples(index=False):
+    style = dict()
+    interp = t.interpolationmode if 'interpolationmode' in df else 'sample-hold' if 'enum' in df else None
+    if interp:
+        if interp == "none":
+            style['linestyle'] = ' '
+            style['marker'] = '.'
+        elif interp == "linear":
+            pass # nothing to do
+        elif interp == "sample-hold":
+            style['drawstyle'] = 'steps-post'
+        elif interp == "backward-sample-hold":
+            style['drawstyle'] = 'steps-pre'
+
+    plt.plot(t.vectime, t.vecvalue, label=chart.make_legend_label(legend, t), **style)
+
+plt.title("""Parabolic antenna""")
+plt.tight_layout()
+
+plt.xlim(0,360)
+
+plt.xticks([0,60,120,180,240,300,360])
+
+plt.grid(b=True, which='major', axis='both', linestyle='--')
+
+plt.savefig('parabolichart.png', dpi=150, transparent=True)
+]]></script>
+            <dialogPage id="Main" label="Main"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<xswt xmlns:x="http://sweet_swt.sf.net/xswt">
+
+  <import xmlns="http://sweet_swt.sf.net/xswt">
+    <package name="java.lang"/>
+    <package name="org.eclipse.swt.widgets" />
+    <package name="org.eclipse.swt.graphics" />
+    <package name="org.eclipse.swt.layout" />
+    <package name="org.eclipse.swt.custom" />
+    <package name="org.omnetpp.common.wizard.support" />
+    <package name="org.omnetpp.ned.editor.wizards.support" />
+    <package name="org.omnetpp.cdt.wizard.support" />
+  </import>
+  <layout x:class="GridLayout" numColumns="2"/>
+
+  <x:children>
+
+    <!-- page generated from the following spec:
+Names {
+	chartName,
+},
+Options {
+	Use antialias?,
+	Use caching?,
+},
+Colors {
+	backgroundColor
+}    
+    -->
+    
+    <!-- Names { -->
+    <group text="Names">
+      <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+      <layout x:class="GridLayout" numColumns="2"/>
+      <x:children>
+
+    <!-- chartName -->
+    <label text="Chart name:"/>
+    <text x:id="chart_name" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </text>
+
+    <!--  -->
+
+    <!-- } -->
+      </x:children>
+    </group>
+
+    <!-- Colors { -->
+    <group text="Colors">
+      <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+      <layout x:class="GridLayout" numColumns="2"/>
+      <x:children>
+
+    <!-- backgroundColor -->
+    <label text="Background color:"/>
+    <ColorChooser x:id="background_color" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </ColorChooser>
+
+    <!-- } -->
+      </x:children>
+    </group>
+
+  </x:children>
+</xswt>
+]]></dialogPage>
+            <dialogPage id="Input" label="Input"><![CDATA[<?xml version='1.0' encoding='UTF-8'?>
+<xswt xmlns:x='http://sweet_swt.sf.net/xswt'>
+  <import xmlns='http://sweet_swt.sf.net/xswt'>
+    <package name='java.lang'/>
+    <package name='org.eclipse.swt.widgets' />
+    <package name='org.eclipse.swt.graphics' />
+    <package name='org.eclipse.swt.layout' />
+    <package name='org.eclipse.swt.custom' />
+  </import>
+  <layout x:class='GridLayout' numColumns='1'/>
+  <x:children>
+    <group text=''>
+
+      <layoutData x:class='GridData' horizontalAlignment='FILL' verticalAlignment='FILL' grabExcessHorizontalSpace='true' grabExcessVerticalSpace='true'/>
+      <layout x:class='GridLayout' numColumns='2'/>
+
+      <x:children>
+            <label text="Filter expression:">
+            	<layoutData x:class="GridData" horizontalAlignment="BEGINNING" verticalAlignment="BEGINNING"/>
+            </label>
+            <text x:id="filter" x:style="BORDER|WRAP|MULTI" x:id.isFilter="true"> 
+                <layoutData x:class="GridData" horizontalAlignment="FILL" verticalAlignment="FILL" grabExcessHorizontalSpace="true" grabExcessVerticalSpace="true"/>
+            </text>
+
+            <label text="Chart Title:"/>
+            <text x:id="title" x:style="BORDER">
+          <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+        </text>
+      </x:children>
+
+    </group>
+  </x:children>
+</xswt>]]></dialogPage>
+            <property name="filter" value="name(receptionPower:vector) AND (runattr:experiment(ParabolicAntenna))"/>
+            <property name="background_color" value=""/>
+            <property name="title" value=""/>
+        </chart>
+        <chart icon="icons/full/obj/linechart.png" id="1019" name="Dipole" template="linechart_mpl" type="MATPLOTLIB">
+            <script><![CDATA[# IDE version   OMNeT++ IDE    6.0.0.190710-009aaf6ab8
+
+from omnetpp.scave import results, chart, vectorops as ops
+import matplotlib.pyplot as plt
+
+params = chart.get_properties()
+
+# This expression selects the results (you might be able to logically simplify it)
+
+filter_expression = params["filter"]
+
+# The data is returned as a Pandas DataFrame
+df = results.get_vectors(filter_expression, include_attrs=True, include_itervars=True)
+
+df = ops.perform_vector_ops(df, params["vector_operations"])
+
+# You can perform any transformations on the data here
+df['vecvalue'] *= 1000000000
+
+print(df)
+
+plt.figure(figsize=(7.5,4))
+
+plt.xlabel('Angle [deg]')
+plt.ylabel('Reception power [nW]')
+
+title, legend = chart.extract_label_columns(df)
+
+for t in df.itertuples(index=False):
+    style = dict()
+    interp = t.interpolationmode if 'interpolationmode' in df else 'sample-hold' if 'enum' in df else None
+    if interp:
+        if interp == "none":
+            style['linestyle'] = ' '
+            style['marker'] = '.'
+        elif interp == "linear":
+            pass # nothing to do
+        elif interp == "sample-hold":
+            style['drawstyle'] = 'steps-post'
+        elif interp == "backward-sample-hold":
+            style['drawstyle'] = 'steps-pre'
+
+    plt.plot(t.vectime, t.vecvalue, label=chart.make_legend_label(legend, t), **style)
+
+plt.title("""Dipole antenna""")
+plt.tight_layout()
+
+plt.xlim(0,360)
+
+plt.xticks([0,60,120,180,240,300,360])
+
+plt.grid(b=True, which='major', axis='both', linestyle='--')
+
+plt.savefig('dipolechart.png', dpi=150, transparent=True)
+]]></script>
+            <dialogPage id="Main" label="Main"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<xswt xmlns:x="http://sweet_swt.sf.net/xswt">
+
+  <import xmlns="http://sweet_swt.sf.net/xswt">
+    <package name="java.lang"/>
+    <package name="org.eclipse.swt.widgets" />
+    <package name="org.eclipse.swt.graphics" />
+    <package name="org.eclipse.swt.layout" />
+    <package name="org.eclipse.swt.custom" />
+    <package name="org.omnetpp.common.wizard.support" />
+    <package name="org.omnetpp.ned.editor.wizards.support" />
+    <package name="org.omnetpp.cdt.wizard.support" />
+  </import>
+  <layout x:class="GridLayout" numColumns="2"/>
+
+  <x:children>
+
+    <!-- page generated from the following spec:
+Names {
+	chartName,
+},
+Options {
+	Use antialias?,
+	Use caching?,
+},
+Colors {
+	backgroundColor
+}    
+    -->
+    
+    <!-- Names { -->
+    <group text="Names">
+      <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+      <layout x:class="GridLayout" numColumns="2"/>
+      <x:children>
+
+    <!-- chartName -->
+    <label text="Chart name:"/>
+    <text x:id="chart_name" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </text>
+
+    <!--  -->
+
+    <!-- } -->
+      </x:children>
+    </group>
+
+    <!-- Colors { -->
+    <group text="Colors">
+      <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+      <layout x:class="GridLayout" numColumns="2"/>
+      <x:children>
+
+    <!-- backgroundColor -->
+    <label text="Background color:"/>
+    <ColorChooser x:id="background_color" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </ColorChooser>
+
+    <!-- } -->
+      </x:children>
+    </group>
+
+  </x:children>
+</xswt>
+]]></dialogPage>
+            <dialogPage id="Input" label="Input"><![CDATA[<?xml version='1.0' encoding='UTF-8'?>
+<xswt xmlns:x='http://sweet_swt.sf.net/xswt'>
+  <import xmlns='http://sweet_swt.sf.net/xswt'>
+    <package name='java.lang'/>
+    <package name='org.eclipse.swt.widgets' />
+    <package name='org.eclipse.swt.graphics' />
+    <package name='org.eclipse.swt.layout' />
+    <package name='org.eclipse.swt.custom' />
+  </import>
+  <layout x:class='GridLayout' numColumns='1'/>
+  <x:children>
+    <group text=''>
+
+      <layoutData x:class='GridData' horizontalAlignment='FILL' verticalAlignment='FILL' grabExcessHorizontalSpace='true' grabExcessVerticalSpace='true'/>
+      <layout x:class='GridLayout' numColumns='2'/>
+
+      <x:children>
+            <label text="Filter expression:">
+            	<layoutData x:class="GridData" horizontalAlignment="BEGINNING" verticalAlignment="BEGINNING"/>
+            </label>
+            <text x:id="filter" x:style="BORDER|WRAP|MULTI" x:id.isFilter="true"> 
+                <layoutData x:class="GridData" horizontalAlignment="FILL" verticalAlignment="FILL" grabExcessHorizontalSpace="true" grabExcessVerticalSpace="true"/>
+            </text>
+
+            <label text="Chart Title:"/>
+            <text x:id="title" x:style="BORDER">
+          <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+        </text>
+      </x:children>
+
+    </group>
+  </x:children>
+</xswt>]]></dialogPage>
+            <property name="filter" value="name(receptionPower:vector) AND (runattr:experiment(DipoleAntenna))"/>
+            <property name="background_color" value=""/>
+            <property name="title" value=""/>
+        </chart>
+        <chart icon="icons/full/obj/linechart.png" id="1018" name="Cosine" template="linechart_mpl" type="MATPLOTLIB">
+            <script><![CDATA[# IDE version   OMNeT++ IDE    6.0.0.190710-009aaf6ab8
+
+from omnetpp.scave import results, chart, vectorops as ops
+import matplotlib.pyplot as plt
+
+params = chart.get_properties()
+
+# This expression selects the results (you might be able to logically simplify it)
+
+filter_expression = params["filter"]
+
+# The data is returned as a Pandas DataFrame
+df = results.get_vectors(filter_expression, include_attrs=True, include_itervars=True)
+
+df = ops.perform_vector_ops(df, params["vector_operations"])
+
+# You can perform any transformations on the data here
+df['vecvalue'] *= 1000000000
+
+print(df)
+
+plt.figure(figsize=(7.5,4))
+
+plt.xlabel('Angle [deg]')
+plt.ylabel('Reception power [nW]')
+
+title, legend = chart.extract_label_columns(df)
+
+for t in df.itertuples(index=False):
+    style = dict()
+    interp = t.interpolationmode if 'interpolationmode' in df else 'sample-hold' if 'enum' in df else None
+    if interp:
+        if interp == "none":
+            style['linestyle'] = ' '
+            style['marker'] = '.'
+        elif interp == "linear":
+            pass # nothing to do
+        elif interp == "sample-hold":
+            style['drawstyle'] = 'steps-post'
+        elif interp == "backward-sample-hold":
+            style['drawstyle'] = 'steps-pre'
+
+    plt.plot(t.vectime, t.vecvalue, label=chart.make_legend_label(legend, t), **style)
+
+plt.title("""Cosine antenna""")
+plt.tight_layout()
+
+plt.xlim(0,360)
+
+plt.xticks([0,60,120,180,240,300,360])
+
+plt.grid(b=True, which='major', axis='both', linestyle='--')
+
+plt.savefig('cosinechart.png', dpi=150, transparent=True)
+]]></script>
+            <dialogPage id="Main" label="Main"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<xswt xmlns:x="http://sweet_swt.sf.net/xswt">
+
+  <import xmlns="http://sweet_swt.sf.net/xswt">
+    <package name="java.lang"/>
+    <package name="org.eclipse.swt.widgets" />
+    <package name="org.eclipse.swt.graphics" />
+    <package name="org.eclipse.swt.layout" />
+    <package name="org.eclipse.swt.custom" />
+    <package name="org.omnetpp.common.wizard.support" />
+    <package name="org.omnetpp.ned.editor.wizards.support" />
+    <package name="org.omnetpp.cdt.wizard.support" />
+  </import>
+  <layout x:class="GridLayout" numColumns="2"/>
+
+  <x:children>
+
+    <!-- page generated from the following spec:
+Names {
+	chartName,
+},
+Options {
+	Use antialias?,
+	Use caching?,
+},
+Colors {
+	backgroundColor
+}    
+    -->
+    
+    <!-- Names { -->
+    <group text="Names">
+      <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+      <layout x:class="GridLayout" numColumns="2"/>
+      <x:children>
+
+    <!-- chartName -->
+    <label text="Chart name:"/>
+    <text x:id="chart_name" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </text>
+
+    <!--  -->
+
+    <!-- } -->
+      </x:children>
+    </group>
+
+    <!-- Colors { -->
+    <group text="Colors">
+      <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+      <layout x:class="GridLayout" numColumns="2"/>
+      <x:children>
+
+    <!-- backgroundColor -->
+    <label text="Background color:"/>
+    <ColorChooser x:id="background_color" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </ColorChooser>
+
+    <!-- } -->
+      </x:children>
+    </group>
+
+  </x:children>
+</xswt>
+]]></dialogPage>
+            <dialogPage id="Input" label="Input"><![CDATA[<?xml version='1.0' encoding='UTF-8'?>
+<xswt xmlns:x='http://sweet_swt.sf.net/xswt'>
+  <import xmlns='http://sweet_swt.sf.net/xswt'>
+    <package name='java.lang'/>
+    <package name='org.eclipse.swt.widgets' />
+    <package name='org.eclipse.swt.graphics' />
+    <package name='org.eclipse.swt.layout' />
+    <package name='org.eclipse.swt.custom' />
+  </import>
+  <layout x:class='GridLayout' numColumns='1'/>
+  <x:children>
+    <group text=''>
+
+      <layoutData x:class='GridData' horizontalAlignment='FILL' verticalAlignment='FILL' grabExcessHorizontalSpace='true' grabExcessVerticalSpace='true'/>
+      <layout x:class='GridLayout' numColumns='2'/>
+
+      <x:children>
+            <label text="Filter expression:">
+            	<layoutData x:class="GridData" horizontalAlignment="BEGINNING" verticalAlignment="BEGINNING"/>
+            </label>
+            <text x:id="filter" x:style="BORDER|WRAP|MULTI" x:id.isFilter="true"> 
+                <layoutData x:class="GridData" horizontalAlignment="FILL" verticalAlignment="FILL" grabExcessHorizontalSpace="true" grabExcessVerticalSpace="true"/>
+            </text>
+
+            <label text="Chart Title:"/>
+            <text x:id="title" x:style="BORDER">
+          <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+        </text>
+      </x:children>
+
+    </group>
+  </x:children>
+</xswt>]]></dialogPage>
+            <property name="filter" value="name(receptionPower:vector) AND (runattr:experiment(CosineAntenna))"/>
+            <property name="background_color" value=""/>
+            <property name="title" value=""/>
+        </chart>
+        <chart icon="icons/full/obj/linechart.png" id="1017" name="16-Yagi" template="linechart_mpl" type="MATPLOTLIB">
+            <script><![CDATA[# IDE version   OMNeT++ IDE    6.0.0.190710-009aaf6ab8
+
+from omnetpp.scave import results, chart, vectorops as ops
+import matplotlib.pyplot as plt
+
+params = chart.get_properties()
+
+# This expression selects the results (you might be able to logically simplify it)
+
+filter_expression = params["filter"]
+
+# The data is returned as a Pandas DataFrame
+df = results.get_vectors(filter_expression, include_attrs=True, include_itervars=True)
+
+df = ops.perform_vector_ops(df, params["vector_operations"])
+
+# You can perform any transformations on the data here
+df['vecvalue'] *= 1000000000
+
+print(df)
+
+plt.figure(figsize=(7.5,4))
+
+plt.xlabel('Angle [deg]')
+plt.ylabel('Reception power [nW]')
+
+title, legend = chart.extract_label_columns(df)
+
+for t in df.itertuples(index=False):
+    style = dict()
+    interp = t.interpolationmode if 'interpolationmode' in df else 'sample-hold' if 'enum' in df else None
+    if interp:
+        if interp == "none":
+            style['linestyle'] = ' '
+            style['marker'] = '.'
+        elif interp == "linear":
+            pass # nothing to do
+        elif interp == "sample-hold":
+            style['drawstyle'] = 'steps-post'
+        elif interp == "backward-sample-hold":
+            style['drawstyle'] = 'steps-pre'
+
+    plt.plot(t.vectime, t.vecvalue, label=chart.make_legend_label(legend, t), **style)
+
+plt.title("""Axially symmetric antenna""")
+plt.tight_layout()
+
+plt.xlim(0,360)
+
+plt.xticks([0,60,120,180,240,300,360])
+
+plt.grid(b=True, which='major', axis='both', linestyle='--')
+
+plt.savefig('axiallysymmetricchart.png', dpi=150, transparent=True)
+]]></script>
+            <dialogPage id="Main" label="Main"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<xswt xmlns:x="http://sweet_swt.sf.net/xswt">
+
+  <import xmlns="http://sweet_swt.sf.net/xswt">
+    <package name="java.lang"/>
+    <package name="org.eclipse.swt.widgets" />
+    <package name="org.eclipse.swt.graphics" />
+    <package name="org.eclipse.swt.layout" />
+    <package name="org.eclipse.swt.custom" />
+    <package name="org.omnetpp.common.wizard.support" />
+    <package name="org.omnetpp.ned.editor.wizards.support" />
+    <package name="org.omnetpp.cdt.wizard.support" />
+  </import>
+  <layout x:class="GridLayout" numColumns="2"/>
+
+  <x:children>
+
+    <!-- page generated from the following spec:
+Names {
+	chartName,
+},
+Options {
+	Use antialias?,
+	Use caching?,
+},
+Colors {
+	backgroundColor
+}    
+    -->
+    
+    <!-- Names { -->
+    <group text="Names">
+      <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+      <layout x:class="GridLayout" numColumns="2"/>
+      <x:children>
+
+    <!-- chartName -->
+    <label text="Chart name:"/>
+    <text x:id="chart_name" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </text>
+
+    <!--  -->
+
+    <!-- } -->
+      </x:children>
+    </group>
+
+    <!-- Colors { -->
+    <group text="Colors">
+      <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+      <layout x:class="GridLayout" numColumns="2"/>
+      <x:children>
+
+    <!-- backgroundColor -->
+    <label text="Background color:"/>
+    <ColorChooser x:id="background_color" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </ColorChooser>
+
+    <!-- } -->
+      </x:children>
+    </group>
+
+  </x:children>
+</xswt>
+]]></dialogPage>
+            <dialogPage id="Input" label="Input"><![CDATA[<?xml version='1.0' encoding='UTF-8'?>
+<xswt xmlns:x='http://sweet_swt.sf.net/xswt'>
+  <import xmlns='http://sweet_swt.sf.net/xswt'>
+    <package name='java.lang'/>
+    <package name='org.eclipse.swt.widgets' />
+    <package name='org.eclipse.swt.graphics' />
+    <package name='org.eclipse.swt.layout' />
+    <package name='org.eclipse.swt.custom' />
+  </import>
+  <layout x:class='GridLayout' numColumns='1'/>
+  <x:children>
+    <group text=''>
+
+      <layoutData x:class='GridData' horizontalAlignment='FILL' verticalAlignment='FILL' grabExcessHorizontalSpace='true' grabExcessVerticalSpace='true'/>
+      <layout x:class='GridLayout' numColumns='2'/>
+
+      <x:children>
+            <label text="Filter expression:">
+            	<layoutData x:class="GridData" horizontalAlignment="BEGINNING" verticalAlignment="BEGINNING"/>
+            </label>
+            <text x:id="filter" x:style="BORDER|WRAP|MULTI" x:id.isFilter="true"> 
+                <layoutData x:class="GridData" horizontalAlignment="FILL" verticalAlignment="FILL" grabExcessHorizontalSpace="true" grabExcessVerticalSpace="true"/>
+            </text>
+
+            <label text="Chart Title:"/>
+            <text x:id="title" x:style="BORDER">
+          <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+        </text>
+      </x:children>
+
+    </group>
+  </x:children>
+</xswt>]]></dialogPage>
+            <property name="filter" value="name(receptionPower:vector) AND (runattr:experiment(AxiallySymmetricAntenna))"/>
+            <property name="background_color" value=""/>
+            <property name="title" value=""/>
+        </chart>
+        <chart icon="icons/full/obj/linechart.png" id="1129" name="16-Yagi (logarithmic)" template="linechart_mpl" type="MATPLOTLIB">
+            <script><![CDATA[# IDE version   OMNeT++ IDE    6.0.0.190710-009aaf6ab8
+
+from omnetpp.scave import results, chart, vectorops as ops
+import matplotlib.pyplot as plt
+
+params = chart.get_properties()
+
+# This expression selects the results (you might be able to logically simplify it)
+
+filter_expression = params["filter"]
+
+# The data is returned as a Pandas DataFrame
+df = results.get_vectors(filter_expression, include_attrs=True, include_itervars=True)
+
+df = ops.perform_vector_ops(df, params["vector_operations"])
+
+# You can perform any transformations on the data here
+df['vecvalue'] *= 1000000000
+
+print(df)
+
+plt.figure(figsize=(7.5,4))
+
+plt.xlabel('Angle [deg]')
+plt.ylabel('Reception power [nW]')
+
+title, legend = chart.extract_label_columns(df)
+
+for t in df.itertuples(index=False):
+    style = dict()
+    interp = t.interpolationmode if 'interpolationmode' in df else 'sample-hold' if 'enum' in df else None
+    if interp:
+        if interp == "none":
+            style['linestyle'] = ' '
+            style['marker'] = '.'
+        elif interp == "linear":
+            pass # nothing to do
+        elif interp == "sample-hold":
+            style['drawstyle'] = 'steps-post'
+        elif interp == "backward-sample-hold":
+            style['drawstyle'] = 'steps-pre'
+
+    plt.plot(t.vectime, t.vecvalue, label=chart.make_legend_label(legend, t), **style)
+
+plt.title("""Axially symmetric antenna""")
+plt.tight_layout()
+
+plt.xlim(0,360)
+
+plt.xticks([0,60,120,180,240,300,360])
+
+plt.grid(b=True, which='major', axis='both', linestyle='--')
+
+plt.yscale('log')
+
+plt.savefig('axiallysymmetricchart_log.png', dpi=150, transparent=True)
+]]></script>
+            <dialogPage id="Main" label="Main"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<xswt xmlns:x="http://sweet_swt.sf.net/xswt">
+
+  <import xmlns="http://sweet_swt.sf.net/xswt">
+    <package name="java.lang"/>
+    <package name="org.eclipse.swt.widgets" />
+    <package name="org.eclipse.swt.graphics" />
+    <package name="org.eclipse.swt.layout" />
+    <package name="org.eclipse.swt.custom" />
+    <package name="org.omnetpp.common.wizard.support" />
+    <package name="org.omnetpp.ned.editor.wizards.support" />
+    <package name="org.omnetpp.cdt.wizard.support" />
+  </import>
+  <layout x:class="GridLayout" numColumns="2"/>
+
+  <x:children>
+
+    <!-- page generated from the following spec:
+Names {
+	chartName,
+},
+Options {
+	Use antialias?,
+	Use caching?,
+},
+Colors {
+	backgroundColor
+}    
+    -->
+    
+    <!-- Names { -->
+    <group text="Names">
+      <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+      <layout x:class="GridLayout" numColumns="2"/>
+      <x:children>
+
+    <!-- chartName -->
+    <label text="Chart name:"/>
+    <text x:id="chart_name" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </text>
+
+    <!--  -->
+
+    <!-- } -->
+      </x:children>
+    </group>
+
+    <!-- Colors { -->
+    <group text="Colors">
+      <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+      <layout x:class="GridLayout" numColumns="2"/>
+      <x:children>
+
+    <!-- backgroundColor -->
+    <label text="Background color:"/>
+    <ColorChooser x:id="background_color" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </ColorChooser>
+
+    <!-- } -->
+      </x:children>
+    </group>
+
+  </x:children>
+</xswt>
+]]></dialogPage>
+            <dialogPage id="Input" label="Input"><![CDATA[<?xml version='1.0' encoding='UTF-8'?>
+<xswt xmlns:x='http://sweet_swt.sf.net/xswt'>
+  <import xmlns='http://sweet_swt.sf.net/xswt'>
+    <package name='java.lang'/>
+    <package name='org.eclipse.swt.widgets' />
+    <package name='org.eclipse.swt.graphics' />
+    <package name='org.eclipse.swt.layout' />
+    <package name='org.eclipse.swt.custom' />
+  </import>
+  <layout x:class='GridLayout' numColumns='1'/>
+  <x:children>
+    <group text=''>
+
+      <layoutData x:class='GridData' horizontalAlignment='FILL' verticalAlignment='FILL' grabExcessHorizontalSpace='true' grabExcessVerticalSpace='true'/>
+      <layout x:class='GridLayout' numColumns='2'/>
+
+      <x:children>
+            <label text="Filter expression:">
+            	<layoutData x:class="GridData" horizontalAlignment="BEGINNING" verticalAlignment="BEGINNING"/>
+            </label>
+            <text x:id="filter" x:style="BORDER|WRAP|MULTI" x:id.isFilter="true"> 
+                <layoutData x:class="GridData" horizontalAlignment="FILL" verticalAlignment="FILL" grabExcessHorizontalSpace="true" grabExcessVerticalSpace="true"/>
+            </text>
+
+            <label text="Chart Title:"/>
+            <text x:id="title" x:style="BORDER">
+          <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+        </text>
+      </x:children>
+
+    </group>
+  </x:children>
+</xswt>]]></dialogPage>
+            <property name="filter" value="name(receptionPower:vector) AND (runattr:experiment(AxiallySymmetricAntenna))"/>
+            <property name="background_color" value=""/>
+            <property name="title" value=""/>
+        </chart>
+        <chart icon="icons/full/obj/linechart.png" id="1130" name="16-Yagi (linear + logarithmic)" template="linechart_mpl" type="MATPLOTLIB">
+            <script><![CDATA[# IDE version   OMNeT++ IDE    6.0.0.190710-009aaf6ab8
+
+from omnetpp.scave import results, chart, vectorops as ops
+import matplotlib.pyplot as plt
+
+params = chart.get_properties()
+
+# This expression selects the results (you might be able to logically simplify it)
+
+filter_expression = params["filter"]
+
+# The data is returned as a Pandas DataFrame
+df = results.get_vectors(filter_expression, include_attrs=True, include_itervars=True)
+
+df = ops.perform_vector_ops(df, params["vector_operations"])
+
+# You can perform any transformations on the data here
+df['vecvalue'] *= 1000000000
+
+print(df)
+
+plt.figure(figsize=(7.5,4))
+
+plt.xlabel('Angle [deg]')
+plt.ylabel('Reception power [nW]')
+
+title, legend = chart.extract_label_columns(df)
+
+ax1 = plt.subplot(211)
+for t in df.itertuples(index=False):
+    style = dict()
+    interp = t.interpolationmode if 'interpolationmode' in df else 'sample-hold' if 'enum' in df else None
+    if interp:
+        if interp == "none":
+            style['linestyle'] = ' '
+            style['marker'] = '.'
+        elif interp == "linear":
+            pass # nothing to do
+        elif interp == "sample-hold":
+            style['drawstyle'] = 'steps-post'
+        elif interp == "backward-sample-hold":
+            style['drawstyle'] = 'steps-pre'
+
+    plt.plot(t.vectime, t.vecvalue, label=chart.make_legend_label(legend, t), **style)
+
+plt.title("""Axially symmetric antenna""")
+plt.tight_layout()
+
+plt.xlim(0,360)
+
+plt.xticks([0,60,120,180,240,300,360])
+
+plt.grid(b=True, which='major', axis='both', linestyle='--')
+
+ax2 = plt.subplot(212)
+for t in df.itertuples(index=False):
+    style = dict()
+    interp = t.interpolationmode if 'interpolationmode' in df else 'sample-hold' if 'enum' in df else None
+    if interp:
+        if interp == "none":
+            style['linestyle'] = ' '
+            style['marker'] = '.'
+        elif interp == "linear":
+            pass # nothing to do
+        elif interp == "sample-hold":
+            style['drawstyle'] = 'steps-post'
+        elif interp == "backward-sample-hold":
+            style['drawstyle'] = 'steps-pre'
+
+    plt.plot(t.vectime, t.vecvalue, label=chart.make_legend_label(legend, t), **style)
+
+plt.yscale('log')
+
+plt.xlim(0,360)
+
+plt.xticks([0,60,120,180,240,300,360])
+
+plt.grid(b=True, which='major', axis='both', linestyle='--')
+
+plt.savefig('axiallysymmetricchart_lin_log.png', dpi=150, transparent=True)
+]]></script>
+            <dialogPage id="Main" label="Main"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<xswt xmlns:x="http://sweet_swt.sf.net/xswt">
+
+  <import xmlns="http://sweet_swt.sf.net/xswt">
+    <package name="java.lang"/>
+    <package name="org.eclipse.swt.widgets" />
+    <package name="org.eclipse.swt.graphics" />
+    <package name="org.eclipse.swt.layout" />
+    <package name="org.eclipse.swt.custom" />
+    <package name="org.omnetpp.common.wizard.support" />
+    <package name="org.omnetpp.ned.editor.wizards.support" />
+    <package name="org.omnetpp.cdt.wizard.support" />
+  </import>
+  <layout x:class="GridLayout" numColumns="2"/>
+
+  <x:children>
+
+    <!-- page generated from the following spec:
+Names {
+	chartName,
+},
+Options {
+	Use antialias?,
+	Use caching?,
+},
+Colors {
+	backgroundColor
+}    
+    -->
+    
+    <!-- Names { -->
+    <group text="Names">
+      <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+      <layout x:class="GridLayout" numColumns="2"/>
+      <x:children>
+
+    <!-- chartName -->
+    <label text="Chart name:"/>
+    <text x:id="chart_name" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </text>
+
+    <!--  -->
+
+    <!-- } -->
+      </x:children>
+    </group>
+
+    <!-- Colors { -->
+    <group text="Colors">
+      <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+      <layout x:class="GridLayout" numColumns="2"/>
+      <x:children>
+
+    <!-- backgroundColor -->
+    <label text="Background color:"/>
+    <ColorChooser x:id="background_color" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </ColorChooser>
+
+    <!-- } -->
+      </x:children>
+    </group>
+
+  </x:children>
+</xswt>
+]]></dialogPage>
+            <dialogPage id="Input" label="Input"><![CDATA[<?xml version='1.0' encoding='UTF-8'?>
+<xswt xmlns:x='http://sweet_swt.sf.net/xswt'>
+  <import xmlns='http://sweet_swt.sf.net/xswt'>
+    <package name='java.lang'/>
+    <package name='org.eclipse.swt.widgets' />
+    <package name='org.eclipse.swt.graphics' />
+    <package name='org.eclipse.swt.layout' />
+    <package name='org.eclipse.swt.custom' />
+  </import>
+  <layout x:class='GridLayout' numColumns='1'/>
+  <x:children>
+    <group text=''>
+
+      <layoutData x:class='GridData' horizontalAlignment='FILL' verticalAlignment='FILL' grabExcessHorizontalSpace='true' grabExcessVerticalSpace='true'/>
+      <layout x:class='GridLayout' numColumns='2'/>
+
+      <x:children>
+            <label text="Filter expression:">
+            	<layoutData x:class="GridData" horizontalAlignment="BEGINNING" verticalAlignment="BEGINNING"/>
+            </label>
+            <text x:id="filter" x:style="BORDER|WRAP|MULTI" x:id.isFilter="true"> 
+                <layoutData x:class="GridData" horizontalAlignment="FILL" verticalAlignment="FILL" grabExcessHorizontalSpace="true" grabExcessVerticalSpace="true"/>
+            </text>
+
+            <label text="Chart Title:"/>
+            <text x:id="title" x:style="BORDER">
+          <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+        </text>
+      </x:children>
+
+    </group>
+  </x:children>
+</xswt>]]></dialogPage>
+            <property name="filter" value="name(receptionPower:vector) AND (runattr:experiment(AxiallySymmetricAntenna))"/>
+            <property name="background_color" value=""/>
+            <property name="title" value=""/>
+        </chart>
+        <chart icon="icons/full/obj/linechart.png" id="1131" name="All antennas" template="linechart_mpl" type="MATPLOTLIB">
+            <script><![CDATA[# IDE version   OMNeT++ IDE    6.0.0.190710-009aaf6ab8
+
+from omnetpp.scave import results, chart, vectorops as ops
+import matplotlib.pyplot as plt
+
+params = chart.get_properties()
+
+# This expression selects the results (you might be able to logically simplify it)
+
+filter_expression = params["filter"]
+
+# The data is returned as a Pandas DataFrame
+df = results.get_vectors(filter_expression, include_attrs=True, include_runattrs=True, include_itervars=True)
+
+df = ops.perform_vector_ops(df, params["vector_operations"])
+
+# You can perform any transformations on the data here
+df['vecvalue'] *= 1000000000
+
+print(df)
+
+plt.figure(figsize=(10,6))
+
+plt.xlabel('Angle [deg]')
+plt.ylabel('Reception power [nW]')
+
+colors = ['xkcd:lightblue','orange','green','red','darkblue']
+
+i = 0
+for t in df.itertuples(index=False):
+    style = dict()
+    interp = t.interpolationmode if 'interpolationmode' in df else 'sample-hold' if 'enum' in df else None
+    if interp:
+        if interp == "none":
+            style['linestyle'] = ' '
+            style['marker'] = '.'
+        elif interp == "linear":
+            pass # nothing to do
+        elif interp == "sample-hold":
+            style['drawstyle'] = 'steps-post'
+        elif interp == "backward-sample-hold":
+            style['drawstyle'] = 'steps-pre'
+
+    p = plt.plot(t.vectime, t.vecvalue, label=t.experiment, **style, color=colors[i])
+    i += 1
+
+plt.title("""All antennas""")
+plt.tight_layout()
+
+plt.xlim(0,360)
+
+plt.xticks([0,60,120,180,240,300,360])
+
+plt.grid(b=True, which='major', axis='both', linestyle='--')
+
+plt.legend()
+
+plt.savefig('allantennaschart.png', dpi=150, transparent=True)]]></script>
+            <dialogPage id="Main" label="Main"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<xswt xmlns:x="http://sweet_swt.sf.net/xswt">
+
+  <import xmlns="http://sweet_swt.sf.net/xswt">
+    <package name="java.lang"/>
+    <package name="org.eclipse.swt.widgets" />
+    <package name="org.eclipse.swt.graphics" />
+    <package name="org.eclipse.swt.layout" />
+    <package name="org.eclipse.swt.custom" />
+    <package name="org.omnetpp.common.wizard.support" />
+    <package name="org.omnetpp.ned.editor.wizards.support" />
+    <package name="org.omnetpp.cdt.wizard.support" />
+  </import>
+  <layout x:class="GridLayout" numColumns="2"/>
+
+  <x:children>
+
+    <!-- page generated from the following spec:
+Names {
+	chartName,
+},
+Options {
+	Use antialias?,
+	Use caching?,
+},
+Colors {
+	backgroundColor
+}    
+    -->
+    
+    <!-- Names { -->
+    <group text="Names">
+      <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+      <layout x:class="GridLayout" numColumns="2"/>
+      <x:children>
+
+    <!-- chartName -->
+    <label text="Chart name:"/>
+    <text x:id="chart_name" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </text>
+
+    <!--  -->
+
+    <!-- } -->
+      </x:children>
+    </group>
+
+    <!-- Colors { -->
+    <group text="Colors">
+      <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+      <layout x:class="GridLayout" numColumns="2"/>
+      <x:children>
+
+    <!-- backgroundColor -->
+    <label text="Background color:"/>
+    <ColorChooser x:id="background_color" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </ColorChooser>
+
+    <!-- } -->
+      </x:children>
+    </group>
+
+  </x:children>
+</xswt>
+]]></dialogPage>
+            <dialogPage id="Input" label="Input"><![CDATA[<?xml version='1.0' encoding='UTF-8'?>
+<xswt xmlns:x='http://sweet_swt.sf.net/xswt'>
+  <import xmlns='http://sweet_swt.sf.net/xswt'>
+    <package name='java.lang'/>
+    <package name='org.eclipse.swt.widgets' />
+    <package name='org.eclipse.swt.graphics' />
+    <package name='org.eclipse.swt.layout' />
+    <package name='org.eclipse.swt.custom' />
+  </import>
+  <layout x:class='GridLayout' numColumns='1'/>
+  <x:children>
+    <group text=''>
+
+      <layoutData x:class='GridData' horizontalAlignment='FILL' verticalAlignment='FILL' grabExcessHorizontalSpace='true' grabExcessVerticalSpace='true'/>
+      <layout x:class='GridLayout' numColumns='2'/>
+
+      <x:children>
+            <label text="Filter expression:">
+            	<layoutData x:class="GridData" horizontalAlignment="BEGINNING" verticalAlignment="BEGINNING"/>
+            </label>
+            <text x:id="filter" x:style="BORDER|WRAP|MULTI" x:id.isFilter="true"> 
+                <layoutData x:class="GridData" horizontalAlignment="FILL" verticalAlignment="FILL" grabExcessHorizontalSpace="true" grabExcessVerticalSpace="true"/>
+            </text>
+
+            <label text="Chart Title:"/>
+            <text x:id="title" x:style="BORDER">
+          <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+        </text>
+      </x:children>
+
+    </group>
+  </x:children>
+</xswt>]]></dialogPage>
+            <property name="filter" value="name(receptionPower:vector)"/>
+            <property name="background_color" value=""/>
+            <property name="title" value=""/>
+        </chart>
+    </charts>
+</analysis>

@@ -56,13 +56,14 @@ class INET_API InterfaceProtocolData : public cObject
 
   protected:
     InterfaceEntry *ownerp = nullptr;    // the interface entry this object belongs to
+    int id;
 
   protected:
     // fires notification with the given signalID, and the interface entry as obj
     virtual void changed(simsignal_t signalID, int fieldId);
 
   public:
-    InterfaceProtocolData() { }
+    InterfaceProtocolData(int id) : id(id) { }
 
     /**
      * Returns the InterfaceEntry that contains this data object, or nullptr
@@ -165,6 +166,7 @@ class INET_API InterfaceEntry : public cModule
      * Returns the requested state of this interface.
      */
     State getState() const { return state; }
+
     /**
      * Returns the combined state of the carrier and the interface requested state.
      */
@@ -221,9 +223,7 @@ class INET_API InterfaceEntry : public cModule
     /**
      * Clears the set of message tags.
      */
-    void clearProtocolDataSet() {
-        protocolDataSet.clearTags();
-    }
+    void clearProtocolDataSet();
 
     /**
      * Returns the message tag for the provided type or returns nullptr if no such message tag is found.
@@ -244,7 +244,9 @@ class INET_API InterfaceEntry : public cModule
      */
     template<typename T> T *addProtocolData() {
         auto t = protocolDataSet.addTag<T>();
-        check_and_cast<InterfaceProtocolData *>(t)->ownerp = this;
+        auto ipd = check_and_cast<InterfaceProtocolData *>(t);
+        ipd->ownerp = this;
+        changed(interfaceConfigChangedSignal, ipd->id);
         return t;
     }
 
@@ -252,8 +254,9 @@ class INET_API InterfaceEntry : public cModule
      * Returns a newly added message tag for the provided type if absent, or returns the message tag that is already present.
      */
     template<typename T> T *addProtocolDataIfAbsent() {
-        auto t = protocolDataSet.addTagIfAbsent<T>();
-        check_and_cast<InterfaceProtocolData *>(t)->ownerp = this;
+        auto t = protocolDataSet.findTag<T>();
+        if (t == nullptr)
+            t = protocolDataSet.addTag<T>();
         return t;
     }
 
@@ -263,6 +266,7 @@ class INET_API InterfaceEntry : public cModule
     template<typename T> T *removeProtocolData() {
         auto t = protocolDataSet.removeTag<T>();
         check_and_cast<InterfaceProtocolData *>(t)->ownerp = nullptr;
+        changed(interfaceConfigChangedSignal, t->id);
         return t;
     }
 
@@ -271,8 +275,10 @@ class INET_API InterfaceEntry : public cModule
      */
     template<typename T> T *removeProtocolDataIfPresent() {
         auto t = protocolDataSet.removeTagIfPresent<T>();
-        if (t != nullptr)
+        if (t != nullptr) {
             check_and_cast<InterfaceProtocolData *>(t)->ownerp = nullptr;
+            changed(interfaceConfigChangedSignal, t->id);
+        }
         return t;
     }
     //@}
@@ -280,7 +286,7 @@ class INET_API InterfaceEntry : public cModule
     /** @name Accessing protocol-specific interface data. Note methods are non-virtual, for performance reasons. */
     //@{
     Ipv4Address getIpv4Address() const;
-    Ipv4Address getNetmask() const;
+    Ipv4Address getIpv4Netmask() const;
     //@}
 
     virtual void joinMulticastGroup(const L3Address& address) const;    // XXX why const method?
