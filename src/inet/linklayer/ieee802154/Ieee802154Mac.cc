@@ -344,13 +344,16 @@ void Ieee802154Mac::updateStatusCCA(t_mac_event event, cMessage *msg)
     switch (event) {
         case EV_TIMER_CCA: {
             EV_DETAIL << "(25) FSM State CCA_3, EV_TIMER_CCA" << endl;
+
+            if (currentTxFrame == nullptr)
+		popTxQueue();
+
             bool isIdle = radio->getReceptionState() == IRadio::RECEPTION_STATE_IDLE;
             if (isIdle) {
                 EV_DETAIL << "(3) FSM State CCA_3, EV_TIMER_CCA, [Channel Idle]: -> TRANSMITFRAME_4." << endl;
                 updateMacState(TRANSMITFRAME_4);
                 radio->setRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
-                if (currentTxFrame == nullptr)
-                    popTxQueue();
+
                 Packet *mac = currentTxFrame->dup();
                 attachSignal(mac, simTime() + aTurnaroundTime);
                 //sendDown(msg);
