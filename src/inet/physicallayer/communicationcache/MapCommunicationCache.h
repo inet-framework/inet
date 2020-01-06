@@ -26,6 +26,16 @@ namespace physicallayer {
 class INET_API MapCommunicationCache : public CommunicationCacheBase
 {
   protected:
+    class MapTransmissionCacheEntry : public TransmissionCacheEntry
+    {
+      public:
+        /**
+         * The map of intermediate reception computation results.
+         */
+        std::map<int, ReceptionCacheEntry> *receptionCacheEntries = nullptr;
+    };
+
+  protected:
     /** @name Cache */
     //@{
     /**
@@ -35,14 +45,14 @@ class INET_API MapCommunicationCache : public CommunicationCacheBase
     /**
      * Caches intermediate computation results for transmissions.
      */
-    std::map<int, TransmissionCacheEntry> transmissionCache;
+    std::map<int, MapTransmissionCacheEntry> transmissionCache;
     //@}
 
   protected:
     /** @name Cache data structures */
     //@{
     virtual RadioCacheEntry *getRadioCacheEntry(const IRadio *radio) override;
-    virtual TransmissionCacheEntry *getTransmissionCacheEntry(const ITransmission *transmission) override;
+    virtual MapTransmissionCacheEntry *getTransmissionCacheEntry(const ITransmission *transmission) override;
     virtual ReceptionCacheEntry *getReceptionCacheEntry(const IRadio *radio, const ITransmission *transmission) override;
     //@}
 
