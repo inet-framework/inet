@@ -58,8 +58,8 @@ void MarkovClassifier::initialize(int stage)
     }
     else if (stage == INITSTAGE_QUEUEING) {
         for (int i = 0; i < (int)outputGates.size(); i++)
-            checkPopPacketSupport(outputGates[i]);
-        checkPopPacketSupport(inputGate);
+            checkPushOrPopPacketSupport(outputGates[i]);
+        checkPushOrPopPacketSupport(inputGate);
         if (collectors[state] != nullptr)
             collectors[state]->handleCanPopPacket(outputGates[state]);
         scheduleWaitTimer();
