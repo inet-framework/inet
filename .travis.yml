@@ -5,7 +5,9 @@ language: generic
 notifications:
   email:
     recipients:
-      - inet@omnetpp.org
+      # This is the string "inet@omnetpp.org" encrypted in such a way that Travis will only decrypt it if the build is running from
+      # the inet-framework/inet repo, and not if from a fork. So we won't get spammed by forks even if Travis CI is enabled on them.
+      - secure: "fWDp+W5lxF3B2bm0+ADjGDeG5uMtaWCBUlR58e+9drpquIGn2Ljh5ENknb/kpIt+HVLaww9eJf70ha8sKwgSwNbMFGAsRMz0KwBImiQBqCeNPFgrEcfS262riosQo7+Uuj4p6evzrmilpO0x6JoY4Dph2XNO74tgXH8xWfPwwp4="
 
 services:
   - docker

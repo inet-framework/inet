@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2019-12-18  Levente Mészáros
+
+	Added getPlotSize() to PlotFigure.
+
 2019-12-07  Andras Varga
 
 	cLabelFigure::setAngle() not yet available, bumped buildnum threshold.

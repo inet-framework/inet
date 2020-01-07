@@ -26,6 +26,16 @@ namespace physicallayer {
 class INET_API VectorCommunicationCache : public CommunicationCacheBase
 {
   protected:
+    class VectorTransmissionCacheEntry : public TransmissionCacheEntry
+    {
+      public:
+        /**
+         * The list of intermediate reception computation results.
+         */
+        std::vector<ReceptionCacheEntry> *receptionCacheEntries = nullptr;
+    };
+
+  protected:
     /** @name Cache */
     //@{
     /**
@@ -43,7 +53,7 @@ class INET_API VectorCommunicationCache : public CommunicationCacheBase
      * needed are removed from the beginning only. May contain nullptr values
      * for not yet computed information.
      */
-    std::vector<TransmissionCacheEntry> transmissionCache;
+    std::vector<VectorTransmissionCacheEntry> transmissionCache;
     /**
      * Caches intermediate computation results for radios. The vector is indexed
      * by radio id (offset with base transmission id).
@@ -55,7 +65,7 @@ class INET_API VectorCommunicationCache : public CommunicationCacheBase
     /** @name Cache data structures */
     //@{
     virtual RadioCacheEntry *getRadioCacheEntry(const IRadio *radio) override;
-    virtual TransmissionCacheEntry *getTransmissionCacheEntry(const ITransmission *transmission) override;
+    virtual VectorTransmissionCacheEntry *getTransmissionCacheEntry(const ITransmission *transmission) override;
     virtual ReceptionCacheEntry *getReceptionCacheEntry(const IRadio *radio, const ITransmission *transmission) override;
     //@}
 

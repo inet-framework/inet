@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2019-12-17  Zoltan Bojthe
+
+	Removed ByteArray, ByteArrayBuffer.
+
 2019-12-10  Levente Mészáros
 
 	Added const qualifiers to StringFormat class where applicable.

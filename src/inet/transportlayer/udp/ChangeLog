@@ -1,5 +1,10 @@
 ====== inet-4.x ======
 
+2019-12-18  Zoltan Bojthe
+
+	Switched to using UdpSetOptionCommand.optionCode value instead of dynamic_cast if-ladder.
+	Fixed copy-paste bug.
+
 2019-11-18  Zoltan Bojthe
 
 	Added TOS support.

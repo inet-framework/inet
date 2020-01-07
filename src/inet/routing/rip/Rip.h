@@ -41,7 +41,7 @@ enum RipMode {
     PASSIVE,   // no updates are sent, but the attached network is advertised
     NO_SPLIT_HORIZON,    // every route is sent to the neighbor
     SPLIT_HORIZON,    // do not send routes to the neighbor it was learnt from
-    SPLIT_HORIZON_POISONED_REVERSE    // send the route to the neighbor it was learnt from with infinite metric (16)
+    SPLIT_HORIZON_POISON_REVERSE    // send the route to the neighbor it was learnt from with infinite metric (16)
 };
 
 /**

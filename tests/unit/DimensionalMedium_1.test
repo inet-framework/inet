@@ -101,7 +101,7 @@ Transmission 1: function(s, Hz) → WpHz {
   domain = [0 s … inf s) x [0 Hz … inf GHz) → range = [0 WpHz … 5e-09 WpHz]
   structure =
     (DomainLimited, domain = [0 s … inf s) x [0 Hz … inf GHz)
-      (TwoDimensionalBoxcar, [0 s … 20 s] x [990 MHz … 1.01 GHz] → 5e-09 WpHz))
+      (Boxcar2D, [0 s … 20 s] x [990 MHz … 1.01 GHz] → 5e-09 WpHz))
   partitioning = {
     constant over [0 s … 20 s) x [0 Hz … 990 MHz)
       → 0 WpHz
@@ -122,7 +122,7 @@ Transmission 2: function(s, Hz) → WpHz {
   domain = [0 s … inf s) x [0 Hz … inf GHz) → range = [0 WpHz … 5e-10 WpHz]
   structure =
     (DomainLimited, domain = [0 s … inf s) x [0 Hz … inf GHz)
-      (TwoDimensionalBoxcar, [0 s … 20 s] x [990 MHz … 1.01 GHz] → 5e-10 WpHz))
+      (Boxcar2D, [0 s … 20 s] x [990 MHz … 1.01 GHz] → 5e-10 WpHz))
   partitioning = {
     constant over [0 s … 20 s) x [0 Hz … 990 MHz)
       → 0 WpHz

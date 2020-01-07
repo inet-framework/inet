@@ -48,14 +48,8 @@ void PacketGate::initialize(int stage)
 
     }
     else if (stage == INITSTAGE_QUEUEING) {
-        if (consumer != nullptr) {
-            checkPushPacketSupport(inputGate);
-            checkPushPacketSupport(outputGate);
-        }
-        if (provider != nullptr) {
-            checkPopPacketSupport(inputGate);
-            checkPopPacketSupport(outputGate);
-        }
+        checkPushOrPopPacketSupport(inputGate);
+        checkPushOrPopPacketSupport(outputGate);
         if (changeIndex < (int)changeTimes.size())
             scheduleChangeTimer();
     }

@@ -667,6 +667,7 @@ if __name__ == "__main__":
         rootDir = os.path.abspath(args.directory)
 
     debug = args.debug
+    release = args.release
     writeOutfile = args.writeOutfile
 
     generator = FingerprintTestCaseGenerator()

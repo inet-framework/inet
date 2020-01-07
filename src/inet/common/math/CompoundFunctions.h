@@ -174,7 +174,9 @@ class INET_API MemoizedFunction : public FunctionBase<R, D>
             return it->second;
         else {
             R v = function->getValue(p);
+#ifdef _OPENMP
 #pragma omp critical
+#endif
             {
                 cache[p] = v;
                 if ((int)cache.size() > limit)
@@ -193,7 +195,7 @@ class INET_API MemoizedFunction : public FunctionBase<R, D>
  * Combines 2 one-dimensional functions into a two-dimensional function.
  */
 template<typename R, typename X, typename Y>
-class INET_API CombinedFunction : public FunctionBase<R, Domain<X, Y>>
+class INET_API Combined2DFunction : public FunctionBase<R, Domain<X, Y>>
 {
   protected:
     const Ptr<const IFunction<R, Domain<X>>> functionX;
@@ -201,7 +203,7 @@ class INET_API CombinedFunction : public FunctionBase<R, Domain<X, Y>>
     // TODO: std::binary_function<X, Y> operation;
 
   public:
-    CombinedFunction(const Ptr<const IFunction<R, Domain<X>>>& functionX, const Ptr<const IFunction<double, Domain<Y>>>& functionY) :
+    Combined2DFunction(const Ptr<const IFunction<R, Domain<X>>>& functionX, const Ptr<const IFunction<double, Domain<Y>>>& functionY) :
         functionX(functionX), functionY(functionY) { }
 
     virtual Interval<X, Y> getDomain() const override {
@@ -270,7 +272,7 @@ class INET_API CombinedFunction : public FunctionBase<R, Domain<X, Y>>
  * Modulates the domain of a two-dimensional function with the values of a one-dimensional function.
  */
 template<typename R, typename X, typename Y>
-class INET_API ModulatedFunction : public FunctionBase<R, Domain<X, Y>>
+class INET_API DomainModulated2DFunction : public FunctionBase<R, Domain<X, Y>>
 {
   protected:
     const Ptr<const IFunction<R, Domain<X, Y>>> function;
@@ -278,7 +280,7 @@ class INET_API ModulatedFunction : public FunctionBase<R, Domain<X, Y>>
     // TODO: std::binary_function<Y, Y> operation;
 
   public:
-    ModulatedFunction(const Ptr<const IFunction<R, Domain<X, Y>>>& function, const Ptr<const IFunction<Y, Domain<X>>>& modulator) :
+    DomainModulated2DFunction(const Ptr<const IFunction<R, Domain<X, Y>>>& function, const Ptr<const IFunction<Y, Domain<X>>>& modulator) :
         function(function), modulator(modulator) { }
 
     virtual R getValue(const Point<X, Y>& p) const override {
@@ -484,13 +486,13 @@ class INET_API ApproximatedFunction : public FunctionBase<R, D>
  * Extrudes a one-dimensional function into a two-dimensional function.
  */
 template<typename R, typename X, typename Y>
-class INET_API ExtrudedFunction : public FunctionBase<R, Domain<X, Y>>
+class INET_API Extruded2DFunction : public FunctionBase<R, Domain<X, Y>>
 {
   protected:
     const Ptr<const IFunction<R, Domain<Y>>> function;
 
   public:
-    ExtrudedFunction(const Ptr<const IFunction<R, Domain<Y>>>& function) : function(function) { }
+    Extruded2DFunction(const Ptr<const IFunction<R, Domain<Y>>>& function) : function(function) { }
 
     virtual R getValue(const Point<X, Y>& p) const override {
         return function->getValue(Point<Y>(std::get<1>(p)));

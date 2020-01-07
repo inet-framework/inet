@@ -31,7 +31,8 @@ MarkovClassifier::~MarkovClassifier()
 
 void MarkovClassifier::initialize(int stage)
 {
-    PacketClassifierBase::initialize(stage);
+    if (stage != INITSTAGE_QUEUEING)
+        PacketClassifierBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         for (int i = 0; i < gateSize("out"); i++) {
             auto output = findConnectedModule<IActivePacketSink>(outputGates[i]);
@@ -57,10 +58,8 @@ void MarkovClassifier::initialize(int stage)
     }
     else if (stage == INITSTAGE_QUEUEING) {
         for (int i = 0; i < (int)outputGates.size(); i++)
-            if (collectors[i] != nullptr)
-                checkPopPacketSupport(outputGates[i]);
-        if (provider != nullptr)
-            checkPopPacketSupport(inputGate);
+            checkPushOrPopPacketSupport(outputGates[i]);
+        checkPushOrPopPacketSupport(inputGate);
         if (collectors[state] != nullptr)
             collectors[state]->handleCanPopPacket(outputGates[state]);
         scheduleWaitTimer();

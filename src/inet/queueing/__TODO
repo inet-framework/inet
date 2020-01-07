@@ -1,4 +1,1 @@
- - documentation: operations are synchronous, push/pop are either successful or terminate the simulation
-   passive components can tell if they can get pushed/popped,
-   push/pop can have far reaching consequences when passing through multiple components
  - add pop strategy queue parameter

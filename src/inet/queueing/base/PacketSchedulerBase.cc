@@ -37,10 +37,8 @@ void PacketSchedulerBase::initialize(int stage)
     }
     else if (stage == INITSTAGE_QUEUEING) {
         for (int i = 0; i < gateSize("in"); i++)
-            if (providers[i] != nullptr)
-                checkPopPacketSupport(inputGates[i]);
-        if (collector != nullptr)
-            checkPopPacketSupport(outputGate);
+            checkPopPacketSupport(inputGates[i]);
+        checkPopPacketSupport(outputGate);
     }
 }
 

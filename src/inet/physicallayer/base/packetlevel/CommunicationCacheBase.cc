@@ -43,6 +43,7 @@ CommunicationCacheBase::RadioCacheEntry &CommunicationCacheBase::RadioCacheEntry
         // NOTE: only allow copying mostly empty ones for now
         ASSERT(other.receptionIntervals == nullptr);
         radio = other.radio;
+        delete receptionIntervals;
         receptionIntervals = other.receptionIntervals;
     }
     return *this;
@@ -62,6 +63,11 @@ CommunicationCacheBase::RadioCacheEntry &CommunicationCacheBase::RadioCacheEntry
 CommunicationCacheBase::RadioCacheEntry::~RadioCacheEntry()
 {
     delete receptionIntervals;
+}
+
+CommunicationCacheBase::ReceptionCacheEntry::ReceptionCacheEntry()
+{
+    receptionDecisions.resize(static_cast<int>(IRadioSignal::SIGNAL_PART_DATA) + 1);
 }
 
 CommunicationCacheBase::ReceptionCacheEntry::ReceptionCacheEntry(const ReceptionCacheEntry &other) :
@@ -143,6 +149,8 @@ CommunicationCacheBase::ReceptionCacheEntry &CommunicationCacheBase::ReceptionCa
         interference = other.interference;
         noise = other.noise;
         snir = other.snir;
+        for (auto receptionDecision : receptionDecisions)
+            delete receptionDecision;
         receptionDecisions = other.receptionDecisions;
         receptionResult = other.receptionResult;
     }
@@ -200,6 +208,46 @@ CommunicationCacheBase::ReceptionCacheEntry::~ReceptionCacheEntry()
     for (auto receptionDecision : receptionDecisions)
         delete receptionDecision;
     delete receptionResult;
+}
+
+CommunicationCacheBase::TransmissionCacheEntry::TransmissionCacheEntry(const TransmissionCacheEntry &other) :
+    transmission(other.transmission),
+    interferenceEndTime(other.interferenceEndTime),
+    signal(other.signal)
+{
+}
+
+CommunicationCacheBase::TransmissionCacheEntry::TransmissionCacheEntry(TransmissionCacheEntry &&other) noexcept :
+    transmission(other.transmission),
+    interferenceEndTime(other.interferenceEndTime),
+    signal(other.signal)
+{
+    other.transmission = nullptr;
+    other.interferenceEndTime = 0;
+    other.signal = nullptr;
+}
+
+CommunicationCacheBase::TransmissionCacheEntry &CommunicationCacheBase::TransmissionCacheEntry::operator=(const TransmissionCacheEntry &other)
+{
+    if (this != &other) {
+        transmission = other.transmission;
+        interferenceEndTime = other.interferenceEndTime;
+        signal = other.signal;
+    }
+    return *this;
+}
+
+CommunicationCacheBase::TransmissionCacheEntry &CommunicationCacheBase::TransmissionCacheEntry::operator=(TransmissionCacheEntry &&other) noexcept
+{
+    if (this != &other) {
+        transmission = other.transmission;
+        interferenceEndTime = other.interferenceEndTime;
+        signal = other.signal;
+        other.transmission = nullptr;
+        other.interferenceEndTime = 0;
+        other.signal = nullptr;
+    }
+    return *this;
 }
 
 std::vector<const ITransmission *> *CommunicationCacheBase::computeInterferingTransmissions(const IRadio *radio, const simtime_t startTime, const simtime_t endTime)
@@ -408,8 +456,6 @@ const IReceptionDecision *CommunicationCacheBase::getCachedReceptionDecision(con
 {
     ASSERT(part != IRadioSignal::SIGNAL_PART_NONE);
     ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(receiver, transmission);
-    if (cacheEntry != nullptr)
-        cacheEntry->receptionDecisions.resize(part + 1);
     return cacheEntry ? cacheEntry->receptionDecisions[part] : nullptr;
 }
 
@@ -420,7 +466,7 @@ void CommunicationCacheBase::setCachedReceptionDecision(const IRadio *receiver, 
     if (cacheEntry == nullptr)
         throw cRuntimeError("Cache entry not found");
     else {
-        cacheEntry->receptionDecisions.resize(part + 1);
+        delete cacheEntry->receptionDecisions[part];
         cacheEntry->receptionDecisions[part] = receptionDecision;
     }
 }
@@ -430,7 +476,7 @@ void CommunicationCacheBase::removeCachedReceptionDecision(const IRadio *receive
     ASSERT(part != IRadioSignal::SIGNAL_PART_NONE);
     ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(receiver, transmission);
     if (cacheEntry != nullptr) {
-        cacheEntry->receptionDecisions.resize(part + 1);
+        delete cacheEntry->receptionDecisions[part];
         cacheEntry->receptionDecisions[part] = nullptr;
     }
 }
