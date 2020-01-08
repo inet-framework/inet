@@ -55,12 +55,6 @@ class SmokeTestCaseGenerator():
         return testcases
 
     def generateFromDictList(self, simulations, filterRegexList, excludeFilterRegexList, repeat):
-        class StoreFingerprintCallback:
-            def __init__(self, simulation):
-                self.simulation = simulation
-            def __call__(self, fingerprint):
-                self.simulation['computedFingerprint'] = fingerprint
-
         class StoreExitcodeCallback:
             def __init__(self, simulation):
                 self.simulation = simulation
@@ -95,7 +89,7 @@ class SmokeTestCaseGenerator():
                 else:
                     raise Exception(csvFile + " Line " + str(csvReader.line_num) + ": the 5th item must contain one of 'PASS', 'FAIL', 'ERROR'" + ": " + '"' + '", "'.join(fields) + '"')
             else:
-                raise Exception(csvFile + "Line " + str(csvReader.line_num) + " must contain 6 items, but contains " + str(len(fields)) + ": " + '"' + '", "'.join(fields) + '"')
+                raise Exception(csvFile + " Line " + str(csvReader.line_num) + " must contain 6 items, but contains " + str(len(fields)) + ": " + '"' + '", "'.join(fields) + '"')
         f.close()
         return simulations
 
@@ -293,8 +287,8 @@ class SmokeTestCase(SimulationTestCase):
 
         # run the simulation
         workingdir = _iif(self.wd.startswith('/'), rootDir + "/" + self.wd, self.wd)
-        resultdir = os.path.abspath(".") + "/results/";
-        ensure_dir(resultdir)
+        resultdir = os.path.abspath(".") + "/results/"
+        os.makedirs(resultdir, exist_ok=True)
         memcheckPrefix = ""
         if memcheck:
             memcheckPrefix = "valgrind --leak-check=full --track-origins=yes --error-exitcode=" + str(memcheckFailedErrorCode) + " --suppressions=" + rootDir + "/tests/fingerprint/valgrind.supp "
@@ -467,7 +461,7 @@ class SimulationTextTestResult(ThreadedTestResult):
         super(SimulationTextTestResult, self).addSuccess(test)
         if test.expectedResult == 'PASS':
             if self.showAll:
-                self.stream.write(": PASS\n")
+                self.stream.write(": " + txtPASS + "\n")
             elif self.dots:
                 self.stream.write('.')
                 self.stream.flush()
@@ -535,7 +529,7 @@ class SimulationTextTestResult(ThreadedTestResult):
         super(SimulationTextTestResult, self).addExpectedFailure(test, err)
         self.expectedFailures[-1] = (test, err[1])  # super class method inserts stack trace; we don't need that, so overwrite it
         if self.showAll:
-            self.stream.write(":FAIL (expected)\n")
+            self.stream.write(": " + txtFAILED_expected + "\n")
         elif self.dots:
             self.stream.write("x")
             self.stream.flush()
@@ -544,7 +538,7 @@ class SimulationTextTestResult(ThreadedTestResult):
         super(SimulationTextTestResult, self).addUnexpectedSuccess(test)
         self.unexpectedSuccesses[-1] = (test)  # super class method inserts stack trace; we don't need that, so overwrite it
         if self.showAll:
-            self.stream.write(": PASS (unexpected)\n")
+            self.stream.write(": " + txtPASS_unexpected + "\n")
         elif self.dots:
             self.stream.write("u")
             self.stream.flush()
