@@ -68,10 +68,10 @@ sim-time-limit = 20s
 **.app[0].sendInterval = 1.706ms   #etherframe and gap: 1066 bytes, 2 packets (sent, echoed): 1066*8/10000000*2 = 17.056ms
 **.app[0].startTime = 0s
 **.app[0].stopTime = 17.06s
-**.host1.app[0].destAddresses = "host2"
-**.host2.app[0].destAddresses = "host1"
-**.host1snap.app[0].destAddresses = "host2snap"
-**.host2snap.app[0].destAddresses = "host1snap"
+**.host1.app[0].destAddresses = ["host2"]
+**.host2.app[0].destAddresses = ["host1"]
+**.host1snap.app[0].destAddresses = ["host2snap"]
+**.host2snap.app[0].destAddresses = ["host1snap"]
 **.app[0].messageLength = 1000 bytes
 **.app[1].typename = "UdpEchoApp"
 **.app[1].localPort = 1234

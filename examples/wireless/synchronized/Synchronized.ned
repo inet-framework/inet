@@ -47,7 +47,7 @@ network Synchronized
             parameters:
                 numApps = 1;
                 app[0].typename = "UdpBasicApp";
-                app[0].destAddresses = "224.0.0.1";
+                app[0].destAddresses = ["224.0.0.1"];
                 app[0].localPort = 1;
                 app[0].destPort = 1;
                 app[0].messageLength = 100B;
