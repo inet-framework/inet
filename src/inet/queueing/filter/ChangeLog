@@ -8,4 +8,4 @@
 	queueing package.
 
 	Added new NED simple modules: OrdinalBasedDropper, PacketFilter, RateLimiter,
-	ContentBasedDropper, and RedDropper.
+	ContentBasedFilter, and RedDropper.

@@ -7,5 +7,6 @@
 	components were either ported or completely replaced with components of the new
 	queueing package.
 
-	Added new core classes: PacketCloner, PacketDelayer, PacketDemultiplexer, PacketDuplicator,
-	PacketMultiplexer, PacketHistory, and OrdinalBasedDuplicator.
+	Added new core classes: PacketCloner, PacketDelayer, PacketDemultiplexer,
+	PacketGate, PacketDuplicator, PacketMultiplexer, PacketHistory, and
+	OrdinalBasedDuplicator.

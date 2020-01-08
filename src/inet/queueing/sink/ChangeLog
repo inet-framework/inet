@@ -7,5 +7,7 @@
 	components were either ported or completely replaced with components of the new
 	queueing package.
 
-	Added new NED simple modules: ActivePacketSink, PassivePacketSink, and PcapFilePacketConsumer.
+	Added new NED simple modules: ActivePacketSink, PassivePacketSink, and
+	PcapFilePacketConsumer.
+
 	Added new NED compound modules: RequestConsumer.

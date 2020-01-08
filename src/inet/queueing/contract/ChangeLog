@@ -8,8 +8,9 @@
 	queueing package.
 
 	Added new interfaces: IPacketBuffer, IPacketCollection, IActivePacketSink,
-	IPassivePacketSink, IPacketDuplicator, IPacketFilter, IActivePacketSource, IPassivePacketSource,
-	IPacketQueue, IPacketQueueingElement, IPacketSink, and IPacketSource.
+	IPassivePacketSink, IPacketDuplicator, IPacketFilter, IActivePacketSource,
+	IPassivePacketSource, IPacketQueue, IPacketQueueingElement, IPacketSink,
+	and IPacketSource.
 
 	Added new functional extension support interfaces: IPacketClassifierFunction,
 	IPacketComparatorFunction, IPacketDropperFunction, IPacketFilterFunction,

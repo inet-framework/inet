@@ -8,4 +8,4 @@
 	queueing package.
 
 	Added new NED simple modules: PacketLabeler, PacketTagger, ContentBasedLabeler,
-	ContentBasedTagger, and RedMarker.
+	ContentBasedTagger, and EcnMarker.
