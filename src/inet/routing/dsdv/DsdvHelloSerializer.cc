@@ -23,22 +23,22 @@ Register_Serializer(DsdvHello, DsdvHelloSerializer);
 
 void DsdvHelloSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
-	const auto& dsdvHello = staticPtrCast<const DsdvHello>(chunk);
-	stream.writeIpv4Address(dsdvHello->getSrcAddress());
-	stream.writeUint32Be(dsdvHello->getSequencenumber());
-	stream.writeIpv4Address(dsdvHello->getNextAddress());
-	stream.writeUint32Be(dsdvHello->getHopdistance());
+    const auto& dsdvHello = staticPtrCast<const DsdvHello>(chunk);
+    stream.writeIpv4Address(dsdvHello->getSrcAddress());
+    stream.writeUint32Be(dsdvHello->getSequencenumber());
+    stream.writeIpv4Address(dsdvHello->getNextAddress());
+    stream.writeUint32Be(dsdvHello->getHopdistance());
 }
 
 const Ptr<Chunk> DsdvHelloSerializer::deserialize(MemoryInputStream& stream) const
 {
-	auto dsdvHello = makeShared<DsdvHello>();
-	dsdvHello->setSrcAddress(stream.readIpv4Address());
-	dsdvHello->setSequencenumber(stream.readUint32Be());
-	dsdvHello->setNextAddress(stream.readIpv4Address());
-	dsdvHello->setHopdistance(stream.readUint32Be());
-	dsdvHello->setChunkLength(B(16));
-	return dsdvHello;
+    auto dsdvHello = makeShared<DsdvHello>();
+    dsdvHello->setSrcAddress(stream.readIpv4Address());
+    dsdvHello->setSequencenumber(stream.readUint32Be());
+    dsdvHello->setNextAddress(stream.readIpv4Address());
+    dsdvHello->setHopdistance(stream.readUint32Be());
+    dsdvHello->setChunkLength(B(16));
+    return dsdvHello;
 }
 
 } // namespace inet
