@@ -23,6 +23,7 @@ class INET_API InterpolatingAntenna : public AntennaBase
   protected:
     class INET_API AntennaGain : public IAntennaGain {
       protected:
+        cModule *module = nullptr;
         double minGain;
         double maxGain;
         std::map<rad, double> elevationGainMap;
@@ -30,11 +31,11 @@ class INET_API InterpolatingAntenna : public AntennaBase
         std::map<rad, double> bankGainMap;
 
       protected:
-        virtual void parseMap(std::map<rad, double>& gainMap, const char *text);
+        virtual std::map<rad, double> parseMap(const cValueMap *valueMap);
         virtual double computeGain(const std::map<rad, double>& gainMap, rad angle) const;
 
       public:
-        AntennaGain(const char *elevation, const char *heading, const char *bank);
+        AntennaGain(cModule *module, const cValueMap *elevation, const cValueMap *heading, const cValueMap *bank);
         virtual double getMinGain() const override { return minGain; }
         virtual double getMaxGain() const override { return maxGain; }
         virtual double computeGain(const Quaternion& direction) const override;

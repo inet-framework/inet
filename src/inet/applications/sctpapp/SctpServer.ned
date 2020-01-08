@@ -19,7 +19,7 @@ simple SctpServer extends SimpleModule like IApp
 {
     parameters:
         @class(SctpServer);
-        string localAddress = default(""); // Comma-separated list of addresses
+        object localAddress = default([]); // List of addresses
         int localPort = default(0); // Port number to listen on
         bool echo = default(false);  // Echoes received packages when true
         volatile double echoDelay @unit(s) = default(0s);
@@ -41,7 +41,7 @@ simple SctpServer extends SimpleModule like IApp
         bool streamReset = default(false);
         double streamRequestTime @unit(s) = default(0s);
         int streamToReset = default(0);
-        string streamPriorities = default("");
+        object streamPriorities = default([]);
     gates:
         input socketIn;
         output socketOut;

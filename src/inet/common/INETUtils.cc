@@ -248,7 +248,7 @@ std::vector<std::vector<intval_t>> asIntMatrix(const cValueArray* matrix)
             numCols = result[i].size();
         else
             if (result[i].size() != numCols)
-                throw cRuntimeError("The row %u size %u differents to previous rows sizes %u", i, result[i].size(), numCols);
+                throw cRuntimeError("The row %zu size %zu differents to previous rows sizes %zu", i, result[i].size(), numCols);
     }
     //TODO check column numbers equality
     return result;

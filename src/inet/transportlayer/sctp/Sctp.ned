@@ -141,7 +141,7 @@ simple Sctp extends SimpleModule like ISctp
         // cmtrpv1 = First resource pooling based CC for SCTP - https://www.tdr.wiwi.uni-due.de/fileadmin/fileupload/I-TDR/SCTP/Paper/AINA2010.pdf
         // cmtrpv2 = Updated version of cmtrpv1 - https://www.tdr.wiwi.uni-due.de/fileadmin/fileupload/I-TDR/SCTP/Paper/ConTEL2011.pdf
         string cmtCCVariant = default("off");
-        string cmtCCPathGroups = default("");
+        object cmtCCPathGroups = default([]);
         bool rpPathBlocking = default(false);
         bool rpScaleBlockingTimeout = default(false);
         int rpMinCwnd = default(1);

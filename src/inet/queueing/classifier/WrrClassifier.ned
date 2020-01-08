@@ -22,6 +22,6 @@ import inet.queueing.contract.IPacketClassifier;
 simple WrrClassifier extends PacketClassifierBase like IPacketClassifier
 {
     parameters:
-        string weights;
+        object weights;
         @class(WrrClassifier);
 }

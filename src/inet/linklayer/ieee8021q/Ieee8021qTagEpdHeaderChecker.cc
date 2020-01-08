@@ -11,6 +11,7 @@
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/ProtocolUtils.h"
+#include "inet/common/stlutils.h"
 #include "inet/linklayer/common/DropEligibleTag_m.h"
 #include "inet/linklayer/common/EtherType_m.h"
 #include "inet/linklayer/common/PcpTag_m.h"
@@ -33,7 +34,7 @@ void Ieee8021qTagEpdHeaderChecker::initialize(int stage)
             qtagProtocol = &Protocol::ieee8021qCTag;
         else
             throw cRuntimeError("Unknown tag type");
-        vlanIdFilter = check_and_cast<cValueArray *>(par("vlanIdFilter").objectValue());
+        vlanIdFilter = (check_and_cast<cValueArray *>(par("vlanIdFilter").objectValue()))->asIntVector();
     }
     else if (stage == INITSTAGE_LINK_LAYER)
         registerProtocol(*qtagProtocol, nullptr, inputGate);
@@ -42,7 +43,7 @@ void Ieee8021qTagEpdHeaderChecker::initialize(int stage)
 void Ieee8021qTagEpdHeaderChecker::handleParameterChange(const char *name)
 {
     if (!strcmp(name, "vlanIdFilter"))
-        vlanIdFilter = check_and_cast<cValueArray *>(par("vlanIdFilter").objectValue());
+        vlanIdFilter = (check_and_cast<cValueArray *>(par("vlanIdFilter").objectValue()))->asIntVector();
 }
 
 void Ieee8021qTagEpdHeaderChecker::processPacket(Packet *packet)
@@ -81,14 +82,7 @@ bool Ieee8021qTagEpdHeaderChecker::matchesPacket(const Packet *packet) const
         return false;
     else {
         auto vlanId = header->getVid();
-        if (vlanIdFilter->size() == 0)
-            return true;
-        else {
-            for (int i = 0; i < vlanIdFilter->size(); i++)
-                if (vlanIdFilter->get(i).intValue() == vlanId)
-                    return true;
-            return false;
-        }
+        return (vlanIdFilter.size() == 0) || contains(vlanIdFilter, vlanId);
     }
 }
 

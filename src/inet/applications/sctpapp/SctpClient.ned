@@ -19,7 +19,7 @@ simple SctpClient extends SimpleModule like IApp
 {
     parameters:
         @class(SctpClient);
-        string localAddress = default(""); // Comma-separated list of addresses
+        object localAddress = default([]); // List of addresses
         int localPort = default(0); // Port number to listen on
         string connectAddress;  // Server address (may be symbolic)
         int connectPort; // Port number to connect to
@@ -45,8 +45,8 @@ simple SctpClient extends SimpleModule like IApp
         double primaryTime @unit(s) = default(0s);
         string newPrimary = default("");
         string streamRequestLengths = default("");
-        string streamRequestRatio = default("");
-        string streamPriorities = default("");
+        object streamRequestRatio = default([]);
+        object streamPriorities = default([]);
         bool finishEndsSimulation = default(false);
         @signal[packetSent](type=inet::Packet);
         @signal[packetReceived](type=inet::Packet);

@@ -21,7 +21,7 @@ simple MarkovScheduler extends PacketSchedulerBase like IPacketScheduler
         displayStringTextFormat = default("classified %p pk (%l)\ncurrent state: %s");
         string clockModule = default(""); // Relative path to a module that implements IClock; optional
         int initialState = default(0); // The starting state of the Markov process
-        string transitionProbabilities; // The transition matrix (N x N) of the Markov process, specified as a list of probabilities
-        string waitIntervals; // The amount of time the Markov process stays in a given state, a list of intervals (N) indexed by the state
+        object transitionProbabilities; // The transition matrix (N x N) of the Markov process, specified as a list of probabilities
+        object waitIntervals; // The amount of time the Markov process stays in a given state, a list of intervals (N) indexed by the state
         @class(MarkovScheduler);
 }

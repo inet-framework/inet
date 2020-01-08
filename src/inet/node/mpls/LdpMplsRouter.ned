@@ -36,7 +36,7 @@ module LdpMplsRouter
         double holdTime @unit(s) = default(15s);
         double helloInterval @unit(s) = default(5s);
         int numLoInterfaces = default(1);
-        string peers;
+        object peers;
         string routerId = default("auto");
         *.forwarding = true;
         *.routingTable.routerId = this.routerId;
@@ -70,7 +70,7 @@ module LdpMplsRouter
         }
         linkStateRouting: LinkStateRouting {
             parameters:
-                peers = parent.peers;
+                peers = dup(parent.peers);
                 @display("p=900,80");
         }
         tcp: <default(firstAvailable("Tcp","TcpLwip","TcpNsc"))> like ITcp {
@@ -102,7 +102,7 @@ module LdpMplsRouter
         }
         mpls: Mpls {
             parameters:
-                //peers = parent.peers;
+                //peers = dup(parent.peers);
                 classifierModule = "^.ldp";
                 @display("p=500,480");
         }

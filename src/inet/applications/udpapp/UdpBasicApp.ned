@@ -34,7 +34,7 @@ simple UdpBasicApp extends SimpleModule like IApp
         string interfaceTableModule;   // The path to the InterfaceTable module
         string clockModule = default(""); // Relative path of a module that implements IClock; optional
         int localPort = default(-1);  // Local port (-1: use ephemeral port)
-        string destAddresses = default(""); // List of IP addresses, separated by spaces ("": don't send)
+        object destAddresses = default([]); // list of IP addresses in JSON format (empty array means: don't send)
         string localAddress = default("");
         string packetName = default("UdpBasicAppData");
         int destPort;

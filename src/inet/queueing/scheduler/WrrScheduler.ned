@@ -24,7 +24,7 @@ import inet.queueing.contract.IPacketScheduler;
 simple WrrScheduler extends PacketSchedulerBase like IPacketScheduler
 {
     parameters:
-        string weights;
+        object weights;
         @class(WrrScheduler);
 }
 
