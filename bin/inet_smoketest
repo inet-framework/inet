@@ -572,15 +572,12 @@ class SimulationTextTestResult(ThreadedTestResult):
         cause = str(msg)
         detail = None
         if cause.count(': '):
-            (cause, detail) = cause.split(': ',1)
+            (cause, detail) = cause.split(': ', 1)
         return (cause, detail)
 
 
 def _iif(cond,t,f):
     return t if cond else f
-
-def ensure_dir(f):
-    os.makedirs(f, exist_ok=True)
 
 if __name__ == "__main__":
     defaultNumThreads = multiprocessing.cpu_count()
@@ -631,6 +628,7 @@ if __name__ == "__main__":
     testSuite = ThreadedTestSuite()
     testSuite.addTests(testcases)
     testSuite.thread_count = args.threads
+    testSuite.repeat = args.repeat
 
     testRunner = unittest.TextTestRunner(stream=sys.stdout, verbosity=9, resultclass=SimulationTextTestResult)
 
