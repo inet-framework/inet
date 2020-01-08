@@ -21,9 +21,9 @@ import inet.physicallayer.wireless.common.base.packetlevel.AntennaBase;
 module InterpolatingAntenna extends AntennaBase
 {
     parameters:
-        string headingGains = default("0 0");   // Sequence of angle [degree] and gain [dB] pairs
-        string elevationGains = default("0 0"); // Sequence of angle [degree] and gain [dB] pairs
-        string bankGains = default("0 0");      // Sequence of angle [degree] and gain [dB] pairs
+        object headingGains = default({0deg: 0dB});   // Sequence of angle [degree] and gain [dB] pairs
+        object elevationGains = default({0deg: 0dB}); // Sequence of angle [degree] and gain [dB] pairs
+        object bankGains = default({0deg: 0dB});      // Sequence of angle [degree] and gain [dB] pairs
         @class(InterpolatingAntenna);
 }
 

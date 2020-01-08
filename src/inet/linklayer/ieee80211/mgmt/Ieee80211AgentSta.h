@@ -32,7 +32,7 @@ class INET_API Ieee80211AgentSta : public SimpleModule, public cListener // TODO
     NetworkInterface *myIface = nullptr;
     MacAddress prevAP;
     bool activeScan = false;
-    std::vector<int> channelsToScan;
+    std::vector<intval_t> channelsToScan;
     simtime_t probeDelay;
     simtime_t minChannelTime;
     simtime_t maxChannelTime;

@@ -50,10 +50,8 @@ void HostAutoConfigurator::setupNetworkLayer()
 {
     EV_INFO << "host auto configuration started" << std::endl;
 
-    std::string interfaces = par("interfaces");
     Ipv4Address addressBase = Ipv4Address(par("addressBase").stringValue());
     Ipv4Address netmask = Ipv4Address(par("netmask").stringValue());
-    std::string mcastGroups = par("mcastGroups").stdstringValue();
 
     // get our host module
     cModule *host = getContainingNode(this);
@@ -69,14 +67,14 @@ void HostAutoConfigurator::setupNetworkLayer()
     if (!routingTable)
         throw cRuntimeError("No routing table found");
 
-    // look at all interface table entries
-    cStringTokenizer interfaceTokenizer(interfaces.c_str());
-    const char *ifname;
     uint32_t loopbackAddr = Ipv4Address::LOOPBACK_ADDRESS.getInt();
-    while ((ifname = interfaceTokenizer.nextToken()) != nullptr) {
-        NetworkInterface *ie = interfaceTable->findInterfaceByName(ifname);
+
+    // look at all interface table entries
+    auto interfaces = check_and_cast<cValueArray *>(par("interfaces").objectValue())->asStringVector();
+    for (const auto& ifname : interfaces) {
+        NetworkInterface *ie = interfaceTable->findInterfaceByName(ifname.c_str());
         if (!ie)
-            throw cRuntimeError("No such interface '%s'", ifname);
+            throw cRuntimeError("No such interface '%s'", ifname.c_str());
 
         auto ipv4Data = ie->getProtocolDataForUpdate<Ipv4InterfaceData>();
         // assign IP Address to all connected interfaces
@@ -99,10 +97,9 @@ void HostAutoConfigurator::setupNetworkLayer()
         ipv4Data->joinMulticastGroup(Ipv4Address::ALL_ROUTERS_MCAST);
 
         // associate interface with specified multicast groups
-        cStringTokenizer interfaceTokenizer(mcastGroups.c_str());
-        const char *mcastGroup_s;
-        while ((mcastGroup_s = interfaceTokenizer.nextToken()) != nullptr) {
-            Ipv4Address mcastGroup(mcastGroup_s);
+        auto mcastGroups = check_and_cast<cValueArray *>(par("mcastGroups").objectValue())->asStringVector();
+        for (const auto& group : mcastGroups) {
+            Ipv4Address mcastGroup(group.c_str());
             ipv4Data->joinMulticastGroup(mcastGroup);
         }
     }

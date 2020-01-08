@@ -31,7 +31,7 @@ simple IpvxTrafGen extends SimpleModule like IIpvxTrafficGenerator
         int numPackets = default(-1); // Max number of packets to generate, -1 means forever
         int protocol; // Value for IPv4, IPv6 protocol field, accepts only between 143 and 254
         volatile int packetLength @unit(B); // Packet length in bytes
-        string destAddresses = default(""); // List of destination addresses, separated by spaces
+        object destAddresses = default([]); // list of destination addresses in JSON format (empty array means: don't send)
         displayStringTextFormat = default("rcvd: {numReceived} pks\nsent: {numSent} pks");
         @lifecycleSupport;
         @display("i=block/source");
@@ -44,3 +44,4 @@ simple IpvxTrafGen extends SimpleModule like IIpvxTrafficGenerator
         input ipIn @labels(Ipv4ControlInfo/up,Ipv6ControlInfo/up);
         output ipOut @labels(Ipv4ControlInfo/down,Ipv6ControlInfo/down);
 }
+

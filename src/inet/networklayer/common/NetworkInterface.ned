@@ -38,7 +38,7 @@ module NetworkInterface extends Module
     submodules:
         pcapRecorder[numPcapRecorders]: PcapRecorder {
             parameters:
-                moduleNamePatterns = ".^";
+                moduleNamePatterns = [".^"];
                 @display("p=100,100;is=s");
         }
         clock: <default("")> like IClock if typename != "" {

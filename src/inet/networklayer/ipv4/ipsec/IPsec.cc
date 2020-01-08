@@ -71,12 +71,14 @@ void IPsec::initSecurityDBs(cXMLElement *spdConfig)
     AuthenticationAlg defaultAuthenticationAlg = strlen(s=par("defaultAuthenticationAlg"))==0 ? (AuthenticationAlg)-1 : authenticationAlgEnum.valueFor(s);
     int defaultMaxTfcPadLength = par("defaultMaxTfcPadLength").intValue();
 
-    checkTags(spdConfig, "SecurityPolicy");
+    static const std::vector<std::string> spdConfigKeywords = {"SecurityPolicy"};
+    checkTags(spdConfig, spdConfigKeywords);
 
     for (cXMLElement *spdEntryElem : spdConfig->getChildrenByTagName("SecurityPolicy")) {
         SecurityPolicy *spdEntry = new SecurityPolicy();
 
-        checkTags(spdEntryElem, "Selector Direction Action Protection EspMode EncryptionAlg AuthenticationAlg MaxTfcPadLength SecurityAssociation");
+        static const std::vector<std::string> spdEntryKeywords = {"Selector", "Direction", "Action", "Protection", "EspMode", "EncryptionAlg", "AuthenticationAlg", "MaxTfcPadLength", "SecurityAssociation"};
+        checkTags(spdEntryElem, spdEntryKeywords);
 
         // Selector
         PacketSelector selector;
@@ -127,7 +129,8 @@ void IPsec::initSecurityDBs(cXMLElement *spdConfig)
 
             // load SA details
             for (cXMLElement *saEntryElem : spdEntryElem->getChildrenByTagName("SecurityAssociation")) {
-                checkTags(saEntryElem, "SPI Selector");
+                static const std::vector<std::string> saEntryKeywords = {"SPI", "Selector"};
+                checkTags(saEntryElem, saEntryKeywords);
 
                 // SPI
                 const cXMLElement *spiElem = getUniqueChild(saEntryElem, "SPI");
@@ -157,7 +160,8 @@ void IPsec::initSecurityDBs(cXMLElement *spdConfig)
 
 void IPsec::parseSelector(const cXMLElement *selectorElem, PacketSelector& selector)
 {
-    checkTags(selectorElem, "LocalAddress RemoteAddress Protocol LocalPort RemotePort ICMPType ICMPCode");
+    static const std::vector<std::string> keywords = {"LocalAddress", "RemoteAddress", "Protocol", "LocalPort", "RemotePort", "ICMPType", "ICMPCode"};
+    checkTags(selectorElem, keywords);
 
     auto addrConv = [](std::string s) {return L3AddressResolver().resolve(s.c_str(), L3AddressResolver::ADDR_IPv4).toIpv4();};
     auto intConv = [](std::string s) {return atoi(s.c_str());};

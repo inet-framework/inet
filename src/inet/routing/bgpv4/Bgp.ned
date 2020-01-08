@@ -28,7 +28,7 @@ simple Bgp extends SimpleModule like IBgp
         xml bgpConfig;
         double ExternalPeerStartDelayOffset @unit(s) = default(0.5s);
         bool redistributeRip = default(false);        // Redistribute routes learned by RIP into BGP
-        string redistributeOspf = default("");        // Redistribute routes learned by OSPF into BGP (O IA E1 E2)
+        object redistributeOspf = default([]);        // Redistribute routes learned by OSPF into BGP (O IA E1 E2)
         bool redistributeInternal = default(false);   // Redistribute BGP routes into OSPF (as external routes)
         bool nextHopSelf = default(false);
         int localPreference = default(100);

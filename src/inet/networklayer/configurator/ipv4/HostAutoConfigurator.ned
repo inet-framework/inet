@@ -23,10 +23,10 @@ simple HostAutoConfigurator extends SimpleModule like IIpv4NodeConfigurator
     parameters:
         @class(HostAutoConfigurator);
         string interfaceTableModule;
-        string interfaces = default("wlan");         // List of interfaces to autoassign addresses to, separated by a single space character
+        object interfaces = default(["wlan"]);         // List of interfaces to autoassign addresses to
         string addressBase = default("10.0.0.0");    // Start of the address range from which to automatically assign an address to the autoassignInterfaces
         string netmask = default("255.0.0.0");       // Subnet netmask in which to automatically assign an address to the autoassignInterfaces
-        string mcastGroups = default("");         // List of IP addresses of multicast groups to join, separated by a single space character
+        object mcastGroups = default([]);         // List of IP addresses of multicast groups to join
         @display("i=block/cogwheel");
 }
 

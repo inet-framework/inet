@@ -17,8 +17,8 @@ import inet.queueing.contract.IPacketMarker;
 simple PacketLabeler extends PacketMarkerBase like IPacketMarker
 {
     parameters:
-        string filterClasses = default(""); // Determines the packets that are marked. The parameter must be the name of a C++ class that implements the IPacketFilterFunction interface and is registered via Register_Class.
-        string labels = default(""); // A space-separated list of labels.
+        object filterClasses = default([]); // Determines the packets that are marked. The parameter must be the name of a C++ class that implements the IPacketFilterFunction interface and is registered via Register_Class.
+        object labels = default([]); // List of labels.
         @display("i=block/star");
         @class(PacketLabeler);
 }

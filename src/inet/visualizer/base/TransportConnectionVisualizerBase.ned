@@ -35,7 +35,7 @@ simple TransportConnectionVisualizerBase extends VisualizerBase
         string iconColor = default("dark"); // Transport connection icon color is a list of colors or a color group name (e.g. dark, light), a set of dark colors by default
         string labelFont = default("<default>"); // Label font, automatic by default
         string labelColor = default("black"); // Label color, black by default
-        string placementHint = default("top"); // Annotation placement hint, space separated list of any, top, bottom, left, right, topLeft, topCenter, topRight, etc.
+        object placementHint = default(["top"]); // Annotation placement hint; list of any, top, bottom, left, right, topLeft, topCenter, topRight, etc.
         double placementPriority = default(0); // Determines the order of annotation positioning
 
         @class(TransportConnectionVisualizerBase);

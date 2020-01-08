@@ -17,6 +17,6 @@ simple LabelScheduler extends PacketSchedulerBase like IPacketScheduler
 {
     parameters:
         int defaultGateIndex = default(0); // Default gate index if no matching labels are found
-        string labels; // Space separated list of labels in the order of priority (highest first)
+        object labels; // List of labels in the order of priority (highest first)
         @class(LabelScheduler);
 }

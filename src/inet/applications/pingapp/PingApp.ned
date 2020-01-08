@@ -49,7 +49,7 @@ simple PingApp extends SimpleModule like IApp
 {
     parameters:
         @class(PingApp);
-        string destAddr = default(""); // Destination address(es), separated by spaces, "*" means all IPv4/IPv6 interfaces in the entire simulation
+        object destAddr = default([]); // Destination address(es), "*" means all IPv4/IPv6 interfaces in the entire simulation
         string srcAddr = default(""); // Source address (useful with multi-homing)
         int packetSize @unit(B) = default(56B); // Size of ping payload, in bytes
         volatile double sendInterval @unit(s) = default(1s); // Time to wait between pings (can be random)

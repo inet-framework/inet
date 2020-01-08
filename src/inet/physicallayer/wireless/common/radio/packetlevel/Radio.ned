@@ -46,7 +46,7 @@ module Radio extends PhysicalLayerBase like IRadio
         string energySourceModule = default("");           // Module path of the energy source module which provides energy to the radio
 
         string initialRadioMode @enum("off","sleep","receiver","transmitter","transceiver") = default("off");
-        string switchingTimes = default("ms 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0"); // Time parameters to switch between radio modes
+        object switchingTimes = default([[0s, 0s, 0s, 0s, 0s], [0s, 0s, 0s, 0s, 0s], [0s, 0s, 0s, 0s, 0s], [0s, 0s, 0s, 0s, 0s], [0s, 0s, 0s, 0s, 0s]]); // Time parameters to switch between radio modes
 
         bool sendRawBytes = default(false); // When true packets are serialized into a sequence of bytes before sending out
 

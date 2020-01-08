@@ -21,7 +21,8 @@ simple Ieee80211AgentSta extends SimpleModule like IIeee80211Agent
         string interfaceTableModule;   // The path to the InterfaceTable module
         string mibModule;
         bool activeScan = default(true);  // Selects between active and passive scanning
-        string channelsToScan = default("");  // List of channel numbers to scan (space delimited); empty means all channels
+
+        object channelsToScan = default([]);  // List of channel numbers to scan; empty means all channels
         double probeDelay @unit(s) = default(100ms); // Delay before sending a probe request during active scanning
         double minChannelTime @unit(s) = default(150ms); // Min interval to spend on a channel during active scanning
         double maxChannelTime @unit(s) = default(300ms); // Channel time for passive scanning, and max channel time for active scanning

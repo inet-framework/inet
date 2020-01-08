@@ -113,7 +113,7 @@ void RsvpClassifier::readTableFromXML(const cXMLElement *fectable)
 {
     ASSERT(fectable);
     ASSERT(!strcmp(fectable->getTagName(), "fectable"));
-    checkTags(fectable, "fecentry");
+    checkTags(fectable, {"fecentry"});
     cXMLElementList list = fectable->getChildrenByTagName("fecentry");
     for (auto& elem : list)
         readItemFromXML(elem);
@@ -129,8 +129,13 @@ void RsvpClassifier::readItemFromXML(const cXMLElement *fec)
     auto it = findFEC(fecid);
 
     if (getUniqueChildIfExists(fec, "label")) {
+
+        std::vector<std::string> v1 = { "xyzzy", "plugh", "abracadabra" };
+        std::vector<std::string> v2({ "xyzzy", "plugh", "abracadabra" });
+        std::vector<std::string> v3{ "xyzzy", "plugh", "abracadabra" };
+
         // bind-fec to label
-        checkTags(fec, "id label destination source");
+        checkTags(fec, {"id", "label", "destination", "source"});
 
         EV_INFO << "binding to a given label" << endl;
 
@@ -153,7 +158,7 @@ void RsvpClassifier::readItemFromXML(const cXMLElement *fec)
     }
     else if (getUniqueChildIfExists(fec, "lspid")) {
         // bind-fec to LSP
-        checkTags(fec, "id destination source tunnel_id extended_tunnel_id endpoint lspid");
+        checkTags(fec, {"id", "destination", "source", "tunnel_id", "extended_tunnel_id", "endpoint", "lspid"});
 
         EV_INFO << "binding to a given path" << endl;
 
@@ -183,7 +188,7 @@ void RsvpClassifier::readItemFromXML(const cXMLElement *fec)
     }
     else {
         // un-bind
-        checkTags(fec, "id");
+        checkTags(fec, {"id"});
 
         if (it != bindings.end()) {
             bindings.erase(it);

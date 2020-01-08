@@ -17,9 +17,9 @@ simple QosClassifier extends SimpleModule like IIeee8021dQosClassifier
 {
     parameters:
         @class(QosClassifier);
-        string ipProtocolUpMap = default("1 BE 58 BE");
-        string udpPortUpMap = default("21 BK 80 BE 4000 VI 5000 VO");
-        string tcpPortUpMap = default("21 BK 80 BE 4000 VI 5000 VO");
+        object ipProtocolUpMap = default([ {protocol:1, up:"BE"}, {protocol:58, up:"BE"} ]);
+        object udpPortUpMap = default([ {port:21, up:"BK"}, {port:80, up:"BE"}, {port:4000, up:"VI"}, {port:5000, up:"VO"} ]);
+        object tcpPortUpMap = default([ {port:21, up:"BK"}, {port:80, up:"BE"}, {port:4000, up:"VI"}, {port:5000, up:"VO"} ]);
         string defaultUp = default("BE");
         @display("i=block/classifier");
     gates:

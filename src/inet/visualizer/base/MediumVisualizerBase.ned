@@ -40,12 +40,12 @@ simple MediumVisualizerBase extends VisualizerBase
 
         bool displaySignalDepartures = default(false); // Display an image where a signal departure is currently in progress, disabled by default
         string signalDepartureImage = default("misc/signal_departure.png"); // Image for ongoing signal departures
-        string signalDeparturePlacementHint = default("topCenter"); // Annotation placement hint, space-separated list of any, top, bottom, left, right, topLeft, topCenter, topRight, etc.
+        object signalDeparturePlacementHint = default(["topCenter"]); // Annotation placement hint, list of any, top, bottom, left, right, topLeft, topCenter, topRight, etc.
         double signalDeparturePlacementPriority = default(1); // Determines the order of annotation positioning
 
         bool displaySignalArrivals = default(false); // Display an image where a signal arrival is currently in progress, disabled by default
         string signalArrivalImage = default("misc/signal_arrival.png"); // Image for ongoing signal arrivals
-        string signalArrivalPlacementHint = default("topCenter"); // Annotation placement hint, space-separated list of any, top, bottom, left, right, topLeft, topCenter, topRight, etc.
+        object signalArrivalPlacementHint = default(["topCenter"]); // Annotation placement hint, list of any, top, bottom, left, right, topLeft, topCenter, topRight, etc.
         double signalArrivalPlacementPriority = default(-1); // Determines the order of annotation positioning
 
         bool displayCommunicationRanges = default(false); // Display communication ranges as circles around radios, enabled by default
@@ -105,7 +105,7 @@ simple MediumVisualizerBase extends VisualizerBase
         int spectrumFigureXTickCount = default(3); // Number of ticks along the X-axis
         int spectrumFigureYTickCount = default(5); // Number of ticks along the Y-axis
         double spectrumFigureInterpolationSize = default(5); // Power spectrum density interpolation distance along the frequency axis
-        string spectrumPlacementHint = default("bottomCenter"); // Annotation placement hint, space-separated list of any, top, bottom, left, right, topLeft, topCenter, topRight, etc.
+        object spectrumPlacementHint = default(["bottomCenter"]); // Annotation placement hint, list of any, top, bottom, left, right, topLeft, topCenter, topRight, etc.
         double spectrumPlacementPriority = default(-1); // Determines the order of annotation positioning
 
         // parameters for the spectrogram figures
@@ -118,7 +118,7 @@ simple MediumVisualizerBase extends VisualizerBase
         double spectrogramPixmapHeight = default(spectrogramFigureHeight); // Pixmap resolution height
         int spectrogramFigureXTickCount = default(3); // Number of ticks along the X-axis
         int spectrogramFigureYTickCount = default(5); // Number of ticks along the Y-axis
-        string spectrogramPlacementHint = default("bottomCenter"); // Annotation placement hint, space-separated list of any, top, bottom, left, right, topLeft, topCenter, topRight, etc.
+        object spectrogramPlacementHint = default(["bottomCenter"]); // Annotation placement hint, list of any, top, bottom, left, right, topLeft, topCenter, topRight, etc.
         double spectrogramPlacementPriority = default(-1); // Determines the order of annotation positioning
 
         @class(MediumVisualizerBase);

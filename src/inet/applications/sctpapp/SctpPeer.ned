@@ -21,7 +21,7 @@ simple SctpPeer extends SimpleModule like IApp
 {
     parameters:
         @class(SctpPeer);
-        string localAddress = default(""); // Comma-separated list of addresses
+        object localAddress = default([]); // List of addresses
         int localPort = default(0); // Port number to listen on
         bool echo = default(false);  // Echoes received packages when true
         double echoDelay @unit(s) = default(0s);
@@ -43,7 +43,7 @@ simple SctpPeer extends SimpleModule like IApp
         double startTime @unit(s) = default(1s); // Time the first session begins
         int numRequestsPerSession = default(1);  // Number of requests sent per session
         int numPacketsToReceive = default(0);
-        string streamPriorities = default("");
+        object streamPriorities = default([]);
 
         @display("i=block/app");
         @signal[packetSent](type=inet::Packet);
