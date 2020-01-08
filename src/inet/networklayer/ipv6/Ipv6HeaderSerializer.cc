@@ -39,8 +39,8 @@ Register_Serializer(Ipv6Header, Ipv6HeaderSerializer);
 void Ipv6HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     const auto& ipv6Header = staticPtrCast<const Ipv6Header>(chunk);
-    stream.writeNBitsOfUint64Be(ipv6Header->getVersion(), 4);
-    stream.writeNBitsOfUint64Be(ipv6Header->getTrafficClass(), 8);
+    stream.writeUint4(ipv6Header->getVersion());
+    stream.writeUint8(ipv6Header->getTrafficClass());
     stream.writeNBitsOfUint64Be(ipv6Header->getFlowLabel(), 20);
     stream.writeUint16Be(B(ipv6Header->getPayloadLength()).get());
     stream.writeByte(ipv6Header->getExtensionHeaderArraySize() != 0 ? ipv6Header->getExtensionHeader(0)->getExtensionType() : ipv6Header->getProtocolId());
@@ -54,7 +54,8 @@ void Ipv6HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
         const Ipv6ExtensionHeader *extHdr = ipv6Header->getExtensionHeader(i);
         stream.writeByte(i + 1 < ipv6Header->getExtensionHeaderArraySize() ? ipv6Header->getExtensionHeader(i + 1)->getExtensionType() : ipv6Header->getProtocolId());
         ASSERT((B(extHdr->getByteLength()).get() & 7) == 0);
-        stream.writeByte(B(extHdr->getByteLength() - B(8)).get() / 8);
+        ASSERT(extHdr->getByteLength() <= B(255 * 8 + 8));
+        stream.writeByte((B(extHdr->getByteLength()).get() - 8) / 8);
         switch (extHdr->getExtensionType()) {
             case IP_PROT_IPv6EXT_HOP: {
                 const Ipv6HopByHopOptionsHeader *hdr = check_and_cast<const Ipv6HopByHopOptionsHeader *>(extHdr);
@@ -78,8 +79,11 @@ void Ipv6HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
             }
             case IP_PROT_IPv6EXT_FRAGMENT: {
                 const Ipv6FragmentHeader *hdr = check_and_cast<const Ipv6FragmentHeader *>(extHdr);
+                ASSERT(hdr->getByteLength() == IPv6_FRAGMENT_HEADER_LENGTH);
                 ASSERT((hdr->getFragmentOffset() & 7) == 0);
-                stream.writeUint16Be(hdr->getFragmentOffset() | (hdr->getMoreFragments() ? 1 : 0));
+                stream.writeNBitsOfUint64Be(hdr->getFragmentOffset() / 8, 13);
+                stream.writeUint2(hdr->getReserved());
+                stream.writeBit(hdr->getMoreFragments());
                 stream.writeUint32Be(hdr->getIdentification());
                 break;
             }
@@ -105,9 +109,10 @@ void Ipv6HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
 const Ptr<Chunk> Ipv6HeaderSerializer::deserialize(MemoryInputStream& stream) const
 {
     auto ipv6Header = makeShared<Ipv6Header>();
-    if (stream.readNBitsToUint64Be(4) != 6)
+    ipv6Header->setVersion(stream.readUint4());
+    if (ipv6Header->getVersion() != 6)
         ipv6Header->markIncorrect();
-    ipv6Header->setTrafficClass(stream.readNBitsToUint64Be(8));
+    ipv6Header->setTrafficClass(stream.readUint8());
     ipv6Header->setFlowLabel(stream.readNBitsToUint64Be(20));
     ipv6Header->setPayloadLength(B(stream.readUint16Be()));
     IpProtocolId nextHeaderId = static_cast<IpProtocolId>(stream.readByte());
@@ -116,71 +121,77 @@ const Ptr<Chunk> Ipv6HeaderSerializer::deserialize(MemoryInputStream& stream) co
     ipv6Header->setSrcAddress(stream.readIpv6Address());
     ipv6Header->setDestAddress(stream.readIpv6Address());
     bool mbool = true;
-    while(mbool) {
+    while (mbool) {
         switch (nextHeaderId) {
             case IP_PROT_IPv6EXT_HOP: {
-                ipv6Header->setExtensionHeaderArraySize(ipv6Header->getExtensionHeaderArraySize() + 1);
                 Ipv6HopByHopOptionsHeader *extHdr = new Ipv6HopByHopOptionsHeader();
                 extHdr->setExtensionType(nextHeaderId);
                 nextHeaderId = static_cast<IpProtocolId>(stream.readByte());
                 uint8_t hdrExtLen = stream.readByte();
-                stream.readByteRepeatedly(0, hdrExtLen + 8 - 2);    // TODO
-                ipv6Header->setExtensionHeader(ipv6Header->getExtensionHeaderArraySize() - 1, extHdr);
+                uint16_t hdrLen = hdrExtLen * 8 + 8;
+                extHdr->setByteLength(B(hdrLen));
+                stream.readByteRepeatedly(0, hdrLen - 2);    // TODO
+                ipv6Header->insertExtensionHeader(extHdr);
                 break;
             }
             case IP_PROT_IPv6EXT_DEST: {
-                ipv6Header->setExtensionHeaderArraySize(ipv6Header->getExtensionHeaderArraySize() + 1);
                 Ipv6DestinationOptionsHeader *extHdr = new Ipv6DestinationOptionsHeader();
                 extHdr->setExtensionType(nextHeaderId);
                 nextHeaderId = static_cast<IpProtocolId>(stream.readByte());
                 uint8_t hdrExtLen = stream.readByte();
-                stream.readByteRepeatedly(0, hdrExtLen + 8 - 2);    // TODO
-                ipv6Header->setExtensionHeader(ipv6Header->getExtensionHeaderArraySize() - 1, extHdr);
+                uint16_t hdrLen = hdrExtLen * 8 + 8;
+                extHdr->setByteLength(B(hdrLen));
+                stream.readByteRepeatedly(0, hdrLen - 2);    // TODO
+                ipv6Header->insertExtensionHeader(extHdr);
                 break;
             }
             case IP_PROT_IPv6EXT_ROUTING: {
-                ipv6Header->setExtensionHeaderArraySize(ipv6Header->getExtensionHeaderArraySize() + 1);
                 Ipv6RoutingHeader *extHdr = new Ipv6RoutingHeader();
                 extHdr->setExtensionType(nextHeaderId);
                 nextHeaderId = static_cast<IpProtocolId>(stream.readByte());
                 uint8_t hdrExtLen = stream.readByte();
+                uint16_t hdrLen = hdrExtLen * 8 + 8;
+                extHdr->setByteLength(B(hdrLen));
                 extHdr->setRoutingType(stream.readByte());
                 extHdr->setSegmentsLeft(stream.readByte());
-                stream.readByteRepeatedly(0, hdrExtLen + 8 - 4);    // TODO
-                ipv6Header->setExtensionHeader(ipv6Header->getExtensionHeaderArraySize() - 1, extHdr);
+                stream.readByteRepeatedly(0, hdrLen - 2);    // TODO
+                ipv6Header->insertExtensionHeader(extHdr);
                 break;
             }
             case IP_PROT_IPv6EXT_FRAGMENT: {
-                ipv6Header->setExtensionHeaderArraySize(ipv6Header->getExtensionHeaderArraySize() + 1);
                 Ipv6FragmentHeader *extHdr = new Ipv6FragmentHeader();
                 extHdr->setExtensionType(nextHeaderId);
                 nextHeaderId = static_cast<IpProtocolId>(stream.readByte());
+                // hdrExtLen ignored, see RFC2460: it's only a reserved field for fragment header
                 stream.readByte();
-                extHdr->setFragmentOffset(stream.readNBitsToUint64Be(13));
-                stream.readNBitsToUint64Be(3);
+                extHdr->setByteLength(IPv6_FRAGMENT_HEADER_LENGTH);
+                extHdr->setFragmentOffset(stream.readNBitsToUint64Be(13) * 8);
+                extHdr->setReserved(stream.readUint2());
                 extHdr->setMoreFragments(stream.readBit());
                 extHdr->setIdentification(stream.readUint32Be());
-                ipv6Header->setExtensionHeader(ipv6Header->getExtensionHeaderArraySize() - 1, extHdr);
+                ipv6Header->insertExtensionHeader(extHdr);
                 break;
             }
             case IP_PROT_IPv6EXT_AUTH: {
-                ipv6Header->setExtensionHeaderArraySize(ipv6Header->getExtensionHeaderArraySize() + 1);
                 Ipv6AuthenticationHeader *extHdr = new Ipv6AuthenticationHeader();
                 extHdr->setExtensionType(nextHeaderId);
                 nextHeaderId = static_cast<IpProtocolId>(stream.readByte());
                 uint8_t hdrExtLen = stream.readByte();
-                stream.readByteRepeatedly(0, hdrExtLen + 8 - 2);    // TODO
-                ipv6Header->setExtensionHeader(ipv6Header->getExtensionHeaderArraySize() - 1, extHdr);
+                uint16_t hdrLen = hdrExtLen * 8 + 8;
+                extHdr->setByteLength(B(hdrLen));
+                stream.readByteRepeatedly(0, hdrLen - 2);    // TODO
+                ipv6Header->insertExtensionHeader(extHdr);
                 break;
             }
             case IP_PROT_IPv6EXT_ESP: {
-                ipv6Header->setExtensionHeaderArraySize(ipv6Header->getExtensionHeaderArraySize() + 1);
                 Ipv6EncapsulatingSecurityPayloadHeader *extHdr = new Ipv6EncapsulatingSecurityPayloadHeader();
                 extHdr->setExtensionType(nextHeaderId);
                 nextHeaderId = static_cast<IpProtocolId>(stream.readByte());
                 uint8_t hdrExtLen = stream.readByte();
-                stream.readByteRepeatedly(0, hdrExtLen + 8 - 2);    // TODO
-                ipv6Header->setExtensionHeader(ipv6Header->getExtensionHeaderArraySize() - 1, extHdr);
+                uint16_t hdrLen = hdrExtLen * 8 + 8;
+                extHdr->setByteLength(B(hdrLen));
+                stream.readByteRepeatedly(0, hdrLen - 2);    // TODO
+                ipv6Header->insertExtensionHeader(extHdr);
                 break;
             }
             default: {
