@@ -1,5 +1,7 @@
 ====== inet-4.x ======
 
+2020-01-08  ------ inet-4.2.0 released ------
+
 2019-10-30  Levente Mészáros
 
 	Removed self message if scheduled at current time and refreshDisplay() calls.

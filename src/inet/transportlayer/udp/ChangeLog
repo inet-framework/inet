@@ -1,5 +1,7 @@
 ====== inet-4.x ======
 
+2020-01-08  ------ inet-4.2.0 released ------
+
 2019-12-18  Zoltan Bojthe
 
 	Switched to using UdpSetOptionCommand.optionCode value instead of dynamic_cast if-ladder.

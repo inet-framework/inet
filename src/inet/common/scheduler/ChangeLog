@@ -1,5 +1,7 @@
 ====== inet-4.x ======
 
+2020-01-08  ------ inet-4.2.0 released ------
+
 2019-10-01  Levente Mészáros
 
 	Begin simulation event is not needed after OMNeT 5.5.1.
