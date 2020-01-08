@@ -127,8 +127,9 @@ void Dymo::initialize(int stage)
             int prefixLength = address.getAddressType()->getMaxPrefixLength();
             if (slash) {
                 int pLength = atoi(slash + 1);
+                *slash = '/';
                 if (pLength < 0 || pLength > prefixLength)
-                    throw cRuntimeError("invalid prefix length in 'clientAddresses' parameter: '%s/%s'", clientAddress, slash);
+                    throw cRuntimeError("invalid prefix length in 'clientAddresses' parameter: '%s'", clientAddress);
                 prefixLength = pLength;
             }
             clientAddressAndPrefixLengthPairs.push_back(std::pair<L3Address, int>(address, prefixLength));
