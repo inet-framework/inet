@@ -42,7 +42,7 @@ simple UdpBasicApp like IApp
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module
         int localPort = default(-1);  // local port (-1: use ephemeral port)
-        string destAddresses = default(""); // list of IP addresses, separated by spaces ("": don't send)
+        object destAddresses = default([]); // list of IP addresses in JSON format (empty array means: don't send)
         string localAddress = default("");
         string packetName = default("UdpBasicAppData");
         int destPort;
