@@ -381,8 +381,8 @@ void HeatMapPlotFigure::addChildren()
     xAxisLabelFigure->setAnchor(ANCHOR_S);
     yAxisLabelFigure = new cLabelFigure("Y axis label");
     yAxisLabelFigure->setAnchor(ANCHOR_S);
-#if OMNETPP_BUILDNUM >= 1500
-    yAxisLabelFigure->setAngle(-90);
+#if OMNETPP_BUILDNUM > 1500
+    yAxisLabelFigure->setAngle(M_PI/2);
 #endif
 
     addFigure(pixmapFigure);
