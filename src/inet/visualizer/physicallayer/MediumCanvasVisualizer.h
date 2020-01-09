@@ -156,6 +156,8 @@ class INET_API MediumCanvasVisualizer : public MediumVisualizerBase
     virtual void handleSignalDepartureEnded(const physicallayer::ITransmission *transmission) override;
     virtual void handleSignalArrivalStarted(const physicallayer::IReception *reception) override;
     virtual void handleSignalArrivalEnded(const physicallayer::IReception *reception) override;
+
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override;
 #endif // WITH_RADIO
 };
 

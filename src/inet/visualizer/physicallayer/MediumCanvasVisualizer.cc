@@ -174,6 +174,9 @@ void MediumCanvasVisualizer::initialize(int stage)
                     networkNodeVisualization->addAnnotation(spectrogramFigure, spectrogramFigure->getPlotSize(), spectrogramPlacementHint, spectrogramPlacementPriority);
                     spectrogramFigures[networkNode] = spectrogramFigure;
                 }
+                if (displayPowerDensityMaps || displaySpectrums || displaySpectrograms)
+                    if (!networkNode->isSubscribed(IMobility::mobilityStateChangedSignal, this))
+                        networkNode->subscribe(IMobility::mobilityStateChangedSignal, this);
             }
         }
     }
@@ -929,6 +932,8 @@ void MediumCanvasVisualizer::handleRadioAdded(const IRadio *radio)
                 setSignalArrivalFigure(radio, signalArrivalFigure);
             }
         }
+        if (displayPowerDensityMaps || displaySpectrums || displaySpectrograms)
+            networkNode->subscribe(IMobility::mobilityStateChangedSignal, this);
     }
 }
 
@@ -949,6 +954,8 @@ void MediumCanvasVisualizer::handleRadioRemoved(const IRadio *radio)
             auto networkNodeVisualization = networkNodeVisualizer->getNetworkNodeVisualization(networkNode);
             networkNodeVisualization->removeAnnotation(arrivalFigure);
         }
+        if (displayPowerDensityMaps || displaySpectrums || displaySpectrograms)
+            networkNode->unsubscribe(IMobility::mobilityStateChangedSignal, this);
     }
 }
 
@@ -1088,6 +1095,14 @@ void MediumCanvasVisualizer::handleSignalArrivalEnded(const IReception *receptio
             }
         }
     }
+}
+
+void MediumCanvasVisualizer::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
+{
+    if (signal == IMobility::mobilityStateChangedSignal)
+        invalidDisplay = true;
+    else
+        MediumVisualizerBase::receiveSignal(source, signal, object, details);
 }
 
 #endif // WITH_RADIO
