@@ -139,14 +139,12 @@ void UdpBasicBurst::processStart()
     if (tos != -1)
         socket.setTos(tos);
 
-    const char *destAddrs = par("destAddresses");
-    cStringTokenizer tokenizer(destAddrs);
-    const char *token;
+    cValueArray *destAddrs = check_and_cast<cValueArray*>(par("destAddresses").objectValue());
     bool excludeLocalDestAddresses = par("excludeLocalDestAddresses");
-
     IInterfaceTable *ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
 
-    while ((token = tokenizer.nextToken()) != nullptr) {
+    for (int i=0; i < destAddrs->size(); i++) {
+        const char *token = destAddrs->get(i).stringValue();
         if (strstr(token, "Broadcast") != nullptr)
             destAddresses.push_back(Ipv4Address::ALLONES_ADDRESS);
         else {
