@@ -28,7 +28,7 @@ simple SomeUDPApp like UDPApp
         int destPort;
         int messageLength; // (bits)
         volatile double sendInterval; // should usually be a random value, e.g. exponential(1)
-        string destAddresses; // list of \IP addresses, separated by spaces
+        object destAddresses; // list of \IP addresses in JSON array format
     gates:
         input udpIn;
         output udpOut;

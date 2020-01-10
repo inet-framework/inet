@@ -34,7 +34,7 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 **.sender[*].trafGen.protocol = 150
 **.sender[*].trafGen.packetLength = 800B
 
-**.sender[*].trafGen.destAddresses = "recip"
+**.sender[*].trafGen.destAddresses = ["recip"]
 
 **.recip.trafGen.protocol = 150
 
