@@ -39,7 +39,7 @@ simple IpvxTrafGen like IIpvxTrafficGenerator
         int numPackets = default(-1); // max number of packets to generate, -1 means forever
         int protocol; // value for IPv4, IPv6 protocol field, accepts only between 143 and 254
         volatile int packetLength @unit(B); // packet length in bytes
-        string destAddresses = default(""); // list of destination addresses, separated by spaces
+        object destAddresses = default([]); // list of destination addresses in JSON format (empty array means: don't send)
         @lifecycleSupport;
         @display("i=block/source");
         @signal[packetSent](type=inet::Packet);

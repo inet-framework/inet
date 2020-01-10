@@ -94,10 +94,9 @@ void IpvxTrafGen::handleMessageWhenUp(cMessage *msg)
     if (msg == timer) {
         if (msg->getKind() == START) {
             destAddresses.clear();
-            const char *destAddrs = par("destAddresses");
-            cStringTokenizer tokenizer(destAddrs);
-            const char *token;
-            while ((token = tokenizer.nextToken()) != nullptr) {
+            cValueArray *destAddrs = check_and_cast<cValueArray*>(par("destAddresses").objectValue());
+            for (int i=0; i < destAddrs->size(); i++) {
+                const char *token = destAddrs->get(i).stringValue();
                 L3Address result;
                 L3AddressResolver().tryResolve(token, result);
                 if (result.isUnspecified())
