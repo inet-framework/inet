@@ -78,17 +78,15 @@ int QosClassifier::parseUserPriority(const char *text)
         throw cRuntimeError("Unknown user priority: '%s'", text);
 }
 
-void QosClassifier::parseUserPriorityMap(const char *text, std::map<int, int>& upMap)
+void QosClassifier::parseUserPriorityMap(const cObject *param, std::map<int, int>& upMap)
 {
-    cStringTokenizer tokenizer(text);
-    while (tokenizer.hasMoreTokens()) {
-        const char *keyString = tokenizer.nextToken();
-        const char *upString = tokenizer.nextToken();
-        if (!keyString || !upString)
-            throw cRuntimeError("Insufficient number of values in: '%s'", text);
-        int key = std::atoi(keyString);
+    auto arrayParam = check_and_cast<const cValueArray *>(param);
+    for (int i=0; i < arrayParam->size(); i++) {
+        auto item = check_and_cast<const cValueMap*>(arrayParam->get(i).objectValue());
+        int port = item->get("port");
+        const char *upString = item->get("up");
         int up = parseUserPriority(upString);
-        upMap.insert(std::pair<int, int>(key, up));
+        upMap.insert(std::pair<int, int>(port, up));
     }
 }
 
