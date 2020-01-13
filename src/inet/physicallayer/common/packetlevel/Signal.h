@@ -26,7 +26,7 @@ namespace physicallayer {
 class INET_API Signal : public cPacket
 {
   public:
-    Signal(const char *name=nullptr);
+    explicit Signal(const char *name=nullptr, short kind=0, int64_t bitLength=0);
     Signal(const Signal& other);
 
     virtual Signal *dup() const override { return new Signal(*this); }
