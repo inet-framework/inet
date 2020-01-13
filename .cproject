@@ -113,10 +113,8 @@
                     					
                     <sourceEntries>
                         						
-                        <entry excluding="inet/applications/voipstream|inet/emulation|inet/linklayer/ext|inet/transportlayer/tcp_nsc|inet/transportlayer/tcp_lwip|transport/tcp_nsc|transport/tcp_lwip" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
-                        						
-                        <entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="tutorials/queueing"/>
-		
+                        <entry excluding="inet/applications/voipstream|inet/emulation|inet/linklayer/ext|inet/transportlayer/tcp_nsc|inet/transportlayer/tcp_lwip|inet/routing/extras|transport/tcp_nsc|transport/tcp_lwip" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
+                        					
                     </sourceEntries>
                     				
                 </configuration>
@@ -229,10 +227,8 @@
                     					
                     <sourceEntries>
                         						
-                        <entry excluding="inet/applications/voipstream|inet/emulation|inet/linklayer/ext|inet/transportlayer/tcp_nsc|inet/transportlayer/tcp_lwip|transport/tcp_nsc|transport/tcp_lwip" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
-                        						
-                        <entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="tutorials/queueing"/>
-		
+                        <entry excluding="inet/applications/voipstream|inet/emulation|inet/linklayer/ext|inet/transportlayer/tcp_nsc|inet/transportlayer/tcp_lwip|inet/routing/extras|transport/tcp_nsc|transport/tcp_lwip" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
+                        					
                     </sourceEntries>
                     				
                 </configuration>
