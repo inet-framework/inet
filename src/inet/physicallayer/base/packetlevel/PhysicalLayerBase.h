@@ -20,7 +20,7 @@
 
 #include "inet/common/LayeredProtocolBase.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
-#include "inet/physicallayer/common/packetlevel/Signal.h"
+#include "../../common/packetlevel/WirelessSignal.h"
 #include "inet/physicallayer/contract/packetlevel/IPhysicalLayer.h"
 
 namespace inet {
@@ -37,7 +37,7 @@ class INET_API PhysicalLayerBase : public LayeredProtocolBase, public IPhysicalL
   protected:
     virtual void initialize(int stage) override;
 
-    virtual void handleSignal(Signal *signal);
+    virtual void handleSignal(WirelessSignal *signal);
     virtual void handleLowerMessage(cMessage *message) override;
 
     virtual void sendUp(cMessage *message);

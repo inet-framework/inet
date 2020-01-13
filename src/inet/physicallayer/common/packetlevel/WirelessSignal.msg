@@ -14,7 +14,7 @@
 //
 
 cplusplus {{
-#include "inet/physicallayer/common/packetlevel/Signal.h"
+#include "inet/physicallayer/common/packetlevel/WirelessSignal.h"
 }}
 
 namespace inet::physicallayer;
@@ -24,7 +24,7 @@ class IArrival { @existingClass; }
 class IListening { @existingClass; }
 class IReception { @existingClass; }
 
-packet Signal
+packet WirelessSignal
 {
     @existingClass;
     @descriptor(readonly);

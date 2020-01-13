@@ -15,15 +15,15 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_SIGNAL_H
-#define __INET_SIGNAL_H
+#ifndef __INET_WIRELESSSIGNAL_H
+#define __INET_WIRELESSSIGNAL_H
 
 #include "inet/physicallayer/contract/packetlevel/ISignal.h"
 
 namespace inet {
 namespace physicallayer {
 
-class INET_API Signal : public cPacket, public ISignal
+class INET_API WirelessSignal : public cPacket, public ISignal
 {
   protected:
     const int transmissionId;
@@ -38,10 +38,10 @@ class INET_API Signal : public cPacket, public ISignal
     bool isDup() const { return transmission == nullptr; }
 
   public:
-    Signal(const ITransmission *transmission);
-    Signal(const Signal& other);
+    WirelessSignal(const ITransmission *transmission);
+    WirelessSignal(const WirelessSignal& other);
 
-    virtual Signal *dup() const override { return new Signal(*this); }
+    virtual WirelessSignal *dup() const override { return new WirelessSignal(*this); }
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 
@@ -56,5 +56,5 @@ class INET_API Signal : public cPacket, public ISignal
 } // namespace physicallayer
 } // namespace inet
 
-#endif // ifndef __INET_SIGNAL_H
+#endif // ifndef __INET_WIRELESSSIGNAL_H
 
