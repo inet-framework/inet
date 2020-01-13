@@ -30,7 +30,7 @@ WirelessSignal::WirelessSignal(const ITransmission *transmission) :
 }
 
 WirelessSignal::WirelessSignal(const WirelessSignal& other) :
-    cPacket(other),
+    Signal(other),
     transmissionId(other.transmissionId),
     transmission(nullptr),
     radioMedium(other.radioMedium)
