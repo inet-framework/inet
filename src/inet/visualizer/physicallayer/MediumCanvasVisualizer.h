@@ -29,7 +29,7 @@
 
 #ifdef WITH_RADIO
 #include "inet/physicallayer/contract/packetlevel/IReceptionDecision.h"
-#include "../../physicallayer/contract/packetlevel/IWirelessSignal.h"
+#include "inet/physicallayer/contract/packetlevel/IWirelessSignal.h"
 #include "inet/physicallayer/contract/packetlevel/ITransmission.h"
 #endif // WITH_RADIO
 

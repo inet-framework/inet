@@ -20,7 +20,7 @@
 #include "inet/networklayer/common/InterfaceEntry.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #ifdef WITH_NEXTHOP
-#include "../../networklayer/nexthop/NextHopInterfaceData.h"
+#include "inet/networklayer/nexthop/NextHopInterfaceData.h"
 #endif // WITH_NEXTHOP
 #ifdef WITH_IPv4
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"

@@ -19,7 +19,7 @@
 #define __INET_WIRELESSSIGNAL_H
 
 #include "inet/physicallayer/common/packetlevel/Signal.h"
-#include "../../contract/packetlevel/IWirelessSignal.h"
+#include "inet/physicallayer/contract/packetlevel/IWirelessSignal.h"
 
 namespace inet {
 namespace physicallayer {

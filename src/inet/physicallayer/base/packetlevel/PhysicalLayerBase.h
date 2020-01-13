@@ -20,7 +20,7 @@
 
 #include "inet/common/LayeredProtocolBase.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
-#include "../../common/packetlevel/WirelessSignal.h"
+#include "inet/physicallayer/common/packetlevel/WirelessSignal.h"
 #include "inet/physicallayer/contract/packetlevel/IPhysicalLayer.h"
 
 namespace inet {
