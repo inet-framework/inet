@@ -14,25 +14,14 @@
 //
 
 cplusplus {{
-#include "inet/physicallayer/common/packetlevel/WirelessSignal.h"
+#include "inet/physicallayer/common/packetlevel/Signal.h"
 }}
-
-import inet.physicallayer.common.packetlevel.Signal;
 
 namespace inet::physicallayer;
 
-class ITransmission { @existingClass; }
-class IArrival { @existingClass; }
-class IListening { @existingClass; }
-class IReception { @existingClass; }
-
-packet WirelessSignal extends Signal
+packet Signal
 {
     @existingClass;
     @descriptor(readonly);
-    const ITransmission *transmission;
-    const IArrival *arrival;
-    const IListening *listening;
-    const IReception *reception;
 }
 
