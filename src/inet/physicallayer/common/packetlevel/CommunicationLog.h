@@ -21,7 +21,7 @@
 #include <fstream>
 
 #include "inet/physicallayer/contract/packetlevel/IReceptionDecision.h"
-#include "../../contract/packetlevel/IWirelessSignal.h"
+#include "inet/physicallayer/contract/packetlevel/IWirelessSignal.h"
 #include "inet/physicallayer/contract/packetlevel/ITransmission.h"
 
 namespace inet {

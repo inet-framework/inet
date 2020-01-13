@@ -21,7 +21,7 @@
 #include "inet/common/packet/printer/ProtocolPrinter.h"
 
 #ifdef WITH_RADIO
-#include "../../../physicallayer/common/packetlevel/WirelessSignal.h"
+#include "inet/physicallayer/common/packetlevel/WirelessSignal.h"
 #endif // WITH_RADIO
 
 namespace inet {
