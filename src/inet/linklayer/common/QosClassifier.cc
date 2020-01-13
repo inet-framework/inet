@@ -43,9 +43,9 @@ void QosClassifier::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
         defaultUp = parseUserPriority(par("defaultUp"));
-        parseUserPriorityMap(par("ipProtocolUpMap"), ipProtocolUpMap);
-        parseUserPriorityMap(par("udpPortUpMap"), udpPortUpMap);
-        parseUserPriorityMap(par("tcpPortUpMap"), tcpPortUpMap);
+        parseUserPriorityMap(par("ipProtocolUpMap"), "protocol", ipProtocolUpMap);
+        parseUserPriorityMap(par("udpPortUpMap"), "port", udpPortUpMap);
+        parseUserPriorityMap(par("tcpPortUpMap"), "port", tcpPortUpMap);
     }
 }
 
@@ -78,15 +78,15 @@ int QosClassifier::parseUserPriority(const char *text)
         throw cRuntimeError("Unknown user priority: '%s'", text);
 }
 
-void QosClassifier::parseUserPriorityMap(const cObject *param, std::map<int, int>& upMap)
+void QosClassifier::parseUserPriorityMap(const cObject *param, const char *keyName, std::map<int, int>& upMap)
 {
     auto arrayParam = check_and_cast<const cValueArray *>(param);
     for (int i=0; i < arrayParam->size(); i++) {
         auto item = check_and_cast<const cValueMap*>(arrayParam->get(i).objectValue());
-        int port = item->get("port");
+        int keyValue = item->get(keyName);
         const char *upString = item->get("up");
         int up = parseUserPriority(upString);
-        upMap.insert(std::pair<int, int>(port, up));
+        upMap.insert(std::pair<int, int>(keyValue, up));
     }
 }
 

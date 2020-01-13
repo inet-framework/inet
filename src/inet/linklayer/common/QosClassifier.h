@@ -33,7 +33,7 @@ class INET_API QosClassifier : public cSimpleModule, public IProtocolRegistratio
     std::map<int, int> tcpPortUpMap;
 
     virtual int parseUserPriority(const char *text);
-    virtual void parseUserPriorityMap(const cObject *param, std::map<int, int>& upMap);
+    virtual void parseUserPriorityMap(const cObject *param, const char *keyName, std::map<int, int>& upMap);
 
     virtual int getUserPriority(cMessage *msg);
 

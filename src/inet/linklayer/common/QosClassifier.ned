@@ -22,8 +22,16 @@ package inet.linklayer.common;
 simple QosClassifier like IIeee8021dQosClassifier
 {
     parameters:
-        object ipProtocolUpMap = default([ {port:1, up:"BE"}, {port:58, up:"BE"} ]);
+        int basePort = 42;
+        object map = {protocol: "UDP", _20:"BK"};
+        object map = [{packet: 'ip.src == "10.0.0.1"', up:"VI"}, {protocol:"TCP", port:20, up:"BK"}];
+        
+        object map = [{protocol: "UDP", _20:"BK", _80:"BE", _4000:"VI"}, {protocol:"TCP", port:20, up:"BK"}];
+        object ipProtocolUpMap = default([ {protocol:1, up:"BE"}, {protocol:58, up:"BE"} ]);
         object udpPortUpMap = default([ {port:21, up:"BK"}, {port:80, up:"BE"}, {port:4000, up:"VI"}, {port:5000, up:"VO"} ]);
+        object udpPortUpMap = default([ {port:basePort + 1, up:"BK"}, {port:80, up:"BE"}, {port:4000, up:"VI"}, {port:5000, up:"VO"} ]);
+        object udpPortUpMap = default({ 21:"BK", 80:"BE", 4000:"VI", 5000:"VO"});
+        object udpPortUpMap = default([ {port:21, up:"BK"}, {80, "BE"}, {4000, "VI"}, {5000, "VO"} ]);
         object tcpPortUpMap = default([ {port:21, up:"BK"}, {port:80, up:"BE"}, {port:4000, up:"VI"}, {port:5000, up:"VO"} ]);
         string defaultUp = default("BE");
         @display("i=block/classifier");
