@@ -1,3 +1,4 @@
+ - use @reconnect to simplify network nodes which copy big parts of StandardHost
  - checkPopPacketSupport and checkPushPacketSupport doesn't work with optionally connected modules (they are not checked) and most of the modules are optionally connected
  - timing API, generic TimeTag or multiple tags containing queueing time, processing time, propagation time, transmission time for the packet data per bit
  - similarly to timing API other meta-data could also be stored for the packet data per bit (e.g. hop count)
