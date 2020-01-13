@@ -19,6 +19,7 @@ import inet.common.INETDefs;
 import inet.common.TagBase;
 import inet.common.packet.chunk.Chunk;
 import inet.linklayer.common.MacAddress;
+import inet.physicallayer.common.packetlevel.Signal;
 
 cplusplus {{
 #include "inet/linklayer/ethernet/Ethernet.h"
@@ -32,7 +33,7 @@ enum SapCode;
 // Abstract base class for various Ethernet traffic types:
 // EtherJam, EtherFilledIfg and EtherPhyFrame.
 //
-packet EthernetSignalBase
+packet EthernetSignalBase extends physicallayer::Signal
 {
     bool srcMacFullDuplex;  // meta-info, for detecting model misconfiguration
     double bitrate;  // meta-info, for detecting model misconfiguration
