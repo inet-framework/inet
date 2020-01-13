@@ -27,10 +27,10 @@ three main features, and boolean parameters for turning them on/off:
    animated disks (:par:`displaySignals` parameter)
 -  **Indication of signal departures and arrivals**: Icons are placed
    above nodes when a signal is departing from them or arriving at their
-   location (``displaySignalDepartures`` and ``displaySignalArrivals``
+   location (:par:`displaySignalDepartures` and :par:`displaySignalArrivals`
    parameters)
 -  **Displaying communication and interference ranges**: Ranges are
-   displayed as circles around nodes ``displayCommunicationRanges`` and
+   displayed as circles around nodes (:par:`displayCommunicationRanges` and
    :par:`displayInterferenceRanges` parameters)
 
 The features above will be described in more detail in the following

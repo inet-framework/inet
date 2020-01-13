@@ -1,5 +1,7 @@
 ====== inet-4.x ======
 
+2020-01-08  ------ inet-4.2.0 released ------
+
 2019-07-26  Levente Mészáros
 
 	Removed 'Min' from log line, because it's not always the case.

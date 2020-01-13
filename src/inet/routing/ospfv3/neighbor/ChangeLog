@@ -1,5 +1,7 @@
 ====== inet-4.x ======
 
+2020-01-08  ------ inet-4.2.0 released ------
+
 2019-10-18  Zoltan Bojthe
 
 	Changed to use msg constructor to set message name and message kind.

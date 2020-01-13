@@ -1,5 +1,7 @@
 ====== inet-4.x ======
 
+2020-01-08  ------ inet-4.2.0 released ------
+
 2019-02-13  Levente Mészáros
 
 	Added frame sequence class desriptors to allow inspecting them in Qtenv.

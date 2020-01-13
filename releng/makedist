@@ -30,8 +30,6 @@ rm -rf $INET_ROOT/out/$DIRNAME
 mkdir -p $INET_ROOT/out/$DIRNAME
 
 git checkout-index -a -f --prefix=$INET_ROOT/out/$DIRNAME/ || { echo --- error copying repo ---; exit 1;}
-(cd showcases; git checkout-index -a -f --prefix=$INET_ROOT/out/$DIRNAME/showcases/ || { echo --- error copying showcases ---; exit 1;})
-(cd tutorials; git checkout-index -a -f --prefix=$INET_ROOT/out/$DIRNAME/tutorials/ || { echo --- error copying tutorials ---; exit 1;})
 
 echo "inet-$BUILDID" > $INET_ROOT/out/$DIRNAME/Version
 

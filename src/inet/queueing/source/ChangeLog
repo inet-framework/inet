@@ -1,5 +1,7 @@
 ====== inet-4.x ======
 
+2020-01-08  ------ inet-4.2.0 released ------
+
 2018-10-03  Levente Mészáros
 
 	Added a new queueing package which replaces the old queue package. This new
@@ -9,4 +11,5 @@
 
 	Added new NED simple modules: ActivePacketSource, PassivePacketSource, EmptyPacketSource,
 	and PcapFilePacketProducer.
+
 	Added new NED compound modules: BurstyPacketProducer, QueueFiller, and ResponseProducer.
