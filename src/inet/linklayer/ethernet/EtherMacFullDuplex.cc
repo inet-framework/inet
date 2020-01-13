@@ -38,7 +38,7 @@ EtherMacFullDuplex::EtherMacFullDuplex()
 
 void EtherMacFullDuplex::initialize(int stage)
 {
-    EtherMacBase::initialize(stage);
+    EtherMacFullDuplexBase::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
         if (!par("duplexMode"))
@@ -51,7 +51,7 @@ void EtherMacFullDuplex::initialize(int stage)
 
 void EtherMacFullDuplex::initializeStatistics()
 {
-    EtherMacBase::initializeStatistics();
+    EtherMacFullDuplexBase::initializeStatistics();
 
     // initialize statistics
     totalSuccessfulRxTime = 0.0;
@@ -59,7 +59,7 @@ void EtherMacFullDuplex::initializeStatistics()
 
 void EtherMacFullDuplex::initializeFlags()
 {
-    EtherMacBase::initializeFlags();
+    EtherMacFullDuplexBase::initializeFlags();
 
     duplexMode = true;
     physInGate->setDeliverOnReceptionStart(false);
@@ -315,7 +315,7 @@ void EtherMacFullDuplex::handleEndTxPeriod()
 
 void EtherMacFullDuplex::finish()
 {
-    EtherMacBase::finish();
+    EtherMacFullDuplexBase::finish();
 
     simtime_t t = simTime();
     simtime_t totalRxChannelIdleTime = t - totalSuccessfulRxTime;

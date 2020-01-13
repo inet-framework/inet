@@ -19,7 +19,7 @@
 #define __INET_ETHERMACFULLDUPLEX_H
 
 #include "inet/common/INETDefs.h"
-#include "inet/linklayer/ethernet/EtherMacBase.h"
+#include "inet/linklayer/ethernet/EtherMacFullDuplexBase.h"
 
 namespace inet {
 
@@ -29,7 +29,7 @@ namespace inet {
  * algorithm is no longer needed. This simplified implementation doesn't
  * contain CSMA/CD, frames are just simply queued up and sent out one by one.
  */
-class INET_API EtherMacFullDuplex : public EtherMacBase
+class INET_API EtherMacFullDuplex : public EtherMacFullDuplexBase
 {
   public:
     EtherMacFullDuplex();
