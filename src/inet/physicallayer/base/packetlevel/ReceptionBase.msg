@@ -15,7 +15,7 @@
 
 import inet.common.INETDefs;
 import inet.common.geometry.Geometry;
-import inet.physicallayer.common.packetlevel.Signal;
+import inet.physicallayer.common.packetlevel.WirelessSignal;
 
 cplusplus {{
 #include "inet/physicallayer/base/packetlevel/ReceptionBase.h"

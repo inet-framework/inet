@@ -15,21 +15,21 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/common/packetlevel/Signal.h"
+#include "WirelessSignal.h"
 #include "inet/physicallayer/contract/packetlevel/IRadio.h"
 #include "inet/physicallayer/contract/packetlevel/IRadioMedium.h"
 
 namespace inet {
 namespace physicallayer {
 
-Signal::Signal(const ITransmission *transmission) :
+WirelessSignal::WirelessSignal(const ITransmission *transmission) :
     transmissionId(transmission->getId()),
     transmission(transmission),
     radioMedium(transmission->getTransmitter()->getMedium())
 {
 }
 
-Signal::Signal(const Signal& other) :
+WirelessSignal::WirelessSignal(const WirelessSignal& other) :
     cPacket(other),
     transmissionId(other.transmissionId),
     transmission(nullptr),
@@ -37,25 +37,25 @@ Signal::Signal(const Signal& other) :
 {
 }
 
-std::ostream& Signal::printToStream(std::ostream& stream, int level) const
+std::ostream& WirelessSignal::printToStream(std::ostream& stream, int level) const
 {
     return stream << (cPacket *)this;
 }
 
-const IRadio *Signal::getTransmitter() const
+const IRadio *WirelessSignal::getTransmitter() const
 {
     auto transmission = getTransmission();
     return transmission != nullptr ? transmission->getTransmitter() : nullptr;
 }
 
-const IRadio *Signal::getReceiver() const
+const IRadio *WirelessSignal::getReceiver() const
 {
     if (receiver == nullptr)
         receiver = check_and_cast<const IRadio *>(getArrivalModule());
     return receiver;
 }
 
-const ITransmission *Signal::getTransmission() const
+const ITransmission *WirelessSignal::getTransmission() const
 {
     if (!isDup())
         return transmission;
@@ -63,7 +63,7 @@ const ITransmission *Signal::getTransmission() const
         return radioMedium->getTransmission(transmissionId);
 }
 
-const IArrival *Signal::getArrival() const
+const IArrival *WirelessSignal::getArrival() const
 {
     if (!isDup()) {
         if (arrival == nullptr)
@@ -76,7 +76,7 @@ const IArrival *Signal::getArrival() const
     }
 }
 
-const IListening *Signal::getListening() const
+const IListening *WirelessSignal::getListening() const
 {
     if (!isDup()) {
         if (listening == nullptr)
@@ -89,7 +89,7 @@ const IListening *Signal::getListening() const
     }
 }
 
-const IReception *Signal::getReception() const
+const IReception *WirelessSignal::getReception() const
 {
     if (!isDup()) {
         if (reception == nullptr)

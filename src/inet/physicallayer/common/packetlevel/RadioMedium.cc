@@ -510,7 +510,7 @@ ISignal *RadioMedium::createTransmitterSignal(const IRadio *radio, Packet *packe
     if (packet != nullptr)
         take(packet);
     auto transmission = radio->getTransmitter()->createTransmission(radio, packet, simTime());
-    auto signal = new Signal(transmission);
+    auto signal = new WirelessSignal(transmission);
     auto duration = transmission->getDuration();
     if (duration > mediumLimitCache->getMaxTransmissionDuration())
         throw cRuntimeError("Maximum transmission duration is exceeded");
@@ -524,7 +524,7 @@ ISignal *RadioMedium::createTransmitterSignal(const IRadio *radio, Packet *packe
 
 ISignal *RadioMedium::createReceiverSignal(const ITransmission *transmission)
 {
-    auto signal = new Signal(transmission);
+    auto signal = new WirelessSignal(transmission);
     signal->setDuration(transmission->getDuration());
     auto transmitterPacket = transmission->getPacket();
     if (transmitterPacket != nullptr) {
@@ -539,7 +539,7 @@ ISignal *RadioMedium::createReceiverSignal(const ITransmission *transmission)
 
 void RadioMedium::sendToAffectedRadios(IRadio *radio, const ISignal *transmittedSignal)
 {
-    const Signal *signal = check_and_cast<const Signal *>(transmittedSignal);
+    const WirelessSignal *signal = check_and_cast<const WirelessSignal *>(transmittedSignal);
     EV_DEBUG << "Sending " << transmittedSignal << " with " << signal->getBitLength() << " bits in " << signal->getDuration() * 1E+6 << " us transmission duration"
              << " from " << radio << " on " << (IRadioMedium *)this << "." << endl;
     if (neighborCache && rangeFilter != RANGE_FILTER_ANYWHERE) {
@@ -575,7 +575,7 @@ void RadioMedium::sendToRadio(IRadio *transmitter, const IRadio *receiver, const
                  << " from " << transmitter << " at " << transmission->getStartPosition()
                  << " to " << receiver << " at " << arrival->getStartPosition()
                  << " in " << propagationTime * 1E+6 << " us propagation time." << endl;
-        auto receivedSignal = static_cast<Signal *>(createReceiverSignal(transmission));
+        auto receivedSignal = static_cast<WirelessSignal *>(createReceiverSignal(transmission));
         cGate *gate = receiver->getRadioGate()->getPathStartGate();
         transmitterRadio->sendDirect(receivedSignal, propagationTime, transmission->getDuration(), gate);
         communicationCache->setCachedSignal(receiver, transmission, receivedSignal);
@@ -704,7 +704,7 @@ void RadioMedium::pickUpSignals(IRadio *receiverRadio)
                          << " from " << (IRadio *)transmitterRadio << " at " << transmission->getStartPosition()
                          << " to " << (IRadio *)receiverRadio << " at " << arrival->getStartPosition()
                          << " in " << arrival->getStartPropagationTime() * 1E+6 << " us propagation time." << endl;
-                auto signal = static_cast<Signal *>(createReceiverSignal(transmission));
+                auto signal = static_cast<WirelessSignal *>(createReceiverSignal(transmission));
                 simtime_t delay = arrival->getStartTime() - simTime();
                 simtime_t duration = delay > 0 ? signal->getDuration() : signal->getDuration() + delay;
                 cGate *gate = receiverRadio->getRadioGate()->getPathStartGate();
