@@ -121,13 +121,13 @@ void PaparazziMobility::initialize(int stage)
 void PaparazziMobility::setInitialPosition()
 {
     MovingMobilityBase::setInitialPosition();
-    if (lastPosition.x-constraintAreaMin.x < borderX)
-        lastPosition.x = borderX;
-    if (constraintAreaMax.x-lastPosition.x < borderX )
+    if (lastPosition.x - constraintAreaMin.x < borderX)
+        lastPosition.x = constraintAreaMin.x + borderX;
+    if (constraintAreaMax.x - lastPosition.x < borderX )
         lastPosition.x = constraintAreaMax.x - borderX;
-    if (lastPosition.y-constraintAreaMin.y < borderY)
-        lastPosition.y = borderY;
-    if (constraintAreaMax.y-lastPosition.y < borderY )
+    if (lastPosition.y - constraintAreaMin.y < borderY)
+        lastPosition.y = constraintAreaMin.y + borderY;
+    if (constraintAreaMax.y - lastPosition.y < borderY )
         lastPosition.y = constraintAreaMax.y - borderY;
 }
 
