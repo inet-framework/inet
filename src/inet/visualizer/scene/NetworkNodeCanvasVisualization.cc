@@ -42,10 +42,10 @@ NetworkNodeCanvasVisualization::NetworkNodeCanvasVisualization(cModule *networkN
     annotationFigure = new cPanelFigure("annotation");
     addFigure(annotationFigure);
     submoduleBounds = getEnvir()->getSubmoduleBounds(networkNode);
-    submoduleBounds.height += 32; // TODO: KLUDGE: extend bounds for submodule name label
+//    submoduleBounds.height += 32; // TODO: KLUDGE: extend bounds for submodule name label
     submoduleBounds.x = -submoduleBounds.width / 2;
     submoduleBounds.y = -submoduleBounds.height / 2;
-    submoduleBounds.height += 32;
+  //  submoduleBounds.height += 32;
     if (networkNode->hasPar("canvasImage") && strlen(networkNode->par("canvasImage")) != 0) {
         auto imageFigure = new cImageFigure("node");
         imageFigure->setTooltip("This image represents a network node");
