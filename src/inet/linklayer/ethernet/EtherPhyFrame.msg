@@ -39,6 +39,13 @@ packet EthernetSignal
 }
 
 //
+// Represents dataframe on the Ethernet.
+//
+packet EthernetFrameSignal extends EthernetSignal
+{
+}
+
+//
 // Represents jam on the Ethernet.
 //
 packet EthernetJamSignal extends EthernetSignal
