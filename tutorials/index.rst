@@ -10,6 +10,10 @@ the simulations (NED, ini and other files) and the web pages are in the
 `tutorials/` subdirectory of the
 `INET repository <https://github.com/inet-framework/inet/tree/master/tutorials>`_.
 
+Recently released tutorials:
+
+- :doc:`fingerprint/doc/index`
+
 The following tutorials are available:
 
 .. toctree::
@@ -18,3 +22,4 @@ The following tutorials are available:
    Wireless <wireless/doc/index>
    IPv4 Network Configurator <configurator/doc/index>
    Queueing <queueing/doc/index>
+   Regression Testing and Fingerprints<fingerprint/doc/index>
