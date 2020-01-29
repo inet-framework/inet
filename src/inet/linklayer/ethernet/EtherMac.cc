@@ -222,8 +222,8 @@ void EtherMac::handleUpperPacket(Packet *packet)
                 packet->getDataLength().str().c_str(), MAX_ETHERNET_FRAME_BYTES.str().c_str());
     }
 
-    if (!connected || disabled) {
-        EV_WARN << (!connected ? "Interface is not connected" : "MAC is disabled") << " -- dropping packet " << frame << endl;
+    if (!connected) {
+        EV_WARN << "Interface is not connected -- dropping packet " << frame << endl;
         PacketDropDetails details;
         details.setReason(INTERFACE_DOWN);
         emit(packetDroppedSignal, packet, &details);
@@ -322,8 +322,8 @@ void EtherMac::processJamSignalFromNetwork(EthernetSignal *msg)
 {
     EV_DETAIL << "Received " << msg << " from network.\n";
 
-    if (!connected || disabled) {
-        EV_WARN << (!connected ? "Interface is not connected" : "MAC is disabled") << " -- dropping msg " << msg << endl;
+    if (!connected) {
+        EV_WARN << "Interface is not connected -- dropping msg " << msg << endl;
         delete msg;
         return;
     }
@@ -369,8 +369,8 @@ void EtherMac::processMsgFromNetwork(EthernetSignal *signal)
 {
     EV_DETAIL << "Received " << signal << " from network.\n";
 
-    if (!connected || disabled) {
-        EV_WARN << (!connected ? "Interface is not connected" : "MAC is disabled") << " -- dropping msg " << signal << endl;
+    if (!connected) {
+        EV_WARN << "Interface is not connected -- dropping msg " << signal << endl;
         if (typeid(*signal) == typeid(EthernetSignal)) {    // do not count JAM and IFG packets
             auto packet = check_and_cast<Packet *>(signal->decapsulate());
             delete signal;

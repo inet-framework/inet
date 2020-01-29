@@ -147,8 +147,8 @@ void EtherMacFullDuplex::handleUpperPacket(Packet *packet)
                 (int)(packet->getByteLength()), B(MAX_ETHERNET_FRAME_BYTES).get());
     }
 
-    if (!connected || disabled) {
-        EV_WARN << (!connected ? "Interface is not connected" : "MAC is disabled") << " -- dropping packet " << packet << endl;
+    if (!connected) {
+        EV_WARN << "Interface is not connected -- dropping packet " << packet << endl;
         PacketDropDetails details;
         details.setReason(INTERFACE_DOWN);
         emit(packetDroppedSignal, packet, &details);
@@ -186,8 +186,8 @@ void EtherMacFullDuplex::processMsgFromNetwork(EthernetSignal *signal)
 {
     EV_INFO << signal << " received." << endl;
 
-    if (!connected || disabled) {
-        EV_WARN << (!connected ? "Interface is not connected" : "MAC is disabled") << " -- dropping msg " << signal << endl;
+    if (!connected) {
+        EV_WARN << "Interface is not connected -- dropping msg " << signal << endl;
         if (typeid(*signal) == typeid(EthernetSignal)) {    // do not count JAM and IFG packets
             auto packet = check_and_cast<Packet *>(signal->decapsulate());
             delete signal;
