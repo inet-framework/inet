@@ -369,6 +369,9 @@ void EtherMac::processMsgFromNetwork(EthernetSignal *signal)
 {
     EV_DETAIL << "Received " << signal << " from network.\n";
 
+    if (signal->getBitrate() != curEtherDescr->txrate)
+        throw cRuntimeError("Ethernet misconfiguration: bitrate in module and on the signal must be same.");
+
     if (!connected) {
         EV_WARN << "Interface is not connected -- dropping msg " << signal << endl;
         if (typeid(*signal) == typeid(EthernetSignal)) {    // do not count JAM and IFG packets
@@ -534,6 +537,7 @@ void EtherMac::startFrameTransmission()
     delete oldPacketProtocolTag;
     auto signal = new EthernetSignal(frame->getName());
     signal->setSrcMacFullDuplex(duplexMode);
+    signal->setBitrate(curEtherDescr->txrate);
     currentSendPkTreeID = signal->getTreeId();
     if (sendRawBytes) {
         auto rawFrame = new Packet(frame->getName(), frame->peekAllAsBytes());
@@ -701,6 +705,7 @@ void EtherMac::sendJamSignal()
 
     EthernetJamSignal *jam = new EthernetJamSignal("JAM_SIGNAL");
     jam->setByteLength(B(JAM_SIGNAL_BYTES).get());
+    jam->setBitrate(curEtherDescr->txrate);
     jam->setAbortedPkTreeID(currentSendPkTreeID);
 
     transmissionChannel->forceTransmissionFinishTime(SIMTIME_ZERO);
@@ -922,6 +927,7 @@ void EtherMac::fillIFGIfInBurst()
         )
     {
         EthernetFilledIfgSignal *gap = new EthernetFilledIfgSignal("FilledIFG");
+        gap->setBitrate(curEtherDescr->txrate);
         bytesSentInBurst += B(gap->getByteLength());
         currentSendPkTreeID = gap->getTreeId();
         send(gap, physOutGate);

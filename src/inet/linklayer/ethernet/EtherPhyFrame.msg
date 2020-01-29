@@ -34,7 +34,8 @@ enum SapCode;
 //
 packet EthernetSignal
 {
-    bool srcMacFullDuplex;  // meta-info, for detecting model misconfiguration 
+    bool srcMacFullDuplex;  // meta-info, for detecting model misconfiguration
+    double bitrate;  // meta-info, for detecting model misconfiguration
 }
 
 //
