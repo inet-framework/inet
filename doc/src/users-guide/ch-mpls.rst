@@ -150,7 +150,7 @@ In INET, the :ned:`Ldp` module takes routing information from :ned:`Ted`
 module. The :ned:`Ted` instance in the network is filled and maintained
 by a :ned:`LinkStateRouting` module. Unfortunately, it is currently not
 possible to use other routing protocol implementations such as
-:ned:`Ospf` in conjunction with :ned:`Ldp`.
+:ned:`Ospfv2` in conjunction with :ned:`Ldp`.
 
 When :ned:`Ldp` is used as signaling protocol, it also serves as ingress
 classifier for :ned:`Mpls`.

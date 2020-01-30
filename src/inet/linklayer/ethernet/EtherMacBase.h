@@ -98,7 +98,6 @@ class INET_API EtherMacBase : public MacProtocolBase
     bool sendRawBytes = false;
     const EtherDescr *curEtherDescr = nullptr;    // constants for the current Ethernet mode, e.g. txrate
     bool connected = false;    // true if connected to a network, set automatically by exploring the network configuration
-    bool disabled = false;    // true if the MAC is disabled, defined by the user
     bool promiscuous = false;    // if true, passes up all received frames
     bool duplexMode = false;    // true if operating in full-duplex mode
     bool frameBursting = false;    // frame bursting on/off (Gigabit Ethernet)
@@ -149,7 +148,7 @@ class INET_API EtherMacBase : public MacProtocolBase
     virtual MacAddress getMacAddress() { return interfaceEntry ? interfaceEntry->getMacAddress() : MacAddress::UNSPECIFIED_ADDRESS; }
 
     double getTxRate() { return curEtherDescr->txrate; }
-    bool isActive() { return connected && !disabled; }
+    bool isActive() { return connected; }
 
     MacTransmitState getTransmitState(){ return transmitState; }
     MacReceiveState getReceiveState(){ return receiveState; }

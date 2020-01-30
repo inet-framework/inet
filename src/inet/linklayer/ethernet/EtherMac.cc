@@ -222,8 +222,8 @@ void EtherMac::handleUpperPacket(Packet *packet)
                 packet->getDataLength().str().c_str(), MAX_ETHERNET_FRAME_BYTES.str().c_str());
     }
 
-    if (!connected || disabled) {
-        EV_WARN << (!connected ? "Interface is not connected" : "MAC is disabled") << " -- dropping packet " << frame << endl;
+    if (!connected) {
+        EV_WARN << "Interface is not connected -- dropping packet " << frame << endl;
         PacketDropDetails details;
         details.setReason(INTERFACE_DOWN);
         emit(packetDroppedSignal, packet, &details);
@@ -322,8 +322,8 @@ void EtherMac::processJamSignalFromNetwork(EthernetSignal *msg)
 {
     EV_DETAIL << "Received " << msg << " from network.\n";
 
-    if (!connected || disabled) {
-        EV_WARN << (!connected ? "Interface is not connected" : "MAC is disabled") << " -- dropping msg " << msg << endl;
+    if (!connected) {
+        EV_WARN << "Interface is not connected -- dropping msg " << msg << endl;
         delete msg;
         return;
     }
@@ -369,8 +369,11 @@ void EtherMac::processMsgFromNetwork(EthernetSignal *signal)
 {
     EV_DETAIL << "Received " << signal << " from network.\n";
 
-    if (!connected || disabled) {
-        EV_WARN << (!connected ? "Interface is not connected" : "MAC is disabled") << " -- dropping msg " << signal << endl;
+    if (signal->getBitrate() != curEtherDescr->txrate)
+        throw cRuntimeError("Ethernet misconfiguration: bitrate in module and on the signal must be same.");
+
+    if (!connected) {
+        EV_WARN << "Interface is not connected -- dropping msg " << signal << endl;
         if (typeid(*signal) == typeid(EthernetSignal)) {    // do not count JAM and IFG packets
             auto packet = check_and_cast<Packet *>(signal->decapsulate());
             delete signal;
@@ -534,6 +537,7 @@ void EtherMac::startFrameTransmission()
     delete oldPacketProtocolTag;
     auto signal = new EthernetSignal(frame->getName());
     signal->setSrcMacFullDuplex(duplexMode);
+    signal->setBitrate(curEtherDescr->txrate);
     currentSendPkTreeID = signal->getTreeId();
     if (sendRawBytes) {
         auto rawFrame = new Packet(frame->getName(), frame->peekAllAsBytes());
@@ -701,6 +705,7 @@ void EtherMac::sendJamSignal()
 
     EthernetJamSignal *jam = new EthernetJamSignal("JAM_SIGNAL");
     jam->setByteLength(B(JAM_SIGNAL_BYTES).get());
+    jam->setBitrate(curEtherDescr->txrate);
     jam->setAbortedPkTreeID(currentSendPkTreeID);
 
     transmissionChannel->forceTransmissionFinishTime(SIMTIME_ZERO);
@@ -922,6 +927,7 @@ void EtherMac::fillIFGIfInBurst()
         )
     {
         EthernetFilledIfgSignal *gap = new EthernetFilledIfgSignal("FilledIFG");
+        gap->setBitrate(curEtherDescr->txrate);
         bytesSentInBurst += B(gap->getByteLength());
         currentSendPkTreeID = gap->getTreeId();
         send(gap, physOutGate);
