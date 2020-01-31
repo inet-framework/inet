@@ -29,12 +29,10 @@
 #include "inet/linklayer/base/MacProtocolBase.h"
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
+#include "inet/linklayer/ethernet/EtherPhyFrame_m.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
 
 namespace inet {
-
-// Forward declarations:
-class EthernetSignal;
 
 /**
  * Base class for Ethernet MAC implementations.

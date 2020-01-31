@@ -75,7 +75,7 @@ void EtherMacFullDuplex::handleMessageWhenUp(cMessage *msg)
     else if (msg->getArrivalGateId() == upperLayerInGateId)
         handleUpperPacket(check_and_cast<Packet *>(msg));
     else if (msg->getArrivalGate() == physInGate)
-        processMsgFromNetwork(check_and_cast<EthernetSignal *>(msg));
+        processMsgFromNetwork(check_and_cast<EthernetSignalBase *>(msg));
     else
         throw cRuntimeError("Message received from unknown gate!");
     processAtHandleMessageFinished();
@@ -115,7 +115,7 @@ void EtherMacFullDuplex::startFrameTransmission()
     auto newPacketProtocolTag = frame->addTag<PacketProtocolTag>();
     *newPacketProtocolTag = *oldPacketProtocolTag;
     delete oldPacketProtocolTag;
-    auto signal = new EthernetSignal(frame->getName());
+    auto signal = new EthernetFrameSignal(frame->getName());
     signal->setSrcMacFullDuplex(duplexMode);
     signal->setBitrate(curEtherDescr->txrate);
     if (sendRawBytes) {
@@ -183,13 +183,13 @@ void EtherMacFullDuplex::handleUpperPacket(Packet *packet)
     }
 }
 
-void EtherMacFullDuplex::processMsgFromNetwork(EthernetSignal *signal)
+void EtherMacFullDuplex::processMsgFromNetwork(EthernetSignalBase *signal)
 {
     EV_INFO << signal << " received." << endl;
 
     if (!connected) {
         EV_WARN << "Interface is not connected -- dropping msg " << signal << endl;
-        if (typeid(*signal) == typeid(EthernetSignal)) {    // do not count JAM and IFG packets
+        if (dynamic_cast<EthernetFrameSignal*>(signal)) {    // do not count JAM and IFG packets
             auto packet = check_and_cast<Packet *>(signal->decapsulate());
             delete signal;
             decapsulate(packet);
@@ -213,6 +213,9 @@ void EtherMacFullDuplex::processMsgFromNetwork(EthernetSignal *signal)
 
     if (dynamic_cast<EthernetFilledIfgSignal *>(signal))
         throw cRuntimeError("There is no burst mode in full-duplex operation: EtherFilledIfg is unexpected");
+
+    if (dynamic_cast<EthernetJamSignal *>(signal))
+        throw cRuntimeError("There is no JAM signal in full-duplex operation: EthernetJamSignal is unexpected");
 
     bool hasBitError = signal->hasBitError();
     auto packet = check_and_cast<Packet *>(signal->decapsulate());
