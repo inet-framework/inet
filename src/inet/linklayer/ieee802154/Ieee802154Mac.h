@@ -301,6 +301,8 @@ class INET_API Ieee802154Mac : public MacProtocolBase, public IMacProtocol
 
     virtual void decapsulate(Packet *packet);
 
+    virtual void refreshDisplay() const override;
+
     Packet *ackMessage;
 
     //sequence number for sending, map for the general case with more senders

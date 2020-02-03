@@ -909,5 +909,44 @@ void Ieee802154Mac::decapsulate(Packet *packet)
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(payloadProtocol);
 }
 
+void Ieee802154Mac::refreshDisplay() const
+{
+    std::stringstream os;
+    os<<"";
+    switch (macState) {
+        case IDLE_1:
+            os<< "IDLE";
+            break;
+
+        case BACKOFF_2:
+            os<< "BACKOFF ("<<(backoffTimer->getArrivalTime()- simTime()).inUnit(SIMTIME_US) <<"us)";
+            break;
+
+        case CCA_3:
+            os<< "CCA ("<<(ccaTimer->getArrivalTime()- simTime()).inUnit(SIMTIME_US) <<"us)";
+            break;
+
+        case TRANSMITFRAME_4:
+            os<< "TRANSMITING FRAME";
+            break;
+
+        case WAITACK_5:
+            os<< "WAITING ACK (" <<(rxAckTimer->getArrivalTime()- simTime()).inUnit(SIMTIME_US) <<"us)";
+            break;
+
+        case WAITSIFS_6:
+            os<< "WAITING SIFS (" <<(sifsTimer->getArrivalTime()- simTime()).inUnit(SIMTIME_US) <<"us)";
+            break;
+
+        case TRANSMITACK_7:
+            os<< "TRANSMITING ACK";
+            break;
+        default:
+            os<< "defined state";
+            break;
+    }
+    getDisplayString().setTagArg("t", 0, os.str().c_str());
+}
+
 } // namespace inet
 
