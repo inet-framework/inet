@@ -676,8 +676,10 @@ void EtherMac::handleEndRxPeriod()
     changeReceptionState(RX_IDLE_STATE);
     numConcurrentTransmissions = 0;
 
-    if (transmitState == TX_IDLE_STATE)
+    if (!duplexMode && transmitState == TX_IDLE_STATE) {
+        EV_DETAIL << "Start IFG period\n";
         scheduleEndIFGPeriod();
+    }
 }
 
 void EtherMac::handleEndBackoffPeriod()
