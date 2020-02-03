@@ -41,7 +41,7 @@ packet EthernetSignalBase
 //
 // Represents dataframe on the Ethernet.
 //
-packet EthernetFrameSignal extends EthernetSignalBase
+packet EthernetSignal extends EthernetSignalBase
 {
 }
 

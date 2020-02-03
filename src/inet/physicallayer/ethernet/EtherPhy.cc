@@ -42,7 +42,7 @@ void EtherPhy::handleMessage(cMessage *message)
         auto phyHeader = makeShared<EthernetPhyHeader>();
         packet->insertAtFront(phyHeader);
         packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernetPhy);
-        auto signal = new EthernetFrameSignal(packet->getName());
+        auto signal = new EthernetSignal(packet->getName());
         signal->setSrcMacFullDuplex(true);
         signal->encapsulate(packet);
         send(signal, "phys$o");
