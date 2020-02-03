@@ -85,8 +85,6 @@ module MediumLAN
         switch: EtherSwitch {
             parameters:
                 numEthInterfaces = n+2;
-                csmacdSupport = true;
-                //eth[0].csmacdSupport = true;
                 eth[0].duplexMode = false;
                 @display("p=625,100");
         }
@@ -98,7 +96,6 @@ module MediumLAN
         }
         hhost[h]: EtherHost {
             parameters:
-                eth.csmacdSupport = true;
                 eth.duplexMode = false;
                 @display("p=325,400,row,150");
         }

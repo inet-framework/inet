@@ -86,7 +86,6 @@ network MixedLAN
         }
         switch: EtherSwitch {
             parameters:
-                csmacdSupport = true;
                 eth[4].duplexMode = false;
                 @display("p=325,400");
             gates:
@@ -300,11 +299,6 @@ network SwitchedDuplexLAN
                 csmacdSupport = false;
         }
 
-        module EtherSwitchFullDuplex extends EtherSwitch
-        {
-            parameters:
-                csmacdSupport = false;
-        }
     submodules:
         hostA: EtherHostFullDuplex {
             parameters:
@@ -322,7 +316,7 @@ network SwitchedDuplexLAN
             parameters:
                 @display("p=100,200");
         }
-        switch: EtherSwitchFullDuplex {
+        switch: EtherSwitch {
             parameters:
                 @display("p=250,200");
             gates:
@@ -334,3 +328,4 @@ network SwitchedDuplexLAN
         switch.ethg[2] <--> ethernetline <--> hostC.ethg;
         switch.ethg[3] <--> ethernetline <--> hostD.ethg;
 }
+

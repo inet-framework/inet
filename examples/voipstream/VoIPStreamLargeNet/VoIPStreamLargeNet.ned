@@ -85,8 +85,6 @@ module VoIPStreamMediumLAN
         switch: EtherSwitch {
             parameters:
                 numEthInterfaces = n+2;
-                csmacdSupport = true;
-                //eth[0].csmacdSupport = true;
                 eth[0].duplexMode = false;
                 @display("is=s");
         }
@@ -98,7 +96,6 @@ module VoIPStreamMediumLAN
         }
         hhost[h]: EtherHost {
             parameters:
-                eth.csmacdSupport = true;
                 eth.duplexMode = false;
                 @display("is=s");
         }
@@ -309,3 +306,4 @@ network VoIPStreamLargeNet
         switchA.ethg++ <--> cable <--> voipClient.ethg++;
         switchD.ethg++ <--> cable <--> voipServer.ethg++;
 }
+
