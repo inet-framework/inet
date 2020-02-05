@@ -10,6 +10,13 @@ network (or network nodes) into simulated and real-world parts in a different
 way. The focus is on the different possibilities of this division of the conceptual
 network, the required simulation and real-world configuration, and the operation.
 
+  so
+
+  -the basic concepts of emulation...that is, extracting some part of the simulation to the real world
+
+  The focus is on the different possibilities of this division of the conceptual
+  network, the required simulation and real-world configuration, and the operation.
+
 INET version: ``4.1``
 
 Source files location: `inet/showcases/emulation/basic <https://github.com/inet-framework/inet-showcases/tree/master/emulation/basic>`__
@@ -25,23 +32,64 @@ The network consists of two hosts, one of which - may it be real or simulated
    :width: 100%
    :align: center
 
-In each configuration, a different part of the conceptual network
+In each configuration, a different part of the network
 is extracted into the real world. The simulated part of the network is configured
-form the ini file as usual, though not only the simulated, but the real part needs
-to be configured as well. For each example, all commands for the configuration of
-the host computer are contained by the ``Test<ConfigurationName>.sh`` shell scripts.
-These scripts are self-contained and ready to be run under Linux.
+form the ini file as usual, though the real part needs
+to be configured as well. For each example, all commands for configuring
+the host computer are contained in the ``Test<ConfigurationName>.sh`` shell scripts.
 
-This showcase presents the separation features using mainly the Ethernet interface as
+.. note:: The scripts only run on Linux.
+
+.. These scripts are self-contained and ready to be run under Linux.
+
+The showcase presents the separation features using mainly the Ethernet interface as
 the separation point between the real and the simulated environment in various ways.
+
+The showcase presents various ways to separate the real and simulated parts of the network,
+using mainly the Ethernet interface as the separation point.
 
 .. TODO: maybe a fully simulated scenario would be appropriate at the beginning.
 
 Real Sender, Simulated Connection and Receiver
 ----------------------------------------------
 
+Case 1: Real Sender, Simulated Connection and Receiver
+------------------------------------------------------
+
 This example simulation presents a real ping application sending ping requests
 to a simulated node. The separation between the simulation and the real world
+takes place in the Ethernet interface of the sender host. The part of the network below
+the Ethernet interface is run in the simulation, while the real host's protocol stack
+is used above the Ethernet interface. This kind of separation can be achieved using
+the :ned:`ExtUpperEthernetInterface` as the sender host's Ethernet interface.
+
+  .. In this case, the sender host uses a real ping application to ping the receiver host.
+
+  .. In this case, the sender host has an :ned:`ExtUpperEthernetInterface`;
+     so most of the senders protocol stack will be real; the connection and the receiver
+     host is simulated.
+
+  .. In this case, the sender host will use a real protocol stack from the physical layer up.
+     The connection and the receiver host is simulated. A real ping application sends ping requests
+     and the simulated ICMP in the receiver host sends ping replies.
+
+  .. The real and simulated parts of the network are separated in the sender host.
+     The host has an :ned:`ExtUpperEthernetInterface`.
+
+  In this case, the real and simulated parts of the network are separated at the ethernet
+  interface in the sender host:
+
+  .. figure:: media/imgs/ExtUpperEthernetInterfaceInSender_embedded_text.svg
+     :width: 90%
+     :align: center
+
+  Thus the protocol stack of the sender from the physical layer up is real,
+  including the ping application. The connection and the receiver host is simulated.
+  This kind of separation can be achieved using
+  the :ned:`ExtUpperEthernetInterface` module.
+
+In this example simulation, a real ping application sends ping requests
+to a simulated host. The separation between the simulation and the real world
 takes place in the Ethernet interface of the sender host. The part of the network below
 the Ethernet interface is run in the simulation, while the real host's protocol stack
 is used above the Ethernet interface. This kind of separation can be achieved using
@@ -80,7 +128,7 @@ of the ping request messages.
    :end-at: *.configurator.config = xml("<config><interface hosts='receiver' names='eth0' address='192.168.2.2' netmask='255.255.255.0'
 
 The simulated part of the network is now properly configured.
-The further configurations affect the real OS and are contained in the
+The further configurations affect the host OS and are contained in the
 ``TestExtUpperEthernetInterfaceInSender.sh`` shell script.
 
 .. At this point, the ``TestExtUpperEthernetInterfaceInSender.sh`` shell script
