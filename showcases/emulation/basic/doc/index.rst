@@ -190,6 +190,9 @@ At the end, the TAP device is also destroyed:
 Simulated Sender and Connection, Real Receiver
 ----------------------------------------------
 
+Case 2: Simulated Sender and Connection, Real Receiver
+------------------------------------------------------
+
 .. simulated sender host and connection, real receiver host
 
 This time a simulated ping application sends ping requests to the host computer.
