@@ -250,7 +250,7 @@ void EtherMac::handleUpperPacket(Packet *packet)
     txQueue->pushPacket(packet);
 
     if (!currentTxFrame && !txQueue->isEmpty())
-        currentTxFrame = txQueue->popPacket();
+        popTxQueue();
 
     if ((duplexMode || receiveState == RX_IDLE_STATE) && transmitState == TX_IDLE_STATE) {
         EV_DETAIL << "No incoming carrier signals detected, frame clear to send\n";
@@ -514,8 +514,7 @@ B EtherMac::calculatePaddedFrameLength(Packet *frame)
 void EtherMac::startFrameTransmission()
 {
     ASSERT(currentTxFrame);
-
-    EV_INFO << "Transmission of " << currentTxFrame << " started.\n";
+    EV_DETAIL << "Transmitting a copy of frame " << currentTxFrame << endl;
 
     Packet *frame = currentTxFrame->dup();
 
@@ -535,6 +534,7 @@ void EtherMac::startFrameTransmission()
     auto newPacketProtocolTag = frame->addTag<PacketProtocolTag>();
     *newPacketProtocolTag = *oldPacketProtocolTag;
     delete oldPacketProtocolTag;
+    EV_INFO << "Transmission of " << frame << " started.\n";
     auto signal = new EthernetSignal(frame->getName());
     signal->setSrcMacFullDuplex(duplexMode);
     signal->setBitrate(curEtherDescr->txrate);
@@ -843,7 +843,7 @@ void EtherMac::frameReceptionComplete()
         processReceivedControlFrame(packet);
     }
     else {
-        EV_INFO << "Reception of " << frame << " successfully completed.\n";
+        EV_INFO << "Reception of " << packet << " successfully completed.\n";
         processReceivedDataFrame(packet);
     }
 }

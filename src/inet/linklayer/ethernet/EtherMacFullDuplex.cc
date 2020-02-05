@@ -109,12 +109,12 @@ void EtherMacFullDuplex::startFrameTransmission()
     encapsulate(frame);
 
     // send
-    EV_INFO << "Transmission of " << frame << " started.\n";
     auto oldPacketProtocolTag = frame->removeTag<PacketProtocolTag>();
     frame->clearTags();
     auto newPacketProtocolTag = frame->addTag<PacketProtocolTag>();
     *newPacketProtocolTag = *oldPacketProtocolTag;
     delete oldPacketProtocolTag;
+    EV_INFO << "Transmission of " << frame << " started.\n";
     auto signal = new EthernetSignal(frame->getName());
     signal->setSrcMacFullDuplex(duplexMode);
     signal->setBitrate(curEtherDescr->txrate);
@@ -171,7 +171,7 @@ void EtherMacFullDuplex::handleUpperPacket(Packet *packet)
     addPaddingAndSetFcs(packet, MIN_ETHERNET_FRAME_BYTES);  // calculate valid FCS
 
     // store frame and possibly begin transmitting
-    EV_DETAIL << "Frame " << frame << " arrived from higher layers, enqueueing\n";
+    EV_DETAIL << "Frame " << packet << " arrived from higher layer, enqueueing\n";
     txQueue->pushPacket(packet);
 
     if (transmitState == TX_IDLE_STATE) {
@@ -248,12 +248,12 @@ void EtherMacFullDuplex::processMsgFromNetwork(EthernetSignalBase *signal)
             processPauseCommand(pauseUnits);
         }
         else {
-            EV_INFO << "Received unknown ethernet flow control frame" << frame << " dropped." << endl;
+            EV_INFO << "Received unknown ethernet flow control frame" << packet << " dropped." << endl;
             delete packet;
         }
     }
     else {
-        EV_INFO << "Reception of " << frame << " successfully completed." << endl;
+        EV_INFO << "Reception of " << packet << " successfully completed." << endl;
         processReceivedDataFrame(packet, frame);
     }
 }
