@@ -40,7 +40,7 @@ div.admonition {
 .align-right { text-align: right; display: block; margin-left: auto; }
 
 /* 'literal and doxytag reference' roles */
-.reference-cpp, .reference-ned, .refeence-ini, .reference-msg {
+.reference-cpp, .reference-ned, .refeence-ini, .reference-msg, .reference-fp {
     font-size: 0.95rem;
     margin-left: 0px;
     margin-right: 0px;
@@ -56,6 +56,7 @@ div.admonition {
 .literal-ini, .reference-ini { color: darkorange; }
 .literal-ned, .reference-ned { color: darkgreen; }
 .literal-msg, .reference-msg { color: purple; }
+.literal-fp, .reference-fp { color: white; }
 .protocol { font-style: italic; }
 
 .page-content .code, .page-content code:not(.download) {
@@ -73,11 +74,20 @@ div.admonition {
     padding-right: 2px;
 }
 
+.page-content code.literal {
+    font-size: 0.95rem;
+    margin-left: 0px;
+    margin-right: 0px;
+    padding-left: 2px;
+    padding-right: 2px;
+}
+
 /* higlighter backgrounds */
 .highlight-cpp .highlight { background-color: #e6f3ff }
 .highlight-ini .highlight { background-color: #fef5d6 }
 .highlight-ned .highlight { background-color: #eeffe4 }
 .highlight-msg .highlight { background-color: #fcf5ff }
+.highlight-fp .highlight { background-color: #000000; text-color= #ffffff }
 
 /* bottom navigation buttons */
 .pagenation #button-prev {
