@@ -17,6 +17,7 @@
 
 #include "inet/common/INETMath.h"
 #include "inet/linklayer/ethernet/EtherBus.h"
+#include "inet/linklayer/ethernet/EtherPhyFrame_m.h"
 
 namespace inet {
 
@@ -194,6 +195,10 @@ void EtherBus::handleMessage(cMessage *msg)
         checkConnections(true);
 
     if (!msg->isSelfMessage()) {
+        auto signal = check_and_cast<EthernetSignalBase *>(msg);
+        if (signal->getSrcMacFullDuplex() != false)
+            throw cRuntimeError("Ethernet misconfiguration: MACs on the Ethernet BUS must be all in half-duplex mode, check it in module '%s'", signal->getSenderModule()->getFullPath().c_str());
+
         // Handle frame sent down from the network entity
         int tapPoint = msg->getArrivalGate()->getIndex();
         EV << "Frame " << msg << " arrived on tap " << tapPoint << endl;
