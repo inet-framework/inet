@@ -31,60 +31,85 @@ network ARPTest
             datarate = 10Mbps;
         }
     submodules:
+        client: StandardHost {
+            @display("p=100,400;i=device/laptop");
+        }
         server: StandardHost {
             @display("p=925,200;i=device/server");
         }
-        router8: Router {
-            @display("p=775,200");
+        router1: Router {
+            numEthInterfaces = 1;
+            eth[0].csmacdSupport = true;
+            eth[0].mac.duplexMode = false;
+            @display("p=250,400");
         }
-        router7: Router {
-            @display("p=625,200");
+        router2: Router {
+            numEthInterfaces = 1;
+            eth[0].csmacdSupport = true;
+            eth[0].mac.duplexMode = false;
+            @display("p=400,400");
         }
-        router6: Router {
-            @display("p=325,200");
+        router3: Router {
+            numEthInterfaces = 1;
+            eth[0].csmacdSupport = true;
+            eth[0].mac.duplexMode = false;
+            @display("p=550,400");
         }
-        bus2: EtherBus {
-            positions = "";
-            propagationSpeed = 2e8 mps;
-            @display("p=475,100;b=350,5");
+        router4: Router {
+            numEthInterfaces = 1;
+            eth[0].csmacdSupport = true;
+            eth[0].mac.duplexMode = false;
+            @display("p=700,400");
         }
         router5: Router {
+            numEthInterfaces = 2;
+            eth[0..1].csmacdSupport = true;
+            eth[0..1].mac.duplexMode = false;
             @display("p=475,200");
+        }
+        router6: Router {
+            numEthInterfaces = 1;
+            eth[0].csmacdSupport = true;
+            eth[0].mac.duplexMode = false;
+            @display("p=325,200");
+        }
+        router7: Router {
+            numEthInterfaces = 1;
+            eth[0].csmacdSupport = true;
+            eth[0].mac.duplexMode = false;
+            @display("p=625,200");
+        }
+        router8: Router {
+            numEthInterfaces = 1;
+            @display("p=775,200");
         }
         bus1: EtherBus {
             positions = "";
             propagationSpeed = 2e8 mps;
             @display("p=475,300;b=500,5");
         }
-        router4: Router {
-            @display("p=700,400");
-        }
-        router3: Router {
-            @display("p=550,400");
-        }
-        router2: Router {
-            @display("p=400,400");
-        }
-        router1: Router {
-            @display("p=250,400");
-        }
-        client: StandardHost {
-            @display("p=100,400;i=device/laptop");
+        bus2: EtherBus {
+            positions = "";
+            propagationSpeed = 2e8 mps;
+            @display("p=475,100;b=350,5");
         }
         configurator: Ipv4NetworkConfigurator {
             @display("p=100,100;is=s");
         }
     connections:
-        server.ethg++ <--> ethline <--> router8.ethg++;
-        bus2.ethg++ <--> ethline <--> router5.ethg++;
-        bus2.ethg++ <--> ethline <--> router6.ethg++;
-        bus2.ethg++ <--> ethline <--> router7.ethg++;
-        router8.ethg++ <--> ethline <--> router7.ethg++;
-        bus1.ethg++ <--> ethline <--> router1.ethg++;
-        bus1.ethg++ <--> ethline <--> router5.ethg++;
-        bus1.ethg++ <--> ethline <--> router2.ethg++;
-        bus1.ethg++ <--> ethline <--> router3.ethg++;
-        bus1.ethg++ <--> ethline <--> router4.ethg++;
+        //half-duplex
+        bus1.ethg++ <--> ethline <--> router1.ethg[0];
+        bus1.ethg++ <--> ethline <--> router2.ethg[0];
+        bus1.ethg++ <--> ethline <--> router3.ethg[0];
+        bus1.ethg++ <--> ethline <--> router4.ethg[0];
+        bus1.ethg++ <--> ethline <--> router5.ethg[0];
+        bus2.ethg++ <--> ethline <--> router5.ethg[1];
+        bus2.ethg++ <--> ethline <--> router6.ethg[0];
+        bus2.ethg++ <--> ethline <--> router7.ethg[0];
+
+        //full-duplex
         client.ethg++ <--> ethline <--> router1.ethg++;
+        server.ethg++ <--> ethline <--> router8.ethg++;
+        router8.ethg++ <--> ethline <--> router7.ethg++;
 }
 
