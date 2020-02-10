@@ -205,6 +205,8 @@ void EtherMacFullDuplex::processMsgFromNetwork(EthernetSignalBase *signal)
         return;
     }
 
+    totalSuccessfulRxTime += signal->getDuration();
+
     if (signal->getSrcMacFullDuplex() != duplexMode)
         throw cRuntimeError("Ethernet misconfiguration: MACs on the same link must be all in full duplex mode, or all in half-duplex mode");
 
@@ -220,7 +222,6 @@ void EtherMacFullDuplex::processMsgFromNetwork(EthernetSignalBase *signal)
     bool hasBitError = signal->hasBitError();
     auto packet = check_and_cast<Packet *>(signal->decapsulate());
     delete signal;
-    totalSuccessfulRxTime += packet->getDuration();
     decapsulate(packet);
     emit(packetReceivedFromLowerSignal, packet);
 
