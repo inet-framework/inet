@@ -48,20 +48,18 @@ module SmallLAN
     gates:
         inout ethg;
     submodules:
-        hub: EtherHub {
-            @display("p=400,100");
-        }
         switch: EtherSwitch {
             parameters:
                 numEthInterfaces = 2;
-                eth[1].csmacdSupport = true;
-                eth[1].mac.duplexMode = false;
+                eth[1].duplexMode = false;
                 @display("p=625,100");
+        }
+        hub: EtherHub {
+            @display("p=400,100");
         }
         host[h]: EtherHost {
             parameters:
-                eth.csmacdSupport = true;
-                eth.mac.duplexMode = false;
+                eth.duplexMode = false;
                 @display("p=100,200,row,150");
         }
     connections:

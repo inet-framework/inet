@@ -50,26 +50,22 @@ network MixedLAN
         }
         busHostA: EtherHost {
             parameters:
-                eth.csmacdSupport = true;
-                eth.mac.duplexMode = false;
+                eth.duplexMode = false;
                 @display("p=100,200");
         }
         busHostB: EtherHost {
             parameters:
-                eth.csmacdSupport = true;
-                eth.mac.duplexMode = false;
+                eth.duplexMode = false;
                 @display("p=250,200");
         }
         busHostC: EtherHost {
             parameters:
-                eth.csmacdSupport = true;
-                eth.mac.duplexMode = false;
+                eth.duplexMode = false;
                 @display("p=650,400");
         }
         busHostD: EtherHost {
             parameters:
-                eth.csmacdSupport = true;
-                eth.mac.duplexMode = false;
+                eth.duplexMode = false;
                 @display("p=800,400");
         }
         switchHostA: EtherHost {
@@ -91,28 +87,24 @@ network MixedLAN
         switch: EtherSwitch {
             parameters:
                 csmacdSupport = true;
-                //eth[4].csmacdSupport = true;
-                eth[4].mac.duplexMode = false;
+                eth[4].duplexMode = false;
                 @display("p=325,400");
             gates:
                 ethg[5];
         }
         hubHostA: EtherHost {
             parameters:
-                eth.csmacdSupport = true;
-                eth.mac.duplexMode = false;
+                eth.duplexMode = false;
                 @display("p=500,100");
         }
         hubHostB: EtherHost {
             parameters:
-                eth.csmacdSupport = true;
-                eth.mac.duplexMode = false;
+                eth.duplexMode = false;
                 @display("p=650,100");
         }
         hubHostC: EtherHost {
             parameters:
-                eth.csmacdSupport = true;
-                eth.mac.duplexMode = false;
+                eth.duplexMode = false;
                 @display("p=800,100");
         }
         hub: EtherHub {
@@ -213,26 +205,22 @@ network HubLAN
     submodules:
         hostA: EtherHost {
             parameters:
-                eth.csmacdSupport = true;
-                eth.mac.duplexMode = false;
+                eth.duplexMode = false;
                 @display("p=250,100");
         }
         hostB: EtherHost {
             parameters:
-                eth.csmacdSupport = true;
-                eth.mac.duplexMode = false;
+                eth.duplexMode = false;
                 @display("p=400,200");
         }
         hostC: EtherHost {
             parameters:
-                eth.csmacdSupport = true;
-                eth.mac.duplexMode = false;
+                eth.duplexMode = false;
                 @display("p=250,300");
         }
         hostD: EtherHost {
             parameters:
-                eth.csmacdSupport = true;
-                eth.mac.duplexMode = false;
+                eth.duplexMode = false;
                 @display("p=100,200");
         }
         hub: EtherHub {
@@ -263,26 +251,22 @@ network BusLAN
     submodules:
         hostA: EtherHost {
             parameters:
-                eth.csmacdSupport = true;
-                eth.mac.duplexMode = false;
+                eth.duplexMode = false;
                 @display("p=100,200");
         }
         hostB: EtherHost {
             parameters:
-                eth.csmacdSupport = true;
-                eth.mac.duplexMode = false;
+                eth.duplexMode = false;
                 @display("p=250,200");
         }
         hostC: EtherHost {
             parameters:
-                eth.csmacdSupport = true;
-                eth.mac.duplexMode = false;
+                eth.duplexMode = false;
                 @display("p=400,200");
         }
         hostD: EtherHost {
             parameters:
-                eth.csmacdSupport = true;
-                eth.mac.duplexMode = false;
+                eth.duplexMode = false;
                 @display("p=550,200");
         }
         bus: EtherBus {

@@ -39,44 +39,37 @@ network ARPTest
         }
         router1: Router {
             numEthInterfaces = 1;
-            eth[0].csmacdSupport = true;
-            eth[0].mac.duplexMode = false;
+            eth[0].duplexMode = false;
             @display("p=250,400");
         }
         router2: Router {
             numEthInterfaces = 1;
-            eth[0].csmacdSupport = true;
-            eth[0].mac.duplexMode = false;
+            eth[0].duplexMode = false;
             @display("p=400,400");
         }
         router3: Router {
             numEthInterfaces = 1;
-            eth[0].csmacdSupport = true;
-            eth[0].mac.duplexMode = false;
+            eth[0].duplexMode = false;
             @display("p=550,400");
         }
         router4: Router {
             numEthInterfaces = 1;
-            eth[0].csmacdSupport = true;
-            eth[0].mac.duplexMode = false;
+            eth[0].duplexMode = false;
             @display("p=700,400");
         }
         router5: Router {
             numEthInterfaces = 2;
-            eth[0..1].csmacdSupport = true;
-            eth[0..1].mac.duplexMode = false;
+            eth[0..1].duplexMode = false;
             @display("p=475,200");
         }
         router6: Router {
             numEthInterfaces = 1;
-            eth[0].csmacdSupport = true;
-            eth[0].mac.duplexMode = false;
+            eth[0].duplexMode = false;
             @display("p=325,200");
         }
         router7: Router {
             numEthInterfaces = 1;
-            eth[0].csmacdSupport = true;
-            eth[0].mac.duplexMode = false;
+            eth[0].duplexMode = false;
             @display("p=625,200");
         }
         router8: Router {
