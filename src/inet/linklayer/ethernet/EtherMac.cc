@@ -249,11 +249,12 @@ void EtherMac::handleUpperPacket(Packet *packet)
     EV_DETAIL << "Frame " << packet << " arrived from higher layer, enqueueing\n";
     txQueue->pushPacket(packet);
 
-    if (!currentTxFrame && !txQueue->isEmpty())
-        popTxQueue();
-
     if ((duplexMode || receiveState == RX_IDLE_STATE) && transmitState == TX_IDLE_STATE) {
         EV_DETAIL << "No incoming carrier signals detected, frame clear to send\n";
+
+        if (!currentTxFrame && !txQueue->isEmpty())
+            popTxQueue();
+
         startFrameTransmission();
     }
 }
@@ -493,6 +494,9 @@ void EtherMac::handleEndIFGPeriod()
 
     // End of IFG period, okay to transmit, if Rx idle OR duplexMode ( checked in startFrameTransmission(); )
 
+    if (currentTxFrame == nullptr && !txQueue->isEmpty())
+        popTxQueue();
+
     // send frame to network
     beginSendFrames();
 }
@@ -614,7 +618,7 @@ void EtherMac::handleEndTxPeriod()
     deleteCurrentTxFrame();
     lastTxFinishTime = simTime();
     // note: cannot be moved into handleEndIFGPeriod(), because in burst mode we need to know whether to send filled IFG or not
-    if (!txQueue->isEmpty())
+    if (!duplexMode && frameBursting && framesSentInBurst > 0 && !txQueue->isEmpty())
         popTxQueue();
 
     // only count transmissions in totalSuccessfulRxTxTime if channel is half-duplex
