@@ -123,7 +123,7 @@ module EtherMacFullDuplex like IEtherMac
         bool sendRawBytes = default(false); // when true packets are serialized into a sequence of bytes before sending out
         bool promiscuous = default(false);  // if true, all packets are received, otherwise only the
                                             // ones with matching destination MAC address
-        bool duplexMode = default(true);    // must be set to "true", as EtherMacFullDuplex does not support half-duplex operation
+        bool duplexMode;                    // must be set to "true", as EtherMacFullDuplex does not support half-duplex operation
                                             // (parameter is present to reduce the risk of accidental misconfiguration)
         int mtu @unit(B) = default(1500B);
         @lifecycleSupport;
