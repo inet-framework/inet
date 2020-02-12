@@ -19,25 +19,106 @@
 #define __INET_ETHERPHY_H
 
 #include "inet/common/INETDefs.h"
+#include "inet/networklayer/common/InterfaceEntry.h"
 
 namespace inet {
-
 namespace physicallayer {
 
-class INET_API EtherPhy : public cSimpleModule
-{
-  protected:
-    cGate *physInGate = nullptr;
-    cGate *upperLayerInGate = nullptr;
+/*
+ * Mac <-> Phy communication:
+ *
+ * Mac.send(cPacket) to Phy (start sending)
+ * Phy.emit(txStarted)  // kell ez, vagy elég a TX_TRANSMITTING_STATE ?
+ * Phy.emit(txFinished) // ebbol tudja a Mac, hogy kuldheti a kovetkezot. vagy elég a TX_IDLE_STATE?
+ * Phy.emit(txAborted)  // honnan tudja majd a MAC, hogy dropolja, vagy ujrakuldje?
+ *
+ * Phy.send(cPacket) to Mac (data arrived)
+ * Phy.emit(rxStarted)
+ * Phy.emit(rxFinished)
+ * Phy.emit(rxAborted)
+ *
+ * how to change Mac module the outgoing cPacket: abort now; for preemption; JAM, ... ?
+ */
 
+class INET_API EtherPhy : public cPhyModule, public cListener
+{
   public:
+    enum TxState : unsigned short{
+        TX_OFF_STATE = 0,
+        TX_IDLE_STATE,
+        TX_TRANSMITTING_STATE,
+        TX_LAST = TX_TRANSMITTING_STATE
+    };
+
+    enum RxState : unsigned short{
+        RX_OFF_STATE = 0,
+        RX_IDLE_STATE,
+        RX_RECEIVING_STATE,
+        RX_LAST = RX_RECEIVING_STATE
+    };
+
+  protected:
+    // Self-message kind values
+    enum SelfMsgKindValues {
+        ENDTRANSMISSION = 101,
+    };
+
+    const char *displayStringTextFormat = nullptr;
+    InterfaceEntry *interfaceEntry = nullptr;   // NIC module
+    cChannel *transmissionChannel = nullptr;    // transmission channel
+    cGate *physInGate = nullptr;    // pointer to the "phys$i" gate
+    cGate *physOutGate = nullptr;    // pointer to the "phys$o" gate
+    cGate *upperLayerInGate = nullptr;
+    cMessage *endTxMsg = nullptr;
+    EthernetSignalBase *curTx = nullptr;
+    EthernetSignalBase *curRx = nullptr;
+    double bitrate = NaN;
+    bool   sendRawBytes = false;
+    bool   duplexMode = true;
+    bool   connected = false;    // true if connected to a network, set automatically by exploring the network configuration
+    TxState txState = TX_OFF_STATE;    // "transmit state" of the MAC
+    RxState rxState = RX_OFF_STATE;    // "receive state" of the MAC
+
+    // statistics
+    simtime_t lastRxStateChangeTime;
+    simtime_t totalRxStateTime[RX_LAST + 1];    // total times by RxState
+  public:
+    static simsignal_t txStateChangedSignal;
+    static simsignal_t txFinishedSignal;
+    static simsignal_t txAbortedSignal;
+    static simsignal_t rxStateChangedSignal;
+
+  protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *msg) override;
+    virtual void finish() override;
+
+    void changeTxState(TxState newState);
+    void changeRxState(RxState newState);
+    void changeRxState(RxState newState, simtime_t t);
+
+    EthernetSignal *encapsulate(Packet *packet);
+    virtual simtime_t calculateDuration(EthernetSignalBase *signal);
+    virtual void startTx(EthernetSignalBase *signal);
+    virtual void endTx();
+    virtual void abortTx();
+
+    Packet *decapsulate(EthernetSignal *signal);
+    virtual void startRx(EthernetSignalBase *signal);
+    virtual void endRx(EthernetSignalBase *signal);
+    virtual void abortRx();
+
+    virtual void receiveSignal(cComponent *src, simsignal_t signalId, cObject *obj, cObject *details) override;
+    bool checkConnected();
+    virtual void connect();
+    virtual void disconnect();
+
+  public:
+    virtual ~EtherPhy();
 };
 
 } // namespace physicallayer
-
 } // namespace inet
 
 #endif // ifndef __INET_ETHERPHY_H
