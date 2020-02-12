@@ -166,7 +166,6 @@ EtherMacFullDuplexBase::EtherMacFullDuplexBase()
 
 EtherMacFullDuplexBase::~EtherMacFullDuplexBase()
 {
-    cancelAndDelete(endTxMsg);
     cancelAndDelete(endIFGMsg);
     cancelAndDelete(endPauseMsg);
 }
@@ -175,8 +174,8 @@ void EtherMacFullDuplexBase::initialize(int stage)
 {
     MacProtocolBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        physInGate = gate("phys$i");
-        physOutGate = gate("phys$o");
+        physInGate = getParentModule()->gate("phys$i")->getPathEndGate();
+        physOutGate = getParentModule()->gate("phys$o")->getPathStartGate();
         lowerLayerInGateId = physInGate->getId();
         lowerLayerOutGateId = physOutGate->getId();
         transmissionChannel = nullptr;
@@ -189,7 +188,6 @@ void EtherMacFullDuplexBase::initialize(int stage)
         lastTxFinishTime = -1.0;    // not equals with current simtime.
 
         // initialize self messages
-        endTxMsg = new cMessage("EndTransmission", ENDTRANSMISSION);
         endIFGMsg = new cMessage("EndIFG", ENDIFG);
         endPauseMsg = new cMessage("EndPause", ENDPAUSE);
 
@@ -200,7 +198,7 @@ void EtherMacFullDuplexBase::initialize(int stage)
         // initialize pause
         pauseUnitsRequested = 0;
 
-        subscribe(POST_MODEL_CHANGE, this);
+        getContainingNicModule(this)->subscribe(POST_MODEL_CHANGE, this);
 
         WATCH(transmitState);
         WATCH(receiveState);
@@ -339,7 +337,6 @@ void EtherMacFullDuplexBase::receiveSignal(cComponent *source, simsignal_t signa
 void EtherMacFullDuplexBase::processConnectDisconnect()
 {
     if (!connected) {
-        cancelEvent(endTxMsg);
         cancelEvent(endIFGMsg);
         cancelEvent(endPauseMsg);
 
@@ -482,16 +479,13 @@ void EtherMacFullDuplexBase::readChannelParameters(bool errorWhenAsymmetric)
     // to verify at the next opportunity (event) that the two channels have eventually
     // been set to the same value.
 
-    cDatarateChannel *outTrChannel = check_and_cast_nullable<cDatarateChannel *>(physOutGate->findTransmissionChannel());
-    cDatarateChannel *inTrChannel = check_and_cast_nullable<cDatarateChannel *>(physInGate->findIncomingTransmissionChannel());
+    cChannel *outTrChannel = physOutGate->findTransmissionChannel();
+    cChannel *inTrChannel = physInGate->findIncomingTransmissionChannel();
 
     connected = physOutGate->getPathEndGate()->isConnected() && physInGate->getPathStartGate()->isConnected();
 
     if (connected && ((!outTrChannel) || (!inTrChannel)))
         throw cRuntimeError("Ethernet phys gate must be connected using a transmission channel");
-
-    double txRate = outTrChannel ? outTrChannel->getNominalDatarate() : 0.0;
-    double rxRate = inTrChannel ? inTrChannel->getNominalDatarate() : 0.0;
 
     bool rxDisabled = !inTrChannel || inTrChannel->isDisabled();
     bool txDisabled = !outTrChannel || outTrChannel->isDisabled();
@@ -502,31 +496,17 @@ void EtherMacFullDuplexBase::readChannelParameters(bool errorWhenAsymmetric)
     if (txDisabled)
         connected = false;
 
-    bool dataratesDiffer;
-    if (!connected) {
-        curEtherDescr = &nullEtherDescr;
-        dataratesDiffer = false;
-        if (!outTrChannel)
-            transmissionChannel = nullptr;
-        if (interfaceEntry) {
-            interfaceEntry->setCarrier(false);
-            interfaceEntry->setDatarate(0);
-        }
-    }
-    else {
-        if (outTrChannel && !transmissionChannel)
-            outTrChannel->subscribe(POST_MODEL_CHANGE, this);
-        transmissionChannel = outTrChannel;
-        dataratesDiffer = (txRate != rxRate);
-    }
-
-    channelsDiffer = dataratesDiffer || (rxDisabled != txDisabled);
+    channelsDiffer = (rxDisabled != txDisabled) || inTrChannel->get;
 
     if (errorWhenAsymmetric && dataratesDiffer)
         throw cRuntimeError("The input/output datarates differ (rx=%g bps vs tx=%g bps)", rxRate, txRate);
 
     if (connected) {
+        if (outTrChannel && !transmissionChannel)
+            outTrChannel->subscribe(POST_MODEL_CHANGE, this);
+        transmissionChannel = outTrChannel;
         // Check valid speeds
+        double txRate = interfaceEntry->par("bitrate");
         for (auto & etherDescr : etherDescrs) {
             if (txRate == etherDescr.txrate) {
                 curEtherDescr = &(etherDescr);
@@ -537,8 +517,17 @@ void EtherMacFullDuplexBase::readChannelParameters(bool errorWhenAsymmetric)
                 return;
             }
         }
-        throw cRuntimeError("Invalid transmission rate %g bps on channel %s at module %s",
-                txRate, transmissionChannel->getFullPath().c_str(), getFullPath().c_str());
+        throw cRuntimeError("Invalid bitrate %g bps on interface %s at module %s",
+                txRate, interfaceEntry->getFullPath().c_str(), getFullPath().c_str());
+    }
+    else {
+        curEtherDescr = &nullEtherDescr;
+        if (!outTrChannel)
+            transmissionChannel = nullptr;
+        if (interfaceEntry) {
+            interfaceEntry->setCarrier(false);
+            interfaceEntry->setDatarate(0);
+        }
     }
 }
 

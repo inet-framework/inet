@@ -37,28 +37,27 @@ class INET_API EtherMacFullDuplex : public EtherMacFullDuplexBase
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
-    virtual void initializeStatistics() override;
     virtual void initializeFlags() override;
     virtual void handleMessageWhenUp(cMessage *msg) override;
-
-    // finish
-    virtual void finish() override;
 
     // event handlers
     virtual void handleEndIFGPeriod();
     virtual void handleEndTxPeriod();
+    virtual void handleAbortTxPeriod();
     virtual void handleEndPausePeriod();
     virtual void handleSelfMessage(cMessage *msg) override;
 
     // helpers
     virtual void startFrameTransmission();
     virtual void handleUpperPacket(Packet *pk) override;
-    virtual void processMsgFromNetwork(EthernetSignalBase *signal);
+    virtual void processMsgFromNetwork(Packet *pk);
     virtual void processReceivedDataFrame(Packet *packet, const Ptr<const EthernetMacHeader>& frame);
     virtual void processPauseCommand(int pauseUnits);
     virtual void scheduleEndIFGPeriod();
     virtual void scheduleEndPausePeriod(int pauseUnits);
     virtual void beginSendFrames();
+
+    virtual void receiveSignal(cComponent *src, simsignal_t signalId, intval_t value, cObject *details) override;
 
     // statistics
     simtime_t totalSuccessfulRxTime;    // total duration of successful transmissions on channel

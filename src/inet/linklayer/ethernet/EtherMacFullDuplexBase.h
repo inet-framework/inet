@@ -40,24 +40,24 @@ namespace inet {
 class INET_API EtherMacFullDuplexBase : public MacProtocolBase
 {
   public:
-        enum MacTransmitState {
-            TX_IDLE_STATE = 1,
-            WAIT_IFG_STATE,
-            SEND_IFG_STATE,
-            TRANSMITTING_STATE,
-            JAMMING_STATE,
-            BACKOFF_STATE,
-            PAUSE_STATE
-            //FIXME add TX_OFF_STATE
-        };
+    enum MacTransmitState {
+        TX_IDLE_STATE = 1,
+        WAIT_IFG_STATE,
+        SEND_IFG_STATE,
+        TRANSMITTING_STATE,
+        JAMMING_STATE,
+        BACKOFF_STATE,
+        PAUSE_STATE
+        //FIXME add TX_OFF_STATE
+    };
 
-        enum MacReceiveState {
-            RX_IDLE_STATE = 1,
-            RECEIVING_STATE,
-            RX_COLLISION_STATE,
-            RX_RECONNECT_STATE
-            //FIXME add RX_OFF_STATE
-        };
+    enum MacReceiveState {
+        RX_IDLE_STATE = 1,
+        RECEIVING_STATE,
+        RX_COLLISION_STATE,
+        RX_RECONNECT_STATE
+        //FIXME add RX_OFF_STATE
+    };
 
   protected:
     // Self-message kind values
@@ -113,7 +113,8 @@ class INET_API EtherMacFullDuplexBase : public MacProtocolBase
     int pauseUnitsRequested = 0;    // requested pause duration, or zero -- examined at endTx
 
     // self messages
-    cMessage *endTxMsg = nullptr, *endIFGMsg = nullptr, *endPauseMsg = nullptr;
+    cMessage *endIFGMsg = nullptr;
+    cMessage *endPauseMsg = nullptr;
 
     // statistics
     unsigned long numFramesSent = 0;

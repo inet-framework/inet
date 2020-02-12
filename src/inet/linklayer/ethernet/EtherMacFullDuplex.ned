@@ -123,8 +123,6 @@ module EtherMacFullDuplex like IEtherMac
         bool sendRawBytes = default(false); // when true packets are serialized into a sequence of bytes before sending out
         bool promiscuous = default(false);  // if true, all packets are received, otherwise only the
                                             // ones with matching destination MAC address
-        bool duplexMode;                    // must be set to "true", as EtherMacFullDuplex does not support half-duplex operation
-                                            // (parameter is present to reduce the risk of accidental misconfiguration)
         int mtu @unit(B) = default(1500B);
         @lifecycleSupport;
         double stopOperationExtraTime @unit(s) = default(-1s);    // extra time after lifecycle stop operation finished
@@ -158,7 +156,9 @@ module EtherMacFullDuplex like IEtherMac
     gates:
         input upperLayerIn @labels(EtherFrame);    // to ~EtherEncap or ~IMacRelayUnit
         output upperLayerOut @labels(EtherFrame);  // to ~EtherEncap or ~IMacRelayUnit
-        inout phys @labels(EtherFrame);            // to physical layer or the network
+        input phyIn @labels(EtherFrame);            // to physical layer or the network
+        output phyOut @labels(EtherFrame);            // to physical layer or the network
+        inout phys;
     submodules:
         queue: <default("EtherQueue")> like IPacketQueue {
             parameters:
