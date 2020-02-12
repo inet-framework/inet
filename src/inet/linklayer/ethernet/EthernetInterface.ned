@@ -18,12 +18,13 @@
 
 package inet.linklayer.ethernet;
 
-import inet.queueing.contract.IPacketQueue;
 import inet.linklayer.contract.IEtherMac;
 import inet.linklayer.contract.IEthernetInterface;
 import inet.linklayer.contract.ITrafficConditioner;
 import inet.linklayer.ieee8021q.IIeee8021qEncap;
 import inet.networklayer.common.InterfaceEntry;
+import inet.physicallayer.ethernet.EtherPhy;
+
 
 //
 // Ethernet network interface. Complements ~EtherMac and ~EtherEncap
@@ -62,6 +63,10 @@ module EthernetInterface extends InterfaceEntry like IEthernetInterface
                 queue.packetCapacity = default(10000);
                 @display("p=250,400");
         }
+        phy: EtherPhy if !csmacdSupport {
+            parameters:
+                @display("p=250,500");
+        }
         encap: <default("EtherEncap")> like IEtherEncap {
             parameters:
                 @display("p=250,200");
@@ -80,7 +85,15 @@ module EthernetInterface extends InterfaceEntry like IEthernetInterface
         encap.lowerLayerOut --> qEncap.upperLayerIn if exists(qEncap);
         encap.lowerLayerIn <-- qEncap.upperLayerOut if exists(qEncap);
 
-        mac.phys <--> { @display("m=s"); } <--> phys;
+        if csmacdSupport {
+            mac.phys <--> { @display("m=s"); } <--> phys;
+        }
+        if !csmacdSupport {
+            mac.phys$o --> mac.phys$i;  //TODO remove it
+            mac.phyOut --> phy.upperLayerIn;
+            mac.phyIn <-- phy.upperLayerOut;
+            phy.phys <--> { @display("m=s"); } <--> phys;
+        }
 
         // no ingressTC
         encap.upperLayerOut --> { @display("m=n"); } --> upperLayerOut if !exists(ingressTC);
