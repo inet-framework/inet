@@ -75,7 +75,7 @@ void EtherMacFullDuplex::handleMessageWhenUp(cMessage *msg)
     else if (msg->getArrivalGateId() == upperLayerInGateId)
         handleUpperPacket(check_and_cast<Packet *>(msg));
     else if (msg->getArrivalGate() == physInGate)
-        processMsgFromNetwork(check_and_cast<EthernetSignal *>(msg));
+        processMsgFromNetwork(check_and_cast<EthernetSignalBase *>(msg));
     else
         throw cRuntimeError("Message received from unknown gate!");
     processAtHandleMessageFinished();
@@ -109,12 +109,12 @@ void EtherMacFullDuplex::startFrameTransmission()
     encapsulate(frame);
 
     // send
-    EV_INFO << "Transmission of " << frame << " started.\n";
     auto oldPacketProtocolTag = frame->removeTag<PacketProtocolTag>();
     frame->clearTags();
     auto newPacketProtocolTag = frame->addTag<PacketProtocolTag>();
     *newPacketProtocolTag = *oldPacketProtocolTag;
     delete oldPacketProtocolTag;
+    EV_INFO << "Transmission of " << frame << " started.\n";
     auto signal = new EthernetSignal(frame->getName());
     signal->setSrcMacFullDuplex(duplexMode);
     signal->setBitrate(curEtherDescr->txrate);
@@ -171,7 +171,7 @@ void EtherMacFullDuplex::handleUpperPacket(Packet *packet)
     addPaddingAndSetFcs(packet, MIN_ETHERNET_FRAME_BYTES);  // calculate valid FCS
 
     // store frame and possibly begin transmitting
-    EV_DETAIL << "Frame " << frame << " arrived from higher layers, enqueueing\n";
+    EV_DETAIL << "Frame " << packet << " arrived from higher layer, enqueueing\n";
     txQueue->pushPacket(packet);
 
     if (transmitState == TX_IDLE_STATE) {
@@ -183,13 +183,13 @@ void EtherMacFullDuplex::handleUpperPacket(Packet *packet)
     }
 }
 
-void EtherMacFullDuplex::processMsgFromNetwork(EthernetSignal *signal)
+void EtherMacFullDuplex::processMsgFromNetwork(EthernetSignalBase *signal)
 {
     EV_INFO << signal << " received." << endl;
 
     if (!connected) {
         EV_WARN << "Interface is not connected -- dropping msg " << signal << endl;
-        if (typeid(*signal) == typeid(EthernetSignal)) {    // do not count JAM and IFG packets
+        if (dynamic_cast<EthernetSignal*>(signal)) {    // do not count JAM and IFG packets
             auto packet = check_and_cast<Packet *>(signal->decapsulate());
             delete signal;
             decapsulate(packet);
@@ -205,6 +205,8 @@ void EtherMacFullDuplex::processMsgFromNetwork(EthernetSignal *signal)
         return;
     }
 
+    totalSuccessfulRxTime += signal->getDuration();
+
     if (signal->getSrcMacFullDuplex() != duplexMode)
         throw cRuntimeError("Ethernet misconfiguration: MACs on the same link must be all in full duplex mode, or all in half-duplex mode");
 
@@ -214,10 +216,12 @@ void EtherMacFullDuplex::processMsgFromNetwork(EthernetSignal *signal)
     if (dynamic_cast<EthernetFilledIfgSignal *>(signal))
         throw cRuntimeError("There is no burst mode in full-duplex operation: EtherFilledIfg is unexpected");
 
+    if (dynamic_cast<EthernetJamSignal *>(signal))
+        throw cRuntimeError("There is no JAM signal in full-duplex operation: EthernetJamSignal is unexpected");
+
     bool hasBitError = signal->hasBitError();
     auto packet = check_and_cast<Packet *>(signal->decapsulate());
     delete signal;
-    totalSuccessfulRxTime += packet->getDuration();
     decapsulate(packet);
     emit(packetReceivedFromLowerSignal, packet);
 
@@ -245,12 +249,12 @@ void EtherMacFullDuplex::processMsgFromNetwork(EthernetSignal *signal)
             processPauseCommand(pauseUnits);
         }
         else {
-            EV_INFO << "Received unknown ethernet flow control frame" << frame << " dropped." << endl;
+            EV_INFO << "Received unknown ethernet flow control frame" << packet << " dropped." << endl;
             delete packet;
         }
     }
     else {
-        EV_INFO << "Reception of " << frame << " successfully completed." << endl;
+        EV_INFO << "Reception of " << packet << " successfully completed." << endl;
         processReceivedDataFrame(packet, frame);
     }
 }

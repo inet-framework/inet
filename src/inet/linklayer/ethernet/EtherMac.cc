@@ -192,7 +192,7 @@ void EtherMac::handleMessageWhenUp(cMessage *msg)
         if (auto jamSignal = dynamic_cast<EthernetJamSignal *>(msg))
             processJamSignalFromNetwork(jamSignal);
         else
-            processMsgFromNetwork(check_and_cast<EthernetSignal *>(msg));
+            processMsgFromNetwork(check_and_cast<EthernetSignalBase *>(msg));
     }
     else
         throw cRuntimeError("Message received from unknown gate");
@@ -249,11 +249,12 @@ void EtherMac::handleUpperPacket(Packet *packet)
     EV_DETAIL << "Frame " << packet << " arrived from higher layer, enqueueing\n";
     txQueue->pushPacket(packet);
 
-    if (!currentTxFrame && !txQueue->isEmpty())
-        currentTxFrame = txQueue->popPacket();
-
     if ((duplexMode || receiveState == RX_IDLE_STATE) && transmitState == TX_IDLE_STATE) {
         EV_DETAIL << "No incoming carrier signals detected, frame clear to send\n";
+
+        if (!currentTxFrame && !txQueue->isEmpty())
+            popTxQueue();
+
         startFrameTransmission();
     }
 }
@@ -318,7 +319,7 @@ void EtherMac::processReceivedJam(EthernetJamSignal *jam)
     processDetectedCollision();
 }
 
-void EtherMac::processJamSignalFromNetwork(EthernetSignal *msg)
+void EtherMac::processJamSignalFromNetwork(EthernetJamSignal *msg)
 {
     EV_DETAIL << "Received " << msg << " from network.\n";
 
@@ -365,7 +366,7 @@ void EtherMac::processJamSignalFromNetwork(EthernetSignal *msg)
     }
 }
 
-void EtherMac::processMsgFromNetwork(EthernetSignal *signal)
+void EtherMac::processMsgFromNetwork(EthernetSignalBase *signal)
 {
     EV_DETAIL << "Received " << signal << " from network.\n";
 
@@ -374,7 +375,7 @@ void EtherMac::processMsgFromNetwork(EthernetSignal *signal)
 
     if (!connected) {
         EV_WARN << "Interface is not connected -- dropping msg " << signal << endl;
-        if (typeid(*signal) == typeid(EthernetSignal)) {    // do not count JAM and IFG packets
+        if (dynamic_cast<EthernetSignal *>(signal)) {    // do not count JAM and IFG packets
             auto packet = check_and_cast<Packet *>(signal->decapsulate());
             delete signal;
             decapsulate(packet);
@@ -493,6 +494,9 @@ void EtherMac::handleEndIFGPeriod()
 
     // End of IFG period, okay to transmit, if Rx idle OR duplexMode ( checked in startFrameTransmission(); )
 
+    if (currentTxFrame == nullptr && !txQueue->isEmpty())
+        popTxQueue();
+
     // send frame to network
     beginSendFrames();
 }
@@ -514,8 +518,7 @@ B EtherMac::calculatePaddedFrameLength(Packet *frame)
 void EtherMac::startFrameTransmission()
 {
     ASSERT(currentTxFrame);
-
-    EV_INFO << "Transmission of " << currentTxFrame << " started.\n";
+    EV_DETAIL << "Transmitting a copy of frame " << currentTxFrame << endl;
 
     Packet *frame = currentTxFrame->dup();
 
@@ -535,6 +538,7 @@ void EtherMac::startFrameTransmission()
     auto newPacketProtocolTag = frame->addTag<PacketProtocolTag>();
     *newPacketProtocolTag = *oldPacketProtocolTag;
     delete oldPacketProtocolTag;
+    EV_INFO << "Transmission of " << frame << " started.\n";
     auto signal = new EthernetSignal(frame->getName());
     signal->setSrcMacFullDuplex(duplexMode);
     signal->setBitrate(curEtherDescr->txrate);
@@ -614,7 +618,7 @@ void EtherMac::handleEndTxPeriod()
     deleteCurrentTxFrame();
     lastTxFinishTime = simTime();
     // note: cannot be moved into handleEndIFGPeriod(), because in burst mode we need to know whether to send filled IFG or not
-    if (!txQueue->isEmpty())
+    if (!duplexMode && frameBursting && framesSentInBurst > 0 && !txQueue->isEmpty())
         popTxQueue();
 
     // only count transmissions in totalSuccessfulRxTxTime if channel is half-duplex
@@ -639,7 +643,7 @@ void EtherMac::handleEndTxPeriod()
     }
 }
 
-void EtherMac::scheduleEndRxPeriod(EthernetSignal *frame)
+void EtherMac::scheduleEndRxPeriod(EthernetSignalBase *frame)
 {
     ASSERT(frameBeingReceived == nullptr);
     ASSERT(!endRxMsg->isScheduled());
@@ -676,8 +680,10 @@ void EtherMac::handleEndRxPeriod()
     changeReceptionState(RX_IDLE_STATE);
     numConcurrentTransmissions = 0;
 
-    if (transmitState == TX_IDLE_STATE)
+    if (!duplexMode && transmitState == TX_IDLE_STATE) {
+        EV_DETAIL << "Start IFG period\n";
         scheduleEndIFGPeriod();
+    }
 }
 
 void EtherMac::handleEndBackoffPeriod()
@@ -808,7 +814,7 @@ void EtherMac::handleEndPausePeriod()
 
 void EtherMac::frameReceptionComplete()
 {
-    EthernetSignal *signal = frameBeingReceived;
+    EthernetSignalBase *signal = frameBeingReceived;
     frameBeingReceived = nullptr;
 
     if (dynamic_cast<EthernetFilledIfgSignal *>(signal) != nullptr) {
@@ -841,7 +847,7 @@ void EtherMac::frameReceptionComplete()
         processReceivedControlFrame(packet);
     }
     else {
-        EV_INFO << "Reception of " << frame << " successfully completed.\n";
+        EV_INFO << "Reception of " << packet << " successfully completed.\n";
         processReceivedDataFrame(packet);
     }
 }
