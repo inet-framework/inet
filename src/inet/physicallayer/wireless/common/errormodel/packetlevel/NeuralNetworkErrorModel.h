@@ -43,7 +43,7 @@ class INET_API NeuralNetworkErrorModel : public ErrorModelBase
     virtual std::string computeModelName(const ISnir *snir) const;
 
   public:
-    virtual ~NeuralNetworkErrorModel() { /*for (auto it : models) delete it.second; */}
+   // virtual ~NeuralNetworkErrorModel() { for (auto it : models) delete it.second; }
 
     virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
 
