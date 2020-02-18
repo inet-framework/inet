@@ -1,3 +1,9 @@
+
+ - temporal and spectral and spatial energy density
+   - sampling
+   - filling
+   - integrating
+
  - use @reconnect to simplify network nodes which copy big parts of StandardHost
  - timing API, generic TimeTag or multiple tags containing queueing time, processing time, propagation time, transmission time for the packet data per bit
  - similarly to timing API other meta-data could also be stored for the packet data per bit (e.g. hop count)
