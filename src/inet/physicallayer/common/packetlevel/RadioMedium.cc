@@ -427,6 +427,7 @@ const IReceptionResult *RadioMedium::getReceptionResult(const IRadio *radio, con
 
 void RadioMedium::addRadio(const IRadio *radio)
 {
+    Enter_Method("addRadio");
     communicationCache->addRadio(radio);
     if (neighborCache)
         neighborCache->addRadio(radio);
@@ -449,6 +450,7 @@ void RadioMedium::addRadio(const IRadio *radio)
 
 void RadioMedium::removeRadio(const IRadio *radio)
 {
+    Enter_Method("removeRadio");
     communicationCache->removeRadio(radio);
     if (neighborCache)
         neighborCache->removeRadio(radio);
@@ -470,6 +472,7 @@ const IRadio *RadioMedium::getRadio(int radioId) const
 
 void RadioMedium::addTransmission(const IRadio *transmitterRadio, const ITransmission *transmission)
 {
+    Enter_Method("addTransmission");
     transmissionCount++;
     communicationCache->addTransmission(transmission);
     simtime_t maxArrivalEndTime = transmission->getEndTime();
@@ -494,6 +497,7 @@ void RadioMedium::addTransmission(const IRadio *transmitterRadio, const ITransmi
 
 void RadioMedium::removeTransmission(const ITransmission *transmission)
 {
+    Enter_Method("removeTranmsission");
     const ISignal *signal = communicationCache->getCachedSignal(transmission);
     communicationCache->removeTransmission(transmission);
     emit(signalRemovedSignal, check_and_cast<const cObject *>(transmission));
@@ -503,7 +507,6 @@ void RadioMedium::removeTransmission(const ITransmission *transmission)
 
 ISignal *RadioMedium::createTransmitterSignal(const IRadio *radio, Packet *packet)
 {
-    Enter_Method_Silent();
     if (packet != nullptr)
         take(packet);
     auto transmission = radio->getTransmitter()->createTransmission(radio, packet, simTime());
@@ -581,6 +584,7 @@ void RadioMedium::sendToRadio(IRadio *transmitter, const IRadio *receiver, const
 
 ISignal *RadioMedium::transmitPacket(const IRadio *radio, Packet *packet)
 {
+    Enter_Method("transmitPacket");
     auto signal = createTransmitterSignal(radio, packet);
     auto transmission = signal->getTransmission();
     addTransmission(radio, transmission);
@@ -593,6 +597,7 @@ ISignal *RadioMedium::transmitPacket(const IRadio *radio, Packet *packet)
 
 Packet *RadioMedium::receivePacket(const IRadio *radio, ISignal *signal)
 {
+    Enter_Method("receivePacket");
     const ITransmission *transmission = signal->getTransmission();
     const IListening *listening = communicationCache->getCachedListening(radio, transmission);
     if (recordCommunicationLog)
@@ -611,6 +616,7 @@ const ITransmission *RadioMedium::getTransmission(int id) const
 
 const IListeningDecision *RadioMedium::listenOnMedium(const IRadio *radio, const IListening *listening) const
 {
+    Enter_Method("listenOnMedium");
     const IListeningDecision *decision = computeListeningDecision(radio, listening);
     EV_DEBUG << "Listening results in: " << decision << " with " << listening << " on medium by " << radio << endl;
     return decision;
