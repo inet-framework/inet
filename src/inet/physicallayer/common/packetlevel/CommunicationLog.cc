@@ -31,7 +31,7 @@ void CommunicationLog::close()
     output.close();
 }
 
-void CommunicationLog::writeTransmission(const IRadio *transmitter, const ISignal *signal)
+void CommunicationLog::writeTransmission(const IRadio *transmitter, const IWirelessSignal *signal)
 {
     const ITransmission *transmission = signal->getTransmission();
     const Radio *transmitterRadio = check_and_cast<const Radio *>(transmitter);
@@ -41,7 +41,7 @@ void CommunicationLog::writeTransmission(const IRadio *transmitter, const ISigna
            << "E " << transmission->getEndTime() << " " << transmission->getEndPosition() << endl;
 }
 
-void CommunicationLog::writeReception(const IRadio *receiver, const ISignal *signal)
+void CommunicationLog::writeReception(const IRadio *receiver, const IWirelessSignal *signal)
 {
     const ITransmission *transmission = signal->getTransmission();
     const IReception *reception = signal->getReception();

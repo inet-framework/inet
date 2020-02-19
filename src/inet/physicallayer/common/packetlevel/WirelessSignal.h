@@ -19,12 +19,12 @@
 #define __INET_WIRELESSSIGNAL_H
 
 #include "inet/physicallayer/common/packetlevel/Signal.h"
-#include "inet/physicallayer/contract/packetlevel/ISignal.h"
+#include "../../contract/packetlevel/IWirelessSignal.h"
 
 namespace inet {
 namespace physicallayer {
 
-class INET_API WirelessSignal : public Signal, public ISignal
+class INET_API WirelessSignal : public Signal, public IWirelessSignal
 {
   protected:
     const int transmissionId;

@@ -34,7 +34,7 @@ module NoiseSource like IRadio
     gates:
         input upperLayerIn @labels(ILinkLayerFrame/down) @loose;
         output upperLayerOut @labels(ILinkLayerFrame/up) @loose;
-        input radioIn @labels(ISignal) @loose;
+        input radioIn @labels(IWirelessSignal) @loose;
     submodules:
         mobility: <default("StationaryMobility")> like IMobility {
             parameters:

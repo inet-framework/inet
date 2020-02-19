@@ -60,6 +60,6 @@ moduleinterface IRadio extends IPhysicalLayer
         @signal[receptionStarted](type=cObject);     // type=IReception
         @signal[receptionEnded](type=cObject);     // type=IReception
     gates:
-        input radioIn @labels(ISignal);
+        input radioIn @labels(IWirelessSignal);
 }
 

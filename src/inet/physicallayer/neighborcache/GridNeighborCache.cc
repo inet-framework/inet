@@ -134,7 +134,7 @@ void GridNeighborCache::removeRadio(const IRadio *radio)
     }
 }
 
-void GridNeighborCache::sendToNeighbors(IRadio *transmitter, const ISignal *signal, double range) const
+void GridNeighborCache::sendToNeighbors(IRadio *transmitter, const IWirelessSignal *signal, double range) const
 {
     double radius = range + (maxSpeed * refillPeriod);
     Coord transmitterPos = transmitter->getAntenna()->getMobility()->getCurrentPosition();
