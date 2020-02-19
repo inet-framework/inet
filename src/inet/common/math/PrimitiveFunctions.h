@@ -350,7 +350,7 @@ class INET_API UnireciprocalFunction : public FunctionBase<R, D>
  * Some constant value r between lower and upper and zero otherwise.
  */
 template<typename R, typename X>
-class INET_API OneDimensionalBoxcarFunction : public FunctionBase<R, Domain<X>>
+class INET_API Boxcar1DFunction : public FunctionBase<R, Domain<X>>
 {
   protected:
     const X lower;
@@ -358,7 +358,7 @@ class INET_API OneDimensionalBoxcarFunction : public FunctionBase<R, Domain<X>>
     const R value;
 
   public:
-    OneDimensionalBoxcarFunction(X lower, X upper, R value) : lower(lower), upper(upper), value(value) {
+    Boxcar1DFunction(X lower, X upper, R value) : lower(lower), upper(upper), value(value) {
         ASSERT(value > R(0));
     }
 
@@ -390,7 +390,7 @@ class INET_API OneDimensionalBoxcarFunction : public FunctionBase<R, Domain<X>>
     virtual bool isNonZero(const Interval<X>& i) const override { return value != R(0) && lower <= std::get<0>(i.getLower()) && std::get<0>(i.getUpper()) <= upper; }
 
     virtual void printStructure(std::ostream& os, int level = 0) const override {
-        os << "(OneDimensionalBoxcar, [" << lower << " … " << upper << "] → " << value << ")";
+        os << "(Boxcar1D, [" << lower << " … " << upper << "] → " << value << ")";
     }
 };
 
@@ -398,7 +398,7 @@ class INET_API OneDimensionalBoxcarFunction : public FunctionBase<R, Domain<X>>
  * Some constant value r between (lowerX, lowerY) and (upperX, upperY) and zero otherwise.
  */
 template<typename R, typename X, typename Y>
-class INET_API TwoDimensionalBoxcarFunction : public FunctionBase<R, Domain<X, Y>>
+class INET_API Boxcar2DFunction : public FunctionBase<R, Domain<X, Y>>
 {
   protected:
     const X lowerX;
@@ -416,7 +416,7 @@ class INET_API TwoDimensionalBoxcarFunction : public FunctionBase<R, Domain<X, Y
     }
 
   public:
-    TwoDimensionalBoxcarFunction(X lowerX, X upperX, Y lowerY, Y upperY, R value) :
+    Boxcar2DFunction(X lowerX, X upperX, Y lowerY, Y upperY, R value) :
         lowerX(lowerX), upperX(upperX), lowerY(lowerY), upperY(upperY), value(value)
     {
         ASSERT(value > R(0));
@@ -450,7 +450,7 @@ class INET_API TwoDimensionalBoxcarFunction : public FunctionBase<R, Domain<X, Y
     }
 
     virtual void printStructure(std::ostream& os, int level = 0) const override {
-        os << "(TwoDimensionalBoxcar, [" << lowerX << " … " << upperX << "] x [" << lowerY << " … " << upperY << "] → " << value << ")";
+        os << "(Boxcar2D, [" << lowerX << " … " << upperX << "] x [" << lowerY << " … " << upperY << "] → " << value << ")";
     }
 };
 
@@ -504,23 +504,88 @@ class INET_API SawtoothFunction : public FunctionBase<R, Domain<X>>
 };
 
 /**
+ * One-dimensional interpolated (e.g. constant, linear) function between intervals defined by points positioned periodically on the X axis.
+ */
+template<typename R, typename X>
+class INET_API PeriodicallyInterpolated1DFunction : public FunctionBase<R, Domain<X>>
+{
+  protected:
+    const X start;
+    const X end;
+    const X step;
+    const IInterpolator<X, R>& interpolator;
+    const std::vector<R> rs;
+
+  public:
+    PeriodicallyInterpolated1DFunction(X start, X end, const IInterpolator<X, R>& interpolator, const std::vector<R>& rs) :
+        start(start), end(end), step((end - start) / rs.size()), interpolator(interpolator), rs(rs) { }
+
+    virtual R getValue(const Point<X>& p) const override {
+        X x = std::get<0>(p);
+        int index = std::floor(toDouble((x - start) / step));
+        if (index < 0)
+            return R(0);
+        else if (index > rs.size() - 1)
+            return R(0);
+        else {
+            R r1 = rs[index];
+            R r2 = rs[index + 1];
+            X x1 = start + index * step;
+            X x2 = x1 + step;
+            return interpolator.getValue(x1, r1, x2, r2, x);
+        }
+    }
+
+    virtual void partition(const Interval<X>& i, const std::function<void (const Interval<X>&, const IFunction<R, Domain<X>> *)> callback) const override {
+        throw cRuntimeError("TODO");
+    }
+};
+
+//template<typename R, typename X, typename Y>
+//class INET_API PeriodicallyInterpolated2DFunction : public FunctionBase<R, Domain<X, Y>>
+//{
+//  protected:
+//    const X startX;
+//    const X endX;
+//    const X stepX;
+//    const Y startY;
+//    const Y endY;
+//    const Y stepY;
+//    const IInterpolator<X, R>& interpolatorX;
+//    const IInterpolator<Y, R>& interpolatorY;
+//    const std::vector<R> rs;
+//
+//  public:
+//    PeriodicallyInterpolated2DFunction(X startX, X endX, Y startY, Y endY, const IInterpolator<X, R>& interpolatorX, const IInterpolator<Y, R>& interpolatorY, const std::vector<R>& rs) :
+//        startX(startX), endX(endX), startY(startY), endY(endY), interpolatorX(interpolatorX), interpolatorY(interpolatorY), rs(rs) { }
+//
+//    virtual R getValue(const Point<X, Y>& p) const override {
+//        throw cRuntimeError("TODO");
+//    }
+//
+//    virtual void partition(const Interval<X, Y>& i, const std::function<void (const Interval<X, Y>&, const IFunction<R, Domain<X, Y>> *)> callback) const override {
+//        throw cRuntimeError("TODO");
+//    }
+//};
+
+/**
  * One-dimensional interpolated (e.g. constant, linear) function between intervals defined by points on the X axis.
  */
 template<typename R, typename X>
-class INET_API OneDimensionalInterpolatedFunction : public FunctionBase<R, Domain<X>>
+class INET_API Interpolated1DFunction : public FunctionBase<R, Domain<X>>
 {
   protected:
     const std::map<X, std::pair<R, const IInterpolator<X, R> *>> rs;
 
   public:
-    OneDimensionalInterpolatedFunction(const std::map<X, R>& rs, const IInterpolator<X, R> *interpolator) : rs([&] () {
+    Interpolated1DFunction(const std::map<X, R>& rs, const IInterpolator<X, R> *interpolator) : rs([&] () {
         std::map<X, std::pair<R, const IInterpolator<X, R> *>> result;
         for (auto it : rs)
             result[it.first] = {it.second, interpolator};
         return result;
     } ()) { }
 
-    OneDimensionalInterpolatedFunction(const std::map<X, std::pair<R, const IInterpolator<X, R> *>>& rs) : rs(rs) { }
+    Interpolated1DFunction(const std::map<X, std::pair<R, const IInterpolator<X, R> *>>& rs) : rs(rs) { }
 
     virtual R getValue(const Point<X>& p) const override {
         X x = std::get<0>(p);
@@ -582,7 +647,7 @@ class INET_API OneDimensionalInterpolatedFunction : public FunctionBase<R, Domai
     virtual bool isFinite(const Interval<X>& i) const override { return true; }
 
     virtual void printStructure(std::ostream& os, int level = 0) const override {
-        os << "(OneDimensionalInterpolated";
+        os << "(Interpolated1D";
         auto size = rs.size();
         for (auto entry : rs) {
             const char *interpolatorClassName = nullptr;
@@ -607,30 +672,6 @@ class INET_API OneDimensionalInterpolatedFunction : public FunctionBase<R, Domai
         os << ")";
     }
 };
-
-/**
- * Two-dimensional interpolated (e.g. constant, linear) function between intervals defined by points on the X and Y axes.
- */
-//template<typename R, typename X, typename Y>
-//class INET_API TwoDimensionalInterpolatedFunction : public Function<R, X, Y>
-//{
-//  protected:
-//    const IInterpolator<T, R>& interpolatorX;
-//    const IInterpolator<T, R>& interpolatorY;
-//    const std::vector<std::tuple<X, Y, R>> rs;
-//
-//  public:
-//    TwoDimensionalInterpolatedFunction(const IInterpolator<T, R>& interpolatorX, const IInterpolator<T, R>& interpolatorY, const std::vector<std::tuple<X, Y, R>>& rs) :
-//        interpolatorX(interpolatorX), interpolatorY(interpolatorY), rs(rs) { }
-//
-//    virtual R getValue(const Point<T>& p) const override {
-//        throw cRuntimeError("TODO");
-//    }
-//
-//    virtual void partition(const Interval<X, Y>& i, const std::function<void (const Interval<X, Y>&, const IFunction<R, Domain<X, Y>> *)> callback) const override {
-//        throw cRuntimeError("TODO");
-//    }
-//};
 
 template<typename R, typename D>
 void simplifyAndCall(const typename D::I& i, const IFunction<R, D> *f, const std::function<void (const typename D::I&, const IFunction<R, D> *)> callback) {

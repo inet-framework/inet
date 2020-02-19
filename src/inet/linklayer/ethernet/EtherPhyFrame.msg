@@ -32,15 +32,23 @@ enum SapCode;
 // Abstract base class for various Ethernet traffic types:
 // EtherJam, EtherFilledIfg and EtherPhyFrame.
 //
-packet EthernetSignal
+packet EthernetSignalBase
 {
-    bool srcMacFullDuplex;  // meta-info, for detecting model misconfiguration 
+    bool srcMacFullDuplex;  // meta-info, for detecting model misconfiguration
+    double bitrate;  // meta-info, for detecting model misconfiguration
+}
+
+//
+// Represents dataframe on the Ethernet.
+//
+packet EthernetSignal extends EthernetSignalBase
+{
 }
 
 //
 // Represents jam on the Ethernet.
 //
-packet EthernetJamSignal extends EthernetSignal
+packet EthernetJamSignal extends EthernetSignalBase
 {
     srcMacFullDuplex = false;
     long abortedPkTreeID = 0;  // this field stores the packetTreeId of the aborted packet
@@ -50,7 +58,7 @@ packet EthernetJamSignal extends EthernetSignal
 // Represents a filled inter-frame gap in burst mode.
 // Also used for calculating IFG times.
 //
-packet EthernetFilledIfgSignal extends EthernetSignal
+packet EthernetFilledIfgSignal extends EthernetSignalBase
 {
     srcMacFullDuplex = false;
     bitLength = b(INTERFRAME_GAP_BITS).get();

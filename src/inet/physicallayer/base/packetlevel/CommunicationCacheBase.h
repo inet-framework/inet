@@ -79,7 +79,7 @@ class INET_API CommunicationCacheBase : public cModule, public ICommunicationCac
         const IReceptionResult *receptionResult = nullptr;
 
       public:
-        ReceptionCacheEntry() { }
+        ReceptionCacheEntry();
         ReceptionCacheEntry(const ReceptionCacheEntry &other);
         ReceptionCacheEntry(ReceptionCacheEntry &&other) noexcept;
         ReceptionCacheEntry &operator=(const ReceptionCacheEntry &other);
@@ -106,10 +106,13 @@ class INET_API CommunicationCacheBase : public cModule, public ICommunicationCac
          * The signal that was created by the transmitter is never nullptr.
          */
         const ISignal *signal = nullptr;
-        /**
-         * The list of intermediate reception computation results.
-         */
-        void *receptionCacheEntries = nullptr;
+
+      public:
+        TransmissionCacheEntry() { }
+        TransmissionCacheEntry(const TransmissionCacheEntry &other);
+        TransmissionCacheEntry(TransmissionCacheEntry &&other) noexcept;
+        TransmissionCacheEntry &operator=(const TransmissionCacheEntry &other);
+        TransmissionCacheEntry &operator=(TransmissionCacheEntry &&other) noexcept;
     };
 
   protected:

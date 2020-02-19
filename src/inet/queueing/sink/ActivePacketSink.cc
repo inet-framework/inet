@@ -29,7 +29,7 @@ void ActivePacketSink::initialize(int stage)
     PacketSinkBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         inputGate = gate("in");
-        provider = getConnectedModule<IPassivePacketSource>(inputGate);
+        provider = findConnectedModule<IPassivePacketSource>(inputGate);
         collectionIntervalParameter = &par("collectionInterval");
         collectionTimer = new cMessage("CollectionTimer");
     }

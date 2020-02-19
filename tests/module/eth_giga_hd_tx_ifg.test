@@ -30,9 +30,8 @@ cmdenv-express-mode=false
 *.host2.app.script = ""
 *.host2.eth.mac.address = "AA-00-00-00-00-02"
 
-*.host*.eth.csmacdSupport = true    # ${"EtherMac","EtherMacFullDuplex"}
 *.host*.eth.queue.typename = ${queue="", "DropTailQueue"}
-*.host*.eth.mac.duplexMode = false     # Half duplex
+*.host*.eth.duplexMode = false     # Half duplex
 *.host*.eth.mac.frameBursting = ${burst=true,false}
 
 #*.host1.ethg$o.channel.logfile="logfile-${runnumber}.txt"

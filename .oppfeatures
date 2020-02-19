@@ -1202,6 +1202,18 @@
         linkerFlags = ""
         />
     <feature
+        id="emulation_showcases"
+        name="Emulation showcases"
+        description = "Showcases that demonstrate communication with external systems/components."
+        initiallyEnabled = "false"
+        requires = "VoIPStream Ethernet Ieee80211 ExternalInterface"
+        labels = "showcase emulation"
+        nedPackages = "inet.showcases.emulation"
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
         id="visualizer_showcases"
         name="Visualization showcases"
         description = "Showcases that demonstrate the visualization of state and behavior of communication networks."

@@ -28,9 +28,10 @@ GETTING STARTED
 You may start by downloading and installing the INET framework. Read the INSTALL
 file for further information.
 
-Then you can gather initial experience by starting some examples or following the
-INET wireless tutorial (tutorials/wireless). After that, you can learn the NED
-language from the OMNeT++ manual & sample simulations.
+Then you can gather initial experience by starting some examples or following a
+tutorial or showcase (see the /examples, /showcases or /tutorials folder).
+After that, you can learn the NED language from the OMNeT++ manual & sample
+simulations.
 
 After that, you may write your own topologies using the NED language. You may
 assign some of the submodule parameters in NED files. You may leave some of
@@ -49,8 +50,7 @@ code somewhere under the src directory. If you add new files under the 'src'
 directory you will need to regenerate the makefiles (using the 'make makefiles'
 command).
 
-If you want to use external interfaces in INET, please install libpcap-dev (on linux)
-or winpcap (on windows from www.winpcap.org) and enable the "Emulation" feature
+If you want to use external interfaces in INET, enable the "Emulation" feature
 either in the IDE or using the inet_featuretool then regenerate the INET makefile
 using 'make makefiles'.
 

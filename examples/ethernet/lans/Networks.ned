@@ -50,18 +50,22 @@ network MixedLAN
         }
         busHostA: EtherHost {
             parameters:
+                eth.duplexMode = false;
                 @display("p=100,200");
         }
         busHostB: EtherHost {
             parameters:
+                eth.duplexMode = false;
                 @display("p=250,200");
         }
         busHostC: EtherHost {
             parameters:
+                eth.duplexMode = false;
                 @display("p=650,400");
         }
         busHostD: EtherHost {
             parameters:
+                eth.duplexMode = false;
                 @display("p=800,400");
         }
         switchHostA: EtherHost {
@@ -82,20 +86,24 @@ network MixedLAN
         }
         switch: EtherSwitch {
             parameters:
+                eth[4].duplexMode = false;
                 @display("p=325,400");
             gates:
                 ethg[5];
         }
         hubHostA: EtherHost {
             parameters:
+                eth.duplexMode = false;
                 @display("p=500,100");
         }
         hubHostB: EtherHost {
             parameters:
+                eth.duplexMode = false;
                 @display("p=650,100");
         }
         hubHostC: EtherHost {
             parameters:
+                eth.duplexMode = false;
                 @display("p=800,100");
         }
         hub: EtherHub {
@@ -105,6 +113,7 @@ network MixedLAN
                 ethg[4];
         }
     connections:
+        //half-duplex:
         bus.ethg[0] <--> C <--> busHostA.ethg;
         bus.ethg[1] <--> C <--> busHostB.ethg;
         bus.ethg[2] <--> C <--> switch.ethg[4];
@@ -112,11 +121,13 @@ network MixedLAN
         bus.ethg[4] <--> C <--> hub.ethg[3];
         bus.ethg[5] <--> C <--> busHostD.ethg;
 
+        //full-duplex:
         switch.ethg[0] <--> C <--> switchHostA.ethg;
         switch.ethg[1] <--> C <--> switchHostB.ethg;
         switch.ethg[2] <--> C <--> switchHostC.ethg;
         switch.ethg[3] <--> C <--> switchHostD.ethg;
 
+        //half-duplex:
         hub.ethg[0] <--> {  delay = 0.1us; datarate = 100Mbps; } <--> hubHostA.ethg;
         hub.ethg[1] <--> {  delay = 0.3us; datarate = 100Mbps; } <--> hubHostB.ethg;
         hub.ethg[2] <--> {  delay = 0.2us; datarate = 100Mbps; } <--> hubHostC.ethg;
@@ -193,18 +204,22 @@ network HubLAN
     submodules:
         hostA: EtherHost {
             parameters:
+                eth.duplexMode = false;
                 @display("p=250,100");
         }
         hostB: EtherHost {
             parameters:
+                eth.duplexMode = false;
                 @display("p=400,200");
         }
         hostC: EtherHost {
             parameters:
+                eth.duplexMode = false;
                 @display("p=250,300");
         }
         hostD: EtherHost {
             parameters:
+                eth.duplexMode = false;
                 @display("p=100,200");
         }
         hub: EtherHub {
@@ -235,18 +250,22 @@ network BusLAN
     submodules:
         hostA: EtherHost {
             parameters:
+                eth.duplexMode = false;
                 @display("p=100,200");
         }
         hostB: EtherHost {
             parameters:
+                eth.duplexMode = false;
                 @display("p=250,200");
         }
         hostC: EtherHost {
             parameters:
+                eth.duplexMode = false;
                 @display("p=400,200");
         }
         hostD: EtherHost {
             parameters:
+                eth.duplexMode = false;
                 @display("p=550,200");
         }
         bus: EtherBus {
@@ -280,11 +299,6 @@ network SwitchedDuplexLAN
                 csmacdSupport = false;
         }
 
-        module EtherSwitchFullDuplex extends EtherSwitch
-        {
-            parameters:
-                csmacdSupport = false;
-        }
     submodules:
         hostA: EtherHostFullDuplex {
             parameters:
@@ -302,7 +316,7 @@ network SwitchedDuplexLAN
             parameters:
                 @display("p=100,200");
         }
-        switch: EtherSwitchFullDuplex {
+        switch: EtherSwitch {
             parameters:
                 @display("p=250,200");
             gates:
@@ -314,3 +328,4 @@ network SwitchedDuplexLAN
         switch.ethg[2] <--> ethernetline <--> hostC.ethg;
         switch.ethg[3] <--> ethernetline <--> hostD.ethg;
 }
+

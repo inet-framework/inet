@@ -1,5 +1,7 @@
 ====== inet-4.x ======
 
+2020-01-08  ------ inet-4.2.0 released ------
+
 2019-05-28  Zoltan Bojthe
 
 	Moved flushQueue() and clearQueue() implementation to MacProtocolBase.

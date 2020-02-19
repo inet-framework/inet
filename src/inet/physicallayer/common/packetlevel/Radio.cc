@@ -399,6 +399,7 @@ Signal *Radio::createSignal(Packet *packet) const
 {
     encapsulate(packet);
     if (sendRawBytes) {
+        // TODO: this doesn't always work, because the packet length may not be divisible by 8
         auto rawPacket = new Packet(packet->getName(), packet->peekAllAsBytes());
         rawPacket->copyTags(*packet);
         delete packet;

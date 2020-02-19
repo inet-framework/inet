@@ -308,13 +308,21 @@ void ScenarioManager::processCreateModuleCommand(const cXMLElement *node)
     cModule *parentModule = getSimulation()->getSystemModule()->getModuleByPath(parentModulePath);
     if (parentModule == nullptr)
         throw cRuntimeError("Parent module '%s' is not found", parentModulePath);
-    cModule *submodule = parentModule->getSubmodule(submoduleName, 0);
-    bool vector = xmlutils::getAttributeBoolValue(node, ATTR_VECTOR, submodule != nullptr);
+
+    //TODO solution for inconsistent out-of-date vectorSize values in OMNeT++
+    int submoduleVectorSize = 0;
+    for (SubmoduleIterator it(parentModule); !it.end(); ++it) {
+        cModule *submodule = *it;
+        if (submodule->isVector() && submodule->isName(submoduleName)) {
+            if (submoduleVectorSize < submodule->getVectorSize())
+                submoduleVectorSize = submodule->getVectorSize();
+        }
+    }
+
+    bool vector = xmlutils::getAttributeBoolValue(node, ATTR_VECTOR, submoduleVectorSize > 0);
     cModule *module = nullptr;
     if (vector) {
-        cModule *submodule = parentModule->getSubmodule(submoduleName, 0);
-        int submoduleIndex = submodule == nullptr ? 0 : submodule->getVectorSize();
-        module = moduleType->create(submoduleName, parentModule, submoduleIndex + 1, submoduleIndex);
+        module = moduleType->create(submoduleName, parentModule, submoduleVectorSize + 1, submoduleVectorSize);
     }
     else {
         module = moduleType->create(submoduleName, parentModule);

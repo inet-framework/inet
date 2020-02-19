@@ -32,7 +32,7 @@ cmdenv-express-mode=false
 
 *.host*.eth.csmacdSupport = ${true,false}
 *.host*.eth.queue.typename = ${"", "DropTailQueue"}
-*.host*.eth.mac.duplexMode = true     # Full duplex
+*.host*.eth.duplexMode = true     # Full duplex
 
 #*.host1.ethg$o.channel.logfile="logfile-${runnumber}.txt"
 **.ethch2.logfile="logfile-${runnumber}.txt"

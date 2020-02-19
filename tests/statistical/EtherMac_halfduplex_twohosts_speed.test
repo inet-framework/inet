@@ -25,7 +25,7 @@ module EtherHostQ extends EtherHost
     parameters:
         queueType = "DropTailQueue";
         macType = "EtherMac";
-        mac.duplexMode = false;
+        duplexMode = false;
 }
 
 network SpeedTest

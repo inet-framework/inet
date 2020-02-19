@@ -1,5 +1,7 @@
 ====== inet-4.x ======
 
+2020-01-08  ------ inet-4.2.0 released ------
+
 2019-06-07  Levente Mészáros
 
 	Added a new Probe network node for visualizing the signal power spectral

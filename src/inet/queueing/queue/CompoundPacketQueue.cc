@@ -84,13 +84,23 @@ void CompoundPacketQueue::removePacket(Packet *packet)
 
 void CompoundPacketQueue::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
 {
-    Enter_Method("receiveSignal");
-    if (signal == packetPushedSignal || signal == packetPoppedSignal || signal == packetRemovedSignal)
-        ;
-    else if (signal == packetDroppedSignal)
+    if (signal == packetPushedSignal) {
+        Enter_Method("receivePacketPushedSignal");
+    }
+    else if (signal == packetPoppedSignal) {
+        Enter_Method("receivePacketPoppedSignal");
+    }
+    else if (signal == packetRemovedSignal) {
+        Enter_Method("receivePacketRemovedSignal");
+    }
+    else if (signal == packetDroppedSignal) {
+        Enter_Method("receivePacketDroppedSignal");
         numDroppedPackets++;
-    else if (signal == packetCreatedSignal)
+    }
+    else if (signal == packetCreatedSignal) {
+        Enter_Method("receivePacketCreatedSignal");
         numCreatedPackets++;
+    }
     else
         throw cRuntimeError("Unknown signal");
     updateDisplayString();

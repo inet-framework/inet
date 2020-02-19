@@ -156,7 +156,7 @@ Ptr<const IFunction<double, Domain<simsec, Hz>>> DimensionalTransmitterBase::cre
             value /= (endTime - startTime).dbl();
         if (!strcmp("integral", frequencyGainsNormalization))
             value /= bandwidth.get();
-        return makeShared<TwoDimensionalBoxcarFunction<double, simsec, Hz>>(simsec(startTime), simsec(endTime), centerFrequency - bandwidth / 2, centerFrequency + bandwidth / 2, value);
+        return makeShared<Boxcar2DFunction<double, simsec, Hz>>(simsec(startTime), simsec(endTime), centerFrequency - bandwidth / 2, centerFrequency + bandwidth / 2, value);
     }
     else {
         Ptr<const IFunction<double, Domain<simsec>>> timeGainFunction;
@@ -178,10 +178,10 @@ Ptr<const IFunction<double, Domain<simsec, Hz>>> DimensionalTransmitterBase::cre
                 time += simsec(duration) * entry.length + entry.offset;
                 ts[time] = {entry.gain, entry.interpolator};
             }
-            timeGainFunction = makeShared<OneDimensionalInterpolatedFunction<double, simsec>>(ts);
+            timeGainFunction = makeShared<Interpolated1DFunction<double, simsec>>(ts);
         }
         else
-            timeGainFunction = makeShared<OneDimensionalBoxcarFunction<double, simsec>>(simsec(startTime), simsec(endTime), 1);
+            timeGainFunction = makeShared<Boxcar1DFunction<double, simsec>>(simsec(startTime), simsec(endTime), 1);
         Ptr<const IFunction<double, Domain<Hz>>> frequencyGainFunction;
         if (frequencyGains.size() != 0) {
             auto startFrequency = centerFrequency - bandwidth / 2;
@@ -202,11 +202,11 @@ Ptr<const IFunction<double, Domain<simsec, Hz>>> DimensionalTransmitterBase::cre
                 ASSERT(!std::isnan(frequency.get()));
                 fs[frequency] = {entry.gain, entry.interpolator};
             }
-            frequencyGainFunction = makeShared<OneDimensionalInterpolatedFunction<double, Hz>>(fs);
+            frequencyGainFunction = makeShared<Interpolated1DFunction<double, Hz>>(fs);
         }
         else
-            frequencyGainFunction = makeShared<OneDimensionalBoxcarFunction<double, Hz>>(centerFrequency - bandwidth / 2, centerFrequency + bandwidth / 2, 1);
-        return makeShared<CombinedFunction<double, simsec, Hz>>(normalize<simsec>(timeGainFunction, timeGainsNormalization), normalize<Hz>(frequencyGainFunction, frequencyGainsNormalization));
+            frequencyGainFunction = makeShared<Boxcar1DFunction<double, Hz>>(centerFrequency - bandwidth / 2, centerFrequency + bandwidth / 2, 1);
+        return makeShared<Combined2DFunction<double, simsec, Hz>>(normalize<simsec>(timeGainFunction, timeGainsNormalization), normalize<Hz>(frequencyGainFunction, frequencyGainsNormalization));
     }
 }
 
@@ -215,7 +215,7 @@ Ptr<const IFunction<WpHz, Domain<simsec, Hz>>> DimensionalTransmitterBase::creat
     Ptr<const IFunction<WpHz, Domain<simsec, Hz>>> powerFunction;
     if (gainFunctionCacheLimit == 0) {
         if (timeGains.size() == 0 && frequencyGains.size() == 0)
-            powerFunction = makeShared<TwoDimensionalBoxcarFunction<WpHz, simsec, Hz>>(simsec(startTime), simsec(endTime), centerFrequency - bandwidth / 2, centerFrequency + bandwidth / 2, power / bandwidth);
+            powerFunction = makeShared<Boxcar2DFunction<WpHz, simsec, Hz>>(simsec(startTime), simsec(endTime), centerFrequency - bandwidth / 2, centerFrequency + bandwidth / 2, power / bandwidth);
         else {
             auto gainFunction = createGainFunction(startTime, endTime, centerFrequency, bandwidth);
             powerFunction = makeShared<ConstantFunction<WpHz, Domain<simsec, Hz>>>(power / Hz(1))->multiply(gainFunction);

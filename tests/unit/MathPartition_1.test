@@ -32,14 +32,14 @@ void FunctionTest::test1()
     auto f1 = makeShared<ConstantFunction<double, Domain<double>>>(10.0);
     printPartitioning<double, Domain<double>>(f1->getDomain(), f1);
 
-    std::cout << "\nOneDimensionalBoxcarFunction\n";
-    auto f2 = makeShared<OneDimensionalBoxcarFunction<double, double>>(-1.0, 1.0, 10.0);
+    std::cout << "\nBoxcar1DFunction\n";
+    auto f2 = makeShared<Boxcar1DFunction<double, double>>(-1.0, 1.0, 10.0);
     printPartitioning<double, Domain<double>>(f2->getDomain(), f2);
     printPartitioning<double, Domain<double>>(Interval<double>(Point<double>(-10.0), Point<double>(0.0), 0b1, 0b0, 0b0), f2);
     printPartitioning<double, Domain<double>>(Interval<double>(Point<double>(0.0), Point<double>(10.0), 0b1, 0b0, 0b0), f2);
 
     std::cout << "\nAddedFunction\n";
-    auto f3 = makeShared<OneDimensionalBoxcarFunction<double, double>>(0.0, 2.0, 1.0);
+    auto f3 = makeShared<Boxcar1DFunction<double, double>>(0.0, 2.0, 1.0);
     auto f4 = f2->add(f3);
     printPartitioning<double, Domain<double>>(f3->getDomain(), f4);
     printPartitioning<double, Domain<double>>(Interval<double>(Point<double>(-10.0), Point<double>(0.0), 0b1, 0b0, 0b0), f4);
@@ -51,26 +51,26 @@ void FunctionTest::test1()
     printPartitioning<double, Domain<double>>(Interval<double>(Point<double>(-10.0), Point<double>(0.0), 0b1, 0b0, 0b0), f5);
     printPartitioning<double, Domain<double>>(Interval<double>(Point<double>(0.0), Point<double>(10.0), 0b1, 0b0, 0b0), f5);
 
-    std::cout << "\nOneDimensionalInterpolatedFunction\n";
+    std::cout << "\nInterpolated1DFunction\n";
     std::map<double, double> rs;
     rs[-INFINITY] = 0.0;
     rs[-1.0] = 0.0;
     rs[0.0] = 10.0;
     rs[1.0] = 0.0;
     rs[INFINITY] = 0.0;
-    auto f6 = makeShared<OneDimensionalInterpolatedFunction<double, double>>(rs, &LinearInterpolator<double, double>::singleton);
+    auto f6 = makeShared<Interpolated1DFunction<double, double>>(rs, &LinearInterpolator<double, double>::singleton);
     printPartitioning<double, Domain<double>>(f6->getDomain(), f6);
 
     std::cout << "\nMultipliedFunction optimization\n";
     auto f7 = makeShared<ConstantFunction<double, Domain<double>>>(0.0)->multiply(f6);
     printPartitioning<double, Domain<double>>(f7->getDomain(), f7);
 
-    std::cout << "\nCombinedFunction\n";
-    auto f8 = makeShared<CombinedFunction<double, double, double>>(f2, f3);
+    std::cout << "\nCombined2DFunction\n";
+    auto f8 = makeShared<Combined2DFunction<double, double, double>>(f2, f3);
     printPartitioning<double, Domain<double, double>>(f8->getDomain(), f8);
 
-    std::cout << "\nTwoDimensionalBoxcarFunction\n";
-    auto f9 = makeShared<TwoDimensionalBoxcarFunction<double, double, double>>(-1.0, 1.0, 0.0, 2.0, 10.0);
+    std::cout << "\nBoxcar2DFunction\n";
+    auto f9 = makeShared<Boxcar2DFunction<double, double, double>>(-1.0, 1.0, 0.0, 2.0, 10.0);
     printPartitioning<double, Domain<double, double>>(f9->getDomain(), f9);
 
     std::cout << "\nDividedFunction\n";
@@ -83,7 +83,7 @@ void FunctionTest::test1()
     printPartitioning<double, Domain<double>>(f12->getDomain(), f12);
 
     std::cout << "\nGaussFunction x BoxcarFunction\n";
-    auto f13 = makeShared<CombinedFunction<double, double, double>>(f11, f2);
+    auto f13 = makeShared<Combined2DFunction<double, double, double>>(f11, f2);
     auto f14 = makeShared<ApproximatedFunction<double, Domain<double, double>, 0, double>>(-10, 10, 1, &AverageInterpolator<double, double>::singleton, f13);
     auto f15 = makeShared<ApproximatedFunction<double, Domain<double, double>, 1, double>>(-1, 1, 0.5, &LeftInterpolator<double, double>::singleton, f14);
     printPartitioning<double, Domain<double, double>>(f15->getDomain(), f15);
@@ -93,9 +93,9 @@ void FunctionTest::test1()
     auto f17 = makeShared<ApproximatedFunction<double, Domain<double>, 0, double>>(0, 8, 1, &LeftInterpolator<double, double>::singleton, f16);
     printPartitioning<double, Domain<double>>(f17->getDomain(), f17);
 
-    std::cout << "\nModulatedFunction\n";
-    auto f18 = makeShared<TwoDimensionalBoxcarFunction<double, double, double>>(0, 8, 0, 1, 1);
-    auto f19 = makeShared<ModulatedFunction<double, double, double>>(f18, f17);
+    std::cout << "\nDomainModulated2DFunction\n";
+    auto f18 = makeShared<Boxcar2DFunction<double, double, double>>(0, 8, 0, 1, 1);
+    auto f19 = makeShared<DomainModulated2DFunction<double, double, double>>(f18, f17);
     printPartitioning<double, Domain<double, double>>(f19->getDomain(), f19);
 }
 
@@ -110,7 +110,7 @@ Partitioning (-inf … inf)
 constant over (-inf … inf)
   → 10
 
-OneDimensionalBoxcarFunction
+Boxcar1DFunction
 
 Partitioning (-inf … inf)
 constant over (-inf … -1)
@@ -184,7 +184,7 @@ constant over [0 … 1)
 constant over [1 … 10)
   → 0
 
-OneDimensionalInterpolatedFunction
+Interpolated1DFunction
 
 Partitioning (-inf … inf)
 constant over (-inf … -1)
@@ -202,7 +202,7 @@ Partitioning (-inf … inf)
 constant over (-inf … inf)
   → 0
 
-CombinedFunction
+Combined2DFunction
 
 Partitioning (-inf … inf) x (-inf … inf)
 constant over (-inf … -1) x (-inf … 0)
@@ -224,7 +224,7 @@ constant over [1 … inf) x [0 … 2)
 constant over [1 … inf) x [2 … inf)
   → 0
 
-TwoDimensionalBoxcarFunction
+Boxcar2DFunction
 
 Partitioning (-inf … inf) x (-inf … inf)
 constant over (-inf … -1) x (-inf … 0)
@@ -608,7 +608,7 @@ constant over [7 … 8)
 constant over [8 … inf)
   → 0
 
-ModulatedFunction
+DomainModulated2DFunction
 
 Partitioning (-inf … inf) x (-inf … inf)
 constant over (-inf … 0) x (-inf … 0)

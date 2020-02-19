@@ -216,7 +216,7 @@ network = SpeedTest
 **.cli.respLength = 1250B      # 10.000 bit
 *.host_*_*.cli.startTime = 0s
 
-*.host_*_H_*.mac.duplexMode = false
+*.host_*_H_*.duplexMode = false
 
 *.host_*_H_*.cli.sendInterval  = 0.1ms        # 10.000 / speed [ / nodecount, when halfduplex]
 

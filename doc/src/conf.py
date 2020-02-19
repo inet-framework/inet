@@ -238,9 +238,9 @@ images_config = {
 # -- Doxylink config ---------------------------------------------------------
 
 doxylink = {
-#        'cpp' : ('doxytags.xml', 'https://omnetpp.org/doc/inet/api-current/doxy/'),
-        'ned' : ('nedtags.xml', 'https://omnetpp.org/doc/inet/api-current/neddoc/'),
-        'msg' : ('msgtags.xml', 'https://omnetpp.org/doc/inet/api-current/neddoc/'),
+#        'cpp' : ('doxytags.xml', 'https://doc.omnetpp.org/inet/api-current/doxy/'),
+        'ned' : ('nedtags.xml', 'https://doc.omnetpp.org/inet/api-current/neddoc/'),
+        'msg' : ('msgtags.xml', 'https://doc.omnetpp.org/inet/api-current/neddoc/'),
 }
 
 # -- Extension configuration -------------------------------------------------

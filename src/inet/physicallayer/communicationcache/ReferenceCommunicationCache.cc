@@ -25,8 +25,10 @@ Define_Module(ReferenceCommunicationCache);
 
 ReferenceCommunicationCache::~ReferenceCommunicationCache()
 {
-    for (auto& transmissionCacheEntry : transmissionCache)
-        delete static_cast<std::vector<ReceptionCacheEntry> *>(transmissionCacheEntry.receptionCacheEntries);
+    for (auto& transmissionCacheEntry : transmissionCache) {
+        delete transmissionCacheEntry.receptionCacheEntries;
+        transmissionCacheEntry.receptionCacheEntries = nullptr;
+    }
 }
 
 ReferenceCommunicationCache::RadioCacheEntry *ReferenceCommunicationCache::getRadioCacheEntry(const IRadio *radio)
@@ -34,15 +36,15 @@ ReferenceCommunicationCache::RadioCacheEntry *ReferenceCommunicationCache::getRa
     return &radioCache[radio->getId()];
 }
 
-ReferenceCommunicationCache::TransmissionCacheEntry *ReferenceCommunicationCache::getTransmissionCacheEntry(const ITransmission *transmission)
+ReferenceCommunicationCache::ReferenceTransmissionCacheEntry *ReferenceCommunicationCache::getTransmissionCacheEntry(const ITransmission *transmission)
 {
     return &transmissionCache[transmission->getId()];
 }
 
 ReferenceCommunicationCache::ReceptionCacheEntry *ReferenceCommunicationCache::getReceptionCacheEntry(const IRadio *radio, const ITransmission *transmission)
 {
-    TransmissionCacheEntry *transmissionCacheEntry = getTransmissionCacheEntry(transmission);
-    auto *receptionCacheEntries = static_cast<std::vector<ReceptionCacheEntry> *>(transmissionCacheEntry->receptionCacheEntries);
+    ReferenceTransmissionCacheEntry *transmissionCacheEntry = getTransmissionCacheEntry(transmission);
+    auto *receptionCacheEntries = transmissionCacheEntry->receptionCacheEntries;
     int radioId = radio->getId();
     if ((int)receptionCacheEntries->size() <= radioId)
         receptionCacheEntries->resize(radioId + 1);
@@ -116,7 +118,7 @@ std::vector<const ITransmission *> *ReferenceCommunicationCache::computeInterfer
     // NOTE: ignore receptionIntervals to test that it doesn't affect simulation results
     std::vector<const ITransmission *> *interferingTransmissions = new std::vector<const ITransmission *>();
     for (const auto& transmissionCacheEntry : transmissionCache) {
-        auto receptionCacheEntries = static_cast<std::vector<ReceptionCacheEntry> *>(transmissionCacheEntry.receptionCacheEntries);
+        auto receptionCacheEntries = transmissionCacheEntry.receptionCacheEntries;
         auto& receptionCacheEntry = receptionCacheEntries->at(radio->getId());
         const IArrival *arrival = receptionCacheEntry.arrival;
         if (arrival != nullptr && !(arrival->getEndTime() < startTime || endTime < arrival->getStartTime()))

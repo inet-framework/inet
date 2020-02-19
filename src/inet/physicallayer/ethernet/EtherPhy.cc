@@ -48,7 +48,7 @@ void EtherPhy::handleMessage(cMessage *message)
         send(signal, "phys$o");
     }
     else if (message->getArrivalGate() == physInGate) {
-        auto signal = check_and_cast<EthernetSignal *>(message);
+        auto signal = check_and_cast<EthernetSignalBase *>(message);
         if (!signal->getSrcMacFullDuplex())
             throw cRuntimeError("Ethernet misconfiguration: MACs on the same link must be all in full duplex mode, or all in half-duplex mode");
         auto packet = check_and_cast<Packet *>(signal->decapsulate());
