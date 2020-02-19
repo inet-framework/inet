@@ -21,7 +21,7 @@
 #include "inet/physicallayer/contract/packetlevel/IAntenna.h"
 #include "inet/physicallayer/contract/packetlevel/IPhysicalLayer.h"
 #include "inet/physicallayer/contract/packetlevel/IReceiver.h"
-#include "inet/physicallayer/contract/packetlevel/ISignal.h"
+#include "IWirelessSignal.h"
 #include "inet/physicallayer/contract/packetlevel/ITransmitter.h"
 
 namespace inet {

@@ -23,5 +23,5 @@ moduleinterface IWirelessInterface extends INetworkInterface
     parameters:
         @display("i=block/ifcard");
     gates:
-        input radioIn @labels(ISignal); // to receive signals
+        input radioIn @labels(IWirelessSignal); // to receive signals
 }

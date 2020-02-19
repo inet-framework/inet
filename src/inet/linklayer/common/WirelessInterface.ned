@@ -34,7 +34,7 @@ module WirelessInterface extends InterfaceEntry like IWirelessInterface
     gates:
         input upperLayerIn;
         output upperLayerOut;
-        input radioIn @labels(ISignal);
+        input radioIn @labels(IWirelessSignal);
     submodules:
         classifier: <default("")> like IIeee8021dQosClassifier if typename != "" {
             @display("p=250,100");

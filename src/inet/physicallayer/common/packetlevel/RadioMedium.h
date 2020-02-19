@@ -245,23 +245,23 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
     /**
      * Creates a new signal for the transmitter.
      */
-    virtual ISignal *createTransmitterSignal(const IRadio *radio, Packet *packet);
+    virtual IWirelessSignal *createTransmitterSignal(const IRadio *radio, Packet *packet);
 
     /**
      * Creates a new signal for a receiver.
      */
-    virtual ISignal *createReceiverSignal(const ITransmission *transmission);
+    virtual IWirelessSignal *createReceiverSignal(const ITransmission *transmission);
 
     /**
      * Sends a copy of the provided signal to all affected receivers on
      * the radio medium.
      */
-    virtual void sendToAffectedRadios(IRadio *transmitter, const ISignal *signal);
+    virtual void sendToAffectedRadios(IRadio *transmitter, const IWirelessSignal *signal);
 
     /**
      * Sends a copy of the provided signal to all receivers on the radio medium.
      */
-    virtual void sendToAllRadios(IRadio *transmitter, const ISignal *signal);
+    virtual void sendToAllRadios(IRadio *transmitter, const IWirelessSignal *signal);
 
     /**
      * Sends a copy of all ongoing signals to the receiver on the radio medium.
@@ -326,10 +326,10 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
     virtual void removeRadio(const IRadio *radio) override;
     virtual const IRadio *getRadio(int id) const override;
 
-    virtual void sendToRadio(IRadio *trasmitter, const IRadio *receiver, const ISignal *signal);
+    virtual void sendToRadio(IRadio *trasmitter, const IRadio *receiver, const IWirelessSignal *signal);
 
-    virtual ISignal *transmitPacket(const IRadio *transmitter, Packet *packet) override;
-    virtual Packet *receivePacket(const IRadio *receiver, ISignal *signal) override;
+    virtual IWirelessSignal *transmitPacket(const IRadio *transmitter, Packet *packet) override;
+    virtual Packet *receivePacket(const IRadio *receiver, IWirelessSignal *signal) override;
     virtual const ITransmission *getTransmission(int id) const override;
 
     virtual const IListeningDecision *listenOnMedium(const IRadio *receiver, const IListening *listening) const override;
