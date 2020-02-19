@@ -476,6 +476,7 @@ void Radio::endReception(cMessage *timer)
         auto isReceptionSuccessful = medium->getReceptionDecision(this, signal->getListening(), transmission, part)->isReceptionSuccessful();
         EV_INFO << "Reception ended: " << (isReceptionSuccessful ? "\x1b[1msuccessfully\x1b[0m" : "\x1b[1munsuccessfully\x1b[0m") << " for " << (ISignal *)signal << " " << IRadioSignal::getSignalPartName(part) << " as " << reception << endl;
         auto macFrame = medium->receivePacket(this, signal);
+        take(macFrame);
         // TODO: FIXME: see handling packets with incorrect PHY headers in the TODO file
         decapsulate(macFrame);
         sendUp(macFrame);
