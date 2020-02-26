@@ -24,12 +24,12 @@
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c lwip__lwip__stream -r 0,         100s,            bec1-4c81/tplx, PASS,
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet__lwip -r 0,                 100s,            3d38-bba4/tplx, PASS,
 
-/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c inet__lwip -r 0,                  50s,            315e-eba7/tplx, PASS,
-/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c inet_nsc -r 0,                    50s,            b90f-b90e/tplx, PASS,
-/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c lwip__inet -r 0,                  50s,            fd4e-2be5/tplx, PASS,
-/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c lwip__lwip -r 0,                  50s,            3b84-9e31/tplx, PASS,
-/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c nsc_inet -r 0,                    50s,            eee3-5229/tplx, PASS,
-/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c nsc_nsc -r 0,                     50s,            abe6-5fbc/tplx, PASS,
+/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c inet__lwip -r 0,                  50s,            082a-29b3/tplx, PASS,
+/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c inet_nsc -r 0,                    50s,            8af0-c265/tplx, PASS,
+/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c lwip__inet -r 0,                  50s,            50bd-baf9/tplx, PASS,
+/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c lwip__lwip -r 0,                  50s,            c646-a350/tplx, PASS,
+/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c nsc_inet -r 0,                    50s,            4e06-7d4a/tplx, PASS,
+/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c nsc_nsc -r 0,                     50s,            ccbd-45a3/tplx, PASS,
 
 /examples/inet/nclients/,            -f omnetpp.ini -c inet__lwip -r 0,                 200s,            e194-036d/tplx, ERROR,
 /examples/inet/nclients/,            -f omnetpp.ini -c lwip__inet -r 0,                 200s,            0de9-dea9/tplx, ERROR,
