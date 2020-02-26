@@ -23,38 +23,41 @@ import inet.node.inet.StandardHost;
 network VoIPStreamTest
 {
     types:
-        channel line1 extends ned.DatarateChannel
+        channel line1 extends ned.TransmissionChannel
         {
             parameters:
                 delay = 100us;
-                datarate = 100Mbps;
         }
 
-        channel line2 extends ned.DatarateChannel
+        channel line2 extends ned.TransmissionChannel
         {
             parameters:
                 delay = 100us;
-                datarate = 100Mbps;
         }
     submodules:
         client: StandardHost {
             parameters:
+                eth[*].bitrate = 100Mbps;
                 @display("p=71,64;i=device/laptop_l");
         }
         switch: EtherSwitch {
             parameters:
+                eth[*].bitrate = 100Mbps;
                 @display("p=202,156;i=device/switch");
         }
         net: Router {
             parameters:
+                eth[*].bitrate = 100Mbps;
                 @display("p=394,166;i=misc/cloud_l");
         }
         router: Router {
             parameters:
+                eth[*].bitrate = 100Mbps;
                 @display("p=311,74;i=abstract/router");
         }
         server: StandardHost {
             parameters:
+                eth[*].bitrate = 100Mbps;
                 @display("p=512,58;i=device/server_l");
         }
         configurator: Ipv4NetworkConfigurator {
