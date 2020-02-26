@@ -21,6 +21,7 @@
 
 
 #include "inet/common/IProtocolRegistrationListener.h"
+#include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
@@ -98,7 +99,7 @@ void EtherMac::initializeFlags()
 {
     EtherMacBase::initializeFlags();
 
-    duplexMode = par("duplexMode");
+    duplexMode = getContainingNicModule(this)->par("duplexMode");
     frameBursting = !duplexMode && par("frameBursting");
     physInGate->setDeliverOnReceptionStart(true);
 }

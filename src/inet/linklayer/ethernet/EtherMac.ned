@@ -114,7 +114,7 @@ module EtherMac like IEtherMac
         bool sendRawBytes = default(false); // when true packets are serialized into a sequence of bytes before sending out
         bool promiscuous = default(false);  // if true, all packets are received, otherwise only the
                                             // ones with matching destination MAC address
-        bool duplexMode;                    // selects full-duplex (true) or half-duplex (false) operation
+        // bool duplexMode;                    // selects full-duplex (true) or half-duplex (false) operation -- get from NIC module
         bool frameBursting = default(true); // enable/disable frame bursting mode in Gigabit Ethernet
         int mtu @unit(B) = default(1500B);
         @lifecycleSupport;

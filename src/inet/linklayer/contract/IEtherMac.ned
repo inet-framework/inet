@@ -49,7 +49,6 @@ moduleinterface IEtherMac
     parameters:
         bool promiscuous;       // if true, all packets are received, otherwise only the
                                 // ones with matching destination MAC address
-        bool duplexMode;        // selects full-duplex (true) or half-duplex (false) operation
         int mtu @unit(B);
         @display("i=block/rxtx");
     gates:
