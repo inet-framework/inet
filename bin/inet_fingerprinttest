@@ -279,7 +279,7 @@ class SimulationTestCase(unittest.TestCase):
                 if re.search("successfully", err):
                     result.isFingerprintOK = True
                 else:
-                    m = re.search("(computed|calculated): ([-a-zA-Z0-9]+(/[a-zA-Z0]+)?)", err)
+                    m = re.search("(computed|calculated): ([-a-zA-Z0-9]+(/[a-zA-Z0~]+)?)", err)
                     if m:
                         result.isFingerprintOK = False
                         result.computedFingerprint = m.group(2)
