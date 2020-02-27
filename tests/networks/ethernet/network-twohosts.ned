@@ -1,7 +1,7 @@
 package inet.tests.ethernet;
 
 import inet.node.ethernet.EtherHost2;
-import ned.DatarateChannel;
+import ned.TransmissionChannel;
 
 
 network TwoHosts
@@ -17,5 +17,6 @@ network TwoHosts
                 @display("p=334,80");
         }
     connections:
-        hostA.ethg <--> DatarateChannel <--> hostB.ethg;
+        hostA.ethg <--> TransmissionChannel <--> hostB.ethg;
 }
+

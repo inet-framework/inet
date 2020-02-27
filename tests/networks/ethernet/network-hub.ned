@@ -3,7 +3,7 @@ package inet.tests.ethernet;
 import inet.linklayer.ethernet.EtherHub;
 import inet.node.ethernet.EtherHost2;
 import inet.common.scenario.ScenarioManager;
-import ned.DatarateChannel;
+import ned.TransmissionChannel;
 
 
 network HostsWithHub
@@ -31,7 +31,8 @@ network HostsWithHub
                 @display("p=80,40");
         }
     connections:
-        hub.ethg++ <--> DatarateChannel <--> hostA.ethg;
-        hub.ethg++ <--> DatarateChannel <--> hostB.ethg;
-        hub.ethg++ <--> DatarateChannel <--> hostC.ethg;
+        hub.ethg++ <--> TransmissionChannel <--> hostA.ethg;
+        hub.ethg++ <--> TransmissionChannel <--> hostB.ethg;
+        hub.ethg++ <--> TransmissionChannel <--> hostC.ethg;
 }
+

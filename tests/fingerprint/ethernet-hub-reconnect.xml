@@ -7,7 +7,7 @@
     <at t="1.5">
         <connect src-module="hostA" src-gate="ethg"
                  dest-module="hub" dest-gate="ethg[0]"
-                 channel-type="ned.DatarateChannel" />
+                 channel-type="ned.TransmissionChannel" />
     </at>
 
     <at t="1.6">
@@ -17,7 +17,7 @@
     <at t="1.7">
         <connect src-module="hostB" src-gate="ethg"
                  dest-module="hub" dest-gate="ethg[1]"
-                 channel-type="ned.DatarateChannel" />
+                 channel-type="ned.TransmissionChannel" />
     </at>
 
     <at t="1.8">
@@ -27,7 +27,7 @@
     <at t="1.9">
         <connect src-module="hostC" src-gate="ethg"
                  dest-module="hub" dest-gate="ethg[2]"
-                 channel-type="ned.DatarateChannel" />
+                 channel-type="ned.TransmissionChannel" />
     </at>
 
     <at t="3.4">
@@ -37,7 +37,7 @@
     <at t="3.5">
         <connect src-module="hostA" src-gate="ethg"
                  dest-module="hub" dest-gate="ethg[0]"
-                 channel-type="ned.DatarateChannel" />
+                 channel-type="ned.TransmissionChannel" />
     </at>
 
     <at t="3.6">
@@ -47,7 +47,7 @@
     <at t="3.7">
         <connect src-module="hostB" src-gate="ethg"
                  dest-module="hub" dest-gate="ethg[1]"
-                 channel-type="ned.DatarateChannel" />
+                 channel-type="ned.TransmissionChannel" />
     </at>
 
     <at t="3.8">
@@ -57,7 +57,7 @@
     <at t="3.9">
         <connect src-module="hostC" src-gate="ethg"
                  dest-module="hub" dest-gate="ethg[2]"
-                 channel-type="ned.DatarateChannel" />
+                 channel-type="ned.TransmissionChannel" />
     </at>
 </scenario>
 
