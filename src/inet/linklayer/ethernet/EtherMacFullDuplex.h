@@ -47,6 +47,7 @@ class INET_API EtherMacFullDuplex : public EtherMacBase
     // event handlers
     virtual void handleEndIFGPeriod();
     virtual void handleEndTxPeriod();
+    virtual void handleAbortTxPeriod();
     virtual void handleEndPausePeriod();
     virtual void handleSelfMessage(cMessage *msg) override;
 

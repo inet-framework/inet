@@ -124,7 +124,8 @@ void EtherMacFullDuplex::startFrameTransmission()
     }
     else
         signal->encapsulate(frame);
-    send(signal, physOutGate);
+    auto duration = calculateDuration(signal);
+    send(signal, physOutGate, duration);
 
     scheduleAt(transmissionChannel->getTransmissionFinishTime(), endTxMsg);
     changeTransmissionState(TRANSMITTING_STATE);
@@ -311,6 +312,11 @@ void EtherMacFullDuplex::handleEndTxPeriod()
         EV_DETAIL << "Start IFG period\n";
         scheduleEndIFGPeriod();
     }
+}
+
+void EtherMacFullDuplex::handleAbortTxPeriod()
+{
+    throw cRuntimeError("unimplemented");
 }
 
 void EtherMacFullDuplex::finish()

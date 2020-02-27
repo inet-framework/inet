@@ -200,6 +200,7 @@ class INET_API EtherMacBase : public MacProtocolBase
     virtual void receiveSignal(cComponent *src, simsignal_t signalId, cObject *obj, cObject *details) override;
     virtual void refreshConnection();
 
+    simtime_t calculateDuration(EthernetSignalBase *signal);
     void changeTransmissionState(MacTransmitState newState);
     void changeReceptionState(MacReceiveState newState);
 };

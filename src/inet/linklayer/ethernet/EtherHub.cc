@@ -148,14 +148,14 @@ void EtherHub::handleMessage(cMessage *msg)
         throw cRuntimeError("Ethernet misconfiguration: MACs on the Ethernet HUB must be all in half-duplex mode, check it in module '%s'", signal->getSenderModule()->getFullPath().c_str());
 
     // Handle frame sent down from the network entity: send out on every other port
-    int arrivalPort = msg->getArrivalGate()->getIndex();
-    EV << "Frame " << msg << " arrived on port " << arrivalPort << ", broadcasting on all other ports\n";
+    int arrivalPort = signal->getArrivalGate()->getIndex();
+    EV << "Frame " << signal << " arrived on port " << arrivalPort << ", broadcasting on all other ports\n";
 
     numMessages++;
-    emit(packetReceivedSignal, msg);
+    emit(packetReceivedSignal, signal);
 
     if (numPorts <= 1) {
-        delete msg;
+        delete signal;
         return;
     }
 
@@ -166,13 +166,13 @@ void EtherHub::handleMessage(cMessage *msg)
                 continue;
 
             bool isLast = (arrivalPort == numPorts - 1) ? (i == numPorts - 2) : (i == numPorts - 1);
-            cMessage *msg2 = isLast ? msg : msg->dup();
+            auto *signal2 = isLast ? signal : signal->dup();
 
             // stop current transmission
             ogate->getTransmissionChannel()->forceTransmissionFinishTime(SIMTIME_ZERO);
 
             // send
-            send(msg2, ogate);
+            send(signal2, ogate, signal->getDuration());
 
             if (isLast)
                 msg = nullptr; // msg sent, do not delete it.

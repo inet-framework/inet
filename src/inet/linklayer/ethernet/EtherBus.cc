@@ -199,6 +199,8 @@ void EtherBus::handleMessage(cMessage *msg)
         if (signal->getSrcMacFullDuplex() != false)
             throw cRuntimeError("Ethernet misconfiguration: MACs on the Ethernet BUS must be all in half-duplex mode, check it in module '%s'", signal->getSenderModule()->getFullPath().c_str());
 
+        auto duration = signal->getDuration();
+
         // Handle frame sent down from the network entity
         int tapPoint = msg->getArrivalGate()->getIndex();
         EV << "Frame " << msg << " arrived on tap " << tapPoint << endl;
@@ -207,17 +209,19 @@ void EtherBus::handleMessage(cMessage *msg)
         if (tapPoint > 0) {
             // start UPSTREAM travel
             // if goes downstream too, we need to make a copy
-            cMessage *msg2 = (tapPoint < numTaps - 1) ? msg->dup() : msg;
-            msg2->setKind(UPSTREAM);
-            msg2->setContextPointer(&tap[tapPoint - 1]);
-            scheduleAt(simTime() + tap[tapPoint].propagationDelay[UPSTREAM], msg2);
+            auto signal2 = (tapPoint < numTaps - 1) ? signal->dup() : signal;
+            signal2->setKind(UPSTREAM);
+            signal2->setContextPointer(&tap[tapPoint - 1]);
+            scheduleAt(simTime() + tap[tapPoint].propagationDelay[UPSTREAM], signal2);
+            signal2->setDuration(duration);
         }
 
         if (tapPoint < numTaps - 1) {
             // start DOWNSTREAM travel
-            msg->setKind(DOWNSTREAM);
-            msg->setContextPointer(&tap[tapPoint + 1]);
-            scheduleAt(simTime() + tap[tapPoint].propagationDelay[DOWNSTREAM], msg);
+            signal->setKind(DOWNSTREAM);
+            signal->setContextPointer(&tap[tapPoint + 1]);
+            scheduleAt(simTime() + tap[tapPoint].propagationDelay[DOWNSTREAM], signal);
+            signal->setDuration(duration);
         }
 
         if (numTaps == 1) {
@@ -227,10 +231,12 @@ void EtherBus::handleMessage(cMessage *msg)
     }
     else {
         // handle upstream and downstream events
-        int direction = msg->getKind();
-        BusTap *thistap = (BusTap *)msg->getContextPointer();
+        auto signal = check_and_cast<EthernetSignalBase *>(msg);
+        auto duration = signal->getDuration();
+        int direction = signal->getKind();
+        BusTap *thistap = (BusTap *)signal->getContextPointer();
         int tapPoint = thistap->id;
-        msg->setContextPointer(nullptr);
+        signal->setContextPointer(nullptr);
 
         EV << "Event " << msg << " on tap " << tapPoint << ", sending out frame\n";
 
@@ -239,16 +245,16 @@ void EtherBus::handleMessage(cMessage *msg)
         cGate *ogate = gate(outputGateBaseId + tapPoint);
         if (ogate->isConnected()) {
             // send out on gate
-            cMessage *msg2 = isLast ? msg : msg->dup();
+            auto signal2 = isLast ? signal : signal->dup();
 
             // stop current transmission
             ogate->getTransmissionChannel()->forceTransmissionFinishTime(SIMTIME_ZERO);
-            send(msg2, ogate);
+            send(signal2, ogate, duration);
         }
         else {
             // skip gate
             if (isLast)
-                delete msg;
+                delete signal;
         }
 
         // if not end of the bus, schedule for next tap
@@ -258,8 +264,9 @@ void EtherBus::handleMessage(cMessage *msg)
         else {
             EV << "Scheduling for next tap\n";
             int nextTap = (direction == UPSTREAM) ? (tapPoint - 1) : (tapPoint + 1);
-            msg->setContextPointer(&tap[nextTap]);
-            scheduleAt(simTime() + tap[tapPoint].propagationDelay[direction], msg);
+            signal->setContextPointer(&tap[nextTap]);
+            scheduleAt(simTime() + tap[tapPoint].propagationDelay[direction], signal);
+            signal->setDuration(duration);
         }
     }
 }
