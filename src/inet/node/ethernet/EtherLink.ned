@@ -17,22 +17,27 @@
 
 package inet.node.ethernet;
 
-import ned.DatarateChannel;
+import ned.TransmissionChannel;
 
 //
 // Base for Ethernet link types. Propagation delay can be specified with the
 // length of the cable, i.e. in meters instead of nanoseconds or microseconds.
 //
-channel EtherLink extends DatarateChannel
+channel EtherLink extends TransmissionChannel
 {
     double length @unit(m) = default(10m);
     delay = replaceUnit(length / 2e8, "s");
 }
 
+channel EtherLinkWithDatarate extends EtherLink
+{
+    double datarate @unit(bps);
+}
+
 //
 // 10 megabit/sec Ethernet link
 //
-channel Eth10M extends EtherLink
+channel Eth10M extends EtherLinkWithDatarate
 {
     datarate = 10Mbps;
 }
@@ -40,7 +45,7 @@ channel Eth10M extends EtherLink
 //
 // 100 megabit/sec Ethernet link
 //
-channel Eth100M extends EtherLink
+channel Eth100M extends EtherLinkWithDatarate
 {
     datarate = 100Mbps;
 }
@@ -48,7 +53,7 @@ channel Eth100M extends EtherLink
 //
 // 1 gigabit/sec Ethernet link
 //
-channel Eth1G extends EtherLink
+channel Eth1G extends EtherLinkWithDatarate
 {
     datarate = 1Gbps;
 }
@@ -56,7 +61,7 @@ channel Eth1G extends EtherLink
 //
 // 10 gigabit/sec Ethernet link
 //
-channel Eth10G extends EtherLink
+channel Eth10G extends EtherLinkWithDatarate
 {
     datarate = 10Gbps;
 }
@@ -64,7 +69,7 @@ channel Eth10G extends EtherLink
 //
 // 40 gigabit/sec Ethernet link
 //
-channel Eth40G extends EtherLink
+channel Eth40G extends EtherLinkWithDatarate
 {
     datarate = 40Gbps;
 }
@@ -72,7 +77,7 @@ channel Eth40G extends EtherLink
 //
 // 100 gigabit/sec Ethernet link
 //
-channel Eth100G extends EtherLink
+channel Eth100G extends EtherLinkWithDatarate
 {
     datarate = 100Gbps;
 }
@@ -80,7 +85,7 @@ channel Eth100G extends EtherLink
 //
 // 200 gigabit/sec Ethernet link
 //
-channel Eth200G extends EtherLink
+channel Eth200G extends EtherLinkWithDatarate
 {
     datarate = 200Gbps;
 }
@@ -88,7 +93,7 @@ channel Eth200G extends EtherLink
 //
 // 400 gigabit/sec Ethernet link
 //
-channel Eth400G extends EtherLink
+channel Eth400G extends EtherLinkWithDatarate
 {
     datarate = 400Gbps;
 }
