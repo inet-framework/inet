@@ -479,8 +479,8 @@ void EtherMacFullDuplexBase::readChannelParameters(bool errorWhenAsymmetric)
     // to verify at the next opportunity (event) that the two channels have eventually
     // been set to the same value.
 
-    cChannel *outTrChannel = physOutGate->findTransmissionChannel();
-    cChannel *inTrChannel = physInGate->findIncomingTransmissionChannel();
+    auto outTrChannel = check_and_cast_nullable<cTransmissionChannel*>(physOutGate->findTransmissionChannel());
+    auto inTrChannel = check_and_cast_nullable<cTransmissionChannel*>(physInGate->findIncomingTransmissionChannel());
 
     connected = physOutGate->getPathEndGate()->isConnected() && physInGate->getPathStartGate()->isConnected();
 
@@ -493,13 +493,15 @@ void EtherMacFullDuplexBase::readChannelParameters(bool errorWhenAsymmetric)
     if (errorWhenAsymmetric && (rxDisabled != txDisabled))
         throw cRuntimeError("The enablements of the input/output channels differ (rx=%s vs tx=%s)", rxDisabled ? "off" : "on", txDisabled ? "off" : "on");
 
+    auto rxDelay = inTrChannel->getDelay();
+    auto txDelay = outTrChannel->getDelay();
+    if (errorWhenAsymmetric && (rxDelay != txDelay))
+        throw cRuntimeError("The delays on the input/output channels differ (rx=%d vs tx=%d)", inTrChannel->getDelay(), outTrChannel->getDelay());
+
     if (txDisabled)
         connected = false;
 
-    channelsDiffer = (rxDisabled != txDisabled) || inTrChannel->get;
-
-    if (errorWhenAsymmetric && dataratesDiffer)
-        throw cRuntimeError("The input/output datarates differ (rx=%g bps vs tx=%g bps)", rxRate, txRate);
+    channelsDiffer = (rxDisabled != txDisabled) || (rxDelay != txDelay);
 
     if (connected) {
         if (outTrChannel && !transmissionChannel)
@@ -518,7 +520,7 @@ void EtherMacFullDuplexBase::readChannelParameters(bool errorWhenAsymmetric)
             }
         }
         throw cRuntimeError("Invalid bitrate %g bps on interface %s at module %s",
-                txRate, interfaceEntry->getFullPath().c_str(), getFullPath().c_str());
+                txRate, interfaceEntry->getInterfaceFullPath().c_str(), getFullPath().c_str());
     }
     else {
         curEtherDescr = &nullEtherDescr;
