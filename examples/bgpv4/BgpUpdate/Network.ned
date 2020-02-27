@@ -4,17 +4,24 @@ import inet.common.misc.ThruputMeteringChannel;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.StandardHost;
 import inet.visualizer.integrated.IntegratedCanvasVisualizer;
+import ned.TransmissionChannel;
+
 
 network BgpNetwork
 {
+    parameters:
+        *.eth[*].bitrate = 100 Mbps;
     types:
         channel LINK_100 extends ThruputMeteringChannel
         {
-            parameters:
-                delay = 50us;
-                datarate = 100Mbps;
-                displayAsTooltip = true;
-                thruputDisplayFormat = "#N";
+            datarate = 100 Mbps;
+            delay = 50us;
+            displayAsTooltip = true;
+            thruputDisplayFormat = "#N";
+        }
+        channel ethlink extends TransmissionChannel
+        {
+            delay = 50us;
         }
     submodules:
         visualizer: IntegratedCanvasVisualizer {
@@ -56,8 +63,8 @@ network BgpNetwork
                 ethg[1];
         }
     connections:
-        H1.ethg[0] <--> LINK_100 <--> A.ethg[0];
+        H1.ethg[0] <--> ethlink <--> A.ethg[0];
         A.pppg[0] <--> LINK_100 <--> B.pppg[0];
-        B.ethg[0] <--> LINK_100 <--> H2.ethg[0];
+        B.ethg[0] <--> ethlink <--> H2.ethg[0];
 }
 

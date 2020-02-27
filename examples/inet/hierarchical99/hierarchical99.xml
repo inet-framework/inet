@@ -3,32 +3,32 @@
     <interface hosts="area11.lan2.*" address="10.11.2.x" netmask="255.255.255.x"/>
     <interface hosts="area11.lan3.*" address="10.11.3.x" netmask="255.255.255.x"/>
     <interface hosts="area11.lan4.*" address="10.11.4.x" netmask="255.255.255.x"/>
-    
+
     <interface hosts="area12.lan1.*" address="10.12.1.x" netmask="255.255.255.x"/>
     <interface hosts="area12.lan2.*" address="10.12.2.x" netmask="255.255.255.x"/>
     <interface hosts="area12.lan3.*" address="10.12.3.x" netmask="255.255.255.x"/>
     <interface hosts="area12.lan4.*" address="10.12.4.x" netmask="255.255.255.x"/>
-    
+
     <interface hosts="area21.lan1.*" address="10.21.1.x" netmask="255.255.255.x"/>
     <interface hosts="area21.lan2.*" address="10.21.2.x" netmask="255.255.255.x"/>
     <interface hosts="area21.lan3.*" address="10.21.3.x" netmask="255.255.255.x"/>
     <interface hosts="area21.lan4.*" address="10.21.4.x" netmask="255.255.255.x"/>
-    
+
     <interface hosts="area22.lan1.*" address="10.22.1.x" netmask="255.255.255.x"/>
     <interface hosts="area22.lan2.*" address="10.22.2.x" netmask="255.255.255.x"/>
     <interface hosts="area22.lan3.*" address="10.22.3.x" netmask="255.255.255.x"/>
     <interface hosts="area22.lan4.*" address="10.22.4.x" netmask="255.255.255.x"/>
-    
+
     <interface hosts="area31.lan1.*" address="10.31.1.x" netmask="255.255.255.x"/>
     <interface hosts="area31.lan2.*" address="10.31.2.x" netmask="255.255.255.x"/>
     <interface hosts="area31.lan3.*" address="10.31.3.x" netmask="255.255.255.x"/>
     <interface hosts="area31.lan4.*" address="10.31.4.x" netmask="255.255.255.x"/>
-    
+
     <interface hosts="area32.lan1.*" address="10.32.1.x" netmask="255.255.255.x"/>
     <interface hosts="area32.lan2.*" address="10.32.2.x" netmask="255.255.255.x"/>
     <interface hosts="area32.lan3.*" address="10.32.3.x" netmask="255.255.255.x"/>
     <interface hosts="area32.lan4.*" address="10.32.4.x" netmask="255.255.255.x"/>
-    
+
     <interface hosts="area*.router*" address="10.x.x.x" netmask="x.x.x.x"/>
     <interface hosts="*" address="10.x.x.x" netmask="255.x.x.0"/>
 </config>

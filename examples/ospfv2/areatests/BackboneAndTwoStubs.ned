@@ -2,22 +2,21 @@
 
 package inet.examples.ospfv2.areatests;
 
-import inet.common.misc.ThruputMeteringChannel;
 import inet.common.scenario.ScenarioManager;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.ospfv2.OspfRouter;
+import ned.TransmissionChannel;
 
 
 network OSPF_BackboneAndTwoStubsTest
 {
     parameters:
         int numBBRouters = default(3);
+        *.eth[*].bitrate = 100 Mbps;
     types:
-        channel C extends ThruputMeteringChannel
+        channel C extends TransmissionChannel
         {
             delay = 0.1us;
-            datarate = 100Mbps;
-            thruputDisplayFormat = "#N";
         }
     submodules:
         BBR[numBBRouters]: OspfRouter {

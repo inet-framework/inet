@@ -26,6 +26,7 @@ import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
 import ned.DatarateChannel;
+import ned.TransmissionChannel;
 
 
 network FlatNet
@@ -36,10 +37,9 @@ network FlatNet
             delay = 1us;
             datarate = 512Mbps;
         }
-        channel ethernetline extends DatarateChannel
-        {
+        channel pppline extends DatarateChannel {
             delay = 0.1us;
-            datarate = 10Mbps;
+            datarate = 10 Mbps;
         }
     submodules:
         configurator: Ipv4NetworkConfigurator {
@@ -57,8 +57,8 @@ network FlatNet
                 @display("i=device/server");
         }
     connections:
-        cli[0].pppg++ <--> ethernetline <--> rte[50].pppg++;
-        cli[1].pppg++ <--> ethernetline <--> rte[8].pppg++;
+        cli[0].pppg++ <--> pppline <--> rte[50].pppg++;
+        cli[1].pppg++ <--> pppline <--> rte[8].pppg++;
         srv.pppg++ <--> fiberline <--> rte[18].pppg++;
         rte[0].pppg++ <--> fiberline <--> rte[1].pppg++;
         rte[1].pppg++ <--> fiberline <--> rte[2].pppg++;
@@ -142,5 +142,4 @@ network FlatNet
         rte[54].pppg++ <--> fiberline <--> rte[55].pppg++;
         rte[55].pppg++ <--> fiberline <--> rte[56].pppg++;
 }
-
 

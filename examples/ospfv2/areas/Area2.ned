@@ -4,20 +4,20 @@ package inet.examples.ospfv2.areas;
 import inet.node.ethernet.EtherSwitch;
 import inet.node.inet.StandardHost;
 import inet.node.ospfv2.OspfRouter;
-import ned.DatarateChannel;
+import ned.TransmissionChannel;
 
 
 module OneNetArea
 {
     parameters:
         @display("p=10,10;b=404,108");
+        *.eth[*].bitrate = 100 Mbps;
     gates:
         inout ethg[];
     types:
-        channel C extends DatarateChannel
+        channel C extends TransmissionChannel
         {
             delay = 0.1us;
-            datarate = 100Mbps;
         }
     submodules:
         H3: StandardHost {

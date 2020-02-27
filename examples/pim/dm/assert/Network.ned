@@ -17,7 +17,7 @@
 package inet.examples.pim.dm.assert;
 
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
-import inet.node.ethernet.Eth100M;
+import inet.node.ethernet.EtherLink;
 import inet.node.ethernet.EtherSwitch;
 import inet.node.inet.MulticastRouter;
 import inet.node.inet.StandardHost;
@@ -25,6 +25,8 @@ import inet.node.inet.StandardHost;
 
 network Network
 {
+    parameters:
+        *.eth[*].bitrate = 100 Mbps;
     submodules:
         R1: MulticastRouter {
             @display("p=400,200");
@@ -52,12 +54,12 @@ network Network
             @display("p=700,199");
         }
     connections allowunconnected:
-        R1.ethg++ <--> Eth100M <--> R2.ethg++;
-        R1.ethg++ <--> Eth100M <--> R3.ethg++;
-        R1.ethg++ <--> Eth100M <--> Source.ethg++;
+        R1.ethg++ <--> EtherLink <--> R2.ethg++;
+        R1.ethg++ <--> EtherLink <--> R3.ethg++;
+        R1.ethg++ <--> EtherLink <--> Source.ethg++;
 
-        switch.ethg++ <--> Eth100M <--> R2.ethg++;
-        switch.ethg++ <--> Eth100M <--> R3.ethg++;
-        R4.ethg++ <--> Eth100M <--> switch.ethg++;
-        R4.ethg++ <--> Eth100M <--> Receiver.ethg++;
+        switch.ethg++ <--> EtherLink <--> R2.ethg++;
+        switch.ethg++ <--> EtherLink <--> R3.ethg++;
+        R4.ethg++ <--> EtherLink <--> switch.ethg++;
+        R4.ethg++ <--> EtherLink <--> Receiver.ethg++;
 }

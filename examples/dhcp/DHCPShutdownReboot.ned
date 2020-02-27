@@ -26,6 +26,8 @@ import inet.visualizer.integrated.IntegratedVisualizer;
 
 network DHCPShutdownReboot
 {
+    parameters:
+        *.eth[*].bitrate = 10Mbps;
     submodules:
         scenarioManager: ScenarioManager {
             @display("p=100,200;is=s");

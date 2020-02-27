@@ -28,7 +28,7 @@ import ned.DatarateChannel;
 network MulticastNetwork
 {
     types:
-        channel ethernet extends DatarateChannel
+        channel pppline extends DatarateChannel
         {
             delay = normal(0.00015s, 0.00005s);
             datarate = 10Mbps;
@@ -121,13 +121,13 @@ network MulticastNetwork
         }
     connections:
         // * Domain 1 * (172.0.0.x)
-        host1.pppg[0] <--> ethernet <--> router1.pppg[0];
-        host2.pppg[0] <--> ethernet <--> router1.pppg[1];
+        host1.pppg[0] <--> pppline <--> router1.pppg[0];
+        host2.pppg[0] <--> pppline <--> router1.pppg[1];
         host2.pppg[1] <--> dialup <--> host3.pppg[1];
-        host3.pppg[0] <--> ethernet <--> router1.pppg[2];
+        host3.pppg[0] <--> pppline <--> router1.pppg[2];
 
         // * Domain 2 * (172.0.1.x)
-        host4.pppg[0] <--> ethernet <--> router3.pppg[0];
+        host4.pppg[0] <--> pppline <--> router3.pppg[0];
 
         // * Domain 3 * (172.0.2.x)
         host5.pppg[0] <--> dialup <--> router4.pppg[0];

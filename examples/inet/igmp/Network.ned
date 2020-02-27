@@ -18,7 +18,7 @@
 package inet.examples.inet.igmp;
 
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
-import inet.node.ethernet.Eth100M;
+import inet.node.ethernet.EtherLink;
 import inet.node.ethernet.EtherSwitch;
 import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
@@ -29,6 +29,8 @@ import inet.node.inet.StandardHost;
 //
 network Network
 {
+    parameters:
+        *.eth[*].bitrate = 100 Mbps;
     submodules:
         Alice: StandardHost {
             @display("p=250,100");
@@ -53,10 +55,10 @@ network Network
             config = xmldoc("config.xml");
         }
     connections allowunconnected:
-        Alice.ethg++ <--> Eth100M <--> etherSwitch.ethg++;
-        Bob.ethg++ <--> Eth100M <--> etherSwitch.ethg++;
-        FITgate1.ethg++ <--> Eth100M <--> etherSwitch.ethg++;
-        FITgate2.ethg++ <--> Eth100M <--> etherSwitch.ethg++;
-        Carlos.ethg++ <--> Eth100M <--> FITgate2.ethg++;
+        Alice.ethg++ <--> EtherLink <--> etherSwitch.ethg++;
+        Bob.ethg++ <--> EtherLink <--> etherSwitch.ethg++;
+        FITgate1.ethg++ <--> EtherLink <--> etherSwitch.ethg++;
+        FITgate2.ethg++ <--> EtherLink <--> etherSwitch.ethg++;
+        Carlos.ethg++ <--> EtherLink <--> FITgate2.ethg++;
 }
 

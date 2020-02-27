@@ -1,25 +1,24 @@
 
 package inet.examples.rip.simpletest;
 
-import inet.common.misc.ThruputMeteringChannel;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.networklayer.configurator.ipv6.Ipv6FlatNetworkConfigurator;
 import inet.networklayer.ipv4.RoutingTableRecorder;
 import inet.node.ethernet.EtherSwitch;
 import inet.node.inet.StandardHost;
 import inet.node.rip.RipRouter;
+import ned.TransmissionChannel;
 
 
 network SimpleTest
 {
     parameters:
+        *.eth[*].bitrate = 100 Mbps;
         @display("p=10,10;b=712,152");
     types:
-        channel C extends ThruputMeteringChannel
+        channel C extends TransmissionChannel
         {
             delay = 0.1us;
-            datarate = 100Mbps;
-            thruputDisplayFormat = "#N";
         }
     submodules:
         rtr: RoutingTableRecorder {

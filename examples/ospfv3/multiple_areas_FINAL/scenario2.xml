@@ -6,10 +6,8 @@
   	<at t="300">
         <connect src-module="Router3" src-gate="ethg[1]"
                  dest-module="Router8" dest-gate="ethg[0]"
-                 channel-type="inet.common.misc.ThruputMeteringChannel">
+                 channel-type="ned.TransmissionChannel">
             <param name="delay" value="0.1us" />
-            <param name="datarate" value="100Mbps" />
-            <param name="thruputDisplayFormat" value='"#N"' />
         </connect>
     </at>
 </scenario>

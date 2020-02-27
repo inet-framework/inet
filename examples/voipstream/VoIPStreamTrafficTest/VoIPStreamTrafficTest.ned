@@ -17,25 +17,23 @@ import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.ethernet.EtherSwitch;
 import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
-import ned.DatarateChannel;
+import ned.TransmissionChannel;
 
 
 network VoIPStreamTrafficTest
 {
     @display("bgb=750,447");
     types:
-        channel line1 extends DatarateChannel
-        {
+        channel line1 extends TransmissionChannel {
             parameters:
                 delay = 100us;
-                datarate = 100Mbps;
+                double datarate @unit(bps) = 100 Mbps;
         }
 
-        channel line2 extends DatarateChannel
-        {
+        channel line2 extends TransmissionChannel {
             parameters:
                 delay = 10us;
-                datarate = 100Mbps;
+                double datarate @unit(bps) = 100 Mbps;
         }
     submodules:
         client: StandardHost {
@@ -81,3 +79,4 @@ network VoIPStreamTrafficTest
         switch2.ethg++ <--> line1 <--> host2.ethg++;
         switch.ethg++ <--> line1 <--> host1.ethg++;
 }
+

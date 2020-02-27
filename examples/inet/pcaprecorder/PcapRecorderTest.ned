@@ -22,14 +22,21 @@ import inet.common.misc.NetAnimTrace;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.StandardHost;
 import ned.DatarateChannel;
+import ned.TransmissionChannel;
 
 
 network PcapRecorderTest
 {
+    parameters:
+        *.eth[*].bitrate = 10 Mbps;
     types:
         channel C extends DatarateChannel
         {
             datarate = 10Mbps;
+            delay = 0.1us;
+        }
+        channel E extends TransmissionChannel
+        {
             delay = 0.1us;
         }
     submodules:
@@ -54,6 +61,6 @@ network PcapRecorderTest
         }
     connections:
         client0.pppg++ <--> C <--> server.pppg++;
-        client1.ethg++ <--> C <--> server.ethg++;
+        client1.ethg++ <--> E <--> server.ethg++;
 }
 

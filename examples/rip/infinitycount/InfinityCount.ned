@@ -7,17 +7,17 @@ package inet.examples.rip.infinitycount;
 import inet.common.scenario.ScenarioManager;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.Router;
-import ned.DatarateChannel;
+import ned.TransmissionChannel;
 
 
 network RIPInfinityCountTest
 {
     parameters:
         int numRipRouters;
+        *.eth[*].bitrate = 10 Mbps;
     types:
-        channel C extends DatarateChannel
+        channel C extends TransmissionChannel
         {
-            datarate = 10Mbps;
             delay = 0.1us;
         }
     submodules:

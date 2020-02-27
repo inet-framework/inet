@@ -7,7 +7,7 @@ import inet.node.rtp.RtpHost;
 network RTPNetwork
 {
     types:
-        channel ethernet extends ned.DatarateChannel
+        channel pppline extends ned.DatarateChannel
         {
             parameters:
                 delay = normal(0.00015s, 0.00005s);
@@ -36,5 +36,5 @@ network RTPNetwork
             @display("p=100,100;is=s");
         }
     connections:
-        sender.pppg++ <--> ethernet <--> receiver.pppg++;
+        sender.pppg++ <--> pppline <--> receiver.pppg++;
 }

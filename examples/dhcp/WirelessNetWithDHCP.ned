@@ -28,8 +28,10 @@ import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 
 network WirelessNetWithDHCP
 {
-    int numHosts;
-    **.mgmt.numChannels = 5;
+    parameters:
+        int numHosts;
+        *.eth[*].bitrate = 100 Mbps;
+        **.mgmt.numChannels = 5;
     submodules:
         radioMedium: Ieee80211ScalarRadioMedium {
             @display("p=100,200;is=s");

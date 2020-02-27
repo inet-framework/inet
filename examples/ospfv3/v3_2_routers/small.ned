@@ -1,22 +1,19 @@
 package inet.examples.ospfv3.v3_2_routers;
 
-import inet.node.ospfv3.Ospfv3Router;
-import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
-import inet.networklayer.configurator.ipv6.Ipv6FlatNetworkConfigurator;
-import inet.common.misc.ThruputMeteringChannel;
-import inet.node.ethernet.EtherSwitch;
-
 import inet.common.scenario.ScenarioManager;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.ospfv3.Ospfv3Router;
+import ned.TransmissionChannel;
 
 
 network v3_2_routers
 {
+    parameters:
+        *.eth[*].bitrate = 100 Mbps;
     types:
-        channel Channel extends ThruputMeteringChannel
+        channel Channel extends TransmissionChannel
         {
             delay = 0.1us;
-            datarate = 100Mbps;
-            thruputDisplayFormat = "#N";
         }
     submodules:
         Router1: Ospfv3Router {
@@ -33,7 +30,7 @@ network v3_2_routers
         }
         configurator: Ipv4NetworkConfigurator {
             @display("p=50,20;is=s");
-         	config = xmldoc("IPv4Config.xml");
+            config = xmldoc("IPv4Config.xml");
             addStaticRoutes = false;
             addDefaultRoutes = false;
             addSubnetRoutes = false;

@@ -27,24 +27,24 @@ import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.ethernet.EtherSwitch;
 import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
+import ned.TransmissionChannel;
 
 
 network NClients
 {
     parameters:
         int n;
+        *.eth[*].bitrate = 10 Mbps;
     types:
-        channel fiberline extends ThruputMeteringChannel
-        {
-            delay = 1us;
-            datarate = 512Mbps;
-            thruputDisplayFormat = "u";
-        }
-        channel ethernetline extends ThruputMeteringChannel
+        channel pppline extends ThruputMeteringChannel
         {
             delay = 0.1us;
             datarate = 10Mbps;
             thruputDisplayFormat = "u";
+        }
+        channel ethernetline extends TransmissionChannel
+        {
+            delay = 0.1us;
         }
     submodules:
         r1: Router {
@@ -76,8 +76,8 @@ network NClients
             cli[i].ethg++ <--> ethernetline <--> s.ethg++;
         }
         s.ethg++ <--> ethernetline <--> r1.ethg++;
-        r1.pppg++ <--> ethernetline <--> r2.pppg++;
-        r2.pppg++ <--> ethernetline <--> r3.pppg++;
-        r3.pppg++ <--> ethernetline <--> srv.pppg++;
+        r1.pppg++ <--> pppline <--> r2.pppg++;
+        r2.pppg++ <--> pppline <--> r3.pppg++;
+        r3.pppg++ <--> pppline <--> srv.pppg++;
 }
 

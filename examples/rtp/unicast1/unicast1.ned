@@ -11,7 +11,7 @@ import ned.DatarateChannel;
 network RTPUnicast1
 {
     types:
-        channel ethernet extends DatarateChannel
+        channel pppline extends DatarateChannel
         {
             delay = normal(0.00015s, 0.00005s);
             datarate = 10Mbps;
@@ -64,8 +64,8 @@ network RTPUnicast1
             @display("p=100,100;is=s");
         }
     connections:
-        host1.pppg++ <--> ethernet <--> router1.pppg++;
-        host2.pppg++ <--> ethernet <--> router1.pppg++;
-        host3.pppg++ <--> ethernet <--> router1.pppg++;
-        host4.pppg++ <--> ethernet <--> router1.pppg++;
+        host1.pppg++ <--> pppline <--> router1.pppg++;
+        host2.pppg++ <--> pppline <--> router1.pppg++;
+        host3.pppg++ <--> pppline <--> router1.pppg++;
+        host4.pppg++ <--> pppline <--> router1.pppg++;
 }

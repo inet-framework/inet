@@ -7,9 +7,13 @@ import inet.node.ethernet.EtherSwitch;
 import inet.node.inet.StandardHost;
 import inet.node.ospfv2.OspfRouter;
 import inet.visualizer.integrated.IntegratedCanvasVisualizer;
+import ned.TransmissionChannel;
+
 
 network BgpNetwork
 {
+    parameters:
+        *.eth[*].bitrate = 100 Mbps;
     types:
         channel LINK_100 extends ThruputMeteringChannel
         {
@@ -18,6 +22,11 @@ network BgpNetwork
                 datarate = 100Mbps;
                 displayAsTooltip = true;
                 thruputDisplayFormat = "#N";
+        }
+        channel ethlink extends TransmissionChannel
+        {
+            parameters:
+                delay = 50us;
         }
     submodules:
         visualizer: IntegratedCanvasVisualizer {
@@ -170,22 +179,22 @@ network BgpNetwork
         }
     connections:
         //LAN RA3
-        HA31.ethg[0] <--> LINK_100 <--> PA3.ethg[0];
-        HA32.ethg[0] <--> LINK_100 <--> PA3.ethg[1];
-        PA3.ethg[2] <--> LINK_100 <--> RA3.ethg[0];
+        HA31.ethg[0] <--> ethlink <--> PA3.ethg[0];
+        HA32.ethg[0] <--> ethlink <--> PA3.ethg[1];
+        PA3.ethg[2] <--> ethlink <--> RA3.ethg[0];
 
         //LAN RB1
-        HB11.ethg[0] <--> LINK_100 <--> PB1.ethg[0];
-        HB12.ethg[0] <--> LINK_100 <--> PB1.ethg[1];
-        PB1.ethg[2] <--> LINK_100 <--> RB1.ethg[0];
+        HB11.ethg[0] <--> ethlink <--> PB1.ethg[0];
+        HB12.ethg[0] <--> ethlink <--> PB1.ethg[1];
+        PB1.ethg[2] <--> ethlink <--> RB1.ethg[0];
 
         //LAN C1 et C2
-        HC11.ethg[0] <--> LINK_100 <--> PC1.ethg[0];
-        HC12.ethg[0] <--> LINK_100 <--> PC1.ethg[1];
-        HC21.ethg[0] <--> LINK_100 <--> PC2.ethg[0];
-        HC22.ethg[0] <--> LINK_100 <--> PC2.ethg[1];
-        PC1.ethg[2] <--> LINK_100 <--> RC1.ethg[0];
-        PC2.ethg[2] <--> LINK_100 <--> RC2.ethg[0];
+        HC11.ethg[0] <--> ethlink <--> PC1.ethg[0];
+        HC12.ethg[0] <--> ethlink <--> PC1.ethg[1];
+        HC21.ethg[0] <--> ethlink <--> PC2.ethg[0];
+        HC22.ethg[0] <--> ethlink <--> PC2.ethg[1];
+        PC1.ethg[2] <--> ethlink <--> RC1.ethg[0];
+        PC2.ethg[2] <--> ethlink <--> RC2.ethg[0];
 
         //OSPF A
         RA1.pppg[2] <--> LINK_100 <--> RA3.pppg[0];

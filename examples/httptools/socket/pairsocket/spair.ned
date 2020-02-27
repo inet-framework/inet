@@ -2,24 +2,20 @@
 // Pair scenario file for the sockets pair example.
 //
 
-
-
 package inet.examples.httptools.socket.pairsocket;
 
 import inet.applications.httptools.configurator.HttpController;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.StandardHost;
-
+import ned.TransmissionChannel;
 
 network HttpSockPair
 {
     parameters:
+        *.eth[*].bitrate = 1000 Mbps;
     types:
-        channel gigabitline extends ned.DatarateChannel
-        {
-            parameters:
-                delay = 0.1us;
-                datarate = 1000Mbps;
+        channel gigabitline extends TransmissionChannel {
+            delay = 0.1us;
         }
     submodules:
         configurator: Ipv4NetworkConfigurator {

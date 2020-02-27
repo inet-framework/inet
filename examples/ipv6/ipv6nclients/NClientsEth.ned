@@ -22,23 +22,18 @@ package inet.examples.ipv6.ipv6nclients;
 import inet.networklayer.configurator.ipv6.Ipv6FlatNetworkConfigurator;
 import inet.node.ipv6.Router6;
 import inet.node.ipv6.StandardHost6;
-import ned.DatarateChannel;
+import ned.TransmissionChannel;
 
 
 network NClientsEth
 {
     parameters:
         int n;
+        *.eth[*].bitrate = 100 Mbps;
     types:
-        channel fiberline extends DatarateChannel
-        {
-            delay = 1us;
-            datarate = 1Gbps;
-        }
-        channel ethernetline extends DatarateChannel
+        channel ethernetline extends TransmissionChannel
         {
             delay = 0.1us;
-            datarate = 100Mbps;
         }
     submodules:
         configurator: Ipv6FlatNetworkConfigurator {
@@ -66,14 +61,5 @@ network NClientsEth
         r1.ethg++ <--> ethernetline <--> r2.ethg++;
         r2.ethg++ <--> ethernetline <--> r3.ethg++;
         r3.ethg++ <--> ethernetline <--> srv.ethg++;
-
-        //XXX
-        // Mixing ethernet and ppp currently doesn't work, due to a bug in
-        // Ipv6FlatNetworkConfigurator::determineGateIndex.
-        //
-        // r1.pppg++ <--> fiberline <--> r2.pppg++;
-        // r2.pppg++ <--> fiberline <--> r3.pppg++;
-        // r3.pppg++ <--> fiberline <--> srv.pppg++;
-        //
 }
 

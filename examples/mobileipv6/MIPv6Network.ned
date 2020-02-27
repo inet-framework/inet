@@ -31,20 +31,12 @@ import inet.node.xmipv6.CorrespondentNode6;
 import inet.node.xmipv6.HomeAgent6;
 import inet.node.xmipv6.WirelessHost6;
 import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+import ned.TransmissionChannel;
 
 
-channel fiberline extends ned.DatarateChannel
+channel ethernetline extends TransmissionChannel
 {
-    parameters:
-        delay = 1us;
-        datarate = 512Mbps;
-}
-
-channel ethernetline extends ned.DatarateChannel
-{
-    parameters:
-        delay = 0.1us;
-        datarate = 100Mbps;
+    delay = 0.1us;
 }
 
 network mIPv6Network
@@ -53,6 +45,7 @@ network mIPv6Network
         int total_mn;
         int total_cn;
         **.mgmt.numChannels = 5;
+        *.eth[*].bitrate = 100 Mbps;
 
         @display("bgb=799,698");
     submodules:

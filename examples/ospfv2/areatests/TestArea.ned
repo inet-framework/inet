@@ -1,10 +1,10 @@
 
 package inet.examples.ospfv2.areatests;
 
-import inet.common.misc.ThruputMeteringChannel;
 import inet.node.ethernet.EtherSwitch;
 import inet.node.inet.StandardHost;
 import inet.node.ospfv2.OspfRouter;
+import ned.TransmissionChannel;
 
 
 module TestArea
@@ -13,14 +13,13 @@ module TestArea
         @display("p=10,10;b=412,316");
         int numHosts = default(3);
         int extGates = default(0);
+        *.eth[*].bitrate = 100 Mbps;
     gates:
         inout ethg[extGates];
     types:
-        channel C extends ThruputMeteringChannel
+        channel C extends TransmissionChannel
         {
             delay = 0.1us;
-            datarate = 100Mbps;
-            thruputDisplayFormat = "#N";
         }
     submodules:
         H[numHosts]: StandardHost {

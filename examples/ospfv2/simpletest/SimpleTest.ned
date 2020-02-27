@@ -1,24 +1,23 @@
 
 package inet.examples.ospfv2.simpletest;
 
-import inet.common.misc.ThruputMeteringChannel;
 import inet.common.scenario.ScenarioManager;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.ethernet.EtherSwitch;
 import inet.node.inet.StandardHost;
 import inet.node.ospfv2.OspfRouter;
+import ned.TransmissionChannel;
 
 
 network SimpleTest
 {
     parameters:
+        *.eth[*].bitrate = 100 Mbps;
         @display("p=10,10;b=712,152");
     types:
-        channel C extends ThruputMeteringChannel
+        channel C extends TransmissionChannel
         {
             delay = 0.1us;
-            datarate = 100Mbps;
-            thruputDisplayFormat = "#N";
         }
     submodules:
         H1: StandardHost {

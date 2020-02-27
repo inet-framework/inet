@@ -18,16 +18,18 @@
 package inet.examples.internetcloud.earthcloud;
 
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
-import inet.node.ethernet.Eth100M;
+import inet.node.ethernet.EtherLink;
 import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
 import inet.node.internetcloud.InternetCloud;
+import ned.DatarateChannel;
 
 
 network SimpleContinentCloud
 {
     parameters:
         int numClients;
+        *.eth[*].bitrate = 100 Mbps;
         @display("i=device/lan-ring");
     gates:
         inout pppg[];
@@ -45,15 +47,23 @@ network SimpleContinentCloud
         for i=0..sizeof(pppg)-1 {
             pppg[i] <--> router.pppg++;
         }
-        router.ethg++ <--> Eth100M <--> server.ethg++;
+        router.ethg++ <--> EtherLink <--> server.ethg++;
         for i=0..numClients-1 {
-            router.ethg++ <--> Eth100M <--> client[i].ethg++;
+            router.ethg++ <--> EtherLink <--> client[i].ethg++;
         }
 }
 
 network EarthCloud
 {
-    @display("bgi=maps/world;bgb=875,414");
+    parameters:
+        *.eth[*].bitrate = 1 Gbps;
+        @display("bgi=maps/world;bgb=875,414");
+    types:
+        channel ppplink extends DatarateChannel
+        {
+            delay = 2 ms;
+            datarate = 100 Mbps;
+        }
     submodules:
         configurator: Ipv4NetworkConfigurator {
             parameters:
@@ -82,11 +92,11 @@ network EarthCloud
             @display("p=260,270");
         }
     connections:
-        africa.pppg++ <--> {  datarate = 100Mbps; delay = 2ms; } <--> internet.pppg++;
-        asia.pppg++ <--> {  datarate = 100Mbps; delay = 2ms; } <--> internet.pppg++;
-        australia.pppg++ <--> {  datarate = 100Mbps; delay = 2ms; } <--> internet.pppg++;
-        europe.pppg++ <--> {  datarate = 100Mbps; delay = 2ms; } <--> internet.pppg++;
-        northAmerica.pppg++ <--> {  datarate = 100Mbps; delay = 2ms; } <--> internet.pppg++;
-        southAmerica.pppg++ <--> {  datarate = 100Mbps; delay = 2ms; } <--> internet.pppg++;
+        africa.pppg++ <--> ppplink <--> internet.pppg++;
+        asia.pppg++ <--> ppplink <--> internet.pppg++;
+        australia.pppg++ <--> ppplink <--> internet.pppg++;
+        europe.pppg++ <--> ppplink <--> internet.pppg++;
+        northAmerica.pppg++ <--> ppplink <--> internet.pppg++;
+        southAmerica.pppg++ <--> ppplink <--> internet.pppg++;
 }
 

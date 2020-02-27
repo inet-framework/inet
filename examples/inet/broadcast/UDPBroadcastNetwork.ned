@@ -5,16 +5,21 @@ import inet.node.ethernet.EtherSwitch;
 import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
 import ned.DatarateChannel;
+import ned.TransmissionChannel;
 
 
 network UDPBroadcastNetwork
 {
     parameters:
         int numTargets;
+        *.eth[*].bitrate = 10Mbps;
     types:
         channel C extends DatarateChannel
         {
             datarate = 10Mbps;
+            delay = 0.1us;
+        }
+        channel E extends TransmissionChannel {
             delay = 0.1us;
         }
     submodules:
@@ -31,7 +36,6 @@ network UDPBroadcastNetwork
                 @display("p=400,200");
         }
         R2: Router {
-
             @display("p=550,200");
         }
         configurator: Ipv4NetworkConfigurator {
@@ -49,8 +53,9 @@ network UDPBroadcastNetwork
         client.pppg++ <--> C <--> R1.pppg++;
         R1.pppg++ <--> C <--> R2.pppg++;
         R2.pppg++ <--> C <--> nonTarget.pppg++;
-        R2.ethg++ <--> C <--> switch.ethg++;
+        R2.ethg++ <--> E <--> switch.ethg++;
         for i=0..numTargets-1 {
-            switch.ethg++ <--> C <--> target[i].ethg++;
+            switch.ethg++ <--> E <--> target[i].ethg++;
         }
 }
+
