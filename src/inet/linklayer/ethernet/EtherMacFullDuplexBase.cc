@@ -493,8 +493,8 @@ void EtherMacFullDuplexBase::readChannelParameters(bool errorWhenAsymmetric)
     if (errorWhenAsymmetric && (rxDisabled != txDisabled))
         throw cRuntimeError("The enablements of the input/output channels differ (rx=%s vs tx=%s)", rxDisabled ? "off" : "on", txDisabled ? "off" : "on");
 
-    auto rxDelay = inTrChannel->getDelay();
-    auto txDelay = outTrChannel->getDelay();
+    auto rxDelay = inTrChannel ? inTrChannel->getDelay() : NaN;
+    auto txDelay = outTrChannel ? outTrChannel->getDelay() : NaN;
     if (errorWhenAsymmetric && (rxDelay != txDelay))
         throw cRuntimeError("The delays on the input/output channels differ (rx=%d vs tx=%d)", inTrChannel->getDelay(), outTrChannel->getDelay());
 
