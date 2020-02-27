@@ -516,6 +516,12 @@ B EtherMac::calculatePaddedFrameLength(Packet *frame)
     return std::max(minFrameLength, B(frame->getDataLength()));
 }
 
+simtime_t EtherMac::calculateDuration(EthernetSignalBase *signal)
+{
+    return signal->getBitLength() / signal->getBitrate();
+}
+
+
 void EtherMac::startFrameTransmission()
 {
     ASSERT(currentTxFrame);
@@ -553,7 +559,8 @@ void EtherMac::startFrameTransmission()
     else
         signal->encapsulate(frame);
     signal->addByteLength(extensionLength.get());
-    send(signal, physOutGate);
+    auto duration = calculateDuration(signal);
+    send(signal, physOutGate, duration);
 
     // check for collisions (there might be an ongoing reception which we don't know about, see below)
     if (!duplexMode && receiveState != RX_IDLE_STATE) {
@@ -717,7 +724,8 @@ void EtherMac::sendJamSignal()
 
     transmissionChannel->forceTransmissionFinishTime(SIMTIME_ZERO);
     //emit(packetSentToLowerSignal, jam);
-    send(jam, physOutGate);
+    auto duration = calculateDuration(jam);
+    send(jam, physOutGate, duration);
 
     scheduleAt(transmissionChannel->getTransmissionFinishTime(), endJammingMsg);
     changeTransmissionState(JAMMING_STATE);
@@ -937,7 +945,8 @@ void EtherMac::fillIFGIfInBurst()
         gap->setBitrate(curEtherDescr->txrate);
         bytesSentInBurst += B(gap->getByteLength());
         currentSendPkTreeID = gap->getTreeId();
-        send(gap, physOutGate);
+        auto duration = calculateDuration(gap);
+        send(gap, physOutGate, duration);
         changeTransmissionState(SEND_IFG_STATE);
         cancelEvent(endIFGMsg);
         scheduleAt(transmissionChannel->getTransmissionFinishTime(), endIFGMsg);
