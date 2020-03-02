@@ -512,7 +512,14 @@ void EtherMacBase::readChannelParameters(bool errorWhenAsymmetric)
         if (outTrChannel && !transmissionChannel)
             outTrChannel->subscribe(POST_MODEL_CHANGE, this);
         transmissionChannel = outTrChannel;
+
         // Check valid speeds
+        if (outTrChannel->hasPar("datarate")) {
+            double txRate = outTrChannel->par("datarate");
+            if (!std::isnan(txRate)) {
+                interfaceEntry->par("bitrate").setDoubleValue(txRate);
+            }
+        }
         double txRate = interfaceEntry->par("bitrate");
         for (auto & etherDescr : etherDescrs) {
             if (txRate == etherDescr.txrate) {

@@ -358,13 +358,26 @@ double NetworkConfiguratorBase::computeWiredLinkWeight(Link *link, const char *m
                 return minLinkWeight;
         }
         else if (!strcmp(metric, "dataRate")) {
-            cChannel *transmissionChannel = linkOut->getLocalGate()->findTransmissionChannel();
-            if (transmissionChannel != nullptr) {
-                double dataRate = transmissionChannel->getNominalDatarate();
-                return dataRate != 0 ? 1 / dataRate : minLinkWeight;
+            double metric = NaN;
+            if (auto nic = findContainingNicModule(linkOut->getLocalGate()->getPathStartGate()->getOwnerModule())) {
+                double dataRate = nic->getDatarate();
+                ASSERT(dataRate == nic->par("bitrate").doubleValue());
+                if (dataRate != 0.0)
+                    metric = 1.0 / dataRate;
+                EV_TRACE << "dataRate metric for " << nic->getInterfaceFullPath() << ": " << metric << endl;
             }
-            else
-                return minLinkWeight;
+            if (std::isnan(metric)) {
+                if (cChannel *transmissionChannel = linkOut->getLocalGate()->findTransmissionChannel()) {
+                    double dataRate = transmissionChannel->getNominalDatarate();
+                    if (dataRate != 0.0)
+                        metric = 1.0 / dataRate;
+                }
+            }
+            if (std::isnan(metric))
+                metric = minLinkWeight;
+
+            EV_TRACE << "dataRate metric for " << linkOut->getLocalGate()->getFullName() << ": " << metric << endl;
+            return metric;
         }
         else if (!strcmp(metric, "errorRate")) {
             cDatarateChannel *transmissionChannel = dynamic_cast<cDatarateChannel *>(linkOut->getLocalGate()->findTransmissionChannel());
