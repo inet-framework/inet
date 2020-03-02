@@ -503,6 +503,9 @@ void EtherMacFullDuplexBase::readChannelParameters(bool errorWhenAsymmetric)
 
     channelsDiffer = (rxDisabled != txDisabled) || (rxDelay != txDelay);
 
+    if (!interfaceEntry)
+        interfaceEntry = getContainingNicModule(this);
+
     if (connected) {
         if (outTrChannel && !transmissionChannel)
             outTrChannel->subscribe(POST_MODEL_CHANGE, this);
