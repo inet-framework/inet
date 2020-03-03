@@ -1,0 +1,1697 @@
+
+
+module inet_common_BitVector {
+  header "inet/common/BitVector.h"
+  export *
+}
+
+
+module inet_common_Compat {
+  header "inet/common/Compat.h"
+  export *
+}
+
+
+module inet_common_DelayedInitializer {
+  header "inet/common/DelayedInitializer.h"
+  export *
+}
+
+
+module inet_common_Endian {
+  header "inet/common/Endian.h"
+  export *
+}
+
+
+module inet_common_FindModule {
+  header "inet/common/FindModule.h"
+  export *
+}
+
+
+module inet_common_FingerprintCalculator {
+  header "inet/common/FingerprintCalculator.h"
+  export *
+}
+
+
+module inet_common_FSMA {
+  header "inet/common/FSMA.h"
+  export *
+}
+
+
+module inet_common_IInterfaceRegistrationListener {
+  header "inet/common/IInterfaceRegistrationListener.h"
+  export *
+}
+
+
+module inet_common_IndexSequence {
+  header "inet/common/IndexSequence.h"
+  export *
+}
+
+
+
+
+module inet_common_INETEndians {
+  header "inet/common/INETEndians.h"
+  export *
+}
+
+
+module inet_common_INETMa {
+  header "inet/common/INETMath.h"
+  export *
+}
+
+
+module inet_common_INETUtils {
+  header "inet/common/INETUtils.h"
+  export *
+}
+
+
+module inet_common_InitStages {
+  textual header "inet/common/InitStages.h"
+  export *
+}
+
+
+
+module inet_common_int128 {
+  header "inet/common/int128.h"
+  export *
+}
+
+
+module inet_common_IntervalTree {
+  header "inet/common/IntervalTree.h"
+  export *
+}
+
+
+module inet_common_IntrusivePtr {
+  header "inet/common/IntrusivePtr.h"
+  export *
+}
+
+
+module inet_common_IProtocolRegistrationListener {
+  header "inet/common/IProtocolRegistrationListener.h"
+  export *
+}
+
+
+module inet_common_IVisitor {
+  header "inet/common/IVisitor.h"
+  export *
+}
+
+
+module inet_common_LayeredProtocolBase {
+  header "inet/common/LayeredProtocolBase.h"
+  export *
+}
+
+
+module inet_common_Mao {
+  header "inet/common/Macho.h"
+  export *
+}
+
+
+module inet_common_MatableField {
+  header "inet/common/MatchableField.h"
+  export *
+}
+
+
+module inet_common_MatableObject {
+  header "inet/common/MatchableObject.h"
+  export *
+}
+
+
+module inet_common_MemoryInputStream {
+  header "inet/common/MemoryInputStream.h"
+  export *
+}
+
+
+module inet_common_MemoryOutputStream {
+  header "inet/common/MemoryOutputStream.h"
+  export *
+}
+
+
+module inet_common_MessageDispater {
+  header "inet/common/MessageDispatcher.h"
+  export *
+}
+
+
+module inet_common_ModuleAccess {
+  header "inet/common/ModuleAccess.h"
+  export *
+}
+
+
+module inet_common_NetworkNamespaceContext {
+  header "inet/common/NetworkNamespaceContext.h"
+  export *
+}
+
+
+module inet_common_ObjectPrinter {
+  header "inet/common/ObjectPrinter.h"
+  export *
+}
+
+module inet_common_OsgScene {
+  header "inet/common/OsgScene.h"
+  export *
+}
+
+
+module inet_common_OsgUtils {
+  header "inet/common/OsgUtils.h"
+  export *
+}
+
+
+module inet_common_PatternMater {
+  header "inet/common/PatternMatcher.h"
+  export *
+}
+
+module inet_common_precompiled_debug {
+  header "inet/common/precompiled_debug.h"
+  export *
+}
+
+
+module inet_common_precompiled {
+  header "inet/common/precompiled.h"
+  export *
+}
+
+
+module inet_common_precompiled_release {
+  header "inet/common/precompiled_release.h"
+  export *
+}
+
+
+module inet_common_ProtocolGroup {
+  header "inet/common/ProtocolGroup.h"
+  export *
+}
+
+
+module inet_common_Protocol {
+  header "inet/common/Protocol.h"
+  export *
+}
+
+
+module inet_common_Protocol_m {
+  header "inet/common/Protocol_m.h"
+  export *
+}
+
+
+module inet_common_ProtocolTag_m {
+  header "inet/common/ProtocolTag_m.h"
+  export *
+}
+
+
+module inet_common_ProtocolTools {
+  header "inet/common/ProtocolTools.h"
+  export *
+}
+
+
+module inet_common_Ptr {
+  header "inet/common/Ptr.h"
+  export *
+}
+
+
+module inet_common_ResultFilters {
+  header "inet/common/ResultFilters.h"
+  export *
+}
+
+
+module inet_common_ResultRecorders {
+  header "inet/common/ResultRecorders.h"
+  export *
+}
+
+
+module inet_common_ortBitVector {
+  header "inet/common/ShortBitVector.h"
+  export *
+}
+
+
+module inet_common_Simsignals {
+  header "inet/common/Simsignals.h"
+  export *
+}
+
+
+module inet_common_Simsignals_m {
+  header "inet/common/Simsignals_m.h"
+  export *
+}
+
+
+module inet_common_stlutils {
+  header "inet/common/stlutils.h"
+  export *
+}
+
+
+module inet_common_StringFormat {
+  header "inet/common/StringFormat.h"
+  export *
+}
+
+
+module inet_common_TagBase_m {
+  header "inet/common/TagBase_m.h"
+  export *
+}
+
+
+module inet_common_TemporaryaredPtr {
+  header "inet/common/TemporarySharedPtr.h"
+  export *
+}
+
+
+module inet_common_TimeTag_m {
+  header "inet/common/TimeTag_m.h"
+  export *
+}
+
+
+module inet_common_TlvOptions_m {
+  header "inet/common/TlvOptions_m.h"
+  export *
+}
+
+
+module inet_common_Topology {
+  header "inet/common/Topology.h"
+  export *
+}
+
+
+module inet_common_Units {
+  header "inet/common/Units.h"
+  export *
+}
+
+
+module inet_common_Units_m {
+  header "inet/common/Units_m.h"
+  export *
+}
+
+
+module inet_common_XMLUtils {
+  header "inet/common/XMLUtils.h"
+  export *
+}
+
+
+
+
+
+
+
+
+
+
+module inet_common_ecksum_EernetCRC {
+  header "inet/common/checksum/EthernetCRC.h"
+  export *
+}
+
+
+module inet_common_ecksum_TcpIpecksum {
+  header "inet/common/checksum/TcpIpChecksum.h"
+  export *
+}
+
+
+module inet_common_figures_BarFigure {
+  header "inet/common/figures/BarFigure.h"
+  export *
+}
+
+
+module inet_common_figures_BoxedLabelFigure {
+  header "inet/common/figures/BoxedLabelFigure.h"
+  export *
+}
+
+
+module inet_common_figures_CounterFigure {
+  header "inet/common/figures/CounterFigure.h"
+  export *
+}
+
+
+module inet_common_figures_FigureRecorder {
+  header "inet/common/figures/FigureRecorder.h"
+  export *
+}
+
+
+module inet_common_figures_GaugeFigure {
+  header "inet/common/figures/GaugeFigure.h"
+  export *
+}
+
+
+module inet_common_figureseatMapFigure {
+  header "inet/common/figures/HeatMapFigure.h"
+  export *
+}
+
+
+module inet_common_figureseatMapPlotFigure {
+  header "inet/common/figures/HeatMapPlotFigure.h"
+  export *
+}
+
+
+module inet_common_figures_IIndicatorFigure {
+  header "inet/common/figures/IIndicatorFigure.h"
+  export *
+}
+
+
+module inet_common_figures_IndexedImageFigure {
+  header "inet/common/figures/IndexedImageFigure.h"
+  export *
+}
+
+
+module inet_common_figures_IndicatorLabelFigure {
+  header "inet/common/figures/IndicatorLabelFigure.h"
+  export *
+}
+
+
+module inet_common_figures_IndicatorTextFigure {
+  header "inet/common/figures/IndicatorTextFigure.h"
+  export *
+}
+
+
+module inet_common_figures_InstrumentUtil {
+  header "inet/common/figures/InstrumentUtil.h"
+  export *
+}
+
+
+module inet_common_figures_LabeledIconFigure {
+  header "inet/common/figures/LabeledIconFigure.h"
+  export *
+}
+
+
+module inet_common_figures_LabeledLineFigure {
+  header "inet/common/figures/LabeledLineFigure.h"
+  export *
+}
+
+
+module inet_common_figures_LabeledPolylineFigure {
+  header "inet/common/figures/LabeledPolylineFigure.h"
+  export *
+}
+
+
+module inet_common_figures_LinearGaugeFigure {
+  header "inet/common/figures/LinearGaugeFigure.h"
+  export *
+}
+
+
+module inet_common_figures_PlotFigure {
+  header "inet/common/figures/PlotFigure.h"
+  export *
+}
+
+
+module inet_common_figures_ProgressMeterFigure {
+  header "inet/common/figures/ProgressMeterFigure.h"
+  export *
+}
+
+
+module inet_common_figures_QueueFigure {
+  header "inet/common/figures/QueueFigure.h"
+  export *
+}
+
+
+module inet_common_figures_SignalFigure {
+  header "inet/common/figures/SignalFigure.h"
+  export *
+}
+
+
+module inet_common_figures_SimTimeTextFigure {
+  header "inet/common/figures/SimTimeTextFigure.h"
+  export *
+}
+
+
+module inet_common_figures_ermometerFigure {
+  header "inet/common/figures/ThermometerFigure.h"
+  export *
+}
+
+
+module inet_common_figures_TrailFigure {
+  header "inet/common/figures/TrailFigure.h"
+  export *
+}
+
+
+module inet_common_geometry_Geometry_m {
+  header "inet/common/geometry/Geometry_m.h"
+  export *
+}
+
+
+module inet_common_lifecycle_ApplicationOperations {
+  header "inet/common/lifecycle/ApplicationOperations.h"
+  export *
+}
+
+
+module inet_common_lifecycle_ILifecycle {
+  header "inet/common/lifecycle/ILifecycle.h"
+  export *
+}
+
+
+module inet_common_lifecycle_InterfaceOperations {
+  header "inet/common/lifecycle/InterfaceOperations.h"
+  export *
+}
+
+
+module inet_common_lifecycle_LifecycleController {
+  header "inet/common/lifecycle/LifecycleController.h"
+  export *
+}
+
+
+module inet_common_lifecycle_LifecycleOperation {
+  header "inet/common/lifecycle/LifecycleOperation.h"
+  export *
+}
+
+
+module inet_common_lifecycle_LifecycleUnsupported {
+  header "inet/common/lifecycle/LifecycleUnsupported.h"
+  export *
+}
+
+
+module inet_common_lifecycle_ModuleOperations {
+  header "inet/common/lifecycle/ModuleOperations.h"
+  export *
+}
+
+
+module inet_common_lifecycle_NodeStatus {
+  header "inet/common/lifecycle/NodeStatus.h"
+  export *
+}
+
+
+module inet_common_lifecycle_OperationalBase {
+  header "inet/common/lifecycle/OperationalBase.h"
+  export *
+}
+
+
+module inet_common_ma_AlgebraicOperations {
+  header "inet/common/math/AlgebraicOperations.h"
+  export *
+}
+
+
+module inet_common_ma_CompoundFunctions {
+  header "inet/common/math/CompoundFunctions.h"
+  export *
+}
+
+
+module inet_common_ma_Domain {
+  header "inet/common/math/Domain.h"
+  export *
+}
+
+
+module inet_common_ma_FunctionBase {
+  header "inet/common/math/FunctionBase.h"
+  export *
+}
+
+
+module inet_common_ma_Functionecker {
+  header "inet/common/math/FunctionChecker.h"
+  export *
+}
+
+
+module inet_common_ma_Functions {
+  header "inet/common/math/Functions.h"
+  export *
+}
+
+
+module inet_common_ma_IFunction {
+  header "inet/common/math/IFunction.h"
+  export *
+}
+
+
+module inet_common_ma_IInterpolator {
+  header "inet/common/math/IInterpolator.h"
+  export *
+}
+
+
+module inet_common_ma_Interpolators {
+  header "inet/common/math/Interpolators.h"
+  export *
+}
+
+
+module inet_common_ma_Interval {
+  header "inet/common/math/Interval.h"
+  export *
+}
+
+
+module inet_common_ma_Point {
+  header "inet/common/math/Point.h"
+  export *
+}
+
+
+module inet_common_ma_PrimitiveFunctions {
+  header "inet/common/math/PrimitiveFunctions.h"
+  export *
+}
+
+
+module inet_common_misc_Messageecker {
+  header "inet/common/misc/MessageChecker.h"
+  export *
+}
+
+
+module inet_common_misc_NetAnimTrace {
+  header "inet/common/misc/NetAnimTrace.h"
+  export *
+}
+
+
+module inet_common_misc_SignalSource {
+  header "inet/common/misc/SignalSource.h"
+  export *
+}
+
+
+module inet_common_misc_ruputMeter {
+  header "inet/common/misc/ThruputMeter.h"
+  export *
+}
+
+
+module inet_common_misc_ruputMeteringannel {
+  header "inet/common/misc/ThruputMeteringChannel.h"
+  export *
+}
+
+
+module inet_common_packet_unkBuffer {
+  header "inet/common/packet/ChunkBuffer.h"
+  export *
+}
+
+
+module inet_common_packet_unkBuffer_m {
+  header "inet/common/packet/ChunkBuffer_m.h"
+  export *
+}
+
+
+module inet_common_packet_unkQueue {
+  header "inet/common/packet/ChunkQueue.h"
+  export *
+}
+
+
+module inet_common_packet_unkQueue_m {
+  header "inet/common/packet/ChunkQueue_m.h"
+  export *
+}
+
+
+module inet_common_packet_Message {
+  header "inet/common/packet/Message.h"
+  export *
+}
+
+
+module inet_common_packet_Message_m {
+  header "inet/common/packet/Message_m.h"
+  export *
+}
+
+
+module inet_common_packet_PacketFilter {
+  header "inet/common/packet/PacketFilter.h"
+  export *
+}
+
+
+module inet_common_packet_Packet {
+  header "inet/common/packet/Packet.h"
+  export *
+}
+
+
+module inet_common_packet_Packet_m {
+  header "inet/common/packet/Packet_m.h"
+  export *
+}
+
+
+module inet_common_packet_ReassemblyBuffer {
+  header "inet/common/packet/ReassemblyBuffer.h"
+  export *
+}
+
+
+module inet_common_packet_ReorderBuffer {
+  header "inet/common/packet/ReorderBuffer.h"
+  export *
+}
+
+
+module inet_common_scenario_IScriptable {
+  header "inet/common/scenario/IScriptable.h"
+  export *
+}
+
+
+module inet_common_scenario_ScenarioManager {
+  header "inet/common/scenario/ScenarioManager.h"
+  export *
+}
+
+
+module inet_common_scenario_ScenarioTimer_m {
+  header "inet/common/scenario/ScenarioTimer_m.h"
+  export *
+}
+
+
+module inet_common_seduler_RealTimeSeduler {
+  header "inet/common/scheduler/RealTimeScheduler.h"
+  export *
+}
+
+
+module inet_common_socket_ISocket {
+  header "inet/common/socket/ISocket.h"
+  export *
+}
+
+
+module inet_common_socket_SocketMap {
+  header "inet/common/socket/SocketMap.h"
+  export *
+}
+
+
+module inet_common_streetmap_OpenStreetMap {
+  header "inet/common/streetmap/OpenStreetMap.h"
+  export *
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+module inet_applications_base_ApplicationBase {
+  header "inet/applications/base/ApplicationBase.h"
+  export *
+}
+
+
+
+
+module inet_applications_base_ApplicationPacket_m {
+  header "inet/applications/base/ApplicationPacket_m.h"
+  export *
+}
+
+
+
+
+module inet_applications_base_ApplicationPacketSerializer {
+  header "inet/applications/base/ApplicationPacketSerializer.h"
+  export *
+}
+
+
+
+
+module inet_linklayer_base_MacProtocolBase {
+  header "inet/linklayer/base/MacProtocolBase.h"
+  export *
+}
+
+
+
+
+module inet_mobility_base_LinearRotatingMobilityBase {
+  header "inet/mobility/base/LinearRotatingMobilityBase.h"
+  export *
+}
+
+
+
+
+module inet_mobility_base_LineSegmentsMobilityBase {
+  header "inet/mobility/base/LineSegmentsMobilityBase.h"
+  export *
+}
+
+
+
+
+module inet_mobility_base_MobilityBase {
+  header "inet/mobility/base/MobilityBase.h"
+  export *
+}
+
+
+
+
+module inet_mobility_base_MovingMobilityBase {
+  header "inet/mobility/base/MovingMobilityBase.h"
+  export *
+}
+
+
+
+
+module inet_mobility_base_RotatingMobilityBase {
+  header "inet/mobility/base/RotatingMobilityBase.h"
+  export *
+}
+
+
+
+
+module inet_mobility_base_StationaryMobilityBase {
+  header "inet/mobility/base/StationaryMobilityBase.h"
+  export *
+}
+
+
+
+
+module inet_networklayer_base_NetworkProtocolBase {
+  header "inet/networklayer/base/NetworkProtocolBase.h"
+  export *
+}
+
+
+
+
+module inet_power_base_CcEnergySinkBase {
+  header "inet/power/base/CcEnergySinkBase.h"
+  export *
+}
+
+
+
+
+module inet_power_base_CcEnergySourceBase {
+  header "inet/power/base/CcEnergySourceBase.h"
+  export *
+}
+
+
+
+
+module inet_power_base_CcEnergyStorageBase {
+  header "inet/power/base/CcEnergyStorageBase.h"
+  export *
+}
+
+
+
+
+module inet_power_base_EnergySinkBase {
+  header "inet/power/base/EnergySinkBase.h"
+  export *
+}
+
+
+
+
+module inet_power_base_EnergySourceBase {
+  header "inet/power/base/EnergySourceBase.h"
+  export *
+}
+
+
+
+
+module inet_power_base_EnergyStorageBase {
+  header "inet/power/base/EnergyStorageBase.h"
+  export *
+}
+
+
+
+
+module inet_power_base_EpEnergySinkBase {
+  header "inet/power/base/EpEnergySinkBase.h"
+  export *
+}
+
+
+
+
+module inet_power_base_EpEnergySourceBase {
+  header "inet/power/base/EpEnergySourceBase.h"
+  export *
+}
+
+
+
+
+module inet_power_base_EpEnergyStorageBase {
+  header "inet/power/base/EpEnergyStorageBase.h"
+  export *
+}
+
+
+
+
+module inet_power_base_PowerDefs {
+  header "inet/power/base/PowerDefs.h"
+  export *
+}
+
+
+
+
+module inet_queueing_base_PacketBufferBase {
+  header "inet/queueing/base/PacketBufferBase.h"
+  export *
+}
+
+
+
+
+module inet_queueing_base_PacketClassifierBase {
+  header "inet/queueing/base/PacketClassifierBase.h"
+  export *
+}
+
+
+
+
+module inet_queueing_base_PacketDuplicatorBase {
+  header "inet/queueing/base/PacketDuplicatorBase.h"
+  export *
+}
+
+
+
+
+module inet_queueing_base_PacketFilterBase {
+  header "inet/queueing/base/PacketFilterBase.h"
+  export *
+}
+
+
+
+
+module inet_queueing_base_PacketLabelerBase {
+  header "inet/queueing/base/PacketLabelerBase.h"
+  export *
+}
+
+
+
+
+module inet_queueing_base_PacketMarkerBase {
+  header "inet/queueing/base/PacketMarkerBase.h"
+  export *
+}
+
+
+
+
+module inet_queueing_base_PacketMeterBase {
+  header "inet/queueing/base/PacketMeterBase.h"
+  export *
+}
+
+
+
+
+module inet_queueing_base_PacketProcessorBase {
+  header "inet/queueing/base/PacketProcessorBase.h"
+  export *
+}
+
+
+
+
+module inet_queueing_base_PacketQueueBase {
+  header "inet/queueing/base/PacketQueueBase.h"
+  export *
+}
+
+
+
+
+module inet_queueing_base_PacketQueueingElementBase {
+  header "inet/queueing/base/PacketQueueingElementBase.h"
+  export *
+}
+
+
+
+
+module inet_queueing_base_PacketSedulerBase {
+  header "inet/queueing/base/PacketSchedulerBase.h"
+  export *
+}
+
+
+
+
+module inet_queueing_base_PacketServerBase {
+  header "inet/queueing/base/PacketServerBase.h"
+  export *
+}
+
+
+
+
+module inet_queueing_base_PacketSinkBase {
+  header "inet/queueing/base/PacketSinkBase.h"
+  export *
+}
+
+
+
+
+module inet_queueing_base_PacketSourceBase {
+  header "inet/queueing/base/PacketSourceBase.h"
+  export *
+}
+
+
+
+
+module inet_queueing_base_PacketTaggerBase {
+  header "inet/queueing/base/PacketTaggerBase.h"
+  export *
+}
+
+
+
+
+module inet_queueing_base_PassivePacketSinkBase {
+  header "inet/queueing/base/PassivePacketSinkBase.h"
+  export *
+}
+
+
+
+
+module inet_queueing_base_TokenGeneratorBase {
+  header "inet/queueing/base/TokenGeneratorBase.h"
+  export *
+}
+
+
+
+
+module inet_routing_base_RoutingProtocolBase {
+  header "inet/routing/base/RoutingProtocolBase.h"
+  export *
+}
+
+
+
+
+module inet_transportlayer_base_TransportProtocolBase {
+  header "inet/transportlayer/base/TransportProtocolBase.h"
+  export *
+}
+
+
+
+
+module inet_visualizer_base_EnergyStorageVisualizerBase {
+  header "inet/visualizer/base/EnergyStorageVisualizerBase.h"
+  export *
+}
+
+
+
+
+module inet_visualizer_base_Ieee80211VisualizerBase {
+  header "inet/visualizer/base/Ieee80211VisualizerBase.h"
+  export *
+}
+
+
+
+
+module inet_visualizer_base_InfoVisualizerBase {
+  header "inet/visualizer/base/InfoVisualizerBase.h"
+  export *
+}
+
+
+
+
+module inet_visualizer_base_InterfaceTableVisualizerBase {
+  header "inet/visualizer/base/InterfaceTableVisualizerBase.h"
+  export *
+}
+
+
+
+
+module inet_visualizer_base_LinkBreakVisualizerBase {
+  header "inet/visualizer/base/LinkBreakVisualizerBase.h"
+  export *
+}
+
+
+
+
+module inet_visualizer_base_LinkCanvasVisualizerBase {
+  header "inet/visualizer/base/LinkCanvasVisualizerBase.h"
+  export *
+}
+
+
+
+
+module inet_visualizer_base_LinkOsgVisualizerBase {
+  header "inet/visualizer/base/LinkOsgVisualizerBase.h"
+  export *
+}
+
+
+
+
+module inet_visualizer_base_LinkVisualizerBase {
+  header "inet/visualizer/base/LinkVisualizerBase.h"
+  export *
+}
+
+
+
+
+module inet_visualizer_base_MediumVisualizerBase {
+  header "inet/visualizer/base/MediumVisualizerBase.h"
+  export *
+}
+
+
+
+
+module inet_visualizer_base_MobilityVisualizerBase {
+  header "inet/visualizer/base/MobilityVisualizerBase.h"
+  export *
+}
+
+
+
+
+module inet_visualizer_base_NetworkConnectionVisualizerBase {
+  header "inet/visualizer/base/NetworkConnectionVisualizerBase.h"
+  export *
+}
+
+
+
+
+module inet_visualizer_base_NetworkNodeVisualizerBase {
+  header "inet/visualizer/base/NetworkNodeVisualizerBase.h"
+  export *
+}
+
+
+
+
+module inet_visualizer_base_PacketDrop_m {
+  header "inet/visualizer/base/PacketDrop_m.h"
+  export *
+}
+
+
+
+
+module inet_visualizer_base_PacketDropVisualizerBase {
+  header "inet/visualizer/base/PacketDropVisualizerBase.h"
+  export *
+}
+
+
+
+
+module inet_visualizer_base_PaCanvasVisualizerBase {
+  header "inet/visualizer/base/PathCanvasVisualizerBase.h"
+  export *
+}
+
+
+
+
+module inet_visualizer_base_PaOsgVisualizerBase {
+  header "inet/visualizer/base/PathOsgVisualizerBase.h"
+  export *
+}
+
+
+
+
+module inet_visualizer_base_PaVisualizerBase {
+  header "inet/visualizer/base/PathVisualizerBase.h"
+  export *
+}
+
+
+
+
+module inet_visualizer_base_ysicalEnvironmentVisualizerBase {
+  header "inet/visualizer/base/PhysicalEnvironmentVisualizerBase.h"
+  export *
+}
+
+
+
+
+module inet_visualizer_base_QueueVisualizerBase {
+  header "inet/visualizer/base/QueueVisualizerBase.h"
+  export *
+}
+
+
+
+
+module inet_visualizer_base_RadioVisualizerBase {
+  header "inet/visualizer/base/RadioVisualizerBase.h"
+  export *
+}
+
+
+
+
+module inet_visualizer_base_RoutingTableVisualizerBase {
+  header "inet/visualizer/base/RoutingTableVisualizerBase.h"
+  export *
+}
+
+
+
+
+module inet_visualizer_base_SceneOsgVisualizerBase {
+  header "inet/visualizer/base/SceneOsgVisualizerBase.h"
+  export *
+}
+
+
+
+
+module inet_visualizer_base_SceneVisualizerBase {
+  header "inet/visualizer/base/SceneVisualizerBase.h"
+  export *
+}
+
+
+
+
+module inet_visualizer_base_StatisticVisualizerBase {
+  header "inet/visualizer/base/StatisticVisualizerBase.h"
+  export *
+}
+
+
+
+
+module inet_visualizer_base_TracingObstacleLossVisualizerBase {
+  header "inet/visualizer/base/TracingObstacleLossVisualizerBase.h"
+  export *
+}
+
+
+
+
+module inet_visualizer_base_TransportConnectionVisualizerBase {
+  header "inet/visualizer/base/TransportConnectionVisualizerBase.h"
+  export *
+}
+
+
+
+
+module inet_visualizer_base_VisualizerBase {
+  header "inet/visualizer/base/VisualizerBase.h"
+  export *
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+module inet_applications_common_SocketTag_m {
+  header "inet/applications/common/SocketTag_m.h"
+  export *
+}
+
+module inet_emulation_common_ExtInterface {
+  header "inet/emulation/common/ExtInterface.h"
+  export *
+}
+
+module inet_environment_common_Material {
+  header "inet/environment/common/Material.h"
+  export *
+}
+
+module inet_environment_common_Material_m {
+  header "inet/environment/common/Material_m.h"
+  export *
+}
+
+module inet_environment_common_MaterialRegistry {
+  header "inet/environment/common/MaterialRegistry.h"
+  export *
+}
+
+module inet_environment_common_PhysicalEnvironment {
+  header "inet/environment/common/PhysicalEnvironment.h"
+  export *
+}
+
+module inet_environment_common_PhysicalObject {
+  header "inet/environment/common/PhysicalObject.h"
+  export *
+}
+
+module inet_environment_common_PhysicalObject_m {
+  header "inet/environment/common/PhysicalObject_m.h"
+  export *
+}
+
+module inet_linklayer_common_EtherType_m {
+  header "inet/linklayer/common/EtherType_m.h"
+  export *
+}
+
+module inet_linklayer_common_ExampleQosClassifier {
+  header "inet/linklayer/common/ExampleQosClassifier.h"
+  export *
+}
+
+module inet_linklayer_common_FcsMode_m {
+  header "inet/linklayer/common/FcsMode_m.h"
+  export *
+}
+
+module inet_linklayer_common_Ieee802Ctrl {
+  header "inet/linklayer/common/Ieee802Ctrl.h"
+  export *
+}
+
+module inet_linklayer_common_Ieee802Ctrl_m {
+  header "inet/linklayer/common/Ieee802Ctrl_m.h"
+  export *
+}
+
+module inet_linklayer_common_Ieee802SapTag_m {
+  header "inet/linklayer/common/Ieee802SapTag_m.h"
+  export *
+}
+
+module inet_linklayer_common_InterfaceTag_m {
+  header "inet/linklayer/common/InterfaceTag_m.h"
+  export *
+}
+
+module inet_linklayer_common_MacAddress {
+  header "inet/linklayer/common/MacAddress.h"
+  export *
+}
+
+module inet_linklayer_common_MacAddress_m {
+  header "inet/linklayer/common/MacAddress_m.h"
+  export *
+}
+
+module inet_linklayer_common_MacAddressTag_m {
+  header "inet/linklayer/common/MacAddressTag_m.h"
+  export *
+}
+
+module inet_linklayer_common_MacAddressType {
+  header "inet/linklayer/common/MacAddressType.h"
+  export *
+}
+
+module inet_linklayer_common_QosClassifier {
+  header "inet/linklayer/common/QosClassifier.h"
+  export *
+}
+
+module inet_linklayer_common_RandomQosClassifier {
+  header "inet/linklayer/common/RandomQosClassifier.h"
+  export *
+}
+
+module inet_linklayer_common_UserPriority {
+  header "inet/linklayer/common/UserPriority.h"
+  export *
+}
+
+module inet_linklayer_common_UserPriorityTag_m {
+  header "inet/linklayer/common/UserPriorityTag_m.h"
+  export *
+}
+
+module inet_linklayer_common_VlanTag_m {
+  header "inet/linklayer/common/VlanTag_m.h"
+  export *
+}
+
+module inet_networklayer_common_DscpTag_m {
+  header "inet/networklayer/common/DscpTag_m.h"
+  export *
+}
+
+module inet_networklayer_common_EchoPacket_m {
+  header "inet/networklayer/common/EchoPacket_m.h"
+  export *
+}
+
+module inet_networklayer_common_EchoPacketSerializer {
+  header "inet/networklayer/common/EchoPacketSerializer.h"
+  export *
+}
+
+module inet_networklayer_common_EchoProtocolDissector {
+  header "inet/networklayer/common/EchoProtocolDissector.h"
+  export *
+}
+
+module inet_networklayer_common_EchoProtocol {
+  header "inet/networklayer/common/EchoProtocol.h"
+  export *
+}
+
+module inet_networklayer_common_EchoProtocolPrinter {
+  header "inet/networklayer/common/EchoProtocolPrinter.h"
+  export *
+}
+
+module inet_networklayer_common_EcnTag_m {
+  header "inet/networklayer/common/EcnTag_m.h"
+  export *
+}
+
+module inet_networklayer_common_FragmentationTag_m {
+  header "inet/networklayer/common/FragmentationTag_m.h"
+  export *
+}
+
+module inet_networklayer_common_HopLimitTag_m {
+  header "inet/networklayer/common/HopLimitTag_m.h"
+  export *
+}
+
+module inet_networklayer_common_InterfaceEntry {
+  header "inet/networklayer/common/InterfaceEntry.h"
+  export *
+}
+
+module inet_networklayer_common_InterfaceEntry_m {
+  header "inet/networklayer/common/InterfaceEntry_m.h"
+  export *
+}
+
+module inet_networklayer_common_InterfaceMatcher {
+  header "inet/networklayer/common/InterfaceMatcher.h"
+  export *
+}
+
+module inet_networklayer_common_InterfaceTable {
+  header "inet/networklayer/common/InterfaceTable.h"
+  export *
+}
+
+module inet_networklayer_common_InterfaceToken {
+  header "inet/networklayer/common/InterfaceToken.h"
+  export *
+}
+
+module inet_networklayer_common_IpProtocolId_m {
+  header "inet/networklayer/common/IpProtocolId_m.h"
+  export *
+}
+
+module inet_networklayer_common_L3Address {
+  header "inet/networklayer/common/L3Address.h"
+  export *
+}
+
+module inet_networklayer_common_L3Address_m {
+  header "inet/networklayer/common/L3Address_m.h"
+  export *
+}
+
+module inet_networklayer_common_L3AddressResolver {
+  header "inet/networklayer/common/L3AddressResolver.h"
+  export *
+}
+
+module inet_networklayer_common_L3AddressTag_m {
+  header "inet/networklayer/common/L3AddressTag_m.h"
+  export *
+}
+
+module inet_networklayer_common_L3Tools {
+  header "inet/networklayer/common/L3Tools.h"
+  export *
+}
+
+module inet_networklayer_common_ModuleIdAddress {
+  header "inet/networklayer/common/ModuleIdAddress.h"
+  export *
+}
+
+module inet_networklayer_common_ModuleIdAddressType {
+  header "inet/networklayer/common/ModuleIdAddressType.h"
+  export *
+}
+
+module inet_networklayer_common_ModulePathAddress {
+  header "inet/networklayer/common/ModulePathAddress.h"
+  export *
+}
+
+module inet_networklayer_common_ModulePathAddressType {
+  header "inet/networklayer/common/ModulePathAddressType.h"
+  export *
+}
+
+module inet_networklayer_common_MulticastTag_m {
+  header "inet/networklayer/common/MulticastTag_m.h"
+  export *
+}
+
+module inet_networklayer_common_NextHopAddressTag_m {
+  header "inet/networklayer/common/NextHopAddressTag_m.h"
+  export *
+}
+
+module inet_networklayer_common_TosTag_m {
+  header "inet/networklayer/common/TosTag_m.h"
+  export *
+}
+
+module inet_queueing_common_LabelsTag_m {
+  header "inet/queueing/common/LabelsTag_m.h"
+  export *
+}
+
+module inet_queueing_common_OrdinalBasedDuplicator {
+  header "inet/queueing/common/OrdinalBasedDuplicator.h"
+  export *
+}
+
+module inet_queueing_common_PacketCloner {
+  header "inet/queueing/common/PacketCloner.h"
+  export *
+}
+
+module inet_queueing_common_PacketDelayer {
+  header "inet/queueing/common/PacketDelayer.h"
+  export *
+}
+
+module inet_queueing_common_PacketDemultiplexer {
+  header "inet/queueing/common/PacketDemultiplexer.h"
+  export *
+}
+
+module inet_queueing_common_PacketDuplicator {
+  header "inet/queueing/common/PacketDuplicator.h"
+  export *
+}
+
+module inet_queueing_common_PacketGate {
+  header "inet/queueing/common/PacketGate.h"
+  export *
+}
+
+module inet_queueing_common_PacketMultiplexer {
+  header "inet/queueing/common/PacketMultiplexer.h"
+  export *
+}
+
+module inet_queueing_common_RateTag_m {
+  header "inet/queueing/common/RateTag_m.h"
+  export *
+}
+
+module inet_routing_common_ManetProtocolDissector {
+  header "inet/routing/common/ManetProtocolDissector.h"
+  export *
+}
+
+module inet_transportlayer_common_CrcMode_m {
+  header "inet/transportlayer/common/CrcMode_m.h"
+  export *
+}
+
+module inet_transportlayer_common_L4PortTag_m {
+  header "inet/transportlayer/common/L4PortTag_m.h"
+  export *
+}
+
+module inet_transportlayer_common_L4Tools {
+  header "inet/transportlayer/common/L4Tools.h"
+  export *
+}
+
+module inet_transportlayer_common_TransportPseudoHeader_m {
+  header "inet/transportlayer/common/TransportPseudoHeader_m.h"
+  export *
+}
+
+module inet_transportlayer_common_TransportPseudoHeaderSerializer {
+  header "inet/transportlayer/common/TransportPseudoHeaderSerializer.h"
+  export *
+}
+
+module inet_visualizer_common_InfoCanvasVisualizer {
+  header "inet/visualizer/common/InfoCanvasVisualizer.h"
+  export *
+}
+
+module inet_visualizer_common_InfoOsgVisualizer {
+  header "inet/visualizer/common/InfoOsgVisualizer.h"
+  export *
+}
+
+module inet_visualizer_common_PacketDropCanvasVisualizer {
+  header "inet/visualizer/common/PacketDropCanvasVisualizer.h"
+  export *
+}
+
+module inet_visualizer_common_PacketDropOsgVisualizer {
+  header "inet/visualizer/common/PacketDropOsgVisualizer.h"
+  export *
+}
+
+module inet_visualizer_common_QueueCanvasVisualizer {
+  header "inet/visualizer/common/QueueCanvasVisualizer.h"
+  export *
+}
+
+module inet_visualizer_common_QueueOsgVisualizer {
+  header "inet/visualizer/common/QueueOsgVisualizer.h"
+  export *
+}
+
+module inet_visualizer_common_StatisticCanvasVisualizer {
+  header "inet/visualizer/common/StatisticCanvasVisualizer.h"
+  export *
+}
+
+module inet_visualizer_common_StatisticOsgVisualizer {
+  header "inet/visualizer/common/StatisticOsgVisualizer.h"
+  export *
+}
