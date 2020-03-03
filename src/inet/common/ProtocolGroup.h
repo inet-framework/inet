@@ -19,6 +19,7 @@
 #define __INET_PROTOCOLGROUP_H
 
 #include "inet/common/Protocol.h"
+#include <map>
 
 namespace inet {
 
