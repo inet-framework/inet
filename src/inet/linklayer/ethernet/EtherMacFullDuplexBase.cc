@@ -558,17 +558,15 @@ void EtherMacFullDuplexBase::printParameters()
 
 void EtherMacFullDuplexBase::finish()
 {
-    {
-        simtime_t t = simTime();
-        recordScalar("simulated time", t);
-        recordScalar("full-duplex", duplexMode);
+    simtime_t t = simTime();
+    recordScalar("simulated time", t);
+    recordScalar("full-duplex", duplexMode);
 
-        if (t > 0) {
-            recordScalar("frames/sec sent", numFramesSent / t);
-            recordScalar("frames/sec rcvd", numFramesReceivedOK / t);
-            recordScalar("bits/sec sent", (8.0 * numBytesSent) / t);
-            recordScalar("bits/sec rcvd", (8.0 * numBytesReceivedOK) / t);
-        }
+    if (t > 0) {
+        recordScalar("frames/sec sent", numFramesSent / t);
+        recordScalar("frames/sec rcvd", numFramesReceivedOK / t);
+        recordScalar("bits/sec sent", (8.0 * numBytesSent) / t);
+        recordScalar("bits/sec rcvd", (8.0 * numBytesReceivedOK) / t);
     }
 }
 
