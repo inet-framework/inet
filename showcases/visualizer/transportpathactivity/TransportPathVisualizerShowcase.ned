@@ -23,6 +23,7 @@ import inet.node.inet.StandardHost;
 import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 import inet.visualizer.integrated.IntegratedVisualizer;
 import inet.visualizer.transportlayer.TransportRouteVisualizer;
+import ned.DatarateChannel;
 
 
 network TransportPathVisualizerSimpleWiredShowcase
@@ -70,6 +71,13 @@ network TransportPathVisualizerSimpleWirelessShowcase
 network TransportPathVisualizerFilteringShowcase
 {
     @display("bgb=1024,700");
+    types:
+        channel Ppp100M extends DatarateChannel
+        {
+            double length @unit(m) = default(10m);
+            delay = replaceUnit(length / 2e8, "s");
+            datarate = 100 Mbps;
+        }
     submodules:
         visualizer: IntegratedVisualizer {
             parameters:
@@ -131,23 +139,23 @@ network TransportPathVisualizerFilteringShowcase
             @display("p=593.352,389.136");
         }
     connections:
-        router0.pppg++ <--> Eth100M <--> router4.pppg++;
+        router0.pppg++ <--> Ppp100M <--> router4.pppg++;
         source1.ethg++ <--> Eth100M <--> switch0.ethg++;
         switch0.ethg++ <--> Eth100M <--> router0.ethg++;
         router3.ethg++ <--> Eth100M <--> switch3.ethg++;
         switch3.ethg++ <--> Eth100M <--> destination1.ethg++;
-        router4.pppg++ <--> Eth100M <--> router1.pppg++;
+        router4.pppg++ <--> Ppp100M <--> router1.pppg++;
         switch1.ethg++ <--> Eth100M <--> router1.ethg++;
         switch1.ethg++ <--> Eth100M <--> source2.ethg++;
         router2.ethg++ <--> Eth100M <--> switch2.ethg++;
         destination2.ethg++ <--> Eth100M <--> switch2.ethg++;
-        router4.pppg++ <--> Eth100M <--> router2.pppg++;
-        router4.pppg++ <--> Eth100M <--> router3.pppg++;
-        router0.pppg++ <--> Eth100M <--> router2.pppg++;
-        router1.pppg++ <--> Eth100M <--> router0.pppg++;
+        router4.pppg++ <--> Ppp100M <--> router2.pppg++;
+        router4.pppg++ <--> Ppp100M <--> router3.pppg++;
+        router0.pppg++ <--> Ppp100M <--> router2.pppg++;
+        router1.pppg++ <--> Ppp100M <--> router0.pppg++;
         switch0.ethg++ <--> Eth100M <--> host1.ethg++;
         switch1.ethg++ <--> Eth100M <--> host2.ethg++;
         switch3.ethg++ <--> Eth100M <--> videoStreamServer.ethg++;
         switch2.ethg++ <--> Eth100M <--> videoStreamClient.ethg++;
-        router2.pppg++ <--> Eth100M <--> router3.pppg++;
+        router2.pppg++ <--> Ppp100M <--> router3.pppg++;
 }

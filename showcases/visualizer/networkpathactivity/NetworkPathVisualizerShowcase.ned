@@ -26,7 +26,15 @@ import inet.node.wireless.AccessPoint;
 import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 import inet.visualizer.integrated.IntegratedVisualizer;
 import inet.visualizer.networklayer.NetworkRouteVisualizer;
+import ned.DatarateChannel;
 
+
+channel Ppp100M extends DatarateChannel
+{
+    double length @unit(m) = default(10m);
+    delay = replaceUnit(length / 2e8, "s");
+    datarate = 100Mbps;
+}
 
 network NetworkPathSimpleShowcase
 {
@@ -123,17 +131,17 @@ network NetworkPathComplexShowcase
         etherSwitch1.ethg++ <--> Eth100M <--> source2.ethg++;
         router2.ethg++ <--> Eth100M <--> etherSwitch2.ethg++;
         destination2.ethg++ <--> Eth100M <--> etherSwitch2.ethg++;
-        router2.pppg++ <--> Eth100M <--> router3.pppg++;
+        router2.pppg++ <--> Ppp100M <--> router3.pppg++;
         etherSwitch0.ethg++ <--> Eth100M <--> host1.ethg++;
         etherSwitch1.ethg++ <--> Eth100M <--> videoClient.ethg++;
         etherSwitch3.ethg++ <--> Eth100M <--> host2.ethg++;
         etherSwitch2.ethg++ <--> Eth100M <--> videoServer.ethg++;
-        router1.pppg++ <--> Eth100M <--> router0.pppg++;
-        router0.pppg++ <--> Eth100M <--> router2.pppg++;
-        router4.pppg++ <--> Eth100M <--> router3.pppg++;
-        router4.pppg++ <--> Eth100M <--> router2.pppg++;
-        router4.pppg++ <--> Eth100M <--> router1.pppg++;
-        router0.pppg++ <--> Eth100M <--> router4.pppg++;
+        router1.pppg++ <--> Ppp100M <--> router0.pppg++;
+        router0.pppg++ <--> Ppp100M <--> router2.pppg++;
+        router4.pppg++ <--> Ppp100M <--> router3.pppg++;
+        router4.pppg++ <--> Ppp100M <--> router2.pppg++;
+        router4.pppg++ <--> Ppp100M <--> router1.pppg++;
+        router0.pppg++ <--> Ppp100M <--> router4.pppg++;
 }
 
 network NetworkPathMobileShowcase
@@ -235,10 +243,10 @@ network NetworkPathRIPShowcase
             @display("p=554.76,458.28");
         }
     connections:
-        router0.pppg++ <--> Eth100M <--> router1.pppg++;
-        router0.pppg++ <--> Eth100M <--> router3.pppg++;
-        router1.pppg++ <--> Eth100M <--> router2.pppg++;
-        router2.pppg++ <--> Eth100M <--> router3.pppg++;
+        router0.pppg++ <--> Ppp100M <--> router1.pppg++;
+        router0.pppg++ <--> Ppp100M <--> router3.pppg++;
+        router1.pppg++ <--> Ppp100M <--> router2.pppg++;
+        router2.pppg++ <--> Ppp100M <--> router3.pppg++;
         router2.ethg++ <--> Eth100M <--> etherSwitch0.ethg++;
         etherSwitch0.ethg++ <--> Eth100M <--> wiredDestination.ethg++;
         router2.ethg++ <--> Eth100M <--> accessPoint1.ethg++;
