@@ -67,19 +67,19 @@ void EtherPhy::initialize(int stage)
     }
     else if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION) {
         interfaceEntry = getContainingNicModule(this);
-        bitrate = interfaceEntry->par("bitrate");   //TODO add a NED parameter reference when supported in OMNeT++
-        duplexMode = interfaceEntry->par("duplexMode");   //TODO add a NED parameter reference when supported in OMNeT++
+        bitrate = interfaceEntry->par("bitrate");   //TODO add a NED parameter reference when will be supported in OMNeT++
+        duplexMode = interfaceEntry->par("duplexMode");   //TODO add a NED parameter reference when will be supported in OMNeT++
         if (!duplexMode)
             throw cRuntimeError("half-duplex currently not supported.");
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
         transmissionChannel = physOutGate->findTransmissionChannel();
-        if (transmissionChannel)
+        if (transmissionChannel) {
             transmissionChannel->subscribe(POST_MODEL_CHANGE, this);
-        if (auto outTrChannel = dynamic_cast<cDatarateChannel *>(transmissionChannel)) {
-            bitrate = outTrChannel->getDatarate();
-            interfaceEntry->par("bitrate").setDoubleValue(bitrate);
-            throw cRuntimeError("replace DatarateChannel to TransmissionChannel and set bitrate on InterfaceEntry");
+            if (transmissionChannel->hasPar("datarate")) {
+                bitrate = transmissionChannel->par("datarate");
+                interfaceEntry->par("bitrate").setDoubleValue(bitrate);
+            }
         }
     }
 }
@@ -212,6 +212,10 @@ void EtherPhy::connect()
         changeTxState(TX_IDLE_STATE);
         changeRxState(RX_IDLE_STATE);
         interfaceEntry->setCarrier(true);
+        if (transmissionChannel->hasPar("datarate")) {
+            bitrate = transmissionChannel->par("datarate");
+            interfaceEntry->par("bitrate").setDoubleValue(bitrate);
+        }
     }
 }
 
