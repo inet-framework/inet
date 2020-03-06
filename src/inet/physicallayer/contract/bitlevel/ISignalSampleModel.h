@@ -31,9 +31,13 @@ namespace physicallayer {
 class INET_API ISignalSampleModel : public IPrintableObject
 {
   public:
-    virtual int getSampleLength() const = 0;
+    virtual int getHeaderSampleLength() const = 0;
 
-    virtual double getSampleRate() const = 0;
+    virtual double getHeaderSampleRate() const = 0;
+
+    virtual int getDataSampleLength() const = 0;
+
+    virtual double getDataSampleRate() const = 0;
 
     virtual const std::vector<W> *getSamples() const = 0;
 };
@@ -44,11 +48,6 @@ class INET_API ITransmissionSampleModel : public virtual ISignalSampleModel
 
 class INET_API IReceptionSampleModel : public virtual ISignalSampleModel
 {
-  public:
-    /**
-     * Returns the receive signal strength indication.
-     */
-    virtual const W getRSSI() const = 0;
 };
 
 } // namespace physicallayer
