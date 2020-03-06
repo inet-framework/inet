@@ -18,6 +18,7 @@
 #ifndef __INET_LAYEREDERRORMODELBASE_H
 #define __INET_LAYEREDERRORMODELBASE_H
 
+#include "inet/physicallayer/base/packetlevel/ApskModulationBase.h"
 #include "inet/physicallayer/contract/bitlevel/ILayeredErrorModel.h"
 
 namespace inet {
@@ -27,9 +28,17 @@ namespace physicallayer {
 class INET_API LayeredErrorModelBase : public cModule, public ILayeredErrorModel
 {
   protected:
+    const char *symbolCorruptionMode = nullptr;
+
+  protected:
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override;
+
     virtual const IReceptionPacketModel *computePacketModel(const LayeredTransmission *transmission, double packetErrorRate) const;
     virtual const IReceptionBitModel *computeBitModel(const LayeredTransmission *transmission, double bitErrorRate) const;
     virtual const IReceptionSymbolModel *computeSymbolModel(const LayeredTransmission *transmission, double symbolErrorRate) const;
+
+    virtual const ISymbol *computeCorruptSymbol(const ApskModulationBase *modulation, const ApskSymbol *transmittedSymbol) const;
 };
 
 } // namespace physicallayer
