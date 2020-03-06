@@ -22,6 +22,7 @@ import inet.physicallayer.contract.packetlevel.IAnalogModel;
 module LayeredDimensionalAnalogModel like IAnalogModel
 {
     parameters:
+        bool attenuateWithCenterFrequency = default(true); // true means frequency selectivity will always use the carrier frequencey as opposed to using the frequency where the change in power occurs
         @display("i=block/tunnel");
         @class(LayeredDimensionalAnalogModel);
 }
