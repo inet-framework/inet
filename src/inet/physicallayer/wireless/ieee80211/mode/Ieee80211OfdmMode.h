@@ -96,7 +96,7 @@ class INET_API Ieee80211OfdmSignalMode : public IIeee80211HeaderMode, public Iee
     virtual const simtime_t getDuration() const override { return getSymbolInterval(); }
 
     const Ieee80211OfdmCode *getCode() const { return code; }
-    const Ieee80211OfdmModulation *getModulation() const override { return modulation; }
+    virtual const Ieee80211OfdmModulation *getModulation() const override { return modulation; }
 
     virtual bps getGrossBitrate() const override { return Ieee80211OfdmModeBase::getGrossBitrate(); }
     virtual bps getNetBitrate() const override { return Ieee80211OfdmModeBase::getNetBitrate(); }
@@ -121,7 +121,7 @@ class INET_API Ieee80211OfdmDataMode : public IIeee80211DataMode, public Ieee802
     virtual const simtime_t getDuration(b dataLength) const override;
 
     const Ieee80211OfdmCode *getCode() const { return code; }
-    const Ieee80211OfdmModulation *getModulation() const override { return modulation; }
+    virtual const Ieee80211OfdmModulation *getModulation() const override { return modulation; }
     virtual bps getGrossBitrate() const override { return Ieee80211OfdmModeBase::getGrossBitrate(); }
     virtual bps getNetBitrate() const override { return Ieee80211OfdmModeBase::getNetBitrate(); }
     virtual int getNumberOfSpatialStreams() const override { return 1; }

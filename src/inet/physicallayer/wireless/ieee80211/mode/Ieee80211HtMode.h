@@ -98,7 +98,7 @@ class INET_API Ieee80211HtSignalMode : public IIeee80211HeaderMode, public Ieee8
     b getTailBitsLength() const { return b(6); }
     virtual unsigned int getSTBC() const { return 0; } // Limitation: We assume that STBC is not used
 
-    virtual const inline simtime_t getHTSIGDuration() const { return 2 * getSymbolInterval(); } // HT-SIG
+    virtual const simtime_t getHTSIGDuration() const { return 2 * getSymbolInterval(); } // HT-SIG
 
     virtual unsigned int getModulationAndCodingScheme() const { return mcsIndex; }
     virtual const simtime_t getDuration() const override { return getHTSIGDuration(); }
@@ -142,15 +142,15 @@ class INET_API Ieee80211HtPreambleMode : public IIeee80211PreambleMode, public I
     virtual const Ieee80211OfdmSignalMode *getLegacySignalMode() const { return legacySignalMode; }
     virtual const Ieee80211HtSignalMode *getHighThroughputSignalMode() const { return highThroughputSignalMode; }
 
-    virtual const inline simtime_t getDoubleGIDuration() const { return 2 * getGIDuration(); } // GI2
-    virtual const inline simtime_t getLSIGDuration() const { return getSymbolInterval(); } // L-SIG
-    virtual const inline simtime_t getNonHTShortTrainingSequenceDuration() const { return 10 * getDFTPeriod() / 4; } // L-STF
-    virtual const inline simtime_t getHTGreenfieldShortTrainingFieldDuration() const { return 10 * getDFTPeriod() / 4; } // HT-GF-STF
-    virtual const inline simtime_t getNonHTLongTrainingFieldDuration() const { return 2 * getDFTPeriod() + getDoubleGIDuration(); } // L-LTF
-    virtual const inline simtime_t getHTShortTrainingFieldDuration() const { return 4E-6; } // HT-STF
+    virtual const simtime_t getDoubleGIDuration() const { return 2 * getGIDuration(); } // GI2
+    virtual const simtime_t getLSIGDuration() const { return getSymbolInterval(); } // L-SIG
+    virtual const simtime_t getNonHTShortTrainingSequenceDuration() const { return 10 * getDFTPeriod() / 4; } // L-STF
+    virtual const simtime_t getHTGreenfieldShortTrainingFieldDuration() const { return 10 * getDFTPeriod() / 4; } // HT-GF-STF
+    virtual const simtime_t getNonHTLongTrainingFieldDuration() const { return 2 * getDFTPeriod() + getDoubleGIDuration(); } // L-LTF
+    virtual const simtime_t getHTShortTrainingFieldDuration() const { return 4E-6; } // HT-STF
     virtual const simtime_t getFirstHTLongTrainingFieldDuration() const;
-    virtual const inline simtime_t getSecondAndSubsequentHTLongTrainingFielDuration() const { return 4E-6; } // HT-LTFs, s = 2,3,..,n
-    virtual inline unsigned int getNumberOfHtLongTrainings() const { return numberOfHTLongTrainings; }
+    virtual const simtime_t getSecondAndSubsequentHTLongTrainingFielDuration() const { return 4E-6; } // HT-LTFs, s = 2,3,..,n
+    virtual unsigned int getNumberOfHtLongTrainings() const { return numberOfHTLongTrainings; }
 
     virtual const simtime_t getDuration() const override;
 
@@ -230,8 +230,8 @@ class INET_API Ieee80211HtMode : public Ieee80211ModeBase
     const BandMode centerFrequencyMode;
 
   protected:
-    virtual inline int getLegacyCwMin() const override { return 15; }
-    virtual inline int getLegacyCwMax() const override { return 1023; }
+    virtual int getLegacyCwMin() const override { return 15; }
+    virtual int getLegacyCwMax() const override { return 1023; }
 
   public:
     Ieee80211HtMode(const char *name, const Ieee80211HtPreambleMode *preambleMode, const Ieee80211HtDataMode *dataMode, const BandMode centerFrequencyMode);
@@ -245,14 +245,14 @@ class INET_API Ieee80211HtMode : public Ieee80211ModeBase
     // Table 20-25—MIMO PHY characteristics
     virtual const simtime_t getSlotTime() const override;
     virtual const simtime_t getShortSlotTime() const;
-    virtual inline const simtime_t getSifsTime() const override;
-    virtual inline const simtime_t getRifsTime() const override { return 2E-6; }
-    virtual inline const simtime_t getCcaTime() const override { return 4E-6; } // < 4
-    virtual inline const simtime_t getPhyRxStartDelay() const override { return 33E-6; }
-    virtual inline const simtime_t getRxTxTurnaroundTime() const override { return 2E-6; } // < 2
-    virtual inline const simtime_t getPreambleLength() const override { return 16E-6; }
-    virtual inline const simtime_t getPlcpHeaderLength() const override { return 4E-6; }
-    virtual inline int getMpduMaxLength() const override { return 65535; } // in octets
+    virtual const simtime_t getSifsTime() const override;
+    virtual const simtime_t getRifsTime() const override { return 2E-6; }
+    virtual const simtime_t getCcaTime() const override { return 4E-6; } // < 4
+    virtual const simtime_t getPhyRxStartDelay() const override { return 33E-6; }
+    virtual const simtime_t getRxTxTurnaroundTime() const override { return 2E-6; } // < 2
+    virtual const simtime_t getPreambleLength() const override { return 16E-6; }
+    virtual const simtime_t getPlcpHeaderLength() const override { return 4E-6; }
+    virtual int getMpduMaxLength() const override { return 65535; } // in octets
     virtual BandMode getCenterFrequencyMode() const { return centerFrequencyMode; }
 
     virtual const simtime_t getDuration(b dataLength) const override { return preambleMode->getDuration() + dataMode->getDuration(dataLength); }
