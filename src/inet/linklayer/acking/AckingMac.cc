@@ -17,16 +17,13 @@
 // author: Zoltan Bojthe
 //
 
-#include <stdio.h>
-#include <string.h>
-
+#include "inet/common/checksum/EthernetCRC.h"
 #include "inet/common/INETUtils.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/packet/Packet.h"
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/common/packet/Packet.h"
 #include "inet/linklayer/acking/AckingMac.h"
-#include "inet/linklayer/acking/AckingMacHeader_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
@@ -50,6 +47,7 @@ void AckingMac::initialize(int stage)
 {
     MacProtocolBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
+        fcsMode = parseFcsMode(par("fcsMode"));
         bitrate = par("bitrate");
         headerLength = par("headerLength");
         promiscuous = par("promiscuous");
@@ -145,8 +143,7 @@ void AckingMac::handleUpperPacket(Packet *packet)
 
 void AckingMac::handleLowerPacket(Packet *packet)
 {
-    auto macHeader = packet->peekAtFront<AckingMacHeader>();
-    if (packet->hasBitError()) {
+    if (!isFcsOk(packet)) {
         EV << "Received frame '" << packet->getName() << "' contains bit errors or collision, dropping it\n";
         PacketDropDetails details;
         details.setReason(INCORRECTLY_RECEIVED);
@@ -155,6 +152,7 @@ void AckingMac::handleLowerPacket(Packet *packet)
         return;
     }
 
+    auto macHeader = packet->peekAtFront<AckingMacHeader>();
     if (!dropFrameNotForUs(packet)) {
         // send Ack if needed
         auto dest = macHeader->getDest();
@@ -223,6 +221,13 @@ void AckingMac::encapsulate(Packet *packet)
         macHeader->setSrcModuleId(getId());
     macHeader->setNetworkProtocol(ProtocolGroup::ethertype.getProtocolNumber(packet->getTag<PacketProtocolTag>()->getProtocol()));
     packet->insertAtFront(macHeader);
+    if (fcsMode != FCS_DISABLED) {
+        auto macTrailer = makeShared<AckingMacTrailer>();
+        macTrailer->setFcsMode(fcsMode);
+        if (fcsMode == FCS_COMPUTED)
+            macTrailer->setFcs(computeFcs(packet->peekAllAsBytes()));
+        packet->insertAtBack(macTrailer);
+    }
     auto macAddressInd = packet->addTagIfAbsent<MacAddressInd>();
     macAddressInd->setSrcAddress(macHeader->getSrc());
     macAddressInd->setDestAddress(macHeader->getDest());
@@ -259,6 +264,8 @@ bool AckingMac::dropFrameNotForUs(Packet *packet)
 void AckingMac::decapsulate(Packet *packet)
 {
     const auto& macHeader = packet->popAtFront<AckingMacHeader>();
+    if (fcsMode != FCS_DISABLED)
+        packet->popAtBack<AckingMacTrailer>(B(4));
     auto macAddressInd = packet->addTagIfAbsent<MacAddressInd>();
     macAddressInd->setSrcAddress(macHeader->getSrc());
     macAddressInd->setDestAddress(macHeader->getDest());
@@ -266,6 +273,42 @@ void AckingMac::decapsulate(Packet *packet)
     auto payloadProtocol = ProtocolGroup::ethertype.getProtocol(macHeader->getNetworkProtocol());
     packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(payloadProtocol);
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(payloadProtocol);
+}
+
+bool AckingMac::isFcsOk(Packet *frame)
+{
+    if (frame->hasBitError() || !frame->peekData()->isCorrect())
+        return false;
+    else {
+        const auto& trailer = frame->peekAtBack<AckingMacTrailer>(B(4));
+        switch (trailer->getFcsMode()) {
+            case FCS_DECLARED_INCORRECT:
+                return false;
+            case FCS_DECLARED_CORRECT:
+                return true;
+            case FCS_COMPUTED: {
+                const auto& fcsBytes = frame->peekDataAt<BytesChunk>(B(0), frame->getDataLength() - trailer->getChunkLength());
+                auto bufferLength = B(fcsBytes->getChunkLength()).get();
+                auto buffer = new uint8_t[bufferLength];
+                fcsBytes->copyToBuffer(buffer, bufferLength);
+                auto computedFcs = ethernetCRC(buffer, bufferLength);
+                delete [] buffer;
+                return computedFcs == trailer->getFcs();
+            }
+            default:
+                throw cRuntimeError("Unknown FCS mode");
+        }
+    }
+}
+
+uint32_t AckingMac::computeFcs(const Ptr<const BytesChunk>& bytes)
+{
+    auto bufferLength = B(bytes->getChunkLength()).get();
+    auto buffer = new uint8_t[bufferLength];
+    bytes->copyToBuffer(buffer, bufferLength);
+    auto computedFcs = ethernetCRC(buffer, bufferLength);
+    delete [] buffer;
+    return computedFcs;
 }
 
 } // namespace inet
