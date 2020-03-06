@@ -19,8 +19,10 @@ ScalarDigitalAnalogConverter::ScalarDigitalAnalogConverter() :
 
 const ITransmissionAnalogModel *ScalarDigitalAnalogConverter::convertDigitalToAnalog(const ITransmissionSampleModel *sampleModel) const
 {
-    const simtime_t duration = sampleModel->getSampleLength() / sampleModel->getSampleRate();
-    return new ScalarTransmissionSignalAnalogModel(duration, centerFrequency, bandwidth, power);
+    simtime_t preambleDuration = 0; // TODO:
+    simtime_t headerDuration = sampleModel->getHeaderSampleLength() / sampleModel->getHeaderSampleRate();
+    simtime_t dataDuration = sampleModel->getDataSampleLength() / sampleModel->getDataSampleRate();
+    return new ScalarTransmissionSignalAnalogModel(preambleDuration, headerDuration, dataDuration, centerFrequency, bandwidth, power);
 }
 
 } // namespace physicallayer

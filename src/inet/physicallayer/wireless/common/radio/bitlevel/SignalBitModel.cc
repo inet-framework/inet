@@ -10,12 +10,12 @@
 namespace inet {
 namespace physicallayer {
 
-SignalBitModel::SignalBitModel(b headerLength, bps headerBitRate, b dataLength, bps dataBitRate, const BitVector *bits) :
+SignalBitModel::SignalBitModel(b headerLength, bps headerBitrate, b dataLength, bps dataBitrate, const BitVector *bits) :
     bits(bits),
     headerLength(headerLength),
-    headerBitRate(headerBitRate),
+    headerBitrate(headerBitrate),
     dataLength(dataLength),
-    dataBitRate(dataBitRate)
+    dataBitrate(dataBitrate)
 {
 }
 
@@ -29,9 +29,9 @@ std::ostream& SignalBitModel::printToStream(std::ostream& stream, int level, int
     stream << "SignalBitModel";
     if (level <= PRINT_LEVEL_TRACE)
         stream << EV_FIELD(headerLength)
-               << EV_FIELD(headerBitRate)
+               << EV_FIELD(headerBitrate)
                << EV_FIELD(dataLength)
-               << EV_FIELD(dataBitRate);
+               << EV_FIELD(dataBitrate);
     return stream;
 }
 
@@ -43,17 +43,17 @@ TransmissionBitModel::TransmissionBitModel(const BitVector *bits, const IForward
 {
 }
 
-TransmissionBitModel::TransmissionBitModel(b headerLength, bps headerBitRate, b dataLength, bps dataBitRate, const BitVector *bits, const IForwardErrorCorrection *forwardErrorCorrection, const IScrambling *scrambling, const IInterleaving *interleaving) :
-    SignalBitModel(headerLength, headerBitRate, dataLength, dataBitRate, bits),
+TransmissionBitModel::TransmissionBitModel(b headerLength, bps headerBitrate, b dataLength, bps dataBitrate, const BitVector *bits, const IForwardErrorCorrection *forwardErrorCorrection, const IScrambling *scrambling, const IInterleaving *interleaving) :
+    SignalBitModel(headerLength, headerBitrate, dataLength, dataBitrate, bits),
     forwardErrorCorrection(forwardErrorCorrection),
     scrambling(scrambling),
     interleaving(interleaving)
 {
 }
 
-ReceptionBitModel::ReceptionBitModel(b headerLength, bps headerBitRate, b dataLength, bps dataBitRate, const BitVector *bits, double bitErrorRate) :
-    SignalBitModel(headerLength, headerBitRate, dataLength, dataBitRate, bits),
-    bitErrorRate(bitErrorRate)
+ReceptionBitModel::ReceptionBitModel(b headerLength, bps headerBitrate, b dataLength, bps dataBitrate, const BitVector *bits, double bitErrorrate) :
+    SignalBitModel(headerLength, headerBitrate, dataLength, dataBitrate, bits),
+    bitErrorRate(bitErrorrate)
 {
 }
 

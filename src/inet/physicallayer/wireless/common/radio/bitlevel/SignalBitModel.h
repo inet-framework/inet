@@ -21,20 +21,20 @@ class INET_API SignalBitModel : public virtual ISignalBitModel
   protected:
     const BitVector *bits;
     const b headerLength;
-    const bps headerBitRate;
+    const bps headerBitrate;
     const b dataLength;
-    const bps dataBitRate;
+    const bps dataBitrate;
 
   public:
-    SignalBitModel(b headerLength, bps headerBitRate, b dataLength, bps dataBitRate, const BitVector *bits);
+    SignalBitModel(b headerLength, bps headerBitrate, b dataLength, bps dataBitrate, const BitVector *bits);
     virtual ~SignalBitModel();
 
     virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
     virtual b getHeaderLength() const override { return headerLength; }
-    virtual bps getHeaderBitRate() const override { return headerBitRate; }
+    virtual bps getHeaderGrossBitrate() const override { return headerBitrate; }
     virtual b getDataLength() const override { return dataLength; }
-    virtual bps getDataBitRate() const override { return dataBitRate; }
-    virtual const BitVector *getBits() const override { return bits; }
+    virtual bps getDataGrossBitrate() const override { return dataBitrate; }
+    virtual const BitVector *getAllBits() const override { return bits; }
 };
 
 class INET_API TransmissionBitModel : public SignalBitModel, public virtual ITransmissionBitModel
@@ -46,7 +46,7 @@ class INET_API TransmissionBitModel : public SignalBitModel, public virtual ITra
 
   public:
     TransmissionBitModel(const BitVector *bits, const IForwardErrorCorrection *forwardErrorCorrection, const IScrambling *scrambling, const IInterleaving *interleaving);
-    TransmissionBitModel(b headerLength, bps headerBitRate, b dataLength, bps dataBitRate, const BitVector *bits, const IForwardErrorCorrection *forwardErrorCorrection, const IScrambling *scrambling, const IInterleaving *interleaving);
+    TransmissionBitModel(b headerLength, bps headerBitrate, b dataLength, bps dataBitrate, const BitVector *bits, const IForwardErrorCorrection *forwardErrorCorrection, const IScrambling *scrambling, const IInterleaving *interleaving);
 
     virtual const IForwardErrorCorrection *getForwardErrorCorrection() const override { return forwardErrorCorrection; }
     virtual const IScrambling *getScrambling() const override { return scrambling; }
@@ -59,7 +59,7 @@ class INET_API ReceptionBitModel : public SignalBitModel, public virtual IRecept
     double bitErrorRate;
 
   public:
-    ReceptionBitModel(b headerLength, bps headerBitRate, b dataLength, bps dataBitRate, const BitVector *bits, double bitErrorRate);
+    ReceptionBitModel(b headerLength, bps headerBitrate, b dataLength, bps dataBitrate, const BitVector *bits);
 
     virtual double getBitErrorRate() const override { return bitErrorRate; }
 };
