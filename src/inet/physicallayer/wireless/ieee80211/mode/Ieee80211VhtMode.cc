@@ -681,11 +681,11 @@ const Ieee80211VhtMode *Ieee80211VhtCompliantModes::getCompliantMode(const Ieee8
         const Ieee80211VhtSignalMode *htSignal = nullptr;
         switch (preambleFormat) {
             case Ieee80211VhtPreambleMode::HT_PREAMBLE_GREENFIELD:
-                htSignal = new Ieee80211VhtSignalMode(mcsMode->getMcsIndex(), &Ieee80211OfdmCompliantModulations::bpskModulation, Ieee80211VhtCompliantCodes::getCompliantCode(&Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, &Ieee80211OfdmCompliantModulations::bpskModulation, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, mcsMode->getBandwidth(), false), mcsMode->getBandwidth(), guardIntervalType);
+                htSignal = new Ieee80211VhtSignalMode(mcsMode->getMcsIndex(), &Ieee80211OfdmCompliantModulations::subcarriers52BpskModulation, Ieee80211VhtCompliantCodes::getCompliantCode(&Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, &Ieee80211OfdmCompliantModulations::subcarriers52BpskModulation, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, mcsMode->getBandwidth(), false), mcsMode->getBandwidth(), guardIntervalType);
                 break;
             case Ieee80211VhtPreambleMode::HT_PREAMBLE_MIXED:
                 legacySignal = &Ieee80211OfdmCompliantModes::ofdmHeaderMode6MbpsRate13;
-                htSignal = new Ieee80211VhtSignalMode(mcsMode->getMcsIndex(), &Ieee80211OfdmCompliantModulations::qbpskModulation, Ieee80211VhtCompliantCodes::getCompliantCode(&Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, &Ieee80211OfdmCompliantModulations::qbpskModulation, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, mcsMode->getBandwidth(), false), mcsMode->getBandwidth(), guardIntervalType);
+                htSignal = new Ieee80211VhtSignalMode(mcsMode->getMcsIndex(), &Ieee80211OfdmCompliantModulations::subcarriers52QbpskModulation, Ieee80211VhtCompliantCodes::getCompliantCode(&Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, &Ieee80211OfdmCompliantModulations::subcarriers52QbpskModulation, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, mcsMode->getBandwidth(), false), mcsMode->getBandwidth(), guardIntervalType);
                 break;
             default:
                 throw cRuntimeError("Unknown preamble format");
