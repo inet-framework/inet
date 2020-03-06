@@ -530,55 +530,148 @@ class INET_API PeriodicallyInterpolated1DFunction : public FunctionBase<R, Domai
 
   public:
     PeriodicallyInterpolated1DFunction(X start, X end, const IInterpolator<X, R>& interpolator, const std::vector<R>& rs) :
-        start(start), end(end), step((end - start) / rs.size()), interpolator(interpolator), rs(rs) { }
+        start(start), end(end), step((end - start) / (rs.size() - 1)), interpolator(interpolator), rs(rs) { }
 
     virtual R getValue(const Point<X>& p) const override {
         X x = std::get<0>(p);
-        int index = std::floor(toDouble((x - start) / step));
-        if (index < 0)
-            return R(0);
-        else if (index > rs.size() - 1)
+        int index = std::floor(toDouble(x - start) / toDouble(step));
+        if (index < 0 || index > rs.size() - 2)
             return R(0);
         else {
             R r1 = rs[index];
             R r2 = rs[index + 1];
-            X x1 = start + index * step;
+            X x1 = start + step * index;
             X x2 = x1 + step;
             return interpolator.getValue(x1, r1, x2, r2, x);
         }
     }
 
     virtual void partition(const Interval<X>& i, const std::function<void (const Interval<X>&, const IFunction<R, Domain<X>> *)> callback) const override {
-        throw cRuntimeError("TODO");
+        const auto& i1 = i.getIntersected(Interval<X>(getLowerBound<X>(), Point<X>(start), 0b0, 0b0, 0b0));
+        if (!i1.isEmpty()) {
+            ConstantFunction<R, Domain<X>> g(R(0));
+            callback(i1, &g);
+        }
+        const auto& i2 = i.getIntersected(Interval<X>(Point<X>(start), Point<X>(end), 0b1, 0b0, 0b0));
+        if (!i2.isEmpty()) {
+            int startIndex = std::max(0, (int)std::floor(toDouble(std::get<0>(i.getLower()) - start) / toDouble(step)));
+            int endIndex = std::min((int)rs.size() - 1, (int)std::ceil(toDouble(std::get<0>(i.getUpper()) - start) / toDouble(step)));
+            for (int index = startIndex; index < endIndex; index++) {
+                Point<X> startPoint(start + step * index);
+                Point<X> endPoint(start + step * (index + 1));
+                const auto& i3 = i.getIntersected(Interval<X>(startPoint, endPoint, 0b1, 0b0, 0b0));
+                if (!i3.isEmpty()) {
+                    if (dynamic_cast<const ConstantInterpolatorBase<X, R> *>(&interpolator)) {
+                        R r = getValue((startPoint + endPoint) / 2);
+                        ConstantFunction<R, Domain<X>> g(r);
+                        callback(i3, &g);
+                    }
+                    else
+                        throw cRuntimeError("TODO");
+                }
+            }
+        }
+        const auto& i4 = i.getIntersected(Interval<X>(Point<X>(end), getUpperBound<X>(), 0b1, 0b0, 0b0));
+        if (!i4.isEmpty()) {
+            ConstantFunction<R, Domain<X>> g(R(0));
+            callback(i4, &g);
+        }
     }
 };
 
-//template<typename R, typename X, typename Y>
-//class INET_API PeriodicallyInterpolated2DFunction : public FunctionBase<R, Domain<X, Y>>
-//{
-//  protected:
-//    const X startX;
-//    const X endX;
-//    const X stepX;
-//    const Y startY;
-//    const Y endY;
-//    const Y stepY;
-//    const IInterpolator<X, R>& interpolatorX;
-//    const IInterpolator<Y, R>& interpolatorY;
-//    const std::vector<R> rs;
-//
-//  public:
-//    PeriodicallyInterpolated2DFunction(X startX, X endX, Y startY, Y endY, const IInterpolator<X, R>& interpolatorX, const IInterpolator<Y, R>& interpolatorY, const std::vector<R>& rs) :
-//        startX(startX), endX(endX), startY(startY), endY(endY), interpolatorX(interpolatorX), interpolatorY(interpolatorY), rs(rs) { }
-//
-//    virtual R getValue(const Point<X, Y>& p) const override {
-//        throw cRuntimeError("TODO");
-//    }
-//
-//    virtual void partition(const Interval<X, Y>& i, const std::function<void (const Interval<X, Y>&, const IFunction<R, Domain<X, Y>> *)> callback) const override {
-//        throw cRuntimeError("TODO");
-//    }
-//};
+template<typename R, typename X, typename Y>
+class INET_API PeriodicallyInterpolated2DFunction : public FunctionBase<R, Domain<X, Y>>
+{
+  protected:
+    const X startX;
+    const X endX;
+    const X stepX;
+    int sizeX;
+    const Y startY;
+    const Y endY;
+    const Y stepY;
+    int sizeY;
+    const IInterpolator<X, R>& interpolatorX;
+    const IInterpolator<Y, R>& interpolatorY;
+    const std::vector<R> rs;
+
+  protected:
+    virtual R getValueInterpolatedAlongX(X x, int indexX, int indexY) const {
+        R r1 = rs[sizeX * indexY + indexX];
+        R r2 = rs[sizeX * indexY + indexX + 1];
+        X x1 = startX + stepX * indexX;
+        X x2 = x1 + stepX;
+        return interpolatorX.getValue(x1, r1, x2, r2, x);
+    }
+
+    void call(const Interval<X, Y>& i, const std::function<void (const Interval<X, Y>&, const IFunction<R, Domain<X, Y>> *)> callback) const {
+        if (!i.isEmpty()) {
+            ConstantFunction<R, Domain<X, Y>> g(R(0));
+            callback(i, &g);
+        }
+    }
+
+  public:
+    PeriodicallyInterpolated2DFunction(X startX, X endX, int sizeX, Y startY, Y endY, int sizeY, const IInterpolator<X, R>& interpolatorX, const IInterpolator<Y, R>& interpolatorY, const std::vector<R>& rs) :
+        startX(startX), endX(endX), stepX((endX - startX) / (sizeX - 1)), sizeX(sizeX),
+        startY(startY), endY(endY), stepY((endY - startY) / (sizeY - 1)), sizeY(sizeY),
+        interpolatorX(interpolatorX), interpolatorY(interpolatorY), rs(rs)
+    {
+        ASSERT(rs.size() == sizeX * sizeY);
+    }
+
+    virtual R getValue(const Point<X, Y>& p) const override {
+        X x = std::get<0>(p);
+        Y y = std::get<1>(p);
+        int indexX = std::floor(toDouble(x - startX) / toDouble(stepX));
+        int indexY = std::floor(toDouble(y - startY) / toDouble(stepY));
+        if (indexX < 0 || indexX > sizeX - 2 || indexY < 0 || indexY > sizeY - 2)
+            return R(0);
+        else {
+            R r1 = getValueInterpolatedAlongX(x, indexX, indexY);
+            R r2 = getValueInterpolatedAlongX(x, indexX, indexY + 1);
+            Y y1 = startY + stepY * indexY;
+            Y y2 = y1 + stepY;
+            return interpolatorY.getValue(y1, r1, y2, r2, y);
+        }
+    }
+
+    virtual void partition(const Interval<X, Y>& i, const std::function<void (const Interval<X, Y>&, const IFunction<R, Domain<X, Y>> *)> callback) const override {
+        call(i.getIntersected(Interval<X, Y>(Point<X, Y>(getLowerBound<X>(), getLowerBound<Y>()), Point<X, Y>(X(startX), Y(startY)), 0b00, 0b00, 0b00)), callback);
+        call(i.getIntersected(Interval<X, Y>(Point<X, Y>(X(startX), getLowerBound<Y>()), Point<X, Y>(X(endX), Y(startY)), 0b10, 0b00, 0b00)), callback);
+        call(i.getIntersected(Interval<X, Y>(Point<X, Y>(X(endX), getLowerBound<Y>()), Point<X, Y>(getUpperBound<X>(), Y(startY)), 0b10, 0b00, 0b00)), callback);
+
+        call(i.getIntersected(Interval<X, Y>(Point<X, Y>(getLowerBound<X>(), Y(startY)), Point<X, Y>(X(startX), Y(endY)), 0b01, 0b00, 0b00)), callback);
+        const auto& i1 = i.getIntersected(Interval<X, Y>(Point<X, Y>(X(startX), Y(startY)), Point<X, Y>(X(endX), Y(endY)), 0b11, 0b00, 0b00));
+        if (!i1.isEmpty()) {
+            int startIndexX = std::max(0, (int)std::floor(toDouble(std::get<0>(i.getLower()) - startX) / toDouble(stepX)));
+            int endIndexX = std::min(sizeX - 1, (int)std::ceil(toDouble(std::get<0>(i.getUpper()) - startX) / toDouble(stepX)));
+            for (int indexX = startIndexX; indexX < endIndexX; indexX++) {
+                int startIndexY = std::max(0, (int)std::floor(toDouble(std::get<1>(i.getLower()) - startY) / toDouble(stepY)));
+                int endIndexY = std::min(sizeY - 1, (int)std::ceil(toDouble(std::get<1>(i.getUpper()) - startY) / toDouble(stepY)));
+                for (int indexY = startIndexY; indexY < endIndexY; indexY++) {
+                    Point<X, Y> startPoint(startX + stepX * indexX, startY + stepY * indexY);
+                    Point<X, Y> endPoint(startX + stepX * (indexX + 1), startY + stepY * (indexY + 1));
+                    const auto& i3 = i.getIntersected(Interval<X, Y>(startPoint, endPoint, 0b11, 0b00, 0b00));
+                    if (!i3.isEmpty()) {
+                        if (dynamic_cast<const ConstantInterpolatorBase<X, R> *>(&interpolatorX) && dynamic_cast<const ConstantInterpolatorBase<Y, R> *>(&interpolatorY)) {
+                            R r = getValue((startPoint + endPoint) / 2);
+                            ConstantFunction<R, Domain<X, Y>> g(r);
+                            callback(i3, &g);
+                        }
+                        else
+                            throw cRuntimeError("TODO");
+                    }
+                }
+            }
+        }
+        call(i.getIntersected(Interval<X, Y>(Point<X, Y>(X(endX), Y(startY)), Point<X, Y>(getUpperBound<X>(), Y(endY)), 0b11, 0b00, 0b00)), callback);
+
+        call(i.getIntersected(Interval<X, Y>(Point<X, Y>(getLowerBound<X>(), Y(endY)), Point<X, Y>(X(startX), getUpperBound<Y>()), 0b01, 0b00, 0b00)), callback);
+        call(i.getIntersected(Interval<X, Y>(Point<X, Y>(X(startX), Y(endY)), Point<X, Y>(X(endX), getUpperBound<Y>()), 0b11, 0b00, 0b00)), callback);
+        call(i.getIntersected(Interval<X, Y>(Point<X, Y>(X(endX), Y(endY)), Point<X, Y>(getUpperBound<X>(), getUpperBound<Y>()), 0b11, 0b00, 0b00)), callback);
+    }
+};
 
 /**
  * One-dimensional interpolated (e.g. constant, linear) function between intervals defined by points on the X axis.
