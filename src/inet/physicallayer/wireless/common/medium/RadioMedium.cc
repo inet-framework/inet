@@ -560,7 +560,7 @@ void RadioMedium::sendToRadio(IRadio *transmitter, const IRadio *receiver, const
 {
     const ITransmission *transmission = transmittedSignal->getTransmission();
     if (receiver != transmitter && receiver->getReceiver() != nullptr && isPotentialReceiver(receiver, transmission)) {
-        auto transmitterRadio = const_cast<Radio *>(check_and_cast<const Radio *>(transmitter));
+        auto transmitterRadio = const_cast<cSimpleModule *>(check_and_cast<const cSimpleModule *>(transmitter));
         cMethodCallContextSwitcher contextSwitcher(transmitterRadio);
         contextSwitcher.methodCall("sendToRadio");
         const IArrival *arrival = getArrival(receiver, transmission);
