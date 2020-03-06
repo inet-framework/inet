@@ -29,8 +29,8 @@ void DimensionalAnalogModelBase::initialize(int stage)
 const Ptr<const IFunction<WpHz, Domain<simsec, Hz>>> DimensionalAnalogModelBase::computeReceptionPower(const IRadio *receiverRadio, const ITransmission *transmission, const IArrival *arrival) const
 {
     const IRadioMedium *radioMedium = receiverRadio->getMedium();
-    const DimensionalTransmission *dimensionalTransmission = check_and_cast<const DimensionalTransmission *>(transmission);
     const IDimensionalSignal *dimensionalSignalAnalogModel = check_and_cast<const IDimensionalSignal *>(transmission->getAnalogModel());
+    const INarrowbandSignal *narrowbandSignal = check_and_cast<const INarrowbandSignal *>(transmission->getAnalogModel());
     const Coord& transmissionStartPosition = transmission->getStartPosition();
     const Coord& receptionStartPosition = arrival->getStartPosition();
     double transmitterAntennaGain = computeAntennaGain(transmission->getTransmitterAntennaGain(), transmissionStartPosition, arrival->getStartPosition(), transmission->getStartOrientation());
@@ -44,13 +44,13 @@ const Ptr<const IFunction<WpHz, Domain<simsec, Hz>>> DimensionalAnalogModelBase:
     Ptr<const IFunction<double, Domain<simsec, Hz>>> attenuationFunction = makeShared<FrequencyDependentAttenuationFunction>(radioMedium, transmitterAntennaGain, receiverAntennaGain, transmissionStartPosition, receptionStartPosition);
     Ptr<const IFunction<WpHz, Domain<simsec, Hz>>> receptionPower;
     if (attenuateWithCenterFrequency) {
-        const auto& constantAttenuationFunction = makeShared<ConstantFunction<double, Domain<simsec, Hz>>>(attenuationFunction->getValue(Point<simsec, Hz>(simsec(0), dimensionalTransmission->getCenterFrequency())));
+        const auto& constantAttenuationFunction = makeShared<ConstantFunction<double, Domain<simsec, Hz>>>(attenuationFunction->getValue(Point<simsec, Hz>(simsec(0), narrowbandSignal->getCenterFrequency())));
         receptionPower = propagatedTransmissionPowerFunction->multiply(constantAttenuationFunction);
     }
     else {
-        Hz lower = dimensionalTransmission->getCenterFrequency() - dimensionalTransmission->getBandwidth() / 2;
-        Hz upper = dimensionalTransmission->getCenterFrequency() + dimensionalTransmission->getBandwidth() / 2;
-        Hz step = dimensionalTransmission->getBandwidth() / 10; // TODO parameter for 10
+        Hz lower = narrowbandSignal->getCenterFrequency() - narrowbandSignal->getBandwidth() / 2;
+        Hz upper = narrowbandSignal->getCenterFrequency() + narrowbandSignal->getBandwidth() / 2;
+        Hz step = narrowbandSignal->getBandwidth() / 10; // TODO: parameter for 10
         const auto& approximatedAttenuationFunction = makeShared<ApproximatedFunction<double, Domain<simsec, Hz>, 1, Hz>>(lower, upper, step, &AverageInterpolator<Hz, double>::singleton, attenuationFunction);
         receptionPower = propagatedTransmissionPowerFunction->multiply(approximatedAttenuationFunction);
     }
@@ -72,9 +72,9 @@ const INoise *DimensionalAnalogModelBase::computeNoise(const IListening *listeni
         receptionPowers.push_back(backgroundNoisePower);
     }
     const std::vector<const IReception *> *interferingReceptions = interference->getInterferingReceptions();
-    for (const auto& interferingReception : *interferingReceptions) {
-        const DimensionalReception *dimensionalReception = check_and_cast<const DimensionalReception *>(interferingReception);
-        auto receptionPower = dimensionalReception->getPower();
+    for (const auto & interferingReception : *interferingReceptions) {
+        auto dimensionalSignal = check_and_cast<const IDimensionalSignal *>(interferingReception->getAnalogModel());
+        auto receptionPower = dimensionalSignal->getPower();
         receptionPowers.push_back(receptionPower);
         EV_TRACE << "Interference power begin " << endl;
         EV_TRACE << *receptionPower << endl;
