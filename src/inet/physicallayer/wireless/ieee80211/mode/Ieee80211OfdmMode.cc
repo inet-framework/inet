@@ -258,7 +258,7 @@ const Ieee80211OfdmMode *Ieee80211OfdmCompliantModes::findCompliantMode(unsigned
                 return &ofdmMode27Mbps;
 
             default:
-                throw cRuntimeError("%d is not a valid rate", signalRateField);
+                return nullptr;
         }
     }
     else if (channelSpacing == MHz(5)) {
