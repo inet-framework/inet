@@ -25,17 +25,21 @@ namespace physicallayer {
 
 class INET_API Ieee80211OfdmModulation : public IModulation
 {
-    protected:
-        const ApskModulationBase *subcarrierModulation;
+  protected:
+    int numSubcarriers;
+    const ApskModulationBase *subcarrierModulation;
 
-    public:
-        Ieee80211OfdmModulation(const ApskModulationBase *subcarrierModulation);
+  public:
+    Ieee80211OfdmModulation(int numSubcarriers, const ApskModulationBase *subcarrierModulation);
 
-        const ApskModulationBase *getSubcarrierModulation() const { return subcarrierModulation; }
-        virtual double calculateBER(double snir, Hz bandwidth, bps bitrate) const override { return subcarrierModulation->calculateBER(snir, bandwidth, bitrate); }
-        virtual double calculateSER(double snir, Hz bandwidth, bps bitrate) const override { return subcarrierModulation->calculateSER(snir, bandwidth, bitrate); }
+    virtual int getNumSubcarriers() const { return numSubcarriers; }
+    virtual const ApskModulationBase *getSubcarrierModulation() const { return subcarrierModulation; }
 
-        virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
+    // TODO: is it correct to calculate this with the same bandwidth and bitrate when there are subcarriers?
+    virtual double calculateBER(double snir, Hz bandwidth, bps bitrate) const override { return subcarrierModulation->calculateBER(snir, bandwidth, bitrate); }
+    virtual double calculateSER(double snir, Hz bandwidth, bps bitrate) const override { return subcarrierModulation->calculateSER(snir, bandwidth, bitrate); }
+
+    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 };
 
 class INET_API Ieee80211OfdmCompliantModulations
