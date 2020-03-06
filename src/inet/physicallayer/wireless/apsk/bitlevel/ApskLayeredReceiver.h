@@ -65,6 +65,7 @@ class INET_API ApskLayeredReceiver : public SnirReceiverBase
     virtual const IDemodulator *getModulator() const { return demodulator; }
     virtual const IPulseFilter *getPulseFilter() const { return pulseFilter; }
     virtual const IAnalogDigitalConverter *getAnalogDigitalConverter() const { return analogDigitalConverter; }
+    virtual bool computeIsReceptionPossible(const IListening *listening, const ITransmission *transmission) const override;
     virtual bool computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part) const override;
     virtual const IListening *createListening(const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord& startPosition, const Coord& endPosition) const override;
     virtual const IListeningDecision *computeListeningDecision(const IListening *listening, const IInterference *interference) const override;
