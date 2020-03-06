@@ -21,6 +21,7 @@ module NarrowbandTransmitterBase like ITransmitter
         double power @unit(W);             // transmission power
         double centerFrequency @unit(Hz); // center frequency of the band where the transmitter transmits on the medium
         double bandwidth @unit(Hz);        // bandwidth of the band where the transmitter transmits on the medium
+        double codeRate = default(1);
         string modulation;                 // "BPSK", "16-QAM", "256-QAM"
         @display("i=block/wtx");
 }
