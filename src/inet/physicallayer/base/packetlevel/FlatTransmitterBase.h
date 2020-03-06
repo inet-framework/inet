@@ -30,6 +30,7 @@ class INET_API FlatTransmitterBase : public NarrowbandTransmitterBase
     simtime_t preambleDuration;
     b headerLength;
     bps bitrate;
+    double codeRate;
     W power;
 
   protected:
