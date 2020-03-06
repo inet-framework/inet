@@ -196,8 +196,14 @@ const IListeningDecision *ApskLayeredReceiver::computeListeningDecision(const IL
     return new ListeningDecision(listening, isListeningPossible);
 }
 
-// TODO this is not purely functional, see interface comment
-// TODO copy
+bool ApskLayeredReceiver::computeIsReceptionPossible(const IListening *listening, const ITransmission *transmission) const
+{
+    auto layeredTransmission = dynamic_cast<const LayeredTransmission *>(transmission);
+    return layeredTransmission && SnirReceiverBase::computeIsReceptionPossible(listening, transmission);
+}
+
+// TODO: this is not purely functional, see interface comment
+// TODO: copy
 bool ApskLayeredReceiver::computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part) const
 {
     auto layeredTransmission = dynamic_cast<const LayeredTransmission *>(reception->getTransmission());

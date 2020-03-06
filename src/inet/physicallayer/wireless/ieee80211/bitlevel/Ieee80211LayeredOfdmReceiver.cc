@@ -356,7 +356,7 @@ const Ieee80211OfdmMode *Ieee80211LayeredOfdmReceiver::computeMode(Hz bandwidth)
 
 const IReceptionResult *Ieee80211LayeredOfdmReceiver::computeReceptionResult(const IListening *listening, const IReception *reception, const IInterference *interference, const ISnir *snir, const std::vector<const IReceptionDecision *> *decisions) const
 {
-    const Ieee80211LayeredTransmission *transmission = dynamic_cast<const Ieee80211LayeredTransmission *>(reception->getTransmission());
+    const Ieee80211LayeredTransmission *transmission = check_and_cast<const Ieee80211LayeredTransmission *>(reception->getTransmission());
     // corruted model
     const IReceptionAnalogModel *analogModel = createAnalogModel(transmission, snir);
     const IReceptionSampleModel *sampleModel = createSampleModel(transmission, snir);
@@ -446,23 +446,34 @@ const IListeningDecision *Ieee80211LayeredOfdmReceiver::computeListeningDecision
     return new ListeningDecision(listening, isListeningPossible);
 }
 
-// TODO this is not purely functional, see interface comment
-// TODO copy
+bool Ieee80211LayeredOfdmReceiver::computeIsReceptionPossible(const IListening *listening, const ITransmission *transmission) const
+{
+    auto ieee80211Transmission = dynamic_cast<const Ieee80211LayeredTransmission *>(transmission);
+    return ieee80211Transmission && SnirReceiverBase::computeIsReceptionPossible(listening, transmission);
+}
+
+// TODO: this is not purely functional, see interface comment
+// TODO: copy
 bool Ieee80211LayeredOfdmReceiver::computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part) const
 {
-    const BandListening *bandListening = check_and_cast<const BandListening *>(listening);
-    const LayeredReception *dimensionalReception = check_and_cast<const LayeredReception *>(reception);
-    const DimensionalReceptionSignalAnalogModel *analogModel = check_and_cast<const DimensionalReceptionSignalAnalogModel *>(dimensionalReception->getAnalogModel());
-    if (bandListening->getCenterFrequency() != analogModel->getCenterFrequency() || bandListening->getBandwidth() != analogModel->getBandwidth()) {
-        EV_DEBUG << "Computing reception possible: listening and reception bands are different -> reception is impossible" << endl;
+    auto ieee80211Transmission = dynamic_cast<const Ieee80211LayeredTransmission *>(reception->getTransmission());
+    if (ieee80211Transmission == nullptr)
         return false;
-    }
     else {
-        const INarrowbandSignal *narrowbandSignalAnalogModel = check_and_cast<const INarrowbandSignal *>(reception->getAnalogModel());
-        W minReceptionPower = narrowbandSignalAnalogModel->computeMinPower(reception->getStartTime(), reception->getEndTime());
-        bool isReceptionPossible = minReceptionPower >= sensitivity;
-        EV_DEBUG << "Computing reception possible" << EV_FIELD(minReceptionPower) << EV_FIELD(sensitivity) << " -> reception is " << (isReceptionPossible ? "possible" : "impossible") << endl;
-        return isReceptionPossible;
+        const BandListening *bandListening = check_and_cast<const BandListening *>(listening);
+        const LayeredReception *dimensionalReception = check_and_cast<const LayeredReception *>(reception);
+        const DimensionalReceptionSignalAnalogModel *analogModel = check_and_cast<const DimensionalReceptionSignalAnalogModel *>(dimensionalReception->getAnalogModel());
+        if (bandListening->getCenterFrequency() != analogModel->getCenterFrequency() || bandListening->getBandwidth() != analogModel->getBandwidth()) {
+            EV_DEBUG << "Computing reception possible: listening and reception bands are different -> reception is impossible" << endl;
+            return false;
+        }
+        else {
+            const INarrowbandSignal *narrowbandSignalAnalogModel = check_and_cast<const INarrowbandSignal *>(reception->getAnalogModel());
+            W minReceptionPower = narrowbandSignalAnalogModel->computeMinPower(reception->getStartTime(), reception->getEndTime());
+            bool isReceptionPossible = minReceptionPower >= sensitivity;
+            EV_DEBUG << "Computing reception possible" << EV_FIELD(minReceptionPower) << EV_FIELD(sensitivity) << " -> reception is " << (isReceptionPossible ? "possible" : "impossible") << endl;
+            return isReceptionPossible;
+        }
     }
 }
 
