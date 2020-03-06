@@ -191,7 +191,7 @@ const ITransmission *Ieee802154UwbIrTransmitter::createTransmission(const IRadio
     const Quaternion& startOrientation = mobility->getCurrentAngularPosition();
     const Quaternion& endOrientation = mobility->getCurrentAngularPosition();
     const Ptr<const IFunction<WpHz, Domain<simsec, Hz>>>& powerFunction = generateIEEE802154AUWBSignal(startTime, bits);
-    return new DimensionalTransmission(transmitter, packet, startTime, endTime, -1, -1, -1, startPosition, endPosition, startOrientation, endOrientation, nullptr, packet->getTotalLength(), b(-1), cfg.centerFrequency, cfg.bandwidth, cfg.bitrate, powerFunction);
+    return new DimensionalTransmission(transmitter, packet, startTime, endTime, -1, -1, -1, startPosition, endPosition, startOrientation, endOrientation, packet->getTotalLength(), b(-1), nullptr, -1, cfg.centerFrequency, cfg.bandwidth, cfg.bitrate, NaN, powerFunction);
 }
 
 } // namespace physicallayer
