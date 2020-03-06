@@ -39,7 +39,7 @@ void NoiseSource::initialize(int stage)
     }
     else if (stage == INITSTAGE_PHYSICAL_LAYER) {
         medium->addRadio(this);
-        scheduleSleepTimer();
+        scheduleAt(par("startTime"), sleepTimer);
     }
 }
 
