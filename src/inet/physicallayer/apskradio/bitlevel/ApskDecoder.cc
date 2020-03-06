@@ -68,7 +68,7 @@ std::ostream& ApskDecoder::printToStream(std::ostream& stream, int level) const
 const IReceptionPacketModel *ApskDecoder::decode(const IReceptionBitModel *bitModel) const
 {
     bool hasBitError = false;
-    BitVector *decodedBits = new BitVector(*bitModel->getBits());
+    BitVector *decodedBits = new BitVector(*bitModel->getAllBits());
     if (deinterleaver)
         *decodedBits = deinterleaver->deinterleave(*decodedBits);
     if (fecDecoder) {
@@ -92,7 +92,7 @@ const IReceptionPacketModel *ApskDecoder::decode(const IReceptionBitModel *bitMo
     }
     delete decodedBits;
     packet->setBitError(hasBitError);
-    return new ReceptionPacketModel(packet, bps(NaN));
+    return new ReceptionPacketModel(packet, bps(NaN), bps(NaN));
 }
 
 } // namespace physicallayer
