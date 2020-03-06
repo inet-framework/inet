@@ -53,7 +53,9 @@ const ITransmission *Ieee80211ScalarTransmitter::createTransmission(const IRadio
     const simtime_t preambleDuration = transmissionMode->getPreambleMode()->getDuration();
     const simtime_t headerDuration = transmissionMode->getHeaderMode()->getDuration();
     const simtime_t dataDuration = duration - headerDuration - preambleDuration;
-    return new Ieee80211ScalarTransmission(transmitter, packet, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, modulation, headerLength, dataLength, centerFrequency, transmissionBandwidth, transmissionBitrate, transmissionPower, transmissionMode, transmissionChannel);
+    auto dataModulation = transmissionMode->getDataMode()->getModulation();
+    auto dataSymbolTime = SimTime(4, SIMTIME_US); // TODO: transmissionMode->getDataMode()->getSymbolInterval();
+    return new Ieee80211ScalarTransmission(transmitter, packet, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, headerLength, dataLength, dataModulation, dataSymbolTime, centerFrequency, transmissionBandwidth, transmissionBitrate, codeRate, transmissionPower, transmissionMode, transmissionChannel);
 }
 
 } // namespace physicallayer
