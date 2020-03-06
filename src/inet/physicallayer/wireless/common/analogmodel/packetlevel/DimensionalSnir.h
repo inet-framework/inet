@@ -36,6 +36,8 @@ class INET_API DimensionalSnir : public SnirBase
     virtual double getMin() const override;
     virtual double getMax() const override;
     virtual double getMean() const override;
+
+    virtual const Ptr<const IFunction<double, Domain<simsec, Hz>>> getSnir() const;
 };
 
 } // namespace physicallayer
