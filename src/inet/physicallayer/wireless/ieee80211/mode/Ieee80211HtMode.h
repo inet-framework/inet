@@ -170,11 +170,10 @@ class INET_API Ieee80211Htmcs
     const Hz bandwidth;
 
   public:
-    Ieee80211Htmcs(unsigned int mcsIndex, const Ieee80211HtCode *code, const Ieee80211OfdmModulation *stream1Modulation, const Ieee80211OfdmModulation *stream2Modulation, const Ieee80211OfdmModulation *stream3Modulation, const Ieee80211OfdmModulation *stream4Modulation);
-    Ieee80211Htmcs(unsigned int mcsIndex, const Ieee80211OfdmModulation *stream1Modulation, const Ieee80211OfdmModulation *stream2Modulation, const Ieee80211OfdmModulation *stream3Modulation, const Ieee80211OfdmModulation *stream4Modulation, const Ieee80211ConvolutionalCode *convolutionalCode, Hz bandwidth);
-    Ieee80211Htmcs(unsigned int mcsIndex, const Ieee80211OfdmModulation *stream1Modulation, const Ieee80211OfdmModulation *stream2Modulation, const Ieee80211OfdmModulation *stream3Modulation, const Ieee80211ConvolutionalCode *convolutionalCode, Hz bandwidth);
-    Ieee80211Htmcs(unsigned int mcsIndex, const Ieee80211OfdmModulation *stream1Modulation, const Ieee80211OfdmModulation *stream2Modulation, const Ieee80211ConvolutionalCode *convolutionalCode, Hz bandwidth);
-    Ieee80211Htmcs(unsigned int mcsIndex, const Ieee80211OfdmModulation *stream1Modulation, const Ieee80211ConvolutionalCode *convolutionalCode, Hz bandwidth);
+    Ieee80211Htmcs(unsigned int mcsIndex, const ApskModulationBase *stream1SubcarrierModulation, const ApskModulationBase *stream2SubcarrierModulation, const ApskModulationBase *stream3SubcarrierModulation, const ApskModulationBase *stream4SubcarrierModulation, const Ieee80211ConvolutionalCode *convolutionalCode, Hz bandwidth);
+    Ieee80211Htmcs(unsigned int mcsIndex, const ApskModulationBase *stream1SubcarrierModulation, const ApskModulationBase *stream2SubcarrierModulation, const ApskModulationBase *stream3SubcarrierModulation, const Ieee80211ConvolutionalCode *convolutionalCode, Hz bandwidth);
+    Ieee80211Htmcs(unsigned int mcsIndex, const ApskModulationBase *stream1SubcarrierModulation, const ApskModulationBase *stream2SubcarrierModulation, const Ieee80211ConvolutionalCode *convolutionalCode, Hz bandwidth);
+    Ieee80211Htmcs(unsigned int mcsIndex, const ApskModulationBase *stream1SubcarrierModulation, const Ieee80211ConvolutionalCode *convolutionalCode, Hz bandwidth);
     virtual ~Ieee80211Htmcs();
 
     const Ieee80211HtCode *getCode() const { return code; }
@@ -184,6 +183,11 @@ class INET_API Ieee80211Htmcs
     virtual const Ieee80211OfdmModulation *getStreamExtension2Modulation() const { return stream3Modulation; }
     virtual const Ieee80211OfdmModulation *getStreamExtension3Modulation() const { return stream4Modulation; }
     virtual Hz getBandwidth() const { return bandwidth; }
+
+    static int getNumberOfDataSubcarriers(Hz bandwidth, int mcsIndex);
+    static int getNumberOfPilotSubcarriers(Hz bandwidth, int mcsIndex);
+    static int getNumberOfTotalSubcarriers(Hz bandwidth, int mcsIndex) { return getNumberOfDataSubcarriers(bandwidth, mcsIndex) + getNumberOfPilotSubcarriers(bandwidth, mcsIndex); }
+
 };
 
 class INET_API Ieee80211HtDataMode : public IIeee80211DataMode, public Ieee80211HtModeBase, public Ieee80211HtTimingRelatedParametersBase
