@@ -40,7 +40,8 @@ const ITransmission *Ieee802154NarrowbandScalarTransmitter::createTransmission(c
     const Coord& endPosition = mobility->getCurrentPosition();
     const Quaternion& startOrientation = mobility->getCurrentAngularPosition();
     const Quaternion& endOrientation = mobility->getCurrentAngularPosition();
-    return new ScalarTransmission(transmitter, packet, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, modulation, headerLength, packet->getTotalLength(), centerFrequency, bandwidth, transmissionBitrate, transmissionPower);
+    auto symbolTime = 0;
+    return new ScalarTransmission(transmitter, packet, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, headerLength, packet->getTotalLength(), modulation, symbolTime, centerFrequency, bandwidth, transmissionBitrate, NaN, transmissionPower);
 }
 
 } // namespace physicallayer
