@@ -105,6 +105,7 @@ class INET_API Ieee80211HtSignalMode : public IIeee80211HeaderMode, public Ieee8
     virtual b getLength() const override;
     virtual bps getNetBitrate() const override { return Ieee80211HtModeBase::getNetBitrate(); }
     virtual bps getGrossBitrate() const override { return Ieee80211HtModeBase::getGrossBitrate(); }
+    virtual const simtime_t getSymbolInterval() const override { return Ieee80211HtTimingRelatedParametersBase::getSymbolInterval(); }
     virtual const Ieee80211OfdmModulation *getModulation() const override { return modulation; }
     virtual const Ieee80211HtCode *getCode() const { return code; }
 
@@ -213,6 +214,7 @@ class INET_API Ieee80211HtDataMode : public IIeee80211DataMode, public Ieee80211
     virtual bps getGrossBitrate() const override { return Ieee80211HtModeBase::getGrossBitrate(); }
     virtual const Ieee80211Htmcs *getModulationAndCodingScheme() const { return modulationAndCodingScheme; }
     virtual const Ieee80211HtCode *getCode() const { return modulationAndCodingScheme->getCode(); }
+    virtual const simtime_t getSymbolInterval() const override { return Ieee80211HtTimingRelatedParametersBase::getSymbolInterval(); }
     virtual const Ieee80211OfdmModulation *getModulation() const override { return modulationAndCodingScheme->getModulation(); }
 };
 

@@ -29,6 +29,7 @@ class INET_API IIeee80211HeaderMode : public cObject, public IPrintableObject
     virtual bps getGrossBitrate() const = 0;
     virtual b getLength() const = 0;
     virtual const simtime_t getDuration() const = 0;
+    virtual const simtime_t getSymbolInterval() const = 0;
     virtual const IModulation *getModulation() const = 0;
     virtual Ptr<Ieee80211PhyHeader> createHeader() const = 0;
 };
@@ -42,6 +43,7 @@ class INET_API IIeee80211DataMode : public cObject, public IPrintableObject
     virtual b getPaddingLength(b dataLength) const = 0;
     virtual b getCompleteLength(b dataLength) const = 0;
     virtual const simtime_t getDuration(b dataLength) const = 0;
+    virtual const simtime_t getSymbolInterval() const = 0;
     virtual const IModulation *getModulation() const = 0;
     virtual int getNumberOfSpatialStreams() const = 0;
 };

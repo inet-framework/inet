@@ -50,6 +50,7 @@ class INET_API Ieee80211DsssHeaderMode : public Ieee80211DsssChunkMode, public I
     virtual bps getNetBitrate() const override { return Mbps(1); }
     virtual bps getGrossBitrate() const override { return getNetBitrate(); }
     virtual const simtime_t getDuration() const override { return (double)getLength().get() / getNetBitrate().get(); }
+    virtual const simtime_t getSymbolInterval() const override { throw cRuntimeError("TODO"); }
     virtual const DbpskModulation *getModulation() const override { return &DbpskModulation::singleton; }
 
     virtual Ptr<Ieee80211PhyHeader> createHeader() const override { return makeShared<Ieee80211DsssPhyHeader>(); }
@@ -69,6 +70,7 @@ class INET_API Ieee80211DsssDataMode : public Ieee80211DsssChunkMode, public IIe
     virtual b getPaddingLength(b dataLength) const override { return b(0); }
     virtual b getCompleteLength(b dataLength) const override { return dataLength; }
     virtual const simtime_t getDuration(b length) const override;
+    virtual const simtime_t getSymbolInterval() const override { throw cRuntimeError("TODO"); }
     virtual const DpskModulationBase *getModulation() const override { return modulation; }
     virtual int getNumberOfSpatialStreams() const override { return 1; }
 };

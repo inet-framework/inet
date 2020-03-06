@@ -60,6 +60,7 @@ class INET_API Ieee80211HrDsssHeaderMode : public IIeee80211HeaderMode
     virtual bps getNetBitrate() const override { return preambleType == IEEE80211_HRDSSS_PREAMBLE_TYPE_SHORT ? Mbps(2) : Mbps(1); }
     virtual bps getGrossBitrate() const override { return getNetBitrate(); }
     virtual const simtime_t getDuration() const override { return (double)getLength().get() / getNetBitrate().get(); }
+    virtual const simtime_t getSymbolInterval() const override { throw cRuntimeError("TODO"); }
     virtual const DpskModulationBase *getModulation() const override { return preambleType == IEEE80211_HRDSSS_PREAMBLE_TYPE_SHORT ? static_cast<const DpskModulationBase *>(&DqpskModulation::singleton) : static_cast<const DpskModulationBase *>(&DbpskModulation::singleton); }
 
     virtual Ptr<Ieee80211PhyHeader> createHeader() const override { return makeShared<Ieee80211HrDsssPhyHeader>(); }
@@ -79,6 +80,7 @@ class INET_API Ieee80211HrDsssDataMode : public IIeee80211DataMode
     virtual b getPaddingLength(b dataLength) const override { return b(0); }
     virtual b getCompleteLength(b dataLength) const override { return dataLength; }
     virtual const simtime_t getDuration(b length) const override;
+    virtual const simtime_t getSymbolInterval() const override { throw cRuntimeError("TODO"); }
     virtual IModulation *getModulation() const override { return nullptr; } // TODO
     virtual int getNumberOfSpatialStreams() const override { return 1; }
 };
