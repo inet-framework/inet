@@ -18,34 +18,34 @@ class INET_API SignalSymbolModel : public virtual ISignalSymbolModel
 {
   protected:
     const int headerSymbolLength;
-    const int payloadSymbolLength;
+    const int dataSymbolLength;
     const double headerSymbolRate;
-    const double payloadSymbolRate;
+    const double dataSymbolRate;
     const std::vector<const ISymbol *> *symbols;
 
   public:
-    SignalSymbolModel(int headerSymbolLength, double headerSymbolRate, int payloadSymbolLength, double payloadSymbolRate, const std::vector<const ISymbol *> *symbols);
+    SignalSymbolModel(int headerSymbolLength, double headerSymbolRate, int dataSymbolLength, double dataSymbolRate, const std::vector<const ISymbol *> *symbols);
     virtual ~SignalSymbolModel();
 
     virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
-    virtual int getPayloadSymbolLength() const override { return payloadSymbolLength; }
-    virtual double getPayloadSymbolRate() const override { return payloadSymbolRate; }
+    virtual int getDataSymbolLength() const override { return dataSymbolLength; }
+    virtual double getDataSymbolRate() const override { return dataSymbolRate; }
     virtual int getHeaderSymbolLength() const override { return headerSymbolLength; }
     virtual double getHeaderSymbolRate() const override { return headerSymbolRate; }
-    virtual const std::vector<const ISymbol *> *getSymbols() const override { return symbols; }
+    virtual const std::vector<const ISymbol *> *getAllSymbols() const override { return symbols; }
 };
 
 class INET_API TransmissionSymbolModel : public SignalSymbolModel, public virtual ITransmissionSymbolModel
 {
   protected:
     const IModulation *headerModulation;
-    const IModulation *payloadModulation;
+    const IModulation *dataModulation;
 
   public:
-    TransmissionSymbolModel(int headerSymbolLength, double headerSymbolRate, int payloadSymbolLength, double payloadSymbolRate, const std::vector<const ISymbol *> *symbols, const IModulation *headerModulation, const IModulation *payloadModulation);
+    TransmissionSymbolModel(int headerSymbolLength, double headerSymbolRate, int dataSymbolLength, double dataSymbolRate, const std::vector<const ISymbol *> *symbols, const IModulation *headerModulation, const IModulation *dataModulation);
 
     virtual const IModulation *getHeaderModulation() const override { return headerModulation; }
-    virtual const IModulation *getPayloadModulation() const override { return payloadModulation; }
+    virtual const IModulation *getDataModulation() const override { return dataModulation; }
 };
 
 class INET_API ReceptionSymbolModel : public SignalSymbolModel, public virtual IReceptionSymbolModel
@@ -54,7 +54,7 @@ class INET_API ReceptionSymbolModel : public SignalSymbolModel, public virtual I
     double symbolErrorRate;
 
   public:
-    ReceptionSymbolModel(int headerSymbolLength, double headerSymbolRate, int payloadSymbolLength, double payloadSymbolRate, const std::vector<const ISymbol *> *symbols, double symbolErrorRate);
+    ReceptionSymbolModel(int headerSymbolLength, double headerSymbolRate, int dataSymbolLength, double dataSymbolRate, const std::vector<const ISymbol *> *symbols, double symbolErrorRate);
 
     virtual double getSymbolErrorRate() const override { return symbolErrorRate; }
 };

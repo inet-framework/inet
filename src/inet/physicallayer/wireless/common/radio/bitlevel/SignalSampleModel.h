@@ -16,35 +16,35 @@ namespace physicallayer {
 class INET_API SignalSampleModel : public virtual ISignalSampleModel
 {
   protected:
-    const int sampleLength;
-    const double sampleRate;
+    const int headerSampleLength;
+    const double headerSampleRate;
+    const int dataSampleLength;
+    const double dataSampleRate;
     const std::vector<W> *samples;
 
   public:
-    SignalSampleModel(int sampleLength, double sampleRate, const std::vector<W> *samples);
+    SignalSampleModel(int headerSampleLength, double headerSampleRate, int dataSampleLength, double dataSampleRate, const std::vector<W> *samples);
     virtual ~SignalSampleModel();
 
     virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
-    virtual int getSampleLength() const override { return sampleLength; }
-    virtual double getSampleRate() const override { return sampleRate; }
+
+    virtual int getHeaderSampleLength() const override { return headerSampleLength; }
+    virtual double getHeaderSampleRate() const override { return headerSampleRate; }
+    virtual int getDataSampleLength() const override { return dataSampleLength; }
+    virtual double getDataSampleRate() const override { return dataSampleRate; }
     virtual const std::vector<W> *getSamples() const override { return samples; }
 };
 
 class INET_API TransmissionSampleModel : public SignalSampleModel, public virtual ITransmissionSampleModel
 {
   public:
-    TransmissionSampleModel(int sampleLength, double sampleRate, const std::vector<W> *samples);
+    TransmissionSampleModel(int headerSampleLength, double headerSampleRate, int dataSampleLength, double dataSampleRate, const std::vector<W> *samples);
 };
 
 class INET_API ReceptionSampleModel : public SignalSampleModel, public virtual IReceptionSampleModel
 {
-  protected:
-    const W rssi;
-
   public:
-    ReceptionSampleModel(int sampleLength, double sampleRate, const std::vector<W> *samples, W rssi);
-
-    virtual const W getRSSI() const override { return rssi; }
+    ReceptionSampleModel(int headerSampleLength, double headerSampleRate, int dataSampleLength, double dataSampleRate, const std::vector<W> *samples);
 };
 
 } // namespace physicallayer

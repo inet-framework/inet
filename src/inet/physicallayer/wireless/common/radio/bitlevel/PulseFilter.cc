@@ -16,9 +16,11 @@ PulseFilter::PulseFilter() :
 
 const IReceptionSymbolModel *PulseFilter::filter(const IReceptionSampleModel *sampleModel) const
 {
-    const int symbolLength = sampleModel->getSampleLength() / samplePerSymbol;
-    const double symbolRate = sampleModel->getSampleRate() / samplePerSymbol;
-    return new ReceptionSymbolModel(symbolLength, symbolRate, -1, NaN, nullptr, NaN);
+    int headerSymbolLength = sampleModel->getHeaderSampleLength() / samplePerSymbol;
+    double headerSymbolRate = sampleModel->getHeaderSampleRate() / samplePerSymbol;
+    int dataSymbolLength = sampleModel->getDataSampleLength() / samplePerSymbol;
+    double dataSymbolRate = sampleModel->getDataSampleRate() / samplePerSymbol;
+    return new ReceptionSymbolModel(headerSymbolLength, headerSymbolRate, dataSymbolLength, dataSymbolRate, nullptr);
 }
 
 } // namespace physicallayer

@@ -10,9 +10,11 @@
 namespace inet {
 namespace physicallayer {
 
-SignalSampleModel::SignalSampleModel(int sampleLength, double sampleRate, const std::vector<W> *samples) :
-    sampleLength(sampleLength),
-    sampleRate(sampleRate),
+SignalSampleModel::SignalSampleModel(int headerSampleLength, double headerSampleRate, int dataSampleLength, double dataSampleRate, const std::vector<W> *samples) :
+    headerSampleLength(headerSampleLength),
+    headerSampleRate(headerSampleRate),
+    dataSampleLength(dataSampleLength),
+    dataSampleRate(dataSampleRate),
     samples(samples)
 {
 }
@@ -26,19 +28,20 @@ std::ostream& SignalSampleModel::printToStream(std::ostream& stream, int level, 
 {
     stream << "SignalSampleModel";
     if (level <= PRINT_LEVEL_TRACE)
-        stream << EV_FIELD(sampleLength)
-               << EV_FIELD(sampleRate);
+        stream << EV_FIELD(headerSampleLength)
+               << EV_FIELD(headerSampleRate)
+               << EV_FIELD(dataSampleLength)
+               << EV_FIELD(dataSampleRate);
     return stream;
 }
 
-TransmissionSampleModel::TransmissionSampleModel(int sampleLength, double sampleRate, const std::vector<W> *samples) :
-    SignalSampleModel(sampleLength, sampleRate, samples)
+TransmissionSampleModel::TransmissionSampleModel(int headerSampleLength, double headerSampleRate, int dataSampleLength, double dataSampleRate, const std::vector<W> *samples) :
+    SignalSampleModel(headerSampleLength, headerSampleRate, dataSampleLength, dataSampleRate, samples)
 {
 }
 
-ReceptionSampleModel::ReceptionSampleModel(int sampleLength, double sampleRate, const std::vector<W> *samples, W rssi) :
-    SignalSampleModel(sampleLength, sampleRate, samples),
-    rssi(rssi)
+ReceptionSampleModel::ReceptionSampleModel(int headerSampleLength, double headerSampleRate, int dataSampleLength, double dataSampleRate, const std::vector<W> *samples) :
+    SignalSampleModel(headerSampleLength, headerSampleRate, dataSampleLength, dataSampleRate, samples)
 {
 }
 

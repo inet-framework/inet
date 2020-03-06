@@ -10,11 +10,11 @@
 namespace inet {
 namespace physicallayer {
 
-SignalSymbolModel::SignalSymbolModel(int headerSymbolLength, double headerSymbolRate, int payloadSymbolLength, double payloadSymbolRate, const std::vector<const ISymbol *> *symbols) :
+SignalSymbolModel::SignalSymbolModel(int headerSymbolLength, double headerSymbolRate, int dataSymbolLength, double dataSymbolRate, const std::vector<const ISymbol *> *symbols) :
     headerSymbolLength(headerSymbolLength),
-    payloadSymbolLength(payloadSymbolLength),
+    dataSymbolLength(dataSymbolLength),
     headerSymbolRate(headerSymbolRate),
-    payloadSymbolRate(payloadSymbolRate),
+    dataSymbolRate(dataSymbolRate),
     symbols(symbols)
 {
 }
@@ -29,21 +29,21 @@ std::ostream& SignalSymbolModel::printToStream(std::ostream& stream, int level, 
     stream << "SignalSymbolModel";
     if (level <= PRINT_LEVEL_TRACE)
         stream << EV_FIELD(headerSymbolLength)
-               << EV_FIELD(payloadSymbolLength)
+               << EV_FIELD(dataSymbolLength)
                << EV_FIELD(headerSymbolRate)
-               << EV_FIELD(payloadSymbolRate);
+               << EV_FIELD(dataSymbolRate);
     return stream;
 }
 
-TransmissionSymbolModel::TransmissionSymbolModel(int headerSymbolLength, double headerSymbolRate, int payloadSymbolLength, double payloadSymbolRate, const std::vector<const ISymbol *> *symbols, const IModulation *headerModulation, const IModulation *payloadModulation) :
-    SignalSymbolModel(headerSymbolLength, headerSymbolRate, payloadSymbolLength, payloadSymbolRate, symbols),
+TransmissionSymbolModel::TransmissionSymbolModel(int headerSymbolLength, double headerSymbolRate, int dataSymbolLength, double dataSymbolRate, const std::vector<const ISymbol *> *symbols, const IModulation *headerModulation, const IModulation *dataModulation) :
+    SignalSymbolModel(headerSymbolLength, headerSymbolRate, dataSymbolLength, dataSymbolRate, symbols),
     headerModulation(headerModulation),
-    payloadModulation(payloadModulation)
+    dataModulation(dataModulation)
 {
 }
 
-ReceptionSymbolModel::ReceptionSymbolModel(int headerSymbolLength, double headerSymbolRate, int payloadSymbolLength, double payloadSymbolRate, const std::vector<const ISymbol *> *symbols, double symbolErrorRate) :
-    SignalSymbolModel(headerSymbolLength, headerSymbolRate, payloadSymbolLength, payloadSymbolRate, symbols),
+ReceptionSymbolModel::ReceptionSymbolModel(int headerSymbolLength, double headerSymbolRate, int dataSymbolLength, double dataSymbolRate, const std::vector<const ISymbol *> *symbols, double symbolErrorRate) :
+    SignalSymbolModel(headerSymbolLength, headerSymbolRate, dataSymbolLength, dataSymbolRate, symbols),
     symbolErrorRate(symbolErrorRate)
 {
 }

@@ -19,9 +19,9 @@ ScalarAnalogDigitalConverter::ScalarAnalogDigitalConverter() :
 
 const IReceptionSampleModel *ScalarAnalogDigitalConverter::convertAnalogToDigital(const IReceptionAnalogModel *analogModel) const
 {
-    const simtime_t duration = analogModel->getDuration();
-    const int sampleLength = std::ceil(duration.dbl() / sampleRate);
-    return new ReceptionSampleModel(sampleLength, sampleRate, nullptr, W(0));
+    int headerSampleLength = std::ceil(analogModel->getHeaderDuration().dbl() / sampleRate);
+    int dataSampleLength = std::ceil(analogModel->getDataDuration().dbl() / sampleRate);
+    return new ReceptionSampleModel(headerSampleLength, sampleRate, dataSampleLength, sampleRate, nullptr);
 }
 
 } // namespace physicallayer

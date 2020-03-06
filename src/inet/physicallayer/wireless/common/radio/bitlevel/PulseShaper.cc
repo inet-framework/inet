@@ -16,9 +16,11 @@ PulseShaper::PulseShaper() :
 
 const ITransmissionSampleModel *PulseShaper::shape(const ITransmissionSymbolModel *symbolModel) const
 {
-    const int sampleLength = symbolModel->getPayloadSymbolLength() * samplePerSymbol;
-    const double sampleRate = symbolModel->getPayloadSymbolRate() * samplePerSymbol;
-    return new TransmissionSampleModel(sampleLength, sampleRate, nullptr);
+    int headerSampleLength = symbolModel->getHeaderSymbolLength() * samplePerSymbol;
+    double headerSampleRate = symbolModel->getHeaderSymbolRate() * samplePerSymbol;
+    int dataSampleLength = symbolModel->getDataSymbolLength() * samplePerSymbol;
+    double dataSampleRate = symbolModel->getDataSymbolRate() * samplePerSymbol;
+    return new TransmissionSampleModel(headerSampleLength, headerSampleRate, dataSampleLength, dataSampleRate, nullptr);
 }
 
 } // namespace physicallayer
