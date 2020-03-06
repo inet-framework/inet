@@ -21,6 +21,24 @@ namespace physicallayer {
 class INET_API ISignalAnalogModel : public IPrintableObject
 {
   public:
+    /**
+     * Returns the duration of the PHY frame preamble part.
+     */
+    virtual const simtime_t getPreambleDuration() const = 0;
+
+    /**
+     * Returns the duration of the PHY frame header part.
+     */
+    virtual const simtime_t getHeaderDuration() const = 0;
+
+    /**
+     * Returns the duration of the PHY frame data part.
+     */
+    virtual const simtime_t getDataDuration() const = 0;
+
+    /**
+     * Returns the total duration of the PHY frame that includes the PHY frame header and data parts.
+     */
     virtual const simtime_t getDuration() const = 0;
 };
 

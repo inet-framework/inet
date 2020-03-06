@@ -25,11 +25,20 @@ namespace physicallayer {
 class INET_API ISignalPacketModel : public IPrintableObject
 {
   public:
-    virtual const Packet *getPacket() const = 0;
     /**
-     * Returns the net bitrate (datarate) of the packet.
+     * Returns the packet that includes the PHY frame header and PHY frame data parts.
      */
-    virtual bps getBitrate() const = 0;
+    virtual const Packet *getPacket() const = 0;
+
+    /**
+     * Returns the net bitrate (datarate) of the PHY frame header part.
+     */
+    virtual bps getHeaderNetBitrate() const = 0;
+
+    /**
+    * Returns the net bitrate (datarate) of the PHY frame data part.
+    */
+    virtual bps getDataNetBitrate() const = 0;
 };
 
 class INET_API ITransmissionPacketModel : public virtual ISignalPacketModel
