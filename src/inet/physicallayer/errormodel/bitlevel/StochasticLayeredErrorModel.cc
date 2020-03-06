@@ -37,6 +37,7 @@ StochasticLayeredErrorModel::StochasticLayeredErrorModel() :
 
 void StochasticLayeredErrorModel::initialize(int stage)
 {
+    LayeredErrorModelBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         packetErrorRate = par("packetErrorRate");
         bitErrorRate = par("bitErrorRate");
