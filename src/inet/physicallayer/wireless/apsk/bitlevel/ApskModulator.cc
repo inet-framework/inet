@@ -39,7 +39,7 @@ std::ostream& ApskModulator::printToStream(std::ostream& stream, int level, int 
 
 const ITransmissionSymbolModel *ApskModulator::modulate(const ITransmissionBitModel *bitModel) const
 {
-    const BitVector *bits = bitModel->getBits();
+    const BitVector *bits = bitModel->getAllBits();
     unsigned int codeWordSize = modulation->getCodeWordSize();
     if (bits->getSize() % codeWordSize != 0)
         throw cRuntimeError("Invalid bit length for code word size");
@@ -50,7 +50,7 @@ const ITransmissionSymbolModel *ApskModulator::modulate(const ITransmissionBitMo
         if (i % codeWordSize == codeWordSize - 1)
             symbols->push_back(modulation->mapToConstellationDiagram(symbolBits));
     }
-    // TODO double symbolRate = bitModel->getBitRate() / modulation->getCodeWordSize();
+    // TODO: double symbolRate = bitModel->getBitrate() / modulation->getCodeWordSize();
     return new TransmissionSymbolModel(symbols->size(), NaN, symbols->size(), NaN, symbols, modulation, modulation);
 }
 

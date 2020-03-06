@@ -90,10 +90,10 @@ const ITransmissionBitModel *ApskEncoder::encode(const ITransmissionPacketModel 
     }
     b netHeaderLength = apskPhyHeader->getChunkLength();
     if (forwardErrorCorrection == nullptr)
-        return new TransmissionBitModel(netHeaderLength, packetModel->getBitrate(), length - netHeaderLength, packetModel->getBitrate(), encodedBits, forwardErrorCorrection, scrambling, interleaving);
+        return new TransmissionBitModel(netHeaderLength, packetModel->getDataNetBitrate(), length - netHeaderLength, packetModel->getDataNetBitrate(), encodedBits, forwardErrorCorrection, scrambling, interleaving);
     else {
         b grossHeaderLength = b(forwardErrorCorrection->getEncodedLength(b(netHeaderLength).get()));
-        bps grossBitrate = packetModel->getBitrate() / forwardErrorCorrection->getCodeRate();
+        bps grossBitrate = packetModel->getDataNetBitrate() / forwardErrorCorrection->getCodeRate();
         return new TransmissionBitModel(grossHeaderLength, grossBitrate, length - grossHeaderLength, grossBitrate, encodedBits, forwardErrorCorrection, scrambling, interleaving);
     }
 }
