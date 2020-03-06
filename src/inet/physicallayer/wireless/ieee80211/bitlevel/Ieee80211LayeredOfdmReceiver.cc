@@ -7,29 +7,31 @@
 
 #include "inet/physicallayer/wireless/ieee80211/bitlevel/Ieee80211LayeredOfdmReceiver.h"
 
+// TODO AFTER REBASE: fix includes here
 #include "inet/common/packet/chunk/BytesChunk.h"
-#include "inet/physicallayer/wireless/common/analogmodel/bitlevel/LayeredReception.h"
-#include "inet/physicallayer/wireless/common/analogmodel/bitlevel/ScalarSignalAnalogModel.h"
-#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/ScalarAnalogModel.h"
-#include "inet/physicallayer/wireless/common/base/packetlevel/NarrowbandNoiseBase.h"
-#include "inet/physicallayer/wireless/common/contract/bitlevel/ISymbol.h"
-#include "inet/physicallayer/wireless/common/contract/packetlevel/SignalTag_m.h"
-#include "inet/physicallayer/wireless/common/modulation/BpskModulation.h"
-#include "inet/physicallayer/wireless/common/radio/bitlevel/LayeredReceptionResult.h"
-#include "inet/physicallayer/wireless/common/radio/bitlevel/SignalBitModel.h"
-#include "inet/physicallayer/wireless/common/radio/bitlevel/SignalSampleModel.h"
-#include "inet/physicallayer/wireless/common/radio/bitlevel/SignalSymbolModel.h"
-#include "inet/physicallayer/wireless/common/radio/packetlevel/BandListening.h"
-#include "inet/physicallayer/wireless/common/radio/packetlevel/ListeningDecision.h"
-#include "inet/physicallayer/wireless/ieee80211/bitlevel/Ieee80211LayeredTransmission.h"
-#include "inet/physicallayer/wireless/ieee80211/bitlevel/Ieee80211OfdmDecoderModule.h"
-#include "inet/physicallayer/wireless/ieee80211/bitlevel/Ieee80211OfdmDefs.h"
-#include "inet/physicallayer/wireless/ieee80211/bitlevel/Ieee80211OfdmDemodulatorModule.h"
-#include "inet/physicallayer/wireless/ieee80211/bitlevel/Ieee80211OfdmSymbol.h"
-#include "inet/physicallayer/wireless/ieee80211/bitlevel/Ieee80211OfdmSymbolModel.h"
-#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211OfdmMode.h"
-#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211OfdmModulation.h"
-#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
+#include "inet/physicallayer/analogmodel/bitlevel/DimensionalSignalAnalogModel.h"
+#include "inet/physicallayer/analogmodel/packetlevel/DimensionalAnalogModel.h"
+#include "inet/physicallayer/base/packetlevel/NarrowbandNoiseBase.h"
+#include "inet/physicallayer/common/bitlevel/LayeredReception.h"
+#include "inet/physicallayer/common/bitlevel/LayeredReceptionResult.h"
+#include "inet/physicallayer/common/bitlevel/SignalBitModel.h"
+#include "inet/physicallayer/common/bitlevel/SignalSampleModel.h"
+#include "inet/physicallayer/common/bitlevel/SignalSymbolModel.h"
+#include "inet/physicallayer/common/packetlevel/BandListening.h"
+#include "inet/physicallayer/common/packetlevel/ListeningDecision.h"
+#include "inet/physicallayer/contract/bitlevel/ISymbol.h"
+#include "inet/physicallayer/contract/packetlevel/SignalTag_m.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211LayeredOfdmReceiver.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211LayeredTransmission.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OfdmDecoderModule.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OfdmDefs.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OfdmDemodulatorModule.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OfdmSymbol.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OfdmSymbolModel.h"
+#include "inet/physicallayer/ieee80211/mode/Ieee80211OfdmMode.h"
+#include "inet/physicallayer/ieee80211/mode/Ieee80211OfdmModulation.h"
+#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211Tag_m.h"
+#include "inet/physicallayer/modulation/BpskModulation.h"
 
 namespace inet {
 namespace physicallayer {
@@ -147,15 +149,13 @@ double Ieee80211LayeredOfdmReceiver::getCodeRateFromDecoderModule(const IDecoder
 const IReceptionBitModel *Ieee80211LayeredOfdmReceiver::createCompleteBitModel(const IReceptionBitModel *signalFieldBitModel, const IReceptionBitModel *dataFieldBitModel) const
 {
     if (levelOfDetail >= BIT_DOMAIN) {
-        if (dataFieldBitModel == nullptr)
-            return new ReceptionBitModel(signalFieldBitModel->getHeaderLength(), signalFieldBitModel->getHeaderGrossBitrate(), b(-1), bps(NaN), new BitVector(*signalFieldBitModel->getAllBits()), NaN);
-        else {
-            BitVector *bits = new BitVector(*signalFieldBitModel->getAllBits());
+        BitVector *bits = new BitVector(*signalFieldBitModel->getAllBits());
+        if (dataFieldBitModel != nullptr) {
             const BitVector *dataBits = dataFieldBitModel->getAllBits();
             for (unsigned int i = 0; i < dataBits->getSize(); i++)
                 bits->appendBit(dataBits->getBit(i));
-            return new ReceptionBitModel(signalFieldBitModel->getHeaderLength(), signalFieldBitModel->getHeaderGrossBitrate(), dataFieldBitModel->getDataLength(), dataFieldBitModel->getDataGrossBitrate(), bits, NaN);
         }
+        return new ReceptionBitModel(signalFieldBitModel->getHeaderLength(), signalFieldBitModel->getHeaderGrossBitrate(), dataFieldBitModel != nullptr ? dataFieldBitModel->getDataLength() : b(0), dataFieldBitModel != nullptr ? dataFieldBitModel->getDataGrossBitrate() : bps(NaN), bits);
     }
     return nullptr;
 }
@@ -166,7 +166,7 @@ const IReceptionPacketModel *Ieee80211LayeredOfdmReceiver::createDataFieldPacket
     if (levelOfDetail > PACKET_DOMAIN) { // Create from the bit model
         if (dataDecoder)
             dataFieldPacketModel = dataDecoder->decode(dataFieldBitModel);
-        else {
+        else if (mode != nullptr) {
             const Ieee80211OfdmCode *code = mode->getDataMode()->getCode();
             const Ieee80211OfdmDecoder decoder(code);
             dataFieldPacketModel = decoder.decode(dataFieldBitModel);
@@ -247,10 +247,9 @@ const IReceptionBitModel *Ieee80211LayeredOfdmReceiver::createSignalFieldBitMode
             signalFieldBitModel = signalDemodulator->demodulate(signalFieldSymbolModel);
         else { // compliant
                // In compliant mode, the signal field modulation is always BPSK
-            const Ieee80211OfdmModulation *signalModulation = new Ieee80211OfdmModulation(52, &BpskModulation::singleton);
-            const Ieee80211OfdmDemodulator demodulator(signalModulation);
+            Ieee80211OfdmModulation modulation(52, &BpskModulation::singleton);
+            const Ieee80211OfdmDemodulator demodulator(&modulation);
             signalFieldBitModel = demodulator.demodulate(signalFieldSymbolModel);
-            delete signalModulation;
         }
     }
     else if (levelOfDetail == BIT_DOMAIN) { // Create from bit model (made by the error model)
@@ -276,7 +275,7 @@ const IReceptionBitModel *Ieee80211LayeredOfdmReceiver::createDataFieldBitModel(
     if (levelOfDetail > BIT_DOMAIN) { // Create from symbol model
         if (dataDemodulator) // non-compliant
             dataFieldBitModel = dataDemodulator->demodulate(dataFieldSymbolModel);
-        else { // compliant
+        else if (mode != nullptr) { // compliant
             const Ieee80211OfdmDataMode *dataMode = mode->getDataMode();
             const Ieee80211OfdmDemodulator ofdmDemodulator(dataMode->getModulation());
             dataFieldBitModel = ofdmDemodulator.demodulate(dataFieldSymbolModel);
@@ -323,9 +322,11 @@ const IReceptionSymbolModel *Ieee80211LayeredOfdmReceiver::createCompleteSymbolM
     if (levelOfDetail >= SYMBOL_DOMAIN) {
         const std::vector<const ISymbol *> *symbols = signalFieldSymbolModel->getAllSymbols();
         std::vector<const ISymbol *> *completeSymbols = new std::vector<const ISymbol *>(*symbols);
-        symbols = dataFieldSymbolModel->getAllSymbols();
-        for (auto& symbol : *symbols)
-            completeSymbols->push_back(new Ieee80211OfdmSymbol(*static_cast<const Ieee80211OfdmSymbol *>(symbol)));
+        if (dataFieldSymbolModel != nullptr) {
+            symbols = dataFieldSymbolModel->getAllSymbols();
+            for (auto & symbol : *symbols)
+                completeSymbols->push_back(new Ieee80211OfdmSymbol(*static_cast<const Ieee80211OfdmSymbol *>(symbol)));
+        }
         return new Ieee80211OfdmReceptionSymbolModel(signalFieldSymbolModel->getHeaderSymbolLength(), signalFieldSymbolModel->getHeaderSymbolRate(), dataFieldSymbolModel->getDataSymbolLength(), dataFieldSymbolModel->getDataSymbolRate(), completeSymbols);
     }
     return nullptr;
@@ -333,15 +334,13 @@ const IReceptionSymbolModel *Ieee80211LayeredOfdmReceiver::createCompleteSymbolM
 
 const IReceptionPacketModel *Ieee80211LayeredOfdmReceiver::createCompletePacketModel(const char *name, const IReceptionPacketModel *signalFieldPacketModel, const IReceptionPacketModel *dataFieldPacketModel) const
 {
-    if (dataFieldPacketModel == nullptr)
-        return new ReceptionPacketModel(signalFieldPacketModel->getPacket()->dup(), bps(NaN), bps(NaN));
-    else {
-        Packet *packet = new Packet(name);
-        packet->insertAtBack(signalFieldPacketModel->getPacket()->peekAllAsBits());
-        packet->insertAtBack(dataFieldPacketModel->getPacket()->peekAllAsBits());
+    Packet *packet = new Packet(name);
+    packet->insertAtBack(signalFieldPacketModel->getPacket()->peekAll());
+    if (dataFieldPacketModel != nullptr) {
+        packet->insertAtBack(dataFieldPacketModel->getPacket()->peekAll());
         packet->setBitError(signalFieldPacketModel->getPacket()->hasBitError() || dataFieldPacketModel->getPacket()->hasBitError());
-        return new ReceptionPacketModel(packet, bps(NaN), bps(NaN));
     }
+    return new ReceptionPacketModel(packet, bps(NaN), bps(NaN));
 }
 
 const Ieee80211OfdmMode *Ieee80211LayeredOfdmReceiver::computeMode(Hz bandwidth) const
@@ -405,6 +404,7 @@ const IReceptionResult *Ieee80211LayeredOfdmReceiver::computeReceptionResult(con
         delete dataFieldPacketModel->getPacket();
         delete dataFieldPacketModel;
     }
+
     // add indications
     auto packet = const_cast<Packet *>(packetModel->getPacket());
     auto snirInd = packet->addTagIfAbsent<SnirInd>();
@@ -451,9 +451,8 @@ const IListeningDecision *Ieee80211LayeredOfdmReceiver::computeListeningDecision
 bool Ieee80211LayeredOfdmReceiver::computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part) const
 {
     const BandListening *bandListening = check_and_cast<const BandListening *>(listening);
-    const LayeredReception *scalarReception = check_and_cast<const LayeredReception *>(reception);
-    // TODO scalar
-    const ScalarReceptionSignalAnalogModel *analogModel = check_and_cast<const ScalarReceptionSignalAnalogModel *>(scalarReception->getAnalogModel());
+    const LayeredReception *dimensionalReception = check_and_cast<const LayeredReception *>(reception);
+    const DimensionalReceptionSignalAnalogModel *analogModel = check_and_cast<const DimensionalReceptionSignalAnalogModel *>(dimensionalReception->getAnalogModel());
     if (bandListening->getCenterFrequency() != analogModel->getCenterFrequency() || bandListening->getBandwidth() != analogModel->getBandwidth()) {
         EV_DEBUG << "Computing reception possible: listening and reception bands are different -> reception is impossible" << endl;
         return false;
