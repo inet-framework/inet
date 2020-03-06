@@ -519,6 +519,8 @@ ISignal *RadioMedium::createTransmitterSignal(const IRadio *radio, Packet *packe
         signal->setName(packet->getName());
         signal->encapsulate(packet);
     }
+    else
+        signal->setName("Noise");
     return signal;
 }
 
@@ -534,6 +536,8 @@ ISignal *RadioMedium::createReceiverSignal(const ITransmission *transmission)
         signal->setName(receiverPacket->getName());
         signal->encapsulate(receiverPacket);
     }
+    else
+        signal->setName("Noise");
     return signal;
 }
 
