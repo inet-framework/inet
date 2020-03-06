@@ -16,12 +16,16 @@ namespace physicallayer {
 class INET_API Ieee80211OfdmModulation : public IModulation
 {
   protected:
+    int numSubcarriers;
     const ApskModulationBase *subcarrierModulation;
 
   public:
-    Ieee80211OfdmModulation(const ApskModulationBase *subcarrierModulation);
+    Ieee80211OfdmModulation(int numSubcarriers, const ApskModulationBase *subcarrierModulation);
 
+    virtual int getNumSubcarriers() const { return numSubcarriers; }
     const ApskModulationBase *getSubcarrierModulation() const { return subcarrierModulation; }
+
+    // TODO: is it correct to calculate this with the same bandwidth and bitrate when there are subcarriers?
     virtual double calculateBER(double snir, Hz bandwidth, bps bitrate) const override { return subcarrierModulation->calculateBER(snir, bandwidth, bitrate); }
     virtual double calculateSER(double snir, Hz bandwidth, bps bitrate) const override { return subcarrierModulation->calculateSER(snir, bandwidth, bitrate); }
 
