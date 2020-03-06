@@ -123,6 +123,15 @@ double DimensionalSnir::getMean() const
     return meanSNIR;
 }
 
+const Ptr<const IFunction<double, Domain<simsec, Hz>>> DimensionalSnir::getSnir() const
+{
+    const DimensionalNoise *dimensionalNoise = check_and_cast<const DimensionalNoise *>(noise);
+    const DimensionalReception *dimensionalReception = check_and_cast<const DimensionalReception *>(reception);
+    auto noisePower = dimensionalNoise->getPower();
+    auto receptionPower = dimensionalReception->getPower();
+    return receptionPower->divide(noisePower);
+}
+
 } // namespace physicallayer
 
 } // namespace inet
