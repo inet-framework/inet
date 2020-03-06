@@ -27,6 +27,16 @@ class INET_API AckingMacHeaderSerializer : public FieldsChunkSerializer
     AckingMacHeaderSerializer() : FieldsChunkSerializer() {}
 };
 
+class INET_API AckingMacTrailerSerializer : public FieldsChunkSerializer
+{
+  protected:
+    virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
+    virtual const Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
+
+  public:
+    AckingMacTrailerSerializer() : FieldsChunkSerializer() {}
+};
+
 class INET_API AckingMacToEthernetPcapRecorderHelper : public cObject, public PcapRecorder::IHelper
 {
     virtual PcapLinkType protocolToLinkType(const Protocol *protocol) const;

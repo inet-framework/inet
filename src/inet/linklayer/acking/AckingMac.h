@@ -13,6 +13,8 @@
 #include "inet/linklayer/contract/IMacProtocol.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
 #include "inet/queueing/contract/IActivePacketSink.h"
+#include "inet/linklayer/acking/AckingMacHeader_m.h"
+
 #include "inet/queueing/contract/IPacketQueue.h"
 
 namespace inet {
@@ -26,9 +28,10 @@ class INET_API AckingMac : public MacProtocolBase, public IMacProtocol, public q
 {
   protected:
     // parameters
-    int headerLength = 0; // AckingMacFrame header length in bytes
-    double bitrate = 0; // [bits per sec]
-    bool promiscuous = false; // promiscuous mode
+    FcsMode fcsMode;
+    int headerLength = 0;    // AckingMacFrame header length in bytes
+    double bitrate = 0;    // [bits per sec]
+    bool promiscuous = false;    // promiscuous mode
     bool fullDuplex = false;
     bool useAck = true;
 
@@ -48,7 +51,11 @@ class INET_API AckingMac : public MacProtocolBase, public IMacProtocol, public q
     virtual bool dropFrameNotForUs(Packet *frame);
     virtual void encapsulate(Packet *msg);
     virtual void decapsulate(Packet *frame);
-    virtual void acked(Packet *packet); // called by other AckingMac module, when receiving a packet with my moduleID
+
+    virtual void acked(Packet *packet);    // called by other AckingMac module, when receiving a packet with my moduleID
+    virtual bool isFcsOk(Packet *frame);
+
+    virtual uint32_t computeFcs(const Ptr<const BytesChunk>& bytes);
 
     // cListener:
     virtual void receiveSignal(cComponent *src, simsignal_t id, intval_t value, cObject *details) override;
