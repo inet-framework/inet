@@ -16,6 +16,7 @@ module NoiseSource like IRadio
 {
     parameters:
         string radioMediumModule = default("radioMedium"); // module path of the medium module where this radio communicates
+        double startTime @unit(s) = default(0s);
         volatile double sleepInterval @unit(s);
         *.mobilityModule = default(absPath(".mobility"));
         @networkNode;
@@ -34,7 +35,7 @@ module NoiseSource like IRadio
             parameters:
                 @display("p=100,200");
         }
-        transmitter: <default("NoiseDimensionalTransmitter")> like ITransmitter {
+        transmitter: <default("NoiseScalarTransmitter")> like ITransmitter {
             parameters:
                 @display("p=100,300");
         }
