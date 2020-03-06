@@ -16,10 +16,14 @@
 //
 
 #include <tuple>
-
 #include "inet/physicallayer/ieee80211/mode/Ieee80211VhtCode.h"
 #include "inet/physicallayer/ieee80211/mode/Ieee80211VhtMode.h"
+#include "inet/physicallayer/modulation/BpskModulation.h"
+#include "inet/physicallayer/modulation/Qam16Modulation.h"
+#include "inet/physicallayer/modulation/Qam256Modulation.h"
+#include "inet/physicallayer/modulation/Qam64Modulation.h"
 #include "inet/physicallayer/modulation/QbpskModulation.h"
+#include "inet/physicallayer/modulation/QpskModulation.h"
 
 namespace inet {
 namespace physicallayer {
@@ -75,60 +79,44 @@ Ieee80211VhtDataMode::Ieee80211VhtDataMode(const Ieee80211Vhtmcs *modulationAndC
 {
 }
 
-
-
-Ieee80211Vhtmcs::Ieee80211Vhtmcs(unsigned int mcsIndex, const Ieee80211VhtCode* code, const Ieee80211OfdmModulation* stream1Modulation, const Ieee80211OfdmModulation* stream2Modulation, const Ieee80211OfdmModulation* stream3Modulation, const Ieee80211OfdmModulation* stream4Modulation, const Ieee80211OfdmModulation* stream5Modulation, const Ieee80211OfdmModulation* stream6Modulation, const Ieee80211OfdmModulation* stream7Modulation, const Ieee80211OfdmModulation* stream8Modulation) :
+Ieee80211Vhtmcs::Ieee80211Vhtmcs(unsigned int mcsIndex, const ApskModulationBase *stream1SubcarrierModulation, const ApskModulationBase *stream2SubcarrierModulation, const ApskModulationBase *stream3SubcarrierModulation, const ApskModulationBase *stream4SubcarrierModulation, const ApskModulationBase *stream5SubcarrierModulation, const ApskModulationBase *stream6SubcarrierModulation, const ApskModulationBase *stream7SubcarrierModulation, const ApskModulationBase *stream8SubcarrierModulation, const Ieee80211ConvolutionalCode* convolutionalCode, Hz bandwidth) :
     mcsIndex(mcsIndex),
-    stream1Modulation(stream1Modulation),
-    stream2Modulation(stream2Modulation),
-    stream3Modulation(stream3Modulation),
-    stream4Modulation(stream4Modulation),
-    stream5Modulation(stream5Modulation),
-    stream6Modulation(stream6Modulation),
-    stream7Modulation(stream7Modulation),
-    stream8Modulation(stream8Modulation),
-    code(code)
-{
-}
-
-Ieee80211Vhtmcs::Ieee80211Vhtmcs(unsigned int mcsIndex, const Ieee80211OfdmModulation* stream1Modulation, const Ieee80211OfdmModulation* stream2Modulation, const Ieee80211OfdmModulation* stream3Modulation, const Ieee80211OfdmModulation* stream4Modulation, const Ieee80211OfdmModulation* stream5Modulation, const Ieee80211OfdmModulation* stream6Modulation, const Ieee80211OfdmModulation* stream7Modulation, const Ieee80211OfdmModulation* stream8Modulation, const Ieee80211ConvolutionalCode* convolutionalCode, Hz bandwidth) :
-    mcsIndex(mcsIndex),
-    stream1Modulation(stream1Modulation),
-    stream2Modulation(stream2Modulation),
-    stream3Modulation(stream3Modulation),
-    stream4Modulation(stream4Modulation),
-    stream5Modulation(stream5Modulation),
-    stream6Modulation(stream6Modulation),
-    stream7Modulation(stream7Modulation),
-    stream8Modulation(stream8Modulation),
+    stream1Modulation(new Ieee80211OfdmModulation(getNumberOfTotalSubcarriers(bandwidth), stream1SubcarrierModulation)),
+    stream2Modulation(new Ieee80211OfdmModulation(getNumberOfTotalSubcarriers(bandwidth), stream2SubcarrierModulation)),
+    stream3Modulation(new Ieee80211OfdmModulation(getNumberOfTotalSubcarriers(bandwidth), stream3SubcarrierModulation)),
+    stream4Modulation(new Ieee80211OfdmModulation(getNumberOfTotalSubcarriers(bandwidth), stream4SubcarrierModulation)),
+    stream5Modulation(new Ieee80211OfdmModulation(getNumberOfTotalSubcarriers(bandwidth), stream5SubcarrierModulation)),
+    stream6Modulation(new Ieee80211OfdmModulation(getNumberOfTotalSubcarriers(bandwidth), stream6SubcarrierModulation)),
+    stream7Modulation(new Ieee80211OfdmModulation(getNumberOfTotalSubcarriers(bandwidth), stream7SubcarrierModulation)),
+    stream8Modulation(new Ieee80211OfdmModulation(getNumberOfTotalSubcarriers(bandwidth), stream8SubcarrierModulation)),
     code(Ieee80211VhtCompliantCodes::getCompliantCode(convolutionalCode, stream1Modulation, stream2Modulation, stream3Modulation, stream4Modulation, stream5Modulation, stream6Modulation, stream7Modulation, stream8Modulation, bandwidth)),
     bandwidth(bandwidth)
 {
 }
 
-Ieee80211Vhtmcs::Ieee80211Vhtmcs(unsigned int mcsIndex, const Ieee80211OfdmModulation* stream1Modulation, const Ieee80211OfdmModulation* stream2Modulation, const Ieee80211OfdmModulation* stream3Modulation, const Ieee80211OfdmModulation* stream4Modulation, const Ieee80211OfdmModulation* stream5Modulation, const Ieee80211OfdmModulation* stream6Modulation, const Ieee80211OfdmModulation* stream7Modulation, const Ieee80211ConvolutionalCode* convolutionalCode, Hz bandwidth) :
+Ieee80211Vhtmcs::Ieee80211Vhtmcs(unsigned int mcsIndex, const ApskModulationBase *stream1SubcarrierModulation, const ApskModulationBase *stream2SubcarrierModulation, const ApskModulationBase *stream3SubcarrierModulation, const ApskModulationBase *stream4SubcarrierModulation, const ApskModulationBase *stream5SubcarrierModulation, const ApskModulationBase *stream6SubcarrierModulation, const ApskModulationBase *stream7SubcarrierModulation, const Ieee80211ConvolutionalCode* convolutionalCode, Hz bandwidth) :
     mcsIndex(mcsIndex),
-    stream1Modulation(stream1Modulation),
-    stream2Modulation(stream2Modulation),
-    stream3Modulation(stream3Modulation),
-    stream4Modulation(stream4Modulation),
-    stream5Modulation(stream5Modulation),
-    stream6Modulation(stream6Modulation),
-    stream7Modulation(stream7Modulation),
+    stream1Modulation(new Ieee80211OfdmModulation(getNumberOfTotalSubcarriers(bandwidth), stream1SubcarrierModulation)),
+    stream2Modulation(new Ieee80211OfdmModulation(getNumberOfTotalSubcarriers(bandwidth), stream2SubcarrierModulation)),
+    stream3Modulation(new Ieee80211OfdmModulation(getNumberOfTotalSubcarriers(bandwidth), stream3SubcarrierModulation)),
+    stream4Modulation(new Ieee80211OfdmModulation(getNumberOfTotalSubcarriers(bandwidth), stream4SubcarrierModulation)),
+    stream5Modulation(new Ieee80211OfdmModulation(getNumberOfTotalSubcarriers(bandwidth), stream5SubcarrierModulation)),
+    stream6Modulation(new Ieee80211OfdmModulation(getNumberOfTotalSubcarriers(bandwidth), stream6SubcarrierModulation)),
+    stream7Modulation(new Ieee80211OfdmModulation(getNumberOfTotalSubcarriers(bandwidth), stream7SubcarrierModulation)),
     stream8Modulation(nullptr),
     code(Ieee80211VhtCompliantCodes::getCompliantCode(convolutionalCode, stream1Modulation, stream2Modulation, stream3Modulation, stream4Modulation, stream5Modulation, stream6Modulation, stream7Modulation, stream8Modulation, bandwidth)),
     bandwidth(bandwidth)
 {
 }
 
-Ieee80211Vhtmcs::Ieee80211Vhtmcs(unsigned int mcsIndex, const Ieee80211OfdmModulation* stream1Modulation, const Ieee80211OfdmModulation* stream2Modulation, const Ieee80211OfdmModulation* stream3Modulation, const Ieee80211OfdmModulation* stream4Modulation, const Ieee80211OfdmModulation* stream5Modulation, const Ieee80211OfdmModulation* stream6Modulation, const Ieee80211ConvolutionalCode* convolutionalCode, Hz bandwidth) :
+Ieee80211Vhtmcs::Ieee80211Vhtmcs(unsigned int mcsIndex, const ApskModulationBase *stream1SubcarrierModulation, const ApskModulationBase *stream2SubcarrierModulation, const ApskModulationBase *stream3SubcarrierModulation, const ApskModulationBase *stream4SubcarrierModulation, const ApskModulationBase *stream5SubcarrierModulation, const ApskModulationBase *stream6SubcarrierModulation, const Ieee80211ConvolutionalCode* convolutionalCode, Hz bandwidth) :
     mcsIndex(mcsIndex),
-    stream1Modulation(stream1Modulation),
-    stream2Modulation(stream2Modulation),
-    stream3Modulation(stream3Modulation),
-    stream4Modulation(stream4Modulation),
-    stream5Modulation(stream5Modulation),
-    stream6Modulation(stream6Modulation),
+    stream1Modulation(new Ieee80211OfdmModulation(getNumberOfTotalSubcarriers(bandwidth), stream1SubcarrierModulation)),
+    stream2Modulation(new Ieee80211OfdmModulation(getNumberOfTotalSubcarriers(bandwidth), stream2SubcarrierModulation)),
+    stream3Modulation(new Ieee80211OfdmModulation(getNumberOfTotalSubcarriers(bandwidth), stream3SubcarrierModulation)),
+    stream4Modulation(new Ieee80211OfdmModulation(getNumberOfTotalSubcarriers(bandwidth), stream4SubcarrierModulation)),
+    stream5Modulation(new Ieee80211OfdmModulation(getNumberOfTotalSubcarriers(bandwidth), stream5SubcarrierModulation)),
+    stream6Modulation(new Ieee80211OfdmModulation(getNumberOfTotalSubcarriers(bandwidth), stream6SubcarrierModulation)),
     stream7Modulation(nullptr),
     stream8Modulation(nullptr),
     code(Ieee80211VhtCompliantCodes::getCompliantCode(convolutionalCode, stream1Modulation, stream2Modulation, stream3Modulation, stream4Modulation, stream5Modulation, stream6Modulation, stream7Modulation, stream8Modulation, bandwidth)),
@@ -136,13 +124,13 @@ Ieee80211Vhtmcs::Ieee80211Vhtmcs(unsigned int mcsIndex, const Ieee80211OfdmModul
 {
 }
 
-Ieee80211Vhtmcs::Ieee80211Vhtmcs(unsigned int mcsIndex, const Ieee80211OfdmModulation* stream1Modulation, const Ieee80211OfdmModulation* stream2Modulation, const Ieee80211OfdmModulation* stream3Modulation, const Ieee80211OfdmModulation* stream4Modulation, const Ieee80211OfdmModulation* stream5Modulation, const Ieee80211ConvolutionalCode* convolutionalCode, Hz bandwidth) :
+Ieee80211Vhtmcs::Ieee80211Vhtmcs(unsigned int mcsIndex, const ApskModulationBase *stream1SubcarrierModulation, const ApskModulationBase *stream2SubcarrierModulation, const ApskModulationBase *stream3SubcarrierModulation, const ApskModulationBase *stream4SubcarrierModulation, const ApskModulationBase *stream5SubcarrierModulation, const Ieee80211ConvolutionalCode* convolutionalCode, Hz bandwidth) :
     mcsIndex(mcsIndex),
-    stream1Modulation(stream1Modulation),
-    stream2Modulation(stream2Modulation),
-    stream3Modulation(stream3Modulation),
-    stream4Modulation(stream4Modulation),
-    stream5Modulation(stream5Modulation),
+    stream1Modulation(new Ieee80211OfdmModulation(getNumberOfTotalSubcarriers(bandwidth), stream1SubcarrierModulation)),
+    stream2Modulation(new Ieee80211OfdmModulation(getNumberOfTotalSubcarriers(bandwidth), stream2SubcarrierModulation)),
+    stream3Modulation(new Ieee80211OfdmModulation(getNumberOfTotalSubcarriers(bandwidth), stream3SubcarrierModulation)),
+    stream4Modulation(new Ieee80211OfdmModulation(getNumberOfTotalSubcarriers(bandwidth), stream4SubcarrierModulation)),
+    stream5Modulation(new Ieee80211OfdmModulation(getNumberOfTotalSubcarriers(bandwidth), stream5SubcarrierModulation)),
     stream6Modulation(nullptr),
     stream7Modulation(nullptr),
     stream8Modulation(nullptr),
@@ -151,12 +139,12 @@ Ieee80211Vhtmcs::Ieee80211Vhtmcs(unsigned int mcsIndex, const Ieee80211OfdmModul
 {
 }
 
-Ieee80211Vhtmcs::Ieee80211Vhtmcs(unsigned int mcsIndex, const Ieee80211OfdmModulation* stream1Modulation, const Ieee80211OfdmModulation* stream2Modulation, const Ieee80211OfdmModulation* stream3Modulation, const Ieee80211OfdmModulation* stream4Modulation, const Ieee80211ConvolutionalCode* convolutionalCode, Hz bandwidth) :
+Ieee80211Vhtmcs::Ieee80211Vhtmcs(unsigned int mcsIndex, const ApskModulationBase *stream1SubcarrierModulation, const ApskModulationBase *stream2SubcarrierModulation, const ApskModulationBase *stream3SubcarrierModulation, const ApskModulationBase *stream4SubcarrierModulation, const Ieee80211ConvolutionalCode* convolutionalCode, Hz bandwidth) :
     mcsIndex(mcsIndex),
-    stream1Modulation(stream1Modulation),
-    stream2Modulation(stream2Modulation),
-    stream3Modulation(stream3Modulation),
-    stream4Modulation(stream4Modulation),
+    stream1Modulation(new Ieee80211OfdmModulation(getNumberOfTotalSubcarriers(bandwidth), stream1SubcarrierModulation)),
+    stream2Modulation(new Ieee80211OfdmModulation(getNumberOfTotalSubcarriers(bandwidth), stream2SubcarrierModulation)),
+    stream3Modulation(new Ieee80211OfdmModulation(getNumberOfTotalSubcarriers(bandwidth), stream3SubcarrierModulation)),
+    stream4Modulation(new Ieee80211OfdmModulation(getNumberOfTotalSubcarriers(bandwidth), stream4SubcarrierModulation)),
     stream5Modulation(nullptr),
     stream6Modulation(nullptr),
     stream7Modulation(nullptr),
@@ -166,11 +154,11 @@ Ieee80211Vhtmcs::Ieee80211Vhtmcs(unsigned int mcsIndex, const Ieee80211OfdmModul
 {
 }
 
-Ieee80211Vhtmcs::Ieee80211Vhtmcs(unsigned int mcsIndex, const Ieee80211OfdmModulation* stream1Modulation, const Ieee80211OfdmModulation* stream2Modulation, const Ieee80211OfdmModulation* stream3Modulation, const Ieee80211ConvolutionalCode* convolutionalCode, Hz bandwidth) :
+Ieee80211Vhtmcs::Ieee80211Vhtmcs(unsigned int mcsIndex, const ApskModulationBase *stream1SubcarrierModulation, const ApskModulationBase *stream2SubcarrierModulation, const ApskModulationBase *stream3SubcarrierModulation, const Ieee80211ConvolutionalCode* convolutionalCode, Hz bandwidth) :
     mcsIndex(mcsIndex),
-    stream1Modulation(stream1Modulation),
-    stream2Modulation(stream2Modulation),
-    stream3Modulation(stream3Modulation),
+    stream1Modulation(new Ieee80211OfdmModulation(getNumberOfTotalSubcarriers(bandwidth), stream1SubcarrierModulation)),
+    stream2Modulation(new Ieee80211OfdmModulation(getNumberOfTotalSubcarriers(bandwidth), stream2SubcarrierModulation)),
+    stream3Modulation(new Ieee80211OfdmModulation(getNumberOfTotalSubcarriers(bandwidth), stream3SubcarrierModulation)),
     stream4Modulation(nullptr),
     stream5Modulation(nullptr),
     stream6Modulation(nullptr),
@@ -182,10 +170,10 @@ Ieee80211Vhtmcs::Ieee80211Vhtmcs(unsigned int mcsIndex, const Ieee80211OfdmModul
 }
 
 
-Ieee80211Vhtmcs::Ieee80211Vhtmcs(unsigned int mcsIndex, const Ieee80211OfdmModulation* stream1Modulation, const Ieee80211OfdmModulation* stream2Modulation, const Ieee80211ConvolutionalCode* convolutionalCode, Hz bandwidth) :
+Ieee80211Vhtmcs::Ieee80211Vhtmcs(unsigned int mcsIndex, const ApskModulationBase *stream1SubcarrierModulation, const ApskModulationBase *stream2SubcarrierModulation, const Ieee80211ConvolutionalCode* convolutionalCode, Hz bandwidth) :
     mcsIndex(mcsIndex),
-    stream1Modulation(stream1Modulation),
-    stream2Modulation(stream2Modulation),
+    stream1Modulation(new Ieee80211OfdmModulation(getNumberOfTotalSubcarriers(bandwidth), stream1SubcarrierModulation)),
+    stream2Modulation(new Ieee80211OfdmModulation(getNumberOfTotalSubcarriers(bandwidth), stream2SubcarrierModulation)),
     stream3Modulation(nullptr),
     stream4Modulation(nullptr),
     stream5Modulation(nullptr),
@@ -197,9 +185,9 @@ Ieee80211Vhtmcs::Ieee80211Vhtmcs(unsigned int mcsIndex, const Ieee80211OfdmModul
 {
 }
 
-Ieee80211Vhtmcs::Ieee80211Vhtmcs(unsigned int mcsIndex, const Ieee80211OfdmModulation* stream1Modulation, const Ieee80211ConvolutionalCode* convolutionalCode, Hz bandwidth) :
+Ieee80211Vhtmcs::Ieee80211Vhtmcs(unsigned int mcsIndex, const ApskModulationBase *stream1SubcarrierModulation, const Ieee80211ConvolutionalCode* convolutionalCode, Hz bandwidth) :
     mcsIndex(mcsIndex),
-    stream1Modulation(stream1Modulation),
+    stream1Modulation(new Ieee80211OfdmModulation(getNumberOfTotalSubcarriers(bandwidth), stream1SubcarrierModulation)),
     stream2Modulation(nullptr),
     stream3Modulation(nullptr),
     stream4Modulation(nullptr),
@@ -213,9 +201,9 @@ Ieee80211Vhtmcs::Ieee80211Vhtmcs(unsigned int mcsIndex, const Ieee80211OfdmModul
 }
 
 
-Ieee80211Vhtmcs::Ieee80211Vhtmcs(unsigned int mcsIndex, const Ieee80211OfdmModulation* stream1Modulation, const Ieee80211ConvolutionalCode* convolutionalCode, Hz bandwidth, int nss) :
+Ieee80211Vhtmcs::Ieee80211Vhtmcs(unsigned int mcsIndex, const ApskModulationBase *stream1SubcarrierModulation, const Ieee80211ConvolutionalCode* convolutionalCode, Hz bandwidth, int nss) :
     mcsIndex(mcsIndex),
-    stream1Modulation(stream1Modulation),
+    stream1Modulation(new Ieee80211OfdmModulation(getNumberOfTotalSubcarriers(bandwidth), stream1SubcarrierModulation)),
     stream2Modulation(nullptr),
     stream3Modulation(nullptr),
     stream4Modulation(nullptr),
@@ -240,6 +228,37 @@ Ieee80211Vhtmcs::Ieee80211Vhtmcs(unsigned int mcsIndex, const Ieee80211OfdmModul
     if (nss > 7)
         stream8Modulation = stream1Modulation;
     code = Ieee80211VhtCompliantCodes::getCompliantCode(convolutionalCode, stream1Modulation, stream2Modulation, stream3Modulation, stream4Modulation, stream5Modulation, stream6Modulation, stream7Modulation, stream8Modulation, bandwidth);
+}
+
+int Ieee80211Vhtmcs::getNumberOfDataSubcarriers(Hz bandwidth)
+{
+    if (bandwidth == MHz(20))
+        return 52;
+    else if (bandwidth == MHz(40))
+        return 108;
+    else if (bandwidth == MHz(80))
+        return 234;
+    else if (bandwidth == MHz(160))
+        return 468;
+    else
+        throw cRuntimeError("Unsupported bandwidth");
+}
+
+int Ieee80211Vhtmcs::getNumberOfPilotSubcarriers(Hz bandwidth)
+{
+    if (bandwidth == MHz(20))
+        return 4;
+    else if (bandwidth == MHz(40))
+        // It is a spacial case, see the comment above.
+        return 6;
+    else if (bandwidth == MHz(80))
+        // It is a spacial case, see the comment above.
+        return 8;
+    else if (bandwidth == MHz(160))
+        // It is a spacial case, see the comment above.
+        return 16;
+    else
+        throw cRuntimeError("Unsupported bandwidth");
 }
 
 
@@ -341,33 +360,12 @@ bps Ieee80211VhtModeBase::getGrossBitrate() const
 
 int Ieee80211VhtModeBase::getNumberOfDataSubcarriers() const
 {
-    if (bandwidth == MHz(20))
-        return 52;
-    else if (bandwidth == MHz(40))
-        return 108;
-    else if (bandwidth == MHz(80))
-        return 234;
-    else if (bandwidth == MHz(160))
-        return 468;
-    else
-        throw cRuntimeError("Unsupported bandwidth");
+    return Ieee80211Vhtmcs::getNumberOfDataSubcarriers(bandwidth);
 }
 
 int Ieee80211VhtModeBase::getNumberOfPilotSubcarriers() const
 {
-    if (bandwidth == MHz(20))
-        return 4;
-    else if (bandwidth == MHz(40))
-        // It is a spacial case, see the comment above.
-        return 6;
-    else if (bandwidth == MHz(80))
-        // It is a spacial case, see the comment above.
-        return 8;
-    else if (bandwidth == MHz(160))
-        // It is a spacial case, see the comment above.
-        return 16;
-    else
-        throw cRuntimeError("Unsupported bandwidth");
+    return Ieee80211Vhtmcs::getNumberOfPilotSubcarriers(bandwidth);
 }
 
 b Ieee80211VhtDataMode::getCompleteLength(b dataLength) const
@@ -707,15 +705,18 @@ const Ieee80211VhtMode* Ieee80211VhtCompliantModes::getCompliantMode(const Ieee8
     auto mode = singleton.modeCache.find(htModeId);
     if (mode == std::end(singleton.modeCache))
     {
+        const Ieee80211OfdmModulation *modulation = nullptr;
         const Ieee80211OfdmSignalMode *legacySignal = nullptr;
         const Ieee80211VhtSignalMode *htSignal = nullptr;
         switch (preambleFormat) {
             case Ieee80211VhtPreambleMode::HT_PREAMBLE_GREENFIELD:
-                htSignal = new Ieee80211VhtSignalMode(mcsMode->getMcsIndex(), &Ieee80211OfdmCompliantModulations::bpskModulation, Ieee80211VhtCompliantCodes::getCompliantCode(&Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, &Ieee80211OfdmCompliantModulations::bpskModulation, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, mcsMode->getBandwidth(), false), mcsMode->getBandwidth(), guardIntervalType);
+                modulation = new Ieee80211OfdmModulation(Ieee80211Vhtmcs::getNumberOfTotalSubcarriers(mcsMode->getBandwidth()), &BpskModulation::singleton);
+                htSignal = new Ieee80211VhtSignalMode(mcsMode->getMcsIndex(), modulation, Ieee80211VhtCompliantCodes::getCompliantCode(&Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, modulation, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, mcsMode->getBandwidth(), false), mcsMode->getBandwidth(), guardIntervalType);
                 break;
             case Ieee80211VhtPreambleMode::HT_PREAMBLE_MIXED:
+                modulation = new Ieee80211OfdmModulation(Ieee80211Vhtmcs::getNumberOfTotalSubcarriers(mcsMode->getBandwidth()), &QbpskModulation::singleton);
                 legacySignal = &Ieee80211OfdmCompliantModes::ofdmHeaderMode6MbpsRate13;
-                htSignal = new Ieee80211VhtSignalMode(mcsMode->getMcsIndex(), &Ieee80211OfdmCompliantModulations::qbpskModulation, Ieee80211VhtCompliantCodes::getCompliantCode(&Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, &Ieee80211OfdmCompliantModulations::qbpskModulation, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, mcsMode->getBandwidth(), false), mcsMode->getBandwidth(), guardIntervalType);
+                htSignal = new Ieee80211VhtSignalMode(mcsMode->getMcsIndex(), modulation, Ieee80211VhtCompliantCodes::getCompliantCode(&Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, modulation, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, mcsMode->getBandwidth(), false), mcsMode->getBandwidth(), guardIntervalType);
                 break;
             default:
                 throw cRuntimeError("Unknown preamble format");
@@ -740,357 +741,357 @@ Ieee80211VhtSignalMode::~Ieee80211VhtSignalMode()
 }
 
 
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs0BW20MHzNss1([](){ return new Ieee80211Vhtmcs(0, &Ieee80211OfdmCompliantModulations::bpskModulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(20), 1);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs1BW20MHzNss1([](){ return new Ieee80211Vhtmcs(1, &Ieee80211OfdmCompliantModulations::qpskModulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(20), 1);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs2BW20MHzNss1([](){ return new Ieee80211Vhtmcs(2, &Ieee80211OfdmCompliantModulations::qpskModulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(20), 1);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs3BW20MHzNss1([](){ return new Ieee80211Vhtmcs(3, &Ieee80211OfdmCompliantModulations::qam16Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(20), 1);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs4BW20MHzNss1([](){ return new Ieee80211Vhtmcs(4, &Ieee80211OfdmCompliantModulations::qam16Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(20), 1);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs5BW20MHzNss1([](){ return new Ieee80211Vhtmcs(5, &Ieee80211OfdmCompliantModulations::qam64Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode2_3, MHz(20), 1);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs6BW20MHzNss1([](){ return new Ieee80211Vhtmcs(6, &Ieee80211OfdmCompliantModulations::qam64Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(20), 1);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs7BW20MHzNss1([](){ return new Ieee80211Vhtmcs(7, &Ieee80211OfdmCompliantModulations::qam64Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(20), 1);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs8BW20MHzNss1([](){ return new Ieee80211Vhtmcs(8, &Ieee80211OfdmCompliantModulations::qam256Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(20), 1);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs0BW20MHzNss1([](){ return new Ieee80211Vhtmcs(0, &BpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(20), 1);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs1BW20MHzNss1([](){ return new Ieee80211Vhtmcs(1, &QpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(20), 1);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs2BW20MHzNss1([](){ return new Ieee80211Vhtmcs(2, &QpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(20), 1);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs3BW20MHzNss1([](){ return new Ieee80211Vhtmcs(3, &Qam16Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(20), 1);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs4BW20MHzNss1([](){ return new Ieee80211Vhtmcs(4, &Qam16Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(20), 1);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs5BW20MHzNss1([](){ return new Ieee80211Vhtmcs(5, &Qam64Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode2_3, MHz(20), 1);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs6BW20MHzNss1([](){ return new Ieee80211Vhtmcs(6, &Qam64Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(20), 1);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs7BW20MHzNss1([](){ return new Ieee80211Vhtmcs(7, &Qam64Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(20), 1);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs8BW20MHzNss1([](){ return new Ieee80211Vhtmcs(8, &Qam256Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(20), 1);});
 const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs9BW20MHzNss1([](){ return nullptr;});
 
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs0BW20MHzNss2([](){ return new Ieee80211Vhtmcs(0, &Ieee80211OfdmCompliantModulations::bpskModulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(20), 2);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs1BW20MHzNss2([](){ return new Ieee80211Vhtmcs(1, &Ieee80211OfdmCompliantModulations::qpskModulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(20), 2);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs2BW20MHzNss2([](){ return new Ieee80211Vhtmcs(2, &Ieee80211OfdmCompliantModulations::qpskModulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(20), 2);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs3BW20MHzNss2([](){ return new Ieee80211Vhtmcs(3, &Ieee80211OfdmCompliantModulations::qam16Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(20), 2);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs4BW20MHzNss2([](){ return new Ieee80211Vhtmcs(4, &Ieee80211OfdmCompliantModulations::qam16Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(20), 2);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs5BW20MHzNss2([](){ return new Ieee80211Vhtmcs(5, &Ieee80211OfdmCompliantModulations::qam64Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode2_3, MHz(20), 2);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs6BW20MHzNss2([](){ return new Ieee80211Vhtmcs(6, &Ieee80211OfdmCompliantModulations::qam64Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(20), 2);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs7BW20MHzNss2([](){ return new Ieee80211Vhtmcs(7, &Ieee80211OfdmCompliantModulations::qam64Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(20), 2);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs8BW20MHzNss2([](){ return new Ieee80211Vhtmcs(8, &Ieee80211OfdmCompliantModulations::qam256Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(20), 2);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs0BW20MHzNss2([](){ return new Ieee80211Vhtmcs(0, &BpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(20), 2);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs1BW20MHzNss2([](){ return new Ieee80211Vhtmcs(1, &QpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(20), 2);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs2BW20MHzNss2([](){ return new Ieee80211Vhtmcs(2, &QpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(20), 2);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs3BW20MHzNss2([](){ return new Ieee80211Vhtmcs(3, &Qam16Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(20), 2);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs4BW20MHzNss2([](){ return new Ieee80211Vhtmcs(4, &Qam16Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(20), 2);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs5BW20MHzNss2([](){ return new Ieee80211Vhtmcs(5, &Qam64Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode2_3, MHz(20), 2);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs6BW20MHzNss2([](){ return new Ieee80211Vhtmcs(6, &Qam64Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(20), 2);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs7BW20MHzNss2([](){ return new Ieee80211Vhtmcs(7, &Qam64Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(20), 2);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs8BW20MHzNss2([](){ return new Ieee80211Vhtmcs(8, &Qam256Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(20), 2);});
 const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs9BW20MHzNss2([](){ return nullptr;});
 
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs0BW20MHzNss3([](){ return new Ieee80211Vhtmcs(0, &Ieee80211OfdmCompliantModulations::bpskModulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(20), 3);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs1BW20MHzNss3([](){ return new Ieee80211Vhtmcs(1, &Ieee80211OfdmCompliantModulations::qpskModulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(20), 3);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs2BW20MHzNss3([](){ return new Ieee80211Vhtmcs(2, &Ieee80211OfdmCompliantModulations::qpskModulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(20), 3);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs3BW20MHzNss3([](){ return new Ieee80211Vhtmcs(3, &Ieee80211OfdmCompliantModulations::qam16Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(20), 3);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs4BW20MHzNss3([](){ return new Ieee80211Vhtmcs(4, &Ieee80211OfdmCompliantModulations::qam16Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(20), 3);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs5BW20MHzNss3([](){ return new Ieee80211Vhtmcs(5, &Ieee80211OfdmCompliantModulations::qam64Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode2_3, MHz(20), 3);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs6BW20MHzNss3([](){ return new Ieee80211Vhtmcs(6, &Ieee80211OfdmCompliantModulations::qam64Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(20), 3);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs7BW20MHzNss3([](){ return new Ieee80211Vhtmcs(7, &Ieee80211OfdmCompliantModulations::qam64Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(20), 3);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs8BW20MHzNss3([](){ return new Ieee80211Vhtmcs(8, &Ieee80211OfdmCompliantModulations::qam256Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(20), 3);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs9BW20MHzNss3([](){ return new Ieee80211Vhtmcs(9, &Ieee80211OfdmCompliantModulations::qam256Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(20), 3);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs0BW20MHzNss3([](){ return new Ieee80211Vhtmcs(0, &BpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(20), 3);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs1BW20MHzNss3([](){ return new Ieee80211Vhtmcs(1, &QpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(20), 3);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs2BW20MHzNss3([](){ return new Ieee80211Vhtmcs(2, &QpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(20), 3);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs3BW20MHzNss3([](){ return new Ieee80211Vhtmcs(3, &Qam16Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(20), 3);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs4BW20MHzNss3([](){ return new Ieee80211Vhtmcs(4, &Qam16Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(20), 3);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs5BW20MHzNss3([](){ return new Ieee80211Vhtmcs(5, &Qam64Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode2_3, MHz(20), 3);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs6BW20MHzNss3([](){ return new Ieee80211Vhtmcs(6, &Qam64Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(20), 3);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs7BW20MHzNss3([](){ return new Ieee80211Vhtmcs(7, &Qam64Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(20), 3);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs8BW20MHzNss3([](){ return new Ieee80211Vhtmcs(8, &Qam256Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(20), 3);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs9BW20MHzNss3([](){ return new Ieee80211Vhtmcs(9, &Qam256Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(20), 3);});
 
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs0BW20MHzNss4([](){ return new Ieee80211Vhtmcs(0, &Ieee80211OfdmCompliantModulations::bpskModulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(20), 4);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs1BW20MHzNss4([](){ return new Ieee80211Vhtmcs(1, &Ieee80211OfdmCompliantModulations::qpskModulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(20), 4);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs2BW20MHzNss4([](){ return new Ieee80211Vhtmcs(2, &Ieee80211OfdmCompliantModulations::qpskModulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(20), 4);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs3BW20MHzNss4([](){ return new Ieee80211Vhtmcs(3, &Ieee80211OfdmCompliantModulations::qam16Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(20), 4);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs4BW20MHzNss4([](){ return new Ieee80211Vhtmcs(4, &Ieee80211OfdmCompliantModulations::qam16Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(20), 4);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs5BW20MHzNss4([](){ return new Ieee80211Vhtmcs(5, &Ieee80211OfdmCompliantModulations::qam64Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode2_3, MHz(20), 4);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs6BW20MHzNss4([](){ return new Ieee80211Vhtmcs(6, &Ieee80211OfdmCompliantModulations::qam64Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(20), 4);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs7BW20MHzNss4([](){ return new Ieee80211Vhtmcs(7, &Ieee80211OfdmCompliantModulations::qam64Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(20), 4);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs8BW20MHzNss4([](){ return new Ieee80211Vhtmcs(8, &Ieee80211OfdmCompliantModulations::qam256Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(20), 4);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs0BW20MHzNss4([](){ return new Ieee80211Vhtmcs(0, &BpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(20), 4);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs1BW20MHzNss4([](){ return new Ieee80211Vhtmcs(1, &QpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(20), 4);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs2BW20MHzNss4([](){ return new Ieee80211Vhtmcs(2, &QpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(20), 4);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs3BW20MHzNss4([](){ return new Ieee80211Vhtmcs(3, &Qam16Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(20), 4);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs4BW20MHzNss4([](){ return new Ieee80211Vhtmcs(4, &Qam16Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(20), 4);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs5BW20MHzNss4([](){ return new Ieee80211Vhtmcs(5, &Qam64Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode2_3, MHz(20), 4);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs6BW20MHzNss4([](){ return new Ieee80211Vhtmcs(6, &Qam64Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(20), 4);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs7BW20MHzNss4([](){ return new Ieee80211Vhtmcs(7, &Qam64Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(20), 4);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs8BW20MHzNss4([](){ return new Ieee80211Vhtmcs(8, &Qam256Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(20), 4);});
 const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs9BW20MHzNss4([](){ return nullptr;});
 
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs0BW20MHzNss5([](){ return new Ieee80211Vhtmcs(0, &Ieee80211OfdmCompliantModulations::bpskModulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(20), 5);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs1BW20MHzNss5([](){ return new Ieee80211Vhtmcs(1, &Ieee80211OfdmCompliantModulations::qpskModulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(20), 5);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs2BW20MHzNss5([](){ return new Ieee80211Vhtmcs(2, &Ieee80211OfdmCompliantModulations::qpskModulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(20), 5);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs3BW20MHzNss5([](){ return new Ieee80211Vhtmcs(3, &Ieee80211OfdmCompliantModulations::qam16Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(20), 5);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs4BW20MHzNss5([](){ return new Ieee80211Vhtmcs(4, &Ieee80211OfdmCompliantModulations::qam16Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(20), 5);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs5BW20MHzNss5([](){ return new Ieee80211Vhtmcs(5, &Ieee80211OfdmCompliantModulations::qam64Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode2_3, MHz(20), 5);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs6BW20MHzNss5([](){ return new Ieee80211Vhtmcs(6, &Ieee80211OfdmCompliantModulations::qam64Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(20), 5);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs7BW20MHzNss5([](){ return new Ieee80211Vhtmcs(7, &Ieee80211OfdmCompliantModulations::qam64Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(20), 5);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs8BW20MHzNss5([](){ return new Ieee80211Vhtmcs(8, &Ieee80211OfdmCompliantModulations::qam256Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(20), 5);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs0BW20MHzNss5([](){ return new Ieee80211Vhtmcs(0, &BpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(20), 5);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs1BW20MHzNss5([](){ return new Ieee80211Vhtmcs(1, &QpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(20), 5);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs2BW20MHzNss5([](){ return new Ieee80211Vhtmcs(2, &QpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(20), 5);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs3BW20MHzNss5([](){ return new Ieee80211Vhtmcs(3, &Qam16Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(20), 5);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs4BW20MHzNss5([](){ return new Ieee80211Vhtmcs(4, &Qam16Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(20), 5);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs5BW20MHzNss5([](){ return new Ieee80211Vhtmcs(5, &Qam64Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode2_3, MHz(20), 5);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs6BW20MHzNss5([](){ return new Ieee80211Vhtmcs(6, &Qam64Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(20), 5);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs7BW20MHzNss5([](){ return new Ieee80211Vhtmcs(7, &Qam64Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(20), 5);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs8BW20MHzNss5([](){ return new Ieee80211Vhtmcs(8, &Qam256Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(20), 5);});
 const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs9BW20MHzNss5([](){ return nullptr;});
 
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs0BW20MHzNss6([](){ return new Ieee80211Vhtmcs(0, &Ieee80211OfdmCompliantModulations::bpskModulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(20), 6);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs1BW20MHzNss6([](){ return new Ieee80211Vhtmcs(1, &Ieee80211OfdmCompliantModulations::qpskModulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(20), 6);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs2BW20MHzNss6([](){ return new Ieee80211Vhtmcs(2, &Ieee80211OfdmCompliantModulations::qpskModulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(20), 6);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs3BW20MHzNss6([](){ return new Ieee80211Vhtmcs(3, &Ieee80211OfdmCompliantModulations::qam16Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(20), 6);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs4BW20MHzNss6([](){ return new Ieee80211Vhtmcs(4, &Ieee80211OfdmCompliantModulations::qam16Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(20), 6);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs5BW20MHzNss6([](){ return new Ieee80211Vhtmcs(5, &Ieee80211OfdmCompliantModulations::qam64Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode2_3, MHz(20), 6);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs6BW20MHzNss6([](){ return new Ieee80211Vhtmcs(6, &Ieee80211OfdmCompliantModulations::qam64Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(20), 6);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs7BW20MHzNss6([](){ return new Ieee80211Vhtmcs(7, &Ieee80211OfdmCompliantModulations::qam64Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(20), 6);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs8BW20MHzNss6([](){ return new Ieee80211Vhtmcs(8, &Ieee80211OfdmCompliantModulations::qam256Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(20), 6);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs9BW20MHzNss6([](){ return new Ieee80211Vhtmcs(9, &Ieee80211OfdmCompliantModulations::qam256Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(20), 6);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs0BW20MHzNss6([](){ return new Ieee80211Vhtmcs(0, &BpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(20), 6);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs1BW20MHzNss6([](){ return new Ieee80211Vhtmcs(1, &QpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(20), 6);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs2BW20MHzNss6([](){ return new Ieee80211Vhtmcs(2, &QpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(20), 6);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs3BW20MHzNss6([](){ return new Ieee80211Vhtmcs(3, &Qam16Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(20), 6);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs4BW20MHzNss6([](){ return new Ieee80211Vhtmcs(4, &Qam16Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(20), 6);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs5BW20MHzNss6([](){ return new Ieee80211Vhtmcs(5, &Qam64Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode2_3, MHz(20), 6);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs6BW20MHzNss6([](){ return new Ieee80211Vhtmcs(6, &Qam64Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(20), 6);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs7BW20MHzNss6([](){ return new Ieee80211Vhtmcs(7, &Qam64Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(20), 6);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs8BW20MHzNss6([](){ return new Ieee80211Vhtmcs(8, &Qam256Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(20), 6);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs9BW20MHzNss6([](){ return new Ieee80211Vhtmcs(9, &Qam256Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(20), 6);});
 
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs0BW20MHzNss7([](){ return new Ieee80211Vhtmcs(0, &Ieee80211OfdmCompliantModulations::bpskModulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(20), 7);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs1BW20MHzNss7([](){ return new Ieee80211Vhtmcs(1, &Ieee80211OfdmCompliantModulations::qpskModulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(20), 7);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs2BW20MHzNss7([](){ return new Ieee80211Vhtmcs(2, &Ieee80211OfdmCompliantModulations::qpskModulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(20), 7);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs3BW20MHzNss7([](){ return new Ieee80211Vhtmcs(3, &Ieee80211OfdmCompliantModulations::qam16Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(20), 7);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs4BW20MHzNss7([](){ return new Ieee80211Vhtmcs(4, &Ieee80211OfdmCompliantModulations::qam16Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(20), 7);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs5BW20MHzNss7([](){ return new Ieee80211Vhtmcs(5, &Ieee80211OfdmCompliantModulations::qam64Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode2_3, MHz(20), 7);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs6BW20MHzNss7([](){ return new Ieee80211Vhtmcs(6, &Ieee80211OfdmCompliantModulations::qam64Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(20), 7);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs7BW20MHzNss7([](){ return new Ieee80211Vhtmcs(7, &Ieee80211OfdmCompliantModulations::qam64Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(20), 7);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs8BW20MHzNss7([](){ return new Ieee80211Vhtmcs(8, &Ieee80211OfdmCompliantModulations::qam256Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(20), 7);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs0BW20MHzNss7([](){ return new Ieee80211Vhtmcs(0, &BpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(20), 7);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs1BW20MHzNss7([](){ return new Ieee80211Vhtmcs(1, &QpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(20), 7);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs2BW20MHzNss7([](){ return new Ieee80211Vhtmcs(2, &QpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(20), 7);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs3BW20MHzNss7([](){ return new Ieee80211Vhtmcs(3, &Qam16Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(20), 7);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs4BW20MHzNss7([](){ return new Ieee80211Vhtmcs(4, &Qam16Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(20), 7);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs5BW20MHzNss7([](){ return new Ieee80211Vhtmcs(5, &Qam64Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode2_3, MHz(20), 7);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs6BW20MHzNss7([](){ return new Ieee80211Vhtmcs(6, &Qam64Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(20), 7);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs7BW20MHzNss7([](){ return new Ieee80211Vhtmcs(7, &Qam64Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(20), 7);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs8BW20MHzNss7([](){ return new Ieee80211Vhtmcs(8, &Qam256Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(20), 7);});
 const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs9BW20MHzNss7([](){ return nullptr;});
 
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs0BW20MHzNss8([](){ return new Ieee80211Vhtmcs(0, &Ieee80211OfdmCompliantModulations::bpskModulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(20), 8);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs1BW20MHzNss8([](){ return new Ieee80211Vhtmcs(1, &Ieee80211OfdmCompliantModulations::qpskModulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(20), 8);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs2BW20MHzNss8([](){ return new Ieee80211Vhtmcs(2, &Ieee80211OfdmCompliantModulations::qpskModulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(20), 8);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs3BW20MHzNss8([](){ return new Ieee80211Vhtmcs(3, &Ieee80211OfdmCompliantModulations::qam16Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(20), 8);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs4BW20MHzNss8([](){ return new Ieee80211Vhtmcs(4, &Ieee80211OfdmCompliantModulations::qam16Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(20), 8);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs5BW20MHzNss8([](){ return new Ieee80211Vhtmcs(5, &Ieee80211OfdmCompliantModulations::qam64Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode2_3, MHz(20), 8);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs6BW20MHzNss8([](){ return new Ieee80211Vhtmcs(6, &Ieee80211OfdmCompliantModulations::qam64Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(20), 8);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs7BW20MHzNss8([](){ return new Ieee80211Vhtmcs(7, &Ieee80211OfdmCompliantModulations::qam64Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(20), 8);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs8BW20MHzNss8([](){ return new Ieee80211Vhtmcs(8, &Ieee80211OfdmCompliantModulations::qam256Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(20), 8);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs0BW20MHzNss8([](){ return new Ieee80211Vhtmcs(0, &BpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(20), 8);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs1BW20MHzNss8([](){ return new Ieee80211Vhtmcs(1, &QpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(20), 8);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs2BW20MHzNss8([](){ return new Ieee80211Vhtmcs(2, &QpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(20), 8);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs3BW20MHzNss8([](){ return new Ieee80211Vhtmcs(3, &Qam16Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(20), 8);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs4BW20MHzNss8([](){ return new Ieee80211Vhtmcs(4, &Qam16Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(20), 8);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs5BW20MHzNss8([](){ return new Ieee80211Vhtmcs(5, &Qam64Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode2_3, MHz(20), 8);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs6BW20MHzNss8([](){ return new Ieee80211Vhtmcs(6, &Qam64Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(20), 8);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs7BW20MHzNss8([](){ return new Ieee80211Vhtmcs(7, &Qam64Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(20), 8);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs8BW20MHzNss8([](){ return new Ieee80211Vhtmcs(8, &Qam256Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(20), 8);});
 const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs9BW20MHzNss8([](){ return nullptr;});
 
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs0BW40MHzNss1([](){ return new Ieee80211Vhtmcs(0, &Ieee80211OfdmCompliantModulations::bpskModulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(40), 1);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs1BW40MHzNss1([](){ return new Ieee80211Vhtmcs(1, &Ieee80211OfdmCompliantModulations::qpskModulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(40), 1);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs2BW40MHzNss1([](){ return new Ieee80211Vhtmcs(2, &Ieee80211OfdmCompliantModulations::qpskModulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(40), 1);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs3BW40MHzNss1([](){ return new Ieee80211Vhtmcs(3, &Ieee80211OfdmCompliantModulations::qam16Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(40), 1);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs4BW40MHzNss1([](){ return new Ieee80211Vhtmcs(4, &Ieee80211OfdmCompliantModulations::qam16Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(40), 1);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs5BW40MHzNss1([](){ return new Ieee80211Vhtmcs(5, &Ieee80211OfdmCompliantModulations::qam64Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode2_3, MHz(40), 1);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs6BW40MHzNss1([](){ return new Ieee80211Vhtmcs(6, &Ieee80211OfdmCompliantModulations::qam64Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(40), 1);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs7BW40MHzNss1([](){ return new Ieee80211Vhtmcs(7, &Ieee80211OfdmCompliantModulations::qam64Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(40), 1);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs8BW40MHzNss1([](){ return new Ieee80211Vhtmcs(8, &Ieee80211OfdmCompliantModulations::qam256Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(40), 1);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs9BW40MHzNss1([](){ return new Ieee80211Vhtmcs(9, &Ieee80211OfdmCompliantModulations::qam256Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(40), 1);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs0BW40MHzNss1([](){ return new Ieee80211Vhtmcs(0, &BpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(40), 1);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs1BW40MHzNss1([](){ return new Ieee80211Vhtmcs(1, &QpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(40), 1);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs2BW40MHzNss1([](){ return new Ieee80211Vhtmcs(2, &QpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(40), 1);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs3BW40MHzNss1([](){ return new Ieee80211Vhtmcs(3, &Qam16Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(40), 1);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs4BW40MHzNss1([](){ return new Ieee80211Vhtmcs(4, &Qam16Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(40), 1);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs5BW40MHzNss1([](){ return new Ieee80211Vhtmcs(5, &Qam64Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode2_3, MHz(40), 1);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs6BW40MHzNss1([](){ return new Ieee80211Vhtmcs(6, &Qam64Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(40), 1);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs7BW40MHzNss1([](){ return new Ieee80211Vhtmcs(7, &Qam64Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(40), 1);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs8BW40MHzNss1([](){ return new Ieee80211Vhtmcs(8, &Qam256Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(40), 1);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs9BW40MHzNss1([](){ return new Ieee80211Vhtmcs(9, &Qam256Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(40), 1);});
 
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs0BW40MHzNss2([](){ return new Ieee80211Vhtmcs(0, &Ieee80211OfdmCompliantModulations::bpskModulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(40), 2);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs1BW40MHzNss2([](){ return new Ieee80211Vhtmcs(1, &Ieee80211OfdmCompliantModulations::qpskModulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(40), 2);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs2BW40MHzNss2([](){ return new Ieee80211Vhtmcs(2, &Ieee80211OfdmCompliantModulations::qpskModulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(40), 2);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs3BW40MHzNss2([](){ return new Ieee80211Vhtmcs(3, &Ieee80211OfdmCompliantModulations::qam16Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(40), 2);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs4BW40MHzNss2([](){ return new Ieee80211Vhtmcs(4, &Ieee80211OfdmCompliantModulations::qam16Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(40), 2);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs5BW40MHzNss2([](){ return new Ieee80211Vhtmcs(5, &Ieee80211OfdmCompliantModulations::qam64Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode2_3, MHz(40), 2);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs6BW40MHzNss2([](){ return new Ieee80211Vhtmcs(6, &Ieee80211OfdmCompliantModulations::qam64Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(40), 2);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs7BW40MHzNss2([](){ return new Ieee80211Vhtmcs(7, &Ieee80211OfdmCompliantModulations::qam64Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(40), 2);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs8BW40MHzNss2([](){ return new Ieee80211Vhtmcs(8, &Ieee80211OfdmCompliantModulations::qam256Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(40), 2);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs9BW40MHzNss2([](){ return new Ieee80211Vhtmcs(9, &Ieee80211OfdmCompliantModulations::qam256Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(40), 2);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs0BW40MHzNss2([](){ return new Ieee80211Vhtmcs(0, &BpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(40), 2);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs1BW40MHzNss2([](){ return new Ieee80211Vhtmcs(1, &QpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(40), 2);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs2BW40MHzNss2([](){ return new Ieee80211Vhtmcs(2, &QpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(40), 2);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs3BW40MHzNss2([](){ return new Ieee80211Vhtmcs(3, &Qam16Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(40), 2);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs4BW40MHzNss2([](){ return new Ieee80211Vhtmcs(4, &Qam16Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(40), 2);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs5BW40MHzNss2([](){ return new Ieee80211Vhtmcs(5, &Qam64Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode2_3, MHz(40), 2);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs6BW40MHzNss2([](){ return new Ieee80211Vhtmcs(6, &Qam64Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(40), 2);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs7BW40MHzNss2([](){ return new Ieee80211Vhtmcs(7, &Qam64Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(40), 2);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs8BW40MHzNss2([](){ return new Ieee80211Vhtmcs(8, &Qam256Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(40), 2);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs9BW40MHzNss2([](){ return new Ieee80211Vhtmcs(9, &Qam256Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(40), 2);});
 
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs0BW40MHzNss3([](){ return new Ieee80211Vhtmcs(0, &Ieee80211OfdmCompliantModulations::bpskModulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(40), 3);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs1BW40MHzNss3([](){ return new Ieee80211Vhtmcs(1, &Ieee80211OfdmCompliantModulations::qpskModulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(40), 3);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs2BW40MHzNss3([](){ return new Ieee80211Vhtmcs(2, &Ieee80211OfdmCompliantModulations::qpskModulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(40), 3);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs3BW40MHzNss3([](){ return new Ieee80211Vhtmcs(3, &Ieee80211OfdmCompliantModulations::qam16Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(40), 3);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs4BW40MHzNss3([](){ return new Ieee80211Vhtmcs(4, &Ieee80211OfdmCompliantModulations::qam16Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(40), 3);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs5BW40MHzNss3([](){ return new Ieee80211Vhtmcs(5, &Ieee80211OfdmCompliantModulations::qam64Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode2_3, MHz(40), 3);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs6BW40MHzNss3([](){ return new Ieee80211Vhtmcs(6, &Ieee80211OfdmCompliantModulations::qam64Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(40), 3);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs7BW40MHzNss3([](){ return new Ieee80211Vhtmcs(7, &Ieee80211OfdmCompliantModulations::qam64Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(40), 3);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs8BW40MHzNss3([](){ return new Ieee80211Vhtmcs(8, &Ieee80211OfdmCompliantModulations::qam256Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(40), 3);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs9BW40MHzNss3([](){ return new Ieee80211Vhtmcs(9, &Ieee80211OfdmCompliantModulations::qam256Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(40), 3);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs0BW40MHzNss3([](){ return new Ieee80211Vhtmcs(0, &BpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(40), 3);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs1BW40MHzNss3([](){ return new Ieee80211Vhtmcs(1, &QpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(40), 3);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs2BW40MHzNss3([](){ return new Ieee80211Vhtmcs(2, &QpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(40), 3);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs3BW40MHzNss3([](){ return new Ieee80211Vhtmcs(3, &Qam16Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(40), 3);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs4BW40MHzNss3([](){ return new Ieee80211Vhtmcs(4, &Qam16Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(40), 3);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs5BW40MHzNss3([](){ return new Ieee80211Vhtmcs(5, &Qam64Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode2_3, MHz(40), 3);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs6BW40MHzNss3([](){ return new Ieee80211Vhtmcs(6, &Qam64Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(40), 3);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs7BW40MHzNss3([](){ return new Ieee80211Vhtmcs(7, &Qam64Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(40), 3);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs8BW40MHzNss3([](){ return new Ieee80211Vhtmcs(8, &Qam256Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(40), 3);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs9BW40MHzNss3([](){ return new Ieee80211Vhtmcs(9, &Qam256Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(40), 3);});
 
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs0BW40MHzNss4([](){ return new Ieee80211Vhtmcs(0, &Ieee80211OfdmCompliantModulations::bpskModulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(40), 4);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs1BW40MHzNss4([](){ return new Ieee80211Vhtmcs(1, &Ieee80211OfdmCompliantModulations::qpskModulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(40), 4);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs2BW40MHzNss4([](){ return new Ieee80211Vhtmcs(2, &Ieee80211OfdmCompliantModulations::qpskModulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(40), 4);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs3BW40MHzNss4([](){ return new Ieee80211Vhtmcs(3, &Ieee80211OfdmCompliantModulations::qam16Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(40), 4);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs4BW40MHzNss4([](){ return new Ieee80211Vhtmcs(4, &Ieee80211OfdmCompliantModulations::qam16Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(40), 4);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs5BW40MHzNss4([](){ return new Ieee80211Vhtmcs(5, &Ieee80211OfdmCompliantModulations::qam64Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode2_3, MHz(40), 4);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs6BW40MHzNss4([](){ return new Ieee80211Vhtmcs(6, &Ieee80211OfdmCompliantModulations::qam64Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(40), 4);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs7BW40MHzNss4([](){ return new Ieee80211Vhtmcs(7, &Ieee80211OfdmCompliantModulations::qam64Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(40), 4);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs8BW40MHzNss4([](){ return new Ieee80211Vhtmcs(8, &Ieee80211OfdmCompliantModulations::qam256Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(40), 4);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs9BW40MHzNss4([](){ return new Ieee80211Vhtmcs(9, &Ieee80211OfdmCompliantModulations::qam256Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(40), 4);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs0BW40MHzNss4([](){ return new Ieee80211Vhtmcs(0, &BpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(40), 4);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs1BW40MHzNss4([](){ return new Ieee80211Vhtmcs(1, &QpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(40), 4);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs2BW40MHzNss4([](){ return new Ieee80211Vhtmcs(2, &QpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(40), 4);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs3BW40MHzNss4([](){ return new Ieee80211Vhtmcs(3, &Qam16Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(40), 4);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs4BW40MHzNss4([](){ return new Ieee80211Vhtmcs(4, &Qam16Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(40), 4);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs5BW40MHzNss4([](){ return new Ieee80211Vhtmcs(5, &Qam64Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode2_3, MHz(40), 4);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs6BW40MHzNss4([](){ return new Ieee80211Vhtmcs(6, &Qam64Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(40), 4);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs7BW40MHzNss4([](){ return new Ieee80211Vhtmcs(7, &Qam64Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(40), 4);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs8BW40MHzNss4([](){ return new Ieee80211Vhtmcs(8, &Qam256Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(40), 4);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs9BW40MHzNss4([](){ return new Ieee80211Vhtmcs(9, &Qam256Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(40), 4);});
 
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs0BW40MHzNss5([](){ return new Ieee80211Vhtmcs(0, &Ieee80211OfdmCompliantModulations::bpskModulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(40), 5);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs1BW40MHzNss5([](){ return new Ieee80211Vhtmcs(1, &Ieee80211OfdmCompliantModulations::qpskModulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(40), 5);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs2BW40MHzNss5([](){ return new Ieee80211Vhtmcs(2, &Ieee80211OfdmCompliantModulations::qpskModulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(40), 5);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs3BW40MHzNss5([](){ return new Ieee80211Vhtmcs(3, &Ieee80211OfdmCompliantModulations::qam16Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(40), 5);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs4BW40MHzNss5([](){ return new Ieee80211Vhtmcs(4, &Ieee80211OfdmCompliantModulations::qam16Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(40), 5);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs5BW40MHzNss5([](){ return new Ieee80211Vhtmcs(5, &Ieee80211OfdmCompliantModulations::qam64Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode2_3, MHz(40), 5);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs6BW40MHzNss5([](){ return new Ieee80211Vhtmcs(6, &Ieee80211OfdmCompliantModulations::qam64Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(40), 5);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs7BW40MHzNss5([](){ return new Ieee80211Vhtmcs(7, &Ieee80211OfdmCompliantModulations::qam64Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(40), 5);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs8BW40MHzNss5([](){ return new Ieee80211Vhtmcs(8, &Ieee80211OfdmCompliantModulations::qam256Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(40), 5);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs9BW40MHzNss5([](){ return new Ieee80211Vhtmcs(9, &Ieee80211OfdmCompliantModulations::qam256Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(40), 5);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs0BW40MHzNss5([](){ return new Ieee80211Vhtmcs(0, &BpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(40), 5);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs1BW40MHzNss5([](){ return new Ieee80211Vhtmcs(1, &QpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(40), 5);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs2BW40MHzNss5([](){ return new Ieee80211Vhtmcs(2, &QpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(40), 5);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs3BW40MHzNss5([](){ return new Ieee80211Vhtmcs(3, &Qam16Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(40), 5);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs4BW40MHzNss5([](){ return new Ieee80211Vhtmcs(4, &Qam16Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(40), 5);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs5BW40MHzNss5([](){ return new Ieee80211Vhtmcs(5, &Qam64Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode2_3, MHz(40), 5);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs6BW40MHzNss5([](){ return new Ieee80211Vhtmcs(6, &Qam64Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(40), 5);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs7BW40MHzNss5([](){ return new Ieee80211Vhtmcs(7, &Qam64Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(40), 5);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs8BW40MHzNss5([](){ return new Ieee80211Vhtmcs(8, &Qam256Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(40), 5);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs9BW40MHzNss5([](){ return new Ieee80211Vhtmcs(9, &Qam256Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(40), 5);});
 
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs0BW40MHzNss6([](){ return new Ieee80211Vhtmcs(0, &Ieee80211OfdmCompliantModulations::bpskModulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(40), 6);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs1BW40MHzNss6([](){ return new Ieee80211Vhtmcs(1, &Ieee80211OfdmCompliantModulations::qpskModulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(40), 6);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs2BW40MHzNss6([](){ return new Ieee80211Vhtmcs(2, &Ieee80211OfdmCompliantModulations::qpskModulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(40), 6);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs3BW40MHzNss6([](){ return new Ieee80211Vhtmcs(3, &Ieee80211OfdmCompliantModulations::qam16Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(40), 6);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs4BW40MHzNss6([](){ return new Ieee80211Vhtmcs(4, &Ieee80211OfdmCompliantModulations::qam16Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(40), 6);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs5BW40MHzNss6([](){ return new Ieee80211Vhtmcs(5, &Ieee80211OfdmCompliantModulations::qam64Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode2_3, MHz(40), 6);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs6BW40MHzNss6([](){ return new Ieee80211Vhtmcs(6, &Ieee80211OfdmCompliantModulations::qam64Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(40), 6);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs7BW40MHzNss6([](){ return new Ieee80211Vhtmcs(7, &Ieee80211OfdmCompliantModulations::qam64Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(40), 6);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs8BW40MHzNss6([](){ return new Ieee80211Vhtmcs(8, &Ieee80211OfdmCompliantModulations::qam256Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(40), 6);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs9BW40MHzNss6([](){ return new Ieee80211Vhtmcs(9, &Ieee80211OfdmCompliantModulations::qam256Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(40), 6);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs0BW40MHzNss6([](){ return new Ieee80211Vhtmcs(0, &BpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(40), 6);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs1BW40MHzNss6([](){ return new Ieee80211Vhtmcs(1, &QpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(40), 6);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs2BW40MHzNss6([](){ return new Ieee80211Vhtmcs(2, &QpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(40), 6);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs3BW40MHzNss6([](){ return new Ieee80211Vhtmcs(3, &Qam16Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(40), 6);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs4BW40MHzNss6([](){ return new Ieee80211Vhtmcs(4, &Qam16Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(40), 6);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs5BW40MHzNss6([](){ return new Ieee80211Vhtmcs(5, &Qam64Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode2_3, MHz(40), 6);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs6BW40MHzNss6([](){ return new Ieee80211Vhtmcs(6, &Qam64Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(40), 6);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs7BW40MHzNss6([](){ return new Ieee80211Vhtmcs(7, &Qam64Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(40), 6);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs8BW40MHzNss6([](){ return new Ieee80211Vhtmcs(8, &Qam256Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(40), 6);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs9BW40MHzNss6([](){ return new Ieee80211Vhtmcs(9, &Qam256Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(40), 6);});
 
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs0BW40MHzNss7([](){ return new Ieee80211Vhtmcs(0, &Ieee80211OfdmCompliantModulations::bpskModulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(40), 7);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs1BW40MHzNss7([](){ return new Ieee80211Vhtmcs(1, &Ieee80211OfdmCompliantModulations::qpskModulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(40), 7);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs2BW40MHzNss7([](){ return new Ieee80211Vhtmcs(2, &Ieee80211OfdmCompliantModulations::qpskModulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(40), 7);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs3BW40MHzNss7([](){ return new Ieee80211Vhtmcs(3, &Ieee80211OfdmCompliantModulations::qam16Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(40), 7);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs4BW40MHzNss7([](){ return new Ieee80211Vhtmcs(4, &Ieee80211OfdmCompliantModulations::qam16Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(40), 7);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs5BW40MHzNss7([](){ return new Ieee80211Vhtmcs(5, &Ieee80211OfdmCompliantModulations::qam64Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode2_3, MHz(40), 7);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs6BW40MHzNss7([](){ return new Ieee80211Vhtmcs(6, &Ieee80211OfdmCompliantModulations::qam64Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(40), 7);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs7BW40MHzNss7([](){ return new Ieee80211Vhtmcs(7, &Ieee80211OfdmCompliantModulations::qam64Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(40), 7);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs8BW40MHzNss7([](){ return new Ieee80211Vhtmcs(8, &Ieee80211OfdmCompliantModulations::qam256Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(40), 7);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs9BW40MHzNss7([](){ return new Ieee80211Vhtmcs(9, &Ieee80211OfdmCompliantModulations::qam256Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(40), 7);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs0BW40MHzNss7([](){ return new Ieee80211Vhtmcs(0, &BpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(40), 7);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs1BW40MHzNss7([](){ return new Ieee80211Vhtmcs(1, &QpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(40), 7);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs2BW40MHzNss7([](){ return new Ieee80211Vhtmcs(2, &QpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(40), 7);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs3BW40MHzNss7([](){ return new Ieee80211Vhtmcs(3, &Qam16Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(40), 7);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs4BW40MHzNss7([](){ return new Ieee80211Vhtmcs(4, &Qam16Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(40), 7);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs5BW40MHzNss7([](){ return new Ieee80211Vhtmcs(5, &Qam64Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode2_3, MHz(40), 7);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs6BW40MHzNss7([](){ return new Ieee80211Vhtmcs(6, &Qam64Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(40), 7);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs7BW40MHzNss7([](){ return new Ieee80211Vhtmcs(7, &Qam64Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(40), 7);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs8BW40MHzNss7([](){ return new Ieee80211Vhtmcs(8, &Qam256Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(40), 7);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs9BW40MHzNss7([](){ return new Ieee80211Vhtmcs(9, &Qam256Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(40), 7);});
 
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs0BW40MHzNss8([](){ return new Ieee80211Vhtmcs(0, &Ieee80211OfdmCompliantModulations::bpskModulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(40), 8);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs1BW40MHzNss8([](){ return new Ieee80211Vhtmcs(1, &Ieee80211OfdmCompliantModulations::qpskModulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(40), 8);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs2BW40MHzNss8([](){ return new Ieee80211Vhtmcs(2, &Ieee80211OfdmCompliantModulations::qpskModulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(40), 8);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs3BW40MHzNss8([](){ return new Ieee80211Vhtmcs(3, &Ieee80211OfdmCompliantModulations::qam16Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(40), 8);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs4BW40MHzNss8([](){ return new Ieee80211Vhtmcs(4, &Ieee80211OfdmCompliantModulations::qam16Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(40), 8);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs5BW40MHzNss8([](){ return new Ieee80211Vhtmcs(5, &Ieee80211OfdmCompliantModulations::qam64Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode2_3, MHz(40), 8);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs6BW40MHzNss8([](){ return new Ieee80211Vhtmcs(6, &Ieee80211OfdmCompliantModulations::qam64Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(40), 8);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs7BW40MHzNss8([](){ return new Ieee80211Vhtmcs(7, &Ieee80211OfdmCompliantModulations::qam64Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(40), 8);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs8BW40MHzNss8([](){ return new Ieee80211Vhtmcs(8, &Ieee80211OfdmCompliantModulations::qam256Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(40), 8);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs9BW40MHzNss8([](){ return new Ieee80211Vhtmcs(9, &Ieee80211OfdmCompliantModulations::qam256Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(40), 8);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs0BW40MHzNss8([](){ return new Ieee80211Vhtmcs(0, &BpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(40), 8);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs1BW40MHzNss8([](){ return new Ieee80211Vhtmcs(1, &QpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(40), 8);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs2BW40MHzNss8([](){ return new Ieee80211Vhtmcs(2, &QpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(40), 8);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs3BW40MHzNss8([](){ return new Ieee80211Vhtmcs(3, &Qam16Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(40), 8);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs4BW40MHzNss8([](){ return new Ieee80211Vhtmcs(4, &Qam16Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(40), 8);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs5BW40MHzNss8([](){ return new Ieee80211Vhtmcs(5, &Qam64Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode2_3, MHz(40), 8);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs6BW40MHzNss8([](){ return new Ieee80211Vhtmcs(6, &Qam64Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(40), 8);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs7BW40MHzNss8([](){ return new Ieee80211Vhtmcs(7, &Qam64Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(40), 8);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs8BW40MHzNss8([](){ return new Ieee80211Vhtmcs(8, &Qam256Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(40), 8);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs9BW40MHzNss8([](){ return new Ieee80211Vhtmcs(9, &Qam256Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(40), 8);});
 
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs0BW80MHzNss1([](){ return new Ieee80211Vhtmcs(0, &Ieee80211OfdmCompliantModulations::bpskModulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(80), 1);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs1BW80MHzNss1([](){ return new Ieee80211Vhtmcs(1, &Ieee80211OfdmCompliantModulations::qpskModulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(80), 1);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs2BW80MHzNss1([](){ return new Ieee80211Vhtmcs(2, &Ieee80211OfdmCompliantModulations::qpskModulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(80), 1);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs3BW80MHzNss1([](){ return new Ieee80211Vhtmcs(3, &Ieee80211OfdmCompliantModulations::qam16Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(80), 1);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs4BW80MHzNss1([](){ return new Ieee80211Vhtmcs(4, &Ieee80211OfdmCompliantModulations::qam16Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(80), 1);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs5BW80MHzNss1([](){ return new Ieee80211Vhtmcs(5, &Ieee80211OfdmCompliantModulations::qam64Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode2_3, MHz(80), 1);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs6BW80MHzNss1([](){ return new Ieee80211Vhtmcs(6, &Ieee80211OfdmCompliantModulations::qam64Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(80), 1);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs7BW80MHzNss1([](){ return new Ieee80211Vhtmcs(7, &Ieee80211OfdmCompliantModulations::qam64Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(80), 1);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs8BW80MHzNss1([](){ return new Ieee80211Vhtmcs(8, &Ieee80211OfdmCompliantModulations::qam256Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(80), 1);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs9BW80MHzNss1([](){ return new Ieee80211Vhtmcs(9, &Ieee80211OfdmCompliantModulations::qam256Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(80), 1);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs0BW80MHzNss1([](){ return new Ieee80211Vhtmcs(0, &BpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(80), 1);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs1BW80MHzNss1([](){ return new Ieee80211Vhtmcs(1, &QpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(80), 1);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs2BW80MHzNss1([](){ return new Ieee80211Vhtmcs(2, &QpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(80), 1);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs3BW80MHzNss1([](){ return new Ieee80211Vhtmcs(3, &Qam16Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(80), 1);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs4BW80MHzNss1([](){ return new Ieee80211Vhtmcs(4, &Qam16Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(80), 1);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs5BW80MHzNss1([](){ return new Ieee80211Vhtmcs(5, &Qam64Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode2_3, MHz(80), 1);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs6BW80MHzNss1([](){ return new Ieee80211Vhtmcs(6, &Qam64Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(80), 1);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs7BW80MHzNss1([](){ return new Ieee80211Vhtmcs(7, &Qam64Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(80), 1);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs8BW80MHzNss1([](){ return new Ieee80211Vhtmcs(8, &Qam256Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(80), 1);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs9BW80MHzNss1([](){ return new Ieee80211Vhtmcs(9, &Qam256Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(80), 1);});
 
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs0BW80MHzNss2([](){ return new Ieee80211Vhtmcs(0, &Ieee80211OfdmCompliantModulations::bpskModulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(80), 2);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs1BW80MHzNss2([](){ return new Ieee80211Vhtmcs(1, &Ieee80211OfdmCompliantModulations::qpskModulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(80), 2);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs2BW80MHzNss2([](){ return new Ieee80211Vhtmcs(2, &Ieee80211OfdmCompliantModulations::qpskModulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(80), 2);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs3BW80MHzNss2([](){ return new Ieee80211Vhtmcs(3, &Ieee80211OfdmCompliantModulations::qam16Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(80), 2);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs4BW80MHzNss2([](){ return new Ieee80211Vhtmcs(4, &Ieee80211OfdmCompliantModulations::qam16Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(80), 2);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs5BW80MHzNss2([](){ return new Ieee80211Vhtmcs(5, &Ieee80211OfdmCompliantModulations::qam64Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode2_3, MHz(80), 2);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs6BW80MHzNss2([](){ return new Ieee80211Vhtmcs(6, &Ieee80211OfdmCompliantModulations::qam64Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(80), 2);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs7BW80MHzNss2([](){ return new Ieee80211Vhtmcs(7, &Ieee80211OfdmCompliantModulations::qam64Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(80), 2);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs8BW80MHzNss2([](){ return new Ieee80211Vhtmcs(8, &Ieee80211OfdmCompliantModulations::qam256Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(80), 2);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs9BW80MHzNss2([](){ return new Ieee80211Vhtmcs(9, &Ieee80211OfdmCompliantModulations::qam256Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(80), 2);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs0BW80MHzNss2([](){ return new Ieee80211Vhtmcs(0, &BpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(80), 2);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs1BW80MHzNss2([](){ return new Ieee80211Vhtmcs(1, &QpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(80), 2);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs2BW80MHzNss2([](){ return new Ieee80211Vhtmcs(2, &QpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(80), 2);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs3BW80MHzNss2([](){ return new Ieee80211Vhtmcs(3, &Qam16Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(80), 2);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs4BW80MHzNss2([](){ return new Ieee80211Vhtmcs(4, &Qam16Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(80), 2);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs5BW80MHzNss2([](){ return new Ieee80211Vhtmcs(5, &Qam64Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode2_3, MHz(80), 2);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs6BW80MHzNss2([](){ return new Ieee80211Vhtmcs(6, &Qam64Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(80), 2);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs7BW80MHzNss2([](){ return new Ieee80211Vhtmcs(7, &Qam64Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(80), 2);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs8BW80MHzNss2([](){ return new Ieee80211Vhtmcs(8, &Qam256Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(80), 2);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs9BW80MHzNss2([](){ return new Ieee80211Vhtmcs(9, &Qam256Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(80), 2);});
 
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs0BW80MHzNss3([](){ return new Ieee80211Vhtmcs(0, &Ieee80211OfdmCompliantModulations::bpskModulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(80), 3);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs1BW80MHzNss3([](){ return new Ieee80211Vhtmcs(1, &Ieee80211OfdmCompliantModulations::qpskModulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(80), 3);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs2BW80MHzNss3([](){ return new Ieee80211Vhtmcs(2, &Ieee80211OfdmCompliantModulations::qpskModulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(80), 3);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs3BW80MHzNss3([](){ return new Ieee80211Vhtmcs(3, &Ieee80211OfdmCompliantModulations::qam16Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(80), 3);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs4BW80MHzNss3([](){ return new Ieee80211Vhtmcs(4, &Ieee80211OfdmCompliantModulations::qam16Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(80), 3);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs5BW80MHzNss3([](){ return new Ieee80211Vhtmcs(5, &Ieee80211OfdmCompliantModulations::qam64Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode2_3, MHz(80), 3);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs0BW80MHzNss3([](){ return new Ieee80211Vhtmcs(0, &BpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(80), 3);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs1BW80MHzNss3([](){ return new Ieee80211Vhtmcs(1, &QpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(80), 3);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs2BW80MHzNss3([](){ return new Ieee80211Vhtmcs(2, &QpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(80), 3);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs3BW80MHzNss3([](){ return new Ieee80211Vhtmcs(3, &Qam16Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(80), 3);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs4BW80MHzNss3([](){ return new Ieee80211Vhtmcs(4, &Qam16Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(80), 3);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs5BW80MHzNss3([](){ return new Ieee80211Vhtmcs(5, &Qam64Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode2_3, MHz(80), 3);});
 const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs6BW80MHzNss3([](){ return nullptr;});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs7BW80MHzNss3([](){ return new Ieee80211Vhtmcs(7, &Ieee80211OfdmCompliantModulations::qam64Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(80), 3);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs8BW80MHzNss3([](){ return new Ieee80211Vhtmcs(8, &Ieee80211OfdmCompliantModulations::qam256Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(80), 3);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs9BW80MHzNss3([](){ return new Ieee80211Vhtmcs(9, &Ieee80211OfdmCompliantModulations::qam256Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(80), 3);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs7BW80MHzNss3([](){ return new Ieee80211Vhtmcs(7, &Qam64Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(80), 3);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs8BW80MHzNss3([](){ return new Ieee80211Vhtmcs(8, &Qam256Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(80), 3);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs9BW80MHzNss3([](){ return new Ieee80211Vhtmcs(9, &Qam256Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(80), 3);});
 
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs0BW80MHzNss4([](){ return new Ieee80211Vhtmcs(0, &Ieee80211OfdmCompliantModulations::bpskModulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(80), 4);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs1BW80MHzNss4([](){ return new Ieee80211Vhtmcs(1, &Ieee80211OfdmCompliantModulations::qpskModulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(80), 4);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs2BW80MHzNss4([](){ return new Ieee80211Vhtmcs(2, &Ieee80211OfdmCompliantModulations::qpskModulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(80), 4);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs3BW80MHzNss4([](){ return new Ieee80211Vhtmcs(3, &Ieee80211OfdmCompliantModulations::qam16Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(80), 4);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs4BW80MHzNss4([](){ return new Ieee80211Vhtmcs(4, &Ieee80211OfdmCompliantModulations::qam16Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(80), 4);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs5BW80MHzNss4([](){ return new Ieee80211Vhtmcs(5, &Ieee80211OfdmCompliantModulations::qam64Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode2_3, MHz(80), 4);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs6BW80MHzNss4([](){ return new Ieee80211Vhtmcs(6, &Ieee80211OfdmCompliantModulations::qam64Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(80), 4);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs7BW80MHzNss4([](){ return new Ieee80211Vhtmcs(7, &Ieee80211OfdmCompliantModulations::qam64Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(80), 4);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs8BW80MHzNss4([](){ return new Ieee80211Vhtmcs(8, &Ieee80211OfdmCompliantModulations::qam256Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(80), 4);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs9BW80MHzNss4([](){ return new Ieee80211Vhtmcs(9, &Ieee80211OfdmCompliantModulations::qam256Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(80), 4);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs0BW80MHzNss4([](){ return new Ieee80211Vhtmcs(0, &BpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(80), 4);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs1BW80MHzNss4([](){ return new Ieee80211Vhtmcs(1, &QpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(80), 4);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs2BW80MHzNss4([](){ return new Ieee80211Vhtmcs(2, &QpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(80), 4);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs3BW80MHzNss4([](){ return new Ieee80211Vhtmcs(3, &Qam16Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(80), 4);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs4BW80MHzNss4([](){ return new Ieee80211Vhtmcs(4, &Qam16Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(80), 4);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs5BW80MHzNss4([](){ return new Ieee80211Vhtmcs(5, &Qam64Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode2_3, MHz(80), 4);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs6BW80MHzNss4([](){ return new Ieee80211Vhtmcs(6, &Qam64Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(80), 4);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs7BW80MHzNss4([](){ return new Ieee80211Vhtmcs(7, &Qam64Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(80), 4);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs8BW80MHzNss4([](){ return new Ieee80211Vhtmcs(8, &Qam256Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(80), 4);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs9BW80MHzNss4([](){ return new Ieee80211Vhtmcs(9, &Qam256Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(80), 4);});
 
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs0BW80MHzNss5([](){ return new Ieee80211Vhtmcs(0, &Ieee80211OfdmCompliantModulations::bpskModulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(80), 5);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs1BW80MHzNss5([](){ return new Ieee80211Vhtmcs(1, &Ieee80211OfdmCompliantModulations::qpskModulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(80), 5);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs2BW80MHzNss5([](){ return new Ieee80211Vhtmcs(2, &Ieee80211OfdmCompliantModulations::qpskModulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(80), 5);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs3BW80MHzNss5([](){ return new Ieee80211Vhtmcs(3, &Ieee80211OfdmCompliantModulations::qam16Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(80), 5);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs4BW80MHzNss5([](){ return new Ieee80211Vhtmcs(4, &Ieee80211OfdmCompliantModulations::qam16Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(80), 5);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs5BW80MHzNss5([](){ return new Ieee80211Vhtmcs(5, &Ieee80211OfdmCompliantModulations::qam64Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode2_3, MHz(80), 5);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs6BW80MHzNss5([](){ return new Ieee80211Vhtmcs(6, &Ieee80211OfdmCompliantModulations::qam64Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(80), 5);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs7BW80MHzNss5([](){ return new Ieee80211Vhtmcs(7, &Ieee80211OfdmCompliantModulations::qam64Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(80), 5);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs8BW80MHzNss5([](){ return new Ieee80211Vhtmcs(8, &Ieee80211OfdmCompliantModulations::qam256Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(80), 5);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs9BW80MHzNss5([](){ return new Ieee80211Vhtmcs(9, &Ieee80211OfdmCompliantModulations::qam256Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(80), 5);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs0BW80MHzNss5([](){ return new Ieee80211Vhtmcs(0, &BpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(80), 5);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs1BW80MHzNss5([](){ return new Ieee80211Vhtmcs(1, &QpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(80), 5);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs2BW80MHzNss5([](){ return new Ieee80211Vhtmcs(2, &QpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(80), 5);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs3BW80MHzNss5([](){ return new Ieee80211Vhtmcs(3, &Qam16Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(80), 5);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs4BW80MHzNss5([](){ return new Ieee80211Vhtmcs(4, &Qam16Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(80), 5);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs5BW80MHzNss5([](){ return new Ieee80211Vhtmcs(5, &Qam64Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode2_3, MHz(80), 5);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs6BW80MHzNss5([](){ return new Ieee80211Vhtmcs(6, &Qam64Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(80), 5);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs7BW80MHzNss5([](){ return new Ieee80211Vhtmcs(7, &Qam64Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(80), 5);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs8BW80MHzNss5([](){ return new Ieee80211Vhtmcs(8, &Qam256Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(80), 5);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs9BW80MHzNss5([](){ return new Ieee80211Vhtmcs(9, &Qam256Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(80), 5);});
 
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs0BW80MHzNss6([](){ return new Ieee80211Vhtmcs(0, &Ieee80211OfdmCompliantModulations::bpskModulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(80), 6);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs1BW80MHzNss6([](){ return new Ieee80211Vhtmcs(1, &Ieee80211OfdmCompliantModulations::qpskModulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(80), 6);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs2BW80MHzNss6([](){ return new Ieee80211Vhtmcs(2, &Ieee80211OfdmCompliantModulations::qpskModulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(80), 6);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs3BW80MHzNss6([](){ return new Ieee80211Vhtmcs(3, &Ieee80211OfdmCompliantModulations::qam16Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(80), 6);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs4BW80MHzNss6([](){ return new Ieee80211Vhtmcs(4, &Ieee80211OfdmCompliantModulations::qam16Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(80), 6);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs5BW80MHzNss6([](){ return new Ieee80211Vhtmcs(5, &Ieee80211OfdmCompliantModulations::qam64Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode2_3, MHz(80), 6);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs6BW80MHzNss6([](){ return new Ieee80211Vhtmcs(6, &Ieee80211OfdmCompliantModulations::qam64Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(80), 6);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs7BW80MHzNss6([](){ return new Ieee80211Vhtmcs(7, &Ieee80211OfdmCompliantModulations::qam64Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(80), 6);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs8BW80MHzNss6([](){ return new Ieee80211Vhtmcs(8, &Ieee80211OfdmCompliantModulations::qam256Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(80), 6);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs9BW80MHzNss6([](){ return new Ieee80211Vhtmcs(9, &Ieee80211OfdmCompliantModulations::qam256Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(80), 6);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs0BW80MHzNss6([](){ return new Ieee80211Vhtmcs(0, &BpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(80), 6);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs1BW80MHzNss6([](){ return new Ieee80211Vhtmcs(1, &QpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(80), 6);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs2BW80MHzNss6([](){ return new Ieee80211Vhtmcs(2, &QpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(80), 6);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs3BW80MHzNss6([](){ return new Ieee80211Vhtmcs(3, &Qam16Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(80), 6);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs4BW80MHzNss6([](){ return new Ieee80211Vhtmcs(4, &Qam16Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(80), 6);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs5BW80MHzNss6([](){ return new Ieee80211Vhtmcs(5, &Qam64Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode2_3, MHz(80), 6);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs6BW80MHzNss6([](){ return new Ieee80211Vhtmcs(6, &Qam64Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(80), 6);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs7BW80MHzNss6([](){ return new Ieee80211Vhtmcs(7, &Qam64Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(80), 6);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs8BW80MHzNss6([](){ return new Ieee80211Vhtmcs(8, &Qam256Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(80), 6);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs9BW80MHzNss6([](){ return new Ieee80211Vhtmcs(9, &Qam256Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(80), 6);});
 
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs0BW80MHzNss7([](){ return new Ieee80211Vhtmcs(0, &Ieee80211OfdmCompliantModulations::bpskModulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(80), 7);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs1BW80MHzNss7([](){ return new Ieee80211Vhtmcs(1, &Ieee80211OfdmCompliantModulations::qpskModulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(80), 7);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs2BW80MHzNss7([](){ return new Ieee80211Vhtmcs(2, &Ieee80211OfdmCompliantModulations::qpskModulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(80), 7);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs3BW80MHzNss7([](){ return new Ieee80211Vhtmcs(3, &Ieee80211OfdmCompliantModulations::qam16Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(80), 7);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs4BW80MHzNss7([](){ return new Ieee80211Vhtmcs(4, &Ieee80211OfdmCompliantModulations::qam16Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(80), 7);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs5BW80MHzNss7([](){ return new Ieee80211Vhtmcs(5, &Ieee80211OfdmCompliantModulations::qam64Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode2_3, MHz(80), 7);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs0BW80MHzNss7([](){ return new Ieee80211Vhtmcs(0, &BpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(80), 7);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs1BW80MHzNss7([](){ return new Ieee80211Vhtmcs(1, &QpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(80), 7);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs2BW80MHzNss7([](){ return new Ieee80211Vhtmcs(2, &QpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(80), 7);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs3BW80MHzNss7([](){ return new Ieee80211Vhtmcs(3, &Qam16Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(80), 7);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs4BW80MHzNss7([](){ return new Ieee80211Vhtmcs(4, &Qam16Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(80), 7);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs5BW80MHzNss7([](){ return new Ieee80211Vhtmcs(5, &Qam64Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode2_3, MHz(80), 7);});
 const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs6BW80MHzNss7([](){ return nullptr;});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs7BW80MHzNss7([](){ return new Ieee80211Vhtmcs(7, &Ieee80211OfdmCompliantModulations::qam64Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(80), 7);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs8BW80MHzNss7([](){ return new Ieee80211Vhtmcs(8, &Ieee80211OfdmCompliantModulations::qam256Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(80), 7);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs9BW80MHzNss7([](){ return new Ieee80211Vhtmcs(9, &Ieee80211OfdmCompliantModulations::qam256Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(80), 7);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs7BW80MHzNss7([](){ return new Ieee80211Vhtmcs(7, &Qam64Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(80), 7);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs8BW80MHzNss7([](){ return new Ieee80211Vhtmcs(8, &Qam256Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(80), 7);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs9BW80MHzNss7([](){ return new Ieee80211Vhtmcs(9, &Qam256Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(80), 7);});
 
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs0BW80MHzNss8([](){ return new Ieee80211Vhtmcs(0, &Ieee80211OfdmCompliantModulations::bpskModulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(80), 8);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs1BW80MHzNss8([](){ return new Ieee80211Vhtmcs(1, &Ieee80211OfdmCompliantModulations::qpskModulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(80), 8);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs2BW80MHzNss8([](){ return new Ieee80211Vhtmcs(2, &Ieee80211OfdmCompliantModulations::qpskModulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(80), 8);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs3BW80MHzNss8([](){ return new Ieee80211Vhtmcs(3, &Ieee80211OfdmCompliantModulations::qam16Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(80), 8);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs4BW80MHzNss8([](){ return new Ieee80211Vhtmcs(4, &Ieee80211OfdmCompliantModulations::qam16Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(80), 8);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs5BW80MHzNss8([](){ return new Ieee80211Vhtmcs(5, &Ieee80211OfdmCompliantModulations::qam64Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode2_3, MHz(80), 8);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs6BW80MHzNss8([](){ return new Ieee80211Vhtmcs(6, &Ieee80211OfdmCompliantModulations::qam64Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(80), 8);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs7BW80MHzNss8([](){ return new Ieee80211Vhtmcs(7, &Ieee80211OfdmCompliantModulations::qam64Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(80), 8);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs8BW80MHzNss8([](){ return new Ieee80211Vhtmcs(8, &Ieee80211OfdmCompliantModulations::qam256Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(80), 8);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs9BW80MHzNss8([](){ return new Ieee80211Vhtmcs(9, &Ieee80211OfdmCompliantModulations::qam256Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(80), 8);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs0BW80MHzNss8([](){ return new Ieee80211Vhtmcs(0, &BpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(80), 8);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs1BW80MHzNss8([](){ return new Ieee80211Vhtmcs(1, &QpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(80), 8);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs2BW80MHzNss8([](){ return new Ieee80211Vhtmcs(2, &QpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(80), 8);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs3BW80MHzNss8([](){ return new Ieee80211Vhtmcs(3, &Qam16Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(80), 8);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs4BW80MHzNss8([](){ return new Ieee80211Vhtmcs(4, &Qam16Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(80), 8);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs5BW80MHzNss8([](){ return new Ieee80211Vhtmcs(5, &Qam64Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode2_3, MHz(80), 8);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs6BW80MHzNss8([](){ return new Ieee80211Vhtmcs(6, &Qam64Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(80), 8);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs7BW80MHzNss8([](){ return new Ieee80211Vhtmcs(7, &Qam64Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(80), 8);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs8BW80MHzNss8([](){ return new Ieee80211Vhtmcs(8, &Qam256Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(80), 8);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs9BW80MHzNss8([](){ return new Ieee80211Vhtmcs(9, &Qam256Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(80), 8);});
 
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs0BW160MHzNss1([](){ return new Ieee80211Vhtmcs(0, &Ieee80211OfdmCompliantModulations::bpskModulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(160), 1);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs1BW160MHzNss1([](){ return new Ieee80211Vhtmcs(1, &Ieee80211OfdmCompliantModulations::qpskModulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(160), 1);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs2BW160MHzNss1([](){ return new Ieee80211Vhtmcs(2, &Ieee80211OfdmCompliantModulations::qpskModulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(160), 1);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs3BW160MHzNss1([](){ return new Ieee80211Vhtmcs(3, &Ieee80211OfdmCompliantModulations::qam16Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(160), 1);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs4BW160MHzNss1([](){ return new Ieee80211Vhtmcs(4, &Ieee80211OfdmCompliantModulations::qam16Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(160), 1);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs5BW160MHzNss1([](){ return new Ieee80211Vhtmcs(5, &Ieee80211OfdmCompliantModulations::qam64Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode2_3, MHz(160), 1);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs6BW160MHzNss1([](){ return new Ieee80211Vhtmcs(6, &Ieee80211OfdmCompliantModulations::qam64Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(160), 1);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs7BW160MHzNss1([](){ return new Ieee80211Vhtmcs(7, &Ieee80211OfdmCompliantModulations::qam64Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(160), 1);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs8BW160MHzNss1([](){ return new Ieee80211Vhtmcs(8, &Ieee80211OfdmCompliantModulations::qam256Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(160), 1);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs9BW160MHzNss1([](){ return new Ieee80211Vhtmcs(9, &Ieee80211OfdmCompliantModulations::qam256Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(160), 1);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs0BW160MHzNss1([](){ return new Ieee80211Vhtmcs(0, &BpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(160), 1);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs1BW160MHzNss1([](){ return new Ieee80211Vhtmcs(1, &QpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(160), 1);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs2BW160MHzNss1([](){ return new Ieee80211Vhtmcs(2, &QpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(160), 1);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs3BW160MHzNss1([](){ return new Ieee80211Vhtmcs(3, &Qam16Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(160), 1);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs4BW160MHzNss1([](){ return new Ieee80211Vhtmcs(4, &Qam16Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(160), 1);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs5BW160MHzNss1([](){ return new Ieee80211Vhtmcs(5, &Qam64Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode2_3, MHz(160), 1);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs6BW160MHzNss1([](){ return new Ieee80211Vhtmcs(6, &Qam64Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(160), 1);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs7BW160MHzNss1([](){ return new Ieee80211Vhtmcs(7, &Qam64Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(160), 1);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs8BW160MHzNss1([](){ return new Ieee80211Vhtmcs(8, &Qam256Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(160), 1);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs9BW160MHzNss1([](){ return new Ieee80211Vhtmcs(9, &Qam256Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(160), 1);});
 
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs0BW160MHzNss2([](){ return new Ieee80211Vhtmcs(0, &Ieee80211OfdmCompliantModulations::bpskModulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(160), 2);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs1BW160MHzNss2([](){ return new Ieee80211Vhtmcs(1, &Ieee80211OfdmCompliantModulations::qpskModulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(160), 2);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs2BW160MHzNss2([](){ return new Ieee80211Vhtmcs(2, &Ieee80211OfdmCompliantModulations::qpskModulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(160), 2);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs3BW160MHzNss2([](){ return new Ieee80211Vhtmcs(3, &Ieee80211OfdmCompliantModulations::qam16Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(160), 2);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs4BW160MHzNss2([](){ return new Ieee80211Vhtmcs(4, &Ieee80211OfdmCompliantModulations::qam16Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(160), 2);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs5BW160MHzNss2([](){ return new Ieee80211Vhtmcs(5, &Ieee80211OfdmCompliantModulations::qam64Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode2_3, MHz(160), 2);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs6BW160MHzNss2([](){ return new Ieee80211Vhtmcs(6, &Ieee80211OfdmCompliantModulations::qam64Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(160), 2);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs7BW160MHzNss2([](){ return new Ieee80211Vhtmcs(7, &Ieee80211OfdmCompliantModulations::qam64Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(160), 2);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs8BW160MHzNss2([](){ return new Ieee80211Vhtmcs(8, &Ieee80211OfdmCompliantModulations::qam256Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(160), 2);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs9BW160MHzNss2([](){ return new Ieee80211Vhtmcs(9, &Ieee80211OfdmCompliantModulations::qam256Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(160), 2);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs0BW160MHzNss2([](){ return new Ieee80211Vhtmcs(0, &BpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(160), 2);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs1BW160MHzNss2([](){ return new Ieee80211Vhtmcs(1, &QpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(160), 2);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs2BW160MHzNss2([](){ return new Ieee80211Vhtmcs(2, &QpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(160), 2);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs3BW160MHzNss2([](){ return new Ieee80211Vhtmcs(3, &Qam16Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(160), 2);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs4BW160MHzNss2([](){ return new Ieee80211Vhtmcs(4, &Qam16Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(160), 2);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs5BW160MHzNss2([](){ return new Ieee80211Vhtmcs(5, &Qam64Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode2_3, MHz(160), 2);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs6BW160MHzNss2([](){ return new Ieee80211Vhtmcs(6, &Qam64Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(160), 2);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs7BW160MHzNss2([](){ return new Ieee80211Vhtmcs(7, &Qam64Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(160), 2);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs8BW160MHzNss2([](){ return new Ieee80211Vhtmcs(8, &Qam256Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(160), 2);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs9BW160MHzNss2([](){ return new Ieee80211Vhtmcs(9, &Qam256Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(160), 2);});
 
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs0BW160MHzNss3([](){ return new Ieee80211Vhtmcs(0, &Ieee80211OfdmCompliantModulations::bpskModulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(160), 3);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs1BW160MHzNss3([](){ return new Ieee80211Vhtmcs(1, &Ieee80211OfdmCompliantModulations::qpskModulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(160), 3);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs2BW160MHzNss3([](){ return new Ieee80211Vhtmcs(2, &Ieee80211OfdmCompliantModulations::qpskModulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(160), 3);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs3BW160MHzNss3([](){ return new Ieee80211Vhtmcs(3, &Ieee80211OfdmCompliantModulations::qam16Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(160), 3);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs4BW160MHzNss3([](){ return new Ieee80211Vhtmcs(4, &Ieee80211OfdmCompliantModulations::qam16Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(160), 3);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs5BW160MHzNss3([](){ return new Ieee80211Vhtmcs(5, &Ieee80211OfdmCompliantModulations::qam64Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode2_3, MHz(160), 3);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs6BW160MHzNss3([](){ return new Ieee80211Vhtmcs(6, &Ieee80211OfdmCompliantModulations::qam64Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(160), 3);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs7BW160MHzNss3([](){ return new Ieee80211Vhtmcs(7, &Ieee80211OfdmCompliantModulations::qam64Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(160), 3);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs8BW160MHzNss3([](){ return new Ieee80211Vhtmcs(8, &Ieee80211OfdmCompliantModulations::qam256Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(160), 3);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs0BW160MHzNss3([](){ return new Ieee80211Vhtmcs(0, &BpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(160), 3);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs1BW160MHzNss3([](){ return new Ieee80211Vhtmcs(1, &QpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(160), 3);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs2BW160MHzNss3([](){ return new Ieee80211Vhtmcs(2, &QpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(160), 3);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs3BW160MHzNss3([](){ return new Ieee80211Vhtmcs(3, &Qam16Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(160), 3);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs4BW160MHzNss3([](){ return new Ieee80211Vhtmcs(4, &Qam16Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(160), 3);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs5BW160MHzNss3([](){ return new Ieee80211Vhtmcs(5, &Qam64Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode2_3, MHz(160), 3);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs6BW160MHzNss3([](){ return new Ieee80211Vhtmcs(6, &Qam64Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(160), 3);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs7BW160MHzNss3([](){ return new Ieee80211Vhtmcs(7, &Qam64Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(160), 3);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs8BW160MHzNss3([](){ return new Ieee80211Vhtmcs(8, &Qam256Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(160), 3);});
 const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs9BW160MHzNss3([](){ return nullptr;});
 
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs0BW160MHzNss4([](){ return new Ieee80211Vhtmcs(0, &Ieee80211OfdmCompliantModulations::bpskModulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(160), 4);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs1BW160MHzNss4([](){ return new Ieee80211Vhtmcs(1, &Ieee80211OfdmCompliantModulations::qpskModulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(160), 4);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs2BW160MHzNss4([](){ return new Ieee80211Vhtmcs(2, &Ieee80211OfdmCompliantModulations::qpskModulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(160), 4);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs3BW160MHzNss4([](){ return new Ieee80211Vhtmcs(3, &Ieee80211OfdmCompliantModulations::qam16Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(160), 4);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs4BW160MHzNss4([](){ return new Ieee80211Vhtmcs(4, &Ieee80211OfdmCompliantModulations::qam16Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(160), 4);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs5BW160MHzNss4([](){ return new Ieee80211Vhtmcs(5, &Ieee80211OfdmCompliantModulations::qam64Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode2_3, MHz(160), 4);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs6BW160MHzNss4([](){ return new Ieee80211Vhtmcs(6, &Ieee80211OfdmCompliantModulations::qam64Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(160), 4);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs7BW160MHzNss4([](){ return new Ieee80211Vhtmcs(7, &Ieee80211OfdmCompliantModulations::qam64Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(160), 4);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs8BW160MHzNss4([](){ return new Ieee80211Vhtmcs(8, &Ieee80211OfdmCompliantModulations::qam256Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(160), 4);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs9BW160MHzNss4([](){ return new Ieee80211Vhtmcs(9, &Ieee80211OfdmCompliantModulations::qam256Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(160), 4);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs0BW160MHzNss4([](){ return new Ieee80211Vhtmcs(0, &BpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(160), 4);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs1BW160MHzNss4([](){ return new Ieee80211Vhtmcs(1, &QpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(160), 4);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs2BW160MHzNss4([](){ return new Ieee80211Vhtmcs(2, &QpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(160), 4);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs3BW160MHzNss4([](){ return new Ieee80211Vhtmcs(3, &Qam16Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(160), 4);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs4BW160MHzNss4([](){ return new Ieee80211Vhtmcs(4, &Qam16Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(160), 4);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs5BW160MHzNss4([](){ return new Ieee80211Vhtmcs(5, &Qam64Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode2_3, MHz(160), 4);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs6BW160MHzNss4([](){ return new Ieee80211Vhtmcs(6, &Qam64Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(160), 4);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs7BW160MHzNss4([](){ return new Ieee80211Vhtmcs(7, &Qam64Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(160), 4);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs8BW160MHzNss4([](){ return new Ieee80211Vhtmcs(8, &Qam256Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(160), 4);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs9BW160MHzNss4([](){ return new Ieee80211Vhtmcs(9, &Qam256Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(160), 4);});
 
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs0BW160MHzNss5([](){ return new Ieee80211Vhtmcs(0, &Ieee80211OfdmCompliantModulations::bpskModulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(160), 5);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs1BW160MHzNss5([](){ return new Ieee80211Vhtmcs(1, &Ieee80211OfdmCompliantModulations::qpskModulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(160), 5);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs2BW160MHzNss5([](){ return new Ieee80211Vhtmcs(2, &Ieee80211OfdmCompliantModulations::qpskModulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(160), 5);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs3BW160MHzNss5([](){ return new Ieee80211Vhtmcs(3, &Ieee80211OfdmCompliantModulations::qam16Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(160), 5);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs4BW160MHzNss5([](){ return new Ieee80211Vhtmcs(4, &Ieee80211OfdmCompliantModulations::qam16Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(160), 5);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs5BW160MHzNss5([](){ return new Ieee80211Vhtmcs(5, &Ieee80211OfdmCompliantModulations::qam64Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode2_3, MHz(160), 5);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs6BW160MHzNss5([](){ return new Ieee80211Vhtmcs(6, &Ieee80211OfdmCompliantModulations::qam64Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(160), 5);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs7BW160MHzNss5([](){ return new Ieee80211Vhtmcs(7, &Ieee80211OfdmCompliantModulations::qam64Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(160), 5);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs8BW160MHzNss5([](){ return new Ieee80211Vhtmcs(8, &Ieee80211OfdmCompliantModulations::qam256Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(160), 5);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs9BW160MHzNss5([](){ return new Ieee80211Vhtmcs(9, &Ieee80211OfdmCompliantModulations::qam256Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(160), 5);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs0BW160MHzNss5([](){ return new Ieee80211Vhtmcs(0, &BpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(160), 5);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs1BW160MHzNss5([](){ return new Ieee80211Vhtmcs(1, &QpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(160), 5);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs2BW160MHzNss5([](){ return new Ieee80211Vhtmcs(2, &QpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(160), 5);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs3BW160MHzNss5([](){ return new Ieee80211Vhtmcs(3, &Qam16Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(160), 5);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs4BW160MHzNss5([](){ return new Ieee80211Vhtmcs(4, &Qam16Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(160), 5);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs5BW160MHzNss5([](){ return new Ieee80211Vhtmcs(5, &Qam64Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode2_3, MHz(160), 5);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs6BW160MHzNss5([](){ return new Ieee80211Vhtmcs(6, &Qam64Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(160), 5);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs7BW160MHzNss5([](){ return new Ieee80211Vhtmcs(7, &Qam64Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(160), 5);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs8BW160MHzNss5([](){ return new Ieee80211Vhtmcs(8, &Qam256Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(160), 5);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs9BW160MHzNss5([](){ return new Ieee80211Vhtmcs(9, &Qam256Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(160), 5);});
 
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs0BW160MHzNss6([](){ return new Ieee80211Vhtmcs(0, &Ieee80211OfdmCompliantModulations::bpskModulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(160), 6);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs1BW160MHzNss6([](){ return new Ieee80211Vhtmcs(1, &Ieee80211OfdmCompliantModulations::qpskModulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(160), 6);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs2BW160MHzNss6([](){ return new Ieee80211Vhtmcs(2, &Ieee80211OfdmCompliantModulations::qpskModulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(160), 6);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs3BW160MHzNss6([](){ return new Ieee80211Vhtmcs(3, &Ieee80211OfdmCompliantModulations::qam16Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(160), 6);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs4BW160MHzNss6([](){ return new Ieee80211Vhtmcs(4, &Ieee80211OfdmCompliantModulations::qam16Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(160), 6);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs5BW160MHzNss6([](){ return new Ieee80211Vhtmcs(5, &Ieee80211OfdmCompliantModulations::qam64Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode2_3, MHz(160), 6);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs6BW160MHzNss6([](){ return new Ieee80211Vhtmcs(6, &Ieee80211OfdmCompliantModulations::qam64Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(160), 6);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs7BW160MHzNss6([](){ return new Ieee80211Vhtmcs(7, &Ieee80211OfdmCompliantModulations::qam64Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(160), 6);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs8BW160MHzNss6([](){ return new Ieee80211Vhtmcs(8, &Ieee80211OfdmCompliantModulations::qam256Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(160), 6);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs9BW160MHzNss6([](){ return new Ieee80211Vhtmcs(9, &Ieee80211OfdmCompliantModulations::qam256Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(160), 6);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs0BW160MHzNss6([](){ return new Ieee80211Vhtmcs(0, &BpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(160), 6);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs1BW160MHzNss6([](){ return new Ieee80211Vhtmcs(1, &QpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(160), 6);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs2BW160MHzNss6([](){ return new Ieee80211Vhtmcs(2, &QpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(160), 6);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs3BW160MHzNss6([](){ return new Ieee80211Vhtmcs(3, &Qam16Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(160), 6);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs4BW160MHzNss6([](){ return new Ieee80211Vhtmcs(4, &Qam16Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(160), 6);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs5BW160MHzNss6([](){ return new Ieee80211Vhtmcs(5, &Qam64Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode2_3, MHz(160), 6);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs6BW160MHzNss6([](){ return new Ieee80211Vhtmcs(6, &Qam64Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(160), 6);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs7BW160MHzNss6([](){ return new Ieee80211Vhtmcs(7, &Qam64Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(160), 6);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs8BW160MHzNss6([](){ return new Ieee80211Vhtmcs(8, &Qam256Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(160), 6);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs9BW160MHzNss6([](){ return new Ieee80211Vhtmcs(9, &Qam256Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(160), 6);});
 
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs0BW160MHzNss7([](){ return new Ieee80211Vhtmcs(0, &Ieee80211OfdmCompliantModulations::bpskModulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(160), 7);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs1BW160MHzNss7([](){ return new Ieee80211Vhtmcs(1, &Ieee80211OfdmCompliantModulations::qpskModulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(160), 7);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs2BW160MHzNss7([](){ return new Ieee80211Vhtmcs(2, &Ieee80211OfdmCompliantModulations::qpskModulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(160), 7);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs3BW160MHzNss7([](){ return new Ieee80211Vhtmcs(3, &Ieee80211OfdmCompliantModulations::qam16Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(160), 7);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs4BW160MHzNss7([](){ return new Ieee80211Vhtmcs(4, &Ieee80211OfdmCompliantModulations::qam16Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(160), 7);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs5BW160MHzNss7([](){ return new Ieee80211Vhtmcs(5, &Ieee80211OfdmCompliantModulations::qam64Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode2_3, MHz(160), 7);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs6BW160MHzNss7([](){ return new Ieee80211Vhtmcs(6, &Ieee80211OfdmCompliantModulations::qam64Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(160), 7);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs7BW160MHzNss7([](){ return new Ieee80211Vhtmcs(7, &Ieee80211OfdmCompliantModulations::qam64Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(160), 7);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs8BW160MHzNss7([](){ return new Ieee80211Vhtmcs(8, &Ieee80211OfdmCompliantModulations::qam256Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(160), 7);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs9BW160MHzNss7([](){ return new Ieee80211Vhtmcs(9, &Ieee80211OfdmCompliantModulations::qam256Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(160), 7);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs0BW160MHzNss7([](){ return new Ieee80211Vhtmcs(0, &BpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(160), 7);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs1BW160MHzNss7([](){ return new Ieee80211Vhtmcs(1, &QpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(160), 7);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs2BW160MHzNss7([](){ return new Ieee80211Vhtmcs(2, &QpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(160), 7);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs3BW160MHzNss7([](){ return new Ieee80211Vhtmcs(3, &Qam16Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(160), 7);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs4BW160MHzNss7([](){ return new Ieee80211Vhtmcs(4, &Qam16Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(160), 7);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs5BW160MHzNss7([](){ return new Ieee80211Vhtmcs(5, &Qam64Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode2_3, MHz(160), 7);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs6BW160MHzNss7([](){ return new Ieee80211Vhtmcs(6, &Qam64Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(160), 7);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs7BW160MHzNss7([](){ return new Ieee80211Vhtmcs(7, &Qam64Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(160), 7);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs8BW160MHzNss7([](){ return new Ieee80211Vhtmcs(8, &Qam256Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(160), 7);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs9BW160MHzNss7([](){ return new Ieee80211Vhtmcs(9, &Qam256Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(160), 7);});
 
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs0BW160MHzNss8([](){ return new Ieee80211Vhtmcs(0, &Ieee80211OfdmCompliantModulations::bpskModulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(160), 8);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs1BW160MHzNss8([](){ return new Ieee80211Vhtmcs(1, &Ieee80211OfdmCompliantModulations::qpskModulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(160), 8);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs2BW160MHzNss8([](){ return new Ieee80211Vhtmcs(2, &Ieee80211OfdmCompliantModulations::qpskModulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(160), 8);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs3BW160MHzNss8([](){ return new Ieee80211Vhtmcs(3, &Ieee80211OfdmCompliantModulations::qam16Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(160), 8);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs4BW160MHzNss8([](){ return new Ieee80211Vhtmcs(4, &Ieee80211OfdmCompliantModulations::qam16Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(160), 8);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs5BW160MHzNss8([](){ return new Ieee80211Vhtmcs(5, &Ieee80211OfdmCompliantModulations::qam64Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode2_3, MHz(160), 8);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs6BW160MHzNss8([](){ return new Ieee80211Vhtmcs(6, &Ieee80211OfdmCompliantModulations::qam64Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(160), 8);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs7BW160MHzNss8([](){ return new Ieee80211Vhtmcs(7, &Ieee80211OfdmCompliantModulations::qam64Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(160), 8);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs8BW160MHzNss8([](){ return new Ieee80211Vhtmcs(8, &Ieee80211OfdmCompliantModulations::qam256Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(160), 8);});
-const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs9BW160MHzNss8([](){ return new Ieee80211Vhtmcs(9, &Ieee80211OfdmCompliantModulations::qam256Modulation, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(160), 8);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs0BW160MHzNss8([](){ return new Ieee80211Vhtmcs(0, &BpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(160), 8);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs1BW160MHzNss8([](){ return new Ieee80211Vhtmcs(1, &QpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(160), 8);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs2BW160MHzNss8([](){ return new Ieee80211Vhtmcs(2, &QpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(160), 8);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs3BW160MHzNss8([](){ return new Ieee80211Vhtmcs(3, &Qam16Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(160), 8);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs4BW160MHzNss8([](){ return new Ieee80211Vhtmcs(4, &Qam16Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(160), 8);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs5BW160MHzNss8([](){ return new Ieee80211Vhtmcs(5, &Qam64Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode2_3, MHz(160), 8);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs6BW160MHzNss8([](){ return new Ieee80211Vhtmcs(6, &Qam64Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(160), 8);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs7BW160MHzNss8([](){ return new Ieee80211Vhtmcs(7, &Qam64Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(160), 8);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs8BW160MHzNss8([](){ return new Ieee80211Vhtmcs(8, &Qam256Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(160), 8);});
+const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs9BW160MHzNss8([](){ return new Ieee80211Vhtmcs(9, &Qam256Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6, MHz(160), 8);});
 
 } /* namespace physicallayer */
 } /* namespace inet */
