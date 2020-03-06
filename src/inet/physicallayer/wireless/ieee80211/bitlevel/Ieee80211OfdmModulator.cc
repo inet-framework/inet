@@ -32,7 +32,7 @@ const double Ieee80211OfdmModulator::pilotSubcarrierPolarityVector[] = {
 };
 
 Ieee80211OfdmModulator::Ieee80211OfdmModulator(const Ieee80211OfdmModulation *subcarrierModulation, unsigned int polarityVectorOffset) :
-    subcarrierModulation(subcarrierModulation),
+    modulation(subcarrierModulation),
     pilotSubcarrierPolarityVectorOffset(polarityVectorOffset)
 {
 }
@@ -41,7 +41,7 @@ std::ostream& Ieee80211OfdmModulator::printToStream(std::ostream& stream, int le
 {
     stream << "Ieee80211OfdmModulator";
     if (level <= PRINT_LEVEL_TRACE)
-        stream << EV_FIELD(subcarrierModulation, printFieldToString(subcarrierModulation, level + 1, evFlags));
+        stream << EV_FIELD(subcarrierModulation, printObjectToString(subcarrierModulation, level + 1, evFlags));
     return stream;
 }
 
@@ -76,10 +76,10 @@ void Ieee80211OfdmModulator::insertPilotSubcarriers(Ieee80211OfdmSymbol *ofdmSym
 const ITransmissionSymbolModel *Ieee80211OfdmModulator::modulate(const ITransmissionBitModel *bitModel) const
 {
     std::vector<const ISymbol *> *ofdmSymbols = new std::vector<const ISymbol *>();
-    const ApskModulationBase *modulationScheme = subcarrierModulation->getSubcarrierModulation();
+    const ApskModulationBase *subcarrierModulation = modulation->getSubcarrierModulation();
     const BitVector *bits = bitModel->getAllBits();
     // Divide the resulting coded and interleaved data string into groups of N_BPSC bits.
-    unsigned int nBPSC = modulationScheme->getCodeWordSize();
+    unsigned int nBPSC = subcarrierModulation->getCodeWordSize();
     ShortBitVector bitGroup;
     std::vector<const ApskSymbol *> apskSymbols;
     for (unsigned int i = 0; i < bits->getSize(); i++) {
@@ -87,7 +87,7 @@ const ITransmissionSymbolModel *Ieee80211OfdmModulator::modulate(const ITransmis
         // to the modulation encoding tables
         bitGroup.setBit(i % nBPSC, bits->getBit(i));
         if (i % nBPSC == nBPSC - 1) {
-            const ApskSymbol *apskSymbol = modulationScheme->mapToConstellationDiagram(bitGroup);
+            const ApskSymbol *apskSymbol = subcarrierModulation->mapToConstellationDiagram(bitGroup);
             apskSymbols.push_back(apskSymbol);
         }
     }
@@ -106,7 +106,7 @@ const ITransmissionSymbolModel *Ieee80211OfdmModulator::modulate(const ITransmis
         EV_DEBUG << "Modulated OFDM symbol: " << *ofdmSymbol << endl;
         ofdmSymbols->push_back(ofdmSymbol);
     }
-    return new Ieee80211OfdmTransmissionSymbolModel(1, NaN, ofdmSymbols->size() - 1, NaN, ofdmSymbols, modulationScheme, modulationScheme);
+    return new Ieee80211OfdmTransmissionSymbolModel(1, NaN, ofdmSymbols->size() - 1, NaN, ofdmSymbols, modulation, modulation);
 }
 
 } // namespace physicallayer

@@ -27,7 +27,7 @@ class INET_API Ieee80211OfdmDemodulator : public IDemodulator
 
   protected:
     BitVector demodulateSymbol(const Ieee80211OfdmSymbol *signalSymbol) const;
-    const IReceptionBitModel *createBitModel(const BitVector *bitRepresentation, int signalFieldBitLength, bps signalFieldBitRate, int dataFieldBitLength, bps dataFieldBitRate) const;
+    const IReceptionBitModel *createBitModel(const BitVector *bitRepresentation, int signalFieldBitLength, bps signalFieldBitrate, int dataFieldBitLength, bps dataFieldBitrate) const;
     bool isPilotOrDcSubcarrier(int i) const;
 
   public:
