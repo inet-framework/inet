@@ -503,6 +503,8 @@ IWirelessSignal *RadioMedium::createTransmitterSignal(const IRadio *radio, Packe
         signal->setName(packet->getName());
         signal->encapsulate(packet);
     }
+    else
+        signal->setName("Noise");
     return signal;
 }
 
@@ -518,6 +520,8 @@ IWirelessSignal *RadioMedium::createReceiverSignal(const ITransmission *transmis
         signal->setName(receiverPacket->getName());
         signal->encapsulate(receiverPacket);
     }
+    else
+        signal->setName("Noise");
     return signal;
 }
 
