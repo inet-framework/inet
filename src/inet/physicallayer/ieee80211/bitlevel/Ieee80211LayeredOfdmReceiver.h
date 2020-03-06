@@ -96,6 +96,7 @@ class INET_API Ieee80211LayeredOfdmReceiver : public SnirReceiverBase
   public:
     virtual ~Ieee80211LayeredOfdmReceiver();
 
+    virtual bool computeIsReceptionPossible(const IListening *listening, const ITransmission *transmission) const override;
     virtual bool computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part) const override;
     virtual const IListeningDecision *computeListeningDecision(const IListening *listening, const IInterference *interference) const override;
     virtual const IListening *createListening(const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition) const override;
