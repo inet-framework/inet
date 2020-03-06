@@ -48,9 +48,8 @@ const ITransmission *ApskScalarTransmitter::createTransmission(const IRadio *tra
     const Coord& endPosition = mobility->getCurrentPosition();
     const Quaternion& startOrientation = mobility->getCurrentAngularPosition();
     const Quaternion& endOrientation = mobility->getCurrentAngularPosition();
-    double codeRate = 2.0; // TODO
-    simtime_t symbolTime = SimTime(4, SIMTIME_US); // TODO
-    return new ApskScalarTransmission(transmitter, packet, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation,  headerLength, dataLength, modulation, symbolTime, transmissionCenterFrequency, transmissionBandwidth, transmissionBitrate, codeRate, transmissionPower);
+    auto symbolTime = 0;
+    return new ApskScalarTransmission(transmitter, packet, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, headerLength, dataLength, modulation, symbolTime, transmissionCenterFrequency, transmissionBandwidth, transmissionBitrate, codeRate, transmissionPower);
 }
 
 } // namespace physicallayer
