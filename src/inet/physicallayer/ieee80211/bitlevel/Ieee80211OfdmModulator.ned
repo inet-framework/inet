@@ -38,6 +38,7 @@ import inet.physicallayer.contract.bitlevel.IModulator;
 simple Ieee80211OfdmModulator like IModulator
 {
     parameters:
+        int numSubcarriers = default(52);
         string subcarrierModulation;
         int pilotSubcarrierPolarityVectorOffset;
         @display("i=block/mac");

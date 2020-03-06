@@ -35,7 +35,7 @@ class INET_API Ieee80211OfdmModulator : public IModulator
     static const ApskSymbol positivePilotSubcarrier;
 
   protected:
-    const Ieee80211OfdmModulation *subcarrierModulation;
+    const Ieee80211OfdmModulation *modulation;
     static const double pilotSubcarrierPolarityVector[127];
     unsigned int pilotSubcarrierPolarityVectorOffset;
 
@@ -47,7 +47,7 @@ class INET_API Ieee80211OfdmModulator : public IModulator
     Ieee80211OfdmModulator(const Ieee80211OfdmModulation *subcarrierModulation, unsigned int polarityVectorOffset);
 
     virtual const ITransmissionSymbolModel *modulate(const ITransmissionBitModel *bitModel) const override;
-    const Ieee80211OfdmModulation *getModulation() const override { return subcarrierModulation; }
+    const Ieee80211OfdmModulation *getModulation() const override { return modulation; }
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 };
 

@@ -25,6 +25,7 @@ import inet.physicallayer.contract.bitlevel.IDemodulator;
 simple Ieee80211OfdmDemodulator like IDemodulator
 {
     parameters:
+        int numSubcarriers = default(52);
         string subcarrierModulation;
         @display("i=block/mac");
         @class(Ieee80211OfdmDemodulatorModule);

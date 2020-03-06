@@ -56,9 +56,9 @@ BitVector Ieee80211OfdmDemodulator::demodulateSymbol(const Ieee80211OfdmSymbol *
     return field;
 }
 
-const IReceptionBitModel *Ieee80211OfdmDemodulator::createBitModel(const BitVector *bitRepresentation, int signalFieldLength, bps signalFieldBitRate, int dataFieldLength, bps dataFieldBitRate) const
+const IReceptionBitModel *Ieee80211OfdmDemodulator::createBitModel(const BitVector *bitRepresentation, int signalFieldLength, bps signalFieldBitrate, int dataFieldLength, bps dataFieldBitrate) const
 {
-    return new ReceptionBitModel(b(signalFieldLength), signalFieldBitRate, b(dataFieldLength), dataFieldBitRate, bitRepresentation);
+    return new ReceptionBitModel(b(signalFieldLength), signalFieldBitrate, b(dataFieldLength), dataFieldBitrate, bitRepresentation);
 }
 
 bool Ieee80211OfdmDemodulator::isPilotOrDcSubcarrier(int i) const
@@ -68,7 +68,7 @@ bool Ieee80211OfdmDemodulator::isPilotOrDcSubcarrier(int i) const
 
 const IReceptionBitModel *Ieee80211OfdmDemodulator::demodulate(const IReceptionSymbolModel *symbolModel) const
 {
-    const std::vector<const ISymbol *> *symbols = symbolModel->getSymbols();
+    const std::vector<const ISymbol *> *symbols = symbolModel->getAllSymbols();
     BitVector *bitRepresentation = new BitVector();
     for (auto & symbols_i : *symbols) {
         const Ieee80211OfdmSymbol *symbol = dynamic_cast<const Ieee80211OfdmSymbol *>(symbols_i);
