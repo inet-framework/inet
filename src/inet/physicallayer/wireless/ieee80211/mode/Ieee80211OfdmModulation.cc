@@ -32,12 +32,12 @@ std::ostream& Ieee80211OfdmModulation::printToStream(std::ostream& stream, int l
 }
 
 // Modulations
-const Ieee80211OfdmModulation Ieee80211OfdmCompliantModulations::qbpskModulation(&QbpskModulation::singleton);
-const Ieee80211OfdmModulation Ieee80211OfdmCompliantModulations::bpskModulation(&BpskModulation::singleton);
-const Ieee80211OfdmModulation Ieee80211OfdmCompliantModulations::qpskModulation(&QpskModulation::singleton);
-const Ieee80211OfdmModulation Ieee80211OfdmCompliantModulations::qam16Modulation(&Qam16Modulation::singleton);
-const Ieee80211OfdmModulation Ieee80211OfdmCompliantModulations::qam64Modulation(&Qam64Modulation::singleton);
-const Ieee80211OfdmModulation Ieee80211OfdmCompliantModulations::qam256Modulation(&Qam256Modulation::singleton);
+const Ieee80211OfdmModulation Ieee80211OfdmCompliantModulations::subcarriers52QbpskModulation(52, &QbpskModulation::singleton);
+const Ieee80211OfdmModulation Ieee80211OfdmCompliantModulations::subcarriers52BpskModulation(52, &BpskModulation::singleton);
+const Ieee80211OfdmModulation Ieee80211OfdmCompliantModulations::subcarriers52QpskModulation(52, &QpskModulation::singleton);
+const Ieee80211OfdmModulation Ieee80211OfdmCompliantModulations::subcarriers52Qam16Modulation(52, &Qam16Modulation::singleton);
+const Ieee80211OfdmModulation Ieee80211OfdmCompliantModulations::subcarriers52Qam64Modulation(52, &Qam64Modulation::singleton);
+const Ieee80211OfdmModulation Ieee80211OfdmCompliantModulations::subcarriers52Qam256Modulation(52, &Qam256Modulation::singleton);
 
 } /* namespace physicallayer */
 } /* namespace inet */
