@@ -1,5 +1,7 @@
 .DEFAULT_GOAL := all-pch
 
+CFLAGS += -std=c++17
+
 #
 # Use the new message compiler introduced in OMNeT++ 5.3
 #
