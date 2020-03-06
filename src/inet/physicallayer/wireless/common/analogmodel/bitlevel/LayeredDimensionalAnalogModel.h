@@ -22,6 +22,7 @@ class INET_API LayeredDimensionalAnalogModel : public DimensionalAnalogModelBase
     virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
 
     virtual const IReception *computeReception(const IRadio *radio, const ITransmission *transmission, const IArrival *arrival) const override;
+    virtual const ISnir *computeSNIR(const IReception *reception, const INoise *noise) const override;
 };
 
 } // namespace physicallayer
