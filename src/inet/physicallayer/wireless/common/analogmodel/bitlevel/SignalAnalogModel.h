@@ -18,14 +18,19 @@ namespace physicallayer {
 class INET_API SignalAnalogModel : public virtual ISignalAnalogModel
 {
   protected:
-    const simtime_t duration;
+    const simtime_t preambleDuration;
+    const simtime_t headerDuration;
+    const simtime_t dataDuration;
 
   public:
-    SignalAnalogModel(const simtime_t duration);
+    SignalAnalogModel(const simtime_t preambleDuration, const simtime_t headerDuration, const simtime_t dataDuration);
 
     virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
 
-    virtual const simtime_t getDuration() const override { return duration; }
+    virtual const simtime_t getPreambleDuration() const override { return preambleDuration; }
+    virtual const simtime_t getHeaderDuration() const override { return headerDuration; }
+    virtual const simtime_t getDataDuration() const override { return dataDuration; }
+    virtual const simtime_t getDuration() const override { return preambleDuration + headerDuration + dataDuration; }
 };
 
 class INET_API NarrowbandSignalAnalogModel : public SignalAnalogModel, public virtual INarrowbandSignal
@@ -35,7 +40,7 @@ class INET_API NarrowbandSignalAnalogModel : public SignalAnalogModel, public vi
     const Hz bandwidth;
 
   public:
-    NarrowbandSignalAnalogModel(const simtime_t duration, Hz centerFrequency, Hz bandwidth);
+    NarrowbandSignalAnalogModel(const simtime_t preambleDuration, const simtime_t headerDuration, const simtime_t dataDuration, Hz centerFrequency, Hz bandwidth);
 
     virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
 

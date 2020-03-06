@@ -20,7 +20,7 @@ class INET_API ScalarSignalAnalogModel : public NarrowbandSignalAnalogModel, pub
     const W power;
 
   public:
-    ScalarSignalAnalogModel(const simtime_t duration, Hz centerFrequency, Hz bandwidth, W power);
+    ScalarSignalAnalogModel(const simtime_t preambleDuration, simtime_t headerDuration, simtime_t dataDuration, Hz centerFrequency, Hz bandwidth, W power);
 
     virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
 
@@ -31,13 +31,13 @@ class INET_API ScalarSignalAnalogModel : public NarrowbandSignalAnalogModel, pub
 class INET_API ScalarTransmissionSignalAnalogModel : public ScalarSignalAnalogModel, public virtual ITransmissionAnalogModel
 {
   public:
-    ScalarTransmissionSignalAnalogModel(const simtime_t duration, Hz centerFrequency, Hz bandwidth, W power);
+    ScalarTransmissionSignalAnalogModel(const simtime_t preambleDuration, simtime_t headerDuration, simtime_t dataDuration, Hz centerFrequency, Hz bandwidth, W power);
 };
 
 class INET_API ScalarReceptionSignalAnalogModel : public ScalarSignalAnalogModel, public virtual IReceptionAnalogModel
 {
   public:
-    ScalarReceptionSignalAnalogModel(const simtime_t duration, Hz centerFrequency, Hz bandwidth, W power);
+    ScalarReceptionSignalAnalogModel(const simtime_t preambleDuration, simtime_t headerDuration, simtime_t dataDuration, Hz centerFrequency, Hz bandwidth, W power);
 };
 
 } // namespace physicallayer

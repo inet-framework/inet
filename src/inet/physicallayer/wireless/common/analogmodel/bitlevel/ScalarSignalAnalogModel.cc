@@ -11,8 +11,8 @@ namespace inet {
 
 namespace physicallayer {
 
-ScalarSignalAnalogModel::ScalarSignalAnalogModel(const simtime_t duration, Hz centerFrequency, Hz bandwidth, W power) :
-    NarrowbandSignalAnalogModel(duration, centerFrequency, bandwidth),
+ScalarSignalAnalogModel::ScalarSignalAnalogModel(const simtime_t preambleDuration, simtime_t headerDuration, simtime_t dataDuration, Hz centerFrequency, Hz bandwidth, W power) :
+    NarrowbandSignalAnalogModel(preambleDuration, dataDuration, headerDuration, centerFrequency, bandwidth),
     power(power)
 {
 }
@@ -25,13 +25,13 @@ std::ostream& ScalarSignalAnalogModel::printToStream(std::ostream& stream, int l
     return NarrowbandSignalAnalogModel::printToStream(stream, level);
 }
 
-ScalarTransmissionSignalAnalogModel::ScalarTransmissionSignalAnalogModel(const simtime_t duration, Hz centerFrequency, Hz bandwidth, W power) :
-    ScalarSignalAnalogModel(duration, centerFrequency, bandwidth, power)
+ScalarTransmissionSignalAnalogModel::ScalarTransmissionSignalAnalogModel(const simtime_t preambleDuration, simtime_t headerDuration, simtime_t dataDuration, Hz centerFrequency, Hz bandwidth, W power) :
+    ScalarSignalAnalogModel(preambleDuration, headerDuration, dataDuration, centerFrequency, bandwidth, power)
 {
 }
 
-ScalarReceptionSignalAnalogModel::ScalarReceptionSignalAnalogModel(const simtime_t duration, Hz centerFrequency, Hz bandwidth, W power) :
-    ScalarSignalAnalogModel(duration, centerFrequency, bandwidth, power)
+ScalarReceptionSignalAnalogModel::ScalarReceptionSignalAnalogModel(const simtime_t preambleDuration, simtime_t headerDuration, simtime_t dataDuration, Hz centerFrequency, Hz bandwidth, W power) :
+    ScalarSignalAnalogModel(preambleDuration, headerDuration, dataDuration, centerFrequency, bandwidth, power)
 {
 }
 
