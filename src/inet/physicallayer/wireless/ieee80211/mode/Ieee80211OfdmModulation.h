@@ -37,12 +37,12 @@ class INET_API Ieee80211OfdmCompliantModulations
     // Modulations supported by the OFDM PHY: Table 18-12—Major parameters of the OFDM PHY
 
   public:
-    static const Ieee80211OfdmModulation qbpskModulation;
-    static const Ieee80211OfdmModulation bpskModulation;
-    static const Ieee80211OfdmModulation qpskModulation;
-    static const Ieee80211OfdmModulation qam16Modulation;
-    static const Ieee80211OfdmModulation qam64Modulation;
-    static const Ieee80211OfdmModulation qam256Modulation;
+    static const Ieee80211OfdmModulation subcarriers52QbpskModulation;
+    static const Ieee80211OfdmModulation subcarriers52BpskModulation;
+    static const Ieee80211OfdmModulation subcarriers52QpskModulation;
+    static const Ieee80211OfdmModulation subcarriers52Qam16Modulation;
+    static const Ieee80211OfdmModulation subcarriers52Qam64Modulation;
+    static const Ieee80211OfdmModulation subcarriers52Qam256Modulation;
 };
 
 } /* namespace physicallayer */
