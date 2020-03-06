@@ -29,7 +29,7 @@ namespace physicallayer {
  * properties of a periodic waveform, called the carrier signal, with a
  * modulating signal that typically contains information to be transmitted.
  */
-class INET_API IModulation : public IPrintableObject
+class INET_API IModulation : public IPrintableObject, public cObject
 {
   public:
     /**
