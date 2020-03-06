@@ -55,37 +55,48 @@ W ScalarAnalogModelBase::computeReceptionPower(const IRadio *receiverRadio, cons
     return transmissionPower * std::min(1.0, transmitterAntennaGain * receiverAntennaGain * pathLoss * obstacleLoss);
 }
 
-void ScalarAnalogModelBase::addReception(const ScalarReception *reception, simtime_t& noiseStartTime, simtime_t& noiseEndTime, std::map<simtime_t, W> *powerChanges) const
+void ScalarAnalogModelBase::addReception(const ScalarReception *reception, simtime_t& noiseStartTime, simtime_t& noiseEndTime, std::map<simtime_t, W>& powerChanges) const
 {
     W power = reception->getPower();
     simtime_t startTime = reception->getStartTime();
     simtime_t endTime = reception->getEndTime();
-    std::map<simtime_t, W>::iterator itStartTime = powerChanges->find(startTime);
-    if (itStartTime != powerChanges->end())
+    std::map<simtime_t, W>::iterator itStartTime = powerChanges.find(startTime);
+    if (itStartTime != powerChanges.end())
         itStartTime->second += power;
     else
-        powerChanges->insert(std::pair<simtime_t, W>(startTime, power));
-    std::map<simtime_t, W>::iterator itEndTime = powerChanges->find(endTime);
-    if (itEndTime != powerChanges->end())
+        powerChanges.insert(std::pair<simtime_t, W>(startTime, power));
+    std::map<simtime_t, W>::iterator itEndTime = powerChanges.find(endTime);
+    if (itEndTime != powerChanges.end())
         itEndTime->second -= power;
     else
-        powerChanges->insert(std::pair<simtime_t, W>(endTime, -power));
+        powerChanges.insert(std::pair<simtime_t, W>(endTime, -power));
     if (reception->getStartTime() < noiseStartTime)
         noiseStartTime = reception->getStartTime();
     if (reception->getEndTime() > noiseEndTime)
         noiseEndTime = reception->getEndTime();
 }
 
-void ScalarAnalogModelBase::addNoise(const ScalarNoise *noise, simtime_t& noiseStartTime, simtime_t& noiseEndTime, std::map<simtime_t, W> *powerChanges) const
+void ScalarAnalogModelBase::addNoise(const ScalarNoise *noise, simtime_t& noiseStartTime, simtime_t& noiseEndTime, std::map<simtime_t, W>& powerChanges) const
 {
-    const std::map<simtime_t, W> *noisePowerChanges = noise->getPowerChanges();
-    for (const auto & noisePowerChange : *noisePowerChanges) {
-        std::map<simtime_t, W>::iterator jt = powerChanges->find(noisePowerChange.first);
-        if (jt != powerChanges->end())
-            jt->second += noisePowerChange.second;
+    const auto& noisePowerFunction = noise->getPower();
+    math::Point<simtime_t> startPoint(noise->getStartTime());
+    math::Point<simtime_t> endPoint(noise->getEndTime());
+    math::Interval<simtime_t> interval(startPoint, endPoint, 0b1, 0b0, 0b0);
+    noisePowerFunction->partition(interval, [&] (const math::Interval<simtime_t>& i1, const math::IFunction<W, math::Domain<simtime_t>> *f) {
+        auto lower = std::get<0>(i1.getLower());
+        auto upper = std::get<0>(i1.getUpper());
+        auto fc = check_and_cast<const math::ConstantFunction<W, math::Domain<simtime_t>> *>(f);
+        std::map<simtime_t, W>::iterator it = powerChanges.find(lower);
+        if (it != powerChanges.end())
+            it->second += fc->getConstantValue();
         else
-            powerChanges->insert(std::pair<simtime_t, W>(noisePowerChange.first, noisePowerChange.second));
-    }
+            powerChanges.insert(std::pair<simtime_t, W>(lower, fc->getConstantValue()));
+        std::map<simtime_t, W>::iterator jt = powerChanges.find(upper);
+        if (jt != powerChanges.end())
+            jt->second -= fc->getConstantValue();
+        else
+            powerChanges.insert(std::pair<simtime_t, W>(upper, -fc->getConstantValue()));
+    });
     if (noise->getStartTime() < noiseStartTime)
         noiseStartTime = noise->getStartTime();
     if (noise->getEndTime() > noiseEndTime)
@@ -99,7 +110,9 @@ const INoise *ScalarAnalogModelBase::computeNoise(const IListening *listening, c
     Hz commonBandwidth = bandListening->getBandwidth();
     simtime_t noiseStartTime = SimTime::getMaxTime();
     simtime_t noiseEndTime = 0;
-    std::map<simtime_t, W> *powerChanges = new std::map<simtime_t, W>();
+    std::map<simtime_t, W> powerChanges;
+    powerChanges[math::getLowerBound<simtime_t>()] = W(0);
+    powerChanges[math::getUpperBound<simtime_t>()] = W(0);
     const std::vector<const IReception *> *interferingReceptions = interference->getInterferingReceptions();
     for (auto reception : *interferingReceptions) {
         const ISignalAnalogModel *signalAnalogModel = reception->getAnalogModel();
@@ -119,13 +132,15 @@ const INoise *ScalarAnalogModelBase::computeNoise(const IListening *listening, c
             throw cRuntimeError("Partially interfering background noise is not supported by ScalarAnalogModel, enable ignorePartialInterference to avoid this error!");
     }
     EV_TRACE << "Noise power begin " << endl;
-    W noise = W(0);
-    for (std::map<simtime_t, W>::const_iterator it = powerChanges->begin(); it != powerChanges->end(); it++) {
-        noise += it->second;
-        EV_TRACE << "Noise at " << it->first << " = " << noise << endl;
+    W power = W(0);
+    for (auto & it : powerChanges) {
+        power += it.second;
+        it.second = power;
+        EV_TRACE << "Noise at " << it.first << " = " << power << endl;
     }
     EV_TRACE << "Noise power end" << endl;
-    return new ScalarNoise(noiseStartTime, noiseEndTime, commonCenterFrequency, commonBandwidth, powerChanges);
+    const auto& powerFunction = makeShared<math::Interpolated1DFunction<W, simtime_t>>(powerChanges, &math::LeftInterpolator<simtime_t, W>::singleton);
+    return new ScalarNoise(noiseStartTime, noiseEndTime, commonCenterFrequency, commonBandwidth, powerFunction);
 }
 
 const INoise *ScalarAnalogModelBase::computeNoise(const IReception *reception, const INoise *noise) const
@@ -134,10 +149,18 @@ const INoise *ScalarAnalogModelBase::computeNoise(const IReception *reception, c
     auto scalarNoise = check_and_cast<const ScalarNoise *>(noise);
     simtime_t noiseStartTime = SimTime::getMaxTime();
     simtime_t noiseEndTime = 0;
-    std::map<simtime_t, W> *powerChanges = new std::map<simtime_t, W>();
+    std::map<simtime_t, W> powerChanges;
+    powerChanges[math::getLowerBound<simtime_t>()] = W(0);
+    powerChanges[math::getUpperBound<simtime_t>()] = W(0);
     addReception(scalarReception, noiseStartTime, noiseEndTime, powerChanges);
     addNoise(scalarNoise, noiseStartTime, noiseEndTime, powerChanges);
-    return new ScalarNoise(noiseStartTime, noiseEndTime, scalarNoise->getCenterFrequency(), scalarNoise->getBandwidth(), powerChanges);
+    W power = W(0);
+    for (auto & it : powerChanges) {
+        power += it.second;
+        it.second = power;
+    }
+    const auto& powerFunction = makeShared<math::Interpolated1DFunction<W, simtime_t>>(powerChanges, &math::LeftInterpolator<simtime_t, W>::singleton);
+    return new ScalarNoise(noiseStartTime, noiseEndTime, scalarNoise->getCenterFrequency(), scalarNoise->getBandwidth(), powerFunction);
 }
 
 const ISnir *ScalarAnalogModelBase::computeSNIR(const IReception *reception, const INoise *noise) const
