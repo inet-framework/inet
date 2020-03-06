@@ -263,7 +263,7 @@ class INET_API Ieee80211OfdmCompliantModes
     static const Ieee80211OfdmMode ofdmMode54Mbps;
 
   public:
-    static const Ieee80211OfdmMode& getCompliantMode(unsigned int signalRateField, Hz channelSpacing);
+    static const Ieee80211OfdmMode *getCompliantMode(unsigned int signalRateField, Hz channelSpacing);
 };
 
 } // namespace physicallayer

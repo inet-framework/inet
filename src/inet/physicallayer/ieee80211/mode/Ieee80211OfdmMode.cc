@@ -208,97 +208,97 @@ const simtime_t Ieee80211OfdmDataMode::getDuration(b dataLength) const
     return numberOfSymbols * getSymbolInterval();
 }
 
-const Ieee80211OfdmMode& Ieee80211OfdmCompliantModes::getCompliantMode(unsigned int signalRateField, Hz channelSpacing)
+const Ieee80211OfdmMode *Ieee80211OfdmCompliantModes::getCompliantMode(unsigned int signalRateField, Hz channelSpacing)
 {
     // Table 18-6—Contents of the SIGNAL field
     if (channelSpacing == MHz(20)) {
         switch (signalRateField) {
             case 13: // 1101
-                return ofdmMode6MbpsCS20MHz;
+                return &ofdmMode6MbpsCS20MHz;
 
             case 15: // 1111
-                return ofdmMode9MbpsCS20MHz;
+                return &ofdmMode9MbpsCS20MHz;
 
             case 5: // 0101
-                return ofdmMode12MbpsCS20MHz;
+                return &ofdmMode12MbpsCS20MHz;
 
             case 7: // 0111
-                return ofdmMode18MbpsCS20MHz;
+                return &ofdmMode18MbpsCS20MHz;
 
             case 9: // 1001
-                return ofdmMode24MbpsCS20MHz;
+                return &ofdmMode24MbpsCS20MHz;
 
             case 11: // 1011
-                return ofdmMode36Mbps;
+                return &ofdmMode36Mbps;
 
             case 1: // 0001
-                return ofdmMode48Mbps;
+                return &ofdmMode48Mbps;
 
             case 3: // 0011
-                return ofdmMode54Mbps;
+                return &ofdmMode54Mbps;
 
             default:
-                throw cRuntimeError("%d is not a valid rate", signalRateField);
+                return nullptr;
         }
     }
     else if (channelSpacing == MHz(10)) {
         switch (signalRateField) {
             case 13:
-                return ofdmMode3MbpsCS10MHz;
+                return &ofdmMode3MbpsCS10MHz;
 
             case 15:
-                return ofdmMode4_5MbpsCS10MHz;
+                return &ofdmMode4_5MbpsCS10MHz;
 
             case 5:
-                return ofdmMode6MbpsCS10MHz;
+                return &ofdmMode6MbpsCS10MHz;
 
             case 7:
-                return ofdmMode9MbpsCS10MHz;
+                return &ofdmMode9MbpsCS10MHz;
 
             case 9:
-                return ofdmMode12MbpsCS10MHz;
+                return &ofdmMode12MbpsCS10MHz;
 
             case 11:
-                return ofdmMode18MbpsCS10MHz;
+                return &ofdmMode18MbpsCS10MHz;
 
             case 1:
-                return ofdmMode24MbpsCS10MHz;
+                return &ofdmMode24MbpsCS10MHz;
 
             case 3:
-                return ofdmMode27Mbps;
+                return &ofdmMode27Mbps;
 
             default:
-                throw cRuntimeError("%d is not a valid rate", signalRateField);
+                return nullptr;
         }
     }
     else if (channelSpacing == MHz(5)) {
         switch (signalRateField) {
             case 13:
-                return ofdmMode1_5Mbps;
+                return &ofdmMode1_5Mbps;
 
             case 15:
-                return ofdmMode2_25Mbps;
+                return &ofdmMode2_25Mbps;
 
             case 5:
-                return ofdmMode3MbpsCS5MHz;
+                return &ofdmMode3MbpsCS5MHz;
 
             case 7:
-                return ofdmMode4_5MbpsCS5MHz;
+                return &ofdmMode4_5MbpsCS5MHz;
 
             case 9:
-                return ofdmMode6MbpsCS5MHz;
+                return &ofdmMode6MbpsCS5MHz;
 
             case 11:
-                return ofdmMode9MbpsCS5MHz;
+                return &ofdmMode9MbpsCS5MHz;
 
             case 1:
-                return ofdmMode12MbpsCS5MHz;
+                return &ofdmMode12MbpsCS5MHz;
 
             case 3:
-                return ofdmMode13_5Mbps;
+                return &ofdmMode13_5Mbps;
 
             default:
-                throw cRuntimeError("%d is not a valid rate", signalRateField);
+                return nullptr;
         }
     }
     else
