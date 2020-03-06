@@ -49,11 +49,7 @@ const ITransmission *NoiseDimensionalTransmitter::createTransmission(const IRadi
     const Quaternion& startOrientation = mobility->getCurrentAngularPosition();
     const Quaternion& endOrientation = mobility->getCurrentAngularPosition();
     const Ptr<const IFunction<WpHz, Domain<simsec, Hz>>>& powerFunction = createPowerFunction(startTime, endTime, centerFrequency, bandwidth, power);
-
-    double codeRate = 2.0; // TODO
-    simtime_t symbolTime = SimTime(4, SIMTIME_US); // TODO
-
-    return new DimensionalTransmission(transmitter, nullptr, startTime, endTime, 0, 0, duration, startPosition, endPosition, startOrientation, endOrientation, b(-1), b(-1), nullptr, symbolTime, centerFrequency, bandwidth, bps(NaN), codeRate, powerFunction);
+    return new DimensionalTransmission(transmitter, nullptr, startTime, endTime, 0, 0, duration, startPosition, endPosition, startOrientation, endOrientation, b(-1), b(-1), nullptr, -1, centerFrequency, bandwidth, bps(NaN), NaN, powerFunction);
 }
 
 } // namespace physicallayer
