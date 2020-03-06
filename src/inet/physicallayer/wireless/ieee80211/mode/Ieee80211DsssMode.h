@@ -28,9 +28,9 @@ class INET_API Ieee80211DsssPreambleMode : public Ieee80211DsssChunkMode, public
     b getSfdFieldLength() const { return b(16); }
     b getLength() const { return getSyncFieldLength() + getSfdFieldLength(); }
 
-    virtual inline bps getNetBitrate() const { return Mbps(1); }
-    virtual inline bps getGrossBitrate() const { return getNetBitrate(); }
-    virtual inline const simtime_t getDuration() const override { return (double)getLength().get() / getNetBitrate().get(); }
+    virtual bps getNetBitrate() const { return Mbps(1); }
+    virtual bps getGrossBitrate() const { return getNetBitrate(); }
+    virtual const simtime_t getDuration() const override { return (double)getLength().get() / getNetBitrate().get(); }
     virtual const DbpskModulation *getModulation() const { return &DbpskModulation::singleton; }
 
     virtual Ptr<Ieee80211PhyPreamble> createPreamble() const override { return makeShared<Ieee80211DsssPhyPreamble>(); }
@@ -47,9 +47,9 @@ class INET_API Ieee80211DsssHeaderMode : public Ieee80211DsssChunkMode, public I
     b getCrcFieldLength() const { return b(16); }
 
     virtual b getLength() const override { return getSignalFieldLength() + getServiceFieldLength() + getLengthFieldLength() + getCrcFieldLength(); }
-    virtual inline bps getNetBitrate() const override { return Mbps(1); }
-    virtual inline bps getGrossBitrate() const override { return getNetBitrate(); }
-    virtual inline const simtime_t getDuration() const override { return (double)getLength().get() / getNetBitrate().get(); }
+    virtual bps getNetBitrate() const override { return Mbps(1); }
+    virtual bps getGrossBitrate() const override { return getNetBitrate(); }
+    virtual const simtime_t getDuration() const override { return (double)getLength().get() / getNetBitrate().get(); }
     virtual const DbpskModulation *getModulation() const override { return &DbpskModulation::singleton; }
 
     virtual Ptr<Ieee80211PhyHeader> createHeader() const override { return makeShared<Ieee80211DsssPhyHeader>(); }
@@ -64,8 +64,8 @@ class INET_API Ieee80211DsssDataMode : public Ieee80211DsssChunkMode, public IIe
     Ieee80211DsssDataMode(const DpskModulationBase *modulation);
 
     virtual Hz getBandwidth() const override { return MHz(22); }
-    virtual inline bps getNetBitrate() const override { return Mbps(1) * modulation->getConstellationSize() / 2; }
-    virtual inline bps getGrossBitrate() const override { return getNetBitrate(); }
+    virtual bps getNetBitrate() const override { return Mbps(1) * modulation->getConstellationSize() / 2; }
+    virtual bps getGrossBitrate() const override { return getNetBitrate(); }
     virtual b getPaddingLength(b dataLength) const override { return b(0); }
     virtual b getCompleteLength(b dataLength) const override { return dataLength; }
     virtual const simtime_t getDuration(b length) const override;
@@ -97,22 +97,22 @@ class INET_API Ieee80211DsssMode : public Ieee80211ModeBase
     virtual const IIeee80211HeaderMode *getHeaderMode() const override { return headerMode; }
     virtual const IIeee80211DataMode *getDataMode() const override { return dataMode; }
 
-    virtual inline Hz getChannelSpacing() const { return MHz(5); }
-    virtual inline Hz getBandwidth() const { return MHz(22); }
+    virtual Hz getChannelSpacing() const { return MHz(5); }
+    virtual Hz getBandwidth() const { return MHz(22); }
 
-    virtual inline const simtime_t getDuration(b dataLength) const override { return preambleMode->getDuration() + headerMode->getDuration() + dataMode->getDuration(dataLength); }
+    virtual const simtime_t getDuration(b dataLength) const override { return preambleMode->getDuration() + headerMode->getDuration() + dataMode->getDuration(dataLength); }
 
     // Table 19-8—ERP characteristics
-    virtual inline const simtime_t getSlotTime() const override { return 20E-6; }
-    virtual inline const simtime_t getShortSlotTime() const { return 9E-6; }
-    virtual inline const simtime_t getSifsTime() const override { return 10E-6; }
+    virtual const simtime_t getSlotTime() const override { return 20E-6; }
+    virtual const simtime_t getShortSlotTime() const { return 9E-6; }
+    virtual const simtime_t getSifsTime() const override { return 10E-6; }
     virtual const simtime_t getRifsTime() const override;
-    virtual inline const simtime_t getCcaTime() const override { return 15E-6; }
-    virtual inline const simtime_t getPhyRxStartDelay() const override { return 192E-6; }
-    virtual inline const simtime_t getRxTxTurnaroundTime() const override { return 5E-6; }
-    virtual inline const simtime_t getPreambleLength() const override { return preambleMode->getDuration(); }
-    virtual inline const simtime_t getPlcpHeaderLength() const override { return headerMode->getDuration(); }
-    virtual inline int getMpduMaxLength() const override { return 8191; }
+    virtual const simtime_t getCcaTime() const override { return 15E-6; }
+    virtual const simtime_t getPhyRxStartDelay() const override { return 192E-6; }
+    virtual const simtime_t getRxTxTurnaroundTime() const override { return 5E-6; }
+    virtual const simtime_t getPreambleLength() const override { return preambleMode->getDuration(); }
+    virtual const simtime_t getPlcpHeaderLength() const override { return headerMode->getDuration(); }
+    virtual int getMpduMaxLength() const override { return 8191; }
 };
 
 /**

@@ -29,15 +29,15 @@ class INET_API Ieee80211HrDsssPreambleMode : public IIeee80211PreambleMode
   public:
     Ieee80211HrDsssPreambleMode(const Ieee80211HrDsssPreambleType preambleType);
 
-    inline Ieee80211HrDsssPreambleType getPreambleType() const { return preambleType; }
+    Ieee80211HrDsssPreambleType getPreambleType() const { return preambleType; }
 
-    inline b getSyncFieldLength() const { return preambleType == IEEE80211_HRDSSS_PREAMBLE_TYPE_SHORT ? b(72) : b(128); }
-    inline b getSfdFieldLength() const { return b(16); }
-    inline b getBitLength() const { return getSyncFieldLength() + getSfdFieldLength(); }
+    b getSyncFieldLength() const { return preambleType == IEEE80211_HRDSSS_PREAMBLE_TYPE_SHORT ? b(72) : b(128); }
+    b getSfdFieldLength() const { return b(16); }
+    b getBitLength() const { return getSyncFieldLength() + getSfdFieldLength(); }
 
-    virtual inline bps getNetBitrate() const { return Mbps(1); }
-    virtual inline bps getGrossBitrate() const { return getNetBitrate(); }
-    virtual inline const simtime_t getDuration() const override { return (double)getBitLength().get() / getNetBitrate().get(); }
+    virtual bps getNetBitrate() const { return Mbps(1); }
+    virtual bps getGrossBitrate() const { return getNetBitrate(); }
+    virtual const simtime_t getDuration() const override { return (double)getBitLength().get() / getNetBitrate().get(); }
     virtual const DbpskModulation *getModulation() const { return &DbpskModulation::singleton; }
 
     virtual Ptr<Ieee80211PhyPreamble> createPreamble() const override { return makeShared<Ieee80211HrDsssPhyPreamble>(); }
@@ -56,10 +56,10 @@ class INET_API Ieee80211HrDsssHeaderMode : public IIeee80211HeaderMode
     b getLengthFieldLength() const { return b(16); }
     b getCrcFieldLength() const { return b(16); }
 
-    virtual inline b getLength() const override { return getSignalFieldLength() + getServiceFieldLength() + getLengthFieldLength() + getCrcFieldLength(); }
-    virtual inline bps getNetBitrate() const override { return preambleType == IEEE80211_HRDSSS_PREAMBLE_TYPE_SHORT ? Mbps(2) : Mbps(1); }
-    virtual inline bps getGrossBitrate() const override { return getNetBitrate(); }
-    virtual inline const simtime_t getDuration() const override { return (double)getLength().get() / getNetBitrate().get(); }
+    virtual b getLength() const override { return getSignalFieldLength() + getServiceFieldLength() + getLengthFieldLength() + getCrcFieldLength(); }
+    virtual bps getNetBitrate() const override { return preambleType == IEEE80211_HRDSSS_PREAMBLE_TYPE_SHORT ? Mbps(2) : Mbps(1); }
+    virtual bps getGrossBitrate() const override { return getNetBitrate(); }
+    virtual const simtime_t getDuration() const override { return (double)getLength().get() / getNetBitrate().get(); }
     virtual const DpskModulationBase *getModulation() const override { return preambleType == IEEE80211_HRDSSS_PREAMBLE_TYPE_SHORT ? static_cast<const DpskModulationBase *>(&DqpskModulation::singleton) : static_cast<const DpskModulationBase *>(&DbpskModulation::singleton); }
 
     virtual Ptr<Ieee80211PhyHeader> createHeader() const override { return makeShared<Ieee80211HrDsssPhyHeader>(); }
@@ -74,8 +74,8 @@ class INET_API Ieee80211HrDsssDataMode : public IIeee80211DataMode
     Ieee80211HrDsssDataMode(bps bitrate);
 
     virtual Hz getBandwidth() const override { return MHz(22); }
-    virtual inline bps getNetBitrate() const override { return bitrate; }
-    virtual inline bps getGrossBitrate() const override { return bitrate; }
+    virtual bps getNetBitrate() const override { return bitrate; }
+    virtual bps getGrossBitrate() const override { return bitrate; }
     virtual b getPaddingLength(b dataLength) const override { return b(0); }
     virtual b getCompleteLength(b dataLength) const override { return dataLength; }
     virtual const simtime_t getDuration(b length) const override;
@@ -103,25 +103,25 @@ class INET_API Ieee80211HrDsssMode : public Ieee80211ModeBase
 
     virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override { return stream << "Ieee80211HrDsssMode"; }
 
-    inline Hz getChannelSpacing() const { return MHz(5); }
-    inline Hz getBandwidth() const { return MHz(22); }
+    Hz getChannelSpacing() const { return MHz(5); }
+    Hz getBandwidth() const { return MHz(22); }
 
     virtual const IIeee80211PreambleMode *getPreambleMode() const override { return preambleMode; }
     virtual const IIeee80211HeaderMode *getHeaderMode() const override { return headerMode; }
     virtual const IIeee80211DataMode *getDataMode() const override { return dataMode; }
 
-    virtual inline const simtime_t getDuration(b dataLength) const override { return preambleMode->getDuration() + headerMode->getDuration() + dataMode->getDuration(dataLength); }
+    virtual const simtime_t getDuration(b dataLength) const override { return preambleMode->getDuration() + headerMode->getDuration() + dataMode->getDuration(dataLength); }
 
     // TODO fill in
-    virtual inline const simtime_t getSlotTime() const override { return 20E-6; }
-    virtual inline const simtime_t getSifsTime() const override { return 10E-6; }
-    virtual inline const simtime_t getCcaTime() const override { return 15E-6; }
+    virtual const simtime_t getSlotTime() const override { return 20E-6; }
+    virtual const simtime_t getSifsTime() const override { return 10E-6; }
+    virtual const simtime_t getCcaTime() const override { return 15E-6; }
     virtual const simtime_t getRifsTime() const override;
-    virtual inline const simtime_t getPhyRxStartDelay() const override { return preambleMode->getPreambleType() == IEEE80211_HRDSSS_PREAMBLE_TYPE_LONG ? 192E-6 : 96E-6; }
-    virtual inline const simtime_t getRxTxTurnaroundTime() const override { return 5E-6; }
-    virtual inline const simtime_t getPreambleLength() const override { return preambleMode->getDuration(); }
-    virtual inline const simtime_t getPlcpHeaderLength() const override { return headerMode->getDuration(); }
-    virtual inline int getMpduMaxLength() const override { return 4095; }
+    virtual const simtime_t getPhyRxStartDelay() const override { return preambleMode->getPreambleType() == IEEE80211_HRDSSS_PREAMBLE_TYPE_LONG ? 192E-6 : 96E-6; }
+    virtual const simtime_t getRxTxTurnaroundTime() const override { return 5E-6; }
+    virtual const simtime_t getPreambleLength() const override { return preambleMode->getDuration(); }
+    virtual const simtime_t getPlcpHeaderLength() const override { return headerMode->getDuration(); }
+    virtual int getMpduMaxLength() const override { return 4095; }
 };
 
 /**

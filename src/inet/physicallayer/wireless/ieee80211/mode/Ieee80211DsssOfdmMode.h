@@ -30,8 +30,8 @@ class INET_API Ieee80211DsssOfdmMode : public Ieee80211ModeBase
     const Ieee80211OfdmDataMode *ofdmDataMode;
 
   protected:
-    virtual inline int getLegacyCwMin() const override { return -1; }
-    virtual inline int getLegacyCwMax() const override { return -1; }
+    virtual int getLegacyCwMin() const override { return -1; }
+    virtual int getLegacyCwMax() const override { return -1; }
 
   public:
     Ieee80211DsssOfdmMode(const char *name, const Ieee80211DsssPreambleMode *dsssPreambleMode, const Ieee80211DsssHeaderMode *dsssHeaderMode, const Ieee80211OfdmPreambleMode *ofdmPreambleMode, const Ieee80211OfdmSignalMode *ofdmSignalMode, const Ieee80211OfdmDataMode *ofdmDataMode);
@@ -43,18 +43,18 @@ class INET_API Ieee80211DsssOfdmMode : public Ieee80211ModeBase
     virtual const IIeee80211DataMode *getDataMode() const override { return ofdmDataMode; }
 
     // TODO fill in
-    virtual inline const simtime_t getDuration(b dataLength) const override { return 0; }
+    virtual const simtime_t getDuration(b dataLength) const override { return 0; }
 
     // TODO fill in
-    virtual inline const simtime_t getSlotTime() const override { return 0; }
-    virtual inline const simtime_t getSifsTime() const override { return 0; }
+    virtual const simtime_t getSlotTime() const override { return 0; }
+    virtual const simtime_t getSifsTime() const override { return 0; }
     virtual const simtime_t getRifsTime() const override;
-    virtual inline const simtime_t getCcaTime() const override { return 0; }
-    virtual inline const simtime_t getPhyRxStartDelay() const override { return 0; }
-    virtual inline const simtime_t getRxTxTurnaroundTime() const override { return 0; }
-    virtual inline const simtime_t getPreambleLength() const override { return 0; }
-    virtual inline const simtime_t getPlcpHeaderLength() const override { return 0; }
-    virtual inline int getMpduMaxLength() const override { return -1; }
+    virtual const simtime_t getCcaTime() const override { return 0; }
+    virtual const simtime_t getPhyRxStartDelay() const override { return 0; }
+    virtual const simtime_t getRxTxTurnaroundTime() const override { return 0; }
+    virtual const simtime_t getPreambleLength() const override { return 0; }
+    virtual const simtime_t getPlcpHeaderLength() const override { return 0; }
+    virtual int getMpduMaxLength() const override { return -1; }
 };
 
 } // namespace physicallayer

@@ -654,7 +654,7 @@ const simtime_t Ieee80211VhtMode::getSlotTime() const
         throw cRuntimeError("Unsupported carrier frequency");
 }
 
-inline const simtime_t Ieee80211VhtMode::getSifsTime() const
+const simtime_t Ieee80211VhtMode::getSifsTime() const
 {
     if (centerFrequencyMode == BAND_5GHZ)
         return 16E-6;
