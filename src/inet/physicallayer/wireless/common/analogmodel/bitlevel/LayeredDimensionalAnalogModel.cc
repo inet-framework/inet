@@ -40,7 +40,7 @@ const IReception *LayeredDimensionalAnalogModel::computeReception(const IRadio *
     const ITransmissionAnalogModel *transmissionAnalogModel = check_and_cast<const ITransmissionAnalogModel *>(transmission->getAnalogModel());
     const INarrowbandSignal *narrowbandAnalogModel = check_and_cast<const INarrowbandSignal *>(transmission->getAnalogModel());
     const Ptr<const IFunction<WpHz, Domain<simsec, Hz>>>& receptionPower = computeReceptionPower(receiverRadio, transmission, arrival);
-    const DimensionalReceptionSignalAnalogModel *receptionSignalAnalogModel = new DimensionalReceptionSignalAnalogModel(transmissionSignalAnalogModel->getDuration(), transmissionSignalAnalogModel->getCenterFrequency(), transmissionSignalAnalogModel->getBandwidth(), receptionPower);
+    const DimensionalReceptionSignalAnalogModel *receptionSignalAnalogModel = new DimensionalReceptionSignalAnalogModel(transmissionAnalogModel->getPreambleDuration(), transmissionAnalogModel->getHeaderDuration(), transmissionAnalogModel->getDataDuration(), narrowbandAnalogModel->getCenterFrequency(), narrowbandAnalogModel->getBandwidth(), receptionPower);
     return new LayeredReception(receptionSignalAnalogModel, receiverRadio, transmission, receptionStartTime, receptionEndTime, receptionStartPosition, receptionEndPosition, receptionStartOrientation, receptionEndOrientation);
 }
 
