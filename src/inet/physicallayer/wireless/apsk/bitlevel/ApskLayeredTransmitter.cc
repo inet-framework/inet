@@ -7,14 +7,16 @@
 
 #include "inet/physicallayer/wireless/apsk/bitlevel/ApskLayeredTransmitter.h"
 
+// TODO AFTER REBASE: fix includes here
 #include "inet/mobility/contract/IMobility.h"
-#include "inet/physicallayer/wireless/apsk/bitlevel/ApskEncoder.h"
-#include "inet/physicallayer/wireless/apsk/bitlevel/ApskModulator.h"
-#include "inet/physicallayer/wireless/apsk/packetlevel/ApskPhyHeader_m.h"
-#include "inet/physicallayer/wireless/common/analogmodel/bitlevel/LayeredTransmission.h"
-#include "inet/physicallayer/wireless/common/analogmodel/bitlevel/ScalarSignalAnalogModel.h"
-#include "inet/physicallayer/wireless/common/contract/bitlevel/ISignalAnalogModel.h"
-#include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
+#include "inet/physicallayer/analogmodel/bitlevel/DimensionalSignalAnalogModel.h"
+#include "inet/physicallayer/apskradio/bitlevel/ApskEncoder.h"
+#include "inet/physicallayer/apskradio/bitlevel/ApskLayeredTransmitter.h"
+#include "inet/physicallayer/apskradio/bitlevel/ApskModulator.h"
+#include "inet/physicallayer/apskradio/packetlevel/ApskPhyHeader_m.h"
+#include "inet/physicallayer/common/bitlevel/LayeredTransmission.h"
+#include "inet/physicallayer/contract/bitlevel/ISignalAnalogModel.h"
+#include "inet/physicallayer/contract/packetlevel/IRadio.h"
 
 namespace inet {
 
@@ -131,7 +133,7 @@ const ITransmissionSampleModel *ApskLayeredTransmitter::createSampleModel(const 
         return nullptr;
 }
 
-const ITransmissionAnalogModel *ApskLayeredTransmitter::createAnalogModel(const ITransmissionPacketModel *packetModel, const ITransmissionBitModel *bitModel, const ITransmissionSampleModel *sampleModel) const
+const ITransmissionAnalogModel *ApskLayeredTransmitter::createAnalogModel(simtime_t startTime, const ITransmissionPacketModel *packetModel, const ITransmissionBitModel *bitModel, const ITransmissionSampleModel *sampleModel) const
 {
     if (digitalAnalogConverter) {
         if (sampleModel == nullptr)
@@ -140,9 +142,15 @@ const ITransmissionAnalogModel *ApskLayeredTransmitter::createAnalogModel(const 
             return digitalAnalogConverter->convertDigitalToAnalog(sampleModel);
     }
     else {
-        simtime_t duration = packetModel->getPacket()->getBitLength() / bitrate.get();
-        // TODO preamble and header durations?
-        return new ScalarTransmissionSignalAnalogModel(0, 0, duration, centerFrequency, bandwidth, power);
+        auto packet = packetModel->getPacket();
+        auto headerLength = packet->peekAtFront<ApskPhyHeader>()->getChunkLength();
+        simtime_t preambleDuration = 0;
+        simtime_t headerDuration = s(headerLength / bitrate).get();
+        simtime_t dataDuration = s((packet->getTotalLength() - headerLength) / bitrate).get();
+        simtime_t duration = preambleDuration + headerDuration + dataDuration;
+        auto endTime = startTime + duration;
+        Ptr<const IFunction<WpHz, Domain<simsec, Hz>>> powerFunction = makeShared<math::Boxcar2DFunction<WpHz, simsec, Hz>>(simsec(startTime), simsec(endTime), centerFrequency - bandwidth / 2, centerFrequency + bandwidth / 2, power / bandwidth);
+        return new DimensionalTransmissionSignalAnalogModel(preambleDuration, headerDuration, dataDuration, centerFrequency, bandwidth, makeFirstQuadrantLimitedFunction(powerFunction));
     }
 }
 
@@ -150,9 +158,19 @@ const ITransmission *ApskLayeredTransmitter::createTransmission(const IRadio *tr
 {
     const ITransmissionPacketModel *packetModel = createPacketModel(packet);
     const ITransmissionBitModel *bitModel = createBitModel(packetModel);
+    EV_TRACE << "TRANSMITTED BYTES: ";
+    for (auto byte : bitModel->getAllBits()->getBytes())
+        EV_TRACE << (int)byte << ", ";
+    EV_TRACE << std::endl;
     const ITransmissionSymbolModel *symbolModel = createSymbolModel(bitModel);
+    EV_TRACE << "TRANSMITTED SYMBOLS: ";
+    for (auto symbol : *symbolModel->getAllSymbols()) {
+        const ApskSymbol *apskSymbol = check_and_cast<const ApskSymbol *>(symbol);
+        EV_TRACE << "(" << apskSymbol->real() << ", " << apskSymbol->imag() << "), ";
+    }
+    EV_TRACE << std::endl;
     const ITransmissionSampleModel *sampleModel = createSampleModel(symbolModel);
-    const ITransmissionAnalogModel *analogModel = createAnalogModel(packetModel, bitModel, sampleModel);
+    const ITransmissionAnalogModel *analogModel = createAnalogModel(startTime, packetModel, bitModel, sampleModel);
     // assuming movement and rotation during transmission is negligible
     IMobility *mobility = transmitter->getAntenna()->getMobility();
     const simtime_t endTime = startTime + analogModel->getDuration();
