@@ -21,9 +21,9 @@ namespace inet {
 
 namespace physicallayer {
 
-ScalarNoise::ScalarNoise(simtime_t startTime, simtime_t endTime, Hz centerFrequency, Hz bandwidth, const std::map<simtime_t, W> *powerChanges) :
+ScalarNoise::ScalarNoise(simtime_t startTime, simtime_t endTime, Hz centerFrequency, Hz bandwidth, Ptr<const math::IFunction<W, math::Domain<simtime_t>>> powerFunction) :
     NarrowbandNoiseBase(startTime, endTime, centerFrequency, bandwidth),
-    powerChanges(powerChanges)
+    powerFunction(powerFunction)
 {
 }
 
@@ -31,32 +31,24 @@ std::ostream& ScalarNoise::printToStream(std::ostream& stream, int level) const
 {
     stream << "ScalarNoise";
     if (level <= PRINT_LEVEL_DETAIL)
-        stream << ", powerChanges = " << powerChanges ;
+        stream << ", powerFunction = " << powerFunction;
     return NarrowbandNoiseBase::printToStream(stream, level);
 }
 
 W ScalarNoise::computeMinPower(simtime_t startTime, simtime_t endTime) const
 {
-    W noisePower = W(0);
-    W minNoisePower = W(NaN);
-    for (const auto & elem : *powerChanges) {
-        noisePower += elem.second;
-        if ((std::isnan(minNoisePower.get()) || noisePower < minNoisePower) && startTime <= elem.first && elem.first < endTime)
-            minNoisePower = noisePower;
-    }
-    return minNoisePower;
+    math::Point<simtime_t> startPoint(startTime);
+    math::Point<simtime_t> endPoint(endTime);
+    math::Interval<simtime_t> interval(startPoint, endPoint, 0b1, 0b1, 0b0);
+    return powerFunction->getMin(interval);
 }
 
 W ScalarNoise::computeMaxPower(simtime_t startTime, simtime_t endTime) const
 {
-    W noisePower = W(0);
-    W maxNoisePower = W(0);
-    for (const auto & elem : *powerChanges) {
-        noisePower += elem.second;
-        if ((std::isnan(maxNoisePower.get()) || noisePower > maxNoisePower) && startTime <= elem.first && elem.first < endTime)
-            maxNoisePower = noisePower;
-    }
-    return maxNoisePower;
+    math::Point<simtime_t> startPoint(startTime);
+    math::Point<simtime_t> endPoint(endTime);
+    math::Interval<simtime_t> interval(startPoint, endPoint, 0b1, 0b1, 0b0);
+    return powerFunction->getMax(interval);
 }
 
 } // namespace physicallayer
