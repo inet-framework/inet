@@ -41,7 +41,7 @@ std::ostream& ApskDemodulator::printToStream(std::ostream& stream, int level, in
 
 const IReceptionBitModel *ApskDemodulator::demodulate(const IReceptionSymbolModel *symbolModel) const
 {
-    const std::vector<const ISymbol *> *symbols = symbolModel->getSymbols();
+    const std::vector<const ISymbol *> *symbols = symbolModel->getAllSymbols();
     BitVector *bits = new BitVector();
     for (auto& symbols_i : *symbols) {
         const ApskSymbol *symbol = dynamic_cast<const ApskSymbol *>(symbols_i);
