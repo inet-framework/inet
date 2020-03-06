@@ -44,6 +44,7 @@ Define_Module(UdpBasicBurst);
 int UdpBasicBurst::counter;
 
 simsignal_t UdpBasicBurst::outOfOrderPkSignal = registerSignal("outOfOrderPk");
+simsignal_t UdpBasicBurst::excessiveDelayPksignal = registerSignal("excessiveDelayPk");
 
 UdpBasicBurst::~UdpBasicBurst()
 {
@@ -75,6 +76,8 @@ void UdpBasicBurst::initialize(int stage)
         nextBurst = startTime;
         nextPkt = startTime;
         dontFragment = par("dontFragment");
+
+        excessiveDelay = par("excessiveDelay");
 
         destAddrRNG = par("destAddrRNG");
         const char *addrModeStr = par("chooseDestAddrMode");
@@ -277,6 +280,8 @@ void UdpBasicBurst::processPacket(Packet *pk)
         else
             sourceSequence[moduleId] = msgId;
     }
+    else
+        throw cRuntimeError("no id in the packet");
 
     if (delayLimit > 0) {
         if (simTime() - pk->getTimestamp() > delayLimit) {
@@ -287,6 +292,12 @@ void UdpBasicBurst::processPacket(Packet *pk)
             delete pk;
             numDeleted++;
             return;
+        }
+    }
+    if (excessiveDelay > 0) {
+        if (simTime() - pk->getTimestamp() > excessiveDelay) {
+            numExessiveDelay++;
+            emit(excessiveDelayPksignal, pk);
         }
     }
 
@@ -354,6 +365,7 @@ void UdpBasicBurst::finish()
     recordScalar("Total sent", numSent);
     recordScalar("Total received", numReceived);
     recordScalar("Total deleted", numDeleted);
+    recordScalar("Total Excessive Delay", numExessiveDelay);
     ApplicationBase::finish();
 }
 
