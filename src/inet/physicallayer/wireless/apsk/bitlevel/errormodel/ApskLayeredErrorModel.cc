@@ -4,12 +4,12 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-
 #include "inet/physicallayer/wireless/apsk/bitlevel/errormodel/ApskLayeredErrorModel.h"
 
+#include "inet/physicallayer/wireless/common/analogmodel/bitlevel/DimensionalSignalAnalogModel.h"
+#include "inet/physicallayer/wireless/common/analogmodel/bitlevel/LayeredSnir.h"
 #include "inet/physicallayer/wireless/apsk/bitlevel/ApskSymbol.h"
 #include "inet/physicallayer/wireless/apsk/packetlevel/ApskPhyHeader_m.h"
-#include "inet/physicallayer/wireless/common/analogmodel/bitlevel/ScalarSignalAnalogModel.h"
 #include "inet/physicallayer/wireless/common/base/packetlevel/ApskModulationBase.h"
 #include "inet/physicallayer/wireless/common/base/packetlevel/NarrowbandTransmissionBase.h"
 #include "inet/physicallayer/wireless/common/radio/bitlevel/SignalBitModel.h"
@@ -17,15 +17,12 @@
 #include "inet/physicallayer/wireless/common/radio/bitlevel/SignalSampleModel.h"
 #include "inet/physicallayer/wireless/common/radio/bitlevel/SignalSymbolModel.h"
 
+
 namespace inet {
 
 namespace physicallayer {
 
 Define_Module(ApskLayeredErrorModel);
-
-ApskLayeredErrorModel::ApskLayeredErrorModel()
-{
-}
 
 std::ostream& ApskLayeredErrorModel::printToStream(std::ostream& stream, int level, int evFlags) const
 {
@@ -35,7 +32,7 @@ std::ostream& ApskLayeredErrorModel::printToStream(std::ostream& stream, int lev
 const IReceptionPacketModel *ApskLayeredErrorModel::computePacketModel(const LayeredTransmission *transmission, const ISnir *snir) const
 {
     const ITransmissionBitModel *bitModel = transmission->getBitModel();
-    const ScalarTransmissionSignalAnalogModel *analogModel = check_and_cast<const ScalarTransmissionSignalAnalogModel *>(transmission->getAnalogModel());
+    const DimensionalTransmissionSignalAnalogModel *analogModel = check_and_cast<const DimensionalTransmissionSignalAnalogModel *>(transmission->getAnalogModel());
     const IModulation *modulation = transmission->getSymbolModel()->getDataModulation();
     double grossBitErrorRate = modulation->calculateBER(snir->getMin(), analogModel->getBandwidth(), bitModel->getDataGrossBitrate());
     int bitLength = transmission->getPacketModel()->getPacket()->getBitLength();
@@ -53,7 +50,7 @@ const IReceptionPacketModel *ApskLayeredErrorModel::computePacketModel(const Lay
 const IReceptionBitModel *ApskLayeredErrorModel::computeBitModel(const LayeredTransmission *transmission, const ISnir *snir) const
 {
     const ITransmissionBitModel *bitModel = transmission->getBitModel();
-    const ScalarTransmissionSignalAnalogModel *analogModel = check_and_cast<const ScalarTransmissionSignalAnalogModel *>(transmission->getAnalogModel());
+    const DimensionalTransmissionSignalAnalogModel *analogModel = check_and_cast<const DimensionalTransmissionSignalAnalogModel *>(transmission->getAnalogModel());
     const IModulation *modulation = transmission->getSymbolModel()->getDataModulation();
     double bitErrorRate = modulation->calculateBER(snir->getMin(), analogModel->getBandwidth(), bitModel->getDataGrossBitrate());
     return LayeredErrorModelBase::computeBitModel(transmission, bitErrorRate);
@@ -61,11 +58,60 @@ const IReceptionBitModel *ApskLayeredErrorModel::computeBitModel(const LayeredTr
 
 const IReceptionSymbolModel *ApskLayeredErrorModel::computeSymbolModel(const LayeredTransmission *transmission, const ISnir *snir) const
 {
-    const IModulation *modulation = transmission->getSymbolModel()->getDataModulation();
-    const ScalarTransmissionSignalAnalogModel *analogModel = check_and_cast<const ScalarTransmissionSignalAnalogModel *>(transmission->getAnalogModel());
-    const ITransmissionBitModel *bitModel = transmission->getBitModel();
-    double symbolErrorRate = modulation->calculateSER(snir->getMin(), analogModel->getBandwidth(), bitModel->getDataGrossBitrate());
-    return LayeredErrorModelBase::computeSymbolModel(transmission, symbolErrorRate);
+    auto layeredSnir = check_and_cast<const LayeredSnir *>(snir);
+    auto analogModel = check_and_cast<const DimensionalTransmissionSignalAnalogModel *>(transmission->getAnalogModel());
+    auto bitModel = transmission->getBitModel();
+    auto transmissionSymbolModel = check_and_cast<const TransmissionSymbolModel *>(transmission->getSymbolModel());
+    auto transmittedSymbols = transmissionSymbolModel->getAllSymbols();
+    auto modulation = check_and_cast<const ApskModulationBase *>(transmissionSymbolModel->getDataModulation());
+    auto bitrate = bitModel->getDataGrossBitrate();
+    auto centerFrequency = analogModel->getCenterFrequency();
+    auto bandwidth = analogModel->getBandwidth();
+    auto reception = snir->getReception();
+    auto startTime = reception->getStartTime();
+    auto endTime = reception->getEndTime();
+    auto duration = endTime - startTime;
+    int symbolCount = transmittedSymbols->size();
+    std::vector<math::Interval<simsec, Hz>> symbolIntervals;
+    symbolIntervals.reserve(symbolCount);
+    for (int symbolIndex = 0; symbolIndex < symbolCount; symbolIndex++) {
+        simtime_t symbolStartTime = (startTime * (symbolCount - symbolIndex) + endTime * symbolIndex) / symbolCount;
+        simtime_t symbolEndTime = (startTime * (symbolCount - symbolIndex - 1) + endTime * (symbolIndex + 1)) / symbolCount;
+        math::Point<simsec, Hz> symbolStartPoint(simsec(symbolStartTime), centerFrequency - bandwidth / 2);
+        math::Point<simsec, Hz> symbolEndPoint(simsec(symbolEndTime), centerFrequency + bandwidth / 2);
+        math::Interval<simsec, Hz> symbolInterval(symbolStartPoint, symbolEndPoint, 0b11, 0b00, 0b00);
+        symbolIntervals.push_back(symbolInterval);
+    }
+    math::Point<simsec, Hz> startPoint(simsec(startTime), centerFrequency - bandwidth / 2);
+    math::Point<simsec, Hz> endPoint(simsec(endTime), centerFrequency + bandwidth / 2);
+    math::Interval<simsec, Hz> interval(startPoint, endPoint, 0b11, 0b00, 0b00);
+    std::vector<double> data(symbolCount);
+    auto snirFunction = layeredSnir->getSnir();
+    snirFunction->partition(interval, [&] (const math::Interval<simsec, Hz>& i1, const math::IFunction<double, math::Domain<simsec, Hz>> *f1) {
+        auto intervalStartTime = std::get<0>(i1.getLower()).get();
+        auto intervalEndTime = std::get<0>(i1.getUpper()).get();
+        auto startIndex = std::max(0, (int)std::floor((intervalStartTime - startTime).dbl() / (endTime - startTime).dbl() * symbolCount));
+        auto endIndex = std::min(symbolCount - 1, (int)std::ceil((intervalEndTime - startTime).dbl() / (endTime - startTime).dbl() * symbolCount));
+        for (int symbolIndex = startIndex; symbolIndex <= endIndex; symbolIndex++) {
+            ASSERT(0 <= symbolIndex && symbolIndex < symbolCount);
+            auto i2 = i1.getIntersected(symbolIntervals[symbolIndex]);
+            double v = i2.getVolume() * f1->getMean(i2);
+            ASSERT(!std::isnan(v));
+            data[symbolIndex] += v;
+        }
+    });
+    auto symbolDuration = duration / symbolCount;
+    auto symbolArea = symbolDuration * bandwidth.get();
+    auto receivedSymbols = new std::vector<const ISymbol *>(symbolCount);
+    for (int i = 0; i < symbolCount; i++) {
+        double snirMean = data[i] / symbolArea;
+        double symbolErrorRate = modulation->calculateSER(snirMean, bandwidth, bitrate);
+        auto transmittedSymbol = check_and_cast<const ApskSymbol *>(transmittedSymbols->at(i));
+        bool isCorruptSymbol = symbolErrorRate == 1 || (symbolErrorRate != 0 && uniform(0, 1) < symbolErrorRate);
+        auto receivedSymbol = isCorruptSymbol ? computeCorruptSymbol(modulation, transmittedSymbol) : transmittedSymbol;
+        receivedSymbols->at(i) = receivedSymbol;
+    }
+    return new ReceptionSymbolModel(transmissionSymbolModel->getHeaderSymbolLength(), transmissionSymbolModel->getHeaderSymbolRate(), transmissionSymbolModel->getDataSymbolLength(), transmissionSymbolModel->getDataSymbolRate(), receivedSymbols, NaN);
 }
 
 const IReceptionSampleModel *ApskLayeredErrorModel::computeSampleModel(const LayeredTransmission *transmission, const ISnir *snir) const
