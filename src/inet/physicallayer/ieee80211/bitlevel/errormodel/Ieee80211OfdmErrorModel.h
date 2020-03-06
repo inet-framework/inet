@@ -29,6 +29,7 @@ namespace physicallayer {
 class INET_API Ieee80211OfdmErrorModel : public Ieee80211NistErrorModel, public ILayeredErrorModel
 {
   protected:
+    const char *symbolCorruptionMode = nullptr;
     double signalSymbolErrorRate;
     double dataSymbolErrorRate;
     double signalBitErrorRate;
@@ -37,7 +38,6 @@ class INET_API Ieee80211OfdmErrorModel : public Ieee80211NistErrorModel, public 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
-    Ieee80211OfdmSymbol *corruptOFDMSymbol(const Ieee80211OfdmSymbol *symbol, double ser, int constellationSize, const std::vector<ApskSymbol> *constellation) const;
     void corruptBits(BitVector *bits, double ber, int begin, int end) const;
 
   public:
@@ -46,6 +46,8 @@ class INET_API Ieee80211OfdmErrorModel : public Ieee80211NistErrorModel, public 
     virtual const IReceptionSymbolModel *computeSymbolModel(const LayeredTransmission *transmission, const ISnir *snir) const override;
     virtual const IReceptionSampleModel *computeSampleModel(const LayeredTransmission *transmission, const ISnir *snir) const override;
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
+
+    virtual const ApskSymbol *computeCorruptSymbol(const ApskModulationBase *modulation, const ApskSymbol *transmittedSymbol) const;
 };
 
 } /* namespace physicallayer */

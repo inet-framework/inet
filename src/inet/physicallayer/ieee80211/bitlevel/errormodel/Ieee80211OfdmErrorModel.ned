@@ -42,6 +42,7 @@ import inet.physicallayer.ieee80211.packetlevel.errormodel.Ieee80211NistErrorMod
 module Ieee80211OfdmErrorModel extends Ieee80211NistErrorModel like ILayeredErrorModel
 {
     parameters:
+        string symbolCorruptionMode @unit("1bit", "uniform") = default("uniform");
         double dataSymbolErrorRate = default(nan);
         double dataBitErrorRate = default(nan);
         double signalSymbolErrorRate = default(nan);
