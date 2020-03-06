@@ -20,9 +20,10 @@
 namespace inet {
 namespace physicallayer {
 
-SignalPacketModel::SignalPacketModel(const Packet *packet, bps bitrate) :
+SignalPacketModel::SignalPacketModel(const Packet *packet, bps headerBitrate, bps dataBitrate) :
     packet(packet),
-    bitrate(bitrate)
+    headerBitrate(headerBitrate),
+    dataBitrate(dataBitrate)
 {
 }
 
@@ -34,13 +35,13 @@ std::ostream& SignalPacketModel::printToStream(std::ostream& stream, int level) 
     return stream;
 }
 
-TransmissionPacketModel::TransmissionPacketModel(const Packet *packet, bps bitrate) :
-    SignalPacketModel(packet, bitrate)
+TransmissionPacketModel::TransmissionPacketModel(const Packet *packet, bps headerBitrate, bps dataBitrate) :
+    SignalPacketModel(packet, headerBitrate, dataBitrate)
 {
 }
 
-ReceptionPacketModel::ReceptionPacketModel(const Packet *packet, bps bitrate) :
-    SignalPacketModel(packet, bitrate)
+ReceptionPacketModel::ReceptionPacketModel(const Packet *packet, bps headerBitrate, bps dataBitrate) :
+    SignalPacketModel(packet, headerBitrate, dataBitrate)
 {
 }
 

@@ -20,12 +20,12 @@
 namespace inet {
 namespace physicallayer {
 
-SignalBitModel::SignalBitModel(b headerLength, bps headerBitRate, b dataLength, bps dataBitRate, const BitVector *bits) :
+SignalBitModel::SignalBitModel(b headerLength, bps headerBitrate, b dataLength, bps dataBitrate, const BitVector *bits) :
     bits(bits),
     headerLength(headerLength),
-    headerBitRate(headerBitRate),
+    headerBitrate(headerBitrate),
     dataLength(dataLength),
-    dataBitRate(dataBitRate)
+    dataBitrate(dataBitrate)
 {
 }
 
@@ -39,9 +39,9 @@ std::ostream& SignalBitModel::printToStream(std::ostream& stream, int level) con
     stream << "SignalBitModel";
     if (level <= PRINT_LEVEL_TRACE)
         stream << ", headerLength = " << headerLength
-               << ", headerBitRate = " << headerBitRate
+               << ", headerBitrate = " << headerBitrate
                << ", dataLength = " << dataLength
-               << ", dataBitRate = " << dataBitRate;
+               << ", dataBitrate = " << dataBitrate;
     return stream;
 }
 
@@ -53,16 +53,16 @@ TransmissionBitModel::TransmissionBitModel(const BitVector *bits, const IForward
 {
 }
 
-TransmissionBitModel::TransmissionBitModel(b headerLength, bps headerBitRate, b dataLength, bps dataBitRate, const BitVector *bits, const IForwardErrorCorrection *forwardErrorCorrection, const IScrambling *scrambling, const IInterleaving *interleaving) :
-    SignalBitModel(headerLength, headerBitRate, dataLength, dataBitRate, bits),
+TransmissionBitModel::TransmissionBitModel(b headerLength, bps headerBitrate, b dataLength, bps dataBitrate, const BitVector *bits, const IForwardErrorCorrection *forwardErrorCorrection, const IScrambling *scrambling, const IInterleaving *interleaving) :
+    SignalBitModel(headerLength, headerBitrate, dataLength, dataBitrate, bits),
     forwardErrorCorrection(forwardErrorCorrection),
     scrambling(scrambling),
     interleaving(interleaving)
 {
 }
 
-ReceptionBitModel::ReceptionBitModel(b headerLength, bps headerBitRate, b dataLength, bps dataBitRate, const BitVector *bits) :
-    SignalBitModel(headerLength, headerBitRate, dataLength, dataBitRate, bits)
+ReceptionBitModel::ReceptionBitModel(b headerLength, bps headerBitrate, b dataLength, bps dataBitrate, const BitVector *bits) :
+    SignalBitModel(headerLength, headerBitrate, dataLength, dataBitrate, bits)
 {
 }
 
