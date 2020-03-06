@@ -24,7 +24,6 @@ class INET_API ScalarSnir : public SnirBase
   protected:
     virtual double computeMin() const;
     virtual double computeMax() const;
-    virtual double computeMean() const;
 
   public:
     ScalarSnir(const IReception *reception, const INoise *noise);
@@ -34,6 +33,8 @@ class INET_API ScalarSnir : public SnirBase
     virtual double getMin() const override;
     virtual double getMax() const override;
     virtual double getMean() const override;
+
+    virtual double computeMean(simtime_t startTime, simtime_t endTime) const;
 };
 
 } // namespace physicallayer
