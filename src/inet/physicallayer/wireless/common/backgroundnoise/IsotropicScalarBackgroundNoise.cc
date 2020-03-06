@@ -46,10 +46,8 @@ const INoise *IsotropicScalarBackgroundNoise::computeNoise(const IListening *lis
         bandwidth = listeningBandwidth;
     else if (bandwidth != listeningBandwidth)
         throw cRuntimeError("Background noise bandwidth doesn't match listening bandwidth");
-    std::map<simtime_t, W> *powerChanges = new std::map<simtime_t, W>();
-    powerChanges->insert(std::pair<simtime_t, W>(startTime, power));
-    powerChanges->insert(std::pair<simtime_t, W>(endTime, -power));
-    return new ScalarNoise(startTime, endTime, centerFrequency, bandwidth, powerChanges);
+    const auto& powerFunction = makeShared<math::Boxcar1DFunction<W, simtime_t>>(startTime, endTime, power);
+    return new ScalarNoise(startTime, endTime, centerFrequency, bandwidth, powerFunction);
 }
 
 } // namespace physicallayer
