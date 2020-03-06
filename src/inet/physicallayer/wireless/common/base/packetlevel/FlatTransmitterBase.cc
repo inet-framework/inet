@@ -17,6 +17,7 @@ FlatTransmitterBase::FlatTransmitterBase() :
     preambleDuration(-1),
     headerLength(b(-1)),
     bitrate(bps(NaN)),
+    codeRate(NaN),
     power(W(NaN))
 {
 }
@@ -28,6 +29,7 @@ void FlatTransmitterBase::initialize(int stage)
         preambleDuration = par("preambleDuration");
         headerLength = b(par("headerLength"));
         bitrate = bps(par("bitrate"));
+        codeRate = par("codeRate");
         power = W(par("power"));
     }
 }
@@ -38,6 +40,7 @@ std::ostream& FlatTransmitterBase::printToStream(std::ostream& stream, int level
         stream << EV_FIELD(preambleDuration)
                << EV_FIELD(headerLength)
                << EV_FIELD(bitrate)
+               << EV_FIELD(codeRate)
                << EV_FIELD(power);
     return NarrowbandTransmitterBase::printToStream(stream, level);
 }
