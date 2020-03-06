@@ -169,16 +169,15 @@ class INET_API Ieee80211Vhtmcs
     const Hz bandwidth;
 
   public:
-    Ieee80211Vhtmcs(unsigned int mcsIndex, const Ieee80211VhtCode *code, const Ieee80211OfdmModulation *stream1Modulation, const Ieee80211OfdmModulation *stream2Modulation, const Ieee80211OfdmModulation *stream3Modulation, const Ieee80211OfdmModulation *stream4Modulation, const Ieee80211OfdmModulation *stream5Modulation, const Ieee80211OfdmModulation *stream6Modulation, const Ieee80211OfdmModulation *stream7Modulation, const Ieee80211OfdmModulation *stream8Modulation);
-    Ieee80211Vhtmcs(unsigned int mcsIndex, const Ieee80211OfdmModulation *stream1Modulation, const Ieee80211OfdmModulation *stream2Modulation, const Ieee80211OfdmModulation *stream3Modulation, const Ieee80211OfdmModulation *stream4Modulation, const Ieee80211OfdmModulation *stream5Modulation, const Ieee80211OfdmModulation *stream6Modulation, const Ieee80211OfdmModulation *stream7Modulation, const Ieee80211OfdmModulation *stream8Modulation, const Ieee80211ConvolutionalCode *convolutionalCode, Hz bandwidth);
-    Ieee80211Vhtmcs(unsigned int mcsIndex, const Ieee80211OfdmModulation *stream1Modulation, const Ieee80211OfdmModulation *stream2Modulation, const Ieee80211OfdmModulation *stream3Modulation, const Ieee80211OfdmModulation *stream4Modulation, const Ieee80211OfdmModulation *stream5Modulation, const Ieee80211OfdmModulation *stream6Modulation, const Ieee80211OfdmModulation *stream7Modulation, const Ieee80211ConvolutionalCode *convolutionalCode, Hz bandwidth);
-    Ieee80211Vhtmcs(unsigned int mcsIndex, const Ieee80211OfdmModulation *stream1Modulation, const Ieee80211OfdmModulation *stream2Modulation, const Ieee80211OfdmModulation *stream3Modulation, const Ieee80211OfdmModulation *stream4Modulation, const Ieee80211OfdmModulation *stream5Modulation, const Ieee80211OfdmModulation *stream6Modulation, const Ieee80211ConvolutionalCode *convolutionalCode, Hz bandwidth);
-    Ieee80211Vhtmcs(unsigned int mcsIndex, const Ieee80211OfdmModulation *stream1Modulation, const Ieee80211OfdmModulation *stream2Modulation, const Ieee80211OfdmModulation *stream3Modulation, const Ieee80211OfdmModulation *stream4Modulation, const Ieee80211OfdmModulation *stream5Modulation, const Ieee80211ConvolutionalCode *convolutionalCode, Hz bandwidth);
-    Ieee80211Vhtmcs(unsigned int mcsIndex, const Ieee80211OfdmModulation *stream1Modulation, const Ieee80211OfdmModulation *stream2Modulation, const Ieee80211OfdmModulation *stream3Modulation, const Ieee80211OfdmModulation *stream4Modulation, const Ieee80211ConvolutionalCode *convolutionalCode, Hz bandwidth);
-    Ieee80211Vhtmcs(unsigned int mcsIndex, const Ieee80211OfdmModulation *stream1Modulation, const Ieee80211OfdmModulation *stream2Modulation, const Ieee80211OfdmModulation *stream3Modulation, const Ieee80211ConvolutionalCode *convolutionalCode, Hz bandwidth);
-    Ieee80211Vhtmcs(unsigned int mcsIndex, const Ieee80211OfdmModulation *stream1Modulation, const Ieee80211OfdmModulation *stream2Modulation, const Ieee80211ConvolutionalCode *convolutionalCode, Hz bandwidth);
-    Ieee80211Vhtmcs(unsigned int mcsIndex, const Ieee80211OfdmModulation *stream1Modulation, const Ieee80211ConvolutionalCode *convolutionalCode, Hz bandwidth);
-    Ieee80211Vhtmcs(unsigned int mcsIndex, const Ieee80211OfdmModulation *stream1Modulation, const Ieee80211ConvolutionalCode *convolutionalCode, Hz bandwidth, int nss);
+    Ieee80211Vhtmcs(unsigned int mcsIndex, const ApskModulationBase *stream1SubcarrierModulation, const ApskModulationBase *stream2SubcarrierModulation, const ApskModulationBase *stream3SubcarrierModulation, const ApskModulationBase *stream4SubcarrierModulation, const ApskModulationBase *stream5SubcarrierModulation, const ApskModulationBase *stream6SubcarrierModulation, const ApskModulationBase *stream7SubcarrierModulation, const ApskModulationBase *stream8SubcarrierModulation, const Ieee80211ConvolutionalCode* convolutionalCode, Hz bandwidth);
+    Ieee80211Vhtmcs(unsigned int mcsIndex, const ApskModulationBase *stream1SubcarrierModulation, const ApskModulationBase *stream2SubcarrierModulation, const ApskModulationBase *stream3SubcarrierModulation, const ApskModulationBase *stream4SubcarrierModulation, const ApskModulationBase *stream5SubcarrierModulation, const ApskModulationBase *stream6SubcarrierModulation, const ApskModulationBase *stream7SubcarrierModulation, const Ieee80211ConvolutionalCode* convolutionalCode, Hz bandwidth);
+    Ieee80211Vhtmcs(unsigned int mcsIndex, const ApskModulationBase *stream1SubcarrierModulation, const ApskModulationBase *stream2SubcarrierModulation, const ApskModulationBase *stream3SubcarrierModulation, const ApskModulationBase *stream4SubcarrierModulation, const ApskModulationBase *stream5SubcarrierModulation, const ApskModulationBase *stream6SubcarrierModulation, const Ieee80211ConvolutionalCode* convolutionalCode, Hz bandwidth);
+    Ieee80211Vhtmcs(unsigned int mcsIndex, const ApskModulationBase *stream1SubcarrierModulation, const ApskModulationBase *stream2SubcarrierModulation, const ApskModulationBase *stream3SubcarrierModulation, const ApskModulationBase *stream4SubcarrierModulation, const ApskModulationBase *stream5SubcarrierModulation, const Ieee80211ConvolutionalCode* convolutionalCode, Hz bandwidth);
+    Ieee80211Vhtmcs(unsigned int mcsIndex, const ApskModulationBase *stream1SubcarrierModulation, const ApskModulationBase *stream2SubcarrierModulation, const ApskModulationBase *stream3SubcarrierModulation, const ApskModulationBase *stream4SubcarrierModulation, const Ieee80211ConvolutionalCode* convolutionalCode, Hz bandwidth);
+    Ieee80211Vhtmcs(unsigned int mcsIndex, const ApskModulationBase *stream1SubcarrierModulation, const ApskModulationBase *stream2SubcarrierModulation, const ApskModulationBase *stream3SubcarrierModulation, const Ieee80211ConvolutionalCode *convolutionalCode, Hz bandwidth);
+    Ieee80211Vhtmcs(unsigned int mcsIndex, const ApskModulationBase *stream1SubcarrierModulation, const ApskModulationBase *stream2SubcarrierModulation, const Ieee80211ConvolutionalCode *convolutionalCode, Hz bandwidth);
+    Ieee80211Vhtmcs(unsigned int mcsIndex, const ApskModulationBase *stream1SubcarrierModulation, const Ieee80211ConvolutionalCode *convolutionalCode, Hz bandwidth);
+    Ieee80211Vhtmcs(unsigned int mcsIndex, const ApskModulationBase *stream1SubcarrierModulation, const Ieee80211ConvolutionalCode *convolutionalCode, Hz bandwidth, int nss);
 
     virtual ~Ieee80211Vhtmcs();
 
@@ -199,6 +198,11 @@ class INET_API Ieee80211Vhtmcs
                + (stream5Modulation ? 1 : 0) + (stream6Modulation ? 1 : 0)
                + (stream7Modulation ? 1 : 0) + (stream8Modulation ? 1 : 0);
     }
+
+    static int getNumberOfDataSubcarriers(Hz bandwidth) { return 48; } // TODO
+    static int getNumberOfPilotSubcarriers(Hz bandwidth) { return 4; } // TODO
+
+    static int getNumberOfTotalSubcarriers(Hz bandwidth) { return getNumberOfDataSubcarriers(bandwidth) + getNumberOfPilotSubcarriers(bandwidth); }
 };
 
 class INET_API Ieee80211VhtDataMode : public IIeee80211DataMode, public Ieee80211VhtModeBase, public Ieee80211HtTimingRelatedParametersBase
