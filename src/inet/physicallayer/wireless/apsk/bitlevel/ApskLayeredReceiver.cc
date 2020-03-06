@@ -4,24 +4,25 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-
 #include "inet/physicallayer/wireless/apsk/bitlevel/ApskLayeredReceiver.h"
 
+#include "inet/physicallayer/wireless/common/analogmodel/bitlevel/DimensionalSignalAnalogModel.h"
+#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/DimensionalSnir.h"
+#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/DimensionalAnalogModel.h"
 #include "inet/physicallayer/wireless/apsk/bitlevel/ApskDecoder.h"
 #include "inet/physicallayer/wireless/apsk/bitlevel/ApskDemodulator.h"
+#include "inet/physicallayer/wireless/apsk/bitlevel/ApskLayeredReceiver.h"
 #include "inet/physicallayer/wireless/apsk/packetlevel/ApskPhyHeader_m.h"
 #include "inet/physicallayer/wireless/common/analogmodel/bitlevel/LayeredReception.h"
-#include "inet/physicallayer/wireless/common/analogmodel/bitlevel/ScalarSignalAnalogModel.h"
-#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/ScalarAnalogModel.h"
-#include "inet/physicallayer/wireless/common/base/packetlevel/NarrowbandNoiseBase.h"
-#include "inet/physicallayer/wireless/common/contract/bitlevel/ISymbol.h"
-#include "inet/physicallayer/wireless/common/contract/packetlevel/SignalTag_m.h"
 #include "inet/physicallayer/wireless/common/radio/bitlevel/LayeredReceptionResult.h"
 #include "inet/physicallayer/wireless/common/radio/bitlevel/SignalBitModel.h"
 #include "inet/physicallayer/wireless/common/radio/bitlevel/SignalSampleModel.h"
 #include "inet/physicallayer/wireless/common/radio/bitlevel/SignalSymbolModel.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/NarrowbandNoiseBase.h"
 #include "inet/physicallayer/wireless/common/radio/packetlevel/BandListening.h"
 #include "inet/physicallayer/wireless/common/radio/packetlevel/ListeningDecision.h"
+#include "inet/physicallayer/wireless/common/contract/bitlevel/ISymbol.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/SignalTag_m.h"
 
 namespace inet {
 namespace physicallayer {
@@ -144,11 +145,20 @@ const IReceptionPacketModel *ApskLayeredReceiver::createPacketModel(const Layere
 
 const IReceptionResult *ApskLayeredReceiver::computeReceptionResult(const IListening *listening, const IReception *reception, const IInterference *interference, const ISnir *snir, const std::vector<const IReceptionDecision *> *decisions) const
 {
-    const LayeredTransmission *transmission = dynamic_cast<const LayeredTransmission *>(reception->getTransmission());
+    const LayeredTransmission *transmission = check_and_cast<const LayeredTransmission *>(reception->getTransmission());
     const IReceptionAnalogModel *analogModel = createAnalogModel(transmission, snir);
     const IReceptionSampleModel *sampleModel = createSampleModel(transmission, snir, analogModel);
     const IReceptionSymbolModel *symbolModel = createSymbolModel(transmission, snir, sampleModel);
+    EV_TRACE << "RECEIVED SYMBOLS: ";
+    for (auto symbol : *symbolModel->getAllSymbols()) {
+        const ApskSymbol *apskSymbol = check_and_cast<const ApskSymbol *>(symbol);
+        EV_TRACE << "(" << apskSymbol->real() << ", " << apskSymbol->imag() << "), ";
+    }
+    EV_TRACE << std::endl;
     const IReceptionBitModel *bitModel = createBitModel(transmission, snir, symbolModel);
+    EV_TRACE << "RECEIVED BYTES: ";
+    for (auto byte : bitModel->getAllBits()->getBytes())
+        EV_TRACE << (int)byte << ", ";
     const IReceptionPacketModel *packetModel = createPacketModel(transmission, snir, bitModel);
     auto packet = const_cast<Packet *>(packetModel->getPacket());
     auto errorRateInd = packet->addTagIfAbsent<ErrorRateInd>();
@@ -162,6 +172,7 @@ const IReceptionResult *ApskLayeredReceiver::computeReceptionResult(const IListe
     snirInd->setMinimumSnir(snir->getMin());
     snirInd->setMaximumSnir(snir->getMax());
     snirInd->setAverageSnir(snir->getMean());
+
     return new LayeredReceptionResult(reception, decisions, packetModel, bitModel, symbolModel, sampleModel, analogModel);
 }
 
@@ -195,20 +206,24 @@ bool ApskLayeredReceiver::computeIsReceptionPossible(const IListening *listening
 // TODO copy
 bool ApskLayeredReceiver::computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part) const
 {
-    const BandListening *bandListening = check_and_cast<const BandListening *>(listening);
-    const LayeredReception *scalarReception = check_and_cast<const LayeredReception *>(reception);
-    // TODO scalar
-    const ScalarReceptionSignalAnalogModel *analogModel = check_and_cast<const ScalarReceptionSignalAnalogModel *>(scalarReception->getAnalogModel());
-    if (bandListening->getCenterFrequency() != analogModel->getCenterFrequency() || bandListening->getBandwidth() != analogModel->getBandwidth()) {
-        EV_DEBUG << "Computing reception possible: listening and reception bands are different -> reception is impossible" << endl;
+    auto layeredTransmission = dynamic_cast<const LayeredTransmission *>(reception->getTransmission());
+    if (layeredTransmission == nullptr)
         return false;
-    }
     else {
-        const INarrowbandSignal *narrowbandSignalAnalogModel = check_and_cast<const INarrowbandSignal *>(scalarReception->getAnalogModel());
-        W minReceptionPower = narrowbandSignalAnalogModel->computeMinPower(reception->getStartTime(), reception->getEndTime());
-        bool isReceptionPossible = minReceptionPower >= sensitivity;
-        EV_DEBUG << "Computing reception possible" << EV_FIELD(minReceptionPower) << EV_FIELD(sensitivity) << " -> reception is " << (isReceptionPossible ? "possible" : "impossible") << endl;
-        return isReceptionPossible;
+        auto bandListening = check_and_cast<const BandListening *>(listening);
+        auto layeredReception = check_and_cast<const LayeredReception *>(reception);
+        const DimensionalReceptionSignalAnalogModel *analogModel = check_and_cast<const DimensionalReceptionSignalAnalogModel *>(layeredReception->getAnalogModel());
+        if (bandListening->getCenterFrequency() != analogModel->getCenterFrequency() || bandListening->getBandwidth() != analogModel->getBandwidth()) {
+            EV_DEBUG << "Computing reception possible: listening and reception bands are different -> reception is impossible" << endl;
+            return false;
+        }
+        else {
+            const INarrowbandSignal *narrowbandSignalAnalogModel = check_and_cast<const INarrowbandSignal *>(layeredReception->getAnalogModel());
+            W minReceptionPower = narrowbandSignalAnalogModel->computeMinPower(reception->getStartTime(), reception->getEndTime());
+            bool isReceptionPossible = minReceptionPower >= sensitivity;
+            EV_DEBUG << "Computing reception possible" << EV_FIELD(minReceptionPower) << EV_FIELD(sensitivity) << " -> reception is " << (isReceptionPossible ? "possible" : "impossible") << endl;
+            return isReceptionPossible;
+        }
     }
 }
 

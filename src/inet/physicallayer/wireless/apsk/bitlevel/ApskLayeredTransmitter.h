@@ -48,7 +48,7 @@ class INET_API ApskLayeredTransmitter : public TransmitterBase
     virtual const ITransmissionBitModel *createBitModel(const ITransmissionPacketModel *packetModel) const;
     virtual const ITransmissionSymbolModel *createSymbolModel(const ITransmissionBitModel *bitModel) const;
     virtual const ITransmissionSampleModel *createSampleModel(const ITransmissionSymbolModel *symbolModel) const;
-    virtual const ITransmissionAnalogModel *createAnalogModel(const ITransmissionPacketModel *packetModel, const ITransmissionBitModel *bitModel, const ITransmissionSampleModel *sampleModel) const;
+    virtual const ITransmissionAnalogModel *createAnalogModel(simtime_t startTime, const ITransmissionPacketModel *packetModel, const ITransmissionBitModel *bitModel, const ITransmissionSampleModel *sampleModel) const;
 
   public:
     ApskLayeredTransmitter();
