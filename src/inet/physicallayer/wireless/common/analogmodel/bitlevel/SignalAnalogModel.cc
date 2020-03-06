@@ -11,20 +11,26 @@ namespace inet {
 
 namespace physicallayer {
 
-SignalAnalogModel::SignalAnalogModel(const simtime_t duration) :
-    duration(duration)
+SignalAnalogModel::SignalAnalogModel(const simtime_t preambleDuration, const simtime_t headerDuration, const simtime_t dataDuration) :
+    preambleDuration(preambleDuration),
+    headerDuration(headerDuration),
+    dataDuration(dataDuration)
 {
 }
 
 std::ostream& SignalAnalogModel::printToStream(std::ostream& stream, int level, int evFlags) const
 {
-    if (level <= PRINT_LEVEL_TRACE)
-        stream << EV_FIELD(duration);
+    if (level <= PRINT_LEVEL_TRACE) {
+        stream << ", preambleDuration = " << preambleDuration
+               << ", headerDuration = " << headerDuration;
+    }
+    if (level <= PRINT_LEVEL_DEBUG)
+        stream << ", preambleDuration = " << preambleDuration;
     return stream;
 }
 
-NarrowbandSignalAnalogModel::NarrowbandSignalAnalogModel(const simtime_t duration, Hz centerFrequency, Hz bandwidth) :
-    SignalAnalogModel(duration),
+NarrowbandSignalAnalogModel::NarrowbandSignalAnalogModel(const simtime_t preambleDuration, const simtime_t headerDuration, const simtime_t dataDuration, Hz centerFrequency, Hz bandwidth) :
+    SignalAnalogModel(preambleDuration, headerDuration, dataDuration),
     centerFrequency(centerFrequency),
     bandwidth(bandwidth)
 {
