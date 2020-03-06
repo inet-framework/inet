@@ -44,12 +44,6 @@ double ScalarSnir::computeMax() const
     return unit(scalarSignalAnalogModel->getPower() / scalarNoise->computeMinPower(reception->getStartTime(), reception->getEndTime())).get();
 }
 
-double ScalarSnir::computeMean() const
-{
-    // TODO
-    return NaN;
-}
-
 double ScalarSnir::getMin() const
 {
     if (std::isnan(minSNIR))
@@ -67,8 +61,20 @@ double ScalarSnir::getMax() const
 double ScalarSnir::getMean() const
 {
     if (std::isnan(meanSNIR))
-        meanSNIR = computeMean();
+        meanSNIR = computeMean(reception->getStartTime(), reception->getEndTime());
     return meanSNIR;
+}
+
+double ScalarSnir::computeMean(simtime_t startTime, simtime_t endTime) const
+{
+    const IScalarSignal *scalarSignalAnalogModel = check_and_cast<const IScalarSignal *>(reception->getAnalogModel());
+    const ScalarNoise *scalarNoise = check_and_cast<const ScalarNoise *>(noise);
+    const auto& signalPowerFunction = makeShared<math::ConstantFunction<W, math::Domain<simtime_t>>>(scalarSignalAnalogModel->getPower());
+    const auto& snirFunction = signalPowerFunction->divide(scalarNoise->getPower());
+    math::Point<simtime_t> startPoint(startTime);
+    math::Point<simtime_t> endPoint(endTime);
+    math::Interval<simtime_t> interval(startPoint, endPoint, 0b1, 0b0, 0b0);
+    return snirFunction->getMean(interval);
 }
 
 } // namespace physicallayer

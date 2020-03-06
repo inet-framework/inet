@@ -11,9 +11,9 @@ namespace inet {
 
 namespace physicallayer {
 
-ScalarNoise::ScalarNoise(simtime_t startTime, simtime_t endTime, Hz centerFrequency, Hz bandwidth, const std::map<simtime_t, W> *powerChanges) :
+ScalarNoise::ScalarNoise(simtime_t startTime, simtime_t endTime, Hz centerFrequency, Hz bandwidth, Ptr<const math::IFunction<W, math::Domain<simtime_t>>> powerFunction) :
     NarrowbandNoiseBase(startTime, endTime, centerFrequency, bandwidth),
-    powerChanges(powerChanges)
+    powerFunction(powerFunction)
 {
 }
 
@@ -21,44 +21,24 @@ std::ostream& ScalarNoise::printToStream(std::ostream& stream, int level, int ev
 {
     stream << "ScalarNoise";
     if (level <= PRINT_LEVEL_DETAIL)
-        stream << EV_FIELD(powerChanges);
+        stream << EV_FIELD(powerFunction);
     return NarrowbandNoiseBase::printToStream(stream, level);
 }
 
 W ScalarNoise::computeMinPower(simtime_t startTime, simtime_t endTime) const
 {
-    W noisePower = W(0);
-    W minNoisePower = W(NaN);
-    simtime_t previousTime;
-    for (const auto& elem : *powerChanges) {
-        if ((std::isnan(minNoisePower.get()) || noisePower < minNoisePower) && previousTime < startTime && elem.first > endTime)
-            minNoisePower = noisePower;
-        noisePower += elem.second;
-        if ((std::isnan(minNoisePower.get()) || noisePower < minNoisePower) && startTime <= elem.first && elem.first < endTime)
-            minNoisePower = noisePower;
-        previousTime = elem.first;
-    }
-    if (std::isnan(minNoisePower.get()))
-        minNoisePower = previousTime < startTime ? W(0) : noisePower;
-    return minNoisePower;
+    math::Point<simtime_t> startPoint(startTime);
+    math::Point<simtime_t> endPoint(endTime);
+    math::Interval<simtime_t> interval(startPoint, endPoint, 0b1, 0b1, 0b0);
+    return powerFunction->getMin(interval);
 }
 
 W ScalarNoise::computeMaxPower(simtime_t startTime, simtime_t endTime) const
 {
-    W noisePower = W(0);
-    W maxNoisePower = W(NaN);
-    simtime_t previousTime;
-    for (const auto& elem : *powerChanges) {
-        if ((std::isnan(maxNoisePower.get()) || noisePower > maxNoisePower) && previousTime < startTime && elem.first > endTime)
-            maxNoisePower = noisePower;
-        noisePower += elem.second;
-        if ((std::isnan(maxNoisePower.get()) || noisePower > maxNoisePower) && startTime <= elem.first && elem.first < endTime)
-            maxNoisePower = noisePower;
-        previousTime = elem.first;
-    }
-    if (std::isnan(maxNoisePower.get()))
-        maxNoisePower = previousTime < startTime ? W(0) : noisePower;
-    return maxNoisePower;
+    math::Point<simtime_t> startPoint(startTime);
+    math::Point<simtime_t> endPoint(endTime);
+    math::Interval<simtime_t> interval(startPoint, endPoint, 0b1, 0b1, 0b0);
+    return powerFunction->getMax(interval);
 }
 
 } // namespace physicallayer
