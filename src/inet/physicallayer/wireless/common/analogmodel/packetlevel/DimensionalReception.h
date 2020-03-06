@@ -17,7 +17,7 @@ namespace physicallayer {
 
 using namespace inet::math;
 
-class INET_API DimensionalReception : public FlatReceptionBase
+class INET_API DimensionalReception : public FlatReceptionBase, public virtual IDimensionalSignal
 {
   protected:
     const Ptr<const IFunction<WpHz, Domain<simsec, Hz>>> power;
@@ -25,7 +25,7 @@ class INET_API DimensionalReception : public FlatReceptionBase
   public:
     DimensionalReception(const IRadio *radio, const ITransmission *transmission, const simtime_t startTime, const simtime_t endTime, const Coord& startPosition, const Coord& endPosition, const Quaternion& startOrientation, const Quaternion& endOrientation, Hz centerFrequency, Hz bandwidth, const Ptr<const IFunction<WpHz, Domain<simsec, Hz>>>& power);
 
-    virtual const Ptr<const IFunction<WpHz, Domain<simsec, Hz>>>& getPower() const { return power; }
+    virtual const Ptr<const IFunction<WpHz, Domain<simsec, Hz>>>& getPower() const override { return power; }
     virtual W computeMinPower(simtime_t startTime, simtime_t endTime) const override;
 };
 
