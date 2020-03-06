@@ -23,18 +23,30 @@ namespace physicallayer {
 class INET_API ISignalBitModel : public IPrintableObject
 {
   public:
-    virtual b getHeaderLength() const = 0;
     /**
-     * Returns the gross (physical) bitrate of the PHY frame header.
+     * Returns the length of the PHY frame header part.
      */
-    virtual bps getHeaderBitRate() const = 0;
+    virtual b getHeaderLength() const = 0;
+
+    /**
+     * Returns the length of the PHY frame data part.
+     */
     virtual b getDataLength() const = 0;
 
     /**
-     * Returns the gross (physical) bitrate of the PHY frame data.
+     * Returns the gross (physical) bitrate of the PHY frame header part.
      */
-    virtual bps getDataBitRate() const = 0;
-    virtual const BitVector *getBits() const = 0;
+    virtual bps getHeaderGrossBitrate() const = 0;
+
+    /**
+     * Returns the gross (physical) bitrate of the PHY frame data part.
+     */
+    virtual bps getDataGrossBitrate() const = 0;
+
+    /**
+     * Returns the all bits of the PHY frame header and data parts.
+     */
+    virtual const BitVector *getAllBits() const = 0;
 };
 
 class INET_API ITransmissionBitModel : public virtual ISignalBitModel
