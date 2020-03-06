@@ -28,6 +28,7 @@ module AckingMac extends MacProtocolBase like ILinkLayer, IMacProtocol
         string address @mutable = default("auto");   // MAC address as hex string (12 hex digits), or
                                                      // "auto". "auto" values will be replaced by
                                                      // a generated MAC address in init stage 0.
+        string fcsMode @enum("disabled", "declared", "computed") = default("disabled");
         double bitrate @unit(bps);
         int mtu @unit(B) = default(4470B);
         int headerLength @unit(B) = default(16B); // AckingMacHeader length

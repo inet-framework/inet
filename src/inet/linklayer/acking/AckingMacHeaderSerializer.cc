@@ -18,6 +18,7 @@
 namespace inet {
 
 Register_Serializer(AckingMacHeader, AckingMacHeaderSerializer);
+Register_Serializer(AckingMacTrailer, AckingMacTrailerSerializer);
 
 void AckingMacHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
@@ -48,6 +49,24 @@ const Ptr<Chunk> AckingMacHeaderSerializer::deserialize(MemoryInputStream& strea
     ASSERT(remainders >= B(0));
     stream.readByteRepeatedly('?', B(remainders).get());
     return macHeader;
+}
+
+void AckingMacTrailerSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
+{
+    const auto& macTrailer = dynamicPtrCast<const AckingMacTrailer>(chunk);
+    auto fcsMode = macTrailer->getFcsMode();
+    if (fcsMode != FCS_COMPUTED)
+        throw cRuntimeError("Cannot serialize AckingMacTrailer without properly computed FCS, try changing the value of the fcsMode parameter (e.g. in the AckingMac module)");
+    stream.writeUint32Be(macTrailer->getFcs());
+}
+
+const Ptr<Chunk> AckingMacTrailerSerializer::deserialize(MemoryInputStream& stream) const
+{
+    auto macTrailer = makeShared<AckingMacTrailer>();
+    auto fcs = stream.readUint32Be();
+    macTrailer->setFcs(fcs);
+    macTrailer->setFcsMode(FCS_COMPUTED);
+    return macTrailer;
 }
 
 Register_Class(AckingMacToEthernetPcapRecorderHelper);
