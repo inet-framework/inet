@@ -34,6 +34,10 @@ namespace keras2cpp {
                 return layers::Activation::make(file);
             case MaxPooling2D:
                 return layers::MaxPooling2D::make(file);
+            case AveragePooling1D:
+                return layers::AveragePooling1D::make(file);
+            case GlobalAveragePooling1D:
+                return layers::GlobalAveragePooling1D::make(file);
             case LSTM:
                 return layers::LSTM::make(file);
             case Embedding:

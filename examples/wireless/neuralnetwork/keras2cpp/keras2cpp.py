@@ -9,7 +9,7 @@ from keras.layers.convolutional import (Conv1D, Conv2D)
 from keras.layers.local import (LocallyConnected1D, LocallyConnected2D)
 from keras.layers.recurrent import LSTM
 from keras.layers.advanced_activations import ELU
-from keras.layers.pooling import MaxPooling2D
+from keras.layers.pooling import MaxPooling2D, AveragePooling1D, GlobalAveragePooling1D
 from keras.layers.embeddings import Embedding
 from keras.layers.normalization import BatchNormalization
 
@@ -22,6 +22,8 @@ LAYERS = (
     ELU,
     Activation,
     MaxPooling2D,
+    AveragePooling1D,
+    GlobalAveragePooling1D,
     LSTM,
     Embedding,
     BatchNormalization,
@@ -107,6 +109,7 @@ def _(layer, f):
 @export.register(InputLayer)
 def _(layer, f):
     pass
+    #f.write(struct.pack('I', return_sequences))
 
 @export.register(Dense)
 def _(layer, f):
@@ -175,6 +178,18 @@ def _(layer, f):
 
     f.write(struct.pack('I', pool_size[0]))
     f.write(struct.pack('I', pool_size[1]))
+
+
+@export.register(AveragePooling1D)
+def _(layer, f):
+    pool_size = layer.get_config()['pool_size']
+
+    f.write(struct.pack('I', pool_size[0]))
+
+
+@export.register(GlobalAveragePooling1D)
+def _(layer, f):
+    pass
 
 
 @export.register(LSTM)
