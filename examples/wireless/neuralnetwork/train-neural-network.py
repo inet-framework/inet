@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 import re
+import os
 import sys
 import csv
 import math
@@ -12,7 +13,7 @@ import tensorflow
 import keras.utils
 
 from keras.models import Model, Sequential
-from keras.layers import Activation, Dense, InputLayer, Concatenate, BatchNormalization, Conv1D
+from keras.layers import Activation, Dense, InputLayer, Concatenate, BatchNormalization, Conv1D, LSTM, GlobalAveragePooling1D, MaxPool1D, AveragePooling1D
 from keras.optimizers import SGD, Adam, Adagrad
 from keras2cpp import keras2cpp
 from PySide2.QtWidgets import QWidget, QSlider, QHBoxLayout, QSplitter, QScrollArea, QLabel, QApplication, QDialog, QLineEdit, QPushButton
@@ -23,8 +24,8 @@ parser = argparse.ArgumentParser()
 parser.add_argument("-o", "--output", default=None)
 parser.add_argument("-c", "--constantInputs", default=None)
 parser.add_argument("-p", "--optimizer", default="adam")
-parser.add_argument("-e", "--epochs", default=100, type=int)
-parser.add_argument("-b", "--batch", default=100, type=int)
+parser.add_argument("-e", "--epochs", default=1000, type=int)
+parser.add_argument("-b", "--batch", default=256, type=int)
 parser.add_argument("-n", "--numSamples", default=0, type=int)
 parser.add_argument("-g", "--showGui", default=False, action='store_true')
 parser.add_argument("-i", "--interactive", default=False, action='store_true')
@@ -76,12 +77,18 @@ def loadTrainingDataset(trainingDataset):
 inputs, outputs = loadTrainingDataset(args.trainingDataset)
 
 def buildModel(inputs=inputs, outputs=outputs):
-    tensorflow.reset_default_graph()
     print(f"Building model for {len(inputs[0])} inputs")
     model = Sequential()
-    model.add(InputLayer(input_shape=(len(inputs[0]),), name="snirs"))
-    model.add(Dense(64, activation="tanh"))
-    model.add(Dense(8, activation="tanh"))
+
+    model.add(Conv1D(filters=32, kernel_size=7, padding="same", input_shape=(None, 1)))
+    #model.add(MaxPool1D(4))
+    #model.add(Conv1D(filters=16, kernel_size=5, padding="same"))
+    model.add(AveragePooling1D(4))
+    model.add(Conv1D(filters=8, kernel_size=3, padding="same"))
+    model.add(LSTM(4, return_sequences=True))
+    model.add(GlobalAveragePooling1D())
+    model.add(Dense(32, activation="tanh"))
+    model.add(Dense(16, activation="tanh"))
     model.add(Dense(1, activation="sigmoid"))
     model.build()
     return model
@@ -92,12 +99,18 @@ def trainModel(model=model, inputs=inputs, outputs=outputs):
     optimizer = SGD() if args.optimizer == "sgd" else Adam() if args.optimizer == "adam" else exit(0)
     model.compile(loss="mean_squared_logarithmic_error", optimizer=optimizer)
     model.summary()
-    model.fit(inputs, outputs, epochs=int(args.epochs), validation_split=0.1, verbose=1, shuffle=True, batch_size=args.batch)
+    try:
+        inse = numpy.expand_dims(inputs, 2)
+        model.fit(inse, outputs, epochs=int(args.epochs), validation_split=0.1, verbose=1, shuffle=True, batch_size=args.batch)
+    except KeyboardInterrupt:
+        print("interrupted fitting")
+
 
 def saveModel(model=model):
     if args.output is None :
         args.output = re.sub("results/(.*?)(_[0-9]+)?\.log", "models/\\1", args.trainingDataset[0])
     print(f"Saving neural network model as {args.output}.h5")
+    os.makedirs(os.path.dirname(args.output), exist_ok=True)
     model.save(args.output + ".h5")
     keras2cpp.export_model(model, args.output + ".model")
 

@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <analysis version="2">
     <inputs>
-        <input pattern="/inet/examples/wireless/neuralnetwork/results/Ieee80211Radio"/>
+        <input pattern="/inet/examples/wireless/neuralnetwork/results/Ieee80211Radio/*/*.sca"/>
+        <input pattern="results/Ieee80211Radio/*/*/*/*/*.sca"/>
     </inputs>
     <charts>
         <chart icon="icons/full/obj/scatterchart.png" id="156" name="Received Packets vs Number of Noise Sources" template="scatterchart_itervars_mpl" type="MATPLOTLIB">
-            <script><![CDATA[import math
+            <script>
+                <![CDATA[import math
 import pandas as pd
 import matplotlib.pyplot as plt
 from omnetpp.scave import results, chart, utils, plot, vectorops as ops
@@ -26,7 +28,7 @@ if not xaxis_itervar or not iso_itervar:
 
 # query vector data into a data frame
 df = results.get_scalars(filter_expression, include_attrs=False, include_itervars=True, include_runattrs=True, include_config_entries=False)
-#print(df)
+print(df)
 
 df[xaxis_itervar] = pd.to_numeric(df[xaxis_itervar], errors="ignore")
 df[iso_itervar] = pd.to_numeric(df[iso_itervar], errors="ignore")
@@ -113,8 +115,10 @@ def power_sliders_on_changed(val):
     fig.canvas.draw_idle()
 power_slider.on_changed(power_sliders_on_changed)
 plt.gcf().subplots_adjust(bottom=0.25)
-]]></script>
-            <dialogPage id="Input" label="Input"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]>
+            </script>
+            <dialogPage id="Input" label="Input">
+                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
   <import xmlns="http://sweet_swt.sf.net/xswt">
     <package name="java.lang" />
@@ -148,8 +152,10 @@ plt.gcf().subplots_adjust(bottom=0.25)
     </composite>
   </x:children>
 </xswt>
-]]></dialogPage>
-            <dialogPage id="Lines" label="Lines"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]>
+            </dialogPage>
+            <dialogPage id="Lines" label="Lines">
+                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -242,8 +248,10 @@ plt.gcf().subplots_adjust(bottom=0.25)
     
   </x:children>
 </xswt>
-]]></dialogPage>
-            <dialogPage id="Plot" label="Plot"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]>
+            </dialogPage>
+            <dialogPage id="Plot" label="Plot">
+                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -407,8 +415,10 @@ plt.gcf().subplots_adjust(bottom=0.25)
 
   </x:children>
 </xswt>
-]]></dialogPage>
-            <dialogPage id="Styling" label="Styling"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]>
+            </dialogPage>
+            <dialogPage id="Styling" label="Styling">
+                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -515,8 +525,10 @@ plt.gcf().subplots_adjust(bottom=0.25)
 
   </x:children>
 </xswt>
-]]></dialogPage>
-            <dialogPage id="Advanced" label="Advanced"><![CDATA[<?xml version='1.0' encoding='UTF-8'?>
+]]>
+            </dialogPage>
+            <dialogPage id="Advanced" label="Advanced">
+                <![CDATA[<?xml version='1.0' encoding='UTF-8'?>
 <xswt xmlns:x='http://sweet_swt.sf.net/xswt'>
   <import xmlns='http://sweet_swt.sf.net/xswt'>
     <package name='java.lang'/>
@@ -535,7 +547,8 @@ plt.gcf().subplots_adjust(bottom=0.25)
     </text>
   </x:children>
 </xswt>
-]]></dialogPage>
+]]>
+            </dialogPage>
             <property name="matplotlibrc.legend.frameon" value="true"/>
             <property name="matplotlibrc.legend.fancybox" value="true"/>
             <property name="grid_show" value="true"/>
@@ -555,7 +568,7 @@ plt.gcf().subplots_adjust(bottom=0.25)
             <property name="xaxis_min" value=""/>
             <property name="matplotlibrc.axes.facecolor" value=""/>
             <property name="linewidth" value="1.5"/>
-            <property name="filter" value="module =~ &quot;*.host[0].app[0]&quot; AND name =~ packetReceived:count"/>
+            <property name="filter" value="name =~ packetReceived:*"/>
             <property name="linestyle" value="solid"/>
             <property name="markersize" value="5"/>
             <property name="drawstyle" value="auto"/>
