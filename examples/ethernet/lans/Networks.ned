@@ -70,18 +70,26 @@ network MixedLAN
         }
         switchHostA: EtherHost {
             parameters:
+                csmacdSupport = false;
+                eth.duplexMode = true;
                 @display("p=100,500");
         }
         switchHostB: EtherHost {
             parameters:
+                csmacdSupport = false;
+                eth.duplexMode = true;
                 @display("p=250,500");
         }
         switchHostC: EtherHost {
             parameters:
+                csmacdSupport = false;
+                eth.duplexMode = true;
                 @display("p=400,500");
         }
         switchHostD: EtherHost {
             parameters:
+                csmacdSupport = false;
+                eth.duplexMode = true;
                 @display("p=550,500");
         }
         switch: EtherSwitch {
@@ -168,18 +176,26 @@ network SwitchedLAN
     submodules:
         hostA: EtherHost {
             parameters:
+                csmacdSupport = false;
+                eth.duplexMode = true;
                 @display("p=250,100");
         }
         hostB: EtherHost {
             parameters:
+                csmacdSupport = false;
+                eth.duplexMode = true;
                 @display("p=400,200");
         }
         hostC: EtherHost {
             parameters:
+                csmacdSupport = false;
+                eth.duplexMode = true;
                 @display("p=250,300");
         }
         hostD: EtherHost {
             parameters:
+                csmacdSupport = false;
+                eth.duplexMode = true;
                 @display("p=100,200");
         }
         switch: EtherSwitch {
@@ -293,27 +309,29 @@ network SwitchedDuplexLAN
                 datarate = 10Mbps;
         }
 
-        module EtherHostFullDuplex extends EtherHost
-        {
+    submodules:
+        hostA: EtherHost {
             parameters:
                 csmacdSupport = false;
-        }
-
-    submodules:
-        hostA: EtherHostFullDuplex {
-            parameters:
+                eth.duplexMode = true;
                 @display("p=250,100");
         }
-        hostB: EtherHostFullDuplex {
+        hostB: EtherHost {
             parameters:
+                csmacdSupport = false;
+                eth.duplexMode = true;
                 @display("p=400,200");
         }
-        hostC: EtherHostFullDuplex {
+        hostC: EtherHost {
             parameters:
+                csmacdSupport = false;
+                eth.duplexMode = true;
                 @display("p=250,300");
         }
-        hostD: EtherHostFullDuplex {
+        hostD: EtherHost {
             parameters:
+                csmacdSupport = false;
+                eth.duplexMode = true;
                 @display("p=100,200");
         }
         switch: EtherSwitch {
