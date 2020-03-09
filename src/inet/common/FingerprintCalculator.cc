@@ -102,14 +102,11 @@ void FingerprintCalculator::addEvent(cEvent *event)
         cSingleFingerprintCalculator::addEvent(event);
     }
     else {
-        if (event->isMessage() && static_cast<cMessage *>(event)->isPacket()) {
-            auto cpacket = static_cast<cPacket *>(event);
-            auto packet = dynamic_cast<Packet *>(cpacket);
-            if (packet == nullptr)
-                packet = dynamic_cast<Packet *>(cpacket->getEncapsulatedPacket());
-            if (packet != nullptr) {
-                auto senderNode = findContainingNode(cpacket->getSenderModule());
-                auto arrivalNode = findContainingNode(cpacket->getArrivalModule());
+        if (event->isMessage()) {
+            auto msg = static_cast<cMessage *>(event);
+            if (! msg->isSelfMessage()) {
+                auto senderNode = findContainingNode(msg->getSenderModule());
+                auto arrivalNode = findContainingNode(msg->getArrivalModule());
                 if (senderNode != arrivalNode)
                     cSingleFingerprintCalculator::addEvent(event);
             }
