@@ -25,6 +25,7 @@ void FingerprintCalculator::parseIngredients(const char *s)
 {
     cSingleFingerprintCalculator::parseIngredients(s);
     filterEvents = strchr(s, NETWORK_COMMUNICATION_FILTER) != nullptr;
+    filterProgress = strchr(s, PROGRESS_CONVERTER_FILTER) != nullptr;
 }
 
 cSingleFingerprintCalculator::FingerprintIngredient FingerprintCalculator::validateIngredient(char ch)
@@ -42,20 +43,21 @@ bool FingerprintCalculator::addEventIngredient(cEvent *event, cSingleFingerprint
     else {
         switch ((FingerprintIngredient)ingredient) {
             case NETWORK_COMMUNICATION_FILTER:
+            case PROGRESS_CONVERTER_FILTER:
                 break;
             case NETWORK_NODE_PATH:
-                if (auto cpacket = dynamic_cast<cPacket *>(event)) {
-                    if (auto senderNode = findContainingNode(cpacket->getSenderModule()))
+                if (auto msg = dynamic_cast<cMessage *>(event)) {
+                    if (auto senderNode = findContainingNode(msg->getSenderModule()))
                         hasher->add(senderNode->getFullPath().c_str());
-                    if (auto arrivalNode = findContainingNode(cpacket->getArrivalModule()))
+                    if (auto arrivalNode = findContainingNode(msg->getArrivalModule()))
                         hasher->add(arrivalNode->getFullPath().c_str());
                 }
                 break;
             case NETWORK_INTERFACE_PATH:
-                if (auto cpacket = dynamic_cast<cPacket *>(event)) {
-                    if (auto senderInterface = findContainingNicModule(cpacket->getSenderModule()))
+                if (auto msg = dynamic_cast<cMessage *>(event)) {
+                    if (auto senderInterface = findContainingNicModule(msg->getSenderModule()))
                         hasher->add(senderInterface->getInterfaceFullPath().c_str());
-                    if (auto arrivalInterface = findContainingNicModule(cpacket->getArrivalModule()))
+                    if (auto arrivalInterface = findContainingNicModule(msg->getArrivalModule()))
                         hasher->add(arrivalInterface->getInterfaceFullPath().c_str());
                 }
                 break;
@@ -88,17 +90,26 @@ bool FingerprintCalculator::addEventIngredient(cEvent *event, cSingleFingerprint
 
 void FingerprintCalculator::addEvent(cEvent *event)
 {
-    if (!filterEvents)
+    if (filterProgress) {
+        if (auto progress = dynamic_cast<cProgress*>(event)) {
+            if (progress->getKind() != cProgress::PACKET_END)
+                return;
+            auto packet = progress->getPacket();
+            packet->setArrival(progress->getArrivalModuleId(), progress->getArrivalGateId(), progress->getArrivalTime());
+            packet->setSentFrom(progress->getSenderModule(), progress->getSenderGateId(), progress->getSendingTime());
+            event = packet;
+        }
+    }
+
+    if (!filterEvents) {
         cSingleFingerprintCalculator::addEvent(event);
+    }
     else {
-        if (event->isMessage() && static_cast<cMessage *>(event)->isPacket()) {
-            auto cpacket = static_cast<cPacket *>(event);
-            auto packet = dynamic_cast<Packet *>(cpacket);
-            if (packet == nullptr)
-                packet = dynamic_cast<Packet *>(cpacket->getEncapsulatedPacket());
-            if (packet != nullptr) {
-                auto senderNode = findContainingNode(cpacket->getSenderModule());
-                auto arrivalNode = findContainingNode(cpacket->getArrivalModule());
+        if (event->isMessage()) {
+            auto msg = static_cast<cMessage *>(event);
+            if (! msg->isSelfMessage()) {
+                auto senderNode = findContainingNode(msg->getSenderModule());
+                auto arrivalNode = findContainingNode(msg->getArrivalModule());
                 if (senderNode != arrivalNode)
                     cSingleFingerprintCalculator::addEvent(event);
             }

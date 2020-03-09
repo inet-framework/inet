@@ -20,7 +20,7 @@
 
 namespace inet {
 
-#define INET_FINGERPRINT_INGREDIENTS "~NID"
+#define INET_FINGERPRINT_INGREDIENTS "~NIDP"
 
 class INET_API FingerprintCalculator : public cSingleFingerprintCalculator
 {
@@ -30,10 +30,12 @@ class INET_API FingerprintCalculator : public cSingleFingerprintCalculator
         NETWORK_NODE_PATH            = 'N',
         NETWORK_INTERFACE_PATH       = 'I',
         PACKET_DATA                  = 'D',
+        PROGRESS_CONVERTER_FILTER              = 'P',     // decode cProgress::PACKET_END to packet, filtering out other cProgress messages
     };
 
   protected:
     bool filterEvents = false;
+    bool filterProgress = false;
 
   protected:
     virtual void parseIngredients(const char *s) override;
