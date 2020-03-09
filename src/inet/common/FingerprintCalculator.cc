@@ -94,7 +94,10 @@ void FingerprintCalculator::addEvent(cEvent *event)
         if (auto progress = dynamic_cast<cProgress*>(event)) {
             if (progress->getKind() != cProgress::PACKET_END)
                 return;
-            event = progress->getPacket();
+            auto packet = progress->getPacket();
+            packet->setArrival(progress->getArrivalModuleId(), progress->getArrivalGateId(), progress->getArrivalTime());
+            packet->setSentFrom(progress->getSenderModule(), progress->getSenderGateId(), progress->getSendingTime());
+            event = packet;
         }
     }
 
