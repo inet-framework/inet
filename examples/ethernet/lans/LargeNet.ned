@@ -57,6 +57,7 @@ module SmallLAN
         }
         host[h]: EtherHost {
             parameters:
+                csmacdSupport = true;
                 eth.duplexMode = false;
                 @display("p=100,200,row,150");
         }
@@ -87,13 +88,18 @@ module MediumLAN
                 @display("p=625,100");
         }
         host[n]: EtherHost {
-            @display("p=100,200,row,150");
+            parameters:
+                csmacdSupport = false;
+                eth.duplexMode = true;
+                @display("p=100,200,row,150");
         }
         hub: EtherHub {
-            @display("p=625,300");
+            parameters:
+                @display("p=625,300");
         }
         hhost[h]: EtherHost {
             parameters:
+                csmacdSupport = true;
                 eth.duplexMode = false;
                 @display("p=325,400,row,150");
         }
@@ -139,13 +145,18 @@ module LargeLAN
                 @display("p=450,100");
         }
         host[n]: EtherHost {
-            @display("p=100,200,row,100");
+            parameters:
+                csmacdSupport = false;
+                eth.duplexMode = true;
+                @display("p=100,200,row,100");
         }
         hub: EtherHub {
-            @display("p=900,100");
+            parameters:
+                @display("p=900,100");
         }
         hhost[h]: EtherHost {
             parameters:
+                csmacdSupport = true;
                 eth.duplexMode = false;
                 @display("p=1050,100,col,100");
         }
@@ -157,6 +168,7 @@ module LargeLAN
         }
         bhost[b]: EtherHost {
             parameters:
+                csmacdSupport = true;
                 eth.duplexMode = false;
                 @display("p=100,400,row,100");
         }
@@ -226,7 +238,10 @@ network LargeNet
             @display("p=400,580");
         }
         serverA: EtherHost {
-            @display("p=550,580");
+            parameters:
+                csmacdSupport = false;
+                eth.duplexMode = true;
+                @display("p=550,580");
         }
         slanA[as]: SmallLAN {
             @display("p=250,580");
@@ -241,7 +256,10 @@ network LargeNet
             @display("p=700,380");
         }
         serverB: EtherHost {
-            @display("p=850,380");
+            parameters:
+                csmacdSupport = false;
+                eth.duplexMode = true;
+                @display("p=850,380");
         }
         slanB[bs]: SmallLAN {
             @display("p=550,380");
@@ -256,7 +274,10 @@ network LargeNet
             @display("p=1000,580");
         }
         serverC: EtherHost {
-            @display("p=1150,580");
+            parameters:
+                csmacdSupport = false;
+                eth.duplexMode = true;
+                @display("p=1150,580");
         }
         slanC[cs]: SmallLAN {
             @display("p=850,580");
@@ -271,7 +292,10 @@ network LargeNet
             @display("p=1300,380");
         }
         serverD: EtherHost {
-            @display("p=1450,380");
+            parameters:
+                csmacdSupport = false;
+                eth.duplexMode = true;
+                @display("p=1450,380");
         }
         slanD[ds]: SmallLAN {
             @display("p=1150,380");

@@ -98,23 +98,41 @@ network LargeNet extends SwitchNetwork
         *.eth[*].bitrate = 1 Gbps;
     submodules:
         host1: EtherHost {
-            @display("p=250,200");
+            parameters:
+                csmacdSupport = false;
+                eth.duplexMode = true;
+                @display("p=250,200");
         }
         host2: EtherHost {
-            @display("p=775,300");
+            parameters:
+                csmacdSupport = false;
+                eth.duplexMode = true;
+                @display("p=775,300");
         }
 
         host3: EtherHost {
+            parameters:
+            csmacdSupport = false;
+            eth.duplexMode = true;
             @display("p=700,100");
         }
         host4: EtherHost {
-            @display("p=775,470");
+            parameters:
+                csmacdSupport = false;
+                eth.duplexMode = true;
+                @display("p=775,470");
         }
         host5: EtherHost {
-            @display("p=325,470");
+            parameters:
+                csmacdSupport = false;
+                eth.duplexMode = true;
+                @display("p=325,470");
         }
         host6: EtherHost {
-            @display("p=325,370");
+            parameters:
+                csmacdSupport = false;
+                eth.duplexMode = true;
+                @display("p=325,370");
         }
         switch8: EtherSwitch {
             @display("p=475,370");

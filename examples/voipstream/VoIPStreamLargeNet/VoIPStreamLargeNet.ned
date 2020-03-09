@@ -87,13 +87,17 @@ module VoIPStreamMediumLAN
                 @display("is=s");
         }
         host[n]: EtherHost {
-            @display("is=s");
+            parameters:
+                csmacdSupport = false;
+                eth.duplexMode = true;
+                @display("is=s");
         }
         hub: EtherHub {
             @display("is=s");
         }
         hhost[h]: EtherHost {
             parameters:
+                csmacdSupport = true;
                 eth.duplexMode = false;
                 @display("is=s");
         }
@@ -133,13 +137,18 @@ module VoIPStreamLargeLAN
                 @display("is=s");
         }
         host[n]: EtherHost {
-            @display("is=s");
+            parameters:
+                csmacdSupport = false;
+                eth.duplexMode = true;
+                @display("is=s");
         }
         hub: EtherHub {
-            @display("is=s");
+            parameters:
+                @display("is=s");
         }
         hhost[h]: EtherHost {
             parameters:
+                csmacdSupport = true;
                 eth.duplexMode = false;
                 @display("is=s");
         }
@@ -151,6 +160,7 @@ module VoIPStreamLargeLAN
         }
         bhost[b]: EtherHost {
             parameters:
+                csmacdSupport = true;
                 eth.duplexMode = false;
                 @display("is=s;p=,,r");
         }
@@ -206,22 +216,38 @@ network VoIPStreamLargeNet
         mlanBB[n*bbm]: VoIPStreamMediumLAN;
         llanBB[n*bbl]: VoIPStreamLargeLAN;
         switchA: EtherSwitch;
-        serverA: EtherHost;
+        serverA: EtherHost {
+            parameters:
+                csmacdSupport = false;
+                eth.duplexMode = true;
+        }
         slanA[as]: VoIPStreamSmallLAN;
         mlanA[am]: VoIPStreamMediumLAN;
         llanA[al]: VoIPStreamLargeLAN;
         switchB: EtherSwitch;
-        serverB: EtherHost;
+        serverB: EtherHost {
+            parameters:
+                csmacdSupport = false;
+                eth.duplexMode = true;
+        }
         slanB[bs]: VoIPStreamSmallLAN;
         mlanB[bm]: VoIPStreamMediumLAN;
         llanB[bl]: VoIPStreamLargeLAN;
         switchC: EtherSwitch;
-        serverC: EtherHost;
+        serverC: EtherHost {
+            parameters:
+                csmacdSupport = false;
+                eth.duplexMode = true;
+        }
         slanC[cs]: VoIPStreamSmallLAN;
         mlanC[cm]: VoIPStreamMediumLAN;
         llanC[cl]: VoIPStreamLargeLAN;
         switchD: EtherSwitch;
-        serverD: EtherHost;
+        serverD: EtherHost {
+            parameters:
+                csmacdSupport = false;
+                eth.duplexMode = true;
+        }
         slanD[ds]: VoIPStreamSmallLAN;
         mlanD[dm]: VoIPStreamMediumLAN;
         llanD[dl]: VoIPStreamLargeLAN;
