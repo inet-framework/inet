@@ -41,8 +41,6 @@ namespace keras2cpp{
             kassert(in.ndim() == 2);  // steps, features
             kassert(in.dims_[0] % pool_size_ == 0);
 
-            const auto& iw = in.dims_;
-
             int num_steps = in.dims_[0];
             int num_pools = num_steps / pool_size_;
             int num_features = in.dims_[1];
@@ -53,7 +51,7 @@ namespace keras2cpp{
                 for (int pool = 0; pool < num_pools; ++pool) {
                     float sum = 0;
                     for (int step_of_pool = 0; step_of_pool < pool_size_; ++step_of_pool)
-                        sum += in.data_[step_of_pool * pool_size * num_features + step * num_features + feature];
+                        sum += in.data_[step_of_pool * pool_size_ * num_features + step_of_pool * num_features + feature];
                     out.data_[pool * num_features + feature] = sum / pool_size_;
                 }
             }
@@ -65,12 +63,10 @@ namespace keras2cpp{
 
 
         GlobalAveragePooling1D::GlobalAveragePooling1D(Stream& file)
-        : {}
+        {}
 
         Tensor GlobalAveragePooling1D::operator()(const Tensor& in) const noexcept {
             kassert(in.ndim() == 2);  // steps, features
-
-            const auto& iw = in.dims_;
 
             int num_steps = in.dims_[0];
             int num_features = in.dims_[1];
