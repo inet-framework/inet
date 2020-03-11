@@ -113,12 +113,25 @@ void VoipStreamSender::initialize(int stage)
         // say HELLO to the world
         EV_TRACE << "VoIPSourceApp -> initialize(" << stage << ")" << endl;
 
-        // Hack for create results folder
+        // KLUDGE: TODO: hack to create results folder (doesn't work when record-scalars = false)
         recordScalar("hackForCreateResultsFolder", 0);
 
         destAddress = L3AddressResolver().resolve(par("destAddress"));
         socket.setOutputGate(gate("socketOut"));
+
         socket.bind(localPort);
+
+        int timeToLive = par("timeToLive");
+        if (timeToLive != -1)
+            socket.setTimeToLive(timeToLive);
+
+        int dscp = par("dscp");
+        if (dscp != -1)
+            socket.setDscp(dscp);
+
+        int tos = par("tos");
+        if (tos != -1)
+            socket.setTos(tos);
 
         simtime_t startTime = par("startTime");
 
@@ -350,15 +363,19 @@ Packet *VoipStreamSender::generatePacket()
         pk->setName("SILENCE");
         vp->setType(SILENCE);
         vp->setChunkLength(B(voipSilencePacketSize));
+        vp->setHeaderLength(voipSilencePacketSize);
+        vp->setDataLength(0);
     }
     else {
         pk->setName("VOICE");
         vp->setType(VOICE);
-        vp->getBytesForUpdate().setDataFromBuffer(opacket.data, opacket.size);
-        vp->setChunkLength(B(voipHeaderSize + opacket.size));
+        vp->setDataLength(opacket.size);
+        vp->setChunkLength(B(voipHeaderSize));
+        vp->setHeaderLength(voipHeaderSize);
+        const auto& voice = makeShared<BytesChunk>(opacket.data, opacket.size);
+        pk->insertAtFront(voice);
     }
 
-    vp->setHeaderLength(voipHeaderSize);
     vp->setTimeStamp(pktID);
     vp->setSeqNo(pktID);
     vp->setCodec(pEncoderCtx->codec_id);
@@ -366,7 +383,7 @@ Packet *VoipStreamSender::generatePacket()
     vp->setSampleBits(pEncoderCtx->bits_per_coded_sample);
     vp->setSamplesPerPacket(samplesPerPacket);
     vp->setTransmitBitrate(compressedBitRate);
-    pk->insertAtBack(vp);
+    pk->insertAtFront(vp);
 
     pktID++;
 

@@ -1,5 +1,7 @@
 ====== inet-4.x ======
 
+2020-01-08  ------ inet-4.2.0 released ------
+
 2019-11-05  Zoltan Bojthe
 
 	Added isLocal() function to MacAddress for testing U/L bit (fix for #94).

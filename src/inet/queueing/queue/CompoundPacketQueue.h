@@ -26,7 +26,7 @@
 namespace inet {
 namespace queueing {
 
-class INET_API CompoundPacketQueue : public PacketQueueBase
+class INET_API CompoundPacketQueue : public PacketQueueBase, public cListener
 {
   protected:
     int packetCapacity = -1;
@@ -43,23 +43,25 @@ class INET_API CompoundPacketQueue : public PacketQueueBase
     virtual void initialize(int stage) override;
 
   public:
-    virtual int getMaxNumPackets() override { return packetCapacity; }
-    virtual int getNumPackets() override;
+    virtual int getMaxNumPackets() const override { return packetCapacity; }
+    virtual int getNumPackets() const override { return collection->getNumPackets(); }
 
-    virtual b getMaxTotalLength() override { return dataCapacity; }
-    virtual b getTotalLength() override;
+    virtual b getMaxTotalLength() const override { return dataCapacity; }
+    virtual b getTotalLength() const override { return collection->getTotalLength(); }
 
-    virtual bool isEmpty() override { return collection->isEmpty(); }
-    virtual Packet *getPacket(int index) override;
+    virtual bool isEmpty() const override { return collection->isEmpty(); }
+    virtual Packet *getPacket(int index) const override { return collection->getPacket(index); }
     virtual void removePacket(Packet *packet) override;
 
-    virtual bool supportsPushPacket(cGate *gate) override { return inputGate == gate; }
-    virtual bool canPushPacket(Packet *packet, cGate *gate) override { return true; }
+    virtual bool supportsPushPacket(cGate *gate) const override { return inputGate == gate; }
+    virtual bool canPushPacket(Packet *packet, cGate *gate) const override { return true; }
     virtual void pushPacket(Packet *packet, cGate *gate) override;
 
-    virtual bool supportsPopPacket(cGate *gate) override { return outputGate == gate; }
-    virtual Packet *canPopPacket(cGate *gate) override { throw cRuntimeError("Invalid operation"); }
+    virtual bool supportsPopPacket(cGate *gate) const override { return outputGate == gate; }
+    virtual Packet *canPopPacket(cGate *gate) const override { throw cRuntimeError("Invalid operation"); }
     virtual Packet *popPacket(cGate *gate) override;
+
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override;
 };
 
 } // namespace queueing

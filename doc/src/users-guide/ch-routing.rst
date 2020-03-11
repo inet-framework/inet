@@ -105,11 +105,11 @@ system (AS).
 
 :ned:`OspfRouter` is a :ned:`Router` with the OSPF protocol enabled.
 
-The :ned:`Ospf` module implements OSPF protocol version 2. Areas and
+The :ned:`Ospfv2` module implements OSPF protocol version 2. Areas and
 routers can be configured using an XML file specified by the
 :par:`ospfConfig` parameter. Various parameters for the network
 interfaces can be specified also in the XML file or as a parameter of
-the :ned:`Ospf` module.
+the :ned:`Ospfv2` module.
 
 .. code-block:: ini
 

@@ -36,14 +36,14 @@ class INET_API IPassivePacketSink
      * packets can be pushed into it without raising an error. The gate must
      * support pushing packets.
      */
-    virtual bool canPushSomePacket(cGate *gate = nullptr) = 0;
+    virtual bool canPushSomePacket(cGate *gate = nullptr) const = 0;
 
     /**
      * Returns true if the given packet can be pushed at the given gate into
      * the packet sink. The packet must not be nullptr and the gate must support
      * pushing packets.
      */
-    virtual bool canPushPacket(Packet *packet, cGate *gate = nullptr) = 0;
+    virtual bool canPushPacket(Packet *packet, cGate *gate = nullptr) const = 0;
 
     /**
      * Pushes a packet into the packet sink at the given gate. The consumer must

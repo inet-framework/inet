@@ -31,10 +31,11 @@ MarkovScheduler::~MarkovScheduler()
 
 void MarkovScheduler::initialize(int stage)
 {
-    PacketSchedulerBase::initialize(stage);
+    if (stage != INITSTAGE_QUEUEING)
+        PacketSchedulerBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         for (int i = 0; i < gateSize("in"); i++) {
-            auto input = getConnectedModule<IActivePacketSource>(inputGates[i]);
+            auto input = findConnectedModule<IActivePacketSource>(inputGates[i]);
             producers.push_back(input);
         }
         consumer = findConnectedModule<IPassivePacketSink>(outputGate);
@@ -56,11 +57,11 @@ void MarkovScheduler::initialize(int stage)
         WATCH(state);
     }
     else if (stage == INITSTAGE_QUEUEING) {
-        for (auto inputGate : inputGates)
-            checkPushPacketSupport(inputGate);
-        if (consumer != nullptr)
-            checkPushPacketSupport(outputGate);
-        producers[state]->handleCanPushPacket(inputGates[state]);
+        for (int i = 0; i < (int)inputGates.size(); i++)
+            checkPushOrPopPacketSupport(inputGates[i]);
+        checkPushOrPopPacketSupport(outputGate);
+        if (producers[state] != nullptr)
+            producers[state]->handleCanPushPacket(inputGates[state]);
         scheduleWaitTimer();
     }
 }
@@ -78,7 +79,8 @@ void MarkovScheduler::handleMessage(cMessage *message)
                 break;
             }
         }
-        producers[state]->handleCanPushPacket(inputGates[state]);
+        if (producers[state] != nullptr)
+            producers[state]->handleCanPushPacket(inputGates[state]);
         scheduleWaitTimer();
     }
     else
@@ -95,12 +97,12 @@ void MarkovScheduler::scheduleWaitTimer()
     scheduleAt(simTime() + waitIntervals[state].doubleValue(this), waitTimer);
 }
 
-bool MarkovScheduler::canPushSomePacket(cGate *gate)
+bool MarkovScheduler::canPushSomePacket(cGate *gate) const
 {
     return gate->getIndex() == state;
 }
 
-bool MarkovScheduler::canPushPacket(Packet *packet, cGate *gate)
+bool MarkovScheduler::canPushPacket(Packet *packet, cGate *gate) const
 {
     return canPushSomePacket(gate);
 }
@@ -116,10 +118,24 @@ void MarkovScheduler::pushPacket(Packet *packet, cGate *gate)
     updateDisplayString();
 }
 
+const char *MarkovScheduler::resolveDirective(char directive) const
+{
+    static std::string result;
+    switch (directive) {
+        case 's':
+            result = std::to_string(state);
+            break;
+        default:
+            return PacketProcessorBase::resolveDirective(directive);
+    }
+    return result.c_str();
+}
+
 void MarkovScheduler::handleCanPushPacket(cGate *gate)
 {
     Enter_Method("handleCanPushPacket");
-    producers[state]->handleCanPushPacket(inputGates[state]);
+    if (producers[state] != nullptr)
+        producers[state]->handleCanPushPacket(inputGates[state]);
 }
 
 } // namespace queueing

@@ -43,7 +43,7 @@ std::ostream& operator<<(std::ostream& os, Ipv6ExtensionHeader eh);
 class Ipv6ExtensionHeader extends cObject
 {
     @packetData;
-    short extensionType;
+    uint8_t extensionType;
     B byteLength = B(0);   // byteLength = n * 8;
 }
 
@@ -55,18 +55,21 @@ cplusplus(Ipv6ExtensionHeader) {{
 // Ipv6 datagram. RFC 2460 Section 3.
 //
 // Header fields not explicitly modelled:
-//    - version (=6): represented by the class name itself
 //    - payload length: will be calculated from encapsulated message length
 //      and extension headers' length
 //
 class Ipv6Header extends NetworkHeaderBase
 {
     chunkLength = IPv6_HEADER_BYTES;
+    uint8_t version = 6;
     Ipv6Address srcAddress;
     Ipv6Address destAddress;
     B payloadLength = B(-1);    // The size of the payload in octets, including any extension headers. The length is set to zero when a Hop-by-Hop extension header carries a Jumbo Payload option.
-    short diffServCodePoint;  // bits 0-5 of trafficClass
-    short explicitCongestionNotification;  // bits 6-7 of trafficClass
+    short trafficClass;    // @bits(8) Traffic Class
+    // OMNeT++ 6.0:
+    // short __dscp @custom @getter(getDscp) @setter(setDscp);  // @bit(6), maps to bits 0-5 of trafficClass
+    // short __ecn @custom @getter(getEcn) @setter(setEcn);  // @bit(2),  maps to bits 6-7 of trafficClass
+
     unsigned int flowLabel;
     short hopLimit = 0;
     IpProtocolId protocolId = IP_PROT_NONE;
@@ -76,8 +79,10 @@ class Ipv6Header extends NetworkHeaderBase
 
 cplusplus(Ipv6Header) {{
   public:
-    virtual short getTrafficClass() const;
-    virtual void setTrafficClass(short trafficClass);
+    virtual short getDscp() const;
+    virtual void setDscp(short dscp);
+    virtual short getEcn() const;
+    virtual void setEcn(short ecn);
 
     /**
      * Returns the extension header of the specified type,

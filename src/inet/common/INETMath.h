@@ -141,10 +141,14 @@ inline bool close(double one, double two) { return fabs(one - two) < EPSILON; }
  */
 inline int stepfunction(double i) { return (i > EPSILON) ? 1 : close(i, 0) ? 0 : -1; };
 
+inline double step(double a, double b) { return b < a ? 0.0 : 1.0; };
+
+inline double clamp(double v, double l, double u) { return v < l ? l : v > u ? u : v; }
+
 /**
- * Returns 1 if the parameter is greater or equal to zero, -1 otherwise
+ * Returns 1 if the parameter is greater than zero, -1 if less than zero, 0 otherwise.
  */
-inline int sign(double i) { return (i >= 0) ? 1 : -1; };
+inline int sign(double v) { return (0 < v) - (v < 0); };
 
 /**
  * Returns an integer that corresponds to rounded double parameter

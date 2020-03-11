@@ -186,8 +186,11 @@ class Ipv4Header extends NetworkHeaderBase
 
     short version = 4;      // @bit(4)
     B headerLength = IPv4_MIN_HEADER_LENGTH;         // @bit(4), bytes, must be multiple of 4
-    short diffServCodePoint;  // @bit(6), maps to bits 0-5 of ToS
-    short explicitCongestionNotification;  // @bit(2),  maps to bits 6-7 of ToS
+    short typeOfService;    // @bit(8)
+    // OMNeT++ 6.0:
+    // short __dscp @custom @getter(getDscp) @setter(setDscp);  // @bit(6), maps to bits 0-5 of ToS, stored in typeOfService
+    // short __ecn @custom @getter(getEcn) @setter(setEcn);  // @bit(2),  maps to bits 6-7 of ToS, stored in typeOfService
+
     B totalLengthField;    // @byte(2)
 
     uint16_t identification;    // @byte(2)
@@ -210,8 +213,10 @@ class Ipv4Header extends NetworkHeaderBase
 
 cplusplus(Ipv4Header) {{
   public:
-    virtual short getTypeOfService() const;
-    virtual void setTypeOfService(short typeOfService);
+    virtual short getDscp() const;
+    virtual void setDscp(short dscp);
+    virtual short getEcn() const;
+    virtual void setEcn(short ecn);
 
     /**
      * Returns the number of extension headers in this datagram
@@ -221,8 +226,8 @@ cplusplus(Ipv4Header) {{
     /**
      * Returns the kth extension header in this datagram
      */
-    virtual TlvOptionBase& getOptionForUpdate(unsigned int k) { handleChange(); return *check_and_cast<TlvOptionBase *>((options.getTlvOptionForUpdate(k))); }
-    virtual const TlvOptionBase& getOption(unsigned int k) const { return *check_and_cast<const TlvOptionBase *>((options.getTlvOption(k))); }
+    virtual TlvOptionBase& getOptionForUpdate(unsigned int k) { handleChange(); return *CHK((options.getTlvOptionForUpdate(k))); }
+    virtual const TlvOptionBase& getOption(unsigned int k) const { return *CHK((options.getTlvOption(k))); }
 
     /**
      * Returns the TlvOptionBase of the specified type,

@@ -22,16 +22,22 @@ namespace queueing {
 
 Define_Module(ContentBasedScheduler);
 
+ContentBasedScheduler::~ContentBasedScheduler()
+{
+    for (auto filter : filters)
+        delete filter;
+}
+
 void ContentBasedScheduler::initialize(int stage)
 {
     PacketSchedulerBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         defaultGateIndex = par("defaultGateIndex");
-        cStringTokenizer packetFilterTokenizer(par("packetFilter"), ";");
-        cStringTokenizer packetDataFilterTokenizer(par("packetDataFilter"), ";");
+        cStringTokenizer packetFilterTokenizer(par("packetFilters"), ";");
+        cStringTokenizer packetDataFilterTokenizer(par("packetDataFilters"), ";");
         while (packetFilterTokenizer.hasMoreTokens() && packetDataFilterTokenizer.hasMoreTokens()) {
-            PacketFilter filter;
-            filter.setPattern(packetFilterTokenizer.nextToken(), packetDataFilterTokenizer.nextToken());
+            auto filter = new PacketFilter();
+            filter->setPattern(packetFilterTokenizer.nextToken(), packetDataFilterTokenizer.nextToken());
             filters.push_back(filter);
         }
     }
@@ -39,11 +45,10 @@ void ContentBasedScheduler::initialize(int stage)
 
 int ContentBasedScheduler::schedulePacket()
 {
-    for (int i = 0; i < (int)inputGates.size(); i++) {
-        auto provider = providers[i];
-        auto packet = provider->canPopPacket(inputGates[i]);
-        for (auto filter : filters) {
-            if (filter.matches(packet))
+    for (auto filter : filters) {
+        for (int i = 0; i < (int)inputGates.size(); i++) {
+            auto packet = providers[i]->canPopPacket(inputGates[i]);
+            if (packet != nullptr && filter->matches(packet))
                 return i;
         }
     }

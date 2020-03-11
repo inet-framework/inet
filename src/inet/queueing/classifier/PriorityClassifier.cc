@@ -32,7 +32,7 @@ int PriorityClassifier::classifyPacket(Packet *packet)
     return -1;
 }
 
-bool PriorityClassifier::canPushSomePacket(cGate *gate)
+bool PriorityClassifier::canPushSomePacket(cGate *gate) const
 {
     for (int i = 0; i < (int)consumers.size(); i++) {
         auto outputConsumer = consumers[i];
@@ -42,7 +42,7 @@ bool PriorityClassifier::canPushSomePacket(cGate *gate)
     return false;
 }
 
-bool PriorityClassifier::canPushPacket(Packet *packet, cGate *gate)
+bool PriorityClassifier::canPushPacket(Packet *packet, cGate *gate) const
 {
     for (int i = 0; i < (int)consumers.size(); i++) {
         auto consumer = consumers[i];

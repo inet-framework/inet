@@ -14,9 +14,7 @@
 // @author Zoltan Bojthe
 //
 
-
-// package module_.lib;
-
+package inet.test.moduletest.lib;
 
 //
 // a simple queue for prevents "channel is currently busy with an ongoing transmission"

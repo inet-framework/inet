@@ -44,6 +44,7 @@ Define_Module(UdpBasicBurst);
 int UdpBasicBurst::counter;
 
 simsignal_t UdpBasicBurst::outOfOrderPkSignal = registerSignal("outOfOrderPk");
+simsignal_t UdpBasicBurst::excessiveDelayPksignal = registerSignal("excessiveDelayPk");
 
 UdpBasicBurst::~UdpBasicBurst()
 {
@@ -76,6 +77,8 @@ void UdpBasicBurst::initialize(int stage)
         nextPkt = startTime;
         dontFragment = par("dontFragment");
 
+        excessiveDelay = par("excessiveDelay");
+
         destAddrRNG = par("destAddrRNG");
         const char *addrModeStr = par("chooseDestAddrMode");
         int addrMode = cEnum::get("inet::ChooseDestAddrMode")->lookup(addrModeStr);
@@ -93,6 +96,8 @@ void UdpBasicBurst::initialize(int stage)
 
         timerNext = new cMessage("UDPBasicBurstTimer");
 
+    }
+    else if (stage == INITSTAGE_APPLICATION_LAYER) {
         if (hasPar("registerInInit") && par("registerInInit").boolValue()) {
             socket.setOutputGate(gate("socketOut"));
             socket.setCallback(this);
@@ -142,6 +147,10 @@ void UdpBasicBurst::processStart()
     int dscp = par("dscp");
     if (dscp != -1)
         socket.setDscp(dscp);
+
+    int tos = par("tos");
+    if (tos != -1)
+        socket.setTos(tos);
 
     const char *destAddrs = par("destAddresses");
     cStringTokenizer tokenizer(destAddrs);
@@ -271,6 +280,8 @@ void UdpBasicBurst::processPacket(Packet *pk)
         else
             sourceSequence[moduleId] = msgId;
     }
+    else
+        throw cRuntimeError("no id in the packet");
 
     if (delayLimit > 0) {
         if (simTime() - pk->getTimestamp() > delayLimit) {
@@ -281,6 +292,12 @@ void UdpBasicBurst::processPacket(Packet *pk)
             delete pk;
             numDeleted++;
             return;
+        }
+    }
+    if (excessiveDelay > 0) {
+        if (simTime() - pk->getTimestamp() > excessiveDelay) {
+            numExessiveDelay++;
+            emit(excessiveDelayPksignal, pk);
         }
     }
 
@@ -348,6 +365,7 @@ void UdpBasicBurst::finish()
     recordScalar("Total sent", numSent);
     recordScalar("Total received", numReceived);
     recordScalar("Total deleted", numDeleted);
+    recordScalar("Total Excessive Delay", numExessiveDelay);
     ApplicationBase::finish();
 }
 

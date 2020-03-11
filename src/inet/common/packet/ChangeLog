@@ -1,5 +1,15 @@
 ====== inet-4.x ======
 
+2020-01-08  ------ inet-4.2.0 released ------
+
+2019-12-12  Levente Mészáros
+
+	Fixed not returning the correct chunk from removeAll().
+
+2019-12-05  Gyorgy Szaszko
+
+	Added displaying attached tags of Packets in Qtenv.
+
 2019-09-18  Levente Mészáros
 
 	Followed chunk API length parameter changes with Packet and ChunkQueue.

@@ -5,6 +5,7 @@ UDP communication via lo0 interface
 %#--------------------------------------------------------------------------------------------------------------
 %file: test.ned
 
+import inet.test.moduletest.lib.*;
 import inet.node.ipv6.StandardHost6;
 
 network LocalUDP

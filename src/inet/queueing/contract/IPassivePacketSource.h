@@ -36,14 +36,14 @@ class INET_API IPassivePacketSource
      * packets can be popped without raising an error. The gate must support
      * popping packets.
      */
-    virtual bool canPopSomePacket(cGate *gate = nullptr) = 0;
+    virtual bool canPopSomePacket(cGate *gate = nullptr) const = 0;
 
     /**
      * Returns the packet that can be popped at the given gate. The returned
      * value may be nullptr if there is no such packet. The gate must support
      * popping packets.
      */
-    virtual Packet *canPopPacket(cGate *gate = nullptr) = 0;
+    virtual Packet *canPopPacket(cGate *gate = nullptr) const = 0;
 
     /**
      * Pops a packet from the packet source at the given gate. The provider must

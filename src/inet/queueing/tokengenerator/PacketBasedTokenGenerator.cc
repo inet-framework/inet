@@ -37,6 +37,10 @@ void PacketBasedTokenGenerator::initialize(int stage)
         numTokensGenerated = 0;
         WATCH(numTokensGenerated);
     }
+    else if (stage == INITSTAGE_QUEUEING) {
+        if (producer != nullptr)
+            producer->handleCanPushPacket(inputGate);
+    }
 }
 
 void PacketBasedTokenGenerator::pushPacket(Packet *packet, cGate *gate)
@@ -52,7 +56,7 @@ void PacketBasedTokenGenerator::pushPacket(Packet *packet, cGate *gate)
     delete packet;
 }
 
-const char *PacketBasedTokenGenerator::resolveDirective(char directive)
+const char *PacketBasedTokenGenerator::resolveDirective(char directive) const
 {
     static std::string result;
     switch (directive) {

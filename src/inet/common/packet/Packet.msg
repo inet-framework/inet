@@ -27,10 +27,15 @@ class Packet extends cPacket
 {
     @existingClass;
     @descriptor(readonly);
-    b totalLength;
     b dataLength;
+    b totalLength;
+    ChunkTemporarySharedPtr *data @packetData @getter(getData);
+    ChunkTemporarySharedPtr *dissection @packetData @getter(getDissection);
+    Chunk *content @packetData @getter(getContent);
+    cObject *tags[] @getter(getTag) @sizeGetter(getNumTags);
+
     b frontOffset;
     b backOffset;
-    Chunk* content @packetData @getter(getContent);
-    cObject *tags[] @getter(getTag) @sizeGetter(getNumTags);
+    ChunkTemporarySharedPtr *front @packetData @getter(getFront);
+    ChunkTemporarySharedPtr *back @packetData @getter(getBack);
 }

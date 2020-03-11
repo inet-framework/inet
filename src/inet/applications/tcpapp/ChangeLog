@@ -1,5 +1,23 @@
 ====== inet-4.x ======
 
+2020-01-08  ------ inet-4.2.0 released ------
+
+2019-11-20  Zoltan Bojthe
+
+	Simplified packet API usage in TcpGenericServerThread.
+
+2019-11-19  Levente Mészáros
+
+	Fixed many memory leaks detected by Valgrind.
+
+2019-11-18  Zoltan Bojthe
+
+	Added TOS support (added 'tos' NED parameter).
+
+2019-11-13  Zoltan Bojthe
+
+	Renamed typeOfService parameter to dscp.
+
 2019-11-08  Levente Mészáros
 
 	Fixed memory leaks detected by static analysis.

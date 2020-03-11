@@ -1,5 +1,11 @@
 ====== inet-4.x ======
 
+2020-01-08  ------ inet-4.2.0 released ------
+
+2019-11-12  Levente Mészáros
+
+	Changed parameter name to packetNameFormat according to naming convention.
+
 2019-10-01  Levente Mészáros
 
 	Added packetNameFormat parameter to ExtLowerUdp.

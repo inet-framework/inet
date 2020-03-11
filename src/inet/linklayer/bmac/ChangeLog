@@ -1,5 +1,19 @@
 ====== inet-4.x ======
 
+2020-01-08  ------ inet-4.2.0 released ------
+
+2019-11-14  Zoltan Bojthe
+
+	Redesigned BMacHeader, added ctrlFrameLength NED parameter.
+
+	Removed the base header MacHeaderBase, added BMacHeaderBase, BMacHeader.
+	Replaced to BMacControlFrame or BMacDataFrameHeader, added
+	ctrlFrameLength NED parameter for define length of BMacControlFrame.
+
+2019-08-14  marcell
+
+	Added BMacHeaderSerializer.
+
 2019-10-18  Zoltan Bojthe
 
 	Added message kind infos (name of used cEnum).

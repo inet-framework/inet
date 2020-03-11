@@ -94,7 +94,7 @@ bool DscpMarker::markPacket(Packet *packet, int dscp)
     if (protocol == &Protocol::ipv4) {
         packet->trimFront();
         const auto& ipv4Header = packet->removeAtFront<Ipv4Header>();
-        ipv4Header->setDiffServCodePoint(dscp);
+        ipv4Header->setDscp(dscp);
         Ipv4::insertCrc(ipv4Header);
         packet->insertAtFront(ipv4Header);
         return true;
@@ -104,7 +104,7 @@ bool DscpMarker::markPacket(Packet *packet, int dscp)
     if (protocol == &Protocol::ipv6) {
         packet->trimFront();
         const auto& ipv6Header = packet->removeAtFront<Ipv6Header>();
-        ipv6Header->setDiffServCodePoint(dscp);
+        ipv6Header->setDscp(dscp);
         packet->insertAtFront(ipv6Header);
         return true;
     }

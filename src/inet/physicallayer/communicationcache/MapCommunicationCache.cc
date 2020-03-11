@@ -25,8 +25,10 @@ Define_Module(MapCommunicationCache);
 
 MapCommunicationCache::~MapCommunicationCache()
 {
-    for (auto& it : transmissionCache)
-        delete static_cast<std::map<int, ReceptionCacheEntry> *>(it.second.receptionCacheEntries);
+    for (auto& it : transmissionCache) {
+        delete it.second.receptionCacheEntries;
+        it.second.receptionCacheEntries = nullptr;
+    }
 }
 
 MapCommunicationCache::RadioCacheEntry *MapCommunicationCache::getRadioCacheEntry(const IRadio *radio)
@@ -34,15 +36,15 @@ MapCommunicationCache::RadioCacheEntry *MapCommunicationCache::getRadioCacheEntr
     return &radioCache[radio->getId()];
 }
 
-MapCommunicationCache::TransmissionCacheEntry *MapCommunicationCache::getTransmissionCacheEntry(const ITransmission *transmission)
+MapCommunicationCache::MapTransmissionCacheEntry *MapCommunicationCache::getTransmissionCacheEntry(const ITransmission *transmission)
 {
     return &transmissionCache[transmission->getId()];
 }
 
 MapCommunicationCache::ReceptionCacheEntry *MapCommunicationCache::getReceptionCacheEntry(const IRadio *radio, const ITransmission *transmission)
 {
-    TransmissionCacheEntry *transmissionCacheEntry = getTransmissionCacheEntry(transmission);
-    auto receptionCacheEntries = static_cast<std::map<int, ReceptionCacheEntry> *>(transmissionCacheEntry->receptionCacheEntries);
+    MapTransmissionCacheEntry *transmissionCacheEntry = getTransmissionCacheEntry(transmission);
+    auto receptionCacheEntries = transmissionCacheEntry->receptionCacheEntries;
     return &(*receptionCacheEntries)[radio->getId()];
 }
 
@@ -59,7 +61,7 @@ void MapCommunicationCache::removeRadio(const IRadio *radio)
     if (it != radioCache.end())
         radioCache.erase(it);
     for (auto& it : transmissionCache) {
-        std::map<int, ReceptionCacheEntry> *receptionCacheEntries = static_cast<std::map<int, ReceptionCacheEntry> *>(it.second.receptionCacheEntries);
+        std::map<int, ReceptionCacheEntry> *receptionCacheEntries = it.second.receptionCacheEntries;
         if (receptionCacheEntries != nullptr) {
             auto jt = receptionCacheEntries->find(radioId);
             if (jt != receptionCacheEntries->end())
@@ -94,8 +96,8 @@ void MapCommunicationCache::removeTransmission(const ITransmission *transmission
 {
     auto it = transmissionCache.find(transmission->getId());
     if (it != transmissionCache.end()) {
-        const TransmissionCacheEntry& transmissionCacheEntry = it->second;
-        std::map<int, ReceptionCacheEntry> *receptionCacheEntries = static_cast<std::map<int, ReceptionCacheEntry> *>(transmissionCacheEntry.receptionCacheEntries);
+        MapTransmissionCacheEntry& transmissionCacheEntry = it->second;
+        std::map<int, ReceptionCacheEntry> *receptionCacheEntries = transmissionCacheEntry.receptionCacheEntries;
         if (receptionCacheEntries != nullptr) {
             for (auto& jt : *receptionCacheEntries) {
                 const RadioCacheEntry& radioCacheEntry = radioCache[jt.first];
@@ -105,7 +107,8 @@ void MapCommunicationCache::removeTransmission(const ITransmission *transmission
                     radioCacheEntry.receptionIntervals->deleteNode(interval);
             }
         }
-        delete static_cast<std::map<int, ReceptionCacheEntry> *>(transmissionCacheEntry.receptionCacheEntries);
+        delete transmissionCacheEntry.receptionCacheEntries;
+        transmissionCacheEntry.receptionCacheEntries = nullptr;
         transmissionCache.erase(it);
     }
 }
@@ -130,10 +133,10 @@ void MapCommunicationCache::removeNonInterferingTransmissions(std::function<void
     int transmissionCount = 0;
     const simtime_t now = simTime();
     for (auto it = transmissionCache.begin(); it != transmissionCache.end();) {
-        const TransmissionCacheEntry& transmissionCacheEntry = it->second;
+        MapTransmissionCacheEntry& transmissionCacheEntry = it->second;
         if (transmissionCacheEntry.interferenceEndTime <= now) {
             if (transmissionCacheEntry.receptionCacheEntries != nullptr) {
-                std::map<int, ReceptionCacheEntry> *receptionCacheEntries = static_cast<std::map<int, ReceptionCacheEntry> *>(transmissionCacheEntry.receptionCacheEntries);
+                std::map<int, ReceptionCacheEntry> *receptionCacheEntries = transmissionCacheEntry.receptionCacheEntries;
                 for (auto radioIt = radioCache.cbegin(); radioIt != radioCache.cend(); radioIt++) {
                     const RadioCacheEntry& radioCacheEntry = radioIt->second;
                     auto receptionIt = receptionCacheEntries->find(radioIt->first);
@@ -145,6 +148,7 @@ void MapCommunicationCache::removeNonInterferingTransmissions(std::function<void
                     }
                 }
                 delete receptionCacheEntries;
+                transmissionCacheEntry.receptionCacheEntries = nullptr;
             }
             f(transmissionCacheEntry.transmission);
             transmissionCache.erase(it++);

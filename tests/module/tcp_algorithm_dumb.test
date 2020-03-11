@@ -14,16 +14,14 @@ output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
 output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
 snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
-#[Cmdenv]
 cmdenv-event-banners=false
 cmdenv-express-mode=true
 
-#[Parameters]
 *.testing=true
 
 ###################################################################
 
-network = ClientServer
+network = inet.test.moduletest.lib.ClientServer
 total-stack = 7MiB
 #**.server.numPcapRecorders = 1
 #**.server.pcapRecorder[0].pcapFile = "results/server.pcap"

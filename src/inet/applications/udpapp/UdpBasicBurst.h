@@ -51,6 +51,7 @@ class INET_API UdpBasicBurst : public ApplicationBase, public UdpSocket::ICallba
     simtime_t delayLimit;
     simtime_t startTime;
     simtime_t stopTime;
+    simtime_t excessiveDelay;
     int localPort = -1, destPort = -1;
     int destAddrRNG = -1;
 
@@ -80,8 +81,10 @@ class INET_API UdpBasicBurst : public ApplicationBase, public UdpSocket::ICallba
     int numReceived = 0;
     int numDeleted = 0;
     int numDuplicated = 0;
+    int numExessiveDelay = 0;
 
     static simsignal_t outOfOrderPkSignal;
+    static simsignal_t excessiveDelayPksignal;
 
   protected:
     // chooses random destination address

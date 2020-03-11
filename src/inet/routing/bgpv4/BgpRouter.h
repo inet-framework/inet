@@ -35,7 +35,7 @@ namespace bgp {
 
 class BgpSession;
 
-class INET_API BgpRouter : public TcpSocket::ICallback
+class INET_API BgpRouter : public TcpSocket::ReceiveQueueBasedCallback
 {
 private:
     IInterfaceTable *ift = nullptr;
@@ -112,7 +112,8 @@ private:
   protected:
     /** @name TcpSocket::ICallback callback methods */
     //@{
-    virtual void socketDataArrived(TcpSocket *socket, Packet *msg, bool urgent) override;
+    virtual void socketDataArrived(TcpSocket *socket) override;
+    virtual void socketDataArrived(TcpSocket *socket, Packet *packet, bool urgent) override;
     virtual void socketAvailable(TcpSocket *socket, TcpAvailableInfo *availableInfo) override { socket->accept(availableInfo->getNewSocketId()); }      //TODO
     virtual void socketEstablished(TcpSocket *socket) override;
     virtual void socketPeerClosed(TcpSocket *socket) override {}

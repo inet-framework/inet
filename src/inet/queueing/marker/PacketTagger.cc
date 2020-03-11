@@ -30,10 +30,13 @@ PacketTagger::~PacketTagger()
 void PacketTagger::initialize(int stage)
 {
     PacketTaggerBase::initialize(stage);
-    if (stage == INITSTAGE_LOCAL) {
-        const char *filterClass = par("filterClass");
-        packetFilterFunction = check_and_cast<IPacketFilterFunction *>(createOne(filterClass));
-    }
+    if (stage == INITSTAGE_LOCAL)
+        packetFilterFunction = createFilterFunction(par("filterClass"));
+}
+
+IPacketFilterFunction *PacketTagger::createFilterFunction(const char *filterClass) const
+{
+    return check_and_cast<IPacketFilterFunction *>(createOne(filterClass));
 }
 
 void PacketTagger::markPacket(Packet *packet)

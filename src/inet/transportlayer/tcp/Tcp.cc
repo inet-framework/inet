@@ -24,6 +24,7 @@
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/packet/Message.h"
+#include "inet/networklayer/common/EcnTag_m.h"
 #include "inet/networklayer/common/IpProtocolId_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 
@@ -157,10 +158,23 @@ void Tcp::handleLowerPacket(Packet *packet)
         L3Address srcAddr, destAddr;
         srcAddr = packet->getTag<L3AddressInd>()->getSrcAddress();
         destAddr = packet->getTag<L3AddressInd>()->getDestAddress();
+        int ecn = 0;
+        if (auto ecnTag = packet->findTag<EcnInd>())
+            ecn = ecnTag->getExplicitCongestionNotification();
+        ASSERT(ecn != -1);
 
         // process segment
         TcpConnection *conn = findConnForSegment(tcpHeader, srcAddr, destAddr);
         if (conn) {
+            TcpStateVariables* state = conn->getState();
+            if (state && state->ect) {
+                // This may be true only in receiver side. According to RFC 3168, page 20:
+                // pure acknowledgement packets (e.g., packets that do not contain
+                // any accompanying data) MUST be sent with the not-ECT codepoint.
+                if (ecn == 3)
+                    state->gotCeIndication = true;
+            }
+
             bool ret = conn->processTCPSegment(packet, tcpHeader, srcAddr, destAddr);
             if (!ret)
                 removeConnection(conn);
@@ -378,7 +392,7 @@ void Tcp::handleCrashOperation(LifecycleOperation *operation)
 void Tcp::reset()
 {
     for (auto & elem : tcpAppConnMap)
-        delete elem.second;
+        elem.second->deleteModule();
     tcpAppConnMap.clear();
     tcpConnMap.clear();
     usedEphemeralPorts.clear();

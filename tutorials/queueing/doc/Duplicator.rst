@@ -1,20 +1,30 @@
-Duplicator
-==========
+Duplicating Packets from One Input to One Output
+================================================
 
-In this test, packets are produced periodically by an active packet source
-(ActivePacketSource). The produced packets are randomly either duplicated or not
-(PacketDuplicator). Finally, the packets are all sent into a passive packet
-sink (PassivePacketSink).
+.. This step demonstrates the :ned:`PacketDuplicator` module, which creates a configured number of duplicates
+   of incoming packets.
 
-The network contains ... TODO
+The :ned:`PacketDuplicator` module creates a configured number of duplicates
+of incoming packets.
+
+.. In this step, packets are produced periodically by an active packet source
+   (:ned:`ActivePacketSource`). The produced packets are randomly either duplicated or not
+   (:ned:`PacketDuplicator`). Finally, the packets are all sent into a passive packet
+   sink (:ned:`PassivePacketSink`).
+
+In this example network, packets are produced periodically by an active packet source
+(:ned:`ActivePacketSource`). The packets are pushed into a
+(:ned:`PacketDuplicator`), which creates 0 or 1 copy of them randomly.
+Finally, the packets are all sent into a passive packet
+sink (:ned:`PassivePacketSink`).
 
 .. figure:: media/Duplicator.png
    :width: 80%
    :align: center
 
-**TODO** Config
-
-.. literalinclude:: ../Duplicator.ned
+.. literalinclude:: ../QueueingTutorial.ned
+   :start-at: network DuplicatorTutorialStep
+   :end-before: //----
    :language: ned
 
 .. literalinclude:: ../omnetpp.ini

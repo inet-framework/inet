@@ -35,6 +35,7 @@
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/common/L3Tools.h"
 #include "inet/networklayer/common/MulticastTag_m.h"
+#include "inet/networklayer/common/TosTag_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
 
@@ -164,77 +165,108 @@ void Udp::handleUpperCommand(cMessage *msg)
             UdpSetOptionCommand *ctrl = check_and_cast<UdpSetOptionCommand *>(msg->getControlInfo());
             SockDesc *sd = getOrCreateSocket(socketId);
 
-            if (auto cmd = dynamic_cast<UdpSetTimeToLiveCommand *>(ctrl))
-                setTimeToLive(sd, cmd->getTtl());
-            else if (auto cmd = dynamic_cast<UdpSetDscpCommand *>(ctrl))
-                setDscp(sd, cmd->getDscp());
-            else if (auto cmd = dynamic_cast<UdpSetBroadcastCommand *>(ctrl))
-                setBroadcast(sd, cmd->getBroadcast());
-            else if (auto cmd = dynamic_cast<UdpSetMulticastInterfaceCommand *>(ctrl))
-                setMulticastOutputInterface(sd, cmd->getInterfaceId());
-            else if (auto cmd = dynamic_cast<UdpSetMulticastLoopCommand *>(ctrl))
-                setMulticastLoop(sd, cmd->getLoop());
-            else if (auto cmd = dynamic_cast<UdpSetReuseAddressCommand *>(ctrl))
-                setReuseAddress(sd, cmd->getReuseAddress());
-            else if (auto cmd = dynamic_cast<UdpJoinMulticastGroupsCommand *>(ctrl)) {
-                std::vector<L3Address> addresses;
-                std::vector<int> interfaceIds;
-                for (size_t i = 0; i < cmd->getMulticastAddrArraySize(); i++)
-                    addresses.push_back(cmd->getMulticastAddr(i));
-                for (size_t i = 0; i < cmd->getInterfaceIdArraySize(); i++)
-                    interfaceIds.push_back(cmd->getInterfaceId(i));
-                joinMulticastGroups(sd, addresses, interfaceIds);
+            switch(ctrl->getOptionCode()) {
+                case UDP_C_SETOPTION_TTL: {
+                    auto cmd = check_and_cast<UdpSetTimeToLiveCommand *>(ctrl);
+                    setTimeToLive(sd, cmd->getTtl());
+                    break;
+                }
+                case UDP_C_SETOPTION_DSCP: {
+                    auto cmd = check_and_cast<UdpSetDscpCommand *>(ctrl);
+                    setDscp(sd, cmd->getDscp());
+                    break;
+                }
+                case UDP_C_SETOPTION_TOS: {
+                    auto cmd = check_and_cast<UdpSetTosCommand *>(ctrl);
+                    setTos(sd, cmd->getTos());
+                    break;
+                }
+                case UDP_C_SETOPTION_BROADCAST: {
+                    auto cmd = check_and_cast<UdpSetBroadcastCommand *>(ctrl);
+                    setBroadcast(sd, cmd->getBroadcast());
+                    break;
+                }
+                case UDP_C_SETOPTION_MCAST_IFACE: {
+                    auto cmd = check_and_cast<UdpSetMulticastInterfaceCommand *>(ctrl);
+                    setMulticastOutputInterface(sd, cmd->getInterfaceId());
+                    break;
+                }
+                case UDP_C_SETOPTION_MCAST_LOOP: {
+                    auto cmd = check_and_cast<UdpSetMulticastLoopCommand *>(ctrl);
+                    setMulticastLoop(sd, cmd->getLoop());
+                    break;
+                }
+                case UDP_C_SETOPTION_REUSEADDR: {
+                    auto cmd = check_and_cast<UdpSetReuseAddressCommand *>(ctrl);
+                    setReuseAddress(sd, cmd->getReuseAddress());
+                    break;
+                }
+                case UDP_C_SETOPTION_JOIN_MCAST_GRP: {
+                    auto cmd = check_and_cast<UdpJoinMulticastGroupsCommand *>(ctrl);
+                    std::vector<L3Address> addresses;
+                    std::vector<int> interfaceIds;
+                    for (size_t i = 0; i < cmd->getMulticastAddrArraySize(); i++)
+                        addresses.push_back(cmd->getMulticastAddr(i));
+                    for (size_t i = 0; i < cmd->getInterfaceIdArraySize(); i++)
+                        interfaceIds.push_back(cmd->getInterfaceId(i));
+                    joinMulticastGroups(sd, addresses, interfaceIds);
+                    break;
+                }
+                case UDP_C_SETOPTION_LEAVE_MCAST_GRP: {
+                    auto cmd = check_and_cast<UdpLeaveMulticastGroupsCommand *>(ctrl);
+                    std::vector<L3Address> addresses;
+                    for (size_t i = 0; i < cmd->getMulticastAddrArraySize(); i++)
+                        addresses.push_back(cmd->getMulticastAddr(i));
+                    leaveMulticastGroups(sd, addresses);
+                    break;
+                }
+                case UDP_C_SETOPTION_BLOCK_MCAST_SRC: {
+                    auto cmd = check_and_cast<UdpBlockMulticastSourcesCommand *>(ctrl);
+                    InterfaceEntry *ie = ift->getInterfaceById(cmd->getInterfaceId());
+                    std::vector<L3Address> sourceList;
+                    for (size_t i = 0; i < cmd->getSourceListArraySize(); i++)
+                        sourceList.push_back(cmd->getSourceList(i));
+                    blockMulticastSources(sd, ie, cmd->getMulticastAddr(), sourceList);
+                    break;
+                }
+                case UDP_C_SETOPTION_UNBLOCK_MCAST_SRC: {
+                    auto cmd = check_and_cast<UdpUnblockMulticastSourcesCommand *>(ctrl);
+                    InterfaceEntry *ie = ift->getInterfaceById(cmd->getInterfaceId());
+                    std::vector<L3Address> sourceList;
+                    for (size_t i = 0; i < cmd->getSourceListArraySize(); i++)
+                        sourceList.push_back(cmd->getSourceList(i));
+                    unblockMulticastSources(sd, ie, cmd->getMulticastAddr(), sourceList);
+                    break;
+                }
+                case UDP_C_SETOPTION_LEAVE_MCAST_SRC: {
+                    auto cmd = check_and_cast<UdpLeaveMulticastSourcesCommand *>(ctrl);
+                   InterfaceEntry *ie = ift->getInterfaceById(cmd->getInterfaceId());
+                    std::vector<L3Address> sourceList;
+                    for (size_t i = 0; i < cmd->getSourceListArraySize(); i++)
+                        sourceList.push_back(cmd->getSourceList(i));
+                    leaveMulticastSources(sd, ie, cmd->getMulticastAddr(), sourceList);
+                    break;
+                }
+                case UDP_C_SETOPTION_JOIN_MCAST_SRC: {
+                    auto cmd = check_and_cast<UdpJoinMulticastSourcesCommand *>(ctrl);
+                    InterfaceEntry *ie = ift->getInterfaceById(cmd->getInterfaceId());
+                    std::vector<L3Address> sourceList;
+                    for (size_t i = 0; i < cmd->getSourceListArraySize(); i++)
+                        sourceList.push_back(cmd->getSourceList(i));
+                    joinMulticastSources(sd, ie, cmd->getMulticastAddr(), sourceList);
+                    break;
+                }
+                case UDP_C_SETOPTION_SET_MCAST_SRC_FILTER: {
+                    auto cmd = check_and_cast<UdpSetMulticastSourceFilterCommand *>(ctrl);
+                    InterfaceEntry *ie = ift->getInterfaceById(cmd->getInterfaceId());
+                    std::vector<L3Address> sourceList;
+                    for (unsigned int i = 0; i < cmd->getSourceListArraySize(); i++)
+                        sourceList.push_back(cmd->getSourceList(i));
+                    setMulticastSourceFilter(sd, ie, cmd->getMulticastAddr(), cmd->getFilterMode(), sourceList);
+                    break;
+                }
+                    throw cRuntimeError("Unknown subclass of UdpSetOptionCommand received from app: code=%d, name=%s", ctrl->getOptionCode(), ctrl->getClassName());
             }
-            else if (auto cmd = dynamic_cast<UdpLeaveMulticastGroupsCommand *>(ctrl)) {
-                std::vector<L3Address> addresses;
-                for (size_t i = 0; i < cmd->getMulticastAddrArraySize(); i++)
-                    addresses.push_back(cmd->getMulticastAddr(i));
-                leaveMulticastGroups(sd, addresses);
-            }
-            else if (auto cmd = dynamic_cast<UdpBlockMulticastSourcesCommand *>(ctrl)) {
-                InterfaceEntry *ie = ift->getInterfaceById(cmd->getInterfaceId());
-                std::vector<L3Address> sourceList;
-                for (size_t i = 0; i < cmd->getSourceListArraySize(); i++)
-                    sourceList.push_back(cmd->getSourceList(i));
-                blockMulticastSources(sd, ie, cmd->getMulticastAddr(), sourceList);
-            }
-            else if (auto cmd = dynamic_cast<UdpUnblockMulticastSourcesCommand *>(ctrl)) {
-                InterfaceEntry *ie = ift->getInterfaceById(cmd->getInterfaceId());
-                std::vector<L3Address> sourceList;
-                for (size_t i = 0; i < cmd->getSourceListArraySize(); i++)
-                    sourceList.push_back(cmd->getSourceList(i));
-                unblockMulticastSources(sd, ie, cmd->getMulticastAddr(), sourceList);
-            }
-            else if (auto cmd = dynamic_cast<UdpUnblockMulticastSourcesCommand *>(ctrl)) {
-                InterfaceEntry *ie = ift->getInterfaceById(cmd->getInterfaceId());
-                std::vector<L3Address> sourceList;
-                for (size_t i = 0; i < cmd->getSourceListArraySize(); i++)
-                    sourceList.push_back(cmd->getSourceList(i));
-                leaveMulticastSources(sd, ie, cmd->getMulticastAddr(), sourceList);
-            }
-            else if (auto cmd = dynamic_cast<UdpLeaveMulticastSourcesCommand *>(ctrl)) {
-               InterfaceEntry *ie = ift->getInterfaceById(cmd->getInterfaceId());
-                std::vector<L3Address> sourceList;
-                for (size_t i = 0; i < cmd->getSourceListArraySize(); i++)
-                    sourceList.push_back(cmd->getSourceList(i));
-                leaveMulticastSources(sd, ie, cmd->getMulticastAddr(), sourceList);
-            }
-            else if (auto cmd = dynamic_cast<UdpJoinMulticastSourcesCommand *>(ctrl)) {
-                InterfaceEntry *ie = ift->getInterfaceById(cmd->getInterfaceId());
-                std::vector<L3Address> sourceList;
-                for (size_t i = 0; i < cmd->getSourceListArraySize(); i++)
-                    sourceList.push_back(cmd->getSourceList(i));
-                joinMulticastSources(sd, ie, cmd->getMulticastAddr(), sourceList);
-            }
-            else if (auto cmd = dynamic_cast<UdpSetMulticastSourceFilterCommand *>(ctrl)) {
-                InterfaceEntry *ie = ift->getInterfaceById(cmd->getInterfaceId());
-                std::vector<L3Address> sourceList;
-                for (unsigned int i = 0; i < cmd->getSourceListArraySize(); i++)
-                    sourceList.push_back(cmd->getSourceList(i));
-                setMulticastSourceFilter(sd, ie, cmd->getMulticastAddr(), cmd->getFilterMode(), sourceList);
-            }
-            else
-                throw cRuntimeError("Unknown subclass of UdpSetOptionCommand received from app: %s", ctrl->getClassName());
             break;
         }
 
@@ -392,6 +424,11 @@ void Udp::setTimeToLive(SockDesc *sd, int ttl)
 void Udp::setDscp(SockDesc *sd, short dscp)
 {
     sd->dscp = dscp;
+}
+
+void Udp::setTos(SockDesc *sd, short tos)
+{
+    sd->tos = tos;
 }
 
 void Udp::setBroadcast(SockDesc *sd, bool broadcast)
@@ -731,6 +768,12 @@ void Udp::handleUpperPacket(Packet *packet)
 
     if (sd->dscp != -1 && packet->findTag<DscpReq>() == nullptr)
         packet->addTag<DscpReq>()->setDifferentiatedServicesCodePoint(sd->dscp);
+
+    if (sd->tos != -1 && packet->findTag<TosReq>() == nullptr) {
+        packet->addTag<TosReq>()->setTos(sd->tos);
+        if (packet->findTag<DscpReq>())
+            throw cRuntimeError("setting error: TOS and DSCP found together");
+    }
 
     const Protocol *l3Protocol = nullptr;
     // TODO: apps use ModuleIdAddress if the network interface doesn't have an IP address configured, and UDP uses NextHopForwarding which results in a weird error in MessageDispatcher

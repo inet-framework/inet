@@ -427,6 +427,7 @@ const IReceptionResult *RadioMedium::getReceptionResult(const IRadio *radio, con
 
 void RadioMedium::addRadio(const IRadio *radio)
 {
+    Enter_Method("addRadio");
     communicationCache->addRadio(radio);
     if (neighborCache)
         neighborCache->addRadio(radio);
@@ -449,6 +450,7 @@ void RadioMedium::addRadio(const IRadio *radio)
 
 void RadioMedium::removeRadio(const IRadio *radio)
 {
+    Enter_Method("removeRadio");
     communicationCache->removeRadio(radio);
     if (neighborCache)
         neighborCache->removeRadio(radio);
@@ -470,6 +472,7 @@ const IRadio *RadioMedium::getRadio(int radioId) const
 
 void RadioMedium::addTransmission(const IRadio *transmitterRadio, const ITransmission *transmission)
 {
+    Enter_Method("addTransmission");
     transmissionCount++;
     communicationCache->addTransmission(transmission);
     simtime_t maxArrivalEndTime = transmission->getEndTime();
@@ -494,6 +497,7 @@ void RadioMedium::addTransmission(const IRadio *transmitterRadio, const ITransmi
 
 void RadioMedium::removeTransmission(const ITransmission *transmission)
 {
+    Enter_Method("removeTranmsission");
     const ISignal *signal = communicationCache->getCachedSignal(transmission);
     communicationCache->removeTransmission(transmission);
     emit(signalRemovedSignal, check_and_cast<const cObject *>(transmission));
@@ -503,7 +507,6 @@ void RadioMedium::removeTransmission(const ITransmission *transmission)
 
 ISignal *RadioMedium::createTransmitterSignal(const IRadio *radio, Packet *packet)
 {
-    Enter_Method_Silent();
     if (packet != nullptr)
         take(packet);
     auto transmission = radio->getTransmitter()->createTransmission(radio, packet, simTime());
@@ -563,6 +566,9 @@ void RadioMedium::sendToRadio(IRadio *transmitter, const IRadio *receiver, const
 {
     const ITransmission *transmission = transmittedSignal->getTransmission();
     if (receiver != transmitter && receiver->getReceiver() != nullptr && isPotentialReceiver(receiver, transmission)) {
+        auto transmitterRadio = const_cast<Radio *>(check_and_cast<const Radio *>(transmitter));
+        cMethodCallContextSwitcher contextSwitcher(transmitterRadio);
+        contextSwitcher.methodCall("sendToRadio");
         const IArrival *arrival = getArrival(receiver, transmission);
         simtime_t propagationTime = arrival->getStartPropagationTime();
         EV_DEBUG << "Sending " << transmittedSignal
@@ -571,9 +577,7 @@ void RadioMedium::sendToRadio(IRadio *transmitter, const IRadio *receiver, const
                  << " in " << propagationTime * 1E+6 << " us propagation time." << endl;
         auto receivedSignal = static_cast<Signal *>(createReceiverSignal(transmission));
         cGate *gate = receiver->getRadioGate()->getPathStartGate();
-        ASSERT(dynamic_cast<IRadio *>(getSimulation()->getContextModule()) != nullptr);
-        auto transmitterModule = const_cast<cSimpleModule *>(check_and_cast<const cSimpleModule *>(transmitter));
-        transmitterModule->sendDirect(receivedSignal, propagationTime, transmission->getDuration(), gate);
+        transmitterRadio->sendDirect(receivedSignal, propagationTime, transmission->getDuration(), gate);
         communicationCache->setCachedSignal(receiver, transmission, receivedSignal);
         signalSendCount++;
     }
@@ -581,6 +585,7 @@ void RadioMedium::sendToRadio(IRadio *transmitter, const IRadio *receiver, const
 
 ISignal *RadioMedium::transmitPacket(const IRadio *radio, Packet *packet)
 {
+    Enter_Method("transmitPacket");
     auto signal = createTransmitterSignal(radio, packet);
     auto transmission = signal->getTransmission();
     addTransmission(radio, transmission);
@@ -593,6 +598,7 @@ ISignal *RadioMedium::transmitPacket(const IRadio *radio, Packet *packet)
 
 Packet *RadioMedium::receivePacket(const IRadio *radio, ISignal *signal)
 {
+    Enter_Method("receivePacket");
     const ITransmission *transmission = signal->getTransmission();
     const IListening *listening = communicationCache->getCachedListening(radio, transmission);
     if (recordCommunicationLog)
@@ -611,6 +617,7 @@ const ITransmission *RadioMedium::getTransmission(int id) const
 
 const IListeningDecision *RadioMedium::listenOnMedium(const IRadio *radio, const IListening *listening) const
 {
+    Enter_Method("listenOnMedium");
     const IListeningDecision *decision = computeListeningDecision(radio, listening);
     EV_DEBUG << "Listening results in: " << decision << " with " << listening << " on medium by " << radio << endl;
     return decision;
@@ -682,7 +689,7 @@ void RadioMedium::sendToAllRadios(IRadio *transmitter, const ISignal *signal)
 void RadioMedium::pickUpSignals(IRadio *receiverRadio)
 {
     communicationCache->mapTransmissions([&] (const ITransmission *transmission) {
-        auto transmitterRadio = dynamic_cast<const Radio*>(getRadio(transmission->getTransmitterId()));
+        auto transmitterRadio = dynamic_cast<const Radio *>(getRadio(transmission->getTransmitterId()));
         if (!transmitterRadio)
             return;
         if (communicationCache->getCachedSignal(receiverRadio, transmission) == nullptr &&
@@ -691,7 +698,7 @@ void RadioMedium::pickUpSignals(IRadio *receiverRadio)
             const IArrival *arrival = getArrival(receiverRadio, transmission);
             if (arrival->getEndTime() >= simTime()) {
                 cMethodCallContextSwitcher contextSwitcher(transmitterRadio);
-                contextSwitcher.methodCallSilent();
+                contextSwitcher.methodCall("sendToRadio");
                 const Packet *packet = transmission->getPacket();
                 EV_DEBUG << "Picking up " << packet << " originally sent "
                          << " from " << (IRadio *)transmitterRadio << " at " << transmission->getStartPosition()
@@ -701,7 +708,6 @@ void RadioMedium::pickUpSignals(IRadio *receiverRadio)
                 simtime_t delay = arrival->getStartTime() - simTime();
                 simtime_t duration = delay > 0 ? signal->getDuration() : signal->getDuration() + delay;
                 cGate *gate = receiverRadio->getRadioGate()->getPathStartGate();
-                ASSERT(dynamic_cast<IRadio *>(getSimulation()->getContextModule()) != nullptr);
                 const_cast<Radio *>(transmitterRadio)->sendDirect(signal, delay > 0 ? delay : 0, duration, gate);
                 communicationCache->setCachedSignal(receiverRadio, transmission, signal);
                 signalSendCount++;
@@ -713,10 +719,12 @@ void RadioMedium::pickUpSignals(IRadio *receiverRadio)
 void RadioMedium::receiveSignal(cComponent *source, simsignal_t signal, intval_t value, cObject *details)
 {
     if (signal == IRadio::radioModeChangedSignal) {
+        Enter_Method("radioModeChanged");
         auto radio = check_and_cast<Radio *>(source);
         pickUpSignals(radio);
     }
     else if (signal == IRadio::listeningChangedSignal) {
+        Enter_Method("listeningChanged");
         auto radio = check_and_cast<Radio *>(source);
         communicationCache->mapTransmissions([&] (const ITransmission *transmission) {
             const IArrival *arrival = getArrival(radio, transmission);
@@ -733,6 +741,7 @@ void RadioMedium::receiveSignal(cComponent *source, simsignal_t signal, intval_t
 void RadioMedium::receiveSignal(cComponent *source, simsignal_t signal, cObject *value, cObject *details)
 {
     if (signal == interfaceConfigChangedSignal) {
+        Enter_Method("interfaceConfigChanged");
         auto interfaceChange = check_and_cast<InterfaceEntryChangeDetails *>(value);
         if (interfaceChange->getFieldId() == InterfaceEntry::F_MACADDRESS) {
             auto radio = check_and_cast<Radio *>(interfaceChange->getInterfaceEntry()->getSubmodule("radio"));

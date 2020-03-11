@@ -35,11 +35,15 @@ void PacketLabeler::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         cStringTokenizer tokenizer(par("filterClasses"));
         while (tokenizer.hasMoreTokens()) {
-            auto filterClass = tokenizer.nextToken();
-            auto filter = check_and_cast<IPacketFilterFunction *>(createOne(filterClass));
+            auto filter = createFilterFunction(tokenizer.nextToken());
             filters.push_back(filter);
         }
     }
+}
+
+IPacketFilterFunction *PacketLabeler::createFilterFunction(const char *filterClass) const
+{
+    return check_and_cast<IPacketFilterFunction *>(createOne(filterClass));
 }
 
 void PacketLabeler::markPacket(Packet *packet)

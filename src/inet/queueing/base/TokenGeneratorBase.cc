@@ -35,11 +35,13 @@ void TokenGeneratorBase::initialize(int stage)
 
 void TokenGeneratorBase::updateDisplayString()
 {
-    auto text = StringFormat::formatString(displayStringTextFormat, this);
-    getDisplayString().setTagArg("t", 0, text);
+    if (getEnvir()->isGUI()) {
+        auto text = StringFormat::formatString(displayStringTextFormat, this);
+        getDisplayString().setTagArg("t", 0, text);
+    }
 }
 
-const char *TokenGeneratorBase::resolveDirective(char directive)
+const char *TokenGeneratorBase::resolveDirective(char directive) const
 {
     static std::string result;
     switch (directive) {

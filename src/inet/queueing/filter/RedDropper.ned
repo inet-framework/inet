@@ -53,6 +53,8 @@ simple RedDropper extends PacketFilterBase
         double maxth = default(50);  // maximum threshold for avg queue length (=buffer capacity)
         double maxp = default(0.02);  // maximum value for pbs
         double pkrate = default(150);  // average packet rate for calculations when queue is empty
+        bool useEcn = default(false); // if enabled, packets are marked with ECN if applicable
+        int packetCapacity = default(int(maxth)); // packets are dropped if queue length is greater
         @class(RedDropper);
         @display("i=block/downarrow");
         @signal[packetDropped](type=inet::Packet);

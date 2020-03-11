@@ -33,8 +33,8 @@ namespace ospfv2 {
 class INET_API Ospfv2PacketSerializer : public FieldsChunkSerializer
 {
   private:
-    static void serializeOspfHeader(MemoryOutputStream& stream, const IntrusivePtr<const Ospfv2Packet>& ospfPacket);
-    static uint16_t deserializeOspfHeader(MemoryInputStream& stream, IntrusivePtr<Ospfv2Packet>& ospfPacket);
+    static void serializeOspfHeader(MemoryOutputStream& stream, const Ptr<const Ospfv2Packet>& ospfPacket);
+    static uint16_t deserializeOspfHeader(MemoryInputStream& stream, Ptr<Ospfv2Packet>& ospfPacket);
 
     static void serializeRouterLsa(MemoryOutputStream& stream, const Ospfv2RouterLsa& routerLsa);
     static void deserializeRouterLsa(MemoryInputStream& stream, const Ptr<Ospfv2LinkStateUpdatePacket> updatePacket, Ospfv2RouterLsa& routerLsa);

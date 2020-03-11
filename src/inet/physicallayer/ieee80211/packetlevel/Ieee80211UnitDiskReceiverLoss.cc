@@ -19,6 +19,7 @@
 #include "inet/physicallayer/common/packetlevel/Radio.h"
 
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211UnitDiskReceiverLoss.h"
+#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211UnitDiskTransmitter.h"
 #include "inet/physicallayer/unitdisk/UnitDiskTransmitter.h"
 
 
@@ -37,12 +38,28 @@ Ieee80211UnitDiskReceiverLoss::Ieee80211UnitDiskReceiverLoss() :
 {
 }
 
+Ieee80211UnitDiskReceiverLoss::~Ieee80211UnitDiskReceiverLoss()
+{
+    if (!nodes.empty())
+        nodes.clear();
+    if (!uniLinks.empty())
+        uniLinks.clear();
+    if (!lossLinks.empty())
+        lossLinks.clear();
+}
+
 void Ieee80211UnitDiskReceiverLoss::initialize(int stage)
 {
     Ieee80211UnitDiskReceiver::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
+        if (!nodes.empty())
+            nodes.clear();
+        if (!uniLinks.empty())
+            uniLinks.clear();
+        if (!lossLinks.empty())
+            lossLinks.clear();
     }
-    else if (stage == INITSTAGE_PHYSICAL_LAYER) {
+    else if (stage == INITSTAGE_PHYSICAL_LAYER_NEIGHBOR_CACHE) {
 
         auto parent = this->getParentModule();
         auto node = getContainingNode(this);
@@ -65,7 +82,7 @@ void Ieee80211UnitDiskReceiverLoss::initialize(int stage)
         cTopology topo("topo");
         topo.extractByProperty("networkNode");
 
-        auto transmitter = check_and_cast<UnitDiskTransmitter *> (parent->getSubmodule("transmitter"));
+        auto transmitter = check_and_cast<Ieee80211UnitDiskTransmitter *> (parent->getSubmodule("transmitter"));
         auto distance = transmitter->getMaxCommunicationRange();
         communicationRange = distance;
 

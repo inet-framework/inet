@@ -22,16 +22,22 @@ namespace queueing {
 
 Define_Module(ContentBasedClassifier);
 
+ContentBasedClassifier::~ContentBasedClassifier()
+{
+    for (auto filter : filters)
+        delete filter;
+}
+
 void ContentBasedClassifier::initialize(int stage)
 {
     PacketClassifierBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         defaultGateIndex = par("defaultGateIndex");
-        cStringTokenizer packetFilterTokenizer(par("packetFilter"), ";");
-        cStringTokenizer packetDataFilterTokenizer(par("packetDataFilter"), ";");
+        cStringTokenizer packetFilterTokenizer(par("packetFilters"), ";");
+        cStringTokenizer packetDataFilterTokenizer(par("packetDataFilters"), ";");
         while (packetFilterTokenizer.hasMoreTokens() && packetDataFilterTokenizer.hasMoreTokens()) {
-            PacketFilter filter;
-            filter.setPattern(packetFilterTokenizer.nextToken(), packetDataFilterTokenizer.nextToken());
+            auto filter = new PacketFilter();
+            filter->setPattern(packetFilterTokenizer.nextToken(), packetDataFilterTokenizer.nextToken());
             filters.push_back(filter);
         }
     }
@@ -41,7 +47,7 @@ int ContentBasedClassifier::classifyPacket(Packet *packet)
 {
     for (int i = 0; i < (int)filters.size(); i++) {
         auto filter = filters[i];
-        if (filter.matches(packet))
+        if (filter->matches(packet))
             return i;
     }
     return defaultGateIndex;

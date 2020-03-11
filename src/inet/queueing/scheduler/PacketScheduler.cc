@@ -25,10 +25,13 @@ Define_Module(PacketScheduler);
 void PacketScheduler::initialize(int stage)
 {
     PacketSchedulerBase::initialize(stage);
-    if (stage == INITSTAGE_LOCAL) {
-        const char *schedulerClass = par("schedulerClass");
-        packetSchedulerFunction = check_and_cast<IPacketSchedulerFunction *>(createOne(schedulerClass));
-    }
+    if (stage == INITSTAGE_LOCAL)
+        packetSchedulerFunction = createSchedulerFunction(par("schedulerClass"));
+}
+
+IPacketSchedulerFunction *PacketScheduler::createSchedulerFunction(const char *schedulerClass) const
+{
+    return check_and_cast<IPacketSchedulerFunction *>(createOne(schedulerClass));
 }
 
 int PacketScheduler::schedulePacket()

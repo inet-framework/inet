@@ -3,11 +3,10 @@ Test using a long transmission and lossy channel (TCPRandomTester).
 Here: packet loss (5%), packet delays (20%, by mean=1s), packet duplication
 (20%, original packet is lost, mean=3 copies created with delay mean=1s)
 
-%inifile: {}.ini
+%inifile: omnetpp.ini
 [General]
-#preload-ned-files = *.ned ../../*.ned @../../../../nedfiles.lst
 ned-path = .;../../../../src;../../lib
-network=TcpTestNet2
+network = inet.test.moduletest.lib.TcpTestNet2
 
 #omnetpp 5.0 - 5.1 compatibility:
 eventlog-file = "${resultdir}/${configname}-${runnumber}.elog"
@@ -15,12 +14,10 @@ output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
 output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
 snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
-#[Cmdenv]
 cmdenv-express-mode=false
 #cmdenv-event-banners=false
 #cmdenv-module-messages=false
 
-#[Parameters]
 *.testing=true
 
 ####cmdenv-log-prefix=""

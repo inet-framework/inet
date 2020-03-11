@@ -65,6 +65,9 @@ bool BvhObjectCache::insertObject(const IPhysicalObject *object)
 void BvhObjectCache::visitObjects(const IVisitor *visitor, const LineSegment& lineSegment) const
 {
     if (!bvhTree)
+#ifdef _OPENMP
+#pragma omp critical
+#endif
         bvhTree = new BvhTree(physicalEnvironment->getSpaceMin(), physicalEnvironment->getSpaceMax(), objects, 0, objects.size() - 1, BvhTree::Axis(axisOrder), leafCapacity);
     bvhTree->lineSegmentQuery(lineSegment, visitor);
 }

@@ -48,14 +48,8 @@ void PacketGate::initialize(int stage)
 
     }
     else if (stage == INITSTAGE_QUEUEING) {
-        if (consumer != nullptr) {
-            checkPushPacketSupport(inputGate);
-            checkPushPacketSupport(outputGate);
-        }
-        if (provider != nullptr) {
-            checkPopPacketSupport(inputGate);
-            checkPopPacketSupport(outputGate);
-        }
+        checkPushOrPopPacketSupport(inputGate);
+        checkPushOrPopPacketSupport(outputGate);
         if (changeIndex < (int)changeTimes.size())
             scheduleChangeTimer();
     }
@@ -105,12 +99,12 @@ void PacketGate::close()
     isOpen_ = false;
 }
 
-bool PacketGate::canPushSomePacket(cGate *gate)
+bool PacketGate::canPushSomePacket(cGate *gate) const
 {
     return isOpen_ && consumer->canPushSomePacket(outputGate->getPathStartGate());
 }
 
-bool PacketGate::canPushPacket(Packet *packet, cGate *gate)
+bool PacketGate::canPushPacket(Packet *packet, cGate *gate) const
 {
     return isOpen_ && consumer->canPushPacket(packet, outputGate->getPathStartGate());
 }
@@ -127,12 +121,12 @@ void PacketGate::pushPacket(Packet *packet, cGate *gate)
     updateDisplayString();
 }
 
-bool PacketGate::canPopSomePacket(cGate *gate)
+bool PacketGate::canPopSomePacket(cGate *gate) const
 {
     return isOpen_ && provider->canPopSomePacket(inputGate->getPathStartGate());
 }
 
-Packet *PacketGate::canPopPacket(cGate *gate)
+Packet *PacketGate::canPopPacket(cGate *gate) const
 {
     return isOpen_ ? provider->canPopPacket(inputGate->getPathStartGate()) : nullptr;
 }

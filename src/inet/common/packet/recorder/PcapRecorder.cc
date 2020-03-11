@@ -34,6 +34,8 @@ simsignal_t PcapRecorder::packetRecordedSignal = registerSignal("packetRecorded"
 
 PcapRecorder::~PcapRecorder()
 {
+    for (auto helper : helpers)
+        delete helper;
 }
 
 PcapRecorder::PcapRecorder() : cSimpleModule(), pcapWriter()

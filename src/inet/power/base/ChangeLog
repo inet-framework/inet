@@ -1,5 +1,7 @@
 ====== inet-4.x ======
 
+2020-01-08  ------ inet-4.2.0 released ------
+
 2019-02-04  Levente Mészáros
 
 	Replaced receiveSignal Enter_Method calls with Enter_Method_Silent calls.

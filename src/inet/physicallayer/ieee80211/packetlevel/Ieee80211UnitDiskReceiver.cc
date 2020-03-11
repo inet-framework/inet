@@ -22,9 +22,7 @@
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211Tag_m.h"
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211TransmissionBase.h"
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211UnitDiskReceiver.h"
-#include "inet/physicallayer/unitdisk/UnitDiskNoise.h"
-#include "inet/physicallayer/unitdisk/UnitDiskReception.h"
-#include "inet/physicallayer/unitdisk/UnitDiskTransmission.h"
+#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211UnitDiskTransmission.h"
 
 namespace inet {
 namespace physicallayer {
@@ -46,6 +44,18 @@ std::ostream& Ieee80211UnitDiskReceiver::printToStream(std::ostream& stream, int
 {
     stream << "Ieee80211UnitDiskReceiver";
     return UnitDiskReceiver::printToStream(stream, level);
+}
+
+bool Ieee80211UnitDiskReceiver::computeIsReceptionPossible(const IListening *listening, const ITransmission *transmission) const
+{
+    auto ieee80211Transmission = dynamic_cast<const Ieee80211UnitDiskTransmission *>(transmission);
+    return ieee80211Transmission && /*modeSet->containsMode(ieee80211Transmission->getMode()) &&*/ ReceiverBase::computeIsReceptionPossible(listening, transmission);
+}
+
+bool Ieee80211UnitDiskReceiver::computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part) const
+{
+    auto ieee80211Transmission = dynamic_cast<const Ieee80211UnitDiskTransmission *>(reception->getTransmission());
+    return ieee80211Transmission && /*modeSet->containsMode(ieee80211Transmission->getMode()) &&*/ UnitDiskReceiver::computeIsReceptionPossible(listening, reception, part);
 }
 
 const IReceptionResult *Ieee80211UnitDiskReceiver::computeReceptionResult(const IListening *listening, const IReception *reception, const IInterference *interference, const ISnir *snir, const std::vector<const IReceptionDecision *> *decisions) const

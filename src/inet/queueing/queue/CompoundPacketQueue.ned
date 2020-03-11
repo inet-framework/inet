@@ -29,8 +29,9 @@ module CompoundPacketQueue extends PacketQueueBase like IPacketQueue
     parameters:
         int packetCapacity = default(-1); // maximum number of packets in the queue, no limit by default
         int dataCapacity @unit(b) = default(-1b); // maximum total length of packets in the queue, no limit by default
-        displayStringTextFormat = default("contains %p pk (%l)\npushed %u popped %o dropped %d");
+        displayStringTextFormat = default("contains %p pk (%l) pushed %u created %c\n popped %o removed %r dropped %d");
         @class(CompoundPacketQueue);
+        @defaultStatistic(queueLength);
         @signal[packetPushed](type=inet::Packet);
         @signal[packetPopped](type=inet::Packet);
         @signal[packetRemoved](type=inet::Packet);

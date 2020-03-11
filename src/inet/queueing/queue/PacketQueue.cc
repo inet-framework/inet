@@ -30,6 +30,7 @@ void PacketQueue::initialize(int stage)
 {
     PacketQueueBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
+        queue.setName("storage");
         inputGate = gate("in");
         producer = findConnectedModule<IActivePacketSource>(inputGate);
         outputGate = gate("out");
@@ -37,25 +38,35 @@ void PacketQueue::initialize(int stage)
         packetCapacity = par("packetCapacity");
         dataCapacity = b(par("dataCapacity"));
         buffer = getModuleFromPar<IPacketBuffer>(par("bufferModule"), this, false);
-        const char *comparatorClass = par("comparatorClass");
-        if (*comparatorClass != '\0')
-            packetComparatorFunction = check_and_cast<IPacketComparatorFunction *>(createOne(comparatorClass));
+        packetComparatorFunction = createComparatorFunction(par("comparatorClass"));
         if (packetComparatorFunction != nullptr)
             queue.setup(packetComparatorFunction);
-        const char *dropperClass = par("dropperClass");
-        if (*dropperClass != '\0')
-            packetDropperFunction = check_and_cast<IPacketDropperFunction *>(createOne(dropperClass));
+        packetDropperFunction = createDropperFunction(par("dropperClass"));
     }
     else if (stage == INITSTAGE_QUEUEING) {
-        if (producer != nullptr) {
-            checkPushPacketSupport(inputGate);
+        checkPushPacketSupport(inputGate);
+        checkPopPacketSupport(outputGate);
+        if (producer != nullptr)
             producer->handleCanPushPacket(inputGate);
-        }
-        if (collector != nullptr)
-            checkPopPacketSupport(outputGate);
     }
     else if (stage == INITSTAGE_LAST)
         updateDisplayString();
+}
+
+IPacketDropperFunction *PacketQueue::createDropperFunction(const char *dropperClass) const
+{
+    if (strlen(dropperClass) == 0)
+        return nullptr;
+    else
+        return check_and_cast<IPacketDropperFunction *>(createOne(dropperClass));
+}
+
+IPacketComparatorFunction *PacketQueue::createComparatorFunction(const char *comparatorClass) const
+{
+    if (strlen(comparatorClass) == 0)
+        return nullptr;
+    else
+        return check_and_cast<IPacketComparatorFunction *>(createOne(comparatorClass));
 }
 
 void PacketQueue::handleMessage(cMessage *message)
@@ -64,18 +75,18 @@ void PacketQueue::handleMessage(cMessage *message)
     pushPacket(packet, packet->getArrivalGate());
 }
 
-bool PacketQueue::isOverloaded()
+bool PacketQueue::isOverloaded() const
 {
     return (packetCapacity != -1 && getNumPackets() > packetCapacity) ||
            (dataCapacity != b(-1) && getTotalLength() > dataCapacity);
 }
 
-int PacketQueue::getNumPackets()
+int PacketQueue::getNumPackets() const
 {
     return queue.getLength();
 }
 
-Packet *PacketQueue::getPacket(int index)
+Packet *PacketQueue::getPacket(int index) const
 {
     if (index < 0 || index >= queue.getLength())
         throw cRuntimeError("index %i out of range", index);
@@ -85,14 +96,20 @@ Packet *PacketQueue::getPacket(int index)
 void PacketQueue::pushPacket(Packet *packet, cGate *gate)
 {
     Enter_Method("pushPacket");
-    emit(packetPushedSignal, packet);
     EV_INFO << "Pushing packet " << packet->getName() << " into the queue." << endl;
     queue.insert(packet);
+    emit(packetPushedSignal, packet);
     if (buffer != nullptr)
         buffer->addPacket(packet);
     else if (isOverloaded()) {
-        if (packetDropperFunction != nullptr)
-            packetDropperFunction->dropPackets(this);
+        if (packetDropperFunction != nullptr) {
+            while (!isEmpty() && isOverloaded()) {
+                auto packet = packetDropperFunction->selectPacket(this);
+                EV_INFO << "Dropping packet " << packet->getName() << " from the queue.\n";
+                queue.remove(packet);
+                dropPacket(packet, QUEUE_OVERFLOW);
+            }
+        }
         else
             throw cRuntimeError("Queue is overloaded but packet dropper function is not specified");
     }
@@ -106,8 +123,10 @@ Packet *PacketQueue::popPacket(cGate *gate)
     Enter_Method("popPacket");
     auto packet = check_and_cast<Packet *>(queue.front());
     EV_INFO << "Popping packet " << packet->getName() << " from the queue." << endl;
-    if (buffer != nullptr)
+    if (buffer != nullptr) {
+        queue.remove(packet);
         buffer->removePacket(packet);
+    }
     else
         queue.pop();
     emit(packetPoppedSignal, packet);
@@ -120,16 +139,17 @@ void PacketQueue::removePacket(Packet *packet)
 {
     Enter_Method("removePacket");
     EV_INFO << "Removing packet " << packet->getName() << " from the queue." << endl;
-    if (buffer != nullptr)
-        buffer->removePacket(packet);
-    else {
+    if (buffer != nullptr) {
         queue.remove(packet);
-        emit(packetRemovedSignal, packet);
-        updateDisplayString();
+        buffer->removePacket(packet);
     }
+    else
+        queue.remove(packet);
+    emit(packetRemovedSignal, packet);
+    updateDisplayString();
 }
 
-bool PacketQueue::canPushSomePacket(cGate *gate)
+bool PacketQueue::canPushSomePacket(cGate *gate) const
 {
     if (packetDropperFunction)
         return true;
@@ -140,7 +160,7 @@ bool PacketQueue::canPushSomePacket(cGate *gate)
     return true;
 }
 
-bool PacketQueue::canPushPacket(Packet *packet, cGate *gate)
+bool PacketQueue::canPushPacket(Packet *packet, cGate *gate) const
 {
     if (packetDropperFunction)
         return true;
@@ -154,9 +174,12 @@ bool PacketQueue::canPushPacket(Packet *packet, cGate *gate)
 void PacketQueue::handlePacketRemoved(Packet *packet)
 {
     Enter_Method("handlePacketRemoved");
-    queue.remove(packet);
-    emit(packetRemovedSignal, packet);
-    updateDisplayString();
+    if (queue.contains(packet)) {
+        EV_INFO << "Removing packet " << packet->getName() << " from the queue." << endl;
+        queue.remove(packet);
+        emit(packetRemovedSignal, packet);
+        updateDisplayString();
+    }
 }
 
 } // namespace queueing

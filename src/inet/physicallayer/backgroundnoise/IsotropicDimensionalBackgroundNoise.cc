@@ -65,7 +65,7 @@ const INoise *IsotropicDimensionalBackgroundNoise::computeNoise(const IListening
         if (std::isnan(bandwidth.get()))
             bandwidth = listeningBandwidth;
         else if (bandwidth != listeningBandwidth)
-            throw cRuntimeError("Background noise bandwidth doesn't match listening bandwidth");
+            throw cRuntimeError("The powerSpectralDensity parameter is not specified and the power parameter cannot be used, because background noise bandwidth doesn't match listening bandwidth");
         // NOTE: dividing by the bandwidth here makes sure the total background noise power in the listening band is the given power
         noisePowerSpectralDensity = power / bandwidth;
     }

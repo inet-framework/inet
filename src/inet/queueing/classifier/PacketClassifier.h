@@ -31,6 +31,7 @@ class INET_API PacketClassifier : public PacketClassifierBase
 
   protected:
     virtual void initialize(int stage) override;
+    virtual IPacketClassifierFunction *createClassifierFunction(const char *classifierClass) const;
     virtual int classifyPacket(Packet *packet) override;
 
   public:

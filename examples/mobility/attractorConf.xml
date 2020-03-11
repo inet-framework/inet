@@ -1,0 +1,32 @@
+<configuration>
+   <common>
+    <attractConf  id = "type_1"  type = "attractor" behaviorType = "nearest">
+        <Xdistribution> uniform(-20,20) </Xdistribution>
+        <Ydistribution> uniform(-20,20) </Ydistribution>
+        <proximity distance="100" repeat = "5" />   -- close attractor
+        <proximity distance="200" repeat = "3" />   -- second close
+        <proximity distance="300" repeat = "2" />   -- third close
+    </attractConf>
+    <attractConf  id = "type_2" type = "attractor" behaviorType = "nearest">
+        <Xdistribution> uniform(-30,30) </Xdistribution>
+        <Ydistribution> uniform(-30,30) </Ydistribution>
+        <proximity distance="200" repeat = "4" />   -- close attractor
+        <proximity distance="300" repeat = "3" />   -- second close
+        <proximity distance="400" repeat = "2" />   -- third close
+        <proximity distance= "MAX" repeat = "1" />  -- any point
+    </attractConf>
+    <attractConf  id = "type_3" type = "landscape">
+        <Xdistribution> uniform($MINX,$MAXX) </Xdistribution>
+        <Ydistribution> uniform($MINY,$MAXY) </Ydistribution>
+        <Zdistribution> uniform($MINZ,$MAXZ) </Zdistribution>
+    </attractConf>
+   </common>
+   <attractor x="100" y="100" z="0" AttractorId="type_1"/>  -- set the position of the attractor
+   <attractor x="200" y="100" z="0" AttractorId="type_1"/>  -- set the position of the attractor
+   <attractor x="300" y="100" z="0" AttractorId="type_1"/>  -- set the position of the attractor
+   <attractor x="300" y="200" z="0" AttractorId="type_2"/>  -- set the position of the attractor
+   <attractor x="300" y="300" z="0" AttractorId="type_2"/>  -- set the position of the attractor
+   <attractor x="300" y="400" z="0" AttractorId="type_2"/>  -- set the position of the attractor
+   <attractor x="300" y="500" z="0" AttractorId="type_2"/>  -- set the position of the attractor   
+   <freeAttractor x="150" y="150" z="0" Xdistribution = "uniform(-30,30)" Ydistribution = "uniform(-30,30)" repetition = "3"/>  -- set the position of the attractor, this is free list, the nodes that doesn't have a type assigned or the type doesn't exist, will use this
+</configuration>

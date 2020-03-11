@@ -83,7 +83,7 @@ void MultiFieldClassifier::PacketDissectorCallback::visitChunk(const Ptr<const C
             return;
         if (protocolId >= 0 && protocolId != ipv4Header->getProtocolId())
             return;
-        if (dscp != -1 && dscp != ipv4Header->getDiffServCodePoint())
+        if (dscp != -1 && dscp != ipv4Header->getDscp())
             return;
         if (tos != -1 && tosMask != 0 && (tos & tosMask) != (ipv4Header->getTypeOfService() & tosMask))
             return;
@@ -109,7 +109,7 @@ void MultiFieldClassifier::PacketDissectorCallback::visitChunk(const Ptr<const C
             return;
         if (protocolId >= 0 && protocolId != ipv6Header->getProtocolId())
             return;
-        if (dscp != -1 && dscp != ipv6Header->getDiffServCodePoint())
+        if (dscp != -1 && dscp != ipv6Header->getDscp())
             return;
         if (tos != -1 && tosMask != 0 && (tos & tosMask) != (ipv6Header->getTrafficClass() & tosMask))
             return;

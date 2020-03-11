@@ -33,6 +33,17 @@ static int comparePacketCreationTime(Packet *packet1, Packet *packet2)
 
 Register_Packet_Comparator_Function(PacketCreationTimeComparator, comparePacketCreationTime);
 
+static int comparePacketByData(Packet *packet1, Packet *packet2)
+{
+    const auto& data1 = packet1->peekDataAt<BytesChunk>(B(0), B(1));
+    auto byte1 = data1->getBytes().at(0);
+    const auto& data2 = packet2->peekDataAt<BytesChunk>(B(0), B(1));
+    auto byte2 = data2->getBytes().at(0);
+    return byte2 - byte1;
+}
+
+Register_Packet_Comparator_Function(PacketDataComparator, comparePacketByData);
+
 } // namespace queueing
 } // namespace inet
 

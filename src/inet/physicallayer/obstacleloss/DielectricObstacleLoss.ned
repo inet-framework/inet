@@ -28,6 +28,8 @@ import inet.physicallayer.base.packetlevel.TracingObstacleLossBase;
 module DielectricObstacleLoss extends TracingObstacleLossBase
 {
     parameters:
+        bool enableDielectricLoss = default(true); // enables/disables material dielectric loss
+        bool enableReflectionLoss = default(true); // enables/disables surface reflection loss 
         @class(DielectricObstacleLoss);
 }
 

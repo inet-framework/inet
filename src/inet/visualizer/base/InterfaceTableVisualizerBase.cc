@@ -41,8 +41,9 @@ InterfaceTableVisualizerBase::InterfaceVisualization::InterfaceVisualization(int
 {
 }
 
-const char *InterfaceTableVisualizerBase::DirectiveResolver::resolveDirective(char directive)
+const char *InterfaceTableVisualizerBase::DirectiveResolver::resolveDirective(char directive) const
 {
+    static std::string result;
     result = "";
     switch (directive) {
         case 'N':
@@ -164,6 +165,7 @@ void InterfaceTableVisualizerBase::subscribe()
     visualizationSubjectModule->subscribe(interfaceCreatedSignal, this);
     visualizationSubjectModule->subscribe(interfaceDeletedSignal, this);
     visualizationSubjectModule->subscribe(interfaceConfigChangedSignal, this);
+    visualizationSubjectModule->subscribe(interfaceStateChangedSignal, this);
     visualizationSubjectModule->subscribe(interfaceIpv4ConfigChangedSignal, this);
 }
 
@@ -175,6 +177,7 @@ void InterfaceTableVisualizerBase::unsubscribe()
         visualizationSubjectModule->unsubscribe(interfaceCreatedSignal, this);
         visualizationSubjectModule->unsubscribe(interfaceDeletedSignal, this);
         visualizationSubjectModule->unsubscribe(interfaceConfigChangedSignal, this);
+        visualizationSubjectModule->unsubscribe(interfaceStateChangedSignal, this);
         visualizationSubjectModule->unsubscribe(interfaceIpv4ConfigChangedSignal, this);
     }
 }
@@ -291,16 +294,17 @@ void InterfaceTableVisualizerBase::receiveSignal(cComponent *source, simsignal_t
             }
         }
     }
-    else if (signal == interfaceConfigChangedSignal || signal == interfaceIpv4ConfigChangedSignal) {
+    else if (signal == interfaceConfigChangedSignal || signal == interfaceIpv4ConfigChangedSignal || signal == interfaceStateChangedSignal) {
         auto networkNode = getContainingNode(static_cast<cModule *>(source));
         if (object != nullptr && nodeFilter.matches(networkNode)) {
             auto interfaceEntryDetails = static_cast<InterfaceEntryChangeDetails *>(object);
             auto interfaceEntry = interfaceEntryDetails->getInterfaceEntry();
             auto fieldId = interfaceEntryDetails->getFieldId();
-            if (fieldId == InterfaceEntry::F_IPV4_DATA
+            if ((signal == interfaceConfigChangedSignal && fieldId == InterfaceEntry::F_IPV4_DATA)
 #ifdef WITH_IPv4
-                    || fieldId == Ipv4InterfaceData::F_IP_ADDRESS || fieldId == Ipv4InterfaceData::F_NETMASK
+                    || (signal == interfaceIpv4ConfigChangedSignal && (fieldId == Ipv4InterfaceData::F_IP_ADDRESS || fieldId == Ipv4InterfaceData::F_NETMASK))
 #endif // WITH_IPv4
+                    || (signal == interfaceStateChangedSignal && (fieldId == InterfaceEntry::F_STATE || fieldId == InterfaceEntry::F_CARRIER))
                     ) {
                 if (interfaceFilter.matches(interfaceEntry)) {
                     auto interfaceVisualization = getInterfaceVisualization(networkNode, interfaceEntry);

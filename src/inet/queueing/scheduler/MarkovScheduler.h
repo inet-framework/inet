@@ -50,14 +50,15 @@ class INET_API MarkovScheduler : public PacketSchedulerBase, public IPassivePack
 
     virtual IPassivePacketSink *getConsumer(cGate *gate) override { return consumer; }
 
-    virtual bool supportsPushPacket(cGate* gate) override { return true; }
-    virtual bool supportsPopPacket(cGate *gate) override { return true; }
+    virtual bool supportsPushPacket(cGate *gate) const override { return true; }
+    virtual bool supportsPopPacket(cGate *gate) const override { return true; }
 
-    virtual bool canPushSomePacket(cGate *gate) override;
-    virtual bool canPushPacket(Packet *packet, cGate *gate) override;
+    virtual bool canPushSomePacket(cGate *gate) const override;
+    virtual bool canPushPacket(Packet *packet, cGate *gate) const override;
     virtual void pushPacket(Packet *packet, cGate *gate) override;
 
     virtual void handleCanPushPacket(cGate *gate) override;
+    virtual const char *resolveDirective(char directive) const override;
 };
 
 } // namespace queueing

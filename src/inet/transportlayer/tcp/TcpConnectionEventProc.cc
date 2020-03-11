@@ -186,10 +186,16 @@ void TcpConnection::process_OPTIONS(TcpEventCode& event, TcpCommand *tcpCommand,
 
     if (auto cmd = dynamic_cast<TcpSetTimeToLiveCommand *>(tcpCommand))
         ttl = cmd->getTtl();
-    else if (auto cmd = dynamic_cast<TcpSetDscpCommand *>(tcpCommand))
+    else if (auto cmd = dynamic_cast<TcpSetTosCommand *>(tcpCommand)) {
+        tos = cmd->getTos();
+    }
+    else if (auto cmd = dynamic_cast<TcpSetDscpCommand *>(tcpCommand)) {
         dscp = cmd->getDscp();
+    }
     else
         throw cRuntimeError("Unknown subclass of TcpSetOptionCommand received from app: %s", tcpCommand->getClassName());
+    delete tcpCommand;
+    delete msg;
 }
 
 void TcpConnection::process_CLOSE(TcpEventCode& event, TcpCommand *tcpCommand, cMessage *msg)

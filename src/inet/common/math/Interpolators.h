@@ -199,6 +199,38 @@ template<typename X, typename Y>
 LinearInterpolator<X, Y> LinearInterpolator<X, Y>::singleton;
 
 template<typename X, typename Y>
+class INET_API LineardbInterpolator : public InterpolatorBase<X, Y>
+{
+  public:
+    static LineardbInterpolator<X, Y> singleton;
+
+  public:
+    virtual Y getValue(const X x1, const Y y1, const X x2, const Y y2, const X x) const override {
+        ASSERT(x1 <= x && x <= x2);
+        if (x1 == x)
+            return y1;
+        else if (x2 == x)
+            return y2;
+        else {
+            auto a = toDouble(x - x1) / toDouble(x2 - x1);
+            auto y1dB = math::fraction2dB(y1);
+            auto y2dB = math::fraction2dB(y2);
+            return math::dB2fraction(y1dB * (1 - a) + y2dB * a);
+        }
+    }
+
+    virtual Y getMean(const X x1, const Y y1, const X x2, const Y y2) const override {
+        ASSERT(x1 <= x2);
+        auto y1dB = math::fraction2dB(y1);
+        auto y2dB = math::fraction2dB(y2);
+        return math::dB2fraction((y1dB + y2dB) / 2);
+    }
+};
+
+template<typename X, typename Y>
+LineardbInterpolator<X, Y> LineardbInterpolator<X, Y>::singleton;
+
+template<typename X, typename Y>
 const IInterpolator<X, Y> *createInterpolator(const char *text) {
     if (!strcmp("either", text))
         return &EitherInterpolator<X, Y>::singleton;
@@ -216,6 +248,8 @@ const IInterpolator<X, Y> *createInterpolator(const char *text) {
         return &MaximumInterpolator<X, Y>::singleton;
     else if (!strcmp("linear", text))
         return &LinearInterpolator<X, Y>::singleton;
+    else if (!strcmp("lineardb", text))
+        return &LineardbInterpolator<X, Y>::singleton;
     else
         throw cRuntimeError("Unknown interpolator: '%s'", text);
 }

@@ -8,7 +8,7 @@ server. The server generates an Destination Unreachable Icmpv6
 error that should be received by the client application in the
 form of an error indication.
 
-%inifile: {}.ini
+%inifile: omnetpp.ini
 [General]
 ned-path = ../../../../examples;../../../../src
 network = inet.examples.ipv6.nclients.NClientsEth

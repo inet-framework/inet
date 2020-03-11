@@ -42,6 +42,7 @@ NetworkNodeCanvasVisualization::NetworkNodeCanvasVisualization(cModule *networkN
     annotationFigure = new cPanelFigure("annotation");
     addFigure(annotationFigure);
     submoduleBounds = getEnvir()->getSubmoduleBounds(networkNode);
+    submoduleBounds.height += 32; // TODO: KLUDGE: extend bounds for submodule name label
     submoduleBounds.x = -submoduleBounds.width / 2;
     submoduleBounds.y = -submoduleBounds.height / 2;
     if (networkNode->hasPar("canvasImage") && strlen(networkNode->par("canvasImage")) != 0) {
@@ -223,6 +224,7 @@ void NetworkNodeCanvasVisualization::layout()
     pts.push_back(getTopCenter(extendendSubmoduleBounds));
     pts.push_back(getTopRight(extendendSubmoduleBounds));
     pts.push_back(getCenterLeft(extendendSubmoduleBounds));
+    pts.push_back(getCenterCenter(extendendSubmoduleBounds));
     pts.push_back(getCenterRight(extendendSubmoduleBounds));
     pts.push_back(getBottomLeft(extendendSubmoduleBounds));
     pts.push_back(getBottomCenter(extendendSubmoduleBounds));
@@ -250,7 +252,7 @@ void NetworkNodeCanvasVisualization::layout()
         // for all candidate points
         for (auto pt: pts) {
             // align annotation to candidate points with its various points
-            for (int k = 0; k < 8; k++) {
+            for (int k = 0; k < 9; k++) {
                 cFigure::Rectangle candidateRc;
                 switch (k) {
                     case 0:
@@ -270,39 +272,47 @@ void NetworkNodeCanvasVisualization::layout()
                         candidateRc = createRectangle(pt - cFigure::Point(0, rs.y / 2), rs);
                         break;
                     case 4:
+                        // candidate point is center center
+                        candidateRc = createRectangle(pt - cFigure::Point(rs.x / 2, rs.y / 2), rs);
+                        break;
+                    case 5:
                         // candidate point is center right
                         candidateRc = createRectangle(pt - cFigure::Point(rs.x, rs.y / 2), rs);
                         break;
-                    case 5:
+                    case 6:
                         // candidate point is bottom left
                         candidateRc = createRectangle(pt - cFigure::Point(0, rs.y), rs);
                         break;
-                    case 6:
+                    case 7:
                         // candidate point is bottom center
                         candidateRc = createRectangle(pt - cFigure::Point(rs.x / 2, rs.y), rs);
                         break;
-                    case 7:
+                    case 8:
                         // candidate point is bottom right
                         candidateRc = createRectangle(pt - cFigure::Point(rs.x, rs.y), rs);
                         break;
+                    default:
+                        throw cRuntimeError("Invalid case");
                 }
 
                 double distance = 0;
-                distance += getClosestPlacementDistance(submoduleBounds, annotation.placementHint, getTopLeft(candidateRc)) * placementPenalty;
-                distance += getClosestPlacementDistance(submoduleBounds, annotation.placementHint, getTopRight(candidateRc)) * placementPenalty;
-                distance += getClosestPlacementDistance(submoduleBounds, annotation.placementHint, getBottomLeft(candidateRc)) * placementPenalty;
-                distance += getClosestPlacementDistance(submoduleBounds, annotation.placementHint, getBottomRight(candidateRc)) * placementPenalty;
+                if (annotation.placementHint != PLACEMENT_CENTER_CENTER) {
+                    distance += getClosestPlacementDistance(submoduleBounds, annotation.placementHint, getTopLeft(candidateRc)) * placementPenalty;
+                    distance += getClosestPlacementDistance(submoduleBounds, annotation.placementHint, getTopRight(candidateRc)) * placementPenalty;
+                    distance += getClosestPlacementDistance(submoduleBounds, annotation.placementHint, getBottomLeft(candidateRc)) * placementPenalty;
+                    distance += getClosestPlacementDistance(submoduleBounds, annotation.placementHint, getBottomRight(candidateRc)) * placementPenalty;
 
-                // find an already positioned annotation which would intersect the candidate rectangle
-                bool intersects = false;
-                for (const auto& rc: rcs) {
-                    if (intersectsRectangle(candidateRc, rc)) {
-                        intersects = true;
-                        break;
+                    // find an already positioned annotation which would intersect the candidate rectangle
+                    bool intersects = false;
+                    for (const auto& rc: rcs) {
+                        if (intersectsRectangle(candidateRc, rc)) {
+                            intersects = true;
+                            break;
+                        }
                     }
+                    if (intersects)
+                        continue;
                 }
-                if (intersects)
-                    continue;
 
                 // if better than the current best
                 distance += getCenterCenter(submoduleBounds).distanceTo(getCenterCenter(candidateRc));
@@ -334,6 +344,7 @@ void NetworkNodeCanvasVisualization::layout()
         pushUnlessContains(pts, rcs, getTopCenter(bestRc));
         pushUnlessContains(pts, rcs, getTopRight(bestRc));
         pushUnlessContains(pts, rcs, getCenterLeft(bestRc));
+        pushUnlessContains(pts, rcs, getCenterCenter(bestRc));
         pushUnlessContains(pts, rcs, getCenterRight(bestRc));
         pushUnlessContains(pts, rcs, getBottomLeft(bestRc));
         pushUnlessContains(pts, rcs, getBottomCenter(bestRc));

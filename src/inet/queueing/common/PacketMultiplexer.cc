@@ -39,8 +39,7 @@ void PacketMultiplexer::initialize(int stage)
     else if (stage == INITSTAGE_QUEUEING) {
         for (auto inputGate : inputGates)
             checkPushPacketSupport(inputGate);
-        if (consumer != nullptr)
-            checkPushPacketSupport(outputGate);
+        checkPushPacketSupport(outputGate);
     }
 }
 

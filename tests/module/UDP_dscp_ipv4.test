@@ -1,0 +1,55 @@
+%description:
+Tests that the TypeOfService UDP socket option takes effect over IPv4.
+
+NClients example network is used, with one client.
+The client sends a packet with a given ToS.
+It is checked that the server receives the datagram with the correct ToS value.
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+[General]
+ned-path = ../../../../examples;../../../../src
+network = inet.examples.inet.nclients.NClients
+sim-time-limit = 15s
+cmdenv-express-mode = false
+
+#omnetpp 5.0 - 5.1 compatibility:
+eventlog-file = "${resultdir}/${configname}-${runnumber}.elog"
+output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
+output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
+snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
+
+# number of client computers
+*.n = 1
+
+# udp apps
+**.cli[*].numApps = 1
+**.cli[*].app[0].typename = "UdpBasicApp"
+**.cli[*].app[0].destAddresses = "srv"
+**.cli[*].app[0].destPort = 1000
+**.cli[*].app[0].messageLength = 64B
+**.cli[*].app[0].dscp = 53  # some abritrary value
+
+**.cli[*].app[0].startTime = 10s
+**.cli[*].app[0].stopTime = 11s
+**.cli[*].app[0].sendInterval = 10s
+
+**.srv.numApps = 1
+**.srv.app[0].typename = "UdpSink"
+**.srv.app[0].localPort = 1000
+
+**.cli[0].numPcapRecorders = 1
+**.cli[0].pcapRecorder[0].pcapFile = "foo.pcap"
+**.crcMode="computed"
+**.fcsMode="computed"
+%#--------------------------------------------------------------------------------------------------------------
+%subst: /omnetpp:://
+%#--------------------------------------------------------------------------------------------------------------
+%contains-regex: stdout
+Received packet: \(inet::Packet\)UdpBasicAppData-0 .* DSCP=53
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+undisposed object:
+%not-contains: stdout
+-- check module destructor
+%#--------------------------------------------------------------------------------------------------------------

@@ -55,8 +55,8 @@ class INET_API MultiFieldClassifier : public queueing::PacketClassifierBase
         L3Address destAddr;
         int destPrefixLength = 0;
         int protocolId = -1;
-        int dscp = 0;
-        int tos = 0;
+        int dscp = -1;
+        int tos = -1;
         int tosMask = 0;
         int srcPortMin = -1;
         int srcPortMax = -1;

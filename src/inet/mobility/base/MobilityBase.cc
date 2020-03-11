@@ -60,8 +60,9 @@ MobilityBase::MobilityBase() :
 {
 }
 
-const char *MobilityBase::DirectiveResolver::resolveDirective(char directive)
+const char *MobilityBase::DirectiveResolver::resolveDirective(char directive) const
 {
+    static std::string result;
     switch (directive) {
         case 'p':
             result = mobility->getCurrentPosition().str();

@@ -167,8 +167,11 @@ bool MacAddressTable::updateTableWithAddress(int interfaceId, const MacAddress& 
         table = new AddressTable();
 
         // set 'the addressTable' to VLAN ID 0
-        if (vid == 0)
-            addressTable = table;
+        if (vid == 0) {
+            this->addressTable = table;
+            AddressTable& addressTable = *table;    // magic to hide the '*' from the name of the watch below
+            WATCH_MAP(addressTable);
+        }
 
         vlanAddressTable[vid] = table;
         iter = table->end();
@@ -347,8 +350,11 @@ void MacAddressTable::readAddressTable(const char *fileName)
             table = new AddressTable();
 
             // set 'the addressTable' to VLAN ID 0
-            if (entry.vid == 0)
-                addressTable = table;
+            if (entry.vid == 0) {
+                this->addressTable = table;
+                AddressTable& addressTable = *table;    // magic to hide the '*' from the name of the watch below
+                WATCH_MAP(addressTable);
+            }
 
             vlanAddressTable[entry.vid] = table;
         }

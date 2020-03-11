@@ -3,6 +3,7 @@
 This test contains basic checks for various multi-dimensional mathematical functions.
 
 %includes:
+#include "inet/common/math/FunctionChecker.h"
 #include "inet/common/math/Functions.h"
 
 %global:
@@ -23,7 +24,7 @@ void FunctionTest::test1()
     FunctionChecker<WpHz, Domain<simsec, Hz>>(backgroundNoise).check();
     std::cout << "Background noise: " << *backgroundNoise << std::endl;
 
-    auto transmission = makeFirstQuadrantLimitedFunction(staticPtrCast<const IFunction<WpHz, Domain<simsec, Hz>>>(makeShared<TwoDimensionalBoxcarFunction<WpHz, simsec, Hz>>(simsec(10), simsec(30), GHz(0.9), GHz(1.1), W(100) / MHz(200))));
+    auto transmission = makeFirstQuadrantLimitedFunction(staticPtrCast<const IFunction<WpHz, Domain<simsec, Hz>>>(makeShared<Boxcar2DFunction<WpHz, simsec, Hz>>(simsec(10), simsec(30), GHz(0.9), GHz(1.1), W(100) / MHz(200))));
     FunctionChecker<WpHz, Domain<simsec, Hz>>(transmission).check();
     std::cout << "Transmission: " << *transmission << std::endl;
 
@@ -34,7 +35,7 @@ void FunctionTest::test1()
     FunctionChecker<double, Domain<simsec, Hz>>(attenuation).check();
     std::cout << "Attenuation: " << *attenuation << std::endl;
 
-    auto propagatedTransmission = makeShared<ShiftFunction<WpHz, Domain<simsec, Hz>>>(transmission, propagation);
+    auto propagatedTransmission = makeShared<DomainShiftedFunction<WpHz, Domain<simsec, Hz>>>(transmission, propagation);
     FunctionChecker<WpHz, Domain<simsec, Hz>>(propagatedTransmission).check();
 
     auto reception = propagatedTransmission->multiply(attenuation);
@@ -45,7 +46,7 @@ void FunctionTest::test1()
     FunctionChecker<double, Domain<simsec, Hz>>(snir1).check();
     std::cout << "SNIR over time and frequency: " << *snir1 << std::endl;
     
-    auto bandpassFilter = makeFirstQuadrantLimitedFunction(staticPtrCast<const IFunction<double, Domain<simsec, Hz>>>(makeShared<TwoDimensionalBoxcarFunction<double, simsec, Hz>>(simsec(20), simsec(40), MHz(900), MHz(1100), 1)));
+    auto bandpassFilter = makeFirstQuadrantLimitedFunction(staticPtrCast<const IFunction<double, Domain<simsec, Hz>>>(makeShared<Boxcar2DFunction<double, simsec, Hz>>(simsec(20), simsec(40), MHz(900), MHz(1100), 1)));
     FunctionChecker<double, Domain<simsec, Hz>>(bandpassFilter).check();
     std::cout << "Bandpass filter: " << *bandpassFilter << std::endl;
 
@@ -78,7 +79,7 @@ Transmission: function(s, Hz) → WpHz {
   domain = [0 s … inf s) x [0 Hz … inf GHz) → range = [0 WpHz … 5e-07 WpHz]
   structure =
     (DomainLimited, domain = [0 s … inf s) x [0 Hz … inf GHz)
-      (TwoDimensionalBoxcar, [10 s … 30 s] x [900 MHz … 1.1 GHz] → 5e-07 WpHz))
+      (Boxcar2D, [10 s … 30 s] x [900 MHz … 1.1 GHz] → 5e-07 WpHz))
   partitioning = {
     constant over [0 s … 10 s) x [0 Hz … 900 MHz)
       → 0 WpHz
@@ -115,9 +116,9 @@ Attenuation: function(s, Hz) → unit {
 Reception: function(s, Hz) → WpHz {
   domain = [10 s … inf s) x [0 Hz … inf GHz) → range = [-inf WpHz … inf WpHz]
   structure =
-    (* (Shift, s = (10 s, 0 Hz)
+    (* (DomainShifted, shift = (10 s, 0 Hz)
          (DomainLimited, domain = [0 s … inf s) x [0 Hz … inf GHz)
-           (TwoDimensionalBoxcar, [10 s … 30 s] x [900 MHz … 1.1 GHz] → 5e-07 WpHz)))
+           (Boxcar2D, [10 s … 30 s] x [900 MHz … 1.1 GHz] → 5e-07 WpHz)))
        Constant 0.5)
   partitioning = {
     constant over [10 s … 20 s) x [0 Hz … 900 MHz)
@@ -144,9 +145,9 @@ Reception: function(s, Hz) → WpHz {
 SNIR over time and frequency: function(s, Hz) → unit {
   domain = [10 s … inf s) x [0 Hz … inf GHz) → range = [-inf … inf]
   structure =
-    (/ (* (Shift, s = (10 s, 0 Hz)
+    (/ (* (DomainShifted, shift = (10 s, 0 Hz)
             (DomainLimited, domain = [0 s … inf s) x [0 Hz … inf GHz)
-              (TwoDimensionalBoxcar, [10 s … 30 s] x [900 MHz … 1.1 GHz] → 5e-07 WpHz)))
+              (Boxcar2D, [10 s … 30 s] x [900 MHz … 1.1 GHz] → 5e-07 WpHz)))
           Constant 0.5)
        (DomainLimited, domain = [0 s … inf s) x [0 Hz … inf GHz)
          Constant 5e-08 WpHz))
@@ -176,7 +177,7 @@ Bandpass filter: function(s, Hz) → unit {
   domain = [0 s … inf s) x [0 Hz … inf GHz) → range = [0 … 1]
   structure =
     (DomainLimited, domain = [0 s … inf s) x [0 Hz … inf GHz)
-      (TwoDimensionalBoxcar, [20 s … 40 s] x [900 MHz … 1.1 GHz] → 1))
+      (Boxcar2D, [20 s … 40 s] x [900 MHz … 1.1 GHz] → 1))
   partitioning = {
     constant over [0 s … 20 s) x [0 Hz … 900 MHz)
       → 0

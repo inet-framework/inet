@@ -81,7 +81,7 @@
         name="INET examples"
         description = "Examples for basic internet protocols (IPv4, TCP, UDP)"
         initiallyEnabled = "true"
-        requires = "IPv4 TCP_INET UDP Ethernet PPP Ieee80211"
+        requires = "IPv4 TCP_INET UDP Ethernet PPP"
         labels = "protocols examples"
         nedPackages = "
                        inet.examples.inet
@@ -1256,6 +1256,18 @@
         requires = "visualization physicalenvironment Ieee80211 IPv4 GPSR"
         labels = "showcase routing"
         nedPackages = "inet.showcases.routing"
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
+        id="emulation_showcases"
+        name="Emulation showcases"
+        description = "Showcases that demonstrate communication with external systems/components."
+        initiallyEnabled = "false"
+        requires = "VoIPStream Ethernet Ieee80211 ExternalInterface"
+        labels = "showcase emulation"
+        nedPackages = "inet.showcases.emulation"
         extraSourceFolders = ""
         compileFlags = ""
         linkerFlags = ""

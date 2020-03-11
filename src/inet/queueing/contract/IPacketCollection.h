@@ -33,33 +33,33 @@ class INET_API IPacketCollection
      * Returns maximum allowed number of packets in the collection.
      * The value -1 means no such limit.
      */
-    virtual int getMaxNumPackets() = 0;
+    virtual int getMaxNumPackets() const = 0;
 
     /**
      * Returns the number of available packets in the collection in the range [0, inf).
      */
-    virtual int getNumPackets() = 0;
+    virtual int getNumPackets() const = 0;
 
     /**
      * Returns maximum allowed total length of all packets in the collection.
      * The value -1 means no such limit.
      */
-    virtual b getMaxTotalLength() = 0;
+    virtual b getMaxTotalLength() const = 0;
 
     /**
      * Returns the total length of all packets in the collection in the range [0, inf).
      */
-    virtual b getTotalLength() = 0;
+    virtual b getTotalLength() const = 0;
 
     /**
      * Returns the packet at the given index. Throws error when the index is out of range.
      */
-    virtual Packet *getPacket(int index) = 0;
+    virtual Packet *getPacket(int index) const = 0;
 
     /**
      * Returns true if there are no packets available in the collection.
      */
-    virtual bool isEmpty() = 0;
+    virtual bool isEmpty() const = 0;
 
     /**
      * Removes a packet from the collection. The collection must contain the packet.

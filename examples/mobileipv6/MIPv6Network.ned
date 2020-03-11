@@ -23,8 +23,8 @@
 
 package inet.examples.mobileipv6;
 
-import inet.linklayer.ethernet.EtherHub;
 import inet.networklayer.configurator.ipv6.Ipv6FlatNetworkConfigurator;
+import inet.node.ethernet.EtherSwitch;
 import inet.node.ipv6.Router6;
 import inet.node.wireless.AccessPoint;
 import inet.node.xmipv6.CorrespondentNode6;
@@ -80,7 +80,9 @@ network mIPv6Network
             parameters:
                 @display("p=220,404");
         }
-        CN[total_cn]: CorrespondentNode6;
+        CN[total_cn]: CorrespondentNode6 {
+            @display("p=405,595");
+        }
         AP_Home: AccessPoint {
             parameters:
                 @display("p=249,172;i=device/accesspoint_s");
@@ -89,43 +91,24 @@ network mIPv6Network
             parameters:
                 @display("p=566,172;i=device/accesspoint_s");
         }
-        hub: EtherHub {
+        switch: EtherSwitch {
             parameters:
-                @display("p=406,412;i=device/hub_s");
+                @display("p=405,467;i=device/hub_s");
         }
+
     connections allowunconnected:
-
-                         //Home_Agent.ethOut++ --> ethernetline --> R_1.ethIn++;
-                         //Home_Agent.ethIn++ <-- ethernetline <-- R_1.ethOut++;
-
         R_1.ethg++ <--> ethernetline <--> R_2.ethg++;
 
-                                                       //R_2.ethOut++ --> ethernetline --> R_3.ethIn++;
-                                                       //R_2.ethIn++ <-- ethernetline <-- R_3.ethOut++;
-
-        Home_Agent.ethg$o++ --> ethernetline --> R_2.ethg$i++;
-        Home_Agent.ethg$i++ <-- ethernetline <-- R_2.ethg$o++;
+        Home_Agent.ethg++ <--> ethernetline <--> R_2.ethg++;
 
         for i=0..total_cn-1 {
-            CN[i].ethg$o++ --> ethernetline --> hub.ethg$i++;
-            CN[i].ethg$i++ <-- ethernetline <-- hub.ethg$o++;
+            CN[i].ethg++ <--> ethernetline <--> switch.ethg++;
         }
 
-        hub.ethg++ <--> ethernetline <--> R_2.ethg++;
+        switch.ethg++ <--> ethernetline <--> R_2.ethg++;
 
-                                                    //R_1.ethOut++ --> ethernetline --> CN.ethIn++;
-                                                    //R_1.ethIn++ <-- ethernetline <-- CN.ethOut++;
-
-        AP_Home.ethg$o++ --> ethernetline --> Home_Agent.ethg$i++;
-        AP_Home.ethg$i++ <-- ethernetline <-- Home_Agent.ethg$o++;
+        AP_Home.ethg++ <--> ethernetline <--> Home_Agent.ethg++;
 
         AP_1.ethg++ <--> ethernetline <--> R_1.ethg++;
-
-                                                        //AP_2.ethOut++ --> ethernetline --> R_2.ethIn++;
-                                                        //AP_2.ethIn++ <-- ethernetline <-- R_2.ethOut++;
-
-                                                        //AP_3.ethOut++ --> ethernetline --> R_3.ethIn++;
-                                                        //AP_3.ethIn++ <-- ethernetline <-- R_3.ethOut++;
-
 }
 

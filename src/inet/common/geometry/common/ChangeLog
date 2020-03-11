@@ -1,5 +1,11 @@
 ====== inet-4.x ======
 
+2020-01-08  ------ inet-4.2.0 released ------
+
+2019-12-05  Levente Mészáros
+
+	Added several utility functions to Coord.
+
 2019-06-07  Levente Mészáros
 
 	Added equality operators to Quaternion.

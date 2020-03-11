@@ -28,8 +28,9 @@ InfoVisualizerBase::InfoVisualization::InfoVisualization(int moduleId) :
 {
 }
 
-const char *InfoVisualizerBase::DirectiveResolver::resolveDirective(char directive)
+const char *InfoVisualizerBase::DirectiveResolver::resolveDirective(char directive) const
 {
+    static std::string result;
     switch (directive) {
         case 'n':
             result = module->getFullName();

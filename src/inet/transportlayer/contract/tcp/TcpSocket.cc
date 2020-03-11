@@ -72,6 +72,7 @@ TcpSocket::~TcpSocket()
         cb->socketDeleted(this);
         cb = nullptr;
     }
+    delete receiveQueue;
 }
 
 void TcpSocket::bind(int lPort)
@@ -223,9 +224,18 @@ void TcpSocket::setTimeToLive(int ttl)
 
 void TcpSocket::setDscp(short dscp)
 {
-    auto request = new Request("setTOS", TCP_C_SETOPTION);
+    auto request = new Request("setDscp", TCP_C_SETOPTION);
     auto *cmd = new TcpSetDscpCommand();
     cmd->setDscp(dscp);
+    request->setControlInfo(cmd);
+    sendToTcp(request);
+}
+
+void TcpSocket::setTos(short dscp)
+{
+    auto request = new Request("setTOS", TCP_C_SETOPTION);
+    auto *cmd = new TcpSetTosCommand();
+    cmd->setTos(dscp);
     request->setControlInfo(cmd);
     sendToTcp(request);
 }

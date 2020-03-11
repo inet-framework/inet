@@ -1,12 +1,12 @@
 %description:
 TCP SACK test
  Testing correct closure of TCP connection when SACK is enabled.
- 
+
  In this example, we assume that the data receiver has first received seven segments of
  500 bytes each, and has sent an acknowledgement with the cumulative
  acknowledgement field set to 3501 (assuming the first sequence number
  is one). The congestion window size at sender's side is 8 segments (i.e. 4000B)
- 
+
         Transmitted      Received    ACK Sent
         Segment          Segment     (Including SACK Blocks)
 
@@ -14,29 +14,28 @@ TCP SACK test
         [4001-4501)      (data packet dropped)
         [4501-5001)      [4501-5001)   3501, SACK=4501-5001
         [5001-5501)      [5001-5501)   3501, SACK=4501-5501
-        [5501-6001)      [5501-6001)   3501, SACK=4501-6001          
+        [5501-6001)      [5501-6001)   3501, SACK=4501-6001
         [6001-6501)      [5001-5501)   3501, SACK=4501-6501
-        [6501-7001)      [6001-6501)   3501, SACK=4501-7001                              
+        [6501-7001)      [6001-6501)   3501, SACK=4501-7001
  		     [7001-7501)		    [7001-7501)   3501, SACK=4501-7501
- 		
+
    Because of two consecutive lost data packets, the sender receives three duplicate acks,
-   triggering Fast Retransmirt + Fast Recovery. The congestion window is now reduced to 7 
-   segments (3500B). 
-   
+   triggering Fast Retransmirt + Fast Recovery. The congestion window is now reduced to 7
+   segments (3500B).
+
  		(Re-)Transmitted      	Received       ACK Sent
         Segment           Segment        (Including SACK Blocks)
  		(R) [3501-4001)     	[3501-4001)   4001, SACK=3501-4001 SACK=4501-5001
    (R) [4001-4501)  	   [4001-4501)   7501
    [7501-8001)			  	    [7501-8001)   8001
  		[8001-8201)+FIN		  	 [8001-8202)   8202
- 
- The last segment [8001-8201), which is sent for the first time during Fast Recovery, 
- contains 200 bytes of data and 1 byte for the FIN. 
-   
 
-%inifile: {}.ini
+ The last segment [8001-8201), which is sent for the first time during Fast Recovery,
+ contains 200 bytes of data and 1 byte for the FIN.
+
+
+%inifile: omnetpp.ini
 [General]
-#preload-ned-files = *.ned ../../*.ned @../../../../nedfiles.lst
 ned-path = .;../../../../src;../../lib
 
 #omnetpp 5.0 - 5.1 compatibility:
@@ -45,14 +44,12 @@ output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
 output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
 snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
-network = TcpTestNet1
+network = inet.test.moduletest.lib.TcpTestNet1
 
-#[Cmdenv]
 cmdenv-event-banners=false
 cmdenv-express-mode=false
 cmdenv-log-prefix="[%c]: "
 
-#[Parameters]
 *.testing=false
 
 # for scriptabletester

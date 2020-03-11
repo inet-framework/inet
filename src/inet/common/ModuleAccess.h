@@ -128,18 +128,18 @@ INET_API InterfaceEntry *getContainingNicModule(const cModule *from);
  * Returns nullptr if no such module is found along the path.
  */
 template<typename T>
-INET_API cGate *findConnectedGate(cGate *gate)
+INET_API cGate *findConnectedGate(cGate *gate, int direction = 0)
 {
     if (!gate->isConnectedOutside())
         return nullptr;
     else {
-        if (gate->getType() == cGate::INPUT) {
+        if (direction < 0 || gate->getType() == cGate::INPUT) {
             for (auto g = gate; g != nullptr; g = g->getPreviousGate())
                 if (dynamic_cast<T *>(g->getOwnerModule()) && g->getType() == cGate::OUTPUT)
                     return g;
             return nullptr;
         }
-        else if (gate->getType() == cGate::OUTPUT) {
+        else if (direction > 0 || gate->getType() == cGate::OUTPUT) {
             for (auto g = gate; g != nullptr; g = g->getNextGate())
                 if (dynamic_cast<T *>(g->getOwnerModule()) && g->getType() == cGate::INPUT)
                     return g;
@@ -155,9 +155,9 @@ INET_API cGate *findConnectedGate(cGate *gate)
  * Throws an error if no such module is found along the path.
  */
 template<typename T>
-INET_API cGate *getConnectedGate(cGate *gate)
+INET_API cGate *getConnectedGate(cGate *gate, int direction = 0)
 {
-    auto connectedGate = findConnectedGate<T>(gate);
+    auto connectedGate = findConnectedGate<T>(gate, direction);
     if (connectedGate == nullptr)
         throw cRuntimeError("Gate %s is not connected to a module of type %s", gate->getFullPath().c_str(), opp_typename(typeid(T)));
     return connectedGate;
@@ -168,9 +168,9 @@ INET_API cGate *getConnectedGate(cGate *gate)
  * Returns nullptr if no such module is found along the path.
  */
 template<typename T>
-INET_API T *findConnectedModule(cGate *gate)
+INET_API T *findConnectedModule(cGate *gate, int direction = 0)
 {
-    auto connectedGate = findConnectedGate<T>(gate);
+    auto connectedGate = findConnectedGate<T>(gate, direction);
     return connectedGate != nullptr ? check_and_cast<T *>(connectedGate->getOwnerModule()) : nullptr;
 }
 
@@ -179,9 +179,9 @@ INET_API T *findConnectedModule(cGate *gate)
  * Throws an error if no such module is found along the path.
  */
 template<typename T>
-INET_API T *getConnectedModule(cGate *gate)
+INET_API T *getConnectedModule(cGate *gate, int direction = 0)
 {
-    auto module = findConnectedModule<T>(gate);
+    auto module = findConnectedModule<T>(gate, direction);
     if (module == nullptr)
         throw cRuntimeError("Gate %s is not connected to a module of type %s", gate->getFullPath().c_str(), opp_typename(typeid(T)));
     return module;

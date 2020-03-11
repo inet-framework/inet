@@ -17,6 +17,7 @@
 
 #include "inet/common/Simsignals.h"
 #include "inet/linklayer/ethernet/EtherHub.h"
+#include "inet/linklayer/ethernet/EtherPhyFrame_m.h"
 
 namespace inet {
 
@@ -142,7 +143,9 @@ void EtherHub::handleMessage(cMessage *msg)
     if (dataratesDiffer)
         checkConnections(true);
 
-    PK(msg);    // only packets accepted
+    auto signal = check_and_cast<EthernetSignalBase *>(msg);
+    if (signal->getSrcMacFullDuplex() != false)
+        throw cRuntimeError("Ethernet misconfiguration: MACs on the Ethernet HUB must be all in half-duplex mode, check it in module '%s'", signal->getSenderModule()->getFullPath().c_str());
 
     // Handle frame sent down from the network entity: send out on every other port
     int arrivalPort = msg->getArrivalGate()->getIndex();

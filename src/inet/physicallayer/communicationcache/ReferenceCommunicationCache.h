@@ -26,18 +26,30 @@ namespace physicallayer {
 class INET_API ReferenceCommunicationCache : public CommunicationCacheBase
 {
   protected:
+    class ReferenceTransmissionCacheEntry : public TransmissionCacheEntry
+    {
+      public:
+        /**
+         * The list of intermediate reception computation results.
+         */
+        std::vector<ReceptionCacheEntry> *receptionCacheEntries = nullptr;
+    };
+
+  protected:
     std::vector<RadioCacheEntry> radioCache;
-    std::vector<TransmissionCacheEntry> transmissionCache;
+    std::vector<ReferenceTransmissionCacheEntry> transmissionCache;
 
   protected:
     /** @name Cache data structures */
     //@{
     virtual RadioCacheEntry *getRadioCacheEntry(const IRadio *radio) override;
-    virtual TransmissionCacheEntry *getTransmissionCacheEntry(const ITransmission *transmission) override;
+    virtual ReferenceTransmissionCacheEntry *getTransmissionCacheEntry(const ITransmission *transmission) override;
     virtual ReceptionCacheEntry *getReceptionCacheEntry(const IRadio *radio, const ITransmission *transmission) override;
     //@}
 
   public:
+    virtual ~ReferenceCommunicationCache();
+
     virtual std::ostream& printToStream(std::ostream &stream, int level) const override { return stream << "ReferenceCommunicationCache"; }
 
     /** @name Radio cache */

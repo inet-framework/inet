@@ -32,12 +32,12 @@ void PassivePacketSource::initialize(int stage)
         collector = findConnectedModule<IActivePacketSink>(outputGate);
         providingIntervalParameter = &par("providingInterval");
         providingTimer = new cMessage("ProvidingTimer");
+        WATCH_PTR(nextPacket);
     }
     else if (stage == INITSTAGE_QUEUEING) {
-        if (collector != nullptr) {
-            checkPopPacketSupport(outputGate);
+        checkPopPacketSupport(outputGate);
+        if (collector != nullptr)
             collector->handleCanPopPacket(outputGate);
-        }
     }
 }
 
@@ -58,13 +58,14 @@ void PassivePacketSource::scheduleProvidingTimer()
         scheduleAt(simTime() + interval, providingTimer);
 }
 
-Packet *PassivePacketSource::canPopPacket(cGate *gate)
+Packet *PassivePacketSource::canPopPacket(cGate *gate) const
 {
     if (providingTimer->isScheduled())
         return nullptr;
     else {
         if (nextPacket == nullptr)
-            nextPacket = createPacket();
+            // TODO: KLUDGE:
+            nextPacket = const_cast<PassivePacketSource *>(this)->createPacket();
         return nextPacket;
     }
 }

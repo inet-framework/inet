@@ -38,11 +38,13 @@ module EthernetInterface extends InterfaceEntry like IEthernetInterface
         string address = default("auto");   // MAC address as hex string (12 hex digits), or
                                             // "auto". "auto" values will be replaced by
                                             // a generated MAC address in init stage 0.
-        bool csmacdSupport = default(false);  // by default CSMA/CD is turned off, so only point-to-point duplex links are supported.
+        bool duplexMode = default(true);      // selects full-duplex (true) or half-duplex (false) operation
+        bool csmacdSupport = default(!duplexMode);  // by default CSMA/CD is turned off, so only point-to-point duplex links are supported.
         string fcsMode @enum("declared","computed") = default("declared");
         @display("i=block/ifcard;bgl=2");
         *.interfaceTableModule = default(absPath(interfaceTableModule));
         *.fcsMode = fcsMode;
+        *.duplexMode = duplexMode;
     gates:
         input upperLayerIn;
         output upperLayerOut;

@@ -36,14 +36,8 @@ void PacketFilterBase::initialize(int stage)
         droppedTotalLength = b(0);
     }
     else if (stage == INITSTAGE_QUEUEING) {
-        if (producer != nullptr)
-            checkPushPacketSupport(outputGate);
-        if (collector != nullptr)
-            checkPopPacketSupport(outputGate);
-        if (provider != nullptr)
-            checkPopPacketSupport(inputGate);
-        if (consumer != nullptr)
-            checkPushPacketSupport(inputGate);
+        checkPushOrPopPacketSupport(inputGate);
+        checkPushOrPopPacketSupport(outputGate);
     }
 }
 
@@ -64,21 +58,23 @@ void PacketFilterBase::pushPacket(Packet *packet, cGate *gate)
     updateDisplayString();
 }
 
-bool PacketFilterBase::canPopSomePacket(cGate *gate)
+bool PacketFilterBase::canPopSomePacket(cGate *gate) const
 {
+    // TODO: KLUDGE:
+    auto nonConstThisPtr = const_cast<PacketFilterBase *>(this);
     auto providerGate = inputGate->getPathStartGate();
     while (true) {
         auto packet = provider->canPopPacket(providerGate);
         if (packet == nullptr)
             return false;
-        else if (matchesPacket(packet))
+        else if (nonConstThisPtr->matchesPacket(packet))
             return true;
         else {
             packet = provider->popPacket(providerGate);
             EV_INFO << "Filtering out packet " << packet->getName() << "." << endl;
-            dropPacket(packet, OTHER_PACKET_DROP);
-            numProcessedPackets++;
-            processedTotalLength += packet->getTotalLength();
+            nonConstThisPtr->dropPacket(packet, OTHER_PACKET_DROP);
+            nonConstThisPtr->numProcessedPackets++;
+            nonConstThisPtr->processedTotalLength += packet->getTotalLength();
             updateDisplayString();
         }
     }
@@ -127,7 +123,7 @@ void PacketFilterBase::dropPacket(Packet *packet, PacketDropReason reason, int l
     droppedTotalLength += packet->getTotalLength();
 }
 
-const char *PacketFilterBase::resolveDirective(char directive)
+const char *PacketFilterBase::resolveDirective(char directive) const
 {
     static std::string result;
     switch (directive) {

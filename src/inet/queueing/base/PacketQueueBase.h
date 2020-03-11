@@ -32,6 +32,7 @@ class INET_API PacketQueueBase : public PacketQueueingElementBase, public IPacke
     int numPoppedPackets = -1;
     int numRemovedPackets = -1;
     int numDroppedPackets = -1;
+    int numCreatedPackets = -1;
 
   protected:
     virtual void initialize(int stage) override;
@@ -40,8 +41,8 @@ class INET_API PacketQueueBase : public PacketQueueingElementBase, public IPacke
     virtual void updateDisplayString();
 
   public:
-    virtual bool canPopSomePacket(cGate *gate) override { return getNumPackets() > 0; }
-    virtual bool canPushSomePacket(cGate *gate) override { return true; }
+    virtual bool canPopSomePacket(cGate *gate) const override { return getNumPackets() > 0; }
+    virtual bool canPushSomePacket(cGate *gate) const override { return true; }
 };
 
 } // namespace queueing

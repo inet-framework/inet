@@ -187,7 +187,7 @@ const Ptr<Chunk> Ospfv2PacketSerializer::deserialize(MemoryInputStream& stream) 
     }
 }
 
-void Ospfv2PacketSerializer::serializeOspfHeader(MemoryOutputStream& stream, const IntrusivePtr<const Ospfv2Packet>& ospfPacket)
+void Ospfv2PacketSerializer::serializeOspfHeader(MemoryOutputStream& stream, const Ptr<const Ospfv2Packet>& ospfPacket)
 {
     stream.writeByte(ospfPacket->getVersion());
     stream.writeByte(ospfPacket->getType());
@@ -204,7 +204,7 @@ void Ospfv2PacketSerializer::serializeOspfHeader(MemoryOutputStream& stream, con
     }
 }
 
-uint16_t Ospfv2PacketSerializer::deserializeOspfHeader(MemoryInputStream& stream, IntrusivePtr<Ospfv2Packet>& ospfPacket)
+uint16_t Ospfv2PacketSerializer::deserializeOspfHeader(MemoryInputStream& stream, Ptr<Ospfv2Packet>& ospfPacket)
 {
     int ospfVer = stream.readUint8();
     if (ospfVer != 2)

@@ -1,19 +1,21 @@
-Passive Source Active Sink
-==========================
+Passive Source - Active Sink
+============================
 
-In this test, packets are collected periodically by an active packet sink
-(ActivePacketSink). The packets are provided by a passive packet source
-(PassivePacketSource).
+This step demonstrates the :ned:`ActivePacketSink` and :ned:`PassivePacketSource` modules.
+The active packet sink (:ned:`ActivePacketSink`) periodically pops packets from the
+passive packet source (:ned:`PassivePacketSource`).
 
-The network contains ... TODO
+The active packet sink module has a configurable collection interval. The passive packet
+source also has a configurable providing interval, which limits the times at which packets
+can be popped from the module.
 
 .. figure:: media/PassiveSourceActiveSink.png
    :width: 60%
    :align: center
 
-**TODO** Config
-
-.. literalinclude:: ../PassiveSourceActiveSink.ned
+.. literalinclude:: ../QueueingTutorial.ned
+   :start-at: network ProviderCollectorTutorialStep
+   :end-before: //----
    :language: ned
 
 .. literalinclude:: ../omnetpp.ini

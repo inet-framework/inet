@@ -1,5 +1,17 @@
 ====== inet-4.x ======
 
+2020-01-08  ------ inet-4.2.0 released ------
+
+2019-12-09  Levente Mészáros
+
+	Removed DomainLimitedFunction in release mode.
+
+2019-12-08  Levente Mészáros
+
+	Fixed memory leak and added TODO items.
+	Added optional caching of signal gain functions in DimensionTransmitterBase.
+	Added gainFunctionCacheLimit parameter to control behavior.
+
 2019-09-24  Levente Mészáros
 
 	Moved the storage of radios and transmissions from the medium into the communication cache.

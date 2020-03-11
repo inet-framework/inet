@@ -1,21 +1,22 @@
-Multiplexer
-===========
+Connecting Multiple Active Sources to a Passive Sink
+====================================================
 
-In this test, packets are produced periodically (randomly) by several active
-packet sources (ActivePacketSources). The packets are consumed by a single passive
-packet sink upon arrival (PassivePacketSink). The single sink is connected to the
-multiple sources using an intermediary component (PacketMultiplexer) which simply
+The :ned:`PacketMultiplexer` module connects to multiple active packet sources on its
+inputs, and pushes all incoming packets onto a passive packet sink on its single output.
+
+In this example network, packets are produced at random intervals by several active
+packet sources (:ned:`ActivePacketSource`). The packets are consumed by a single passive
+packet sink (:ned:`PassivePacketSink`) upon arrival. The single sink is connected to
+multiple sources using an intermediary component (:ned:`PacketMultiplexer`) which simply
 forwards packets.
-
-The network contains ... TODO
 
 .. figure:: media/Multiplexer.png
    :width: 80%
    :align: center
 
-**TODO** Config
-
-.. literalinclude:: ../Multiplexer.ned
+.. literalinclude:: ../QueueingTutorial.ned
+   :start-at: network MultiplexerTutorialStep
+   :end-before: //----
    :language: ned
 
 .. literalinclude:: ../omnetpp.ini

@@ -43,7 +43,7 @@ void TestApp::initialize()
 {
     out.open("result.txt");
     if (out.fail())
-      throw cRuntimeError("Can not open output file.");
+        throw cRuntimeError("Can not open output file.");
 
     {
         Packet *packet = new Packet("ipv4-1", makeShared<ByteCountChunk>(B(30)));
@@ -159,7 +159,7 @@ void TestApp::initialize()
     {
         Packet *packet = new Packet("ipv4-10", makeShared<ByteCountChunk>(B(30)));
         const auto& ipv4Header = makeShared<Ipv4Header>();
-        ipv4Header->setSrcAddress(Ipv4Address("192.168.2.1"));    
+        ipv4Header->setSrcAddress(Ipv4Address("192.168.2.1"));
         ipv4Header->setTotalLengthField(ipv4Header->getHeaderLength() + packet->getDataLength());
         ipv4Header->setCrcMode(CRC_DECLARED_CORRECT);
         packet->insertAtFront(ipv4Header);
@@ -180,7 +180,7 @@ void TestApp::initialize()
     {
         Packet *packet = new Packet("ipv4-12", makeShared<ByteCountChunk>(B(30)));
         const auto& ipv4Header = makeShared<Ipv4Header>();
-        ipv4Header->setDestAddress(Ipv4Address("192.168.2.1"));    
+        ipv4Header->setDestAddress(Ipv4Address("192.168.2.1"));
         ipv4Header->setTotalLengthField(ipv4Header->getHeaderLength() + packet->getDataLength());
         ipv4Header->setCrcMode(CRC_DECLARED_CORRECT);
         packet->insertAtFront(ipv4Header);
@@ -286,6 +286,7 @@ void TestApp::handleMessage(cMessage *msg)
 
 %file: TestNetwork.ned
 
+import inet.test.moduletest.lib.*;
 import inet.networklayer.diffserv.MultiFieldClassifier;
 
 network TestNetwork

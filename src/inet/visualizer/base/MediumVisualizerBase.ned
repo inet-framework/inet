@@ -68,18 +68,67 @@ simple MediumVisualizerBase extends VisualizerBase
         string interferenceRangeLineStyle = default("solid"); // interference range circle line style, solid by default
         double interferenceRangeLineWidth = default(1); // interference range circle line width, 1 by default
 
-        bool displaySpectrums = default(false); // display power spectrum density at the nodes, can be enabled with dimensional analog models only
-        double spectrumFigureWidth = default(100); // plot figure width in pixels
-        double spectrumFigureHeight = default(60); // plot figure height in pixels
+        // parameters shared between power density maps, spectrums and spectrograms
+        bool autoPowerAxis = default(true); // enables automatic power axis configuration
+        double signalMinPower @unit(dBmW) = default(inf dBmW); // minimum signal power if axis is not automatic
+        double signalMaxPower @unit(dBmW) = default(0 dBmW); // maximum signal power if axis is not automatic
+        double signalMinPowerDensity @unit(dBmWpMHz) = default(inf dBmWpMHz); // minimum signal power density if axis is not automatic
+        double signalMaxPowerDensity @unit(dBmWpMHz) = default(-inf dBmWpMHz); // maxium signal power density if axis is not automatic
+        bool autoTimeAxis = default(true); // enables automatic time axis configuration
+        double signalMinTime @unit(s) = default(0 s); // relative to current simulation time
+        double signalMaxTime @unit(s) = default(0 s); // relative to current simulation time
+        bool autoFrequencyAxis = default(true); // enables automatic frequency axis configuration
+        double signalMinFrequency @unit(Hz) = default(inf Hz); // minimum signal frequency if axis is not automatic
+        double signalMaxFrequency @unit(Hz) = default(-inf Hz); // maximum signal frequency if axis is not automatic
+
+        // parameters for main power density map
+        bool displayMainPowerDensityMap = default(false); // display a power density map for the transmission medium, can be enabled with dimensional analog models only
+        double mainPowerDensityMapPixmapDensity = default(1); // pixmap relative resolution
+        double mainPowerDensityMapMinX = default(0); // minimum X coordinate
+        double mainPowerDensityMapMaxX = default(nan); // maximum X coordinate, compound module size by default
+        double mainPowerDensityMapMinY = default(0); // minimum Y coordinate
+        double mainPowerDensityMapMaxY = default(nan); // maximum Y coordinate, compound module size by default
+        double mainPowerDensityMapZ = default(0); // Z coordinate
+        int mainPowerDensityMapFigureXTickCount = default(3); // number of ticks along the X axis
+        int mainPowerDensityMapFigureYTickCount = default(3); // number of ticks along the Y axis
+
+        // parameters for power density maps
+        bool displayPowerDensityMaps = default(false); // display power density maps at the nodes, can be enabled with dimensional analog models only
+        string powerDensityMapMode @emu("total", "signal", "auto") = default("auto"); // total means total transmission medium, signal means transmitted or received signal, auto means total or signal and noise if transmission or reception is in progress
+        bool powerDensityMapSampling = default(true); // use signal sampling for pixels or use signal partitioning for filling pixels
+        int powerDensityMapApproximationSize = default(10); // medium power density function approximation along X and Y axes
+        double powerDensityMapCenterFrequency @unit(Hz) = default(nan Hz); // center frequency of medium power density sampling or integration
+        double powerDensityMapBandwidth @unit(Hz) = default(0 Hz); // bandwidth of medium power density integration, 0 means sampling, inf means total integrated power
+        double powerDensityMapFigureWidth = default(200); // plot figure width in pixels
+        double powerDensityMapFigureHeight = default(120); // plot figure height in pixels
+        double powerDensityMapPixmapWidth = default(powerDensityMapFigureWidth); // pixmap resolution width
+        double powerDensityMapPixmapHeight = default(powerDensityMapFigureHeight); // pixmap resolution height
+        double powerDensityMapZ = default(0); // Z coordinate
+        int powerDensityMapFigureXTickCount = default(3); // number of ticks along the X axis
+        int powerDensityMapFigureYTickCount = default(3); // number of ticks along the Y axis
+
+        // parameters for spectrum figures
+        bool displaySpectrums = default(false); // display power spectral density at the nodes, can be enabled with dimensional analog models only
+        string spectrumMode @emu("total", "signal", "auto") = default("auto"); // total means total transmission medium, signal means transmitted or received signal, auto means total or signal and noise if transmission or reception is in progress
+        double spectrumFigureWidth = default(200); // plot figure width in pixels
+        double spectrumFigureHeight = default(120); // plot figure height in pixels
+        int spectrumFigureXTickCount = default(3); // number of ticks along the X axis
+        int spectrumFigureYTickCount = default(5); // number of ticks along the Y axis
         double spectrumFigureInterpolationSize = default(5); // power spectrum density interpolation distance along the frequency axis
-        bool spectrumAutoFrequencyAxis = default(true); // enables automatic frequency axis configuration
-        double spectrumMinFrequency @unit(Hz) = default(inf Hz);
-        double spectrumMaxFrequency @unit(Hz) = default(-inf Hz);
-        bool spectrumAutoPowerAxis = default(true); // enables automatic power axis configuration
-        double spectrumMinPower @unit(dBmWpMHz) = default(inf dBmWpMHz);
-        double spectrumMaxPower @unit(dBmWpMHz) = default(-inf dBmWpMHz);
         string spectrumPlacementHint = default("bottomCenter"); // annotation placement hint, space separated list of any, top, bottom, left, right, topLeft, topCenter, topRight, etc. 
         double spectrumPlacementPriority = default(-1); // determines the order of annotation positioning
+
+        // parameters for spectrogram figures
+        bool displaySpectrograms = default(false); // display power density spectrograms at the nodes, can be enabled with dimensional analog models only
+        string spectrogramMode @emu("total", "signal", "auto") = default("auto"); // total means total transmission medium, signal means transmitted or received signal, auto means total or signal and noise if transmission or reception is in progress
+        double spectrogramFigureWidth = default(200); // plot figure width in pixels
+        double spectrogramFigureHeight = default(120); // plot figure height in pixels
+        double spectrogramPixmapWidth = default(spectrogramFigureWidth); // pixmap resolution width
+        double spectrogramPixmapHeight = default(spectrogramFigureHeight); // pixmap resolution height
+        int spectrogramFigureXTickCount = default(3); // number of ticks along the X axis
+        int spectrogramFigureYTickCount = default(5); // number of ticks along the Y axis
+        string spectrogramPlacementHint = default("bottomCenter"); // annotation placement hint, space separated list of any, top, bottom, left, right, topLeft, topCenter, topRight, etc. 
+        double spectrogramPlacementPriority = default(-1); // determines the order of annotation positioning
 
         @class(MediumVisualizerBase);
 }

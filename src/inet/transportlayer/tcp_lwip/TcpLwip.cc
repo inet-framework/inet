@@ -136,7 +136,14 @@ TcpLwip::~TcpLwip()
 
     while (!tcpAppConnMapM.empty()) {
         auto i = tcpAppConnMapM.begin();
-        delete i->second;
+        auto& pcb = i->second->pcbM;
+        if (pcb) {
+            pcb->callback_arg = nullptr;
+            getLwipTcpLayer()->tcp_pcb_purge(pcb);
+            memp_free(MEMP_TCP_PCB, pcb);
+            pcb = nullptr;
+        }
+        i->second->deleteModule();
         tcpAppConnMapM.erase(i);
     }
 
@@ -255,11 +262,9 @@ void TcpLwip::notifyAboutIncomingSegmentProcessing(LwipTcpLayer::tcp_pcb *pcb, u
 void TcpLwip::lwip_free_pcb_event(LwipTcpLayer::tcp_pcb *pcb)
 {
     TcpLwipConnection *conn = static_cast<TcpLwipConnection *>(pcb->callback_arg);
-    if (conn != nullptr) {
-        if (conn->pcbM == pcb) {
-            // conn->sendIndicationToApp(TCP_I_????); // TODO send some indication when need
-            removeConnection(*conn);
-        }
+    if (conn != nullptr && conn->pcbM == pcb) {
+        // conn->sendIndicationToApp(TCP_I_????); // TODO send some indication when need
+        removeConnection(*conn);
     }
 }
 
@@ -373,7 +378,7 @@ void TcpLwip::removeConnection(TcpLwipConnection& conn)
     conn.pcbM->callback_arg = nullptr;
     conn.pcbM = nullptr;
     tcpAppConnMapM.erase(conn.connIdM);
-    delete &conn;
+    conn.deleteModule();
 }
 
 err_t TcpLwip::tcp_event_err(TcpLwipConnection& conn, err_t err)
@@ -642,8 +647,10 @@ void TcpLwip::ip_output(LwipTcpLayer::tcp_pcb *pcb, L3Address const& srcP, L3Add
         conn->notifyAboutSending(*tcpHdr);
     }
 
-    EV_INFO << this << ": Send segment: conn ID=" << conn->connIdM << " from " << srcP
-            << " to " << destP << " SEQ=" << tcpHdr->getSequenceNo();
+    EV_INFO << this << ": Send segment:";
+    if (conn)
+        EV_INFO << "conn ID=" << conn->connIdM;
+    EV_INFO << " from " << srcP << " to " << destP << " SEQ=" << tcpHdr->getSequenceNo();
     if (tcpHdr->getSynBit())
         EV_INFO << " SYN";
     if (tcpHdr->getAckBit())

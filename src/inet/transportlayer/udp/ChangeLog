@@ -1,5 +1,20 @@
 ====== inet-4.x ======
 
+2020-01-08  ------ inet-4.2.0 released ------
+
+2019-12-18  Zoltan Bojthe
+
+	Switched to using UdpSetOptionCommand.optionCode value instead of dynamic_cast if-ladder.
+	Fixed copy-paste bug.
+
+2019-11-18  Zoltan Bojthe
+
+	Added TOS support.
+
+2019-11-13  Zoltan Bojthe
+
+	Renamed typeOfService to dscp, Udp already uses this value to send DscpReq to IP layer.
+
 2019-10-31  Zoltan Bojthe
 
 	Moved kind enums to MSG files.

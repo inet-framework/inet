@@ -53,6 +53,7 @@ unsigned char SctpHeaderSerializer::sharedKey[512];
 void SctpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     uint8_t buffer[MAXBUFLEN];
+    memset(&buffer, 0, MAXBUFLEN);
     // int32 size_chunk = sizeof(struct chunk);
 
     int authstart = 0;

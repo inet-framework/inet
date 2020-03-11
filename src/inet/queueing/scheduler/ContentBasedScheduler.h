@@ -28,11 +28,14 @@ class INET_API ContentBasedScheduler : public PacketSchedulerBase
 {
   protected:
     int defaultGateIndex = -1;
-    std::vector<PacketFilter> filters;
+    std::vector<PacketFilter *> filters;
 
   protected:
     virtual void initialize(int stage) override;
     virtual int schedulePacket() override;
+
+  public:
+    virtual ~ContentBasedScheduler();
 };
 
 } // namespace queueing

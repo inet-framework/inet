@@ -30,16 +30,16 @@ class INET_API PlotFigure : public cGroupFigure, public inet::IIndicatorFigure
     {
         cLineFigure *tick;
         cLineFigure *dashLine;
-        cTextFigure *number;
+        cLabelFigure *number;
 
-        Tick(cLineFigure *tick, cLineFigure *dashLine, cTextFigure *number) :
+        Tick(cLineFigure *tick, cLineFigure *dashLine, cLabelFigure *number) :
             tick(tick), dashLine(dashLine), number(number) {}
     };
 
     std::vector<cPathFigure *> seriesPlotFigures;
-    cTextFigure *labelFigure;
-    cTextFigure *xAxisLabelFigure;
-    cTextFigure *yAxisLabelFigure;
+    cLabelFigure *labelFigure;
+    cLabelFigure *xAxisLabelFigure;
+    cLabelFigure *yAxisLabelFigure;
     cRectangleFigure *backgroundFigure;
     std::vector<Tick> xTicks;
     std::vector<Tick> yTicks;
@@ -47,16 +47,17 @@ class INET_API PlotFigure : public cGroupFigure, public inet::IIndicatorFigure
     Rectangle bounds;
     int numSeries = -1;
     double timeWindow = NaN;
-    double yTickSize = 2.5;
-    double xTickSize = 3;
+    double yTickSize = INFINITY;
+    double xTickSize = INFINITY;
     int labelOffset = 0;
-    double numberSizeFactor = 1;
     double minX = 0;
     double maxX = 1;
     double minY = 0;
     double maxY = 1;
     const char *xValueFormat = "%g";
     const char *yValueFormat = "%g";
+    bool invalidLayout = true;
+    bool invalidPlot = true;
 
     std::vector<std::list<std::pair<double, double>>> seriesValues;
 
@@ -65,7 +66,7 @@ class INET_API PlotFigure : public cGroupFigure, public inet::IIndicatorFigure
     void redrawXTicks();
     void addChildren();
     void layout();
-    void refresh();
+    void plot();
 
   public:
     PlotFigure(const char *name = nullptr);
@@ -79,14 +80,15 @@ class INET_API PlotFigure : public cGroupFigure, public inet::IIndicatorFigure
     virtual void setNumSeries(int numSeries);
     virtual int getNumSeries() const override { return numSeries; }
 
-    virtual const Point getSize() const override { return getBounds().getSize(); }
     virtual void setValue(int series, simtime_t timestamp, double value) override { setValue(series, timestamp.dbl(), value); }
     virtual void setValue(int series, double x, double y);
-    virtual void clearValues(int series) { seriesValues[series].clear(); }
+    virtual void clearValues(int series) { seriesValues[series].clear(); invalidPlot = true; }
 
     //getters and setters
+    const Point getPlotSize() const { return backgroundFigure->getBounds().getSize(); }
     void setPlotSize(const Point& p);
 
+    virtual const Point getSize() const override { return getBounds().getSize(); }
     const Rectangle& getBounds() const;
     void setBounds(const Rectangle& rect);
 
@@ -95,11 +97,11 @@ class INET_API PlotFigure : public cGroupFigure, public inet::IIndicatorFigure
 
     double getXTickSize() const;
     void setXTickSize(double size);
-    void setXTickCount(int count) { setXTickSize((maxX - minX) / (count - 1)); }
+    void setXTickCount(int count);
 
     double getYTickSize() const;
     void setYTickSize(double size);
-    void setYTickCount(int count) { setYTickSize((maxY - minY) / (count - 1)); }
+    void setYTickCount(int count);
 
     double getTimeWindow() const;
     void setTimeWindow(double timeWindow);

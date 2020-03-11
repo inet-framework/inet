@@ -32,7 +32,7 @@ void TcpGenericServerThread::established()
 
 void TcpGenericServerThread::dataArrived(Packet *msg, bool)
 {
-    const auto& appmsg = msg->peekDataAt<GenericAppMsg>(B(0), B(msg->getByteLength()));
+    const auto& appmsg = msg->peekData<GenericAppMsg>();
 
     if (!appmsg)
         throw cRuntimeError("Message (%s)%s is not a GenericAppMsg -- probably wrong client app",

@@ -45,8 +45,8 @@ class INET_API ActivePacketSink : public PacketSinkBase, public IActivePacketSin
 
     virtual IPassivePacketSource *getProvider(cGate *gate) override { return provider; }
 
-    virtual bool supportsPushPacket(cGate *gate) override { return false; }
-    virtual bool supportsPopPacket(cGate *gate) override { return inputGate == gate; }
+    virtual bool supportsPushPacket(cGate *gate) const override { return false; }
+    virtual bool supportsPopPacket(cGate *gate) const override { return inputGate == gate; }
 
     virtual void handleCanPopPacket(cGate *gate) override;
 };

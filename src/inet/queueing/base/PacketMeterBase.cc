@@ -34,14 +34,8 @@ void PacketMeterBase::initialize(int stage)
         consumer = findConnectedModule<IPassivePacketSink>(outputGate);
     }
     else if (stage == INITSTAGE_QUEUEING) {
-        if (consumer != nullptr) {
-            checkPushPacketSupport(inputGate);
-            checkPushPacketSupport(outputGate);
-        }
-        if (provider != nullptr) {
-            checkPopPacketSupport(inputGate);
-            checkPopPacketSupport(outputGate);
-        }
+        checkPushOrPopPacketSupport(inputGate);
+        checkPushOrPopPacketSupport(outputGate);
     }
 }
 
@@ -56,7 +50,7 @@ void PacketMeterBase::pushPacket(Packet *packet, cGate *gate)
     updateDisplayString();
 }
 
-bool PacketMeterBase::canPopSomePacket(cGate *gate)
+bool PacketMeterBase::canPopSomePacket(cGate *gate) const
 {
     return provider->canPopPacket(inputGate->getPathStartGate());
 }

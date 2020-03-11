@@ -33,7 +33,7 @@ namespace math {
 template<typename R, typename D>
 class INET_API IFunction : public cObject,
 #if INET_PTR_IMPLEMENTATION == INET_STD_SHARED_PTR
-    public std::enable_shared_from_this<Chunk>
+    public std::enable_shared_from_this<IFunction<R, D>>
 #elif INET_PTR_IMPLEMENTATION == INET_INTRUSIVE_PTR
     public IntrusivePtrCounter<IFunction<R, D>>
 #else
@@ -80,6 +80,16 @@ class INET_API IFunction : public cObject,
      * Returns true if the function value is finite in the given domain.
      */
     virtual bool isFinite(const typename D::I& i) const = 0;
+
+    /**
+     * Returns true if the function value is non-zero in the whole domain.
+     */
+    virtual bool isNonZero() const = 0;
+
+    /**
+     * Returns true if the function value is non-zero in the given domain.
+     */
+    virtual bool isNonZero(const typename D::I& i) const = 0;
 
     /**
      * Returns the minimum value for the whole domain.

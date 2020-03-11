@@ -1,19 +1,19 @@
-Delayer
-=======
+Delaying Packets
+================
 
-In this test, packets are produced periodically by an active packet source
-(ActivePacketSource). The produced packets are delayed (PacketDelayer) for a random
-amount of time. Finally, the packets are sent into a passive packet sink (PassivePacketSink).
+The :ned:`PacketDelayer` module delays packets for a configured amount of time.
 
-The network contains ... TODO
+In this example network, packets are produced periodically by an active packet source
+(:ned:`ActivePacketSource`). The produced packets are delayed (:ned:`PacketDelayer`) for a random
+amount of time. Finally, the packets are pushed into a passive packet sink (:ned:`PassivePacketSink`).
 
 .. figure:: media/Delayer.png
    :width: 80%
    :align: center
 
-**TODO** Config
-
-.. literalinclude:: ../Delayer.ned
+.. literalinclude:: ../QueueingTutorial.ned
+   :start-at: network DelayerTutorialStep
+   :end-before: //----
    :language: ned
 
 .. literalinclude:: ../omnetpp.ini

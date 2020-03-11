@@ -38,7 +38,7 @@ void PacketSourceBase::initialize(int stage)
     }
 }
 
-const char *PacketSourceBase::createPacketName()
+const char *PacketSourceBase::createPacketName(const Ptr<const Chunk>& data) const
 {
     return StringFormat::formatString(packetNameFormat, [&] (char directive) {
         static std::string result;
@@ -46,8 +46,26 @@ const char *PacketSourceBase::createPacketName()
             case 'n':
                 result = getFullName();
                 break;
+            case 'p':
+                result = getFullPath();
+                break;
             case 'c':
                 result = std::to_string(numProcessedPackets);
+                break;
+            case 'l':
+                result = data->getChunkLength().str();
+                break;
+            case 'd':
+                if (auto byteCountChunk = dynamicPtrCast<const ByteCountChunk>(data))
+                    result = std::to_string(byteCountChunk->getData());
+                else if (auto bitCountChunk = dynamicPtrCast<const BitCountChunk>(data))
+                    result = std::to_string(bitCountChunk->getData());
+                break;
+            case 't':
+                result = simTime().str();
+                break;
+            case 'e':
+                result = std::to_string(getSimulation()->getEventNumber());
                 break;
             default:
                 throw cRuntimeError("Unknown directive: %c", directive);
@@ -56,7 +74,7 @@ const char *PacketSourceBase::createPacketName()
     });
 }
 
-Ptr<Chunk> PacketSourceBase::createPacketContent()
+Ptr<Chunk> PacketSourceBase::createPacketContent() const
 {
     auto packetLength = b(packetLengthParameter->intValue());
     auto packetData = packetDataParameter->intValue();
@@ -98,9 +116,9 @@ Ptr<Chunk> PacketSourceBase::createPacketContent()
 
 Packet *PacketSourceBase::createPacket()
 {
-    auto packetName = createPacketName();
     auto packetContent = createPacketContent();
     packetContent->addTag<CreationTimeTag>()->setCreationTime(simTime());
+    auto packetName = createPacketName(packetContent);
     auto packet = new Packet(packetName, packetContent);
     numProcessedPackets++;
     processedTotalLength += packet->getDataLength();

@@ -94,7 +94,7 @@ void PacketServer::handleCanPopPacket(cGate *gate)
     }
 }
 
-const char *PacketServer::resolveDirective(char directive)
+const char *PacketServer::resolveDirective(char directive) const
 {
     static std::string result;
     switch (directive) {

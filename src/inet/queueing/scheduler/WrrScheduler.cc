@@ -51,7 +51,7 @@ void WrrScheduler::initialize(int stage)
     }
 }
 
-int WrrScheduler::getNumPackets()
+int WrrScheduler::getNumPackets() const
 {
     int size = 0;
     for (auto collection : collections)
@@ -59,7 +59,7 @@ int WrrScheduler::getNumPackets()
     return size;
 }
 
-b WrrScheduler::getTotalLength()
+b WrrScheduler::getTotalLength() const
 {
     b totalLength(0);
     for (auto collection : collections)

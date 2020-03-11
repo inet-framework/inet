@@ -59,6 +59,7 @@ class INET_API EtherEncap : public Ieee8022Llc
     std::map<int, Socket *> socketIdToSocketMap;
 
   protected:
+    virtual ~EtherEncap();
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
 

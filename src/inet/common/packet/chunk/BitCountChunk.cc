@@ -124,7 +124,7 @@ void BitCountChunk::doRemoveAtBack(b length)
 std::string BitCountChunk::str() const
 {
     std::ostringstream os;
-    os << "BitCountChunk, length = " << length;
+    os << "BitCountChunk, length = " << length << ", data = " << (int)data;
     return os.str();
 }
 

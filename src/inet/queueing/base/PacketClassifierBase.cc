@@ -36,14 +36,12 @@ void PacketClassifierBase::initialize(int stage)
     }
     else if (stage == INITSTAGE_QUEUEING) {
         for (int i = 0; i < gateSize("out"); i++)
-            if (consumers[i] != nullptr)
-                checkPushPacketSupport(outputGates[i]);
-        if (producer != nullptr)
-            checkPushPacketSupport(inputGate);
+            checkPushPacketSupport(outputGates[i]);
+        checkPushPacketSupport(inputGate);
     }
 }
 
-bool PacketClassifierBase::canPushSomePacket(cGate *gate)
+bool PacketClassifierBase::canPushSomePacket(cGate *gate) const
 {
     for (int i = 0; i < (int)outputGates.size(); i++)
         if (!consumers[i]->canPushSomePacket(outputGates[i]->getPathEndGate()))
@@ -57,14 +55,12 @@ void PacketClassifierBase::pushPacket(Packet *packet, cGate *gate)
     emit(packetPushedSignal, packet);
     EV_INFO << "Classifying packet " << packet->getName() << ".\n";
     int index = classifyPacket(packet);
-    if (index == -1)
-        throw cRuntimeError("Cannot classify packet");
-    else {
-        processedTotalLength += packet->getDataLength();
-        pushOrSendPacket(packet, outputGates[index], consumers[index]);
-        numProcessedPackets++;
-        updateDisplayString();
-    }
+    if (index < 0 || static_cast<unsigned int>(index) >= outputGates.size())
+        throw cRuntimeError("Classified packet to invalid output gate: %d", index);
+    processedTotalLength += packet->getDataLength();
+    pushOrSendPacket(packet, outputGates[index], consumers[index]);
+    numProcessedPackets++;
+    updateDisplayString();
 }
 
 void PacketClassifierBase::handleCanPushPacket(cGate *gate)
