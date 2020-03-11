@@ -31,6 +31,28 @@ simsignal_t EtherPhy::txFinishedSignal = registerSignal("txFinished");
 simsignal_t EtherPhy::txAbortedSignal = registerSignal("txAborted");
 simsignal_t EtherPhy::rxStateChangedSignal = registerSignal("rxStateChanged");
 
+std::ostream& operator <<(std::ostream& o, EtherPhy::RxState s)
+{
+    switch (s) {
+        case EtherPhy::RX_OFF_STATE: o << "OFF"; break;
+        case EtherPhy::RX_IDLE_STATE: o << "IDLE"; break;
+        case EtherPhy::RX_RECEIVING_STATE: o << "RX"; break;
+        default: o << (int)s;
+    }
+    return o;
+}
+
+std::ostream& operator <<(std::ostream& o, EtherPhy::TxState s)
+{
+    switch (s) {
+        case EtherPhy::TX_OFF_STATE: o << "OFF"; break;
+        case EtherPhy::TX_IDLE_STATE: o << "IDLE"; break;
+        case EtherPhy::TX_TRANSMITTING_STATE: o << "TX"; break;
+        default: o << (int)s;
+    }
+    return o;
+}
+
 EtherPhy::~EtherPhy()
 {
     cancelAndDelete(endTxMsg);
@@ -55,12 +77,17 @@ void EtherPhy::initialize(int stage)
         txState = connected ? TX_IDLE_STATE : TX_OFF_STATE;
         rxState = connected ? RX_IDLE_STATE : RX_OFF_STATE;
         lastRxStateChangeTime = simTime();
+        emit(txStateChangedSignal, static_cast<intval_t>(txState));
+        emit(rxStateChangedSignal, static_cast<intval_t>(rxState));
 
         // initialize self messages
         endTxMsg = new cMessage("EndTransmission", ENDTRANSMISSION);
 
         for (int i = 0; i <= RX_LAST; i++)
             totalRxStateTime[i] = SIMTIME_ZERO;
+
+        WATCH(rxState);
+        WATCH(txState);
 
         subscribe(PRE_MODEL_CHANGE, this);
         subscribe(POST_MODEL_CHANGE, this);

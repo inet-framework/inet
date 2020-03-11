@@ -31,6 +31,8 @@ simple EtherPhy
         @signal[rxStateChanged](type=long); // enum=MacTransmitState
         @signal[txFinished](type=long);
         @signal[txAborted](type=long);
+        @statistic[rxState](title="RX state"; source=rxStateChanged; record=vector; interpolationmode=sample-hold);
+        @statistic[txState](title="TX state"; source=txStateChanged; record=vector; interpolationmode=sample-hold);
     gates:
         input upperLayerIn @labels(EtherFrame);
         output upperLayerOut @labels(EtherFrame);

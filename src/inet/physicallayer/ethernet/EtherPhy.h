@@ -118,6 +118,9 @@ class INET_API EtherPhy : public cPhyModule, public cListener
     virtual ~EtherPhy();
 };
 
+std::ostream& operator <<(std::ostream& o, EtherPhy::RxState);
+std::ostream& operator <<(std::ostream& o, EtherPhy::TxState);
+
 } // namespace physicallayer
 } // namespace inet
 
