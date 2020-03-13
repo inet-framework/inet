@@ -23,7 +23,7 @@
 /examples/aodv/,                     -f omnetpp.ini -c SimpleLifecycle -r 0,          100s,          a20d-c44b/~tNPl, PASS, wireless adhoc
 /examples/aodv/,                     -f omnetpp.ini -c ShortestPath -r 0,             100s,          3a72-db39/~tNPl, PASS, wireless adhoc
 
-/examples/bgpv4/Bgp2RoutersInAS/,    -f omnetpp.ini -c General -r 0,                1000s,           c504-7297/~tNPl, PASS, ospf
+/examples/bgpv4/Bgp2RoutersInAS/,    -f omnetpp.ini -c General -r 0,                1000s,           3449-315b/~tNPl, PASS, ospf
 /examples/bgpv4/Bgp3Routers/,        -f omnetpp.ini -c General -r 0,                1000s,           2c93-b913/~tNPl, PASS, ospf
 /examples/bgpv4/BgpCompleteTest/,    -f omnetpp.ini -c General -r 0,                1000s,           a62e-572b/~tNPl, PASS, ospf
 /examples/bgpv4/BgpOpen/,            -f omnetpp.ini -c General -r 0,                62s,             9dce-698e/~tNPl, PASS, ospf
@@ -207,8 +207,8 @@
 /examples/inet/shutdownrestart/,     -f omnetpp.ini -c TCP -r 1,                    100s,            b258-3e06/~tNPl, PASS,
 /examples/inet/shutdownrestart/,     -f omnetpp.ini -c TCP -r 2,                    100s,            56b0-e363/~tNPl, PASS,
 
-/examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMACFullDuplex -r 0, 5s,    a0a4-cccc/~tNPl, PASS,
-/examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMACFullDuplex -r 1, 5s,    a0a4-cccc/~tNPl, PASS,
+/examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMACFullDuplex -r 0, 5s,    5029-7263/~tNPl, PASS,
+/examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMACFullDuplex -r 1, 5s,    5029-7263/~tNPl, PASS,
 /examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMAC_fullduplex -r 0, 3s,   2487-88f0/~tNPl, PASS,
 /examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMAC_fullduplex -r 1, 3s,   2487-88f0/~tNPl, PASS,
 /examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMAC_halfduplex -r 0, 2s,   6a02-5da8/~tNPl, PASS,
