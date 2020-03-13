@@ -2,23 +2,23 @@
 /tutorials/configurator/,            -f omnetpp.ini -c Step1 -r 0,                              500s,           0000-0000/tplx, PASS,
 /tutorials/configurator/,            -f omnetpp.ini -c Step2 -r 0,                              500s,           0000-0000/tplx, PASS,
 /tutorials/configurator/,            -f omnetpp.ini -c Step3 -r 0,                              500s,           0000-0000/tplx, PASS,
-/tutorials/configurator/,            -f omnetpp.ini -c Step4 -r 0,                              500s,           4aa9-9e95/tplx, PASS,   # Step4 extended
-/tutorials/configurator/,            -f omnetpp.ini -c Step5A -r 0,                             500s,           bb4e-8df8/tplx, PASS,
-/tutorials/configurator/,            -f omnetpp.ini -c Step5B -r 0,                             500s,           2e03-f076/tplx, PASS,
-/tutorials/configurator/,            -f omnetpp.ini -c Step6A -r 0,                             500s,           4ebb-6559/tplx, PASS,
-/tutorials/configurator/,            -f omnetpp.ini -c Step6B -r 0,                             500s,           4ebb-6559/tplx, PASS,
+/tutorials/configurator/,            -f omnetpp.ini -c Step4 -r 0,                              500s,           f389-0127/tplx, PASS,   # Step4 extended
+/tutorials/configurator/,            -f omnetpp.ini -c Step5A -r 0,                             500s,           224c-e3fb/tplx, PASS,
+/tutorials/configurator/,            -f omnetpp.ini -c Step5B -r 0,                             500s,           e19d-fd42/tplx, PASS,
+/tutorials/configurator/,            -f omnetpp.ini -c Step6A -r 0,                             500s,           ff1b-cc84/tplx, PASS,
+/tutorials/configurator/,            -f omnetpp.ini -c Step6B -r 0,                             500s,           ff1b-cc84/tplx, PASS,
 /tutorials/configurator/,            -f omnetpp.ini -c Step7A -r 0,                             500s,           0000-0000/tplx, PASS,
 /tutorials/configurator/,            -f omnetpp.ini -c Step7B -r 0,                             500s,           0000-0000/tplx, PASS,
 /tutorials/configurator/,            -f omnetpp.ini -c Step7C -r 0,                             500s,           0000-0000/tplx, PASS,
-/tutorials/configurator/,            -f omnetpp.ini -c Step8A -r 0,                             100s,           9e51-7ccd/tplx, PASS,   # Step8A extended
-/tutorials/configurator/,            -f omnetpp.ini -c Step8B -r 0,                             100s,           ae4a-da2a/tplx, PASS,
-/tutorials/configurator/,            -f omnetpp.ini -c Step9 -r 0,                              100s,           21fe-1187/tplx, PASS,
+/tutorials/configurator/,            -f omnetpp.ini -c Step8A -r 0,                             100s,           46be-c7a8/tplx, PASS,   # Step8A extended
+/tutorials/configurator/,            -f omnetpp.ini -c Step8B -r 0,                             100s,           1ca4-52e8/tplx, PASS,
+/tutorials/configurator/,            -f omnetpp.ini -c Step9 -r 0,                              100s,           dcbf-ae44/tplx, PASS,
 /tutorials/configurator/,            -f omnetpp.ini -c Step10A -r 0,                            100s,           4b6f-7cd9/tplx, PASS,   # Step10A extended
 /tutorials/configurator/,            -f omnetpp.ini -c Step10B -r 0,                            100s,           4b6f-7cd9/tplx, PASS,   # Step10B extended
 /tutorials/configurator/,            -f omnetpp.ini -c Step10C -r 0,                            100s,           71f5-b341/tplx, PASS,
 /tutorials/configurator/,            -f omnetpp.ini -c Step11A -r 0,                            500s,           0000-0000/tplx, PASS,
-/tutorials/configurator/,            -f omnetpp.ini -c Step11B -r 0,                            500s,           8ada-b74b/tplx, PASS,
-/tutorials/configurator/,            -f omnetpp.ini -c Step12 -r 0,                             100s,           eec4-1fe3/tplx, PASS,
+/tutorials/configurator/,            -f omnetpp.ini -c Step11B -r 0,                            500s,           a0c6-9fca/tplx, PASS,
+/tutorials/configurator/,            -f omnetpp.ini -c Step12 -r 0,                             100s,           ddc7-8b2e/tplx, PASS,
 
 # /tutorials/rip/,                     -f omnetpp.ini -c Step1 -r 0,                              100s,           c5dc-94dd/tplx, PASS,
 # /tutorials/rip/,                     -f omnetpp.ini -c Step2 -r 0,                              100s,           8277-66eb/tplx, PASS,   # Step2 extended
