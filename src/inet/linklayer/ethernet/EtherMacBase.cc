@@ -179,7 +179,8 @@ void EtherMacBase::initialize(int stage)
         physOutGate = gate("phys$o");
         lowerLayerInGateId = physInGate->getId();
         lowerLayerOutGateId = physOutGate->getId();
-        transmissionChannel = nullptr;
+        rxTransmissionChannel = nullptr;
+        txTransmissionChannel = nullptr;
         currentTxFrame = nullptr;
 
         initializeFlags();
@@ -329,9 +330,8 @@ void EtherMacBase::receiveSignal(cComponent *source, simsignal_t signalID, cObje
         if ((physOutGate == gcobj->pathStartGate) || (physInGate == gcobj->pathEndGate))
             refreshConnection();
     }
-    else if (transmissionChannel && dynamic_cast<cPostParameterChangeNotification *>(obj)) {    // note: we are subscribed to the channel object too
-        cPostParameterChangeNotification *gcobj = static_cast<cPostParameterChangeNotification *>(obj);
-        if (transmissionChannel == gcobj->par->getOwner())
+    else if (auto gcobj = dynamic_cast<cPostParameterChangeNotification *>(obj)) {    // note: we are subscribed to the channel object too
+        if (gcobj->par->getOwner() == txTransmissionChannel)
             refreshConnection();
     }
 }
@@ -509,17 +509,27 @@ void EtherMacBase::readChannelParameters(bool errorWhenAsymmetric)
     channelsDiffer = (rxDisabled != txDisabled) || (rxDelay != txDelay);
 
     if (connected) {
-        if (outTrChannel && !transmissionChannel)
-            outTrChannel->subscribe(POST_MODEL_CHANGE, this);
-        transmissionChannel = outTrChannel;
+        rxTransmissionChannel = inTrChannel;
+        txTransmissionChannel = outTrChannel;
+        if (!rxTransmissionChannel->isSubscribed(POST_MODEL_CHANGE, this))
+            rxTransmissionChannel->subscribe(POST_MODEL_CHANGE, this);
+        if (!txTransmissionChannel->isSubscribed(POST_MODEL_CHANGE, this))
+            txTransmissionChannel->subscribe(POST_MODEL_CHANGE, this);
 
         // Check valid speeds
-        if (outTrChannel->hasPar("datarate")) {
-            double txRate = outTrChannel->par("datarate");
-            if (!std::isnan(txRate)) {
-                interfaceEntry->par("bitrate").setDoubleValue(txRate);
-            }
+        if (rxTransmissionChannel->hasPar("datarate") && txTransmissionChannel->hasPar("datarate")) {
+            double bitrate = txTransmissionChannel->par("datarate");
+            double rxBitrate = rxTransmissionChannel->par("datarate");
+            if (bitrate != rxBitrate)
+                throw cRuntimeError("The datarate parameters on tx and rx transmission channels are differ %g vs %g", bitrate, rxBitrate);
+            interfaceEntry->par("bitrate").setDoubleValue(bitrate);
         }
+        else if (!rxTransmissionChannel->hasPar("datarate") && !txTransmissionChannel->hasPar("datarate")) {
+            // channels doesn't have datarate parameters
+        }
+        else
+            throw cRuntimeError("asymmetric settings: only one channel has datarate parameter on tx/rx transmission channels");
+
         double txRate = interfaceEntry->par("bitrate");
         for (auto & etherDescr : etherDescrs) {
             if (txRate == etherDescr.txrate) {
@@ -530,12 +540,14 @@ void EtherMacBase::readChannelParameters(bool errorWhenAsymmetric)
             }
         }
         throw cRuntimeError("Invalid transmission rate %g bps on channel %s at module %s",
-                txRate, transmissionChannel->getFullPath().c_str(), getFullPath().c_str());
+                txRate, txTransmissionChannel->getFullPath().c_str(), getFullPath().c_str());
     }
     else {
         curEtherDescr = &nullEtherDescr;
+        if (!inTrChannel)
+            rxTransmissionChannel = nullptr;
         if (!outTrChannel)
-            transmissionChannel = nullptr;
+            txTransmissionChannel = nullptr;
         interfaceEntry->setCarrier(false);
         interfaceEntry->setDatarate(0);
     }
@@ -613,11 +625,11 @@ void EtherMacBase::refreshDisplay() const
                 result = std::to_string(txQueue->getNumPackets());
                 break;
             case 'b':
-                if (transmissionChannel == nullptr)
+                if (txTransmissionChannel == nullptr)
                     result = "not connected";
                 else {
                     char datarateText[40];
-                    double datarate = transmissionChannel->getNominalDatarate();
+                    double datarate = txTransmissionChannel->getNominalDatarate();
                     if (datarate >= 1e9)
                         sprintf(datarateText, "%gGbps", datarate / 1e9);
                     else if (datarate >= 1e6)

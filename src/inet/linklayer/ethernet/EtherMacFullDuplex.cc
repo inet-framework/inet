@@ -127,7 +127,7 @@ void EtherMacFullDuplex::startFrameTransmission()
     auto duration = calculateDuration(signal);
     send(signal, physOutGate, duration);
 
-    scheduleAt(transmissionChannel->getTransmissionFinishTime(), endTxMsg);
+    scheduleAt(txTransmissionChannel->getTransmissionFinishTime(), endTxMsg);
     changeTransmissionState(TRANSMITTING_STATE);
 }
 

@@ -715,12 +715,12 @@ void EtherMac::sendJamSignal()
     jam->setBitrate(curEtherDescr->txrate);
     jam->setAbortedPkTreeID(currentSendPkTreeID);
 
-    transmissionChannel->forceTransmissionFinishTime(SIMTIME_ZERO);
+    txTransmissionChannel->forceTransmissionFinishTime(SIMTIME_ZERO);
     //emit(packetSentToLowerSignal, jam);
     auto duration = calculateDuration(jam);
     send(jam, physOutGate, duration);
 
-    scheduleAt(transmissionChannel->getTransmissionFinishTime(), endJammingMsg);
+    scheduleAt(txTransmissionChannel->getTransmissionFinishTime(), endJammingMsg);
     changeTransmissionState(JAMMING_STATE);
 }
 
@@ -942,7 +942,7 @@ void EtherMac::fillIFGIfInBurst()
         send(gap, physOutGate, duration);
         changeTransmissionState(SEND_IFG_STATE);
         cancelEvent(endIFGMsg);
-        scheduleAt(transmissionChannel->getTransmissionFinishTime(), endIFGMsg);
+        scheduleAt(txTransmissionChannel->getTransmissionFinishTime(), endIFGMsg);
     }
     else {
         bytesSentInBurst = B(0);
@@ -958,7 +958,7 @@ void EtherMac::scheduleEndTxPeriod(B sentFrameByteLength)
         framesSentInBurst++;
     }
 
-    scheduleAt(transmissionChannel->getTransmissionFinishTime(), endTxMsg);
+    scheduleAt(txTransmissionChannel->getTransmissionFinishTime(), endTxMsg);
     changeTransmissionState(TRANSMITTING_STATE);
 }
 
