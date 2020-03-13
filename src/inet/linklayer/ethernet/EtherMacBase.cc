@@ -331,7 +331,7 @@ void EtherMacBase::receiveSignal(cComponent *source, simsignal_t signalID, cObje
             refreshConnection();
     }
     else if (auto gcobj = dynamic_cast<cPostParameterChangeNotification *>(obj)) {    // note: we are subscribed to the channel object too
-        if (gcobj->par->getOwner() == txTransmissionChannel)
+        if (gcobj->par->getOwner() == txTransmissionChannel || gcobj->par->getOwner() == rxTransmissionChannel)
             refreshConnection();
     }
 }
@@ -500,7 +500,7 @@ void EtherMacBase::readChannelParameters(bool errorWhenAsymmetric)
     if (errorWhenAsymmetric && (rxDelay != txDelay))
         throw cRuntimeError("The delays on the input/output channels differ (rx=%s vs tx=%s)", rxDelay.str().c_str(), txDelay.str().c_str());
 
-    if (txDisabled)
+    if (rxDisabled || txDisabled)
         connected = false;
 
     if (!interfaceEntry)

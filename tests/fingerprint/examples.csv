@@ -222,7 +222,7 @@
 /examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMAC_fullduplex -r 0, 3s,   dd92-8dc9/tplx, PASS,
 /examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMAC_fullduplex -r 1, 3s,   dd92-8dc9/tplx, PASS,
 /examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMAC_halfduplex -r 0, 2s,   9488-232c/tplx, PASS,
-/examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMAC_halfduplex -r 1, 2s,   1668-9622/tplx, PASS,
+/examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMAC_halfduplex -r 1, 2s,   9b65-82b6/tplx, PASS,
 
 /examples/inet/tcp_ppp_reconnect/,   -f omnetpp.ini -c General -r 0,     5s,              defb-8774/tplx, PASS,
 
