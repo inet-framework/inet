@@ -40,7 +40,7 @@ namespace physicallayer {
  * how to change Mac module the outgoing cPacket: abort now; for preemption; JAM, ... ?
  */
 
-class INET_API EtherPhy : public cPhyModule, public cListener, public ILifecycle
+class INET_API EtherPhy : public cSimpleModule, public cListener, public ILifecycle
 {
   public:
     enum TxState : short{
@@ -63,6 +63,13 @@ class INET_API EtherPhy : public cPhyModule, public cListener, public ILifecycle
     // Self-message kind values
     enum SelfMsgKindValues {
         ENDTRANSMISSION = 101,
+        MODIFYTRANSMISSION,
+    };
+
+    enum FcsCheckResult {
+        FCS_OK,
+        MCRC_OK,
+        FCS_BAD
     };
 
     const char *displayStringTextFormat = nullptr;
@@ -74,6 +81,8 @@ class INET_API EtherPhy : public cPhyModule, public cListener, public ILifecycle
     cGate *upperLayerInGate = nullptr;
     cMessage *endTxMsg = nullptr;
     EthernetSignalBase *curTx = nullptr;
+    cMessage *scheduledTxModifier = nullptr;
+    simtime_t curTxStartTime;
     EthernetSignalBase *curRx = nullptr;
     double bitrate = NaN;
     bool   sendRawBytes = false;
@@ -99,11 +108,14 @@ class INET_API EtherPhy : public cPhyModule, public cListener, public ILifecycle
     virtual void finish() override;
     virtual void handleParameterChange(const char *parname) override;
 
-    void changeTxState(TxState newState);
-    void changeRxState(RxState newState);
+    virtual void handleSelfMessage(cMessage *message);
+
+    virtual void changeTxState(TxState newState);
+    virtual void changeRxState(RxState newState);
 
     EthernetSignal *encapsulate(Packet *packet);
-    virtual simtime_t calculateDuration(EthernetSignalBase *signal);
+    virtual simtime_t calculateDuration(EthernetSignalBase *signal) const;
+    static simtime_t calculateDuration(b length, double bitrate);
     virtual void startTx(EthernetSignalBase *signal);
     virtual void endTx();
     virtual void abortTx();
@@ -113,15 +125,19 @@ class INET_API EtherPhy : public cPhyModule, public cListener, public ILifecycle
     virtual void receivePacketProgress(cPacket *packet, int bitPosition, simtime_t timePosition, int extraProcessableBitLength, simtime_t extraProcessableDuration) override;
     virtual void receivePacketEnd(cPacket *packet) override;
 
+    FcsCheckResult verifyFcs(Packet *packet);
     Packet *decapsulate(EthernetSignal *signal);
     virtual void startRx(EthernetSignalBase *signal);
     virtual void endRx(EthernetSignalBase *signal);
     virtual void abortRx();
 
     virtual void receiveSignal(cComponent *src, simsignal_t signalId, cObject *obj, cObject *details) override;
-    bool checkConnected();
+    virtual bool checkConnected();
     virtual void handleConnected();
     virtual void handleDisconnected();
+    virtual void processMsgFromUpperLayer(cMessage *message);
+    virtual void modifyCurrentPreemptableTx(cMessage *message);
+    virtual void modifyTxProgress(cMessage *message);
 
     virtual bool handleOperationStage(LifecycleOperation *operation, IDoneCallback *doneCallback) override;
 

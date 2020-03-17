@@ -24,6 +24,7 @@
 #include "inet/linklayer/ethernet/EtherMacFullDuplex.h"
 #include "inet/linklayer/ethernet/EtherPhyFrame_m.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/physicallayer/contract/ethernet/EtherPhyCmd_m.h"
 #include "inet/physicallayer/ethernet/EtherPhy.h"
 
 namespace inet {
@@ -101,6 +102,9 @@ void EtherMacFullDuplex::startFrameTransmission()
     auto newPacketProtocolTag = frame->addTag<PacketProtocolTag>();
     *newPacketProtocolTag = *oldPacketProtocolTag;
     delete oldPacketProtocolTag;
+
+    frame->setKind(physicallayer::ETH_CMD_SEND);   //TODO or CMD_SEND_PREEMPTABLE, ...
+
     EV_INFO << "Transmission of " << frame << " started.\n";
     if (sendRawBytes) {
         //TODO
