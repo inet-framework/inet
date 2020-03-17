@@ -17,6 +17,8 @@
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
+#include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/ethernet/EtherPhyFrame_m.h"
 #include "inet/physicallayer/ethernet/EtherPhy.h"
@@ -392,6 +394,39 @@ void EtherPhy::receivePacketProgress(cPacket *packet, int bitPosition, simtime_t
 void EtherPhy::receivePacketEnd(cPacket *packet)
 {
     endRx(check_and_cast<EthernetSignalBase *>(packet));
+}
+
+bool EtherPhy::handleOperationStage(LifecycleOperation *operation, IDoneCallback *doneCallback)
+{
+    Enter_Method_Silent();
+    int stage = operation->getCurrentStage();
+    if (dynamic_cast<ModuleStartOperation *>(operation)) {
+        if (stage == ModuleStartOperation::STAGE_PHYSICAL_LAYER) {
+            handleParameterChange(nullptr);
+        }
+        else if (stage == ModuleStartOperation::STAGE_LINK_LAYER) {
+            if (checkConnected())
+                handleConnected();
+            else
+                handleDisconnected();
+            return true;
+        }
+    }
+    else if (dynamic_cast<ModuleStopOperation *>(operation)) {
+        if (stage == ModuleStopOperation::STAGE_PHYSICAL_LAYER) {
+            handleDisconnected();
+            return true;
+        }
+    }
+    else if (dynamic_cast<ModuleCrashOperation *>(operation)) {
+        if (stage == ModuleCrashOperation::STAGE_CRASH) {
+            handleDisconnected();
+            return true;
+        }
+    }
+    else
+        throw cRuntimeError("unaccepted Lifecycle operation: (%s)%s", operation->getClassName(), operation->getName());
+    return true;
 }
 
 } // namespace physicallayer
