@@ -48,7 +48,7 @@ void NoiseSource::initialize(int stage)
     }
     else if (stage == INITSTAGE_PHYSICAL_LAYER) {
         medium->addRadio(this);
-        scheduleAt(par("startTime"), sleepTimer);
+        scheduleSleepTimer();
     }
 }
 
@@ -71,14 +71,15 @@ void NoiseSource::startTransmission()
 
 void NoiseSource::endTransmission()
 {
-    Signal *signal = static_cast<Signal *>(transmissionTimer->getContextPointer());
     transmissionTimer->setContextPointer(nullptr);
-    scheduleSleepTimer(signal->getDuration());
+    scheduleSleepTimer();
 }
 
-void NoiseSource::scheduleSleepTimer(simtime_t transmissionDuration)
+void NoiseSource::scheduleSleepTimer()
 {
-    scheduleAt(simTime() + par("sleepInterval") - transmissionDuration, sleepTimer);
+    simtime_t repetitionTime = par("repetitionTime");
+    scheduleAt(lastSleepStartTime + repetitionTime + par("jitterTime"), sleepTimer);
+    lastSleepStartTime += repetitionTime;
 }
 
 void NoiseSource::scheduleTransmissionTimer(const ITransmission *transmission)
