@@ -30,6 +30,7 @@
 #include "inet/linklayer/ethernet/Ethernet.h"
 #include "inet/linklayer/ethernet/EtherPhyFrame_m.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/physicallayer/ethernet/EtherPhy.h"
 #include "inet/queueing/function/PacketComparatorFunction.h"
 
 namespace inet {
@@ -174,12 +175,8 @@ void EtherMacFullDuplexBase::initialize(int stage)
 {
     MacProtocolBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        physInGate = getParentModule()->gate("phys$i")->getPathEndGate();
-        physOutGate = getParentModule()->gate("phys$o")->getPathStartGate();
-        lowerLayerInGateId = physInGate->getId();
-        lowerLayerOutGateId = physOutGate->getId();
-        rxTransmissionChannel = nullptr;
-        txTransmissionChannel = nullptr;
+        lowerLayerInGateId = gate("phyIn")->getId();
+        lowerLayerOutGateId = gate("phyOut")->getId();
         currentTxFrame = nullptr;
 
         initializeFlags();
@@ -199,7 +196,9 @@ void EtherMacFullDuplexBase::initialize(int stage)
         // initialize pause
         pauseUnitsRequested = 0;
 
-        getContainingNicModule(this)->subscribe(POST_MODEL_CHANGE, this);
+        auto ie = getContainingNicModule(this);
+        ie->subscribe(POST_MODEL_CHANGE, this);
+        ie->subscribe(physicallayer::EtherPhy::connectionStateChangedSignal, this);    //TODO or register to PHY directly
 
         WATCH(transmitState);
         WATCH(receiveState);
@@ -217,18 +216,16 @@ void EtherMacFullDuplexBase::initializeQueue()
 
 void EtherMacFullDuplexBase::initializeFlags()
 {
-    displayStringTextFormat = par("displayStringTextFormat");
-    sendRawBytes = par("sendRawBytes");
+    handleParameterChange(nullptr);
     duplexMode = true;
 
     // initialize connected flag
-    connected = physOutGate->getPathEndGate()->isConnected() && physInGate->getPathStartGate()->isConnected();
+    connected = false;
 
     if (!connected)
         EV_WARN << "MAC not connected to a network.\n";
 
     // initialize promiscuous flag
-    promiscuous = par("promiscuous");
 
     frameBursting = false;
 }
@@ -254,9 +251,15 @@ void EtherMacFullDuplexBase::initializeStatistics()
     WATCH(numPauseFramesSent);
 }
 
+void EtherMacFullDuplexBase::handleParameterChange(const char *parname)
+{
+    displayStringTextFormat = par("displayStringTextFormat");
+    sendRawBytes = par("sendRawBytes");
+    promiscuous = par("promiscuous");
+}
+
 void EtherMacFullDuplexBase::configureInterfaceEntry()
 {
-
     // MTU: typical values are 576 (Internet de facto), 1500 (Ethernet-friendly),
     // 4000 (on some point-to-point links), 4470 (Cisco routers default, FDDI compatible)
     interfaceEntry->setMtu(par("mtu"));
@@ -271,7 +274,7 @@ void EtherMacFullDuplexBase::handleStartOperation(LifecycleOperation *operation)
     interfaceEntry->setState(InterfaceEntry::State::UP);
     initializeFlags();
     initializeQueue();
-    readChannelParameters(true);
+    readChannelParameters();
 }
 
 void EtherMacFullDuplexBase::handleStopOperation(LifecycleOperation *operation)
@@ -317,20 +320,22 @@ void EtherMacFullDuplexBase::receiveSignal(cComponent *source, simsignal_t signa
 
     MacProtocolBase::receiveSignal(source, signalID, obj, details);
 
-    if (signalID != POST_MODEL_CHANGE)
-        return;
+    if (signalID == POST_MODEL_CHANGE) {
+        if (auto gcobj = dynamic_cast<cPostParameterChangeNotification *>(obj)) {
+            if (interfaceEntry == gcobj->par->getOwner() && !strcmp(gcobj->par->getName(), "bitrate")) {
+                readChannelParameters();
+            }
+        }
+    }
+}
 
-    if (auto gcobj = dynamic_cast<cPostPathCreateNotification *>(obj)) {
-        if ((physOutGate == gcobj->pathStartGate) || (physInGate == gcobj->pathEndGate))
-            refreshConnection();
-    }
-    else if (auto gcobj = dynamic_cast<cPostPathCutNotification *>(obj)) {
-        if ((physOutGate == gcobj->pathStartGate) || (physInGate == gcobj->pathEndGate))
-            refreshConnection();
-    }
-    else if (auto gcobj = dynamic_cast<cPostParameterChangeNotification *>(obj)) {    // note: we are subscribed to the channel object too
-        if (txTransmissionChannel == gcobj->par->getOwner() || rxTransmissionChannel == gcobj->par->getOwner())
-            refreshConnection();
+void EtherMacFullDuplexBase::receiveSignal(cComponent *src, simsignal_t signalId, intval_t value, cObject *details)
+{
+    Enter_Method_Silent();
+
+    if (signalId == physicallayer::EtherPhy::connectionStateChangedSignal) {
+        connected = value;
+        readChannelParameters();
     }
 }
 
@@ -426,7 +431,7 @@ void EtherMacFullDuplexBase::refreshConnection()
     Enter_Method_Silent();
 
     bool oldConn = connected;
-    readChannelParameters(false);
+    readChannelParameters();
 
     if (oldConn != connected)
         processConnectDisconnect();
@@ -471,7 +476,7 @@ bool EtherMacFullDuplexBase::dropFrameNotForUs(Packet *packet, const Ptr<const E
     return true;
 }
 
-void EtherMacFullDuplexBase::readChannelParameters(bool errorWhenAsymmetric)
+void EtherMacFullDuplexBase::readChannelParameters()
 {
     // When the connected channels change at runtime, we'll receive
     // two separate notifications (one for the rx channel and one for the tx one),
@@ -479,63 +484,15 @@ void EtherMacFullDuplexBase::readChannelParameters(bool errorWhenAsymmetric)
     // to verify at the next opportunity (event) that the two channels have eventually
     // been set to the same value.
 
-    auto outTrChannel = check_and_cast_nullable<cTransmissionChannel*>(physOutGate->findTransmissionChannel());
-    auto inTrChannel = check_and_cast_nullable<cTransmissionChannel*>(physInGate->findIncomingTransmissionChannel());
-
-    connected = physOutGate->getPathEndGate()->isConnected() && physInGate->getPathStartGate()->isConnected();
-
-    if (connected && ((!outTrChannel) || (!inTrChannel)))
-        throw cRuntimeError("Ethernet phys gate must be connected using a transmission channel");
-
-    bool rxDisabled = !inTrChannel || inTrChannel->isDisabled();
-    bool txDisabled = !outTrChannel || outTrChannel->isDisabled();
-
-    if (errorWhenAsymmetric && (rxDisabled != txDisabled))
-        throw cRuntimeError("The enablements of the input/output channels differ (rx=%s vs tx=%s)", rxDisabled ? "off" : "on", txDisabled ? "off" : "on");
-
-    auto rxDelay = inTrChannel ? inTrChannel->getDelay() : NaN;
-    auto txDelay = outTrChannel ? outTrChannel->getDelay() : NaN;
-    if (errorWhenAsymmetric && (rxDelay != txDelay))
-        throw cRuntimeError("The delays on the input/output channels differ (rx=%s vs tx=%s)", rxDelay.str().c_str(), txDelay.str().c_str());
-
-    if (txDisabled)
-        connected = false;
-
-    channelsDiffer = (rxDisabled != txDisabled) || (rxDelay != txDelay);
-
     if (!interfaceEntry)
         interfaceEntry = getContainingNicModule(this);
 
     if (connected) {
-        rxTransmissionChannel = inTrChannel;
-        txTransmissionChannel = outTrChannel;
-        if (!rxTransmissionChannel->isSubscribed(POST_MODEL_CHANGE, this))
-            rxTransmissionChannel->subscribe(POST_MODEL_CHANGE, this);
-        if (!txTransmissionChannel->isSubscribed(POST_MODEL_CHANGE, this))
-            txTransmissionChannel->subscribe(POST_MODEL_CHANGE, this);
-
-        // Check valid speeds
-        if (rxTransmissionChannel->hasPar("datarate") && txTransmissionChannel->hasPar("datarate")) {
-            double bitrate = txTransmissionChannel->par("datarate");
-            double rxBitrate = rxTransmissionChannel->par("datarate");
-            if (bitrate != rxBitrate)
-                throw cRuntimeError("The datarate parameters on tx and rx transmission channels are differ %g vs %g", bitrate, rxBitrate);
-            interfaceEntry->par("bitrate").setDoubleValue(bitrate);
-        }
-        else if (!rxTransmissionChannel->hasPar("datarate") && !txTransmissionChannel->hasPar("datarate")) {
-            // channels doesn't have datarate parameters
-        }
-        else
-            throw cRuntimeError("asymmetric settings: only one channel has datarate parameter on tx/rx transmission channels");
-
         double txRate = interfaceEntry->par("bitrate");
         for (auto & etherDescr : etherDescrs) {
             if (txRate == etherDescr.txrate) {
                 curEtherDescr = &(etherDescr);
-                if (interfaceEntry) {
-                    interfaceEntry->setCarrier(true);
-                    interfaceEntry->setDatarate(txRate);
-                }
+                interfaceEntry->setDatarate(txRate);
                 return;
             }
         }
@@ -544,14 +501,7 @@ void EtherMacFullDuplexBase::readChannelParameters(bool errorWhenAsymmetric)
     }
     else {
         curEtherDescr = &nullEtherDescr;
-        if (!inTrChannel)
-            rxTransmissionChannel = nullptr;
-        if (!outTrChannel)
-            txTransmissionChannel = nullptr;
-        if (interfaceEntry) {
-            interfaceEntry->setCarrier(false);
-            interfaceEntry->setDatarate(0);
-        }
+        interfaceEntry->setDatarate(0.0);
     }
 }
 
@@ -625,11 +575,11 @@ void EtherMacFullDuplexBase::refreshDisplay() const
                 result = std::to_string(txQueue->getNumPackets());
                 break;
             case 'b':
-                if (txTransmissionChannel == nullptr)
+                if (!connected)
                     result = "not connected";
                 else {
                     char datarateText[40];
-                    double datarate = txTransmissionChannel->getNominalDatarate();
+                    double datarate = this->curEtherDescr->txrate;
                     if (datarate >= 1e9)
                         sprintf(datarateText, "%gGbps", datarate / 1e9);
                     else if (datarate >= 1e6)

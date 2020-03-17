@@ -100,12 +100,6 @@ class INET_API EtherMacFullDuplexBase : public MacProtocolBase
     bool duplexMode = false;    // true if operating in full-duplex mode
     bool frameBursting = false;    // frame bursting on/off (Gigabit Ethernet)
 
-    // gate pointers, etc.
-    cChannel *rxTransmissionChannel = nullptr;    // incoming transmission channel
-    cChannel *txTransmissionChannel = nullptr;    // transmission channel
-    cGate *physInGate = nullptr;    // pointer to the "phys$i" gate
-    cGate *physOutGate = nullptr;    // pointer to the "phys$o" gate
-
     // state
     bool channelsDiffer = false;    // true when tx and rx channels differ (only one of them exists, or 'datarate' or 'disable' parameters differ) (configuration error, or between changes of tx/rx channels)
     MacTransmitState transmitState = static_cast<MacTransmitState>(-1);    // "transmit state" of the MAC
@@ -170,6 +164,7 @@ class INET_API EtherMacFullDuplexBase : public MacProtocolBase
     virtual void initializeFlags();
     virtual void initializeQueue();
     virtual void initializeStatistics();
+    virtual void handleParameterChange(const char *parname) override;
 
     // finish
     virtual void finish() override;
@@ -181,7 +176,7 @@ class INET_API EtherMacFullDuplexBase : public MacProtocolBase
      * Calculates datarates, etc. Verifies the datarates on the incoming/outgoing channels,
      * and throws error when they differ and the parameter errorWhenAsymmetric is true.
      */
-    virtual void readChannelParameters(bool errorWhenAsymmetric);
+    virtual void readChannelParameters();
     virtual void printParameters();
 
     // helpers
@@ -200,6 +195,7 @@ class INET_API EtherMacFullDuplexBase : public MacProtocolBase
 
     // model change related functions
     virtual void receiveSignal(cComponent *src, simsignal_t signalId, cObject *obj, cObject *details) override;
+    virtual void receiveSignal(cComponent *src, simsignal_t signalId, intval_t value, cObject *details) override;
     virtual void refreshConnection();
 
     void changeTransmissionState(MacTransmitState newState);

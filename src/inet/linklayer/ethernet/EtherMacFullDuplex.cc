@@ -60,7 +60,7 @@ void EtherMacFullDuplex::initializeFlags()
 void EtherMacFullDuplex::handleMessageWhenUp(cMessage *msg)
 {
     if (channelsDiffer)
-        readChannelParameters(true);
+        readChannelParameters();
 
     if (msg->isSelfMessage())
         handleSelfMessage(msg);
@@ -365,6 +365,7 @@ void EtherMacFullDuplex::receiveSignal(cComponent *src, simsignal_t signalId, in
 {
     Enter_Method_Silent();
 
+    EtherMacFullDuplexBase::receiveSignal(src, signalId, value, details);
     if (signalId == physicallayer::EtherPhy::txFinishedSignal)
         this->handleEndTxPeriod();
     else if (signalId == physicallayer::EtherPhy::txAbortedSignal)

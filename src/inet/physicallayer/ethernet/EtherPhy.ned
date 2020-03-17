@@ -29,6 +29,7 @@ simple EtherPhy
         string displayStringTextFormat = default("rate: %b\nsent: %s, rcvd: %r\nqueue: %q, drop: %d");
         @signal[txStateChanged](type=long); // enum=MacTxState
         @signal[rxStateChanged](type=long); // enum=MacTransmitState
+        @signal[connectionStateChanged](type=long); // 1-connected, 0-disconnected
         @signal[txFinished](type=long);
         @signal[txAborted](type=long);
         @statistic[rxState](title="RX state"; source=rxStateChanged; record=vector; interpolationmode=sample-hold);

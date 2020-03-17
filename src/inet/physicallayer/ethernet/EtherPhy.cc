@@ -30,6 +30,7 @@ simsignal_t EtherPhy::txStateChangedSignal = registerSignal("txStateChanged");
 simsignal_t EtherPhy::txFinishedSignal = registerSignal("txFinished");
 simsignal_t EtherPhy::txAbortedSignal = registerSignal("txAborted");
 simsignal_t EtherPhy::rxStateChangedSignal = registerSignal("rxStateChanged");
+simsignal_t EtherPhy::connectionStateChangedSignal = registerSignal("connectionStateChanged");
 
 std::ostream& operator <<(std::ostream& o, EtherPhy::RxState s)
 {
@@ -65,13 +66,10 @@ void EtherPhy::initialize(int stage)
         physInGate = gate("phys$i");
         physOutGate = gate("phys$o");
         upperLayerInGate = gate("upperLayerIn");
-        displayStringTextFormat = par("displayStringTextFormat");
-        sendRawBytes = par("sendRawBytes");
+        handleParameterChange(nullptr);
 
         // initialize connected flag
         connected = false;
-        physOutGate->getPathEndGate()->isConnected() && physInGate->getPathStartGate()->isConnected();
-
         txTransmissionChannel = rxTransmissionChannel = nullptr;
 
         // initialize states
@@ -119,6 +117,13 @@ void EtherPhy::finish()
         recordScalar("rx channel utilization (%)", 100 * (totalRxStateTime[RX_RECEIVING_STATE] / t));
         recordScalar("rx channel off (%)", 100 * (totalRxStateTime[RX_OFF_STATE] / t));
     }
+}
+
+void EtherPhy::handleParameterChange(const char *parname)
+{
+    upperLayerInGate = gate("upperLayerIn");
+    displayStringTextFormat = par("displayStringTextFormat");
+    sendRawBytes = par("sendRawBytes");
 }
 
 void EtherPhy::changeTxState(TxState newState)
@@ -225,12 +230,19 @@ void EtherPhy::handleConnected()
         txTransmissionChannel = physOutGate->getTransmissionChannel();
         if (!txTransmissionChannel->isSubscribed(POST_MODEL_CHANGE, this))
             txTransmissionChannel->subscribe(POST_MODEL_CHANGE, this);
-        changeTxState(TX_IDLE_STATE);
         rxTransmissionChannel = physInGate->getIncomingTransmissionChannel();
         if (!rxTransmissionChannel->isSubscribed(POST_MODEL_CHANGE, this))
             rxTransmissionChannel->subscribe(POST_MODEL_CHANGE, this);
-        changeRxState(RX_IDLE_STATE);
-        interfaceEntry->setCarrier(true);
+
+        //TODO Should accep asymmetric settings - changed on tx channel first, than changed on rx channel or vica versa
+        if (rxTransmissionChannel->hasPar("delay") && txTransmissionChannel->hasPar("delay")) {
+            double rxDelay = rxTransmissionChannel->par("delay");
+            double txDelay = txTransmissionChannel->par("delay");
+            if (rxDelay != txDelay)
+                throw cRuntimeError("The delay parameters on tx and rx transmission channels are differ %g vs %g", txDelay, rxDelay);
+        }
+        else
+            throw cRuntimeError("the tx/rx transmission channels doesn't have delay parameter");    // TODO delay needed both tx/rx
 
         if (rxTransmissionChannel->hasPar("datarate") && txTransmissionChannel->hasPar("datarate")) {
             bitrate = txTransmissionChannel->par("datarate");
@@ -244,6 +256,11 @@ void EtherPhy::handleConnected()
         }
         else
             throw cRuntimeError("asymmetric settings: only one channel has datarate parameter on tx/rx transmission channels");
+
+        changeTxState(TX_IDLE_STATE);
+        changeRxState(RX_IDLE_STATE);
+        emit(connectionStateChangedSignal, 1);
+        interfaceEntry->setCarrier(true);
     }
 }
 
@@ -257,6 +274,7 @@ void EtherPhy::handleDisconnected()
         changeTxState(TX_OFF_STATE);
         rxTransmissionChannel = physInGate->findIncomingTransmissionChannel();
         changeRxState(RX_OFF_STATE);
+        emit(connectionStateChangedSignal, 0);
         interfaceEntry->setCarrier(false);
     }
 }

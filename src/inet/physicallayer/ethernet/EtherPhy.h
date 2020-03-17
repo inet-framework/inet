@@ -90,12 +90,14 @@ class INET_API EtherPhy : public cPhyModule, public cListener
     static simsignal_t txFinishedSignal;
     static simsignal_t txAbortedSignal;
     static simsignal_t rxStateChangedSignal;
+    static simsignal_t connectionStateChangedSignal;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *msg) override;
     virtual void finish() override;
+    virtual void handleParameterChange(const char *parname) override;
 
     void changeTxState(TxState newState);
     void changeRxState(RxState newState);
