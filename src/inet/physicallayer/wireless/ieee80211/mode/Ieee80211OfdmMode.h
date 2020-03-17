@@ -50,7 +50,11 @@ class INET_API Ieee80211OfdmModeBase : public Ieee80211OfdmTimingRelatedParamete
 
     int getNumberOfDataSubcarriers() const { return 48; }
     int getNumberOfPilotSubcarriers() const { return 4; }
+    // The null subcarrier and the guard subcarriers at the sides are not included.
     int getNumberOfTotalSubcarriers() const { return getNumberOfDataSubcarriers() + getNumberOfPilotSubcarriers(); }
+
+    Hz getSubcarrierStartFrequencyOffset(int subcarrierIndex) const;
+    Hz getSubcarrierEndFrequencyOffset(int subcarrierIndex) const;
 
     virtual bps getGrossBitrate() const;
     virtual bps getNetBitrate() const;

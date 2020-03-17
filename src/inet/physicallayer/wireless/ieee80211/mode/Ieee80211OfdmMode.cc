@@ -62,6 +62,36 @@ bps Ieee80211OfdmModeBase::computeNetBitrate(bps grossBitrate, const Ieee80211Of
     return grossBitrate;
 }
 
+Hz Ieee80211OfdmModeBase::getSubcarrierStartFrequencyOffset(int subcarrierIndex) const
+{
+    int numSubcarriers = getNumberOfTotalSubcarriers();
+
+    if (subcarrierIndex < 0 || subcarrierIndex >= numSubcarriers)
+        throw cRuntimeError("Invalid subcarrier index: %d", subcarrierIndex);
+
+    Hz spacing = getSubcarrierFrequencySpacing();
+
+    if (subcarrierIndex < numSubcarriers / 2)
+        return spacing * (subcarrierIndex - (numSubcarriers / 2) - 0.5);
+    else
+        return spacing * (subcarrierIndex - (numSubcarriers / 2) + 0.5);
+}
+
+Hz Ieee80211OfdmModeBase::getSubcarrierEndFrequencyOffset(int subcarrierIndex) const
+{
+    int numSubcarriers = getNumberOfTotalSubcarriers();
+
+    if (subcarrierIndex < 0 || subcarrierIndex >= numSubcarriers)
+        throw cRuntimeError("Invalid subcarrier index: %d", subcarrierIndex);
+
+    Hz spacing = getSubcarrierFrequencySpacing();
+
+    if (subcarrierIndex < numSubcarriers / 2)
+        return spacing * (subcarrierIndex - (numSubcarriers / 2) + 0.5);
+    else
+        return spacing * (subcarrierIndex - (numSubcarriers / 2) + 1.5);
+}
+
 bps Ieee80211OfdmModeBase::getGrossBitrate() const
 {
     if (std::isnan(grossBitrate.get()))
