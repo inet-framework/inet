@@ -26,6 +26,8 @@ class INET_API NoiseSource : public cSimpleModule, public virtual IRadio
     const IAntenna *antenna = nullptr;
     const ITransmitter *transmitter = nullptr;
 
+    simtime_t lastSleepStartTime;
+
     cMessage *transmissionTimer = nullptr;
     cMessage *sleepTimer = nullptr;
 
@@ -37,7 +39,7 @@ class INET_API NoiseSource : public cSimpleModule, public virtual IRadio
     virtual void startTransmission();
     virtual void endTransmission();
 
-    virtual void scheduleSleepTimer(simtime_t transmissionDuration);
+    virtual void scheduleSleepTimer();
     virtual void scheduleTransmissionTimer(const ITransmission *transmission);
 
   public:
