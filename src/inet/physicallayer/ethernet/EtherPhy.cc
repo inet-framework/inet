@@ -387,6 +387,7 @@ EthernetSignal *EtherPhy::encapsulate(Packet *packet)
     packet->insertAtFront(phyHeader);
     packet->clearTags();
     packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::ethernetPhy);
+    packet->setKind(0);
     auto signal = new EthernetSignal(packet->getName());
     signal->setSrcMacFullDuplex(duplexMode);
     signal->setBitrate(bitrate);
