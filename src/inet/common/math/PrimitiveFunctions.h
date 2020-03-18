@@ -99,6 +99,10 @@ class INET_API UnilinearFunction : public FunctionBase<R, D>
         return std::isfinite(toDouble(rLower)) && std::isfinite(toDouble(rUpper));
     }
 
+    virtual bool isNonZero(const typename D::I& i) const override {
+        return rLower != R(0) || rUpper != R(0);
+    }
+
     virtual R getMin(const typename D::I& i) const override {
         return std::min(getValue(i.getLower()), getValue(i.getUpper()));
     }
@@ -189,6 +193,14 @@ class INET_API BilinearFunction : public FunctionBase<R, D>
 
     virtual void partition(const typename D::I& i, const std::function<void (const typename D::I&, const IFunction<R, D> *)> callback) const override {
         callback(i, this);
+    }
+
+    virtual bool isFinite(const typename D::I& i) const override {
+        return std::isfinite(toDouble(rLowerLower)) && std::isfinite(toDouble(rLowerUpper)) && std::isfinite(toDouble(rUpperLower)) && std::isfinite(toDouble(rUpperUpper));
+    }
+
+    virtual bool isNonZero(const typename D::I& i) const override {
+        return rLowerLower != R(0) || rLowerUpper != R(0) || rUpperLower != R(0) || rUpperUpper != R(0);
     }
 
     virtual R getMin(const typename D::I& i) const override {
