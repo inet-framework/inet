@@ -531,6 +531,220 @@ class INET_API Extruded2DFunction : public FunctionBase<R, Domain<X, Y>>
     }
 };
 
+/**
+ * Rasterizes a function into a grid where each cell is a constant value with
+ * the mean of the original function.
+ */
+template<typename R, typename X, typename Y>
+class INET_API Rasterized2DFunction : public FunctionBase<R, Domain<X, Y>>
+{
+  protected:
+    const X startX;
+    const X endX;
+    const X stepX;
+    int sizeX;
+    const Y startY;
+    const Y endY;
+    const Y stepY;
+    int sizeY;
+    const Ptr<const IFunction<R, Domain<X, Y>>> function;
+
+  protected:
+    void call(const Interval<X, Y>& i, const std::function<void (const Interval<X, Y>&, const IFunction<R, Domain<X, Y>> *)> callback) const {
+        if (!i.isEmpty()) {
+            ConstantFunction<R, Domain<X, Y>> g(R(0));
+            callback(i, &g);
+        }
+    }
+
+  public:
+    Rasterized2DFunction(X startX, X endX, int sizeX, Y startY, Y endY, int sizeY, const Ptr<const IFunction<R, Domain<X, Y>>>& function) :
+        startX(startX), endX(endX), stepX((endX - startX) / (sizeX - 1)), sizeX(sizeX),
+        startY(startY), endY(endY), stepY((endY - startY) / (sizeY - 1)), sizeY(sizeY),
+        function(function)
+    {
+    }
+
+    virtual R getValue(const Point<X, Y>& p) const override {
+        X x = std::get<0>(p);
+        Y y = std::get<1>(p);
+        int indexX = std::floor(toDouble(x - startX) / toDouble(stepX));
+        int indexY = std::floor(toDouble(y - startY) / toDouble(stepY));
+        if (indexX < 0 || indexX > sizeX - 2 || indexY < 0 || indexY > sizeY - 2)
+            return R(0);
+        else {
+            X x1 = startX + stepX * indexX;
+            X x2 = x1 + stepX;
+            Y y1 = startY + stepY * indexY;
+            Y y2 = y1 + stepY;
+            Point<X, Y> lower(x1, y1);
+            Point<X, Y> upper(x2, y2);
+            Interval<X, Y> interval(lower, upper, 0b11, 0b00, 0b00);
+            return function->getMean(interval);
+        }
+    }
+
+    virtual void partition(const Interval<X, Y>& i, const std::function<void (const Interval<X, Y>&, const IFunction<R, Domain<X, Y>> *)> callback) const override {
+        call(i.getIntersected(Interval<X, Y>(Point<X, Y>(getLowerBound<X>(), getLowerBound<Y>()), Point<X, Y>(X(startX), Y(startY)), 0b00, 0b00, 0b00)), callback);
+        call(i.getIntersected(Interval<X, Y>(Point<X, Y>(X(startX), getLowerBound<Y>()), Point<X, Y>(X(endX), Y(startY)), 0b10, 0b00, 0b00)), callback);
+        call(i.getIntersected(Interval<X, Y>(Point<X, Y>(X(endX), getLowerBound<Y>()), Point<X, Y>(getUpperBound<X>(), Y(startY)), 0b10, 0b00, 0b00)), callback);
+
+        call(i.getIntersected(Interval<X, Y>(Point<X, Y>(getLowerBound<X>(), Y(startY)), Point<X, Y>(X(startX), Y(endY)), 0b01, 0b00, 0b00)), callback);
+        const auto& i1 = i.getIntersected(Interval<X, Y>(Point<X, Y>(X(startX), Y(startY)), Point<X, Y>(X(endX), Y(endY)), 0b11, 0b00, 0b00));
+        if (!i1.isEmpty()) {
+            int startIndexX = std::max(0, (int)std::floor(toDouble(std::get<0>(i1.getLower()) - startX) / toDouble(stepX)));
+            int endIndexX = std::min(sizeX - 1, (int)std::ceil(toDouble(std::get<0>(i1.getUpper()) - startX) / toDouble(stepX)));
+            int startIndexY = std::max(0, (int)std::floor(toDouble(std::get<1>(i1.getLower()) - startY) / toDouble(stepY)));
+            int endIndexY = std::min(sizeY - 1, (int)std::ceil(toDouble(std::get<1>(i1.getUpper()) - startY) / toDouble(stepY)));
+            int countX = endIndexX - startIndexX;
+            int countY = endIndexY - startIndexY;
+            R means[countX][countY];
+            for (int indexX = 0; indexX < countX; indexX++)
+                for (int indexY = 0; indexY < countY; indexY++)
+                    means[indexX][indexY] = R(0);
+            Point<X, Y> lower(startX + stepX * startIndexX, startY + stepY * startIndexY);
+            Point<X, Y> upper(startX + stepX * (endIndexX + 1), startY + stepY * (endIndexY + 1));
+            Interval<X, Y> interval(lower, upper, 0b11, 0b00, 0b00);
+            function->partition(interval, [&] (const Interval<X, Y>& i2, const IFunction<R, Domain<X, Y>> *f2) {
+                if (f2->isNonZero(i2)) {
+                    int partitionStartIndexX = std::max(0, (int)std::floor(toDouble(std::get<0>(i2.getLower()) - startX) / toDouble(stepX)));
+                    int partitionEndIndexX = std::min(sizeX - 1, (int)std::ceil(toDouble(std::get<0>(i2.getUpper()) - startX) / toDouble(stepX)));
+                    int partitionStartIndexY = std::max(0, (int)std::floor(toDouble(std::get<1>(i2.getLower()) - startY) / toDouble(stepY)));
+                    int partitionEndIndexY = std::min(sizeY - 1, (int)std::ceil(toDouble(std::get<1>(i2.getUpper()) - startY) / toDouble(stepY)));
+                    for (int indexX = partitionStartIndexX; indexX < partitionEndIndexX; indexX++) {
+                        for (int indexY = partitionStartIndexY; indexY < partitionEndIndexY; indexY++) {
+                            Point<X, Y> lowerCell(startX + stepX * indexX, startY + stepY * indexY);
+                            Point<X, Y> upperCell(startX + stepX * (indexX + 1), startY + stepY * (indexY + 1));
+                            Interval<X, Y> cellInterval(lowerCell, upperCell, 0b11, 0b00, 0b00);
+                            const auto& i3 = i2.getIntersected(cellInterval);
+                            if (!i3.isEmpty()) {
+                                R mean = f2->getMean(i3);
+                                means[indexX][indexY] += mean * i3.getVolume();
+                            }
+                        }
+                    }
+                }
+            });
+            for (int indexX = startIndexX; indexX < endIndexX; indexX++) {
+                for (int indexY = startIndexY; indexY < endIndexY; indexY++) {
+                    Point<X, Y> lowerCell(startX + stepX * indexX, startY + stepY * indexY);
+                    Point<X, Y> upperCell(startX + stepX * (indexX + 1), startY + stepY * (indexY + 1));
+                    Interval<X, Y> cellInterval(lowerCell, upperCell, 0b11, 0b00, 0b00);
+                    const auto& i2 = i1.getIntersected(cellInterval);
+                    if (!i2.isEmpty()) {
+                        ConstantFunction<R, Domain<X, Y>> h(means[indexX][indexY] / (toDouble(stepX) * toDouble(stepY)));
+                        callback(i2, &h);
+                    }
+                }
+            }
+        }
+        call(i.getIntersected(Interval<X, Y>(Point<X, Y>(X(endX), Y(startY)), Point<X, Y>(getUpperBound<X>(), Y(endY)), 0b11, 0b00, 0b00)), callback);
+
+        call(i.getIntersected(Interval<X, Y>(Point<X, Y>(getLowerBound<X>(), Y(endY)), Point<X, Y>(X(startX), getUpperBound<Y>()), 0b01, 0b00, 0b00)), callback);
+        call(i.getIntersected(Interval<X, Y>(Point<X, Y>(X(startX), Y(endY)), Point<X, Y>(X(endX), getUpperBound<Y>()), 0b11, 0b00, 0b00)), callback);
+        call(i.getIntersected(Interval<X, Y>(Point<X, Y>(X(endX), Y(endY)), Point<X, Y>(getUpperBound<X>(), getUpperBound<Y>()), 0b11, 0b00, 0b00)), callback);
+    }
+};
+
+/**
+ * Fixes the parameters of a function from the left.
+ */
+template<typename R, typename C, int DIMSC, typename D, int DIMSD, typename E>
+class INET_API LeftCurryingFunction : public FunctionBase<R, D>
+{
+  protected:
+    const typename C::P point;
+    const Ptr<const IFunction<R, E>> function;
+
+  public:
+    LeftCurryingFunction(const typename C::P& point, const Ptr<const IFunction<R, E>>& function) : point(point), function(function) { }
+
+    virtual R getValue(const typename D::P& p) const override {
+        return function->getValue(concat(point, p));
+    }
+
+    virtual void partition(const typename D::I& i, const std::function<void (const typename D::I&, const IFunction<R, D> *)> callback) const override {
+        const typename E::P lower = concat(point, i.getLower());
+        const typename E::P upper = concat(point, i.getUpper());
+        const typename E::I interval(lower, upper, DIMSC + i.getLowerClosed(), DIMSC + i.getUpperClosed(), DIMSC + i.getFixed());
+        function->partition(interval, [&] (const typename E::I& i1, const IFunction<R, E> *f) {
+            const auto& l1 = i1.getLower();
+            const auto& u1 = i1.getUpper();
+            typename D::P l2 = D::P::getZero();
+            typename D::P u2 = D::P::getZero();
+            l2.template copyFrom<typename E::P, DIMSD>(l1);
+            u2.template copyFrom<typename E::P, DIMSD>(u1);
+            const typename D::I i2(l2, u2, i1.getLowerClosed() & DIMSD, i1.getUpperClosed() & DIMSD, i1.getFixed() & DIMSD);
+            if (auto cf = dynamic_cast<const ConstantFunction<R, E> *>(f)) {
+                ConstantFunction<R, D> h(cf->getConstantValue());
+                callback(i2, &h);
+            }
+            else if (auto lf = dynamic_cast<const UnilinearFunction<R, E> *>(f)) {
+                const auto& l3 = lf->getLower();
+                const auto& u3 = lf->getUpper();
+                typename D::P l4 = D::P::getZero();
+                typename D::P u4 = D::P::getZero();
+                l4.template copyFrom<typename E::P, DIMSD>(l3);
+                u4.template copyFrom<typename E::P, DIMSD>(u3);
+                UnilinearFunction<R, D> h(l4, u4, lf->getRLower(), lf->getRUpper(), lf->getDimension() - 3);
+                callback(i2, &h);
+            }
+            else
+                throw cRuntimeError("TODO");
+        });
+    }
+};
+
+/**
+ * Fixes the parameters of a function from the right.
+ */
+template<typename R, typename C, int DIMSC, typename D, int DIMSD, typename E>
+class INET_API RightCurryingFunction : public FunctionBase<R, C>
+{
+  protected:
+    const typename D::P point;
+    const Ptr<const IFunction<R, E>> function;
+
+  public:
+    RightCurryingFunction(const typename D::P& point, const Ptr<const IFunction<R, E>>& function) : point(point), function(function) { }
+
+    virtual R getValue(const typename C::P& p) const override {
+        return function->getValue(concat(p, point));
+    }
+
+    virtual void partition(const typename C::I& i, const std::function<void (const typename C::I&, const IFunction<R, C> *)> callback) const override {
+        auto size = std::tuple_size<typename D::P::type>::value;
+        const typename E::P lower = concat(i.getLower(), point);
+        const typename E::P upper = concat(i.getUpper(), point);
+        const typename E::I interval(lower, upper, (i.getLowerClosed() << size) + DIMSD, (i.getUpperClosed() << size) + DIMSD, (i.getFixed() << size) + DIMSD);
+        function->partition(interval, [&] (const typename E::I& i1, const IFunction<R, E> *f) {
+            const auto& l1 = i1.getLower();
+            const auto& u1 = i1.getUpper();
+            typename C::P l2 = C::P::getZero();
+            typename C::P u2 = C::P::getZero();
+            l2.template copyFrom<typename E::P, DIMSC>(l1);
+            u2.template copyFrom<typename E::P, DIMSC>(u1);
+            const typename C::I i2(l2, u2, (i1.getLowerClosed() & DIMSC) >> size, (i1.getUpperClosed() & DIMSD) >> size, (i1.getFixed() & DIMSD) >> size);
+            if (auto cf = dynamic_cast<const ConstantFunction<R, E> *>(f)) {
+                ConstantFunction<R, C> h(cf->getConstantValue());
+                callback(i2, &h);
+            }
+            else if (auto lf = dynamic_cast<const UnilinearFunction<R, E> *>(f)) {
+                const auto& l3 = lf->getLower();
+                const auto& u3 = lf->getUpper();
+                typename C::P l4 = C::P::getZero();
+                typename C::P u4 = C::P::getZero();
+                l4.template copyFrom<typename E::P, DIMSC>(l3);
+                u4.template copyFrom<typename E::P, DIMSC>(u3);
+                UnilinearFunction<R, C> h(l4, u4, lf->getRLower(), lf->getRUpper(), lf->getDimension() - 3);
+                callback(i2, &h);
+            }
+            else
+                throw cRuntimeError("TODO");
+        });
+    }
+};
+
 template<typename R, typename D, int DIMS, typename RI, typename DI>
 class INET_API IntegratedFunction;
 
