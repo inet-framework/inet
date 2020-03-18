@@ -108,7 +108,7 @@ void MediumVisualizerBase::initialize(int stage)
         mainPowerDensityMapFigureYTickCount = par("mainPowerDensityMapFigureYTickCount");
         displayPowerDensityMaps = par("displayPowerDensityMaps");
         powerDensityMapMode = par("powerDensityMapMode");
-        powerDensityMapSampling = par("powerDensityMapSampling");
+        powerDensityMapPixelMode = par("powerDensityMapPixelMode");
         powerDensityMapApproximationSize = par("powerDensityMapApproximationSize");
         powerDensityMapCenterFrequency = Hz(par("powerDensityMapCenterFrequency"));
         powerDensityMapBandwidth = Hz(par("powerDensityMapBandwidth"));
@@ -130,6 +130,7 @@ void MediumVisualizerBase::initialize(int stage)
         spectrumPlacementPriority = par("spectrumPlacementPriority");
         displaySpectrograms = par("displaySpectrograms");
         spectrogramMode = par("spectrogramMode");
+        spectrogramPixelMode = par("spectrogramPixelMode");
         spectrogramFigureWidth = par("spectrogramFigureWidth");
         spectrogramFigureHeight = par("spectrogramFigureHeight");
         spectrogramPixmapWidth = par("spectrogramPixmapWidth");

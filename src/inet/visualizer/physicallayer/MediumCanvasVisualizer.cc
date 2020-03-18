@@ -306,8 +306,9 @@ void MediumCanvasVisualizer::refreshPowerDensityMapFigurePowerFunction(const Ptr
     }
     auto size = maxPosition - minPosition;
     auto pixmapSize = figure->getPixmapSize();
-    if (powerDensityMapSampling) {
+    if (!strcmp(powerDensityMapPixelMode, "sample")) {
         const int xsize = pixmapSize.x;
+        // NOTE: this method is fast, but it only get samples of the function at certain places, so it may result in incorrect colors
 #ifdef _OPENMP
 #pragma omp parallel for
 #endif
@@ -324,12 +325,13 @@ void MediumCanvasVisualizer::refreshPowerDensityMapFigurePowerFunction(const Ptr
             }
         }
     }
-    else {
+    else if (!strcmp(powerDensityMapPixelMode, "partition")) {
         Point<m, m, m, simsec, Hz> l(m(minPosition.x), m(minPosition.y), m(minPosition.z), simsec(simTime()), powerDensityMapCenterFrequency);
         Point<m, m, m, simsec, Hz> u(m(maxPosition.x), m(maxPosition.y), m(maxPosition.z), simsec(simTime()), powerDensityMapCenterFrequency);
         Interval<m, m, m, simsec, Hz> i(l, u, 0b00111, 0b00111, 0b00111);
         auto approximatedMediumPowerFunction1 = makeShared<ApproximatedFunction<WpHz, Domain<m, m, m, simsec, Hz>, 0, m>>(m(minPosition.x), m(maxPosition.x), m(size.x) / pixmapSize.x * powerDensityMapApproximationSize, &LinearInterpolator<m, WpHz>::singleton, powerDensityFunction);
         auto approximatedMediumPowerFunction2 = makeShared<ApproximatedFunction<WpHz, Domain<m, m, m, simsec, Hz>, 1, m>>(m(minPosition.y), m(maxPosition.y), m(size.y) / pixmapSize.y * powerDensityMapApproximationSize, &LinearInterpolator<m, WpHz>::singleton, approximatedMediumPowerFunction1);
+        // NOTE: this method is fast, but it may paint the same pixel several times, so the last will be the effective color
         approximatedMediumPowerFunction2->partition(i, [&] (const Interval<m, m, m, simsec, Hz>& j, const IFunction<WpHz, Domain<m, m, m, simsec, Hz>> *partitonPowerFunction) {
             auto lower = j.getLower();
             auto upper = j.getUpper();
@@ -357,6 +359,28 @@ void MediumCanvasVisualizer::refreshPowerDensityMapFigurePowerFunction(const Ptr
                 throw cRuntimeError("TODO");
         });
     }
+    else if (!strcmp(powerDensityMapPixelMode, "mean")) {
+        auto approximatedMediumPowerFunction1 = makeShared<ApproximatedFunction<WpHz, Domain<m, m, m, simsec, Hz>, 0, m>>(m(minPosition.x), m(maxPosition.x), m(size.x) / pixmapSize.x * powerDensityMapApproximationSize, &LinearInterpolator<m, WpHz>::singleton, powerDensityFunction);
+        auto approximatedMediumPowerFunction2 = makeShared<ApproximatedFunction<WpHz, Domain<m, m, m, simsec, Hz>, 1, m>>(m(minPosition.y), m(maxPosition.y), m(size.y) / pixmapSize.y * powerDensityMapApproximationSize, &LinearInterpolator<m, WpHz>::singleton, approximatedMediumPowerFunction1);
+        Point<m, simsec, Hz> point(m(minPosition.z), simsec(simTime()), powerDensityMapCenterFrequency);
+        auto fixedPowerFunction = makeShared<RightCurryingFunction<WpHz, Domain<m, m>, 0b11000, Domain<m, simsec, Hz>, 0b111, Domain<m, m, m, simsec, Hz>>>(point, approximatedMediumPowerFunction2);
+        auto rasterizedFunction = makeShared<Rasterized2DFunction<WpHz, m, m>>(m(minPosition.x), m(maxPosition.x), pixmapSize.x + 1, m(minPosition.y), m(maxPosition.y), pixmapSize.y + 1, fixedPowerFunction);
+        Point<m, m> lower(m(minPosition.x), m(minPosition.y));
+        Point<m, m> upper(m(maxPosition.x), m(maxPosition.y));
+        Interval<m, m> interval(lower, upper, 0b11, 0b00, 0b00);
+        rasterizedFunction->partition(interval, [&] (const Interval<m, m>& i, const IFunction<WpHz, Domain<m, m>> *f) {
+            if (auto cf = dynamic_cast<const ConstantFunction<WpHz, Domain<m, m>> *>(f)) {
+                auto center = (i.getLower() + i.getUpper()) / 2;
+                auto x = m(std::get<0>(center)).get();
+                auto y = m(std::get<1>(center)).get();
+                figure->setValue(x, y, wpHz2dBmWpMHz(WpHz(cf->getConstantValue()).get()), channel);
+            }
+            else
+                throw cRuntimeError("Invalid partition function");
+        });
+    }
+    else
+        throw cRuntimeError("Unknown powerDensityMapPixelMode");
 }
 
 void MediumCanvasVisualizer::refreshSpectrumFigure(const cModule *networkNode, PlotFigure *figure) const
@@ -596,35 +620,75 @@ void MediumCanvasVisualizer::refreshSpectrogramFigurePowerFunction(const Ptr<con
     auto marginFrequency = 0.05 * (signalMaxFrequency - signalMinFrequency);
     auto minFrequency = signalMinFrequency - marginFrequency;
     auto maxFrequency = signalMaxFrequency + marginFrequency;
-    Point<m, m, m, simsec, Hz> l(m(position.x), m(position.y), m(position.z), simsec(minTime), minFrequency);
-    Point<m, m, m, simsec, Hz> u(m(position.x), m(position.y), m(position.z), simsec(maxTime), maxFrequency);
-    Interval<m, m, m, simsec, Hz> i(l, u, 0b11100, 0b11100, 0b11100);
-    powerFunction->partition(i, [&] (const Interval<m, m, m, simsec, Hz>& j, const IFunction<WpHz, Domain<m, m, m, simsec, Hz>> *partitonPowerFunction) {
-        auto lower = j.getLower();
-        auto upper = j.getUpper();
-        auto x1 = GHz(std::get<4>(lower)).get();
-        auto x2 = GHz(std::get<4>(upper)).get();
-        auto y1 = (simsec(std::get<3>(lower)).get() - simTime()).dbl() / std::pow(10.0, signalTimeUnit);
-        auto y2 = (simsec(std::get<3>(upper)).get() - simTime()).dbl() / std::pow(10.0, signalTimeUnit);
-        if (auto cf = dynamic_cast<const ConstantFunction<WpHz, Domain<m, m, m, simsec, Hz>> *>(partitonPowerFunction)) {
-            auto v = cf->getConstantValue() == WpHz(0) ? figure->getMinValue() : wpHz2dBmWpMHz(WpHz(cf->getConstantValue()).get());
-            figure->setConstantValue(x1, x2, y1, y2, v, channel);
+    auto pixmapSize = figure->getPixmapSize();
+    if (!strcmp(spectrogramPixelMode, "sample")) {
+        const int xsize = pixmapSize.x;
+        // NOTE: this method is fast, but it only get samples of the function at certain places, so it may result in incorrect colors
+#ifdef _OPENMP
+#pragma omp parallel for
+#endif
+        for (int x = 0; x < xsize; x++) {
+            auto frequency = minFrequency + (maxFrequency - minFrequency) * x / pixmapSize.x;
+            for (int y = 0; y < pixmapSize.y; y++) {
+                auto time = minTime + (maxTime - minTime) * y / pixmapSize.y;
+                Point<m, m, m, simsec, Hz> p(m(position.x), m(position.y), m(position.z), simsec(time), frequency);
+                auto value = powerFunction->getValue(p);
+                figure->setValue(x, y, wpHz2dBmWpMHz(WpHz(value).get()), channel);
+            }
         }
-        else if (auto lf = dynamic_cast<const UnilinearFunction<WpHz, Domain<m, m, m, simsec, Hz>> *>(partitonPowerFunction)) {
-            auto vl = lf->getRLower() == WpHz(0) ? figure->getMinValue() : wpHz2dBmWpMHz(WpHz(lf->getRLower()).get());
-            auto vu = lf->getRUpper() == WpHz(0) ? figure->getMinValue() : wpHz2dBmWpMHz(WpHz(lf->getRUpper()).get());
-            figure->setLinearValue(x1, x2, y1, y2, vl, vu, 4 - lf->getDimension(), channel);
-        }
-        else if (auto bf = dynamic_cast<const BilinearFunction<WpHz, Domain<m, m, m, simsec, Hz>> *>(partitonPowerFunction)) {
-            auto v11 = bf->getRLowerLower() == WpHz(0) ? figure->getMinValue() : wpHz2dBmWpMHz(WpHz(bf->getRLowerLower()).get());
-            auto v21 = bf->getRLowerUpper() == WpHz(0) ? figure->getMinValue() : wpHz2dBmWpMHz(WpHz(bf->getRLowerUpper()).get());
-            auto v12 = bf->getRUpperLower() == WpHz(0) ? figure->getMinValue() : wpHz2dBmWpMHz(WpHz(bf->getRUpperLower()).get());
-            auto v22 = bf->getRUpperUpper() == WpHz(0) ? figure->getMinValue() : wpHz2dBmWpMHz(WpHz(bf->getRUpperUpper()).get());
-            figure->setBilinearValue(x1, x2, y1, y2, v11, v21, v12, v22, 2);
-        }
-        else
-            throw cRuntimeError("TODO");
-    });
+    }
+    else if (!strcmp(spectrogramPixelMode, "partition")) {
+        Point<m, m, m, simsec, Hz> l(m(position.x), m(position.y), m(position.z), simsec(minTime), minFrequency);
+        Point<m, m, m, simsec, Hz> u(m(position.x), m(position.y), m(position.z), simsec(maxTime), maxFrequency);
+        Interval<m, m, m, simsec, Hz> i(l, u, 0b11100, 0b11100, 0b11100);
+        // NOTE: this method is fast, but it may paint the same pixel several times, so the last will be the effective color
+        powerFunction->partition(i, [&] (const Interval<m, m, m, simsec, Hz>& j, const IFunction<WpHz, Domain<m, m, m, simsec, Hz>> *partitonPowerFunction) {
+            auto lower = j.getLower();
+            auto upper = j.getUpper();
+            auto x1 = GHz(std::get<4>(lower)).get();
+            auto x2 = GHz(std::get<4>(upper)).get();
+            auto y1 = (simsec(std::get<3>(lower)).get() - simTime()).dbl() / std::pow(10.0, signalTimeUnit);
+            auto y2 = (simsec(std::get<3>(upper)).get() - simTime()).dbl() / std::pow(10.0, signalTimeUnit);
+            if (auto cf = dynamic_cast<const ConstantFunction<WpHz, Domain<m, m, m, simsec, Hz>> *>(partitonPowerFunction)) {
+                auto v = cf->getConstantValue() == WpHz(0) ? figure->getMinValue() : wpHz2dBmWpMHz(WpHz(cf->getConstantValue()).get());
+                figure->setConstantValue(x1, x2, y1, y2, v, channel);
+            }
+            else if (auto lf = dynamic_cast<const UnilinearFunction<WpHz, Domain<m, m, m, simsec, Hz>> *>(partitonPowerFunction)) {
+                auto vl = lf->getRLower() == WpHz(0) ? figure->getMinValue() : wpHz2dBmWpMHz(WpHz(lf->getRLower()).get());
+                auto vu = lf->getRUpper() == WpHz(0) ? figure->getMinValue() : wpHz2dBmWpMHz(WpHz(lf->getRUpper()).get());
+                figure->setLinearValue(x1, x2, y1, y2, vl, vu, 4 - lf->getDimension(), channel);
+            }
+            else if (auto bf = dynamic_cast<const BilinearFunction<WpHz, Domain<m, m, m, simsec, Hz>> *>(partitonPowerFunction)) {
+                auto v11 = bf->getRLowerLower() == WpHz(0) ? figure->getMinValue() : wpHz2dBmWpMHz(WpHz(bf->getRLowerLower()).get());
+                auto v21 = bf->getRLowerUpper() == WpHz(0) ? figure->getMinValue() : wpHz2dBmWpMHz(WpHz(bf->getRLowerUpper()).get());
+                auto v12 = bf->getRUpperLower() == WpHz(0) ? figure->getMinValue() : wpHz2dBmWpMHz(WpHz(bf->getRUpperLower()).get());
+                auto v22 = bf->getRUpperUpper() == WpHz(0) ? figure->getMinValue() : wpHz2dBmWpMHz(WpHz(bf->getRUpperUpper()).get());
+                figure->setBilinearValue(x1, x2, y1, y2, v11, v21, v12, v22, 2);
+            }
+            else
+                throw cRuntimeError("TODO");
+        });
+    }
+    else if (!strcmp(spectrogramPixelMode, "mean")) {
+        Point<m, m, m> point(m(position.x), m(position.y), m(position.z));
+        auto fixedPowerFunction = makeShared<LeftCurryingFunction<WpHz, Domain<m, m, m>, 0b11100, Domain<simsec, Hz>, 0b11, Domain<m, m, m, simsec, Hz>>>(point, powerFunction);
+        auto rasterizedFunction = makeShared<Rasterized2DFunction<WpHz, simsec, Hz>>(simsec(minTime), simsec(maxTime), pixmapSize.y + 1, minFrequency, maxFrequency, pixmapSize.x + 1, fixedPowerFunction);
+        Point<simsec, Hz> lower(simsec(minTime), minFrequency);
+        Point<simsec, Hz> upper(simsec(maxTime), maxFrequency);
+        Interval<simsec, Hz> interval(lower, upper, 0b11, 0b00, 0b00);
+        rasterizedFunction->partition(interval, [&] (const Interval<simsec, Hz>& i, const IFunction<WpHz, Domain<simsec, Hz>> *f) {
+            if (auto cf = dynamic_cast<const ConstantFunction<WpHz, Domain<simsec, Hz>> *>(f)) {
+                auto center = (i.getLower() + i.getUpper()) / 2;
+                auto x = GHz(std::get<1>(center)).get();
+                auto y = (simsec(std::get<0>(center)).get() - simTime()).dbl() / std::pow(10.0, signalTimeUnit);
+                figure->setValue(x, y, wpHz2dBmWpMHz(WpHz(cf->getConstantValue()).get()), channel);
+            }
+            else
+                throw cRuntimeError("Invalid partition function");
+        });
+    }
+    else
+        throw cRuntimeError("Unknown spectrogramPixelMode");
 }
 
 std::tuple<const ITransmission *, const ITransmission *, const IAntenna *, IMobility *> MediumCanvasVisualizer::extractSpectrumFigureParameters(const cModule *networkNode) const
