@@ -598,10 +598,10 @@ class INET_API Rasterized2DFunction : public FunctionBase<R, Domain<X, Y>>
             int endIndexY = std::min(sizeY - 1, (int)std::ceil(toDouble(std::get<1>(i1.getUpper()) - startY) / toDouble(stepY)));
             int countX = endIndexX - startIndexX;
             int countY = endIndexY - startIndexY;
-            R means[countX][countY];
+            R *means = new R[countX * countY];
             for (int indexX = 0; indexX < countX; indexX++)
                 for (int indexY = 0; indexY < countY; indexY++)
-                    means[indexX][indexY] = R(0);
+                    means[indexY * countX + indexX] = R(0);
             Point<X, Y> lower(startX + stepX * startIndexX, startY + stepY * startIndexY);
             Point<X, Y> upper(startX + stepX * (endIndexX + 1), startY + stepY * (endIndexY + 1));
             Interval<X, Y> interval(lower, upper, 0b11, 0b00, 0b00);
@@ -619,7 +619,7 @@ class INET_API Rasterized2DFunction : public FunctionBase<R, Domain<X, Y>>
                             const auto& i3 = i2.getIntersected(cellInterval);
                             if (!i3.isEmpty()) {
                                 R mean = f2->getMean(i3);
-                                means[indexX][indexY] += mean * i3.getVolume();
+                                means[indexY * countX + indexX] += mean * i3.getVolume();
                             }
                         }
                     }
@@ -632,11 +632,12 @@ class INET_API Rasterized2DFunction : public FunctionBase<R, Domain<X, Y>>
                     Interval<X, Y> cellInterval(lowerCell, upperCell, 0b11, 0b00, 0b00);
                     const auto& i2 = i1.getIntersected(cellInterval);
                     if (!i2.isEmpty()) {
-                        ConstantFunction<R, Domain<X, Y>> h(means[indexX][indexY] / (toDouble(stepX) * toDouble(stepY)));
+                        ConstantFunction<R, Domain<X, Y>> h(means[indexY * countX + indexX] / (toDouble(stepX) * toDouble(stepY)));
                         callback(i2, &h);
                     }
                 }
             }
+            delete [] means;
         }
         call(i.getIntersected(Interval<X, Y>(Point<X, Y>(X(endX), Y(startY)), Point<X, Y>(getUpperBound<X>(), Y(endY)), 0b11, 0b00, 0b00)), callback);
 
