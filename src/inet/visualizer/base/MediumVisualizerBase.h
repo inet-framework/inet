@@ -96,7 +96,7 @@ class INET_API MediumVisualizerBase : public VisualizerBase, public cListener
     int mainPowerDensityMapFigureYTickCount = -1;
     bool displayPowerDensityMaps = false;
     const char *powerDensityMapMode = nullptr;
-    bool powerDensityMapSampling = false;
+    const char *powerDensityMapPixelMode = nullptr;
     int powerDensityMapApproximationSize = -1;
     Hz powerDensityMapCenterFrequency = Hz(NaN);
     Hz powerDensityMapBandwidth = Hz(NaN);
@@ -118,6 +118,7 @@ class INET_API MediumVisualizerBase : public VisualizerBase, public cListener
     double spectrumPlacementPriority;
     bool displaySpectrograms = false;
     const char *spectrogramMode = nullptr;
+    const char *spectrogramPixelMode = nullptr;
     double spectrogramFigureWidth = NaN;
     double spectrogramFigureHeight = NaN;
     double spectrogramPixmapWidth = NaN;

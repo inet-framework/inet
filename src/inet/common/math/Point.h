@@ -79,6 +79,10 @@ template<>
 struct bits_to_indices_sequence<0b10, 2> { typedef integer_sequence<size_t, 0> type; };
 
 template<>
+struct bits_to_indices_sequence<0b00011, 5> { typedef integer_sequence<size_t, 3, 4> type; };
+template<>
+struct bits_to_indices_sequence<0b11000, 5> { typedef integer_sequence<size_t, 0, 1> type; };
+template<>
 struct bits_to_indices_sequence<0b11110, 5> { typedef integer_sequence<size_t, 0, 1, 2, 3> type; };
 
 template<int DIMS, int SIZE>

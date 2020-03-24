@@ -94,8 +94,8 @@ simple MediumVisualizerBase extends VisualizerBase
 
         // parameters for power density maps
         bool displayPowerDensityMaps = default(false); // display power density maps at the nodes, can be enabled with dimensional analog models only
-        string powerDensityMapMode @emu("total", "signal", "auto") = default("auto"); // total means total transmission medium, signal means transmitted or received signal, auto means total or signal and noise if transmission or reception is in progress
-        bool powerDensityMapSampling = default(true); // use signal sampling for pixels or use signal partitioning for filling pixels
+        string powerDensityMapMode @enum("total", "signal", "auto") = default("auto"); // total means total transmission medium, signal means transmitted or received signal, auto means total or signal and noise if transmission or reception is in progress
+        string powerDensityMapPixelMode @enum("sample", "partition", "mean") = default("mean"); // specifices the method used to determine the color of each pixel, sample method is the least accurate but the fastest (sample < partition < mean)
         int powerDensityMapApproximationSize = default(10); // medium power density function approximation along X and Y axes
         double powerDensityMapCenterFrequency @unit(Hz) = default(nan Hz); // center frequency of medium power density sampling or integration
         double powerDensityMapBandwidth @unit(Hz) = default(0 Hz); // bandwidth of medium power density integration, 0 means sampling, inf means total integrated power
@@ -109,7 +109,7 @@ simple MediumVisualizerBase extends VisualizerBase
 
         // parameters for spectrum figures
         bool displaySpectrums = default(false); // display power spectral density at the nodes, can be enabled with dimensional analog models only
-        string spectrumMode @emu("total", "signal", "auto") = default("auto"); // total means total transmission medium, signal means transmitted or received signal, auto means total or signal and noise if transmission or reception is in progress
+        string spectrumMode @enum("total", "signal", "auto") = default("auto"); // total means total transmission medium, signal means transmitted or received signal, auto means total or signal and noise if transmission or reception is in progress
         double spectrumFigureWidth = default(200); // plot figure width in pixels
         double spectrumFigureHeight = default(120); // plot figure height in pixels
         int spectrumFigureXTickCount = default(3); // number of ticks along the X axis
@@ -120,7 +120,8 @@ simple MediumVisualizerBase extends VisualizerBase
 
         // parameters for spectrogram figures
         bool displaySpectrograms = default(false); // display power density spectrograms at the nodes, can be enabled with dimensional analog models only
-        string spectrogramMode @emu("total", "signal", "auto") = default("auto"); // total means total transmission medium, signal means transmitted or received signal, auto means total or signal and noise if transmission or reception is in progress
+        string spectrogramMode @enum("total", "signal", "auto") = default("auto"); // total means total transmission medium, signal means transmitted or received signal, auto means total or signal and noise if transmission or reception is in progress
+        string spectrogramPixelMode @enum("sample", "partition", "mean") = default("mean"); // specifices the method used to determine the color of each pixel, sample method is the least accurate but the fastest (sample < partition < mean)
         double spectrogramFigureWidth = default(200); // plot figure width in pixels
         double spectrogramFigureHeight = default(120); // plot figure height in pixels
         double spectrogramPixmapWidth = default(spectrogramFigureWidth); // pixmap resolution width
