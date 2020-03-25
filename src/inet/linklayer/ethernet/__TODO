@@ -1,3 +1,29 @@
+
+infok az ethernetről
+ - shutdown/restart/crash
+ - ifup/ifdown
+ - pause frame - CONTROL FRAMES!!!
+ - datarate from channel
+ - (halfduplexnél ifup,restart,conn esetén lehet folyamatban lévő jel a kábelen...)
+ - rx, tx státusz + statisztika
+ - mtu
+ - interface mac addresse
+ - (halfduplex: min frame length, padded ifd (burst mode), frame extension, backoff, retransmission, jam)
+ - promiscuous mode
+ - rx/tx ellenőrzés: bitrate, connecting, isdisabled azonos-e... (nem lehet azonnal ellenőrizni)
+ - fcs: mCRC, egyéb esetek: mCRC_OK a network-ön
+
+ - eth socket
+
+ - encap/decap: ethII, LLC, SNAP, EthTagging(e.g. QTag)
+ 
+ - virtual interface: legyen külön be/ki gate hozzá?
+
+
+
+
+
+
  - refactor ethernet interfaces to support composition (e.g. Q tags, AE tag)
  - hints:
 
