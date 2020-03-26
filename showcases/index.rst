@@ -13,7 +13,20 @@ the simulations (NED, ini and other files) and the web pages are in the
 `showcases/` subdirectory of the
 `INET repository <https://github.com/inet-framework/inet/tree/master/showcases>`_.
 
-The following showcases are available:
+.. The following showcases are available:
+
+Recently released showcases:
+
+.. toctree::
+  :maxdepth: 1
+
+  visualizer/spectrum/doc/index
+  emulation/voip/doc/index
+  emulation/babel/doc/index
+  wireless/txop/doc/index
+  wireless/aggregation/doc/index
+
+All showcases:
 
 .. toctree::
    :maxdepth: 2
