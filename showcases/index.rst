@@ -17,14 +17,11 @@ the simulations (NED, ini and other files) and the web pages are in the
 
 Recently released showcases:
 
-.. toctree::
-  :maxdepth: 1
-
-  wireless/crosstalk/doc/index
-  wireless/coexistence/doc/index
-  visualizer/spectrum/doc/index
-  emulation/voip/doc/index
-  emulation/babel/doc/index
+- :doc:`wireless/crosstalk/doc/index`
+- :doc:`wireless/coexistence/doc/index`
+- :doc:`visualizer/spectrum/doc/index`
+- :doc:`emulation/voip/doc/index`
+- :doc:`emulation/babel/doc/index`
 
 All showcases:
 
@@ -32,71 +29,9 @@ All showcases:
    :maxdepth: 2
 
    emulation/index
-      basic/doc/index
-      voip/doc/index
-      babel/doc/index
-
    general/index
-     pcaprecording/doc/index
-     ethernet/largeNet/doc/index
-     diffserv/doc/index
-     .. mobility/doc/index
-     .. dynamic/doc/index
-
    mobility/index
-      basic/doc/index
-      combining/doc/index
-      spatial/doc/index
-
    routing/index
-     manet/doc/index
-
    visualizer/index
-     packetdrop/doc/index
-     transportpathactivity/doc/index
-     networkpathactivity/doc/index
-     datalinkactivity/doc/index
-     physicallinkactivity/doc/index
-     radiomediumactivity/doc/index
-     routingtable/doc/index
-     interfacetable/doc/index
-     ieee80211/doc/index
-     transportconnection/doc/index
-     spectrum/doc/index
-     .. linkbreak/doc/index
-     .. obstacleloss/doc/index
-     networknode/doc/index
-     environment/doc/index
-     mobility/doc/index
-     earth/doc/index
-     .. osgdemo/doc/index
-     instrumentfigures/doc/index
-     styling/doc/index
-     submoduleinfo/doc/index
-     statistic/doc/index
-     .. filtering/doc/index
-     .. advanced/doc/index
-
    wireless/index
-      pathloss/doc/index
-      directionalantennas/doc/index
-      sensornetwork/doc/index
-      ieee802154/doc/index
-      power/doc/index
-      coexistence/doc/index
-      .. levelofdetail/doc/index
-      .. scaling/doc/index
-      throughput/doc/index
-      handover/doc/index
-      ratecontrol/doc/index
-      fragmentation/doc/index
-      qos/doc/index
-      blockack/doc/index
-      aggregation/doc/index
-      txop/doc/index
-      errorrate/doc/index
-      hiddennode/doc/index
-      multiradio/doc/index
-      crosstalk/doc/index
-      .. infrastructure/doc/index
 
