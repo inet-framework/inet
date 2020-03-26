@@ -14,6 +14,7 @@ General Wireless:
    sensornetwork/doc/index
    ieee802154/doc/index
    power/doc/index
+   coexistence/doc/index
 .. levelofdetail/doc/index
 .. scaling/doc/index
 
