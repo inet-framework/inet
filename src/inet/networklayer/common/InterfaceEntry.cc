@@ -129,6 +129,10 @@ void InterfaceEntry::initialize(int stage)
             setBroadcast(par("broadcast"));
         if (hasPar("multicast"))
             setMulticast(par("multicast"));
+        if (hasPar("bitrate"))
+            setDatarate(par("bitrate"));
+        if (hasPar("mtu"))
+            setMtu(par("mtu"));
         if (hasPar("pointToPoint"))
             setPointToPoint(par("pointToPoint"));
         if (auto interfaceTable = findModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this))
