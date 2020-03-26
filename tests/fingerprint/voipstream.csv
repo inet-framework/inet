@@ -6,46 +6,46 @@
 #    libavresample: 2.1.0
 #
 # working directory, command line arguments, simulation time limit, fingerprint, expected result, tags
-/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g726 -r 0,        60s,     d723-fa33/tplx, PASS, udp
-/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g726 -r 1,        60s,     fbad-5efc/tplx, PASS, udp
-/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g726 -r 2,        60s,     3cf5-8d1f/tplx, PASS, udp
-/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g726 -r 3,        60s,     5098-7810/tplx, PASS, udp
-/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g726 -r 4,        60s,     449b-fa55/tplx, PASS, udp
-/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g726 -r 5,        60s,     4a24-d172/tplx, PASS, udp
-/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g726 -r 6,        60s,     bc6f-8eaa/tplx, PASS, udp
-/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g726 -r 7,        60s,     1777-8ab5/tplx, PASS, udp
-/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g726 -r 8,        60s,     42e1-f80c/tplx, PASS, udp
-/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g726 -r 9,        60s,     b35a-5ad6/tplx, PASS, udp
-/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g711_aLaw -r 0,   60s,     99bd-af94/tplx, PASS, udp
-/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g711_aLaw -r 1,   60s,     9ac8-89e3/tplx, PASS, udp
-/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g711_aLaw -r 2,   60s,     c44a-5b8c/tplx, PASS, udp
-/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g711_aLaw -r 3,   60s,     226b-3129/tplx, PASS, udp
-/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g711_aLaw -r 4,   60s,     d45c-7efb/tplx, PASS, udp
-/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g711_aLaw -r 5,   60s,     1aae-8935/tplx, PASS, udp
-/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g711_aLaw -r 6,   60s,     1de1-a312/tplx, PASS, udp
-/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g711_aLaw -r 7,   60s,     4432-d539/tplx, PASS, udp
-/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g711_aLaw -r 8,   60s,     d3f3-d8db/tplx, PASS, udp
-/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g711_aLaw -r 9,   60s,     f8c9-319b/tplx, PASS, udp
-/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g711_muLaw -r 0,  60s,     618e-9ac6/tplx, PASS, udp
-/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g711_muLaw -r 1,  60s,     909f-1126/tplx, PASS, udp
-/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g711_muLaw -r 2,  60s,     b2ff-1063/tplx, PASS, udp
-/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g711_muLaw -r 3,  60s,     7556-3c4c/tplx, PASS, udp
-/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g711_muLaw -r 4,  60s,     c2a6-3df7/tplx, PASS, udp
-/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g711_muLaw -r 5,  60s,     c27f-70b3/tplx, PASS, udp
-/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g711_muLaw -r 6,  60s,     146b-2e69/tplx, PASS, udp
-/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g711_muLaw -r 7,  60s,     14bf-8bee/tplx, PASS, udp
-/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g711_muLaw -r 8,  60s,     50b3-c018/tplx, PASS, udp
-/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g711_muLaw -r 9,  60s,     7654-8f81/tplx, PASS, udp
-/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c pcm_s16le -r 0,   60s,     af1e-bda8/tplx, PASS, udp
-/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c pcm_s16le -r 1,   60s,     1d21-57c8/tplx, PASS, udp
-/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c pcm_s16le -r 2,   60s,     1abb-48aa/tplx, PASS, udp
-/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c pcm_s16le -r 3,   60s,     b579-a3b8/tplx, PASS, udp
-/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c pcm_s16le -r 4,   60s,     03cc-a3bb/tplx, PASS, udp
-/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c pcm_s16le -r 5,   60s,     5cb6-554e/tplx, PASS, udp
-/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c pcm_s16le -r 6,   60s,     27b5-da41/tplx, PASS, udp
-/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c pcm_s16le -r 7,   60s,     c102-53d3/tplx, PASS, udp
-/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c pcm_s16le -r 8,   60s,     c3e1-d06a/tplx, PASS, udp
-/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c pcm_s16le -r 9,   60s,     9906-12c7/tplx, PASS, udp
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g726 -r 0,        60s,     d723-fa33/tplx, PASS, udp EthFD
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g726 -r 1,        60s,     fbad-5efc/tplx, PASS, udp EthFD
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g726 -r 2,        60s,     3cf5-8d1f/tplx, PASS, udp EthFD
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g726 -r 3,        60s,     5098-7810/tplx, PASS, udp EthFD
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g726 -r 4,        60s,     449b-fa55/tplx, PASS, udp EthFD
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g726 -r 5,        60s,     4a24-d172/tplx, PASS, udp EthFD
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g726 -r 6,        60s,     bc6f-8eaa/tplx, PASS, udp EthFD
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g726 -r 7,        60s,     1777-8ab5/tplx, PASS, udp EthFD
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g726 -r 8,        60s,     42e1-f80c/tplx, PASS, udp EthFD
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g726 -r 9,        60s,     b35a-5ad6/tplx, PASS, udp EthFD
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g711_aLaw -r 0,   60s,     99bd-af94/tplx, PASS, udp EthFD
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g711_aLaw -r 1,   60s,     9ac8-89e3/tplx, PASS, udp EthFD
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g711_aLaw -r 2,   60s,     c44a-5b8c/tplx, PASS, udp EthFD
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g711_aLaw -r 3,   60s,     226b-3129/tplx, PASS, udp EthFD
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g711_aLaw -r 4,   60s,     d45c-7efb/tplx, PASS, udp EthFD
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g711_aLaw -r 5,   60s,     1aae-8935/tplx, PASS, udp EthFD
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g711_aLaw -r 6,   60s,     1de1-a312/tplx, PASS, udp EthFD
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g711_aLaw -r 7,   60s,     4432-d539/tplx, PASS, udp EthFD
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g711_aLaw -r 8,   60s,     d3f3-d8db/tplx, PASS, udp EthFD
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g711_aLaw -r 9,   60s,     f8c9-319b/tplx, PASS, udp EthFD
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g711_muLaw -r 0,  60s,     618e-9ac6/tplx, PASS, udp EthFD
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g711_muLaw -r 1,  60s,     909f-1126/tplx, PASS, udp EthFD
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g711_muLaw -r 2,  60s,     b2ff-1063/tplx, PASS, udp EthFD
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g711_muLaw -r 3,  60s,     7556-3c4c/tplx, PASS, udp EthFD
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g711_muLaw -r 4,  60s,     c2a6-3df7/tplx, PASS, udp EthFD
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g711_muLaw -r 5,  60s,     c27f-70b3/tplx, PASS, udp EthFD
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g711_muLaw -r 6,  60s,     146b-2e69/tplx, PASS, udp EthFD
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g711_muLaw -r 7,  60s,     14bf-8bee/tplx, PASS, udp EthFD
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g711_muLaw -r 8,  60s,     50b3-c018/tplx, PASS, udp EthFD
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g711_muLaw -r 9,  60s,     7654-8f81/tplx, PASS, udp EthFD
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c pcm_s16le -r 0,   60s,     af1e-bda8/tplx, PASS, udp EthFD
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c pcm_s16le -r 1,   60s,     1d21-57c8/tplx, PASS, udp EthFD
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c pcm_s16le -r 2,   60s,     1abb-48aa/tplx, PASS, udp EthFD
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c pcm_s16le -r 3,   60s,     b579-a3b8/tplx, PASS, udp EthFD
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c pcm_s16le -r 4,   60s,     03cc-a3bb/tplx, PASS, udp EthFD
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c pcm_s16le -r 5,   60s,     5cb6-554e/tplx, PASS, udp EthFD
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c pcm_s16le -r 6,   60s,     27b5-da41/tplx, PASS, udp EthFD
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c pcm_s16le -r 7,   60s,     c102-53d3/tplx, PASS, udp EthFD
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c pcm_s16le -r 8,   60s,     c3e1-d06a/tplx, PASS, udp EthFD
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c pcm_s16le -r 9,   60s,     9906-12c7/tplx, PASS, udp EthFD
 
-/examples/voipstream/VoIPStreamLargeNet/,    -f omnetpp.ini -c General -r 0,      5s,     011d-c919/tplx, PASS, udp
-/examples/voipstream/VoIPStreamTrafficTest/, -f omnetpp.ini -c General -r 0,      2s,     244f-a5cc/tplx, PASS, udp
+/examples/voipstream/VoIPStreamLargeNet/,    -f omnetpp.ini -c General -r 0,      5s,     011d-c919/tplx, PASS, udp EthFD EthHD
+/examples/voipstream/VoIPStreamTrafficTest/, -f omnetpp.ini -c General -r 0,      2s,     244f-a5cc/tplx, PASS, udp EthFD
