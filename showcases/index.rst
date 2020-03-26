@@ -20,11 +20,11 @@ Recently released showcases:
 .. toctree::
   :maxdepth: 1
 
+  wireless/crosstalk/doc/index
   wireless/coexistence/doc/index
   visualizer/spectrum/doc/index
   emulation/voip/doc/index
   emulation/babel/doc/index
-  wireless/txop/doc/index
 
 All showcases:
 
@@ -97,6 +97,6 @@ All showcases:
       errorrate/doc/index
       hiddennode/doc/index
       multiradio/doc/index
-      .. crosstalk/doc/index
+      crosstalk/doc/index
       .. infrastructure/doc/index
 

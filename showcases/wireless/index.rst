@@ -34,5 +34,5 @@ IEEE 802.11:
    errorrate/doc/index
    hiddennode/doc/index
    multiradio/doc/index
-.. crosstalk/doc/index
+   crosstalk/doc/index
 .. infrastructure/doc/index
