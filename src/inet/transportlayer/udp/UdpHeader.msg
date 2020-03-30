@@ -21,8 +21,11 @@ import inet.common.INETDefs;
 import inet.transportlayer.common.CrcMode;
 import inet.transportlayer.contract.TransportHeaderBase;
 
-namespace inet;
+cplusplus {{
+#include "inet/common/INETUtils.h"
+}}
 
+namespace inet;
 
 cplusplus {{
 const B UDP_HEADER_LENGTH = B(8);
@@ -37,7 +40,7 @@ class UdpHeader extends TransportHeaderBase
     unsigned short destPort;
     chunkLength = UDP_HEADER_LENGTH;
     B totalLengthField = B(-1);   // UDP header + payload in bytes
-    uint16_t crc = 0;
+    uint16_t crc = 0 @toString(utils::hex($)) @fromString(utils::uhex($));
     CrcMode crcMode = CRC_MODE_UNDEFINED;
 }
 
