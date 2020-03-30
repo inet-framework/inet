@@ -36,6 +36,17 @@ INET_API std::string ltostr(long i);    //XXX make an ultostr as well, to be con
  */
 INET_API std::string dtostr(double d);
 
+INET_API std::string hex(int16_t l);
+INET_API std::string hex(uint16_t l);
+INET_API std::string hex(int32_t l);
+INET_API std::string hex(uint32_t l);
+INET_API std::string hex(int64_t l);
+INET_API std::string hex(uint64_t l);
+
+INET_API long hex(const char *s);
+
+INET_API unsigned long uhex(const char *s);
+
 /**
  *  Converts string to double
  */
