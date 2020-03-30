@@ -81,7 +81,7 @@ an :ned:`Ipv4NetworkConfigurator`, an :ned:`Ieee80211ScalarRadioMedium` and
 an :ned:`IntegratedVisualizer` module. During simulation, ``host1`` will send
 UDP packets to ``host2``.
 
-.. figure:: media/network.png
+.. image:: media/network.png
    :width: 70%
    :align: center
 
@@ -153,7 +153,7 @@ is empty:
 Here is the starting frame sequence at the beginning of the simulation displayed in
 Qtenv's packet traffic view:
 
-.. figure:: media/startingframesequence.png
+.. image:: media/startingframesequence.png
    :width: 100%
    :align: center
 
@@ -164,7 +164,7 @@ but waits for a block ack request.
 
 Here are the ADDBA request and ADDBA response frames displayed in the packet traffic view:
 
-.. figure:: media/addba.png
+.. image:: media/addba.png
    :width: 100%
    :align: center
 
@@ -174,21 +174,21 @@ After sending five UDP packets, ``host1`` sends a block ack request, ``host2`` r
 with a block ack. The block ack frame acks the five previous frames. Here is the block ack
 request frame displayed in Qtenv's packet inspector:
 
-.. figure:: media/blockackreq.png
+.. image:: media/blockackreq.png
    :width: 90%
    :align: center
 
 The block ack request contains the starting sequence number, which indicates the
 first packet to be acked. Here is the block ack response frame:
 
-.. figure:: media/blockackresp.png
+.. image:: media/blockackresp.png
    :width: 80%
    :align: center
 
 It contains the starting sequence number as well, and the bitmap which specifies
 which packets were received correctly. Here is the bitmap:
 
-.. figure:: media/bitmap.png
+.. image:: media/bitmap.png
    :width: 80%
    :align: center
 
@@ -199,7 +199,7 @@ The first five entries are used. It acks the five packets, starting from sequenc
 It is indicated in the block ack when some of the frames in a block were not received correctly.
 The MAC retransmits those in the next block. Here is a retransmission in the packet traffic view:
 
-.. figure:: media/retransmission.png
+.. image:: media/retransmission.png
    :width: 100%
    :align: center
 
@@ -207,7 +207,7 @@ First, ``host1`` sends five packets, ``Data-16`` to ``Data-20``. Two of the fram
 and ``Data-18`` are not received correctly, indicated in the block ack's bitmap (starting
 sequence number is 16, corresponding to ``Data-16``):
 
-.. figure:: media/retxblockack2.png
+.. image:: media/retxblockack2.png
    :width: 80%
    :align: center
 
@@ -227,7 +227,7 @@ are sent after 16 frames. It is defined in the ``Fragmentation`` configuration i
 
 Here is how the simulation starts displayed in the packet traffic view:
 
-.. figure:: media/frag_packetview_.png
+.. image:: media/frag_packetview_.png
    :width: 100%
    :align: center
 
@@ -235,20 +235,20 @@ After sending a fragment, the block ack session is negotiated. After that, ``hos
 the remaining fragments of ``Data-0``, which are normal acked. However, the fragments of the
 next packet, ``Data-1``, are block acked:
 
-.. figure:: media/frag_blockack_messageview_.png
+.. image:: media/frag_blockack_messageview_.png
    :width: 100%
    :align: center
 
 In the next block, two fragments of ``Data-1`` are retransmitted, then several fragments of ``Data-2``
 are sent:
 
-.. figure:: media/frag_retx_messageview.png
+.. image:: media/frag_retx_messageview.png
    :width: 100%
    :align: center
 
 Here is the block ack bitmap for this block:
 
-.. figure:: media/frag_retx_ba.png
+.. image:: media/frag_retx_ba.png
    :width: 90%
    :align: center
 
@@ -273,7 +273,7 @@ The smaller and larger packets are created at the same rate, so ``host1`` sends 
 However, only the smaller ones are considered when sending block ack requests (sent after five
 of the 700B packets). The larger packets are normal acked immediately:
 
-.. figure:: media/mixed_messageview.png
+.. image:: media/mixed_messageview.png
    :width: 100%
    :align: center
 
@@ -283,7 +283,7 @@ for the first time (there was no ack). The 802.11 MAC sequence numbers are conti
 all the packets sent by the MAC, so the block ack bitmap contains (the already acked) large
 packets as well:
 
-.. figure:: media/mixed_blockack.png
+.. image:: media/mixed_blockack.png
    :width: 100%
    :align: center
 

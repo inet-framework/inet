@@ -52,7 +52,7 @@ The network contains two :ned:`AdhocHost`'s, ``source`` and ``destination``.
 The ``linkVisualizer's`` type is :ned:`PhysicalLinkVisualizer`. In this
 simulation, ``source`` will be pinging ``destination``.
 
-.. figure:: media/PhysicalLinkVisualizerSimple.png
+.. image:: media/PhysicalLinkVisualizerSimple.png
    :width: 100%
 
 Physical link activity visualization is enabled by setting the
@@ -101,7 +101,7 @@ The communication ranges of the nodes (blue circles in the picture) have
 been reduced so that ``source`` and ``destination`` cannot receive
 frames correctly from each other.
 
-.. figure:: media/Filtering_sh_all_comm_ranges.png
+.. image:: media/Filtering_sh_all_comm_ranges.png
    :width: 100%
 
 For this network, the type of ``visualizer`` module is
@@ -144,7 +144,7 @@ also randomly roam within predefined borders. The communication range of
 nodes is reduced so that nodes can typically communicate only with some
 closer nodes.
 
-.. figure:: media/PhysicalLinkVisualizerDynamic.png
+.. image:: media/PhysicalLinkVisualizerDynamic.png
    :width: 100%
 
 The nodes send UDP packets in every second by using an :ned:`UdpBasicApp`

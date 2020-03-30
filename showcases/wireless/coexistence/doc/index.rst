@@ -34,7 +34,7 @@ but the signal spectra can overlap. In this showcase, we will configure the two
 networks to actually use overlapping channels. The channel spectra for both
 technologies are shown on the following image:
 
-.. figure:: media/channels.png
+.. image:: media/channels.png
    :width: 100%
    :align: center
 
@@ -45,7 +45,7 @@ frequency and bandwidth of 802.15.4 on default, and we'll use Wifi Channel 9
 (center frequency of 2452 MHz) so that the Wifi and WPAN transmission spectra
 overlap:
 
-.. figure:: media/channels8.png
+.. image:: media/channels8.png
    :width: 30%
    :align: center
 
@@ -125,7 +125,7 @@ the Wifi and the WPAN is illustrated with the sequence chart below. The chart sh
 a packet transmission and ACK, first for the Wifi and then for the WPAN. The scale
 is linear.
 
-.. figure:: media/seqchart.png
+.. image:: media/seqchart.png
    :width: 100%
    :align: center
 
@@ -151,7 +151,7 @@ Configuration
 The simulation uses the ``CoexistenceShowcase`` network,
 defined in :download:`CoexistenceShowcase.ned <../CoexistenceShowcase.ned>`:
 
-.. figure:: media/network2.png
+.. image:: media/network2.png
    :width: 100%
    :align: center
 
@@ -180,7 +180,7 @@ so the radio uses a flat signal in time. In frequency, instead of the
 default flat signal, we configure a more realistic shape.
 We'll use the 802.11 OFDM spectral mask, as in the standard:
 
-.. figure:: media/spectralmask_wifi.png
+.. image:: media/spectralmask_wifi.png
    :width: 100%
    :align: center
 
@@ -246,7 +246,7 @@ with a :ned:`Ieee802154NarrowbandDimensionalRadio`. As in the case of the Wifi h
 the default flat signal shape is used in time. In frequency, we'll use a more
 realistic shape, based on the modulated spectrum of the CC2420 Zigbee transmitter:
 
-.. figure:: media/spectrum_wpan.png
+.. image:: media/spectrum_wpan.png
    :width: 100%
    :align: center
 
@@ -376,11 +376,11 @@ when both of them communicate concurrently.
 
 Here are the performance results:
 
-.. figure:: media/wifiperformance.png
+.. image:: media/wifiperformance.png
    :width: 70%
    :align: center
 
-.. figure:: media/wpanperformance.png
+.. image:: media/wpanperformance.png
    :width: 70%
    :align: center
 

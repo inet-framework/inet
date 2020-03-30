@@ -64,7 +64,7 @@ The :ned:`RadioVisualizer` module can visualize antenna directional characterist
 using its antenna lobe visualization feature. For example, the radiation patterns of
 an isotropic and a directional antenna looks like the following:
 
-.. figure:: media/antennalobe.png
+.. image:: media/antennalobe.png
    :width: 100%
    :align: center
 
@@ -91,7 +91,7 @@ The showcase contains five example simulations, which demonstrate the
 directional characteristics of five antenna models. The simulation uses
 the ``DirectionalAntennasShowcase`` network:
 
-.. figure:: media/network.png
+.. image:: media/network.png
    :width: 60%
    :align: center
 
@@ -165,7 +165,7 @@ The radiation pattern is shown as a circle, as expected
 As the destination node circles the source node, we record the reception power of the frames.
 Here is the reception power vs. direction plot:
 
-.. figure:: media/isotropicchart.png
+.. image:: media/isotropicchart.png
    :width: 100%
    :align: center
 
@@ -176,7 +176,7 @@ The :ned:`ParabolicAntenna` module simulates the radiation
 pattern of the main lobe of a `parabolic antenna <https://en.wikipedia.org/wiki/Parabolic_antenna>`__,
 such as this one:
 
-.. figure:: media/parabolicantenna.jpg
+.. image:: media/parabolicantenna.jpg
    :width: 40%
    :align: center
 
@@ -197,6 +197,7 @@ The configuration for this antenna is :ned:`ParabolicAntenna` in
 When the simulation is run, it looks like the following:
 
 .. video:: media/parabolic.mp4
+   :width: 100%
 
 .. <!--internal video recording, animation speed 1, playback speed 21.88, normal run, crop 25 25 150 750-->
 
@@ -215,7 +216,7 @@ Here is the reception power vs. direction plot (note that the destination host
 starts at 90 degrees away from the main lobe axis, so that the main lobe is
 more apparent on the reception power plot):
 
-.. figure:: media/parabolicchart.png
+.. image:: media/parabolicchart.png
    :width: 100%
 
 Dipole Antenna
@@ -244,7 +245,7 @@ radiation pattern. As can be seen from the animation, there is no successful com
 when the destination node is near the antenna's axis due to low antenna gain in that direction.
 Here is the reception power vs. direction plot:
 
-.. figure:: media/dipolechart.png
+.. image:: media/dipolechart.png
    :width: 100%
 
 Cosine Antenna
@@ -268,7 +269,7 @@ It looks like the following:
 As can be seen on the video, the radiation pattern is similar to that of the parabolic antenna.
 Here is the reception power vs. direction plot:
 
-.. figure:: media/cosinechart.png
+.. image:: media/cosinechart.png
    :width: 100%
 
 Axially Symmetric Antenna
@@ -295,7 +296,7 @@ parameters is ``"0 0"``, defaulting to an isotropic antenna.
 We demonstrate :ned:`AxiallySymmetricAntenna` by modeling a real-world
 16-element Yagi antenna, such as this one:
 
-.. figure:: media/yagiantenna.jpg
+.. image:: media/yagiantenna.jpg
    :width: 60%
    :align: center
 
@@ -319,18 +320,18 @@ As we run the simulation, we can see the radiation pattern displayed:
 
 Here is the reception power vs. direction plot:
 
-.. figure:: media/axiallysymmetricchart.png
+.. image:: media/axiallysymmetricchart.png
    :width: 100%
 
 Here is the same plot with a logarithmic scale, where the details
 further from the main lobe are more apparent:
 
-.. figure:: media/axiallysymmetricchart_log.png
+.. image:: media/axiallysymmetricchart_log.png
    :width: 100%
 
 Here are the results for all antennas on one plot, for comparison:
 
-.. figure:: media/allantennaschart.png
+.. image:: media/allantennaschart.png
       :width: 100%
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`DirectionalAntennasShowcase.ned <../DirectionalAntennasShowcase.ned>`

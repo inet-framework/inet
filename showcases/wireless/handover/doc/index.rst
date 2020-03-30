@@ -34,7 +34,7 @@ the association is complete, data exchange can begin.
 
 The example simulation will use the following network:
 
-.. figure:: media/network2.png
+.. image:: media/network2.png
    :width: 80%
    :align: center
 
@@ -70,7 +70,7 @@ Response. As AP1 is on channel 2, the host sends out three Probe
 Requests before it gets a Probe Response. This frame exchange is shown in the following
 packet log.
 
-.. figure:: media/scan.png
+.. image:: media/scan.png
    :width: 100%
 
 When the host gets the Probe Response, it initiates the authentication
@@ -80,7 +80,7 @@ associated with AP1, a text bubble appears at the host indicating that
 it is associated with the AP. The authentication and association
 processes are shown in the packet log below.
 
-.. figure:: media/assoc.png
+.. image:: media/assoc.png
    :width: 100%
 
 This animation shows the handover.
@@ -117,16 +117,16 @@ leaves AP2's communication range.
 The host's ``mgmt`` module contains a variable that indicates which
 access point the host is associated with.
 
-.. figure:: media/assocap2.png
+.. image:: media/assocap2.png
    :width: 100%
 
 The ``mgmt`` modules of access points maintain a list of hosts that are
 associated with them.
 
-.. figure:: media/stalist1.png
+.. image:: media/stalist1.png
    :width: 100%
 
-.. figure:: media/stalist2.png
+.. image:: media/stalist2.png
    :width: 100%
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`HandoverShowcase.ned <../HandoverShowcase.ned>`

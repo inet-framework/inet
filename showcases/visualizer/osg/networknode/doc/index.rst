@@ -144,7 +144,7 @@ playground.
 The simulation can be "run" (it does nothing) by selecting the ``Canvas``
 configuration from ``omnetpp.ini``. You should see the following:
 
-.. figure:: media/IconsOnCanvas_v0111.png
+.. image:: media/IconsOnCanvas_v0111.png
    :width: 40%
    :align: center
 
@@ -165,7 +165,7 @@ by enabling it in :ned:`IntegratedVisualizer`.
 When you run the ``Basic3D`` configuration on the ini file, you should
 see something like the following:
 
-.. figure:: media/IconsOnOsgscene_v0111.png
+.. image:: media/IconsOnOsgscene_v0111.png
    :width: 80%
    :align: center
 

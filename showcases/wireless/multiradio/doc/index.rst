@@ -32,7 +32,7 @@ to have multiple wireless interfaces.
 To test the router, we'll use two hosts, one on each wireless LAN.
 The network will look like the following:
 
-.. figure:: media/network.png
+.. image:: media/network.png
    :width: 70%
    :align: center
 

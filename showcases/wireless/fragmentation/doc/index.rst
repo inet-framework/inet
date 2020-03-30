@@ -86,7 +86,7 @@ the performance. Furthermore, we'll examine the domain of effectiveness for frag
 
 The example simulation uses the following network:
 
-.. figure:: media/network3.png
+.. image:: media/network3.png
    :width: 90%
    :align: center
 
@@ -203,11 +203,11 @@ Results
 
 Here are the results from the simulations:
 
-.. figure:: media/numberofpackets.png
+.. image:: media/numberofpackets.png
    :width: 90%
    :align: center
 
-.. figure:: media/throughput.png
+.. image:: media/throughput.png
    :width: 100%
    :align: center
 
@@ -230,7 +230,7 @@ configurations unless otherwise noted.)
 First, the iteration variable was the packet size (going from 100B to 2500B),
 with a constant fragmentation threshold of 250 bytes:
 
-.. figure:: media/onlypacketsize.png
+.. image:: media/onlypacketsize.png
    :width: 90%
    :align: center
 
@@ -245,7 +245,7 @@ of TXOP increases throughput, and the use of TXOP + block acks increases it furt
 
 Secondly, the fragmentation threshold was iterated, using a 1000-byte packet size:
 
-.. figure:: media/threshold.png
+.. image:: media/threshold.png
    :width: 90%
    :align: center
 
@@ -258,7 +258,7 @@ The MAC can fragment packets to a maximum of 16 fragments. Due to the larger
 packets, the fragmentation threshold was set to around 1/16th of the packet size
 (taking MAC headers into account), so that the MAC always fragments packets to 16 pieces.
 
-.. figure:: media/packetsize.png
+.. image:: media/packetsize.png
    :width: 90%
    :align: center
 
@@ -269,7 +269,7 @@ and TXOP + block ack.
 
 Then, the transmission power was iterated to examine performance at different noise levels.
 
-.. figure:: media/snir.png
+.. image:: media/snir.png
    :width: 100%
    :align: center
 
