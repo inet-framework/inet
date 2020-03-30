@@ -1,5 +1,3 @@
-:orphan:
-
 Crosstalk between adjacent IEEE 802.11 channels
 ===============================================
 
@@ -48,8 +46,20 @@ interference, e.g. Channels 1, 6, and 11, as illustrated below.
    :width: 100%
    :align: center
 
+In INET, the scalar analog model represents signals with a scalar signal power, 
+and a constant center frequency and bandwidth. The scalar model can only handle 
+situations when the spectra of two concurrent signals are identical or don’t 
+overlap at all. When using the dimensional analog model, signal power can change 
+in both time and frequency; more realistic signal shapes can be specified. 
+This model is also able to calculate the interference of signals whose spectra 
+partially overlap.
+
 There are example simulations for the three cases outlined in the Goals
-section. All simulations use variations of the same network, which is
+section. In the cases of completely overlapping channels and independent channels,
+the simulations use the scalar analog model; in the case of the partially overlapping
+channels, the dimensional analog model is used.
+
+All simulations use variations of the same network, which is
 illustrated by the image below:
 
 .. figure:: media/basenetwork.png
@@ -223,5 +233,5 @@ Discussion
 ----------
 
 Use `this
-page <https://github.com/inet-framework/inet-showcases/issues/TODO>`__ in
+page <https://github.com/inet-framework/inet-showcases/issues/50>`__ in
 the GitHub issue tracker for commenting on this showcase.
