@@ -48,7 +48,7 @@ module of that access category. The module is located at ``hcf.edca.edcaf[*].txo
 in the module hierarchy; there are four ``edcaf`` (EDCA Function) modules for the
 four access categories:
 
-.. figure:: media/edca.png
+.. image:: media/edca.png
    :width: 80%
    :align: center
 
@@ -103,7 +103,7 @@ Thus, the list of all alternative frame sequences that can repeat during the TXO
 
 The simulation uses the following network:
 
-.. figure:: media/network.png
+.. image:: media/network.png
    :width: 80%
    :align: center
 
@@ -154,7 +154,7 @@ Results
 The following image shows frame exchanges during a TXOP, displayed on a linear-scale
 sequence chart:
 
-.. figure:: media/elog2.png
+.. image:: media/elog2.png
    :align: center
    :width: 100%
 

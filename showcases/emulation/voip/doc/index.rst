@@ -62,7 +62,7 @@ The Simulation Setup
 
 The following figure illustrates the simulation setup:
 
-.. figure:: media/setup.png
+.. image:: media/setup.png
    :align: center
    :width: 40%
 
@@ -179,7 +179,7 @@ simulation process.
 The setup for the loopback interface case is illustrated by the following
 figure:
 
-.. figure:: media/setup2.png
+.. image:: media/setup2.png
    :align: center
    :width: 40%
 
@@ -229,7 +229,7 @@ We'll create two namespaces, ``net0`` and ``net1``. Then we'll create a virtual
 Ethernet interface in both, and name them ``veth0`` and ``veth1``. The two
 interfaces will be connected to each other. This setup is illustrated below:
 
-.. figure:: media/setup3.png
+.. image:: media/setup3.png
    :align: center
    :width: 40%
 
@@ -297,7 +297,7 @@ protocol stack, the packets are sent in bursts, as illustrated by the following 
 The image displays the time for packets sent by the sender (left) and packets received
 by the receiver (right):
 
-.. figure:: media/log.png
+.. image:: media/log.png
    :width: 100%
    :align: center
 

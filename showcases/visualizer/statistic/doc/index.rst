@@ -62,7 +62,7 @@ source node. The simulation can be run by choosing the ``PingRtt``
 configuration from the ini file. The simulation uses the following
 simple network:
 
-.. figure:: media/rttnetwork.png
+.. image:: media/rttnetwork.png
    :width: 50%
    :align: center
 
@@ -97,7 +97,7 @@ receiving node. The simulation can be run by choosing
 ``PacketErrorRate`` from the ini file. The simulation uses the following
 network:
 
-.. figure:: media/pernetwork.png
+.. image:: media/pernetwork.png
    :width: 100%
 
 The network contains two :ned:`AdhocHost`'s. One of them, the ``source``, is

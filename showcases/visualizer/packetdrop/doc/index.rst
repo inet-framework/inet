@@ -56,7 +56,7 @@ One can click on the packet drop icon to display information about the
 packet drop in the inspector panel, such as the packet drop reason,
 or the module where the packet was dropped:
 
-.. figure:: media/inspector2.png
+.. image:: media/inspector2.png
    :width: 70%
    :align: center
 
@@ -77,7 +77,7 @@ to queue overflow. This simulation can be run by choosing the
 bottleneck link where packets will be dropped due to an overflowing
 queue:
 
-.. figure:: media/queuefullnetwork.png
+.. image:: media/queuefullnetwork.png
    :width: 80%
    :align: center
 
@@ -126,7 +126,7 @@ packet drops:
 
 This log excerpt shows the packet drop:
 
-.. figure:: media/log_queuefull_3.png
+.. image:: media/log_queuefull_3.png
 
 
 ARP resolution failed
@@ -154,7 +154,7 @@ The following animation illustrates this:
 
 This excerpt shows this in the log:
 
-.. figure:: media/log_arpfailed_2.png
+.. image:: media/log_arpfailed_2.png
    :width: 100%
 
 MAC retry limit reached
@@ -182,7 +182,7 @@ This scenario is illustrated in the following animation:
 
 These events looks like the following in the logs:
 
-.. figure:: media/log_macretrylimit_2.png
+.. image:: media/log_macretrylimit_2.png
    :width: 100%
 
 No route to destination
@@ -193,7 +193,6 @@ routes. The configuration is ``NoRouteToDestination`` in the ini file.
 The network is the following:
 
 .. figure:: media/noroutenetwork.png
-   :width: 60%
    :align: center
 
 It contains two connected :ned:`StandardHost`'s. The
@@ -208,7 +207,7 @@ illustrated in the following video:
 
 Here is also a log excerpt illustrating this:
 
-.. figure:: media/log_noroute_2.png
+.. image:: media/log_noroute_2.png
 
 Interface not connected
 -----------------------
@@ -234,7 +233,7 @@ illustrated in the following animation:
 Note the packet drop animation at ``host1``. The packet drops are also
 evidenced in the log:
 
-.. figure:: media/log_notconnected_2.png
+.. image:: media/log_notconnected_2.png
    :width: 100%
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`PacketDropVisualizationShowcase.ned <../PacketDropVisualizationShowcase.ned>`

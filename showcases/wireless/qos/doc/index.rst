@@ -93,7 +93,7 @@ The Configuration
 
 The example simulation uses the following network:
 
-.. figure:: media/network4.png
+.. image:: media/network4.png
    :width: 100%
    :align: center
 
@@ -146,7 +146,7 @@ End-to-End Delay
 
 Here is the plot of the end-to-end delay of received packets in the non-QoS case:
 
-.. figure:: media/delay_nonqos.png
+.. image:: media/delay_nonqos.png
    :width: 100%
    :align: center
 
@@ -160,7 +160,7 @@ generate more traffic than the channel can carry, thus the queue stays filled up
 and packets are dropped. Note that dropped packets are not indicated on the charts,
 as we're plotting UDP packets received by ``server``.
 
-.. figure:: media/delay_qos.png
+.. image:: media/delay_qos.png
    :width: 100%
    :align: center
 
@@ -198,13 +198,13 @@ Jitter
 
 Let's take a look at jitter:
 
-.. figure:: media/jitter_nonqos.png
+.. image:: media/jitter_nonqos.png
    :width: 100%
 
 In the non-QoS case, the jitter data points are scattered with the same pattern
 for all four traffic categories.
 
-.. figure:: media/jitter_qos.png
+.. image:: media/jitter_qos.png
    :width: 100%
 
 In the QoS case, the jitter is lower for the video
@@ -215,7 +215,7 @@ when the higher priority traffic stops.
 
 Here are the jitter charts on the same scale (slightly zoomed in):
 
-.. figure:: media/jitter.png
+.. image:: media/jitter.png
    :width: 100%
 
 The following table summarizes the average jitter for the different access categories (approximately):
@@ -240,7 +240,7 @@ for background and best effort.
 Let us spend a minute on explaning an artifact in the QoS jitter plot, namely
 some data points forming horizontal lines. Here is a relevant part of the plot, zoomed in:
 
- .. figure:: media/jitter_qos_zoomed.png
+ .. image:: media/jitter_qos_zoomed.png
     :width: 100%
 
 Some jitter data points of best effort and video form two horizontal lines.
@@ -261,11 +261,11 @@ Throughput
 
 Let's see the throughput:
 
-.. figure:: media/throughput_nonqos_.png
+.. image:: media/throughput_nonqos_.png
    :width: 90%
    :align: center
 
-.. figure:: media/throughput_qos_.png
+.. image:: media/throughput_qos_.png
    :width: 90%
    :align: center
 

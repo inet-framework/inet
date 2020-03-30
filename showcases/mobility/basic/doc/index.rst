@@ -49,7 +49,7 @@ The size of the scene is 400x400x0 meters. It contains a configurable
 number of hosts and an :ned:`IntegratedVisualizer` module to
 visualize some aspects of mobility. The following image shows the layout of the network:
 
-.. figure:: media/scene.png
+.. image:: media/scene.png
    :scale: 100%
    :align: center
 
@@ -218,7 +218,7 @@ mobility module, the :par:`targetMobility` parameter to ``host2``'s mobility mod
 the orientation of ``host3`` points in the direction of the
 ``host1``-``host2`` vector:
 
-.. figure:: media/FacingMobility.png
+.. image:: media/FacingMobility.png
    :width: 50%
    :align: center
 
@@ -301,7 +301,7 @@ We specify only the :par:`numHosts` parameter; the other parameters of the
 mobility are left on their defaults. Thus the layout conforms to the
 available space:
 
-.. figure:: media/StaticGridMobility.png
+.. image:: media/StaticGridMobility.png
    :scale: 100%
    :align: center
 
@@ -324,7 +324,7 @@ The configuration for the example simulation in omnetpp.ini is the following:
 
 The configuration just sets the mobility type. Here is what it looks like when the simulation is run:
 
-.. figure:: media/StationaryMobility.png
+.. image:: media/StationaryMobility.png
    :scale: 100%
    :align: center
 

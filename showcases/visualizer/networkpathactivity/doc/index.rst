@@ -58,7 +58,7 @@ The network contains two :ned:`StandardHost`'s, a ``source`` host and a
 ``destination`` host. In this configuration, the ``source`` host will be
 pinging the ``destination`` host.
 
-.. figure:: media/NetworkPathSimple.png
+.. image:: media/NetworkPathSimple.png
    :width: 80%
    :align: center
 
@@ -103,7 +103,7 @@ ini file.
 
 We use the following network for this showcase:
 
-.. figure:: media/NetworkPathComplex_v0703.png
+.. image:: media/NetworkPathComplex_v0703.png
    :width: 100%
 
 The network consists of five ``routers`` (``router0..router4``), four
@@ -151,7 +151,7 @@ have been chosen so that the network is connected, but nodes can
 typically only communicate by using multi-hop paths. The nodes will also
 randomly roam within predefined borders.
 
-.. figure:: media/NetworkPathMobileShowcase_v0606.png
+.. image:: media/NetworkPathMobileShowcase_v0606.png
    :width: 100%
 
 The routing protocol is AODV, a reactive (on-demand) MANET routing
@@ -212,7 +212,7 @@ access points (``accessPoint0`` and ``accessPoint1``).
 
 The following image displays the network for this example.
 
-.. figure:: media/NetworkPathChanging.png
+.. image:: media/NetworkPathChanging.png
    :width: 100%
 
 IP addresses are assigned manually, using the configuration file

@@ -112,7 +112,7 @@ The simulation can be run by choosing the ``PcapRecording``
 configuration from the ini file. The simulation uses the following
 network:
 
-.. figure:: media/network2.png
+.. image:: media/network2.png
    :width: 100%
 
 The network contains two ``adhocHost``\ s named ``host1`` and ``host2``,
@@ -177,7 +177,7 @@ The :par:`packetDataFilter` parameter's value ``*ArpPacket`` matches the
 ``inet::ArpPacket`` class. There is an ARP request packet open in the
 packet inspector on the following image:
 
-.. figure:: media/arppacketclass.png
+.. image:: media/arppacketclass.png
    :width: 60%
    :align: center
 
@@ -261,36 +261,36 @@ sequence number, CRC, etc. Click to zoom.)
 
 TCP data, in ``ethHost1`` (sent from ``ethHost1`` to ``ethHost2``):
 
-.. figure:: media/ethHost9.png
+.. image:: media/ethHost9.png
    :width: 100%
 
 Ping request, in ``router1``'s eth interface (sent from ``ethHost1`` to
 ``router1``):
 
-.. figure:: media/routerEth2_2.png
+.. image:: media/routerEth2_2.png
    :width: 100%
 
 TCP ACK, in ``router1``'s ppp interface (sent from ``ethHost1`` to
 ``ethHost2``):
 
-.. figure:: media/routerPPP3.png
+.. image:: media/routerPPP3.png
    :width: 100%
 
 UDP data packet, in ``host1``'s wlan interface (sent from ``host1`` to
 ``host2``):
 
-.. figure:: media/wifi5.png
+.. image:: media/wifi5.png
    :width: 100%
 
 The following screenshot shows ``ethHost1.pcap`` opened with TCPDump:
 
-.. figure:: media/tcpdump.png
+.. image:: media/tcpdump.png
    :width: 100%
 
 TCP data packet, in ``ethHost2``, recorded at the IPv4 module (sent from
 ``ethHost1`` to ``ethHost2``):
 
-.. figure:: media/rawip.png
+.. image:: media/rawip.png
    :width: 100%
 
 The following images are the PCAP traces from ``host2`` and ``router2``,
@@ -299,12 +299,12 @@ where the set of recorded packets were narrowed with
 
 The ARP packets from ``host2``:
 
-.. figure:: media/arp.png
+.. image:: media/arp.png
    :width: 100%
 
 The TCP data packets from ``router2``:
 
-.. figure:: media/tcpdata.png
+.. image:: media/tcpdata.png
    :width: 100%
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`PcapRecordingShowcase.ned <../PcapRecordingShowcase.ned>`

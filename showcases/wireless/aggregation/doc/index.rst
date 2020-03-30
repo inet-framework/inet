@@ -30,7 +30,7 @@ There are two kinds of frame aggregation in 802.11:
 - MAC Service Data Unit (MSDU) aggregation: the packets received by the MAC from the upper layer are MSDUs. Each packet gets an MSDU subframe header. Two or more subframes are bundled together and put in an 802.11 MAC frame (header + trailer). The resulting frame is an aggregate-MSDU (a-MSDU). The a-MSDUs are transmitted with a single PHY header by the radio.
 - MAC Protocol Data Unit (MPDU) aggregation: MPDUs are frames passed from the MAC to the PHY layer. Each MPDU has a MAC header and trailer. Multiple MPDU-s are bundled together to create an aggregate MPDU (a-MPDU), which is transmitted with a PHY header by the radio.
 
-.. figure:: media/dataunits3.png
+.. image:: media/dataunits3.png
    :width: 100%
    :align: center
 
@@ -55,7 +55,7 @@ Because a-MSDUs lack a global FCS, they can only be acknowledged with block ACKs
 
 Here is an a-MSDU of three subframes displayed in qtenv's packet view:
 
-.. figure:: media/subframe.png
+.. image:: media/subframe.png
    :width: 100%
    :align: center
 
@@ -96,7 +96,7 @@ The Network
 The simulation uses the following network, defined in
 :download:`AggregationShowcase.ned <../AggregationShowcase.ned>`:
 
-.. figure:: media/network.png
+.. image:: media/network.png
    :width: 90%
    :align: center
 
@@ -181,11 +181,11 @@ We run the simulations for 10 seconds.
 We measure the number of packets received by ``host2``, and the application-level throughput.
 Here are the results from the simulations:
 
-.. figure:: media/receivedpackets_t.png
+.. image:: media/receivedpackets_t.png
    :width: 80%
    :align: center
 
-.. figure:: media/avgthroughput_t.png
+.. image:: media/avgthroughput_t.png
    :width: 90%
    :align: center
 
@@ -212,7 +212,7 @@ to contend for channel access during the TXOP, which decreases overhead even mor
 The following image shows frame exchanges for the three configurations on a sequence chart,
 on the same time scale:
 
-.. figure:: media/elog5_1.png
+.. image:: media/elog5_1.png
    :width: 100%
    :align: center
 
@@ -230,7 +230,7 @@ the performance is optimal, and the delay is minimized (we configured traffic th
 
 Here is the end-to-end delay of received packets in ``host2``'s UDP app:
 
-.. figure:: media/delay8_t.png
+.. image:: media/delay8_t.png
    :width: 100%
    :align: center
 

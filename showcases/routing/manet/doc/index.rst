@@ -242,7 +242,7 @@ configuration in :download:`omnetpp.ini <../omnetpp.ini>`. This
 configuration uses the ``ManetProtocolShowcaseA`` network. The network
 looks like the following:
 
-.. figure:: media/networkA.png
+.. image:: media/networkA.png
    :width: 60%
    :align: center
 
@@ -339,7 +339,7 @@ by broadcasting a RREQ message. When a new route is discovered
 The following log excerpt shows ``node6`` handling the first RREQ and
 RREP messages:
 
-.. figure:: media/aodvlog3.png
+.. image:: media/aodvlog3.png
    :width: 100%
 
 DSDV
@@ -410,7 +410,7 @@ configuration in :download:`omnetpp.ini <../omnetpp.ini>`. It uses the
 ``ManetRoutingProtocolsShowcaseB`` network. The network looks like the
 following:
 
-.. figure:: media/networkB.png
+.. image:: media/networkB.png
    :width: 100%
 
 Just as with the previous two configurations, the nodes are
@@ -470,7 +470,7 @@ in communication range (those that a beacon was received from) and uses
 that for routing decisions. Here is ``node12``'s neighbor position
 table:
 
-.. figure:: media/positions.png
+.. image:: media/positions.png
    :width: 100%
 
 The table links node positions with IP addresses (it also contains the

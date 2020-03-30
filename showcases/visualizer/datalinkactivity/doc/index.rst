@@ -64,7 +64,7 @@ The wired network contains two :ned:`StandardHost`'s, ``wiredSource`` and
 ``wiredDestination``. The ``linkVisualizer`` module's type is
 :ned:`DataLinkVisualizer`.
 
-.. figure:: media/DataLinkVisualizerSimpleWired.png
+.. image:: media/DataLinkVisualizerSimpleWired.png
    :width: 100%
 
 In this configuration, ``wiredSource`` pings ``wiredDestination``. Data
@@ -98,7 +98,7 @@ traffic and the visualization settings are the same as the configuration
 of the wired example. The simulation can be run by choosing the
 ``EnablingVisualizationWireless`` configuration from the ini file.
 
-.. figure:: media/DataLinkVisualizerSimpleWireless.png
+.. image:: media/DataLinkVisualizerSimpleWireless.png
    :width: 100%
 
 The following animation depicts what happens when the simulation is run.
@@ -124,7 +124,7 @@ the ini file.
 
 We use the following network for this showcase.
 
-.. figure:: media/DataLinkVisualizerFiltering.png
+.. image:: media/DataLinkVisualizerFiltering.png
    :width: 100%
 
 This network consists of four switches (``etherSwitch1..etherSwitch4``)
@@ -188,7 +188,7 @@ selecting the ``ActivityLevel`` configuration from the ini file.
 
 We use the following wireless network for this example.
 
-.. figure:: media/ActivityLevel_v1206.png
+.. image:: media/ActivityLevel_v1206.png
    :width: 100%
 
 The network consists of three :ned:`AdhocHost` nodes: ``person1``, ``person2``,
@@ -264,7 +264,7 @@ ini file.
 
 We use the following network for this simulation:
 
-.. figure:: media/DataLinkVisualizerDynamic.png
+.. image:: media/DataLinkVisualizerDynamic.png
    :width: 100%
 
 Nodes are of the type :ned:`AodvRouter`, and are placed randomly on the

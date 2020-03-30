@@ -52,7 +52,7 @@ Some of the instrument figure types available in INET are the following:
 
 - *indexedImage:* A figure that displays one of several images: the first image for the value 0, the second image for the value of 1, and so on.
 
-.. image:: media/trafficlights.png
+.. figure:: media/trafficlights.png
    :width: 30%
    :align: center
 
@@ -68,7 +68,7 @@ The Network
 The configuration for this showcase demonstrates the use of several
 instrument figures. It uses the following network:
 
-.. figure:: media/network3.png
+.. image:: media/network3.png
    :width: 80%
    :align: center
 

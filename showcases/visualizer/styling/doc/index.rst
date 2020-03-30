@@ -42,11 +42,11 @@ following configuration is used for the visualizer:
 Move the mouse over the image to see the differences between the default
 and the customized visualization.
 
-.. figure:: media/Line_default_v0727.png
+.. image:: media/Line_default_v0727.png
    :width: 80%
    :align: center
 
-.. figure:: media/Line_custom_v0727.png
+.. image:: media/Line_custom_v0727.png
    :width: 80%
    :align: center
 
@@ -87,11 +87,11 @@ To customize the fonts used in labels, we configure
 Move the mouse over the image to see the differences between the default
 and the customized visualization.
 
-.. figure:: media/Font_default_v0727.png
+.. image:: media/Font_default_v0727.png
    :width: 80%
    :align: center
 
-.. figure:: media/Font_custom_v0727.png
+.. image:: media/Font_custom_v0727.png
    :width: 80%
    :align: center
 
@@ -133,11 +133,11 @@ icons:
 Move the mouse over the image to see the differences between the default
 and the customized visualization.
 
-.. figure:: media/Icon_default_v0727.png
+.. image:: media/Icon_default_v0727.png
    :width: 80%
    :align: center
 
-.. figure:: media/Icon_custom_v0727.png
+.. image:: media/Icon_custom_v0727.png
    :width: 80%
    :align: center
 
@@ -146,7 +146,7 @@ path is used to find the image, just like with the ``i`` display string
 tag or the ``cIconFigure`` class. In our case, the ``misc/marker2`` name
 resolves to the ``inet/images/misc/marker2.png`` file:
 
-.. figure:: media/marker2.png
+.. image:: media/marker2.png
    :width: 24
    :align: center
 
@@ -190,11 +190,11 @@ We use the following configuration to place the annotation icons.
 Move the mouse over the image to see the differences between the default
 and the customized visualization.
 
-.. figure:: media/Annotation_default_v0802.png
+.. image:: media/Annotation_default_v0802.png
    :width: 80%
    :align: center
 
-.. figure:: media/Annotation_custom_v0802.png
+.. image:: media/Annotation_custom_v0802.png
    :width: 80%
    :align: center
 
