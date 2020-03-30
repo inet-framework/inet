@@ -35,6 +35,58 @@ std::string dtostr(double d)
     return os.str();
 }
 
+std::string hex(uint16_t l)
+{
+    std::ostringstream os;
+    os << std::hex << l;
+    return os.str();
+}
+
+std::string hex(int16_t l)
+{
+    std::ostringstream os;
+    os << std::hex << l;
+    return os.str();
+}
+
+std::string hex(uint32_t l)
+{
+    std::ostringstream os;
+    os << std::hex << l;
+    return os.str();
+}
+
+std::string hex(int32_t l)
+{
+    std::ostringstream os;
+    os << std::hex << l;
+    return os.str();
+}
+
+std::string hex(uint64_t l)
+{
+    std::ostringstream os;
+    os << std::hex << l;
+    return os.str();
+}
+
+std::string hex(int64_t l)
+{
+    std::ostringstream os;
+    os << std::hex << l;
+    return os.str();
+}
+
+long hex(const char *s)
+{
+    return strtol(s, nullptr, 16);
+}
+
+unsigned long uhex(const char *s)
+{
+    return strtoul(s, nullptr, 16);
+}
+
 double atod(const char *s)
 {
     char *e;
