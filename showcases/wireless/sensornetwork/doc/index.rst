@@ -148,7 +148,7 @@ except for the MAC protocol-specific settings. All three simulations
 will use the same network, :ned:`SensorNetworkShowcaseA`, defined in
 :download:`SensorNetworkShowcase.ned <../SensorNetworkShowcase.ned>`:
 
-.. figure:: media/network.png
+.. image:: media/network.png
    :width: 100%
 
 In the network, the wireless sensor nodes are of the type
@@ -199,7 +199,7 @@ default settings), and then modifying it. The modified configuration is
 in the :download:`config.xml <../config.xml>` file. The following
 image shows the routes:
 
-.. figure:: media/routes.png
+.. image:: media/routes.png
    :width: 100%
 
 Each sensor node will send an UDP packet with a 10-byte payload
@@ -333,7 +333,7 @@ configurations (each sensor sending data every second to the server),
 except that it will use a similar, but more generic network layout
 instead of the warehouse network:
 
-.. figure:: media/statisticnetwork.png
+.. image:: media/statisticnetwork.png
    :width: 60%
    :align: center
 
@@ -381,7 +381,7 @@ increments (the default of :par:`slotDuration` is 100ms.) The number of
 packets received by the server for each :par:`slotDuration` value is shown
 on the following image (time in seconds):
 
-.. figure:: media/statisticbmac2.png
+.. image:: media/statisticbmac2.png
    :width: 100%
 
 The sensors send 100 packets each during the 100s, thus
@@ -410,7 +410,7 @@ similarly to the parameter study for B-MAC. The :par:`slotDuration` for the
 sensors will be 2.5 times that of the gateway (an arbitrary value.) Here
 are the results (time in seconds):
 
-.. figure:: media/statisticxmac2.png
+.. image:: media/statisticxmac2.png
    :width: 100%
 
 According to this, the optimal value for the gateway's :par:`slotDuration`
@@ -434,7 +434,7 @@ We set :par:`reservedMobileSlots` to 0, and :par:`numSlots` to 8. The
 number of received packets are displayed on the following image (time in
 seconds):
 
-.. figure:: media/statisticlmac4.png
+.. image:: media/statisticlmac4.png
    :width: 100%
 
 It is apparent from the results that the network can carry almost all
@@ -582,7 +582,7 @@ statistics:
 Note that the values for the ``residualEnergyCapacity`` statistic are
 negative, so it is inverted in the anf file. Here are the results:
 
-.. figure:: media/power.png
+.. image:: media/power.png
    :width: 100%
 
 From this, it is apparent that LMac carried the most packets, and

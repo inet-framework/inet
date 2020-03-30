@@ -54,7 +54,7 @@ choosing the ``DisplayingPropagationTransmissionsReceptions``
 configuration from the ini file. The simulation uses the following
 network:
 
-.. figure:: media/simplenetwork.png
+.. image:: media/simplenetwork.png
    :width: 100%
 
 The scene size is about 900x600 meters. The network contains two
@@ -73,14 +73,14 @@ following visualizer settings:
 
 When the simulation is run the network looks like this:
 
-.. figure:: media/simple.png
+.. image:: media/simple.png
    :width: 100%
 
 Parts of the communication range circles are visible in the image. With
 the current radio settings, the interference ranges are much larger than
 the communication ranges. One has to zoom out for them to be visible:
 
-.. figure:: media/interferencerange.png
+.. image:: media/interferencerange.png
    :width: 100%
 
 The communication and interference ranges are estimated for each node,
@@ -163,7 +163,7 @@ until the "last bit" has traveled past the farthest node. In this
 phase, the simulation slows down again. The transition between the two
 simulation speeds is smooth.
 
-.. figure:: media/phases.png
+.. image:: media/phases.png
    :width: 100%
 
 Also, it can happen that the simulation doesn't slow down because the
@@ -240,7 +240,7 @@ The configuration
 
 The example configuration for this section uses the following network:
 
-.. figure:: media/multiplenodesnetwork.png
+.. image:: media/multiplenodesnetwork.png
    :width: 100%
 
 The scene size is 1000x500 meters. The network contains three
@@ -271,7 +271,7 @@ communication and interference range circles are not enabled in this
 simulation; the following screenshot illustrates where the communication
 range circles would be if they were enabled:
 
-.. figure:: media/relay_ranges.png
+.. image:: media/relay_ranges.png
    :width: 100%
 
 When the simulation is run, this happens:
@@ -298,7 +298,7 @@ Interfering signals
 This configuration demonstrates how the visualization of interfering
 signals looks like. It uses the following network:
 
-.. figure:: media/interferencenetwork.png
+.. image:: media/interferencenetwork.png
    :width: 100%
 
 The scene size is 1000x500 meters. The network contains three

@@ -56,7 +56,7 @@ The first example simulation, configured in the
 visualization with default settings. This example simulation uses the
 following network:
 
-.. figure:: media/simplenetwork.png
+.. image:: media/simplenetwork.png
    :width: 60%
    :align: center
 
@@ -76,7 +76,7 @@ After the simulation is run for a while and the TCP connection is
 established, the icons representing the endpoints of the TCP connection
 will appear above the hosts. The network will look like the following:
 
-.. figure:: media/simpleconnection.png
+.. image:: media/simpleconnection.png
    :width: 60%
    :align: center
 
@@ -88,7 +88,7 @@ multiple connections and the filtering by node and port number. The
 simulation can be run by choosing the ``MultipleConnections``
 configuration from the ini file. It uses the following network:
 
-.. figure:: media/complexnetwork.png
+.. image:: media/complexnetwork.png
    :width: 60%
    :align: center
 
@@ -117,7 +117,7 @@ network will look like the following. Note that there are several icons
 above ``host1`` and the server, indicating multiple connections.
 Endpoints can be matched by color.
 
-.. figure:: media/port80.png
+.. image:: media/port80.png
    :width: 80%
    :align: center
 
@@ -125,7 +125,7 @@ To visualize the connections that use port 22 at the server, the
 :par:`destinationPortFilter` should be set to 22. The network will look
 like this:
 
-.. figure:: media/port22.png
+.. image:: media/port22.png
    :width: 80%
    :align: center
 
@@ -133,7 +133,7 @@ Additionally, to visualize port 22 connections at ``host2`` only, the
 :par:`sourceNodeFilter` parameter should be set to ``host2``. The result
 looks like this:
 
-.. figure:: media/port22host2.png
+.. image:: media/port22host2.png
    :width: 80%
    :align: center
 

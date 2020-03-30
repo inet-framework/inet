@@ -72,7 +72,7 @@ nodes is simulated.
 The simulation can be run by choosing the ``Ieee802154`` configuration
 from :download:`omnetpp.ini <../omnetpp.ini>`. It uses the following network:
 
-.. figure:: media/network.png
+.. image:: media/network.png
    :width: 60%
    :align: center
 
@@ -90,7 +90,7 @@ the center. This setup is achieved with the following configuration of
 
 The following image shows the routes:
 
-.. figure:: media/routes.png
+.. image:: media/routes.png
    :width: 60%
    :align: center
 
@@ -155,7 +155,7 @@ network. For this, we use the ``Ieee802154Power`` configuration in
 We plotted the energy consumption (-1 \* ``residualEnergyCapacity``) of
 all nodes on the following bar chart (values in Joules):
 
-.. figure:: media/powerconsumption.png
+.. image:: media/powerconsumption.png
    :width: 100%
 
 The sensors consumed a bit more power than the lamps, and the controller

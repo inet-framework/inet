@@ -70,7 +70,7 @@ In addition to the two hosts named ``source`` and ``destination``,
 the network also contains a :ned:`PhysicalEnvironment` module, an
 :ned:`Ipv4NetworkConfigurator`, and a :ned:`Ieee80211ScalarRadioMedium`:
 
-.. figure:: media/network.png
+.. image:: media/network.png
    :width: 80%
    :align: center
 

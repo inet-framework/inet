@@ -64,7 +64,7 @@ does as well. SNIR is independent of modulations and coding schemes, so
 it is the same for all bitrates. This can be seen on the following plot,
 which displays SNIR against distance.
 
-.. figure:: media/SNIR_distance_v2.png
+.. image:: media/SNIR_distance_v2.png
    :width: 100%
 
 The next plot shows how packet error rate decreases with SNIR. Slower
@@ -85,14 +85,14 @@ Note that the completely flat and completely vertical lines on the plot
 are due to the signal power decreasing below the sensitivity of the
 receiver.
 
-.. figure:: media/PER_SNIR_v3.png
+.. image:: media/PER_SNIR_v3.png
    :width: 100%
 
 The following plot shows the packet error rate vs distance. Again,
 slower bitrates show fewer packet errors as the distance increases
 because of the simpler modulation.
 
-.. figure:: media/PER_distance_v3.png
+.. image:: media/PER_distance_v3.png
    :width: 100%
 
 We also compute the effective bitrate, which is the gross bitrate
@@ -108,7 +108,7 @@ are more sensitive to increases in distance, as the effective bitrate
 drops rapidly after a critical distance. This critical distance is
 farther for slower bitrates, and the decrease is not as rapid.
 
-.. figure:: media/throughput_distance3.png
+.. image:: media/throughput_distance3.png
    :width: 100%
 
 802.11 ranges depend on many variables, e.g. transmission power,

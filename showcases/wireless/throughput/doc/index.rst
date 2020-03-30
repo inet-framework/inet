@@ -76,7 +76,7 @@ the minimal contention window to calculate the theoretical throughput:
 The following plot compares the computed throughput to the results of
 the simulation for all bitrates and both packet sizes:
 
-.. figure:: media/throughput3.png
+.. image:: media/throughput3.png
    :width: 100%
 
 The two curves match almost exactly. The curves are not linear:
@@ -98,7 +98,7 @@ bitrates of 6, 18, and 54 Mbps, on the same linear timescale. One can
 see how the proportion of data parts shrinks compared to the duration of
 the frame exchange as bitrates increase.
 
-.. figure:: media/seqchart3.png
+.. image:: media/seqchart3.png
    :width: 100%
 
 The following sequence chart illustrates the relative sizes of the
@@ -106,7 +106,7 @@ preamble, physical header, and data part of a 54 Mbps frame exchange.
 The preamble and the physical header has the same duration regardless of
 the bitrate, further increasing overhead at higher bitrates.
 
-.. figure:: media/seqchart5.png
+.. image:: media/seqchart5.png
    :width: 100%
 
 There are techniques that increase application-level throughput by

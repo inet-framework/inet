@@ -43,7 +43,7 @@ three rooms. The network contains just two modules, a
 :ned:`PhysicalEnvironment` and an :ned:`IntegratedVisualizer` module. When the
 simulation is run, the network looks like this:
 
-.. figure:: media/default.png
+.. image:: media/default.png
    :width: 80%
    :align: center
 
@@ -61,7 +61,7 @@ view is set to isometric projection, by setting the
 
 When the simulation is run, the network looks like the following.
 
-.. figure:: media/isometric.png
+.. image:: media/isometric.png
    :width: 80%
    :align: center
 
@@ -75,7 +75,7 @@ The result will look like the following. Note that the
 :ned:`SceneVisualizer` view settings have no effect on the 3D view; you can
 use the mouse to move the camera and change the view angle.
 
-.. figure:: media/3d.png
+.. image:: media/3d.png
    :width: 80%
    :align: center
 

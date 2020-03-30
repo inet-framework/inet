@@ -42,7 +42,7 @@ channels overlap, and transmissions on these channels can interfere. There can
 be a few independent channels, where there is no cross-channel
 interference, e.g. Channels 1, 6, and 11, as illustrated below.
 
-.. figure:: media/channels.png
+.. image:: media/channels.png
    :width: 100%
    :align: center
 
@@ -62,7 +62,7 @@ channels, the dimensional analog model is used.
 All simulations use variations of the same network, which is
 illustrated by the image below:
 
-.. figure:: media/basenetwork.png
+.. image:: media/basenetwork.png
    :width: 80%
    :align: center
 
@@ -202,7 +202,7 @@ The host pairs are set to adjacent Wifi Channels 1 and 2.
 Also, a more realistic signal spectrum is configured, based on the spectral mask
 of OFDM transmissions, as in the 802.11 standard:
 
-.. figure:: media/spectralmask_wifi.png
+.. image:: media/spectralmask_wifi.png
    :width: 80%
    :align: center
 

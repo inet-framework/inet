@@ -68,7 +68,7 @@ of the scene, acting as an obstacle. The line of transmission will
 intersect the obstacle at certain times, which will degrade
 transmissions.
 
-.. figure:: media/network2.png
+.. image:: media/network2.png
    :width: 100%
 
 Configuration
@@ -107,10 +107,10 @@ following plots show the nominal data bitrate and the actual application
 level throughput for the two configurations (the values are in s and
 bps).
 
-.. figure:: media/noratecontrol2.png
+.. image:: media/noratecontrol2.png
    :width: 100%
 
-.. figure:: media/aarf2.png
+.. image:: media/aarf2.png
    :width: 100%
 
 In the configuration where there is no rate control, the nominal bitrate

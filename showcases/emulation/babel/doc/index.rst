@@ -68,7 +68,7 @@ blue circles, and the green movement trail circles show the path of the nodes.
 The simulation and the real world is split at the wlan Ext interfaces in the hosts.
 The following figure illustrates the emulation setup:
 
-.. figure:: media/setup__.png
+.. image:: media/setup__.png
    :width: 90%
    :align: center
 
@@ -77,7 +77,7 @@ Each host has an :ned:`ExtUpperIeee80211Interface`. The interface contains an
 in the host OS. The 802.11 radio, MAC and LLC are simulated; packets enter and
 exit the TAP device above the LLC:
 
-.. figure:: media/extinterface.png
+.. image:: media/extinterface.png
    :width: 50%
    :align: center
 
@@ -201,7 +201,7 @@ A Babel message opened in Wireshark is shown on the following image.
 It is sent by ``host[0]`` at the beginning of the simulation when the route
 between ``host[0]`` and ``host[2]`` forms for the first time:
 
-.. figure:: media/babelmessage3.png
+.. image:: media/babelmessage3.png
    :align: center
    :width: 100%
 

@@ -32,7 +32,7 @@ visualized at the submodule of the containing network node, typically at
 the top level canvas. The following image illustrates this with the
 example of an application that communicates over UDP:
 
-.. figure:: media/example.png
+.. image:: media/example.png
    :width: 70%
    :align: center
 
@@ -79,7 +79,7 @@ are routed via ``relay``.
 The network also contains an :ned:`Ipv4NetworkConfigurator`, an
 :ned:`Ieee80211ScalarRadioMedium`, and an :ned:`IntegratedVisualizer` module.
 
-.. figure:: media/infonetwork.png
+.. image:: media/infonetwork.png
    :width: 60%
    :align: center
 
@@ -100,7 +100,7 @@ is set to display the submodule's display string text.
 To run the simulation, choose the ``PacketCounts`` configuration
 from the ini file.
 
-.. figure:: media/packetcounts.png
+.. image:: media/packetcounts.png
    :width: 60%
    :align: center
 

@@ -62,7 +62,7 @@ reduce latency.
 
 The following image shows the layout of the network:
 
-.. figure:: media/diffserv_network_layout.png
+.. image:: media/diffserv_network_layout.png
    :width: 100%
 
 In our setup, ``voipPhone1`` will transmit VoIP packets to ``voipPhone2``.
@@ -100,7 +100,7 @@ The router's PPP interface contains the key elements of Differentiated
 Services in this network: a queue (``queue``) and a traffic conditioner (``egressTC``).
 If both of them are used, the layout of the interface looks like the following:
 
-.. figure:: media/RouterPPP.png
+.. image:: media/RouterPPP.png
    :scale: 100%
    :align: center
 
@@ -108,7 +108,7 @@ In the ``VoIP_WithPolicing`` and ``VoIP_WithPolicingAndQueuing``
 configurations, INET's :ned:`TrafficConditioner` module is used in the
 router's PPP interface to achieve the required policing.
 
-.. figure:: media/TrafficConditioner.png
+.. image:: media/TrafficConditioner.png
    :scale: 100%
    :align: center
 
@@ -147,7 +147,7 @@ In the ``VoIP_WithPolicingAndQueuing`` configuration, a
 :ned:`DiffservQueue` module is used instead of :ned:`DropTailQueue` in the
 router's PPP interface to achieve priority queuing.
 
-.. figure:: media/DiffServQueue.png
+.. image:: media/DiffServQueue.png
    :scale: 100%
    :align: center
 
@@ -198,13 +198,13 @@ The delay of the VoIP packets also is very high, approximately 2.5 seconds,
 which is way too much compared to a real phone call. The following plot
 shows the delay of each VoIP packet:
 
-.. figure:: media/VoIP_WithoutQoS_delay.png
+.. image:: media/VoIP_WithoutQoS_delay.png
    :width: 100%
 
 The dropouts you hear can also easily be observed if we zoom into the
 timeline of the received audio using `Audacity <https://www.audacityteam.org/>`__:
 
-.. figure:: media/VoIP_WithoutQoS_audio.png
+.. image:: media/VoIP_WithoutQoS_audio.png
    :width: 100%
 
 With Traffic Policing
@@ -230,7 +230,7 @@ at the beginning of the recording:
 
 The following plot shows the delay of the VoIP packets:
 
-.. figure:: media/VoIP_WithPolicing_delay.png
+.. image:: media/VoIP_WithPolicing_delay.png
    :width: 100%
 
 Although the delay of the packets is much less than it was with the
@@ -241,7 +241,7 @@ The dropout problem that was present throughout the whole transmission
 using the first configuration is successfully eliminated, as we can see
 if we take a look at the audio track:
 
-.. figure:: media/VoIP_WithPolicing_audio.png
+.. image:: media/VoIP_WithPolicing_audio.png
    :width: 100%
 
 With Traffic Policing and Priority Queuing
@@ -267,7 +267,7 @@ the previous configuration are almost inaudible now.
 
 As seen from the next plot, the delay of voice packets has been reduced to about 0.11s:
 
-.. figure:: media/VoIP_WithPolicingAndQueueing_delay.png
+.. image:: media/VoIP_WithPolicingAndQueueing_delay.png
    :width: 100%
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`DiffservNetwork.ned <../DiffservNetwork.ned>`

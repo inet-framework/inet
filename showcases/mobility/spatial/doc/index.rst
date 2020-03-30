@@ -31,7 +31,7 @@ OpenSceneGraph (OSG). To try these examples yourself, make sure that your
 OMNeT++ installation has been compiled with OSG support. If it is not,
 you won't be able to switch to 3D view using the globe icon on the Qtenv toolbar.
 
-.. figure:: media/QtenvToolbar.png
+.. image:: media/QtenvToolbar.png
    :scale: 100%
    :align: center
 
@@ -41,7 +41,7 @@ The model
 The simulations use the :ned:`MobilityShowcase3D` network. It contains a
 configurable number of mobile nodes (hosts) and an :ned:`IntegratedVisualizer` module.
 
-.. figure:: media/Playground2D.png
+.. image:: media/Playground2D.png
    :scale: 80%
    :align: center
 
@@ -67,7 +67,7 @@ at the time of writing, not all features are implemented in :ned:`MobilityOsgVis
 
 When simulations are run, the scene looks like the following in 3D view:
 
-.. figure:: media/3DPlayground.png
+.. image:: media/3DPlayground.png
    :scale: 100%
    :align: center
 

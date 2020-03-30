@@ -89,7 +89,7 @@ In the example demonstrating the spectrum visualization, two pairs of :ned:`Adho
 communicate with each other on different but interfering Wifi channels. The simulation uses
 the following network:
 
-.. figure:: media/network4.png
+.. image:: media/network4.png
    :width: 80%
    :align: center
 
@@ -110,7 +110,7 @@ be specified.
 The following sets the radio type to dimensional, and configures a more realistic signal
 shape in frequency (the spectral mask in the 802.11 standard):
 
-.. figure:: media/spectralmask_wifi.png
+.. image:: media/spectralmask_wifi.png
    :width: 100%
    :align: center
 
@@ -184,7 +184,7 @@ Interference is visualized on the spectrogram as a mix of green and red colors; 
 the proportion of signal and interference can be decoded based on the green and red color
 intensity in the pixmap.
 
-.. figure:: media/interference.png
+.. image:: media/interference.png
    :width: 50%
    :align: center
 
@@ -291,7 +291,7 @@ The ``PowerDensityMap`` configuration uses a similar network as the previous exa
 but without a probe module. The network also contains physical objects which represent
 an apartment, and hosts have different positions compared to the previous examples:
 
-.. figure:: media/powerdensitymapnetwork3.png
+.. image:: media/powerdensitymapnetwork3.png
    :width: 100%
    :align: center
 
