@@ -117,8 +117,10 @@ void InterfaceEntry::initialize(int stage)
     else if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION) {
         if (hasPar("address")) {
             const char *address = par("address");
-            if (!strcmp(address, "auto"))
+            if (!strcmp(address, "auto")) {
                 setMacAddress(MacAddress::generateAutoAddress());
+                par("address").setStringValue(getMacAddress().str());
+            }
             else
                 setMacAddress(MacAddress(address));
             setInterfaceToken(macAddr.formInterfaceIdentifier());
