@@ -46,7 +46,7 @@ extensions = [
     'sphinx.ext.todo',
     'sphinx.ext.githubpages',
     'sphinx.ext.graphviz',
-    'sphinxcontrib.images',
+    #'sphinxcontrib.images',
     'tools.doxylink',
 ]
 
