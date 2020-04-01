@@ -23,6 +23,7 @@
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
 #include "inet/linklayer/ethernet/Ethernet.h"
 #include "inet/linklayer/ieee8022/Ieee8022Llc.h"
+#include "inet/networklayer/common/InterfaceEntry.h"
 
 namespace inet {
 
@@ -43,6 +44,7 @@ class INET_API EtherEncap : public Ieee8022Llc
     static simsignal_t decapPkSignal;
     static simsignal_t pauseSentSignal;
     bool useSNAP;    // true: generate EtherFrameWithSNAP, false: generate EthernetIIFrame
+    InterfaceEntry *interfaceEntry = nullptr;
 
     struct Socket
     {
