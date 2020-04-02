@@ -102,11 +102,12 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
      */
     bool macAddressFilter;
     /**
-     * Records all transmissions and receptions into a separate trace file.
+     * Records all transmissions (if recordCommunicationTransmissionLog is enabled) and receptions (if recordCommunicationReceptionLog is enabled) into a separate trace file.
      * The communication log file can be found at:
      * ${resultdir}/${configname}-${runnumber}.tlog
      */
-    bool recordCommunicationLog;
+    bool recordCommunicationTransmissionLog;
+    bool recordCommunicationReceptionLog;
     //@}
 
     /** @name Timer */
