@@ -376,8 +376,8 @@ EthernetSignal *EtherPhy::encapsulate(Packet *packet)
         case ETH_CMD_SEND_PREEMPTABLE:
             req = packet->removeTag<PreemptionReq>();
             phyHeader->setPreambleType(req->isFirst() ? SMD_Sx : SMD_Cx);
-            phyHeader->setFragId(req->getFragId());
-            phyHeader->setFragCount(req->getFragCount());
+            phyHeader->setSmdNumber(req->getFragId());
+            phyHeader->setFragmentNumber(req->getFragCount());
             break;
         case ETH_CMD_MODIFY_CURRENT_PREEMPTABLE:
             throw cRuntimeError("Model Error");
@@ -514,8 +514,8 @@ Packet *EtherPhy::decapsulate(EthernetSignal *signal)
             auto ind = packet->addTag<PreemptionInd>();
             ind->setIsFirst(phyHeader->getPreambleType() == SMD_Sx);
             ind->setIsLast(true);   //FIXME get from CRC
-            ind->setFragId(phyHeader->getFragId());
-            ind->setFragCount(phyHeader->getFragCount());
+            ind->setFragId(phyHeader->getSmdNumber());
+            ind->setFragCount(phyHeader->getFragmentNumber());
             kind = ETH_IND_RECV_PREEMPTABLE;
             break;
         }

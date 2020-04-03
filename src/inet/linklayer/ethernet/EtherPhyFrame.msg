@@ -66,14 +66,13 @@ packet EthernetFilledIfgSignal extends EthernetSignalBase
 }
 
 // http://www.enodenetworks.com/assets/docs/8023br.pdf
-
 enum EthernetPreambleType {
-    SFD = 1;         // 0xD5;
+    SFD = 1;         // 0xD5
     SMD_E = SFD;
-    SMD_Verify = 2;  // 0x07;      // Bookkeeping
-    SMD_Respond = 3; // 0x19;     // Bookkeeping
-    SMD_Sx = 4;      // 0xE6, 0x4C, 0x7F or 0xB3, see fragId in EthernetPhyHeader
-    SMD_Cx = 5;      // 0x61, 0x52, 0x9E or 0x2A
+    SMD_Verify = 2;  // 0x07
+    SMD_Respond = 3; // 0x19
+    SMD_Sx = 4;      // 0xE6, 0x4C, 0x7F or 0xB3, see smdNumber in EthernetPhyHeader
+    SMD_Cx = 5;      // 0x61, 0x52, 0x9E or 0x2A, see smdNumber in EthernetPhyHeader
 };
 
 // Verify Msg:
@@ -103,8 +102,8 @@ class EthernetPhyHeader extends FieldsChunk
 {
     chunkLength = PREAMBLE_BYTES + SFD_BYTES;
     EthernetPreambleType preambleType = SFD;
-    short fragId = 0;       // 0-3, coded in SMD_Sx or SMD_Cx
-    short fragCount = 0;    // 0-3 (modulo 4), coded values: 0xE6, 0x4C, 0x7F and 0xB3
+    uint8_t smdNumber = 0;       // 0-3, see SMD_Sx or SMD_Cx
+    uint8_t fragmentNumber = 0;  // 0-3 (real fragment number modulo 4)
 }
 // preamble bytes: 0x55
 
