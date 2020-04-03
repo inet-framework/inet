@@ -23,6 +23,7 @@ package inet.linklayer.contract;
 moduleinterface IEthernetInterface extends IWiredInterface
 {
     parameters:
+        double bitrate @unit(bps);
         @display("i=block/ifcard");
 }
 
