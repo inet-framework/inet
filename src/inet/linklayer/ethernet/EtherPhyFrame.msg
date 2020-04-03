@@ -65,6 +65,31 @@ packet EthernetFilledIfgSignal extends EthernetSignalBase
     bitLength = b(INTERFRAME_GAP_BITS).get();
 }
 
+// http://www.enodenetworks.com/assets/docs/8023br.pdf
+enum EthernetPreambleType {
+    SFD = 1;         // 0xD5
+    SMD_E = SFD;
+    SMD_Verify = 2;  // 0x07
+    SMD_Respond = 3; // 0x19
+    SMD_Sx = 4;      // 0xE6, 0x4C, 0x7F or 0xB3, see smdNumber in EthernetPhyHeader
+    SMD_Cx = 5;      // 0x61, 0x52, 0x9E or 0x2A, see smdNumber in EthernetPhyHeader
+};
+
+// Verify Msg:
+// 7*0x55 SMD_Verify | 60*0x00 | mCRC
+
+// Response Msg:
+// 7*0x55 SMD_Respond | 60*0x00 | mCRC
+
+// mCRC:
+// The least significant 16 bits of the mCRC are inverted just before transmission.
+// However, for the last fragment, the original CRC is used, and the last 16 bits
+// are not inverted. This difference with the mCRC’s allows the receiver to detect
+// that the last fragment has been received. It also enables the verification that
+// all the data in the concatenation of all received fragments are identical to the
+// original message (figure 9 left). This is a way to detect the integrity of a
+// received message: all fragments taken together must be equal to the original message.
+
 //
 // Represents an Ethernet PHY frame.
 //
@@ -76,5 +101,10 @@ packet EthernetFilledIfgSignal extends EthernetSignalBase
 class EthernetPhyHeader extends FieldsChunk
 {
     chunkLength = PREAMBLE_BYTES + SFD_BYTES;
+    EthernetPreambleType preambleType = SFD;
+    uint8_t smdNumber = 0;       // 0-3, see SMD_Sx or SMD_Cx
+    uint8_t fragmentNumber = 0;  // 0-3 (real fragment number modulo 4)
 }
+// preamble bytes: 0x55
+
 
