@@ -30,6 +30,7 @@ module ExtLowerEthernetInterface extends ExtInterface like IEthernetInterface
 {
     parameters:
         @display("i=block/ifcard");
+        double bitrate @unit(bps) = default(nan bps);
     gates:
         inout phys @loose;
     submodules:

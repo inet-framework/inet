@@ -30,6 +30,7 @@ module ExtUpperEthernetInterface extends ExtInterface like IEthernetInterface
 {
     parameters:
         bool csmacdSupport = default(false);  // by default CSMA/CD is turned off, so only point-to-point duplex links are supported.
+        double bitrate @unit(bps) = default(nan bps);
         @display("i=block/ifcard");
     gates:
         inout phys @labels(EtherFrame);
