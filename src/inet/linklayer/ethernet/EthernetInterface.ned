@@ -40,6 +40,7 @@ module EthernetInterface extends InterfaceEntry like IEthernetInterface
                                             // a generated MAC address in init stage 0.
         bool duplexMode = default(true);      // selects full-duplex (true) or half-duplex (false) operation
         bool csmacdSupport = default(!duplexMode);  // by default CSMA/CD is turned off, so only point-to-point duplex links are supported.
+        double bitrate @unit(bps) = default(0 bps);
         string fcsMode @enum("declared","computed") = default("declared");
         @display("i=block/ifcard;bgl=2");
         *.interfaceTableModule = default(absPath(interfaceTableModule));
