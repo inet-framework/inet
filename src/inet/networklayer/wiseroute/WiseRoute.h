@@ -78,10 +78,8 @@ class INET_API WiseRoute : public NetworkProtocolBase, public INetworkProtocol
     virtual void handleCrashOperation(LifecycleOperation *operation) override {}    //TODO implementation
 
   protected:
-    enum messagesTypes {
-        DATA,
-        ROUTE_FLOOD,
-        SEND_ROUTE_FLOOD_TIMER
+    enum messageKinds {
+        SEND_ROUTE_FLOOD_TIMER = 101
     };
 
     typedef enum floodTypes {

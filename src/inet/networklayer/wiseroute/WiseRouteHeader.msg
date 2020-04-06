@@ -25,6 +25,11 @@ cplusplus {{
 
 namespace inet;
 
+enum WiseRouteMsgType {
+    DATA = 1;
+    ROUTE_FLOOD = 2;
+};
+
 class WiseRouteHeader extends NetworkHeaderBase
 {
     L3Address   srcAddr;
@@ -32,6 +37,7 @@ class WiseRouteHeader extends NetworkHeaderBase
     unsigned long seqNum = 0;
     int     isFlood;
     int     nbHops;
+    WiseRouteMsgType     headerKind = static_cast<WiseRouteMsgType>(-1);
     IpProtocolId     protocolId;
     L3Address finalDestAddr;
     L3Address initialSrcAddr;
