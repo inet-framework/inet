@@ -1,14 +1,13 @@
 # working directory, command line arguments, simulation time limit, fingerprint, expected result, tags
-.,                                   -f ethernet-hub.ini -r 0,                     ,                 5980-c790/tplx, PASS, EthHD
-.,                                   -f ethernet-hub.ini -r 1,                     ,                 f718-fbc0/tplx, PASS, EthHD
-.,                                   -f ethernet-hub.ini -r 2,                     ,                 5d9b-8d6b/tplx, PASS, EthHD
-.,                                   -f ethernet-hub.ini -r 3,                     ,                 edaf-da96/tplx, PASS, EthHD
-.,                                   -f ethernet-hub.ini -r 4,                     ,                 6951-55cc/tplx, PASS, EthHD
-.,                                   -f ethernet-hub.ini -r 5,                     ,                 84b5-dd83/tplx, PASS, EthHD
-.,                                   -f ethernet-hub.ini -r 6,                     ,                 eea6-09b5/tplx, PASS, EthHD
-.,                                   -f ethernet-hub.ini -r 7,                     ,                 3729-a7f2/tplx, PASS, EthHD
-.,                                   -f ethernet-hub.ini -r 8,                     ,                 c373-2f68/tplx, PASS, EthHD
-.,                                   -f ethernet-hub.ini -r 9,                     ,                 23e2-f7af/tplx, PASS, EthHD
-.,                                   -f ethernet-hub.ini -r 10,                    ,                 19ab-8cbc/tplx, PASS, EthHD
-.,                                   -f ethernet-hub.ini -r 11,                    ,                 78c2-61a0/tplx, PASS, EthHD
-# .,                                   -f ethernet-hub.ini -r 12,                    ,                 0000-0000/tplx, PASS, EthHD
+.,                                   -f ethernet-hub.ini -r 0,                     ,                 5980-c790/tplx;e819-2376/~tNPl, PASS, EthHD
+.,                                   -f ethernet-hub.ini -r 1,                     ,                 f718-fbc0/tplx;adf6-2856/~tNPl, PASS, EthHD
+.,                                   -f ethernet-hub.ini -r 2,                     ,                 5d9b-8d6b/tplx;421c-f1c3/~tNPl, PASS, EthHD
+.,                                   -f ethernet-hub.ini -r 3,                     ,                 edaf-da96/tplx;c027-edc9/~tNPl, PASS, EthHD
+.,                                   -f ethernet-hub.ini -r 4,                     ,                 6951-55cc/tplx;4aec-0a51/~tNPl, PASS, EthHD
+.,                                   -f ethernet-hub.ini -r 5,                     ,                 84b5-dd83/tplx;22f6-4a22/~tNPl, PASS, EthHD
+.,                                   -f ethernet-hub.ini -r 6,                     ,                 eea6-09b5/tplx;a640-e518/~tNPl, PASS, EthHD
+.,                                   -f ethernet-hub.ini -r 7,                     ,                 3729-a7f2/tplx;95a5-0410/~tNPl, PASS, EthHD
+.,                                   -f ethernet-hub.ini -r 8,                     ,                 c373-2f68/tplx;8ba5-8a42/~tNPl, PASS, EthHD
+.,                                   -f ethernet-hub.ini -r 9,                     ,                 23e2-f7af/tplx;8092-3b2f/~tNPl, PASS, EthHD
+.,                                   -f ethernet-hub.ini -r 10,                    ,                 19ab-8cbc/tplx;cfa4-3f2f/~tNPl, PASS, EthHD
+.,                                   -f ethernet-hub.ini -r 11,                    ,                 78c2-61a0/tplx;8583-4074/~tNPl, PASS, EthHD

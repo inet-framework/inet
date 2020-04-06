@@ -14,3 +14,7 @@ Fingerprints are fragile to NED changes and parameter value changes.
 When a fingerprint test fails, the simulation's correctness has to be
 verified by some other means, and the fingerprints in the tests
 updated.
+
+There is a linux command for reformat csv (doesn't work correctly,
+when the csv contains comma in quoted field, e.g. "foo, bar"
+$ cat examples.csv | perl -pe 's/ +/ /g'| column -t -s, -n -e | perl -pe 's/(  +)/,\1/g' >examples_new.csv
