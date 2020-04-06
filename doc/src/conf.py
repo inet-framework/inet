@@ -45,7 +45,7 @@ extensions = [
     'sphinx.ext.todo',
     'sphinx.ext.githubpages',
     'sphinx.ext.graphviz',
-#    'sphinxcontrib.images',  ## needed, but not yet compatible with sphinx 2.x
+    'sphinxcontrib.images',
     'tools.doxylink',
 ]
 
@@ -226,7 +226,7 @@ extlinks = {
 
 # image extension config
 images_config = {
-    'override_image_directive': False,
+    'override_image_directive': True,
 #    'backend': 'LightBox2',
 #    'default_image_width': '100%',
 #    'default_image_height': 'auto',

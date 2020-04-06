@@ -1,5 +1,3 @@
-:orphan:
-
 Coexistence of IEEE 802.11 and 802.15.4
 =======================================
 
@@ -8,8 +6,8 @@ Goals
 
 Different wireless technologies sometimes operate in the same frequency range.
 For example, both IEEE 802.11 and IEEE 802.15.4 have versions that use the 2.4 GHz
-ISM band. As such, the signals of the two protocols can interfere (called
-cross-technology interference, or CTI).
+ISM band. As such, the signals of the two protocols can interfere. This is called
+cross-technology interference, or CTI.
 
 INET has support for simulating CTI between any of its wireless protocol models.
 Simulation can be used to examine how the different protocols
@@ -32,8 +30,8 @@ baseline performance of both models to their concurrent performance.
 The example simulation features a Wifi (802.11) and a WPAN (802.15.4) network close
 to each other. All nodes communicate in the 2.4 GHz band. The signals
 for the two wireless protocols have different center frequencies and bandwidths,
-but the signal spectrums can overlap. In this showcase, we will configure the two
-networks to actually use overlapping channels. The channel spectrums for both
+but the signal spectra can overlap. In this showcase, we will configure the two
+networks to actually use overlapping channels. The channel spectra for both
 technologies are shown on the following image:
 
 .. figure:: media/channels.png
@@ -44,7 +42,7 @@ For the WPAN, we'll use INET's 802.15.4 narrowband version, in which transmissio
 have a 2450 MHz carrier frequency and a 2.8 MHz bandwidth by default. For the Wifi,
 we'll use 802.11g, in which transmissions have a 20 MHz bandwidth. We'll leave the
 frequency and bandwidth of 802.15.4 on default, and we'll use Wifi Channel 9
-(center frequency of 2452 MHz) so that the Wifi and WPAN transmission spectrums
+(center frequency of 2452 MHz) so that the Wifi and WPAN transmission spectra
 overlap:
 
 .. figure:: media/channels8.png
@@ -57,11 +55,11 @@ As the signal center frequencies and bandwidths of the 802.11 and 802.15.4
 models are not identical, the dimensional analog model needs to be used,
 instead of the scalar analog model. The scalar analog model represents
 signals with a scalar signal power, and a constant center frequency and
-bandwidth. The scalar model can only handle situations when the spectrums
+bandwidth. The scalar model can only handle situations when the spectra
 of two concurrent signals are identical or don't overlap at all. When using
 the dimensional analog model, signal power can change in both time and frequency;
 more realistic signal shapes can be specified. This model is also able to
-calculate the interference of signals whose spectrums partially overlap.
+calculate the interference of signals whose spectra partially overlap.
 
 In order for the signals of Wifi and WPAN to interfere,
 the two networks have to share a radio medium module instance.
@@ -345,7 +343,7 @@ are indicated with blue. When receiving a signal, the received signal is
 indicated with green; the sum of interfering signals are indicated with red.
 Note that the spectrum figure configures its scale automatically based on the
 signals displayed; also, all spectrum figures use the same scale so that the
-signal spectrums and power levels can be compared.
+signal spectra and power levels can be compared.
 
 The Wifi and WPAN hosts detect each others' transmissions (but cannot receive them),
 and this causes them to defer from transmitting. Sometimes they transmit at the same
@@ -402,4 +400,4 @@ Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`CoexistenceShowcas
 Discussion
 ----------
 
-Use `this <https://github.com/inet-framework/inet-showcases/issues/TODO>`__ page in the GitHub issue tracker for commenting on this showcase.
+Use `this <https://github.com/inet-framework/inet-showcases/issues/49>`__ page in the GitHub issue tracker for commenting on this showcase.

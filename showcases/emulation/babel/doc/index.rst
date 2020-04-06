@@ -60,7 +60,7 @@ The Babel daemons will update the routes as connectivity changes between the thr
 The network is shown on the following image; the communication ranges are indicated with
 blue circles, and the green movement trail circles show the path of the nodes.
 
-.. figure:: media/network4.png
+.. image:: media/network4.png
    :align: center
    :width: 80%
 

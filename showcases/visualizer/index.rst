@@ -25,6 +25,7 @@ Communication:
    interfacetable/doc/index
    ieee80211/doc/index
    transportconnection/doc/index
+   spectrum/doc/index
 .. linkbreak/doc/index
 .. obstacleloss/doc/index
 
