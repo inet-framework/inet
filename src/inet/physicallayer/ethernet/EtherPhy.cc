@@ -540,6 +540,7 @@ void EtherPhy::startRx(EthernetSignalBase *signal)
     // only the rx end received in full duplex mode
     if (rxState == RX_IDLE_STATE)
         changeRxState(RX_RECEIVING_STATE);
+    delete signal;
 }
 
 void EtherPhy::endRx(EthernetSignalBase *signal)
@@ -549,9 +550,11 @@ void EtherPhy::endRx(EthernetSignalBase *signal)
     if (signal->getBitrate() != bitrate)
         throw cRuntimeError("Ethernet misconfiguration: MACs on the same link must be same bitrate %f Mbps (sender:%s, %f Mbps)", bitrate/1e6, signal->getSenderModule()->getFullPath().c_str(), signal->getBitrate()/1e6);
 
-    if (signal->hasBitError())
+    if (signal->hasBitError()) {
         ; //TODO
-
+        delete signal;
+        return;
+    }
     if (rxState == RX_RECEIVING_STATE) {
         if (auto packet = decapsulate(check_and_cast<EthernetSignal*>(signal)))
             send(packet, "upperLayerOut");
