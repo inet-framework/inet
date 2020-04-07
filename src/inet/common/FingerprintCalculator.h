@@ -30,7 +30,7 @@ class INET_API FingerprintCalculator : public cSingleFingerprintCalculator
         NETWORK_NODE_PATH            = 'N',
         NETWORK_INTERFACE_PATH       = 'I',
         PACKET_DATA                  = 'D',
-        PROGRESS_CONVERTER_FILTER              = 'P',     // decode cProgress::PACKET_END to packet, filtering out other cProgress messages
+        PROGRESS_CONVERTER_FILTER    = 'P',     // decode cProgress::PACKET_END to packet, filtering out other cProgress messages
     };
 
   protected:
