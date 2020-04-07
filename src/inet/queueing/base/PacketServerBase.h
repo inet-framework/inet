@@ -44,8 +44,8 @@ class INET_API PacketServerBase : public PacketSinkBase, public IActivePacketSin
     virtual IPassivePacketSource *getProvider(cGate *gate) override { return provider; }
     virtual IPassivePacketSink *getConsumer(cGate *gate) override { return consumer; }
 
-    virtual bool supportsPushPacket(cGate *gate) const override { return outputGate == gate; }
-    virtual bool supportsPopPacket(cGate *gate) const override { return inputGate == gate; }
+    virtual bool supportsPacketPushing(cGate *gate) const override { return outputGate == gate; }
+    virtual bool supportsPacketPulling(cGate *gate) const override { return inputGate == gate; }
 };
 
 } // namespace queueing

@@ -33,8 +33,8 @@ void PacketServerBase::initialize(int stage)
         consumer = getConnectedModule<IPassivePacketSink>(outputGate);
     }
     else if (stage == INITSTAGE_QUEUEING) {
-        checkPopPacketSupport(inputGate);
-        checkPushPacketSupport(outputGate);
+        checkPacketPullingSupport(inputGate);
+        checkPacketPushingSupport(outputGate);
     }
 }
 

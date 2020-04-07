@@ -27,12 +27,12 @@ void PacketQueueBase::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         displayStringTextFormat = par("displayStringTextFormat");
         numPushedPackets = 0;
-        numPoppedPackets = 0;
+        numPulledPackets = 0;
         numRemovedPackets = 0;
         numDroppedPackets = 0;
         numCreatedPackets = 0;
         WATCH(numPushedPackets);
-        WATCH(numPoppedPackets);
+        WATCH(numPulledPackets);
         WATCH(numRemovedPackets);
         WATCH(numDroppedPackets);
     }
@@ -42,8 +42,8 @@ void PacketQueueBase::emit(simsignal_t signal, cObject *object, cObject *details
 {
     if (signal == packetPushedSignal)
         numPushedPackets++;
-    else if (signal == packetPoppedSignal)
-        numPoppedPackets++;
+    else if (signal == packetPulledSignal)
+        numPulledPackets++;
     else if (signal == packetRemovedSignal)
         numRemovedPackets++;
     else if (signal == packetDroppedSignal)
@@ -67,7 +67,7 @@ void PacketQueueBase::updateDisplayString()
                     result = std::to_string(numPushedPackets);
                     break;
                 case 'o':
-                    result = std::to_string(numPoppedPackets);
+                    result = std::to_string(numPulledPackets);
                     break;
                 case 'r':
                     result = std::to_string(numRemovedPackets);

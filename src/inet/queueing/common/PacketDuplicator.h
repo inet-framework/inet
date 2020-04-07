@@ -39,8 +39,8 @@ class INET_API PacketDuplicator : public PassivePacketSinkBase, public IActivePa
   public:
     virtual IPassivePacketSink *getConsumer(cGate *gate) override { return consumer; }
 
-    virtual bool supportsPushPacket(cGate *gate) const override { return true; }
-    virtual bool supportsPopPacket(cGate *gate) const override { return false; }
+    virtual bool supportsPacketPushing(cGate *gate) const override { return true; }
+    virtual bool supportsPacketPulling(cGate *gate) const override { return false; }
 
     virtual void pushPacket(Packet *packet, cGate *gate) override;
 

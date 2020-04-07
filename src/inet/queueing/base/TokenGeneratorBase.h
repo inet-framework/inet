@@ -41,8 +41,8 @@ class INET_API TokenGeneratorBase : public PacketQueueingElementBase, public Str
     virtual void updateDisplayString();
 
   public:
-    virtual bool supportsPushPacket(cGate *gate) const override { return false; }
-    virtual bool supportsPopPacket(cGate *gate) const override { return false; }
+    virtual bool supportsPacketPushing(cGate *gate) const override { return false; }
+    virtual bool supportsPacketPulling(cGate *gate) const override { return false; }
 
     virtual const char *resolveDirective(char directive) const override;
 };

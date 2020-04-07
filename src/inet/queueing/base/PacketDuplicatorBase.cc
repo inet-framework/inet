@@ -31,8 +31,8 @@ void PacketDuplicatorBase::initialize(int stage)
         consumer = findConnectedModule<IPassivePacketSink>(outputGate);
     }
     else if (stage == INITSTAGE_QUEUEING) {
-        checkPushPacketSupport(inputGate);
-        checkPushPacketSupport(outputGate);
+        checkPacketPushingSupport(inputGate);
+        checkPacketPushingSupport(outputGate);
     }
 }
 

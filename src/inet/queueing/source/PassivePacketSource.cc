@@ -35,9 +35,9 @@ void PassivePacketSource::initialize(int stage)
         WATCH_PTR(nextPacket);
     }
     else if (stage == INITSTAGE_QUEUEING) {
-        checkPopPacketSupport(outputGate);
+        checkPacketPullingSupport(outputGate);
         if (collector != nullptr)
-            collector->handleCanPopPacket(outputGate);
+            collector->handleCanPullPacket(outputGate);
     }
 }
 
@@ -45,7 +45,7 @@ void PassivePacketSource::handleMessage(cMessage *message)
 {
     if (message == providingTimer) {
         if (collector != nullptr)
-            collector->handleCanPopPacket(outputGate);
+            collector->handleCanPullPacket(outputGate);
     }
     else
         throw cRuntimeError("Unknown message");
@@ -58,7 +58,7 @@ void PassivePacketSource::scheduleProvidingTimer()
         scheduleAt(simTime() + interval, providingTimer);
 }
 
-Packet *PassivePacketSource::canPopPacket(cGate *gate) const
+Packet *PassivePacketSource::canPullPacket(cGate *gate) const
 {
     if (providingTimer->isScheduled())
         return nullptr;
@@ -70,15 +70,15 @@ Packet *PassivePacketSource::canPopPacket(cGate *gate) const
     }
 }
 
-Packet *PassivePacketSource::popPacket(cGate *gate)
+Packet *PassivePacketSource::pullPacket(cGate *gate)
 {
-    Enter_Method("popPacket");
+    Enter_Method("pullPacket");
     if (providingTimer->isScheduled()  && providingTimer->getArrivalTime() > simTime())
         throw cRuntimeError("Another packet is already being provided");
     else {
         auto packet = providePacket(gate);
         animateSend(packet, outputGate);
-        emit(packetPoppedSignal, packet);
+        emit(packetPulledSignal, packet);
         scheduleProvidingTimer();
         return packet;
     }

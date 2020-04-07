@@ -44,7 +44,7 @@ class INET_API PacketServer : public PacketServerBase
     virtual IPassivePacketSink *getConsumer(cGate *gate) override { return consumer; }
 
     virtual void handleCanPushPacket(cGate *gate) override;
-    virtual void handleCanPopPacket(cGate *gate) override;
+    virtual void handleCanPullPacket(cGate *gate) override;
 
     virtual const char *resolveDirective(char directive) const override;
 };

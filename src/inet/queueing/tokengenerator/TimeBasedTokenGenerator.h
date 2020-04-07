@@ -40,8 +40,8 @@ class INET_API TimeBasedTokenGenerator : public TokenGeneratorBase
   public:
     virtual ~TimeBasedTokenGenerator() { cancelAndDelete(generationTimer); }
 
-    virtual bool supportsPushPacket(cGate *gate) const override { return false; }
-    virtual bool supportsPopPacket(cGate *gate) const override { return false; }
+    virtual bool supportsPacketPushing(cGate *gate) const override { return false; }
+    virtual bool supportsPacketPulling(cGate *gate) const override { return false; }
 };
 
 } // namespace queueing

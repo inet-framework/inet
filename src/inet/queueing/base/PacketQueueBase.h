@@ -29,7 +29,7 @@ class INET_API PacketQueueBase : public PacketQueueingElementBase, public IPacke
   protected:
     const char *displayStringTextFormat = nullptr;
     int numPushedPackets = -1;
-    int numPoppedPackets = -1;
+    int numPulledPackets = -1;
     int numRemovedPackets = -1;
     int numDroppedPackets = -1;
     int numCreatedPackets = -1;
@@ -41,7 +41,7 @@ class INET_API PacketQueueBase : public PacketQueueingElementBase, public IPacke
     virtual void updateDisplayString();
 
   public:
-    virtual bool canPopSomePacket(cGate *gate) const override { return getNumPackets() > 0; }
+    virtual bool canPullSomePacket(cGate *gate) const override { return getNumPackets() > 0; }
     virtual bool canPushSomePacket(cGate *gate) const override { return true; }
 };
 

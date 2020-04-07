@@ -50,8 +50,8 @@ class INET_API MarkovScheduler : public PacketSchedulerBase, public IPassivePack
 
     virtual IPassivePacketSink *getConsumer(cGate *gate) override { return consumer; }
 
-    virtual bool supportsPushPacket(cGate *gate) const override { return true; }
-    virtual bool supportsPopPacket(cGate *gate) const override { return true; }
+    virtual bool supportsPacketPushing(cGate *gate) const override { return true; }
+    virtual bool supportsPacketPulling(cGate *gate) const override { return true; }
 
     virtual bool canPushSomePacket(cGate *gate) const override;
     virtual bool canPushPacket(Packet *packet, cGate *gate) const override;

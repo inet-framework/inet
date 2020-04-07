@@ -21,7 +21,7 @@ import inet.queueing.base.PacketServerBase;
 import inet.queueing.contract.IPacketServer;
 
 //
-// This module repeatedly pops packets from the connected packet provider and
+// This module repeatedly pulls packets from the connected packet provider and
 // it pushes them into the connected packet consumer. The packets are processed
 // in zero simulation time, and the process continues until the available number
 // of tokens is not sufficient anymore.

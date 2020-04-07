@@ -54,8 +54,8 @@ class INET_API PacketBuffer : public PacketBufferBase, public IPacketBuffer
     virtual void addPacket(Packet *packet) override;
     virtual void removePacket(Packet *packet) override;
 
-    virtual bool supportsPushPacket(cGate *gate) const override { return false; }
-    virtual bool supportsPopPacket(cGate *gate) const override { return false; }
+    virtual bool supportsPacketPushing(cGate *gate) const override { return false; }
+    virtual bool supportsPacketPulling(cGate *gate) const override { return false; }
 };
 
 } // namespace queueing

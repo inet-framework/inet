@@ -48,8 +48,8 @@ void PacketGate::initialize(int stage)
 
     }
     else if (stage == INITSTAGE_QUEUEING) {
-        checkPushOrPopPacketSupport(inputGate);
-        checkPushOrPopPacketSupport(outputGate);
+        checkPackingPushingOrPullingSupport(inputGate);
+        checkPackingPushingOrPullingSupport(outputGate);
         if (changeIndex < (int)changeTimes.size())
             scheduleChangeTimer();
     }
@@ -89,7 +89,7 @@ void PacketGate::open()
     if (producer != nullptr)
         producer->handleCanPushPacket(inputGate);
     if (collector != nullptr)
-        collector->handleCanPopPacket(outputGate);
+        collector->handleCanPullPacket(outputGate);
 }
 
 void PacketGate::close()
@@ -121,22 +121,22 @@ void PacketGate::pushPacket(Packet *packet, cGate *gate)
     updateDisplayString();
 }
 
-bool PacketGate::canPopSomePacket(cGate *gate) const
+bool PacketGate::canPullSomePacket(cGate *gate) const
 {
-    return isOpen_ && provider->canPopSomePacket(inputGate->getPathStartGate());
+    return isOpen_ && provider->canPullSomePacket(inputGate->getPathStartGate());
 }
 
-Packet *PacketGate::canPopPacket(cGate *gate) const
+Packet *PacketGate::canPullPacket(cGate *gate) const
 {
-    return isOpen_ ? provider->canPopPacket(inputGate->getPathStartGate()) : nullptr;
+    return isOpen_ ? provider->canPullPacket(inputGate->getPathStartGate()) : nullptr;
 }
 
-Packet *PacketGate::popPacket(cGate *gate)
+Packet *PacketGate::pullPacket(cGate *gate)
 {
-    Enter_Method("popPacket");
+    Enter_Method("pullPacket");
     if (!isOpen_)
-        throw cRuntimeError("Cannot pop packet when the gate is closed");
-    auto packet = provider->popPacket(inputGate->getPathStartGate());
+        throw cRuntimeError("Cannot pull packet when the gate is closed");
+    auto packet = provider->pullPacket(inputGate->getPathStartGate());
     EV_INFO << "Passing packet " << packet->getName() << "." << endl;
     numProcessedPackets++;
     processedTotalLength += packet->getTotalLength();
@@ -152,11 +152,11 @@ void PacketGate::handleCanPushPacket(cGate *gate)
         producer->handleCanPushPacket(inputGate);
 }
 
-void PacketGate::handleCanPopPacket(cGate *gate)
+void PacketGate::handleCanPullPacket(cGate *gate)
 {
-    Enter_Method("handleCanPopPacket");
+    Enter_Method("handleCanPullPacket");
     if (isOpen_ && collector != nullptr)
-        collector->handleCanPopPacket(outputGate);
+        collector->handleCanPullPacket(outputGate);
 }
 
 } // namespace queueing

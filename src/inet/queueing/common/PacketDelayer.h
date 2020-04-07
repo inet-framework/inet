@@ -40,8 +40,8 @@ class INET_API PacketDelayer : public PassivePacketSinkBase, public IActivePacke
   public:
     virtual IPassivePacketSink *getConsumer(cGate *gate) override { return consumer; }
 
-    virtual bool supportsPushPacket(cGate *gate) const override { return true; }
-    virtual bool supportsPopPacket(cGate *gate) const override { return true; }
+    virtual bool supportsPacketPushing(cGate *gate) const override { return true; }
+    virtual bool supportsPacketPulling(cGate *gate) const override { return true; }
 
     virtual void pushPacket(Packet *packet, cGate *gate) override;
 

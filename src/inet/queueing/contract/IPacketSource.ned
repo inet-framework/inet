@@ -28,5 +28,5 @@ moduleinterface IPacketSource
     parameters:
         @display("i=block/source");
     gates:
-        output out @labels(push,pop);
+        output out @labels(push,pull);
 }

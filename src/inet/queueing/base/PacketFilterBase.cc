@@ -36,8 +36,8 @@ void PacketFilterBase::initialize(int stage)
         droppedTotalLength = b(0);
     }
     else if (stage == INITSTAGE_QUEUEING) {
-        checkPushOrPopPacketSupport(inputGate);
-        checkPushOrPopPacketSupport(outputGate);
+        checkPackingPushingOrPullingSupport(inputGate);
+        checkPackingPushingOrPullingSupport(outputGate);
     }
 }
 
@@ -58,19 +58,19 @@ void PacketFilterBase::pushPacket(Packet *packet, cGate *gate)
     updateDisplayString();
 }
 
-bool PacketFilterBase::canPopSomePacket(cGate *gate) const
+bool PacketFilterBase::canPullSomePacket(cGate *gate) const
 {
     // TODO: KLUDGE:
     auto nonConstThisPtr = const_cast<PacketFilterBase *>(this);
     auto providerGate = inputGate->getPathStartGate();
     while (true) {
-        auto packet = provider->canPopPacket(providerGate);
+        auto packet = provider->canPullPacket(providerGate);
         if (packet == nullptr)
             return false;
         else if (nonConstThisPtr->matchesPacket(packet))
             return true;
         else {
-            packet = provider->popPacket(providerGate);
+            packet = provider->pullPacket(providerGate);
             EV_INFO << "Filtering out packet " << packet->getName() << "." << endl;
             nonConstThisPtr->dropPacket(packet, OTHER_PACKET_DROP);
             nonConstThisPtr->numProcessedPackets++;
@@ -80,19 +80,19 @@ bool PacketFilterBase::canPopSomePacket(cGate *gate) const
     }
 }
 
-Packet *PacketFilterBase::popPacket(cGate *gate)
+Packet *PacketFilterBase::pullPacket(cGate *gate)
 {
-    Enter_Method("popPacket");
+    Enter_Method("pullPacket");
     auto providerGate = inputGate->getPathStartGate();
     while (true) {
-        auto packet = provider->popPacket(providerGate);
+        auto packet = provider->pullPacket(providerGate);
         numProcessedPackets++;
         processedTotalLength += packet->getTotalLength();
         if (matchesPacket(packet)) {
             EV_INFO << "Passing through packet " << packet->getName() << "." << endl;
             animateSend(packet, outputGate);
             updateDisplayString();
-            emit(packetPoppedSignal, packet);
+            emit(packetPulledSignal, packet);
             return packet;
         }
         else {
@@ -109,11 +109,11 @@ void PacketFilterBase::handleCanPushPacket(cGate *gate)
         producer->handleCanPushPacket(inputGate);
 }
 
-void PacketFilterBase::handleCanPopPacket(cGate *gate)
+void PacketFilterBase::handleCanPullPacket(cGate *gate)
 {
-    Enter_Method("handleCanPopPacket");
+    Enter_Method("handleCanPullPacket");
     if (collector != nullptr)
-        collector->handleCanPopPacket(outputGate);
+        collector->handleCanPullPacket(outputGate);
 }
 
 void PacketFilterBase::dropPacket(Packet *packet, PacketDropReason reason, int limit)

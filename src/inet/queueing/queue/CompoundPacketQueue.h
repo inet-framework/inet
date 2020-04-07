@@ -53,13 +53,13 @@ class INET_API CompoundPacketQueue : public PacketQueueBase, public cListener
     virtual Packet *getPacket(int index) const override { return collection->getPacket(index); }
     virtual void removePacket(Packet *packet) override;
 
-    virtual bool supportsPushPacket(cGate *gate) const override { return inputGate == gate; }
+    virtual bool supportsPacketPushing(cGate *gate) const override { return inputGate == gate; }
     virtual bool canPushPacket(Packet *packet, cGate *gate) const override { return true; }
     virtual void pushPacket(Packet *packet, cGate *gate) override;
 
-    virtual bool supportsPopPacket(cGate *gate) const override { return outputGate == gate; }
-    virtual Packet *canPopPacket(cGate *gate) const override { throw cRuntimeError("Invalid operation"); }
-    virtual Packet *popPacket(cGate *gate) override;
+    virtual bool supportsPacketPulling(cGate *gate) const override { return outputGate == gate; }
+    virtual Packet *canPullPacket(cGate *gate) const override { throw cRuntimeError("Invalid operation"); }
+    virtual Packet *pullPacket(cGate *gate) override;
 
     virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override;
 };

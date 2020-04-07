@@ -47,7 +47,7 @@ int ContentBasedScheduler::schedulePacket()
 {
     for (auto filter : filters) {
         for (int i = 0; i < (int)inputGates.size(); i++) {
-            auto packet = providers[i]->canPopPacket(inputGates[i]);
+            auto packet = providers[i]->canPullPacket(inputGates[i]);
             if (packet != nullptr && filter->matches(packet))
                 return i;
         }
