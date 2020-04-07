@@ -38,8 +38,8 @@ void PacketMultiplexer::initialize(int stage)
     }
     else if (stage == INITSTAGE_QUEUEING) {
         for (auto inputGate : inputGates)
-            checkPushPacketSupport(inputGate);
-        checkPushPacketSupport(outputGate);
+            checkPacketPushingSupport(inputGate);
+        checkPacketPushingSupport(outputGate);
     }
 }
 

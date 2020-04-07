@@ -38,10 +38,10 @@ class INET_API IActivePacketSink
     virtual IPassivePacketSource *getProvider(cGate *gate) = 0;
 
     /**
-     * Notifies about a state change that allows to pop some packet from the
+     * Notifies about a state change that allows to pull some packet from the
      * passive packet source at the given gate. The gate is never nulltr.
      */
-    virtual void handleCanPopPacket(cGate *gate) = 0;
+    virtual void handleCanPullPacket(cGate *gate) = 0;
 };
 
 } // namespace queueing

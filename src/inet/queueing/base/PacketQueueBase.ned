@@ -25,17 +25,17 @@ package inet.queueing.base;
 // - %p - number of packet
 // - %l - total length
 // - %u - number of pushed packets
-// - %o - number of popped packets
+// - %o - number of pulled packets
 // - %r - number of removed packets
 // - %d - number of dropped packets
-// - %n - name of next popped packet
+// - %n - name of next pulled packet
 //
 // @see ~IPacketQueue
 //
 simple PacketQueueBase
 {
     parameters:
-        string displayStringTextFormat = default("contains %p pk (%l)\npushed %u popped %o dropped %d"); // determines display string text above the submodule
+        string displayStringTextFormat = default("contains %p pk (%l)\npushed %u pulled %o dropped %d"); // determines display string text above the submodule
         @display("i=block/queue");
     gates:
         input in @loose;

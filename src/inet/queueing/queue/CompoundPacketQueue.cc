@@ -35,15 +35,15 @@ void CompoundPacketQueue::initialize(int stage)
         provider = check_and_cast<IPassivePacketSource *>(outputGate->getPathStartGate()->getOwnerModule());
         collection = check_and_cast<IPacketCollection *>(provider);
         subscribe(packetPushedSignal, this);
-        subscribe(packetPoppedSignal, this);
+        subscribe(packetPulledSignal, this);
         subscribe(packetRemovedSignal, this);
         subscribe(packetDroppedSignal, this);
         subscribe(packetCreatedSignal, this);
         WATCH(numCreatedPackets);
     }
     else if (stage == INITSTAGE_QUEUEING) {
-        checkPushPacketSupport(inputGate);
-        checkPopPacketSupport(outputGate);
+        checkPacketPushingSupport(inputGate);
+        checkPacketPullingSupport(outputGate);
     }
     else if (stage == INITSTAGE_LAST)
         updateDisplayString();
@@ -65,11 +65,11 @@ void CompoundPacketQueue::pushPacket(Packet *packet, cGate *gate)
     }
 }
 
-Packet *CompoundPacketQueue::popPacket(cGate *gate)
+Packet *CompoundPacketQueue::pullPacket(cGate *gate)
 {
-    Enter_Method("popPacket");
-    auto packet = provider->popPacket(outputGate->getPathStartGate());
-    emit(packetPoppedSignal, packet);
+    Enter_Method("pullPacket");
+    auto packet = provider->pullPacket(outputGate->getPathStartGate());
+    emit(packetPulledSignal, packet);
     updateDisplayString();
     return packet;
 }
@@ -87,8 +87,8 @@ void CompoundPacketQueue::receiveSignal(cComponent *source, simsignal_t signal, 
     if (signal == packetPushedSignal) {
         Enter_Method("receivePacketPushedSignal");
     }
-    else if (signal == packetPoppedSignal) {
-        Enter_Method("receivePacketPoppedSignal");
+    else if (signal == packetPulledSignal) {
+        Enter_Method("receivePacketPulledSignal");
     }
     else if (signal == packetRemovedSignal) {
         Enter_Method("receivePacketRemovedSignal");

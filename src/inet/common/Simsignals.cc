@@ -104,7 +104,7 @@ simsignal_t packetSentSignal = cComponent::registerSignal("packetSent");
 simsignal_t packetReceivedSignal = cComponent::registerSignal("packetReceived");
 
 simsignal_t packetPushedSignal = cComponent::registerSignal("packetPushed");
-simsignal_t packetPoppedSignal = cComponent::registerSignal("packetPopped");
+simsignal_t packetPulledSignal = cComponent::registerSignal("packetPulled");
 
 void printSignalBanner(simsignal_t signalID, const cObject *obj, const cObject *details)
 {

@@ -21,7 +21,7 @@ import inet.queueing.base.PacketServerBase;
 import inet.queueing.contract.IPacketServer;
 
 //
-// This module repeatedly pops packets from the connected packet provider and
+// This module repeatedly pulls packets from the connected packet provider and
 // after a processing delay it pushes the packet into the connected packet
 // consumer. The processing delay is processingTime + packetLength / processingBitrate.
 //

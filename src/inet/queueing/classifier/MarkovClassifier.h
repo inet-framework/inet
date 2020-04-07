@@ -51,14 +51,14 @@ class INET_API MarkovClassifier : public PacketClassifierBase, public IActivePac
 
     virtual IPassivePacketSource *getProvider(cGate *gate) override { return provider; }
 
-    virtual bool supportsPushPacket(cGate *gate) const override { return true; }
-    virtual bool supportsPopPacket(cGate *gate) const override { return true; }
+    virtual bool supportsPacketPushing(cGate *gate) const override { return true; }
+    virtual bool supportsPacketPulling(cGate *gate) const override { return true; }
 
-    virtual bool canPopSomePacket(cGate *gate) const override;
-    virtual Packet *canPopPacket(cGate *gate) const override;
-    virtual Packet *popPacket(cGate *gate) override;
+    virtual bool canPullSomePacket(cGate *gate) const override;
+    virtual Packet *canPullPacket(cGate *gate) const override;
+    virtual Packet *pullPacket(cGate *gate) override;
 
-    virtual void handleCanPopPacket(cGate *gate) override;
+    virtual void handleCanPullPacket(cGate *gate) override;
     virtual const char *resolveDirective(char directive) const override;
 
 };

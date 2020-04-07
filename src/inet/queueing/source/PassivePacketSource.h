@@ -46,12 +46,12 @@ class INET_API PassivePacketSource : public PacketSourceBase, public IPassivePac
   public:
     virtual ~PassivePacketSource() { delete nextPacket; cancelAndDelete(providingTimer); }
 
-    virtual bool supportsPushPacket(cGate *gate) const override { return false; }
-    virtual bool supportsPopPacket(cGate *gate) const override { return outputGate == gate; }
+    virtual bool supportsPacketPushing(cGate *gate) const override { return false; }
+    virtual bool supportsPacketPulling(cGate *gate) const override { return outputGate == gate; }
 
-    virtual bool canPopSomePacket(cGate *gate) const override { return !providingTimer->isScheduled(); }
-    virtual Packet *canPopPacket(cGate *gate) const override;
-    virtual Packet *popPacket(cGate *gate) override;
+    virtual bool canPullSomePacket(cGate *gate) const override { return !providingTimer->isScheduled(); }
+    virtual Packet *canPullPacket(cGate *gate) const override;
+    virtual Packet *pullPacket(cGate *gate) override;
 };
 
 } // namespace queueing

@@ -26,7 +26,7 @@ static int schedulePacketByData(const std::vector<IPassivePacketSource *>& queue
     int selectedIndex = -1;
     int selectedData = -1;
     for (int i = 0; i < (int)queues.size(); i++) {
-        auto packet = queues[i]->canPopPacket();
+        auto packet = queues[i]->canPullPacket();
         if (packet != nullptr) {
             const auto& dataChunk = packet->peekDataAt<BytesChunk>(B(0), B(1));
             auto data = dataChunk->getBytes().at(0);
@@ -46,7 +46,7 @@ static int schedulePacketByUserPriority(const std::vector<IPassivePacketSource *
     int selectedIndex = -1;
     int selectedUserPriority = -1;
     for (int i = 0; i < (int)queues.size(); i++) {
-        auto packet = queues[i]->canPopPacket();
+        auto packet = queues[i]->canPullPacket();
         auto userPriorityReq = packet->getTag<UserPriorityReq>();
         if (userPriorityReq->getUserPriority() > selectedUserPriority)
             selectedIndex = i;

@@ -21,18 +21,18 @@ import inet.queueing.base.PacketSourceBase;
 import inet.queueing.contract.IPassivePacketSource;
 
 //
-// This module is a passive packet source which can be popped for packets from
+// This module is a passive packet source which can be pulled for packets from
 // the connected packet collector.
 //
 simple PassivePacketSource extends PacketSourceBase like IPassivePacketSource
 {
     parameters:
-        volatile double providingInterval @unit(s) = default(0s); // elapsed time between subsequent packets allowed to be popped by the connected packet collector, 0 means any number of packets can be popped at the same simulation time
+        volatile double providingInterval @unit(s) = default(0s); // elapsed time between subsequent packets allowed to be pulled by the connected packet collector, 0 means any number of packets can be pulled at the same simulation time
         @class(PassivePacketSource);
-        @signal[packetPopped](type=inet::Packet);
+        @signal[packetPulled](type=inet::Packet);
         @signal[packetCreated](type=inet::Packet);
-        @statistic[packetPopped](title="packets popped"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
+        @statistic[packetPulled](title="packets pulled"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetCreated](title="packets created"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
     gates:
-        output out @labels(pop);
+        output out @labels(pull);
 }

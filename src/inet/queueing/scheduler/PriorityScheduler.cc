@@ -77,7 +77,7 @@ void PriorityScheduler::removePacket(Packet *packet)
 int PriorityScheduler::schedulePacket()
 {
     for (int i = 0; i < (int)providers.size(); i++)
-        if (providers[i]->canPopSomePacket(inputGates[i]->getPathStartGate()))
+        if (providers[i]->canPullSomePacket(inputGates[i]->getPathStartGate()))
             return i;
     return -1;
 }

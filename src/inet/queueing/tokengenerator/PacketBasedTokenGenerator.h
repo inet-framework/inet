@@ -40,8 +40,8 @@ class INET_API PacketBasedTokenGenerator : public PassivePacketSinkBase, public 
     virtual void initialize(int stage) override;
 
   public:
-    virtual bool supportsPushPacket(cGate *gate) const override { return true; }
-    virtual bool supportsPopPacket(cGate *gate) const override { return false; }
+    virtual bool supportsPacketPushing(cGate *gate) const override { return true; }
+    virtual bool supportsPacketPulling(cGate *gate) const override { return false; }
 
     virtual bool canPushSomePacket(cGate *gate) const override { return server->getNumTokens() == 0; }
     virtual bool canPushPacket(Packet *packet, cGate *gate) const override { return server->getNumTokens() == 0; }

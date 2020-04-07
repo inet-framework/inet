@@ -33,7 +33,7 @@ void PcapFilePacketConsumer::initialize(int stage)
         pcapWriter.open(par("filename"), par("snaplen"), par("networkType"));
     }
     else if (stage == INITSTAGE_QUEUEING) {
-        checkPushPacketSupport(inputGate);
+        checkPacketPushingSupport(inputGate);
         if (producer != nullptr)
             producer->handleCanPushPacket(inputGate);
     }

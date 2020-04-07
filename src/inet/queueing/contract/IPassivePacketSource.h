@@ -33,24 +33,24 @@ class INET_API IPassivePacketSource
 
     /**
      * Returns false if the packet source is empty at the given gate and no more
-     * packets can be popped without raising an error. The gate must support
-     * popping packets.
+     * packets can be pulled without raising an error. The gate must support
+     * pulling packets.
      */
-    virtual bool canPopSomePacket(cGate *gate = nullptr) const = 0;
+    virtual bool canPullSomePacket(cGate *gate = nullptr) const = 0;
 
     /**
-     * Returns the packet that can be popped at the given gate. The returned
+     * Returns the packet that can be pulled at the given gate. The returned
      * value may be nullptr if there is no such packet. The gate must support
-     * popping packets.
+     * pulling packets.
      */
-    virtual Packet *canPopPacket(cGate *gate = nullptr) const = 0;
+    virtual Packet *canPullPacket(cGate *gate = nullptr) const = 0;
 
     /**
      * Pops a packet from the packet source at the given gate. The provider must
      * not be empty at the given gate. The returned packet is never nullptr, and
-     * the gate must support popping packets.
+     * the gate must support pulling packets.
      */
-    virtual Packet *popPacket(cGate *gate = nullptr) = 0;
+    virtual Packet *pullPacket(cGate *gate = nullptr) = 0;
 };
 
 } // namespace queueing

@@ -21,15 +21,15 @@ import inet.queueing.base.PacketSinkBase;
 import inet.queueing.contract.IActivePacketSink;
 
 //
-// This module is an active packet sink which pops packets from the connected
-// packet provider. All popped packets are counted and deleted.
+// This module is an active packet sink which pulls packets from the connected
+// packet provider. All pulled packets are counted and deleted.
 //
 simple ActivePacketSink extends PacketSinkBase like IActivePacketSink
 {
     parameters:
-        volatile double collectionInterval @unit(s); // elapsed time between subsequent packets popped from the connected packet provider
+        volatile double collectionInterval @unit(s); // elapsed time between subsequent packets pulled from the connected packet provider
         @class(ActivePacketSink);
     gates:
-        input in @labels(pop);
+        input in @labels(pull);
 }
 

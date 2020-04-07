@@ -37,42 +37,42 @@ void PacketSchedulerBase::initialize(int stage)
     }
     else if (stage == INITSTAGE_QUEUEING) {
         for (int i = 0; i < gateSize("in"); i++)
-            checkPopPacketSupport(inputGates[i]);
-        checkPopPacketSupport(outputGate);
+            checkPacketPullingSupport(inputGates[i]);
+        checkPacketPullingSupport(outputGate);
     }
 }
 
-bool PacketSchedulerBase::canPopSomePacket(cGate *gate) const
+bool PacketSchedulerBase::canPullSomePacket(cGate *gate) const
 {
     for (int i = 0; i < gateSize("in"); i++) {
         auto inputProvider = providers[i];
-        if (inputProvider->canPopSomePacket(inputGates[i]->getPathStartGate()))
+        if (inputProvider->canPullSomePacket(inputGates[i]->getPathStartGate()))
             return true;
     }
     return false;
 }
 
-Packet *PacketSchedulerBase::popPacket(cGate *gate)
+Packet *PacketSchedulerBase::pullPacket(cGate *gate)
 {
-    Enter_Method("popPacket");
+    Enter_Method("pullPacket");
     int index = schedulePacket();
     if (index < 0 || static_cast<unsigned int>(index) >= inputGates.size())
         throw cRuntimeError("Scheduled packet from invalid input gate: %d", index);
-    auto packet = providers[index]->popPacket(inputGates[index]->getPathStartGate());
+    auto packet = providers[index]->pullPacket(inputGates[index]->getPathStartGate());
     EV_INFO << "Scheduling packet " << packet->getName() << ".\n";
     numProcessedPackets++;
     processedTotalLength += packet->getDataLength();
     updateDisplayString();
     animateSend(packet, outputGate);
-    emit(packetPoppedSignal, packet);
+    emit(packetPulledSignal, packet);
     return packet;
 }
 
-void PacketSchedulerBase::handleCanPopPacket(cGate *gate)
+void PacketSchedulerBase::handleCanPullPacket(cGate *gate)
 {
-    Enter_Method("handleCanPopPacket");
+    Enter_Method("handleCanPullPacket");
     if (collector != nullptr)
-        collector->handleCanPopPacket(outputGate);
+        collector->handleCanPullPacket(outputGate);
 }
 
 } // namespace queueing

@@ -22,8 +22,8 @@ import inet.queueing.contract.IPacketScheduler;
 
 //
 // This module connects one packet collector to multiple packet providers. It
-// can be popped for packets by the connected packet collector. When this
-// happens, the scheduler pops a packet from one of its packet providers based
+// can be pulled for packets by the connected packet collector. When this
+// happens, the scheduler pulls a packet from one of its packet providers based
 // on the configured packet filters. The first matching expression determines
 // the index of the input gate.
 //

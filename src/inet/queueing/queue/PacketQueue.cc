@@ -44,8 +44,8 @@ void PacketQueue::initialize(int stage)
         packetDropperFunction = createDropperFunction(par("dropperClass"));
     }
     else if (stage == INITSTAGE_QUEUEING) {
-        checkPushPacketSupport(inputGate);
-        checkPopPacketSupport(outputGate);
+        checkPacketPushingSupport(inputGate);
+        checkPacketPullingSupport(outputGate);
         if (producer != nullptr)
             producer->handleCanPushPacket(inputGate);
     }
@@ -115,12 +115,12 @@ void PacketQueue::pushPacket(Packet *packet, cGate *gate)
     }
     updateDisplayString();
     if (collector != nullptr && getNumPackets() != 0)
-        collector->handleCanPopPacket(outputGate);
+        collector->handleCanPullPacket(outputGate);
 }
 
-Packet *PacketQueue::popPacket(cGate *gate)
+Packet *PacketQueue::pullPacket(cGate *gate)
 {
-    Enter_Method("popPacket");
+    Enter_Method("pullPacket");
     auto packet = check_and_cast<Packet *>(queue.front());
     EV_INFO << "Popping packet " << packet->getName() << " from the queue." << endl;
     if (buffer != nullptr) {
@@ -129,7 +129,7 @@ Packet *PacketQueue::popPacket(cGate *gate)
     }
     else
         queue.pop();
-    emit(packetPoppedSignal, packet);
+    emit(packetPulledSignal, packet);
     updateDisplayString();
     animateSend(packet, outputGate);
     return packet;

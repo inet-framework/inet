@@ -20,7 +20,7 @@ package inet.queueing.contract;
 //
 // This module interface is implemented by packet scheduler modules. A packet
 // scheduler is a passive module which has multiple active inputs and one
-// passive output. Packets popped from the passive output are provided by
+// passive output. Packets pulled from the passive output are provided by
 // one of the inputs without any delay and reordering.
 //
 moduleinterface IPacketScheduler extends IPassivePacketSource
@@ -28,5 +28,5 @@ moduleinterface IPacketScheduler extends IPassivePacketSource
     parameters:
         @display("i=block/join");
     gates:
-        input in[] @labels(pop);
+        input in[] @labels(pull);
 }

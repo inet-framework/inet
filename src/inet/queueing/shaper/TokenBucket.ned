@@ -29,7 +29,7 @@ module TokenBucket
         @display("i=block/buffer");
     gates:
         input in @labels(push);
-        output out @labels(pop);
+        output out @labels(pull);
     submodules:
         queue: <default("DropTailQueue")> like IPacketQueue {
             parameters:

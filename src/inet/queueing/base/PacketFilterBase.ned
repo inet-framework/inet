@@ -30,10 +30,10 @@ simple PacketFilterBase extends PacketProcessorBase
         displayStringTextFormat = default("dropped %d/%p pk (%k/%l)"); // determines the text that is written on top of the submodule
         @display("i=block/downarrow");
         @signal[packetPushed](type=inet::Packet);
-        @signal[packetPopped](type=inet::Packet);
+        @signal[packetPulled](type=inet::Packet);
         @signal[packetDropped](type=inet::Packet);
         @statistic[packetPushed](title="packets pushed"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
-        @statistic[packetPopped](title="packets popped"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
+        @statistic[packetPulled](title="packets pulled"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetDropped](title="packets dropped"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
     gates:
         input in;
