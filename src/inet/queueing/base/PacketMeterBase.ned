@@ -24,7 +24,7 @@ package inet.queueing.base;
 //
 // @see ~IPacketMeter
 //
-simple PacketMeterBase extends PacketProcessorBase
+simple PacketMeterBase extends PacketFlowBase
 {
     parameters:
         displayStringTextFormat = default("metered %p pk (%l)");

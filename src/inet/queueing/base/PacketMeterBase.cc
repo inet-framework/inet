@@ -15,71 +15,15 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-#include "inet/common/ModuleAccess.h"
 #include "inet/queueing/base/PacketMeterBase.h"
-#include "inet/common/Simsignals.h"
 
 namespace inet {
 namespace queueing {
 
-void PacketMeterBase::initialize(int stage)
+void PacketMeterBase::processPacket(Packet *packet)
 {
-    PacketProcessorBase::initialize(stage);
-    if (stage == INITSTAGE_LOCAL) {
-        inputGate = gate("in");
-        outputGate = gate("out");
-        producer = findConnectedModule<IActivePacketSource>(inputGate);
-        collector = findConnectedModule<IActivePacketSink>(outputGate);
-        provider = findConnectedModule<IPassivePacketSource>(inputGate);
-        consumer = findConnectedModule<IPassivePacketSink>(outputGate);
-    }
-    else if (stage == INITSTAGE_QUEUEING) {
-        checkPackingPushingOrPullingSupport(inputGate);
-        checkPackingPushingOrPullingSupport(outputGate);
-    }
-}
-
-void PacketMeterBase::pushPacket(Packet *packet, cGate *gate)
-{
-    Enter_Method("pushPacket");
     EV_INFO << "Metering packet " << packet->getName() << "." << endl;
     meterPacket(packet);
-    pushOrSendPacket(packet, outputGate, consumer);
-    numProcessedPackets++;
-    processedTotalLength += packet->getTotalLength();
-    updateDisplayString();
-}
-
-bool PacketMeterBase::canPullSomePacket(cGate *gate) const
-{
-    return provider->canPullPacket(inputGate->getPathStartGate());
-}
-
-Packet *PacketMeterBase::pullPacket(cGate *gate)
-{
-    Enter_Method("pullPacket");
-    auto packet = provider->pullPacket(inputGate->getPathStartGate());
-    EV_INFO << "Metering packet " << packet->getName() << "." << endl;
-    meterPacket(packet);
-    numProcessedPackets++;
-    processedTotalLength += packet->getTotalLength();
-    updateDisplayString();
-    animateSend(packet, outputGate);
-    return packet;
-}
-
-void PacketMeterBase::handleCanPushPacket(cGate *gate)
-{
-    Enter_Method("handleCanPushPacket");
-    if (producer != nullptr)
-        producer->handleCanPushPacket(inputGate);
-}
-
-void PacketMeterBase::handleCanPullPacket(cGate *gate)
-{
-    Enter_Method("handleCanPullPacket");
-    if (collector != nullptr)
-        collector->handleCanPullPacket(outputGate);
 }
 
 } // namespace queueing
