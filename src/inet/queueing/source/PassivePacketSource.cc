@@ -80,6 +80,7 @@ Packet *PassivePacketSource::pullPacket(cGate *gate)
         animateSend(packet, outputGate);
         emit(packetPulledSignal, packet);
         scheduleProvidingTimer();
+        updateDisplayString();
         return packet;
     }
 }

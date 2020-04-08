@@ -28,6 +28,7 @@ import inet.queueing.contract.IPacketServer;
 simple PacketServer extends PacketServerBase like IPacketServer
 {
     parameters:
+        displayStringTextFormat = default("served %p pk (%l)\n%s");
         volatile double processingTime @unit(s); // determines additional processing time per packet
         volatile double processingBitrate @unit(bps) = default(inf bps); // determines additional processing time per bit
         @class(PacketServer);

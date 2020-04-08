@@ -122,7 +122,7 @@ Packet *PacketQueue::pullPacket(cGate *gate)
 {
     Enter_Method("pullPacket");
     auto packet = check_and_cast<Packet *>(queue.front());
-    EV_INFO << "Popping packet " << packet->getName() << " from the queue." << endl;
+    EV_INFO << "Pulling packet " << packet->getName() << " from the queue." << endl;
     if (buffer != nullptr) {
         queue.remove(packet);
         buffer->removePacket(packet);
@@ -130,8 +130,8 @@ Packet *PacketQueue::pullPacket(cGate *gate)
     else
         queue.pop();
     emit(packetPulledSignal, packet);
-    updateDisplayString();
     animateSend(packet, outputGate);
+    updateDisplayString();
     return packet;
 }
 
