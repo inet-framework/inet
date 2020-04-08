@@ -27,7 +27,7 @@ namespace queueing {
 class INET_API PacketScheduler : public PacketSchedulerBase
 {
   protected:
-    IPacketSchedulerFunction *packetSchedulerFunction;
+    IPacketSchedulerFunction *packetSchedulerFunction = nullptr;
 
   protected:
     virtual void initialize(int stage) override;

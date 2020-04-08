@@ -27,7 +27,7 @@ namespace queueing {
 class INET_API PacketFilter : public PacketFilterBase
 {
   protected:
-    IPacketFilterFunction *packetFilterFunction;
+    IPacketFilterFunction *packetFilterFunction = nullptr;
 
   protected:
     virtual void initialize(int stage) override;
