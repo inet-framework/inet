@@ -29,8 +29,8 @@ void PcapFilePacketConsumer::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         inputGate = gate("in");
         producer = findConnectedModule<IActivePacketSource>(inputGate);
-        pcapWriter.setFlushParameter(par("alwaysFlush").boolValue());
-        pcapWriter.openPcap(par("filename"), par("snaplen"), par("networkType"));
+        pcapWriter.setFlush(par("alwaysFlush"));
+        pcapWriter.open(par("filename"), par("snaplen"), par("networkType"));
     }
     else if (stage == INITSTAGE_QUEUEING) {
         checkPushPacketSupport(inputGate);
@@ -41,7 +41,7 @@ void PcapFilePacketConsumer::initialize(int stage)
 
 void PcapFilePacketConsumer::finish()
 {
-    pcapWriter.closePcap();
+    pcapWriter.close();
 }
 
 void PcapFilePacketConsumer::pushPacket(Packet *packet, cGate *gate)
