@@ -25,7 +25,7 @@ namespace queueing {
 
 typedef int (*PacketClassifierFunction)(Packet *packet);
 
-class INET_API CPacketClassifierFunction : public cObject, public IPacketClassifierFunction
+class INET_API CPacketClassifierFunction : public cObject, public virtual IPacketClassifierFunction
 {
   protected:
     PacketClassifierFunction packetClassifierFunction;

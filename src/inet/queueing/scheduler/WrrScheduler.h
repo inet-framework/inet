@@ -27,7 +27,7 @@ namespace queueing {
 /**
  * This module implements a Weighted Round Robin Scheduler.
  */
-class INET_API WrrScheduler : public PacketSchedulerBase, public IPacketCollection
+class INET_API WrrScheduler : public PacketSchedulerBase, public virtual IPacketCollection
 {
   protected:
     int *weights = nullptr; // array of weights (has numInputs elements)

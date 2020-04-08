@@ -25,7 +25,7 @@ namespace queueing {
 
 typedef bool (*PacketFilterFunction)(Packet *packet);
 
-class INET_API CPacketFilterFunction : public cObject, public IPacketFilterFunction
+class INET_API CPacketFilterFunction : public cObject, public virtual IPacketFilterFunction
 {
   protected:
     PacketFilterFunction packetFilterFunction;

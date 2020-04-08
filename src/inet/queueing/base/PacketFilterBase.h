@@ -24,7 +24,7 @@
 namespace inet {
 namespace queueing {
 
-class INET_API PacketFilterBase : public PacketProcessorBase, public IPacketFilter
+class INET_API PacketFilterBase : public PacketProcessorBase, public virtual IPacketFilter
 {
   protected:
     cGate *inputGate = nullptr;

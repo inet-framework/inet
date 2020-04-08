@@ -27,7 +27,7 @@ namespace queueing {
 /**
  * This class defines the interface for packet duplicators.
  */
-class INET_API IPacketDuplicator : public IPassivePacketSink, public IActivePacketSource
+class INET_API IPacketDuplicator : public virtual IPassivePacketSink, public virtual IActivePacketSource
 {
 };
 

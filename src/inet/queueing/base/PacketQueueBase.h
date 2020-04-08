@@ -24,7 +24,7 @@
 namespace inet {
 namespace queueing {
 
-class INET_API PacketQueueBase : public PacketQueueingElementBase, public IPacketQueue
+class INET_API PacketQueueBase : public PacketQueueingElementBase, public virtual IPacketQueue
 {
   protected:
     const char *displayStringTextFormat = nullptr;
