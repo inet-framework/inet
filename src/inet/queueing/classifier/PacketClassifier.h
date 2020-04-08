@@ -27,7 +27,7 @@ namespace queueing {
 class INET_API PacketClassifier : public PacketClassifierBase
 {
   protected:
-    IPacketClassifierFunction *packetClassifierFunction;
+    IPacketClassifierFunction *packetClassifierFunction = nullptr;
 
   protected:
     virtual void initialize(int stage) override;
