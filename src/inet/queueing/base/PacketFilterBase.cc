@@ -44,6 +44,7 @@ void PacketFilterBase::initialize(int stage)
 void PacketFilterBase::pushPacket(Packet *packet, cGate *gate)
 {
     Enter_Method("pushPacket");
+    take(packet);
     emit(packetPushedSignal, packet);
     if (matchesPacket(packet)) {
         EV_INFO << "Passing through packet " << packet->getName() << "." << endl;
@@ -71,6 +72,7 @@ bool PacketFilterBase::canPullSomePacket(cGate *gate) const
             return true;
         else {
             packet = provider->pullPacket(providerGate);
+            const_cast<PacketFilterBase *>(this)->take(packet);
             EV_INFO << "Filtering out packet " << packet->getName() << "." << endl;
             nonConstThisPtr->dropPacket(packet, OTHER_PACKET_DROP);
             nonConstThisPtr->numProcessedPackets++;
@@ -86,6 +88,7 @@ Packet *PacketFilterBase::pullPacket(cGate *gate)
     auto providerGate = inputGate->getPathStartGate();
     while (true) {
         auto packet = provider->pullPacket(providerGate);
+        take(packet);
         numProcessedPackets++;
         processedTotalLength += packet->getTotalLength();
         if (matchesPacket(packet)) {
