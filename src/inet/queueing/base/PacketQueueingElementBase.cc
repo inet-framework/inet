@@ -37,52 +37,72 @@ void PacketQueueingElementBase::animateSend(Packet *packet, cGate *gate)
     }
 }
 
-void PacketQueueingElementBase::checkPacketPushingSupport(cGate *gate) const
+void PacketQueueingElementBase::checkPacketOperationSupport(cGate *gate) const
 {
     auto startGate = findConnectedGate<IPacketQueueingElement>(gate, -1);
-    if (startGate != nullptr) {
-        auto startElement = check_and_cast<IPacketQueueingElement *>(startGate->getOwnerModule());
-        if (!startElement->supportsPacketPushing(startGate))
-            throw cRuntimeError(startGate->getOwnerModule(), "doesn't support push on gate %s", startGate->getFullPath().c_str());
-    }
     auto endGate = findConnectedGate<IPacketQueueingElement>(gate, 1);
-    if (endGate != nullptr) {
-        auto endElement = check_and_cast<IPacketQueueingElement *>(endGate->getOwnerModule());
-        if (!endElement->supportsPacketPushing(endGate))
-            throw cRuntimeError(endGate->getOwnerModule(), "doesn't support push on gate %s", endGate->getFullPath().c_str());
+    auto startElement = startGate == nullptr ? nullptr : check_and_cast<IPacketQueueingElement *>(startGate->getOwnerModule());
+    auto endElement = endGate == nullptr ? nullptr : check_and_cast<IPacketQueueingElement *>(endGate->getOwnerModule());
+    if (startElement != nullptr && endElement != nullptr) {
+        bool startPushing = startElement->supportsPacketPushing(startGate);
+        bool startPulling = startElement->supportsPacketPulling(startGate);
+        bool startPassing = startElement->supportsPacketPassing(startGate);
+        bool startStreaming = startElement->supportsPacketStreaming(startGate);
+        bool endPushing = endElement->supportsPacketPushing(endGate);
+        bool endPulling = endElement->supportsPacketPulling(endGate);
+        bool endPassing = endElement->supportsPacketPassing(endGate);
+        bool endStreaming = endElement->supportsPacketStreaming(endGate);
+        bool bothPushing = startPushing && endPushing;
+        bool bothPulling = startPulling && endPulling;
+        bool bothPassing = startPassing && endPassing;
+        bool bothStreaming = startStreaming && endStreaming;
+        bool eitherPushing = startPushing || endPushing;
+        bool eitherPulling = startPulling || endPulling;
+        bool eitherPassing = startPassing || endPassing;
+        bool eitherStreaming = startStreaming || endStreaming;
+        if (!bothPushing && !bothPulling) {
+            if (eitherPushing) {
+                if (startPushing)
+                    throw cRuntimeError(endGate->getOwnerModule(), "doesn't support packet pushing on gate %s", endGate->getFullPath().c_str());
+                if (endPushing)
+                    throw cRuntimeError(startGate->getOwnerModule(), "doesn't support packet pushing on gate %s", startGate->getFullPath().c_str());
+            }
+            else if (eitherPulling) {
+                if (startPulling)
+                    throw cRuntimeError(endGate->getOwnerModule(), "doesn't support packet pulling on gate %s", endGate->getFullPath().c_str());
+                if (endPulling)
+                    throw cRuntimeError(startGate->getOwnerModule(), "doesn't support packet pulling on gate %s", startGate->getFullPath().c_str());
+            }
+            else
+                throw cRuntimeError(endGate->getOwnerModule(), "neither supports packet pushing nor packet pulling on gate %s", gate->getFullPath().c_str());
+        }
+        if (!bothPassing && !bothStreaming) {
+            if (eitherPassing) {
+                if (startPassing)
+                    throw cRuntimeError(endGate->getOwnerModule(), "doesn't support packet passing on gate %s", endGate->getFullPath().c_str());
+                if (endPassing)
+                    throw cRuntimeError(startGate->getOwnerModule(), "doesn't support packet passing on gate %s", startGate->getFullPath().c_str());
+            }
+            else if (eitherStreaming) {
+                if (startStreaming)
+                    throw cRuntimeError(endGate->getOwnerModule(), "doesn't support packet streaming on gate %s", endGate->getFullPath().c_str());
+                if (endStreaming)
+                    throw cRuntimeError(startGate->getOwnerModule(), "doesn't support packet streaming on gate %s", startGate->getFullPath().c_str());
+            }
+            else
+                throw cRuntimeError(endGate->getOwnerModule(), "neither supports packet passing nor packet streaming on gate %s", gate->getFullPath().c_str());
+        }
     }
-}
-
-void PacketQueueingElementBase::checkPacketPullingSupport(cGate *gate) const
-{
-    auto startGate = findConnectedGate<IPacketQueueingElement>(gate, -1);
-    if (startGate != nullptr) {
-        auto startElement = check_and_cast<IPacketQueueingElement *>(startGate->getOwnerModule());
-        if (!startElement->supportsPacketPulling(startGate))
-            throw cRuntimeError(startGate->getOwnerModule(), "doesn't support pull on gate %s", startGate->getFullPath().c_str());
+    else if (startElement != nullptr && endElement == nullptr) {
+        if (!startElement->supportsPacketSending(startGate))
+            throw cRuntimeError(startGate->getOwnerModule(), "doesn't support packet sending on gate %s", startGate->getFullPath().c_str());
     }
-    auto endGate = findConnectedGate<IPacketQueueingElement>(gate, 1);
-    if (endGate != nullptr) {
-        auto endElement = check_and_cast<IPacketQueueingElement *>(endGate->getOwnerModule());
-        if (!endElement->supportsPacketPulling(endGate))
-            throw cRuntimeError(endGate->getOwnerModule(), "doesn't support pull on gate %s", endGate->getFullPath().c_str());
+    else if (startElement == nullptr && endElement != nullptr) {
+        if (!endElement->supportsPacketSending(endGate))
+            throw cRuntimeError(endGate->getOwnerModule(), "doesn't support packet sending on gate %s", endGate->getFullPath().c_str());
     }
-}
-
-void PacketQueueingElementBase::checkPackingPushingOrPullingSupport(cGate *gate) const
-{
-    auto startGate = findConnectedGate<IPacketQueueingElement>(gate, -1);
-    if (startGate != nullptr) {
-        auto startElement = check_and_cast<IPacketQueueingElement *>(startGate->getOwnerModule());
-        if (!startElement->supportsPacketPushing(startGate) && !startElement->supportsPacketPulling(startGate))
-            throw cRuntimeError(startGate->getOwnerModule(), "neither supports push or pull on gate %s", startGate->getFullPath().c_str());
-    }
-    auto endGate = findConnectedGate<IPacketQueueingElement>(gate, 1);
-    if (endGate != nullptr) {
-        auto endElement = check_and_cast<IPacketQueueingElement *>(endGate->getOwnerModule());
-        if (!endElement->supportsPacketPushing(endGate) && !endElement->supportsPacketPulling(endGate))
-            throw cRuntimeError(endGate->getOwnerModule(), "neither supports push or pull on gate %s", endGate->getFullPath().c_str());
-    }
+    else
+        throw cRuntimeError("Cannot check packet operation support on gate %s", gate->getFullPath().c_str());
 }
 
 void PacketQueueingElementBase::pushOrSendPacket(Packet *packet, cGate *gate)
