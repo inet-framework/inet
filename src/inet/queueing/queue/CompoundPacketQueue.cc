@@ -69,6 +69,7 @@ Packet *CompoundPacketQueue::popPacket(cGate *gate)
 {
     Enter_Method("popPacket");
     auto packet = provider->popPacket(outputGate->getPathStartGate());
+    take(packet);
     emit(packetPoppedSignal, packet);
     updateDisplayString();
     return packet;

@@ -48,6 +48,7 @@ Packet *PacketDemultiplexer::popPacket(cGate *gate)
 {
     Enter_Method("popPacket");
     auto packet = provider->popPacket(inputGate->getPathStartGate());
+    take(packet);
     EV_INFO << "Forwarding popped packet " << packet->getName() << "." << endl;
     animateSend(packet, gate);
     numProcessedPackets++;

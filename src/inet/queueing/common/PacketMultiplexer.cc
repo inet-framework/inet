@@ -46,6 +46,7 @@ void PacketMultiplexer::initialize(int stage)
 void PacketMultiplexer::pushPacket(Packet *packet, cGate *gate)
 {
     Enter_Method("pushPacket");
+    take(packet);
     EV_INFO << "Forwarding pushed packet " << packet->getName() << "." << endl;
     processedTotalLength += packet->getDataLength();
     pushOrSendPacket(packet, outputGate, consumer);

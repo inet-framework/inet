@@ -37,6 +37,7 @@ void PacketDuplicator::initialize(int stage)
 void PacketDuplicator::pushPacket(Packet *packet, cGate *gate)
 {
     Enter_Method("pushPacket");
+    take(packet);
     int numDuplicates = par("numDuplicates");
     for (int i = 0; i < numDuplicates; i++) {
         EV_INFO << "Forwarding duplicate packet " << packet->getName() << "." << endl;
