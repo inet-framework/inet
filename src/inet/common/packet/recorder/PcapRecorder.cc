@@ -19,10 +19,12 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include "inet/common/packet/recorder/PcapngWriter.h"
 #include "inet/common/packet/recorder/PcapRecorder.h"
+#include "inet/common/packet/recorder/PcapWriter.h"
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/common/StringFormat.h"
 #include "inet/common/stlutils.h"
+#include "inet/common/StringFormat.h"
 
 namespace inet {
 
@@ -34,11 +36,12 @@ simsignal_t PcapRecorder::packetRecordedSignal = registerSignal("packetRecorded"
 
 PcapRecorder::~PcapRecorder()
 {
+    delete pcapWriter;
     for (auto helper : helpers)
         delete helper;
 }
 
-PcapRecorder::PcapRecorder() : cSimpleModule(), pcapWriter()
+PcapRecorder::PcapRecorder() : cSimpleModule()
 {
 }
 
@@ -115,8 +118,8 @@ void PcapRecorder::initialize()
     const char *file = par("pcapFile");
     recordPcap = *file != '\0';
     if (recordPcap && pcapLinkType != LINKTYPE_INVALID) {
-        pcapWriter.openPcap(file, snaplen, pcapLinkType);
-        pcapWriter.setFlushParameter(par("alwaysFlush").boolValue());
+        pcapWriter->open(file, snaplen, pcapLinkType);
+        pcapWriter->setFlush(par("alwaysFlush"));
     }
 
     WATCH(numRecorded);
@@ -174,17 +177,17 @@ void PcapRecorder::recordPacket(const cPacket *msg, bool l2r)
         auto protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
         if (contains(dumpProtocols, protocol)) {
             if (pcapLinkType == LINKTYPE_INVALID) {
-                ASSERT(!pcapWriter.isOpen());
+                ASSERT(!pcapWriter->isOpen());
                 pcapLinkType = protocolToLinkType(protocol);
                 if (pcapLinkType == LINKTYPE_INVALID)
                     throw cRuntimeError("Cannot determine the PCAP link type from protocol '%s', specify it in the pcapLinkType parameter", protocol->getName());
-                pcapWriter.openPcap(par("pcapFile"), snaplen, pcapLinkType);
-                pcapWriter.setFlushParameter(par("alwaysFlush").boolValue());
+                pcapWriter->open(par("pcapFile"), snaplen, pcapLinkType);
+                pcapWriter->setFlush(par("alwaysFlush"));
             }
             if (!matchesLinkType(protocol)) {
                 auto convertedPacket = tryConvertToLinkType(packet, protocol);
                 if (convertedPacket) {
-                    pcapWriter.writePacket(simTime(), convertedPacket);
+                    pcapWriter->writePacket(simTime(), convertedPacket);
                     numRecorded++;
                     emit(packetRecordedSignal, packet);
                     delete convertedPacket;
@@ -192,7 +195,7 @@ void PcapRecorder::recordPacket(const cPacket *msg, bool l2r)
                 }
                 throw cRuntimeError("The protocol '%s' doesn't match PCAP link type %d", protocol->getName(), pcapLinkType);
             }
-            pcapWriter.writePacket(simTime(), packet);
+            pcapWriter->writePacket(simTime(), packet);
             numRecorded++;
             emit(packetRecordedSignal, packet);
         }
@@ -202,7 +205,7 @@ void PcapRecorder::recordPacket(const cPacket *msg, bool l2r)
 void PcapRecorder::finish()
 {
     packetDumper.dump("", "pcapRecorder finished");
-    pcapWriter.closePcap();
+    pcapWriter->close();
 }
 
 bool PcapRecorder::matchesLinkType(const Protocol *protocol) const
