@@ -25,7 +25,7 @@
 namespace inet {
 namespace queueing {
 
-class INET_API PacketQueueingElementBase : public cSimpleModule, public IPacketQueueingElement
+class INET_API PacketQueueingElementBase : public cSimpleModule, public virtual IPacketQueueingElement
 {
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }

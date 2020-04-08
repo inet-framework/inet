@@ -24,7 +24,7 @@
 namespace inet {
 namespace queueing {
 
-class INET_API PacketClassifierBase : public PassivePacketSinkBase, public IActivePacketSource
+class INET_API PacketClassifierBase : public PassivePacketSinkBase, public virtual IActivePacketSource
 {
   protected:
     cGate *inputGate = nullptr;

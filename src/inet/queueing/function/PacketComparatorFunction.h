@@ -25,7 +25,7 @@ namespace queueing {
 
 typedef int (*PacketComparatorFunction)(Packet *packet1, Packet *packet2);
 
-class INET_API CPacketComparatorFunction : public cObject, public IPacketComparatorFunction
+class INET_API CPacketComparatorFunction : public cObject, public virtual IPacketComparatorFunction
 {
   protected:
     PacketComparatorFunction packetComparatorFunction;

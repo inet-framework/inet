@@ -24,7 +24,7 @@
 namespace inet {
 namespace queueing {
 
-class INET_API PassivePacketSinkBase : public PacketSinkBase, public IPassivePacketSink
+class INET_API PassivePacketSinkBase : public PacketSinkBase, public virtual IPassivePacketSink
 {
   protected:
     virtual void handleMessage(cMessage *message) override;

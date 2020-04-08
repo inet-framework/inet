@@ -25,7 +25,7 @@
 namespace inet {
 namespace queueing {
 
-class INET_API PcapFilePacketProducer : public PacketQueueingElementBase, public IActivePacketSource
+class INET_API PcapFilePacketProducer : public PacketQueueingElementBase, public virtual IActivePacketSource
 {
   protected:
     cGate *outputGate = nullptr;

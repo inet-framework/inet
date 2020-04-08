@@ -25,7 +25,7 @@ namespace queueing {
 
 typedef Packet *(*PacketDropperFunction)(IPacketCollection *packets);
 
-class INET_API CPacketDropperFunction : public cObject, public IPacketDropperFunction
+class INET_API CPacketDropperFunction : public cObject, public virtual IPacketDropperFunction
 {
   protected:
     PacketDropperFunction packetDropperFunction;

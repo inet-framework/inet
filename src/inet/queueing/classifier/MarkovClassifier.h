@@ -25,7 +25,7 @@
 namespace inet {
 namespace queueing {
 
-class INET_API MarkovClassifier : public PacketClassifierBase, public IActivePacketSink, public IPassivePacketSource
+class INET_API MarkovClassifier : public PacketClassifierBase, public virtual IActivePacketSink, public virtual IPassivePacketSource
 {
   protected:
     IPassivePacketSource *provider = nullptr;

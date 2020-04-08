@@ -28,7 +28,7 @@ namespace queueing {
 /**
  * This class defines the interface for packet queues.
  */
-class INET_API IPacketQueue : public IPacketCollection, public IPassivePacketSink, public IPassivePacketSource
+class INET_API IPacketQueue : public virtual IPacketCollection, public virtual IPassivePacketSink, public virtual IPassivePacketSource
 {
 };
 

@@ -24,7 +24,7 @@
 namespace inet {
 namespace queueing {
 
-class INET_API PacketMeterBase : public PacketProcessorBase, public IPacketMeter
+class INET_API PacketMeterBase : public PacketFlowBase, public virtual IPacketMeter
 {
   protected:
     cGate *inputGate = nullptr;
