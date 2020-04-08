@@ -25,7 +25,7 @@ package inet.queueing.base;
 simple PacketServerBase extends PacketSinkBase
 {
     parameters:
-        displayStringTextFormat = default("served %p pk (%l)\n%s");
+        displayStringTextFormat = default("served %p pk (%l)");
         @display("i=block/server");
         @signal[packetServed](type=inet::Packet);
         @statistic[packetServed](title="packets served"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);

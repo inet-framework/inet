@@ -73,7 +73,7 @@ void PcapFilePacketProducer::schedulePacket()
 void PcapFilePacketProducer::handleCanPushPacket(cGate *gate)
 {
     Enter_Method("handleCanPushPacket");
-    if (gate->getPathStartGate() == outputGate)
+    if (gate == outputGate)
         schedulePacket();
 }
 
