@@ -76,7 +76,7 @@ protected:
              risInt(risInt),
              ourpa(ourpa) {}
          virtual m getLength() const {return length;}
-         virtual double getMinGain() const override;
+         virtual double getMinGain() const override {return 0;}
          virtual double getMaxGain() const override;
          virtual double computeGain(const Quaternion direction) const override;
          virtual double getAngolo(Coord p1, Coord p2)const;
