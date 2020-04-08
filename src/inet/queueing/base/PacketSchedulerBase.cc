@@ -36,9 +36,9 @@ void PacketSchedulerBase::initialize(int stage)
         }
     }
     else if (stage == INITSTAGE_QUEUEING) {
-        for (int i = 0; i < gateSize("in"); i++)
-            checkPacketPullingSupport(inputGates[i]);
-        checkPacketPullingSupport(outputGate);
+        for (int i = 0; i < (int)inputGates.size(); i++)
+            checkPacketOperationSupport(inputGates[i]);
+        checkPacketOperationSupport(outputGate);
     }
 }
 

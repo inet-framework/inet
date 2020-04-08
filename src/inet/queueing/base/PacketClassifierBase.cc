@@ -36,8 +36,8 @@ void PacketClassifierBase::initialize(int stage)
     }
     else if (stage == INITSTAGE_QUEUEING) {
         for (int i = 0; i < gateSize("out"); i++)
-            checkPacketPushingSupport(outputGates[i]);
-        checkPacketPushingSupport(inputGate);
+            checkPacketOperationSupport(outputGates[i]);
+        checkPacketOperationSupport(inputGate);
     }
 }
 

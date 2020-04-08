@@ -33,7 +33,7 @@ void PcapFilePacketProducer::initialize(int stage)
         pcapReader.openPcap(par("filename"), par("packetNameFormat"));
     }
     else if (stage == INITSTAGE_QUEUEING) {
-        checkPacketPushingSupport(outputGate);
+        checkPacketOperationSupport(outputGate);
         schedulePacket();
     }
 }
