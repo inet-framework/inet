@@ -25,7 +25,9 @@ void PacketQueueingElementBase::animateSend(Packet *packet, cGate *gate)
 {
     auto envir = getEnvir();
     if (envir->isGUI()) {
+        auto endGate = gate->getPathEndGate();
         packet->setSentFrom(gate->getOwnerModule(), gate->getId(), simTime());
+        packet->setArrival(endGate->getOwnerModule()->getId(), endGate->getId(), simTime());
         if (gate->getNextGate() != nullptr) {
             envir->beginSend(packet);
             while (gate->getNextGate() != nullptr) {
