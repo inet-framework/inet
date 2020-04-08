@@ -44,7 +44,7 @@ void PacketSchedulerBase::initialize(int stage)
 
 bool PacketSchedulerBase::canPullSomePacket(cGate *gate) const
 {
-    for (int i = 0; i < gateSize("in"); i++) {
+    for (int i = 0; i < (int)inputGates.size(); i++) {
         auto inputProvider = providers[i];
         if (inputProvider->canPullSomePacket(inputGates[i]->getPathStartGate()))
             return true;
@@ -61,10 +61,10 @@ Packet *PacketSchedulerBase::pullPacket(cGate *gate)
     auto packet = providers[index]->pullPacket(inputGates[index]->getPathStartGate());
     take(packet);
     EV_INFO << "Scheduling packet " << packet->getName() << ".\n";
+    animateSend(packet, outputGate);
     numProcessedPackets++;
     processedTotalLength += packet->getDataLength();
     updateDisplayString();
-    animateSend(packet, outputGate);
     emit(packetPulledSignal, packet);
     return packet;
 }

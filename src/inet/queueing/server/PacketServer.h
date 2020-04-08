@@ -40,9 +40,6 @@ class INET_API PacketServer : public PacketServerBase
   public:
     virtual ~PacketServer() { cancelAndDelete(processingTimer); delete packet; }
 
-    virtual IPassivePacketSource *getProvider(cGate *gate) override { return provider; }
-    virtual IPassivePacketSink *getConsumer(cGate *gate) override { return consumer; }
-
     virtual void handleCanPushPacket(cGate *gate) override;
     virtual void handleCanPullPacket(cGate *gate) override;
 
