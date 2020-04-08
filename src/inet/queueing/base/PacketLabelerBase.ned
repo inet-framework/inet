@@ -25,7 +25,4 @@ simple PacketLabelerBase extends PacketMarkerBase
     parameters:
         string labels = default(""); // a space separated list of labels
         @display("i=block/star");
-    gates:
-        input in @labels(push);
-        output out @labels(push);
 }

@@ -31,7 +31,4 @@ simple RateMeter extends PacketMeterBase like IPacketMeter
         double alpha; // parameter in the range of (0, 1) for the exponential weight decrease
         @display("i=block/star");
         @class(RateMeter);
-    gates:
-        input in @labels(push);
-        output out @labels(push);
 }
