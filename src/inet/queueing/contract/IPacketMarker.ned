@@ -25,7 +25,7 @@ package inet.queueing.contract;
 // a label) to the packet based on the data and meta data it contains. The packets
 // are processed individually.
 //
-moduleinterface IPacketMarker extends IPacketSink, IPacketSource
+moduleinterface IPacketMarker extends IPacketFlow
 {
     parameters:
         @display("i=block/star");
