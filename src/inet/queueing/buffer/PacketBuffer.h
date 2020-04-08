@@ -26,7 +26,7 @@
 namespace inet {
 namespace queueing {
 
-class INET_API PacketBuffer : public PacketBufferBase, public IPacketBuffer
+class INET_API PacketBuffer : public PacketBufferBase, public virtual IPacketBuffer
 {
   protected:
     int packetCapacity = -1;

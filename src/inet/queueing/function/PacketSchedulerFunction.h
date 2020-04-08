@@ -25,7 +25,7 @@ namespace queueing {
 
 typedef int (*PacketSchedulerFunction)(const std::vector<IPassivePacketSource *>& providers);
 
-class INET_API CPacketSchedulerFunction : public cObject, public IPacketSchedulerFunction
+class INET_API CPacketSchedulerFunction : public cObject, public virtual IPacketSchedulerFunction
 {
   protected:
     PacketSchedulerFunction packetSchedulerFunction;

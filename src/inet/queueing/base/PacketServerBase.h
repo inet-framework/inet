@@ -25,7 +25,7 @@
 namespace inet {
 namespace queueing {
 
-class INET_API PacketServerBase : public PacketSinkBase, public IActivePacketSink, public IActivePacketSource
+class INET_API PacketServerBase : public PacketSinkBase, public virtual IActivePacketSink, public virtual IActivePacketSource
 {
   public:
     static simsignal_t packetServedSignal;

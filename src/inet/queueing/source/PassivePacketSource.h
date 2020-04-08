@@ -25,7 +25,7 @@
 namespace inet {
 namespace queueing {
 
-class INET_API PassivePacketSource : public PacketSourceBase, public IPassivePacketSource
+class INET_API PassivePacketSource : public PacketSourceBase, public virtual IPassivePacketSource
 {
   protected:
     cGate *outputGate = nullptr;

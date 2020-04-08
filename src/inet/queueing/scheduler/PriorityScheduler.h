@@ -24,7 +24,7 @@
 namespace inet {
 namespace queueing {
 
-class INET_API PriorityScheduler : public PacketSchedulerBase, public IPacketCollection
+class INET_API PriorityScheduler : public PacketSchedulerBase, public virtual IPacketCollection
 {
   protected:
     std::vector<IPacketCollection *> collections;

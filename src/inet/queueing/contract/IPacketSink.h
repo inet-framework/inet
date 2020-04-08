@@ -28,7 +28,7 @@ namespace queueing {
  * This class defines the interface for packet sinks which can be both passive
  * and active.
  */
-class INET_API IPacketSink : public IPassivePacketSink, public IActivePacketSink
+class INET_API IPacketSink : public virtual IPassivePacketSink, public virtual IActivePacketSink
 {
 };
 

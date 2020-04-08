@@ -25,7 +25,7 @@
 namespace inet {
 namespace queueing {
 
-class INET_API PacketSchedulerBase : public PacketProcessorBase, public IActivePacketSink, public IPassivePacketSource
+class INET_API PacketSchedulerBase : public PacketProcessorBase, public virtual IActivePacketSink, public virtual IPassivePacketSource
 {
   protected:
     std::vector<cGate *> inputGates;

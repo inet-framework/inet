@@ -24,7 +24,7 @@
 namespace inet {
 namespace queueing {
 
-class INET_API PacketDuplicatorBase : public PacketQueueingElementBase, public IPacketDuplicator
+class INET_API PacketDuplicatorBase : public PacketQueueingElementBase, public virtual IPacketDuplicator
 {
   protected:
     cGate *inputGate = nullptr;

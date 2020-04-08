@@ -24,7 +24,7 @@
 namespace inet {
 namespace queueing {
 
-class INET_API MarkovScheduler : public PacketSchedulerBase, public IPassivePacketSink, public IActivePacketSource
+class INET_API MarkovScheduler : public PacketSchedulerBase, public virtual IPassivePacketSink, public virtual IActivePacketSource
 {
   protected:
     std::vector<IActivePacketSource *> producers;

@@ -24,7 +24,7 @@
 namespace inet {
 namespace queueing {
 
-class INET_API LabelScheduler : public PacketSchedulerBase, public IPacketCollection
+class INET_API LabelScheduler : public PacketSchedulerBase, public virtual IPacketCollection
 {
   protected:
     int defaultGateIndex = -1;
