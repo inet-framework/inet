@@ -25,7 +25,7 @@ package inet.queueing.contract;
 // the packet rate) to the packets based on the data and meta data they contain.
 // The packets are processed as part of a stream.
 //
-moduleinterface IPacketMeter extends IPacketSink, IPacketSource
+moduleinterface IPacketMeter extends IPacketFlow
 {
     parameters:
         @display("i=block/star");
