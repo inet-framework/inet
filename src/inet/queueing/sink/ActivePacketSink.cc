@@ -57,6 +57,7 @@ void ActivePacketSink::scheduleCollectionTimer()
 void ActivePacketSink::collectPacket()
 {
     auto packet = provider->pullPacket(inputGate->getPathStartGate());
+    take(packet);
     EV_INFO << "Collecting packet " << packet->getName() << "." << endl;
     numProcessedPackets++;
     processedTotalLength += packet->getDataLength();

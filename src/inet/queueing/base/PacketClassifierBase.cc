@@ -52,6 +52,7 @@ bool PacketClassifierBase::canPushSomePacket(cGate *gate) const
 void PacketClassifierBase::pushPacket(Packet *packet, cGate *gate)
 {
     Enter_Method("pushPacket");
+    take(packet);
     emit(packetPushedSignal, packet);
     EV_INFO << "Classifying packet " << packet->getName() << ".\n";
     int index = classifyPacket(packet);

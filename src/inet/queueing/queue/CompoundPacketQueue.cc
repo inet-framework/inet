@@ -69,6 +69,7 @@ Packet *CompoundPacketQueue::pullPacket(cGate *gate)
 {
     Enter_Method("pullPacket");
     auto packet = provider->pullPacket(outputGate->getPathStartGate());
+    take(packet);
     emit(packetPulledSignal, packet);
     updateDisplayString();
     return packet;

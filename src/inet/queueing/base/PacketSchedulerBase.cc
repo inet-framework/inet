@@ -59,6 +59,7 @@ Packet *PacketSchedulerBase::pullPacket(cGate *gate)
     if (index < 0 || static_cast<unsigned int>(index) >= inputGates.size())
         throw cRuntimeError("Scheduled packet from invalid input gate: %d", index);
     auto packet = providers[index]->pullPacket(inputGates[index]->getPathStartGate());
+    take(packet);
     EV_INFO << "Scheduling packet " << packet->getName() << ".\n";
     numProcessedPackets++;
     processedTotalLength += packet->getDataLength();

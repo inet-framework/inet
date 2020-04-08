@@ -124,7 +124,6 @@ void PacketQueueingElementBase::pushOrSendPacket(Packet *packet, cGate *gate, IP
         consumer->pushPacket(packet, gate->getPathEndGate());
     }
     else {
-        take(packet);
         send(packet, gate);
     }
 }
