@@ -36,8 +36,8 @@ void PacketFilterBase::initialize(int stage)
         droppedTotalLength = b(0);
     }
     else if (stage == INITSTAGE_QUEUEING) {
-        checkPackingPushingOrPullingSupport(inputGate);
-        checkPackingPushingOrPullingSupport(outputGate);
+        checkPacketOperationSupport(inputGate);
+        checkPacketOperationSupport(outputGate);
     }
 }
 

@@ -42,8 +42,8 @@ void CompoundPacketQueue::initialize(int stage)
         WATCH(numCreatedPackets);
     }
     else if (stage == INITSTAGE_QUEUEING) {
-        checkPacketPushingSupport(inputGate);
-        checkPacketPullingSupport(outputGate);
+        checkPacketOperationSupport(inputGate);
+        checkPacketOperationSupport(outputGate);
     }
     else if (stage == INITSTAGE_LAST)
         updateDisplayString();
