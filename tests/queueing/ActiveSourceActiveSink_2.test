@@ -34,4 +34,4 @@ cmdenv-event-banners = false
 %exitcode: 1
 
 %contains: stderr
-doesn't support pop on gate
+doesn't support pull on gate
