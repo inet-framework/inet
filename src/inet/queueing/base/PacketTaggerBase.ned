@@ -23,7 +23,7 @@ import inet.queueing.contract.IPacketSource;
 //
 // This is a base module for various packet tagger modules.
 //
-simple PacketTaggerBase extends PacketProcessorBase
+simple PacketTaggerBase extends PacketMarkerBase
 {
     parameters:
         int dscp = default(-1); // specifies differentiated services code point
@@ -34,9 +34,7 @@ simple PacketTaggerBase extends PacketProcessorBase
         int vlanId = default(-1); // specifies VLAN, unused by default
         int userPriority = default(-1); // specifies user priority, unused by default
         double transmissionPower @unit(W) = default(nan W); // specifies signal transmission power, unused by default
+        displayStringTextFormat = default("tagged %p pk (%l)");
         @class(PacketTaggerBase);
         @display("i=block/star");
-    gates:
-        input in;
-        output out;
 }

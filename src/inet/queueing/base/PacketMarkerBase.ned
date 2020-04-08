@@ -24,7 +24,7 @@ package inet.queueing.base;
 //
 // @see ~IPacketMarker, ~PacketLabeler
 //
-simple PacketMarkerBase extends PacketProcessorBase
+simple PacketMarkerBase extends PacketFlowBase
 {
     parameters:
         displayStringTextFormat = default("marked %p pk (%l)");

@@ -18,7 +18,7 @@
 #ifndef __INET_PACKETMARKERBASE_H
 #define __INET_PACKETMARKERBASE_H
 
-#include "inet/queueing/base/PacketProcessorBase.h"
+#include "inet/queueing/base/PacketFlowBase.h"
 #include "inet/queueing/contract/IPacketMarker.h"
 
 namespace inet {
@@ -27,34 +27,8 @@ namespace queueing {
 class INET_API PacketMarkerBase : public PacketFlowBase, public virtual IPacketMarker
 {
   protected:
-    cGate *inputGate = nullptr;
-    IActivePacketSource *producer = nullptr;
-    IPassivePacketSource *provider = nullptr;
-
-    cGate *outputGate = nullptr;
-    IPassivePacketSink *consumer = nullptr;
-    IActivePacketSink *collector = nullptr;
-
-  protected:
-    virtual void initialize(int stage) override;
+    virtual void processPacket(Packet *packet) override;
     virtual void markPacket(Packet *packet) = 0;
-
-  public:
-    virtual IPassivePacketSink *getConsumer(cGate *gate) override { return this; }
-    virtual IPassivePacketSource *getProvider(cGate *gate) override { return this; }
-
-    virtual bool supportsPacketPushing(cGate *gate) const override { return true; }
-    virtual bool canPushSomePacket(cGate *gate) const override { return true; }
-    virtual bool canPushPacket(Packet *packet, cGate *gate) const override { return true; }
-    virtual void pushPacket(Packet *packet, cGate *gate) override;
-
-    virtual bool supportsPacketPulling(cGate *gate) const override { return true; }
-    virtual bool canPullSomePacket(cGate *gate) const override;
-    virtual Packet *canPullPacket(cGate *gate) const override { throw cRuntimeError("Invalid operation"); }
-    virtual Packet *pullPacket(cGate *gate) override;
-
-    virtual void handleCanPushPacket(cGate *gate) override;
-    virtual void handleCanPullPacket(cGate *gate) override;
 };
 
 } // namespace queueing

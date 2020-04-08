@@ -19,13 +19,12 @@
 #define __INET_PACKETGATE_H
 
 #include "inet/queueing/base/PacketProcessorBase.h"
-#include "inet/queueing/contract/IPacketSink.h"
-#include "inet/queueing/contract/IPacketSource.h"
+#include "inet/queueing/contract/IPacketFlow.h"
 
 namespace inet {
 namespace queueing {
 
-class INET_API PacketGate : public PacketProcessorBase, public IPacketSource, public IPacketSink
+class INET_API PacketGate : public PacketProcessorBase, public virtual IPacketFlow
 {
   protected:
     cGate *inputGate = nullptr;
