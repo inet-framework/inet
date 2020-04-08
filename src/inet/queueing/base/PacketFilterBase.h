@@ -41,6 +41,7 @@ class INET_API PacketFilterBase : public PacketProcessorBase, public virtual IPa
   protected:
     virtual void initialize(int stage) override;
     virtual bool matchesPacket(Packet *packet) = 0;
+    virtual void dropPacket(Packet *packet);
     virtual void dropPacket(Packet *packet, PacketDropReason reason, int limit = -1) override;
     virtual const char *resolveDirective(char directive) const override;
 

@@ -52,7 +52,7 @@ void PacketFilterBase::pushPacket(Packet *packet, cGate *gate)
     }
     else {
         EV_INFO << "Filtering out packet " << packet->getName() << "." << endl;
-        dropPacket(packet, OTHER_PACKET_DROP);
+        dropPacket(packet);
     }
     numProcessedPackets++;
     processedTotalLength += packet->getTotalLength();
@@ -74,7 +74,7 @@ bool PacketFilterBase::canPullSomePacket(cGate *gate) const
             packet = provider->pullPacket(providerGate);
             const_cast<PacketFilterBase *>(this)->take(packet);
             EV_INFO << "Filtering out packet " << packet->getName() << "." << endl;
-            nonConstThisPtr->dropPacket(packet, OTHER_PACKET_DROP);
+            nonConstThisPtr->dropPacket(packet);
             nonConstThisPtr->numProcessedPackets++;
             nonConstThisPtr->processedTotalLength += packet->getTotalLength();
             updateDisplayString();
@@ -100,7 +100,7 @@ Packet *PacketFilterBase::pullPacket(cGate *gate)
         }
         else {
             EV_INFO << "Filtering out packet " << packet->getName() << "." << endl;
-            dropPacket(packet, OTHER_PACKET_DROP);
+            dropPacket(packet);
         }
     }
 }
@@ -117,6 +117,11 @@ void PacketFilterBase::handleCanPullPacket(cGate *gate)
     Enter_Method("handleCanPullPacket");
     if (collector != nullptr)
         collector->handleCanPullPacket(outputGate);
+}
+
+void PacketFilterBase::dropPacket(Packet *packet)
+{
+    dropPacket(packet, OTHER_PACKET_DROP);
 }
 
 void PacketFilterBase::dropPacket(Packet *packet, PacketDropReason reason, int limit)
