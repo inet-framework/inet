@@ -87,11 +87,11 @@ cmdenv-event-banners = false
 %contains: stdout
 Producing packet sourceApplication-0.
 Pushing packet sourceApplication-0 into the queue.
-Popping packet sourceApplication-0 from the queue.
+Pulling packet sourceApplication-0 from the queue.
 Processing packet sourceApplication-0 started.
 Producing packet sourceApplication-0.
 Pushing packet sourceApplication-0 into the queue.
-Popping packet sourceApplication-0 from the queue.
+Pulling packet sourceApplication-0 from the queue.
 Processing packet sourceApplication-0 started.
 
 Running simulation...
@@ -99,19 +99,19 @@ Producing packet sourceApplication-1.
 Pushing packet sourceApplication-1 into the queue.
 Processing packet sourceApplication-0 ended.
 Delaying packet sourceApplication-0.
-Popping packet sourceApplication-1 from the queue.
+Pulling packet sourceApplication-1 from the queue.
 Processing packet sourceApplication-1 started.
 Producing packet sourceApplication-1.
 Pushing packet sourceApplication-1 into the queue.
 Processing packet sourceApplication-0 ended.
 Delaying packet sourceApplication-0.
-Popping packet sourceApplication-1 from the queue.
+Pulling packet sourceApplication-1 from the queue.
 Processing packet sourceApplication-1 started.
 Processing packet sourceApplication-1 ended.
 Delaying packet sourceApplication-1.
 Producing packet sourceApplication-2.
 Pushing packet sourceApplication-2 into the queue.
-Popping packet sourceApplication-2 from the queue.
+Pulling packet sourceApplication-2 from the queue.
 Processing packet sourceApplication-2 started.
 Consuming packet sourceApplication-0.
 Consuming packet sourceApplication-0.
@@ -121,11 +121,11 @@ Producing packet sourceApplication-3.
 Pushing packet sourceApplication-3 into the queue.
 Producing packet sourceApplication-2.
 Pushing packet sourceApplication-2 into the queue.
-Popping packet sourceApplication-2 from the queue.
+Pulling packet sourceApplication-2 from the queue.
 Processing packet sourceApplication-2 started.
 Processing packet sourceApplication-2 ended.
 Delaying packet sourceApplication-2.
-Popping packet sourceApplication-3 from the queue.
+Pulling packet sourceApplication-3 from the queue.
 Processing packet sourceApplication-3 started.
 Producing packet sourceApplication-3.
 Pushing packet sourceApplication-3 into the queue.
@@ -138,11 +138,11 @@ Producing packet sourceApplication-4.
 Pushing packet sourceApplication-4 into the queue.
 Producing packet sourceApplication-4.
 Pushing packet sourceApplication-4 into the queue.
-Popping packet sourceApplication-4 from the queue.
+Pulling packet sourceApplication-4 from the queue.
 Processing packet sourceApplication-4 started.
 Processing packet sourceApplication-2 ended.
 Delaying packet sourceApplication-2.
-Popping packet sourceApplication-3 from the queue.
+Pulling packet sourceApplication-3 from the queue.
 Processing packet sourceApplication-3 started.
 Consuming packet sourceApplication-3.
 Processing packet sourceApplication-4 ended.
@@ -151,11 +151,11 @@ Producing packet sourceApplication-5.
 Pushing packet sourceApplication-5 into the queue.
 Processing packet sourceApplication-3 ended.
 Delaying packet sourceApplication-3.
-Popping packet sourceApplication-4 from the queue.
+Pulling packet sourceApplication-4 from the queue.
 Processing packet sourceApplication-4 started.
 Producing packet sourceApplication-5.
 Pushing packet sourceApplication-5 into the queue.
-Popping packet sourceApplication-5 from the queue.
+Pulling packet sourceApplication-5 from the queue.
 Processing packet sourceApplication-5 started.
 Consuming packet sourceApplication-3.
 Producing packet sourceApplication-6.
@@ -165,13 +165,13 @@ Pushing packet sourceApplication-7 into the queue.
 Consuming packet sourceApplication-2.
 Processing packet sourceApplication-4 ended.
 Delaying packet sourceApplication-4.
-Popping packet sourceApplication-5 from the queue.
+Pulling packet sourceApplication-5 from the queue.
 Processing packet sourceApplication-5 started.
 Producing packet sourceApplication-8.
 Pushing packet sourceApplication-8 into the queue.
 Processing packet sourceApplication-5 ended.
 Delaying packet sourceApplication-5.
-Popping packet sourceApplication-6 from the queue.
+Pulling packet sourceApplication-6 from the queue.
 Processing packet sourceApplication-6 started.
 Producing packet sourceApplication-6.
 Pushing packet sourceApplication-6 into the queue.
@@ -182,16 +182,16 @@ Producing packet sourceApplication-9.
 Pushing packet sourceApplication-9 into the queue.
 Processing packet sourceApplication-5 ended.
 Delaying packet sourceApplication-5.
-Popping packet sourceApplication-6 from the queue.
+Pulling packet sourceApplication-6 from the queue.
 Processing packet sourceApplication-6 started.
 Processing packet sourceApplication-6 ended.
 Delaying packet sourceApplication-6.
-Popping packet sourceApplication-7 from the queue.
+Pulling packet sourceApplication-7 from the queue.
 Processing packet sourceApplication-7 started.
 Producing packet sourceApplication-7.
 Pushing packet sourceApplication-7 into the queue.
 Consuming packet sourceApplication-5.
 Processing packet sourceApplication-7 ended.
 Delaying packet sourceApplication-7.
-Popping packet sourceApplication-8 from the queue.
+Pulling packet sourceApplication-8 from the queue.
 Processing packet sourceApplication-8 started.
