@@ -60,7 +60,7 @@ Producing packet producer-1.
 Classifying packet producer-1.
 Pushing packet producer-1 into the queue.
 Adding packet producer-1 to the buffer.
-Popping packet producer-1 from the queue.
+Pulling packet producer-1 from the queue.
 Removing packet producer-1 from the buffer.
 Scheduling packet producer-1.
 Collecting packet producer-1.
@@ -68,7 +68,7 @@ Producing packet producer-2.
 Classifying packet producer-2.
 Pushing packet producer-2 into the queue.
 Adding packet producer-2 to the buffer.
-Popping packet producer-2 from the queue.
+Pulling packet producer-2 from the queue.
 Removing packet producer-2 from the buffer.
 Scheduling packet producer-2.
 Collecting packet producer-2.
@@ -76,7 +76,7 @@ Producing packet producer-3.
 Classifying packet producer-3.
 Pushing packet producer-3 into the queue.
 Adding packet producer-3 to the buffer.
-Popping packet producer-3 from the queue.
+Pulling packet producer-3 from the queue.
 Removing packet producer-3 from the buffer.
 Scheduling packet producer-3.
 Collecting packet producer-3.
@@ -88,7 +88,7 @@ Producing packet producer-5.
 Classifying packet producer-5.
 Pushing packet producer-5 into the queue.
 Adding packet producer-5 to the buffer.
-Popping packet producer-4 from the queue.
+Pulling packet producer-4 from the queue.
 Removing packet producer-4 from the buffer.
 Scheduling packet producer-4.
 Collecting packet producer-4.
@@ -96,7 +96,7 @@ Producing packet producer-6.
 Classifying packet producer-6.
 Pushing packet producer-6 into the queue.
 Adding packet producer-6 to the buffer.
-Popping packet producer-6 from the queue.
+Pulling packet producer-6 from the queue.
 Removing packet producer-6 from the buffer.
 Scheduling packet producer-6.
 Collecting packet producer-6.
@@ -108,11 +108,11 @@ Producing packet producer-8.
 Classifying packet producer-8.
 Pushing packet producer-8 into the queue.
 Adding packet producer-8 to the buffer.
-Popping packet producer-8 from the queue.
+Pulling packet producer-8 from the queue.
 Removing packet producer-8 from the buffer.
 Scheduling packet producer-8.
 Collecting packet producer-8.
-Popping packet producer-5 from the queue.
+Pulling packet producer-5 from the queue.
 Removing packet producer-5 from the buffer.
 Scheduling packet producer-5.
 Collecting packet producer-5.
