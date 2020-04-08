@@ -116,6 +116,13 @@ void PcapRecorder::initialize()
 
     pcapLinkType = (PcapLinkType)par("pcapLinkType").intValue();
     const char *file = par("pcapFile");
+    const char *fileFormat = par("fileFormat");
+    if (!strcmp(fileFormat, "pcap"))
+        pcapWriter = new PcapWriter();
+    else if (!strcmp(fileFormat, "pcapng"))
+        pcapWriter = new PcapngWriter();
+    else
+        throw cRuntimeError("Unknown fileFormat parameter");
     recordPcap = *file != '\0';
     if (recordPcap && pcapLinkType != LINKTYPE_INVALID) {
         pcapWriter->open(file, snaplen, pcapLinkType);
@@ -212,6 +219,8 @@ bool PcapRecorder::matchesLinkType(const Protocol *protocol) const
 {
     if (protocol == nullptr)
         return false;
+    else if (*protocol == Protocol::ethernetPhy)
+        return pcapLinkType == LINKTYPE_ETHERNET_MPACKET;
     else if (*protocol == Protocol::ethernetMac)
         return pcapLinkType == LINKTYPE_ETHERNET;
     else if (*protocol == Protocol::ppp)
