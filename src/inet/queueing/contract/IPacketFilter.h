@@ -18,8 +18,7 @@
 #ifndef __INET_IPACKETFILTER_H
 #define __INET_IPACKETFILTER_H
 
-#include "inet/queueing/contract/IPacketSink.h"
-#include "inet/queueing/contract/IPacketSource.h"
+#include "inet/queueing/contract/IPacketFlow.h"
 
 namespace inet {
 namespace queueing {
@@ -27,7 +26,7 @@ namespace queueing {
 /**
  * This class defines the interface for packet filters.
  */
-class INET_API IPacketFilter : public IPacketSink, public IPacketSource
+class INET_API IPacketFilter : public virtual IPacketFlow
 {
 };
 

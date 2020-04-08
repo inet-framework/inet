@@ -24,7 +24,7 @@ package inet.queueing.contract;
 // output. Processed packets are either dropped, if they don't match the filter
 // criteria, or they are passed through without any delay or reordering.
 //
-moduleinterface IPacketFilter extends IPacketSink, IPacketSource
+moduleinterface IPacketFilter extends IPacketFlow
 {
     parameters:
         @display("i=block/downarrow");

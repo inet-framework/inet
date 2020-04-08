@@ -18,8 +18,7 @@
 #ifndef __INET_IPACKETMARKER_H
 #define __INET_IPACKETMARKER_H
 
-#include "inet/queueing/contract/IPacketSink.h"
-#include "inet/queueing/contract/IPacketSource.h"
+#include "inet/queueing/contract/IPacketFlow.h"
 
 namespace inet {
 namespace queueing {
@@ -27,7 +26,7 @@ namespace queueing {
 /**
  * This class defines the interface for packet markers.
  */
-class INET_API IPacketMarker : public IPacketSink, public IPacketSource
+class INET_API IPacketMarker : public virtual IPacketFlow
 {
 };
 
