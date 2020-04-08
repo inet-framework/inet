@@ -58,8 +58,8 @@ void MarkovScheduler::initialize(int stage)
     }
     else if (stage == INITSTAGE_QUEUEING) {
         for (int i = 0; i < (int)inputGates.size(); i++)
-            checkPackingPushingOrPullingSupport(inputGates[i]);
-        checkPackingPushingOrPullingSupport(outputGate);
+            checkPacketOperationSupport(inputGates[i]);
+        checkPacketOperationSupport(outputGate);
         if (producers[state] != nullptr)
             producers[state]->handleCanPushPacket(inputGates[state]);
         scheduleWaitTimer();

@@ -34,7 +34,7 @@ void ActivePacketSink::initialize(int stage)
         collectionTimer = new cMessage("CollectionTimer");
     }
     else if (stage == INITSTAGE_QUEUEING)
-        checkPacketPullingSupport(inputGate);
+        checkPacketOperationSupport(inputGate);
 }
 
 void ActivePacketSink::handleMessage(cMessage *message)

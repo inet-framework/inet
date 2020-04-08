@@ -35,7 +35,7 @@ void PassivePacketSource::initialize(int stage)
         WATCH_PTR(nextPacket);
     }
     else if (stage == INITSTAGE_QUEUEING) {
-        checkPacketPullingSupport(outputGate);
+        checkPacketOperationSupport(outputGate);
         if (collector != nullptr)
             collector->handleCanPullPacket(outputGate);
     }

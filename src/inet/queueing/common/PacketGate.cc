@@ -48,8 +48,8 @@ void PacketGate::initialize(int stage)
 
     }
     else if (stage == INITSTAGE_QUEUEING) {
-        checkPackingPushingOrPullingSupport(inputGate);
-        checkPackingPushingOrPullingSupport(outputGate);
+        checkPacketOperationSupport(inputGate);
+        checkPacketOperationSupport(outputGate);
         if (changeIndex < (int)changeTimes.size())
             scheduleChangeTimer();
     }

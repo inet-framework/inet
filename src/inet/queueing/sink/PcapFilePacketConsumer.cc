@@ -43,7 +43,7 @@ void PcapFilePacketConsumer::initialize(int stage)
             throw cRuntimeError("invalid direction parameter value: %s", dirString);
     }
     else if (stage == INITSTAGE_QUEUEING) {
-        checkPacketPushingSupport(inputGate);
+        checkPacketOperationSupport(inputGate);
         if (producer != nullptr)
             producer->handleCanPushPacket(inputGate);
     }

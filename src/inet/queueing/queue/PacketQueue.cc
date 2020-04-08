@@ -44,8 +44,8 @@ void PacketQueue::initialize(int stage)
         packetDropperFunction = createDropperFunction(par("dropperClass"));
     }
     else if (stage == INITSTAGE_QUEUEING) {
-        checkPacketPushingSupport(inputGate);
-        checkPacketPullingSupport(outputGate);
+        checkPacketOperationSupport(inputGate);
+        checkPacketOperationSupport(outputGate);
         if (producer != nullptr)
             producer->handleCanPushPacket(inputGate);
     }

@@ -32,7 +32,7 @@ void EmptyPacketSource::initialize(int stage)
         consumer = findConnectedModule<IPassivePacketSink>(outputGate);
     }
     else if (stage == INITSTAGE_QUEUEING) {
-        checkPacketPushingSupport(outputGate);
+        checkPacketOperationSupport(outputGate);
     }
 }
 
