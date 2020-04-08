@@ -32,4 +32,4 @@ cmdenv-event-banners = false
 %exitcode: 1
 
 %contains: stderr
-doesn't support push on gate
+doesn't support packet pushing on gate
