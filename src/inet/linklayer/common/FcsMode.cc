@@ -26,7 +26,9 @@ namespace inet {
 
 FcsMode parseFcsMode(const char *fcsModeString)
 {
-    if (!strcmp(fcsModeString, "declared"))
+    if (!strcmp(fcsModeString, "disabled"))
+        return FCS_DISABLED;
+    else if (!strcmp(fcsModeString, "declared"))
         return FCS_DECLARED_CORRECT;
     else if (!strcmp(fcsModeString, "declaredCorrect"))
         return FCS_DECLARED_CORRECT;
