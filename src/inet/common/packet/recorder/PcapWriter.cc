@@ -53,10 +53,10 @@ struct pcaprec_hdr
 
 PcapWriter::~PcapWriter()
 {
-    closePcap();
+    close();
 }
 
-void PcapWriter::openPcap(const char *filename, unsigned int snaplen_par, uint32 network)
+void PcapWriter::open(const char *filename, unsigned int snaplen_par, uint32 network)
 {
     struct pcap_hdr fh;
 
@@ -109,7 +109,7 @@ void PcapWriter::writePacket(simtime_t stime, const Packet *packet)
         fflush(dumpfile);
 }
 
-void PcapWriter::closePcap()
+void PcapWriter::close()
 {
     if (dumpfile) {
         fclose(dumpfile);
