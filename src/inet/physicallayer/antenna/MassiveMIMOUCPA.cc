@@ -58,11 +58,12 @@ void MassiveMIMOUCPA::initialize(int stage) {
 		if (risInt < 0)
 		      risInt =  calcolaInt();
         cModule *radioModule = getParentModule();
+        IRadio * radio = check_and_cast<IRadio *>(radioModule);
         radioModule->subscribe(IRadio::radioModeChangedSignal, this);
         radioModule->subscribe(IRadio::receptionStateChangedSignal, this);
         radioModule->subscribe(IRadio::transmissionStateChangedSignal, this);
         radioModule->subscribe(IRadio::receivedSignalPartChangedSignal, this);
-        gain = makeShared<AntennaGain>(length, M, phiz, freq, distance, risInt, this);
+        gain = makeShared<AntennaGain>(length, M, phiz, freq, distance, risInt, this, radio);
 
 /*
         const char *energySourceModule = par("energySourceModule");

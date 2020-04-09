@@ -65,7 +65,6 @@ class INET_API MassiveMIMOURPA : public AntennaBase, protected cListener
         double distance;
         double risInt;
 
-        IRadio *radio = nullptr;
         IEnergySource *energySource = nullptr;
         int numAntennas;
         // internal state
@@ -73,9 +72,10 @@ class INET_API MassiveMIMOURPA : public AntennaBase, protected cListener
         double newConfigurtion = 0;
         W actualConsumption = W(0);
         MassiveMIMOURPA *ourpa;
+        IRadio *radio = nullptr;
 
       public:
-        AntennaGain(m length, int M, int N, double phiz, double freq, double distance, double risInt, MassiveMIMOURPA *ourpa ):
+        AntennaGain(m length, int M, int N, double phiz, double freq, double distance, double risInt, MassiveMIMOURPA *ourpa, IRadio *radio):
             length(length),
             M(M),
             N(N),
@@ -83,7 +83,8 @@ class INET_API MassiveMIMOURPA : public AntennaBase, protected cListener
             freq(freq),
             distance (distance),
             risInt(risInt),
-            ourpa(ourpa) {}
+            ourpa(ourpa),
+            radio(radio){}
         virtual m getLength() const {return length;}
         virtual double getMinGain() const override {return 0;}
         virtual double getMaxGain() const override;

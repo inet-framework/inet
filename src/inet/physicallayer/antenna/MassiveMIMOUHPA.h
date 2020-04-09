@@ -57,7 +57,6 @@ protected:
          double freq;
          double distance;
          double risInt;
-         IRadio *radio = nullptr;
          IEnergySource *energySource = nullptr;
          int numAntennas;
          // internal state
@@ -65,16 +64,18 @@ protected:
          double newConfigurtion = 0;
          W actualConsumption = W(0);
          MassiveMIMOUHPA *ourpa;
+         IRadio *radio = nullptr;
 
        public:
-         AntennaGain(m length, int M, double phiz, double freq, double distance, double risInt, MassiveMIMOUHPA *ourpa ):
+         AntennaGain(m length, int M, double phiz, double freq, double distance, double risInt, MassiveMIMOUHPA *ourpa, IRadio *radio):
              length(length),
              M(M),
              phiz(phiz),
              freq(freq),
              distance (distance),
              risInt(risInt),
-             ourpa(ourpa) {}
+             ourpa(ourpa),
+             radio(radio){}
          virtual m getLength() const {return length;}
          virtual double getMinGain() const override {return 0;}
          virtual double getMaxGain() const override;
