@@ -36,7 +36,7 @@ sim-time-limit = 10s
 cmdenv-event-banners = false
 *.producer.packetLength = intuniform(1B, 2B)
 *.producer.productionInterval = 1s
-*.filter.packetFilter = "totalLength(\"1 B\")"
+*.filter.packetFilter = "totalLength=~\"1 B\""
 
 %contains: stdout
 Producing packet producer-1.
