@@ -39,7 +39,7 @@ class INET_API IPassivePacketSource
      * The gate must be a valid gate of this module and it must support pulling
      * packets.
      */
-    virtual bool canPullSomePacket(cGate *gate = nullptr) const = 0;
+    virtual bool canPullSomePacket(cGate *gate) const = 0;
 
     /**
      * Returns the packet that can be pulled at the given gate. The returned
@@ -48,7 +48,7 @@ class INET_API IPassivePacketSource
      * The gate must be a valid gate of this module and it must support pushing
      * packets.
      */
-    virtual Packet *canPullPacket(cGate *gate = nullptr) const = 0;
+    virtual Packet *canPullPacket(cGate *gate) const = 0;
 
     /**
      * Pulls the packet from the packet source at the given gate. This operation
@@ -59,7 +59,7 @@ class INET_API IPassivePacketSource
      * not be nullptr. The gate must be a valid gate of this module and it must
      * support pulling and passing packets.
      */
-    virtual Packet *pullPacket(cGate *gate = nullptr) = 0;
+    virtual Packet *pullPacket(cGate *gate) = 0;
 
     /**
      * Starts pulling the packet from the packet source at the given gate. This
