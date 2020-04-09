@@ -32,14 +32,11 @@ namespace queueing {
 class INET_API PacketQueue : public PacketQueueBase, public IPacketBuffer::ICallback
 {
   protected:
-    cGate *inputGate = nullptr;
-    IActivePacketSource *producer = nullptr;
-
-    cGate *outputGate = nullptr;
-    IActivePacketSink *collector = nullptr;
-
     int packetCapacity = -1;
     b dataCapacity = b(-1);
+
+    IActivePacketSource *producer = nullptr;
+    IActivePacketSink *collector = nullptr;
 
     cPacketQueue queue;
     IPacketBuffer *buffer = nullptr;
