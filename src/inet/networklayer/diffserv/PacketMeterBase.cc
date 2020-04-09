@@ -34,7 +34,7 @@ void PacketMeterBase::initialize(int stage)
 void PacketMeterBase::handleCanPushPacket(cGate *gate)
 {
     if (producer != nullptr)
-        producer->handleCanPushPacket(inputGate);
+        producer->handleCanPushPacket(inputGate->getPathStartGate());
 }
 
 } // namespace inet
