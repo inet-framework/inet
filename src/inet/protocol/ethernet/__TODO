@@ -1,0 +1,70 @@
+Ethernet tasks
+==============
+
+ - generic dispatcher or not?
+ - LLC/SNAP stb.
+ - queueing packets
+ - egress/ingress traffic conditioning
+ - handling sockets
+ - adding/checking source/destination addresses
+ - inserting/checking Q tags (C/S tags)
+ - AE tag handling
+ - FCS insertion/verification
+ - mac (media access control) timing, gap, jamming, etc.
+ - preemption
+ - cutthrough
+ - adding/removing phy preamble, extension, etc.
+ - physical signal transmission/reception
+ - cable connect/disconnect handling
+
+
+
+
+
+
+ - refactor ethernet interfaces to support composition (e.g. Q tags, AE tag)
+ - hints:
+
+IEEE 802.3 MAC processing steps for incoming frame:
+ - pop 6 bytes as destination address
+ - pop 6 bytes as source address
+
+IEEE 802.1 Q
+ - pop 2 bytes as ethernet type
+ - pop 2 bytes TCI
+
+IEEE 802.1 AE
+ - pop 2 bytes as ethernet type
+ - pop whatever
+
+IEEE 802.2 LLC
+ - pop 3 bytes as LLC
+ - pop 5 bytes as SNAP
+
+IEEE 802 dispatcher
+ - peek 2 bytes as type or length
+
+IEEE 802.x encap ==? IEEE 802 dispatcher
+ - pop 2 bytes as type or length
+
+BytesChunk (no composition)
+MagicEthernetMacHeader (no composition)
+SequenceChunk of many small IEEE 802.x headers (fully composed)
+NotSoMagicEthernetMacHeader + SequenceChunk of many other small IEEE 802.x headers (composed but not completely)
+
+Ieee8023MacAddresses
+Ieee8023TypeOrLength
+Ieee8023MacHeader : Ieee8023TypeOrLength, Ieee8023MacAddresses
+Ieee8021QHeader : Ieee8023TypeOrLength
+Ieee8021AeHeader : Ieee8023TypeOrLength
+Ieee8022LlcHeader
+Ieee8022SnapHeader : Ieee8022LlcHeader
+
+ - How to check connections between  half-duplex and full duplex ethernet cards.
+   Mi a helyzet, ha így konfiguráltuk, mennyire hasonlít a működés a valósághoz?
+
+ - The EtherHub, EtherBus must assert halfduplex communication!!!
+
+ - The EtherBus should require 10Mbit speed
+
+ - How abort a transmit, when detected a collision.

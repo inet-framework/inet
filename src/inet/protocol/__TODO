@@ -1,0 +1,16 @@
+considerations for generic modular packet processing elements:
+ - modules implement the same set of interfaces
+ - gates are either passive or active
+   active output gate is connected to a passive input gate (push)
+   passive output gate is connected to an active input gate (pull)
+ - communication between elements is either synchronous (push/pull) or asynchronous (send)
+   - packets can be sent to and received from gates asynchronously
+   - packets can be pushed to or pulled from gates synchronously
+ - processing granularity is either
+   - passing a packet as a whole
+   - streaming packet start, progress, and end
+ - processing of a single element can be (input -> output):
+   - passing: passing in -> passing out
+   - streamer: passing in -> streaming out
+   - destreamer: streaming in -> passing out
+   - streaming: streaming in -> streaming out
