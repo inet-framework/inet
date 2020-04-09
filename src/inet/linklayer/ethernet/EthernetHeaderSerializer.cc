@@ -22,12 +22,17 @@
 namespace inet {
 
 Register_Serializer(EthernetMacHeader, EthernetMacHeaderSerializer);
+
 Register_Serializer(EthernetControlFrame, EthernetControlFrameSerializer);
 Register_Serializer(EthernetPauseFrame, EthernetControlFrameSerializer);
 Register_Serializer(EthernetPadding, EthernetPaddingSerializer);
+
 Register_Serializer(EthernetFcs, EthernetFcsSerializer);
 Register_Serializer(EthernetFragmentFcs, EthernetFcsSerializer);
+
+Register_Serializer(EthernetPhyHeaderBase, EthernetPhyHeaderBaseSerializer);
 Register_Serializer(EthernetPhyHeader, EthernetPhyHeaderSerializer);
+Register_Serializer(EthernetFragmentPhyHeader, EthernetFragmentPhyHeaderSerializer);
 
 static void serializeQtag(MemoryOutputStream& stream, uint16_t ethType, const Ieee8021qHeader *qtag)
 {
@@ -136,11 +141,47 @@ const Ptr<Chunk> EthernetFcsSerializer::deserialize(MemoryInputStream& stream) c
     return ethernetFcs;
 }
 
+void EthernetPhyHeaderBaseSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
+{
+    throw cRuntimeError("Invalid operation");
+}
+
+const Ptr<Chunk> EthernetPhyHeaderBaseSerializer::deserialize(MemoryInputStream& stream) const
+{
+    uint8_t byte = stream.getData().at(B(PREAMBLE_BYTES).get());
+    if (byte == 0xD5) {
+        EthernetPhyHeaderSerializer serializer;
+        return serializer.deserialize(stream);
+    }
+    else {
+        EthernetFragmentPhyHeaderSerializer serializer;
+        return serializer.deserialize(stream);
+    }
+}
+
 void EthernetPhyHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
-    const auto& ethernetPhyHeader = staticPtrCast<const EthernetPhyHeader>(chunk);
-    stream.writeByteRepeatedly(0x55, B(PREAMBLE_BYTES).get() - (ethernetPhyHeader->getPreambleType() == SMD_Cx ? 1 : 0));
-    switch (ethernetPhyHeader->getPreambleType()) {
+    stream.writeByteRepeatedly(0x55, B(PREAMBLE_BYTES).get()); // preamble
+    stream.writeByte(0xD5); // SFD
+}
+
+const Ptr<Chunk> EthernetPhyHeaderSerializer::deserialize(MemoryInputStream& stream) const
+{
+    auto header = makeShared<EthernetPhyHeader>();
+    bool preambleReadSuccessfully = stream.readByteRepeatedly(0x55, B(PREAMBLE_BYTES).get()); // preamble
+    uint8_t sfd = stream.readByte();
+    if (!preambleReadSuccessfully || sfd != 0xD5) {
+        header->markIncorrect();
+        header->markImproperlyRepresented();
+    }
+    return header;
+}
+
+void EthernetFragmentPhyHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
+{
+    const auto& header = staticPtrCast<const EthernetFragmentPhyHeader>(chunk);
+    stream.writeByteRepeatedly(0x55, B(PREAMBLE_BYTES).get() - (header->getPreambleType() == SMD_Cx ? 1 : 0));
+    switch (header->getPreambleType()) {
         case SFD:
             stream.writeByte(0xD5);
             break;
@@ -152,49 +193,49 @@ void EthernetPhyHeaderSerializer::serialize(MemoryOutputStream& stream, const Pt
             break;
         case SMD_Sx: {
             int smdSxValues[] = {0xE6, 0x4C, 0x7F, 0xB3};
-            stream.writeByte(smdSxValues[ethernetPhyHeader->getSmdNumber()]);
+            stream.writeByte(smdSxValues[header->getSmdNumber()]);
             break;
         }
         case SMD_Cx: {
             int smdCxValues[] = {0x61, 0x52, 0x9E, 0x2A};
-            stream.writeByte(smdCxValues[ethernetPhyHeader->getSmdNumber()]);
+            stream.writeByte(smdCxValues[header->getSmdNumber()]);
             int fragmentNumberValues[] = {0xE6, 0x4C, 0x7F, 0xB3};
-            stream.writeByte(fragmentNumberValues[ethernetPhyHeader->getFragmentNumber()]);
+            stream.writeByte(fragmentNumberValues[header->getFragmentNumber()]);
             break;
         }
     }
 }
 
-const Ptr<Chunk> EthernetPhyHeaderSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> EthernetFragmentPhyHeaderSerializer::deserialize(MemoryInputStream& stream) const
 {
-    auto ethernetPhyHeader = makeShared<EthernetPhyHeader>();
+    auto header = makeShared<EthernetFragmentPhyHeader>();
     bool preambleReadSuccessfully = stream.readByteRepeatedly(0x55, B(PREAMBLE_BYTES).get() - 1);
     if (!preambleReadSuccessfully)
-        ethernetPhyHeader->markIncorrect();
+        header->markIncorrect();
     uint8_t value = stream.readByte();
     if (value == 0x55) {
         uint8_t value = stream.readByte();
         if (value == 0xD5)
-            ethernetPhyHeader->setPreambleType(SFD);
+            header->setPreambleType(SFD);
         else {
-            ethernetPhyHeader->setPreambleType(SMD_Sx);
+            header->setPreambleType(SMD_Sx);
             int smdSxValues[] = {0xE6, 0x4C, 0x7F, 0xB3};
             int smdNumber = std::distance(smdSxValues, std::find(smdSxValues, smdSxValues + 4, value));
-            ethernetPhyHeader->setSmdNumber(smdNumber);
-            ethernetPhyHeader->setFragmentNumber(0);
+            header->setSmdNumber(smdNumber);
+            header->setFragmentNumber(0);
         }
     }
     else {
-        ethernetPhyHeader->setPreambleType(SMD_Cx);
+        header->setPreambleType(SMD_Cx);
         uint8_t value = stream.readByte();
         int smdCxValues[] = {0x61, 0x52, 0x9E, 0x2A};
         int smdNumber = std::distance(smdCxValues, std::find(smdCxValues, smdCxValues + 4, value));
-        ethernetPhyHeader->setSmdNumber(smdNumber);
+        header->setSmdNumber(smdNumber);
         int fragmentNumberValues[] = {0xE6, 0x4C, 0x7F, 0xB3};
         int fragmentNumber = std::distance(fragmentNumberValues, std::find(fragmentNumberValues, fragmentNumberValues + 4, value));
-        ethernetPhyHeader->setFragmentNumber(fragmentNumber);
+        header->setFragmentNumber(fragmentNumber);
     }
-    return ethernetPhyHeader;
+    return header;
 }
 
 } // namespace inet
