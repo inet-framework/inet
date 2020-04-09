@@ -1,0 +1,66 @@
+%description:
+
+Tests packet serialization.
+
+%file: test.ned
+
+import inet.queueing.source.ActivePacketSource;
+import inet.queueing.sink.PassivePacketSink;
+import inet.protocol.common.PacketSerializer;
+import inet.protocol.common.PacketDeserializer;
+
+network TestSerialization
+{
+    submodules:
+        source: ActivePacketSource {
+            @display("p=100,100");
+        }
+        serializer: PacketSerializer {
+            @display("p=100,200");
+        }
+        deserializer: PacketDeserializer {
+            @display("p=100,300");
+        }
+        sink: PassivePacketSink {
+            @display("p=100,400");
+        }
+    connections:
+        source.out --> serializer.in;
+        serializer.out --> deserializer.in;
+        deserializer.out --> sink.in;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = TestSerialization
+sim-time-limit = 10s
+cmdenv-event-banners = false
+*.source.packetLength = 100B
+*.source.productionInterval = 1s
+
+%contains: stdout
+Producing packet source-0.
+Consuming packet source-0.
+
+Running simulation...
+Producing packet source-1.
+Consuming packet source-1.
+Producing packet source-2.
+Consuming packet source-2.
+Producing packet source-3.
+Consuming packet source-3.
+Producing packet source-4.
+Consuming packet source-4.
+Producing packet source-5.
+Consuming packet source-5.
+Producing packet source-6.
+Consuming packet source-6.
+Producing packet source-7.
+Consuming packet source-7.
+Producing packet source-8.
+Consuming packet source-8.
+Producing packet source-9.
+Consuming packet source-9.
+Producing packet source-10.
+Consuming packet source-10.

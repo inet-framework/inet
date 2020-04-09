@@ -1,0 +1,122 @@
+%description:
+
+Tests FragmentTag and FragmentNumberHeader based fragmentation.
+
+%file: test.ned
+
+import inet.queueing.source.ActivePacketSource;
+import inet.queueing.sink.PassivePacketSink;
+import inet.protocol.fragmentation.FragmentNumberHeaderChecker;
+import inet.protocol.fragmentation.FragmentNumberHeaderInserter;
+import inet.protocol.fragmentation.FragmentTagBasedFragmenter;
+import inet.protocol.fragmentation.FragmentTagBasedDefragmenter;
+
+network TestFragmentTagAndFragmentNumberHeaderBasedFragmentation
+{
+    submodules:
+        source: ActivePacketSource {
+            @display("p=100,100");
+        }
+        fragmenter: FragmentTagBasedFragmenter {
+            @display("p=100,200");
+        }
+        inserter: FragmentNumberHeaderInserter {
+            @display("p=100,300");
+        }
+        checker: FragmentNumberHeaderChecker {
+            @display("p=100,400");
+        }
+        defragmenter: FragmentTagBasedDefragmenter {
+            @display("p=100,500");
+        }
+        sink: PassivePacketSink {
+            @display("p=100,600");
+        }
+    connections:
+        source.out --> fragmenter.in;
+        fragmenter.out --> inserter.in;
+        inserter.out --> checker.in;
+        checker.out --> defragmenter.in;
+        defragmenter.out --> sink.in;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = TestFragmentTagAndFragmentNumberHeaderBasedFragmentation
+sim-time-limit = 2s
+cmdenv-event-banners = false
+*.source.packetLength = 100B
+*.source.productionInterval = 1s
+*.fragmenter.fragmenterPolicy.typename = "LengthBasedFragmenterPolicy"
+*.fragmenter.fragmenterPolicy.maxFragmentLength = 10B
+
+%contains: stdout
+Producing packet source-0.
+Fragmenting packet source-0 into packet source-0-frag0.
+Defragmenting packet source-0 from packet source-0-frag0.
+Fragmenting packet source-0 into packet source-0-frag1.
+Defragmenting packet source-0 from packet source-0-frag1.
+Fragmenting packet source-0 into packet source-0-frag2.
+Defragmenting packet source-0 from packet source-0-frag2.
+Fragmenting packet source-0 into packet source-0-frag3.
+Defragmenting packet source-0 from packet source-0-frag3.
+Fragmenting packet source-0 into packet source-0-frag4.
+Defragmenting packet source-0 from packet source-0-frag4.
+Fragmenting packet source-0 into packet source-0-frag5.
+Defragmenting packet source-0 from packet source-0-frag5.
+Fragmenting packet source-0 into packet source-0-frag6.
+Defragmenting packet source-0 from packet source-0-frag6.
+Fragmenting packet source-0 into packet source-0-frag7.
+Defragmenting packet source-0 from packet source-0-frag7.
+Fragmenting packet source-0 into packet source-0-frag8.
+Defragmenting packet source-0 from packet source-0-frag8.
+Fragmenting packet source-0 into packet source-0-frag9.
+Defragmenting packet source-0 from packet source-0-frag9.
+Consuming packet source-0.
+
+Running simulation...
+Producing packet source-1.
+Fragmenting packet source-1 into packet source-1-frag0.
+Defragmenting packet source-1 from packet source-1-frag0.
+Fragmenting packet source-1 into packet source-1-frag1.
+Defragmenting packet source-1 from packet source-1-frag1.
+Fragmenting packet source-1 into packet source-1-frag2.
+Defragmenting packet source-1 from packet source-1-frag2.
+Fragmenting packet source-1 into packet source-1-frag3.
+Defragmenting packet source-1 from packet source-1-frag3.
+Fragmenting packet source-1 into packet source-1-frag4.
+Defragmenting packet source-1 from packet source-1-frag4.
+Fragmenting packet source-1 into packet source-1-frag5.
+Defragmenting packet source-1 from packet source-1-frag5.
+Fragmenting packet source-1 into packet source-1-frag6.
+Defragmenting packet source-1 from packet source-1-frag6.
+Fragmenting packet source-1 into packet source-1-frag7.
+Defragmenting packet source-1 from packet source-1-frag7.
+Fragmenting packet source-1 into packet source-1-frag8.
+Defragmenting packet source-1 from packet source-1-frag8.
+Fragmenting packet source-1 into packet source-1-frag9.
+Defragmenting packet source-1 from packet source-1-frag9.
+Consuming packet source-1.
+Producing packet source-2.
+Fragmenting packet source-2 into packet source-2-frag0.
+Defragmenting packet source-2 from packet source-2-frag0.
+Fragmenting packet source-2 into packet source-2-frag1.
+Defragmenting packet source-2 from packet source-2-frag1.
+Fragmenting packet source-2 into packet source-2-frag2.
+Defragmenting packet source-2 from packet source-2-frag2.
+Fragmenting packet source-2 into packet source-2-frag3.
+Defragmenting packet source-2 from packet source-2-frag3.
+Fragmenting packet source-2 into packet source-2-frag4.
+Defragmenting packet source-2 from packet source-2-frag4.
+Fragmenting packet source-2 into packet source-2-frag5.
+Defragmenting packet source-2 from packet source-2-frag5.
+Fragmenting packet source-2 into packet source-2-frag6.
+Defragmenting packet source-2 from packet source-2-frag6.
+Fragmenting packet source-2 into packet source-2-frag7.
+Defragmenting packet source-2 from packet source-2-frag7.
+Fragmenting packet source-2 into packet source-2-frag8.
+Defragmenting packet source-2 from packet source-2-frag8.
+Fragmenting packet source-2 into packet source-2-frag9.
+Defragmenting packet source-2 from packet source-2-frag9.
+Consuming packet source-2.

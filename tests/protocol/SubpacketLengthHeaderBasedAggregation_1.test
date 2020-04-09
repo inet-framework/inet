@@ -1,0 +1,84 @@
+%description:
+
+Tests SubpacketLengthHeader based aggregation.
+
+%file: test.ned
+
+import inet.queueing.source.ActivePacketSource;
+import inet.queueing.sink.PassivePacketSink;
+import inet.protocol.aggregation.SubpacketLengthHeaderBasedAggregator;
+import inet.protocol.aggregation.SubpacketLengthHeaderBasedDeaggregator;
+
+network TestSubpacketLengthHeaderBasedAggregation
+{
+    submodules:
+        source: ActivePacketSource {
+            @display("p=100,100");
+        }
+        aggregator: SubpacketLengthHeaderBasedAggregator {
+            @display("p=100,200");
+        }
+        deaggregator: SubpacketLengthHeaderBasedDeaggregator {
+            @display("p=100,300");
+        }
+        sink: PassivePacketSink {
+            @display("p=100,400");
+        }
+    connections:
+        source.out --> aggregator.in;
+        aggregator.out --> deaggregator.in;
+        deaggregator.out --> sink.in;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = TestSubpacketLengthHeaderBasedAggregation
+sim-time-limit = 10s
+cmdenv-event-banners = false
+*.source.packetLength = 100B
+*.source.productionInterval = 1s
+*.aggregator.aggregatorPolicy.typename = "LengthBasedAggregatorPolicy"
+*.aggregator.aggregatorPolicy.maxNumSubpackets = 3
+*.aggregator.aggregatorPolicy.maxAggregatedLength = 1000B
+
+%contains: stdout
+Producing packet source-0.
+Aggregating packet source-0 into packet source-0.
+
+Running simulation...
+Producing packet source-1.
+Aggregating packet source-1 into packet source-0+source-1.
+Producing packet source-2.
+Aggregating packet source-2 into packet source-0+source-1+source-2.
+Producing packet source-3.
+Deaggregating packet source-0 from packet source-0+source-1+source-2.
+Consuming packet source-0.
+Deaggregating packet source-1 from packet source-0+source-1+source-2.
+Consuming packet source-1.
+Deaggregating packet source-2 from packet source-0+source-1+source-2.
+Consuming packet source-2.
+Aggregating packet source-3 into packet source-3.
+Producing packet source-4.
+Aggregating packet source-4 into packet source-3+source-4.
+Producing packet source-5.
+Aggregating packet source-5 into packet source-3+source-4+source-5.
+Producing packet source-6.
+Deaggregating packet source-3 from packet source-3+source-4+source-5.
+Consuming packet source-3.
+Deaggregating packet source-4 from packet source-3+source-4+source-5.
+Consuming packet source-4.
+Deaggregating packet source-5 from packet source-3+source-4+source-5.
+Consuming packet source-5.
+Aggregating packet source-6 into packet source-6.
+Producing packet source-7.
+Aggregating packet source-7 into packet source-6+source-7.
+Producing packet source-8.
+Aggregating packet source-8 into packet source-6+source-7+source-8.
+Producing packet source-9.
+Deaggregating packet source-6 from packet source-6+source-7+source-8.
+Consuming packet source-6.
+Deaggregating packet source-7 from packet source-6+source-7+source-8.
+Consuming packet source-7.
+Deaggregating packet source-8 from packet source-6+source-7+source-8.
+Consuming packet source-8.
