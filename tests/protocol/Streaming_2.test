@@ -1,0 +1,110 @@
+%description:
+
+Tests packet streaming.
+
+%file: test.ned
+
+import inet.queueing.source.PassivePacketSource;
+import inet.queueing.sink.ActivePacketSink;
+import inet.protocol.common.PacketStreamer;
+import inet.protocol.common.PacketDestreamer;
+
+network TestStreaming
+{
+    submodules:
+        source: PassivePacketSource {
+            @display("p=100,100");
+        }
+        streamer: PacketStreamer {
+            @display("p=100,200");
+        }
+        destreamer: PacketDestreamer {
+            @display("p=100,300");
+        }
+        sink: ActivePacketSink {
+            @display("p=100,400");
+        }
+    connections:
+        source.out --> streamer.in;
+        streamer.out --> destreamer.in;
+        destreamer.out --> sink.in;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = TestStreaming
+sim-time-limit = 10s
+cmdenv-event-banners = false
+*.source.packetLength = 100B
+*.sink.collectionInterval = 1s
+
+%contains: stdout
+Providing packet source-0.
+Starting streaming packet source-0.
+Starting destreaming packet source-0.
+Ending streaming packet source-0.
+Ending destreaming packet source-0.
+Collecting packet source-0.
+
+Running simulation...
+Providing packet source-1.
+Starting streaming packet source-1.
+Starting destreaming packet source-1.
+Ending streaming packet source-1.
+Ending destreaming packet source-1.
+Collecting packet source-1.
+Providing packet source-2.
+Starting streaming packet source-2.
+Starting destreaming packet source-2.
+Ending streaming packet source-2.
+Ending destreaming packet source-2.
+Collecting packet source-2.
+Providing packet source-3.
+Starting streaming packet source-3.
+Starting destreaming packet source-3.
+Ending streaming packet source-3.
+Ending destreaming packet source-3.
+Collecting packet source-3.
+Providing packet source-4.
+Starting streaming packet source-4.
+Starting destreaming packet source-4.
+Ending streaming packet source-4.
+Ending destreaming packet source-4.
+Collecting packet source-4.
+Providing packet source-5.
+Starting streaming packet source-5.
+Starting destreaming packet source-5.
+Ending streaming packet source-5.
+Ending destreaming packet source-5.
+Collecting packet source-5.
+Providing packet source-6.
+Starting streaming packet source-6.
+Starting destreaming packet source-6.
+Ending streaming packet source-6.
+Ending destreaming packet source-6.
+Collecting packet source-6.
+Providing packet source-7.
+Starting streaming packet source-7.
+Starting destreaming packet source-7.
+Ending streaming packet source-7.
+Ending destreaming packet source-7.
+Collecting packet source-7.
+Providing packet source-8.
+Starting streaming packet source-8.
+Starting destreaming packet source-8.
+Ending streaming packet source-8.
+Ending destreaming packet source-8.
+Collecting packet source-8.
+Providing packet source-9.
+Starting streaming packet source-9.
+Starting destreaming packet source-9.
+Ending streaming packet source-9.
+Ending destreaming packet source-9.
+Collecting packet source-9.
+Providing packet source-10.
+Starting streaming packet source-10.
+Starting destreaming packet source-10.
+Ending streaming packet source-10.
+Ending destreaming packet source-10.
+Collecting packet source-10.
