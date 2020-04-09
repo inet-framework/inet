@@ -39,7 +39,7 @@ class INET_API IPassivePacketSink
      * The gate must be a valid gate of this module and it must support pushing
      * packets.
      */
-    virtual bool canPushSomePacket(cGate *gate = nullptr) const = 0;
+    virtual bool canPushSomePacket(cGate *gate) const = 0;
 
     /**
      * Returns true if the given packet can be pushed at the given gate into
@@ -48,7 +48,7 @@ class INET_API IPassivePacketSink
      * The packet must not be nullptr. The gate must be a valid gate of this
      * module and it must support pushing packets.
      */
-    virtual bool canPushPacket(Packet *packet, cGate *gate = nullptr) const = 0;
+    virtual bool canPushPacket(Packet *packet, cGate *gate) const = 0;
 
     /**
      * Pushes the packet into the packet sink at the given gate. This operation
@@ -62,7 +62,7 @@ class INET_API IPassivePacketSink
      * The gate must be a valid gate of this module and it must support pushing
      * and passing packets.
      */
-    virtual void pushPacket(Packet *packet, cGate *gate = nullptr) = 0;
+    virtual void pushPacket(Packet *packet, cGate *gate) = 0;
 
     /**
      * Starts pushing the packet into the packet sink at the given gate. This is
