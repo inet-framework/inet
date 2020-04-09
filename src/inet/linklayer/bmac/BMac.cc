@@ -153,7 +153,7 @@ void BMac::configureInterfaceEntry()
 void BMac::handleUpperPacket(Packet *packet)
 {
     encapsulate(packet);
-    txQueue->pushPacket(packet);
+    txQueue->enqueuePacket(packet);
     EV_DETAIL << "Max queue length: " << txQueue->getMaxNumPackets() << ", packet put in queue\n"
               << "  queue size: " << txQueue->getNumPackets() << " macState: " << macState << endl;
     // force wakeup now

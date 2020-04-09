@@ -356,7 +356,7 @@ void EtherMacFullDuplexBase::processConnectDisconnect()
 
         // Clear queue
         while (!txQueue->isEmpty()) {
-            Packet *msg = txQueue->pullPacket();
+            Packet *msg = txQueue->dequeuePacket();
             EV_DETAIL << "Interface is not connected, dropping packet " << msg << endl;
             numDroppedPkFromHLIfaceDown++;
             PacketDropDetails details;
