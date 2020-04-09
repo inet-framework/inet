@@ -34,8 +34,6 @@ enum EthernetControlOpCode
     ETHERNET_CONTROL_PAUSE = 1;
 }
 
-enum SapCode;
-
 //
 // Ethernet MAC header
 //
@@ -55,7 +53,6 @@ cplusplus {{
 }}
 
 //
-//
 // Ethernet control frames used by the PAUSE protocol
 //
 class EthernetControlFrame extends FieldsChunk
@@ -74,10 +71,16 @@ class EthernetPauseFrame extends EthernetControlFrame
     int pauseTime; // in 512 bit-time units
 }
 
+//
+// Ethernet padding
+//
 class EthernetPadding extends FieldsChunk
 {
 }
 
+//
+// Ethernet FCS trailer
+//
 class EthernetFcs extends FieldsChunk
 {
     chunkLength = ETHER_FCS_BYTES;
@@ -85,9 +88,12 @@ class EthernetFcs extends FieldsChunk
     FcsMode fcsMode = FCS_MODE_UNDEFINED;
 }
 
+//
+// Ethernet fragment FCS trailer
+//
 class EthernetFragmentFcs extends EthernetFcs
 {
-    bool inverted;
+    bool mCrc;
 }
 
 cplusplus(EthernetFcs) {{
