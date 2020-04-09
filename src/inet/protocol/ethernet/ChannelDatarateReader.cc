@@ -27,13 +27,18 @@ void ChannelDatarateReader::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         auto interfaceEntry = getContainingNicModule(this);
         auto txGate = interfaceEntry->gate("phys$o");
-        auto txTransmissionChannel = txGate->getTransmissionChannel();
-        if (txTransmissionChannel->hasPar("datarate")) {
-            double bitrate = txTransmissionChannel->par("datarate");
+        auto txTransmissionChannel = txGate->findTransmissionChannel();
+        if (txTransmissionChannel) {
+            if (txTransmissionChannel->hasPar("datarate")) {
+                double bitrate = txTransmissionChannel->par("datarate");
 
-            //TODO which is the good solution from these?
-            interfaceEntry->par("bitrate").setDoubleValue(bitrate);
-            interfaceEntry->setDatarate(bitrate);
+                //TODO which is the good solution from these?
+                interfaceEntry->par("bitrate").setDoubleValue(bitrate);
+                interfaceEntry->setDatarate(bitrate);
+            }
+        }
+        else {
+            interfaceEntry->setCarrier(false);      //TODO move to InterfaceEntry?
         }
     }
 }
