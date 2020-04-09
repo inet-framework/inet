@@ -32,10 +32,7 @@ class INET_API CompoundPacketQueue : public PacketQueueBase, public cListener
     int packetCapacity = -1;
     b dataCapacity = b(-1);
 
-    cGate *inputGate = nullptr;
     IPassivePacketSink *consumer = nullptr;
-
-    cGate *outputGate = nullptr;
     IPassivePacketSource *provider = nullptr;
     IPacketCollection *collection = nullptr;
 

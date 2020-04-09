@@ -29,8 +29,6 @@ void CompoundPacketQueue::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         packetCapacity = par("packetCapacity");
         dataCapacity = b(par("dataCapacity"));
-        inputGate = gate("in");
-        outputGate = gate("out");
         consumer = check_and_cast<IPassivePacketSink *>(inputGate->getPathEndGate()->getOwnerModule());
         provider = check_and_cast<IPassivePacketSource *>(outputGate->getPathStartGate()->getOwnerModule());
         collection = check_and_cast<IPacketCollection *>(provider);
