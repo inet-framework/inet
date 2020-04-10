@@ -27,11 +27,11 @@ import inet.physicallayer.base.packetlevel.AntennaBase;
 module MassiveMIMOUCPA extends AntennaBase
 {
     parameters:
-        double length @unit(m); // the length of the single antenna
+        double length @unit(m) = default(1m); // the length of the single antenna
         double distance; // distance between elements
         double freq;
         double phiz; // the steering angle
-        int M;  //number of circular rings
+        int M = default(10);  //number of circular rings
         string energySourceModule;
         double interval @unit(s)=default(2s);
 
