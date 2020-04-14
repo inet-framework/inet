@@ -19,12 +19,16 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/packet/recorder/PcapngWriter.h"
-#include "inet/common/packet/recorder/PcapRecorder.h"
-#include "inet/common/packet/recorder/PcapWriter.h"
+#include "inet/common/DirectionTag_m.h"
+#include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/stlutils.h"
 #include "inet/common/StringFormat.h"
+#include "inet/common/packet/recorder/PcapngWriter.h"
+#include "inet/common/packet/recorder/PcapRecorder.h"
+#include "inet/common/packet/recorder/PcapWriter.h"
+#include "inet/linklayer/common/InterfaceTag_m.h"
+#include "inet/networklayer/common/InterfaceTable.h"
 
 namespace inet {
 
@@ -58,14 +62,14 @@ void PcapRecorder::initialize()
         cStringTokenizer signalTokenizer(par("sendingSignalNames"));
 
         while (signalTokenizer.hasMoreTokens())
-            signalList[registerSignal(signalTokenizer.nextToken())] = true;
+            signalList[registerSignal(signalTokenizer.nextToken())] = DIRECTION_OUTBOUND;
     }
 
     {
         cStringTokenizer signalTokenizer(par("receivingSignalNames"));
 
         while (signalTokenizer.hasMoreTokens())
-            signalList[registerSignal(signalTokenizer.nextToken())] = false;
+            signalList[registerSignal(signalTokenizer.nextToken())] = DIRECTION_INBOUND;
     }
 
     {
@@ -114,7 +118,6 @@ void PcapRecorder::initialize()
         }
     }
 
-    pcapLinkType = (PcapLinkType)par("pcapLinkType").intValue();
     const char *file = par("pcapFile");
     const char *fileFormat = par("fileFormat");
     if (!strcmp(fileFormat, "pcap"))
@@ -124,8 +127,8 @@ void PcapRecorder::initialize()
     else
         throw cRuntimeError("Unknown fileFormat parameter");
     recordPcap = *file != '\0';
-    if (recordPcap && pcapLinkType != LINKTYPE_INVALID) {
-        pcapWriter->open(file, snaplen, pcapLinkType);
+    if (recordPcap) {
+        pcapWriter->open(file, snaplen);
         pcapWriter->setFlush(par("alwaysFlush"));
     }
 
@@ -165,15 +168,15 @@ void PcapRecorder::receiveSignal(cComponent *source, simsignal_t signalID, cObje
 
     if (packet) {
         SignalList::const_iterator i = signalList.find(signalID);
-        bool l2r = (i != signalList.end()) ? i->second : true;
-        recordPacket(packet, l2r);
+        Direction direction = (i != signalList.end()) ? i->second : DIRECTION_UNDEFINED;
+        recordPacket(packet, direction, source);
     }
 }
 
-void PcapRecorder::recordPacket(const cPacket *msg, bool l2r)
+void PcapRecorder::recordPacket(const cPacket *msg, Direction direction, cComponent *source)
 {
-    EV << "PcapRecorder::recordPacket(" << msg->getFullPath() << ", " << l2r << ")\n";
-    packetDumper.dumpPacket(l2r, msg);
+    EV_DEBUG << "PcapRecorder::recordPacket(" << msg->getFullPath() << ", " << direction << ")\n";
+    packetDumper.dumpPacket(direction == DIRECTION_OUTBOUND, msg);
 
     if (!recordPcap)
         return;
@@ -182,29 +185,57 @@ void PcapRecorder::recordPacket(const cPacket *msg, bool l2r)
 
     if (packet && packetFilter.matches(packet) && (dumpBadFrames || !packet->hasBitError())) {
         auto protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
+
+        // get Direction
+        if (direction == DIRECTION_UNDEFINED) {
+            if (auto directionTag = packet->findTag<DirectionTag>())
+                direction = directionTag->getDirection();
+        }
+
+        // get InterfaceEntry
+        auto srcModule = check_and_cast<cModule *>(source);
+        auto interfaceEntry = findContainingNicModule(srcModule);
+        if (interfaceEntry == nullptr) {
+            int ifaceId = -1;
+            if (direction == DIRECTION_OUTBOUND) {
+                if (auto ifaceTag = packet->findTag<InterfaceReq>())
+                    ifaceId = ifaceTag->getInterfaceId();
+            }
+            else if (direction == DIRECTION_INBOUND) {
+                if (auto ifaceTag = packet->findTag<InterfaceInd>())
+                    ifaceId = ifaceTag->getInterfaceId();
+            }
+            if (ifaceId != -1) {
+                auto ift = check_and_cast_nullable<InterfaceTable *>(getContainingNode(srcModule)->getSubmodule("interfaceTable"));
+                interfaceEntry = ift->getInterfaceById(ifaceId);
+            }
+        }
+
         if (contains(dumpProtocols, protocol)) {
-            if (pcapLinkType == LINKTYPE_INVALID) {
-                ASSERT(!pcapWriter->isOpen());
-                pcapLinkType = protocolToLinkType(protocol);
-                if (pcapLinkType == LINKTYPE_INVALID)
-                    throw cRuntimeError("Cannot determine the PCAP link type from protocol '%s', specify it in the pcapLinkType parameter", protocol->getName());
-                pcapWriter->open(par("pcapFile"), snaplen, pcapLinkType);
+            auto pcapLinkType = protocolToLinkType(protocol);
+            if (pcapLinkType == LINKTYPE_INVALID)
+                throw cRuntimeError("Cannot determine the PCAP link type from protocol '%s'", protocol->getName());
+
+            if (!pcapWriter->isOpen()) {
+                pcapWriter->open(par("pcapFile"), snaplen);
                 pcapWriter->setFlush(par("alwaysFlush"));
             }
-            if (!matchesLinkType(protocol)) {
-                auto convertedPacket = tryConvertToLinkType(packet, protocol);
-                if (convertedPacket) {
-                    pcapWriter->writePacket(simTime(), convertedPacket);
+
+            if (matchesLinkType(pcapLinkType, protocol)) {
+                pcapWriter->writePacket(simTime(), packet, direction, interfaceEntry, pcapLinkType);
+                numRecorded++;
+                emit(packetRecordedSignal, packet);
+            }
+            else {
+                if (auto convertedPacket = tryConvertToLinkType(packet, pcapLinkType, protocol)) {
+                    pcapWriter->writePacket(simTime(), convertedPacket, direction, interfaceEntry, pcapLinkType);
                     numRecorded++;
                     emit(packetRecordedSignal, packet);
                     delete convertedPacket;
-                    return;
                 }
-                throw cRuntimeError("The protocol '%s' doesn't match PCAP link type %d", protocol->getName(), pcapLinkType);
+                else
+                    throw cRuntimeError("The protocol '%s' doesn't match PCAP link type %d", protocol->getName(), pcapLinkType);
             }
-            pcapWriter->writePacket(simTime(), packet);
-            numRecorded++;
-            emit(packetRecordedSignal, packet);
         }
     }
 }
@@ -215,7 +246,7 @@ void PcapRecorder::finish()
     pcapWriter->close();
 }
 
-bool PcapRecorder::matchesLinkType(const Protocol *protocol) const
+bool PcapRecorder::matchesLinkType(PcapLinkType pcapLinkType, const Protocol *protocol) const
 {
     if (protocol == nullptr)
         return false;
@@ -266,7 +297,7 @@ PcapLinkType PcapRecorder::protocolToLinkType(const Protocol *protocol) const
     return LINKTYPE_INVALID;
 }
 
-Packet *PcapRecorder::tryConvertToLinkType(const Packet* packet, const Protocol *protocol) const
+Packet *PcapRecorder::tryConvertToLinkType(const Packet* packet, PcapLinkType pcapLinkType, const Protocol *protocol) const
 {
     for (IHelper *helper: helpers) {
         if (auto newPacket = helper->tryConvertToLinkType(packet, pcapLinkType, protocol))

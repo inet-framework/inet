@@ -23,6 +23,7 @@
 
 #include "inet/common/packet/Packet.h"
 #include "inet/common/packet/recorder/IPcapWriter.h"
+#include "inet/common/packet/recorder/PcapRecorder.h"
 
 namespace inet {
 
@@ -37,7 +38,12 @@ class INET_API PcapWriter : public IPcapWriter
   protected:
     FILE *dumpfile = nullptr;    // pcap file
     unsigned int snaplen = 0;    // max. length of packets in pcap file
+    PcapLinkType network = LINKTYPE_INVALID;    // the network type header field in the PCAP file, see http://www.tcpdump.org/linktypes.html
     bool flush = false;
+    bool needHeader = true;
+
+  protected:
+    void writeHeader(PcapLinkType linkType);
 
   public:
     /**
@@ -55,7 +61,7 @@ class INET_API PcapWriter : public IPcapWriter
      * is the length that packets will be truncated to. Throws an exception
      * if the file cannot be opened.
      */
-    void open(const char *filename, unsigned int snaplen, uint32 network) override;
+    void open(const char *filename, unsigned int snaplen) override;
 
     /**
      * Returns true if the pcap file is currently open.
@@ -66,7 +72,7 @@ class INET_API PcapWriter : public IPcapWriter
      * Records the given packet into the output file if it is open,
      * and throws an exception otherwise.
      */
-    void writePacket(simtime_t time, const Packet *packet) override;
+    void writePacket(simtime_t time, const Packet *packet, Direction direction, InterfaceEntry *ie, PcapLinkType linkType) override;
 
     /**
      * Closes the output file if it is open.
