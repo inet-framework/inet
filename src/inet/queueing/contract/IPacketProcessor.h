@@ -15,8 +15,8 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_IPACKETQUEUEINGELEMENT_H
-#define __INET_IPACKETQUEUEINGELEMENT_H
+#ifndef __INET_IPACKETPROCESSOR_H
+#define __INET_IPACKETPROCESSOR_H
 
 #include "inet/common/packet/Packet.h"
 
@@ -24,15 +24,15 @@ namespace inet {
 namespace queueing {
 
 /**
- * This class defines the interface for packet queueing elements.
+ * This class defines the interface for packet processors.
  */
-class INET_API IPacketQueueingElement
+class INET_API IPacketProcessor
 {
   public:
-    virtual ~IPacketQueueingElement() {}
+    virtual ~IPacketProcessor() {}
 
     /**
-     * Returns true if the element supports sending packets at the given gate.
+     * Returns true if the processor supports sending packets at the given gate.
      * Sending a packet is an asynchronous operation that is initiated by the
      * source module. A sent packet is always passed as a whole using standard
      * handleMessage().
@@ -40,8 +40,8 @@ class INET_API IPacketQueueingElement
      * For output gates, true means that this module can send packets into the
      * connected module. For input gates, true means that the connected module
      * can send packets into this module. For example, a standard OMNeT++ module
-     * can send packets to an INET queueing element module, or an INET queueing
-     * element module can send packets to a standard OMNeT++ module.
+     * can send packets to an INET packet processor module, or an INET packet
+     * processor module can send packets to a standard OMNeT++ module.
      *
      * Connecting incompatible gates raises an error during initialize. The gate
      * parameter must be a valid gate of this module. The gate should be marked
@@ -50,7 +50,7 @@ class INET_API IPacketQueueingElement
     virtual bool supportsPacketSending(cGate *gate) const = 0;
 
     /**
-     * Returns true if the element supports pushing packets at the given gate.
+     * Returns true if the processor supports pushing packets at the given gate.
      * Pushing a packet is a synchronous operation that is initiated by the
      * source module. A pushed packet can be passed as a whole using pushPacket(),
      * or it can be streamed from the source to the sink using pushPacketStart(),
@@ -68,7 +68,7 @@ class INET_API IPacketQueueingElement
     virtual bool supportsPacketPushing(cGate *gate) const = 0;
 
     /**
-     * Returns true if the element supports pulling packets at the given gate.
+     * Returns true if the processor supports pulling packets at the given gate.
      * Pulling a packet is a synchronous operation that is initiated by the
      * sink module. A pulled packet can be passed as a whole using pullPacket(),
      * or it can be streamed from the source to the sink using pullPacketStart(),
@@ -86,7 +86,7 @@ class INET_API IPacketQueueingElement
     virtual bool supportsPacketPulling(cGate *gate) const = 0;
 
     /**
-     * Returns true if the element supports passing packets as a whole at the
+     * Returns true if the processor supports passing packets as a whole at the
      * given gate. A passed packet is handed over from one module to another
      * by either the standard OMNeT++ handleMessage() mechanism, or by directly
      * calling pushPacket() or pullPacket().
@@ -100,7 +100,7 @@ class INET_API IPacketQueueingElement
     virtual bool supportsPacketPassing(cGate *gate) const = 0;
 
     /**
-     * Returns true if the element supports streaming packets at the given gate.
+     * Returns true if the processor supports streaming packets at the given gate.
      * A streamed packet is handed over from one module to another using several
      * method calls and potentially exending to a non-zero simulation duration.
      *
@@ -116,5 +116,5 @@ class INET_API IPacketQueueingElement
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_IPACKETQUEUEINGELEMENT_H
+#endif // ifndef __INET_IPACKETPROCESSOR_H
 

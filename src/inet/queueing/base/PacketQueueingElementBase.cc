@@ -41,10 +41,10 @@ void PacketQueueingElementBase::animateSend(Packet *packet, cGate *gate)
 
 void PacketQueueingElementBase::checkPacketOperationSupport(cGate *gate) const
 {
-    auto startGate = findConnectedGate<IPacketQueueingElement>(gate, -1);
-    auto endGate = findConnectedGate<IPacketQueueingElement>(gate, 1);
-    auto startElement = startGate == nullptr ? nullptr : check_and_cast<IPacketQueueingElement *>(startGate->getOwnerModule());
-    auto endElement = endGate == nullptr ? nullptr : check_and_cast<IPacketQueueingElement *>(endGate->getOwnerModule());
+    auto startGate = findConnectedGate<IPacketProcessor>(gate, -1);
+    auto endGate = findConnectedGate<IPacketProcessor>(gate, 1);
+    auto startElement = startGate == nullptr ? nullptr : check_and_cast<IPacketProcessor *>(startGate->getOwnerModule());
+    auto endElement = endGate == nullptr ? nullptr : check_and_cast<IPacketProcessor *>(endGate->getOwnerModule());
     if (startElement != nullptr && endElement != nullptr) {
         bool startPushing = startElement->supportsPacketPushing(startGate);
         bool startPulling = startElement->supportsPacketPulling(startGate);

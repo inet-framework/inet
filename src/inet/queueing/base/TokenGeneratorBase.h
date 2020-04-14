@@ -19,7 +19,7 @@
 #define __INET_TOKENGENERATORBASE_H
 
 #include "inet/common/StringFormat.h"
-#include "inet/queueing/contract/IPacketQueueingElement.h"
+#include "inet/queueing/contract/IPacketProcessor.h"
 #include "inet/queueing/server/TokenBasedServer.h"
 
 namespace inet {
