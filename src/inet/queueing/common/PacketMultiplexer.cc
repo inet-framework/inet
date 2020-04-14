@@ -43,15 +43,77 @@ void PacketMultiplexer::initialize(int stage)
     }
 }
 
+void PacketMultiplexer::checkPacketStreaming(Packet *packet)
+{
+    if (inProgressStreamId != -1 && (packet == nullptr || packet->getTreeId() != inProgressStreamId))
+        throw cRuntimeError("Another packet streaming operation is already in progress");
+}
+
+void PacketMultiplexer::startPacketStreaming(Packet *packet)
+{
+    inProgressStreamId = packet->getTreeId();
+}
+
+void PacketMultiplexer::endPacketStreaming(Packet *packet)
+{
+    emit(packetPushedSignal, packet);
+    handlePacketProcessed(packet);
+    inProgressStreamId = -1;
+}
+
 void PacketMultiplexer::pushPacket(Packet *packet, cGate *gate)
 {
     Enter_Method("pushPacket");
     take(packet);
     EV_INFO << "Forwarding pushed packet " << packet->getName() << "." << endl;
-    processedTotalLength += packet->getDataLength();
+    handlePacketProcessed(packet);
     pushOrSendPacket(packet, outputGate, consumer);
-    numProcessedPackets++;
     updateDisplayString();
+}
+
+void PacketMultiplexer::pushPacketStart(Packet *packet, cGate *gate)
+{
+    Enter_Method("pushPacketStart");
+    take(packet);
+    EV_INFO << "Forwarding pushed packet " << packet->getName() << "." << endl;
+    checkPacketStreaming(packet);
+    startPacketStreaming(packet);
+    pushOrSendPacketStart(packet, outputGate->getPathEndGate(), consumer);
+    updateDisplayString();
+}
+
+void PacketMultiplexer::pushPacketEnd(Packet *packet, cGate *gate)
+{
+    Enter_Method("pushPacketEnd");
+    take(packet);
+    EV_INFO << "Forwarding pushed packet " << packet->getName() << "." << endl;
+    if (!isStreamingPacket())
+        startPacketStreaming(packet);
+    else
+        checkPacketStreaming(packet);
+    endPacketStreaming(packet);
+    pushOrSendPacketEnd(packet, outputGate->getPathEndGate(), consumer);
+    updateDisplayString();
+}
+
+void PacketMultiplexer::pushPacketProgress(Packet *packet, cGate *gate, b position, b extraProcessableLength)
+{
+    Enter_Method("pushPacketProgress");
+    take(packet);
+    EV_INFO << "Forwarding pushed packet " << packet->getName() << "." << endl;
+    if (!isStreamingPacket())
+        startPacketStreaming(packet);
+    else
+        checkPacketStreaming(packet);
+    if (packet->getTotalLength() == position + extraProcessableLength)
+        endPacketStreaming(packet);
+    pushOrSendPacketProgress(packet, outputGate->getPathEndGate(), consumer, position, extraProcessableLength);
+    updateDisplayString();
+}
+
+b PacketMultiplexer::getPushPacketProcessedLength(Packet *packet, cGate *gate)
+{
+    return consumer->getPushPacketProcessedLength(packet, outputGate->getPathEndGate());
 }
 
 void PacketMultiplexer::handleCanPushPacket(cGate *gate)
@@ -66,7 +128,6 @@ void PacketMultiplexer::handleCanPushPacket(cGate *gate)
 void PacketMultiplexer::handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful)
 {
     Enter_Method("handlePushPacketProcessed");
-    throw cRuntimeError("Invalid operation");
 }
 
 } // namespace queueing
