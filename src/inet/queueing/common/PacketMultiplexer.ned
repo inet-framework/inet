@@ -31,6 +31,10 @@ simple PacketMultiplexer extends PacketSinkBase like IActivePacketSource // TODO
         displayStringTextFormat = default("passed %p pk (%l)"); // %p number of packet, %l total length
         @class(PacketMultiplexer);
         @display("i=block/join");
+        @signal[packetPushed](type=inet::Packet);
+        @signal[packetPulled](type=inet::Packet);
+        @statistic[packetPushed](title="packets pushed"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
+        @statistic[packetPulled](title="packets pulled"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
     gates:
         input in[] @labels(push);
         output out @labels(push);
