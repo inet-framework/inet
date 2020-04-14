@@ -44,6 +44,7 @@ class INET_API PacketMeterBase : public PassivePacketSinkBase, public IActivePac
     virtual bool supportsPacketPulling(cGate *gate) const override { return false; }
 
     virtual void handleCanPushPacket(cGate *gate) override;
+    virtual void handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful) override;
 };
 
 } // namespace inet
