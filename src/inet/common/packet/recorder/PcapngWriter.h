@@ -32,8 +32,8 @@ class INET_API PcapngWriter : public IPcapWriter
     FILE *dumpfile = nullptr;    // pcap file
     bool flush = false;
     uint32_t linkType = 0;
-    int nextInterfaceId = 0;
-    std::map<int, int> interfaceModuleIdToInterfaceId;
+    int nextPcapngInterfaceId = 0;
+    std::map<int, int> interfaceModuleIdToPcapngInterfaceId;
 
   public:
     /**
@@ -50,7 +50,7 @@ class INET_API PcapngWriter : public IPcapWriter
      * Opens a PCAP file with the given file name. Throws an exception
      * if the file cannot be opened.
      */
-    void open(const char *filename, unsigned int snaplen, uint32_t linkType) override;
+    void open(const char *filename, unsigned int snaplen) override;
 
     /**
      * Returns true if the pcap file is currently open.
@@ -66,7 +66,7 @@ class INET_API PcapngWriter : public IPcapWriter
      * Records the given packet into the output file if it is open,
      * and throws an exception otherwise.
      */
-    void writePacket(simtime_t time, const Packet *packet) override;
+    void writePacket(simtime_t time, const Packet *packet, Direction direction, InterfaceEntry *ie, PcapLinkType linkType) override;
 
     /**
      * Closes the output file if it is open.
