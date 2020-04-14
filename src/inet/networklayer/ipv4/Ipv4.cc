@@ -1008,13 +1008,16 @@ void Ipv4::encapsulate(Packet *transportPacket)
             throw cRuntimeError("TosReq and DscpReq found together");
         if (transportPacket->findTag<EcnReq>())
             throw cRuntimeError("TosReq and EcnReq found together");
+        transportPacket->addTag<TosInd>()->setTos(ipv4Header->getTypeOfService());
     }
     if (DscpReq *dscpReq = transportPacket->removeTagIfPresent<DscpReq>()) {
         ipv4Header->setDscp(dscpReq->getDifferentiatedServicesCodePoint());
+        transportPacket->addTag<DscpInd>()->setDifferentiatedServicesCodePoint(ipv4Header->getDscp());
         delete dscpReq;
     }
     if (EcnReq *ecnReq = transportPacket->removeTagIfPresent<EcnReq>()) {
         ipv4Header->setEcn(ecnReq->getExplicitCongestionNotification());
+        transportPacket->addTag<EcnInd>()->setExplicitCongestionNotification(ipv4Header->getEcn());
         delete ecnReq;
     }
 
