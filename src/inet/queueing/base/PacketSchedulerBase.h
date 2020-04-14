@@ -34,22 +34,39 @@ class INET_API PacketSchedulerBase : public PacketProcessorBase, public virtual 
     cGate *outputGate = nullptr;
     IActivePacketSink *collector = nullptr;
 
+    int inProgressStreamId = -1;
+    int inProgressGateIndex = -1;
+
   protected:
     virtual void initialize(int stage) override;
 
     virtual int schedulePacket() = 0;
+    virtual int callSchedulePacket();
+
+    virtual bool isStreamingPacket() const { return inProgressStreamId != -1; }
+    virtual void startPacketStreaming();
+    virtual void endPacketStreaming(Packet *packet);
+    virtual void checkPacketStreaming(Packet *packet);
 
   public:
     virtual IPassivePacketSource *getProvider(cGate *gate) override { return providers[gate->getIndex()]; }
 
     virtual bool supportsPacketPushing(cGate *gate) const override { return false; }
     virtual bool supportsPacketPulling(cGate *gate) const override { return true; }
+    virtual bool supportsPacketStreaming(cGate *gate) const override { return true; }
 
     virtual bool canPullSomePacket(cGate *gate) const override;
-    virtual Packet *canPullPacket(cGate *gate) const override { throw cRuntimeError("Invalid operation"); }
+    virtual Packet *canPullPacket(cGate *gate) const override;
+
     virtual Packet *pullPacket(cGate *gate) override;
+    virtual Packet *pullPacketStart(cGate *gate) override;
+    virtual Packet *pullPacketEnd(cGate *gate) override;
+    virtual Packet *pullPacketProgress(cGate *gate, b& position, b& extraProcessableLength) override;
+
+    virtual b getPullPacketProcessedLength(Packet *packet, cGate *gate) override;
 
     virtual void handleCanPullPacket(cGate *gate) override;
+    virtual void handlePullPacketProcessed(Packet *packet, cGate *gate, bool successful) override;
 };
 
 } // namespace queueing

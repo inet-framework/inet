@@ -41,6 +41,35 @@ void PacketClassifierBase::initialize(int stage)
     }
 }
 
+int PacketClassifierBase::callClassifyPacket(Packet *packet)
+{
+    int index = classifyPacket(packet);
+    if (index < 0 || static_cast<unsigned int>(index) >= outputGates.size())
+        throw cRuntimeError("Classified packet to invalid output gate: %d", index);
+    return index;
+}
+
+void PacketClassifierBase::checkPacketStreaming(Packet *packet)
+{
+    if (inProgressStreamId != -1 && (packet == nullptr || packet->getTreeId() != inProgressStreamId))
+        throw cRuntimeError("Another packet streaming operation is already in progress");
+}
+
+void PacketClassifierBase::startPacketStreaming(Packet *packet)
+{
+    EV_INFO << "Classifying packet " << packet->getName() << ".\n";
+    inProgressStreamId = packet->getTreeId();
+    inProgressGateIndex = callClassifyPacket(packet);
+}
+
+void PacketClassifierBase::endPacketStreaming(Packet *packet)
+{
+    emit(packetPushedSignal, packet);
+    handlePacketProcessed(packet);
+    inProgressStreamId = -1;
+    inProgressGateIndex = -1;
+}
+
 bool PacketClassifierBase::canPushSomePacket(cGate *gate) const
 {
     for (int i = 0; i < (int)outputGates.size(); i++)
@@ -49,19 +78,71 @@ bool PacketClassifierBase::canPushSomePacket(cGate *gate) const
     return true;
 }
 
+bool PacketClassifierBase::canPushPacket(Packet *packet, cGate *gate) const
+{
+    return canPushSomePacket(gate);
+}
+
 void PacketClassifierBase::pushPacket(Packet *packet, cGate *gate)
 {
     Enter_Method("pushPacket");
     take(packet);
-    emit(packetPushedSignal, packet);
+    checkPacketStreaming(nullptr);
     EV_INFO << "Classifying packet " << packet->getName() << ".\n";
-    int index = classifyPacket(packet);
-    if (index < 0 || static_cast<unsigned int>(index) >= outputGates.size())
-        throw cRuntimeError("Classified packet to invalid output gate: %d", index);
-    processedTotalLength += packet->getDataLength();
+    int index = callClassifyPacket(packet);
+    handlePacketProcessed(packet);
+    emit(packetPushedSignal, packet);
     pushOrSendPacket(packet, outputGates[index], consumers[index]);
-    numProcessedPackets++;
     updateDisplayString();
+}
+
+void PacketClassifierBase::pushPacketStart(Packet *packet, cGate *gate)
+{
+    Enter_Method("pushPacketStart");
+    take(packet);
+    checkPacketStreaming(packet);
+    startPacketStreaming(packet);
+    pushOrSendPacketStart(packet, outputGates[inProgressGateIndex]->getPathEndGate(), consumers[inProgressGateIndex]);
+    updateDisplayString();
+}
+
+void PacketClassifierBase::pushPacketEnd(Packet *packet, cGate *gate)
+{
+    Enter_Method("pushPacketEnd");
+    take(packet);
+    if (!isStreamingPacket())
+        startPacketStreaming(packet);
+    else
+        checkPacketStreaming(packet);
+    auto outputGate = outputGates[inProgressGateIndex];
+    auto consumer = consumers[inProgressGateIndex];
+    endPacketStreaming(packet);
+    pushOrSendPacketEnd(packet, outputGate->getPathEndGate(), consumer);
+    updateDisplayString();
+}
+
+void PacketClassifierBase::pushPacketProgress(Packet *packet,  cGate *gate, b position, b extraProcessableLength)
+{
+    Enter_Method("pushPacketProgress");
+    take(packet);
+    if (!isStreamingPacket())
+        startPacketStreaming(packet);
+    else
+        checkPacketStreaming(packet);
+    auto outputGate = outputGates[inProgressGateIndex];
+    auto consumer = consumers[inProgressGateIndex];
+    if (packet->getTotalLength() == position + extraProcessableLength)
+        endPacketStreaming(packet);
+    pushOrSendPacketProgress(packet, outputGate->getPathEndGate(), consumer, position, extraProcessableLength);
+    updateDisplayString();
+}
+
+b PacketClassifierBase::getPushPacketProcessedLength(Packet *packet, cGate *gate)
+{
+    checkPacketStreaming(packet);
+    auto outputGate = outputGates[inProgressGateIndex];
+    auto consumer = consumers[inProgressGateIndex];
+    return consumer->getPushPacketProcessedLength(packet, outputGate->getPathEndGate());
 }
 
 void PacketClassifierBase::handleCanPushPacket(cGate *gate)
@@ -69,6 +150,11 @@ void PacketClassifierBase::handleCanPushPacket(cGate *gate)
     Enter_Method("handleCanPushPacket");
     if (producer != nullptr)
         producer->handleCanPushPacket(inputGate->getPathStartGate());
+}
+
+void PacketClassifierBase::handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful)
+{
+    producer->handlePushPacketProcessed(packet, inputGate->getPathStartGate(), successful);
 }
 
 } // namespace queueing
