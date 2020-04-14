@@ -94,7 +94,7 @@ class INET_API MultiFieldClassifier : public queueing::PacketClassifierBase
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
-    virtual void pushPacket(Packet *packet, cGate *gate = nullptr) override;
+    virtual void pushPacket(Packet *packet, cGate *gate) override;
     virtual void refreshDisplay() const override;
 
     virtual int classifyPacket(Packet *packet) override;

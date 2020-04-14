@@ -53,10 +53,10 @@ class INET_API DscpMarker : public queueing::PacketQueueingElementBase, public q
     virtual void handleMessage(cMessage *message) override;
     virtual void refreshDisplay() const override;
 
-    virtual bool canPushSomePacket(cGate *gate = nullptr) const override { return true; }
-    virtual bool canPushPacket(Packet *packet, cGate *gate = nullptr) const override { return true; }
-    virtual void pushPacket(Packet *packet, cGate *gate = nullptr) override;
+    virtual bool canPushSomePacket(cGate *gate) const override { return true; }
+    virtual bool canPushPacket(Packet *packet, cGate *gate) const override { return true; }
 
+    virtual void pushPacket(Packet *packet, cGate *gate) override;
     virtual bool markPacket(Packet *msg, int dscp);
 };
 
