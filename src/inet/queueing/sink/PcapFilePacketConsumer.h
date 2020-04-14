@@ -30,8 +30,9 @@ class INET_API PcapFilePacketConsumer : public PassivePacketSinkBase
   protected:
     cGate *inputGate = nullptr;
     IActivePacketSource *producer = nullptr;
-
     PcapWriter pcapWriter;
+    Direction direction = DIRECTION_UNDEFINED;
+    PcapLinkType networkType = LINKTYPE_INVALID;
 
   protected:
     virtual void initialize(int stage) override;
