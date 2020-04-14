@@ -74,6 +74,11 @@ void ActivePacketSink::handleCanPullPacket(cGate *gate)
     }
 }
 
+void ActivePacketSink::handlePullPacketProcessed(Packet *packet, cGate *gate, bool successful)
+{
+    Enter_Method("handlePullPacketProcessed");
+}
+
 } // namespace queueing
 } // namespace inet
 

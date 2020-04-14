@@ -139,6 +139,13 @@ void MarkovScheduler::handleCanPushPacket(cGate *gate)
         producers[state]->handleCanPushPacket(inputGates[state]->getPathStartGate());
 }
 
+void MarkovScheduler::handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful)
+{
+    Enter_Method("handlePushPacketProcessed");
+    if (producers[state] != nullptr)
+        producers[state]->handlePushPacketProcessed(packet, inputGates[state]->getPathStartGate(), successful);
+}
+
 } // namespace queueing
 } // namespace inet
 

@@ -39,7 +39,8 @@ class INET_API EmptyPacketSource : public PacketQueueingElementBase, public virt
     virtual bool supportsPacketPushing(cGate *gate) const override { return outputGate == gate; }
     virtual bool supportsPacketPulling(cGate *gate) const override { return false; }
 
-    virtual void handleCanPushPacket(cGate *gate) override { }
+    virtual void handleCanPushPacket(cGate *gate) override;
+    virtual void handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful) override;
 };
 
 } // namespace queueing

@@ -63,6 +63,12 @@ void PacketMultiplexer::handleCanPushPacket(cGate *gate)
             producers[i]->handleCanPushPacket(inputGates[i]->getPathStartGate());
 }
 
+void PacketMultiplexer::handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful)
+{
+    Enter_Method("handlePushPacketProcessed");
+    throw cRuntimeError("Invalid operation");
+}
+
 } // namespace queueing
 } // namespace inet
 

@@ -49,6 +49,7 @@ class INET_API ActivePacketSource : public PacketSourceBase, public virtual IAct
     virtual bool supportsPacketPulling(cGate *gate) const override { return false; }
 
     virtual void handleCanPushPacket(cGate *gate) override;
+    virtual void handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful) override;
 };
 
 } // namespace queueing

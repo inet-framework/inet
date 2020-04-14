@@ -66,6 +66,12 @@ void PacketDemultiplexer::handleCanPullPacket(cGate *gate)
             collectors[i]->handleCanPullPacket(outputGates[i]->getPathEndGate());
 }
 
+void PacketDemultiplexer::handlePullPacketProcessed(Packet *packet, cGate *gate, bool successful)
+{
+    Enter_Method("handlePullPacketProcessed");
+    throw cRuntimeError("Invalid operation");
+}
+
 } // namespace queueing
 } // namespace inet
 

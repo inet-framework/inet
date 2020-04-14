@@ -59,8 +59,9 @@ class INET_API MarkovClassifier : public PacketClassifierBase, public virtual IA
     virtual Packet *pullPacket(cGate *gate) override;
 
     virtual void handleCanPullPacket(cGate *gate) override;
-    virtual const char *resolveDirective(char directive) const override;
+    virtual void handlePullPacketProcessed(Packet *packet, cGate *gate, bool successful) override;
 
+    virtual const char *resolveDirective(char directive) const override;
 };
 
 } // namespace queueing

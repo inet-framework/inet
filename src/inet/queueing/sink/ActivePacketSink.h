@@ -49,6 +49,7 @@ class INET_API ActivePacketSink : public PacketSinkBase, public virtual IActiveP
     virtual bool supportsPacketPulling(cGate *gate) const override { return inputGate == gate; }
 
     virtual void handleCanPullPacket(cGate *gate) override;
+    virtual void handlePullPacketProcessed(Packet *packet, cGate *gate, bool successful) override;
 };
 
 } // namespace queueing
