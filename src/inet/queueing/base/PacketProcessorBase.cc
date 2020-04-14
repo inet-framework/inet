@@ -33,6 +33,12 @@ void PacketProcessorBase::initialize(int stage)
         updateDisplayString();
 }
 
+void PacketProcessorBase::handlePacketProcessed(Packet *packet)
+{
+    numProcessedPackets++;
+    processedTotalLength += packet->getDataLength();
+}
+
 void PacketProcessorBase::updateDisplayString() const
 {
     if (getEnvir()->isGUI()) {
