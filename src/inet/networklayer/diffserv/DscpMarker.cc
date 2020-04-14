@@ -40,7 +40,7 @@ simsignal_t DscpMarker::packetMarkedSignal = registerSignal("packetMarked");
 
 void DscpMarker::initialize(int stage)
 {
-    PacketQueueingElementBase::initialize(stage);
+    PacketProcessorBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         parseDSCPs(par("dscps"), "dscps", dscps);
         if (dscps.empty())
