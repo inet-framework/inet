@@ -34,6 +34,7 @@ class INET_API PacketProcessorBase : public PacketQueueingElementBase, public St
 
   protected:
     virtual void initialize(int stage) override;
+    virtual void handlePacketProcessed(Packet *packet);
     virtual void updateDisplayString() const;
 
   public:
