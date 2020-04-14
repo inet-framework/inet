@@ -42,6 +42,33 @@ void PacketSchedulerBase::initialize(int stage)
     }
 }
 
+int PacketSchedulerBase::callSchedulePacket()
+{
+    int index = schedulePacket();
+    if (index < 0 || static_cast<unsigned int>(index) >= inputGates.size())
+        throw cRuntimeError("Scheduled packet from invalid input gate: %d", index);
+    return index;
+}
+
+void PacketSchedulerBase::checkPacketStreaming(Packet *packet)
+{
+    if (inProgressStreamId != -1 && (packet == nullptr || packet->getTreeId() != inProgressStreamId))
+        throw cRuntimeError("Another packet streaming operation is already in progress");
+}
+
+void PacketSchedulerBase::startPacketStreaming()
+{
+    inProgressGateIndex = callSchedulePacket();
+}
+
+void PacketSchedulerBase::endPacketStreaming(Packet *packet)
+{
+    emit(packetPulledSignal, packet);
+    handlePacketProcessed(packet);
+    inProgressStreamId = -1;
+    inProgressGateIndex = -1;
+}
+
 bool PacketSchedulerBase::canPullSomePacket(cGate *gate) const
 {
     for (int i = 0; i < (int)inputGates.size(); i++) {
@@ -52,21 +79,82 @@ bool PacketSchedulerBase::canPullSomePacket(cGate *gate) const
     return false;
 }
 
+Packet *PacketSchedulerBase::canPullPacket(cGate *gate) const
+{
+    for (int i = 0; i < (int)inputGates.size(); i++) {
+        auto inputProvider = providers[i];
+        auto packet = inputProvider->canPullPacket(inputGates[i]->getPathStartGate());
+        if (packet != nullptr)
+            return packet;
+    }
+    return nullptr;
+}
+
 Packet *PacketSchedulerBase::pullPacket(cGate *gate)
 {
     Enter_Method("pullPacket");
-    int index = schedulePacket();
-    if (index < 0 || static_cast<unsigned int>(index) >= inputGates.size())
-        throw cRuntimeError("Scheduled packet from invalid input gate: %d", index);
+    checkPacketStreaming(nullptr);
+    int index = callSchedulePacket();
     auto packet = providers[index]->pullPacket(inputGates[index]->getPathStartGate());
     take(packet);
     EV_INFO << "Scheduling packet " << packet->getName() << ".\n";
-    animateSend(packet, outputGate);
-    numProcessedPackets++;
-    processedTotalLength += packet->getDataLength();
-    updateDisplayString();
+    handlePacketProcessed(packet);
     emit(packetPulledSignal, packet);
+    animateSend(packet, outputGate);
+    updateDisplayString();
     return packet;
+}
+
+Packet *PacketSchedulerBase::pullPacketStart(cGate *gate)
+{
+    Enter_Method("pullPacketStart");
+    checkPacketStreaming(nullptr);
+    startPacketStreaming();
+    auto packet = providers[inProgressGateIndex]->pullPacketStart(inputGates[inProgressGateIndex]->getPathStartGate());
+    take(packet);
+    inProgressStreamId = packet->getTreeId();
+    animateSend(packet, outputGate);
+    updateDisplayString();
+    return packet;
+}
+
+Packet *PacketSchedulerBase::pullPacketEnd(cGate *gate)
+{
+    Enter_Method("pullPacketEnd");
+    if (!isStreamingPacket())
+        startPacketStreaming();
+    auto packet = providers[inProgressGateIndex]->pullPacketEnd(inputGates[inProgressGateIndex]->getPathStartGate());
+    take(packet);
+    checkPacketStreaming(packet);
+    inProgressStreamId = packet->getTreeId();
+    endPacketStreaming(packet);
+    animateSend(packet, outputGate);
+    updateDisplayString();
+    return packet;
+}
+
+Packet *PacketSchedulerBase::pullPacketProgress(cGate *gate, b& position, b& extraProcessableLength)
+{
+    Enter_Method("pullPacketProgress");
+    if (!isStreamingPacket())
+        startPacketStreaming();
+    auto packet = providers[inProgressGateIndex]->pullPacketProgress(inputGates[inProgressGateIndex]->getPathStartGate(), position, extraProcessableLength);
+    take(packet);
+    checkPacketStreaming(packet);
+    inProgressStreamId = packet->getTreeId();
+    if (packet->getTotalLength() == position + extraProcessableLength)
+        endPacketStreaming(packet);
+    animateSend(packet, outputGate);
+    updateDisplayString();
+    return packet;
+}
+
+b PacketSchedulerBase::getPullPacketProcessedLength(Packet *packet, cGate *gate)
+{
+    checkPacketStreaming(packet);
+    auto inputGate = inputGates[inProgressGateIndex];
+    auto provider = providers[inProgressGateIndex];
+    return provider->getPullPacketProcessedLength(packet, inputGate->getPathStartGate());
 }
 
 void PacketSchedulerBase::handleCanPullPacket(cGate *gate)
@@ -74,6 +162,11 @@ void PacketSchedulerBase::handleCanPullPacket(cGate *gate)
     Enter_Method("handleCanPullPacket");
     if (collector != nullptr)
         collector->handleCanPullPacket(outputGate->getPathEndGate());
+}
+
+void PacketSchedulerBase::handlePullPacketProcessed(Packet *packet, cGate *gate, bool successful)
+{
+    collector->handlePullPacketProcessed(packet, outputGate->getPathStartGate(), successful);
 }
 
 } // namespace queueing
