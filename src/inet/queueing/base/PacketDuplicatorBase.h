@@ -47,7 +47,13 @@ class INET_API PacketDuplicatorBase : public PacketQueueingElementBase, public v
     virtual bool canPushPacket(Packet *packet, cGate *gate) const override { return true; }
     virtual void pushPacket(Packet *packet, cGate *gate) override;
 
+    virtual void pushPacketStart(Packet *packet, cGate *gate) override { throw cRuntimeError("Invalid operation"); }
+    virtual void pushPacketEnd(Packet *packet, cGate *gate) override { throw cRuntimeError("Invalid operation"); }
+    virtual void pushPacketProgress(Packet *packet, cGate *gate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("Invalid operation"); }
+    virtual b getPushPacketProcessedLength(Packet *packet, cGate *gate) override { throw cRuntimeError("Invalid operation"); }
+
     virtual void handleCanPushPacket(cGate *gate) override;
+    virtual void handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful) override { throw cRuntimeError("Invalid operation"); }
 };
 
 } // namespace queueing
