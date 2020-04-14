@@ -42,15 +42,15 @@ cmdenv-event-banners = false
 %contains: stdout
 Opening gate.
 Providing packet provider-0.
-Passing packet provider-0.
+Passing through packet provider-0.
 Collecting packet provider-0.
 Providing packet provider-1.
-Passing packet provider-1.
+Passing through packet provider-1.
 Collecting packet provider-1.
 Providing packet provider-2.
-Passing packet provider-2.
+Passing through packet provider-2.
 Collecting packet provider-2.
 Providing packet provider-3.
-Passing packet provider-3.
+Passing through packet provider-3.
 Collecting packet provider-3.
 Closing gate.
