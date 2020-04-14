@@ -119,9 +119,38 @@ void PacketQueueingElementBase::pushOrSendPacket(Packet *packet, cGate *gate, IP
         animateSend(packet, gate);
         consumer->pushPacket(packet, gate->getPathEndGate());
     }
-    else {
+    else
         send(packet, gate);
+}
+
+void PacketQueueingElementBase::pushOrSendPacketStart(Packet *packet, cGate *gate, IPassivePacketSink *consumer)
+{
+    if (consumer != nullptr) {
+        animateSend(packet, gate);
+        consumer->pushPacketStart(packet, gate->getPathEndGate());
     }
+    else
+        sendPacketStart(packet, gate, 0);
+}
+
+void PacketQueueingElementBase::pushOrSendPacketEnd(Packet *packet, cGate *gate, IPassivePacketSink *consumer)
+{
+    if (consumer != nullptr) {
+        animateSend(packet, gate);
+        consumer->pushPacketEnd(packet, gate->getPathEndGate());
+    }
+    else
+        sendPacketEnd(packet, gate, 0);
+}
+
+void PacketQueueingElementBase::pushOrSendPacketProgress(Packet *packet, cGate *gate, IPassivePacketSink *consumer, b position, b extraProcessableLength)
+{
+    if (consumer != nullptr) {
+        animateSend(packet, gate);
+        consumer->pushPacketProgress(packet, gate->getPathEndGate(), position, extraProcessableLength);
+    }
+    else
+        sendPacketProgress(packet, gate, 0, b(position).get(), 0, b(extraProcessableLength).get(), 0);
 }
 
 void PacketQueueingElementBase::dropPacket(Packet *packet, PacketDropReason reason, int limit)
