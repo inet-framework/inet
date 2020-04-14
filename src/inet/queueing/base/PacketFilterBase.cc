@@ -41,9 +41,34 @@ void PacketFilterBase::initialize(int stage)
     }
 }
 
+void PacketFilterBase::handleMessage(cMessage *message)
+{
+    auto packet = check_and_cast<Packet *>(message);
+    pushPacket(packet, packet->getArrivalGate());
+}
+
+void PacketFilterBase::checkPacketStreaming(Packet *packet)
+{
+    if (inProgressStreamId != -1 && (packet == nullptr || packet->getTreeId() != inProgressStreamId))
+        throw cRuntimeError("Another packet streaming operation is already in progress");
+}
+
+void PacketFilterBase::startPacketStreaming(Packet *packet)
+{
+    inProgressStreamId = packet->getTreeId();
+}
+
+void PacketFilterBase::endPacketStreaming(Packet *packet)
+{
+    emit(packetPushedSignal, packet);
+    handlePacketProcessed(packet);
+    inProgressStreamId = -1;
+}
+
 void PacketFilterBase::pushPacket(Packet *packet, cGate *gate)
 {
     Enter_Method("pushPacket");
+    checkPacketStreaming(nullptr);
     take(packet);
     emit(packetPushedSignal, packet);
     if (matchesPacket(packet)) {
@@ -54,9 +79,87 @@ void PacketFilterBase::pushPacket(Packet *packet, cGate *gate)
         EV_INFO << "Filtering out packet " << packet->getName() << "." << endl;
         dropPacket(packet);
     }
-    numProcessedPackets++;
-    processedTotalLength += packet->getTotalLength();
+    handlePacketProcessed(packet);
     updateDisplayString();
+}
+
+void PacketFilterBase::pushPacketStart(Packet *packet, cGate *gate)
+{
+    Enter_Method("pushPacketStart");
+    take(packet);
+    checkPacketStreaming(packet);
+    startPacketStreaming(packet);
+    if (matchesPacket(packet)) {
+        EV_INFO << "Passing through packet " << packet->getName() << "." << endl;
+        pushOrSendPacketStart(packet, outputGate, consumer);
+    }
+    else {
+        EV_INFO << "Filtering out packet " << packet->getName() << "." << endl;
+        dropPacket(packet);
+    }
+    updateDisplayString();
+}
+
+void PacketFilterBase::pushPacketEnd(Packet *packet, cGate *gate)
+{
+    Enter_Method("pushPacketEnd");
+    take(packet);
+    if (!isStreamingPacket())
+        startPacketStreaming(packet);
+    else
+        checkPacketStreaming(packet);
+    if (matchesPacket(packet)) {
+        EV_INFO << "Passing through packet " << packet->getName() << "." << endl;
+        pushOrSendPacketEnd(packet, outputGate, consumer);
+        endPacketStreaming(packet);
+    }
+    else {
+        EV_INFO << "Filtering out packet " << packet->getName() << "." << endl;
+        endPacketStreaming(packet);
+        dropPacket(packet);
+    }
+    pushOrSendPacketEnd(packet, outputGate->getPathEndGate(), consumer);
+    updateDisplayString();
+}
+
+void PacketFilterBase::pushPacketProgress(Packet *packet, cGate *gate, b position, b extraProcessableLength)
+{
+    Enter_Method("pushPacketProgress");
+    take(packet);
+    if (!isStreamingPacket())
+        startPacketStreaming(packet);
+    else
+        checkPacketStreaming(packet);
+    if (matchesPacket(packet)) {
+        EV_INFO << "Passing through packet " << packet->getName() << "." << endl;
+        if (packet->getTotalLength() == position + extraProcessableLength)
+            endPacketStreaming(packet);
+        pushOrSendPacketProgress(packet, outputGate, consumer, position, extraProcessableLength);
+    }
+    else {
+        EV_INFO << "Filtering out packet " << packet->getName() << "." << endl;
+        endPacketStreaming(packet);
+        dropPacket(packet);
+    }
+    updateDisplayString();
+}
+
+b PacketFilterBase::getPushPacketProcessedLength(Packet *packet, cGate *gate)
+{
+    checkPacketStreaming(packet);
+    return consumer->getPushPacketProcessedLength(packet, outputGate->getPathEndGate());
+}
+
+void PacketFilterBase::handleCanPushPacket(cGate *gate)
+{
+    Enter_Method("handleCanPushPacket");
+    if (producer != nullptr)
+        producer->handleCanPushPacket(inputGate->getPathStartGate());
+}
+
+void PacketFilterBase::handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful)
+{
+    producer->handlePushPacketProcessed(packet, inputGate->getPathStartGate(), successful);
 }
 
 bool PacketFilterBase::canPullSomePacket(cGate *gate) const
@@ -75,8 +178,7 @@ bool PacketFilterBase::canPullSomePacket(cGate *gate) const
             const_cast<PacketFilterBase *>(this)->take(packet);
             EV_INFO << "Filtering out packet " << packet->getName() << "." << endl;
             nonConstThisPtr->dropPacket(packet);
-            nonConstThisPtr->numProcessedPackets++;
-            nonConstThisPtr->processedTotalLength += packet->getTotalLength();
+            nonConstThisPtr->handlePacketProcessed(packet);
             updateDisplayString();
         }
     }
@@ -89,8 +191,7 @@ Packet *PacketFilterBase::pullPacket(cGate *gate)
     while (true) {
         auto packet = provider->pullPacket(providerGate);
         take(packet);
-        numProcessedPackets++;
-        processedTotalLength += packet->getTotalLength();
+        handlePacketProcessed(packet);
         if (matchesPacket(packet)) {
             EV_INFO << "Passing through packet " << packet->getName() << "." << endl;
             animateSend(packet, outputGate);
@@ -105,11 +206,35 @@ Packet *PacketFilterBase::pullPacket(cGate *gate)
     }
 }
 
-void PacketFilterBase::handleCanPushPacket(cGate *gate)
+Packet *PacketFilterBase::pullPacketStart(cGate *gate)
 {
-    Enter_Method("handleCanPushPacket");
-    if (producer != nullptr)
-        producer->handleCanPushPacket(inputGate->getPathStartGate());
+    Enter_Method("pullPacketStart");
+    throw cRuntimeError("Invalid operation");
+}
+
+Packet *PacketFilterBase::pullPacketEnd(cGate *gate)
+{
+    Enter_Method("pullPacketEnd");
+    throw cRuntimeError("Invalid operation");
+}
+
+Packet *PacketFilterBase::pullPacketProgress(cGate *gate, b& position, b& extraProcessableLength)
+{
+    Enter_Method("pullPacketProgress");
+    throw cRuntimeError("Invalid operation");
+}
+
+b PacketFilterBase::getPullPacketProcessedLength(Packet *packet, cGate *gate)
+{
+    checkPacketStreaming(packet);
+    return provider->getPullPacketProcessedLength(packet, inputGate->getPathStartGate());
+}
+
+void PacketFilterBase::handlePullPacketProcessed(Packet *packet, cGate *gate, bool successful)
+{
+    Enter_Method("handlePullPacketProcessed");
+    if (collector != nullptr)
+        collector->handlePullPacketProcessed(packet, outputGate->getPathEndGate(), successful);
 }
 
 void PacketFilterBase::handleCanPullPacket(cGate *gate)

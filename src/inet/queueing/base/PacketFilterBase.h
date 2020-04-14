@@ -35,14 +35,25 @@ class INET_API PacketFilterBase : public PacketProcessorBase, public virtual IPa
     IPassivePacketSink *consumer = nullptr;
     IActivePacketSink *collector = nullptr;
 
+    int inProgressStreamId = -1;
+
     int numDroppedPackets = 0;
     b droppedTotalLength = b(-1);
 
   protected:
     virtual void initialize(int stage) override;
+    virtual void handleMessage(cMessage *message) override;
+
     virtual bool matchesPacket(Packet *packet) = 0;
+
+    virtual bool isStreamingPacket() const { return inProgressStreamId != -1; }
+    virtual void startPacketStreaming(Packet *packet);
+    virtual void endPacketStreaming(Packet *packet);
+    virtual void checkPacketStreaming(Packet *packet);
+
     virtual void dropPacket(Packet *packet);
     virtual void dropPacket(Packet *packet, PacketDropReason reason, int limit = -1) override;
+
     virtual const char *resolveDirective(char directive) const override;
 
   public:
@@ -50,16 +61,35 @@ class INET_API PacketFilterBase : public PacketProcessorBase, public virtual IPa
     virtual IPassivePacketSource *getProvider(cGate *gate) override { return this; }
 
     virtual bool supportsPacketPushing(cGate *gate) const override { return true; }
+    virtual bool supportsPacketPulling(cGate *gate) const override { return true; }
+    virtual bool supportsPacketStreaming(cGate *gate) const override { return true; }
+
     virtual bool canPushSomePacket(cGate *gate) const override { return true; }
     virtual bool canPushPacket(Packet *packet, cGate *gate) const override { return true; }
+
     virtual void pushPacket(Packet *packet, cGate *gate) override;
 
-    virtual bool supportsPacketPulling(cGate *gate) const override { return true; }
-    virtual bool canPullSomePacket(cGate *gate) const override;
-    virtual Packet *canPullPacket(cGate *gate) const override { throw cRuntimeError("Invalid operation"); }
-    virtual Packet *pullPacket(cGate *gate) override;
+    virtual void pushPacketStart(Packet *packet, cGate *gate) override;
+    virtual void pushPacketEnd(Packet *packet, cGate *gate) override;
+    virtual void pushPacketProgress(Packet *packet, cGate *gate, b position, b extraProcessableLength = b(0)) override;
+
+    virtual b getPushPacketProcessedLength(Packet *packet, cGate *gate) override;
 
     virtual void handleCanPushPacket(cGate *gate) override;
+    virtual void handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful) override;
+
+    virtual bool canPullSomePacket(cGate *gate) const override;
+    virtual Packet *canPullPacket(cGate *gate) const override { throw cRuntimeError("Invalid operation"); }
+
+    virtual Packet *pullPacket(cGate *gate) override;
+
+    virtual Packet *pullPacketStart(cGate *gate) override;
+    virtual Packet *pullPacketEnd(cGate *gate) override;
+    virtual Packet *pullPacketProgress(cGate *gate, b& position, b& extraProcessableLength) override;
+
+    virtual b getPullPacketProcessedLength(Packet *packet, cGate *gate) override;
+
+    virtual void handlePullPacketProcessed(Packet *packet, cGate *gate, bool successful) override;
     virtual void handleCanPullPacket(cGate *gate) override;
 };
 
