@@ -37,5 +37,11 @@ void PacketMeterBase::handleCanPushPacket(cGate *gate)
         producer->handleCanPushPacket(inputGate->getPathStartGate());
 }
 
+void PacketMeterBase::handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful)
+{
+    if (producer != nullptr)
+        producer->handlePushPacketProcessed(packet, gate, successful);
+}
+
 } // namespace inet
 
