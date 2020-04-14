@@ -17,6 +17,7 @@
 
 #include "inet/applications/common/SocketTag_m.h"
 #include "inet/common/MessageDispatcher.h"
+#include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 
@@ -41,6 +42,48 @@ void MessageDispatcher::arrived(cMessage *message, cGate *inGate, simtime_t t)
     else
         outGate = handleMessage(check_and_cast<Message *>(message), inGate);
     outGate->deliver(message, t);
+}
+
+bool MessageDispatcher::canPushSomePacket(cGate *inGate) const
+{
+    int size = gateSize("out");
+    for (int i = 0; i < size; i++) {
+        auto outGate = const_cast<MessageDispatcher *>(this)->gate("out", i);
+        auto consumer = findConnectedModule<queueing::IPassivePacketSink>(outGate);
+        if (consumer != nullptr && !dynamic_cast<MessageDispatcher *>(consumer) && !consumer->canPushSomePacket(outGate->getPathEndGate()))
+            return false;
+    }
+    return true;
+}
+
+bool MessageDispatcher::canPushPacket(Packet *packet, cGate *inGate) const
+{
+    auto outGate = const_cast<MessageDispatcher *>(this)->handlePacket(packet, inGate);
+    auto consumer = findConnectedModule<queueing::IPassivePacketSink>(outGate);
+    return consumer != nullptr && !dynamic_cast<MessageDispatcher *>(consumer) && consumer->canPushPacket(packet, outGate->getPathEndGate());
+}
+
+void MessageDispatcher::pushPacket(Packet *packet, cGate *inGate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    auto outGate = handlePacket(packet, inGate);
+    auto consumer = findConnectedModule<IPassivePacketSink>(outGate);
+    if (consumer != nullptr)
+        consumer->pushPacket(packet, outGate->getPathEndGate());
+    else
+        send(packet, outGate);
+}
+
+void MessageDispatcher::handleCanPushPacket(cGate *outGate)
+{
+    int size = gateSize("in");
+    for (int i = 0; i < size; i++) {
+        auto inGate = gate("in", i);
+        auto producer = findConnectedModule<queueing::IActivePacketSource>(inGate);
+        if (producer != nullptr && !dynamic_cast<MessageDispatcher *>(producer))
+            producer->handleCanPushPacket(inGate->getPathStartGate());
+    }
 }
 
 cGate *MessageDispatcher::handlePacket(Packet *packet, cGate *inGate)
