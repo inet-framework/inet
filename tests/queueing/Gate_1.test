@@ -42,15 +42,15 @@ cmdenv-event-banners = false
 %contains: stdout
 Opening gate.
 Producing packet producer-0.
-Passing packet producer-0.
+Passing through packet producer-0.
 Consuming packet producer-0.
 Producing packet producer-1.
-Passing packet producer-1.
+Passing through packet producer-1.
 Consuming packet producer-1.
 Producing packet producer-2.
-Passing packet producer-2.
+Passing through packet producer-2.
 Consuming packet producer-2.
 Producing packet producer-3.
-Passing packet producer-3.
+Passing through packet producer-3.
 Consuming packet producer-3.
 Closing gate.
