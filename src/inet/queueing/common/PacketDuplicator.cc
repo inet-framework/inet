@@ -55,7 +55,7 @@ void PacketDuplicator::handleCanPushPacket(cGate *gate)
 {
     Enter_Method("handleCanPushPacket");
     if (producer != nullptr)
-        producer->handleCanPushPacket(inputGate);
+        producer->handleCanPushPacket(inputGate->getPathStartGate());
 }
 
 } // namespace queueing

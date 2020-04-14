@@ -87,9 +87,9 @@ void PacketGate::open()
     EV_DEBUG << "Opening gate.\n";
     isOpen_ = true;
     if (producer != nullptr)
-        producer->handleCanPushPacket(inputGate);
+        producer->handleCanPushPacket(inputGate->getPathStartGate());
     if (collector != nullptr)
-        collector->handleCanPullPacket(outputGate);
+        collector->handleCanPullPacket(outputGate->getPathEndGate());
 }
 
 void PacketGate::close()
@@ -151,14 +151,14 @@ void PacketGate::handleCanPushPacket(cGate *gate)
 {
     Enter_Method("handleCanPushPacket");
     if (isOpen_ && producer != nullptr)
-        producer->handleCanPushPacket(inputGate);
+        producer->handleCanPushPacket(inputGate->getPathStartGate());
 }
 
 void PacketGate::handleCanPullPacket(cGate *gate)
 {
     Enter_Method("handleCanPullPacket");
     if (isOpen_ && collector != nullptr)
-        collector->handleCanPullPacket(outputGate);
+        collector->handleCanPullPacket(outputGate->getPathEndGate());
 }
 
 } // namespace queueing
