@@ -25,15 +25,9 @@ Define_Module(PacketGate);
 
 void PacketGate::initialize(int stage)
 {
-    PacketProcessorBase::initialize(stage);
+    PacketFilterBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         isOpen_ = par("initiallyOpen");
-        inputGate = gate("in");
-        outputGate = gate("out");
-        producer = findConnectedModule<IActivePacketSource>(inputGate);
-        collector = findConnectedModule<IActivePacketSink>(outputGate);
-        provider = findConnectedModule<IPassivePacketSource>(inputGate);
-        consumer = findConnectedModule<IPassivePacketSink>(outputGate);
         changeTimer = new cMessage("ChangeTimer");
         double openTime = par("openTime");
         if (!std::isnan(openTime))
@@ -48,8 +42,6 @@ void PacketGate::initialize(int stage)
 
     }
     else if (stage == INITSTAGE_QUEUEING) {
-        checkPacketOperationSupport(inputGate);
-        checkPacketOperationSupport(outputGate);
         if (changeIndex < (int)changeTimes.size())
             scheduleChangeTimer();
     }
@@ -64,6 +56,11 @@ void PacketGate::handleMessage(cMessage *message)
     }
     else
         throw cRuntimeError("Unknown message");
+}
+
+bool PacketGate::matchesPacket(Packet *packet)
+{
+    return isOpen_;
 }
 
 void PacketGate::scheduleChangeTimer()
@@ -109,19 +106,6 @@ bool PacketGate::canPushPacket(Packet *packet, cGate *gate) const
     return isOpen_ && consumer->canPushPacket(packet, outputGate->getPathStartGate());
 }
 
-void PacketGate::pushPacket(Packet *packet, cGate *gate)
-{
-    Enter_Method("pushPacket");
-    take(packet);
-    if (!isOpen_)
-        throw cRuntimeError("Cannot push packet when the gate is closed");
-    EV_INFO << "Passing packet " << packet->getName() << "." << endl;
-    pushOrSendPacket(packet, outputGate, consumer);
-    numProcessedPackets++;
-    processedTotalLength += packet->getTotalLength();
-    updateDisplayString();
-}
-
 bool PacketGate::canPullSomePacket(cGate *gate) const
 {
     return isOpen_ && provider->canPullSomePacket(inputGate->getPathStartGate());
@@ -132,33 +116,18 @@ Packet *PacketGate::canPullPacket(cGate *gate) const
     return isOpen_ ? provider->canPullPacket(inputGate->getPathStartGate()) : nullptr;
 }
 
-Packet *PacketGate::pullPacket(cGate *gate)
-{
-    Enter_Method("pullPacket");
-    if (!isOpen_)
-        throw cRuntimeError("Cannot pull packet when the gate is closed");
-    auto packet = provider->pullPacket(inputGate->getPathStartGate());
-    take(packet);
-    EV_INFO << "Passing packet " << packet->getName() << "." << endl;
-    numProcessedPackets++;
-    processedTotalLength += packet->getTotalLength();
-    updateDisplayString();
-    animateSend(packet, outputGate);
-    return packet;
-}
-
 void PacketGate::handleCanPushPacket(cGate *gate)
 {
     Enter_Method("handleCanPushPacket");
-    if (isOpen_ && producer != nullptr)
-        producer->handleCanPushPacket(inputGate->getPathStartGate());
+    if (isOpen_)
+        PacketFilterBase::handleCanPushPacket(gate);
 }
 
 void PacketGate::handleCanPullPacket(cGate *gate)
 {
     Enter_Method("handleCanPullPacket");
-    if (isOpen_ && collector != nullptr)
-        collector->handleCanPullPacket(outputGate->getPathEndGate());
+    if (isOpen_)
+        PacketFilterBase::handleCanPullPacket(gate);
 }
 
 } // namespace queueing

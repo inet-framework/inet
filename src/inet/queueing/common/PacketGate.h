@@ -18,23 +18,15 @@
 #ifndef __INET_PACKETGATE_H
 #define __INET_PACKETGATE_H
 
-#include "inet/queueing/base/PacketProcessorBase.h"
+#include "inet/queueing/base/PacketFilterBase.h"
 #include "inet/queueing/contract/IPacketFlow.h"
 
 namespace inet {
 namespace queueing {
 
-class INET_API PacketGate : public PacketProcessorBase, public virtual IPacketFlow
+class INET_API PacketGate : public PacketFilterBase, public virtual IPacketFlow
 {
   protected:
-    cGate *inputGate = nullptr;
-    IActivePacketSource *producer = nullptr;
-    IPassivePacketSource *provider = nullptr;
-
-    cGate *outputGate = nullptr;
-    IPassivePacketSink *consumer = nullptr;
-    IActivePacketSink *collector = nullptr;
-
     int changeIndex = 0;
     std::vector<simtime_t> changeTimes;
     bool isOpen_ = false;
@@ -44,6 +36,8 @@ class INET_API PacketGate : public PacketProcessorBase, public virtual IPacketFl
   protected:
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *message) override;
+
+    virtual bool matchesPacket(Packet *packet) override;
 
     virtual void scheduleChangeTimer();
     virtual void processChangeTimer();
@@ -59,14 +53,13 @@ class INET_API PacketGate : public PacketProcessorBase, public virtual IPacketFl
     virtual IPassivePacketSource *getProvider(cGate *gate) override { return this; }
 
     virtual bool supportsPacketPushing(cGate *gate) const override { return true; }
+    virtual bool supportsPacketPulling(cGate *gate) const override { return true; }
+
     virtual bool canPushSomePacket(cGate *gate) const override;
     virtual bool canPushPacket(Packet *packet, cGate *gate) const override;
-    virtual void pushPacket(Packet *packet, cGate *gate) override;
 
-    virtual bool supportsPacketPulling(cGate *gate) const override { return true; }
     virtual bool canPullSomePacket(cGate *gate) const override;
     virtual Packet *canPullPacket(cGate *gate) const override;
-    virtual Packet *pullPacket(cGate *gate) override;
 
     virtual void handleCanPushPacket(cGate *gate) override;
     virtual void handleCanPullPacket(cGate *gate) override;
