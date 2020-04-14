@@ -29,11 +29,16 @@ class INET_API PacketQueueingElementBase : public cSimpleModule, public virtual 
 {
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+
     virtual void animateSend(Packet *packet, cGate *gate);
     virtual void checkPacketOperationSupport(cGate *gate) const;
 
     virtual void pushOrSendPacket(Packet *packet, cGate *gate);
     virtual void pushOrSendPacket(Packet *packet, cGate *gate, IPassivePacketSink *consumer);
+    virtual void pushOrSendPacketStart(Packet *packet, cGate *gate, IPassivePacketSink *consumer);
+    virtual void pushOrSendPacketEnd(Packet *packet, cGate *gate, IPassivePacketSink *consumer);
+    virtual void pushOrSendPacketProgress(Packet *packet, cGate *gate, IPassivePacketSink *consumer, b position, b extraProcessableLength);
+
     virtual void dropPacket(Packet *packet, PacketDropReason reason, int limit = -1);
 };
 
