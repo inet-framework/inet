@@ -23,7 +23,7 @@
 #include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/queueing/contract/IActivePacketSource.h"
-#include "inet/queueing/contract/IPacketQueueingElement.h"
+#include "inet/queueing/contract/IPacketProcessor.h"
 #include "inet/queueing/contract/IPassivePacketSink.h"
 
 namespace inet {
@@ -31,7 +31,7 @@ namespace inet {
 /**
  * This class implements the corresponding module. See module documentation for more details.
  */
-class INET_API MessageDispatcher : public cSimpleModule, public IProtocolRegistrationListener, public IInterfaceRegistrationListener, public queueing::IActivePacketSource, public queueing::IPassivePacketSink, public queueing::IPacketQueueingElement
+class INET_API MessageDispatcher : public cSimpleModule, public IProtocolRegistrationListener, public IInterfaceRegistrationListener, public queueing::IActivePacketSource, public queueing::IPassivePacketSink, public queueing::IPacketProcessor
 {
   public:
     class Key
