@@ -18,13 +18,14 @@
 #ifndef __INET_PACKETMULTIPLEXER_H
 #define __INET_PACKETMULTIPLEXER_H
 
+#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/queueing/base/PassivePacketSinkBase.h"
 #include "inet/queueing/contract/IActivePacketSource.h"
 
 namespace inet {
 namespace queueing {
 
-class INET_API PacketMultiplexer : public PassivePacketSinkBase, public IActivePacketSource
+class INET_API PacketMultiplexer : public PassivePacketSinkBase, public virtual IActivePacketSource, public virtual IProtocolRegistrationListener
 {
   protected:
     std::vector<cGate *> inputGates;
