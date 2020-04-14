@@ -221,7 +221,7 @@ void PacketFlowBase::handleCanPullPacket(cGate *gate)
 {
     Enter_Method("handleCanPullPacket");
     if (collector != nullptr)
-        collector->handleCanPullPacket(outputGate);
+        collector->handleCanPullPacket(outputGate->getPathEndGate());
 }
 
 void PacketFlowBase::handlePullPacketProcessed(Packet *packet, cGate *gate, bool successful)
