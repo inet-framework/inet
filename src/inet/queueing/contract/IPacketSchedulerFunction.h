@@ -34,7 +34,7 @@ class INET_API IPacketSchedulerFunction
     /**
      * Returns the index of the scheduled provider.
      */
-    virtual int schedulePacket(const std::vector<IPassivePacketSource *>& providers) const = 0;
+    virtual int schedulePacket(const std::vector<IPassivePacketSource *>& sources) const = 0;
 };
 
 } // namespace queueing
