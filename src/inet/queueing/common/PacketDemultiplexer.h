@@ -45,7 +45,13 @@ class INET_API PacketDemultiplexer : public PacketProcessorBase, public virtual 
 
     virtual bool canPullSomePacket(cGate *gate) const override { return provider->canPullSomePacket(inputGate->getPathStartGate()); }
     virtual Packet *canPullPacket(cGate *gate) const override { return  provider->canPullPacket(inputGate->getPathStartGate()); }
+
     virtual Packet* pullPacket(cGate *gate) override;
+
+    virtual Packet *pullPacketStart(cGate *gate) override { throw cRuntimeError("Invalid operation"); }
+    virtual Packet *pullPacketEnd(cGate *gate) override { throw cRuntimeError("Invalid operation"); }
+    virtual Packet *pullPacketProgress(cGate *gate, b& position, b& extraProcessableLength) override { throw cRuntimeError("Invalid operation"); }
+    virtual b getPullPacketProcessedLength(Packet *packet, cGate *gate) override { throw cRuntimeError("Invalid operation"); }
 
     virtual void handlePullPacketProcessed(Packet *packet, cGate *gate, bool successful) override;
     virtual void handleCanPullPacket(cGate *gate) override;

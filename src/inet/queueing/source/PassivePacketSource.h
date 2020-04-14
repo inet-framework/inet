@@ -51,7 +51,12 @@ class INET_API PassivePacketSource : public PacketSourceBase, public virtual IPa
 
     virtual bool canPullSomePacket(cGate *gate) const override { return !providingTimer->isScheduled(); }
     virtual Packet *canPullPacket(cGate *gate) const override;
+
     virtual Packet *pullPacket(cGate *gate) override;
+    virtual Packet *pullPacketStart(cGate *gate) override { throw cRuntimeError("Invalid operation"); }
+    virtual Packet *pullPacketEnd(cGate *gate) override { throw cRuntimeError("Invalid operation"); }
+    virtual Packet *pullPacketProgress(cGate *gate, b& position, b& extraProcessableLength) override { throw cRuntimeError("Invalid operation"); }
+    virtual b getPullPacketProcessedLength(Packet *packet, cGate *gate) override { throw cRuntimeError("Invalid operation"); }
 };
 
 } // namespace queueing
