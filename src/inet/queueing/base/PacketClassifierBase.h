@@ -33,21 +33,39 @@ class INET_API PacketClassifierBase : public PassivePacketSinkBase, public virtu
     std::vector<cGate *> outputGates;
     std::vector<IPassivePacketSink *> consumers;
 
+    int inProgressStreamId = -1;
+    int inProgressGateIndex = -1;
+
   protected:
     virtual void initialize(int stage) override;
+
     virtual int classifyPacket(Packet *packet) = 0;
+    virtual int callClassifyPacket(Packet *packet);
+
+    virtual bool isStreamingPacket() const { return inProgressStreamId != -1; }
+    virtual void startPacketStreaming(Packet *packet);
+    virtual void endPacketStreaming(Packet *packet);
+    virtual void checkPacketStreaming(Packet *packet);
 
   public:
     virtual IPassivePacketSink *getConsumer(cGate *gate) override { return consumers[gate->getIndex()]; }
 
     virtual bool supportsPacketPushing(cGate *gate) const override { return true; }
     virtual bool supportsPacketPulling(cGate *gate) const override { return false; }
+    virtual bool supportsPacketStreaming(cGate *gate) const override { return true; }
 
     virtual bool canPushSomePacket(cGate *gate) const override;
-    virtual bool canPushPacket(Packet *packet, cGate *gate) const override { return canPushSomePacket(gate); }
+    virtual bool canPushPacket(Packet *packet, cGate *gate) const override;
+
     virtual void pushPacket(Packet *packet, cGate *gate) override;
+    virtual void pushPacketStart(Packet *packet, cGate *gate) override;
+    virtual void pushPacketEnd(Packet *packet, cGate *gate) override;
+    virtual void pushPacketProgress(Packet *packet, cGate *gate, b position, b extraProcessableLength = b(0)) override;
+
+    virtual b getPushPacketProcessedLength(Packet *packet, cGate *gate) override;
 
     virtual void handleCanPushPacket(cGate *gate) override;
+    virtual void handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful) override;
 };
 
 } // namespace queueing
