@@ -47,7 +47,7 @@ class INET_API TokenBucketMeter : public PacketMeterBase
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
-    virtual void pushPacket(Packet *packet, cGate *gate = nullptr) override;
+    virtual void pushPacket(Packet *packet, cGate *gate) override;
     virtual void refreshDisplay() const override;
 
     virtual int meterPacket(Packet *packet) override;
