@@ -45,6 +45,7 @@ class INET_API PacketDuplicator : public PassivePacketSinkBase, public virtual I
     virtual void pushPacket(Packet *packet, cGate *gate) override;
 
     virtual void handleCanPushPacket(cGate *gate) override;
+    virtual void handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful) override;
 };
 
 } // namespace queueing

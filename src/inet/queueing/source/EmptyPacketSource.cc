@@ -36,6 +36,16 @@ void EmptyPacketSource::initialize(int stage)
     }
 }
 
+void EmptyPacketSource::handleCanPushPacket(cGate *gate)
+{
+    Enter_Method("handleCanPushPacket");
+}
+
+void EmptyPacketSource::handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful)
+{
+    Enter_Method("handlePushPacketProcessed");
+}
+
 } // namespace queueing
 } // namespace inet
 

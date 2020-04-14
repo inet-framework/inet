@@ -74,6 +74,11 @@ void ActivePacketSource::handleCanPushPacket(cGate *gate)
     }
 }
 
+void ActivePacketSource::handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful)
+{
+    Enter_Method("handlePushPacketProcessed");
+}
+
 } // namespace queueing
 } // namespace inet
 

@@ -38,6 +38,16 @@ void PacketServerBase::initialize(int stage)
     }
 }
 
+void PacketServerBase::handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful)
+{
+    Enter_Method("handlePushPacketProcessed");
+}
+
+void PacketServerBase::handlePullPacketProcessed(Packet *packet, cGate *gate, bool successful)
+{
+    Enter_Method("handlePullPacketProcessed");
+}
+
 } // namespace queueing
 } // namespace inet
 

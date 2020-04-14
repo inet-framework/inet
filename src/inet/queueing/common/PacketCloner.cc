@@ -59,6 +59,12 @@ void PacketCloner::handleCanPushPacket(cGate *gate)
         producer->handleCanPushPacket(inputGate->getPathStartGate());
 }
 
+void PacketCloner::handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful)
+{
+    Enter_Method("handlePushPacketProcessed");
+    producer->handlePushPacketProcessed(packet, gate, successful);
+}
+
 } // namespace queueing
 } // namespace inet
 
