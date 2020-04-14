@@ -55,12 +55,6 @@ void DscpMarker::initialize(int stage)
     }
 }
 
-void DscpMarker::handleMessage(cMessage *message)
-{
-    auto packet = check_and_cast<Packet *>(message);
-    pushPacket(packet, packet->getArrivalGate());
-}
-
 void DscpMarker::pushPacket(Packet *packet, cGate *inputGate)
 {
     numRcvd++;
