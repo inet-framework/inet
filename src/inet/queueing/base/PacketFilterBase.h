@@ -62,8 +62,8 @@ class INET_API PacketFilterBase : public PacketProcessorBase, public virtual IPa
     virtual bool supportsPacketPulling(cGate *gate) const override { return true; }
     virtual bool supportsPacketStreaming(cGate *gate) const override { return true; }
 
-    virtual bool canPushSomePacket(cGate *gate) const override { return true; }
-    virtual bool canPushPacket(Packet *packet, cGate *gate) const override { return true; }
+    virtual bool canPushSomePacket(cGate *gate) const override;
+    virtual bool canPushPacket(Packet *packet, cGate *gate) const override;
 
     virtual void pushPacket(Packet *packet, cGate *gate) override;
 
