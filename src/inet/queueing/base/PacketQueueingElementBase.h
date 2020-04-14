@@ -40,6 +40,11 @@ class INET_API PacketQueueingElementBase : public cSimpleModule, public virtual 
     virtual void pushOrSendPacketProgress(Packet *packet, cGate *gate, IPassivePacketSink *consumer, b position, b extraProcessableLength);
 
     virtual void dropPacket(Packet *packet, PacketDropReason reason, int limit = -1);
+
+  public:
+    virtual bool supportsPacketSending(cGate *gate) const override { return true; }
+    virtual bool supportsPacketPassing(cGate *gate) const override { return true; }
+    virtual bool supportsPacketStreaming(cGate *gate) const override { return false; }
 };
 
 } // namespace queueing
