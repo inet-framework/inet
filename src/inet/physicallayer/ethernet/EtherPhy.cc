@@ -213,7 +213,7 @@ void EtherPhy::modifyCurrentPreemptableTx(cMessage *message)
 
     if (auto signal = dynamic_cast<EthernetSignal*>(curTx)) {
         auto oldPacket = check_and_cast<Packet*>(signal->getEncapsulatedPacket());
-        const auto& phyHeader = oldPacket->peekAtFront<EthernetPhyHeader>();
+        const auto& phyHeader = oldPacket->peekAtFront<EthernetFragmentPhyHeader>();
         auto type = phyHeader->getPreambleType();
         if (type == SMD_Sx || type == SMD_Cx) {
             auto newPacket = check_and_cast<Packet *>(message);
@@ -367,7 +367,7 @@ void EtherPhy::handleDisconnected()
 
 EthernetSignal *EtherPhy::encapsulate(Packet *packet)
 {
-    auto phyHeader = makeShared<EthernetPhyHeader>();
+    auto phyHeader = makeShared<EthernetFragmentPhyHeader>();
     PreemptionReq *req = nullptr;
     switch (packet->getKind()) {
         case ETH_CMD_SEND:
@@ -490,7 +490,7 @@ Packet *EtherPhy::decapsulate(EthernetSignal *signal)
 {
     auto packet = check_and_cast<Packet *>(signal->decapsulate());
     delete signal;
-    auto phyHeader = packet->popAtFront<EthernetPhyHeader>();
+    auto phyHeader = packet->popAtFront<EthernetFragmentPhyHeader>();
     auto fcsCheckResult = verifyFcs(packet);
     if (fcsCheckResult == FCS_BAD) {
         //TODO drop packet
