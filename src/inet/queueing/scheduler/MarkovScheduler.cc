@@ -61,7 +61,7 @@ void MarkovScheduler::initialize(int stage)
             checkPacketOperationSupport(inputGates[i]);
         checkPacketOperationSupport(outputGate);
         if (producers[state] != nullptr)
-            producers[state]->handleCanPushPacket(inputGates[state]);
+            producers[state]->handleCanPushPacket(inputGates[state]->getPathStartGate());
         scheduleWaitTimer();
     }
 }
@@ -80,7 +80,7 @@ void MarkovScheduler::handleMessage(cMessage *message)
             }
         }
         if (producers[state] != nullptr)
-            producers[state]->handleCanPushPacket(inputGates[state]);
+            producers[state]->handleCanPushPacket(inputGates[state]->getPathStartGate());
         scheduleWaitTimer();
     }
     else
@@ -136,7 +136,7 @@ void MarkovScheduler::handleCanPushPacket(cGate *gate)
 {
     Enter_Method("handleCanPushPacket");
     if (producers[state] != nullptr)
-        producers[state]->handleCanPushPacket(inputGates[state]);
+        producers[state]->handleCanPushPacket(inputGates[state]->getPathStartGate());
 }
 
 } // namespace queueing

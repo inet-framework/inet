@@ -109,14 +109,14 @@ void PacketFilterBase::handleCanPushPacket(cGate *gate)
 {
     Enter_Method("handleCanPushPacket");
     if (producer != nullptr)
-        producer->handleCanPushPacket(inputGate);
+        producer->handleCanPushPacket(inputGate->getPathStartGate());
 }
 
 void PacketFilterBase::handleCanPullPacket(cGate *gate)
 {
     Enter_Method("handleCanPullPacket");
     if (collector != nullptr)
-        collector->handleCanPullPacket(outputGate);
+        collector->handleCanPullPacket(outputGate->getPathEndGate());
 }
 
 void PacketFilterBase::dropPacket(Packet *packet)

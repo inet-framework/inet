@@ -73,7 +73,7 @@ void PacketSchedulerBase::handleCanPullPacket(cGate *gate)
 {
     Enter_Method("handleCanPullPacket");
     if (collector != nullptr)
-        collector->handleCanPullPacket(outputGate);
+        collector->handleCanPullPacket(outputGate->getPathEndGate());
 }
 
 } // namespace queueing

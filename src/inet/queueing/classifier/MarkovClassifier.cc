@@ -61,7 +61,7 @@ void MarkovClassifier::initialize(int stage)
             checkPacketOperationSupport(outputGates[i]);
         checkPacketOperationSupport(inputGate);
         if (collectors[state] != nullptr)
-            collectors[state]->handleCanPullPacket(outputGates[state]);
+            collectors[state]->handleCanPullPacket(outputGates[state]->getPathEndGate());
         scheduleWaitTimer();
     }
 }
@@ -80,7 +80,7 @@ void MarkovClassifier::handleMessage(cMessage *message)
             }
         }
         if (collectors[state] != nullptr)
-            collectors[state]->handleCanPullPacket(outputGates[state]);
+            collectors[state]->handleCanPullPacket(outputGates[state]->getPathEndGate());
         scheduleWaitTimer();
     }
     else
@@ -138,7 +138,7 @@ void MarkovClassifier::handleCanPullPacket(cGate *gate)
 {
     Enter_Method("handleCanPullPacket");
     if (collectors[state] != nullptr)
-        collectors[state]->handleCanPullPacket(outputGates[state]);
+        collectors[state]->handleCanPullPacket(outputGates[state]->getPathEndGate());
 }
 
 } // namespace queueing

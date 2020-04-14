@@ -47,7 +47,7 @@ void PacketQueue::initialize(int stage)
         checkPacketOperationSupport(inputGate);
         checkPacketOperationSupport(outputGate);
         if (producer != nullptr)
-            producer->handleCanPushPacket(inputGate);
+            producer->handleCanPushPacket(inputGate->getPathStartGate());
     }
     else if (stage == INITSTAGE_LAST)
         updateDisplayString();
@@ -115,7 +115,7 @@ void PacketQueue::pushPacket(Packet *packet, cGate *gate)
     }
     updateDisplayString();
     if (collector != nullptr && getNumPackets() != 0)
-        collector->handleCanPullPacket(outputGate);
+        collector->handleCanPullPacket(outputGate->getPathEndGate());
 }
 
 Packet *PacketQueue::pullPacket(cGate *gate)

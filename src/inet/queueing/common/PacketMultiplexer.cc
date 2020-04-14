@@ -60,7 +60,7 @@ void PacketMultiplexer::handleCanPushPacket(cGate *gate)
     for (int i = 0; i < (int)inputGates.size(); i++)
         // NOTE: notifying a listener may prevent others from pushing
         if (producers[i] != nullptr && consumer->canPushSomePacket(outputGate))
-            producers[i]->handleCanPushPacket(inputGates[i]);
+            producers[i]->handleCanPushPacket(inputGates[i]->getPathStartGate());
 }
 
 } // namespace queueing

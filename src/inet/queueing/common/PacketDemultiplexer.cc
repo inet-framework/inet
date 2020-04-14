@@ -63,7 +63,7 @@ void PacketDemultiplexer::handleCanPullPacket(cGate *gate)
     for (int i = 0; i < (int)outputGates.size(); i++)
         // NOTE: notifying a listener may prevent others from pulling
         if (collectors[i] != nullptr && provider->canPullSomePacket(inputGate->getPathStartGate()))
-            collectors[i]->handleCanPullPacket(outputGates[i]);
+            collectors[i]->handleCanPullPacket(outputGates[i]->getPathEndGate());
 }
 
 } // namespace queueing

@@ -39,7 +39,7 @@ void PacketBasedTokenGenerator::initialize(int stage)
     }
     else if (stage == INITSTAGE_QUEUEING) {
         if (producer != nullptr)
-            producer->handleCanPushPacket(inputGate);
+            producer->handleCanPushPacket(inputGate->getPathStartGate());
     }
 }
 
