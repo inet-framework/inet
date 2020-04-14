@@ -213,13 +213,21 @@ void PacketPrinter::printPacket(Packet *packet, const Options *options, Context&
     PacketDissector::PduTreeBuilder pduTreeBuilder;
     auto packetProtocolTag = packet->findTag<PacketProtocolTag>();
     auto protocol = packetProtocolTag != nullptr ? packetProtocolTag->getProtocol() : nullptr;
-    PacketDissector packetDissector(ProtocolDissectorRegistry::globalRegistry, pduTreeBuilder);
-    packetDissector.dissectPacket(packet, protocol);
-    auto& protocolDataUnit = pduTreeBuilder.getTopLevelPdu();
-    if (pduTreeBuilder.isSimplyEncapsulatedPacket() && isEnabledOption(options, "Print inside out"))
-        const_cast<PacketPrinter *>(this)->printPacketInsideOut(protocolDataUnit, options, context);
-    else
-        const_cast<PacketPrinter *>(this)->printPacketLeftToRight(protocolDataUnit, options, context);
+    try {
+        PacketDissector packetDissector(ProtocolDissectorRegistry::globalRegistry, pduTreeBuilder);
+        packetDissector.dissectPacket(packet, protocol);
+    }
+    catch (cRuntimeError& e) {
+        // NOTE: don't propagate errors from printPacket, becaue it can break Qtenv for example
+        context.infoColumn << e.what() << ": ";
+    }
+    const auto& protocolDataUnit = pduTreeBuilder.getTopLevelPdu();
+    if (protocolDataUnit != nullptr) {
+        if (pduTreeBuilder.isSimplyEncapsulatedPacket() && isEnabledOption(options, "Print inside out"))
+            const_cast<PacketPrinter *>(this)->printPacketInsideOut(protocolDataUnit, options, context);
+        else
+            const_cast<PacketPrinter *>(this)->printPacketLeftToRight(protocolDataUnit, options, context);
+    }
 }
 
 std::string PacketPrinter::printPacketToString(Packet *packet, const char *format) const
