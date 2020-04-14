@@ -18,14 +18,14 @@
 #ifndef __INET_PACKETQUEUEINGELEMENTBASE_H
 #define __INET_PACKETQUEUEINGELEMENTBASE_H
 
-#include "inet/queueing/contract/IPassivePacketSink.h"
-#include "inet/queueing/contract/IPacketQueueingElement.h"
 #include "inet/common/Simsignals.h"
+#include "inet/queueing/contract/IPacketProcessor.h"
+#include "inet/queueing/contract/IPassivePacketSink.h"
 
 namespace inet {
 namespace queueing {
 
-class INET_API PacketQueueingElementBase : public cSimpleModule, public virtual IPacketQueueingElement
+class INET_API PacketQueueingElementBase : public cSimpleModule, public virtual IPacketProcessor
 {
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
