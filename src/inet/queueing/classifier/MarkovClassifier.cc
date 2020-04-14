@@ -141,6 +141,13 @@ void MarkovClassifier::handleCanPullPacket(cGate *gate)
         collectors[state]->handleCanPullPacket(outputGates[state]->getPathEndGate());
 }
 
+void MarkovClassifier::handlePullPacketProcessed(Packet *packet, cGate *gate, bool successful)
+{
+    Enter_Method("handlePullPacketProcessed");
+    if (collectors[state] != nullptr)
+        collectors[state]->handlePullPacketProcessed(packet, outputGates[state]->getPathEndGate(), successful);
+}
+
 } // namespace queueing
 } // namespace inet
 

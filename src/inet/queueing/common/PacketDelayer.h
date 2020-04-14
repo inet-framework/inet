@@ -46,6 +46,7 @@ class INET_API PacketDelayer : public PassivePacketSinkBase, public virtual IAct
     virtual void pushPacket(Packet *packet, cGate *gate) override;
 
     virtual void handleCanPushPacket(cGate *gate) override;
+    virtual void handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful) override;
 };
 
 } // namespace queueing

@@ -58,6 +58,12 @@ void PacketDuplicator::handleCanPushPacket(cGate *gate)
         producer->handleCanPushPacket(inputGate->getPathStartGate());
 }
 
+void PacketDuplicator::handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful)
+{
+    Enter_Method("handlePushPacketProcessed");
+    producer->handlePushPacketProcessed(packet, gate, successful);
+}
+
 } // namespace queueing
 } // namespace inet
 

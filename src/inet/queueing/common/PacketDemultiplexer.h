@@ -47,6 +47,7 @@ class INET_API PacketDemultiplexer : public PacketProcessorBase, public virtual 
     virtual Packet *canPullPacket(cGate *gate) const override { return  provider->canPullPacket(inputGate->getPathStartGate()); }
     virtual Packet* pullPacket(cGate *gate) override;
 
+    virtual void handlePullPacketProcessed(Packet *packet, cGate *gate, bool successful) override;
     virtual void handleCanPullPacket(cGate *gate) override;
 };
 
