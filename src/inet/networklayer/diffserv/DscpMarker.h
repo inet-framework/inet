@@ -19,17 +19,17 @@
 #define __INET_DSCPMARKER_H
 
 #include "inet/common/INETDefs.h"
-#include "inet/queueing/base/PacketQueueingElementBase.h"
-#include "inet/queueing/contract/IPassivePacketSink.h"
-#include "inet/queueing/contract/IActivePacketSource.h"
 #include "inet/common/packet/Packet.h"
+#include "inet/queueing/base/PassivePacketSinkBase.h"
+#include "inet/queueing/contract/IActivePacketSource.h"
+#include "inet/queueing/contract/IPassivePacketSink.h"
 
 namespace inet {
 
 /**
  * DSCP Marker.
  */
-class INET_API DscpMarker : public queueing::PacketQueueingElementBase, public queueing::IPassivePacketSink, public queueing::IActivePacketSource
+class INET_API DscpMarker : public queueing::PassivePacketSinkBase, public queueing::IActivePacketSource
 {
   protected:
     std::vector<int> dscps;
@@ -50,14 +50,14 @@ class INET_API DscpMarker : public queueing::PacketQueueingElementBase, public q
 
   protected:
     virtual void initialize(int stage) override;
-    virtual void handleMessage(cMessage *message) override;
     virtual void refreshDisplay() const override;
 
-    virtual bool canPushSomePacket(cGate *gate) const override { return true; }
-    virtual bool canPushPacket(Packet *packet, cGate *gate) const override { return true; }
-
-    virtual void pushPacket(Packet *packet, cGate *gate) override;
     virtual bool markPacket(Packet *msg, int dscp);
+
+  public:
+    virtual void pushPacket(Packet *packet, cGate *gate) override;
+
+    virtual void handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful) override { }
 };
 
 } // namespace inet
