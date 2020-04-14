@@ -25,7 +25,7 @@
 namespace inet {
 namespace queueing {
 
-class INET_API TokenGeneratorBase : public PacketQueueingElementBase, public StringFormat::IDirectiveResolver
+class INET_API TokenGeneratorBase : public PacketProcessorBase
 {
   public:
     static simsignal_t tokensCreatedSignal;

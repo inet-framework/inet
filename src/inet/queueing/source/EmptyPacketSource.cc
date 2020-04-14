@@ -26,7 +26,7 @@ Define_Module(EmptyPacketSource);
 
 void EmptyPacketSource::initialize(int stage)
 {
-    PacketQueueingElementBase::initialize(stage);
+    PacketProcessorBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         outputGate = gate("out");
         consumer = findConnectedModule<IPassivePacketSink>(outputGate);

@@ -18,13 +18,13 @@
 #ifndef __INET_PACKETDUPLICATORBASE_H
 #define __INET_PACKETDUPLICATORBASE_H
 
-#include "inet/queueing/base/PacketQueueingElementBase.h"
+#include "inet/queueing/base/PacketProcessorBase.h"
 #include "inet/queueing/contract/IPacketDuplicator.h"
 
 namespace inet {
 namespace queueing {
 
-class INET_API PacketDuplicatorBase : public PacketQueueingElementBase, public virtual IPacketDuplicator
+class INET_API PacketDuplicatorBase : public PacketProcessorBase, public virtual IPacketDuplicator
 {
   protected:
     cGate *inputGate = nullptr;
