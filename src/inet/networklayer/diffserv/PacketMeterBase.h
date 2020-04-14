@@ -20,7 +20,7 @@
 
 #include "inet/queueing/base/PassivePacketSinkBase.h"
 #include "inet/queueing/contract/IActivePacketSource.h"
-#include "inet/queueing/contract/IPacketQueueingElement.h"
+#include "inet/queueing/contract/IPacketProcessor.h"
 
 namespace inet {
 
