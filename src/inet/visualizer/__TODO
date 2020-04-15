@@ -1,3 +1,4 @@
+ - InfoVisualizer info string depends on the display string of other module, if the display string is updated in refreshDisplay, then at the end of the simulation the last value is not displayed correctly (e.g. express run without update -> packet count = 0)
  - CanvasProjection is initialized in INITSTAGE_LOCAL of SceneCanvasVisualizer and also used in INITSTAGE_LOCAL by mobility and all other visualizers
  - should be possible to set viewAngle, viewTranslation and get the same graphics with flipped Y
  - add optional arguments to MobilityBase for inverse conversion
