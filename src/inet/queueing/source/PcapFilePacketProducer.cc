@@ -26,16 +26,11 @@ Define_Module(PcapFilePacketProducer);
 
 void PcapFilePacketProducer::initialize(int stage)
 {
-    PacketProcessorBase::initialize(stage);
-    if (stage == INITSTAGE_LOCAL) {
-        outputGate = gate("out");
-        consumer = findConnectedModule<IPassivePacketSink>(outputGate);
+    ActivePacketSourceBase::initialize(stage);
+    if (stage == INITSTAGE_LOCAL)
         pcapReader.openPcap(par("filename"), par("packetNameFormat"));
-    }
-    else if (stage == INITSTAGE_QUEUEING) {
-        checkPacketOperationSupport(outputGate);
+    else if (stage == INITSTAGE_QUEUEING)
         schedulePacket();
-    }
 }
 
 void PcapFilePacketProducer::finish()

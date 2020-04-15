@@ -25,7 +25,7 @@ Define_Module(PacketCloner);
 
 void PacketCloner::initialize(int stage)
 {
-    PassivePacketSinkBase::initialize(stage);
+    PacketSinkBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         inputGate = gate("in");
         producer = findConnectedModule<IActivePacketSource>(inputGate);
@@ -36,6 +36,12 @@ void PacketCloner::initialize(int stage)
             consumers.push_back(consumer);
         }
     }
+}
+
+void PacketCloner::handleMessage(cMessage *message)
+{
+    auto packet = check_and_cast<Packet *>(message);
+    pushPacket(packet, packet->getArrivalGate());
 }
 
 void PacketCloner::pushPacket(Packet *packet, cGate *gate)

@@ -25,7 +25,7 @@ Define_Module(PacketMultiplexer);
 
 void PacketMultiplexer::initialize(int stage)
 {
-    PassivePacketSinkBase::initialize(stage);
+    PacketProcessorBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         for (int i = 0; i < gateSize("in"); i++) {
             auto inputGate = gate("in", i);

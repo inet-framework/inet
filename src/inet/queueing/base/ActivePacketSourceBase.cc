@@ -15,15 +15,23 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-package inet.queueing.contract;
+#include "inet/common/ModuleAccess.h"
+#include "inet/queueing/base/ActivePacketSourceBase.h"
 
-//
-// This module interface is implemented by packet pullers. A packet puler
-// connects one input to one output. Packets can be pulled from its output
-// and it pulls packets from its input.
-//
-moduleinterface IPacketPuller extends IActivePacketSink, IPassivePacketSource
+namespace inet {
+namespace queueing {
+
+void ActivePacketSourceBase::initialize(int stage)
 {
-    parameters:
-        @display("i=block/star");
+    PacketSourceBase::initialize(stage);
+    if (stage == INITSTAGE_LOCAL) {
+        outputGate = gate("out");
+        consumer = findConnectedModule<IPassivePacketSink>(outputGate);
+    }
+    else if (stage == INITSTAGE_QUEUEING)
+        checkPacketOperationSupport(outputGate);
 }
+
+} // namespace queueing
+} // namespace inet
+

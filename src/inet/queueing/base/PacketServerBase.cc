@@ -25,7 +25,7 @@ simsignal_t PacketServerBase::packetServedSignal = cComponent::registerSignal("p
 
 void PacketServerBase::initialize(int stage)
 {
-    PacketSinkBase::initialize(stage);
+    PacketProcessorBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         inputGate = gate("in");
         provider = getConnectedModule<IPassivePacketSource>(inputGate);

@@ -15,8 +15,6 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-#include "inet/common/ModuleAccess.h"
-#include "inet/common/Simsignals.h"
 #include "inet/queueing/sink/ActivePacketSink.h"
 
 namespace inet {
@@ -26,15 +24,11 @@ Define_Module(ActivePacketSink);
 
 void ActivePacketSink::initialize(int stage)
 {
-    PacketSinkBase::initialize(stage);
+    ActivePacketSinkBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        inputGate = gate("in");
-        provider = findConnectedModule<IPassivePacketSource>(inputGate);
         collectionIntervalParameter = &par("collectionInterval");
         collectionTimer = new cMessage("CollectionTimer");
     }
-    else if (stage == INITSTAGE_QUEUEING)
-        checkPacketOperationSupport(inputGate);
 }
 
 void ActivePacketSink::handleMessage(cMessage *message)

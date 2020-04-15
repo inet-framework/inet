@@ -24,10 +24,11 @@ package inet.queueing.base;
 //
 // @see ~IPacketFilter
 //
-simple PacketFilterBase extends PacketFlowBase
+simple PacketFilterBase extends PacketProcessorBase
 {
     parameters:
         displayStringTextFormat = default("dropped %d/%p pk (%k/%l)"); // determines the text that is written on top of the submodule
+        @class(PacketFilterBase);
         @display("i=block/downarrow");
         @signal[packetPushed](type=inet::Packet);
         @signal[packetPulled](type=inet::Packet);
@@ -35,4 +36,7 @@ simple PacketFilterBase extends PacketFlowBase
         @statistic[packetPushed](title="packets pushed"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetPulled](title="packets pulled"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetDropped](title="packets dropped"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
+    gates:
+        input in @labels(send,push,pull,pass,stream);
+        output out @labels(send,push,pull,pass,stream);
 }
