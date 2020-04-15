@@ -124,25 +124,22 @@ INET_API InterfaceEntry *getContainingNicModule(const cModule *from);
 template<typename T>
 cGate *findConnectedGate(cGate *gate, int direction = 0)
 {
-    if (!gate->isConnectedOutside())
+    if (direction < 0 || (direction == 0 && gate->getType() == cGate::INPUT)) {
+        for (auto g = gate; g != nullptr; g = g->getPreviousGate())
+            if (dynamic_cast<T *>(g->getOwnerModule()) && g->getType() == cGate::OUTPUT)
+                return g;
         return nullptr;
-    else {
-        if (direction < 0 || gate->getType() == cGate::INPUT) {
-            for (auto g = gate; g != nullptr; g = g->getPreviousGate())
-                if (dynamic_cast<T *>(g->getOwnerModule()) && g->getType() == cGate::OUTPUT)
-                    return g;
-            return nullptr;
-        }
-        else if (direction > 0 || gate->getType() == cGate::OUTPUT) {
-            for (auto g = gate; g != nullptr; g = g->getNextGate())
-                if (dynamic_cast<T *>(g->getOwnerModule()) && g->getType() == cGate::INPUT)
-                    return g;
-            return nullptr;
-        }
-        else
-            throw cRuntimeError("Unknown gate type");
     }
+    else if (direction > 0 || (direction == 0 && gate->getType() == cGate::OUTPUT)) {
+        for (auto g = gate; g != nullptr; g = g->getNextGate())
+            if (dynamic_cast<T *>(g->getOwnerModule()) && g->getType() == cGate::INPUT)
+                return g;
+        return nullptr;
+    }
+    else
+        throw cRuntimeError("Unknown gate type");
 }
+
 
 /**
  * Returns a gate of a module with type T that is on the path starting at the given gate.
