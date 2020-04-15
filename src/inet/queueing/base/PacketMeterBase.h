@@ -28,7 +28,6 @@ class INET_API PacketMeterBase : public PacketFlowBase, public virtual IPacketMe
 {
   protected:
     virtual void processPacket(Packet *packet) override;
-    virtual void meterPacket(Packet *packet) = 0;
 };
 
 } // namespace queueing
