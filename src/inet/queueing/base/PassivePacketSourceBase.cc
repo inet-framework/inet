@@ -20,29 +20,6 @@
 namespace inet {
 namespace queueing {
 
-Packet *PassivePacketSourceBase::pullPacketStart(cGate *gate)
-{
-    b position;
-    b extraProcessableLength;
-    auto packet = pullPacketProgress(gate, position, extraProcessableLength);
-    if (position != b(0))
-        throw cRuntimeError("Invalid position");
-    return packet;
-}
-
-Packet *PassivePacketSourceBase::pullPacketEnd(cGate *gate)
-{
-    b position;
-    b extraProcessableLength;
-    auto packet = pullPacketProgress(gate, position, extraProcessableLength);
-    if (position != packet->getTotalLength())
-        throw cRuntimeError("Invalid position");
-    if (extraProcessableLength != b(0))
-        throw cRuntimeError("Invalid extraProcessableLength");
-    return packet;
-
-}
-
 } // namespace queueing
 } // namespace inet
 

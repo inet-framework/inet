@@ -133,7 +133,7 @@ Packet *PacketSchedulerBase::pullPacketEnd(cGate *gate)
     return packet;
 }
 
-Packet *PacketSchedulerBase::pullPacketProgress(cGate *gate, b& position, b& extraProcessableLength)
+Packet *PacketSchedulerBase::pullPacketProgress(cGate *gate, b position, b extraProcessableLength)
 {
     Enter_Method("pullPacketProgress");
     if (!isStreamingPacket())

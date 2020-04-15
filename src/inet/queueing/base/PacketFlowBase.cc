@@ -195,7 +195,7 @@ Packet *PacketFlowBase::pullPacketEnd(cGate *gate)
     return packet;
 }
 
-Packet *PacketFlowBase::pullPacketProgress(cGate *gate, b& position, b& extraProcessableLength)
+Packet *PacketFlowBase::pullPacketProgress(cGate *gate, b position, b extraProcessableLength)
 {
     Enter_Method("pullPacketProgress");
     auto packet = provider->pullPacketProgress(inputGate->getPathStartGate(), position, extraProcessableLength);
