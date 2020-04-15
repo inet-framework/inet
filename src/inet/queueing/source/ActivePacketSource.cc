@@ -26,15 +26,12 @@ Define_Module(ActivePacketSource);
 
 void ActivePacketSource::initialize(int stage)
 {
-    PacketSourceBase::initialize(stage);
+    ActivePacketSourceBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        outputGate = gate("out");
-        consumer = findConnectedModule<IPassivePacketSink>(outputGate);
         productionIntervalParameter = &par("productionInterval");
         productionTimer = new cMessage("ProductionTimer");
     }
     else if (stage == INITSTAGE_QUEUEING) {
-        checkPacketOperationSupport(outputGate);
         if (consumer == nullptr && !productionTimer->isScheduled())
             scheduleProductionTimer();
     }

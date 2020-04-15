@@ -18,30 +18,14 @@
 #ifndef __INET_PACKETDUPLICATOR_H
 #define __INET_PACKETDUPLICATOR_H
 
-#include "inet/queueing/base/PassivePacketSinkBase.h"
-#include "inet/queueing/contract/IActivePacketSource.h"
+#include "inet/queueing/base/PacketPusherBase.h"
 
 namespace inet {
 namespace queueing {
 
-class INET_API PacketDuplicator : public PassivePacketSinkBase, public virtual IActivePacketSource
+class INET_API PacketDuplicator : public PacketPusherBase
 {
-  protected:
-    cGate *inputGate = nullptr;
-    IActivePacketSource *producer = nullptr;
-
-    cGate *outputGate = nullptr;
-    IPassivePacketSink *consumer = nullptr;
-
-  protected:
-    virtual void initialize(int stage) override;
-
   public:
-    virtual IPassivePacketSink *getConsumer(cGate *gate) override { return consumer; }
-
-    virtual bool supportsPacketPushing(cGate *gate) const override { return true; }
-    virtual bool supportsPacketPulling(cGate *gate) const override { return false; }
-
     virtual void pushPacket(Packet *packet, cGate *gate) override;
 
     virtual void handleCanPushPacket(cGate *gate) override;

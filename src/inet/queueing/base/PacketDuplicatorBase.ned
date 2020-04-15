@@ -15,15 +15,11 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-package inet.queueing.contract;
+package inet.queueing.base;
 
-//
-// This module interface is implemented by packet pullers. A packet puler
-// connects one input to one output. Packets can be pulled from its output
-// and it pulls packets from its input.
-//
-moduleinterface IPacketPuller extends IActivePacketSink, IPassivePacketSource
+simple PacketDuplicatorBase extends PacketProcessorBase
 {
     parameters:
+        @class(PacketDuplicatorBase);
         @display("i=block/star");
 }

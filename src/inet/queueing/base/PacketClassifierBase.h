@@ -18,13 +18,14 @@
 #ifndef __INET_PACKETCLASSIFIERBASE_H
 #define __INET_PACKETCLASSIFIERBASE_H
 
-#include "inet/queueing/base/PassivePacketSinkBase.h"
+#include "inet/queueing/base/PacketProcessorBase.h"
 #include "inet/queueing/contract/IActivePacketSource.h"
+#include "inet/queueing/contract/IPassivePacketSink.h"
 
 namespace inet {
 namespace queueing {
 
-class INET_API PacketClassifierBase : public PassivePacketSinkBase, public virtual IActivePacketSource
+class INET_API PacketClassifierBase : public PacketProcessorBase, public virtual IPassivePacketSink, public virtual IActivePacketSource
 {
   protected:
     cGate *inputGate = nullptr;

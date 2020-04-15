@@ -18,18 +18,14 @@
 #ifndef __INET_ACTIVEPACKETSOURCE_H
 #define __INET_ACTIVEPACKETSOURCE_H
 
-#include "inet/queueing/base/PacketSourceBase.h"
-#include "inet/queueing/contract/IActivePacketSource.h"
+#include "inet/queueing/base/ActivePacketSourceBase.h"
 
 namespace inet {
 namespace queueing {
 
-class INET_API ActivePacketSource : public PacketSourceBase, public virtual IActivePacketSource
+class INET_API ActivePacketSource : public ActivePacketSourceBase
 {
   protected:
-    cGate *outputGate = nullptr;
-    IPassivePacketSink *consumer = nullptr;
-
     cPar *productionIntervalParameter = nullptr;
     cMessage *productionTimer = nullptr;
 
@@ -42,11 +38,6 @@ class INET_API ActivePacketSource : public PacketSourceBase, public virtual IAct
 
   public:
     virtual ~ActivePacketSource() { cancelAndDelete(productionTimer); }
-
-    virtual IPassivePacketSink *getConsumer(cGate *gate) override { return consumer; }
-
-    virtual bool supportsPacketPushing(cGate *gate) const override { return outputGate == gate; }
-    virtual bool supportsPacketPulling(cGate *gate) const override { return false; }
 
     virtual void handleCanPushPacket(cGate *gate) override;
     virtual void handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful) override;

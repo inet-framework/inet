@@ -18,14 +18,14 @@
 #ifndef __INET_PACKETSERVERBASE_H
 #define __INET_PACKETSERVERBASE_H
 
-#include "inet/queueing/base/PacketSinkBase.h"
+#include "inet/queueing/base/PacketProcessorBase.h"
 #include "inet/queueing/contract/IActivePacketSink.h"
 #include "inet/queueing/contract/IActivePacketSource.h"
 
 namespace inet {
 namespace queueing {
 
-class INET_API PacketServerBase : public PacketSinkBase, public virtual IActivePacketSink, public virtual IActivePacketSource
+class INET_API PacketServerBase : public PacketProcessorBase, public virtual IActivePacketSink, public virtual IActivePacketSource
 {
   public:
     static simsignal_t packetServedSignal;

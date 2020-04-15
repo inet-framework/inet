@@ -24,10 +24,11 @@ package inet.queueing.base;
 //
 // @see ~IPacketClassifier
 //
-simple PacketClassifierBase extends PacketSinkBase
+simple PacketClassifierBase extends PacketProcessorBase
 {
     parameters:
         displayStringTextFormat = default("classified %p pk (%l)");
+        @class(PacketClassifierBase);
         @display("i=block/classifier");
         @signal[packetPushed](type=inet::Packet);
         @statistic[packetPushed](title="packets pushed"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);

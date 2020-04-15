@@ -20,11 +20,11 @@ package inet.queueing.base;
 //
 // This is a base module for various token generator modules.
 //
-simple TokenGeneratorBase
+simple TokenGeneratorBase extends PacketProcessorBase
 {
     parameters:
         string serverModule; // module path of the packet server where the tokens are generated via C++ method call
-        string displayStringTextFormat = default("generated %t tk\nto %s"); // determines display string text above the submodule
+        displayStringTextFormat = default("generated %t tk\nto %s"); // determines display string text above the submodule
         @class(TokenGeneratorBase);
         @display("i=block/control");
 }

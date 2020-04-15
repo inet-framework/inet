@@ -23,17 +23,6 @@ namespace queueing {
 
 Define_Module(PacketDelayer);
 
-void PacketDelayer::initialize(int stage)
-{
-    PassivePacketSinkBase::initialize(stage);
-    if (stage == INITSTAGE_LOCAL) {
-        inputGate = gate("in");
-        producer = findConnectedModule<IActivePacketSource>(inputGate);
-        outputGate = gate("out");
-        consumer = findConnectedModule<IPassivePacketSink>(outputGate);
-    }
-}
-
 void PacketDelayer::handleMessage(cMessage *message)
 {
     if (message->isSelfMessage()) {
