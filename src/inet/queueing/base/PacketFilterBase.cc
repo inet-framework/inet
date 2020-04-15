@@ -218,7 +218,7 @@ Packet *PacketFilterBase::pullPacketEnd(cGate *gate)
     throw cRuntimeError("Invalid operation");
 }
 
-Packet *PacketFilterBase::pullPacketProgress(cGate *gate, b& position, b& extraProcessableLength)
+Packet *PacketFilterBase::pullPacketProgress(cGate *gate, b position, b extraProcessableLength)
 {
     Enter_Method("pullPacketProgress");
     throw cRuntimeError("Invalid operation");
