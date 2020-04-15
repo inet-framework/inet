@@ -35,7 +35,6 @@ class INET_API PacketDuplicatorBase : public PacketProcessorBase, public virtual
 
   protected:
     virtual void initialize(int stage) override;
-    virtual int getNumPacketDuplicates(Packet *packet) = 0;
 
   public:
     virtual IPassivePacketSink *getConsumer(cGate *gate) override { return this; }

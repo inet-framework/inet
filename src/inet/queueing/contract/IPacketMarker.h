@@ -28,6 +28,11 @@ namespace queueing {
  */
 class INET_API IPacketMarker : public virtual IPacketFlow
 {
+  public:
+    /**
+     * Marks the packet by attaching information to it.
+     */
+    virtual void markPacket(Packet *packet) = 0;
 };
 
 } // namespace queueing
