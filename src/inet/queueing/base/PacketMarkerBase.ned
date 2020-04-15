@@ -28,4 +28,5 @@ simple PacketMarkerBase extends PacketFlowBase
 {
     parameters:
         displayStringTextFormat = default("marked %p pk (%l)");
+        @class(PacketMarkerBase);
 }

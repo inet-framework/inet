@@ -22,10 +22,11 @@ package inet.queueing.base;
 //
 // @see ~IPacketServer
 //
-simple PacketServerBase extends PacketSinkBase
+simple PacketServerBase extends PacketProcessorBase
 {
     parameters:
         displayStringTextFormat = default("served %p pk (%l)");
+        @class(PacketServerBase);
         @display("i=block/server");
         @signal[packetServed](type=inet::Packet);
         @statistic[packetServed](title="packets served"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);

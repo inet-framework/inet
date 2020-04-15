@@ -15,10 +15,22 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
+#include "inet/common/ModuleAccess.h"
 #include "inet/queueing/base/PassivePacketSinkBase.h"
 
 namespace inet {
 namespace queueing {
+
+void PassivePacketSinkBase::initialize(int stage)
+{
+    PacketSinkBase::initialize(stage);
+    if (stage == INITSTAGE_LOCAL) {
+        inputGate = gate("in");
+        producer = findConnectedModule<IActivePacketSource>(inputGate);
+    }
+    else if (stage == INITSTAGE_QUEUEING)
+        checkPacketOperationSupport(inputGate);
+}
 
 void PassivePacketSinkBase::handleMessage(cMessage *message)
 {

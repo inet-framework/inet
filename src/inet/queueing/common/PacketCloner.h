@@ -18,13 +18,13 @@
 #ifndef __INET_PACKETCLONER_H
 #define __INET_PACKETCLONER_H
 
-#include "inet/queueing/base/PassivePacketSinkBase.h"
+#include "inet/queueing/base/PacketSinkBase.h"
 #include "inet/queueing/contract/IActivePacketSource.h"
 
 namespace inet {
 namespace queueing {
 
-class INET_API PacketCloner : public PassivePacketSinkBase, public virtual IActivePacketSource
+class INET_API PacketCloner : public PacketSinkBase, public virtual IPassivePacketSink, public virtual IActivePacketSource
 {
   protected:
     cGate *inputGate = nullptr;
@@ -35,14 +35,24 @@ class INET_API PacketCloner : public PassivePacketSinkBase, public virtual IActi
 
   protected:
     virtual void initialize(int stage) override;
+    virtual void handleMessage(cMessage *message) override;
 
   public:
-    virtual IPassivePacketSink *getConsumer(cGate *gate) override { return consumers[gate->getIndex()]; }
-
-    virtual bool supportsPacketPushing(cGate *gate) const override { return true; }
+    virtual bool supportsPacketPushing(cGate *gate) const override { return inputGate == gate; }
     virtual bool supportsPacketPulling(cGate *gate) const override { return false; }
 
+    virtual IPassivePacketSink *getConsumer(cGate *gate) override { return consumers[gate->getIndex()]; }
+
+    virtual bool canPushSomePacket(cGate *gate) const override { return true; }
+    virtual bool canPushPacket(Packet *packet, cGate *gate) const override { return true; }
+
     virtual void pushPacket(Packet *packet, cGate *gate) override;
+
+    virtual void pushPacketStart(Packet *packet, cGate *gate) override { throw cRuntimeError("Invalid operation"); }
+    virtual void pushPacketEnd(Packet *packet, cGate *gate) override { throw cRuntimeError("Invalid operation"); }
+    virtual void pushPacketProgress(Packet *packet, cGate *gate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("Invalid operation"); }
+
+    virtual b getPushPacketProcessedLength(Packet *packet, cGate *gate) override { throw cRuntimeError("Invalid operation"); }
 
     virtual void handleCanPushPacket(cGate *gate) override;
     virtual void handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful) override;

@@ -18,19 +18,14 @@
 #ifndef __INET_PASSIVEPACKETSOURCE_H
 #define __INET_PASSIVEPACKETSOURCE_H
 
-#include "inet/queueing/base/PacketSourceBase.h"
-#include "inet/queueing/contract/IActivePacketSink.h"
-#include "inet/queueing/contract/IPassivePacketSource.h"
+#include "inet/queueing/base/PassivePacketSourceBase.h"
 
 namespace inet {
 namespace queueing {
 
-class INET_API PassivePacketSource : public PacketSourceBase, public virtual IPassivePacketSource
+class INET_API PassivePacketSource : public PassivePacketSourceBase
 {
   protected:
-    cGate *outputGate = nullptr;
-    IActivePacketSink *collector = nullptr;
-
     cPar *providingIntervalParameter = nullptr;
     cMessage *providingTimer = nullptr;
 

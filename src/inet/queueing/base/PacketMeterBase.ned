@@ -28,4 +28,5 @@ simple PacketMeterBase extends PacketFlowBase
 {
     parameters:
         displayStringTextFormat = default("metered %p pk (%l)");
+        @class(PacketMeterBase);
 }

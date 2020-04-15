@@ -15,23 +15,33 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-#include "inet/common/ModuleAccess.h"
-#include "inet/queueing/base/PassivePacketSourceBase.h"
+#ifndef __INET_ACTIVEPACKETSOURCEBASE_H
+#define __INET_ACTIVEPACKETSOURCEBASE_H
+
+#include "inet/queueing/base/PacketSourceBase.h"
+#include "inet/queueing/contract/IActivePacketSource.h"
 
 namespace inet {
 namespace queueing {
 
-void PassivePacketSourceBase::initialize(int stage)
+class INET_API ActivePacketSourceBase : public PacketSourceBase, public virtual IActivePacketSource
 {
-    PacketSourceBase::initialize(stage);
-    if (stage == INITSTAGE_LOCAL) {
-        outputGate = gate("out");
-        collector = findConnectedModule<IActivePacketSink>(outputGate);
-    }
-    else if (stage == INITSTAGE_QUEUEING)
-        checkPacketOperationSupport(outputGate);
-}
+  protected:
+    cGate *outputGate = nullptr;
+    IPassivePacketSink *consumer = nullptr;
+
+  protected:
+    virtual void initialize(int stage) override;
+
+  public:
+    virtual IPassivePacketSink *getConsumer(cGate *gate) override { return consumer; }
+
+    virtual bool supportsPacketPushing(cGate *gate) const override { return outputGate == gate; }
+    virtual bool supportsPacketPulling(cGate *gate) const override { return false; }
+};
 
 } // namespace queueing
 } // namespace inet
+
+#endif // ifndef __INET_ACTIVEPACKETSOURCEBASE_H
 

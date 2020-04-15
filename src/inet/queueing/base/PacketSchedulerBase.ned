@@ -28,6 +28,7 @@ simple PacketSchedulerBase extends PacketProcessorBase
 {
     parameters:
         displayStringTextFormat = default("scheduled %p pk (%l)");
+        @class(PacketSchedulerBase);
         @display("i=block/join");
         @signal[packetPulled](type=inet::Packet);
         @statistic[packetPulled](title="packets pulled"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);

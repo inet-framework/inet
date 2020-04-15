@@ -23,17 +23,6 @@ namespace queueing {
 
 Define_Module(PacketDuplicator);
 
-void PacketDuplicator::initialize(int stage)
-{
-    PassivePacketSinkBase::initialize(stage);
-    if (stage == INITSTAGE_LOCAL) {
-        inputGate = gate("in");
-        producer = findConnectedModule<IActivePacketSource>(inputGate);
-        outputGate = gate("out");
-        consumer = getConnectedModule<IPassivePacketSink>(outputGate);
-    }
-}
-
 void PacketDuplicator::pushPacket(Packet *packet, cGate *gate)
 {
     Enter_Method("pushPacket");

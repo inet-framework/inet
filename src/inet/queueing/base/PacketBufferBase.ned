@@ -30,10 +30,10 @@ package inet.queueing.base;
 //
 // @see ~IPacketBuffer
 //
-simple PacketBufferBase
+simple PacketBufferBase extends PacketProcessorBase
 {
     parameters:
-        string displayStringTextFormat = default("contains %p pk (%l)\nadded %a removed %r dropped %d"); // determines display string text above the submodule
+        displayStringTextFormat = default("contains %p pk (%l)\nadded %a removed %r dropped %d"); // determines display string text above the submodule
         @display("i=block/buffer");
     gates:
         input in @loose;

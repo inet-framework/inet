@@ -18,18 +18,14 @@
 #ifndef __INET_ACTIVEPACKETSINK_H
 #define __INET_ACTIVEPACKETSINK_H
 
-#include "inet/queueing/base/PacketSinkBase.h"
-#include "inet/queueing/contract/IActivePacketSink.h"
+#include "inet/queueing/base/ActivePacketSinkBase.h"
 
 namespace inet {
 namespace queueing {
 
-class INET_API ActivePacketSink : public PacketSinkBase, public virtual IActivePacketSink
+class INET_API ActivePacketSink : public ActivePacketSinkBase
 {
-  public:
-    cGate *inputGate = nullptr;
-    IPassivePacketSource *provider = nullptr;
-
+  protected:
     cPar *collectionIntervalParameter = nullptr;
     cMessage *collectionTimer = nullptr;
 
@@ -42,11 +38,6 @@ class INET_API ActivePacketSink : public PacketSinkBase, public virtual IActiveP
 
   public:
     virtual ~ActivePacketSink() { cancelAndDelete(collectionTimer); }
-
-    virtual IPassivePacketSource *getProvider(cGate *gate) override { return provider; }
-
-    virtual bool supportsPacketPushing(cGate *gate) const override { return false; }
-    virtual bool supportsPacketPulling(cGate *gate) const override { return inputGate == gate; }
 
     virtual void handleCanPullPacket(cGate *gate) override;
     virtual void handlePullPacketProcessed(Packet *packet, cGate *gate, bool successful) override;

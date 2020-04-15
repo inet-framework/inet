@@ -22,6 +22,8 @@ package inet.queueing.base;
 //
 simple PacketPusherBase extends PacketProcessorBase
 {
+    parameters:
+        @class(PacketPusherBase);
     gates:
         input in;
         output out;

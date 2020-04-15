@@ -19,6 +19,7 @@
 #define __INET_PASSIVEPACKETSINKBASE_H
 
 #include "inet/queueing/base/PacketSinkBase.h"
+#include "inet/queueing/contract/IActivePacketSource.h"
 #include "inet/queueing/contract/IPassivePacketSink.h"
 
 namespace inet {
@@ -27,9 +28,17 @@ namespace queueing {
 class INET_API PassivePacketSinkBase : public PacketSinkBase, public virtual IPassivePacketSink
 {
   protected:
+    cGate *inputGate = nullptr;
+    IActivePacketSource *producer = nullptr;
+
+  protected:
+    virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *message) override;
 
   public:
+    virtual bool supportsPacketPushing(cGate *gate) const override { return inputGate == gate; }
+    virtual bool supportsPacketPulling(cGate *gate) const override { return false; }
+
     virtual bool canPushSomePacket(cGate *gate) const override { return true; }
     virtual bool canPushPacket(Packet *packet, cGate *gate) const override { return true; }
 

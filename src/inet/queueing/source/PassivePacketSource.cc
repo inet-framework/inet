@@ -15,7 +15,6 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-#include "inet/common/ModuleAccess.h"
 #include "inet/common/Simsignals.h"
 #include "inet/queueing/source/PassivePacketSource.h"
 
@@ -26,16 +25,13 @@ Define_Module(PassivePacketSource);
 
 void PassivePacketSource::initialize(int stage)
 {
-    PacketSourceBase::initialize(stage);
+    PassivePacketSourceBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        outputGate = gate("out");
-        collector = findConnectedModule<IActivePacketSink>(outputGate);
         providingIntervalParameter = &par("providingInterval");
         providingTimer = new cMessage("ProvidingTimer");
         WATCH_PTR(nextPacket);
     }
     else if (stage == INITSTAGE_QUEUEING) {
-        checkPacketOperationSupport(outputGate);
         if (collector != nullptr)
             collector->handleCanPullPacket(outputGate->getPathEndGate());
     }
