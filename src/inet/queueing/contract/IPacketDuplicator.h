@@ -29,6 +29,11 @@ namespace queueing {
  */
 class INET_API IPacketDuplicator : public virtual IPassivePacketSink, public virtual IActivePacketSource
 {
+  public:
+    /**
+     * Returns the number of duplicates to be generated.
+     */
+    virtual int getNumPacketDuplicates(Packet *packet) = 0;
 };
 
 } // namespace queueing

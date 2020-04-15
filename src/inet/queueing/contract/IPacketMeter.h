@@ -28,6 +28,11 @@ namespace queueing {
  */
 class INET_API IPacketMeter : public virtual IPacketFlow
 {
+  public:
+    /**
+     * Meters the packet and attaches the result.
+     */
+    virtual void meterPacket(Packet *packet) = 0;
 };
 
 } // namespace queueing

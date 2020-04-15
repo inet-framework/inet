@@ -28,6 +28,11 @@ namespace queueing {
  */
 class INET_API IPacketFilter : public virtual IPacketFlow
 {
+  public:
+    /**
+     * Returns true if the filter matches the given packet.
+     */
+    virtual bool matchesPacket(Packet *packet) = 0;
 };
 
 } // namespace queueing
