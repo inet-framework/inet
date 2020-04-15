@@ -26,9 +26,6 @@ namespace queueing {
 
 class INET_API PassivePacketSourceBase : public PacketProcessorBase, public virtual IPassivePacketSource
 {
-  public:
-    virtual Packet *pullPacketStart(cGate *gate) override;
-    virtual Packet *pullPacketEnd(cGate *gate) override;
 };
 
 } // namespace queueing

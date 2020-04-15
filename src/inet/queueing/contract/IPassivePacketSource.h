@@ -118,7 +118,7 @@ class INET_API IPassivePacketSource
      * must support pulling and streaming packets. The returned packet must not
      * be nullptr.
      */
-    virtual Packet *pullPacketProgress(cGate *gate, b& position, b& extraProcessableLength) = 0;
+    virtual Packet *pullPacketProgress(cGate *gate, b position, b extraProcessableLength) = 0;
 
     /**
      * Returns the processed length of the currently streaming packet.
