@@ -191,6 +191,7 @@ class INET_API InterfaceEntry : public cModule
     bool isLoopback() const { return loopback; }
     double getDatarate() const { return datarate; }
     const MacAddress& getMacAddress() const { return macAddr; }
+    bool matchesMacAddress(const MacAddress& address) const { return address.isMulticast() || macAddr == address; }
     const InterfaceToken& getInterfaceToken() const { return token; }
     //@}
 
