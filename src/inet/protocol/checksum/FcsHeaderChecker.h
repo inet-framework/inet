@@ -32,6 +32,7 @@ class INET_API FcsHeaderChecker : public FcsCheckerBase
 
   protected:
     virtual void initialize(int stage) override;
+    virtual void processPacket(Packet *packet) override;
 
   public:
     virtual bool matchesPacket(const Packet *packet) const override;

@@ -32,6 +32,7 @@ class INET_API CrcHeaderChecker : public CrcCheckerBase
 
   protected:
     virtual void initialize(int stage) override;
+    virtual void processPacket(Packet *packet) override;
 
   public:
     virtual bool matchesPacket(const Packet *packet) const override;

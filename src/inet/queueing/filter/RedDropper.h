@@ -31,6 +31,9 @@ namespace queueing {
 class INET_API RedDropper : public PacketFilterBase
 {
   protected:
+    enum RedResult { QUEUE_FULL, RANDOMLY_ABOVE_LIMIT, RANDOMLY_BELOW_LIMIT, ABOVE_MAX_LIMIT, BELOW_MIN_LIMIT };
+
+  protected:
     double wq = 0.0;
     double minth = NaN;
     double maxth = NaN;
@@ -44,16 +47,19 @@ class INET_API RedDropper : public PacketFilterBase
     int packetCapacity = -1;
     bool useEcn = false;
     bool markNext = false;
+    mutable RedResult lastResult;
 
     IPacketCollection *collection = nullptr;
 
-    enum RedResult { QUEUE_FULL, RANDOMLY_ABOVE_LIMIT, RANDOMLY_BELOW_LIMIT, ABOVE_MAX_LIMIT, BELOW_MIN_LIMIT };
 
   protected:
     virtual void initialize(int stage) override;
-    virtual RedResult doRandomEarlyDetection(Packet *packet);
-    virtual bool matchesPacket(const Packet *packet) const override;
+    virtual RedResult doRandomEarlyDetection(const Packet *packet);
+    virtual void processPacket(Packet *packet) override;
     virtual void pushOrSendPacket(Packet *packet, cGate *gate, IPassivePacketSink *consumer) override;
+
+  public:
+    virtual bool matchesPacket(const Packet *packet) const override;
 };
 
 } // namespace queueing

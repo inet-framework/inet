@@ -79,7 +79,7 @@ void EcnMarker::setEcn(Packet *packet, IpEcnCode ecn)
     }
 }
 
-IpEcnCode EcnMarker::getEcn(Packet *packet)
+IpEcnCode EcnMarker::getEcn(const Packet *packet)
 {
 #if defined(WITH_ETHERNET) && defined(WITH_IPv4)
     auto protocol = packet->getTag<PacketProtocolTag>()->getProtocol();

@@ -31,7 +31,7 @@ class INET_API EcnMarker : public PacketMarkerBase
 
   public:
     static void setEcn(Packet *packet, IpEcnCode ecn);
-    static IpEcnCode getEcn(Packet *packet);
+    static IpEcnCode getEcn(const Packet *packet);
 };
 
 } // namespace queueing
