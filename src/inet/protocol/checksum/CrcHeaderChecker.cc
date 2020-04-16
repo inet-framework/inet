@@ -16,7 +16,7 @@
 //
 
 #include "inet/common/IProtocolRegistrationListener.h"
-#include "CrcHeaderChecker.h"
+#include "inet/protocol/checksum/CrcHeaderChecker.h"
 #include "inet/protocol/checksum/header/CrcHeader_m.h"
 #include "inet/protocol/contract/IProtocol.h"
 

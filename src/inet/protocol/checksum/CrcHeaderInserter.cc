@@ -17,7 +17,7 @@
 
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ProtocolTag_m.h"
-#include "CrcHeaderInserter.h"
+#include "inet/protocol/checksum/CrcHeaderInserter.h"
 #include "inet/protocol/checksum/header/CrcHeader_m.h"
 #include "inet/protocol/contract/IProtocol.h"
 
