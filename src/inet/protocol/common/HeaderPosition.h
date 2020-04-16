@@ -33,6 +33,19 @@ enum HeaderPosition
 INET_API HeaderPosition parseHeaderPosition(const char *string);
 
 template <typename T>
+const Ptr<const T> peekHeader(const Packet *packet, HeaderPosition headerPosition, b length)
+{
+    switch (headerPosition) {
+        case HP_FRONT:
+            return packet->peekAtFront<T>();
+        case HP_BACK:
+            return packet->peekAtBack<T>(length);
+        default:
+            throw cRuntimeError("Unknown headerPosition");
+    }
+}
+
+template <typename T>
 const Ptr<const T> popHeader(Packet *packet, HeaderPosition headerPosition, b length)
 {
     switch (headerPosition) {
