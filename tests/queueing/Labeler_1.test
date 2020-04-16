@@ -45,14 +45,14 @@ network TestLabeler
 
 using namespace inet; 
 
-static bool testSmall(Packet *packet)
+static bool testSmall(const Packet *packet)
 {
     return packet->getTotalLength() == B(1);
 }
 
 Register_Packet_Filter_Function(TestSmall, testSmall);
 
-static bool testLarge(Packet *packet)
+static bool testLarge(const Packet *packet)
 {
     return packet->getTotalLength() == B(2);
 }
