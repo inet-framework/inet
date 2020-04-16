@@ -27,8 +27,11 @@ using namespace inet::queueing;
 class INET_API EthernetPreambleChecker : public PacketFilterBase
 {
   protected:
-    virtual bool matchesPacket(const Packet *packet) const override;
+    virtual void processPacket(Packet *packet) override;
     virtual void dropPacket(Packet *packet) override;
+
+  public:
+    virtual bool matchesPacket(const Packet *packet) const override;
 };
 
 } // namespace inet

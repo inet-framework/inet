@@ -58,7 +58,7 @@ void RedDropper::initialize(int stage)
     }
 }
 
-RedDropper::RedResult RedDropper::doRandomEarlyDetection(Packet *packet)
+RedDropper::RedResult RedDropper::doRandomEarlyDetection(const Packet *packet)
 {
     int queueLength = collection->getNumPackets();
 
@@ -103,17 +103,29 @@ RedDropper::RedResult RedDropper::doRandomEarlyDetection(Packet *packet)
 
 bool RedDropper::matchesPacket(const Packet *packet) const
 {
-    auto redResult = doRandomEarlyDetection(packet);
-    switch (redResult) {
+    lastResult = const_cast<RedDropper *>(this)->doRandomEarlyDetection(packet);
+    switch (lastResult) {
+        case RANDOMLY_ABOVE_LIMIT:
+        case ABOVE_MAX_LIMIT:
+            return useEcn && EcnMarker::getEcn(packet) != IP_ECN_NOT_ECT;
+        case RANDOMLY_BELOW_LIMIT:
+        case BELOW_MIN_LIMIT:
+            return true;
+        case QUEUE_FULL:
+            return false;
+        default:
+            throw cRuntimeError("Unknown RED result");
+    }
+}
+
+void RedDropper::processPacket(Packet *packet)
+{
+    switch (lastResult) {
         case RANDOMLY_ABOVE_LIMIT:
         case ABOVE_MAX_LIMIT: {
-            if (!useEcn)
-                return false;
-            else {
+            if (useEcn) {
                 IpEcnCode ecn = EcnMarker::getEcn(packet);
-                if (ecn == IP_ECN_NOT_ECT)
-                    return false;
-                else {
+                if (ecn != IP_ECN_NOT_ECT) {
                     // if next packet should be marked and it is not
                     if (markNext && ecn != IP_ECN_CE) {
                         EcnMarker::setEcn(packet, IP_ECN_CE);
@@ -125,17 +137,15 @@ bool RedDropper::matchesPacket(const Packet *packet) const
                         else
                             EcnMarker::setEcn(packet, IP_ECN_CE);
                     }
-                    return true;
                 }
             }
         }
         case RANDOMLY_BELOW_LIMIT:
         case BELOW_MIN_LIMIT:
-            return true;
         case QUEUE_FULL:
-            return false;
+            return;
         default:
-            throw cRuntimeError("Unknown XXX");
+            throw cRuntimeError("Unknown RED result");
     }
 }
 

@@ -38,16 +38,17 @@ void ReceiveAtMacAddress::initialize(int stage)
     }
 }
 
+void ReceiveAtMacAddress::processPacket(Packet *packet)
+{
+    packet->popAtFront<DestinationMacAddressHeader>();
+    // TODO: KLUDGE:
+    packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&IProtocol::sequenceNumber);
+}
+
 bool ReceiveAtMacAddress::matchesPacket(const Packet *packet) const
 {
-    auto header = packet->popAtFront<DestinationMacAddressHeader>();
-    if (header->getDestinationAddress() == address) {
-        // TODO: KLUDGE:
-        packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&IProtocol::sequenceNumber);
-        return true;
-    }
-    else
-        return false;
+    auto header = packet->peekAtFront<DestinationMacAddressHeader>();
+    return header->getDestinationAddress() == address;
 }
 
 } // namespace inet

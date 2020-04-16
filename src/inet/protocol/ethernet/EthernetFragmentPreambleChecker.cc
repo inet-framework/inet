@@ -26,40 +26,43 @@ Define_Module(EthernetFragmentPreambleChecker);
 
 bool EthernetFragmentPreambleChecker::matchesPacket(const Packet *packet) const
 {
-    const auto& header = packet->popAtFront<EthernetFragmentPhyHeader>(b(-1), Chunk::PF_ALLOW_INCORRECT + Chunk::PF_ALLOW_IMPROPERLY_REPRESENTED);
-    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);
+    const auto& header = packet->peekAtFront<EthernetFragmentPhyHeader>(b(-1), Chunk::PF_ALLOW_INCORRECT + Chunk::PF_ALLOW_IMPROPERLY_REPRESENTED);
     if (header->isIncorrect() || header->isImproperlyRepresented())
         return false;
     else if (header->getPreambleType() != SMD_Sx && header->getPreambleType() != SMD_Cx)
         return false;
     else {
-        auto fragmentTag = packet->addTag<FragmentTag>();
-        fragmentTag->setFragmentNumber(-1);
-        fragmentTag->setNumFragments(-1);
-        if (header->getSmdNumber() == smdNumber) {
-            if (header->getFragmentNumber() == fragmentNumber) {
-                if (header->getPreambleType() == SMD_Cx)
-                    fragmentNumber = (fragmentNumber + 1) % 4;
-                fragmentTag->setFirstFragment(false);
-                return true;
-            }
-            else {
-                smdNumber = -1;
-                return false;
-            }
+        if (header->getSmdNumber() == smdNumber)
+            return header->getFragmentNumber() == fragmentNumber;
+        else
+            return header->getFragmentNumber() == 0;
+    }
+}
+
+void EthernetFragmentPreambleChecker::processPacket(Packet *packet)
+{
+    const auto& header = packet->popAtFront<EthernetFragmentPhyHeader>();
+    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);
+    auto fragmentTag = packet->addTag<FragmentTag>();
+    fragmentTag->setFragmentNumber(-1);
+    fragmentTag->setNumFragments(-1);
+    if (header->getSmdNumber() == smdNumber) {
+        if (header->getFragmentNumber() == fragmentNumber) {
+            if (header->getPreambleType() == SMD_Cx)
+                fragmentNumber = (fragmentNumber + 1) % 4;
+            fragmentTag->setFirstFragment(false);
         }
-        else {
-            if (header->getFragmentNumber() == 0) {
-                smdNumber = header->getSmdNumber();
-                fragmentNumber = 0;
-                fragmentTag->setFirstFragment(true);
-                return true;
-            }
-            else {
-                smdNumber = -1;
-                return false;
-            }
+        else
+            smdNumber = -1;
+    }
+    else {
+        if (header->getFragmentNumber() == 0) {
+            smdNumber = header->getSmdNumber();
+            fragmentNumber = 0;
+            fragmentTag->setFirstFragment(true);
         }
+        else
+            smdNumber = -1;
     }
 }
 

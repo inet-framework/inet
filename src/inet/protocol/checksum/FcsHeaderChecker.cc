@@ -16,7 +16,7 @@
 //
 
 #include "inet/common/IProtocolRegistrationListener.h"
-#include "FcsHeaderChecker.h"
+#include "inet/protocol/checksum/FcsHeaderChecker.h"
 #include "inet/protocol/checksum/header/FcsHeader_m.h"
 #include "inet/protocol/contract/IProtocol.h"
 
@@ -34,9 +34,14 @@ void FcsHeaderChecker::initialize(int stage)
     }
 }
 
+void FcsHeaderChecker::processPacket(Packet *packet)
+{
+    popHeader<FcsHeader>(packet, headerPosition, B(4));
+}
+
 bool FcsHeaderChecker::matchesPacket(const Packet *packet) const
 {
-    const auto& header = popHeader<FcsHeader>(packet, headerPosition, B(4));
+    const auto& header = peekHeader<FcsHeader>(packet, headerPosition, B(4));
     auto fcsMode = header->getFcsMode();
     auto fcs = header->getFcs();
     return checkFcs(packet, fcsMode, fcs);
