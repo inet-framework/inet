@@ -40,38 +40,38 @@ cmdenv-event-banners = false
 
 %contains: stdout
 Producing packet producer-0.
-Dropping packet number 0 (inet::Packet)producer-0 (1 B) [ByteCountChunk, length = 1 B, data = 63]
 Filtering out packet producer-0.
+Dropping packet number 0 (inet::Packet)producer-0 (1 B) [ByteCountChunk, length = 1 B, data = 63]
 
 Running simulation...
 Producing packet producer-1.
 Passing through packet producer-1.
 Consuming packet producer-1.
 Producing packet producer-2.
-Dropping packet number 2 (inet::Packet)producer-2 (1 B) [ByteCountChunk, length = 1 B, data = 63]
 Filtering out packet producer-2.
+Dropping packet number 2 (inet::Packet)producer-2 (1 B) [ByteCountChunk, length = 1 B, data = 63]
 Producing packet producer-3.
 Passing through packet producer-3.
 Consuming packet producer-3.
 Producing packet producer-4.
-Dropping packet number 4 (inet::Packet)producer-4 (1 B) [ByteCountChunk, length = 1 B, data = 63]
 Filtering out packet producer-4.
+Dropping packet number 4 (inet::Packet)producer-4 (1 B) [ByteCountChunk, length = 1 B, data = 63]
 Producing packet producer-5.
 Passing through packet producer-5.
 Consuming packet producer-5.
 Producing packet producer-6.
-Dropping packet number 6 (inet::Packet)producer-6 (1 B) [ByteCountChunk, length = 1 B, data = 63]
 Filtering out packet producer-6.
+Dropping packet number 6 (inet::Packet)producer-6 (1 B) [ByteCountChunk, length = 1 B, data = 63]
 Producing packet producer-7.
 Passing through packet producer-7.
 Consuming packet producer-7.
 Producing packet producer-8.
-Dropping packet number 8 (inet::Packet)producer-8 (1 B) [ByteCountChunk, length = 1 B, data = 63]
 Filtering out packet producer-8.
+Dropping packet number 8 (inet::Packet)producer-8 (1 B) [ByteCountChunk, length = 1 B, data = 63]
 Producing packet producer-9.
 Passing through packet producer-9.
 Consuming packet producer-9.
 Producing packet producer-10.
+Filtering out packet producer-10.
 Dropping packet number 10 (inet::Packet)producer-10 (1 B) [ByteCountChunk, length = 1 B, data = 63]
 End of dropsVector reached.
-Filtering out packet producer-10.

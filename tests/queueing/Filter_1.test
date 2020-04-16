@@ -34,7 +34,7 @@ network TestFilter
 
 using namespace inet; 
 
-static bool testFilter(Packet *packet)
+static bool testFilter(const Packet *packet)
 {
     return packet->getId() % 2 == 0;
 }

@@ -6,8 +6,8 @@ Tests signal transmitter and signal receiver.
 
 import inet.queueing.source.ActivePacketSource;
 import inet.queueing.sink.PassivePacketSink;
-import inet.protocol.transceiver.Transmitter;
-import inet.protocol.transceiver.Receiver;
+import inet.protocol.transceiver.PacketTransmitter;
+import inet.protocol.transceiver.PacketReceiver;
 
 network TestTransceiver
 {
@@ -15,10 +15,10 @@ network TestTransceiver
         source: ActivePacketSource {
             @display("p=100,100");
         }
-        transmitter: Transmitter {
+        transmitter: PacketTransmitter {
             @display("p=100,200");
         }
-        receiver: Receiver {
+        receiver: PacketReceiver {
             @display("p=100,300");
         }
         sink: PassivePacketSink {
