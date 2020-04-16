@@ -16,7 +16,7 @@
 //
 
 #include "inet/common/IProtocolRegistrationListener.h"
-#include "inet/protocol/checksum/FcsHeaderChecker.h"
+#include "FcsHeaderChecker.h"
 #include "inet/protocol/checksum/header/FcsHeader_m.h"
 #include "inet/protocol/contract/IProtocol.h"
 
