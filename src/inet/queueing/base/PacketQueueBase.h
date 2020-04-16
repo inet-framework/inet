@@ -39,6 +39,8 @@ class INET_API PacketQueueBase : public PacketProcessorBase, public virtual IPac
 
   protected:
     virtual void initialize(int stage) override;
+    virtual void handleMessage(cMessage *message) override;
+
     virtual void emit(simsignal_t signal, cObject *object, cObject *details = nullptr) override;
 
     virtual void updateDisplayString();

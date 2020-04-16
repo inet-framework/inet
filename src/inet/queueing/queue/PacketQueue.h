@@ -46,9 +46,10 @@ class INET_API PacketQueue : public PacketQueueBase, public IPacketBuffer::ICall
 
   protected:
     virtual void initialize(int stage) override;
+
     virtual IPacketDropperFunction *createDropperFunction(const char *dropperClass) const;
     virtual IPacketComparatorFunction *createComparatorFunction(const char *comparatorClass) const;
-    virtual void handleMessage(cMessage *message) override;
+
     virtual bool isOverloaded() const;
 
   public:

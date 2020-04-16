@@ -40,6 +40,12 @@ void PacketQueueBase::initialize(int stage)
     }
 }
 
+void PacketQueueBase::handleMessage(cMessage *message)
+{
+    auto packet = check_and_cast<Packet *>(message);
+    pushPacket(packet, packet->getArrivalGate());
+}
+
 void PacketQueueBase::emit(simsignal_t signal, cObject *object, cObject *details)
 {
     if (signal == packetPushedSignal)

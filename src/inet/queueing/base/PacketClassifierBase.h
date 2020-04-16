@@ -39,6 +39,7 @@ class INET_API PacketClassifierBase : public PacketProcessorBase, public virtual
 
   protected:
     virtual void initialize(int stage) override;
+    virtual void handleMessage(cMessage *message) override;
 
     virtual int classifyPacket(Packet *packet) = 0;
     virtual int callClassifyPacket(Packet *packet);
