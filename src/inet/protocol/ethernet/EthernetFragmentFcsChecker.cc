@@ -28,11 +28,11 @@ bool EthernetFragmentFcsChecker::checkComputedFcs(const Packet *packet, uint32_t
 {
     auto data = packet->peekDataAsBytes();
     auto bytes = data->getBytes();
-    uint32_t fragmentFcs = ethernetCRC(bytes.data(), packet->getByteLength());
+    uint32_t fragmentFcs = ethernetCRC(bytes.data(), packet->getByteLength() - 4);
     auto fragmentTag = packet->getTag<FragmentTag>();
     if (fragmentTag->getFirstFragment())
         completeFcs = 0;
-    completeFcs = ethernetCRC(bytes.data(), packet->getByteLength(), completeFcs);
+    completeFcs = ethernetCRC(bytes.data(), packet->getByteLength() - 4, completeFcs);
     bool lastFragment = receivedFcs != (fragmentFcs ^ 0xFFFF0000);
     fragmentTag->setLastFragment(lastFragment);
     return !lastFragment || receivedFcs == completeFcs;
