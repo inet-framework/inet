@@ -128,7 +128,11 @@ INET_API InterfaceEntry *getContainingNicModule(const cModule *from);
  * Returns nullptr if no such module is found along the path.
  */
 template<typename T>
-INET_API cGate *findConnectedGate(cGate *gate, int direction = 0)
+INET_API cGate *findConnectedGate(cGate *gate, int direction = 0);
+
+template<typename T>
+cGate *findConnectedGate(cGate *gate, int direction)
+
 {
     if (!gate->isConnectedOutside())
         return nullptr;
@@ -155,7 +159,10 @@ INET_API cGate *findConnectedGate(cGate *gate, int direction = 0)
  * Throws an error if no such module is found along the path.
  */
 template<typename T>
-INET_API cGate *getConnectedGate(cGate *gate, int direction = 0)
+INET_API cGate *getConnectedGate(cGate *gate, int direction = 0);
+
+template<typename T>
+cGate *getConnectedGate(cGate *gate, int direction)
 {
     auto connectedGate = findConnectedGate<T>(gate, direction);
     if (connectedGate == nullptr)
@@ -168,7 +175,10 @@ INET_API cGate *getConnectedGate(cGate *gate, int direction = 0)
  * Returns nullptr if no such module is found along the path.
  */
 template<typename T>
-INET_API T *findConnectedModule(cGate *gate, int direction = 0)
+INET_API T *findConnectedModule(cGate *gate, int direction = 0);
+
+template<typename T>
+T *findConnectedModule(cGate *gate, int direction)
 {
     auto connectedGate = findConnectedGate<T>(gate, direction);
     return connectedGate != nullptr ? check_and_cast<T *>(connectedGate->getOwnerModule()) : nullptr;
@@ -179,7 +189,10 @@ INET_API T *findConnectedModule(cGate *gate, int direction = 0)
  * Throws an error if no such module is found along the path.
  */
 template<typename T>
-INET_API T *getConnectedModule(cGate *gate, int direction = 0)
+INET_API T *getConnectedModule(cGate *gate, int direction = 0);
+
+template<typename T>
+T *getConnectedModule(cGate *gate, int direction)
 {
     auto module = findConnectedModule<T>(gate, direction);
     if (module == nullptr)
