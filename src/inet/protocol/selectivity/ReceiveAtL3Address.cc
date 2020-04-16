@@ -36,7 +36,7 @@ void ReceiveAtL3Address::initialize(int stage)
     }
 }
 
-bool ReceiveAtL3Address::matchesPacket(Packet *packet)
+bool ReceiveAtL3Address::matchesPacket(const Packet *packet) const
 {
     auto header = packet->popAtFront<DestinationL3AddressHeader>();
     return header->getDestinationAddress() == address;

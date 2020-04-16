@@ -26,7 +26,7 @@ namespace inet {
 
 Define_Module(EthernetTypeOrLengthChecker);
 
-bool EthernetTypeOrLengthChecker::matchesPacket(Packet *packet)
+bool EthernetTypeOrLengthChecker::matchesPacket(const Packet *packet) const
 {
     const auto& header = packet->popAtFront<Ieee8023TypeOrLength>();
     auto protocol = ProtocolGroup::ethertype.findProtocol(header->getTypeOrLength());

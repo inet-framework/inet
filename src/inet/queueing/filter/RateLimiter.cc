@@ -32,7 +32,7 @@ void RateLimiter::initialize(int stage)
     }
 }
 
-bool RateLimiter::matchesPacket(Packet *packet)
+bool RateLimiter::matchesPacket(const Packet *packet) const
 {
     auto rateTag = packet->getTag<RateTag>();
     double p = 0;

@@ -24,7 +24,7 @@ namespace inet {
 
 Define_Module(EthernetFragmentPreambleChecker);
 
-bool EthernetFragmentPreambleChecker::matchesPacket(Packet *packet)
+bool EthernetFragmentPreambleChecker::matchesPacket(const Packet *packet) const
 {
     const auto& header = packet->popAtFront<EthernetFragmentPhyHeader>(b(-1), Chunk::PF_ALLOW_INCORRECT + Chunk::PF_ALLOW_IMPROPERLY_REPRESENTED);
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);

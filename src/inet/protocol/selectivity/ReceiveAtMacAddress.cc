@@ -38,7 +38,7 @@ void ReceiveAtMacAddress::initialize(int stage)
     }
 }
 
-bool ReceiveAtMacAddress::matchesPacket(Packet *packet)
+bool ReceiveAtMacAddress::matchesPacket(const Packet *packet) const
 {
     auto header = packet->popAtFront<DestinationMacAddressHeader>();
     if (header->getDestinationAddress() == address) {

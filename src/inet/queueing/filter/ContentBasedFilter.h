@@ -31,7 +31,7 @@ class INET_API ContentBasedFilter : public PacketFilterBase
 
   protected:
     virtual void initialize(int stage) override;
-    virtual bool matchesPacket(Packet *packet) override;
+    virtual bool matchesPacket(const Packet *packet) const override;
 };
 
 } // namespace queueing
