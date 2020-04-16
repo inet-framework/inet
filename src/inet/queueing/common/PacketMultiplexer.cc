@@ -43,6 +43,12 @@ void PacketMultiplexer::initialize(int stage)
     }
 }
 
+void PacketMultiplexer::handleMessage(cMessage *message)
+{
+    auto packet = check_and_cast<Packet *>(message);
+    pushPacket(packet, packet->getArrivalGate());
+}
+
 void PacketMultiplexer::checkPacketStreaming(Packet *packet)
 {
     if (inProgressStreamId != -1 && (packet == nullptr || packet->getTreeId() != inProgressStreamId))

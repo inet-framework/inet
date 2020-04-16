@@ -39,6 +39,7 @@ class INET_API PacketMultiplexer : public PacketProcessorBase, public virtual IP
 
   protected:
     virtual void initialize(int stage) override;
+    virtual void handleMessage(cMessage *message) override;
 
     virtual bool isStreamingPacket() const { return inProgressStreamId != -1; }
     virtual void startPacketStreaming(Packet *packet);
